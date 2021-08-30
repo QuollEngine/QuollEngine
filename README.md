@@ -4,6 +4,21 @@
 
 A game engine hobby project by Gasim Gasimzada.
 
+## Current Support
+
+- [x] Load GLTF scenes
+- [x] Load images as 2D textures
+- [x] Load KTX textures
+- [x] Shadowmapping
+- [x] Imgui support
+- [ ] Imgui texture support
+- [x] Scene loader demo
+- [x] Entity component system using Sparse Sets
+- [x] Environment map support
+- [x] GLFW window support
+
+
+
 ## License
 
 Licensed under [MIT](./LICENSE).
