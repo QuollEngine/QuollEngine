@@ -171,6 +171,12 @@ int main() {
                            renderer->createShader("shadowmap.vert.spv"));
   shaderLibrary->addShader("__engine.default.shadowmap.fragment",
                            renderer->createShader("shadowmap.frag.spv"));
+  shaderLibrary->addShader("__engine.imgui.vertex",
+                           renderer->createShader("imgui.vert.spv"));
+  shaderLibrary->addShader("__engine.imgui.fragment",
+                           renderer->createShader("imgui.frag.spv"));
+
+  renderer->getImguiRenderer()->createEverything();
 
   auto cubeMesh = createCube();
 

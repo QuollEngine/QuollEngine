@@ -19,6 +19,14 @@ public:
   ResourceAllocator &operator=(ResourceAllocator &&rhs) = delete;
 
   /**
+   * @brief Create empty vertex buffer with size
+   *
+   * @param size Size
+   * @return Vertex buffer
+   */
+  virtual HardwareBuffer *createVertexBuffer(size_t size) = 0;
+
+  /**
    * @brief Creates vertex buffer from vertices
    *
    * @param vertices List of vertices
@@ -26,6 +34,14 @@ public:
    */
   virtual HardwareBuffer *
   createVertexBuffer(const std::vector<Vertex> &vertices) = 0;
+
+  /**
+   * @brief Create empty index buffer with size
+   *
+   * @param size Size
+   * @return Index buffer
+   */
+  virtual HardwareBuffer *createIndexBuffer(size_t size) = 0;
 
   /**
    * @brief Creates index buffer from indices

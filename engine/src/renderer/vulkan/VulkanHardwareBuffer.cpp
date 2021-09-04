@@ -12,6 +12,23 @@
 namespace liquid {
 
 VulkanHardwareBuffer::VulkanHardwareBuffer(
+    HardwareBufferType type, size_t size, VmaAllocator allocator_,
+    const SharedPtr<StatsManager> &statsManager)
+    : HardwareBuffer(type, size, statsManager), allocator(allocator_) {
+  switch (getType()) {
+  case HardwareBuffer::VERTEX:
+    createBuffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    break;
+  case HardwareBuffer::INDEX:
+    createBuffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+    break;
+  case HardwareBuffer::UNIFORM:
+    createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    break;
+  }
+}
+
+VulkanHardwareBuffer::VulkanHardwareBuffer(
     VmaAllocator allocator_, const std::vector<Vertex> &vertices,
     const SharedPtr<StatsManager> &statsManager)
     : HardwareBuffer(vertices, statsManager), allocator(allocator_) {
@@ -45,6 +62,14 @@ VulkanHardwareBuffer::VulkanHardwareBuffer(
     : HardwareBuffer(bufferSize, statsManager), allocator(allocator_) {
   createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 }
+
+void *VulkanHardwareBuffer::map() {
+  void *buffer = nullptr;
+  vmaMapMemory(allocator, allocation, &buffer);
+  return buffer;
+}
+
+void VulkanHardwareBuffer::unmap() { vmaUnmapMemory(allocator, allocation); }
 
 void VulkanHardwareBuffer::update(void *data) {
   void *buffer = nullptr;

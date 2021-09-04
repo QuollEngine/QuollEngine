@@ -50,7 +50,7 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, nullptr);
 
-  const auto &texture = resourceAllocator.createTexture2D({1, 7, 1, data});
+  const auto &texture = resourceAllocator.createTexture2D({1, 7, 1, 0, data});
 
   EXPECT_NE(texture, nullptr);
   EXPECT_NE(texture->getResourceBinder(), nullptr);

@@ -6,9 +6,17 @@
 
 class TestResourceAllocator : public liquid::ResourceAllocator {
 public:
+  virtual liquid::HardwareBuffer *createVertexBuffer(size_t vertexSize) {
+    return new TestBuffer(vertexSize);
+  }
+
   virtual liquid::HardwareBuffer *
   createVertexBuffer(const std::vector<liquid::Vertex> &vertices) {
     return new TestBuffer(vertices);
+  }
+
+  virtual liquid::HardwareBuffer *createIndexBuffer(size_t indexBuffer) {
+    return new TestBuffer(indexBuffer);
   }
 
   virtual liquid::HardwareBuffer *

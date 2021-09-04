@@ -49,6 +49,11 @@ VulkanRenderer::~VulkanRenderer() {
   renderContext.destroy();
   swapchain.destroy();
 
+  if (imguiRenderer) {
+    delete imguiRenderer;
+    imguiRenderer = nullptr;
+  }
+
   if (allocator) {
     vmaDestroyAllocator(allocator);
     LOG_DEBUG("[Vulkan] Allocator destroyed");
@@ -60,11 +65,6 @@ VulkanRenderer::~VulkanRenderer() {
 
   if (shaderLibrary) {
     delete shaderLibrary;
-  }
-
-  if (imguiRenderer) {
-    delete imguiRenderer;
-    imguiRenderer = nullptr;
   }
 
   if (pipelineBuilder) {
@@ -270,8 +270,9 @@ void VulkanRenderer::setClearColor(glm::vec4 clearColor_) {
 }
 
 void VulkanRenderer::createImgui() {
-  imguiRenderer = new ImguiRenderer(window, context, swapchain, mainRenderPass,
-                                    uploadContext);
+  imguiRenderer =
+      new ImguiRenderer(window, context, swapchain, mainRenderPass,
+                        uploadContext, shaderLibrary, resourceAllocator);
 }
 
 void VulkanRenderer::setViewportAndScissor(VkCommandBuffer commandBuffer,

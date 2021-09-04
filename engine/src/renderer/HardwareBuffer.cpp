@@ -3,6 +3,15 @@
 
 namespace liquid {
 
+HardwareBuffer::HardwareBuffer(HardwareBufferType type, size_t bufferSize_,
+                               const SharedPtr<StatsManager> &statsManager_)
+    : bufferType(type), bufferSize(bufferSize_), itemSize(0),
+      statsManager(statsManager_) {
+  if (statsManager) {
+    statsManager->addBuffer(bufferSize);
+  }
+}
+
 HardwareBuffer::HardwareBuffer(const std::vector<Vertex> &vertices,
                                const SharedPtr<StatsManager> &statsManager_)
     : bufferType(VERTEX), itemSize(vertices.size()),

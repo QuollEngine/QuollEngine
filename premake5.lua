@@ -74,6 +74,10 @@ project "LiquidEngine"
         "vendor/src/imgui/*.cpp"
     }
 
+    removefiles {
+        "vendor/src/imgui/imgui_impl_vulkan.cpp"
+    }
+
     configuration "Debug"
         defines { "LIQUID_DEBUG" }
 
@@ -94,7 +98,8 @@ project "LiquidEngineTest"
     }
 
     removefiles {
-        "engine/src/renderer/vulkan/VmaImpl.cpp"
+        "engine/src/renderer/vulkan/VmaImpl.cpp",
+        "vendor/src/imgui/imgui_impl_vulkan.cpp"
     }
 
     includedirs {
@@ -245,5 +250,7 @@ project "DemoSceneViewer"
         "glslc ../../../demos/scene-viewer/assets/skybox.frag -o %{cfg.buildtarget.directory}/skybox.frag.spv",
         "glslc ../../../demos/scene-viewer/assets/skybox.vert -o %{cfg.buildtarget.directory}/skybox.vert.spv",
         "glslc ../../../demos/scene-viewer/assets/shadowmap.frag -o %{cfg.buildtarget.directory}/shadowmap.frag.spv",
-        "glslc ../../../demos/scene-viewer/assets/shadowmap.vert -o %{cfg.buildtarget.directory}/shadowmap.vert.spv"
+        "glslc ../../../demos/scene-viewer/assets/shadowmap.vert -o %{cfg.buildtarget.directory}/shadowmap.vert.spv",
+        "glslc ../../../demos/scene-viewer/assets/imgui.frag -o %{cfg.buildtarget.directory}/imgui.frag.spv",
+        "glslc ../../../demos/scene-viewer/assets/imgui.vert -o %{cfg.buildtarget.directory}/imgui.vert.spv"
     }

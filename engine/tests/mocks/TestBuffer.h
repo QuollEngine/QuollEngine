@@ -31,6 +31,15 @@ public:
     memcpy(data, data_, getBufferSize());
   }
 
+  void *map() {
+    if (!data) {
+      data = new char[getBufferSize()];
+    }
+    return data;
+  }
+
+  void unmap() {}
+
 public:
   void *data = nullptr;
 };

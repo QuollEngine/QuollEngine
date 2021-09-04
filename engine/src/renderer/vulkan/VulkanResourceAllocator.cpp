@@ -13,9 +13,19 @@ VulkanResourceAllocator::VulkanResourceAllocator(
     : uploadContext(uploadContext_), allocator(allocator_), device(device_),
       statsManager(statsManager_) {}
 
+HardwareBuffer *VulkanResourceAllocator::createVertexBuffer(size_t bufferSize) {
+  return new VulkanHardwareBuffer(HardwareBuffer::VERTEX, bufferSize, allocator,
+                                  statsManager);
+}
+
 HardwareBuffer *VulkanResourceAllocator::createVertexBuffer(
     const std::vector<Vertex> &vertices) {
   return new VulkanHardwareBuffer(allocator, vertices, statsManager);
+}
+
+HardwareBuffer *VulkanResourceAllocator::createIndexBuffer(size_t bufferSize) {
+  return new VulkanHardwareBuffer(HardwareBuffer::INDEX, bufferSize, allocator,
+                                  statsManager);
 }
 
 HardwareBuffer *VulkanResourceAllocator::createIndexBuffer(

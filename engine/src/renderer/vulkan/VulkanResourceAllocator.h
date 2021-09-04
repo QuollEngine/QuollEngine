@@ -27,6 +27,14 @@ public:
                           const SharedPtr<StatsManager> &statsManager);
 
   /**
+   * @brief Create empty vertex buffer with size
+   *
+   * @param size Size
+   * @return Vertex buffer
+   */
+  HardwareBuffer *createVertexBuffer(size_t size) override;
+
+  /**
    * @brief Creates vertex buffer from vertices
    *
    * @param vertices List of vertices
@@ -34,6 +42,14 @@ public:
    */
   HardwareBuffer *
   createVertexBuffer(const std::vector<Vertex> &vertices) override;
+
+  /**
+   * @brief Create empty index buffer with size
+   *
+   * @param size Size
+   * @return Index buffer
+   */
+  HardwareBuffer *createIndexBuffer(size_t size) override;
 
   /**
    * @brief Creates index buffer from indices

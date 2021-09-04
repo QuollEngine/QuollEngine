@@ -51,6 +51,18 @@ public:
                        const SharedPtr<StatsManager> &statsManager = nullptr);
 
   /**
+   * @brief Create hardware buffer
+   *
+   * @param type Buffer type
+   * @param size Buffer size
+   * @param allocator VmaAllocator
+   * @param statsManager Stats manager
+   */
+  VulkanHardwareBuffer(HardwareBufferType type, size_t size,
+                       VmaAllocator allocator,
+                       const SharedPtr<StatsManager> &statsManager = nullptr);
+
+  /**
    * @brief Deletes Vulkan buffer
    */
   ~VulkanHardwareBuffer();
@@ -59,6 +71,10 @@ public:
   VulkanHardwareBuffer(VulkanHardwareBuffer &&rhs) = delete;
   VulkanHardwareBuffer &operator=(const VulkanHardwareBuffer &rhs) = delete;
   VulkanHardwareBuffer &operator=(VulkanHardwareBuffer &&rhs) = delete;
+
+  void *map() override;
+
+  void unmap() override;
 
   /**
    * @brief Update buffer

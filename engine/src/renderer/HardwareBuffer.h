@@ -19,6 +19,16 @@ public:
 
 public:
   /**
+   * @brief Default constructor
+   *
+   * @param type Buffer type
+   * @param size Buffer size
+   * @param statsManager Stats manager
+   */
+  HardwareBuffer(HardwareBufferType type, size_t bufferSize,
+                 const SharedPtr<StatsManager> &statsManager = nullptr);
+
+  /**
    * @brief Constructor for vertex buffer
    *
    * @param vertices List of vertices
@@ -54,6 +64,18 @@ public:
   HardwareBuffer(HardwareBuffer &&rhs) = delete;
   HardwareBuffer &operator=(const HardwareBuffer &rhs) = delete;
   HardwareBuffer &operator=(HardwareBuffer &&rhs) = delete;
+
+  /**
+   * @brief Map buffer
+   *
+   * @return Mapped data
+   */
+  virtual void *map() = 0;
+
+  /**
+   * @brief Unmap buffer
+   */
+  virtual void unmap() = 0;
 
   /**
    * @brief Update buffer
