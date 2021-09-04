@@ -86,6 +86,8 @@ private:
   void createRenderPass();
   void createPipelineBuilder();
 
+  void loadShaders();
+
   void createSwapchain();
   void recreateSwapchain();
 

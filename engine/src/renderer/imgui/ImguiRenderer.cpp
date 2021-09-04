@@ -41,6 +41,8 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 
   frameData.resize(2);
   loadFonts();
+  createDescriptors();
+  createPipeline();
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
 }
@@ -181,48 +183,50 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
   }
 }
 
-void ImguiRenderer::createEverything() {
+void ImguiRenderer::createDescriptors() {
+
   const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
       fontTexture->getResourceBinder());
 
-  {
-    VkDescriptorSetLayoutBinding binding{};
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    binding.descriptorCount = 1;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    std::array<VkDescriptorSetLayoutBinding, 1> bindings{binding};
+  VkDescriptorSetLayoutBinding binding{};
+  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  binding.descriptorCount = 1;
+  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  std::array<VkDescriptorSetLayoutBinding, 1> bindings{binding};
 
-    VkDescriptorSetLayoutCreateInfo info = {};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.bindingCount = bindings.size();
-    info.pBindings = bindings.data();
-    vkCreateDescriptorSetLayout(vulkanContext.getDevice(), &info, nullptr,
-                                &descriptorLayout);
+  VkDescriptorSetLayoutCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+  info.bindingCount = bindings.size();
+  info.pBindings = bindings.data();
+  vkCreateDescriptorSetLayout(vulkanContext.getDevice(), &info, nullptr,
+                              &descriptorLayout);
 
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorManager->getDescriptorPool();
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &descriptorLayout;
-    vkAllocateDescriptorSets(vulkanContext.getDevice(), &allocInfo,
-                             &descriptorSet);
+  VkDescriptorSetAllocateInfo allocInfo{};
+  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  allocInfo.descriptorPool = descriptorManager->getDescriptorPool();
+  allocInfo.descriptorSetCount = 1;
+  allocInfo.pSetLayouts = &descriptorLayout;
+  vkAllocateDescriptorSets(vulkanContext.getDevice(), &allocInfo,
+                           &descriptorSet);
 
-    VkDescriptorImageInfo imageInfo{};
-    imageInfo.sampler = binder->getSampler();
-    imageInfo.imageView = binder->getImageView();
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    std::array<VkWriteDescriptorSet, 1> writes{};
-    writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[0].dstSet = descriptorSet;
-    writes[0].descriptorCount = 1;
-    writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[0].pImageInfo = &imageInfo;
-    vkUpdateDescriptorSets(vulkanContext.getDevice(), writes.size(),
-                           writes.data(), 0, NULL);
+  VkDescriptorImageInfo imageInfo{};
+  imageInfo.sampler = binder->getSampler();
+  imageInfo.imageView = binder->getImageView();
+  imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  std::array<VkWriteDescriptorSet, 1> writes{};
+  writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  writes[0].dstSet = descriptorSet;
+  writes[0].descriptorCount = 1;
+  writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  writes[0].pImageInfo = &imageInfo;
+  vkUpdateDescriptorSets(vulkanContext.getDevice(), writes.size(),
+                         writes.data(), 0, NULL);
 
-    ImGuiIO &io = ImGui::GetIO();
-    io.Fonts->SetTexID(fontTexture.get());
-  }
+  ImGuiIO &io = ImGui::GetIO();
+  io.Fonts->SetTexID(fontTexture.get());
+}
+
+void ImguiRenderer::createPipeline() {
 
   std::array<VkPushConstantRange, 1> pushConstants{};
   pushConstants.at(0).stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

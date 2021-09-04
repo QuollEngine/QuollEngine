@@ -1,4 +1,5 @@
 #include "core/Base.h"
+#include "core/Engine.h"
 #include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -269,6 +270,8 @@ private:
 };
 
 int main() {
+  liquid::Engine::setAssetsPath(
+      std::filesystem::path("../../../../engine/bin/Debug/assets"));
   Game game;
   return game.run();
 }

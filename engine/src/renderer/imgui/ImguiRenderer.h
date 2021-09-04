@@ -40,10 +40,11 @@ public:
 
   void draw(VkCommandBuffer buffer);
 
-  void createEverything();
-
 private:
   void loadFonts();
+
+  void createPipeline();
+  void createDescriptors();
 
   void setupRenderStates(ImDrawData *draw_data, VkCommandBuffer commandBuffer,
                          int fbWidth, int fbHeight);

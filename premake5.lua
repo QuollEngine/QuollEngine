@@ -83,6 +83,18 @@ project "LiquidEngine"
 
     links { "vulkan", "glfw", "ktx" }
 
+    postbuildcommands {
+        "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
+        "glslc ../../engine/assets/shaders/pbr.vert -o %{cfg.buildtarget.directory}/assets/shaders/pbr.vert.spv",
+        "glslc ../../engine/assets/shaders/pbr.frag -o %{cfg.buildtarget.directory}/assets/shaders/pbr.frag.spv",
+        "glslc ../../engine/assets/shaders/skybox.frag -o %{cfg.buildtarget.directory}/assets/shaders/skybox.frag.spv",
+        "glslc ../../engine/assets/shaders/skybox.vert -o %{cfg.buildtarget.directory}/assets/shaders/skybox.vert.spv",
+        "glslc ../../engine/assets/shaders/shadowmap.frag -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.frag.spv",
+        "glslc ../../engine/assets/shaders/shadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.vert.spv",
+        "glslc ../../engine/assets/shaders/imgui.frag -o %{cfg.buildtarget.directory}/assets/shaders/imgui.frag.spv",
+        "glslc ../../engine/assets/shaders/imgui.vert -o %{cfg.buildtarget.directory}/assets/shaders/imgui.vert.spv"
+    }
+
 project "LiquidEngineTest"
     basedir "workspace/engine-test/"
     kind "ConsoleApp"
@@ -102,6 +114,13 @@ project "LiquidEngineTest"
         "vendor/src/imgui/imgui_impl_vulkan.cpp"
     }
 
+    postbuildcommands {
+        "{COPY} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",
+        "{COPY} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
+        "{COPY} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
+        "{COPY} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx"
+    }
+
     includedirs {
         "engine/src"
     }
@@ -110,13 +129,6 @@ project "LiquidEngineTest"
 
     filter { "system:linux" }
         links { "dl" }
-
-    postbuildcommands {
-        "{COPY} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",
-        "{COPY} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
-        "{COPY} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
-        "{COPY} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx"
-    }
 
     filter { "toolset:clang" }
         buildoptions {
@@ -244,13 +256,4 @@ project "DemoSceneViewer"
 
         links { "AppKit.framework" }
 
-    postbuildcommands {
-        "glslc ../../../demos/scene-viewer/assets/gltf-shader.vert -o %{cfg.buildtarget.directory}/gltf-shader.vert.spv",
-        "glslc ../../../demos/scene-viewer/assets/gltf-shader.frag -o %{cfg.buildtarget.directory}/gltf-shader.frag.spv",
-        "glslc ../../../demos/scene-viewer/assets/skybox.frag -o %{cfg.buildtarget.directory}/skybox.frag.spv",
-        "glslc ../../../demos/scene-viewer/assets/skybox.vert -o %{cfg.buildtarget.directory}/skybox.vert.spv",
-        "glslc ../../../demos/scene-viewer/assets/shadowmap.frag -o %{cfg.buildtarget.directory}/shadowmap.frag.spv",
-        "glslc ../../../demos/scene-viewer/assets/shadowmap.vert -o %{cfg.buildtarget.directory}/shadowmap.vert.spv",
-        "glslc ../../../demos/scene-viewer/assets/imgui.frag -o %{cfg.buildtarget.directory}/imgui.frag.spv",
-        "glslc ../../../demos/scene-viewer/assets/imgui.vert -o %{cfg.buildtarget.directory}/imgui.vert.spv"
-    }
+    

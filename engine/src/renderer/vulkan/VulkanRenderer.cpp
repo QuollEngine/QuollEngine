@@ -1,4 +1,5 @@
 #include "core/Base.h"
+#include "core/Engine.h"
 #include "core/EngineGlobals.h"
 #include "window/glfw/GLFWWindow.h"
 
@@ -20,6 +21,8 @@ VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
     : entityContext(entityContext_), window(window_),
       context(window_, enableValidations_), statsManager(new StatsManager),
       debugManager(new DebugManager), shaderLibrary(new ShaderLibrary) {
+
+  loadShaders();
 
   descriptorManager = new VulkanDescriptorManager(context.getDevice());
 
@@ -80,6 +83,34 @@ VulkanRenderer::~VulkanRenderer() {
   window->removeResizeHandler(resizeHandler);
 
   window = nullptr;
+}
+
+void VulkanRenderer::loadShaders() {
+  std::cout << Engine::getAssetsPath() << "\n";
+  shaderLibrary->addShader(
+      "__engine.default.pbr.vertex",
+      createShader(Engine::getAssetsPath() + "/shaders/pbr.vert.spv"));
+  shaderLibrary->addShader(
+      "__engine.default.pbr.fragment",
+      createShader(Engine::getAssetsPath() + "/shaders/pbr.frag.spv"));
+  shaderLibrary->addShader(
+      "__engine.default.skybox.vertex",
+      createShader(Engine::getAssetsPath() + "/shaders/skybox.vert.spv"));
+  shaderLibrary->addShader(
+      "__engine.default.skybox.fragment",
+      createShader(Engine::getAssetsPath() + "/shaders/skybox.frag.spv"));
+  shaderLibrary->addShader(
+      "__engine.default.shadowmap.vertex",
+      createShader(Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"));
+  shaderLibrary->addShader(
+      "__engine.default.shadowmap.fragment",
+      createShader(Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"));
+  shaderLibrary->addShader(
+      "__engine.imgui.vertex",
+      createShader(Engine::getAssetsPath() + "/shaders/imgui.vert.spv"));
+  shaderLibrary->addShader(
+      "__engine.imgui.fragment",
+      createShader(Engine::getAssetsPath() + "/shaders/imgui.frag.spv"));
 }
 
 void VulkanRenderer::recreateSwapchain() {

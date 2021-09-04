@@ -1,4 +1,5 @@
 #include "core/Base.h"
+#include "core/Engine.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -38,6 +39,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 
 int main() {
   try {
+    liquid::Engine::setAssetsPath(
+        std::filesystem::path("../../../../engine/bin/Debug/assets"));
     liquid::EntityContext context;
     std::unique_ptr<liquid::GLFWWindow> window(
         new liquid::GLFWWindow("Rotating Cube", 640, 480));

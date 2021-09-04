@@ -1,4 +1,5 @@
 #include "core/Base.h"
+#include "core/Engine.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -101,6 +102,8 @@ const auto moveSpeed = 0.5f;
 const auto strafeSpeed = 0.5f;
 
 int main() {
+  liquid::Engine::setAssetsPath(
+      std::filesystem::path("../../../../engine/bin/Debug/assets"));
 
   liquid::EntityContext context;
   std::unique_ptr<liquid::GLFWWindow> window(
@@ -157,26 +160,6 @@ int main() {
           editorCamera.pitch(2.0f);
         }
       });
-
-  liquid::ShaderLibrary *shaderLibrary = renderer->getShaderLibrary();
-  shaderLibrary->addShader("__engine.default.pbr.vertex",
-                           renderer->createShader("gltf-shader.vert.spv"));
-  shaderLibrary->addShader("__engine.default.pbr.fragment",
-                           renderer->createShader("gltf-shader.frag.spv"));
-  shaderLibrary->addShader("__engine.default.skybox.vertex",
-                           renderer->createShader("skybox.vert.spv"));
-  shaderLibrary->addShader("__engine.default.skybox.fragment",
-                           renderer->createShader("skybox.frag.spv"));
-  shaderLibrary->addShader("__engine.default.shadowmap.vertex",
-                           renderer->createShader("shadowmap.vert.spv"));
-  shaderLibrary->addShader("__engine.default.shadowmap.fragment",
-                           renderer->createShader("shadowmap.frag.spv"));
-  shaderLibrary->addShader("__engine.imgui.vertex",
-                           renderer->createShader("imgui.vert.spv"));
-  shaderLibrary->addShader("__engine.imgui.fragment",
-                           renderer->createShader("imgui.frag.spv"));
-
-  renderer->getImguiRenderer()->createEverything();
 
   auto cubeMesh = createCube();
 
