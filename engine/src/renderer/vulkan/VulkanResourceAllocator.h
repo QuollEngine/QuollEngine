@@ -86,14 +86,13 @@ public:
   createTextureCubemap(const TextureCubemapData &data) override;
 
   /**
-   * @brief Create shadowmap texture
+   * @brief Create texture that is filled by framebuffer
    *
-   * @param dimensions Dimensions
-   * @param layers Number of layers
-   * @return Shadowmap texture
+   * @param data Framebuffer texture data
+   * @return Framebuffer texture
    */
-  SharedPtr<Texture> createTextureShadowmap(uint32_t dimensions,
-                                            uint32_t layers) override;
+  SharedPtr<Texture>
+  createTextureFramebuffer(const TextureFramebufferData &data) override;
 
 private:
   const VulkanUploadContext &uploadContext;

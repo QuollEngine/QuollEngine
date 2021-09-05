@@ -70,6 +70,7 @@ SharedPtr<Texture> KtxTextureLoader::loadFromFile(const String &filename) {
     textureData.data = ktxTextureData->pData;
     textureData.width = ktxTextureData->baseWidth;
     textureData.height = ktxTextureData->baseHeight;
+    textureData.format = ktxTexture_GetVkFormat(ktxTextureData);
 
     texture = resourceAllocator->createTexture2D(textureData);
   }

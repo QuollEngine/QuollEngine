@@ -10,8 +10,7 @@ A game engine hobby project by Gasim Gasimzada.
 - [x] Load images as 2D textures
 - [x] Load KTX textures
 - [x] Shadowmapping
-- [x] Imgui support
-- [ ] Imgui texture support
+- [x] Imgui support with textures
 - [x] Scene loader demo
 - [x] Entity component system using Sparse Sets
 - [x] Environment map support

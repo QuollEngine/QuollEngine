@@ -44,7 +44,9 @@ private:
   void loadFonts();
 
   void createPipeline();
-  void createDescriptors();
+
+  void createDescriptorLayout();
+  VkDescriptorSet createDescriptorFromTexture(Texture *texture);
 
   void setupRenderStates(ImDrawData *draw_data, VkCommandBuffer commandBuffer,
                          int fbWidth, int fbHeight);
@@ -64,9 +66,10 @@ private:
 
   ShaderLibrary *shaderLibrary = nullptr;
   VkDescriptorSetLayout descriptorLayout = nullptr;
-  VkDescriptorSet descriptorSet = nullptr;
   VkPipelineLayout pipelineLayout = nullptr;
   VkPipeline pipeline = nullptr;
+
+  std::unordered_map<Texture *, VkDescriptorSet> descriptorMap;
 };
 
 } // namespace liquid

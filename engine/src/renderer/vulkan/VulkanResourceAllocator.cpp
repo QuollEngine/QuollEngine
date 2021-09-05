@@ -348,11 +348,9 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
   return std::make_shared<Texture>(binder, textureData.size, statsManager);
 }
 
-SharedPtr<Texture>
-VulkanResourceAllocator::createTextureShadowmap(uint32_t dimensions,
-                                                uint32_t layers) {
-  size_t textureSize = dimensions * dimensions;
-  VkFormat SHADOW_IMAGE_FORMAT = VK_FORMAT_D16_UNORM;
+SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
+    const TextureFramebufferData &data) {
+  size_t textureSize = data.width * data.height;
 
   VmaAllocation allocation = nullptr;
   VkImage image = nullptr;
@@ -364,12 +362,12 @@ VulkanResourceAllocator::createTextureShadowmap(uint32_t dimensions,
   imageCreateInfo.pNext = nullptr;
   imageCreateInfo.flags = 0;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-  imageCreateInfo.extent = {dimensions, dimensions, 1};
-  imageCreateInfo.arrayLayers = layers;
+  imageCreateInfo.extent = {data.width, data.height, 1};
+  imageCreateInfo.arrayLayers = data.layers;
   imageCreateInfo.mipLevels = 1;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  imageCreateInfo.format = SHADOW_IMAGE_FORMAT;
+  imageCreateInfo.format = (VkFormat)data.format;
   imageCreateInfo.usage =
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
@@ -385,7 +383,7 @@ VulkanResourceAllocator::createTextureShadowmap(uint32_t dimensions,
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   imageViewCreateInfo.flags = 0;
   imageViewCreateInfo.pNext = nullptr;
-  imageViewCreateInfo.format = SHADOW_IMAGE_FORMAT;
+  imageViewCreateInfo.format = (VkFormat)data.format;
   imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
   imageViewCreateInfo.image = image;
   imageViewCreateInfo.subresourceRange = {};
@@ -393,7 +391,7 @@ VulkanResourceAllocator::createTextureShadowmap(uint32_t dimensions,
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-  imageViewCreateInfo.subresourceRange.layerCount = layers;
+  imageViewCreateInfo.subresourceRange.layerCount = data.layers;
 
   checkForVulkanError(
       vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageView),

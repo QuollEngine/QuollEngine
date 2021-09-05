@@ -41,7 +41,7 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 
   frameData.resize(2);
   loadFonts();
-  createDescriptors();
+  createDescriptorLayout();
   createPipeline();
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
@@ -172,6 +172,22 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
           scissor.extent.height = (uint32_t)(clipRect.w - clipRect.y);
           vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+          vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipeline);
+
+          auto *texture = static_cast<Texture *>(cmd->TextureId);
+
+          if (descriptorMap.find(texture) == descriptorMap.end()) {
+            descriptorMap.insert(
+                {texture, createDescriptorFromTexture(texture)});
+          }
+
+          VkDescriptorSet textureDescriptorSet = descriptorMap.at(texture);
+
+          vkCmdBindDescriptorSets(
+              commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0,
+              1, &textureDescriptorSet, 0, nullptr);
+
           vkCmdDrawIndexed(
               commandBuffer, cmd->ElemCount, 1, cmd->IdxOffset + indexOffset,
               static_cast<int32_t>(cmd->VtxOffset + vertexOffset), 0);
@@ -183,11 +199,7 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
   }
 }
 
-void ImguiRenderer::createDescriptors() {
-
-  const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
-      fontTexture->getResourceBinder());
-
+void ImguiRenderer::createDescriptorLayout() {
   VkDescriptorSetLayoutBinding binding{};
   binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   binding.descriptorCount = 1;
@@ -200,6 +212,13 @@ void ImguiRenderer::createDescriptors() {
   info.pBindings = bindings.data();
   vkCreateDescriptorSetLayout(vulkanContext.getDevice(), &info, nullptr,
                               &descriptorLayout);
+}
+
+VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(Texture *texture) {
+  const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
+      texture->getResourceBinder());
+
+  VkDescriptorSet descriptorSet = nullptr;
 
   VkDescriptorSetAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -222,12 +241,10 @@ void ImguiRenderer::createDescriptors() {
   vkUpdateDescriptorSets(vulkanContext.getDevice(), writes.size(),
                          writes.data(), 0, NULL);
 
-  ImGuiIO &io = ImGui::GetIO();
-  io.Fonts->SetTexID(fontTexture.get());
+  return descriptorSet;
 }
 
 void ImguiRenderer::createPipeline() {
-
   std::array<VkPushConstantRange, 1> pushConstants{};
   pushConstants.at(0).stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   pushConstants.at(0).offset = 0;
@@ -360,10 +377,6 @@ void ImguiRenderer::createPipeline() {
 void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       VkCommandBuffer commandBuffer,
                                       int fbWidth, int fbHeight) {
-  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-  vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
-
   if (data->TotalVtxCount > 0) {
     std::array<VkBuffer, 1> vertexBuffers{
         std::dynamic_pointer_cast<VulkanHardwareBuffer>(
@@ -415,6 +428,8 @@ void ImguiRenderer::loadFonts() {
     textureData.format = VK_FORMAT_R8G8B8A8_UNORM;
     fontTexture = resourceAllocator->createTexture2D(textureData);
   }
+
+  io.Fonts->SetTexID(fontTexture.get());
 
   LOG_DEBUG("[ImGui] Fonts loaded");
 }

@@ -177,8 +177,7 @@ VkCullModeFlags
 VulkanPipelineBuilder::getVulkanCullMode(const CullMode &cullMode) {
   switch (cullMode) {
   case CullMode::Back:
-    return VK_CULL_MODE_NONE;
-    // return VK_CULL_MODE_BACK_BIT;
+    return VK_CULL_MODE_BACK_BIT;
   case CullMode::Front:
     return VK_CULL_MODE_FRONT_BIT;
   case CullMode::FrontAndBack:

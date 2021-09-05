@@ -55,13 +55,14 @@ public:
   }
 
   virtual liquid::SharedPtr<liquid::Texture>
-  createTextureShadowmap(uint32_t dimensions, uint32_t layers) {
+  createTextureFramebuffer(const liquid::TextureFramebufferData &data) {
     auto binder = std::make_shared<TestTextureResourceBinder>();
-    binder->type = TestTextureResourceBinder::TextureShadowmap;
-    binder->width = dimensions;
-    binder->height = dimensions;
+    binder->type = TestTextureResourceBinder::TextureFramebuffer;
+    binder->width = data.width;
+    binder->height = data.height;
+    binder->format = data.format;
     binder->data = nullptr;
-    return std::make_shared<liquid::Texture>(binder, dimensions * dimensions,
+    return std::make_shared<liquid::Texture>(binder, data.width * data.height,
                                              nullptr);
   }
 };

@@ -78,14 +78,13 @@ public:
   createTextureCubemap(const TextureCubemapData &data) = 0;
 
   /**
-   * @brief Create shadowmap texture
+   * @brief Create texture that is filled by framebuffer
    *
-   * @param dimensions Dimensions
-   * @param layers Number of layers
-   * @return Shadowmap texture
+   * @param data Framebuffer texture data
+   * @return Framebuffer texture
    */
-  virtual SharedPtr<Texture> createTextureShadowmap(uint32_t dimensions,
-                                                    uint32_t layers) = 0;
+  virtual SharedPtr<Texture>
+  createTextureFramebuffer(const TextureFramebufferData &data) = 0;
 };
 
 } // namespace liquid

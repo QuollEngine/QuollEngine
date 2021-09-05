@@ -31,6 +31,13 @@ struct TextureCubemapData {
   std::array<TextureCubemapDataLayerParams, CUBE_FACES> faceData{};
 };
 
+struct TextureFramebufferData {
+  uint32_t width = 0;
+  uint32_t height = 0;
+  uint32_t format = 0;
+  uint32_t layers = 0;
+};
+
 class Texture {
 public:
   /**

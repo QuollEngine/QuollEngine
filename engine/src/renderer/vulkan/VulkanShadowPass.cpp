@@ -124,8 +124,12 @@ void VulkanShadowPass::createResourceManager(
 void VulkanShadowPass::createTextures(
     VmaAllocator allocator, const SharedPtr<StatsManager> &statsManager) {
 
-  shadowmapTexture = resourceAllocator->createTextureShadowmap(
-      shadowmapExtent.width, NUM_LIGHTS);
+  TextureFramebufferData data{};
+  data.width = shadowmapExtent.width;
+  data.height = shadowmapExtent.height;
+  data.layers = NUM_LIGHTS;
+  data.format = VK_FORMAT_D16_UNORM;
+  shadowmapTexture = resourceAllocator->createTextureFramebuffer(data);
 }
 
 void VulkanShadowPass::createFramebuffers() {

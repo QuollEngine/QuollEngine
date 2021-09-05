@@ -123,13 +123,17 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
   delete[] outData;
 }
 
-TEST_F(VulkanResourceAllocatorTests, CreatesTextureShadowmap) {
+TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
   EXPECT_CALL(*vmaLibMock, vmaCreateImage)
-      .WillOnce([](auto allocator, const auto *imageCreateInfo,
+      .WillOnce([](auto allocator, const VkImageCreateInfo *pCreateInfo,
                    const auto *imageAllocationInfo, auto image,
                    auto *allocation, auto *x) {
         *image = (VkImage)0xff00ff00;
         *allocation = (VmaAllocation)0xff00ffaa;
+
+        EXPECT_EQ(pCreateInfo->arrayLayers, 5);
+        EXPECT_EQ(pCreateInfo->format, VK_FORMAT_D16_UNORM);
+
         return VK_SUCCESS;
       });
 
@@ -151,7 +155,12 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureShadowmap) {
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, nullptr);
 
-  const auto &texture = resourceAllocator.createTextureShadowmap(1024, 5);
+  liquid::TextureFramebufferData textureData{};
+  textureData.width = 1024;
+  textureData.height = 1024;
+  textureData.layers = 5;
+  textureData.format = VK_FORMAT_D16_UNORM;
+  const auto &texture = resourceAllocator.createTextureFramebuffer(textureData);
 
   EXPECT_NE(texture, nullptr);
   EXPECT_NE(texture->getResourceBinder(), nullptr);

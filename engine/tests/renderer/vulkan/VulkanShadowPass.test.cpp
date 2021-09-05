@@ -11,8 +11,8 @@ using ::testing::SaveArg;
 
 class VulkanTestResourceAllocator : public TestResourceAllocator {
 public:
-  liquid::SharedPtr<liquid::Texture> createTextureShadowmap(uint32_t dimensions,
-                                                            uint32_t layers) {
+  liquid::SharedPtr<liquid::Texture>
+  createTextureFramebuffer(const liquid::TextureFramebufferData &data) {
     auto binder = std::make_shared<liquid::VulkanTextureBinder>(
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     return std::make_shared<liquid::Texture>(binder, 0, nullptr);
