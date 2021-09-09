@@ -125,6 +125,9 @@ project "LiquidEngineTest"
         "engine/src"
     }
 
+    configuration "Debug"
+        defines { "LIQUID_DEBUG" }
+
     links { "glfw", "gtest", "gtest_main", "gmock", "ktx" }
 
     filter { "system:linux" }

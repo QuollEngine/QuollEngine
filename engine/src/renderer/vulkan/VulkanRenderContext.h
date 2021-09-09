@@ -6,6 +6,7 @@
 #include "window/glfw/GLFWWindow.h"
 #include "VulkanSwapchain.h"
 #include "VulkanRenderContext.h"
+#include "VulkanCommandExecutor.h"
 
 namespace liquid {
 
@@ -32,11 +33,11 @@ public:
   void destroy();
 
   /**
-   * @brief Render commands provided through function
+   * @brief Render commands in command list
    *
-   * @param renderFn Render function
+   * @param commandList Command list
    */
-  void render(const std::function<void(VkCommandBuffer)> &renderFn);
+  void render(RenderCommandList &commandList);
 
   /**
    * @brief Present to screen
@@ -64,7 +65,7 @@ private:
    *
    * @return Command buffer for current frame
    */
-  VkCommandBuffer beginRendering();
+  VulkanCommandExecutor *beginRendering();
 
   /**
    * @brief End rendering
@@ -93,7 +94,7 @@ private:
 private:
   uint32_t currentFrame = 0;
 
-  std::array<VkCommandBuffer, NUM_FRAMES> commandBuffers{};
+  std::array<VulkanCommandExecutor *, NUM_FRAMES> commandExecutors{};
   std::array<VkSemaphore, NUM_FRAMES> imageAvailableSemaphores{};
   std::array<VkSemaphore, NUM_FRAMES> renderFinishedSemaphores{};
   std::array<VkFence, NUM_FRAMES> renderFences{};

@@ -21,9 +21,7 @@ namespace liquid {
 
 ImguiRenderer::ImguiRenderer(GLFWWindow *window,
                              const VulkanContext &vulkanContext_,
-                             const VulkanSwapchain &swapchain,
                              VkRenderPass renderPass_,
-                             const VulkanUploadContext &uploadContext,
                              ShaderLibrary *shaderLibrary_,
                              ResourceAllocator *resourceAllocator_)
     : vulkanContext(vulkanContext_), resourceAllocator(resourceAllocator_),
@@ -80,7 +78,7 @@ void ImguiRenderer::beginRendering() {
 
 void ImguiRenderer::endRendering() { ImGui::Render(); }
 
-void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
+void ImguiRenderer::draw(RenderCommandList &commandList) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -129,7 +127,7 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
     frameObj.vertexBuffer->unmap();
   }
 
-  setupRenderStates(data, commandBuffer, fbWidth, fbHeight);
+  setupRenderStates(data, commandList, fbWidth, fbHeight);
 
   uint32_t indexOffset = 0;
   uint32_t vertexOffset = 0;
@@ -140,40 +138,36 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
       if (cmd->UserCallback != NULL) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
-          setupRenderStates(data, commandBuffer, fbWidth, fbHeight);
+          setupRenderStates(data, commandList, fbWidth, fbHeight);
         } else {
           cmd->UserCallback(cmdList, cmd);
         }
       } else {
-        glm::vec4 clipRect;
-        clipRect.x =
+        glm::vec2 clipRectOffset;
+        glm::vec4 clipRectSize;
+
+        clipRectOffset.x =
             (cmd->ClipRect.x - data->DisplayPos.x) * data->FramebufferScale.x;
-        clipRect.y =
+        clipRectOffset.y =
             (cmd->ClipRect.y - data->DisplayPos.y) * data->FramebufferScale.y;
-        clipRect.z =
+        clipRectSize.x =
             (cmd->ClipRect.z - data->DisplayPos.x) * data->FramebufferScale.x;
-        clipRect.w =
+        clipRectSize.y =
             (cmd->ClipRect.w - data->DisplayPos.y) * data->FramebufferScale.y;
 
-        if (clipRect.x < (float)fbWidth && clipRect.y < (float)fbHeight &&
-            clipRect.z >= 0.0f && clipRect.w >= 0.0f) {
+        if (clipRectOffset.x < (float)fbWidth &&
+            clipRectOffset.y < (float)fbHeight && clipRectSize.x >= 0.0f &&
+            clipRectSize.y >= 0.0f) {
 
-          if (clipRect.x < 0.0f) {
-            clipRect.x = 0.0f;
+          if (clipRectOffset.x < 0.0f) {
+            clipRectOffset.x = 0.0f;
           }
-          if (clipRect.y < 0.0f) {
-            clipRect.y = 0.0f;
+          if (clipRectOffset.y < 0.0f) {
+            clipRectOffset.y = 0.0f;
           }
 
-          VkRect2D scissor{};
-          scissor.offset.x = (int32_t)(clipRect.x);
-          scissor.offset.y = (int32_t)(clipRect.y);
-          scissor.extent.width = (uint32_t)(clipRect.z - clipRect.x);
-          scissor.extent.height = (uint32_t)(clipRect.w - clipRect.y);
-          vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-          vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            pipeline);
+          commandList.setScissor(clipRectOffset, clipRectSize);
+          commandList.bindPipeline(pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
           auto *texture = static_cast<Texture *>(cmd->TextureId);
 
@@ -182,15 +176,12 @@ void ImguiRenderer::draw(VkCommandBuffer commandBuffer) {
                 {texture, createDescriptorFromTexture(texture)});
           }
 
-          VkDescriptorSet textureDescriptorSet = descriptorMap.at(texture);
-
-          vkCmdBindDescriptorSets(
-              commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0,
-              1, &textureDescriptorSet, 0, nullptr);
-
-          vkCmdDrawIndexed(
-              commandBuffer, cmd->ElemCount, 1, cmd->IdxOffset + indexOffset,
-              static_cast<int32_t>(cmd->VtxOffset + vertexOffset), 0);
+          commandList.bindDescriptorSets(pipelineLayout,
+                                         VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
+                                         {descriptorMap.at(texture)}, {});
+          commandList.drawIndexed(
+              cmd->ElemCount, cmd->IdxOffset + indexOffset,
+              static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
         }
       }
     }
@@ -375,43 +366,33 @@ void ImguiRenderer::createPipeline() {
 }
 
 void ImguiRenderer::setupRenderStates(ImDrawData *data,
-                                      VkCommandBuffer commandBuffer,
+                                      RenderCommandList &commandList,
                                       int fbWidth, int fbHeight) {
   if (data->TotalVtxCount > 0) {
-    std::array<VkBuffer, 1> vertexBuffers{
-        std::dynamic_pointer_cast<VulkanHardwareBuffer>(
-            frameData.at(currentFrame).vertexBuffer)
-            ->getBuffer()};
-    VkBuffer indexBuffer = std::dynamic_pointer_cast<VulkanHardwareBuffer>(
-                               frameData.at(currentFrame).indexBuffer)
-                               ->getBuffer();
-    std::array<VkDeviceSize, 1> vertexBufferOffsets{0};
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers.data(),
-                           vertexBufferOffsets.data());
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0,
-                         sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16
-                                                : VK_INDEX_TYPE_UINT32);
+    commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer.get());
+    commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer.get(),
+                                sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16
+                                                       : VK_INDEX_TYPE_UINT32);
   }
 
-  VkViewport viewport;
-  viewport.x = 0;
-  viewport.y = 0;
-  viewport.width = (float)fbWidth;
-  viewport.height = (float)fbHeight;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
-  vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+  commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
 
   const float SCALE_FACTOR = 2.0f;
   std::array<float, 2> scale{SCALE_FACTOR / data->DisplaySize.x,
                              SCALE_FACTOR / data->DisplaySize.y};
   std::array<float, 2> translate{-1.0f - data->DisplayPos.x * scale[0],
                                  -1.0f - data->DisplayPos.y * scale[1]};
-  vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT,
-                     0, sizeof(float) * scale.size(), scale.data());
-  vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT,
-                     sizeof(float) * scale.size(),
-                     sizeof(float) * translate.size(), translate.data());
+
+  float *scaleConstant = new float[2];
+  memcpy(scaleConstant, scale.data(), sizeof(float) * scale.size());
+  commandList.pushConstants(pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                            sizeof(float) * scale.size(), scaleConstant);
+
+  float *translateConstant = new float[2];
+  memcpy(translateConstant, translate.data(), sizeof(float) * translate.size());
+  commandList.pushConstants(
+      pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * scale.size(),
+      sizeof(float) * translate.size(), translateConstant);
 }
 
 void ImguiRenderer::loadFonts() {

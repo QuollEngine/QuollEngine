@@ -24,7 +24,6 @@ void VulkanRenderContext::destroy() {
       renderFences.at(i) = nullptr;
     }
   }
-
   LOG_DEBUG("[Vulkan] Render fences destroyed");
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
@@ -38,18 +37,20 @@ void VulkanRenderContext::destroy() {
       renderFinishedSemaphores.at(i) = nullptr;
     }
   }
-
   LOG_DEBUG("[Vulkan] Render semaphores destroyed");
+
+  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
+    delete commandExecutors.at(i);
+  }
 
   vkDestroyCommandPool(device, commandPool, nullptr);
   LOG_DEBUG("[Vulkan] Command Pool destroyed");
 }
 
-void VulkanRenderContext::render(
-    const std::function<void(VkCommandBuffer)> &renderFn) {
-  VkCommandBuffer commandBuffer = beginRendering();
+void VulkanRenderContext::render(RenderCommandList &commandList) {
+  auto *executor = beginRendering();
 
-  renderFn(commandBuffer);
+  executor->execute(commandList);
 
   endRendering();
 }
@@ -74,31 +75,20 @@ VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
   return vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
-VkCommandBuffer VulkanRenderContext::beginRendering() {
+VulkanCommandExecutor *VulkanRenderContext::beginRendering() {
   vkWaitForFences(device, 1, &renderFences.at(currentFrame), true,
                   std::numeric_limits<uint32_t>::max());
   vkResetFences(device, 1, &renderFences.at(currentFrame));
 
-  vkResetCommandBuffer(commandBuffers.at(currentFrame), 0);
-
-  VkCommandBufferBeginInfo beginInfo{};
-  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  beginInfo.flags = 0;
-  beginInfo.pInheritanceInfo = nullptr;
-
-  checkForVulkanError(
-      vkBeginCommandBuffer(commandBuffers.at(currentFrame), &beginInfo),
-      "Failed to begin recording command buffer for frame");
-
-  return commandBuffers.at(currentFrame);
+  return commandExecutors.at(currentFrame);
 }
 
 void VulkanRenderContext::endRendering() {
-  checkForVulkanError(vkEndCommandBuffer(commandBuffers.at(currentFrame)),
-                      "Failed to finish recording command buffer for frame");
-
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+  std::array<VkCommandBuffer, 1> commandBuffers{
+      commandExecutors.at(currentFrame)->getCommandBuffer()};
 
   std::array<VkSemaphore, 1> waitSemaphores{
       imageAvailableSemaphores.at(currentFrame)};
@@ -107,8 +97,8 @@ void VulkanRenderContext::endRendering() {
   submitInfo.waitSemaphoreCount = waitSemaphores.size();
   submitInfo.pWaitSemaphores = waitSemaphores.data();
   submitInfo.pWaitDstStageMask = waitStages.data();
-  submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &commandBuffers.at(currentFrame);
+  submitInfo.commandBufferCount = commandBuffers.size();
+  submitInfo.pCommandBuffers = commandBuffers.data();
 
   std::array<VkSemaphore, 1> signalSemaphores{
       renderFinishedSemaphores.at(currentFrame)};
@@ -155,6 +145,8 @@ void VulkanRenderContext::createFences() {
 }
 
 void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily) {
+  std::array<VkCommandBuffer, NUM_FRAMES> commandBuffers{};
+
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -175,6 +167,10 @@ void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily) {
   checkForVulkanError(
       vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()),
       "Failed to allocate command buffers");
+
+  for (size_t i = 0; i < NUM_FRAMES; ++i) {
+    commandExecutors.at(i) = new VulkanCommandExecutor(commandBuffers.at(i));
+  }
 
   LOG_DEBUG("[Vulkan] Command buffers allocated");
 }

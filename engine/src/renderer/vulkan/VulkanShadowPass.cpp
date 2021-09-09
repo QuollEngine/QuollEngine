@@ -9,7 +9,7 @@ namespace liquid {
 constexpr uint32_t NUM_LIGHTS = 16;
 
 VulkanShadowPass::VulkanShadowPass(uint32_t shadowmapDimensions,
-                                   VkDevice device_, VmaAllocator allocator,
+                                   VkDevice device_,
                                    VulkanPipelineBuilder *pipelineBuilder,
                                    ResourceAllocator *resourceAllocator_,
                                    VulkanDescriptorManager *descriptorManager,
@@ -18,7 +18,7 @@ VulkanShadowPass::VulkanShadowPass(uint32_t shadowmapDimensions,
       device(device_), resourceAllocator(resourceAllocator_) {
   createRenderPass();
   createResourceManager(pipelineBuilder, descriptorManager);
-  createTextures(allocator, statsManager);
+  createTextures(statsManager);
   createFramebuffers();
 }
 
@@ -35,25 +35,20 @@ VulkanShadowPass::~VulkanShadowPass() {
 }
 
 void VulkanShadowPass::render(
-    VkCommandBuffer commandBuffer,
-    std::function<void(VkCommandBuffer cmd)> renderFn) {
-  std::array<VkClearValue, 1> clearValues{};
-  clearValues[0].depthStencil = {1.0f, 0};
+    RenderCommandList &commandList,
+    std::function<void(RenderCommandList &commandList)> renderFn) {
 
-  VkRenderPassBeginInfo beginInfo{};
-  beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  beginInfo.renderPass = renderPass;
-  beginInfo.framebuffer = framebuffer;
-  beginInfo.renderArea.offset = {0, 0};
-  beginInfo.renderArea.extent = shadowmapExtent;
-  beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-  beginInfo.pClearValues = clearValues.data();
+  VkClearValue clearValue{};
+  clearValue.depthStencil.depth = 1.0f;
+  clearValue.depthStencil.stencil = 0;
 
-  vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+  commandList.beginRenderPass(renderPass, framebuffer, {0, 0},
+                              {shadowmapExtent.width, shadowmapExtent.height},
+                              {clearValue});
 
-  renderFn(commandBuffer);
+  renderFn(commandList);
 
-  vkCmdEndRenderPass(commandBuffer);
+  commandList.endRenderPass();
 }
 
 void VulkanShadowPass::createRenderPass() {
@@ -122,7 +117,7 @@ void VulkanShadowPass::createResourceManager(
 }
 
 void VulkanShadowPass::createTextures(
-    VmaAllocator allocator, const SharedPtr<StatsManager> &statsManager) {
+    const SharedPtr<StatsManager> &statsManager) {
 
   TextureFramebufferData data{};
   data.width = shadowmapExtent.width;

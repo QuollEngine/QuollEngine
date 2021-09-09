@@ -32,9 +32,7 @@ public:
    *
    * @return Scene descriptor set
    */
-  inline VkDescriptorSet *getSceneDescriptorSet() {
-    return &sceneDescriptorSet;
-  }
+  inline VkDescriptorSet getSceneDescriptorSet() { return sceneDescriptorSet; }
 
   /**
    * @brief Get scene

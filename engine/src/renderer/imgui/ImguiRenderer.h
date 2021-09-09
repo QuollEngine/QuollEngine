@@ -7,12 +7,12 @@
 #include "renderer/vulkan/VulkanContext.h"
 #include "renderer/vulkan/VulkanDescriptorManager.h"
 #include "renderer/vulkan/VulkanSwapchain.h"
-#include "renderer/vulkan/VulkanUploadContext.h"
 #include "renderer/vulkan/VulkanShader.h"
 #include "renderer/vulkan/VulkanTextureBinder.h"
 #include "renderer/ShaderLibrary.h"
 #include "renderer/ResourceAllocator.h"
 #include "renderer/HardwareBuffer.h"
+#include "renderer/RenderCommandList.h"
 
 namespace liquid {
 
@@ -24,9 +24,7 @@ class ImguiRenderer {
 
 public:
   ImguiRenderer(GLFWWindow *window, const VulkanContext &vulkanContext,
-                const VulkanSwapchain &swapchain, VkRenderPass renderPass,
-                const VulkanUploadContext &uploadContext,
-                ShaderLibrary *shaderLibrary,
+                VkRenderPass renderPass, ShaderLibrary *shaderLibrary,
                 ResourceAllocator *resourceAllocator);
   ~ImguiRenderer();
 
@@ -38,6 +36,7 @@ public:
   void beginRendering();
   void endRendering();
 
+  void draw(RenderCommandList &commandList);
   void draw(VkCommandBuffer buffer);
 
 private:
@@ -49,6 +48,8 @@ private:
   VkDescriptorSet createDescriptorFromTexture(Texture *texture);
 
   void setupRenderStates(ImDrawData *draw_data, VkCommandBuffer commandBuffer,
+                         int fbWidth, int fbHeight);
+  void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
                          int fbWidth, int fbHeight);
 
 private:

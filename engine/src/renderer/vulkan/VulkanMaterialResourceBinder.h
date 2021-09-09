@@ -59,8 +59,8 @@ public:
    *
    * @return Material descriptor set
    */
-  inline const VkDescriptorSet *getDescriptorSet() const {
-    return &materialDescriptorSet;
+  inline const VkDescriptorSet getDescriptorSet() const {
+    return materialDescriptorSet;
   }
 
 private:

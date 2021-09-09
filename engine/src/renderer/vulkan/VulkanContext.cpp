@@ -41,36 +41,33 @@ void VulkanContext::createInstance(const String &engineName,
       "VK_EXT_metal_surface", "VK_MVK_macos_surface", "VK_KHR_surface"};
 
   VkApplicationInfo appInfo{};
-
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = nullptr;
-
   appInfo.pApplicationName = applicationName.c_str();
   appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 11, 0);
   appInfo.pEngineName = engineName.c_str();
   appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 11, 0);
   appInfo.apiVersion = VK_API_VERSION_1_2;
 
-  VkInstanceCreateInfo createAppInfo{};
-  createAppInfo.flags = 0;
-  createAppInfo.pNext = nullptr;
-
-  createAppInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-  createAppInfo.pApplicationInfo = &appInfo;
-  createAppInfo.enabledLayerCount = 0;
-  createAppInfo.ppEnabledLayerNames = nullptr;
+  VkInstanceCreateInfo createInstanceInfo{};
+  createInstanceInfo.flags = 0;
+  createInstanceInfo.pNext = nullptr;
+  createInstanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  createInstanceInfo.pApplicationInfo = &appInfo;
+  createInstanceInfo.enabledLayerCount = 0;
+  createInstanceInfo.ppEnabledLayerNames = nullptr;
 
   if (enableValidations) {
     LOG_DEBUG("[Vulkan] Validations layers enabled");
-    validator.attachToInstanceCreateConfig(createAppInfo);
+    validator.attachToInstanceCreateConfig(createInstanceInfo);
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   }
 
-  createAppInfo.enabledExtensionCount =
+  createInstanceInfo.enabledExtensionCount =
       static_cast<uint32_t>(extensions.size());
-  createAppInfo.ppEnabledExtensionNames = extensions.data();
+  createInstanceInfo.ppEnabledExtensionNames = extensions.data();
 
-  checkForVulkanError(vkCreateInstance(&createAppInfo, nullptr, &instance),
+  checkForVulkanError(vkCreateInstance(&createInstanceInfo, nullptr, &instance),
                       "Failed to create instance");
 
   if (enableValidations) {

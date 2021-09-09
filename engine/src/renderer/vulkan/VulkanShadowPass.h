@@ -7,6 +7,7 @@
 #include "VulkanResourceManager.h"
 #include "renderer/ResourceAllocator.h"
 #include "renderer/Material.h"
+#include "renderer/RenderCommandList.h"
 
 namespace liquid {
 
@@ -17,14 +18,12 @@ public:
    *
    * @param shadowmapDimensions Shadowmap dimensions
    * @param device Vulkan device
-   * @param allocator Vma Allocator
    * @param pipelineBuilder Vma Allocator
    * @param resourceAllocator Resource allocator
    * @param descriptorManager Descriptor manager
    * @param statsManager Stats manager
    */
   VulkanShadowPass(uint32_t shadowmapDimensions, VkDevice device,
-                   VmaAllocator allocator,
                    VulkanPipelineBuilder *pipelineBuilder,
                    ResourceAllocator *resourceAllocator,
                    VulkanDescriptorManager *descriptorManager,
@@ -43,11 +42,11 @@ public:
   /**
    * @brief Process commands in render pass
    *
-   * @param commandBuffer Command buffer
+   * @param commandList Command list
    * @param renderFn Render function to process
    */
-  void render(VkCommandBuffer buffer,
-              std::function<void(VkCommandBuffer cmd)> renderFn);
+  void render(RenderCommandList &commandList,
+              std::function<void(RenderCommandList &commandList)> renderFn);
 
   /**
    * @brief Get resource manager
@@ -90,11 +89,9 @@ private:
   /**
    * @brief Create shadow map texture
    *
-   * @param allocator Vma Allocator
    * @param statsManager Stats manager
    */
-  void createTextures(VmaAllocator allocator,
-                      const SharedPtr<StatsManager> &statsManager);
+  void createTextures(const SharedPtr<StatsManager> &statsManager);
 
   /**
    * @brief Create framebuffer

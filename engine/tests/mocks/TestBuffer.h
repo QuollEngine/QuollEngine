@@ -17,6 +17,10 @@ public:
       size_t bufferSize,
       const liquid::SharedPtr<liquid::StatsManager> &statsManager = nullptr)
       : liquid::HardwareBuffer(bufferSize, statsManager) {}
+  TestBuffer(
+      HardwareBufferType type, size_t bufferSize,
+      const liquid::SharedPtr<liquid::StatsManager> &statsManager = nullptr)
+      : liquid::HardwareBuffer(type, bufferSize, statsManager) {}
 
   ~TestBuffer() {
     if (data) {

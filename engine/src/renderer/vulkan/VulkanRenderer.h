@@ -7,20 +7,20 @@
 #include "renderer/ResourceAllocator.h"
 
 #include "VulkanSwapchain.h"
-#include "VulkanContext.h"
 #include "VulkanPipelineBuilder.h"
 #include "VulkanShader.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanRenderData.h"
-#include "VulkanRenderContext.h"
-#include "VulkanUploadContext.h"
 #include "VulkanResourceManager.h"
 #include "VulkanShadowPass.h"
 #include "VulkanResourceAllocator.h"
 
+#include "VulkanRenderBackend.h"
+
 #include "renderer/ShaderLibrary.h"
 #include "renderer/MaterialPBR.h"
 #include "renderer/imgui/ImguiRenderer.h"
+#include "renderer/RenderCommandList.h"
 
 #include "entity/EntityContext.h"
 
@@ -46,7 +46,7 @@ public:
   VulkanRenderer &operator=(const VulkanRenderer &rhs) = delete;
   VulkanRenderer &operator=(VulkanRenderer &&rhs) = delete;
 
-  void drawRenderables(VkCommandBuffer commandBuffer, Camera *camera,
+  void drawRenderables(RenderCommandList &commandList, Camera *camera,
                        bool useForShadowMapping);
   void draw(const SharedPtr<VulkanRenderData> &renderData);
   void waitForIdle();
@@ -62,15 +62,15 @@ public:
                     const CullMode &cullMode);
   SharedPtr<VulkanShader> createShader(const String &shaderFile);
 
-  inline ResourceAllocator *getResourceAllocator() { return resourceAllocator; }
+  inline ResourceAllocator *getResourceAllocator() {
+    return renderBackend.getResourceAllocator();
+  }
   inline VulkanPipelineBuilder *getPipelineBuilder() { return pipelineBuilder; }
   inline ImguiRenderer *getImguiRenderer() { return imguiRenderer; }
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
   void setClearColor(glm::vec4 clearColor);
-
-  inline const VulkanContext &getContext() const { return context; }
 
   inline const SharedPtr<StatsManager> &getStatsManager() {
     return statsManager;
@@ -79,42 +79,34 @@ public:
     return debugManager;
   }
 
+  inline const VulkanContext &getContext() {
+    return renderBackend.getVulkanInstance();
+  }
+
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
 private:
-  void createAllocator();
   void createRenderPass();
   void createPipelineBuilder();
 
   void loadShaders();
-
-  void createSwapchain();
-  void recreateSwapchain();
-
-  void createMainPass();
-  void destroyMainPass();
-  void createMainFramebuffers();
-  void destroyMainFramebuffers();
 
   void createShadowPass();
   void destroyShadowPass();
 
   void createImgui();
 
-  void setViewportAndScissor(VkCommandBuffer commandBuffer, VkExtent2D extent);
+  void setViewportAndScissor(RenderCommandList &commandList, glm::vec2 extent);
 
 private:
   glm::vec4 clearColor{0.0, 0.0, 0.0, 1.0};
 
-  uint32_t resizeHandler = 0;
+  bool framebufferResized = false;
 
-  VulkanUploadContext uploadContext;
-  VulkanRenderContext renderContext;
+  VulkanRenderBackend renderBackend;
+
   VulkanDescriptorManager *descriptorManager = nullptr;
   VulkanPipelineBuilder *pipelineBuilder = nullptr;
-
-  VkRenderPass mainRenderPass = nullptr;
-  std::vector<VkFramebuffer> mainFramebuffers;
   VulkanResourceManager *mainResourceManager = nullptr;
 
   SharedPtr<VulkanShadowPass> shadowPass;
@@ -123,17 +115,6 @@ private:
   ImguiRenderer *imguiRenderer = nullptr;
 
   ShaderLibrary *shaderLibrary;
-
-  bool framebufferResized = false;
-
-  VulkanSwapchain swapchain;
-
-  ResourceAllocator *resourceAllocator = nullptr;
-  VmaAllocator allocator = nullptr;
-
-  VulkanContext context;
-
-  GLFWWindow *window;
 
   EntityContext &entityContext;
 
