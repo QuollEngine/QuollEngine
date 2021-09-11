@@ -72,9 +72,7 @@ public:
 
   void setClearColor(glm::vec4 clearColor);
 
-  inline const SharedPtr<StatsManager> &getStatsManager() {
-    return statsManager;
-  }
+  inline const StatsManager &getStatsManager() { return statsManager; }
   inline const SharedPtr<DebugManager> &getDebugManager() {
     return debugManager;
   }
@@ -119,7 +117,7 @@ private:
   EntityContext &entityContext;
 
   SharedPtr<DebugManager> debugManager;
-  SharedPtr<StatsManager> statsManager;
+  StatsManager statsManager;
 };
 
 } // namespace liquid

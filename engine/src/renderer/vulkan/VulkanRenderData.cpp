@@ -33,8 +33,8 @@ VulkanRenderData::VulkanRenderData(
 
   const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
       scene->getActiveCamera()->getUniformBuffer());
-  sceneBuffer.reset(dynamic_cast<VulkanHardwareBuffer *>(
-      resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject))));
+  sceneBuffer = std::dynamic_pointer_cast<VulkanHardwareBuffer>(
+      resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject)));
 
   sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
       cameraBuffer, sceneBuffer, shadowmaps, {});

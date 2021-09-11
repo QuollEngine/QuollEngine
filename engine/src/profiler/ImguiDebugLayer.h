@@ -17,7 +17,7 @@ public:
    * @param debugManager Debug manager
    */
   ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
-                  const SharedPtr<StatsManager> &statsManager,
+                  const StatsManager &statsManager,
                   const SharedPtr<DebugManager> &debugManager_);
 
   /**
@@ -66,7 +66,7 @@ private:
 
 private:
   PhysicalDeviceInformation physicalDeviceInfo;
-  SharedPtr<StatsManager> statsManager = nullptr;
+  const StatsManager &statsManager;
   SharedPtr<DebugManager> debugManager = nullptr;
   uint32_t fps = 0;
 

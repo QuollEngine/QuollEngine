@@ -128,16 +128,18 @@ void VulkanCommandExecutor::executePushConstants(
 
 void VulkanCommandExecutor::executeBindVertexBuffer(
     const RenderCommandBindVertexBuffer *const command) {
-  auto *buffer =
-      dynamic_cast<VulkanHardwareBuffer *>(command->buffer)->getBuffer();
+  const auto &buffer =
+      std::dynamic_pointer_cast<VulkanHardwareBuffer>(command->buffer)
+          ->getBuffer();
   std::array<VkDeviceSize, 1> offsets{0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, offsets.data());
 }
 
 void VulkanCommandExecutor::executeBindIndexBuffer(
     const RenderCommandBindIndexBuffer *const command) {
-  auto *buffer =
-      dynamic_cast<VulkanHardwareBuffer *>(command->buffer)->getBuffer();
+  const auto &buffer =
+      std::dynamic_pointer_cast<VulkanHardwareBuffer>(command->buffer)
+          ->getBuffer();
   vkCmdBindIndexBuffer(commandBuffer, buffer, 0, command->indexType);
 }
 

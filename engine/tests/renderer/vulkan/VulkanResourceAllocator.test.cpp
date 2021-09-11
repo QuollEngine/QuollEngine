@@ -46,9 +46,10 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
         return VK_SUCCESS;
       });
 
+  liquid::StatsManager statsManager;
   liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
-                                                    nullptr, nullptr);
+                                                    nullptr, statsManager);
 
   const auto &texture = resourceAllocator.createTexture2D({1, 7, 1, 0, data});
 
@@ -101,9 +102,10 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
         return VK_SUCCESS;
       });
 
+  liquid::StatsManager statsManager;
   liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
-                                                    nullptr, nullptr);
+                                                    nullptr, statsManager);
 
   const auto &texture =
       resourceAllocator.createTextureCubemap({5, 5, 1, 0, data});
@@ -151,9 +153,10 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
         return VK_SUCCESS;
       });
 
+  liquid::StatsManager statsManager;
   liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
-                                                    nullptr, nullptr);
+                                                    nullptr, statsManager);
 
   liquid::TextureFramebufferData textureData{};
   textureData.width = 1024;

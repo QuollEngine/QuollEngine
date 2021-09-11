@@ -25,8 +25,8 @@ Material::Material(const SharedPtr<Shader> &vertexShader_,
       maxValue = maxValue > value.getSize() ? maxValue : value.getSize();
     }
 
-    uniformBuffer.reset(
-        resourceAllocator->createUniformBuffer(maxValue * properties.size()));
+    uniformBuffer =
+        resourceAllocator->createUniformBuffer(maxValue * properties.size());
 
     updateBufferWithProperties();
   }

@@ -23,14 +23,14 @@ public:
    *
    * @return Number of draw calls
    */
-  inline uint32_t getDrawCallsCount() { return drawCallsCount; }
+  inline uint32_t getDrawCallsCount() const { return drawCallsCount; }
 
   /**
    * @brief Get number of drawn primitives
    *
    * @return Number of drawn primitives
    */
-  inline size_t getDrawnPrimitivesCount() { return drawnPrimitivesCount; }
+  inline size_t getDrawnPrimitivesCount() const { return drawnPrimitivesCount; }
 
   /**
    * @brief Add texture stats

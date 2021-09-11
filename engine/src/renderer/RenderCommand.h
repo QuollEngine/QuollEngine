@@ -21,13 +21,36 @@ enum class RenderCommandType {
 
 struct RenderCommandBase {
   RenderCommandType type = RenderCommandType::Unknown;
+
+  /**
+   * @brief Create render command
+   *
+   * @param type Render command type
+   */
+  RenderCommandBase(RenderCommandType type_) : type(type_){};
+
+  /**
+   * @brief Delete render command
+   */
+  virtual ~RenderCommandBase() = default;
+
+  RenderCommandBase(RenderCommandBase &rhs) = delete;
+  RenderCommandBase(RenderCommandBase &&rhs) = delete;
+  RenderCommandBase &operator=(RenderCommandBase &rhs) = delete;
+  RenderCommandBase &operator=(RenderCommandBase &&rhs) = delete;
 };
 
 template <RenderCommandType commandType>
 struct TypedRenderCommandBase : public RenderCommandBase {
   static_assert(commandType != RenderCommandType::Unknown);
 
-  TypedRenderCommandBase() { type = commandType; }
+  /**
+   * @brief Create typed render command
+   *
+   * Template enum parameter will be used to create
+   * command type
+   */
+  TypedRenderCommandBase() : RenderCommandBase(commandType) {}
 };
 
 struct RenderCommandBeginRenderPass
@@ -81,12 +104,12 @@ struct RenderCommandSetScissor
 
 struct RenderCommandBindVertexBuffer
     : public TypedRenderCommandBase<RenderCommandType::BindVertexBuffer> {
-  HardwareBuffer *buffer = nullptr;
+  SharedPtr<HardwareBuffer> buffer = nullptr;
 };
 
 struct RenderCommandBindIndexBuffer
     : public TypedRenderCommandBase<RenderCommandType::BindIndexBuffer> {
-  HardwareBuffer *buffer = nullptr;
+  SharedPtr<HardwareBuffer> buffer = nullptr;
   VkIndexType indexType = VK_INDEX_TYPE_MAX_ENUM;
 };
 

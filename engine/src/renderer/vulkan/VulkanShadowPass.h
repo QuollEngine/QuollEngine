@@ -27,7 +27,7 @@ public:
                    VulkanPipelineBuilder *pipelineBuilder,
                    ResourceAllocator *resourceAllocator,
                    VulkanDescriptorManager *descriptorManager,
-                   const SharedPtr<StatsManager> &statsManager);
+                   StatsManager &statsManager);
 
   /**
    * @brief Destroy all resources related to this pass
@@ -91,7 +91,7 @@ private:
    *
    * @param statsManager Stats manager
    */
-  void createTextures(const SharedPtr<StatsManager> &statsManager);
+  void createTextures(StatsManager &statsManager);
 
   /**
    * @brief Create framebuffer

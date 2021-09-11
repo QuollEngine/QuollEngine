@@ -7,35 +7,87 @@
 
 namespace liquid {
 
+VulkanResourceAllocator *
+VulkanResourceAllocator::create(const VulkanContext &vulkanInstance,
+                                const VulkanUploadContext &uploadContext,
+                                StatsManager &statsManager) {
+  VmaAllocator allocator = nullptr;
+
+  VmaAllocatorCreateInfo createInfo{};
+  createInfo.instance = vulkanInstance.getInstance();
+  createInfo.physicalDevice =
+      vulkanInstance.getPhysicalDevice().getVulkanDevice();
+  createInfo.device = vulkanInstance.getDevice();
+
+  checkForVulkanError(vmaCreateAllocator(&createInfo, &allocator),
+                      "Failed to create allocator");
+
+  LOG_DEBUG("[Vulkan] Allocator created");
+
+  return new VulkanResourceAllocator(uploadContext, allocator,
+                                     vulkanInstance.getDevice(), statsManager);
+}
+
 VulkanResourceAllocator::VulkanResourceAllocator(
     const VulkanUploadContext &uploadContext_, VmaAllocator allocator_,
-    VkDevice device_, const SharedPtr<StatsManager> &statsManager_)
+    VkDevice device_, StatsManager &statsManager_)
     : uploadContext(uploadContext_), allocator(allocator_), device(device_),
       statsManager(statsManager_) {}
 
-HardwareBuffer *VulkanResourceAllocator::createVertexBuffer(size_t bufferSize) {
-  return new VulkanHardwareBuffer(HardwareBuffer::VERTEX, bufferSize, allocator,
-                                  statsManager);
+VulkanResourceAllocator::~VulkanResourceAllocator() {
+  if (allocator) {
+    vmaDestroyAllocator(allocator);
+    LOG_DEBUG("[Vulkan] Allocator destroyed");
+  }
 }
 
-HardwareBuffer *VulkanResourceAllocator::createVertexBuffer(
-    const std::vector<Vertex> &vertices) {
-  return new VulkanHardwareBuffer(allocator, vertices, statsManager);
+SharedPtr<HardwareBuffer>
+VulkanResourceAllocator::createVertexBuffer(size_t bufferSize) {
+  return createHardwareBuffer(HardwareBuffer::VERTEX, bufferSize);
 }
 
-HardwareBuffer *VulkanResourceAllocator::createIndexBuffer(size_t bufferSize) {
-  return new VulkanHardwareBuffer(HardwareBuffer::INDEX, bufferSize, allocator,
-                                  statsManager);
+SharedPtr<HardwareBuffer>
+VulkanResourceAllocator::createIndexBuffer(size_t bufferSize) {
+  return createHardwareBuffer(HardwareBuffer::INDEX, bufferSize);
 }
 
-HardwareBuffer *VulkanResourceAllocator::createIndexBuffer(
-    const std::vector<uint32_t> &indices) {
-  return new VulkanHardwareBuffer(allocator, indices, statsManager);
-}
-
-HardwareBuffer *
+SharedPtr<HardwareBuffer>
 VulkanResourceAllocator::createUniformBuffer(size_t bufferSize) {
-  return new VulkanHardwareBuffer(allocator, bufferSize, statsManager);
+  return createHardwareBuffer(HardwareBuffer::UNIFORM, bufferSize);
+}
+
+SharedPtr<HardwareBuffer> VulkanResourceAllocator::createHardwareBuffer(
+    HardwareBuffer::HardwareBufferType bufferType, size_t bufferSize) {
+
+  VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
+  if (bufferType == HardwareBuffer::VERTEX) {
+    usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  } else if (bufferType == HardwareBuffer::INDEX) {
+    usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+  } else if (bufferType == HardwareBuffer::UNIFORM) {
+    usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  }
+
+  VkBufferCreateInfo createBufferInfo{};
+  createBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  createBufferInfo.pNext = nullptr;
+  createBufferInfo.flags = 0;
+  createBufferInfo.size = bufferSize;
+  createBufferInfo.usage = usageFlags;
+
+  VmaAllocationCreateInfo createAllocationInfo{};
+  createAllocationInfo.flags = 0;
+  createAllocationInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+  VmaAllocation allocation = nullptr;
+  VkBuffer buffer = nullptr;
+
+  checkForVulkanError(vmaCreateBuffer(allocator, &createBufferInfo,
+                                      &createAllocationInfo, &buffer,
+                                      &allocation, nullptr),
+                      "Cannot create hardware buffer");
+  return std::make_shared<VulkanHardwareBuffer>(
+      bufferType, bufferSize, buffer, allocation, allocator, statsManager);
 }
 
 SharedPtr<Texture>

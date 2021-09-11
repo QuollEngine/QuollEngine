@@ -11,7 +11,7 @@ template <class T> String convertToString(T value) {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo_,
-    const SharedPtr<StatsManager> &statsManager_,
+    const StatsManager &statsManager_,
     const SharedPtr<DebugManager> &debugManager_)
     : physicalDeviceInfo(physicalDeviceInfo_), statsManager(statsManager_),
       debugManager(debugManager_) {}
@@ -22,9 +22,7 @@ void ImguiDebugLayer::render() {
     if (ImGui::BeginMenu("Debug")) {
       ImGui::MenuItem("Physical Device Information", nullptr,
                       &physicalDeviceInfoVisible);
-      if (statsManager) {
-        ImGui::MenuItem("Usage Metrics", nullptr, &usageMetricsVisible);
-      }
+      ImGui::MenuItem("Usage Metrics", nullptr, &usageMetricsVisible);
 
       ImGui::MenuItem("Performance Metrics", nullptr,
                       &performanceMetricsVisible);
@@ -66,7 +64,7 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
 }
 
 void ImguiDebugLayer::renderUsageMetrics() {
-  if (!usageMetricsVisible || !statsManager)
+  if (!usageMetricsVisible)
     return;
 
   ImGui::Begin("Usage Metrics", &usageMetricsVisible);
@@ -77,17 +75,17 @@ void ImguiDebugLayer::renderUsageMetrics() {
                             ImGuiTableFlags_RowBg)) {
 
     renderTableRow("Number of buffers",
-                   convertToString(statsManager->getAllocatedBuffersCount()));
+                   convertToString(statsManager.getAllocatedBuffersCount()));
     renderTableRow("Total size of allocated buffer",
-                   convertToString(statsManager->getAllocatedBuffersSize()));
+                   convertToString(statsManager.getAllocatedBuffersSize()));
     renderTableRow("Number of textures",
-                   convertToString(statsManager->getAllocatedTexturesCount()));
+                   convertToString(statsManager.getAllocatedTexturesCount()));
     renderTableRow("Total size of allocated textures",
-                   convertToString(statsManager->getAllocatedTexturesSize()));
+                   convertToString(statsManager.getAllocatedTexturesSize()));
     renderTableRow("Number of draw calls",
-                   convertToString(statsManager->getDrawCallsCount()));
+                   convertToString(statsManager.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
-                   convertToString(statsManager->getDrawnPrimitivesCount()));
+                   convertToString(statsManager.getDrawnPrimitivesCount()));
 
     ImGui::EndTable();
   }

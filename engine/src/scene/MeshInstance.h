@@ -20,13 +20,7 @@ public:
    */
   MeshInstance(Mesh *mesh, ResourceAllocator *resourceAllocator);
 
-  /**
-   * @brief Destroys mesh instance
-   *
-   * Destroys hardware buffers
-   */
-  ~MeshInstance();
-
+  ~MeshInstance() = default;
   MeshInstance(const MeshInstance &rhs) = delete;
   MeshInstance(MeshInstance &&rhs) = delete;
   MeshInstance &operator=(const MeshInstance &rhs) = delete;
@@ -45,7 +39,8 @@ public:
    *
    * @return Vertex buffers
    */
-  inline const std::vector<HardwareBuffer *> &getVertexBuffers() const {
+  inline const std::vector<SharedPtr<HardwareBuffer>> &
+  getVertexBuffers() const {
     return vertexBuffers;
   }
 
@@ -54,7 +49,7 @@ public:
    *
    * @return Index buffers
    */
-  inline const std::vector<HardwareBuffer *> &getIndexBuffers() const {
+  inline const std::vector<SharedPtr<HardwareBuffer>> &getIndexBuffers() const {
     return indexBuffers;
   }
 
@@ -67,10 +62,20 @@ public:
     return materials;
   }
 
+  /**
+   * @brief Get index counts
+   *
+   * @return Index counts
+   */
+  inline const std::vector<size_t> &getIndexCounts() const {
+    return indexCounts;
+  }
+
 private:
-  std::vector<HardwareBuffer *> vertexBuffers;
-  std::vector<HardwareBuffer *> indexBuffers;
+  std::vector<SharedPtr<HardwareBuffer>> vertexBuffers;
+  std::vector<SharedPtr<HardwareBuffer>> indexBuffers;
   std::vector<SharedPtr<Material>> materials;
+  std::vector<size_t> indexCounts;
 };
 
 } // namespace liquid

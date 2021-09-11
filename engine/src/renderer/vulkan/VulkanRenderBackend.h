@@ -22,8 +22,10 @@ public:
    *
    * @param window GLFW window
    * @param enableValidations Enable validations
+   * @param statsManager Stats manager
    */
-  VulkanRenderBackend(GLFWWindow *window, bool enableValidations = false);
+  VulkanRenderBackend(GLFWWindow *window, bool enableValidations,
+                      StatsManager &statsManager);
 
   VulkanRenderBackend(const VulkanRenderBackend &rhs) = delete;
   VulkanRenderBackend(VulkanRenderBackend &&rhs) = delete;
@@ -101,11 +103,6 @@ public:
   void waitForIdle();
 
 public:
-  /**
-   * @brief Create allocator
-   */
-  void createAllocator();
-
   /**
    * @brief Create swapchain
    */

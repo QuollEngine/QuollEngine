@@ -4,7 +4,8 @@
 
 TEST(TextureTest, GetsResourceBinder) {
   auto binder = std::make_shared<TestTextureResourceBinder>();
-  liquid::Texture texture(binder, 0, nullptr);
+  liquid::StatsManager statsManager;
+  liquid::Texture texture(binder, 0, statsManager);
 
   EXPECT_EQ(texture.getResourceBinder().get(), binder.get());
 }

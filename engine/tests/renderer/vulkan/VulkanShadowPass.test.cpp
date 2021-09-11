@@ -15,13 +15,14 @@ public:
   createTextureFramebuffer(const liquid::TextureFramebufferData &data) {
     auto binder = std::make_shared<liquid::VulkanTextureBinder>(
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    return std::make_shared<liquid::Texture>(binder, 0, nullptr);
+    return std::make_shared<liquid::Texture>(binder, 0, statsManager);
   }
 };
 
 class VulkanShadowPassTests : public VulkanTestBase {
 public:
   VulkanTestResourceAllocator resourceAllocator;
+  liquid::StatsManager statsManager;
 };
 
 TEST_F(VulkanShadowPassTests, ThrowsErrorIfCreateRenderPassFails) {
@@ -33,7 +34,7 @@ TEST_F(VulkanShadowPassTests, ThrowsErrorIfCreateRenderPassFails) {
   EXPECT_THROW(
       {
         liquid::VulkanShadowPass shadowPass(
-            2048, nullptr, nullptr, &resourceAllocator, nullptr, nullptr);
+            2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
       },
       liquid::VulkanError);
 }
@@ -43,8 +44,8 @@ TEST_F(VulkanShadowPassTests, CreatesRenderPass) {
 
   EXPECT_CALL(*vulkanLibMock, vkCreateRenderPass(_, _, _, _)).Times(1);
 
-  liquid::VulkanShadowPass shadowPass(2048, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 
   EXPECT_EQ(shadowPass.getExtent().width, 2048);
   EXPECT_EQ(shadowPass.getExtent().height, 2048);
@@ -54,15 +55,15 @@ TEST_F(VulkanShadowPassTests, CreatesResourceManager) {
   ON_CALL(*vulkanLibMock, vkCreateRenderPass).WillByDefault(Return(VK_SUCCESS));
   ON_CALL(*vulkanLibMock, vkCreateFramebuffer)
       .WillByDefault(Return(VK_SUCCESS));
-  liquid::VulkanShadowPass shadowPass(2048, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 
   EXPECT_NE(shadowPass.getResourceManager(), nullptr);
 }
 
 TEST_F(VulkanShadowPassTests, CreatesShadowmapTextures) {
-  liquid::VulkanShadowPass shadowPass(2048, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 
   EXPECT_NE(shadowPass.getShadowmap(), nullptr);
 }
@@ -75,7 +76,7 @@ TEST_F(VulkanShadowPassTests, ThrowsErrorIfCreateFramebufferFails) {
   EXPECT_THROW(
       {
         liquid::VulkanShadowPass shadowPass(
-            2048, nullptr, nullptr, &resourceAllocator, nullptr, nullptr);
+            2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
       },
       liquid::VulkanError);
 }
@@ -87,8 +88,8 @@ TEST_F(VulkanShadowPassTests, CreatesFramebuffers) {
 
   EXPECT_CALL(*vulkanLibMock, vkCreateFramebuffer(_, _, _, _)).Times(1);
 
-  liquid::VulkanShadowPass shadowPass(2048, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 }
 
 TEST_F(VulkanShadowPassTests, RenderCommandsInRenderPass) {
@@ -110,8 +111,8 @@ TEST_F(VulkanShadowPassTests, RenderCommandsInRenderPass) {
         return VK_SUCCESS;
       });
 
-  liquid::VulkanShadowPass shadowPass(4096, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      4096, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 
   liquid::RenderCommandList commandList;
 
@@ -154,6 +155,6 @@ TEST_F(VulkanShadowPassTests, DestroysRenderPassAndFramebuffers) {
 
   EXPECT_CALL(*vulkanLibMock, vkDestroyRenderPass(_, _, _)).Times(1);
   EXPECT_CALL(*vulkanLibMock, vkDestroyFramebuffer(_, _, _)).Times(1);
-  liquid::VulkanShadowPass shadowPass(2048, nullptr, nullptr,
-                                      &resourceAllocator, nullptr, nullptr);
+  liquid::VulkanShadowPass shadowPass(
+      2048, nullptr, nullptr, &resourceAllocator, nullptr, statsManager);
 }

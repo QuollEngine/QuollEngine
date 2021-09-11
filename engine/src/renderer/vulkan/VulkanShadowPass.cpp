@@ -13,7 +13,7 @@ VulkanShadowPass::VulkanShadowPass(uint32_t shadowmapDimensions,
                                    VulkanPipelineBuilder *pipelineBuilder,
                                    ResourceAllocator *resourceAllocator_,
                                    VulkanDescriptorManager *descriptorManager,
-                                   const SharedPtr<StatsManager> &statsManager)
+                                   StatsManager &statsManager)
     : shadowmapExtent{shadowmapDimensions, shadowmapDimensions},
       device(device_), resourceAllocator(resourceAllocator_) {
   createRenderPass();
@@ -116,8 +116,7 @@ void VulkanShadowPass::createResourceManager(
       descriptorManager, pipelineBuilder, renderPass, 0);
 }
 
-void VulkanShadowPass::createTextures(
-    const SharedPtr<StatsManager> &statsManager) {
+void VulkanShadowPass::createTextures(StatsManager &statsManager) {
 
   TextureFramebufferData data{};
   data.width = shadowmapExtent.width;

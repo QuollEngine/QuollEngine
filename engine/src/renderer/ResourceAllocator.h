@@ -24,16 +24,7 @@ public:
    * @param size Size
    * @return Vertex buffer
    */
-  virtual HardwareBuffer *createVertexBuffer(size_t size) = 0;
-
-  /**
-   * @brief Creates vertex buffer from vertices
-   *
-   * @param vertices List of vertices
-   * @return Vertex buffer
-   */
-  virtual HardwareBuffer *
-  createVertexBuffer(const std::vector<Vertex> &vertices) = 0;
+  virtual SharedPtr<HardwareBuffer> createVertexBuffer(size_t size) = 0;
 
   /**
    * @brief Create empty index buffer with size
@@ -41,24 +32,15 @@ public:
    * @param size Size
    * @return Index buffer
    */
-  virtual HardwareBuffer *createIndexBuffer(size_t size) = 0;
-
-  /**
-   * @brief Creates index buffer from indices
-   *
-   * @param indices List of indices
-   * @return Index buffer
-   */
-  virtual HardwareBuffer *
-  createIndexBuffer(const std::vector<uint32_t> &indices) = 0;
+  virtual SharedPtr<HardwareBuffer> createIndexBuffer(size_t size) = 0;
 
   /**
    * @brief Create uniform buffer from arbitrary data
    *
-   * @param bufferSize Buffer size
+   * @param size Buffer size
    * @return Uniform buffer
    */
-  virtual HardwareBuffer *createUniformBuffer(size_t bufferSize) = 0;
+  virtual SharedPtr<HardwareBuffer> createUniformBuffer(size_t size) = 0;
 
   /**
    * @brief Create 2D texture

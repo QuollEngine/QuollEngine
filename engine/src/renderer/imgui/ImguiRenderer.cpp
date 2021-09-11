@@ -93,21 +93,19 @@ void ImguiRenderer::draw(RenderCommandList &commandList) {
   auto &frameObj = frameData.at(currentFrame);
 
   if (data->TotalVtxCount > 0) {
-    size_t vertex_size = data->TotalVtxCount * sizeof(ImDrawVert);
-    size_t index_size = data->TotalIdxCount * sizeof(ImDrawIdx);
+    size_t vertexSize = data->TotalVtxCount * sizeof(ImDrawVert);
+    size_t indexSize = data->TotalIdxCount * sizeof(ImDrawIdx);
 
     if (!frameObj.vertexBuffer ||
-        frameObj.vertexBuffer->getBufferSize() < vertex_size) {
-      frameObj.vertexBuffer =
-          SharedPtr<HardwareBuffer>(resourceAllocator->createVertexBuffer(
-              getAlignedBufferSize(vertex_size)));
+        frameObj.vertexBuffer->getBufferSize() < vertexSize) {
+      frameObj.vertexBuffer = resourceAllocator->createVertexBuffer(
+          getAlignedBufferSize(vertexSize));
     }
 
     if (!frameObj.indexBuffer ||
-        frameObj.indexBuffer->getBufferSize() < index_size) {
+        frameObj.indexBuffer->getBufferSize() < indexSize) {
       frameObj.indexBuffer =
-          SharedPtr<HardwareBuffer>(resourceAllocator->createIndexBuffer(
-              getAlignedBufferSize(index_size)));
+          resourceAllocator->createIndexBuffer(getAlignedBufferSize(indexSize));
     }
 
     auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBuffer->map());
@@ -369,8 +367,8 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       RenderCommandList &commandList,
                                       int fbWidth, int fbHeight) {
   if (data->TotalVtxCount > 0) {
-    commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer.get());
-    commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer.get(),
+    commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
+    commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,
                                 sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16
                                                        : VK_INDEX_TYPE_UINT32);
   }

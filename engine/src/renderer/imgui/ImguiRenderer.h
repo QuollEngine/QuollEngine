@@ -37,7 +37,6 @@ public:
   void endRendering();
 
   void draw(RenderCommandList &commandList);
-  void draw(VkCommandBuffer buffer);
 
 private:
   void loadFonts();
@@ -47,8 +46,6 @@ private:
   void createDescriptorLayout();
   VkDescriptorSet createDescriptorFromTexture(Texture *texture);
 
-  void setupRenderStates(ImDrawData *draw_data, VkCommandBuffer commandBuffer,
-                         int fbWidth, int fbHeight);
   void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
                          int fbWidth, int fbHeight);
 

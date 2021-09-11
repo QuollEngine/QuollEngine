@@ -5,17 +5,20 @@
 namespace liquid {
 
 VulkanRenderBackend::VulkanRenderBackend(GLFWWindow *window_,
-                                         bool enableValidations_)
+                                         bool enableValidations_,
+                                         StatsManager &statsManager)
     : window(window_), vulkanInstance(window_, enableValidations_) {
 
-  createAllocator();
+  renderContext.create(vulkanInstance);
+  uploadContext.create(vulkanInstance);
+
+  resourceAllocator = VulkanResourceAllocator::create(
+      vulkanInstance, uploadContext, statsManager);
+
   createSwapchain();
 
   createSwapchainPass();
   createSwapchainFramebuffers();
-
-  renderContext.create(vulkanInstance);
-  uploadContext.create(vulkanInstance);
 
   resizeHandler = window->addResizeHandler(
       [this](uint32_t x, uint32_t y) mutable { framebufferResized = true; });
@@ -32,11 +35,6 @@ VulkanRenderBackend::~VulkanRenderBackend() {
 
   swapchain.destroy();
 
-  if (allocator) {
-    vmaDestroyAllocator(allocator);
-    LOG_DEBUG("[Vulkan] Allocator destroyed");
-  }
-
   if (resourceAllocator) {
     delete resourceAllocator;
   }
@@ -48,25 +46,9 @@ void VulkanRenderBackend::waitForIdle() {
   vkDeviceWaitIdle(vulkanInstance.getDevice());
 }
 
-void VulkanRenderBackend::createAllocator() {
-  VmaAllocatorCreateInfo createInfo{};
-  createInfo.instance = vulkanInstance.getInstance();
-  createInfo.physicalDevice =
-      vulkanInstance.getPhysicalDevice().getVulkanDevice();
-  createInfo.device = vulkanInstance.getDevice();
-
-  checkForVulkanError(vmaCreateAllocator(&createInfo, &allocator),
-                      "Failed to create allocator");
-
-  LOG_DEBUG("[Vulkan] Allocator created");
-
-  // TODO: Add stats manager
-  resourceAllocator = new VulkanResourceAllocator(
-      uploadContext, allocator, vulkanInstance.getDevice(), nullptr);
-}
-
 void VulkanRenderBackend::createSwapchain() {
-  swapchain = VulkanSwapchain(window, vulkanInstance, allocator);
+  swapchain = VulkanSwapchain(window, vulkanInstance,
+                              resourceAllocator->getVmaAllocator());
 
   LOG_DEBUG("[Vulkan] Swapchain created");
 }

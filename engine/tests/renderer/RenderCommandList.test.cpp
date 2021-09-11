@@ -1,8 +1,17 @@
 #include <gtest/gtest.h>
 #include "renderer/RenderCommandList.h"
-#include "../mocks/TestBuffer.h"
+#include "../mocks/TestResourceAllocator.h"
 
-TEST(RenderCommandListTests, RecordBeginRenderPass) {
+class RenderCommandListTests : public ::testing::Test {
+public:
+  TestResourceAllocator resourceAllocator;
+};
+
+class RenderCommandListDeathTest : public RenderCommandListTests {
+public:
+};
+
+TEST_F(RenderCommandListTests, RecordBeginRenderPass) {
   liquid::RenderCommandList commandList;
 
   commandList.beginRenderPass((VkRenderPass)0x34343434, (VkFramebuffer)0x232322,
@@ -11,7 +20,7 @@ TEST(RenderCommandListTests, RecordBeginRenderPass) {
             liquid::RenderCommandType::BeginRenderPass);
 }
 
-TEST(RenderCommandListTests, RecordEndRenderPass) {
+TEST_F(RenderCommandListTests, RecordEndRenderPass) {
   liquid::RenderCommandList commandList;
 
   commandList.endRenderPass();
@@ -19,7 +28,7 @@ TEST(RenderCommandListTests, RecordEndRenderPass) {
             liquid::RenderCommandType::EndRenderPass);
 }
 
-TEST(RenderCommandListTests, RecordBindPipeline) {
+TEST_F(RenderCommandListTests, RecordBindPipeline) {
   liquid::RenderCommandList commandList;
 
   commandList.bindPipeline((VkPipeline)0x34343434,
@@ -28,7 +37,7 @@ TEST(RenderCommandListTests, RecordBindPipeline) {
             liquid::RenderCommandType::BindPipeline);
 }
 
-TEST(RenderCommandListTests, RecordBindDescriptorSets) {
+TEST_F(RenderCommandListTests, RecordBindDescriptorSets) {
   liquid::RenderCommandList commandList;
 
   commandList.bindDescriptorSets((VkPipelineLayout)0x2323232,
@@ -37,45 +46,39 @@ TEST(RenderCommandListTests, RecordBindDescriptorSets) {
             liquid::RenderCommandType::BindDescriptorSets);
 }
 
-TEST(RenderCommandListDeathTest, BindVertexBufferFailsIfBufferIsNotVertex) {
+TEST_F(RenderCommandListDeathTest, BindVertexBufferFailsIfBufferIsNotVertex) {
   liquid::RenderCommandList commandList;
-  auto *buffer = new TestBuffer(liquid::HardwareBuffer::INDEX, 0);
-  EXPECT_DEATH(commandList.bindVertexBuffer(buffer), ".*");
-  delete buffer;
+  EXPECT_DEATH(
+      commandList.bindVertexBuffer(resourceAllocator.createIndexBuffer(0)),
+      ".*");
 }
 
-TEST(RenderCommandListTests, RecordBindVertexBuffer) {
+TEST_F(RenderCommandListTests, RecordBindVertexBuffer) {
   liquid::RenderCommandList commandList;
 
-  auto *buffer = new TestBuffer(liquid::HardwareBuffer::VERTEX, 0);
-
-  commandList.bindVertexBuffer(buffer);
+  commandList.bindVertexBuffer(resourceAllocator.createVertexBuffer(0));
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindVertexBuffer);
-
-  delete buffer;
 }
 
-TEST(RenderCommandListDeathTest, BindIndexBufferFailsIfBufferIsNotVertex) {
+TEST_F(RenderCommandListDeathTest, BindIndexBufferFailsIfBufferIsNotIndex) {
   liquid::RenderCommandList commandList;
-  auto *buffer = new TestBuffer(liquid::HardwareBuffer::VERTEX, 0);
-  EXPECT_DEATH(commandList.bindIndexBuffer(buffer, VK_INDEX_TYPE_UINT32), ".*");
-  delete buffer;
+  EXPECT_DEATH(
+      commandList.bindIndexBuffer(resourceAllocator.createVertexBuffer(0),
+                                  VK_INDEX_TYPE_UINT32),
+      ".*");
 }
 
-TEST(RenderCommandListTests, RecordBindIndexBuffer) {
+TEST_F(RenderCommandListTests, RecordBindIndexBuffer) {
   liquid::RenderCommandList commandList;
 
-  auto *buffer = new TestBuffer(liquid::HardwareBuffer::INDEX, 0);
-
-  commandList.bindIndexBuffer(buffer, VK_INDEX_TYPE_UINT32);
+  commandList.bindIndexBuffer(resourceAllocator.createIndexBuffer(0),
+                              VK_INDEX_TYPE_UINT32);
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindIndexBuffer);
-
-  delete buffer;
 }
 
-TEST(RenderCommandListTests, RecordPushConstants) {
+TEST_F(RenderCommandListTests, RecordPushConstants) {
   liquid::RenderCommandList commandList;
 
   commandList.pushConstants((VkPipelineLayout)0x112121,
@@ -84,7 +87,7 @@ TEST(RenderCommandListTests, RecordPushConstants) {
             liquid::RenderCommandType::PushConstants);
 }
 
-TEST(RenderCommandListTests, SetViewport) {
+TEST_F(RenderCommandListTests, SetViewport) {
   liquid::RenderCommandList commandList;
 
   commandList.setViewport({0, 0}, {800, 600}, {0.0, 1.0});
@@ -92,7 +95,7 @@ TEST(RenderCommandListTests, SetViewport) {
             liquid::RenderCommandType::SetViewport);
 }
 
-TEST(RenderCommandListTests, SetScissor) {
+TEST_F(RenderCommandListTests, SetScissor) {
   liquid::RenderCommandList commandList;
 
   commandList.setScissor({0, 0}, {800, 600});

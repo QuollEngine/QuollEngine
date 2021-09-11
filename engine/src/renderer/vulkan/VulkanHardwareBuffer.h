@@ -19,48 +19,18 @@ namespace liquid {
 class VulkanHardwareBuffer : public HardwareBuffer {
 public:
   /**
-   * @brief Constructor for vertex buffer
-   *
-   * @param allocator Vma Allocator
-   * @param vertices List of vertices
-   * @param statsManager Stats Manager
-   */
-  VulkanHardwareBuffer(VmaAllocator allocator,
-                       const std::vector<Vertex> &vertices,
-                       const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Constructor for index buffer
-   *
-   * @param allocator Vma Allocator
-   * @param vertices List of vertices
-   * @param statsManager Stats Manager
-   */
-  VulkanHardwareBuffer(VmaAllocator allocator,
-                       const std::vector<uint32_t> &indices,
-                       const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Constructor for uniform buffer
-   *
-   * @param allocator Vma Allocator
-   * @param bufferSize Buffer size
-   * @param statsManager Stats Manager
-   */
-  VulkanHardwareBuffer(VmaAllocator allocator, size_t bufferSize,
-                       const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Create hardware buffer
+   * @brief Create Vulkan hardware buffer
    *
    * @param type Buffer type
-   * @param size Buffer size
-   * @param allocator VmaAllocator
+   * @param bufferSize Buffer size
+   * @param buffer Vulkan buffer
+   * @param allocation Vma allocation
+   * @param bmaAllocator Vma allocator
    * @param statsManager Stats manager
    */
-  VulkanHardwareBuffer(HardwareBufferType type, size_t size,
-                       VmaAllocator allocator,
-                       const SharedPtr<StatsManager> &statsManager = nullptr);
+  VulkanHardwareBuffer(HardwareBufferType type, size_t bufferSize,
+                       VkBuffer buffer, VmaAllocation allocation,
+                       VmaAllocator allocator, StatsManager &statsManager);
 
   /**
    * @brief Deletes Vulkan buffer
@@ -72,8 +42,16 @@ public:
   VulkanHardwareBuffer &operator=(const VulkanHardwareBuffer &rhs) = delete;
   VulkanHardwareBuffer &operator=(VulkanHardwareBuffer &&rhs) = delete;
 
+  /**
+   * @brief Map hardware buffer
+   *
+   * @return Mapped buffer data
+   */
   void *map() override;
 
+  /**
+   * @brief Unmap hardware buffer
+   */
   void unmap() override;
 
   /**
@@ -96,14 +74,6 @@ public:
    * @return Vma allocation
    */
   inline VmaAllocation getAllocation() { return allocation; }
-
-private:
-  /**
-   * @brief Create vulkan buffer
-   *
-   * @param usage Buffer usage
-   */
-  void createBuffer(VkBufferUsageFlags usage);
 
 private:
   VkBuffer buffer = nullptr;

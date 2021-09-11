@@ -48,7 +48,7 @@ public:
    * @param statsManager Stats manager
    */
   Texture(const SharedPtr<TextureBinder> &binder, size_t size,
-          const SharedPtr<StatsManager> &statsManager);
+          StatsManager &statsManager);
 
   /**
    * @brief Destroy texture
@@ -71,7 +71,7 @@ public:
 
 private:
   SharedPtr<TextureBinder> binder = nullptr;
-  SharedPtr<StatsManager> statsManager = nullptr;
+  StatsManager &statsManager;
   size_t size = 0;
 };
 

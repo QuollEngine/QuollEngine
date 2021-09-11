@@ -18,9 +18,9 @@ constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
 
 VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
                                GLFWWindow *window, bool enableValidations)
-    : entityContext(entityContext_), renderBackend(window, enableValidations),
-      statsManager(new StatsManager), debugManager(new DebugManager),
-      shaderLibrary(new ShaderLibrary) {
+    : entityContext(entityContext_),
+      renderBackend(window, enableValidations, statsManager),
+      debugManager(new DebugManager), shaderLibrary(new ShaderLibrary) {
 
   descriptorManager = new VulkanDescriptorManager(
       renderBackend.getVulkanInstance().getDevice());
@@ -45,14 +45,17 @@ VulkanRenderer::~VulkanRenderer() {
   if (imguiRenderer) {
     delete imguiRenderer;
     imguiRenderer = nullptr;
+    LOG_DEBUG("[Vulkan] Imgui renderer destroyed");
   }
 
   if (shaderLibrary) {
     delete shaderLibrary;
+    LOG_DEBUG("[Vulkan] Shader library destroyed");
   }
 
   if (pipelineBuilder) {
     delete pipelineBuilder;
+    LOG_DEBUG("[Vulkan] Pipeline builder destroyed");
   }
 
   if (descriptorManager) {
@@ -212,21 +215,15 @@ void VulkanRenderer::drawRenderables(RenderCommandList &commandList,
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
           commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                       VK_INDEX_TYPE_UINT32);
-          commandList.drawIndexed(
-              instance->getIndexBuffers().at(i)->getItemSize(), 0, 0);
+          commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
 
-          if (statsManager) {
-            statsManager->addDrawCall(
-                instance->getIndexBuffers().at(i)->getItemSize() / 3);
-          }
+          statsManager.addDrawCall(instance->getIndexCounts().at(i) / 3);
         }
       });
 }
 
 void VulkanRenderer::draw(const SharedPtr<VulkanRenderData> &renderData) {
-  if (statsManager) {
-    statsManager->resetDrawCalls();
-  }
+  statsManager.resetDrawCalls();
 
   uint32_t imageIdx = renderBackend.getSwapchain().acquireNextImage(
       renderBackend.getRenderContext().getImageAvailableSemaphore());
@@ -260,39 +257,37 @@ void VulkanRenderer::draw(const SharedPtr<VulkanRenderData> &renderData) {
     }
   });
 
-  {
-    setViewportAndScissor(commandList,
-                          {renderBackend.getSwapchain().getExtent().width,
-                           renderBackend.getSwapchain().getExtent().height});
+  setViewportAndScissor(commandList,
+                        {renderBackend.getSwapchain().getExtent().width,
+                         renderBackend.getSwapchain().getExtent().height});
 
-    VkClearValue clearColorValue;
-    clearColorValue.color.float32[0] = clearColor.x;
-    clearColorValue.color.float32[1] = clearColor.y;
-    clearColorValue.color.float32[2] = clearColor.z;
-    clearColorValue.color.float32[3] = clearColor.w;
+  VkClearValue clearColorValue;
+  clearColorValue.color.float32[0] = clearColor.x;
+  clearColorValue.color.float32[1] = clearColor.y;
+  clearColorValue.color.float32[2] = clearColor.z;
+  clearColorValue.color.float32[3] = clearColor.w;
 
-    VkClearValue clearDepthValue;
-    clearDepthValue.depthStencil.depth = 1.0f;
-    clearDepthValue.depthStencil.stencil = 0;
+  VkClearValue clearDepthValue;
+  clearDepthValue.depthStencil.depth = 1.0f;
+  clearDepthValue.depthStencil.stencil = 0;
 
-    commandList.beginRenderPass(
-        renderBackend.getSwapchainPass(),
-        renderBackend.getSwapchainFramebuffers().at(imageIdx), {0, 0},
-        {renderBackend.getSwapchain().getExtent().width,
-         renderBackend.getSwapchain().getExtent().height},
-        {clearColorValue, clearDepthValue});
+  commandList.beginRenderPass(
+      renderBackend.getSwapchainPass(),
+      renderBackend.getSwapchainFramebuffers().at(imageIdx), {0, 0},
+      {renderBackend.getSwapchain().getExtent().width,
+       renderBackend.getSwapchain().getExtent().height},
+      {clearColorValue, clearDepthValue});
 
-    commandList.bindDescriptorSets(pipelineBuilder->getPipelineLayout(),
-                                   VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
-                                   {renderData->getSceneDescriptorSet()}, {});
+  commandList.bindDescriptorSets(pipelineBuilder->getPipelineLayout(),
+                                 VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
+                                 {renderData->getSceneDescriptorSet()}, {});
 
-    auto *scene = renderData->getScene();
-    drawRenderables(commandList, scene->getActiveCamera(), false);
+  auto *scene = renderData->getScene();
+  drawRenderables(commandList, scene->getActiveCamera(), false);
 
-    imguiRenderer->draw(commandList);
+  imguiRenderer->draw(commandList);
 
-    commandList.endRenderPass();
-  }
+  commandList.endRenderPass();
 
   renderBackend.getRenderContext().render(commandList);
 

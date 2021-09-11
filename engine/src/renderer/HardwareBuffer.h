@@ -26,34 +26,7 @@ public:
    * @param statsManager Stats manager
    */
   HardwareBuffer(HardwareBufferType type, size_t bufferSize,
-                 const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Constructor for vertex buffer
-   *
-   * @param vertices List of vertices
-   * @param statsManager Stats manager
-   */
-  HardwareBuffer(const std::vector<Vertex> &vertices,
-                 const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Constructor for index buffer
-   *
-   * @param indices List of indices
-   * @param statsManager Stats manager
-   */
-  HardwareBuffer(const std::vector<uint32_t> &indices,
-                 const SharedPtr<StatsManager> &statsManager = nullptr);
-
-  /**
-   * @brief Constructor for uniform buffer
-   *
-   * @param bufferSize Buffer size
-   * @param statsManager Stats manager
-   */
-  HardwareBuffer(size_t bufferSize,
-                 const SharedPtr<StatsManager> &statsManager = nullptr);
+                 StatsManager &statsManager);
 
   /**
    * @brief Default Destructor
@@ -85,13 +58,6 @@ public:
   virtual void update(void *data) = 0;
 
   /**
-   * @brief Gets number of items in the buffer
-   *
-   * @return Number of items
-   */
-  inline size_t getItemSize() { return itemSize; }
-
-  /**
    * @brief Gets buffer size
    *
    * @return Buffer size
@@ -108,10 +74,9 @@ public:
   inline HardwareBufferType getType() { return bufferType; }
 
 private:
-  size_t itemSize;
-  size_t bufferSize;
+  size_t bufferSize = 0;
   HardwareBufferType bufferType;
-  SharedPtr<StatsManager> statsManager;
+  StatsManager &statsManager;
 };
 
 } // namespace liquid

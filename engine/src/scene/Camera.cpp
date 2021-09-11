@@ -2,9 +2,9 @@
 
 namespace liquid {
 
-Camera::Camera(ResourceAllocator *resourceAllocator)
-    : uniformBuffer(
-          resourceAllocator->createUniformBuffer(sizeof(CameraData))) {}
+Camera::Camera(ResourceAllocator *resourceAllocator) {
+  uniformBuffer = resourceAllocator->createUniformBuffer(sizeof(CameraData));
+}
 
 void Camera::setPerspective(float fovY, float aspectRatio, float near,
                             float far) {
