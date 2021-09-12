@@ -24,9 +24,9 @@ TEST(MeshInstanceTest, CreatesVertexAndIndexBuffersOnConstruct) {
 
   for (size_t i = 0; i < 2; ++i) {
     EXPECT_EQ(instance.getVertexBuffers().at(i)->getType(),
-              liquid::HardwareBuffer::VERTEX);
+              liquid::HardwareBuffer::Vertex);
     EXPECT_EQ(instance.getIndexBuffers().at(i)->getType(),
-              liquid::HardwareBuffer::INDEX);
+              liquid::HardwareBuffer::Index);
   }
 }
 

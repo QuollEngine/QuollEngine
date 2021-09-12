@@ -7,7 +7,7 @@ TEST(CameraTest, CreatesUniformBufferOnConstruct) {
   TestResourceAllocator resourceAllocator;
   liquid::Camera camera(&resourceAllocator);
   EXPECT_EQ(camera.getUniformBuffer()->getType(),
-            liquid::HardwareBuffer::UNIFORM);
+            liquid::HardwareBuffer::Uniform);
 }
 
 TEST(CameraTest, SetsPerspectiveProjectionAndUpdatesProjectionView) {

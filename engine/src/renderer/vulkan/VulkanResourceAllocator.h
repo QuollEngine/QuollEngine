@@ -6,6 +6,7 @@
 #include "renderer/ResourceAllocator.h"
 #include "profiler/StatsManager.h"
 
+#include "VulkanHardwareBuffer.h"
 #include "VulkanUploadContext.h"
 
 namespace liquid {
@@ -107,7 +108,7 @@ public:
   inline VmaAllocator getVmaAllocator() { return allocator; }
 
 private:
-  SharedPtr<HardwareBuffer>
+  SharedPtr<VulkanHardwareBuffer>
   createHardwareBuffer(HardwareBuffer::HardwareBufferType bufferType,
                        size_t bufferSize);
 

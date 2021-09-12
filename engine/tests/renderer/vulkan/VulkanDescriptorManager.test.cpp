@@ -74,10 +74,10 @@ TEST_F(VulkanDescriptorManagerTests, CreatesSceneDescriptorSetWithShadowmaps) {
   liquid::VulkanDescriptorManager manager(nullptr);
   manager.createSceneDescriptorSet(
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       shadowmaps, {});
 }
@@ -98,10 +98,10 @@ TEST_F(VulkanDescriptorManagerTests,
   liquid::VulkanDescriptorManager manager(nullptr);
   manager.createSceneDescriptorSet(
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       sampleTexture, {sampleTexture, sampleTexture, sampleTexture});
 }
@@ -136,7 +136,7 @@ TEST_F(VulkanDescriptorManagerTests,
   liquid::VulkanDescriptorManager manager(nullptr);
   manager.createMaterialDescriptorSet(
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       {});
 }
@@ -167,7 +167,7 @@ TEST_F(VulkanDescriptorManagerTests,
   liquid::VulkanDescriptorManager manager(nullptr);
   manager.createMaterialDescriptorSet(
       std::make_shared<liquid::VulkanHardwareBuffer>(
-          liquid::HardwareBuffer::UNIFORM, 0, nullptr, nullptr, nullptr,
+          liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
       {std::make_shared<liquid::Texture>(
           std::make_shared<liquid::VulkanTextureBinder>(

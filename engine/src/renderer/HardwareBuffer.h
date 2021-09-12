@@ -15,7 +15,7 @@ class StatsManager;
  */
 class HardwareBuffer {
 public:
-  enum HardwareBufferType { VERTEX, INDEX, UNIFORM };
+  enum HardwareBufferType { Vertex, Index, Uniform, Transfer };
 
 public:
   /**

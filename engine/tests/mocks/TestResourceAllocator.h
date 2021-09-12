@@ -8,19 +8,19 @@ class TestResourceAllocator : public liquid::ResourceAllocator {
 public:
   virtual liquid::SharedPtr<liquid::HardwareBuffer>
   createVertexBuffer(size_t vertexSize) {
-    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::VERTEX,
+    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::Vertex,
                                         vertexSize, statsManager);
   }
 
   virtual liquid::SharedPtr<liquid::HardwareBuffer>
   createIndexBuffer(size_t indexSize) {
-    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::INDEX,
+    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::Index,
                                         indexSize, statsManager);
   }
 
   virtual liquid::SharedPtr<liquid::HardwareBuffer>
   createUniformBuffer(size_t bufferSize) {
-    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::UNIFORM,
+    return std::make_shared<TestBuffer>(liquid::HardwareBuffer::Uniform,
                                         bufferSize, statsManager);
   }
 

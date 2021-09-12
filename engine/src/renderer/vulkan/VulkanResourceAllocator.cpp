@@ -2,8 +2,9 @@
 #include "VulkanResourceAllocator.h"
 #include "VulkanError.h"
 #include "VulkanHardwareBuffer.h"
-
 #include "VulkanTextureBinder.h"
+
+#include "renderer/RenderCommandList.h"
 
 namespace liquid {
 
@@ -43,29 +44,33 @@ VulkanResourceAllocator::~VulkanResourceAllocator() {
 
 SharedPtr<HardwareBuffer>
 VulkanResourceAllocator::createVertexBuffer(size_t bufferSize) {
-  return createHardwareBuffer(HardwareBuffer::VERTEX, bufferSize);
+  return createHardwareBuffer(HardwareBuffer::Vertex, bufferSize);
 }
 
 SharedPtr<HardwareBuffer>
 VulkanResourceAllocator::createIndexBuffer(size_t bufferSize) {
-  return createHardwareBuffer(HardwareBuffer::INDEX, bufferSize);
+  return createHardwareBuffer(HardwareBuffer::Index, bufferSize);
 }
 
 SharedPtr<HardwareBuffer>
 VulkanResourceAllocator::createUniformBuffer(size_t bufferSize) {
-  return createHardwareBuffer(HardwareBuffer::UNIFORM, bufferSize);
+  return createHardwareBuffer(HardwareBuffer::Uniform, bufferSize);
 }
 
-SharedPtr<HardwareBuffer> VulkanResourceAllocator::createHardwareBuffer(
+SharedPtr<VulkanHardwareBuffer> VulkanResourceAllocator::createHardwareBuffer(
     HardwareBuffer::HardwareBufferType bufferType, size_t bufferSize) {
 
-  VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
-  if (bufferType == HardwareBuffer::VERTEX) {
-    usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-  } else if (bufferType == HardwareBuffer::INDEX) {
-    usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-  } else if (bufferType == HardwareBuffer::UNIFORM) {
-    usageFlags = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
+  if (bufferType == HardwareBuffer::Vertex) {
+    bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  } else if (bufferType == HardwareBuffer::Index) {
+    bufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+  } else if (bufferType == HardwareBuffer::Uniform) {
+    bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  } else if (bufferType == HardwareBuffer::Transfer) {
+    bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY;
   }
 
   VkBufferCreateInfo createBufferInfo{};
@@ -73,11 +78,11 @@ SharedPtr<HardwareBuffer> VulkanResourceAllocator::createHardwareBuffer(
   createBufferInfo.pNext = nullptr;
   createBufferInfo.flags = 0;
   createBufferInfo.size = bufferSize;
-  createBufferInfo.usage = usageFlags;
+  createBufferInfo.usage = bufferUsage;
 
   VmaAllocationCreateInfo createAllocationInfo{};
   createAllocationInfo.flags = 0;
-  createAllocationInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  createAllocationInfo.usage = memoryUsage;
 
   VmaAllocation allocation = nullptr;
   VkBuffer buffer = nullptr;
@@ -94,28 +99,12 @@ SharedPtr<Texture>
 VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
   uint32_t textureSize = textureData.width * textureData.height * 4;
 
-  VkBuffer buffer = nullptr;
-  VmaAllocation bufferAllocation = nullptr;
-
-  VkBufferCreateInfo createBufferInfo{};
-  createBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  createBufferInfo.pNext = nullptr;
-  createBufferInfo.flags = 0;
-  createBufferInfo.size = textureSize;
-  createBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-  VmaAllocationCreateInfo bufferAllocationInfo{};
-  bufferAllocationInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-
-  checkForVulkanError(vmaCreateBuffer(allocator, &createBufferInfo,
-                                      &bufferAllocationInfo, &buffer,
-                                      &bufferAllocation, nullptr),
-                      "Failed to create staging buffer");
-
-  void *data = nullptr;
-  vmaMapMemory(allocator, bufferAllocation, &data);
+  auto hardwareBuffer =
+      createHardwareBuffer(HardwareBuffer::Transfer, textureSize);
+  VkBuffer buffer = hardwareBuffer->getBuffer();
+  void *data = hardwareBuffer->map();
   memcpy(data, static_cast<void *>(textureData.data), textureSize);
-  vmaUnmapMemory(allocator, bufferAllocation);
+  hardwareBuffer->unmap();
 
   VkExtent3D extent{};
   extent.width = textureData.width;
@@ -148,6 +137,61 @@ VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
                                      &imageAllocationInfo, &image, &allocation,
                                      nullptr),
                       "Failed to create image");
+
+  VkImageSubresourceRange range{};
+  range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  range.baseMipLevel = 0;
+  range.levelCount = 1;
+  range.baseArrayLayer = 0;
+  range.layerCount = 1;
+
+  VkImageMemoryBarrier imageBarrierTransfer{};
+  imageBarrierTransfer.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  imageBarrierTransfer.pNext = nullptr;
+  imageBarrierTransfer.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  imageBarrierTransfer.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+  imageBarrierTransfer.image = image;
+  imageBarrierTransfer.subresourceRange = range;
+  imageBarrierTransfer.srcAccessMask = 0;
+  imageBarrierTransfer.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+  VkImageViewCreateInfo imageViewInfo{};
+  imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  imageViewInfo.pNext = nullptr;
+  imageViewInfo.flags = 0;
+  imageViewInfo.image = image;
+  imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  imageViewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+  imageViewInfo.subresourceRange.baseMipLevel = 0;
+  imageViewInfo.subresourceRange.baseArrayLayer = 0;
+  imageViewInfo.subresourceRange.layerCount = 1;
+  imageViewInfo.subresourceRange.levelCount = 1;
+  imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+  checkForVulkanError(
+      vkCreateImageView(device, &imageViewInfo, nullptr, &imageView),
+      "Failed to create image view");
+
+  VkSamplerCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  createInfo.pNext = nullptr;
+  createInfo.flags = 0;
+
+  createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+  createInfo.minFilter = VK_FILTER_NEAREST;
+  createInfo.magFilter = VK_FILTER_NEAREST;
+  checkForVulkanError(vkCreateSampler(device, &createInfo, nullptr, &sampler),
+                      "Failed to create 2D texture sampler");
+
+  LOG_DEBUG("[Vulkan] 2D Texture created");
+
+  auto texture = std::make_shared<Texture>(
+      std::make_shared<VulkanTextureBinder>(device, allocator, image,
+                                            allocation, imageView, sampler),
+      textureSize, statsManager);
 
   uploadContext.submit([extent, image, buffer](VkCommandBuffer commandBuffer) {
     VkImageSubresourceRange range{};
@@ -196,78 +240,25 @@ VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
                          0, nullptr, 1, &imageBarrierReadable);
   });
 
-  vmaDestroyBuffer(allocator, buffer, bufferAllocation);
-
-  VkImageViewCreateInfo imageViewInfo{};
-  imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  imageViewInfo.pNext = nullptr;
-  imageViewInfo.flags = 0;
-  imageViewInfo.image = image;
-  imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-  imageViewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-  imageViewInfo.subresourceRange.baseMipLevel = 0;
-  imageViewInfo.subresourceRange.baseArrayLayer = 0;
-  imageViewInfo.subresourceRange.layerCount = 1;
-  imageViewInfo.subresourceRange.levelCount = 1;
-  imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-  checkForVulkanError(
-      vkCreateImageView(device, &imageViewInfo, nullptr, &imageView),
-      "Failed to create image view");
-
-  VkSamplerCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  createInfo.pNext = nullptr;
-  createInfo.flags = 0;
-
-  createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-
-  createInfo.minFilter = VK_FILTER_NEAREST;
-  createInfo.magFilter = VK_FILTER_NEAREST;
-  checkForVulkanError(vkCreateSampler(device, &createInfo, nullptr, &sampler),
-                      "Failed to create 2D texture sampler");
-
-  LOG_DEBUG("[Vulkan] 2D Texture created");
-
-  auto binder = std::make_shared<VulkanTextureBinder>(
-      device, allocator, image, allocation, imageView, sampler);
-
-  return std::make_shared<Texture>(binder, textureSize, statsManager);
+  return texture;
 }
 
 SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
     const TextureCubemapData &textureData) {
   const uint32_t CUBEMAP_SIDES = 6;
 
-  VkBuffer buffer = nullptr;
-  VmaAllocation bufferAllocation = nullptr;
   VkFormat format = (VkFormat)textureData.format;
 
-  VkBufferCreateInfo createBufferInfo{};
-  createBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  createBufferInfo.pNext = nullptr;
-  createBufferInfo.flags = 0;
-  createBufferInfo.size = textureData.size;
-  createBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-  VmaAllocationCreateInfo bufferAllocationInfo{};
-  bufferAllocationInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-
-  checkForVulkanError(vmaCreateBuffer(allocator, &createBufferInfo,
-                                      &bufferAllocationInfo, &buffer,
-                                      &bufferAllocation, nullptr),
-                      "Failed to create staging buffer");
-
-  void *data = nullptr;
-  vmaMapMemory(allocator, bufferAllocation, &data);
+  auto hardwareBuffer =
+      createHardwareBuffer(HardwareBuffer::Transfer, textureData.size);
+  VkBuffer buffer = hardwareBuffer->getBuffer();
+  void *data = hardwareBuffer->map();
   for (size_t i = 0; i < CUBEMAP_SIDES; ++i) {
     memcpy(static_cast<char *>(data) + textureData.faceData.at(i).size * i,
            textureData.data + textureData.faceData.at(i).offset,
            textureData.faceData.at(i).size);
   }
-  vmaUnmapMemory(allocator, bufferAllocation);
+  hardwareBuffer->unmap();
 
   VkExtent3D extent{};
   extent.width = textureData.width;
@@ -354,8 +345,6 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr,
                          0, nullptr, 1, &imageBarrierReadable);
   });
-
-  vmaDestroyBuffer(allocator, buffer, bufferAllocation);
 
   VkImageViewCreateInfo imageViewInfo{};
   imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
