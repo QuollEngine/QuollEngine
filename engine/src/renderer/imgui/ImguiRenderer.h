@@ -55,7 +55,7 @@ private:
 
   ResourceAllocator *resourceAllocator = nullptr;
 
-  VkRenderPass renderPass = nullptr;
+  VkRenderPass renderPass = VK_NULL_HANDLE;
 
   SharedPtr<Texture> fontTexture = nullptr;
 
@@ -63,9 +63,9 @@ private:
   uint32_t currentFrame = 0;
 
   ShaderLibrary *shaderLibrary = nullptr;
-  VkDescriptorSetLayout descriptorLayout = nullptr;
-  VkPipelineLayout pipelineLayout = nullptr;
-  VkPipeline pipeline = nullptr;
+  VkDescriptorSetLayout descriptorLayout = VK_NULL_HANDLE;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  VkPipeline pipeline = VK_NULL_HANDLE;
 
   std::unordered_map<Texture *, VkDescriptorSet> descriptorMap;
 };

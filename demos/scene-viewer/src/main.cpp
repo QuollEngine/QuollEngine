@@ -100,10 +100,11 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
 
 const auto moveSpeed = 0.5f;
 const auto strafeSpeed = 0.5f;
+const auto timeDelta = 1.0f;
 
 int main() {
   liquid::Engine::setAssetsPath(
-      std::filesystem::path("../../../../engine/bin/Debug/assets"));
+      std::filesystem::path("../../../../engine/bin/Debug/assets").string());
 
   liquid::EntityContext context;
   std::unique_ptr<liquid::GLFWWindow> window(
@@ -137,27 +138,27 @@ int main() {
         }
 
         if (key == GLFW_KEY_W) {
-          editorCamera.move(moveSpeed);
+          editorCamera.move(moveSpeed * timeDelta);
         } else if (key == GLFW_KEY_S) {
-          editorCamera.move(-moveSpeed);
+          editorCamera.move(-moveSpeed * timeDelta);
         }
 
         if (key == GLFW_KEY_A) {
-          editorCamera.strafe(-strafeSpeed);
+          editorCamera.strafe(-strafeSpeed * timeDelta);
         } else if (key == GLFW_KEY_D) {
-          editorCamera.strafe(strafeSpeed);
+          editorCamera.strafe(strafeSpeed * timeDelta);
         }
 
         if (key == GLFW_KEY_LEFT) {
-          editorCamera.yaw(-2.0f);
+          editorCamera.yaw(-2.0f * timeDelta);
         } else if (key == GLFW_KEY_RIGHT) {
-          editorCamera.yaw(2.0f);
+          editorCamera.yaw(2.0f * timeDelta);
         }
 
         if (key == GLFW_KEY_DOWN) {
-          editorCamera.pitch(-2.0f);
+          editorCamera.pitch(-2.0f * timeDelta);
         } else if (key == GLFW_KEY_UP) {
-          editorCamera.pitch(2.0f);
+          editorCamera.pitch(2.0f * timeDelta);
         }
       });
 

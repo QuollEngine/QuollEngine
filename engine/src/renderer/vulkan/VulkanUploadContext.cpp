@@ -90,13 +90,13 @@ void VulkanUploadContext::createFence() {
 void VulkanUploadContext::destroy() {
   if (uploadFence) {
     vkDestroyFence(device, uploadFence, nullptr);
-    uploadFence = nullptr;
+    uploadFence = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Upload fence destroyed");
   }
 
   if (uploadCommandPool) {
     vkDestroyCommandPool(device, uploadCommandPool, nullptr);
-    uploadCommandPool = nullptr;
+    uploadCommandPool = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Upload command pool destroyed");
   }
 }

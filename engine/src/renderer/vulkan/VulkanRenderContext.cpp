@@ -21,7 +21,7 @@ void VulkanRenderContext::destroy() {
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     if (renderFences.at(i)) {
       vkDestroyFence(device, renderFences.at(i), nullptr);
-      renderFences.at(i) = nullptr;
+      renderFences.at(i) = VK_NULL_HANDLE;
     }
   }
   LOG_DEBUG("[Vulkan] Render fences destroyed");
@@ -29,12 +29,12 @@ void VulkanRenderContext::destroy() {
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     if (imageAvailableSemaphores.at(i)) {
       vkDestroySemaphore(device, imageAvailableSemaphores.at(i), nullptr);
-      imageAvailableSemaphores.at(i) = nullptr;
+      imageAvailableSemaphores.at(i) = VK_NULL_HANDLE;
     }
 
     if (renderFinishedSemaphores.at(i)) {
       vkDestroySemaphore(device, renderFinishedSemaphores.at(i), nullptr);
-      renderFinishedSemaphores.at(i) = nullptr;
+      renderFinishedSemaphores.at(i) = VK_NULL_HANDLE;
     }
   }
   LOG_DEBUG("[Vulkan] Render semaphores destroyed");

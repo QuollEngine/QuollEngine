@@ -99,7 +99,7 @@ private:
   std::array<VkSemaphore, NUM_FRAMES> renderFinishedSemaphores{};
   std::array<VkFence, NUM_FRAMES> renderFences{};
 
-  VkCommandPool commandPool = nullptr;
+  VkCommandPool commandPool = VK_NULL_HANDLE;
 
   VkQueue graphicsQueue = nullptr;
   VkQueue presentQueue = nullptr;

@@ -76,7 +76,7 @@ public:
   inline VmaAllocation getAllocation() { return allocation; }
 
 private:
-  VkBuffer buffer = nullptr;
+  VkBuffer buffer = VK_NULL_HANDLE;
   VmaAllocation allocation = nullptr;
   VmaAllocator allocator;
 };

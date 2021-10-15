@@ -141,7 +141,7 @@ private:
 
   GLFWWindow *window = nullptr;
 
-  VkRenderPass swapchainPass = nullptr;
+  VkRenderPass swapchainPass = VK_NULL_HANDLE;
   std::vector<VkFramebuffer> swapchainFramebuffers;
 
   VmaAllocator allocator = nullptr;

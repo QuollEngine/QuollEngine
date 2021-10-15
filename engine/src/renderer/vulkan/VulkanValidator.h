@@ -101,7 +101,7 @@ private:
 
 private:
   VkInstance instance = nullptr;
-  VkDebugUtilsMessengerEXT messenger = nullptr;
+  VkDebugUtilsMessengerEXT messenger = VK_NULL_HANDLE;
 
   std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
   VkDebugUtilsMessengerCreateInfoEXT messengerCreateInfo{};

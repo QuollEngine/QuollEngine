@@ -142,10 +142,10 @@ private:
                        GLFWWindow *window);
 
 private:
-  VkSwapchainKHR swapchain = nullptr;
+  VkSwapchainKHR swapchain = VK_NULL_HANDLE;
   std::vector<VkImageView> imageViews;
-  VkImageView depthImageView = nullptr;
-  VkImage depthImage = nullptr;
+  VkImageView depthImageView = VK_NULL_HANDLE;
+  VkImage depthImage = VK_NULL_HANDLE;
 
   VmaAllocation depthImageAllocation = nullptr;
   VmaAllocator allocator = nullptr;

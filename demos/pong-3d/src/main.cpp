@@ -271,7 +271,7 @@ private:
 
 int main() {
   liquid::Engine::setAssetsPath(
-      std::filesystem::path("../../../../engine/bin/Debug/assets"));
+      std::filesystem::path("../../../../engine/bin/Debug/assets").string());
   Game game;
   return game.run();
 }

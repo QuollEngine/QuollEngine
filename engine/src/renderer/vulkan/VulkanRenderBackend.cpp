@@ -159,7 +159,7 @@ void VulkanRenderBackend::createSwapchainFramebuffers() {
 void VulkanRenderBackend::destroySwapchainPass() {
   if (swapchainPass) {
     vkDestroyRenderPass(vulkanInstance.getDevice(), swapchainPass, nullptr);
-    swapchainPass = nullptr;
+    swapchainPass = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Swapchain render Pass destroyed");
   }
 }

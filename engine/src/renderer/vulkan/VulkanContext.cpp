@@ -22,7 +22,7 @@ VulkanContext::~VulkanContext() {
 
   if (surface) {
     vkDestroySurfaceKHR(instance, surface, nullptr);
-    surface = nullptr;
+    surface = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Surface destroyed");
   }
 

@@ -13,7 +13,7 @@ Material::Material(const SharedPtr<Shader> &vertexShader_,
     : vertexShader(vertexShader_), fragmentShader(fragmentShader_),
       textures(textures_), cullMode(cullMode_) {
 
-  for (auto i = 0; i < properties_.size(); ++i) {
+  for (size_t i = 0; i < properties_.size(); ++i) {
     auto &prop = properties_[i];
     properties.push_back(prop.second);
     propertyMap.insert(std::make_pair(prop.first, i));

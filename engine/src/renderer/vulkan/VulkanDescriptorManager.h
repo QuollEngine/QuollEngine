@@ -97,10 +97,10 @@ private:
   void createDescriptorPool();
 
 public:
-  VkDescriptorSetLayout sceneLayout = nullptr;
-  VkDescriptorSetLayout materialLayout = nullptr;
+  VkDescriptorSetLayout sceneLayout = VK_NULL_HANDLE;
+  VkDescriptorSetLayout materialLayout = VK_NULL_HANDLE;
 
-  VkDescriptorPool descriptorPool = nullptr;
+  VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 
   VkDevice device;
 };

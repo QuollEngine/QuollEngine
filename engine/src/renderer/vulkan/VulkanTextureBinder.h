@@ -51,9 +51,9 @@ public:
 public:
   VkDevice device = nullptr;
   VmaAllocator allocator = nullptr;
-  VkImage image = nullptr;
-  VkImageView imageView = nullptr;
-  VkSampler sampler = nullptr;
+  VkImage image = VK_NULL_HANDLE;
+  VkImageView imageView = VK_NULL_HANDLE;
+  VkSampler sampler = VK_NULL_HANDLE;
   VmaAllocation allocation = nullptr;
 };
 

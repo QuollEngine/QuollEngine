@@ -9,7 +9,7 @@ std::vector<char> VulkanShader::readShaderFile(const String &shaderFile) {
 
   if (!file.is_open()) {
     throw VulkanError("Failed to open shader file \"" + shaderFile + "\"",
-                      VK_ERROR_INVALID_SHADER_NV);
+                      VK_SUCCESS);
   }
 
   std::streamsize fileSize = file.tellg();
@@ -45,7 +45,7 @@ VulkanShader::VulkanShader(VkDevice device_, const String &shaderFile)
 VulkanShader::~VulkanShader() {
   if (shaderModule) {
     vkDestroyShaderModule(device, shaderModule, nullptr);
-    shaderModule = nullptr;
+    shaderModule = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Shader module destroyed");
   }
 }

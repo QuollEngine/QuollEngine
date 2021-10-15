@@ -43,7 +43,7 @@ private:
   static std::vector<char> readShaderFile(const String &shaderFile);
 
 private:
-  VkShaderModule shaderModule = nullptr;
+  VkShaderModule shaderModule = VK_NULL_HANDLE;
 
   VkDevice device = nullptr;
 };

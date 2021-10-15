@@ -40,7 +40,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 int main() {
   try {
     liquid::Engine::setAssetsPath(
-        std::filesystem::path("../../../../engine/bin/Debug/assets"));
+        std::filesystem::path("../../../../engine/bin/Debug/assets").string());
     liquid::EntityContext context;
     std::unique_ptr<liquid::GLFWWindow> window(
         new liquid::GLFWWindow("Rotating Cube", 640, 480));
@@ -90,12 +90,12 @@ int main() {
     const auto &fbSize = window->getFramebufferSize();
 
     camera->setPerspective(
-        70.0, static_cast<float>(fbSize.width) / fbSize.height, 0.1, 200.0);
+        70.0f, static_cast<float>(fbSize.width) / fbSize.height, 0.1f, 200.0f);
     camera->lookAt({0.0, 0.0, -6.0}, {0.0, 0.0, 1.0}, {0.0, 1.0, 0.0});
 
     window->addResizeHandler([&camera](uint32_t width, uint32_t height) {
-      camera->setPerspective(70.0, static_cast<float>(width) / height, 0.1,
-                             200.0);
+      camera->setPerspective(70.0f, static_cast<float>(width) / height, 0.1f,
+                             200.0f);
     });
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());

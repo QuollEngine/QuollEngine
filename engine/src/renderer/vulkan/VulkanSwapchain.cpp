@@ -73,7 +73,7 @@ VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
   createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
   createInfo.presentMode = presentMode;
   createInfo.clipped = true;
-  createInfo.oldSwapchain = nullptr;
+  createInfo.oldSwapchain = VK_NULL_HANDLE;
 
   checkForVulkanError(
       vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain),
@@ -179,10 +179,10 @@ VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) {
   window = rhs.window;
   device = rhs.device;
 
-  rhs.swapchain = nullptr;
+  rhs.swapchain = VK_NULL_HANDLE;
   rhs.imageViews.clear();
-  rhs.depthImageView = nullptr;
-  rhs.depthImage = nullptr;
+  rhs.depthImageView = VK_NULL_HANDLE;
+  rhs.depthImage = VK_NULL_HANDLE;
 }
 
 VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
@@ -207,10 +207,10 @@ VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
   window = rhs.window;
   device = rhs.device;
 
-  rhs.swapchain = nullptr;
+  rhs.swapchain = VK_NULL_HANDLE;
   rhs.imageViews.clear();
-  rhs.depthImageView = nullptr;
-  rhs.depthImage = nullptr;
+  rhs.depthImageView = VK_NULL_HANDLE;
+  rhs.depthImage = VK_NULL_HANDLE;
 
   return *this;
 }
@@ -220,13 +220,13 @@ VulkanSwapchain::~VulkanSwapchain() { destroy(); }
 void VulkanSwapchain::destroy() {
   if (depthImageView) {
     vkDestroyImageView(device, depthImageView, nullptr);
-    depthImageView = nullptr;
+    depthImageView = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Depth image view destroyed");
   }
 
   if (depthImage) {
     vmaDestroyImage(allocator, depthImage, depthImageAllocation);
-    depthImage = nullptr;
+    depthImage = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Depth image destroyed");
   }
 
@@ -240,7 +240,7 @@ void VulkanSwapchain::destroy() {
 
   if (swapchain) {
     vkDestroySwapchainKHR(device, swapchain, nullptr);
-    swapchain = nullptr;
+    swapchain = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Swapchain destroyed");
   }
 }
@@ -288,7 +288,7 @@ VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
   uint32_t imageIndex = 0;
   VkResult result = vkAcquireNextImageKHR(
       device, swapchain, std::numeric_limits<uint64_t>::max(),
-      imageAvailableSemaphore, nullptr, &imageIndex);
+      imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
     return std::numeric_limits<uint32_t>::max();

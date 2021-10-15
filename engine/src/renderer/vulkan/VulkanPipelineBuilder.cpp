@@ -140,11 +140,11 @@ VulkanPipelineBuilder::build(VkPipelineShaderStageCreateInfo *shaderStages,
   pipelineInfo.layout = pipelineLayout;
   pipelineInfo.renderPass = renderPass;
   pipelineInfo.subpass = subpass;
-  pipelineInfo.basePipelineHandle = nullptr;
+  pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
   pipelineInfo.basePipelineIndex = -1;
 
-  VkPipeline pipeline = nullptr;
-  checkForVulkanError(vkCreateGraphicsPipelines(device, nullptr, 1,
+  VkPipeline pipeline = VK_NULL_HANDLE;
+  checkForVulkanError(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1,
                                                 &pipelineInfo, nullptr,
                                                 &pipeline),
                       "Failed to create graphics pipeline");

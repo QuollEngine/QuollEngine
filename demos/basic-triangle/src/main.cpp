@@ -30,7 +30,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 int main() {
   try {
     liquid::Engine::setAssetsPath(
-        std::filesystem::path("../../../../engine/bin/Debug/assets"));
+        std::filesystem::path("../../../../engine/bin/Debug/assets").string());
     liquid::EntityContext context;
     std::unique_ptr<liquid::GLFWWindow> window(
         new liquid::GLFWWindow("Triangle", 640, 480));

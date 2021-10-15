@@ -42,8 +42,8 @@ private:
   void createCommandPool(const VulkanContext &context);
 
 private:
-  VkFence uploadFence = nullptr;
-  VkCommandPool uploadCommandPool = nullptr;
+  VkFence uploadFence = VK_NULL_HANDLE;
+  VkCommandPool uploadCommandPool = VK_NULL_HANDLE;
   VkDevice device = nullptr;
   VkQueue graphicsQueue = nullptr;
 };

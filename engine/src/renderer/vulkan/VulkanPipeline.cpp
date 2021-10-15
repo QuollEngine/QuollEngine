@@ -9,13 +9,13 @@ VulkanPipeline::VulkanPipeline(VkDevice device_, VkPipeline pipeline_)
 VulkanPipeline::VulkanPipeline(VulkanPipeline &&rhs) {
   pipeline = rhs.pipeline;
   device = rhs.device;
-  rhs.pipeline = nullptr;
+  rhs.pipeline = VK_NULL_HANDLE;
 }
 
 VulkanPipeline &VulkanPipeline::operator=(VulkanPipeline &&rhs) {
   pipeline = rhs.pipeline;
   device = rhs.device;
-  rhs.pipeline = nullptr;
+  rhs.pipeline = VK_NULL_HANDLE;
   return *this;
 };
 

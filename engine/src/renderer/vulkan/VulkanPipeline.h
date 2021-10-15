@@ -62,8 +62,8 @@ public:
   inline VkPipeline getPipeline() const { return pipeline; }
 
 private:
-  VkDevice device = nullptr;
-  VkPipeline pipeline = nullptr;
+  VkDevice device = VK_NULL_HANDLE;
+  VkPipeline pipeline = VK_NULL_HANDLE;
 };
 
 } // namespace liquid

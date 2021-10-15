@@ -76,7 +76,7 @@ private:
   static VkCullModeFlags getVulkanCullMode(const CullMode &cullMode);
 
 private:
-  VkPipelineLayout pipelineLayout = nullptr;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkDevice device = nullptr;
 };
 

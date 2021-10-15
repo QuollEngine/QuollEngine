@@ -17,13 +17,13 @@ VulkanDescriptorManager::VulkanDescriptorManager(VkDevice device_)
 VulkanDescriptorManager::~VulkanDescriptorManager() {
   if (sceneLayout) {
     vkDestroyDescriptorSetLayout(device, sceneLayout, nullptr);
-    sceneLayout = nullptr;
+    sceneLayout = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Scene descriptor set layout destroyed");
   }
 
   if (materialLayout) {
     vkDestroyDescriptorSetLayout(device, materialLayout, nullptr);
-    materialLayout = nullptr;
+    materialLayout = VK_NULL_HANDLE;
     LOG_DEBUG("[Vulkan] Material descriptor set layout destroyed");
   }
 
@@ -38,7 +38,7 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
     const SharedPtr<VulkanHardwareBuffer> &sceneBuffer,
     const SharedPtr<Texture> &shadowmaps,
     const std::array<SharedPtr<Texture>, 3> &iblMaps) {
-  VkDescriptorSet sceneDescriptorSet = nullptr;
+  VkDescriptorSet sceneDescriptorSet = VK_NULL_HANDLE;
 
   VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
   descriptorSetAllocateInfo.sType =
@@ -167,7 +167,7 @@ VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
                       VK_SUCCESS);
   }
 
-  VkDescriptorSet materialDescriptorSet = nullptr;
+  VkDescriptorSet materialDescriptorSet = VK_NULL_HANDLE;
 
   VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
   descriptorSetAllocateInfo.sType =
@@ -206,7 +206,7 @@ VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
   std::vector<VkDescriptorImageInfo> materialTextureInfos;
   if (!textures.empty()) {
     materialTextureInfos.resize(textures.size());
-    for (auto i = 0; i < textures.size(); ++i) {
+    for (size_t i = 0; i < textures.size(); ++i) {
       const auto &vulkanBinder = std::dynamic_pointer_cast<VulkanTextureBinder>(
           textures[i]->getResourceBinder());
       materialTextureInfos[i] = {};

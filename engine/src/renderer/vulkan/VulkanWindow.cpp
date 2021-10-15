@@ -7,7 +7,7 @@
 namespace liquid {
 
 VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow *window) {
-  VkSurfaceKHR surface = nullptr;
+  VkSurfaceKHR surface = VK_NULL_HANDLE;
   checkForVulkanError(glfwCreateWindowSurface(instance, window->getInstance(),
                                               nullptr, &surface),
                       "Failed to create Vulkan Surface");

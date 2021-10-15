@@ -67,8 +67,8 @@ private:
   VulkanPipeline graphicsPipeline;
   VulkanPipeline wireframeGraphicsPipeline;
 
-  VkDescriptorSet materialDescriptorSet = nullptr;
-  VulkanDescriptorManager *descriptorManager = nullptr;
+  VkDescriptorSet materialDescriptorSet = VK_NULL_HANDLE;
+  VulkanDescriptorManager *descriptorManager = VK_NULL_HANDLE;
 };
 
 } // namespace liquid

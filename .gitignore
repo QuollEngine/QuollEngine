@@ -1,3 +1,4 @@
+# Workspace directory
 workspace/
 
 # macOS
@@ -5,3 +6,6 @@ workspace/
 
 # Vendor
 vendor/
+
+# Visual Studio
+.vs

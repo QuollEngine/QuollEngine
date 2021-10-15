@@ -250,7 +250,7 @@ TEST(EntityStorageSparseSetTests, IterateEntities) {
   storage.setComponent<FloatComponent>(e1, {10.2});
   storage.setComponent<StringComponent>(e1, {"Entity 1"});
   storage.setComponent<IntComponent>(e2, {20});
-  storage.setComponent<FloatComponent>(e3, {30.2});
+  storage.setComponent<FloatComponent>(e3, {30.2f});
   storage.setComponent<IntComponent>(e3, {30});
   storage.setComponent<StringComponent>(e3, {"Entity 3"});
   storage.setComponent<IntComponent>(e4, {40});

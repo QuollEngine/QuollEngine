@@ -94,7 +94,7 @@ private:
   VkDevice device = nullptr;
   VulkanPhysicalDevice physicalDevice;
 
-  VkSurfaceKHR surface = nullptr;
+  VkSurfaceKHR surface = VK_NULL_HANDLE;
 
   VulkanValidator validator;
   VkInstance instance = nullptr;

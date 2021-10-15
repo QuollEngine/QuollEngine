@@ -77,7 +77,7 @@ TEST_F(MaterialPBRTest, GetsProperties) {
                                              0.3,
                                              nullptr,
                                              0,
-                                             glm::vec3(1.0, 0.2, 0.4)};
+                                             glm::vec3(1.0f, 0.2f, 0.4f)};
 
 #define EXPECT_PROP_EQ(idx, key, type, value)                                  \
   EXPECT_EQ(properties.getProperties()[idx].first, key);                       \
@@ -164,7 +164,7 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
       0.3,
       std::make_shared<liquid::Texture>(nullptr, 0, statsManager),
       0,
-      glm::vec3(1.0, 0.2, 0.4)};
+      glm::vec3(1.0f, 0.2f, 0.4f)};
 
   liquid::MaterialPBR material(properties, &shaderLibrary,
                                liquid::CullMode::None, &resourceAllocator,

@@ -54,17 +54,17 @@ ImguiRenderer::~ImguiRenderer() {
   if (descriptorLayout) {
     vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorLayout,
                                  nullptr);
-    descriptorLayout = nullptr;
+    descriptorLayout = VK_NULL_HANDLE;
   }
 
   if (pipelineLayout) {
     vkDestroyPipelineLayout(vulkanContext.getDevice(), pipelineLayout, nullptr);
-    pipelineLayout = nullptr;
+    pipelineLayout = VK_NULL_HANDLE;
   }
 
   if (pipeline) {
     vkDestroyPipeline(vulkanContext.getDevice(), pipeline, nullptr);
-    pipeline = nullptr;
+    pipeline = VK_NULL_HANDLE;
   }
 
   ImGui_ImplGlfw_Shutdown();
@@ -207,7 +207,7 @@ VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(Texture *texture) {
   const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
       texture->getResourceBinder());
 
-  VkDescriptorSet descriptorSet = nullptr;
+  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
   VkDescriptorSetAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -359,8 +359,8 @@ void ImguiRenderer::createPipeline() {
   createInfo.layout = pipelineLayout;
   createInfo.renderPass = renderPass;
   createInfo.subpass = 0;
-  vkCreateGraphicsPipelines(vulkanContext.getDevice(), nullptr, 1, &createInfo,
-                            nullptr, &pipeline);
+  vkCreateGraphicsPipelines(vulkanContext.getDevice(), VK_NULL_HANDLE, 1,
+                            &createInfo, nullptr, &pipeline);
 }
 
 void ImguiRenderer::setupRenderStates(ImDrawData *data,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 #include "HardwareBuffer.h"
 
 namespace liquid {
@@ -55,8 +55,8 @@ struct TypedRenderCommandBase : public RenderCommandBase {
 
 struct RenderCommandBeginRenderPass
     : public TypedRenderCommandBase<RenderCommandType::BeginRenderPass> {
-  VkRenderPass renderPass = nullptr;
-  VkFramebuffer framebuffer = nullptr;
+  VkRenderPass renderPass = VK_NULL_HANDLE;
+  VkFramebuffer framebuffer = VK_NULL_HANDLE;
   glm::ivec2 renderAreaOffset{};
   glm::uvec2 renderAreaSize{};
   std::vector<VkClearValue> clearValues;
@@ -67,13 +67,13 @@ struct RenderCommandEndRenderPass
 
 struct RenderCommandBindPipeline
     : public TypedRenderCommandBase<RenderCommandType::BindPipeline> {
-  VkPipeline pipeline = nullptr;
+  VkPipeline pipeline = VK_NULL_HANDLE;
   VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 };
 
 struct RenderCommandBindDescriptorSets
     : public TypedRenderCommandBase<RenderCommandType::BindDescriptorSets> {
-  VkPipelineLayout pipelineLayout = nullptr;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
   uint32_t firstSet = 0;
   std::vector<VkDescriptorSet> descriptorSets;
@@ -82,7 +82,7 @@ struct RenderCommandBindDescriptorSets
 
 struct RenderCommandPushConstants
     : public TypedRenderCommandBase<RenderCommandType::PushConstants> {
-  VkPipelineLayout pipelineLayout = nullptr;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
   VkShaderStageFlags stageFlags = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
   uint32_t offset = 0;
   uint32_t size = 0;

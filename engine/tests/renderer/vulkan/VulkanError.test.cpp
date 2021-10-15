@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include <gtest/gtest.h>
 #include <vulkan/vulkan.hpp>
 #include "renderer/vulkan/VulkanError.h"

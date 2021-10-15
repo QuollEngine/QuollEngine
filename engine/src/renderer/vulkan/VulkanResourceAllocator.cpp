@@ -85,7 +85,7 @@ SharedPtr<VulkanHardwareBuffer> VulkanResourceAllocator::createHardwareBuffer(
   createAllocationInfo.usage = memoryUsage;
 
   VmaAllocation allocation = nullptr;
-  VkBuffer buffer = nullptr;
+  VkBuffer buffer = VK_NULL_HANDLE;
 
   checkForVulkanError(vmaCreateBuffer(allocator, &createBufferInfo,
                                       &createAllocationInfo, &buffer,
@@ -128,10 +128,10 @@ VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
   VmaAllocationCreateInfo imageAllocationInfo{};
   imageAllocationInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
-  VmaAllocation allocation = nullptr;
-  VkImage image = nullptr;
-  VkImageView imageView = nullptr;
-  VkSampler sampler = nullptr;
+  VmaAllocation allocation = VK_NULL_HANDLE;
+  VkImage image = VK_NULL_HANDLE;
+  VkImageView imageView = VK_NULL_HANDLE;
+  VkSampler sampler = VK_NULL_HANDLE;
 
   checkForVulkanError(vmaCreateImage(allocator, &imageCreateInfo,
                                      &imageAllocationInfo, &image, &allocation,
@@ -245,7 +245,7 @@ VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
 
 SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
     const TextureCubemapData &textureData) {
-  const uint32_t CUBEMAP_SIDES = 6;
+  static constexpr uint32_t CUBEMAP_SIDES = 6;
 
   VkFormat format = (VkFormat)textureData.format;
 
@@ -266,9 +266,9 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
   extent.depth = 1;
 
   VmaAllocation allocation = nullptr;
-  VkImage image = nullptr;
-  VkImageView imageView = nullptr;
-  VkSampler sampler = nullptr;
+  VkImage image = VK_NULL_HANDLE;
+  VkImageView imageView = VK_NULL_HANDLE;
+  VkSampler sampler = VK_NULL_HANDLE;
 
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -294,8 +294,8 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
                                      nullptr),
                       "Failed to create cubemap image");
 
-  uploadContext.submit([extent, buffer, image, &textureData,
-                        CUBEMAP_SIDES](VkCommandBuffer commandBuffer) {
+  uploadContext.submit([extent, buffer, image,
+                        &textureData](VkCommandBuffer commandBuffer) {
     VkImageSubresourceRange range{};
     range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     range.baseMipLevel = 0;
@@ -394,9 +394,9 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
   size_t textureSize = data.width * data.height;
 
   VmaAllocation allocation = nullptr;
-  VkImage image = nullptr;
-  VkImageView imageView = nullptr;
-  VkSampler sampler = nullptr;
+  VkImage image = VK_NULL_HANDLE;
+  VkImageView imageView = VK_NULL_HANDLE;
+  VkSampler sampler = VK_NULL_HANDLE;
 
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

@@ -101,11 +101,11 @@ private:
 private:
   VkExtent2D shadowmapExtent{};
   VkDevice device = nullptr;
-  VkRenderPass renderPass = nullptr;
+  VkRenderPass renderPass = VK_NULL_HANDLE;
   SharedPtr<VulkanResourceManager> resourceManager = nullptr;
   ResourceAllocator *resourceAllocator = nullptr;
   SharedPtr<Texture> shadowmapTexture;
-  VkFramebuffer framebuffer = nullptr;
+  VkFramebuffer framebuffer = VK_NULL_HANDLE;
 };
 
 } // namespace liquid
