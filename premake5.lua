@@ -3,6 +3,7 @@ workspace "LiquidEngine"
     configurations { "Debug" }
     language "C++"
     cppdialect "C++17"
+    architecture "x86_64"
 
     sysincludedirs {
         "vendor/include",
@@ -56,6 +57,15 @@ workspace "LiquidEngine"
             ["ENABLE_STRICT_OBJC_MSGSEND"] = "YES",
         }
 
+        -- GLFW is linked statically; so, we need to 
+        -- link the necessary frameworks
+        links {
+            "Cocoa.framework",
+            "CoreFoundation.framework",
+            "IOKit.framework",
+            "CoreVideo.framework"
+        }
+
         filter { "configurations:Debug" }
             xcodebuildsettings {
                 ["CLANG_ENABLE_OBJC_WEAK"] = "YES",
@@ -81,7 +91,7 @@ project "LiquidEngine"
     configuration "Debug"
         defines { "LIQUID_DEBUG" }
 
-    links { "vulkan", "glfw", "ktx" }
+    links { "vulkan", "glfw3", "ktx" }
 
     postbuildcommands {
         "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
@@ -115,10 +125,10 @@ project "LiquidEngineTest"
     }
 
     postbuildcommands {
-        "{COPY} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",
-        "{COPY} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
-        "{COPY} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
-        "{COPY} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx"
+        "{COPYFILE} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",
+        "{COPYFILE} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
+        "{COPYFILE} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
+        "{COPYFILE} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx"
     }
 
     includedirs {
@@ -128,10 +138,15 @@ project "LiquidEngineTest"
     configuration "Debug"
         defines { "LIQUID_DEBUG" }
 
-    links { "glfw", "gtest", "gtest_main", "gmock", "ktx" }
+    links { "glfw3", "gtest", "gtest_main", "gmock", "ktx" }
 
     filter { "system:linux" }
-        links { "dl" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+            "dl"
+        }
 
     filter { "toolset:clang" }
         buildoptions {
@@ -165,7 +180,7 @@ project "DemoBasicTriangle"
         "demos/basic-triangle/src/**.cpp"
     }
 
-    links { "vulkan", "glfw", "ktx", "LiquidEngine" }
+    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
 
     postbuildcommands {
         "glslc ../../../demos/basic-triangle/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
@@ -173,8 +188,15 @@ project "DemoBasicTriangle"
         "glslc ../../../demos/basic-triangle/assets/red-shader.frag -o %{cfg.buildtarget.directory}/red-shader.frag.spv",
         "glslc ../../../demos/basic-triangle/assets/texture-shader.frag -o %{cfg.buildtarget.directory}/texture-shader.frag.spv",
         "glslc ../../../demos/basic-triangle/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
-        "{COPY} ../../../demos/basic-triangle/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
+        "{COPYFILE} ../../../demos/basic-triangle/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
     }
+
+    filter { "system:linux" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+        }
 
 project "DemoRotatingCube"
     basedir "workspace/demos/rotating-cube"
@@ -185,16 +207,22 @@ project "DemoRotatingCube"
         "demos/rotating-cube/src/**.cpp"
     }
 
-    links { "vulkan", "glfw", "ktx", "LiquidEngine" }
+    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
 
     postbuildcommands {
         "glslc ../../../demos/rotating-cube/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
         "glslc ../../../demos/rotating-cube/assets/texture-shader.frag -o %{cfg.buildtarget.directory}/texture-shader.frag.spv",
         "glslc ../../../demos/rotating-cube/assets/material-shader.vert -o %{cfg.buildtarget.directory}/material-shader.vert.spv",
         "glslc ../../../demos/rotating-cube/assets/material-shader.frag -o %{cfg.buildtarget.directory}/material-shader.frag.spv",
-        "{COPY} ../../../demos/rotating-cube/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
+        "{COPYFILE} ../../../demos/rotating-cube/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
     }
 
+    filter { "system:linux" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+        }
 
 project "DemoTransformingSpheres"
     basedir "workspace/demos/earth-and-moon"
@@ -205,17 +233,24 @@ project "DemoTransformingSpheres"
         "demos/transforming-spheres/src/**.cpp"
     }
 
-    links { "vulkan", "glfw", "ktx", "LiquidEngine" }
+    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
 
     postbuildcommands {
         "glslc ../../../demos/transforming-spheres/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
         "glslc ../../../demos/transforming-spheres/assets/basic-shader.frag -o %{cfg.buildtarget.directory}/basic-shader.frag.spv",
         "glslc ../../../demos/transforming-spheres/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
         "glslc ../../../demos/transforming-spheres/assets/texture-shader.frag -o %{cfg.buildtarget.directory}/texture-shader.frag.spv",
-        "{COPY} ../../../demos/transforming-spheres/assets/textures/lava.jpg %{cfg.buildtarget.directory}/lava.jpg",
-        "{COPY} ../../../demos/transforming-spheres/assets/textures/water.png %{cfg.buildtarget.directory}/water.png",
-        "{COPY} ../../../demos/transforming-spheres/assets/textures/grass.png %{cfg.buildtarget.directory}/grass.png"
+        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/lava.jpg %{cfg.buildtarget.directory}/lava.jpg",
+        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/water.png %{cfg.buildtarget.directory}/water.png",
+        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/grass.png %{cfg.buildtarget.directory}/grass.png"
     }
+
+    filter { "system:linux" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+        }
 
 project "DemoPong"
     basedir "workspace/demos/pong-3d"
@@ -226,12 +261,19 @@ project "DemoPong"
         "demos/pong-3d/src/**.cpp"
     }
 
-    links { "vulkan", "glfw", "ktx", "LiquidEngine" }
+    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
 
     postbuildcommands {
         "glslc ../../../demos/pong-3d/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
         "glslc ../../../demos/pong-3d/assets/basic-shader.frag -o %{cfg.buildtarget.directory}/basic-shader.frag.spv"
     }
+
+    filter { "system:linux" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+        }
 
 project "DemoSceneViewer"
     basedir "workspace/demos/scene-viewer"
@@ -242,10 +284,15 @@ project "DemoSceneViewer"
         "demos/scene-viewer/src/**.cpp"
     }
 
-    links { "vulkan", "glfw", "ktx", "LiquidEngine" }
+    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
 
     filter { "system:linux" }
         removefiles { "demos/scene-viewer/src/**.win32.cpp" }
+        links {
+            "Xrandr",
+            "Xi",
+            "X11",
+        }
     
     filter { "system:windows" }
         removefiles { "demos/scene-viewer/src/**.linux.cpp" }
