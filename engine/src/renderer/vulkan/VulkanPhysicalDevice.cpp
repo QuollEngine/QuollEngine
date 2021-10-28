@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "VulkanPhysicalDevice.h"
 
 namespace liquid {
@@ -20,30 +21,8 @@ VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
 
     VulkanQueueFamily queueFamilyIndices(physicalDevice, surface);
 
-    // surface capabilities
-    VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface,
-                                              &surfaceCapabilities);
-
-    // surface formats
-    uint32_t surfaceFormatsCount = 0;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface,
-                                         &surfaceFormatsCount, nullptr);
-    std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(
-        physicalDevice, surface, &surfaceFormatsCount, surfaceFormats.data());
-
-    // present modes
-    uint32_t presentModesCount = 0;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
-                                              &presentModesCount, nullptr);
-    std::vector<VkPresentModeKHR> presentModes(presentModesCount);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(
-        physicalDevice, surface, &presentModesCount, presentModes.data());
-
-    devices.push_back(VulkanPhysicalDevice(
-        physicalDevice, deviceProperties, deviceFeatures, queueFamilyIndices,
-        surfaceCapabilities, surfaceFormats, presentModes));
+    devices.push_back(VulkanPhysicalDevice(physicalDevice, deviceProperties,
+                                           deviceFeatures, queueFamilyIndices));
   }
 
   return devices;
@@ -53,14 +32,9 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(
     const VkPhysicalDevice &device_,
     const VkPhysicalDeviceProperties &properties_,
     const VkPhysicalDeviceFeatures &features_,
-    const VulkanQueueFamily &queueFamilyIndices_,
-    const VkSurfaceCapabilitiesKHR &surfaceCapabilities_,
-    const std::vector<VkSurfaceFormatKHR> &surfaceFormats_,
-    const std::vector<VkPresentModeKHR> &presentModes_)
+    const VulkanQueueFamily &queueFamilyIndices_)
     : device(device_), properties(properties_), features(features_),
-      queueFamilyIndices(queueFamilyIndices_),
-      surfaceCapabilities(surfaceCapabilities_),
-      surfaceFormats(surfaceFormats_), presentModes(presentModes_) {
+      queueFamilyIndices(queueFamilyIndices_) {
   name = String((const char *)properties.deviceName);
 }
 
@@ -91,6 +65,37 @@ VulkanPhysicalDevice::getSupportedExtensions() const {
                                        supportedExtensions.data());
 
   return supportedExtensions;
+}
+
+const VkSurfaceCapabilitiesKHR VulkanPhysicalDevice::getSurfaceCapabilities(
+    const VkSurfaceKHR &surface) const {
+  VkSurfaceCapabilitiesKHR surfaceCapabilities{};
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
+                                            &surfaceCapabilities);
+  return surfaceCapabilities;
+}
+
+const std::vector<VkSurfaceFormatKHR>
+VulkanPhysicalDevice::getSurfaceFormats(const VkSurfaceKHR &surface) const {
+  uint32_t surfaceFormatsCount = 0;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount,
+                                       nullptr);
+  std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount,
+                                       surfaceFormats.data());
+
+  return surfaceFormats;
+}
+
+const std::vector<VkPresentModeKHR>
+VulkanPhysicalDevice::getPresentModes(const VkSurfaceKHR &surface) const {
+  uint32_t presentModesCount = 0;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModesCount,
+                                            nullptr);
+  std::vector<VkPresentModeKHR> presentModes(presentModesCount);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModesCount,
+                                            presentModes.data());
+  return presentModes;
 }
 
 const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {

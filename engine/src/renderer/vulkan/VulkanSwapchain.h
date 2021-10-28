@@ -25,9 +25,10 @@ public:
    * @param window Pointer to window
    * @param context Vulkan context
    * @param allocator Allocator
+   * @param oldSwapchain Old swapchain
    */
   VulkanSwapchain(GLFWWindow *window, const VulkanContext &context,
-                  VmaAllocator allocator);
+                  VmaAllocator allocator, VkSwapchainKHR oldSwapchain);
 
   /**
    * @brief Move operator for swapchain
@@ -140,6 +141,15 @@ private:
    */
   void calculateExtent(const VkSurfaceCapabilitiesKHR &capabilities,
                        GLFWWindow *window);
+
+  /**
+   * @brief Get suitable composite alpha
+   *
+   * @param surfaceCapabilities Surface capabilities
+   * @return Composite alpha
+   */
+  VkCompositeAlphaFlagBitsKHR
+  getSuitableCompositeAlpha(const VkSurfaceCapabilitiesKHR &capabilities) const;
 
 private:
   VkSwapchainKHR swapchain = VK_NULL_HANDLE;

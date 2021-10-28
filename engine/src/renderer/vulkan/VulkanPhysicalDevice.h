@@ -34,17 +34,11 @@ public:
    * @param properties Physical Device properties
    * @param features Physical Device features
    * @param queueFamilyIndices Queue Family Indices
-   * @param surfaceCapabilities Surface Capabilities
-   * @param surfaceFormats Surface Formats
-   * @param presentModes Present Modes
    */
   VulkanPhysicalDevice(const VkPhysicalDevice &device,
                        const VkPhysicalDeviceProperties &properties,
                        const VkPhysicalDeviceFeatures &features,
-                       const VulkanQueueFamily &queueFamilyIndices,
-                       const VkSurfaceCapabilitiesKHR &surfaceCapabilities,
-                       const std::vector<VkSurfaceFormatKHR> &surfaceFormats,
-                       const std::vector<VkPresentModeKHR> &presentModes);
+                       const VulkanQueueFamily &queueFamilyIndices);
 
   /**
    * @brief Checks if physical device supports swapchain
@@ -89,29 +83,29 @@ public:
   /**
    * @brief Get surface capabilities
    *
+   * @param surface Surface
    * @return Surface capabilities
    */
-  inline const VkSurfaceCapabilitiesKHR &getSurfaceCapabilities() const {
-    return surfaceCapabilities;
-  }
+  const VkSurfaceCapabilitiesKHR
+  getSurfaceCapabilities(const VkSurfaceKHR &surface) const;
 
   /**
    * @brief Get surface formats
    *
+   * @param surface Surface
    * @return Surface formats
    */
-  inline const std::vector<VkSurfaceFormatKHR> &getSurfaceFormats() const {
-    return surfaceFormats;
-  }
+  const std::vector<VkSurfaceFormatKHR>
+  getSurfaceFormats(const VkSurfaceKHR &surface) const;
 
   /**
    * @brief Get present modes
    *
+   * @param surface Surface
    * @return Present modes
    */
-  inline const std::vector<VkPresentModeKHR> &getPresentModes() const {
-    return presentModes;
-  }
+  const std::vector<VkPresentModeKHR>
+  getPresentModes(const VkSurfaceKHR &surface) const;
 
   /**
    * @brief Gets supported extensions in device
@@ -131,10 +125,6 @@ private:
   VulkanQueueFamily queueFamilyIndices;
   VkPhysicalDeviceProperties properties{};
   VkPhysicalDeviceFeatures features{};
-
-  VkSurfaceCapabilitiesKHR surfaceCapabilities{};
-  std::vector<VkSurfaceFormatKHR> surfaceFormats;
-  std::vector<VkPresentModeKHR> presentModes;
 
   String name;
 

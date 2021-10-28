@@ -1,3 +1,6 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
+
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE
 #define TINYGLTF_NO_INCLUDE_JSON
@@ -7,16 +10,11 @@
 #include <json/json.hpp>
 #include <stb/stb_image.h>
 
-#include "TinyGLTFLoader.h"
-
-#include "core/EngineGlobals.h"
-
-#include "renderer/Texture.h"
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
-
+#include "renderer/Texture.h"
 #include "renderer/MaterialPBR.h"
-
+#include "TinyGLTFLoader.h"
 #include "GLTFError.h"
 
 namespace liquid {

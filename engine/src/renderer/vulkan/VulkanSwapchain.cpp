@@ -24,17 +24,20 @@ VulkanContext::getSupportedExtensions(const String &layerName) {
 
 VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
                                  const VulkanContext &context,
-                                 VmaAllocator allocator_)
+                                 VmaAllocator allocator_,
+                                 VkSwapchainKHR oldSwapchain)
     : window(window_), device(context.getDevice()), allocator(allocator_) {
+  const auto &surfaceCapabilities =
+      context.getPhysicalDevice().getSurfaceCapabilities(context.getSurface());
 
   pickMostSuitableSurfaceFormat(
-      context.getPhysicalDevice().getSurfaceFormats());
-  pickMostSuitablePresentMode(context.getPhysicalDevice().getPresentModes());
-  calculateExtent(context.getPhysicalDevice().getSurfaceCapabilities(), window);
+      context.getPhysicalDevice().getSurfaceFormats(context.getSurface()));
+  pickMostSuitablePresentMode(
+      context.getPhysicalDevice().getPresentModes(context.getSurface()));
+  calculateExtent(surfaceCapabilities, window);
 
-  uint32_t imageCount = std::min(
-      context.getPhysicalDevice().getSurfaceCapabilities().minImageCount + 1,
-      context.getPhysicalDevice().getSurfaceCapabilities().maxImageCount);
+  uint32_t imageCount = std::min(surfaceCapabilities.minImageCount + 1,
+                                 surfaceCapabilities.maxImageCount);
 
   bool sameQueueFamily =
       context.getPhysicalDevice()
@@ -43,7 +46,6 @@ VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
       context.getPhysicalDevice().getQueueFamilyIndices().presentFamily.value();
 
   VkSwapchainCreateInfoKHR createInfo{};
-
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   createInfo.pNext = nullptr;
   createInfo.flags = 0;
@@ -68,12 +70,11 @@ VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
     createInfo.pQueueFamilyIndices = nullptr;
   }
 
-  createInfo.preTransform =
-      context.getPhysicalDevice().getSurfaceCapabilities().currentTransform;
-  createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  createInfo.preTransform = surfaceCapabilities.currentTransform;
+  createInfo.compositeAlpha = getSuitableCompositeAlpha(surfaceCapabilities);
   createInfo.presentMode = presentMode;
   createInfo.clipped = true;
-  createInfo.oldSwapchain = VK_NULL_HANDLE;
+  createInfo.oldSwapchain = oldSwapchain;
 
   checkForVulkanError(
       vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain),
@@ -281,6 +282,26 @@ void VulkanSwapchain::calculateExtent(
                std::min(capabilities.maxImageExtent.height, size.height));
 
   extent = VkExtent2D{width, height};
+}
+
+VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(
+    const VkSurfaceCapabilitiesKHR &capabilities) const {
+  if (capabilities.supportedCompositeAlpha &
+      VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR) {
+    return VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR;
+  }
+
+  if (capabilities.supportedCompositeAlpha &
+      VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR) {
+    return VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR;
+  }
+
+  if (capabilities.supportedCompositeAlpha &
+      VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR) {
+    return VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+  }
+
+  return VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 }
 
 uint32_t

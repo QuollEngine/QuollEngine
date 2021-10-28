@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "Light.h"
 
 namespace liquid {

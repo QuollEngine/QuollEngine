@@ -1,3 +1,20 @@
+-- Link dependencies shared
+-- by all projects
+function linkDependencies()
+    links { "vendor-libimgui", "glfw3", "ktx" }
+
+    filter { "system:windows" }
+        links { "vulkan-1" }
+
+    filter { "system:linux or system:macosx" }
+        links { "vulkan" }
+
+    filter { "system:linux" }
+        links { "Xrandr", "Xi", "X11", "dl" }
+
+    filter{}
+end
+
 workspace "LiquidEngine"
     basedir "workspace/"
     configurations { "Debug" }
@@ -6,23 +23,54 @@ workspace "LiquidEngine"
     architecture "x86_64"
 
     sysincludedirs {
-        "vendor/include",
-        "/usr/local/include",
+        "vendor/include"
     }
 
     includedirs {
-        "engine/src/"
+        "engine/src"
     }
 
     libdirs {
-        "vendor/lib",
-        "/usr/local/lib",
+        "vendor/lib"
     }
 
-    filter { "system:linux" }
-        linkoptions { "-pthread" }
+    -- This define is needed for libktx to reference
+    -- static library functions instead of DLL
+    defines {
+        "KHRONOS_STATIC"
+    }
 
+    -- Vulkan SDK for Windows adds environment
+    -- variable that points to Vulkan SDK
+    -- installation
+    filter { "system:windows" }
+        sysincludedirs {
+            "$(VULKAN_SDK)/Include"
+        }
+
+        libdirs {
+            "$(VULKAN_SDK)/Lib"
+        }
+
+        defines {
+            "LIQUID_PLATFORM_WINDOWS"
+        }
+
+    -- Vulkan SDK for macOS is installed to
+    -- global include, library, and bin dirs
     filter { "system:macosx" }
+        sysincludedirs {
+            "/usr/local/include"
+        }
+
+        libdirs {
+            "/usr/local/lib"
+        }
+
+        defines {
+            "LIQUID_PLATFORM_MACOS"
+        }
+
         xcodebuildsettings {
             ["MACOSX_DEPLOYMENT_TARGET"] = "11.1",
             ["ONLY_ACTIVE_ARCH"] = "YES",
@@ -72,26 +120,54 @@ workspace "LiquidEngine"
                 ["CODE_SIGN_IDENTITY"] = "-"
             }
 
+    -- TODO: Support linux window
+    filter { "system:linux" }
+        linkoptions { "-pthread" }
+
+        defines {
+            "LIQUID_PLATFORM_LINUX"
+        }
+
+    -- Sets working directory for Visual Studio
+    -- so that, applications use the same path
+    -- as if we were to open exe file directly
+    filter { "toolset:msc-*" }
+        debugdir "$(TargetDir)"
+
+    configuration "Debug"
+        defines { "LIQUID_DEBUG" }
+        symbols "On"
+
+    configuration "Release"
+        defines { "LIQUID_RELEASE" }
+        optimize "On"
+
+project "vendor-libimgui"
+    basedir "vendor/projects/imgui"
+    kind "StaticLib"
+
+    files {
+        "vendor/projects/imgui/*.cpp",
+    }
+
 project "LiquidEngine"
-    basedir "workspace/engine/"
+    basedir "workspace/engine"
     kind "StaticLib"
 
     pchheader "../../engine/src/core/Base.h"
 
+    filter { "toolset:msc-*" }
+        pchheader "core/Base.h"
+        pchsource "engine/src/core/Base.cpp"
+
+    filter{}
+
     files {
         "engine/src/**.h",
-        "engine/src/**.cpp",
-        "vendor/src/imgui/*.cpp"
+        "engine/src/**.cpp"
     }
 
-    removefiles {
-        "vendor/src/imgui/imgui_impl_vulkan.cpp"
-    }
-
-    configuration "Debug"
-        defines { "LIQUID_DEBUG" }
-
-    links { "vulkan", "glfw3", "ktx" }
+    linkDependencies{}
 
     postbuildcommands {
         "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
@@ -109,19 +185,15 @@ project "LiquidEngineTest"
     basedir "workspace/engine-test/"
     kind "ConsoleApp"
 
-    pchheader "../../engine/src/core/Base.h"
-
     files {
         "engine/src/**.cpp",
         "engine/src/**.h",
-        "vendor/src/imgui/*.cpp",
         "engine/tests/**.cpp",
         "engine/tests/**.h"
     }
 
     removefiles {
         "engine/src/renderer/vulkan/VmaImpl.cpp",
-        "vendor/src/imgui/imgui_impl_vulkan.cpp"
     }
 
     postbuildcommands {
@@ -131,22 +203,13 @@ project "LiquidEngineTest"
         "{COPYFILE} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx"
     }
 
-    includedirs {
-        "engine/src"
-    }
+    links { "vendor-libimgui", "glfw3", "ktx" }
 
-    configuration "Debug"
-        defines { "LIQUID_DEBUG" }
+    filter { "system:windows" }
+        links { "gtestd", "gtest_maind", "gmockd" }
 
-    links { "glfw3", "gtest", "gtest_main", "gmock", "ktx" }
-
-    filter { "system:linux" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-            "dl"
-        }
+    filter { "system:macosx or system:linux" }
+        links { "gtest", "gtest_main", "gmock", "Xrandr", "Xi", "X11", "dl" }
 
     filter { "toolset:clang" }
         buildoptions {
@@ -180,7 +243,8 @@ project "DemoBasicTriangle"
         "demos/basic-triangle/src/**.cpp"
     }
 
-    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
+    links { "LiquidEngine" }
+    linkDependencies{}
 
     postbuildcommands {
         "glslc ../../../demos/basic-triangle/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
@@ -207,7 +271,8 @@ project "DemoRotatingCube"
         "demos/rotating-cube/src/**.cpp"
     }
 
-    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
+    links { "LiquidEngine" }
+    linkDependencies{}
 
     postbuildcommands {
         "glslc ../../../demos/rotating-cube/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
@@ -233,7 +298,8 @@ project "DemoTransformingSpheres"
         "demos/transforming-spheres/src/**.cpp"
     }
 
-    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
+    links { "LiquidEngine" }
+    linkDependencies{}
 
     postbuildcommands {
         "glslc ../../../demos/transforming-spheres/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
@@ -261,7 +327,8 @@ project "DemoPong"
         "demos/pong-3d/src/**.cpp"
     }
 
-    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
+    links { "LiquidEngine" }
+    linkDependencies{}
 
     postbuildcommands {
         "glslc ../../../demos/pong-3d/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
@@ -284,7 +351,8 @@ project "DemoSceneViewer"
         "demos/scene-viewer/src/**.cpp"
     }
 
-    links { "vulkan", "glfw3", "ktx", "LiquidEngine" }
+    links { "LiquidEngine" }
+    linkDependencies{}
 
     filter { "system:linux" }
         removefiles { "demos/scene-viewer/src/**.win32.cpp" }

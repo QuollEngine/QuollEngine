@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "DebugManager.h"
 
 namespace liquid {

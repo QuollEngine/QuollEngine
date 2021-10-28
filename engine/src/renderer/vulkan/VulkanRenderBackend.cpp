@@ -1,6 +1,7 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
 #include "VulkanRenderBackend.h"
 #include "VulkanError.h"
-#include "core/EngineGlobals.h"
 
 namespace liquid {
 
@@ -48,7 +49,8 @@ void VulkanRenderBackend::waitForIdle() {
 
 void VulkanRenderBackend::createSwapchain() {
   swapchain = VulkanSwapchain(window, vulkanInstance,
-                              resourceAllocator->getVmaAllocator());
+                              resourceAllocator->getVmaAllocator(),
+                              swapchain.getSwapchain());
 
   LOG_DEBUG("[Vulkan] Swapchain created");
 }

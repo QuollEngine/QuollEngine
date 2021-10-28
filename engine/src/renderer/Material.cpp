@@ -1,5 +1,6 @@
-#include "Material.h"
+#include "core/Base.h"
 #include "core/EngineGlobals.h"
+#include "Material.h"
 
 namespace liquid {
 

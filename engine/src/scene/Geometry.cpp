@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "Geometry.h"
 
 namespace liquid {

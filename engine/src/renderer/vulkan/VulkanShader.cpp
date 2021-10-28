@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "core/EngineGlobals.h"
 #include "VulkanShader.h"
 #include "VulkanError.h"

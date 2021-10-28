@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "VulkanCommandExecutor.h"
 #include "VulkanHardwareBuffer.h"
 #include "VulkanError.h"

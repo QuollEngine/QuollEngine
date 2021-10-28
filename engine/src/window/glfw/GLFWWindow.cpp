@@ -1,6 +1,7 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
 #include "GLFWWindow.h"
 #include "GLFWError.h"
-#include "core/EngineGlobals.h"
 
 namespace liquid {
 

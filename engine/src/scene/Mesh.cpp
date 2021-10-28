@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "Mesh.h"
 
 namespace liquid {

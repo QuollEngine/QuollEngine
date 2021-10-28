@@ -43,13 +43,12 @@ jobs:
 
       - name: Build
         run: |
-          cd workspace/engine-test
-          make
+          make --directory workspace
       
       - name: Test
         run: |
           cd workspace/engine-test/bin/Debug
-          LD_LIBRARY_PATH=../../../../vendor/lib ./LiquidEngineTest
+          ./LiquidEngineTest
 
       - name: Coverage
         run: |

@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "MainLoop.h"
 #include "renderer/vulkan/VulkanRenderer.h"
 #include "window/glfw/GLFWWindow.h"

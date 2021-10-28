@@ -1,5 +1,5 @@
+#include "core/Base.h"
 #include "KtxError.h"
-#include <ktx.h>
 
 // Reference:
 // https://www.khronos.org/ktx/documentation/libktx/ktx_8h.html#a8de6927e772cc95a9f49593c3dd72069

@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "VulkanResourceManager.h"
 #include "VulkanMaterialResourceBinder.h"
 

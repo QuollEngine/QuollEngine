@@ -1,8 +1,9 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
+#include "profiler/StatsManager.h"
 #include "VulkanShadowPass.h"
 #include "VulkanError.h"
 #include "VulkanTextureBinder.h"
-#include "core/EngineGlobals.h"
-#include "profiler/StatsManager.h"
 
 namespace liquid {
 

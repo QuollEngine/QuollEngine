@@ -1,9 +1,10 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
+
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
 
 #include "ImguiError.h"
-#include "core/EngineGlobals.h"
 
 static const VkDeviceSize BUFFER_MEMORY_ALIGNMENT = 256;
 

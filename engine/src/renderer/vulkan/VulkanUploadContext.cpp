@@ -1,6 +1,7 @@
+#include "core/Base.h"
+#include "core/EngineGlobals.h"
 #include "VulkanUploadContext.h"
 #include "VulkanError.h"
-#include "core/EngineGlobals.h"
 
 namespace liquid {
 

@@ -115,11 +115,24 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteComponent(Entity entity) {
                       " does not exist for entity " + std::to_string(entity));
   }
 
-  size_t entityToDelete = pool.entityIndices[entity];
-  pool.entities[entityToDelete] = pool.entities.back();
+  Entity movedEntity = pool.entities.back();
+  size_t entityIndexToDelete = pool.entityIndices[entity];
+
+  // Move last entity in the array to place of deleted entity
+  pool.entities[entityIndexToDelete] = movedEntity;
+
+  // Change index of moved entity to the index of deleted entity
+  pool.entityIndices[movedEntity] = entityIndexToDelete;
+
+  // Delete last item from entities array
   pool.entities.pop_back();
-  pool.components[entityToDelete] = pool.components.back();
+
+  // Move last component in the array to place of deleted component
+  pool.components[entityIndexToDelete] = pool.components.back();
+
+  // Delete last item from components array
   pool.components.pop_back();
+
   pool.entityIndices[entity] = DEAD_INDEX;
 }
 

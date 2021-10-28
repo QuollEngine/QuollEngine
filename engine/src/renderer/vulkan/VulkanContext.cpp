@@ -1,6 +1,8 @@
+#include "core/Base.h"
 #include "core/EngineGlobals.h"
 #include "VulkanContext.h"
 #include "VulkanWindow.h"
+#include "VulkanWindowExtensions.h"
 #include "VulkanError.h"
 
 namespace liquid {
@@ -37,8 +39,11 @@ VulkanContext::~VulkanContext() {
 
 void VulkanContext::createInstance(const String &engineName,
                                    const String &applicationName) {
-  std::vector<const char *> extensions{
-      "VK_EXT_metal_surface", "VK_MVK_macos_surface", "VK_KHR_surface"};
+  std::vector<const char *> extensions;
+  extensions.resize(vulkanWindowExtensions.size());
+  std::transform(vulkanWindowExtensions.begin(), vulkanWindowExtensions.end(),
+                 extensions.begin(),
+                 [](const String &ext) { return ext.c_str(); });
 
   VkApplicationInfo appInfo{};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -80,11 +85,11 @@ void VulkanContext::createInstance(const String &engineName,
 void VulkanContext::pickPhysicalDevice() {
   auto &&devices = VulkanPhysicalDevice::getPhysicalDevices(instance, surface);
   auto it =
-      std::find_if(devices.begin(), devices.end(), [](const auto &device) {
+      std::find_if(devices.begin(), devices.end(), [this](const auto &device) {
         return device.getQueueFamilyIndices().isComplete() &&
                device.supportsSwapchain() &&
-               !device.getSurfaceFormats().empty() &&
-               !device.getPresentModes().empty();
+               !device.getSurfaceFormats(surface).empty() &&
+               !device.getPresentModes(surface).empty();
       });
 
   if (it == devices.end()) {
@@ -123,7 +128,7 @@ void VulkanContext::createLogicalDevice() {
   }
   std::vector<const char *> extensions;
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  extensions.push_back("VK_KHR_portability_subset");
+  // extensions.push_back("VK_KHR_portability_subset");
   extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
 

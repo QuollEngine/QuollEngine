@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "HardwareBuffer.h"
 #include "profiler/StatsManager.h"
 
