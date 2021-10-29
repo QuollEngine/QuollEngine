@@ -87,14 +87,18 @@ int main() {
 
     auto *instancePtr = instance.get();
 
-    return mainLoop.run(scene.get(), [instancePtr, materials]() mutable {
-      if (changed) {
-        instancePtr->setMaterial(materials[materialIndex % materials.size()]);
-        changed = false;
-      }
+    return mainLoop.run(
+        scene.get(),
+        [instancePtr, materials](double dt) mutable {
+          if (changed) {
+            instancePtr->setMaterial(
+                materials[materialIndex % materials.size()]);
+            changed = false;
+          }
 
-      return true;
-    });
+          return true;
+        },
+        []() {});
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;
     return 1;

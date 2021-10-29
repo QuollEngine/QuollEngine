@@ -126,7 +126,8 @@ int main() {
     liquid::MainLoop mainLoop(renderer.get(), window.get());
 
     mainLoop.run(
-        scene.get(), [node, child1, child2, child3, child1_1, frame]() mutable {
+        scene.get(),
+        [node, child1, child2, child3, child1_1, frame](double dt) mutable {
           node->setTransform(glm::rotate(glm::mat4{1.0f},
                                          glm::radians(frame * 0.4f),
                                          glm::vec3{1.0, 1.0, 1.0}));
@@ -160,7 +161,8 @@ int main() {
           }
 
           return true;
-        });
+        },
+        []() {});
     return 0;
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;

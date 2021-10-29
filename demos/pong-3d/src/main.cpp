@@ -54,15 +54,15 @@ public:
     liquid::MainLoop mainLoop(renderer.get(), window.get());
 
     try {
-      float dt = 0.1;
+      return mainLoop.run(
+          scene.get(),
+          [=](double dt) mutable {
+            updateGameLogic(0.15);
+            updateScene(0.15);
 
-      return mainLoop.run(scene.get(), [=]() mutable {
-        updateGameLogic(dt);
-
-        updateScene(dt);
-
-        return true;
-      });
+            return true;
+          },
+          []() {});
 
     } catch (std::runtime_error error) {
       std::cerr << error.what() << std::endl;

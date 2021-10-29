@@ -11,30 +11,46 @@ MainLoop::MainLoop(VulkanRenderer *renderer_, GLFWWindow *window_)
       debugLayer(renderer->getContext().getPhysicalDevice().getDeviceInfo(),
                  renderer->getStatsManager(), renderer->getDebugManager()) {}
 
-int MainLoop::run(Scene *scene, const std::function<bool()> &updater) {
-
+int MainLoop::run(Scene *scene, const std::function<bool(double)> &updater,
+                  const std::function<void()> &renderUI) {
   bool running = true;
 
   const auto &renderData = renderer->prepareScene(scene);
 
-  auto prevTime = std::chrono::high_resolution_clock::now();
-  uint32_t frames = 0;
-
   constexpr uint32_t ONE_SECOND_IN_MS = 1000;
+  constexpr double MAX_UPDATE_TIME = 0.25;
+  constexpr double dt = 0.01;
 
+  uint32_t frames = 0;
+  double accumulator = 0.0;
+
+  auto prevGameTime = std::chrono::high_resolution_clock::now();
+  auto prevFrameTime = prevGameTime;
   while (running) {
     auto currentTime = std::chrono::high_resolution_clock::now();
+
     if (window->shouldClose()) {
       break;
     }
 
     window->pollEvents();
 
+    double frameTime = std::clamp(
+        std::chrono::duration<double>(currentTime - prevGameTime).count(), 0.0,
+        MAX_UPDATE_TIME);
+
+    prevGameTime = currentTime;
+    accumulator += frameTime;
+
     renderData->update();
 
-    renderer->getImguiRenderer()->beginRendering();
-    running = updater();
+    while (accumulator >= dt) {
+      running = updater(dt);
+      accumulator -= dt;
+    }
 
+    renderer->getImguiRenderer()->beginRendering();
+    renderUI();
     debugLayer.render();
     renderer->getImguiRenderer()->endRendering();
 
@@ -43,9 +59,9 @@ int MainLoop::run(Scene *scene, const std::function<bool()> &updater) {
     renderer->draw(renderData);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
-                                                              prevTime)
+                                                              prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
-      prevTime = currentTime;
+      prevFrameTime = currentTime;
       debugLayer.collectFPS(frames);
       frames = 0;
     } else {

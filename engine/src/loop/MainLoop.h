@@ -15,7 +15,8 @@ class MainLoop {
 public:
   MainLoop(VulkanRenderer *renderer, GLFWWindow *window);
 
-  int run(Scene *scene, const std::function<bool()> &updater);
+  int run(Scene *scene, const std::function<bool(double)> &update,
+          const std::function<void()> &renderUI);
 
 private:
   VulkanRenderer *renderer = nullptr;

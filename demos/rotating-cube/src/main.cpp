@@ -100,23 +100,26 @@ int main() {
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
 
-    return mainLoop.run(scene.get(), [node, frame, materials, &instance,
-                                      materialIndex, &renderer]() mutable {
-      if (materialChanged) {
-        materialIndex++;
-        materialChanged = false;
-        instance->setMaterial(materials[materialIndex % materials.size()]);
-      }
-      node->setTransform(glm::rotate(glm::mat4{1.0f},
-                                     glm::radians(frame * 0.4f),
-                                     glm::vec3{0.0, 1.0, 1.0}));
+    return mainLoop.run(
+        scene.get(),
+        [node, frame, materials, &instance, materialIndex,
+         &renderer](double dt) mutable {
+          if (materialChanged) {
+            materialIndex++;
+            materialChanged = false;
+            instance->setMaterial(materials[materialIndex % materials.size()]);
+          }
+          node->setTransform(glm::rotate(glm::mat4{1.0f},
+                                         glm::radians(frame * 0.4f),
+                                         glm::vec3{0.0, 1.0, 1.0}));
 
-      if (rotate) {
-        frame++;
-      }
+          if (rotate) {
+            frame++;
+          }
 
-      return true;
-    });
+          return true;
+        },
+        []() {});
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;
     return 1;

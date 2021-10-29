@@ -98,8 +98,8 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
   }
 }
 
-const auto moveSpeed = 0.5f;
-const auto strafeSpeed = 0.5f;
+const auto moveSpeed = 0.5f;   // 0.5 m/s * 0.01s
+const auto strafeSpeed = 0.5f; // m/s
 const auto timeDelta = 1.0f;
 
 int main() {
@@ -231,54 +231,55 @@ int main() {
     static float horizontalAngle = 0, verticalAngle = 0;
     static double prevX = 0.0, prevY = 0.0;
 
-    mainLoop.run(scene.get(), [&ui, node, &editorCamera, &window]() mutable {
-      ImGuiIO &io = ImGui::GetIO();
+    mainLoop.run(
+        scene.get(),
+        [&ui, node, &editorCamera, &window](double dt) mutable {
+          ImGuiIO &io = ImGui::GetIO();
 
-      if (leftMouseBtnPressed && !io.WantCaptureMouse) {
-        double xpos, ypos;
-        glfwGetCursorPos(window->getInstance(), &xpos, &ypos);
+          if (leftMouseBtnPressed && !io.WantCaptureMouse) {
+            double xpos, ypos;
+            glfwGetCursorPos(window->getInstance(), &xpos, &ypos);
 
-        const auto &size = window->getWindowSize();
-        float width = (float)size.width;
-        float height = (float)size.height;
+            const auto &size = window->getWindowSize();
+            float width = (float)size.width;
+            float height = (float)size.height;
 
-        if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
-          float x = (xpos / width) * 5;
-          float y = (ypos / height) * 5;
+            if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
+              float x = (xpos / width) * 5;
+              float y = (ypos / height) * 5;
 
-          if (abs(xpos - prevX) > 1.0) {
-            if (xpos < prevX) {
-              horizontalAngle -= x;
-            } else {
-              horizontalAngle += x;
+              if (abs(xpos - prevX) > 1.0) {
+                if (xpos < prevX) {
+                  horizontalAngle -= x;
+                } else {
+                  horizontalAngle += x;
+                }
+              }
+
+              if (abs(ypos - prevY) > 1.0) {
+                if (ypos < prevY) {
+                  verticalAngle -= y;
+                } else {
+                  verticalAngle += y;
+                }
+              }
+
+              prevX = xpos;
+              prevY = ypos;
             }
           }
 
-          if (abs(ypos - prevY) > 1.0) {
-            if (ypos < prevY) {
-              verticalAngle -= y;
-            } else {
-              verticalAngle += y;
-            }
-          }
+          editorCamera.update();
 
-          prevX = xpos;
-          prevY = ypos;
-        }
-      }
+          node->setTransform(
+              glm::rotate(glm::mat4{1.0f}, glm::radians(horizontalAngle),
+                          glm::vec3{0.0, 1.0, 0.0}) *
+              glm::rotate(glm::mat4{1.0f}, glm::radians(verticalAngle),
+                          glm::vec3{1.0, 0.0, 0.0}));
 
-      editorCamera.update();
-
-      node->setTransform(
-          glm::rotate(glm::mat4{1.0f}, glm::radians(horizontalAngle),
-                      glm::vec3{0.0, 1.0, 0.0}) *
-          glm::rotate(glm::mat4{1.0f}, glm::radians(verticalAngle),
-                      glm::vec3{1.0, 0.0, 0.0}));
-
-      ui.render();
-
-      return !changed;
-    });
+          return !changed;
+        },
+        [&ui]() { ui.render(); });
 
     ui.getSceneHierarchy().setScene(nullptr);
     context.destroy();
