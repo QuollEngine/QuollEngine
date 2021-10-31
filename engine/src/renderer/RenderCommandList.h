@@ -78,6 +78,14 @@ public:
                      uint32_t size, void *data);
 
   /**
+   * @brief Draw
+   *
+   * @param vertexCount Vertex count
+   * @param firstVertex First vertex
+   */
+  void draw(size_t vertexCount, uint32_t firstVertex);
+
+  /**
    * @brief Draw indexed
    *
    * @param indexCount Index count

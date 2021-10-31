@@ -56,11 +56,6 @@ void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
           static_cast<const RenderCommandBindIndexBuffer *>(command.get()));
       break;
-    case RenderCommandType::DrawIndexed:
-      executeDrawIndexed(
-          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
-          static_cast<const RenderCommandDrawIndexed *const>(command.get()));
-      break;
     case RenderCommandType::SetViewport:
       executeSetViewport(
           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
@@ -70,6 +65,16 @@ void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
       executeSetScissor(
           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
           static_cast<const RenderCommandSetScissor *const>(command.get()));
+      break;
+    case RenderCommandType::Draw:
+      executeDraw(
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
+          static_cast<const RenderCommandDraw *const>(command.get()));
+      break;
+    case RenderCommandType::DrawIndexed:
+      executeDrawIndexed(
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
+          static_cast<const RenderCommandDrawIndexed *const>(command.get()));
       break;
     default:
       break;
@@ -162,6 +167,12 @@ void VulkanCommandExecutor::executeSetScissor(
   scissor.offset = {command->offset.x, command->offset.y};
   scissor.extent = {command->size.x, command->size.y};
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+}
+
+void VulkanCommandExecutor::executeDraw(
+    const RenderCommandDraw *const command) {
+  vkCmdDraw(commandBuffer, static_cast<uint32_t>(command->vertexCount), 1,
+            command->firstVertex, 0);
 }
 
 void VulkanCommandExecutor::executeDrawIndexed(

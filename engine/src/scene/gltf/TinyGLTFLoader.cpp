@@ -180,46 +180,40 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
           continue;
         }
 
-        // Meshes without indices are not supported
-        if (primitive.indices < 0) {
-          engineLogger.log(Logger::Warning)
-              << "Mesh #" << i << ", Primitive #" << p
-              << " does not support indices. Skipping...";
-          continue;
-        }
-
-        auto &&indexMeta =
-            TinyGLTFLoader::getBufferMetaForAccessor(model, primitive.indices);
-        indices.resize(indexMeta.accessor.count);
-        if (indexMeta.accessor.componentType ==
-                TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
-            indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-          const auto *data =
-              reinterpret_cast<const uint32_t *>(indexMeta.rawData);
-          for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-            indices[i] = data[i];
+        if (primitive.indices >= 0) {
+          auto &&indexMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+              model, primitive.indices);
+          indices.resize(indexMeta.accessor.count);
+          if (indexMeta.accessor.componentType ==
+                  TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
+              indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+            const auto *data =
+                reinterpret_cast<const uint32_t *>(indexMeta.rawData);
+            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+              indices[i] = data[i];
+            }
+          } else if (indexMeta.accessor.componentType ==
+                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT &&
+                     indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+            const auto *data =
+                reinterpret_cast<const uint16_t *>(indexMeta.rawData);
+            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+              indices[i] = data[i];
+            }
+          } else if (indexMeta.accessor.componentType ==
+                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
+                     indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+            const auto *data =
+                reinterpret_cast<const uint8_t *>(indexMeta.rawData);
+            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+              indices[i] = data[i];
+            }
+          } else {
+            engineLogger.log(Logger::Warning)
+                << "Mesh #" << i << ", Primitive #" << p
+                << " has invalid index format. Skipping...";
+            continue;
           }
-        } else if (indexMeta.accessor.componentType ==
-                       TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT &&
-                   indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-          const auto *data =
-              reinterpret_cast<const uint16_t *>(indexMeta.rawData);
-          for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-            indices[i] = data[i];
-          }
-        } else if (indexMeta.accessor.componentType ==
-                       TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
-                   indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-          const auto *data =
-              reinterpret_cast<const uint8_t *>(indexMeta.rawData);
-          for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-            indices[i] = data[i];
-          }
-        } else {
-          engineLogger.log(Logger::Warning)
-              << "Mesh #" << i << ", Primitive #" << p
-              << " has invalid index format. Skipping...";
-          continue;
         }
 
         auto &&positionMeta = TinyGLTFLoader::getBufferMetaForAccessor(

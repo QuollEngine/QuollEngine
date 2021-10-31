@@ -102,3 +102,17 @@ TEST_F(RenderCommandListTests, SetScissor) {
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::SetScissor);
 }
+
+TEST_F(RenderCommandListTests, Draw) {
+  liquid::RenderCommandList commandList;
+  commandList.draw(4, 0);
+  EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
+            liquid::RenderCommandType::Draw);
+}
+
+TEST_F(RenderCommandListTests, DrawIndexed) {
+  liquid::RenderCommandList commandList;
+  commandList.drawIndexed(2, 0, 1);
+  EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
+            liquid::RenderCommandType::DrawIndexed);
+}

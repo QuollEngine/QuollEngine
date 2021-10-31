@@ -96,6 +96,13 @@ private:
   void executeSetScissor(const RenderCommandSetScissor *const command);
 
   /**
+   * @brief Execute draw command
+   *
+   * @param command Drawcommand
+   */
+  void executeDraw(const RenderCommandDraw *const command);
+
+  /**
    * @brief Execute draw indexed command
    *
    * @param command Draw indexed command

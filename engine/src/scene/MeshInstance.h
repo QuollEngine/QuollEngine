@@ -63,6 +63,15 @@ public:
   }
 
   /**
+   * @brief Get vertex counts
+   *
+   * @return Vertex counts
+   */
+  inline const std::vector<size_t> &getVertexCounts() const {
+    return vertexCounts;
+  }
+
+  /**
    * @brief Get index counts
    *
    * @return Index counts
@@ -75,6 +84,7 @@ private:
   std::vector<SharedPtr<HardwareBuffer>> vertexBuffers;
   std::vector<SharedPtr<HardwareBuffer>> indexBuffers;
   std::vector<SharedPtr<Material>> materials;
+  std::vector<size_t> vertexCounts;
   std::vector<size_t> indexCounts;
 };
 

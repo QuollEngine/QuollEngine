@@ -213,11 +213,16 @@ void VulkanRenderer::drawRenderables(RenderCommandList &commandList,
           }
 
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
-          commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
-                                      VK_INDEX_TYPE_UINT32);
-          commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
 
-          statsManager.addDrawCall(instance->getIndexCounts().at(i) / 3);
+          if (instance->getIndexBuffers().at(i) != nullptr) {
+            commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
+                                        VK_INDEX_TYPE_UINT32);
+            commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
+            statsManager.addDrawCall(instance->getIndexCounts().at(i) / 3);
+          } else {
+            commandList.draw(instance->getVertexCounts().at(i), 0);
+            statsManager.addDrawCall(instance->getVertexCounts().at(i) / 3);
+          }
         }
       });
 }

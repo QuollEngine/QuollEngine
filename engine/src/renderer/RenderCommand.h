@@ -15,6 +15,7 @@ enum class RenderCommandType {
   PushConstants,
   BindVertexBuffer,
   BindIndexBuffer,
+  Draw,
   DrawIndexed,
   Unknown
 };
@@ -111,6 +112,12 @@ struct RenderCommandBindIndexBuffer
     : public TypedRenderCommandBase<RenderCommandType::BindIndexBuffer> {
   SharedPtr<HardwareBuffer> buffer = nullptr;
   VkIndexType indexType = VK_INDEX_TYPE_MAX_ENUM;
+};
+
+struct RenderCommandDraw
+    : public TypedRenderCommandBase<RenderCommandType::Draw> {
+  size_t vertexCount = 0;
+  uint32_t firstVertex = 0;
 };
 
 struct RenderCommandDrawIndexed

@@ -83,20 +83,27 @@ void RenderCommandList::setViewport(const glm::vec2 &offset,
   record(command);
 }
 
+void RenderCommandList::setScissor(const glm::vec2 &offset,
+                                   const glm::vec2 &size) {
+  auto *command = new RenderCommandSetScissor;
+  command->offset = offset;
+  command->size = size;
+  record(command);
+}
+
+void RenderCommandList::draw(size_t vertexCount, uint32_t firstVertex) {
+  auto *command = new RenderCommandDraw;
+  command->vertexCount = vertexCount;
+  command->firstVertex = firstVertex;
+  record(command);
+}
+
 void RenderCommandList::drawIndexed(size_t indexCount, uint32_t firstIndex,
                                     int32_t vertexOffset) {
   auto *command = new RenderCommandDrawIndexed;
   command->indexCount = indexCount;
   command->firstIndex = firstIndex;
   command->vertexOffset = vertexOffset;
-  record(command);
-}
-
-void RenderCommandList::setScissor(const glm::vec2 &offset,
-                                   const glm::vec2 &size) {
-  auto *command = new RenderCommandSetScissor;
-  command->offset = offset;
-  command->size = size;
   record(command);
 }
 

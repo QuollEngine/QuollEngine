@@ -80,6 +80,10 @@ VK_NO_IMPL_VOID(vkCmdCopyBufferToImage(VkCommandBuffer commandBuffer,
                                        uint32_t regionCount,
                                        const VkBufferImageCopy *pRegions));
 
+VK_NO_IMPL_VOID(vkCmdDraw(VkCommandBuffer commandBuffer, uint32_t vertexCount,
+                          uint32_t instanceCount, uint32_t firstVertex,
+                          uint32_t firstIndex));
+
 VK_NO_IMPL_VOID(vkCmdDrawIndexed(VkCommandBuffer commandBuffer,
                                  uint32_t indexCount, uint32_t instanceCount,
                                  uint32_t firstIndex, int32_t vertexOffset,
