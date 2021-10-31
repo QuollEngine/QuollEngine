@@ -262,62 +262,6 @@ project "DemoBasicTriangle"
             "X11",
         }
 
-project "DemoRotatingCube"
-    basedir "workspace/demos/rotating-cube"
-    kind "ConsoleApp"
-    configurations { "Debug" }
-    files {
-        "demos/rotating-cube/src/**.h",
-        "demos/rotating-cube/src/**.cpp"
-    }
-
-    links { "LiquidEngine" }
-    linkDependencies{}
-
-    postbuildcommands {
-        "glslc ../../../demos/rotating-cube/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
-        "glslc ../../../demos/rotating-cube/assets/texture-shader.frag -o %{cfg.buildtarget.directory}/texture-shader.frag.spv",
-        "glslc ../../../demos/rotating-cube/assets/material-shader.vert -o %{cfg.buildtarget.directory}/material-shader.vert.spv",
-        "glslc ../../../demos/rotating-cube/assets/material-shader.frag -o %{cfg.buildtarget.directory}/material-shader.frag.spv",
-        "{COPYFILE} ../../../demos/rotating-cube/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
-    }
-
-    filter { "system:linux" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-        }
-
-project "DemoTransformingSpheres"
-    basedir "workspace/demos/earth-and-moon"
-    kind "ConsoleApp"
-    configurations { "Debug" }
-    files {
-        "demos/transforming-spheres/src/**.h",
-        "demos/transforming-spheres/src/**.cpp"
-    }
-
-    links { "LiquidEngine" }
-    linkDependencies{}
-
-    postbuildcommands {
-        "glslc ../../../demos/transforming-spheres/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
-        "glslc ../../../demos/transforming-spheres/assets/basic-shader.frag -o %{cfg.buildtarget.directory}/basic-shader.frag.spv",
-        "glslc ../../../demos/transforming-spheres/assets/texture-shader.vert -o %{cfg.buildtarget.directory}/texture-shader.vert.spv",
-        "glslc ../../../demos/transforming-spheres/assets/texture-shader.frag -o %{cfg.buildtarget.directory}/texture-shader.frag.spv",
-        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/lava.jpg %{cfg.buildtarget.directory}/lava.jpg",
-        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/water.png %{cfg.buildtarget.directory}/water.png",
-        "{COPYFILE} ../../../demos/transforming-spheres/assets/textures/grass.png %{cfg.buildtarget.directory}/grass.png"
-    }
-
-    filter { "system:linux" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-        }
-
 project "DemoPong"
     basedir "workspace/demos/pong-3d"
     kind "ConsoleApp"
