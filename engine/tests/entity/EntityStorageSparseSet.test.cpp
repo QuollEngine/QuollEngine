@@ -396,3 +396,26 @@ TEST(EntityStorageSparseSetTests, DeletesOnlyNeededComponents) {
   // entity index will point to DEAD_INDEX
   storage.deleteEntity(newE1);
 }
+
+TEST(EntityStorageSparseSetTests, DeletesMultipleComponents) {
+  liquid::EntityStorageSparseSet<IntComponent, StringComponent> storage;
+  auto e1 = storage.createEntity();
+  auto e2 = storage.createEntity();
+  auto e3 = storage.createEntity();
+  auto e4 = storage.createEntity();
+  auto e5 = storage.createEntity();
+  auto e6 = storage.createEntity();
+  storage.setComponent<IntComponent>(e1, {10});
+  storage.setComponent<IntComponent>(e2, {20});
+  storage.setComponent<IntComponent>(e3, {30});
+  storage.setComponent<IntComponent>(e4, {30});
+  storage.setComponent<IntComponent>(e5, {30});
+  storage.setComponent<IntComponent>(e6, {30});
+
+  storage.deleteComponent<IntComponent>(e1);
+  storage.deleteComponent<IntComponent>(e2);
+  storage.deleteComponent<IntComponent>(e3);
+  storage.deleteComponent<IntComponent>(e4);
+  storage.deleteComponent<IntComponent>(e5);
+  storage.deleteComponent<IntComponent>(e6);
+}

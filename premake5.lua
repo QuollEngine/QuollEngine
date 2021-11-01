@@ -182,7 +182,7 @@ project "LiquidEngine"
     }
 
 project "LiquidEngineTest"
-    basedir "workspace/engine-test/"
+    basedir "workspace/engine-test"
     kind "ConsoleApp"
 
     files {
@@ -209,7 +209,10 @@ project "LiquidEngineTest"
         links { "gtestd", "gtest_maind", "gmockd" }
 
     filter { "system:macosx or system:linux" }
-        links { "gtest", "gtest_main", "gmock", "Xrandr", "Xi", "X11", "dl" }
+        links { "gtest", "gtest_main", "gmock" }
+
+    filter { "system:linux" }
+        links { "Xrandr", "Xi", "X11", "dl" }
 
     filter { "toolset:clang" }
         buildoptions {
