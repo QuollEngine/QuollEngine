@@ -202,7 +202,7 @@ int main() {
 
     context.setComponent<liquid::LightComponent>(
         light1, {std::make_shared<liquid::Light>(
-                    liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 0.0f},
+                    liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 0.5f, 0.5f},
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
 
     auto *node = scene->getRootNode();

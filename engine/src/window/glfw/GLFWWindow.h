@@ -106,6 +106,61 @@ public:
    */
   void removeKeyHandler(uint32_t handle);
 
+  /**
+   * @brief Add mouse move handler
+   *
+   * @param handler Mouse move handler
+   * @return Mouse move handler ID
+   */
+  uint32_t addMouseMoveHandler(
+      const std::function<void(double xpos, double ypos)> &handler);
+
+  /**
+   * @brief Remove mouse move handler
+   *
+   * @param handle Mouse move handle
+   */
+  void removeMouseMoveHandler(uint32_t handle);
+
+  /**
+   * @brief Add mouse button handler
+   *
+   * @param handler Mouse button handler
+   * @return Mouse button handler ID
+   */
+  uint32_t addMouseButtonHandler(
+      const std::function<void(int button, int action, int mods)> &handler);
+
+  /**
+   * @brief Remove mouse button handler
+   *
+   * @param handle Mouse button handle
+   */
+  void removeMouseButtonHandler(uint32_t handle);
+
+  /**
+   * @brief Get current mouse position
+   *
+   * @return Current mouse position
+   */
+  glm::vec2 getCurrentMousePosition() const;
+
+  /**
+   * @brief Set mouse position
+   *
+   * @param position Mouse position
+   */
+  void setMousePosition(const glm::vec2 &position);
+
+  /**
+   * @brief Check if key is pressed
+   *
+   * @param key Keyboard key
+   * @retval true Pressed
+   * @retval false Not pressed
+   */
+  bool isKeyPressed(int key) const;
+
 private:
   ::GLFWwindow *windowInstance;
 
@@ -114,6 +169,8 @@ private:
 
   HandlerMap<void(uint32_t, uint32_t)> resizeHandlers;
   HandlerMap<void(int key, int scancode, int action, int mods)> keyHandlers;
+  HandlerMap<void(int button, int action, int mods)> mouseButtonHandlers;
+  HandlerMap<void(double xpos, double ypos)> mouseMoveHandlers;
 };
 
 } // namespace liquid

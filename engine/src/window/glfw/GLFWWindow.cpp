@@ -42,6 +42,27 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
       handler(key, scancode, action, mods);
     }
   });
+
+  glfwSetCursorPosCallback(windowInstance, [](::GLFWwindow *windowInstance,
+                                              double xpos, double ypos) {
+    auto *window =
+        static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+
+    for (auto &[_, handler] : window->mouseMoveHandlers) {
+      handler(xpos, ypos);
+    }
+  });
+
+  glfwSetMouseButtonCallback(
+      windowInstance,
+      [](::GLFWwindow *windowInstance, int button, int action, int mods) {
+        auto *window =
+            static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+
+        for (auto &[_, handler] : window->mouseButtonHandlers) {
+          handler(button, action, mods);
+        }
+      });
 }
 
 GLFWWindow::~GLFWWindow() {
@@ -98,6 +119,43 @@ uint32_t GLFWWindow::addKeyHandler(
 
 void GLFWWindow::removeKeyHandler(uint32_t handle) {
   keyHandlers.erase(keyHandlers.find(handle));
+}
+
+uint32_t GLFWWindow::addMouseMoveHandler(
+    const std::function<void(double xpos, double ypos)> &handler) {
+  uint32_t id = static_cast<uint32_t>(mouseMoveHandlers.size());
+  mouseMoveHandlers.insert(std::make_pair(id, handler));
+  return id;
+}
+
+void GLFWWindow::removeMouseMoveHandler(uint32_t handle) {
+  mouseMoveHandlers.erase(mouseMoveHandlers.find(handle));
+}
+
+uint32_t GLFWWindow::addMouseButtonHandler(
+    const std::function<void(int button, int action, int mods)> &handler) {
+  uint32_t id = static_cast<uint32_t>(mouseButtonHandlers.size());
+  mouseButtonHandlers.insert(std::make_pair(id, handler));
+  return id;
+}
+
+void GLFWWindow::removeMouseButtonHandler(uint32_t handle) {
+  mouseButtonHandlers.erase(mouseButtonHandlers.find(handle));
+}
+
+glm::vec2 GLFWWindow::getCurrentMousePosition() const {
+  glm::dvec2 mousePos;
+  glfwGetCursorPos(windowInstance, &mousePos.x, &mousePos.y);
+
+  return glm::vec2(mousePos);
+}
+
+void GLFWWindow::setMousePosition(const glm::vec2 &position) {
+  glfwSetCursorPos(windowInstance, position.x, position.y);
+}
+
+bool GLFWWindow::isKeyPressed(int key) const {
+  return glfwGetKey(windowInstance, key) == GLFW_PRESS;
 }
 
 } // namespace liquid

@@ -111,7 +111,8 @@ workspace "LiquidEngine"
             "Cocoa.framework",
             "CoreFoundation.framework",
             "IOKit.framework",
-            "CoreVideo.framework"
+            "CoreVideo.framework",
+            "AppKit.framework"
         }
 
         filter { "configurations:Debug" }
@@ -236,6 +237,24 @@ project "LiquidEngineTest"
             "-ftest-coverage"
         }
 
+project "Liquidator"
+    basedir "workspace/editor"
+    kind "ConsoleApp"
+    configurations { "Debug" }
+
+    files {
+        "editor/src/**.h",
+        "editor/src/**.cpp"
+    }
+
+    links { "LiquidEngine" }
+    linkDependencies{}
+
+    postbuildcommands {
+        "{COPYFILE} ../../editor/assets/default-scene.gltf %{cfg.buildtarget.directory}/default-scene.gltf",
+        "{COPYFILE} ../../editor/assets/default-scene.bin %{cfg.buildtarget.directory}/default-scene.bin",
+    }
+
 project "DemoBasicTriangle"
     basedir "workspace/demos/basic-triangle"
     kind "ConsoleApp"
@@ -258,13 +277,6 @@ project "DemoBasicTriangle"
         "{COPYFILE} ../../../demos/basic-triangle/assets/textures/brick.png %{cfg.buildtarget.directory}/brick.png"
     }
 
-    filter { "system:linux" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-        }
-
 project "DemoPong"
     basedir "workspace/demos/pong-3d"
     kind "ConsoleApp"
@@ -282,13 +294,6 @@ project "DemoPong"
         "glslc ../../../demos/pong-3d/assets/basic-shader.frag -o %{cfg.buildtarget.directory}/basic-shader.frag.spv"
     }
 
-    filter { "system:linux" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-        }
-
 project "DemoSceneViewer"
     basedir "workspace/demos/scene-viewer"
     kind "ConsoleApp"
@@ -303,11 +308,6 @@ project "DemoSceneViewer"
 
     filter { "system:linux" }
         removefiles { "demos/scene-viewer/src/**.win32.cpp" }
-        links {
-            "Xrandr",
-            "Xi",
-            "X11",
-        }
     
     filter { "system:windows" }
         removefiles { "demos/scene-viewer/src/**.linux.cpp" }
@@ -319,6 +319,5 @@ project "DemoSceneViewer"
 
         removefiles { "demos/scene-viewer/src/**.linux.cpp", "demos/scene-viewer/src/**.win32.cpp" }
 
-        links { "AppKit.framework" }
 
     
