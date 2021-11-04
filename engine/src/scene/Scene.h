@@ -50,6 +50,13 @@ public:
   SceneNode *addChild(Entity entity, glm::mat4 transform = glm::mat4{1.0});
 
   /**
+   * @brief Delete child node
+   *
+   * @param node Child node
+   */
+  void removeChild(SceneNode *node);
+
+  /**
    * @brief Sets transform
    *
    * @param transform Local transform

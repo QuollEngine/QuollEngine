@@ -18,7 +18,7 @@
 #include "loop/MainLoop.h"
 
 #include "editor-scene/EditorCamera.h"
-#include "ui/MenuBar.h"
+#include "ui/SceneHierarchyPanel.h"
 
 int main() {
   try {
@@ -38,10 +38,9 @@ int main() {
     const auto &scene = loader.loadFromFile("default-scene.gltf");
     scene->setActiveCamera(editorCamera.getCamera().get());
 
-    liquidator::MenuBar menuBar;
-
     auto light1 = context.createEntity();
 
+    context.setComponent<liquid::NameComponent>(light1, {"Light"});
     context.setComponent<liquid::LightComponent>(
         light1, {std::make_shared<liquid::Light>(
                     liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
@@ -52,6 +51,8 @@ int main() {
 
     renderer->setClearColor({0.19, 0.21, 0.26, 1.0});
 
+    liquidator::SceneHierarchyPanel sceneHierarchyPanel(context);
+
     return mainLoop.run(
         scene.get(),
         [&editorCamera](double dt) mutable {
@@ -61,8 +62,8 @@ int main() {
           }
           return true;
         },
-        [&menuBar]() {
-          // menuBar.render();
+        [&sceneHierarchyPanel, &scene]() {
+          sceneHierarchyPanel.render(scene.get());
         });
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;

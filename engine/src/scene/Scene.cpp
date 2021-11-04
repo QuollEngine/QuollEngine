@@ -27,6 +27,15 @@ SceneNode *SceneNode::addChild(Entity entity, glm::mat4 transform) {
   return children.back();
 }
 
+void SceneNode::removeChild(SceneNode *node) {
+  auto it = std::find(children.begin(), children.end(), node);
+
+  if (it != children.end()) {
+    children.erase(it);
+    delete node;
+  }
+}
+
 void SceneNode::setTransform(glm::mat4 transform) {
   entityContext.getComponent<TransformComponent>(entity).transformLocal =
       transform;

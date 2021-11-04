@@ -116,3 +116,45 @@ TEST(SceneTest, UpdatesLightIfExists) {
   EXPECT_TRUE(context.getComponent<liquid::LightComponent>(entity)
                   .light->getPosition() == glm::vec3(1.0f, 0.5f, 1.0f));
 }
+
+TEST(SceneTest, DeletesChildIfExists) {
+  liquid::EntityContext context;
+
+  liquid::SceneNode *node = new liquid::SceneNode(
+      context.createEntity(), glm::mat4{1.0f}, nullptr, context);
+
+  auto e1 = context.createEntity();
+  auto e2 = context.createEntity();
+
+  auto *child1 = node->addChild(e1);
+  auto *child2 = node->addChild(e2);
+
+  EXPECT_EQ(node->getChildren().size(), 2);
+  EXPECT_EQ(node->getChildren().at(0), child1);
+  EXPECT_EQ(node->getChildren().at(1), child2);
+
+  node->removeChild(child1);
+  EXPECT_EQ(node->getChildren().size(), 1);
+  EXPECT_EQ(node->getChildren().at(0), child2);
+  EXPECT_FALSE(context.hasComponent<liquid::TransformComponent>(e1));
+
+  delete node;
+}
+
+TEST(SceneTest, DoesNotDeleteNodeThatsNotAChild) {
+  liquid::EntityContext context;
+
+  liquid::SceneNode *node = new liquid::SceneNode(
+      context.createEntity(), glm::mat4{1.0f}, nullptr, context);
+
+  auto e2 = context.createEntity();
+  liquid::SceneNode *node2 =
+      new liquid::SceneNode(e2, glm::mat4{1.0f}, nullptr, context);
+
+  node->removeChild(node2);
+
+  EXPECT_TRUE(context.hasComponent<liquid::TransformComponent>(e2));
+
+  delete node;
+  delete node2;
+}
