@@ -9,6 +9,11 @@ namespace liquidator {
 class EditorCamera {
   enum class InputState { None = 0, Pan = 1, Rotate = 2, Zoom = 3 };
 
+  static constexpr float DEFAULT_FOV = 70.0f;
+  static constexpr float DEFAULT_NEAR = 0.001f;
+  static constexpr float DEFAULT_FAR = 1000.0f;
+  static constexpr glm::vec3 DEFAULT_EYE{0.0f, 0.0f, -10.0f};
+
 public:
   /**
    * @brief Create editor camera
@@ -17,6 +22,11 @@ public:
    * @param window Window
    */
   EditorCamera(liquid::VulkanRenderer *renderer, liquid::GLFWWindow *window);
+
+  EditorCamera(const EditorCamera &) = delete;
+  EditorCamera &operator=(const EditorCamera &) = delete;
+  EditorCamera(EditorCamera &&) = delete;
+  EditorCamera &operator=(EditorCamera &&) = delete;
 
   /**
    * @brief Destroy editor camera
@@ -108,14 +118,14 @@ private:
   void updatePerspective(float aspectRatio);
 
 private:
-  float fov = 70.0f;
-  float near = 0.001f;
-  float far = 1000.0f;
+  float fov = DEFAULT_FOV;
+  float near = DEFAULT_NEAR;
+  float far = DEFAULT_FAR;
 
   InputState inputState = InputState::None;
-  glm::vec2 prevMousePos;
+  glm::vec2 prevMousePos{};
 
-  glm::vec3 eye{0.0f, 0.0f, -10.0f};
+  glm::vec3 eye = DEFAULT_EYE;
   glm::vec3 center{0.0f, 0.0f, 0.0f};
   glm::vec3 up{0.0f, 1.0f, 0.0f};
 

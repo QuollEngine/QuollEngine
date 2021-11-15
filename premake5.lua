@@ -27,7 +27,8 @@ workspace "LiquidEngine"
     }
 
     includedirs {
-        "engine/src"
+        "engine/src",
+        "platform-tools/include"
     }
 
     libdirs {
@@ -247,7 +248,7 @@ project "Liquidator"
         "editor/src/**.cpp"
     }
 
-    links { "LiquidEngine" }
+    links { "LiquidEngine", "LiquidEnginePlatformTools" }
     linkDependencies{}
 
     postbuildcommands {
@@ -286,7 +287,7 @@ project "DemoPong"
         "demos/pong-3d/src/**.cpp"
     }
 
-    links { "LiquidEngine" }
+    links { "LiquidEngine", "LiquidEnginePlatformTools" }
     linkDependencies{}
 
     postbuildcommands {
@@ -303,21 +304,34 @@ project "DemoSceneViewer"
         "demos/scene-viewer/src/**.cpp"
     }
 
-    links { "LiquidEngine" }
+    links { "LiquidEngine", "LiquidEnginePlatformTools" }
     linkDependencies{}
 
+project "LiquidEnginePlatformTools"
+    basedir "workspace/platform-tools"
+    kind "StaticLib"
+    configurations { 
+        "Debug"
+    }
+
+    includedirs {
+        "platform-tools/include"
+    }
+
+    files {
+        "platform-tools/src/*.cpp", 
+        "platform-tools/include/platform-tools/*.h", 
+    }
+
     filter { "system:linux" }
-        removefiles { "demos/scene-viewer/src/**.win32.cpp" }
-    
+    removefiles { "platform-tools/src/**.win32.cpp" }
+
     filter { "system:windows" }
-        removefiles { "demos/scene-viewer/src/**.linux.cpp" }
+        removefiles { "platform-tools/src/**.linux.cpp" }
 
     filter { "system:macosx" }
         files {
-            "demos/scene-viewer/src/**.mm"
+            "platform-tools/src/**.mm"
         }
 
-        removefiles { "demos/scene-viewer/src/**.linux.cpp", "demos/scene-viewer/src/**.win32.cpp" }
-
-
-    
+    removefiles { "platform-tools/src/**.linux.cpp", "platform-tools/src/**.win32.cpp" }

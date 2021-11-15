@@ -1,5 +1,7 @@
 #include <AppKit/AppKit.h>
-#include "NativeFileDialog.h"
+#include "platform-tools/NativeFileDialog.h"
+
+namespace liquid::platform_tools {
 
 liquid::String NativeFileDialog::getFilePathFromDialog(const std::vector<liquid::String> &extensions) {
     
@@ -25,20 +27,4 @@ liquid::String NativeFileDialog::getFilePathFromDialog(const std::vector<liquid:
     return filename;
 }
 
-liquid::String NativeFileDialog::getDirectoryPathFromDialog() {
-    NSOpenPanel *fileDialog = [NSOpenPanel openPanel];
-    fileDialog.canChooseDirectories = true;
-    fileDialog.allowsMultipleSelection = false;
-    fileDialog.allowedFileTypes = @[];
-    
-    liquid::String filename;
-    
-    NSModalResponse result = [fileDialog runModal];
-    if (result == NSModalResponseOK){
-        NSURL *nsFilenameUrl = [fileDialog URL];
-        NSString *nsFilename = [nsFilenameUrl path];
-        filename = liquid::String([nsFilename UTF8String]);
-    }
-    
-    return filename;
-}
+} // namespace liquid::platform_tools

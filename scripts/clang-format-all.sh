@@ -12,4 +12,4 @@ else
     ARGS="-i"
 fi
 
-find engine demos -type f -name "*.h" -o -name "*.cpp" -o -name "*.frag" -o -name "*.vert" | xargs $CMD -style=file $ARGS
+find engine editor demos -type f -name "*.h" -o -name "*.cpp" -o -name "*.frag" -o -name "*.vert" | xargs $CMD -style=file $ARGS

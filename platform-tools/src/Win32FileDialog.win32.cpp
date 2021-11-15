@@ -1,7 +1,9 @@
 #include "core/Base.h"
-#include "NativeFileDialog.h"
+#include "platform-tools/NativeFileDialog.h"
 #include <windows.h>
 #include <shobjidl.h>
+
+namespace liquid::platform_tools {
 
 static void checkWin32Error(HRESULT res, const liquid::String &message) {
   LIQUID_ASSERT(SUCCEEDED(res), "Failed to open file dialog " + message);
@@ -27,11 +29,12 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   filters.pszSpec = wideExtensions.c_str();
 
   std::string str = std::string(wideExtensions.begin(), wideExtensions.end());
-  std::cout << str << "\n";
 
   pFileOpen->SetFileTypes(1, &filters);
 
-  checkWin32Error(pFileOpen->Show(NULL), "Cannot show file dialog");
+  if (!SUCCEEDED(pFileOpen->Show(NULL))) {
+    return "";
+  }
 
   IShellItem *pItem = nullptr;
   if (!SUCCEEDED(pFileOpen->GetResult(&pItem))) {
@@ -53,6 +56,4 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   return filePath;
 }
 
-liquid::String NativeFileDialog::getDirectoryPathFromDialog() {
-  throw std::runtime_error("Not implemented");
-}
+} // namespace liquid::platform_tools

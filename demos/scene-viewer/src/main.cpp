@@ -18,7 +18,7 @@
 #include "loaders/ImageTextureLoader.h"
 #include "loop/MainLoop.h"
 
-#include "NativeFileDialog.h"
+#include "platform-tools/NativeFileDialog.h"
 #include "cube.h"
 
 #include "ui/SceneHierarchy.h"
@@ -27,7 +27,7 @@
 
 #include <stb/stb_image.h>
 
-static NativeFileDialog fileDialog;
+static liquid::platform_tools::NativeFileDialog fileDialog;
 std::list<liquid::String> sceneQueue;
 bool changed = true;
 

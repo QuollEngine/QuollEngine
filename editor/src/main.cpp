@@ -18,7 +18,12 @@
 #include "loop/MainLoop.h"
 
 #include "editor-scene/EditorCamera.h"
+#include "ui/MenuBar.h"
 #include "ui/SceneHierarchyPanel.h"
+
+static const glm::vec4 CLEAR_COLOR{0.19, 0.21, 0.26, 1.0};
+static const uint32_t INITIAL_WIDTH = 1024;
+static const uint32_t INITIAL_HEIGHT = 768;
 
 int main() {
   try {
@@ -26,7 +31,7 @@ int main() {
         std::filesystem::path("../../../engine/bin/Debug/assets").string());
     liquid::EntityContext context;
     std::unique_ptr<liquid::GLFWWindow> window(
-        new liquid::GLFWWindow("Liquidator", 1024, 768));
+        new liquid::GLFWWindow("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT));
     std::unique_ptr<liquid::VulkanRenderer> renderer(
         new liquid::VulkanRenderer(context, window.get()));
 
@@ -37,8 +42,9 @@ int main() {
 
     const auto &scene = std::make_shared<liquid::Scene>(context);
 
-    scene->getRootNode()->addChild(loader.loadFromFile("default-scene.gltf"));
     scene->setActiveCamera(editorCamera.getCamera().get());
+
+    scene->getRootNode()->addChild(loader.loadFromFile("default-scene.gltf"));
 
     auto light1 = context.createEntity();
     context.setComponent<liquid::NameComponent>(light1, {"Light"});
@@ -48,8 +54,9 @@ int main() {
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
     scene->getRootNode()->addChild(light1);
 
-    renderer->setClearColor({0.19, 0.21, 0.26, 1.0});
+    renderer->setClearColor(CLEAR_COLOR);
 
+    liquidator::MenuBar menuBar(loader);
     liquidator::SceneHierarchyPanel sceneHierarchyPanel(context);
 
     return mainLoop.run(
@@ -61,7 +68,8 @@ int main() {
           }
           return true;
         },
-        [&sceneHierarchyPanel, &scene]() {
+        [&sceneHierarchyPanel, &menuBar, &scene]() {
+          menuBar.render(scene.get());
           sceneHierarchyPanel.render(scene.get());
         });
   } catch (std::runtime_error error) {

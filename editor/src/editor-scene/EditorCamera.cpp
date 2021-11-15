@@ -10,10 +10,10 @@ EditorCamera::EditorCamera(liquid::VulkanRenderer *renderer,
                            liquid::GLFWWindow *window_)
     : window(window_), camera(new Camera(renderer->getResourceAllocator())) {
   updatePerspectiveBasedOnFramebuffer();
-  resizeHandler =
-      window->addResizeHandler([this](uint32_t width, uint32_t height) {
-        updatePerspective(static_cast<float>(width) / height);
-      });
+  resizeHandler = window->addResizeHandler([this](uint32_t width,
+                                                  uint32_t height) {
+    updatePerspective(static_cast<float>(width) / static_cast<float>(height));
+  });
 
   mouseButtonHandler = window->addMouseButtonHandler(
       [this](int button, int action, int mods) mutable {
@@ -47,7 +47,7 @@ EditorCamera::EditorCamera(liquid::VulkanRenderer *renderer,
         bool outOfBounds = false;
 
         if (xpos <= 0) {
-          newPos.x = size.width;
+          newPos.x = static_cast<float>(size.width);
           outOfBounds = true;
         } else if (xpos >= size.width) {
           newPos.x = 0;
@@ -55,7 +55,7 @@ EditorCamera::EditorCamera(liquid::VulkanRenderer *renderer,
         }
 
         if (ypos <= 0) {
-          newPos.y = size.height;
+          newPos.y = static_cast<float>(size.height);
           outOfBounds = true;
         } else if (ypos >= size.height) {
           newPos.y = 0;
@@ -105,11 +105,14 @@ void EditorCamera::pan() {
 void EditorCamera::rotate() {
   glm::vec2 mousePos = window->getCurrentMousePosition();
 
+  const auto &size = window->getFramebufferSize();
+
+  const float TWO_PI = 2.0f * glm::pi<float>();
   glm::vec2 screenToSphere{
       // horizontal = 2pi
-      (2.0f * glm::pi<float>() / window->getFramebufferSize().width),
+      (TWO_PI / static_cast<float>(size.width)),
       // vertical = pi
-      (glm::pi<float>() / window->getFramebufferSize().height)};
+      (glm::pi<float>() / static_cast<float>(size.height))};
 
   // Convert mouse position difference to angle
   // difference for arcball
@@ -141,7 +144,8 @@ void EditorCamera::zoom() {
 
 void EditorCamera::updatePerspectiveBasedOnFramebuffer() {
   const auto &fbSize = window->getFramebufferSize();
-  updatePerspective(static_cast<float>(fbSize.width) / fbSize.height);
+  updatePerspective(static_cast<float>(fbSize.width) /
+                    static_cast<float>(fbSize.height));
 }
 
 void EditorCamera::updatePerspective(float aspectRatio) {
