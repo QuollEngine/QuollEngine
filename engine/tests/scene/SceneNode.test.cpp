@@ -38,7 +38,30 @@ TEST(SceneTest, AddsChildWithLocalTransform) {
   EXPECT_EQ(sceneNode.getChildren().size(), 3);
   for (auto &i : sceneNode.getChildren()) {
     EXPECT_EQ(i->getParent(), &sceneNode);
-    EXPECT_EQ(i->getParent(), &sceneNode);
+  }
+}
+
+TEST(SceneTest, AddsSceneNode) {
+  liquid::EntityContext context;
+  liquid::Scene scene(context);
+  liquid::SceneNode sceneNode(context.createEntity(), glm::mat4{1.0}, nullptr,
+                              context);
+
+  std::array<liquid::SceneNode *, 2> entityList{
+      new liquid::SceneNode{context.createEntity(), glm::mat4{1.0}, nullptr,
+                            context},
+      new liquid::SceneNode{context.createEntity(), glm::mat4{1.0}, nullptr,
+                            context}};
+
+  sceneNode.addChild(entityList.at(0));
+  sceneNode.addChild(entityList.at(1));
+
+  EXPECT_EQ(sceneNode.getChildren().size(), 2);
+  const auto &children = sceneNode.getChildren();
+  for (size_t i = 0; i < children.size(); ++i) {
+    EXPECT_EQ(sceneNode.getChildren().at(i)->getParent(), &sceneNode);
+    EXPECT_EQ(sceneNode.getChildren().at(i)->getEntity(),
+              entityList.at(i)->getEntity());
   }
 }
 

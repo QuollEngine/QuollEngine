@@ -23,8 +23,13 @@ SceneNode::~SceneNode() {
 }
 
 SceneNode *SceneNode::addChild(Entity entity, glm::mat4 transform) {
-  children.push_back(new SceneNode(entity, transform, this, entityContext));
+  addChild(new SceneNode(entity, transform, this, entityContext));
   return children.back();
+}
+
+void SceneNode::addChild(SceneNode *node) {
+  node->parent = this;
+  children.push_back(node);
 }
 
 void SceneNode::removeChild(SceneNode *node) {

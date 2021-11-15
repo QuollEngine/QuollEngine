@@ -29,9 +29,9 @@ public:
    * @brief Load GLTF from ASCII file
    *
    * @param filename File name
-   * @return Scene
+   * @return Scene node
    */
-  SharedPtr<Scene> loadFromFile(const String &filename);
+  SceneNode *loadFromFile(const String &filename);
 
 private:
   struct BufferMeta {
@@ -74,10 +74,10 @@ private:
    *
    * @param model TinyGLTF model
    * @param meshEntityMap Mesh index entity map
-   * @return Scene
+   * @return Scene node
    */
-  SharedPtr<Scene> getScene(const tinygltf::Model &model,
-                            const std::map<uint32_t, Entity> &meshEntityMap);
+  SceneNode *getScene(const tinygltf::Model &model,
+                      const std::map<uint32_t, Entity> &meshEntityMap);
 
   /**
    * @brief Geta buffer metadata for accessor

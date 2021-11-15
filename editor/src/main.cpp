@@ -11,8 +11,8 @@
 #include "scene/MeshInstance.h"
 #include "entity/EntityContext.h"
 #include "window/glfw/GLFWWindow.h"
-#include "scene/gltf/TinyGLTFLoader.h"
 
+#include "loaders/TinyGLTFLoader.h"
 #include "loaders/ImageTextureLoader.h"
 
 #include "loop/MainLoop.h"
@@ -30,24 +30,23 @@ int main() {
     std::unique_ptr<liquid::VulkanRenderer> renderer(
         new liquid::VulkanRenderer(context, window.get()));
 
+    liquid::MainLoop mainLoop(renderer.get(), window.get());
+    liquid::TinyGLTFLoader loader(context, renderer.get());
+
     liquidator::EditorCamera editorCamera(renderer.get(), window.get());
 
-    liquid::MainLoop mainLoop(renderer.get(), window.get());
+    const auto &scene = std::make_shared<liquid::Scene>(context);
 
-    liquid::TinyGLTFLoader loader(context, renderer.get());
-    const auto &scene = loader.loadFromFile("default-scene.gltf");
+    scene->getRootNode()->addChild(loader.loadFromFile("default-scene.gltf"));
     scene->setActiveCamera(editorCamera.getCamera().get());
 
     auto light1 = context.createEntity();
-
     context.setComponent<liquid::NameComponent>(light1, {"Light"});
     context.setComponent<liquid::LightComponent>(
         light1, {std::make_shared<liquid::Light>(
                     liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
-
-    auto *node = scene->getRootNode();
-    node->addChild(light1);
+    scene->getRootNode()->addChild(light1);
 
     renderer->setClearColor({0.19, 0.21, 0.26, 1.0});
 

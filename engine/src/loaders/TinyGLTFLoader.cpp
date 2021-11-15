@@ -37,7 +37,7 @@ TinyGLTFLoader::TinyGLTFLoader(EntityContext &entityContext_,
     : entityContext(entityContext_), renderer(renderer_),
       defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
 
-SharedPtr<Scene> TinyGLTFLoader::loadFromFile(const String &filename) {
+SceneNode *TinyGLTFLoader::loadFromFile(const String &filename) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   String error, warning;
@@ -58,19 +58,20 @@ SharedPtr<Scene> TinyGLTFLoader::loadFromFile(const String &filename) {
 
   auto &&materials = getMaterials(model);
   auto &&meshes = getMeshes(model, materials);
-  auto scene = getScene(model, meshes);
+  auto *scene = getScene(model, meshes);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 
   return scene;
 }
 
-SharedPtr<Scene>
+SceneNode *
 TinyGLTFLoader::getScene(const tinygltf::Model &model,
                          const std::map<uint32_t, Entity> &meshEntityMap) {
   try {
     auto &gltfScene = model.scenes.at(model.defaultScene);
-    SharedPtr<Scene> scene(new Scene(entityContext));
+    auto *rootNode = new SceneNode(entityContext.createEntity(),
+                                   glm::mat4{1.0f}, nullptr, entityContext);
 
     std::vector<SceneNode *> nodes(model.nodes.size());
 
@@ -134,7 +135,7 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
       if (parentIndex >= 0) {
         nodes.at(nodeIndex) = nodes[parentIndex]->addChild(entity, transform);
       } else {
-        nodes.at(nodeIndex) = scene->getRootNode()->addChild(entity, transform);
+        nodes.at(nodeIndex) = rootNode->addChild(entity, transform);
       }
 
       for (auto child : gltfNode.children) {
@@ -142,7 +143,7 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
       }
     }
 
-    return scene;
+    return rootNode;
   } catch (std::out_of_range e) {
     throw GLTFError("Failed to load scene");
   }

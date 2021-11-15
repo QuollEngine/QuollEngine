@@ -13,8 +13,7 @@
 #include "scene/MeshInstance.h"
 #include "scene/Light.h"
 
-#include "scene/gltf/TinyGLTFLoader.h"
-
+#include "loaders/TinyGLTFLoader.h"
 #include "loaders/KtxTextureLoader.h"
 #include "loaders/ImageTextureLoader.h"
 #include "loop/MainLoop.h"
@@ -174,12 +173,13 @@ int main() {
 
   while (!window->shouldClose()) {
     liquid::SharedPtr<liquid::Scene> scene = nullptr;
+    scene = std::make_shared<liquid::Scene>(context);
 
-    if (sceneQueue.empty()) {
-      scene = std::make_shared<liquid::Scene>(context);
-    } else {
+    if (!sceneQueue.empty()) {
       auto gltfFilename = sceneQueue.back();
-      scene = loader.loadFromFile(gltfFilename);
+      scene = std::make_shared<liquid::Scene>(context);
+      scene->getRootNode()->addChild(loader.loadFromFile(gltfFilename));
+
       sceneQueue.pop_back();
     }
 
