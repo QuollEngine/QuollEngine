@@ -8,23 +8,42 @@ jobs:
   format-check:
     name: Format Check
     runs-on: ubuntu-20.04
-
     steps:
       - uses: actions/checkout@v2
       - name: Verify Clang Format
         run: ./scripts/clang-format-all.sh 12 verify
 
-  build-and-test:
-    name: Build and Test
+  static-analysis:
+    name: Static Analysis
     runs-on: ubuntu-20.04
-
     steps:
       - name: Install dependencies
         run: |
           sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
           sudo apt update
-          sudo apt install vulkan-sdk xorg-dev lcov clang-tidy-12
+          sudo apt install vulkan-sdk xorg-dev clang-tidy-12
+
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies and setup project
+        run: |
+          python3 project.py
+
+      - name: Static Analysis
+        run: |
+          ./scripts/clang-tidy-all.sh 12
+
+  build-and-test-linux:
+    name: Build and Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+          sudo apt update
+          sudo apt install vulkan-sdk xorg-dev lcov
 
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
           tar xvzf premake-5.0.0-alpha16-linux.tar.gz
@@ -32,14 +51,11 @@ jobs:
           sudo mv premake5 /usr/local/bin/premake5
 
       - uses: actions/checkout@v2
+
       - name: Install dependencies and setup project
         run: |
           python3 project.py
           premake5 gmake
-
-      - name: Static Analysis
-        run: |
-          ./scripts/clang-tidy-all.sh 12
 
       - name: Build
         run: |
