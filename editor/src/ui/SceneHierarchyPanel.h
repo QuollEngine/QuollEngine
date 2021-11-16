@@ -2,6 +2,7 @@
 
 #include "scene/Scene.h"
 #include "entity/EntityContext.h"
+#include "../editor-scene/SceneManager.h"
 
 namespace liquidator {
 
@@ -17,9 +18,9 @@ public:
   /**
    * @brief Render the UI
    *
-   * @param scene Scene
+   * @param sceneManager Scene manager
    */
-  void render(liquid::Scene *scene);
+  void render(SceneManager &sceneManager);
 
 private:
   /**

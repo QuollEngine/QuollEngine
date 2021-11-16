@@ -13,6 +13,8 @@ class EditorCamera {
   static constexpr float DEFAULT_NEAR = 0.001f;
   static constexpr float DEFAULT_FAR = 1000.0f;
   static constexpr glm::vec3 DEFAULT_EYE{0.0f, 0.0f, -10.0f};
+  static constexpr glm::vec3 DEFAULT_CENTER{0.0f, 0.0f, 0.0f};
+  static constexpr glm::vec3 DEFAULT_UP{0.0f, 1.0f, 0.0f};
 
 public:
   /**
@@ -89,6 +91,11 @@ public:
    */
   void update();
 
+  /**
+   * @brief Reset camera to defaults
+   */
+  void reset();
+
 private:
   /**
    * @brief Pan camera using mouse movement
@@ -126,8 +133,8 @@ private:
   glm::vec2 prevMousePos{};
 
   glm::vec3 eye = DEFAULT_EYE;
-  glm::vec3 center{0.0f, 0.0f, 0.0f};
-  glm::vec3 up{0.0f, 1.0f, 0.0f};
+  glm::vec3 center = DEFAULT_CENTER;
+  glm::vec3 up = DEFAULT_UP;
 
   uint32_t resizeHandler;
   uint32_t mouseButtonHandler;

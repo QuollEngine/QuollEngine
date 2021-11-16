@@ -87,6 +87,15 @@ void EditorCamera::update() {
   camera->lookAt(eye, center, up);
 }
 
+void EditorCamera::reset() {
+  eye = DEFAULT_EYE;
+  center = DEFAULT_CENTER;
+  up = DEFAULT_UP;
+  fov = DEFAULT_FOV;
+  near = DEFAULT_NEAR;
+  far = DEFAULT_FAR;
+}
+
 void EditorCamera::pan() {
   constexpr float panSpeed = 0.03f;
 

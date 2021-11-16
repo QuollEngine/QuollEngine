@@ -4,6 +4,8 @@
 #include "loaders/TinyGLTFLoader.h"
 #include "scene/Scene.h"
 
+#include "../editor-scene/SceneManager.h"
+
 namespace liquidator {
 
 class MenuBar {
@@ -18,9 +20,9 @@ public:
   /**
    * @brief Render menu bar
    *
-   * @param scene Scene
+   * @param sceneManager Scene manager
    */
-  void render(liquid::Scene *scene);
+  void render(SceneManager &sceneManager);
 
 private:
   /**
@@ -30,6 +32,13 @@ private:
    * @param scene Target scene
    */
   void handleGLTFImport(const liquid::String &filePath, liquid::Scene *scene);
+
+  /**
+   * @brief Handle new scene item click
+   *
+   * @param sceneManager Scene manager
+   */
+  void handleNewScene(SceneManager &sceneManager);
 
 private:
   liquid::platform_tools::NativeFileDialog fileDialog;

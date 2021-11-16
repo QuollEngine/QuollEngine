@@ -251,11 +251,6 @@ project "Liquidator"
     links { "LiquidEngine", "LiquidEnginePlatformTools" }
     linkDependencies{}
 
-    postbuildcommands {
-        "{COPYFILE} ../../editor/assets/default-scene.gltf %{cfg.buildtarget.directory}/default-scene.gltf",
-        "{COPYFILE} ../../editor/assets/default-scene.bin %{cfg.buildtarget.directory}/default-scene.bin",
-    }
-
 project "DemoBasicTriangle"
     basedir "workspace/demos/basic-triangle"
     kind "ConsoleApp"

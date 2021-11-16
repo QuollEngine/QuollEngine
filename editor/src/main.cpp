@@ -18,6 +18,7 @@
 #include "loop/MainLoop.h"
 
 #include "editor-scene/EditorCamera.h"
+#include "editor-scene/SceneManager.h"
 #include "ui/MenuBar.h"
 #include "ui/SceneHierarchyPanel.h"
 
@@ -37,41 +38,33 @@ int main() {
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
     liquid::TinyGLTFLoader loader(context, renderer.get());
-
     liquidator::EditorCamera editorCamera(renderer.get(), window.get());
-
-    const auto &scene = std::make_shared<liquid::Scene>(context);
-
-    scene->setActiveCamera(editorCamera.getCamera().get());
-
-    scene->getRootNode()->addChild(loader.loadFromFile("default-scene.gltf"));
-
-    auto light1 = context.createEntity();
-    context.setComponent<liquid::NameComponent>(light1, {"Light"});
-    context.setComponent<liquid::LightComponent>(
-        light1, {std::make_shared<liquid::Light>(
-                    liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
-                    glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
-    scene->getRootNode()->addChild(light1);
+    liquidator::SceneManager sceneManager(context, editorCamera);
 
     renderer->setClearColor(CLEAR_COLOR);
 
     liquidator::MenuBar menuBar(loader);
     liquidator::SceneHierarchyPanel sceneHierarchyPanel(context);
 
-    return mainLoop.run(
-        scene.get(),
-        [&editorCamera](double dt) mutable {
-          ImGuiIO &io = ImGui::GetIO();
-          if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
-            editorCamera.update();
-          }
-          return true;
-        },
-        [&sceneHierarchyPanel, &menuBar, &scene]() {
-          menuBar.render(scene.get());
-          sceneHierarchyPanel.render(scene.get());
-        });
+    while (sceneManager.hasNewScene()) {
+      sceneManager.createNewScene();
+
+      mainLoop.run(
+          sceneManager.getActiveScene(),
+          [&editorCamera, &sceneManager](double dt) mutable {
+            ImGuiIO &io = ImGui::GetIO();
+            if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
+              editorCamera.update();
+            }
+            return !sceneManager.hasNewScene();
+          },
+          [&sceneHierarchyPanel, &menuBar, &sceneManager]() {
+            menuBar.render(sceneManager);
+            sceneHierarchyPanel.render(sceneManager);
+          });
+    }
+
+    return 0;
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;
     return 1;
