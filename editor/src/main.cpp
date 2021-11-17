@@ -53,9 +53,7 @@ int main() {
           sceneManager.getActiveScene(),
           [&editorCamera, &sceneManager](double dt) mutable {
             ImGuiIO &io = ImGui::GetIO();
-            if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
-              editorCamera.update();
-            }
+            editorCamera.update();
             return !sceneManager.hasNewScene();
           },
           [&sceneHierarchyPanel, &menuBar, &sceneManager]() {

@@ -75,6 +75,10 @@ EditorCamera::~EditorCamera() {
   window->removeMouseMoveHandler(mouseMoveHandler);
 }
 
+void EditorCamera::setCenter(const glm::vec3 &center_) { center = center_; }
+
+void EditorCamera::setEye(const glm::vec3 &eye_) { eye = eye_; }
+
 void EditorCamera::update() {
   if (inputState == InputState::Pan) {
     pan();
@@ -112,12 +116,13 @@ void EditorCamera::pan() {
 }
 
 void EditorCamera::rotate() {
+  constexpr float TWO_PI = 2.0f * glm::pi<float>();
+
   glm::vec2 mousePos = window->getCurrentMousePosition();
 
   const auto &size = window->getFramebufferSize();
 
-  const float TWO_PI = 2.0f * glm::pi<float>();
-  glm::vec2 screenToSphere{
+  glm ::vec2 screenToSphere{
       // horizontal = 2pi
       (TWO_PI / static_cast<float>(size.width)),
       // vertical = pi

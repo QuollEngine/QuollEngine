@@ -42,6 +42,13 @@ public:
   inline bool hasNewScene() const { return newSceneRequested; }
 
   /**
+   * @brief Get editor camera
+   *
+   * @return Editor camera
+   */
+  inline EditorCamera &getEditorCamera() { return editorCamera; }
+
+  /**
    * @brief Creates a new scene and sets it as active
    */
   void createNewScene();

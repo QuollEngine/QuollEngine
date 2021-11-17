@@ -1,5 +1,6 @@
 #include "SceneHierarchyPanel.h"
 #include <imgui.h>
+#include <glm/gtc/matrix_access.hpp>
 
 namespace liquidator {
 
@@ -10,13 +11,14 @@ void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::Begin("Scene");
   for (auto *child :
        sceneManager.getActiveScene()->getRootNode()->getChildren()) {
-    renderNode(child, ImGuiTreeNodeFlags_DefaultOpen);
+    renderNode(child, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
   }
 
   ImGui::End();
 }
 
-void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags) {
+void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
+                                     SceneManager &sceneManager) {
   liquid::String name;
   if (context.hasComponent<liquid::NameComponent>(node->getEntity())) {
     name = context.getComponent<liquid::NameComponent>(node->getEntity()).name;
@@ -38,15 +40,20 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags) {
   }
 
   if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::MenuItem("Go to view")) {
+      handleMoveToNode(node, sceneManager.getEditorCamera());
+    }
+
     if (ImGui::MenuItem("Delete")) {
       handleDelete(node);
     }
+
     ImGui::EndPopup();
   }
 
   if (open) {
     for (auto *child : node->getChildren()) {
-      renderNode(child, 0);
+      renderNode(child, 0, sceneManager);
     }
     ImGui::TreePop();
   }
@@ -61,6 +68,25 @@ void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node) {
   }
 
   context.deleteEntity(entity);
+}
+
+void SceneHierarchyPanel::handleMoveToNode(liquid::SceneNode *node,
+                                           EditorCamera &camera) {
+  LIQUID_ASSERT(
+      context.hasComponent<liquid::TransformComponent>(node->getEntity()),
+      "Scene node must have transform component");
+
+  auto &transformComponent =
+      context.getComponent<liquid::TransformComponent>(node->getEntity());
+
+  const auto &translation =
+      glm::vec3(glm::column(transformComponent.transformWorld, 3));
+
+  constexpr glm::vec3 distanceFromCenter{0.0f, 0.0f, 10.0f};
+
+  camera.reset();
+  camera.setCenter(translation);
+  camera.setEye(translation - distanceFromCenter);
 }
 
 } // namespace liquidator

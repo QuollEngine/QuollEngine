@@ -87,6 +87,20 @@ public:
   inline const liquid::SharedPtr<liquid::Camera> &getCamera() { return camera; }
 
   /**
+   * @brief Set camera center
+   *
+   * @param center Center vector
+   */
+  void setCenter(const glm::vec3 &center);
+
+  /**
+   * @brief Set camera eye position
+   *
+   * @param eye Eye vector
+   */
+  void setEye(const glm::vec3 &eye);
+
+  /**
    * @brief Update camera
    */
   void update();
