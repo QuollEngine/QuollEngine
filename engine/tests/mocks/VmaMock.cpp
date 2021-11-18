@@ -1,3 +1,4 @@
+#include "core/Base.h"
 #include "VulkanMock.h"
 
 VmaLibMock *VulkanTestBase::vmaLibMock = nullptr;

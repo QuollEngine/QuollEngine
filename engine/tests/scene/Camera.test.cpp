@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
 #include "core/Base.h"
 #include "scene/Camera.h"
+
 #include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 TEST(CameraTest, CreatesUniformBufferOnConstruct) {
   TestResourceAllocator resourceAllocator;

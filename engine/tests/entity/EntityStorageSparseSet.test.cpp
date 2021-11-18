@@ -1,7 +1,8 @@
-#include <gtest/gtest.h>
 #include "core/Base.h"
 #include "entity/EntityStorageSparseSet.h"
 #include "entity/EntityContext.h"
+
+#include <gtest/gtest.h>
 
 struct Component1 {
   int intValue;

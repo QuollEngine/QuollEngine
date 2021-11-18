@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-
 #include "core/Base.h"
-#include "../mocks/TestBuffer.h"
 #include "profiler/StatsManager.h"
+#include "../mocks/TestBuffer.h"
+
+#include <gtest/gtest.h>
 
 TEST(HardwareBufferTest, CreatesBuffer) {
   liquid::StatsManager statsManager;

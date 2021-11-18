@@ -1,9 +1,10 @@
 #include "core/Base.h"
-#include <gtest/gtest.h>
 #include "scene/Mesh.h"
 #include "scene/MeshInstance.h"
+
 #include "../mocks/TestResourceAllocator.h"
 #include "../mocks/TestResourceManager.h"
+#include <gtest/gtest.h>
 
 using MaterialPtr = liquid::SharedPtr<liquid::Material>;
 

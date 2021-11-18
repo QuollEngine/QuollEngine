@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "renderer/RenderCommandList.h"
+
 #include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 class RenderCommandListTests : public ::testing::Test {
 public:

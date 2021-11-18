@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "profiler/DebugManager.h"
+
+#include <gtest/gtest.h>
 
 TEST(DebugManager, SetWireframeMode) {
   liquid::DebugManager debugManager;

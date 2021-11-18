@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
 #include "core/Base.h"
 #include "scene/Scene.h"
 
 #include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 liquid::SharedPtr<liquid::MeshInstance> emptyMeshInstance = nullptr;
 

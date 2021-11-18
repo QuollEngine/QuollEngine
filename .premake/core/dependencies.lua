@@ -19,6 +19,8 @@ function linkDependenciesWith(...)
 
     filter { "system:linux or system:macosx" }
         links { "vulkan" }
+    
+    filter{}
 
     linkDependenciesWithoutVulkan{}
 

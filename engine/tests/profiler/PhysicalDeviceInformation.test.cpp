@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "profiler/PhysicalDeviceInformation.h"
+
+#include <gtest/gtest.h>
 
 TEST(PhysicalDeviceInformationTest, SetsNameTypePropertiesAndLimits) {
   liquid::PhysicalDeviceInformation info(

@@ -1,8 +1,8 @@
-#include <gtest/gtest.h>
-#include <glm/gtx/string_cast.hpp>
 #include "core/Base.h"
-
 #include "scene/Light.h"
+
+#include <glm/gtx/string_cast.hpp>
+#include <gtest/gtest.h>
 
 TEST(Light, TypeColorAndPowerIsSet) {
   liquid::Light light(liquid::Light::DIRECTIONAL, {2.0, 2.5, -1.5},

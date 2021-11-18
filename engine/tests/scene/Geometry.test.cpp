@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "scene/Geometry.h"
+
 #include "../mocks/TestResourceManager.h"
 #include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 using ShaderPtr = liquid::SharedPtr<liquid::Shader>;
 

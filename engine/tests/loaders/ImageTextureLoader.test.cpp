@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
-#include "../mocks/TestResourceAllocator.h"
+#include "core/Base.h"
 #include "loaders/ImageTextureLoader.h"
+
+#include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 TEST(ImageTextureLoaderTests, LoadsImageUsingStb) {
   TestResourceAllocator allocator;

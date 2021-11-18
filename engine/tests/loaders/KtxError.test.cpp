@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "loaders/KtxError.h"
+
+#include <gtest/gtest.h>
 
 TEST(KtxErrorTest, ShowsErrorMessageWithoutCodeIfSuccess) {
   liquid::KtxError error("Test error message", KTX_SUCCESS);

@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "scene/Mesh.h"
+
+#include <gtest/gtest.h>
 
 static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
   return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;

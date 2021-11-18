@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "core/Base.h"
 #include "core/Property.h"
+
+#include <gtest/gtest.h>
 
 TEST(PropertyTest, SetsInt32Value) {
   liquid::Property property(-232);

@@ -1,8 +1,10 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "renderer/MaterialPBR.h"
+
 #include "../mocks/TestShader.h"
 #include "../mocks/TestResourceAllocator.h"
 #include "../mocks/TestResourceManager.h"
+#include <gtest/gtest.h>
 
 class MaterialPBRTest : public ::testing::Test {
 public:

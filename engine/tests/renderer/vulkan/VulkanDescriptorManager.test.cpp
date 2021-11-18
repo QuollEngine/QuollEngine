@@ -1,10 +1,12 @@
-#include <gtest/gtest.h>
-#include "../../mocks/VulkanMock.h"
-#include "../../mocks/TestResourceAllocator.h"
+#include "core/Base.h"
 #include "renderer/vulkan/VulkanDescriptorManager.h"
 #include "renderer/vulkan/VulkanError.h"
 #include "renderer/vulkan/VulkanHardwareBuffer.h"
 #include "renderer/vulkan/VulkanTextureBinder.h"
+
+#include <gtest/gtest.h>
+#include "../../mocks/VulkanMock.h"
+#include "../../mocks/TestResourceAllocator.h"
 
 using ::testing::_;
 using ::testing::Return;

@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "renderer/ShaderLibrary.h"
+
 #include "../mocks/TestShader.h"
+#include <gtest/gtest.h>
 
 TEST(ShaderLibraryTests, ThrowsErrorIfShaderNotFound) {
   liquid::ShaderLibrary library;

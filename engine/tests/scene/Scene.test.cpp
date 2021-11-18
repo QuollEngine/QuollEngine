@@ -1,10 +1,10 @@
-#include <gtest/gtest.h>
 #include "core/Base.h"
 #include "scene/Scene.h"
 #include "scene/Camera.h"
 #include "scene/Light.h"
 
 #include "../mocks/TestResourceAllocator.h"
+#include <gtest/gtest.h>
 
 TEST(SceneTest, CreatesEmptyRootNodeOnConstruct) {
   liquid::EntityContext context;

@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "renderer/Texture.h"
+
 #include "../mocks/TestTextureResourceBinder.h"
+#include <gtest/gtest.h>
 
 TEST(TextureTest, GetsResourceBinder) {
   auto binder = std::make_shared<TestTextureResourceBinder>();

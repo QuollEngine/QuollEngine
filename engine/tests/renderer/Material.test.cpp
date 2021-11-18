@@ -1,10 +1,10 @@
-#include <gtest/gtest.h>
-
 #include "core/Base.h"
 #include "renderer/Texture.h"
 #include "renderer/Material.h"
+
 #include "../mocks/TestResourceAllocator.h"
 #include "../mocks/TestResourceManager.h"
+#include <gtest/gtest.h>
 
 using ShaderPtr = liquid::SharedPtr<liquid::Shader>;
 using TexturePtr = liquid::SharedPtr<liquid::Texture>;

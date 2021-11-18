@@ -1,5 +1,7 @@
-#include <gtest/gtest.h>
+#include "core/Base.h"
 #include "profiler/StatsManager.h"
+
+#include <gtest/gtest.h>
 
 TEST(StatsManagerTest, AddsDrawCalls) {
   liquid::StatsManager manager;
