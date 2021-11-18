@@ -1,0 +1,5 @@
+include 'core/library.lua'
+include 'core/platform.lua'
+include 'core/toolset.lua'
+include 'core/dependencies.lua'
+include 'core/testing.lua'
