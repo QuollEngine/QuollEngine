@@ -19,13 +19,24 @@ TEST(SceneTest, CreatesEmptyRootNodeOnConstruct) {
   EXPECT_TRUE(rootNode->getWorldTransform() == glm::mat4{1.0f});
 }
 
-TEST(SceneTest, SetsActiveCamera) {
+TEST(SceneTest, SetsActiveCameraEntity) {
   TestResourceAllocator resourceAllocator;
 
   liquid::EntityContext context;
   liquid::Scene scene(context);
-  std::unique_ptr<liquid::Camera> camera(
-      new liquid::Camera(&resourceAllocator));
-  scene.setActiveCamera(camera.get());
-  EXPECT_EQ(scene.getActiveCamera(), camera.get());
+  auto entity = context.createEntity();
+  context.setComponent<liquid::CameraComponent>(
+      entity, {std::make_shared<liquid::Camera>(&resourceAllocator)});
+  scene.setActiveCamera(entity);
+  EXPECT_EQ(scene.getActiveCamera().get(),
+            context.getComponent<liquid::CameraComponent>(entity).camera.get());
+}
+
+TEST(SceneDeathTest,
+     SetingActiveCameraEntityFailsIfEntityHasNoCameraComponent) {
+  TestResourceAllocator resourceAllocator;
+
+  liquid::EntityContext context;
+  liquid::Scene scene(context);
+  EXPECT_DEATH(scene.setActiveCamera(context.createEntity()), ".*");
 }

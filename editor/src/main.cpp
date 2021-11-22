@@ -38,7 +38,8 @@ int main() {
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
     liquid::TinyGLTFLoader loader(context, renderer.get());
-    liquidator::EditorCamera editorCamera(renderer.get(), window.get());
+    liquidator::EditorCamera editorCamera(context, renderer.get(),
+                                          window.get());
     liquidator::SceneManager sceneManager(context, editorCamera);
 
     renderer->setClearColor(CLEAR_COLOR);

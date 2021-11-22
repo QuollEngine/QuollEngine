@@ -6,9 +6,12 @@ using liquid::VulkanRenderer;
 
 namespace liquidator {
 
-EditorCamera::EditorCamera(liquid::VulkanRenderer *renderer,
+EditorCamera::EditorCamera(liquid::EntityContext &context_,
+                           liquid::VulkanRenderer *renderer,
                            liquid::GLFWWindow *window_)
-    : window(window_), camera(new Camera(renderer->getResourceAllocator())) {
+    : context(context_), window(window_),
+      camera(new Camera(renderer->getResourceAllocator())) {
+
   updatePerspectiveBasedOnFramebuffer();
   resizeHandler = window->addResizeHandler([this](uint32_t width,
                                                   uint32_t height) {
@@ -73,6 +76,8 @@ EditorCamera::~EditorCamera() {
   window->removeResizeHandler(resizeHandler);
   window->removeMouseButtonHandler(mouseButtonHandler);
   window->removeMouseMoveHandler(mouseMoveHandler);
+
+  context.deleteComponent<liquid::CameraComponent>(cameraEntity);
 }
 
 void EditorCamera::setCenter(const glm::vec3 &center_) { center = center_; }
@@ -98,6 +103,9 @@ void EditorCamera::reset() {
   fov = DEFAULT_FOV;
   near = DEFAULT_NEAR;
   far = DEFAULT_FAR;
+
+  cameraEntity = context.createEntity();
+  context.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
 }
 
 void EditorCamera::pan() {

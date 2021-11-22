@@ -113,7 +113,7 @@ int main() {
 
   glfwSetMouseButtonCallback(window->getInstance(), mouse_callback);
 
-  EditorCamera editorCamera(renderer.get(), window.get());
+  EditorCamera editorCamera(context, renderer.get(), window.get());
 
   window->addKeyHandler(
       [&editorCamera](int key, int scancode, int action, int mods) {
@@ -174,6 +174,7 @@ int main() {
   while (!window->shouldClose()) {
     liquid::SharedPtr<liquid::Scene> scene = nullptr;
     scene = std::make_shared<liquid::Scene>(context);
+    editorCamera.initEntity();
 
     if (!sceneQueue.empty()) {
       auto gltfFilename = sceneQueue.back();
@@ -192,7 +193,7 @@ int main() {
       }
     });
 
-    scene->setActiveCamera(editorCamera.getCamera().get());
+    scene->setActiveCamera(editorCamera.getCamera());
 
     ui.getSceneHierarchy().setScene(scene);
 

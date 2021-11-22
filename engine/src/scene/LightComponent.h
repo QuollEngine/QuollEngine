@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/Light.h"
+#include "Light.h"
 
 namespace liquid {
 

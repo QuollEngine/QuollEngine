@@ -19,7 +19,7 @@ void SceneManager::createNewScene() {
 
   editorCamera.reset();
   activeScene = new liquid::Scene(context);
-  activeScene->setActiveCamera(editorCamera.getCamera().get());
+  activeScene->setActiveCamera(editorCamera.getCamera());
 
   auto light1 = context.createEntity();
   context.setComponent<liquid::NameComponent>(light1, {"Light"});

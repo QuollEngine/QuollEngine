@@ -74,11 +74,13 @@ int main() {
         new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
     context.setComponent<liquid::MeshComponent>(entity, {instance});
 
-    std::unique_ptr<liquid::Camera> camera(
-        new liquid::Camera(renderer->getResourceAllocator()));
     std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
+    auto camera = context.createEntity();
+    context.setComponent<liquid::CameraComponent>(
+        camera,
+        {std::make_shared<liquid::Camera>(renderer->getResourceAllocator())});
 
-    scene->setActiveCamera(camera.get());
+    scene->setActiveCamera(camera);
     scene->getRootNode()->addChild(entity, glm::mat4{1.0f});
 
     glfwSetKeyCallback(window->getInstance(), key_callback);
@@ -87,7 +89,7 @@ int main() {
 
     auto *instancePtr = instance.get();
 
-    return mainLoop.run(
+    mainLoop.run(
         scene.get(),
         [instancePtr, materials](double dt) mutable {
           if (changed) {
@@ -99,6 +101,9 @@ int main() {
           return true;
         },
         []() {});
+
+    context.destroy();
+    return 0;
   } catch (std::runtime_error error) {
     std::cerr << error.what() << std::endl;
     return 1;

@@ -2,11 +2,13 @@
 
 #include "scene/Camera.h"
 #include "renderer/vulkan/VulkanRenderer.h"
+#include "entity/EntityContext.h"
 #include "window/glfw/GLFWWindow.h"
 
 class EditorCamera {
 public:
-  EditorCamera(liquid::VulkanRenderer *renderer, liquid::GLFWWindow *window);
+  EditorCamera(liquid::EntityContext &context, liquid::VulkanRenderer *renderer,
+               liquid::GLFWWindow *window);
 
   inline void setFOV(float fov_) { fov = fov_; }
 
@@ -20,7 +22,7 @@ public:
 
   inline float getFar() { return far; }
 
-  inline const liquid::SharedPtr<liquid::Camera> &getCamera() { return camera; }
+  inline liquid::Entity getCamera() { return cameraEntity; }
 
   inline void setPosition(glm::vec3 position_) { position = position_; }
 
@@ -33,6 +35,8 @@ public:
   void yaw(float speed);
 
   void pitch(float speed);
+
+  void initEntity();
 
 private:
   void updatePerspective();
@@ -55,6 +59,8 @@ private:
   glm::vec3 position{5.0f, 1.0f, -10.0f};
 
   liquid::SharedPtr<liquid::Camera> camera;
+  liquid::EntityContext &entityContext;
+  liquid::Entity cameraEntity;
   uint32_t resizeHandler;
   liquid::GLFWWindow *window;
 };

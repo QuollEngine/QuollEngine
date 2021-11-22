@@ -22,6 +22,12 @@ template <class... ComponentTypes> class EntityStorageSparseSet {
   template <typename T> struct IterFnType { typedef T type; };
 
 public:
+  EntityStorageSparseSet() = default;
+  EntityStorageSparseSet(const EntityStorageSparseSet &) = delete;
+  EntityStorageSparseSet(EntityStorageSparseSet &&) = delete;
+  EntityStorageSparseSet &operator=(const EntityStorageSparseSet &) = delete;
+  EntityStorageSparseSet &operator=(EntityStorageSparseSet &&) = delete;
+
   /**
    * @brief Destroy storage
    *

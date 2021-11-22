@@ -93,7 +93,21 @@ Scene::~Scene() {
   }
 }
 
-void Scene::setActiveCamera(Camera *camera_) { camera = camera_; }
+void Scene::setActiveCamera(Entity camera) {
+  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(camera),
+                "Entity " + std::to_string(camera) +
+                    " does not have a camera component");
+
+  cameraEntity = camera;
+}
+
+const SharedPtr<Camera> &Scene::getActiveCamera() {
+  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(cameraEntity),
+                "Entity " + std::to_string(cameraEntity) +
+                    " does not have a camera component");
+
+  return entityContext.getComponent<CameraComponent>(cameraEntity).camera;
+}
 
 void Scene::update() { rootNode->update(); }
 

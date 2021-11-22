@@ -147,15 +147,16 @@ public:
   /**
    * @brief Sets active camera
    *
-   * @param camera Camera
+   * @param entity Entity with camera
    */
-  void setActiveCamera(Camera *camera);
+  void setActiveCamera(Entity camera);
 
-  /** @brief Gets active camera
+  /**
+   * @brief Gets active camera
    *
    * @return Camera
    */
-  inline Camera *getActiveCamera() { return camera; }
+  const SharedPtr<Camera> &getActiveCamera();
 
   /**
    * @brief Get root node
@@ -173,8 +174,7 @@ public:
 
 private:
   SceneNode *rootNode = nullptr;
-  Camera *camera = nullptr;
-
+  Entity cameraEntity = ENTITY_MAX;
   EntityContext &entityContext;
 };
 

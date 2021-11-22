@@ -4,9 +4,13 @@ using liquid::Camera;
 using liquid::GLFWWindow;
 using liquid::VulkanRenderer;
 
-EditorCamera::EditorCamera(liquid::VulkanRenderer *renderer,
-                           liquid::GLFWWindow *window_)
-    : window(window_), camera(new Camera(renderer->getResourceAllocator())) {
+EditorCamera::EditorCamera(liquid::EntityContext &entityContext_,
+                           VulkanRenderer *renderer, GLFWWindow *window_)
+    : entityContext(entityContext_), window(window_),
+      camera(new Camera(renderer->getResourceAllocator())) {
+
+  initEntity();
+
   updatePerspective();
   window->addResizeHandler([this](uint32_t width, uint32_t height) {
     updatePerspective(width, height);
@@ -20,6 +24,11 @@ void EditorCamera::strafe(float speed) { strafeSpeed = speed; }
 void EditorCamera::yaw(float speed) { yawSpeed = speed; }
 
 void EditorCamera::pitch(float speed) { pitchSpeed = speed; }
+
+void EditorCamera::initEntity() {
+  cameraEntity = entityContext.createEntity();
+  entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+}
 
 void EditorCamera::update() {
   rotation += glm::vec2{yawSpeed, pitchSpeed};

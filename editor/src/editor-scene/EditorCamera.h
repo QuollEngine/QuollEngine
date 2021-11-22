@@ -3,6 +3,7 @@
 #include "scene/Camera.h"
 #include "renderer/vulkan/VulkanRenderer.h"
 #include "window/glfw/GLFWWindow.h"
+#include "entity/EntityContext.h"
 
 namespace liquidator {
 
@@ -20,10 +21,12 @@ public:
   /**
    * @brief Create editor camera
    *
+   * @param context Entity context
    * @param renderer Renderer
    * @param window Window
    */
-  EditorCamera(liquid::VulkanRenderer *renderer, liquid::GLFWWindow *window);
+  EditorCamera(liquid::EntityContext &context, liquid::VulkanRenderer *renderer,
+               liquid::GLFWWindow *window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
@@ -84,7 +87,7 @@ public:
    *
    * @return Camera
    */
-  inline const liquid::SharedPtr<liquid::Camera> &getCamera() { return camera; }
+  inline const liquid::Entity getCamera() const { return cameraEntity; }
 
   /**
    * @brief Set camera center
@@ -156,6 +159,8 @@ private:
 
   liquid::GLFWWindow *window;
   liquid::SharedPtr<liquid::Camera> camera;
+  liquid::EntityContext &context;
+  liquid::Entity cameraEntity = liquid::ENTITY_MAX;
 };
 
 } // namespace liquidator

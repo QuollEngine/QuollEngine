@@ -46,7 +46,8 @@ public:
   VulkanRenderer &operator=(const VulkanRenderer &rhs) = delete;
   VulkanRenderer &operator=(VulkanRenderer &&rhs) = delete;
 
-  void drawRenderables(RenderCommandList &commandList, Camera *camera,
+  void drawRenderables(RenderCommandList &commandList,
+                       const SharedPtr<Camera> &camera,
                        bool useForShadowMapping);
   void draw(const SharedPtr<VulkanRenderData> &renderData);
   void waitForIdle();

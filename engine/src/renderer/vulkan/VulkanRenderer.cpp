@@ -175,7 +175,8 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
 }
 
 void VulkanRenderer::drawRenderables(RenderCommandList &commandList,
-                                     Camera *camera, bool useForShadowMapping) {
+                                     const SharedPtr<Camera> &camera,
+                                     bool useForShadowMapping) {
   entityContext.iterateEntities<MeshComponent, TransformComponent>(
       [&commandList, camera, useForShadowMapping,
        this](Entity entity, const MeshComponent &mesh,

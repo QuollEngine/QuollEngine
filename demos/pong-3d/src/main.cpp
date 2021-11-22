@@ -169,7 +169,9 @@ private:
 
   void setupScene() {
 
-    scene->setActiveCamera(camera.get());
+    auto cameraEntity = entityContext.createEntity();
+    entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+    scene->setActiveCamera(cameraEntity);
 
     const auto &fbSize = window->getFramebufferSize();
 
@@ -230,7 +232,7 @@ private:
 private:
   std::unique_ptr<liquid::GLFWWindow> window;
   std::unique_ptr<liquid::VulkanRenderer> renderer;
-  std::unique_ptr<liquid::Camera> camera;
+  liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
 
   liquid::SharedPtr<liquid::Shader> vertexShader;
