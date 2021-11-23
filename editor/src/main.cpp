@@ -19,8 +19,7 @@
 
 #include "editor-scene/EditorCamera.h"
 #include "editor-scene/SceneManager.h"
-#include "ui/MenuBar.h"
-#include "ui/SceneHierarchyPanel.h"
+#include "ui/UIRoot.h"
 
 static const glm::vec4 CLEAR_COLOR{0.19, 0.21, 0.26, 1.0};
 static const uint32_t INITIAL_WIDTH = 1024;
@@ -44,8 +43,7 @@ int main() {
 
     renderer->setClearColor(CLEAR_COLOR);
 
-    liquidator::MenuBar menuBar(loader);
-    liquidator::SceneHierarchyPanel sceneHierarchyPanel(context);
+    liquidator::UIRoot ui(context, loader);
 
     while (sceneManager.hasNewScene()) {
       sceneManager.createNewScene();
@@ -57,10 +55,7 @@ int main() {
             editorCamera.update();
             return !sceneManager.hasNewScene();
           },
-          [&sceneHierarchyPanel, &menuBar, &sceneManager]() {
-            menuBar.render(sceneManager);
-            sceneHierarchyPanel.render(sceneManager);
-          });
+          [&ui, &sceneManager]() { ui.render(sceneManager); });
     }
 
     return 0;

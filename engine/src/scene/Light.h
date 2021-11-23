@@ -88,6 +88,13 @@ public:
   inline LightType getType() { return type; }
 
   /**
+   * @brief Get light type name
+   *
+   * @return Light type name
+   */
+  const String getTypeName() const;
+
+  /**
    * @brief Get light position
    *
    * @return Light position

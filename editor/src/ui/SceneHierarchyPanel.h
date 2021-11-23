@@ -8,6 +8,8 @@
 namespace liquidator {
 
 class SceneHierarchyPanel {
+  using NodeClickHandler = std::function<void(liquid::SceneNode *)>;
+
 public:
   /**
    * @brief Create scene hierarchy panel
@@ -23,6 +25,13 @@ public:
    */
   void render(SceneManager &sceneManager);
 
+  /**
+   * @brief Set node click handler
+   *
+   * @param handler Node click handler
+   */
+  void setNodeClickHandler(const NodeClickHandler &handler);
+
 private:
   /**
    * @brief Render scene node as tree node
@@ -34,6 +43,7 @@ private:
   void renderNode(liquid::SceneNode *node, int flags,
                   SceneManager &sceneManager);
 
+private:
   /**
    * @brief Handle node deletion
    *
@@ -51,6 +61,7 @@ private:
 
 private:
   liquid::EntityContext &context;
+  NodeClickHandler nodeClickHandler;
 };
 
 } // namespace liquidator

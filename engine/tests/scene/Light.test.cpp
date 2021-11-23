@@ -12,6 +12,7 @@ TEST(Light, TypeColorAndPowerIsSet) {
   EXPECT_TRUE(light.getDirection() == glm::vec3(2.0, 2.5, -1.5));
   EXPECT_EQ(light.getIntensity(), 500);
   EXPECT_EQ(light.getType(), liquid::Light::DIRECTIONAL);
+  EXPECT_EQ(light.getTypeName(), "Directional");
 }
 
 TEST(Light, PositionSetter) {

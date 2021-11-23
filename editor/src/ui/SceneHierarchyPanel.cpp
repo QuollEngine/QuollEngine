@@ -17,6 +17,10 @@ void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::End();
 }
 
+void SceneHierarchyPanel::setNodeClickHandler(const NodeClickHandler &handler) {
+  nodeClickHandler = handler;
+}
+
 void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
                                      SceneManager &sceneManager) {
   liquid::String name;
@@ -37,6 +41,9 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   bool open = false;
   if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
     open = !isLeaf;
+    if (ImGui::IsItemClicked()) {
+      nodeClickHandler(node);
+    }
   }
 
   if (ImGui::BeginPopupContextItem()) {

@@ -32,4 +32,13 @@ void Light::setColor(glm::vec4 color_) { color = color_; }
 
 void Light::setIntensity(float intensity_) { intensity = intensity_; }
 
+const String Light::getTypeName() const {
+  switch (type) {
+  case DIRECTIONAL:
+    return "Directional";
+  default:
+    return "Unknown";
+  }
+}
+
 } // namespace liquid
