@@ -1,4 +1,6 @@
 #include "SceneHierarchyPanel.h"
+#include "ConfirmationDialog.h"
+
 #include <imgui.h>
 #include <glm/gtc/matrix_access.hpp>
 
@@ -46,17 +48,25 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
     }
   }
 
+  ConfirmationDialog confirmDeleteSceneNode(
+      "Delete scene node",
+      "Are you sure you want to delete node \"" + name + "\"?",
+      [this, node](SceneManager &sceneManager) { handleDelete(node); },
+      "Delete");
+
   if (ImGui::BeginPopupContextItem()) {
     if (ImGui::MenuItem("Go to view")) {
       handleMoveToNode(node, sceneManager.getEditorCamera());
     }
 
     if (ImGui::MenuItem("Delete")) {
-      handleDelete(node);
+      confirmDeleteSceneNode.show();
     }
 
     ImGui::EndPopup();
   }
+
+  confirmDeleteSceneNode.render(sceneManager);
 
   if (open) {
     for (auto *child : node->getChildren()) {

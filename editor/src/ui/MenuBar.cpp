@@ -1,4 +1,6 @@
 #include "MenuBar.h"
+#include "ConfirmationDialog.h"
+
 #include <imgui.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_access.hpp>
@@ -8,11 +10,14 @@ namespace liquidator {
 MenuBar::MenuBar(const liquid::TinyGLTFLoader &loader_) : loader(loader_) {}
 
 void MenuBar::render(SceneManager &sceneManager) {
-  bool createNewSceneConfirmationDialogOpen = false;
+  ConfirmationDialog confirmCreateNewScene(
+      "Create New Scene", "Are you sure you want to create a new scene?",
+      [this](SceneManager &sceneManager) { handleNewScene(sceneManager); });
+
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
       if (ImGui::MenuItem("New", nullptr)) {
-        createNewSceneConfirmationDialogOpen = true;
+        confirmCreateNewScene.show();
       }
 
       if (ImGui::MenuItem("Import GLTF...", nullptr)) {
@@ -26,27 +31,7 @@ void MenuBar::render(SceneManager &sceneManager) {
     ImGui::EndMainMenuBar();
   }
 
-  if (createNewSceneConfirmationDialogOpen) {
-    ImGui::OpenPopup("Create New Scene");
-    createNewSceneConfirmationDialogOpen = false;
-  }
-
-  bool open = true;
-  if (ImGui::BeginPopupModal("Create New Scene", &open)) {
-    ImGui::Text("Are you sure you want to create a new scene?");
-    if (ImGui::Button("Create")) {
-      handleNewScene(sceneManager);
-      ImGui::CloseCurrentPopup();
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Cancel")) {
-      ImGui::CloseCurrentPopup();
-    }
-
-    ImGui::EndPopup();
-  }
+  confirmCreateNewScene.render(sceneManager);
 }
 
 void MenuBar::handleGLTFImport(const liquid::String &filePath,
