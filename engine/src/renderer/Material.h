@@ -8,7 +8,7 @@
 #include "ResourceAllocator.h"
 #include "MaterialResourceBinder.h"
 #include "ResourceManager.h"
-#include "CullMode.h"
+#include "renderer/render-graph/RenderGraphPipelineDescriptor.h"
 
 namespace liquid {
 
@@ -17,19 +17,14 @@ public:
   /**
    * @brief Creates material
    *
-   * @param vertexShader Vertex shader
-   * @param fragmentShader Fragment shader
    * @param textures Textures
    * @param properties Material properties
-   * @param cullMode Cull mode
    * @param resourceAllocator Resource allocator
    * @param resourceManager Resource manager
    */
-  Material(const SharedPtr<Shader> &vertexShader,
-           const SharedPtr<Shader> &fragmentShader,
-           const std::vector<SharedPtr<Texture>> &textures,
+  Material(const std::vector<SharedPtr<Texture>> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           const CullMode &cullMode, ResourceAllocator *resourceAllocator,
+           ResourceAllocator *resourceAllocator,
            ResourceManager *resourceManager);
 
   /**
@@ -98,13 +93,6 @@ public:
     return properties;
   }
 
-  /**
-   * @brief Get cull mode
-   *
-   * @return Cull mode
-   */
-  inline const CullMode &getCullMode() const { return cullMode; }
-
 private:
   /**
    * @brief Copies local data to buffer
@@ -119,7 +107,7 @@ private:
   SharedPtr<Shader> fragmentShader = nullptr;
   std::vector<SharedPtr<Texture>> textures;
   SharedPtr<HardwareBuffer> uniformBuffer = nullptr;
-  CullMode cullMode;
+  CullMode cullMode = CullMode::None;
 
   std::vector<Property> properties;
   std::map<String, size_t> propertyMap;

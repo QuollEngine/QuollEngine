@@ -7,15 +7,13 @@
 #include "renderer/ResourceAllocator.h"
 
 #include "VulkanSwapchain.h"
-#include "VulkanPipelineBuilder.h"
 #include "VulkanShader.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanRenderData.h"
 #include "VulkanResourceManager.h"
-#include "VulkanShadowPass.h"
 #include "VulkanResourceAllocator.h"
-
 #include "VulkanRenderBackend.h"
+#include "VulkanGraphEvaluator.h"
 
 #include "renderer/ShaderLibrary.h"
 #include "renderer/MaterialPBR.h"
@@ -46,9 +44,6 @@ public:
   VulkanRenderer &operator=(const VulkanRenderer &rhs) = delete;
   VulkanRenderer &operator=(VulkanRenderer &&rhs) = delete;
 
-  void drawRenderables(RenderCommandList &commandList,
-                       const SharedPtr<Camera> &camera,
-                       bool useForShadowMapping);
   void draw(const SharedPtr<VulkanRenderData> &renderData);
   void waitForIdle();
 
@@ -66,7 +61,6 @@ public:
   inline ResourceAllocator *getResourceAllocator() {
     return renderBackend.getResourceAllocator();
   }
-  inline VulkanPipelineBuilder *getPipelineBuilder() { return pipelineBuilder; }
   inline ImguiRenderer *getImguiRenderer() { return imguiRenderer; }
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
@@ -85,35 +79,32 @@ public:
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
 private:
-  void createRenderPass();
-  void createPipelineBuilder();
+  void createRenderGraph(const SharedPtr<VulkanRenderData> &renderData);
 
   void loadShaders();
 
-  void createShadowPass();
-  void destroyShadowPass();
-
   void createImgui();
 
-  void setViewportAndScissor(RenderCommandList &commandList, glm::vec2 extent);
+  void createMainPipelineLayout();
 
 private:
   glm::vec4 clearColor{0.0, 0.0, 0.0, 1.0};
 
-  bool framebufferResized = false;
-
   VulkanRenderBackend renderBackend;
 
   VulkanDescriptorManager *descriptorManager = nullptr;
-  VulkanPipelineBuilder *pipelineBuilder = nullptr;
   VulkanResourceManager *mainResourceManager = nullptr;
 
-  SharedPtr<VulkanShadowPass> shadowPass;
   std::vector<SharedPtr<Material>> shadowMaterials;
 
   ImguiRenderer *imguiRenderer = nullptr;
 
   ShaderLibrary *shaderLibrary;
+
+  RenderGraph graph;
+  bool graphCreated = false;
+
+  VkPipelineLayout mainPipelineLayout = VK_NULL_HANDLE;
 
   EntityContext &entityContext;
 

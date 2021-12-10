@@ -1,7 +1,6 @@
 #pragma once
 
 #include "renderer/ResourceManager.h"
-#include "VulkanPipelineBuilder.h"
 #include "VulkanDescriptorManager.h"
 
 namespace liquid {
@@ -12,13 +11,8 @@ public:
    * @brief Create Vulkan resource manager
    *
    * @param descriptorManager Descriptor manager
-   * @param pipelineBuilder Pipeline builder
-   * @param renderPass Vulkan render pass
-   * @param subpass Vulkan render pass subpass index
    */
-  VulkanResourceManager(VulkanDescriptorManager *descriptorManager,
-                        VulkanPipelineBuilder *pipelineBuilder,
-                        VkRenderPass renderPass, uint32_t subpass);
+  VulkanResourceManager(VulkanDescriptorManager *descriptorManager);
 
   /**
    * @brief Create Vulkan material resource binder
@@ -31,9 +25,6 @@ public:
 
 private:
   VulkanDescriptorManager *descriptorManager;
-  VulkanPipelineBuilder *pipelineBuilder;
-  VkRenderPass renderPass;
-  uint32_t subpass;
 };
 
 } // namespace liquid

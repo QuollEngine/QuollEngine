@@ -5,12 +5,26 @@
 
 namespace liquid {
 
-void VulkanUploadContext::create(const VulkanContext &context) {
+VulkanUploadContext::VulkanUploadContext(const VulkanContext &context) {
   device = context.getDevice();
   graphicsQueue = context.getGraphicsQueue();
 
   createCommandPool(context);
   createFence();
+}
+
+VulkanUploadContext::~VulkanUploadContext() {
+  if (uploadFence) {
+    vkDestroyFence(device, uploadFence, nullptr);
+    uploadFence = VK_NULL_HANDLE;
+    LOG_DEBUG("[Vulkan] Upload fence destroyed");
+  }
+
+  if (uploadCommandPool) {
+    vkDestroyCommandPool(device, uploadCommandPool, nullptr);
+    uploadCommandPool = VK_NULL_HANDLE;
+    LOG_DEBUG("[Vulkan] Upload command pool destroyed");
+  }
 }
 
 void VulkanUploadContext::submit(const SubmitFn &submitFn) const {
@@ -86,20 +100,6 @@ void VulkanUploadContext::createFence() {
                       "Failed to create upload fence");
 
   LOG_DEBUG("[Vulkan] Upload fence created");
-}
-
-void VulkanUploadContext::destroy() {
-  if (uploadFence) {
-    vkDestroyFence(device, uploadFence, nullptr);
-    uploadFence = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Upload fence destroyed");
-  }
-
-  if (uploadCommandPool) {
-    vkDestroyCommandPool(device, uploadCommandPool, nullptr);
-    uploadCommandPool = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Upload command pool destroyed");
-  }
 }
 
 } // namespace liquid

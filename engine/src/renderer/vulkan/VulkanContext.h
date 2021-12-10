@@ -34,6 +34,11 @@ public:
    */
   ~VulkanContext();
 
+  /**
+   * @brief Default constructor
+   */
+  VulkanContext() = default;
+
   VulkanContext(const VulkanContext &rhs) = delete;
   VulkanContext(VulkanContext &&rhs) = delete;
   VulkanContext &operator=(const VulkanContext &rhs) = delete;
@@ -99,8 +104,8 @@ private:
   VulkanValidator validator;
   VkInstance instance = nullptr;
 
-  bool enableValidations;
-  GLFWWindow *window;
+  bool enableValidations = false;
+  GLFWWindow *window = nullptr;
 };
 
 } // namespace liquid

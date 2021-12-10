@@ -32,7 +32,8 @@ public:
    * @param pipeline Pipeline
    * @param bindPoint Pipeline bind point
    */
-  void bindPipeline(VkPipeline pipeline, VkPipelineBindPoint bindPoint);
+  void bindPipeline(const SharedPtr<Pipeline> &pipeline,
+                    VkPipelineBindPoint bindPoint);
 
   /**
    * @brief Bind descriptor sets

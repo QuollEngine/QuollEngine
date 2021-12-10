@@ -19,9 +19,8 @@ TEST(GeometryTest, SetsVerticesAndIndicesOnConstruct) {
   const std::vector<liquid::Vertex> vertices{
       {1.0, 2.0, 3.0}, {1.0, 2.0, 3.0}, {1.0, 2.0, 2.0}};
   std::vector<uint32_t> indices{0, 1, 2, 2, 1, 0};
-  liquid::SharedPtr<liquid::Material> material(new liquid::Material(
-      shaderVert, shaderFrag, {}, {}, liquid::CullMode::None,
-      &resourceAllocator, &resourceManager));
+  liquid::SharedPtr<liquid::Material> material(
+      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
   liquid::Geometry geometry(vertices, indices, material);
 
   auto &meshVertices = geometry.getVertices();
@@ -83,10 +82,8 @@ TEST(GeometryTest, SetsMaterial) {
 
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
-  ShaderPtr shaderVert, shaderFrag;
-  liquid::SharedPtr<liquid::Material> material(new liquid::Material(
-      shaderVert, shaderFrag, {}, {}, liquid::CullMode::None,
-      &resourceAllocator, &resourceManager));
+  liquid::SharedPtr<liquid::Material> material(
+      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
 
   geometry.setMaterial(material);
   EXPECT_EQ(geometry.getMaterial().get(), material.get());

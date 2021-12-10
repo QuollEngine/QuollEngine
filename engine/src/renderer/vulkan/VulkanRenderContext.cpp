@@ -5,7 +5,7 @@
 
 namespace liquid {
 
-void VulkanRenderContext::create(const VulkanContext &context) {
+VulkanRenderContext::VulkanRenderContext(const VulkanContext &context) {
   device = context.getDevice();
   createCommandBuffers(context.getPhysicalDevice()
                            .getQueueFamilyIndices()
@@ -18,7 +18,7 @@ void VulkanRenderContext::create(const VulkanContext &context) {
   presentQueue = context.getPresentQueue();
 }
 
-void VulkanRenderContext::destroy() {
+VulkanRenderContext::~VulkanRenderContext() {
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     if (renderFences.at(i)) {
       vkDestroyFence(device, renderFences.at(i), nullptr);

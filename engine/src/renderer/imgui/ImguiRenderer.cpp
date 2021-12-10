@@ -1,8 +1,10 @@
 #include "core/Base.h"
 #include "core/EngineGlobals.h"
 
+#include "renderer/Pipeline.h"
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
+#include "renderer/vulkan/VulkanPipeline.h"
 
 #include "ImguiError.h"
 
@@ -22,11 +24,8 @@ namespace liquid {
 
 ImguiRenderer::ImguiRenderer(GLFWWindow *window,
                              const VulkanContext &vulkanContext_,
-                             VkRenderPass renderPass_,
-                             ShaderLibrary *shaderLibrary_,
                              ResourceAllocator *resourceAllocator_)
-    : vulkanContext(vulkanContext_), resourceAllocator(resourceAllocator_),
-      shaderLibrary(shaderLibrary_), renderPass(renderPass_) {
+    : vulkanContext(vulkanContext_), resourceAllocator(resourceAllocator_) {
   ImGui::CreateContext();
 
   descriptorManager = new VulkanDescriptorManager(vulkanContext.getDevice());
@@ -41,7 +40,7 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
   frameData.resize(2);
   loadFonts();
   createDescriptorLayout();
-  createPipeline();
+  createPipelineLayout();
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
 }
@@ -63,11 +62,6 @@ ImguiRenderer::~ImguiRenderer() {
     pipelineLayout = VK_NULL_HANDLE;
   }
 
-  if (pipeline) {
-    vkDestroyPipeline(vulkanContext.getDevice(), pipeline, nullptr);
-    pipeline = VK_NULL_HANDLE;
-  }
-
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 }
@@ -79,7 +73,8 @@ void ImguiRenderer::beginRendering() {
 
 void ImguiRenderer::endRendering() { ImGui::Render(); }
 
-void ImguiRenderer::draw(RenderCommandList &commandList) {
+void ImguiRenderer::draw(RenderCommandList &commandList,
+                         const SharedPtr<Pipeline> &pipeline) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -234,7 +229,7 @@ VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(Texture *texture) {
   return descriptorSet;
 }
 
-void ImguiRenderer::createPipeline() {
+void ImguiRenderer::createPipelineLayout() {
   std::array<VkPushConstantRange, 1> pushConstants{};
   pushConstants.at(0).stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
   pushConstants.at(0).offset = 0;
@@ -249,119 +244,6 @@ void ImguiRenderer::createPipeline() {
   layoutInfo.pPushConstantRanges = pushConstants.data();
   vkCreatePipelineLayout(vulkanContext.getDevice(), &layoutInfo, nullptr,
                          &pipelineLayout);
-
-  const auto &vertexShader =
-      std::dynamic_pointer_cast<VulkanShader>(
-          shaderLibrary->getShader("__engine.imgui.vertex"))
-          ->getShaderModule();
-  const auto &fragmentShader =
-      std::dynamic_pointer_cast<VulkanShader>(
-          shaderLibrary->getShader("__engine.imgui.fragment"))
-          ->getShaderModule();
-
-  std::array<VkPipelineShaderStageCreateInfo, 2> stages{};
-  stages.at(0).sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  stages.at(0).stage = VK_SHADER_STAGE_VERTEX_BIT;
-  stages.at(0).module = vertexShader;
-  stages.at(0).pName = "main";
-  stages.at(1).sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  stages.at(1).stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  stages.at(1).module = fragmentShader;
-  stages.at(1).pName = "main";
-
-  VkVertexInputBindingDescription bindingDescriptions{};
-  bindingDescriptions.stride = sizeof(ImDrawVert);
-  bindingDescriptions.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-  std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-  attributeDescriptions.at(0).location = 0;
-  attributeDescriptions.at(0).binding = 0;
-  attributeDescriptions.at(0).format = VK_FORMAT_R32G32_SFLOAT;
-  attributeDescriptions.at(0).offset = IM_OFFSETOF(ImDrawVert, pos);
-  attributeDescriptions.at(1).location = 1;
-  attributeDescriptions.at(1).binding = 0;
-  attributeDescriptions.at(1).format = VK_FORMAT_R32G32_SFLOAT;
-  attributeDescriptions.at(1).offset = IM_OFFSETOF(ImDrawVert, uv);
-  attributeDescriptions.at(2).location = 2;
-  attributeDescriptions.at(2).binding = 0;
-  attributeDescriptions.at(2).format = VK_FORMAT_R8G8B8A8_UNORM;
-  attributeDescriptions.at(2).offset = IM_OFFSETOF(ImDrawVert, col);
-
-  VkPipelineVertexInputStateCreateInfo vertexInputState{};
-  vertexInputState.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputState.vertexBindingDescriptionCount = 1;
-  vertexInputState.pVertexBindingDescriptions = &bindingDescriptions;
-  vertexInputState.vertexAttributeDescriptionCount = 3;
-  vertexInputState.pVertexAttributeDescriptions = attributeDescriptions.data();
-
-  VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-  inputAssembly.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-  VkPipelineViewportStateCreateInfo viewport{};
-  viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport.viewportCount = 1;
-  viewport.scissorCount = 1;
-
-  VkPipelineRasterizationStateCreateInfo rasterization{};
-  rasterization.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-  rasterization.polygonMode = VK_POLYGON_MODE_FILL;
-  rasterization.cullMode = VK_CULL_MODE_NONE;
-  rasterization.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-  rasterization.lineWidth = 1.0f;
-
-  VkPipelineMultisampleStateCreateInfo multisample{};
-  multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-  multisample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-  VkPipelineColorBlendAttachmentState colorAttachment{};
-  colorAttachment.blendEnable = true;
-  colorAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-  colorAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-  colorAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-  colorAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-  colorAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-  colorAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-  colorAttachment.colorWriteMask =
-      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-
-  VkPipelineDepthStencilStateCreateInfo depthInfo{};
-  depthInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-
-  VkPipelineColorBlendStateCreateInfo blendInfo{};
-  blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-  blendInfo.attachmentCount = 1;
-  blendInfo.pAttachments = &colorAttachment;
-
-  std::array<VkDynamicState, 2> dynamicStates{VK_DYNAMIC_STATE_VIEWPORT,
-                                              VK_DYNAMIC_STATE_SCISSOR};
-  VkPipelineDynamicStateCreateInfo dynamicState{};
-  dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-  dynamicState.dynamicStateCount = dynamicStates.size();
-  dynamicState.pDynamicStates = dynamicStates.data();
-
-  VkGraphicsPipelineCreateInfo createInfo{};
-  createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-  createInfo.flags = 0;
-  createInfo.stageCount = stages.size();
-  createInfo.pStages = stages.data();
-  createInfo.pVertexInputState = &vertexInputState;
-  createInfo.pInputAssemblyState = &inputAssembly;
-  createInfo.pViewportState = &viewport;
-  createInfo.pRasterizationState = &rasterization;
-  createInfo.pMultisampleState = &multisample;
-  createInfo.pDepthStencilState = &depthInfo;
-  createInfo.pColorBlendState = &blendInfo;
-  createInfo.pDynamicState = &dynamicState;
-  createInfo.layout = pipelineLayout;
-  createInfo.renderPass = renderPass;
-  createInfo.subpass = 0;
-  vkCreateGraphicsPipelines(vulkanContext.getDevice(), VK_NULL_HANDLE, 1,
-                            &createInfo, nullptr, &pipeline);
 }
 
 void ImguiRenderer::setupRenderStates(ImDrawData *data,

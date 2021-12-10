@@ -57,11 +57,8 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         ShaderLibrary *shaderLibrary, const CullMode &cullMode,
                          ResourceAllocator *resourceAllocator,
                          ResourceManager *resourceManager)
-    : Material(shaderLibrary->getShader("__engine.default.pbr.vertex"),
-               shaderLibrary->getShader("__engine.default.pbr.fragment"),
-               properties.getTextures(), properties.getProperties(), cullMode,
+    : Material(properties.getTextures(), properties.getProperties(),
                resourceAllocator, resourceManager) {}
 } // namespace liquid

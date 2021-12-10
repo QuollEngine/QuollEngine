@@ -358,7 +358,6 @@ void VulkanDescriptorManager::createDescriptorPool() {
   descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
   descriptorPoolInfo.pNext = nullptr;
   descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
   descriptorPoolInfo.maxSets = NUM_DESCRIPTORS;
   descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   descriptorPoolInfo.pPoolSizes = poolSizes.data();

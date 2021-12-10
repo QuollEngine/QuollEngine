@@ -6,12 +6,14 @@
 
 #include "window/glfw/GLFWWindow.h"
 
+#include "renderer/render-graph/RenderGraph.h"
+
 #include "VulkanRenderContext.h"
 #include "VulkanUploadContext.h"
 #include "VulkanContext.h"
 #include "VulkanDescriptorManager.h"
-#include "VulkanPipelineBuilder.h"
 #include "VulkanResourceAllocator.h"
+#include "VulkanGraphEvaluator.h"
 
 namespace liquid {
 
@@ -75,27 +77,18 @@ public:
   inline VulkanSwapchain &getSwapchain() { return swapchain; }
 
   /**
-   * @brief Get swapchain pass
-   *
-   * @return Swapchain pass
-   */
-  inline VkRenderPass getSwapchainPass() { return swapchainPass; }
-
-  /**
-   * @brief Get swapchain framebuffers
-   *
-   * @return Swapchain framebuffers
-   */
-  inline const std::vector<VkFramebuffer> &getSwapchainFramebuffers() const {
-    return swapchainFramebuffers;
-  }
-
-  /**
    * @brief Check if framebuffer is resized
    *
    * @return Framebuffer is resized
    */
   inline bool isFramebufferResized() const { return framebufferResized; }
+
+  /**
+   * @brief Execute render graph
+   *
+   * @param graph Render graph
+   */
+  void execute(RenderGraph &graph);
 
   /**
    * @brief Wait for idle device
@@ -115,34 +108,11 @@ public:
    */
   void recreateSwapchain();
 
-  /**
-   * @brief Create swapchain pass
-   */
-  void createSwapchainPass();
-
-  /**
-   * @brief Create swapchain framebuffers
-   */
-  void createSwapchainFramebuffers();
-
-  /**
-   * @brief Destroys swapchain pass
-   */
-  void destroySwapchainPass();
-
-  /**
-   * @brief Destroys swapchain framebuffers
-   */
-  void destroySwapchainFramebuffers();
-
 private:
   uint32_t resizeHandler = 0;
   bool framebufferResized = false;
 
   GLFWWindow *window = nullptr;
-
-  VkRenderPass swapchainPass = VK_NULL_HANDLE;
-  std::vector<VkFramebuffer> swapchainFramebuffers;
 
   VmaAllocator allocator = nullptr;
   VulkanResourceAllocator *resourceAllocator = nullptr;
@@ -150,6 +120,7 @@ private:
   VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;
   VulkanRenderContext renderContext;
+  std::unique_ptr<VulkanGraphEvaluator> graphEvaluator;
 };
 
 } // namespace liquid

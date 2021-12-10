@@ -13,6 +13,7 @@
 #include "renderer/ResourceAllocator.h"
 #include "renderer/HardwareBuffer.h"
 #include "renderer/RenderCommandList.h"
+#include "renderer/Pipeline.h"
 
 namespace liquid {
 
@@ -24,7 +25,6 @@ class ImguiRenderer {
 
 public:
   ImguiRenderer(GLFWWindow *window, const VulkanContext &vulkanContext,
-                VkRenderPass renderPass, ShaderLibrary *shaderLibrary,
                 ResourceAllocator *resourceAllocator);
   ~ImguiRenderer();
 
@@ -36,12 +36,15 @@ public:
   void beginRendering();
   void endRendering();
 
-  void draw(RenderCommandList &commandList);
+  void draw(RenderCommandList &commandList,
+            const SharedPtr<Pipeline> &pipeline);
+
+  inline VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
 private:
   void loadFonts();
 
-  void createPipeline();
+  void createPipelineLayout();
 
   void createDescriptorLayout();
   VkDescriptorSet createDescriptorFromTexture(Texture *texture);

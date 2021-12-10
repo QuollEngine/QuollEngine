@@ -6,32 +6,27 @@
 #include "../mocks/TestResourceManager.h"
 #include <gtest/gtest.h>
 
-using ShaderPtr = liquid::SharedPtr<liquid::Shader>;
 using TexturePtr = liquid::SharedPtr<liquid::Texture>;
 
 TEST(MaterialTest, SetsShadersBuffersTextureAndResourceBinder) {
   std::vector<TexturePtr> textures{nullptr};
-  ShaderPtr shaderVert, shaderFrag;
 
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
   liquid::Material material(
-      shaderVert, shaderFrag, textures,
+      textures,
       {
           {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
           {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
       },
-      liquid::CullMode::Front, &resourceAllocator, &resourceManager);
+      &resourceAllocator, &resourceManager);
 
   EXPECT_NE(material.getResourceBinder(), nullptr);
   const auto &testBinder = std::static_pointer_cast<TestMaterialResourceBinder>(
       material.getResourceBinder());
   EXPECT_EQ(testBinder->material, &material);
 
-  EXPECT_EQ(material.getCullMode(), liquid::CullMode::Front);
-  EXPECT_EQ(material.getVertexShader().get(), shaderVert.get());
-  EXPECT_EQ(material.getFragmentShader().get(), shaderFrag.get());
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_NE(material.getUniformBuffer(), nullptr);
@@ -52,55 +47,41 @@ TEST(MaterialTest, SetsShadersBuffersTextureAndResourceBinder) {
 
 TEST(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   std::vector<TexturePtr> textures{nullptr};
-  ShaderPtr shaderVert, shaderFrag;
 
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
-  liquid::Material material(shaderVert, shaderFrag, textures, {},
-                            liquid::CullMode::Front, &resourceAllocator,
-                            &resourceManager);
+  liquid::Material material(textures, {}, &resourceAllocator, &resourceManager);
 
-  EXPECT_EQ(material.getVertexShader().get(), shaderVert.get());
-  EXPECT_EQ(material.getFragmentShader().get(), shaderFrag.get());
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_EQ(material.getUniformBuffer(), nullptr);
 }
 
 TEST(MaterialTest, DoesNotSetTexturesIfNoTexture) {
-  ShaderPtr shaderVert, shaderFrag;
-
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
-  liquid::Material material(shaderVert, shaderFrag, {}, {},
-                            liquid::CullMode::Front, &resourceAllocator,
-                            &resourceManager);
+  liquid::Material material({}, {}, &resourceAllocator, &resourceManager);
 
-  EXPECT_EQ(material.getVertexShader().get(), shaderVert.get());
-  EXPECT_EQ(material.getFragmentShader().get(), shaderFrag.get());
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
   EXPECT_EQ(material.getUniformBuffer(), nullptr);
 }
 
 TEST(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
-  ShaderPtr shaderVert, shaderFrag;
-
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material(shaderVert, shaderFrag, {},
+  liquid::Material material({},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            liquid::CullMode::Front, &resourceAllocator,
-                            &resourceManager);
+                            &resourceAllocator, &resourceManager);
 
   const auto &properties = material.getProperties();
   {
@@ -135,21 +116,18 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
 }
 
 TEST(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
-  ShaderPtr shaderVert, shaderFrag;
-
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material(shaderVert, shaderFrag, {},
+  liquid::Material material({},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            liquid::CullMode::Front, &resourceAllocator,
-                            &resourceManager);
+                            &resourceAllocator, &resourceManager);
 
   const auto &properties = material.getProperties();
   {
@@ -184,21 +162,18 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
 }
 
 TEST(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
-  ShaderPtr shaderVert, shaderFrag;
-
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material(shaderVert, shaderFrag, {},
+  liquid::Material material({},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            liquid::CullMode::Front, &resourceAllocator,
-                            &resourceManager);
+                            &resourceAllocator, &resourceManager);
 
   const auto &properties = material.getProperties();
   {

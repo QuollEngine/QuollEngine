@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include "HardwareBuffer.h"
+#include "Pipeline.h"
 
 namespace liquid {
 
@@ -68,7 +69,7 @@ struct RenderCommandEndRenderPass
 
 struct RenderCommandBindPipeline
     : public TypedRenderCommandBase<RenderCommandType::BindPipeline> {
-  VkPipeline pipeline = VK_NULL_HANDLE;
+  SharedPtr<Pipeline> pipeline = nullptr;
   VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 };
 

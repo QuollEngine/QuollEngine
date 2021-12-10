@@ -23,6 +23,7 @@
 #include <memory>
 #include <list>
 #include <type_traits>
+#include <variant>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>

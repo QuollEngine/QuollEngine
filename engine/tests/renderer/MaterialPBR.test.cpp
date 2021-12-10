@@ -66,17 +66,17 @@ TEST_F(MaterialPBRTest, GetsTextures) {
 TEST_F(MaterialPBRTest, GetsProperties) {
   liquid::MaterialPBR::Properties properties{nullptr,
                                              0,
-                                             {1.0, 0.2, 0.3, 0.4},
+                                             {1.0f, 0.2f, 0.3f, 0.4f},
                                              nullptr,
                                              0,
-                                             0.2,
-                                             0.6,
+                                             0.2f,
+                                             0.6f,
                                              nullptr,
                                              1,
-                                             0.7,
+                                             0.7f,
                                              nullptr,
                                              0,
-                                             0.3,
+                                             0.3f,
                                              nullptr,
                                              0,
                                              glm::vec3(1.0f, 0.2f, 0.4f)};
@@ -141,43 +141,29 @@ TEST_F(MaterialPBRTest, GetsProperties) {
 }
 
 TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
-  liquid::ShaderLibrary shaderLibrary;
-  shaderLibrary.addShader("__engine.default.pbr.vertex",
-                          std::make_shared<TestShader>("pbr-vert.shader"));
-  shaderLibrary.addShader("__engine.default.pbr.fragment",
-                          std::make_shared<TestShader>("pbr-frag.shader"));
-
   TestResourceAllocator resourceAllocator;
   TestResourceManager resourceManager;
 
   liquid::MaterialPBR::Properties properties{
       std::make_shared<liquid::Texture>(nullptr, 0, statsManager),
       0,
-      {1.0, 0.2, 0.3, 0.4},
+      {1.0f, 0.2f, 0.3f, 0.4f},
       nullptr,
       0,
-      0.2,
-      0.6,
+      0.2f,
+      0.6f,
       std::make_shared<liquid::Texture>(nullptr, 0, statsManager),
       1,
-      0.7,
+      0.7f,
       nullptr,
       0,
-      0.3,
+      0.3f,
       std::make_shared<liquid::Texture>(nullptr, 0, statsManager),
       0,
       glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material(properties, &shaderLibrary,
-                               liquid::CullMode::None, &resourceAllocator,
+  liquid::MaterialPBR material(properties, &resourceAllocator,
                                &resourceManager);
-
-  EXPECT_EQ(std::dynamic_pointer_cast<TestShader>(material.getVertexShader())
-                ->shaderFile,
-            "pbr-vert.shader");
-  EXPECT_EQ(std::dynamic_pointer_cast<TestShader>(material.getFragmentShader())
-                ->shaderFile,
-            "pbr-frag.shader");
 
   EXPECT_EQ(material.getTextures().size(), 3);
   EXPECT_EQ(material.getUniformBuffer()->getBufferSize(),

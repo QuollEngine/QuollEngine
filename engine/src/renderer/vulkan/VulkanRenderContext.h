@@ -23,14 +23,19 @@ public:
    *
    * @param context Vulkan context
    */
-  void create(const VulkanContext &context);
+  VulkanRenderContext(const VulkanContext &context);
 
   /**
    * @brief Destroy render context
    *
    * Destroys render semaphores, fences, and command buffers
    */
-  void destroy();
+  ~VulkanRenderContext();
+
+  VulkanRenderContext(const VulkanRenderContext &) = delete;
+  VulkanRenderContext(VulkanRenderContext &&) = delete;
+  VulkanRenderContext &operator=(const VulkanRenderContext &) = delete;
+  VulkanRenderContext &operator=(VulkanRenderContext &&) = delete;
 
   /**
    * @brief Render commands in command list

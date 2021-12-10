@@ -14,12 +14,22 @@ public:
    *
    * @param context Vulkan context
    */
-  void create(const VulkanContext &context);
+  VulkanUploadContext(const VulkanContext &context);
 
   /**
    * @brief Destroy upload context
    */
-  void destroy();
+  ~VulkanUploadContext();
+
+  /**
+   * @brief Default constructor
+   */
+  VulkanUploadContext() = default;
+
+  VulkanUploadContext(const VulkanUploadContext &) = delete;
+  VulkanUploadContext(VulkanUploadContext &&) = delete;
+  VulkanUploadContext &operator=(const VulkanUploadContext &) = delete;
+  VulkanUploadContext &operator=(VulkanUploadContext &&) = delete;
 
   /**
    * @brief Submit for upload

@@ -11,10 +11,12 @@ using ::testing::Return;
 
 class VulkanResourceAllocatorTests : public VulkanTestBase {
 public:
+  liquid::VulkanContext vulkanContext;
+  liquid::VulkanUploadContext uploadContext;
+  liquid::StatsManager statsManager;
 };
 
 TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
-
   unsigned char data[] = {1, 2, 3, 4, 5, 6, 7};
 
   EXPECT_CALL(*vmaLibMock, vmaMapMemory)
@@ -46,8 +48,6 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
         return VK_SUCCESS;
       });
 
-  liquid::StatsManager statsManager;
-  liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, statsManager);
 
@@ -102,8 +102,6 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
         return VK_SUCCESS;
       });
 
-  liquid::StatsManager statsManager;
-  liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, statsManager);
 
@@ -153,8 +151,6 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
         return VK_SUCCESS;
       });
 
-  liquid::StatsManager statsManager;
-  liquid::VulkanUploadContext uploadContext;
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, statsManager);
 

@@ -1,16 +1,13 @@
 #pragma once
 
+#include "renderer/Pipeline.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace liquid {
 
-class VulkanPipeline {
+class VulkanPipeline : public Pipeline {
 public:
-  /**
-   * @brief Default constructor
-   */
-  VulkanPipeline() = default;
-
   /**
    * Constructor to set device and pipeline
    *
@@ -20,39 +17,16 @@ public:
   VulkanPipeline(VkDevice device, VkPipeline pipeline);
 
   /**
-   * @brief Move constructor
-   *
-   * @param rhs Vulkan pipeline
-   */
-  VulkanPipeline(VulkanPipeline &&rhs);
-
-  /**
-   * @brief Move equality operator
-   *
-   * @param rhs Vulkan pipeline
-   */
-  VulkanPipeline &operator=(VulkanPipeline &&rhs);
-
-  /**
-   * @brief Copy constructor
-   *
-   * Deleted
-   */
-  VulkanPipeline &operator=(const VulkanPipeline &rhs) = delete;
-
-  /**
-   * @brief Copy equality operator
-   *
-   * Deleted
-   */
-  VulkanPipeline(const VulkanPipeline &rhs) = delete;
-
-  /**
    * @brief Destructor
    *
    * Destroys Vulkan pipeline
    */
   ~VulkanPipeline();
+
+  VulkanPipeline(const VulkanPipeline &) = delete;
+  VulkanPipeline(VulkanPipeline &&) = delete;
+  VulkanPipeline &operator=(const VulkanPipeline &) = delete;
+  VulkanPipeline &operator=(VulkanPipeline &&) = delete;
 
   /**
    * @brief Get Vulkan pipeline

@@ -8,8 +8,6 @@
 
 using MaterialPtr = liquid::SharedPtr<liquid::Material>;
 
-liquid::SharedPtr<liquid::Shader> emptyShader(nullptr);
-
 TEST(MeshInstanceTest, CreatesVertexAndIndexBuffersOnConstruct) {
   TestResourceAllocator resourceAllocator;
 
@@ -69,9 +67,8 @@ TEST(MeshInstanceTest, SetsMaterial) {
   liquid::Mesh mesh;
   liquid::Geometry geom;
   mesh.addGeometry(geom);
-  MaterialPtr material(new liquid::Material(
-      emptyShader, emptyShader, {}, {}, liquid::CullMode::None,
-      &resourceAllocator, &resourceManager));
+  MaterialPtr material(
+      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
   liquid::MeshInstance instance(&mesh, &resourceAllocator);
   EXPECT_EQ(instance.getMaterials().size(), 1);
   EXPECT_EQ(instance.getMaterials().at(0), nullptr);

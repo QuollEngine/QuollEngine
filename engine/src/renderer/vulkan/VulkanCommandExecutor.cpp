@@ -1,6 +1,7 @@
 #include "core/Base.h"
 #include "VulkanCommandExecutor.h"
 #include "VulkanHardwareBuffer.h"
+#include "VulkanPipeline.h"
 #include "VulkanError.h"
 
 namespace liquid {
@@ -112,7 +113,9 @@ void VulkanCommandExecutor::executeEndRenderPass(
 
 void VulkanCommandExecutor::executeBindPipeline(
     const RenderCommandBindPipeline *const command) {
-  vkCmdBindPipeline(commandBuffer, command->bindPoint, command->pipeline);
+  const auto &pipeline =
+      std::dynamic_pointer_cast<VulkanPipeline>(command->pipeline);
+  vkCmdBindPipeline(commandBuffer, command->bindPoint, pipeline->getPipeline());
 }
 
 void VulkanCommandExecutor::executeBindDescriptorSets(

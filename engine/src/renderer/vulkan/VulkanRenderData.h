@@ -28,18 +28,20 @@ public:
                    const std::vector<SharedPtr<Material>> &shadowMaterials);
 
   /**
-   * @brief Gets scene descriptor set
-   *
-   * @return Scene descriptor set
-   */
-  inline VkDescriptorSet getSceneDescriptorSet() { return sceneDescriptorSet; }
-
-  /**
    * @brief Get scene
    *
    * @return Scene
    */
   inline Scene *getScene() { return scene; }
+
+  /**
+   * @brief Get scene buffer
+   *
+   * @return Scene buffer
+   */
+  inline const SharedPtr<VulkanHardwareBuffer> &getSceneBuffer() const {
+    return sceneBuffer;
+  }
 
   /**
    * @brief Update scene data
@@ -48,7 +50,6 @@ public:
 
 private:
   EntityContext &entityContext;
-  VkDescriptorSet sceneDescriptorSet;
   VulkanDescriptorManager *descriptorManager;
   SharedPtr<Texture> shadowmaps;
   SharedPtr<VulkanHardwareBuffer> sceneBuffer;

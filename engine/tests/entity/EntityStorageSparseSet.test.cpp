@@ -248,14 +248,14 @@ TEST(EntityStorageSparseSetTests, IterateEntities) {
   auto e4 = storage.createEntity(); // 3
   auto e5 = storage.createEntity(); // 4
   storage.setComponent<IntComponent>(e1, {10});
-  storage.setComponent<FloatComponent>(e1, {10.2});
+  storage.setComponent<FloatComponent>(e1, {10.2f});
   storage.setComponent<StringComponent>(e1, {"Entity 1"});
   storage.setComponent<IntComponent>(e2, {20});
   storage.setComponent<FloatComponent>(e3, {30.2f});
   storage.setComponent<IntComponent>(e3, {30});
   storage.setComponent<StringComponent>(e3, {"Entity 3"});
   storage.setComponent<IntComponent>(e4, {40});
-  storage.setComponent<Component1>(e4, {40, 40.4});
+  storage.setComponent<Component1>(e4, {40, 40.4f});
   storage.setComponent<IntComponent>(e5, {50});
   storage.setComponent<StringComponent>(e5, {"Entity 5"});
 
@@ -317,7 +317,7 @@ TEST(EntityStorageSparseSetTests, DestroysOneComponent) {
   auto e1 = storage.createEntity(); // 0
   auto e2 = storage.createEntity(); // 1
   storage.setComponent<IntComponent>(e1, {10});
-  storage.setComponent<FloatComponent>(e1, {10.2});
+  storage.setComponent<FloatComponent>(e1, {10.2f});
   storage.setComponent<StringComponent>(e1, {"Entity 1"});
   storage.setComponent<IntComponent>(e2, {20});
   storage.setComponent<StringComponent>(e2, {"Entity 1"});
@@ -347,7 +347,7 @@ TEST(EntityStorageSparseSetTests, DestroysAll) {
   auto e1 = storage.createEntity(); // 0
   auto e2 = storage.createEntity(); // 1
   storage.setComponent<IntComponent>(e1, {10});
-  storage.setComponent<FloatComponent>(e1, {10.2});
+  storage.setComponent<FloatComponent>(e1, {10.2f});
   storage.setComponent<StringComponent>(e1, {"Entity 1"});
   storage.setComponent<IntComponent>(e2, {20});
   storage.setComponent<StringComponent>(e2, {"Entity 1"});

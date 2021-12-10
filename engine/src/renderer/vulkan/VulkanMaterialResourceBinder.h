@@ -4,7 +4,6 @@
 #include "renderer/Material.h"
 
 #include "VulkanDescriptorManager.h"
-#include "VulkanPipelineBuilder.h"
 
 namespace liquid {
 
@@ -17,14 +16,9 @@ public:
    *
    * @param material Material
    * @param descriptorManager Descriptor manager
-   * @param pipelineBuilder Pipeline builder
-   * @param renderPass Vulkan render pass
-   * @param subpass Vulkan render pass subpass index
    */
   VulkanMaterialResourceBinder(Material *material,
-                               VulkanDescriptorManager *descriptorManager,
-                               VulkanPipelineBuilder *pipelineBuilder,
-                               VkRenderPass renderPass, uint32_t subpass);
+                               VulkanDescriptorManager *descriptorManager);
 
   /**
    * @brief Destroy Vulkan material resource binder
@@ -42,19 +36,6 @@ public:
   operator=(VulkanMaterialResourceBinder &&rhs) = delete;
 
   /**
-   * @brief Get graphics pipeline
-   *
-   * Returns wireframe pipeline if wireframeMode is true
-   *
-   * @param wireframeMode Wireframe mode state
-   * @return Graphics pipeline
-   */
-  inline VkPipeline getGraphicsPipeline(bool wireframeMode) const {
-    return wireframeMode ? wireframeGraphicsPipeline.getPipeline()
-                         : graphicsPipeline.getPipeline();
-  }
-
-  /**
    * @brief Get material descriptor set
    *
    * @return Material descriptor set
@@ -64,11 +45,8 @@ public:
   }
 
 private:
-  VulkanPipeline graphicsPipeline;
-  VulkanPipeline wireframeGraphicsPipeline;
-
   VkDescriptorSet materialDescriptorSet = VK_NULL_HANDLE;
-  VulkanDescriptorManager *descriptorManager = VK_NULL_HANDLE;
+  VulkanDescriptorManager *descriptorManager = nullptr;
 };
 
 } // namespace liquid

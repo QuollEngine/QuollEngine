@@ -35,40 +35,38 @@ VulkanRenderData::VulkanRenderData(
       scene->getActiveCamera()->getUniformBuffer());
   sceneBuffer = std::dynamic_pointer_cast<VulkanHardwareBuffer>(
       resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject)));
-
-  sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
-      cameraBuffer, sceneBuffer, shadowmaps, {});
 }
 
 void VulkanRenderData::update() {
   SceneBufferObject sceneData{};
 
-  Entity entity = ENTITY_MAX;
+  // Entity entity = ENTITY_MAX;
 
-  entityContext.iterateEntities<EnvironmentComponent>(
-      [&entity](Entity e,
-                const EnvironmentComponent &environmentComponent) mutable {
-        if (entity == ENTITY_MAX) {
-          entity = e;
-        }
-      });
+  // entityContext.iterateEntities<EnvironmentComponent>(
+  //    [&entity](Entity e,
+  //              const EnvironmentComponent &environmentComponent) mutable {
+  //      if (entity == ENTITY_MAX) {
+  //        entity = e;
+  //      }
+  //    });
 
-  if (entity < ENTITY_MAX && entity != environmentMapEntity) {
-    const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
-        scene->getActiveCamera()->getUniformBuffer());
-    auto &component = entityContext.getComponent<EnvironmentComponent>(entity);
+  // if (entity < ENTITY_MAX && entity != environmentMapEntity) {
+  //  const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
+  //      scene->getActiveCamera()->getUniformBuffer());
+  //  auto &component =
+  //  entityContext.getComponent<EnvironmentComponent>(entity);
 
-    sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
-        cameraBuffer, sceneBuffer, shadowmaps,
-        {component.irradianceMap, component.specularMap, component.brdfLUT});
+  //  sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
+  //      cameraBuffer, sceneBuffer, shadowmaps,
+  //      {component.irradianceMap, component.specularMap, component.brdfLUT});
 
-    entityContext.deleteEntity(environmentMapEntity);
-    environmentMapEntity = entity;
-  }
+  //  entityContext.deleteEntity(environmentMapEntity);
+  //  environmentMapEntity = entity;
+  //}
 
-  if (entityContext.hasEntity(environmentMapEntity)) {
-    sceneData.hasIBL.x = 1;
-  }
+  // if (entityContext.hasEntity(environmentMapEntity)) {
+  //  sceneData.hasIBL.x = 1;
+  //}
 
   size_t i = 0;
   entityContext.iterateEntities<LightComponent>(

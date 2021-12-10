@@ -1,5 +1,6 @@
 #include "core/Base.h"
 #include "renderer/RenderCommandList.h"
+#include "renderer/Pipeline.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
@@ -33,7 +34,7 @@ TEST_F(RenderCommandListTests, RecordEndRenderPass) {
 TEST_F(RenderCommandListTests, RecordBindPipeline) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindPipeline((VkPipeline)0x34343434,
+  commandList.bindPipeline(std::make_shared<liquid::Pipeline>(),
                            VK_PIPELINE_BIND_POINT_GRAPHICS);
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindPipeline);

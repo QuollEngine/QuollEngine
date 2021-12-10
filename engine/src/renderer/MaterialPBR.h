@@ -51,13 +51,11 @@ public:
    * @brief Create PBR material
    *
    * @param properties PBR properties
-   * @param shaderLibrary Shader library
-   * @param cullMode Cull mode
    * @param resourceAllocator Resource allocator
    * @param resourceManager Resource manager
    */
-  MaterialPBR(const Properties &properties, ShaderLibrary *shaderLibrary,
-              const CullMode &cullMode, ResourceAllocator *resourceAllocator,
+  MaterialPBR(const Properties &properties,
+              ResourceAllocator *resourceAllocator,
               ResourceManager *resourceManager);
 };
 

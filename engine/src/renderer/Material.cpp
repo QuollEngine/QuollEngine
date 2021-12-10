@@ -4,15 +4,11 @@
 
 namespace liquid {
 
-Material::Material(const SharedPtr<Shader> &vertexShader_,
-                   const SharedPtr<Shader> &fragmentShader_,
-                   const std::vector<SharedPtr<Texture>> &textures_,
+Material::Material(const std::vector<SharedPtr<Texture>> &textures_,
                    const std::vector<std::pair<String, Property>> &properties_,
-                   const CullMode &cullMode_,
                    ResourceAllocator *resourceAllocator,
                    ResourceManager *resourceManager)
-    : vertexShader(vertexShader_), fragmentShader(fragmentShader_),
-      textures(textures_), cullMode(cullMode_) {
+    : textures(textures_) {
 
   for (size_t i = 0; i < properties_.size(); ++i) {
     auto &prop = properties_[i];

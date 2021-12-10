@@ -33,7 +33,7 @@ void RenderCommandList::bindDescriptorSets(
   record(command);
 }
 
-void RenderCommandList::bindPipeline(VkPipeline pipeline,
+void RenderCommandList::bindPipeline(const SharedPtr<Pipeline> &pipeline,
                                      VkPipelineBindPoint bindPoint) {
   auto *command = new RenderCommandBindPipeline;
   command->pipeline = pipeline;

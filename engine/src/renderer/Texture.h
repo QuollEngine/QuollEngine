@@ -69,6 +69,13 @@ public:
    */
   inline const SharedPtr<TextureBinder> &getResourceBinder() { return binder; }
 
+  /**
+   * @brief Get texture size
+   *
+   * @return Texture size
+   */
+  inline size_t getSize() const { return size; }
+
 private:
   SharedPtr<TextureBinder> binder = nullptr;
   StatsManager &statsManager;

@@ -91,7 +91,7 @@ public:
    *
    * @return Vulkan extent
    */
-  inline VkExtent2D getExtent() { return extent; }
+  inline const VkExtent2D &getExtent() { return extent; }
 
   /**
    * @brief Gets Vulkan image views
