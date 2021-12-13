@@ -31,18 +31,16 @@ public:
                         const RenderPassAttachment &attachment);
 
   /**
-   * @brief Write swapchain color resource
+   * @brief Write swapchain resource
    *
-   * @return Swapchain color resource ID
-   */
-  GraphResourceId writeSwapchainColor();
-
-  /**
-   * @brief Write swapchain depth resource
+   * @param name Swapchain attachment name
+   * @param attachment Swapchain attachment description
    *
-   * @return Swapchain depth resource ID
+   * @return Swapchain resource ID
    */
-  GraphResourceId writeSwapchainDepth();
+  GraphResourceId
+  writeSwapchain(const String &name,
+                 const RenderPassSwapchainAttachment &attachment);
 
   /**
    * @brief Read attachment resource

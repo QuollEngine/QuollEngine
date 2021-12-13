@@ -76,18 +76,22 @@ private:
   /**
    * @brief Create swapchain color attachment
    *
+   * @param attachment Swapchain attachment description
    * @param index Attachment index
    * @return Attachment info
    */
-  VulkanAttachmentInfo createSwapchainColorAttachment(uint32_t index);
+  VulkanAttachmentInfo createSwapchainColorAttachment(
+      const RenderPassSwapchainAttachment &attachment, uint32_t index);
 
   /**
    * @brief Create swapchain depth attachment
    *
+   * @param attachment Swapchain attachment description
    * @param index Attachment index
    * @return Attachment info
    */
-  VulkanAttachmentInfo createSwapchainDepthAttachment(uint32_t index);
+  VulkanAttachmentInfo createSwapchainDepthAttachment(
+      const RenderPassSwapchainAttachment &attachment, uint32_t index);
 
   /**
    * @brief Create color attachment

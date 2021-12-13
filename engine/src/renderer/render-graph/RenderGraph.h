@@ -244,6 +244,17 @@ public:
                                 const RenderPassAttachment &attachment);
 
   /**
+   * @brief Add swapchain attachment
+   *
+   * @param name Attachment name
+   * @param attachment Attachment object
+   * @return Attachment ID
+   */
+  GraphResourceId
+  addSwapchainAttachment(const String &name,
+                         const RenderPassSwapchainAttachment &attachment);
+
+  /**
    * @brief Add pipeline
    *
    * @param descriptor Pipeline descriptor
@@ -284,25 +295,14 @@ public:
   }
 
   /**
-   * @brief Check if resource is swapchain color atatchment
+   * @brief Check if resource ID has associated swapchain attachment
    *
    * @param id Resource ID
-   * @retval true Resource is swapchain color attachment
-   * @retval false Resource is not swapchain color attachment
+   * @retval true Swapchain attachment exists for resource ID
+   * @retval false No swapchain attachment associated with resource ID
    */
-  inline const bool isSwapchainColor(GraphResourceId id) const {
-    return id == swapchainColorAttachment;
-  }
-
-  /**
-   * @brief Check if resource is swapchain depth atatchment
-   *
-   * @param id Resource ID
-   * @retval true Resource is swapchain depth attachment
-   * @retval false Resource is not swapchain depth attachment
-   */
-  inline const bool isSwapchainDepth(GraphResourceId id) const {
-    return id == swapchainDepthAttachment;
+  inline const bool hasSwapchainAttachment(GraphResourceId id) const {
+    return swapchainAttachments.find(id) != swapchainAttachments.end();
   }
 
   /**
@@ -327,6 +327,17 @@ public:
   }
 
   /**
+   * @brief Get swapchain attachment resource
+   *
+   * @param id Resource ID
+   * @return Attachment
+   */
+  inline const RenderPassSwapchainAttachment &
+  getSwapchainAttachment(GraphResourceId id) const {
+    return swapchainAttachments.at(id);
+  }
+
+  /**
    * @brief Get pipeline resource
    *
    * @param id Resource ID
@@ -342,24 +353,6 @@ public:
    * @return Resource registry
    */
   inline RenderGraphRegistry &getResourceRegistry() { return registry; }
-
-  /**
-   * @brief Get swapchain color attachment
-   *
-   * @return Swapchain color attachment ID
-   */
-  inline GraphResourceId getSwapchainColorAttachment() {
-    return swapchainColorAttachment;
-  }
-
-  /**
-   * @brief Get swapchain depth attachment
-   *
-   * @return Swapchain depth attachment ID
-   */
-  inline GraphResourceId getSwapchainDepthAttachment() {
-    return swapchainDepthAttachment;
-  }
 
   /**
    * @brief Get all render passes
@@ -397,11 +390,11 @@ private:
   std::unordered_map<GraphResourceId, RenderPassAttachment> attachments;
   std::unordered_map<GraphResourceId, PipelineDescriptor> pipelines;
   std::unordered_map<String, GraphResourceId> resourceMap;
+  std::unordered_map<GraphResourceId, RenderPassSwapchainAttachment>
+      swapchainAttachments;
   std::vector<RenderGraphPassInterface *> passes;
 
-  GraphResourceId swapchainColorAttachment = 0;
-  GraphResourceId swapchainDepthAttachment = 1;
-  GraphResourceId lastId = 2;
+  GraphResourceId lastId = 0;
 
   RenderGraphRegistry registry;
 };

@@ -39,10 +39,10 @@ std::vector<RenderGraphPassInterface *> RenderGraph::compile() {
   // Validate that all input attachments exist
   for (auto &x : tempPasses) {
     for (auto &input : x->getInputs()) {
-      LIQUID_ASSERT(hasAttachment(input),
+      LIQUID_ASSERT(hasAttachment(input) || hasSwapchainAttachment(input),
                     "An input in " + x->getName()
                         << " does not point to any resource");
-      if (!hasAttachment(input)) {
+      if (!hasAttachment(input) && !hasSwapchainAttachment(input)) {
         engineLogger.log(Logger::Fatal) << "An input in " << x->getName()
                                         << "does not point to any resource.";
       }
@@ -125,6 +125,15 @@ RenderGraph::addAttachment(const String &name,
   LIQUID_ASSERT(!hasAttachment(id),
                 "Attachment for \"" + name + "\" already exists");
   attachments.insert({id, attachment});
+  return id;
+}
+
+GraphResourceId RenderGraph::addSwapchainAttachment(
+    const String &name, const RenderPassSwapchainAttachment &attachment) {
+  auto id = getResourceId(name);
+  LIQUID_ASSERT(!hasSwapchainAttachment(id),
+                "Swapchain Attachment for \"" + name + "\" already exists");
+  swapchainAttachments.insert({id, attachment});
   return id;
 }
 

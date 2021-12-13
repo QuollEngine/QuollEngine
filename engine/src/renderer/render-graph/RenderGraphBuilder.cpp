@@ -11,22 +11,17 @@ RenderGraphBuilder::RenderGraphBuilder(RenderGraph &graph_,
                                        RenderGraphPassInterface *pass_)
     : graph(graph_), pass(pass_) {}
 
-GraphResourceId RenderGraphBuilder::write(const String &name,
-                                          const RenderPassAttachment &color) {
-  GraphResourceId resourceId = graph.addAttachment(name, color);
+GraphResourceId
+RenderGraphBuilder::write(const String &name,
+                          const RenderPassAttachment &attachment) {
+  GraphResourceId resourceId = graph.addAttachment(name, attachment);
   pass->addOutput(resourceId);
   return resourceId;
 }
 
-GraphResourceId RenderGraphBuilder::writeSwapchainColor() {
-  auto resourceId = graph.getSwapchainColorAttachment();
-  pass->addOutput(resourceId);
-  pass->setSwapchainRelative(true);
-  return resourceId;
-}
-
-GraphResourceId RenderGraphBuilder::writeSwapchainDepth() {
-  auto resourceId = graph.getSwapchainDepthAttachment();
+GraphResourceId RenderGraphBuilder::writeSwapchain(
+    const String &name, const RenderPassSwapchainAttachment &attachment) {
+  GraphResourceId resourceId = graph.addSwapchainAttachment(name, attachment);
   pass->addOutput(resourceId);
   pass->setSwapchainRelative(true);
   return resourceId;

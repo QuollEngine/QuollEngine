@@ -136,27 +136,34 @@ TEST_F(RenderGraphBuilderTest, SetsAttachmentIdAsInputForPass) {
   }
 }
 
-TEST_F(RenderGraphBuilderTest, SetsSwapchainColorAttachmentIdAsOutputForPass) {
+TEST_F(RenderGraphBuilderDeathTest,
+       FailsToSetSwapchainAttachmentIfAttachmentAlreadyExists) {
   auto pass1 = std::make_shared<NoncePass>(1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
-  auto resourceId = builder.writeSwapchainColor();
-
-  EXPECT_EQ(pass1->getOutputs().at(0), graph.getSwapchainColorAttachment());
-  EXPECT_EQ(resourceId, graph.getSwapchainColorAttachment());
-  EXPECT_TRUE(graph.isSwapchainColor(resourceId));
-  EXPECT_TRUE(pass1->isSwapchainRelative());
+  auto resourceId = builder.writeSwapchain("Test color", {});
+  EXPECT_DEATH(builder.writeSwapchain("Test color", {}), ".*");
 }
 
-TEST_F(RenderGraphBuilderTest, SetsSwapchainDepthAttachmentIdAsOutputForPass) {
+TEST_F(RenderGraphBuilderTest,
+       CreatesSwapchainAttachmentInGraphAndAddsItAsPassOutput) {
   auto pass1 = std::make_shared<NoncePass>(1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
-  auto resourceId = builder.writeSwapchainDepth();
+  liquid::RenderPassSwapchainAttachment color{
+      liquid::AttachmentType::Color, liquid::AttachmentLoadOp::Load,
+      liquid::AttachmentStoreOp::Store, glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
+  auto resourceId = builder.writeSwapchain("Test color", color);
+  const auto &stored = graph.getSwapchainAttachment(resourceId);
 
-  EXPECT_EQ(pass1->getOutputs().at(0), graph.getSwapchainDepthAttachment());
-  EXPECT_EQ(resourceId, graph.getSwapchainDepthAttachment());
-  EXPECT_TRUE(graph.isSwapchainDepth(resourceId));
+  EXPECT_EQ(resourceId, graph.getResourceId("Test color"));
+  EXPECT_FALSE(graph.hasAttachment(resourceId));
+  EXPECT_TRUE(std::get<glm::vec4>(stored.clearValue) ==
+              glm::vec4(1.0f, 0.0f, 2.0f, 0.5f));
+  EXPECT_EQ(pass1->getInputs().size(), 0);
+  EXPECT_EQ(pass1->getOutputs().size(), 1);
+  EXPECT_EQ(pass1->getOutputs().at(0), resourceId);
+
   EXPECT_TRUE(pass1->isSwapchainRelative());
 }
 

@@ -93,7 +93,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       "F",
       [](auto &builder, auto &scope) {
         builder.read("e-f");
-        builder.write("f-g", {});
+        builder.writeSwapchain("f-g", {});
       },
       noopExecutor);
 
@@ -104,6 +104,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
         builder.read("f-g");
         builder.read("d-g");
         builder.read("b-g");
+        builder.writeSwapchain("swapchain", {});
       },
       noopExecutor);
 

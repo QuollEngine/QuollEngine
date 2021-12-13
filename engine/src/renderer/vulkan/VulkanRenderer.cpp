@@ -186,17 +186,26 @@ void VulkanRenderer::createRenderGraph(
 
   struct MainPassScope {
     GraphResourceId pipeline;
-    GraphResourceId imguiPipeline;
     GraphResourceId shadowmapTexture;
     VkDescriptorSet sceneDescriptorSet;
     VkDescriptorSet sceneDescriptorSetFragment;
   };
 
+  constexpr glm::vec4 blueishClearValue{0.19f, 0.21f, 0.26f, 1.0f};
+
   graph.addPass<MainPassScope>(
       "mainPass",
-      [this](RenderGraphBuilder &builder, MainPassScope &scope) {
-        builder.writeSwapchainColor();
-        builder.writeSwapchainDepth();
+      [this, blueishClearValue](RenderGraphBuilder &builder,
+                                MainPassScope &scope) {
+        builder.writeSwapchain(
+            "mainColor", RenderPassSwapchainAttachment{
+                             AttachmentType::Color, AttachmentLoadOp::Clear,
+                             AttachmentStoreOp::Store, blueishClearValue});
+        builder.writeSwapchain("mainDepth", RenderPassSwapchainAttachment{
+                                                AttachmentType::Depth,
+                                                AttachmentLoadOp::Clear,
+                                                AttachmentStoreOp::Store,
+                                                DepthStencilClear{1.0f, 0}});
         scope.shadowmapTexture = builder.read("shadowmap");
         scope.pipeline = builder.create(PipelineDescriptor{
             shaderLibrary->getShader("__engine.default.pbr.vertex"),
@@ -206,28 +215,6 @@ void VulkanRenderer::createRenderGraph(
             PipelineRasterizer{PolygonMode::Fill, CullMode::None,
                                FrontFace::Clockwise},
             PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
-
-        scope.imguiPipeline = builder.create(PipelineDescriptor{
-            shaderLibrary->getShader("__engine.imgui.vertex"),
-            shaderLibrary->getShader("__engine.imgui.fragment"),
-            PipelineVertexInputLayout{
-                {PipelineVertexInputBinding{0, sizeof(ImDrawVert),
-                                            VertexInputRate::Vertex}},
-                {PipelineVertexInputAttribute{0, 0, VK_FORMAT_R32G32_SFLOAT,
-                                              IM_OFFSETOF(ImDrawVert, pos)},
-                 PipelineVertexInputAttribute{1, 0, VK_FORMAT_R32G32_SFLOAT,
-                                              IM_OFFSETOF(ImDrawVert, uv)},
-                 PipelineVertexInputAttribute{2, 0, VK_FORMAT_R8G8B8A8_UNORM,
-                                              IM_OFFSETOF(ImDrawVert, col)}}
-
-            },
-            PipelineInputAssembly{PrimitiveTopology::TriangleList},
-            PipelineRasterizer{PolygonMode::Fill, CullMode::None,
-                               FrontFace::CounterClockwise},
-            PipelineColorBlend{{PipelineColorBlendAttachment{
-                true, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha,
-                BlendOp::Add, BlendFactor::One, BlendFactor::OneMinusSrcAlpha,
-                BlendOp::Add}}}});
       },
       [this, &renderData](auto &commandList, MainPassScope &scope,
                           RenderGraphRegistry &registry) {
@@ -310,8 +297,46 @@ void VulkanRenderer::createRenderGraph(
                 }
               }
             });
+      });
 
-        auto &imguiPipeline = registry.getPipeline(scope.imguiPipeline);
+  struct ImguiScope {
+    GraphResourceId pipeline;
+  };
+
+  graph.addPass<ImguiScope>(
+      "imgui",
+      [this](RenderGraphBuilder &builder, ImguiScope &scope) {
+        builder.read("mainColor");
+        builder.writeSwapchain("imguiColor", RenderPassSwapchainAttachment{
+                                                 AttachmentType::Color,
+                                                 AttachmentLoadOp::Load,
+                                                 AttachmentStoreOp::Store});
+
+        scope.pipeline = builder.create(PipelineDescriptor{
+            shaderLibrary->getShader("__engine.imgui.vertex"),
+            shaderLibrary->getShader("__engine.imgui.fragment"),
+            PipelineVertexInputLayout{
+                {PipelineVertexInputBinding{0, sizeof(ImDrawVert),
+                                            VertexInputRate::Vertex}},
+                {PipelineVertexInputAttribute{0, 0, VK_FORMAT_R32G32_SFLOAT,
+                                              IM_OFFSETOF(ImDrawVert, pos)},
+                 PipelineVertexInputAttribute{1, 0, VK_FORMAT_R32G32_SFLOAT,
+                                              IM_OFFSETOF(ImDrawVert, uv)},
+                 PipelineVertexInputAttribute{2, 0, VK_FORMAT_R8G8B8A8_UNORM,
+                                              IM_OFFSETOF(ImDrawVert, col)}}
+
+            },
+            PipelineInputAssembly{PrimitiveTopology::TriangleList},
+            PipelineRasterizer{PolygonMode::Fill, CullMode::None,
+                               FrontFace::CounterClockwise},
+            PipelineColorBlend{{PipelineColorBlendAttachment{
+                true, BlendFactor::SrcAlpha, BlendFactor::OneMinusSrcAlpha,
+                BlendOp::Add, BlendFactor::One, BlendFactor::OneMinusSrcAlpha,
+                BlendOp::Add}}}});
+      },
+      [this](RenderCommandList &commandList, ImguiScope &scope,
+             RenderGraphRegistry &registry) {
+        auto &imguiPipeline = registry.getPipeline(scope.pipeline);
         imguiRenderer->draw(commandList, imguiPipeline);
       });
 

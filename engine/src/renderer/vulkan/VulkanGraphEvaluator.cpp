@@ -81,25 +81,29 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
     if (!force &&
         graph.getResourceRegistry().hasRenderPass(pass->getRenderPass()) &&
         (graph.getResourceRegistry().hasTexture(resourceId) ||
-         graph.isSwapchainColor(resourceId) ||
-         graph.isSwapchainDepth(resourceId))) {
+         graph.hasSwapchainAttachment(resourceId))) {
       continue;
     }
 
-    if (graph.isSwapchainColor(resourceId)) {
+    if (graph.hasSwapchainAttachment(resourceId)) {
       framebufferAttachments.resize(swapchain.getImageViews().size());
-      info = createSwapchainColorAttachment(attachments.size());
-      colorAttachments.push_back(info.reference);
-    } else if (graph.isSwapchainDepth(resourceId)) {
-      framebufferAttachments.resize(swapchain.getImageViews().size());
-      info = createSwapchainDepthAttachment(attachments.size());
-      depthAttachment = info.reference;
+      const auto &graphAttachment = graph.getSwapchainAttachment(resourceId);
+      if (graphAttachment.type == AttachmentType::Color) {
+        info =
+            createSwapchainColorAttachment(graphAttachment, attachments.size());
+        colorAttachments.push_back(info.reference);
+      } else if (graphAttachment.type == AttachmentType::Depth) {
+        info =
+            createSwapchainDepthAttachment(graphAttachment, attachments.size());
+        depthAttachment = info.reference;
+      } else {
+        continue;
+      }
     } else {
       const auto &graphAttachment = graph.getAttachment(resourceId);
       if (graphAttachment.type == AttachmentType::Color) {
         info = createColorAttachment(graphAttachment, attachments.size());
         colorAttachments.push_back(info.reference);
-        ;
       } else if (graphAttachment.type == AttachmentType::Depth) {
         info = createDepthAttachment(graphAttachment, attachments.size());
         depthAttachment = info.reference;
@@ -213,16 +217,18 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
-VulkanGraphEvaluator::createSwapchainColorAttachment(uint32_t index) {
-  constexpr glm::vec4 blueishClearValue{0.19f, 0.21f, 0.26f, 1.0f};
+VulkanGraphEvaluator::createSwapchainColorAttachment(
+    const RenderPassSwapchainAttachment &attachment, uint32_t index) {
 
   VulkanAttachmentInfo info{};
 
   // Attachment description
   info.description.format = swapchain.getSurfaceFormat().format;
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
-  info.description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  info.description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  info.description.loadOp =
+      VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
+  info.description.storeOp =
+      VulkanMapping::getAttachmentStoreOp(attachment.storeOp);
   info.description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
   info.description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   info.description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -233,10 +239,14 @@ VulkanGraphEvaluator::createSwapchainColorAttachment(uint32_t index) {
   info.reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   // Attachment clear value
-  info.clearValue.color.float32[0] = blueishClearValue.r;
-  info.clearValue.color.float32[1] = blueishClearValue.g;
-  info.clearValue.color.float32[2] = blueishClearValue.b;
-  info.clearValue.color.float32[3] = blueishClearValue.a;
+  info.clearValue.color.float32[0] =
+      std::get<glm::vec4>(attachment.clearValue).x;
+  info.clearValue.color.float32[1] =
+      std::get<glm::vec4>(attachment.clearValue).y;
+  info.clearValue.color.float32[2] =
+      std::get<glm::vec4>(attachment.clearValue).z;
+  info.clearValue.color.float32[3] =
+      std::get<glm::vec4>(attachment.clearValue).w;
 
   // Framebuffer image views
   info.framebufferAttachments.resize(swapchain.getImageViews().size(),
@@ -255,14 +265,17 @@ VulkanGraphEvaluator::createSwapchainColorAttachment(uint32_t index) {
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
-VulkanGraphEvaluator::createSwapchainDepthAttachment(uint32_t index) {
+VulkanGraphEvaluator::createSwapchainDepthAttachment(
+    const RenderPassSwapchainAttachment &attachment, uint32_t index) {
   VulkanAttachmentInfo info{};
 
   // Attachment description
   info.description.format = swapchain.getDepthFormat();
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
-  info.description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  info.description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  info.description.loadOp =
+      VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
+  info.description.storeOp =
+      VulkanMapping::getAttachmentStoreOp(attachment.storeOp);
   info.description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   info.description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   info.description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -274,8 +287,10 @@ VulkanGraphEvaluator::createSwapchainDepthAttachment(uint32_t index) {
   info.reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   // Attachment clear value
-  info.clearValue.depthStencil.depth = 1.0f;
-  info.clearValue.depthStencil.stencil = 0;
+  info.clearValue.depthStencil.depth =
+      std::get<DepthStencilClear>(attachment.clearValue).clearDepth;
+  info.clearValue.depthStencil.stencil =
+      std::get<DepthStencilClear>(attachment.clearValue).clearStencil;
 
   // Framebuffer image views
   info.framebufferAttachments.resize(swapchain.getImageViews().size(),

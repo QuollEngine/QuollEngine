@@ -23,4 +23,11 @@ struct RenderPassAttachment {
   std::variant<glm::vec4, DepthStencilClear> clearValue;
 };
 
+struct RenderPassSwapchainAttachment {
+  AttachmentType type;
+  AttachmentLoadOp loadOp;
+  AttachmentStoreOp storeOp;
+  std::variant<glm::vec4, DepthStencilClear> clearValue;
+};
+
 } // namespace liquid
