@@ -33,7 +33,7 @@ int main() {
     std::unique_ptr<liquid::GLFWWindow> window(
         new liquid::GLFWWindow("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT));
     std::unique_ptr<liquid::VulkanRenderer> renderer(
-        new liquid::VulkanRenderer(context, window.get()));
+        new liquid::VulkanRenderer(context, window.get(), true));
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
     liquid::TinyGLTFLoader loader(context, renderer.get());
@@ -41,9 +41,9 @@ int main() {
                                           window.get());
     liquidator::SceneManager sceneManager(context, editorCamera);
 
-    renderer->setClearColor(CLEAR_COLOR);
-
     liquidator::UIRoot ui(context, loader);
+
+    liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
 
     while (sceneManager.hasNewScene()) {
       sceneManager.createNewScene();

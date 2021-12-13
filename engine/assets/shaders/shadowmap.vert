@@ -4,7 +4,7 @@
 
 layout(location = 0) in vec3 vPosition;
 
-layout(std140, set = 1, binding = 0) uniform MaterialData {
+layout(std140, set = 0, binding = 0) uniform MaterialData {
   mat4 lightMatrix;
   int lightIndex[1];
 }

@@ -17,6 +17,8 @@
 
 namespace liquid {
 
+class VulkanPipeline;
+
 class ImguiRenderer {
   struct FrameData {
     SharedPtr<HardwareBuffer> vertexBuffer = nullptr;
@@ -39,18 +41,16 @@ public:
   void draw(RenderCommandList &commandList,
             const SharedPtr<Pipeline> &pipeline);
 
-  inline VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
-
 private:
   void loadFonts();
 
-  void createPipelineLayout();
-
-  void createDescriptorLayout();
-  VkDescriptorSet createDescriptorFromTexture(Texture *texture);
+  VkDescriptorSet
+  createDescriptorFromTexture(Texture *texture,
+                              const SharedPtr<Pipeline> &pipeline);
 
   void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
-                         int fbWidth, int fbHeight);
+                         int fbWidth, int fbHeight,
+                         const SharedPtr<VulkanPipeline> &pipeline);
 
 private:
   VulkanDescriptorManager *descriptorManager;
@@ -64,11 +64,6 @@ private:
 
   std::vector<FrameData> frameData;
   uint32_t currentFrame = 0;
-
-  ShaderLibrary *shaderLibrary = nullptr;
-  VkDescriptorSetLayout descriptorLayout = VK_NULL_HANDLE;
-  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-  VkPipeline pipeline = VK_NULL_HANDLE;
 
   std::unordered_map<Texture *, VkDescriptorSet> descriptorMap;
 };

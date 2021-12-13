@@ -42,6 +42,18 @@
       ]
     },
     {
+      "name": "spirv-reflect",
+      "url": "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/heads/master.zip",
+      "buildSource": "SPIRV-Reflect-master",
+      "cmd": [
+        "{MKDIR} {{VENDOR_DIR}}/projects/spirv-reflect",
+        "{MKDIR} {{VENDOR_DIR}}/include/include/spirv/unified1",
+        "{COPY} spirv_reflect.c {{VENDOR_DIR}}/projects/spirv-reflect",
+        "{COPY} spirv_reflect.h {{VENDOR_DIR}}/include/spirv_reflect.h",
+        "{COPY} include/spirv/unified1/spirv.h {{VENDOR_DIR}}/include/include/spirv/unified1"
+      ]
+    },
+    {
       "name": "glm",
       "buildSource": "glm",
       "url": "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip",

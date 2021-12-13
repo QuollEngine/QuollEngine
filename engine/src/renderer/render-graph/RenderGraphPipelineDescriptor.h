@@ -126,7 +126,6 @@ struct PipelineColorBlend {
 };
 
 struct PipelineDescriptor {
-  VkPipelineLayout pipelineLayout;
   SharedPtr<Shader> vertexShader;
   SharedPtr<Shader> fragmentShader;
   PipelineVertexInputLayout inputLayout;

@@ -2,12 +2,12 @@
 
 #include "renderer/MaterialResourceBinder.h"
 #include "renderer/Material.h"
-
+#include "VulkanPipeline.h"
 #include "VulkanDescriptorManager.h"
 
 namespace liquid {
 
-class VulkanMaterialResourceBinder : public MaterialResourceBinder {
+class VulkanDeferredMaterialBinder : public MaterialResourceBinder {
 public:
   /**
    * @brief Create Vulkan material resource binder
@@ -17,36 +17,36 @@ public:
    * @param material Material
    * @param descriptorManager Descriptor manager
    */
-  VulkanMaterialResourceBinder(Material *material,
+  VulkanDeferredMaterialBinder(Material *material,
                                VulkanDescriptorManager *descriptorManager);
 
   /**
    * @brief Destroy Vulkan material resource binder
    *
-   * Destroys pipelines and descriptor set
+   * Destroys descriptor set
    */
-  ~VulkanMaterialResourceBinder();
+  ~VulkanDeferredMaterialBinder();
 
-  VulkanMaterialResourceBinder(const VulkanMaterialResourceBinder &rhs) =
+  VulkanDeferredMaterialBinder(const VulkanDeferredMaterialBinder &rhs) =
       delete;
-  VulkanMaterialResourceBinder(VulkanMaterialResourceBinder &&rhs) = delete;
-  VulkanMaterialResourceBinder &
-  operator=(const VulkanMaterialResourceBinder &rhs) = delete;
-  VulkanMaterialResourceBinder &
-  operator=(VulkanMaterialResourceBinder &&rhs) = delete;
+  VulkanDeferredMaterialBinder(VulkanDeferredMaterialBinder &&rhs) = delete;
+  VulkanDeferredMaterialBinder &
+  operator=(const VulkanDeferredMaterialBinder &rhs) = delete;
+  VulkanDeferredMaterialBinder &
+  operator=(VulkanDeferredMaterialBinder &&rhs) = delete;
 
   /**
    * @brief Get material descriptor set
    *
+   * @param layout Descriptor set layout
    * @return Material descriptor set
    */
-  inline const VkDescriptorSet getDescriptorSet() const {
-    return materialDescriptorSet;
-  }
+  VkDescriptorSet getDescriptorSet(VkDescriptorSetLayout layout);
 
 private:
   VkDescriptorSet materialDescriptorSet = VK_NULL_HANDLE;
   VulkanDescriptorManager *descriptorManager = nullptr;
+  Material *material;
 };
 
 } // namespace liquid

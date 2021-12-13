@@ -92,7 +92,7 @@ def cmd_mkdir(cmdLine):
     mainParts = parts[1:len(parts)]
     includedDirs = [os.path.normpath(p) for p in mainParts]
     for directory in includedDirs:
-        os.mkdir(directory)
+        os.makedirs(directory)
 
 project = open_project(projectFile)
 clean_make_dir(vendorDir)

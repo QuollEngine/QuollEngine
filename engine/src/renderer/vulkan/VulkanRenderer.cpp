@@ -8,8 +8,8 @@
 #include "VulkanRenderer.h"
 #include "VulkanHardwareBuffer.h"
 #include "VulkanStandardPushConstants.h"
-#include "VulkanMaterialResourceBinder.h"
 #include "VulkanPipeline.h"
+#include "VulkanDeferredMaterialBinder.h"
 
 #include "renderer/render-graph/RenderGraph.h"
 #include "VulkanGraphEvaluator.h"
@@ -30,11 +30,11 @@ VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
   descriptorManager = new VulkanDescriptorManager(
       renderBackend.getVulkanInstance().getDevice());
 
-  mainResourceManager = new VulkanResourceManager(descriptorManager);
+  deferredResourceManager =
+      new VulkanDeferredResourceManager(descriptorManager);
 
   loadShaders();
   createImgui();
-  createMainPipelineLayout();
 }
 
 VulkanRenderer::~VulkanRenderer() {
@@ -53,11 +53,9 @@ VulkanRenderer::~VulkanRenderer() {
     LOG_DEBUG("[Vulkan] Shader library destroyed");
   }
 
-  if (mainPipelineLayout) {
-    vkDestroyPipelineLayout(renderBackend.getVulkanInstance().getDevice(),
-                            mainPipelineLayout, nullptr);
-    LOG_DEBUG("[Vulkan] Main pipeline layout destroyed");
-    mainPipelineLayout = VK_NULL_HANDLE;
+  if (deferredResourceManager) {
+    delete deferredResourceManager;
+    LOG_DEBUG("[Vulkan] deferred resource manager destroyed");
   }
 
   if (descriptorManager) {
@@ -120,7 +118,6 @@ void VulkanRenderer::createRenderGraph(
                                               DepthStencilClear{1.0f, 0}});
 
         scope.pipeline = builder.create(PipelineDescriptor{
-            mainPipelineLayout,
             shaderLibrary->getShader("__engine.default.shadowmap.vertex"),
             shaderLibrary->getShader("__engine.default.shadowmap.fragment"),
             PipelineVertexInputLayout::create<Vertex>(),
@@ -133,19 +130,25 @@ void VulkanRenderer::createRenderGraph(
                           RenderGraphRegistry &registry) {
         const auto &pipeline = registry.getPipeline(scope.pipeline);
 
+        const auto &vulkanPipeline =
+            std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+
         commandList.bindPipeline(pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
         for (auto &shadowMaterial : shadowMaterials) {
           const auto &materialBinder =
-              std::dynamic_pointer_cast<VulkanMaterialResourceBinder>(
+              std::dynamic_pointer_cast<VulkanDeferredMaterialBinder>(
                   shadowMaterial->getResourceBinder());
 
           commandList.bindDescriptorSets(
-              mainPipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, 1,
-              {materialBinder->getDescriptorSet()}, {});
+              vulkanPipeline->getPipelineLayout(),
+              VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
+              {materialBinder->getDescriptorSet(
+                  vulkanPipeline->getDescriptorLayout(0))},
+              {});
 
           entityContext.iterateEntities<MeshComponent, TransformComponent>(
-              [&commandList, &renderData,
+              [&commandList, &renderData, &vulkanPipeline,
                this](Entity entity, const MeshComponent &mesh,
                      const TransformComponent &transform) {
                 const auto &instance = mesh.instance;
@@ -153,9 +156,10 @@ void VulkanRenderer::createRenderGraph(
                 auto *transformConstant = new VulkanStandardPushConstants;
                 transformConstant->modelMatrix = transform.transformWorld;
 
-                commandList.pushConstants(
-                    mainPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                    sizeof(VulkanStandardPushConstants), transformConstant);
+                commandList.pushConstants(vulkanPipeline->getPipelineLayout(),
+                                          VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                          sizeof(VulkanStandardPushConstants),
+                                          transformConstant);
 
                 for (size_t i = 0; i < instance->getVertexBuffers().size();
                      ++i) {
@@ -185,6 +189,7 @@ void VulkanRenderer::createRenderGraph(
     GraphResourceId imguiPipeline;
     GraphResourceId shadowmapTexture;
     VkDescriptorSet sceneDescriptorSet;
+    VkDescriptorSet sceneDescriptorSetFragment;
   };
 
   graph.addPass<MainPassScope>(
@@ -194,7 +199,6 @@ void VulkanRenderer::createRenderGraph(
         builder.writeSwapchainDepth();
         scope.shadowmapTexture = builder.read("shadowmap");
         scope.pipeline = builder.create(PipelineDescriptor{
-            mainPipelineLayout,
             shaderLibrary->getShader("__engine.default.pbr.vertex"),
             shaderLibrary->getShader("__engine.default.pbr.fragment"),
             PipelineVertexInputLayout::create<Vertex>(),
@@ -204,7 +208,6 @@ void VulkanRenderer::createRenderGraph(
             PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
         scope.imguiPipeline = builder.create(PipelineDescriptor{
-            imguiRenderer->getPipelineLayout(),
             shaderLibrary->getShader("__engine.imgui.vertex"),
             shaderLibrary->getShader("__engine.imgui.fragment"),
             PipelineVertexInputLayout{
@@ -228,6 +231,13 @@ void VulkanRenderer::createRenderGraph(
       },
       [this, &renderData](auto &commandList, MainPassScope &scope,
                           RenderGraphRegistry &registry) {
+        const auto &pipeline = registry.getPipeline(scope.pipeline);
+
+        commandList.bindPipeline(pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        const auto &vulkanMainPipeline =
+            std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+
         if (!scope.sceneDescriptorSet) {
           const auto &cameraBuffer =
               std::static_pointer_cast<VulkanHardwareBuffer>(
@@ -237,19 +247,26 @@ void VulkanRenderer::createRenderGraph(
 
           scope.sceneDescriptorSet =
               descriptorManager->createSceneDescriptorSet(
+                  cameraBuffer, nullptr, nullptr, {},
+                  vulkanMainPipeline->getDescriptorLayout(0));
+
+          scope.sceneDescriptorSetFragment =
+              descriptorManager->createSceneDescriptorSet(
                   cameraBuffer, renderData->getSceneBuffer(),
-                  registry.getTexture(scope.shadowmapTexture), {});
+                  registry.getTexture(scope.shadowmapTexture), {},
+                  vulkanMainPipeline->getDescriptorLayout(1));
         }
-        const auto &pipeline = registry.getPipeline(scope.pipeline);
 
-        commandList.bindPipeline(pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
-
-        commandList.bindDescriptorSets(mainPipelineLayout,
+        commandList.bindDescriptorSets(vulkanMainPipeline->getPipelineLayout(),
                                        VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
                                        {scope.sceneDescriptorSet}, {});
 
+        commandList.bindDescriptorSets(vulkanMainPipeline->getPipelineLayout(),
+                                       VK_PIPELINE_BIND_POINT_GRAPHICS, 1,
+                                       {scope.sceneDescriptorSetFragment}, {});
+
         entityContext.iterateEntities<MeshComponent, TransformComponent>(
-            [&commandList, &renderData,
+            [&commandList, &renderData, &vulkanMainPipeline,
              this](Entity entity, const MeshComponent &mesh,
                    const TransformComponent &transform) {
               const auto &instance = mesh.instance;
@@ -258,18 +275,22 @@ void VulkanRenderer::createRenderGraph(
               transformConstant->modelMatrix = transform.transformWorld;
 
               commandList.pushConstants(
-                  mainPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                  vulkanMainPipeline->getPipelineLayout(),
+                  VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                   sizeof(VulkanStandardPushConstants), transformConstant);
 
               for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
                 if (instance->getMaterials().at(i)) {
                   const auto &materialBinder =
-                      std::dynamic_pointer_cast<VulkanMaterialResourceBinder>(
+                      std::dynamic_pointer_cast<VulkanDeferredMaterialBinder>(
                           instance->getMaterials().at(i)->getResourceBinder());
 
+                  const auto &desc = materialBinder->getDescriptorSet(
+                      vulkanMainPipeline->getDescriptorLayout(2));
+
                   commandList.bindDescriptorSets(
-                      mainPipelineLayout, VK_PIPELINE_BIND_POINT_GRAPHICS, 1,
-                      {materialBinder->getDescriptorSet()}, {});
+                      vulkanMainPipeline->getPipelineLayout(),
+                      VK_PIPELINE_BIND_POINT_GRAPHICS, 2, {desc}, {});
                 }
 
                 commandList.bindVertexBuffer(
@@ -310,45 +331,21 @@ SharedPtr<Material> VulkanRenderer::createMaterial(
     const CullMode &cullMode) {
   return std::make_shared<Material>(textures, properties,
                                     renderBackend.getResourceAllocator(),
-                                    mainResourceManager);
+                                    deferredResourceManager);
 }
 
 SharedPtr<Material>
 VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                                   const CullMode &cullMode) {
-  return std::make_shared<MaterialPBR>(
-      properties, renderBackend.getResourceAllocator(), mainResourceManager);
-}
-
-void VulkanRenderer::setClearColor(glm::vec4 clearColor_) {
-  clearColor = clearColor_;
+  return std::make_shared<MaterialPBR>(properties,
+                                       renderBackend.getResourceAllocator(),
+                                       deferredResourceManager);
 }
 
 void VulkanRenderer::createImgui() {
   imguiRenderer = new ImguiRenderer(renderBackend.getWindow(),
                                     renderBackend.getVulkanInstance(),
                                     renderBackend.getResourceAllocator());
-}
-
-void VulkanRenderer::createMainPipelineLayout() {
-  VkPushConstantRange pushConstantRange{};
-  pushConstantRange.offset = 0;
-  pushConstantRange.size = sizeof(VulkanStandardPushConstants);
-  pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-  auto descriptorSetLayouts = descriptorManager->getDescriptorLayouts();
-  VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-  pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = (uint32_t)descriptorSetLayouts.size();
-  pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-  pipelineLayoutInfo.pushConstantRangeCount = 1;
-  pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-
-  checkForVulkanError(
-      vkCreatePipelineLayout(renderBackend.getVulkanInstance().getDevice(),
-                             &pipelineLayoutInfo, nullptr, &mainPipelineLayout),
-      "Failed to create main pipeline layout");
-  LOG_DEBUG("[Vulkan] Main pipeline layout created");
 }
 
 SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
@@ -362,7 +359,7 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
             {},
             {{"lightMatrix", glm::mat4{1.0f}},
              {"lightIndex", static_cast<int>(i)}},
-            renderBackend.getResourceAllocator(), mainResourceManager)));
+            renderBackend.getResourceAllocator(), deferredResourceManager)));
 
         i++;
       });

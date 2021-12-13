@@ -5,14 +5,14 @@
 
 namespace liquid {
 
-class VulkanResourceManager : public ResourceManager {
+class VulkanDeferredResourceManager : public ResourceManager {
 public:
   /**
    * @brief Create Vulkan resource manager
    *
    * @param descriptorManager Descriptor manager
    */
-  VulkanResourceManager(VulkanDescriptorManager *descriptorManager);
+  VulkanDeferredResourceManager(VulkanDescriptorManager *descriptorManager);
 
   /**
    * @brief Create Vulkan material resource binder

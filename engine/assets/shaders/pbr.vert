@@ -16,7 +16,7 @@ layout(location = 6) out float outTangentHand;
 layout(location = 7) out mat3 outTBN;
 layout(location = 10) out mat4 outModelMatrix;
 
-layout(set = 0, binding = 0) uniform CameraBuffer {
+layout(set = 0, binding = 0) uniform CameraData {
   mat4 proj;
   mat4 view;
   mat4 viewproj;

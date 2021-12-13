@@ -10,24 +10,10 @@ constexpr uint32_t MAX_TEXTURE_DESCRIPTORS = 8;
 
 VulkanDescriptorManager::VulkanDescriptorManager(VkDevice device_)
     : device(device_) {
-  createSceneDescriptorLayout();
-  createMaterialDescriptorLayout();
   createDescriptorPool();
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
-  if (sceneLayout) {
-    vkDestroyDescriptorSetLayout(device, sceneLayout, nullptr);
-    sceneLayout = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Scene descriptor set layout destroyed");
-  }
-
-  if (materialLayout) {
-    vkDestroyDescriptorSetLayout(device, materialLayout, nullptr);
-    materialLayout = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Material descriptor set layout destroyed");
-  }
-
   if (descriptorPool) {
     vkDestroyDescriptorPool(device, descriptorPool, nullptr);
     LOG_DEBUG("[Vulkan] Descriptor pool destroyed");
@@ -38,7 +24,8 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
     const SharedPtr<VulkanHardwareBuffer> &cameraBuffer,
     const SharedPtr<VulkanHardwareBuffer> &sceneBuffer,
     const SharedPtr<Texture> &shadowmaps,
-    const std::array<SharedPtr<Texture>, 3> &iblMaps) {
+    const std::array<SharedPtr<Texture>, 3> &iblMaps,
+    VkDescriptorSetLayout layout) {
   VkDescriptorSet sceneDescriptorSet = VK_NULL_HANDLE;
 
   VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
@@ -46,7 +33,7 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   descriptorSetAllocateInfo.pNext = nullptr;
   descriptorSetAllocateInfo.descriptorPool = descriptorPool;
-  descriptorSetAllocateInfo.pSetLayouts = &sceneLayout;
+  descriptorSetAllocateInfo.pSetLayouts = &layout;
   descriptorSetAllocateInfo.descriptorSetCount = 1;
 
   checkForVulkanError(vkAllocateDescriptorSets(device,
@@ -59,56 +46,66 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
 
   // Camera Buffer Write
   VkDescriptorBufferInfo cameraBufferInfo{};
-  cameraBufferInfo.buffer = cameraBuffer->getBuffer();
-  cameraBufferInfo.offset = 0;
-  cameraBufferInfo.range = cameraBuffer->getBufferSize();
+  if (cameraBuffer) {
 
-  VkWriteDescriptorSet setCameraBufferWrite{};
-  setCameraBufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  setCameraBufferWrite.pNext = nullptr;
-  setCameraBufferWrite.dstBinding = 0;
-  setCameraBufferWrite.dstSet = sceneDescriptorSet;
-  setCameraBufferWrite.descriptorCount = 1;
-  setCameraBufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  setCameraBufferWrite.pBufferInfo = &cameraBufferInfo;
+    cameraBufferInfo.buffer = cameraBuffer->getBuffer();
+    cameraBufferInfo.offset = 0;
+    cameraBufferInfo.range = cameraBuffer->getBufferSize();
 
-  writes.push_back(setCameraBufferWrite);
+    VkWriteDescriptorSet setCameraBufferWrite{};
+    setCameraBufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    setCameraBufferWrite.pNext = nullptr;
+    setCameraBufferWrite.dstBinding = 0;
+    setCameraBufferWrite.dstSet = sceneDescriptorSet;
+    setCameraBufferWrite.descriptorCount = 1;
+    setCameraBufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    setCameraBufferWrite.pBufferInfo = &cameraBufferInfo;
+
+    writes.push_back(setCameraBufferWrite);
+  }
 
   // Scene Buffer Write
   VkDescriptorBufferInfo sceneBufferInfo{};
-  sceneBufferInfo.buffer = sceneBuffer->getBuffer();
-  sceneBufferInfo.offset = 0;
-  sceneBufferInfo.range = sceneBuffer->getBufferSize();
+  if (sceneBuffer) {
 
-  VkWriteDescriptorSet setSceneBufferWrite{};
-  setSceneBufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  setSceneBufferWrite.pNext = nullptr;
-  setSceneBufferWrite.dstBinding = 1;
-  setSceneBufferWrite.dstSet = sceneDescriptorSet;
-  setSceneBufferWrite.descriptorCount = 1;
-  setSceneBufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  setSceneBufferWrite.pBufferInfo = &sceneBufferInfo;
+    sceneBufferInfo.buffer = sceneBuffer->getBuffer();
+    sceneBufferInfo.offset = 0;
+    sceneBufferInfo.range = sceneBuffer->getBufferSize();
 
-  writes.push_back(setSceneBufferWrite);
+    VkWriteDescriptorSet setSceneBufferWrite{};
+    setSceneBufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    setSceneBufferWrite.pNext = nullptr;
+    setSceneBufferWrite.dstBinding = 1;
+    setSceneBufferWrite.dstSet = sceneDescriptorSet;
+    setSceneBufferWrite.descriptorCount = 1;
+    setSceneBufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    setSceneBufferWrite.pBufferInfo = &sceneBufferInfo;
 
-  const auto &vulkanShadowmap = std::dynamic_pointer_cast<VulkanTextureBinder>(
-      shadowmaps->getResourceBinder());
+    writes.push_back(setSceneBufferWrite);
+  }
 
   VkDescriptorImageInfo shadowmapInfo{};
-  shadowmapInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-  shadowmapInfo.sampler = vulkanShadowmap->getSampler();
-  shadowmapInfo.imageView = vulkanShadowmap->getImageView();
+  if (shadowmaps) {
+    const auto &vulkanShadowmap =
+        std::dynamic_pointer_cast<VulkanTextureBinder>(
+            shadowmaps->getResourceBinder());
 
-  VkWriteDescriptorSet setShadowmapWrite{};
-  setShadowmapWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  setShadowmapWrite.pNext = nullptr;
-  setShadowmapWrite.dstBinding = 2;
-  setShadowmapWrite.dstSet = sceneDescriptorSet;
-  setShadowmapWrite.descriptorCount = 1;
-  setShadowmapWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  setShadowmapWrite.pImageInfo = &shadowmapInfo;
+    shadowmapInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    shadowmapInfo.sampler = vulkanShadowmap->getSampler();
+    shadowmapInfo.imageView = vulkanShadowmap->getImageView();
 
-  writes.push_back(setShadowmapWrite);
+    VkWriteDescriptorSet setShadowmapWrite{};
+    setShadowmapWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    setShadowmapWrite.pNext = nullptr;
+    setShadowmapWrite.dstBinding = 2;
+    setShadowmapWrite.dstSet = sceneDescriptorSet;
+    setShadowmapWrite.descriptorCount = 1;
+    setShadowmapWrite.descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    setShadowmapWrite.pImageInfo = &shadowmapInfo;
+
+    writes.push_back(setShadowmapWrite);
+  }
 
   std::array<VkDescriptorImageInfo, 2> iblInfos{};
   VkDescriptorImageInfo lutInfo{};
@@ -128,7 +125,7 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
     setIblWrite.pNext = nullptr;
     setIblWrite.dstBinding = 3;
     setIblWrite.dstSet = sceneDescriptorSet;
-    setIblWrite.descriptorCount = iblInfos.size();
+    setIblWrite.descriptorCount = static_cast<uint32_t>(iblInfos.size());
     setIblWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     setIblWrite.pImageInfo = iblInfos.data();
 
@@ -159,7 +156,8 @@ VkDescriptorSet VulkanDescriptorManager::createSceneDescriptorSet(
 
 VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
     const SharedPtr<VulkanHardwareBuffer> &buffer,
-    const std::vector<SharedPtr<Texture>> &textures) {
+    const std::vector<SharedPtr<Texture>> &textures,
+    VkDescriptorSetLayout layout) {
 
   if (textures.size() > MAX_TEXTURE_DESCRIPTORS) {
     throw VulkanError("Cannot create material descriptor set with more than " +
@@ -175,7 +173,7 @@ VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   descriptorSetAllocateInfo.pNext = nullptr;
   descriptorSetAllocateInfo.descriptorPool = descriptorPool;
-  descriptorSetAllocateInfo.pSetLayouts = &materialLayout;
+  descriptorSetAllocateInfo.pSetLayouts = &layout;
   descriptorSetAllocateInfo.descriptorSetCount = 1;
 
   checkForVulkanError(vkAllocateDescriptorSets(device,
@@ -186,8 +184,8 @@ VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
 
   std::vector<VkWriteDescriptorSet> writes;
 
+  VkDescriptorBufferInfo materialBufferInfo{};
   if (buffer) {
-    VkDescriptorBufferInfo materialBufferInfo{};
     materialBufferInfo.buffer = buffer->getBuffer();
     materialBufferInfo.offset = 0;
     materialBufferInfo.range = buffer->getBufferSize();
@@ -235,113 +233,6 @@ VkDescriptorSet VulkanDescriptorManager::createMaterialDescriptorSet(
                          writes.data(), 0, nullptr);
 
   return materialDescriptorSet;
-}
-
-void VulkanDescriptorManager::createSceneDescriptorLayout() {
-  VkDescriptorSetLayoutBinding cameraBinding{};
-  cameraBinding.binding = 0;
-  cameraBinding.descriptorCount = 1;
-  cameraBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  cameraBinding.stageFlags =
-      VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  VkDescriptorSetLayoutBinding sceneBinding{};
-  sceneBinding.binding = 1;
-  sceneBinding.descriptorCount = 1;
-  sceneBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  sceneBinding.stageFlags =
-      VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  VkDescriptorSetLayoutBinding shadowmapBinding{};
-  shadowmapBinding.binding = 2;
-  shadowmapBinding.descriptorCount = 1;
-  shadowmapBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  shadowmapBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  VkDescriptorSetLayoutBinding iblBinding{};
-  iblBinding.binding = 3;
-  iblBinding.descriptorCount = 2;
-  iblBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  iblBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  VkDescriptorSetLayoutBinding lutBinding{};
-  lutBinding.binding = 4;
-  lutBinding.descriptorCount = 1;
-  lutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  lutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-  std::array<VkDescriptorBindingFlags, 5> bindingFlags{
-      0, 0, 0, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT,
-      VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT};
-
-  VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
-  bindingFlagsCreateInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-  bindingFlagsCreateInfo.pNext = nullptr;
-  bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
-  bindingFlagsCreateInfo.bindingCount = bindingFlags.size();
-
-  // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-  std::array<VkDescriptorSetLayoutBinding, 5> bindings{
-      cameraBinding, sceneBinding, shadowmapBinding, iblBinding, lutBinding};
-
-  VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
-  descriptorSetLayoutInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  descriptorSetLayoutInfo.pNext = &bindingFlagsCreateInfo;
-  descriptorSetLayoutInfo.flags = 0;
-  descriptorSetLayoutInfo.bindingCount = bindings.size();
-  descriptorSetLayoutInfo.pBindings = bindings.data();
-
-  checkForVulkanError(vkCreateDescriptorSetLayout(device,
-                                                  &descriptorSetLayoutInfo,
-                                                  nullptr, &sceneLayout),
-                      "Failed to create scene descriptor set layout");
-
-  LOG_DEBUG("[Vulkan] Scene descriptor set layout created");
-}
-
-void VulkanDescriptorManager::createMaterialDescriptorLayout() {
-  VkDescriptorSetLayoutBinding bufferBinding{};
-  bufferBinding.binding = 0;
-  bufferBinding.descriptorCount = 1;
-  bufferBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  bufferBinding.stageFlags =
-      VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  VkDescriptorSetLayoutBinding textureBinding{};
-  textureBinding.binding = 1;
-  textureBinding.descriptorCount = MAX_TEXTURE_DESCRIPTORS;
-  textureBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  textureBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-  std::array<VkDescriptorSetLayoutBinding, 2> bindings{bufferBinding,
-                                                       textureBinding};
-
-  std::array<VkDescriptorBindingFlags, 2> bindingFlags{
-      0, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT};
-
-  VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
-  bindingFlagsCreateInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-  bindingFlagsCreateInfo.pNext = nullptr;
-  bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
-  bindingFlagsCreateInfo.bindingCount = bindingFlags.size();
-
-  VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo{};
-  descriptorSetLayoutInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  descriptorSetLayoutInfo.pNext = &bindingFlagsCreateInfo;
-  descriptorSetLayoutInfo.flags = 0;
-  descriptorSetLayoutInfo.bindingCount = bindings.size();
-  descriptorSetLayoutInfo.pBindings = bindings.data();
-  checkForVulkanError(vkCreateDescriptorSetLayout(device,
-                                                  &descriptorSetLayoutInfo,
-                                                  nullptr, &materialLayout),
-                      "Failed to create material descriptor set layout");
-
-  LOG_DEBUG("[Vulkan] Material descriptor set layout created");
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {

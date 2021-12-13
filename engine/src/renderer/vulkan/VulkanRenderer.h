@@ -10,7 +10,7 @@
 #include "VulkanShader.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanRenderData.h"
-#include "VulkanResourceManager.h"
+#include "VulkanDeferredResourceManager.h"
 #include "VulkanResourceAllocator.h"
 #include "VulkanRenderBackend.h"
 #include "VulkanGraphEvaluator.h"
@@ -65,8 +65,6 @@ public:
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
-  void setClearColor(glm::vec4 clearColor);
-
   inline const StatsManager &getStatsManager() { return statsManager; }
   inline const SharedPtr<DebugManager> &getDebugManager() {
     return debugManager;
@@ -85,26 +83,18 @@ private:
 
   void createImgui();
 
-  void createMainPipelineLayout();
-
 private:
-  glm::vec4 clearColor{0.0, 0.0, 0.0, 1.0};
-
   VulkanRenderBackend renderBackend;
 
   VulkanDescriptorManager *descriptorManager = nullptr;
-  VulkanResourceManager *mainResourceManager = nullptr;
+  VulkanDeferredResourceManager *deferredResourceManager = nullptr;
+  ImguiRenderer *imguiRenderer = nullptr;
+  ShaderLibrary *shaderLibrary = nullptr;
 
   std::vector<SharedPtr<Material>> shadowMaterials;
 
-  ImguiRenderer *imguiRenderer = nullptr;
-
-  ShaderLibrary *shaderLibrary;
-
   RenderGraph graph;
   bool graphCreated = false;
-
-  VkPipelineLayout mainPipelineLayout = VK_NULL_HANDLE;
 
   EntityContext &entityContext;
 

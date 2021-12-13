@@ -37,34 +37,30 @@ public:
    * @param sceneBuffer Scene buffer
    * @param shadowmaps Shadow maps
    * @param iblMaps Image based lighting maps
+   * @param layout Descriptor set layout
+   *
    * @return Scene descriptor set
    */
   VkDescriptorSet
   createSceneDescriptorSet(const SharedPtr<VulkanHardwareBuffer> &cameraBuffer,
                            const SharedPtr<VulkanHardwareBuffer> &sceneBuffer,
                            const SharedPtr<Texture> &shadowmaps,
-                           const std::array<SharedPtr<Texture>, 3> &iblMaps);
+                           const std::array<SharedPtr<Texture>, 3> &iblMaps,
+                           VkDescriptorSetLayout layout);
 
   /**
    * @brief Create material descriptor set
    *
    * @param buffer Material buffer
    * @param textures Material textures
+   * @param layout Descriptor set layout
    *
    * @return Material descriptor set
    */
   VkDescriptorSet
   createMaterialDescriptorSet(const SharedPtr<VulkanHardwareBuffer> &buffer,
-                              const std::vector<SharedPtr<Texture>> &textures);
-
-  /**
-   * @brief Get descriptor set layouts
-   *
-   * @return List of descriptor set layouts
-   */
-  inline std::array<VkDescriptorSetLayout, 2> getDescriptorLayouts() {
-    return {sceneLayout, materialLayout};
-  }
+                              const std::vector<SharedPtr<Texture>> &textures,
+                              VkDescriptorSetLayout layout = VK_NULL_HANDLE);
 
   /**
    * @brief Get descriptor pool
@@ -82,24 +78,11 @@ public:
 
 private:
   /**
-   * @brief Create scene descriptor layout
-   */
-  void createSceneDescriptorLayout();
-
-  /**
-   * @brief Create material descriptor layout
-   */
-  void createMaterialDescriptorLayout();
-
-  /**
    * @brief Create descriptor pool
    */
   void createDescriptorPool();
 
 public:
-  VkDescriptorSetLayout sceneLayout = VK_NULL_HANDLE;
-  VkDescriptorSetLayout materialLayout = VK_NULL_HANDLE;
-
   VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 
   VkDevice device;

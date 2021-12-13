@@ -27,10 +27,7 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
                              ResourceAllocator *resourceAllocator_)
     : vulkanContext(vulkanContext_), resourceAllocator(resourceAllocator_) {
   ImGui::CreateContext();
-
-  descriptorManager = new VulkanDescriptorManager(vulkanContext.getDevice());
   ImGui::StyleColorsDark();
-
   ImGui_ImplGlfw_InitForVulkan(window->getInstance(), true);
 
   ImGuiIO &io = ImGui::GetIO();
@@ -38,9 +35,9 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
   frameData.resize(2);
+
+  descriptorManager = new VulkanDescriptorManager(vulkanContext.getDevice());
   loadFonts();
-  createDescriptorLayout();
-  createPipelineLayout();
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
 }
@@ -50,17 +47,6 @@ ImguiRenderer::~ImguiRenderer() {
 
   fontTexture = nullptr;
   frameData.clear();
-
-  if (descriptorLayout) {
-    vkDestroyDescriptorSetLayout(vulkanContext.getDevice(), descriptorLayout,
-                                 nullptr);
-    descriptorLayout = VK_NULL_HANDLE;
-  }
-
-  if (pipelineLayout) {
-    vkDestroyPipelineLayout(vulkanContext.getDevice(), pipelineLayout, nullptr);
-    pipelineLayout = VK_NULL_HANDLE;
-  }
 
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
@@ -79,6 +65,9 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 
   if (!data)
     return;
+
+  const auto &vulkanPipeline =
+      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
   int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
   int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
@@ -121,7 +110,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
     frameObj.vertexBuffer->unmap();
   }
 
-  setupRenderStates(data, commandList, fbWidth, fbHeight);
+  setupRenderStates(data, commandList, fbWidth, fbHeight, vulkanPipeline);
 
   uint32_t indexOffset = 0;
   uint32_t vertexOffset = 0;
@@ -132,7 +121,8 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
       if (cmd->UserCallback != NULL) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
-          setupRenderStates(data, commandList, fbWidth, fbHeight);
+          setupRenderStates(data, commandList, fbWidth, fbHeight,
+                            vulkanPipeline);
         } else {
           cmd->UserCallback(cmdList, cmd);
         }
@@ -167,10 +157,10 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 
           if (descriptorMap.find(texture) == descriptorMap.end()) {
             descriptorMap.insert(
-                {texture, createDescriptorFromTexture(texture)});
+                {texture, createDescriptorFromTexture(texture, pipeline)});
           }
 
-          commandList.bindDescriptorSets(pipelineLayout,
+          commandList.bindDescriptorSets(vulkanPipeline->getPipelineLayout(),
                                          VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
                                          {descriptorMap.at(texture)}, {});
           commandList.drawIndexed(
@@ -184,32 +174,24 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
   }
 }
 
-void ImguiRenderer::createDescriptorLayout() {
-  VkDescriptorSetLayoutBinding binding{};
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  binding.descriptorCount = 1;
-  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-  std::array<VkDescriptorSetLayoutBinding, 1> bindings{binding};
+VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(
+    Texture *texture, const SharedPtr<Pipeline> &pipeline) {
+  const auto &vulkanPipeline =
+      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
-  VkDescriptorSetLayoutCreateInfo info = {};
-  info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  info.bindingCount = bindings.size();
-  info.pBindings = bindings.data();
-  vkCreateDescriptorSetLayout(vulkanContext.getDevice(), &info, nullptr,
-                              &descriptorLayout);
-}
-
-VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(Texture *texture) {
   const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
       texture->getResourceBinder());
 
   VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
 
+  std::array<VkDescriptorSetLayout, 1> layouts{
+      vulkanPipeline->getDescriptorLayout(0)};
+
   VkDescriptorSetAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   allocInfo.descriptorPool = descriptorManager->getDescriptorPool();
   allocInfo.descriptorSetCount = 1;
-  allocInfo.pSetLayouts = &descriptorLayout;
+  allocInfo.pSetLayouts = layouts.data();
   vkAllocateDescriptorSets(vulkanContext.getDevice(), &allocInfo,
                            &descriptorSet);
 
@@ -229,26 +211,9 @@ VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(Texture *texture) {
   return descriptorSet;
 }
 
-void ImguiRenderer::createPipelineLayout() {
-  std::array<VkPushConstantRange, 1> pushConstants{};
-  pushConstants.at(0).stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  pushConstants.at(0).offset = 0;
-  pushConstants.at(0).size = sizeof(float) * 4;
-
-  std::array<VkDescriptorSetLayout, 1> setLayouts{descriptorLayout};
-  VkPipelineLayoutCreateInfo layoutInfo{};
-  layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  layoutInfo.setLayoutCount = 1;
-  layoutInfo.pSetLayouts = setLayouts.data();
-  layoutInfo.pushConstantRangeCount = 1;
-  layoutInfo.pPushConstantRanges = pushConstants.data();
-  vkCreatePipelineLayout(vulkanContext.getDevice(), &layoutInfo, nullptr,
-                         &pipelineLayout);
-}
-
-void ImguiRenderer::setupRenderStates(ImDrawData *data,
-                                      RenderCommandList &commandList,
-                                      int fbWidth, int fbHeight) {
+void ImguiRenderer::setupRenderStates(
+    ImDrawData *data, RenderCommandList &commandList, int fbWidth, int fbHeight,
+    const SharedPtr<VulkanPipeline> &pipeline) {
   if (data->TotalVtxCount > 0) {
     commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
     commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,
@@ -266,14 +231,16 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   float *scaleConstant = new float[2];
   memcpy(scaleConstant, scale.data(), sizeof(float) * scale.size());
-  commandList.pushConstants(pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+  commandList.pushConstants(pipeline->getPipelineLayout(),
+                            VK_SHADER_STAGE_VERTEX_BIT, 0,
                             sizeof(float) * scale.size(), scaleConstant);
 
   float *translateConstant = new float[2];
   memcpy(translateConstant, translate.data(), sizeof(float) * translate.size());
   commandList.pushConstants(
-      pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, sizeof(float) * scale.size(),
-      sizeof(float) * translate.size(), translateConstant);
+      pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT,
+      sizeof(float) * scale.size(), sizeof(float) * translate.size(),
+      translateConstant);
 }
 
 void ImguiRenderer::loadFonts() {

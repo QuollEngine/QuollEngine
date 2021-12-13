@@ -393,27 +393,74 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
     const PipelineDescriptor &descriptor, VkRenderPass renderPass) {
   VkPipeline pipeline = VK_NULL_HANDLE;
 
-  // Pipeline stages
-  VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-  vertShaderStageInfo.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-  vertShaderStageInfo.module =
-      std::dynamic_pointer_cast<VulkanShader>(descriptor.vertexShader)
-          ->getShaderModule();
-  vertShaderStageInfo.pName = "main";
+  std::array<SharedPtr<VulkanShader>, 2> shaders{
+      std::dynamic_pointer_cast<VulkanShader>(descriptor.vertexShader),
+      std::dynamic_pointer_cast<VulkanShader>(descriptor.fragmentShader),
+  };
 
-  VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-  fragShaderStageInfo.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  fragShaderStageInfo.module =
-      std::dynamic_pointer_cast<VulkanShader>(descriptor.fragmentShader)
-          ->getShaderModule();
-  fragShaderStageInfo.pName = "main";
+  std::array<VkPipelineShaderStageCreateInfo, 2> stages{};
+  for (size_t i = 0; i < 2; ++i) {
+    stages.at(i).sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    stages.at(i).pName = "main";
+    stages.at(i).module = shaders.at(i)->getShaderModule();
+    stages.at(i).stage = shaders.at(i)->getShaderStage();
+  }
 
-  std::array<VkPipelineShaderStageCreateInfo, 2> stages{vertShaderStageInfo,
-                                                        fragShaderStageInfo};
+  // Pipeline Layout
+  std::vector<VkDescriptorSetLayout> descriptorLayouts;
+  std::vector<VkPushConstantRange> pushConstantRanges;
+
+  for (auto &shader : shaders) {
+    const auto &reflection = shader->getReflectionData();
+    for (auto &x : reflection.descriptorSetLayouts) {
+
+      std::vector<VkDescriptorBindingFlags> bindingFlags(
+          x.size(), VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+
+      VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
+      bindingFlagsCreateInfo.sType =
+          VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+      bindingFlagsCreateInfo.pNext = nullptr;
+      bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
+      bindingFlagsCreateInfo.bindingCount = bindingFlags.size();
+
+      VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+      VkDescriptorSetLayoutCreateInfo createInfo{};
+      createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+      createInfo.flags = 0;
+      createInfo.pNext = &bindingFlagsCreateInfo;
+      createInfo.bindingCount = x.size();
+      createInfo.pBindings = x.data();
+      checkForVulkanError(
+          vkCreateDescriptorSetLayout(vulkanInstance.getDevice(), &createInfo,
+                                      nullptr, &layout),
+          "Failed to create descriptor set layout");
+
+      descriptorLayouts.push_back(layout);
+    }
+
+    for (auto &x : reflection.pushConstantRanges) {
+      pushConstantRanges.push_back(x);
+    }
+  }
+
+  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+  pipelineLayoutCreateInfo.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutCreateInfo.flags = 0;
+  pipelineLayoutCreateInfo.pNext = nullptr;
+  pipelineLayoutCreateInfo.setLayoutCount =
+      static_cast<uint32_t>(descriptorLayouts.size());
+  pipelineLayoutCreateInfo.pSetLayouts = descriptorLayouts.data();
+  pipelineLayoutCreateInfo.pushConstantRangeCount =
+      static_cast<uint32_t>(pushConstantRanges.size());
+  pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
+
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  checkForVulkanError(vkCreatePipelineLayout(vulkanInstance.getDevice(),
+                                             &pipelineLayoutCreateInfo, nullptr,
+                                             &pipelineLayout),
+                      "Failed to create pipeline layout");
 
   // Dynamic state
   std::array<VkDynamicState, 2> dynamicStates{VK_DYNAMIC_STATE_VIEWPORT,
@@ -575,8 +622,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   pipelineInfo.basePipelineIndex = -1;
   pipelineInfo.renderPass = renderPass;
   pipelineInfo.subpass = 0;
-  pipelineInfo.layout = descriptor.pipelineLayout;
-
+  pipelineInfo.layout = pipelineLayout;
   pipelineInfo.stageCount = stages.size();
   pipelineInfo.pStages = stages.data();
   pipelineInfo.pVertexInputState = &vertexInput;
@@ -595,7 +641,8 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
 
   LOG_DEBUG("[Vulkan] Pipeline created");
 
-  return std::make_shared<VulkanPipeline>(vulkanInstance.getDevice(), pipeline);
+  return std::make_shared<VulkanPipeline>(vulkanInstance.getDevice(), pipeline,
+                                          pipelineLayout, descriptorLayouts);
 }
 
 } // namespace liquid

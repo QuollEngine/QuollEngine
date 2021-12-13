@@ -163,11 +163,13 @@ TEST_F(RenderGraphBuilderTest, SetsSwapchainDepthAttachmentIdAsOutputForPass) {
 TEST_F(RenderGraphBuilderTest, CreatesPipelineResource) {
   auto pass1 = std::make_shared<NoncePass>(1);
 
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
-  auto resourceId = builder.create(liquid::PipelineDescriptor{
-      (VkPipelineLayout)0x23232323,
-  });
+  liquid::PipelineDescriptor descriptor{};
+  descriptor.inputAssembly.primitiveTopology =
+      liquid::PrimitiveTopology::PatchList;
 
-  EXPECT_EQ(graph.getPipeline(resourceId).pipelineLayout,
-            (VkPipelineLayout)0x23232323);
+  liquid::RenderGraphBuilder builder(graph, pass1.get());
+  auto resourceId = builder.create(descriptor);
+
+  EXPECT_EQ(graph.getPipeline(resourceId).inputAssembly.primitiveTopology,
+            liquid::PrimitiveTopology::PatchList);
 }

@@ -167,8 +167,6 @@ int main() {
 
   liquid::MainLoop mainLoop(renderer.get(), window.get());
 
-  renderer->setClearColor({0.19, 0.21, 0.26, 1.0});
-
   UILayer ui(context);
 
   while (!window->shouldClose()) {

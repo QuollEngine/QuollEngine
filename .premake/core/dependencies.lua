@@ -1,6 +1,6 @@
 -- Link dependencies without Vulkan
 function linkDependenciesWithoutVulkan()
-    links { "vendor-libimgui", "glfw3", "ktx" }
+    links { "vendor-libimgui", "vendor-libspirv-reflect", "glfw3", "ktx" }
 
     -- These libs must be linked after
     -- all libraries are linked
