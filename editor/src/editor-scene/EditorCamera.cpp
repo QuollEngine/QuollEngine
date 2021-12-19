@@ -1,5 +1,7 @@
 #include "EditorCamera.h"
 
+#include <GLFW/glfw3.h>
+
 using liquid::Camera;
 using liquid::GLFWWindow;
 using liquid::VulkanRenderer;

@@ -17,6 +17,8 @@
 
 #include "loop/MainLoop.h"
 
+#include <GLFW/glfw3.h>
+
 uint32_t materialIndex = 0;
 bool changed = false;
 

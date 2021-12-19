@@ -25,7 +25,7 @@
 #include "ui/UILayer.h"
 #include "EditorCamera.h"
 
-#include <stb/stb_image.h>
+#include <GLFW/glfw3.h>
 
 static liquid::platform_tools::NativeFileDialog fileDialog;
 std::list<liquid::String> sceneQueue;

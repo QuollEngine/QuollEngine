@@ -1,9 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
-
 #include "core/Base.h"
-#include <GLFW/glfw3.h>
 
 struct GLFWwindow;
 

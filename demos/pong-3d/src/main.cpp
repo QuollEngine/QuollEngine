@@ -18,6 +18,8 @@
 #include "cube.h"
 #include "sphere.h"
 
+#include <GLFW/glfw3.h>
+
 class Game {
 public:
   Game()
