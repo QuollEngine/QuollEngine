@@ -11,11 +11,11 @@ MainLoop::MainLoop(VulkanRenderer *renderer_, GLFWWindow *window_)
       debugLayer(renderer->getContext().getPhysicalDevice().getDeviceInfo(),
                  renderer->getStatsManager(), renderer->getDebugManager()) {}
 
-int MainLoop::run(Scene *scene, const std::function<bool(double)> &updater,
+int MainLoop::run(RenderGraph &graph,
+                  const std::function<bool(double)> &updater,
                   const std::function<void()> &renderUI) {
-  bool running = true;
 
-  const auto &renderData = renderer->prepareScene(scene);
+  bool running = true;
 
   constexpr uint32_t ONE_SECOND_IN_MS = 1000;
   constexpr double MAX_UPDATE_TIME = 0.25;
@@ -42,21 +42,17 @@ int MainLoop::run(Scene *scene, const std::function<bool(double)> &updater,
     prevGameTime = currentTime;
     accumulator += frameTime;
 
-    renderData->update();
-
     while (accumulator >= dt) {
       running = updater(dt);
       accumulator -= dt;
     }
 
-    renderer->getImguiRenderer()->beginRendering();
+    ImguiRenderer::beginRendering();
     renderUI();
     debugLayer.render();
-    renderer->getImguiRenderer()->endRendering();
+    ImguiRenderer::endRendering();
 
-    scene->update();
-
-    renderer->draw(renderData);
+    renderer->getRenderBackend().execute(graph);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
@@ -69,7 +65,7 @@ int MainLoop::run(Scene *scene, const std::function<bool(double)> &updater,
     }
   }
 
-  renderer->waitForIdle();
+  renderer->getRenderBackend().waitForIdle();
 
   return 0;
 }

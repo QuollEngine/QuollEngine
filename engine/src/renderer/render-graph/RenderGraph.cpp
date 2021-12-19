@@ -1,8 +1,19 @@
 #include "core/Base.h"
 #include "core/EngineGlobals.h"
 #include "RenderGraph.h"
+#include "RenderGraphPassBase.h"
 
 namespace liquid {
+
+RenderGraph::RenderGraph(RenderGraph &&rhs) {
+  passes = rhs.passes;
+  attachments = rhs.attachments;
+  swapchainAttachments = rhs.swapchainAttachments;
+  resourceMap = resourceMap;
+  registry = rhs.registry;
+
+  rhs.passes.clear();
+}
 
 RenderGraph::~RenderGraph() {
   for (auto &x : passes) {
@@ -10,12 +21,12 @@ RenderGraph::~RenderGraph() {
   }
 }
 
-void RenderGraph::addPass(RenderGraphPassInterface *pass) {
+void RenderGraph::addPassInternal(RenderGraphPassBase *pass) {
   passes.push_back(pass);
 }
 
-std::vector<RenderGraphPassInterface *> RenderGraph::compile() {
-  std::vector<RenderGraphPassInterface *> tempPasses = passes;
+std::vector<RenderGraphPassBase *> RenderGraph::compile() {
+  std::vector<RenderGraphPassBase *> tempPasses = passes;
 
   // Validate pass names
   std::set<String> uniquePasses;
@@ -86,7 +97,7 @@ std::vector<RenderGraphPassInterface *> RenderGraph::compile() {
   }
 
   // topological sort based on DFS
-  std::vector<RenderGraphPassInterface *> sortedPasses;
+  std::vector<RenderGraphPassBase *> sortedPasses;
   sortedPasses.reserve(tempPasses.size());
   std::vector<bool> visited(tempPasses.size(), false);
 
@@ -104,7 +115,7 @@ std::vector<RenderGraphPassInterface *> RenderGraph::compile() {
 void RenderGraph::topologicalSort(
     size_t index, std::vector<bool> &visited,
     const std::vector<std::list<size_t>> &adjacencyList,
-    std::vector<RenderGraphPassInterface *> &output) {
+    std::vector<RenderGraphPassBase *> &output) {
   visited.at(index) = true;
 
   for (size_t x : adjacencyList.at(index)) {
@@ -148,25 +159,6 @@ const GraphResourceId RenderGraph::getResourceId(const String &name) {
     resourceMap[name] = generateNewId();
   }
   return resourceMap.at(name);
-}
-
-RenderGraphPassInterface::RenderGraphPassInterface(GraphResourceId renderPass_)
-    : renderPass(renderPass_) {}
-
-void RenderGraphPassInterface::addInput(GraphResourceId resourceId) {
-  inputs.push_back(resourceId);
-}
-
-void RenderGraphPassInterface::addOutput(GraphResourceId resourceId) {
-  outputs.push_back(resourceId);
-}
-
-void RenderGraphPassInterface::addResource(GraphResourceId resourceId) {
-  resources.push_back(resourceId);
-}
-
-void RenderGraphPassInterface::setSwapchainRelative(bool swapchainRelative_) {
-  swapchainRelative = swapchainRelative_;
 }
 
 } // namespace liquid

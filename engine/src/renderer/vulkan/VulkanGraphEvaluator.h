@@ -41,7 +41,7 @@ public:
    * @param graph Render graph
    * @return Topologically sorted render passes
    */
-  std::vector<RenderGraphPassInterface *> build(RenderGraph &graph);
+  std::vector<RenderGraphPassBase *> build(RenderGraph &graph);
 
   /**
    * @brief Rebuild swapchain related passes
@@ -59,7 +59,7 @@ public:
    * @param imageIdx Swapchain image index
    */
   void execute(RenderCommandList &commandList,
-               const std::vector<RenderGraphPassInterface *> &passes,
+               const std::vector<RenderGraphPassBase *> &passes,
                RenderGraph &graph, uint32_t imageIdx);
 
 private:
@@ -70,8 +70,7 @@ private:
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
    */
-  void buildPass(RenderGraphPassInterface *pass, RenderGraph &graph,
-                 bool force);
+  void buildPass(RenderGraphPassBase *pass, RenderGraph &graph, bool force);
 
   /**
    * @brief Create swapchain color attachment

@@ -17,7 +17,7 @@ void EntityPanel::render(SceneManager &sceneManager) {
     name = context.getComponent<liquid::NameComponent>(selectedEntity).name +
            "###" + std::to_string(selectedEntity);
   } else {
-    liquid::String name = "Entity: " + std::to_string(selectedEntity);
+    name = "Entity: " + std::to_string(selectedEntity);
   }
 
   bool open = true;

@@ -34,8 +34,7 @@ TEST_F(RenderCommandListTests, RecordEndRenderPass) {
 TEST_F(RenderCommandListTests, RecordBindPipeline) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindPipeline(std::make_shared<liquid::Pipeline>(),
-                           VK_PIPELINE_BIND_POINT_GRAPHICS);
+  commandList.bindPipeline(std::make_shared<liquid::Pipeline>());
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindPipeline);
 }
@@ -43,8 +42,8 @@ TEST_F(RenderCommandListTests, RecordBindPipeline) {
 TEST_F(RenderCommandListTests, RecordBindDescriptorSets) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindDescriptorSets((VkPipelineLayout)0x2323232,
-                                 VK_PIPELINE_BIND_POINT_GRAPHICS, 0, {}, {});
+  commandList.bindDescriptorSets(std::make_shared<liquid::Pipeline>(), 0, {},
+                                 {});
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindDescriptorSets);
 }
@@ -84,7 +83,7 @@ TEST_F(RenderCommandListTests, RecordBindIndexBuffer) {
 TEST_F(RenderCommandListTests, RecordPushConstants) {
   liquid::RenderCommandList commandList;
 
-  commandList.pushConstants((VkPipelineLayout)0x112121,
+  commandList.pushConstants(std::make_shared<liquid::Pipeline>(),
                             VK_SHADER_STAGE_VERTEX_BIT, 0, 0, nullptr);
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::PushConstants);

@@ -35,8 +35,8 @@ public:
   ImguiRenderer &operator=(const ImguiRenderer &rhs) = delete;
   ImguiRenderer &operator=(ImguiRenderer &&rhs) = delete;
 
-  void beginRendering();
-  void endRendering();
+  static void beginRendering();
+  static void endRendering();
 
   void draw(RenderCommandList &commandList,
             const SharedPtr<Pipeline> &pipeline);

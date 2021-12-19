@@ -70,13 +70,11 @@ struct RenderCommandEndRenderPass
 struct RenderCommandBindPipeline
     : public TypedRenderCommandBase<RenderCommandType::BindPipeline> {
   SharedPtr<Pipeline> pipeline = nullptr;
-  VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 };
 
 struct RenderCommandBindDescriptorSets
     : public TypedRenderCommandBase<RenderCommandType::BindDescriptorSets> {
-  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-  VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
+  SharedPtr<Pipeline> pipeline = nullptr;
   uint32_t firstSet = 0;
   std::vector<VkDescriptorSet> descriptorSets;
   std::vector<uint32_t> dynamicOffsets;
@@ -84,7 +82,7 @@ struct RenderCommandBindDescriptorSets
 
 struct RenderCommandPushConstants
     : public TypedRenderCommandBase<RenderCommandType::PushConstants> {
-  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  SharedPtr<Pipeline> pipeline = nullptr;
   VkShaderStageFlags stageFlags = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
   uint32_t offset = 0;
   uint32_t size = 0;

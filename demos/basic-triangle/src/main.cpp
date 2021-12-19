@@ -11,6 +11,7 @@
 #include "scene/MeshInstance.h"
 #include "entity/EntityContext.h"
 #include "window/glfw/GLFWWindow.h"
+#include "renderer/passes/ImguiPass.h"
 
 #include "loaders/ImageTextureLoader.h"
 
@@ -28,84 +29,121 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 int main() {
-  try {
-    liquid::Engine::setAssetsPath(
-        std::filesystem::path("../../../../engine/bin/Debug/assets").string());
-    liquid::EntityContext context;
-    std::unique_ptr<liquid::GLFWWindow> window(
-        new liquid::GLFWWindow("Triangle", 640, 480));
-    std::unique_ptr<liquid::VulkanRenderer> renderer(
-        new liquid::VulkanRenderer(context, window.get()));
-    auto entity = context.createEntity();
+  liquid::Engine::setAssetsPath(
+      std::filesystem::path("../../../../engine/bin/Debug/assets").string());
+  liquid::EntityContext context;
+  std::unique_ptr<liquid::GLFWWindow> window(
+      new liquid::GLFWWindow("Triangle", 640, 480));
+  std::unique_ptr<liquid::VulkanRenderer> renderer(
+      new liquid::VulkanRenderer(context, window.get()));
+  auto entity = context.createEntity();
 
-    liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
+  liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
 
-    auto &&shaderBasicVert = renderer->createShader("basic-shader.vert.spv");
-    auto &&shaderBasicFrag = renderer->createShader("basic-shader.frag.spv");
-    auto &&shaderRedFrag = renderer->createShader("red-shader.frag.spv");
-    auto &&shaderTextureVert =
-        renderer->createShader("texture-shader.vert.spv");
-    auto &&shaderTextureFrag =
-        renderer->createShader("texture-shader.frag.spv");
+  auto &&shaderBasicVert = renderer->createShader("basic-shader.vert.spv");
+  auto &&shaderBasicFrag = renderer->createShader("basic-shader.frag.spv");
+  auto &&shaderRedFrag = renderer->createShader("red-shader.frag.spv");
+  auto &&shaderTextureVert = renderer->createShader("texture-shader.vert.spv");
+  auto &&shaderTextureFrag = renderer->createShader("texture-shader.frag.spv");
 
-    std::array<liquid::SharedPtr<liquid::Material>, 3> materials{
-        renderer->createMaterial(shaderBasicVert, shaderBasicFrag, {}, {},
-                                 liquid::CullMode::None),
-        renderer->createMaterial(shaderBasicVert, shaderRedFrag, {}, {},
-                                 liquid::CullMode::None),
-        renderer->createMaterial(shaderTextureVert, shaderTextureFrag,
-                                 {textureLoader.loadFromFile("brick.png")}, {},
-                                 liquid::CullMode::None)};
+  std::array<liquid::SharedPtr<liquid::Material>, 3> materials{
+      renderer->createMaterial(shaderBasicVert, shaderBasicFrag, {}, {},
+                               liquid::CullMode::None),
+      renderer->createMaterial(shaderBasicVert, shaderRedFrag, {}, {},
+                               liquid::CullMode::None),
+      renderer->createMaterial(shaderTextureVert, shaderTextureFrag,
+                               {textureLoader.loadFromFile("brick.png")}, {},
+                               liquid::CullMode::None)};
 
-    liquid::Mesh mesh;
-    liquid::Geometry geom;
-    geom.addVertex({-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-                    0.0, 0.0, 0.0});
-    geom.addVertex({0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                    0.0, 0.0, 1.0});
-    geom.addVertex({1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                    1.0, 1.0, 1.0});
+  liquid::Mesh mesh;
+  liquid::Geometry geom;
+  geom.addVertex({-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+                  0.0, 0.0, 0.0});
+  geom.addVertex({0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                  0.0, 0.0, 1.0});
+  geom.addVertex({1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                  1.0, 1.0, 1.0});
 
-    geom.addTriangle(0, 1, 2);
-    geom.setMaterial(materials[materialIndex % 3]);
-    mesh.addGeometry(geom);
+  geom.addTriangle(0, 1, 2);
+  geom.setMaterial(materials[materialIndex % 3]);
+  mesh.addGeometry(geom);
 
-    liquid::SharedPtr<liquid::MeshInstance> instance(
-        new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
-    context.setComponent<liquid::MeshComponent>(entity, {instance});
+  liquid::SharedPtr<liquid::MeshInstance> instance(
+      new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
+  context.setComponent<liquid::MeshComponent>(entity, {instance});
 
-    std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
-    auto camera = context.createEntity();
-    context.setComponent<liquid::CameraComponent>(
-        camera,
-        {std::make_shared<liquid::Camera>(renderer->getResourceAllocator())});
+  std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
+  auto camera = context.createEntity();
+  context.setComponent<liquid::CameraComponent>(
+      camera,
+      {std::make_shared<liquid::Camera>(renderer->getResourceAllocator())});
 
-    scene->setActiveCamera(camera);
-    scene->getRootNode()->addChild(entity, glm::mat4{1.0f});
+  scene->setActiveCamera(camera);
+  scene->getRootNode()->addChild(entity, glm::mat4{1.0f});
 
-    glfwSetKeyCallback(window->getInstance(), key_callback);
+  glfwSetKeyCallback(window->getInstance(), key_callback);
 
-    liquid::MainLoop mainLoop(renderer.get(), window.get());
+  liquid::MainLoop mainLoop(renderer.get(), window.get());
 
-    auto *instancePtr = instance.get();
+  auto *instancePtr = instance.get();
 
-    mainLoop.run(
-        scene.get(),
-        [instancePtr, materials](double dt) mutable {
-          if (changed) {
-            instancePtr->setMaterial(
-                materials[materialIndex % materials.size()]);
-            changed = false;
-          }
+  const auto &renderData = renderer->prepareScene(scene.get());
 
-          return true;
-        },
-        []() {});
+  struct Scope {
+    liquid::GraphResourceId basicPipeline;
+    liquid::GraphResourceId redPipeline;
+    liquid::GraphResourceId texturePipeline;
+  };
+  liquid::RenderGraph graph;
+  graph.addInlinePass<Scope>(
+      "mainPass",
+      [shaderBasicVert, shaderBasicFrag, shaderRedFrag, shaderTextureVert,
+       shaderTextureFrag](liquid::RenderGraphBuilder &builder, Scope &scope) {
+        builder.writeSwapchain("mainColor",
+                               {liquid::AttachmentType::Color,
+                                liquid::AttachmentLoadOp::Clear,
+                                liquid::AttachmentStoreOp::Store,
+                                glm::vec4{0.19f, 0.21f, 0.26f, 1.0f}});
 
-    context.destroy();
-    return 0;
-  } catch (std::runtime_error error) {
-    std::cerr << error.what() << std::endl;
-    return 1;
-  }
+        builder.writeSwapchain("mainDepth",
+                               {liquid::AttachmentType::Depth,
+                                liquid::AttachmentLoadOp::Clear,
+                                liquid::AttachmentStoreOp::Store,
+                                liquid::DepthStencilClear{1.0f, 0}});
+
+        scope.basicPipeline = builder.create(liquid::PipelineDescriptor{
+            shaderBasicVert, shaderRedFrag,
+            liquid::PipelineVertexInputLayout::create<liquid::Vertex>()});
+      },
+      [&instance](liquid::RenderCommandList &commandList, Scope &scope,
+                  liquid::RenderGraphRegistry &registry) {
+        const auto &pipeline = registry.getPipeline(scope.basicPipeline);
+        commandList.bindPipeline(pipeline);
+        commandList.bindVertexBuffer(instance->getVertexBuffers().at(0));
+        commandList.bindIndexBuffer(instance->getIndexBuffers().at(0),
+                                    VK_INDEX_TYPE_UINT32);
+        commandList.draw(3, 0);
+      });
+
+  liquid::ImguiRenderer imgui(renderer->getRenderBackend().getWindow(),
+                              renderer->getRenderBackend().getVulkanInstance(),
+                              renderer->getResourceAllocator());
+
+  graph.addPass<liquid::ImguiPass>("imgui", renderer->getRenderBackend(),
+                                   renderer->getShaderLibrary(), "mainColor");
+
+  mainLoop.run(
+      graph,
+      [instancePtr, materials](double dt) mutable {
+        if (changed) {
+          instancePtr->setMaterial(materials[materialIndex % materials.size()]);
+          changed = false;
+        }
+
+        return true;
+      },
+      []() {});
+
+  context.destroy();
+  return 0;
 }

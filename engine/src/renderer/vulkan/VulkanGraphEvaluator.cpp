@@ -20,7 +20,7 @@ VulkanGraphEvaluator::VulkanGraphEvaluator(
     : vulkanInstance(vulkanInstance_), swapchain(swapchain_),
       resourceAllocator(resourceAllocator_) {}
 
-std::vector<RenderGraphPassInterface *>
+std::vector<RenderGraphPassBase *>
 VulkanGraphEvaluator::build(RenderGraph &graph) {
   const auto &&passes = graph.compile();
 
@@ -42,7 +42,7 @@ void VulkanGraphEvaluator::rebuildSwapchainRelatedPasses(RenderGraph &graph) {
 
 void VulkanGraphEvaluator::execute(
     RenderCommandList &commandList,
-    const std::vector<RenderGraphPassInterface *> &result, RenderGraph &graph,
+    const std::vector<RenderGraphPassBase *> &result, RenderGraph &graph,
     uint32_t imageIdx) {
 
   for (auto &item : result) {
@@ -58,12 +58,12 @@ void VulkanGraphEvaluator::execute(
                             {0.0f, 1.0f});
     commandList.setScissor({0.0f, 0.0f}, renderPass->getExtent());
 
-    item->execute(commandList);
+    item->execute(commandList, graph.getResourceRegistry());
     commandList.endRenderPass();
   }
 }
 
-void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
+void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
                                      RenderGraph &graph, bool force) {
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkAttachmentReference> colorAttachments;
@@ -85,16 +85,18 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
       continue;
     }
 
+    uint32_t lastAttachmentIndex = static_cast<uint32_t>(attachments.size());
+
     if (graph.hasSwapchainAttachment(resourceId)) {
       framebufferAttachments.resize(swapchain.getImageViews().size());
       const auto &graphAttachment = graph.getSwapchainAttachment(resourceId);
       if (graphAttachment.type == AttachmentType::Color) {
-        info =
-            createSwapchainColorAttachment(graphAttachment, attachments.size());
+        info = createSwapchainColorAttachment(graphAttachment,
+                                              lastAttachmentIndex);
         colorAttachments.push_back(info.reference);
       } else if (graphAttachment.type == AttachmentType::Depth) {
-        info =
-            createSwapchainDepthAttachment(graphAttachment, attachments.size());
+        info = createSwapchainDepthAttachment(graphAttachment,
+                                              lastAttachmentIndex);
         depthAttachment = info.reference;
       } else {
         continue;
@@ -102,10 +104,10 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
     } else {
       const auto &graphAttachment = graph.getAttachment(resourceId);
       if (graphAttachment.type == AttachmentType::Color) {
-        info = createColorAttachment(graphAttachment, attachments.size());
+        info = createColorAttachment(graphAttachment, lastAttachmentIndex);
         colorAttachments.push_back(info.reference);
       } else if (graphAttachment.type == AttachmentType::Depth) {
-        info = createDepthAttachment(graphAttachment, attachments.size());
+        info = createDepthAttachment(graphAttachment, lastAttachmentIndex);
         depthAttachment = info.reference;
       } else {
         continue;
@@ -136,7 +138,8 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
 
     VkSubpassDescription subpass{};
     subpass.flags = 0;
-    subpass.colorAttachmentCount = colorAttachments.size();
+    subpass.colorAttachmentCount =
+        static_cast<uint32_t>(colorAttachments.size());
     subpass.pColorAttachments = colorAttachments.data();
     subpass.pDepthStencilAttachment =
         depthAttachment.has_value() ? &depthAttachment.value() : nullptr;
@@ -151,7 +154,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
     createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     createInfo.flags = 0;
     createInfo.pNext = nullptr;
-    createInfo.attachmentCount = attachments.size();
+    createInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     createInfo.pAttachments = attachments.data();
     createInfo.subpassCount = 1;
     createInfo.pSubpasses = &subpass;
@@ -170,7 +173,8 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassInterface *pass,
       createInfo.flags = 0;
       createInfo.pNext = nullptr;
       createInfo.pAttachments = framebufferAttachments.at(i).data();
-      createInfo.attachmentCount = framebufferAttachments.at(i).size();
+      createInfo.attachmentCount =
+          static_cast<uint32_t>(framebufferAttachments.at(i).size());
       createInfo.renderPass = renderPass;
       createInfo.width = width;
       createInfo.height = height;
@@ -437,14 +441,15 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
           VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
       bindingFlagsCreateInfo.pNext = nullptr;
       bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
-      bindingFlagsCreateInfo.bindingCount = bindingFlags.size();
+      bindingFlagsCreateInfo.bindingCount =
+          static_cast<uint32_t>(bindingFlags.size());
 
       VkDescriptorSetLayout layout = VK_NULL_HANDLE;
       VkDescriptorSetLayoutCreateInfo createInfo{};
       createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
       createInfo.flags = 0;
       createInfo.pNext = &bindingFlagsCreateInfo;
-      createInfo.bindingCount = x.size();
+      createInfo.bindingCount = static_cast<uint32_t>(x.size());
       createInfo.pBindings = x.data();
       checkForVulkanError(
           vkCreateDescriptorSetLayout(vulkanInstance.getDevice(), &createInfo,
@@ -583,7 +588,8 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
       VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   colorBlending.pNext = nullptr;
   colorBlending.flags = 0;
-  colorBlending.attachmentCount = colorBlendAttachments.size();
+  colorBlending.attachmentCount =
+      static_cast<uint32_t>(colorBlendAttachments.size());
   colorBlending.pAttachments = colorBlendAttachments.data();
   colorBlending.logicOpEnable = false;
   colorBlending.logicOp = VK_LOGIC_OP_COPY;
@@ -600,7 +606,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
 
   // Vertex Input Bindings
   vertexInput.vertexBindingDescriptionCount =
-      descriptor.inputLayout.bindings.size();
+      static_cast<uint32_t>(descriptor.inputLayout.bindings.size());
   std::vector<VkVertexInputBindingDescription> vertexInputBindings(
       descriptor.inputLayout.bindings.size());
   for (size_t i = 0; i < descriptor.inputLayout.bindings.size(); ++i) {
@@ -613,7 +619,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   vertexInput.pVertexBindingDescriptions = vertexInputBindings.data();
 
   vertexInput.vertexAttributeDescriptionCount =
-      descriptor.inputLayout.attributes.size();
+      static_cast<uint32_t>(descriptor.inputLayout.attributes.size());
   std::vector<VkVertexInputAttributeDescription> vertexInputDescriptions(
       descriptor.inputLayout.attributes.size());
 
@@ -638,7 +644,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   pipelineInfo.renderPass = renderPass;
   pipelineInfo.subpass = 0;
   pipelineInfo.layout = pipelineLayout;
-  pipelineInfo.stageCount = stages.size();
+  pipelineInfo.stageCount = static_cast<uint32_t>(stages.size());
   pipelineInfo.pStages = stages.data();
   pipelineInfo.pVertexInputState = &vertexInput;
   pipelineInfo.pInputAssemblyState = &inputAssembly;

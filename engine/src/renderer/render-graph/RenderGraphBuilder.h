@@ -1,11 +1,13 @@
 #pragma once
 
 #include "RenderGraphResource.h"
+#include "RenderGraphAttachmentDescriptor.h"
+#include "RenderGraphPipelineDescriptor.h"
 
 namespace liquid {
 
 class RenderGraph;
-class RenderGraphPassInterface;
+class RenderGraphPassBase;
 
 class RenderGraphBuilder {
 public:
@@ -15,7 +17,7 @@ public:
    * @param graph Render graph
    * @param pass Render pass
    */
-  RenderGraphBuilder(RenderGraph &graph, RenderGraphPassInterface *pass);
+  RenderGraphBuilder(RenderGraph &graph, RenderGraphPassBase *pass);
 
   /**
    * @brief Write attachment resource
@@ -66,7 +68,7 @@ public:
 
 private:
   RenderGraph &graph;
-  RenderGraphPassInterface *pass;
+  RenderGraphPassBase *pass;
 };
 
 } // namespace liquid

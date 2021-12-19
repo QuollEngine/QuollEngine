@@ -44,9 +44,6 @@ public:
   VulkanRenderer &operator=(const VulkanRenderer &rhs) = delete;
   VulkanRenderer &operator=(VulkanRenderer &&rhs) = delete;
 
-  void draw(const SharedPtr<VulkanRenderData> &renderData);
-  void waitForIdle();
-
   SharedPtr<Material>
   createMaterial(const SharedPtr<Shader> &vertexShader,
                  const SharedPtr<Shader> &fragmentShader,
@@ -61,11 +58,12 @@ public:
   inline ResourceAllocator *getResourceAllocator() {
     return renderBackend.getResourceAllocator();
   }
-  inline ImguiRenderer *getImguiRenderer() { return imguiRenderer; }
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
-  inline const StatsManager &getStatsManager() { return statsManager; }
+  inline const StatsManager &getStatsManager() {
+    return renderBackend.getStatsManager();
+  }
   inline const SharedPtr<DebugManager> &getDebugManager() {
     return debugManager;
   }
@@ -76,30 +74,25 @@ public:
 
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
+  RenderGraph createRenderGraph(const SharedPtr<VulkanRenderData> &renderData);
+
+  inline VulkanRenderBackend &getRenderBackend() { return renderBackend; }
+
 private:
-  void createRenderGraph(const SharedPtr<VulkanRenderData> &renderData);
-
   void loadShaders();
-
-  void createImgui();
 
 private:
   VulkanRenderBackend renderBackend;
 
   VulkanDescriptorManager *descriptorManager = nullptr;
   VulkanDeferredResourceManager *deferredResourceManager = nullptr;
-  ImguiRenderer *imguiRenderer = nullptr;
   ShaderLibrary *shaderLibrary = nullptr;
 
   std::vector<SharedPtr<Material>> shadowMaterials;
 
-  RenderGraph graph;
-  bool graphCreated = false;
-
   EntityContext &entityContext;
 
   SharedPtr<DebugManager> debugManager;
-  StatsManager statsManager;
 };
 
 } // namespace liquid

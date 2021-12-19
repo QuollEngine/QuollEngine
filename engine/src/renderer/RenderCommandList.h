@@ -30,22 +30,20 @@ public:
    * @brief Bind pipeline
    *
    * @param pipeline Pipeline
-   * @param bindPoint Pipeline bind point
    */
-  void bindPipeline(const SharedPtr<Pipeline> &pipeline,
-                    VkPipelineBindPoint bindPoint);
+  void bindPipeline(const SharedPtr<Pipeline> &pipeline);
 
   /**
    * @brief Bind descriptor sets
    *
-   * @param pipelineLayout Pipeline layout
+   * @param Pipeline
    * @param bindPoint Pipeline bind point
    * @param firstSet First set
    * @param descriptorSets Descriptor sets
    * @param dynamicOffsets Dynamic offsets
    */
-  void bindDescriptorSets(VkPipelineLayout pipelineLayout,
-                          VkPipelineBindPoint bindPoint, uint32_t firstSet,
+  void bindDescriptorSets(const SharedPtr<Pipeline> &pipeline,
+                          uint32_t firstSet,
                           const std::vector<VkDescriptorSet> &descriptorSets,
                           const std::vector<uint32_t> &dynamicOffsets);
 
@@ -68,13 +66,13 @@ public:
   /**
    * @brief Push constants
    *
-   * @param pipelineLayout Pipeline layout
+   * @param pipeline Pipeline
    * @param stageFlags Stage flags
    * @param offset Offset
    * @param size Size
    * @param data Data
    */
-  void pushConstants(VkPipelineLayout pipelineLayout,
+  void pushConstants(const SharedPtr<Pipeline> &pipeline,
                      VkShaderStageFlags stageFlags, uint32_t offset,
                      uint32_t size, void *data);
 

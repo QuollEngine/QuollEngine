@@ -24,10 +24,8 @@ public:
    *
    * @param window GLFW window
    * @param enableValidations Enable validations
-   * @param statsManager Stats manager
    */
-  VulkanRenderBackend(GLFWWindow *window, bool enableValidations,
-                      StatsManager &statsManager);
+  VulkanRenderBackend(GLFWWindow *window, bool enableValidations);
 
   VulkanRenderBackend(const VulkanRenderBackend &rhs) = delete;
   VulkanRenderBackend(VulkanRenderBackend &&rhs) = delete;
@@ -84,6 +82,13 @@ public:
   inline bool isFramebufferResized() const { return framebufferResized; }
 
   /**
+   * @brief Get stats manager
+   *
+   * @return Stats manager
+   */
+  inline StatsManager &getStatsManager() { return statsManager; }
+
+  /**
    * @brief Execute render graph
    *
    * @param graph Render graph
@@ -120,6 +125,7 @@ private:
   VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;
   VulkanRenderContext renderContext;
+  StatsManager statsManager;
   std::unique_ptr<VulkanGraphEvaluator> graphEvaluator;
 };
 

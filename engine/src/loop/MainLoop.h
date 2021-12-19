@@ -2,6 +2,7 @@
 
 #include "core/Base.h"
 
+#include "renderer/render-graph/RenderGraph.h"
 #include "profiler/ImguiDebugLayer.h"
 
 namespace liquid {
@@ -15,7 +16,7 @@ class MainLoop {
 public:
   MainLoop(VulkanRenderer *renderer, GLFWWindow *window);
 
-  int run(Scene *scene, const std::function<bool(double)> &update,
+  int run(RenderGraph &graph, const std::function<bool(double)> &update,
           const std::function<void()> &renderUI);
 
 private:

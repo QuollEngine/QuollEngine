@@ -52,10 +52,12 @@ public:
   int run() {
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
+    const auto &renderData = renderer->prepareScene(scene.get());
+    auto graph = renderer->createRenderGraph(renderData);
 
     try {
       return mainLoop.run(
-          scene.get(),
+          graph,
           [=](double dt) mutable {
             updateGameLogic(0.15);
             updateScene(0.15);

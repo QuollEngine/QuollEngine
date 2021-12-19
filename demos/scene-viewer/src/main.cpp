@@ -230,10 +230,14 @@ int main() {
     static float horizontalAngle = 0, verticalAngle = 0;
     static double prevX = 0.0, prevY = 0.0;
 
+    const auto &renderData = renderer->prepareScene(scene.get());
+    liquid::RenderGraph graph = renderer->createRenderGraph(renderData);
+
     mainLoop.run(
-        scene.get(),
-        [&ui, node, &editorCamera, &window](double dt) mutable {
+        graph,
+        [&ui, &scene, node, &editorCamera, &window](double dt) mutable {
           ImGuiIO &io = ImGui::GetIO();
+          scene->update();
 
           if (leftMouseBtnPressed && !io.WantCaptureMouse) {
             double xpos, ypos;

@@ -3,6 +3,8 @@
 #include "GLFWWindow.h"
 #include "GLFWError.h"
 
+#include <GLFW/glfw3.h>
+
 namespace liquid {
 
 GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
@@ -96,6 +98,10 @@ SizeObject GLFWWindow::getWindowSize() {
       static_cast<uint32_t>(height),
   };
 }
+
+bool GLFWWindow::shouldClose() { return glfwWindowShouldClose(windowInstance); }
+
+void GLFWWindow::pollEvents() { glfwPollEvents(); }
 
 uint32_t GLFWWindow::addResizeHandler(
     const std::function<void(uint32_t, uint32_t)> &handler) {

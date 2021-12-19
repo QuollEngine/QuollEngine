@@ -103,8 +103,11 @@ TEST_F(VulkanDescriptorManagerTests,
   // MAX_TEXTURE_DESCRIPTORS = 8
   std::vector<liquid::SharedPtr<liquid::Texture>> textures(9);
 
-  EXPECT_THROW({ manager.createMaterialDescriptorSet(nullptr, textures); },
-               liquid::VulkanError);
+  EXPECT_THROW(
+      {
+        manager.createMaterialDescriptorSet(nullptr, textures, VK_NULL_HANDLE);
+      },
+      liquid::VulkanError);
 }
 
 TEST_F(VulkanDescriptorManagerTests,
@@ -113,8 +116,9 @@ TEST_F(VulkanDescriptorManagerTests,
       .WillByDefault(Return(VK_ERROR_UNKNOWN));
   liquid::VulkanDescriptorManager manager(nullptr);
 
-  EXPECT_THROW({ manager.createMaterialDescriptorSet(nullptr, {}); },
-               liquid::VulkanError);
+  EXPECT_THROW(
+      { manager.createMaterialDescriptorSet(nullptr, {}, VK_NULL_HANDLE); },
+      liquid::VulkanError);
 }
 
 TEST_F(VulkanDescriptorManagerTests,
@@ -129,7 +133,7 @@ TEST_F(VulkanDescriptorManagerTests,
       std::make_shared<liquid::VulkanHardwareBuffer>(
           liquid::HardwareBuffer::Uniform, 0, nullptr, nullptr, nullptr,
           statsManager),
-      {});
+      {}, VK_NULL_HANDLE);
 }
 
 TEST_F(VulkanDescriptorManagerTests,
@@ -142,10 +146,12 @@ TEST_F(VulkanDescriptorManagerTests,
   liquid::VulkanDescriptorManager manager(nullptr);
 
   manager.createMaterialDescriptorSet(
-      nullptr, {std::make_shared<liquid::Texture>(
-                   std::make_shared<liquid::VulkanTextureBinder>(
-                       nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
-                   0, statsManager)});
+      nullptr,
+      {std::make_shared<liquid::Texture>(
+          std::make_shared<liquid::VulkanTextureBinder>(
+              nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
+          0, statsManager)},
+      VK_NULL_HANDLE);
 }
 
 TEST_F(VulkanDescriptorManagerTests,
@@ -163,7 +169,8 @@ TEST_F(VulkanDescriptorManagerTests,
       {std::make_shared<liquid::Texture>(
           std::make_shared<liquid::VulkanTextureBinder>(
               nullptr, nullptr, nullptr, nullptr, nullptr, nullptr),
-          0, statsManager)});
+          0, statsManager)},
+      VK_NULL_HANDLE);
 }
 
 TEST_F(VulkanDescriptorManagerTests, DestroysDescriptorPoolIfExists) {

@@ -56,6 +56,15 @@ public:
     return descriptorSetLayouts.at(index);
   }
 
+  /**
+   * @brief Get pipeline bind point
+   *
+   * @return Pipeline bind point
+   */
+  inline VkPipelineBindPoint getBindPoint() const {
+    return VK_PIPELINE_BIND_POINT_GRAPHICS;
+  }
+
 private:
   VkDevice device = VK_NULL_HANDLE;
   VkPipeline pipeline = VK_NULL_HANDLE;

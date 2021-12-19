@@ -21,23 +21,20 @@ void RenderCommandList::endRenderPass() {
 }
 
 void RenderCommandList::bindDescriptorSets(
-    VkPipelineLayout pipelineLayout, VkPipelineBindPoint bindPoint,
-    uint32_t firstSet, const std::vector<VkDescriptorSet> &descriptorSets,
+    const SharedPtr<Pipeline> &pipeline, uint32_t firstSet,
+    const std::vector<VkDescriptorSet> &descriptorSets,
     const std::vector<uint32_t> &dynamicOffsets) {
   auto *command = new RenderCommandBindDescriptorSets;
-  command->pipelineLayout = pipelineLayout;
-  command->bindPoint = bindPoint;
+  command->pipeline = pipeline;
   command->firstSet = firstSet;
   command->descriptorSets = descriptorSets;
   command->dynamicOffsets = dynamicOffsets;
   record(command);
 }
 
-void RenderCommandList::bindPipeline(const SharedPtr<Pipeline> &pipeline,
-                                     VkPipelineBindPoint bindPoint) {
+void RenderCommandList::bindPipeline(const SharedPtr<Pipeline> &pipeline) {
   auto *command = new RenderCommandBindPipeline;
   command->pipeline = pipeline;
-  command->bindPoint = bindPoint;
   record(command);
 }
 
@@ -60,12 +57,12 @@ void RenderCommandList::bindIndexBuffer(const SharedPtr<HardwareBuffer> &buffer,
   record(command);
 }
 
-void RenderCommandList::pushConstants(VkPipelineLayout pipelineLayout,
+void RenderCommandList::pushConstants(const SharedPtr<Pipeline> &pipeline,
                                       VkShaderStageFlags stageFlags,
                                       uint32_t offset, uint32_t size,
                                       void *data) {
   auto *command = new RenderCommandPushConstants;
-  command->pipelineLayout = pipelineLayout;
+  command->pipeline = pipeline;
   command->stageFlags = stageFlags;
   command->offset = offset;
   command->size = size;

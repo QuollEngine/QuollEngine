@@ -8,7 +8,7 @@
 namespace liquid {
 
 RenderGraphBuilder::RenderGraphBuilder(RenderGraph &graph_,
-                                       RenderGraphPassInterface *pass_)
+                                       RenderGraphPassBase *pass_)
     : graph(graph_), pass(pass_) {}
 
 GraphResourceId

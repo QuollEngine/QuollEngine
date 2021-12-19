@@ -48,14 +48,23 @@ int main() {
     while (sceneManager.hasNewScene()) {
       sceneManager.createNewScene();
 
+      const auto &renderData =
+          renderer->prepareScene(sceneManager.getActiveScene());
+
+      liquid::RenderGraph graph = renderer->createRenderGraph(renderData);
+
       mainLoop.run(
-          sceneManager.getActiveScene(),
+          graph,
           [&editorCamera, &sceneManager](double dt) mutable {
             ImGuiIO &io = ImGui::GetIO();
             editorCamera.update();
+            sceneManager.getActiveScene()->update();
             return !sceneManager.hasNewScene();
           },
-          [&ui, &sceneManager]() { ui.render(sceneManager); });
+          [&ui, &sceneManager, &renderData]() {
+            ui.render(sceneManager);
+            renderData->update();
+          });
     }
 
     return 0;

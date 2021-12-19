@@ -80,9 +80,6 @@ struct MaterialData {
 
 layout(set = 2, binding = 1) uniform sampler2D tex[8];
 
-layout(push_constant) uniform constants { mat4 modelMatrix; }
-pushConstants;
-
 MaterialData materialData = MaterialData(
     materialDataRaw.baseColorTexture[0],
     materialDataRaw.baseColorTextureCoord[0], materialDataRaw.baseColorFactor,

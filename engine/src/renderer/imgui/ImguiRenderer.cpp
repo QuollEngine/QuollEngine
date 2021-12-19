@@ -151,7 +151,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
           }
 
           commandList.setScissor(clipRectOffset, clipRectSize);
-          commandList.bindPipeline(pipeline, VK_PIPELINE_BIND_POINT_GRAPHICS);
+          commandList.bindPipeline(pipeline);
 
           auto *texture = static_cast<Texture *>(cmd->TextureId);
 
@@ -160,8 +160,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
                 {texture, createDescriptorFromTexture(texture, pipeline)});
           }
 
-          commandList.bindDescriptorSets(vulkanPipeline->getPipelineLayout(),
-                                         VK_PIPELINE_BIND_POINT_GRAPHICS, 0,
+          commandList.bindDescriptorSets(pipeline, 0,
                                          {descriptorMap.at(texture)}, {});
           commandList.drawIndexed(
               cmd->ElemCount, cmd->IdxOffset + indexOffset,
@@ -205,8 +204,9 @@ VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(
   writes[0].descriptorCount = 1;
   writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   writes[0].pImageInfo = &imageInfo;
-  vkUpdateDescriptorSets(vulkanContext.getDevice(), writes.size(),
-                         writes.data(), 0, NULL);
+  vkUpdateDescriptorSets(vulkanContext.getDevice(),
+                         static_cast<uint32_t>(writes.size()), writes.data(), 0,
+                         nullptr);
 
   return descriptorSet;
 }
@@ -229,18 +229,20 @@ void ImguiRenderer::setupRenderStates(
   std::array<float, 2> translate{-1.0f - data->DisplayPos.x * scale[0],
                                  -1.0f - data->DisplayPos.y * scale[1]};
 
+  uint32_t scaleDataSize = static_cast<uint32_t>(sizeof(float) * scale.size());
+  uint32_t translateDataSize =
+      static_cast<uint32_t>(sizeof(float) * translate.size());
+
   float *scaleConstant = new float[2];
-  memcpy(scaleConstant, scale.data(), sizeof(float) * scale.size());
-  commandList.pushConstants(pipeline->getPipelineLayout(),
-                            VK_SHADER_STAGE_VERTEX_BIT, 0,
-                            sizeof(float) * scale.size(), scaleConstant);
+
+  memcpy(scaleConstant, scale.data(), scaleDataSize);
+  commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                            scaleDataSize, scaleConstant);
 
   float *translateConstant = new float[2];
-  memcpy(translateConstant, translate.data(), sizeof(float) * translate.size());
-  commandList.pushConstants(
-      pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT,
-      sizeof(float) * scale.size(), sizeof(float) * translate.size(),
-      translateConstant);
+  memcpy(translateConstant, translate.data(), scaleDataSize);
+  commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, scaleDataSize,
+                            translateDataSize, translateConstant);
 }
 
 void ImguiRenderer::loadFonts() {

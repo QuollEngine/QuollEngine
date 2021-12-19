@@ -115,13 +115,16 @@ void VulkanCommandExecutor::executeBindPipeline(
     const RenderCommandBindPipeline *const command) {
   const auto &pipeline =
       std::dynamic_pointer_cast<VulkanPipeline>(command->pipeline);
-  vkCmdBindPipeline(commandBuffer, command->bindPoint, pipeline->getPipeline());
+  vkCmdBindPipeline(commandBuffer, pipeline->getBindPoint(),
+                    pipeline->getPipeline());
 }
 
 void VulkanCommandExecutor::executeBindDescriptorSets(
     const RenderCommandBindDescriptorSets *const command) {
-  vkCmdBindDescriptorSets(commandBuffer, command->bindPoint,
-                          command->pipelineLayout, command->firstSet,
+  const auto &pipeline =
+      std::dynamic_pointer_cast<VulkanPipeline>(command->pipeline);
+  vkCmdBindDescriptorSets(commandBuffer, pipeline->getBindPoint(),
+                          pipeline->getPipelineLayout(), command->firstSet,
                           static_cast<uint32_t>(command->descriptorSets.size()),
                           command->descriptorSets.data(),
                           static_cast<uint32_t>(command->dynamicOffsets.size()),
@@ -130,7 +133,9 @@ void VulkanCommandExecutor::executeBindDescriptorSets(
 
 void VulkanCommandExecutor::executePushConstants(
     const RenderCommandPushConstants *const command) {
-  vkCmdPushConstants(commandBuffer, command->pipelineLayout,
+  const auto &pipeline =
+      std::dynamic_pointer_cast<VulkanPipeline>(command->pipeline);
+  vkCmdPushConstants(commandBuffer, pipeline->getPipelineLayout(),
                      command->stageFlags, command->offset, command->size,
                      command->data.get());
 }

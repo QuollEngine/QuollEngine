@@ -10,19 +10,17 @@ public:
 
 class RenderGraphBuilderDeathTest : public RenderGraphBuilderTest {};
 
-struct NoncePass : public liquid::RenderGraphPassInterface {
-  NoncePass(liquid::GraphResourceId renderPass)
-      : RenderGraphPassInterface(renderPass) {}
+struct NoncePass : public liquid::RenderGraphPassBase {
+  NoncePass(const liquid::String &name, liquid::GraphResourceId renderPass)
+      : RenderGraphPassBase(name, renderPass) {}
 
-  void build(liquid::RenderGraphBuilder &&builder) {}
-  void execute(liquid::RenderCommandList &commandList) {}
-  const liquid::String &getName() const { return name; }
-
-  liquid::String name = "";
+  void buildInternal(liquid::RenderGraphBuilder &builder) {}
+  void execute(liquid::RenderCommandList &commandList,
+               liquid::RenderGraphRegistry &registry) {}
 };
 
 TEST_F(RenderGraphBuilderTest, CreatesAttachmentInGraphAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
   liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
@@ -46,8 +44,8 @@ TEST_F(RenderGraphBuilderTest, CreatesAttachmentInGraphAndAddsItAsPassOutput) {
 
 TEST_F(RenderGraphBuilderTest,
        UpdatesAttachmentInGraphIfIdExistsAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>(1);
-  auto pass2 = std::make_shared<NoncePass>(2);
+  auto pass1 = std::make_shared<NoncePass>("nonce1", 1);
+  auto pass2 = std::make_shared<NoncePass>("nonce2", 2);
 
   auto prevResourceId = std::numeric_limits<liquid::GraphResourceId>::max();
 
@@ -84,7 +82,7 @@ TEST_F(RenderGraphBuilderTest,
 
 TEST_F(RenderGraphBuilderDeathTest,
        FailsToSetAttachmentIfAttachmentAlreadyExists) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
   liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
@@ -98,7 +96,7 @@ TEST_F(RenderGraphBuilderDeathTest,
 
 TEST_F(RenderGraphBuilderTest,
        CreatesResourceIdWithoutReferenceIfResourceDoesNotExist) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
 
@@ -110,8 +108,8 @@ TEST_F(RenderGraphBuilderTest,
 }
 
 TEST_F(RenderGraphBuilderTest, SetsAttachmentIdAsInputForPass) {
-  auto pass1 = std::make_shared<NoncePass>(1);
-  auto pass2 = std::make_shared<NoncePass>(2);
+  auto pass1 = std::make_shared<NoncePass>("nonce1", 1);
+  auto pass2 = std::make_shared<NoncePass>("nonce2", 2);
 
   {
     liquid::RenderGraphBuilder builder(graph, pass1.get());
@@ -138,7 +136,7 @@ TEST_F(RenderGraphBuilderTest, SetsAttachmentIdAsInputForPass) {
 
 TEST_F(RenderGraphBuilderDeathTest,
        FailsToSetSwapchainAttachmentIfAttachmentAlreadyExists) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
   auto resourceId = builder.writeSwapchain("Test color", {});
@@ -147,7 +145,7 @@ TEST_F(RenderGraphBuilderDeathTest,
 
 TEST_F(RenderGraphBuilderTest,
        CreatesSwapchainAttachmentInGraphAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
   liquid::RenderPassSwapchainAttachment color{
@@ -168,7 +166,7 @@ TEST_F(RenderGraphBuilderTest,
 }
 
 TEST_F(RenderGraphBuilderTest, CreatesPipelineResource) {
-  auto pass1 = std::make_shared<NoncePass>(1);
+  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::PipelineDescriptor descriptor{};
   descriptor.inputAssembly.primitiveTopology =

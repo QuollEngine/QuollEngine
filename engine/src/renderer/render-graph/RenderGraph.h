@@ -7,191 +7,17 @@
 #include "RenderGraphPipelineDescriptor.h"
 #include "RenderGraphRegistry.h"
 #include "RenderGraphBuilder.h"
+#include "RenderGraphInlinePass.h"
 
 namespace liquid {
 
 class RenderGraph;
-class RenderGraphPassInterface;
-
-class RenderGraphPassInterface {
-public:
-  /**
-   * @brief Create render render graph pass
-   *
-   * @param renderPass Render pass resource
-   */
-  RenderGraphPassInterface(GraphResourceId renderPass);
-
-  /**
-   * @brief Build pass
-   *
-   * @param builder Graph builder
-   * @pure
-   */
-  virtual void build(RenderGraphBuilder &&builder) = 0;
-
-  /**
-   * @brief Execute pass
-   *
-   * @param commandList Render command list
-   * @pure
-   */
-  virtual void execute(RenderCommandList &commandList) = 0;
-
-  /**
-   * @brief Get pass name
-   *
-   * @return Pass name
-   * @pure
-   */
-  virtual const String &getName() const = 0;
-
-  /**
-   * @brief Add input resource
-   *
-   * @param resourceId Input resource ID
-   */
-  void addInput(GraphResourceId resourceId);
-
-  /**
-   * @brief Add output resource
-   *
-   * @param resourceId Output resource ID
-   */
-  void addOutput(GraphResourceId resourceId);
-
-  /**
-   * @brief Add resource
-   *
-   * @param resourceId Non attachment resource ID
-   */
-  void addResource(GraphResourceId resourceId);
-
-  /*
-   * @brief Set swapchain relative
-   *
-   * @param swapchainRelative Swapchain relative flag
-   */
-  void setSwapchainRelative(bool swapchainRelative);
-
-  /**
-   * @brief Get all input resources
-   *
-   * @return Input resources
-   */
-  inline const std::vector<GraphResourceId> &getInputs() const {
-    return inputs;
-  }
-
-  /**
-   * @brief Get all output resources
-   *
-   * @return Output resources
-   */
-  inline const std::vector<GraphResourceId> &getOutputs() const {
-    return outputs;
-  }
-
-  /**
-   * @brief Get non attachment resources
-   *
-   * @return Resources
-   */
-  inline const std::vector<GraphResourceId> &getResources() const {
-    return resources;
-  }
-
-  /**
-   * @brief Get render pass
-   *
-   * @return Render pass resource
-   */
-  inline GraphResourceId getRenderPass() const { return renderPass; }
-
-  /**
-   * @brief Is swapchain relative
-   *
-   * @retval true Pass is swapchain relative
-   * @retval false Pass is not swapchain relative
-   */
-  inline bool isSwapchainRelative() const { return swapchainRelative; }
-
-private:
-  std::vector<GraphResourceId> inputs;
-  std::vector<GraphResourceId> outputs;
-  std::vector<GraphResourceId> resources;
-  bool swapchainRelative = false;
-
-  GraphResourceId renderPass;
-};
-
-template <class TScope>
-class RenderGraphPass : public RenderGraphPassInterface {
-public:
-  using BuilderFn =
-      std::function<void(RenderGraphBuilder &builder, TScope &scope)>;
-  using ExecutorFn =
-      std::function<void(RenderCommandList &commandList, TScope &scope,
-                         RenderGraphRegistry &registry)>;
-
-public:
-  /**
-   * @brief Create render graph pass
-   *
-   * @param name_ Pass name
-   * @param renderPass_ Render pass resource
-   * @param builderFn_ Builder function
-   * @param executorFn_ Executor function
-   * @param registry Resource registry
-   */
-  RenderGraphPass(const String &name_, GraphResourceId renderPass_,
-                  const BuilderFn &builderFn_, const ExecutorFn &executorFn_,
-                  RenderGraphRegistry &registry_)
-      : RenderGraphPassInterface(renderPass_), name(name_),
-        builderFn(builderFn_), executorFn(executorFn_), registry(registry_) {}
-
-  /**
-   * @brief Build pass
-   *
-   * @param builder Graph builder
-   */
-  void build(RenderGraphBuilder &&builder) override {
-    if (dirty) {
-      builderFn(builder, scope);
-      dirty = false;
-    }
-  }
-
-  /**
-   * @brief Execute pass
-   *
-   * @param commandList Render command list
-   */
-  void execute(RenderCommandList &commandList) override {
-    executorFn(commandList, scope, registry);
-  }
-
-  /**
-   * @brief Get pass name
-   *
-   * @return Pass name
-   */
-  const String &getName() const override { return name; }
-
-private:
-  String name;
-  BuilderFn builderFn;
-  ExecutorFn executorFn;
-  TScope scope{};
-  RenderGraphRegistry &registry;
-  bool dirty = true;
-};
 
 class RenderGraph {
 public:
   RenderGraph() = default;
   RenderGraph(const RenderGraph &) = delete;
-  RenderGraph(RenderGraph &&) = delete;
+  RenderGraph(RenderGraph &&rhs);
   RenderGraph &operator=(const RenderGraph &) = delete;
   RenderGraph &operator=(RenderGraph &&) = delete;
 
@@ -205,12 +31,18 @@ public:
   /**
    * @brief Add render pass
    *
-   * @param pass Render pass
+   * @tparam PassType Pass class type
+   * @tparam ...Args Class constructor argument types
+   * @param name Pass name
+   * @param ...args Class constructor arguments
    */
-  void addPass(RenderGraphPassInterface *pass);
+  template <class PassType, class... Args>
+  inline void addPass(const String &name, Args &&...args) {
+    addPassInternal(new PassType(name, generateNewId(), args...));
+  }
 
   /**
-   * @brief Add render pass
+   * @brief Add inline render pass
    *
    * @tparam TScope Local scope object type
    * @param name Pass name
@@ -218,12 +50,12 @@ public:
    * @param executor Executor function
    */
   template <class TScope>
-  inline void
-  addPass(const String &name,
-          const typename RenderGraphPass<TScope>::BuilderFn &builder,
-          const typename RenderGraphPass<TScope>::ExecutorFn &executor) {
-    addPass(new RenderGraphPass<TScope>(name, generateNewId(), builder,
-                                        executor, registry));
+  inline void addInlinePass(
+      const String &name,
+      const typename RenderGraphInlinePass<TScope>::BuilderFn &builder,
+      const typename RenderGraphInlinePass<TScope>::ExecutorFn &executor) {
+    addPassInternal(new RenderGraphInlinePass<TScope>(name, generateNewId(),
+                                                      builder, executor));
   }
 
   /**
@@ -231,7 +63,7 @@ public:
    *
    * @return Topologically sorted list of render passes
    */
-  std::vector<RenderGraphPassInterface *> compile();
+  std::vector<RenderGraphPassBase *> compile();
 
   /**
    * @brief Add attachment
@@ -359,8 +191,7 @@ public:
    *
    * @return Render passes
    */
-  inline const std::vector<RenderGraphPassInterface *> &
-  getRenderPasses() const {
+  inline const std::vector<RenderGraphPassBase *> &getRenderPasses() const {
     return passes;
   }
 
@@ -377,7 +208,7 @@ private:
    */
   void topologicalSort(size_t index, std::vector<bool> &visited,
                        const std::vector<std::list<size_t>> &adjacencyList,
-                       std::vector<RenderGraphPassInterface *> &output);
+                       std::vector<RenderGraphPassBase *> &output);
 
   /**
    * @brief Generate unique resource ID
@@ -386,13 +217,20 @@ private:
    */
   GraphResourceId generateNewId();
 
+  /**
+   * @brief Add render pass
+   *
+   * @param pass Render pass
+   */
+  void addPassInternal(RenderGraphPassBase *pass);
+
 private:
   std::unordered_map<GraphResourceId, RenderPassAttachment> attachments;
   std::unordered_map<GraphResourceId, PipelineDescriptor> pipelines;
   std::unordered_map<String, GraphResourceId> resourceMap;
   std::unordered_map<GraphResourceId, RenderPassSwapchainAttachment>
       swapchainAttachments;
-  std::vector<RenderGraphPassInterface *> passes;
+  std::vector<RenderGraphPassBase *> passes;
 
   GraphResourceId lastId = 0;
 

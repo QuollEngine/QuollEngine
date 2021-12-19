@@ -2,6 +2,8 @@
 #include "core/EngineGlobals.h"
 #include "window/glfw/GLFWWindow.h"
 #include <vulkan/vulkan.hpp>
+#include <GLFW/glfw3.h>
+
 #include "VulkanError.h"
 
 namespace liquid {

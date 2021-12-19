@@ -38,7 +38,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   liquid::RenderGraph graph;
 
   // A
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "A",
       [](auto &builder, auto &scope) {
         builder.write("a-b", {});
@@ -47,7 +47,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // B
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "B",
       [](auto &builder, auto &scope) {
         builder.read("a-b");
@@ -58,7 +58,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // C
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "C",
       [](auto &builder, auto &scope) {
         builder.read("b-c");
@@ -68,7 +68,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // D
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "D",
       [](auto &builder, auto &scope) {
         builder.read("a-d");
@@ -79,7 +79,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // E
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "E",
       [](auto &builder, auto &scope) {
         builder.read("d-e");
@@ -89,7 +89,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // F
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "F",
       [](auto &builder, auto &scope) {
         builder.read("e-f");
@@ -98,7 +98,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // G
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "G",
       [](auto &builder, auto &scope) {
         builder.read("f-g");
@@ -109,7 +109,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       noopExecutor);
 
   // H
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "H", [](auto &builder, auto &scope) { builder.write("h-c", {}); },
       noopExecutor);
 
@@ -120,7 +120,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   std::vector<liquid::String> names(sortedPasses.size());
   std::transform(
       sortedPasses.begin(), sortedPasses.end(), names.begin(),
-      [](liquid::RenderGraphPassInterface *pass) { return pass->getName(); });
+      [](liquid::RenderGraphPassBase *pass) { return pass->getName(); });
 
   // Convert it to string for easier checking
   liquid::String output = "";
@@ -137,17 +137,17 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   liquid::RenderGraph graph;
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
       noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "B", [](auto &builder, auto &scope) {}, noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "C", [](auto &builder, auto &scope) {}, noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "E", [](auto &builder, auto &scope) { builder.read("a-b"); },
       noopExecutor);
 
@@ -158,7 +158,7 @@ TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
   std::set_terminate([]() { FAIL(); });
   liquid::RenderGraph graph;
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
       noopExecutor);
 
@@ -174,17 +174,17 @@ TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   liquid::RenderGraph graph;
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
       noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "B", [](auto &builder, auto &scope) {}, noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) {}, noopExecutor);
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "E", [](auto &builder, auto &scope) { builder.read("a-b"); },
       noopExecutor);
 
@@ -195,7 +195,7 @@ TEST_F(RenderGraphDeathTest,
        CompilationFailsIfNodeInputDoesNotPointToResource) {
   liquid::RenderGraph graph;
 
-  graph.addPass<EmptyScope>(
+  graph.addInlinePass<EmptyScope>(
       "E", [](auto &builder, auto &scope) { builder.read("d-e"); },
       noopExecutor);
 

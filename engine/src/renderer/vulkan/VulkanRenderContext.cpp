@@ -95,15 +95,16 @@ void VulkanRenderContext::endRendering() {
       imageAvailableSemaphores.at(currentFrame)};
   std::array<VkPipelineStageFlags, 1> waitStages{
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-  submitInfo.waitSemaphoreCount = waitSemaphores.size();
+  submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
   submitInfo.pWaitSemaphores = waitSemaphores.data();
   submitInfo.pWaitDstStageMask = waitStages.data();
-  submitInfo.commandBufferCount = commandBuffers.size();
+  submitInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
   submitInfo.pCommandBuffers = commandBuffers.data();
 
   std::array<VkSemaphore, 1> signalSemaphores{
       renderFinishedSemaphores.at(currentFrame)};
-  submitInfo.signalSemaphoreCount = signalSemaphores.size();
+  submitInfo.signalSemaphoreCount =
+      static_cast<uint32_t>(signalSemaphores.size());
   submitInfo.pSignalSemaphores = signalSemaphores.data();
 
   checkForVulkanError(vkQueueSubmit(graphicsQueue, 1, &submitInfo,

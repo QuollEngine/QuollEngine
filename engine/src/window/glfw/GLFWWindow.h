@@ -5,6 +5,8 @@
 #include "core/Base.h"
 #include <GLFW/glfw3.h>
 
+struct GLFWwindow;
+
 namespace liquid {
 
 struct SizeObject {
@@ -66,12 +68,12 @@ public:
    * @retval true Window should close
    * @retval false Window should not close
    */
-  inline bool shouldClose() { return glfwWindowShouldClose(windowInstance); }
+  bool shouldClose();
 
   /**
    * @brief Polls window events
    */
-  inline void pollEvents() { glfwPollEvents(); }
+  void pollEvents();
 
   /**
    * @brief Add resize handler

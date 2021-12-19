@@ -60,7 +60,7 @@ public:
   VkDescriptorSet
   createMaterialDescriptorSet(const SharedPtr<VulkanHardwareBuffer> &buffer,
                               const std::vector<SharedPtr<Texture>> &textures,
-                              VkDescriptorSetLayout layout = VK_NULL_HANDLE);
+                              VkDescriptorSetLayout layout);
 
   /**
    * @brief Get descriptor pool
