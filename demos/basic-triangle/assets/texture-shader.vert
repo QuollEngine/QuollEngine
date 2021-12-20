@@ -8,9 +8,6 @@ layout(location = 4) in vec2 vTextureCoord;
 layout(location = 0) out vec3 outColor;
 layout(location = 1) out vec2 outTextureCoord;
 
-layout(push_constant) uniform constants { mat4 modelMatrix; }
-pushConstants;
-
 void main() {
   gl_Position = vec4(vPosition, 1.0f);
   outColor = vColor;

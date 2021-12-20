@@ -6,7 +6,7 @@ layout(location = 1) in vec2 textureCoord;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 1, binding = 1) uniform sampler2D tex;
+layout(set = 0, binding = 0) uniform sampler2D tex;
 
 void main() {
   vec3 texColor = texture(tex, textureCoord).xyz;

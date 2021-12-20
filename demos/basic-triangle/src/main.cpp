@@ -6,6 +6,8 @@
 #include "renderer/Shader.h"
 
 #include "renderer/vulkan/VulkanRenderer.h"
+#include "renderer/vulkan/VulkanPipeline.h"
+#include "renderer/vulkan/VulkanDeferredMaterialBinder.h"
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
 #include "scene/MeshInstance.h"
@@ -20,13 +22,11 @@
 #include <GLFW/glfw3.h>
 
 uint32_t materialIndex = 0;
-bool changed = false;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action,
                   int mods) {
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
     materialIndex++;
-    changed = true;
   }
 }
 
@@ -92,17 +92,17 @@ int main() {
   const auto &renderData = renderer->prepareScene(scene.get());
 
   struct Scope {
-    liquid::GraphResourceId basicPipeline;
-    liquid::GraphResourceId wireframeBasicPipeline;
-
-    liquid::GraphResourceId redPipeline;
-    liquid::GraphResourceId texturePipeline;
+    std::array<liquid::GraphResourceId, 2> basicPipeline;
+    std::array<liquid::GraphResourceId, 2> redPipeline;
+    std::array<liquid::GraphResourceId, 2> texturePipeline;
   };
+
   liquid::RenderGraph graph;
   graph.addInlinePass<Scope>(
       "mainPass",
       [shaderBasicVert, shaderBasicFrag, shaderRedFrag, shaderTextureVert,
-       shaderTextureFrag](liquid::RenderGraphBuilder &builder, Scope &scope) {
+       shaderTextureFrag,
+       &materials](liquid::RenderGraphBuilder &builder, Scope &scope) {
         builder.writeSwapchain("mainColor",
                                {liquid::AttachmentType::Color,
                                 liquid::AttachmentLoadOp::Clear,
@@ -115,29 +115,70 @@ int main() {
                                 liquid::AttachmentStoreOp::Store,
                                 liquid::DepthStencilClear{1.0f, 0}});
 
-        scope.basicPipeline = builder.create(liquid::PipelineDescriptor{
-            shaderBasicVert, shaderRedFrag,
-            liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
-            liquid::PipelineInputAssembly{}, liquid::PipelineRasterizer{},
-            liquid::PipelineColorBlend{
-                {liquid::PipelineColorBlendAttachment{}}}});
-        scope.wireframeBasicPipeline =
-            builder.create(liquid::PipelineDescriptor{
-                shaderBasicVert, shaderRedFrag,
-                liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
-                liquid::PipelineInputAssembly{},
-                liquid::PipelineRasterizer{liquid::PolygonMode::Line},
-                liquid::PipelineColorBlend{
-                    {liquid::PipelineColorBlendAttachment{}}}});
+        auto createTrianglePipelines =
+            [&builder](const liquid::SharedPtr<liquid::Shader> &vertShader,
+                       const liquid::SharedPtr<liquid::Shader> &fragShader)
+            -> std::array<liquid::GraphResourceId, 2> {
+          return {
+              builder.create(liquid::PipelineDescriptor{
+                  vertShader, fragShader,
+                  liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+                  liquid::PipelineInputAssembly{},
+                  liquid::PipelineRasterizer{liquid::PolygonMode::Fill},
+                  liquid::PipelineColorBlend{
+                      {liquid::PipelineColorBlendAttachment{}}}}),
+              builder.create(liquid::PipelineDescriptor{
+                  vertShader, fragShader,
+                  liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+                  liquid::PipelineInputAssembly{},
+                  liquid::PipelineRasterizer{liquid::PolygonMode::Line},
+                  liquid::PipelineColorBlend{
+                      {liquid::PipelineColorBlendAttachment{}}}})};
+        };
+
+        scope.basicPipeline =
+            createTrianglePipelines(shaderBasicVert, shaderBasicFrag);
+        scope.redPipeline =
+            createTrianglePipelines(shaderBasicVert, shaderRedFrag);
+        scope.texturePipeline =
+            createTrianglePipelines(shaderTextureVert, shaderTextureFrag);
       },
-      [&instance, &renderer](liquid::RenderCommandList &commandList,
-                             Scope &scope,
-                             liquid::RenderGraphRegistry &registry) {
-        const auto &pipeline =
-            renderer->getDebugManager()->getWireframeMode()
-                ? registry.getPipeline(scope.wireframeBasicPipeline)
-                : registry.getPipeline(scope.basicPipeline);
-        commandList.bindPipeline(pipeline);
+      [&instance, &renderer,
+       &materials](liquid::RenderCommandList &commandList, Scope &scope,
+                   liquid::RenderGraphRegistry &registry) {
+        constexpr uint32_t BASIC_MATERIAL = 0;
+        constexpr uint32_t RED_MATERIAL = 1;
+        constexpr uint32_t TEXTURE_MATERIAL = 2;
+        uint32_t pIdx = renderer->getDebugManager()->getWireframeMode() ? 1 : 0;
+        uint32_t material = materialIndex % materials.size();
+
+        if (material == BASIC_MATERIAL) {
+          const auto &pipeline =
+              registry.getPipeline(scope.basicPipeline.at(pIdx));
+          commandList.bindPipeline(pipeline);
+
+        } else if (material == RED_MATERIAL) {
+          const auto &pipeline =
+              registry.getPipeline(scope.redPipeline.at(pIdx));
+          commandList.bindPipeline(pipeline);
+        } else if (material == TEXTURE_MATERIAL) {
+          const auto &pipeline =
+              registry.getPipeline(scope.texturePipeline.at(pIdx));
+          commandList.bindPipeline(pipeline);
+
+          const auto &vulkanPipeline =
+              std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
+
+          const auto &materialBinder =
+              std::dynamic_pointer_cast<liquid::VulkanDeferredMaterialBinder>(
+                  materials.at(material)->getResourceBinder());
+
+          const auto &desc = materialBinder->getDescriptorSet(
+              vulkanPipeline->getDescriptorLayout(0));
+
+          commandList.bindDescriptorSets(pipeline, 0, {desc}, {});
+        }
+
         commandList.bindVertexBuffer(instance->getVertexBuffers().at(0));
         commandList.bindIndexBuffer(instance->getIndexBuffers().at(0),
                                     VK_INDEX_TYPE_UINT32);
@@ -148,15 +189,7 @@ int main() {
                                    renderer->getShaderLibrary(), "mainColor");
 
   mainLoop.run(
-      graph,
-      [instancePtr, materials](double dt) mutable {
-        if (changed) {
-          instancePtr->setMaterial(materials[materialIndex % materials.size()]);
-          changed = false;
-        }
-
-        return true;
-      },
+      graph, [instancePtr, materials](double dt) mutable { return true; },
       []() {});
 
   context.destroy();
