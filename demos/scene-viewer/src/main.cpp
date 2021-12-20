@@ -71,10 +71,7 @@ liquid::Entity getNewSkybox(GLFWwindow *window, liquid::Mesh *mesh,
   auto entity = context.createEntity();
 
   const auto &material = renderer->createMaterial(
-      renderer->getShaderLibrary()->getShader("__engine.default.skybox.vertex"),
-      renderer->getShaderLibrary()->getShader(
-          "__engine.default.skybox.fragment"),
-      {environmentTexture}, {}, liquid::CullMode::Front);
+      nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance>(
       mesh, renderer->getResourceAllocator());
@@ -203,6 +200,7 @@ int main() {
         light1, {std::make_shared<liquid::Light>(
                     liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 0.5f, 0.5f},
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
+    context.setComponent<liquid::NameComponent>(light1, {"Light 1"});
 
     auto *node = scene->getRootNode();
     node->addChild(light1);
@@ -235,9 +233,11 @@ int main() {
 
     mainLoop.run(
         graph,
-        [&ui, &scene, node, &editorCamera, &window](double dt) mutable {
+        [&ui, &scene, node, &editorCamera, &window,
+         &renderData](double dt) mutable {
           ImGuiIO &io = ImGui::GetIO();
           scene->update();
+          renderData->update();
 
           if (leftMouseBtnPressed && !io.WantCaptureMouse) {
             double xpos, ypos;

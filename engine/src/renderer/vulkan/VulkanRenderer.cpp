@@ -17,6 +17,7 @@
 #include "renderer/passes/ImguiPass.h"
 #include "renderer/passes/ScenePass.h"
 #include "renderer/passes/ShadowPass.h"
+#include "renderer/passes/EnvironmentPass.h"
 
 #include "renderer/SceneRenderer.h"
 
@@ -68,10 +69,10 @@ void VulkanRenderer::loadShaders() {
       "__engine.default.pbr.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/pbr.frag.spv"));
   shaderLibrary->addShader(
-      "__engine.default.skybox.vertex",
+      "__engine.skybox.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/skybox.vert.spv"));
   shaderLibrary->addShader(
-      "__engine.default.skybox.fragment",
+      "__engine.skybox.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/skybox.frag.spv"));
   shaderLibrary->addShader(
       "__engine.default.shadowmap.vertex",
@@ -89,14 +90,16 @@ void VulkanRenderer::loadShaders() {
 
 RenderGraph VulkanRenderer::createRenderGraph(
     const SharedPtr<VulkanRenderData> &renderData) {
-
   RenderGraph graph;
 
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
                             shadowMaterials);
   graph.addPass<ScenePass>("mainPass", entityContext, shaderLibrary,
                            descriptorManager, renderData);
-  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, "mainColor");
+  graph.addPass<EnvironmentPass>("environmentPass", entityContext,
+                                 shaderLibrary, descriptorManager, renderData);
+  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary,
+                           "environmentColor");
 
   return graph;
 }
@@ -142,8 +145,8 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
       });
 
   return std::make_shared<VulkanRenderData>(
-      entityContext, scene, descriptorManager,
-      renderBackend.getResourceAllocator(), nullptr, shadowMaterials);
+      entityContext, scene, renderBackend.getResourceAllocator(), nullptr,
+      shadowMaterials);
 }
 
 } // namespace liquid

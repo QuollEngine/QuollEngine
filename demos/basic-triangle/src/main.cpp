@@ -115,7 +115,10 @@ int main() {
 
         scope.basicPipeline = builder.create(liquid::PipelineDescriptor{
             shaderBasicVert, shaderRedFrag,
-            liquid::PipelineVertexInputLayout::create<liquid::Vertex>()});
+            liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+            liquid::PipelineInputAssembly{}, liquid::PipelineRasterizer{},
+            liquid::PipelineColorBlend{
+                {liquid::PipelineColorBlendAttachment{}}}});
       },
       [&instance](liquid::RenderCommandList &commandList, Scope &scope,
                   liquid::RenderGraphRegistry &registry) {
@@ -126,10 +129,6 @@ int main() {
                                     VK_INDEX_TYPE_UINT32);
         commandList.draw(3, 0);
       });
-
-  liquid::ImguiRenderer imgui(renderer->getRenderBackend().getWindow(),
-                              renderer->getRenderBackend().getVulkanInstance(),
-                              renderer->getResourceAllocator());
 
   graph.addPass<liquid::ImguiPass>("imgui", renderer->getRenderBackend(),
                                    renderer->getShaderLibrary(), "mainColor");

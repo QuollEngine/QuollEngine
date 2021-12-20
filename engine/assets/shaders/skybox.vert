@@ -2,7 +2,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec3 vPosition;
-
 layout(location = 0) out vec3 texCoord;
 
 layout(set = 0, binding = 0) uniform CameraBuffer {
@@ -11,9 +10,6 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 viewproj;
 }
 cameraData;
-
-layout(push_constant) uniform constants { mat4 modelMatrix; }
-pushConstants;
 
 void main() {
   mat4 viewWithoutTranslation =

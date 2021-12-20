@@ -12,7 +12,6 @@ SceneRenderer::SceneRenderer(EntityContext &entityContext_,
 
 void SceneRenderer::render(RenderCommandList &commandList,
                            const SharedPtr<Pipeline> &pipeline) {
-
   const auto &vulkanPipeline =
       std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
@@ -20,6 +19,9 @@ void SceneRenderer::render(RenderCommandList &commandList,
       [&commandList, &pipeline, &vulkanPipeline,
        this](Entity entity, const MeshComponent &mesh,
              const TransformComponent &transform) {
+        if (entityContext.hasComponent<EnvironmentComponent>(entity)) {
+          return;
+        }
         const auto &instance = mesh.instance;
 
         auto *transformConstant = new VulkanStandardPushConstants;

@@ -45,6 +45,12 @@ void ScenePass::execute(RenderCommandList &commandList,
   const auto &vulkanMainPipeline =
       std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
+  if (renderData->isEnvironmentChanged()) {
+    sceneDescriptorSetFragment = VK_NULL_HANDLE;
+    sceneDescriptorSet = VK_NULL_HANDLE;
+    renderData->cleanEnvironmentChangeFlag();
+  }
+
   if (!sceneDescriptorSet) {
     const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
         renderData->getScene()->getActiveCamera()->getUniformBuffer());
@@ -55,7 +61,8 @@ void ScenePass::execute(RenderCommandList &commandList,
 
     sceneDescriptorSetFragment = descriptorManager->createSceneDescriptorSet(
         cameraBuffer, renderData->getSceneBuffer(),
-        registry.getTexture(shadowMapTextureId), {},
+        registry.getTexture(shadowMapTextureId),
+        renderData->getEnvironmentTextures(),
         vulkanMainPipeline->getDescriptorLayout(1));
   }
 

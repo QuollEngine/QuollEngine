@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VulkanDescriptorManager.h"
+#include "VulkanHardwareBuffer.h"
 #include "renderer/HardwareBuffer.h"
 #include "renderer/ResourceAllocator.h"
 #include "renderer/Material.h"
@@ -22,7 +22,6 @@ public:
    * @param shadowMaterials Shadow materials
    */
   VulkanRenderData(EntityContext &entityContext, Scene *scene,
-                   VulkanDescriptorManager *manager,
                    ResourceAllocator *resourceAllocator,
                    const SharedPtr<Texture> &shadowmaps,
                    const std::vector<SharedPtr<Material>> &shadowMaterials);
@@ -48,13 +47,33 @@ public:
    */
   void update();
 
+  /**
+   * @brief Check if environment is changed
+   *
+   * @retval true Environment changes
+   * @retval false Environment did not change
+   */
+  inline bool isEnvironmentChanged() const { return environmentChanged; }
+
+  /**
+   * @brief Get environment map textures
+   *
+   * @return Environment map textures
+   */
+  std::array<SharedPtr<Texture>, 3> getEnvironmentTextures() const;
+
+  /**
+   * @brief Clean environment change flag
+   */
+  void cleanEnvironmentChangeFlag();
+
 private:
   EntityContext &entityContext;
-  VulkanDescriptorManager *descriptorManager;
   SharedPtr<Texture> shadowmaps;
   SharedPtr<VulkanHardwareBuffer> sceneBuffer;
   Scene *scene;
   Entity environmentMapEntity = ENTITY_MAX;
+  bool environmentChanged = false;
 
   const std::vector<SharedPtr<Material>> &shadowMaterials;
 };

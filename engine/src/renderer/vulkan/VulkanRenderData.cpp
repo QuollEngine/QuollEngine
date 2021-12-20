@@ -24,12 +24,10 @@ struct SceneBufferObject {
 
 VulkanRenderData::VulkanRenderData(
     EntityContext &entityContext_, Scene *scene_,
-    VulkanDescriptorManager *descriptorManager_,
     ResourceAllocator *resourceAllocator, const SharedPtr<Texture> &shadowmaps_,
     const std::vector<SharedPtr<Material>> &shadowMaterials_)
     : entityContext(entityContext_), scene(scene_),
-      shadowMaterials(shadowMaterials_), descriptorManager(descriptorManager_),
-      shadowmaps(shadowmaps_) {
+      shadowMaterials(shadowMaterials_), shadowmaps(shadowmaps_) {
 
   const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
       scene->getActiveCamera()->getUniformBuffer());
@@ -39,34 +37,29 @@ VulkanRenderData::VulkanRenderData(
 
 void VulkanRenderData::update() {
   SceneBufferObject sceneData{};
+  Entity entity = environmentMapEntity;
 
-  // Entity entity = ENTITY_MAX;
+  entityContext.iterateEntities<EnvironmentComponent>(
+      [&entity](Entity e,
+                const EnvironmentComponent &environmentComponent) mutable {
+        if (entity != e) {
+          entity = e;
+        }
+      });
 
-  // entityContext.iterateEntities<EnvironmentComponent>(
-  //    [&entity](Entity e,
-  //              const EnvironmentComponent &environmentComponent) mutable {
-  //      if (entity == ENTITY_MAX) {
-  //        entity = e;
-  //      }
-  //    });
+  if (entity < ENTITY_MAX && entity != environmentMapEntity) {
 
-  // if (entity < ENTITY_MAX && entity != environmentMapEntity) {
-  //  const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
-  //      scene->getActiveCamera()->getUniformBuffer());
-  //  auto &component =
-  //  entityContext.getComponent<EnvironmentComponent>(entity);
+    if (entityContext.hasEntity(environmentMapEntity)) {
+      entityContext.deleteEntity(environmentMapEntity);
+    }
+    environmentChanged = true;
+    environmentMapEntity = entity;
+  }
 
-  //  sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
-  //      cameraBuffer, sceneBuffer, shadowmaps,
-  //      {component.irradianceMap, component.specularMap, component.brdfLUT});
-
-  //  entityContext.deleteEntity(environmentMapEntity);
-  //  environmentMapEntity = entity;
-  //}
-
-  // if (entityContext.hasEntity(environmentMapEntity)) {
-  //  sceneData.hasIBL.x = 1;
-  //}
+  if (entityContext.hasEntity(environmentMapEntity) &&
+      entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
+    sceneData.hasIBL.x = 1;
+  }
 
   size_t i = 0;
   entityContext.iterateEntities<LightComponent>(
@@ -86,6 +79,25 @@ void VulkanRenderData::update() {
 
   sceneData.numLights.x = static_cast<uint32_t>(i);
   sceneBuffer->update(&sceneData);
+}
+
+std::array<SharedPtr<Texture>, 3>
+VulkanRenderData::getEnvironmentTextures() const {
+  if (entityContext.hasEntity(environmentMapEntity) &&
+      entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
+
+    const auto &environment =
+        entityContext.getComponent<EnvironmentComponent>(environmentMapEntity);
+
+    return {environment.irradianceMap, environment.specularMap,
+            environment.brdfLUT};
+  }
+
+  return {};
+}
+
+void VulkanRenderData::cleanEnvironmentChangeFlag() {
+  environmentChanged = false;
 }
 
 } // namespace liquid
