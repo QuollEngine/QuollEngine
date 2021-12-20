@@ -95,7 +95,7 @@ RenderGraph VulkanRenderer::createRenderGraph(
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
                             shadowMaterials);
   graph.addPass<ScenePass>("mainPass", entityContext, shaderLibrary,
-                           descriptorManager, renderData);
+                           descriptorManager, renderData, debugManager);
   graph.addPass<EnvironmentPass>("environmentPass", entityContext,
                                  shaderLibrary, descriptorManager, renderData);
   graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary,

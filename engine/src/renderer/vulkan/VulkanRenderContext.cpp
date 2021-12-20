@@ -5,11 +5,13 @@
 
 namespace liquid {
 
-VulkanRenderContext::VulkanRenderContext(const VulkanContext &context) {
+VulkanRenderContext::VulkanRenderContext(const VulkanContext &context,
+                                         StatsManager &statsManager) {
   device = context.getDevice();
   createCommandBuffers(context.getPhysicalDevice()
                            .getQueueFamilyIndices()
-                           .graphicsFamily.value());
+                           .graphicsFamily.value(),
+                       statsManager);
 
   createSemaphores();
   createFences();
@@ -146,7 +148,8 @@ void VulkanRenderContext::createFences() {
   LOG_DEBUG("[Vulkan] Render fence created");
 }
 
-void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily) {
+void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily,
+                                               StatsManager &statsManager) {
   std::array<VkCommandBuffer, NUM_FRAMES> commandBuffers{};
 
   VkCommandPoolCreateInfo poolInfo{};
@@ -171,7 +174,8 @@ void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily) {
       "Failed to allocate command buffers");
 
   for (size_t i = 0; i < NUM_FRAMES; ++i) {
-    commandExecutors.at(i) = new VulkanCommandExecutor(commandBuffers.at(i));
+    commandExecutors.at(i) =
+        new VulkanCommandExecutor(commandBuffers.at(i), statsManager);
   }
 
   LOG_DEBUG("[Vulkan] Command buffers allocated");

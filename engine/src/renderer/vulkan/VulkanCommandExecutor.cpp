@@ -6,8 +6,9 @@
 
 namespace liquid {
 
-VulkanCommandExecutor::VulkanCommandExecutor(VkCommandBuffer commandBuffer_)
-    : commandBuffer(commandBuffer_) {}
+VulkanCommandExecutor::VulkanCommandExecutor(VkCommandBuffer commandBuffer_,
+                                             StatsManager &statsManager_)
+    : commandBuffer(commandBuffer_), statsManager(statsManager_) {}
 
 void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
   vkResetCommandBuffer(commandBuffer, 0);
@@ -181,12 +182,14 @@ void VulkanCommandExecutor::executeDraw(
     const RenderCommandDraw *const command) {
   vkCmdDraw(commandBuffer, static_cast<uint32_t>(command->vertexCount), 1,
             command->firstVertex, 0);
+  statsManager.addDrawCall(command->vertexCount / 3);
 }
 
 void VulkanCommandExecutor::executeDrawIndexed(
     const RenderCommandDrawIndexed *const command) {
   vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(command->indexCount), 1,
                    command->firstIndex, command->vertexOffset, 0);
+  statsManager.addDrawCall(command->indexCount / 3);
 }
 
 } // namespace liquid

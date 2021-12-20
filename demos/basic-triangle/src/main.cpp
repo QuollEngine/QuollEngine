@@ -93,6 +93,8 @@ int main() {
 
   struct Scope {
     liquid::GraphResourceId basicPipeline;
+    liquid::GraphResourceId wireframeBasicPipeline;
+
     liquid::GraphResourceId redPipeline;
     liquid::GraphResourceId texturePipeline;
   };
@@ -119,10 +121,22 @@ int main() {
             liquid::PipelineInputAssembly{}, liquid::PipelineRasterizer{},
             liquid::PipelineColorBlend{
                 {liquid::PipelineColorBlendAttachment{}}}});
+        scope.wireframeBasicPipeline =
+            builder.create(liquid::PipelineDescriptor{
+                shaderBasicVert, shaderRedFrag,
+                liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+                liquid::PipelineInputAssembly{},
+                liquid::PipelineRasterizer{liquid::PolygonMode::Line},
+                liquid::PipelineColorBlend{
+                    {liquid::PipelineColorBlendAttachment{}}}});
       },
-      [&instance](liquid::RenderCommandList &commandList, Scope &scope,
-                  liquid::RenderGraphRegistry &registry) {
-        const auto &pipeline = registry.getPipeline(scope.basicPipeline);
+      [&instance, &renderer](liquid::RenderCommandList &commandList,
+                             Scope &scope,
+                             liquid::RenderGraphRegistry &registry) {
+        const auto &pipeline =
+            renderer->getDebugManager()->getWireframeMode()
+                ? registry.getPipeline(scope.wireframeBasicPipeline)
+                : registry.getPipeline(scope.basicPipeline);
         commandList.bindPipeline(pipeline);
         commandList.bindVertexBuffer(instance->getVertexBuffers().at(0));
         commandList.bindIndexBuffer(instance->getIndexBuffers().at(0),

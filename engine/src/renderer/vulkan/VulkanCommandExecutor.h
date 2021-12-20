@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/RenderCommandList.h"
+#include "profiler/StatsManager.h"
 
 namespace liquid {
 
@@ -11,7 +12,8 @@ public:
    *
    * @param commandBuffer Command buffer
    */
-  VulkanCommandExecutor(VkCommandBuffer commandBuffer);
+  VulkanCommandExecutor(VkCommandBuffer commandBuffer,
+                        StatsManager &statsManager);
 
   /**
    * @brief Execute commands
@@ -111,6 +113,7 @@ private:
 
 private:
   VkCommandBuffer commandBuffer;
+  StatsManager &statsManager;
 };
 
 } // namespace liquid

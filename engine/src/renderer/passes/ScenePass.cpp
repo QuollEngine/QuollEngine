@@ -11,10 +11,11 @@ ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
                      EntityContext &entityContext,
                      ShaderLibrary *shaderLibrary_,
                      VulkanDescriptorManager *descriptorManager_,
-                     const SharedPtr<VulkanRenderData> &renderData_)
+                     const SharedPtr<VulkanRenderData> &renderData_,
+                     const SharedPtr<DebugManager> &debugManager_)
     : RenderGraphPassBase(name, resourceId), sceneRenderer(entityContext, true),
       shaderLibrary(shaderLibrary_), descriptorManager(descriptorManager_),
-      renderData(renderData_) {}
+      renderData(renderData_), debugManager(debugManager_) {}
 
 void ScenePass::buildInternal(RenderGraphBuilder &builder) {
   builder.writeSwapchain("mainColor",
@@ -34,11 +35,21 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
       PipelineRasterizer{PolygonMode::Fill, CullMode::None,
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
+  wireframePipelineId = builder.create(PipelineDescriptor{
+      shaderLibrary->getShader("__engine.default.pbr.vertex"),
+      shaderLibrary->getShader("__engine.default.pbr.fragment"),
+      PipelineVertexInputLayout::create<Vertex>(),
+      PipelineInputAssembly{PrimitiveTopology::TriangleList},
+      PipelineRasterizer{PolygonMode::Line, CullMode::None,
+                         FrontFace::Clockwise},
+      PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 }
 
 void ScenePass::execute(RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
-  const auto &pipeline = registry.getPipeline(pipelineId);
+  const auto &pipeline = debugManager->getWireframeMode()
+                             ? registry.getPipeline(wireframePipelineId)
+                             : registry.getPipeline(pipelineId);
 
   commandList.bindPipeline(pipeline);
 

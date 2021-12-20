@@ -4,6 +4,7 @@
 #include <vma/vk_mem_alloc.h>
 
 #include "window/glfw/GLFWWindow.h"
+#include "profiler/StatsManager.h"
 #include "VulkanSwapchain.h"
 #include "VulkanRenderContext.h"
 #include "VulkanCommandExecutor.h"
@@ -23,7 +24,7 @@ public:
    *
    * @param context Vulkan context
    */
-  VulkanRenderContext(const VulkanContext &context);
+  VulkanRenderContext(const VulkanContext &context, StatsManager &statsManager);
 
   /**
    * @brief Destroy render context
@@ -93,8 +94,10 @@ private:
    * @brief Create command pool and buffer
    *
    * @param graphicsQueueFamily Graphics queue family index
+   * @param statsManager Stats manager
    */
-  void createCommandBuffers(uint32_t graphicsQueueFamily);
+  void createCommandBuffers(uint32_t graphicsQueueFamily,
+                            StatsManager &statsManager);
 
 private:
   uint32_t currentFrame = 0;

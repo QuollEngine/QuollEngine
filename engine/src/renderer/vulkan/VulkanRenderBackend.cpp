@@ -8,7 +8,8 @@ namespace liquid {
 VulkanRenderBackend::VulkanRenderBackend(GLFWWindow *window_,
                                          bool enableValidations_)
     : window(window_), vulkanInstance(window_, enableValidations_),
-      renderContext(vulkanInstance), uploadContext(vulkanInstance) {
+      renderContext(vulkanInstance, statsManager),
+      uploadContext(vulkanInstance) {
   resourceAllocator = VulkanResourceAllocator::create(
       vulkanInstance, uploadContext, statsManager);
 
@@ -34,6 +35,7 @@ VulkanRenderBackend::~VulkanRenderBackend() {
 }
 
 void VulkanRenderBackend::execute(RenderGraph &graph) {
+  statsManager.resetDrawCalls();
   auto &&result = graphEvaluator->build(graph);
 
   uint32_t imageIdx =
