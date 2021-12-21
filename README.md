@@ -4,19 +4,60 @@
 
 A game engine hobby project by Gasim Gasimzada.
 
-## Current Support
+## Current Status
 
-- [x] Load GLTF scenes
-- [x] Load images as 2D textures
-- [x] Load KTX textures
-- [x] Shadowmapping
-- [x] Imgui support with textures
-- [x] Scene loader demo
-- [x] Entity component system using Sparse Sets
-- [x] Environment map support
-- [x] GLFW window support
-
-
+- [ ] Vulkan RHI
+    - [x] Generation of pipeline layouts using Spir-V reflection
+    - [x] Single threaded command execution
+    - [x] Command buffer abstraction using Render Command List
+    - [ ] Handling descriptors
+    - [ ] Split RHI from renderer
+- [ ] Renderer
+    - [x] Render Graph support
+    - [x] Simple shadow maps
+    - [x] Skybox
+    - [x] PBR with IBL
+    - [ ] Instancing
+    - [ ] Deferred rendering
+    - [ ] Cascaded shadow mapping
+    - [ ] Multi-threaded Render Graph evaluation
+    - [ ] Font rendering
+    - [ ] Water rendering
+    - [ ] HDR
+    - [ ] Tonemapping
+    - [ ] Raytracing pipeline
+- [ ] Editor
+    - [x] Load GLTF scenes into scene
+    - [x] Simple UI to view entity information
+    - [ ] Render scene into Imgui panel
+    - [ ] Quaternion based arcball camera
+    - [ ] Editor grid
+    - [ ] Docking
+    - [ ] Gizmos
+    - [ ] Trackpad support
+    - [ ] Mouse movement improvements
+    - [ ] Keyboard shortcuts
+    - [ ] Mesh component details
+    - [ ] Status bar
+    - [ ] macOS support
+- [x] Core
+    - [x] ECS using Sparse Sets
+    - [x] Simple logger using streams
+- [x] Stats manager
+    - [x] Number of allocated resources (images, buffers)
+    - [x] Number of draw calls
+    - [ ] Number of bound descriptors, pipelines, and buffers
+- [ ] Profiler 
+- [ ] Animation
+- [ ] Physics
+- [ ] Audio
+- [ ] Scripting
+- [ ] Project
+    - [x] Premake based project that support Linux, macOS, and Windows
+    - [x] Dependency fetcher script
+    - [ ] Increase test coverage
+    - [ ] Enable codecov in main branch for comparison
+    - [ ] Replace exceptions with assertions
 
 ## License
 
