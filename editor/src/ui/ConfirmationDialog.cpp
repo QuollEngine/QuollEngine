@@ -21,7 +21,7 @@ void ConfirmationDialog::render(SceneManager &sceneManager) {
   }
 
   if (ImGui::BeginPopupModal(title.c_str())) {
-    ImGui::Text(prompt.c_str());
+    ImGui::Text("%s", prompt.c_str());
     if (ImGui::Button(confirmButtonLabel.c_str())) {
       confirmHandler(sceneManager);
       ImGui::CloseCurrentPopup();

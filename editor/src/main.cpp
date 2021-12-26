@@ -21,7 +21,6 @@
 #include "editor-scene/SceneManager.h"
 #include "ui/UIRoot.h"
 
-static const glm::vec4 CLEAR_COLOR{0.19, 0.21, 0.26, 1.0};
 static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
@@ -56,7 +55,6 @@ int main() {
       mainLoop.run(
           graph,
           [&editorCamera, &sceneManager](double dt) mutable {
-            ImGuiIO &io = ImGui::GetIO();
             editorCamera.update();
             sceneManager.getActiveScene()->update();
             return !sceneManager.hasNewScene();

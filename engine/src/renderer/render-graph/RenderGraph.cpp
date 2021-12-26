@@ -9,7 +9,7 @@ RenderGraph::RenderGraph(RenderGraph &&rhs) {
   passes = rhs.passes;
   attachments = rhs.attachments;
   swapchainAttachments = rhs.swapchainAttachments;
-  resourceMap = resourceMap;
+  resourceMap = rhs.resourceMap;
   registry = rhs.registry;
 
   rhs.passes.clear();
