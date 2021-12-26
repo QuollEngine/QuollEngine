@@ -29,8 +29,6 @@ VulkanRenderData::VulkanRenderData(
     : entityContext(entityContext_), scene(scene_),
       shadowMaterials(shadowMaterials_), shadowmaps(shadowmaps_) {
 
-  const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
-      scene->getActiveCamera()->getUniformBuffer());
   sceneBuffer = std::dynamic_pointer_cast<VulkanHardwareBuffer>(
       resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject)));
 }

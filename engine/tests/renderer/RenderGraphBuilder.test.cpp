@@ -90,7 +90,7 @@ TEST_F(RenderGraphBuilderDeathTest,
                                      liquid::AttachmentLoadOp::Load,
                                      liquid::AttachmentStoreOp::Store,
                                      glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
-  auto resourceId = builder.write("Test color", color);
+  builder.write("Test color", color);
   EXPECT_DEATH(builder.write("Test color", {}), ".*");
 }
 
@@ -139,7 +139,7 @@ TEST_F(RenderGraphBuilderDeathTest,
   auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
   liquid::RenderGraphBuilder builder(graph, pass1.get());
-  auto resourceId = builder.writeSwapchain("Test color", {});
+  builder.writeSwapchain("Test color", {});
   EXPECT_DEATH(builder.writeSwapchain("Test color", {}), ".*");
 }
 

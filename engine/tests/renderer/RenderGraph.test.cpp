@@ -8,8 +8,6 @@ struct EmptyScope {};
 constexpr auto noopExecutor = [](liquid::RenderCommandList &commandList,
                                  EmptyScope &scope,
                                  liquid::RenderGraphRegistry &registry) {};
-constexpr auto noopBuilder = [](liquid::RenderGraphBuilder &builder,
-                                EmptyScope &scope) {};
 
 class RenderGraphTest : public ::testing::Test {
 public:

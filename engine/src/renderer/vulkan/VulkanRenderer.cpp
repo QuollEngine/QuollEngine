@@ -23,8 +23,6 @@
 
 namespace liquid {
 
-constexpr uint32_t NUM_LIGHTS = 16;
-
 VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
                                GLFWWindow *window, bool enableValidations)
     : entityContext(entityContext_), renderBackend(window, enableValidations),

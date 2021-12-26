@@ -2,7 +2,7 @@
 function setupToolsetOptions()
     filter { "system:macosx" }
         xcodebuildsettings {
-            ["MACOSX_DEPLOYMENT_TARGET"] = "11.1",
+            ["MACOSX_DEPLOYMENT_TARGET"] = "12.0",
             ["ONLY_ACTIVE_ARCH"] = "YES",
             ["ENABLE_TESTABILITY"] = "YES",
             ["ARCHS"] = "$(ARCHS_STANDARD)",
@@ -48,4 +48,8 @@ function setupToolsetOptions()
         debugdir "$(TargetDir)"
 
     filter{}
+
+    -- Disable edit and continue feature
+    -- in all toolset
+    editandcontinue "Off"
 end

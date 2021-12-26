@@ -2,7 +2,7 @@ project "LiquidEngine"
     basedir "../workspace/engine"
     kind "StaticLib"
 
-    pchheader "engine/src/core/Base.h"
+    pchheader "../../engine/src/core/Base.h"
 
     filter { "toolset:msc-*" }
         pchheader "core/Base.h"
@@ -33,7 +33,7 @@ project "LiquidEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
-    pchheader "engine/src/core/Base.h"
+    pchheader "../../engine/src/core/Base.h"
 
     filter { "toolset:msc-*" }
         pchheader "core/Base.h"
