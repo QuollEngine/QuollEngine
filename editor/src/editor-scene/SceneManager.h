@@ -2,6 +2,7 @@
 
 #include "scene/Scene.h"
 #include "EditorCamera.h"
+#include "EditorGrid.h"
 
 namespace liquidator {
 
@@ -12,8 +13,10 @@ public:
    *
    * @param context Entity context
    * @param editorCamera Editor camera
+   * @param editorGrid Editor grid
    */
-  SceneManager(liquid::EntityContext &context, EditorCamera &editorCamera);
+  SceneManager(liquid::EntityContext &context, EditorCamera &editorCamera,
+               EditorGrid &editorGrid);
 
   SceneManager(const SceneManager &) = delete;
   SceneManager(SceneManager &&) = delete;
@@ -49,6 +52,13 @@ public:
   inline EditorCamera &getEditorCamera() { return editorCamera; }
 
   /**
+   * @brief Get editor grid
+   *
+   * @return Editor grid
+   */
+  inline EditorGrid &getEditorGrid() { return editorGrid; }
+
+  /**
    * @brief Creates a new scene and sets it as active
    */
   void createNewScene();
@@ -58,6 +68,7 @@ private:
   bool newSceneRequested = true;
   liquid::EntityContext &context;
   EditorCamera &editorCamera;
+  EditorGrid &editorGrid;
 };
 
 } // namespace liquidator

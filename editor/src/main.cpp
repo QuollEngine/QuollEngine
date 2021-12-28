@@ -6,6 +6,7 @@
 #include "renderer/Shader.h"
 
 #include "renderer/vulkan/VulkanRenderer.h"
+#include "renderer/vulkan/VulkanPipeline.h"
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
 #include "scene/MeshInstance.h"
@@ -19,6 +20,7 @@
 
 #include "editor-scene/EditorCamera.h"
 #include "editor-scene/SceneManager.h"
+#include "editor-scene/EditorGrid.h"
 #include "ui/UIRoot.h"
 
 static const uint32_t INITIAL_WIDTH = 1024;
@@ -34,11 +36,19 @@ int main() {
     std::unique_ptr<liquid::VulkanRenderer> renderer(
         new liquid::VulkanRenderer(context, window.get(), true));
 
+    renderer->getShaderLibrary()->addShader(
+        "editor-grid.vert",
+        renderer->createShader("assets/shaders/editor-grid.vert.spv"));
+    renderer->getShaderLibrary()->addShader(
+        "editor-grid.frag",
+        renderer->createShader("assets/shaders/editor-grid.frag.spv"));
+
     liquid::MainLoop mainLoop(renderer.get(), window.get());
     liquid::TinyGLTFLoader loader(context, renderer.get());
     liquidator::EditorCamera editorCamera(context, renderer.get(),
                                           window.get());
-    liquidator::SceneManager sceneManager(context, editorCamera);
+    liquidator::EditorGrid editorGrid(renderer->getResourceAllocator());
+    liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
 
     liquidator::UIRoot ui(context, loader);
 
@@ -47,10 +57,95 @@ int main() {
     while (sceneManager.hasNewScene()) {
       sceneManager.createNewScene();
 
+      const auto &cameraObj =
+          context
+              .getComponent<liquid::CameraComponent>(editorCamera.getCamera())
+              .camera;
+
       const auto &renderData =
           renderer->prepareScene(sceneManager.getActiveScene());
 
-      liquid::RenderGraph graph = renderer->createRenderGraph(renderData);
+      liquid::RenderGraph graph =
+          renderer->createRenderGraph(renderData, "editorDebugColor");
+      struct EditorDebugScope {
+        liquid::GraphResourceId editorGridPipeline = 0;
+        VkDescriptorSet sceneDescriptorSet = VK_NULL_HANDLE;
+        VkDescriptorSet gridDescriptorSet = VK_NULL_HANDLE;
+      };
+
+      graph.addInlinePass<EditorDebugScope>(
+          "editorDebug",
+          [&renderer](liquid::RenderGraphBuilder &builder,
+                      EditorDebugScope &scope) {
+            builder.read("environmentColor");
+            builder.writeSwapchain("editorDebugColor",
+                                   liquid::RenderPassSwapchainAttachment{
+                                       liquid::AttachmentType::Color,
+                                       liquid::AttachmentLoadOp::Load,
+                                       liquid::AttachmentStoreOp::Store,
+                                       glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)});
+
+            builder.writeSwapchain("editorDebugDepth",
+                                   liquid::RenderPassSwapchainAttachment{
+                                       liquid::AttachmentType::Depth,
+                                       liquid::AttachmentLoadOp::Load,
+                                       liquid::AttachmentStoreOp::Store,
+                                       liquid::DepthStencilClear{1.0, 0}});
+            scope.editorGridPipeline =
+                builder.create(liquid::PipelineDescriptor{
+                    renderer->getShaderLibrary()->getShader("editor-grid.vert"),
+                    renderer->getShaderLibrary()->getShader("editor-grid.frag"),
+                    {},
+                    liquid::PipelineInputAssembly{},
+                    liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
+                                               liquid::CullMode::None,
+                                               liquid::FrontFace::Clockwise},
+                    liquid::PipelineColorBlend{
+                        {liquid::PipelineColorBlendAttachment{
+                            true, liquid::BlendFactor::SrcAlpha,
+                            liquid::BlendFactor::OneMinusSrcAlpha,
+                            liquid::BlendOp::Add, liquid::BlendFactor::One,
+                            liquid::BlendFactor::OneMinusSrcAlpha,
+                            liquid::BlendOp::Add}}}});
+          },
+          [&renderer, &cameraObj, &editorCamera, &editorGrid](
+              liquid::RenderCommandList &commandList, EditorDebugScope &scope,
+              liquid::RenderGraphRegistry &registry) {
+            const auto &pipeline =
+                registry.getPipeline(scope.editorGridPipeline);
+
+            if (!scope.sceneDescriptorSet) {
+              const auto &vulkanPipeline =
+                  std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
+
+              scope.sceneDescriptorSet =
+                  renderer->getDescriptorManager()->createSceneDescriptorSet(
+                      std::dynamic_pointer_cast<liquid::VulkanHardwareBuffer>(
+                          cameraObj->getUniformBuffer()),
+                      nullptr, nullptr, {},
+                      vulkanPipeline->getDescriptorLayout(0));
+            }
+
+            if (!scope.gridDescriptorSet) {
+              const auto &vulkanPipeline =
+                  std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
+
+              scope.gridDescriptorSet =
+                  renderer->getDescriptorManager()->createMaterialDescriptorSet(
+                      std::dynamic_pointer_cast<liquid::VulkanHardwareBuffer>(
+                          editorGrid.getUniformBuffer()),
+                      {}, vulkanPipeline->getDescriptorLayout(1));
+            }
+
+            commandList.bindPipeline(pipeline);
+            commandList.bindDescriptorSets(pipeline, 0,
+                                           {scope.sceneDescriptorSet}, {});
+            commandList.bindDescriptorSets(pipeline, 1,
+                                           {scope.gridDescriptorSet}, {});
+
+            constexpr uint32_t PLANE_VERTICES = 6;
+            commandList.draw(PLANE_VERTICES, 0);
+          });
 
       mainLoop.run(
           graph,

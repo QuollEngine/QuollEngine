@@ -72,9 +72,14 @@ public:
     return renderBackend.getVulkanInstance();
   }
 
+  inline VulkanDescriptorManager *getDescriptorManager() {
+    return descriptorManager;
+  }
+
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
-  RenderGraph createRenderGraph(const SharedPtr<VulkanRenderData> &renderData);
+  RenderGraph createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
+                                const String &imguiDep = "environmentColor");
 
   inline VulkanRenderBackend &getRenderBackend() { return renderBackend; }
 

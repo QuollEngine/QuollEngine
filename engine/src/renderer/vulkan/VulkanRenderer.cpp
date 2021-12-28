@@ -86,8 +86,9 @@ void VulkanRenderer::loadShaders() {
       createShader(Engine::getAssetsPath() + "/shaders/imgui.frag.spv"));
 }
 
-RenderGraph VulkanRenderer::createRenderGraph(
-    const SharedPtr<VulkanRenderData> &renderData) {
+RenderGraph
+VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
+                                  const String &imguiDep) {
   RenderGraph graph;
 
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
@@ -96,8 +97,7 @@ RenderGraph VulkanRenderer::createRenderGraph(
                            descriptorManager, renderData, debugManager);
   graph.addPass<EnvironmentPass>("environmentPass", entityContext,
                                  shaderLibrary, descriptorManager, renderData);
-  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary,
-                           "environmentColor");
+  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, imguiDep);
 
   return graph;
 }

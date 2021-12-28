@@ -1,10 +1,11 @@
+#include "core/Base.h"
 #include "SceneManager.h"
 
 namespace liquidator {
 
 SceneManager::SceneManager(liquid::EntityContext &context_,
-                           EditorCamera &editorCamera_)
-    : context(context_), editorCamera(editorCamera_) {}
+                           EditorCamera &editorCamera_, EditorGrid &editorGrid_)
+    : context(context_), editorCamera(editorCamera_), editorGrid(editorGrid_) {}
 
 void SceneManager::requestEmptyScene() { newSceneRequested = true; }
 
