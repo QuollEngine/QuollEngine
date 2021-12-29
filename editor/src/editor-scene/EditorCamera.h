@@ -13,7 +13,7 @@ class EditorCamera {
   static constexpr float DEFAULT_FOV = 70.0f;
   static constexpr float DEFAULT_NEAR = 0.001f;
   static constexpr float DEFAULT_FAR = 1000.0f;
-  static constexpr glm::vec3 DEFAULT_EYE{0.0f, 0.0f, -10.0f};
+  static constexpr glm::vec3 DEFAULT_EYE{0.0f, 5.0f, -10.0f};
   static constexpr glm::vec3 DEFAULT_CENTER{0.0f, 0.0f, 0.0f};
   static constexpr glm::vec3 DEFAULT_UP{0.0f, 1.0f, 0.0f};
 

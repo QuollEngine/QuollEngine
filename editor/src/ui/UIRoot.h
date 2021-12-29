@@ -5,6 +5,7 @@
 #include "MenuBar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
+#include "EditorGridPanel.h"
 
 namespace liquidator {
 
@@ -40,6 +41,7 @@ private:
   MenuBar menuBar;
   SceneHierarchyPanel sceneHierarchyPanel;
   EntityPanel entityPanel;
+  EditorGridPanel editorCameraPanel;
 };
 
 } // namespace liquidator

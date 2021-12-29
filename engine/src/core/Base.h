@@ -34,7 +34,9 @@
 #include "Assert.h"
 
 namespace liquid {
+
 using String = std::string;
 
 template <class T> using SharedPtr = std::shared_ptr<T>;
+
 } // namespace liquid
