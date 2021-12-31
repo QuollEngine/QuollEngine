@@ -11,9 +11,9 @@
 #include "VulkanRenderContext.h"
 #include "VulkanUploadContext.h"
 #include "VulkanContext.h"
-#include "VulkanDescriptorManager.h"
 #include "VulkanResourceAllocator.h"
 #include "VulkanGraphEvaluator.h"
+#include "VulkanDescriptorManager.h"
 
 namespace liquid {
 
@@ -122,6 +122,7 @@ private:
   VmaAllocator allocator = nullptr;
   VulkanResourceAllocator *resourceAllocator = nullptr;
   VulkanContext vulkanInstance;
+  VulkanDescriptorManager descriptorManager;
   VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;
   VulkanRenderContext renderContext;

@@ -8,7 +8,8 @@ namespace liquid {
 VulkanRenderBackend::VulkanRenderBackend(GLFWWindow *window_,
                                          bool enableValidations_)
     : window(window_), vulkanInstance(window_, enableValidations_),
-      renderContext(vulkanInstance, statsManager),
+      descriptorManager(vulkanInstance.getDevice()),
+      renderContext(vulkanInstance, descriptorManager, statsManager),
       uploadContext(vulkanInstance) {
   resourceAllocator = VulkanResourceAllocator::create(
       vulkanInstance, uploadContext, statsManager);

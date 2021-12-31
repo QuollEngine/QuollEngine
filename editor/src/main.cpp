@@ -6,7 +6,6 @@
 #include "renderer/Shader.h"
 
 #include "renderer/vulkan/VulkanRenderer.h"
-#include "renderer/vulkan/VulkanPipeline.h"
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
 #include "scene/MeshInstance.h"
@@ -69,8 +68,6 @@ int main() {
           renderer->createRenderGraph(renderData, "editorDebugColor");
       struct EditorDebugScope {
         liquid::GraphResourceId editorGridPipeline = 0;
-        VkDescriptorSet sceneDescriptorSet = VK_NULL_HANDLE;
-        VkDescriptorSet gridDescriptorSet = VK_NULL_HANDLE;
       };
 
       graph.addInlinePass<EditorDebugScope>(
@@ -114,38 +111,24 @@ int main() {
             const auto &pipeline =
                 registry.getPipeline(scope.editorGridPipeline);
 
-            if (!scope.sceneDescriptorSet) {
-              const auto &vulkanPipeline =
-                  std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
+            liquid::Descriptor sceneDescriptor;
+            sceneDescriptor.bind(0, cameraObj->getUniformBuffer(),
+                                 liquid::DescriptorType::UniformBuffer);
 
-              scope.sceneDescriptorSet =
-                  renderer->getDescriptorManager()->createSceneDescriptorSet(
-                      std::dynamic_pointer_cast<liquid::VulkanHardwareBuffer>(
-                          cameraObj->getUniformBuffer()),
-                      nullptr, nullptr, {},
-                      vulkanPipeline->getDescriptorLayout(0));
-            }
-
-            if (!scope.gridDescriptorSet) {
-              const auto &vulkanPipeline =
-                  std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
-
-              scope.gridDescriptorSet =
-                  renderer->getDescriptorManager()->createMaterialDescriptorSet(
-                      std::dynamic_pointer_cast<liquid::VulkanHardwareBuffer>(
-                          editorGrid.getUniformBuffer()),
-                      {}, vulkanPipeline->getDescriptorLayout(1));
-            }
+            liquid::Descriptor gridDescriptor;
+            gridDescriptor.bind(0, editorGrid.getUniformBuffer(),
+                                liquid::DescriptorType::UniformBuffer);
 
             commandList.bindPipeline(pipeline);
-            commandList.bindDescriptorSets(pipeline, 0,
-                                           {scope.sceneDescriptorSet}, {});
-            commandList.bindDescriptorSets(pipeline, 1,
-                                           {scope.gridDescriptorSet}, {});
+            commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
+            commandList.bindDescriptor(pipeline, 1, gridDescriptor);
 
             constexpr uint32_t PLANE_VERTICES = 6;
             commandList.draw(PLANE_VERTICES, 0);
           });
+
+      const auto &catTexture =
+          textureLoader.loadFromFile("/Users/gasim/Screenshots/daktun.jpg");
 
       mainLoop.run(
           graph,
@@ -154,7 +137,7 @@ int main() {
             sceneManager.getActiveScene()->update();
             return !sceneManager.hasNewScene();
           },
-          [&ui, &sceneManager, &renderData]() {
+          [&ui, &sceneManager, &renderData, &catTexture]() {
             ui.render(sceneManager);
             renderData->update();
           });

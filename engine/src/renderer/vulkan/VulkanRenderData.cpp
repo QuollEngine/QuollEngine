@@ -29,8 +29,8 @@ VulkanRenderData::VulkanRenderData(
     : entityContext(entityContext_), scene(scene_),
       shadowMaterials(shadowMaterials_), shadowmaps(shadowmaps_) {
 
-  sceneBuffer = std::dynamic_pointer_cast<VulkanHardwareBuffer>(
-      resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject)));
+  sceneBuffer =
+      resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject));
 }
 
 void VulkanRenderData::update() {

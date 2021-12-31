@@ -4,7 +4,6 @@
 #include "renderer/ShaderLibrary.h"
 #include "entity/EntityContext.h"
 #include "renderer/vulkan/VulkanRenderData.h"
-#include "renderer/vulkan/VulkanDescriptorManager.h"
 
 namespace liquid {
 
@@ -17,12 +16,10 @@ public:
    * @param renderPassId Render pass resource ID
    * @param entityContext Entity context
    * @param shaderLibrary Shader library
-   * @param descriptorManager Descriptor manager
    * @param renderData Render data
    */
   EnvironmentPass(const String &name, GraphResourceId renderPassId,
                   EntityContext &entityContext, ShaderLibrary *shaderLibrary,
-                  VulkanDescriptorManager *descriptorManager,
                   const SharedPtr<VulkanRenderData> &renderData);
 
   /**
@@ -46,8 +43,6 @@ private:
   EntityContext &entityContext;
   ShaderLibrary *shaderLibrary;
   SharedPtr<VulkanRenderData> renderData;
-  VkDescriptorSet sceneDescriptorSet = VK_NULL_HANDLE;
-  VulkanDescriptorManager *descriptorManager;
 };
 
 } // namespace liquid

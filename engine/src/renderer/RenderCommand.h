@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include "HardwareBuffer.h"
 #include "Pipeline.h"
+#include "Descriptor.h"
 
 namespace liquid {
 
@@ -12,7 +13,7 @@ enum class RenderCommandType {
   SetViewport,
   SetScissor,
   BindPipeline,
-  BindDescriptorSets,
+  BindDescriptor,
   PushConstants,
   BindVertexBuffer,
   BindIndexBuffer,
@@ -72,12 +73,11 @@ struct RenderCommandBindPipeline
   SharedPtr<Pipeline> pipeline = nullptr;
 };
 
-struct RenderCommandBindDescriptorSets
-    : public TypedRenderCommandBase<RenderCommandType::BindDescriptorSets> {
+struct RenderCommandBindDescriptor
+    : public TypedRenderCommandBase<RenderCommandType::BindDescriptor> {
   SharedPtr<Pipeline> pipeline = nullptr;
   uint32_t firstSet = 0;
-  std::vector<VkDescriptorSet> descriptorSets;
-  std::vector<uint32_t> dynamicOffsets;
+  Descriptor descriptor;
 };
 
 struct RenderCommandPushConstants

@@ -34,18 +34,14 @@ public:
   void bindPipeline(const SharedPtr<Pipeline> &pipeline);
 
   /**
-   * @brief Bind descriptor sets
+   * @brief Bind descriptor
    *
-   * @param Pipeline
-   * @param bindPoint Pipeline bind point
+   * @param pipeline Pipeline
    * @param firstSet First set
-   * @param descriptorSets Descriptor sets
-   * @param dynamicOffsets Dynamic offsets
+   * @param descriptor Descriptor
    */
-  void bindDescriptorSets(const SharedPtr<Pipeline> &pipeline,
-                          uint32_t firstSet,
-                          const std::vector<VkDescriptorSet> &descriptorSets,
-                          const std::vector<uint32_t> &dynamicOffsets);
+  void bindDescriptor(const SharedPtr<Pipeline> &pipeline, uint32_t firstSet,
+                      const Descriptor &descriptor);
 
   /**
    * @brief Bind vertex buffer

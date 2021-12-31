@@ -3,7 +3,6 @@
 #include "scene/MeshInstance.h"
 
 #include "../mocks/TestResourceAllocator.h"
-#include "../mocks/TestResourceManager.h"
 #include <gtest/gtest.h>
 
 using MaterialPtr = liquid::SharedPtr<liquid::Material>;
@@ -62,13 +61,11 @@ TEST(MeshInstanceTest, CreateWithoutIndexBuffersOnConstruct) {
 
 TEST(MeshInstanceTest, SetsMaterial) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   liquid::Mesh mesh;
   liquid::Geometry geom;
   mesh.addGeometry(geom);
-  MaterialPtr material(
-      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
+  MaterialPtr material(new liquid::Material({}, {}, &resourceAllocator));
   liquid::MeshInstance instance(&mesh, &resourceAllocator);
   EXPECT_EQ(instance.getMaterials().size(), 1);
   EXPECT_EQ(instance.getMaterials().at(0), nullptr);

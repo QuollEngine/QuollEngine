@@ -3,7 +3,6 @@
 
 #include "../mocks/TestShader.h"
 #include "../mocks/TestResourceAllocator.h"
-#include "../mocks/TestResourceManager.h"
 #include <gtest/gtest.h>
 
 class MaterialPBRTest : public ::testing::Test {
@@ -142,7 +141,6 @@ TEST_F(MaterialPBRTest, GetsProperties) {
 
 TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   liquid::MaterialPBR::Properties properties{
       std::make_shared<liquid::Texture>(nullptr, 0, statsManager),
@@ -162,8 +160,7 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
       0,
       glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material(properties, &resourceAllocator,
-                               &resourceManager);
+  liquid::MaterialPBR material(properties, &resourceAllocator);
 
   EXPECT_EQ(material.getTextures().size(), 3);
   EXPECT_EQ(material.getUniformBuffer()->getBufferSize(),

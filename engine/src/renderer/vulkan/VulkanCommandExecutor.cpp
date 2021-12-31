@@ -6,9 +6,11 @@
 
 namespace liquid {
 
-VulkanCommandExecutor::VulkanCommandExecutor(VkCommandBuffer commandBuffer_,
-                                             StatsManager &statsManager_)
-    : commandBuffer(commandBuffer_), statsManager(statsManager_) {}
+VulkanCommandExecutor::VulkanCommandExecutor(
+    VkCommandBuffer commandBuffer_, VulkanDescriptorManager &descriptorManager_,
+    StatsManager &statsManager_)
+    : commandBuffer(commandBuffer_), descriptorManager(descriptorManager_),
+      statsManager(statsManager_) {}
 
 void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
   vkResetCommandBuffer(commandBuffer, 0);
@@ -38,10 +40,10 @@ void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
           static_cast<const RenderCommandBindPipeline *>(command.get()));
       break;
-    case RenderCommandType::BindDescriptorSets:
-      executeBindDescriptorSets(
+    case RenderCommandType::BindDescriptor:
+      executeBindDescriptor(
           // NOLINTNEXTLINE(cppcoreguidelines-pro-type-static-cast-downcast)
-          static_cast<const RenderCommandBindDescriptorSets *>(command.get()));
+          static_cast<const RenderCommandBindDescriptor *>(command.get()));
       break;
     case RenderCommandType::PushConstants:
       executePushConstants(
@@ -120,16 +122,17 @@ void VulkanCommandExecutor::executeBindPipeline(
                     pipeline->getPipeline());
 }
 
-void VulkanCommandExecutor::executeBindDescriptorSets(
-    const RenderCommandBindDescriptorSets *const command) {
+void VulkanCommandExecutor::executeBindDescriptor(
+    const RenderCommandBindDescriptor *const command) {
   const auto &pipeline =
       std::dynamic_pointer_cast<VulkanPipeline>(command->pipeline);
+
+  VkDescriptorSet descriptorSet = descriptorManager.getOrCreateDescriptor(
+      command->descriptor, pipeline->getDescriptorLayout(command->firstSet));
+
   vkCmdBindDescriptorSets(commandBuffer, pipeline->getBindPoint(),
-                          pipeline->getPipelineLayout(), command->firstSet,
-                          static_cast<uint32_t>(command->descriptorSets.size()),
-                          command->descriptorSets.data(),
-                          static_cast<uint32_t>(command->dynamicOffsets.size()),
-                          command->dynamicOffsets.data());
+                          pipeline->getPipelineLayout(), command->firstSet, 1,
+                          &descriptorSet, 0, {});
 }
 
 void VulkanCommandExecutor::executePushConstants(

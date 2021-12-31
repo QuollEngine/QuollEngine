@@ -6,8 +6,6 @@
 #include "renderer/Shader.h"
 
 #include "renderer/vulkan/VulkanRenderer.h"
-#include "renderer/vulkan/VulkanPipeline.h"
-#include "renderer/vulkan/VulkanDeferredMaterialBinder.h"
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
 #include "scene/MeshInstance.h"
@@ -89,8 +87,6 @@ int main() {
 
   auto *instancePtr = instance.get();
 
-  const auto &renderData = renderer->prepareScene(scene.get());
-
   struct Scope {
     std::array<liquid::GraphResourceId, 2> basicPipeline;
     std::array<liquid::GraphResourceId, 2> redPipeline;
@@ -166,17 +162,8 @@ int main() {
               registry.getPipeline(scope.texturePipeline.at(pIdx));
           commandList.bindPipeline(pipeline);
 
-          const auto &vulkanPipeline =
-              std::dynamic_pointer_cast<liquid::VulkanPipeline>(pipeline);
-
-          const auto &materialBinder =
-              std::dynamic_pointer_cast<liquid::VulkanDeferredMaterialBinder>(
-                  materials.at(material)->getResourceBinder());
-
-          const auto &desc = materialBinder->getDescriptorSet(
-              vulkanPipeline->getDescriptorLayout(0));
-
-          commandList.bindDescriptorSets(pipeline, 0, {desc}, {});
+          commandList.bindDescriptor(pipeline, 0,
+                                     materials.at(material)->getDescriptor());
         }
 
         commandList.bindVertexBuffer(instance->getVertexBuffers().at(0));

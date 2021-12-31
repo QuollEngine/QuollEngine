@@ -1,23 +1,15 @@
 #pragma once
 
-#include "core/Base.h"
 #include <imgui.h>
 
 #include "window/glfw/GLFWWindow.h"
 #include "renderer/vulkan/VulkanContext.h"
-#include "renderer/vulkan/VulkanDescriptorManager.h"
-#include "renderer/vulkan/VulkanSwapchain.h"
-#include "renderer/vulkan/VulkanShader.h"
-#include "renderer/vulkan/VulkanTextureBinder.h"
-#include "renderer/ShaderLibrary.h"
 #include "renderer/ResourceAllocator.h"
 #include "renderer/HardwareBuffer.h"
 #include "renderer/RenderCommandList.h"
 #include "renderer/Pipeline.h"
 
 namespace liquid {
-
-class VulkanPipeline;
 
 class ImguiRenderer {
   struct FrameData {
@@ -50,22 +42,16 @@ private:
 
   void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
                          int fbWidth, int fbHeight,
-                         const SharedPtr<VulkanPipeline> &pipeline);
+                         const SharedPtr<Pipeline> &pipeline);
 
 private:
-  VulkanDescriptorManager *descriptorManager;
   const VulkanContext &vulkanContext;
 
   ResourceAllocator *resourceAllocator = nullptr;
-
-  VkRenderPass renderPass = VK_NULL_HANDLE;
-
   SharedPtr<Texture> fontTexture = nullptr;
 
   std::vector<FrameData> frameData;
   uint32_t currentFrame = 0;
-
-  std::unordered_map<Texture *, VkDescriptorSet> descriptorMap;
 };
 
 } // namespace liquid

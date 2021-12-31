@@ -20,15 +20,13 @@ void RenderCommandList::endRenderPass() {
   record(new RenderCommandEndRenderPass);
 }
 
-void RenderCommandList::bindDescriptorSets(
-    const SharedPtr<Pipeline> &pipeline, uint32_t firstSet,
-    const std::vector<VkDescriptorSet> &descriptorSets,
-    const std::vector<uint32_t> &dynamicOffsets) {
-  auto *command = new RenderCommandBindDescriptorSets;
+void RenderCommandList::bindDescriptor(const SharedPtr<Pipeline> &pipeline,
+                                       uint32_t firstSet,
+                                       const Descriptor &descriptor) {
+  auto *command = new RenderCommandBindDescriptor;
   command->pipeline = pipeline;
   command->firstSet = firstSet;
-  command->descriptorSets = descriptorSets;
-  command->dynamicOffsets = dynamicOffsets;
+  command->descriptor = descriptor;
   record(command);
 }
 

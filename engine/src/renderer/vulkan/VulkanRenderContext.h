@@ -8,6 +8,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanRenderContext.h"
 #include "VulkanCommandExecutor.h"
+#include "VulkanDescriptorManager.h"
 
 namespace liquid {
 
@@ -23,8 +24,12 @@ public:
    * for rendering
    *
    * @param context Vulkan context
+   * @param descriptorManager Descriptor manager
+   * @param statsManager Stats manager
    */
-  VulkanRenderContext(const VulkanContext &context, StatsManager &statsManager);
+  VulkanRenderContext(const VulkanContext &context,
+                      VulkanDescriptorManager &descriptorManager,
+                      StatsManager &statsManager);
 
   /**
    * @brief Destroy render context
@@ -108,6 +113,8 @@ private:
   std::array<VkFence, NUM_FRAMES> renderFences{};
 
   VkCommandPool commandPool = VK_NULL_HANDLE;
+
+  VulkanDescriptorManager &descriptorManager;
 
   VkQueue graphicsQueue = nullptr;
   VkQueue presentQueue = nullptr;

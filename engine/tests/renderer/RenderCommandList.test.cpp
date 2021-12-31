@@ -39,13 +39,13 @@ TEST_F(RenderCommandListTests, RecordBindPipeline) {
             liquid::RenderCommandType::BindPipeline);
 }
 
-TEST_F(RenderCommandListTests, RecordBindDescriptorSets) {
+TEST_F(RenderCommandListTests, RecordBindDescriptors) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindDescriptorSets(std::make_shared<liquid::Pipeline>(), 0, {},
-                                 {});
+  commandList.bindDescriptor(std::make_shared<liquid::Pipeline>(), 0,
+                             liquid::Descriptor{});
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
-            liquid::RenderCommandType::BindDescriptorSets);
+            liquid::RenderCommandType::BindDescriptor);
 }
 
 TEST_F(RenderCommandListDeathTest, BindVertexBufferFailsIfBufferIsNotVertex) {
