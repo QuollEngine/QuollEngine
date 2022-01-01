@@ -127,9 +127,6 @@ int main() {
             commandList.draw(PLANE_VERTICES, 0);
           });
 
-      const auto &catTexture =
-          textureLoader.loadFromFile("/Users/gasim/Screenshots/daktun.jpg");
-
       mainLoop.run(
           graph,
           [&editorCamera, &sceneManager](double dt) mutable {
@@ -137,7 +134,7 @@ int main() {
             sceneManager.getActiveScene()->update();
             return !sceneManager.hasNewScene();
           },
-          [&ui, &sceneManager, &renderData, &catTexture]() {
+          [&ui, &sceneManager, &renderData]() {
             ui.render(sceneManager);
             renderData->update();
           });
