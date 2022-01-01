@@ -1,7 +1,5 @@
 #include "core/Base.h"
 #include "ScenePass.h"
-#include "renderer/vulkan/VulkanPipeline.h"
-#include "renderer/vulkan/VulkanHardwareBuffer.h"
 
 namespace liquid {
 
@@ -10,12 +8,11 @@ constexpr glm::vec4 blueishClearValue{0.19f, 0.21f, 0.26f, 1.0f};
 ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
                      EntityContext &entityContext,
                      ShaderLibrary *shaderLibrary_,
-                     VulkanDescriptorManager *descriptorManager_,
                      const SharedPtr<VulkanRenderData> &renderData_,
                      const SharedPtr<DebugManager> &debugManager_)
     : RenderGraphPassBase(name, resourceId), sceneRenderer(entityContext, true),
-      shaderLibrary(shaderLibrary_), descriptorManager(descriptorManager_),
-      renderData(renderData_), debugManager(debugManager_) {}
+      shaderLibrary(shaderLibrary_), renderData(renderData_),
+      debugManager(debugManager_) {}
 
 void ScenePass::buildInternal(RenderGraphBuilder &builder) {
   builder.writeSwapchain("mainColor",
@@ -53,32 +50,26 @@ void ScenePass::execute(RenderCommandList &commandList,
 
   commandList.bindPipeline(pipeline);
 
-  const auto &vulkanMainPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+  const auto &cameraBuffer =
+      renderData->getScene()->getActiveCamera()->getUniformBuffer();
 
-  if (renderData->isEnvironmentChanged()) {
-    sceneDescriptorSetFragment = VK_NULL_HANDLE;
-    sceneDescriptorSet = VK_NULL_HANDLE;
-    renderData->cleanEnvironmentChangeFlag();
-  }
+  Descriptor sceneDescriptor, sceneDescriptorFragment;
 
-  if (!sceneDescriptorSet) {
-    const auto &cameraBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
-        renderData->getScene()->getActiveCamera()->getUniformBuffer());
+  const auto &iblMaps = renderData->getEnvironmentTextures();
 
-    sceneDescriptorSet = descriptorManager->createSceneDescriptorSet(
-        cameraBuffer, nullptr, nullptr, {},
-        vulkanMainPipeline->getDescriptorLayout(0));
+  sceneDescriptor.bind(0, cameraBuffer, DescriptorType::UniformBuffer);
+  sceneDescriptorFragment.bind(0, cameraBuffer, DescriptorType::UniformBuffer)
+      .bind(1, renderData->getSceneBuffer(), DescriptorType::UniformBuffer)
+      .bind(2, {registry.getTexture(shadowMapTextureId)},
+            DescriptorType::CombinedImageSampler);
 
-    sceneDescriptorSetFragment = descriptorManager->createSceneDescriptorSet(
-        cameraBuffer, renderData->getSceneBuffer(),
-        registry.getTexture(shadowMapTextureId),
-        renderData->getEnvironmentTextures(),
-        vulkanMainPipeline->getDescriptorLayout(1));
-  }
+  sceneDescriptorFragment
+      .bind(3, {iblMaps.at(0), iblMaps.at(1)},
+            DescriptorType::CombinedImageSampler)
+      .bind(4, {iblMaps.at(2)}, DescriptorType::CombinedImageSampler);
 
-  commandList.bindDescriptorSets(pipeline, 0, {sceneDescriptorSet}, {});
-  commandList.bindDescriptorSets(pipeline, 1, {sceneDescriptorSetFragment}, {});
+  commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
+  commandList.bindDescriptor(pipeline, 1, sceneDescriptorFragment);
 
   sceneRenderer.render(commandList, pipeline);
 }

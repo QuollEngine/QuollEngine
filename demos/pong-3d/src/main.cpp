@@ -5,7 +5,9 @@
 #include <glm/gtx/transform.hpp>
 
 #include "renderer/vulkan/VulkanRenderer.h"
+#include "renderer/SceneRenderer.h"
 #include "window/glfw/GLFWWindow.h"
+#include "renderer/passes/ImguiPass.h"
 
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
@@ -52,10 +54,61 @@ public:
   }
 
   int run() {
-
     liquid::MainLoop mainLoop(renderer.get(), window.get());
     const auto &renderData = renderer->prepareScene(scene.get());
-    auto graph = renderer->createRenderGraph(renderData);
+
+    liquid::RenderGraph graph;
+
+    struct PongScope {
+      liquid::GraphResourceId pipeline = 0;
+    };
+
+    liquid::SceneRenderer sceneRenderer(entityContext, false);
+
+    graph.addInlinePass<PongScope>(
+        "mainPass",
+        [this](liquid::RenderGraphBuilder &builder, PongScope &scope) {
+          builder.writeSwapchain("mainColor",
+                                 liquid::RenderPassSwapchainAttachment{
+                                     liquid::AttachmentType::Color,
+                                     liquid::AttachmentLoadOp::Clear,
+                                     liquid::AttachmentStoreOp::Store,
+                                     glm::vec4(1.0, 0.0, 1.0, 0.0)});
+          builder.writeSwapchain("mainDepth",
+                                 liquid::RenderPassSwapchainAttachment{
+                                     liquid::AttachmentType::Depth,
+                                     liquid::AttachmentLoadOp::Clear,
+                                     liquid::AttachmentStoreOp::Store,
+                                     liquid::DepthStencilClear{1.0, 0}});
+
+          scope.pipeline = builder.create(liquid::PipelineDescriptor{
+              vertexShader, fragmentShader,
+              liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+              liquid::PipelineInputAssembly{
+                  liquid::PrimitiveTopology::TriangleList},
+              liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
+                                         liquid::CullMode::None,
+                                         liquid::FrontFace::Clockwise},
+              liquid::PipelineColorBlend{
+                  {liquid::PipelineColorBlendAttachment{}}}});
+        },
+        [&sceneRenderer, this](liquid::RenderCommandList &commandList,
+                               PongScope &scope,
+                               liquid::RenderGraphRegistry &registry) {
+          const auto &pipeline = registry.getPipeline(scope.pipeline);
+          commandList.bindPipeline(pipeline);
+
+          liquid::Descriptor descriptor;
+          descriptor.bind(0, camera->getUniformBuffer(),
+                          liquid::DescriptorType::UniformBuffer);
+
+          commandList.bindDescriptor(pipeline, 0, descriptor);
+
+          sceneRenderer.render(commandList, pipeline);
+        });
+
+    graph.addPass<liquid::ImguiPass>("imguiPass", renderer->getRenderBackend(),
+                                     renderer->getShaderLibrary(), "mainColor");
 
     try {
       return mainLoop.run(

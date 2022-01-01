@@ -1,9 +1,9 @@
 #pragma once
 
-#include "VulkanHardwareBuffer.h"
 #include "renderer/HardwareBuffer.h"
 #include "renderer/ResourceAllocator.h"
 #include "renderer/Material.h"
+#include "renderer/Descriptor.h"
 #include "scene/Scene.h"
 #include "entity/EntityContext.h"
 
@@ -38,7 +38,7 @@ public:
    *
    * @return Scene buffer
    */
-  inline const SharedPtr<VulkanHardwareBuffer> &getSceneBuffer() const {
+  inline const SharedPtr<HardwareBuffer> &getSceneBuffer() const {
     return sceneBuffer;
   }
 
@@ -70,10 +70,11 @@ public:
 private:
   EntityContext &entityContext;
   SharedPtr<Texture> shadowmaps;
-  SharedPtr<VulkanHardwareBuffer> sceneBuffer;
+  SharedPtr<HardwareBuffer> sceneBuffer;
   Scene *scene;
   Entity environmentMapEntity = ENTITY_MAX;
   bool environmentChanged = false;
+  Descriptor descriptor;
 
   const std::vector<SharedPtr<Material>> &shadowMaterials;
 };

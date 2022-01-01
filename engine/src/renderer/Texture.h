@@ -38,7 +38,7 @@ struct TextureFramebufferData {
   uint32_t layers = 0;
 };
 
-class Texture {
+class Texture : public std::enable_shared_from_this<Texture> {
 public:
   /**
    * @brief Create resource

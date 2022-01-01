@@ -25,24 +25,24 @@ public:
 
   public:
     SharedPtr<Texture> baseColorTexture;
-    int baseColorTextureCoord;
+    int baseColorTextureCoord = -1;
     glm::vec4 baseColorFactor;
 
     SharedPtr<Texture> metallicRoughnessTexture;
-    int metallicRoughnessTextureCoord;
-    float metallicFactor;
-    float roughnessFactor;
+    int metallicRoughnessTextureCoord = -1;
+    float metallicFactor = 0.0f;
+    float roughnessFactor = 0.0f;
 
     SharedPtr<Texture> normalTexture;
-    int normalTextureCoord;
-    float normalScale;
+    int normalTextureCoord = -1;
+    float normalScale = 0.0f;
 
     SharedPtr<Texture> occlusionTexture;
-    int occlusionTextureCoord;
-    float occlusionStrength;
+    int occlusionTextureCoord = -1;
+    float occlusionStrength = 0.0f;
 
     SharedPtr<Texture> emissiveTexture;
-    int emissiveTextureCoord;
+    int emissiveTextureCoord = -1;
     glm::vec3 emissiveFactor;
   };
 
@@ -52,11 +52,9 @@ public:
    *
    * @param properties PBR properties
    * @param resourceAllocator Resource allocator
-   * @param resourceManager Resource manager
    */
   MaterialPBR(const Properties &properties,
-              ResourceAllocator *resourceAllocator,
-              ResourceManager *resourceManager);
+              ResourceAllocator *resourceAllocator);
 };
 
 } // namespace liquid

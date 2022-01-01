@@ -57,8 +57,7 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         ResourceAllocator *resourceAllocator,
-                         ResourceManager *resourceManager)
+                         ResourceAllocator *resourceAllocator)
     : Material(properties.getTextures(), properties.getProperties(),
-               resourceAllocator, resourceManager) {}
+               resourceAllocator) {}
 } // namespace liquid

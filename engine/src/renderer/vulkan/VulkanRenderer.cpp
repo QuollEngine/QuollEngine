@@ -5,10 +5,7 @@
 
 #include "VulkanValidator.h"
 #include "VulkanRenderer.h"
-#include "VulkanHardwareBuffer.h"
 #include "VulkanStandardPushConstants.h"
-#include "VulkanPipeline.h"
-#include "VulkanDeferredMaterialBinder.h"
 #include "VulkanError.h"
 
 #include "renderer/render-graph/RenderGraph.h"
@@ -28,12 +25,6 @@ VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
     : entityContext(entityContext_), renderBackend(window, enableValidations),
       debugManager(new DebugManager), shaderLibrary(new ShaderLibrary) {
 
-  descriptorManager = new VulkanDescriptorManager(
-      renderBackend.getVulkanInstance().getDevice());
-
-  deferredResourceManager =
-      new VulkanDeferredResourceManager(descriptorManager);
-
   loadShaders();
 }
 
@@ -45,17 +36,6 @@ VulkanRenderer::~VulkanRenderer() {
   if (shaderLibrary) {
     delete shaderLibrary;
     LOG_DEBUG("[Vulkan] Shader library destroyed");
-  }
-
-  if (deferredResourceManager) {
-    delete deferredResourceManager;
-    LOG_DEBUG("[Vulkan] deferred resource manager destroyed");
-  }
-
-  if (descriptorManager) {
-    delete descriptorManager;
-    descriptorManager = nullptr;
-    LOG_DEBUG("[Vulkan] Descriptor manager destroyed");
   }
 }
 
@@ -93,10 +73,10 @@ VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
 
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
                             shadowMaterials);
-  graph.addPass<ScenePass>("mainPass", entityContext, shaderLibrary,
-                           descriptorManager, renderData, debugManager);
+  graph.addPass<ScenePass>("mainPass", entityContext, shaderLibrary, renderData,
+                           debugManager);
   graph.addPass<EnvironmentPass>("environmentPass", entityContext,
-                                 shaderLibrary, descriptorManager, renderData);
+                                 shaderLibrary, renderData);
   graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, imguiDep);
 
   return graph;
@@ -114,16 +94,14 @@ SharedPtr<Material> VulkanRenderer::createMaterial(
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {
   return std::make_shared<Material>(textures, properties,
-                                    renderBackend.getResourceAllocator(),
-                                    deferredResourceManager);
+                                    renderBackend.getResourceAllocator());
 }
 
 SharedPtr<Material>
 VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                                   const CullMode &cullMode) {
   return std::make_shared<MaterialPBR>(properties,
-                                       renderBackend.getResourceAllocator(),
-                                       deferredResourceManager);
+                                       renderBackend.getResourceAllocator());
 }
 
 SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
@@ -133,11 +111,11 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
   size_t i = 0;
   entityContext.iterateEntities<LightComponent>(
       [&i, this](Entity entity, const LightComponent &light) {
-        shadowMaterials.push_back(SharedPtr<Material>(new Material(
-            {},
-            {{"lightMatrix", glm::mat4{1.0f}},
-             {"lightIndex", static_cast<int>(i)}},
-            renderBackend.getResourceAllocator(), deferredResourceManager)));
+        shadowMaterials.push_back(SharedPtr<Material>(
+            new Material({},
+                         {{"lightMatrix", glm::mat4{1.0f}},
+                          {"lightIndex", static_cast<int>(i)}},
+                         renderBackend.getResourceAllocator())));
 
         i++;
       });

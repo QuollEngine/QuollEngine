@@ -7,8 +7,8 @@
 #include "HardwareBuffer.h"
 #include "ResourceAllocator.h"
 #include "MaterialResourceBinder.h"
-#include "ResourceManager.h"
 #include "renderer/render-graph/RenderGraphPipelineDescriptor.h"
+#include "Descriptor.h"
 
 namespace liquid {
 
@@ -20,12 +20,10 @@ public:
    * @param textures Textures
    * @param properties Material properties
    * @param resourceAllocator Resource allocator
-   * @param resourceManager Resource manager
    */
   Material(const std::vector<SharedPtr<Texture>> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           ResourceAllocator *resourceAllocator,
-           ResourceManager *resourceManager);
+           ResourceAllocator *resourceAllocator);
 
   /**
    * @brief Update property
@@ -76,15 +74,6 @@ public:
   }
 
   /**
-   * @brief Get resource binder
-   *
-   * @return Resource binder
-   */
-  inline const SharedPtr<MaterialResourceBinder> &getResourceBinder() {
-    return resourceBinder;
-  }
-
-  /**
    * @brief Get properties
    *
    * @return Unordered list of properties
@@ -92,6 +81,13 @@ public:
   inline const std::vector<Property> &getProperties() const {
     return properties;
   }
+
+  /**
+   * @brief Get descriptor
+   *
+   * @return Descriptor
+   */
+  inline const Descriptor &getDescriptor() const { return descriptor; }
 
 private:
   /**
@@ -107,12 +103,11 @@ private:
   SharedPtr<Shader> fragmentShader = nullptr;
   std::vector<SharedPtr<Texture>> textures;
   SharedPtr<HardwareBuffer> uniformBuffer = nullptr;
-  CullMode cullMode = CullMode::None;
+
+  Descriptor descriptor;
 
   std::vector<Property> properties;
   std::map<String, size_t> propertyMap;
-
-  SharedPtr<MaterialResourceBinder> resourceBinder = nullptr;
 };
 
 } // namespace liquid

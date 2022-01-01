@@ -1,8 +1,6 @@
 #include "core/Base.h"
 #include "SceneRenderer.h"
 #include "vulkan/VulkanStandardPushConstants.h"
-#include "vulkan/VulkanPipeline.h"
-#include "vulkan/VulkanDeferredMaterialBinder.h"
 
 namespace liquid {
 
@@ -12,13 +10,9 @@ SceneRenderer::SceneRenderer(EntityContext &entityContext_,
 
 void SceneRenderer::render(RenderCommandList &commandList,
                            const SharedPtr<Pipeline> &pipeline) {
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
-
   entityContext.iterateEntities<MeshComponent, TransformComponent>(
-      [&commandList, &pipeline, &vulkanPipeline,
-       this](Entity entity, const MeshComponent &mesh,
-             const TransformComponent &transform) {
+      [&commandList, &pipeline, this](Entity entity, const MeshComponent &mesh,
+                                      const TransformComponent &transform) {
         if (entityContext.hasComponent<EnvironmentComponent>(entity)) {
           return;
         }
@@ -35,14 +29,8 @@ void SceneRenderer::render(RenderCommandList &commandList,
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
 
           if (instance->getMaterials().at(i) && bindMaterialData) {
-            const auto &materialBinder =
-                std::dynamic_pointer_cast<VulkanDeferredMaterialBinder>(
-                    instance->getMaterials().at(i)->getResourceBinder());
-
-            const auto &desc = materialBinder->getDescriptorSet(
-                vulkanPipeline->getDescriptorLayout(2));
-
-            commandList.bindDescriptorSets(pipeline, 2, {desc}, {});
+            commandList.bindDescriptor(
+                pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
 
           if (instance->getIndexBuffers().at(i) != nullptr) {

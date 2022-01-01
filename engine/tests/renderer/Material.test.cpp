@@ -3,16 +3,14 @@
 #include "renderer/Material.h"
 
 #include "../mocks/TestResourceAllocator.h"
-#include "../mocks/TestResourceManager.h"
 #include <gtest/gtest.h>
 
 using TexturePtr = liquid::SharedPtr<liquid::Texture>;
 
-TEST(MaterialTest, SetsShadersBuffersTextureAndResourceBinder) {
+TEST(MaterialTest, SetsBuffersAndTextures) {
   std::vector<TexturePtr> textures{nullptr};
 
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   liquid::Material material(
       textures,
@@ -20,12 +18,7 @@ TEST(MaterialTest, SetsShadersBuffersTextureAndResourceBinder) {
           {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
           {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
       },
-      &resourceAllocator, &resourceManager);
-
-  EXPECT_NE(material.getResourceBinder(), nullptr);
-  const auto &testBinder = std::static_pointer_cast<TestMaterialResourceBinder>(
-      material.getResourceBinder());
-  EXPECT_EQ(testBinder->material, &material);
+      &resourceAllocator);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
@@ -33,6 +26,11 @@ TEST(MaterialTest, SetsShadersBuffersTextureAndResourceBinder) {
   // Memory alignment
   EXPECT_EQ(material.getUniformBuffer()->getBufferSize(),
             sizeof(glm::vec4) + sizeof(glm::vec4));
+
+  EXPECT_EQ(material.getDescriptor().getBindings().at(0).type,
+            liquid::DescriptorType::UniformBuffer);
+  EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
+            liquid::DescriptorType::CombinedImageSampler);
 
   auto *data = reinterpret_cast<char *>(
       (std::static_pointer_cast<TestBuffer>(material.getUniformBuffer()))
@@ -49,20 +47,22 @@ TEST(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   std::vector<TexturePtr> textures{nullptr};
 
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
-  liquid::Material material(textures, {}, &resourceAllocator, &resourceManager);
+  liquid::Material material(textures, {}, &resourceAllocator);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_EQ(material.getUniformBuffer(), nullptr);
+  EXPECT_EQ(material.getDescriptor().getBindings().find(0),
+            material.getDescriptor().getBindings().end());
+  EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
+            liquid::DescriptorType::CombinedImageSampler);
 }
 
 TEST(MaterialTest, DoesNotSetTexturesIfNoTexture) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
-  liquid::Material material({}, {}, &resourceAllocator, &resourceManager);
+  liquid::Material material({}, {}, &resourceAllocator);
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
@@ -71,7 +71,6 @@ TEST(MaterialTest, DoesNotSetTexturesIfNoTexture) {
 
 TEST(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
@@ -81,7 +80,7 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &resourceAllocator, &resourceManager);
+                            &resourceAllocator);
 
   const auto &properties = material.getProperties();
   {
@@ -117,7 +116,6 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
 
 TEST(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
@@ -127,7 +125,7 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &resourceAllocator, &resourceManager);
+                            &resourceAllocator);
 
   const auto &properties = material.getProperties();
   {
@@ -163,7 +161,6 @@ TEST(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
 
 TEST(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
 
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
@@ -173,7 +170,7 @@ TEST(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &resourceAllocator, &resourceManager);
+                            &resourceAllocator);
 
   const auto &properties = material.getProperties();
   {

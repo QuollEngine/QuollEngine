@@ -6,8 +6,7 @@ namespace liquid {
 
 Material::Material(const std::vector<SharedPtr<Texture>> &textures_,
                    const std::vector<std::pair<String, Property>> &properties_,
-                   ResourceAllocator *resourceAllocator,
-                   ResourceManager *resourceManager)
+                   ResourceAllocator *resourceAllocator)
     : textures(textures_) {
 
   for (size_t i = 0; i < properties_.size(); ++i) {
@@ -26,9 +25,10 @@ Material::Material(const std::vector<SharedPtr<Texture>> &textures_,
         resourceAllocator->createUniformBuffer(maxValue * properties.size());
 
     updateBufferWithProperties();
+    descriptor.bind(0, uniformBuffer, DescriptorType::UniformBuffer);
   }
 
-  resourceBinder = resourceManager->createMaterialResourceBinder(this);
+  descriptor.bind(1, textures, DescriptorType::CombinedImageSampler);
 }
 
 void Material::updateProperty(const String &name, const Property &value) {

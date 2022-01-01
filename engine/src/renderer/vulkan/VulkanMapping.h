@@ -2,6 +2,7 @@
 
 #include "renderer/render-graph/RenderGraphPipelineDescriptor.h"
 #include "renderer/render-graph/RenderGraphAttachmentDescriptor.h"
+#include "renderer/Descriptor.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -80,6 +81,14 @@ public:
    * @return Vulkan vertex input rate
    */
   static VkVertexInputRate getVertexInputRate(VertexInputRate vertexInputRate);
+
+  /**
+   * @brief Get Vulkan descriptor type
+   *
+   * @param descriptorType Descriptor type
+   * @return Vulkan descriptor type
+   */
+  static VkDescriptorType getDescriptorType(DescriptorType descriptorType);
 };
 
 } // namespace liquid

@@ -5,8 +5,10 @@
 
 namespace liquid {
 
-VulkanRenderContext::VulkanRenderContext(const VulkanContext &context,
-                                         StatsManager &statsManager) {
+VulkanRenderContext::VulkanRenderContext(
+    const VulkanContext &context, VulkanDescriptorManager &descriptorManager_,
+    StatsManager &statsManager)
+    : descriptorManager(descriptorManager_) {
   device = context.getDevice();
   createCommandBuffers(context.getPhysicalDevice()
                            .getQueueFamilyIndices()
@@ -174,8 +176,8 @@ void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily,
       "Failed to allocate command buffers");
 
   for (size_t i = 0; i < NUM_FRAMES; ++i) {
-    commandExecutors.at(i) =
-        new VulkanCommandExecutor(commandBuffers.at(i), statsManager);
+    commandExecutors.at(i) = new VulkanCommandExecutor(
+        commandBuffers.at(i), descriptorManager, statsManager);
   }
 
   LOG_DEBUG("[Vulkan] Command buffers allocated");

@@ -1,90 +1,80 @@
 #pragma once
 
-#include "core/Base.h"
-#include <vulkan/vulkan.hpp>
+#include "renderer/Descriptor.h"
+#include "renderer/Pipeline.h"
 
-#include "renderer/Texture.h"
-#include "VulkanHardwareBuffer.h"
+#include <vulkan/vulkan.hpp>
 
 namespace liquid {
 
 class VulkanDescriptorManager {
 public:
   /**
-   * @brief Creates vulkan descriptor manager
+   * @brief Create Vulkan descriptor manager
    *
-   * Creates descriptor pool and descriptor layouts
+   * @param device Vulkan device
    */
   VulkanDescriptorManager(VkDevice device);
 
+  VulkanDescriptorManager(const VulkanDescriptorManager &) = delete;
+  VulkanDescriptorManager(VulkanDescriptorManager &&) = delete;
+  VulkanDescriptorManager &operator=(const VulkanDescriptorManager &) = delete;
+  VulkanDescriptorManager &operator=(VulkanDescriptorManager &&) = delete;
+
   /**
-   * @brief Destroys descriptor manager
-   *
-   * Destroys descriptor pool and descriptor layouts
+   * @brief Destroy desceriptor manager
    */
   ~VulkanDescriptorManager();
 
-  VulkanDescriptorManager(const VulkanDescriptorManager &rhs) = delete;
-  VulkanDescriptorManager(VulkanDescriptorManager &&rhs) = delete;
-  VulkanDescriptorManager &
-  operator=(const VulkanDescriptorManager &rhs) = delete;
-  VulkanDescriptorManager &operator=(VulkanDescriptorManager &&rhs) = delete;
-
   /**
-   * @brief Create scene descriptor set
+   * @brief Get Vulkan descriptor set
    *
-   * @param cameraBuffer Camera buffer
-   * @param sceneBuffer Scene buffer
-   * @param shadowmaps Shadow maps
-   * @param iblMaps Image based lighting maps
-   * @param layout Descriptor set layout
+   * Gets descriptor set from cache or creates
+   * descriptors and returns it
    *
-   * @return Scene descriptor set
+   * @param descriptor Descriptor
+   * @param layout Vulkan descriptor layout
+   * @return Vulkan descriptor set
    */
-  VkDescriptorSet
-  createSceneDescriptorSet(const SharedPtr<VulkanHardwareBuffer> &cameraBuffer,
-                           const SharedPtr<VulkanHardwareBuffer> &sceneBuffer,
-                           const SharedPtr<Texture> &shadowmaps,
-                           const std::array<SharedPtr<Texture>, 3> &iblMaps,
-                           VkDescriptorSetLayout layout);
-
-  /**
-   * @brief Create material descriptor set
-   *
-   * @param buffer Material buffer
-   * @param textures Material textures
-   * @param layout Descriptor set layout
-   *
-   * @return Material descriptor set
-   */
-  VkDescriptorSet
-  createMaterialDescriptorSet(const SharedPtr<VulkanHardwareBuffer> &buffer,
-                              const std::vector<SharedPtr<Texture>> &textures,
-                              VkDescriptorSetLayout layout);
-
-  /**
-   * @brief Get descriptor pool
-   *
-   * @return Descriptor pool
-   */
-  inline VkDescriptorPool getDescriptorPool() const { return descriptorPool; }
-
-  /**
-   * @brief Get device
-   *
-   * @return Vulkan device
-   */
-  inline VkDevice getDevice() const { return device; }
+  VkDescriptorSet getOrCreateDescriptor(const Descriptor &descriptor,
+                                        VkDescriptorSetLayout layout);
 
 private:
+  /**
+   * @brief Create descriptor set
+   *
+   * @param descriptor Descriptor
+   * @param layout Descriptor layout
+   * @return Vulkan descriptor set
+   */
+  VkDescriptorSet createDescriptorSet(const Descriptor &descriptor,
+                                      VkDescriptorSetLayout layout);
+
+  /**
+   * @brief Allocate descriptor set
+   *
+   * @param layout Vulkan descriptor layout
+   * @return Vulkan descriptor set
+   */
+  VkDescriptorSet allocateDescriptorSet(VkDescriptorSetLayout layout);
+
   /**
    * @brief Create descriptor pool
    */
   void createDescriptorPool();
 
-public:
-  VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+  /**
+   * @brief Create hash from descriptor and layout
+   *
+   * @param descriptor Descriptor
+   * @param layout Descriptor layout
+   * @return Hash code
+   */
+  String createHash(const Descriptor &descriptor, VkDescriptorSetLayout layout);
 
+private:
+  std::unordered_map<String, VkDescriptorSet> descriptorCache;
+  VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
   VkDevice device;
 };
 

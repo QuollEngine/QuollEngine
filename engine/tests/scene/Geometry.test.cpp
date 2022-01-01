@@ -1,7 +1,6 @@
 #include "core/Base.h"
 #include "scene/Geometry.h"
 
-#include "../mocks/TestResourceManager.h"
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
@@ -13,14 +12,13 @@ static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
 
 TEST(GeometryTest, SetsVerticesAndIndicesOnConstruct) {
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
   ShaderPtr shaderVert, shaderFrag;
 
   const std::vector<liquid::Vertex> vertices{
       {1.0, 2.0, 3.0}, {1.0, 2.0, 3.0}, {1.0, 2.0, 2.0}};
   std::vector<uint32_t> indices{0, 1, 2, 2, 1, 0};
   liquid::SharedPtr<liquid::Material> material(
-      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
+      new liquid::Material({}, {}, &resourceAllocator));
   liquid::Geometry geometry(vertices, indices, material);
 
   auto &meshVertices = geometry.getVertices();
@@ -81,9 +79,8 @@ TEST(GeometryTest, SetsMaterial) {
   EXPECT_EQ(geometry.getMaterial().get(), nullptr);
 
   TestResourceAllocator resourceAllocator;
-  TestResourceManager resourceManager;
   liquid::SharedPtr<liquid::Material> material(
-      new liquid::Material({}, {}, &resourceAllocator, &resourceManager));
+      new liquid::Material({}, {}, &resourceAllocator));
 
   geometry.setMaterial(material);
   EXPECT_EQ(geometry.getMaterial().get(), material.get());

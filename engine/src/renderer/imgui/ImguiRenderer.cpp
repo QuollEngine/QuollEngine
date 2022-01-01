@@ -1,10 +1,8 @@
 #include "core/Base.h"
 #include "core/EngineGlobals.h"
 
-#include "renderer/Pipeline.h"
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
-#include "renderer/vulkan/VulkanPipeline.h"
 
 #include "ImguiError.h"
 
@@ -36,15 +34,12 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 
   frameData.resize(2);
 
-  descriptorManager = new VulkanDescriptorManager(vulkanContext.getDevice());
   loadFonts();
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
 }
 
 ImguiRenderer::~ImguiRenderer() {
-  delete descriptorManager;
-
   fontTexture = nullptr;
   frameData.clear();
 
@@ -65,9 +60,6 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 
   if (!data)
     return;
-
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
   int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
   int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
@@ -110,7 +102,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
     frameObj.vertexBuffer->unmap();
   }
 
-  setupRenderStates(data, commandList, fbWidth, fbHeight, vulkanPipeline);
+  setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
 
   uint32_t indexOffset = 0;
   uint32_t vertexOffset = 0;
@@ -121,8 +113,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
       if (cmd->UserCallback != NULL) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
-          setupRenderStates(data, commandList, fbWidth, fbHeight,
-                            vulkanPipeline);
+          setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
         } else {
           cmd->UserCallback(cmdList, cmd);
         }
@@ -153,15 +144,12 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
           commandList.setScissor(clipRectOffset, clipRectSize);
           commandList.bindPipeline(pipeline);
 
-          auto *texture = static_cast<Texture *>(cmd->TextureId);
+          const auto &texture =
+              static_cast<Texture *>(cmd->TextureId)->shared_from_this();
+          Descriptor descriptor;
+          descriptor.bind(0, {texture}, DescriptorType::CombinedImageSampler);
 
-          if (descriptorMap.find(texture) == descriptorMap.end()) {
-            descriptorMap.insert(
-                {texture, createDescriptorFromTexture(texture, pipeline)});
-          }
-
-          commandList.bindDescriptorSets(pipeline, 0,
-                                         {descriptorMap.at(texture)}, {});
+          commandList.bindDescriptor(pipeline, 0, descriptor);
           commandList.drawIndexed(
               cmd->ElemCount, cmd->IdxOffset + indexOffset,
               static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
@@ -173,47 +161,10 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
   }
 }
 
-VkDescriptorSet ImguiRenderer::createDescriptorFromTexture(
-    Texture *texture, const SharedPtr<Pipeline> &pipeline) {
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
-
-  const auto &binder = std::dynamic_pointer_cast<VulkanTextureBinder>(
-      texture->getResourceBinder());
-
-  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-
-  std::array<VkDescriptorSetLayout, 1> layouts{
-      vulkanPipeline->getDescriptorLayout(0)};
-
-  VkDescriptorSetAllocateInfo allocInfo{};
-  allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  allocInfo.descriptorPool = descriptorManager->getDescriptorPool();
-  allocInfo.descriptorSetCount = 1;
-  allocInfo.pSetLayouts = layouts.data();
-  vkAllocateDescriptorSets(vulkanContext.getDevice(), &allocInfo,
-                           &descriptorSet);
-
-  VkDescriptorImageInfo imageInfo{};
-  imageInfo.sampler = binder->getSampler();
-  imageInfo.imageView = binder->getImageView();
-  imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  std::array<VkWriteDescriptorSet, 1> writes{};
-  writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  writes[0].dstSet = descriptorSet;
-  writes[0].descriptorCount = 1;
-  writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  writes[0].pImageInfo = &imageInfo;
-  vkUpdateDescriptorSets(vulkanContext.getDevice(),
-                         static_cast<uint32_t>(writes.size()), writes.data(), 0,
-                         nullptr);
-
-  return descriptorSet;
-}
-
-void ImguiRenderer::setupRenderStates(
-    ImDrawData *data, RenderCommandList &commandList, int fbWidth, int fbHeight,
-    const SharedPtr<VulkanPipeline> &pipeline) {
+void ImguiRenderer::setupRenderStates(ImDrawData *data,
+                                      RenderCommandList &commandList,
+                                      int fbWidth, int fbHeight,
+                                      const SharedPtr<Pipeline> &pipeline) {
   if (data->TotalVtxCount > 0) {
     commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
     commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,

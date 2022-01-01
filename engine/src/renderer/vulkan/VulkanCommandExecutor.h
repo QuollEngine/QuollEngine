@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/RenderCommandList.h"
+#include "VulkanDescriptorManager.h"
 #include "profiler/StatsManager.h"
 
 namespace liquid {
@@ -11,8 +12,11 @@ public:
    * @brief Create command executor
    *
    * @param commandBuffer Command buffer
+   * @param descriptorManager Descriptor manager
+   * @param statsManager Stats manager
    */
   VulkanCommandExecutor(VkCommandBuffer commandBuffer,
+                        VulkanDescriptorManager &descriptorManager,
                         StatsManager &statsManager);
 
   /**
@@ -53,12 +57,11 @@ private:
   void executeBindPipeline(const RenderCommandBindPipeline *const command);
 
   /**
-   * @brief Compile bind descriptor sets command
+   * @brief Execute bind descriptor command
    *
-   * @param command Descriptor set command
+   * @param command Bind descriptor command
    */
-  void executeBindDescriptorSets(
-      const RenderCommandBindDescriptorSets *const command);
+  void executeBindDescriptor(const RenderCommandBindDescriptor *const command);
 
   /**
    * @brief Execute push constants command
@@ -113,6 +116,7 @@ private:
 
 private:
   VkCommandBuffer commandBuffer;
+  VulkanDescriptorManager &descriptorManager;
   StatsManager &statsManager;
 };
 

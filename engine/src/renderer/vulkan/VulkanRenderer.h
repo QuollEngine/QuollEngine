@@ -8,9 +8,7 @@
 
 #include "VulkanSwapchain.h"
 #include "VulkanShader.h"
-#include "VulkanDescriptorManager.h"
 #include "VulkanRenderData.h"
-#include "VulkanDeferredResourceManager.h"
 #include "VulkanResourceAllocator.h"
 #include "VulkanRenderBackend.h"
 #include "VulkanGraphEvaluator.h"
@@ -72,10 +70,6 @@ public:
     return renderBackend.getVulkanInstance();
   }
 
-  inline VulkanDescriptorManager *getDescriptorManager() {
-    return descriptorManager;
-  }
-
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
   RenderGraph createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
@@ -89,8 +83,6 @@ private:
 private:
   VulkanRenderBackend renderBackend;
 
-  VulkanDescriptorManager *descriptorManager = nullptr;
-  VulkanDeferredResourceManager *deferredResourceManager = nullptr;
   ShaderLibrary *shaderLibrary = nullptr;
 
   std::vector<SharedPtr<Material>> shadowMaterials;

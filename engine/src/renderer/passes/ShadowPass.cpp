@@ -1,7 +1,5 @@
 #include "core/Base.h"
 #include "ShadowPass.h"
-#include "renderer/vulkan/VulkanPipeline.h"
-#include "renderer/vulkan/VulkanDeferredMaterialBinder.h"
 
 namespace liquid {
 
@@ -41,20 +39,10 @@ void ShadowPass::execute(RenderCommandList &commandList,
                          RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
 
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
-
   commandList.bindPipeline(pipeline);
 
   for (auto &shadowMaterial : shadowMaterials) {
-    const auto &materialBinder =
-        std::dynamic_pointer_cast<VulkanDeferredMaterialBinder>(
-            shadowMaterial->getResourceBinder());
-
-    commandList.bindDescriptorSets(pipeline, 0,
-                                   {materialBinder->getDescriptorSet(
-                                       vulkanPipeline->getDescriptorLayout(0))},
-                                   {});
+    commandList.bindDescriptor(pipeline, 0, shadowMaterial->getDescriptor());
 
     sceneRenderer.render(commandList, pipeline);
   }

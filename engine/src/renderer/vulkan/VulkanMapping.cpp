@@ -162,4 +162,16 @@ VkVertexInputRate VulkanMapping::getVertexInputRate(VertexInputRate inputRate) {
   }
 }
 
+VkDescriptorType
+VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
+  switch (descriptorType) {
+  case DescriptorType::CombinedImageSampler:
+    return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  case DescriptorType::UniformBuffer:
+    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  default:
+    return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+  }
+}
+
 } // namespace liquid
