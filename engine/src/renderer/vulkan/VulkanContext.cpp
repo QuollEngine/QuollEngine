@@ -7,6 +7,9 @@
 
 namespace liquid {
 
+const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
+    "VK_KHR_portability_subset";
+
 VulkanContext::VulkanContext(GLFWWindow *window_, bool enableValidations_)
     : window(window_), enableValidations(enableValidations_) {
   createInstance("Engine", "Engine");
@@ -126,11 +129,33 @@ void VulkanContext::createLogicalDevice() {
   if (physicalDevice.getQueueFamilyIndices().graphicsFamily.value() !=
       physicalDevice.getQueueFamilyIndices().presentFamily.value()) {
   }
+
+  const auto &pdExtensions = physicalDevice.getSupportedExtensions();
+
   std::vector<const char *> extensions;
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  // extensions.push_back("VK_KHR_portability_subset");
+  LOG_DEBUG("[Vulkan] Extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+
   extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+  LOG_DEBUG("[Vulkan] Extension enabled: "
+            << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
+  LOG_DEBUG("[Vulkan] Extension enabled: "
+            << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
+
+  const auto &portabilityExt = std::find_if(
+      pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
+        return String(static_cast<const char *>(ext.extensionName)) ==
+               LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
+      });
+
+  if (portabilityExt != pdExtensions.end()) {
+    extensions.push_back(
+        LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
+    LOG_DEBUG("[Vulkan] Extension enabled: "
+              << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+  }
 
   VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures{};
   descriptorIndexingFeatures.sType =

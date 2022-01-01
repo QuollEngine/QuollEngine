@@ -43,6 +43,7 @@ void VulkanRenderBackend::execute(RenderGraph &graph) {
       swapchain.acquireNextImage(renderContext.getImageAvailableSemaphore());
 
   if (imageIdx == std::numeric_limits<uint32_t>::max()) {
+    recreateSwapchain();
     graphEvaluator->rebuildSwapchainRelatedPasses(graph);
     return;
   }
