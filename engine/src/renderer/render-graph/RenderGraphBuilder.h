@@ -22,34 +22,18 @@ public:
   /**
    * @brief Write attachment resource
    *
-   * Adds resource to graph and adds resource ID
-   * to render pass output
+   * Adds resource ID to render pass output
    *
    * @param name Resource name
-   * @param attachment Attachment object
    * @return ID associated with resource
    */
-  GraphResourceId write(const String &name,
-                        const RenderPassAttachment &attachment);
-
-  /**
-   * @brief Write swapchain resource
-   *
-   * @param name Swapchain attachment name
-   * @param attachment Swapchain attachment description
-   *
-   * @return Swapchain resource ID
-   */
-  GraphResourceId
-  writeSwapchain(const String &name,
-                 const RenderPassSwapchainAttachment &attachment);
+  GraphResourceId write(const String &name);
 
   /**
    * @brief Read attachment resource
    *
    * Reads ID resource from graph and adds it
-   * to render pass input. ID will be provided
-   * regardless of existence of resource
+   * to render pass input.
    *
    * @param name Resource name
    * @return ID associated with resource

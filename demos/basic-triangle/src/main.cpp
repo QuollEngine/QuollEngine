@@ -94,22 +94,19 @@ int main() {
   };
 
   liquid::RenderGraph graph;
+
+  graph.create("depthBuffer",
+               {liquid::AttachmentType::Depth,
+                liquid::AttachmentSizeMethod::SwapchainRelative, 100, 100, 1,
+                VK_FORMAT_D32_SFLOAT, liquid::DepthStencilClear{1.0f, 0}});
   graph.addInlinePass<Scope>(
       "mainPass",
       [shaderBasicVert, shaderBasicFrag, shaderRedFrag, shaderTextureVert,
        shaderTextureFrag,
        &materials](liquid::RenderGraphBuilder &builder, Scope &scope) {
-        builder.writeSwapchain("mainColor",
-                               {liquid::AttachmentType::Color,
-                                liquid::AttachmentLoadOp::Clear,
-                                liquid::AttachmentStoreOp::Store,
-                                glm::vec4{0.19f, 0.21f, 0.26f, 1.0f}});
+        builder.write("SWAPCHAIN");
 
-        builder.writeSwapchain("mainDepth",
-                               {liquid::AttachmentType::Depth,
-                                liquid::AttachmentLoadOp::Clear,
-                                liquid::AttachmentStoreOp::Store,
-                                liquid::DepthStencilClear{1.0f, 0}});
+        builder.write("depthBuffer");
 
         auto createTrianglePipelines =
             [&builder](const liquid::SharedPtr<liquid::Shader> &vertShader,
@@ -173,7 +170,7 @@ int main() {
       });
 
   graph.addPass<liquid::ImguiPass>("imgui", renderer->getRenderBackend(),
-                                   renderer->getShaderLibrary(), "mainColor");
+                                   renderer->getShaderLibrary(), "SWAPCHAIN");
 
   mainLoop.run(
       graph, [instancePtr, materials](double dt) mutable { return true; },

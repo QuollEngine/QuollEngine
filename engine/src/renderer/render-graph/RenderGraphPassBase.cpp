@@ -17,8 +17,9 @@ void RenderGraphPassBase::addInput(GraphResourceId resourceId) {
   inputs.push_back(resourceId);
 }
 
-void RenderGraphPassBase::addOutput(GraphResourceId resourceId) {
-  outputs.push_back(resourceId);
+void RenderGraphPassBase::addOutput(GraphResourceId resourceId,
+                                    const RenderPassAttachment &attachment) {
+  outputs.insert({resourceId, attachment});
 }
 
 void RenderGraphPassBase::addResource(GraphResourceId resourceId) {

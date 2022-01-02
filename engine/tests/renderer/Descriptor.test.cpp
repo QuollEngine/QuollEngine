@@ -20,10 +20,10 @@ using DescriptorDeathTest = DescriptorTest;
 TEST_F(DescriptorTest, AddsTextureBinding) {
   liquid::Descriptor descriptor;
 
-  const auto &tex1 =
-      std::make_shared<liquid::Texture>(nullptr, 250, statsManager);
-  const auto &tex2 =
-      std::make_shared<liquid::Texture>(nullptr, 350, statsManager);
+  const auto &tex1 = std::make_shared<liquid::Texture>(nullptr, 250, 25, 10, 1,
+                                                       0, statsManager);
+  const auto &tex2 = std::make_shared<liquid::Texture>(nullptr, 350, 35, 10, 1,
+                                                       0, statsManager);
   descriptor.bind(2, {tex1, tex2},
                   liquid::DescriptorType::CombinedImageSampler);
   EXPECT_EQ(descriptor.getBindings().at(2).type,
@@ -49,10 +49,10 @@ TEST_F(DescriptorTest, AddsUniformBufferBinding) {
 
 TEST_F(DescriptorTest, CreatesHashFromBindings) {
   liquid::Descriptor descriptor;
-  const auto &tex1 =
-      std::make_shared<liquid::Texture>(nullptr, 250, statsManager);
-  const auto &tex2 =
-      std::make_shared<liquid::Texture>(nullptr, 350, statsManager);
+  const auto &tex1 = std::make_shared<liquid::Texture>(nullptr, 250, 25, 10, 1,
+                                                       0, statsManager);
+  const auto &tex2 = std::make_shared<liquid::Texture>(nullptr, 350, 35, 10, 1,
+                                                       0, statsManager);
   const auto &buffer1 = std::make_shared<TestBuffer>(
       liquid::HardwareBuffer::Uniform, 250, statsManager);
   const auto &buffer2 = std::make_shared<TestBuffer>(
@@ -83,8 +83,8 @@ TEST_F(DescriptorDeathTest, FailsIfBufferIsUsedForCombinedImageSampler) {
 }
 
 TEST_F(DescriptorDeathTest, FailsIfBufferIsUsedForSampler) {
-  const auto &tex =
-      std::make_shared<liquid::Texture>(nullptr, 250, statsManager);
+  const auto &tex = std::make_shared<liquid::Texture>(nullptr, 250, 25, 10, 1,
+                                                      0, statsManager);
   liquid::Descriptor descriptor;
   EXPECT_DEATH(
       { descriptor.bind(0, {tex}, liquid::DescriptorType::UniformBuffer); },

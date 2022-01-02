@@ -115,50 +115,6 @@ VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
   }
 
   LOG_DEBUG("[Vulkan] Swapchain image views created");
-
-  VkExtent3D depthImageExtent = {extent.width, extent.height, 1};
-
-  VkImageCreateInfo depthImageCreateInfo = {};
-  depthImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-  depthImageCreateInfo.pNext = nullptr;
-  depthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-  depthImageCreateInfo.format = depthFormat;
-  depthImageCreateInfo.extent = depthImageExtent;
-  depthImageCreateInfo.mipLevels = 1;
-  depthImageCreateInfo.arrayLayers = 1;
-  depthImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-  depthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  depthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-
-  VmaAllocationCreateInfo depthImageAllocationCreateInfo{};
-  depthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-  depthImageAllocationCreateInfo.requiredFlags =
-      VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-  checkForVulkanError(vmaCreateImage(allocator_, &depthImageCreateInfo,
-                                     &depthImageAllocationCreateInfo,
-                                     &depthImage, &depthImageAllocation,
-                                     nullptr),
-                      "Depth image creation failed");
-
-  VkImageViewCreateInfo imageViewCreateInfo = {};
-  imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  imageViewCreateInfo.pNext = nullptr;
-
-  imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-  imageViewCreateInfo.image = depthImage;
-  imageViewCreateInfo.format = depthFormat;
-  imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-  imageViewCreateInfo.subresourceRange.levelCount = 1;
-  imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-  imageViewCreateInfo.subresourceRange.layerCount = 1;
-  imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-  checkForVulkanError(
-      vkCreateImageView(device, &imageViewCreateInfo, nullptr, &depthImageView),
-      "Depth image view creation failed");
-
-  LOG_DEBUG("[Vulkan] Depth image view created");
 }
 
 VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) {
@@ -167,11 +123,7 @@ VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) {
   swapchain = rhs.swapchain;
   imageViews = rhs.imageViews;
 
-  depthImageView = rhs.depthImageView;
-  depthImage = rhs.depthImage;
-  depthImageAllocation = rhs.depthImageAllocation;
   allocator = rhs.allocator;
-  depthFormat = rhs.depthFormat;
 
   extent = rhs.extent;
   surfaceFormat = rhs.surfaceFormat;
@@ -182,8 +134,6 @@ VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) {
 
   rhs.swapchain = VK_NULL_HANDLE;
   rhs.imageViews.clear();
-  rhs.depthImageView = VK_NULL_HANDLE;
-  rhs.depthImage = VK_NULL_HANDLE;
 }
 
 VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
@@ -195,11 +145,7 @@ VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
   swapchain = rhs.swapchain;
   imageViews = rhs.imageViews;
 
-  depthImageView = rhs.depthImageView;
-  depthImage = rhs.depthImage;
-  depthImageAllocation = rhs.depthImageAllocation;
   allocator = rhs.allocator;
-  depthFormat = rhs.depthFormat;
 
   extent = rhs.extent;
   surfaceFormat = rhs.surfaceFormat;
@@ -210,8 +156,6 @@ VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
 
   rhs.swapchain = VK_NULL_HANDLE;
   rhs.imageViews.clear();
-  rhs.depthImageView = VK_NULL_HANDLE;
-  rhs.depthImage = VK_NULL_HANDLE;
 
   return *this;
 }
@@ -219,18 +163,6 @@ VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
 VulkanSwapchain::~VulkanSwapchain() { destroy(); }
 
 void VulkanSwapchain::destroy() {
-  if (depthImageView) {
-    vkDestroyImageView(device, depthImageView, nullptr);
-    depthImageView = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Depth image view destroyed");
-  }
-
-  if (depthImage) {
-    vmaDestroyImage(allocator, depthImage, depthImageAllocation);
-    depthImage = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Depth image destroyed");
-  }
-
   if (!imageViews.empty()) {
     for (auto &x : imageViews) {
       vkDestroyImageView(device, x, nullptr);

@@ -20,7 +20,6 @@ class VulkanGraphEvaluator {
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t layers = 0;
-    SharedPtr<Texture> texture = nullptr;
   };
 
 public:
@@ -73,44 +72,39 @@ private:
   void buildPass(RenderGraphPassBase *pass, RenderGraph &graph, bool force);
 
   /**
-   * @brief Create swapchain color attachment
+   * @brief Create swapchain attachment
    *
-   * @param attachment Swapchain attachment description
+   * @param attachment Attachment description
    * @param index Attachment index
    * @return Attachment info
    */
-  VulkanAttachmentInfo createSwapchainColorAttachment(
-      const RenderPassSwapchainAttachment &attachment, uint32_t index);
-
-  /**
-   * @brief Create swapchain depth attachment
-   *
-   * @param attachment Swapchain attachment description
-   * @param index Attachment index
-   * @return Attachment info
-   */
-  VulkanAttachmentInfo createSwapchainDepthAttachment(
-      const RenderPassSwapchainAttachment &attachment, uint32_t index);
+  VulkanAttachmentInfo
+  createSwapchainAttachment(const RenderPassAttachment &attachment,
+                            uint32_t index);
 
   /**
    * @brief Create color attachment
    *
    * @param attachment Attachment description
+   * @param texture Texture
    * @param index Attachment index
    * @return Attachment info
    */
   VulkanAttachmentInfo
-  createColorAttachment(const RenderPassAttachment &attachment, uint32_t index);
+  createColorAttachment(const RenderPassAttachment &attachment,
+                        const SharedPtr<Texture> &texture, uint32_t index);
 
   /**
    * @brief Create depth attachment
    *
    * @param attachment Attachment description
+   * @param texture Texture
    * @param index Attachment index
    * @return Attachment info
    */
   VulkanAttachmentInfo
-  createDepthAttachment(const RenderPassAttachment &attachment, uint32_t index);
+  createDepthAttachment(const RenderPassAttachment &attachment,
+                        const SharedPtr<Texture> &texture, uint32_t index);
 
   /**
    * @brief Create graphics pipeline
@@ -122,6 +116,16 @@ private:
   const SharedPtr<Pipeline>
   createGraphicsPipeline(const PipelineDescriptor &descriptor,
                          VkRenderPass renderPass);
+
+  /**
+   * @brief Create texture
+   *
+   * @param resourceId Resource Id
+   * @param data Attachment data
+   * @return Texture
+   */
+  SharedPtr<Texture> createTexture(GraphResourceId resourceId,
+                                   const AttachmentData &data);
 
 private:
   VulkanContext &vulkanInstance;

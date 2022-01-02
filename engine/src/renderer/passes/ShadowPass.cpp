@@ -3,9 +3,6 @@
 
 namespace liquid {
 
-constexpr uint32_t NUM_LIGHTS = 16;
-constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
-
 ShadowPass::ShadowPass(const String &name, GraphResourceId renderPass,
                        EntityContext &entityContext,
                        ShaderLibrary *shaderLibrary_,
@@ -14,17 +11,7 @@ ShadowPass::ShadowPass(const String &name, GraphResourceId renderPass,
       sceneRenderer(entityContext, false), shadowMaterials(shadowMaterials_) {}
 
 void ShadowPass::buildInternal(RenderGraphBuilder &builder) {
-  shadowMapId = builder.write("shadowmap",
-                              RenderPassAttachment{AttachmentType::Depth,
-                                                   TextureFramebufferData{
-                                                       SHADOWMAP_DIMENSIONS,
-                                                       SHADOWMAP_DIMENSIONS,
-                                                       VK_FORMAT_D16_UNORM,
-                                                       NUM_LIGHTS,
-                                                   },
-                                                   AttachmentLoadOp::Clear,
-                                                   AttachmentStoreOp::Store,
-                                                   DepthStencilClear{1.0f, 0}});
+  shadowMapId = builder.write("shadowmap");
 
   pipelineId = builder.create(PipelineDescriptor{
       shaderLibrary->getShader("__engine.default.shadowmap.vertex"),

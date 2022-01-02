@@ -8,7 +8,7 @@ public:
   liquid::RenderGraph graph;
 };
 
-class RenderGraphBuilderDeathTest : public RenderGraphBuilderTest {};
+using RenderGraphBuilderDeathTest = RenderGraphBuilderTest;
 
 struct NoncePass : public liquid::RenderGraphPassBase {
   NoncePass(const liquid::String &name, liquid::GraphResourceId renderPass)
@@ -19,150 +19,81 @@ struct NoncePass : public liquid::RenderGraphPassBase {
                liquid::RenderGraphRegistry &registry) {}
 };
 
-TEST_F(RenderGraphBuilderTest, CreatesAttachmentInGraphAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
+TEST_F(RenderGraphBuilderDeathTest,
+       FailsToAddResourceOutputIfResourceDoesNotExist) {
+  auto pass = std::make_shared<NoncePass>("nonce", 1);
 
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
-  liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
-                                     {},
-                                     liquid::AttachmentLoadOp::Load,
-                                     liquid::AttachmentStoreOp::Store,
-                                     glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
-  auto resourceId = builder.write("Test color", color);
-
-  EXPECT_EQ(resourceId, graph.getResourceId("Test color"));
-
-  const auto &stored = graph.getAttachment(resourceId);
-  EXPECT_TRUE(std::get<glm::vec4>(stored.clearValue) ==
-              glm::vec4(1.0f, 0.0f, 2.0f, 0.5f));
-  EXPECT_EQ(pass1->getInputs().size(), 0);
-  EXPECT_EQ(pass1->getOutputs().size(), 1);
-  EXPECT_EQ(pass1->getOutputs().at(0), resourceId);
-
-  EXPECT_FALSE(pass1->isSwapchainRelative());
+  liquid::RenderGraphBuilder builder(graph, pass.get());
+  EXPECT_DEATH({ builder.write("Test color"); }, ".*");
 }
 
-TEST_F(RenderGraphBuilderTest,
-       UpdatesAttachmentInGraphIfIdExistsAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>("nonce1", 1);
-  auto pass2 = std::make_shared<NoncePass>("nonce2", 2);
+TEST_F(RenderGraphBuilderTest, AddsResourceIdAsPassOutput) {
+  auto pass = std::make_shared<NoncePass>("nonce", 1);
 
-  auto prevResourceId = std::numeric_limits<liquid::GraphResourceId>::max();
+  graph.create("Test color", {});
 
-  {
-    liquid::RenderGraphBuilder builder(graph, pass2.get());
-    prevResourceId = builder.read("Test color");
-  }
+  liquid::RenderGraphBuilder builder(graph, pass.get());
+  auto outputId = builder.write("Test color");
 
-  {
-    liquid::RenderGraphBuilder builder(graph, pass1.get());
-    liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
-                                       {},
-                                       liquid::AttachmentLoadOp::Load,
-                                       liquid::AttachmentStoreOp::Store,
-                                       glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
+  EXPECT_EQ(outputId, graph.getResourceId("Test color"));
 
-    auto resourceId = builder.write("Test color", color);
+  EXPECT_EQ(pass->getInputs().size(), 0);
+  EXPECT_EQ(pass->getOutputs().size(), 1);
+  EXPECT_EQ(graph.getResourceId("Test color"), outputId);
 
-    EXPECT_EQ(resourceId, graph.getResourceId("Test color"));
-    EXPECT_EQ(resourceId, pass2->getInputs().at(0));
-    EXPECT_EQ(resourceId, prevResourceId);
+  EXPECT_FALSE(pass->isSwapchainRelative());
+}
 
-    const auto &stored = graph.getAttachment(resourceId);
-    EXPECT_TRUE(std::get<glm::vec4>(stored.clearValue) ==
-                glm::vec4(1.0f, 0.0f, 2.0f, 0.5f));
-    EXPECT_EQ(pass1->getInputs().size(), 0);
-    EXPECT_EQ(pass1->getOutputs().size(), 1);
-    EXPECT_EQ(pass1->getOutputs().at(0), resourceId);
+TEST_F(RenderGraphBuilderTest, AddsResourceIdAsPassInput) {
+  auto pass = std::make_shared<NoncePass>("nonce1", 1);
 
-    EXPECT_FALSE(pass1->isSwapchainRelative());
-    EXPECT_FALSE(pass2->isSwapchainRelative());
-  }
+  auto resourceId = graph.create("Test color", {});
+
+  liquid::RenderGraphBuilder builder(graph, pass.get());
+  auto inputId = builder.read("Test color");
+
+  EXPECT_EQ(pass->getInputs().size(), 1);
+  EXPECT_EQ(pass->getOutputs().size(), 0);
+  EXPECT_FALSE(pass->isSwapchainRelative());
+
+  EXPECT_EQ(pass->getInputs().at(0), resourceId);
+  EXPECT_EQ(resourceId, inputId);
 }
 
 TEST_F(RenderGraphBuilderDeathTest,
-       FailsToSetAttachmentIfAttachmentAlreadyExists) {
-  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
+       FailsToAddResourceInputIfResourceDoesNotExist) {
+  auto pass = std::make_shared<NoncePass>("nonce", 1);
 
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
-  liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
-                                     {},
-                                     liquid::AttachmentLoadOp::Load,
-                                     liquid::AttachmentStoreOp::Store,
-                                     glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
-  builder.write("Test color", color);
-  EXPECT_DEATH(builder.write("Test color", {}), ".*");
+  liquid::RenderGraphBuilder builder(graph, pass.get());
+  EXPECT_DEATH({ builder.read("Test color"); }, ".*");
 }
 
 TEST_F(RenderGraphBuilderTest,
-       CreatesResourceIdWithoutReferenceIfResourceDoesNotExist) {
-  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
+       SetsPassAsSwapchainRelativeIfResourceIsSwapchain) {
+  auto pass = std::make_shared<NoncePass>("nonce", 1);
+  liquid::RenderGraphBuilder builder(graph, pass.get());
 
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
+  auto resourceId = builder.write("SWAPCHAIN");
 
-  auto resourceId = builder.read("Something");
-  EXPECT_TRUE(graph.hasResourceId("Something"));
-  EXPECT_EQ(pass1->getInputs().at(0), resourceId);
-  EXPECT_FALSE(pass1->isSwapchainRelative());
-  EXPECT_FALSE(graph.hasAttachment(resourceId));
-}
-
-TEST_F(RenderGraphBuilderTest, SetsAttachmentIdAsInputForPass) {
-  auto pass1 = std::make_shared<NoncePass>("nonce1", 1);
-  auto pass2 = std::make_shared<NoncePass>("nonce2", 2);
-
-  {
-    liquid::RenderGraphBuilder builder(graph, pass1.get());
-    liquid::RenderPassAttachment color{liquid::AttachmentType::Color,
-                                       {},
-                                       liquid::AttachmentLoadOp::Load,
-                                       liquid::AttachmentStoreOp::Store,
-                                       glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
-    builder.write("Test color", color);
-  }
-
-  {
-    liquid::RenderGraphBuilder builder(graph, pass2.get());
-    auto resourceId = builder.read("Test color");
-
-    EXPECT_EQ(pass2->getInputs().size(), 1);
-    EXPECT_EQ(pass2->getOutputs().size(), 0);
-    EXPECT_FALSE(pass2->isSwapchainRelative());
-
-    EXPECT_EQ(pass2->getInputs().at(0), pass1->getOutputs().at(0));
-    EXPECT_EQ(pass2->getInputs().at(0), resourceId);
-  }
-}
-
-TEST_F(RenderGraphBuilderDeathTest,
-       FailsToSetSwapchainAttachmentIfAttachmentAlreadyExists) {
-  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
-
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
-  builder.writeSwapchain("Test color", {});
-  EXPECT_DEATH(builder.writeSwapchain("Test color", {}), ".*");
+  EXPECT_EQ(pass->getOutputs().size(), 1);
+  EXPECT_TRUE(pass->getOutputs().find(resourceId) != pass->getOutputs().end());
+  EXPECT_TRUE(pass->isSwapchainRelative());
 }
 
 TEST_F(RenderGraphBuilderTest,
-       CreatesSwapchainAttachmentInGraphAndAddsItAsPassOutput) {
-  auto pass1 = std::make_shared<NoncePass>("nonce", 1);
+       SetsPassAsSwapchainRelativeIfResourceIsSwapchainRelative) {
+  auto pass = std::make_shared<NoncePass>("nonce", 1);
+  liquid::RenderGraphBuilder builder(graph, pass.get());
 
-  liquid::RenderGraphBuilder builder(graph, pass1.get());
-  liquid::RenderPassSwapchainAttachment color{
-      liquid::AttachmentType::Color, liquid::AttachmentLoadOp::Load,
-      liquid::AttachmentStoreOp::Store, glm::vec4{1.0f, 0.0f, 2.0f, 0.5f}};
-  auto resourceId = builder.writeSwapchain("Test color", color);
-  const auto &stored = graph.getSwapchainAttachment(resourceId);
+  graph.create("swapchainRelative",
+               {liquid::AttachmentType::Color,
+                liquid::AttachmentSizeMethod::SwapchainRelative});
+  auto resourceId = builder.write("swapchainRelative");
 
-  EXPECT_EQ(resourceId, graph.getResourceId("Test color"));
-  EXPECT_FALSE(graph.hasAttachment(resourceId));
-  EXPECT_TRUE(std::get<glm::vec4>(stored.clearValue) ==
-              glm::vec4(1.0f, 0.0f, 2.0f, 0.5f));
-  EXPECT_EQ(pass1->getInputs().size(), 0);
-  EXPECT_EQ(pass1->getOutputs().size(), 1);
-  EXPECT_EQ(pass1->getOutputs().at(0), resourceId);
-
-  EXPECT_TRUE(pass1->isSwapchainRelative());
+  EXPECT_EQ(pass->getInputs().size(), 0);
+  EXPECT_EQ(pass->getOutputs().size(), 1);
+  EXPECT_TRUE(pass->getOutputs().find(resourceId) != pass->getOutputs().end());
+  EXPECT_TRUE(pass->isSwapchainRelative());
 }
 
 TEST_F(RenderGraphBuilderTest, CreatesPipelineResource) {

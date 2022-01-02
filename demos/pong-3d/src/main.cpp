@@ -55,7 +55,6 @@ public:
 
   int run() {
     liquid::MainLoop mainLoop(renderer.get(), window.get());
-    const auto &renderData = renderer->prepareScene(scene.get());
 
     liquid::RenderGraph graph;
 
@@ -65,21 +64,16 @@ public:
 
     liquid::SceneRenderer sceneRenderer(entityContext, false);
 
+    graph.create("depthBuffer",
+                 {liquid::AttachmentType::Depth,
+                  liquid::AttachmentSizeMethod::SwapchainRelative, 100, 100, 1,
+                  VK_FORMAT_D32_SFLOAT, liquid::DepthStencilClear{1.0f, 0}});
+
     graph.addInlinePass<PongScope>(
         "mainPass",
         [this](liquid::RenderGraphBuilder &builder, PongScope &scope) {
-          builder.writeSwapchain("mainColor",
-                                 liquid::RenderPassSwapchainAttachment{
-                                     liquid::AttachmentType::Color,
-                                     liquid::AttachmentLoadOp::Clear,
-                                     liquid::AttachmentStoreOp::Store,
-                                     glm::vec4(1.0, 0.0, 1.0, 0.0)});
-          builder.writeSwapchain("mainDepth",
-                                 liquid::RenderPassSwapchainAttachment{
-                                     liquid::AttachmentType::Depth,
-                                     liquid::AttachmentLoadOp::Clear,
-                                     liquid::AttachmentStoreOp::Store,
-                                     liquid::DepthStencilClear{1.0, 0}});
+          builder.write("SWAPCHAIN");
+          builder.write("depthBuffer");
 
           scope.pipeline = builder.create(liquid::PipelineDescriptor{
               vertexShader, fragmentShader,
@@ -108,7 +102,7 @@ public:
         });
 
     graph.addPass<liquid::ImguiPass>("imguiPass", renderer->getRenderBackend(),
-                                     renderer->getShaderLibrary(), "mainColor");
+                                     renderer->getShaderLibrary(), "SWAPCHAIN");
 
     try {
       return mainLoop.run(

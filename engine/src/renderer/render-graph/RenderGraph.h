@@ -11,8 +11,6 @@
 
 namespace liquid {
 
-class RenderGraph;
-
 class RenderGraph {
 public:
   RenderGraph() = default;
@@ -59,6 +57,14 @@ public:
   }
 
   /**
+   * @brief Create texture resource
+   *
+   * @param name Resource name
+   * @param data Texture data
+   */
+  GraphResourceId create(const String &name, const AttachmentData &data);
+
+  /**
    * @brief Compile graph
    *
    * @return Topologically sorted list of render passes
@@ -66,25 +72,11 @@ public:
   std::vector<RenderGraphPassBase *> compile();
 
   /**
-   * @brief Add attachment
+   * @brief Set swapchain clear color
    *
-   * @param name Attachment name
-   * @param attachment Attachment object
-   * @return Attachment ID
+   * @param color Swapchain color
    */
-  GraphResourceId addAttachment(const String &name,
-                                const RenderPassAttachment &attachment);
-
-  /**
-   * @brief Add swapchain attachment
-   *
-   * @param name Attachment name
-   * @param attachment Attachment object
-   * @return Attachment ID
-   */
-  GraphResourceId
-  addSwapchainAttachment(const String &name,
-                         const RenderPassSwapchainAttachment &attachment);
+  void setSwapchainColor(const glm::vec4 &color);
 
   /**
    * @brief Add pipeline
@@ -116,26 +108,41 @@ public:
   }
 
   /**
-   * @brief Check if resource ID has associated attachment
+   * @brief Check if resource ID has associated texture
    *
    * @param id Resource ID
-   * @retval true Attachment exists for resource ID
-   * @retval false No attachment associated with resource ID
+   * @retval true Texture exists for resource ID
+   * @retval false Texture does not exist for resource ID
    */
-  inline const bool hasAttachment(GraphResourceId id) const {
-    return attachments.find(id) != attachments.end();
+  inline const bool hasTexture(GraphResourceId id) const {
+    return textures.find(id) != textures.end();
   }
 
   /**
-   * @brief Check if resource ID has associated swapchain attachment
+   * @brief Get textures
+   *
+   * @return Textures
+   */
+  inline const std::unordered_map<GraphResourceId, AttachmentData> &
+  getTextures() const {
+    return textures;
+  }
+
+  /**
+   * @brief Get swapchain color
+   *
+   * @return Swapchain color
+   */
+  inline const glm::vec4 &getSwapchainColor() const { return swapchainColor; }
+
+  /**
+   * @brief Check if resource is swapchain
    *
    * @param id Resource ID
-   * @retval true Swapchain attachment exists for resource ID
-   * @retval false No swapchain attachment associated with resource ID
+   * @retval true Resource is swapchain
+   * @retval false Resource is not swapchain
    */
-  inline const bool hasSwapchainAttachment(GraphResourceId id) const {
-    return swapchainAttachments.find(id) != swapchainAttachments.end();
-  }
+  inline const bool isSwapchain(GraphResourceId id) const { return id == 0; }
 
   /**
    * @brief Check if resource is a pipeline
@@ -146,27 +153,6 @@ public:
    */
   inline const bool isPipeline(GraphResourceId id) const {
     return pipelines.find(id) != pipelines.end();
-  }
-
-  /**
-   * @brief Get attachment resource
-   *
-   * @param id Resource ID
-   * @return Attachment
-   */
-  inline const RenderPassAttachment &getAttachment(GraphResourceId id) const {
-    return attachments.at(id);
-  }
-
-  /**
-   * @brief Get swapchain attachment resource
-   *
-   * @param id Resource ID
-   * @return Attachment
-   */
-  inline const RenderPassSwapchainAttachment &
-  getSwapchainAttachment(GraphResourceId id) const {
-    return swapchainAttachments.at(id);
   }
 
   /**
@@ -225,16 +211,16 @@ private:
   void addPassInternal(RenderGraphPassBase *pass);
 
 private:
-  std::unordered_map<GraphResourceId, RenderPassAttachment> attachments;
   std::unordered_map<GraphResourceId, PipelineDescriptor> pipelines;
-  std::unordered_map<String, GraphResourceId> resourceMap;
-  std::unordered_map<GraphResourceId, RenderPassSwapchainAttachment>
-      swapchainAttachments;
+  std::unordered_map<GraphResourceId, AttachmentData> textures;
+  std::unordered_map<String, GraphResourceId> resourceMap{{"SWAPCHAIN", 0}};
   std::vector<RenderGraphPassBase *> passes;
 
-  GraphResourceId lastId = 0;
+  GraphResourceId lastId = 1;
 
   RenderGraphRegistry registry;
+
+  glm::vec4 swapchainColor{};
 };
 
 } // namespace liquid

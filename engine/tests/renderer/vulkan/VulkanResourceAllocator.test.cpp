@@ -51,7 +51,13 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, statsManager);
 
-  const auto &texture = resourceAllocator.createTexture2D({1, 7, 1, 0, data});
+  liquid::TextureData textureData{};
+  textureData.width = 1;
+  textureData.height = 7;
+  textureData.channels = 1;
+  textureData.format = 12121;
+  textureData.data = data;
+  const auto &texture = resourceAllocator.createTexture2D(textureData);
 
   EXPECT_NE(texture, nullptr);
   EXPECT_NE(texture->getResourceBinder(), nullptr);
@@ -64,6 +70,12 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
   EXPECT_NE(vulkanBinder->imageView, nullptr);
   EXPECT_NE(vulkanBinder->sampler, nullptr);
   EXPECT_NE(vulkanBinder->allocation, nullptr);
+
+  EXPECT_EQ(texture->getSize(), textureData.width * textureData.height * 4);
+  EXPECT_EQ(texture->getWidth(), textureData.width);
+  EXPECT_EQ(texture->getHeight(), textureData.height);
+  EXPECT_EQ(texture->getLayers(), 1);
+  EXPECT_EQ(texture->getFormat(), textureData.format);
 }
 
 TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
@@ -105,8 +117,14 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
   liquid::VulkanResourceAllocator resourceAllocator(uploadContext, nullptr,
                                                     nullptr, statsManager);
 
-  const auto &texture =
-      resourceAllocator.createTextureCubemap({5, 5, 1, 0, data});
+  liquid::TextureCubemapData textureData;
+  textureData.size = 250;
+  textureData.width = 5;
+  textureData.height = 6;
+  textureData.data = data;
+  textureData.format = 1211;
+
+  const auto &texture = resourceAllocator.createTextureCubemap(textureData);
 
   EXPECT_NE(texture, nullptr);
   EXPECT_NE(texture->getResourceBinder(), nullptr);
@@ -119,6 +137,11 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
   EXPECT_NE(vulkanBinder->imageView, nullptr);
   EXPECT_NE(vulkanBinder->sampler, nullptr);
   EXPECT_NE(vulkanBinder->allocation, nullptr);
+  EXPECT_EQ(texture->getSize(), textureData.size);
+  EXPECT_EQ(texture->getWidth(), textureData.width);
+  EXPECT_EQ(texture->getHeight(), textureData.height);
+  EXPECT_EQ(texture->getLayers(), 6);
+  EXPECT_EQ(texture->getFormat(), textureData.format);
 
   delete[] outData;
 }
@@ -156,7 +179,7 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
 
   liquid::TextureFramebufferData textureData{};
   textureData.width = 1024;
-  textureData.height = 1024;
+  textureData.height = 2048;
   textureData.layers = 5;
   textureData.format = VK_FORMAT_D16_UNORM;
   const auto &texture = resourceAllocator.createTextureFramebuffer(textureData);
@@ -172,4 +195,9 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
   EXPECT_NE(vulkanBinder->imageView, nullptr);
   EXPECT_NE(vulkanBinder->sampler, nullptr);
   EXPECT_NE(vulkanBinder->allocation, nullptr);
+  EXPECT_EQ(texture->getSize(), textureData.width * textureData.height);
+  EXPECT_EQ(texture->getWidth(), textureData.width);
+  EXPECT_EQ(texture->getHeight(), textureData.height);
+  EXPECT_EQ(texture->getLayers(), textureData.layers);
+  EXPECT_EQ(texture->getFormat(), textureData.format);
 }

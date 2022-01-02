@@ -14,11 +14,8 @@ ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
       shaderLibrary(shaderLibrary_), previousColor(previousColor_) {}
 
 void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
-  builder.read(previousColor);
-  builder.writeSwapchain(
-      "imguiColor", RenderPassSwapchainAttachment{AttachmentType::Color,
-                                                  AttachmentLoadOp::Load,
-                                                  AttachmentStoreOp::Store});
+  builder.read("SWAPCHAIN");
+  builder.write("SWAPCHAIN");
 
   pipelineId = builder.create(PipelineDescriptor{
       shaderLibrary->getShader("__engine.imgui.default.vertex"),

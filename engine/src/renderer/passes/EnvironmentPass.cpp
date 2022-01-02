@@ -12,7 +12,6 @@ EnvironmentPass::EnvironmentPass(const String &name,
       shaderLibrary(shaderLibrary_), renderData(renderData_) {}
 
 void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
-  builder.read("mainColor");
   pipelineId = builder.create(PipelineDescriptor{
       shaderLibrary->getShader("__engine.skybox.default.vertex"),
       shaderLibrary->getShader("__engine.skybox.default.fragment"),
@@ -21,14 +20,8 @@ void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
-  builder.writeSwapchain("environmentColor",
-                         RenderPassSwapchainAttachment{
-                             AttachmentType::Color, AttachmentLoadOp::Load,
-                             AttachmentStoreOp::Store, glm::vec4{}});
-  builder.writeSwapchain("environmentDepth",
-                         RenderPassSwapchainAttachment{
-                             AttachmentType::Depth, AttachmentLoadOp::Load,
-                             AttachmentStoreOp::Store, DepthStencilClear{}});
+  builder.write("SWAPCHAIN");
+  builder.write("depthBuffer");
 }
 
 void EnvironmentPass::execute(RenderCommandList &commandList,
