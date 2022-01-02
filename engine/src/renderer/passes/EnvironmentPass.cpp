@@ -20,7 +20,7 @@ void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
-  builder.write("SWAPCHAIN");
+  builder.write("mainColor");
   builder.write("depthBuffer");
 }
 

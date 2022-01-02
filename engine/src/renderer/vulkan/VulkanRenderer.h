@@ -59,7 +59,7 @@ public:
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
-  inline const StatsManager &getStatsManager() {
+  inline StatsManager &getStatsManager() {
     return renderBackend.getStatsManager();
   }
   inline const SharedPtr<DebugManager> &getDebugManager() {
@@ -72,8 +72,9 @@ public:
 
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
-  RenderGraph createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
-                                const String &imguiDep = "environmentColor");
+  RenderGraph createRenderGraph(
+      const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
+      const std::function<void(const SharedPtr<Texture> &)> &imUpdate);
 
   inline VulkanRenderBackend &getRenderBackend() { return renderBackend; }
 

@@ -3,9 +3,12 @@
 
 #include <gtest/gtest.h>
 
-TEST(StatsManagerTest, AddsDrawCalls) {
+class StatsManagerTest : public ::testing::Test {
+public:
   liquid::StatsManager manager;
+};
 
+TEST_F(StatsManagerTest, AddsDrawCalls) {
   manager.addDrawCall(80);
   manager.addDrawCall(125);
 
@@ -13,9 +16,7 @@ TEST(StatsManagerTest, AddsDrawCalls) {
   EXPECT_EQ(manager.getDrawnPrimitivesCount(), 205);
 }
 
-TEST(StatsManagerTest, ResetsDrawCalls) {
-  liquid::StatsManager manager;
-
+TEST_F(StatsManagerTest, ResetsDrawCalls) {
   manager.addDrawCall(80);
   manager.addDrawCall(125);
 
@@ -24,9 +25,7 @@ TEST(StatsManagerTest, ResetsDrawCalls) {
   EXPECT_EQ(manager.getDrawnPrimitivesCount(), 0);
 }
 
-TEST(StatsManagerTest, RemovesTextureStats) {
-  liquid::StatsManager manager;
-
+TEST_F(StatsManagerTest, RemovesTextureStats) {
   manager.addTexture(250);
   manager.addTexture(740);
 
@@ -36,9 +35,7 @@ TEST(StatsManagerTest, RemovesTextureStats) {
   EXPECT_EQ(manager.getAllocatedTexturesSize(), 740);
 }
 
-TEST(StatsManagerTest, AddsBufferStats) {
-  liquid::StatsManager manager;
-
+TEST_F(StatsManagerTest, AddsBufferStats) {
   manager.addBuffer(250);
   manager.addBuffer(740);
 
@@ -46,9 +43,7 @@ TEST(StatsManagerTest, AddsBufferStats) {
   EXPECT_EQ(manager.getAllocatedBuffersSize(), 990);
 }
 
-TEST(StatsManagerTest, RemovesBufferStats) {
-  liquid::StatsManager manager;
-
+TEST_F(StatsManagerTest, RemovesBufferStats) {
   manager.addBuffer(250);
   manager.addBuffer(740);
 
@@ -56,4 +51,9 @@ TEST(StatsManagerTest, RemovesBufferStats) {
 
   EXPECT_EQ(manager.getAllocatedBuffersCount(), 1);
   EXPECT_EQ(manager.getAllocatedBuffersSize(), 740);
+}
+
+TEST_F(StatsManagerTest, CollectsFPS) {
+  manager.collectFPS(60);
+  EXPECT_EQ(manager.getFPS(), 60);
 }

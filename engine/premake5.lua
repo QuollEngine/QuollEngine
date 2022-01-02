@@ -26,7 +26,9 @@ project "LiquidEngine"
         "glslc ../../engine/assets/shaders/shadowmap.frag -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.frag.spv",
         "glslc ../../engine/assets/shaders/shadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.vert.spv",
         "glslc ../../engine/assets/shaders/imgui.frag -o %{cfg.buildtarget.directory}/assets/shaders/imgui.frag.spv",
-        "glslc ../../engine/assets/shaders/imgui.vert -o %{cfg.buildtarget.directory}/assets/shaders/imgui.vert.spv"
+        "glslc ../../engine/assets/shaders/imgui.vert -o %{cfg.buildtarget.directory}/assets/shaders/imgui.vert.spv",
+        "glslc ../../engine/assets/shaders/fullscreenQuad.frag -o %{cfg.buildtarget.directory}/assets/shaders/fullscreenQuad.frag.spv",
+        "glslc ../../engine/assets/shaders/fullscreenQuad.vert -o %{cfg.buildtarget.directory}/assets/shaders/fullscreenQuad.vert.spv"
     }
 
 project "LiquidEngineTest"

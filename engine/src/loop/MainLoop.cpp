@@ -1,19 +1,16 @@
 #include "core/Base.h"
+
 #include "MainLoop.h"
 #include "renderer/vulkan/VulkanRenderer.h"
 #include "window/glfw/GLFWWindow.h"
-#include "scene/Scene.h"
 
 namespace liquid {
 
 MainLoop::MainLoop(VulkanRenderer *renderer_, GLFWWindow *window_)
-    : renderer(renderer_), window(window_),
-      debugLayer(renderer->getContext().getPhysicalDevice().getDeviceInfo(),
-                 renderer->getStatsManager(), renderer->getDebugManager()) {}
+    : renderer(renderer_), window(window_) {}
 
 int MainLoop::run(RenderGraph &graph,
-                  const std::function<bool(double)> &updater,
-                  const std::function<void()> &renderUI) {
+                  const std::function<bool(double)> &updater) {
 
   bool running = true;
 
@@ -47,18 +44,13 @@ int MainLoop::run(RenderGraph &graph,
       accumulator -= dt;
     }
 
-    ImguiRenderer::beginRendering();
-    renderUI();
-    debugLayer.render();
-    ImguiRenderer::endRendering();
-
     renderer->getRenderBackend().execute(graph);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
       prevFrameTime = currentTime;
-      debugLayer.collectFPS(frames);
+      renderer->getStatsManager().collectFPS(frames);
       frames = 0;
     } else {
       frames++;

@@ -15,6 +15,7 @@
 #include "renderer/passes/ScenePass.h"
 #include "renderer/passes/ShadowPass.h"
 #include "renderer/passes/EnvironmentPass.h"
+#include "renderer/passes/FullscreenQuadPass.h"
 
 #include "renderer/SceneRenderer.h"
 
@@ -64,11 +65,17 @@ void VulkanRenderer::loadShaders() {
   shaderLibrary->addShader(
       "__engine.imgui.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/imgui.frag.spv"));
+  shaderLibrary->addShader("__engine.fullscreenQuad.default.vertex",
+                           createShader(Engine::getAssetsPath() +
+                                        "/shaders/fullscreenQuad.vert.spv"));
+  shaderLibrary->addShader("__engine.fullscreenQuad.default.fragment",
+                           createShader(Engine::getAssetsPath() +
+                                        "/shaders/fullscreenQuad.frag.spv"));
 }
 
-RenderGraph
-VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
-                                  const String &imguiDep) {
+RenderGraph VulkanRenderer::createRenderGraph(
+    const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
+    const std::function<void(const SharedPtr<Texture> &)> &imUpdate) {
   RenderGraph graph;
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
@@ -82,13 +89,21 @@ VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
                               SHADOWMAP_DIMENSIONS, NUM_LIGHTS,
                               VK_FORMAT_D16_UNORM, DepthStencilClear{1.0f, 0}});
 
-  constexpr uint32_t DEPTH_BUFFER_SIZE_PERCENTAGE = 100;
+  constexpr uint32_t SWAPCHAIN_SIZE_PERCENTAGE = 100;
+
+  graph.create("mainColor",
+               AttachmentData{AttachmentType::Color,
+                              AttachmentSizeMethod::SwapchainRelative,
+                              SWAPCHAIN_SIZE_PERCENTAGE,
+                              SWAPCHAIN_SIZE_PERCENTAGE, 1,
+                              VK_FORMAT_B8G8R8A8_SRGB, BLUEISH_CLEAR_VALUE});
+
   graph.create(
       "depthBuffer",
       AttachmentData{AttachmentType::Depth,
                      AttachmentSizeMethod::SwapchainRelative,
-                     DEPTH_BUFFER_SIZE_PERCENTAGE, DEPTH_BUFFER_SIZE_PERCENTAGE,
-                     1, VK_FORMAT_D32_SFLOAT, DepthStencilClear{1.0f, 0}});
+                     SWAPCHAIN_SIZE_PERCENTAGE, SWAPCHAIN_SIZE_PERCENTAGE, 1,
+                     VK_FORMAT_D32_SFLOAT, DepthStencilClear{1.0f, 0}});
 
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
                             shadowMaterials);
@@ -96,7 +111,8 @@ VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
                            debugManager);
   graph.addPass<EnvironmentPass>("environmentPass", entityContext,
                                  shaderLibrary, renderData);
-  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, imguiDep);
+  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, debugManager,
+                           imguiDep, imUpdate);
 
   return graph;
 }

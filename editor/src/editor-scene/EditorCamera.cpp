@@ -14,12 +14,6 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
     : context(context_), window(window_),
       camera(new Camera(renderer->getResourceAllocator())) {
 
-  updatePerspectiveBasedOnFramebuffer();
-  resizeHandler = window->addResizeHandler([this](uint32_t width,
-                                                  uint32_t height) {
-    updatePerspective(static_cast<float>(width) / static_cast<float>(height));
-  });
-
   mouseButtonHandler = window->addMouseButtonHandler(
       [this](int button, int action, int mods) mutable {
         if (button != GLFW_MOUSE_BUTTON_MIDDLE) {
@@ -28,42 +22,61 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
 
         if (action == GLFW_RELEASE) {
           inputState = InputState::None;
-        } else if (window->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+          return;
+        }
+
+        const auto &cursorPos = window->getCurrentMousePosition();
+
+        // Do not trigger action if cursor is outside
+        // Imgui window viewport
+        if (cursorPos.x < x || cursorPos.x > x + width || cursorPos.y < y ||
+            cursorPos.y > y + height) {
+          return;
+        }
+
+        if (window->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
           inputState = InputState::Pan;
-          prevMousePos = window->getCurrentMousePosition();
+          prevMousePos = cursorPos;
         } else if (window->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
           inputState = InputState::Zoom;
-          prevMousePos = window->getCurrentMousePosition();
+          prevMousePos = cursorPos;
         } else {
           inputState = InputState::Rotate;
-          prevMousePos = window->getCurrentMousePosition();
+          prevMousePos = cursorPos;
         }
       });
 
+  // Out of bounds handler
   mouseMoveHandler =
       window->addMouseMoveHandler([this](double xpos, double ypos) mutable {
         if (inputState == InputState::None) {
           return;
         }
 
-        const auto &size = window->getFramebufferSize();
+        constexpr float MIN_OOB_THRESHOLD = 2.0f;
+        const auto &size = window->getWindowSize();
+
+        float minX = 0;
+        float maxX = static_cast<float>(size.width);
+        float minY = 0;
+        float maxY = static_cast<float>(size.height);
 
         glm::vec2 newPos{xpos, ypos};
         bool outOfBounds = false;
 
-        if (xpos <= 0) {
-          newPos.x = static_cast<float>(size.width);
+        if (xpos <= minX) {
+          newPos.x = maxX - MIN_OOB_THRESHOLD;
           outOfBounds = true;
-        } else if (xpos >= size.width) {
-          newPos.x = 0;
+        } else if (xpos >= maxX) {
+          newPos.x = minX + MIN_OOB_THRESHOLD;
           outOfBounds = true;
         }
 
-        if (ypos <= 0) {
-          newPos.y = static_cast<float>(size.height);
+        if (ypos <= minY) {
+          newPos.y = maxY - MIN_OOB_THRESHOLD;
           outOfBounds = true;
-        } else if (ypos >= size.height) {
-          newPos.y = 0;
+        } else if (ypos >= maxY) {
+          newPos.y = minY + MIN_OOB_THRESHOLD;
           outOfBounds = true;
         }
 
@@ -75,7 +88,6 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
 }
 
 EditorCamera::~EditorCamera() {
-  window->removeResizeHandler(resizeHandler);
   window->removeMouseButtonHandler(mouseButtonHandler);
   window->removeMouseMoveHandler(mouseMoveHandler);
 
@@ -96,6 +108,8 @@ void EditorCamera::update() {
   }
 
   camera->lookAt(eye, center, up);
+  camera->setPerspective(
+      fov, static_cast<float>(width) / static_cast<float>(height), near, far);
 }
 
 void EditorCamera::reset() {
@@ -106,8 +120,10 @@ void EditorCamera::reset() {
   near = DEFAULT_NEAR;
   far = DEFAULT_FAR;
 
-  cameraEntity = context.createEntity();
-  context.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+  if (!context.hasEntity(cameraEntity)) {
+    cameraEntity = context.createEntity();
+    context.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+  }
 }
 
 void EditorCamera::pan() {
@@ -166,10 +182,12 @@ void EditorCamera::zoom() {
   prevMousePos = mousePos;
 }
 
-void EditorCamera::updatePerspectiveBasedOnFramebuffer() {
-  const auto &fbSize = window->getFramebufferSize();
-  updatePerspective(static_cast<float>(fbSize.width) /
-                    static_cast<float>(fbSize.height));
+void EditorCamera::setViewport(float x_, float y_, float width_,
+                               float height_) {
+  x = x_;
+  y = y_;
+  width = width_;
+  height = height_;
 }
 
 void EditorCamera::updatePerspective(float aspectRatio) {

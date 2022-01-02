@@ -21,13 +21,6 @@ public:
                   const SharedPtr<DebugManager> &debugManager_);
 
   /**
-   * @brief Collect frames per second
-   *
-   * @param fps Frames per second
-   */
-  void collectFPS(uint32_t fps);
-
-  /**
    * @brief Render debug UI
    */
   void render();
@@ -68,7 +61,6 @@ private:
   PhysicalDeviceInformation physicalDeviceInfo;
   const StatsManager &statsManager;
   SharedPtr<DebugManager> debugManager = nullptr;
-  uint32_t fps = 0;
 
   bool usageMetricsVisible = false;
   bool physicalDeviceInfoVisible = false;

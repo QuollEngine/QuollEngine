@@ -64,8 +64,20 @@ int main() {
       const auto &renderData =
           renderer->prepareScene(sceneManager.getActiveScene());
 
-      liquid::RenderGraph graph =
-          renderer->createRenderGraph(renderData, "editorDebugColor");
+      liquid::RenderGraph graph = renderer->createRenderGraph(
+          renderData, "mainColor",
+          [&sceneManager, &ui, &renderData](const auto &sceneTexture) {
+            if (ImGui::Begin("View", nullptr, ImGuiWindowFlags_NoTitleBar)) {
+              const auto &size = ImGui::GetContentRegionAvail();
+              const auto &pos = ImGui::GetWindowPos();
+              sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
+                                                         size.y);
+              ImGui::Image(sceneTexture.get(), size);
+              ImGui::End();
+            }
+
+            ui.render(sceneManager);
+          });
       struct EditorDebugScope {
         liquid::GraphResourceId editorGridPipeline = 0;
       };
@@ -74,7 +86,8 @@ int main() {
           "editorDebug",
           [&renderer](liquid::RenderGraphBuilder &builder,
                       EditorDebugScope &scope) {
-            builder.write("SWAPCHAIN");
+            builder.read("mainColor");
+            builder.write("mainColor");
             builder.write("depthBuffer");
 
             scope.editorGridPipeline =
@@ -116,17 +129,14 @@ int main() {
             commandList.draw(PLANE_VERTICES, 0);
           });
 
-      mainLoop.run(
-          graph,
-          [&editorCamera, &sceneManager](double dt) mutable {
-            editorCamera.update();
-            sceneManager.getActiveScene()->update();
-            return !sceneManager.hasNewScene();
-          },
-          [&ui, &sceneManager, &renderData]() {
-            ui.render(sceneManager);
-            renderData->update();
-          });
+      mainLoop.run(graph, [&editorCamera, &sceneManager,
+                           &renderData](double dt) mutable {
+        editorCamera.update();
+        sceneManager.getActiveScene()->update();
+
+        renderData->update();
+        return !sceneManager.hasNewScene();
+      });
     }
 
     return 0;

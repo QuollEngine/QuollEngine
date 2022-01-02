@@ -33,4 +33,6 @@ void StatsManager::removeBuffer(size_t size) {
   allocatedBuffersCount--;
 }
 
+void StatsManager::collectFPS(uint32_t fps_) { fps = fps_; }
+
 } // namespace liquid

@@ -8,6 +8,7 @@
 #include "renderer/SceneRenderer.h"
 #include "window/glfw/GLFWWindow.h"
 #include "renderer/passes/ImguiPass.h"
+#include "renderer/passes/FullscreenQuadPass.h"
 
 #include "scene/Vertex.h"
 #include "scene/Mesh.h"
@@ -102,18 +103,17 @@ public:
         });
 
     graph.addPass<liquid::ImguiPass>("imguiPass", renderer->getRenderBackend(),
-                                     renderer->getShaderLibrary(), "SWAPCHAIN");
+                                     renderer->getShaderLibrary(),
+                                     renderer->getDebugManager(), "SWAPCHAIN",
+                                     [](const auto &sceneTexture) {});
 
     try {
-      return mainLoop.run(
-          graph,
-          [=](double dt) mutable {
-            updateGameLogic(0.15);
-            updateScene(0.15);
+      return mainLoop.run(graph, [=](double dt) mutable {
+        updateGameLogic(0.15);
+        updateScene(0.15);
 
-            return true;
-          },
-          []() {});
+        return true;
+      });
 
     } catch (std::runtime_error error) {
       std::cerr << error.what() << std::endl;

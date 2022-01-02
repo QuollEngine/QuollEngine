@@ -113,6 +113,16 @@ public:
    */
   void reset();
 
+  /**
+   * @brief Set viewport
+   *
+   * @param x Viewport x position
+   * @param y Viewport y position
+   * @param width Viewport width
+   * @param height Viewport height
+   */
+  void setViewport(float x, float y, float width, float height);
+
 private:
   /**
    * @brief Pan camera using mouse movement
@@ -130,11 +140,6 @@ private:
   void zoom();
 
   /**
-   * @brief Update perspective based on framebuffer size
-   */
-  void updatePerspectiveBasedOnFramebuffer();
-
-  /**
    * @brief Update perspective
    *
    * @param aspectRatio Aspect ratio
@@ -146,6 +151,11 @@ private:
   float near = DEFAULT_NEAR;
   float far = DEFAULT_FAR;
 
+  float x = 0.0f;
+  float y = 0.0f;
+  float width = 0.0f;
+  float height = 0.0f;
+
   InputState inputState = InputState::None;
   glm::vec2 prevMousePos{};
 
@@ -153,7 +163,6 @@ private:
   glm::vec3 center = DEFAULT_CENTER;
   glm::vec3 up = DEFAULT_UP;
 
-  uint32_t resizeHandler;
   uint32_t mouseButtonHandler;
   uint32_t mouseMoveHandler;
 

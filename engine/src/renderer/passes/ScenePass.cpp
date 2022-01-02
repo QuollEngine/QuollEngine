@@ -13,7 +13,7 @@ ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
       debugManager(debugManager_) {}
 
 void ScenePass::buildInternal(RenderGraphBuilder &builder) {
-  builder.write("SWAPCHAIN");
+  builder.write("mainColor");
   builder.write("depthBuffer");
 
   shadowMapTextureId = builder.read("shadowmap");

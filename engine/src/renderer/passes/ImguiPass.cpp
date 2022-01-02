@@ -4,17 +4,22 @@
 
 namespace liquid {
 
-ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
-                     VulkanRenderBackend &backend,
-                     ShaderLibrary *shaderLibrary_,
-                     const String &previousColor_)
+ImguiPass::ImguiPass(
+    const String &name, GraphResourceId renderPassId,
+    VulkanRenderBackend &backend, ShaderLibrary *shaderLibrary_,
+    const SharedPtr<DebugManager> &debugManager, const String &previousColor_,
+    const std::function<void(const SharedPtr<Texture> &)> &imUpdate)
     : RenderGraphPassBase(name, renderPassId),
       imguiRenderer(backend.getWindow(), backend.getVulkanInstance(),
                     backend.getResourceAllocator()),
-      shaderLibrary(shaderLibrary_), previousColor(previousColor_) {}
+      shaderLibrary(shaderLibrary_),
+      debugLayer(
+          backend.getVulkanInstance().getPhysicalDevice().getDeviceInfo(),
+          backend.getStatsManager(), debugManager),
+      previousColor(previousColor_), imguiUpdateFn(imUpdate) {}
 
 void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
-  builder.read("SWAPCHAIN");
+  sceneTextureId = builder.read(previousColor);
   builder.write("SWAPCHAIN");
 
   pipelineId = builder.create(PipelineDescriptor{
@@ -43,6 +48,17 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
 void ImguiPass::execute(RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
+  const auto &sceneTexture = registry.hasTexture(sceneTextureId)
+                                 ? registry.getTexture(sceneTextureId)
+                                 : nullptr;
+
+  imguiRenderer.beginRendering();
+
+  imguiUpdateFn(sceneTexture);
+
+  debugLayer.render();
+  imguiRenderer.endRendering();
+
   imguiRenderer.draw(commandList, pipeline);
 }
 
