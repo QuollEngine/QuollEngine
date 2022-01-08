@@ -1,23 +1,22 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(location = 0) in vec4 modelPosition;
-layout(location = 1) in vec3 worldPosition;
-layout(location = 2) in vec3 fragColor;
-layout(location = 3) in vec2 textureCoord[2];
-layout(location = 5) in vec3 normal;
-layout(location = 6) in float tangentHand;
-layout(location = 7) in mat3 TBN;
-layout(location = 10) in mat4 modelMatrix;
+layout(location = 0) in vec4 inModelPosition;
+layout(location = 1) in vec3 inWorldPosition;
+layout(location = 2) in vec2 inTextureCoord[2];
+layout(location = 4) in vec3 inNormal;
+layout(location = 5) in float inTangentHand;
+layout(location = 6) in mat3 inTBN;
+layout(location = 9) in mat4 inModelMatrix;
 
 layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform CameraData {
   mat4 proj;
   mat4 view;
-  mat4 viewproj;
+  mat4 viewProj;
 }
-cameraData;
+uCameraData;
 
 struct LightData {
   vec4 color;
@@ -31,13 +30,11 @@ layout(std140, set = 1, binding = 1) uniform SceneData {
   uvec4 numLights;
   uvec4 hasIBL;
 }
-sceneData;
+uSceneData;
 
-layout(set = 1, binding = 2) uniform sampler2DArray shadowmap;
-
-layout(set = 1, binding = 3) uniform samplerCube iblMaps[2];
-
-layout(set = 1, binding = 4) uniform sampler2D brdfLUT;
+layout(set = 1, binding = 2) uniform sampler2DArray uShadowmap;
+layout(set = 1, binding = 3) uniform samplerCube uIblMaps[2];
+layout(set = 1, binding = 4) uniform sampler2D uBrdfLUT;
 
 layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
   int baseColorTexture[1];
@@ -57,7 +54,7 @@ layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
   int emissiveTextureCoord[1];
   vec3 emissiveFactor;
 }
-materialDataRaw;
+uMaterialDataRaw;
 
 struct MaterialData {
   int baseColorTexture;
@@ -78,36 +75,51 @@ struct MaterialData {
   vec3 emissiveFactor;
 };
 
-layout(set = 2, binding = 1) uniform sampler2D tex[8];
+MaterialData uMaterialData = MaterialData(
+    uMaterialDataRaw.baseColorTexture[0],
+    uMaterialDataRaw.baseColorTextureCoord[0], uMaterialDataRaw.baseColorFactor,
+    uMaterialDataRaw.metallicRoughnessTexture[0],
+    uMaterialDataRaw.metallicRoughnessTextureCoord[0],
+    uMaterialDataRaw.metallicFactor[0], uMaterialDataRaw.roughnessFactor[0],
+    uMaterialDataRaw.normalTexture[0], uMaterialDataRaw.normalTextureCoord[0],
+    uMaterialDataRaw.normalScale[0], uMaterialDataRaw.occlusionTexture[0],
+    uMaterialDataRaw.occlusionTextureCoord[0],
+    uMaterialDataRaw.occlusionStrength[0], uMaterialDataRaw.emissiveTexture[0],
+    uMaterialDataRaw.emissiveTextureCoord[0], uMaterialDataRaw.emissiveFactor);
 
-MaterialData materialData = MaterialData(
-    materialDataRaw.baseColorTexture[0],
-    materialDataRaw.baseColorTextureCoord[0], materialDataRaw.baseColorFactor,
-    materialDataRaw.metallicRoughnessTexture[0],
-    materialDataRaw.metallicRoughnessTextureCoord[0],
-    materialDataRaw.metallicFactor[0], materialDataRaw.roughnessFactor[0],
-    materialDataRaw.normalTexture[0], materialDataRaw.normalTextureCoord[0],
-    materialDataRaw.normalScale[0], materialDataRaw.occlusionTexture[0],
-    materialDataRaw.occlusionTextureCoord[0],
-    materialDataRaw.occlusionStrength[0], materialDataRaw.emissiveTexture[0],
-    materialDataRaw.emissiveTextureCoord[0], materialDataRaw.emissiveFactor);
+layout(set = 2, binding = 1) uniform sampler2D uTextures[8];
 
 const float PI = 3.141592653589793;
+const mat4 DEPTH_BIAS = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
+                             1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
 
-vec4 SRGBtoLinear(vec4 srgbIn) {
-  vec3 bLess = step(vec3(0.04045), srgbIn.xyz);
-  vec3 linOut =
-      mix(srgbIn.xyz / vec3(12.92),
-          pow((srgbIn.xyz + vec3(0.055)) / vec3(1.055), vec3(2.4)), bLess);
-  return vec4(linOut, srgbIn.w);
+/**
+ * sRGB to Linear color
+ *
+ * @param srgbColor Color in SRGB color space
+ * @return Color in linear color space
+ */
+vec4 srgbToLinear(vec4 srgbColor) {
+  vec3 bLess = step(vec3(0.04045), srgbColor.xyz);
+  vec3 linearOut =
+      mix(srgbColor.xyz / vec3(12.92),
+          pow((srgbColor.xyz + vec3(0.055)) / vec3(1.055), vec3(2.4)), bLess);
+  return vec4(linearOut, srgbColor.w);
 }
 
-vec4 LinearToSRGB(vec4 linearRGB) {
-  bvec3 cutoff = lessThan(linearRGB.rgb, vec3(0.0031308));
-  vec3 higher = vec3(1.055) * pow(linearRGB.rgb, vec3(1.0 / 2.4)) - vec3(0.055);
-  vec3 lower = linearRGB.rgb * vec3(12.92);
+/**
+ * Linear color to sRGB
+ *
+ * @param linearColor Color in linear color space
+ * @return Color in sRGB color space
+ */
+vec4 linearToSrgb(vec4 linearColor) {
+  bvec3 cutoff = lessThan(linearColor.rgb, vec3(0.0031308));
+  vec3 higher =
+      vec3(1.055) * pow(linearColor.rgb, vec3(1.0 / 2.4)) - vec3(0.055);
+  vec3 lower = linearColor.rgb * vec3(12.92);
 
-  return vec4(mix(higher, lower, cutoff), linearRGB.a);
+  return vec4(mix(higher, lower, cutoff), linearColor.a);
 }
 
 /**
@@ -170,24 +182,26 @@ float schlickSpecularGeometricAttenuation(float roughness, float NdotV,
  * @return Normal
  */
 vec3 getNormal() {
-  mat3 tbn = TBN;
-  if (tangentHand == 0) {
-    vec3 posDx = dFdx(worldPosition);
-    vec3 posDy = dFdy(worldPosition);
-    vec3 texDx = dFdx(vec3(textureCoord[materialData.normalTextureCoord], 0.0));
-    vec3 texDy = dFdy(vec3(textureCoord[materialData.normalTextureCoord], 0.0));
+  mat3 tbn = inTBN;
+  if (inTangentHand == 0) {
+    vec3 posDx = dFdx(inWorldPosition);
+    vec3 posDy = dFdy(inWorldPosition);
+    vec3 texDx =
+        dFdx(vec3(inTextureCoord[uMaterialData.normalTextureCoord], 0.0));
+    vec3 texDy =
+        dFdy(vec3(inTextureCoord[uMaterialData.normalTextureCoord], 0.0));
 
-    vec3 N = normalize(normal);
+    vec3 N = normalize(inNormal);
     vec3 T = normalize(posDx * texDy.t - posDy * texDx.t);
     vec3 B = -normalize(cross(N, T));
     tbn = mat3(T, B, N);
   }
 
-  if (materialData.normalTexture >= 0) {
-    vec3 n = texture(tex[materialData.normalTexture],
-                     textureCoord[materialData.normalTextureCoord])
+  if (uMaterialData.normalTexture >= 0) {
+    vec3 n = texture(uTextures[uMaterialData.normalTexture],
+                     inTextureCoord[uMaterialData.normalTextureCoord])
                  .rgb *
-             materialData.normalScale;
+             uMaterialData.normalScale;
     return normalize(tbn * n);
   } else {
     return normalize(tbn[2]);
@@ -201,9 +215,16 @@ struct LightCalculations {
   float intensity;
 };
 
+/**
+ * Get light surface calculations for directional light
+ *
+ * @param light Light data
+ * @param n Normal
+ * @param v View
+ * @return Light calculations
+ */
 LightCalculations getDirectionalLightSurfaceCalculations(LightData light,
                                                          vec3 n, vec3 v) {
-
   vec3 direction = light.direction.xyz;
   vec3 l = normalize(direction);
   vec3 h = normalize(v + l);
@@ -213,28 +234,33 @@ LightCalculations getDirectionalLightSurfaceCalculations(LightData light,
                            clamp(dot(v, h), 0.0, 1.0), light.direction.w);
 }
 
+/**
+ * Calculate shadow factor
+ *
+ * @param fragLightPosition Light position
+ * @param lightDirection Light direction
+ * @param layer Shadowmap layer
+ * @return Shadow factor
+ */
 float calculateShadow(vec4 fragLightPosition, vec3 lightDirection, uint layer) {
   vec3 shadowCoords = fragLightPosition.xyz / fragLightPosition.w;
 
-  float closestDepth = texture(shadowmap, vec3(shadowCoords.xy, layer)).r;
+  float closestDepth = texture(uShadowmap, vec3(shadowCoords.xy, layer)).r;
   float currentDepth = shadowCoords.z;
 
   return closestDepth >= currentDepth - 0.0005 ? 1.0 : 0.0;
 }
 
-const mat4 depthBias = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
-                            1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
-
 void main() {
-  uint num = sceneData.numLights.x;
+  uint num = uSceneData.numLights.x;
 
-  float metallic = materialData.metallicFactor;
-  float roughness = materialData.roughnessFactor;
+  float metallic = uMaterialData.metallicFactor;
+  float roughness = uMaterialData.roughnessFactor;
 
-  if (materialData.metallicRoughnessTexture >= 0) {
+  if (uMaterialData.metallicRoughnessTexture >= 0) {
     vec3 mrSample =
-        texture(tex[materialData.metallicRoughnessTexture],
-                textureCoord[materialData.metallicRoughnessTextureCoord])
+        texture(uTextures[uMaterialData.metallicRoughnessTexture],
+                inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
             .xyz;
     roughness *= mrSample.g;
     metallic *= mrSample.b;
@@ -244,14 +270,15 @@ void main() {
   metallic = clamp(metallic, 0.0, 1.0);
 
   vec4 baseColor;
-  if (materialData.baseColorTexture >= 0) {
+  if (uMaterialData.baseColorTexture >= 0) {
     baseColor =
-        SRGBtoLinear(texture(tex[materialData.baseColorTexture],
-                             textureCoord[materialData.baseColorTextureCoord]))
+        srgbToLinear(
+            texture(uTextures[uMaterialData.baseColorTexture],
+                    inTextureCoord[uMaterialData.baseColorTextureCoord]))
             .xyzw *
-        materialData.baseColorFactor;
+        uMaterialData.baseColorFactor;
   } else {
-    baseColor = materialData.baseColorFactor;
+    baseColor = uMaterialData.baseColorFactor;
   }
 
   const float dielectricSpecular = 0.04;
@@ -262,9 +289,9 @@ void main() {
 
   float alpha = roughness * roughness;
 
-  vec3 cameraPos = vec3(cameraData.view[3]);
+  vec3 cameraPos = vec3(uCameraData.view[3]);
   vec3 n = getNormal();
-  vec3 v = normalize(cameraPos - worldPosition);
+  vec3 v = normalize(cameraPos - inWorldPosition);
   vec3 color = vec3(0.0, 0.0, 0.0);
 
   float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
@@ -272,16 +299,17 @@ void main() {
   for (int i = 0; i < num; i++) {
     LightCalculations calc;
 
-    if (sceneData.lights[i].type.x == 0) {
-      calc = getDirectionalLightSurfaceCalculations(sceneData.lights[i], n, v);
+    if (uSceneData.lights[i].type.x == 0) {
+      calc = getDirectionalLightSurfaceCalculations(uSceneData.lights[i], n, v);
     } else {
       continue;
     }
 
-    vec4 fragLightPosition = depthBias * sceneData.lights[i].lightSpaceMatrix *
-                             modelMatrix * vec4(modelPosition.xyz, 1.0);
+    vec4 fragLightPosition = DEPTH_BIAS *
+                             uSceneData.lights[i].lightSpaceMatrix *
+                             inModelMatrix * vec4(inModelPosition.xyz, 1.0);
 
-    const vec4 lightColor = sceneData.lights[i].color;
+    const vec4 lightColor = uSceneData.lights[i].color;
     const float lightIntensity = calc.intensity;
 
     float NdotL = calc.NdotL;
@@ -296,36 +324,37 @@ void main() {
     vec3 specularBRDF = F * D * G / (4 * NdotL * NdotV);
 
     float shadow = calculateShadow(fragLightPosition,
-                                   sceneData.lights[i].direction.xyz, i);
+                                   uSceneData.lights[i].direction.xyz, i);
     color += vec3(lightColor) * shadow * NdotL * lightIntensity *
              (diffuseBRDF + specularBRDF);
   }
 
-  if (sceneData.hasIBL.x == 1) {
+  if (uSceneData.hasIBL.x == 1) {
     vec3 reflection = -normalize(reflect(v, n));
-    vec3 diffuse = texture(iblMaps[0], n).rgb * diffuseColor;
-    vec3 brdf = texture(brdfLUT, vec2(NdotV, 1.0 - roughness)).rgb;
+    vec3 diffuse = texture(uIblMaps[0], n).rgb * diffuseColor;
+    vec3 brdf = texture(uBrdfLUT, vec2(NdotV, 1.0 - roughness)).rgb;
     vec3 specular =
-        texture(iblMaps[1], reflection).rgb * (f0 + brdf.x + brdf.y);
+        texture(uIblMaps[1], reflection).rgb * (f0 + brdf.x + brdf.y);
 
     color += diffuse + specular;
   }
 
-  if (materialData.occlusionTexture >= 0) {
-    float ao = texture(tex[materialData.occlusionTexture],
-                       textureCoord[materialData.occlusionTextureCoord])
+  if (uMaterialData.occlusionTexture >= 0) {
+    float ao = texture(uTextures[uMaterialData.occlusionTexture],
+                       inTextureCoord[uMaterialData.occlusionTextureCoord])
                    .r;
-    color = mix(color, color * ao, materialData.occlusionStrength);
+    color = mix(color, color * ao, uMaterialData.occlusionStrength);
   }
 
-  if (materialData.emissiveTexture >= 0) {
+  if (uMaterialData.emissiveTexture >= 0) {
     vec3 emissive =
-        SRGBtoLinear(texture(tex[materialData.emissiveTexture],
-                             textureCoord[materialData.emissiveTextureCoord]))
+        srgbToLinear(
+            texture(uTextures[uMaterialData.emissiveTexture],
+                    inTextureCoord[uMaterialData.emissiveTextureCoord]))
             .rgb *
-        materialData.emissiveFactor;
+        uMaterialData.emissiveFactor;
     color += emissive;
   }
 
-  outColor = LinearToSRGB(vec4(color, baseColor.a));
+  outColor = linearToSrgb(vec4(color, baseColor.a));
 }

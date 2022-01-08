@@ -1,22 +1,24 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(location = 0) in vec3 vPosition;
-layout(location = 0) out vec3 texCoord;
+layout(location = 0) in vec3 inPosition;
 
-layout(set = 0, binding = 0) uniform CameraBuffer {
+layout(location = 0) out vec3 outTexCoord;
+
+layout(set = 0, binding = 0) uniform CameraData {
   mat4 proj;
   mat4 view;
-  mat4 viewproj;
+  mat4 viewProj;
 }
-cameraData;
+uCameraData;
 
 void main() {
   mat4 viewWithoutTranslation =
-      mat4(cameraData.view[0], cameraData.view[1], cameraData.view[2],
+      mat4(uCameraData.view[0], uCameraData.view[1], uCameraData.view[2],
            vec4(0.0, 0.0, 0.0, 1.0));
   vec4 position =
-      cameraData.proj * viewWithoutTranslation * vec4(vPosition.xyz, 1.0);
+      uCameraData.proj * viewWithoutTranslation * vec4(inPosition.xyz, 1.0);
+
   gl_Position = position.xyww;
-  texCoord = vPosition;
+  outTexCoord = inPosition;
 }
