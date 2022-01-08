@@ -15,6 +15,7 @@ void UIRoot::render(SceneManager &sceneManager) {
   sceneHierarchyPanel.render(sceneManager);
   entityPanel.render(sceneManager);
   editorCameraPanel.render(sceneManager);
+  statusBar.render(sceneManager);
 }
 
 void UIRoot::handleNodeClick(liquid::SceneNode *node) {
