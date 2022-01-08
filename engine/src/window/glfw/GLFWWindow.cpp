@@ -65,6 +65,15 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
           handler(button, action, mods);
         }
       });
+
+  glfwSetScrollCallback(windowInstance, [](::GLFWwindow *windowInstance,
+                                           double xoffset, double yoffset) {
+    auto *window =
+        static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+    for (auto &[_, handler] : window->scrollWheelHandlers) {
+      handler(xoffset, yoffset);
+    }
+  });
 }
 
 GLFWWindow::~GLFWWindow() {
@@ -147,6 +156,17 @@ uint32_t GLFWWindow::addMouseButtonHandler(
 
 void GLFWWindow::removeMouseButtonHandler(uint32_t handle) {
   mouseButtonHandlers.erase(mouseButtonHandlers.find(handle));
+}
+
+uint32_t GLFWWindow::addScrollWheelHandler(
+    const std::function<void(double xoffset, double yoffset)> &handler) {
+  uint32_t id = static_cast<uint32_t>(scrollWheelHandlers.size());
+  scrollWheelHandlers.insert(std::make_pair(id, handler));
+  return id;
+}
+
+void GLFWWindow::removeScrollWheelHandler(uint32_t handle) {
+  scrollWheelHandlers.erase(scrollWheelHandlers.find(handle));
 }
 
 glm::vec2 GLFWWindow::getCurrentMousePosition() const {

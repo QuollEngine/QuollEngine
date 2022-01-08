@@ -11,6 +11,7 @@ class EditorCamera {
 public:
   enum class InputState { None = 0, Pan = 1, Rotate = 2, Zoom = 3 };
 
+  static constexpr float ZOOM_SPEED = 0.03f;
   static constexpr float DEFAULT_FOV = 70.0f;
   static constexpr float DEFAULT_NEAR = 0.001f;
   static constexpr float DEFAULT_FAR = 1000.0f;
@@ -171,8 +172,9 @@ private:
   glm::vec3 center = DEFAULT_CENTER;
   glm::vec3 up = DEFAULT_UP;
 
-  uint32_t mouseButtonHandler;
-  uint32_t mouseMoveHandler;
+  uint32_t mouseButtonHandler = 0;
+  uint32_t mouseMoveHandler = 0;
+  uint32_t scrollWheelHandler = 0;
 
   liquid::GLFWWindow *window;
   liquid::SharedPtr<liquid::Camera> camera;
