@@ -8,6 +8,7 @@
 namespace liquidator {
 
 class EditorCamera {
+public:
   enum class InputState { None = 0, Pan = 1, Rotate = 2, Zoom = 3 };
 
   static constexpr float DEFAULT_FOV = 70.0f;
@@ -122,6 +123,13 @@ public:
    * @param height Viewport height
    */
   void setViewport(float x, float y, float width, float height);
+
+  /**
+   * @brief Get input state
+   *
+   * @return Input state
+   */
+  inline const InputState &getInputState() const { return inputState; }
 
 private:
   /**
