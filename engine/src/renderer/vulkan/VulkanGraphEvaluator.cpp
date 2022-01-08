@@ -24,6 +24,13 @@ std::vector<RenderGraphPassBase *>
 VulkanGraphEvaluator::build(RenderGraph &graph) {
   const auto &&passes = graph.compile();
 
+  for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
+    if (!graph.getResourceRegistry().hasTexture(resourceId)) {
+      graph.getResourceRegistry().addTexture(
+          resourceId, createTexture(resourceId, textureDesc));
+    }
+  }
+
   for (auto &pass : passes) {
     buildPass(pass, graph, false);
   }
@@ -31,6 +38,13 @@ VulkanGraphEvaluator::build(RenderGraph &graph) {
 }
 
 void VulkanGraphEvaluator::rebuildSwapchainRelatedPasses(RenderGraph &graph) {
+  for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
+    if (textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
+      graph.getResourceRegistry().addTexture(
+          resourceId, createTexture(resourceId, textureDesc));
+    }
+  }
+
   for (auto &pass : graph.getRenderPasses()) {
     if (!pass->isSwapchainRelative()) {
       continue;
@@ -69,65 +83,63 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
   std::vector<VkAttachmentReference> colorAttachments;
   std::optional<VkAttachmentReference> depthAttachment;
   std::vector<VkClearValue> clearValues;
-  std::vector<std::vector<VkImageView>> framebufferAttachments(1);
 
   uint32_t width = 0;
   uint32_t height = 0;
   uint32_t layers = 0;
 
-  for (auto &resourceId : pass->getOutputs()) {
+  size_t imageViewsPerFramebuffer = 1;
+
+  for (auto &[resourceId, _] : pass->getOutputs()) {
+    if (graph.isSwapchain(resourceId)) {
+      imageViewsPerFramebuffer = swapchain.getImageViews().size();
+      break;
+    }
+  }
+
+  std::vector<std::vector<VkImageView>> framebufferAttachments(
+      imageViewsPerFramebuffer);
+
+  for (auto &[resourceId, graphAttachment] : pass->getOutputs()) {
     VulkanAttachmentInfo info{};
 
     if (!force &&
         graph.getResourceRegistry().hasRenderPass(pass->getRenderPass()) &&
         (graph.getResourceRegistry().hasTexture(resourceId) ||
-         graph.hasSwapchainAttachment(resourceId))) {
+         graph.isSwapchain(resourceId))) {
       continue;
     }
 
     uint32_t lastAttachmentIndex = static_cast<uint32_t>(attachments.size());
 
-    if (graph.hasSwapchainAttachment(resourceId)) {
-      framebufferAttachments.resize(swapchain.getImageViews().size());
-      const auto &graphAttachment = graph.getSwapchainAttachment(resourceId);
-      if (graphAttachment.type == AttachmentType::Color) {
-        info = createSwapchainColorAttachment(graphAttachment,
-                                              lastAttachmentIndex);
-        colorAttachments.push_back(info.reference);
-      } else if (graphAttachment.type == AttachmentType::Depth) {
-        info = createSwapchainDepthAttachment(graphAttachment,
-                                              lastAttachmentIndex);
-        depthAttachment = info.reference;
-      } else {
-        continue;
-      }
+    if (graph.isSwapchain(resourceId)) {
+      info = createSwapchainAttachment(graphAttachment, lastAttachmentIndex);
+      colorAttachments.push_back(info.reference);
     } else {
-      const auto &graphAttachment = graph.getAttachment(resourceId);
-      if (graphAttachment.type == AttachmentType::Color) {
-        info = createColorAttachment(graphAttachment, lastAttachmentIndex);
+      const auto &texture = graph.getResourceRegistry().getTexture(resourceId);
+      const auto &textureType = graph.getTextures().at(resourceId).type;
+      if (textureType == AttachmentType::Color) {
+        info = createColorAttachment(graphAttachment, texture,
+                                     lastAttachmentIndex);
         colorAttachments.push_back(info.reference);
-      } else if (graphAttachment.type == AttachmentType::Depth) {
-        info = createDepthAttachment(graphAttachment, lastAttachmentIndex);
+      } else if (textureType == AttachmentType::Depth) {
+        info = createDepthAttachment(graphAttachment, texture,
+                                     lastAttachmentIndex);
         depthAttachment = info.reference;
-      } else {
-        continue;
       }
     }
 
     clearValues.push_back(info.clearValue);
     attachments.push_back(info.description);
 
-    for (size_t i = 0; i < info.framebufferAttachments.size(); ++i) {
-      framebufferAttachments.at(i).push_back(info.framebufferAttachments.at(i));
+    for (size_t i = 0; i < framebufferAttachments.size(); ++i) {
+      framebufferAttachments.at(i).push_back(info.framebufferAttachments.at(
+          i % info.framebufferAttachments.size()));
     }
 
     width = info.width;
     height = info.height;
     layers = info.layers;
-
-    if (info.texture) {
-      graph.getResourceRegistry().addTexture(resourceId, info.texture);
-    }
   }
 
   if (!colorAttachments.empty() || depthAttachment.has_value()) {
@@ -221,8 +233,8 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
-VulkanGraphEvaluator::createSwapchainColorAttachment(
-    const RenderPassSwapchainAttachment &attachment, uint32_t index) {
+VulkanGraphEvaluator::createSwapchainAttachment(
+    const RenderPassAttachment &attachment, uint32_t index) {
 
   VulkanAttachmentInfo info{};
 
@@ -269,57 +281,13 @@ VulkanGraphEvaluator::createSwapchainColorAttachment(
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
-VulkanGraphEvaluator::createSwapchainDepthAttachment(
-    const RenderPassSwapchainAttachment &attachment, uint32_t index) {
-  VulkanAttachmentInfo info{};
-
-  // Attachment description
-  info.description.format = swapchain.getDepthFormat();
-  info.description.samples = VK_SAMPLE_COUNT_1_BIT;
-  info.description.loadOp =
-      VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
-  info.description.storeOp =
-      VulkanMapping::getAttachmentStoreOp(attachment.storeOp);
-  info.description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-  info.description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-  info.description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  info.description.finalLayout =
-      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-  // Attachment reference
-  info.reference.attachment = index;
-  info.reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-  // Attachment clear value
-  info.clearValue.depthStencil.depth =
-      std::get<DepthStencilClear>(attachment.clearValue).clearDepth;
-  info.clearValue.depthStencil.stencil =
-      std::get<DepthStencilClear>(attachment.clearValue).clearStencil;
-
-  // Framebuffer image views
-  info.framebufferAttachments.resize(swapchain.getImageViews().size(),
-                                     VK_NULL_HANDLE);
-
-  for (size_t i = 0; i < swapchain.getImageViews().size(); ++i) {
-    info.framebufferAttachments.at(i) = swapchain.getDepthImageView();
-  }
-
-  // Dimensions
-  info.width = swapchain.getExtent().width;
-  info.height = swapchain.getExtent().height;
-  info.layers = 1;
-
-  return info;
-}
-
-VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createColorAttachment(
-    const RenderPassAttachment &attachment, uint32_t index) {
+    const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
+    uint32_t index) {
   VulkanAttachmentInfo info{};
 
   // Attachment description
-  info.description.format =
-      static_cast<VkFormat>(attachment.textureData.format);
+  info.description.format = static_cast<VkFormat>(texture->getFormat());
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
   info.description.loadOp =
       VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
@@ -345,31 +313,27 @@ VulkanGraphEvaluator::createColorAttachment(
   info.clearValue.color.float32[3] =
       std::get<glm::vec4>(attachment.clearValue).w;
 
-  // Framebuffer image views
-  info.texture =
-      resourceAllocator->createTextureFramebuffer(attachment.textureData);
-
   info.framebufferAttachments.push_back(
       std::dynamic_pointer_cast<VulkanTextureBinder>(
-          info.texture->getResourceBinder())
+          texture->getResourceBinder())
           ->getImageView());
 
   // Dimensions
-  info.width = attachment.textureData.width;
-  info.height = attachment.textureData.height;
-  info.layers = attachment.textureData.layers;
+  info.width = texture->getWidth();
+  info.height = texture->getHeight();
+  info.layers = texture->getLayers();
 
   return info;
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createDepthAttachment(
-    const RenderPassAttachment &attachment, uint32_t index) {
+    const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
+    uint32_t index) {
   VulkanAttachmentInfo info{};
 
   // Attachment description
-  info.description.format =
-      static_cast<VkFormat>(attachment.textureData.format);
+  info.description.format = static_cast<VkFormat>(texture->getFormat());
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
   info.description.loadOp =
       VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
@@ -379,7 +343,7 @@ VulkanGraphEvaluator::createDepthAttachment(
   info.description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   info.description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   info.description.finalLayout =
-      VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   // Attachment reference
   info.reference.attachment = index;
@@ -391,19 +355,15 @@ VulkanGraphEvaluator::createDepthAttachment(
   info.clearValue.depthStencil.stencil =
       std::get<DepthStencilClear>(attachment.clearValue).clearStencil;
 
-  // Framebuffer image views
-  info.texture =
-      resourceAllocator->createTextureFramebuffer(attachment.textureData);
-
   info.framebufferAttachments.push_back(
       std::dynamic_pointer_cast<VulkanTextureBinder>(
-          info.texture->getResourceBinder())
+          texture->getResourceBinder())
           ->getImageView());
 
   // Dimensions
-  info.width = attachment.textureData.width;
-  info.height = attachment.textureData.height;
-  info.layers = attachment.textureData.layers;
+  info.width = texture->getWidth();
+  info.height = texture->getHeight();
+  info.layers = texture->getLayers();
 
   return info;
 }
@@ -664,6 +624,34 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
 
   return std::make_shared<VulkanPipeline>(vulkanInstance.getDevice(), pipeline,
                                           pipelineLayout, descriptorLayouts);
+}
+
+SharedPtr<Texture>
+VulkanGraphEvaluator::createTexture(GraphResourceId resourceId,
+                                    const AttachmentData &data) {
+  uint32_t width = data.width;
+  uint32_t height = data.height;
+
+  if (data.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
+    constexpr uint32_t PERCENTAGE_RATIO = 100;
+    width = swapchain.getExtent().width * width / PERCENTAGE_RATIO;
+    height = swapchain.getExtent().height * height / PERCENTAGE_RATIO;
+  }
+
+  uint32_t usageFlags = 0;
+  uint32_t aspectFlags = 0;
+  if (data.type == AttachmentType::Color) {
+    usageFlags =
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+  } else if (data.type == AttachmentType::Depth) {
+    usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+                 VK_IMAGE_USAGE_SAMPLED_BIT;
+    aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+  }
+
+  return resourceAllocator->createTextureFramebuffer(TextureFramebufferData{
+      width, height, data.layers, data.format, usageFlags, aspectFlags});
 }
 
 } // namespace liquid

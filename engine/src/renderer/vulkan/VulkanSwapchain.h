@@ -102,20 +102,6 @@ public:
     return imageViews;
   }
 
-  /**
-   * @brief Gets depth format
-   *
-   * @return Depth format
-   */
-  inline VkFormat getDepthFormat() { return depthFormat; }
-
-  /**
-   * @brief Gets depth image view
-   *
-   * @return Depth image view
-   */
-  inline VkImageView getDepthImageView() { return depthImageView; }
-
 private:
   /**
    * @brief Picks most suitable surface format
@@ -154,12 +140,8 @@ private:
 private:
   VkSwapchainKHR swapchain = VK_NULL_HANDLE;
   std::vector<VkImageView> imageViews;
-  VkImageView depthImageView = VK_NULL_HANDLE;
-  VkImage depthImage = VK_NULL_HANDLE;
 
-  VmaAllocation depthImageAllocation = nullptr;
   VmaAllocator allocator = nullptr;
-  VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
 
   VkExtent2D extent{};
   VkSurfaceFormatKHR surfaceFormat{};

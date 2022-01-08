@@ -14,18 +14,18 @@ public:
 };
 
 TEST_F(RenderGraphRegistryTest, AddsTextureToRegistry) {
-  registry.addTexture(
-      1, std::make_shared<liquid::Texture>(nullptr, 100, statsManager));
+  registry.addTexture(1, std::make_shared<liquid::Texture>(nullptr, 100, 20, 5,
+                                                           1, 0, statsManager));
 
   EXPECT_TRUE(registry.hasTexture(1));
   EXPECT_EQ(registry.getTexture(1)->getSize(), 100);
 }
 
-TEST_F(RenderGraphRegistryTest, UpdatedExistingTextureInRegistry) {
-  registry.addTexture(
-      1, std::make_shared<liquid::Texture>(nullptr, 100, statsManager));
-  registry.addTexture(
-      1, std::make_shared<liquid::Texture>(nullptr, 250, statsManager));
+TEST_F(RenderGraphRegistryTest, UpdatesExistingTextureInRegistry) {
+  registry.addTexture(1, std::make_shared<liquid::Texture>(nullptr, 100, 20, 5,
+                                                           1, 0, statsManager));
+  registry.addTexture(1, std::make_shared<liquid::Texture>(nullptr, 250, 20, 5,
+                                                           1, 0, statsManager));
 
   EXPECT_TRUE(registry.hasTexture(1));
   EXPECT_EQ(registry.getTexture(1)->getSize(), 250);

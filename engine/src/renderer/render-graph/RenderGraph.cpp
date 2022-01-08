@@ -7,8 +7,7 @@ namespace liquid {
 
 RenderGraph::RenderGraph(RenderGraph &&rhs) {
   passes = rhs.passes;
-  attachments = rhs.attachments;
-  swapchainAttachments = rhs.swapchainAttachments;
+  textures = rhs.textures;
   resourceMap = rhs.resourceMap;
   registry = rhs.registry;
 
@@ -47,19 +46,6 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
     x->build(RenderGraphBuilder(*this, x));
   }
 
-  // Validate that all input attachments exist
-  for (auto &x : tempPasses) {
-    for (auto &input : x->getInputs()) {
-      LIQUID_ASSERT(hasAttachment(input) || hasSwapchainAttachment(input),
-                    "An input in " + x->getName()
-                        << " does not point to any resource");
-      if (!hasAttachment(input) && !hasSwapchainAttachment(input)) {
-        engineLogger.log(Logger::Fatal) << "An input in " << x->getName()
-                                        << "does not point to any resource.";
-      }
-    }
-  }
-
   // Delete lonely nodes
   for (auto it = tempPasses.begin(); it != tempPasses.end(); ++it) {
     if ((*it)->getInputs().size() == 0 && (*it)->getOutputs().size() == 0) {
@@ -81,17 +67,14 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
   // Create adjacency list from inputs and outputs
   // to determine the edges of the graph
   std::vector<std::list<size_t>> adjacencyList;
-  std::vector<size_t> stalePasses;
   adjacencyList.resize(tempPasses.size());
 
   for (size_t i = 0; i < tempPasses.size(); ++i) {
-    for (auto &resourceId : tempPasses.at(i)->getOutputs()) {
+    for (const auto &[resourceId, _] : tempPasses.at(i)->getOutputs()) {
       if (passReads.find(resourceId) != passReads.end()) {
         for (auto &read : passReads.at(resourceId)) {
           adjacencyList.at(i).push_back(read);
         }
-      } else {
-        stalePasses.push_back(i);
       }
     }
   }
@@ -108,6 +91,33 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
   }
 
   std::reverse(sortedPasses.begin(), sortedPasses.end());
+
+  // TODO: Test this
+  std::unordered_map<GraphResourceId, bool> visitedOutputs;
+  for (const auto &pass : sortedPasses) {
+    for (const auto &[output, _] : pass->getOutputs()) {
+      visitedOutputs.insert({output, false});
+    }
+  }
+
+  for (auto &pass : sortedPasses) {
+    for (auto &[output, attachment] : pass->getOutputs()) {
+      if (!visitedOutputs.at(output)) {
+        attachment.loadOp = AttachmentLoadOp::Clear;
+        visitedOutputs.at(output) = true;
+      } else {
+        attachment.loadOp = AttachmentLoadOp::Load;
+      }
+
+      attachment.storeOp = AttachmentStoreOp::Store;
+
+      if (isSwapchain(output)) {
+        attachment.clearValue = getSwapchainColor();
+      } else if (hasTexture(output)) {
+        attachment.clearValue = textures.at(output).clearValue;
+      }
+    }
+  }
 
   return sortedPasses;
 }
@@ -129,23 +139,15 @@ void RenderGraph::topologicalSort(
 
 GraphResourceId RenderGraph::generateNewId() { return lastId++; }
 
-GraphResourceId
-RenderGraph::addAttachment(const String &name,
-                           const RenderPassAttachment &attachment) {
+GraphResourceId RenderGraph::create(const String &name,
+                                    const AttachmentData &data) {
   auto id = getResourceId(name);
-  LIQUID_ASSERT(!hasAttachment(id),
-                "Attachment for \"" + name + "\" already exists");
-  attachments.insert({id, attachment});
+  textures.insert({id, data});
   return id;
 }
 
-GraphResourceId RenderGraph::addSwapchainAttachment(
-    const String &name, const RenderPassSwapchainAttachment &attachment) {
-  auto id = getResourceId(name);
-  LIQUID_ASSERT(!hasSwapchainAttachment(id),
-                "Swapchain Attachment for \"" + name + "\" already exists");
-  swapchainAttachments.insert({id, attachment});
-  return id;
+void RenderGraph::setSwapchainColor(const glm::vec4 &color) {
+  swapchainColor = color;
 }
 
 GraphResourceId RenderGraph::addPipeline(const PipelineDescriptor &descriptor) {

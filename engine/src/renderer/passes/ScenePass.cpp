@@ -3,8 +3,6 @@
 
 namespace liquid {
 
-constexpr glm::vec4 blueishClearValue{0.19f, 0.21f, 0.26f, 1.0f};
-
 ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
                      EntityContext &entityContext,
                      ShaderLibrary *shaderLibrary_,
@@ -15,14 +13,9 @@ ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
       debugManager(debugManager_) {}
 
 void ScenePass::buildInternal(RenderGraphBuilder &builder) {
-  builder.writeSwapchain("mainColor",
-                         RenderPassSwapchainAttachment{
-                             AttachmentType::Color, AttachmentLoadOp::Clear,
-                             AttachmentStoreOp::Store, blueishClearValue});
-  builder.writeSwapchain(
-      "mainDepth", RenderPassSwapchainAttachment{
-                       AttachmentType::Depth, AttachmentLoadOp::Clear,
-                       AttachmentStoreOp::Store, DepthStencilClear{1.0f, 0}});
+  builder.write("SWAPCHAIN");
+  builder.write("depthBuffer");
+
   shadowMapTextureId = builder.read("shadowmap");
   pipelineId = builder.create(PipelineDescriptor{
       shaderLibrary->getShader("__engine.default.pbr.vertex"),

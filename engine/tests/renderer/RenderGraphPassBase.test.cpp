@@ -25,6 +25,7 @@ public:
 
 TEST_F(RenderGraphPassBaseTest, SetsDirtyFlagToFalseIfBuildIsCalled) {
   RenderGraphPassMock pass("Test", 1);
+  EXPECT_CALL(pass, buildInternal).Times(1);
   EXPECT_TRUE(pass.isDirty());
   pass.build(liquid::RenderGraphBuilder(graph, &pass));
   EXPECT_FALSE(pass.isDirty());

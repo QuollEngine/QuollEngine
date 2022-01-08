@@ -74,20 +74,9 @@ int main() {
           "editorDebug",
           [&renderer](liquid::RenderGraphBuilder &builder,
                       EditorDebugScope &scope) {
-            builder.read("environmentColor");
-            builder.writeSwapchain("editorDebugColor",
-                                   liquid::RenderPassSwapchainAttachment{
-                                       liquid::AttachmentType::Color,
-                                       liquid::AttachmentLoadOp::Load,
-                                       liquid::AttachmentStoreOp::Store,
-                                       glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)});
+            builder.write("SWAPCHAIN");
+            builder.write("depthBuffer");
 
-            builder.writeSwapchain("editorDebugDepth",
-                                   liquid::RenderPassSwapchainAttachment{
-                                       liquid::AttachmentType::Depth,
-                                       liquid::AttachmentLoadOp::Load,
-                                       liquid::AttachmentStoreOp::Store,
-                                       liquid::DepthStencilClear{1.0, 0}});
             scope.editorGridPipeline =
                 builder.create(liquid::PipelineDescriptor{
                     renderer->getShaderLibrary()->getShader("editor-grid.vert"),

@@ -5,6 +5,8 @@
 #include "../RenderCommandList.h"
 #include "RenderGraphRegistry.h"
 
+#include "RenderGraphAttachmentDescriptor.h"
+
 namespace liquid {
 
 class RenderGraphPassBase {
@@ -72,8 +74,10 @@ public:
    * @brief Add output resource
    *
    * @param resourceId Output resource ID
+   * @param attachment Attachment
    */
-  void addOutput(GraphResourceId resourceId);
+  void addOutput(GraphResourceId resourceId,
+                 const RenderPassAttachment &attachment);
 
   /**
    * @brief Add resource
@@ -103,7 +107,8 @@ public:
    *
    * @return Output resources
    */
-  inline const std::vector<GraphResourceId> &getOutputs() const {
+  inline std::unordered_map<GraphResourceId, RenderPassAttachment> &
+  getOutputs() {
     return outputs;
   }
 
@@ -141,8 +146,9 @@ public:
 
 private:
   std::vector<GraphResourceId> inputs;
-  std::vector<GraphResourceId> outputs;
   std::vector<GraphResourceId> resources;
+  std::unordered_map<GraphResourceId, RenderPassAttachment> outputs;
+
   bool swapchainRelative = false;
 
   GraphResourceId renderPass;

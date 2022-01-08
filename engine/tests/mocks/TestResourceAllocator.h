@@ -32,7 +32,8 @@ public:
     binder->height = texture.width;
     binder->data = texture.data;
     return std::make_shared<liquid::Texture>(
-        binder, texture.width * texture.height * 4, statsManager);
+        binder, texture.width * texture.height * 4, texture.width,
+        texture.height, 1, texture.format, statsManager);
   }
 
   virtual liquid::SharedPtr<liquid::Texture>
@@ -43,7 +44,8 @@ public:
     binder->height = texture.height;
     binder->data = texture.data;
     return std::make_shared<liquid::Texture>(
-        binder, texture.width * texture.height * 6 * 4, statsManager);
+        binder, texture.width * texture.height * 6 * 4, texture.width,
+        texture.height, 6, texture.format, statsManager);
   }
 
   virtual liquid::SharedPtr<liquid::Texture>
@@ -54,8 +56,9 @@ public:
     binder->height = data.height;
     binder->format = data.format;
     binder->data = nullptr;
-    return std::make_shared<liquid::Texture>(binder, data.width * data.height,
-                                             statsManager);
+    return std::make_shared<liquid::Texture>(
+        binder, data.width * data.height, data.width, data.height, data.layers,
+        data.format, statsManager);
   }
 
 protected:

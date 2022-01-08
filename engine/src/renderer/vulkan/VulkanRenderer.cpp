@@ -70,6 +70,25 @@ RenderGraph
 VulkanRenderer::createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
                                   const String &imguiDep) {
   RenderGraph graph;
+  constexpr uint32_t NUM_LIGHTS = 16;
+  constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
+  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+
+  graph.setSwapchainColor(BLUEISH_CLEAR_VALUE);
+
+  graph.create("shadowmap",
+               AttachmentData{AttachmentType::Depth,
+                              AttachmentSizeMethod::Fixed, SHADOWMAP_DIMENSIONS,
+                              SHADOWMAP_DIMENSIONS, NUM_LIGHTS,
+                              VK_FORMAT_D16_UNORM, DepthStencilClear{1.0f, 0}});
+
+  constexpr uint32_t DEPTH_BUFFER_SIZE_PERCENTAGE = 100;
+  graph.create(
+      "depthBuffer",
+      AttachmentData{AttachmentType::Depth,
+                     AttachmentSizeMethod::SwapchainRelative,
+                     DEPTH_BUFFER_SIZE_PERCENTAGE, DEPTH_BUFFER_SIZE_PERCENTAGE,
+                     1, VK_FORMAT_D32_SFLOAT, DepthStencilClear{1.0f, 0}});
 
   graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
                             shadowMaterials);

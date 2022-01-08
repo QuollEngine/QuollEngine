@@ -33,14 +33,24 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // |   +---+   +---+               |
   // +-------------------------------+
 
-  liquid::RenderGraph graph;
+  graph.create("a-b", {});
+  graph.create("a-d", {});
+  graph.create("d-b", {});
+  graph.create("b-c", {});
+  graph.create("b-g", {});
+  graph.create("h-c", {});
+  graph.create("c-e", {});
+  graph.create("d-e", {});
+  graph.create("d-g", {});
+  graph.create("e-f", {});
+  graph.create("f-g", {});
 
   // A
   graph.addInlinePass<EmptyScope>(
       "A",
       [](auto &builder, auto &scope) {
-        builder.write("a-b", {});
-        builder.write("a-d", {});
+        builder.write("a-b");
+        builder.write("a-d");
       },
       noopExecutor);
 
@@ -50,8 +60,8 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       [](auto &builder, auto &scope) {
         builder.read("a-b");
         builder.read("d-b");
-        builder.write("b-c", {});
-        builder.write("b-g", {});
+        builder.write("b-c");
+        builder.write("b-g");
       },
       noopExecutor);
 
@@ -61,7 +71,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       [](auto &builder, auto &scope) {
         builder.read("b-c");
         builder.read("h-c");
-        builder.write("c-e", {});
+        builder.write("c-e");
       },
       noopExecutor);
 
@@ -70,9 +80,9 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       "D",
       [](auto &builder, auto &scope) {
         builder.read("a-d");
-        builder.write("d-b", {});
-        builder.write("d-e", {});
-        builder.write("d-g", {});
+        builder.write("d-b");
+        builder.write("d-e");
+        builder.write("d-g");
       },
       noopExecutor);
 
@@ -82,7 +92,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       [](auto &builder, auto &scope) {
         builder.read("d-e");
         builder.read("c-e");
-        builder.write("e-f", {});
+        builder.write("e-f");
       },
       noopExecutor);
 
@@ -91,7 +101,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       "F",
       [](auto &builder, auto &scope) {
         builder.read("e-f");
-        builder.writeSwapchain("f-g", {});
+        builder.write("f-g");
       },
       noopExecutor);
 
@@ -102,13 +112,13 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
         builder.read("f-g");
         builder.read("d-g");
         builder.read("b-g");
-        builder.writeSwapchain("swapchain", {});
+        builder.write("SWAPCHAIN");
       },
       noopExecutor);
 
   // H
   graph.addInlinePass<EmptyScope>(
-      "H", [](auto &builder, auto &scope) { builder.write("h-c", {}); },
+      "H", [](auto &builder, auto &scope) { builder.write("h-c"); },
       noopExecutor);
 
   const auto &sortedPasses = graph.compile();
@@ -132,11 +142,71 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   EXPECT_EQ(output, "H A D B C E F G");
 }
 
+TEST_F(RenderGraphTest, SetsPassLoadOperations) {
+  auto resourceId = graph.create("a-b", {});
+  graph.addInlinePass<EmptyScope>(
+      "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
+      noopExecutor);
+  graph.addInlinePass<EmptyScope>(
+      "B", [](auto &builder, auto &scope) { builder.write("a-b"); },
+      noopExecutor);
+  graph.addInlinePass<EmptyScope>(
+      "C", [](auto &builder, auto &scope) { builder.write("a-b"); },
+      noopExecutor);
+
+  const auto &sortedPasses = graph.compile();
+  EXPECT_EQ(sortedPasses.at(0)->getOutputs().at(resourceId).loadOp,
+            liquid::AttachmentLoadOp::Clear);
+  EXPECT_EQ(sortedPasses.at(1)->getOutputs().at(resourceId).loadOp,
+            liquid::AttachmentLoadOp::Load);
+  EXPECT_EQ(sortedPasses.at(2)->getOutputs().at(resourceId).loadOp,
+            liquid::AttachmentLoadOp::Load);
+}
+
+TEST_F(RenderGraphTest, SetPassClearValues) {
+  constexpr glm::vec4 SWAPCHAIN_CLEAR{1.0, 0.0, 1.0, 1.0};
+  constexpr liquid::DepthStencilClear DEPTH_CLEAR{1.0f, 5};
+
+  graph.setSwapchainColor(SWAPCHAIN_CLEAR);
+  liquid::AttachmentData data;
+  data.clearValue = DEPTH_CLEAR;
+
+  auto depthId = graph.create("depthBuffer", data);
+  auto swapchainId = graph.getResourceId("SWAPCHAIN");
+  graph.addInlinePass<EmptyScope>(
+      "a-b",
+      [](auto &builder, auto &scope) {
+        builder.write("SWAPCHAIN");
+        builder.write("depthBuffer");
+      },
+      noopExecutor);
+  graph.addInlinePass<EmptyScope>(
+      "b-c",
+      [](auto &builder, auto &scope) {
+        builder.write("SWAPCHAIN");
+        builder.write("depthBuffer");
+      },
+      noopExecutor);
+
+  const auto &sortedPasses = graph.compile();
+  for (const auto &pass : sortedPasses) {
+    EXPECT_TRUE(
+        std::get<glm::vec4>(pass->getOutputs().at(swapchainId).clearValue) ==
+        SWAPCHAIN_CLEAR);
+    EXPECT_TRUE(std::get<liquid::DepthStencilClear>(
+                    pass->getOutputs().at(depthId).clearValue)
+                    .clearDepth == DEPTH_CLEAR.clearDepth);
+    EXPECT_TRUE(std::get<liquid::DepthStencilClear>(
+                    pass->getOutputs().at(depthId).clearValue)
+                    .clearStencil == DEPTH_CLEAR.clearStencil);
+  }
+}
+
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
-  liquid::RenderGraph graph;
+  graph.create("a-b", {});
 
   graph.addInlinePass<EmptyScope>(
-      "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
+      "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
       noopExecutor);
 
   graph.addInlinePass<EmptyScope>(
@@ -154,10 +224,11 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 
 TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
   std::set_terminate([]() { FAIL(); });
-  liquid::RenderGraph graph;
+
+  graph.create("a-b", {});
 
   graph.addInlinePass<EmptyScope>(
-      "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
+      "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
       noopExecutor);
 
   EXPECT_EXIT(
@@ -170,10 +241,10 @@ TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
 }
 
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
-  liquid::RenderGraph graph;
+  graph.create("a-b", {});
 
   graph.addInlinePass<EmptyScope>(
-      "A", [](auto &builder, auto &scope) { builder.write("a-b", {}); },
+      "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
       noopExecutor);
 
   graph.addInlinePass<EmptyScope>(
@@ -184,17 +255,6 @@ TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
 
   graph.addInlinePass<EmptyScope>(
       "E", [](auto &builder, auto &scope) { builder.read("a-b"); },
-      noopExecutor);
-
-  EXPECT_DEATH(graph.compile(), ".*");
-}
-
-TEST_F(RenderGraphDeathTest,
-       CompilationFailsIfNodeInputDoesNotPointToResource) {
-  liquid::RenderGraph graph;
-
-  graph.addInlinePass<EmptyScope>(
-      "E", [](auto &builder, auto &scope) { builder.read("d-e"); },
       noopExecutor);
 
   EXPECT_DEATH(graph.compile(), ".*");

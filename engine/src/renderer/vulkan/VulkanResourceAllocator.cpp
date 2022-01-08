@@ -191,7 +191,8 @@ VulkanResourceAllocator::createTexture2D(const TextureData &textureData) {
   auto texture = std::make_shared<Texture>(
       std::make_shared<VulkanTextureBinder>(device, allocator, image,
                                             allocation, imageView, sampler),
-      textureSize, statsManager);
+      textureSize, textureData.width, textureData.height, 1, textureData.format,
+      statsManager);
 
   uploadContext.submit([extent, image, buffer](VkCommandBuffer commandBuffer) {
     VkImageSubresourceRange range{};
@@ -247,7 +248,7 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
     const TextureCubemapData &textureData) {
   static constexpr uint32_t CUBEMAP_SIDES = 6;
 
-  VkFormat format = (VkFormat)textureData.format;
+  VkFormat format = static_cast<VkFormat>(textureData.format);
 
   auto hardwareBuffer =
       createHardwareBuffer(HardwareBuffer::Transfer, textureData.size);
@@ -386,7 +387,9 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureCubemap(
       device, allocator, image, allocation, imageView, sampler);
 
   LOG_DEBUG("[Vulkan] Cubemap texture created");
-  return std::make_shared<Texture>(binder, textureData.size, statsManager);
+  return std::make_shared<Texture>(binder, textureData.size, textureData.width,
+                                   textureData.height, CUBEMAP_SIDES,
+                                   textureData.format, statsManager);
 }
 
 SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
@@ -408,9 +411,8 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
   imageCreateInfo.mipLevels = 1;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  imageCreateInfo.format = (VkFormat)data.format;
-  imageCreateInfo.usage =
-      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+  imageCreateInfo.format = static_cast<VkFormat>(data.format);
+  imageCreateInfo.usage = static_cast<VkImageUsageFlags>(data.usageFlags);
 
   VmaAllocationCreateInfo allocationCreateInfo{};
   allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -424,11 +426,13 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   imageViewCreateInfo.flags = 0;
   imageViewCreateInfo.pNext = nullptr;
-  imageViewCreateInfo.format = (VkFormat)data.format;
-  imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+  imageViewCreateInfo.format = static_cast<VkFormat>(data.format);
+  imageViewCreateInfo.viewType =
+      data.layers > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D;
   imageViewCreateInfo.image = image;
   imageViewCreateInfo.subresourceRange = {};
-  imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+  imageViewCreateInfo.subresourceRange.aspectMask =
+      static_cast<VkImageAspectFlags>(data.aspectMask);
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -461,7 +465,8 @@ SharedPtr<Texture> VulkanResourceAllocator::createTextureFramebuffer(
   auto binder = std::make_shared<VulkanTextureBinder>(
       device, allocator, image, allocation, imageView, sampler);
 
-  return std::make_shared<Texture>(binder, textureSize, statsManager);
+  return std::make_shared<Texture>(binder, textureSize, data.width, data.height,
+                                   data.layers, data.format, statsManager);
 }
 
 } // namespace liquid
