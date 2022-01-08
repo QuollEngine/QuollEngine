@@ -170,11 +170,12 @@ int main() {
       });
 
   graph.addPass<liquid::ImguiPass>("imgui", renderer->getRenderBackend(),
-                                   renderer->getShaderLibrary(), "SWAPCHAIN");
+                                   renderer->getShaderLibrary(),
+                                   renderer->getDebugManager(), "SWAPCHAIN",
+                                   [](const auto &sceneTexture) {});
 
-  mainLoop.run(
-      graph, [instancePtr, materials](double dt) mutable { return true; },
-      []() {});
+  mainLoop.run(graph,
+               [instancePtr, materials](double dt) mutable { return true; });
 
   context.destroy();
   return 0;

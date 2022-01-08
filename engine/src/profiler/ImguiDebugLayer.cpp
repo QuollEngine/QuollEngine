@@ -42,12 +42,12 @@ void ImguiDebugLayer::render() {
   renderPerformanceMetrics();
 }
 
-void ImguiDebugLayer::collectFPS(uint32_t fps_) { fps = fps_; }
-
 void ImguiDebugLayer::renderPerformanceMetrics() {
   const uint32_t ONE_SECOND_IN_MS = 1000;
   if (!performanceMetricsVisible)
     return;
+
+  uint32_t fps = statsManager.getFPS();
 
   ImGui::Begin("Performance Metrics", &performanceMetricsVisible);
   if (ImGui::BeginTable("Table", 2,

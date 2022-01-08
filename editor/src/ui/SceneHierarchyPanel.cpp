@@ -49,7 +49,7 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   }
 
   ConfirmationDialog confirmDeleteSceneNode(
-      "Delete scene node",
+      "Delete scene node#" + std::to_string(node->getEntity()),
       "Are you sure you want to delete node \"" + name + "\"?",
       [this, node](SceneManager &sceneManager) { handleDelete(node); },
       "Delete");

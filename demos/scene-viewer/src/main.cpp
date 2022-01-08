@@ -6,6 +6,7 @@
 #include "renderer/vulkan/VulkanRenderer.h"
 #include "renderer/Material.h"
 #include "renderer/ShaderLibrary.h"
+#include "renderer/passes/FullscreenQuadPass.h"
 
 #include "window/glfw/GLFWWindow.h"
 
@@ -229,60 +230,61 @@ int main() {
     static double prevX = 0.0, prevY = 0.0;
 
     const auto &renderData = renderer->prepareScene(scene.get());
-    liquid::RenderGraph graph = renderer->createRenderGraph(renderData);
+    liquid::RenderGraph graph = renderer->createRenderGraph(
+        renderData, "mainColor", [&ui](const auto &tex) { ui.render(); });
 
-    mainLoop.run(
-        graph,
-        [&ui, &scene, node, &editorCamera, &window,
-         &renderData](double dt) mutable {
-          ImGuiIO &io = ImGui::GetIO();
-          scene->update();
-          renderData->update();
+    graph.addPass<liquid::FullscreenQuadPass>(
+        "fullscreenQuad", renderer->getShaderLibrary(), "mainColor");
 
-          if (leftMouseBtnPressed && !io.WantCaptureMouse) {
-            double xpos, ypos;
-            glfwGetCursorPos(window->getInstance(), &xpos, &ypos);
+    mainLoop.run(graph, [&ui, &scene, node, &editorCamera, &window,
+                         &renderData](double dt) mutable {
+      ImGuiIO &io = ImGui::GetIO();
+      scene->update();
+      renderData->update();
 
-            const auto &size = window->getWindowSize();
-            float width = (float)size.width;
-            float height = (float)size.height;
+      if (leftMouseBtnPressed && !io.WantCaptureMouse) {
+        double xpos, ypos;
+        glfwGetCursorPos(window->getInstance(), &xpos, &ypos);
 
-            if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
-              float x = (xpos / width) * 5;
-              float y = (ypos / height) * 5;
+        const auto &size = window->getWindowSize();
+        float width = (float)size.width;
+        float height = (float)size.height;
 
-              if (abs(xpos - prevX) > 1.0) {
-                if (xpos < prevX) {
-                  horizontalAngle -= x;
-                } else {
-                  horizontalAngle += x;
-                }
-              }
+        if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
+          float x = (xpos / width) * 5;
+          float y = (ypos / height) * 5;
 
-              if (abs(ypos - prevY) > 1.0) {
-                if (ypos < prevY) {
-                  verticalAngle -= y;
-                } else {
-                  verticalAngle += y;
-                }
-              }
-
-              prevX = xpos;
-              prevY = ypos;
+          if (abs(xpos - prevX) > 1.0) {
+            if (xpos < prevX) {
+              horizontalAngle -= x;
+            } else {
+              horizontalAngle += x;
             }
           }
 
-          editorCamera.update();
+          if (abs(ypos - prevY) > 1.0) {
+            if (ypos < prevY) {
+              verticalAngle -= y;
+            } else {
+              verticalAngle += y;
+            }
+          }
 
-          node->setTransform(
-              glm::rotate(glm::mat4{1.0f}, glm::radians(horizontalAngle),
-                          glm::vec3{0.0, 1.0, 0.0}) *
-              glm::rotate(glm::mat4{1.0f}, glm::radians(verticalAngle),
-                          glm::vec3{1.0, 0.0, 0.0}));
+          prevX = xpos;
+          prevY = ypos;
+        }
+      }
 
-          return !changed;
-        },
-        [&ui]() { ui.render(); });
+      editorCamera.update();
+
+      node->setTransform(
+          glm::rotate(glm::mat4{1.0f}, glm::radians(horizontalAngle),
+                      glm::vec3{0.0, 1.0, 0.0}) *
+          glm::rotate(glm::mat4{1.0f}, glm::radians(verticalAngle),
+                      glm::vec3{1.0, 0.0, 0.0}));
+
+      return !changed;
+    });
 
     ui.getSceneHierarchy().setScene(nullptr);
     context.destroy();

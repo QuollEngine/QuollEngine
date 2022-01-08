@@ -299,9 +299,8 @@ VulkanGraphEvaluator::createColorAttachment(
   info.description.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   // Attachment reference
-  VkAttachmentReference reference{};
-  reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-  reference.attachment = index;
+  info.reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  info.reference.attachment = index;
 
   // Attachment clear value
   info.clearValue.color.float32[0] =

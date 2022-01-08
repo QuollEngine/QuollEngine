@@ -94,6 +94,20 @@ public:
    */
   inline size_t getAllocatedBuffersSize() const { return allocatedBuffersSize; }
 
+  /**
+   * @brief Collect frames per second
+   *
+   * @param fps Frames per second
+   */
+  void collectFPS(uint32_t fps);
+
+  /**
+   * @brief Get frames per second
+   *
+   * @return Frames per second
+   */
+  inline uint32_t getFPS() const { return fps; }
+
 private:
   uint32_t drawCallsCount = 0;
   size_t drawnPrimitivesCount = 0;
@@ -103,6 +117,8 @@ private:
 
   uint32_t allocatedBuffersCount = 0;
   size_t allocatedBuffersSize = 0;
+
+  uint32_t fps = 0;
 };
 
 } // namespace liquid

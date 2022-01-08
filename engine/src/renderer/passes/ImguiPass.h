@@ -5,6 +5,9 @@
 #include "../ShaderLibrary.h"
 #include "../imgui/ImguiRenderer.h"
 #include "../vulkan/VulkanRenderBackend.h"
+#include "profiler/DebugManager.h"
+#include "profiler/ImguiDebugLayer.h"
+#include "profiler/StatsManager.h"
 
 namespace liquid {
 
@@ -17,11 +20,15 @@ public:
    * @param renderPassId Pass resource ID
    * @param backend Render backend
    * @param shaderLibrary Shader library
+   * @param debugManager Debug manager
    * @param previousColor Previous color attachment name
+   * @param imUpdate Imgui update
    */
   ImguiPass(const String &name, GraphResourceId renderPassId,
             VulkanRenderBackend &backend, ShaderLibrary *shaderLibrary,
-            const String &previousColor);
+            const SharedPtr<DebugManager> &debugManager,
+            const String &previousColor,
+            const std::function<void(const SharedPtr<Texture> &)> &imUpdate);
   /**
    * @brief Build pass
    *
@@ -43,6 +50,9 @@ private:
   String previousColor;
   ImguiRenderer imguiRenderer;
   GraphResourceId pipelineId = 0;
+  ImguiDebugLayer debugLayer;
+  GraphResourceId sceneTextureId = 0;
+  std::function<void(const SharedPtr<Texture> &)> imguiUpdateFn;
 };
 
 } // namespace liquid
