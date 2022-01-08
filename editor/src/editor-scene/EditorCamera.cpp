@@ -85,11 +85,23 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
           window->setMousePosition(newPos);
         }
       });
+
+  scrollWheelHandler =
+      window->addScrollWheelHandler([this](double xoffset, double yoffset) {
+        if (inputState != InputState::None) {
+          return;
+        }
+        glm::vec3 change =
+            glm::vec3(eye - center) * static_cast<float>(yoffset) * ZOOM_SPEED;
+        center += change;
+        eye += change;
+      });
 }
 
 EditorCamera::~EditorCamera() {
   window->removeMouseButtonHandler(mouseButtonHandler);
   window->removeMouseMoveHandler(mouseMoveHandler);
+  window->removeScrollWheelHandler(scrollWheelHandler);
 
   context.deleteComponent<liquid::CameraComponent>(cameraEntity);
 }
@@ -127,13 +139,13 @@ void EditorCamera::reset() {
 }
 
 void EditorCamera::pan() {
-  constexpr float panSpeed = 0.03f;
+  constexpr float PAN_SPEED = 0.03f;
 
   glm::vec2 mousePos = window->getCurrentMousePosition();
   glm::vec3 right = glm::normalize(glm::cross(glm::vec3(eye - center), up));
 
   glm::vec2 mousePosDiff =
-      glm::vec4((mousePos - prevMousePos) * panSpeed, 0.0f, 0.0f);
+      glm::vec4((mousePos - prevMousePos) * PAN_SPEED, 0.0f, 0.0f);
 
   glm::vec3 change = up * mousePosDiff.y + right * mousePosDiff.x;
   eye += change;
@@ -171,10 +183,8 @@ void EditorCamera::rotate() {
 }
 
 void EditorCamera::zoom() {
-  constexpr float zoomSpeed = 0.03f;
-
   glm::vec2 mousePos = window->getCurrentMousePosition();
-  float zoomFactor = (mousePos.y - prevMousePos.y) * zoomSpeed;
+  float zoomFactor = (mousePos.y - prevMousePos.y) * ZOOM_SPEED;
 
   glm::vec3 change = glm::vec3(eye - center) * zoomFactor;
   center += change;

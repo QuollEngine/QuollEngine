@@ -138,6 +138,22 @@ public:
   void removeMouseButtonHandler(uint32_t handle);
 
   /**
+   * @brief Add scroll whell handler
+   *
+   * @param handler Scroll wheel handler
+   * @return Scroll wheel handler ID
+   */
+  uint32_t addScrollWheelHandler(
+      const std::function<void(double xoffset, double yoffset)> &handler);
+
+  /**
+   * @brief Remove scroll wheel handler
+   *
+   * @param handler Scroll wheel handle
+   */
+  void removeScrollWheelHandler(uint32_t handle);
+
+  /**
    * @brief Get current mouse position
    *
    * @return Current mouse position
@@ -170,6 +186,7 @@ private:
   HandlerMap<void(int key, int scancode, int action, int mods)> keyHandlers;
   HandlerMap<void(int button, int action, int mods)> mouseButtonHandlers;
   HandlerMap<void(double xpos, double ypos)> mouseMoveHandlers;
+  HandlerMap<void(double xoffset, double yoffset)> scrollWheelHandlers;
 };
 
 } // namespace liquid
