@@ -33,8 +33,8 @@
     },
     {
       "name": "dearimgui",
-      "url": "https://github.com/ocornut/imgui/archive/refs/tags/v1.83.zip",
-      "buildSource": "imgui-1.83",
+      "url": "https://github.com/ocornut/imgui/archive/refs/heads/docking.zip",
+      "buildSource": "imgui-docking",
       "cmd": [
         "{MKDIR} {{VENDOR_DIR}}/projects/imgui",
         "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp {{VENDOR_DIR}}/projects/imgui",

@@ -1,4 +1,4 @@
-#include <iostream>
+#include "core/Base.h"
 #include "UIRoot.h"
 
 namespace liquidator {
@@ -11,7 +11,9 @@ UIRoot::UIRoot(liquid::EntityContext &context,
 }
 
 void UIRoot::render(SceneManager &sceneManager) {
+  layout.setup();
   menuBar.render(sceneManager);
+
   sceneHierarchyPanel.render(sceneManager);
   entityPanel.render(sceneManager);
   editorCameraPanel.render(sceneManager);

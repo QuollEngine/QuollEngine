@@ -67,7 +67,8 @@ int main() {
       liquid::RenderGraph graph = renderer->createRenderGraph(
           renderData, "mainColor",
           [&sceneManager, &ui, &renderData](const auto &sceneTexture) {
-            if (ImGui::Begin("View", nullptr, ImGuiWindowFlags_NoTitleBar)) {
+            ui.render(sceneManager);
+            if (ImGui::Begin("View")) {
               const auto &size = ImGui::GetContentRegionAvail();
               const auto &pos = ImGui::GetWindowPos();
               sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
@@ -75,9 +76,8 @@ int main() {
               ImGui::Image(sceneTexture.get(), size);
               ImGui::End();
             }
-
-            ui.render(sceneManager);
           });
+
       struct EditorDebugScope {
         liquid::GraphResourceId editorGridPipeline = 0;
       };

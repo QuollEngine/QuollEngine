@@ -17,7 +17,7 @@ void EditorGridPanel::render(SceneManager &sceneManager) {
     return;
   }
 
-  if (ImGui::Begin("Editor Grid", &open)) {
+  if (ImGui::Begin("Editor Grid", &open, ImGuiWindowFlags_NoDocking)) {
     bool showGridLines = sceneManager.getEditorGrid().gridLinesShown();
     if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
       sceneManager.getEditorGrid().setGridLinesFlag(showGridLines);

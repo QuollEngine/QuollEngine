@@ -7,6 +7,7 @@
 #include "EntityPanel.h"
 #include "EditorGridPanel.h"
 #include "StatusBar.h"
+#include "Layout.h"
 
 namespace liquidator {
 
@@ -44,6 +45,7 @@ private:
   EntityPanel entityPanel;
   EditorGridPanel editorCameraPanel;
   StatusBar statusBar;
+  Layout layout;
 };
 
 } // namespace liquidator

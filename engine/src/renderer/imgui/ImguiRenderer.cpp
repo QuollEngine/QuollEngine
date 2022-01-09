@@ -36,6 +36,8 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 
   loadFonts();
 
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
 }
 
