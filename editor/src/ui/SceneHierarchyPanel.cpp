@@ -40,11 +40,16 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
         ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
   }
 
+  if (selectedNode == node) {
+    treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
+  }
+
   bool open = false;
   if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
     open = !isLeaf;
     if (ImGui::IsItemClicked()) {
       nodeClickHandler(node);
+      selectedNode = node;
     }
   }
 

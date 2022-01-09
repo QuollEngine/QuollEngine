@@ -62,6 +62,7 @@ private:
 private:
   liquid::EntityContext &context;
   NodeClickHandler nodeClickHandler;
+  liquid::SceneNode *selectedNode = nullptr;
 };
 
 } // namespace liquidator

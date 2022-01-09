@@ -8,23 +8,13 @@ EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : context(entityContext) {}
 
 void EntityPanel::render(SceneManager &sceneManager) {
-  if (!context.hasEntity(selectedEntity)) {
-    return;
-  }
-
-  liquid::String name;
-  if (context.hasComponent<liquid::NameComponent>(selectedEntity)) {
-    name = context.getComponent<liquid::NameComponent>(selectedEntity).name +
-           "###" + std::to_string(selectedEntity);
-  } else {
-    name = "Entity: " + std::to_string(selectedEntity);
-  }
-
   bool open = true;
-  if (ImGui::Begin(name.c_str(), &open)) {
-    renderName();
-    renderLight();
-    renderTransform();
+  if (ImGui::Begin("Properties", &open)) {
+    if (context.hasEntity(selectedEntity)) {
+      renderName();
+      renderLight();
+      renderTransform();
+    }
     ImGui::End();
   }
 

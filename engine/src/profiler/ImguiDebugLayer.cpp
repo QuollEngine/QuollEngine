@@ -49,7 +49,8 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
 
   uint32_t fps = statsManager.getFPS();
 
-  ImGui::Begin("Performance Metrics", &performanceMetricsVisible);
+  ImGui::Begin("Performance Metrics", &performanceMetricsVisible,
+               ImGuiWindowFlags_NoDocking);
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
                             ImGuiTableColumnFlags_WidthStretch |
@@ -67,7 +68,8 @@ void ImguiDebugLayer::renderUsageMetrics() {
   if (!usageMetricsVisible)
     return;
 
-  ImGui::Begin("Usage Metrics", &usageMetricsVisible);
+  ImGui::Begin("Usage Metrics", &usageMetricsVisible,
+               ImGuiWindowFlags_NoDocking);
 
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
@@ -98,7 +100,7 @@ void ImguiDebugLayer::renderPhysicalDeviceInfo() {
     return;
 
   ImGui::Begin(("Device Info: " + physicalDeviceInfo.getName()).c_str(),
-               &physicalDeviceInfoVisible);
+               &physicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking);
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
                             ImGuiTableColumnFlags_WidthStretch)) {
