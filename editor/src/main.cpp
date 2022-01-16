@@ -86,7 +86,6 @@ int main() {
           "editorDebug",
           [&renderer](liquid::RenderGraphBuilder &builder,
                       EditorDebugScope &scope) {
-            builder.read("mainColor");
             builder.write("mainColor");
             builder.write("depthBuffer");
 

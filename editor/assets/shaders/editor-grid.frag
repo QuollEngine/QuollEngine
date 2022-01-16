@@ -22,6 +22,9 @@ void main() {
   // pos(t) = near + t * (far - near)
   vec3 fragPos = inNearPoint + t * (inFarPoint - inNearPoint);
 
+  // Default color
+  outColor = vec4(0.0, 0.0, 0.0, 0.0);
+
   // Compute lines
   if (t > 0) {
     vec2 gridCoord = fragPos.xz;
