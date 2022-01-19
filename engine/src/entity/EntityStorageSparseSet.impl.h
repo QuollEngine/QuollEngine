@@ -180,7 +180,7 @@ EntityStorageSparseSet<ComponentTypes...>::getSmallestEntityListFromPools(
 template <class... ComponentTypes>
 template <class... PickComponents, size_t... PickComponentIndices>
 void EntityStorageSparseSet<ComponentTypes...>::iterateEntitiesInternal(
-    const std::function<void(Entity, const PickComponents &...)> &iterFn,
+    const std::function<void(Entity, PickComponents &...)> &iterFn,
     std::index_sequence<PickComponentIndices...> sequence) {
   std::tuple<EntityStorageSparseSetComponentPool<PickComponents> &...>
       pickedPools = {
@@ -217,7 +217,7 @@ template <class... ComponentTypes>
 template <class... PickComponents>
 void EntityStorageSparseSet<ComponentTypes...>::iterateEntities(
     const typename EntityStorageSparseSet::template IterFnType<
-        std::function<void(Entity, const PickComponents &...)>>::type &iterFn) {
+        std::function<void(Entity, PickComponents &...)>>::type &iterFn) {
   iterateEntitiesInternal(iterFn, std::index_sequence_for<PickComponents...>{});
 }
 
