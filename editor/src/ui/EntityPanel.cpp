@@ -4,6 +4,9 @@
 
 namespace liquidator {
 
+constexpr size_t VEC3_ARRAY_SIZE = 3;
+constexpr size_t VEC4_ARRAY_SIZE = 4;
+
 EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : context(entityContext) {}
 
@@ -64,8 +67,6 @@ void EntityPanel::renderLight() {
       context.getComponent<liquid::LightComponent>(selectedEntity);
 
   if (ImGui::CollapsingHeader("Light")) {
-    constexpr size_t VEC3_ARRAY_SIZE = 3;
-    constexpr size_t VEC4_ARRAY_SIZE = 4;
     ImGui::Text("Type: %s", component.light->getTypeName().c_str());
 
     ImGui::Text("Direction");
@@ -103,23 +104,24 @@ void EntityPanel::renderTransform() {
       context.getComponent<liquid::TransformComponent>(selectedEntity);
 
   if (ImGui::CollapsingHeader("Transform")) {
-    if (ImGui::BeginTable("table-transformLocal", 4,
-                          ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch |
-                              ImGuiTableFlags_RowBg)) {
-
-      ImGui::Text("Local transform");
-      for (glm::mat4::length_type i = 0; i < 4; ++i) {
-        ImGui::TableNextRow();
-        for (glm::mat4::length_type j = 0; j < 4; ++j) {
-          ImGui::TableNextColumn();
-          ImGui::Text("%f", component.transformLocal[i][j]);
-        }
-      }
-
-      ImGui::EndTable();
+    ImGui::Text("Position");
+    std::array<float, VEC3_ARRAY_SIZE> imguiPosition{component.localPosition.x,
+                                                     component.localPosition.y,
+                                                     component.localPosition.z};
+    if (ImGui::InputFloat3("###InputTransformPosition", imguiPosition.data())) {
+      component.localPosition = {imguiPosition.at(0), imguiPosition.at(1),
+                                 imguiPosition.at(2)};
     }
 
+    ImGui::Text("Scale");
+    std::array<float, VEC3_ARRAY_SIZE> imguiScale{
+        component.localScale.x, component.localScale.y, component.localScale.z};
+    if (ImGui::InputFloat3("###InputTransformScale", imguiScale.data())) {
+      component.localScale = {imguiScale.at(0), imguiScale.at(1),
+                              imguiScale.at(2)};
+    }
+
+    ImGui::Text("World Transform");
     if (ImGui::BeginTable("table-transformWorld", 4,
                           ImGuiTableFlags_Borders |
                               ImGuiTableColumnFlags_WidthStretch |
@@ -130,7 +132,7 @@ void EntityPanel::renderTransform() {
         ImGui::TableNextRow();
         for (glm::mat4::length_type j = 0; j < 4; ++j) {
           ImGui::TableNextColumn();
-          ImGui::Text("%f", component.transformWorld[i][j]);
+          ImGui::Text("%f", component.worldTransform[i][j]);
         }
       }
 

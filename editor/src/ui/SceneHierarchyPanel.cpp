@@ -102,7 +102,7 @@ void SceneHierarchyPanel::handleMoveToNode(liquid::SceneNode *node,
       context.getComponent<liquid::TransformComponent>(node->getEntity());
 
   const auto &translation =
-      glm::vec3(glm::column(transformComponent.transformWorld, 3));
+      glm::vec3(glm::column(transformComponent.worldTransform, 3));
 
   constexpr glm::vec3 distanceFromCenter{0.0f, 0.0f, 10.0f};
 

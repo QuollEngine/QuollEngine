@@ -19,6 +19,27 @@
 
 namespace liquid {
 
+/**
+ * @brief Decomposes matrix into TRS values
+ *
+ * @param matrix Input matrix
+ * @param position Output position
+ * @param rotation Output rotation
+ * @param scale Output scale
+ */
+static void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
+                            glm::quat &rotation, glm::vec3 &scale) {
+  glm::mat4 temp = matrix;
+  position = temp[3];
+
+  for (glm::mat4::length_type i = 0; i < 3; ++i) {
+    scale[i] = glm::length(temp[i]);
+    temp[i] /= scale[i];
+  }
+
+  rotation = glm::toQuat(matrix);
+}
+
 TinyGLTFLoader::BufferMeta
 TinyGLTFLoader::getBufferMetaForAccessor(const tinygltf::Model &model,
                                          int accessorIndex) {
@@ -70,8 +91,8 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
                          const std::map<uint32_t, Entity> &meshEntityMap) {
   try {
     auto &gltfScene = model.scenes.at(model.defaultScene);
-    auto *rootNode = new SceneNode(entityContext.createEntity(),
-                                   glm::mat4{1.0f}, nullptr, entityContext);
+    auto *rootNode =
+        new SceneNode(entityContext.createEntity(), {}, nullptr, entityContext);
 
     std::vector<SceneNode *> nodes(model.nodes.size());
 
@@ -93,39 +114,38 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
       entityContext.setComponent<NameComponent>(entity,
                                                 {String(gltfNode.name)});
 
-      glm::mat4 transform{1.0f};
+      constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
+      constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
+      constexpr size_t SCALE_MATRIX_SIZE = 3;
+      constexpr size_t ROTATION_MATRIX_SIZE = 4;
 
-      constexpr size_t transformMatrixSize = 6;
-      constexpr size_t translationMatrixSize = 3;
-      constexpr size_t scaleMatrixSize = 3;
-      constexpr size_t rotationMatrixSize = 4;
+      TransformComponent transform;
 
-      if (gltfNode.matrix.size() == transformMatrixSize) {
-        transform = glm::make_mat4(gltfNode.matrix.data());
+      if (gltfNode.matrix.size() == TRANSFORM_MATRIX_SIZE) {
+        decomposeMatrix(glm::make_mat4(gltfNode.matrix.data()),
+                        transform.localPosition, transform.localRotation,
+                        transform.localScale);
+
       } else if (gltfNode.matrix.size() > 0) {
         engineLogger.log(Logger::Warning)
             << "Node matrix data must have 16 values. Skipping...";
       } else {
-        if (gltfNode.translation.size() == translationMatrixSize) {
-          transform *= glm::translate(
-              glm::mat4{1.0f},
-              glm::vec3(glm::make_vec3(gltfNode.translation.data())));
+        if (gltfNode.translation.size() == TRANSLATION_MATRIX_SIZE) {
+          transform.localPosition = glm::make_vec3(gltfNode.translation.data());
         } else if (gltfNode.translation.size() > 0) {
           engineLogger.log(Logger::Warning)
               << "Node translation data must have 3 values. Skipping...";
         }
 
-        if (gltfNode.rotation.size() == rotationMatrixSize) {
-          transform *= glm::mat4_cast(
-              glm::quat(glm::make_quat(gltfNode.rotation.data())));
+        if (gltfNode.rotation.size() == ROTATION_MATRIX_SIZE) {
+          transform.localRotation = glm::make_quat(gltfNode.rotation.data());
         } else if (gltfNode.rotation.size() > 0) {
           engineLogger.log(Logger::Warning)
               << "Node rotation data must have 4 values. Skipping...";
         }
 
-        if (gltfNode.scale.size() == scaleMatrixSize) {
-          transform *= glm::scale(
-              glm::mat4{1.0}, glm::vec3(glm::make_vec3(gltfNode.scale.data())));
+        if (gltfNode.scale.size() == SCALE_MATRIX_SIZE) {
+          transform.localScale = glm::make_vec3(gltfNode.scale.data());
         } else if (gltfNode.scale.size() > 0) {
           engineLogger.log(Logger::Warning)
               << "Node scale data must have 3 values. Skipping...";

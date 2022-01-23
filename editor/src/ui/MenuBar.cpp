@@ -42,7 +42,10 @@ void MenuBar::handleGLTFImport(const liquid::String &filePath,
   const auto &invViewMatrix =
       glm::inverse(scene->getActiveCamera()->getViewMatrix());
 
-  sceneNode->setTransform(invViewMatrix * glm::translate(distanceFromEye));
+  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
+
+  auto &transform = sceneNode->getTransform();
+  transform.localPosition = orientation[3];
 
   scene->getRootNode()->addChild(sceneNode);
 }

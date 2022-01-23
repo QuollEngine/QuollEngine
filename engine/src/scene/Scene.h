@@ -17,11 +17,12 @@ public:
    * @brief Create scene node
    *
    * @param entity Entity
-   * @param transform Local transform
+   * @param transform Transform component
    * @param parent Parent node
+   * @param context Entity context
    */
-  SceneNode(Entity entity, glm::mat4 transform, SceneNode *parent,
-            EntityContext &context);
+  SceneNode(Entity entity, const TransformComponent &transform,
+            SceneNode *parent, EntityContext &context);
 
   /**
    * @brief Destroys scene node and its children
@@ -35,19 +36,17 @@ public:
 
   /**
    * @brief Updates children
-   *
-   * @param forceUpdate Force update even if node is not modified
    */
-  void update(bool forceUpdate = false);
+  void update();
 
   /**
    * @brief Adds child node with entity
    *
    * @param entity Entity
-   * @param transform Local transform
+   * @param transform Transform component
    * @return Pointer to newly created scene node
    */
-  SceneNode *addChild(Entity entity, glm::mat4 transform = glm::mat4{1.0});
+  SceneNode *addChild(Entity entity, const TransformComponent &component = {});
 
   /*
    * @brief Add child node
@@ -64,18 +63,20 @@ public:
   void removeChild(SceneNode *node);
 
   /**
-   * @brief Sets transform
-   *
-   * @param transform Local transform
-   */
-  void setTransform(glm::mat4 transform);
-
-  /**
    * @brief Set entity
    *
    * @param entity Entity
    */
   void setEntity(Entity entity);
+
+  /**
+   * @brief Get transform
+   *
+   * @return Transform component
+   */
+  inline TransformComponent &getTransform() {
+    return entityContext.getComponent<TransformComponent>(entity);
+  }
 
   /**
    * @brief Gets world transform
@@ -84,7 +85,7 @@ public:
    */
   inline const glm::mat4 &getWorldTransform() const {
     return entityContext.getComponent<TransformComponent>(entity)
-        .transformWorld;
+        .worldTransform;
   }
 
   /**
@@ -111,7 +112,6 @@ public:
   inline SceneNode *getParent() { return parent; }
 
 private:
-  bool dirty = true;
   Entity entity = std::numeric_limits<Entity>::max();
 
   SceneNode *parent = nullptr;

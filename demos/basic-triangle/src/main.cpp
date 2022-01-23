@@ -79,7 +79,7 @@ int main() {
       {std::make_shared<liquid::Camera>(renderer->getResourceAllocator())});
 
   scene->setActiveCamera(camera);
-  scene->getRootNode()->addChild(entity, glm::mat4{1.0f});
+  scene->getRootNode()->addChild(entity);
 
   glfwSetKeyCallback(window->getInstance(), key_callback);
 

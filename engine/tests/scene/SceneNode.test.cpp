@@ -6,31 +6,44 @@
 
 liquid::SharedPtr<liquid::MeshInstance> emptyMeshInstance = nullptr;
 
+glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
+
+  return glm::translate(glm::mat4(1.0f), transform.localPosition) *
+         glm::toMat4(transform.localRotation) *
+         glm::scale(glm::mat4(1.0f), transform.localScale);
+}
+
 TEST(SceneTest, CreatesNodeWithIdentityWorldTransform) {
   liquid::EntityContext context;
-  auto local = glm::translate(glm::mat4{1.0f}, {1.0f, 1.0f, 1.0f});
+  liquid::TransformComponent transform{glm::vec3{1.0f, 0.0f, 1.0f},
+                                       glm::quat{1.0f, 0.5f, 0.5f, 0.5f},
+                                       glm::vec3{0.5f, 0.5f, 0.5f}};
+
   auto entity = context.createEntity();
-  liquid::SceneNode sceneNode(entity, local, nullptr, context);
+  liquid::SceneNode sceneNode(entity, transform, nullptr, context);
 
   EXPECT_EQ(sceneNode.getEntity(), entity);
   EXPECT_EQ(sceneNode.getParent(), nullptr);
 
-  EXPECT_TRUE(
-      context.getComponent<liquid::TransformComponent>(entity).transformLocal ==
-      local);
-  EXPECT_TRUE(
-      context.getComponent<liquid::TransformComponent>(entity).transformWorld ==
-      glm::mat4{1.0f});
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).localPosition,
+      transform.localPosition);
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).localRotation,
+      transform.localRotation);
+  EXPECT_EQ(context.getComponent<liquid::TransformComponent>(entity).localScale,
+            transform.localScale);
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).worldTransform,
+      glm::mat4(1.0f));
 
-  EXPECT_TRUE(sceneNode.getWorldTransform() == glm::mat4{1.0f});
-  EXPECT_FALSE(sceneNode.getWorldTransform() == local);
+  EXPECT_EQ(sceneNode.getWorldTransform(), glm::mat4(1.0f));
 }
 
 TEST(SceneTest, AddsChildWithLocalTransform) {
   liquid::EntityContext context;
   liquid::Scene scene(context);
-  liquid::SceneNode sceneNode(context.createEntity(), glm::mat4{1.0}, nullptr,
-                              context);
+  liquid::SceneNode sceneNode(context.createEntity(), {}, nullptr, context);
   sceneNode.addChild(context.createEntity());
   sceneNode.addChild(context.createEntity());
   sceneNode.addChild(context.createEntity());
@@ -44,14 +57,11 @@ TEST(SceneTest, AddsChildWithLocalTransform) {
 TEST(SceneTest, AddsSceneNode) {
   liquid::EntityContext context;
   liquid::Scene scene(context);
-  liquid::SceneNode sceneNode(context.createEntity(), glm::mat4{1.0}, nullptr,
-                              context);
+  liquid::SceneNode sceneNode(context.createEntity(), {}, nullptr, context);
 
   std::array<liquid::SceneNode *, 2> entityList{
-      new liquid::SceneNode{context.createEntity(), glm::mat4{1.0}, nullptr,
-                            context},
-      new liquid::SceneNode{context.createEntity(), glm::mat4{1.0}, nullptr,
-                            context}};
+      new liquid::SceneNode{context.createEntity(), {}, nullptr, context},
+      new liquid::SceneNode{context.createEntity(), {}, nullptr, context}};
 
   sceneNode.addChild(entityList.at(0));
   sceneNode.addChild(entityList.at(1));
@@ -68,62 +78,77 @@ TEST(SceneTest, AddsSceneNode) {
 TEST(SceneTest, SetsEntity) {
   liquid::EntityContext context;
   auto entity = context.createEntity();
-  liquid::SceneNode root(context.createEntity(), glm::mat4{5.0f}, nullptr,
-                         context);
-  auto *sceneNode = root.addChild(entity);
+
+  liquid::TransformComponent transform;
+  transform.localPosition = glm::vec3(1.0f, 0.0f, 0.0);
+  liquid::SceneNode root(context.createEntity(), {}, nullptr, context);
+  auto *sceneNode = root.addChild(entity, transform);
 
   root.update();
 
   EXPECT_EQ(sceneNode->getEntity(), entity);
-  EXPECT_TRUE(
-      context.getComponent<liquid::TransformComponent>(entity).transformLocal ==
-      glm::mat4{1.0f});
-  EXPECT_TRUE(
-      context.getComponent<liquid::TransformComponent>(entity).transformWorld ==
-      glm::mat4{5.0f});
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).localPosition,
+      transform.localPosition);
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).worldTransform,
+      getLocalTransform(transform));
 
   auto newEntity = context.createEntity();
   sceneNode->setEntity(newEntity);
 
   EXPECT_NE(newEntity, entity);
   EXPECT_EQ(sceneNode->getEntity(), newEntity);
-  EXPECT_TRUE(context.getComponent<liquid::TransformComponent>(newEntity)
-                  .transformLocal == glm::mat4{1.0f});
-  EXPECT_TRUE(context.getComponent<liquid::TransformComponent>(newEntity)
-                  .transformWorld == glm::mat4{5.0f});
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(newEntity).localPosition,
+      transform.localPosition);
+  EXPECT_EQ(context.getComponent<liquid::TransformComponent>(newEntity)
+                .worldTransform,
+            getLocalTransform(transform));
 }
 
 TEST(SceneTest, UpdateSetsLocalMatrixToWorldIfNoParent) {
   liquid::EntityContext context;
-  auto local = glm::translate(glm::mat4{1.0f}, {1.0f, 1.0f, 1.0f});
-  liquid::SceneNode sceneNode(context.createEntity(), local, nullptr, context);
+
+  liquid::TransformComponent transform;
+  transform.localPosition = glm::vec3(1.0f, 0.0f, 0.0);
+
+  liquid::SceneNode sceneNode(context.createEntity(), transform, nullptr,
+                              context);
   sceneNode.update();
 
-  EXPECT_TRUE(
+  EXPECT_EQ(
       context.getComponent<liquid::TransformComponent>(sceneNode.getEntity())
-          .transformWorld == local);
+          .worldTransform,
+      getLocalTransform(transform));
 }
 
 TEST(SceneTest, UpdatesChildrenWithParent) {
   liquid::EntityContext context;
-  auto parentTransform = glm::translate(glm::mat4{1.0f}, {1.0f, 1.0f, 1.0f});
-  auto childTransform = glm::rotate(glm::mat4{1.0f}, glm::radians(15.0f),
-                                    glm::vec3{0.0f, 1.0f, 0.0f});
+
+  liquid::TransformComponent parentTransform;
+  parentTransform.localPosition = glm::vec3(1.0f);
+
+  liquid::TransformComponent childTransform;
+  childTransform.localRotation =
+      glm::angleAxis(glm::radians(15.f), glm::vec3(0.0f, 1.0f, 0.0f));
 
   liquid::SceneNode parentNode(context.createEntity(), parentTransform, nullptr,
                                context);
   liquid::SharedPtr<liquid::MeshInstance> meshInstance = nullptr;
-  auto *childNode = parentNode.addChild(context.createEntity());
-  childNode->setTransform(childTransform);
+  auto *childNode = parentNode.addChild(context.createEntity(), childTransform);
 
   parentNode.update();
-  EXPECT_TRUE(childNode->getWorldTransform() ==
-              parentTransform * childTransform);
+  EXPECT_EQ(childNode->getWorldTransform(),
+            getLocalTransform(parentTransform) *
+                getLocalTransform(childTransform));
 }
 
 TEST(SceneTest, UpdatesLightIfExists) {
   liquid::EntityContext context;
-  auto local = glm::translate(glm::mat4{1.0f}, {1.0f, 0.5f, 1.0f});
+
+  liquid::TransformComponent transform;
+  transform.localPosition = glm::vec3(1.0f, 0.5f, 1.0f);
 
   auto entity = context.createEntity();
 
@@ -133,18 +158,19 @@ TEST(SceneTest, UpdatesLightIfExists) {
       entity, {std::make_shared<liquid::Light>(liquid::Light::DIRECTIONAL,
                                                glm::vec3{}, glm::vec4{}, 1.0)});
 
-  liquid::SceneNode sceneNode(entity, local, nullptr, context);
+  liquid::SceneNode sceneNode(entity, transform, nullptr, context);
   sceneNode.update();
 
-  EXPECT_TRUE(context.getComponent<liquid::LightComponent>(entity)
-                  .light->getPosition() == glm::vec3(1.0f, 0.5f, 1.0f));
+  EXPECT_EQ(
+      context.getComponent<liquid::LightComponent>(entity).light->getPosition(),
+      transform.localPosition);
 }
 
 TEST(SceneTest, DeletesChildIfExists) {
   liquid::EntityContext context;
 
-  liquid::SceneNode *node = new liquid::SceneNode(
-      context.createEntity(), glm::mat4{1.0f}, nullptr, context);
+  liquid::SceneNode *node =
+      new liquid::SceneNode(context.createEntity(), {}, nullptr, context);
 
   auto e1 = context.createEntity();
   auto e2 = context.createEntity();
@@ -167,12 +193,11 @@ TEST(SceneTest, DeletesChildIfExists) {
 TEST(SceneTest, DoesNotDeleteNodeThatsNotAChild) {
   liquid::EntityContext context;
 
-  liquid::SceneNode *node = new liquid::SceneNode(
-      context.createEntity(), glm::mat4{1.0f}, nullptr, context);
+  liquid::SceneNode *node =
+      new liquid::SceneNode(context.createEntity(), {}, nullptr, context);
 
   auto e2 = context.createEntity();
-  liquid::SceneNode *node2 =
-      new liquid::SceneNode(e2, glm::mat4{1.0f}, nullptr, context);
+  liquid::SceneNode *node2 = new liquid::SceneNode(e2, {}, nullptr, context);
 
   node->removeChild(node2);
 
