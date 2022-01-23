@@ -3,8 +3,11 @@
 namespace liquid {
 
 struct TransformComponent {
-  glm::mat4 transformLocal;
-  glm::mat4 transformWorld{1.0f};
+  glm::vec3 localPosition{0.0f};
+  glm::quat localRotation{1.0f, 0.0f, 0.0f, 0.0f};
+  glm::vec3 localScale{1.0f};
+
+  glm::mat4 worldTransform{1.0f};
 };
 
 } // namespace liquid

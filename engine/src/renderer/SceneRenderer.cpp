@@ -19,7 +19,7 @@ void SceneRenderer::render(RenderCommandList &commandList,
         const auto &instance = mesh.instance;
 
         auto *transformConstant = new VulkanStandardPushConstants;
-        transformConstant->modelMatrix = transform.transformWorld;
+        transformConstant->modelMatrix = transform.worldTransform;
 
         commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
                                   sizeof(VulkanStandardPushConstants),

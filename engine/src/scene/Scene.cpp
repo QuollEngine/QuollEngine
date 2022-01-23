@@ -3,11 +3,10 @@
 
 namespace liquid {
 
-SceneNode::SceneNode(Entity entity_, glm::mat4 transform_, SceneNode *parent_,
-                     EntityContext &entityContext_)
+SceneNode::SceneNode(Entity entity_, const TransformComponent &transform,
+                     SceneNode *parent_, EntityContext &entityContext_)
     : entity(entity_), parent(parent_), entityContext(entityContext_) {
-  entityContext.setComponent<TransformComponent>(entity,
-                                                 {transform_, glm::mat4{1.0f}});
+  entityContext.setComponent<TransformComponent>(entity, transform);
 }
 
 SceneNode::~SceneNode() {
@@ -22,7 +21,8 @@ SceneNode::~SceneNode() {
   children.clear();
 }
 
-SceneNode *SceneNode::addChild(Entity entity, glm::mat4 transform) {
+SceneNode *SceneNode::addChild(Entity entity,
+                               const TransformComponent &transform) {
   addChild(new SceneNode(entity, transform, this, entityContext));
   return children.back();
 }
@@ -41,49 +41,43 @@ void SceneNode::removeChild(SceneNode *node) {
   }
 }
 
-void SceneNode::setTransform(glm::mat4 transform) {
-  entityContext.getComponent<TransformComponent>(entity).transformLocal =
-      transform;
-  dirty = true;
-}
-
 void SceneNode::setEntity(Entity entity_) {
   auto &component = entityContext.getComponent<TransformComponent>(entity);
 
-  entityContext.setComponent<TransformComponent>(
-      entity_, {component.transformLocal, component.transformWorld});
+  entityContext.setComponent<TransformComponent>(entity_, component);
   entity = entity_;
 }
 
-void SceneNode::update(bool forceUpdate) {
-  bool needsUpdate = dirty || forceUpdate;
-  if (needsUpdate) {
-    auto &component = entityContext.getComponent<TransformComponent>(entity);
-    if (parent) {
-      component.transformWorld =
-          entityContext.getComponent<TransformComponent>(parent->getEntity())
-              .transformWorld *
-          component.transformLocal;
-    } else {
-      component.transformWorld = component.transformLocal;
-    }
+void SceneNode::update() {
+  auto &component = entityContext.getComponent<TransformComponent>(entity);
 
-    if (entityContext.hasComponent<LightComponent>(entity)) {
-      entityContext.getComponent<LightComponent>(entity).light->setPosition(
-          component.transformWorld[3]);
-    }
+  glm::mat4 identity{1.0f};
+  glm::mat4 localTransform = glm::translate(identity, component.localPosition) *
+                             glm::toMat4(component.localRotation) *
+                             glm::scale(identity, component.localScale);
 
-    dirty = false;
+  if (parent) {
+    component.worldTransform =
+        entityContext.getComponent<TransformComponent>(parent->getEntity())
+            .worldTransform *
+        localTransform;
+  } else {
+    component.worldTransform = localTransform;
+  }
+
+  if (entityContext.hasComponent<LightComponent>(entity)) {
+    entityContext.getComponent<LightComponent>(entity).light->setPosition(
+        component.worldTransform[3]);
   }
 
   for (auto &node : children) {
-    node->update(needsUpdate);
+    node->update();
   }
 }
 
 Scene::Scene(EntityContext &entityContext_) : entityContext(entityContext_) {
-  rootNode = new SceneNode(entityContext.createEntity(), glm::mat4(1.0f),
-                           nullptr, entityContext);
+  rootNode =
+      new SceneNode(entityContext.createEntity(), {}, nullptr, entityContext);
 }
 
 Scene::~Scene() {

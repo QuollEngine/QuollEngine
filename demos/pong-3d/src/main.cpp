@@ -142,15 +142,22 @@ private:
   }
 
   void updateScene(float dt) {
-    p2->setTransform(glm::translate(glm::mat4{1.0f}, {botPosition, 0.0, 3.0}) *
-                     glm::scale(glm::mat4{1.0}, {1.0, 0.2, 0.1}));
+    {
+      auto &transform = p2->getTransform();
+      transform.localPosition = glm::vec3(botPosition, 0.0f, 3.0f);
+      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+    }
 
-    p1->setTransform(
-        glm::translate(glm::mat4{1.0f}, {playerPosition, 0.0, -3.0}) *
-        glm::scale(glm::mat4{1.0}, {1.0, 0.2, 0.1}));
+    {
+      auto &transform = p1->getTransform();
+      transform.localPosition = glm::vec3(playerPosition, 0.0f, -3.0f);
+      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+    }
 
-    ball->setTransform(glm::translate(
-        glm::mat4{1.0f}, {ballPosition.x, ballPosition.y, ballPosition.z}));
+    {
+      auto &transform = ball->getTransform();
+      transform.localPosition = ballPosition;
+    }
 
     scene->update();
   }
@@ -265,19 +272,22 @@ private:
         e4, createWallTransform({0.0, 0.0, -3.5}, 0, 5.0));
 
     // Create paddles
-    p1 = scene->getRootNode()->addChild(pe1, glm::mat4());
-    p2 = scene->getRootNode()->addChild(pe2, glm::mat4());
+    p1 = scene->getRootNode()->addChild(pe1);
+    p2 = scene->getRootNode()->addChild(pe2);
 
     // create ball
-    ball = scene->getRootNode()->addChild(ballEntity, glm::mat4());
+    ball = scene->getRootNode()->addChild(ballEntity);
   }
 
-  glm::mat4 createWallTransform(glm::vec3 position, float rotation,
-                                float scaleX) {
-    return glm::translate(glm::mat4{1.0}, position) *
-           glm::rotate(glm::mat4{1.0}, glm::radians(rotation),
-                       glm::vec3(0, 1, 0)) *
-           glm::scale(glm::mat4{1.0}, {scaleX, 0.2, 0.1});
+  liquid::TransformComponent createWallTransform(glm::vec3 position,
+                                                 float rotation, float scaleX) {
+    liquid::TransformComponent transform{};
+    transform.localPosition = position;
+    transform.localRotation =
+        glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0));
+
+    transform.localScale = glm::vec3(scaleX, 0.2f, 0.1f);
+    return transform;
   }
 
 private:

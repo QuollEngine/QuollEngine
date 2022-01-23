@@ -277,11 +277,11 @@ int main() {
 
       editorCamera.update();
 
-      node->setTransform(
-          glm::rotate(glm::mat4{1.0f}, glm::radians(horizontalAngle),
-                      glm::vec3{0.0, 1.0, 0.0}) *
-          glm::rotate(glm::mat4{1.0f}, glm::radians(verticalAngle),
-                      glm::vec3{1.0, 0.0, 0.0}));
+      node->getTransform().localRotation =
+          glm::angleAxis(glm::radians(horizontalAngle),
+                         glm::vec3(0.0f, 1.0f, 0.0f)) *
+          glm::angleAxis(glm::radians(verticalAngle),
+                         glm::vec3(1.0f, 0.0f, 0.0f));
 
       return !changed;
     });

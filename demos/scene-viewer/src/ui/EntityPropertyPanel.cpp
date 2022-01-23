@@ -42,23 +42,6 @@ void EntityPropertyPanel::renderTransformDetails() {
       context.getComponent<TransformComponent>(entity);
 
   if (ImGui::CollapsingHeader("Transform")) {
-    if (ImGui::BeginTable("table-transformLocal", 4,
-                          ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch |
-                              ImGuiTableFlags_RowBg)) {
-
-      ImGui::Text("Local transform");
-      for (uint32_t i = 0; i < 4; ++i) {
-        ImGui::TableNextRow();
-        for (uint32_t j = 0; j < 4; ++j) {
-          ImGui::TableNextColumn();
-          ImGui::Text("%f", transformComponent.transformLocal[i][j]);
-        }
-      }
-
-      ImGui::EndTable();
-    }
-
     if (ImGui::BeginTable("table-transformWorld", 4,
                           ImGuiTableFlags_Borders |
                               ImGuiTableColumnFlags_WidthStretch |
@@ -69,7 +52,7 @@ void EntityPropertyPanel::renderTransformDetails() {
         ImGui::TableNextRow();
         for (uint32_t j = 0; j < 4; ++j) {
           ImGui::TableNextColumn();
-          ImGui::Text("%f", transformComponent.transformWorld[i][j]);
+          ImGui::Text("%f", transformComponent.worldTransform[i][j]);
         }
       }
 
