@@ -6,6 +6,7 @@
 #include "scene/CameraComponent.h"
 #include "scene/TransformComponent.h"
 #include "scene/EnvironmentComponent.h"
+#include "animation/AnimationComponent.h"
 
 #include "Entity.h"
 #include "EntityError.h"
@@ -16,6 +17,6 @@ namespace liquid {
 using EntityContext =
     EntityStorageSparseSet<MeshComponent, LightComponent, CameraComponent,
                            TransformComponent, EnvironmentComponent,
-                           NameComponent>;
+                           AnimationComponent, NameComponent>;
 
 } // namespace liquid

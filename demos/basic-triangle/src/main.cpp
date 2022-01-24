@@ -13,9 +13,12 @@
 #include "window/glfw/GLFWWindow.h"
 #include "renderer/passes/ImguiPass.h"
 
+#include "animation/AnimationSystem.h"
+
 #include "loaders/ImageTextureLoader.h"
 
 #include "loop/MainLoop.h"
+#include "renderer/vulkan/VulkanStandardPushConstants.h"
 
 #include <GLFW/glfw3.h>
 
@@ -37,6 +40,53 @@ int main() {
   std::unique_ptr<liquid::VulkanRenderer> renderer(
       new liquid::VulkanRenderer(context, window.get()));
   auto entity = context.createEntity();
+
+  liquid::AnimationSystem animationSystem(context);
+
+  liquid::Animation anim0("triangle", 4.0f);
+  {
+    liquid::KeyframeSequence rotation(
+        liquid::KeyframeSequenceTarget::Rotation,
+        liquid::KeyframeSequenceInterpolation::Step);
+
+    glm::quat tick = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 0, 1.0f));
+    glm::quat tock = glm::angleAxis(glm::radians(30.0f), glm::vec3(0, 0, 1.0f));
+
+    glm::vec4 qtick(tick.x, tick.y, tick.z, tick.w);
+    glm::vec4 qtock(tock.x, tock.y, tock.z, tock.w);
+
+    rotation.addKeyframe(0.0f, qtick);
+    rotation.addKeyframe(0.3f, qtock);
+    rotation.addKeyframe(0.6f, qtick);
+    rotation.addKeyframe(1.0f, qtock);
+
+    anim0.addKeyframeSequence(rotation);
+  }
+  {
+    liquid::KeyframeSequence scale(liquid::KeyframeSequenceTarget::Scale,
+                                   liquid::KeyframeSequenceInterpolation::Step);
+    scale.addKeyframe(0.0f, glm::vec4(1.0f));
+    scale.addKeyframe(0.2f, glm::vec4(0.8f));
+    scale.addKeyframe(0.4f, glm::vec4(0.6f));
+    scale.addKeyframe(0.6f, glm::vec4(0.4f));
+    scale.addKeyframe(0.8f, glm::vec4(0.6f));
+
+    anim0.addKeyframeSequence(scale);
+  }
+  {
+    liquid::KeyframeSequence translation(
+        liquid::KeyframeSequenceTarget::Position,
+        liquid::KeyframeSequenceInterpolation::Step);
+
+    translation.addKeyframe(0.0f, glm::vec4(0.0f));
+    translation.addKeyframe(0.2f, glm::vec4(0.2f));
+    translation.addKeyframe(0.4f, glm::vec4(0.4f));
+    translation.addKeyframe(0.6f, glm::vec4(0.2f));
+
+    anim0.addKeyframeSequence(translation);
+  }
+
+  animationSystem.addAnimation(anim0);
 
   liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
 
@@ -71,6 +121,9 @@ int main() {
   liquid::SharedPtr<liquid::MeshInstance> instance(
       new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
   context.setComponent<liquid::MeshComponent>(entity, {instance});
+
+  context.setComponent<liquid::AnimationComponent>(entity,
+                                                   {"triangle", true, 0.0f});
 
   std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
   auto camera = context.createEntity();
@@ -136,7 +189,7 @@ int main() {
         scope.texturePipeline =
             createTrianglePipelines(shaderTextureVert, shaderTextureFrag);
       },
-      [&instance, &renderer,
+      [&instance, &renderer, entity, &context,
        &materials](liquid::RenderCommandList &commandList, Scope &scope,
                    liquid::RenderGraphRegistry &registry) {
         constexpr uint32_t BASIC_MATERIAL = 0;
@@ -145,23 +198,26 @@ int main() {
         uint32_t pIdx = renderer->getDebugManager()->getWireframeMode() ? 1 : 0;
         uint32_t material = materialIndex % materials.size();
 
+        liquid::SharedPtr<liquid::Pipeline> pipeline;
+
         if (material == BASIC_MATERIAL) {
-          const auto &pipeline =
-              registry.getPipeline(scope.basicPipeline.at(pIdx));
-          commandList.bindPipeline(pipeline);
-
+          pipeline = registry.getPipeline(scope.basicPipeline.at(pIdx));
         } else if (material == RED_MATERIAL) {
-          const auto &pipeline =
-              registry.getPipeline(scope.redPipeline.at(pIdx));
-          commandList.bindPipeline(pipeline);
+          pipeline = registry.getPipeline(scope.redPipeline.at(pIdx));
         } else if (material == TEXTURE_MATERIAL) {
-          const auto &pipeline =
-              registry.getPipeline(scope.texturePipeline.at(pIdx));
-          commandList.bindPipeline(pipeline);
-
+          pipeline = registry.getPipeline(scope.texturePipeline.at(pIdx));
           commandList.bindDescriptor(pipeline, 0,
                                      materials.at(material)->getDescriptor());
         }
+        commandList.bindPipeline(pipeline);
+        auto *constants = new liquid::VulkanStandardPushConstants;
+        constants->modelMatrix =
+            context.getComponent<liquid::TransformComponent>(entity)
+                .worldTransform;
+
+        commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                  sizeof(liquid::VulkanStandardPushConstants),
+                                  constants);
 
         commandList.bindVertexBuffer(instance->getVertexBuffers().at(0));
         commandList.bindIndexBuffer(instance->getIndexBuffers().at(0),
@@ -174,8 +230,11 @@ int main() {
                                    renderer->getDebugManager(), "SWAPCHAIN",
                                    [](const auto &sceneTexture) {});
 
-  mainLoop.run(graph,
-               [instancePtr, materials](double dt) mutable { return true; });
+  mainLoop.run(graph, [&scene, &animationSystem](double dt) mutable {
+    animationSystem.update(dt);
+    scene->update();
+    return true;
+  });
 
   context.destroy();
   return 0;

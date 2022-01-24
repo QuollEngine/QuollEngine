@@ -132,8 +132,9 @@ public:
    * @param iterFn Iterator function
    */
   template <class... PickComponents>
-  void iterateEntities(const typename IterFnType<std::function<void(
-                           Entity, const PickComponents &...)>>::type &iterFn);
+  void iterateEntities(
+      const typename IterFnType<
+          std::function<void(Entity, PickComponents &...)>>::type &iterFn);
 
   /**
    * @brief Destroys all entities and components
@@ -184,7 +185,7 @@ private:
    */
   template <class... PickComponents, size_t... PickComponentIndices>
   void iterateEntitiesInternal(
-      const std::function<void(Entity, const PickComponents &...)> &iterFn,
+      const std::function<void(Entity, PickComponents &...)> &iterFn,
       std::index_sequence<PickComponentIndices...> sequence);
 
   /**
