@@ -1,7 +1,5 @@
 #include "core/Base.h"
 #include "core/Engine.h"
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 
 #include "renderer/vulkan/VulkanRenderer.h"
 #include "renderer/Material.h"
@@ -108,6 +106,7 @@ int main() {
       new liquid::GLFWWindow("Scene Viewer", 1024, 768));
   std::unique_ptr<liquid::VulkanRenderer> renderer(
       new liquid::VulkanRenderer(context, window.get(), true));
+  liquid::AnimationSystem animationSystem(context);
 
   glfwSetMouseButtonCallback(window->getInstance(), mouse_callback);
 
@@ -161,7 +160,7 @@ int main() {
 
   auto cubeMesh = createCube();
 
-  liquid::TinyGLTFLoader loader(context, renderer.get());
+  liquid::TinyGLTFLoader loader(context, renderer.get(), animationSystem);
 
   liquid::MainLoop mainLoop(renderer.get(), window.get());
 

@@ -54,8 +54,10 @@ TinyGLTFLoader::getBufferMetaForAccessor(const tinygltf::Model &model,
 }
 
 TinyGLTFLoader::TinyGLTFLoader(EntityContext &entityContext_,
-                               VulkanRenderer *renderer_)
+                               VulkanRenderer *renderer_,
+                               AnimationSystem &animationSystem_)
     : entityContext(entityContext_), renderer(renderer_),
+      animationSystem(animationSystem_),
       defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
 
 SceneNode *TinyGLTFLoader::loadFromFile(const String &filename) {
@@ -77,9 +79,10 @@ SceneNode *TinyGLTFLoader::loadFromFile(const String &filename) {
     throw GLTFError("Failed to parse GLTF file");
   }
 
+  auto &&animations = getAnimations(model);
   auto &&materials = getMaterials(model);
   auto &&meshes = getMeshes(model, materials);
-  auto *scene = getScene(model, meshes);
+  auto *scene = getScene(model, meshes, animations);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 
@@ -88,7 +91,8 @@ SceneNode *TinyGLTFLoader::loadFromFile(const String &filename) {
 
 SceneNode *
 TinyGLTFLoader::getScene(const tinygltf::Model &model,
-                         const std::map<uint32_t, Entity> &meshEntityMap) {
+                         const std::map<uint32_t, Entity> &meshEntityMap,
+                         const std::map<uint32_t, String> &nodeAnimationMap) {
   try {
     auto &gltfScene = model.scenes.at(model.defaultScene);
     auto *rootNode =
@@ -113,6 +117,12 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
 
       entityContext.setComponent<NameComponent>(entity,
                                                 {String(gltfNode.name)});
+
+      auto animation = nodeAnimationMap.find(nodeIndex);
+      if (animation != nodeAnimationMap.end()) {
+        entityContext.setComponent<AnimationComponent>(
+            entity, {animation->second, false});
+      }
 
       constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
       constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
@@ -477,6 +487,134 @@ TinyGLTFLoader::getMaterials(const tinygltf::Model &model) {
   } catch (std::out_of_range e) {
     throw GLTFError("Failed load textures and materials");
   }
+}
+
+std::map<uint32_t, String>
+TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
+  std::map<uint32_t, String> animations;
+  for (size_t i = 0; i < model.animations.size(); ++i) {
+    const auto &gltfAnimation = model.animations.at(i);
+
+    std::vector<std::pair<std::vector<float>, std::vector<glm::vec4>>> samplers(
+        gltfAnimation.samplers.size());
+
+    float maxTime = 0.0f;
+
+    for (size_t i = 0; i < gltfAnimation.samplers.size(); ++i) {
+      const auto &sampler = gltfAnimation.samplers.at(i);
+      const auto &input =
+          TinyGLTFLoader::getBufferMetaForAccessor(model, sampler.input);
+      const auto &output =
+          TinyGLTFLoader::getBufferMetaForAccessor(model, sampler.output);
+
+      LIQUID_ASSERT(input.accessor.type == TINYGLTF_TYPE_SCALAR,
+                    "Animation time accessor must be in SCALAR format");
+
+      LIQUID_ASSERT(input.accessor.componentType ==
+                        TINYGLTF_COMPONENT_TYPE_FLOAT,
+                    "Animation time accessor component type must be FLOAT");
+
+      LIQUID_ASSERT(
+          input.accessor.count == output.accessor.count,
+          "Sampler input and output must have the same number of items");
+
+      LIQUID_ASSERT(output.accessor.componentType ==
+                        TINYGLTF_COMPONENT_TYPE_FLOAT,
+                    "Animation output accessor component type must be FLOAT");
+
+      std::vector<float> &times = samplers.at(i).first;
+      times.resize(input.accessor.count);
+
+      std::vector<glm::vec4> &values = samplers.at(i).second;
+      values.resize(output.accessor.count);
+
+      float max = 0.0f;
+
+      {
+        const float *inputData = reinterpret_cast<const float *>(input.rawData);
+        for (size_t i = 0; i < input.accessor.count; ++i) {
+          times.at(i) = inputData[i];
+          max = std::max(max, inputData[i]);
+        }
+      }
+
+      maxTime = std::max(max, maxTime);
+
+      // Normalize the time
+      {
+        for (size_t i = 0; i < times.size(); ++i) {
+          times.at(i) = times.at(i) / max;
+        }
+      }
+
+      if (output.accessor.type == TINYGLTF_TYPE_VEC3) {
+        const glm::vec3 *outputData =
+            reinterpret_cast<const glm::vec3 *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = glm::vec4(outputData[i], 0.0f);
+        }
+      } else if (output.accessor.type == TINYGLTF_TYPE_VEC4) {
+        const glm::vec4 *outputData =
+            reinterpret_cast<const glm::vec4 *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = outputData[i];
+        }
+
+        for (auto &v : values) {
+          std::cout << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "\n";
+        }
+      } else if (output.accessor.type == TINYGLTF_TYPE_SCALAR) {
+        const float *outputData =
+            reinterpret_cast<const float *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = glm::vec4(outputData[i], 0, 0, 0);
+        }
+      }
+    }
+
+    Animation animation(gltfAnimation.name, maxTime);
+
+    int32_t targetNode = -1;
+
+    for (const auto &channel : gltfAnimation.channels) {
+      const auto &sampler = samplers.at(channel.sampler);
+
+      if (channel.target_node == -1) {
+        // Ignore channel if target node is not specified
+        continue;
+      }
+
+      if (targetNode == -1) {
+        targetNode = channel.target_node;
+      } else {
+        LIQUID_ASSERT(
+            targetNode == channel.target_node,
+            "All channels in animation must point to the same target node");
+      }
+
+      KeyframeSequenceTarget target = KeyframeSequenceTarget::Position;
+      if (channel.target_path == "rotation") {
+        target = KeyframeSequenceTarget::Rotation;
+      } else if (channel.target_path == "scale") {
+        target = KeyframeSequenceTarget::Scale;
+      } else if (channel.target_path == "position") {
+        target = KeyframeSequenceTarget::Position;
+      }
+
+      KeyframeSequence sequence(target, KeyframeSequenceInterpolation::Step);
+      for (size_t i = 0; i < sampler.first.size(); ++i) {
+        sequence.addKeyframe(sampler.first.at(i), sampler.second.at(i));
+      }
+      animation.addKeyframeSequence(sequence);
+    }
+
+    LIQUID_ASSERT(targetNode >= 0, "Animation must have a target node");
+
+    animations.insert({targetNode, animation.getName()});
+
+    animationSystem.addAnimation(animation);
+  }
+  return animations;
 }
 
 } // namespace liquid
