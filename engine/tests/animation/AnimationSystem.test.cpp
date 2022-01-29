@@ -11,10 +11,12 @@ public:
   AnimationSystemTest() : system(context) {}
 
   liquid::Entity createEntity(bool loop,
-                              const liquid::String &animName = "testAnim") {
+                              const liquid::String &animName = "testAnim",
+                              bool playing = true) {
     auto entity = context.createEntity();
     context.setComponent<liquid::TransformComponent>(entity, {});
-    context.setComponent<liquid::AnimationComponent>(entity, {animName, loop});
+    context.setComponent<liquid::AnimationComponent>(
+        entity, {animName, loop, 0.0f, playing});
 
     return entity;
   }
@@ -41,6 +43,17 @@ TEST_F(AnimationSystemTest,
 
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(2.0f);
+  EXPECT_EQ(animation.currentTime, 0.0f);
+}
+
+TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
+  createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
+  auto entity = createEntity(false, "testAnim", false);
+
+  const auto &animation =
+      context.getComponent<liquid::AnimationComponent>(entity);
+  EXPECT_EQ(animation.currentTime, 0.0f);
+  system.update(0.5f);
   EXPECT_EQ(animation.currentTime, 0.0f);
 }
 

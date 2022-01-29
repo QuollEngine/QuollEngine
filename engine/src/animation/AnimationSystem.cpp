@@ -20,10 +20,12 @@ void AnimationSystem::update(float dt) {
 
         const Animation &animation = (*iter).second;
 
-        animComp.currentTime =
-            std::min(animComp.currentTime + dt, animation.getTime());
-        if (animComp.loop && animComp.currentTime >= animation.getTime()) {
-          animComp.currentTime = 0.0f;
+        if (animComp.playing) {
+          animComp.currentTime =
+              std::min(animComp.currentTime + dt, animation.getTime());
+          if (animComp.loop && animComp.currentTime >= animation.getTime()) {
+            animComp.currentTime = 0.0f;
+          }
         }
 
         float normalizedTime = animComp.currentTime / animation.getTime();

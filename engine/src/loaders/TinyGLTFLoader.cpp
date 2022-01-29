@@ -115,8 +115,10 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
                           ? meshEntityMap.at(gltfNode.mesh)
                           : entityContext.createEntity();
 
-      entityContext.setComponent<NameComponent>(entity,
-                                                {String(gltfNode.name)});
+      String nodeName = String(gltfNode.name);
+      String entityName =
+          nodeName.length() > 0 ? nodeName : "Entity " + std::to_string(entity);
+      entityContext.setComponent<NameComponent>(entity, {entityName});
 
       auto animation = nodeAnimationMap.find(nodeIndex);
       if (animation != nodeAnimationMap.end()) {
@@ -581,7 +583,6 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
     }
 
     Animation animation(gltfAnimation.name, maxTime);
-
     int32_t targetNode = -1;
 
     for (const auto &channel : gltfAnimation.channels) {
@@ -619,7 +620,6 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
     LIQUID_ASSERT(targetNode >= 0, "Animation must have a target node");
 
     animations.insert({targetNode, animation.getName()});
-
     animationSystem.addAnimation(animation);
   }
   return animations;
