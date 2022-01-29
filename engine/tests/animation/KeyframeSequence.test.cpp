@@ -75,6 +75,14 @@ TEST(KeyframeSequenceDeathTest,
   EXPECT_DEATH({ sequence.getInterpolatedValue(0.0f); }, ".*");
 }
 
+TEST(KeyframeSequenceTest, GetLastKeyframeValueIfTimeIsBiggerThanLastKeyframe) {
+  liquid::KeyframeSequence sequence(SequenceTarget::Position,
+                                    SequenceInterpolation::Step);
+  sequence.addKeyframe(1.0f, glm::vec4{0.5f});
+
+  EXPECT_EQ(sequence.getInterpolatedValue(5.0f), glm::vec4(0.5f));
+}
+
 TEST(KeyframeSequenceTest, GetPreviousKeyframeValueOnStepInterpolation) {
   liquid::KeyframeSequence sequence(SequenceTarget::Position,
                                     SequenceInterpolation::Step);
@@ -90,10 +98,33 @@ TEST(KeyframeSequenceTest, GetPreviousKeyframeValueOnStepInterpolation) {
   EXPECT_EQ(sequence.getInterpolatedValue(1.0f), glm::vec4(1.0f));
 }
 
-TEST(KeyframeSequenceTest, GetLastKeyframeValueIfTimeIsBiggerThanLastKeyframe) {
+TEST(KeyframeSequenceTest,
+     GetInterpolatedKeyFrameValueBetweenTwoKeysOnLinearInterpolation) {
   liquid::KeyframeSequence sequence(SequenceTarget::Position,
-                                    SequenceInterpolation::Step);
-  sequence.addKeyframe(1.0f, glm::vec4{0.5f});
+                                    SequenceInterpolation::Linear);
 
-  EXPECT_EQ(sequence.getInterpolatedValue(5.0f), glm::vec4(0.5f));
+  sequence.addKeyframe(0.0f, glm::vec4{0.0f});
+  sequence.addKeyframe(0.5f, glm::vec4{0.5f});
+  sequence.addKeyframe(1.0f, glm::vec4{1.0f});
+
+  for (float t = 0; t < 0.5f; t += 0.05f) {
+    // 0 + (t - 0.0) * vec4(0.5 - 0.0) / (0.5 - 0.0) = t
+    EXPECT_EQ(sequence.getInterpolatedValue(t), glm::vec4(t));
+  }
+
+  for (float t = 0.5f; t <= 1.0f; t += 0.05f) {
+    // 0.5 + (t - 0.5) * vec4(1.0 - 0.0) / (1.0 - 0.0) = 0.5 + (1 - 0.5)
+    EXPECT_EQ(sequence.getInterpolatedValue(t), glm::vec4(0.5 + (t - 0.5f)));
+  }
+}
+
+TEST(KeyframeSequenceTest, GetLastItemValueIfTimeIsLargerThanLastTime) {
+  liquid::KeyframeSequence sequence(SequenceTarget::Position,
+                                    SequenceInterpolation::Linear);
+  sequence.addKeyframe(0.0f, glm::vec4{0.0f});
+  sequence.addKeyframe(0.5f, glm::vec4{0.5f});
+  sequence.addKeyframe(1.0f, glm::vec4{3.0f});
+
+  EXPECT_EQ(sequence.getInterpolatedValue(1.0f), glm::vec4(3.0f));
+  EXPECT_EQ(sequence.getInterpolatedValue(2.0f), glm::vec4(3.0f));
 }
