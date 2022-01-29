@@ -8,8 +8,10 @@
 #include "core/Base.h"
 #include "scene/Scene.h"
 #include "scene/Mesh.h"
+#include "animation/Animation.h"
 
 #include "renderer/vulkan/VulkanRenderer.h"
+#include "animation/AnimationSystem.h"
 
 #include <tinygltf/tiny_gltf.h>
 
@@ -22,8 +24,10 @@ public:
    *
    * @param entityContext Entity context
    * @param renderer Vulkan renderer
+   * @param animationSystem Animation system
    */
-  TinyGLTFLoader(EntityContext &entityContext, VulkanRenderer *renderer);
+  TinyGLTFLoader(EntityContext &entityContext, VulkanRenderer *renderer,
+                 AnimationSystem &animationSystem);
 
   /**
    * @brief Load GLTF from ASCII file
@@ -67,6 +71,17 @@ private:
   std::vector<SharedPtr<Material>> getMaterials(const tinygltf::Model &model);
 
   /**
+   * @brief Read animation dataa and return them for usage
+   *
+   * Conforms to on GLTF 2.0 spec
+   * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+   *
+   * @param model TinyGLTF model
+   * @return Map for animation index and Animation
+   */
+  std::map<uint32_t, String> getAnimations(const tinygltf::Model &model);
+
+  /**
    * @brief Reads scene data and creates scenes
    *
    * Conforms to on GLTF 2.0 spec
@@ -74,10 +89,12 @@ private:
    *
    * @param model TinyGLTF model
    * @param meshEntityMap Mesh index entity map
+   * @param nodeAnimationMap Node ID animation map
    * @return Scene node
    */
   SceneNode *getScene(const tinygltf::Model &model,
-                      const std::map<uint32_t, Entity> &meshEntityMap);
+                      const std::map<uint32_t, Entity> &meshEntityMap,
+                      const std::map<uint32_t, String> &nodeAnimationMap);
 
   /**
    * @brief Geta buffer metadata for accessor
@@ -91,6 +108,7 @@ private:
 
 private:
   EntityContext &entityContext;
+  AnimationSystem &animationSystem;
   VulkanRenderer *renderer = nullptr;
 
   SharedPtr<Material> defaultMaterial;

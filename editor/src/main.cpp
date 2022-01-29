@@ -34,6 +34,7 @@ int main() {
         new liquid::GLFWWindow("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT));
     std::unique_ptr<liquid::VulkanRenderer> renderer(
         new liquid::VulkanRenderer(context, window.get(), true));
+    liquid::AnimationSystem animationSystem(context);
 
     renderer->getShaderLibrary()->addShader(
         "editor-grid.vert",
@@ -43,7 +44,7 @@ int main() {
         renderer->createShader("assets/shaders/editor-grid.frag.spv"));
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
-    liquid::TinyGLTFLoader loader(context, renderer.get());
+    liquid::TinyGLTFLoader loader(context, renderer.get(), animationSystem);
     liquidator::EditorCamera editorCamera(context, renderer.get(),
                                           window.get());
     liquidator::EditorGrid editorGrid(renderer->getResourceAllocator());
@@ -128,11 +129,12 @@ int main() {
             commandList.draw(PLANE_VERTICES, 0);
           });
 
-      mainLoop.run(graph, [&editorCamera, &sceneManager,
-                           &renderData](double dt) mutable {
+      mainLoop.run(graph, [&editorCamera, &sceneManager, &renderData,
+                           &animationSystem](double dt) mutable {
         editorCamera.update();
         sceneManager.getActiveScene()->update();
 
+        animationSystem.update(static_cast<float>(dt));
         renderData->update();
         return !sceneManager.hasNewScene();
       });
