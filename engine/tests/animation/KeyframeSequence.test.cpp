@@ -114,7 +114,7 @@ TEST(KeyframeSequenceTest,
 
   for (float t = 0.5f; t <= 1.0f; t += 0.05f) {
     // 0.5 + (t - 0.5) * vec4(1.0 - 0.0) / (1.0 - 0.0) = 0.5 + (1 - 0.5)
-    EXPECT_EQ(sequence.getInterpolatedValue(t), glm::vec4(0.5 + (t - 0.5f)));
+    EXPECT_EQ(sequence.getInterpolatedValue(t), glm::vec4(0.5f + (t - 0.5f)));
   }
 }
 

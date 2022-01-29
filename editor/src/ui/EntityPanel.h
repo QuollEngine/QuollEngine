@@ -44,6 +44,11 @@ private:
    */
   void renderTransform();
 
+  /**
+   * @brief Render animation component
+   */
+  void renderAnimation();
+
 private:
   liquid::Entity selectedEntity = liquid::ENTITY_MAX;
   liquid::EntityContext &context;

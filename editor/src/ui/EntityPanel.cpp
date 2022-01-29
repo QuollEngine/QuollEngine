@@ -17,6 +17,7 @@ void EntityPanel::render(SceneManager &sceneManager) {
       renderName();
       renderLight();
       renderTransform();
+      renderAnimation();
     }
     ImGui::End();
   }
@@ -137,6 +138,40 @@ void EntityPanel::renderTransform() {
       }
 
       ImGui::EndTable();
+    }
+  }
+}
+
+void EntityPanel::renderAnimation() {
+  if (!context.hasComponent<liquid::AnimationComponent>(selectedEntity)) {
+    return;
+  }
+
+  auto &component =
+      context.getComponent<liquid::AnimationComponent>(selectedEntity);
+
+  if (ImGui::CollapsingHeader("Animation")) {
+    ImGui::Text("Name: %s", component.animation.c_str());
+
+    ImGui::Text("Time");
+    ImGui::InputFloat("###InputTime", &component.currentTime);
+
+    ImGui::Checkbox("Loop", &component.loop);
+
+    if (!component.playing) {
+      if (ImGui::Button("Play")) {
+        component.playing = true;
+      }
+    } else {
+      if (ImGui::Button("Pause")) {
+        component.playing = false;
+      }
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Reset")) {
+      component.currentTime = 0.0f;
     }
   }
 }
