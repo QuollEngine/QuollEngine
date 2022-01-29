@@ -4,7 +4,7 @@ namespace liquid {
 
 enum class KeyframeSequenceTarget { Position, Rotation, Scale };
 
-enum class KeyframeSequenceInterpolation { Step };
+enum class KeyframeSequenceInterpolation { Step, Linear };
 
 class KeyframeSequence {
 public:
@@ -70,6 +70,23 @@ public:
    * @return Interpolated value
    */
   glm::vec4 getInterpolatedValue(float time) const;
+
+private:
+  /**
+   * @brief Get value at previous time
+   *
+   * @param time ime
+   * @return Value at previous time
+   */
+  glm::vec4 getStepInterpolatedValue(float time) const;
+
+  /**
+   * @brief Get linear interpolated value between two times
+   *
+   * @param time Time
+   * @return Interpolated value
+   */
+  glm::vec4 getLinearInterpolatedValue(float time) const;
 
 private:
   KeyframeSequenceTarget target;

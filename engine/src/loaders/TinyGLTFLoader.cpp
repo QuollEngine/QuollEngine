@@ -120,8 +120,8 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
 
       auto animation = nodeAnimationMap.find(nodeIndex);
       if (animation != nodeAnimationMap.end()) {
-        entityContext.setComponent<AnimationComponent>(
-            entity, {animation->second, false});
+        entityContext.setComponent<AnimationComponent>(entity,
+                                                       {animation->second});
       }
 
       constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
@@ -495,8 +495,14 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
-    std::vector<std::pair<std::vector<float>, std::vector<glm::vec4>>> samplers(
-        gltfAnimation.samplers.size());
+    struct SamplerInfo {
+      std::vector<float> times;
+      std::vector<glm::vec4> values;
+      KeyframeSequenceInterpolation interpolation =
+          KeyframeSequenceInterpolation::Linear;
+    };
+
+    std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
 
     float maxTime = 0.0f;
 
@@ -522,11 +528,17 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
                         TINYGLTF_COMPONENT_TYPE_FLOAT,
                     "Animation output accessor component type must be FLOAT");
 
-      std::vector<float> &times = samplers.at(i).first;
+      std::vector<float> &times = samplers.at(i).times;
       times.resize(input.accessor.count);
 
-      std::vector<glm::vec4> &values = samplers.at(i).second;
+      std::vector<glm::vec4> &values = samplers.at(i).values;
       values.resize(output.accessor.count);
+
+      if (sampler.interpolation == "LINEAR") {
+        samplers.at(i).interpolation = KeyframeSequenceInterpolation::Linear;
+      } else if (sampler.interpolation == "STEP") {
+        samplers.at(i).interpolation = KeyframeSequenceInterpolation::Step;
+      }
 
       float max = 0.0f;
 
@@ -558,10 +570,6 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
             reinterpret_cast<const glm::vec4 *>(output.rawData);
         for (size_t i = 0; i < output.accessor.count; ++i) {
           values.at(i) = outputData[i];
-        }
-
-        for (auto &v : values) {
-          std::cout << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "\n";
         }
       } else if (output.accessor.type == TINYGLTF_TYPE_SCALAR) {
         const float *outputData =
@@ -601,9 +609,9 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
         target = KeyframeSequenceTarget::Position;
       }
 
-      KeyframeSequence sequence(target, KeyframeSequenceInterpolation::Step);
-      for (size_t i = 0; i < sampler.first.size(); ++i) {
-        sequence.addKeyframe(sampler.first.at(i), sampler.second.at(i));
+      KeyframeSequence sequence(target, sampler.interpolation);
+      for (size_t i = 0; i < sampler.times.size(); ++i) {
+        sequence.addKeyframe(sampler.times.at(i), sampler.values.at(i));
       }
       animation.addKeyframeSequence(sequence);
     }
