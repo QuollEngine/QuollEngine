@@ -3,11 +3,7 @@ project "DemoBasicTriangle"
     kind "ConsoleApp"
     configurations { "Debug" }
 
-    files {
-        "src/**.h",
-        "src/**.cpp"
-    }
-
+    loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine"}
 
     postbuildcommands {
