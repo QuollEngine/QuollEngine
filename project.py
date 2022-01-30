@@ -3,6 +3,7 @@ import os
 import json
 import zipfile
 import platform
+import time
 from glob import glob
 from urllib.request import urlretrieve
 from urllib.parse import urlparse
@@ -15,6 +16,9 @@ projectFile = os.path.join(workingDir, 'project.json')
 vendorDir = os.path.join(workingDir, 'vendor')
 tempDir = os.path.join(vendorDir, 'tmp')
 buildMode = 'Debug'
+
+
+profiler_data = {}
 
 #
 # Deletes existing directory and
@@ -49,12 +53,17 @@ def open_project(path):
 #
 def fetch_dependencies(project):
     for x in project['dependencies']:
+        profiler_data[x['name']] = { 'fetch': 0, 'build': 0 }
+
         print(f'Fetching {x["name"]}...')
+        start = time.time()
+        profiler_data[x['name']]['fetch']
         urlretrieve(x['url'], x['archivePath'])
         with zipfile.ZipFile(x['archivePath'], 'r') as zipRef:
             zipRef.extractall(x['archiveContentPath'])
 
         os.unlink(x['archivePath'])
+        profiler_data[x['name']]['fetch'] = time.time() - start
 
 #
 # Command to copy files to directory
@@ -105,6 +114,7 @@ fetch_dependencies(project)
 
 for x in project['dependencies']:
     print(f'Building {x["name"]}...')
+    start = time.time()
     
     for cmdLine in x['cmd']:
         parsedCmdLine = cmdLine.replace('{{VENDOR_DIR}}', vendorDir).replace('{{BUILD_MODE}}', buildMode)
@@ -118,4 +128,15 @@ for x in project['dependencies']:
         else:
             subprocess.run(parsedCmdLine.split(' '), shell=platform.system() == 'Windows', cwd=x['sourceDir'])
 
+    profiler_data[x['name']]['build'] = time.time() - start
+
 shutil.rmtree(tempDir)
+
+profiler_table = [[k, v['fetch'], v['build']] for k,v in profiler_data.items()]
+
+print(f'{"Name":<14} {"Fetch":<8} {"Build":<8}')
+for k, v in profiler_data.items():
+    fixed_fetch = f'{v["fetch"]:.4f}'
+    fixed_build = f'{v["build"]:.4f}'
+
+    print(f'{k:<14} {fixed_fetch:<8} {fixed_build:<8}')

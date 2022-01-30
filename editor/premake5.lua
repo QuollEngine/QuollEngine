@@ -3,11 +3,7 @@ project "Liquidator"
     kind "ConsoleApp"
     configurations { "Debug" }
 
-    files {
-        "src/**.h",
-        "src/**.cpp"
-    }
-
+    loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEnginePlatformTools"}
 
     postbuildcommands {

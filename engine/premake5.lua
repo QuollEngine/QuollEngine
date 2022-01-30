@@ -10,11 +10,7 @@ project "LiquidEngine"
 
     filter{}
 
-    files {
-        "src/**.h",
-        "src/**.cpp"
-    }
-
+    loadSourceFiles{}
     linkDependenciesWith{}
 
     postbuildcommands {

@@ -2,11 +2,8 @@ project "DemoPong"
     basedir "../../workspace/demos/pong-3d"
     kind "ConsoleApp"
     configurations { "Debug" }
-    files {
-        "src/**.h",
-        "src/**.cpp"
-    }
 
+    loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine"}
 
     postbuildcommands {

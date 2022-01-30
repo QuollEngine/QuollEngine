@@ -2,9 +2,6 @@ project "DemoSceneViewer"
     basedir "../../workspace/demos/scene-viewer"
     kind "ConsoleApp"
     configurations { "Debug" }
-    files {
-        "src/**.h",
-        "src/**.cpp"
-    }
 
+    loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEnginePlatformTools"}
