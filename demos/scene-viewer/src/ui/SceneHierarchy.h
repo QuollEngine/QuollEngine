@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/Base.h"
-#include "scene/Scene.h"
+#include "liquid/core/Base.h"
+#include "liquid/scene/Scene.h"
 
 class SceneHierarchy {
   using ClickHandler = std::function<void(liquid::Entity entity)>;

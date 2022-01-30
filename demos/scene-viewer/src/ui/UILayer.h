@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/Base.h"
-#include "entity/Entity.h"
-#include "entity/EntityContext.h"
+#include "liquid/core/Base.h"
+#include "liquid/entity/Entity.h"
+#include "liquid/entity/EntityContext.h"
 #include "SceneHierarchy.h"
 #include "EntityPropertyPanel.h"
 #include "MenuBar.h"

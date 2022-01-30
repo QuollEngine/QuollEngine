@@ -1,6 +1,6 @@
-#include "core/Base.h"
-#include "renderer/render-graph/RenderGraphRegistry.h"
-#include "renderer/Texture.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/render-graph/RenderGraphRegistry.h"
+#include "liquid/renderer/Texture.h"
 
 #include <gtest/gtest.h>
 

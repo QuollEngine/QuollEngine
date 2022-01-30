@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "loaders/KtxError.h"
+#include "liquid/core/Base.h"
+#include "liquid/loaders/KtxError.h"
 
 #include <gtest/gtest.h>
 

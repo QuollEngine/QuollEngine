@@ -1,6 +1,6 @@
-#include "core/Base.h"
-#include "renderer/render-graph/RenderGraphPassBase.h"
-#include "renderer/render-graph/RenderGraph.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/render-graph/RenderGraphPassBase.h"
+#include "liquid/renderer/render-graph/RenderGraph.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>

@@ -1,4 +1,4 @@
-#include "core/Base.h"
+#include "liquid/core/Base.h"
 #include "platform-tools/NativeFileDialog.h"
 
 namespace liquid::platform_tools {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/ResourceAllocator.h"
+#include "liquid/renderer/ResourceAllocator.h"
 #include "TestBuffer.h"
 #include "TestTextureResourceBinder.h"
 

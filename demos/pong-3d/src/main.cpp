@@ -1,22 +1,22 @@
-#include "core/Base.h"
-#include "core/Engine.h"
+#include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 #include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "renderer/vulkan/VulkanRenderer.h"
-#include "renderer/SceneRenderer.h"
-#include "window/glfw/GLFWWindow.h"
-#include "renderer/passes/ImguiPass.h"
-#include "renderer/passes/FullscreenQuadPass.h"
+#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/SceneRenderer.h"
+#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/renderer/passes/ImguiPass.h"
+#include "liquid/renderer/passes/FullscreenQuadPass.h"
 
-#include "scene/Vertex.h"
-#include "scene/Mesh.h"
-#include "scene/MeshInstance.h"
-#include "scene/Camera.h"
-#include "scene/Scene.h"
+#include "liquid/scene/Vertex.h"
+#include "liquid/scene/Mesh.h"
+#include "liquid/scene/MeshInstance.h"
+#include "liquid/scene/Camera.h"
+#include "liquid/scene/Scene.h"
 
-#include "loop/MainLoop.h"
+#include "liquid/loop/MainLoop.h"
 
 #include "cube.h"
 #include "sphere.h"

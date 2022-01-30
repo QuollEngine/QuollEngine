@@ -1,8 +1,8 @@
-#include "core/Base.h"
+#include "liquid/core/Base.h"
 #include <gtest/gtest.h>
 #include "../mocks/TestResourceAllocator.h"
-#include "loaders/KtxTextureLoader.h"
-#include "loaders/KtxError.h"
+#include "liquid/loaders/KtxTextureLoader.h"
+#include "liquid/loaders/KtxError.h"
 
 TEST(KtxTextureLoaderTests, FailsIfKtxFileCannotBeLoaded) {
   TestResourceAllocator resourceAllocator;

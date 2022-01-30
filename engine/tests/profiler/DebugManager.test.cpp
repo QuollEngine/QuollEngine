@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "profiler/DebugManager.h"
+#include "liquid/core/Base.h"
+#include "liquid/profiler/DebugManager.h"
 
 #include <gtest/gtest.h>
 

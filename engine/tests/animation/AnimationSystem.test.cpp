@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "animation/AnimationSystem.h"
+#include "liquid/core/Base.h"
+#include "liquid/animation/AnimationSystem.h"
 
 #include <gtest/gtest.h>
 

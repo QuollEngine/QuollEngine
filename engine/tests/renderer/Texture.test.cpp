@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "renderer/Texture.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/Texture.h"
 
 #include "../mocks/TestTextureResourceBinder.h"
 #include <gtest/gtest.h>

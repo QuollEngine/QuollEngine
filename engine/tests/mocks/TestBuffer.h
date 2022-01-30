@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer/HardwareBuffer.h"
-#include "profiler/StatsManager.h"
+#include "liquid/renderer/HardwareBuffer.h"
+#include "liquid/profiler/StatsManager.h"
 
 class TestBuffer : public liquid::HardwareBuffer {
 public:

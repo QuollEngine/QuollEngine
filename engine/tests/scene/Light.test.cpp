@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "scene/Light.h"
+#include "liquid/core/Base.h"
+#include "liquid/scene/Light.h"
 
 #include <glm/gtx/string_cast.hpp>
 #include <gtest/gtest.h>

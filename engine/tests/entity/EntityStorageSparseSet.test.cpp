@@ -1,6 +1,6 @@
-#include "core/Base.h"
-#include "entity/EntityStorageSparseSet.h"
-#include "entity/EntityContext.h"
+#include "liquid/core/Base.h"
+#include "liquid/entity/EntityStorageSparseSet.h"
+#include "liquid/entity/EntityContext.h"
 
 #include <gtest/gtest.h>
 

@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "scene/Mesh.h"
+#include "liquid/core/Base.h"
+#include "liquid/scene/Mesh.h"
 
 #include <gtest/gtest.h>
 

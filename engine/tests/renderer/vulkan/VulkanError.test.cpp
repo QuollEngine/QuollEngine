@@ -1,7 +1,7 @@
-#include "core/Base.h"
+#include "liquid/core/Base.h"
 #include <gtest/gtest.h>
 #include <vulkan/vulkan.hpp>
-#include "renderer/vulkan/VulkanError.h"
+#include "liquid/renderer/vulkan/VulkanError.h"
 
 TEST(VulkanErrorTest, ShowsErrorMessageWithoutCodeIfSuccess) {
   liquid::VulkanError error("Test error message", VK_SUCCESS);

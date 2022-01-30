@@ -1,7 +1,7 @@
 #pragma once
 
 #include <math.h>
-#include "scene/Mesh.h"
+#include "liquid/scene/Mesh.h"
 
 static constexpr float PI = 3.14159265;
 

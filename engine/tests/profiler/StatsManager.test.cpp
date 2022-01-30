@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "profiler/StatsManager.h"
+#include "liquid/core/Base.h"
+#include "liquid/profiler/StatsManager.h"
 
 #include <gtest/gtest.h>
 
