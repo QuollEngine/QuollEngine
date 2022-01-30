@@ -19,8 +19,7 @@ public:
    * @param context Entity context
    * @param gltfLoader GLTF loader
    */
-  UIRoot(liquid::EntityContext &context,
-         const liquid::TinyGLTFLoader &gltfLoader);
+  UIRoot(liquid::EntityContext &context, const liquid::GLTFLoader &gltfLoader);
 
   /**
    * @brief Render UI Root

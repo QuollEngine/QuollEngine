@@ -9,15 +9,22 @@
 
 #include <json/json.hpp>
 #include <stb/stb_image.h>
+#include <tinygltf/tiny_gltf.h>
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
 #include "liquid/renderer/Texture.h"
 #include "liquid/renderer/MaterialPBR.h"
-#include "TinyGLTFLoader.h"
+#include "GLTFLoader.h"
 #include "GLTFError.h"
 
 namespace liquid {
+
+struct BufferMeta {
+  tinygltf::Accessor accessor;
+  tinygltf::BufferView bufferView;
+  const unsigned char *rawData;
+};
 
 /**
  * @brief Decomposes matrix into TRS values
@@ -40,9 +47,15 @@ static void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
   rotation = glm::toQuat(matrix);
 }
 
-TinyGLTFLoader::BufferMeta
-TinyGLTFLoader::getBufferMetaForAccessor(const tinygltf::Model &model,
-                                         int accessorIndex) {
+/**
+ * @brief Geta buffer metadata for accessor
+ *
+ * @param model TinyGLTF model
+ * @param accessorIndex Index of buffer accessor
+ * @return GLTF buffer metadata
+ */
+static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
+                                           int accessorIndex) {
   auto accessor = model.accessors.at(accessorIndex);
   auto bufferView = model.bufferViews.at(accessor.bufferView);
   const unsigned char *bufferStart =
@@ -53,46 +66,22 @@ TinyGLTFLoader::getBufferMetaForAccessor(const tinygltf::Model &model,
   return {accessor, bufferView, bufferOffset};
 }
 
-TinyGLTFLoader::TinyGLTFLoader(EntityContext &entityContext_,
-                               VulkanRenderer *renderer_,
-                               AnimationSystem &animationSystem_)
-    : entityContext(entityContext_), renderer(renderer_),
-      animationSystem(animationSystem_),
-      defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
-
-SceneNode *TinyGLTFLoader::loadFromFile(const String &filename) {
-  tinygltf::TinyGLTF loader;
-  tinygltf::Model model;
-  String error, warning;
-
-  bool ret = loader.LoadASCIIFromFile(&model, &error, &warning, filename);
-
-  if (!warning.empty()) {
-    engineLogger.log(Logger::Warning) << warning;
-  }
-
-  if (!error.empty()) {
-    throw GLTFError(error);
-  }
-
-  if (!ret) {
-    throw GLTFError("Failed to parse GLTF file");
-  }
-
-  auto &&animations = getAnimations(model);
-  auto &&materials = getMaterials(model);
-  auto &&meshes = getMeshes(model, materials);
-  auto *scene = getScene(model, meshes, animations);
-
-  LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
-
-  return scene;
-}
-
-SceneNode *
-TinyGLTFLoader::getScene(const tinygltf::Model &model,
-                         const std::map<uint32_t, Entity> &meshEntityMap,
-                         const std::map<uint32_t, String> &nodeAnimationMap) {
+/**
+ * @brief Reads scene data and creates scenes
+ *
+ * Conforms to on GLTF 2.0 spec
+ * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+ *
+ * @param model TinyGLTF model
+ * @param meshEntityMap Mesh index entity map
+ * @param nodeAnimationMap Node ID animation map
+ * @param entityContext Entity context
+ * @return Scene node
+ */
+static SceneNode *getScene(const tinygltf::Model &model,
+                           const std::map<uint32_t, Entity> &meshEntityMap,
+                           const std::map<uint32_t, String> &nodeAnimationMap,
+                           EntityContext &entityContext) {
   try {
     auto &gltfScene = model.scenes.at(model.defaultScene);
     auto *rootNode =
@@ -181,9 +170,24 @@ TinyGLTFLoader::getScene(const tinygltf::Model &model,
   }
 }
 
-std::map<uint32_t, Entity>
-TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
-                          const std::vector<SharedPtr<Material>> &materials) {
+/**
+ * @brief Reads mesh data and creates mesh instances
+ *
+ * Conforms to on GLTF 2.0 spec
+ * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+ *
+ * @param model TinyGLTF model
+ * @param materials List of materials
+ * @param entityContext Entity context
+ * @param renderer Renderer
+ * @param defaultMaterial Default material
+ * @return Map for mesh index and entity
+ */
+static std::map<uint32_t, Entity>
+getMeshes(const tinygltf::Model &model,
+          const std::vector<SharedPtr<Material>> &materials,
+          EntityContext &entityContext, VulkanRenderer *renderer,
+          const SharedPtr<Material> &defaultMaterial) {
   std::vector<SharedPtr<MeshInstance>> instances;
   std::map<uint32_t, Entity> entityMap;
 
@@ -214,8 +218,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
         }
 
         if (primitive.indices >= 0) {
-          auto &&indexMeta = TinyGLTFLoader::getBufferMetaForAccessor(
-              model, primitive.indices);
+          auto &&indexMeta = getBufferMetaForAccessor(model, primitive.indices);
           indices.resize(indexMeta.accessor.count);
           if (indexMeta.accessor.componentType ==
                   TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
@@ -249,7 +252,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
           }
         }
 
-        auto &&positionMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+        auto &&positionMeta = getBufferMetaForAccessor(
             model, primitive.attributes.at("POSITION"));
 
         size_t vertexSize = positionMeta.accessor.count;
@@ -274,7 +277,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
         }
 
         if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
-          auto &&normalMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+          auto &&normalMeta = getBufferMetaForAccessor(
               model, primitive.attributes.at("NORMAL"));
           // According to spec, normal attribute can only be vec3<float> and
           // all attributes of a primitive must have the same number of items
@@ -298,7 +301,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
 
         if (primitive.attributes.find("TANGENT") !=
             primitive.attributes.end()) {
-          auto &&tangentMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+          auto &&tangentMeta = getBufferMetaForAccessor(
               model, primitive.attributes.at("TANGENT"));
           // According to spec, normal attribute can only be vec4<float> and
           // all attributes of a primitive must have the same number of items
@@ -325,7 +328,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
 
         if (primitive.attributes.find("TEXCOORD_0") !=
             primitive.attributes.end()) {
-          auto &&uvMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+          auto &&uvMeta = getBufferMetaForAccessor(
               model, primitive.attributes.at("TEXCOORD_0"));
 
           // According to spec, UV data is always in vec2 format
@@ -355,7 +358,7 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
 
         if (primitive.attributes.find("TEXCOORD_1") !=
             primitive.attributes.end()) {
-          auto &&uvMeta = TinyGLTFLoader::getBufferMetaForAccessor(
+          auto &&uvMeta = getBufferMetaForAccessor(
               model, primitive.attributes.at("TEXCOORD_1"));
 
           // According to spec, UV data is always in vec2 format
@@ -407,8 +410,16 @@ TinyGLTFLoader::getMeshes(const tinygltf::Model &model,
   }
 }
 
-std::vector<SharedPtr<Material>>
-TinyGLTFLoader::getMaterials(const tinygltf::Model &model) {
+/**
+ * @brief Geta buffer metadata for accessor
+ *
+ * @param model TinyGLTF model
+ * @param accessorIndex Index of buffer accessor
+ * @param renderer Renderer
+ * @return GLTF buffer metadata
+ */
+static std::vector<SharedPtr<Material>>
+getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
   try {
     std::vector<SharedPtr<Texture>> textures;
     std::vector<SharedPtr<Material>> materials;
@@ -491,8 +502,17 @@ TinyGLTFLoader::getMaterials(const tinygltf::Model &model) {
   }
 }
 
-std::map<uint32_t, String>
-TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
+/**
+ * @brief Read animation dataa and return them for usage
+ *
+ * Conforms to on GLTF 2.0 spec
+ * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+ *
+ * @param model TinyGLTF model
+ * @return Map for animation index and Animation
+ */
+static std::map<uint32_t, String>
+getAnimations(const tinygltf::Model &model, AnimationSystem &animationSystem) {
   std::map<uint32_t, String> animations;
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
@@ -510,10 +530,8 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
 
     for (size_t i = 0; i < gltfAnimation.samplers.size(); ++i) {
       const auto &sampler = gltfAnimation.samplers.at(i);
-      const auto &input =
-          TinyGLTFLoader::getBufferMetaForAccessor(model, sampler.input);
-      const auto &output =
-          TinyGLTFLoader::getBufferMetaForAccessor(model, sampler.output);
+      const auto &input = getBufferMetaForAccessor(model, sampler.input);
+      const auto &output = getBufferMetaForAccessor(model, sampler.output);
 
       LIQUID_ASSERT(input.accessor.type == TINYGLTF_TYPE_SCALAR,
                     "Animation time accessor must be in SCALAR format");
@@ -623,6 +641,42 @@ TinyGLTFLoader::getAnimations(const tinygltf::Model &model) {
     animationSystem.addAnimation(animation);
   }
   return animations;
+}
+
+GLTFLoader::GLTFLoader(EntityContext &entityContext_, VulkanRenderer *renderer_,
+                       AnimationSystem &animationSystem_)
+    : entityContext(entityContext_), renderer(renderer_),
+      animationSystem(animationSystem_),
+      defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
+
+SceneNode *GLTFLoader::loadFromFile(const String &filename) {
+  tinygltf::TinyGLTF loader;
+  tinygltf::Model model;
+  String error, warning;
+
+  bool ret = loader.LoadASCIIFromFile(&model, &error, &warning, filename);
+
+  if (!warning.empty()) {
+    engineLogger.log(Logger::Warning) << warning;
+  }
+
+  if (!error.empty()) {
+    throw GLTFError(error);
+  }
+
+  if (!ret) {
+    throw GLTFError("Failed to parse GLTF file");
+  }
+
+  auto &&animations = getAnimations(model, animationSystem);
+  auto &&materials = getMaterials(model, renderer);
+  auto &&meshes =
+      getMeshes(model, materials, entityContext, renderer, defaultMaterial);
+  auto *scene = getScene(model, meshes, animations, entityContext);
+
+  LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
+
+  return scene;
 }
 
 } // namespace liquid

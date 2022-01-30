@@ -12,7 +12,7 @@
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/scene/Light.h"
 
-#include "liquid/loaders/TinyGLTFLoader.h"
+#include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/KtxTextureLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 #include "liquid/loop/MainLoop.h"
@@ -160,7 +160,7 @@ int main() {
 
   auto cubeMesh = createCube();
 
-  liquid::TinyGLTFLoader loader(context, renderer.get(), animationSystem);
+  liquid::GLTFLoader loader(context, renderer.get(), animationSystem);
 
   liquid::MainLoop mainLoop(renderer.get(), window.get());
 
