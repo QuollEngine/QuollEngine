@@ -1,7 +1,7 @@
 #pragma once
 
 #include "platform-tools/NativeFileDialog.h"
-#include "liquid/loaders/TinyGLTFLoader.h"
+#include "liquid/loaders/GLTFLoader.h"
 #include "liquid/scene/Scene.h"
 
 #include "../editor-scene/SceneManager.h"
@@ -15,7 +15,7 @@ public:
    *
    * @param loader GLTF loader
    */
-  MenuBar(const liquid::TinyGLTFLoader &loader);
+  MenuBar(const liquid::GLTFLoader &loader);
 
   /**
    * @brief Render menu bar
@@ -42,7 +42,7 @@ private:
 
 private:
   liquid::platform_tools::NativeFileDialog fileDialog;
-  liquid::TinyGLTFLoader loader;
+  liquid::GLTFLoader loader;
 };
 
 } // namespace liquidator

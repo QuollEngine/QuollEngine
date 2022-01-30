@@ -7,7 +7,7 @@
 
 namespace liquidator {
 
-MenuBar::MenuBar(const liquid::TinyGLTFLoader &loader_) : loader(loader_) {}
+MenuBar::MenuBar(const liquid::GLTFLoader &loader_) : loader(loader_) {}
 
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(

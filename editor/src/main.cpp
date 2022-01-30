@@ -12,7 +12,7 @@
 #include "liquid/entity/EntityContext.h"
 #include "liquid/window/glfw/GLFWWindow.h"
 
-#include "liquid/loaders/TinyGLTFLoader.h"
+#include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
 #include "liquid/loop/MainLoop.h"
@@ -44,7 +44,7 @@ int main() {
         renderer->createShader("assets/shaders/editor-grid.frag.spv"));
 
     liquid::MainLoop mainLoop(renderer.get(), window.get());
-    liquid::TinyGLTFLoader loader(context, renderer.get(), animationSystem);
+    liquid::GLTFLoader loader(context, renderer.get(), animationSystem);
     liquidator::EditorCamera editorCamera(context, renderer.get(),
                                           window.get());
     liquidator::EditorGrid editorGrid(renderer->getResourceAllocator());
