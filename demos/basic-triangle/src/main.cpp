@@ -1,24 +1,24 @@
-#include "core/Base.h"
-#include "core/Engine.h"
+#include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
-#include "renderer/Material.h"
-#include "renderer/Texture.h"
-#include "renderer/Shader.h"
+#include "liquid/renderer/Material.h"
+#include "liquid/renderer/Texture.h"
+#include "liquid/renderer/Shader.h"
 
-#include "renderer/vulkan/VulkanRenderer.h"
-#include "scene/Vertex.h"
-#include "scene/Mesh.h"
-#include "scene/MeshInstance.h"
-#include "entity/EntityContext.h"
-#include "window/glfw/GLFWWindow.h"
-#include "renderer/passes/ImguiPass.h"
+#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/scene/Vertex.h"
+#include "liquid/scene/Mesh.h"
+#include "liquid/scene/MeshInstance.h"
+#include "liquid/entity/EntityContext.h"
+#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/renderer/passes/ImguiPass.h"
 
-#include "animation/AnimationSystem.h"
+#include "liquid/animation/AnimationSystem.h"
 
-#include "loaders/ImageTextureLoader.h"
+#include "liquid/loaders/ImageTextureLoader.h"
 
-#include "loop/MainLoop.h"
-#include "renderer/vulkan/VulkanStandardPushConstants.h"
+#include "liquid/loop/MainLoop.h"
+#include "liquid/renderer/vulkan/VulkanStandardPushConstants.h"
 
 #include <GLFW/glfw3.h>
 

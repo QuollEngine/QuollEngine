@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "renderer/MaterialPBR.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/MaterialPBR.h"
 
 #include "../mocks/TestShader.h"
 #include "../mocks/TestResourceAllocator.h"

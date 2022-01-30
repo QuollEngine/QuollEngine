@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "core/Property.h"
+#include "liquid/core/Base.h"
+#include "liquid/core/Property.h"
 
 #include <gtest/gtest.h>
 

@@ -1,4 +1,4 @@
-#include "renderer/Pipeline.h"
+#include "liquid/renderer/Pipeline.h"
 
 class TestPipeline : public liquid::Pipeline {
 public:

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "scene/Camera.h"
-#include "renderer/vulkan/VulkanRenderer.h"
-#include "entity/EntityContext.h"
-#include "window/glfw/GLFWWindow.h"
+#include "liquid/scene/Camera.h"
+#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/entity/EntityContext.h"
+#include "liquid/window/glfw/GLFWWindow.h"
 
 class EditorCamera {
 public:

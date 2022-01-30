@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "renderer/ShaderLibrary.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/ShaderLibrary.h"
 
 #include "../mocks/TestShader.h"
 #include <gtest/gtest.h>

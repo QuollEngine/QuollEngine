@@ -1,7 +1,7 @@
-#include "core/Base.h"
-#include "renderer/Descriptor.h"
-#include "renderer/Texture.h"
-#include "renderer/HardwareBuffer.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/Descriptor.h"
+#include "liquid/renderer/Texture.h"
+#include "liquid/renderer/HardwareBuffer.h"
 
 #include "../mocks/TestBuffer.h"
 

@@ -1,6 +1,6 @@
-#include "core/Base.h"
-#include "renderer/Texture.h"
-#include "renderer/Material.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/Texture.h"
+#include "liquid/renderer/Material.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>

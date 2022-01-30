@@ -1,7 +1,7 @@
-#include "core/Base.h"
-#include "renderer/vulkan/VulkanResourceAllocator.h"
-#include "renderer/vulkan/VulkanTextureBinder.h"
-#include "renderer/vulkan/VulkanError.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/vulkan/VulkanResourceAllocator.h"
+#include "liquid/renderer/vulkan/VulkanTextureBinder.h"
+#include "liquid/renderer/vulkan/VulkanError.h"
 
 #include <gtest/gtest.h>
 #include "../../mocks/VulkanMock.h"

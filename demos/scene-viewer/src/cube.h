@@ -1,4 +1,4 @@
-#include "scene/Mesh.h"
+#include "liquid/scene/Mesh.h"
 
 liquid::Mesh createCube() {
   liquid::Mesh mesh;

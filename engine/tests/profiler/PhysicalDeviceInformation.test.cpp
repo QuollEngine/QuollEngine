@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "profiler/PhysicalDeviceInformation.h"
+#include "liquid/core/Base.h"
+#include "liquid/profiler/PhysicalDeviceInformation.h"
 
 #include <gtest/gtest.h>
 

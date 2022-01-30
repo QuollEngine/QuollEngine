@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene/Scene.h"
+#include "liquid/scene/Scene.h"
 #include "EditorCamera.h"
 #include "EditorGrid.h"
 

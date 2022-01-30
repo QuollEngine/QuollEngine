@@ -1,8 +1,8 @@
 #pragma once
 
 #include "platform-tools/NativeFileDialog.h"
-#include "loaders/TinyGLTFLoader.h"
-#include "scene/Scene.h"
+#include "liquid/loaders/TinyGLTFLoader.h"
+#include "liquid/scene/Scene.h"
 
 #include "../editor-scene/SceneManager.h"
 

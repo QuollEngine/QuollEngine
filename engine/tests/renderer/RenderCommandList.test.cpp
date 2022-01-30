@@ -1,6 +1,6 @@
-#include "core/Base.h"
-#include "renderer/RenderCommandList.h"
-#include "renderer/Pipeline.h"
+#include "liquid/core/Base.h"
+#include "liquid/renderer/RenderCommandList.h"
+#include "liquid/renderer/Pipeline.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>

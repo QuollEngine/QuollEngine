@@ -1,4 +1,4 @@
-#include "core/Base.h"
+#include "liquid/core/Base.h"
 #include "platform-tools/NativeFileDialog.h"
 #include <windows.h>
 #include <shobjidl.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity/EntityContext.h"
+#include "liquid/entity/EntityContext.h"
 #include "../editor-scene/SceneManager.h"
 
 namespace liquidator {

@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "scene/Geometry.h"
+#include "liquid/core/Base.h"
+#include "liquid/scene/Geometry.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>

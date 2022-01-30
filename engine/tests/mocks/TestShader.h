@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/Shader.h"
+#include "liquid/renderer/Shader.h"
 
 class TestShader : public liquid::Shader {
 public:

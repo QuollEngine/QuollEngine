@@ -1,7 +1,7 @@
-#include "core/Base.h"
-#include "scene/Scene.h"
-#include "scene/Camera.h"
-#include "scene/Light.h"
+#include "liquid/core/Base.h"
+#include "liquid/scene/Scene.h"
+#include "liquid/scene/Camera.h"
+#include "liquid/scene/Light.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>

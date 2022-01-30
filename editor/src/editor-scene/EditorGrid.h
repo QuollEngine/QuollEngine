@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer/ResourceAllocator.h"
-#include "renderer/HardwareBuffer.h"
+#include "liquid/renderer/ResourceAllocator.h"
+#include "liquid/renderer/HardwareBuffer.h"
 
 namespace liquidator {
 

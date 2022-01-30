@@ -1,5 +1,5 @@
-#include "core/Base.h"
-#include "animation/KeyframeSequence.h"
+#include "liquid/core/Base.h"
+#include "liquid/animation/KeyframeSequence.h"
 
 #include <gtest/gtest.h>
 

@@ -2,11 +2,11 @@ project "LiquidEngine"
     basedir "../workspace/engine"
     kind "StaticLib"
 
-    pchheader "../../engine/src/core/Base.h"
+    pchheader "../../engine/src/liquid/core/Base.h"
 
     filter { "toolset:msc-*" }
-        pchheader "core/Base.h"
-        pchsource "src/core/Base.cpp"
+        pchheader "liquid/core/Base.h"
+        pchsource "src/liquid/core/Base.cpp"
 
     filter{}
 
@@ -35,11 +35,11 @@ project "LiquidEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
-    pchheader "../../engine/src/core/Base.h"
+    pchheader "../../engine/src/liquid/core/Base.h"
 
     filter { "toolset:msc-*" }
-        pchheader "core/Base.h"
-        pchsource "src/core/Base.cpp"
+        pchheader "liquid/core/Base.h"
+        pchsource "src/liquid/core/Base.cpp"
 
     filter{}
 
@@ -51,7 +51,7 @@ project "LiquidEngineTest"
     }
 
     removefiles {
-        "src/renderer/vulkan/VmaImpl.cpp",
+        "src/liquid/renderer/vulkan/VmaImpl.cpp",
     }
 
     setupTestingOptions{}

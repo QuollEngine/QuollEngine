@@ -1,4 +1,4 @@
-#include "renderer/RenderPass.h"
+#include "liquid/renderer/RenderPass.h"
 
 class TestRenderPass : public liquid::RenderPass {
 public:
