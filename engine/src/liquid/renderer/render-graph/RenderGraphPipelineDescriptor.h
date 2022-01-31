@@ -2,6 +2,7 @@
 
 #include "liquid/renderer/Shader.h"
 #include "liquid/scene/Vertex.h"
+#include "liquid/scene/SkinnedVertex.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -109,6 +110,45 @@ inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
                                     offsetof(Vertex, u0)},
        PipelineVertexInputAttribute{TEXCOORD1_LOCATION, 0, R32G32_SFLOAT,
                                     offsetof(Vertex, u1)}}};
+}
+
+template <>
+inline PipelineVertexInputLayout
+PipelineVertexInputLayout::create<SkinnedVertex>() {
+  constexpr uint32_t POSITION_LOCATION = 0;
+  constexpr uint32_t NORMAL_LOCATION = 1;
+  constexpr uint32_t TANGENT_LOCATION = 2;
+  constexpr uint32_t COLOR_LOCATION = 3;
+  constexpr uint32_t TEXCOORD0_LOCATION = 4;
+  constexpr uint32_t TEXCOORD1_LOCATION = 5;
+  constexpr uint32_t JOINTS_LOCATION = 6;
+  constexpr uint32_t WEIGHTS_LOCATION = 7;
+
+  // TODO: Create abstract format type
+  constexpr uint32_t R32G32B32A32_SFLOAT = 109;
+  constexpr uint32_t R32G32B32_SFLOAT = 106;
+  constexpr uint32_t R32G32_SFLOAT = 103;
+  constexpr uint32_t R32G32B32A32_UINT = 107;
+
+  return PipelineVertexInputLayout{
+      {PipelineVertexInputBinding{0, sizeof(SkinnedVertex),
+                                  VertexInputRate::Vertex}},
+      {PipelineVertexInputAttribute{POSITION_LOCATION, 0, R32G32B32_SFLOAT,
+                                    offsetof(SkinnedVertex, x)},
+       PipelineVertexInputAttribute{NORMAL_LOCATION, 0, R32G32B32_SFLOAT,
+                                    offsetof(SkinnedVertex, nx)},
+       PipelineVertexInputAttribute{TANGENT_LOCATION, 0, R32G32B32A32_SFLOAT,
+                                    offsetof(SkinnedVertex, tx)},
+       PipelineVertexInputAttribute{COLOR_LOCATION, 0, R32G32B32_SFLOAT,
+                                    offsetof(SkinnedVertex, r)},
+       PipelineVertexInputAttribute{TEXCOORD0_LOCATION, 0, R32G32_SFLOAT,
+                                    offsetof(SkinnedVertex, u0)},
+       PipelineVertexInputAttribute{TEXCOORD1_LOCATION, 0, R32G32_SFLOAT,
+                                    offsetof(SkinnedVertex, u1)},
+       PipelineVertexInputAttribute{JOINTS_LOCATION, 0, R32G32B32A32_UINT,
+                                    offsetof(SkinnedVertex, j0)},
+       PipelineVertexInputAttribute{WEIGHTS_LOCATION, 0, R32G32B32A32_SFLOAT,
+                                    offsetof(SkinnedVertex, w0)}}};
 }
 
 struct PipelineColorBlendAttachment {

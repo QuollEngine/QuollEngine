@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/scene/Mesh.h"
+#include "liquid/scene/Vertex.h"
 
 #include <gtest/gtest.h>
 
@@ -7,9 +8,9 @@ static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
   return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 }
 
-TEST(MeshTest, StoresGeometries) {
-  liquid::Mesh mesh;
-  liquid::Geometry g0, g1, g2;
+TEST(BaseMeshTest, StoresGeometries) {
+  liquid::BaseMesh<liquid::Vertex> mesh;
+  liquid::BaseGeometry<liquid::Vertex> g0, g1, g2;
   liquid::Vertex v0{1.0f, 0.0f, 0.0f}, v1{0.0f, 1.0f, 0.0f},
       v2{0.0f, 0.0f, 1.0f};
   g0.addVertex(v0);

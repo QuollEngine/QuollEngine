@@ -2,17 +2,24 @@
 #pragma once
 
 #include "liquid/core/Base.h"
-#include "Vertex.h"
 #include "liquid/renderer/Material.h"
 
 namespace liquid {
 
-class Geometry {
+/**
+ * @brief Base geometry
+ *
+ * @tparam TVertex Vertex type
+ */
+template <class TVertex> class BaseGeometry {
+public:
+  using Vertex = TVertex;
+
 public:
   /**
    * @brief Default Constructor
    */
-  Geometry() = default;
+  BaseGeometry() = default;
 
   /**
    * @brief Create geometry from vertices and indices
@@ -21,16 +28,17 @@ public:
    * @param indices List of indices
    * @param material Material
    */
-  Geometry(const std::vector<Vertex> &vertices,
-           const std::vector<uint32_t> &indices,
-           const SharedPtr<Material> &material);
+  BaseGeometry(const std::vector<Vertex> &vertices_,
+               const std::vector<uint32_t> &indices_,
+               const SharedPtr<Material> &material_)
+      : vertices(vertices_), indices(indices_), material(material_) {}
 
   /**
    * @brief Add vertex
    *
    * @param vertex Vertex
    */
-  void addVertex(const Vertex &vertex);
+  void addVertex(const Vertex &vertex) { vertices.push_back(vertex); }
 
   /**
    * @brief Add triangle
@@ -39,14 +47,20 @@ public:
    * @param p2 Vertex index of second point
    * @param p3 Vertex index of third point
    */
-  void addTriangle(uint32_t p1, uint32_t p2, uint32_t p3);
+  void addTriangle(uint32_t p1, uint32_t p2, uint32_t p3) {
+    indices.push_back(p1);
+    indices.push_back(p2);
+    indices.push_back(p3);
+  }
 
   /**
    * @brief Set material
    *
-   * @param material
+   * @param material Material
    */
-  void setMaterial(const SharedPtr<Material> &material);
+  void setMaterial(const SharedPtr<Material> &material_) {
+    material = material_;
+  }
 
   /**
    * @brief Get vertices

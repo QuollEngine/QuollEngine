@@ -43,12 +43,12 @@ public:
       handleKeyClick(key, scancode, action, mods);
     });
 
-    barInstance.reset(
-        new liquid::MeshInstance(&barMesh, renderer->getResourceAllocator()));
+    barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
+        &barMesh, renderer->getResourceAllocator()));
     barInstance->setMaterial(material);
 
-    ballInstance.reset(
-        new liquid::MeshInstance(&ballMesh, renderer->getResourceAllocator()));
+    ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
+        &ballMesh, renderer->getResourceAllocator()));
     ballInstance->setMaterial(material);
 
     setupScene();
@@ -300,8 +300,8 @@ private:
   liquid::SharedPtr<liquid::Shader> fragmentShader;
   liquid::SharedPtr<liquid::Material> material;
 
-  liquid::SharedPtr<liquid::MeshInstance> barInstance;
-  liquid::SharedPtr<liquid::MeshInstance> ballInstance;
+  liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> barInstance;
+  liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> ballInstance;
 
   liquid::SceneNode *p1, *p2, *ball;
 

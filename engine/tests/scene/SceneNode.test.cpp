@@ -4,10 +4,7 @@
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
-liquid::SharedPtr<liquid::MeshInstance> emptyMeshInstance = nullptr;
-
 glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
-
   return glm::translate(glm::mat4(1.0f), transform.localPosition) *
          glm::toMat4(transform.localRotation) *
          glm::scale(glm::mat4(1.0f), transform.localScale);
@@ -135,7 +132,6 @@ TEST(SceneTest, UpdatesChildrenWithParent) {
 
   liquid::SceneNode parentNode(context.createEntity(), parentTransform, nullptr,
                                context);
-  liquid::SharedPtr<liquid::MeshInstance> meshInstance = nullptr;
   auto *childNode = parentNode.addChild(context.createEntity(), childTransform);
 
   parentNode.update();

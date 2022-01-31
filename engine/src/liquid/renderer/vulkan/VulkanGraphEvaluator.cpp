@@ -385,15 +385,17 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   }
 
   // Pipeline Layout
-  std::vector<VkDescriptorSetLayout> descriptorLayouts;
+  std::map<uint32_t, VkDescriptorSetLayout> descriptorLayoutsMap;
+  std::unordered_map<uint32_t, VkDescriptorSetLayout> descriptorLayouts;
+  std::vector<VkDescriptorSetLayout> descriptorLayoutsRaw;
   std::vector<VkPushConstantRange> pushConstantRanges;
 
   for (auto &shader : shaders) {
     const auto &reflection = shader->getReflectionData();
-    for (auto &x : reflection.descriptorSetLayouts) {
+    for (auto &[set, bindings] : reflection.descriptorSetLayouts) {
 
       std::vector<VkDescriptorBindingFlags> bindingFlags(
-          x.size(), VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+          bindings.size(), VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 
       VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
       bindingFlagsCreateInfo.sType =
@@ -408,19 +410,24 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
       createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
       createInfo.flags = 0;
       createInfo.pNext = &bindingFlagsCreateInfo;
-      createInfo.bindingCount = static_cast<uint32_t>(x.size());
-      createInfo.pBindings = x.data();
+      createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+      createInfo.pBindings = bindings.data();
       checkForVulkanError(
           vkCreateDescriptorSetLayout(vulkanInstance.getDevice(), &createInfo,
                                       nullptr, &layout),
           "Failed to create descriptor set layout");
 
-      descriptorLayouts.push_back(layout);
+      descriptorLayoutsMap.insert({set, layout});
     }
 
     for (auto &x : reflection.pushConstantRanges) {
       pushConstantRanges.push_back(x);
     }
+  }
+
+  for (auto &[set, layout] : descriptorLayoutsMap) {
+    descriptorLayoutsRaw.push_back(layout);
+    descriptorLayouts.insert({set, layout});
   }
 
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
@@ -430,7 +437,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   pipelineLayoutCreateInfo.pNext = nullptr;
   pipelineLayoutCreateInfo.setLayoutCount =
       static_cast<uint32_t>(descriptorLayouts.size());
-  pipelineLayoutCreateInfo.pSetLayouts = descriptorLayouts.data();
+  pipelineLayoutCreateInfo.pSetLayouts = descriptorLayoutsRaw.data();
   pipelineLayoutCreateInfo.pushConstantRangeCount =
       static_cast<uint32_t>(pushConstantRanges.size());
   pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();

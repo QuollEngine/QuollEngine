@@ -99,8 +99,6 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
       spvReflectEnumerateDescriptorSets(&shaderReflectModule, &count,
                                         &descriptors.at(0));
 
-      reflectionData.descriptorSetLayouts.reserve(count);
-
       for (auto &ds : descriptors) {
         const SpvReflectDescriptorSet &reflectDescriptorSet = *ds;
 
@@ -122,7 +120,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
             bindings.at(i).descriptorCount *= reflectBinding->array.dims[j];
           }
         }
-        reflectionData.descriptorSetLayouts.push_back(bindings);
+        reflectionData.descriptorSetLayouts.insert({ds->set, bindings});
       }
     }
   }

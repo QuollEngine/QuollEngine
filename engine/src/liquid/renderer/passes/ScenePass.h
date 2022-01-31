@@ -51,6 +51,8 @@ private:
   GraphResourceId wireframePipelineId = 0;
   GraphResourceId shadowMapTextureId = 0;
 
+  GraphResourceId skinnedPipelineId = 0;
+
   SharedPtr<VulkanRenderData> renderData;
   SharedPtr<DebugManager> debugManager;
 };

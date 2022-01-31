@@ -15,12 +15,14 @@ project "LiquidEngine"
 
     postbuildcommands {
         "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
-        "glslc ../../engine/assets/shaders/pbr.vert -o %{cfg.buildtarget.directory}/assets/shaders/pbr.vert.spv",
+        "glslc ../../engine/assets/shaders/geometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/geometry.vert.spv",
+        "glslc ../../engine/assets/shaders/skinnedGeometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/skinnedGeometry.vert.spv",
         "glslc ../../engine/assets/shaders/pbr.frag -o %{cfg.buildtarget.directory}/assets/shaders/pbr.frag.spv",
         "glslc ../../engine/assets/shaders/skybox.frag -o %{cfg.buildtarget.directory}/assets/shaders/skybox.frag.spv",
         "glslc ../../engine/assets/shaders/skybox.vert -o %{cfg.buildtarget.directory}/assets/shaders/skybox.vert.spv",
         "glslc ../../engine/assets/shaders/shadowmap.frag -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.frag.spv",
-        "glslc ../../engine/assets/shaders/shadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.vert.spv",
+        "glslc ../../engine/assets/shaders/shadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.vert.spv", 
+        "glslc ../../engine/assets/shaders/skinnedShadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/skinnedShadowmap.vert.spv",
         "glslc ../../engine/assets/shaders/imgui.frag -o %{cfg.buildtarget.directory}/assets/shaders/imgui.frag.spv",
         "glslc ../../engine/assets/shaders/imgui.vert -o %{cfg.buildtarget.directory}/assets/shaders/imgui.vert.spv",
         "glslc ../../engine/assets/shaders/fullscreenQuad.frag -o %{cfg.buildtarget.directory}/assets/shaders/fullscreenQuad.frag.spv",

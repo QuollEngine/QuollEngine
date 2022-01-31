@@ -1,36 +1,12 @@
 #pragma once
 
-#include "liquid/core/Base.h"
+#include "BaseGeometry.h"
+#include "BaseMesh.h"
 #include "Vertex.h"
-#include "Geometry.h"
 
 namespace liquid {
 
-class Mesh {
-public:
-  /**
-   * @brief Default Constructor
-   */
-  Mesh() = default;
-
-  /**
-   * @brief Add geometry
-   *
-   * @param geometry Geometry
-   */
-  void addGeometry(const Geometry &geometry);
-
-  /**
-   * @brief Get geometries
-   *
-   * @return List of geometries
-   */
-  inline const std::vector<Geometry> &getGeometries() const {
-    return geometries;
-  }
-
-private:
-  std::vector<Geometry> geometries;
-};
+using Geometry = BaseGeometry<Vertex>;
+using Mesh = BaseMesh<Vertex>;
 
 } // namespace liquid
