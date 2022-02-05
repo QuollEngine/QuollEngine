@@ -31,6 +31,8 @@ VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
 
 VulkanRenderer::~VulkanRenderer() {
   entityContext.destroyComponents<MeshComponent>();
+  entityContext.destroyComponents<SkinnedMeshComponent>();
+  entityContext.destroyComponents<SkeletonComponent>();
 
   shadowMaterials.clear();
 
@@ -42,10 +44,13 @@ VulkanRenderer::~VulkanRenderer() {
 
 void VulkanRenderer::loadShaders() {
   shaderLibrary->addShader(
-      "__engine.default.pbr.vertex",
-      createShader(Engine::getAssetsPath() + "/shaders/pbr.vert.spv"));
+      "__engine.geometry.default.vertex",
+      createShader(Engine::getAssetsPath() + "/shaders/geometry.vert.spv"));
+  shaderLibrary->addShader("__engine.geometry.skinned.vertex",
+                           createShader(Engine::getAssetsPath() +
+                                        "/shaders/skinnedGeometry.vert.spv"));
   shaderLibrary->addShader(
-      "__engine.default.pbr.fragment",
+      "__engine.pbr.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/pbr.frag.spv"));
   shaderLibrary->addShader(
       "__engine.skybox.default.vertex",
@@ -54,10 +59,14 @@ void VulkanRenderer::loadShaders() {
       "__engine.skybox.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/skybox.frag.spv"));
   shaderLibrary->addShader(
-      "__engine.default.shadowmap.vertex",
+      "__engine.shadowmap.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"));
+  shaderLibrary->addShader("__engine.shadowmap.skinned.vertex",
+                           createShader(Engine::getAssetsPath() +
+                                        "/shaders/skinnedShadowmap.vert.spv"));
+
   shaderLibrary->addShader(
-      "__engine.default.shadowmap.fragment",
+      "__engine.shadowmap.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"));
   shaderLibrary->addShader(
       "__engine.imgui.default.vertex",

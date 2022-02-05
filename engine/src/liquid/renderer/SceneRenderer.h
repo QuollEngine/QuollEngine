@@ -13,6 +13,10 @@ public:
   void render(RenderCommandList &commandList,
               const SharedPtr<Pipeline> &pipeline);
 
+  void renderSkinned(RenderCommandList &commandList,
+                     const SharedPtr<Pipeline> &pipeline,
+                     uint32_t desciptorSet);
+
 private:
   EntityContext &entityContext;
   bool bindMaterialData;

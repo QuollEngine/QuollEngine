@@ -14,9 +14,17 @@ void ShadowPass::buildInternal(RenderGraphBuilder &builder) {
   shadowMapId = builder.write("shadowmap");
 
   pipelineId = builder.create(PipelineDescriptor{
-      shaderLibrary->getShader("__engine.default.shadowmap.vertex"),
-      shaderLibrary->getShader("__engine.default.shadowmap.fragment"),
+      shaderLibrary->getShader("__engine.shadowmap.default.vertex"),
+      shaderLibrary->getShader("__engine.shadowmap.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
+      PipelineInputAssembly{PrimitiveTopology::TriangleList},
+      PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
+                         FrontFace::Clockwise}});
+
+  skinnedPipelineId = builder.create(PipelineDescriptor{
+      shaderLibrary->getShader("__engine.shadowmap.skinned.vertex"),
+      shaderLibrary->getShader("__engine.shadowmap.default.fragment"),
+      PipelineVertexInputLayout::create<SkinnedVertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
                          FrontFace::Clockwise}});
@@ -32,6 +40,17 @@ void ShadowPass::execute(RenderCommandList &commandList,
     commandList.bindDescriptor(pipeline, 0, shadowMaterial->getDescriptor());
 
     sceneRenderer.render(commandList, pipeline);
+  }
+
+  const auto &skinnedPipeline = registry.getPipeline(skinnedPipelineId);
+  commandList.bindPipeline(skinnedPipeline);
+
+  for (auto &shadowMaterial : shadowMaterials) {
+
+    commandList.bindDescriptor(skinnedPipeline, 0,
+                               shadowMaterial->getDescriptor());
+
+    sceneRenderer.renderSkinned(commandList, skinnedPipeline, 1);
   }
 }
 

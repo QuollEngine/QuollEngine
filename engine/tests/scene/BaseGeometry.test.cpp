@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
-#include "liquid/scene/Geometry.h"
+#include "liquid/scene/BaseGeometry.h"
+#include "liquid/scene/Vertex.h"
 
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
@@ -10,7 +11,7 @@ static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
   return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 }
 
-TEST(GeometryTest, SetsVerticesAndIndicesOnConstruct) {
+TEST(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {
   TestResourceAllocator resourceAllocator;
   ShaderPtr shaderVert, shaderFrag;
 
@@ -19,7 +20,7 @@ TEST(GeometryTest, SetsVerticesAndIndicesOnConstruct) {
   std::vector<uint32_t> indices{0, 1, 2, 2, 1, 0};
   liquid::SharedPtr<liquid::Material> material(
       new liquid::Material({}, {}, &resourceAllocator));
-  liquid::Geometry geometry(vertices, indices, material);
+  liquid::BaseGeometry<liquid::Vertex> geometry(vertices, indices, material);
 
   auto &meshVertices = geometry.getVertices();
   auto &meshIndices = geometry.getIndices();
@@ -35,8 +36,8 @@ TEST(GeometryTest, SetsVerticesAndIndicesOnConstruct) {
   }
 }
 
-TEST(GeometryTest, AddsTriangleAsIndices) {
-  liquid::Geometry geometry;
+TEST(BaseGeometryTest, AddsTriangleAsIndices) {
+  liquid::BaseGeometry<liquid::Vertex> geometry;
 
   EXPECT_EQ(geometry.getIndices().size(), 0);
 
@@ -55,8 +56,8 @@ TEST(GeometryTest, AddsTriangleAsIndices) {
   EXPECT_EQ(indices[5], 3);
 }
 
-TEST(GeometryTest, AddsVertices) {
-  liquid::Geometry geometry;
+TEST(BaseGeometryTest, AddsVertices) {
+  liquid::BaseGeometry<liquid::Vertex> geometry;
 
   EXPECT_EQ(geometry.getVertices().size(), 0);
 
@@ -74,8 +75,8 @@ TEST(GeometryTest, AddsVertices) {
   EXPECT_TRUE(vertices[1] == v2);
 }
 
-TEST(GeometryTest, SetsMaterial) {
-  liquid::Geometry geometry;
+TEST(BaseGeometryTest, SetsMaterial) {
+  liquid::BaseGeometry<liquid::Vertex> geometry;
   EXPECT_EQ(geometry.getMaterial().get(), nullptr);
 
   TestResourceAllocator resourceAllocator;

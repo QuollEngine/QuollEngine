@@ -46,6 +46,7 @@ function setupToolsetOptions()
     -- as if we were to open exe file directly
     filter { "toolset:msc-*" }
         debugdir "$(TargetDir)"
+        flags { "MultiProcessorCompile" }
 
     filter{}
 

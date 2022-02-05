@@ -18,16 +18,26 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
 
   shadowMapTextureId = builder.read("shadowmap");
   pipelineId = builder.create(PipelineDescriptor{
-      shaderLibrary->getShader("__engine.default.pbr.vertex"),
-      shaderLibrary->getShader("__engine.default.pbr.fragment"),
+      shaderLibrary->getShader("__engine.geometry.default.vertex"),
+      shaderLibrary->getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::None,
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
+
+  skinnedPipelineId = builder.create(PipelineDescriptor{
+      shaderLibrary->getShader("__engine.geometry.skinned.vertex"),
+      shaderLibrary->getShader("__engine.pbr.default.fragment"),
+      PipelineVertexInputLayout::create<SkinnedVertex>(),
+      PipelineInputAssembly{PrimitiveTopology::TriangleList},
+      PipelineRasterizer{PolygonMode::Fill, CullMode::None,
+                         FrontFace::Clockwise},
+      PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
+
   wireframePipelineId = builder.create(PipelineDescriptor{
-      shaderLibrary->getShader("__engine.default.pbr.vertex"),
-      shaderLibrary->getShader("__engine.default.pbr.fragment"),
+      shaderLibrary->getShader("__engine.geometry.default.vertex"),
+      shaderLibrary->getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Line, CullMode::None,
@@ -61,10 +71,19 @@ void ScenePass::execute(RenderCommandList &commandList,
             DescriptorType::CombinedImageSampler)
       .bind(4, {iblMaps.at(2)}, DescriptorType::CombinedImageSampler);
 
+  commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
   commandList.bindDescriptor(pipeline, 1, sceneDescriptorFragment);
 
   sceneRenderer.render(commandList, pipeline);
+
+  const auto &skinPipeline = registry.getPipeline(skinnedPipelineId);
+
+  commandList.bindPipeline(skinPipeline);
+  commandList.bindDescriptor(skinPipeline, 0, sceneDescriptor);
+  commandList.bindDescriptor(skinPipeline, 1, sceneDescriptorFragment);
+
+  sceneRenderer.renderSkinned(commandList, skinPipeline, 3);
 }
 
 } // namespace liquid

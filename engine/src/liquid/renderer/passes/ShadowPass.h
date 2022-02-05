@@ -40,6 +40,7 @@ public:
 
 private:
   GraphResourceId pipelineId = 0;
+  GraphResourceId skinnedPipelineId = 0;
   GraphResourceId shadowMapId = 0;
 
   ShaderLibrary *shaderLibrary;

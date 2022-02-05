@@ -72,7 +72,7 @@ liquid::Entity getNewSkybox(GLFWwindow *window, liquid::Mesh *mesh,
   const auto &material = renderer->createMaterial(
       nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
 
-  auto instance = std::make_shared<liquid::MeshInstance>(
+  auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
       mesh, renderer->getResourceAllocator());
   instance->setMaterial(material);
 

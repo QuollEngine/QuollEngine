@@ -16,9 +16,10 @@ public:
    * @param pipelineLayout Vulkan pipeline layout handle
    * @param descriptorSetLayout Descriptor set layout handles
    */
-  VulkanPipeline(
-      VkDevice device, VkPipeline pipeline, VkPipelineLayout pipelineLayout,
-      const std::vector<VkDescriptorSetLayout> &descriptorSetLayouts);
+  VulkanPipeline(VkDevice device, VkPipeline pipeline,
+                 VkPipelineLayout pipelineLayout,
+                 const std::unordered_map<uint32_t, VkDescriptorSetLayout>
+                     &descriptorSetLayouts);
 
   /**
    * @brief Destructor
@@ -69,7 +70,7 @@ private:
   VkDevice device = VK_NULL_HANDLE;
   VkPipeline pipeline = VK_NULL_HANDLE;
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-  std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
+  std::unordered_map<uint32_t, VkDescriptorSetLayout> descriptorSetLayouts;
 };
 
 } // namespace liquid

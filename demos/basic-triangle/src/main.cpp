@@ -118,7 +118,7 @@ int main() {
   geom.setMaterial(materials[materialIndex % 3]);
   mesh.addGeometry(geom);
 
-  liquid::SharedPtr<liquid::MeshInstance> instance(
+  liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> instance(
       new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
   context.setComponent<liquid::MeshComponent>(entity, {instance});
 

@@ -11,7 +11,8 @@ namespace liquid {
 class VulkanShader : public Shader {
   struct ReflectionData {
     std::vector<VkPushConstantRange> pushConstantRanges;
-    std::vector<std::vector<VkDescriptorSetLayoutBinding>> descriptorSetLayouts;
+    std::map<uint32_t, std::vector<VkDescriptorSetLayoutBinding>>
+        descriptorSetLayouts;
   };
 
 public:

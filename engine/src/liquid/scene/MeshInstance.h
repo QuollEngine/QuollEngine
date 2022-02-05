@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Mesh.h"
 #include "liquid/renderer/HardwareBuffer.h"
 #include "liquid/renderer/ResourceAllocator.h"
 #include "liquid/renderer/Material.h"
 
 namespace liquid {
 
-class MeshInstance {
+template <class Mesh> class MeshInstance {
 public:
   /**
    * @brief Creates mesh instance from mesh
@@ -18,7 +17,29 @@ public:
    * @param mesh Mesh
    * @param resourceAllocator Resource allocator
    */
-  MeshInstance(Mesh *mesh, ResourceAllocator *resourceAllocator);
+  MeshInstance(Mesh *mesh, ResourceAllocator *resourceAllocator) {
+    for (auto &geometry : mesh->getGeometries()) {
+      const auto &vertexBuffer = resourceAllocator->createVertexBuffer(
+          geometry.getVertices().size() * sizeof(typename Mesh::Vertex));
+
+      vertexBuffer->update((void *)geometry.getVertices().data());
+
+      if (geometry.getIndices().size() > 0) {
+        const auto &indexBuffer = resourceAllocator->createIndexBuffer(
+            geometry.getIndices().size() * sizeof(uint32_t));
+
+        indexBuffer->update((void *)geometry.getIndices().data());
+        indexBuffers.push_back(indexBuffer);
+      } else {
+        indexBuffers.push_back(nullptr);
+      }
+
+      indexCounts.push_back(geometry.getIndices().size());
+      vertexCounts.push_back(geometry.getVertices().size());
+      vertexBuffers.push_back(vertexBuffer);
+      materials.push_back(geometry.getMaterial());
+    }
+  }
 
   ~MeshInstance() = default;
   MeshInstance(const MeshInstance &rhs) = delete;
@@ -32,7 +53,9 @@ public:
    * @param material Material
    * @param index Index
    */
-  void setMaterial(const SharedPtr<Material> &material, size_t index = 0);
+  void setMaterial(const SharedPtr<Material> &material, size_t index = 0) {
+    materials.at(index) = material;
+  }
 
   /**
    * @brief Get vertex buffers

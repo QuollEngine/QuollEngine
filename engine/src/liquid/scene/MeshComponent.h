@@ -1,12 +1,12 @@
 #pragma once
 
-#include "liquid/core/Base.h"
+#include "Mesh.h"
 #include "MeshInstance.h"
 
 namespace liquid {
 
 struct MeshComponent {
-  SharedPtr<MeshInstance> instance = nullptr;
+  SharedPtr<MeshInstance<Mesh>> instance;
 };
 
 } // namespace liquid

@@ -13,6 +13,7 @@
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
+#include "liquid/scene/Skeleton.h"
 #include "liquid/renderer/Texture.h"
 #include "liquid/renderer/MaterialPBR.h"
 #include "GLTFLoader.h"
@@ -24,6 +25,14 @@ struct BufferMeta {
   tinygltf::Accessor accessor;
   tinygltf::BufferView bufferView;
   const unsigned char *rawData;
+};
+
+struct TransformData {
+  glm::vec3 localPosition{0.0f};
+  glm::quat localRotation{1.0f, 0.0f, 0.0f, 0.0f};
+  glm::vec3 localScale{1.0f};
+
+  glm::mat4 localTransform{1.0f};
 };
 
 /**
@@ -45,6 +54,64 @@ static void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
   }
 
   rotation = glm::toQuat(matrix);
+}
+
+/**
+ * @brief Load transform data
+ *
+ * Load matrix or each transform
+ * attribute based on the given
+ * ones
+ *
+ * @param node
+ * @return
+ */
+TransformData loadTransformData(const tinygltf::Node &node) {
+  TransformData data{};
+
+  constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
+  constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
+  constexpr size_t SCALE_MATRIX_SIZE = 3;
+  constexpr size_t ROTATION_MATRIX_SIZE = 4;
+
+  glm::mat4 finalTransform = glm::mat4{1.0f};
+  if (node.matrix.size() == TRANSFORM_MATRIX_SIZE) {
+    finalTransform = glm::make_mat4(node.matrix.data());
+    decomposeMatrix(finalTransform, data.localPosition, data.localRotation,
+                    data.localScale);
+
+  } else if (node.matrix.size() > 0) {
+    engineLogger.log(Logger::Warning)
+        << "Node matrix data must have 16 values. Skipping...";
+  } else {
+    if (node.translation.size() == TRANSLATION_MATRIX_SIZE) {
+      data.localPosition = glm::make_vec3(node.translation.data());
+      finalTransform *= glm::translate(glm::mat4{1.0f}, data.localPosition);
+    } else if (node.translation.size() > 0) {
+      engineLogger.log(Logger::Warning)
+          << "Node translation data must have 3 values. Skipping...";
+    }
+
+    if (node.rotation.size() == ROTATION_MATRIX_SIZE) {
+      data.localRotation = glm::make_quat(node.rotation.data());
+      finalTransform *= glm::toMat4(data.localRotation);
+    } else if (node.rotation.size() > 0) {
+      engineLogger.log(Logger::Warning)
+          << "Node rotation data must have 4 values. Skipping...";
+    }
+
+    if (node.scale.size() == SCALE_MATRIX_SIZE) {
+      data.localScale = glm::make_vec3(node.scale.data());
+      finalTransform *= glm::scale(glm::mat4{1.0f}, data.localScale);
+    } else if (node.scale.size() > 0) {
+      engineLogger.log(Logger::Warning)
+          << "Node scale data must have 3 values. Skipping...";
+    }
+  }
+
+  data.localTransform = finalTransform;
+
+  return data;
 }
 
 /**
@@ -75,12 +142,14 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
  * @param model TinyGLTF model
  * @param meshEntityMap Mesh index entity map
  * @param nodeAnimationMap Node ID animation map
+ * @param skeletons Skeleton ID map
  * @param entityContext Entity context
  * @return Scene node
  */
 static SceneNode *getScene(const tinygltf::Model &model,
                            const std::map<uint32_t, Entity> &meshEntityMap,
                            const std::map<uint32_t, String> &nodeAnimationMap,
+                           const std::map<uint32_t, Skeleton> &skeletons,
                            EntityContext &entityContext) {
   try {
     auto &gltfScene = model.scenes.at(model.defaultScene);
@@ -89,10 +158,19 @@ static SceneNode *getScene(const tinygltf::Model &model,
 
     std::vector<SceneNode *> nodes(model.nodes.size());
 
+    std::unordered_map<int, bool> jointNodes;
+    for (auto &skin : model.skins) {
+      for (auto &joint : skin.joints) {
+        jointNodes.insert({joint, true});
+      }
+    }
+
     std::list<std::pair<int, int>> nodesToProcess;
 
     for (auto &nodeIndex : gltfScene.nodes) {
-      nodesToProcess.push_back(std::make_pair(nodeIndex, -1));
+      if (jointNodes.find(nodeIndex) == jointNodes.end()) {
+        nodesToProcess.push_back(std::make_pair(nodeIndex, -1));
+      }
     }
 
     while (!nodesToProcess.empty()) {
@@ -115,43 +193,19 @@ static SceneNode *getScene(const tinygltf::Model &model,
                                                        {animation->second});
       }
 
-      constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
-      constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
-      constexpr size_t SCALE_MATRIX_SIZE = 3;
-      constexpr size_t ROTATION_MATRIX_SIZE = 4;
+      const auto &skeleton = skeletons.find(gltfNode.skin);
+      if (skeleton != skeletons.end()) {
+        entityContext.setComponent<SkeletonComponent>(entity,
+                                                      {skeleton->second});
+      }
 
       TransformComponent transform;
 
-      if (gltfNode.matrix.size() == TRANSFORM_MATRIX_SIZE) {
-        decomposeMatrix(glm::make_mat4(gltfNode.matrix.data()),
-                        transform.localPosition, transform.localRotation,
-                        transform.localScale);
+      const auto &data = loadTransformData(gltfNode);
 
-      } else if (gltfNode.matrix.size() > 0) {
-        engineLogger.log(Logger::Warning)
-            << "Node matrix data must have 16 values. Skipping...";
-      } else {
-        if (gltfNode.translation.size() == TRANSLATION_MATRIX_SIZE) {
-          transform.localPosition = glm::make_vec3(gltfNode.translation.data());
-        } else if (gltfNode.translation.size() > 0) {
-          engineLogger.log(Logger::Warning)
-              << "Node translation data must have 3 values. Skipping...";
-        }
-
-        if (gltfNode.rotation.size() == ROTATION_MATRIX_SIZE) {
-          transform.localRotation = glm::make_quat(gltfNode.rotation.data());
-        } else if (gltfNode.rotation.size() > 0) {
-          engineLogger.log(Logger::Warning)
-              << "Node rotation data must have 4 values. Skipping...";
-        }
-
-        if (gltfNode.scale.size() == SCALE_MATRIX_SIZE) {
-          transform.localScale = glm::make_vec3(gltfNode.scale.data());
-        } else if (gltfNode.scale.size() > 0) {
-          engineLogger.log(Logger::Warning)
-              << "Node scale data must have 3 values. Skipping...";
-        }
-      }
+      transform.localPosition = data.localPosition;
+      transform.localRotation = data.localRotation;
+      transform.localScale = data.localScale;
 
       if (parentIndex >= 0) {
         nodes.at(nodeIndex) = nodes[parentIndex]->addChild(entity, transform);
@@ -160,7 +214,9 @@ static SceneNode *getScene(const tinygltf::Model &model,
       }
 
       for (auto child : gltfNode.children) {
-        nodesToProcess.push_back(std::make_pair(child, nodeIndex));
+        if (jointNodes.find(child) == jointNodes.end()) {
+          nodesToProcess.push_back(std::make_pair(child, nodeIndex));
+        }
       }
     }
 
@@ -168,6 +224,276 @@ static SceneNode *getScene(const tinygltf::Model &model,
   } catch (std::out_of_range e) {
     throw GLTFError("Failed to load scene");
   }
+}
+
+/**
+ * @brief Get skeletons
+ *
+ * @param model GLTF nodel
+ * @return Skeleton skin map
+ */
+static std::map<uint32_t, Skeleton>
+getSkeletons(const tinygltf::Model &model,
+             ResourceAllocator *resourceAllocator) {
+  std::map<uint32_t, Skeleton> skeletons;
+
+  for (size_t i = 0; i < model.skins.size(); ++i) {
+    const auto &skin = model.skins.at(i);
+
+    std::unordered_map<uint32_t, int> jointParents;
+    std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
+
+    auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
+
+    LIQUID_ASSERT(ibMeta.accessor.componentType ==
+                      TINYGLTF_COMPONENT_TYPE_FLOAT,
+                  "Inverse bind matrices accessor must be of type FLOAT");
+
+    LIQUID_ASSERT(ibMeta.accessor.type == TINYGLTF_TYPE_MAT4,
+                  "Inverse bind matrices accessor must be of type MAT4");
+
+    LIQUID_ASSERT(ibMeta.accessor.count >= skin.joints.size(),
+                  "Inverse bind matrices cannot be less than number of joints");
+
+    std::vector<glm::mat4> inverseBindMatrices(ibMeta.accessor.count);
+
+    {
+      const auto *data = reinterpret_cast<const glm::mat4 *>(ibMeta.rawData);
+      for (size_t i = 0; i < ibMeta.accessor.count; ++i) {
+        inverseBindMatrices.at(i) = data[i];
+      }
+    }
+
+    for (size_t i = 0; i < skin.joints.size(); ++i) {
+      const auto &joint = skin.joints.at(i);
+      normalizedJointMap.insert({joint, i});
+      jointParents.insert({i, -1});
+    }
+
+    for (size_t j = 0; j < model.nodes.size(); ++j) {
+      if (normalizedJointMap.find(j) == normalizedJointMap.end()) {
+        continue;
+      }
+
+      uint32_t nJ = normalizedJointMap.at(j);
+
+      const auto &node = model.nodes.at(j);
+      for (auto &child : node.children) {
+        if (normalizedJointMap.find(child) == normalizedJointMap.end()) {
+          continue;
+        }
+
+        uint32_t nChild = normalizedJointMap.at(child);
+        jointParents.at(nChild) = static_cast<int>(nJ);
+      }
+    }
+
+    uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
+    Skeleton skeleton(numJoints, resourceAllocator);
+
+    for (auto &joint : skin.joints) {
+      uint32_t nJoint = normalizedJointMap.at(joint);
+      int parent = jointParents.at(nJoint);
+      if (parent >= 0) {
+        const auto &node = model.nodes.at(joint);
+        const auto &data = loadTransformData(node);
+        skeleton.addJoint(data.localTransform, parent,
+                          inverseBindMatrices.at(nJoint), node.name);
+      }
+    }
+
+    skeleton.update();
+
+    skeletons.insert({i, skeleton});
+  }
+
+  return skeletons;
+}
+
+/**
+ * @brief Load standard mesh attributes
+ *
+ * Loads position, normal, tangents,
+ * and texture coordinates that exist
+ * for both mesh and skinned mesh
+ *
+ * @tparam TMesh Mesh type
+ * @param primitive GLTF mesh primitive
+ * @param i Mesh index
+ * @param p Primitive index
+ * @param model GLTF model
+ * @param mesh Mesh
+ */
+template <class TVertex>
+std::pair<std::vector<TVertex>, std::vector<uint32_t>>
+loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
+                           size_t p, const tinygltf::Model &model) {
+  std::vector<uint32_t> indices;
+  std::vector<TVertex> vertices;
+
+  if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
+    engineLogger.log(Logger::Warning)
+        << "Mesh #" << i << ", Primitive #" << p
+        << " does not have a position attribute. Skipping...";
+    return {};
+  }
+
+  if (primitive.indices >= 0) {
+    auto &&indexMeta = getBufferMetaForAccessor(model, primitive.indices);
+    indices.resize(indexMeta.accessor.count);
+    if (indexMeta.accessor.componentType ==
+            TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
+        indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+      const auto *data = reinterpret_cast<const uint32_t *>(indexMeta.rawData);
+      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+        indices[i] = data[i];
+      }
+    } else if (indexMeta.accessor.componentType ==
+                   TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT &&
+               indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+      const auto *data = reinterpret_cast<const uint16_t *>(indexMeta.rawData);
+      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+        indices[i] = data[i];
+      }
+    } else if (indexMeta.accessor.componentType ==
+                   TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
+               indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
+      const auto *data = reinterpret_cast<const uint8_t *>(indexMeta.rawData);
+      for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
+        indices[i] = data[i];
+      }
+    } else {
+      engineLogger.log(Logger::Warning)
+          << "Mesh #" << i << ", Primitive #" << p
+          << " has invalid index format. Skipping...";
+      return {};
+    }
+  }
+
+  auto &&positionMeta =
+      getBufferMetaForAccessor(model, primitive.attributes.at("POSITION"));
+
+  size_t vertexSize = positionMeta.accessor.count;
+  vertices.resize(vertexSize);
+
+  // According to spec, position attribute can only be vec3<float>
+  if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
+      positionMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+    auto *data = reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
+    for (size_t i = 0; i < vertexSize; ++i) {
+      vertices[i].x = data[i].x;
+      vertices[i].y = data[i].y;
+      vertices[i].z = data[i].z;
+    }
+  } else {
+    engineLogger.log(Logger::Warning)
+        << "Mesh #" << i << ", Primitive #0"
+        << " has invalid position format. Skipping...";
+    return {};
+  }
+
+  if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
+    auto &&normalMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("NORMAL"));
+    // According to spec, normal attribute can only be vec3<float> and
+    // all attributes of a primitive must have the same number of items
+    if (normalMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
+        normalMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
+        normalMeta.accessor.count == vertexSize) {
+      auto *data = reinterpret_cast<const glm::vec3 *>(normalMeta.rawData);
+      for (size_t i = 0; i < vertexSize; ++i) {
+        vertices[i].nx = data[i].x;
+        vertices[i].ny = data[i].y;
+        vertices[i].nz = data[i].z;
+      }
+    }
+  } else {
+    engineLogger.log(Logger::Warning)
+        << "Calculating flat normals is not supported";
+    // TODO: Calculate flat normals
+  }
+
+  if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
+    auto &&tangentMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("TANGENT"));
+    // According to spec, normal attribute can only be vec4<float> and
+    // all attributes of a primitive must have the same number of items
+    if (tangentMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
+        tangentMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
+        tangentMeta.accessor.count == vertexSize) {
+      auto *data = reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
+      for (size_t i = 0; i < vertexSize; ++i) {
+        vertices[i].tx = data[i].x;
+        vertices[i].ty = data[i].y;
+        vertices[i].tz = data[i].z;
+        vertices[i].tw = data[i].w;
+      }
+    }
+  } else {
+    // TODO: Calculate tangents using MikkTSpace algorithms
+    engineLogger.log(Logger::Warning)
+        << "Tangents will be calculated using derivative functions in "
+           "pixel shader. For more accurate results, you need to provide "
+           "the tangent attribute when generating GLTF model.";
+  }
+
+  if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
+    auto &&uvMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("TEXCOORD_0"));
+
+    // According to spec, UV data is always in vec2 format
+    // and all attributes of a primitive must have
+    // the same number of items
+    if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
+        uvMeta.accessor.count == vertexSize) {
+      // UV coordinates can be float, ubyte, and ushort
+      if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
+        for (size_t i = 0; i < vertexSize; ++i) {
+          vertices[i].u0 = data[i].x;
+          vertices[i].v0 = data[i].y;
+        }
+      } else if (uvMeta.accessor.componentType ==
+                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
+                 uvMeta.accessor.componentType ==
+                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+        // TODO: Convert integer coordinates to float
+        engineLogger.log(Logger::Warning)
+            << "Integer based texture coordinates are not supported for "
+               "TEXCOORD0";
+      }
+    }
+  }
+
+  if (primitive.attributes.find("TEXCOORD_1") != primitive.attributes.end()) {
+    auto &&uvMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("TEXCOORD_1"));
+
+    // According to spec, UV data is always in vec2 format
+    // and all attributes of a primitive must have
+    // the same number of items
+    if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
+        uvMeta.accessor.count == vertexSize) {
+      // UV coordinates can be float, ubyte, and ushort
+      if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
+        for (size_t i = 0; i < vertexSize; ++i) {
+          vertices[i].u1 = data[i].x;
+          vertices[i].v1 = data[i].y;
+        }
+      } else if (uvMeta.accessor.componentType ==
+                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
+                 uvMeta.accessor.componentType ==
+                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+        // TODO: Convert integer coordinates to float
+        engineLogger.log(Logger::Warning)
+            << "Integer based texture coordinates are not supported for "
+               "TEXCOORD1";
+      }
+    }
+  }
+
+  return {vertices, indices};
 }
 
 /**
@@ -188,12 +514,11 @@ getMeshes(const tinygltf::Model &model,
           const std::vector<SharedPtr<Material>> &materials,
           EntityContext &entityContext, VulkanRenderer *renderer,
           const SharedPtr<Material> &defaultMaterial) {
-  std::vector<SharedPtr<MeshInstance>> instances;
   std::map<uint32_t, Entity> entityMap;
 
   try {
     for (auto i = 0; i < model.meshes.size(); ++i) {
-      auto &gltfMesh = model.meshes[i];
+      const auto &gltfMesh = model.meshes[i];
 
       // TODO: Support multiple primitives
       if (gltfMesh.primitives.empty()) {
@@ -202,207 +527,107 @@ getMeshes(const tinygltf::Model &model,
         continue;
       }
 
-      liquid::Mesh *mesh = new liquid::Mesh;
+      bool isSkinnedMesh = false;
+      for (auto &primitive : gltfMesh.primitives) {
+        if (primitive.attributes.find("JOINTS_0") !=
+            primitive.attributes.end()) {
+          isSkinnedMesh = true;
+        }
+      }
+
+      Mesh mesh;
+      SkinnedMesh skinnedMesh;
+
       for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
-        auto &primitive = gltfMesh.primitives[p];
+        const auto &primitive = gltfMesh.primitives.at(p);
 
-        std::vector<uint32_t> indices;
-        std::vector<Vertex> vertices;
+        SharedPtr<Material> material = primitive.material >= 0
+                                           ? materials.at(primitive.material)
+                                           : defaultMaterial;
 
-        if (primitive.attributes.find("POSITION") ==
-            primitive.attributes.end()) {
-          engineLogger.log(Logger::Warning)
-              << "Mesh #" << i << ", Primitive #" << p
-              << " does not have a position attribute. Skipping...";
-          continue;
-        }
+        if (isSkinnedMesh) {
+          auto &&[vertices, indices] =
+              loadStandardMeshAttributes<SkinnedMesh::Vertex>(primitive, i, p,
+                                                              model);
 
-        if (primitive.indices >= 0) {
-          auto &&indexMeta = getBufferMetaForAccessor(model, primitive.indices);
-          indices.resize(indexMeta.accessor.count);
-          if (indexMeta.accessor.componentType ==
-                  TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT &&
-              indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-            const auto *data =
-                reinterpret_cast<const uint32_t *>(indexMeta.rawData);
-            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-              indices[i] = data[i];
-            }
-          } else if (indexMeta.accessor.componentType ==
-                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT &&
-                     indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-            const auto *data =
-                reinterpret_cast<const uint16_t *>(indexMeta.rawData);
-            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-              indices[i] = data[i];
-            }
-          } else if (indexMeta.accessor.componentType ==
-                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
-                     indexMeta.accessor.type == TINYGLTF_TYPE_SCALAR) {
-            const auto *data =
-                reinterpret_cast<const uint8_t *>(indexMeta.rawData);
-            for (size_t i = 0; i < indexMeta.accessor.count; ++i) {
-              indices[i] = data[i];
-            }
-          } else {
-            engineLogger.log(Logger::Warning)
-                << "Mesh #" << i << ", Primitive #" << p
-                << " has invalid index format. Skipping...";
-            continue;
-          }
-        }
+          if (primitive.attributes.find("JOINTS_0") !=
+              primitive.attributes.end()) {
 
-        auto &&positionMeta = getBufferMetaForAccessor(
-            model, primitive.attributes.at("POSITION"));
+            auto &&jointMeta = getBufferMetaForAccessor(
+                model, primitive.attributes.at("JOINTS_0"));
 
-        size_t vertexSize = positionMeta.accessor.count;
-        vertices.resize(vertexSize);
-
-        // According to spec, position attribute can only be vec3<float>
-        if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
-            positionMeta.accessor.componentType ==
-                TINYGLTF_COMPONENT_TYPE_FLOAT) {
-          auto *data =
-              reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
-          for (size_t i = 0; i < vertexSize; ++i) {
-            vertices[i].x = data[i].x;
-            vertices[i].y = data[i].y;
-            vertices[i].z = data[i].z;
-          }
-        } else {
-          engineLogger.log(Logger::Warning)
-              << "Mesh #" << i << ", Primitive #0"
-              << " has invalid position format. Skipping...";
-          continue;
-        }
-
-        if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
-          auto &&normalMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("NORMAL"));
-          // According to spec, normal attribute can only be vec3<float> and
-          // all attributes of a primitive must have the same number of items
-          if (normalMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
-              normalMeta.accessor.componentType ==
-                  TINYGLTF_COMPONENT_TYPE_FLOAT &&
-              normalMeta.accessor.count == vertexSize) {
-            auto *data =
-                reinterpret_cast<const glm::vec3 *>(normalMeta.rawData);
-            for (size_t i = 0; i < vertexSize; ++i) {
-              vertices[i].nx = data[i].x;
-              vertices[i].ny = data[i].y;
-              vertices[i].nz = data[i].z;
-            }
-          }
-        } else {
-          engineLogger.log(Logger::Warning)
-              << "Calculating flat normals is not supported";
-          // TODO: Calculate flat normals
-        }
-
-        if (primitive.attributes.find("TANGENT") !=
-            primitive.attributes.end()) {
-          auto &&tangentMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("TANGENT"));
-          // According to spec, normal attribute can only be vec4<float> and
-          // all attributes of a primitive must have the same number of items
-          if (tangentMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
-              tangentMeta.accessor.componentType ==
-                  TINYGLTF_COMPONENT_TYPE_FLOAT &&
-              tangentMeta.accessor.count == vertexSize) {
-            auto *data =
-                reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
-            for (size_t i = 0; i < vertexSize; ++i) {
-              vertices[i].tx = data[i].x;
-              vertices[i].ty = data[i].y;
-              vertices[i].tz = data[i].z;
-              vertices[i].tw = data[i].w;
-            }
-          }
-        } else {
-          // TODO: Calculate tangents using MikkTSpace algorithms
-          engineLogger.log(Logger::Warning)
-              << "Tangents will be calculated using derivative functions in "
-                 "pixel shader. For more accurate results, you need to provide "
-                 "the tangent attribute when generating GLTF model.";
-        }
-
-        if (primitive.attributes.find("TEXCOORD_0") !=
-            primitive.attributes.end()) {
-          auto &&uvMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("TEXCOORD_0"));
-
-          // According to spec, UV data is always in vec2 format
-          // and all attributes of a primitive must have
-          // the same number of items
-          if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
-              uvMeta.accessor.count == vertexSize) {
-            // UV coordinates can be float, ubyte, and ushort
-            if (uvMeta.accessor.componentType ==
-                TINYGLTF_COMPONENT_TYPE_FLOAT) {
-              auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
-              for (size_t i = 0; i < vertexSize; ++i) {
-                vertices[i].u0 = data[i].x;
-                vertices[i].v0 = data[i].y;
-              }
-            } else if (uvMeta.accessor.componentType ==
-                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
-                       uvMeta.accessor.componentType ==
-                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-              // TODO: Convert integer coordinates to float
+            if (jointMeta.accessor.type != TINYGLTF_TYPE_VEC4) {
               engineLogger.log(Logger::Warning)
-                  << "Integer based texture coordinates are not supported for "
-                     "TEXCOORD0";
-            }
-          }
-        }
+                  << "Mesh #" << i
+                  << " JOINTS_0 is not in VEC4 format. Skipping...";
+            } else if (jointMeta.accessor.componentType ==
+                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
+                       jointMeta.accessor.type == TINYGLTF_TYPE_VEC4) {
+              const auto *data =
+                  reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
 
-        if (primitive.attributes.find("TEXCOORD_1") !=
-            primitive.attributes.end()) {
-          auto &&uvMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("TEXCOORD_1"));
-
-          // According to spec, UV data is always in vec2 format
-          // and all attributes of a primitive must have
-          // the same number of items
-          if (uvMeta.accessor.type == TINYGLTF_TYPE_VEC2 &&
-              uvMeta.accessor.count == vertexSize) {
-            // UV coordinates can be float, ubyte, and ushort
-            if (uvMeta.accessor.componentType ==
-                TINYGLTF_COMPONENT_TYPE_FLOAT) {
-              auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
-              for (size_t i = 0; i < vertexSize; ++i) {
-                vertices[i].u1 = data[i].x;
-                vertices[i].v1 = data[i].y;
+              for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+                vertices.at(i).j0 = data[i].x;
+                vertices.at(i).j1 = data[i].y;
+                vertices.at(i).j2 = data[i].z;
+                vertices.at(i).j3 = data[i].w;
               }
-            } else if (uvMeta.accessor.componentType ==
-                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
-                       uvMeta.accessor.componentType ==
-                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-              // TODO: Convert integer coordinates to float
-              engineLogger.log(Logger::Warning)
-                  << "Integer based texture coordinates are not supported for "
-                     "TEXCOORD1";
+            } else if (jointMeta.accessor.componentType ==
+                       TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+              const auto *data =
+                  reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
+              for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+                vertices.at(i).j0 = data[i].x;
+                vertices.at(i).j1 = data[i].y;
+                vertices.at(i).j2 = data[i].z;
+                vertices.at(i).j3 = data[i].w;
+              }
             }
           }
+
+          if (primitive.attributes.find("WEIGHTS_0") !=
+              primitive.attributes.end()) {
+            auto &&weightMeta = getBufferMetaForAccessor(
+                model, primitive.attributes.at("WEIGHTS_0"));
+            if (weightMeta.accessor.componentType ==
+                TINYGLTF_COMPONENT_TYPE_FLOAT) {
+              const auto *data =
+                  reinterpret_cast<const glm::vec4 *>(weightMeta.rawData);
+
+              for (size_t i = 0; i < weightMeta.accessor.count; ++i) {
+                vertices.at(i).w0 = data[i].x;
+                vertices.at(i).w1 = data[i].y;
+                vertices.at(i).w2 = data[i].z;
+                vertices.at(i).w3 = data[i].w;
+              }
+            }
+          }
+
+          if (vertices.size() > 0) {
+            skinnedMesh.addGeometry({vertices, indices, material});
+          }
+        } else {
+          const auto &[vertices, indices] =
+              loadStandardMeshAttributes<Mesh::Vertex>(primitive, i, p, model);
+          if (vertices.size() > 0) {
+            mesh.addGeometry({vertices, indices, material});
+          }
         }
-
-        SharedPtr<Material> material =
-            gltfMesh.primitives.at(p).material >= 0
-                ? materials.at(gltfMesh.primitives.at(p).material)
-                : defaultMaterial;
-
-        liquid::Geometry geometry(vertices, indices, material);
-        mesh->addGeometry(geometry);
       }
 
       auto entity = entityContext.createEntity();
-      entityContext.setComponent<MeshComponent>(
-          entity, {std::make_shared<MeshInstance>(
-                      mesh, renderer->getResourceAllocator())});
+      if (isSkinnedMesh) {
+        entityContext.setComponent<SkinnedMeshComponent>(
+            entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
+                        &skinnedMesh, renderer->getResourceAllocator())});
+
+      } else {
+        entityContext.setComponent<MeshComponent>(
+            entity, {std::make_shared<MeshInstance<Mesh>>(
+                        &mesh, renderer->getResourceAllocator())});
+      }
 
       entityMap.insert({i, entity});
-
-      delete mesh;
     }
     return entityMap;
   } catch (std::out_of_range e) {
@@ -426,7 +651,6 @@ getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
 
     for (auto &gltfTexture : model.textures) {
       // TODO: Support creating different samplers
-
       auto &image = model.images.at(gltfTexture.source);
 
       TextureData imageData;
@@ -668,11 +892,12 @@ SceneNode *GLTFLoader::loadFromFile(const String &filename) {
     throw GLTFError("Failed to parse GLTF file");
   }
 
+  auto &&skeletons = getSkeletons(model, renderer->getResourceAllocator());
   auto &&animations = getAnimations(model, animationSystem);
   auto &&materials = getMaterials(model, renderer);
   auto &&meshes =
       getMeshes(model, materials, entityContext, renderer, defaultMaterial);
-  auto *scene = getScene(model, meshes, animations, entityContext);
+  auto *scene = getScene(model, meshes, animations, skeletons, entityContext);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 
