@@ -33,7 +33,7 @@ void StatusBar::render(SceneManager &sceneManager) {
       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse |
       ImGuiWindowFlags_NoSavedSettings |
       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground |
-      ImGuiWindowFlags_MenuBar;
+      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
   if (ImGui::Begin("StatusBar", nullptr, flags)) {
     if (ImGui::BeginMenuBar()) {
       ImGui::Text("%s", state.c_str());

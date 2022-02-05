@@ -7,10 +7,13 @@
 namespace liquidator {
 
 void Layout::setup() {
+  const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
   const auto &viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(
       ImVec2(viewport->Pos.x, viewport->Pos.y + ImGui::GetFrameHeight()));
-  ImGui::SetNextWindowSize(viewport->Size);
+  ImGui::SetNextWindowSize(ImVec2(
+      // Extract status bar from viewport size
+      viewport->Size.x, viewport->Size.y - WINDOW_AND_STATUS_BAR_HEIGHT));
   ImGui::SetNextWindowViewport(viewport->ID);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
