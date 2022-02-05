@@ -119,7 +119,7 @@ int main() {
   mesh.addGeometry(geom);
 
   liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> instance(
-      new liquid::MeshInstance(&mesh, renderer->getResourceAllocator()));
+      new liquid::MeshInstance(mesh, renderer->getResourceAllocator()));
   context.setComponent<liquid::MeshComponent>(entity, {instance});
 
   context.setComponent<liquid::AnimationComponent>(entity,

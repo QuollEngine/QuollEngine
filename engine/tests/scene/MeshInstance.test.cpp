@@ -19,7 +19,7 @@ TEST(MeshInstanceTest, CreatesVertexAndIndexBuffersOnConstruct) {
   mesh.addGeometry(geom1);
   mesh.addGeometry(geom2);
 
-  liquid::MeshInstance<liquid::Mesh> instance(&mesh, &resourceAllocator);
+  liquid::MeshInstance<liquid::Mesh> instance(mesh, &resourceAllocator);
 
   EXPECT_EQ(instance.getVertexBuffers().size(), 2);
   EXPECT_EQ(instance.getIndexBuffers().size(), 2);
@@ -43,7 +43,7 @@ TEST(MeshInstanceTest, CreateWithoutIndexBuffersOnConstruct) {
 
   mesh.addGeometry(geom1);
   mesh.addGeometry(geom2);
-  liquid::MeshInstance<liquid::Mesh> instance(&mesh, &resourceAllocator);
+  liquid::MeshInstance<liquid::Mesh> instance(mesh, &resourceAllocator);
 
   EXPECT_EQ(instance.getVertexBuffers().size(), 2);
   EXPECT_EQ(instance.getIndexBuffers().size(), 2);
@@ -66,7 +66,7 @@ TEST(MeshInstanceTest, SetsMaterial) {
   liquid::Geometry geom;
   mesh.addGeometry(geom);
   MaterialPtr material(new liquid::Material({}, {}, &resourceAllocator));
-  liquid::MeshInstance<liquid::Mesh> instance(&mesh, &resourceAllocator);
+  liquid::MeshInstance<liquid::Mesh> instance(mesh, &resourceAllocator);
   EXPECT_EQ(instance.getMaterials().size(), 1);
   EXPECT_EQ(instance.getMaterials().at(0), nullptr);
 

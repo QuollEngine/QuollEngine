@@ -32,7 +32,7 @@ bool changed = true;
 
 bool leftMouseBtnPressed = false;
 
-liquid::Entity getNewSkybox(GLFWwindow *window, liquid::Mesh *mesh,
+liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
                             liquid::VulkanRenderer *renderer,
                             liquid::EntityContext &context) {
   liquid::KtxTextureLoader ktxLoader(renderer->getResourceAllocator());
@@ -209,7 +209,7 @@ int main() {
 
     ui.onEnvironmentOpen([&window, &context, &cubeMesh, &renderer, &node,
                           &environmentNode]() mutable {
-      auto environment = getNewSkybox(window->getInstance(), &cubeMesh,
+      auto environment = getNewSkybox(window->getInstance(), cubeMesh,
                                       renderer.get(), context);
 
       if (environment == std::numeric_limits<liquid::Entity>::max()) {

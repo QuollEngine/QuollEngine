@@ -44,11 +44,11 @@ public:
     });
 
     barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        &barMesh, renderer->getResourceAllocator()));
+        barMesh, renderer->getResourceAllocator()));
     barInstance->setMaterial(material);
 
     ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        &ballMesh, renderer->getResourceAllocator()));
+        ballMesh, renderer->getResourceAllocator()));
     ballInstance->setMaterial(material);
 
     setupScene();
