@@ -619,12 +619,12 @@ getMeshes(const tinygltf::Model &model,
       if (isSkinnedMesh) {
         entityContext.setComponent<SkinnedMeshComponent>(
             entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
-                        &skinnedMesh, renderer->getResourceAllocator())});
+                        skinnedMesh, renderer->getResourceAllocator())});
 
       } else {
         entityContext.setComponent<MeshComponent>(
             entity, {std::make_shared<MeshInstance<Mesh>>(
-                        &mesh, renderer->getResourceAllocator())});
+                        mesh, renderer->getResourceAllocator())});
       }
 
       entityMap.insert({i, entity});

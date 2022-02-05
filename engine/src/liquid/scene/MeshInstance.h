@@ -17,8 +17,8 @@ public:
    * @param mesh Mesh
    * @param resourceAllocator Resource allocator
    */
-  MeshInstance(Mesh *mesh, ResourceAllocator *resourceAllocator) {
-    for (auto &geometry : mesh->getGeometries()) {
+  MeshInstance(const Mesh &mesh, ResourceAllocator *resourceAllocator) {
+    for (auto &geometry : mesh.getGeometries()) {
       const auto &vertexBuffer = resourceAllocator->createVertexBuffer(
           geometry.getVertices().size() * sizeof(typename Mesh::Vertex));
 
