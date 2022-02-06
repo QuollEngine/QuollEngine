@@ -13,6 +13,7 @@ VulkanCommandExecutor::VulkanCommandExecutor(
       statsManager(statsManager_) {}
 
 void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
+  LIQUID_PROFILE_EVENT("VulkanCommandExecutor::execute");
   vkResetCommandBuffer(commandBuffer, 0);
 
   VkCommandBufferBeginInfo beginInfo{};

@@ -53,6 +53,7 @@ VulkanRenderContext::~VulkanRenderContext() {
 }
 
 void VulkanRenderContext::render(RenderCommandList &commandList) {
+  LIQUID_PROFILE_EVENT("VulkanRenderContext::render");
   auto *executor = beginRendering();
 
   executor->execute(commandList);
@@ -62,6 +63,7 @@ void VulkanRenderContext::render(RenderCommandList &commandList) {
 
 VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
                                       uint32_t imageIdx) {
+  LIQUID_PROFILE_EVENT("VulkanRenderContext::present");
   std::array<VkSemaphore, 1> waitSemaphores{
       renderFinishedSemaphores.at(currentFrame)};
   std::array<VkSwapchainKHR, 1> swapchains{swapchain.getSwapchain()};

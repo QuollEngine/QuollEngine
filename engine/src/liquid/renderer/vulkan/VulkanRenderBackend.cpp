@@ -36,6 +36,7 @@ VulkanRenderBackend::~VulkanRenderBackend() {
 }
 
 void VulkanRenderBackend::execute(RenderGraph &graph) {
+  LIQUID_PROFILE_EVENT("VulkanRenderBackend::execute");
   statsManager.resetDrawCalls();
   auto &&result = graphEvaluator->build(graph);
 

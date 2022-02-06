@@ -24,6 +24,7 @@ int MainLoop::run(RenderGraph &graph,
   auto prevGameTime = std::chrono::high_resolution_clock::now();
   auto prevFrameTime = prevGameTime;
   while (running) {
+    LIQUID_PROFILE_FRAME("MainLoop");
     auto currentTime = std::chrono::high_resolution_clock::now();
 
     if (window->shouldClose()) {

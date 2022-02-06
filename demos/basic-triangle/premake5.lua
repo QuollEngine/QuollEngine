@@ -1,7 +1,6 @@
 project "DemoBasicTriangle"
     basedir "../../workspace/demos/basic-triangle"
     kind "ConsoleApp"
-    configurations { "Debug" }
 
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine"}

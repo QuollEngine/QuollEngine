@@ -32,6 +32,16 @@
       ]
     },
     {
+      "name": "optick",
+      "buildSource": "optick-1.3.3.0",
+      "url": "https://github.com/bombomby/optick/archive/refs/tags/1.3.3.0.zip",
+      "cmd": [
+        "cmake . -B build -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}}",
+        "cmake --build build --config {{BUILD_MODE}}",
+        "cmake --install build --config {{BUILD_MODE}}"
+      ]
+    },
+    {
       "name": "dearimgui",
       "url": "https://github.com/ocornut/imgui/archive/refs/heads/docking.zip",
       "buildSource": "imgui-docking",

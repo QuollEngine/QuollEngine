@@ -25,6 +25,7 @@ void RenderGraph::addPassInternal(RenderGraphPassBase *pass) {
 }
 
 std::vector<RenderGraphPassBase *> RenderGraph::compile() {
+  LIQUID_PROFILE_EVENT("RenderGraph::compile");
   std::vector<RenderGraphPassBase *> tempPasses = passes;
 
   // Validate pass names

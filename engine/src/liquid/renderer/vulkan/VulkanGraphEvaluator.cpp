@@ -22,6 +22,7 @@ VulkanGraphEvaluator::VulkanGraphEvaluator(
 
 std::vector<RenderGraphPassBase *>
 VulkanGraphEvaluator::build(RenderGraph &graph) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::build");
   const auto &&passes = graph.compile();
 
   for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
@@ -38,6 +39,8 @@ VulkanGraphEvaluator::build(RenderGraph &graph) {
 }
 
 void VulkanGraphEvaluator::rebuildSwapchainRelatedPasses(RenderGraph &graph) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::rebuildSwapchainRelatedPasses");
+
   for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
     if (textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
       graph.getResourceRegistry().addTexture(
@@ -58,6 +61,7 @@ void VulkanGraphEvaluator::execute(
     RenderCommandList &commandList,
     const std::vector<RenderGraphPassBase *> &result, RenderGraph &graph,
     uint32_t imageIdx) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::execute");
 
   for (auto &item : result) {
     const auto &renderPass = std::static_pointer_cast<VulkanRenderPass>(
@@ -79,6 +83,7 @@ void VulkanGraphEvaluator::execute(
 
 void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
                                      RenderGraph &graph, bool force) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::buildPass");
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkAttachmentReference> colorAttachments;
   std::optional<VkAttachmentReference> depthAttachment;
@@ -235,7 +240,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
 VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createSwapchainAttachment(
     const RenderPassAttachment &attachment, uint32_t index) {
-
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createSwapchainAttachment");
   VulkanAttachmentInfo info{};
 
   // Attachment description
@@ -284,6 +289,7 @@ VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createColorAttachment(
     const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
     uint32_t index) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createColorAttachment");
   VulkanAttachmentInfo info{};
 
   // Attachment description
@@ -329,6 +335,7 @@ VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createDepthAttachment(
     const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
     uint32_t index) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createDepthAttachment");
   VulkanAttachmentInfo info{};
 
   // Attachment description
@@ -369,6 +376,8 @@ VulkanGraphEvaluator::createDepthAttachment(
 
 const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
     const PipelineDescriptor &descriptor, VkRenderPass renderPass) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createGraphicsPipeline");
+
   VkPipeline pipeline = VK_NULL_HANDLE;
 
   std::array<SharedPtr<VulkanShader>, 2> shaders{
@@ -635,6 +644,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
 SharedPtr<Texture>
 VulkanGraphEvaluator::createTexture(GraphResourceId resourceId,
                                     const AttachmentData &data) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createTexture");
   uint32_t width = data.width;
   uint32_t height = data.height;
 

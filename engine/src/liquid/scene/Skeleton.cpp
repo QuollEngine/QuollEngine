@@ -29,6 +29,7 @@ void Skeleton::addJoint(const glm::mat4 &transform, JointId parentId,
 }
 
 void Skeleton::update() {
+  LIQUID_PROFILE_EVENT("Skeleton::update");
   // Starting from index 1 because
   // root does not need to by updated
   for (size_t i = 1; i < jointLocalTransforms.size(); ++i) {

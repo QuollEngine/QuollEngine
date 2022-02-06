@@ -49,6 +49,7 @@ void SceneNode::setEntity(Entity entity_) {
 }
 
 void SceneNode::update() {
+  LIQUID_PROFILE_EVENT("SceneNode::Update");
   auto &component = entityContext.getComponent<TransformComponent>(entity);
 
   glm::mat4 identity{1.0f};
