@@ -85,7 +85,7 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
   sortedPasses.reserve(tempPasses.size());
   std::vector<bool> visited(tempPasses.size(), false);
 
-  for (size_t i = 0; i < tempPasses.size(); ++i) {
+  for (size_t i = tempPasses.size(); i-- > 0;) {
     if (!visited.at(i)) {
       topologicalSort(i, visited, adjacencyList, sortedPasses);
     }

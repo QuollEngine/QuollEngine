@@ -23,7 +23,7 @@ void main() {
   vec3 fragPos = inNearPoint + t * (inFarPoint - inNearPoint);
 
   // Default color
-  outColor = vec4(0.0, 0.0, 0.0, 0.0);
+  outColor = vec4(0.0);
 
   // Compute lines
   if (t > 0) {
@@ -36,10 +36,12 @@ void main() {
     float lineAlpha = 1.0 - min(line, 1.0);
     vec2 center = min(derivative, vec2(1.0, 1.0)) * 0.5;
 
+    float nonAxisAlpha = min(lineAlpha, 0.3);
+
     vec4 color = vec4(0.0);
     // Set non-axis line color
     if (uGridData.gridLines.x == 1) {
-      color = vec4(LINE_COLOR, lineAlpha);
+      color = vec4(LINE_COLOR, nonAxisAlpha);
     }
 
     // Set Z axis color if X position is at zero

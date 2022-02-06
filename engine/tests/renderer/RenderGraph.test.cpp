@@ -139,7 +139,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // Trim last space
   output.erase(output.find_last_not_of(' ') + 1);
 
-  EXPECT_EQ(output, "H A D B C E F G");
+  EXPECT_EQ(output, "A D B H C E F G");
 }
 
 TEST_F(RenderGraphTest, SetsPassLoadOperations) {
