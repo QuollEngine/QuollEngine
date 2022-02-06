@@ -1,3 +1,19 @@
+-- Link profiler dependencies
+function linkProfilerDependencies()
+    filter { "configurations:Profile-Debug or configurations:Profile-Release" }
+
+        filter { "system:windows" }
+            links { "OptickCored" }
+            postbuildcommands {
+                '{COPY} %{wks.location}/../vendor/bin/OptickCored.dll %{cfg.buildtarget.directory}'
+            }
+            
+        filter {"system:linux or system:macosx"}
+            links { "OptickCore" }
+
+    filter{}
+end
+
 -- Link dependencies without Vulkan
 function linkDependenciesWithoutVulkan()
     links { "vendor-libimgui", "vendor-libspirv-reflect", "glfw3", "ktx" }
@@ -23,6 +39,7 @@ function linkDependenciesWith(...)
     filter{}
 
     linkDependenciesWithoutVulkan{}
+    linkProfilerDependencies{}
 
     filter{}
 end

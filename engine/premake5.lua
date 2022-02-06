@@ -33,6 +33,9 @@ project "LiquidEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
+    -- Disable profiler in tests
+    undefines { "LIQUID_PROFILER" }
+
     pchheader "../../engine/src/liquid/core/Base.h"
 
     filter { "toolset:msc-*" }

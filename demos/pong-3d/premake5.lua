@@ -1,7 +1,6 @@
 project "DemoPong"
     basedir "../../workspace/demos/pong-3d"
     kind "ConsoleApp"
-    configurations { "Debug" }
 
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine"}

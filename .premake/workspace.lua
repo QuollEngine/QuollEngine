@@ -4,6 +4,9 @@ workspace "LiquidEngine"
     language "C++"
     cppdialect "C++17"
     architecture "x86_64"
+
+    -- Set editor as starting project
+    startproject "Liquidator"
     
     setupLibraryDirectories{}
     setupPlatformDefines{}
@@ -15,12 +18,15 @@ workspace "LiquidEngine"
         "../platform-tools/include"
     }
     
-    configurations { "Debug" }
+    configurations { "Debug", "Release", "Profile-Debug", "Profile-Release" }
 
-    configuration "Debug"
+    filter {"configurations:Debug or configurations:Profile-Debug"}
         defines { "LIQUID_DEBUG" }
         symbols "On"
 
-    configuration "Release"
+    filter {"configurations:Release or configurations:Profile-Release"}
         defines { "LIQUID_RELEASE" }
         optimize "On"
+
+    filter {"configurations:Profile-Debug or configurations:Profile-Release"}
+        defines { "LIQUID_PROFILER" }

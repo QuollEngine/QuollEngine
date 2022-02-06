@@ -238,6 +238,7 @@ VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(
 
 uint32_t
 VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
+  LIQUID_PROFILE_EVENT("VulkanSwapchain::acquireNextImage");
   uint32_t imageIndex = 0;
   VkResult result = vkAcquireNextImageKHR(
       device, swapchain, std::numeric_limits<uint64_t>::max(),

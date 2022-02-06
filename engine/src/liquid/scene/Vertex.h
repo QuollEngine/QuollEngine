@@ -5,8 +5,8 @@ namespace liquid {
 /**
  * @brief Vertex information
  *
- * Stores position, normal, and color
- * information for a vertex
+ * Stores position, normal, and color,
+ * and texture coordinates for a vertex
  */
 struct Vertex {
   float x, y, z;

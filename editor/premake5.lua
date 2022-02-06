@@ -1,7 +1,6 @@
 project "Liquidator"
     basedir "../workspace/editor"
     kind "ConsoleApp"
-    configurations { "Debug" }
 
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEnginePlatformTools"}

@@ -33,6 +33,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "Assert.h"
+#include "Profiler.h"
 
 namespace liquid {
 
