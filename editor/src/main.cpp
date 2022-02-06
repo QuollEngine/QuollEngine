@@ -102,9 +102,9 @@ int main() {
                     liquid::PipelineColorBlend{
                         {liquid::PipelineColorBlendAttachment{
                             true, liquid::BlendFactor::SrcAlpha,
-                            liquid::BlendFactor::OneMinusSrcAlpha,
-                            liquid::BlendOp::Add, liquid::BlendFactor::One,
-                            liquid::BlendFactor::OneMinusSrcAlpha,
+                            liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
+                            liquid::BlendFactor::SrcAlpha,
+                            liquid::BlendFactor::DstAlpha,
                             liquid::BlendOp::Add}}}});
           },
           [&renderer, &cameraObj, &editorCamera, &editorGrid](
