@@ -208,13 +208,13 @@ static SceneNode *getScene(const tinygltf::Model &model,
 
       auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
       if (skinAnimation != animationData.skinAnimationMap.end()) {
-        entityContext.setComponent<AnimationComponent>(entity,
-                                                       {skinAnimation->second});
+        entityContext.setComponent<AnimatorComponent>(entity,
+                                                      {skinAnimation->second});
       } else {
         auto animation = animationData.nodeAnimationMap.find(nodeIndex);
         if (animation != animationData.nodeAnimationMap.end()) {
-          entityContext.setComponent<AnimationComponent>(entity,
-                                                         {animation->second});
+          entityContext.setComponent<AnimatorComponent>(entity,
+                                                        {animation->second});
         }
       }
 

@@ -143,12 +143,12 @@ void EntityPanel::renderTransform() {
 }
 
 void EntityPanel::renderAnimation() {
-  if (!context.hasComponent<liquid::AnimationComponent>(selectedEntity)) {
+  if (!context.hasComponent<liquid::AnimatorComponent>(selectedEntity)) {
     return;
   }
 
   auto &component =
-      context.getComponent<liquid::AnimationComponent>(selectedEntity);
+      context.getComponent<liquid::AnimatorComponent>(selectedEntity);
 
   if (ImGui::CollapsingHeader("Animation")) {
     ImGui::Text("Name: %s", component.animation.c_str());

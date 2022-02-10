@@ -12,7 +12,7 @@ void AnimationSystem::addAnimation(const Animation &animation) {
 
 void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
-  entityContext.iterateEntities<TransformComponent, AnimationComponent>(
+  entityContext.iterateEntities<TransformComponent, AnimatorComponent>(
       [this, dt](Entity entity, auto &transform, auto &animComp) {
         const auto &iter = animations.find(animComp.animation);
         if (iter == animations.end()) {
