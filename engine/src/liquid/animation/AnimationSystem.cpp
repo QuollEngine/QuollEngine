@@ -31,16 +31,36 @@ void AnimationSystem::update(float dt) {
 
         float normalizedTime = animComp.currentTime / animation.getTime();
 
+        bool hasSkeleton =
+            entityContext.hasComponent<SkeletonComponent>(entity);
+
         for (auto &sequence : animation.getKeyframeSequences()) {
           const auto &value = sequence.getInterpolatedValue(normalizedTime);
 
-          if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
-            transform.localPosition = glm::vec3(value);
-          } else if (sequence.getTarget() == KeyframeSequenceTarget::Rotation) {
-            transform.localRotation =
-                glm::quat(value.w, value.x, value.y, value.z);
-          } else if (sequence.getTarget() == KeyframeSequenceTarget::Scale) {
-            transform.localScale = glm::vec3(value);
+          if (sequence.isJointTarget() && hasSkeleton) {
+            auto &skeleton =
+                entityContext.getComponent<SkeletonComponent>(entity).skeleton;
+            if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
+              skeleton.setJointPosition(sequence.getJoint(), glm::vec3(value));
+            } else if (sequence.getTarget() ==
+                       KeyframeSequenceTarget::Rotation) {
+              skeleton.setJointRotation(
+                  sequence.getJoint(),
+                  glm::quat(value.w, value.x, value.y, value.z));
+            } else if (sequence.getTarget() == KeyframeSequenceTarget::Scale) {
+              skeleton.setJointScale(sequence.getJoint(), glm::vec3(value));
+            }
+            skeleton.update();
+          } else {
+            if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
+              transform.localPosition = glm::vec3(value);
+            } else if (sequence.getTarget() ==
+                       KeyframeSequenceTarget::Rotation) {
+              transform.localRotation =
+                  glm::quat(value.w, value.x, value.y, value.z);
+            } else if (sequence.getTarget() == KeyframeSequenceTarget::Scale) {
+              transform.localScale = glm::vec3(value);
+            }
           }
         }
       });

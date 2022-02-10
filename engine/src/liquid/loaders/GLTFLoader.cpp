@@ -35,6 +35,19 @@ struct TransformData {
   glm::mat4 localTransform{1.0f};
 };
 
+struct SkeletonData {
+  std::map<uint32_t, Skeleton> skinSkeletonMap;
+
+  std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
+
+  std::unordered_map<uint32_t, uint32_t> jointSkinMap;
+};
+
+struct AnimationData {
+  std::map<uint32_t, String> nodeAnimationMap;
+  std::map<uint32_t, String> skinAnimationMap;
+};
+
 /**
  * @brief Decomposes matrix into TRS values
  *
@@ -141,14 +154,14 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
  *
  * @param model TinyGLTF model
  * @param meshEntityMap Mesh index entity map
- * @param nodeAnimationMap Node ID animation map
+ * @param nodeAnimationMap Animation data
  * @param skeletons Skeleton ID map
  * @param entityContext Entity context
  * @return Scene node
  */
 static SceneNode *getScene(const tinygltf::Model &model,
                            const std::map<uint32_t, Entity> &meshEntityMap,
-                           const std::map<uint32_t, String> &nodeAnimationMap,
+                           const AnimationData &animationData,
                            const std::map<uint32_t, Skeleton> &skeletons,
                            EntityContext &entityContext) {
   try {
@@ -187,16 +200,22 @@ static SceneNode *getScene(const tinygltf::Model &model,
           nodeName.length() > 0 ? nodeName : "Entity " + std::to_string(entity);
       entityContext.setComponent<NameComponent>(entity, {entityName});
 
-      auto animation = nodeAnimationMap.find(nodeIndex);
-      if (animation != nodeAnimationMap.end()) {
-        entityContext.setComponent<AnimationComponent>(entity,
-                                                       {animation->second});
-      }
-
       const auto &skeleton = skeletons.find(gltfNode.skin);
       if (skeleton != skeletons.end()) {
         entityContext.setComponent<SkeletonComponent>(entity,
                                                       {skeleton->second});
+      }
+
+      auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
+      if (skinAnimation != animationData.skinAnimationMap.end()) {
+        entityContext.setComponent<AnimationComponent>(entity,
+                                                       {skinAnimation->second});
+      } else {
+        auto animation = animationData.nodeAnimationMap.find(nodeIndex);
+        if (animation != animationData.nodeAnimationMap.end()) {
+          entityContext.setComponent<AnimationComponent>(entity,
+                                                         {animation->second});
+        }
       }
 
       TransformComponent transform;
@@ -230,15 +249,16 @@ static SceneNode *getScene(const tinygltf::Model &model,
  * @brief Get skeletons
  *
  * @param model GLTF nodel
- * @return Skeleton skin map
+ * @return Skeleton data
  */
-static std::map<uint32_t, Skeleton>
-getSkeletons(const tinygltf::Model &model,
-             ResourceAllocator *resourceAllocator) {
+static SkeletonData getSkeletons(const tinygltf::Model &model,
+                                 ResourceAllocator *resourceAllocator) {
   std::map<uint32_t, Skeleton> skeletons;
 
-  for (size_t i = 0; i < model.skins.size(); ++i) {
-    const auto &skin = model.skins.at(i);
+  SkeletonData skeletonData{};
+
+  for (size_t si = 0; si < model.skins.size(); ++si) {
+    const auto &skin = model.skins.at(si);
 
     std::unordered_map<uint32_t, int> jointParents;
     std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
@@ -267,6 +287,13 @@ getSkeletons(const tinygltf::Model &model,
     for (size_t i = 0; i < skin.joints.size(); ++i) {
       const auto &joint = skin.joints.at(i);
       normalizedJointMap.insert({joint, i});
+
+      LIQUID_ASSERT(skeletonData.gltfToNormalizedJointMap.find(joint) ==
+                        skeletonData.gltfToNormalizedJointMap.end(),
+                    "Single joint cannot be accessed by multiple skin");
+      skeletonData.gltfToNormalizedJointMap.insert({joint, i});
+      skeletonData.jointSkinMap.insert({joint, si});
+
       jointParents.insert({i, -1});
     }
 
@@ -297,17 +324,18 @@ getSkeletons(const tinygltf::Model &model,
       if (parent >= 0) {
         const auto &node = model.nodes.at(joint);
         const auto &data = loadTransformData(node);
-        skeleton.addJoint(data.localTransform, parent,
+        skeleton.addJoint(data.localPosition, data.localRotation,
+                          data.localScale, parent,
                           inverseBindMatrices.at(nJoint), node.name);
       }
     }
 
     skeleton.update();
 
-    skeletons.insert({i, skeleton});
+    skeletonData.skinSkeletonMap.insert({si, skeleton});
   }
 
-  return skeletons;
+  return skeletonData;
 }
 
 /**
@@ -733,11 +761,14 @@ getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
  *
  * @param model TinyGLTF model
- * @return Map for animation index and Animation
+ * @param skeletonData Skeleton data
+ * @return Animation data
  */
-static std::map<uint32_t, String>
-getAnimations(const tinygltf::Model &model, AnimationSystem &animationSystem) {
-  std::map<uint32_t, String> animations;
+static AnimationData getAnimations(const tinygltf::Model &model,
+                                   const SkeletonData &skeletonData,
+                                   AnimationSystem &animationSystem) {
+  AnimationData animationData;
+
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
@@ -826,6 +857,7 @@ getAnimations(const tinygltf::Model &model, AnimationSystem &animationSystem) {
 
     Animation animation(gltfAnimation.name, maxTime);
     int32_t targetNode = -1;
+    int32_t targetSkin = -1;
 
     for (const auto &channel : gltfAnimation.channels) {
       const auto &sampler = samplers.at(channel.sampler);
@@ -833,14 +865,6 @@ getAnimations(const tinygltf::Model &model, AnimationSystem &animationSystem) {
       if (channel.target_node == -1) {
         // Ignore channel if target node is not specified
         continue;
-      }
-
-      if (targetNode == -1) {
-        targetNode = channel.target_node;
-      } else {
-        LIQUID_ASSERT(
-            targetNode == channel.target_node,
-            "All channels in animation must point to the same target node");
       }
 
       KeyframeSequenceTarget target = KeyframeSequenceTarget::Position;
@@ -852,19 +876,57 @@ getAnimations(const tinygltf::Model &model, AnimationSystem &animationSystem) {
         target = KeyframeSequenceTarget::Position;
       }
 
-      KeyframeSequence sequence(target, sampler.interpolation);
+      uint32_t targetJoint = 0;
+
+      auto it = skeletonData.jointSkinMap.find(channel.target_node);
+      bool skinFound = it != skeletonData.jointSkinMap.end();
+      if (targetSkin == -1 && skinFound) {
+        targetSkin = static_cast<int32_t>(it->second);
+        targetJoint =
+            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+      } else if (skinFound) {
+        LIQUID_ASSERT(
+            it->second == targetSkin,
+            "All channels in animation must point to the same target skin");
+        targetJoint =
+            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+      }
+
+      if (targetSkin == -1 && targetNode == -1) {
+        targetNode = channel.target_node;
+      } else {
+        LIQUID_ASSERT(targetNode == -1, "All channels in animation must either "
+                                        "animate skin or node, not both");
+        LIQUID_ASSERT(
+            targetNode == -1 || targetNode == channel.target_node,
+            "All channels in animation must point to the same target node");
+      }
+
+      LIQUID_ASSERT(targetSkin == -1 || targetNode == -1,
+                    "A channel must point to a node or a skin");
+
+      auto &&sequence =
+          targetSkin != -1
+              ? KeyframeSequence(target, sampler.interpolation, targetJoint)
+              : KeyframeSequence(target, sampler.interpolation);
+
       for (size_t i = 0; i < sampler.times.size(); ++i) {
         sequence.addKeyframe(sampler.times.at(i), sampler.values.at(i));
       }
       animation.addKeyframeSequence(sequence);
     }
 
-    LIQUID_ASSERT(targetNode >= 0, "Animation must have a target node");
+    LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
+                  "Animation must have a target node or skin");
 
-    animations.insert({targetNode, animation.getName()});
     animationSystem.addAnimation(animation);
+    if (targetSkin >= 0) {
+      animationData.skinAnimationMap.insert({targetSkin, animation.getName()});
+    } else {
+      animationData.nodeAnimationMap.insert({targetNode, animation.getName()});
+    }
   }
-  return animations;
+  return animationData;
 }
 
 GLTFLoader::GLTFLoader(EntityContext &entityContext_, VulkanRenderer *renderer_,
@@ -892,12 +954,13 @@ SceneNode *GLTFLoader::loadFromFile(const String &filename) {
     throw GLTFError("Failed to parse GLTF file");
   }
 
-  auto &&skeletons = getSkeletons(model, renderer->getResourceAllocator());
-  auto &&animations = getAnimations(model, animationSystem);
+  auto &&skeletonData = getSkeletons(model, renderer->getResourceAllocator());
+  auto &&animationData = getAnimations(model, skeletonData, animationSystem);
   auto &&materials = getMaterials(model, renderer);
   auto &&meshes =
       getMeshes(model, materials, entityContext, renderer, defaultMaterial);
-  auto *scene = getScene(model, meshes, animations, skeletons, entityContext);
+  auto *scene = getScene(model, meshes, animationData,
+                         skeletonData.skinSkeletonMap, entityContext);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 
