@@ -147,11 +147,24 @@ void EntityPanel::renderAnimation() {
     return;
   }
 
-  auto &component =
-      context.getComponent<liquid::AnimatorComponent>(selectedEntity);
-
   if (ImGui::CollapsingHeader("Animation")) {
-    ImGui::Text("Name: %s", component.animation.c_str());
+
+    auto &component =
+        context.getComponent<liquid::AnimatorComponent>(selectedEntity);
+
+    if (ImGui::BeginCombo(
+            "###SelectAnimation",
+            component.animations.at(component.currentAnimation).c_str(), 0)) {
+      for (size_t i = 0; i < component.animations.size(); ++i) {
+        bool selectable = component.currentAnimation == i;
+
+        if (ImGui::Selectable(component.animations.at(i).c_str(),
+                              &selectable)) {
+          component.currentAnimation = i;
+        }
+      }
+      ImGui::EndCombo();
+    }
 
     ImGui::Text("Time");
     ImGui::InputFloat("###InputTime", &component.currentTime);

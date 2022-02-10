@@ -44,8 +44,8 @@ struct SkeletonData {
 };
 
 struct AnimationData {
-  std::map<uint32_t, String> nodeAnimationMap;
-  std::map<uint32_t, String> skinAnimationMap;
+  std::map<uint32_t, std::vector<String>> nodeAnimationMap;
+  std::map<uint32_t, std::vector<String>> skinAnimationMap;
 };
 
 /**
@@ -207,15 +207,18 @@ static SceneNode *getScene(const tinygltf::Model &model,
       }
 
       auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
+      AnimatorComponent animator{};
       if (skinAnimation != animationData.skinAnimationMap.end()) {
-        entityContext.setComponent<AnimatorComponent>(entity,
-                                                      {skinAnimation->second});
+        animator.animations = skinAnimation->second;
       } else {
         auto animation = animationData.nodeAnimationMap.find(nodeIndex);
         if (animation != animationData.nodeAnimationMap.end()) {
-          entityContext.setComponent<AnimatorComponent>(entity,
-                                                        {animation->second});
+          animator.animations = animation->second;
         }
+      }
+
+      if (!animator.animations.empty()) {
+        entityContext.setComponent<AnimatorComponent>(entity, animator);
       }
 
       TransformComponent transform;
@@ -921,9 +924,23 @@ static AnimationData getAnimations(const tinygltf::Model &model,
 
     animationSystem.addAnimation(animation);
     if (targetSkin >= 0) {
-      animationData.skinAnimationMap.insert({targetSkin, animation.getName()});
+      if (animationData.skinAnimationMap.find(targetSkin) ==
+          animationData.skinAnimationMap.end()) {
+        animationData.skinAnimationMap.insert(
+            {static_cast<uint32_t>(targetSkin), {}});
+      }
+
+      animationData.skinAnimationMap.at(targetSkin)
+          .push_back(animation.getName());
     } else {
-      animationData.nodeAnimationMap.insert({targetNode, animation.getName()});
+      if (animationData.nodeAnimationMap.find(targetSkin) ==
+          animationData.nodeAnimationMap.end()) {
+        animationData.nodeAnimationMap.insert(
+            {static_cast<uint32_t>(targetNode), {}});
+      }
+
+      animationData.nodeAnimationMap.at(targetNode)
+          .push_back(animation.getName());
     }
   }
   return animationData;
