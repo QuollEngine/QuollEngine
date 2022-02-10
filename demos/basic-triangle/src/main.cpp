@@ -122,8 +122,8 @@ int main() {
       new liquid::MeshInstance(mesh, renderer->getResourceAllocator()));
   context.setComponent<liquid::MeshComponent>(entity, {instance});
 
-  context.setComponent<liquid::AnimationComponent>(entity,
-                                                   {"triangle", true, 0.0f});
+  context.setComponent<liquid::AnimatorComponent>(entity,
+                                                  {"triangle", true, 0.0f});
 
   std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
   auto camera = context.createEntity();

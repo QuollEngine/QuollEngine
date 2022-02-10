@@ -19,7 +19,7 @@ public:
                               bool playing = true) {
     auto entity = context.createEntity();
     context.setComponent<liquid::TransformComponent>(entity, {});
-    context.setComponent<liquid::AnimationComponent>(
+    context.setComponent<liquid::AnimatorComponent>(
         entity, {animName, loop, 0.0f, playing});
 
     return entity;
@@ -72,7 +72,7 @@ TEST_F(AnimationSystemTest,
        DoesNotAdvanceEntityAnimationIfAnimationDoesNotExist) {
   auto entity = createEntity(false, "non-existent");
   const auto &animation =
-      context.getComponent<liquid::AnimationComponent>(entity);
+      context.getComponent<liquid::AnimatorComponent>(entity);
 
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(2.0f);
@@ -84,7 +84,7 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
   auto entity = createEntity(false, "testAnim", false);
 
   const auto &animation =
-      context.getComponent<liquid::AnimationComponent>(entity);
+      context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(0.5f);
   EXPECT_EQ(animation.currentTime, 0.0f);
@@ -95,7 +95,7 @@ TEST_F(AnimationSystemTest, AdvancedEntityAnimationByDeltaTime) {
   auto entity = createEntity(false);
 
   const auto &animation =
-      context.getComponent<liquid::AnimationComponent>(entity);
+      context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(0.5f);
   EXPECT_EQ(animation.currentTime, 0.5f);
@@ -106,7 +106,7 @@ TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
   auto entity = createEntity(false);
 
   const auto &animation =
-      context.getComponent<liquid::AnimationComponent>(entity);
+      context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(1.5f);
   EXPECT_EQ(animation.currentTime, 1.0f);
@@ -118,7 +118,7 @@ TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
   createAnimation(liquid::KeyframeSequenceTarget::Position, 1.0f);
   auto entity = createEntity(true);
   const auto &animation =
-      context.getComponent<liquid::AnimationComponent>(entity);
+      context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.currentTime, 0.0f);
   system.update(1.0f);
   EXPECT_EQ(animation.currentTime, 0.0f);
