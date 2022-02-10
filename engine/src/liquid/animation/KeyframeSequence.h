@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/scene/Joint.h"
+
 namespace liquid {
 
 enum class KeyframeSequenceTarget { Position, Rotation, Scale };
@@ -16,6 +18,16 @@ public:
    */
   KeyframeSequence(KeyframeSequenceTarget target,
                    KeyframeSequenceInterpolation interpolation);
+
+  /**
+   * @brief Create keyframe sequence for joint
+   *
+   * @param target Sequence target
+   * @param interpolation Interpolation
+   * @param joint Target joint
+   */
+  KeyframeSequence(KeyframeSequenceTarget target,
+                   KeyframeSequenceInterpolation interpolation, JointId joint);
 
   /**
    * @brief Get sequence target
@@ -71,6 +83,21 @@ public:
    */
   glm::vec4 getInterpolatedValue(float time) const;
 
+  /**
+   * @brief Get joint
+   *
+   * @return joint
+   */
+  inline JointId getJoint() const { return joint; }
+
+  /**
+   * @brief Is joint target
+   *
+   * @retval true Is joint target
+   * @retval false Is not joint target
+   */
+  inline bool isJointTarget() const { return jointTarget; }
+
 private:
   /**
    * @brief Get value at previous time
@@ -91,6 +118,8 @@ private:
 private:
   KeyframeSequenceTarget target;
   KeyframeSequenceInterpolation interpolation;
+  JointId joint = 0;
+  bool jointTarget = false;
 
   std::vector<float> keyframeTimes;
   std::vector<glm::vec4> keyframeValues;

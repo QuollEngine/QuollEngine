@@ -12,6 +12,8 @@ TEST(KeyframeSequenceTest, CreateSequenceForPosition) {
                                     SequenceInterpolation::Step);
 
   EXPECT_EQ(sequence.getTarget(), liquid::KeyframeSequenceTarget::Position);
+  EXPECT_EQ(sequence.getJoint(), 0);
+  EXPECT_FALSE(sequence.isJointTarget());
 }
 
 TEST(KeyframeSequenceTest, CreateSequenceForRotation) {
@@ -19,6 +21,8 @@ TEST(KeyframeSequenceTest, CreateSequenceForRotation) {
                                     SequenceInterpolation::Step);
 
   EXPECT_EQ(sequence.getTarget(), SequenceTarget::Rotation);
+  EXPECT_EQ(sequence.getJoint(), 0);
+  EXPECT_FALSE(sequence.isJointTarget());
 }
 
 TEST(KeyframeSequenceTest, CreateSequenceForScale) {
@@ -26,6 +30,16 @@ TEST(KeyframeSequenceTest, CreateSequenceForScale) {
                                     SequenceInterpolation::Step);
 
   EXPECT_EQ(sequence.getTarget(), SequenceTarget::Scale);
+  EXPECT_EQ(sequence.getJoint(), 0);
+  EXPECT_FALSE(sequence.isJointTarget());
+}
+
+TEST(KeyframeSequenceTest, CreateWithJoint) {
+  liquid::KeyframeSequence sequence(SequenceTarget::Position,
+                                    SequenceInterpolation::Step, 1);
+
+  EXPECT_EQ(sequence.getJoint(), 1);
+  EXPECT_TRUE(sequence.isJointTarget());
 }
 
 TEST(KeyframeSequenceTest, CreateSequenceWithStepInterpolation) {

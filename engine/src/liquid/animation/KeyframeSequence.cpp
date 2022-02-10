@@ -8,6 +8,12 @@ KeyframeSequence::KeyframeSequence(KeyframeSequenceTarget target_,
                                    KeyframeSequenceInterpolation interpolation_)
     : target(target_), interpolation(interpolation_) {}
 
+KeyframeSequence::KeyframeSequence(KeyframeSequenceTarget target_,
+                                   KeyframeSequenceInterpolation interpolation_,
+                                   JointId joint_)
+    : target(target_), interpolation(interpolation_), joint(joint_),
+      jointTarget(true) {}
+
 void KeyframeSequence::addKeyframe(float time, glm::vec4 value) {
   LIQUID_ASSERT(time >= 0.0f && time <= 1.0f,
                 "Normalized time must be between [0,1]");
