@@ -14,7 +14,8 @@ void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   entityContext.iterateEntities<TransformComponent, AnimatorComponent>(
       [this, dt](Entity entity, auto &transform, auto &animComp) {
-        const auto &iter = animations.find(animComp.animation);
+        const auto &iter =
+            animations.find(animComp.animations.at(animComp.currentAnimation));
         if (iter == animations.end()) {
           return;
         }

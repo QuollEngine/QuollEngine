@@ -20,7 +20,7 @@ public:
     auto entity = context.createEntity();
     context.setComponent<liquid::TransformComponent>(entity, {});
     context.setComponent<liquid::AnimatorComponent>(
-        entity, {animName, loop, 0.0f, playing});
+        entity, {0, loop, 0.0f, playing, {animName}});
 
     return entity;
   }
