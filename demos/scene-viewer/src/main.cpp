@@ -174,7 +174,12 @@ int main() {
     if (!sceneQueue.empty()) {
       auto gltfFilename = sceneQueue.back();
       scene = std::make_shared<liquid::Scene>(context);
-      scene->getRootNode()->addChild(loader.loadFromFile(gltfFilename));
+      auto &&result = loader.loadFromFile(gltfFilename);
+      if (result.hasResult()) {
+        scene->getRootNode()->addChild(result.getResult());
+      } else {
+        // TODO: Add logger
+      }
 
       sceneQueue.pop_back();
     }

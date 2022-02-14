@@ -18,9 +18,7 @@ SharedPtr<Texture> ImageTextureLoader::loadFromFile(const String &filename) {
   textureData.data =
       stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
-  if (!textureData.data) {
-    throw std::runtime_error("Failed to load image: " + filename);
-  }
+  LIQUID_ASSERT(textureData.data, "Failed to load image: " + filename);
 
   textureData.width = width;
   textureData.height = height;

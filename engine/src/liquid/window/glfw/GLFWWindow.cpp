@@ -8,9 +8,7 @@
 namespace liquid {
 
 GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
-  if (!glfwInit()) {
-    throw GLFWError("Failed to initialize GLFW");
-  }
+  LIQUID_ASSERT(glfwInit(), "[GLFW] Failed to initialize GLFW");
 
   // Do not create OpenGL context
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -18,9 +16,8 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
   windowInstance =
       glfwCreateWindow(static_cast<int>(width), static_cast<int>(height),
                        title.c_str(), nullptr, nullptr);
-  if (!windowInstance) {
-    throw GLFWError("Failed to create window");
-  }
+
+  LIQUID_ASSERT(windowInstance, "[GLFW] Failed to create windows");
 
   LOG_DEBUG("[GLFW] Window Created");
 

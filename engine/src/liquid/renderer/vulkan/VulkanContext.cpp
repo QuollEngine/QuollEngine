@@ -95,9 +95,7 @@ void VulkanContext::pickPhysicalDevice() {
                !device.getPresentModes(surface).empty();
       });
 
-  if (it == devices.end()) {
-    throw VulkanError("No suitable physical device found", VK_SUCCESS);
-  }
+  LIQUID_ASSERT(it != devices.end(), "No suitable physical device found");
 
   physicalDevice = *it;
   LOG_DEBUG("[Vulkan] Physical device selected: " << physicalDevice.getName());

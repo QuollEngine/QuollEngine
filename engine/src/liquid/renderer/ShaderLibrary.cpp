@@ -13,9 +13,7 @@ void ShaderLibrary::addShader(const String &name,
 
 const SharedPtr<Shader> &ShaderLibrary::getShader(const String &name) const {
   const auto &shader = shaders.find(name);
-  if (shader == shaders.end()) {
-    throw std::runtime_error("Shader \"" + name + "\" not found");
-  }
+  LIQUID_ASSERT(shader != shaders.end(), "Shader \"" + name + "\" not found");
 
   return shader->second;
 }

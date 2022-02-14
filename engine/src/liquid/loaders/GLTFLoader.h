@@ -3,11 +3,13 @@
 #include "liquid/entity/EntityContext.h"
 #include "liquid/renderer/vulkan/VulkanRenderer.h"
 #include "liquid/animation/AnimationSystem.h"
+#include "GLTFError.h"
 
 namespace liquid {
 
 class GLTFLoader {
-public:
+  using Res = Errorable<SceneNode *, GLTFError>;
+
 public:
   /**
    * @brief Creates loader with shaders and renderer
@@ -25,7 +27,7 @@ public:
    * @param filename File name
    * @return Scene node
    */
-  SceneNode *loadFromFile(const String &filename);
+  Res loadFromFile(const String &filename);
 
 private:
   EntityContext &entityContext;

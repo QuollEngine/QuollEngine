@@ -18,9 +18,8 @@ TEST(ImageTextureLoaderTests, LoadsImageUsingStb) {
   EXPECT_NE(textureData->data, nullptr);
 }
 
-TEST(ImageTextureLoaderTests, ThrowsErrorOnFailedLoad) {
+TEST(ImageTextureLoaderDeathTest, ThrowsErrorOnFailedLoad) {
   TestResourceAllocator resourceAllocator;
   liquid::ImageTextureLoader loader(&resourceAllocator);
-  EXPECT_THROW(loader.loadFromFile("non-existent-image.png"),
-               std::runtime_error);
+  EXPECT_DEATH(loader.loadFromFile("non-existent-image.png"), ".*");
 }

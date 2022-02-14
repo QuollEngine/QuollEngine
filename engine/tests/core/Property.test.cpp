@@ -86,22 +86,22 @@ TEST(PropertyTest, SetsMatrix4Value) {
             "-0.45, 0.20, -1.00], [-1.00, -0.45, -0.20, -1.00]]");
 }
 
-TEST(PropertyTest, UndefinedTypeThrowsError) {
+TEST(PropertyDeathTest, UndefinedTypeThrowsError) {
   liquid::Property property(12.0f);
-  EXPECT_THROW(property.getValue<std::string>(), std::invalid_argument);
+  EXPECT_DEATH(property.getValue<std::string>(), ".*");
 }
 
-TEST(PropertyTest, CastingToWrongTypeThrowsError) {
+TEST(PropertyDeathTest, CastingToWrongTypeThrowsError) {
   liquid::Property p1(12.0f);
 
-  EXPECT_THROW(p1.getValue<int32_t>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<uint32_t>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<uint64_t>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<glm::vec2>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<glm::vec3>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<glm::vec4>(), std::runtime_error);
-  EXPECT_THROW(p1.getValue<glm::mat4>(), std::runtime_error);
+  EXPECT_DEATH(p1.getValue<int32_t>(), ".*");
+  EXPECT_DEATH(p1.getValue<uint32_t>(), ".*");
+  EXPECT_DEATH(p1.getValue<uint64_t>(), ".*");
+  EXPECT_DEATH(p1.getValue<glm::vec2>(), ".*");
+  EXPECT_DEATH(p1.getValue<glm::vec3>(), ".*");
+  EXPECT_DEATH(p1.getValue<glm::vec4>(), ".*");
+  EXPECT_DEATH(p1.getValue<glm::mat4>(), ".*");
 
   liquid::Property p2(glm::vec2{1.0f, 1.0f});
-  EXPECT_THROW(p2.getValue<float>(), std::runtime_error);
+  EXPECT_DEATH(p2.getValue<float>(), ".*");
 }

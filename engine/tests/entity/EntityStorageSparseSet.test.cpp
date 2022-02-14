@@ -51,13 +51,13 @@ TEST(EntityStorageSparseSetTests, ReturnsTrueIfComponentExists) {
   EXPECT_TRUE(storage.hasComponent<IntComponent>(entity));
 }
 
-TEST(EntityStorageSparseSetTests, GetThrowsErrorIfEntityDoesNotHaveComponent) {
+TEST(EntityStorageSparseSetDeathTest,
+     GetThrowsErrorIfEntityDoesNotHaveComponent) {
   liquid::EntityStorageSparseSet<IntComponent, FloatComponent> storage;
   auto entity = storage.createEntity();
   storage.setComponent<IntComponent>(entity, {1});
 
-  EXPECT_THROW({ storage.getComponent<FloatComponent>(entity); },
-               liquid::EntityError);
+  EXPECT_DEATH({ storage.getComponent<FloatComponent>(entity); }, ".*");
 }
 
 TEST(EntityStorageSparseSetTests, AddsComponentsIfDoesNotExist) {
@@ -130,12 +130,11 @@ TEST(EntityStorageSparseSetTests, CountsComponentsWithEntity) {
   EXPECT_EQ(storage.getEntityCountForComponent<IntComponent>(), 4);
 }
 
-TEST(EntityStorageSparseSetTests,
+TEST(EntityStorageSparseSetDeathTest,
      DeleteThrowsErrorIfEntityDoesNotHaveComponent) {
   liquid::EntityStorageSparseSet<IntComponent> storage;
   auto entity = storage.createEntity();
-  EXPECT_THROW({ storage.deleteComponent<IntComponent>(entity); },
-               liquid::EntityError);
+  EXPECT_DEATH({ storage.deleteComponent<IntComponent>(entity); }, ".*");
 }
 
 TEST(EntityStorageSparseSetTests, DeletesComponentIfExists) {

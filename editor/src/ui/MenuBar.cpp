@@ -37,17 +37,20 @@ void MenuBar::render(SceneManager &sceneManager) {
 void MenuBar::handleGLTFImport(const liquid::String &filePath,
                                liquid::Scene *scene) {
   constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-  auto *sceneNode = loader.loadFromFile(filePath);
+  auto &&result = loader.loadFromFile(filePath);
+
+  if (result.hasError())
+    return;
 
   const auto &invViewMatrix =
       glm::inverse(scene->getActiveCamera()->getViewMatrix());
 
   const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
 
-  auto &transform = sceneNode->getTransform();
+  auto &transform = result.getResult()->getTransform();
   transform.localPosition = orientation[3];
 
-  scene->getRootNode()->addChild(sceneNode);
+  scene->getRootNode()->addChild(result.getResult());
 }
 
 void MenuBar::handleNewScene(SceneManager &sceneManager) {

@@ -4,17 +4,15 @@
 #include "liquid/loaders/KtxTextureLoader.h"
 #include "liquid/loaders/KtxError.h"
 
-TEST(KtxTextureLoaderTests, FailsIfKtxFileCannotBeLoaded) {
+TEST(KtxTextureLoaderDeathTest, FailsIfKtxFileCannotBeLoaded) {
   TestResourceAllocator resourceAllocator;
   liquid::KtxTextureLoader loader(&resourceAllocator);
 
   // non-existent file
-  EXPECT_THROW({ loader.loadFromFile("non-existent-file.ktx"); },
-               liquid::KtxError);
+  EXPECT_DEATH({ loader.loadFromFile("non-existent-file.ktx"); }, ".*");
 
   // invalid format
-  EXPECT_THROW({ loader.loadFromFile("white-image-100x100.png"); },
-               liquid::KtxError);
+  EXPECT_DEATH({ loader.loadFromFile("white-image-100x100.png"); }, ".*");
 }
 
 TEST(KtxTextureLoaderTests, LoadsTexture2D) {
@@ -49,9 +47,9 @@ TEST(KtxTextureLoaderTests, LoadsTextureCubemap) {
   EXPECT_NE(binder->data, nullptr);
 }
 
-TEST(KtxTextureLoaderTests, LoadsTexture1D) {
+TEST(KtxTextureLoaderDeathTest, LoadsTexture1D) {
   TestResourceAllocator resourceAllocator;
   liquid::KtxTextureLoader loader(&resourceAllocator);
 
-  EXPECT_THROW({ loader.loadFromFile("1x1-1d.ktx"); }, liquid::KtxError);
+  EXPECT_DEATH({ loader.loadFromFile("1x1-1d.ktx"); }, ".*");
 }

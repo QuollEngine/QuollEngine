@@ -164,88 +164,83 @@ static SceneNode *getScene(const tinygltf::Model &model,
                            const AnimationData &animationData,
                            const std::map<uint32_t, Skeleton> &skeletons,
                            EntityContext &entityContext) {
-  try {
-    auto &gltfScene = model.scenes.at(model.defaultScene);
-    auto *rootNode =
-        new SceneNode(entityContext.createEntity(), {}, nullptr, entityContext);
+  auto &gltfScene = model.scenes.at(model.defaultScene);
+  auto *rootNode =
+      new SceneNode(entityContext.createEntity(), {}, nullptr, entityContext);
 
-    std::vector<SceneNode *> nodes(model.nodes.size());
+  std::vector<SceneNode *> nodes(model.nodes.size());
 
-    std::unordered_map<int, bool> jointNodes;
-    for (auto &skin : model.skins) {
-      for (auto &joint : skin.joints) {
-        jointNodes.insert({joint, true});
-      }
+  std::unordered_map<int, bool> jointNodes;
+  for (auto &skin : model.skins) {
+    for (auto &joint : skin.joints) {
+      jointNodes.insert({joint, true});
     }
-
-    std::list<std::pair<int, int>> nodesToProcess;
-
-    for (auto &nodeIndex : gltfScene.nodes) {
-      if (jointNodes.find(nodeIndex) == jointNodes.end()) {
-        nodesToProcess.push_back(std::make_pair(nodeIndex, -1));
-      }
-    }
-
-    while (!nodesToProcess.empty()) {
-      auto [nodeIndex, parentIndex] = nodesToProcess.front();
-      auto &gltfNode = model.nodes.at(nodeIndex);
-      nodesToProcess.pop_front();
-
-      Entity entity = gltfNode.mesh >= 0 && meshEntityMap.size() > 0
-                          ? meshEntityMap.at(gltfNode.mesh)
-                          : entityContext.createEntity();
-
-      String nodeName = String(gltfNode.name);
-      String entityName =
-          nodeName.length() > 0 ? nodeName : "Entity " + std::to_string(entity);
-      entityContext.setComponent<NameComponent>(entity, {entityName});
-
-      const auto &skeleton = skeletons.find(gltfNode.skin);
-      if (skeleton != skeletons.end()) {
-        entityContext.setComponent<SkeletonComponent>(entity,
-                                                      {skeleton->second});
-      }
-
-      auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
-      AnimatorComponent animator{};
-      if (skinAnimation != animationData.skinAnimationMap.end()) {
-        animator.animations = skinAnimation->second;
-      } else {
-        auto animation = animationData.nodeAnimationMap.find(nodeIndex);
-        if (animation != animationData.nodeAnimationMap.end()) {
-          animator.animations = animation->second;
-        }
-      }
-
-      if (!animator.animations.empty()) {
-        entityContext.setComponent<AnimatorComponent>(entity, animator);
-      }
-
-      TransformComponent transform;
-
-      const auto &data = loadTransformData(gltfNode);
-
-      transform.localPosition = data.localPosition;
-      transform.localRotation = data.localRotation;
-      transform.localScale = data.localScale;
-
-      if (parentIndex >= 0) {
-        nodes.at(nodeIndex) = nodes[parentIndex]->addChild(entity, transform);
-      } else {
-        nodes.at(nodeIndex) = rootNode->addChild(entity, transform);
-      }
-
-      for (auto child : gltfNode.children) {
-        if (jointNodes.find(child) == jointNodes.end()) {
-          nodesToProcess.push_back(std::make_pair(child, nodeIndex));
-        }
-      }
-    }
-
-    return rootNode;
-  } catch (std::out_of_range e) {
-    throw GLTFError("Failed to load scene");
   }
+
+  std::list<std::pair<int, int>> nodesToProcess;
+
+  for (auto &nodeIndex : gltfScene.nodes) {
+    if (jointNodes.find(nodeIndex) == jointNodes.end()) {
+      nodesToProcess.push_back(std::make_pair(nodeIndex, -1));
+    }
+  }
+
+  while (!nodesToProcess.empty()) {
+    auto [nodeIndex, parentIndex] = nodesToProcess.front();
+    auto &gltfNode = model.nodes.at(nodeIndex);
+    nodesToProcess.pop_front();
+
+    Entity entity = gltfNode.mesh >= 0 && meshEntityMap.size() > 0
+                        ? meshEntityMap.at(gltfNode.mesh)
+                        : entityContext.createEntity();
+
+    String nodeName = String(gltfNode.name);
+    String entityName =
+        nodeName.length() > 0 ? nodeName : "Entity " + std::to_string(entity);
+    entityContext.setComponent<NameComponent>(entity, {entityName});
+
+    const auto &skeleton = skeletons.find(gltfNode.skin);
+    if (skeleton != skeletons.end()) {
+      entityContext.setComponent<SkeletonComponent>(entity, {skeleton->second});
+    }
+
+    auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
+    AnimatorComponent animator{};
+    if (skinAnimation != animationData.skinAnimationMap.end()) {
+      animator.animations = skinAnimation->second;
+    } else {
+      auto animation = animationData.nodeAnimationMap.find(nodeIndex);
+      if (animation != animationData.nodeAnimationMap.end()) {
+        animator.animations = animation->second;
+      }
+    }
+
+    if (!animator.animations.empty()) {
+      entityContext.setComponent<AnimatorComponent>(entity, animator);
+    }
+
+    TransformComponent transform;
+
+    const auto &data = loadTransformData(gltfNode);
+
+    transform.localPosition = data.localPosition;
+    transform.localRotation = data.localRotation;
+    transform.localScale = data.localScale;
+
+    if (parentIndex >= 0) {
+      nodes.at(nodeIndex) = nodes[parentIndex]->addChild(entity, transform);
+    } else {
+      nodes.at(nodeIndex) = rootNode->addChild(entity, transform);
+    }
+
+    for (auto child : gltfNode.children) {
+      if (jointNodes.find(child) == jointNodes.end()) {
+        nodesToProcess.push_back(std::make_pair(child, nodeIndex));
+      }
+    }
+  }
+
+  return rootNode;
 }
 
 /**
@@ -260,7 +255,7 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
 
   SkeletonData skeletonData{};
 
-  for (size_t si = 0; si < model.skins.size(); ++si) {
+  for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
     const auto &skin = model.skins.at(si);
 
     std::unordered_map<uint32_t, int> jointParents;
@@ -268,15 +263,33 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
 
     auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
 
-    LIQUID_ASSERT(ibMeta.accessor.componentType ==
-                      TINYGLTF_COMPONENT_TYPE_FLOAT,
-                  "Inverse bind matrices accessor must be of type FLOAT");
+    if (ibMeta.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+      engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices accessor must be of type FLOAT. Skipping "
+             "skin #"
+          << si;
 
-    LIQUID_ASSERT(ibMeta.accessor.type == TINYGLTF_TYPE_MAT4,
-                  "Inverse bind matrices accessor must be of type MAT4");
+      continue;
+    }
 
-    LIQUID_ASSERT(ibMeta.accessor.count >= skin.joints.size(),
-                  "Inverse bind matrices cannot be less than number of joints");
+    if (ibMeta.accessor.type != TINYGLTF_TYPE_MAT4) {
+      engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices accessor must be MAT4. Skipping "
+             "skin #"
+          << si;
+      continue;
+    }
+
+    if (ibMeta.accessor.count < skin.joints.size()) {
+      engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices cannot be fewer than number of joints. "
+             "Skipping "
+             "skin #"
+          << si;
+      continue;
+    }
+
+    bool success = true;
 
     std::vector<glm::mat4> inverseBindMatrices(ibMeta.accessor.count);
 
@@ -287,20 +300,31 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
       }
     }
 
-    for (size_t i = 0; i < skin.joints.size(); ++i) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(skin.joints.size()); ++i) {
       const auto &joint = skin.joints.at(i);
       normalizedJointMap.insert({joint, i});
 
+      if (skeletonData.gltfToNormalizedJointMap.find(joint) ==
+          skeletonData.gltfToNormalizedJointMap.end()) {
+        engineLogger.log(Logger::Warning)
+            << "Single joint cannot be a child of multiple skins. Skipping "
+               "joint #"
+            << joint
+            << " for "
+               "skin #"
+            << si;
+        continue;
+      }
       LIQUID_ASSERT(skeletonData.gltfToNormalizedJointMap.find(joint) ==
                         skeletonData.gltfToNormalizedJointMap.end(),
-                    "Single joint cannot be accessed by multiple skin");
+                    "Single joint cannot be accessed by multiple skins");
       skeletonData.gltfToNormalizedJointMap.insert({joint, i});
       skeletonData.jointSkinMap.insert({joint, si});
 
       jointParents.insert({i, -1});
     }
 
-    for (size_t j = 0; j < model.nodes.size(); ++j) {
+    for (uint32_t j = 0; j < static_cast<uint32_t>(model.nodes.size()); ++j) {
       if (normalizedJointMap.find(j) == normalizedJointMap.end()) {
         continue;
       }
@@ -547,123 +571,118 @@ getMeshes(const tinygltf::Model &model,
           const SharedPtr<Material> &defaultMaterial) {
   std::map<uint32_t, Entity> entityMap;
 
-  try {
-    for (auto i = 0; i < model.meshes.size(); ++i) {
-      const auto &gltfMesh = model.meshes[i];
+  for (auto i = 0; i < model.meshes.size(); ++i) {
+    const auto &gltfMesh = model.meshes[i];
 
-      // TODO: Support multiple primitives
-      if (gltfMesh.primitives.empty()) {
-        engineLogger.log(Logger::Warning)
-            << "Mesh #" << i << " does not have primitives. Skipping...";
-        continue;
+    // TODO: Support multiple primitives
+    if (gltfMesh.primitives.empty()) {
+      engineLogger.log(Logger::Warning)
+          << "Mesh #" << i << " does not have primitives. Skipping...";
+      continue;
+    }
+
+    bool isSkinnedMesh = false;
+    for (auto &primitive : gltfMesh.primitives) {
+      if (primitive.attributes.find("JOINTS_0") != primitive.attributes.end()) {
+        isSkinnedMesh = true;
       }
+    }
 
-      bool isSkinnedMesh = false;
-      for (auto &primitive : gltfMesh.primitives) {
+    Mesh mesh;
+    SkinnedMesh skinnedMesh;
+
+    for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
+      const auto &primitive = gltfMesh.primitives.at(p);
+
+      SharedPtr<Material> material = primitive.material >= 0
+                                         ? materials.at(primitive.material)
+                                         : defaultMaterial;
+
+      if (isSkinnedMesh) {
+        auto &&[vertices, indices] =
+            loadStandardMeshAttributes<SkinnedMesh::Vertex>(primitive, i, p,
+                                                            model);
+
         if (primitive.attributes.find("JOINTS_0") !=
             primitive.attributes.end()) {
-          isSkinnedMesh = true;
-        }
-      }
 
-      Mesh mesh;
-      SkinnedMesh skinnedMesh;
+          auto &&jointMeta = getBufferMetaForAccessor(
+              model, primitive.attributes.at("JOINTS_0"));
 
-      for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
-        const auto &primitive = gltfMesh.primitives.at(p);
+          if (jointMeta.accessor.type != TINYGLTF_TYPE_VEC4) {
+            engineLogger.log(Logger::Warning)
+                << "Mesh #" << i
+                << " JOINTS_0 is not in VEC4 format. Skipping...";
+          } else if (jointMeta.accessor.componentType ==
+                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
+                     jointMeta.accessor.type == TINYGLTF_TYPE_VEC4) {
+            const auto *data =
+                reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
 
-        SharedPtr<Material> material = primitive.material >= 0
-                                           ? materials.at(primitive.material)
-                                           : defaultMaterial;
-
-        if (isSkinnedMesh) {
-          auto &&[vertices, indices] =
-              loadStandardMeshAttributes<SkinnedMesh::Vertex>(primitive, i, p,
-                                                              model);
-
-          if (primitive.attributes.find("JOINTS_0") !=
-              primitive.attributes.end()) {
-
-            auto &&jointMeta = getBufferMetaForAccessor(
-                model, primitive.attributes.at("JOINTS_0"));
-
-            if (jointMeta.accessor.type != TINYGLTF_TYPE_VEC4) {
-              engineLogger.log(Logger::Warning)
-                  << "Mesh #" << i
-                  << " JOINTS_0 is not in VEC4 format. Skipping...";
-            } else if (jointMeta.accessor.componentType ==
-                           TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
-                       jointMeta.accessor.type == TINYGLTF_TYPE_VEC4) {
-              const auto *data =
-                  reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
-
-              for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-                vertices.at(i).j0 = data[i].x;
-                vertices.at(i).j1 = data[i].y;
-                vertices.at(i).j2 = data[i].z;
-                vertices.at(i).j3 = data[i].w;
-              }
-            } else if (jointMeta.accessor.componentType ==
-                       TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-              const auto *data =
-                  reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
-              for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-                vertices.at(i).j0 = data[i].x;
-                vertices.at(i).j1 = data[i].y;
-                vertices.at(i).j2 = data[i].z;
-                vertices.at(i).j3 = data[i].w;
-              }
+            for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+              vertices.at(i).j0 = data[i].x;
+              vertices.at(i).j1 = data[i].y;
+              vertices.at(i).j2 = data[i].z;
+              vertices.at(i).j3 = data[i].w;
+            }
+          } else if (jointMeta.accessor.componentType ==
+                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+            const auto *data =
+                reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
+            for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+              vertices.at(i).j0 = data[i].x;
+              vertices.at(i).j1 = data[i].y;
+              vertices.at(i).j2 = data[i].z;
+              vertices.at(i).j3 = data[i].w;
             }
           }
+        }
 
-          if (primitive.attributes.find("WEIGHTS_0") !=
-              primitive.attributes.end()) {
-            auto &&weightMeta = getBufferMetaForAccessor(
-                model, primitive.attributes.at("WEIGHTS_0"));
-            if (weightMeta.accessor.componentType ==
-                TINYGLTF_COMPONENT_TYPE_FLOAT) {
-              const auto *data =
-                  reinterpret_cast<const glm::vec4 *>(weightMeta.rawData);
+        if (primitive.attributes.find("WEIGHTS_0") !=
+            primitive.attributes.end()) {
+          auto &&weightMeta = getBufferMetaForAccessor(
+              model, primitive.attributes.at("WEIGHTS_0"));
+          if (weightMeta.accessor.componentType ==
+              TINYGLTF_COMPONENT_TYPE_FLOAT) {
+            const auto *data =
+                reinterpret_cast<const glm::vec4 *>(weightMeta.rawData);
 
-              for (size_t i = 0; i < weightMeta.accessor.count; ++i) {
-                vertices.at(i).w0 = data[i].x;
-                vertices.at(i).w1 = data[i].y;
-                vertices.at(i).w2 = data[i].z;
-                vertices.at(i).w3 = data[i].w;
-              }
+            for (size_t i = 0; i < weightMeta.accessor.count; ++i) {
+              vertices.at(i).w0 = data[i].x;
+              vertices.at(i).w1 = data[i].y;
+              vertices.at(i).w2 = data[i].z;
+              vertices.at(i).w3 = data[i].w;
             }
           }
-
-          if (vertices.size() > 0) {
-            skinnedMesh.addGeometry({vertices, indices, material});
-          }
-        } else {
-          const auto &[vertices, indices] =
-              loadStandardMeshAttributes<Mesh::Vertex>(primitive, i, p, model);
-          if (vertices.size() > 0) {
-            mesh.addGeometry({vertices, indices, material});
-          }
         }
-      }
 
-      auto entity = entityContext.createEntity();
-      if (isSkinnedMesh) {
-        entityContext.setComponent<SkinnedMeshComponent>(
-            entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
-                        skinnedMesh, renderer->getResourceAllocator())});
-
+        if (vertices.size() > 0) {
+          skinnedMesh.addGeometry({vertices, indices, material});
+        }
       } else {
-        entityContext.setComponent<MeshComponent>(
-            entity, {std::make_shared<MeshInstance<Mesh>>(
-                        mesh, renderer->getResourceAllocator())});
+        const auto &[vertices, indices] =
+            loadStandardMeshAttributes<Mesh::Vertex>(primitive, i, p, model);
+        if (vertices.size() > 0) {
+          mesh.addGeometry({vertices, indices, material});
+        }
       }
-
-      entityMap.insert({i, entity});
     }
-    return entityMap;
-  } catch (std::out_of_range e) {
-    throw GLTFError("Failed load meshes");
+
+    auto entity = entityContext.createEntity();
+    if (isSkinnedMesh) {
+      entityContext.setComponent<SkinnedMeshComponent>(
+          entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
+                      skinnedMesh, renderer->getResourceAllocator())});
+
+    } else {
+      entityContext.setComponent<MeshComponent>(
+          entity, {std::make_shared<MeshInstance<Mesh>>(
+                      mesh, renderer->getResourceAllocator())});
+    }
+
+    entityMap.insert({i, entity});
   }
+  return entityMap;
 }
 
 /**
@@ -676,85 +695,79 @@ getMeshes(const tinygltf::Model &model,
  */
 static std::vector<SharedPtr<Material>>
 getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
-  try {
-    std::vector<SharedPtr<Texture>> textures;
-    std::vector<SharedPtr<Material>> materials;
+  std::vector<SharedPtr<Texture>> textures;
+  std::vector<SharedPtr<Material>> materials;
 
-    for (auto &gltfTexture : model.textures) {
-      // TODO: Support creating different samplers
-      auto &image = model.images.at(gltfTexture.source);
+  for (auto &gltfTexture : model.textures) {
+    // TODO: Support creating different samplers
+    auto &image = model.images.at(gltfTexture.source);
 
-      TextureData imageData;
-      imageData.height = image.height;
-      imageData.width = image.width;
-      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-      imageData.data = const_cast<unsigned char *>(image.image.data());
+    TextureData imageData;
+    imageData.height = image.height;
+    imageData.width = image.width;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+    imageData.data = const_cast<unsigned char *>(image.image.data());
 
-      textures.push_back(
-          renderer->getResourceAllocator()->createTexture2D(imageData));
-    }
-
-    for (auto &gltfMaterial : model.materials) {
-      std::vector<std::pair<String, Property>> materialProperties;
-
-      MaterialPBR::Properties properties{};
-
-      if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-        properties.baseColorTexture = textures.at(
-            gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
-      }
-      properties.baseColorTextureCoord =
-          gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
-      auto &colorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
-      properties.baseColorFactor = glm::vec4{colorFactor[0], colorFactor[1],
-                                             colorFactor[2], colorFactor[3]};
-
-      if (gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index >=
-          0) {
-        properties.metallicRoughnessTexture = textures.at(
-            gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index);
-      }
-      properties.metallicRoughnessTextureCoord =
-          gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
-      properties.metallicFactor =
-          static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
-      properties.roughnessFactor =
-          static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
-
-      if (gltfMaterial.normalTexture.index >= 0) {
-        properties.normalTexture =
-            textures.at(gltfMaterial.normalTexture.index);
-      }
-      properties.normalTextureCoord = gltfMaterial.normalTexture.texCoord;
-      properties.normalScale =
-          static_cast<float>(gltfMaterial.normalTexture.scale);
-
-      if (gltfMaterial.occlusionTexture.index >= 0) {
-        properties.occlusionTexture =
-            textures.at(gltfMaterial.occlusionTexture.index);
-      }
-      properties.occlusionTextureCoord = gltfMaterial.occlusionTexture.texCoord;
-      properties.occlusionStrength =
-          static_cast<float>(gltfMaterial.occlusionTexture.strength);
-
-      if (gltfMaterial.emissiveTexture.index >= 0) {
-        properties.emissiveTexture =
-            textures.at(gltfMaterial.emissiveTexture.index);
-      }
-      properties.emissiveTextureCoord = gltfMaterial.emissiveTexture.texCoord;
-      auto &emissiveFactor = gltfMaterial.emissiveFactor;
-      properties.emissiveFactor =
-          glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
-
-      CullMode cullMode =
-          gltfMaterial.doubleSided ? CullMode::None : CullMode::Back;
-      materials.push_back(renderer->createMaterialPBR(properties, cullMode));
-    }
-
-    return materials;
-  } catch (std::out_of_range e) {
-    throw GLTFError("Failed load textures and materials");
+    textures.push_back(
+        renderer->getResourceAllocator()->createTexture2D(imageData));
   }
+
+  for (auto &gltfMaterial : model.materials) {
+    std::vector<std::pair<String, Property>> materialProperties;
+
+    MaterialPBR::Properties properties{};
+
+    if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
+      properties.baseColorTexture =
+          textures.at(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
+    }
+    properties.baseColorTextureCoord =
+        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
+    auto &colorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
+    properties.baseColorFactor = glm::vec4{colorFactor[0], colorFactor[1],
+                                           colorFactor[2], colorFactor[3]};
+
+    if (gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
+      properties.metallicRoughnessTexture = textures.at(
+          gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index);
+    }
+    properties.metallicRoughnessTextureCoord =
+        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
+    properties.metallicFactor =
+        static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
+    properties.roughnessFactor =
+        static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor);
+
+    if (gltfMaterial.normalTexture.index >= 0) {
+      properties.normalTexture = textures.at(gltfMaterial.normalTexture.index);
+    }
+    properties.normalTextureCoord = gltfMaterial.normalTexture.texCoord;
+    properties.normalScale =
+        static_cast<float>(gltfMaterial.normalTexture.scale);
+
+    if (gltfMaterial.occlusionTexture.index >= 0) {
+      properties.occlusionTexture =
+          textures.at(gltfMaterial.occlusionTexture.index);
+    }
+    properties.occlusionTextureCoord = gltfMaterial.occlusionTexture.texCoord;
+    properties.occlusionStrength =
+        static_cast<float>(gltfMaterial.occlusionTexture.strength);
+
+    if (gltfMaterial.emissiveTexture.index >= 0) {
+      properties.emissiveTexture =
+          textures.at(gltfMaterial.emissiveTexture.index);
+    }
+    properties.emissiveTextureCoord = gltfMaterial.emissiveTexture.texCoord;
+    auto &emissiveFactor = gltfMaterial.emissiveFactor;
+    properties.emissiveFactor =
+        glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
+
+    CullMode cullMode =
+        gltfMaterial.doubleSided ? CullMode::None : CullMode::Back;
+    materials.push_back(renderer->createMaterialPBR(properties, cullMode));
+  }
+
+  return materials;
 }
 
 /**
@@ -791,20 +804,29 @@ static AnimationData getAnimations(const tinygltf::Model &model,
       const auto &input = getBufferMetaForAccessor(model, sampler.input);
       const auto &output = getBufferMetaForAccessor(model, sampler.output);
 
-      LIQUID_ASSERT(input.accessor.type == TINYGLTF_TYPE_SCALAR,
-                    "Animation time accessor must be in SCALAR format");
+      if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
+        engineLogger.log(Logger::Warning)
+            << "Animation time accessor must be in SCALAR format. Skipping...";
+        continue;
+      }
 
-      LIQUID_ASSERT(input.accessor.componentType ==
-                        TINYGLTF_COMPONENT_TYPE_FLOAT,
-                    "Animation time accessor component type must be FLOAT");
+      if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        engineLogger.log(Logger::Warning)
+            << "Animation time accessor component type must be FLOAT";
+        continue;
+      }
 
-      LIQUID_ASSERT(
-          input.accessor.count == output.accessor.count,
-          "Sampler input and output must have the same number of items");
+      if (input.accessor.count != output.accessor.count) {
+        engineLogger.log(Logger::Warning)
+            << "Sampler input and output must have the same number of items";
+        continue;
+      }
 
-      LIQUID_ASSERT(output.accessor.componentType ==
-                        TINYGLTF_COMPONENT_TYPE_FLOAT,
-                    "Animation output accessor component type must be FLOAT");
+      if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        engineLogger.log(Logger::Warning)
+            << "Animation output accessor component type must be FLOAT";
+        continue;
+      }
 
       std::vector<float> &times = samplers.at(i).times;
       times.resize(input.accessor.count);
@@ -952,7 +974,7 @@ GLTFLoader::GLTFLoader(EntityContext &entityContext_, VulkanRenderer *renderer_,
       animationSystem(animationSystem_),
       defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
 
-SceneNode *GLTFLoader::loadFromFile(const String &filename) {
+GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   String error, warning;
@@ -964,11 +986,11 @@ SceneNode *GLTFLoader::loadFromFile(const String &filename) {
   }
 
   if (!error.empty()) {
-    throw GLTFError(error);
+    return Res(GLTFError::Error);
   }
 
   if (!ret) {
-    throw GLTFError("Failed to parse GLTF file");
+    return Res(GLTFError::Error);
   }
 
   auto &&skeletonData = getSkeletons(model, renderer->getResourceAllocator());
@@ -981,7 +1003,7 @@ SceneNode *GLTFLoader::loadFromFile(const String &filename) {
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 
-  return scene;
+  return Res(scene);
 }
 
 } // namespace liquid

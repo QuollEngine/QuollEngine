@@ -35,10 +35,7 @@ void VulkanValidator::attachToInstanceCreateConfig(
 }
 
 void VulkanValidator::attachToInstance(VkInstance instance) {
-  if (!checkValidationSupport()) {
-    throw VulkanError("Cannot create debug messenger",
-                      VK_ERROR_LAYER_NOT_PRESENT);
-  }
+  LIQUID_ASSERT(checkValidationSupport(), "Cannot create debug messenger");
 
   checkForVulkanError(VulkanValidator::createDebugUtilsMessengerEXT(
                           instance, &messengerCreateInfo, nullptr, &messenger),
