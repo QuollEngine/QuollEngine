@@ -302,9 +302,8 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(skin.joints.size()); ++i) {
       const auto &joint = skin.joints.at(i);
-      normalizedJointMap.insert({joint, i});
 
-      if (skeletonData.gltfToNormalizedJointMap.find(joint) ==
+      if (skeletonData.gltfToNormalizedJointMap.find(joint) !=
           skeletonData.gltfToNormalizedJointMap.end()) {
         engineLogger.log(Logger::Warning)
             << "Single joint cannot be a child of multiple skins. Skipping "
@@ -318,6 +317,7 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
       LIQUID_ASSERT(skeletonData.gltfToNormalizedJointMap.find(joint) ==
                         skeletonData.gltfToNormalizedJointMap.end(),
                     "Single joint cannot be accessed by multiple skins");
+      normalizedJointMap.insert({joint, i});
       skeletonData.gltfToNormalizedJointMap.insert({joint, i});
       skeletonData.jointSkinMap.insert({joint, si});
 
