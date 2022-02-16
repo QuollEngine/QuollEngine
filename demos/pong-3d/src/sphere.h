@@ -3,7 +3,7 @@
 #include <math.h>
 #include "liquid/scene/Mesh.h"
 
-static constexpr float PI = 3.14159265;
+static constexpr float PI = 3.14159265f;
 
 enum SphereColor { RED = 0x1, GREEN = 0x2, BLUE = 0x4 };
 

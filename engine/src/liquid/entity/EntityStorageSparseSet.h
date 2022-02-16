@@ -85,7 +85,6 @@ public:
    * @tparam ComponentType Component type
    * @param entity Entity
    * @return Component value
-   * @throws EntityError Component not found
    */
   template <class ComponentType>
   const ComponentType &getComponent(Entity entity) const;
@@ -96,7 +95,6 @@ public:
    * @tparam ComponentType Component type
    * @param entity Entity
    * @return Component value
-   * @throws EntityError Component not found
    */
   template <class ComponentType> ComponentType &getComponent(Entity entity);
 

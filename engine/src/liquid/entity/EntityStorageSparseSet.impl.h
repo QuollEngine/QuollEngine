@@ -46,11 +46,10 @@ template <class... ComponentTypes>
 template <class ComponentType>
 void EntityStorageSparseSet<ComponentTypes...>::setComponent(
     Entity entity, const ComponentType &value) {
-  auto &pool = getPoolForComponent<ComponentType>();
+  LIQUID_ASSERT(hasEntity(entity),
+                "Entity " + std::to_string(entity) + " does not exist");
 
-  if (!hasEntity(entity)) {
-    throw EntityError("Entity " + std::to_string(entity) + " does not exist");
-  }
+  auto &pool = getPoolForComponent<ComponentType>();
 
   if (entity >= pool.entityIndices.size()) {
     // TODO: Make this better
@@ -72,11 +71,9 @@ template <class... ComponentTypes>
 template <class ComponentType>
 const ComponentType &
 EntityStorageSparseSet<ComponentTypes...>::getComponent(Entity entity) const {
-  if (!hasComponent<ComponentType>(entity)) {
-    throw EntityError("Component named " +
-                      String(typeid(ComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
-  }
+  LIQUID_ASSERT(hasComponent<ComponentType>(entity),
+                "Component named " + String(typeid(ComponentType).name()) +
+                    " does not exist for entity " + std::to_string(entity));
   const auto &pool = getPoolForComponent<ComponentType>();
 
   return pool.components[pool.entityIndices[entity]];
@@ -86,11 +83,9 @@ template <class... ComponentTypes>
 template <class ComponentType>
 ComponentType &
 EntityStorageSparseSet<ComponentTypes...>::getComponent(Entity entity) {
-  if (!hasComponent<ComponentType>(entity)) {
-    throw EntityError("Component named " +
-                      String(typeid(ComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
-  }
+  LIQUID_ASSERT(hasComponent<ComponentType>(entity),
+                "Component named " + String(typeid(ComponentType).name()) +
+                    " does not exist for entity " + std::to_string(entity));
   auto &pool = getPoolForComponent<ComponentType>();
 
   return pool.components[pool.entityIndices[entity]];
@@ -109,11 +104,9 @@ template <class... ComponentTypes>
 template <class ComponentType>
 void EntityStorageSparseSet<ComponentTypes...>::deleteComponent(Entity entity) {
   auto &pool = getPoolForComponent<ComponentType>();
-  if (entity >= pool.entityIndices.size()) {
-    throw EntityError("Component named " +
-                      String(typeid(ComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
-  }
+  LIQUID_ASSERT(entity < pool.entityIndices.size(),
+                "Component named " + String(typeid(ComponentType).name()) +
+                    " does not exist for entity " + std::to_string(entity));
 
   Entity movedEntity = pool.entities.back();
   size_t entityIndexToDelete = pool.entityIndices[entity];

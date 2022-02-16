@@ -98,11 +98,13 @@ public:
   /**
    * @brief Get value
    *
-   * @tvalue VertexType Value type
+   * @tvalue ValueType Value type
    * @return Property value
    */
   template <class ValueType> inline const ValueType getValue() const {
-    throw std::invalid_argument("Property type is not supported");
+    LIQUID_ASSERT(false, "Property type is not supported");
+
+    return std::any_cast<ValueType>(value);
   }
 
 private:
@@ -112,63 +114,50 @@ private:
 };
 
 template <> inline const int32_t Property::getValue() const {
-  if (type != INT32) {
-    throw std::runtime_error("Property type is not int32");
-  }
+  LIQUID_ASSERT(type == INT32, "Property type is not int32");
 
   return std::any_cast<int32_t>(value);
 }
 
 template <> inline const uint32_t Property::getValue() const {
-  if (type != UINT32) {
-    throw std::runtime_error("Property type is not uint32");
-  }
+  LIQUID_ASSERT(type == UINT32, "Property type is not uint32");
 
   return std::any_cast<uint32_t>(value);
 }
 
 template <> inline const uint64_t Property::getValue() const {
-  if (type != UINT64) {
-    throw std::runtime_error("Property type is not uint64");
-  }
+  LIQUID_ASSERT(type == UINT64, "Property type is not uint64");
 
   return std::any_cast<uint64_t>(value);
 }
 
 template <> inline const float Property::getValue() const {
-  if (type != REAL) {
-    throw std::runtime_error("Property type is not a real number");
-  }
+  LIQUID_ASSERT(type == REAL, "Property type is not a real number");
 
   return std::any_cast<float>(value);
 }
 
 template <> inline const glm::vec2 Property::getValue() const {
-  if (type != VECTOR2) {
-    throw std::runtime_error("Property type is not Vector2");
-  }
+  LIQUID_ASSERT(type == VECTOR2, "Property type is not Vector2");
+
   return std::any_cast<glm::vec2>(value);
 }
 
 template <> inline const glm::vec3 Property::getValue() const {
-  if (type != VECTOR3) {
-    throw std::runtime_error("Property type is not Vector3");
-  }
+  LIQUID_ASSERT(type == VECTOR3, "Property type is not Vector3");
 
   return std::any_cast<glm::vec3>(value);
 }
 
 template <> inline const glm::vec4 Property::getValue() const {
-  if (type != VECTOR4) {
-    throw std::runtime_error("Property type is not Vector4");
-  }
+  LIQUID_ASSERT(type == VECTOR4, "Property type is not Vector4");
+
   return std::any_cast<glm::vec4>(value);
 }
 
 template <> inline const glm::mat4 Property::getValue() const {
-  if (type != MATRIX4) {
-    throw std::runtime_error("Property type is not Matrix4");
-  }
+  LIQUID_ASSERT(type == MATRIX4, "Property type is not Matrix4");
+
   return std::any_cast<glm::mat4>(value);
 }
 

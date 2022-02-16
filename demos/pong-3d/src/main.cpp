@@ -107,18 +107,12 @@ public:
                                      renderer->getDebugManager(), "SWAPCHAIN",
                                      [](const auto &sceneTexture) {});
 
-    try {
-      return mainLoop.run(graph, [=](double dt) mutable {
-        updateGameLogic(0.15);
-        updateScene(0.15);
+    return mainLoop.run(graph, [=](double dt) mutable {
+      updateGameLogic(0.15f);
+      updateScene(0.15f);
 
-        return true;
-      });
-
-    } catch (std::runtime_error error) {
-      std::cerr << error.what() << std::endl;
-      return 1;
-    }
+      return true;
+    });
   }
 
 private:
@@ -163,8 +157,8 @@ private:
   }
 
   void updateGameLogic(float dt) {
-    if (abs(botPosition - ballPosition.x) < 0.2) {
-      botVelocity = 0;
+    if (abs(botPosition - ballPosition.x) < 0.2f) {
+      botVelocity = 0.0;
     } else if (botPosition > ballPosition.x) {
       botVelocity = -velocity;
     } else {
@@ -177,12 +171,12 @@ private:
     // and output it based on the angle
     // TODO: Changing Z velocity for more fun
     if (ballPosition.z > safeAreaTop) {
-      if ((ballPosition.x - ballRadius - botPosition - paddleWidth < 0.1) &&
-          (ballPosition.x + ballRadius - botPosition + paddleWidth) > -0.1) {
+      if ((ballPosition.x - ballRadius - botPosition - paddleWidth < 0.1f) &&
+          (ballPosition.x + ballRadius - botPosition + paddleWidth) > -0.1f) {
         ballVelocity.z = -ballVelocity.z;
-        ballVelocity.x *= 1.04;
+        ballVelocity.x *= 1.04f;
 
-        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0) {
+        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0.0f) {
           ballVelocity.x *= -1;
         }
       } else {
@@ -190,18 +184,19 @@ private:
         ballVelocity = {0.1, 0.0, 0.3};
       }
     } else if (ballPosition.z < safeAreaBottom) {
-      if ((ballPosition.x - ballRadius - playerPosition - paddleWidth < 0.1) &&
-          (ballPosition.x + ballRadius - playerPosition + paddleWidth) > -0.1) {
+      if ((ballPosition.x - ballRadius - playerPosition - paddleWidth < 0.1f) &&
+          (ballPosition.x + ballRadius - playerPosition + paddleWidth) >
+              -0.1f) {
         ballVelocity.z = -ballVelocity.z;
 
-        ballVelocity.x *= 1.04;
+        ballVelocity.x *= 1.04f;
 
-        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0) {
-          ballVelocity.x *= -1;
+        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0.0f) {
+          ballVelocity.x *= -1.0f;
         }
       } else {
-        ballPosition = {0, 0, 0};
-        ballVelocity = {0.1, 0.0, -0.3};
+        ballPosition = {0.0f, 0.0f, 0.0f};
+        ballVelocity = {0.1f, 0.0f, -0.3f};
       }
     }
 
@@ -226,7 +221,6 @@ private:
   }
 
   void setupScene() {
-
     auto cameraEntity = entityContext.createEntity();
     entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
     scene->setActiveCamera(cameraEntity);
@@ -234,12 +228,12 @@ private:
     const auto &fbSize = window->getFramebufferSize();
 
     camera->setPerspective(
-        70.0, static_cast<float>(fbSize.width) / fbSize.height, 0.1, 200.0);
-    camera->lookAt({0.0, 4.0, -8.0}, {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0});
+        70.0, static_cast<float>(fbSize.width) / fbSize.height, 0.1f, 200.0f);
+    camera->lookAt({0.0f, 4.0f, -8.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 
     window->addResizeHandler([this](uint32_t width, uint32_t height) {
-      this->camera->setPerspective(70.0, static_cast<float>(width) / height,
-                                   0.1, 200.0);
+      this->camera->setPerspective(70.0f, static_cast<float>(width) / height,
+                                   0.1f, 200.0f);
     });
 
     auto e1 = entityContext.createEntity();
@@ -263,13 +257,13 @@ private:
 
     // Create walls
     scene->getRootNode()->addChild(
-        e1, createWallTransform({0.0, 0.0, 3.5}, 0, 5.0));
+        e1, createWallTransform({0.0f, 0.0f, 3.5f}, 0.0f, 5.0f));
     scene->getRootNode()->addChild(
-        e2, createWallTransform({-5.0, 0.0, 0}, 90, 3.6));
-    scene->getRootNode()->addChild(e3,
-                                   createWallTransform({5.0, 0.0, 0}, 90, 3.6));
+        e2, createWallTransform({-5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
     scene->getRootNode()->addChild(
-        e4, createWallTransform({0.0, 0.0, -3.5}, 0, 5.0));
+        e3, createWallTransform({5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
+    scene->getRootNode()->addChild(
+        e4, createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
 
     // Create paddles
     p1 = scene->getRootNode()->addChild(pe1);
@@ -309,25 +303,25 @@ private:
   // Game specific parameters
   float velocity = 0.4f;
 
-  float ballRadius = 0.3;
+  float ballRadius = 0.3f;
 
   // wall center position - width
-  float wallLineLeft = 5.0 - 0.1;
-  float wallLineRight = -5 + 0.1;
+  float wallLineLeft = 5.0f - 0.1f;
+  float wallLineRight = -5.0f + 0.1f;
 
   // cube width / 2
-  float paddleWidth = 1.0;
+  float paddleWidth = 1.0f;
 
-  float safeAreaTop = 2.7;
-  float safeAreaBottom = -2.7;
+  float safeAreaTop = 2.7f;
+  float safeAreaBottom = -2.7f;
 
-  float playerVelocity = 0;
-  float playerPosition = 0;
+  float playerVelocity = 0.0f;
+  float playerPosition = 0.0f;
 
-  float botVelocity = 0.0;
-  float botPosition = 0.0;
-  glm::vec3 ballPosition{0.0, 0.0, 0.0};
-  glm::vec3 ballVelocity{0.2, 0.0, 0.3};
+  float botVelocity = 0.0f;
+  float botPosition = 0.0f;
+  glm::vec3 ballPosition{0.0f, 0.0f, 0.0f};
+  glm::vec3 ballVelocity{0.2f, 0.0f, 0.3f};
 
   liquid::EntityContext entityContext;
 };

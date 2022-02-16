@@ -20,7 +20,6 @@ public:
    *
    * @param name Shader name
    * @return Shader
-   * @throws std::runtime_error Shader not found
    */
   const SharedPtr<Shader> &getShader(const String &name) const;
 

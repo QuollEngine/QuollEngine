@@ -37,10 +37,8 @@ VulkanShader::~VulkanShader() {
 std::vector<char> VulkanShader::readShaderFile(const String &shaderFile) {
   std::ifstream file(shaderFile, std::ios::ate | std::ios::binary);
 
-  if (!file.is_open()) {
-    throw VulkanError("Failed to open shader file \"" + shaderFile + "\"",
-                      VK_SUCCESS);
-  }
+  LIQUID_ASSERT(file.is_open(),
+                "Failed to open shader file \"" + shaderFile + "\"");
 
   std::streamsize fileSize = file.tellg();
   std::vector<char> buffer(fileSize);

@@ -4,11 +4,10 @@
 #include "../mocks/TestShader.h"
 #include <gtest/gtest.h>
 
-TEST(ShaderLibraryTests, ThrowsErrorIfShaderNotFound) {
+TEST(ShaderLibraryDeathTest, ThrowsErrorIfShaderNotFound) {
   liquid::ShaderLibrary library;
 
-  EXPECT_THROW({ library.getShader("non-existing-shader"); },
-               std::runtime_error);
+  EXPECT_DEATH({ library.getShader("non-existing-shader"); }, ".*");
 }
 
 TEST(ShaderLibraryTests, AddsShader) {

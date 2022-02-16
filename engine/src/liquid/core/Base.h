@@ -34,6 +34,7 @@
 
 #include "Assert.h"
 #include "Profiler.h"
+#include "Errorable.h"
 
 namespace liquid {
 

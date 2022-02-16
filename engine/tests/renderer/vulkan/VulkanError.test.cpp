@@ -29,8 +29,8 @@ TEST(CheckForVulkanError, DoesNothingIfSuccess) {
       liquid::checkForVulkanError(VK_SUCCESS, "Test error message"));
 }
 
-TEST(CheckForVulkanError, ThrowsVulkanErrorIfNotSuccess) {
-  EXPECT_THROW(
+TEST(CheckForVulkanErrorDeathTest, ThrowsVulkanErrorIfNotSuccess) {
+  EXPECT_DEATH(
       liquid::checkForVulkanError(VK_ERROR_DEVICE_LOST, "Test error message"),
-      liquid::VulkanError);
+      ".*");
 }
