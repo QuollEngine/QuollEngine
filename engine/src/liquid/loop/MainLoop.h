@@ -11,7 +11,7 @@ class MainLoop {
 public:
   MainLoop(VulkanRenderer *renderer, GLFWWindow *window);
 
-  int run(RenderGraph &graph, const std::function<bool(double)> &update);
+  int run(RenderGraph &graph, const std::function<bool(float)> &update);
 
 private:
   VulkanRenderer *renderer = nullptr;

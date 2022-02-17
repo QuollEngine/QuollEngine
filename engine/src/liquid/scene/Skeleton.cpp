@@ -64,7 +64,8 @@ void Skeleton::update() {
   LIQUID_PROFILE_EVENT("Skeleton::update");
   // Starting from index 1 because
   // root does not need to be updated
-  for (size_t i = 1; i < jointLocalPositions.size(); ++i) {
+  for (uint32_t i = 1; i < static_cast<uint32_t>(jointLocalPositions.size());
+       ++i) {
     const auto &parentWorld = jointWorldTransforms.at(jointParents.at(i));
     jointWorldTransforms.at(i) = parentWorld * getJointLocalTransform(i);
   }

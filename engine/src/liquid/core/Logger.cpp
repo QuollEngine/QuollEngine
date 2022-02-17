@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
 #include "Logger.h"
 
+#pragma warning(disable : 4996)
+
 namespace liquid {
 
 std::streamsize NullOutStreamBuf::xsputn(const char *s, std::streamsize n) {

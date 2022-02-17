@@ -29,22 +29,22 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTexture2D) {
       .WillOnce([](auto allocator, const auto *imageCreateInfo,
                    const auto *imageAllocationInfo, auto image,
                    auto *allocation, auto *x) {
-        *image = (VkImage)0xff00ff00;
-        *allocation = (VmaAllocation)0xff00ffaa;
+        *image = (VkImage)0xff00ff0010000000;
+        *allocation = (VmaAllocation)0xff00ffaa10000000;
         return VK_SUCCESS;
       });
 
   EXPECT_CALL(*vulkanLibMock, vkCreateImageView)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *imageView) {
-        *imageView = (VkImageView)0xff00ffcc;
+        *imageView = (VkImageView)0xff00ffcc10000000;
         return VK_SUCCESS;
       });
 
   EXPECT_CALL(*vulkanLibMock, vkCreateSampler)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *sampler) {
-        *sampler = (VkSampler)0xff00ffee;
+        *sampler = (VkSampler)0xff00ffee10000000;
         return VK_SUCCESS;
       });
 
@@ -95,22 +95,22 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureCubemap) {
       .WillOnce([](auto allocator, const auto *imageCreateInfo,
                    const auto *imageAllocationInfo, auto image,
                    auto *allocation, auto *x) {
-        *image = (VkImage)0xff00ff00;
-        *allocation = (VmaAllocation)0xff00ffaa;
+        *image = (VkImage)0xff00ff0010000000;
+        *allocation = (VmaAllocation)0xff00ffaa10000000;
         return VK_SUCCESS;
       });
 
   EXPECT_CALL(*vulkanLibMock, vkCreateImageView)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *imageView) {
-        *imageView = (VkImageView)0xff00ffcc;
+        *imageView = (VkImageView)0xff00ffcc10000000;
         return VK_SUCCESS;
       });
 
   EXPECT_CALL(*vulkanLibMock, vkCreateSampler)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *sampler) {
-        *sampler = (VkSampler)0xff00ffee;
+        *sampler = (VkSampler)0xff00ffee10000000;
         return VK_SUCCESS;
       });
 
@@ -151,8 +151,8 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
       .WillOnce([](auto allocator, const VkImageCreateInfo *pCreateInfo,
                    const auto *imageAllocationInfo, auto image,
                    auto *allocation, auto *x) {
-        *image = (VkImage)0xff00ff00;
-        *allocation = (VmaAllocation)0xff00ffaa;
+        *image = (VkImage)0xff00ff0010000000;
+        *allocation = (VmaAllocation)0xff00ffaa10000000;
 
         EXPECT_EQ(pCreateInfo->arrayLayers, 5);
         EXPECT_EQ(pCreateInfo->format, VK_FORMAT_D16_UNORM);
@@ -163,14 +163,14 @@ TEST_F(VulkanResourceAllocatorTests, CreatesTextureFramebuffer) {
   EXPECT_CALL(*vulkanLibMock, vkCreateImageView)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *imageView) {
-        *imageView = (VkImageView)0xff00ffcc;
+        *imageView = (VkImageView)0xff00ffcc10000000;
         return VK_SUCCESS;
       });
 
   EXPECT_CALL(*vulkanLibMock, vkCreateSampler)
       .WillOnce([](auto device, const auto *pCreateInfo, const auto *allocator,
                    auto *sampler) {
-        *sampler = (VkSampler)0xff00ffee;
+        *sampler = (VkSampler)0xff00ffee10000000;
         return VK_SUCCESS;
       });
 

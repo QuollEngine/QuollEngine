@@ -28,8 +28,6 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   wideExtensions = wss.str();
   filters.pszSpec = wideExtensions.c_str();
 
-  std::string str = std::string(wideExtensions.begin(), wideExtensions.end());
-
   pFileOpen->SetFileTypes(1, &filters);
 
   if (!SUCCEEDED(pFileOpen->Show(NULL))) {
@@ -47,7 +45,12 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   }
 
   std::wstring ws(pszFilePath);
-  std::string filePath = std::string(ws.begin(), ws.end());
+  int length = WideCharToMultiByte(
+      CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()), NULL, 0, NULL, NULL);
+
+  liquid::String filePath(length, 0);
+  WideCharToMultiByte(CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()),
+                      &filePath.at(0), length, NULL, NULL);
 
   CoTaskMemFree(pszFilePath);
   pItem->Release();

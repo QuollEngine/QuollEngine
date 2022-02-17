@@ -10,7 +10,7 @@ MainLoop::MainLoop(VulkanRenderer *renderer_, GLFWWindow *window_)
     : renderer(renderer_), window(window_) {}
 
 int MainLoop::run(RenderGraph &graph,
-                  const std::function<bool(double)> &updater) {
+                  const std::function<bool(float)> &updater) {
 
   bool running = true;
 
@@ -41,7 +41,7 @@ int MainLoop::run(RenderGraph &graph,
     accumulator += frameTime;
 
     while (accumulator >= dt) {
-      running = updater(dt);
+      running = updater(static_cast<float>(dt));
       accumulator -= dt;
     }
 

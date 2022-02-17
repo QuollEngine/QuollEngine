@@ -20,6 +20,9 @@ workspace "LiquidEngine"
     
     configurations { "Debug", "Release", "Profile-Debug", "Profile-Release" }
 
+    filter { "toolset:msc-*" }
+        flags { "FatalCompileWarnings" }
+
     filter {"configurations:Debug or configurations:Profile-Debug"}
         defines { "LIQUID_DEBUG" }
         symbols "On"

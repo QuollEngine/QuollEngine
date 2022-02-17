@@ -247,18 +247,21 @@ int main() {
       renderData->update();
 
       if (leftMouseBtnPressed && !io.WantCaptureMouse) {
-        double xpos, ypos;
-        glfwGetCursorPos(window->getInstance(), &xpos, &ypos);
+        double dxpos = 0.0, dypos = 0.0;
+        glfwGetCursorPos(window->getInstance(), &dxpos, &dypos);
+
+        float xpos = static_cast<float>(dxpos);
+        float ypos = static_cast<float>(dypos);
 
         const auto &size = window->getWindowSize();
         float width = (float)size.width;
         float height = (float)size.height;
 
         if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
-          float x = (xpos / width) * 5;
-          float y = (ypos / height) * 5;
+          float x = (xpos / width) * 5.0f;
+          float y = (ypos / height) * 5.0f;
 
-          if (abs(xpos - prevX) > 1.0) {
+          if (abs(xpos - prevX) > 1.0f) {
             if (xpos < prevX) {
               horizontalAngle -= x;
             } else {
@@ -266,7 +269,7 @@ int main() {
             }
           }
 
-          if (abs(ypos - prevY) > 1.0) {
+          if (abs(ypos - prevY) > 1.0f) {
             if (ypos < prevY) {
               verticalAngle -= y;
             } else {
