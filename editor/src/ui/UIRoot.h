@@ -8,6 +8,7 @@
 #include "EditorGridPanel.h"
 #include "StatusBar.h"
 #include "Layout.h"
+#include "liquid/animation/AnimationSystem.h"
 
 namespace liquidator {
 
@@ -27,8 +28,10 @@ public:
    * Renders all components inside the root
    *
    * @param sceneManager Scene manager
+   * @param animationSystem Animation system
    */
-  void render(SceneManager &sceneManager);
+  void render(SceneManager &sceneManager,
+              const liquid::AnimationSystem &animationSystem);
 
 private:
   /**

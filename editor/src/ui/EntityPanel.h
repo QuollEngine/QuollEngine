@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/entity/EntityContext.h"
+#include "liquid/animation/AnimationSystem.h"
 #include "../editor-scene/SceneManager.h"
 
 namespace liquidator {
@@ -18,8 +19,10 @@ public:
    * @brief Render panel
    *
    * @param sceneManager Scene manager
+   * @param animationSystem Animation system
    */
-  void render(SceneManager &sceneManager);
+  void render(SceneManager &sceneManager,
+              const liquid::AnimationSystem &animationSystem);
 
   /**
    * @brief Set selected entity
@@ -46,8 +49,10 @@ private:
 
   /**
    * @brief Render animation component
+   *
+   * @param animationSystem Animation system
    */
-  void renderAnimation();
+  void renderAnimation(const liquid::AnimationSystem &animationSystem);
 
 private:
   liquid::Entity selectedEntity = liquid::ENTITY_MAX;

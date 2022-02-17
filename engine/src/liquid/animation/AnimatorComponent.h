@@ -8,7 +8,7 @@ struct AnimatorComponent {
   float currentTime = 0.0f;
   bool playing = false;
 
-  std::vector<String> animations;
+  std::vector<uint32_t> animations;
 };
 
 } // namespace liquid

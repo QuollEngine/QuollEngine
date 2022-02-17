@@ -44,8 +44,8 @@ struct SkeletonData {
 };
 
 struct AnimationData {
-  std::map<uint32_t, std::vector<String>> nodeAnimationMap;
-  std::map<uint32_t, std::vector<String>> skinAnimationMap;
+  std::map<uint32_t, std::vector<uint32_t>> nodeAnimationMap;
+  std::map<uint32_t, std::vector<uint32_t>> skinAnimationMap;
 };
 
 /**
@@ -944,7 +944,7 @@ static AnimationData getAnimations(const tinygltf::Model &model,
     LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
                   "Animation must have a target node or skin");
 
-    animationSystem.addAnimation(animation);
+    uint32_t index = animationSystem.addAnimation(animation);
     if (targetSkin >= 0) {
       if (animationData.skinAnimationMap.find(targetSkin) ==
           animationData.skinAnimationMap.end()) {
@@ -952,8 +952,7 @@ static AnimationData getAnimations(const tinygltf::Model &model,
             {static_cast<uint32_t>(targetSkin), {}});
       }
 
-      animationData.skinAnimationMap.at(targetSkin)
-          .push_back(animation.getName());
+      animationData.skinAnimationMap.at(targetSkin).push_back(index);
     } else {
       if (animationData.nodeAnimationMap.find(targetSkin) ==
           animationData.nodeAnimationMap.end()) {
@@ -961,8 +960,7 @@ static AnimationData getAnimations(const tinygltf::Model &model,
             {static_cast<uint32_t>(targetNode), {}});
       }
 
-      animationData.nodeAnimationMap.at(targetNode)
-          .push_back(animation.getName());
+      animationData.nodeAnimationMap.at(targetNode).push_back(index);
     }
   }
   return animationData;
