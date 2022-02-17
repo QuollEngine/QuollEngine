@@ -6,21 +6,24 @@ namespace liquid {
 AnimationSystem::AnimationSystem(EntityContext &entityContext_)
     : entityContext(entityContext_) {}
 
-void AnimationSystem::addAnimation(const Animation &animation) {
-  animations.insert({animation.getName(), animation});
+uint32_t AnimationSystem::addAnimation(const Animation &animation) {
+  uint32_t lastId = static_cast<uint32_t>(animations.size());
+
+  animations.push_back(animation);
+  return lastId;
 }
 
 void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   entityContext.iterateEntities<TransformComponent, AnimatorComponent>(
       [this, dt](Entity entity, auto &transform, auto &animComp) {
-        const auto &iter =
-            animations.find(animComp.animations.at(animComp.currentAnimation));
-        if (iter == animations.end()) {
+        uint32_t index = animComp.animations.at(animComp.currentAnimation);
+
+        if (index >= animations.size()) {
           return;
         }
 
-        const Animation &animation = (*iter).second;
+        const Animation &animation = animations.at(index);
 
         if (animComp.playing) {
           animComp.currentTime =

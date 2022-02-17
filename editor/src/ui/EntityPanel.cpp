@@ -10,14 +10,15 @@ constexpr size_t VEC4_ARRAY_SIZE = 4;
 EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : context(entityContext) {}
 
-void EntityPanel::render(SceneManager &sceneManager) {
+void EntityPanel::render(SceneManager &sceneManager,
+                         const liquid::AnimationSystem &animationSystem) {
   bool open = true;
   if (ImGui::Begin("Properties", &open)) {
     if (context.hasEntity(selectedEntity)) {
       renderName();
       renderLight();
       renderTransform();
-      renderAnimation();
+      renderAnimation(animationSystem);
     }
     ImGui::End();
   }
@@ -142,24 +143,29 @@ void EntityPanel::renderTransform() {
   }
 }
 
-void EntityPanel::renderAnimation() {
+void EntityPanel::renderAnimation(
+    const liquid::AnimationSystem &animationSystem) {
   if (!context.hasComponent<liquid::AnimatorComponent>(selectedEntity)) {
     return;
   }
 
   if (ImGui::CollapsingHeader("Animation")) {
-
     auto &component =
         context.getComponent<liquid::AnimatorComponent>(selectedEntity);
 
-    if (ImGui::BeginCombo(
-            "###SelectAnimation",
-            component.animations.at(component.currentAnimation).c_str(), 0)) {
+    const auto &currentName =
+        animationSystem
+            .getAnimation(component.animations.at(component.currentAnimation))
+            .getName();
+
+    if (ImGui::BeginCombo("###SelectAnimation", currentName.c_str(), 0)) {
       for (size_t i = 0; i < component.animations.size(); ++i) {
         bool selectable = component.currentAnimation == i;
 
-        if (ImGui::Selectable(component.animations.at(i).c_str(),
-                              &selectable)) {
+        const auto &animationName =
+            animationSystem.getAnimation(component.animations.at(i)).getName();
+
+        if (ImGui::Selectable(animationName.c_str(), &selectable)) {
           component.currentAnimation = i;
         }
       }

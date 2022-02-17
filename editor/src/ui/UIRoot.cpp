@@ -10,12 +10,13 @@ UIRoot::UIRoot(liquid::EntityContext &context,
       [this](liquid::SceneNode *node) { handleNodeClick(node); });
 }
 
-void UIRoot::render(SceneManager &sceneManager) {
+void UIRoot::render(SceneManager &sceneManager,
+                    const liquid::AnimationSystem &animationSystem) {
   layout.setup();
   menuBar.render(sceneManager);
   statusBar.render(sceneManager);
   sceneHierarchyPanel.render(sceneManager);
-  entityPanel.render(sceneManager);
+  entityPanel.render(sceneManager, animationSystem);
   editorCameraPanel.render(sceneManager);
 }
 

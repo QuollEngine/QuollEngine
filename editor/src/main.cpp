@@ -64,8 +64,9 @@ int main() {
 
     liquid::RenderGraph graph = renderer->createRenderGraph(
         renderData, "mainColor",
-        [&sceneManager, &ui, &renderData](const auto &sceneTexture) {
-          ui.render(sceneManager);
+        [&sceneManager, &animationSystem, &ui,
+         &renderData](const auto &sceneTexture) {
+          ui.render(sceneManager, animationSystem);
           if (ImGui::Begin("View")) {
             const auto &size = ImGui::GetContentRegionAvail();
             const auto &pos = ImGui::GetWindowPos();

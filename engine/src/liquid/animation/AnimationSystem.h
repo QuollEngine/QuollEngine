@@ -18,8 +18,9 @@ public:
    * @brief Add animation
    *
    * @param animation Animation
+   * @return Animation index
    */
-  void addAnimation(const Animation &animation);
+  uint32_t addAnimation(const Animation &animation);
 
   /**
    * @brief Update all animations
@@ -28,10 +29,23 @@ public:
    */
   void update(float dt);
 
+  /**
+   * @brief Get animation
+   *
+   * @param index Animation index
+   * @return Animation
+   */
+  inline const Animation &getAnimation(uint32_t index) const {
+    LIQUID_ASSERT(index < animations.size(), "Animation at index " +
+                                                 std::to_string(index) +
+                                                 " does not exist");
+    return animations.at(index);
+  }
+
 private:
   EntityContext &entityContext;
 
-  std::unordered_map<String, Animation> animations;
+  std::vector<Animation> animations;
 };
 
 } // namespace liquid

@@ -14,22 +14,19 @@ public:
 
   AnimationSystemTest() : system(context) {}
 
-  liquid::Entity createEntity(bool loop,
-                              const liquid::String &animName = "testAnim",
+  liquid::Entity createEntity(bool loop, uint32_t animIndex = 0,
                               bool playing = true) {
     auto entity = context.createEntity();
     context.setComponent<liquid::TransformComponent>(entity, {});
     context.setComponent<liquid::AnimatorComponent>(
-        entity, {0, loop, 0.0f, playing, {animName}});
+        entity, {0, loop, 0.0f, playing, {animIndex}});
 
     return entity;
   }
 
-  liquid::Entity
-  createEntityWithSkeleton(bool loop,
-                           const liquid::String &animName = "testAnim",
-                           bool playing = true) {
-    auto entity = createEntity(loop, animName, playing);
+  liquid::Entity createEntityWithSkeleton(bool loop, uint32_t animIndex = 0,
+                                          bool playing = true) {
+    auto entity = createEntity(loop, animIndex, playing);
 
     liquid::Skeleton skeleton(2, &allocator);
     skeleton.addJoint(glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
@@ -40,7 +37,7 @@ public:
     return entity;
   }
 
-  void createAnimation(liquid::KeyframeSequenceTarget target, float time) {
+  uint32_t createAnimation(liquid::KeyframeSequenceTarget target, float time) {
     liquid::Animation animation("testAnim", time);
     liquid::KeyframeSequence sequence(
         target, liquid::KeyframeSequenceInterpolation::Step);
@@ -50,11 +47,11 @@ public:
     sequence.addKeyframe(1.0f, glm::vec4(1.0f));
 
     animation.addKeyframeSequence(sequence);
-    system.addAnimation(animation);
+    return system.addAnimation(animation);
   }
 
-  void createSkeletonAnimation(liquid::KeyframeSequenceTarget target,
-                               float time) {
+  uint32_t createSkeletonAnimation(liquid::KeyframeSequenceTarget target,
+                                   float time) {
     liquid::Animation animation("testAnim", time);
     liquid::KeyframeSequence sequence(
         target, liquid::KeyframeSequenceInterpolation::Step, 1);
@@ -64,13 +61,27 @@ public:
     sequence.addKeyframe(1.0f, glm::vec4(1.0f));
 
     animation.addKeyframeSequence(sequence);
-    system.addAnimation(animation);
+    return system.addAnimation(animation);
   }
 };
 
+using AnimationSystemDeathTest = AnimationSystemTest;
+
+TEST_F(AnimationSystemTest, AddsAnimation) {
+  uint32_t index =
+      createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
+
+  EXPECT_EQ(system.getAnimation(index).getName(), "testAnim");
+  EXPECT_EQ(system.getAnimation(index).getTime(), 2.0f);
+}
+
+TEST_F(AnimationSystemDeathTest, FailsIfNonExistentAnimationIsRequested) {
+  EXPECT_DEATH(system.getAnimation(12), ".*");
+}
+
 TEST_F(AnimationSystemTest,
        DoesNotAdvanceEntityAnimationIfAnimationDoesNotExist) {
-  auto entity = createEntity(false, "non-existent");
+  auto entity = createEntity(false, 1);
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
 
@@ -80,8 +91,9 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
-  createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
-  auto entity = createEntity(false, "testAnim", false);
+  auto animIndex =
+      createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
+  auto entity = createEntity(false, animIndex, false);
 
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
