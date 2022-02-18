@@ -20,7 +20,7 @@ TEST(CameraTest, SetsPerspectiveProjectionAndUpdatesProjectionView) {
   EXPECT_TRUE(const_cast<glm::mat4 &>(camera.getProjectionViewMatrix()) ==
               glm::mat4{1.0f});
 
-  camera.setPerspective(90.0, 0.5, 0.1, 100.0);
+  camera.setPerspective(90.0f, 0.5f, 0.1f, 100.0f);
 
   auto projection = glm::perspective(glm::radians(90.0f), 0.5f, 0.1f, 100.0f);
   projection[1][1] *= -1;
@@ -40,7 +40,7 @@ TEST(CameraTest, SetsViewAndUpdatesProjectionView) {
   EXPECT_TRUE(const_cast<glm::mat4 &>(camera.getProjectionViewMatrix()) ==
               glm::mat4{1.0f});
 
-  camera.lookAt({0.0f, 0.0, 0.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 0.0});
+  camera.lookAt({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f});
 
   auto view =
       glm::lookAt(glm::vec3{0.0f, 0.0f, 0.0f}, glm::vec3{1.0f, 1.0f, 1.0f},
@@ -58,7 +58,7 @@ TEST(CameraData, UpdatesBufferOnSetProjectionView) {
   auto *buffer = static_cast<TestBuffer *>(camera.getUniformBuffer().get());
   EXPECT_EQ(buffer->data, nullptr);
 
-  camera.setPerspective(90.0, 0.5, 0.1, 100.0);
+  camera.setPerspective(90.0f, 0.5f, 0.1f, 100.0f);
 
   EXPECT_NE(buffer->data, nullptr);
   auto &cameraData = *static_cast<liquid::CameraData *>(buffer->data);
@@ -76,7 +76,7 @@ TEST(CameraData, UpdatesBufferOnLookAt) {
   auto *buffer = static_cast<TestBuffer *>(camera.getUniformBuffer().get());
   EXPECT_EQ(buffer->data, nullptr);
 
-  camera.lookAt({0.0f, 0.0, 0.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 0.0});
+  camera.lookAt({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f});
 
   EXPECT_NE(buffer->data, nullptr);
 

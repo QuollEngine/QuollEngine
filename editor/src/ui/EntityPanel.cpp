@@ -166,7 +166,7 @@ void EntityPanel::renderAnimation(
             animationSystem.getAnimation(component.animations.at(i)).getName();
 
         if (ImGui::Selectable(animationName.c_str(), &selectable)) {
-          component.currentAnimation = i;
+          component.currentAnimation = static_cast<uint32_t>(i);
         }
       }
       ImGui::EndCombo();

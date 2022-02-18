@@ -86,7 +86,7 @@ int main() {
     anim0.addKeyframeSequence(translation);
   }
 
-  animationSystem.addAnimation(anim0);
+  uint32_t animation = animationSystem.addAnimation(anim0);
 
   liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
 
@@ -123,7 +123,7 @@ int main() {
   context.setComponent<liquid::MeshComponent>(entity, {instance});
 
   context.setComponent<liquid::AnimatorComponent>(
-      entity, {0, true, 0.0f, true, {"triangle"}});
+      entity, {0, true, 0.0f, true, {animation}});
 
   std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
   auto camera = context.createEntity();
@@ -230,7 +230,7 @@ int main() {
                                    renderer->getDebugManager(), "SWAPCHAIN",
                                    [](const auto &sceneTexture) {});
 
-  mainLoop.run(graph, [&scene, &animationSystem](double dt) mutable {
+  mainLoop.run(graph, [&scene, &animationSystem](float dt) mutable {
     animationSystem.update(dt);
     scene->update();
     return true;
