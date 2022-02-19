@@ -17,9 +17,10 @@ public:
    * @param entityContext Entity context
    * @param renderer Vulkan renderer
    * @param animationSystem Animation system
+   * @param debug Enable debugging parameters
    */
   GLTFLoader(EntityContext &entityContext, VulkanRenderer *renderer,
-             AnimationSystem &animationSystem);
+             AnimationSystem &animationSystem, bool debug = false);
 
   /**
    * @brief Load GLTF from ASCII file
@@ -33,6 +34,7 @@ private:
   EntityContext &entityContext;
   AnimationSystem &animationSystem;
   VulkanRenderer *renderer = nullptr;
+  bool debug = false;
 
   SharedPtr<Material> defaultMaterial;
 };

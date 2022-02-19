@@ -156,6 +156,7 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
  * @param meshEntityMap Mesh index entity map
  * @param nodeAnimationMap Animation data
  * @param skeletons Skeleton ID map
+ * @param createDebugComponent Create debug component
  * @param entityContext Entity context
  * @return Scene node
  */
@@ -163,6 +164,7 @@ static SceneNode *getScene(const tinygltf::Model &model,
                            const std::map<uint32_t, Entity> &meshEntityMap,
                            const AnimationData &animationData,
                            const std::map<uint32_t, Skeleton> &skeletons,
+                           bool createDebugComponent,
                            EntityContext &entityContext) {
   auto &gltfScene = model.scenes.at(model.defaultScene);
   auto *rootNode =
@@ -198,6 +200,10 @@ static SceneNode *getScene(const tinygltf::Model &model,
     String entityName =
         nodeName.length() > 0 ? nodeName : "Entity " + std::to_string(entity);
     entityContext.setComponent<NameComponent>(entity, {entityName});
+
+    if (createDebugComponent) {
+      entityContext.setComponent<DebugComponent>(entity, {});
+    }
 
     const auto &skeleton = skeletons.find(gltfNode.skin);
     if (skeleton != skeletons.end()) {
@@ -343,19 +349,32 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
     }
 
     uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
-    Skeleton skeleton(numJoints, resourceAllocator);
+
+    std::vector<glm::vec3> jLocalPositions;
+    std::vector<glm::quat> jLocalRotations;
+    std::vector<glm::vec3> jLocalScales;
+    std::vector<glm::mat4> jInverseBindMatrices;
+    std::vector<String> jNames;
+    std::vector<JointId> jParents;
 
     for (auto &joint : skin.joints) {
       uint32_t nJoint = normalizedJointMap.at(joint);
       int parent = jointParents.at(nJoint);
-      if (parent >= 0) {
-        const auto &node = model.nodes.at(joint);
-        const auto &data = loadTransformData(node);
-        skeleton.addJoint(data.localPosition, data.localRotation,
-                          data.localScale, parent,
-                          inverseBindMatrices.at(nJoint), node.name);
-      }
+      const auto &node = model.nodes.at(joint);
+      const auto &data = loadTransformData(node);
+
+      jLocalPositions.push_back(data.localPosition);
+      jLocalRotations.push_back(data.localRotation);
+      jLocalScales.push_back(data.localScale);
+      jInverseBindMatrices.push_back(inverseBindMatrices.at(nJoint));
+      jNames.push_back(node.name);
+      jParents.push_back(parent >= 0 ? parent : 0);
     }
+
+    Skeleton skeleton(std::move(jLocalPositions), std::move(jLocalRotations),
+                      std::move(jLocalScales), std::move(jParents),
+                      std::move(jInverseBindMatrices), std::move(jNames),
+                      resourceAllocator);
 
     skeleton.update();
 
@@ -967,10 +986,11 @@ static AnimationData getAnimations(const tinygltf::Model &model,
 }
 
 GLTFLoader::GLTFLoader(EntityContext &entityContext_, VulkanRenderer *renderer_,
-                       AnimationSystem &animationSystem_)
+                       AnimationSystem &animationSystem_, bool debug_)
     : entityContext(entityContext_), renderer(renderer_),
       animationSystem(animationSystem_),
-      defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)) {}
+      defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)),
+      debug(debug_) {}
 
 GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
   tinygltf::TinyGLTF loader;
@@ -997,7 +1017,7 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
   auto &&meshes =
       getMeshes(model, materials, entityContext, renderer, defaultMaterial);
   auto *scene = getScene(model, meshes, animationData,
-                         skeletonData.skinSkeletonMap, entityContext);
+                         skeletonData.skinSkeletonMap, debug, entityContext);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 

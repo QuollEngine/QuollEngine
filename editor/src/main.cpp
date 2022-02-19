@@ -11,6 +11,7 @@
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/entity/EntityContext.h"
 #include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/renderer/vulkan/VulkanStandardPushConstants.h"
 
 #include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
@@ -42,8 +43,15 @@ int main() {
       "editor-grid.frag",
       renderer->createShader("assets/shaders/editor-grid.frag.spv"));
 
+  renderer->getShaderLibrary()->addShader(
+      "skeleton-lines.vert",
+      renderer->createShader("assets/shaders/skeleton-lines.vert.spv"));
+  renderer->getShaderLibrary()->addShader(
+      "skeleton-lines.frag",
+      renderer->createShader("assets/shaders/skeleton-lines.frag.spv"));
+
   liquid::MainLoop mainLoop(renderer.get(), window.get());
-  liquid::GLTFLoader loader(context, renderer.get(), animationSystem);
+  liquid::GLTFLoader loader(context, renderer.get(), animationSystem, true);
   liquidator::EditorCamera editorCamera(context, renderer.get(), window.get());
   liquidator::EditorGrid editorGrid(renderer->getResourceAllocator());
   liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
@@ -79,6 +87,7 @@ int main() {
 
     struct EditorDebugScope {
       liquid::GraphResourceId editorGridPipeline = 0;
+      liquid::GraphResourceId skeletonLinesPipeline = 0;
     };
 
     graph.addInlinePass<EditorDebugScope>(
@@ -101,8 +110,28 @@ int main() {
                   liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
                   liquid::BlendFactor::SrcAlpha, liquid::BlendFactor::DstAlpha,
                   liquid::BlendOp::Add}}}});
+
+          scope.skeletonLinesPipeline =
+              builder.create(liquid::PipelineDescriptor{
+                  renderer->getShaderLibrary()->getShader(
+                      "skeleton-lines.vert"),
+                  renderer->getShaderLibrary()->getShader(
+                      "skeleton-lines.frag"),
+                  {},
+                  liquid::PipelineInputAssembly{
+                      liquid::PrimitiveTopology::LineList},
+                  liquid::PipelineRasterizer{liquid::PolygonMode::Line,
+                                             liquid::CullMode::None,
+                                             liquid::FrontFace::Clockwise},
+                  liquid::PipelineColorBlend{
+                      {liquid::PipelineColorBlendAttachment{
+                          true, liquid::BlendFactor::SrcAlpha,
+                          liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
+                          liquid::BlendFactor::SrcAlpha,
+                          liquid::BlendFactor::DstAlpha,
+                          liquid::BlendOp::Add}}}});
         },
-        [&renderer, &cameraObj, &editorCamera, &editorGrid](
+        [&renderer, &cameraObj, &editorCamera, &editorGrid, &context](
             liquid::RenderCommandList &commandList, EditorDebugScope &scope,
             liquid::RenderGraphRegistry &registry) {
           const auto &pipeline = registry.getPipeline(scope.editorGridPipeline);
@@ -121,15 +150,60 @@ int main() {
 
           constexpr uint32_t PLANE_VERTICES = 6;
           commandList.draw(PLANE_VERTICES, 0);
+
+          const auto &skeletonPipeline =
+              registry.getPipeline(scope.skeletonLinesPipeline);
+          commandList.bindPipeline(skeletonPipeline);
+
+          context.iterateEntities<liquid::TransformComponent,
+                                  liquid::SkeletonComponent,
+                                  liquid::DebugComponent>(
+              [&commandList, &skeletonPipeline,
+               &cameraObj](auto entity, auto &transform,
+                           const liquid::SkeletonComponent &skeleton,
+                           const liquid::DebugComponent &debug) {
+                if (!debug.showBones)
+                  return;
+
+                liquid::Descriptor sceneDescriptor;
+                sceneDescriptor.bind(0, cameraObj->getUniformBuffer(),
+                                     liquid::DescriptorType::UniformBuffer);
+
+                liquid::Descriptor skeletonDescriptor;
+                skeletonDescriptor.bind(0, skeleton.skeleton.getDebugBuffer(),
+                                        liquid::DescriptorType::UniformBuffer);
+
+                auto *transformConstant =
+                    new liquid::VulkanStandardPushConstants;
+                transformConstant->modelMatrix = transform.worldTransform;
+
+                commandList.bindDescriptor(skeletonPipeline, 0,
+                                           sceneDescriptor);
+                commandList.bindDescriptor(skeletonPipeline, 1,
+                                           skeletonDescriptor);
+
+                commandList.pushConstants(
+                    skeletonPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                    sizeof(liquid::VulkanStandardPushConstants),
+                    transformConstant);
+
+                commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
+              });
         });
 
     mainLoop.run(graph, [&editorCamera, &sceneManager, &renderData,
-                         &animationSystem](double dt) mutable {
+                         &animationSystem, &context](double dt) mutable {
       editorCamera.update();
       sceneManager.getActiveScene()->update();
 
       animationSystem.update(static_cast<float>(dt));
       renderData->update();
+
+      context.iterateEntities<liquid::SkeletonComponent>(
+          [](auto entity, auto &component) {
+            component.skeleton.updateDebug();
+          });
+
       return !sceneManager.hasNewScene();
     });
   }

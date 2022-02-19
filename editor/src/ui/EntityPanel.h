@@ -54,6 +54,11 @@ private:
    */
   void renderAnimation(const liquid::AnimationSystem &animationSystem);
 
+  /**
+   * @brief Render skeleton component
+   */
+  void renderSkeleton();
+
 private:
   liquid::Entity selectedEntity = liquid::ENTITY_MAX;
   liquid::EntityContext &context;

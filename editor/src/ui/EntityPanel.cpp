@@ -19,6 +19,7 @@ void EntityPanel::render(SceneManager &sceneManager,
       renderLight();
       renderTransform();
       renderAnimation(animationSystem);
+      renderSkeleton();
     }
     ImGui::End();
   }
@@ -139,6 +140,21 @@ void EntityPanel::renderTransform() {
       }
 
       ImGui::EndTable();
+    }
+  }
+}
+
+void EntityPanel::renderSkeleton() {
+  if (!context.hasComponent<liquid::SkeletonComponent>(selectedEntity)) {
+    return;
+  }
+
+  if (ImGui::CollapsingHeader("Skeleton")) {
+    if (context.hasComponent<liquid::DebugComponent>(selectedEntity)) {
+      auto &component =
+          context.getComponent<liquid::DebugComponent>(selectedEntity);
+
+      ImGui::Checkbox("Show bones", &component.showBones);
     }
   }
 }
