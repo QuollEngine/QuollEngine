@@ -28,9 +28,9 @@ public:
                                           bool playing = true) {
     auto entity = createEntity(loop, animIndex, playing);
 
-    liquid::Skeleton skeleton(2, &allocator);
-    skeleton.addJoint(glm::vec3(0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
-                      glm::vec3(1.0f), 0, glm::mat4{1.0f}, "Joint0");
+    liquid::Skeleton skeleton(
+        {glm::vec3{0.0f}}, {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
+        {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}}, {"Joint0"}, &allocator);
 
     context.setComponent<liquid::SkeletonComponent>(entity, {skeleton});
 
@@ -54,7 +54,7 @@ public:
                                    float time) {
     liquid::Animation animation("testAnim", time);
     liquid::KeyframeSequence sequence(
-        target, liquid::KeyframeSequenceInterpolation::Step, 1);
+        target, liquid::KeyframeSequenceInterpolation::Step, 0);
 
     sequence.addKeyframe(0.0f, glm::vec4(0.0f));
     sequence.addKeyframe(0.5f, glm::vec4(0.5f));
@@ -197,15 +197,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
   system.update(0.5f);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.5f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -222,15 +222,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
   system.update(0.5f);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -247,15 +247,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
   system.update(0.5f);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(1), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(1),
+  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(1), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(0.5f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));

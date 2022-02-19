@@ -4,62 +4,145 @@
 #include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 struct SkeletonTest : public ::testing::Test {
   TestResourceAllocator allocator;
+
+  liquid::Skeleton createSkeleton(uint32_t numJoints) {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::quat> rotations;
+    std::vector<glm::vec3> scales;
+    std::vector<liquid::JointId> parents;
+    std::vector<glm::mat4> inverseBindMatrices;
+    std::vector<liquid::String> names;
+
+    for (uint32_t i = 0; i < numJoints; ++i) {
+      float value = static_cast<float>(i + 1);
+      positions.push_back(glm::vec3(value));
+      rotations.push_back(glm::quat(value, value, value, value));
+      scales.push_back(glm::vec3(value));
+      parents.push_back(i > 0 ? i - 1 : 0);
+      inverseBindMatrices.push_back(glm::mat4(value));
+      names.push_back("Joint " + std::to_string(i));
+    }
+
+    return liquid::Skeleton(std::move(positions), std::move(rotations),
+                            std::move(scales), std::move(parents),
+                            std::move(inverseBindMatrices), std::move(names),
+                            &allocator);
+  }
+
+  template <class T> std::vector<T> createItems(uint32_t numJoints) {
+    return std::vector<T>(numJoints);
+  }
 };
 
 using SkeletonDeathTest = SkeletonTest;
 
 TEST_F(SkeletonDeathTest, FailsIfNumberOfJointsIsZeroOnConstruct) {
-  EXPECT_DEATH({ liquid::Skeleton skeleton(0, &allocator); }, ".*");
+  EXPECT_DEATH(createSkeleton(0), ".*");
 }
 
-TEST_F(SkeletonTest, CreatesRootJointOnConstruct) {
-  liquid::Skeleton skeleton(1, &allocator);
-  EXPECT_EQ(skeleton.getJointLocalTransform(0), glm::mat4(1.0f));
+TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(2), createItems<glm::quat>(1),
+            createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
+            createItems<glm::mat4>(1), createItems<liquid::String>(1),
+            &allocator);
+      },
+      ".*");
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(1), createItems<glm::quat>(2),
+            createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
+            createItems<glm::mat4>(1), createItems<liquid::String>(1),
+            &allocator);
+      },
+      ".*");
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(1), createItems<glm::quat>(1),
+            createItems<glm::vec3>(2), createItems<liquid::JointId>(1),
+            createItems<glm::mat4>(1), createItems<liquid::String>(1),
+            &allocator);
+      },
+      ".*");
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(1), createItems<glm::quat>(1),
+            createItems<glm::vec3>(1), createItems<liquid::JointId>(2),
+            createItems<glm::mat4>(1), createItems<liquid::String>(1),
+            &allocator);
+      },
+      ".*");
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(1), createItems<glm::quat>(1),
+            createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
+            createItems<glm::mat4>(2), createItems<liquid::String>(1),
+            &allocator);
+      },
+      ".*");
+  EXPECT_DEATH(
+      {
+        liquid::Skeleton skeleton(
+            createItems<glm::vec3>(1), createItems<glm::quat>(2),
+            createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
+            createItems<glm::mat4>(1), createItems<liquid::String>(2),
+            &allocator);
+      },
+      ".*");
+}
+
+TEST_F(SkeletonTest, CreatesAllJointPrametersOnConstruct) {
+  auto &&skeleton = createSkeleton(2);
+  EXPECT_EQ(skeleton.getNumJoints(), 2);
+
+  EXPECT_EQ(skeleton.getJointName(0), "Joint 0");
   EXPECT_EQ(skeleton.getJointParent(0), 0);
-  EXPECT_EQ(skeleton.getJointLocalTransform(0), glm::mat4(1.0f));
+  EXPECT_EQ(skeleton.getLocalPosition(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.getLocalRotation(0), glm::quat(1.0f, 1.0f, 1.0f, 1.0f));
+  EXPECT_EQ(skeleton.getLocalScale(0), glm::vec3(1.0f));
   EXPECT_EQ(skeleton.getJointInverseBindMatrix(0), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.getJointWorldTransform(0), glm::mat4(1.0f));
-  EXPECT_EQ(skeleton.getJointName(0), "__rootJoint");
+
+  EXPECT_EQ(skeleton.getJointName(1), "Joint 1");
+  EXPECT_EQ(skeleton.getJointParent(1), 0);
+  EXPECT_EQ(skeleton.getLocalPosition(1), glm::vec3(2.0f));
+  EXPECT_EQ(skeleton.getLocalRotation(1), glm::quat(2.0f, 2.0f, 2.0f, 2.0f));
+  EXPECT_EQ(skeleton.getLocalScale(1), glm::vec3(2.0f));
+  EXPECT_EQ(skeleton.getJointInverseBindMatrix(1), glm::mat4(2.0f));
+  EXPECT_EQ(skeleton.getJointWorldTransform(1), glm::mat4(1.0f));
+}
+
+TEST_F(SkeletonTest, CreatesDebugParametersOnConstruct) {
+  auto &&skeleton = createSkeleton(2);
+  EXPECT_EQ(skeleton.getNumDebugBones(), 4);
 }
 
 TEST_F(SkeletonTest, CreatesUniformBufferOnConstruct) {
-  liquid::Skeleton skeleton(5, &allocator);
+  auto &&skeleton = createSkeleton(5);
 
   EXPECT_EQ(skeleton.getBuffer()->getType(), liquid::HardwareBuffer::Uniform);
   EXPECT_EQ(skeleton.getBuffer()->getBufferSize(), sizeof(glm::mat4) * 5);
 }
 
-TEST_F(SkeletonTest, AddsJointWithTransformParentInverseBindAndName) {
-  liquid::Skeleton skeleton(3, &allocator);
-
-  skeleton.addJoint(glm::vec3{1.4f}, glm::quat{1.0f, 2.0f, 0.0f, 0.0f},
-                    glm::vec3{1.2f}, 0, glm::mat4{2.0f}, "B0");
-  skeleton.addJoint(glm::vec3{1.2f}, glm::quat{1.0f, 3.0f, 0.0f, 0.0f},
-                    glm::vec3{1.5f}, 1, glm::mat4{2.5f}, "B1");
-
-  EXPECT_EQ(skeleton.getLocalPosition(1), glm::vec3(1.4f));
-  EXPECT_EQ(skeleton.getLocalRotation(1), glm::quat(1.0f, 2.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.getLocalScale(1), glm::vec3(1.2f));
-  EXPECT_EQ(skeleton.getJointParent(1), 0);
-  EXPECT_EQ(skeleton.getJointInverseBindMatrix(1), glm::mat4(2.0f));
-  EXPECT_EQ(skeleton.getJointName(1), "B0");
-  EXPECT_EQ(skeleton.getLocalPosition(2), glm::vec3(1.2f));
-  EXPECT_EQ(skeleton.getLocalRotation(2), glm::quat(1.0f, 3.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.getLocalScale(2), glm::vec3(1.5f));
-  EXPECT_EQ(skeleton.getJointParent(2), 1);
-  EXPECT_EQ(skeleton.getJointInverseBindMatrix(2), glm::mat4(2.5f));
-  EXPECT_EQ(skeleton.getJointName(2), "B1");
+TEST_F(SkeletonTest, CreatesDebugUniformBufferOnConstruct) {
+  auto &&skeleton = createSkeleton(5);
+  EXPECT_EQ(skeleton.getDebugBuffer()->getType(),
+            liquid::HardwareBuffer::Uniform);
+  EXPECT_EQ(skeleton.getDebugBuffer()->getBufferSize(), sizeof(glm::mat4) * 10);
 }
 
 TEST_F(SkeletonTest, UpdatesWorldTransformsOnUpdate) {
-  liquid::Skeleton skeleton(3, &allocator);
-
-  skeleton.addJoint(glm::vec3{0.0f}, glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
-                    glm::vec3{1.2f}, 0, glm::mat4{2.0f}, "B0");
-  skeleton.addJoint(glm::vec3{1.2f}, glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
-                    glm::vec3{1.5f}, 1, glm::mat4{2.5f}, "B1");
+  auto &&skeleton = createSkeleton(3);
 
   EXPECT_EQ(skeleton.getJointWorldTransform(0), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.getJointWorldTransform(1), glm::mat4(1.0f));
@@ -67,47 +150,32 @@ TEST_F(SkeletonTest, UpdatesWorldTransformsOnUpdate) {
 
   skeleton.update();
 
-  EXPECT_EQ(skeleton.getJointWorldTransform(0), glm::mat4(1.0f));
+  EXPECT_EQ(skeleton.getJointWorldTransform(0),
+            skeleton.getJointLocalTransform(0));
   EXPECT_EQ(skeleton.getJointWorldTransform(1),
-            skeleton.getJointLocalTransform(1) * glm::mat4(2.0f));
+            skeleton.getJointWorldTransform(0) *
+                skeleton.getJointLocalTransform(1));
   EXPECT_EQ(skeleton.getJointWorldTransform(2),
-            skeleton.getJointLocalTransform(1) *
-                skeleton.getJointLocalTransform(2) * glm::mat4(2.5f));
-}
-
-TEST_F(SkeletonDeathTest, FailsAddingJointIfMaximumIsReached) {
-  liquid::Skeleton skeleton(1, &allocator);
-  EXPECT_DEATH(skeleton.addJoint(glm::vec3(), glm::quat(), glm::vec3(), 0,
-                                 glm::mat4(1.0f)),
-               ".*");
-}
-
-TEST_F(SkeletonDeathTest, FailsAddingJointIfParentDoesNotExist) {
-  liquid::Skeleton skeleton(5, &allocator);
-  EXPECT_DEATH(
-      {
-        skeleton.addJoint(glm::vec3(), glm::quat(), glm::vec3(), 121,
-                          glm::mat4(1.0f));
-      },
-      ".*");
+            skeleton.getJointWorldTransform(1) *
+                skeleton.getJointLocalTransform(2));
 }
 
 TEST_F(SkeletonDeathTest, FailsIfNonExistentJointTransformIsRequested) {
-  liquid::Skeleton skeleton(5, &allocator);
+  auto &&skeleton = createSkeleton(1);
   EXPECT_DEATH({ skeleton.getJointLocalTransform(2); }, ".*");
 }
 
 TEST_F(SkeletonDeathTest, FailsIfNonExistentJointInverseBindMatrixIsRequested) {
-  liquid::Skeleton skeleton(5, &allocator);
+  auto &&skeleton = createSkeleton(1);
   EXPECT_DEATH({ skeleton.getJointInverseBindMatrix(2); }, ".*");
 }
 
 TEST_F(SkeletonDeathTest, FailsIfNonExistentJointParentIsRequested) {
-  liquid::Skeleton skeleton(5, &allocator);
+  auto &&skeleton = createSkeleton(1);
   EXPECT_DEATH({ skeleton.getJointParent(2); }, ".*");
 }
 
 TEST_F(SkeletonDeathTest, FailsIfNonExistentJointNameIsRequested) {
-  liquid::Skeleton skeleton(5, &allocator);
+  auto &&skeleton = createSkeleton(1);
   EXPECT_DEATH({ skeleton.getJointName(2); }, ".*");
 }
