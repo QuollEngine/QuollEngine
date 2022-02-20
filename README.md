@@ -10,7 +10,7 @@ A game engine hobby project by Gasim Gasimzada.
     - [x] Generation of pipeline layouts using Spir-V reflection
     - [x] Single threaded command execution
     - [x] Command buffer abstraction using Render Command List
-    - [ ] Handling descriptors
+    - [x] Handling descriptors
     - [ ] Split RHI from renderer
 - [ ] Renderer
     - [x] Render Graph support
@@ -29,16 +29,16 @@ A game engine hobby project by Gasim Gasimzada.
 - [ ] Editor
     - [x] Load GLTF scenes into scene
     - [x] Simple UI to view entity information
-    - [ ] Render scene into Imgui panel
+    - [x] Render scene into Imgui panel
     - [ ] Quaternion based arcball camera
-    - [ ] Editor grid
-    - [ ] Docking
+    - [x] Editor grid
+    - [x] Docking
     - [ ] Gizmos
     - [ ] Trackpad support
     - [ ] Mouse movement improvements
     - [ ] Keyboard shortcuts
     - [ ] Mesh component details
-    - [ ] Status bar
+    - [x] Status bar
     - [ ] macOS support
 - [x] Core
     - [x] ECS using Sparse Sets
@@ -47,8 +47,8 @@ A game engine hobby project by Gasim Gasimzada.
     - [x] Number of allocated resources (images, buffers)
     - [x] Number of draw calls
     - [ ] Number of bound descriptors, pipelines, and buffers
-- [ ] Profiler 
-- [ ] Animation
+- [x] Profiler 
+- [x] Animation
 - [ ] Physics
 - [ ] Audio
 - [ ] Scripting
@@ -57,7 +57,7 @@ A game engine hobby project by Gasim Gasimzada.
     - [x] Dependency fetcher script
     - [ ] Increase test coverage
     - [ ] Enable codecov in main branch for comparison
-    - [ ] Replace exceptions with assertions
+    - [x] Replace exceptions with assertions
 
 ## License
 

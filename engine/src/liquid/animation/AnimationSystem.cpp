@@ -26,20 +26,21 @@ void AnimationSystem::update(float dt) {
         const Animation &animation = animations.at(index);
 
         if (animComp.playing) {
-          animComp.currentTime =
-              std::min(animComp.currentTime + dt, animation.getTime());
-          if (animComp.loop && animComp.currentTime >= animation.getTime()) {
-            animComp.currentTime = 0.0f;
+          animComp.normalizedTime = std::min(
+              // Divide delta time by animation time
+              // to advance time at a constant speed
+              animComp.normalizedTime + (dt / animation.getTime()), 1.0f);
+          if (animComp.loop && animComp.normalizedTime >= 1.0f) {
+            animComp.normalizedTime = 0.0f;
           }
         }
-
-        float normalizedTime = animComp.currentTime / animation.getTime();
 
         bool hasSkeleton =
             entityContext.hasComponent<SkeletonComponent>(entity);
 
         for (auto &sequence : animation.getKeyframeSequences()) {
-          const auto &value = sequence.getInterpolatedValue(normalizedTime);
+          const auto &value =
+              sequence.getInterpolatedValue(animComp.normalizedTime);
 
           if (sequence.isJointTarget() && hasSkeleton) {
             auto &skeleton =
