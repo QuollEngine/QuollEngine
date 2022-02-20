@@ -169,12 +169,11 @@ void EntityPanel::renderAnimation(
     auto &component =
         context.getComponent<liquid::AnimatorComponent>(selectedEntity);
 
-    const auto &currentName =
-        animationSystem
-            .getAnimation(component.animations.at(component.currentAnimation))
-            .getName();
+    const auto &currentAnimation = animationSystem.getAnimation(
+        component.animations.at(component.currentAnimation));
 
-    if (ImGui::BeginCombo("###SelectAnimation", currentName.c_str(), 0)) {
+    if (ImGui::BeginCombo("###SelectAnimation",
+                          currentAnimation.getName().c_str(), 0)) {
       for (size_t i = 0; i < component.animations.size(); ++i) {
         bool selectable = component.currentAnimation == i;
 
@@ -189,7 +188,12 @@ void EntityPanel::renderAnimation(
     }
 
     ImGui::Text("Time");
-    ImGui::InputFloat("###InputTime", &component.currentTime);
+
+    float animationTime = component.normalizedTime * currentAnimation.getTime();
+    if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
+                           currentAnimation.getTime())) {
+      component.normalizedTime = animationTime / currentAnimation.getTime();
+    }
 
     ImGui::Checkbox("Loop", &component.loop);
 
@@ -206,7 +210,7 @@ void EntityPanel::renderAnimation(
     ImGui::SameLine();
 
     if (ImGui::Button("Reset")) {
-      component.currentTime = 0.0f;
+      component.normalizedTime = 0.0f;
     }
   }
 }

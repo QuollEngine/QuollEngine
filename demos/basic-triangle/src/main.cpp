@@ -47,7 +47,7 @@ int main() {
   {
     liquid::KeyframeSequence rotation(
         liquid::KeyframeSequenceTarget::Rotation,
-        liquid::KeyframeSequenceInterpolation::Step);
+        liquid::KeyframeSequenceInterpolation::Linear);
 
     glm::quat tick = glm::angleAxis(glm::radians(0.0f), glm::vec3(0, 0, 1.0f));
     glm::quat tock = glm::angleAxis(glm::radians(30.0f), glm::vec3(0, 0, 1.0f));
@@ -63,8 +63,9 @@ int main() {
     anim0.addKeyframeSequence(rotation);
   }
   {
-    liquid::KeyframeSequence scale(liquid::KeyframeSequenceTarget::Scale,
-                                   liquid::KeyframeSequenceInterpolation::Step);
+    liquid::KeyframeSequence scale(
+        liquid::KeyframeSequenceTarget::Scale,
+        liquid::KeyframeSequenceInterpolation::Linear);
     scale.addKeyframe(0.0f, glm::vec4(1.0f));
     scale.addKeyframe(0.2f, glm::vec4(0.8f));
     scale.addKeyframe(0.4f, glm::vec4(0.6f));
@@ -76,7 +77,7 @@ int main() {
   {
     liquid::KeyframeSequence translation(
         liquid::KeyframeSequenceTarget::Position,
-        liquid::KeyframeSequenceInterpolation::Step);
+        liquid::KeyframeSequenceInterpolation::Linear);
 
     translation.addKeyframe(0.0f, glm::vec4(0.0f));
     translation.addKeyframe(0.2f, glm::vec4(0.2f));
