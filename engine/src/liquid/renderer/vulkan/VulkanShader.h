@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include <vulkan/vulkan.hpp>
 #include "liquid/renderer/Shader.h"
 

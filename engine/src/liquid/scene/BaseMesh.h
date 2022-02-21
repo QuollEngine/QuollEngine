@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "BaseGeometry.h"
 
 namespace liquid {

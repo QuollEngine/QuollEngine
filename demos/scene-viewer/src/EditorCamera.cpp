@@ -1,3 +1,4 @@
+#include "liquid/core/Base.h"
 #include "EditorCamera.h"
 
 using liquid::Camera;

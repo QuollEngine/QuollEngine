@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "TextureBinder.h"
 #include "liquid/profiler/StatsManager.h"
 

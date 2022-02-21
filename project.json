@@ -16,9 +16,39 @@
       "buildSource": "KTX-Software-4.0.0",
       "cmd": [
         "cmake . -B build -DKTX_FEATURE_TESTS=OFF -DKTX_FEATURE_TOOLS=OFF -DKTX_FEATURE_VULKAN=OFF -DKTX_FEATURE_KTX1=OFF -DKTX_FEATURE_STATIC_LIBRARY=ON -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}}",
-        "chmod +x mkversion",
         "cmake --build build --config {{BUILD_MODE}}",
         "cmake --install build --config {{BUILD_MODE}}"
+      ]
+    },
+    {
+      "name": "physx",
+      "url": "https://github.com/NVIDIAGameWorks/PhysX/archive/refs/heads/4.1.zip",
+      "buildSource": "PhysX-4.1",
+      "cmd": [
+        {
+          "type": "cmake",
+          "source": "physx/source/compiler/cmake",
+          "options": {
+            "common": {
+              "CMAKE_BUILD_TYPE": "{{BUILD_MODE}}",
+              "PHYSX_ROOT_DIR": "{{SOURCE_DIR}}/physx",
+              "NV_USE_DEBUG_WINCRT": "ON",
+              "NV_USE_STATIC_WINCRT": "OFF",
+              "PXSHARED_INSTALL_PREFIX": "{{VENDOR_DIR}}",
+              "CMAKEMODULES_PATH": "{{SOURCE_DIR}}/externals/cmakemodules",
+              "PX_ROOT_LIB_DIR": "lib",
+              "PX_OUTPUT_LIB_DIR": "{{SOURCE_DIR}}/build",
+              "PX_OUTPUT_BIN_DIR": "{{SOURCE_DIR}}/bin",
+              "PXSHARED_PATH": "{{SOURCE_DIR}}/pxshared",
+              "TARGET_BUILD_PLATFORM": "{{PLATFORM}}",
+              "PX_GENERATE_STATIC_LIBRARIES": "ON",
+              "CMAKE_INSTALL_PREFIX": "{{VENDOR_DIR}}"
+            },
+            "linux": {
+              "CMAKE_CXX_FLAGS": "\"-Wno-restrict -Wno-class-memaccess\""
+            }
+          }
+        }
       ]
     },
     {

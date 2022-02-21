@@ -16,6 +16,8 @@
 #include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
+#include "liquid/physics/PhysicsSystem.h"
+
 #include "liquid/loop/MainLoop.h"
 
 #include "editor-scene/EditorCamera.h"
@@ -35,6 +37,7 @@ int main() {
   std::unique_ptr<liquid::VulkanRenderer> renderer(
       new liquid::VulkanRenderer(context, window.get(), true));
   liquid::AnimationSystem animationSystem(context);
+  liquid::PhysicsSystem physicsSystem(context);
 
   renderer->getShaderLibrary()->addShader(
       "editor-grid.vert",
@@ -72,8 +75,8 @@ int main() {
 
     liquid::RenderGraph graph = renderer->createRenderGraph(
         renderData, "mainColor",
-        [&sceneManager, &animationSystem, &ui,
-         &renderData](const auto &sceneTexture) {
+        [&sceneManager, &animationSystem, &ui, &renderData,
+         &physicsSystem](const auto &sceneTexture) {
           ui.render(sceneManager, animationSystem);
           if (ImGui::Begin("View")) {
             const auto &size = ImGui::GetContentRegionAvail();
@@ -191,21 +194,23 @@ int main() {
               });
         });
 
-    mainLoop.run(graph, [&editorCamera, &sceneManager, &renderData,
-                         &animationSystem, &context](double dt) mutable {
-      editorCamera.update();
-      sceneManager.getActiveScene()->update();
+    mainLoop.run(graph,
+                 [&editorCamera, &sceneManager, &renderData, &animationSystem,
+                  &physicsSystem, &context](double dt) mutable {
+                   editorCamera.update();
 
-      animationSystem.update(static_cast<float>(dt));
-      renderData->update();
+                   animationSystem.update(static_cast<float>(dt));
+                   renderData->update();
 
-      context.iterateEntities<liquid::SkeletonComponent>(
-          [](auto entity, auto &component) {
-            component.skeleton.updateDebug();
-          });
+                   context.iterateEntities<liquid::SkeletonComponent>(
+                       [](auto entity, auto &component) {
+                         component.skeleton.updateDebug();
+                       });
 
-      return !sceneManager.hasNewScene();
-    });
+                   sceneManager.getActiveScene()->update();
+                   physicsSystem.update(static_cast<float>(dt));
+                   return !sceneManager.hasNewScene();
+                 });
   }
 
   return 0;

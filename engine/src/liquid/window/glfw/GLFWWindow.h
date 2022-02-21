@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
-
 struct GLFWwindow;
 
 namespace liquid {

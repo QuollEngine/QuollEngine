@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "liquid/scene/Vertex.h"
 
 namespace liquid {

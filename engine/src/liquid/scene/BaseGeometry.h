@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "liquid/renderer/Material.h"
 
 namespace liquid {
