@@ -12,7 +12,8 @@ EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : context(entityContext) {}
 
 void EntityPanel::render(SceneManager &sceneManager,
-                         const liquid::AnimationSystem &animationSystem) {
+                         const liquid::AnimationSystem &animationSystem,
+                         liquid::PhysicsSystem &physicsSystem) {
   bool open = true;
   if (ImGui::Begin("Properties", &open)) {
     if (context.hasEntity(selectedEntity)) {
@@ -22,6 +23,7 @@ void EntityPanel::render(SceneManager &sceneManager,
       renderAnimation(animationSystem);
       renderSkeleton();
     }
+    renderAddComponent(physicsSystem);
     ImGui::End();
   }
 
@@ -32,8 +34,6 @@ void EntityPanel::render(SceneManager &sceneManager,
 
 void EntityPanel::setSelectedEntity(liquid::Entity entity) {
   selectedEntity = entity;
-  if (context.hasComponent<liquid::NameComponent>(selectedEntity)) {
-  }
 }
 
 void EntityPanel::renderName() {
@@ -222,6 +222,37 @@ void EntityPanel::renderAnimation(
     if (ImGui::Button("Reset")) {
       component.normalizedTime = 0.0f;
     }
+  }
+}
+
+void EntityPanel::renderAddComponent(liquid::PhysicsSystem &physicsSystem) {
+  if (!context.hasEntity(selectedEntity)) {
+    return;
+  }
+
+  if (ImGui::Button("Add component")) {
+    ImGui::OpenPopup("AddComponentPopup");
+  }
+
+  if (ImGui::BeginPopup("AddComponentPopup")) {
+    if (!context.hasComponent<liquid::TransformComponent>(selectedEntity)) {
+      if (ImGui::Selectable("Transform")) {
+        context.setComponent<liquid::TransformComponent>(selectedEntity, {});
+      }
+    }
+
+    if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity)) {
+      if (ImGui::Selectable("Rigid body")) {
+        constexpr glm::vec3 DEFAULT_VALUE(0.5f);
+        physicsSystem.createDynamicRigidBody(
+            selectedEntity, {},
+            {liquid::PhysicsGeometryType::Box,
+             liquid::PhysicsGeometryBox{DEFAULT_VALUE}},
+            {});
+      }
+    }
+
+    ImGui::EndPopup();
   }
 }
 

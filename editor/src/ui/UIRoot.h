@@ -9,6 +9,7 @@
 #include "StatusBar.h"
 #include "Layout.h"
 #include "liquid/animation/AnimationSystem.h"
+#include "liquid/physics/PhysicsSystem.h"
 
 namespace liquidator {
 
@@ -29,9 +30,11 @@ public:
    *
    * @param sceneManager Scene manager
    * @param animationSystem Animation system
+   * @param physicsSystem Physics system
    */
   void render(SceneManager &sceneManager,
-              const liquid::AnimationSystem &animationSystem);
+              const liquid::AnimationSystem &animationSystem,
+              liquid::PhysicsSystem &physicsSystem);
 
 private:
   /**

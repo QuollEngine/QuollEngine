@@ -11,12 +11,13 @@ UIRoot::UIRoot(liquid::EntityContext &context,
 }
 
 void UIRoot::render(SceneManager &sceneManager,
-                    const liquid::AnimationSystem &animationSystem) {
+                    const liquid::AnimationSystem &animationSystem,
+                    liquid::PhysicsSystem &physicsSystem) {
   layout.setup();
   menuBar.render(sceneManager);
   statusBar.render(sceneManager);
   sceneHierarchyPanel.render(sceneManager);
-  entityPanel.render(sceneManager, animationSystem);
+  entityPanel.render(sceneManager, animationSystem, physicsSystem);
   editorCameraPanel.render(sceneManager);
 }
 

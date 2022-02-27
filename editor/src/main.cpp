@@ -77,7 +77,7 @@ int main() {
         renderData, "mainColor",
         [&sceneManager, &animationSystem, &ui, &renderData,
          &physicsSystem](const auto &sceneTexture) {
-          ui.render(sceneManager, animationSystem);
+          ui.render(sceneManager, animationSystem, physicsSystem);
           if (ImGui::Begin("View")) {
             const auto &size = ImGui::GetContentRegionAvail();
             const auto &pos = ImGui::GetWindowPos();

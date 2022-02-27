@@ -2,6 +2,8 @@
 
 #include "liquid/entity/EntityContext.h"
 #include "liquid/animation/AnimationSystem.h"
+#include "liquid/physics/PhysicsSystem.h"
+
 #include "../editor-scene/SceneManager.h"
 
 namespace liquidator {
@@ -20,9 +22,11 @@ public:
    *
    * @param sceneManager Scene manager
    * @param animationSystem Animation system
+   * @param physicsSystem Physics system
    */
   void render(SceneManager &sceneManager,
-              const liquid::AnimationSystem &animationSystem);
+              const liquid::AnimationSystem &animationSystem,
+              liquid::PhysicsSystem &physicsSystem);
 
   /**
    * @brief Set selected entity
@@ -58,6 +62,13 @@ private:
    * @brief Render skeleton component
    */
   void renderSkeleton();
+
+  /**
+   * @brief Render add component button
+   *
+   * @param physicsSystem Physics system
+   */
+  void renderAddComponent(liquid::PhysicsSystem &physicsSystem);
 
 private:
   liquid::Entity selectedEntity = liquid::ENTITY_MAX;
