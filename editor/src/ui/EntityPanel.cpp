@@ -1,3 +1,4 @@
+#include "liquid/core/Base.h"
 #include "EntityPanel.h"
 
 #include <imgui.h>
@@ -114,6 +115,15 @@ void EntityPanel::renderTransform() {
     if (ImGui::InputFloat3("###InputTransformPosition", imguiPosition.data())) {
       component.localPosition = {imguiPosition.at(0), imguiPosition.at(1),
                                  imguiPosition.at(2)};
+    }
+
+    ImGui::Text("Rotation");
+    std::array<float, VEC3_ARRAY_SIZE> imguiRotation{component.localRotation.x,
+                                                     component.localRotation.y,
+                                                     component.localRotation.z};
+    if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
+      component.localRotation = glm::quat(glm::vec3(
+          imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
     }
 
     ImGui::Text("Scale");

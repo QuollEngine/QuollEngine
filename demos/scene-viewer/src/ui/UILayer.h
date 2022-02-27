@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/entity/EntityContext.h"
 #include "SceneHierarchy.h"

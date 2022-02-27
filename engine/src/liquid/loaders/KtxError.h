@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ktx.h>
-#include "liquid/core/Base.h"
 
 namespace liquid {
 

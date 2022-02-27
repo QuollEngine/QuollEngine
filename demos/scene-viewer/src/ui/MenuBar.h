@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
-
 class MenuBar {
 public:
   using MenuItemHandler = std::function<void()>;

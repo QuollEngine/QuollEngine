@@ -1,3 +1,4 @@
+#include "liquid/core/Base.h"
 #include "UILayer.h"
 
 UILayer::UILayer(liquid::EntityContext &context)

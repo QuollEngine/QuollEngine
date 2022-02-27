@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
-
 #include "Camera.h"
 #include "Light.h"
 #include "liquid/entity/Entity.h"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
-
 #include "liquid/renderer/HardwareBuffer.h"
 #include "liquid/renderer/ResourceAllocator.h"
 

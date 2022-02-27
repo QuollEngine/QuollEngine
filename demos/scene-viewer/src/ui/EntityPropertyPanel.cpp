@@ -1,3 +1,5 @@
+#include "liquid/core/Base.h"
+
 #include "EntityPropertyPanel.h"
 #include <imgui.h>
 

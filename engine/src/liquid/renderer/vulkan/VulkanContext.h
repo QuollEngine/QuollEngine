@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "liquid/core/Base.h"
 
 #include "VulkanValidator.h"
 #include "VulkanPhysicalDevice.h"

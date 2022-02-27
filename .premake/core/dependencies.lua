@@ -16,7 +16,7 @@ end
 
 -- Link dependencies without Vulkan
 function linkDependenciesWithoutVulkan()
-    links { "vendor-libimgui", "vendor-libspirv-reflect", "glfw3", "ktx" }
+    links { "vendor-libimgui", "vendor-libspirv-reflect", "glfw3", "ktx", "PhysX_static", "PhysXPvdSDK_static", "PhysXExtensions_static", "PhysXCommon_static", "PhysXFoundation_static" }
 
     -- These libs must be linked after
     -- all libraries are linked

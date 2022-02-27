@@ -11,7 +11,8 @@ function setupLibraryDirectories()
     }
 
     libdirs {
-        "../vendor/lib"
+        "../vendor/lib",
+        "../vendor/lib/debug"
     }
 
     filter { "system:windows" }

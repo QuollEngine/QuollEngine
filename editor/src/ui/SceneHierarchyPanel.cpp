@@ -1,3 +1,4 @@
+#include "liquid/core/Base.h"
 #include "SceneHierarchyPanel.h"
 #include "ConfirmationDialog.h"
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
-
 namespace liquid {
 
 /**

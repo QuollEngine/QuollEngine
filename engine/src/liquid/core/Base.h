@@ -1,5 +1,15 @@
 #pragma once
 
+#ifdef LIQUID_DEBUG
+#ifndef _DEBUG
+#define _DEBUG
+#endif
+#else
+#ifndef NDEBUG
+#define NDEBUG
+#endif
+#endif
+
 #include <iostream>
 #include <algorithm>
 #include <filesystem>
@@ -31,6 +41,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #include "Assert.h"
 #include "Profiler.h"

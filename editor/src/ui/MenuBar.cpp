@@ -1,3 +1,4 @@
+#include "liquid/core/Base.h"
 #include "MenuBar.h"
 #include "ConfirmationDialog.h"
 

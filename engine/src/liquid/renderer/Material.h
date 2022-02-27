@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "liquid/core/Property.h"
 #include "Shader.h"
 #include "Texture.h"

@@ -6,7 +6,11 @@ namespace liquid {
 SceneNode::SceneNode(Entity entity_, const TransformComponent &transform,
                      SceneNode *parent_, EntityContext &entityContext_)
     : entity(entity_), parent(parent_), entityContext(entityContext_) {
-  entityContext.setComponent<TransformComponent>(entity, transform);
+  TransformComponent newTransform = transform;
+  if (parent) {
+    newTransform.parent = parent->getEntity();
+  }
+  entityContext.setComponent<TransformComponent>(entity, newTransform);
 }
 
 SceneNode::~SceneNode() {

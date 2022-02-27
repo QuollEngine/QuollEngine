@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/core/Base.h"
 #include "VulkanContext.h"
 
 namespace liquid {
