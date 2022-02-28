@@ -150,7 +150,7 @@ void PhysicsSystem::update(float dt) {
         actors[i]->getType() != physx::PxActorType::eRIGID_DYNAMIC) {
       continue;
     }
-    auto *actor = dynamic_cast<physx::PxRigidActor *>(actors[i]);
+    auto *actor = static_cast<physx::PxRigidActor *>(actors[i]);
     const auto &globalTransform = actor->getGlobalPose();
 
     Entity entity =
@@ -182,7 +182,7 @@ void PhysicsSystem::update(float dt) {
         actors[i]->getType() != physx::PxActorType::eRIGID_DYNAMIC) {
       continue;
     }
-    auto *actor = dynamic_cast<physx::PxRigidActor *>(actors[i]);
+    auto *actor = static_cast<physx::PxRigidActor *>(actors[i]);
     const auto &globalTransform = actor->getGlobalPose();
 
     Entity entity =
@@ -252,8 +252,6 @@ void PhysicsSystem::createDynamicRigidBody(
   if (!shape) {
     return;
   }
-
-  auto &transform = entityContext.getComponent<TransformComponent>(entity);
 
   auto *rigidDynamic = impl->getPhysics()->createRigidDynamic(
       physx::PxTransform(physx::PxVec3{0.0f, 0.0f, 0.0f},
