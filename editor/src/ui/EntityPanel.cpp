@@ -230,26 +230,37 @@ void EntityPanel::renderAddComponent(liquid::PhysicsSystem &physicsSystem) {
     return;
   }
 
+  bool hasAllComponents =
+      context.hasComponent<liquid::TransformComponent>(selectedEntity) &&
+      context.hasComponent<liquid::RigidBodyComponent>(selectedEntity) &&
+      context.hasComponent<liquid::CollidableComponent>(selectedEntity);
+
+  if (hasAllComponents)
+    return;
+
   if (ImGui::Button("Add component")) {
     ImGui::OpenPopup("AddComponentPopup");
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!context.hasComponent<liquid::TransformComponent>(selectedEntity)) {
-      if (ImGui::Selectable("Transform")) {
-        context.setComponent<liquid::TransformComponent>(selectedEntity, {});
-      }
+    if (!context.hasComponent<liquid::TransformComponent>(selectedEntity) &&
+        ImGui::Selectable("Transform")) {
+      context.setComponent<liquid::TransformComponent>(selectedEntity, {});
     }
 
-    if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity)) {
-      if (ImGui::Selectable("Rigid body")) {
-        constexpr glm::vec3 DEFAULT_VALUE(0.5f);
-        physicsSystem.createDynamicRigidBody(
-            selectedEntity, {},
-            {liquid::PhysicsGeometryType::Box,
-             liquid::PhysicsGeometryBox{DEFAULT_VALUE}},
-            {});
-      }
+    if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity) &&
+        ImGui::Selectable("Rigid body")) {
+      physicsSystem.createRigidBodyComponent(selectedEntity, {});
+    }
+
+    if (!context.hasComponent<liquid::CollidableComponent>(selectedEntity) &&
+        ImGui::Selectable("Collidable")) {
+      constexpr glm::vec3 DEFAULT_VALUE(0.5f);
+
+      physicsSystem.createCollidableComponent(
+          selectedEntity, {},
+          {liquid::PhysicsGeometryType::Box,
+           liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
     }
 
     ImGui::EndPopup();

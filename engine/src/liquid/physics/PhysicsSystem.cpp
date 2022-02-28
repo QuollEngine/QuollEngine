@@ -6,6 +6,8 @@
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultErrorCallback.h>
 
+#include "liquid/core/EngineGlobals.h"
+
 #ifdef LIQUID_PROFILER
 static const bool RECORD_MEMORY_ALLOCATIONS = true;
 #else
@@ -113,6 +115,31 @@ void PhysicsSystem::update(float dt) {
   glm::vec3 empty3;
   glm::vec4 empty4;
 
+  entityContext.iterateEntities<TransformComponent, CollidableComponent>(
+      [&empty3, &empty4](auto entity, const TransformComponent &transform,
+                         CollidableComponent &collidable) {
+        if (!collidable.rigidStatic)
+          return;
+
+        glm::vec3 position;
+        glm::quat rotation;
+
+        glm::decompose(transform.worldTransform, empty3, rotation, position,
+                       empty3, empty4);
+
+        physx::PxTransform pose;
+        pose.p.x = position.x;
+        pose.p.y = position.y;
+        pose.p.z = position.z;
+
+        pose.q.w = rotation.w;
+        pose.q.x = rotation.x;
+        pose.q.y = rotation.y;
+        pose.q.z = rotation.z;
+
+        collidable.rigidStatic->setGlobalPose(pose);
+      });
+
   // sync transforms with physics system
   entityContext.iterateEntities<TransformComponent, RigidBodyComponent>(
       [&empty3, &empty4](auto entity, const TransformComponent &transform,
@@ -216,71 +243,13 @@ void PhysicsSystem::update(float dt) {
   }
 }
 
-void PhysicsSystem::createDynamicRigidBody(
-    liquid::Entity entity, const PhysicsMaterialDesc &materialDesc,
-    const PhysicsGeometryDesc &geometryDesc,
-    const PhysicsDynamicRigidBodyDesc &dynamicDesc) {
-  if (!entityContext.hasComponent<TransformComponent>(entity)) {
-    return;
-  }
-  auto *material = impl->getPhysics()->createMaterial(
-      materialDesc.staticFriction, materialDesc.dynamicFriction,
-      materialDesc.restitution);
-
-  physx::PxShape *shape = nullptr;
-
-  if (geometryDesc.type == PhysicsGeometryType::Sphere) {
-    const auto &[radius] = std::get<PhysicsGeometrySphere>(geometryDesc.params);
-    const auto &geometry = physx::PxSphereGeometry(radius);
-    shape = impl->getPhysics()->createShape(geometry, *material);
-  } else if (geometryDesc.type == PhysicsGeometryType::Box) {
-    const auto &[halfExtents] =
-        std::get<PhysicsGeometryBox>(geometryDesc.params);
-    const auto &geometry =
-        physx::PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
-    shape = impl->getPhysics()->createShape(geometry, *material);
-  } else if (geometryDesc.type == PhysicsGeometryType::Capsule) {
-    const auto &[radius, halfHeight] =
-        std::get<PhysicsGeometryCapsule>(geometryDesc.params);
-    const auto &geometry = physx::PxCapsuleGeometry(radius, halfHeight);
-    shape = impl->getPhysics()->createShape(geometry, *material);
-  } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
-    const auto &geometry = physx::PxPlaneGeometry();
-    shape = impl->getPhysics()->createShape(geometry, *material);
-  }
-
-  if (!shape) {
-    return;
-  }
-
-  auto *rigidDynamic = impl->getPhysics()->createRigidDynamic(
-      physx::PxTransform(physx::PxVec3{0.0f, 0.0f, 0.0f},
-                         physx::PxQuat{0.0f, 0.0f, 0.0f, 1.0f}));
-
-  rigidDynamic->setMass(dynamicDesc.mass);
-  rigidDynamic->setMassSpaceInertiaTensor(
-      {dynamicDesc.inertia.x, dynamicDesc.inertia.y, dynamicDesc.inertia.z});
-
-  impl->getScene()->addActor(*rigidDynamic);
-
-  rigidDynamic->attachShape(*shape);
-  rigidDynamic->userData =
-      reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
-
-  RigidBodyComponent component;
-  component.actor = rigidDynamic;
-  component.material = material;
-  component.shape = shape;
-
-  entityContext.setComponent(entity, component);
-}
-
-void PhysicsSystem::createStaticRigidBody(
+void PhysicsSystem::createCollidableComponent(
     liquid::Entity entity, const PhysicsMaterialDesc &materialDesc,
     const PhysicsGeometryDesc &geometryDesc) {
   if (!entityContext.hasComponent<TransformComponent>(entity)) {
     return;
   }
+
   auto *material = impl->getPhysics()->createMaterial(
       materialDesc.staticFriction, materialDesc.dynamicFriction,
       materialDesc.restitution);
@@ -308,22 +277,69 @@ void PhysicsSystem::createStaticRigidBody(
   }
 
   if (!shape) {
+    engineLogger.log(Logger::Warning)
+        << "Invalid shape parameters. Shape was not created";
     return;
   }
 
-  auto &transform = entityContext.getComponent<TransformComponent>(entity);
-
-  auto *rigidStatic = impl->getPhysics()->createRigidStatic(physx::PxTransform(
-      physx::PxVec3{0.0f, 0.0f, 0.0f}, physx::PxQuat{0.0f, 0.0f, 0.0f, 1.0f}));
-
-  rigidStatic->attachShape(*shape);
-  rigidStatic->userData =
-      reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
-
-  RigidBodyComponent component;
-  component.actor = rigidStatic;
+  CollidableComponent component;
   component.material = material;
   component.shape = shape;
+
+  if (entityContext.hasComponent<RigidBodyComponent>(entity)) {
+    entityContext.getComponent<RigidBodyComponent>(entity).actor->attachShape(
+        *shape);
+  } else {
+    auto *rigidBody = impl->getPhysics()->createRigidStatic(
+        physx::PxTransform(physx::PxVec3{0.0f, 0.0f, 0.0f},
+                           physx::PxQuat{0.0f, 0.0f, 0.0f, 1.0f}));
+
+    rigidBody->attachShape(*shape);
+    rigidBody->userData =
+        reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
+
+    impl->getScene()->addActor(*rigidBody);
+    component.rigidStatic = rigidBody;
+  }
+
+  entityContext.setComponent(entity, component);
+}
+
+void PhysicsSystem::createRigidBodyComponent(
+    liquid::Entity entity, const PhysicsDynamicRigidBodyDesc &dynamicDesc) {
+  if (!entityContext.hasComponent<TransformComponent>(entity)) {
+    return;
+  }
+
+  physx::PxTransform transform({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f});
+  physx::PxShape *shape = nullptr;
+  if (entityContext.hasComponent<CollidableComponent>(entity)) {
+    auto &collidable = entityContext.getComponent<CollidableComponent>(entity);
+    if (collidable.rigidStatic) {
+      transform = collidable.rigidStatic->getGlobalPose();
+      impl->getScene()->removeActor(*collidable.rigidStatic, false);
+      collidable.rigidStatic->release();
+      collidable.rigidStatic = nullptr;
+    }
+    shape = collidable.shape;
+  }
+
+  auto *rigidBody = impl->getPhysics()->createRigidDynamic(transform);
+  rigidBody->userData =
+      reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
+
+  rigidBody->setMass(dynamicDesc.mass);
+  rigidBody->setMassSpaceInertiaTensor(
+      {dynamicDesc.inertia.x, dynamicDesc.inertia.y, dynamicDesc.inertia.z});
+
+  if (shape) {
+    rigidBody->attachShape(*shape);
+  }
+
+  impl->getScene()->addActor(*rigidBody);
+
+  RigidBodyComponent component;
+  component.actor = rigidBody;
 
   entityContext.setComponent(entity, component);
 }
