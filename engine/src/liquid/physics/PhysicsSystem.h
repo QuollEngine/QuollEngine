@@ -70,28 +70,24 @@ public:
   void update(float dt);
 
   /**
-   * @brief Create dynamic rigid body
+   * @brief Create collidable component
    *
    * @param entity Entity
    * @param materialDesc Material description
    * @param geometryDesc Geometry description
-   * @param dynamicDesc Dynamic description
    */
-  void createDynamicRigidBody(liquid::Entity entity,
-                              const PhysicsMaterialDesc &materialDesc,
-                              const PhysicsGeometryDesc &geometryDesc,
-                              const PhysicsDynamicRigidBodyDesc &dynamicDesc);
+  void createCollidableComponent(liquid::Entity entity,
+                                 const PhysicsMaterialDesc &materialDesc,
+                                 const PhysicsGeometryDesc &geometryDesc);
 
   /**
-   * @brief Create static rigid body
+   * @brief Create rigid body component
    *
    * @param entity Entity
-   * @param materialDesc Material description
-   * @param geometryDesc Geometry description
+   * @param dynamicDesc Dynamic description
    */
-  void createStaticRigidBody(liquid::Entity entity,
-                             const PhysicsMaterialDesc &materialDesc,
-                             const PhysicsGeometryDesc &geometryDesc);
+  void createRigidBodyComponent(liquid::Entity entity,
+                                const PhysicsDynamicRigidBodyDesc &dynamicDesc);
 
 private:
   PhysicsSystemImpl *impl;

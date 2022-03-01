@@ -12,6 +12,7 @@
 #include "liquid/animation/AnimatorComponent.h"
 #include "liquid/scene/SkeletonComponent.h"
 #include "liquid/physics/RigidBodyComponent.h"
+#include "liquid/physics/CollidableComponent.h"
 #include "liquid/profiler/DebugComponent.h"
 
 #include "EntityError.h"
@@ -19,11 +20,10 @@
 
 namespace liquid {
 
-using EntityContext =
-    EntityStorageSparseSet<MeshComponent, LightComponent, CameraComponent,
-                           TransformComponent, EnvironmentComponent,
-                           AnimatorComponent, NameComponent,
-                           SkinnedMeshComponent, SkeletonComponent,
-                           RigidBodyComponent, DebugComponent>;
+using EntityContext = EntityStorageSparseSet<
+    MeshComponent, LightComponent, CameraComponent, TransformComponent,
+    EnvironmentComponent, AnimatorComponent, NameComponent,
+    SkinnedMeshComponent, SkeletonComponent, RigidBodyComponent,
+    CollidableComponent, DebugComponent>;
 
 } // namespace liquid
