@@ -1,12 +1,15 @@
 #pragma once
 
 #include <PxConfig.h>
-#include <PxRigidActor.h>
+#include <PxRigidDynamic.h>
+
+#include "PhysicsObjects.h"
 
 namespace liquid {
 
 struct RigidBodyComponent {
-  physx::PxRigidActor *actor = nullptr;
+  PhysicsDynamicRigidBodyDesc dynamicDesc;
+  physx::PxRigidDynamic *actor = nullptr;
 };
 
 } // namespace liquid

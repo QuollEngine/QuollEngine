@@ -250,17 +250,16 @@ void EntityPanel::renderAddComponent(liquid::PhysicsSystem &physicsSystem) {
 
     if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      physicsSystem.createRigidBodyComponent(selectedEntity, {});
+      context.setComponent<liquid::RigidBodyComponent>(selectedEntity, {});
     }
 
     if (!context.hasComponent<liquid::CollidableComponent>(selectedEntity) &&
         ImGui::Selectable("Collidable")) {
       constexpr glm::vec3 DEFAULT_VALUE(0.5f);
 
-      physicsSystem.createCollidableComponent(
-          selectedEntity, {},
-          {liquid::PhysicsGeometryType::Box,
-           liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
+      context.setComponent<liquid::CollidableComponent>(
+          selectedEntity, {liquid::PhysicsGeometryType::Box,
+                           liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
     }
 
     ImGui::EndPopup();
