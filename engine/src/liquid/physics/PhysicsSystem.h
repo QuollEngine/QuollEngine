@@ -2,42 +2,9 @@
 
 #include "liquid/entity/EntityContext.h"
 
+#include "PhysicsObjects.h"
+
 namespace liquid {
-
-struct PhysicsMaterialDesc {
-  float staticFriction = 1.0f;
-  float dynamicFriction = 1.0f;
-  float restitution = 1.0f;
-};
-
-enum class PhysicsGeometryType { Sphere, Plane, Capsule, Box };
-
-struct PhysicsGeometrySphere {
-  float radius = 1.0f;
-};
-
-struct PhysicsGeometryPlane {};
-
-struct PhysicsGeometryCapsule {
-  float radius = 1.0f;
-  float halfHeight = 1.0f;
-};
-
-struct PhysicsGeometryBox {
-  glm::vec3 halfExtents;
-};
-
-struct PhysicsGeometryDesc {
-  PhysicsGeometryType type = PhysicsGeometryType::Box;
-  std::variant<PhysicsGeometrySphere, PhysicsGeometryPlane,
-               PhysicsGeometryCapsule, PhysicsGeometryBox>
-      params = PhysicsGeometryBox{{0.0f, 0.0f, 0.0f}};
-};
-
-struct PhysicsDynamicRigidBodyDesc {
-  float mass = 1.0f;
-  glm::vec3 inertia;
-};
 
 class PhysicsSystem {
   class PhysicsSystemImpl;
@@ -69,25 +36,16 @@ public:
    */
   void update(float dt);
 
+private:
   /**
-   * @brief Create collidable component
-   *
-   * @param entity Entity
-   * @param materialDesc Material description
-   * @param geometryDesc Geometry description
+   * @brief Synchronize physics components
    */
-  void createCollidableComponent(liquid::Entity entity,
-                                 const PhysicsMaterialDesc &materialDesc,
-                                 const PhysicsGeometryDesc &geometryDesc);
+  void synchronizeComponents();
 
   /**
-   * @brief Create rigid body component
-   *
-   * @param entity Entity
-   * @param dynamicDesc Dynamic description
+   * @brief Synchronize transforms
    */
-  void createRigidBodyComponent(liquid::Entity entity,
-                                const PhysicsDynamicRigidBodyDesc &dynamicDesc);
+  void synchronizeTransforms();
 
 private:
   PhysicsSystemImpl *impl;
