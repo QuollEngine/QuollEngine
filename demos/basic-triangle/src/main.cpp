@@ -32,13 +32,16 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 int main() {
+
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../../engine/bin/Debug/assets").string());
   liquid::EntityContext context;
   std::unique_ptr<liquid::GLFWWindow> window(
       new liquid::GLFWWindow("Triangle", 640, 480));
-  std::unique_ptr<liquid::VulkanRenderer> renderer(
-      new liquid::VulkanRenderer(context, window.get()));
+
+  liquid::experimental::VulkanRenderBackend backend(*window.get());
+  std::unique_ptr<liquid::VulkanRenderer> renderer(new liquid::VulkanRenderer(
+      context, window.get(), backend.getOrCreateDevice()));
   auto entity = context.createEntity();
 
   liquid::AnimationSystem animationSystem(context);

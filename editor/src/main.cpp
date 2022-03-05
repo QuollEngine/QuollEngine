@@ -13,6 +13,8 @@
 #include "liquid/window/glfw/GLFWWindow.h"
 #include "liquid/renderer/vulkan/VulkanStandardPushConstants.h"
 
+#include "liquid/rhi/vulkan/VulkanRenderBackend.h"
+
 #include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
@@ -29,13 +31,17 @@ static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
 int main() {
+
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../engine/bin/Debug/assets").string());
   liquid::EntityContext context;
   std::unique_ptr<liquid::GLFWWindow> window(
       new liquid::GLFWWindow("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT));
-  std::unique_ptr<liquid::VulkanRenderer> renderer(
-      new liquid::VulkanRenderer(context, window.get(), true));
+
+  liquid::experimental::VulkanRenderBackend backend(*window.get());
+
+  std::unique_ptr<liquid::VulkanRenderer> renderer(new liquid::VulkanRenderer(
+      context, window.get(), backend.getOrCreateDevice()));
   liquid::AnimationSystem animationSystem(context);
   liquid::PhysicsSystem physicsSystem(context);
 

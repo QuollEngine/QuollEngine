@@ -21,9 +21,9 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 namespace liquid {
 
 ImguiRenderer::ImguiRenderer(GLFWWindow *window,
-                             const VulkanContext &vulkanContext_,
+                             experimental::VulkanRenderDevice *device_,
                              ResourceAllocator *resourceAllocator_)
-    : vulkanContext(vulkanContext_), resourceAllocator(resourceAllocator_) {
+    : device(device_), resourceAllocator(resourceAllocator_) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window->getInstance(), true);

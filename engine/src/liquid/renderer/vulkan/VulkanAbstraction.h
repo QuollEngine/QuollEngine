@@ -9,32 +9,37 @@
 
 #include "VulkanRenderContext.h"
 #include "VulkanUploadContext.h"
-#include "VulkanContext.h"
 #include "VulkanResourceAllocator.h"
 #include "VulkanGraphEvaluator.h"
 #include "VulkanDescriptorManager.h"
 
+#include "../../rhi/vulkan/VulkanRenderDevice.h"
+
 namespace liquid {
 
-class VulkanRenderBackend {
+/**
+ * @deprecated This class will be replaced with RHI
+ */
+class VulkanAbstraction {
 public:
   /**
    * @brief Create Vulkan render backend
    *
    * @param window GLFW window
-   * @param enableValidations Enable validations
+   * @param device Vulkan render device
    */
-  VulkanRenderBackend(GLFWWindow *window, bool enableValidations);
+  VulkanAbstraction(GLFWWindow *window,
+                    experimental::VulkanRenderDevice *device);
 
-  VulkanRenderBackend(const VulkanRenderBackend &rhs) = delete;
-  VulkanRenderBackend(VulkanRenderBackend &&rhs) = delete;
-  VulkanRenderBackend &operator=(const VulkanRenderBackend &rhs) = delete;
-  VulkanRenderBackend &operator=(VulkanRenderBackend &&rhs) = delete;
+  VulkanAbstraction(const VulkanAbstraction &rhs) = delete;
+  VulkanAbstraction(VulkanAbstraction &&rhs) = delete;
+  VulkanAbstraction &operator=(const VulkanAbstraction &rhs) = delete;
+  VulkanAbstraction &operator=(VulkanAbstraction &&rhs) = delete;
 
   /**
    * @brief Destroy Vulkan render backend
    */
-  ~VulkanRenderBackend();
+  ~VulkanAbstraction();
 
   /**
    * @brief Get resource allocator
@@ -44,13 +49,6 @@ public:
   inline VulkanResourceAllocator *getResourceAllocator() {
     return resourceAllocator;
   }
-
-  /**
-   * @brief Get Vulkan instance
-   *
-   * @return Vulkan instance
-   */
-  inline VulkanContext &getVulkanInstance() { return vulkanInstance; }
 
   /**
    * @brief Get window
@@ -99,6 +97,13 @@ public:
    */
   void waitForIdle();
 
+  /**
+   * @brief Get Vulkan device
+   *
+   * @return Vulkan device
+   */
+  inline experimental::VulkanRenderDevice *getDevice() { return device; }
+
 public:
   /**
    * @brief Create swapchain
@@ -116,11 +121,12 @@ private:
   uint32_t resizeHandler = 0;
   bool framebufferResized = false;
 
+  experimental::VulkanRenderDevice *device = nullptr;
+
   GLFWWindow *window = nullptr;
 
   VmaAllocator allocator = nullptr;
   VulkanResourceAllocator *resourceAllocator = nullptr;
-  VulkanContext vulkanInstance;
   VulkanDescriptorManager descriptorManager;
   VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;

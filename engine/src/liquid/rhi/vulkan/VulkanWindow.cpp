@@ -5,13 +5,13 @@
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
 
-#include "VulkanError.h"
+#include "liquid/renderer/vulkan/VulkanError.h"
 
 namespace liquid {
 
-VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow *window) {
+VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow &window) {
   VkSurfaceKHR surface = VK_NULL_HANDLE;
-  checkForVulkanError(glfwCreateWindowSurface(instance, window->getInstance(),
+  checkForVulkanError(glfwCreateWindowSurface(instance, window.getInstance(),
                                               nullptr, &surface),
                       "Failed to create Vulkan Surface");
 

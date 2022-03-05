@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "VulkanContext.h"
+#include "../../rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 
@@ -23,11 +23,11 @@ public:
    * @brief Creates swapchain
    *
    * @param window Pointer to window
-   * @param context Vulkan context
+   * @param device Vulkan render device
    * @param allocator Allocator
    * @param oldSwapchain Old swapchain
    */
-  VulkanSwapchain(GLFWWindow *window, const VulkanContext &context,
+  VulkanSwapchain(GLFWWindow *window, experimental::VulkanRenderDevice *device,
                   VmaAllocator allocator, VkSwapchainKHR oldSwapchain);
 
   /**
@@ -147,8 +147,9 @@ private:
   VkSurfaceFormatKHR surfaceFormat{};
   VkPresentModeKHR presentMode{};
 
+  experimental::VulkanRenderDevice *device = nullptr;
+
   GLFWWindow *window = nullptr;
-  VkDevice device = nullptr;
 };
 
 } // namespace liquid

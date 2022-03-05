@@ -6,16 +6,15 @@ namespace liquid {
 
 ImguiPass::ImguiPass(
     const String &name, GraphResourceId renderPassId,
-    VulkanRenderBackend &backend, ShaderLibrary *shaderLibrary_,
+    VulkanAbstraction &abstraction, ShaderLibrary *shaderLibrary_,
     const SharedPtr<DebugManager> &debugManager, const String &previousColor_,
     const std::function<void(const SharedPtr<Texture> &)> &imUpdate)
     : RenderGraphPassBase(name, renderPassId),
-      imguiRenderer(backend.getWindow(), backend.getVulkanInstance(),
-                    backend.getResourceAllocator()),
+      imguiRenderer(abstraction.getWindow(), abstraction.getDevice(),
+                    abstraction.getResourceAllocator()),
       shaderLibrary(shaderLibrary_),
-      debugLayer(
-          backend.getVulkanInstance().getPhysicalDevice().getDeviceInfo(),
-          backend.getStatsManager(), debugManager),
+      debugLayer(abstraction.getDevice()->getPhysicalDevice().getDeviceInfo(),
+                 abstraction.getStatsManager(), debugManager),
       previousColor(previousColor_), imguiUpdateFn(imUpdate) {}
 
 void ImguiPass::buildInternal(RenderGraphBuilder &builder) {

@@ -5,11 +5,14 @@
 
 namespace liquid {
 
-VulkanUploadContext::VulkanUploadContext(const VulkanContext &context) {
-  device = context.getDevice();
-  graphicsQueue = context.getGraphicsQueue();
+VulkanUploadContext::VulkanUploadContext(
+    experimental::VulkanRenderDevice *device_) {
+  device = device_->getVulkanDevice();
+  graphicsQueue = device_->getGraphicsQueue();
 
-  createCommandPool(context);
+  createCommandPool(device_->getPhysicalDevice()
+                        .getQueueFamilyIndices()
+                        .graphicsFamily.value());
   createFence();
 }
 
@@ -73,15 +76,13 @@ void VulkanUploadContext::submit(const SubmitFn &submitFn) const {
   vkResetCommandPool(device, uploadCommandPool, 0);
 }
 
-void VulkanUploadContext::createCommandPool(const VulkanContext &context) {
+void VulkanUploadContext::createCommandPool(uint32_t graphicsFamily) {
   VkCommandPoolCreateInfo uploadPoolInfo{};
   uploadPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   uploadPoolInfo.flags = 0;
   uploadPoolInfo.pNext = nullptr;
 
-  uploadPoolInfo.queueFamilyIndex = context.getPhysicalDevice()
-                                        .getQueueFamilyIndices()
-                                        .graphicsFamily.value();
+  uploadPoolInfo.queueFamilyIndex = graphicsFamily;
 
   checkForVulkanError(
       vkCreateCommandPool(device, &uploadPoolInfo, nullptr, &uploadCommandPool),

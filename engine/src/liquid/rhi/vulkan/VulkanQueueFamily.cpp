@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanQueueFamily.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
 VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
                                      VkSurfaceKHR surface) {
@@ -30,4 +30,4 @@ VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
   }
 }
 
-} // namespace liquid
+} // namespace liquid::experimental

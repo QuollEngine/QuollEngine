@@ -26,8 +26,9 @@
 class Game {
 public:
   Game()
-      : window(new liquid::GLFWWindow("Pong 3D", 800, 600)),
-        renderer(new liquid::VulkanRenderer(entityContext, window.get(), true)),
+      : window("Pong 3D", 800, 600), backend(window),
+        renderer(new liquid::VulkanRenderer(entityContext, &window,
+                                            backend.getOrCreateDevice())),
         vertexShader(renderer->createShader("basic-shader.vert.spv")),
         fragmentShader(renderer->createShader("basic-shader.frag.spv")),
         material(renderer->createMaterial(vertexShader, fragmentShader, {}, {},
@@ -39,7 +40,7 @@ public:
     liquid::Mesh barMesh = createCube();
     liquid::Mesh ballMesh = createSphere(ballRadius, 10, 10, RED);
 
-    window->addKeyHandler([this](int key, int scancode, int action, int mods) {
+    window.addKeyHandler([this](int key, int scancode, int action, int mods) {
       handleKeyClick(key, scancode, action, mods);
     });
 
@@ -55,7 +56,7 @@ public:
   }
 
   int run() {
-    liquid::MainLoop mainLoop(renderer.get(), window.get());
+    liquid::MainLoop mainLoop(renderer.get(), &window);
 
     liquid::RenderGraph graph;
 
@@ -225,13 +226,13 @@ private:
     entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
     scene->setActiveCamera(cameraEntity);
 
-    const auto &fbSize = window->getFramebufferSize();
+    const auto &fbSize = window.getFramebufferSize();
 
     camera->setPerspective(
         70.0, static_cast<float>(fbSize.width) / fbSize.height, 0.1f, 200.0f);
     camera->lookAt({0.0f, 4.0f, -8.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 
-    window->addResizeHandler([this](uint32_t width, uint32_t height) {
+    window.addResizeHandler([this](uint32_t width, uint32_t height) {
       this->camera->setPerspective(70.0f, static_cast<float>(width) / height,
                                    0.1f, 200.0f);
     });
@@ -285,8 +286,10 @@ private:
   }
 
 private:
-  std::unique_ptr<liquid::GLFWWindow> window;
+  liquid::GLFWWindow window;
+  liquid::experimental::VulkanRenderBackend backend;
   std::unique_ptr<liquid::VulkanRenderer> renderer;
+
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
 

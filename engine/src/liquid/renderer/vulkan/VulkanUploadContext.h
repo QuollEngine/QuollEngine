@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VulkanContext.h"
+#include "../../rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 
@@ -11,9 +11,9 @@ public:
   /**
    * @brief Create upload context
    *
-   * @param context Vulkan context
+   * @param device Vulkan device
    */
-  VulkanUploadContext(const VulkanContext &context);
+  VulkanUploadContext(experimental::VulkanRenderDevice *device);
 
   /**
    * @brief Destroy upload context
@@ -46,9 +46,9 @@ private:
   /**
    * @brief Create command pool for uploads
    *
-   * @param context Vulkan context
+   * @param graphicsFamily Graphics family index
    */
-  void createCommandPool(const VulkanContext &context);
+  void createCommandPool(uint32_t graphicsFamily);
 
 private:
   VkFence uploadFence = VK_NULL_HANDLE;

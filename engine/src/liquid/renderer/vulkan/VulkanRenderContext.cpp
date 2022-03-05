@@ -6,11 +6,11 @@
 namespace liquid {
 
 VulkanRenderContext::VulkanRenderContext(
-    const VulkanContext &context, VulkanDescriptorManager &descriptorManager_,
-    StatsManager &statsManager)
+    experimental::VulkanRenderDevice *device_,
+    VulkanDescriptorManager &descriptorManager_, StatsManager &statsManager)
     : descriptorManager(descriptorManager_) {
-  device = context.getDevice();
-  createCommandBuffers(context.getPhysicalDevice()
+  device = device_->getVulkanDevice();
+  createCommandBuffers(device_->getPhysicalDevice()
                            .getQueueFamilyIndices()
                            .graphicsFamily.value(),
                        statsManager);
@@ -18,8 +18,8 @@ VulkanRenderContext::VulkanRenderContext(
   createSemaphores();
   createFences();
 
-  graphicsQueue = context.getGraphicsQueue();
-  presentQueue = context.getPresentQueue();
+  graphicsQueue = device_->getGraphicsQueue();
+  presentQueue = device_->getPresentQueue();
 }
 
 VulkanRenderContext::~VulkanRenderContext() {

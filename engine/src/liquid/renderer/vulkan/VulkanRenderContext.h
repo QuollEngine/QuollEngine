@@ -9,6 +9,7 @@
 #include "VulkanRenderContext.h"
 #include "VulkanCommandExecutor.h"
 #include "VulkanDescriptorManager.h"
+#include "../../rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 
@@ -23,11 +24,11 @@ public:
    * Creates semaphores, fences, and command buffers
    * for rendering
    *
-   * @param context Vulkan context
+   * @param device Vulkan device
    * @param descriptorManager Descriptor manager
    * @param statsManager Stats manager
    */
-  VulkanRenderContext(const VulkanContext &context,
+  VulkanRenderContext(experimental::VulkanRenderDevice *device,
                       VulkanDescriptorManager &descriptorManager,
                       StatsManager &statsManager);
 

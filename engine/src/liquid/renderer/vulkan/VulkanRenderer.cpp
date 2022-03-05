@@ -3,7 +3,6 @@
 #include "liquid/core/EngineGlobals.h"
 #include "liquid/window/glfw/GLFWWindow.h"
 
-#include "VulkanValidator.h"
 #include "VulkanRenderer.h"
 #include "VulkanStandardPushConstants.h"
 #include "VulkanError.h"
@@ -22,10 +21,10 @@
 namespace liquid {
 
 VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
-                               GLFWWindow *window, bool enableValidations)
-    : entityContext(entityContext_), renderBackend(window, enableValidations),
-      debugManager(new DebugManager), shaderLibrary(new ShaderLibrary) {
-
+                               GLFWWindow *window,
+                               experimental::VulkanRenderDevice *device)
+    : entityContext(entityContext_), abstraction(window, device),
+      debugManager(new DebugManager) {
   loadShaders();
 }
 
@@ -120,7 +119,7 @@ RenderGraph VulkanRenderer::createRenderGraph(
                            debugManager);
   graph.addPass<EnvironmentPass>("environmentPass", entityContext,
                                  shaderLibrary, renderData);
-  graph.addPass<ImguiPass>("imgui", renderBackend, shaderLibrary, debugManager,
+  graph.addPass<ImguiPass>("imgui", abstraction, shaderLibrary, debugManager,
                            imguiDep, imUpdate);
 
   return graph;
@@ -128,7 +127,7 @@ RenderGraph VulkanRenderer::createRenderGraph(
 
 SharedPtr<VulkanShader> VulkanRenderer::createShader(const String &shaderFile) {
   return std::make_shared<VulkanShader>(
-      renderBackend.getVulkanInstance().getDevice(), shaderFile);
+      abstraction.getDevice()->getVulkanDevice(), shaderFile);
 }
 
 SharedPtr<Material> VulkanRenderer::createMaterial(
@@ -138,14 +137,14 @@ SharedPtr<Material> VulkanRenderer::createMaterial(
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {
   return std::make_shared<Material>(textures, properties,
-                                    renderBackend.getResourceAllocator());
+                                    abstraction.getResourceAllocator());
 }
 
 SharedPtr<Material>
 VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                                   const CullMode &cullMode) {
   return std::make_shared<MaterialPBR>(properties,
-                                       renderBackend.getResourceAllocator());
+                                       abstraction.getResourceAllocator());
 }
 
 SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
@@ -159,14 +158,14 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
             new Material({},
                          {{"lightMatrix", glm::mat4{1.0f}},
                           {"lightIndex", static_cast<int>(i)}},
-                         renderBackend.getResourceAllocator())));
+                         abstraction.getResourceAllocator())));
 
         i++;
       });
 
-  return std::make_shared<VulkanRenderData>(
-      entityContext, scene, renderBackend.getResourceAllocator(), nullptr,
-      shadowMaterials);
+  return std::make_shared<VulkanRenderData>(entityContext, scene,
+                                            abstraction.getResourceAllocator(),
+                                            nullptr, shadowMaterials);
 }
 
 } // namespace liquid

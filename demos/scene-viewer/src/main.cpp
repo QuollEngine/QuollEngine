@@ -98,14 +98,17 @@ const auto strafeSpeed = 0.5f; // m/s
 const auto timeDelta = 1.0f;
 
 int main() {
+
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../../engine/bin/Debug/assets").string());
 
   liquid::EntityContext context;
   std::unique_ptr<liquid::GLFWWindow> window(
       new liquid::GLFWWindow("Scene Viewer", 1024, 768));
-  std::unique_ptr<liquid::VulkanRenderer> renderer(
-      new liquid::VulkanRenderer(context, window.get(), true));
+  liquid::experimental::VulkanRenderBackend backend(*window.get());
+
+  std::unique_ptr<liquid::VulkanRenderer> renderer(new liquid::VulkanRenderer(
+      context, window.get(), backend.getOrCreateDevice()));
   liquid::AnimationSystem animationSystem(context);
 
   glfwSetMouseButtonCallback(window->getInstance(), mouse_callback);

@@ -1,29 +1,29 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
-#include "VulkanRenderBackend.h"
+#include "VulkanAbstraction.h"
 #include "VulkanError.h"
 
 namespace liquid {
 
-VulkanRenderBackend::VulkanRenderBackend(GLFWWindow *window_,
-                                         bool enableValidations_)
-    : window(window_), vulkanInstance(window_, enableValidations_),
-      descriptorManager(vulkanInstance.getDevice()),
-      renderContext(vulkanInstance, descriptorManager, statsManager),
-      uploadContext(vulkanInstance) {
-  resourceAllocator = VulkanResourceAllocator::create(
-      vulkanInstance, uploadContext, statsManager);
+VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
+                                     experimental::VulkanRenderDevice *device_)
+    : window(window_), device(device_),
+      descriptorManager(device->getVulkanDevice()),
+      renderContext(device, descriptorManager, statsManager),
+      uploadContext(device) {
+  resourceAllocator =
+      VulkanResourceAllocator::create(device, uploadContext, statsManager);
 
   createSwapchain();
 
-  graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
-      vulkanInstance, swapchain, resourceAllocator);
+  graphEvaluator = std::make_unique<VulkanGraphEvaluator>(device, swapchain,
+                                                          resourceAllocator);
 
   resizeHandler = window->addResizeHandler(
       [this](uint32_t x, uint32_t y) mutable { framebufferResized = true; });
 }
 
-VulkanRenderBackend::~VulkanRenderBackend() {
+VulkanAbstraction::~VulkanAbstraction() {
   window->removeResizeHandler(resizeHandler);
 
   swapchain.destroy();
@@ -35,8 +35,8 @@ VulkanRenderBackend::~VulkanRenderBackend() {
   window = nullptr;
 }
 
-void VulkanRenderBackend::execute(RenderGraph &graph) {
-  LIQUID_PROFILE_EVENT("VulkanRenderBackend::execute");
+void VulkanAbstraction::execute(RenderGraph &graph) {
+  LIQUID_PROFILE_EVENT("VulkanAbstraction::execute");
   statsManager.resetDrawCalls();
   auto &&result = graphEvaluator->build(graph);
 
@@ -64,19 +64,19 @@ void VulkanRenderBackend::execute(RenderGraph &graph) {
   }
 }
 
-void VulkanRenderBackend::waitForIdle() {
-  vkDeviceWaitIdle(vulkanInstance.getDevice());
+void VulkanAbstraction::waitForIdle() {
+  vkDeviceWaitIdle(device->getVulkanDevice());
 }
 
-void VulkanRenderBackend::createSwapchain() {
-  swapchain = VulkanSwapchain(window, vulkanInstance,
-                              resourceAllocator->getVmaAllocator(),
-                              swapchain.getSwapchain());
+void VulkanAbstraction::createSwapchain() {
+  swapchain =
+      VulkanSwapchain(window, device, resourceAllocator->getVmaAllocator(),
+                      swapchain.getSwapchain());
 
   LOG_DEBUG("[Vulkan] Swapchain created");
 }
 
-void VulkanRenderBackend::recreateSwapchain() {
+void VulkanAbstraction::recreateSwapchain() {
   waitForIdle();
   createSwapchain();
 
