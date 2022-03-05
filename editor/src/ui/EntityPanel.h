@@ -64,11 +64,19 @@ private:
   void renderSkeleton();
 
   /**
-   * @brief Render add component button
-   *
-   * @param physicsSystem Physics system
+   * @brief Render collidable component
    */
-  void renderAddComponent(liquid::PhysicsSystem &physicsSystem);
+  void renderCollidable();
+
+  /**
+   * @brief Render rigid body component
+   */
+  void renderRigidBody();
+
+  /**
+   * @brief Render add component button
+   */
+  void renderAddComponent();
 
 private:
   liquid::Entity selectedEntity = liquid::ENTITY_MAX;

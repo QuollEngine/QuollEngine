@@ -22,8 +22,10 @@ void EntityPanel::render(SceneManager &sceneManager,
       renderTransform();
       renderAnimation(animationSystem);
       renderSkeleton();
+      renderCollidable();
+      renderRigidBody();
     }
-    renderAddComponent(physicsSystem);
+    renderAddComponent();
     ImGui::End();
   }
 
@@ -225,7 +227,181 @@ void EntityPanel::renderAnimation(
   }
 }
 
-void EntityPanel::renderAddComponent(liquid::PhysicsSystem &physicsSystem) {
+/**
+ * @brief Get geometry name
+ *
+ * @param type Geometry type
+ * @return String name for geometry
+ */
+static liquid::String getGeometryName(const liquid::PhysicsGeometryType &type) {
+  switch (type) {
+  case liquid::PhysicsGeometryType::Box:
+    return "Box";
+  case liquid::PhysicsGeometryType::Sphere:
+    return "Sphere";
+  case liquid::PhysicsGeometryType::Capsule:
+    return "Capsule";
+  case liquid::PhysicsGeometryType::Plane:
+    return "Plane";
+  default:
+    return "Unknown";
+  }
+}
+
+/**
+ * @brief Get defaulty geometry from type
+ *
+ * @param type Geometry type
+ * @return Default geometry parameters
+ */
+static liquid::PhysicsGeometryParams
+getDefaultGeometryFromType(const liquid::PhysicsGeometryType &type) {
+  switch (type) {
+  case liquid::PhysicsGeometryType::Box:
+  default:
+    return liquid::PhysicsGeometryBox();
+  case liquid::PhysicsGeometryType::Sphere:
+    return liquid::PhysicsGeometrySphere();
+  case liquid::PhysicsGeometryType::Capsule:
+    return liquid::PhysicsGeometryCapsule();
+  case liquid::PhysicsGeometryType::Plane:
+    return liquid::PhysicsGeometryPlane();
+  }
+}
+
+void EntityPanel::renderCollidable() {
+  if (!context.hasComponent<liquid::CollidableComponent>(selectedEntity)) {
+    return;
+  }
+
+  if (ImGui::CollapsingHeader("Collidable")) {
+    std::array<liquid::PhysicsGeometryType, sizeof(liquid::PhysicsGeometryType)>
+        types{
+            liquid::PhysicsGeometryType::Box,
+            liquid::PhysicsGeometryType::Sphere,
+            liquid::PhysicsGeometryType::Capsule,
+            liquid::PhysicsGeometryType::Plane,
+        };
+
+    auto &collidable =
+        context.getComponent<liquid::CollidableComponent>(selectedEntity);
+
+    if (ImGui::BeginCombo(
+            "###SelectGeometryType",
+            getGeometryName(collidable.geometryDesc.type).c_str())) {
+
+      for (auto type : types) {
+        if (type != collidable.geometryDesc.type &&
+            ImGui::Selectable(getGeometryName(type).c_str())) {
+          collidable.geometryDesc.type = type;
+          collidable.geometryDesc.params = getDefaultGeometryFromType(type);
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
+      auto &box =
+          std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
+      std::array<float, 3> extents{box.halfExtents.x, box.halfExtents.y,
+                                   box.halfExtents.z};
+      ImGui::Text("Half extents");
+      if (ImGui::InputFloat3("###HalfExtents", extents.data())) {
+        box.halfExtents.x = extents.at(0);
+        box.halfExtents.y = extents.at(1);
+        box.halfExtents.z = extents.at(2);
+      }
+    } else if (collidable.geometryDesc.type ==
+               liquid::PhysicsGeometryType::Sphere) {
+      auto &sphere = std::get<liquid::PhysicsGeometrySphere>(
+          collidable.geometryDesc.params);
+      ImGui::Text("Radius");
+      ImGui::InputFloat("###Radius", &sphere.radius);
+    } else if (collidable.geometryDesc.type ==
+               liquid::PhysicsGeometryType::Capsule) {
+      auto &capsule = std::get<liquid::PhysicsGeometryCapsule>(
+          collidable.geometryDesc.params);
+      ImGui::Text("Radius");
+      ImGui::InputFloat("###Radius", &capsule.radius);
+
+      ImGui::Text("Half height");
+      ImGui::InputFloat("###HalfHeight", &capsule.halfHeight);
+    }
+  }
+}
+
+void EntityPanel::renderRigidBody() {
+  if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity)) {
+    return;
+  }
+
+  if (ImGui::CollapsingHeader("Rigid Body")) {
+    auto &rigidBody =
+        context.getComponent<liquid::RigidBodyComponent>(selectedEntity);
+
+    ImGui::Text("Mass");
+    ImGui::InputFloat("###Mass", &rigidBody.dynamicDesc.mass);
+
+    std::array<float, 3> inertia{rigidBody.dynamicDesc.inertia.x,
+                                 rigidBody.dynamicDesc.inertia.y,
+                                 rigidBody.dynamicDesc.inertia.z};
+
+    if (ImGui::InputFloat3("###Inertia", inertia.data())) {
+      rigidBody.dynamicDesc.inertia.x = inertia.at(0);
+      rigidBody.dynamicDesc.inertia.y = inertia.at(1);
+      rigidBody.dynamicDesc.inertia.z = inertia.at(2);
+    }
+
+    rigidBody.actor->getLinearVelocity();
+
+    auto renderRow3 = [](const liquid::String &label,
+                         const physx::PxVec3 &value) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text(label.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%.2f, %.2f, %.2f", value.x, value.y, value.z);
+    };
+
+    auto renderRowQuat = [](const liquid::String &label,
+                            const physx::PxQuat &value) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text(label.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%.2f, %.2f, %.2f, 0.2f", value.w, value.x, value.y, value.z);
+    };
+
+    auto renderScalar = [](const liquid::String &label, float value) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text(label.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%0.2f", value);
+    };
+
+    if (ImGui::BeginTable("TableRigidBodyDetails", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
+      auto *actor = rigidBody.actor;
+      renderRow3("Pose position", actor->getGlobalPose().p);
+      renderRowQuat("Pose rotation", actor->getGlobalPose().q);
+      renderRow3("CMass position", actor->getCMassLocalPose().p);
+      renderRowQuat("CMass rotation", actor->getCMassLocalPose().q);
+      renderRow3("Inverse inertia tensor",
+                 actor->getMassSpaceInvInertiaTensor());
+      renderScalar("Linear damping", actor->getLinearDamping());
+      renderScalar("Angular damping", actor->getAngularDamping());
+      renderRow3("Linear velocity", actor->getLinearVelocity());
+      renderRow3("Angular velocity", actor->getAngularVelocity());
+
+      ImGui::EndTable();
+    }
+  }
+}
+
+void EntityPanel::renderAddComponent() {
   if (!context.hasEntity(selectedEntity)) {
     return;
   }

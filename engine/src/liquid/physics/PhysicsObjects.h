@@ -43,17 +43,19 @@ struct PhysicsGeometryCapsule {
  * @brief Box geometry data
  */
 struct PhysicsGeometryBox {
-  glm::vec3 halfExtents;
+  glm::vec3 halfExtents{1.0f};
 };
+
+using PhysicsGeometryParams =
+    std::variant<liquid::PhysicsGeometryBox, liquid::PhysicsGeometrySphere,
+                 liquid::PhysicsGeometryCapsule, liquid::PhysicsGeometryPlane>;
 
 /**
  * @brief Describes geometry
  */
 struct PhysicsGeometryDesc {
   PhysicsGeometryType type = PhysicsGeometryType::Box;
-  std::variant<PhysicsGeometrySphere, PhysicsGeometryPlane,
-               PhysicsGeometryCapsule, PhysicsGeometryBox>
-      params = PhysicsGeometryBox{{0.0f, 0.0f, 0.0f}};
+  PhysicsGeometryParams params = PhysicsGeometryBox{{0.0f, 0.0f, 0.0f}};
 };
 
 /**
