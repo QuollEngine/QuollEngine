@@ -6,7 +6,6 @@
 #include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
-#include "VulkanContext.h"
 #include "VulkanSwapchain.h"
 
 namespace liquid {
@@ -26,11 +25,11 @@ public:
   /**
    * @brief Create graph evaluator
    *
-   * @param vulkanInstance Vulkan instance
+   * @param device Vulkan device
    * @param swapchain Swapchain
    * @param resourceAllocator Resource allocator
    */
-  VulkanGraphEvaluator(VulkanContext &vulkanInstance,
+  VulkanGraphEvaluator(experimental::VulkanRenderDevice *device,
                        VulkanSwapchain &swapchain,
                        ResourceAllocator *resourceAllocator);
 
@@ -128,7 +127,7 @@ private:
                                    const AttachmentData &data);
 
 private:
-  VulkanContext &vulkanInstance;
+  experimental::VulkanRenderDevice *device;
   VulkanSwapchain &swapchain;
   ResourceAllocator *resourceAllocator;
 };

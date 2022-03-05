@@ -9,7 +9,7 @@
 #include "VulkanShader.h"
 #include "VulkanRenderData.h"
 #include "VulkanResourceAllocator.h"
-#include "VulkanRenderBackend.h"
+#include "VulkanAbstraction.h"
 #include "VulkanGraphEvaluator.h"
 
 #include "liquid/renderer/ShaderLibrary.h"
@@ -33,7 +33,7 @@ class VulkanRenderer {
 
 public:
   VulkanRenderer(EntityContext &context, GLFWWindow *window,
-                 bool enableValidations = false);
+                 experimental::VulkanRenderDevice *device);
   ~VulkanRenderer();
 
   VulkanRenderer(const VulkanRenderer &rhs) = delete;
@@ -53,20 +53,16 @@ public:
   SharedPtr<VulkanShader> createShader(const String &shaderFile);
 
   inline ResourceAllocator *getResourceAllocator() {
-    return renderBackend.getResourceAllocator();
+    return abstraction.getResourceAllocator();
   }
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
   inline StatsManager &getStatsManager() {
-    return renderBackend.getStatsManager();
+    return abstraction.getStatsManager();
   }
   inline const SharedPtr<DebugManager> &getDebugManager() {
     return debugManager;
-  }
-
-  inline const VulkanContext &getContext() {
-    return renderBackend.getVulkanInstance();
   }
 
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
@@ -75,15 +71,15 @@ public:
       const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
       const std::function<void(const SharedPtr<Texture> &)> &imUpdate);
 
-  inline VulkanRenderBackend &getRenderBackend() { return renderBackend; }
+  inline VulkanAbstraction &getRenderBackend() { return abstraction; }
 
 private:
   void loadShaders();
 
 private:
-  VulkanRenderBackend renderBackend;
+  VulkanAbstraction abstraction;
 
-  ShaderLibrary *shaderLibrary = nullptr;
+  ShaderLibrary *shaderLibrary = new ShaderLibrary;
 
   std::vector<SharedPtr<Material>> shadowMaterials;
 

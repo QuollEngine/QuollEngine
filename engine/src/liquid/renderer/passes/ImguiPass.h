@@ -4,7 +4,7 @@
 #include "../render-graph/RenderGraphPassBase.h"
 #include "../ShaderLibrary.h"
 #include "../imgui/ImguiRenderer.h"
-#include "../vulkan/VulkanRenderBackend.h"
+#include "../vulkan/VulkanAbstraction.h"
 #include "liquid/profiler/DebugManager.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/profiler/StatsManager.h"
@@ -25,7 +25,7 @@ public:
    * @param imUpdate Imgui update
    */
   ImguiPass(const String &name, GraphResourceId renderPassId,
-            VulkanRenderBackend &backend, ShaderLibrary *shaderLibrary,
+            VulkanAbstraction &backend, ShaderLibrary *shaderLibrary,
             const SharedPtr<DebugManager> &debugManager,
             const String &previousColor,
             const std::function<void(const SharedPtr<Texture> &)> &imUpdate);

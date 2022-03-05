@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::experimental {
 
 /**
  * @brief Vulkan queue family indices
@@ -52,4 +52,4 @@ public:
   std::optional<uint32_t> presentFamily;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

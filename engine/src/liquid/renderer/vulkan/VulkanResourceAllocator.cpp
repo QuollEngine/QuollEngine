@@ -9,16 +9,15 @@
 namespace liquid {
 
 VulkanResourceAllocator *
-VulkanResourceAllocator::create(const VulkanContext &vulkanInstance,
+VulkanResourceAllocator::create(experimental::VulkanRenderDevice *device,
                                 const VulkanUploadContext &uploadContext,
                                 StatsManager &statsManager) {
   VmaAllocator allocator = nullptr;
 
   VmaAllocatorCreateInfo createInfo{};
-  createInfo.instance = vulkanInstance.getInstance();
-  createInfo.physicalDevice =
-      vulkanInstance.getPhysicalDevice().getVulkanDevice();
-  createInfo.device = vulkanInstance.getDevice();
+  createInfo.instance = device->getBackend().getVulkanInstance();
+  createInfo.physicalDevice = device->getPhysicalDevice().getVulkanDevice();
+  createInfo.device = device->getVulkanDevice();
 
   checkForVulkanError(vmaCreateAllocator(&createInfo, &allocator),
                       "Failed to create allocator");
@@ -26,7 +25,7 @@ VulkanResourceAllocator::create(const VulkanContext &vulkanInstance,
   LOG_DEBUG("[Vulkan] Allocator created");
 
   return new VulkanResourceAllocator(uploadContext, allocator,
-                                     vulkanInstance.getDevice(), statsManager);
+                                     device->getVulkanDevice(), statsManager);
 }
 
 VulkanResourceAllocator::VulkanResourceAllocator(

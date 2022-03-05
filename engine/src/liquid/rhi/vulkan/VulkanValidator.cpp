@@ -1,9 +1,9 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
 #include "VulkanValidator.h"
-#include "VulkanError.h"
+#include "liquid/renderer/vulkan/VulkanError.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
 VulkanValidator::VulkanValidator() {
   messengerCreateInfo.sType =
@@ -99,4 +99,4 @@ bool VulkanValidator::checkValidationSupport() {
   return true;
 }
 
-} // namespace liquid
+} // namespace liquid::experimental

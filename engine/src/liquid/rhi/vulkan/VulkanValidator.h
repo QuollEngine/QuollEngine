@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::experimental {
 
 /**
  * @brief Validates vulkan
@@ -107,4 +107,4 @@ private:
   VkDebugUtilsMessengerCreateInfoEXT messengerCreateInfo{};
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

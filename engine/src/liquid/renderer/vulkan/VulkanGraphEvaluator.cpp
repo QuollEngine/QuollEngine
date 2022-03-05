@@ -15,9 +15,9 @@
 namespace liquid {
 
 VulkanGraphEvaluator::VulkanGraphEvaluator(
-    VulkanContext &vulkanInstance_, VulkanSwapchain &swapchain_,
+    experimental::VulkanRenderDevice *device_, VulkanSwapchain &swapchain_,
     ResourceAllocator *resourceAllocator_)
-    : vulkanInstance(vulkanInstance_), swapchain(swapchain_),
+    : device(device_), swapchain(swapchain_),
       resourceAllocator(resourceAllocator_) {}
 
 std::vector<RenderGraphPassBase *>
@@ -178,7 +178,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
     createInfo.dependencyCount = 0;
     createInfo.pDependencies = nullptr;
 
-    checkForVulkanError(vkCreateRenderPass(vulkanInstance.getDevice(),
+    checkForVulkanError(vkCreateRenderPass(device->getVulkanDevice(),
                                            &createInfo, nullptr, &renderPass),
                         "Failed to create render pass");
 
@@ -197,7 +197,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       createInfo.height = height;
       createInfo.layers = layers;
 
-      checkForVulkanError(vkCreateFramebuffer(vulkanInstance.getDevice(),
+      checkForVulkanError(vkCreateFramebuffer(device->getVulkanDevice(),
                                               &createInfo, nullptr,
                                               &framebuffers.at(i)),
                           "Failed to create framebuffer");
@@ -209,7 +209,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
 
     graph.getResourceRegistry().addRenderPass(
         pass->getRenderPass(),
-        std::make_shared<VulkanRenderPass>(vulkanInstance.getDevice(),
+        std::make_shared<VulkanRenderPass>(device->getVulkanDevice(),
                                            renderPass, framebuffers,
                                            clearValues, width, height, layers));
   }
@@ -421,10 +421,10 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
       createInfo.pNext = &bindingFlagsCreateInfo;
       createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
       createInfo.pBindings = bindings.data();
-      checkForVulkanError(
-          vkCreateDescriptorSetLayout(vulkanInstance.getDevice(), &createInfo,
-                                      nullptr, &layout),
-          "Failed to create descriptor set layout");
+      checkForVulkanError(vkCreateDescriptorSetLayout(device->getVulkanDevice(),
+                                                      &createInfo, nullptr,
+                                                      &layout),
+                          "Failed to create descriptor set layout");
 
       descriptorLayoutsMap.insert({set, layout});
     }
@@ -452,7 +452,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
 
   VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-  checkForVulkanError(vkCreatePipelineLayout(vulkanInstance.getDevice(),
+  checkForVulkanError(vkCreatePipelineLayout(device->getVulkanDevice(),
                                              &pipelineLayoutCreateInfo, nullptr,
                                              &pipelineLayout),
                       "Failed to create pipeline layout");
@@ -631,13 +631,13 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
   pipelineInfo.pDynamicState = &dynamicState;
 
   checkForVulkanError(
-      vkCreateGraphicsPipelines(vulkanInstance.getDevice(), VK_NULL_HANDLE, 1,
+      vkCreateGraphicsPipelines(device->getVulkanDevice(), VK_NULL_HANDLE, 1,
                                 &pipelineInfo, nullptr, &pipeline),
       "Failed to create pipeline");
 
   LOG_DEBUG("[Vulkan] Pipeline created");
 
-  return std::make_shared<VulkanPipeline>(vulkanInstance.getDevice(), pipeline,
+  return std::make_shared<VulkanPipeline>(device->getVulkanDevice(), pipeline,
                                           pipelineLayout, descriptorLayouts);
 }
 

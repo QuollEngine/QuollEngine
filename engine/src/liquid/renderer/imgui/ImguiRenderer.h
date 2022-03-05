@@ -3,11 +3,12 @@
 #include <imgui.h>
 
 #include "liquid/window/glfw/GLFWWindow.h"
-#include "liquid/renderer/vulkan/VulkanContext.h"
 #include "liquid/renderer/ResourceAllocator.h"
 #include "liquid/renderer/HardwareBuffer.h"
 #include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
+
+#include "../../rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 
@@ -18,7 +19,7 @@ class ImguiRenderer {
   };
 
 public:
-  ImguiRenderer(GLFWWindow *window, const VulkanContext &vulkanContext,
+  ImguiRenderer(GLFWWindow *window, experimental::VulkanRenderDevice *device,
                 ResourceAllocator *resourceAllocator);
   ~ImguiRenderer();
 
@@ -45,7 +46,7 @@ private:
                          const SharedPtr<Pipeline> &pipeline);
 
 private:
-  const VulkanContext &vulkanContext;
+  experimental::VulkanRenderDevice *device = nullptr;
 
   ResourceAllocator *resourceAllocator = nullptr;
   SharedPtr<Texture> fontTexture = nullptr;

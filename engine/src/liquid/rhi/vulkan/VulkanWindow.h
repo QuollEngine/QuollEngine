@@ -2,7 +2,6 @@
 
 #include <vulkan/vulkan.hpp>
 #include "liquid/window/glfw/GLFWWindow.h"
-#include "VulkanError.h"
 
 namespace liquid {
 
@@ -10,9 +9,9 @@ namespace liquid {
  * @brief Create Vulkan surface from window
  *
  * @param instance Vulkan instance
- * @param window Pointer to window
+ * @param window Window
  * @return Vulkan surface
  */
-VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow *window);
+VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow &window);
 
 } // namespace liquid

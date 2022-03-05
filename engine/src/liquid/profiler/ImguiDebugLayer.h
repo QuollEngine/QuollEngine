@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PhysicalDeviceInformation.h"
-#include "liquid/renderer/vulkan/VulkanContext.h"
 #include "liquid/profiler/StatsManager.h"
 #include "liquid/profiler/DebugManager.h"
 

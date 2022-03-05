@@ -16,12 +16,12 @@ public:
   /**
    * @brief Create Vulkan resource allocator
    *
-   * @param vulkanInstance Vulkan instance
+   * @param device Vulkan device
    * @param uploadContext Vulkan upload context
    * @param statsManager Stats manager
    */
   static VulkanResourceAllocator *
-  create(const VulkanContext &vulkanInstance,
+  create(experimental::VulkanRenderDevice *device,
          const VulkanUploadContext &uploadContext, StatsManager &statsManager);
 
 public:

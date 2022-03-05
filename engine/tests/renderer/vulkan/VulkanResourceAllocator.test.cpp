@@ -11,7 +11,6 @@ using ::testing::Return;
 
 class VulkanResourceAllocatorTests : public VulkanTestBase {
 public:
-  liquid::VulkanContext vulkanContext;
   liquid::VulkanUploadContext uploadContext;
   liquid::StatsManager statsManager;
 };

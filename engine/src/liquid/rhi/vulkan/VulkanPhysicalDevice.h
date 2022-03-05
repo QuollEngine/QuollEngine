@@ -4,7 +4,7 @@
 #include "VulkanQueueFamily.h"
 #include "liquid/profiler/PhysicalDeviceInformation.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
 /**
  * @brief Vulkan Physical Device information
@@ -131,4 +131,4 @@ private:
   VkPhysicalDevice device = nullptr;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental
