@@ -36,19 +36,14 @@ void RenderCommandList::bindPipeline(const SharedPtr<Pipeline> &pipeline) {
   record(command);
 }
 
-void RenderCommandList::bindVertexBuffer(
-    const SharedPtr<HardwareBuffer> &buffer) {
-  LIQUID_ASSERT(buffer->getType() == HardwareBuffer::Vertex,
-                "Passed hardware buffer must be vertex buffer");
+void RenderCommandList::bindVertexBuffer(BufferHandle buffer) {
   auto *command = new RenderCommandBindVertexBuffer;
   command->buffer = buffer;
   record(command);
 }
 
-void RenderCommandList::bindIndexBuffer(const SharedPtr<HardwareBuffer> &buffer,
+void RenderCommandList::bindIndexBuffer(BufferHandle buffer,
                                         VkIndexType indexType) {
-  LIQUID_ASSERT(buffer->getType() == HardwareBuffer::Index,
-                "Passed hardware buffer must be index buffer");
   auto *command = new RenderCommandBindIndexBuffer;
   command->buffer = buffer;
   command->indexType = indexType;

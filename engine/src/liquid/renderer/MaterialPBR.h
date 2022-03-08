@@ -14,7 +14,7 @@ public:
      *
      * @return List of textures
      */
-    const std::vector<SharedPtr<Texture>> getTextures() const;
+    const std::vector<TextureHandle> getTextures() const;
 
     /**
      * @brief Get Property objects
@@ -24,24 +24,24 @@ public:
     const std::vector<std::pair<String, Property>> getProperties() const;
 
   public:
-    SharedPtr<Texture> baseColorTexture;
+    TextureHandle baseColorTexture = 0;
     int baseColorTextureCoord = -1;
     glm::vec4 baseColorFactor;
 
-    SharedPtr<Texture> metallicRoughnessTexture;
+    TextureHandle metallicRoughnessTexture = 0;
     int metallicRoughnessTextureCoord = -1;
     float metallicFactor = 0.0f;
     float roughnessFactor = 0.0f;
 
-    SharedPtr<Texture> normalTexture;
+    TextureHandle normalTexture = 0;
     int normalTextureCoord = -1;
     float normalScale = 0.0f;
 
-    SharedPtr<Texture> occlusionTexture;
+    TextureHandle occlusionTexture = 0;
     int occlusionTextureCoord = -1;
     float occlusionStrength = 0.0f;
 
-    SharedPtr<Texture> emissiveTexture;
+    TextureHandle emissiveTexture = 0;
     int emissiveTextureCoord = -1;
     glm::vec3 emissiveFactor;
   };
@@ -51,10 +51,10 @@ public:
    * @brief Create PBR material
    *
    * @param properties PBR properties
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
   MaterialPBR(const Properties &properties,
-              ResourceAllocator *resourceAllocator);
+              experimental::ResourceRegistry &registry);
 };
 
 } // namespace liquid

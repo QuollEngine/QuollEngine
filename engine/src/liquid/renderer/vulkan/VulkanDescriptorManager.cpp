@@ -3,19 +3,16 @@
 #include <vulkan/vulkan.hpp>
 
 #include "VulkanDescriptorManager.h"
-#include "VulkanHardwareBuffer.h"
-#include "VulkanTextureBinder.h"
 #include "VulkanMapping.h"
 
 #include "liquid/core/EngineGlobals.h"
 #include "VulkanError.h"
 
-#include "liquid/renderer/Texture.h"
-
 namespace liquid {
 
-VulkanDescriptorManager::VulkanDescriptorManager(VkDevice device_)
-    : device(device_) {
+VulkanDescriptorManager::VulkanDescriptorManager(
+    VkDevice device_, const experimental::VulkanResourceRegistry &registry_)
+    : device(device_), registry(registry_) {
   createDescriptorPool();
 }
 
@@ -65,27 +62,28 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
         VulkanMapping::getDescriptorType(binding.second.type);
 
     if (binding.second.type == DescriptorType::UniformBuffer) {
-      const auto &vkBuffer = std::static_pointer_cast<VulkanHardwareBuffer>(
-          std::get<SharedPtr<HardwareBuffer>>(binding.second.data));
-
+      const auto &vkBuffer =
+          registry.getBuffer(std::get<BufferHandle>(binding.second.data));
       bufferInfos.push_back(VkDescriptorBufferInfo{vkBuffer->getBuffer(), 0,
-                                                   vkBuffer->getBufferSize()});
+                                                   vkBuffer->getSize()});
 
       const auto &bufferObj = bufferInfos.at(bufferInfos.size() - 1);
       write.pBufferInfo = &bufferObj;
       write.descriptorCount = 1;
       writes.push_back(write);
+
     } else if (binding.second.type == DescriptorType::CombinedImageSampler) {
       imageInfos.push_back({});
       auto &imageInfoObjects = imageInfos.at(imageInfos.size() - 1);
 
-      const std::vector<SharedPtr<Texture>> &textures =
-          std::get<std::vector<SharedPtr<Texture>>>(binding.second.data);
-      for (const auto &tex : textures) {
-        if (!tex)
+      const auto &textures =
+          std::get<std::vector<TextureHandle>>(binding.second.data);
+      for (const auto tex : textures) {
+        if (tex == 0)
           continue;
-        const auto &native = std::static_pointer_cast<VulkanTextureBinder>(
-            tex->getResourceBinder());
+
+        const auto &native = registry.getTexture(tex);
+
         imageInfoObjects.push_back({native->getSampler(),
                                     native->getImageView(),
                                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL});

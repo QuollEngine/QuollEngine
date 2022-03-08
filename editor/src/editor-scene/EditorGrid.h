@@ -1,7 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/ResourceAllocator.h"
-#include "liquid/renderer/HardwareBuffer.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquidator {
 
@@ -14,9 +13,9 @@ public:
   /**
    * @brief Create editor grid
    *
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  EditorGrid(liquid::ResourceAllocator *resourceAllocator);
+  EditorGrid(liquid::experimental::ResourceRegistry &registry);
 
   /**
    * @brief Set grid lines display flag
@@ -53,10 +52,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline const liquid::SharedPtr<liquid::HardwareBuffer> &
-  getUniformBuffer() const {
-    return buffer;
-  }
+  inline liquid::BufferHandle getUniformBuffer() const { return buffer; }
 
 private:
   /**
@@ -66,7 +62,8 @@ private:
 
 private:
   EditorGridData data;
-  liquid::SharedPtr<liquid::HardwareBuffer> buffer;
+  liquid::BufferHandle buffer;
+  liquid::experimental::ResourceRegistry &registry;
 };
 
 } // namespace liquidator

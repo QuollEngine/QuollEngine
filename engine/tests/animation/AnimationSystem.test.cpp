@@ -2,15 +2,13 @@
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/scene/Skeleton.h"
 
-#include "../mocks/TestResourceAllocator.h"
-
 #include <gtest/gtest.h>
 
 class AnimationSystemTest : public ::testing::Test {
 public:
   liquid::EntityContext context;
   liquid::AnimationSystem system;
-  TestResourceAllocator allocator;
+  liquid::experimental::ResourceRegistry registry;
 
   AnimationSystemTest() : system(context) {}
 
@@ -30,7 +28,7 @@ public:
 
     liquid::Skeleton skeleton(
         {glm::vec3{0.0f}}, {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
-        {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}}, {"Joint0"}, &allocator);
+        {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}}, {"Joint0"}, &registry);
 
     context.setComponent<liquid::SkeletonComponent>(entity, {skeleton});
 

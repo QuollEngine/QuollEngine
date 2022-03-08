@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/renderer/Texture.h"
 #include "liquid/renderer/RenderCommandList.h"
 #include "RenderGraphResource.h"
 #include "RenderGraphAttachmentDescriptor.h"

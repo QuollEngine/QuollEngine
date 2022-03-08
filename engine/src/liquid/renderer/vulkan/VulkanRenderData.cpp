@@ -3,38 +3,18 @@
 
 namespace liquid {
 
-constexpr size_t MAX_LIGHTS = 16;
-
-struct LightData {
-  // NOLINTNEXTLINE
-  alignas(16) glm::vec4 color;
-  // NOLINTNEXTLINE
-  alignas(16) glm::vec4 direction;
-  // NOLINTNEXTLINE
-  alignas(16) glm::uvec4 type;
-  // NOLINTNEXTLINE
-  alignas(16) glm::mat4 lightSpaceMatrix;
-};
-
-struct SceneBufferObject {
-  std::array<LightData, MAX_LIGHTS> lights{};
-  glm::uvec4 numLights;
-  glm::uvec4 hasIBL;
-};
-
 VulkanRenderData::VulkanRenderData(
     EntityContext &entityContext_, Scene *scene_,
-    ResourceAllocator *resourceAllocator, const SharedPtr<Texture> &shadowmaps_,
-    const std::vector<SharedPtr<Material>> &shadowMaterials_)
+    const std::vector<SharedPtr<Material>> &shadowMaterials_,
+    experimental::ResourceRegistry &registry_)
     : entityContext(entityContext_), scene(scene_),
-      shadowMaterials(shadowMaterials_), shadowmaps(shadowmaps_) {
+      shadowMaterials(shadowMaterials_), registry(registry_) {
 
   sceneBuffer =
-      resourceAllocator->createUniformBuffer(sizeof(SceneBufferObject));
+      registry.addBuffer({BufferType::Uniform, sizeof(SceneBufferObject)});
 }
 
 void VulkanRenderData::update() {
-  SceneBufferObject sceneData{};
   Entity entity = environmentMapEntity;
 
   entityContext.iterateEntities<EnvironmentComponent>(
@@ -61,8 +41,7 @@ void VulkanRenderData::update() {
 
   size_t i = 0;
   entityContext.iterateEntities<LightComponent>(
-      [&i, &sceneData, this](Entity entity,
-                             const LightComponent &lightComponent) {
+      [&i, this](Entity entity, const LightComponent &lightComponent) {
         const auto &light = lightComponent.light;
         sceneData.lights.at(i).color = light->getColor();
         sceneData.lights.at(i).direction =
@@ -76,11 +55,11 @@ void VulkanRenderData::update() {
       });
 
   sceneData.numLights.x = static_cast<uint32_t>(i);
-  sceneBuffer->update(&sceneData);
+  registry.updateBuffer(sceneBuffer, {BufferType::Uniform,
+                                      sizeof(SceneBufferObject), &sceneData});
 }
 
-std::array<SharedPtr<Texture>, 3>
-VulkanRenderData::getEnvironmentTextures() const {
+std::array<TextureHandle, 3> VulkanRenderData::getEnvironmentTextures() const {
   if (entityContext.hasEntity(environmentMapEntity) &&
       entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
 

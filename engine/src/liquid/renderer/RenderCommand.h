@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "HardwareBuffer.h"
 #include "Pipeline.h"
 #include "Descriptor.h"
+
+#include "liquid/rhi/RenderHandle.h"
 
 namespace liquid {
 
@@ -104,12 +105,12 @@ struct RenderCommandSetScissor
 
 struct RenderCommandBindVertexBuffer
     : public TypedRenderCommandBase<RenderCommandType::BindVertexBuffer> {
-  SharedPtr<HardwareBuffer> buffer = nullptr;
+  BufferHandle buffer = 0;
 };
 
 struct RenderCommandBindIndexBuffer
     : public TypedRenderCommandBase<RenderCommandType::BindIndexBuffer> {
-  SharedPtr<HardwareBuffer> buffer = nullptr;
+  BufferHandle buffer = 0;
   VkIndexType indexType = VK_INDEX_TYPE_MAX_ENUM;
 };
 

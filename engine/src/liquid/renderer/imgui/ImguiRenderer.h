@@ -3,8 +3,6 @@
 #include <imgui.h>
 
 #include "liquid/window/glfw/GLFWWindow.h"
-#include "liquid/renderer/ResourceAllocator.h"
-#include "liquid/renderer/HardwareBuffer.h"
 #include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
@@ -14,13 +12,20 @@ namespace liquid {
 
 class ImguiRenderer {
   struct FrameData {
-    SharedPtr<HardwareBuffer> vertexBuffer = nullptr;
-    SharedPtr<HardwareBuffer> indexBuffer = nullptr;
+    BufferHandle vertexBuffer = 0;
+    size_t vertexBufferSize = 0;
+    void *vertexBufferData = nullptr;
+
+    BufferHandle indexBuffer = 0;
+    void *indexBufferData = nullptr;
+    size_t indexBufferSize = 0;
+
+    bool firstTime = true;
   };
 
 public:
   ImguiRenderer(GLFWWindow *window, experimental::VulkanRenderDevice *device,
-                ResourceAllocator *resourceAllocator);
+                experimental::ResourceRegistry &registry);
   ~ImguiRenderer();
 
   ImguiRenderer(const ImguiRenderer &rhs) = delete;
@@ -37,19 +42,15 @@ public:
 private:
   void loadFonts();
 
-  VkDescriptorSet
-  createDescriptorFromTexture(Texture *texture,
-                              const SharedPtr<Pipeline> &pipeline);
-
   void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
                          int fbWidth, int fbHeight,
                          const SharedPtr<Pipeline> &pipeline);
 
 private:
   experimental::VulkanRenderDevice *device = nullptr;
+  experimental::ResourceRegistry &registry;
 
-  ResourceAllocator *resourceAllocator = nullptr;
-  SharedPtr<Texture> fontTexture = nullptr;
+  TextureHandle fontTexture = 0;
 
   std::vector<FrameData> frameData;
   uint32_t currentFrame = 0;

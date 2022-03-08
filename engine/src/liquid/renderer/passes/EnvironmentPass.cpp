@@ -47,7 +47,7 @@ void EnvironmentPass::execute(RenderCommandList &commandList,
               pipeline, 1,
               mesh.instance->getMaterials().at(i)->getDescriptor());
 
-          if (mesh.instance->getIndexBuffers().at(i) != nullptr) {
+          if (mesh.instance->getIndexBuffers().at(i) > 0) {
             commandList.bindIndexBuffer(mesh.instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
             commandList.drawIndexed(mesh.instance->getIndexCounts().at(i), 0,

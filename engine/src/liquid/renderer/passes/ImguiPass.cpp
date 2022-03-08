@@ -4,14 +4,15 @@
 
 namespace liquid {
 
-ImguiPass::ImguiPass(
-    const String &name, GraphResourceId renderPassId,
-    VulkanAbstraction &abstraction, ShaderLibrary *shaderLibrary_,
-    const SharedPtr<DebugManager> &debugManager, const String &previousColor_,
-    const std::function<void(const SharedPtr<Texture> &)> &imUpdate)
+ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
+                     VulkanAbstraction &abstraction,
+                     ShaderLibrary *shaderLibrary_,
+                     const SharedPtr<DebugManager> &debugManager,
+                     const String &previousColor_,
+                     const std::function<void(TextureHandle)> &imUpdate)
     : RenderGraphPassBase(name, renderPassId),
       imguiRenderer(abstraction.getWindow(), abstraction.getDevice(),
-                    abstraction.getResourceAllocator()),
+                    abstraction.getRegistry()),
       shaderLibrary(shaderLibrary_),
       debugLayer(abstraction.getDevice()->getPhysicalDevice().getDeviceInfo(),
                  abstraction.getStatsManager(), debugManager),
@@ -47,9 +48,9 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
 void ImguiPass::execute(RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
-  const auto &sceneTexture = registry.hasTexture(sceneTextureId)
-                                 ? registry.getTexture(sceneTextureId)
-                                 : nullptr;
+  auto sceneTexture = registry.hasTexture(sceneTextureId)
+                          ? registry.getTexture(sceneTextureId)
+                          : 0;
 
   imguiRenderer.beginRendering();
 

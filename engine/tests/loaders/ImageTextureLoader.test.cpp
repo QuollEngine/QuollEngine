@@ -1,25 +1,30 @@
 #include "liquid/core/Base.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
-TEST(ImageTextureLoaderTests, LoadsImageUsingStb) {
-  TestResourceAllocator allocator;
-  liquid::ImageTextureLoader loader(&allocator);
-  const auto &texture = loader.loadFromFile("white-image-100x100.png");
+class ImageTextureLoaderTest : public ::testing::Test {
+public:
+  liquid::experimental::ResourceRegistry registry;
+};
 
-  ASSERT_NE(texture, nullptr);
-  const auto &textureData = std::static_pointer_cast<TestTextureResourceBinder>(
-      texture->getResourceBinder());
+using ImageTextureLoaderDeathTest = ImageTextureLoaderTest;
 
-  EXPECT_EQ(textureData->width, 100);
-  EXPECT_EQ(textureData->height, 100);
-  EXPECT_NE(textureData->data, nullptr);
+TEST_F(ImageTextureLoaderTest, LoadsImageUsingStb) {
+  liquid::ImageTextureLoader loader(registry);
+  auto texture = loader.loadFromFile("white-image-100x100.png");
+
+  EXPECT_NE(texture, 0);
+
+  const auto &description = registry.getTextureMap().getDescription(texture);
+
+  EXPECT_EQ(description.width, 100);
+  EXPECT_EQ(description.height, 100);
+  EXPECT_EQ(description.size, 100 * 100 * 4);
+  EXPECT_NE(description.data, nullptr);
 }
 
-TEST(ImageTextureLoaderDeathTest, ThrowsErrorOnFailedLoad) {
-  TestResourceAllocator resourceAllocator;
-  liquid::ImageTextureLoader loader(&resourceAllocator);
+TEST_F(ImageTextureLoaderDeathTest, ThrowsErrorOnFailedLoad) {
+  liquid::ImageTextureLoader loader(registry);
   EXPECT_DEATH(loader.loadFromFile("non-existent-image.png"), ".*");
 }

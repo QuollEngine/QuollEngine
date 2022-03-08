@@ -2,7 +2,6 @@
 
 #include "liquid/renderer/render-graph/RenderGraph.h"
 #include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
-#include "liquid/renderer/ResourceAllocator.h"
 #include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
@@ -27,26 +26,33 @@ public:
    *
    * @param device Vulkan device
    * @param swapchain Swapchain
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
+   * @param realRegistry Real registry of resources
    */
-  VulkanGraphEvaluator(experimental::VulkanRenderDevice *device,
-                       VulkanSwapchain &swapchain,
-                       ResourceAllocator *resourceAllocator);
+  VulkanGraphEvaluator(
+      experimental::VulkanRenderDevice *device, VulkanSwapchain &swapchain,
+      experimental::ResourceRegistry &registry,
+      const experimental::VulkanResourceRegistry &realRegistry);
 
   /**
-   * @brief Build render graph
+   * @brief Compile render graph
    *
    * @param graph Render graph
-   * @return Topologically sorted render passes
+   * @param swapchainRecreated Compile swapchain related passes
+   * @return Topologically sorted list of passes
    */
-  std::vector<RenderGraphPassBase *> build(RenderGraph &graph);
+  std::vector<RenderGraphPassBase *> compile(RenderGraph &graph,
+                                             bool swapchainRecreated);
 
   /**
-   * @brief Rebuild swapchain related passes
+   * @brief Build passes
    *
+   * @param compiled Compiled passes
    * @param graph Render graph
+   * @param swapchainRecreated Rebuild swapchain related passes
    */
-  void rebuildSwapchainRelatedPasses(RenderGraph &graph);
+  void build(std::vector<RenderGraphPassBase *> &compiled, RenderGraph &graph,
+             bool swapchainRecreated);
 
   /**
    * @brief Execute render graph
@@ -91,7 +97,7 @@ private:
    */
   VulkanAttachmentInfo
   createColorAttachment(const RenderPassAttachment &attachment,
-                        const SharedPtr<Texture> &texture, uint32_t index);
+                        TextureHandle texture, uint32_t index);
 
   /**
    * @brief Create depth attachment
@@ -103,7 +109,7 @@ private:
    */
   VulkanAttachmentInfo
   createDepthAttachment(const RenderPassAttachment &attachment,
-                        const SharedPtr<Texture> &texture, uint32_t index);
+                        TextureHandle texture, uint32_t index);
 
   /**
    * @brief Create graphics pipeline
@@ -119,17 +125,16 @@ private:
   /**
    * @brief Create texture
    *
-   * @param resourceId Resource Id
    * @param data Attachment data
    * @return Texture
    */
-  SharedPtr<Texture> createTexture(GraphResourceId resourceId,
-                                   const AttachmentData &data);
+  TextureHandle createTexture(const AttachmentData &data);
 
 private:
   experimental::VulkanRenderDevice *device;
   VulkanSwapchain &swapchain;
-  ResourceAllocator *resourceAllocator;
+  experimental::ResourceRegistry &registry;
+  const experimental::VulkanResourceRegistry &realRegistry;
 };
 
 } // namespace liquid

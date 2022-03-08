@@ -35,8 +35,10 @@ bool leftMouseBtnPressed = false;
 liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
                             liquid::VulkanRenderer *renderer,
                             liquid::EntityContext &context) {
-  liquid::KtxTextureLoader ktxLoader(renderer->getResourceAllocator());
-  liquid::ImageTextureLoader imageLoader(renderer->getResourceAllocator());
+  liquid::KtxTextureLoader ktxLoader(
+      renderer->getRenderBackend().getRegistry());
+  liquid::ImageTextureLoader imageLoader(
+      renderer->getRenderBackend().getRegistry());
 
   liquid::String envPath = fileDialog.getFilePathFromDialog({"ktx", "ktx2"});
 
@@ -73,7 +75,7 @@ liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
       nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
-      mesh, renderer->getResourceAllocator());
+      mesh, renderer->getRenderBackend().getRegistry());
   instance->setMaterial(material);
 
   context.setComponent<liquid::MeshComponent>(entity, {instance});
@@ -238,7 +240,7 @@ int main() {
 
     const auto &renderData = renderer->prepareScene(scene.get());
     liquid::RenderGraph graph = renderer->createRenderGraph(
-        renderData, "mainColor", [&ui](const auto &tex) { ui.render(); });
+        renderData, "SWAPCHAIN", [&ui](const auto &tex) { ui.render(); });
 
     graph.addPass<liquid::FullscreenQuadPass>(
         "fullscreenQuad", renderer->getShaderLibrary(), "mainColor");

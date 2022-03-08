@@ -4,6 +4,8 @@
 #include "VulkanDescriptorManager.h"
 #include "liquid/profiler/StatsManager.h"
 
+#include "liquid/rhi/vulkan/VulkanResourceRegistry.h"
+
 namespace liquid {
 
 class VulkanCommandExecutor {
@@ -13,10 +15,12 @@ public:
    *
    * @param commandBuffer Command buffer
    * @param descriptorManager Descriptor manager
+   * @param registry Vulkan resource registry
    * @param statsManager Stats manager
    */
   VulkanCommandExecutor(VkCommandBuffer commandBuffer,
                         VulkanDescriptorManager &descriptorManager,
+                        const experimental::VulkanResourceRegistry &registry,
                         StatsManager &statsManager);
 
   /**
@@ -74,14 +78,18 @@ private:
    * @brief Execute bind vertex buffer
    *
    * @param command Bind vertex buffer command
+   * @deprecated Will be replaced with the new command that accepts
+   *             handles
    */
   void
   executeBindVertexBuffer(const RenderCommandBindVertexBuffer *const command);
 
   /**
-   * @brief Execute bind index buffer command
+   * @brief Execute bind index buffer
    *
    * @param command Bind index buffer command
+   * @deprecated Will be replaced with the new command that accepts
+   *             handles
    */
   void
   executeBindIndexBuffer(const RenderCommandBindIndexBuffer *const command);
@@ -117,6 +125,7 @@ private:
 private:
   VkCommandBuffer commandBuffer;
   VulkanDescriptorManager &descriptorManager;
+  const experimental::VulkanResourceRegistry &registry;
   StatsManager &statsManager;
 };
 

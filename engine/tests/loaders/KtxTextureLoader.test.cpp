@@ -1,12 +1,18 @@
 #include "liquid/core/Base.h"
-#include <gtest/gtest.h>
-#include "../mocks/TestResourceAllocator.h"
 #include "liquid/loaders/KtxTextureLoader.h"
 #include "liquid/loaders/KtxError.h"
 
-TEST(KtxTextureLoaderDeathTest, FailsIfKtxFileCannotBeLoaded) {
-  TestResourceAllocator resourceAllocator;
-  liquid::KtxTextureLoader loader(&resourceAllocator);
+#include <gtest/gtest.h>
+
+class KtxTextureLoaderTest : public ::testing::Test {
+public:
+  liquid::experimental::ResourceRegistry registry;
+};
+
+using KtxTextureLoaderDeathTest = KtxTextureLoaderTest;
+
+TEST_F(KtxTextureLoaderDeathTest, FailsIfKtxFileCannotBeLoaded) {
+  liquid::KtxTextureLoader loader(registry);
 
   // non-existent file
   EXPECT_DEATH({ loader.loadFromFile("non-existent-file.ktx"); }, ".*");
@@ -15,41 +21,38 @@ TEST(KtxTextureLoaderDeathTest, FailsIfKtxFileCannotBeLoaded) {
   EXPECT_DEATH({ loader.loadFromFile("white-image-100x100.png"); }, ".*");
 }
 
-TEST(KtxTextureLoaderTests, LoadsTexture2D) {
-  TestResourceAllocator resourceAllocator;
-  liquid::KtxTextureLoader loader(&resourceAllocator);
-
-  const auto &texture = loader.loadFromFile("1x1-2d.ktx");
-  ASSERT_NE(texture, nullptr);
-
-  const auto &binder = std::static_pointer_cast<TestTextureResourceBinder>(
-      texture->getResourceBinder());
-
-  EXPECT_EQ(binder->type, TestTextureResourceBinder::Texture2D);
-  EXPECT_EQ(binder->width, 1);
-  EXPECT_EQ(binder->height, 1);
-  EXPECT_NE(binder->data, nullptr);
-}
-
-TEST(KtxTextureLoaderTests, LoadsTextureCubemap) {
-  TestResourceAllocator resourceAllocator;
-  liquid::KtxTextureLoader loader(&resourceAllocator);
-
-  const auto &texture = loader.loadFromFile("1x1-cubemap.ktx");
-  ASSERT_NE(texture, nullptr);
-
-  const auto &binder = std::static_pointer_cast<TestTextureResourceBinder>(
-      texture->getResourceBinder());
-
-  EXPECT_EQ(binder->type, TestTextureResourceBinder::TextureCubemap);
-  EXPECT_EQ(binder->width, 1);
-  EXPECT_EQ(binder->height, 1);
-  EXPECT_NE(binder->data, nullptr);
-}
-
-TEST(KtxTextureLoaderDeathTest, LoadsTexture1D) {
-  TestResourceAllocator resourceAllocator;
-  liquid::KtxTextureLoader loader(&resourceAllocator);
+TEST_F(KtxTextureLoaderDeathTest, LoadsTexture1D) {
+  liquid::KtxTextureLoader loader(registry);
 
   EXPECT_DEATH({ loader.loadFromFile("1x1-1d.ktx"); }, ".*");
+}
+
+TEST_F(KtxTextureLoaderTest, LoadsTexture2D) {
+  liquid::KtxTextureLoader loader(registry);
+
+  auto texture = loader.loadFromFile("1x1-2d.ktx");
+
+  const auto &description = registry.getTextureMap().getDescription(texture);
+
+  EXPECT_EQ(description.type, liquid::TextureType::Standard);
+  EXPECT_EQ(description.width, 1);
+  EXPECT_EQ(description.height, 1);
+  EXPECT_EQ(description.layers, 1);
+  EXPECT_NE(description.data, nullptr);
+  EXPECT_EQ(description.format, 43);
+}
+
+TEST_F(KtxTextureLoaderTest, LoadsTextureCubemap) {
+  liquid::KtxTextureLoader loader(registry);
+
+  auto texture = loader.loadFromFile("1x1-cubemap.ktx");
+
+  const auto &description = registry.getTextureMap().getDescription(texture);
+
+  EXPECT_EQ(description.type, liquid::TextureType::Cubemap);
+  EXPECT_EQ(description.width, 1);
+  EXPECT_EQ(description.height, 1);
+  EXPECT_EQ(description.layers, 6);
+  EXPECT_NE(description.data, nullptr);
+  EXPECT_EQ(description.format, 43);
 }

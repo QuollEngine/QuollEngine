@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "VulkanGraphEvaluator.h"
-#include "VulkanTextureBinder.h"
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 #include "VulkanPipeline.h"
@@ -16,44 +15,35 @@ namespace liquid {
 
 VulkanGraphEvaluator::VulkanGraphEvaluator(
     experimental::VulkanRenderDevice *device_, VulkanSwapchain &swapchain_,
-    ResourceAllocator *resourceAllocator_)
-    : device(device_), swapchain(swapchain_),
-      resourceAllocator(resourceAllocator_) {}
+    experimental::ResourceRegistry &registry_,
+    const experimental::VulkanResourceRegistry &realRegistry_)
+    : device(device_), swapchain(swapchain_), registry(registry_),
+      realRegistry(realRegistry_) {}
 
 std::vector<RenderGraphPassBase *>
-VulkanGraphEvaluator::build(RenderGraph &graph) {
-  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::build");
-  const auto &&passes = graph.compile();
+VulkanGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::compile");
+
+  const auto &&compiled = graph.compile();
 
   for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
-    if (!graph.getResourceRegistry().hasTexture(resourceId)) {
-      graph.getResourceRegistry().addTexture(
-          resourceId, createTexture(resourceId, textureDesc));
+    if (!graph.getResourceRegistry().hasTexture(resourceId) ||
+        (swapchainRecreated &&
+         textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative)) {
+      graph.getResourceRegistry().addTexture(resourceId,
+                                             createTexture(textureDesc));
     }
   }
 
-  for (auto &pass : passes) {
-    buildPass(pass, graph, false);
-  }
-  return passes;
+  return compiled;
 }
 
-void VulkanGraphEvaluator::rebuildSwapchainRelatedPasses(RenderGraph &graph) {
-  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::rebuildSwapchainRelatedPasses");
+void VulkanGraphEvaluator::build(std::vector<RenderGraphPassBase *> &compiled,
+                                 RenderGraph &graph, bool swapchainRecreated) {
+  LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::build");
 
-  for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
-    if (textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
-      graph.getResourceRegistry().addTexture(
-          resourceId, createTexture(resourceId, textureDesc));
-    }
-  }
-
-  for (auto &pass : graph.getRenderPasses()) {
-    if (!pass->isSwapchainRelative()) {
-      continue;
-    }
-
-    buildPass(pass, graph, true);
+  for (auto &pass : compiled) {
+    buildPass(pass, graph, swapchainRecreated && pass->isSwapchainRelative());
   }
 }
 
@@ -287,13 +277,15 @@ VulkanGraphEvaluator::createSwapchainAttachment(
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createColorAttachment(
-    const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
+    const RenderPassAttachment &attachment, TextureHandle texture,
     uint32_t index) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createColorAttachment");
   VulkanAttachmentInfo info{};
 
+  const auto &desc = registry.getTextureMap().getDescription(texture);
+
   // Attachment description
-  info.description.format = static_cast<VkFormat>(texture->getFormat());
+  info.description.format = static_cast<VkFormat>(desc.format);
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
   info.description.loadOp =
       VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
@@ -319,27 +311,27 @@ VulkanGraphEvaluator::createColorAttachment(
       std::get<glm::vec4>(attachment.clearValue).w;
 
   info.framebufferAttachments.push_back(
-      std::dynamic_pointer_cast<VulkanTextureBinder>(
-          texture->getResourceBinder())
-          ->getImageView());
+      realRegistry.getTexture(texture)->getImageView());
 
   // Dimensions
-  info.width = texture->getWidth();
-  info.height = texture->getHeight();
-  info.layers = texture->getLayers();
+  info.width = desc.width;
+  info.height = desc.height;
+  info.layers = desc.layers;
 
   return info;
 }
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createDepthAttachment(
-    const RenderPassAttachment &attachment, const SharedPtr<Texture> &texture,
+    const RenderPassAttachment &attachment, TextureHandle texture,
     uint32_t index) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createDepthAttachment");
   VulkanAttachmentInfo info{};
 
+  const auto &desc = registry.getTextureMap().getDescription(texture);
+
   // Attachment description
-  info.description.format = static_cast<VkFormat>(texture->getFormat());
+  info.description.format = static_cast<VkFormat>(desc.format);
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
   info.description.loadOp =
       VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
@@ -362,14 +354,12 @@ VulkanGraphEvaluator::createDepthAttachment(
       std::get<DepthStencilClear>(attachment.clearValue).clearStencil;
 
   info.framebufferAttachments.push_back(
-      std::dynamic_pointer_cast<VulkanTextureBinder>(
-          texture->getResourceBinder())
-          ->getImageView());
+      realRegistry.getTexture(texture)->getImageView());
 
   // Dimensions
-  info.width = texture->getWidth();
-  info.height = texture->getHeight();
-  info.layers = texture->getLayers();
+  info.width = desc.width;
+  info.height = desc.height;
+  info.layers = desc.layers;
 
   return info;
 }
@@ -641,9 +631,7 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
                                           pipelineLayout, descriptorLayouts);
 }
 
-SharedPtr<Texture>
-VulkanGraphEvaluator::createTexture(GraphResourceId resourceId,
-                                    const AttachmentData &data) {
+TextureHandle VulkanGraphEvaluator::createTexture(const AttachmentData &data) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createTexture");
   uint32_t width = data.width;
   uint32_t height = data.height;
@@ -654,20 +642,22 @@ VulkanGraphEvaluator::createTexture(GraphResourceId resourceId,
     height = swapchain.getExtent().height * height / PERCENTAGE_RATIO;
   }
 
-  uint32_t usageFlags = 0;
-  uint32_t aspectFlags = 0;
+  TextureDescription description;
+  description.width = width;
+  description.height = height;
+  description.layers = data.layers;
+  description.format = data.format;
   if (data.type == AttachmentType::Color) {
-    usageFlags =
+    description.usageFlags =
         VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
   } else if (data.type == AttachmentType::Depth) {
-    usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
-                 VK_IMAGE_USAGE_SAMPLED_BIT;
-    aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+    description.usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+                             VK_IMAGE_USAGE_SAMPLED_BIT;
+    description.aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
   }
 
-  return resourceAllocator->createTextureFramebuffer(TextureFramebufferData{
-      width, height, data.layers, data.format, usageFlags, aspectFlags});
+  return registry.addTexture(description);
 }
 
 } // namespace liquid

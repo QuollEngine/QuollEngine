@@ -1,7 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/Texture.h"
-#include "liquid/renderer/ResourceAllocator.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -10,9 +9,9 @@ public:
   /**
    * @brief Create KTX texture loader
    *
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  KtxTextureLoader(ResourceAllocator *resourceAllocator);
+  KtxTextureLoader(experimental::ResourceRegistry &registry);
 
   /**
    * @brief Load texture from KTX file
@@ -20,10 +19,10 @@ public:
    * @param filename Filename
    * @return Texture
    */
-  SharedPtr<Texture> loadFromFile(const String &filename);
+  TextureHandle loadFromFile(const String &filename);
 
 private:
-  ResourceAllocator *resourceAllocator;
+  experimental::ResourceRegistry &registry;
 };
 
 } // namespace liquid

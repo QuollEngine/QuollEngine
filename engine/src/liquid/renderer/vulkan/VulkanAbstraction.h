@@ -9,11 +9,11 @@
 
 #include "VulkanRenderContext.h"
 #include "VulkanUploadContext.h"
-#include "VulkanResourceAllocator.h"
 #include "VulkanGraphEvaluator.h"
 #include "VulkanDescriptorManager.h"
 
-#include "../../rhi/vulkan/VulkanRenderDevice.h"
+#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 
@@ -40,15 +40,6 @@ public:
    * @brief Destroy Vulkan render backend
    */
   ~VulkanAbstraction();
-
-  /**
-   * @brief Get resource allocator
-   *
-   * @return Resource allocator
-   */
-  inline VulkanResourceAllocator *getResourceAllocator() {
-    return resourceAllocator;
-  }
 
   /**
    * @brief Get window
@@ -104,6 +95,13 @@ public:
    */
   inline experimental::VulkanRenderDevice *getDevice() { return device; }
 
+  /**
+   * @brief Get registry
+   *
+   * @return Registry
+   */
+  inline experimental::ResourceRegistry &getRegistry() { return registry; }
+
 public:
   /**
    * @brief Create swapchain
@@ -120,13 +118,15 @@ public:
 private:
   uint32_t resizeHandler = 0;
   bool framebufferResized = false;
+  bool swapchainRecreated = false;
 
   experimental::VulkanRenderDevice *device = nullptr;
 
   GLFWWindow *window = nullptr;
 
+  experimental::ResourceRegistry registry;
+
   VmaAllocator allocator = nullptr;
-  VulkanResourceAllocator *resourceAllocator = nullptr;
   VulkanDescriptorManager descriptorManager;
   VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;

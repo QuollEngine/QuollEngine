@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/renderer/HardwareBuffer.h"
-#include "liquid/renderer/ResourceAllocator.h"
 #include "liquid/renderer/Material.h"
+
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -15,23 +15,27 @@ public:
    * hardware buffers from mesh data
    *
    * @param mesh Mesh
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  MeshInstance(const Mesh &mesh, ResourceAllocator *resourceAllocator) {
-    for (auto &geometry : mesh.getGeometries()) {
-      const auto &vertexBuffer = resourceAllocator->createVertexBuffer(
-          geometry.getVertices().size() * sizeof(typename Mesh::Vertex));
+  MeshInstance(const Mesh &mesh, experimental::ResourceRegistry &registry)
+      : mRegistry(registry), mMesh(mesh) {
+    for (auto &geometry : mMesh.getGeometries()) {
+      size_t bufferSize =
+          geometry.getVertices().size() * sizeof(typename Mesh::Vertex);
 
-      vertexBuffer->update((void *)geometry.getVertices().data());
+      auto vertexBuffer =
+          registry.addBuffer({BufferType::Vertex, bufferSize,
+                              (void *)geometry.getVertices().data()});
 
       if (geometry.getIndices().size() > 0) {
-        const auto &indexBuffer = resourceAllocator->createIndexBuffer(
-            geometry.getIndices().size() * sizeof(uint32_t));
+        size_t bufferSize = geometry.getIndices().size() * sizeof(uint32_t);
 
-        indexBuffer->update((void *)geometry.getIndices().data());
+        auto indexBuffer = registry.addBuffer(
+            {BufferType::Index, geometry.getIndices().size() * sizeof(uint32_t),
+             (void *)geometry.getIndices().data()});
         indexBuffers.push_back(indexBuffer);
       } else {
-        indexBuffers.push_back(nullptr);
+        indexBuffers.push_back(0);
       }
 
       indexCounts.push_back(geometry.getIndices().size());
@@ -41,7 +45,16 @@ public:
     }
   }
 
-  ~MeshInstance() = default;
+  ~MeshInstance() {
+    for (auto &x : vertexBuffers) {
+      mRegistry.deleteBuffer(x);
+    }
+
+    for (auto &x : indexBuffers) {
+      mRegistry.deleteBuffer(x);
+    }
+  }
+
   MeshInstance(const MeshInstance &rhs) = delete;
   MeshInstance(MeshInstance &&rhs) = delete;
   MeshInstance &operator=(const MeshInstance &rhs) = delete;
@@ -62,8 +75,7 @@ public:
    *
    * @return Vertex buffers
    */
-  inline const std::vector<SharedPtr<HardwareBuffer>> &
-  getVertexBuffers() const {
+  inline const std::vector<BufferHandle> &getVertexBuffers() const {
     return vertexBuffers;
   }
 
@@ -72,7 +84,7 @@ public:
    *
    * @return Index buffers
    */
-  inline const std::vector<SharedPtr<HardwareBuffer>> &getIndexBuffers() const {
+  inline const std::vector<BufferHandle> &getIndexBuffers() const {
     return indexBuffers;
   }
 
@@ -104,11 +116,14 @@ public:
   }
 
 private:
-  std::vector<SharedPtr<HardwareBuffer>> vertexBuffers;
-  std::vector<SharedPtr<HardwareBuffer>> indexBuffers;
+  std::vector<BufferHandle> vertexBuffers;
+  std::vector<BufferHandle> indexBuffers;
   std::vector<SharedPtr<Material>> materials;
   std::vector<size_t> vertexCounts;
   std::vector<size_t> indexCounts;
+
+  Mesh mMesh;
+  experimental::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquid

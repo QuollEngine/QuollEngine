@@ -9,11 +9,11 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
                    std::vector<JointId> &&parents,
                    std::vector<glm::mat4> &&inverseBindMatrices,
                    std::vector<String> &&names,
-                   ResourceAllocator *resourceAllocator)
+                   experimental::ResourceRegistry *registry_)
     : jointLocalPositions(positions), jointLocalRotations(rotations),
       jointLocalScales(scales), jointParents(parents),
       jointInverseBindMatrices(inverseBindMatrices), jointNames(names),
-      numJoints(positions.size()) {
+      numJoints(positions.size()), registry(registry_) {
   LIQUID_ASSERT(numJoints > 0, "No joints provided");
   LIQUID_ASSERT(jointLocalPositions.size() == numJoints &&
                     jointLocalRotations.size() == numJoints &&
@@ -27,7 +27,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
   jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
 
   buffer =
-      resourceAllocator->createUniformBuffer(sizeof(glm::mat4) * numJoints);
+      registry->addBuffer({BufferType::Uniform, sizeof(glm::mat4) * numJoints});
 
   // Debug data
   for (JointId joint = 0; joint < static_cast<uint32_t>(numJoints); ++joint) {
@@ -39,8 +39,8 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
 
   debugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
 
-  debugBuffer =
-      resourceAllocator->createUniformBuffer(sizeof(glm::mat4) * numDebugBones);
+  debugBuffer = registry->addBuffer(
+      {BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
 }
 
 const glm::mat4 Skeleton::getJointLocalTransform(JointId joint) const {
@@ -83,7 +83,9 @@ void Skeleton::update() {
         jointWorldTransforms.at(i) * jointInverseBindMatrices.at(i);
   }
 
-  buffer->update(jointFinalTransforms.data());
+  registry->updateBuffer(buffer,
+                         {BufferType::Uniform, sizeof(glm::mat4) * numJoints,
+                          jointFinalTransforms.data()});
 }
 
 void Skeleton::updateDebug() {
@@ -93,7 +95,9 @@ void Skeleton::updateDebug() {
     debugBoneTransforms.at(i) = jointWorldTransforms.at(debugBones.at(i));
   }
 
-  debugBuffer->update(debugBoneTransforms.data());
+  registry->updateBuffer(debugBuffer, {BufferType::Uniform,
+                                       sizeof(glm::mat4) * debugBones.size(),
+                                       debugBoneTransforms.data()});
 }
 
 } // namespace liquid

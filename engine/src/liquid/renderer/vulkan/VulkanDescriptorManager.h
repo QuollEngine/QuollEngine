@@ -3,6 +3,8 @@
 #include "liquid/renderer/Descriptor.h"
 #include "liquid/renderer/Pipeline.h"
 
+#include "liquid/rhi/vulkan/VulkanResourceRegistry.h"
+
 #include <vulkan/vulkan.hpp>
 
 namespace liquid {
@@ -13,8 +15,10 @@ public:
    * @brief Create Vulkan descriptor manager
    *
    * @param device Vulkan device
+   * @param registry Vulkan resource registry
    */
-  VulkanDescriptorManager(VkDevice device);
+  VulkanDescriptorManager(VkDevice device,
+                          const experimental::VulkanResourceRegistry &registry);
 
   VulkanDescriptorManager(const VulkanDescriptorManager &) = delete;
   VulkanDescriptorManager(VulkanDescriptorManager &&) = delete;
@@ -76,6 +80,8 @@ private:
   std::unordered_map<String, VkDescriptorSet> descriptorCache;
   VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
   VkDevice device;
+
+  const experimental::VulkanResourceRegistry &registry;
 };
 
 } // namespace liquid

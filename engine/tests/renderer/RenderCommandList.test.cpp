@@ -2,12 +2,10 @@
 #include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
 class RenderCommandListTests : public ::testing::Test {
 public:
-  TestResourceAllocator resourceAllocator;
 };
 
 class RenderCommandListDeathTest : public RenderCommandListTests {
@@ -48,34 +46,18 @@ TEST_F(RenderCommandListTests, RecordBindDescriptors) {
             liquid::RenderCommandType::BindDescriptor);
 }
 
-TEST_F(RenderCommandListDeathTest, BindVertexBufferFailsIfBufferIsNotVertex) {
-  liquid::RenderCommandList commandList;
-  EXPECT_DEATH(
-      commandList.bindVertexBuffer(resourceAllocator.createIndexBuffer(0)),
-      ".*");
-}
-
 TEST_F(RenderCommandListTests, RecordBindVertexBuffer) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindVertexBuffer(resourceAllocator.createVertexBuffer(0));
+  commandList.bindVertexBuffer(1);
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindVertexBuffer);
-}
-
-TEST_F(RenderCommandListDeathTest, BindIndexBufferFailsIfBufferIsNotIndex) {
-  liquid::RenderCommandList commandList;
-  EXPECT_DEATH(
-      commandList.bindIndexBuffer(resourceAllocator.createVertexBuffer(0),
-                                  VK_INDEX_TYPE_UINT32),
-      ".*");
 }
 
 TEST_F(RenderCommandListTests, RecordBindIndexBuffer) {
   liquid::RenderCommandList commandList;
 
-  commandList.bindIndexBuffer(resourceAllocator.createIndexBuffer(0),
-                              VK_INDEX_TYPE_UINT32);
+  commandList.bindIndexBuffer(1, VK_INDEX_TYPE_UINT32);
   EXPECT_EQ(commandList.getRecordedCommands().at(0)->type,
             liquid::RenderCommandType::BindIndexBuffer);
 }

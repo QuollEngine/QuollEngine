@@ -33,7 +33,8 @@ public:
         fragmentShader(renderer->createShader("basic-shader.frag.spv")),
         material(renderer->createMaterial(vertexShader, fragmentShader, {}, {},
                                           liquid::CullMode::None)),
-        camera(new liquid::Camera(renderer->getResourceAllocator())) {
+        camera(
+            new liquid::Camera(&renderer->getRenderBackend().getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
 
@@ -45,11 +46,11 @@ public:
     });
 
     barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        barMesh, renderer->getResourceAllocator()));
+        barMesh, renderer->getRenderBackend().getRegistry()));
     barInstance->setMaterial(material);
 
     ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        ballMesh, renderer->getResourceAllocator()));
+        ballMesh, renderer->getRenderBackend().getRegistry()));
     ballInstance->setMaterial(material);
 
     setupScene();

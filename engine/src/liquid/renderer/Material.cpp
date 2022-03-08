@@ -4,27 +4,20 @@
 
 namespace liquid {
 
-Material::Material(const std::vector<SharedPtr<Texture>> &textures_,
+Material::Material(const std::vector<TextureHandle> &textures_,
                    const std::vector<std::pair<String, Property>> &properties_,
-                   ResourceAllocator *resourceAllocator)
-    : textures(textures_) {
+                   experimental::ResourceRegistry &registry_)
+    : textures(textures_), registry(registry_) {
 
   for (size_t i = 0; i < properties_.size(); ++i) {
     auto &prop = properties_[i];
     properties.push_back(prop.second);
-    propertyMap.insert(std::make_pair(prop.first, i));
+    propertyMap.insert({prop.first, i});
   }
 
   if (!properties.empty()) {
-    size_t maxValue = 0;
-    for (auto &value : properties) {
-      maxValue = maxValue > value.getSize() ? maxValue : value.getSize();
-    }
-
-    uniformBuffer =
-        resourceAllocator->createUniformBuffer(maxValue * properties.size());
-
-    updateBufferWithProperties();
+    auto size = updateBufferData();
+    uniformBuffer = registry.addBuffer({BufferType::Uniform, size, data});
     descriptor.bind(0, uniformBuffer, DescriptorType::UniformBuffer);
   }
 
@@ -48,18 +41,26 @@ void Material::updateProperty(const String &name, const Property &value) {
   }
 
   properties.at(index) = value;
-  updateBufferWithProperties();
+  auto size = updateBufferData();
+  registry.updateBuffer(uniformBuffer, {BufferType::Uniform, size, data});
 }
 
-void Material::updateBufferWithProperties() {
-  char *data = new char[uniformBuffer->getBufferSize()];
+size_t Material::updateBufferData() {
+  if (data) {
+    delete data;
+  }
 
+  size_t size = 0;
   size_t idx = 0;
 
   size_t maxValue = 0;
   for (auto &value : properties) {
     maxValue = maxValue > value.getSize() ? maxValue : value.getSize();
   }
+
+  size = maxValue * properties.size();
+
+  data = new char[size];
 
   for (auto &value : properties) {
     if (value.getType() == Property::INT32) {
@@ -87,9 +88,7 @@ void Material::updateBufferWithProperties() {
     idx += maxValue;
   }
 
-  uniformBuffer->update(data);
-
-  delete[] data;
+  return size;
 }
 
 } // namespace liquid

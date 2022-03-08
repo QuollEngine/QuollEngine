@@ -13,7 +13,7 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
                            liquid::VulkanRenderer *renderer,
                            liquid::GLFWWindow *window_)
     : context(context_), window(window_),
-      camera(new Camera(renderer->getResourceAllocator())) {
+      camera(new Camera(&renderer->getRenderBackend().getRegistry())) {
 
   mouseButtonHandler = window->addMouseButtonHandler(
       [this](int button, int action, int mods) mutable {

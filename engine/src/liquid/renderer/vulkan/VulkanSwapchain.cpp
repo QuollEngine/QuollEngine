@@ -25,9 +25,9 @@ namespace liquid {
 
 VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
                                  experimental::VulkanRenderDevice *device_,
-                                 VmaAllocator allocator_,
                                  VkSwapchainKHR oldSwapchain)
-    : window(window_), device(device_), allocator(allocator_) {
+    : window(window_), device(device_),
+      allocator(device->getResourceManager().getVmaAllocator()) {
   const auto &surfaceCapabilities =
       device->getPhysicalDevice().getSurfaceCapabilities(
           device->getBackend().getSurface());

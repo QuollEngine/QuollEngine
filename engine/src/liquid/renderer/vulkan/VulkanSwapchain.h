@@ -28,7 +28,7 @@ public:
    * @param oldSwapchain Old swapchain
    */
   VulkanSwapchain(GLFWWindow *window, experimental::VulkanRenderDevice *device,
-                  VmaAllocator allocator, VkSwapchainKHR oldSwapchain);
+                  VkSwapchainKHR oldSwapchain);
 
   /**
    * @brief Move operator for swapchain

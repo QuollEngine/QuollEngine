@@ -2,12 +2,11 @@
 
 #include "liquid/core/Property.h"
 #include "Shader.h"
-#include "Texture.h"
-#include "HardwareBuffer.h"
-#include "ResourceAllocator.h"
 #include "MaterialResourceBinder.h"
-#include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
 #include "Descriptor.h"
+
+#include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -18,11 +17,11 @@ public:
    *
    * @param textures Textures
    * @param properties Material properties
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  Material(const std::vector<SharedPtr<Texture>> &textures,
+  Material(const std::vector<TextureHandle> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           ResourceAllocator *resourceAllocator);
+           experimental::ResourceRegistry &registry);
 
   /**
    * @brief Update property
@@ -33,11 +32,11 @@ public:
   void updateProperty(const String &name, const Property &value);
 
   /**
-   * @brief Gets texture
+   * @brief Get texture handles
    *
-   * @return Pointer to texture
+   * @return List of texture handles
    */
-  inline const std::vector<SharedPtr<Texture>> &getTextures() {
+  inline const std::vector<TextureHandle> &getTextures() const {
     return textures;
   }
 
@@ -47,7 +46,7 @@ public:
    * @retval true Has textures
    * @retval false Does not have textures
    */
-  inline bool hasTextures() { return !textures.empty(); }
+  inline bool hasTextures() const { return !textures.empty(); }
 
   /**
    * @brief Gets vertex shader
@@ -68,9 +67,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline const SharedPtr<HardwareBuffer> &getUniformBuffer() {
-    return uniformBuffer;
-  }
+  inline BufferHandle getUniformBuffer() const { return uniformBuffer; }
 
   /**
    * @brief Get properties
@@ -90,18 +87,22 @@ public:
 
 private:
   /**
-   * @brief Copies local data to buffer
+   * @brief Update buffer data
    *
    * Merges all properties into a memory region
-   * and updates buffer with this memory region
+   *
+   * @return Size of buffer data
    */
-  void updateBufferWithProperties();
+  size_t updateBufferData();
 
 private:
   SharedPtr<Shader> vertexShader = nullptr;
   SharedPtr<Shader> fragmentShader = nullptr;
-  std::vector<SharedPtr<Texture>> textures;
-  SharedPtr<HardwareBuffer> uniformBuffer = nullptr;
+  std::vector<TextureHandle> textures;
+  BufferHandle uniformBuffer = 0;
+
+  experimental::ResourceRegistry &registry;
+  char *data = nullptr;
 
   Descriptor descriptor;
 

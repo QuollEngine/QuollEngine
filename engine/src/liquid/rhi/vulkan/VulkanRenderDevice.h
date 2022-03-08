@@ -4,6 +4,10 @@
 
 #include "VulkanPhysicalDevice.h"
 #include "VulkanRenderBackend.h"
+#include "VulkanResourceManager.h"
+#include "VulkanResourceRegistry.h"
+
+#include "../ResourceRegistry.h"
 
 namespace liquid::experimental {
 
@@ -27,6 +31,14 @@ public:
   VulkanRenderDevice &operator=(const VulkanRenderDevice &) = delete;
   VulkanRenderDevice(VulkanRenderDevice &&) = delete;
   VulkanRenderDevice &operator=(VulkanRenderDevice &&) = delete;
+
+  void synchronize(ResourceRegistry &registry);
+
+  void synchronizeDeletes(ResourceRegistry &registry);
+
+  inline const VulkanResourceRegistry &getResourceRegistry() const {
+    return mRegistry;
+  }
 
   /**
    * @brief Get Vulkan device handle
@@ -65,6 +77,13 @@ public:
    */
   inline VulkanRenderBackend &getBackend() { return mBackend; }
 
+  /**
+   * @brief Get resource manager
+   *
+   * @return Resource manager
+   */
+  inline VulkanResourceManager &getResourceManager() { return mManager; }
+
 private:
   /**
    * @brief Create Vulkan device
@@ -72,11 +91,19 @@ private:
   void createVulkanDevice();
 
   /**
+   * @brief Create resource manager
+   */
+  void createResourceManager();
+
+  /**
    * @brief Get device queues
    */
   void getDeviceQueues();
 
 private:
+  VulkanResourceManager mManager;
+  VulkanResourceRegistry mRegistry;
+
   VkQueue mPresentQueue = VK_NULL_HANDLE;
   VkQueue mGraphicsQueue = VK_NULL_HANDLE;
   VkDevice mDevice = VK_NULL_HANDLE;

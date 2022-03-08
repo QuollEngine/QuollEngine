@@ -2,7 +2,6 @@
 #include "liquid/core/Engine.h"
 
 #include "liquid/renderer/Material.h"
-#include "liquid/renderer/Texture.h"
 #include "liquid/renderer/Shader.h"
 
 #include "liquid/renderer/vulkan/VulkanRenderer.h"
@@ -92,7 +91,8 @@ int main() {
 
   uint32_t animation = animationSystem.addAnimation(anim0);
 
-  liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
+  liquid::ImageTextureLoader textureLoader(
+      renderer->getRenderBackend().getRegistry());
 
   auto &&shaderBasicVert = renderer->createShader("basic-shader.vert.spv");
   auto &&shaderBasicFrag = renderer->createShader("basic-shader.frag.spv");
@@ -123,7 +123,8 @@ int main() {
   mesh.addGeometry(geom);
 
   liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> instance(
-      new liquid::MeshInstance(mesh, renderer->getResourceAllocator()));
+      new liquid::MeshInstance(mesh,
+                               renderer->getRenderBackend().getRegistry()));
   context.setComponent<liquid::MeshComponent>(entity, {instance});
 
   context.setComponent<liquid::AnimatorComponent>(
@@ -132,8 +133,8 @@ int main() {
   std::unique_ptr<liquid::Scene> scene(new liquid::Scene(context));
   auto camera = context.createEntity();
   context.setComponent<liquid::CameraComponent>(
-      camera,
-      {std::make_shared<liquid::Camera>(renderer->getResourceAllocator())});
+      camera, {std::make_shared<liquid::Camera>(
+                  &renderer->getRenderBackend().getRegistry())});
 
   scene->setActiveCamera(camera);
   scene->getRootNode()->addChild(entity);

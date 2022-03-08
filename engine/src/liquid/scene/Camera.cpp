@@ -3,8 +3,10 @@
 
 namespace liquid {
 
-Camera::Camera(ResourceAllocator *resourceAllocator) {
-  uniformBuffer = resourceAllocator->createUniformBuffer(sizeof(CameraData));
+Camera::Camera(experimental::ResourceRegistry *registry_)
+    : registry(registry_) {
+  uniformBuffer =
+      registry->addBuffer({BufferType::Uniform, sizeof(CameraData)});
 }
 
 void Camera::setPerspective(float fovY, float aspectRatio, float near,
@@ -15,13 +17,17 @@ void Camera::setPerspective(float fovY, float aspectRatio, float near,
   data.projectionMatrix[1][1] *= -1;
 
   updateProjectionViewMatrix();
-  uniformBuffer->update(&data);
+
+  registry->updateBuffer(uniformBuffer,
+                         {BufferType::Uniform, sizeof(CameraData), &data});
 }
 
 void Camera::lookAt(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
   data.viewMatrix = glm::lookAt(position, direction, up);
   updateProjectionViewMatrix();
-  uniformBuffer->update(&data);
+
+  registry->updateBuffer(uniformBuffer,
+                         {BufferType::Uniform, sizeof(CameraData), &data});
 }
 
 void Camera::updateProjectionViewMatrix() {
