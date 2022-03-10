@@ -3,11 +3,17 @@
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Light.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
-TEST(SceneTest, CreatesEmptyRootNodeOnConstruct) {
+class SceneTest : public ::testing::Test {
+public:
+  liquid::experimental::ResourceRegistry registry;
   liquid::EntityContext context;
+};
+
+using SceneDeathTest = SceneTest;
+
+TEST_F(SceneTest, CreatesEmptyRootNodeOnConstruct) {
   liquid::Scene scene(context);
 
   auto *rootNode = scene.getRootNode();
@@ -19,23 +25,18 @@ TEST(SceneTest, CreatesEmptyRootNodeOnConstruct) {
   EXPECT_TRUE(rootNode->getWorldTransform() == glm::mat4{1.0f});
 }
 
-TEST(SceneTest, SetsActiveCameraEntity) {
-  TestResourceAllocator resourceAllocator;
-
-  liquid::EntityContext context;
+TEST_F(SceneTest, SetsActiveCameraEntity) {
   liquid::Scene scene(context);
   auto entity = context.createEntity();
   context.setComponent<liquid::CameraComponent>(
-      entity, {std::make_shared<liquid::Camera>(&resourceAllocator)});
+      entity, {std::make_shared<liquid::Camera>(&registry)});
   scene.setActiveCamera(entity);
   EXPECT_EQ(scene.getActiveCamera().get(),
             context.getComponent<liquid::CameraComponent>(entity).camera.get());
 }
 
-TEST(SceneDeathTest,
-     SetingActiveCameraEntityFailsIfEntityHasNoCameraComponent) {
-  TestResourceAllocator resourceAllocator;
-
+TEST_F(SceneDeathTest,
+       SetingActiveCameraEntityFailsIfEntityHasNoCameraComponent) {
   liquid::EntityContext context;
   liquid::Scene scene(context);
   EXPECT_DEATH(scene.setActiveCamera(context.createEntity()), ".*");

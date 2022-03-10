@@ -1,7 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/HardwareBuffer.h"
-#include "liquid/renderer/ResourceAllocator.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -18,9 +17,9 @@ public:
    *
    * Creates camera and uniform buffer for renderer
    *
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  Camera(ResourceAllocator *resourceAllocator);
+  Camera(experimental::ResourceRegistry *registry);
 
   /**
    * @brief Sets prespective projection
@@ -71,9 +70,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline const SharedPtr<HardwareBuffer> &getUniformBuffer() {
-    return uniformBuffer;
-  }
+  inline BufferHandle getUniformBuffer() { return uniformBuffer; }
 
   /**
    * @brief Get camera data
@@ -90,8 +87,8 @@ private:
 
 private:
   CameraData data;
-
-  SharedPtr<HardwareBuffer> uniformBuffer;
+  BufferHandle uniformBuffer;
+  experimental::ResourceRegistry *registry;
 };
 
 } // namespace liquid

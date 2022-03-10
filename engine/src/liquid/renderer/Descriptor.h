@@ -1,9 +1,8 @@
 #pragma once
 
-namespace liquid {
+#include "liquid/rhi/RenderHandle.h"
 
-class Texture;
-class HardwareBuffer;
+namespace liquid {
 
 enum class DescriptorType {
   UniformBuffer,
@@ -12,7 +11,7 @@ enum class DescriptorType {
 
 struct DescriptorBinding {
   DescriptorType type;
-  std::variant<std::vector<SharedPtr<Texture>>, SharedPtr<HardwareBuffer>> data;
+  std::variant<std::vector<TextureHandle>, BufferHandle> data;
 };
 
 class Descriptor {
@@ -25,9 +24,9 @@ public:
    * @param type Descriptor type
    * @return Current object
    */
-  Descriptor &bind(uint32_t binding,
-                   const std::vector<SharedPtr<Texture>> &textures,
+  Descriptor &bind(uint32_t binding, const std::vector<TextureHandle> &textures,
                    DescriptorType type);
+
   /**
    * @brief Bind buffer descriptor
    *
@@ -36,8 +35,7 @@ public:
    * @param type Descriptor type
    * @return Current object
    */
-  Descriptor &bind(uint32_t binding, const SharedPtr<HardwareBuffer> &buffer,
-                   DescriptorType type);
+  Descriptor &bind(uint32_t binding, BufferHandle buffer, DescriptorType type);
 
   /**
    * @brief Get bindings

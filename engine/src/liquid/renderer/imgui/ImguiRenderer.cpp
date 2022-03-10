@@ -22,8 +22,8 @@ namespace liquid {
 
 ImguiRenderer::ImguiRenderer(GLFWWindow *window,
                              experimental::VulkanRenderDevice *device_,
-                             ResourceAllocator *resourceAllocator_)
-    : device(device_), resourceAllocator(resourceAllocator_) {
+                             experimental::ResourceRegistry &registry_)
+    : device(device_), registry(registry_) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window->getInstance(), true);
@@ -32,7 +32,7 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
   io.BackendRendererName = "ImguiCustomBackend";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
-  frameData.resize(2);
+  frameData.resize(1);
 
   loadFonts();
 
@@ -42,7 +42,20 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 }
 
 ImguiRenderer::~ImguiRenderer() {
-  fontTexture = nullptr;
+
+  registry.deleteTexture(fontTexture);
+
+  for (auto &x : frameData) {
+    registry.deleteBuffer(x.vertexBuffer);
+    registry.deleteBuffer(x.indexBuffer);
+
+    if (x.vertexBufferData)
+      delete[] x.vertexBufferData;
+
+    if (x.indexBufferData)
+      delete[] x.indexBufferData;
+  }
+
   frameData.clear();
 
   ImGui_ImplGlfw_Shutdown();
@@ -72,23 +85,29 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
   auto &frameObj = frameData.at(currentFrame);
 
   if (data->TotalVtxCount > 0) {
-    size_t vertexSize = data->TotalVtxCount * sizeof(ImDrawVert);
-    size_t indexSize = data->TotalIdxCount * sizeof(ImDrawIdx);
+    size_t vertexSize =
+        getAlignedBufferSize(data->TotalVtxCount * sizeof(ImDrawVert));
+    size_t indexSize =
+        getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
 
-    if (!frameObj.vertexBuffer ||
-        frameObj.vertexBuffer->getBufferSize() < vertexSize) {
-      frameObj.vertexBuffer = resourceAllocator->createVertexBuffer(
-          getAlignedBufferSize(vertexSize));
+    if (frameObj.vertexBufferSize < vertexSize) {
+      if (frameObj.vertexBufferData) {
+        delete[] frameObj.vertexBufferData;
+      }
+      frameObj.vertexBufferData = new char[vertexSize];
+      frameObj.vertexBufferSize = vertexSize;
     }
 
-    if (!frameObj.indexBuffer ||
-        frameObj.indexBuffer->getBufferSize() < indexSize) {
-      frameObj.indexBuffer =
-          resourceAllocator->createIndexBuffer(getAlignedBufferSize(indexSize));
+    if (frameObj.indexBufferSize < indexSize) {
+      if (frameObj.indexBufferData) {
+        delete[] frameObj.indexBufferData;
+      }
+      frameObj.indexBufferData = new char[indexSize];
+      frameObj.indexBufferSize = indexSize;
     }
 
-    auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBuffer->map());
-    auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBuffer->map());
+    auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBufferData);
+    auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBufferData);
 
     for (int n = 0; n < data->CmdListsCount; n++) {
       const ImDrawList *cmd_list = data->CmdLists[n];
@@ -100,8 +119,39 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
       ibDst += cmd_list->IdxBuffer.Size;
     }
 
-    frameObj.indexBuffer->unmap();
-    frameObj.vertexBuffer->unmap();
+    if (registry.getBufferMap().hasDescription(frameObj.vertexBuffer)) {
+      registry.updateBuffer(frameObj.vertexBuffer,
+                            {BufferType::Vertex, frameObj.vertexBufferSize,
+                             frameObj.vertexBufferData});
+    } else {
+      frameObj.vertexBuffer =
+          registry.addBuffer({BufferType::Vertex, frameObj.vertexBufferSize,
+                              frameObj.vertexBufferData});
+    }
+
+    if (registry.getBufferMap().hasDescription(frameObj.indexBuffer)) {
+      registry.updateBuffer(frameObj.indexBuffer,
+                            {BufferType::Index, frameObj.indexBufferSize,
+                             frameObj.indexBufferData});
+    } else {
+      frameObj.indexBuffer =
+          registry.addBuffer({BufferType::Index, frameObj.indexBufferSize,
+                              frameObj.indexBufferData});
+    }
+  }
+
+  // @temporary
+  // This workaround is necessary because
+  // the buffer creation, deletion, and update
+  // are deferred to the beginning of the next
+  // frame. This still causes warnings but
+  // the warnings will be resolved once textures
+  // also use the new resource manager and this
+  // function will be split into two parts
+  // preparing the data and recording commands
+  if (frameObj.firstTime) {
+    frameObj.firstTime = false;
+    return;
   }
 
   setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
@@ -146,10 +196,12 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
           commandList.setScissor(clipRectOffset, clipRectSize);
           commandList.bindPipeline(pipeline);
 
-          const auto &texture =
-              static_cast<Texture *>(cmd->TextureId)->shared_from_this();
+          auto handle = static_cast<TextureHandle>(
+              reinterpret_cast<uintptr_t>(cmd->TextureId));
+
           Descriptor descriptor;
-          descriptor.bind(0, {texture}, DescriptorType::CombinedImageSampler);
+          descriptor.bind(0, std::vector<TextureHandle>{handle},
+                          DescriptorType::CombinedImageSampler);
 
           commandList.bindDescriptor(pipeline, 0, descriptor);
           commandList.drawIndexed(
@@ -201,19 +253,25 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 void ImguiRenderer::loadFonts() {
   ImGuiIO &io = ImGui::GetIO();
   unsigned char *pixels = nullptr;
-  TextureData textureData{};
   int width = 0, height = 0;
   io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+  TextureDescription description;
   if (width > 0 || height > 0) {
-    textureData.channels = 4;
-    textureData.data = pixels;
-    textureData.width = width;
-    textureData.height = height;
-    textureData.format = VK_FORMAT_R8G8B8A8_UNORM;
-    fontTexture = resourceAllocator->createTexture2D(textureData);
+    description.size = width * height * 4;
+    description.width = width;
+    description.height = height;
+    description.format = VK_FORMAT_R8G8B8A8_SRGB;
+    description.usageFlags =
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    description.data = pixels;
+
+    fontTexture = registry.addTexture(description);
   }
 
-  io.Fonts->SetTexID(fontTexture.get());
+  io.Fonts->SetTexID(
+      reinterpret_cast<void *>(static_cast<uintptr_t>(fontTexture)));
 
   LOG_DEBUG("[ImGui] Fonts loaded");
 }

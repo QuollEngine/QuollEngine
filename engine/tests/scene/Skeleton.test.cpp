@@ -1,13 +1,11 @@
 #include "liquid/core/Base.h"
 #include "liquid/scene/Skeleton.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
-
 #include <glm/gtx/string_cast.hpp>
 
 struct SkeletonTest : public ::testing::Test {
-  TestResourceAllocator allocator;
+  liquid::experimental::ResourceRegistry registry;
 
   liquid::Skeleton createSkeleton(uint32_t numJoints) {
     std::vector<glm::vec3> positions;
@@ -30,7 +28,7 @@ struct SkeletonTest : public ::testing::Test {
     return liquid::Skeleton(std::move(positions), std::move(rotations),
                             std::move(scales), std::move(parents),
                             std::move(inverseBindMatrices), std::move(names),
-                            &allocator);
+                            &registry);
   }
 
   template <class T> std::vector<T> createItems(uint32_t numJoints) {
@@ -51,7 +49,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(2), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
             createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &allocator);
+            &registry);
       },
       ".*");
   EXPECT_DEATH(
@@ -60,7 +58,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(1), createItems<glm::quat>(2),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
             createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &allocator);
+            &registry);
       },
       ".*");
   EXPECT_DEATH(
@@ -69,7 +67,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(2), createItems<liquid::JointId>(1),
             createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &allocator);
+            &registry);
       },
       ".*");
   EXPECT_DEATH(
@@ -78,7 +76,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(2),
             createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &allocator);
+            &registry);
       },
       ".*");
   EXPECT_DEATH(
@@ -87,7 +85,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
             createItems<glm::mat4>(2), createItems<liquid::String>(1),
-            &allocator);
+            &registry);
       },
       ".*");
   EXPECT_DEATH(
@@ -96,7 +94,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
             createItems<glm::vec3>(1), createItems<glm::quat>(2),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
             createItems<glm::mat4>(1), createItems<liquid::String>(2),
-            &allocator);
+            &registry);
       },
       ".*");
 }
@@ -130,15 +128,21 @@ TEST_F(SkeletonTest, CreatesDebugParametersOnConstruct) {
 TEST_F(SkeletonTest, CreatesUniformBufferOnConstruct) {
   auto &&skeleton = createSkeleton(5);
 
-  EXPECT_EQ(skeleton.getBuffer()->getType(), liquid::HardwareBuffer::Uniform);
-  EXPECT_EQ(skeleton.getBuffer()->getBufferSize(), sizeof(glm::mat4) * 5);
+  const auto &description =
+      registry.getBufferMap().getDescription(skeleton.getBuffer());
+
+  EXPECT_EQ(description.type, liquid::BufferType::Uniform);
+  EXPECT_EQ(description.size, sizeof(glm::mat4) * 5);
 }
 
 TEST_F(SkeletonTest, CreatesDebugUniformBufferOnConstruct) {
   auto &&skeleton = createSkeleton(5);
-  EXPECT_EQ(skeleton.getDebugBuffer()->getType(),
-            liquid::HardwareBuffer::Uniform);
-  EXPECT_EQ(skeleton.getDebugBuffer()->getBufferSize(), sizeof(glm::mat4) * 10);
+
+  const auto &description =
+      registry.getBufferMap().getDescription(skeleton.getDebugBuffer());
+
+  EXPECT_EQ(description.type, liquid::BufferType::Uniform);
+  EXPECT_EQ(description.size, sizeof(glm::mat4) * 10);
 }
 
 TEST_F(SkeletonTest, UpdatesWorldTransformsOnUpdate) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/ResourceAllocator.h"
+#include "liquid/rhi/ResourceRegistry.h"
 #include "Joint.h"
 
 namespace liquid {
@@ -16,13 +16,14 @@ public:
    * @param parents Joint parents
    * @param inverseBindMatrices Joint inverse bind matrices
    * @param names Joint names
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
   Skeleton(std::vector<glm::vec3> &&positions,
            std::vector<glm::quat> &&rotations, std::vector<glm::vec3> &&scales,
            std::vector<JointId> &&parents,
            std::vector<glm::mat4> &&inverseBindMatrices,
-           std::vector<String> &&names, ResourceAllocator *resourceAllocator);
+           std::vector<String> &&names,
+           experimental::ResourceRegistry *registry);
 
   /**
    * @brief Set joint position
@@ -148,7 +149,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline const SharedPtr<HardwareBuffer> &getBuffer() const { return buffer; }
+  inline BufferHandle getBuffer() const { return buffer; }
 
   /**
    * @brief Get debug uniform buffer
@@ -158,9 +159,7 @@ public:
    *
    * @return Debug uniform buffer
    */
-  inline const SharedPtr<HardwareBuffer> &getDebugBuffer() const {
-    return debugBuffer;
-  }
+  inline BufferHandle getDebugBuffer() const { return debugBuffer; }
 
   /**
    * @brief Get number of joints
@@ -203,11 +202,13 @@ private:
   std::vector<glm::mat4> jointFinalTransforms;
 
   std::vector<String> jointNames;
-  SharedPtr<HardwareBuffer> buffer;
+  BufferHandle buffer;
 
   std::vector<JointId> debugBones;
   std::vector<glm::mat4> debugBoneTransforms;
-  SharedPtr<HardwareBuffer> debugBuffer;
+  BufferHandle debugBuffer;
+
+  experimental::ResourceRegistry *registry;
 };
 
 } // namespace liquid

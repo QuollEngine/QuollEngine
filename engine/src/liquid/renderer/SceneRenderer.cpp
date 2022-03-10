@@ -33,7 +33,7 @@ void SceneRenderer::render(RenderCommandList &commandList,
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
 
-          if (instance->getIndexBuffers().at(i) != nullptr) {
+          if (instance->getIndexBuffers().at(i) > 0) {
             commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
             commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
@@ -75,7 +75,7 @@ void SceneRenderer::renderSkinned(RenderCommandList &commandList,
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
 
-          if (instance->getIndexBuffers().at(i) != nullptr) {
+          if (instance->getIndexBuffers().at(i) > 0) {
             commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
             commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);

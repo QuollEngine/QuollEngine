@@ -53,7 +53,7 @@ void ScenePass::execute(RenderCommandList &commandList,
 
   commandList.bindPipeline(pipeline);
 
-  const auto &cameraBuffer =
+  auto cameraBuffer =
       renderData->getScene()->getActiveCamera()->getUniformBuffer();
 
   Descriptor sceneDescriptor, sceneDescriptorFragment;
@@ -63,13 +63,15 @@ void ScenePass::execute(RenderCommandList &commandList,
   sceneDescriptor.bind(0, cameraBuffer, DescriptorType::UniformBuffer);
   sceneDescriptorFragment.bind(0, cameraBuffer, DescriptorType::UniformBuffer)
       .bind(1, renderData->getSceneBuffer(), DescriptorType::UniformBuffer)
-      .bind(2, {registry.getTexture(shadowMapTextureId)},
+      .bind(2,
+            std::vector<TextureHandle>{registry.getTexture(shadowMapTextureId)},
             DescriptorType::CombinedImageSampler);
 
   sceneDescriptorFragment
       .bind(3, {iblMaps.at(0), iblMaps.at(1)},
             DescriptorType::CombinedImageSampler)
-      .bind(4, {iblMaps.at(2)}, DescriptorType::CombinedImageSampler);
+      .bind(4, std::vector<TextureHandle>{iblMaps.at(2)},
+            DescriptorType::CombinedImageSampler);
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(pipeline, 0, sceneDescriptor);

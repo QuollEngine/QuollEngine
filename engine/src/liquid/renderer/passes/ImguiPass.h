@@ -28,7 +28,7 @@ public:
             VulkanAbstraction &backend, ShaderLibrary *shaderLibrary,
             const SharedPtr<DebugManager> &debugManager,
             const String &previousColor,
-            const std::function<void(const SharedPtr<Texture> &)> &imUpdate);
+            const std::function<void(TextureHandle)> &imUpdate);
   /**
    * @brief Build pass
    *
@@ -52,7 +52,7 @@ private:
   GraphResourceId pipelineId = 0;
   ImguiDebugLayer debugLayer;
   GraphResourceId sceneTextureId = 0;
-  std::function<void(const SharedPtr<Texture> &)> imguiUpdateFn;
+  std::function<void(TextureHandle)> imguiUpdateFn;
 };
 
 } // namespace liquid

@@ -3,12 +3,9 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "liquid/renderer/ResourceAllocator.h"
-
 #include "VulkanSwapchain.h"
 #include "VulkanShader.h"
 #include "VulkanRenderData.h"
-#include "VulkanResourceAllocator.h"
 #include "VulkanAbstraction.h"
 #include "VulkanGraphEvaluator.h"
 
@@ -30,7 +27,6 @@ namespace liquid {
 class GLFWWindow;
 
 class VulkanRenderer {
-
 public:
   VulkanRenderer(EntityContext &context, GLFWWindow *window,
                  experimental::VulkanRenderDevice *device);
@@ -44,17 +40,13 @@ public:
   SharedPtr<Material>
   createMaterial(const SharedPtr<Shader> &vertexShader,
                  const SharedPtr<Shader> &fragmentShader,
-                 const std::vector<SharedPtr<Texture>> &textures,
+                 const std::vector<TextureHandle> &textures,
                  const std::vector<std::pair<String, Property>> &properties,
                  const CullMode &cullMode);
   SharedPtr<Material>
   createMaterialPBR(const MaterialPBR::Properties &properties,
                     const CullMode &cullMode);
   SharedPtr<VulkanShader> createShader(const String &shaderFile);
-
-  inline ResourceAllocator *getResourceAllocator() {
-    return abstraction.getResourceAllocator();
-  }
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
@@ -67,9 +59,10 @@ public:
 
   inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
 
-  RenderGraph createRenderGraph(
-      const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
-      const std::function<void(const SharedPtr<Texture> &)> &imUpdate);
+  RenderGraph
+  createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
+                    const String &imguiDep,
+                    const std::function<void(TextureHandle)> &imUpdate);
 
   inline VulkanAbstraction &getRenderBackend() { return abstraction; }
 

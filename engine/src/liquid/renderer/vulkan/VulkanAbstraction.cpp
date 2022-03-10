@@ -8,16 +8,14 @@ namespace liquid {
 VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
                                      experimental::VulkanRenderDevice *device_)
     : window(window_), device(device_),
-      descriptorManager(device->getVulkanDevice()),
+      descriptorManager(device->getVulkanDevice(),
+                        device->getResourceRegistry()),
       renderContext(device, descriptorManager, statsManager),
       uploadContext(device) {
-  resourceAllocator =
-      VulkanResourceAllocator::create(device, uploadContext, statsManager);
-
   createSwapchain();
 
-  graphEvaluator = std::make_unique<VulkanGraphEvaluator>(device, swapchain,
-                                                          resourceAllocator);
+  graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
+      device, swapchain, registry, device->getResourceRegistry());
 
   resizeHandler = window->addResizeHandler(
       [this](uint32_t x, uint32_t y) mutable { framebufferResized = true; });
@@ -28,39 +26,42 @@ VulkanAbstraction::~VulkanAbstraction() {
 
   swapchain.destroy();
 
-  if (resourceAllocator) {
-    delete resourceAllocator;
-  }
-
   window = nullptr;
 }
 
 void VulkanAbstraction::execute(RenderGraph &graph) {
   LIQUID_PROFILE_EVENT("VulkanAbstraction::execute");
   statsManager.resetDrawCalls();
-  auto &&result = graphEvaluator->build(graph);
 
   uint32_t imageIdx =
       swapchain.acquireNextImage(renderContext.getImageAvailableSemaphore());
 
   if (imageIdx == std::numeric_limits<uint32_t>::max()) {
     recreateSwapchain();
-    graphEvaluator->rebuildSwapchainRelatedPasses(graph);
     return;
+  }
+
+  auto &&compiled = graphEvaluator->compile(graph, swapchainRecreated);
+  device->synchronize(registry);
+
+  graphEvaluator->build(compiled, graph, swapchainRecreated);
+
+  if (swapchainRecreated) {
+    swapchainRecreated = false;
   }
 
   RenderCommandList commandList;
 
-  graphEvaluator->execute(commandList, result, graph, imageIdx);
-
+  graphEvaluator->execute(commandList, compiled, graph, imageIdx);
   renderContext.render(commandList);
+
+  device->synchronizeDeletes(registry);
 
   auto queuePresentResult = renderContext.present(swapchain, imageIdx);
 
   if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
       queuePresentResult == VK_SUBOPTIMAL_KHR || isFramebufferResized()) {
     recreateSwapchain();
-    graphEvaluator->rebuildSwapchainRelatedPasses(graph);
   }
 }
 
@@ -69,9 +70,7 @@ void VulkanAbstraction::waitForIdle() {
 }
 
 void VulkanAbstraction::createSwapchain() {
-  swapchain =
-      VulkanSwapchain(window, device, resourceAllocator->getVmaAllocator(),
-                      swapchain.getSwapchain());
+  swapchain = VulkanSwapchain(window, device, swapchain.getSwapchain());
 
   LOG_DEBUG("[Vulkan] Swapchain created");
 }
@@ -81,6 +80,7 @@ void VulkanAbstraction::recreateSwapchain() {
   createSwapchain();
 
   framebufferResized = false;
+  swapchainRecreated = true;
 
   LOG_DEBUG("[Vulkan] Swapchain recreated");
 }

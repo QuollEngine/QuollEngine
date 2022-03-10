@@ -3,9 +3,9 @@
 namespace liquid {
 
 struct EnvironmentComponent {
-  SharedPtr<Texture> irradianceMap = nullptr;
-  SharedPtr<Texture> specularMap = nullptr;
-  SharedPtr<Texture> brdfLUT = nullptr;
+  TextureHandle irradianceMap = 0;
+  TextureHandle specularMap = 0;
+  TextureHandle brdfLUT = 0;
 };
 
 } // namespace liquid

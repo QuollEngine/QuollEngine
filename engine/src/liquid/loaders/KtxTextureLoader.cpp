@@ -8,10 +8,10 @@
 
 namespace liquid {
 
-KtxTextureLoader::KtxTextureLoader(ResourceAllocator *resourceAllocator_)
-    : resourceAllocator(resourceAllocator_) {}
+KtxTextureLoader::KtxTextureLoader(experimental::ResourceRegistry &registry_)
+    : registry(registry_) {}
 
-SharedPtr<Texture> KtxTextureLoader::loadFromFile(const String &filename) {
+TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
   ktxTexture *ktxTextureData = nullptr;
   KTX_error_code result = ktxTexture_CreateFromNamedFile(
       filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
@@ -20,67 +20,52 @@ SharedPtr<Texture> KtxTextureLoader::loadFromFile(const String &filename) {
   LIQUID_ASSERT(result == KTX_SUCCESS,
                 KtxError("Failed to load KTX file", result).what());
 
-  LIQUID_ASSERT(ktxTextureData->numDimensions >= 1 &&
-                    ktxTextureData->numDimensions <= 3,
-                "KTX texture dimensions must be 1 or 3");
-
-  LIQUID_ASSERT(
-      ktxTextureData->numDimensions != 1,
-      KtxError("1D textures are not supported", KTX_UNSUPPORTED_FEATURE)
-          .what());
-
-  LIQUID_ASSERT(
-      ktxTextureData->numDimensions != 3,
-      KtxError("3D textures are not supported", KTX_UNSUPPORTED_FEATURE)
-          .what());
+  LIQUID_ASSERT(ktxTextureData->numDimensions == 2,
+                "Only 2D textures are supported");
 
   LIQUID_ASSERT(
       !ktxTextureData->isArray,
       KtxError("Texture arrays are not supported", KTX_UNSUPPORTED_FEATURE)
           .what());
 
-  SharedPtr<Texture> texture = nullptr;
+  constexpr uint32_t CUBEMAP_SIDES = 6;
+
+  TextureDescription description;
+  description.type =
+      ktxTextureData->isCubemap ? TextureType::Cubemap : TextureType::Standard;
+  description.width = ktxTextureData->baseWidth;
+  description.height = ktxTextureData->baseHeight;
+  description.depth = ktxTextureData->baseDepth;
+  description.format = ktxTexture_GetVkFormat(ktxTextureData);
+  description.layers = ktxTextureData->numLayers *
+                       (ktxTextureData->isCubemap ? CUBEMAP_SIDES : 1);
+  description.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
+  description.usageFlags =
+      VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+  description.data = new char[description.size];
+
+  char *srcData = reinterpret_cast<char *>(ktxTexture_GetData(ktxTextureData));
 
   if (ktxTextureData->isCubemap) {
-    const size_t CUBE_NUM_FACES = 6;
-    LIQUID_ASSERT(
-        ktxTextureData->baseWidth == ktxTextureData->baseHeight,
-        KtxError("Cubemap width and height are not equal", KTX_INVALID_VALUE)
-            .what());
-
     size_t faceSize = ktxTexture_GetImageSize(ktxTextureData, 0);
 
-    TextureCubemapData cubemapData;
-    cubemapData.width = ktxTextureData->baseWidth;
-    cubemapData.height = ktxTextureData->baseHeight;
-    cubemapData.data = ktxTexture_GetData(ktxTextureData);
-    cubemapData.size = faceSize * CUBE_NUM_FACES;
+    char *dstData = static_cast<char *>(description.data);
 
-    // TODO: Abstract away the format type
-    cubemapData.format = ktxTexture_GetVkFormat(ktxTextureData);
-
-    for (size_t i = 0; i < cubemapData.faceData.size(); ++i) {
+    for (size_t i = 0; i < CUBEMAP_SIDES; ++i) {
       size_t offset = 0;
       ktxTexture_GetImageOffset(ktxTextureData, 0, 0,
                                 static_cast<ktx_uint32_t>(i), &offset);
 
-      cubemapData.faceData.at(i).offset = offset;
-      cubemapData.faceData.at(i).size = faceSize;
+      memcpy(dstData + faceSize * i, srcData + offset, faceSize);
     }
-
-    texture = resourceAllocator->createTextureCubemap(cubemapData);
   } else {
-    liquid::TextureData textureData;
-    textureData.data = ktxTextureData->pData;
-    textureData.width = ktxTextureData->baseWidth;
-    textureData.height = ktxTextureData->baseHeight;
-    textureData.format = ktxTexture_GetVkFormat(ktxTextureData);
-
-    texture = resourceAllocator->createTexture2D(textureData);
+    memcpy(description.data, srcData, description.size);
   }
 
   ktxTexture_Destroy(ktxTextureData);
-  return texture;
+
+  return registry.addTexture(description);
 }
 
 } // namespace liquid

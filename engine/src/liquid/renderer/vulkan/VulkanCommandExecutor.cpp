@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "VulkanCommandExecutor.h"
-#include "VulkanHardwareBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanError.h"
 
@@ -8,9 +7,10 @@ namespace liquid {
 
 VulkanCommandExecutor::VulkanCommandExecutor(
     VkCommandBuffer commandBuffer_, VulkanDescriptorManager &descriptorManager_,
+    const experimental::VulkanResourceRegistry &registry_,
     StatsManager &statsManager_)
     : commandBuffer(commandBuffer_), descriptorManager(descriptorManager_),
-      statsManager(statsManager_) {}
+      registry(registry_), statsManager(statsManager_) {}
 
 void VulkanCommandExecutor::execute(const RenderCommandList &commandList) {
   LIQUID_PROFILE_EVENT("VulkanCommandExecutor::execute");
@@ -147,19 +147,18 @@ void VulkanCommandExecutor::executePushConstants(
 
 void VulkanCommandExecutor::executeBindVertexBuffer(
     const RenderCommandBindVertexBuffer *const command) {
-  const auto &buffer =
-      std::dynamic_pointer_cast<VulkanHardwareBuffer>(command->buffer)
-          ->getBuffer();
+  const auto &buffer = registry.getBuffer(command->buffer);
   std::array<VkDeviceSize, 1> offsets{0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &buffer, offsets.data());
+  std::array<VkBuffer, 1> buffers{buffer->getBuffer()};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers.data(), offsets.data());
 }
 
 void VulkanCommandExecutor::executeBindIndexBuffer(
     const RenderCommandBindIndexBuffer *const command) {
-  const auto &buffer =
-      std::dynamic_pointer_cast<VulkanHardwareBuffer>(command->buffer)
-          ->getBuffer();
-  vkCmdBindIndexBuffer(commandBuffer, buffer, 0, command->indexType);
+  const auto &buffer = registry.getBuffer(command->buffer);
+
+  vkCmdBindIndexBuffer(commandBuffer, buffer->getBuffer(), 0,
+                       command->indexType);
 }
 
 void VulkanCommandExecutor::executeSetViewport(

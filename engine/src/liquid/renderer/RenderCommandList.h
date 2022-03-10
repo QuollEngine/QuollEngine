@@ -47,7 +47,7 @@ public:
    *
    * @param buffer Vertex buffer
    */
-  void bindVertexBuffer(const SharedPtr<HardwareBuffer> &buffer);
+  void bindVertexBuffer(BufferHandle buffer);
 
   /**
    * @brief Bind index buffer
@@ -55,8 +55,7 @@ public:
    * @param buffer Index buffer
    * @param indexType Index buffer data type
    */
-  void bindIndexBuffer(const SharedPtr<HardwareBuffer> &buffer,
-                       VkIndexType indexType);
+  void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType);
 
   /**
    * @brief Push constants

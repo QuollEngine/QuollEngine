@@ -2,7 +2,6 @@
 #include "liquid/scene/BaseGeometry.h"
 #include "liquid/scene/Vertex.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
 using ShaderPtr = liquid::SharedPtr<liquid::Shader>;
@@ -11,15 +10,19 @@ static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
   return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 }
 
-TEST(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {
-  TestResourceAllocator resourceAllocator;
+class BaseGeometryTest : public ::testing::Test {
+public:
+  liquid::experimental::ResourceRegistry registry;
+};
+
+TEST_F(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {
   ShaderPtr shaderVert, shaderFrag;
 
   const std::vector<liquid::Vertex> vertices{
       {1.0, 2.0, 3.0}, {1.0, 2.0, 3.0}, {1.0, 2.0, 2.0}};
   std::vector<uint32_t> indices{0, 1, 2, 2, 1, 0};
   liquid::SharedPtr<liquid::Material> material(
-      new liquid::Material({}, {}, &resourceAllocator));
+      new liquid::Material({}, {}, registry));
   liquid::BaseGeometry<liquid::Vertex> geometry(vertices, indices, material);
 
   auto &meshVertices = geometry.getVertices();
@@ -36,7 +39,7 @@ TEST(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {
   }
 }
 
-TEST(BaseGeometryTest, AddsTriangleAsIndices) {
+TEST_F(BaseGeometryTest, AddsTriangleAsIndices) {
   liquid::BaseGeometry<liquid::Vertex> geometry;
 
   EXPECT_EQ(geometry.getIndices().size(), 0);
@@ -56,7 +59,7 @@ TEST(BaseGeometryTest, AddsTriangleAsIndices) {
   EXPECT_EQ(indices[5], 3);
 }
 
-TEST(BaseGeometryTest, AddsVertices) {
+TEST_F(BaseGeometryTest, AddsVertices) {
   liquid::BaseGeometry<liquid::Vertex> geometry;
 
   EXPECT_EQ(geometry.getVertices().size(), 0);
@@ -75,13 +78,12 @@ TEST(BaseGeometryTest, AddsVertices) {
   EXPECT_TRUE(vertices[1] == v2);
 }
 
-TEST(BaseGeometryTest, SetsMaterial) {
+TEST_F(BaseGeometryTest, SetsMaterial) {
   liquid::BaseGeometry<liquid::Vertex> geometry;
   EXPECT_EQ(geometry.getMaterial().get(), nullptr);
 
-  TestResourceAllocator resourceAllocator;
   liquid::SharedPtr<liquid::Material> material(
-      new liquid::Material({}, {}, &resourceAllocator));
+      new liquid::Material({}, {}, registry));
 
   geometry.setMaterial(material);
   EXPECT_EQ(geometry.getMaterial().get(), material.get());

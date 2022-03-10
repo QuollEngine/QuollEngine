@@ -2,7 +2,6 @@
 #include "liquid/core/Engine.h"
 
 #include "liquid/renderer/Material.h"
-#include "liquid/renderer/Texture.h"
 #include "liquid/renderer/Shader.h"
 
 #include "liquid/renderer/vulkan/VulkanRenderer.h"
@@ -62,12 +61,10 @@ int main() {
   liquid::MainLoop mainLoop(renderer.get(), window.get());
   liquid::GLTFLoader loader(context, renderer.get(), animationSystem, true);
   liquidator::EditorCamera editorCamera(context, renderer.get(), window.get());
-  liquidator::EditorGrid editorGrid(renderer->getResourceAllocator());
+  liquidator::EditorGrid editorGrid(renderer->getRenderBackend().getRegistry());
   liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
 
   liquidator::UIRoot ui(context, loader);
-
-  liquid::ImageTextureLoader textureLoader(renderer->getResourceAllocator());
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
@@ -89,7 +86,9 @@ int main() {
             const auto &pos = ImGui::GetWindowPos();
             sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
                                                        size.y);
-            ImGui::Image(sceneTexture.get(), size);
+            ImGui::Image(
+                reinterpret_cast<void *>(static_cast<uintptr_t>(sceneTexture)),
+                size);
             ImGui::End();
           }
         });

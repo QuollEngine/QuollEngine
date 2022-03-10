@@ -83,7 +83,7 @@ void VulkanRenderer::loadShaders() {
 
 RenderGraph VulkanRenderer::createRenderGraph(
     const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
-    const std::function<void(const SharedPtr<Texture> &)> &imUpdate) {
+    const std::function<void(TextureHandle)> &imUpdate) {
   RenderGraph graph;
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
@@ -133,18 +133,17 @@ SharedPtr<VulkanShader> VulkanRenderer::createShader(const String &shaderFile) {
 SharedPtr<Material> VulkanRenderer::createMaterial(
     const SharedPtr<Shader> &vertexShader,
     const SharedPtr<Shader> &fragmentShader,
-    const std::vector<SharedPtr<Texture>> &textures,
+    const std::vector<TextureHandle> &textures,
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {
   return std::make_shared<Material>(textures, properties,
-                                    abstraction.getResourceAllocator());
+                                    abstraction.getRegistry());
 }
 
 SharedPtr<Material>
 VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                                   const CullMode &cullMode) {
-  return std::make_shared<MaterialPBR>(properties,
-                                       abstraction.getResourceAllocator());
+  return std::make_shared<MaterialPBR>(properties, abstraction.getRegistry());
 }
 
 SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
@@ -158,14 +157,13 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
             new Material({},
                          {{"lightMatrix", glm::mat4{1.0f}},
                           {"lightIndex", static_cast<int>(i)}},
-                         abstraction.getResourceAllocator())));
+                         abstraction.getRegistry())));
 
         i++;
       });
 
-  return std::make_shared<VulkanRenderData>(entityContext, scene,
-                                            abstraction.getResourceAllocator(),
-                                            nullptr, shadowMaterials);
+  return std::make_shared<VulkanRenderData>(
+      entityContext, scene, shadowMaterials, abstraction.getRegistry());
 }
 
 } // namespace liquid

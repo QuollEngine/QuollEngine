@@ -7,29 +7,27 @@
 
 namespace liquid {
 
-ImageTextureLoader::ImageTextureLoader(ResourceAllocator *resourceAllocator_)
-    : resourceAllocator(resourceAllocator_) {}
+ImageTextureLoader::ImageTextureLoader(
+    experimental::ResourceRegistry &registry_)
+    : registry(registry_) {}
 
-SharedPtr<Texture> ImageTextureLoader::loadFromFile(const String &filename) {
-  TextureData textureData{};
-
+TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
+  liquid::TextureDescription description;
   int width = 0, height = 0, channels = 0;
 
-  textureData.data =
+  description.data =
       stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+  LIQUID_ASSERT(description.data, "Failed to load image: " + filename);
 
-  LIQUID_ASSERT(textureData.data, "Failed to load image: " + filename);
+  description.format = VK_FORMAT_R8G8B8A8_SRGB;
+  description.width = width;
+  description.height = height;
+  description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+  description.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  description.type = TextureType::Standard;
+  description.size = width * height * channels;
 
-  textureData.width = width;
-  textureData.height = height;
-  textureData.channels = channels;
-  textureData.format = VK_FORMAT_R8G8B8A8_SRGB;
-
-  auto texture = resourceAllocator->createTexture2D(textureData);
-
-  delete textureData.data;
-
-  return texture;
+  return registry.addTexture(description);
 }
 
 } // namespace liquid

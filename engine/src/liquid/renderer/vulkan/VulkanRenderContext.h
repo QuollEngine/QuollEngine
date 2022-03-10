@@ -100,10 +100,13 @@ private:
    * @brief Create command pool and buffer
    *
    * @param graphicsQueueFamily Graphics queue family index
+   * @param registry Resource registry
    * @param statsManager Stats manager
    */
-  void createCommandBuffers(uint32_t graphicsQueueFamily,
-                            StatsManager &statsManager);
+  void
+  createCommandBuffers(uint32_t graphicsQueueFamily,
+                       const experimental::VulkanResourceRegistry &registry,
+                       StatsManager &statsManager);
 
 private:
   uint32_t currentFrame = 0;

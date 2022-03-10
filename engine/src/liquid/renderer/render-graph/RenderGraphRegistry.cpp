@@ -4,7 +4,7 @@
 namespace liquid {
 
 void RenderGraphRegistry::addTexture(GraphResourceId resourceId,
-                                     const SharedPtr<Texture> &texture) {
+                                     TextureHandle texture) {
   if (textures.find(resourceId) != textures.end()) {
     textures.at(resourceId) = texture;
   } else {

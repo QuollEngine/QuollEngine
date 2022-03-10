@@ -1,7 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/scene/Scene.h"
 
-#include "../mocks/TestResourceAllocator.h"
 #include <gtest/gtest.h>
 
 glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
@@ -10,7 +9,7 @@ glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
          glm::scale(glm::mat4(1.0f), transform.localScale);
 }
 
-TEST(SceneTest, CreatesNodeWithIdentityWorldTransform) {
+TEST(SceneNodeTest, CreatesNodeWithIdentityWorldTransform) {
   liquid::EntityContext context;
   liquid::TransformComponent transform{glm::vec3{1.0f, 0.0f, 1.0f},
                                        glm::quat{1.0f, 0.5f, 0.5f, 0.5f},
@@ -37,7 +36,7 @@ TEST(SceneTest, CreatesNodeWithIdentityWorldTransform) {
   EXPECT_EQ(sceneNode.getWorldTransform(), glm::mat4(1.0f));
 }
 
-TEST(SceneTest, AddsChildWithLocalTransform) {
+TEST(SceneNodeTest, AddsChildWithLocalTransform) {
   liquid::EntityContext context;
   liquid::Scene scene(context);
   liquid::SceneNode sceneNode(context.createEntity(), {}, nullptr, context);
@@ -51,7 +50,7 @@ TEST(SceneTest, AddsChildWithLocalTransform) {
   }
 }
 
-TEST(SceneTest, AddsSceneNode) {
+TEST(SceneNodeTest, AddsSceneNode) {
   liquid::EntityContext context;
   liquid::Scene scene(context);
   liquid::SceneNode sceneNode(context.createEntity(), {}, nullptr, context);
@@ -72,7 +71,7 @@ TEST(SceneTest, AddsSceneNode) {
   }
 }
 
-TEST(SceneTest, SetsEntity) {
+TEST(SceneNodeTest, SetsEntity) {
   liquid::EntityContext context;
   auto entity = context.createEntity();
 
@@ -104,7 +103,7 @@ TEST(SceneTest, SetsEntity) {
             getLocalTransform(transform));
 }
 
-TEST(SceneTest, UpdateSetsLocalMatrixToWorldIfNoParent) {
+TEST(SceneNodeTest, UpdateSetsLocalMatrixToWorldIfNoParent) {
   liquid::EntityContext context;
 
   liquid::TransformComponent transform;
@@ -120,7 +119,7 @@ TEST(SceneTest, UpdateSetsLocalMatrixToWorldIfNoParent) {
       getLocalTransform(transform));
 }
 
-TEST(SceneTest, UpdatesChildrenWithParent) {
+TEST(SceneNodeTest, UpdatesChildrenWithParent) {
   liquid::EntityContext context;
 
   liquid::TransformComponent parentTransform;
@@ -140,7 +139,7 @@ TEST(SceneTest, UpdatesChildrenWithParent) {
                 getLocalTransform(childTransform));
 }
 
-TEST(SceneTest, UpdatesLightIfExists) {
+TEST(SceneNodeTest, UpdatesLightIfExists) {
   liquid::EntityContext context;
 
   liquid::TransformComponent transform;
@@ -162,7 +161,7 @@ TEST(SceneTest, UpdatesLightIfExists) {
       transform.localPosition);
 }
 
-TEST(SceneTest, DeletesChildIfExists) {
+TEST(SceneNodeTest, DeletesChildIfExists) {
   liquid::EntityContext context;
 
   liquid::SceneNode *node =
@@ -186,7 +185,7 @@ TEST(SceneTest, DeletesChildIfExists) {
   delete node;
 }
 
-TEST(SceneTest, DoesNotDeleteNodeThatsNotAChild) {
+TEST(SceneNodeTest, DoesNotDeleteNodeThatsNotAChild) {
   liquid::EntityContext context;
 
   liquid::SceneNode *node =

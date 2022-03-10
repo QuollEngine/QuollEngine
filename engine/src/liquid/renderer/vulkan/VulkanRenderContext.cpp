@@ -13,7 +13,7 @@ VulkanRenderContext::VulkanRenderContext(
   createCommandBuffers(device_->getPhysicalDevice()
                            .getQueueFamilyIndices()
                            .graphicsFamily.value(),
-                       statsManager);
+                       device_->getResourceRegistry(), statsManager);
 
   createSemaphores();
   createFences();
@@ -152,8 +152,9 @@ void VulkanRenderContext::createFences() {
   LOG_DEBUG("[Vulkan] Render fence created");
 }
 
-void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily,
-                                               StatsManager &statsManager) {
+void VulkanRenderContext::createCommandBuffers(
+    uint32_t queueFamily, const experimental::VulkanResourceRegistry &registry,
+    StatsManager &statsManager) {
   std::array<VkCommandBuffer, NUM_FRAMES> commandBuffers{};
 
   VkCommandPoolCreateInfo poolInfo{};
@@ -179,7 +180,7 @@ void VulkanRenderContext::createCommandBuffers(uint32_t queueFamily,
 
   for (size_t i = 0; i < NUM_FRAMES; ++i) {
     commandExecutors.at(i) = new VulkanCommandExecutor(
-        commandBuffers.at(i), descriptorManager, statsManager);
+        commandBuffers.at(i), descriptorManager, registry, statsManager);
   }
 
   LOG_DEBUG("[Vulkan] Command buffers allocated");

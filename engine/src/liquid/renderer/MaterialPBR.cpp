@@ -3,26 +3,25 @@
 
 namespace liquid {
 
-const std::vector<SharedPtr<Texture>>
-MaterialPBR::Properties::getTextures() const {
-  std::vector<SharedPtr<Texture>> textures;
-  if (baseColorTexture) {
+const std::vector<TextureHandle> MaterialPBR::Properties::getTextures() const {
+  std::vector<TextureHandle> textures;
+  if (baseColorTexture > 0) {
     textures.push_back(baseColorTexture);
   }
 
-  if (metallicRoughnessTexture) {
+  if (metallicRoughnessTexture > 0) {
     textures.push_back(metallicRoughnessTexture);
   }
 
-  if (normalTexture) {
+  if (normalTexture > 0) {
     textures.push_back(normalTexture);
   }
 
-  if (occlusionTexture) {
+  if (occlusionTexture > 0) {
     textures.push_back(occlusionTexture);
   }
 
-  if (emissiveTexture) {
+  if (emissiveTexture > 0) {
     textures.push_back(emissiveTexture);
   }
 
@@ -32,11 +31,12 @@ MaterialPBR::Properties::getTextures() const {
 const std::vector<std::pair<String, Property>>
 MaterialPBR::Properties::getProperties() const {
   int index = 0;
-  int baseColorTextureIndex = baseColorTexture ? index++ : -1;
-  int metallicRoughnessTextureIndex = metallicRoughnessTexture ? index++ : -1;
-  int normalTextureIndex = normalTexture ? index++ : -1;
-  int occlusionTextureIndex = occlusionTexture ? index++ : -1;
-  int emissiveTextureIndex = emissiveTexture ? index++ : -1;
+  int baseColorTextureIndex = baseColorTexture > 0 ? index++ : -1;
+  int metallicRoughnessTextureIndex =
+      metallicRoughnessTexture > 0 ? index++ : -1;
+  int normalTextureIndex = normalTexture > 0 ? index++ : -1;
+  int occlusionTextureIndex = occlusionTexture > 0 ? index++ : -1;
+  int emissiveTextureIndex = emissiveTexture > 0 ? index++ : -1;
 
   return {{"baseColorTexture", baseColorTextureIndex},
           {"baseColorTextureCoord", baseColorTextureCoord},
@@ -57,7 +57,7 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         ResourceAllocator *resourceAllocator)
-    : Material(properties.getTextures(), properties.getProperties(),
-               resourceAllocator) {}
+                         experimental::ResourceRegistry &registry)
+    : Material(properties.getTextures(), properties.getProperties(), registry) {
+}
 } // namespace liquid

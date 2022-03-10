@@ -14,7 +14,6 @@
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
 #include "liquid/scene/Skeleton.h"
-#include "liquid/renderer/Texture.h"
 #include "liquid/renderer/MaterialPBR.h"
 #include "GLTFLoader.h"
 #include "GLTFError.h"
@@ -256,7 +255,7 @@ static SceneNode *getScene(const tinygltf::Model &model,
  * @return Skeleton data
  */
 static SkeletonData getSkeletons(const tinygltf::Model &model,
-                                 ResourceAllocator *resourceAllocator) {
+                                 experimental::ResourceRegistry &registry) {
   std::map<uint32_t, Skeleton> skeletons;
 
   SkeletonData skeletonData{};
@@ -374,7 +373,7 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
     Skeleton skeleton(std::move(jLocalPositions), std::move(jLocalRotations),
                       std::move(jLocalScales), std::move(jParents),
                       std::move(jInverseBindMatrices), std::move(jNames),
-                      resourceAllocator);
+                      &registry);
 
     skeleton.update();
 
@@ -690,13 +689,14 @@ getMeshes(const tinygltf::Model &model,
     auto entity = entityContext.createEntity();
     if (isSkinnedMesh) {
       entityContext.setComponent<SkinnedMeshComponent>(
-          entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
-                      skinnedMesh, renderer->getResourceAllocator())});
+          entity,
+          {std::make_shared<MeshInstance<SkinnedMesh>>(
+              skinnedMesh, renderer->getRenderBackend().getRegistry())});
 
     } else {
       entityContext.setComponent<MeshComponent>(
           entity, {std::make_shared<MeshInstance<Mesh>>(
-                      mesh, renderer->getResourceAllocator())});
+                      mesh, renderer->getRenderBackend().getRegistry())});
     }
 
     entityMap.insert({i, entity});
@@ -714,21 +714,27 @@ getMeshes(const tinygltf::Model &model,
  */
 static std::vector<SharedPtr<Material>>
 getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
-  std::vector<SharedPtr<Texture>> textures;
+  std::vector<TextureHandle> textures;
   std::vector<SharedPtr<Material>> materials;
 
   for (auto &gltfTexture : model.textures) {
     // TODO: Support creating different samplers
     auto &image = model.images.at(gltfTexture.source);
 
-    TextureData imageData;
-    imageData.height = image.height;
-    imageData.width = image.width;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
-    imageData.data = const_cast<unsigned char *>(image.image.data());
+    TextureDescription description;
+    description.width = image.width;
+    description.height = image.height;
+    description.format = VK_FORMAT_R8G8B8A8_SRGB;
+    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    description.usageFlags =
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    description.size = image.width * image.height * 4;
+
+    description.data = new char[description.size];
+    memcpy(description.data, image.image.data(), description.size);
 
     textures.push_back(
-        renderer->getResourceAllocator()->createTexture2D(imageData));
+        renderer->getRenderBackend().getRegistry().addTexture(description));
   }
 
   for (auto &gltfMaterial : model.materials) {
@@ -1011,7 +1017,8 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
     return Res(GLTFError::Error);
   }
 
-  auto &&skeletonData = getSkeletons(model, renderer->getResourceAllocator());
+  auto &&skeletonData =
+      getSkeletons(model, renderer->getRenderBackend().getRegistry());
   auto &&animationData = getAnimations(model, skeletonData, animationSystem);
   auto &&materials = getMaterials(model, renderer);
   auto &&meshes =

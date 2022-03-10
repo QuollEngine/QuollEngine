@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/ResourceAllocator.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -14,9 +14,9 @@ public:
   /**
    * @brief Create image texture loader
    *
-   * @param resourceAllocator Resource allocator
+   * @param registry Resource registry
    */
-  ImageTextureLoader(ResourceAllocator *resourceAllocator);
+  ImageTextureLoader(experimental::ResourceRegistry &registry);
 
   /**
    * @brief Load image from filename
@@ -24,10 +24,10 @@ public:
    * @param filename Filename
    * @return 2D Texture
    */
-  SharedPtr<Texture> loadFromFile(const String &filename);
+  TextureHandle loadFromFile(const String &filename);
 
 private:
-  ResourceAllocator *resourceAllocator;
+  experimental::ResourceRegistry &registry;
 };
 
 } // namespace liquid

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "RenderGraphResource.h"
-#include "liquid/renderer/Texture.h"
 #include "liquid/renderer/Pipeline.h"
 #include "liquid/renderer/RenderPass.h"
+
+#include "liquid/rhi/RenderHandle.h"
 
 namespace liquid {
 
@@ -15,8 +16,7 @@ public:
    * @param resourceId Resource ID
    * @param texture Texture
    */
-  void addTexture(GraphResourceId resourceId,
-                  const SharedPtr<Texture> &texture);
+  void addTexture(GraphResourceId resourceId, TextureHandle texture);
 
   /**
    * @brief Add pipeline resource
@@ -42,7 +42,7 @@ public:
    * @param resourceId Resource ID
    * @return Texture
    */
-  inline const SharedPtr<Texture> &getTexture(GraphResourceId resourceId) {
+  inline TextureHandle &getTexture(GraphResourceId resourceId) {
     return textures.at(resourceId);
   }
 
@@ -101,7 +101,7 @@ public:
   }
 
 private:
-  std::unordered_map<GraphResourceId, SharedPtr<Texture>> textures;
+  std::unordered_map<GraphResourceId, TextureHandle> textures;
   std::unordered_map<GraphResourceId, SharedPtr<Pipeline>> pipelines;
   std::unordered_map<GraphResourceId, SharedPtr<RenderPass>> renderPasses;
 };
