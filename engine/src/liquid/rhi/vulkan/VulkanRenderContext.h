@@ -5,13 +5,15 @@
 
 #include "liquid/window/glfw/GLFWWindow.h"
 #include "liquid/profiler/StatsManager.h"
-#include "VulkanSwapchain.h"
-#include "VulkanRenderContext.h"
-#include "VulkanCommandExecutor.h"
 #include "VulkanDescriptorManager.h"
-#include "../../rhi/vulkan/VulkanRenderDevice.h"
+#include "VulkanCommandPool.h"
+#include "liquid/renderer/vulkan/VulkanSwapchain.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanQueue.h"
 
-namespace liquid {
+#include "liquid/rhi/RenderCommandList.h"
+
+namespace liquid::experimental {
 
 class VulkanRenderContext {
 public:
@@ -25,12 +27,12 @@ public:
    * for rendering
    *
    * @param device Vulkan device
-   * @param descriptorManager Descriptor manager
-   * @param statsManager Stats manager
+   * @param pool Command pool
+   * @param graphicsQueue Graphics queue
+   * @param presentQueue Present queue
    */
-  VulkanRenderContext(experimental::VulkanRenderDevice *device,
-                      VulkanDescriptorManager &descriptorManager,
-                      StatsManager &statsManager);
+  VulkanRenderContext(VulkanDeviceObject &device, VulkanCommandPool &pool,
+                      VulkanQueue &graphicsQueue, VulkanQueue &presentQueue);
 
   /**
    * @brief Destroy render context
@@ -43,13 +45,6 @@ public:
   VulkanRenderContext(VulkanRenderContext &&) = delete;
   VulkanRenderContext &operator=(const VulkanRenderContext &) = delete;
   VulkanRenderContext &operator=(VulkanRenderContext &&) = delete;
-
-  /**
-   * @brief Render commands in command list
-   *
-   * @param commandList Command list
-   */
-  void render(RenderCommandList &commandList);
 
   /**
    * @brief Present to screen
@@ -69,7 +64,6 @@ public:
     return imageAvailableSemaphores.at(currentFrame);
   }
 
-private:
   /**
    * @brief Begin Rendering
    *
@@ -77,7 +71,7 @@ private:
    *
    * @return Command buffer for current frame
    */
-  VulkanCommandExecutor *beginRendering();
+  RenderCommandList &beginRendering();
 
   /**
    * @brief End rendering
@@ -86,6 +80,7 @@ private:
    */
   void endRendering();
 
+private:
   /**
    * @brief Create render semaphores
    */
@@ -96,33 +91,17 @@ private:
    */
   void createFences();
 
-  /**
-   * @brief Create command pool and buffer
-   *
-   * @param graphicsQueueFamily Graphics queue family index
-   * @param registry Resource registry
-   * @param statsManager Stats manager
-   */
-  void
-  createCommandBuffers(uint32_t graphicsQueueFamily,
-                       const experimental::VulkanResourceRegistry &registry,
-                       StatsManager &statsManager);
-
 private:
   uint32_t currentFrame = 0;
 
-  std::array<VulkanCommandExecutor *, NUM_FRAMES> commandExecutors{};
   std::array<VkSemaphore, NUM_FRAMES> imageAvailableSemaphores{};
   std::array<VkSemaphore, NUM_FRAMES> renderFinishedSemaphores{};
   std::array<VkFence, NUM_FRAMES> renderFences{};
+  std::vector<RenderCommandList> renderCommandLists;
 
-  VkCommandPool commandPool = VK_NULL_HANDLE;
-
-  VulkanDescriptorManager &descriptorManager;
-
-  VkQueue graphicsQueue = nullptr;
-  VkQueue presentQueue = nullptr;
-  VkDevice device = nullptr;
+  VulkanQueue &mGraphicsQueue;
+  VulkanQueue &mPresentQueue;
+  VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

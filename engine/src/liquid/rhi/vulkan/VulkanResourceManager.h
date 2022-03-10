@@ -4,22 +4,25 @@
 #include "../TextureDescription.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
-
-namespace liquid {
-
-class VulkanUploadContext;
-
-} // namespace liquid
+#include "VulkanPhysicalDevice.h"
+#include "VulkanRenderBackend.h"
+#include "VulkanUploadContext.h"
 
 namespace liquid::experimental {
 
-class VulkanRenderDevice;
-
 class VulkanResourceManager {
 public:
-  void create(VulkanRenderDevice *device);
+  VulkanResourceManager(VulkanRenderBackend &backend,
+                        VulkanPhysicalDevice &physicalDevice,
+                        VulkanDeviceObject &device,
+                        VulkanUploadContext &uploadContext);
 
-  void destroy();
+  ~VulkanResourceManager();
+
+  VulkanResourceManager(const VulkanResourceManager &) = delete;
+  VulkanResourceManager &operator=(const VulkanResourceManager &) = delete;
+  VulkanResourceManager(VulkanResourceManager &&) = delete;
+  VulkanResourceManager &operator=(VulkanResourceManager &&) = delete;
 
   std::unique_ptr<VulkanBuffer>
   createBuffer(const BufferDescription &description);
@@ -39,9 +42,8 @@ public:
 
 private:
   VmaAllocator mAllocator = VK_NULL_HANDLE;
-  VulkanRenderDevice *mDevice = nullptr;
-
-  VulkanUploadContext *mUploadContext = nullptr;
+  VulkanDeviceObject &mDevice;
+  VulkanUploadContext &mUploadContext;
 };
 
 } // namespace liquid::experimental

@@ -38,8 +38,10 @@ public:
         indexBuffers.push_back(0);
       }
 
-      indexCounts.push_back(geometry.getIndices().size());
-      vertexCounts.push_back(geometry.getVertices().size());
+      indexCounts.push_back(
+          static_cast<uint32_t>(geometry.getIndices().size()));
+      vertexCounts.push_back(
+          static_cast<uint32_t>(geometry.getVertices().size()));
       vertexBuffers.push_back(vertexBuffer);
       materials.push_back(geometry.getMaterial());
     }
@@ -102,7 +104,7 @@ public:
    *
    * @return Vertex counts
    */
-  inline const std::vector<size_t> &getVertexCounts() const {
+  inline const std::vector<uint32_t> &getVertexCounts() const {
     return vertexCounts;
   }
 
@@ -111,7 +113,7 @@ public:
    *
    * @return Index counts
    */
-  inline const std::vector<size_t> &getIndexCounts() const {
+  inline const std::vector<uint32_t> &getIndexCounts() const {
     return indexCounts;
   }
 
@@ -119,8 +121,8 @@ private:
   std::vector<BufferHandle> vertexBuffers;
   std::vector<BufferHandle> indexBuffers;
   std::vector<SharedPtr<Material>> materials;
-  std::vector<size_t> vertexCounts;
-  std::vector<size_t> indexCounts;
+  std::vector<uint32_t> vertexCounts;
+  std::vector<uint32_t> indexCounts;
 
   Mesh mMesh;
   experimental::ResourceRegistry &mRegistry;

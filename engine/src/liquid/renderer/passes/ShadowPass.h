@@ -1,10 +1,11 @@
 #pragma once
 
 #include "../render-graph/RenderGraph.h"
-#include "../RenderCommandList.h"
 #include "../ShaderLibrary.h"
 #include "liquid/entity/EntityContext.h"
 #include "../SceneRenderer.h"
+
+#include "liquid/rhi/RenderCommandList.h"
 
 namespace liquid {
 

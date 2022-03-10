@@ -3,9 +3,15 @@
 #include "../base/RenderDevice.h"
 
 #include "VulkanPhysicalDevice.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanQueue.h"
 #include "VulkanRenderBackend.h"
 #include "VulkanResourceManager.h"
 #include "VulkanResourceRegistry.h"
+#include "VulkanCommandPool.h"
+#include "VulkanDescriptorManager.h"
+#include "VulkanRenderContext.h"
+#include "VulkanUploadContext.h"
 
 #include "../ResourceRegistry.h"
 
@@ -16,11 +22,11 @@ public:
   /**
    * @brief Create Vulkan render device
    *
-   * @param physicalDevice Physical device
    * @param backend Render backend
+   * @param physicalDevice Physical device
    */
-  VulkanRenderDevice(const VulkanPhysicalDevice &physicalDevice,
-                     VulkanRenderBackend &backend);
+  VulkanRenderDevice(VulkanRenderBackend &backend,
+                     const VulkanPhysicalDevice &physicalDevice);
 
   /**
    * @brief Destroy render device
@@ -36,6 +42,16 @@ public:
 
   void synchronizeDeletes(ResourceRegistry &registry);
 
+  /**
+   * @brief Wait for idle
+   */
+  void wait();
+
+  /**
+   * @brief Get resource registry
+   *
+   * @return Resource registry
+   */
   inline const VulkanResourceRegistry &getResourceRegistry() const {
     return mRegistry;
   }
@@ -57,20 +73,6 @@ public:
   }
 
   /**
-   * @brief Get present queue
-   *
-   * @return Present queue
-   */
-  inline VkQueue getPresentQueue() const { return mPresentQueue; }
-
-  /**
-   * @brief Get graphics queue
-   *
-   * @return Graphics queue
-   */
-  inline VkQueue getGraphicsQueue() const { return mGraphicsQueue; }
-
-  /**
    * @brief Get backend
    *
    * @return Render backend
@@ -84,32 +86,33 @@ public:
    */
   inline VulkanResourceManager &getResourceManager() { return mManager; }
 
-private:
   /**
-   * @brief Create Vulkan device
+   * @brief Get command pool
+   *
+   * @return Command pool
    */
-  void createVulkanDevice();
+  inline VulkanCommandPool &getCommandPool() { return mCommandPool; }
 
   /**
-   * @brief Create resource manager
+   * @brief Get render context
+   *
+   * @return Render context
    */
-  void createResourceManager();
-
-  /**
-   * @brief Get device queues
-   */
-  void getDeviceQueues();
+  inline VulkanRenderContext &getRenderContext() { return mRenderContext; }
 
 private:
-  VulkanResourceManager mManager;
-  VulkanResourceRegistry mRegistry;
-
-  VkQueue mPresentQueue = VK_NULL_HANDLE;
-  VkQueue mGraphicsQueue = VK_NULL_HANDLE;
-  VkDevice mDevice = VK_NULL_HANDLE;
-
-  VulkanPhysicalDevice mPhysicalDevice;
   VulkanRenderBackend &mBackend;
+  VulkanPhysicalDevice mPhysicalDevice;
+  VulkanDeviceObject mDevice;
+  VulkanQueue mPresentQueue;
+  VulkanQueue mGraphicsQueue;
+
+  VulkanDescriptorManager mDescriptorManager;
+  VulkanResourceRegistry mRegistry;
+  VulkanCommandPool mCommandPool;
+  VulkanRenderContext mRenderContext;
+  VulkanUploadContext mUploadContext;
+  VulkanResourceManager mManager;
 };
 
 } // namespace liquid::experimental

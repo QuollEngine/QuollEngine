@@ -42,7 +42,7 @@ VulkanRenderBackend::~VulkanRenderBackend() {
 VulkanRenderDevice *VulkanRenderBackend::getOrCreateDevice() {
   if (!mDevice) {
     auto &&physicalDevice = pickPhysicalDevice();
-    mDevice.reset(new VulkanRenderDevice(physicalDevice, *this));
+    mDevice.reset(new VulkanRenderDevice(*this, physicalDevice));
   }
 
   return mDevice.get();

@@ -5,26 +5,25 @@
 #include "liquid/renderer/vulkan/VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
 
-#include "liquid/renderer/vulkan/VulkanUploadContext.h"
-
 namespace liquid::experimental {
 
-void VulkanResourceManager::create(VulkanRenderDevice *device) {
-  mDevice = device;
+VulkanResourceManager::VulkanResourceManager(
+    VulkanRenderBackend &backend, VulkanPhysicalDevice &physicalDevice,
+    VulkanDeviceObject &device, VulkanUploadContext &uploadContext)
+    : mDevice(device), mUploadContext(uploadContext) {
+
   VmaAllocatorCreateInfo createInfo{};
-  createInfo.instance = mDevice->getBackend().getVulkanInstance();
-  createInfo.physicalDevice = mDevice->getPhysicalDevice().getVulkanDevice();
-  createInfo.device = mDevice->getVulkanDevice();
+  createInfo.instance = backend.getVulkanInstance();
+  createInfo.physicalDevice = physicalDevice.getVulkanDevice();
+  createInfo.device = mDevice;
 
   checkForVulkanError(vmaCreateAllocator(&createInfo, &mAllocator),
                       "Failed to create VMA allocator");
 
-  mUploadContext = new VulkanUploadContext(mDevice);
-
   LOG_DEBUG("[Vulkan] Resource manager created");
 }
 
-void VulkanResourceManager::destroy() {
+VulkanResourceManager::~VulkanResourceManager() {
   if (mAllocator) {
     vmaDestroyAllocator(mAllocator);
     LOG_DEBUG("[Vulkan] Resource manager destroyed");
@@ -165,10 +164,9 @@ VulkanResourceManager::createTexture(const TextureDescription &description) {
   imageViewCreateInfo.subresourceRange.layerCount = description.layers;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
   imageViewCreateInfo.subresourceRange.aspectMask = description.aspectFlags;
-  checkForVulkanError(vkCreateImageView(mDevice->getVulkanDevice(),
-                                        &imageViewCreateInfo, nullptr,
-                                        &imageView),
-                      "Failed to create image view");
+  checkForVulkanError(
+      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &imageView),
+      "Failed to create image view");
 
   VkSamplerCreateInfo samplerCreateInfo{};
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -179,16 +177,16 @@ VulkanResourceManager::createTexture(const TextureDescription &description) {
   samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
   samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
   samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
-  checkForVulkanError(vkCreateSampler(mDevice->getVulkanDevice(),
-                                      &samplerCreateInfo, nullptr, &sampler),
-                      "Failed to image sampler");
+  checkForVulkanError(
+      vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &sampler),
+      "Failed to image sampler");
 
   if (description.data) {
     auto stagingBuffer = createBuffer(
         {BufferType::Transfer, description.size, description.data});
 
-    mUploadContext->submit([extent, image, &stagingBuffer,
-                            &description](VkCommandBuffer commandBuffer) {
+    mUploadContext.submit([extent, image, &stagingBuffer,
+                           &description](VkCommandBuffer commandBuffer) {
       VkImageSubresourceRange range{};
       range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
       range.baseMipLevel = 0;
@@ -243,10 +241,9 @@ VulkanResourceManager::createTexture(const TextureDescription &description) {
 
 void VulkanResourceManager::destroyTexture(
     const std::unique_ptr<VulkanTexture> &texture) {
-  vkDestroySampler(mDevice->getVulkanDevice(), texture->getSampler(), nullptr);
+  vkDestroySampler(mDevice, texture->getSampler(), nullptr);
 
-  vkDestroyImageView(mDevice->getVulkanDevice(), texture->getImageView(),
-                     nullptr);
+  vkDestroyImageView(mDevice, texture->getImageView(), nullptr);
 
   vmaDestroyImage(mAllocator, texture->getImage(), texture->getAllocation());
 }

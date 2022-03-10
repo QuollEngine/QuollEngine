@@ -12,7 +12,6 @@
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/MaterialPBR.h"
 #include "liquid/renderer/imgui/ImguiRenderer.h"
-#include "liquid/renderer/RenderCommandList.h"
 
 #include "liquid/entity/EntityContext.h"
 
@@ -21,6 +20,8 @@
 
 #include "liquid/profiler/StatsManager.h"
 #include "liquid/profiler/DebugManager.h"
+
+#include "liquid/rhi/RenderCommandList.h"
 
 namespace liquid {
 

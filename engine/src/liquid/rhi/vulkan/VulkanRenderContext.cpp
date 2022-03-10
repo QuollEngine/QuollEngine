@@ -1,31 +1,28 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
 #include "VulkanRenderContext.h"
-#include "VulkanError.h"
+#include "VulkanCommandBuffer.h"
+#include "liquid/renderer/vulkan/VulkanError.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
-VulkanRenderContext::VulkanRenderContext(
-    experimental::VulkanRenderDevice *device_,
-    VulkanDescriptorManager &descriptorManager_, StatsManager &statsManager)
-    : descriptorManager(descriptorManager_) {
-  device = device_->getVulkanDevice();
-  createCommandBuffers(device_->getPhysicalDevice()
-                           .getQueueFamilyIndices()
-                           .graphicsFamily.value(),
-                       device_->getResourceRegistry(), statsManager);
+VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
+                                         VulkanCommandPool &pool,
+                                         VulkanQueue &graphicsQueue,
+                                         VulkanQueue &presentQueue)
+    : mDevice(device), mGraphicsQueue(graphicsQueue),
+      mPresentQueue(presentQueue) {
+
+  renderCommandLists = std::move(pool.createCommandLists(NUM_FRAMES));
 
   createSemaphores();
   createFences();
-
-  graphicsQueue = device_->getGraphicsQueue();
-  presentQueue = device_->getPresentQueue();
 }
 
 VulkanRenderContext::~VulkanRenderContext() {
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     if (renderFences.at(i)) {
-      vkDestroyFence(device, renderFences.at(i), nullptr);
+      vkDestroyFence(mDevice, renderFences.at(i), nullptr);
       renderFences.at(i) = VK_NULL_HANDLE;
     }
   }
@@ -33,32 +30,16 @@ VulkanRenderContext::~VulkanRenderContext() {
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     if (imageAvailableSemaphores.at(i)) {
-      vkDestroySemaphore(device, imageAvailableSemaphores.at(i), nullptr);
+      vkDestroySemaphore(mDevice, imageAvailableSemaphores.at(i), nullptr);
       imageAvailableSemaphores.at(i) = VK_NULL_HANDLE;
     }
 
     if (renderFinishedSemaphores.at(i)) {
-      vkDestroySemaphore(device, renderFinishedSemaphores.at(i), nullptr);
+      vkDestroySemaphore(mDevice, renderFinishedSemaphores.at(i), nullptr);
       renderFinishedSemaphores.at(i) = VK_NULL_HANDLE;
     }
   }
   LOG_DEBUG("[Vulkan] Render semaphores destroyed");
-
-  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
-    delete commandExecutors.at(i);
-  }
-
-  vkDestroyCommandPool(device, commandPool, nullptr);
-  LOG_DEBUG("[Vulkan] Command Pool destroyed");
-}
-
-void VulkanRenderContext::render(RenderCommandList &commandList) {
-  LIQUID_PROFILE_EVENT("VulkanRenderContext::render");
-  auto *executor = beginRendering();
-
-  executor->execute(commandList);
-
-  endRendering();
 }
 
 VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
@@ -79,23 +60,44 @@ VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
 
   currentFrame = (currentFrame + 1) % NUM_FRAMES;
 
-  return vkQueuePresentKHR(presentQueue, &presentInfo);
+  return vkQueuePresentKHR(mPresentQueue, &presentInfo);
 }
 
-VulkanCommandExecutor *VulkanRenderContext::beginRendering() {
-  vkWaitForFences(device, 1, &renderFences.at(currentFrame), true,
+RenderCommandList &VulkanRenderContext::beginRendering() {
+  vkWaitForFences(mDevice, 1, &renderFences.at(currentFrame), true,
                   std::numeric_limits<uint32_t>::max());
-  vkResetFences(device, 1, &renderFences.at(currentFrame));
+  vkResetFences(mDevice, 1, &renderFences.at(currentFrame));
 
-  return commandExecutors.at(currentFrame);
+  auto *commandBuffer = dynamic_cast<experimental::VulkanCommandBuffer *>(
+                            renderCommandLists.at(currentFrame)
+                                .getNativeRenderCommandList()
+                                .get())
+                            ->getVulkanCommandBuffer();
+
+  VkCommandBufferBeginInfo beginInfo{};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = 0;
+  beginInfo.pInheritanceInfo = nullptr;
+
+  checkForVulkanError(vkBeginCommandBuffer(commandBuffer, &beginInfo),
+                      "Failed to begin recording command buffer");
+
+  return renderCommandLists.at(currentFrame);
 }
 
 void VulkanRenderContext::endRendering() {
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-  std::array<VkCommandBuffer, 1> commandBuffers{
-      commandExecutors.at(currentFrame)->getCommandBuffer()};
+  auto *commandBuffer = dynamic_cast<experimental::VulkanCommandBuffer *>(
+                            renderCommandLists.at(currentFrame)
+                                .getNativeRenderCommandList()
+                                .get())
+                            ->getVulkanCommandBuffer();
+
+  vkEndCommandBuffer(commandBuffer);
+
+  std::array<VkCommandBuffer, 1> commandBuffers{commandBuffer};
 
   std::array<VkSemaphore, 1> waitSemaphores{
       imageAvailableSemaphores.at(currentFrame)};
@@ -113,7 +115,7 @@ void VulkanRenderContext::endRendering() {
       static_cast<uint32_t>(signalSemaphores.size());
   submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-  checkForVulkanError(vkQueueSubmit(graphicsQueue, 1, &submitInfo,
+  checkForVulkanError(vkQueueSubmit(mGraphicsQueue, 1, &submitInfo,
                                     renderFences.at(currentFrame)),
                       "Failed to submit graphics queue");
 }
@@ -125,11 +127,11 @@ void VulkanRenderContext::createSemaphores() {
   semaphoreInfo.flags = 0;
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
-    checkForVulkanError(vkCreateSemaphore(device, &semaphoreInfo, nullptr,
+    checkForVulkanError(vkCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
                                           &imageAvailableSemaphores.at(i)),
                         "Failed to create image available semaphore");
 
-    checkForVulkanError(vkCreateSemaphore(device, &semaphoreInfo, nullptr,
+    checkForVulkanError(vkCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
                                           &renderFinishedSemaphores.at(i)),
                         "Failed to create render finished semaphores");
   }
@@ -145,45 +147,11 @@ void VulkanRenderContext::createFences() {
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     checkForVulkanError(
-        vkCreateFence(device, &fenceInfo, nullptr, &renderFences.at(i)),
+        vkCreateFence(mDevice, &fenceInfo, nullptr, &renderFences.at(i)),
         "Failed to create render fence");
   }
 
   LOG_DEBUG("[Vulkan] Render fence created");
 }
 
-void VulkanRenderContext::createCommandBuffers(
-    uint32_t queueFamily, const experimental::VulkanResourceRegistry &registry,
-    StatsManager &statsManager) {
-  std::array<VkCommandBuffer, NUM_FRAMES> commandBuffers{};
-
-  VkCommandPoolCreateInfo poolInfo{};
-  poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-  poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-  poolInfo.queueFamilyIndex = queueFamily;
-
-  checkForVulkanError(
-      vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool),
-      "Failed to create command pool");
-
-  LOG_DEBUG("[Vulkan] Command pool created");
-
-  VkCommandBufferAllocateInfo allocInfo{};
-  allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  allocInfo.commandPool = commandPool;
-  allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  allocInfo.commandBufferCount = NUM_FRAMES;
-
-  checkForVulkanError(
-      vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()),
-      "Failed to allocate command buffers");
-
-  for (size_t i = 0; i < NUM_FRAMES; ++i) {
-    commandExecutors.at(i) = new VulkanCommandExecutor(
-        commandBuffers.at(i), descriptorManager, registry, statsManager);
-  }
-
-  LOG_DEBUG("[Vulkan] Command buffers allocated");
-}
-
-} // namespace liquid
+} // namespace liquid::experimental

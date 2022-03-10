@@ -3,22 +3,22 @@
 #include <vulkan/vulkan.hpp>
 
 #include "VulkanDescriptorManager.h"
-#include "VulkanMapping.h"
+#include "liquid/renderer/vulkan/VulkanMapping.h"
 
+#include "liquid/renderer/vulkan/VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
-#include "VulkanError.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
 VulkanDescriptorManager::VulkanDescriptorManager(
-    VkDevice device_, const experimental::VulkanResourceRegistry &registry_)
-    : device(device_), registry(registry_) {
+    VulkanDeviceObject &device, const VulkanResourceRegistry &registry)
+    : mDevice(device), mRegistry(registry) {
   createDescriptorPool();
 }
 
 VulkanDescriptorManager::~VulkanDescriptorManager() {
-  if (descriptorPool) {
-    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+  if (mDescriptorPool) {
+    vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
   }
 }
 
@@ -26,11 +26,11 @@ VkDescriptorSet
 VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
                                                VkDescriptorSetLayout layout) {
   const String &hash = createHash(descriptor, layout);
-  const auto &found = descriptorCache.find(hash);
+  const auto &found = mDescriptorCache.find(hash);
 
-  if (found == descriptorCache.end()) {
+  if (found == mDescriptorCache.end()) {
     VkDescriptorSet set = createDescriptorSet(descriptor, layout);
-    descriptorCache.insert({hash, set});
+    mDescriptorCache.insert({hash, set});
     return set;
   }
   return (*found).second;
@@ -63,7 +63,7 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
 
     if (binding.second.type == DescriptorType::UniformBuffer) {
       const auto &vkBuffer =
-          registry.getBuffer(std::get<BufferHandle>(binding.second.data));
+          mRegistry.getBuffer(std::get<BufferHandle>(binding.second.data));
       bufferInfos.push_back(VkDescriptorBufferInfo{vkBuffer->getBuffer(), 0,
                                                    vkBuffer->getSize()});
 
@@ -82,7 +82,7 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
         if (tex == 0)
           continue;
 
-        const auto &native = registry.getTexture(tex);
+        const auto &native = mRegistry.getTexture(tex);
 
         imageInfoObjects.push_back({native->getSampler(),
                                     native->getImageView(),
@@ -97,7 +97,7 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
     }
   }
 
-  vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()),
+  vkUpdateDescriptorSets(mDevice, static_cast<uint32_t>(writes.size()),
                          writes.data(), 0, nullptr);
 
   return descriptorSet;
@@ -111,12 +111,12 @@ VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
   descriptorSetAllocateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   descriptorSetAllocateInfo.pNext = nullptr;
-  descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+  descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
   descriptorSetAllocateInfo.pSetLayouts = &layout;
   descriptorSetAllocateInfo.descriptorSetCount = 1;
 
   checkForVulkanError(vkAllocateDescriptorSets(
-                          device, &descriptorSetAllocateInfo, &descriptorSet),
+                          mDevice, &descriptorSetAllocateInfo, &descriptorSet),
                       "Failed to allocate descriptor set");
   LOG_DEBUG("[Vulkan] Descriptor set allocated");
 
@@ -143,8 +143,8 @@ void VulkanDescriptorManager::createDescriptorPool() {
   descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   descriptorPoolInfo.pPoolSizes = poolSizes.data();
 
-  checkForVulkanError(vkCreateDescriptorPool(device, &descriptorPoolInfo,
-                                             nullptr, &descriptorPool),
+  checkForVulkanError(vkCreateDescriptorPool(mDevice, &descriptorPoolInfo,
+                                             nullptr, &mDescriptorPool),
                       "Failed to create descriptor pool");
 
   LOG_DEBUG("[Vulkan] Descriptor pool created");
@@ -157,4 +157,4 @@ String VulkanDescriptorManager::createHash(const Descriptor &descriptor,
   return ss.str();
 }
 
-} // namespace liquid
+} // namespace liquid::experimental
