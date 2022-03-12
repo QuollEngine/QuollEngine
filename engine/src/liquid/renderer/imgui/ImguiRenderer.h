@@ -3,10 +3,10 @@
 #include <imgui.h>
 
 #include "liquid/window/glfw/GLFWWindow.h"
-#include "liquid/renderer/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
-#include "../../rhi/vulkan/VulkanRenderDevice.h"
+#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
+#include "liquid/rhi/RenderCommandList.h"
 
 namespace liquid {
 

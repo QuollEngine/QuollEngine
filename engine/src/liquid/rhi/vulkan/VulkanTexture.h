@@ -9,6 +9,7 @@ class VulkanTexture {
 public:
   /**
    * @brief Create Vulkan texture
+   *
    * @param image Vulkan image
    * @param imageView Vulkan image view
    * @param sampler Vulkan sampler

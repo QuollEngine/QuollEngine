@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../../rhi/vulkan/VulkanRenderDevice.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanQueue.h"
+#include "VulkanCommandPool.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
 class VulkanUploadContext {
   using SubmitFn = std::function<void(VkCommandBuffer)>;
@@ -12,18 +14,16 @@ public:
    * @brief Create upload context
    *
    * @param device Vulkan device
+   * @param pool Command pool
+   * @param queue Vulkan queue
    */
-  VulkanUploadContext(experimental::VulkanRenderDevice *device);
+  VulkanUploadContext(VulkanDeviceObject &device, VulkanCommandPool &pool,
+                      VulkanQueue &queue);
 
   /**
    * @brief Destroy upload context
    */
   ~VulkanUploadContext();
-
-  /**
-   * @brief Default constructor
-   */
-  VulkanUploadContext() = default;
 
   VulkanUploadContext(const VulkanUploadContext &) = delete;
   VulkanUploadContext(VulkanUploadContext &&) = delete;
@@ -43,18 +43,11 @@ private:
    */
   void createFence();
 
-  /**
-   * @brief Create command pool for uploads
-   *
-   * @param graphicsFamily Graphics family index
-   */
-  void createCommandPool(uint32_t graphicsFamily);
-
 private:
-  VkFence uploadFence = VK_NULL_HANDLE;
-  VkCommandPool uploadCommandPool = VK_NULL_HANDLE;
-  VkDevice device = nullptr;
-  VkQueue graphicsQueue = nullptr;
+  VkFence mUploadFence = VK_NULL_HANDLE;
+  RenderCommandList mCommandList;
+  VulkanQueue &mQueue;
+  VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

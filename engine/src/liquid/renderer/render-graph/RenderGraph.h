@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/RenderCommandList.h"
+#include "liquid/rhi/RenderCommandList.h"
 #include "RenderGraphResource.h"
 #include "RenderGraphAttachmentDescriptor.h"
 #include "RenderGraphPipelineDescriptor.h"

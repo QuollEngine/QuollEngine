@@ -1,11 +1,12 @@
 #pragma once
 
 #include "liquid/renderer/render-graph/RenderGraph.h"
-#include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
-#include "liquid/renderer/RenderCommandList.h"
+#include "liquid/rhi/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
 #include "VulkanSwapchain.h"
+#include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
+#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 
 namespace liquid {
 

@@ -3,11 +3,12 @@
 #include "liquid/renderer/Descriptor.h"
 #include "liquid/renderer/Pipeline.h"
 
-#include "liquid/rhi/vulkan/VulkanResourceRegistry.h"
+#include "VulkanResourceRegistry.h"
+#include "VulkanDeviceObject.h"
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::experimental {
 
 class VulkanDescriptorManager {
 public:
@@ -17,8 +18,8 @@ public:
    * @param device Vulkan device
    * @param registry Vulkan resource registry
    */
-  VulkanDescriptorManager(VkDevice device,
-                          const experimental::VulkanResourceRegistry &registry);
+  VulkanDescriptorManager(VulkanDeviceObject &device,
+                          const VulkanResourceRegistry &registry);
 
   VulkanDescriptorManager(const VulkanDescriptorManager &) = delete;
   VulkanDescriptorManager(VulkanDescriptorManager &&) = delete;
@@ -77,11 +78,11 @@ private:
   String createHash(const Descriptor &descriptor, VkDescriptorSetLayout layout);
 
 private:
-  std::unordered_map<String, VkDescriptorSet> descriptorCache;
-  VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-  VkDevice device;
+  std::unordered_map<String, VkDescriptorSet> mDescriptorCache;
+  VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
+  VkDevice mDevice;
 
-  const experimental::VulkanResourceRegistry &registry;
+  const experimental::VulkanResourceRegistry &mRegistry;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

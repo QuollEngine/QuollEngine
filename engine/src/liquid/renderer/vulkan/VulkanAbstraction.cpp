@@ -7,11 +7,7 @@ namespace liquid {
 
 VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
                                      experimental::VulkanRenderDevice *device_)
-    : window(window_), device(device_),
-      descriptorManager(device->getVulkanDevice(),
-                        device->getResourceRegistry()),
-      renderContext(device, descriptorManager, statsManager),
-      uploadContext(device) {
+    : window(window_), device(device_) {
   createSwapchain();
 
   graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
@@ -33,6 +29,8 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
   LIQUID_PROFILE_EVENT("VulkanAbstraction::execute");
   statsManager.resetDrawCalls();
 
+  auto &renderContext = device->getRenderContext();
+
   uint32_t imageIdx =
       swapchain.acquireNextImage(renderContext.getImageAvailableSemaphore());
 
@@ -50,14 +48,12 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
     swapchainRecreated = false;
   }
 
-  RenderCommandList commandList;
-
-  graphEvaluator->execute(commandList, compiled, graph, imageIdx);
-  renderContext.render(commandList);
-
-  device->synchronizeDeletes(registry);
+  auto &commandBuffer = renderContext.beginRendering();
+  graphEvaluator->execute(commandBuffer, compiled, graph, imageIdx);
+  renderContext.endRendering();
 
   auto queuePresentResult = renderContext.present(swapchain, imageIdx);
+  device->synchronizeDeletes(registry);
 
   if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
       queuePresentResult == VK_SUBOPTIMAL_KHR || isFramebufferResized()) {
@@ -65,9 +61,7 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
   }
 }
 
-void VulkanAbstraction::waitForIdle() {
-  vkDeviceWaitIdle(device->getVulkanDevice());
-}
+void VulkanAbstraction::waitForIdle() { device->wait(); }
 
 void VulkanAbstraction::createSwapchain() {
   swapchain = VulkanSwapchain(window, device, swapchain.getSwapchain());

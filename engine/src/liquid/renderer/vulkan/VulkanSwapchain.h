@@ -3,7 +3,11 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "../../rhi/vulkan/VulkanRenderDevice.h"
+namespace liquid::experimental {
+
+class VulkanRenderDevice;
+
+} // namespace liquid::experimental
 
 namespace liquid {
 

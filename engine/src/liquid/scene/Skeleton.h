@@ -175,7 +175,9 @@ public:
    *
    * @return Number for bones
    */
-  inline size_t getNumDebugBones() const { return debugBoneTransforms.size(); }
+  inline uint32_t getNumDebugBones() const {
+    return static_cast<uint32_t>(debugBoneTransforms.size());
+  }
 
   /**
    * @brief Update skeleton

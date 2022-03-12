@@ -2,26 +2,11 @@
 #include "liquid/core/EngineGlobals.h"
 #include "liquid/window/glfw/GLFWWindow.h"
 #include "liquid/rhi/vulkan/VulkanPhysicalDevice.h"
+#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 #include "VulkanSwapchain.h"
 #include "VulkanError.h"
 
 namespace liquid {
-//
-// std::vector<VkExtensionProperties>
-// VulkanContext::getSupportedExtensions(const String &layerName) {
-//  uint32_t supportedExtensionCount = 0;
-//
-//  vkEnumerateInstanceExtensionProperties(layerName.c_str(),
-//                                         &supportedExtensionCount, nullptr);
-//
-//  std::vector<VkExtensionProperties> supportedExtensions(
-//      supportedExtensionCount);
-//  vkEnumerateInstanceExtensionProperties(
-//      layerName.c_str(), &supportedExtensionCount,
-//      supportedExtensions.data());
-//
-//  return supportedExtensions;
-//}
 
 VulkanSwapchain::VulkanSwapchain(GLFWWindow *window_,
                                  experimental::VulkanRenderDevice *device_,

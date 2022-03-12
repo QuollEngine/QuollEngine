@@ -7,10 +7,7 @@
 
 #include "liquid/renderer/render-graph/RenderGraph.h"
 
-#include "VulkanRenderContext.h"
-#include "VulkanUploadContext.h"
 #include "VulkanGraphEvaluator.h"
-#include "VulkanDescriptorManager.h"
 
 #include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/vulkan/VulkanRenderDevice.h"
@@ -47,13 +44,6 @@ public:
    * @return Window
    */
   inline GLFWWindow *getWindow() { return window; }
-
-  /**
-   * @brief Get render context
-   *
-   * @return Render context
-   */
-  inline VulkanRenderContext &getRenderContext() { return renderContext; }
 
   /**
    * @brief Get swapchain
@@ -127,10 +117,7 @@ private:
   experimental::ResourceRegistry registry;
 
   VmaAllocator allocator = nullptr;
-  VulkanDescriptorManager descriptorManager;
-  VulkanUploadContext uploadContext;
   VulkanSwapchain swapchain;
-  VulkanRenderContext renderContext;
   StatsManager statsManager;
   std::unique_ptr<VulkanGraphEvaluator> graphEvaluator;
 };

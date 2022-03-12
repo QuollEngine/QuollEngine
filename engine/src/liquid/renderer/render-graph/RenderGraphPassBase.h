@@ -1,8 +1,9 @@
 #pragma once
 
+#include "liquid/rhi/RenderCommandList.h"
+
 #include "RenderGraphResource.h"
 #include "RenderGraphBuilder.h"
-#include "../RenderCommandList.h"
 #include "RenderGraphRegistry.h"
 
 #include "RenderGraphAttachmentDescriptor.h"
