@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/renderer/Pipeline.h"
 
-#include "VulkanSwapchain.h"
+#include "liquid/rhi/vulkan/VulkanSwapchain.h"
 #include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
 #include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 
@@ -31,7 +31,8 @@ public:
    * @param realRegistry Real registry of resources
    */
   VulkanGraphEvaluator(
-      experimental::VulkanRenderDevice *device, VulkanSwapchain &swapchain,
+      experimental::VulkanRenderDevice *device,
+      experimental::VulkanSwapchain &swapchain,
       experimental::ResourceRegistry &registry,
       const experimental::VulkanResourceRegistry &realRegistry);
 
@@ -133,7 +134,7 @@ private:
 
 private:
   experimental::VulkanRenderDevice *device;
-  VulkanSwapchain &swapchain;
+  experimental::VulkanSwapchain &swapchain;
   experimental::ResourceRegistry &registry;
   const experimental::VulkanResourceRegistry &realRegistry;
 };

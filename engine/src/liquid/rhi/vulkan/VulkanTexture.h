@@ -2,6 +2,11 @@
 
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
+#include "VulkanDeviceObject.h"
+#include "VulkanUploadContext.h"
+#include "VulkanResourceAllocator.h"
+
+#include "liquid/rhi/TextureDescription.h"
 
 namespace liquid::experimental {
 
@@ -10,13 +15,24 @@ public:
   /**
    * @brief Create Vulkan texture
    *
-   * @param image Vulkan image
-   * @param imageView Vulkan image view
-   * @param sampler Vulkan sampler
-   * @param allocation Vulkan allocation
+   * @param description Texture description
+   * @param allocator Vma allocator
+   * @param device Vulkan device
+   * @param uploadContext Upload context
    */
-  VulkanTexture(VkImage image, VkImageView imageView, VkSampler sampler,
-                VmaAllocation allocation);
+  VulkanTexture(const TextureDescription &description,
+                VulkanResourceAllocator &allocator, VulkanDeviceObject &device,
+                VulkanUploadContext &uploadContext);
+
+  /**
+   * @brief Destroy texture
+   */
+  ~VulkanTexture();
+
+  VulkanTexture(const VulkanTexture &) = delete;
+  VulkanTexture &operator=(const VulkanTexture &) = delete;
+  VulkanTexture(VulkanTexture &&) = delete;
+  VulkanTexture &operator=(VulkanTexture &&) = delete;
 
   /**
    * @brief Get Vulkan image
@@ -51,6 +67,8 @@ private:
   VkImageView mImageView = VK_NULL_HANDLE;
   VkSampler mSampler = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
+  VulkanResourceAllocator &mAllocator;
+  VulkanDeviceObject &mDevice;
 };
 
 } // namespace liquid::experimental

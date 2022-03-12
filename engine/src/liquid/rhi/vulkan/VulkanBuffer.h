@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include <vma/vk_mem_alloc.h>
 
-#include "../BufferDescription.h"
+#include "VulkanResourceAllocator.h"
+#include "liquid/rhi/BufferDescription.h"
 
 namespace liquid::experimental {
 
@@ -12,13 +12,28 @@ public:
   /**
    * @brief Create buffer
    *
-   * @param type Buffer type
-   * @param size Buffer size
-   * @param buffer Vulkan buffer
-   * @param allocation Vulkan allocation
+   * @param description Buffer description
+   * @param allocator Vulkan allocator
    */
-  VulkanBuffer(BufferType type, size_t size, VkBuffer buffer,
-               VmaAllocation allocation);
+  VulkanBuffer(const BufferDescription &description,
+               VulkanResourceAllocator &allocator);
+
+  /**
+   * @brief Destroy buffer
+   */
+  ~VulkanBuffer();
+
+  VulkanBuffer(const VulkanBuffer &) = delete;
+  VulkanBuffer &operator=(const VulkanBuffer &) = delete;
+  VulkanBuffer(VulkanBuffer &&) = delete;
+  VulkanBuffer &operator=(VulkanBuffer &&) = delete;
+
+  /**
+   * @brief Update buffer
+   *
+   * @param description Buffer description
+   */
+  void update(const BufferDescription &description);
 
   /**
    * @brief Get Vulkan buffer
@@ -49,6 +64,21 @@ public:
   inline size_t getSize() const { return mSize; }
 
 private:
+  /**
+   * @brief Create buffer
+   *
+   * @param description Buffer description
+   */
+  void createBuffer(const BufferDescription &description);
+
+  /**
+   * @brief Destroy buffer
+   */
+  void destroyBuffer();
+
+private:
+  VulkanResourceAllocator &mAllocator;
+
   VkBuffer mBuffer = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
   BufferType mType;

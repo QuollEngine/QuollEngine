@@ -1,5 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanResourceRegistry.h"
+#include "VulkanTexture.h"
+#include "VulkanBuffer.h"
 
 namespace liquid::experimental {
 

@@ -6,6 +6,7 @@
 #include "VulkanStandardPushConstants.h"
 #include "VulkanShader.h"
 #include "VulkanRenderPass.h"
+#include "liquid/rhi/vulkan/VulkanTexture.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -14,7 +15,8 @@
 namespace liquid {
 
 VulkanGraphEvaluator::VulkanGraphEvaluator(
-    experimental::VulkanRenderDevice *device_, VulkanSwapchain &swapchain_,
+    experimental::VulkanRenderDevice *device_,
+    experimental::VulkanSwapchain &swapchain_,
     experimental::ResourceRegistry &registry_,
     const experimental::VulkanResourceRegistry &realRegistry_)
     : device(device_), swapchain(swapchain_), registry(registry_),

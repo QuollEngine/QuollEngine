@@ -259,8 +259,8 @@ int main() {
         float ypos = static_cast<float>(dypos);
 
         const auto &size = window->getWindowSize();
-        float width = (float)size.width;
-        float height = (float)size.height;
+        float width = (float)size.x;
+        float height = (float)size.y;
 
         if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
           float x = (xpos / width) * 5.0f;

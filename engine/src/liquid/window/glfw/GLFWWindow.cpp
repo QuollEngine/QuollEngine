@@ -85,7 +85,7 @@ GLFWWindow::~GLFWWindow() {
   glfwTerminate();
 }
 
-SizeObject GLFWWindow::getFramebufferSize() {
+glm::uvec2 GLFWWindow::getFramebufferSize() {
   int width = 0, height = 0;
   glfwGetFramebufferSize(windowInstance, &width, &height);
 
@@ -95,7 +95,7 @@ SizeObject GLFWWindow::getFramebufferSize() {
   };
 }
 
-SizeObject GLFWWindow::getWindowSize() {
+glm::uvec2 GLFWWindow::getWindowSize() {
   int width = 0, height = 0;
   glfwGetWindowSize(windowInstance, &width, &height);
 

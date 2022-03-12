@@ -1,19 +1,18 @@
 #pragma once
 
-#include "../base/RenderDevice.h"
+#include "liquid/rhi/base/RenderDevice.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 #include "VulkanPhysicalDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanQueue.h"
+#include "VulkanRenderContext.h"
+#include "VulkanUploadContext.h"
 #include "VulkanRenderBackend.h"
-#include "VulkanResourceManager.h"
+#include "VulkanResourceAllocator.h"
 #include "VulkanResourceRegistry.h"
 #include "VulkanCommandPool.h"
 #include "VulkanDescriptorManager.h"
-#include "VulkanRenderContext.h"
-#include "VulkanUploadContext.h"
-
-#include "../ResourceRegistry.h"
 
 namespace liquid::experimental {
 
@@ -27,16 +26,6 @@ public:
    */
   VulkanRenderDevice(VulkanRenderBackend &backend,
                      const VulkanPhysicalDevice &physicalDevice);
-
-  /**
-   * @brief Destroy render device
-   */
-  ~VulkanRenderDevice();
-
-  VulkanRenderDevice(const VulkanRenderDevice &) = delete;
-  VulkanRenderDevice &operator=(const VulkanRenderDevice &) = delete;
-  VulkanRenderDevice(VulkanRenderDevice &&) = delete;
-  VulkanRenderDevice &operator=(VulkanRenderDevice &&) = delete;
 
   void synchronize(ResourceRegistry &registry);
 
@@ -61,7 +50,7 @@ public:
    *
    * @return Vulkan device handle
    */
-  inline VkDevice getVulkanDevice() const { return mDevice; }
+  inline VulkanDeviceObject &getVulkanDevice() { return mDevice; }
 
   /**
    * @brief Get physical device
@@ -84,7 +73,7 @@ public:
    *
    * @return Resource manager
    */
-  inline VulkanResourceManager &getResourceManager() { return mManager; }
+  inline VulkanResourceAllocator &getResourceAllocator() { return mAllocator; }
 
   /**
    * @brief Get command pool
@@ -107,12 +96,12 @@ private:
   VulkanQueue mPresentQueue;
   VulkanQueue mGraphicsQueue;
 
-  VulkanDescriptorManager mDescriptorManager;
+  VulkanResourceAllocator mAllocator;
   VulkanResourceRegistry mRegistry;
+  VulkanDescriptorManager mDescriptorManager;
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;
   VulkanUploadContext mUploadContext;
-  VulkanResourceManager mManager;
 };
 
 } // namespace liquid::experimental

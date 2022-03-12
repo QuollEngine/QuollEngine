@@ -66,7 +66,7 @@ static const std::map<VkResult, liquid::String> resultMap{
 
 namespace liquid {
 
-static String createErrorMessage(const String &what, VkResult resultCode) {
+String createVulkanErrorMessage(VkResult resultCode, const String &what) {
   String errorMessage = "[VulkanError] " + what;
   if (resultCode == VK_SUCCESS) {
     return errorMessage;
@@ -79,8 +79,5 @@ static String createErrorMessage(const String &what, VkResult resultCode) {
 
   return errorMessage + ": " + humanReadableResultString + " " + codeString;
 }
-
-VulkanError::VulkanError(const String &what, VkResult resultCode)
-    : std::runtime_error(createErrorMessage(what, resultCode)){};
 
 } // namespace liquid

@@ -52,7 +52,7 @@ void EditorCamera::update() {
 
 void EditorCamera::updatePerspective() {
   const auto &fbSize = window->getFramebufferSize();
-  updatePerspective(fbSize.width, fbSize.height);
+  updatePerspective(fbSize.x, fbSize.y);
 }
 
 void EditorCamera::updatePerspective(uint32_t width, uint32_t height) {

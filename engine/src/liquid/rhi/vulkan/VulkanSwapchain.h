@@ -1,17 +1,12 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include <vma/vk_mem_alloc.h>
+
+#include "VulkanRenderBackend.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanPhysicalDevice.h"
 
 namespace liquid::experimental {
-
-class VulkanRenderDevice;
-
-} // namespace liquid::experimental
-
-namespace liquid {
-
-class GLFWWindow;
 
 /**
  * @brief Vulkan swapchain
@@ -19,19 +14,17 @@ class GLFWWindow;
 class VulkanSwapchain {
 public:
   /**
-   * @brief Initializes object with empty handles
-   */
-  VulkanSwapchain() = default;
-
-  /**
    * @brief Creates swapchain
    *
-   * @param window Pointer to window
-   * @param device Vulkan render device
-   * @param allocator Allocator
+   * @param backend Vulkan backend
+   * @param physicalDevice Physical device
+   * @param device Vulkan device object
+   * @param size Size object
    * @param oldSwapchain Old swapchain
    */
-  VulkanSwapchain(GLFWWindow *window, experimental::VulkanRenderDevice *device,
+  VulkanSwapchain(const VulkanRenderBackend &backend,
+                  const VulkanPhysicalDevice &physicalDevice,
+                  VulkanDeviceObject &device, const glm::uvec2 &size,
                   VkSwapchainKHR oldSwapchain);
 
   /**
@@ -57,11 +50,6 @@ public:
   VulkanSwapchain(const VulkanSwapchain &) = delete;
 
   /**
-   * @brief Destroys Vulkan swapchain
-   */
-  void destroy();
-
-  /**
    * @brief Acquires next image and signals semaphore
    *
    * @param imageAvailableSemaphore Semaphore to signal
@@ -74,28 +62,28 @@ public:
    *
    * @return Surface format
    */
-  inline VkSurfaceFormatKHR getSurfaceFormat() { return surfaceFormat; }
+  inline VkSurfaceFormatKHR getSurfaceFormat() { return mSurfaceFormat; }
 
   /**
    * @brief Gets present mode
    *
    * @return Present mode
    */
-  inline VkPresentModeKHR getPresentMode() { return presentMode; }
+  inline VkPresentModeKHR getPresentMode() { return mPresentMode; }
 
   /**
    * @brief Gets Vulkan swapchain
    *
    * @return Vulkan swapchain handle
    */
-  inline VkSwapchainKHR getSwapchain() const { return swapchain; }
+  inline VkSwapchainKHR getSwapchain() const { return mSwapchain; }
 
   /**
    * @brief Gets extent
    *
    * @return Vulkan extent
    */
-  inline const VkExtent2D &getExtent() { return extent; }
+  inline const VkExtent2D &getExtent() { return mExtent; }
 
   /**
    * @brief Gets Vulkan image views
@@ -103,10 +91,15 @@ public:
    * @return Vulkan image views
    */
   inline const std::vector<VkImageView> &getImageViews() const {
-    return imageViews;
+    return mImageViews;
   }
 
 private:
+  /**
+   * @brief Destroys Vulkan swapchain
+   */
+  void destroy();
+
   /**
    * @brief Picks most suitable surface format
    *
@@ -118,7 +111,7 @@ private:
   /**
    * @brief Picks most present mode
    *
-   * @param presentModes List of present modes
+   * @param presentModes List of pGresent modes
    */
   void pickMostSuitablePresentMode(
       const std::vector<VkPresentModeKHR> &presentModes);
@@ -127,10 +120,10 @@ private:
    * @brief Calculates extent from surface capabilities and window
    *
    * @param capabilities Surface capabilities
-   * @param window Pointer to window
+   * @param size Window size object
    */
   void calculateExtent(const VkSurfaceCapabilitiesKHR &capabilities,
-                       GLFWWindow *window);
+                       const glm::uvec2 &size);
 
   /**
    * @brief Get suitable composite alpha
@@ -142,18 +135,14 @@ private:
   getSuitableCompositeAlpha(const VkSurfaceCapabilitiesKHR &capabilities) const;
 
 private:
-  VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-  std::vector<VkImageView> imageViews;
+  VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
+  std::vector<VkImageView> mImageViews;
 
-  VmaAllocator allocator = nullptr;
+  VkExtent2D mExtent{};
+  VkSurfaceFormatKHR mSurfaceFormat{};
+  VkPresentModeKHR mPresentMode{};
 
-  VkExtent2D extent{};
-  VkSurfaceFormatKHR surfaceFormat{};
-  VkPresentModeKHR presentMode{};
-
-  experimental::VulkanRenderDevice *device = nullptr;
-
-  GLFWWindow *window = nullptr;
+  VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

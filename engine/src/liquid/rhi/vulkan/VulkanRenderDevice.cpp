@@ -4,6 +4,8 @@
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
 #include "liquid/renderer/vulkan/VulkanError.h"
+#include "VulkanTexture.h"
+#include "VulkanBuffer.h"
 
 #include "liquid/core/EngineGlobals.h"
 
@@ -25,44 +27,32 @@ VulkanRenderDevice::VulkanRenderDevice(
           mPhysicalDevice.getQueueFamilyIndices().presentFamily.value()),
       mRenderContext(mDevice, mCommandPool, mGraphicsQueue, mPresentQueue),
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
-      mManager(mBackend, mPhysicalDevice, mDevice, mUploadContext) {}
-
-VulkanRenderDevice::~VulkanRenderDevice() {
-  for (const auto &[_, x] : mRegistry.getBuffers()) {
-    mManager.destroyBuffer(x);
-  }
-
-  for (const auto &[_, x] : mRegistry.getTextures()) {
-    mManager.destroyTexture(x);
-  }
-}
+      mAllocator(mBackend, mPhysicalDevice, mDevice) {}
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   for (auto &handle : registry.getBufferMap().getDirtyCreates()) {
-    auto &&buffer =
-        mManager.createBuffer(registry.getBufferMap().getDescription(handle));
-    mRegistry.addBuffer(handle, std::move(buffer));
+    mRegistry.addBuffer(
+        handle,
+        std::make_unique<VulkanBuffer>(
+            registry.getBufferMap().getDescription(handle), mAllocator));
   }
 
   registry.getBufferMap().clearDirtyCreates();
 
   for (auto &handle : registry.getBufferMap().getDirtyUpdates()) {
     if (registry.getBufferMap().hasDescription(handle)) {
-      auto &buffer = mRegistry.getBuffer(handle);
-      auto newBuffer = mManager.updateBuffer(
-          buffer, registry.getBufferMap().getDescription(handle));
-      if (newBuffer) {
-        mRegistry.updateBuffer(handle, std::move(newBuffer));
-      }
+      mRegistry.getBuffer(handle)->update(
+          registry.getBufferMap().getDescription(handle));
     }
   }
   registry.getBufferMap().clearDirtyUpdates();
 
   for (auto &handle : registry.getTextureMap().getDirtyCreates()) {
     if (registry.getTextureMap().hasDescription(handle)) {
-      auto &&texture = mManager.createTexture(
-          registry.getTextureMap().getDescription(handle));
-      mRegistry.addTexture(handle, std::move(texture));
+      mRegistry.addTexture(handle,
+                           std::make_unique<VulkanTexture>(
+                               registry.getTextureMap().getDescription(handle),
+                               mAllocator, mDevice, mUploadContext));
     }
   }
   registry.getTextureMap().clearDirtyCreates();
@@ -70,14 +60,12 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
 
 void VulkanRenderDevice::synchronizeDeletes(ResourceRegistry &registry) {
   for (auto &handle : registry.getBufferMap().getDirtyDeletes()) {
-    mManager.destroyBuffer(mRegistry.getBuffer(handle));
     mRegistry.removeBuffer(handle);
   }
 
   registry.getBufferMap().clearDirtyDeletes();
 
   for (auto &handle : registry.getTextureMap().getDirtyDeletes()) {
-    mManager.destroyTexture(mRegistry.getTexture(handle));
     mRegistry.removeTexture(handle);
   }
 

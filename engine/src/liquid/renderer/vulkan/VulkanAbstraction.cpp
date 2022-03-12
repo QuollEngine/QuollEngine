@@ -7,8 +7,10 @@ namespace liquid {
 
 VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
                                      experimental::VulkanRenderDevice *device_)
-    : window(window_), device(device_) {
-  createSwapchain();
+    : window(window_), device(device_),
+      swapchain(device->getBackend(), device->getPhysicalDevice(),
+                device->getVulkanDevice(), window->getFramebufferSize(),
+                VK_NULL_HANDLE) {
 
   graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
       device, swapchain, registry, device->getResourceRegistry());
@@ -19,8 +21,6 @@ VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
 
 VulkanAbstraction::~VulkanAbstraction() {
   window->removeResizeHandler(resizeHandler);
-
-  swapchain.destroy();
 
   window = nullptr;
 }
@@ -63,15 +63,12 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
 
 void VulkanAbstraction::waitForIdle() { device->wait(); }
 
-void VulkanAbstraction::createSwapchain() {
-  swapchain = VulkanSwapchain(window, device, swapchain.getSwapchain());
-
-  LOG_DEBUG("[Vulkan] Swapchain created");
-}
-
 void VulkanAbstraction::recreateSwapchain() {
   waitForIdle();
-  createSwapchain();
+  swapchain = experimental::VulkanSwapchain(
+      device->getBackend(), device->getPhysicalDevice(),
+      device->getVulkanDevice(), window->getFramebufferSize(),
+      swapchain.getSwapchain());
 
   framebufferResized = false;
   swapchainRecreated = true;
