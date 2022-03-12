@@ -1,8 +1,8 @@
 #pragma once
 
 #include "RenderGraphResource.h"
-#include "RenderGraphAttachmentDescriptor.h"
-#include "RenderGraphPipelineDescriptor.h"
+#include "RenderGraphAttachmentDescription.h"
+#include "RenderGraphPipelineDescription.h"
 
 namespace liquid {
 
@@ -48,7 +48,7 @@ public:
    * @param descriptor Pipeline descriptor
    * @return Pipeline resource ID
    */
-  GraphResourceId create(const PipelineDescriptor &descriptor);
+  GraphResourceId create(const RenderGraphPipelineDescription &descriptor);
 
 private:
   RenderGraph &graph;

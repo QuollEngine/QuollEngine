@@ -165,7 +165,7 @@ struct PipelineColorBlend {
   std::vector<PipelineColorBlendAttachment> attachments;
 };
 
-struct PipelineDescriptor {
+struct RenderGraphPipelineDescription {
   SharedPtr<Shader> vertexShader;
   SharedPtr<Shader> fragmentShader;
   PipelineVertexInputLayout inputLayout;

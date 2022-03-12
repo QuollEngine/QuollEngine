@@ -22,7 +22,7 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
   sceneTextureId = builder.read(previousColor);
   builder.write("SWAPCHAIN");
 
-  pipelineId = builder.create(PipelineDescriptor{
+  pipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.imgui.default.vertex"),
       shaderLibrary->getShader("__engine.imgui.default.fragment"),
       PipelineVertexInputLayout{

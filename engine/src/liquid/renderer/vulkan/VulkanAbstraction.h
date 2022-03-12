@@ -6,8 +6,7 @@
 #include "liquid/window/glfw/GLFWWindow.h"
 
 #include "liquid/renderer/render-graph/RenderGraph.h"
-
-#include "VulkanGraphEvaluator.h"
+#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
 
 #include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/vulkan/VulkanRenderDevice.h"
@@ -101,12 +100,11 @@ private:
   GLFWWindow *window = nullptr;
   experimental::VulkanRenderDevice *device = nullptr;
   experimental::VulkanSwapchain swapchain;
-
   experimental::ResourceRegistry registry;
+  RenderGraphEvaluator graphEvaluator;
 
   VmaAllocator allocator = nullptr;
   StatsManager statsManager;
-  std::unique_ptr<VulkanGraphEvaluator> graphEvaluator;
 };
 
 } // namespace liquid

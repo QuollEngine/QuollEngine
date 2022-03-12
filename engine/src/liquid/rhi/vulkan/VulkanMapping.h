@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/renderer/render-graph/RenderGraphPipelineDescriptor.h"
-#include "liquid/renderer/render-graph/RenderGraphAttachmentDescriptor.h"
-#include "liquid/renderer/Descriptor.h"
+#include "liquid/renderer/render-graph/RenderGraphPipelineDescription.h"
+#include "liquid/renderer/render-graph/RenderGraphAttachmentDescription.h"
+#include "liquid/rhi/Descriptor.h"
 
 #include <vulkan/vulkan.hpp>
 

@@ -3,7 +3,7 @@
 #include "../render-graph/RenderGraph.h"
 #include "../ShaderLibrary.h"
 #include "../SceneRenderer.h"
-#include "../Descriptor.h"
+#include "liquid/rhi/Descriptor.h"
 #include "liquid/entity/EntityContext.h"
 #include "../vulkan/VulkanRenderData.h"
 #include "liquid/profiler/DebugManager.h"

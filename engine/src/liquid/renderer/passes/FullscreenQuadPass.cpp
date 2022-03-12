@@ -12,7 +12,7 @@ FullscreenQuadPass::FullscreenQuadPass(const String &name,
 
 void FullscreenQuadPass::buildInternal(RenderGraphBuilder &builder) {
   inputTexture = builder.read(inputDep);
-  pipelineId = builder.create(PipelineDescriptor{
+  pipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.fullscreenQuad.default.vertex"),
       shaderLibrary->getShader("__engine.fullscreenQuad.default.fragment"),
       PipelineVertexInputLayout{}, PipelineInputAssembly{},

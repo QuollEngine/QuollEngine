@@ -1,7 +1,6 @@
 #pragma once
 
-#include "liquid/renderer/Descriptor.h"
-#include "liquid/renderer/Pipeline.h"
+#include "liquid/rhi/Descriptor.h"
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanDeviceObject.h"

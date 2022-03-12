@@ -1,7 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+
 #include "VulkanValidator.h"
-#include "liquid/renderer/vulkan/VulkanError.h"
+#include "VulkanError.h"
 
 namespace liquid::experimental {
 

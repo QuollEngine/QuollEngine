@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/renderer/Material.h"
-#include "liquid/renderer/Descriptor.h"
+#include "liquid/rhi/Descriptor.h"
 #include "liquid/scene/Scene.h"
 #include "liquid/entity/EntityContext.h"
 

@@ -1,25 +1,26 @@
 #pragma once
 
-#include "liquid/renderer/Pipeline.h"
+#include "liquid/rhi/vulkan/VulkanDeviceObject.h"
+#include "liquid/rhi/vulkan/VulkanResourceRegistry.h"
+
+#include "liquid/rhi/PipelineDescription.h"
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::experimental {
 
-class VulkanPipeline : public Pipeline {
+class VulkanPipeline {
 public:
   /**
-   * Constructor to set device and pipeline
+   * @brief Create pipeline
    *
+   * @param description Pipeline description
    * @param device Vulkan device
-   * @param pipeline Vulkan pipeline handle
-   * @param pipelineLayout Vulkan pipeline layout handle
-   * @param descriptorSetLayout Descriptor set layout handles
+   * @param registry Resource registry
    */
-  VulkanPipeline(VkDevice device, VkPipeline pipeline,
-                 VkPipelineLayout pipelineLayout,
-                 const std::unordered_map<uint32_t, VkDescriptorSetLayout>
-                     &descriptorSetLayouts);
+  VulkanPipeline(const PipelineDescription &description,
+                 VulkanDeviceObject &device,
+                 const VulkanResourceRegistry &registry);
 
   /**
    * @brief Destructor
@@ -38,14 +39,14 @@ public:
    *
    * @return Vulkan pipeline
    */
-  inline VkPipeline getPipeline() const { return pipeline; }
+  inline VkPipeline getPipeline() const { return mPipeline; }
 
   /**
    * @brief Get Vulkan pipeline layout
    *
    * @return Vulkan pipeline layout
    */
-  inline VkPipelineLayout getPipelineLayout() const { return pipelineLayout; }
+  inline VkPipelineLayout getPipelineLayout() const { return mPipelineLayout; }
 
   /**
    * @brief Get descriptor layout at index
@@ -54,7 +55,7 @@ public:
    * @return Descriptor layout
    */
   inline const VkDescriptorSetLayout getDescriptorLayout(uint32_t index) const {
-    return descriptorSetLayouts.at(index);
+    return mDescriptorLayouts.at(index);
   }
 
   /**
@@ -67,10 +68,11 @@ public:
   }
 
 private:
-  VkDevice device = VK_NULL_HANDLE;
-  VkPipeline pipeline = VK_NULL_HANDLE;
-  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-  std::unordered_map<uint32_t, VkDescriptorSetLayout> descriptorSetLayouts;
+  VulkanDeviceObject &mDevice;
+  VkPipeline mPipeline = VK_NULL_HANDLE;
+  VkPipelineLayout mPipelineLayout = VK_NULL_HANDLE;
+
+  std::unordered_map<uint32_t, VkDescriptorSetLayout> mDescriptorLayouts;
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

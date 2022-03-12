@@ -1,10 +1,11 @@
 #include "liquid/core/Base.h"
 
-#include "liquid/renderer/vulkan/VulkanPipeline.h"
 #include "VulkanCommandBuffer.h"
-
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
+#include "VulkanRenderPass.h"
+#include "VulkanFramebuffer.h"
+#include "VulkanPipeline.h"
 
 namespace liquid::experimental {
 
@@ -15,14 +16,16 @@ VulkanCommandBuffer::VulkanCommandBuffer(
       mDescriptorManager(descriptorManager) {}
 
 void VulkanCommandBuffer::beginRenderPass(
-    VkRenderPass renderPass, VkFramebuffer framebuffer,
+    RenderPassHandle renderPass, FramebufferHandle framebuffer,
     const glm::ivec2 &renderAreaOffset, const glm::uvec2 &renderAreaSize,
     const std::vector<VkClearValue> &clearValues) {
   VkRenderPassBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   beginInfo.pNext = nullptr;
-  beginInfo.framebuffer = framebuffer;
-  beginInfo.renderPass = renderPass;
+  beginInfo.framebuffer =
+      mRegistry.getFramebuffers().at(framebuffer)->getFramebuffer();
+  beginInfo.renderPass =
+      mRegistry.getRenderPasses().at(renderPass)->getRenderPass();
   beginInfo.renderArea.offset = {renderAreaOffset.x, renderAreaOffset.y};
   beginInfo.renderArea.extent = {renderAreaSize.x, renderAreaSize.y};
   beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -35,19 +38,17 @@ void VulkanCommandBuffer::endRenderPass() {
   vkCmdEndRenderPass(mCommandBuffer);
 }
 
-void VulkanCommandBuffer::bindPipeline(const SharedPtr<Pipeline> &pipeline) {
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
+  const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
 
   vkCmdBindPipeline(mCommandBuffer, vulkanPipeline->getBindPoint(),
                     vulkanPipeline->getPipeline());
 }
 
-void VulkanCommandBuffer::bindDescriptor(const SharedPtr<Pipeline> &pipeline,
+void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
                                          uint32_t firstSet,
                                          const Descriptor &descriptor) {
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+  const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
   VkDescriptorSet descriptorSet = mDescriptorManager.getOrCreateDescriptor(
       descriptor, vulkanPipeline->getDescriptorLayout(firstSet));
 
@@ -71,12 +72,11 @@ void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
   vkCmdBindIndexBuffer(mCommandBuffer, vulkanBuffer->getBuffer(), 0, indexType);
 }
 
-void VulkanCommandBuffer::pushConstants(const SharedPtr<Pipeline> &pipeline,
+void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
                                         VkShaderStageFlags stageFlags,
                                         uint32_t offset, uint32_t size,
                                         void *data) {
-  const auto &vulkanPipeline =
-      std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+  const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
 
   vkCmdPushConstants(mCommandBuffer, vulkanPipeline->getPipelineLayout(),
                      stageFlags, offset, size, data);

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
-#include "VulkanDeviceObject.h"
 
-#include "liquid/renderer/vulkan/VulkanError.h"
+#include "VulkanDeviceObject.h"
+#include "VulkanError.h"
 
 #include "liquid/core/EngineGlobals.h"
 

@@ -105,22 +105,25 @@ int main() {
           builder.write("mainColor");
           builder.write("depthBuffer");
 
-          scope.editorGridPipeline = builder.create(liquid::PipelineDescriptor{
-              renderer->getShaderLibrary()->getShader("editor-grid.vert"),
-              renderer->getShaderLibrary()->getShader("editor-grid.frag"),
-              {},
-              liquid::PipelineInputAssembly{},
-              liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
-                                         liquid::CullMode::None,
-                                         liquid::FrontFace::Clockwise},
-              liquid::PipelineColorBlend{{liquid::PipelineColorBlendAttachment{
-                  true, liquid::BlendFactor::SrcAlpha,
-                  liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
-                  liquid::BlendFactor::SrcAlpha, liquid::BlendFactor::DstAlpha,
-                  liquid::BlendOp::Add}}}});
+          scope.editorGridPipeline =
+              builder.create(liquid::RenderGraphPipelineDescription{
+                  renderer->getShaderLibrary()->getShader("editor-grid.vert"),
+                  renderer->getShaderLibrary()->getShader("editor-grid.frag"),
+                  {},
+                  liquid::PipelineInputAssembly{},
+                  liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
+                                             liquid::CullMode::None,
+                                             liquid::FrontFace::Clockwise},
+                  liquid::PipelineColorBlend{
+                      {liquid::PipelineColorBlendAttachment{
+                          true, liquid::BlendFactor::SrcAlpha,
+                          liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
+                          liquid::BlendFactor::SrcAlpha,
+                          liquid::BlendFactor::DstAlpha,
+                          liquid::BlendOp::Add}}}});
 
           scope.skeletonLinesPipeline =
-              builder.create(liquid::PipelineDescriptor{
+              builder.create(liquid::RenderGraphPipelineDescription{
                   renderer->getShaderLibrary()->getShader(
                       "skeleton-lines.vert"),
                   renderer->getShaderLibrary()->getShader(

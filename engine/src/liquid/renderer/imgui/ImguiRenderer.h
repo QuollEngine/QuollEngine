@@ -3,7 +3,6 @@
 #include <imgui.h>
 
 #include "liquid/window/glfw/GLFWWindow.h"
-#include "liquid/renderer/Pipeline.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 #include "liquid/rhi/RenderCommandList.h"
@@ -36,15 +35,13 @@ public:
   static void beginRendering();
   static void endRendering();
 
-  void draw(RenderCommandList &commandList,
-            const SharedPtr<Pipeline> &pipeline);
+  void draw(RenderCommandList &commandList, PipelineHandle pipeline);
 
 private:
   void loadFonts();
 
   void setupRenderStates(ImDrawData *draw_data, RenderCommandList &commandList,
-                         int fbWidth, int fbHeight,
-                         const SharedPtr<Pipeline> &pipeline);
+                         int fbWidth, int fbHeight, PipelineHandle pipeline);
 
 private:
   experimental::VulkanRenderDevice *device = nullptr;

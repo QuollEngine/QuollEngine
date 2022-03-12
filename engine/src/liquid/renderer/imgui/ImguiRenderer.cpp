@@ -70,7 +70,7 @@ void ImguiRenderer::beginRendering() {
 void ImguiRenderer::endRendering() { ImGui::Render(); }
 
 void ImguiRenderer::draw(RenderCommandList &commandList,
-                         const SharedPtr<Pipeline> &pipeline) {
+                         PipelineHandle pipeline) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -218,7 +218,7 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       RenderCommandList &commandList,
                                       int fbWidth, int fbHeight,
-                                      const SharedPtr<Pipeline> &pipeline) {
+                                      PipelineHandle pipeline) {
   if (data->TotalVtxCount > 0) {
     commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
     commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,

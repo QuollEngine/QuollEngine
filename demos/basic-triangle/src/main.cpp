@@ -171,14 +171,14 @@ int main() {
                        const liquid::SharedPtr<liquid::Shader> &fragShader)
             -> std::array<liquid::GraphResourceId, 2> {
           return {
-              builder.create(liquid::PipelineDescriptor{
+              builder.create(liquid::RenderGraphPipelineDescription{
                   vertShader, fragShader,
                   liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
                   liquid::PipelineInputAssembly{},
                   liquid::PipelineRasterizer{liquid::PolygonMode::Fill},
                   liquid::PipelineColorBlend{
                       {liquid::PipelineColorBlendAttachment{}}}}),
-              builder.create(liquid::PipelineDescriptor{
+              builder.create(liquid::RenderGraphPipelineDescription{
                   vertShader, fragShader,
                   liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
                   liquid::PipelineInputAssembly{},
@@ -203,7 +203,7 @@ int main() {
         uint32_t pIdx = renderer->getDebugManager()->getWireframeMode() ? 1 : 0;
         uint32_t material = materialIndex % materials.size();
 
-        liquid::SharedPtr<liquid::Pipeline> pipeline;
+        liquid::PipelineHandle pipeline = 0;
 
         if (material == BASIC_MATERIAL) {
           pipeline = registry.getPipeline(scope.basicPipeline.at(pIdx));

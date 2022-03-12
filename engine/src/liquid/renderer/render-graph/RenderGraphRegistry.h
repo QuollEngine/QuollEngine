@@ -1,8 +1,7 @@
 #pragma once
 
 #include "RenderGraphResource.h"
-#include "liquid/renderer/Pipeline.h"
-#include "liquid/renderer/RenderPass.h"
+#include "RenderGraphPassResult.h"
 
 #include "liquid/rhi/RenderHandle.h"
 
@@ -24,8 +23,7 @@ public:
    * @param resourceId Resource ID
    * @param pipeline Pipeline
    */
-  void addPipeline(GraphResourceId resourceId,
-                   const SharedPtr<Pipeline> &pipeline);
+  void addPipeline(GraphResourceId resourceId, PipelineHandle pipeline);
 
   /**
    * @brief Add render pass resource
@@ -34,7 +32,7 @@ public:
    * @param renderPass Render pass
    */
   void addRenderPass(GraphResourceId resourceId,
-                     const SharedPtr<RenderPass> &renderPass);
+                     RenderGraphPassResult &&renderPass);
 
   /**
    * @brief Get texture
@@ -63,7 +61,7 @@ public:
    * @param resourceId Resource ID
    * @return Pipeline
    */
-  inline const SharedPtr<Pipeline> &getPipeline(GraphResourceId resourceId) {
+  inline PipelineHandle getPipeline(GraphResourceId resourceId) {
     return pipelines.at(resourceId);
   }
 
@@ -84,8 +82,7 @@ public:
    * @param resourceId Resource ID
    * @return Render pass
    */
-  inline const SharedPtr<RenderPass> &
-  getRenderPass(GraphResourceId resourceId) {
+  inline RenderGraphPassResult &getRenderPass(GraphResourceId resourceId) {
     return renderPasses.at(resourceId);
   }
 
@@ -102,8 +99,8 @@ public:
 
 private:
   std::unordered_map<GraphResourceId, TextureHandle> textures;
-  std::unordered_map<GraphResourceId, SharedPtr<Pipeline>> pipelines;
-  std::unordered_map<GraphResourceId, SharedPtr<RenderPass>> renderPasses;
+  std::unordered_map<GraphResourceId, RenderGraphPassResult> renderPasses;
+  std::unordered_map<GraphResourceId, PipelineHandle> pipelines;
 };
 
 } // namespace liquid

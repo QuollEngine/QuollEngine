@@ -17,7 +17,7 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
   builder.write("depthBuffer");
 
   shadowMapTextureId = builder.read("shadowmap");
-  pipelineId = builder.create(PipelineDescriptor{
+  pipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.geometry.default.vertex"),
       shaderLibrary->getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
@@ -26,7 +26,7 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
-  skinnedPipelineId = builder.create(PipelineDescriptor{
+  skinnedPipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.geometry.skinned.vertex"),
       shaderLibrary->getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -35,7 +35,7 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
                          FrontFace::Clockwise},
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
-  wireframePipelineId = builder.create(PipelineDescriptor{
+  wireframePipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.geometry.default.vertex"),
       shaderLibrary->getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),

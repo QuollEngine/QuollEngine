@@ -3,7 +3,7 @@
 #include "liquid/core/Property.h"
 #include "Shader.h"
 #include "MaterialResourceBinder.h"
-#include "Descriptor.h"
+#include "liquid/rhi/Descriptor.h"
 
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/ResourceRegistry.h"

@@ -52,7 +52,7 @@ project "LiquidEngineTest"
     }
 
     removefiles {
-        "src/liquid/renderer/vulkan/VmaImpl.cpp",
+        "src/liquid/rhi/vulkan/VmaImpl.cpp",
     }
 
     setupTestingOptions{}

@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/renderer/Descriptor.h"
+#include "liquid/rhi/Descriptor.h"
 
 #include <gtest/gtest.h>
 
