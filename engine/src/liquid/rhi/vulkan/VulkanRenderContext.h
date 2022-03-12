@@ -7,7 +7,7 @@
 #include "liquid/profiler/StatsManager.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanCommandPool.h"
-#include "liquid/renderer/vulkan/VulkanSwapchain.h"
+#include "VulkanSwapchain.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanQueue.h"
 

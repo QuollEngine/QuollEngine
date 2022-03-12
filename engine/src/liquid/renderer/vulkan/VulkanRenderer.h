@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "VulkanSwapchain.h"
 #include "VulkanShader.h"
 #include "VulkanRenderData.h"
 #include "VulkanAbstraction.h"

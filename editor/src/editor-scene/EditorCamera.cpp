@@ -58,9 +58,9 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
         const auto &size = window->getWindowSize();
 
         float minX = 0;
-        float maxX = static_cast<float>(size.width);
+        float maxX = static_cast<float>(size.x);
         float minY = 0;
-        float maxY = static_cast<float>(size.height);
+        float maxY = static_cast<float>(size.y);
 
         glm::vec2 newPos{xpos, ypos};
         bool outOfBounds = false;
@@ -161,11 +161,10 @@ void EditorCamera::rotate() {
 
   const auto &size = window->getFramebufferSize();
 
-  glm ::vec2 screenToSphere{
-      // horizontal = 2pi
-      (TWO_PI / static_cast<float>(size.width)),
-      // vertical = pi
-      (glm::pi<float>() / static_cast<float>(size.height))};
+  glm ::vec2 screenToSphere{// horizontal = 2pi
+                            (TWO_PI / static_cast<float>(size.x)),
+                            // vertical = pi
+                            (glm::pi<float>() / static_cast<float>(size.y))};
 
   // Convert mouse position difference to angle
   // difference for arcball

@@ -8,6 +8,9 @@
 #include "liquid/renderer/vulkan/VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
 
+#include "VulkanBuffer.h"
+#include "VulkanTexture.h"
+
 namespace liquid::experimental {
 
 VulkanDescriptorManager::VulkanDescriptorManager(

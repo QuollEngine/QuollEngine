@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../RenderHandle.h"
-#include "VulkanBuffer.h"
-#include "VulkanTexture.h"
+#include "liquid/rhi/RenderHandle.h"
 
 namespace liquid::experimental {
+
+class VulkanBuffer;
+class VulkanTexture;
 
 class VulkanResourceRegistry {
   template <class THandle, class TVulkanObject>

@@ -8,6 +8,8 @@
 #include "liquid/renderer/vulkan/VulkanError.h"
 #include "VulkanWindowExtensions.h"
 #include "VulkanWindow.h"
+#include "VulkanTexture.h"
+#include "VulkanBuffer.h"
 #include <GLFW/glfw3.h>
 
 #include "VulkanRenderDevice.h"

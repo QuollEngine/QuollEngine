@@ -229,8 +229,8 @@ private:
 
     const auto &fbSize = window.getFramebufferSize();
 
-    camera->setPerspective(
-        70.0, static_cast<float>(fbSize.width) / fbSize.height, 0.1f, 200.0f);
+    camera->setPerspective(70.0, static_cast<float>(fbSize.x) / fbSize.y, 0.1f,
+                           200.0f);
     camera->lookAt({0.0f, 4.0f, -8.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 
     window.addResizeHandler([this](uint32_t width, uint32_t height) {

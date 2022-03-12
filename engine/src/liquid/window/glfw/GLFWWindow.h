@@ -4,11 +4,6 @@ struct GLFWwindow;
 
 namespace liquid {
 
-struct SizeObject {
-  uint32_t width;
-  uint32_t height;
-};
-
 /**
  * @brief GLFW Window
  *
@@ -48,14 +43,14 @@ public:
    *
    * @return Framebuffer size
    */
-  SizeObject getFramebufferSize();
+  glm::uvec2 getFramebufferSize();
 
   /**
    * @brief Gets window size
    *
    * @return Framebuffer size
    */
-  SizeObject getWindowSize();
+  glm::uvec2 getWindowSize();
 
   /**
    * @brief Checks is window should close

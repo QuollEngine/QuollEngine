@@ -3,6 +3,9 @@
 #include "liquid/renderer/vulkan/VulkanPipeline.h"
 #include "VulkanCommandBuffer.h"
 
+#include "VulkanBuffer.h"
+#include "VulkanTexture.h"
+
 namespace liquid::experimental {
 
 VulkanCommandBuffer::VulkanCommandBuffer(

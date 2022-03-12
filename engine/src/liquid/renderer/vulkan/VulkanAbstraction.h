@@ -46,13 +46,6 @@ public:
   inline GLFWWindow *getWindow() { return window; }
 
   /**
-   * @brief Get swapchain
-   *
-   * @return Swapchain
-   */
-  inline VulkanSwapchain &getSwapchain() { return swapchain; }
-
-  /**
    * @brief Check if framebuffer is resized
    *
    * @return Framebuffer is resized
@@ -94,11 +87,6 @@ public:
 
 public:
   /**
-   * @brief Create swapchain
-   */
-  void createSwapchain();
-
-  /**
    * @brief Recreate swapchain
    *
    * Recreates swapchain, framebuffers and render pass
@@ -110,14 +98,13 @@ private:
   bool framebufferResized = false;
   bool swapchainRecreated = false;
 
-  experimental::VulkanRenderDevice *device = nullptr;
-
   GLFWWindow *window = nullptr;
+  experimental::VulkanRenderDevice *device = nullptr;
+  experimental::VulkanSwapchain swapchain;
 
   experimental::ResourceRegistry registry;
 
   VmaAllocator allocator = nullptr;
-  VulkanSwapchain swapchain;
   StatsManager statsManager;
   std::unique_ptr<VulkanGraphEvaluator> graphEvaluator;
 };
