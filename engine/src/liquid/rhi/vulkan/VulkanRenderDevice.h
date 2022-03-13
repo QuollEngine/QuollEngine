@@ -3,6 +3,9 @@
 #include "liquid/rhi/base/RenderDevice.h"
 #include "liquid/rhi/ResourceRegistry.h"
 
+#include "liquid/renderer/render-graph/RenderGraph.h"
+#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
+
 #include "VulkanPhysicalDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanQueue.h"
@@ -24,29 +27,23 @@ public:
    *
    * @param backend Render backend
    * @param physicalDevice Physical device
+   * @param framebufferSize Framebuffer size
    */
   VulkanRenderDevice(VulkanRenderBackend &backend,
                      const VulkanPhysicalDevice &physicalDevice);
 
-  void synchronizeSwapchain(const VulkanSwapchain &swapchain);
-
-  void synchronize(ResourceRegistry &registry);
-
-  void synchronizeDeletes(ResourceRegistry &registry);
+  /**
+   * @brief Execute render graph
+   *
+   * @param graph Render graph
+   * @param evaluator Render graph evaluator
+   */
+  void execute(RenderGraph &graph, RenderGraphEvaluator &evaluator);
 
   /**
    * @brief Wait for idle
    */
   void wait();
-
-  /**
-   * @brief Get resource registry
-   *
-   * @return Resource registry
-   */
-  inline const VulkanResourceRegistry &getResourceRegistry() const {
-    return mRegistry;
-  }
 
   /**
    * @brief Get Vulkan device handle
@@ -64,33 +61,32 @@ public:
     return mPhysicalDevice;
   }
 
+private:
   /**
-   * @brief Get backend
-   *
-   * @return Render backend
+   * @brief Recreate swapchain
    */
-  inline VulkanRenderBackend &getBackend() { return mBackend; }
+  void recreateSwapchain();
 
   /**
-   * @brief Get resource manager
+   * @brief Synchronize swapchain images
    *
-   * @return Resource manager
+   * @param prevNumSwapchainImages Previous swapchain image count
    */
-  inline VulkanResourceAllocator &getResourceAllocator() { return mAllocator; }
+  void synchronizeSwapchain(size_t prevNumSwapchainImages);
 
   /**
-   * @brief Get command pool
+   * @brief Synchronize resources
    *
-   * @return Command pool
+   * @param registry Resource registry
    */
-  inline VulkanCommandPool &getCommandPool() { return mCommandPool; }
+  void synchronize(ResourceRegistry &registry);
 
   /**
-   * @brief Get render context
+   * @brief Synchronize resource deletes
    *
-   * @return Render context
+   * @param registry Resource registry
    */
-  inline VulkanRenderContext &getRenderContext() { return mRenderContext; }
+  void synchronizeDeletes(ResourceRegistry &registry);
 
 private:
   VulkanRenderBackend &mBackend;
@@ -105,8 +101,9 @@ private:
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;
   VulkanUploadContext mUploadContext;
+  VulkanSwapchain mSwapchain;
 
-  TextureHandle mNumSwapchainImages = 0;
+  bool mSwapchainRecreated = false;
 };
 
 } // namespace liquid::experimental

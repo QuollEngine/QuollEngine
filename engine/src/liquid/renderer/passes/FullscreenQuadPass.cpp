@@ -5,7 +5,7 @@ namespace liquid {
 
 FullscreenQuadPass::FullscreenQuadPass(const String &name,
                                        GraphResourceId renderPassId,
-                                       ShaderLibrary *shaderLibrary_,
+                                       ShaderLibrary &shaderLibrary_,
                                        const String &inputDep_)
     : RenderGraphPassBase(name, renderPassId), shaderLibrary(shaderLibrary_),
       inputDep(inputDep_) {}
@@ -13,8 +13,8 @@ FullscreenQuadPass::FullscreenQuadPass(const String &name,
 void FullscreenQuadPass::buildInternal(RenderGraphBuilder &builder) {
   inputTexture = builder.read(inputDep);
   pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.fullscreenQuad.default.vertex"),
-      shaderLibrary->getShader("__engine.fullscreenQuad.default.fragment"),
+      shaderLibrary.getShader("__engine.fullscreenQuad.default.vertex"),
+      shaderLibrary.getShader("__engine.fullscreenQuad.default.fragment"),
       PipelineVertexInputLayout{}, PipelineInputAssembly{},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
                          FrontFace::CounterClockwise},

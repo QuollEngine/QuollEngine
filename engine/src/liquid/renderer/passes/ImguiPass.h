@@ -4,7 +4,6 @@
 #include "../render-graph/RenderGraphPassBase.h"
 #include "../ShaderLibrary.h"
 #include "../imgui/ImguiRenderer.h"
-#include "../vulkan/VulkanAbstraction.h"
 #include "liquid/profiler/DebugManager.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/profiler/StatsManager.h"
@@ -18,15 +17,16 @@ public:
    *
    * @param name Pass name
    * @param renderPassId Pass resource ID
-   * @param backend Render backend
+   * @param imguiRenderer Imgui renderer
    * @param shaderLibrary Shader library
    * @param debugManager Debug manager
    * @param previousColor Previous color attachment name
    * @param imUpdate Imgui update
    */
   ImguiPass(const String &name, GraphResourceId renderPassId,
-            VulkanAbstraction &backend, ShaderLibrary *shaderLibrary,
-            const SharedPtr<DebugManager> &debugManager,
+            ImguiRenderer &imguiRenderer, ShaderLibrary &shaderLibrary,
+            const PhysicalDeviceInformation &deviceInfo,
+            StatsManager &statsManager, DebugManager &debugManager,
             const String &previousColor,
             const std::function<void(TextureHandle)> &imUpdate);
   /**
@@ -46,9 +46,9 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  ShaderLibrary *shaderLibrary;
+  ShaderLibrary &shaderLibrary;
   String previousColor;
-  ImguiRenderer imguiRenderer;
+  ImguiRenderer &imguiRenderer;
   GraphResourceId pipelineId = 0;
   ImguiDebugLayer debugLayer;
   GraphResourceId sceneTextureId = 0;

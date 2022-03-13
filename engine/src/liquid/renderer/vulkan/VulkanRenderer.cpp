@@ -21,60 +21,59 @@ namespace liquid {
 VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
                                GLFWWindow *window,
                                experimental::VulkanRenderDevice *device)
-    : entityContext(entityContext_), abstraction(window, device),
-      debugManager(new DebugManager) {
+    : mEntityContext(entityContext_), mGraphEvaluator(mRegistry),
+      mDevice(device), mImguiRenderer(window, mRegistry) {
   loadShaders();
 }
 
 VulkanRenderer::~VulkanRenderer() {
-  entityContext.destroyComponents<MeshComponent>();
-  entityContext.destroyComponents<SkinnedMeshComponent>();
-  entityContext.destroyComponents<SkeletonComponent>();
+  mEntityContext.destroyComponents<MeshComponent>();
+  mEntityContext.destroyComponents<SkinnedMeshComponent>();
+  mEntityContext.destroyComponents<SkeletonComponent>();
 
-  shadowMaterials.clear();
+  mShadowMaterials.clear();
+}
 
-  if (shaderLibrary) {
-    delete shaderLibrary;
-    LOG_DEBUG("[Vulkan] Shader library destroyed");
-  }
+void VulkanRenderer::render(RenderGraph &graph) {
+  mDevice->execute(graph, mGraphEvaluator);
 }
 
 void VulkanRenderer::loadShaders() {
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.geometry.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/geometry.vert.spv"));
-  shaderLibrary->addShader("__engine.geometry.skinned.vertex",
+  mShaderLibrary.addShader("__engine.geometry.skinned.vertex",
                            createShader(Engine::getAssetsPath() +
                                         "/shaders/skinnedGeometry.vert.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.pbr.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/pbr.frag.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.skybox.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/skybox.vert.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.skybox.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/skybox.frag.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.shadowmap.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"));
-  shaderLibrary->addShader("__engine.shadowmap.skinned.vertex",
+  mShaderLibrary.addShader("__engine.shadowmap.skinned.vertex",
                            createShader(Engine::getAssetsPath() +
                                         "/shaders/skinnedShadowmap.vert.spv"));
 
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.imgui.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/imgui.vert.spv"));
-  shaderLibrary->addShader(
+  mShaderLibrary.addShader(
       "__engine.imgui.default.fragment",
       createShader(Engine::getAssetsPath() + "/shaders/imgui.frag.spv"));
-  shaderLibrary->addShader("__engine.fullscreenQuad.default.vertex",
+  mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
                            createShader(Engine::getAssetsPath() +
                                         "/shaders/fullscreenQuad.vert.spv"));
-  shaderLibrary->addShader("__engine.fullscreenQuad.default.fragment",
+  mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
                            createShader(Engine::getAssetsPath() +
                                         "/shaders/fullscreenQuad.frag.spv"));
 }
@@ -111,21 +110,21 @@ RenderGraph VulkanRenderer::createRenderGraph(
                      SWAPCHAIN_SIZE_PERCENTAGE, SWAPCHAIN_SIZE_PERCENTAGE, 1,
                      VK_FORMAT_D32_SFLOAT, DepthStencilClear{1.0f, 0}});
 
-  graph.addPass<ShadowPass>("shadowPass", entityContext, shaderLibrary,
-                            shadowMaterials);
-  graph.addPass<ScenePass>("mainPass", entityContext, shaderLibrary, renderData,
-                           debugManager);
-  graph.addPass<EnvironmentPass>("environmentPass", entityContext,
-                                 shaderLibrary, renderData);
-  graph.addPass<ImguiPass>("imgui", abstraction, shaderLibrary, debugManager,
-                           imguiDep, imUpdate);
+  graph.addPass<ShadowPass>("shadowPass", mEntityContext, mShaderLibrary,
+                            mShadowMaterials);
+  graph.addPass<ScenePass>("mainPass", mEntityContext, mShaderLibrary,
+                           renderData, mDebugManager);
+  graph.addPass<EnvironmentPass>("environmentPass", mEntityContext,
+                                 mShaderLibrary, renderData);
+  graph.addPass<ImguiPass>("imgui", mImguiRenderer, mShaderLibrary,
+                           mDevice->getPhysicalDevice().getDeviceInfo(),
+                           mStatsManager, mDebugManager, imguiDep, imUpdate);
 
   return graph;
 }
 
 SharedPtr<VulkanShader> VulkanRenderer::createShader(const String &shaderFile) {
-  return std::make_shared<VulkanShader>(
-      abstraction.getDevice()->getVulkanDevice(), shaderFile);
+  return std::make_shared<VulkanShader>(mDevice->getVulkanDevice(), shaderFile);
 }
 
 SharedPtr<Material> VulkanRenderer::createMaterial(
@@ -134,34 +133,33 @@ SharedPtr<Material> VulkanRenderer::createMaterial(
     const std::vector<TextureHandle> &textures,
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {
-  return std::make_shared<Material>(textures, properties,
-                                    abstraction.getRegistry());
+  return std::make_shared<Material>(textures, properties, mRegistry);
 }
 
 SharedPtr<Material>
 VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                                   const CullMode &cullMode) {
-  return std::make_shared<MaterialPBR>(properties, abstraction.getRegistry());
+  return std::make_shared<MaterialPBR>(properties, mRegistry);
 }
 
 SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
-  shadowMaterials.reserve(
-      entityContext.getEntityCountForComponent<LightComponent>());
+  mShadowMaterials.reserve(
+      mEntityContext.getEntityCountForComponent<LightComponent>());
 
   size_t i = 0;
-  entityContext.iterateEntities<LightComponent>(
+  mEntityContext.iterateEntities<LightComponent>(
       [&i, this](Entity entity, const LightComponent &light) {
-        shadowMaterials.push_back(SharedPtr<Material>(
+        mShadowMaterials.push_back(SharedPtr<Material>(
             new Material({},
                          {{"lightMatrix", glm::mat4{1.0f}},
                           {"lightIndex", static_cast<int>(i)}},
-                         abstraction.getRegistry())));
+                         mRegistry)));
 
         i++;
       });
 
-  return std::make_shared<VulkanRenderData>(
-      entityContext, scene, shadowMaterials, abstraction.getRegistry());
+  return std::make_shared<VulkanRenderData>(mEntityContext, scene,
+                                            mShadowMaterials, mRegistry);
 }
 
 } // namespace liquid

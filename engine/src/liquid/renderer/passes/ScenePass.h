@@ -23,9 +23,9 @@ public:
    * @param debugManager Debug manager
    */
   ScenePass(const String &name, GraphResourceId renderPassId,
-            EntityContext &entityContext, ShaderLibrary *shaderLibrary,
+            EntityContext &entityContext, ShaderLibrary &shaderLibrary,
             const SharedPtr<VulkanRenderData> &renderData,
-            const SharedPtr<DebugManager> &debugManager);
+            DebugManager &debugManager);
 
   /**
    * @brief Build pass
@@ -44,7 +44,7 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  ShaderLibrary *shaderLibrary;
+  ShaderLibrary &shaderLibrary;
   SceneRenderer sceneRenderer;
 
   GraphResourceId pipelineId = 0;
@@ -54,7 +54,7 @@ private:
   GraphResourceId skinnedPipelineId = 0;
 
   SharedPtr<VulkanRenderData> renderData;
-  SharedPtr<DebugManager> debugManager;
+  DebugManager debugManager;
 };
 
 } // namespace liquid

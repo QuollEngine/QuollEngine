@@ -17,7 +17,7 @@ public:
    */
   ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
                   const StatsManager &statsManager,
-                  const SharedPtr<DebugManager> &debugManager_);
+                  DebugManager &debugManager_);
 
   /**
    * @brief Render debug UI
@@ -59,7 +59,7 @@ private:
 private:
   PhysicalDeviceInformation physicalDeviceInfo;
   const StatsManager &statsManager;
-  SharedPtr<DebugManager> debugManager = nullptr;
+  DebugManager &debugManager;
 
   bool usageMetricsVisible = false;
   bool physicalDeviceInfoVisible = false;

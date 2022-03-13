@@ -45,7 +45,7 @@ int MainLoop::run(RenderGraph &graph,
       accumulator -= dt;
     }
 
-    renderer->getRenderBackend().execute(graph);
+    renderer->render(graph);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
@@ -58,7 +58,7 @@ int MainLoop::run(RenderGraph &graph,
     }
   }
 
-  renderer->getRenderBackend().waitForIdle();
+  renderer->wait();
 
   return 0;
 }

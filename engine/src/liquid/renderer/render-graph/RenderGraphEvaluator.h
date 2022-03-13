@@ -65,6 +65,8 @@ public:
                const std::vector<RenderGraphPassBase *> &passes,
                RenderGraph &graph, uint32_t imageIdx);
 
+  inline experimental::ResourceRegistry &getRegistry() { return mRegistry; }
+
 private:
   /**
    * @brief Build render pass resources

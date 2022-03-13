@@ -689,14 +689,13 @@ getMeshes(const tinygltf::Model &model,
     auto entity = entityContext.createEntity();
     if (isSkinnedMesh) {
       entityContext.setComponent<SkinnedMeshComponent>(
-          entity,
-          {std::make_shared<MeshInstance<SkinnedMesh>>(
-              skinnedMesh, renderer->getRenderBackend().getRegistry())});
+          entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
+                      skinnedMesh, renderer->getRegistry())});
 
     } else {
       entityContext.setComponent<MeshComponent>(
           entity, {std::make_shared<MeshInstance<Mesh>>(
-                      mesh, renderer->getRenderBackend().getRegistry())});
+                      mesh, renderer->getRegistry())});
     }
 
     entityMap.insert({i, entity});
@@ -733,8 +732,7 @@ getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
     description.data = new char[description.size];
     memcpy(description.data, image.image.data(), description.size);
 
-    textures.push_back(
-        renderer->getRenderBackend().getRegistry().addTexture(description));
+    textures.push_back(renderer->getRegistry().addTexture(description));
   }
 
   for (auto &gltfMaterial : model.materials) {
@@ -1017,8 +1015,7 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
     return Res(GLTFError::Error);
   }
 
-  auto &&skeletonData =
-      getSkeletons(model, renderer->getRenderBackend().getRegistry());
+  auto &&skeletonData = getSkeletons(model, renderer->getRegistry());
   auto &&animationData = getAnimations(model, skeletonData, animationSystem);
   auto &&materials = getMaterials(model, renderer);
   auto &&meshes =

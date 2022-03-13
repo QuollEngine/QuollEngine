@@ -44,24 +44,24 @@ int main() {
   liquid::AnimationSystem animationSystem(context);
   liquid::PhysicsSystem physicsSystem(context);
 
-  renderer->getShaderLibrary()->addShader(
+  renderer->getShaderLibrary().addShader(
       "editor-grid.vert",
       renderer->createShader("assets/shaders/editor-grid.vert.spv"));
-  renderer->getShaderLibrary()->addShader(
+  renderer->getShaderLibrary().addShader(
       "editor-grid.frag",
       renderer->createShader("assets/shaders/editor-grid.frag.spv"));
 
-  renderer->getShaderLibrary()->addShader(
+  renderer->getShaderLibrary().addShader(
       "skeleton-lines.vert",
       renderer->createShader("assets/shaders/skeleton-lines.vert.spv"));
-  renderer->getShaderLibrary()->addShader(
+  renderer->getShaderLibrary().addShader(
       "skeleton-lines.frag",
       renderer->createShader("assets/shaders/skeleton-lines.frag.spv"));
 
   liquid::MainLoop mainLoop(renderer.get(), window.get());
   liquid::GLTFLoader loader(context, renderer.get(), animationSystem, true);
   liquidator::EditorCamera editorCamera(context, renderer.get(), window.get());
-  liquidator::EditorGrid editorGrid(renderer->getRenderBackend().getRegistry());
+  liquidator::EditorGrid editorGrid(renderer->getRegistry());
   liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
 
   liquidator::UIRoot ui(context, loader);
@@ -107,8 +107,8 @@ int main() {
 
           scope.editorGridPipeline =
               builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer->getShaderLibrary()->getShader("editor-grid.vert"),
-                  renderer->getShaderLibrary()->getShader("editor-grid.frag"),
+                  renderer->getShaderLibrary().getShader("editor-grid.vert"),
+                  renderer->getShaderLibrary().getShader("editor-grid.frag"),
                   {},
                   liquid::PipelineInputAssembly{},
                   liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
@@ -124,10 +124,8 @@ int main() {
 
           scope.skeletonLinesPipeline =
               builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer->getShaderLibrary()->getShader(
-                      "skeleton-lines.vert"),
-                  renderer->getShaderLibrary()->getShader(
-                      "skeleton-lines.frag"),
+                  renderer->getShaderLibrary().getShader("skeleton-lines.vert"),
+                  renderer->getShaderLibrary().getShader("skeleton-lines.frag"),
                   {},
                   liquid::PipelineInputAssembly{
                       liquid::PrimitiveTopology::LineList},

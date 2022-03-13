@@ -65,6 +65,28 @@ public:
    */
   inline VkSurfaceKHR getSurface() const { return mSurface; }
 
+  /**
+   * @brief Get framebuffer size
+   *
+   * @return Framebuffer size
+   */
+  inline const glm::uvec2 getFramebufferSize() const {
+    return mWindow.getFramebufferSize();
+  }
+
+  /**
+   * @brief Check if framebuffer is resized
+   *
+   * @retval true Framebuffer is resized
+   * @retval false Framebuffer is not resized
+   */
+  inline bool isFramebufferResized() const { return mFramebufferResized; }
+
+  /**
+   * @brief Finish framebuffer resize
+   */
+  void finishFramebufferResize();
+
 private:
   /**
    * @brief Create vulkan instance
@@ -86,6 +108,10 @@ private:
   VkSurfaceKHR mSurface = VK_NULL_HANDLE;
   VulkanValidator mValidator;
   std::unique_ptr<VulkanRenderDevice> mDevice;
+
+  GLFWWindow &mWindow;
+  bool mFramebufferResized = false;
+  uint32_t mResizeListener = 0;
 };
 
 } // namespace liquid::experimental

@@ -6,15 +6,15 @@ namespace liquid {
 EnvironmentPass::EnvironmentPass(const String &name,
                                  GraphResourceId renderPassId,
                                  EntityContext &entityContext_,
-                                 ShaderLibrary *shaderLibrary_,
+                                 ShaderLibrary &shaderLibrary_,
                                  const SharedPtr<VulkanRenderData> &renderData_)
     : RenderGraphPassBase(name, renderPassId), entityContext(entityContext_),
       shaderLibrary(shaderLibrary_), renderData(renderData_) {}
 
 void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
   pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.skybox.default.vertex"),
-      shaderLibrary->getShader("__engine.skybox.default.fragment"),
+      shaderLibrary.getShader("__engine.skybox.default.vertex"),
+      shaderLibrary.getShader("__engine.skybox.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(), PipelineInputAssembly{},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
                          FrontFace::Clockwise},

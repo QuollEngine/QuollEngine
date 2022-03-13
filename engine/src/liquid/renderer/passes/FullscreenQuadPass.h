@@ -18,7 +18,7 @@ public:
    * @param inputDep Input dependency
    */
   FullscreenQuadPass(const String &name, GraphResourceId renderPassId,
-                     ShaderLibrary *shaderLibrary, const String &inputDep);
+                     ShaderLibrary &shaderLibrary, const String &inputDep);
 
   /**
    * @brief Build pass
@@ -39,7 +39,7 @@ public:
 private:
   GraphResourceId pipelineId = 0;
   GraphResourceId inputTexture = 0;
-  ShaderLibrary *shaderLibrary;
+  ShaderLibrary &shaderLibrary;
   String inputDep;
 };
 
