@@ -35,6 +35,9 @@ public:
 
   void removeTexture(TextureHandle handle);
 
+  void updateTexture(TextureHandle handle,
+                     std::unique_ptr<VulkanTexture> &&texture);
+
   inline const std::unique_ptr<VulkanTexture> &
   getTexture(TextureHandle handle) const {
     return mTextures.at(handle);

@@ -28,4 +28,9 @@ void VulkanResourceRegistry::removeTexture(TextureHandle handle) {
   mTextures.erase(handle);
 }
 
+void VulkanResourceRegistry::updateTexture(
+    TextureHandle handle, std::unique_ptr<VulkanTexture> &&texture) {
+  mTextures.at(handle) = std::move(texture);
+}
+
 } // namespace liquid::experimental

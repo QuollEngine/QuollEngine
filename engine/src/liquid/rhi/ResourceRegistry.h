@@ -6,6 +6,8 @@
 
 namespace liquid::experimental {
 
+static constexpr uint32_t RESERVED_HANDLE_SIZE = 20;
+
 /**
  * @brief Registry map
  *
@@ -15,9 +17,14 @@ namespace liquid::experimental {
  *
  * @tparam THandle Resource Handle type
  * @tparam TDescription Description type
+ * @tparam TStartingHandle Starting handle id
  */
-template <class THandle, class TDescription> class ResourceRegistryMap {
+template <class THandle, class TDescription,
+          THandle TStartingHandleId =
+              static_cast<THandle>(RESERVED_HANDLE_SIZE)>
+class ResourceRegistryMap {
   using HandleList = std::vector<THandle>;
+  static_assert(TStartingHandleId >= 1, "Starting handle cannot be ZERO");
 
 public:
   /**
@@ -120,7 +127,7 @@ private:
   std::vector<THandle> mDirtyDeletes;
 
   // ZERO means undefined
-  THandle mLastHandle = 1;
+  THandle mLastHandle = TStartingHandleId;
 };
 
 class ResourceRegistry {

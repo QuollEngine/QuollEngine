@@ -62,14 +62,14 @@ public:
    *
    * @return Surface format
    */
-  inline VkSurfaceFormatKHR getSurfaceFormat() { return mSurfaceFormat; }
+  inline VkSurfaceFormatKHR getSurfaceFormat() const { return mSurfaceFormat; }
 
   /**
    * @brief Gets present mode
    *
    * @return Present mode
    */
-  inline VkPresentModeKHR getPresentMode() { return mPresentMode; }
+  inline VkPresentModeKHR getPresentMode() const { return mPresentMode; }
 
   /**
    * @brief Gets Vulkan swapchain
@@ -83,7 +83,7 @@ public:
    *
    * @return Vulkan extent
    */
-  inline const VkExtent2D &getExtent() { return mExtent; }
+  inline const glm::uvec2 &getExtent() { return mExtent; }
 
   /**
    * @brief Gets Vulkan image views
@@ -93,6 +93,13 @@ public:
   inline const std::vector<VkImageView> &getImageViews() const {
     return mImageViews;
   }
+
+  /**
+   * @brief Get Vulkan images
+   *
+   * @return Vulkan images
+   */
+  inline const std::vector<VkImage> &getImages() const { return mImages; }
 
 private:
   /**
@@ -137,8 +144,9 @@ private:
 private:
   VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
   std::vector<VkImageView> mImageViews;
+  std::vector<VkImage> mImages;
 
-  VkExtent2D mExtent{};
+  glm::uvec2 mExtent{};
   VkSurfaceFormatKHR mSurfaceFormat{};
   VkPresentModeKHR mPresentMode{};
 

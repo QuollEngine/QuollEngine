@@ -12,8 +12,10 @@ VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
                 device->getVulkanDevice(), window->getFramebufferSize(),
                 VK_NULL_HANDLE) {
 
+  device->synchronizeSwapchain(swapchain);
+
   graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
-      device, swapchain, registry, device->getResourceRegistry());
+      device, registry, device->getResourceRegistry());
 
   resizeHandler = window->addResizeHandler(
       [this](uint32_t x, uint32_t y) mutable { framebufferResized = true; });
@@ -39,10 +41,13 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
     return;
   }
 
-  auto &&compiled = graphEvaluator->compile(graph, swapchainRecreated);
+  auto &&compiled =
+      graphEvaluator->compile(graph, swapchainRecreated, swapchain.getExtent());
   device->synchronize(registry);
 
-  graphEvaluator->build(compiled, graph, swapchainRecreated);
+  graphEvaluator->build(compiled, graph, swapchainRecreated,
+                        static_cast<uint32_t>(swapchain.getImages().size()),
+                        swapchain.getExtent());
 
   if (swapchainRecreated) {
     swapchainRecreated = false;
@@ -72,6 +77,8 @@ void VulkanAbstraction::recreateSwapchain() {
 
   framebufferResized = false;
   swapchainRecreated = true;
+
+  device->synchronizeSwapchain(swapchain);
 
   LOG_DEBUG("[Vulkan] Swapchain recreated");
 }

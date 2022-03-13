@@ -7,11 +7,19 @@
 
 namespace liquid::experimental {
 
+VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
+                             VkSampler sampler, VkFormat format,
+                             VulkanResourceAllocator &allocator,
+                             VulkanDeviceObject &device)
+    : mAllocator(allocator), mDevice(device), mImage(image),
+      mImageView(imageView), mSampler(sampler), mFormat(format) {}
+
 VulkanTexture::VulkanTexture(const TextureDescription &description,
                              VulkanResourceAllocator &allocator,
                              VulkanDeviceObject &device,
                              VulkanUploadContext &uploadContext)
-    : mAllocator(allocator), mDevice(device) {
+    : mAllocator(allocator), mDevice(device),
+      mFormat(static_cast<VkFormat>(description.format)) {
   LIQUID_ASSERT(
       description.type == TextureType::Cubemap ? description.layers == 6 : true,
       "Cubemap must have 6 layers");
@@ -140,11 +148,17 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 }
 
 VulkanTexture::~VulkanTexture() {
-  vkDestroySampler(mDevice, mSampler, nullptr);
+  if (mSampler) {
+    vkDestroySampler(mDevice, mSampler, nullptr);
+  }
 
-  vkDestroyImageView(mDevice, mImageView, nullptr);
+  if (mImageView) {
+    vkDestroyImageView(mDevice, mImageView, nullptr);
+  }
 
-  vmaDestroyImage(mAllocator, mImage, mAllocation);
+  if (mAllocation && mImage) {
+    vmaDestroyImage(mAllocator, mImage, mAllocation);
+  }
 }
 
 } // namespace liquid::experimental

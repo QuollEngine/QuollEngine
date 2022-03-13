@@ -32,7 +32,6 @@ public:
    */
   VulkanGraphEvaluator(
       experimental::VulkanRenderDevice *device,
-      experimental::VulkanSwapchain &swapchain,
       experimental::ResourceRegistry &registry,
       const experimental::VulkanResourceRegistry &realRegistry);
 
@@ -41,10 +40,12 @@ public:
    *
    * @param graph Render graph
    * @param swapchainRecreated Compile swapchain related passes
+   * @param extent Swapchain extent
    * @return Topologically sorted list of passes
    */
   std::vector<RenderGraphPassBase *> compile(RenderGraph &graph,
-                                             bool swapchainRecreated);
+                                             bool swapchainRecreated,
+                                             const glm::uvec2 &extent);
 
   /**
    * @brief Build passes
@@ -52,9 +53,12 @@ public:
    * @param compiled Compiled passes
    * @param graph Render graph
    * @param swapchainRecreated Rebuild swapchain related passes
+   * @param numSwapchainImages Number of swapchain images
+   * @param extent Swapchain extent
    */
   void build(std::vector<RenderGraphPassBase *> &compiled, RenderGraph &graph,
-             bool swapchainRecreated);
+             bool swapchainRecreated, uint32_t numSwapchainImages,
+             const glm::uvec2 &extent);
 
   /**
    * @brief Execute render graph
@@ -75,19 +79,25 @@ private:
    * @param pass Render pass
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
+   * @param numSwapchainImages Number of swapchain images
+   * @param extent Swapchain extent
    */
-  void buildPass(RenderGraphPassBase *pass, RenderGraph &graph, bool force);
+  void buildPass(RenderGraphPassBase *pass, RenderGraph &graph, bool force,
+                 uint32_t numSwapchainImages, const glm::uvec2 &extent);
 
   /**
    * @brief Create swapchain attachment
    *
    * @param attachment Attachment description
    * @param index Attachment index
+   * @param numSwapchainAttachments Number of swapchain attachments
+   * @param extent Swapchain extent
    * @return Attachment info
    */
   VulkanAttachmentInfo
   createSwapchainAttachment(const RenderPassAttachment &attachment,
-                            uint32_t index);
+                            uint32_t index, uint32_t numSwapchainAttachments,
+                            const glm::uvec2 &extent);
 
   /**
    * @brief Create color attachment
@@ -128,13 +138,14 @@ private:
    * @brief Create texture
    *
    * @param data Attachment data
+   * @param extent Swapchain extent
    * @return Texture
    */
-  TextureHandle createTexture(const AttachmentData &data);
+  TextureHandle createTexture(const AttachmentData &data,
+                              const glm::uvec2 &extent);
 
 private:
   experimental::VulkanRenderDevice *device;
-  experimental::VulkanSwapchain &swapchain;
   experimental::ResourceRegistry &registry;
   const experimental::VulkanResourceRegistry &realRegistry;
 };

@@ -15,6 +15,21 @@ public:
   /**
    * @brief Create Vulkan texture
    *
+   * Create texture from available resources
+   * @param image Vulkan image
+   * @param imageView Vulkan image view
+   * @param sampler Vulkan sampler
+   * @param format Vulkan format
+   * @param resourceAllocator Resource allocator
+   * @param device Vulkan device
+   */
+  VulkanTexture(VkImage image, VkImageView imageView, VkSampler sampler,
+                VkFormat format, VulkanResourceAllocator &allocator,
+                VulkanDeviceObject &device);
+
+  /**
+   * @brief Create Vulkan texture
+   *
    * @param description Texture description
    * @param allocator Vma allocator
    * @param device Vulkan device
@@ -62,7 +77,13 @@ public:
    */
   inline VmaAllocation getAllocation() const { return mAllocation; }
 
+  /**
+   * @brief Get Vulkan format
+   */
+  inline VkFormat getFormat() const { return mFormat; }
+
 private:
+  VkFormat mFormat = VK_FORMAT_MAX_ENUM;
   VkImage mImage = VK_NULL_HANDLE;
   VkImageView mImageView = VK_NULL_HANDLE;
   VkSampler mSampler = VK_NULL_HANDLE;
