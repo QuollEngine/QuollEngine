@@ -9,7 +9,7 @@ SceneRenderer::SceneRenderer(EntityContext &entityContext_,
     : entityContext(entityContext_), bindMaterialData(bindMaterialData_) {}
 
 void SceneRenderer::render(RenderCommandList &commandList,
-                           const SharedPtr<Pipeline> &pipeline) {
+                           PipelineHandle pipeline) {
   entityContext.iterateEntities<MeshComponent, TransformComponent>(
       [&commandList, &pipeline, this](Entity entity, const MeshComponent &mesh,
                                       const TransformComponent &transform) {
@@ -45,7 +45,7 @@ void SceneRenderer::render(RenderCommandList &commandList,
 }
 
 void SceneRenderer::renderSkinned(RenderCommandList &commandList,
-                                  const SharedPtr<Pipeline> &pipeline,
+                                  PipelineHandle pipeline,
                                   uint32_t descriptorSet) {
   entityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
                                 TransformComponent>(

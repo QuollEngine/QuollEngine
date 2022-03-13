@@ -6,7 +6,7 @@
 #include "RenderGraphBuilder.h"
 #include "RenderGraphRegistry.h"
 
-#include "RenderGraphAttachmentDescriptor.h"
+#include "RenderGraphAttachmentDescription.h"
 
 namespace liquid {
 

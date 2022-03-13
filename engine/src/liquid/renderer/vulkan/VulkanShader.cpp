@@ -1,7 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
 #include "VulkanShader.h"
-#include "VulkanError.h"
+
+#include "liquid/rhi/vulkan/VulkanError.h"
 
 namespace liquid {
 

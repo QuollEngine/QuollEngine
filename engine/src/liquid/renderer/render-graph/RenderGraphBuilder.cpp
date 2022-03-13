@@ -1,8 +1,8 @@
 #include "liquid/core/Base.h"
 
 #include "RenderGraph.h"
-#include "RenderGraphAttachmentDescriptor.h"
-#include "RenderGraphPipelineDescriptor.h"
+#include "RenderGraphAttachmentDescription.h"
+#include "RenderGraphPipelineDescription.h"
 #include "RenderGraphBuilder.h"
 
 namespace liquid {
@@ -34,7 +34,7 @@ GraphResourceId RenderGraphBuilder::read(const String &name) {
 }
 
 GraphResourceId
-RenderGraphBuilder::create(const PipelineDescriptor &descriptor) {
+RenderGraphBuilder::create(const RenderGraphPipelineDescription &descriptor) {
   auto resourceId = graph.addPipeline(descriptor);
   pass->addResource(resourceId);
   return resourceId;

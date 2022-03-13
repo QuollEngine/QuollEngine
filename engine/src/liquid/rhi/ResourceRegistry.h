@@ -1,8 +1,11 @@
 #pragma once
 
+#include "RenderHandle.h"
 #include "BufferDescription.h"
 #include "TextureDescription.h"
-#include "RenderHandle.h"
+#include "RenderPassDescription.h"
+#include "FramebufferDescription.h"
+#include "PipelineDescription.h"
 
 namespace liquid::experimental {
 
@@ -189,9 +192,114 @@ public:
     return mTextures;
   }
 
+  /**
+   * @brief Add render pass
+   *
+   * @param description Render pass description
+   * @return RenderPass handle
+   */
+  RenderPassHandle addRenderPass(const RenderPassDescription &description);
+
+  /**
+   * @brief Update render pass
+   *
+   * @param handle Render pass handle
+   * @param description Render pass Description
+   */
+  void updateRenderPass(RenderPassHandle handle,
+                        const RenderPassDescription &description);
+
+  /**
+   * @brief Remove render pass
+   *
+   * @param handle Render pass handle
+   */
+  void deleteRenderPass(RenderPassHandle handle);
+
+  /**
+   * @brief Get render pass map
+   *
+   * @return Render pass map
+   */
+  inline ResourceRegistryMap<RenderPassHandle, RenderPassDescription> &
+  getRenderPassMap() {
+    return mRenderPasses;
+  }
+
+  /**
+   * @brief Add framebuffer
+   *
+   * @param description Render pass description
+   * @return Framebuffer handle
+   */
+  FramebufferHandle addFramebuffer(const FramebufferDescription &description);
+
+  /**
+   * @brief Update framebuffer
+   *
+   * @param handle Framebuffer handle
+   * @param description Framebuffer Description
+   */
+  void updateFramebuffer(FramebufferHandle handle,
+                         const FramebufferDescription &description);
+
+  /**
+   * @brief Remove framebuffer
+   *
+   * @param handle Render pass handle
+   */
+  void deleteFramebuffer(FramebufferHandle handle);
+
+  /**
+   * @brief Get framebuffer map
+   *
+   * @return Render pass map
+   */
+  inline ResourceRegistryMap<FramebufferHandle, FramebufferDescription> &
+  getFramebufferMap() {
+    return mFramebuffers;
+  }
+
+  /**
+   * @brief Add pipeline
+   *
+   * @param description Render pass description
+   * @return Pipeline handle
+   */
+  PipelineHandle addPipeline(const PipelineDescription &description);
+
+  /**
+   * @brief Update pipeline
+   *
+   * @param handle Pipeline handle
+   * @param description Pipeline Description
+   */
+  void updatePipeline(PipelineHandle handle,
+                      const PipelineDescription &description);
+
+  /**
+   * @brief Remove pipeline
+   *
+   * @param handle Render pass handle
+   */
+  void deletePipeline(PipelineHandle handle);
+
+  /**
+   * @brief Get pipeline map
+   *
+   * @return Render pass map
+   */
+  inline ResourceRegistryMap<PipelineHandle, PipelineDescription> &
+  getPipelineMap() {
+    return mPipelines;
+  }
+
 private:
   ResourceRegistryMap<BufferHandle, BufferDescription> mBuffers;
   ResourceRegistryMap<TextureHandle, TextureDescription> mTextures;
+  ResourceRegistryMap<RenderPassHandle, RenderPassDescription> mRenderPasses;
+  ResourceRegistryMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
+  ResourceRegistryMap<PipelineHandle, PipelineDescription> mPipelines;
 };
 
 } // namespace liquid::experimental

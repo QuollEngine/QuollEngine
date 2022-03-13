@@ -66,8 +66,8 @@ public:
    * @param renderAreaSize Render area size
    * @param clearValues Clear values
    */
-  inline void beginRenderPass(VkRenderPass renderPass,
-                              VkFramebuffer framebuffer,
+  inline void beginRenderPass(RenderPassHandle renderPass,
+                              FramebufferHandle framebuffer,
                               const glm::ivec2 &renderAreaOffset,
                               const glm::uvec2 &renderAreaSize,
                               const std::vector<VkClearValue> &clearValues) {
@@ -85,7 +85,7 @@ public:
    *
    * @param pipeline Pipeline
    */
-  void bindPipeline(const SharedPtr<Pipeline> &pipeline) {
+  void bindPipeline(PipelineHandle pipeline) {
     mNativeRenderCommandList->bindPipeline(pipeline);
   }
 
@@ -96,8 +96,8 @@ public:
    * @param firstSet First set
    * @param descriptor Descriptor
    */
-  inline void bindDescriptor(const SharedPtr<Pipeline> &pipeline,
-                             uint32_t firstSet, const Descriptor &descriptor) {
+  inline void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+                             const Descriptor &descriptor) {
     mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor);
   }
 
@@ -129,9 +129,8 @@ public:
    * @param size Size
    * @param data Data
    */
-  void pushConstants(const SharedPtr<Pipeline> &pipeline,
-                     VkShaderStageFlags stageFlags, uint32_t offset,
-                     uint32_t size, void *data) {
+  void pushConstants(PipelineHandle pipeline, VkShaderStageFlags stageFlags,
+                     uint32_t offset, uint32_t size, void *data) {
     mNativeRenderCommandList->pushConstants(pipeline, stageFlags, offset, size,
                                             data);
   }

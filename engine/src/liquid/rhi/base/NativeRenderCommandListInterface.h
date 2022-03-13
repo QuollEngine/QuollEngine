@@ -1,8 +1,7 @@
 #pragma once
 
-#include "liquid/renderer/Pipeline.h"
-#include "liquid/renderer/Descriptor.h"
-#include "../RenderHandle.h"
+#include "liquid/rhi/Descriptor.h"
+#include "liquid/rhi/RenderHandle.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -20,7 +19,7 @@ public:
    * @param clearValues Clear values
    */
   virtual void
-  beginRenderPass(VkRenderPass renderPass, VkFramebuffer framebuffer,
+  beginRenderPass(RenderPassHandle renderPass, FramebufferHandle framebuffer,
                   const glm::ivec2 &renderAreaOffset,
                   const glm::uvec2 &renderAreaSize,
                   const std::vector<VkClearValue> &clearValues) = 0;
@@ -35,7 +34,7 @@ public:
    *
    * @param pipeline Pipeline
    */
-  virtual void bindPipeline(const SharedPtr<Pipeline> &pipeline) = 0;
+  virtual void bindPipeline(PipelineHandle pipeline) = 0;
 
   /**
    * @brief Bind descriptor
@@ -44,8 +43,7 @@ public:
    * @param firstSet First set
    * @param descriptor Descriptor
    */
-  virtual void bindDescriptor(const SharedPtr<Pipeline> &pipeline,
-                              uint32_t firstSet,
+  virtual void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                               const Descriptor &descriptor) = 0;
 
   /**
@@ -72,7 +70,7 @@ public:
    * @param size Size
    * @param data Data
    */
-  virtual void pushConstants(const SharedPtr<Pipeline> &pipeline,
+  virtual void pushConstants(PipelineHandle pipeline,
                              VkShaderStageFlags stageFlags, uint32_t offset,
                              uint32_t size, void *data) = 0;
 

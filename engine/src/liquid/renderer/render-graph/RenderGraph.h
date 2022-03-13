@@ -2,8 +2,8 @@
 
 #include "liquid/rhi/RenderCommandList.h"
 #include "RenderGraphResource.h"
-#include "RenderGraphAttachmentDescriptor.h"
-#include "RenderGraphPipelineDescriptor.h"
+#include "RenderGraphAttachmentDescription.h"
+#include "RenderGraphPipelineDescription.h"
 #include "RenderGraphRegistry.h"
 #include "RenderGraphBuilder.h"
 #include "RenderGraphInlinePass.h"
@@ -83,7 +83,7 @@ public:
    * @param descriptor Pipeline descriptor
    * @return Pipeline ID
    */
-  GraphResourceId addPipeline(const PipelineDescriptor &descriptor);
+  GraphResourceId addPipeline(const RenderGraphPipelineDescription &descriptor);
 
   /**
    * @brief Get resource from name
@@ -160,7 +160,8 @@ public:
    * @param id Resource ID
    * @return Pipeline descriptor
    */
-  inline const PipelineDescriptor &getPipeline(GraphResourceId id) const {
+  inline const RenderGraphPipelineDescription &
+  getPipeline(GraphResourceId id) const {
     return pipelines.at(id);
   }
 
@@ -210,7 +211,7 @@ private:
   void addPassInternal(RenderGraphPassBase *pass);
 
 private:
-  std::unordered_map<GraphResourceId, PipelineDescriptor> pipelines;
+  std::unordered_map<GraphResourceId, RenderGraphPipelineDescription> pipelines;
   std::unordered_map<GraphResourceId, AttachmentData> textures;
   std::unordered_map<String, GraphResourceId> resourceMap{{"SWAPCHAIN", 0}};
   std::vector<RenderGraphPassBase *> passes;

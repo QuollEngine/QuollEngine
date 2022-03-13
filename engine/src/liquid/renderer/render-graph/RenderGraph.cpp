@@ -9,7 +9,7 @@ RenderGraph::RenderGraph(RenderGraph &&rhs) {
   passes = rhs.passes;
   textures = rhs.textures;
   resourceMap = rhs.resourceMap;
-  registry = rhs.registry;
+  registry = std::move(rhs.registry);
 
   rhs.passes.clear();
 }
@@ -151,7 +151,8 @@ void RenderGraph::setSwapchainColor(const glm::vec4 &color) {
   swapchainColor = color;
 }
 
-GraphResourceId RenderGraph::addPipeline(const PipelineDescriptor &descriptor) {
+GraphResourceId
+RenderGraph::addPipeline(const RenderGraphPipelineDescription &descriptor) {
   auto id = generateNewId();
   pipelines.insert({id, descriptor});
   return id;

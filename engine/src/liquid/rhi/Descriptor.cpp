@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "Descriptor.h"
+#include "liquid/rhi/Descriptor.h"
 
 namespace liquid {
 

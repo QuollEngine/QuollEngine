@@ -3,10 +3,13 @@
 #include <vulkan/vulkan.hpp>
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
-#include "liquid/renderer/vulkan/VulkanError.h"
 #include "VulkanTexture.h"
 #include "VulkanBuffer.h"
+#include "VulkanRenderPass.h"
+#include "VulkanFramebuffer.h"
+#include "VulkanPipeline.h"
 
+#include "VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
 
 namespace liquid::experimental {
@@ -60,13 +63,14 @@ void VulkanRenderDevice::synchronizeSwapchain(
 }
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
+
+  // Buffers
   for (auto &handle : registry.getBufferMap().getDirtyCreates()) {
     mRegistry.addBuffer(
         handle,
         std::make_unique<VulkanBuffer>(
             registry.getBufferMap().getDescription(handle), mAllocator));
   }
-
   registry.getBufferMap().clearDirtyCreates();
 
   for (auto &handle : registry.getBufferMap().getDirtyUpdates()) {
@@ -77,6 +81,7 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   }
   registry.getBufferMap().clearDirtyUpdates();
 
+  // Textures
   for (auto &handle : registry.getTextureMap().getDirtyCreates()) {
     if (registry.getTextureMap().hasDescription(handle)) {
       mRegistry.addTexture(handle,
@@ -86,6 +91,64 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
     }
   }
   registry.getTextureMap().clearDirtyCreates();
+
+  // Render passes
+  for (auto &handle : registry.getRenderPassMap().getDirtyCreates()) {
+    mRegistry.addRenderPass(
+        handle, std::make_unique<VulkanRenderPass>(
+                    registry.getRenderPassMap().getDescription(handle), mDevice,
+                    mRegistry));
+  }
+  registry.getRenderPassMap().clearDirtyCreates();
+
+  for (auto &handle : registry.getRenderPassMap().getDirtyUpdates()) {
+    if (registry.getRenderPassMap().hasDescription(handle)) {
+      mRegistry.updateRenderPass(
+          handle, std::make_unique<VulkanRenderPass>(
+                      registry.getRenderPassMap().getDescription(handle),
+                      mDevice, mRegistry));
+    }
+  }
+  registry.getRenderPassMap().clearDirtyUpdates();
+
+  // Framebuffers
+  for (auto &handle : registry.getFramebufferMap().getDirtyCreates()) {
+    mRegistry.addFramebuffer(
+        handle, std::make_unique<VulkanFramebuffer>(
+                    registry.getFramebufferMap().getDescription(handle),
+                    mDevice, mRegistry));
+  }
+  registry.getFramebufferMap().clearDirtyCreates();
+
+  for (auto &handle : registry.getFramebufferMap().getDirtyUpdates()) {
+    if (registry.getFramebufferMap().hasDescription(handle)) {
+      mRegistry.updateFramebuffer(
+          handle, std::make_unique<VulkanFramebuffer>(
+                      registry.getFramebufferMap().getDescription(handle),
+                      mDevice, mRegistry));
+    }
+  }
+  registry.getFramebufferMap().clearDirtyUpdates();
+
+  // Pipelines
+  for (auto &handle : registry.getPipelineMap().getDirtyCreates()) {
+    mRegistry.addPipeline(handle,
+                          std::make_unique<VulkanPipeline>(
+                              registry.getPipelineMap().getDescription(handle),
+                              mDevice, mRegistry));
+  }
+
+  registry.getPipelineMap().clearDirtyCreates();
+
+  for (auto &handle : registry.getPipelineMap().getDirtyUpdates()) {
+    if (registry.getPipelineMap().hasDescription(handle)) {
+      mRegistry.updatePipeline(
+          handle, std::make_unique<VulkanPipeline>(
+                      registry.getPipelineMap().getDescription(handle), mDevice,
+                      mRegistry));
+    }
+  }
+  registry.getPipelineMap().clearDirtyUpdates();
 }
 
 void VulkanRenderDevice::synchronizeDeletes(ResourceRegistry &registry) {

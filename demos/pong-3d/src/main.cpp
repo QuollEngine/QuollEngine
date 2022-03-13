@@ -78,16 +78,17 @@ public:
           builder.write("SWAPCHAIN");
           builder.write("depthBuffer");
 
-          scope.pipeline = builder.create(liquid::PipelineDescriptor{
-              vertexShader, fragmentShader,
-              liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
-              liquid::PipelineInputAssembly{
-                  liquid::PrimitiveTopology::TriangleList},
-              liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
-                                         liquid::CullMode::None,
-                                         liquid::FrontFace::Clockwise},
-              liquid::PipelineColorBlend{
-                  {liquid::PipelineColorBlendAttachment{}}}});
+          scope.pipeline =
+              builder.create(liquid::RenderGraphPipelineDescription{
+                  vertexShader, fragmentShader,
+                  liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
+                  liquid::PipelineInputAssembly{
+                      liquid::PrimitiveTopology::TriangleList},
+                  liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
+                                             liquid::CullMode::None,
+                                             liquid::FrontFace::Clockwise},
+                  liquid::PipelineColorBlend{
+                      {liquid::PipelineColorBlendAttachment{}}}});
         },
         [&sceneRenderer, this](liquid::RenderCommandList &commandList,
                                PongScope &scope,

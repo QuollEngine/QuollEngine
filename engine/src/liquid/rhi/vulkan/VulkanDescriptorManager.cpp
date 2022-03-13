@@ -3,13 +3,12 @@
 #include <vulkan/vulkan.hpp>
 
 #include "VulkanDescriptorManager.h"
-#include "liquid/renderer/vulkan/VulkanMapping.h"
-
-#include "liquid/renderer/vulkan/VulkanError.h"
-#include "liquid/core/EngineGlobals.h"
-
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
+#include "VulkanMapping.h"
+#include "VulkanError.h"
+
+#include "liquid/core/EngineGlobals.h"
 
 namespace liquid::experimental {
 
@@ -85,7 +84,7 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
         if (tex == 0)
           continue;
 
-        const auto &native = mRegistry.getTexture(tex);
+        const auto &native = mRegistry.getTextures().at(tex);
 
         imageInfoObjects.push_back({native->getSampler(),
                                     native->getImageView(),

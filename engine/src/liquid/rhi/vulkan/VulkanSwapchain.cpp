@@ -1,8 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
-#include "VulkanSwapchain.h"
 
-#include "liquid/renderer/vulkan/VulkanError.h"
+#include "VulkanSwapchain.h"
+#include "VulkanError.h"
 
 namespace liquid::experimental {
 

@@ -99,7 +99,7 @@ TEST_F(RenderGraphBuilderTest,
 TEST_F(RenderGraphBuilderTest, CreatesPipelineResource) {
   auto pass1 = std::make_shared<NoncePass>("nonce", 1);
 
-  liquid::PipelineDescriptor descriptor{};
+  liquid::RenderGraphPipelineDescription descriptor{};
   descriptor.inputAssembly.primitiveTopology =
       liquid::PrimitiveTopology::PatchList;
 

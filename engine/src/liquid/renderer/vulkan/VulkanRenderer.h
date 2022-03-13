@@ -6,7 +6,6 @@
 #include "VulkanShader.h"
 #include "VulkanRenderData.h"
 #include "VulkanAbstraction.h"
-#include "VulkanGraphEvaluator.h"
 
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/MaterialPBR.h"

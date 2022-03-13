@@ -12,7 +12,7 @@ EnvironmentPass::EnvironmentPass(const String &name,
       shaderLibrary(shaderLibrary_), renderData(renderData_) {}
 
 void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
-  pipelineId = builder.create(PipelineDescriptor{
+  pipelineId = builder.create(RenderGraphPipelineDescription{
       shaderLibrary->getShader("__engine.skybox.default.vertex"),
       shaderLibrary->getShader("__engine.skybox.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(), PipelineInputAssembly{},

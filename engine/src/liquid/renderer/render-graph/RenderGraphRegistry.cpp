@@ -13,7 +13,7 @@ void RenderGraphRegistry::addTexture(GraphResourceId resourceId,
 }
 
 void RenderGraphRegistry::addPipeline(GraphResourceId resourceId,
-                                      const SharedPtr<Pipeline> &pipeline) {
+                                      PipelineHandle pipeline) {
   if (pipelines.find(resourceId) != pipelines.end()) {
     pipelines.at(resourceId) = pipeline;
   } else {
@@ -21,12 +21,12 @@ void RenderGraphRegistry::addPipeline(GraphResourceId resourceId,
   }
 }
 
-void RenderGraphRegistry::addRenderPass(
-    GraphResourceId resourceId, const SharedPtr<RenderPass> &renderPass) {
+void RenderGraphRegistry::addRenderPass(GraphResourceId resourceId,
+                                        RenderGraphPassResult &&renderPass) {
   if (renderPasses.find(resourceId) != renderPasses.end()) {
-    renderPasses.at(resourceId) = renderPass;
+    renderPasses.at(resourceId) = std::move(renderPass);
   } else {
-    renderPasses.insert({resourceId, renderPass});
+    renderPasses.insert({resourceId, std::move(renderPass)});
   }
 }
 

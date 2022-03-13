@@ -1,7 +1,8 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+
 #include "VulkanAbstraction.h"
-#include "VulkanError.h"
+#include "liquid/rhi/vulkan/VulkanError.h"
+#include "liquid/core/EngineGlobals.h"
 
 namespace liquid {
 
@@ -10,12 +11,10 @@ VulkanAbstraction::VulkanAbstraction(GLFWWindow *window_,
     : window(window_), device(device_),
       swapchain(device->getBackend(), device->getPhysicalDevice(),
                 device->getVulkanDevice(), window->getFramebufferSize(),
-                VK_NULL_HANDLE) {
+                VK_NULL_HANDLE),
+      graphEvaluator(registry) {
 
   device->synchronizeSwapchain(swapchain);
-
-  graphEvaluator = std::make_unique<VulkanGraphEvaluator>(
-      device, registry, device->getResourceRegistry());
 
   resizeHandler = window->addResizeHandler(
       [this](uint32_t x, uint32_t y) mutable { framebufferResized = true; });
@@ -42,19 +41,20 @@ void VulkanAbstraction::execute(RenderGraph &graph) {
   }
 
   auto &&compiled =
-      graphEvaluator->compile(graph, swapchainRecreated, swapchain.getExtent());
-  device->synchronize(registry);
+      graphEvaluator.compile(graph, swapchainRecreated, swapchain.getExtent());
 
-  graphEvaluator->build(compiled, graph, swapchainRecreated,
-                        static_cast<uint32_t>(swapchain.getImages().size()),
-                        swapchain.getExtent());
+  graphEvaluator.build(compiled, graph, swapchainRecreated,
+                       static_cast<uint32_t>(swapchain.getImages().size()),
+                       swapchain.getExtent());
+
+  device->synchronize(registry);
 
   if (swapchainRecreated) {
     swapchainRecreated = false;
   }
 
   auto &commandBuffer = renderContext.beginRendering();
-  graphEvaluator->execute(commandBuffer, compiled, graph, imageIdx);
+  graphEvaluator.execute(commandBuffer, compiled, graph, imageIdx);
   renderContext.endRendering();
 
   auto queuePresentResult = renderContext.present(swapchain, imageIdx);

@@ -37,7 +37,8 @@ public:
    * @param renderAreaSize Render area size
    * @param clearValues Clear values
    */
-  void beginRenderPass(VkRenderPass renderPass, VkFramebuffer framebuffer,
+  void beginRenderPass(RenderPassHandle renderPass,
+                       FramebufferHandle framebuffer,
                        const glm::ivec2 &renderAreaOffset,
                        const glm::uvec2 &renderAreaSize,
                        const std::vector<VkClearValue> &clearValues) override;
@@ -52,7 +53,7 @@ public:
    *
    * @param pipeline Pipeline
    */
-  void bindPipeline(const SharedPtr<Pipeline> &pipeline) override;
+  void bindPipeline(PipelineHandle pipeline) override;
 
   /**
    * @brief Bind descriptor
@@ -61,7 +62,7 @@ public:
    * @param firstSet First set
    * @param descriptor Descriptor
    */
-  void bindDescriptor(const SharedPtr<Pipeline> &pipeline, uint32_t firstSet,
+  void bindDescriptor(PipelineHandle, uint32_t firstSet,
                       const Descriptor &descriptor) override;
 
   /**
@@ -88,9 +89,8 @@ public:
    * @param size Size
    * @param data Data
    */
-  void pushConstants(const SharedPtr<Pipeline> &pipeline,
-                     VkShaderStageFlags stageFlags, uint32_t offset,
-                     uint32_t size, void *data) override;
+  void pushConstants(PipelineHandle pipeline, VkShaderStageFlags stageFlags,
+                     uint32_t offset, uint32_t size, void *data) override;
 
   /**
    * @brief Draw
