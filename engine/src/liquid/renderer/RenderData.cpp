@@ -1,12 +1,11 @@
 #include "liquid/core/Base.h"
-#include "VulkanRenderData.h"
+#include "RenderData.h"
 
 namespace liquid {
 
-VulkanRenderData::VulkanRenderData(
-    EntityContext &entityContext_, Scene *scene_,
-    const std::vector<SharedPtr<Material>> &shadowMaterials_,
-    experimental::ResourceRegistry &registry_)
+RenderData::RenderData(EntityContext &entityContext_, Scene *scene_,
+                       const std::vector<SharedPtr<Material>> &shadowMaterials_,
+                       experimental::ResourceRegistry &registry_)
     : entityContext(entityContext_), scene(scene_),
       shadowMaterials(shadowMaterials_), registry(registry_) {
 
@@ -14,7 +13,7 @@ VulkanRenderData::VulkanRenderData(
       registry.addBuffer({BufferType::Uniform, sizeof(SceneBufferObject)});
 }
 
-void VulkanRenderData::update() {
+void RenderData::update() {
   Entity entity = environmentMapEntity;
 
   entityContext.iterateEntities<EnvironmentComponent>(
@@ -59,7 +58,7 @@ void VulkanRenderData::update() {
                                       sizeof(SceneBufferObject), &sceneData});
 }
 
-std::array<TextureHandle, 3> VulkanRenderData::getEnvironmentTextures() const {
+std::array<TextureHandle, 3> RenderData::getEnvironmentTextures() const {
   if (entityContext.hasEntity(environmentMapEntity) &&
       entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
 
@@ -73,8 +72,6 @@ std::array<TextureHandle, 3> VulkanRenderData::getEnvironmentTextures() const {
   return {};
 }
 
-void VulkanRenderData::cleanEnvironmentChangeFlag() {
-  environmentChanged = false;
-}
+void RenderData::cleanEnvironmentChangeFlag() { environmentChanged = false; }
 
 } // namespace liquid

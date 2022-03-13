@@ -1,13 +1,12 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
-#include "GLFWWindow.h"
-#include "GLFWError.h"
+#include "Window.h"
 
 #include <GLFW/glfw3.h>
 
 namespace liquid {
 
-GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
+Window::Window(const String &title, uint32_t width, uint32_t height) {
   LIQUID_ASSERT(glfwInit(), "[GLFW] Failed to initialize GLFW");
 
   // Do not create OpenGL context
@@ -26,7 +25,7 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
   glfwSetFramebufferSizeCallback(
       windowInstance, [](::GLFWwindow *windowInstance, int width, int height) {
         auto *window =
-            static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
         for (auto &[_, handler] : window->resizeHandlers) {
           handler(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
         }
@@ -35,7 +34,7 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
   glfwSetKeyCallback(windowInstance, [](::GLFWwindow *windowInstance, int key,
                                         int scancode, int action, int mods) {
     auto *window =
-        static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
     for (auto &[_, handler] : window->keyHandlers) {
       handler(key, scancode, action, mods);
@@ -45,7 +44,7 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
   glfwSetCursorPosCallback(windowInstance, [](::GLFWwindow *windowInstance,
                                               double xpos, double ypos) {
     auto *window =
-        static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
     for (auto &[_, handler] : window->mouseMoveHandlers) {
       handler(xpos, ypos);
@@ -56,7 +55,7 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
       windowInstance,
       [](::GLFWwindow *windowInstance, int button, int action, int mods) {
         auto *window =
-            static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
         for (auto &[_, handler] : window->mouseButtonHandlers) {
           handler(button, action, mods);
@@ -66,14 +65,14 @@ GLFWWindow::GLFWWindow(const String &title, uint32_t width, uint32_t height) {
   glfwSetScrollCallback(windowInstance, [](::GLFWwindow *windowInstance,
                                            double xoffset, double yoffset) {
     auto *window =
-        static_cast<GLFWWindow *>(glfwGetWindowUserPointer(windowInstance));
+        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
     for (auto &[_, handler] : window->scrollWheelHandlers) {
       handler(xoffset, yoffset);
     }
   });
 }
 
-GLFWWindow::~GLFWWindow() {
+Window::~Window() {
   resizeHandlers.clear();
   keyHandlers.clear();
 
@@ -85,7 +84,7 @@ GLFWWindow::~GLFWWindow() {
   glfwTerminate();
 }
 
-glm::uvec2 GLFWWindow::getFramebufferSize() {
+glm::uvec2 Window::getFramebufferSize() {
   int width = 0, height = 0;
   glfwGetFramebufferSize(windowInstance, &width, &height);
 
@@ -95,7 +94,7 @@ glm::uvec2 GLFWWindow::getFramebufferSize() {
   };
 }
 
-glm::uvec2 GLFWWindow::getWindowSize() {
+glm::uvec2 Window::getWindowSize() {
   int width = 0, height = 0;
   glfwGetWindowSize(windowInstance, &width, &height);
 
@@ -105,11 +104,11 @@ glm::uvec2 GLFWWindow::getWindowSize() {
   };
 }
 
-bool GLFWWindow::shouldClose() { return glfwWindowShouldClose(windowInstance); }
+bool Window::shouldClose() { return glfwWindowShouldClose(windowInstance); }
 
-void GLFWWindow::pollEvents() { glfwPollEvents(); }
+void Window::pollEvents() { glfwPollEvents(); }
 
-uint32_t GLFWWindow::addResizeHandler(
+uint32_t Window::addResizeHandler(
     const std::function<void(uint32_t, uint32_t)> &handler) {
   uint32_t id = static_cast<uint32_t>(resizeHandlers.size());
 
@@ -117,68 +116,70 @@ uint32_t GLFWWindow::addResizeHandler(
   return id;
 }
 
-void GLFWWindow::removeResizeHandler(uint32_t handle) {
+void Window::removeResizeHandler(uint32_t handle) {
   resizeHandlers.erase(resizeHandlers.find(handle));
 }
 
-uint32_t GLFWWindow::addKeyHandler(
-    const std::function<void(int, int, int, int)> &handler) {
+uint32_t
+Window::addKeyHandler(const std::function<void(int, int, int, int)> &handler) {
   uint32_t id = static_cast<uint32_t>(keyHandlers.size());
 
   keyHandlers.insert(std::make_pair(id, handler));
   return id;
 }
 
-void GLFWWindow::removeKeyHandler(uint32_t handle) {
+void Window::removeKeyHandler(uint32_t handle) {
   keyHandlers.erase(keyHandlers.find(handle));
 }
 
-uint32_t GLFWWindow::addMouseMoveHandler(
+uint32_t Window::addMouseMoveHandler(
     const std::function<void(double xpos, double ypos)> &handler) {
   uint32_t id = static_cast<uint32_t>(mouseMoveHandlers.size());
   mouseMoveHandlers.insert(std::make_pair(id, handler));
   return id;
 }
 
-void GLFWWindow::removeMouseMoveHandler(uint32_t handle) {
+void Window::removeMouseMoveHandler(uint32_t handle) {
   mouseMoveHandlers.erase(mouseMoveHandlers.find(handle));
 }
 
-uint32_t GLFWWindow::addMouseButtonHandler(
+uint32_t Window::addMouseButtonHandler(
     const std::function<void(int button, int action, int mods)> &handler) {
   uint32_t id = static_cast<uint32_t>(mouseButtonHandlers.size());
   mouseButtonHandlers.insert(std::make_pair(id, handler));
   return id;
 }
 
-void GLFWWindow::removeMouseButtonHandler(uint32_t handle) {
+void Window::removeMouseButtonHandler(uint32_t handle) {
   mouseButtonHandlers.erase(mouseButtonHandlers.find(handle));
 }
 
-uint32_t GLFWWindow::addScrollWheelHandler(
+uint32_t Window::addScrollWheelHandler(
     const std::function<void(double xoffset, double yoffset)> &handler) {
   uint32_t id = static_cast<uint32_t>(scrollWheelHandlers.size());
   scrollWheelHandlers.insert(std::make_pair(id, handler));
   return id;
 }
 
-void GLFWWindow::removeScrollWheelHandler(uint32_t handle) {
+void Window::removeScrollWheelHandler(uint32_t handle) {
   scrollWheelHandlers.erase(scrollWheelHandlers.find(handle));
 }
 
-glm::vec2 GLFWWindow::getCurrentMousePosition() const {
+glm::vec2 Window::getCurrentMousePosition() const {
   glm::dvec2 mousePos;
   glfwGetCursorPos(windowInstance, &mousePos.x, &mousePos.y);
 
   return glm::vec2(mousePos);
 }
 
-void GLFWWindow::setMousePosition(const glm::vec2 &position) {
+void Window::setMousePosition(const glm::vec2 &position) {
   glfwSetCursorPos(windowInstance, position.x, position.y);
 }
 
-bool GLFWWindow::isKeyPressed(int key) const {
+bool Window::isKeyPressed(int key) const {
   return glfwGetKey(windowInstance, key) == GLFW_PRESS;
 }
+
+void Window::focus() { glfwFocusWindow(windowInstance); }
 
 } // namespace liquid

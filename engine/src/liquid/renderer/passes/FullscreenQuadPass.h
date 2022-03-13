@@ -2,8 +2,8 @@
 
 #include "liquid/renderer/render-graph/RenderGraphPassBase.h"
 #include "liquid/renderer/ShaderLibrary.h"
+#include "liquid/renderer/RenderData.h"
 #include "liquid/entity/EntityContext.h"
-#include "liquid/renderer/vulkan/VulkanRenderData.h"
 
 namespace liquid {
 

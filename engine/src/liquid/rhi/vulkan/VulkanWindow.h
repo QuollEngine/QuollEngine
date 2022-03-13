@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 namespace liquid {
 
@@ -12,6 +12,6 @@ namespace liquid {
  * @param window Window
  * @return Vulkan surface
  */
-VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow &window);
+VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window);
 
 } // namespace liquid

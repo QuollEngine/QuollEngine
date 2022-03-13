@@ -3,13 +3,14 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "VulkanShader.h"
-#include "VulkanRenderData.h"
-#include "liquid/renderer/ShaderLibrary.h"
-#include "liquid/renderer/MaterialPBR.h"
-#include "liquid/renderer/imgui/ImguiRenderer.h"
-#include "liquid/renderer/render-graph/RenderGraph.h"
-#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
+#include "vulkan/VulkanShader.h"
+
+#include "RenderData.h"
+#include "ShaderLibrary.h"
+#include "MaterialPBR.h"
+#include "imgui/ImguiRenderer.h"
+#include "render-graph/RenderGraph.h"
+#include "render-graph/RenderGraphEvaluator.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 
@@ -23,18 +24,18 @@
 
 namespace liquid {
 
-class GLFWWindow;
+class Window;
 
-class VulkanRenderer {
+class Renderer {
 public:
-  VulkanRenderer(EntityContext &context, GLFWWindow *window,
-                 experimental::VulkanRenderDevice *device);
-  ~VulkanRenderer();
+  Renderer(EntityContext &context, Window &window,
+           experimental::VulkanRenderDevice *device);
+  ~Renderer();
 
-  VulkanRenderer(const VulkanRenderer &rhs) = delete;
-  VulkanRenderer(VulkanRenderer &&rhs) = delete;
-  VulkanRenderer &operator=(const VulkanRenderer &rhs) = delete;
-  VulkanRenderer &operator=(VulkanRenderer &&rhs) = delete;
+  Renderer(const Renderer &rhs) = delete;
+  Renderer(Renderer &&rhs) = delete;
+  Renderer &operator=(const Renderer &rhs) = delete;
+  Renderer &operator=(Renderer &&rhs) = delete;
 
   SharedPtr<Material>
   createMaterial(const SharedPtr<Shader> &vertexShader,
@@ -47,7 +48,7 @@ public:
                     const CullMode &cullMode);
   SharedPtr<VulkanShader> createShader(const String &shaderFile);
 
-  SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
+  SharedPtr<RenderData> prepareScene(Scene *scene);
 
   inline StatsManager &getStatsManager() { return mStatsManager; }
   inline DebugManager &getDebugManager() { return mDebugManager; }
@@ -57,7 +58,7 @@ public:
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   RenderGraph
-  createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
+  createRenderGraph(const SharedPtr<RenderData> &renderData,
                     const String &imguiDep,
                     const std::function<void(TextureHandle)> &imUpdate);
 

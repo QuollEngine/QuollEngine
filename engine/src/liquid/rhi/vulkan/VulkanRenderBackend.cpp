@@ -18,8 +18,7 @@ namespace liquid::experimental {
 
 static const String LIQUID_ENGINE_NAME = "Liquid";
 
-VulkanRenderBackend::VulkanRenderBackend(GLFWWindow &window,
-                                         bool enableValidations)
+VulkanRenderBackend::VulkanRenderBackend(Window &window, bool enableValidations)
     : mWindow(window) {
   createInstance("RHI", enableValidations);
   mSurface = createSurfaceFromWindow(mInstance, window);

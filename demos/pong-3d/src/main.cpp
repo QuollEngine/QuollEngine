@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/SceneRenderer.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 #include "liquid/renderer/passes/ImguiPass.h"
 #include "liquid/renderer/passes/FullscreenQuadPass.h"
 
@@ -27,13 +27,12 @@ class Game {
 public:
   Game()
       : window("Pong 3D", 800, 600), backend(window),
-        renderer(new liquid::VulkanRenderer(entityContext, &window,
-                                            backend.getOrCreateDevice())),
-        vertexShader(renderer->createShader("basic-shader.vert.spv")),
-        fragmentShader(renderer->createShader("basic-shader.frag.spv")),
-        material(renderer->createMaterial(vertexShader, fragmentShader, {}, {},
-                                          liquid::CullMode::None)),
-        camera(new liquid::Camera(&renderer->getRegistry())) {
+        renderer(entityContext, window, backend.getOrCreateDevice()),
+        vertexShader(renderer.createShader("basic-shader.vert.spv")),
+        fragmentShader(renderer.createShader("basic-shader.frag.spv")),
+        material(renderer.createMaterial(vertexShader, fragmentShader, {}, {},
+                                         liquid::CullMode::None)),
+        camera(new liquid::Camera(&renderer.getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
 
@@ -45,18 +44,18 @@ public:
     });
 
     barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        barMesh, renderer->getRegistry()));
+        barMesh, renderer.getRegistry()));
     barInstance->setMaterial(material);
 
     ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        ballMesh, renderer->getRegistry()));
+        ballMesh, renderer.getRegistry()));
     ballInstance->setMaterial(material);
 
     setupScene();
   }
 
   int run() {
-    liquid::MainLoop mainLoop(renderer.get(), &window);
+    liquid::MainLoop mainLoop(renderer, window);
 
     liquid::RenderGraph graph;
 
@@ -105,9 +104,9 @@ public:
         });
 
     graph.addPass<liquid::ImguiPass>(
-        "imguiPass", renderer->getImguiRenderer(), renderer->getShaderLibrary(),
-        renderer->getRenderDevice()->getPhysicalDevice().getDeviceInfo(),
-        renderer->getStatsManager(), renderer->getDebugManager(), "SWAPCHAIN",
+        "imguiPass", renderer.getImguiRenderer(), renderer.getShaderLibrary(),
+        renderer.getRenderDevice()->getPhysicalDevice().getDeviceInfo(),
+        renderer.getStatsManager(), renderer.getDebugManager(), "SWAPCHAIN",
         [](const auto &sceneTexture) {});
 
     return mainLoop.run(graph, [=](double dt) mutable {
@@ -288,9 +287,9 @@ private:
   }
 
 private:
-  liquid::GLFWWindow window;
+  liquid::Window window;
   liquid::experimental::VulkanRenderBackend backend;
-  std::unique_ptr<liquid::VulkanRenderer> renderer;
+  liquid::Renderer renderer;
 
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;

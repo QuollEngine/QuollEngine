@@ -6,7 +6,7 @@ namespace liquid {
 ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
                      EntityContext &entityContext,
                      ShaderLibrary &shaderLibrary_,
-                     const SharedPtr<VulkanRenderData> &renderData_,
+                     const SharedPtr<RenderData> &renderData_,
                      DebugManager &debugManager_)
     : RenderGraphPassBase(name, resourceId), sceneRenderer(entityContext, true),
       shaderLibrary(shaderLibrary_), renderData(renderData_),

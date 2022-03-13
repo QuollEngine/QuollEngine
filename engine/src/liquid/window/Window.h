@@ -10,7 +10,7 @@ namespace liquid {
  * Manages lifecycle and handles of
  * GLFW window
  */
-class GLFWWindow {
+class Window {
 public:
   /**
    * @brief Creates window
@@ -19,17 +19,17 @@ public:
    * @param width Window width
    * @param height Window height
    */
-  GLFWWindow(const String &title, uint32_t width, uint32_t height);
+  Window(const String &title, uint32_t width, uint32_t height);
 
   /**
    * @brief Destroys window
    */
-  ~GLFWWindow();
+  ~Window();
 
-  GLFWWindow(const GLFWWindow &rhs) = delete;
-  GLFWWindow(GLFWWindow &&rhs) = delete;
-  GLFWWindow &operator=(const GLFWWindow &rhs) = delete;
-  GLFWWindow &operator=(GLFWWindow &&rhs) = delete;
+  Window(const Window &rhs) = delete;
+  Window(Window &&rhs) = delete;
+  Window &operator=(const Window &rhs) = delete;
+  Window &operator=(Window &&rhs) = delete;
 
   /**
    * @brief Gets GLFW instance
@@ -168,6 +168,11 @@ public:
    * @retval false Not pressed
    */
   bool isKeyPressed(int key) const;
+
+  /**
+   * @brief Focus window
+   */
+  void focus();
 
 private:
   ::GLFWwindow *windowInstance;

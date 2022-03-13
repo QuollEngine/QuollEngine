@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/entity/EntityContext.h"
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/Renderer.h"
 #include "liquid/animation/AnimationSystem.h"
 #include "GLTFError.h"
 
@@ -19,7 +19,7 @@ public:
    * @param animationSystem Animation system
    * @param debug Enable debugging parameters
    */
-  GLTFLoader(EntityContext &entityContext, VulkanRenderer *renderer,
+  GLTFLoader(EntityContext &entityContext, Renderer &renderer,
              AnimationSystem &animationSystem, bool debug = false);
 
   /**
@@ -33,7 +33,7 @@ public:
 private:
   EntityContext &entityContext;
   AnimationSystem &animationSystem;
-  VulkanRenderer *renderer = nullptr;
+  Renderer &renderer;
   bool debug = false;
 
   SharedPtr<Material> defaultMaterial;

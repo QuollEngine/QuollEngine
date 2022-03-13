@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 #include <vulkan/vulkan.hpp>
 #include <GLFW/glfw3.h>
@@ -9,7 +9,7 @@
 
 namespace liquid {
 
-VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, GLFWWindow &window) {
+VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window) {
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   checkForVulkanError(glfwCreateWindowSurface(instance, window.getInstance(),
                                               nullptr, &surface),

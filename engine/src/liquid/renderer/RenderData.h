@@ -7,7 +7,7 @@
 
 namespace liquid {
 
-class VulkanRenderData {
+class RenderData {
   constexpr static size_t MAX_LIGHTS = 16;
 
   struct LightData {
@@ -37,9 +37,9 @@ public:
    * @param shadowMaterials Shadow materials
    * @param registry Resource registry
    */
-  VulkanRenderData(EntityContext &entityContext, Scene *scene,
-                   const std::vector<SharedPtr<Material>> &shadowMaterials,
-                   experimental::ResourceRegistry &registry);
+  RenderData(EntityContext &entityContext, Scene *scene,
+             const std::vector<SharedPtr<Material>> &shadowMaterials,
+             experimental::ResourceRegistry &registry);
 
   /**
    * @brief Get scene

@@ -20,12 +20,12 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 
 namespace liquid {
 
-ImguiRenderer::ImguiRenderer(GLFWWindow *window,
+ImguiRenderer::ImguiRenderer(Window &window,
                              experimental::ResourceRegistry &registry_)
     : registry(registry_) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
-  ImGui_ImplGlfw_InitForVulkan(window->getInstance(), true);
+  ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
 
   ImGuiIO &io = ImGui::GetIO();
   io.BackendRendererName = "ImguiCustomBackend";
@@ -41,7 +41,6 @@ ImguiRenderer::ImguiRenderer(GLFWWindow *window,
 }
 
 ImguiRenderer::~ImguiRenderer() {
-
   registry.deleteTexture(fontTexture);
 
   for (auto &x : frameData) {

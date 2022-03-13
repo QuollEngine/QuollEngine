@@ -4,17 +4,17 @@
 
 namespace liquid {
 
-class VulkanRenderer;
-class GLFWWindow;
+class Renderer;
+class Window;
 
 class MainLoop {
 public:
-  MainLoop(VulkanRenderer *renderer, GLFWWindow *window);
+  MainLoop(Renderer &renderer, Window &window);
 
   int run(RenderGraph &graph, const std::function<bool(float)> &update);
 
 private:
-  VulkanRenderer *renderer = nullptr;
-  GLFWWindow *window = nullptr;
+  Renderer &renderer;
+  Window &window;
 };
 } // namespace liquid

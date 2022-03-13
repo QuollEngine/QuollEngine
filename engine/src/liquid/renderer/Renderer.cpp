@@ -1,10 +1,10 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 #include "liquid/core/EngineGlobals.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
-#include "VulkanRenderer.h"
-#include "VulkanStandardPushConstants.h"
+#include "Renderer.h"
+#include "StandardPushConstants.h"
 
 #include "liquid/renderer/render-graph/RenderGraph.h"
 
@@ -18,15 +18,14 @@
 
 namespace liquid {
 
-VulkanRenderer::VulkanRenderer(EntityContext &entityContext_,
-                               GLFWWindow *window,
-                               experimental::VulkanRenderDevice *device)
+Renderer::Renderer(EntityContext &entityContext_, Window &window,
+                   experimental::VulkanRenderDevice *device)
     : mEntityContext(entityContext_), mGraphEvaluator(mRegistry),
       mDevice(device), mImguiRenderer(window, mRegistry) {
   loadShaders();
 }
 
-VulkanRenderer::~VulkanRenderer() {
+Renderer::~Renderer() {
   mEntityContext.destroyComponents<MeshComponent>();
   mEntityContext.destroyComponents<SkinnedMeshComponent>();
   mEntityContext.destroyComponents<SkeletonComponent>();
@@ -34,11 +33,11 @@ VulkanRenderer::~VulkanRenderer() {
   mShadowMaterials.clear();
 }
 
-void VulkanRenderer::render(RenderGraph &graph) {
+void Renderer::render(RenderGraph &graph) {
   mDevice->execute(graph, mGraphEvaluator);
 }
 
-void VulkanRenderer::loadShaders() {
+void Renderer::loadShaders() {
   mShaderLibrary.addShader(
       "__engine.geometry.default.vertex",
       createShader(Engine::getAssetsPath() + "/shaders/geometry.vert.spv"));
@@ -78,8 +77,8 @@ void VulkanRenderer::loadShaders() {
                                         "/shaders/fullscreenQuad.frag.spv"));
 }
 
-RenderGraph VulkanRenderer::createRenderGraph(
-    const SharedPtr<VulkanRenderData> &renderData, const String &imguiDep,
+RenderGraph Renderer::createRenderGraph(
+    const SharedPtr<RenderData> &renderData, const String &imguiDep,
     const std::function<void(TextureHandle)> &imUpdate) {
   RenderGraph graph;
   constexpr uint32_t NUM_LIGHTS = 16;
@@ -123,11 +122,11 @@ RenderGraph VulkanRenderer::createRenderGraph(
   return graph;
 }
 
-SharedPtr<VulkanShader> VulkanRenderer::createShader(const String &shaderFile) {
+SharedPtr<VulkanShader> Renderer::createShader(const String &shaderFile) {
   return std::make_shared<VulkanShader>(mDevice->getVulkanDevice(), shaderFile);
 }
 
-SharedPtr<Material> VulkanRenderer::createMaterial(
+SharedPtr<Material> Renderer::createMaterial(
     const SharedPtr<Shader> &vertexShader,
     const SharedPtr<Shader> &fragmentShader,
     const std::vector<TextureHandle> &textures,
@@ -137,12 +136,12 @@ SharedPtr<Material> VulkanRenderer::createMaterial(
 }
 
 SharedPtr<Material>
-VulkanRenderer::createMaterialPBR(const MaterialPBR::Properties &properties,
-                                  const CullMode &cullMode) {
+Renderer::createMaterialPBR(const MaterialPBR::Properties &properties,
+                            const CullMode &cullMode) {
   return std::make_shared<MaterialPBR>(properties, mRegistry);
 }
 
-SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
+SharedPtr<RenderData> Renderer::prepareScene(Scene *scene) {
   mShadowMaterials.reserve(
       mEntityContext.getEntityCountForComponent<LightComponent>());
 
@@ -158,8 +157,8 @@ SharedPtr<VulkanRenderData> VulkanRenderer::prepareScene(Scene *scene) {
         i++;
       });
 
-  return std::make_shared<VulkanRenderData>(mEntityContext, scene,
-                                            mShadowMaterials, mRegistry);
+  return std::make_shared<RenderData>(mEntityContext, scene, mShadowMaterials,
+                                      mRegistry);
 }
 
 } // namespace liquid
