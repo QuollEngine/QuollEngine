@@ -13,6 +13,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanCommandPool.h"
 #include "VulkanDescriptorManager.h"
+#include "VulkanSwapchain.h"
 
 namespace liquid::experimental {
 
@@ -26,6 +27,8 @@ public:
    */
   VulkanRenderDevice(VulkanRenderBackend &backend,
                      const VulkanPhysicalDevice &physicalDevice);
+
+  void synchronizeSwapchain(const VulkanSwapchain &swapchain);
 
   void synchronize(ResourceRegistry &registry);
 
@@ -102,6 +105,8 @@ private:
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;
   VulkanUploadContext mUploadContext;
+
+  TextureHandle mNumSwapchainImages = 0;
 };
 
 } // namespace liquid::experimental

@@ -36,7 +36,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanRenderBackend &backend,
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = mSurfaceFormat.format;
   createInfo.imageColorSpace = mSurfaceFormat.colorSpace;
-  createInfo.imageExtent = mExtent;
+  createInfo.imageExtent = VkExtent2D{mExtent.x, mExtent.y};
   createInfo.imageArrayLayers = 1;
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -64,16 +64,15 @@ VulkanSwapchain::VulkanSwapchain(const VulkanRenderBackend &backend,
       "Failed to create swapchain");
 
   vkGetSwapchainImagesKHR(device, mSwapchain, &imageCount, nullptr);
-  std::vector<VkImage> swapchainImages(imageCount);
-  vkGetSwapchainImagesKHR(device, mSwapchain, &imageCount,
-                          swapchainImages.data());
+  mImages.resize(imageCount);
+  vkGetSwapchainImagesKHR(device, mSwapchain, &imageCount, mImages.data());
 
-  mImageViews.resize(swapchainImages.size());
+  mImageViews.resize(mImages.size());
 
-  for (size_t i = 0; i < swapchainImages.size(); ++i) {
+  for (size_t i = 0; i < mImages.size(); ++i) {
     VkImageViewCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image = swapchainImages[i];
+    createInfo.image = mImages.at(i);
 
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     createInfo.format = mSurfaceFormat.format;
@@ -89,12 +88,11 @@ VulkanSwapchain::VulkanSwapchain(const VulkanRenderBackend &backend,
     createInfo.subresourceRange.layerCount = 1;
 
     checkForVulkanError(
-        vkCreateImageView(device, &createInfo, nullptr, &mImageViews[i]),
+        vkCreateImageView(device, &createInfo, nullptr, &mImageViews.at(i)),
         "Failed to create image views for swapchain");
   }
 
-  LOG_DEBUG("[Vulkan] Swapchain created (" << swapchainImages.size()
-                                           << " images)");
+  LOG_DEBUG("[Vulkan] Swapchain created (" << mImages.size() << " images)");
 }
 
 VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) : mDevice(rhs.mDevice) {
@@ -102,6 +100,7 @@ VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) : mDevice(rhs.mDevice) {
 
   mSwapchain = rhs.mSwapchain;
   mImageViews = rhs.mImageViews;
+  mImages = rhs.mImages;
 
   mExtent = rhs.mExtent;
   mSurfaceFormat = rhs.mSurfaceFormat;
@@ -109,6 +108,7 @@ VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) : mDevice(rhs.mDevice) {
 
   rhs.mSwapchain = VK_NULL_HANDLE;
   rhs.mImageViews.clear();
+  rhs.mImages.clear();
 }
 
 VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
@@ -133,13 +133,6 @@ VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
 VulkanSwapchain::~VulkanSwapchain() { destroy(); }
 
 void VulkanSwapchain::destroy() {
-  if (!mImageViews.empty()) {
-    for (auto &x : mImageViews) {
-      vkDestroyImageView(mDevice, x, nullptr);
-    }
-    mImageViews.clear();
-  }
-
   if (mSwapchain) {
     vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
     mSwapchain = VK_NULL_HANDLE;
@@ -181,7 +174,7 @@ void VulkanSwapchain::calculateExtent(
       std::max(capabilities.minImageExtent.height,
                std::min(capabilities.maxImageExtent.height, size.y));
 
-  mExtent = VkExtent2D{width, height};
+  mExtent = glm::uvec2{width, height};
 }
 
 VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(

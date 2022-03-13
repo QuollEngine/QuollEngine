@@ -29,6 +29,36 @@ VulkanRenderDevice::VulkanRenderDevice(
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mAllocator(mBackend, mPhysicalDevice, mDevice) {}
 
+void VulkanRenderDevice::synchronizeSwapchain(
+    const VulkanSwapchain &swapchain) {
+
+  auto numNewSwapchainImages = swapchain.getImages().size();
+
+  // Remove unused swapchain images if
+  // new swapchain has fewer images than
+  // previous one
+  for (size_t i = numNewSwapchainImages + 1; i < mNumSwapchainImages; ++i) {
+    mRegistry.removeTexture(static_cast<TextureHandle>(i));
+  }
+
+  mNumSwapchainImages = static_cast<TextureHandle>(numNewSwapchainImages);
+
+  for (size_t i = 0; i < mNumSwapchainImages; ++i) {
+    TextureHandle handle = static_cast<TextureHandle>(i + 1);
+
+    auto &&ptr = std::make_unique<VulkanTexture>(
+        swapchain.getImages().at(i), swapchain.getImageViews().at(i),
+        VK_NULL_HANDLE, swapchain.getSurfaceFormat().format, mAllocator,
+        mDevice);
+
+    if (mRegistry.getTextures().find(handle) != mRegistry.getTextures().end()) {
+      mRegistry.updateTexture(handle, std::move(ptr));
+    } else {
+      mRegistry.addTexture(handle, std::move(ptr));
+    }
+  }
+}
+
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   for (auto &handle : registry.getBufferMap().getDirtyCreates()) {
     mRegistry.addBuffer(

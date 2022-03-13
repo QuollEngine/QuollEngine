@@ -16,14 +16,13 @@ namespace liquid {
 
 VulkanGraphEvaluator::VulkanGraphEvaluator(
     experimental::VulkanRenderDevice *device_,
-    experimental::VulkanSwapchain &swapchain_,
     experimental::ResourceRegistry &registry_,
     const experimental::VulkanResourceRegistry &realRegistry_)
-    : device(device_), swapchain(swapchain_), registry(registry_),
-      realRegistry(realRegistry_) {}
+    : device(device_), registry(registry_), realRegistry(realRegistry_) {}
 
 std::vector<RenderGraphPassBase *>
-VulkanGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated) {
+VulkanGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated,
+                              const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::compile");
 
   const auto &&compiled = graph.compile();
@@ -32,8 +31,8 @@ VulkanGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated) {
     if (!graph.getResourceRegistry().hasTexture(resourceId) ||
         (swapchainRecreated &&
          textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative)) {
-      graph.getResourceRegistry().addTexture(resourceId,
-                                             createTexture(textureDesc));
+      graph.getResourceRegistry().addTexture(
+          resourceId, createTexture(textureDesc, extent));
     }
   }
 
@@ -41,11 +40,14 @@ VulkanGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated) {
 }
 
 void VulkanGraphEvaluator::build(std::vector<RenderGraphPassBase *> &compiled,
-                                 RenderGraph &graph, bool swapchainRecreated) {
+                                 RenderGraph &graph, bool swapchainRecreated,
+                                 uint32_t numSwapchainImages,
+                                 const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::build");
 
   for (auto &pass : compiled) {
-    buildPass(pass, graph, swapchainRecreated && pass->isSwapchainRelative());
+    buildPass(pass, graph, swapchainRecreated && pass->isSwapchainRelative(),
+              numSwapchainImages, extent);
   }
 }
 
@@ -74,7 +76,9 @@ void VulkanGraphEvaluator::execute(
 }
 
 void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
-                                     RenderGraph &graph, bool force) {
+                                     RenderGraph &graph, bool force,
+                                     uint32_t numSwapchainImages,
+                                     const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::buildPass");
   std::vector<VkAttachmentDescription> attachments;
   std::vector<VkAttachmentReference> colorAttachments;
@@ -89,7 +93,7 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
 
   for (auto &[resourceId, _] : pass->getOutputs()) {
     if (graph.isSwapchain(resourceId)) {
-      imageViewsPerFramebuffer = swapchain.getImageViews().size();
+      imageViewsPerFramebuffer = numSwapchainImages;
       break;
     }
   }
@@ -110,7 +114,8 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
     uint32_t lastAttachmentIndex = static_cast<uint32_t>(attachments.size());
 
     if (graph.isSwapchain(resourceId)) {
-      info = createSwapchainAttachment(graphAttachment, lastAttachmentIndex);
+      info = createSwapchainAttachment(graphAttachment, lastAttachmentIndex,
+                                       numSwapchainImages, extent);
       colorAttachments.push_back(info.reference);
     } else {
       const auto &texture = graph.getResourceRegistry().getTexture(resourceId);
@@ -231,12 +236,15 @@ void VulkanGraphEvaluator::buildPass(RenderGraphPassBase *pass,
 
 VulkanGraphEvaluator::VulkanAttachmentInfo
 VulkanGraphEvaluator::createSwapchainAttachment(
-    const RenderPassAttachment &attachment, uint32_t index) {
+    const RenderPassAttachment &attachment, uint32_t index,
+    uint32_t numSwapchainImages, const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createSwapchainAttachment");
+  LIQUID_ASSERT(numSwapchainImages > 0,
+                "Number of swapchain images must be greater than ZERO");
   VulkanAttachmentInfo info{};
 
   // Attachment description
-  info.description.format = swapchain.getSurfaceFormat().format;
+  info.description.format = realRegistry.getTexture(1)->getFormat();
   info.description.samples = VK_SAMPLE_COUNT_1_BIT;
   info.description.loadOp =
       VulkanMapping::getAttachmentLoadOp(attachment.loadOp);
@@ -262,16 +270,18 @@ VulkanGraphEvaluator::createSwapchainAttachment(
       std::get<glm::vec4>(attachment.clearValue).w;
 
   // Framebuffer image views
-  info.framebufferAttachments.resize(swapchain.getImageViews().size(),
-                                     VK_NULL_HANDLE);
+  info.framebufferAttachments.resize(numSwapchainImages, VK_NULL_HANDLE);
 
-  for (size_t i = 0; i < swapchain.getImageViews().size(); ++i) {
-    info.framebufferAttachments.at(i) = swapchain.getImageViews().at(i);
+  for (uint32_t i = 0; i < numSwapchainImages; ++i) {
+    auto handle = static_cast<TextureHandle>(i + 1);
+
+    info.framebufferAttachments.at(i) =
+        realRegistry.getTexture(handle)->getImageView();
   }
 
   // Dimensions
-  info.width = swapchain.getExtent().width;
-  info.height = swapchain.getExtent().height;
+  info.width = extent.x;
+  info.height = extent.y;
   info.layers = 1;
 
   return info;
@@ -633,15 +643,16 @@ const SharedPtr<Pipeline> VulkanGraphEvaluator::createGraphicsPipeline(
                                           pipelineLayout, descriptorLayouts);
 }
 
-TextureHandle VulkanGraphEvaluator::createTexture(const AttachmentData &data) {
+TextureHandle VulkanGraphEvaluator::createTexture(const AttachmentData &data,
+                                                  const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("VulkanGraphEvaluator::createTexture");
   uint32_t width = data.width;
   uint32_t height = data.height;
 
   if (data.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
     constexpr uint32_t PERCENTAGE_RATIO = 100;
-    width = swapchain.getExtent().width * width / PERCENTAGE_RATIO;
-    height = swapchain.getExtent().height * height / PERCENTAGE_RATIO;
+    width = extent.x * width / PERCENTAGE_RATIO;
+    height = extent.y * height / PERCENTAGE_RATIO;
   }
 
   TextureDescription description;
