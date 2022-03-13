@@ -21,7 +21,7 @@ public:
    * @param shadowMaterials Shadow materials
    */
   ShadowPass(const String &name, GraphResourceId renderPassId,
-             EntityContext &entityContext, ShaderLibrary *shaderLibrary,
+             EntityContext &entityContext, ShaderLibrary &shaderLibrary,
              const std::vector<SharedPtr<Material>> &shadowMaterials);
   /**
    * @brief Build pass
@@ -44,7 +44,7 @@ private:
   GraphResourceId skinnedPipelineId = 0;
   GraphResourceId shadowMapId = 0;
 
-  ShaderLibrary *shaderLibrary;
+  ShaderLibrary &shaderLibrary;
   SceneRenderer sceneRenderer;
 
   std::vector<SharedPtr<Material>> shadowMaterials;

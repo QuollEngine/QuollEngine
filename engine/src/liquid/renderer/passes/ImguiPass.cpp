@@ -5,17 +5,15 @@
 namespace liquid {
 
 ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
-                     VulkanAbstraction &abstraction,
-                     ShaderLibrary *shaderLibrary_,
-                     const SharedPtr<DebugManager> &debugManager,
+                     ImguiRenderer &imguiRenderer_,
+                     ShaderLibrary &shaderLibrary_,
+                     const PhysicalDeviceInformation &deviceInfo,
+                     StatsManager &statsManager, DebugManager &debugManager,
                      const String &previousColor_,
                      const std::function<void(TextureHandle)> &imUpdate)
-    : RenderGraphPassBase(name, renderPassId),
-      imguiRenderer(abstraction.getWindow(), abstraction.getDevice(),
-                    abstraction.getRegistry()),
+    : RenderGraphPassBase(name, renderPassId), imguiRenderer(imguiRenderer_),
       shaderLibrary(shaderLibrary_),
-      debugLayer(abstraction.getDevice()->getPhysicalDevice().getDeviceInfo(),
-                 abstraction.getStatsManager(), debugManager),
+      debugLayer(deviceInfo, statsManager, debugManager),
       previousColor(previousColor_), imguiUpdateFn(imUpdate) {}
 
 void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
@@ -23,8 +21,8 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
   builder.write("SWAPCHAIN");
 
   pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.imgui.default.vertex"),
-      shaderLibrary->getShader("__engine.imgui.default.fragment"),
+      shaderLibrary.getShader("__engine.imgui.default.vertex"),
+      shaderLibrary.getShader("__engine.imgui.default.fragment"),
       PipelineVertexInputLayout{
           {PipelineVertexInputBinding{0, sizeof(ImDrawVert),
                                       VertexInputRate::Vertex}},

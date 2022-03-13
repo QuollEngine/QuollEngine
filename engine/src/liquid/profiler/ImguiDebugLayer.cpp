@@ -11,8 +11,7 @@ template <class T> String convertToString(T value) {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo_,
-    const StatsManager &statsManager_,
-    const SharedPtr<DebugManager> &debugManager_)
+    const StatsManager &statsManager_, DebugManager &debugManager_)
     : physicalDeviceInfo(physicalDeviceInfo_), statsManager(statsManager_),
       debugManager(debugManager_) {}
 
@@ -28,7 +27,7 @@ void ImguiDebugLayer::render() {
                       &performanceMetricsVisible);
 
       if (ImGui::MenuItem("Wireframe Mode", nullptr, &wireframeModeEnabled)) {
-        debugManager->setWireframeMode(wireframeModeEnabled);
+        debugManager.setWireframeMode(wireframeModeEnabled);
       }
 
       ImGui::EndMenu();

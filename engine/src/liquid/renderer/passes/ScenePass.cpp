@@ -5,9 +5,9 @@ namespace liquid {
 
 ScenePass::ScenePass(const String &name, GraphResourceId resourceId,
                      EntityContext &entityContext,
-                     ShaderLibrary *shaderLibrary_,
+                     ShaderLibrary &shaderLibrary_,
                      const SharedPtr<VulkanRenderData> &renderData_,
-                     const SharedPtr<DebugManager> &debugManager_)
+                     DebugManager &debugManager_)
     : RenderGraphPassBase(name, resourceId), sceneRenderer(entityContext, true),
       shaderLibrary(shaderLibrary_), renderData(renderData_),
       debugManager(debugManager_) {}
@@ -18,8 +18,8 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
 
   shadowMapTextureId = builder.read("shadowmap");
   pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.geometry.default.vertex"),
-      shaderLibrary->getShader("__engine.pbr.default.fragment"),
+      shaderLibrary.getShader("__engine.geometry.default.vertex"),
+      shaderLibrary.getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::None,
@@ -27,8 +27,8 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
   skinnedPipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.geometry.skinned.vertex"),
-      shaderLibrary->getShader("__engine.pbr.default.fragment"),
+      shaderLibrary.getShader("__engine.geometry.skinned.vertex"),
+      shaderLibrary.getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<SkinnedVertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::None,
@@ -36,8 +36,8 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 
   wireframePipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.geometry.default.vertex"),
-      shaderLibrary->getShader("__engine.pbr.default.fragment"),
+      shaderLibrary.getShader("__engine.geometry.default.vertex"),
+      shaderLibrary.getShader("__engine.pbr.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Line, CullMode::None,
@@ -47,7 +47,7 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
 
 void ScenePass::execute(RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
-  const auto &pipeline = debugManager->getWireframeMode()
+  const auto &pipeline = debugManager.getWireframeMode()
                              ? registry.getPipeline(wireframePipelineId)
                              : registry.getPipeline(pipelineId);
 

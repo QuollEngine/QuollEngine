@@ -5,7 +5,7 @@ namespace liquid {
 
 ShadowPass::ShadowPass(const String &name, GraphResourceId renderPass,
                        EntityContext &entityContext,
-                       ShaderLibrary *shaderLibrary_,
+                       ShaderLibrary &shaderLibrary_,
                        const std::vector<SharedPtr<Material>> &shadowMaterials_)
     : RenderGraphPassBase(name, renderPass), shaderLibrary(shaderLibrary_),
       sceneRenderer(entityContext, false), shadowMaterials(shadowMaterials_) {}
@@ -14,16 +14,16 @@ void ShadowPass::buildInternal(RenderGraphBuilder &builder) {
   shadowMapId = builder.write("shadowmap");
 
   pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.shadowmap.default.vertex"),
-      shaderLibrary->getShader("__engine.shadowmap.default.fragment"),
+      shaderLibrary.getShader("__engine.shadowmap.default.vertex"),
+      shaderLibrary.getShader("__engine.shadowmap.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
                          FrontFace::Clockwise}});
 
   skinnedPipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary->getShader("__engine.shadowmap.skinned.vertex"),
-      shaderLibrary->getShader("__engine.shadowmap.default.fragment"),
+      shaderLibrary.getShader("__engine.shadowmap.skinned.vertex"),
+      shaderLibrary.getShader("__engine.shadowmap.default.fragment"),
       PipelineVertexInputLayout::create<SkinnedVertex>(),
       PipelineInputAssembly{PrimitiveTopology::TriangleList},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,

@@ -16,15 +16,21 @@
 
 namespace liquid::experimental {
 
-const String ENGINE_NAME = "Liquid";
+static const String LIQUID_ENGINE_NAME = "Liquid";
 
 VulkanRenderBackend::VulkanRenderBackend(GLFWWindow &window,
-                                         bool enableValidations) {
+                                         bool enableValidations)
+    : mWindow(window) {
   createInstance("RHI", enableValidations);
   mSurface = createSurfaceFromWindow(mInstance, window);
+
+  mResizeListener = window.addResizeHandler(
+      [this](auto width, auto height) { mFramebufferResized = true; });
 }
 
 VulkanRenderBackend::~VulkanRenderBackend() {
+  mWindow.removeResizeHandler(mResizeListener);
+
   mDevice.reset();
 
   if (mSurface) {
@@ -50,6 +56,10 @@ VulkanRenderDevice *VulkanRenderBackend::getOrCreateDevice() {
   return mDevice.get();
 }
 
+void VulkanRenderBackend::finishFramebufferResize() {
+  mFramebufferResized = false;
+}
+
 void VulkanRenderBackend::createInstance(const String &applicationName,
                                          bool enableValidations) {
   std::vector<const char *> extensions;
@@ -63,7 +73,7 @@ void VulkanRenderBackend::createInstance(const String &applicationName,
   appInfo.pNext = nullptr;
   appInfo.pApplicationName = applicationName.c_str();
   appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);
-  appInfo.pEngineName = ENGINE_NAME.c_str();
+  appInfo.pEngineName = LIQUID_ENGINE_NAME.c_str();
   appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);
   appInfo.apiVersion = VK_API_VERSION_1_2;
 

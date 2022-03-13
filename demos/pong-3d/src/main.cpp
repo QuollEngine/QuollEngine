@@ -33,8 +33,7 @@ public:
         fragmentShader(renderer->createShader("basic-shader.frag.spv")),
         material(renderer->createMaterial(vertexShader, fragmentShader, {}, {},
                                           liquid::CullMode::None)),
-        camera(
-            new liquid::Camera(&renderer->getRenderBackend().getRegistry())) {
+        camera(new liquid::Camera(&renderer->getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
 
@@ -46,11 +45,11 @@ public:
     });
 
     barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        barMesh, renderer->getRenderBackend().getRegistry()));
+        barMesh, renderer->getRegistry()));
     barInstance->setMaterial(material);
 
     ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        ballMesh, renderer->getRenderBackend().getRegistry()));
+        ballMesh, renderer->getRegistry()));
     ballInstance->setMaterial(material);
 
     setupScene();
@@ -105,10 +104,11 @@ public:
           sceneRenderer.render(commandList, pipeline);
         });
 
-    graph.addPass<liquid::ImguiPass>("imguiPass", renderer->getRenderBackend(),
-                                     renderer->getShaderLibrary(),
-                                     renderer->getDebugManager(), "SWAPCHAIN",
-                                     [](const auto &sceneTexture) {});
+    graph.addPass<liquid::ImguiPass>(
+        "imguiPass", renderer->getImguiRenderer(), renderer->getShaderLibrary(),
+        renderer->getRenderDevice()->getPhysicalDevice().getDeviceInfo(),
+        renderer->getStatsManager(), renderer->getDebugManager(), "SWAPCHAIN",
+        [](const auto &sceneTexture) {});
 
     return mainLoop.run(graph, [=](double dt) mutable {
       updateGameLogic(0.15f);

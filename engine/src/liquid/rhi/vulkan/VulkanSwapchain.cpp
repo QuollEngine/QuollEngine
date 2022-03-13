@@ -6,10 +6,9 @@
 
 namespace liquid::experimental {
 
-VulkanSwapchain::VulkanSwapchain(const VulkanRenderBackend &backend,
+VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
                                  const VulkanPhysicalDevice &physicalDevice,
                                  VulkanDeviceObject &device,
-                                 const glm::uvec2 &size,
                                  VkSwapchainKHR oldSwapchain)
     : mDevice(device) {
   const auto &surfaceCapabilities =
@@ -19,7 +18,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanRenderBackend &backend,
       physicalDevice.getSurfaceFormats(backend.getSurface()));
   pickMostSuitablePresentMode(
       physicalDevice.getPresentModes(backend.getSurface()));
-  calculateExtent(surfaceCapabilities, size);
+  calculateExtent(surfaceCapabilities, backend.getFramebufferSize());
 
   uint32_t imageCount = std::min(surfaceCapabilities.minImageCount + 1,
                                  surfaceCapabilities.maxImageCount);

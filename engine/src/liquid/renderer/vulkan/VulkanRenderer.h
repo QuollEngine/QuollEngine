@@ -5,11 +5,13 @@
 
 #include "VulkanShader.h"
 #include "VulkanRenderData.h"
-#include "VulkanAbstraction.h"
-
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/MaterialPBR.h"
 #include "liquid/renderer/imgui/ImguiRenderer.h"
+#include "liquid/renderer/render-graph/RenderGraph.h"
+#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
+
+#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 
 #include "liquid/entity/EntityContext.h"
 
@@ -18,8 +20,6 @@
 
 #include "liquid/profiler/StatsManager.h"
 #include "liquid/profiler/DebugManager.h"
-
-#include "liquid/rhi/RenderCommandList.h"
 
 namespace liquid {
 
@@ -49,35 +49,36 @@ public:
 
   SharedPtr<VulkanRenderData> prepareScene(Scene *scene);
 
-  inline StatsManager &getStatsManager() {
-    return abstraction.getStatsManager();
-  }
-  inline const SharedPtr<DebugManager> &getDebugManager() {
-    return debugManager;
-  }
-
-  inline ShaderLibrary *getShaderLibrary() { return shaderLibrary; }
+  inline StatsManager &getStatsManager() { return mStatsManager; }
+  inline DebugManager &getDebugManager() { return mDebugManager; }
+  inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
+  inline experimental::ResourceRegistry &getRegistry() { return mRegistry; }
+  inline experimental::VulkanRenderDevice *getRenderDevice() { return mDevice; }
+  inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   RenderGraph
   createRenderGraph(const SharedPtr<VulkanRenderData> &renderData,
                     const String &imguiDep,
                     const std::function<void(TextureHandle)> &imUpdate);
 
-  inline VulkanAbstraction &getRenderBackend() { return abstraction; }
+  void render(RenderGraph &graph);
+
+  inline void wait() { mDevice->wait(); }
 
 private:
   void loadShaders();
 
 private:
-  VulkanAbstraction abstraction;
+  EntityContext &mEntityContext;
+  experimental::ResourceRegistry mRegistry;
+  RenderGraphEvaluator mGraphEvaluator;
+  experimental::VulkanRenderDevice *mDevice;
+  ImguiRenderer mImguiRenderer;
+  StatsManager mStatsManager;
+  ShaderLibrary mShaderLibrary;
+  DebugManager mDebugManager;
 
-  ShaderLibrary *shaderLibrary = new ShaderLibrary;
-
-  std::vector<SharedPtr<Material>> shadowMaterials;
-
-  EntityContext &entityContext;
-
-  SharedPtr<DebugManager> debugManager;
+  std::vector<SharedPtr<Material>> mShadowMaterials;
 };
 
 } // namespace liquid

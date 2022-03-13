@@ -4,8 +4,8 @@
 
 #include "liquid/window/glfw/GLFWWindow.h"
 
-#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
 #include "liquid/rhi/RenderCommandList.h"
+#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquid {
 
@@ -23,8 +23,7 @@ class ImguiRenderer {
   };
 
 public:
-  ImguiRenderer(GLFWWindow *window, experimental::VulkanRenderDevice *device,
-                experimental::ResourceRegistry &registry);
+  ImguiRenderer(GLFWWindow *window, experimental::ResourceRegistry &registry);
   ~ImguiRenderer();
 
   ImguiRenderer(const ImguiRenderer &rhs) = delete;
@@ -44,7 +43,6 @@ private:
                          int fbWidth, int fbHeight, PipelineHandle pipeline);
 
 private:
-  experimental::VulkanRenderDevice *device = nullptr;
   experimental::ResourceRegistry &registry;
 
   TextureHandle fontTexture = 0;

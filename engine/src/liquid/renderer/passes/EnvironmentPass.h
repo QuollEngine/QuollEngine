@@ -19,7 +19,7 @@ public:
    * @param renderData Render data
    */
   EnvironmentPass(const String &name, GraphResourceId renderPassId,
-                  EntityContext &entityContext, ShaderLibrary *shaderLibrary,
+                  EntityContext &entityContext, ShaderLibrary &shaderLibrary,
                   const SharedPtr<VulkanRenderData> &renderData);
 
   /**
@@ -41,7 +41,7 @@ public:
 private:
   GraphResourceId pipelineId = 0;
   EntityContext &entityContext;
-  ShaderLibrary *shaderLibrary;
+  ShaderLibrary &shaderLibrary;
   SharedPtr<VulkanRenderData> renderData;
 };
 

@@ -19,13 +19,11 @@ public:
    * @param backend Vulkan backend
    * @param physicalDevice Physical device
    * @param device Vulkan device object
-   * @param size Size object
    * @param oldSwapchain Old swapchain
    */
-  VulkanSwapchain(const VulkanRenderBackend &backend,
+  VulkanSwapchain(VulkanRenderBackend &backend,
                   const VulkanPhysicalDevice &physicalDevice,
-                  VulkanDeviceObject &device, const glm::uvec2 &size,
-                  VkSwapchainKHR oldSwapchain);
+                  VulkanDeviceObject &device, VkSwapchainKHR oldSwapchain);
 
   /**
    * @brief Move operator for swapchain

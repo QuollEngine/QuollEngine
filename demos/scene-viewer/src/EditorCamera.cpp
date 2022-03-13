@@ -8,7 +8,7 @@ using liquid::VulkanRenderer;
 EditorCamera::EditorCamera(liquid::EntityContext &entityContext_,
                            VulkanRenderer *renderer, GLFWWindow *window_)
     : entityContext(entityContext_), window(window_),
-      camera(new Camera(&renderer->getRenderBackend().getRegistry())) {
+      camera(new Camera(&renderer->getRegistry())) {
 
   initEntity();
 

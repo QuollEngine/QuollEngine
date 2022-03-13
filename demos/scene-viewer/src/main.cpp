@@ -35,10 +35,8 @@ bool leftMouseBtnPressed = false;
 liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
                             liquid::VulkanRenderer *renderer,
                             liquid::EntityContext &context) {
-  liquid::KtxTextureLoader ktxLoader(
-      renderer->getRenderBackend().getRegistry());
-  liquid::ImageTextureLoader imageLoader(
-      renderer->getRenderBackend().getRegistry());
+  liquid::KtxTextureLoader ktxLoader(renderer->getRegistry());
+  liquid::ImageTextureLoader imageLoader(renderer->getRegistry());
 
   liquid::String envPath = fileDialog.getFilePathFromDialog({"ktx", "ktx2"});
 
@@ -75,7 +73,7 @@ liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
       nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
-      mesh, renderer->getRenderBackend().getRegistry());
+      mesh, renderer->getRegistry());
   instance->setMaterial(material);
 
   context.setComponent<liquid::MeshComponent>(entity, {instance});
