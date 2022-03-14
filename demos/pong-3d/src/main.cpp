@@ -28,10 +28,11 @@ public:
   Game()
       : window("Pong 3D", 800, 600), backend(window),
         renderer(entityContext, window, backend.getOrCreateDevice()),
-        vertexShader(renderer.createShader("basic-shader.vert.spv")),
-        fragmentShader(renderer.createShader("basic-shader.frag.spv")),
-        material(renderer.createMaterial(vertexShader, fragmentShader, {}, {},
-                                         liquid::CullMode::None)),
+        vertexShader(
+            renderer.getRegistry().addShader({"basic-shader.vert.spv"})),
+        fragmentShader(
+            renderer.getRegistry().addShader({"basic-shader.frag.spv"})),
+        material(renderer.createMaterial({}, {}, liquid::CullMode::None)),
         camera(new liquid::Camera(&renderer.getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
@@ -294,8 +295,8 @@ private:
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
 
-  liquid::SharedPtr<liquid::Shader> vertexShader;
-  liquid::SharedPtr<liquid::Shader> fragmentShader;
+  liquid::ShaderHandle vertexShader;
+  liquid::ShaderHandle fragmentShader;
   liquid::SharedPtr<liquid::Material> material;
 
   liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> barInstance;

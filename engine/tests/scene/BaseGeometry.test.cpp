@@ -4,8 +4,6 @@
 
 #include <gtest/gtest.h>
 
-using ShaderPtr = liquid::SharedPtr<liquid::Shader>;
-
 static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
   return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 }
@@ -16,8 +14,6 @@ public:
 };
 
 TEST_F(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {
-  ShaderPtr shaderVert, shaderFrag;
-
   const std::vector<liquid::Vertex> vertices{
       {1.0, 2.0, 3.0}, {1.0, 2.0, 3.0}, {1.0, 2.0, 2.0}};
   std::vector<uint32_t> indices{0, 1, 2, 2, 1, 0};

@@ -1,10 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
-#include <vma/vk_mem_alloc.h>
-
-#include "vulkan/VulkanShader.h"
-
 #include "RenderData.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
@@ -38,15 +33,12 @@ public:
   Renderer &operator=(Renderer &&rhs) = delete;
 
   SharedPtr<Material>
-  createMaterial(const SharedPtr<Shader> &vertexShader,
-                 const SharedPtr<Shader> &fragmentShader,
-                 const std::vector<TextureHandle> &textures,
+  createMaterial(const std::vector<TextureHandle> &textures,
                  const std::vector<std::pair<String, Property>> &properties,
                  const CullMode &cullMode);
   SharedPtr<Material>
   createMaterialPBR(const MaterialPBR::Properties &properties,
                     const CullMode &cullMode);
-  SharedPtr<VulkanShader> createShader(const String &shaderFile);
 
   SharedPtr<RenderData> prepareScene(Scene *scene);
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "liquid/renderer/Shader.h"
+#include "liquid/rhi/RenderHandle.h"
+
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
 
@@ -166,8 +167,8 @@ struct PipelineColorBlend {
 };
 
 struct RenderGraphPipelineDescription {
-  SharedPtr<Shader> vertexShader;
-  SharedPtr<Shader> fragmentShader;
+  ShaderHandle vertexShader = 0;
+  ShaderHandle fragmentShader = 0;
   PipelineVertexInputLayout inputLayout;
   PipelineInputAssembly inputAssembly;
   PipelineRasterizer rasterizer;

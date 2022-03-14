@@ -8,6 +8,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
+#include "VulkanShader.h"
 
 #include "VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
@@ -66,6 +67,14 @@ void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
 }
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
+  // Shaders
+  for (auto &handle : registry.getShaderMap().getDirtyCreates()) {
+    mRegistry.addShader(
+        handle, std::make_unique<VulkanShader>(
+                    registry.getShaderMap().getDescription(handle), mDevice));
+  }
+
+  registry.getShaderMap().clearDirtyCreates();
 
   // Buffers
   for (auto &handle : registry.getBufferMap().getDirtyCreates()) {
@@ -166,6 +175,13 @@ void VulkanRenderDevice::synchronizeDeletes(ResourceRegistry &registry) {
   }
 
   registry.getBufferMap().clearDirtyDeletes();
+
+  // Shaders
+  for (auto &handle : registry.getShaderMap().getDirtyDeletes()) {
+    mRegistry.removeShader(handle);
+  }
+
+  registry.getShaderMap().clearDirtyDeletes();
 }
 
 void VulkanRenderDevice::execute(RenderGraph &graph,

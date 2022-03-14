@@ -1,15 +1,13 @@
 #pragma once
 
-#include "liquid/renderer/Shader.h"
 #include "liquid/renderer/render-graph/RenderGraphPipelineDescription.h"
-#include <vulkan/vulkan.hpp>
 
 namespace liquid {
 
 struct PipelineDescription {
   RenderPassHandle renderPass = 0;
-  SharedPtr<Shader> vertexShader;
-  SharedPtr<Shader> fragmentShader;
+  ShaderHandle vertexShader = 0;
+  ShaderHandle fragmentShader = 0;
   PipelineVertexInputLayout inputLayout;
   PipelineInputAssembly inputAssembly;
   PipelineRasterizer rasterizer;

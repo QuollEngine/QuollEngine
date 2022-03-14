@@ -2,7 +2,6 @@
 #include "liquid/core/Engine.h"
 
 #include "liquid/renderer/Material.h"
-#include "liquid/renderer/Shader.h"
 
 #include "liquid/renderer/Renderer.h"
 #include "liquid/scene/Vertex.h"
@@ -43,18 +42,18 @@ int main() {
   liquid::PhysicsSystem physicsSystem(context);
 
   renderer.getShaderLibrary().addShader(
-      "editor-grid.vert",
-      renderer.createShader("assets/shaders/editor-grid.vert.spv"));
+      "editor-grid.vert", renderer.getRegistry().addShader(
+                              {"assets/shaders/editor-grid.vert.spv"}));
   renderer.getShaderLibrary().addShader(
-      "editor-grid.frag",
-      renderer.createShader("assets/shaders/editor-grid.frag.spv"));
+      "editor-grid.frag", renderer.getRegistry().addShader(
+                              {"assets/shaders/editor-grid.frag.spv"}));
 
   renderer.getShaderLibrary().addShader(
-      "skeleton-lines.vert",
-      renderer.createShader("assets/shaders/skeleton-lines.vert.spv"));
+      "skeleton-lines.vert", renderer.getRegistry().addShader(
+                                 {"assets/shaders/skeleton-lines.vert.spv"}));
   renderer.getShaderLibrary().addShader(
-      "skeleton-lines.frag",
-      renderer.createShader("assets/shaders/skeleton-lines.frag.spv"));
+      "skeleton-lines.frag", renderer.getRegistry().addShader(
+                                 {"assets/shaders/skeleton-lines.frag.spv"}));
 
   liquid::MainLoop mainLoop(renderer, window);
   liquid::GLTFLoader loader(context, renderer, animationSystem, true);

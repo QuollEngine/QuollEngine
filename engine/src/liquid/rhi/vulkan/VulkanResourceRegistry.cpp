@@ -5,8 +5,18 @@
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
+#include "VulkanShader.h"
 
 namespace liquid::experimental {
+
+void VulkanResourceRegistry::addShader(ShaderHandle handle,
+                                       std::unique_ptr<VulkanShader> &&shader) {
+  mShaders.insert({handle, std::move(shader)});
+}
+
+void VulkanResourceRegistry::removeShader(ShaderHandle handle) {
+  mShaders.erase(handle);
+}
 
 void VulkanResourceRegistry::addBuffer(BufferHandle handle,
                                        std::unique_ptr<VulkanBuffer> &&buffer) {

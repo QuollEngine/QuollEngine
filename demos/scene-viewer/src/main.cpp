@@ -69,8 +69,8 @@ liquid::Entity getNewSkybox(liquid::Window &window, const liquid::Mesh &mesh,
 
   auto entity = context.createEntity();
 
-  const auto &material = renderer.createMaterial(
-      nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
+  const auto &material = renderer.createMaterial({environmentTexture}, {},
+                                                 liquid::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
       mesh, renderer.getRegistry());

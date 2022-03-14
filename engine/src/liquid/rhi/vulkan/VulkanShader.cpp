@@ -1,14 +1,17 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+
 #include "VulkanShader.h"
+#include "VulkanError.h"
 
-#include "liquid/rhi/vulkan/VulkanError.h"
+#include "spirv_reflect.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
-VulkanShader::VulkanShader(VkDevice device_, const String &shaderFile)
-    : device(device_) {
-  const auto &shaderBytes = VulkanShader::readShaderFile(shaderFile);
+VulkanShader::VulkanShader(const ShaderDescription &description,
+                           VulkanDeviceObject &device)
+    : mDevice(device) {
+  const auto &shaderBytes = VulkanShader::readShaderFile(description.path);
 
   VkShaderModuleCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -19,18 +22,17 @@ VulkanShader::VulkanShader(VkDevice device_, const String &shaderFile)
   createInfo.pCode = reinterpret_cast<const uint32_t *>(shaderBytes.data());
 
   checkForVulkanError(
-      vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule),
-      "Failed to create shader module from \"" + shaderFile + "\"");
+      vkCreateShaderModule(device, &createInfo, nullptr, &mShaderModule),
+      "Failed to create shader module from \"" + description.path + "\"");
 
-  LOG_DEBUG("[Vulkan] Shader module created from \"" + shaderFile + "\"");
+  LOG_DEBUG("[Vulkan] Shader module created from \"" + description.path + "\"");
 
-  createReflectionInfo(shaderBytes, shaderFile);
+  createReflectionInfo(shaderBytes, description.path);
 }
 
 VulkanShader::~VulkanShader() {
-  if (shaderModule) {
-    vkDestroyShaderModule(device, shaderModule, nullptr);
-    shaderModule = VK_NULL_HANDLE;
+  if (mShaderModule) {
+    vkDestroyShaderModule(mDevice, mShaderModule, nullptr);
     LOG_DEBUG("[Vulkan] Shader module destroyed");
   }
 }
@@ -61,7 +63,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
   LIQUID_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS,
                 "Failed to read reflection data from shader " + shaderFile);
 
-  stage = static_cast<VkShaderStageFlagBits>(shaderReflectModule.shader_stage);
+  mStage = static_cast<VkShaderStageFlagBits>(shaderReflectModule.shader_stage);
 
   // Push constants
   {
@@ -74,16 +76,16 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
       spvReflectEnumeratePushConstantBlocks(&shaderReflectModule, &count,
                                             &blocks.at(0));
 
-      reflectionData.pushConstantRanges.reserve(count);
+      mReflectionData.pushConstantRanges.reserve(count);
 
       for (auto &blk : blocks) {
         const SpvReflectBlockVariable &reflectBlock = *blk;
         VkPushConstantRange range{};
         range.offset = reflectBlock.offset;
         range.size = reflectBlock.size;
-        range.stageFlags = stage;
+        range.stageFlags = mStage;
 
-        reflectionData.pushConstantRanges.push_back(range);
+        mReflectionData.pushConstantRanges.push_back(range);
       }
     }
   }
@@ -109,7 +111,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
           auto *reflectBinding = reflectDescriptorSet.bindings[i];
 
           bindings.at(i).binding = reflectBinding->binding;
-          bindings.at(i).stageFlags = stage;
+          bindings.at(i).stageFlags = mStage;
           bindings.at(i).descriptorType =
               static_cast<VkDescriptorType>(reflectBinding->descriptor_type);
 
@@ -119,7 +121,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
             bindings.at(i).descriptorCount *= reflectBinding->array.dims[j];
           }
         }
-        reflectionData.descriptorSetLayouts.insert({ds->set, bindings});
+        mReflectionData.descriptorSetLayouts.insert({ds->set, bindings});
       }
     }
   }
@@ -127,4 +129,4 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
   spvReflectDestroyShaderModule(&shaderReflectModule);
 }
 
-} // namespace liquid
+} // namespace liquid::experimental
