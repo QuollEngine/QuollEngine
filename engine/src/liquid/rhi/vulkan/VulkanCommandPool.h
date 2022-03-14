@@ -5,7 +5,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanDescriptorManager.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanCommandPool {
 public:
@@ -46,4 +46,4 @@ private:
   const VulkanResourceRegistry &mRegistry;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

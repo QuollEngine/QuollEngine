@@ -20,8 +20,7 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 
 namespace liquid {
 
-ImguiRenderer::ImguiRenderer(Window &window,
-                             experimental::ResourceRegistry &registry_)
+ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry_)
     : registry(registry_) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
@@ -67,8 +66,8 @@ void ImguiRenderer::beginRendering() {
 
 void ImguiRenderer::endRendering() { ImGui::Render(); }
 
-void ImguiRenderer::draw(RenderCommandList &commandList,
-                         PipelineHandle pipeline) {
+void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
+                         rhi::PipelineHandle pipeline) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -119,21 +118,21 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 
     if (registry.getBufferMap().hasDescription(frameObj.vertexBuffer)) {
       registry.updateBuffer(frameObj.vertexBuffer,
-                            {BufferType::Vertex, frameObj.vertexBufferSize,
+                            {rhi::BufferType::Vertex, frameObj.vertexBufferSize,
                              frameObj.vertexBufferData});
     } else {
-      frameObj.vertexBuffer =
-          registry.addBuffer({BufferType::Vertex, frameObj.vertexBufferSize,
-                              frameObj.vertexBufferData});
+      frameObj.vertexBuffer = registry.addBuffer({rhi::BufferType::Vertex,
+                                                  frameObj.vertexBufferSize,
+                                                  frameObj.vertexBufferData});
     }
 
     if (registry.getBufferMap().hasDescription(frameObj.indexBuffer)) {
       registry.updateBuffer(frameObj.indexBuffer,
-                            {BufferType::Index, frameObj.indexBufferSize,
+                            {rhi::BufferType::Index, frameObj.indexBufferSize,
                              frameObj.indexBufferData});
     } else {
       frameObj.indexBuffer =
-          registry.addBuffer({BufferType::Index, frameObj.indexBufferSize,
+          registry.addBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
                               frameObj.indexBufferData});
     }
   }
@@ -194,12 +193,12 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
           commandList.setScissor(clipRectOffset, clipRectSize);
           commandList.bindPipeline(pipeline);
 
-          auto handle = static_cast<TextureHandle>(
+          auto handle = static_cast<rhi::TextureHandle>(
               reinterpret_cast<uintptr_t>(cmd->TextureId));
 
-          Descriptor descriptor;
-          descriptor.bind(0, std::vector<TextureHandle>{handle},
-                          DescriptorType::CombinedImageSampler);
+          rhi::Descriptor descriptor;
+          descriptor.bind(0, std::vector<rhi::TextureHandle>{handle},
+                          rhi::DescriptorType::CombinedImageSampler);
 
           commandList.bindDescriptor(pipeline, 0, descriptor);
           commandList.drawIndexed(
@@ -214,9 +213,9 @@ void ImguiRenderer::draw(RenderCommandList &commandList,
 }
 
 void ImguiRenderer::setupRenderStates(ImDrawData *data,
-                                      RenderCommandList &commandList,
+                                      rhi::RenderCommandList &commandList,
                                       int fbWidth, int fbHeight,
-                                      PipelineHandle pipeline) {
+                                      rhi::PipelineHandle pipeline) {
   if (data->TotalVtxCount > 0) {
     commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
     commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,
@@ -254,7 +253,7 @@ void ImguiRenderer::loadFonts() {
   int width = 0, height = 0;
   io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
-  TextureDescription description;
+  rhi::TextureDescription description;
   if (width > 0 || height > 0) {
     description.size = width * height * 4;
     description.width = width;

@@ -6,7 +6,7 @@
 #include "VulkanMapping.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    VulkanDeviceObject &device,
@@ -98,4 +98,4 @@ VulkanRenderPass::~VulkanRenderPass() {
   LOG_DEBUG("[Vulkan] Render pass destroyed");
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

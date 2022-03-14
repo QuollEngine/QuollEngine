@@ -64,7 +64,7 @@ static const std::map<VkResult, liquid::String> resultMap{
      "Swapchain does not have exclusive full screen access"},
 };
 
-namespace liquid {
+namespace liquid::rhi {
 
 String createVulkanErrorMessage(VkResult resultCode, const String &what) {
   String errorMessage = "[VulkanError] " + what;
@@ -80,4 +80,4 @@ String createVulkanErrorMessage(VkResult resultCode, const String &what) {
   return errorMessage + ": " + humanReadableResultString + " " + codeString;
 }
 
-} // namespace liquid
+} // namespace liquid::rhi

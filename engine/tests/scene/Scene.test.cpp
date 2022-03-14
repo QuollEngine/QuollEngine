@@ -7,7 +7,7 @@
 
 class SceneTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
   liquid::EntityContext context;
 };
 

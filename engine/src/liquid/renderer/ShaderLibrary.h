@@ -12,7 +12,7 @@ public:
    * @param name Shader name
    * @param shader Shader object
    */
-  void addShader(const String &name, ShaderHandle shader);
+  void addShader(const String &name, rhi::ShaderHandle shader);
 
   /**
    * @brief Get shader
@@ -20,10 +20,10 @@ public:
    * @param name Shader name
    * @return Shader
    */
-  ShaderHandle getShader(const String &name) const;
+  rhi::ShaderHandle getShader(const String &name) const;
 
 private:
-  std::unordered_map<String, ShaderHandle> shaders;
+  std::unordered_map<String, rhi::ShaderHandle> shaders;
 };
 
 } // namespace liquid

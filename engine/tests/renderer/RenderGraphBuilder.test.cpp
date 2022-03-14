@@ -15,7 +15,7 @@ struct NoncePass : public liquid::RenderGraphPassBase {
       : RenderGraphPassBase(name, renderPass) {}
 
   void buildInternal(liquid::RenderGraphBuilder &builder) {}
-  void execute(liquid::RenderCommandList &commandList,
+  void execute(liquid::rhi::RenderCommandList &commandList,
                liquid::RenderGraphRegistry &registry) {}
 };
 

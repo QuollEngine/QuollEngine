@@ -2,7 +2,7 @@
 
 #include "base/NativeRenderCommandListInterface.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class RenderCommandList {
 public:
@@ -66,7 +66,7 @@ public:
    * @param renderAreaSize Render area size
    * @param clearValues Clear values
    */
-  inline void beginRenderPass(RenderPassHandle renderPass,
+  inline void beginRenderPass(rhi::RenderPassHandle renderPass,
                               FramebufferHandle framebuffer,
                               const glm::ivec2 &renderAreaOffset,
                               const glm::uvec2 &renderAreaSize,
@@ -183,10 +183,10 @@ private:
   std::unique_ptr<NativeRenderCommandListInterface> mNativeRenderCommandList;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi
 
-namespace liquid {
+namespace liquid::rhi {
 
-using RenderCommandList = experimental::RenderCommandList;
+using RenderCommandList = rhi::RenderCommandList;
 
-} // namespace liquid
+} // namespace liquid::rhi

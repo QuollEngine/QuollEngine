@@ -13,7 +13,7 @@
 #include "VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanRenderDevice::VulkanRenderDevice(
     VulkanRenderBackend &backend, const VulkanPhysicalDevice &physicalDevice)
@@ -237,4 +237,4 @@ void VulkanRenderDevice::recreateSwapchain() {
   mSwapchainRecreated = true;
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

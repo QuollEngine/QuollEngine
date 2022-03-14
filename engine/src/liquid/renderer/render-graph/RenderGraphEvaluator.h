@@ -12,12 +12,12 @@ namespace liquid {
 class RenderGraphEvaluator {
   struct VulkanAttachmentInfo {
     VkClearValue clearValue;
-    std::vector<TextureHandle> framebufferAttachments;
+    std::vector<rhi::TextureHandle> framebufferAttachments;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t layers = 0;
 
-    RenderPassAttachmentDescription attachment;
+    rhi::RenderPassAttachmentDescription attachment;
   };
 
 public:
@@ -26,7 +26,7 @@ public:
    *
    * @param registry Resource registry
    */
-  RenderGraphEvaluator(experimental::ResourceRegistry &registry);
+  RenderGraphEvaluator(rhi::ResourceRegistry &registry);
 
   /**
    * @brief Compile render graph
@@ -61,11 +61,16 @@ public:
    * @param graph Render graph
    * @param imageIdx Swapchain image index
    */
-  void execute(RenderCommandList &commandList,
+  void execute(rhi::RenderCommandList &commandList,
                const std::vector<RenderGraphPassBase *> &passes,
                RenderGraph &graph, uint32_t imageIdx);
 
-  inline experimental::ResourceRegistry &getRegistry() { return mRegistry; }
+  /**
+   * @brief Get resource registry
+   *
+   * @return Resouce registry
+   */
+  inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
 
 private:
   /**
@@ -102,7 +107,7 @@ private:
    */
   VulkanAttachmentInfo
   createColorAttachment(const RenderPassAttachment &attachment,
-                        TextureHandle texture);
+                        rhi::TextureHandle texture);
 
   /**
    * @brief Create depth attachment
@@ -113,7 +118,7 @@ private:
    */
   VulkanAttachmentInfo
   createDepthAttachment(const RenderPassAttachment &attachment,
-                        TextureHandle texture);
+                        rhi::TextureHandle texture);
 
   /**
    * @brief Create texture
@@ -122,11 +127,11 @@ private:
    * @param extent Swapchain extent
    * @return Texture
    */
-  TextureHandle createTexture(const AttachmentData &data,
-                              const glm::uvec2 &extent);
+  rhi::TextureHandle createTexture(const AttachmentData &data,
+                                   const glm::uvec2 &extent);
 
 private:
-  experimental::ResourceRegistry &mRegistry;
+  rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquid

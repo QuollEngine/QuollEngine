@@ -18,7 +18,7 @@
 #include "VulkanDescriptorManager.h"
 #include "VulkanSwapchain.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanRenderDevice : public RenderDevice {
 public:
@@ -106,4 +106,4 @@ private:
   bool mSwapchainRecreated = false;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

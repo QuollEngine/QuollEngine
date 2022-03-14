@@ -5,7 +5,7 @@
 
 class ImageTextureLoaderTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 using ImageTextureLoaderDeathTest = ImageTextureLoaderTest;

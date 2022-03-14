@@ -3,9 +3,9 @@
 namespace liquid {
 
 struct EnvironmentComponent {
-  TextureHandle irradianceMap = 0;
-  TextureHandle specularMap = 0;
-  TextureHandle brdfLUT = 0;
+  rhi::TextureHandle irradianceMap = 0;
+  rhi::TextureHandle specularMap = 0;
+  rhi::TextureHandle brdfLUT = 0;
 };
 
 } // namespace liquid

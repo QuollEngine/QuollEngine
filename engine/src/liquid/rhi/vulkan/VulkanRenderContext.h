@@ -13,7 +13,7 @@
 
 #include "liquid/rhi/RenderCommandList.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanRenderContext {
 public:
@@ -104,4 +104,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

@@ -4,7 +4,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanDeviceObject.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanRenderPass {
 public:
@@ -41,4 +41,4 @@ private:
   VkRenderPass mRenderPass = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

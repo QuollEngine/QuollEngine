@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/rhi/Descriptor.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 Descriptor &Descriptor::bind(uint32_t binding,
                              const std::vector<TextureHandle> &textures,
@@ -34,4 +34,4 @@ Descriptor &Descriptor::bind(uint32_t binding, BufferHandle buffer,
   return *this;
 }
 
-} // namespace liquid
+} // namespace liquid::rhi

@@ -10,7 +10,7 @@ static bool operator==(const liquid::Vertex &lhs, const liquid::Vertex &rhs) {
 
 class BaseGeometryTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 TEST_F(BaseGeometryTest, SetsVerticesAndIndicesOnConstruct) {

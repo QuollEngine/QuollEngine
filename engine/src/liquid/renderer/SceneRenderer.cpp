@@ -8,8 +8,8 @@ SceneRenderer::SceneRenderer(EntityContext &entityContext_,
                              bool bindMaterialData_)
     : entityContext(entityContext_), bindMaterialData(bindMaterialData_) {}
 
-void SceneRenderer::render(RenderCommandList &commandList,
-                           PipelineHandle pipeline) {
+void SceneRenderer::render(rhi::RenderCommandList &commandList,
+                           rhi::PipelineHandle pipeline) {
   entityContext.iterateEntities<MeshComponent, TransformComponent>(
       [&commandList, &pipeline, this](Entity entity, const MeshComponent &mesh,
                                       const TransformComponent &transform) {
@@ -44,8 +44,8 @@ void SceneRenderer::render(RenderCommandList &commandList,
       });
 }
 
-void SceneRenderer::renderSkinned(RenderCommandList &commandList,
-                                  PipelineHandle pipeline,
+void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
+                                  rhi::PipelineHandle pipeline,
                                   uint32_t descriptorSet) {
   entityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
                                 TransformComponent>(
@@ -61,9 +61,9 @@ void SceneRenderer::renderSkinned(RenderCommandList &commandList,
                                   sizeof(StandardPushConstants),
                                   transformConstant);
 
-        Descriptor skeletonDescriptor;
+        rhi::Descriptor skeletonDescriptor;
         skeletonDescriptor.bind(0, skeleton.skeleton.getBuffer(),
-                                DescriptorType::UniformBuffer);
+                                rhi::DescriptorType::UniformBuffer);
 
         commandList.bindDescriptor(pipeline, descriptorSet, skeletonDescriptor);
 

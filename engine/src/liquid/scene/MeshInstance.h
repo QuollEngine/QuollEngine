@@ -17,22 +17,23 @@ public:
    * @param mesh Mesh
    * @param registry Resource registry
    */
-  MeshInstance(const Mesh &mesh, experimental::ResourceRegistry &registry)
+  MeshInstance(const Mesh &mesh, rhi::ResourceRegistry &registry)
       : mRegistry(registry), mMesh(mesh) {
     for (auto &geometry : mMesh.getGeometries()) {
       size_t bufferSize =
           geometry.getVertices().size() * sizeof(typename Mesh::Vertex);
 
       auto vertexBuffer =
-          registry.addBuffer({BufferType::Vertex, bufferSize,
+          registry.addBuffer({rhi::BufferType::Vertex, bufferSize,
                               (void *)geometry.getVertices().data()});
 
       if (geometry.getIndices().size() > 0) {
         size_t bufferSize = geometry.getIndices().size() * sizeof(uint32_t);
 
-        auto indexBuffer = registry.addBuffer(
-            {BufferType::Index, geometry.getIndices().size() * sizeof(uint32_t),
-             (void *)geometry.getIndices().data()});
+        auto indexBuffer =
+            registry.addBuffer({rhi::BufferType::Index,
+                                geometry.getIndices().size() * sizeof(uint32_t),
+                                (void *)geometry.getIndices().data()});
         indexBuffers.push_back(indexBuffer);
       } else {
         indexBuffers.push_back(0);
@@ -77,7 +78,7 @@ public:
    *
    * @return Vertex buffers
    */
-  inline const std::vector<BufferHandle> &getVertexBuffers() const {
+  inline const std::vector<rhi::BufferHandle> &getVertexBuffers() const {
     return vertexBuffers;
   }
 
@@ -86,7 +87,7 @@ public:
    *
    * @return Index buffers
    */
-  inline const std::vector<BufferHandle> &getIndexBuffers() const {
+  inline const std::vector<rhi::BufferHandle> &getIndexBuffers() const {
     return indexBuffers;
   }
 
@@ -118,14 +119,14 @@ public:
   }
 
 private:
-  std::vector<BufferHandle> vertexBuffers;
-  std::vector<BufferHandle> indexBuffers;
+  std::vector<rhi::BufferHandle> vertexBuffers;
+  std::vector<rhi::BufferHandle> indexBuffers;
   std::vector<SharedPtr<Material>> materials;
   std::vector<uint32_t> vertexCounts;
   std::vector<uint32_t> indexCounts;
 
   Mesh mMesh;
-  experimental::ResourceRegistry &mRegistry;
+  rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquid

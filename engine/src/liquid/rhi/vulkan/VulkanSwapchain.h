@@ -6,7 +6,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanPhysicalDevice.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 /**
  * @brief Vulkan swapchain
@@ -151,4 +151,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

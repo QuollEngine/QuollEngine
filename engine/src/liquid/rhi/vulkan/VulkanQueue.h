@@ -2,7 +2,7 @@
 
 #include "VulkanDeviceObject.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanQueue {
 public:
@@ -33,4 +33,4 @@ private:
   uint32_t mQueueIndex = 0;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

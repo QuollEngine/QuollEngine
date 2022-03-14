@@ -28,7 +28,7 @@ public:
             const PhysicalDeviceInformation &deviceInfo,
             StatsManager &statsManager, DebugManager &debugManager,
             const String &previousColor,
-            const std::function<void(TextureHandle)> &imUpdate);
+            const std::function<void(rhi::TextureHandle)> &imUpdate);
   /**
    * @brief Build pass
    *
@@ -42,7 +42,7 @@ public:
    * @param commandList Render command list
    * @param registry Render graph registry
    */
-  void execute(RenderCommandList &commandList,
+  void execute(rhi::RenderCommandList &commandList,
                RenderGraphRegistry &registry) override;
 
 private:
@@ -52,7 +52,7 @@ private:
   GraphResourceId pipelineId = 0;
   ImguiDebugLayer debugLayer;
   GraphResourceId sceneTextureId = 0;
-  std::function<void(TextureHandle)> imguiUpdateFn;
+  std::function<void(rhi::TextureHandle)> imguiUpdateFn;
 };
 
 } // namespace liquid

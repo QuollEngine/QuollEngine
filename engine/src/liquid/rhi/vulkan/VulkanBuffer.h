@@ -5,7 +5,7 @@
 #include "VulkanResourceAllocator.h"
 #include "liquid/rhi/BufferDescription.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanBuffer {
 public:
@@ -54,7 +54,7 @@ public:
    *
    * @return Buffer type
    */
-  inline BufferType getType() const { return mType; }
+  inline rhi::BufferType getType() const { return mType; }
 
   /**
    * @brief Get buffer size
@@ -81,8 +81,8 @@ private:
 
   VkBuffer mBuffer = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
-  BufferType mType;
+  rhi::BufferType mType;
   size_t mSize = 0;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

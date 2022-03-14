@@ -1,9 +1,9 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 class RenderBackend {
 public:
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

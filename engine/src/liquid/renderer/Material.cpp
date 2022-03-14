@@ -4,9 +4,9 @@
 
 namespace liquid {
 
-Material::Material(const std::vector<TextureHandle> &textures_,
+Material::Material(const std::vector<rhi::TextureHandle> &textures_,
                    const std::vector<std::pair<String, Property>> &properties_,
-                   experimental::ResourceRegistry &registry_)
+                   rhi::ResourceRegistry &registry_)
     : textures(textures_), registry(registry_) {
 
   for (size_t i = 0; i < properties_.size(); ++i) {
@@ -17,11 +17,11 @@ Material::Material(const std::vector<TextureHandle> &textures_,
 
   if (!properties.empty()) {
     auto size = updateBufferData();
-    uniformBuffer = registry.addBuffer({BufferType::Uniform, size, data});
-    descriptor.bind(0, uniformBuffer, DescriptorType::UniformBuffer);
+    uniformBuffer = registry.addBuffer({rhi::BufferType::Uniform, size, data});
+    descriptor.bind(0, uniformBuffer, rhi::DescriptorType::UniformBuffer);
   }
 
-  descriptor.bind(1, textures, DescriptorType::CombinedImageSampler);
+  descriptor.bind(1, textures, rhi::DescriptorType::CombinedImageSampler);
 }
 
 void Material::updateProperty(const String &name, const Property &value) {
@@ -42,7 +42,7 @@ void Material::updateProperty(const String &name, const Property &value) {
 
   properties.at(index) = value;
   auto size = updateBufferData();
-  registry.updateBuffer(uniformBuffer, {BufferType::Uniform, size, data});
+  registry.updateBuffer(uniformBuffer, {rhi::BufferType::Uniform, size, data});
 }
 
 size_t Material::updateBufferData() {

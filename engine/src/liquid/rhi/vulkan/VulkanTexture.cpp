@@ -4,7 +4,7 @@
 #include "VulkanTexture.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
                              VkSampler sampler, VkFormat format,
@@ -94,7 +94,8 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   if (description.data) {
     VulkanBuffer stagingBuffer(
-        {BufferType::Transfer, description.size, description.data}, mAllocator);
+        {rhi::BufferType::Transfer, description.size, description.data},
+        mAllocator);
 
     uploadContext.submit([extent, this, &stagingBuffer,
                           &description](VkCommandBuffer commandBuffer) {
@@ -160,4 +161,4 @@ VulkanTexture::~VulkanTexture() {
   }
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

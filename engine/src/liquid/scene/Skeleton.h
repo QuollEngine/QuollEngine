@@ -22,8 +22,7 @@ public:
            std::vector<glm::quat> &&rotations, std::vector<glm::vec3> &&scales,
            std::vector<JointId> &&parents,
            std::vector<glm::mat4> &&inverseBindMatrices,
-           std::vector<String> &&names,
-           experimental::ResourceRegistry *registry);
+           std::vector<String> &&names, rhi::ResourceRegistry *registry);
 
   /**
    * @brief Set joint position
@@ -149,7 +148,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline BufferHandle getBuffer() const { return buffer; }
+  inline rhi::BufferHandle getBuffer() const { return buffer; }
 
   /**
    * @brief Get debug uniform buffer
@@ -159,7 +158,7 @@ public:
    *
    * @return Debug uniform buffer
    */
-  inline BufferHandle getDebugBuffer() const { return debugBuffer; }
+  inline rhi::BufferHandle getDebugBuffer() const { return debugBuffer; }
 
   /**
    * @brief Get number of joints
@@ -204,13 +203,13 @@ private:
   std::vector<glm::mat4> jointFinalTransforms;
 
   std::vector<String> jointNames;
-  BufferHandle buffer;
+  rhi::BufferHandle buffer;
 
   std::vector<JointId> debugBones;
   std::vector<glm::mat4> debugBoneTransforms;
-  BufferHandle debugBuffer;
+  rhi::BufferHandle debugBuffer;
 
-  experimental::ResourceRegistry *registry;
+  rhi::ResourceRegistry *registry;
 };
 
 } // namespace liquid

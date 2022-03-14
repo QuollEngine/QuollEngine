@@ -10,7 +10,7 @@ ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
                      const PhysicalDeviceInformation &deviceInfo,
                      StatsManager &statsManager, DebugManager &debugManager,
                      const String &previousColor_,
-                     const std::function<void(TextureHandle)> &imUpdate)
+                     const std::function<void(rhi::TextureHandle)> &imUpdate)
     : RenderGraphPassBase(name, renderPassId), imguiRenderer(imguiRenderer_),
       shaderLibrary(shaderLibrary_),
       debugLayer(deviceInfo, statsManager, debugManager),
@@ -43,7 +43,7 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
           BlendOp::Add}}}});
 }
 
-void ImguiPass::execute(RenderCommandList &commandList,
+void ImguiPass::execute(rhi::RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
   auto sceneTexture = registry.hasTexture(sceneTextureId)

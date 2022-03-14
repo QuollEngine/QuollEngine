@@ -5,11 +5,11 @@
 #include "liquid/rhi/vulkan/VulkanError.h"
 
 TEST(CheckForVulkanError, DoesNothingIfSuccess) {
-  liquid::checkForVulkanError(VK_SUCCESS, "Test error message");
+  liquid::rhi::checkForVulkanError(VK_SUCCESS, "Test error message");
 }
 
 TEST(CheckForVulkanErrorDeathTest, ThrowsVulkanErrorIfNotSuccess) {
-  EXPECT_DEATH(
-      liquid::checkForVulkanError(VK_ERROR_DEVICE_LOST, "Test error message"),
-      ".*");
+  EXPECT_DEATH(liquid::rhi::checkForVulkanError(VK_ERROR_DEVICE_LOST,
+                                                "Test error message"),
+               ".*");
 }

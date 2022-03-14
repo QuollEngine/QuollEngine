@@ -3,8 +3,9 @@
 
 namespace liquid {
 
-const std::vector<TextureHandle> MaterialPBR::Properties::getTextures() const {
-  std::vector<TextureHandle> textures;
+const std::vector<rhi::TextureHandle>
+MaterialPBR::Properties::getTextures() const {
+  std::vector<rhi::TextureHandle> textures;
   if (baseColorTexture > 0) {
     textures.push_back(baseColorTexture);
   }
@@ -57,7 +58,7 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         experimental::ResourceRegistry &registry)
+                         rhi::ResourceRegistry &registry)
     : Material(properties.getTextures(), properties.getProperties(), registry) {
 }
 } // namespace liquid

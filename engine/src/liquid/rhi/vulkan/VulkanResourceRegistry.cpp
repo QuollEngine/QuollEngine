@@ -7,7 +7,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 void VulkanResourceRegistry::addShader(ShaderHandle handle,
                                        std::unique_ptr<VulkanShader> &&shader) {
@@ -47,12 +47,14 @@ void VulkanResourceRegistry::updateTexture(
 }
 
 void VulkanResourceRegistry::addRenderPass(
-    RenderPassHandle handle, std::unique_ptr<VulkanRenderPass> &&renderPass) {
+    rhi::RenderPassHandle handle,
+    std::unique_ptr<VulkanRenderPass> &&renderPass) {
   mRenderPasses.insert({handle, std::move(renderPass)});
 }
 
 void VulkanResourceRegistry::updateRenderPass(
-    RenderPassHandle handle, std::unique_ptr<VulkanRenderPass> &&renderPass) {
+    rhi::RenderPassHandle handle,
+    std::unique_ptr<VulkanRenderPass> &&renderPass) {
   mRenderPasses.at(handle) = std::move(renderPass);
 }
 
@@ -63,7 +65,8 @@ void VulkanResourceRegistry::addFramebuffer(
 }
 
 void VulkanResourceRegistry::updateFramebuffer(
-    RenderPassHandle handle, std::unique_ptr<VulkanFramebuffer> &&framebuffer) {
+    rhi::RenderPassHandle handle,
+    std::unique_ptr<VulkanFramebuffer> &&framebuffer) {
   mFramebuffers.at(handle) = std::move(framebuffer);
 }
 
@@ -73,8 +76,8 @@ void VulkanResourceRegistry::addPipeline(
 }
 
 void VulkanResourceRegistry::updatePipeline(
-    RenderPassHandle handle, std::unique_ptr<VulkanPipeline> &&pipeline) {
+    rhi::RenderPassHandle handle, std::unique_ptr<VulkanPipeline> &&pipeline) {
   mPipelines.at(handle) = std::move(pipeline);
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

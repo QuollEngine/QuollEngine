@@ -1,16 +1,15 @@
 #pragma once
 
 #include "RenderHandle.h"
-#include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::rhi {
 
 struct FramebufferDescription {
-  RenderPassHandle renderPass = 0;
+  rhi::RenderPassHandle renderPass = 0;
   uint32_t width = 0;
   uint32_t height = 0;
   uint32_t layers = 0;
   std::vector<TextureHandle> attachments;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

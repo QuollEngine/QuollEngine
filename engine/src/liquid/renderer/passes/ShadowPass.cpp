@@ -30,7 +30,7 @@ void ShadowPass::buildInternal(RenderGraphBuilder &builder) {
                          FrontFace::Clockwise}});
 }
 
-void ShadowPass::execute(RenderCommandList &commandList,
+void ShadowPass::execute(rhi::RenderCommandList &commandList,
                          RenderGraphRegistry &registry) {
   auto pipeline = registry.getPipeline(pipelineId);
 

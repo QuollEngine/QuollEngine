@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 enum class DescriptorType {
   UniformBuffer,
@@ -58,4 +58,4 @@ private:
   String hashCode;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

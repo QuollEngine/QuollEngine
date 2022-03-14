@@ -35,7 +35,7 @@ public:
    * @param commandList Render command list
    * @param registry Render graph registry
    */
-  void execute(RenderCommandList &commandList,
+  void execute(rhi::RenderCommandList &commandList,
                RenderGraphRegistry &registry) override;
 
 private:

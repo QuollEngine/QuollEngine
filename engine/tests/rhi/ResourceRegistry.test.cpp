@@ -7,7 +7,7 @@ struct TestDesc {
   uint32_t value = 0;
 };
 
-using TestMap = liquid::experimental::ResourceRegistryMap<uint32_t, TestDesc>;
+using TestMap = liquid::rhi::ResourceRegistryMap<uint32_t, TestDesc>;
 
 TEST(ResourceRegistryMapTest, AddsNewResource) {
   TestMap map;

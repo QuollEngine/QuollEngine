@@ -5,7 +5,7 @@
 #include "liquid/rhi/ShaderDescription.h"
 #include "VulkanDeviceObject.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanShader {
   struct ReflectionData {
@@ -84,4 +84,4 @@ private:
   ReflectionData mReflectionData{};
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

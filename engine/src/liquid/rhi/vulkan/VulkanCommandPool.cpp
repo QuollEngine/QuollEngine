@@ -5,7 +5,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
                                      uint32_t queueFamilyIndex,
@@ -60,4 +60,4 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
   return std::move(renderCommandLists);
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

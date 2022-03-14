@@ -10,7 +10,7 @@
 
 #include "liquid/core/EngineGlobals.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanDescriptorManager::VulkanDescriptorManager(
     VulkanDeviceObject &device, const VulkanResourceRegistry &registry)
@@ -159,4 +159,4 @@ String VulkanDescriptorManager::createHash(const Descriptor &descriptor,
   return ss.str();
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

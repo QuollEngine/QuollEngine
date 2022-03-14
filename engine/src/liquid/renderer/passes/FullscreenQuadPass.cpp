@@ -23,15 +23,15 @@ void FullscreenQuadPass::buildInternal(RenderGraphBuilder &builder) {
   builder.write("SWAPCHAIN");
 }
 
-void FullscreenQuadPass::execute(RenderCommandList &commandList,
+void FullscreenQuadPass::execute(rhi::RenderCommandList &commandList,
                                  RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
   commandList.bindPipeline(pipeline);
 
-  Descriptor descriptor;
-  descriptor.bind(0,
-                  std::vector<TextureHandle>{registry.getTexture(inputTexture)},
-                  DescriptorType::CombinedImageSampler);
+  rhi::Descriptor descriptor;
+  descriptor.bind(
+      0, std::vector<rhi::TextureHandle>{registry.getTexture(inputTexture)},
+      rhi::DescriptorType::CombinedImageSampler);
   commandList.bindDescriptor(pipeline, 0, descriptor);
 
   commandList.draw(3, 0);

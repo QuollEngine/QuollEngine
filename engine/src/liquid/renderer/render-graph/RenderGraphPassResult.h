@@ -8,8 +8,8 @@ namespace liquid {
 
 class RenderGraphPassResult {
 public:
-  RenderGraphPassResult(RenderPassHandle renderPass,
-                        const std::vector<FramebufferHandle> &framebuffers,
+  RenderGraphPassResult(rhi::RenderPassHandle renderPass,
+                        const std::vector<rhi::FramebufferHandle> &framebuffers,
                         const std::vector<VkClearValue> &clearValues,
                         uint32_t width, uint32_t height, uint32_t layers);
 
@@ -18,7 +18,7 @@ public:
    *
    * @return List of framebuffers
    */
-  inline const std::vector<FramebufferHandle> &getFramebuffers() const {
+  inline const std::vector<rhi::FramebufferHandle> &getFramebuffers() const {
     return framebuffers;
   };
 
@@ -27,7 +27,7 @@ public:
    *
    * @return Render pass handle
    */
-  inline RenderPassHandle getRenderPass() const { return renderPass; }
+  inline rhi::RenderPassHandle getRenderPass() const { return renderPass; }
 
   /**
    * @brief Get clear values
@@ -46,8 +46,8 @@ public:
   inline glm::uvec2 getExtent() const { return extent; }
 
 private:
-  RenderPassHandle renderPass;
-  std::vector<FramebufferHandle> framebuffers;
+  rhi::RenderPassHandle renderPass;
+  std::vector<rhi::FramebufferHandle> framebuffers;
   std::vector<VkClearValue> clearValues;
   bool swapchainRelative = false;
 

@@ -5,7 +5,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 struct SkeletonTest : public ::testing::Test {
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 
   liquid::Skeleton createSkeleton(uint32_t numJoints) {
     std::vector<glm::vec3> positions;
@@ -131,7 +131,7 @@ TEST_F(SkeletonTest, CreatesUniformBufferOnConstruct) {
   const auto &description =
       registry.getBufferMap().getDescription(skeleton.getBuffer());
 
-  EXPECT_EQ(description.type, liquid::BufferType::Uniform);
+  EXPECT_EQ(description.type, liquid::rhi::BufferType::Uniform);
   EXPECT_EQ(description.size, sizeof(glm::mat4) * 5);
 }
 
@@ -141,7 +141,7 @@ TEST_F(SkeletonTest, CreatesDebugUniformBufferOnConstruct) {
   const auto &description =
       registry.getBufferMap().getDescription(skeleton.getDebugBuffer());
 
-  EXPECT_EQ(description.type, liquid::BufferType::Uniform);
+  EXPECT_EQ(description.type, liquid::rhi::BufferType::Uniform);
   EXPECT_EQ(description.size, sizeof(glm::mat4) * 10);
 }
 

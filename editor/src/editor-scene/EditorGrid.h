@@ -15,7 +15,7 @@ public:
    *
    * @param registry Resource registry
    */
-  EditorGrid(liquid::experimental::ResourceRegistry &registry);
+  EditorGrid(liquid::rhi::ResourceRegistry &registry);
 
   /**
    * @brief Set grid lines display flag
@@ -52,7 +52,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline liquid::BufferHandle getUniformBuffer() const { return buffer; }
+  inline liquid::rhi::BufferHandle getUniformBuffer() const { return buffer; }
 
 private:
   /**
@@ -62,8 +62,8 @@ private:
 
 private:
   EditorGridData data;
-  liquid::BufferHandle buffer;
-  liquid::experimental::ResourceRegistry &registry;
+  liquid::rhi::BufferHandle buffer;
+  liquid::rhi::ResourceRegistry &registry;
 };
 
 } // namespace liquidator

@@ -6,7 +6,7 @@
 
 class KtxTextureLoaderTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 using KtxTextureLoaderDeathTest = KtxTextureLoaderTest;
@@ -34,7 +34,7 @@ TEST_F(KtxTextureLoaderTest, LoadsTexture2D) {
 
   const auto &description = registry.getTextureMap().getDescription(texture);
 
-  EXPECT_EQ(description.type, liquid::TextureType::Standard);
+  EXPECT_EQ(description.type, liquid::rhi::TextureType::Standard);
   EXPECT_EQ(description.width, 1);
   EXPECT_EQ(description.height, 1);
   EXPECT_EQ(description.layers, 1);
@@ -49,7 +49,7 @@ TEST_F(KtxTextureLoaderTest, LoadsTextureCubemap) {
 
   const auto &description = registry.getTextureMap().getDescription(texture);
 
-  EXPECT_EQ(description.type, liquid::TextureType::Cubemap);
+  EXPECT_EQ(description.type, liquid::rhi::TextureType::Cubemap);
   EXPECT_EQ(description.width, 1);
   EXPECT_EQ(description.height, 1);
   EXPECT_EQ(description.layers, 6);

@@ -1,13 +1,13 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 enum class BufferType { Vertex, Index, Uniform, Transfer };
 
 struct BufferDescription {
-  BufferType type = BufferType::Vertex;
+  BufferType type = rhi::BufferType::Vertex;
   size_t size = 0;
   void *data = nullptr;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

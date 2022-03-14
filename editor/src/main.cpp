@@ -35,7 +35,7 @@ int main() {
   liquid::EntityContext context;
   liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
 
-  liquid::experimental::VulkanRenderBackend backend(window);
+  liquid::rhi::VulkanRenderBackend backend(window);
 
   liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
   liquid::AnimationSystem animationSystem(context);
@@ -138,17 +138,17 @@ int main() {
                           liquid::BlendOp::Add}}}});
         },
         [&renderer, &cameraObj, &editorCamera, &editorGrid, &context](
-            liquid::RenderCommandList &commandList, EditorDebugScope &scope,
-            liquid::RenderGraphRegistry &registry) {
+            liquid::rhi::RenderCommandList &commandList,
+            EditorDebugScope &scope, liquid::RenderGraphRegistry &registry) {
           const auto &pipeline = registry.getPipeline(scope.editorGridPipeline);
 
-          liquid::Descriptor sceneDescriptor;
+          liquid::rhi::Descriptor sceneDescriptor;
           sceneDescriptor.bind(0, cameraObj->getUniformBuffer(),
-                               liquid::DescriptorType::UniformBuffer);
+                               liquid::rhi::DescriptorType::UniformBuffer);
 
-          liquid::Descriptor gridDescriptor;
+          liquid::rhi::Descriptor gridDescriptor;
           gridDescriptor.bind(0, editorGrid.getUniformBuffer(),
-                              liquid::DescriptorType::UniformBuffer);
+                              liquid::rhi::DescriptorType::UniformBuffer);
 
           commandList.bindPipeline(pipeline);
           commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
@@ -171,13 +171,15 @@ int main() {
                 if (!debug.showBones)
                   return;
 
-                liquid::Descriptor sceneDescriptor;
-                sceneDescriptor.bind(0, cameraObj->getUniformBuffer(),
-                                     liquid::DescriptorType::UniformBuffer);
+                liquid::rhi::Descriptor sceneDescriptor;
+                sceneDescriptor.bind(
+                    0, cameraObj->getUniformBuffer(),
+                    liquid::rhi::DescriptorType::UniformBuffer);
 
-                liquid::Descriptor skeletonDescriptor;
-                skeletonDescriptor.bind(0, skeleton.skeleton.getDebugBuffer(),
-                                        liquid::DescriptorType::UniformBuffer);
+                liquid::rhi::Descriptor skeletonDescriptor;
+                skeletonDescriptor.bind(
+                    0, skeleton.skeleton.getDebugBuffer(),
+                    liquid::rhi::DescriptorType::UniformBuffer);
 
                 auto *transformConstant = new liquid::StandardPushConstants;
                 transformConstant->modelMatrix = transform.worldTransform;

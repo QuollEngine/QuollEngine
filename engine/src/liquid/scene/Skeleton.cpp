@@ -9,7 +9,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
                    std::vector<JointId> &&parents,
                    std::vector<glm::mat4> &&inverseBindMatrices,
                    std::vector<String> &&names,
-                   experimental::ResourceRegistry *registry_)
+                   rhi::ResourceRegistry *registry_)
     : jointLocalPositions(positions), jointLocalRotations(rotations),
       jointLocalScales(scales), jointParents(parents),
       jointInverseBindMatrices(inverseBindMatrices), jointNames(names),
@@ -26,8 +26,8 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
   jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
   jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
 
-  buffer =
-      registry->addBuffer({BufferType::Uniform, sizeof(glm::mat4) * numJoints});
+  buffer = registry->addBuffer(
+      {rhi::BufferType::Uniform, sizeof(glm::mat4) * numJoints});
 
   // Debug data
   for (JointId joint = 0; joint < static_cast<uint32_t>(numJoints); ++joint) {
@@ -40,7 +40,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
   debugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
 
   debugBuffer = registry->addBuffer(
-      {BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
+      {rhi::BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
 }
 
 const glm::mat4 Skeleton::getJointLocalTransform(JointId joint) const {
@@ -83,9 +83,9 @@ void Skeleton::update() {
         jointWorldTransforms.at(i) * jointInverseBindMatrices.at(i);
   }
 
-  registry->updateBuffer(buffer,
-                         {BufferType::Uniform, sizeof(glm::mat4) * numJoints,
-                          jointFinalTransforms.data()});
+  registry->updateBuffer(buffer, {rhi::BufferType::Uniform,
+                                  sizeof(glm::mat4) * numJoints,
+                                  jointFinalTransforms.data()});
 }
 
 void Skeleton::updateDebug() {
@@ -95,7 +95,7 @@ void Skeleton::updateDebug() {
     debugBoneTransforms.at(i) = jointWorldTransforms.at(debugBones.at(i));
   }
 
-  registry->updateBuffer(debugBuffer, {BufferType::Uniform,
+  registry->updateBuffer(debugBuffer, {rhi::BufferType::Uniform,
                                        sizeof(glm::mat4) * debugBones.size(),
                                        debugBoneTransforms.data()});
 }
