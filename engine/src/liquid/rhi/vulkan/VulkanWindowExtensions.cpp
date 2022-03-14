@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanWindowExtensions.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 #if defined(LIQUID_PLATFORM_WINDOWS)
 const std::vector<String> vulkanWindowExtensions{"VK_KHR_surface",
@@ -15,4 +15,4 @@ const std::vector<String> vulkanWindowExtensions{};
 const std::vector<String> vulkanWindowExtensions{};
 #endif
 
-} // namespace liquid
+} // namespace liquid::rhi

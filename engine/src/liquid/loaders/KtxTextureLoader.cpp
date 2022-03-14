@@ -8,10 +8,10 @@
 
 namespace liquid {
 
-KtxTextureLoader::KtxTextureLoader(experimental::ResourceRegistry &registry_)
+KtxTextureLoader::KtxTextureLoader(rhi::ResourceRegistry &registry_)
     : registry(registry_) {}
 
-TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
+rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
   ktxTexture *ktxTextureData = nullptr;
   KTX_error_code result = ktxTexture_CreateFromNamedFile(
       filename.c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
@@ -30,9 +30,9 @@ TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
 
   constexpr uint32_t CUBEMAP_SIDES = 6;
 
-  TextureDescription description;
-  description.type =
-      ktxTextureData->isCubemap ? TextureType::Cubemap : TextureType::Standard;
+  rhi::TextureDescription description;
+  description.type = ktxTextureData->isCubemap ? rhi::TextureType::Cubemap
+                                               : rhi::TextureType::Standard;
   description.width = ktxTextureData->baseWidth;
   description.height = ktxTextureData->baseHeight;
   description.depth = ktxTextureData->baseDepth;

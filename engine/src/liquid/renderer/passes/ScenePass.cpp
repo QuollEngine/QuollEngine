@@ -45,7 +45,7 @@ void ScenePass::buildInternal(RenderGraphBuilder &builder) {
       PipelineColorBlend{{PipelineColorBlendAttachment{}}}});
 }
 
-void ScenePass::execute(RenderCommandList &commandList,
+void ScenePass::execute(rhi::RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
   const auto &pipeline = debugManager.getWireframeMode()
                              ? registry.getPipeline(wireframePipelineId)
@@ -56,22 +56,24 @@ void ScenePass::execute(RenderCommandList &commandList,
   auto cameraBuffer =
       renderData->getScene()->getActiveCamera()->getUniformBuffer();
 
-  Descriptor sceneDescriptor, sceneDescriptorFragment;
+  rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
 
   const auto &iblMaps = renderData->getEnvironmentTextures();
 
-  sceneDescriptor.bind(0, cameraBuffer, DescriptorType::UniformBuffer);
-  sceneDescriptorFragment.bind(0, cameraBuffer, DescriptorType::UniformBuffer)
-      .bind(1, renderData->getSceneBuffer(), DescriptorType::UniformBuffer)
+  sceneDescriptor.bind(0, cameraBuffer, rhi::DescriptorType::UniformBuffer);
+  sceneDescriptorFragment
+      .bind(0, cameraBuffer, rhi::DescriptorType::UniformBuffer)
+      .bind(1, renderData->getSceneBuffer(), rhi::DescriptorType::UniformBuffer)
       .bind(2,
-            std::vector<TextureHandle>{registry.getTexture(shadowMapTextureId)},
-            DescriptorType::CombinedImageSampler);
+            std::vector<rhi::TextureHandle>{
+                registry.getTexture(shadowMapTextureId)},
+            rhi::DescriptorType::CombinedImageSampler);
 
   sceneDescriptorFragment
       .bind(3, {iblMaps.at(0), iblMaps.at(1)},
-            DescriptorType::CombinedImageSampler)
-      .bind(4, std::vector<TextureHandle>{iblMaps.at(2)},
-            DescriptorType::CombinedImageSampler);
+            rhi::DescriptorType::CombinedImageSampler)
+      .bind(4, std::vector<rhi::TextureHandle>{iblMaps.at(2)},
+            rhi::DescriptorType::CombinedImageSampler);
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(pipeline, 0, sceneDescriptor);

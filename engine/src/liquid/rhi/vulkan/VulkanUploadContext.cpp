@@ -5,7 +5,7 @@
 #include "VulkanUploadContext.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanUploadContext::VulkanUploadContext(VulkanDeviceObject &mDevice,
                                          VulkanCommandPool &pool,
@@ -34,7 +34,7 @@ void VulkanUploadContext::submit(const SubmitFn &submitFn) const {
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-  auto *commandBuffer = dynamic_cast<experimental::VulkanCommandBuffer *>(
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
                             mCommandList.getNativeRenderCommandList().get())
                             ->getVulkanCommandBuffer();
 
@@ -72,4 +72,4 @@ void VulkanUploadContext::createFence() {
   LOG_DEBUG("[Vulkan] Upload fence created");
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

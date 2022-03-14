@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class NativeRenderCommandListInterface {
 public:
@@ -18,11 +18,10 @@ public:
    * @param renderAreaSize Render area size
    * @param clearValues Clear values
    */
-  virtual void
-  beginRenderPass(RenderPassHandle renderPass, FramebufferHandle framebuffer,
-                  const glm::ivec2 &renderAreaOffset,
-                  const glm::uvec2 &renderAreaSize,
-                  const std::vector<VkClearValue> &clearValues) = 0;
+  virtual void beginRenderPass(
+      rhi::RenderPassHandle renderPass, FramebufferHandle framebuffer,
+      const glm::ivec2 &renderAreaOffset, const glm::uvec2 &renderAreaSize,
+      const std::vector<VkClearValue> &clearValues) = 0;
 
   /**
    * @brief End render pass
@@ -111,4 +110,4 @@ public:
   virtual void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) = 0;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

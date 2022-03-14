@@ -1,9 +1,9 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 struct ShaderDescription {
   String path;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

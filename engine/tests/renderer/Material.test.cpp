@@ -5,11 +5,11 @@
 
 class MaterialTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 TEST_F(MaterialTest, SetsBuffersAndTextures) {
-  std::vector<liquid::TextureHandle> textures{0};
+  std::vector<liquid::rhi::TextureHandle> textures{0};
 
   liquid::Material material(
       textures,
@@ -29,9 +29,9 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
   EXPECT_EQ(description.size, sizeof(glm::vec4) * 2);
 
   EXPECT_EQ(material.getDescriptor().getBindings().at(0).type,
-            liquid::DescriptorType::UniformBuffer);
+            liquid::rhi::DescriptorType::UniformBuffer);
   EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
-            liquid::DescriptorType::CombinedImageSampler);
+            liquid::rhi::DescriptorType::CombinedImageSampler);
 
   char *data = static_cast<char *>(description.data);
 
@@ -43,7 +43,7 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
 }
 
 TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
-  std::vector<liquid::TextureHandle> textures{0};
+  std::vector<liquid::rhi::TextureHandle> textures{0};
 
   liquid::Material material(textures, {}, registry);
 
@@ -53,7 +53,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   EXPECT_EQ(material.getDescriptor().getBindings().find(0),
             material.getDescriptor().getBindings().end());
   EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
-            liquid::DescriptorType::CombinedImageSampler);
+            liquid::rhi::DescriptorType::CombinedImageSampler);
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {

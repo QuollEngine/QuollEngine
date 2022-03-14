@@ -24,16 +24,16 @@ void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
   builder.write("depthBuffer");
 }
 
-void EnvironmentPass::execute(RenderCommandList &commandList,
+void EnvironmentPass::execute(rhi::RenderCommandList &commandList,
                               RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
 
   commandList.bindPipeline(pipeline);
 
-  Descriptor descriptor;
+  rhi::Descriptor descriptor;
   descriptor.bind(0,
                   renderData->getScene()->getActiveCamera()->getUniformBuffer(),
-                  DescriptorType::UniformBuffer);
+                  rhi::DescriptorType::UniformBuffer);
 
   commandList.bindDescriptor(pipeline, 0, descriptor);
 

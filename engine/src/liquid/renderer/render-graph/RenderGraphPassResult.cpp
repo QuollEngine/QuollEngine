@@ -6,8 +6,8 @@
 namespace liquid {
 
 RenderGraphPassResult::RenderGraphPassResult(
-    RenderPassHandle renderPass_,
-    const std::vector<FramebufferHandle> &framebuffers_,
+    rhi::RenderPassHandle renderPass_,
+    const std::vector<rhi::FramebufferHandle> &framebuffers_,
     const std::vector<VkClearValue> &clearValues_, uint32_t width_,
     uint32_t height_, uint32_t layers_)
     : renderPass(renderPass_), framebuffers(framebuffers_),

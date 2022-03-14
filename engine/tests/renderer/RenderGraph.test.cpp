@@ -5,7 +5,7 @@
 
 struct EmptyScope {};
 
-constexpr auto noopExecutor = [](liquid::RenderCommandList &commandList,
+constexpr auto noopExecutor = [](liquid::rhi::RenderCommandList &commandList,
                                  EmptyScope &scope,
                                  liquid::RenderGraphRegistry &registry) {};
 

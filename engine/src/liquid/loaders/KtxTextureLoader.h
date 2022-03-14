@@ -11,7 +11,7 @@ public:
    *
    * @param registry Resource registry
    */
-  KtxTextureLoader(experimental::ResourceRegistry &registry);
+  KtxTextureLoader(rhi::ResourceRegistry &registry);
 
   /**
    * @brief Load texture from KTX file
@@ -19,10 +19,10 @@ public:
    * @param filename Filename
    * @return Texture
    */
-  TextureHandle loadFromFile(const String &filename);
+  rhi::TextureHandle loadFromFile(const String &filename);
 
 private:
-  experimental::ResourceRegistry &registry;
+  rhi::ResourceRegistry &registry;
 };
 
 } // namespace liquid

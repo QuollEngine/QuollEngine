@@ -89,15 +89,15 @@ public:
                   liquid::PipelineColorBlend{
                       {liquid::PipelineColorBlendAttachment{}}}});
         },
-        [&sceneRenderer, this](liquid::RenderCommandList &commandList,
+        [&sceneRenderer, this](liquid::rhi::RenderCommandList &commandList,
                                PongScope &scope,
                                liquid::RenderGraphRegistry &registry) {
           const auto &pipeline = registry.getPipeline(scope.pipeline);
           commandList.bindPipeline(pipeline);
 
-          liquid::Descriptor descriptor;
+          liquid::rhi::Descriptor descriptor;
           descriptor.bind(0, camera->getUniformBuffer(),
-                          liquid::DescriptorType::UniformBuffer);
+                          liquid::rhi::DescriptorType::UniformBuffer);
 
           commandList.bindDescriptor(pipeline, 0, descriptor);
 
@@ -289,14 +289,14 @@ private:
 
 private:
   liquid::Window window;
-  liquid::experimental::VulkanRenderBackend backend;
+  liquid::rhi::VulkanRenderBackend backend;
   liquid::Renderer renderer;
 
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
 
-  liquid::ShaderHandle vertexShader;
-  liquid::ShaderHandle fragmentShader;
+  liquid::rhi::ShaderHandle vertexShader;
+  liquid::rhi::ShaderHandle fragmentShader;
   liquid::SharedPtr<liquid::Material> material;
 
   liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> barInstance;

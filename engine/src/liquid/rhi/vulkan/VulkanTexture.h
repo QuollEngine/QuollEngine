@@ -8,7 +8,7 @@
 
 #include "liquid/rhi/TextureDescription.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanTexture {
 public:
@@ -92,4 +92,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

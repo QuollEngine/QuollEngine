@@ -19,7 +19,7 @@ public:
    *
    * @param registry Resource registry
    */
-  Camera(experimental::ResourceRegistry *registry);
+  Camera(rhi::ResourceRegistry *registry);
 
   /**
    * @brief Sets prespective projection
@@ -70,7 +70,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline BufferHandle getUniformBuffer() { return uniformBuffer; }
+  inline rhi::BufferHandle getUniformBuffer() { return uniformBuffer; }
 
   /**
    * @brief Get camera data
@@ -87,8 +87,8 @@ private:
 
 private:
   CameraData data;
-  BufferHandle uniformBuffer;
-  experimental::ResourceRegistry *registry;
+  rhi::BufferHandle uniformBuffer;
+  rhi::ResourceRegistry *registry;
 };
 
 } // namespace liquid

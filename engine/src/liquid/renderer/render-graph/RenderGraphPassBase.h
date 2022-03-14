@@ -54,7 +54,7 @@ public:
    * @param registry Render graph registry
    * @pure
    */
-  virtual void execute(RenderCommandList &commandList,
+  virtual void execute(rhi::RenderCommandList &commandList,
                        RenderGraphRegistry &registry) = 0;
 
   /**

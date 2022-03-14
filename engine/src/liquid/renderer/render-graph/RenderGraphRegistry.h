@@ -15,7 +15,7 @@ public:
    * @param resourceId Resource ID
    * @param texture Texture
    */
-  void addTexture(GraphResourceId resourceId, TextureHandle texture);
+  void addTexture(GraphResourceId resourceId, rhi::TextureHandle texture);
 
   /**
    * @brief Add pipeline resource
@@ -23,7 +23,7 @@ public:
    * @param resourceId Resource ID
    * @param pipeline Pipeline
    */
-  void addPipeline(GraphResourceId resourceId, PipelineHandle pipeline);
+  void addPipeline(GraphResourceId resourceId, rhi::PipelineHandle pipeline);
 
   /**
    * @brief Add render pass resource
@@ -40,7 +40,7 @@ public:
    * @param resourceId Resource ID
    * @return Texture
    */
-  inline TextureHandle &getTexture(GraphResourceId resourceId) {
+  inline rhi::TextureHandle &getTexture(GraphResourceId resourceId) {
     return textures.at(resourceId);
   }
 
@@ -61,7 +61,7 @@ public:
    * @param resourceId Resource ID
    * @return Pipeline
    */
-  inline PipelineHandle getPipeline(GraphResourceId resourceId) {
+  inline rhi::PipelineHandle getPipeline(GraphResourceId resourceId) {
     return pipelines.at(resourceId);
   }
 
@@ -98,9 +98,9 @@ public:
   }
 
 private:
-  std::unordered_map<GraphResourceId, TextureHandle> textures;
+  std::unordered_map<GraphResourceId, rhi::TextureHandle> textures;
   std::unordered_map<GraphResourceId, RenderGraphPassResult> renderPasses;
-  std::unordered_map<GraphResourceId, PipelineHandle> pipelines;
+  std::unordered_map<GraphResourceId, rhi::PipelineHandle> pipelines;
 };
 
 } // namespace liquid

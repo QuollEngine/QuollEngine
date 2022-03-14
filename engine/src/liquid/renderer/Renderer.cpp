@@ -19,7 +19,7 @@
 namespace liquid {
 
 Renderer::Renderer(EntityContext &entityContext_, Window &window,
-                   experimental::VulkanRenderDevice *device)
+                   rhi::VulkanRenderDevice *device)
     : mEntityContext(entityContext_), mGraphEvaluator(mRegistry),
       mDevice(device), mImguiRenderer(window, mRegistry) {
   loadShaders();
@@ -85,7 +85,7 @@ void Renderer::loadShaders() {
 
 RenderGraph Renderer::createRenderGraph(
     const SharedPtr<RenderData> &renderData, const String &imguiDep,
-    const std::function<void(TextureHandle)> &imUpdate) {
+    const std::function<void(rhi::TextureHandle)> &imUpdate) {
   RenderGraph graph;
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
@@ -129,7 +129,7 @@ RenderGraph Renderer::createRenderGraph(
 }
 
 SharedPtr<Material> Renderer::createMaterial(
-    const std::vector<TextureHandle> &textures,
+    const std::vector<rhi::TextureHandle> &textures,
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {
   return std::make_shared<Material>(textures, properties, mRegistry);

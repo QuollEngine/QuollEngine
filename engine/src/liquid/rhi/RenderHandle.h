@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 using ShaderHandle = uint32_t;
 
@@ -14,4 +14,4 @@ using FramebufferHandle = uint32_t;
 
 using PipelineHandle = uint32_t;
 
-} // namespace liquid
+} // namespace liquid::rhi

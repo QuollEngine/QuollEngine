@@ -4,7 +4,7 @@
 
 #include "VulkanPhysicalDevice.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanDeviceObject {
 public:
@@ -36,4 +36,4 @@ private:
   VkDevice mDevice = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

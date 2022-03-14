@@ -7,7 +7,7 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VkCommandBuffer commandBuffer, const VulkanResourceRegistry &registry,
@@ -16,7 +16,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(
       mDescriptorManager(descriptorManager) {}
 
 void VulkanCommandBuffer::beginRenderPass(
-    RenderPassHandle renderPass, FramebufferHandle framebuffer,
+    rhi::RenderPassHandle renderPass, FramebufferHandle framebuffer,
     const glm::ivec2 &renderAreaOffset, const glm::uvec2 &renderAreaSize,
     const std::vector<VkClearValue> &clearValues) {
   VkRenderPassBeginInfo beginInfo{};
@@ -107,4 +107,4 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
   vkCmdSetScissor(mCommandBuffer, 0, 1, &scissor);
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

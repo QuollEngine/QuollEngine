@@ -24,7 +24,7 @@ class Window;
 class Renderer {
 public:
   Renderer(EntityContext &context, Window &window,
-           experimental::VulkanRenderDevice *device);
+           rhi::VulkanRenderDevice *device);
   ~Renderer();
 
   Renderer(const Renderer &rhs) = delete;
@@ -33,7 +33,7 @@ public:
   Renderer &operator=(Renderer &&rhs) = delete;
 
   SharedPtr<Material>
-  createMaterial(const std::vector<TextureHandle> &textures,
+  createMaterial(const std::vector<rhi::TextureHandle> &textures,
                  const std::vector<std::pair<String, Property>> &properties,
                  const CullMode &cullMode);
   SharedPtr<Material>
@@ -45,14 +45,14 @@ public:
   inline StatsManager &getStatsManager() { return mStatsManager; }
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
-  inline experimental::ResourceRegistry &getRegistry() { return mRegistry; }
-  inline experimental::VulkanRenderDevice *getRenderDevice() { return mDevice; }
+  inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
+  inline rhi::VulkanRenderDevice *getRenderDevice() { return mDevice; }
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   RenderGraph
   createRenderGraph(const SharedPtr<RenderData> &renderData,
                     const String &imguiDep,
-                    const std::function<void(TextureHandle)> &imUpdate);
+                    const std::function<void(rhi::TextureHandle)> &imUpdate);
 
   void render(RenderGraph &graph);
 
@@ -63,9 +63,9 @@ private:
 
 private:
   EntityContext &mEntityContext;
-  experimental::ResourceRegistry mRegistry;
+  rhi::ResourceRegistry mRegistry;
   RenderGraphEvaluator mGraphEvaluator;
-  experimental::VulkanRenderDevice *mDevice;
+  rhi::VulkanRenderDevice *mDevice;
   ImguiRenderer mImguiRenderer;
   StatsManager mStatsManager;
   ShaderLibrary mShaderLibrary;

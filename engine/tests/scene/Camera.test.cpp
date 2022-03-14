@@ -5,7 +5,7 @@
 
 class CameraTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 TEST_F(CameraTest, CreatesUniformBufferOnConstruct) {
@@ -13,7 +13,7 @@ TEST_F(CameraTest, CreatesUniformBufferOnConstruct) {
 
   EXPECT_EQ(
       registry.getBufferMap().getDescription(camera.getUniformBuffer()).type,
-      liquid::BufferType::Uniform);
+      liquid::rhi::BufferType::Uniform);
 }
 
 TEST_F(CameraTest, SetsPerspectiveProjectionAndUpdatesProjectionView) {

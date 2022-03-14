@@ -8,7 +8,7 @@ using MaterialPtr = liquid::SharedPtr<liquid::Material>;
 
 class MeshInstanceTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 TEST_F(MeshInstanceTest, CreatesVertexAndIndexBuffersOnConstruct) {

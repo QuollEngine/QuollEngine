@@ -33,13 +33,13 @@ public:
    *
    * @param entityContext Entity context
    * @param scene Scene
-   * @param descriptorManager Descriptor manager
+   * @param descriptorManager rhi::Descriptor manager
    * @param shadowMaterials Shadow materials
    * @param registry Resource registry
    */
   RenderData(EntityContext &entityContext, Scene *scene,
              const std::vector<SharedPtr<Material>> &shadowMaterials,
-             experimental::ResourceRegistry &registry);
+             rhi::ResourceRegistry &registry);
 
   /**
    * @brief Get scene
@@ -53,7 +53,7 @@ public:
    *
    * @return Scene buffer
    */
-  inline BufferHandle getSceneBuffer() const { return sceneBuffer; }
+  inline rhi::BufferHandle getSceneBuffer() const { return sceneBuffer; }
 
   /**
    * @brief Update scene data
@@ -73,7 +73,7 @@ public:
    *
    * @return Environment map textures
    */
-  std::array<TextureHandle, 3> getEnvironmentTextures() const;
+  std::array<rhi::TextureHandle, 3> getEnvironmentTextures() const;
 
   /**
    * @brief Clean environment change flag
@@ -82,13 +82,13 @@ public:
 
 private:
   EntityContext &entityContext;
-  BufferHandle sceneBuffer;
+  rhi::BufferHandle sceneBuffer;
   Scene *scene;
   Entity environmentMapEntity = ENTITY_MAX;
   bool environmentChanged = false;
-  Descriptor descriptor;
+  rhi::Descriptor descriptor;
   SceneBufferObject sceneData{};
-  experimental::ResourceRegistry &registry;
+  rhi::ResourceRegistry &registry;
 
   const std::vector<SharedPtr<Material>> &shadowMaterials;
 };

@@ -14,7 +14,7 @@ public:
   MOCK_METHOD(void, buildInternal, (liquid::RenderGraphBuilder &), (override));
 
   MOCK_METHOD(void, execute,
-              (liquid::RenderCommandList &, liquid::RenderGraphRegistry &),
+              (liquid::rhi::RenderCommandList &, liquid::RenderGraphRegistry &),
               (override));
 };
 

@@ -5,12 +5,12 @@ namespace liquid {
 
 RenderData::RenderData(EntityContext &entityContext_, Scene *scene_,
                        const std::vector<SharedPtr<Material>> &shadowMaterials_,
-                       experimental::ResourceRegistry &registry_)
+                       rhi::ResourceRegistry &registry_)
     : entityContext(entityContext_), scene(scene_),
       shadowMaterials(shadowMaterials_), registry(registry_) {
 
   sceneBuffer =
-      registry.addBuffer({BufferType::Uniform, sizeof(SceneBufferObject)});
+      registry.addBuffer({rhi::BufferType::Uniform, sizeof(SceneBufferObject)});
 }
 
 void RenderData::update() {
@@ -54,11 +54,11 @@ void RenderData::update() {
       });
 
   sceneData.numLights.x = static_cast<uint32_t>(i);
-  registry.updateBuffer(sceneBuffer, {BufferType::Uniform,
+  registry.updateBuffer(sceneBuffer, {rhi::BufferType::Uniform,
                                       sizeof(SceneBufferObject), &sceneData});
 }
 
-std::array<TextureHandle, 3> RenderData::getEnvironmentTextures() const {
+std::array<rhi::TextureHandle, 3> RenderData::getEnvironmentTextures() const {
   if (entityContext.hasEntity(environmentMapEntity) &&
       entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
 

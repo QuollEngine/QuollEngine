@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanMapping.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 VkPrimitiveTopology
 VulkanMapping::getPrimitiveTopology(PrimitiveTopology topology) {
@@ -174,4 +174,4 @@ VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
   }
 }
 
-} // namespace liquid
+} // namespace liquid::rhi

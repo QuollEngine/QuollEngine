@@ -5,7 +5,7 @@
 #include "VulkanRenderContext.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
                                          VulkanCommandPool &pool,
@@ -69,7 +69,7 @@ RenderCommandList &VulkanRenderContext::beginRendering() {
                   std::numeric_limits<uint32_t>::max());
   vkResetFences(mDevice, 1, &renderFences.at(currentFrame));
 
-  auto *commandBuffer = dynamic_cast<experimental::VulkanCommandBuffer *>(
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
                             renderCommandLists.at(currentFrame)
                                 .getNativeRenderCommandList()
                                 .get())
@@ -90,7 +90,7 @@ void VulkanRenderContext::endRendering() {
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-  auto *commandBuffer = dynamic_cast<experimental::VulkanCommandBuffer *>(
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
                             renderCommandLists.at(currentFrame)
                                 .getNativeRenderCommandList()
                                 .get())
@@ -155,4 +155,4 @@ void VulkanRenderContext::createFences() {
   LOG_DEBUG("[Vulkan] Render fence created");
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

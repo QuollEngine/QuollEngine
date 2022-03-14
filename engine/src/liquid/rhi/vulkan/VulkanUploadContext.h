@@ -4,7 +4,7 @@
 #include "VulkanQueue.h"
 #include "VulkanCommandPool.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanUploadContext {
   using SubmitFn = std::function<void(VkCommandBuffer)>;
@@ -50,4 +50,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

@@ -3,7 +3,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanBuffer::VulkanBuffer(const BufferDescription &description,
                            VulkanResourceAllocator &allocator)
@@ -34,13 +34,13 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
 
   VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
-  if (description.type == BufferType::Vertex) {
+  if (description.type == rhi::BufferType::Vertex) {
     bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-  } else if (description.type == BufferType::Index) {
+  } else if (description.type == rhi::BufferType::Index) {
     bufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-  } else if (description.type == BufferType::Uniform) {
+  } else if (description.type == rhi::BufferType::Uniform) {
     bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-  } else if (description.type == BufferType::Transfer) {
+  } else if (description.type == rhi::BufferType::Transfer) {
     bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY;
   }
@@ -73,4 +73,4 @@ void VulkanBuffer::destroyBuffer() {
   vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

@@ -16,7 +16,7 @@ public:
    *
    * @param registry Resource registry
    */
-  ImageTextureLoader(experimental::ResourceRegistry &registry);
+  ImageTextureLoader(rhi::ResourceRegistry &registry);
 
   /**
    * @brief Load image from filename
@@ -24,10 +24,10 @@ public:
    * @param filename Filename
    * @return 2D Texture
    */
-  TextureHandle loadFromFile(const String &filename);
+  rhi::TextureHandle loadFromFile(const String &filename);
 
 private:
-  experimental::ResourceRegistry &registry;
+  rhi::ResourceRegistry &registry;
 };
 
 } // namespace liquid

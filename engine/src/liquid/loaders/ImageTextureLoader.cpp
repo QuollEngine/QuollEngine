@@ -7,12 +7,11 @@
 
 namespace liquid {
 
-ImageTextureLoader::ImageTextureLoader(
-    experimental::ResourceRegistry &registry_)
+ImageTextureLoader::ImageTextureLoader(rhi::ResourceRegistry &registry_)
     : registry(registry_) {}
 
-TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
-  liquid::TextureDescription description;
+rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
+  liquid::rhi::TextureDescription description;
   int width = 0, height = 0, channels = 0;
 
   description.data =
@@ -24,7 +23,7 @@ TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
   description.height = height;
   description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
   description.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-  description.type = TextureType::Standard;
+  description.type = rhi::TextureType::Standard;
   description.size = width * height * channels;
 
   return registry.addTexture(description);

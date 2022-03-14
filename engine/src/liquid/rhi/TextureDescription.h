@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 enum class TextureType { Standard, Cubemap };
 
@@ -18,4 +18,4 @@ struct TextureDescription {
   void *data = nullptr;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

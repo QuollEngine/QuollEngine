@@ -6,7 +6,7 @@
 
 #include <vma/vk_mem_alloc.h>
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanResourceAllocator {
 public:
@@ -27,4 +27,4 @@ private:
   VmaAllocator mAllocator = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

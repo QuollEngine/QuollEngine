@@ -93,7 +93,7 @@ int main() {
 
   liquid::EntityContext context;
   liquid::Window window("Scene Viewer", 1024, 768);
-  liquid::experimental::VulkanRenderBackend backend(window);
+  liquid::rhi::VulkanRenderBackend backend(window);
 
   liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
   liquid::AnimationSystem animationSystem(context);

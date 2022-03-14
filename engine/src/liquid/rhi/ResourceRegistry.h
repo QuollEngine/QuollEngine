@@ -8,7 +8,7 @@
 #include "PipelineDescription.h"
 #include "ShaderDescription.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 static constexpr uint32_t RESERVED_HANDLE_SIZE = 20;
 
@@ -223,7 +223,7 @@ public:
    * @param description Render pass description
    * @return RenderPass handle
    */
-  RenderPassHandle addRenderPass(const RenderPassDescription &description);
+  rhi::RenderPassHandle addRenderPass(const RenderPassDescription &description);
 
   /**
    * @brief Update render pass
@@ -231,7 +231,7 @@ public:
    * @param handle Render pass handle
    * @param description Render pass Description
    */
-  void updateRenderPass(RenderPassHandle handle,
+  void updateRenderPass(rhi::RenderPassHandle handle,
                         const RenderPassDescription &description);
 
   /**
@@ -239,14 +239,14 @@ public:
    *
    * @param handle Render pass handle
    */
-  void deleteRenderPass(RenderPassHandle handle);
+  void deleteRenderPass(rhi::RenderPassHandle handle);
 
   /**
    * @brief Get render pass map
    *
    * @return Render pass map
    */
-  inline ResourceRegistryMap<RenderPassHandle, RenderPassDescription> &
+  inline ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription> &
   getRenderPassMap() {
     return mRenderPasses;
   }
@@ -323,9 +323,10 @@ private:
   ResourceRegistryMap<ShaderHandle, ShaderDescription> mShaders;
   ResourceRegistryMap<BufferHandle, BufferDescription> mBuffers;
   ResourceRegistryMap<TextureHandle, TextureDescription> mTextures;
-  ResourceRegistryMap<RenderPassHandle, RenderPassDescription> mRenderPasses;
+  ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription>
+      mRenderPasses;
   ResourceRegistryMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
   ResourceRegistryMap<PipelineHandle, PipelineDescription> mPipelines;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

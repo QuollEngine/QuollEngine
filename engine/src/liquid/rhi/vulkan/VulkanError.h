@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace liquid::rhi {
 
 /**
  * @brief Create Vulkan error message
@@ -24,4 +24,4 @@ inline void checkForVulkanError(VkResult resultCode,
                 createVulkanErrorMessage(resultCode, errorMessage));
 }
 
-} // namespace liquid
+} // namespace liquid::rhi

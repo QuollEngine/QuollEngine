@@ -7,7 +7,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanDescriptorManager {
 public:
@@ -81,7 +81,7 @@ private:
   VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
   VkDevice mDevice;
 
-  const experimental::VulkanResourceRegistry &mRegistry;
+  const rhi::VulkanResourceRegistry &mRegistry;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

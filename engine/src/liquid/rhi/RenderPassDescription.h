@@ -4,7 +4,7 @@
 #include "liquid/renderer/render-graph/RenderGraphAttachmentDescription.h"
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::rhi {
 
 struct RenderPassAttachmentDescription {
   AttachmentLoadOp loadOp;
@@ -19,4 +19,4 @@ struct RenderPassDescription {
   VkPipelineBindPoint bindPoint;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

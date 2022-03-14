@@ -5,7 +5,7 @@
 
 class MaterialPBRTest : public ::testing::Test {
 public:
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 };
 
 TEST_F(MaterialPBRTest, GetsTextures) {

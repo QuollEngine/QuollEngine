@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanBuffer;
 class VulkanTexture;
@@ -19,7 +19,8 @@ class VulkanResourceRegistry {
   using ShaderMap = VulkanResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = VulkanResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = VulkanResourceMap<TextureHandle, VulkanTexture>;
-  using RenderPassMap = VulkanResourceMap<RenderPassHandle, VulkanRenderPass>;
+  using RenderPassMap =
+      VulkanResourceMap<rhi::RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap =
       VulkanResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
@@ -131,7 +132,7 @@ public:
    * @param handle Render pass handle
    * @param renderPass Vulkan render pass
    */
-  void addRenderPass(RenderPassHandle handle,
+  void addRenderPass(rhi::RenderPassHandle handle,
                      std::unique_ptr<VulkanRenderPass> &&renderPass);
 
   /**
@@ -140,7 +141,7 @@ public:
    * @param handle Render pass handle
    * @param renderPass Vulkan render pass
    */
-  void updateRenderPass(RenderPassHandle handle,
+  void updateRenderPass(rhi::RenderPassHandle handle,
                         std::unique_ptr<VulkanRenderPass> &&renderPass);
 
   /**
@@ -165,7 +166,7 @@ public:
    * @param handle Framebuffer handle
    * @param framebuffer Vulkan framebuffer
    */
-  void updateFramebuffer(RenderPassHandle handle,
+  void updateFramebuffer(rhi::RenderPassHandle handle,
                          std::unique_ptr<VulkanFramebuffer> &&framebuffer);
 
   /**
@@ -190,7 +191,7 @@ public:
    * @param handle Pipeline handle
    * @param pipeline Vulkan pipeline
    */
-  void updatePipeline(RenderPassHandle handle,
+  void updatePipeline(rhi::RenderPassHandle handle,
                       std::unique_ptr<VulkanPipeline> &&pipeline);
 
   /**
@@ -209,4 +210,4 @@ private:
   PipelineMap mPipelines;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

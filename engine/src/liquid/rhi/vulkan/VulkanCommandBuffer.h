@@ -4,7 +4,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorManager.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanCommandBuffer : public NativeRenderCommandListInterface {
 public:
@@ -37,7 +37,7 @@ public:
    * @param renderAreaSize Render area size
    * @param clearValues Clear values
    */
-  void beginRenderPass(RenderPassHandle renderPass,
+  void beginRenderPass(rhi::RenderPassHandle renderPass,
                        FramebufferHandle framebuffer,
                        const glm::ivec2 &renderAreaOffset,
                        const glm::uvec2 &renderAreaSize,
@@ -135,4 +135,4 @@ private:
   VulkanDescriptorManager &mDescriptorManager;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

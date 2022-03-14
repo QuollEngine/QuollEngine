@@ -5,7 +5,7 @@
 
 #include "liquid/core/EngineGlobals.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
@@ -101,4 +101,4 @@ VulkanDeviceObject::~VulkanDeviceObject() {
   }
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

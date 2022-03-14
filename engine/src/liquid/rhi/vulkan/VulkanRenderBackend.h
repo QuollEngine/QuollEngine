@@ -14,7 +14,7 @@ constexpr bool ENABLE_VALIDATIONS_DEFAULT = true;
 constexpr bool ENABLE_VALIDATIONS_DEFAULT = false;
 #endif
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanRenderDevice;
 
@@ -114,4 +114,4 @@ private:
   uint32_t mResizeListener = 0;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

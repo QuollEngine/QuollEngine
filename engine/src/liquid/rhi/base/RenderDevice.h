@@ -1,9 +1,9 @@
 #pragma once
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class RenderDevice {
 public:
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

@@ -7,7 +7,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 class VulkanPipeline {
 public:
@@ -75,4 +75,4 @@ private:
   std::unordered_map<uint32_t, VkDescriptorSetLayout> mDescriptorLayouts;
 };
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

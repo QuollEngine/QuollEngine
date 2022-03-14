@@ -9,7 +9,7 @@ public:
   using BuilderFn =
       std::function<void(RenderGraphBuilder &builder, TScope &scope)>;
   using ExecutorFn =
-      std::function<void(RenderCommandList &commandList, TScope &scope,
+      std::function<void(rhi::RenderCommandList &commandList, TScope &scope,
                          RenderGraphRegistry &registry)>;
 
 public:
@@ -42,7 +42,7 @@ public:
    * @param commandList Render command list
    * @param registry Render graph registry
    */
-  void execute(RenderCommandList &commandList,
+  void execute(rhi::RenderCommandList &commandList,
                RenderGraphRegistry &registry) override {
     executorFn(commandList, scope, registry);
   }

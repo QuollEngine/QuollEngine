@@ -255,7 +255,7 @@ static SceneNode *getScene(const tinygltf::Model &model,
  * @return Skeleton data
  */
 static SkeletonData getSkeletons(const tinygltf::Model &model,
-                                 experimental::ResourceRegistry &registry) {
+                                 rhi::ResourceRegistry &registry) {
   std::map<uint32_t, Skeleton> skeletons;
 
   SkeletonData skeletonData{};
@@ -713,14 +713,14 @@ getMeshes(const tinygltf::Model &model,
  */
 static std::vector<SharedPtr<Material>>
 getMaterials(const tinygltf::Model &model, Renderer &renderer) {
-  std::vector<TextureHandle> textures;
+  std::vector<rhi::TextureHandle> textures;
   std::vector<SharedPtr<Material>> materials;
 
   for (auto &gltfTexture : model.textures) {
     // TODO: Support creating different samplers
     auto &image = model.images.at(gltfTexture.source);
 
-    TextureDescription description;
+    rhi::TextureDescription description;
     description.width = image.width;
     description.height = image.height;
     description.format = VK_FORMAT_R8G8B8A8_SRGB;

@@ -8,7 +8,7 @@ class AnimationSystemTest : public ::testing::Test {
 public:
   liquid::EntityContext context;
   liquid::AnimationSystem system;
-  liquid::experimental::ResourceRegistry registry;
+  liquid::rhi::ResourceRegistry registry;
 
   AnimationSystemTest() : system(context) {}
 

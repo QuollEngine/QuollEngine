@@ -5,7 +5,7 @@
 #include "VulkanRenderDevice.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanResourceAllocator::VulkanResourceAllocator(
     VulkanRenderBackend &backend, VulkanPhysicalDevice &physicalDevice,
@@ -29,4 +29,4 @@ VulkanResourceAllocator::~VulkanResourceAllocator() {
   }
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

@@ -17,9 +17,9 @@ public:
    * @param properties Material properties
    * @param registry Resource registry
    */
-  Material(const std::vector<TextureHandle> &textures,
+  Material(const std::vector<rhi::TextureHandle> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           experimental::ResourceRegistry &registry);
+           rhi::ResourceRegistry &registry);
 
   /**
    * @brief Update property
@@ -34,7 +34,7 @@ public:
    *
    * @return List of texture handles
    */
-  inline const std::vector<TextureHandle> &getTextures() const {
+  inline const std::vector<rhi::TextureHandle> &getTextures() const {
     return textures;
   }
 
@@ -51,7 +51,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline BufferHandle getUniformBuffer() const { return uniformBuffer; }
+  inline rhi::BufferHandle getUniformBuffer() const { return uniformBuffer; }
 
   /**
    * @brief Get properties
@@ -65,9 +65,9 @@ public:
   /**
    * @brief Get descriptor
    *
-   * @return Descriptor
+   * @return rhi::Descriptor
    */
-  inline const Descriptor &getDescriptor() const { return descriptor; }
+  inline const rhi::Descriptor &getDescriptor() const { return descriptor; }
 
 private:
   /**
@@ -80,13 +80,13 @@ private:
   size_t updateBufferData();
 
 private:
-  std::vector<TextureHandle> textures;
-  BufferHandle uniformBuffer = 0;
+  std::vector<rhi::TextureHandle> textures;
+  rhi::BufferHandle uniformBuffer = 0;
 
-  experimental::ResourceRegistry &registry;
+  rhi::ResourceRegistry &registry;
   char *data = nullptr;
 
-  Descriptor descriptor;
+  rhi::Descriptor descriptor;
 
   std::vector<Property> properties;
   std::map<String, size_t> propertyMap;

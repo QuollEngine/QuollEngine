@@ -7,7 +7,7 @@
 #include "VulkanMapping.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                VulkanDeviceObject &device,
@@ -284,4 +284,4 @@ VulkanPipeline::~VulkanPipeline() {
   LOG_DEBUG("[Vulkan] Descriptor set layouts destroyed");
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

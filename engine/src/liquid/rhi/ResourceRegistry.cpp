@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ResourceRegistry.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 ShaderHandle ResourceRegistry::addShader(const ShaderDescription &description) {
   return mShaders.addDescription(description);
@@ -34,18 +34,18 @@ void ResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.deleteDescription(handle);
 }
 
-RenderPassHandle
+rhi::RenderPassHandle
 ResourceRegistry::addRenderPass(const RenderPassDescription &description) {
   return mRenderPasses.addDescription(description);
 }
 
 void ResourceRegistry::updateRenderPass(
-    RenderPassHandle handle, const RenderPassDescription &description) {
+    rhi::RenderPassHandle handle, const RenderPassDescription &description) {
   LIQUID_ASSERT(handle > 0, "Render pass does not exist");
   mRenderPasses.updateDescription(handle, description);
 }
 
-void ResourceRegistry::deleteRenderPass(RenderPassHandle handle) {
+void ResourceRegistry::deleteRenderPass(rhi::RenderPassHandle handle) {
   mRenderPasses.deleteDescription(handle);
 }
 
@@ -79,4 +79,4 @@ void ResourceRegistry::deletePipeline(PipelineHandle handle) {
   mPipelines.deleteDescription(handle);
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

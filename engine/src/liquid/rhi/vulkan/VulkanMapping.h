@@ -6,7 +6,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace liquid {
+namespace liquid::rhi {
 
 class VulkanMapping {
 public:
@@ -91,4 +91,4 @@ public:
   static VkDescriptorType getDescriptorType(DescriptorType descriptorType);
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

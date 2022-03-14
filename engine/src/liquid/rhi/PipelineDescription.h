@@ -2,7 +2,7 @@
 
 #include "liquid/renderer/render-graph/RenderGraphPipelineDescription.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 struct PipelineDescription {
   RenderPassHandle renderPass = 0;
@@ -14,4 +14,4 @@ struct PipelineDescription {
   PipelineColorBlend colorBlend;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

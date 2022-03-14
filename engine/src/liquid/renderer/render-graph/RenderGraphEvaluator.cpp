@@ -6,8 +6,7 @@
 
 namespace liquid {
 
-RenderGraphEvaluator::RenderGraphEvaluator(
-    experimental::ResourceRegistry &registry)
+RenderGraphEvaluator::RenderGraphEvaluator(rhi::ResourceRegistry &registry)
     : mRegistry(registry) {}
 
 std::vector<RenderGraphPassBase *>
@@ -42,7 +41,7 @@ void RenderGraphEvaluator::build(std::vector<RenderGraphPassBase *> &compiled,
 }
 
 void RenderGraphEvaluator::execute(
-    RenderCommandList &commandList,
+    rhi::RenderCommandList &commandList,
     const std::vector<RenderGraphPassBase *> &result, RenderGraph &graph,
     uint32_t imageIdx) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::execute");
@@ -84,11 +83,11 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
     }
   }
 
-  std::vector<std::vector<TextureHandle>> framebufferAttachments(
+  std::vector<std::vector<rhi::TextureHandle>> framebufferAttachments(
       imageViewsPerFramebuffer);
 
-  RenderPassDescription renderPassDesc{};
-  RenderPassHandle renderPass = 0;
+  rhi::RenderPassDescription renderPassDesc{};
+  rhi::RenderPassHandle renderPass = 0;
 
   for (auto &[resourceId, graphAttachment] : pass->getOutputs()) {
     VulkanAttachmentInfo info{};
@@ -147,11 +146,11 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       renderPass = mRegistry.addRenderPass(renderPassDesc);
     }
 
-    std::vector<FramebufferHandle> framebuffers(framebufferAttachments.size(),
-                                                0);
+    std::vector<rhi::FramebufferHandle> framebuffers(
+        framebufferAttachments.size(), 0);
 
     for (size_t i = 0; i < framebuffers.size(); ++i) {
-      FramebufferDescription framebufferDesc;
+      rhi::FramebufferDescription framebufferDesc;
       framebufferDesc.width = width;
       framebufferDesc.height = height;
       framebufferDesc.layers = layers;
@@ -192,7 +191,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       }
 
       const auto &desc = graph.getPipeline(resource);
-      PipelineDescription description;
+      rhi::PipelineDescription description;
       description.vertexShader = desc.vertexShader;
       description.fragmentShader = desc.fragmentShader;
       description.colorBlend = desc.colorBlend;
@@ -201,7 +200,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       description.inputLayout = desc.inputLayout;
       description.renderPass = renderPass;
 
-      PipelineHandle handle = 0;
+      rhi::PipelineHandle handle = 0;
       if (hasPipeline) {
         handle = graph.getResourceRegistry().getPipeline(resource);
         mRegistry.updatePipeline(handle, description);
@@ -237,7 +236,7 @@ RenderGraphEvaluator::createSwapchainAttachment(
   info.framebufferAttachments.resize(numSwapchainImages, 0);
 
   for (uint32_t i = 0; i < numSwapchainImages; ++i) {
-    auto handle = static_cast<TextureHandle>(i + 1);
+    auto handle = static_cast<rhi::TextureHandle>(i + 1);
 
     info.framebufferAttachments.at(i) = handle;
   }
@@ -257,7 +256,7 @@ RenderGraphEvaluator::createSwapchainAttachment(
 
 RenderGraphEvaluator::VulkanAttachmentInfo
 RenderGraphEvaluator::createColorAttachment(
-    const RenderPassAttachment &attachment, TextureHandle texture) {
+    const RenderPassAttachment &attachment, rhi::TextureHandle texture) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createColorAttachment");
   VulkanAttachmentInfo info{};
 
@@ -289,7 +288,7 @@ RenderGraphEvaluator::createColorAttachment(
 
 RenderGraphEvaluator::VulkanAttachmentInfo
 RenderGraphEvaluator::createDepthAttachment(
-    const RenderPassAttachment &attachment, TextureHandle texture) {
+    const RenderPassAttachment &attachment, rhi::TextureHandle texture) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createDepthAttachment");
   VulkanAttachmentInfo info{};
 
@@ -315,8 +314,9 @@ RenderGraphEvaluator::createDepthAttachment(
   return info;
 }
 
-TextureHandle RenderGraphEvaluator::createTexture(const AttachmentData &data,
-                                                  const glm::uvec2 &extent) {
+rhi::TextureHandle
+RenderGraphEvaluator::createTexture(const AttachmentData &data,
+                                    const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createTexture");
   uint32_t width = data.width;
   uint32_t height = data.height;
@@ -327,7 +327,7 @@ TextureHandle RenderGraphEvaluator::createTexture(const AttachmentData &data,
     height = extent.y * height / PERCENTAGE_RATIO;
   }
 
-  TextureDescription description;
+  rhi::TextureDescription description;
   description.width = width;
   description.height = height;
   description.layers = data.layers;

@@ -4,7 +4,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanError.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
                                  const VulkanPhysicalDevice &physicalDevice,
@@ -211,4 +211,4 @@ VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
   return imageIndex;
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi

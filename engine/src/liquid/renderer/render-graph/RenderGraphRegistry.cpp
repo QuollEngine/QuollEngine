@@ -4,7 +4,7 @@
 namespace liquid {
 
 void RenderGraphRegistry::addTexture(GraphResourceId resourceId,
-                                     TextureHandle texture) {
+                                     rhi::TextureHandle texture) {
   if (textures.find(resourceId) != textures.end()) {
     textures.at(resourceId) = texture;
   } else {
@@ -13,7 +13,7 @@ void RenderGraphRegistry::addTexture(GraphResourceId resourceId,
 }
 
 void RenderGraphRegistry::addPipeline(GraphResourceId resourceId,
-                                      PipelineHandle pipeline) {
+                                      rhi::PipelineHandle pipeline) {
   if (pipelines.find(resourceId) != pipelines.end()) {
     pipelines.at(resourceId) = pipeline;
   } else {

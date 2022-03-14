@@ -9,10 +9,11 @@ class SceneRenderer {
 public:
   SceneRenderer(EntityContext &entityContext, bool bindMaterialData);
 
-  void render(RenderCommandList &commandList, PipelineHandle pipeline);
+  void render(rhi::RenderCommandList &commandList,
+              rhi::PipelineHandle pipeline);
 
-  void renderSkinned(RenderCommandList &commandList, PipelineHandle pipeline,
-                     uint32_t desciptorSet);
+  void renderSkinned(rhi::RenderCommandList &commandList,
+                     rhi::PipelineHandle pipeline, uint32_t desciptorSet);
 
 private:
   EntityContext &entityContext;

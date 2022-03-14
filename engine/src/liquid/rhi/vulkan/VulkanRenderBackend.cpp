@@ -15,7 +15,7 @@
 
 #include "liquid/core/EngineGlobals.h"
 
-namespace liquid::experimental {
+namespace liquid::rhi {
 
 static const String LIQUID_ENGINE_NAME = "Liquid";
 
@@ -126,4 +126,4 @@ VulkanPhysicalDevice VulkanRenderBackend::pickPhysicalDevice() {
   return physicalDevice;
 }
 
-} // namespace liquid::experimental
+} // namespace liquid::rhi
