@@ -1,14 +1,14 @@
 #pragma once
 
 #include "liquid/scene/Camera.h"
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/Renderer.h"
 #include "liquid/entity/EntityContext.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 class EditorCamera {
 public:
-  EditorCamera(liquid::EntityContext &context, liquid::VulkanRenderer *renderer,
-               liquid::GLFWWindow *window);
+  EditorCamera(liquid::EntityContext &context, liquid::Renderer &renderer,
+               liquid::Window &window);
 
   inline void setFOV(float fov_) { fov = fov_; }
 
@@ -62,5 +62,5 @@ private:
   liquid::EntityContext &entityContext;
   liquid::Entity cameraEntity;
   uint32_t resizeHandler;
-  liquid::GLFWWindow *window;
+  liquid::Window &window;
 };

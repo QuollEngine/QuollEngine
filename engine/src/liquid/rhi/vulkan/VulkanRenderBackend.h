@@ -6,7 +6,7 @@
 #include "VulkanPhysicalDevice.h"
 #include "VulkanValidator.h"
 
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 #ifdef LIQUID_DEBUG
 constexpr bool ENABLE_VALIDATIONS_DEFAULT = true;
@@ -29,7 +29,7 @@ public:
    * @param window Window
    * @param enableValidations Enable validations
    */
-  VulkanRenderBackend(GLFWWindow &window,
+  VulkanRenderBackend(Window &window,
                       bool enableValidations = ENABLE_VALIDATIONS_DEFAULT);
 
   VulkanRenderBackend(const VulkanRenderBackend &) = delete;
@@ -109,7 +109,7 @@ private:
   VulkanValidator mValidator;
   std::unique_ptr<VulkanRenderDevice> mDevice;
 
-  GLFWWindow &mWindow;
+  Window &mWindow;
   bool mFramebufferResized = false;
   uint32_t mResizeListener = 0;
 };

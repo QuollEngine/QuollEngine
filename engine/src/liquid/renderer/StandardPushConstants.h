@@ -2,7 +2,7 @@
 
 namespace liquid {
 
-struct VulkanStandardPushConstants {
+struct StandardPushConstants {
   glm::mat4 modelMatrix;
 };
 

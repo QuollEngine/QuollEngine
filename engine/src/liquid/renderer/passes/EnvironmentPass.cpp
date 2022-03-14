@@ -7,7 +7,7 @@ EnvironmentPass::EnvironmentPass(const String &name,
                                  GraphResourceId renderPassId,
                                  EntityContext &entityContext_,
                                  ShaderLibrary &shaderLibrary_,
-                                 const SharedPtr<VulkanRenderData> &renderData_)
+                                 const SharedPtr<RenderData> &renderData_)
     : RenderGraphPassBase(name, renderPassId), entityContext(entityContext_),
       shaderLibrary(shaderLibrary_), renderData(renderData_) {}
 

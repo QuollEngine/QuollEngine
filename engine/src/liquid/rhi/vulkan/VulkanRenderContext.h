@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 #include "liquid/profiler/StatsManager.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanCommandPool.h"

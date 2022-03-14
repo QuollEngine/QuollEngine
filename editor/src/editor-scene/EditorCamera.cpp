@@ -4,18 +4,17 @@
 #include <GLFW/glfw3.h>
 
 using liquid::Camera;
-using liquid::GLFWWindow;
-using liquid::VulkanRenderer;
+using liquid::Renderer;
+using liquid::Window;
 
 namespace liquidator {
 
 EditorCamera::EditorCamera(liquid::EntityContext &context_,
-                           liquid::VulkanRenderer *renderer,
-                           liquid::GLFWWindow *window_)
+                           liquid::Renderer &renderer, liquid::Window &window_)
     : context(context_), window(window_),
-      camera(new Camera(&renderer->getRegistry())) {
+      camera(new Camera(&renderer.getRegistry())) {
 
-  mouseButtonHandler = window->addMouseButtonHandler(
+  mouseButtonHandler = window.addMouseButtonHandler(
       [this](int button, int action, int mods) mutable {
         if (button != GLFW_MOUSE_BUTTON_MIDDLE) {
           return;
@@ -26,7 +25,7 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
           return;
         }
 
-        const auto &cursorPos = window->getCurrentMousePosition();
+        const auto &cursorPos = window.getCurrentMousePosition();
 
         // Do not trigger action if cursor is outside
         // Imgui window viewport
@@ -35,10 +34,10 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
           return;
         }
 
-        if (window->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
           inputState = InputState::Pan;
           prevMousePos = cursorPos;
-        } else if (window->isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+        } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
           inputState = InputState::Zoom;
           prevMousePos = cursorPos;
         } else {
@@ -49,13 +48,13 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
 
   // Out of bounds handler
   mouseMoveHandler =
-      window->addMouseMoveHandler([this](double xpos, double ypos) mutable {
+      window.addMouseMoveHandler([this](double xpos, double ypos) mutable {
         if (inputState == InputState::None) {
           return;
         }
 
         constexpr float MIN_OOB_THRESHOLD = 2.0f;
-        const auto &size = window->getWindowSize();
+        const auto &size = window.getWindowSize();
 
         float minX = 0;
         float maxX = static_cast<float>(size.x);
@@ -83,12 +82,12 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
 
         if (outOfBounds) {
           prevMousePos = newPos;
-          window->setMousePosition(newPos);
+          window.setMousePosition(newPos);
         }
       });
 
   scrollWheelHandler =
-      window->addScrollWheelHandler([this](double xoffset, double yoffset) {
+      window.addScrollWheelHandler([this](double xoffset, double yoffset) {
         if (inputState != InputState::None) {
           return;
         }
@@ -100,9 +99,9 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
 }
 
 EditorCamera::~EditorCamera() {
-  window->removeMouseButtonHandler(mouseButtonHandler);
-  window->removeMouseMoveHandler(mouseMoveHandler);
-  window->removeScrollWheelHandler(scrollWheelHandler);
+  window.removeMouseButtonHandler(mouseButtonHandler);
+  window.removeMouseMoveHandler(mouseMoveHandler);
+  window.removeScrollWheelHandler(scrollWheelHandler);
 
   context.deleteComponent<liquid::CameraComponent>(cameraEntity);
 }
@@ -142,7 +141,7 @@ void EditorCamera::reset() {
 void EditorCamera::pan() {
   constexpr float PAN_SPEED = 0.03f;
 
-  glm::vec2 mousePos = window->getCurrentMousePosition();
+  glm::vec2 mousePos = window.getCurrentMousePosition();
   glm::vec3 right = glm::normalize(glm::cross(glm::vec3(eye - center), up));
 
   glm::vec2 mousePosDiff =
@@ -157,9 +156,8 @@ void EditorCamera::pan() {
 void EditorCamera::rotate() {
   constexpr float TWO_PI = 2.0f * glm::pi<float>();
 
-  glm::vec2 mousePos = window->getCurrentMousePosition();
-
-  const auto &size = window->getFramebufferSize();
+  glm::vec2 mousePos = window.getCurrentMousePosition();
+  const auto &size = window.getFramebufferSize();
 
   glm ::vec2 screenToSphere{// horizontal = 2pi
                             (TWO_PI / static_cast<float>(size.x)),
@@ -183,7 +181,7 @@ void EditorCamera::rotate() {
 }
 
 void EditorCamera::zoom() {
-  glm::vec2 mousePos = window->getCurrentMousePosition();
+  glm::vec2 mousePos = window.getCurrentMousePosition();
   float zoomFactor = (mousePos.y - prevMousePos.y) * ZOOM_SPEED;
 
   glm::vec3 change = glm::vec3(eye - center) * zoomFactor;

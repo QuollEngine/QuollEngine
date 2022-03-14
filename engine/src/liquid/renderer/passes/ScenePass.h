@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../render-graph/RenderGraph.h"
-#include "../ShaderLibrary.h"
-#include "../SceneRenderer.h"
+#include "liquid/renderer/render-graph/RenderGraph.h"
+#include "liquid/renderer/ShaderLibrary.h"
+#include "liquid/renderer/SceneRenderer.h"
+#include "liquid/renderer/RenderData.h"
+
 #include "liquid/rhi/Descriptor.h"
 #include "liquid/entity/EntityContext.h"
-#include "../vulkan/VulkanRenderData.h"
 #include "liquid/profiler/DebugManager.h"
 
 namespace liquid {
@@ -24,7 +25,7 @@ public:
    */
   ScenePass(const String &name, GraphResourceId renderPassId,
             EntityContext &entityContext, ShaderLibrary &shaderLibrary,
-            const SharedPtr<VulkanRenderData> &renderData,
+            const SharedPtr<RenderData> &renderData,
             DebugManager &debugManager);
 
   /**
@@ -53,7 +54,7 @@ private:
 
   GraphResourceId skinnedPipelineId = 0;
 
-  SharedPtr<VulkanRenderData> renderData;
+  SharedPtr<RenderData> renderData;
   DebugManager debugManager;
 };
 

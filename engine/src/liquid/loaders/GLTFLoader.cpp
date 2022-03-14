@@ -585,7 +585,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
 static std::map<uint32_t, Entity>
 getMeshes(const tinygltf::Model &model,
           const std::vector<SharedPtr<Material>> &materials,
-          EntityContext &entityContext, VulkanRenderer *renderer,
+          EntityContext &entityContext, Renderer &renderer,
           const SharedPtr<Material> &defaultMaterial) {
   std::map<uint32_t, Entity> entityMap;
 
@@ -690,12 +690,12 @@ getMeshes(const tinygltf::Model &model,
     if (isSkinnedMesh) {
       entityContext.setComponent<SkinnedMeshComponent>(
           entity, {std::make_shared<MeshInstance<SkinnedMesh>>(
-                      skinnedMesh, renderer->getRegistry())});
+                      skinnedMesh, renderer.getRegistry())});
 
     } else {
       entityContext.setComponent<MeshComponent>(
-          entity, {std::make_shared<MeshInstance<Mesh>>(
-                      mesh, renderer->getRegistry())});
+          entity,
+          {std::make_shared<MeshInstance<Mesh>>(mesh, renderer.getRegistry())});
     }
 
     entityMap.insert({i, entity});
@@ -712,7 +712,7 @@ getMeshes(const tinygltf::Model &model,
  * @return GLTF buffer metadata
  */
 static std::vector<SharedPtr<Material>>
-getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
+getMaterials(const tinygltf::Model &model, Renderer &renderer) {
   std::vector<TextureHandle> textures;
   std::vector<SharedPtr<Material>> materials;
 
@@ -732,7 +732,7 @@ getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
     description.data = new char[description.size];
     memcpy(description.data, image.image.data(), description.size);
 
-    textures.push_back(renderer->getRegistry().addTexture(description));
+    textures.push_back(renderer.getRegistry().addTexture(description));
   }
 
   for (auto &gltfMaterial : model.materials) {
@@ -787,7 +787,7 @@ getMaterials(const tinygltf::Model &model, VulkanRenderer *renderer) {
 
     CullMode cullMode =
         gltfMaterial.doubleSided ? CullMode::None : CullMode::Back;
-    materials.push_back(renderer->createMaterialPBR(properties, cullMode));
+    materials.push_back(renderer.createMaterialPBR(properties, cullMode));
   }
 
   return materials;
@@ -989,11 +989,11 @@ static AnimationData getAnimations(const tinygltf::Model &model,
   return animationData;
 }
 
-GLTFLoader::GLTFLoader(EntityContext &entityContext_, VulkanRenderer *renderer_,
+GLTFLoader::GLTFLoader(EntityContext &entityContext_, Renderer &renderer_,
                        AnimationSystem &animationSystem_, bool debug_)
     : entityContext(entityContext_), renderer(renderer_),
       animationSystem(animationSystem_),
-      defaultMaterial(renderer->createMaterialPBR({}, CullMode::Back)),
+      defaultMaterial(renderer.createMaterialPBR({}, CullMode::Back)),
       debug(debug_) {}
 
 GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
@@ -1015,7 +1015,7 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
     return Res(GLTFError::Error);
   }
 
-  auto &&skeletonData = getSkeletons(model, renderer->getRegistry());
+  auto &&skeletonData = getSkeletons(model, renderer.getRegistry());
   auto &&animationData = getAnimations(model, skeletonData, animationSystem);
   auto &&materials = getMaterials(model, renderer);
   auto &&meshes =

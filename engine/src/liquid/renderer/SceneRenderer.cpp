@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "SceneRenderer.h"
-#include "vulkan/VulkanStandardPushConstants.h"
+#include "StandardPushConstants.h"
 
 namespace liquid {
 
@@ -18,11 +18,11 @@ void SceneRenderer::render(RenderCommandList &commandList,
         }
         const auto &instance = mesh.instance;
 
-        auto *transformConstant = new VulkanStandardPushConstants;
+        auto *transformConstant = new StandardPushConstants;
         transformConstant->modelMatrix = transform.worldTransform;
 
         commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                  sizeof(VulkanStandardPushConstants),
+                                  sizeof(StandardPushConstants),
                                   transformConstant);
 
         for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
@@ -54,11 +54,11 @@ void SceneRenderer::renderSkinned(RenderCommandList &commandList,
              const auto &transform) {
         const auto &instance = mesh.instance;
 
-        auto *transformConstant = new VulkanStandardPushConstants;
+        auto *transformConstant = new StandardPushConstants;
         transformConstant->modelMatrix = transform.worldTransform;
 
         commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                  sizeof(VulkanStandardPushConstants),
+                                  sizeof(StandardPushConstants),
                                   transformConstant);
 
         Descriptor skeletonDescriptor;

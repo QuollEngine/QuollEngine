@@ -2,18 +2,18 @@
 #include "EditorCamera.h"
 
 using liquid::Camera;
-using liquid::GLFWWindow;
-using liquid::VulkanRenderer;
+using liquid::Renderer;
+using liquid::Window;
 
 EditorCamera::EditorCamera(liquid::EntityContext &entityContext_,
-                           VulkanRenderer *renderer, GLFWWindow *window_)
+                           Renderer &renderer, Window &window_)
     : entityContext(entityContext_), window(window_),
-      camera(new Camera(&renderer->getRegistry())) {
+      camera(new Camera(&renderer.getRegistry())) {
 
   initEntity();
 
   updatePerspective();
-  window->addResizeHandler([this](uint32_t width, uint32_t height) {
+  window.addResizeHandler([this](uint32_t width, uint32_t height) {
     updatePerspective(width, height);
   });
 }
@@ -51,7 +51,7 @@ void EditorCamera::update() {
 }
 
 void EditorCamera::updatePerspective() {
-  const auto &fbSize = window->getFramebufferSize();
+  const auto &fbSize = window.getFramebufferSize();
   updatePerspective(fbSize.x, fbSize.y);
 }
 

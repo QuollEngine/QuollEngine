@@ -1,12 +1,12 @@
 #include "liquid/core/Base.h"
 
 #include "MainLoop.h"
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/renderer/Renderer.h"
+#include "liquid/window/Window.h"
 
 namespace liquid {
 
-MainLoop::MainLoop(VulkanRenderer *renderer_, GLFWWindow *window_)
+MainLoop::MainLoop(Renderer &renderer_, Window &window_)
     : renderer(renderer_), window(window_) {}
 
 int MainLoop::run(RenderGraph &graph,
@@ -27,11 +27,11 @@ int MainLoop::run(RenderGraph &graph,
     LIQUID_PROFILE_FRAME("MainLoop");
     auto currentTime = std::chrono::high_resolution_clock::now();
 
-    if (window->shouldClose()) {
+    if (window.shouldClose()) {
       break;
     }
 
-    window->pollEvents();
+    window.pollEvents();
 
     double frameTime = std::clamp(
         std::chrono::duration<double>(currentTime - prevGameTime).count(), 0.0,
@@ -45,20 +45,20 @@ int MainLoop::run(RenderGraph &graph,
       accumulator -= dt;
     }
 
-    renderer->render(graph);
+    renderer.render(graph);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
       prevFrameTime = currentTime;
-      renderer->getStatsManager().collectFPS(frames);
+      renderer.getStatsManager().collectFPS(frames);
       frames = 0;
     } else {
       frames++;
     }
   }
 
-  renderer->wait();
+  renderer.wait();
 
   return 0;
 }

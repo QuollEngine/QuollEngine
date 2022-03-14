@@ -4,13 +4,13 @@
 #include "liquid/renderer/Material.h"
 #include "liquid/renderer/Shader.h"
 
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/Renderer.h"
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/entity/EntityContext.h"
-#include "liquid/window/glfw/GLFWWindow.h"
-#include "liquid/renderer/vulkan/VulkanStandardPushConstants.h"
+#include "liquid/window/Window.h"
+#include "liquid/renderer/StandardPushConstants.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
 
@@ -34,34 +34,32 @@ int main() {
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../engine/bin/Debug/assets").string());
   liquid::EntityContext context;
-  std::unique_ptr<liquid::GLFWWindow> window(
-      new liquid::GLFWWindow("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT));
+  liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
 
-  liquid::experimental::VulkanRenderBackend backend(*window.get());
+  liquid::experimental::VulkanRenderBackend backend(window);
 
-  std::unique_ptr<liquid::VulkanRenderer> renderer(new liquid::VulkanRenderer(
-      context, window.get(), backend.getOrCreateDevice()));
+  liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
   liquid::AnimationSystem animationSystem(context);
   liquid::PhysicsSystem physicsSystem(context);
 
-  renderer->getShaderLibrary().addShader(
+  renderer.getShaderLibrary().addShader(
       "editor-grid.vert",
-      renderer->createShader("assets/shaders/editor-grid.vert.spv"));
-  renderer->getShaderLibrary().addShader(
+      renderer.createShader("assets/shaders/editor-grid.vert.spv"));
+  renderer.getShaderLibrary().addShader(
       "editor-grid.frag",
-      renderer->createShader("assets/shaders/editor-grid.frag.spv"));
+      renderer.createShader("assets/shaders/editor-grid.frag.spv"));
 
-  renderer->getShaderLibrary().addShader(
+  renderer.getShaderLibrary().addShader(
       "skeleton-lines.vert",
-      renderer->createShader("assets/shaders/skeleton-lines.vert.spv"));
-  renderer->getShaderLibrary().addShader(
+      renderer.createShader("assets/shaders/skeleton-lines.vert.spv"));
+  renderer.getShaderLibrary().addShader(
       "skeleton-lines.frag",
-      renderer->createShader("assets/shaders/skeleton-lines.frag.spv"));
+      renderer.createShader("assets/shaders/skeleton-lines.frag.spv"));
 
-  liquid::MainLoop mainLoop(renderer.get(), window.get());
-  liquid::GLTFLoader loader(context, renderer.get(), animationSystem, true);
-  liquidator::EditorCamera editorCamera(context, renderer.get(), window.get());
-  liquidator::EditorGrid editorGrid(renderer->getRegistry());
+  liquid::MainLoop mainLoop(renderer, window);
+  liquid::GLTFLoader loader(context, renderer, animationSystem, true);
+  liquidator::EditorCamera editorCamera(context, renderer, window);
+  liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
 
   liquidator::UIRoot ui(context, loader);
@@ -74,9 +72,9 @@ int main() {
             .camera;
 
     const auto &renderData =
-        renderer->prepareScene(sceneManager.getActiveScene());
+        renderer.prepareScene(sceneManager.getActiveScene());
 
-    liquid::RenderGraph graph = renderer->createRenderGraph(
+    liquid::RenderGraph graph = renderer.createRenderGraph(
         renderData, "mainColor",
         [&sceneManager, &animationSystem, &ui, &renderData,
          &physicsSystem](const auto &sceneTexture) {
@@ -107,8 +105,8 @@ int main() {
 
           scope.editorGridPipeline =
               builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer->getShaderLibrary().getShader("editor-grid.vert"),
-                  renderer->getShaderLibrary().getShader("editor-grid.frag"),
+                  renderer.getShaderLibrary().getShader("editor-grid.vert"),
+                  renderer.getShaderLibrary().getShader("editor-grid.frag"),
                   {},
                   liquid::PipelineInputAssembly{},
                   liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
@@ -124,8 +122,8 @@ int main() {
 
           scope.skeletonLinesPipeline =
               builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer->getShaderLibrary().getShader("skeleton-lines.vert"),
-                  renderer->getShaderLibrary().getShader("skeleton-lines.frag"),
+                  renderer.getShaderLibrary().getShader("skeleton-lines.vert"),
+                  renderer.getShaderLibrary().getShader("skeleton-lines.frag"),
                   {},
                   liquid::PipelineInputAssembly{
                       liquid::PrimitiveTopology::LineList},
@@ -182,8 +180,7 @@ int main() {
                 skeletonDescriptor.bind(0, skeleton.skeleton.getDebugBuffer(),
                                         liquid::DescriptorType::UniformBuffer);
 
-                auto *transformConstant =
-                    new liquid::VulkanStandardPushConstants;
+                auto *transformConstant = new liquid::StandardPushConstants;
                 transformConstant->modelMatrix = transform.worldTransform;
 
                 commandList.bindDescriptor(skeletonPipeline, 0,
@@ -193,8 +190,7 @@ int main() {
 
                 commandList.pushConstants(
                     skeletonPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                    sizeof(liquid::VulkanStandardPushConstants),
-                    transformConstant);
+                    sizeof(liquid::StandardPushConstants), transformConstant);
 
                 commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
               });

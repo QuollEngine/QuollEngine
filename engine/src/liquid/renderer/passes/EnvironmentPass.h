@@ -2,8 +2,8 @@
 
 #include "liquid/renderer/render-graph/RenderGraphPassBase.h"
 #include "liquid/renderer/ShaderLibrary.h"
+#include "liquid/renderer/RenderData.h"
 #include "liquid/entity/EntityContext.h"
-#include "liquid/renderer/vulkan/VulkanRenderData.h"
 
 namespace liquid {
 
@@ -20,7 +20,7 @@ public:
    */
   EnvironmentPass(const String &name, GraphResourceId renderPassId,
                   EntityContext &entityContext, ShaderLibrary &shaderLibrary,
-                  const SharedPtr<VulkanRenderData> &renderData);
+                  const SharedPtr<RenderData> &renderData);
 
   /**
    * @brief Build pass
@@ -42,7 +42,7 @@ private:
   GraphResourceId pipelineId = 0;
   EntityContext &entityContext;
   ShaderLibrary &shaderLibrary;
-  SharedPtr<VulkanRenderData> renderData;
+  SharedPtr<RenderData> renderData;
 };
 
 } // namespace liquid

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "liquid/scene/Camera.h"
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/renderer/Renderer.h"
+#include "liquid/window/Window.h"
 #include "liquid/entity/EntityContext.h"
 
 namespace liquidator {
@@ -27,8 +27,8 @@ public:
    * @param renderer Renderer
    * @param window Window
    */
-  EditorCamera(liquid::EntityContext &context, liquid::VulkanRenderer *renderer,
-               liquid::GLFWWindow *window);
+  EditorCamera(liquid::EntityContext &context, liquid::Renderer &renderer,
+               liquid::Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
@@ -176,7 +176,7 @@ private:
   uint32_t mouseMoveHandler = 0;
   uint32_t scrollWheelHandler = 0;
 
-  liquid::GLFWWindow *window;
+  liquid::Window &window;
   liquid::SharedPtr<liquid::Camera> camera;
   liquid::EntityContext &context;
   liquid::Entity cameraEntity = liquid::ENTITY_MAX;

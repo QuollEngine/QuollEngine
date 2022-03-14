@@ -1,12 +1,12 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
-#include "liquid/renderer/vulkan/VulkanRenderer.h"
+#include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/Material.h"
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/passes/FullscreenQuadPass.h"
 
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 #include "liquid/scene/Scene.h"
 #include "liquid/scene/MeshInstance.h"
@@ -32,11 +32,11 @@ bool changed = true;
 
 bool leftMouseBtnPressed = false;
 
-liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
-                            liquid::VulkanRenderer *renderer,
+liquid::Entity getNewSkybox(liquid::Window &window, const liquid::Mesh &mesh,
+                            liquid::Renderer &renderer,
                             liquid::EntityContext &context) {
-  liquid::KtxTextureLoader ktxLoader(renderer->getRegistry());
-  liquid::ImageTextureLoader imageLoader(renderer->getRegistry());
+  liquid::KtxTextureLoader ktxLoader(renderer.getRegistry());
+  liquid::ImageTextureLoader imageLoader(renderer.getRegistry());
 
   liquid::String envPath = fileDialog.getFilePathFromDialog({"ktx", "ktx2"});
 
@@ -65,15 +65,15 @@ liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
   }
   auto lutTexture = imageLoader.loadFromFile(lutPath);
 
-  glfwFocusWindow(window);
+  window.focus();
 
   auto entity = context.createEntity();
 
-  const auto &material = renderer->createMaterial(
+  const auto &material = renderer.createMaterial(
       nullptr, nullptr, {environmentTexture}, {}, liquid::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
-      mesh, renderer->getRegistry());
+      mesh, renderer.getRegistry());
   instance->setMaterial(material);
 
   context.setComponent<liquid::MeshComponent>(entity, {instance});
@@ -83,39 +83,34 @@ liquid::Entity getNewSkybox(GLFWwindow *window, const liquid::Mesh &mesh,
   return entity;
 }
 
-void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
-  if (action == GLFW_RELEASE) {
-    leftMouseBtnPressed = false;
-  }
-
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    leftMouseBtnPressed = true;
-  }
-}
-
 const auto moveSpeed = 0.5f;   // 0.5 m/s * 0.01s
 const auto strafeSpeed = 0.5f; // m/s
 const auto timeDelta = 1.0f;
 
 int main() {
-
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../../engine/bin/Debug/assets").string());
 
   liquid::EntityContext context;
-  std::unique_ptr<liquid::GLFWWindow> window(
-      new liquid::GLFWWindow("Scene Viewer", 1024, 768));
-  liquid::experimental::VulkanRenderBackend backend(*window.get());
+  liquid::Window window("Scene Viewer", 1024, 768);
+  liquid::experimental::VulkanRenderBackend backend(window);
 
-  std::unique_ptr<liquid::VulkanRenderer> renderer(new liquid::VulkanRenderer(
-      context, window.get(), backend.getOrCreateDevice()));
+  liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
   liquid::AnimationSystem animationSystem(context);
 
-  glfwSetMouseButtonCallback(window->getInstance(), mouse_callback);
+  window.addMouseButtonHandler([](int button, int action, int mods) {
+    if (action == GLFW_RELEASE) {
+      leftMouseBtnPressed = false;
+    }
 
-  EditorCamera editorCamera(context, renderer.get(), window.get());
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+      leftMouseBtnPressed = true;
+    }
+  });
 
-  window->addKeyHandler(
+  EditorCamera editorCamera(context, renderer, window);
+
+  window.addKeyHandler(
       [&editorCamera](int key, int scancode, int action, int mods) {
         if (action == GLFW_RELEASE) {
           if (key == GLFW_KEY_W || key == GLFW_KEY_S) {
@@ -163,13 +158,13 @@ int main() {
 
   auto cubeMesh = createCube();
 
-  liquid::GLTFLoader loader(context, renderer.get(), animationSystem);
+  liquid::GLTFLoader loader(context, renderer, animationSystem);
 
-  liquid::MainLoop mainLoop(renderer.get(), window.get());
+  liquid::MainLoop mainLoop(renderer, window);
 
   UILayer ui(context);
 
-  while (!window->shouldClose()) {
+  while (!window.shouldClose()) {
     liquid::SharedPtr<liquid::Scene> scene = nullptr;
     scene = std::make_shared<liquid::Scene>(context);
     editorCamera.initEntity();
@@ -189,7 +184,7 @@ int main() {
 
     ui.onSceneOpen([&window]() {
       liquid::String newFile = fileDialog.getFilePathFromDialog({"gltf"});
-      glfwFocusWindow(window->getInstance());
+      window.focus();
       if (!newFile.empty()) {
         sceneQueue.push_back(newFile);
         changed = true;
@@ -217,8 +212,7 @@ int main() {
 
     ui.onEnvironmentOpen([&window, &context, &cubeMesh, &renderer, &node,
                           &environmentNode]() mutable {
-      auto environment = getNewSkybox(window->getInstance(), cubeMesh,
-                                      renderer.get(), context);
+      auto environment = getNewSkybox(window, cubeMesh, renderer, context);
 
       if (environment == std::numeric_limits<liquid::Entity>::max()) {
         return;
@@ -236,12 +230,12 @@ int main() {
     static float horizontalAngle = 0, verticalAngle = 0;
     static double prevX = 0.0, prevY = 0.0;
 
-    const auto &renderData = renderer->prepareScene(scene.get());
-    liquid::RenderGraph graph = renderer->createRenderGraph(
+    const auto &renderData = renderer.prepareScene(scene.get());
+    liquid::RenderGraph graph = renderer.createRenderGraph(
         renderData, "SWAPCHAIN", [&ui](const auto &tex) { ui.render(); });
 
     graph.addPass<liquid::FullscreenQuadPass>(
-        "fullscreenQuad", renderer->getShaderLibrary(), "mainColor");
+        "fullscreenQuad", renderer.getShaderLibrary(), "mainColor");
 
     mainLoop.run(graph, [&ui, &scene, node, &editorCamera, &window,
                          &renderData](double dt) mutable {
@@ -250,38 +244,34 @@ int main() {
       renderData->update();
 
       if (leftMouseBtnPressed && !io.WantCaptureMouse) {
-        double dxpos = 0.0, dypos = 0.0;
-        glfwGetCursorPos(window->getInstance(), &dxpos, &dypos);
+        const auto &pos = window.getCurrentMousePosition();
 
-        float xpos = static_cast<float>(dxpos);
-        float ypos = static_cast<float>(dypos);
-
-        const auto &size = window->getWindowSize();
+        const auto &size = window.getWindowSize();
         float width = (float)size.x;
         float height = (float)size.y;
 
-        if (xpos < width && xpos >= 0 && ypos < height && ypos >= 0) {
-          float x = (xpos / width) * 5.0f;
-          float y = (ypos / height) * 5.0f;
+        if (pos.x < width && pos.x >= 0 && pos.y < height && pos.y >= 0) {
+          float x = (pos.x / width) * 5.0f;
+          float y = (pos.y / height) * 5.0f;
 
-          if (abs(xpos - prevX) > 1.0f) {
-            if (xpos < prevX) {
+          if (abs(pos.x - prevX) > 1.0f) {
+            if (pos.x < prevX) {
               horizontalAngle -= x;
             } else {
               horizontalAngle += x;
             }
           }
 
-          if (abs(ypos - prevY) > 1.0f) {
-            if (ypos < prevY) {
+          if (abs(pos.y - prevY) > 1.0f) {
+            if (pos.y < prevY) {
               verticalAngle -= y;
             } else {
               verticalAngle += y;
             }
           }
 
-          prevX = xpos;
-          prevY = ypos;
+          prevX = pos.x;
+          prevY = pos.y;
         }
       }
 

@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "liquid/window/glfw/GLFWWindow.h"
+#include "liquid/window/Window.h"
 
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/ResourceRegistry.h"
@@ -23,7 +23,7 @@ class ImguiRenderer {
   };
 
 public:
-  ImguiRenderer(GLFWWindow *window, experimental::ResourceRegistry &registry);
+  ImguiRenderer(Window &window, experimental::ResourceRegistry &registry);
   ~ImguiRenderer();
 
   ImguiRenderer(const ImguiRenderer &rhs) = delete;
