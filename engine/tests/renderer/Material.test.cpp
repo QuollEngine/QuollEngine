@@ -9,7 +9,8 @@ public:
 };
 
 TEST_F(MaterialTest, SetsBuffersAndTextures) {
-  std::vector<liquid::rhi::TextureHandle> textures{0};
+  std::vector<liquid::rhi::TextureHandle> textures{
+      liquid::rhi::TextureHandle(1)};
 
   liquid::Material material(
       textures,
@@ -24,7 +25,7 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_NE(material.getUniformBuffer(), 0);
+  EXPECT_TRUE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
   // Memory alignment
   EXPECT_EQ(description.size, sizeof(glm::vec4) * 2);
 
@@ -43,13 +44,14 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
 }
 
 TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
-  std::vector<liquid::rhi::TextureHandle> textures{0};
+  std::vector<liquid::rhi::TextureHandle> textures{
+      liquid::rhi::TextureHandle(1)};
 
   liquid::Material material(textures, {}, registry);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_EQ(material.getUniformBuffer(), 0);
+  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
   EXPECT_EQ(material.getDescriptor().getBindings().find(0),
             material.getDescriptor().getBindings().end());
   EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
@@ -61,7 +63,7 @@ TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
-  EXPECT_EQ(material.getUniformBuffer(), 0);
+  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
 }
 
 TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {

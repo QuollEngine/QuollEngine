@@ -87,7 +87,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       imageViewsPerFramebuffer);
 
   rhi::RenderPassDescription renderPassDesc{};
-  rhi::RenderPassHandle renderPass = 0;
+  rhi::RenderPassHandle renderPass = rhi::RenderPassHandle::Invalid;
 
   for (auto &[resourceId, graphAttachment] : pass->getOutputs()) {
     VulkanAttachmentInfo info{};
@@ -130,7 +130,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
   }
 
   if (!renderPassDesc.colorAttachments.empty() ||
-      renderPassDesc.depthAttachment.texture > 0) {
+      rhi::isHandleValid(renderPassDesc.depthAttachment.texture)) {
     renderPassDesc.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
     bool renderPassExists =
@@ -147,7 +147,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
     }
 
     std::vector<rhi::FramebufferHandle> framebuffers(
-        framebufferAttachments.size(), 0);
+        framebufferAttachments.size(), rhi::FramebufferHandle::Invalid);
 
     for (size_t i = 0; i < framebuffers.size(); ++i) {
       rhi::FramebufferDescription framebufferDesc;
@@ -200,7 +200,7 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       description.inputLayout = desc.inputLayout;
       description.renderPass = renderPass;
 
-      rhi::PipelineHandle handle = 0;
+      rhi::PipelineHandle handle = rhi::PipelineHandle::Invalid;
       if (hasPipeline) {
         handle = graph.getResourceRegistry().getPipeline(resource);
         mRegistry.updatePipeline(handle, description);
@@ -233,7 +233,8 @@ RenderGraphEvaluator::createSwapchainAttachment(
       std::get<glm::vec4>(attachment.clearValue).w;
 
   // Framebuffer image views
-  info.framebufferAttachments.resize(numSwapchainImages, 0);
+  info.framebufferAttachments.resize(numSwapchainImages,
+                                     rhi::TextureHandle::Invalid);
 
   for (uint32_t i = 0; i < numSwapchainImages; ++i) {
     auto handle = static_cast<rhi::TextureHandle>(i + 1);
@@ -243,7 +244,7 @@ RenderGraphEvaluator::createSwapchainAttachment(
 
   info.attachment.loadOp = attachment.loadOp;
   info.attachment.storeOp = attachment.storeOp;
-  info.attachment.texture = 1;
+  info.attachment.texture = rhi::TextureHandle{1};
   info.attachment.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   // Dimensions

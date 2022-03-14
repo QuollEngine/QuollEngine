@@ -11,11 +11,11 @@ namespace liquid {
 
 class ImguiRenderer {
   struct FrameData {
-    rhi::BufferHandle vertexBuffer = 0;
+    rhi::BufferHandle vertexBuffer = rhi::BufferHandle::Invalid;
     size_t vertexBufferSize = 0;
     void *vertexBufferData = nullptr;
 
-    rhi::BufferHandle indexBuffer = 0;
+    rhi::BufferHandle indexBuffer = rhi::BufferHandle::Invalid;
     void *indexBufferData = nullptr;
     size_t indexBufferSize = 0;
 
@@ -46,7 +46,7 @@ private:
 private:
   rhi::ResourceRegistry &registry;
 
-  rhi::TextureHandle fontTexture = 0;
+  rhi::TextureHandle fontTexture = rhi::TextureHandle::Invalid;
 
   std::vector<FrameData> frameData;
   uint32_t currentFrame = 0;

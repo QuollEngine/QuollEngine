@@ -9,7 +9,7 @@ namespace liquid::rhi {
 struct RenderPassAttachmentDescription {
   AttachmentLoadOp loadOp;
   AttachmentStoreOp storeOp;
-  TextureHandle texture = 0;
+  TextureHandle texture = TextureHandle::Invalid;
   VkImageLayout layout = VK_IMAGE_LAYOUT_MAX_ENUM;
 };
 

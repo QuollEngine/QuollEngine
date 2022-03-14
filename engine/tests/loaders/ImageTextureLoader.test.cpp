@@ -14,7 +14,7 @@ TEST_F(ImageTextureLoaderTest, LoadsImageUsingStb) {
   liquid::ImageTextureLoader loader(registry);
   auto texture = loader.loadFromFile("white-image-100x100.png");
 
-  EXPECT_NE(texture, 0);
+  EXPECT_TRUE(liquid::rhi::isHandleValid(texture));
 
   const auto &description = registry.getTextureMap().getDescription(texture);
 

@@ -166,7 +166,7 @@ public:
    * @param handle Framebuffer handle
    * @param framebuffer Vulkan framebuffer
    */
-  void updateFramebuffer(rhi::RenderPassHandle handle,
+  void updateFramebuffer(rhi::FramebufferHandle handle,
                          std::unique_ptr<VulkanFramebuffer> &&framebuffer);
 
   /**
@@ -191,7 +191,7 @@ public:
    * @param handle Pipeline handle
    * @param pipeline Vulkan pipeline
    */
-  void updatePipeline(rhi::RenderPassHandle handle,
+  void updatePipeline(rhi::PipelineHandle handle,
                       std::unique_ptr<VulkanPipeline> &&pipeline);
 
   /**

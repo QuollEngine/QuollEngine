@@ -33,7 +33,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
 
-          if (instance->getIndexBuffers().at(i) > 0) {
+          if (rhi::isHandleValid(instance->getIndexBuffers().at(i))) {
             commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
             commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
@@ -75,7 +75,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
 
-          if (instance->getIndexBuffers().at(i) > 0) {
+          if (rhi::isHandleValid(instance->getIndexBuffers().at(i))) {
             commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
             commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);

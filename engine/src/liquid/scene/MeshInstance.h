@@ -36,7 +36,7 @@ public:
                                 (void *)geometry.getIndices().data()});
         indexBuffers.push_back(indexBuffer);
       } else {
-        indexBuffers.push_back(0);
+        indexBuffers.push_back(rhi::BufferHandle::Invalid);
       }
 
       indexCounts.push_back(

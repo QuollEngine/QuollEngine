@@ -2,16 +2,58 @@
 
 namespace liquid::rhi {
 
-using ShaderHandle = uint32_t;
+enum class ShaderHandle : uint32_t { Invalid = 0 };
 
-using BufferHandle = uint32_t;
+enum class BufferHandle : uint32_t { Invalid = 0 };
 
-using TextureHandle = uint32_t;
+enum class TextureHandle : uint32_t { Invalid = 0 };
 
-using RenderPassHandle = uint32_t;
+enum class RenderPassHandle : uint32_t { Invalid = 0 };
 
-using FramebufferHandle = uint32_t;
+enum class FramebufferHandle : uint32_t { Invalid = 0 };
 
-using PipelineHandle = uint32_t;
+enum class PipelineHandle : uint32_t { Invalid = 0 };
+
+/**
+ * @brief Check if type equals any of the other types
+ *
+ * @tparam T Type
+ * @tparam ...Rest Other types
+ */
+template <class T, class... Rest>
+inline constexpr bool is_any_same = (std::is_same_v<T, Rest> || ...);
+
+/**
+ * @brief Check if handle is valid
+ *
+ * @tparam THandle Handle type
+ * @param handle Handle
+ * @retval true Handle is valid
+ * @retval false Handle is not valid
+ */
+template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
+  static_assert(
+      is_any_same<THandle, ShaderHandle, BufferHandle, TextureHandle,
+                  RenderPassHandle, FramebufferHandle, PipelineHandle>,
+      "Type must be a render handle");
+  return handle != THandle::Invalid;
+}
+
+/**
+ * @brief Cast handle to uint
+ *
+ * @tparam THandle Handle type
+ * @param handle Handle
+ * @return Handle value in uint
+ */
+template <class THandle>
+constexpr inline uint32_t castHandleToUint(THandle handle) {
+  static_assert(
+      is_any_same<THandle, ShaderHandle, BufferHandle, TextureHandle,
+                  RenderPassHandle, FramebufferHandle, PipelineHandle>,
+      "Type must be a render handle");
+
+  return static_cast<uint32_t>(handle);
+}
 
 } // namespace liquid::rhi

@@ -24,11 +24,11 @@ static constexpr uint32_t RESERVED_HANDLE_SIZE = 20;
  * @tparam TStartingHandle Starting handle id
  */
 template <class THandle, class TDescription,
-          THandle TStartingHandleId =
-              static_cast<THandle>(RESERVED_HANDLE_SIZE)>
+          THandle TStartingHandleId = THandle(RESERVED_HANDLE_SIZE)>
 class ResourceRegistryMap {
   using HandleList = std::vector<THandle>;
-  static_assert(TStartingHandleId >= 1, "Starting handle cannot be ZERO");
+  static_assert(TStartingHandleId != THandle::Invalid,
+                "Starting handle cannot be invalid");
 
 public:
   /**
@@ -38,7 +38,8 @@ public:
    * @return Resource handle
    */
   THandle addDescription(const TDescription &description) {
-    THandle newHandle = mLastHandle++;
+    THandle newHandle = mLastHandle;
+    mLastHandle = static_cast<THandle>(rhi::castHandleToUint(mLastHandle) + 1);
     mDescriptions.insert({newHandle, description});
     mDirtyCreates.push_back(newHandle);
 

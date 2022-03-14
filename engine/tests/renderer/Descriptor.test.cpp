@@ -14,7 +14,7 @@ using DescriptorDeathTest = DescriptorTest;
 TEST_F(DescriptorTest, AddsTextureBinding) {
   liquid::rhi::Descriptor descriptor;
 
-  liquid::rhi::TextureHandle tex1 = 1, tex2 = 2;
+  liquid::rhi::TextureHandle tex1{1}, tex2{2};
 
   descriptor.bind(2, {tex1, tex2},
                   liquid::rhi::DescriptorType::CombinedImageSampler);
@@ -28,19 +28,21 @@ TEST_F(DescriptorTest, AddsTextureBinding) {
 
 TEST_F(DescriptorTest, AddsUniformBufferBinding) {
   liquid::rhi::Descriptor descriptor;
-  descriptor.bind(2, 2, liquid::rhi::DescriptorType::UniformBuffer);
+
+  liquid::rhi::BufferHandle buffer{2};
+  descriptor.bind(2, buffer, liquid::rhi::DescriptorType::UniformBuffer);
 
   EXPECT_EQ(descriptor.getBindings().at(2).type,
             liquid::rhi::DescriptorType::UniformBuffer);
   auto data =
       std::get<liquid::rhi::BufferHandle>(descriptor.getBindings().at(2).data);
-  EXPECT_EQ(data, 2);
+  EXPECT_EQ(data, buffer);
 }
 
 TEST_F(DescriptorTest, CreatesHashFromBindings) {
   liquid::rhi::Descriptor descriptor;
-  liquid::rhi::TextureHandle tex1 = 1, tex2 = 2;
-  liquid::rhi::BufferHandle buffer1 = 1, buffer2 = 2;
+  liquid::rhi::TextureHandle tex1{1}, tex2{2};
+  liquid::rhi::BufferHandle buffer1{1}, buffer2{2};
 
   descriptor.bind(0, {tex1, tex2},
                   liquid::rhi::DescriptorType::CombinedImageSampler);
@@ -48,14 +50,14 @@ TEST_F(DescriptorTest, CreatesHashFromBindings) {
   descriptor.bind(2, buffer2, liquid::rhi::DescriptorType::UniformBuffer);
 
   std::stringstream ss;
-  ss << "b:0;t:1;d:" << tex1 << ";d:" << tex2 << ";|b:1;t:0;d:" << buffer1
-     << "|b:2;t:0;d:" << buffer2 << "|";
+  ss << "b:0;t:1;d:" << 1 << ";d:" << 2 << ";|b:1;t:0;d:" << 1
+     << "|b:2;t:0;d:" << 2 << "|";
 
   EXPECT_EQ(descriptor.getHashCode(), ss.str());
 }
 
 TEST_F(DescriptorDeathTest, FailsIfBufferIsUsedForCombinedImageSampler) {
-  liquid::rhi::BufferHandle buffer = 1;
+  liquid::rhi::BufferHandle buffer{1};
   liquid::rhi::Descriptor descriptor;
   EXPECT_DEATH(
       {
@@ -66,7 +68,7 @@ TEST_F(DescriptorDeathTest, FailsIfBufferIsUsedForCombinedImageSampler) {
 }
 
 TEST_F(DescriptorDeathTest, FailsIfTextureIsUsedForUniformBuffer) {
-  liquid::rhi::TextureHandle texture = 1;
+  liquid::rhi::TextureHandle texture{1};
   liquid::rhi::Descriptor descriptor;
   EXPECT_DEATH(
       {

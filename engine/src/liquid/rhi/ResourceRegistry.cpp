@@ -21,7 +21,7 @@ void ResourceRegistry::deleteBuffer(BufferHandle handle) {
 
 void ResourceRegistry::updateBuffer(BufferHandle handle,
                                     const BufferDescription &description) {
-  LIQUID_ASSERT(handle > 0, "Buffer does not exist");
+  LIQUID_ASSERT(rhi::isHandleValid(handle), "Buffer does not exist");
   mBuffers.updateDescription(handle, description);
 }
 
@@ -41,7 +41,7 @@ ResourceRegistry::addRenderPass(const RenderPassDescription &description) {
 
 void ResourceRegistry::updateRenderPass(
     rhi::RenderPassHandle handle, const RenderPassDescription &description) {
-  LIQUID_ASSERT(handle > 0, "Render pass does not exist");
+  LIQUID_ASSERT(rhi::isHandleValid(handle), "Render pass does not exist");
   mRenderPasses.updateDescription(handle, description);
 }
 
@@ -56,7 +56,7 @@ ResourceRegistry::addFramebuffer(const FramebufferDescription &description) {
 
 void ResourceRegistry::updateFramebuffer(
     FramebufferHandle handle, const FramebufferDescription &description) {
-  LIQUID_ASSERT(handle > 0, "Framebuffer does not exist");
+  LIQUID_ASSERT(rhi::isHandleValid(handle), "Framebuffer does not exist");
   mFramebuffers.updateDescription(handle, description);
 }
 
@@ -71,7 +71,7 @@ ResourceRegistry::addPipeline(const PipelineDescription &description) {
 
 void ResourceRegistry::updatePipeline(PipelineHandle handle,
                                       const PipelineDescription &description) {
-  LIQUID_ASSERT(handle > 0, "Pipeline does not exist");
+  LIQUID_ASSERT(rhi::isHandleValid(handle), "Pipeline does not exist");
   mPipelines.updateDescription(handle, description);
 }
 

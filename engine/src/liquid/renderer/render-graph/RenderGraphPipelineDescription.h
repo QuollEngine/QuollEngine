@@ -167,8 +167,8 @@ struct PipelineColorBlend {
 };
 
 struct RenderGraphPipelineDescription {
-  rhi::ShaderHandle vertexShader = 0;
-  rhi::ShaderHandle fragmentShader = 0;
+  rhi::ShaderHandle vertexShader = rhi::ShaderHandle::Invalid;
+  rhi::ShaderHandle fragmentShader = rhi::ShaderHandle::Invalid;
   PipelineVertexInputLayout inputLayout;
   PipelineInputAssembly inputAssembly;
   PipelineRasterizer rasterizer;
