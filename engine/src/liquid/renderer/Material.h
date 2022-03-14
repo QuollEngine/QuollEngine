@@ -1,12 +1,10 @@
 #pragma once
 
 #include "liquid/core/Property.h"
-#include "Shader.h"
-#include "MaterialResourceBinder.h"
-#include "liquid/rhi/Descriptor.h"
 
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/Descriptor.h"
 
 namespace liquid {
 
@@ -49,20 +47,6 @@ public:
   inline bool hasTextures() const { return !textures.empty(); }
 
   /**
-   * @brief Gets vertex shader
-   *
-   * @return Pointer to vertex shader
-   */
-  inline const SharedPtr<Shader> &getVertexShader() { return vertexShader; }
-
-  /**
-   * @brief Gets fragment shader
-   *
-   * @return Pointer to fragment shader
-   */
-  inline const SharedPtr<Shader> &getFragmentShader() { return fragmentShader; }
-
-  /**
    * @brief Gets uniform buffer
    *
    * @return Uniform buffer
@@ -96,8 +80,6 @@ private:
   size_t updateBufferData();
 
 private:
-  SharedPtr<Shader> vertexShader = nullptr;
-  SharedPtr<Shader> fragmentShader = nullptr;
   std::vector<TextureHandle> textures;
   BufferHandle uniformBuffer = 0;
 

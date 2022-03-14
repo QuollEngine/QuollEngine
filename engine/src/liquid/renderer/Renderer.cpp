@@ -38,43 +38,49 @@ void Renderer::render(RenderGraph &graph) {
 }
 
 void Renderer::loadShaders() {
+  mShaderLibrary.addShader("__engine.geometry.default.vertex",
+                           mRegistry.addShader({Engine::getAssetsPath() +
+                                                "/shaders/geometry.vert.spv"}));
   mShaderLibrary.addShader(
-      "__engine.geometry.default.vertex",
-      createShader(Engine::getAssetsPath() + "/shaders/geometry.vert.spv"));
-  mShaderLibrary.addShader("__engine.geometry.skinned.vertex",
-                           createShader(Engine::getAssetsPath() +
-                                        "/shaders/skinnedGeometry.vert.spv"));
+      "__engine.geometry.skinned.vertex",
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/skinnedGeometry.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.pbr.default.fragment",
-      createShader(Engine::getAssetsPath() + "/shaders/pbr.frag.spv"));
-  mShaderLibrary.addShader(
-      "__engine.skybox.default.vertex",
-      createShader(Engine::getAssetsPath() + "/shaders/skybox.vert.spv"));
-  mShaderLibrary.addShader(
-      "__engine.skybox.default.fragment",
-      createShader(Engine::getAssetsPath() + "/shaders/skybox.frag.spv"));
+      mRegistry.addShader({Engine::getAssetsPath() + "/shaders/pbr.frag.spv"}));
+  mShaderLibrary.addShader("__engine.skybox.default.vertex",
+                           mRegistry.addShader({Engine::getAssetsPath() +
+                                                "/shaders/skybox.vert.spv"}));
+  mShaderLibrary.addShader("__engine.skybox.default.fragment",
+                           mRegistry.addShader({Engine::getAssetsPath() +
+                                                "/shaders/skybox.frag.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.vertex",
-      createShader(Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"));
-  mShaderLibrary.addShader("__engine.shadowmap.skinned.vertex",
-                           createShader(Engine::getAssetsPath() +
-                                        "/shaders/skinnedShadowmap.vert.spv"));
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"}));
+  mShaderLibrary.addShader(
+      "__engine.shadowmap.skinned.vertex",
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/skinnedShadowmap.vert.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
-      createShader(Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"));
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"}));
+  mShaderLibrary.addShader("__engine.imgui.default.vertex",
+                           mRegistry.addShader({Engine::getAssetsPath() +
+                                                "/shaders/imgui.vert.spv"}));
+  mShaderLibrary.addShader("__engine.imgui.default.fragment",
+                           mRegistry.addShader({Engine::getAssetsPath() +
+                                                "/shaders/imgui.frag.spv"}));
   mShaderLibrary.addShader(
-      "__engine.imgui.default.vertex",
-      createShader(Engine::getAssetsPath() + "/shaders/imgui.vert.spv"));
+      "__engine.fullscreenQuad.default.vertex",
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.vert.spv"}));
   mShaderLibrary.addShader(
-      "__engine.imgui.default.fragment",
-      createShader(Engine::getAssetsPath() + "/shaders/imgui.frag.spv"));
-  mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
-                           createShader(Engine::getAssetsPath() +
-                                        "/shaders/fullscreenQuad.vert.spv"));
-  mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
-                           createShader(Engine::getAssetsPath() +
-                                        "/shaders/fullscreenQuad.frag.spv"));
+      "__engine.fullscreenQuad.default.fragment",
+      mRegistry.addShader(
+          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
 }
 
 RenderGraph Renderer::createRenderGraph(
@@ -122,13 +128,7 @@ RenderGraph Renderer::createRenderGraph(
   return graph;
 }
 
-SharedPtr<VulkanShader> Renderer::createShader(const String &shaderFile) {
-  return std::make_shared<VulkanShader>(mDevice->getVulkanDevice(), shaderFile);
-}
-
 SharedPtr<Material> Renderer::createMaterial(
-    const SharedPtr<Shader> &vertexShader,
-    const SharedPtr<Shader> &fragmentShader,
     const std::vector<TextureHandle> &textures,
     const std::vector<std::pair<String, Property>> &properties,
     const CullMode &cullMode) {

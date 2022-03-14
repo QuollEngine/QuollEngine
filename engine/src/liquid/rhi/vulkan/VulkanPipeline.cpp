@@ -1,9 +1,9 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+
 #include "VulkanRenderPass.h"
 #include "VulkanPipeline.h"
-
-#include "liquid/renderer/vulkan/VulkanShader.h"
+#include "VulkanShader.h"
 #include "VulkanMapping.h"
 #include "VulkanError.h"
 
@@ -13,9 +13,10 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                VulkanDeviceObject &device,
                                const VulkanResourceRegistry &registry)
     : mDevice(device) {
-  std::array<SharedPtr<VulkanShader>, 2> shaders{
-      std::dynamic_pointer_cast<VulkanShader>(description.vertexShader),
-      std::dynamic_pointer_cast<VulkanShader>(description.fragmentShader),
+
+  std::array<VulkanShader *, 2> shaders{
+      registry.getShader(description.vertexShader).get(),
+      registry.getShader(description.fragmentShader).get(),
   };
 
   std::array<VkPipelineShaderStageCreateInfo, 2> stages{};

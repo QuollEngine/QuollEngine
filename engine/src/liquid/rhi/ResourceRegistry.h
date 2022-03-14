@@ -6,6 +6,7 @@
 #include "RenderPassDescription.h"
 #include "FramebufferDescription.h"
 #include "PipelineDescription.h"
+#include "ShaderDescription.h"
 
 namespace liquid::experimental {
 
@@ -135,6 +136,30 @@ private:
 
 class ResourceRegistry {
 public:
+  /**
+   * @brief Add shader
+   *
+   * @param description Shader description
+   * @return Shader handle
+   */
+  ShaderHandle addShader(const ShaderDescription &description);
+
+  /**
+   * @brief Delete shader
+   *
+   * @param handle Shader handle
+   */
+  void deleteShader(ShaderHandle handle);
+
+  /**
+   * @brief Get shader map
+   *
+   * @return Shader map
+   */
+  inline ResourceRegistryMap<ShaderHandle, ShaderDescription> &getShaderMap() {
+    return mShaders;
+  }
+
   /**
    * @brief Add buffer
    *
@@ -295,6 +320,7 @@ public:
   }
 
 private:
+  ResourceRegistryMap<ShaderHandle, ShaderDescription> mShaders;
   ResourceRegistryMap<BufferHandle, BufferDescription> mBuffers;
   ResourceRegistryMap<TextureHandle, TextureDescription> mTextures;
   ResourceRegistryMap<RenderPassHandle, RenderPassDescription> mRenderPasses;

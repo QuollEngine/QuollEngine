@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-#include "liquid/renderer/Shader.h"
 
-#include "spirv_reflect.h"
+#include "liquid/rhi/ShaderDescription.h"
+#include "VulkanDeviceObject.h"
 
-namespace liquid {
+namespace liquid::experimental {
 
-class VulkanShader : public Shader {
+class VulkanShader {
   struct ReflectionData {
     std::vector<VkPushConstantRange> pushConstantRanges;
     std::map<uint32_t, std::vector<VkDescriptorSetLayoutBinding>>
@@ -18,10 +18,11 @@ public:
   /**
    * @brief Creates Vulkan shader
    *
+   * @param description Shader description
    * @param device Vulkan device
-   * @param shaderFile Path to shader
    */
-  VulkanShader(VkDevice device, const String &shaderFile);
+  VulkanShader(const ShaderDescription &description,
+               VulkanDeviceObject &device);
 
   /**
    * @brief Destroys shader
@@ -38,7 +39,7 @@ public:
    *
    * @return Vulkan shader module
    */
-  inline const VkShaderModule &getShaderModule() const { return shaderModule; }
+  inline const VkShaderModule &getShaderModule() const { return mShaderModule; }
 
   /**
    * @brief Get reflection data
@@ -46,7 +47,7 @@ public:
    * @return Reflection data
    */
   inline const ReflectionData &getReflectionData() const {
-    return reflectionData;
+    return mReflectionData;
   }
 
   /**
@@ -54,7 +55,7 @@ public:
    *
    * @return Shader stage flag
    */
-  inline const VkShaderStageFlagBits getShaderStage() const { return stage; }
+  inline const VkShaderStageFlagBits getShaderStage() const { return mStage; }
 
 private:
   /**
@@ -75,12 +76,12 @@ private:
                             const String &shaderFile);
 
 private:
-  VkShaderModule shaderModule = VK_NULL_HANDLE;
-  VkShaderStageFlagBits stage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+  VulkanDeviceObject &mDevice;
 
-  ReflectionData reflectionData{};
+  VkShaderModule mShaderModule = VK_NULL_HANDLE;
+  VkShaderStageFlagBits mStage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
 
-  VkDevice device = nullptr;
+  ReflectionData mReflectionData{};
 };
 
-} // namespace liquid
+} // namespace liquid::experimental

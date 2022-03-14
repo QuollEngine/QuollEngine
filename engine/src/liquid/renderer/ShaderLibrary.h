@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Shader.h"
+#include "liquid/rhi/RenderHandle.h"
 
 namespace liquid {
 
@@ -12,7 +12,7 @@ public:
    * @param name Shader name
    * @param shader Shader object
    */
-  void addShader(const String &name, const SharedPtr<Shader> &shader);
+  void addShader(const String &name, ShaderHandle shader);
 
   /**
    * @brief Get shader
@@ -20,10 +20,10 @@ public:
    * @param name Shader name
    * @return Shader
    */
-  const SharedPtr<Shader> &getShader(const String &name) const;
+  ShaderHandle getShader(const String &name) const;
 
 private:
-  std::unordered_map<String, SharedPtr<Shader>> shaders;
+  std::unordered_map<String, ShaderHandle> shaders;
 };
 
 } // namespace liquid

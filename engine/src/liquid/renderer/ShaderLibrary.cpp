@@ -4,14 +4,13 @@
 
 namespace liquid {
 
-void ShaderLibrary::addShader(const String &name,
-                              const SharedPtr<Shader> &shader) {
+void ShaderLibrary::addShader(const String &name, ShaderHandle shader) {
   shaders.insert(std::make_pair(name, shader));
 
   LOG_DEBUG("Shader \"" << name << "\" loaded");
 }
 
-const SharedPtr<Shader> &ShaderLibrary::getShader(const String &name) const {
+ShaderHandle ShaderLibrary::getShader(const String &name) const {
   const auto &shader = shaders.find(name);
   LIQUID_ASSERT(shader != shaders.end(), "Shader \"" + name + "\" not found");
 

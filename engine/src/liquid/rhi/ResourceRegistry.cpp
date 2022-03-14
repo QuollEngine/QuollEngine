@@ -3,6 +3,14 @@
 
 namespace liquid::experimental {
 
+ShaderHandle ResourceRegistry::addShader(const ShaderDescription &description) {
+  return mShaders.addDescription(description);
+}
+
+void ResourceRegistry::deleteShader(ShaderHandle handle) {
+  mShaders.deleteDescription(handle);
+}
+
 BufferHandle ResourceRegistry::addBuffer(const BufferDescription &description) {
   return mBuffers.addDescription(description);
 }

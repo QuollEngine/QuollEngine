@@ -8,6 +8,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
+#include "VulkanShader.h"
 #include <GLFW/glfw3.h>
 #include "VulkanRenderDevice.h"
 #include "VulkanError.h"

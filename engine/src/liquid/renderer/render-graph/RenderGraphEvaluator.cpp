@@ -1,16 +1,8 @@
 #include "liquid/core/Base.h"
-#include "liquid/renderer/vulkan/VulkanShader.h"
-#include "RenderGraphEvaluator.h"
-#include "liquid/renderer/render-graph/RenderGraphPassResult.h"
-#include "liquid/rhi/vulkan/VulkanTexture.h"
-#include "liquid/rhi/vulkan/VulkanFramebuffer.h"
-#include "liquid/rhi/vulkan/VulkanPipeline.h"
-#include "liquid/rhi/vulkan/VulkanMapping.h"
-#include "liquid/rhi/vulkan/VulkanError.h"
-
-#include <vulkan/vulkan.hpp>
-
 #include "liquid/core/EngineGlobals.h"
+
+#include "RenderGraphEvaluator.h"
+#include "RenderGraphPassResult.h"
 
 namespace liquid {
 

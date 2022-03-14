@@ -9,12 +9,14 @@ class VulkanTexture;
 class VulkanRenderPass;
 class VulkanFramebuffer;
 class VulkanPipeline;
+class VulkanShader;
 
 class VulkanResourceRegistry {
   template <class THandle, class TVulkanObject>
   using VulkanResourceMap =
       std::unordered_map<THandle, std::unique_ptr<TVulkanObject>>;
 
+  using ShaderMap = VulkanResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = VulkanResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = VulkanResourceMap<TextureHandle, VulkanTexture>;
   using RenderPassMap = VulkanResourceMap<RenderPassHandle, VulkanRenderPass>;
@@ -23,6 +25,32 @@ class VulkanResourceRegistry {
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
 
 public:
+  /**
+   * @brief Add shader
+   *
+   * @param handle Shader handle
+   * @param shader Vulkan shader
+   */
+  void addShader(ShaderHandle handle, std::unique_ptr<VulkanShader> &&shader);
+
+  /**
+   * @brief Remove shader
+   *
+   * @param handle Shader handle
+   */
+  void removeShader(ShaderHandle handle);
+
+  /**
+   * @brief Get shader
+   *
+   * @param handle Shader handle
+   * @return Vulkan shader
+   */
+  inline const std::unique_ptr<VulkanShader> &
+  getShader(ShaderHandle handle) const {
+    return mShaders.at(handle);
+  }
+
   /**
    * @brief Add buffer
    *
@@ -173,6 +201,7 @@ public:
   inline const PipelineMap &getPipelines() const { return mPipelines; }
 
 private:
+  ShaderMap mShaders;
   BufferMap mBuffers;
   TextureMap mTextures;
   RenderPassMap mRenderPasses;
