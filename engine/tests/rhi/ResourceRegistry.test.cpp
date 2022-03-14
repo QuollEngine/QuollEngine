@@ -7,7 +7,8 @@ struct TestDesc {
   uint32_t value = 0;
 };
 
-using TestMap = liquid::rhi::ResourceRegistryMap<uint32_t, TestDesc>;
+using TestMap =
+    liquid::rhi::ResourceRegistryMap<liquid::rhi::ShaderHandle, TestDesc>;
 
 TEST(ResourceRegistryMapTest, AddsNewResource) {
   TestMap map;

@@ -5,9 +5,9 @@
 namespace liquid::rhi {
 
 struct PipelineDescription {
-  RenderPassHandle renderPass = 0;
-  ShaderHandle vertexShader = 0;
-  ShaderHandle fragmentShader = 0;
+  RenderPassHandle renderPass = RenderPassHandle::Invalid;
+  ShaderHandle vertexShader = ShaderHandle::Invalid;
+  ShaderHandle fragmentShader = ShaderHandle::Invalid;
   PipelineVertexInputLayout inputLayout;
   PipelineInputAssembly inputAssembly;
   PipelineRasterizer rasterizer;

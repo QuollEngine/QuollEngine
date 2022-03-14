@@ -6,23 +6,23 @@ namespace liquid {
 const std::vector<rhi::TextureHandle>
 MaterialPBR::Properties::getTextures() const {
   std::vector<rhi::TextureHandle> textures;
-  if (baseColorTexture > 0) {
+  if (rhi::isHandleValid(baseColorTexture)) {
     textures.push_back(baseColorTexture);
   }
 
-  if (metallicRoughnessTexture > 0) {
+  if (rhi::isHandleValid(metallicRoughnessTexture)) {
     textures.push_back(metallicRoughnessTexture);
   }
 
-  if (normalTexture > 0) {
+  if (rhi::isHandleValid(normalTexture)) {
     textures.push_back(normalTexture);
   }
 
-  if (occlusionTexture > 0) {
+  if (rhi::isHandleValid(occlusionTexture)) {
     textures.push_back(occlusionTexture);
   }
 
-  if (emissiveTexture > 0) {
+  if (rhi::isHandleValid(emissiveTexture)) {
     textures.push_back(emissiveTexture);
   }
 
@@ -32,12 +32,14 @@ MaterialPBR::Properties::getTextures() const {
 const std::vector<std::pair<String, Property>>
 MaterialPBR::Properties::getProperties() const {
   int index = 0;
-  int baseColorTextureIndex = baseColorTexture > 0 ? index++ : -1;
+  int baseColorTextureIndex =
+      rhi::isHandleValid(baseColorTexture) ? index++ : -1;
   int metallicRoughnessTextureIndex =
-      metallicRoughnessTexture > 0 ? index++ : -1;
-  int normalTextureIndex = normalTexture > 0 ? index++ : -1;
-  int occlusionTextureIndex = occlusionTexture > 0 ? index++ : -1;
-  int emissiveTextureIndex = emissiveTexture > 0 ? index++ : -1;
+      rhi::isHandleValid(metallicRoughnessTexture) ? index++ : -1;
+  int normalTextureIndex = rhi::isHandleValid(normalTexture) ? index++ : -1;
+  int occlusionTextureIndex =
+      rhi::isHandleValid(occlusionTexture) ? index++ : -1;
+  int emissiveTextureIndex = rhi::isHandleValid(emissiveTexture) ? index++ : -1;
 
   return {{"baseColorTexture", baseColorTextureIndex},
           {"baseColorTextureCoord", baseColorTextureCoord},

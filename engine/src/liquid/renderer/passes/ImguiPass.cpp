@@ -48,7 +48,7 @@ void ImguiPass::execute(rhi::RenderCommandList &commandList,
   const auto &pipeline = registry.getPipeline(pipelineId);
   auto sceneTexture = registry.hasTexture(sceneTextureId)
                           ? registry.getTexture(sceneTextureId)
-                          : 0;
+                          : rhi::TextureHandle::Invalid;
 
   imguiRenderer.beginRendering();
 

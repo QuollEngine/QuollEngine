@@ -24,24 +24,24 @@ public:
     const std::vector<std::pair<String, Property>> getProperties() const;
 
   public:
-    rhi::TextureHandle baseColorTexture = 0;
+    rhi::TextureHandle baseColorTexture = rhi::TextureHandle::Invalid;
     int baseColorTextureCoord = -1;
     glm::vec4 baseColorFactor;
 
-    rhi::TextureHandle metallicRoughnessTexture = 0;
+    rhi::TextureHandle metallicRoughnessTexture = rhi::TextureHandle::Invalid;
     int metallicRoughnessTextureCoord = -1;
     float metallicFactor = 0.0f;
     float roughnessFactor = 0.0f;
 
-    rhi::TextureHandle normalTexture = 0;
+    rhi::TextureHandle normalTexture = rhi::TextureHandle::Invalid;
     int normalTextureCoord = -1;
     float normalScale = 0.0f;
 
-    rhi::TextureHandle occlusionTexture = 0;
+    rhi::TextureHandle occlusionTexture = rhi::TextureHandle::Invalid;
     int occlusionTextureCoord = -1;
     float occlusionStrength = 0.0f;
 
-    rhi::TextureHandle emissiveTexture = 0;
+    rhi::TextureHandle emissiveTexture = rhi::TextureHandle::Invalid;
     int emissiveTextureCoord = -1;
     glm::vec3 emissiveFactor;
   };

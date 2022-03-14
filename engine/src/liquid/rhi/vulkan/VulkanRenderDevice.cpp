@@ -48,9 +48,7 @@ void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
     mRegistry.removeTexture(static_cast<TextureHandle>(i));
   }
 
-  auto numSwapchainImages = static_cast<TextureHandle>(numNewSwapchainImages);
-
-  for (size_t i = 0; i < numSwapchainImages; ++i) {
+  for (size_t i = 0; i < numNewSwapchainImages; ++i) {
     TextureHandle handle = static_cast<TextureHandle>(i + 1);
 
     auto &&ptr = std::make_unique<VulkanTexture>(

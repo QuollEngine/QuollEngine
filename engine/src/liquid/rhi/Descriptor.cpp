@@ -12,8 +12,8 @@ Descriptor &Descriptor::bind(uint32_t binding,
   bindings.insert({binding, DescriptorBinding{type, textures}});
   std::stringstream ss;
   ss << "b:" << binding << ";t:" << static_cast<uint32_t>(type) << ";";
-  for (auto &x : textures) {
-    ss << "d:" << x << ";";
+  for (auto x : textures) {
+    ss << "d:" << rhi::castHandleToUint(x) << ";";
   }
   ss << "|";
   hashCode += ss.str();
@@ -29,7 +29,7 @@ Descriptor &Descriptor::bind(uint32_t binding, BufferHandle buffer,
   bindings.insert({binding, DescriptorBinding{type, buffer}});
   std::stringstream ss;
   ss << "b:" << binding << ";t:" << static_cast<uint32_t>(type)
-     << ";d:" << buffer << "|";
+     << ";d:" << rhi::castHandleToUint(buffer) << "|";
   hashCode += ss.str();
   return *this;
 }

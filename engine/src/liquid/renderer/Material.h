@@ -81,7 +81,7 @@ private:
 
 private:
   std::vector<rhi::TextureHandle> textures;
-  rhi::BufferHandle uniformBuffer = 0;
+  rhi::BufferHandle uniformBuffer = rhi::BufferHandle::Invalid;
 
   rhi::ResourceRegistry &registry;
   char *data = nullptr;

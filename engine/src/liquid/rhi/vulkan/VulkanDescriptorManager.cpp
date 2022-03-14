@@ -81,7 +81,7 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
       const auto &textures =
           std::get<std::vector<TextureHandle>>(binding.second.data);
       for (const auto tex : textures) {
-        if (tex == 0)
+        if (!rhi::isHandleValid(tex))
           continue;
 
         const auto &native = mRegistry.getTextures().at(tex);

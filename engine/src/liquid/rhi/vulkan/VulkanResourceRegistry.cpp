@@ -65,7 +65,7 @@ void VulkanResourceRegistry::addFramebuffer(
 }
 
 void VulkanResourceRegistry::updateFramebuffer(
-    rhi::RenderPassHandle handle,
+    rhi::FramebufferHandle handle,
     std::unique_ptr<VulkanFramebuffer> &&framebuffer) {
   mFramebuffers.at(handle) = std::move(framebuffer);
 }
@@ -76,7 +76,7 @@ void VulkanResourceRegistry::addPipeline(
 }
 
 void VulkanResourceRegistry::updatePipeline(
-    rhi::RenderPassHandle handle, std::unique_ptr<VulkanPipeline> &&pipeline) {
+    rhi::PipelineHandle handle, std::unique_ptr<VulkanPipeline> &&pipeline) {
   mPipelines.at(handle) = std::move(pipeline);
 }
 

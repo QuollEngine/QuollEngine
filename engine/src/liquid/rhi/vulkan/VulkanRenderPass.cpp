@@ -17,7 +17,8 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       description.colorAttachments.size());
   VkAttachmentReference depthReference;
 
-  bool hasDepthAttachment = description.depthAttachment.texture > 0;
+  bool hasDepthAttachment =
+      rhi::isHandleValid(description.depthAttachment.texture);
 
   std::vector<VkAttachmentDescription> attachments(
       description.colorAttachments.size() + (hasDepthAttachment ? 1 : 0));

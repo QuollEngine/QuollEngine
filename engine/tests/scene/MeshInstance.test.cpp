@@ -29,8 +29,8 @@ TEST_F(MeshInstanceTest, CreatesVertexAndIndexBuffersOnConstruct) {
   EXPECT_EQ(instance.getMaterials().size(), 2);
 
   for (size_t i = 0; i < 2; ++i) {
-    EXPECT_NE(instance.getVertexBuffers().at(i), 0);
-    EXPECT_NE(instance.getIndexBuffers().at(i), 0);
+    EXPECT_TRUE(liquid::rhi::isHandleValid(instance.getVertexBuffers().at(i)));
+    EXPECT_TRUE(liquid::rhi::isHandleValid(instance.getIndexBuffers().at(i)));
   }
 }
 
@@ -48,11 +48,11 @@ TEST_F(MeshInstanceTest, CreatesWithoutIndexBuffersOnConstruct) {
   EXPECT_EQ(instance.getMaterials().size(), 2);
 
   for (size_t i = 0; i < 2; ++i) {
-    EXPECT_NE(instance.getVertexBuffers().at(i), 0);
+    EXPECT_TRUE(liquid::rhi::isHandleValid(instance.getVertexBuffers().at(i)));
   }
 
-  EXPECT_EQ(instance.getIndexBuffers().at(0), 0);
-  EXPECT_NE(instance.getIndexBuffers().at(1), 0);
+  EXPECT_FALSE(liquid::rhi::isHandleValid(instance.getIndexBuffers().at(0)));
+  EXPECT_TRUE(liquid::rhi::isHandleValid(instance.getIndexBuffers().at(1)));
 }
 
 TEST_F(MeshInstanceTest, SetsMaterial) {
