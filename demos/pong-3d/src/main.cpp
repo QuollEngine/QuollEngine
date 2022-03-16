@@ -29,9 +29,9 @@ public:
       : window("Pong 3D", 800, 600), backend(window),
         renderer(entityContext, window, backend.getOrCreateDevice()),
         vertexShader(
-            renderer.getRegistry().addShader({"basic-shader.vert.spv"})),
+            renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
-            renderer.getRegistry().addShader({"basic-shader.frag.spv"})),
+            renderer.getRegistry().setShader({"basic-shader.frag.spv"})),
         material(renderer.createMaterial({}, {}, liquid::CullMode::None)),
         camera(new liquid::Camera(&renderer.getRegistry())) {
 

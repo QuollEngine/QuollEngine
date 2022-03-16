@@ -12,6 +12,8 @@ namespace liquid::rhi {
 
 static constexpr uint32_t RESERVED_HANDLE_SIZE = 20;
 
+enum class ResourceRegistryState { Set, Delete };
+
 /**
  * @brief Registry map
  *
@@ -32,30 +34,27 @@ class ResourceRegistryMap {
 
 public:
   /**
-   * @brief Add description
+   * @brief Set description
+   *
+   * Creates new resource or updates
+   * existing one
    *
    * @param description Description
-   * @return Resource handle
-   */
-  THandle addDescription(const TDescription &description) {
-    THandle newHandle = mLastHandle;
-    mLastHandle = static_cast<THandle>(rhi::castHandleToUint(mLastHandle) + 1);
-    mDescriptions.insert({newHandle, description});
-    mDirtyCreates.push_back(newHandle);
-
-    return newHandle;
-  }
-
-  /**
-   * @brief Update description
-   *
    * @param handle Resource handle
-   * @param description Description
+   * @return New or existing resource handle
    */
-  inline void updateDescription(THandle handle,
-                                const TDescription &description) {
-    mDescriptions.at(handle) = description;
-    mDirtyUpdates.push_back(handle);
+  inline THandle setDescription(const TDescription &description,
+                                THandle handle) {
+    LIQUID_ASSERT(handle == THandle::Invalid ||
+                      mDescriptions.find(handle) != mDescriptions.end(),
+                  "Cannot update non existent resource");
+
+    auto retHandle = handle == THandle::Invalid ? mLastHandle : handle;
+    mDescriptions.insert_or_assign(retHandle, description);
+    mStagedResources.insert_or_assign(retHandle, ResourceRegistryState::Set);
+    mLastHandle = static_cast<THandle>(rhi::castHandleToUint(mLastHandle) +
+                                       (handle == THandle::Invalid));
+    return retHandle;
   }
 
   /**
@@ -65,7 +64,22 @@ public:
    */
   inline void deleteDescription(THandle handle) {
     mDescriptions.erase(handle);
-    mDirtyDeletes.push_back(handle);
+    mStagedResources.insert_or_assign(handle, ResourceRegistryState::Delete);
+  }
+
+  /**
+   * @brief Clear staged resources
+   */
+  inline void clearStagedResources() { mStagedResources.clear(); }
+
+  /**
+   * @brief Get staged resources
+   *
+   * @return Staged resources
+   */
+  inline const std::map<THandle, ResourceRegistryState> &
+  getStagedResources() const {
+    return mStagedResources;
   }
 
   /**
@@ -89,47 +103,9 @@ public:
     return mDescriptions.find(handle) != mDescriptions.end();
   }
 
-  /**
-   * @brief Get newly added resources
-   *
-   * @return List of newly added resources
-   */
-  inline const HandleList &getDirtyCreates() const { return mDirtyCreates; }
-
-  /**
-   * @brief Get newly updated resources
-   *
-   * @return List of newly updated resources
-   */
-  inline const HandleList &getDirtyUpdates() const { return mDirtyUpdates; }
-
-  /**
-   * @brief Get newly deleted resources
-   *
-   * @return List of newly deleted resources
-   */
-  inline const HandleList &getDirtyDeletes() const { return mDirtyDeletes; }
-
-  /**
-   * @brief Clear dirty creates
-   */
-  inline void clearDirtyCreates() { mDirtyCreates.clear(); }
-
-  /**
-   * @brief Clear dirty deletes
-   */
-  inline void clearDirtyDeletes() { mDirtyDeletes.clear(); }
-
-  /**
-   * @brief Clear dirty updates
-   */
-  inline void clearDirtyUpdates() { mDirtyUpdates.clear(); }
-
 private:
   std::unordered_map<THandle, TDescription> mDescriptions;
-  std::vector<THandle> mDirtyCreates;
-  std::vector<THandle> mDirtyUpdates;
-  std::vector<THandle> mDirtyDeletes;
+  std::map<THandle, ResourceRegistryState> mStagedResources;
 
   // ZERO means undefined
   THandle mLastHandle = TStartingHandleId;
@@ -138,12 +114,14 @@ private:
 class ResourceRegistry {
 public:
   /**
-   * @brief Add shader
+   * @brief Set shader
    *
    * @param description Shader description
+   * @param handle Shader handle
    * @return Shader handle
    */
-  ShaderHandle addShader(const ShaderDescription &description);
+  ShaderHandle setShader(const ShaderDescription &description,
+                         ShaderHandle handle = ShaderHandle::Invalid);
 
   /**
    * @brief Delete shader
@@ -162,12 +140,14 @@ public:
   }
 
   /**
-   * @brief Add buffer
+   * @brief Set buffer
    *
    * @param description Buffer description
+   * @param handle Buffer handle
    * @return Buffer handle
    */
-  BufferHandle addBuffer(const BufferDescription &description);
+  BufferHandle setBuffer(const BufferDescription &description,
+                         BufferHandle handle = BufferHandle::Invalid);
 
   /**
    * @brief Delete buffer
@@ -175,14 +155,6 @@ public:
    * @param handle Buffer handle
    */
   void deleteBuffer(BufferHandle handle);
-
-  /**
-   * @brief Update buffer
-   *
-   * @param handle Buffer handle
-   * @param description Buffer description
-   */
-  void updateBuffer(BufferHandle handle, const BufferDescription &description);
 
   /**
    * @brief Get buffer map
@@ -194,12 +166,14 @@ public:
   }
 
   /**
-   * @brief Add texture
+   * @brief Set texture
    *
    * @param description Texture description
+   * @param handle Texture handle
    * @return Texture handle
    */
-  TextureHandle addTexture(const TextureDescription &description);
+  TextureHandle setTexture(const TextureDescription &description,
+                           TextureHandle handle = TextureHandle::Invalid);
 
   /**
    * @brief Remove texture
@@ -219,55 +193,43 @@ public:
   }
 
   /**
-   * @brief Add render pass
+   * @brief Set render pass
    *
    * @param description Render pass description
-   * @return RenderPass handle
-   */
-  rhi::RenderPassHandle addRenderPass(const RenderPassDescription &description);
-
-  /**
-   * @brief Update render pass
-   *
    * @param handle Render pass handle
-   * @param description Render pass Description
+   * @return Render pass handle
    */
-  void updateRenderPass(rhi::RenderPassHandle handle,
-                        const RenderPassDescription &description);
+  RenderPassHandle
+  setRenderPass(const RenderPassDescription &description,
+                RenderPassHandle handle = RenderPassHandle::Invalid);
 
   /**
    * @brief Remove render pass
    *
    * @param handle Render pass handle
    */
-  void deleteRenderPass(rhi::RenderPassHandle handle);
+  void deleteRenderPass(RenderPassHandle handle);
 
   /**
    * @brief Get render pass map
    *
    * @return Render pass map
    */
-  inline ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription> &
+  inline ResourceRegistryMap<RenderPassHandle, RenderPassDescription> &
   getRenderPassMap() {
     return mRenderPasses;
   }
 
   /**
-   * @brief Add framebuffer
+   * @brief Set framebuffer
    *
    * @param description Render pass description
+   * @param handle Framebuffer handle
    * @return Framebuffer handle
    */
-  FramebufferHandle addFramebuffer(const FramebufferDescription &description);
-
-  /**
-   * @brief Update framebuffer
-   *
-   * @param handle Framebuffer handle
-   * @param description Framebuffer Description
-   */
-  void updateFramebuffer(FramebufferHandle handle,
-                         const FramebufferDescription &description);
+  FramebufferHandle
+  setFramebuffer(const FramebufferDescription &description,
+                 FramebufferHandle handle = FramebufferHandle::Invalid);
 
   /**
    * @brief Remove framebuffer
@@ -279,7 +241,7 @@ public:
   /**
    * @brief Get framebuffer map
    *
-   * @return Render pass map
+   * @return Framebuffer map
    */
   inline ResourceRegistryMap<FramebufferHandle, FramebufferDescription> &
   getFramebufferMap() {
@@ -287,21 +249,14 @@ public:
   }
 
   /**
-   * @brief Add pipeline
+   * @brief Set pipeline
    *
    * @param description Render pass description
+   * @param handle Pipeline handle
    * @return Pipeline handle
    */
-  PipelineHandle addPipeline(const PipelineDescription &description);
-
-  /**
-   * @brief Update pipeline
-   *
-   * @param handle Pipeline handle
-   * @param description Pipeline Description
-   */
-  void updatePipeline(PipelineHandle handle,
-                      const PipelineDescription &description);
+  PipelineHandle setPipeline(const PipelineDescription &description,
+                             PipelineHandle handle = PipelineHandle::Invalid);
 
   /**
    * @brief Remove pipeline
@@ -313,7 +268,7 @@ public:
   /**
    * @brief Get pipeline map
    *
-   * @return Render pass map
+   * @return Pipeline map
    */
   inline ResourceRegistryMap<PipelineHandle, PipelineDescription> &
   getPipelineMap() {

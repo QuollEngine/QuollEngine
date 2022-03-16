@@ -732,7 +732,7 @@ getMaterials(const tinygltf::Model &model, Renderer &renderer) {
     description.data = new char[description.size];
     memcpy(description.data, image.image.data(), description.size);
 
-    textures.push_back(renderer.getRegistry().addTexture(description));
+    textures.push_back(renderer.getRegistry().setTexture(description));
   }
 
   for (auto &gltfMaterial : model.materials) {

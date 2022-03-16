@@ -7,74 +7,59 @@ struct TestDesc {
   uint32_t value = 0;
 };
 
-using TestMap =
-    liquid::rhi::ResourceRegistryMap<liquid::rhi::ShaderHandle, TestDesc>;
+using TestHandle = liquid::rhi::ShaderHandle;
 
-TEST(ResourceRegistryMapTest, AddsNewResource) {
+using TestMap = liquid::rhi::ResourceRegistryMap<TestHandle, TestDesc>;
+
+TEST(ResourceRegistryMapTest,
+     SettingDescriptionToNonExistentResourceCreatesResource) {
   TestMap map;
-  auto id = map.addDescription({1});
-
+  auto id = map.setDescription({1}, TestHandle::Invalid);
   EXPECT_EQ(map.getDescription(id).value, 1);
 }
 
-TEST(ResourceRegistryMapTest, AddingNewResourceAddsNewIdToCreateList) {
+TEST(ResourceRegistryMapTest, FailsToSetResourceIfValidResourceDoesNotExist) {
   TestMap map;
-  auto id = map.addDescription({1});
-  EXPECT_EQ(map.getDirtyCreates().size(), 1);
-  EXPECT_EQ(map.getDirtyCreates().at(0), id);
+  EXPECT_DEATH(map.setDescription({1}, TestHandle{5}), ".*");
 }
 
-TEST(ResourceRegistryMapTest, ClearsCreateListOnCall) {
+TEST(ResourceRegistryMapTest,
+     SettingDescriptionToValidResourceUpdatesResource) {
   TestMap map;
-  map.addDescription({1});
-  map.clearDirtyCreates();
-  EXPECT_EQ(map.getDirtyCreates().size(), 0);
-}
-
-TEST(ResourceRegistryMapTest, UpdatesResource) {
-  TestMap map;
-  auto id = map.addDescription({1});
-  map.updateDescription(id, {2});
-
+  auto id = map.setDescription({1}, TestHandle::Invalid);
+  auto updateId = map.setDescription({2}, id);
+  EXPECT_EQ(updateId, id);
   EXPECT_EQ(map.getDescription(id).value, 2);
 }
 
-TEST(ResourceRegistryMapTest, UpdatingResourceAddsIdToUpdateList) {
+TEST(ResourceRegistryMapTest,
+     UpdatingDescriptionAddsResourceToStagedWithSetFlag) {
   TestMap map;
-  auto id = map.addDescription({1});
-  map.updateDescription(id, {2});
-  EXPECT_EQ(map.getDirtyUpdates().size(), 1);
-  EXPECT_EQ(map.getDirtyUpdates().at(0), id);
+  auto id = map.setDescription({1}, TestHandle::Invalid);
+  EXPECT_EQ(map.getStagedResources().at(id),
+            liquid::rhi::ResourceRegistryState::Set);
 }
 
-TEST(ResourceRegistryMapTest, ClearsUpdateListOnCall) {
+TEST(ResourceRegistryMapTest, DeletesDescription) {
   TestMap map;
-  auto id = map.addDescription({1});
-  map.updateDescription(id, {2});
-
-  map.clearDirtyUpdates();
-  EXPECT_EQ(map.getDirtyUpdates().size(), 0);
-}
-
-TEST(ResourceRegistryMapTest, DeletesResource) {
-  TestMap map;
-  auto id = map.addDescription({1});
+  auto id = map.setDescription({1}, TestHandle::Invalid);
   map.deleteDescription(id);
   EXPECT_FALSE(map.hasDescription(id));
 }
 
-TEST(ResourceRegistryMapTest, DeletingResourceAddsIdToDeleteList) {
+TEST(ResourceRegistryMapTest,
+     DeletingDescriptionAddsResourceToStagedWithDeleteFlag) {
   TestMap map;
-  auto id = map.addDescription({1});
+  auto id = map.setDescription({1}, TestHandle::Invalid);
   map.deleteDescription(id);
-  EXPECT_EQ(map.getDirtyDeletes().at(0), id);
+  EXPECT_EQ(map.getStagedResources().at(id),
+            liquid::rhi::ResourceRegistryState::Delete);
 }
 
-TEST(ResourceRegistryMapTest, ClearsDeleteListOnCall) {
+TEST(ResourceRegistryMapTest, ClearsStagedResources) {
   TestMap map;
-  auto id = map.addDescription({1});
+  auto id = map.setDescription({1}, TestHandle::Invalid);
   map.deleteDescription(id);
-
-  map.clearDirtyDeletes();
-  EXPECT_EQ(map.getDirtyDeletes().size(), 0);
+  map.clearStagedResources();
+  EXPECT_EQ(map.getStagedResources().size(), 0);
 }

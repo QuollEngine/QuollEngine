@@ -116,25 +116,15 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
       ibDst += cmd_list->IdxBuffer.Size;
     }
 
-    if (registry.getBufferMap().hasDescription(frameObj.vertexBuffer)) {
-      registry.updateBuffer(frameObj.vertexBuffer,
-                            {rhi::BufferType::Vertex, frameObj.vertexBufferSize,
-                             frameObj.vertexBufferData});
-    } else {
-      frameObj.vertexBuffer = registry.addBuffer({rhi::BufferType::Vertex,
-                                                  frameObj.vertexBufferSize,
-                                                  frameObj.vertexBufferData});
-    }
+    frameObj.vertexBuffer =
+        registry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
+                            frameObj.vertexBufferData},
+                           frameObj.vertexBuffer);
 
-    if (registry.getBufferMap().hasDescription(frameObj.indexBuffer)) {
-      registry.updateBuffer(frameObj.indexBuffer,
-                            {rhi::BufferType::Index, frameObj.indexBufferSize,
-                             frameObj.indexBufferData});
-    } else {
-      frameObj.indexBuffer =
-          registry.addBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
-                              frameObj.indexBufferData});
-    }
+    frameObj.indexBuffer =
+        registry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
+                            frameObj.indexBufferData},
+                           frameObj.indexBuffer);
   }
 
   // @temporary
@@ -264,7 +254,7 @@ void ImguiRenderer::loadFonts() {
     description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
     description.data = pixels;
 
-    fontTexture = registry.addTexture(description);
+    fontTexture = registry.setTexture(description);
   }
 
   io.Fonts->SetTexID(

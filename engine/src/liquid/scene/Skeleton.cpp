@@ -26,7 +26,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
   jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
   jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
 
-  buffer = registry->addBuffer(
+  buffer = registry->setBuffer(
       {rhi::BufferType::Uniform, sizeof(glm::mat4) * numJoints});
 
   // Debug data
@@ -39,7 +39,7 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
 
   debugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
 
-  debugBuffer = registry->addBuffer(
+  debugBuffer = registry->setBuffer(
       {rhi::BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
 }
 
@@ -83,9 +83,9 @@ void Skeleton::update() {
         jointWorldTransforms.at(i) * jointInverseBindMatrices.at(i);
   }
 
-  registry->updateBuffer(buffer, {rhi::BufferType::Uniform,
-                                  sizeof(glm::mat4) * numJoints,
-                                  jointFinalTransforms.data()});
+  registry->setBuffer({rhi::BufferType::Uniform, sizeof(glm::mat4) * numJoints,
+                       jointFinalTransforms.data()},
+                      buffer);
 }
 
 void Skeleton::updateDebug() {
@@ -95,9 +95,10 @@ void Skeleton::updateDebug() {
     debugBoneTransforms.at(i) = jointWorldTransforms.at(debugBones.at(i));
   }
 
-  registry->updateBuffer(debugBuffer, {rhi::BufferType::Uniform,
-                                       sizeof(glm::mat4) * debugBones.size(),
-                                       debugBoneTransforms.data()});
+  registry->setBuffer({rhi::BufferType::Uniform,
+                       sizeof(glm::mat4) * debugBones.size(),
+                       debugBoneTransforms.data()},
+                      buffer);
 }
 
 } // namespace liquid

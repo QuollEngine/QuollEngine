@@ -42,17 +42,17 @@ int main() {
   liquid::PhysicsSystem physicsSystem(context);
 
   renderer.getShaderLibrary().addShader(
-      "editor-grid.vert", renderer.getRegistry().addShader(
+      "editor-grid.vert", renderer.getRegistry().setShader(
                               {"assets/shaders/editor-grid.vert.spv"}));
   renderer.getShaderLibrary().addShader(
-      "editor-grid.frag", renderer.getRegistry().addShader(
+      "editor-grid.frag", renderer.getRegistry().setShader(
                               {"assets/shaders/editor-grid.frag.spv"}));
 
   renderer.getShaderLibrary().addShader(
-      "skeleton-lines.vert", renderer.getRegistry().addShader(
+      "skeleton-lines.vert", renderer.getRegistry().setShader(
                                  {"assets/shaders/skeleton-lines.vert.spv"}));
   renderer.getShaderLibrary().addShader(
-      "skeleton-lines.frag", renderer.getRegistry().addShader(
+      "skeleton-lines.frag", renderer.getRegistry().setShader(
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
   liquid::MainLoop mainLoop(renderer, window);

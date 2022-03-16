@@ -17,7 +17,7 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures_,
 
   if (!properties.empty()) {
     auto size = updateBufferData();
-    uniformBuffer = registry.addBuffer({rhi::BufferType::Uniform, size, data});
+    uniformBuffer = registry.setBuffer({rhi::BufferType::Uniform, size, data});
     descriptor.bind(0, uniformBuffer, rhi::DescriptorType::UniformBuffer);
   }
 
@@ -42,7 +42,8 @@ void Material::updateProperty(const String &name, const Property &value) {
 
   properties.at(index) = value;
   auto size = updateBufferData();
-  registry.updateBuffer(uniformBuffer, {rhi::BufferType::Uniform, size, data});
+  uniformBuffer =
+      registry.setBuffer({rhi::BufferType::Uniform, size, data}, uniformBuffer);
 }
 
 size_t Material::updateBufferData() {

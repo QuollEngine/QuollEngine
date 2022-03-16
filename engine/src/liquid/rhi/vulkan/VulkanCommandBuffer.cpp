@@ -58,7 +58,7 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
 }
 
 void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
-  const auto &vulkanBuffer = mRegistry.getBuffer(buffer);
+  const auto &vulkanBuffer = mRegistry.getBuffers().at(buffer);
   std::array<VkDeviceSize, 1> offsets{0};
   std::array<VkBuffer, 1> buffers{vulkanBuffer->getBuffer()};
 
@@ -67,7 +67,7 @@ void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
 
 void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
                                           VkIndexType indexType) {
-  const auto &vulkanBuffer = mRegistry.getBuffer(buffer);
+  const auto &vulkanBuffer = mRegistry.getBuffers().at(buffer);
 
   vkCmdBindIndexBuffer(mCommandBuffer, vulkanBuffer->getBuffer(), 0, indexType);
 }

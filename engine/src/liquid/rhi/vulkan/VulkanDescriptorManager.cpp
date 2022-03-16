@@ -64,8 +64,8 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
         VulkanMapping::getDescriptorType(binding.second.type);
 
     if (binding.second.type == DescriptorType::UniformBuffer) {
-      const auto &vkBuffer =
-          mRegistry.getBuffer(std::get<BufferHandle>(binding.second.data));
+      const auto &vkBuffer = mRegistry.getBuffers().at(
+          std::get<BufferHandle>(binding.second.data));
       bufferInfos.push_back(VkDescriptorBufferInfo{vkBuffer->getBuffer(), 0,
                                                    vkBuffer->getSize()});
 

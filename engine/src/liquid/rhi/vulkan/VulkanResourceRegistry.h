@@ -27,64 +27,51 @@ class VulkanResourceRegistry {
 
 public:
   /**
-   * @brief Add shader
+   * @brief Set shader
    *
    * @param handle Shader handle
    * @param shader Vulkan shader
    */
-  void addShader(ShaderHandle handle, std::unique_ptr<VulkanShader> &&shader);
+  void setShader(ShaderHandle handle, std::unique_ptr<VulkanShader> &&shader);
 
   /**
-   * @brief Remove shader
+   * @brief Delete shader
    *
    * @param handle Shader handle
    */
-  void removeShader(ShaderHandle handle);
+  void deleteShader(ShaderHandle handle);
 
   /**
-   * @brief Get shader
+   * @brief Get shaders
    *
-   * @param handle Shader handle
-   * @return Vulkan shader
+   * @return List of shaders
    */
-  inline const std::unique_ptr<VulkanShader> &
-  getShader(ShaderHandle handle) const {
-    return mShaders.at(handle);
-  }
+  inline const ShaderMap &getShaders() const { return mShaders; }
 
   /**
-   * @brief Add buffer
+   * @brief Set buffer
    *
    * @param handle Buffer handle
    * @param buffer Vulkan buffer
    */
-  void addBuffer(BufferHandle handle, std::unique_ptr<VulkanBuffer> &&buffer);
+  void setBuffer(BufferHandle handle, std::unique_ptr<VulkanBuffer> &&buffer);
 
   /**
-   * @brief Remove buffer
+   * @brief Delete buffer
    *
    * @param handle Buffer handle
    */
-  void removeBuffer(BufferHandle handle);
+  void deleteBuffer(BufferHandle handle);
 
   /**
-   * @brief Update buffer
+   * @brief Check if buffer exists
    *
    * @param handle Buffer handle
-   * @param buffer Vulkan buffer
+   * @retval true Buffer exists
+   * @retval false Buffer does not exist
    */
-  void updateBuffer(BufferHandle handle,
-                    std::unique_ptr<VulkanBuffer> &&buffer);
-
-  /**
-   * @brief Get buffer
-   *
-   * @param handle Buffer handle
-   * @return Vulkan buffer
-   */
-  inline const std::unique_ptr<VulkanBuffer> &
-  getBuffer(BufferHandle handle) const {
-    return mBuffers.at(handle);
+  inline bool hasBuffer(BufferHandle handle) const {
+    return mBuffers.find(handle) != mBuffers.end();
   }
 
   /**
@@ -95,20 +82,20 @@ public:
   inline const BufferMap &getBuffers() const { return mBuffers; }
 
   /**
-   * @brief Add texture
+   * @brief Set texture
    *
    * @param handle Texture handle
    * @param texture Vulkan texture
    */
-  void addTexture(TextureHandle handle,
+  void setTexture(TextureHandle handle,
                   std::unique_ptr<VulkanTexture> &&texture);
 
   /**
-   * @brief Remove texture
+   * @brief Delete texture
    *
    * @param handle Texture handle
    */
-  void removeTexture(TextureHandle handle);
+  void deleteTexture(TextureHandle handle);
 
   /**
    * @brief Get textures
@@ -118,31 +105,20 @@ public:
   inline const TextureMap &getTextures() const { return mTextures; }
 
   /**
-   * @brief Update texture
-   *
-   * @param handle Texture handle
-   * @param texture Vulkan texture
-   */
-  void updateTexture(TextureHandle handle,
-                     std::unique_ptr<VulkanTexture> &&texture);
-
-  /**
-   * @brief Add render pass
+   * @brief Set render pass
    *
    * @param handle Render pass handle
    * @param renderPass Vulkan render pass
    */
-  void addRenderPass(rhi::RenderPassHandle handle,
+  void setRenderPass(rhi::RenderPassHandle handle,
                      std::unique_ptr<VulkanRenderPass> &&renderPass);
 
   /**
-   * @brief Update render pass
+   * @brief Delete render pass
    *
    * @param handle Render pass handle
-   * @param renderPass Vulkan render pass
    */
-  void updateRenderPass(rhi::RenderPassHandle handle,
-                        std::unique_ptr<VulkanRenderPass> &&renderPass);
+  void deleteRenderPass(rhi::RenderPassHandle handle);
 
   /**
    * @brief Get render passes
@@ -152,22 +128,20 @@ public:
   inline const RenderPassMap &getRenderPasses() const { return mRenderPasses; }
 
   /**
-   * @brief Add framebuffer
+   * @brief Set framebuffer
    *
    * @param handle Framebuffer handle
    * @param framebuffer Vulkan framebuffer
    */
-  void addFramebuffer(FramebufferHandle handle,
+  void setFramebuffer(FramebufferHandle handle,
                       std::unique_ptr<VulkanFramebuffer> &&framebuffer);
 
   /**
-   * @brief Update framebuffer
+   * @brief Delete framebuffer
    *
    * @param handle Framebuffer handle
-   * @param framebuffer Vulkan framebuffer
    */
-  void updateFramebuffer(rhi::FramebufferHandle handle,
-                         std::unique_ptr<VulkanFramebuffer> &&framebuffer);
+  void deleteFramebuffer(rhi::FramebufferHandle handle);
 
   /**
    * @brief Get framebuffers
@@ -177,22 +151,20 @@ public:
   inline const FramebufferMap &getFramebuffers() const { return mFramebuffers; }
 
   /**
-   * @brief Add pipeline
+   * @brief Set pipeline
    *
    * @param handle Pipeline handle
    * @param pipeline Vulkan pipeline
    */
-  void addPipeline(PipelineHandle handle,
+  void setPipeline(PipelineHandle handle,
                    std::unique_ptr<VulkanPipeline> &&pipeline);
 
   /**
-   * @brief Update pipeline
+   * @brief Delete pipeline
    *
    * @param handle Pipeline handle
-   * @param pipeline Vulkan pipeline
    */
-  void updatePipeline(rhi::PipelineHandle handle,
-                      std::unique_ptr<VulkanPipeline> &&pipeline);
+  void deletePipeline(rhi::PipelineHandle handle);
 
   /**
    * @brief Get pipelines
