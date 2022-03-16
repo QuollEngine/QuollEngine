@@ -81,13 +81,6 @@ private:
    */
   void synchronize(ResourceRegistry &registry);
 
-  /**
-   * @brief Synchronize resource deletes
-   *
-   * @param registry Resource registry
-   */
-  void synchronizeDeletes(ResourceRegistry &registry);
-
 private:
   VulkanRenderBackend &mBackend;
   VulkanPhysicalDevice mPhysicalDevice;

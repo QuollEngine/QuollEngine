@@ -140,11 +140,9 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       renderPass = graph.getResourceRegistry()
                        .getRenderPass(pass->getRenderPass())
                        .getRenderPass();
-
-      mRegistry.updateRenderPass(renderPass, renderPassDesc);
-    } else {
-      renderPass = mRegistry.addRenderPass(renderPassDesc);
     }
+
+    renderPass = mRegistry.setRenderPass(renderPassDesc, renderPass);
 
     std::vector<rhi::FramebufferHandle> framebuffers(
         framebufferAttachments.size(), rhi::FramebufferHandle::Invalid);
@@ -162,10 +160,9 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
                                  .getRenderPass(pass->getRenderPass())
                                  .getFramebuffers()
                                  .at(i);
-        mRegistry.updateFramebuffer(framebuffers.at(i), framebufferDesc);
-      } else {
-        framebuffers.at(i) = mRegistry.addFramebuffer(framebufferDesc);
       }
+      framebuffers.at(i) =
+          mRegistry.setFramebuffer(framebufferDesc, framebuffers.at(i));
     }
 
     if (framebuffers.size() > 0) {
@@ -203,11 +200,9 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
       rhi::PipelineHandle handle = rhi::PipelineHandle::Invalid;
       if (hasPipeline) {
         handle = graph.getResourceRegistry().getPipeline(resource);
-        mRegistry.updatePipeline(handle, description);
-      } else {
-        handle = mRegistry.addPipeline(description);
       }
 
+      handle = mRegistry.setPipeline(description, handle);
       graph.getResourceRegistry().addPipeline(resource, handle);
     }
   }
@@ -343,7 +338,7 @@ RenderGraphEvaluator::createTexture(const AttachmentData &data,
     description.aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
   }
 
-  return mRegistry.addTexture(description);
+  return mRegistry.setTexture(description);
 }
 
 } // namespace liquid

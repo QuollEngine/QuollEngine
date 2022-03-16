@@ -39,47 +39,47 @@ void Renderer::render(RenderGraph &graph) {
 
 void Renderer::loadShaders() {
   mShaderLibrary.addShader("__engine.geometry.default.vertex",
-                           mRegistry.addShader({Engine::getAssetsPath() +
+                           mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/geometry.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.geometry.skinned.vertex",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/skinnedGeometry.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.pbr.default.fragment",
-      mRegistry.addShader({Engine::getAssetsPath() + "/shaders/pbr.frag.spv"}));
+      mRegistry.setShader({Engine::getAssetsPath() + "/shaders/pbr.frag.spv"}));
   mShaderLibrary.addShader("__engine.skybox.default.vertex",
-                           mRegistry.addShader({Engine::getAssetsPath() +
+                           mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/skybox.vert.spv"}));
   mShaderLibrary.addShader("__engine.skybox.default.fragment",
-                           mRegistry.addShader({Engine::getAssetsPath() +
+                           mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/skybox.frag.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.vertex",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/shadowmap.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.skinned.vertex",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/skinnedShadowmap.vert.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/shadowmap.frag.spv"}));
   mShaderLibrary.addShader("__engine.imgui.default.vertex",
-                           mRegistry.addShader({Engine::getAssetsPath() +
+                           mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/imgui.vert.spv"}));
   mShaderLibrary.addShader("__engine.imgui.default.fragment",
-                           mRegistry.addShader({Engine::getAssetsPath() +
+                           mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/imgui.frag.spv"}));
   mShaderLibrary.addShader(
       "__engine.fullscreenQuad.default.vertex",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/fullscreenQuad.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.fullscreenQuad.default.fragment",
-      mRegistry.addShader(
+      mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
 }
 

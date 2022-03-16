@@ -65,7 +65,7 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return registry.addTexture(description);
+  return registry.setTexture(description);
 }
 
 } // namespace liquid

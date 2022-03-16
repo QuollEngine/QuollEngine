@@ -10,7 +10,7 @@ RenderData::RenderData(EntityContext &entityContext_, Scene *scene_,
       shadowMaterials(shadowMaterials_), registry(registry_) {
 
   sceneBuffer =
-      registry.addBuffer({rhi::BufferType::Uniform, sizeof(SceneBufferObject)});
+      registry.setBuffer({rhi::BufferType::Uniform, sizeof(SceneBufferObject)});
 }
 
 void RenderData::update() {
@@ -54,8 +54,9 @@ void RenderData::update() {
       });
 
   sceneData.numLights.x = static_cast<uint32_t>(i);
-  registry.updateBuffer(sceneBuffer, {rhi::BufferType::Uniform,
-                                      sizeof(SceneBufferObject), &sceneData});
+  registry.setBuffer(
+      {rhi::BufferType::Uniform, sizeof(SceneBufferObject), &sceneData},
+      sceneBuffer);
 }
 
 std::array<rhi::TextureHandle, 3> RenderData::getEnvironmentTextures() const {

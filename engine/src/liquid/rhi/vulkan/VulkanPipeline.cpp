@@ -15,8 +15,8 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
     : mDevice(device) {
 
   std::array<VulkanShader *, 2> shaders{
-      registry.getShader(description.vertexShader).get(),
-      registry.getShader(description.fragmentShader).get(),
+      registry.getShaders().at(description.vertexShader).get(),
+      registry.getShaders().at(description.fragmentShader).get(),
   };
 
   std::array<VkPipelineShaderStageCreateInfo, 2> stages{};

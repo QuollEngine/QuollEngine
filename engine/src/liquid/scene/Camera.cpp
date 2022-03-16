@@ -5,7 +5,7 @@ namespace liquid {
 
 Camera::Camera(rhi::ResourceRegistry *registry_) : registry(registry_) {
   uniformBuffer =
-      registry->addBuffer({rhi::BufferType::Uniform, sizeof(CameraData)});
+      registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData)});
 }
 
 void Camera::setPerspective(float fovY, float aspectRatio, float near,
@@ -17,16 +17,16 @@ void Camera::setPerspective(float fovY, float aspectRatio, float near,
 
   updateProjectionViewMatrix();
 
-  registry->updateBuffer(uniformBuffer,
-                         {rhi::BufferType::Uniform, sizeof(CameraData), &data});
+  registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &data},
+                      uniformBuffer);
 }
 
 void Camera::lookAt(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
   data.viewMatrix = glm::lookAt(position, direction, up);
   updateProjectionViewMatrix();
 
-  registry->updateBuffer(uniformBuffer,
-                         {rhi::BufferType::Uniform, sizeof(CameraData), &data});
+  registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &data},
+                      uniformBuffer);
 }
 
 void Camera::updateProjectionViewMatrix() {

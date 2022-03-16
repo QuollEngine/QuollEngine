@@ -5,7 +5,7 @@ namespace liquidator {
 
 EditorGrid::EditorGrid(liquid::rhi::ResourceRegistry &registry_)
     : registry(registry_) {
-  buffer = registry.addBuffer(
+  buffer = registry.setBuffer(
       {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &data});
   updateUniformBuffer();
 }
@@ -21,8 +21,9 @@ void EditorGrid::setAxisLinesFlag(bool flag) {
 }
 
 void EditorGrid::updateUniformBuffer() {
-  registry.updateBuffer(buffer, {liquid::rhi::BufferType::Uniform,
-                                 sizeof(EditorGridData), &data});
+  registry.setBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &data},
+      buffer);
 }
 
 } // namespace liquidator

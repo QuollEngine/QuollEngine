@@ -26,7 +26,7 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
   description.type = rhi::TextureType::Standard;
   description.size = width * height * channels;
 
-  return registry.addTexture(description);
+  return registry.setTexture(description);
 }
 
 } // namespace liquid

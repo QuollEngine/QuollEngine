@@ -3,46 +3,38 @@
 
 namespace liquid::rhi {
 
-ShaderHandle ResourceRegistry::addShader(const ShaderDescription &description) {
-  return mShaders.addDescription(description);
+ShaderHandle ResourceRegistry::setShader(const ShaderDescription &description,
+                                         ShaderHandle handle) {
+  return mShaders.setDescription(description, handle);
 }
 
 void ResourceRegistry::deleteShader(ShaderHandle handle) {
   mShaders.deleteDescription(handle);
 }
 
-BufferHandle ResourceRegistry::addBuffer(const BufferDescription &description) {
-  return mBuffers.addDescription(description);
+BufferHandle ResourceRegistry::setBuffer(const BufferDescription &description,
+                                         BufferHandle handle) {
+  return mBuffers.setDescription(description, handle);
 }
 
 void ResourceRegistry::deleteBuffer(BufferHandle handle) {
   mBuffers.deleteDescription(handle);
 }
 
-void ResourceRegistry::updateBuffer(BufferHandle handle,
-                                    const BufferDescription &description) {
-  LIQUID_ASSERT(rhi::isHandleValid(handle), "Buffer does not exist");
-  mBuffers.updateDescription(handle, description);
-}
-
 TextureHandle
-ResourceRegistry::addTexture(const TextureDescription &description) {
-  return mTextures.addDescription(description);
+ResourceRegistry::setTexture(const TextureDescription &description,
+                             TextureHandle handle) {
+  return mTextures.setDescription(description, handle);
 }
 
 void ResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.deleteDescription(handle);
 }
 
-rhi::RenderPassHandle
-ResourceRegistry::addRenderPass(const RenderPassDescription &description) {
-  return mRenderPasses.addDescription(description);
-}
-
-void ResourceRegistry::updateRenderPass(
-    rhi::RenderPassHandle handle, const RenderPassDescription &description) {
-  LIQUID_ASSERT(rhi::isHandleValid(handle), "Render pass does not exist");
-  mRenderPasses.updateDescription(handle, description);
+RenderPassHandle
+ResourceRegistry::setRenderPass(const RenderPassDescription &description,
+                                RenderPassHandle handle) {
+  return mRenderPasses.setDescription(description, handle);
 }
 
 void ResourceRegistry::deleteRenderPass(rhi::RenderPassHandle handle) {
@@ -50,14 +42,9 @@ void ResourceRegistry::deleteRenderPass(rhi::RenderPassHandle handle) {
 }
 
 FramebufferHandle
-ResourceRegistry::addFramebuffer(const FramebufferDescription &description) {
-  return mFramebuffers.addDescription(description);
-}
-
-void ResourceRegistry::updateFramebuffer(
-    FramebufferHandle handle, const FramebufferDescription &description) {
-  LIQUID_ASSERT(rhi::isHandleValid(handle), "Framebuffer does not exist");
-  mFramebuffers.updateDescription(handle, description);
+ResourceRegistry::setFramebuffer(const FramebufferDescription &description,
+                                 FramebufferHandle handle) {
+  return mFramebuffers.setDescription(description, handle);
 }
 
 void ResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
@@ -65,14 +52,9 @@ void ResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
 }
 
 PipelineHandle
-ResourceRegistry::addPipeline(const PipelineDescription &description) {
-  return mPipelines.addDescription(description);
-}
-
-void ResourceRegistry::updatePipeline(PipelineHandle handle,
-                                      const PipelineDescription &description) {
-  LIQUID_ASSERT(rhi::isHandleValid(handle), "Pipeline does not exist");
-  mPipelines.updateDescription(handle, description);
+ResourceRegistry::setPipeline(const PipelineDescription &description,
+                              PipelineHandle handle) {
+  return mPipelines.setDescription(description, handle);
 }
 
 void ResourceRegistry::deletePipeline(PipelineHandle handle) {

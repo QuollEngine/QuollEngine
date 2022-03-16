@@ -45,141 +45,111 @@ void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
   // new swapchain has fewer images than
   // previous one
   for (size_t i = numNewSwapchainImages + 1; i < prevNumSwapchainImages; ++i) {
-    mRegistry.removeTexture(static_cast<TextureHandle>(i));
+    mRegistry.deleteTexture(static_cast<TextureHandle>(i));
   }
 
   for (size_t i = 0; i < numNewSwapchainImages; ++i) {
     TextureHandle handle = static_cast<TextureHandle>(i + 1);
 
-    auto &&ptr = std::make_unique<VulkanTexture>(
-        mSwapchain.getImages().at(i), mSwapchain.getImageViews().at(i),
-        VK_NULL_HANDLE, mSwapchain.getSurfaceFormat().format, mAllocator,
-        mDevice);
-
-    if (mRegistry.getTextures().find(handle) != mRegistry.getTextures().end()) {
-      mRegistry.updateTexture(handle, std::move(ptr));
-    } else {
-      mRegistry.addTexture(handle, std::move(ptr));
-    }
+    mRegistry.setTexture(
+        handle, std::make_unique<VulkanTexture>(
+                    mSwapchain.getImages().at(i),
+                    mSwapchain.getImageViews().at(i), VK_NULL_HANDLE,
+                    mSwapchain.getSurfaceFormat().format, mAllocator, mDevice));
   }
 }
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   // Shaders
-  for (auto &handle : registry.getShaderMap().getDirtyCreates()) {
-    mRegistry.addShader(
-        handle, std::make_unique<VulkanShader>(
-                    registry.getShaderMap().getDescription(handle), mDevice));
-  }
-
-  registry.getShaderMap().clearDirtyCreates();
-
-  // Buffers
-  for (auto &handle : registry.getBufferMap().getDirtyCreates()) {
-    mRegistry.addBuffer(
-        handle,
-        std::make_unique<VulkanBuffer>(
-            registry.getBufferMap().getDescription(handle), mAllocator));
-  }
-  registry.getBufferMap().clearDirtyCreates();
-
-  for (auto &handle : registry.getBufferMap().getDirtyUpdates()) {
-    if (registry.getBufferMap().hasDescription(handle)) {
-      mRegistry.getBuffer(handle)->update(
-          registry.getBufferMap().getDescription(handle));
+  for (auto [handle, state] : registry.getShaderMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
+      mRegistry.setShader(
+          handle, std::make_unique<VulkanShader>(
+                      registry.getShaderMap().getDescription(handle), mDevice));
+    } else {
+      mRegistry.deleteShader(handle);
     }
   }
-  registry.getBufferMap().clearDirtyUpdates();
+
+  registry.getShaderMap().clearStagedResources();
+
+  // Buffers
+  for (auto [handle, state] : registry.getBufferMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
+      if (mRegistry.hasBuffer(handle)) {
+        mRegistry.getBuffers().at(handle)->update(
+            registry.getBufferMap().getDescription(handle));
+      } else {
+        mRegistry.setBuffer(
+            handle,
+            std::make_unique<VulkanBuffer>(
+                registry.getBufferMap().getDescription(handle), mAllocator));
+      }
+    } else {
+      mRegistry.deleteBuffer(handle);
+    }
+  }
+
+  registry.getBufferMap().clearStagedResources();
 
   // Textures
-  for (auto &handle : registry.getTextureMap().getDirtyCreates()) {
-    if (registry.getTextureMap().hasDescription(handle)) {
-      mRegistry.addTexture(handle,
+  for (auto [handle, state] : registry.getTextureMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
+      mRegistry.setTexture(handle,
                            std::make_unique<VulkanTexture>(
                                registry.getTextureMap().getDescription(handle),
                                mAllocator, mDevice, mUploadContext));
+    } else {
+      mRegistry.deleteTexture(handle);
     }
   }
-  registry.getTextureMap().clearDirtyCreates();
+
+  registry.getTextureMap().clearStagedResources();
 
   // Render passes
-  for (auto &handle : registry.getRenderPassMap().getDirtyCreates()) {
-    mRegistry.addRenderPass(
-        handle, std::make_unique<VulkanRenderPass>(
-                    registry.getRenderPassMap().getDescription(handle), mDevice,
-                    mRegistry));
-  }
-  registry.getRenderPassMap().clearDirtyCreates();
-
-  for (auto &handle : registry.getRenderPassMap().getDirtyUpdates()) {
-    if (registry.getRenderPassMap().hasDescription(handle)) {
-      mRegistry.updateRenderPass(
+  for (auto [handle, state] :
+       registry.getRenderPassMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
+      mRegistry.setRenderPass(
           handle, std::make_unique<VulkanRenderPass>(
                       registry.getRenderPassMap().getDescription(handle),
                       mDevice, mRegistry));
+    } else {
+      mRegistry.deleteRenderPass(handle);
     }
   }
-  registry.getRenderPassMap().clearDirtyUpdates();
+
+  registry.getRenderPassMap().clearStagedResources();
 
   // Framebuffers
-  for (auto &handle : registry.getFramebufferMap().getDirtyCreates()) {
-    mRegistry.addFramebuffer(
-        handle, std::make_unique<VulkanFramebuffer>(
-                    registry.getFramebufferMap().getDescription(handle),
-                    mDevice, mRegistry));
-  }
-  registry.getFramebufferMap().clearDirtyCreates();
-
-  for (auto &handle : registry.getFramebufferMap().getDirtyUpdates()) {
-    if (registry.getFramebufferMap().hasDescription(handle)) {
-      mRegistry.updateFramebuffer(
+  for (auto [handle, state] :
+       registry.getFramebufferMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
+      mRegistry.setFramebuffer(
           handle, std::make_unique<VulkanFramebuffer>(
                       registry.getFramebufferMap().getDescription(handle),
                       mDevice, mRegistry));
+    } else {
+      mRegistry.deleteFramebuffer(handle);
     }
   }
-  registry.getFramebufferMap().clearDirtyUpdates();
+
+  registry.getFramebufferMap().clearStagedResources();
 
   // Pipelines
-  for (auto &handle : registry.getPipelineMap().getDirtyCreates()) {
-    mRegistry.addPipeline(handle,
-                          std::make_unique<VulkanPipeline>(
-                              registry.getPipelineMap().getDescription(handle),
-                              mDevice, mRegistry));
-  }
+  for (auto [handle, state] : registry.getPipelineMap().getStagedResources()) {
+    if (state == ResourceRegistryState::Set) {
 
-  registry.getPipelineMap().clearDirtyCreates();
-
-  for (auto &handle : registry.getPipelineMap().getDirtyUpdates()) {
-    if (registry.getPipelineMap().hasDescription(handle)) {
-      mRegistry.updatePipeline(
+      mRegistry.setPipeline(
           handle, std::make_unique<VulkanPipeline>(
                       registry.getPipelineMap().getDescription(handle), mDevice,
                       mRegistry));
+    } else {
+      mRegistry.deletePipeline(handle);
     }
   }
-  registry.getPipelineMap().clearDirtyUpdates();
-}
 
-void VulkanRenderDevice::synchronizeDeletes(ResourceRegistry &registry) {
-  for (auto &handle : registry.getBufferMap().getDirtyDeletes()) {
-    mRegistry.removeBuffer(handle);
-  }
-
-  registry.getBufferMap().clearDirtyDeletes();
-
-  for (auto &handle : registry.getTextureMap().getDirtyDeletes()) {
-    mRegistry.removeTexture(handle);
-  }
-
-  registry.getBufferMap().clearDirtyDeletes();
-
-  // Shaders
-  for (auto &handle : registry.getShaderMap().getDirtyDeletes()) {
-    mRegistry.removeShader(handle);
-  }
-
-  registry.getShaderMap().clearDirtyDeletes();
+  registry.getPipelineMap().clearStagedResources();
 }
 
 void VulkanRenderDevice::execute(RenderGraph &graph,
@@ -212,7 +182,6 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
   mRenderContext.endRendering();
 
   auto queuePresentResult = mRenderContext.present(mSwapchain, imageIdx);
-  synchronizeDeletes(evaluator.getRegistry());
 
   if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
       queuePresentResult == VK_SUBOPTIMAL_KHR ||

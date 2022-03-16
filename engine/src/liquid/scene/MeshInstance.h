@@ -24,14 +24,14 @@ public:
           geometry.getVertices().size() * sizeof(typename Mesh::Vertex);
 
       auto vertexBuffer =
-          registry.addBuffer({rhi::BufferType::Vertex, bufferSize,
+          registry.setBuffer({rhi::BufferType::Vertex, bufferSize,
                               (void *)geometry.getVertices().data()});
 
       if (geometry.getIndices().size() > 0) {
         size_t bufferSize = geometry.getIndices().size() * sizeof(uint32_t);
 
         auto indexBuffer =
-            registry.addBuffer({rhi::BufferType::Index,
+            registry.setBuffer({rhi::BufferType::Index,
                                 geometry.getIndices().size() * sizeof(uint32_t),
                                 (void *)geometry.getIndices().data()});
         indexBuffers.push_back(indexBuffer);
