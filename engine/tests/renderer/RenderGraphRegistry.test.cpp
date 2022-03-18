@@ -8,21 +8,6 @@ public:
   liquid::RenderGraphRegistry registry;
 };
 
-TEST_F(RenderGraphRegistryTest, AddsTextureToRegistry) {
-  registry.addTexture(1, liquid::rhi::TextureHandle(2));
-
-  EXPECT_TRUE(registry.hasTexture(1));
-  EXPECT_EQ(registry.getTexture(1), liquid::rhi::TextureHandle(2));
-}
-
-TEST_F(RenderGraphRegistryTest, UpdatesExistingTextureInRegistry) {
-  registry.addTexture(1, liquid::rhi::TextureHandle(2));
-  registry.addTexture(1, liquid::rhi::TextureHandle(3));
-
-  EXPECT_TRUE(registry.hasTexture(1));
-  EXPECT_EQ(registry.getTexture(1), liquid::rhi::TextureHandle(3));
-}
-
 TEST_F(RenderGraphRegistryTest, AddsRenderPassToRegistry) {
   registry.addRenderPass(
       1, liquid::RenderGraphPassResult(liquid::rhi::RenderPassHandle(2), {}, {},

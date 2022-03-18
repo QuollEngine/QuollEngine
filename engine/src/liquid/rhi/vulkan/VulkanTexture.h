@@ -34,10 +34,12 @@ public:
    * @param allocator Vma allocator
    * @param device Vulkan device
    * @param uploadContext Upload context
+   * @param swapchainExtent Swapchain extent
    */
   VulkanTexture(const TextureDescription &description,
                 VulkanResourceAllocator &allocator, VulkanDeviceObject &device,
-                VulkanUploadContext &uploadContext);
+                VulkanUploadContext &uploadContext,
+                const glm::uvec2 &swapchainExtent);
 
   /**
    * @brief Destroy texture
@@ -82,6 +84,25 @@ public:
    */
   inline VkFormat getFormat() const { return mFormat; }
 
+  /**
+   * @brief Check if texture resizes with swapchain
+   *
+   * @retval true Texture resizes with swapchain
+   * @retval false Texture does not resize with swapchain
+   */
+  inline bool isSwapchainRelative() const {
+    return mDescription.sizeMethod == TextureSizeMethod::SwapchainRatio;
+  }
+
+  /**
+   * @brief Get description
+   *
+   * @return Description
+   */
+  inline const TextureDescription &getDescription() const {
+    return mDescription;
+  }
+
 private:
   VkFormat mFormat = VK_FORMAT_MAX_ENUM;
   VkImage mImage = VK_NULL_HANDLE;
@@ -90,6 +111,7 @@ private:
   VmaAllocation mAllocation = VK_NULL_HANDLE;
   VulkanResourceAllocator &mAllocator;
   VulkanDeviceObject &mDevice;
+  TextureDescription mDescription;
 };
 
 } // namespace liquid::rhi

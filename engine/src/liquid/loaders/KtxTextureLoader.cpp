@@ -40,9 +40,8 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
   description.layers = ktxTextureData->numLayers *
                        (ktxTextureData->isCubemap ? CUBEMAP_SIDES : 1);
   description.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
-  description.usageFlags =
-      VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-  description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+  description.usage = rhi::TextureUsage::Sampled | rhi::TextureUsage::Color |
+                      rhi::TextureUsage::TransferDestination;
   description.data = new char[description.size];
 
   char *srcData = reinterpret_cast<char *>(ktxTexture_GetData(ktxTextureData));

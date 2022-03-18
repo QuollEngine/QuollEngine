@@ -16,9 +16,11 @@ VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
 VulkanTexture::VulkanTexture(const TextureDescription &description,
                              VulkanResourceAllocator &allocator,
                              VulkanDeviceObject &device,
-                             VulkanUploadContext &uploadContext)
+                             VulkanUploadContext &uploadContext,
+                             const glm::uvec2 &swapchainExtent)
     : mAllocator(allocator), mDevice(device),
-      mFormat(static_cast<VkFormat>(description.format)) {
+      mFormat(static_cast<VkFormat>(description.format)),
+      mDescription(description) {
   LIQUID_ASSERT(
       description.type == TextureType::Cubemap ? description.layers == 6 : true,
       "Cubemap must have 6 layers");
@@ -38,10 +40,39 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
     imageViewType = VK_IMAGE_VIEW_TYPE_2D;
   }
 
+  static constexpr uint32_t HUNDRED_PERCENT = 100;
+
   VkExtent3D extent{};
-  extent.width = description.width;
-  extent.height = description.height;
+  if (isSwapchainRelative()) {
+    extent.width = description.width * swapchainExtent.x / HUNDRED_PERCENT;
+    extent.height = description.height * swapchainExtent.y / HUNDRED_PERCENT;
+  } else {
+    extent.width = description.width;
+    extent.height = description.height;
+  }
   extent.depth = description.depth;
+
+  VkImageUsageFlags usageFlags = 0;
+  VkImageAspectFlags aspectFlags = 0;
+
+  if ((description.usage & TextureUsage::Color) == TextureUsage::Color) {
+    usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+  }
+
+  if ((description.usage & TextureUsage::Depth) == TextureUsage::Depth) {
+    usageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+  }
+
+  if ((description.usage & TextureUsage::Sampled) == TextureUsage::Sampled) {
+    usageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+  }
+
+  if ((description.usage & TextureUsage::TransferDestination) ==
+      TextureUsage::TransferDestination) {
+    usageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  }
 
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -54,7 +85,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.arrayLayers = description.layers;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  imageCreateInfo.usage = description.usageFlags;
+  imageCreateInfo.usage = usageFlags;
 
   VmaAllocationCreateInfo allocationCreateInfo{};
   allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -74,7 +105,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
   imageViewCreateInfo.subresourceRange.layerCount = description.layers;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
-  imageViewCreateInfo.subresourceRange.aspectMask = description.aspectFlags;
+  imageViewCreateInfo.subresourceRange.aspectMask = aspectFlags;
   checkForVulkanError(
       vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
       "Failed to create image view");
@@ -97,10 +128,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
         {rhi::BufferType::Transfer, description.size, description.data},
         mAllocator);
 
-    uploadContext.submit([extent, this, &stagingBuffer,
-                          &description](VkCommandBuffer commandBuffer) {
+    uploadContext.submit([extent, this, &stagingBuffer, &description,
+                          aspectFlags](VkCommandBuffer commandBuffer) {
       VkImageSubresourceRange range{};
-      range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      range.aspectMask = aspectFlags;
       range.baseMipLevel = 0;
       range.levelCount = 1;
       range.baseArrayLayer = 0;

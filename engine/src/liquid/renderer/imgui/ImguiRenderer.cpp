@@ -245,13 +245,13 @@ void ImguiRenderer::loadFonts() {
 
   rhi::TextureDescription description;
   if (width > 0 || height > 0) {
+    description.usage = rhi::TextureUsage::Color |
+                        rhi::TextureUsage::TransferDestination |
+                        rhi::TextureUsage::Sampled;
     description.size = width * height * 4;
     description.width = width;
     description.height = height;
     description.format = VK_FORMAT_R8G8B8A8_SRGB;
-    description.usageFlags =
-        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
     description.data = pixels;
 
     fontTexture = registry.setTexture(description);

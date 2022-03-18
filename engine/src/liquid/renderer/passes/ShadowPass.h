@@ -42,7 +42,7 @@ public:
 private:
   GraphResourceId pipelineId = 0;
   GraphResourceId skinnedPipelineId = 0;
-  GraphResourceId shadowMapId = 0;
+  rhi::TextureHandle shadowMapId = rhi::TextureHandle::Invalid;
 
   ShaderLibrary &shaderLibrary;
   SceneRenderer sceneRenderer;

@@ -56,12 +56,14 @@ public:
   }
 
   /**
-   * @brief Create texture resource
+   * @brief Import texture
    *
-   * @param name Resource name
-   * @param data Texture data
+   * @param name Name of texture
+   * @param handle Texture handle
+   * @param clearValue Clear value
    */
-  GraphResourceId create(const String &name, const AttachmentData &data);
+  void import(const String &name, rhi::TextureHandle handle,
+              const std::variant<glm::vec4, DepthStencilClear> &clearValue);
 
   /**
    * @brief Compile graph
@@ -93,7 +95,7 @@ public:
    * @param name Resource name
    * @return Resource ID
    */
-  const GraphResourceId getResourceId(const String &name);
+  rhi::TextureHandle getResourceId(const String &name);
 
   /**
    * @brief Check if resource ID exists for name
@@ -103,18 +105,7 @@ public:
    * @retval false Resource ID does not exist
    */
   inline const bool hasResourceId(const String &name) const {
-    return resourceMap.find(name) != resourceMap.end();
-  }
-
-  /**
-   * @brief Check if resource ID has associated texture
-   *
-   * @param id Resource ID
-   * @retval true Texture exists for resource ID
-   * @retval false Texture does not exist for resource ID
-   */
-  inline const bool hasTexture(GraphResourceId id) const {
-    return textures.find(id) != textures.end();
+    return mResourceMap.find(name) != mResourceMap.end();
   }
 
   /**
@@ -122,9 +113,10 @@ public:
    *
    * @return Textures
    */
-  inline const std::unordered_map<GraphResourceId, AttachmentData> &
+  inline const std::unordered_map<rhi::TextureHandle,
+                                  std::variant<glm::vec4, DepthStencilClear>> &
   getTextures() const {
-    return textures;
+    return mTextures;
   }
 
   /**
@@ -141,7 +133,9 @@ public:
    * @retval true Resource is swapchain
    * @retval false Resource is not swapchain
    */
-  inline const bool isSwapchain(GraphResourceId id) const { return id == 0; }
+  inline const bool isSwapchain(rhi::TextureHandle id) const {
+    return id == rhi::TextureHandle(1);
+  }
 
   /**
    * @brief Check if resource is a pipeline
@@ -212,8 +206,13 @@ private:
 
 private:
   std::unordered_map<GraphResourceId, RenderGraphPipelineDescription> pipelines;
-  std::unordered_map<GraphResourceId, AttachmentData> textures;
-  std::unordered_map<String, GraphResourceId> resourceMap{{"SWAPCHAIN", 0}};
+  std::unordered_map<String, rhi::TextureHandle> mResourceMap{
+      {"SWAPCHAIN", rhi::TextureHandle(1)}};
+
+  std::unordered_map<rhi::TextureHandle,
+                     std::variant<glm::vec4, DepthStencilClear>>
+      mTextures;
+
   std::vector<RenderGraphPassBase *> passes;
 
   GraphResourceId lastId = 1;

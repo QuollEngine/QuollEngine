@@ -9,25 +9,6 @@ namespace liquid {
 RenderGraphEvaluator::RenderGraphEvaluator(rhi::ResourceRegistry &registry)
     : mRegistry(registry) {}
 
-std::vector<RenderGraphPassBase *>
-RenderGraphEvaluator::compile(RenderGraph &graph, bool swapchainRecreated,
-                              const glm::uvec2 &extent) {
-  LIQUID_PROFILE_EVENT("RenderGraphEvaluator::compile");
-
-  const auto &&compiled = graph.compile();
-
-  for (const auto &[resourceId, textureDesc] : graph.getTextures()) {
-    if (!graph.getResourceRegistry().hasTexture(resourceId) ||
-        (swapchainRecreated &&
-         textureDesc.sizeMethod == AttachmentSizeMethod::SwapchainRelative)) {
-      graph.getResourceRegistry().addTexture(
-          resourceId, createTexture(textureDesc, extent));
-    }
-  }
-
-  return compiled;
-}
-
 void RenderGraphEvaluator::build(std::vector<RenderGraphPassBase *> &compiled,
                                  RenderGraph &graph, bool swapchainRecreated,
                                  uint32_t numSwapchainImages,
@@ -35,7 +16,8 @@ void RenderGraphEvaluator::build(std::vector<RenderGraphPassBase *> &compiled,
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::build");
 
   for (auto &pass : compiled) {
-    buildPass(pass, graph, swapchainRecreated && pass->isSwapchainRelative(),
+    buildPass(pass, graph,
+              swapchainRecreated && hasSwapchainRelativeResources(pass),
               numSwapchainImages, extent);
   }
 }
@@ -67,6 +49,12 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
                                      RenderGraph &graph, bool force,
                                      uint32_t numSwapchainImages,
                                      const glm::uvec2 &extent) {
+
+  if (!force &&
+      graph.getResourceRegistry().hasRenderPass(pass->getRenderPass())) {
+    return;
+  }
+
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::buildPass");
   std::vector<VkClearValue> clearValues;
 
@@ -92,25 +80,21 @@ void RenderGraphEvaluator::buildPass(RenderGraphPassBase *pass,
   for (auto &[resourceId, graphAttachment] : pass->getOutputs()) {
     VulkanAttachmentInfo info{};
 
-    if (!force &&
-        graph.getResourceRegistry().hasRenderPass(pass->getRenderPass()) &&
-        (graph.getResourceRegistry().hasTexture(resourceId) ||
-         graph.isSwapchain(resourceId))) {
-      continue;
-    }
-
     if (graph.isSwapchain(resourceId)) {
       info = createSwapchainAttachment(graphAttachment, numSwapchainImages,
                                        extent);
       renderPassDesc.colorAttachments.push_back(info.attachment);
     } else {
-      const auto &texture = graph.getResourceRegistry().getTexture(resourceId);
-      const auto &textureType = graph.getTextures().at(resourceId).type;
-      if (textureType == AttachmentType::Color) {
-        info = createColorAttachment(graphAttachment, texture);
+
+      const auto &texture =
+          mRegistry.getTextureMap().getDescription(resourceId);
+      if ((texture.usage & rhi::TextureUsage::Color) ==
+          rhi::TextureUsage::Color) {
+        info = createColorAttachment(graphAttachment, resourceId, extent);
         renderPassDesc.colorAttachments.push_back(info.attachment);
-      } else if (textureType == AttachmentType::Depth) {
-        info = createDepthAttachment(graphAttachment, texture);
+      } else if ((texture.usage & rhi::TextureUsage::Depth) ==
+                 rhi::TextureUsage::Depth) {
+        info = createDepthAttachment(graphAttachment, resourceId, extent);
         renderPassDesc.depthAttachment = info.attachment;
       }
     }
@@ -252,7 +236,8 @@ RenderGraphEvaluator::createSwapchainAttachment(
 
 RenderGraphEvaluator::VulkanAttachmentInfo
 RenderGraphEvaluator::createColorAttachment(
-    const RenderPassAttachment &attachment, rhi::TextureHandle texture) {
+    const RenderPassAttachment &attachment, rhi::TextureHandle texture,
+    const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createColorAttachment");
   VulkanAttachmentInfo info{};
 
@@ -274,9 +259,15 @@ RenderGraphEvaluator::createColorAttachment(
   info.attachment.storeOp = attachment.storeOp;
   info.attachment.texture = texture;
 
-  // Dimensions
-  info.width = desc.width;
-  info.height = desc.height;
+  constexpr uint32_t HUNDRED_PERCENT = 100;
+  if (desc.sizeMethod == rhi::TextureSizeMethod::SwapchainRatio) {
+    info.width = desc.width * extent.x / HUNDRED_PERCENT;
+    info.height = desc.height * extent.y / HUNDRED_PERCENT;
+  } else {
+    info.width = desc.width;
+    info.height = desc.height;
+  }
+
   info.layers = desc.layers;
 
   return info;
@@ -284,7 +275,8 @@ RenderGraphEvaluator::createColorAttachment(
 
 RenderGraphEvaluator::VulkanAttachmentInfo
 RenderGraphEvaluator::createDepthAttachment(
-    const RenderPassAttachment &attachment, rhi::TextureHandle texture) {
+    const RenderPassAttachment &attachment, rhi::TextureHandle texture,
+    const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createDepthAttachment");
   VulkanAttachmentInfo info{};
 
@@ -302,43 +294,31 @@ RenderGraphEvaluator::createDepthAttachment(
   info.attachment.storeOp = attachment.storeOp;
   info.attachment.texture = texture;
 
-  // Dimensions
-  info.width = desc.width;
-  info.height = desc.height;
+  constexpr uint32_t HUNDRED_PERCENT = 100;
+  if (desc.sizeMethod == rhi::TextureSizeMethod::SwapchainRatio) {
+    info.width = desc.width * extent.x / HUNDRED_PERCENT;
+    info.height = desc.height * extent.y / HUNDRED_PERCENT;
+  } else {
+    info.width = desc.width;
+    info.height = desc.height;
+  }
+
   info.layers = desc.layers;
 
   return info;
 }
 
-rhi::TextureHandle
-RenderGraphEvaluator::createTexture(const AttachmentData &data,
-                                    const glm::uvec2 &extent) {
-  LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createTexture");
-  uint32_t width = data.width;
-  uint32_t height = data.height;
-
-  if (data.sizeMethod == AttachmentSizeMethod::SwapchainRelative) {
-    constexpr uint32_t PERCENTAGE_RATIO = 100;
-    width = extent.x * width / PERCENTAGE_RATIO;
-    height = extent.y * height / PERCENTAGE_RATIO;
+bool RenderGraphEvaluator::hasSwapchainRelativeResources(
+    RenderGraphPassBase *pass) {
+  for (auto &[handle, _] : pass->getOutputs()) {
+    if (handle == rhi::TextureHandle(1) ||
+        mRegistry.getTextureMap().getDescription(handle).sizeMethod ==
+            rhi::TextureSizeMethod::SwapchainRatio) {
+      return true;
+    }
   }
 
-  rhi::TextureDescription description;
-  description.width = width;
-  description.height = height;
-  description.layers = data.layers;
-  description.format = data.format;
-  if (data.type == AttachmentType::Color) {
-    description.usageFlags =
-        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-  } else if (data.type == AttachmentType::Depth) {
-    description.usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
-                             VK_IMAGE_USAGE_SAMPLED_BIT;
-    description.aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
-  }
-
-  return mRegistry.setTexture(description);
+  return false;
 }
 
 } // namespace liquid

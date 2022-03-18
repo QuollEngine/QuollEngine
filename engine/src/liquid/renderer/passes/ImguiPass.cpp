@@ -46,13 +46,10 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
 void ImguiPass::execute(rhi::RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
   const auto &pipeline = registry.getPipeline(pipelineId);
-  auto sceneTexture = registry.hasTexture(sceneTextureId)
-                          ? registry.getTexture(sceneTextureId)
-                          : rhi::TextureHandle::Invalid;
 
   imguiRenderer.beginRendering();
 
-  imguiUpdateFn(sceneTexture);
+  imguiUpdateFn(sceneTextureId);
 
   debugLayer.render();
   imguiRenderer.endRendering();

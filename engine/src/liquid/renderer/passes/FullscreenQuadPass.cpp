@@ -29,9 +29,7 @@ void FullscreenQuadPass::execute(rhi::RenderCommandList &commandList,
   commandList.bindPipeline(pipeline);
 
   rhi::Descriptor descriptor;
-  descriptor.bind(
-      0, std::vector<rhi::TextureHandle>{registry.getTexture(inputTexture)},
-      rhi::DescriptorType::CombinedImageSampler);
+  descriptor.bind(0, {inputTexture}, rhi::DescriptorType::CombinedImageSampler);
   commandList.bindDescriptor(pipeline, 0, descriptor);
 
   commandList.draw(3, 0);

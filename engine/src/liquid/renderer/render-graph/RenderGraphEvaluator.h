@@ -29,18 +29,6 @@ public:
   RenderGraphEvaluator(rhi::ResourceRegistry &registry);
 
   /**
-   * @brief Compile render graph
-   *
-   * @param graph Render graph
-   * @param swapchainRecreated Compile swapchain related passes
-   * @param extent Swapchain extent
-   * @return Topologically sorted list of passes
-   */
-  std::vector<RenderGraphPassBase *> compile(RenderGraph &graph,
-                                             bool swapchainRecreated,
-                                             const glm::uvec2 &extent);
-
-  /**
    * @brief Build passes
    *
    * @param compiled Compiled passes
@@ -103,32 +91,33 @@ private:
    *
    * @param attachment Attachment description
    * @param texture Texture
+   * @param extent Swapchain extent
    * @return Attachment info
    */
   VulkanAttachmentInfo
   createColorAttachment(const RenderPassAttachment &attachment,
-                        rhi::TextureHandle texture);
+                        rhi::TextureHandle texture, const glm::uvec2 &extent);
 
   /**
    * @brief Create depth attachment
    *
    * @param attachment Attachment description
    * @param texture Texture
+   * @param extent Swapchain extent
    * @return Attachment info
    */
   VulkanAttachmentInfo
   createDepthAttachment(const RenderPassAttachment &attachment,
-                        rhi::TextureHandle texture);
+                        rhi::TextureHandle texture, const glm::uvec2 &extent);
 
   /**
-   * @brief Create texture
+   * @brief Check if pass is has swapchain relative resources
    *
-   * @param data Attachment data
-   * @param extent Swapchain extent
-   * @return Texture
+   * @param pass Render pass
+   * @retval true Has swapchain resources
+   * @retval false Does not have swapchain relative resources
    */
-  rhi::TextureHandle createTexture(const AttachmentData &data,
-                                   const glm::uvec2 &extent);
+  bool hasSwapchainRelativeResources(RenderGraphPassBase *pass);
 
 private:
   rhi::ResourceRegistry &mRegistry;

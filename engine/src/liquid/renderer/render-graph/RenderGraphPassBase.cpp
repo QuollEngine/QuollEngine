@@ -13,21 +13,17 @@ void RenderGraphPassBase::build(RenderGraphBuilder &&builder) {
   }
 }
 
-void RenderGraphPassBase::addInput(GraphResourceId resourceId) {
+void RenderGraphPassBase::addInput(rhi::TextureHandle resourceId) {
   inputs.push_back(resourceId);
 }
 
-void RenderGraphPassBase::addOutput(GraphResourceId resourceId,
+void RenderGraphPassBase::addOutput(rhi::TextureHandle resourceId,
                                     const RenderPassAttachment &attachment) {
   outputs.insert({resourceId, attachment});
 }
 
 void RenderGraphPassBase::addResource(GraphResourceId resourceId) {
   resources.push_back(resourceId);
-}
-
-void RenderGraphPassBase::setSwapchainRelative(bool swapchainRelative_) {
-  swapchainRelative = swapchainRelative_;
 }
 
 } // namespace liquid

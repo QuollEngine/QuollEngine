@@ -37,8 +37,67 @@ VulkanRenderDevice::VulkanRenderDevice(
   synchronizeSwapchain(0);
 }
 
-void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
+void VulkanRenderDevice::execute(RenderGraph &graph,
+                                 RenderGraphEvaluator &evaluator) {
+  LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
 
+  uint32_t imageIdx =
+      mSwapchain.acquireNextImage(mRenderContext.getImageAvailableSemaphore());
+
+  if (imageIdx == std::numeric_limits<uint32_t>::max()) {
+    synchronize(evaluator.getRegistry());
+    recreateSwapchain();
+    return;
+  }
+
+  auto &&compiled = graph.compile();
+
+  evaluator.build(compiled, graph, mSwapchainRecreated,
+                  static_cast<uint32_t>(mSwapchain.getImages().size()),
+                  mSwapchain.getExtent());
+
+  synchronize(evaluator.getRegistry());
+
+  if (mSwapchainRecreated) {
+    mSwapchainRecreated = false;
+  }
+
+  auto &commandBuffer = mRenderContext.beginRendering();
+  evaluator.execute(commandBuffer, compiled, graph, imageIdx);
+  mRenderContext.endRendering();
+
+  auto queuePresentResult = mRenderContext.present(mSwapchain, imageIdx);
+
+  if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
+      queuePresentResult == VK_SUBOPTIMAL_KHR ||
+      mBackend.isFramebufferResized()) {
+    recreateSwapchain();
+  }
+}
+
+void VulkanRenderDevice::wait() { vkDeviceWaitIdle(mDevice); }
+
+void VulkanRenderDevice::recreateSwapchain() {
+  wait();
+  size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();
+
+  mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice,
+                               mSwapchain.getSwapchain());
+
+  synchronizeSwapchain(prevNumSwapchainImages);
+  mBackend.finishFramebufferResize();
+  mSwapchainRecreated = true;
+
+  for (auto handle : mRegistry.getSwapchainRelativeTextures()) {
+    auto &texture = mRegistry.getTextures().at(handle);
+    mRegistry.setTexture(handle,
+                         std::make_unique<VulkanTexture>(
+                             texture->getDescription(), mAllocator, mDevice,
+                             mUploadContext, mSwapchain.getExtent()));
+  }
+}
+
+void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
   auto numNewSwapchainImages = mSwapchain.getImages().size();
 
   // Remove unused swapchain images if
@@ -56,6 +115,17 @@ void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
                     mSwapchain.getImages().at(i),
                     mSwapchain.getImageViews().at(i), VK_NULL_HANDLE,
                     mSwapchain.getSurfaceFormat().format, mAllocator, mDevice));
+  }
+
+  // Recreate swapchain relative textures
+  mRegistry.deleteDanglingSwapchainRelativeTextures();
+
+  for (auto handle : mRegistry.getSwapchainRelativeTextures()) {
+    auto &texture = mRegistry.getTextures().at(handle);
+    mRegistry.setTexture(handle,
+                         std::make_unique<VulkanTexture>(
+                             texture->getDescription(), mAllocator, mDevice,
+                             mUploadContext, mSwapchain.getExtent()));
   }
 }
 
@@ -98,7 +168,8 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
       mRegistry.setTexture(handle,
                            std::make_unique<VulkanTexture>(
                                registry.getTextureMap().getDescription(handle),
-                               mAllocator, mDevice, mUploadContext));
+                               mAllocator, mDevice, mUploadContext,
+                               mSwapchain.getExtent()));
     } else {
       mRegistry.deleteTexture(handle);
     }
@@ -150,58 +221,6 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   }
 
   registry.getPipelineMap().clearStagedResources();
-}
-
-void VulkanRenderDevice::execute(RenderGraph &graph,
-                                 RenderGraphEvaluator &evaluator) {
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
-
-  uint32_t imageIdx =
-      mSwapchain.acquireNextImage(mRenderContext.getImageAvailableSemaphore());
-
-  if (imageIdx == std::numeric_limits<uint32_t>::max()) {
-    recreateSwapchain();
-    return;
-  }
-
-  auto &&compiled =
-      evaluator.compile(graph, mSwapchainRecreated, mSwapchain.getExtent());
-
-  evaluator.build(compiled, graph, mSwapchainRecreated,
-                  static_cast<uint32_t>(mSwapchain.getImages().size()),
-                  mSwapchain.getExtent());
-
-  synchronize(evaluator.getRegistry());
-
-  if (mSwapchainRecreated) {
-    mSwapchainRecreated = false;
-  }
-
-  auto &commandBuffer = mRenderContext.beginRendering();
-  evaluator.execute(commandBuffer, compiled, graph, imageIdx);
-  mRenderContext.endRendering();
-
-  auto queuePresentResult = mRenderContext.present(mSwapchain, imageIdx);
-
-  if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
-      queuePresentResult == VK_SUBOPTIMAL_KHR ||
-      mBackend.isFramebufferResized()) {
-    recreateSwapchain();
-  }
-}
-
-void VulkanRenderDevice::wait() { vkDeviceWaitIdle(mDevice); }
-
-void VulkanRenderDevice::recreateSwapchain() {
-  wait();
-  size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();
-
-  mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice,
-                               mSwapchain.getSwapchain());
-
-  synchronizeSwapchain(prevNumSwapchainImages);
-  mBackend.finishFramebufferResize();
-  mSwapchainRecreated = true;
 }
 
 } // namespace liquid::rhi
