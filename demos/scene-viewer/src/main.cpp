@@ -160,7 +160,7 @@ int main() {
 
   liquid::GLTFLoader loader(context, renderer, animationSystem);
 
-  liquid::MainLoop mainLoop(renderer, window);
+  liquid::MainLoop mainLoop(window, renderer.getStatsManager());
 
   UILayer ui(context);
 
@@ -231,14 +231,21 @@ int main() {
     static double prevX = 0.0, prevY = 0.0;
 
     const auto &renderData = renderer.prepareScene(scene.get());
-    liquid::RenderGraph graph = renderer.createRenderGraph(
-        renderData, "SWAPCHAIN", [&ui](const auto &tex) { ui.render(); });
+    liquid::RenderGraph graph =
+        renderer.createRenderGraph(renderData, "SWAPCHAIN");
 
     graph.addPass<liquid::FullscreenQuadPass>(
         "fullscreenQuad", renderer.getShaderLibrary(), "mainColor");
 
-    mainLoop.run(graph, [&ui, &scene, node, &editorCamera, &window,
-                         &renderData](double dt) mutable {
+    mainLoop.setRenderFn([&renderer, &ui, &graph]() {
+      renderer.getImguiRenderer().beginRendering();
+      ui.render();
+      renderer.getImguiRenderer().endRendering();
+      renderer.render(graph);
+    });
+
+    mainLoop.setUpdateFn([&ui, &scene, node, &editorCamera, &window,
+                          &renderData](double dt) mutable {
       ImGuiIO &io = ImGui::GetIO();
       scene->update();
       renderData->update();
@@ -286,8 +293,12 @@ int main() {
       return !changed;
     });
 
+    mainLoop.run();
+
     ui.getSceneHierarchy().setScene(nullptr);
     context.destroy();
   }
+
+  renderer.wait();
   return 0;
 }

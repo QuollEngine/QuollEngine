@@ -10,6 +10,7 @@
 #include "liquid/entity/EntityContext.h"
 #include "liquid/window/Window.h"
 #include "liquid/renderer/StandardPushConstants.h"
+#include "liquid/profiler/ImguiDebugLayer.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
 
@@ -29,17 +30,23 @@ static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
 int main() {
-
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../engine/bin/Debug/assets").string());
   liquid::EntityContext entityContext;
   liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
 
   liquid::rhi::VulkanRenderBackend backend(window);
+  liquid::DebugManager debugManager;
 
-  liquid::Renderer renderer(entityContext, window, backend.getOrCreateDevice());
+  auto *device = backend.getOrCreateDevice();
+
+  liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext);
   liquid::PhysicsSystem physicsSystem(entityContext);
+
+  liquid::ImguiDebugLayer debugLayer(
+      device->getPhysicalDevice().getDeviceInfo(), renderer.getStatsManager(),
+      debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(
@@ -55,7 +62,7 @@ int main() {
       "skeleton-lines.frag", renderer.getRegistry().setShader(
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
-  liquid::MainLoop mainLoop(renderer, window);
+  liquid::MainLoop mainLoop(window, renderer.getStatsManager());
   liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
@@ -75,22 +82,8 @@ int main() {
     const auto &renderData =
         renderer.prepareScene(sceneManager.getActiveScene());
 
-    liquid::RenderGraph graph = renderer.createRenderGraph(
-        renderData, "mainColor",
-        [&sceneManager, &animationSystem, &ui, &renderData,
-         &physicsSystem](const auto &sceneTexture) {
-          ui.render(sceneManager, animationSystem, physicsSystem);
-          if (ImGui::Begin("View")) {
-            const auto &size = ImGui::GetContentRegionAvail();
-            const auto &pos = ImGui::GetWindowPos();
-            sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
-                                                       size.y);
-            ImGui::Image(
-                reinterpret_cast<void *>(static_cast<uintptr_t>(sceneTexture)),
-                size);
-            ImGui::End();
-          }
-        });
+    liquid::RenderGraph graph =
+        renderer.createRenderGraph(renderData, "mainColor");
 
     struct EditorDebugScope {
       liquid::GraphResourceId editorGridPipeline = 0;
@@ -199,24 +192,51 @@ int main() {
               });
         });
 
-    mainLoop.run(graph,
-                 [&editorCamera, &sceneManager, &renderData, &animationSystem,
-                  &physicsSystem, &entityContext](double dt) mutable {
-                   editorCamera.update();
+    mainLoop.setUpdateFn([&editorCamera, &sceneManager, &renderData,
+                          &animationSystem, &physicsSystem,
+                          &entityContext](double dt) mutable {
+      editorCamera.update();
 
-                   animationSystem.update(static_cast<float>(dt));
-                   renderData->update();
+      animationSystem.update(static_cast<float>(dt));
+      renderData->update();
 
-                   entityContext.iterateEntities<liquid::SkeletonComponent>(
-                       [](auto entity, auto &component) {
-                         component.skeleton.updateDebug();
-                       });
+      entityContext.iterateEntities<liquid::SkeletonComponent>(
+          [](auto entity, auto &component) {
+            component.skeleton.updateDebug();
+          });
 
-                   sceneManager.getActiveScene()->update();
-                   physicsSystem.update(static_cast<float>(dt));
-                   return !sceneManager.hasNewScene();
-                 });
+      sceneManager.getActiveScene()->update();
+      physicsSystem.update(static_cast<float>(dt));
+      return !sceneManager.hasNewScene();
+    });
+
+    mainLoop.setRenderFn([&renderer, &graph, &ui, &sceneManager,
+                          &animationSystem, &physicsSystem, &debugLayer]() {
+      auto &imgui = renderer.getImguiRenderer();
+
+      imgui.beginRendering();
+      ui.render(sceneManager, animationSystem, physicsSystem);
+
+      if (ImGui::Begin("View")) {
+        const auto &size = ImGui::GetContentRegionAvail();
+        const auto &pos = ImGui::GetWindowPos();
+        sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
+                                                   size.y);
+        ImGui::Image(reinterpret_cast<void *>(static_cast<uintptr_t>(
+                         graph.getResourceId("mainColor"))),
+                     size);
+        ImGui::End();
+      }
+
+      debugLayer.render();
+      imgui.endRendering();
+
+      return renderer.render(graph);
+    });
+
+    mainLoop.run();
   }
 
+  renderer.wait();
   return 0;
 }

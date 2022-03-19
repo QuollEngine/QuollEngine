@@ -4,17 +4,42 @@
 
 namespace liquid {
 
-class Renderer;
 class Window;
+class StatsManager;
 
 class MainLoop {
 public:
-  MainLoop(Renderer &renderer, Window &window);
+  /**
+   * @brief Create main loop
+   *
+   * @param window Window
+   * @param statsManager Stats manager
+   */
+  MainLoop(Window &window, StatsManager &statsManager);
 
-  int run(RenderGraph &graph, const std::function<bool(float)> &update);
+  /**
+   * @brief Run main loop
+   */
+  void run();
+
+  /**
+   * @brief Set update function
+   *
+   * @param updateFn Update function
+   */
+  void setUpdateFn(const std::function<bool(float)> &updateFn);
+
+  /**
+   * @brief Set render function
+   *
+   * @param renderFn Render function
+   */
+  void setRenderFn(const std::function<void()> &renderFn);
 
 private:
-  Renderer &mRenderer;
   Window &mWindow;
+  StatsManager &mStatsManager;
+  std::function<bool(float)> mUpdateFn;
+  std::function<void()> mRenderFn;
 };
 } // namespace liquid

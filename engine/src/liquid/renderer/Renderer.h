@@ -49,10 +49,8 @@ public:
   inline rhi::VulkanRenderDevice *getRenderDevice() { return mDevice; }
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
-  RenderGraph
-  createRenderGraph(const SharedPtr<RenderData> &renderData,
-                    const String &imguiDep,
-                    const std::function<void(rhi::TextureHandle)> &imUpdate);
+  RenderGraph createRenderGraph(const SharedPtr<RenderData> &renderData,
+                                const String &imguiDep);
 
   void render(RenderGraph &graph);
 
