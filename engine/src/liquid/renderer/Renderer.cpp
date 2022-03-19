@@ -83,9 +83,8 @@ void Renderer::loadShaders() {
           {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
 }
 
-RenderGraph Renderer::createRenderGraph(
-    const SharedPtr<RenderData> &renderData, const String &imguiDep,
-    const std::function<void(rhi::TextureHandle)> &imUpdate) {
+RenderGraph Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
+                                        const String &imguiDep) {
   RenderGraph graph;
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
@@ -131,9 +130,7 @@ RenderGraph Renderer::createRenderGraph(
                            renderData, mDebugManager);
   graph.addPass<EnvironmentPass>("environmentPass", mEntityContext,
                                  mShaderLibrary, renderData);
-  graph.addPass<ImguiPass>("imgui", mImguiRenderer, mShaderLibrary,
-                           mDevice->getPhysicalDevice().getDeviceInfo(),
-                           mStatsManager, mDebugManager, imguiDep, imUpdate);
+  graph.addPass<ImguiPass>("imgui", mImguiRenderer, mShaderLibrary, imguiDep);
 
   return graph;
 }

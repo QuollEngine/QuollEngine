@@ -18,12 +18,20 @@ class ImguiRenderer {
     rhi::BufferHandle indexBuffer = rhi::BufferHandle::Invalid;
     void *indexBufferData = nullptr;
     size_t indexBufferSize = 0;
-
-    bool firstTime = true;
   };
 
 public:
+  /**
+   * @brief Create imgui renderer
+   *
+   * @param window Window
+   * @param registry Resource registry
+   */
   ImguiRenderer(Window &window, rhi::ResourceRegistry &registry);
+
+  /**
+   * @brief Destroy imgui renderer
+   */
   ~ImguiRenderer();
 
   ImguiRenderer(const ImguiRenderer &rhs) = delete;
@@ -31,23 +39,48 @@ public:
   ImguiRenderer &operator=(const ImguiRenderer &rhs) = delete;
   ImguiRenderer &operator=(ImguiRenderer &&rhs) = delete;
 
-  static void beginRendering();
-  static void endRendering();
+  /**
+   * @brief Begin imgui rendering
+   */
+  void beginRendering();
 
+  /**
+   * @brief End imgui rendering
+   *
+   * Prepares all the buffers for drawing
+   */
+  void endRendering();
+
+  /**
+   * @brief Send imgui data to command list
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline
+   */
   void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline);
 
 private:
+  /**
+   * @brief Load fonts
+   */
   void loadFonts();
 
-  void setupRenderStates(ImDrawData *draw_data,
-                         rhi::RenderCommandList &commandList, int fbWidth,
-                         int fbHeight, rhi::PipelineHandle pipeline);
+  /**
+   * @brief Setup remder states
+   *
+   * @param data Imgui data
+   * @param commandList Command list
+   * @param fbWidth Framebuffer width
+   * @param fbHeight Framebuffer height
+   * @param pipeline Pipeline
+   */
+  void setupRenderStates(ImDrawData *data, rhi::RenderCommandList &commandList,
+                         int fbWidth, int fbHeight,
+                         rhi::PipelineHandle pipeline);
 
 private:
   rhi::ResourceRegistry &mRegistry;
-
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
-
   std::vector<FrameData> mFrameData;
   uint32_t mCurrentFrame = 0;
 };

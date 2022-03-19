@@ -19,16 +19,11 @@ public:
    * @param renderPassId Pass resource ID
    * @param imguiRenderer Imgui renderer
    * @param shaderLibrary Shader library
-   * @param debugManager Debug manager
    * @param previousColor Previous color attachment name
-   * @param imUpdate Imgui update
    */
   ImguiPass(const String &name, GraphResourceId renderPassId,
             ImguiRenderer &imguiRenderer, ShaderLibrary &shaderLibrary,
-            const PhysicalDeviceInformation &deviceInfo,
-            StatsManager &statsManager, DebugManager &debugManager,
-            const String &previousColor,
-            const std::function<void(rhi::TextureHandle)> &imUpdate);
+            const String &previousColor);
   /**
    * @brief Build pass
    *
@@ -50,9 +45,6 @@ private:
   String mPreviousColor;
   ImguiRenderer &mImguiRenderer;
   GraphResourceId mPipelineId = 0;
-  ImguiDebugLayer mDebugLayer;
-  rhi::TextureHandle mSceneTextureId = rhi::TextureHandle::Invalid;
-  std::function<void(rhi::TextureHandle)> mImguiUpdateFn;
 };
 
 } // namespace liquid

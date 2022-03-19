@@ -1,17 +1,23 @@
 #include "liquid/core/Base.h"
+#include "liquid/window/Window.h"
+#include "liquid/profiler/StatsManager.h"
 
 #include "MainLoop.h"
-#include "liquid/renderer/Renderer.h"
-#include "liquid/window/Window.h"
 
 namespace liquid {
 
-MainLoop::MainLoop(Renderer &renderer, Window &window)
-    : mRenderer(renderer), mWindow(window) {}
+MainLoop::MainLoop(Window &window, StatsManager &statsManager)
+    : mWindow(window), mStatsManager(statsManager) {}
 
-int MainLoop::run(RenderGraph &graph,
-                  const std::function<bool(float)> &updater) {
+void MainLoop::setUpdateFn(const std::function<bool(float)> &updateFn) {
+  mUpdateFn = updateFn;
+}
 
+void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
+  mRenderFn = renderFn;
+}
+
+void MainLoop::run() {
   bool running = true;
 
   constexpr uint32_t ONE_SECOND_IN_MS = 1000;
@@ -41,26 +47,22 @@ int MainLoop::run(RenderGraph &graph,
     accumulator += frameTime;
 
     while (accumulator >= dt) {
-      running = updater(static_cast<float>(dt));
+      running = mUpdateFn(static_cast<float>(dt));
       accumulator -= dt;
     }
 
-    mRenderer.render(graph);
+    mRenderFn();
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
       prevFrameTime = currentTime;
-      mRenderer.getStatsManager().collectFPS(frames);
+      mStatsManager.collectFPS(frames);
       frames = 0;
     } else {
       frames++;
     }
   }
-
-  mRenderer.wait();
-
-  return 0;
 }
 
 } // namespace liquid

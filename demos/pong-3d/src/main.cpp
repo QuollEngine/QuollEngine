@@ -56,7 +56,7 @@ public:
   }
 
   int run() {
-    liquid::MainLoop mainLoop(renderer, window);
+    liquid::MainLoop mainLoop(window, renderer.getStatsManager());
 
     liquid::RenderGraph graph;
 
@@ -113,18 +113,21 @@ public:
           sceneRenderer.render(commandList, pipeline);
         });
 
-    graph.addPass<liquid::ImguiPass>(
-        "imguiPass", renderer.getImguiRenderer(), renderer.getShaderLibrary(),
-        renderer.getRenderDevice()->getPhysicalDevice().getDeviceInfo(),
-        renderer.getStatsManager(), renderer.getDebugManager(), "SWAPCHAIN",
-        [](const auto &sceneTexture) {});
+    graph.addPass<liquid::ImguiPass>("imguiPass", renderer.getImguiRenderer(),
+                                     renderer.getShaderLibrary(), "SWAPCHAIN");
 
-    return mainLoop.run(graph, [=](double dt) mutable {
+    mainLoop.setUpdateFn([=](float dt) mutable {
       updateGameLogic(0.15f);
       updateScene(0.15f);
 
       return true;
     });
+
+    mainLoop.setRenderFn([this, &graph]() { renderer.render(graph); });
+
+    mainLoop.run();
+    renderer.wait();
+    return 0;
   }
 
 private:

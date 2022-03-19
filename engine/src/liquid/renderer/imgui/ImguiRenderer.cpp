@@ -30,7 +30,8 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
   io.BackendRendererName = "ImguiCustomBackend";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
-  mFrameData.resize(1);
+  static constexpr size_t FRAMES_IN_FLIGHT = 3;
+  mFrameData.resize(FRAMES_IN_FLIGHT);
 
   loadFonts();
 
@@ -64,10 +65,9 @@ void ImguiRenderer::beginRendering() {
   ImGui::NewFrame();
 }
 
-void ImguiRenderer::endRendering() { ImGui::Render(); }
+void ImguiRenderer::endRendering() {
+  ImGui::Render();
 
-void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
-                         rhi::PipelineHandle pipeline) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -126,20 +126,21 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
                              frameObj.indexBufferData},
                             frameObj.indexBuffer);
   }
+}
 
-  // @temporary
-  // This workaround is necessary because
-  // the buffer creation, deletion, and update
-  // are deferred to the beginning of the next
-  // frame. This still causes warnings but
-  // the warnings will be resolved once textures
-  // also use the new resource manager and this
-  // function will be split into two parts
-  // preparing the data and recording commands
-  if (frameObj.firstTime) {
-    frameObj.firstTime = false;
+void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
+                         rhi::PipelineHandle pipeline) {
+
+  auto *data = ImGui::GetDrawData();
+
+  if (!data)
     return;
-  }
+
+  auto &frameObj = mFrameData.at(mCurrentFrame);
+  int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
+  int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
+  if (fbWidth <= 0 || fbHeight <= 0)
+    return;
 
   setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
 
