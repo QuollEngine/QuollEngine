@@ -69,7 +69,7 @@ public:
    *
    * @param resourceId Input resource ID
    */
-  void addInput(GraphResourceId resourceId);
+  void addInput(rhi::TextureHandle resourceId);
 
   /**
    * @brief Add output resource
@@ -77,7 +77,7 @@ public:
    * @param resourceId Output resource ID
    * @param attachment Attachment
    */
-  void addOutput(GraphResourceId resourceId,
+  void addOutput(rhi::TextureHandle resourceId,
                  const RenderPassAttachment &attachment);
 
   /**
@@ -87,19 +87,12 @@ public:
    */
   void addResource(GraphResourceId resourceId);
 
-  /*
-   * @brief Set swapchain relative
-   *
-   * @param swapchainRelative Swapchain relative flag
-   */
-  void setSwapchainRelative(bool swapchainRelative);
-
   /**
    * @brief Get all input resources
    *
    * @return Input resources
    */
-  inline const std::vector<GraphResourceId> &getInputs() const {
+  inline const std::vector<rhi::TextureHandle> &getInputs() const {
     return inputs;
   }
 
@@ -108,7 +101,7 @@ public:
    *
    * @return Output resources
    */
-  inline std::unordered_map<GraphResourceId, RenderPassAttachment> &
+  inline std::unordered_map<rhi::TextureHandle, RenderPassAttachment> &
   getOutputs() {
     return outputs;
   }
@@ -130,14 +123,6 @@ public:
   inline GraphResourceId getRenderPass() const { return renderPass; }
 
   /**
-   * @brief Is swapchain relative
-   *
-   * @retval true Pass is swapchain relative
-   * @retval false Pass is not swapchain relative
-   */
-  inline bool isSwapchainRelative() const { return swapchainRelative; }
-
-  /**
    * @brief Check if pass is dirty and has to be rebuild
    *
    * @retval true Pass is dirty
@@ -146,11 +131,9 @@ public:
   inline bool isDirty() const { return dirty; }
 
 private:
-  std::vector<GraphResourceId> inputs;
+  std::vector<rhi::TextureHandle> inputs;
   std::vector<GraphResourceId> resources;
-  std::unordered_map<GraphResourceId, RenderPassAttachment> outputs;
-
-  bool swapchainRelative = false;
+  std::unordered_map<rhi::TextureHandle, RenderPassAttachment> outputs;
 
   GraphResourceId renderPass;
   String name;

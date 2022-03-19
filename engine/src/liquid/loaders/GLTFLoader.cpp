@@ -721,12 +721,11 @@ getMaterials(const tinygltf::Model &model, Renderer &renderer) {
     auto &image = model.images.at(gltfTexture.source);
 
     rhi::TextureDescription description;
+    description.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled |
+                        rhi::TextureUsage::TransferDestination;
     description.width = image.width;
     description.height = image.height;
     description.format = VK_FORMAT_R8G8B8A8_SRGB;
-    description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-    description.usageFlags =
-        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     description.size = image.width * image.height * 4;
 
     description.data = new char[description.size];

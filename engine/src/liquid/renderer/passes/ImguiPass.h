@@ -51,7 +51,7 @@ private:
   ImguiRenderer &imguiRenderer;
   GraphResourceId pipelineId = 0;
   ImguiDebugLayer debugLayer;
-  GraphResourceId sceneTextureId = 0;
+  rhi::TextureHandle sceneTextureId = rhi::TextureHandle::Invalid;
   std::function<void(rhi::TextureHandle)> imguiUpdateFn;
 };
 

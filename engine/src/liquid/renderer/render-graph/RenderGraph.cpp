@@ -7,9 +7,11 @@ namespace liquid {
 
 RenderGraph::RenderGraph(RenderGraph &&rhs) {
   passes = rhs.passes;
-  textures = rhs.textures;
-  resourceMap = rhs.resourceMap;
+  mTextures = std::move(rhs.mTextures);
+  mResourceMap = std::move(rhs.mResourceMap);
   registry = std::move(rhs.registry);
+  pipelines = std::move(rhs.pipelines);
+  lastId = rhs.lastId;
 
   rhs.passes.clear();
 }
@@ -58,7 +60,7 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
 
   // Cache reads so we can easily access them
   // for creating the adjacency lsit
-  std::unordered_map<GraphResourceId, std::vector<size_t>> passReads;
+  std::unordered_map<rhi::TextureHandle, std::vector<size_t>> passReads;
   for (size_t i = 0; i < tempPasses.size(); ++i) {
     for (auto &resourceId : tempPasses.at(i)->getInputs()) {
       passReads[resourceId].push_back(i);
@@ -94,7 +96,7 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
   std::reverse(sortedPasses.begin(), sortedPasses.end());
 
   // TODO: Test this
-  std::unordered_map<GraphResourceId, bool> visitedOutputs;
+  std::unordered_map<rhi::TextureHandle, bool> visitedOutputs;
   for (const auto &pass : sortedPasses) {
     for (const auto &[output, _] : pass->getOutputs()) {
       visitedOutputs.insert({output, false});
@@ -114,8 +116,8 @@ std::vector<RenderGraphPassBase *> RenderGraph::compile() {
 
       if (isSwapchain(output)) {
         attachment.clearValue = getSwapchainColor();
-      } else if (hasTexture(output)) {
-        attachment.clearValue = textures.at(output).clearValue;
+      } else {
+        attachment.clearValue = mTextures.at(output);
       }
     }
   }
@@ -140,11 +142,11 @@ void RenderGraph::topologicalSort(
 
 GraphResourceId RenderGraph::generateNewId() { return lastId++; }
 
-GraphResourceId RenderGraph::create(const String &name,
-                                    const AttachmentData &data) {
-  auto id = getResourceId(name);
-  textures.insert({id, data});
-  return id;
+void RenderGraph::import(
+    const String &name, rhi::TextureHandle handle,
+    const std::variant<glm::vec4, DepthStencilClear> &clearValue) {
+  mTextures.insert_or_assign(handle, clearValue);
+  mResourceMap.insert_or_assign(name, handle);
 }
 
 void RenderGraph::setSwapchainColor(const glm::vec4 &color) {
@@ -158,11 +160,9 @@ RenderGraph::addPipeline(const RenderGraphPipelineDescription &descriptor) {
   return id;
 }
 
-const GraphResourceId RenderGraph::getResourceId(const String &name) {
-  if (!hasResourceId(name)) {
-    resourceMap[name] = generateNewId();
-  }
-  return resourceMap.at(name);
+rhi::TextureHandle RenderGraph::getResourceId(const String &name) {
+  LIQUID_ASSERT(hasResourceId(name), "Resource does not exist");
+  return mResourceMap.at(name);
 }
 
 } // namespace liquid

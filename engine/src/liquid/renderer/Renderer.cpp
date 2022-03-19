@@ -90,30 +90,40 @@ RenderGraph Renderer::createRenderGraph(
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
   constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+  constexpr uint32_t SWAPCHAIN_SIZE_PERCENTAGE = 100;
 
   graph.setSwapchainColor(BLUEISH_CLEAR_VALUE);
 
-  graph.create("shadowmap",
-               AttachmentData{AttachmentType::Depth,
-                              AttachmentSizeMethod::Fixed, SHADOWMAP_DIMENSIONS,
-                              SHADOWMAP_DIMENSIONS, NUM_LIGHTS,
-                              VK_FORMAT_D16_UNORM, DepthStencilClear{1.0f, 0}});
+  rhi::TextureDescription shadowMapDesc{};
+  shadowMapDesc.sizeMethod = rhi::TextureSizeMethod::Fixed;
+  shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+  shadowMapDesc.width = SHADOWMAP_DIMENSIONS;
+  shadowMapDesc.height = SHADOWMAP_DIMENSIONS;
+  shadowMapDesc.layers = NUM_LIGHTS;
+  shadowMapDesc.format = VK_FORMAT_D16_UNORM;
+  auto shadowmap = mRegistry.setTexture(shadowMapDesc);
 
-  constexpr uint32_t SWAPCHAIN_SIZE_PERCENTAGE = 100;
+  rhi::TextureDescription mainColorDesc{};
+  mainColorDesc.sizeMethod = rhi::TextureSizeMethod::SwapchainRatio;
+  mainColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+  mainColorDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
+  mainColorDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
+  mainColorDesc.layers = 1;
+  mainColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+  auto mainColor = mRegistry.setTexture(mainColorDesc);
 
-  graph.create("mainColor",
-               AttachmentData{AttachmentType::Color,
-                              AttachmentSizeMethod::SwapchainRelative,
-                              SWAPCHAIN_SIZE_PERCENTAGE,
-                              SWAPCHAIN_SIZE_PERCENTAGE, 1,
-                              VK_FORMAT_B8G8R8A8_SRGB, BLUEISH_CLEAR_VALUE});
+  rhi::TextureDescription depthBufferDesc{};
+  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::SwapchainRatio;
+  depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+  depthBufferDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
+  depthBufferDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
+  depthBufferDesc.layers = 1;
+  depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
+  auto depthBuffer = mRegistry.setTexture(depthBufferDesc);
 
-  graph.create(
-      "depthBuffer",
-      AttachmentData{AttachmentType::Depth,
-                     AttachmentSizeMethod::SwapchainRelative,
-                     SWAPCHAIN_SIZE_PERCENTAGE, SWAPCHAIN_SIZE_PERCENTAGE, 1,
-                     VK_FORMAT_D32_SFLOAT, DepthStencilClear{1.0f, 0}});
+  graph.import("shadowmap", shadowmap, DepthStencilClear{1.0f, 0});
+  graph.import("mainColor", mainColor, BLUEISH_CLEAR_VALUE);
+  graph.import("depthBuffer", depthBuffer, DepthStencilClear{1.0f, 0});
 
   graph.addPass<ShadowPass>("shadowPass", mEntityContext, mShaderLibrary,
                             mShadowMaterials);

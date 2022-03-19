@@ -38,7 +38,7 @@ public:
 
 private:
   GraphResourceId pipelineId = 0;
-  GraphResourceId inputTexture = 0;
+  rhi::TextureHandle inputTexture = rhi::TextureHandle::Invalid;
   ShaderLibrary &shaderLibrary;
   String inputDep;
 };

@@ -10,14 +10,6 @@ namespace liquid {
 class RenderGraphRegistry {
 public:
   /**
-   * @brief Add texture resource
-   *
-   * @param resourceId Resource ID
-   * @param texture Texture
-   */
-  void addTexture(GraphResourceId resourceId, rhi::TextureHandle texture);
-
-  /**
    * @brief Add pipeline resource
    *
    * @param resourceId Resource ID
@@ -33,27 +25,6 @@ public:
    */
   void addRenderPass(GraphResourceId resourceId,
                      RenderGraphPassResult &&renderPass);
-
-  /**
-   * @brief Get texture
-   *
-   * @param resourceId Resource ID
-   * @return Texture
-   */
-  inline rhi::TextureHandle &getTexture(GraphResourceId resourceId) {
-    return textures.at(resourceId);
-  }
-
-  /**
-   * @brief Check if texture resource exists
-   *
-   * @param resourceId Resource ID
-   * @retval true Resource exists
-   * @retval false Resource does not exist
-   */
-  inline bool hasTexture(GraphResourceId resourceId) const {
-    return textures.find(resourceId) != textures.end();
-  }
 
   /**
    * @brief Get pipeline
@@ -98,7 +69,6 @@ public:
   }
 
 private:
-  std::unordered_map<GraphResourceId, rhi::TextureHandle> textures;
   std::unordered_map<GraphResourceId, RenderGraphPassResult> renderPasses;
   std::unordered_map<GraphResourceId, rhi::PipelineHandle> pipelines;
 };

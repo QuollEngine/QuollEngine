@@ -29,11 +29,26 @@ void VulkanResourceRegistry::deleteBuffer(BufferHandle handle) {
 
 void VulkanResourceRegistry::setTexture(
     TextureHandle handle, std::unique_ptr<VulkanTexture> &&texture) {
+  if (texture->isSwapchainRelative()) {
+    mSwapchainRelativeTextures.insert(handle);
+  }
+
   mTextures.insert_or_assign(handle, std::move(texture));
 }
 
 void VulkanResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.erase(handle);
+}
+
+void VulkanResourceRegistry::deleteDanglingSwapchainRelativeTextures() {
+  for (auto it = mSwapchainRelativeTextures.begin();
+       it != mSwapchainRelativeTextures.end(); ++it) {
+    auto textureIt = mTextures.find(*it);
+    if (textureIt == mTextures.end() ||
+        !textureIt->second->isSwapchainRelative()) {
+      it = mSwapchainRelativeTextures.erase(it);
+    }
+  }
 }
 
 void VulkanResourceRegistry::setRenderPass(

@@ -33,17 +33,17 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // |   +---+   +---+               |
   // +-------------------------------+
 
-  graph.create("a-b", {});
-  graph.create("a-d", {});
-  graph.create("d-b", {});
-  graph.create("b-c", {});
-  graph.create("b-g", {});
-  graph.create("h-c", {});
-  graph.create("c-e", {});
-  graph.create("d-e", {});
-  graph.create("d-g", {});
-  graph.create("e-f", {});
-  graph.create("f-g", {});
+  graph.import("a-b", liquid::rhi::TextureHandle{2}, {});
+  graph.import("a-d", liquid::rhi::TextureHandle{3}, {});
+  graph.import("d-b", liquid::rhi::TextureHandle{4}, {});
+  graph.import("b-c", liquid::rhi::TextureHandle{5}, {});
+  graph.import("b-g", liquid::rhi::TextureHandle{6}, {});
+  graph.import("h-c", liquid::rhi::TextureHandle{7}, {});
+  graph.import("c-e", liquid::rhi::TextureHandle{8}, {});
+  graph.import("d-e", liquid::rhi::TextureHandle{9}, {});
+  graph.import("d-g", liquid::rhi::TextureHandle{10}, {});
+  graph.import("e-f", liquid::rhi::TextureHandle{11}, {});
+  graph.import("f-g", liquid::rhi::TextureHandle{12}, {});
 
   // A
   graph.addInlinePass<EmptyScope>(
@@ -143,7 +143,9 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 }
 
 TEST_F(RenderGraphTest, SetsPassLoadOperations) {
-  auto resourceId = graph.create("a-b", {});
+  liquid::rhi::TextureHandle resourceId{2};
+  graph.import("a-b", resourceId, {});
+
   graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
       noopExecutor);
@@ -168,10 +170,10 @@ TEST_F(RenderGraphTest, SetPassClearValues) {
   constexpr liquid::DepthStencilClear DEPTH_CLEAR{1.0f, 5};
 
   graph.setSwapchainColor(SWAPCHAIN_CLEAR);
-  liquid::AttachmentData data;
-  data.clearValue = DEPTH_CLEAR;
 
-  auto depthId = graph.create("depthBuffer", data);
+  liquid::rhi::TextureHandle depthId{2};
+
+  graph.import("depthBuffer", depthId, DEPTH_CLEAR);
   auto swapchainId = graph.getResourceId("SWAPCHAIN");
   graph.addInlinePass<EmptyScope>(
       "a-b",
@@ -203,7 +205,8 @@ TEST_F(RenderGraphTest, SetPassClearValues) {
 }
 
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
-  graph.create("a-b", {});
+  liquid::rhi::TextureHandle handle{2};
+  graph.import("a-b", handle, {});
 
   graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
@@ -225,7 +228,8 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
   std::set_terminate([]() { FAIL(); });
 
-  graph.create("a-b", {});
+  liquid::rhi::TextureHandle handle{2};
+  graph.import("a-b", handle, {});
 
   graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b"); },
@@ -241,7 +245,8 @@ TEST_F(RenderGraphDeathTest, BuildOnlyCalledOnce) {
 }
 
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
-  graph.create("a-b", {});
+  liquid::rhi::TextureHandle handle{2};
+  graph.import("a-b", handle, {});
 
   graph.addInlinePass<EmptyScope>(
       "A", [](auto &builder, auto &scope) { builder.write("a-b"); },

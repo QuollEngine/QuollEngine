@@ -27,7 +27,7 @@ public:
    * @param name Resource name
    * @return ID associated with resource
    */
-  GraphResourceId write(const String &name);
+  rhi::TextureHandle write(const String &name);
 
   /**
    * @brief Read attachment resource
@@ -38,7 +38,7 @@ public:
    * @param name Resource name
    * @return ID associated with resource
    */
-  GraphResourceId read(const String &name);
+  rhi::TextureHandle read(const String &name);
 
   /**
    * @brief Write pipeline resource

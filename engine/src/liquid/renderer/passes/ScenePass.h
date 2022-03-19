@@ -50,7 +50,7 @@ private:
 
   GraphResourceId pipelineId = 0;
   GraphResourceId wireframePipelineId = 0;
-  GraphResourceId shadowMapTextureId = 0;
+  rhi::TextureHandle shadowMapTextureId = rhi::TextureHandle::Invalid;
 
   GraphResourceId skinnedPipelineId = 0;
 

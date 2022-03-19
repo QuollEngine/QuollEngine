@@ -64,16 +64,12 @@ void ScenePass::execute(rhi::RenderCommandList &commandList,
   sceneDescriptorFragment
       .bind(0, cameraBuffer, rhi::DescriptorType::UniformBuffer)
       .bind(1, renderData->getSceneBuffer(), rhi::DescriptorType::UniformBuffer)
-      .bind(2,
-            std::vector<rhi::TextureHandle>{
-                registry.getTexture(shadowMapTextureId)},
-            rhi::DescriptorType::CombinedImageSampler);
+      .bind(2, {shadowMapTextureId}, rhi::DescriptorType::CombinedImageSampler);
 
   sceneDescriptorFragment
       .bind(3, {iblMaps.at(0), iblMaps.at(1)},
             rhi::DescriptorType::CombinedImageSampler)
-      .bind(4, std::vector<rhi::TextureHandle>{iblMaps.at(2)},
-            rhi::DescriptorType::CombinedImageSampler);
+      .bind(4, {iblMaps.at(2)}, rhi::DescriptorType::CombinedImageSampler);
 
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(pipeline, 0, sceneDescriptor);

@@ -21,8 +21,9 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
   description.format = VK_FORMAT_R8G8B8A8_SRGB;
   description.width = width;
   description.height = height;
-  description.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-  description.usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  description.usage = rhi::TextureUsage::Color |
+                      rhi::TextureUsage::TransferDestination |
+                      rhi::TextureUsage::Sampled;
   description.type = rhi::TextureType::Standard;
   description.size = width * height * channels;
 

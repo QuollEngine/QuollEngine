@@ -30,7 +30,8 @@ TEST_F(RenderGraphBuilderDeathTest,
 TEST_F(RenderGraphBuilderTest, AddsResourceIdAsPassOutput) {
   auto pass = std::make_shared<NoncePass>("nonce", 1);
 
-  graph.create("Test color", {});
+  liquid::rhi::TextureHandle handle{2};
+  graph.import("Test color", handle, {});
 
   liquid::RenderGraphBuilder builder(graph, pass.get());
   auto outputId = builder.write("Test color");
@@ -40,21 +41,19 @@ TEST_F(RenderGraphBuilderTest, AddsResourceIdAsPassOutput) {
   EXPECT_EQ(pass->getInputs().size(), 0);
   EXPECT_EQ(pass->getOutputs().size(), 1);
   EXPECT_EQ(graph.getResourceId("Test color"), outputId);
-
-  EXPECT_FALSE(pass->isSwapchainRelative());
 }
 
 TEST_F(RenderGraphBuilderTest, AddsResourceIdAsPassInput) {
   auto pass = std::make_shared<NoncePass>("nonce1", 1);
 
-  auto resourceId = graph.create("Test color", {});
+  liquid::rhi::TextureHandle resourceId{2};
+  graph.import("Test color", resourceId, {});
 
   liquid::RenderGraphBuilder builder(graph, pass.get());
   auto inputId = builder.read("Test color");
 
   EXPECT_EQ(pass->getInputs().size(), 1);
   EXPECT_EQ(pass->getOutputs().size(), 0);
-  EXPECT_FALSE(pass->isSwapchainRelative());
 
   EXPECT_EQ(pass->getInputs().at(0), resourceId);
   EXPECT_EQ(resourceId, inputId);
@@ -66,34 +65,6 @@ TEST_F(RenderGraphBuilderDeathTest,
 
   liquid::RenderGraphBuilder builder(graph, pass.get());
   EXPECT_DEATH({ builder.read("Test color"); }, ".*");
-}
-
-TEST_F(RenderGraphBuilderTest,
-       SetsPassAsSwapchainRelativeIfResourceIsSwapchain) {
-  auto pass = std::make_shared<NoncePass>("nonce", 1);
-  liquid::RenderGraphBuilder builder(graph, pass.get());
-
-  auto resourceId = builder.write("SWAPCHAIN");
-
-  EXPECT_EQ(pass->getOutputs().size(), 1);
-  EXPECT_TRUE(pass->getOutputs().find(resourceId) != pass->getOutputs().end());
-  EXPECT_TRUE(pass->isSwapchainRelative());
-}
-
-TEST_F(RenderGraphBuilderTest,
-       SetsPassAsSwapchainRelativeIfResourceIsSwapchainRelative) {
-  auto pass = std::make_shared<NoncePass>("nonce", 1);
-  liquid::RenderGraphBuilder builder(graph, pass.get());
-
-  graph.create("swapchainRelative",
-               {liquid::AttachmentType::Color,
-                liquid::AttachmentSizeMethod::SwapchainRelative});
-  auto resourceId = builder.write("swapchainRelative");
-
-  EXPECT_EQ(pass->getInputs().size(), 0);
-  EXPECT_EQ(pass->getOutputs().size(), 1);
-  EXPECT_TRUE(pass->getOutputs().find(resourceId) != pass->getOutputs().end());
-  EXPECT_TRUE(pass->isSwapchainRelative());
 }
 
 TEST_F(RenderGraphBuilderTest, CreatesPipelineResource) {

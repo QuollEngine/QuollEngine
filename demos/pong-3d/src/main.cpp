@@ -66,10 +66,19 @@ public:
 
     liquid::SceneRenderer sceneRenderer(entityContext, false);
 
-    graph.create("depthBuffer",
-                 {liquid::AttachmentType::Depth,
-                  liquid::AttachmentSizeMethod::SwapchainRelative, 100, 100, 1,
-                  VK_FORMAT_D32_SFLOAT, liquid::DepthStencilClear{1.0f, 0}});
+    liquid::rhi::TextureDescription desc;
+    desc.usage =
+        liquid::rhi::TextureUsage::Depth | liquid::rhi::TextureUsage::Sampled;
+    desc.sizeMethod = liquid::rhi::TextureSizeMethod::SwapchainRatio;
+    desc.width = 100;
+    desc.height = 100;
+    desc.layers = 1;
+    desc.format = VK_FORMAT_D32_SFLOAT;
+
+    auto depthBuffer = renderer.getRegistry().setTexture(desc);
+
+    graph.import("depthBuffer", depthBuffer,
+                 liquid::DepthStencilClear{1.0f, 0});
 
     graph.addInlinePass<PongScope>(
         "mainPass",
