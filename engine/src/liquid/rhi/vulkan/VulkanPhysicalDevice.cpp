@@ -29,13 +29,13 @@ VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
 }
 
 VulkanPhysicalDevice::VulkanPhysicalDevice(
-    const VkPhysicalDevice &device_,
-    const VkPhysicalDeviceProperties &properties_,
-    const VkPhysicalDeviceFeatures &features_,
-    const VulkanQueueFamily &queueFamilyIndices_)
-    : device(device_), properties(properties_), features(features_),
-      queueFamilyIndices(queueFamilyIndices_) {
-  name = String((const char *)properties.deviceName);
+    const VkPhysicalDevice &device,
+    const VkPhysicalDeviceProperties &properties,
+    const VkPhysicalDeviceFeatures &features,
+    const VulkanQueueFamily &queueFamilyIndices)
+    : mDevice(device), mProperties(properties), mFeatures(features),
+      mQueueFamilyIndices(queueFamilyIndices) {
+  mName = String((const char *)mProperties.deviceName);
 }
 
 bool VulkanPhysicalDevice::supportsSwapchain() const {
@@ -57,11 +57,11 @@ bool VulkanPhysicalDevice::supportsSwapchain() const {
 const std::vector<VkExtensionProperties>
 VulkanPhysicalDevice::getSupportedExtensions() const {
   uint32_t extensionCount = 0;
-  vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+  vkEnumerateDeviceExtensionProperties(mDevice, nullptr, &extensionCount,
                                        nullptr);
 
   std::vector<VkExtensionProperties> supportedExtensions(extensionCount);
-  vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
+  vkEnumerateDeviceExtensionProperties(mDevice, nullptr, &extensionCount,
                                        supportedExtensions.data());
 
   return supportedExtensions;
@@ -70,7 +70,7 @@ VulkanPhysicalDevice::getSupportedExtensions() const {
 const VkSurfaceCapabilitiesKHR VulkanPhysicalDevice::getSurfaceCapabilities(
     const VkSurfaceKHR &surface) const {
   VkSurfaceCapabilitiesKHR surfaceCapabilities{};
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mDevice, surface,
                                             &surfaceCapabilities);
   return surfaceCapabilities;
 }
@@ -78,10 +78,10 @@ const VkSurfaceCapabilitiesKHR VulkanPhysicalDevice::getSurfaceCapabilities(
 const std::vector<VkSurfaceFormatKHR>
 VulkanPhysicalDevice::getSurfaceFormats(const VkSurfaceKHR &surface) const {
   uint32_t surfaceFormatsCount = 0;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount,
+  vkGetPhysicalDeviceSurfaceFormatsKHR(mDevice, surface, &surfaceFormatsCount,
                                        nullptr);
   std::vector<VkSurfaceFormatKHR> surfaceFormats(surfaceFormatsCount);
-  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &surfaceFormatsCount,
+  vkGetPhysicalDeviceSurfaceFormatsKHR(mDevice, surface, &surfaceFormatsCount,
                                        surfaceFormats.data());
 
   return surfaceFormats;
@@ -90,20 +90,20 @@ VulkanPhysicalDevice::getSurfaceFormats(const VkSurfaceKHR &surface) const {
 const std::vector<VkPresentModeKHR>
 VulkanPhysicalDevice::getPresentModes(const VkSurfaceKHR &surface) const {
   uint32_t presentModesCount = 0;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModesCount,
-                                            nullptr);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(mDevice, surface,
+                                            &presentModesCount, nullptr);
   std::vector<VkPresentModeKHR> presentModes(presentModesCount);
-  vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModesCount,
-                                            presentModes.data());
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      mDevice, surface, &presentModesCount, presentModes.data());
   return presentModes;
 }
 
 const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
-  VkPhysicalDeviceProperties properties;
-  vkGetPhysicalDeviceProperties(device, &properties);
+  VkPhysicalDeviceProperties mProperties;
+  vkGetPhysicalDeviceProperties(mDevice, &mProperties);
 
   PhysicalDeviceType type;
-  switch (properties.deviceType) {
+  switch (mProperties.deviceType) {
   case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
     type = PhysicalDeviceType::DISCRETE_GPU;
     break;
@@ -123,13 +123,13 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
     break;
   }
 
-  const auto &limits = properties.limits;
+  const auto &limits = mProperties.limits;
 
   PhysicalDeviceInformation::UnorderedPropertyMap propertiesMap{
-      {"apiVersion", properties.apiVersion},
-      {"driverVersion", properties.driverVersion},
-      {"vendorID", properties.vendorID},
-      {"deviceID", properties.deviceID}};
+      {"apiVersion", mProperties.apiVersion},
+      {"driverVersion", mProperties.driverVersion},
+      {"vendorID", mProperties.vendorID},
+      {"deviceID", mProperties.deviceID}};
 
   PhysicalDeviceInformation::UnorderedPropertyMap limitsMap{
       {"maxImageDimension1D", limits.maxImageDimension1D},
@@ -274,7 +274,7 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
        limits.optimalBufferCopyRowPitchAlignment},
       {"nonCoherentAtomSize", limits.nonCoherentAtomSize}};
 
-  return PhysicalDeviceInformation(name, type, propertiesMap, limitsMap);
+  return PhysicalDeviceInformation(mName, type, propertiesMap, limitsMap);
 }
 
 } // namespace liquid::rhi

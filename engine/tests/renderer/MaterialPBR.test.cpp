@@ -138,7 +138,6 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
   liquid::MaterialPBR material(properties, registry);
 
   EXPECT_EQ(material.getTextures().size(), 3);
-  EXPECT_EQ(
-      registry.getBufferMap().getDescription(material.getUniformBuffer()).size,
-      16 * sizeof(glm::vec4));
+  EXPECT_EQ(registry.getBufferMap().getDescription(material.getBuffer()).size,
+            16 * sizeof(glm::vec4));
 }

@@ -73,7 +73,7 @@ public:
    * @return Transform component
    */
   inline TransformComponent &getTransform() {
-    return entityContext.getComponent<TransformComponent>(entity);
+    return mEntityContext.getComponent<TransformComponent>(mEntity);
   }
 
   /**
@@ -82,7 +82,7 @@ public:
    * @return World transform matrix
    */
   inline const glm::mat4 &getWorldTransform() const {
-    return entityContext.getComponent<TransformComponent>(entity)
+    return mEntityContext.getComponent<TransformComponent>(mEntity)
         .worldTransform;
   }
 
@@ -91,7 +91,7 @@ public:
    *
    * @return Entity
    */
-  inline Entity getEntity() const { return entity; }
+  inline Entity getEntity() const { return mEntity; }
 
   /**
    * @brief Gets children
@@ -99,7 +99,7 @@ public:
    * @return List of children
    */
   inline const std::vector<SceneNode *> &getChildren() const {
-    return children;
+    return mChildren;
   }
 
   /**
@@ -107,15 +107,15 @@ public:
    *
    * @return Parent node
    */
-  inline SceneNode *getParent() { return parent; }
+  inline SceneNode *getParent() { return mParent; }
 
 private:
-  Entity entity = std::numeric_limits<Entity>::max();
+  Entity mEntity = std::numeric_limits<Entity>::max();
 
-  SceneNode *parent = nullptr;
-  std::vector<SceneNode *> children;
+  SceneNode *mParent = nullptr;
+  std::vector<SceneNode *> mChildren;
 
-  EntityContext &entityContext;
+  EntityContext &mEntityContext;
 };
 
 class Scene {
@@ -161,19 +161,19 @@ public:
    *
    * @return Root scene node
    */
-  inline SceneNode *getRootNode() { return rootNode; }
+  inline SceneNode *getRootNode() { return mRootNode; }
 
   /**
    * @brief Get entity context
    *
    * @return Entity context
    */
-  inline EntityContext &getEntityContext() { return entityContext; }
+  inline EntityContext &getEntityContext() { return mEntityContext; }
 
 private:
-  SceneNode *rootNode = nullptr;
-  Entity cameraEntity = ENTITY_MAX;
-  EntityContext &entityContext;
+  SceneNode *mRootNode = nullptr;
+  Entity mCameraEntity = ENTITY_MAX;
+  EntityContext &mEntityContext;
 };
 
 } // namespace liquid

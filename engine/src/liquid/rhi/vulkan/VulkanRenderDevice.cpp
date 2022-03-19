@@ -18,17 +18,14 @@ namespace liquid::rhi {
 VulkanRenderDevice::VulkanRenderDevice(
     VulkanRenderBackend &backend, const VulkanPhysicalDevice &physicalDevice)
     : mPhysicalDevice(physicalDevice), mBackend(backend),
-      mCommandPool(
-          mDevice,
-          mPhysicalDevice.getQueueFamilyIndices().graphicsFamily.value(),
-          mRegistry, mDescriptorManager),
+      mCommandPool(mDevice,
+                   mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
+                   mRegistry, mDescriptorManager),
       mDevice(mPhysicalDevice), mDescriptorManager(mDevice, mRegistry),
       mGraphicsQueue(
-          mDevice,
-          mPhysicalDevice.getQueueFamilyIndices().graphicsFamily.value()),
-      mPresentQueue(
-          mDevice,
-          mPhysicalDevice.getQueueFamilyIndices().presentFamily.value()),
+          mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
+      mPresentQueue(mDevice,
+                    mPhysicalDevice.getQueueFamilyIndices().getPresentFamily()),
       mRenderContext(mDevice, mCommandPool, mGraphicsQueue, mPresentQueue),
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, VK_NULL_HANDLE),

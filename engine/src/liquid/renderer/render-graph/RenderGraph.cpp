@@ -6,29 +6,29 @@
 namespace liquid {
 
 RenderGraph::RenderGraph(RenderGraph &&rhs) {
-  passes = rhs.passes;
+  mPasses = rhs.mPasses;
   mTextures = std::move(rhs.mTextures);
   mResourceMap = std::move(rhs.mResourceMap);
-  registry = std::move(rhs.registry);
-  pipelines = std::move(rhs.pipelines);
-  lastId = rhs.lastId;
+  mRegistry = std::move(rhs.mRegistry);
+  mPipelines = std::move(rhs.mPipelines);
+  mLastId = rhs.mLastId;
 
-  rhs.passes.clear();
+  rhs.mPasses.clear();
 }
 
 RenderGraph::~RenderGraph() {
-  for (auto &x : passes) {
+  for (auto &x : mPasses) {
     delete x;
   }
 }
 
 void RenderGraph::addPassInternal(RenderGraphPassBase *pass) {
-  passes.push_back(pass);
+  mPasses.push_back(pass);
 }
 
 std::vector<RenderGraphPassBase *> RenderGraph::compile() {
   LIQUID_PROFILE_EVENT("RenderGraph::compile");
-  std::vector<RenderGraphPassBase *> tempPasses = passes;
+  std::vector<RenderGraphPassBase *> tempPasses = mPasses;
 
   // Validate pass names
   std::set<String> uniquePasses;
@@ -137,10 +137,10 @@ void RenderGraph::topologicalSort(
     }
   }
 
-  output.push_back(passes.at(index));
+  output.push_back(mPasses.at(index));
 }
 
-GraphResourceId RenderGraph::generateNewId() { return lastId++; }
+GraphResourceId RenderGraph::generateNewId() { return mLastId++; }
 
 void RenderGraph::import(
     const String &name, rhi::TextureHandle handle,
@@ -150,13 +150,13 @@ void RenderGraph::import(
 }
 
 void RenderGraph::setSwapchainColor(const glm::vec4 &color) {
-  swapchainColor = color;
+  mSwapchainColor = color;
 }
 
 GraphResourceId
 RenderGraph::addPipeline(const RenderGraphPipelineDescription &descriptor) {
   auto id = generateNewId();
-  pipelines.insert({id, descriptor});
+  mPipelines.insert({id, descriptor});
   return id;
 }
 

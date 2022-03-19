@@ -24,8 +24,8 @@ VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
                                  surfaceCapabilities.maxImageCount);
 
   bool sameQueueFamily =
-      physicalDevice.getQueueFamilyIndices().graphicsFamily.value() ==
-      physicalDevice.getQueueFamilyIndices().presentFamily.value();
+      physicalDevice.getQueueFamilyIndices().getGraphicsFamily() ==
+      physicalDevice.getQueueFamilyIndices().getPresentFamily();
 
   VkSwapchainCreateInfoKHR createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;

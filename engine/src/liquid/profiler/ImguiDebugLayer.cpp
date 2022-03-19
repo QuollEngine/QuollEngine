@@ -10,24 +10,24 @@ template <class T> String convertToString(T value) {
 }
 
 ImguiDebugLayer::ImguiDebugLayer(
-    const PhysicalDeviceInformation &physicalDeviceInfo_,
-    const StatsManager &statsManager_, DebugManager &debugManager_)
-    : physicalDeviceInfo(physicalDeviceInfo_), statsManager(statsManager_),
-      debugManager(debugManager_) {}
+    const PhysicalDeviceInformation &physicalDeviceInfo,
+    const StatsManager &statsManager, DebugManager &debugManager)
+    : mPhysicalDeviceInfo(physicalDeviceInfo), mStatsManager(statsManager),
+      mDebugManager(debugManager) {}
 
 void ImguiDebugLayer::render() {
   if (ImGui::BeginMainMenuBar()) {
 
     if (ImGui::BeginMenu("Debug")) {
       ImGui::MenuItem("Physical Device Information", nullptr,
-                      &physicalDeviceInfoVisible);
-      ImGui::MenuItem("Usage Metrics", nullptr, &usageMetricsVisible);
+                      &mPhysicalDeviceInfoVisible);
+      ImGui::MenuItem("Usage Metrics", nullptr, &mUsageMetricsVisible);
 
       ImGui::MenuItem("Performance Metrics", nullptr,
-                      &performanceMetricsVisible);
+                      &mPerformanceMetricsVisible);
 
-      if (ImGui::MenuItem("Wireframe Mode", nullptr, &wireframeModeEnabled)) {
-        debugManager.setWireframeMode(wireframeModeEnabled);
+      if (ImGui::MenuItem("Wireframe Mode", nullptr, &mWireframeModeEnabled)) {
+        mDebugManager.setWireframeMode(mWireframeModeEnabled);
       }
 
       ImGui::EndMenu();
@@ -43,12 +43,12 @@ void ImguiDebugLayer::render() {
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
   const uint32_t ONE_SECOND_IN_MS = 1000;
-  if (!performanceMetricsVisible)
+  if (!mPerformanceMetricsVisible)
     return;
 
-  uint32_t fps = statsManager.getFPS();
+  uint32_t fps = mStatsManager.getFPS();
 
-  ImGui::Begin("Performance Metrics", &performanceMetricsVisible,
+  ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
                ImGuiWindowFlags_NoDocking);
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
@@ -64,10 +64,10 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
 }
 
 void ImguiDebugLayer::renderUsageMetrics() {
-  if (!usageMetricsVisible)
+  if (!mUsageMetricsVisible)
     return;
 
-  ImGui::Begin("Usage Metrics", &usageMetricsVisible,
+  ImGui::Begin("Usage Metrics", &mUsageMetricsVisible,
                ImGuiWindowFlags_NoDocking);
 
   if (ImGui::BeginTable("Table", 2,
@@ -76,17 +76,17 @@ void ImguiDebugLayer::renderUsageMetrics() {
                             ImGuiTableFlags_RowBg)) {
 
     renderTableRow("Number of buffers",
-                   convertToString(statsManager.getAllocatedBuffersCount()));
+                   convertToString(mStatsManager.getAllocatedBuffersCount()));
     renderTableRow("Total size of allocated buffer",
-                   convertToString(statsManager.getAllocatedBuffersSize()));
+                   convertToString(mStatsManager.getAllocatedBuffersSize()));
     renderTableRow("Number of textures",
-                   convertToString(statsManager.getAllocatedTexturesCount()));
+                   convertToString(mStatsManager.getAllocatedTexturesCount()));
     renderTableRow("Total size of allocated textures",
-                   convertToString(statsManager.getAllocatedTexturesSize()));
+                   convertToString(mStatsManager.getAllocatedTexturesSize()));
     renderTableRow("Number of draw calls",
-                   convertToString(statsManager.getDrawCallsCount()));
+                   convertToString(mStatsManager.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
-                   convertToString(statsManager.getDrawnPrimitivesCount()));
+                   convertToString(mStatsManager.getDrawnPrimitivesCount()));
 
     ImGui::EndTable();
   }
@@ -95,25 +95,25 @@ void ImguiDebugLayer::renderUsageMetrics() {
 }
 
 void ImguiDebugLayer::renderPhysicalDeviceInfo() {
-  if (!physicalDeviceInfoVisible)
+  if (!mPhysicalDeviceInfoVisible)
     return;
 
-  ImGui::Begin(("Device Info: " + physicalDeviceInfo.getName()).c_str(),
-               &physicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking);
+  ImGui::Begin(("Device Info: " + mPhysicalDeviceInfo.getName()).c_str(),
+               &mPhysicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking);
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
                             ImGuiTableColumnFlags_WidthStretch)) {
-    renderTableRow("Name", physicalDeviceInfo.getName());
-    renderTableRow("Type", physicalDeviceInfo.getTypeString());
+    renderTableRow("Name", mPhysicalDeviceInfo.getName());
+    renderTableRow("Type", mPhysicalDeviceInfo.getTypeString());
 
     ImGui::EndTable();
   }
 
   ImGui::Text("Properties");
-  renderPropertyMapAsTable(physicalDeviceInfo.getProperties());
+  renderPropertyMapAsTable(mPhysicalDeviceInfo.getProperties());
 
   ImGui::Text("Limits");
-  renderPropertyMapAsTable(physicalDeviceInfo.getLimits());
+  renderPropertyMapAsTable(mPhysicalDeviceInfo.getLimits());
   ImGui::End();
 }
 

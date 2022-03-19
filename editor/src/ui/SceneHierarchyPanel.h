@@ -14,9 +14,9 @@ public:
   /**
    * @brief Create scene hierarchy panel
    *
-   * @param context Entity context
+   * @param entityContext Entity entityContext
    */
-  SceneHierarchyPanel(liquid::EntityContext &context);
+  SceneHierarchyPanel(liquid::EntityContext &entityContext);
 
   /**
    * @brief Render the UI
@@ -60,9 +60,9 @@ private:
   void handleMoveToNode(liquid::SceneNode *node, EditorCamera &camera);
 
 private:
-  liquid::EntityContext &context;
-  NodeClickHandler nodeClickHandler;
-  liquid::SceneNode *selectedNode = nullptr;
+  liquid::EntityContext &mEntityContext;
+  NodeClickHandler mNodeClickHandler;
+  liquid::SceneNode *mSelectedNode = nullptr;
 };
 
 } // namespace liquidator

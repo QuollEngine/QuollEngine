@@ -7,40 +7,43 @@
 namespace liquid::rhi {
 
 VulkanValidator::VulkanValidator() {
-  messengerCreateInfo.sType =
+  mMessengerCreateInfo.sType =
       VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-  messengerCreateInfo.messageSeverity =
+  mMessengerCreateInfo.messageSeverity =
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-  messengerCreateInfo.messageType =
+  mMessengerCreateInfo.messageType =
       VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-  messengerCreateInfo.pfnUserCallback = VulkanValidator::debugCallback;
-  messengerCreateInfo.pUserData = nullptr;
+  mMessengerCreateInfo.pfnUserCallback = VulkanValidator::debugCallback;
+  mMessengerCreateInfo.pUserData = nullptr;
 }
 
 void VulkanValidator::detachFromInstance(VkInstance instance) {
-  if (messenger) {
-    VulkanValidator::destroyDebugUtilsMessengerEXT(instance, messenger,
+  if (mMessenger) {
+    VulkanValidator::destroyDebugUtilsMessengerEXT(instance, mMessenger,
                                                    nullptr);
   }
 }
 
 void VulkanValidator::attachToInstanceCreateConfig(
     VkInstanceCreateInfo &createInfo) {
-  createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&messengerCreateInfo;
-  createInfo.ppEnabledLayerNames = validationLayers.data();
-  createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+  createInfo.pNext =
+      (VkDebugUtilsMessengerCreateInfoEXT *)&mMessengerCreateInfo;
+  createInfo.ppEnabledLayerNames = mValidationLayers.data();
+  createInfo.enabledLayerCount =
+      static_cast<uint32_t>(mValidationLayers.size());
 }
 
 void VulkanValidator::attachToInstance(VkInstance instance) {
   LIQUID_ASSERT(checkValidationSupport(), "Cannot create debug messenger");
 
-  checkForVulkanError(VulkanValidator::createDebugUtilsMessengerEXT(
-                          instance, &messengerCreateInfo, nullptr, &messenger),
-                      "Cannot create debug messenger");
+  checkForVulkanError(
+      VulkanValidator::createDebugUtilsMessengerEXT(
+          instance, &mMessengerCreateInfo, nullptr, &mMessenger),
+      "Cannot create debug messenger");
 }
 
 VkResult VulkanValidator::createDebugUtilsMessengerEXT(
@@ -85,7 +88,7 @@ bool VulkanValidator::checkValidationSupport() {
   std::vector<VkLayerProperties> availableLayers(layerCount);
   vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-  for (auto &neededLayer : validationLayers) {
+  for (auto &neededLayer : mValidationLayers) {
     auto it = std::find_if(availableLayers.begin(), availableLayers.end(),
                            [neededLayer](auto &layer) {
                              return strcmp((const char *)layer.layerName,

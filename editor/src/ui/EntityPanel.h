@@ -79,8 +79,8 @@ private:
   void renderAddComponent();
 
 private:
-  liquid::Entity selectedEntity = liquid::ENTITY_MAX;
-  liquid::EntityContext &context;
+  liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
+  liquid::EntityContext &mEntityContext;
 };
 
 } // namespace liquidator

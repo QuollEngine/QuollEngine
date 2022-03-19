@@ -46,14 +46,14 @@ public:
    *
    * @return Scene
    */
-  inline Scene *getScene() { return scene; }
+  inline Scene *getScene() { return mScene; }
 
   /**
    * @brief Get scene buffer
    *
    * @return Scene buffer
    */
-  inline rhi::BufferHandle getSceneBuffer() const { return sceneBuffer; }
+  inline rhi::BufferHandle getSceneBuffer() const { return mSceneBuffer; }
 
   /**
    * @brief Update scene data
@@ -66,7 +66,7 @@ public:
    * @retval true Environment changes
    * @retval false Environment did not change
    */
-  inline bool isEnvironmentChanged() const { return environmentChanged; }
+  inline bool isEnvironmentChanged() const { return mEnvironmentChanged; }
 
   /**
    * @brief Get environment map textures
@@ -81,16 +81,16 @@ public:
   void cleanEnvironmentChangeFlag();
 
 private:
-  EntityContext &entityContext;
-  rhi::BufferHandle sceneBuffer;
-  Scene *scene;
-  Entity environmentMapEntity = ENTITY_MAX;
-  bool environmentChanged = false;
-  rhi::Descriptor descriptor;
-  SceneBufferObject sceneData{};
-  rhi::ResourceRegistry &registry;
+  EntityContext &mEntityContext;
+  rhi::BufferHandle mSceneBuffer;
+  Scene *mScene;
+  Entity mEnvironmentMapEntity = ENTITY_MAX;
+  bool mEnvironmentChanged = false;
+  rhi::Descriptor mDescriptor;
+  SceneBufferObject mSceneData{};
+  rhi::ResourceRegistry &mRegistry;
 
-  const std::vector<SharedPtr<Material>> &shadowMaterials;
+  const std::vector<SharedPtr<Material>> &mShadowMaterials;
 };
 
 } // namespace liquid

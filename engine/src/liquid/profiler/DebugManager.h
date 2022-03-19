@@ -16,10 +16,10 @@ public:
    *
    * @return Wireframe mode state
    */
-  inline bool getWireframeMode() const { return wireframeMode; }
+  inline bool getWireframeMode() const { return mWireframeMode; }
 
 private:
-  bool wireframeMode = false;
+  bool mWireframeMode = false;
 };
 
 } // namespace liquid

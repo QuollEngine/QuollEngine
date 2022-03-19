@@ -26,14 +26,14 @@ public:
    *
    * @return Animation name
    */
-  inline const String &getName() const { return name; }
+  inline const String &getName() const { return mName; }
 
   /**
    * @brief Get animation time
    *
    * @return Animation time
    */
-  inline float getTime() const { return time; }
+  inline float getTime() const { return mTime; }
 
   /**
    * @brief Get keyframe sequences
@@ -41,13 +41,13 @@ public:
    * @return Keyframe sequences
    */
   inline const std::vector<KeyframeSequence> &getKeyframeSequences() const {
-    return keyframeSequences;
+    return mKeyframeSequences;
   }
 
 private:
-  String name;
-  float time;
-  std::vector<KeyframeSequence> keyframeSequences;
+  String mName;
+  float mTime;
+  std::vector<KeyframeSequence> mKeyframeSequences;
 };
 
 } // namespace liquid

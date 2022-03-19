@@ -53,14 +53,14 @@ public:
    *
    * @return Physical device name
    */
-  inline const String &getName() const { return name; }
+  inline const String &getName() const { return mName; }
 
   /**
    * @brief Gets Vulkan device handle
    *
    * @return Vulkan device handle
    */
-  inline VkPhysicalDevice getVulkanDevice() const { return device; }
+  inline VkPhysicalDevice getVulkanDevice() const { return mDevice; }
 
   /**
    * @brief Get device features
@@ -68,7 +68,7 @@ public:
    * @return Device features
    */
   inline const VkPhysicalDeviceFeatures &getFeatures() const {
-    return features;
+    return mFeatures;
   }
 
   /**
@@ -77,7 +77,7 @@ public:
    * @return Queue family indices
    */
   inline const VulkanQueueFamily &getQueueFamilyIndices() const {
-    return queueFamilyIndices;
+    return mQueueFamilyIndices;
   }
 
   /**
@@ -122,13 +122,13 @@ public:
   const PhysicalDeviceInformation getDeviceInfo() const;
 
 private:
-  VulkanQueueFamily queueFamilyIndices;
-  VkPhysicalDeviceProperties properties{};
-  VkPhysicalDeviceFeatures features{};
+  VulkanQueueFamily mQueueFamilyIndices;
+  VkPhysicalDeviceProperties mProperties{};
+  VkPhysicalDeviceFeatures mFeatures{};
 
-  String name;
+  String mName;
 
-  VkPhysicalDevice device = nullptr;
+  VkPhysicalDevice mDevice = VK_NULL_HANDLE;
 };
 
 } // namespace liquid::rhi

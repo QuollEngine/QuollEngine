@@ -23,11 +23,11 @@ public:
   /**
    * @brief Create editor camera
    *
-   * @param context Entity context
+   * @param entityContext Entity context
    * @param renderer Renderer
    * @param window Window
    */
-  EditorCamera(liquid::EntityContext &context, liquid::Renderer &renderer,
+  EditorCamera(liquid::EntityContext &entityContext, liquid::Renderer &renderer,
                liquid::Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
@@ -47,49 +47,49 @@ public:
    *
    * @param fov Field of view
    */
-  inline void setFOV(float fov_) { fov = fov_; }
+  inline void setFOV(float fov) { mFov = fov; }
 
   /**
    * @brief Set near plane
    *
    * @param near Near plane
    */
-  inline void setNear(float near_) { near = near_; }
+  inline void setNear(float near) { mNear = near; }
 
   /**
    * @brief Set far plane
    *
    * @param Far plane
    */
-  inline void setFar(float far_) { far = far_; }
+  inline void setFar(float far) { mFar = far; }
 
   /**
    * @brief Get field of view
    *
    * @return Field of view
    */
-  inline float getFOV() { return fov; }
+  inline float getFOV() { return mFov; }
 
   /**
    * @brief Get near place
    *
    * @return Near plane
    */
-  inline float getNear() { return near; }
+  inline float getNear() { return mNear; }
 
   /**
    * @brief Get far plane
    *
    * @return Far plane
    */
-  inline float getFar() { return far; }
+  inline float getFar() { return mFar; }
 
   /**
    * @brief Get camera
    *
    * @return Camera
    */
-  inline const liquid::Entity getCamera() const { return cameraEntity; }
+  inline const liquid::Entity getCamera() const { return mCameraEntity; }
 
   /**
    * @brief Set camera center
@@ -130,7 +130,7 @@ public:
    *
    * @return Input state
    */
-  inline const InputState &getInputState() const { return inputState; }
+  inline const InputState &getInputState() const { return mInputState; }
 
 private:
   /**
@@ -156,30 +156,30 @@ private:
   void updatePerspective(float aspectRatio);
 
 private:
-  float fov = DEFAULT_FOV;
-  float near = DEFAULT_NEAR;
-  float far = DEFAULT_FAR;
+  float mFov = DEFAULT_FOV;
+  float mNear = DEFAULT_NEAR;
+  float mFar = DEFAULT_FAR;
 
-  float x = 0.0f;
-  float y = 0.0f;
-  float width = 0.0f;
-  float height = 0.0f;
+  float mX = 0.0f;
+  float mY = 0.0f;
+  float mWidth = 0.0f;
+  float mHeight = 0.0f;
 
-  InputState inputState = InputState::None;
-  glm::vec2 prevMousePos{};
+  InputState mInputState = InputState::None;
+  glm::vec2 mPrevMousePos{};
 
-  glm::vec3 eye = DEFAULT_EYE;
-  glm::vec3 center = DEFAULT_CENTER;
-  glm::vec3 up = DEFAULT_UP;
+  glm::vec3 mEye = DEFAULT_EYE;
+  glm::vec3 mCenter = DEFAULT_CENTER;
+  glm::vec3 mUp = DEFAULT_UP;
 
-  uint32_t mouseButtonHandler = 0;
-  uint32_t mouseMoveHandler = 0;
-  uint32_t scrollWheelHandler = 0;
+  uint32_t mMouseButtonHandler = 0;
+  uint32_t mMouseMoveHandler = 0;
+  uint32_t mScrollWheelHandler = 0;
 
-  liquid::Window &window;
-  liquid::SharedPtr<liquid::Camera> camera;
-  liquid::EntityContext &context;
-  liquid::Entity cameraEntity = liquid::ENTITY_MAX;
+  liquid::Window &mWindow;
+  liquid::SharedPtr<liquid::Camera> mCamera;
+  liquid::EntityContext &mEntityContext;
+  liquid::Entity mCameraEntity = liquid::ENTITY_MAX;
 };
 
 } // namespace liquidator

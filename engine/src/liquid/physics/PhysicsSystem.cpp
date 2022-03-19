@@ -32,27 +32,27 @@ public:
     constexpr uint32_t PVD_TIMEOUT_IN_MS = 2000;
     constexpr glm::vec3 GRAVITY(0.0f, -9.8f, 0.0f);
 
-    foundation = PxCreateFoundation(PX_PHYSICS_VERSION, defaultAllocator,
-                                    defaultErrorCallback);
+    mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mDefaultAllocator,
+                                     mDefaultErrorCallback);
 
-    pvd = PxCreatePvd(*foundation);
+    mPvd = PxCreatePvd(*mFoundation);
     PxPvdTransport *transport = PxDefaultPvdSocketTransportCreate(
         "127.0.0.1", PVD_PORT, PVD_TIMEOUT_IN_MS);
-    pvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
+    mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
-    physics =
-        PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(),
-                        RECORD_MEMORY_ALLOCATIONS, pvd);
+    mPhysics =
+        PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(),
+                        RECORD_MEMORY_ALLOCATIONS, mPvd);
 
-    PxSceneDesc sceneDesc(physics->getTolerancesScale());
-    dispatcher = PxDefaultCpuDispatcherCreate(1);
-    sceneDesc.cpuDispatcher = dispatcher;
+    PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
+    mDispatcher = PxDefaultCpuDispatcherCreate(1);
+    sceneDesc.cpuDispatcher = mDispatcher;
     sceneDesc.filterShader = PxDefaultSimulationFilterShader;
     sceneDesc.gravity = PxVec3(GRAVITY.x, GRAVITY.y, GRAVITY.z);
     sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
-    scene = physics->createScene(sceneDesc);
+    mScene = mPhysics->createScene(sceneDesc);
 
-    auto *pvdClient = scene->getScenePvdClient();
+    auto *pvdClient = mScene->getScenePvdClient();
     if (pvdClient) {
       pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
       pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
@@ -71,11 +71,11 @@ public:
    * Destroy PhysX objects
    */
   ~PhysicsSystemImpl() {
-    scene->release();
-    dispatcher->release();
-    physics->release();
-    pvd->release();
-    foundation->release();
+    mScene->release();
+    mDispatcher->release();
+    mPhysics->release();
+    mPvd->release();
+    mFoundation->release();
   }
 
   /**
@@ -91,7 +91,7 @@ public:
       const auto &[radius] =
           std::get<PhysicsGeometrySphere>(geometryDesc.params);
       const auto &geometry = PxSphereGeometry(radius);
-      return physics->createShape(geometry, material, true);
+      return mPhysics->createShape(geometry, material, true);
     }
 
     if (geometryDesc.type == PhysicsGeometryType::Box) {
@@ -99,19 +99,19 @@ public:
           std::get<PhysicsGeometryBox>(geometryDesc.params);
       const auto &geometry =
           PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
-      return physics->createShape(geometry, material, true);
+      return mPhysics->createShape(geometry, material, true);
     }
 
     if (geometryDesc.type == PhysicsGeometryType::Capsule) {
       const auto &[radius, halfHeight] =
           std::get<PhysicsGeometryCapsule>(geometryDesc.params);
       const auto &geometry = PxCapsuleGeometry(radius, halfHeight);
-      return physics->createShape(geometry, material, true);
+      return mPhysics->createShape(geometry, material, true);
     }
 
     if (geometryDesc.type == PhysicsGeometryType::Plane) {
       const auto &geometry = PxPlaneGeometry();
-      return physics->createShape(geometry, material, true);
+      return mPhysics->createShape(geometry, material, true);
     }
 
     return nullptr;
@@ -152,40 +152,40 @@ public:
    *
    * @return PhysX scene
    */
-  inline PxScene *getScene() { return scene; }
+  inline PxScene *getScene() { return mScene; }
 
   /**
    * @brief Get PhysX physics SDK
    * @return PhysX physics SDK
    */
-  inline PxPhysics *getPhysics() { return physics; }
+  inline PxPhysics *getPhysics() { return mPhysics; }
 
 private:
-  PxDefaultAllocator defaultAllocator;
-  PxDefaultErrorCallback defaultErrorCallback;
+  PxDefaultAllocator mDefaultAllocator;
+  PxDefaultErrorCallback mDefaultErrorCallback;
 
-  PxPvd *pvd = nullptr;
-  PxFoundation *foundation = nullptr;
-  PxPhysics *physics = nullptr;
-  PxDefaultCpuDispatcher *dispatcher = nullptr;
+  PxPvd *mPvd = nullptr;
+  PxFoundation *mFoundation = nullptr;
+  PxPhysics *mPhysics = nullptr;
+  PxDefaultCpuDispatcher *mDispatcher = nullptr;
 
-  PxScene *scene = nullptr;
+  PxScene *mScene = nullptr;
 };
 
-PhysicsSystem::PhysicsSystem(EntityContext &entityContext_)
-    : entityContext(entityContext_) {
-  impl = new PhysicsSystemImpl;
+PhysicsSystem::PhysicsSystem(EntityContext &entityContext)
+    : mEntityContext(entityContext) {
+  mImpl = new PhysicsSystemImpl;
 }
 
-PhysicsSystem::~PhysicsSystem() { delete impl; }
+PhysicsSystem::~PhysicsSystem() { delete mImpl; }
 
 void PhysicsSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("PhysicsSystem::update");
 
   synchronizeComponents();
 
-  impl->getScene()->simulate(dt);
-  impl->getScene()->fetchResults(true);
+  mImpl->getScene()->simulate(dt);
+  mImpl->getScene()->fetchResults(true);
 
   synchronizeTransforms();
 }
@@ -196,9 +196,9 @@ void PhysicsSystem::synchronizeComponents() {
   {
     LIQUID_PROFILE_EVENT("Cleanup unused static rigid bodies");
     PxActorTypeFlags desiredType = PxActorTypeFlag::eRIGID_STATIC;
-    PxU32 count = impl->getScene()->getNbActors(desiredType);
+    PxU32 count = mImpl->getScene()->getNbActors(desiredType);
     PxActor **buffer = new PxActor *[count];
-    impl->getScene()->getActors(desiredType, buffer, count);
+    mImpl->getScene()->getActors(desiredType, buffer, count);
     for (PxU32 i = 0; i < count; ++i) {
       PxRigidStatic *actor = static_cast<PxRigidStatic *>(buffer[i]);
 
@@ -207,14 +207,14 @@ void PhysicsSystem::synchronizeComponents() {
 
       // Destroy actor and shape if there is
       // no collidable component
-      if (!entityContext.hasComponent<CollidableComponent>(entity)) {
+      if (!mEntityContext.hasComponent<CollidableComponent>(entity)) {
         physx::PxShape *shape = nullptr;
         actor->getShapes(&shape, 1);
 
         actor->detachShape(*shape);
         shape->release();
 
-        impl->getScene()->removeActor(*actor);
+        mImpl->getScene()->removeActor(*actor);
       }
     }
     delete[] buffer;
@@ -223,9 +223,9 @@ void PhysicsSystem::synchronizeComponents() {
   {
     LIQUID_PROFILE_EVENT("Cleanup unused rigid bodies");
     PxActorTypeFlags desiredType = PxActorTypeFlag::eRIGID_DYNAMIC;
-    PxU32 count = impl->getScene()->getNbActors(desiredType);
+    PxU32 count = mImpl->getScene()->getNbActors(desiredType);
     PxActor **buffer = new PxActor *[count];
-    impl->getScene()->getActors(desiredType, buffer, count);
+    mImpl->getScene()->getActors(desiredType, buffer, count);
     for (PxU32 i = 0; i < count; ++i) {
       PxRigidDynamic *actor = static_cast<PxRigidDynamic *>(buffer[i]);
 
@@ -234,7 +234,7 @@ void PhysicsSystem::synchronizeComponents() {
 
       // Destroy shape in actor if collidable component
       // is removed
-      if (!entityContext.hasComponent<CollidableComponent>(entity) &&
+      if (!mEntityContext.hasComponent<CollidableComponent>(entity) &&
           actor->getNbShapes() > 0) {
         PxShape *shape = nullptr;
         actor->getShapes(&shape, 1);
@@ -244,8 +244,8 @@ void PhysicsSystem::synchronizeComponents() {
       }
 
       // Destroy actor itself if rigid body component is removed
-      if (!entityContext.hasComponent<RigidBodyComponent>(entity)) {
-        impl->getScene()->removeActor(*actor);
+      if (!mEntityContext.hasComponent<RigidBodyComponent>(entity)) {
+        mImpl->getScene()->removeActor(*actor);
         actor->release();
       }
     }
@@ -254,12 +254,12 @@ void PhysicsSystem::synchronizeComponents() {
 
   {
     LIQUID_PROFILE_EVENT("Synchronize collidable components");
-    entityContext.iterateEntities<CollidableComponent, TransformComponent>(
+    mEntityContext.iterateEntities<CollidableComponent, TransformComponent>(
         [this](auto entity, CollidableComponent &collidable,
                const TransformComponent &transform) {
           // Create or set material
           if (!collidable.material) {
-            collidable.material = impl->getPhysics()->createMaterial(
+            collidable.material = mImpl->getPhysics()->createMaterial(
                 collidable.materialDesc.staticFriction,
                 collidable.materialDesc.dynamicFriction,
                 collidable.materialDesc.restitution);
@@ -274,21 +274,21 @@ void PhysicsSystem::synchronizeComponents() {
 
           // Create or set shape
           if (!collidable.shape) {
-            collidable.shape = impl->createShape(collidable.geometryDesc,
-                                                 *collidable.material);
+            collidable.shape = mImpl->createShape(collidable.geometryDesc,
+                                                  *collidable.material);
             collidable.material->release();
           } else if (PhysxMapping::getPhysxGeometryType(
                          collidable.geometryDesc.type) ==
                      collidable.shape->getGeometryType()) {
-            impl->updateShapeWithGeometryData(collidable.geometryDesc,
-                                              collidable.shape);
+            mImpl->updateShapeWithGeometryData(collidable.geometryDesc,
+                                               collidable.shape);
           } else {
-            auto *newShape = impl->createShape(collidable.geometryDesc,
-                                               *collidable.material);
+            auto *newShape = mImpl->createShape(collidable.geometryDesc,
+                                                *collidable.material);
 
-            if (entityContext.hasComponent<RigidBodyComponent>(entity)) {
+            if (mEntityContext.hasComponent<RigidBodyComponent>(entity)) {
               RigidBodyComponent &rigidBody =
-                  entityContext.getComponent<RigidBodyComponent>(entity);
+                  mEntityContext.getComponent<RigidBodyComponent>(entity);
               rigidBody.actor->detachShape(*collidable.shape);
               rigidBody.actor->attachShape(*newShape);
             } else {
@@ -301,15 +301,15 @@ void PhysicsSystem::synchronizeComponents() {
           }
 
           // Create rigid static if no rigid body
-          if (!entityContext.hasComponent<RigidBodyComponent>(entity) &&
+          if (!mEntityContext.hasComponent<RigidBodyComponent>(entity) &&
               !collidable.rigidStatic) {
-            collidable.rigidStatic = impl->getPhysics()->createRigidStatic(
+            collidable.rigidStatic = mImpl->getPhysics()->createRigidStatic(
                 PhysxMapping::getPhysxTransform(transform.worldTransform));
             collidable.rigidStatic->attachShape(*collidable.shape);
             collidable.rigidStatic->userData =
                 reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
 
-            impl->getScene()->addActor(*collidable.rigidStatic);
+            mImpl->getScene()->addActor(*collidable.rigidStatic);
           } else if (collidable.rigidStatic) {
             // Update transform of rigid static if exists
             collidable.rigidStatic->setGlobalPose(
@@ -320,31 +320,32 @@ void PhysicsSystem::synchronizeComponents() {
 
   {
     LIQUID_PROFILE_EVENT("Synchronize rigid body components");
-    entityContext.iterateEntities<RigidBodyComponent, TransformComponent>(
+    mEntityContext.iterateEntities<RigidBodyComponent, TransformComponent>(
         [this](auto entity, RigidBodyComponent &rigidBody,
                TransformComponent &transform) {
           if (!rigidBody.actor) {
-            rigidBody.actor = impl->getPhysics()->createRigidDynamic(
+            rigidBody.actor = mImpl->getPhysics()->createRigidDynamic(
                 PhysxMapping::getPhysxTransform(transform.worldTransform));
             rigidBody.actor->userData =
                 reinterpret_cast<void *>(static_cast<uintptr_t>(entity));
 
-            impl->getScene()->addActor(*rigidBody.actor);
+            mImpl->getScene()->addActor(*rigidBody.actor);
 
             // Clear collidable's rigid body if exists
-            if (entityContext.hasComponent<CollidableComponent>(entity)) {
+            if (mEntityContext.hasComponent<CollidableComponent>(entity)) {
               CollidableComponent &collidable =
-                  entityContext.getComponent<CollidableComponent>(entity);
-              impl->getScene()->removeActor(*collidable.rigidStatic, false);
+                  mEntityContext.getComponent<CollidableComponent>(entity);
+              mImpl->getScene()->removeActor(*collidable.rigidStatic, false);
               collidable.rigidStatic->release();
               collidable.rigidStatic = nullptr;
             }
           }
 
-          if (entityContext.hasComponent<CollidableComponent>(entity) &&
+          if (mEntityContext.hasComponent<CollidableComponent>(entity) &&
               rigidBody.actor->getNbShapes() == 0) {
             rigidBody.actor->attachShape(
-                *entityContext.getComponent<CollidableComponent>(entity).shape);
+                *mEntityContext.getComponent<CollidableComponent>(entity)
+                     .shape);
           }
 
           rigidBody.actor->setMass(rigidBody.dynamicDesc.mass);
@@ -360,7 +361,7 @@ void PhysicsSystem::synchronizeComponents() {
 void PhysicsSystem::synchronizeTransforms() {
   LIQUID_PROFILE_EVENT("PhysicsSystem::synchronizeTransforms");
   uint32_t count = 0;
-  auto **actors = impl->getScene()->getActiveActors(count);
+  auto **actors = mImpl->getScene()->getActiveActors(count);
 
   {
     LIQUID_PROFILE_EVENT("Synchronize world transforms");
@@ -382,9 +383,9 @@ void PhysicsSystem::synchronizeTransforms() {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityContext.hasComponent<TransformComponent>(entity)) {
+      if (mEntityContext.hasComponent<TransformComponent>(entity)) {
         auto &transform =
-            entityContext.getComponent<TransformComponent>(entity);
+            mEntityContext.getComponent<TransformComponent>(entity);
 
         glm::quat emptyQuat;
         glm::vec3 scale;
@@ -419,13 +420,13 @@ void PhysicsSystem::synchronizeTransforms() {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityContext.hasComponent<TransformComponent>(entity)) {
+      if (mEntityContext.hasComponent<TransformComponent>(entity)) {
         auto &transform =
-            entityContext.getComponent<TransformComponent>(entity);
+            mEntityContext.getComponent<TransformComponent>(entity);
 
-        if (entityContext.hasComponent<TransformComponent>(transform.parent)) {
+        if (mEntityContext.hasComponent<TransformComponent>(transform.parent)) {
           const auto &parentTransform =
-              entityContext.getComponent<TransformComponent>(transform.parent);
+              mEntityContext.getComponent<TransformComponent>(transform.parent);
 
           const auto &invParentTransform =
               glm::inverse(parentTransform.worldTransform);

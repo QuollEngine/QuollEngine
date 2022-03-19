@@ -5,39 +5,39 @@
 
 namespace liquidator {
 
-ConfirmationDialog::ConfirmationDialog(
-    const liquid::String &title_, const liquid::String &prompt_,
-    const ConfirmHandler &confirmHandler_,
-    const liquid::String &confirmButtonLabel_,
-    const liquid::String &cancelButtonLabel_)
-    : title(title_), prompt(prompt_), confirmHandler(confirmHandler_),
-      confirmButtonLabel(confirmButtonLabel_),
-      cancelButtonLabel(cancelButtonLabel_) {}
+ConfirmationDialog::ConfirmationDialog(const liquid::String &title,
+                                       const liquid::String &prompt,
+                                       const ConfirmHandler &confirmHandler,
+                                       const liquid::String &confirmButtonLabel,
+                                       const liquid::String &cancelButtonLabel)
+    : mTitle(title), mPrompt(prompt), mConfirmHandler(confirmHandler),
+      mConfirmButtonLabel(confirmButtonLabel),
+      mCancelButtonLabel(cancelButtonLabel) {}
 
-void ConfirmationDialog::show() { open = true; }
+void ConfirmationDialog::show() { mOpen = true; }
 
 void ConfirmationDialog::render(SceneManager &sceneManager) {
-  if (open) {
-    ImGui::OpenPopup(title.c_str());
+  if (mOpen) {
+    ImGui::OpenPopup(mTitle.c_str());
   }
 
-  if (ImGui::BeginPopupModal(title.c_str())) {
-    ImGui::Text("%s", prompt.c_str());
-    if (ImGui::Button(confirmButtonLabel.c_str())) {
-      confirmHandler(sceneManager);
+  if (ImGui::BeginPopupModal(mTitle.c_str())) {
+    ImGui::Text("%s", mPrompt.c_str());
+    if (ImGui::Button(mConfirmButtonLabel.c_str())) {
+      mConfirmHandler(sceneManager);
       ImGui::CloseCurrentPopup();
     }
 
     ImGui::SameLine();
 
-    if (ImGui::Button(cancelButtonLabel.c_str())) {
+    if (ImGui::Button(mCancelButtonLabel.c_str())) {
       ImGui::CloseCurrentPopup();
     }
 
     ImGui::EndPopup();
   }
 
-  open = false;
+  mOpen = false;
 }
 
 } // namespace liquidator

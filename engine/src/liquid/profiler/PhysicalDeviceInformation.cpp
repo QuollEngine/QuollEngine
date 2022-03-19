@@ -4,13 +4,12 @@
 namespace liquid {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
-    const String &name_, PhysicalDeviceType type_,
-    const UnorderedPropertyMap &properties_,
-    const UnorderedPropertyMap &limits_)
-    : name(name_), type(type_), properties(properties_), limits(limits_) {}
+    const String &name, PhysicalDeviceType type,
+    const UnorderedPropertyMap &properties, const UnorderedPropertyMap &limits)
+    : mName(name), mType(type), mProperties(properties), mLimits(limits) {}
 
 const String PhysicalDeviceInformation::getTypeString() const {
-  switch (type) {
+  switch (mType) {
   case PhysicalDeviceType::DISCRETE_GPU:
     return "Discrete GPU";
   case PhysicalDeviceType::INTEGRATED_GPU:

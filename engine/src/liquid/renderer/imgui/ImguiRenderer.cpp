@@ -20,8 +20,8 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 
 namespace liquid {
 
-ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry_)
-    : registry(registry_) {
+ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
+    : mRegistry(registry) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -30,7 +30,7 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry_)
   io.BackendRendererName = "ImguiCustomBackend";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 
-  frameData.resize(1);
+  mFrameData.resize(1);
 
   loadFonts();
 
@@ -40,11 +40,11 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry_)
 }
 
 ImguiRenderer::~ImguiRenderer() {
-  registry.deleteTexture(fontTexture);
+  mRegistry.deleteTexture(mFontTexture);
 
-  for (auto &x : frameData) {
-    registry.deleteBuffer(x.vertexBuffer);
-    registry.deleteBuffer(x.indexBuffer);
+  for (auto &x : mFrameData) {
+    mRegistry.deleteBuffer(x.vertexBuffer);
+    mRegistry.deleteBuffer(x.indexBuffer);
 
     if (x.vertexBufferData)
       delete[] x.vertexBufferData;
@@ -53,7 +53,7 @@ ImguiRenderer::~ImguiRenderer() {
       delete[] x.indexBufferData;
   }
 
-  frameData.clear();
+  mFrameData.clear();
 
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
@@ -78,8 +78,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
-  currentFrame = (currentFrame + 1) % frameData.size();
-  auto &frameObj = frameData.at(currentFrame);
+  mCurrentFrame = (mCurrentFrame + 1) % mFrameData.size();
+  auto &frameObj = mFrameData.at(mCurrentFrame);
 
   if (data->TotalVtxCount > 0) {
     size_t vertexSize =
@@ -117,14 +117,14 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
     }
 
     frameObj.vertexBuffer =
-        registry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
-                            frameObj.vertexBufferData},
-                           frameObj.vertexBuffer);
+        mRegistry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
+                             frameObj.vertexBufferData},
+                            frameObj.vertexBuffer);
 
     frameObj.indexBuffer =
-        registry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
-                            frameObj.indexBufferData},
-                           frameObj.indexBuffer);
+        mRegistry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
+                             frameObj.indexBufferData},
+                            frameObj.indexBuffer);
   }
 
   // @temporary
@@ -207,8 +207,8 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       int fbWidth, int fbHeight,
                                       rhi::PipelineHandle pipeline) {
   if (data->TotalVtxCount > 0) {
-    commandList.bindVertexBuffer(frameData.at(currentFrame).vertexBuffer);
-    commandList.bindIndexBuffer(frameData.at(currentFrame).indexBuffer,
+    commandList.bindVertexBuffer(mFrameData.at(mCurrentFrame).vertexBuffer);
+    commandList.bindIndexBuffer(mFrameData.at(mCurrentFrame).indexBuffer,
                                 sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16
                                                        : VK_INDEX_TYPE_UINT32);
   }
@@ -254,11 +254,11 @@ void ImguiRenderer::loadFonts() {
     description.format = VK_FORMAT_R8G8B8A8_SRGB;
     description.data = pixels;
 
-    fontTexture = registry.setTexture(description);
+    mFontTexture = mRegistry.setTexture(description);
   }
 
   io.Fonts->SetTexID(
-      reinterpret_cast<void *>(static_cast<uintptr_t>(fontTexture)));
+      reinterpret_cast<void *>(static_cast<uintptr_t>(mFontTexture)));
 
   LOG_DEBUG("[ImGui] Fonts loaded");
 }

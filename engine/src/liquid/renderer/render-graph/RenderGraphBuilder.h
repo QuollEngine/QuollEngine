@@ -51,8 +51,8 @@ public:
   GraphResourceId create(const RenderGraphPipelineDescription &descriptor);
 
 private:
-  RenderGraph &graph;
-  RenderGraphPassBase *pass;
+  RenderGraph &mGraph;
+  RenderGraphPassBase *mPass;
 };
 
 } // namespace liquid

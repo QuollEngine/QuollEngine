@@ -6,8 +6,8 @@
 
 namespace liquid {
 
-MainLoop::MainLoop(Renderer &renderer_, Window &window_)
-    : renderer(renderer_), window(window_) {}
+MainLoop::MainLoop(Renderer &renderer, Window &window)
+    : mRenderer(renderer), mWindow(window) {}
 
 int MainLoop::run(RenderGraph &graph,
                   const std::function<bool(float)> &updater) {
@@ -27,11 +27,11 @@ int MainLoop::run(RenderGraph &graph,
     LIQUID_PROFILE_FRAME("MainLoop");
     auto currentTime = std::chrono::high_resolution_clock::now();
 
-    if (window.shouldClose()) {
+    if (mWindow.shouldClose()) {
       break;
     }
 
-    window.pollEvents();
+    mWindow.pollEvents();
 
     double frameTime = std::clamp(
         std::chrono::duration<double>(currentTime - prevGameTime).count(), 0.0,
@@ -45,20 +45,20 @@ int MainLoop::run(RenderGraph &graph,
       accumulator -= dt;
     }
 
-    renderer.render(graph);
+    mRenderer.render(graph);
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
       prevFrameTime = currentTime;
-      renderer.getStatsManager().collectFPS(frames);
+      mRenderer.getStatsManager().collectFPS(frames);
       frames = 0;
     } else {
       frames++;
     }
   }
 
-  renderer.wait();
+  mRenderer.wait();
 
   return 0;
 }

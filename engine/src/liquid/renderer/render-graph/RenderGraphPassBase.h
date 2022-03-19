@@ -62,7 +62,7 @@ public:
    *
    * @return Pass name
    */
-  inline const String &getName() const { return name; }
+  inline const String &getName() const { return mName; }
 
   /**
    * @brief Add input resource
@@ -93,7 +93,7 @@ public:
    * @return Input resources
    */
   inline const std::vector<rhi::TextureHandle> &getInputs() const {
-    return inputs;
+    return mInputs;
   }
 
   /**
@@ -103,7 +103,7 @@ public:
    */
   inline std::unordered_map<rhi::TextureHandle, RenderPassAttachment> &
   getOutputs() {
-    return outputs;
+    return mOutputs;
   }
 
   /**
@@ -112,7 +112,7 @@ public:
    * @return Resources
    */
   inline const std::vector<GraphResourceId> &getResources() const {
-    return resources;
+    return mResources;
   }
 
   /**
@@ -120,7 +120,7 @@ public:
    *
    * @return Render pass resource
    */
-  inline GraphResourceId getRenderPass() const { return renderPass; }
+  inline GraphResourceId getRenderPass() const { return mRenderPass; }
 
   /**
    * @brief Check if pass is dirty and has to be rebuild
@@ -128,16 +128,16 @@ public:
    * @retval true Pass is dirty
    * @retval false Pass is not dirty
    */
-  inline bool isDirty() const { return dirty; }
+  inline bool isDirty() const { return mDirty; }
 
 private:
-  std::vector<rhi::TextureHandle> inputs;
-  std::vector<GraphResourceId> resources;
-  std::unordered_map<rhi::TextureHandle, RenderPassAttachment> outputs;
+  std::vector<rhi::TextureHandle> mInputs;
+  std::vector<GraphResourceId> mResources;
+  std::unordered_map<rhi::TextureHandle, RenderPassAttachment> mOutputs;
 
-  GraphResourceId renderPass;
-  String name;
-  bool dirty = true;
+  GraphResourceId mRenderPass;
+  String mName;
+  bool mDirty = true;
 };
 
 } // namespace liquid

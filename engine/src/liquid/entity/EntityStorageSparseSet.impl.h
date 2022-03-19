@@ -5,13 +5,13 @@ EntityStorageSparseSet<ComponentTypes...>::~EntityStorageSparseSet() {
 
 template <class... ComponentTypes>
 Entity EntityStorageSparseSet<ComponentTypes...>::createEntity() {
-  numEntities++;
-  if (deleted.size() > 0) {
-    auto eid = deleted.front();
-    deleted.pop_front();
+  mNumEntities++;
+  if (mDeleted.size() > 0) {
+    auto eid = mDeleted.front();
+    mDeleted.pop_front();
     return eid;
   } else {
-    auto eid = lastEntity++;
+    auto eid = mLastEntity++;
     return eid;
   }
 }
@@ -19,17 +19,17 @@ Entity EntityStorageSparseSet<ComponentTypes...>::createEntity() {
 template <class... ComponentTypes>
 inline const size_t
 EntityStorageSparseSet<ComponentTypes...>::getEntityCount() const {
-  return numEntities;
+  return mNumEntities;
 }
 
 template <class... ComponentTypes>
 bool EntityStorageSparseSet<ComponentTypes...>::hasEntity(Entity entity) const {
-  for (auto &deletedEntity : deleted) {
+  for (auto &deletedEntity : mDeleted) {
     if (deletedEntity == entity)
       return false;
   }
 
-  return entity < lastEntity;
+  return entity < mLastEntity;
 }
 
 template <class... ComponentTypes>
@@ -38,8 +38,8 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteEntity(Entity entity) {
     return;
 
   deleteAllEntityComponents(entity);
-  deleted.push_back(entity);
-  this->numEntities--;
+  mDeleted.push_back(entity);
+  this->mNumEntities--;
 }
 
 template <class... ComponentTypes>
@@ -178,7 +178,7 @@ void EntityStorageSparseSet<ComponentTypes...>::iterateEntitiesInternal(
   std::tuple<EntityStorageSparseSetComponentPool<PickComponents> &...>
       pickedPools = {
           std::get<EntityStorageSparseSetComponentPool<PickComponents>>(
-              componentPools)...};
+              mComponentPools)...};
 
   const auto &smallestEntities = getSmallestEntityListFromPools(pickedPools);
 
@@ -219,7 +219,7 @@ template <class ComponentType>
 const EntityStorageSparseSetComponentPool<ComponentType> &
 EntityStorageSparseSet<ComponentTypes...>::getPoolForComponent() const {
   return std::get<EntityStorageSparseSetComponentPool<ComponentType>>(
-      componentPools);
+      mComponentPools);
 }
 
 template <class... ComponentTypes>
@@ -227,14 +227,14 @@ template <class ComponentType>
 EntityStorageSparseSetComponentPool<ComponentType> &
 EntityStorageSparseSet<ComponentTypes...>::getPoolForComponent() {
   return std::get<EntityStorageSparseSetComponentPool<ComponentType>>(
-      componentPools);
+      mComponentPools);
 }
 
 template <class... ComponentTypes>
 template <size_t Index>
 void EntityStorageSparseSet<ComponentTypes...>::deleteAllEntityComponents(
     Entity entity) {
-  auto &pool = std::get<Index>(componentPools);
+  auto &pool = std::get<Index>(mComponentPools);
   if (entity < pool.entityIndices.size() &&
       pool.entityIndices[entity] < DEAD_INDEX) {
 
@@ -267,9 +267,9 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteAllEntityComponents(
 template <class... ComponentTypes>
 template <size_t Index>
 void EntityStorageSparseSet<ComponentTypes...>::deleteAllComponents() {
-  std::get<Index>(componentPools).components.clear();
-  std::get<Index>(componentPools).entityIndices.clear();
-  std::get<Index>(componentPools).entities.clear();
+  std::get<Index>(mComponentPools).components.clear();
+  std::get<Index>(mComponentPools).entityIndices.clear();
+  std::get<Index>(mComponentPools).entities.clear();
 
   if constexpr (Index + 1 != sizeof...(ComponentTypes)) {
     deleteAllComponents<Index + 1>();
@@ -278,7 +278,7 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteAllComponents() {
 
 template <class... ComponentTypes>
 void EntityStorageSparseSet<ComponentTypes...>::deleteAllEntities() {
-  lastEntity = 0;
-  deleted.clear();
-  numEntities = 0;
+  mLastEntity = 0;
+  mDeleted.clear();
+  mNumEntities = 0;
 }

@@ -35,7 +35,7 @@ public:
    * @retval false Not complete
    */
   inline bool isComplete() const {
-    return graphicsFamily.has_value() && presentFamily.has_value();
+    return mGraphicsFamily.has_value() && mPresentFamily.has_value();
   }
 
   /**
@@ -44,12 +44,26 @@ public:
    * @return Array with graphics and present family indices
    */
   inline const std::vector<uint32_t> toArray() const {
-    return {graphicsFamily.value(), presentFamily.value()};
+    return {mGraphicsFamily.value(), mPresentFamily.value()};
   }
 
-public:
-  std::optional<uint32_t> graphicsFamily;
-  std::optional<uint32_t> presentFamily;
+  /**
+   * @brief Get graphics queue index
+   *
+   * @return Graphics queue index
+   */
+  inline uint32_t getGraphicsFamily() const { return mGraphicsFamily.value(); }
+
+  /**
+   * @brief Get present queue index
+   *
+   * @return Present queue index
+   */
+  inline uint32_t getPresentFamily() const { return mPresentFamily.value(); }
+
+private:
+  std::optional<uint32_t> mGraphicsFamily;
+  std::optional<uint32_t> mPresentFamily;
 };
 
 } // namespace liquid::rhi

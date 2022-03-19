@@ -34,7 +34,7 @@ public:
    *
    * @return Sequence target
    */
-  inline KeyframeSequenceTarget getTarget() const { return target; }
+  inline KeyframeSequenceTarget getTarget() const { return mTarget; }
 
   /**
    * @brief Get sequence interpolation
@@ -42,7 +42,7 @@ public:
    * @return Sequence interpolation
    */
   inline KeyframeSequenceInterpolation getInterpolation() const {
-    return interpolation;
+    return mInterpolation;
   }
 
   /**
@@ -60,7 +60,7 @@ public:
    * @return Keyframe time
    */
   inline float getKeyframeTime(size_t index) const {
-    return keyframeTimes.at(index);
+    return mKeyframeTimes.at(index);
   }
 
   /**
@@ -70,7 +70,7 @@ public:
    * @return Keyframe value
    */
   inline const glm::vec4 &getKeyframeValue(size_t index) const {
-    return keyframeValues.at(index);
+    return mKeyframeValues.at(index);
   }
 
   /**
@@ -88,7 +88,7 @@ public:
    *
    * @return joint
    */
-  inline JointId getJoint() const { return joint; }
+  inline JointId getJoint() const { return mJoint; }
 
   /**
    * @brief Is joint target
@@ -96,7 +96,7 @@ public:
    * @retval true Is joint target
    * @retval false Is not joint target
    */
-  inline bool isJointTarget() const { return jointTarget; }
+  inline bool isJointTarget() const { return mJointTarget; }
 
 private:
   /**
@@ -116,13 +116,13 @@ private:
   glm::vec4 getLinearInterpolatedValue(float time) const;
 
 private:
-  KeyframeSequenceTarget target;
-  KeyframeSequenceInterpolation interpolation;
-  JointId joint = 0;
-  bool jointTarget = false;
+  KeyframeSequenceTarget mTarget;
+  KeyframeSequenceInterpolation mInterpolation;
+  JointId mJoint = 0;
+  bool mJointTarget = false;
 
-  std::vector<float> keyframeTimes;
-  std::vector<glm::vec4> keyframeValues;
+  std::vector<float> mKeyframeTimes;
+  std::vector<glm::vec4> mKeyframeValues;
 };
 
 } // namespace liquid

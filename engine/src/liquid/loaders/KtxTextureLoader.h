@@ -22,7 +22,7 @@ public:
   rhi::TextureHandle loadFromFile(const String &filename);
 
 private:
-  rhi::ResourceRegistry &registry;
+  rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquid

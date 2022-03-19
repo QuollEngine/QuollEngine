@@ -14,7 +14,7 @@ public:
   void render(SceneManager &sceneManager);
 
 private:
-  bool open = false;
+  bool mOpen = false;
 };
 
 } // namespace liquidator

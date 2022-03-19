@@ -4,35 +4,35 @@
 namespace liquid {
 
 void StatsManager::addDrawCall(size_t primitiveCount) {
-  drawCallsCount++;
-  drawnPrimitivesCount += primitiveCount;
+  mDrawCallsCount++;
+  mDrawnPrimitivesCount += primitiveCount;
 }
 
 void StatsManager::resetDrawCalls() {
-  drawCallsCount = 0;
-  drawnPrimitivesCount = 0;
+  mDrawCallsCount = 0;
+  mDrawnPrimitivesCount = 0;
 }
 
 void StatsManager::addTexture(size_t size) {
-  allocatedTexturesSize += size;
-  allocatedTexturesCount++;
+  mAllocatedTexturesSize += size;
+  mAllocatedTexturesCount++;
 }
 
 void StatsManager::removeTexture(size_t size) {
-  allocatedTexturesSize -= size;
-  allocatedTexturesCount--;
+  mAllocatedTexturesSize -= size;
+  mAllocatedTexturesCount--;
 }
 
 void StatsManager::addBuffer(size_t size) {
-  allocatedBuffersSize += size;
-  allocatedBuffersCount++;
+  mAllocatedBuffersSize += size;
+  mAllocatedBuffersCount++;
 }
 
 void StatsManager::removeBuffer(size_t size) {
-  allocatedBuffersSize -= size;
-  allocatedBuffersCount--;
+  mAllocatedBuffersSize -= size;
+  mAllocatedBuffersCount--;
 }
 
-void StatsManager::collectFPS(uint32_t fps_) { fps = fps_; }
+void StatsManager::collectFPS(uint32_t fps) { mFps = fps; }
 
 } // namespace liquid

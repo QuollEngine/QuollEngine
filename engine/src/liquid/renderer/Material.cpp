@@ -4,29 +4,29 @@
 
 namespace liquid {
 
-Material::Material(const std::vector<rhi::TextureHandle> &textures_,
-                   const std::vector<std::pair<String, Property>> &properties_,
-                   rhi::ResourceRegistry &registry_)
-    : textures(textures_), registry(registry_) {
+Material::Material(const std::vector<rhi::TextureHandle> &textures,
+                   const std::vector<std::pair<String, Property>> &properties,
+                   rhi::ResourceRegistry &registry)
+    : mTextures(textures), mRegistry(registry) {
 
-  for (size_t i = 0; i < properties_.size(); ++i) {
-    auto &prop = properties_[i];
-    properties.push_back(prop.second);
-    propertyMap.insert({prop.first, i});
+  for (size_t i = 0; i < properties.size(); ++i) {
+    auto &prop = properties[i];
+    mProperties.push_back(prop.second);
+    mPropertyMap.insert({prop.first, i});
   }
 
-  if (!properties.empty()) {
+  if (!mProperties.empty()) {
     auto size = updateBufferData();
-    uniformBuffer = registry.setBuffer({rhi::BufferType::Uniform, size, data});
-    descriptor.bind(0, uniformBuffer, rhi::DescriptorType::UniformBuffer);
+    mBuffer = mRegistry.setBuffer({rhi::BufferType::Uniform, size, mData});
+    mDescriptor.bind(0, mBuffer, rhi::DescriptorType::UniformBuffer);
   }
 
-  descriptor.bind(1, textures, rhi::DescriptorType::CombinedImageSampler);
+  mDescriptor.bind(1, mTextures, rhi::DescriptorType::CombinedImageSampler);
 }
 
 void Material::updateProperty(const String &name, const Property &value) {
-  const auto &it = propertyMap.find(name);
-  if (it == propertyMap.end() || (*it).second > properties.size()) {
+  const auto &it = mPropertyMap.find(name);
+  if (it == mPropertyMap.end() || (*it).second > mProperties.size()) {
     LOG_DEBUG("Property \"" << name
                             << "\" does not exist in material. Skipping...");
     return;
@@ -34,57 +34,57 @@ void Material::updateProperty(const String &name, const Property &value) {
 
   size_t index = (*it).second;
 
-  if (properties.at(index).getType() != value.getType()) {
+  if (mProperties.at(index).getType() != value.getType()) {
     LOG_DEBUG("Type of property \""
               << name << "\" does match the type of new property. Skipping...");
     return;
   }
 
-  properties.at(index) = value;
+  mProperties.at(index) = value;
   auto size = updateBufferData();
-  uniformBuffer =
-      registry.setBuffer({rhi::BufferType::Uniform, size, data}, uniformBuffer);
+  mBuffer =
+      mRegistry.setBuffer({rhi::BufferType::Uniform, size, mData}, mBuffer);
 }
 
 size_t Material::updateBufferData() {
-  if (data) {
-    delete data;
+  if (mData) {
+    delete mData;
   }
 
   size_t size = 0;
   size_t idx = 0;
 
   size_t maxValue = 0;
-  for (auto &value : properties) {
+  for (auto &value : mProperties) {
     maxValue = maxValue > value.getSize() ? maxValue : value.getSize();
   }
 
-  size = maxValue * properties.size();
+  size = maxValue * mProperties.size();
 
-  data = new char[size];
+  mData = new char[size];
 
-  for (auto &value : properties) {
+  for (auto &value : mProperties) {
     if (value.getType() == Property::INT32) {
       auto val = value.getValue<int32_t>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::UINT32) {
       auto val = value.getValue<uint32_t>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::REAL) {
       auto val = value.getValue<float>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::VECTOR2) {
       auto &val = value.getValue<glm::vec2>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::VECTOR3) {
       auto &val = value.getValue<glm::vec3>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::VECTOR4) {
       auto &val = value.getValue<glm::vec4>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     } else if (value.getType() == Property::MATRIX4) {
       auto &val = value.getValue<glm::mat4>();
-      memcpy(data + idx, &val, maxValue);
+      memcpy(mData + idx, &val, maxValue);
     }
     idx += maxValue;
   }

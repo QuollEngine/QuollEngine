@@ -9,52 +9,52 @@ using liquid::Window;
 
 namespace liquidator {
 
-EditorCamera::EditorCamera(liquid::EntityContext &context_,
-                           liquid::Renderer &renderer, liquid::Window &window_)
-    : context(context_), window(window_),
-      camera(new Camera(&renderer.getRegistry())) {
+EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
+                           liquid::Renderer &renderer, liquid::Window &window)
+    : mEntityContext(entityContext), mWindow(window),
+      mCamera(new Camera(&renderer.getRegistry())) {
 
-  mouseButtonHandler = window.addMouseButtonHandler(
+  mMouseButtonHandler = mWindow.addMouseButtonHandler(
       [this](int button, int action, int mods) mutable {
         if (button != GLFW_MOUSE_BUTTON_MIDDLE) {
           return;
         }
 
         if (action == GLFW_RELEASE) {
-          inputState = InputState::None;
+          mInputState = InputState::None;
           return;
         }
 
-        const auto &cursorPos = window.getCurrentMousePosition();
+        const auto &cursorPos = mWindow.getCurrentMousePosition();
 
         // Do not trigger action if cursor is outside
         // Imgui window viewport
-        if (cursorPos.x < x || cursorPos.x > x + width || cursorPos.y < y ||
-            cursorPos.y > y + height) {
+        if (cursorPos.x < mX || cursorPos.x > mX + mWidth || cursorPos.y < mY ||
+            cursorPos.y > mY + mHeight) {
           return;
         }
 
-        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
-          inputState = InputState::Pan;
-          prevMousePos = cursorPos;
-        } else if (window.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-          inputState = InputState::Zoom;
-          prevMousePos = cursorPos;
+        if (mWindow.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+          mInputState = InputState::Pan;
+          mPrevMousePos = cursorPos;
+        } else if (mWindow.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+          mInputState = InputState::Zoom;
+          mPrevMousePos = cursorPos;
         } else {
-          inputState = InputState::Rotate;
-          prevMousePos = cursorPos;
+          mInputState = InputState::Rotate;
+          mPrevMousePos = cursorPos;
         }
       });
 
   // Out of bounds handler
-  mouseMoveHandler =
-      window.addMouseMoveHandler([this](double xpos, double ypos) mutable {
-        if (inputState == InputState::None) {
+  mMouseMoveHandler =
+      mWindow.addMouseMoveHandler([this](double xpos, double ypos) mutable {
+        if (mInputState == InputState::None) {
           return;
         }
 
         constexpr float MIN_OOB_THRESHOLD = 2.0f;
-        const auto &size = window.getWindowSize();
+        const auto &size = mWindow.getWindowSize();
 
         float minX = 0;
         float maxX = static_cast<float>(size.x);
@@ -81,83 +81,85 @@ EditorCamera::EditorCamera(liquid::EntityContext &context_,
         }
 
         if (outOfBounds) {
-          prevMousePos = newPos;
-          window.setMousePosition(newPos);
+          mPrevMousePos = newPos;
+          mWindow.setMousePosition(newPos);
         }
       });
 
-  scrollWheelHandler =
-      window.addScrollWheelHandler([this](double xoffset, double yoffset) {
-        if (inputState != InputState::None) {
+  mScrollWheelHandler =
+      mWindow.addScrollWheelHandler([this](double xoffset, double yoffset) {
+        if (mInputState != InputState::None) {
           return;
         }
-        glm::vec3 change =
-            glm::vec3(eye - center) * static_cast<float>(yoffset) * ZOOM_SPEED;
-        center += change;
-        eye += change;
+        glm::vec3 change = glm::vec3(mEye - mCenter) *
+                           static_cast<float>(yoffset) * ZOOM_SPEED;
+        mCenter += change;
+        mEye += change;
       });
 }
 
 EditorCamera::~EditorCamera() {
-  window.removeMouseButtonHandler(mouseButtonHandler);
-  window.removeMouseMoveHandler(mouseMoveHandler);
-  window.removeScrollWheelHandler(scrollWheelHandler);
+  mWindow.removeMouseButtonHandler(mMouseButtonHandler);
+  mWindow.removeMouseMoveHandler(mMouseMoveHandler);
+  mWindow.removeScrollWheelHandler(mScrollWheelHandler);
 
-  context.deleteComponent<liquid::CameraComponent>(cameraEntity);
+  mEntityContext.deleteComponent<liquid::CameraComponent>(mCameraEntity);
 }
 
-void EditorCamera::setCenter(const glm::vec3 &center_) { center = center_; }
+void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
 
-void EditorCamera::setEye(const glm::vec3 &eye_) { eye = eye_; }
+void EditorCamera::setEye(const glm::vec3 &eye) { mEye = eye; }
 
 void EditorCamera::update() {
-  if (inputState == InputState::Pan) {
+  if (mInputState == InputState::Pan) {
     pan();
-  } else if (inputState == InputState::Rotate) {
+  } else if (mInputState == InputState::Rotate) {
     rotate();
-  } else if (inputState == InputState::Zoom) {
+  } else if (mInputState == InputState::Zoom) {
     zoom();
   }
 
-  camera->lookAt(eye, center, up);
-  camera->setPerspective(
-      fov, static_cast<float>(width) / static_cast<float>(height), near, far);
+  mCamera->lookAt(mEye, mCenter, mUp);
+  mCamera->setPerspective(
+      mFov, static_cast<float>(mWidth) / static_cast<float>(mHeight), mNear,
+      mFar);
 }
 
 void EditorCamera::reset() {
-  eye = DEFAULT_EYE;
-  center = DEFAULT_CENTER;
-  up = DEFAULT_UP;
-  fov = DEFAULT_FOV;
-  near = DEFAULT_NEAR;
-  far = DEFAULT_FAR;
+  mEye = DEFAULT_EYE;
+  mCenter = DEFAULT_CENTER;
+  mUp = DEFAULT_UP;
+  mFov = DEFAULT_FOV;
+  mNear = DEFAULT_NEAR;
+  mFar = DEFAULT_FAR;
 
-  if (!context.hasEntity(cameraEntity)) {
-    cameraEntity = context.createEntity();
-    context.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+  if (!mEntityContext.hasEntity(mCameraEntity)) {
+    mCameraEntity = mEntityContext.createEntity();
+    mEntityContext.setComponent<liquid::CameraComponent>(mCameraEntity,
+                                                         {mCamera});
   }
 }
 
 void EditorCamera::pan() {
   constexpr float PAN_SPEED = 0.03f;
 
-  glm::vec2 mousePos = window.getCurrentMousePosition();
-  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(eye - center), up));
+  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(mEye - mCenter), mUp));
 
   glm::vec2 mousePosDiff =
-      glm::vec4((mousePos - prevMousePos) * PAN_SPEED, 0.0f, 0.0f);
+      glm::vec4((mousePos - mPrevMousePos) * PAN_SPEED, 0.0f, 0.0f);
 
-  glm::vec3 change = up * mousePosDiff.y + right * mousePosDiff.x;
-  eye += change;
-  center += change;
-  prevMousePos = mousePos;
+  glm::vec3 change = mUp * mousePosDiff.y + right * mousePosDiff.x;
+  mEye += change;
+  mCenter += change;
+  mPrevMousePos = mousePos;
 }
 
 void EditorCamera::rotate() {
   constexpr float TWO_PI = 2.0f * glm::pi<float>();
 
-  glm::vec2 mousePos = window.getCurrentMousePosition();
-  const auto &size = window.getFramebufferSize();
+  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  const auto &size = mWindow.getFramebufferSize();
 
   glm ::vec2 screenToSphere{// horizontal = 2pi
                             (TWO_PI / static_cast<float>(size.x)),
@@ -166,40 +168,39 @@ void EditorCamera::rotate() {
 
   // Convert mouse position difference to angle
   // difference for arcball
-  glm::vec2 angleDiff = (mousePos - prevMousePos) * screenToSphere;
-  glm::vec3 direction = glm::vec3(eye - center);
-  glm::vec3 right = glm::normalize(glm::cross(direction, up));
-  up = glm::normalize(glm::cross(right, direction));
+  glm::vec2 angleDiff = (mousePos - mPrevMousePos) * screenToSphere;
+  glm::vec3 direction = glm::vec3(mEye - mCenter);
+  glm::vec3 right = glm::normalize(glm::cross(direction, mUp));
+  mUp = glm::normalize(glm::cross(right, direction));
 
-  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, up);
+  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, mUp);
   glm::mat4 rotationY = glm::rotate(glm::mat4{1.0f}, angleDiff.y, right);
 
-  eye =
-      glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) + center;
+  mEye =
+      glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) + mCenter;
 
-  prevMousePos = mousePos;
+  mPrevMousePos = mousePos;
 }
 
 void EditorCamera::zoom() {
-  glm::vec2 mousePos = window.getCurrentMousePosition();
-  float zoomFactor = (mousePos.y - prevMousePos.y) * ZOOM_SPEED;
+  glm::vec2 mousePos = mWindow.getCurrentMousePosition();
+  float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZOOM_SPEED;
 
-  glm::vec3 change = glm::vec3(eye - center) * zoomFactor;
-  center += change;
-  eye += change;
-  prevMousePos = mousePos;
+  glm::vec3 change = glm::vec3(mEye - mCenter) * zoomFactor;
+  mCenter += change;
+  mEye += change;
+  mPrevMousePos = mousePos;
 }
 
-void EditorCamera::setViewport(float x_, float y_, float width_,
-                               float height_) {
-  x = x_;
-  y = y_;
-  width = width_;
-  height = height_;
+void EditorCamera::setViewport(float x, float y, float width, float height) {
+  mX = x;
+  mY = y;
+  mWidth = width;
+  mHeight = height;
 }
 
 void EditorCamera::updatePerspective(float aspectRatio) {
-  camera->setPerspective(fov, aspectRatio, near, far);
+  mCamera->setPerspective(mFov, aspectRatio, mNear, mFar);
 }
 
 } // namespace liquidator

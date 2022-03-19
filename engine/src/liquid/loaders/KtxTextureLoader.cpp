@@ -8,8 +8,8 @@
 
 namespace liquid {
 
-KtxTextureLoader::KtxTextureLoader(rhi::ResourceRegistry &registry_)
-    : registry(registry_) {}
+KtxTextureLoader::KtxTextureLoader(rhi::ResourceRegistry &registry)
+    : mRegistry(registry) {}
 
 rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
   ktxTexture *ktxTextureData = nullptr;
@@ -64,7 +64,7 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
 
   ktxTexture_Destroy(ktxTextureData);
 
-  return registry.setTexture(description);
+  return mRegistry.setTexture(description);
 }
 
 } // namespace liquid

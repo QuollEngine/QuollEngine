@@ -11,11 +11,11 @@ public:
   /**
    * @brief Create scene manager
    *
-   * @param context Entity context
+   * @param entityContext Entity context
    * @param editorCamera Editor camera
    * @param editorGrid Editor grid
    */
-  SceneManager(liquid::EntityContext &context, EditorCamera &editorCamera,
+  SceneManager(liquid::EntityContext &entityContext, EditorCamera &editorCamera,
                EditorGrid &editorGrid);
 
   SceneManager(const SceneManager &) = delete;
@@ -34,7 +34,7 @@ public:
    *
    * @return Active scene
    */
-  inline liquid::Scene *getActiveScene() { return activeScene; }
+  inline liquid::Scene *getActiveScene() { return mActiveScene; }
 
   /**
    * @brief Check if new scene has been requested
@@ -42,21 +42,21 @@ public:
    * @retval true New scene is requested
    * @retval false New scene is not requested
    */
-  inline bool hasNewScene() const { return newSceneRequested; }
+  inline bool hasNewScene() const { return mNewSceneRequested; }
 
   /**
    * @brief Get editor camera
    *
    * @return Editor camera
    */
-  inline EditorCamera &getEditorCamera() { return editorCamera; }
+  inline EditorCamera &getEditorCamera() { return mEditorCamera; }
 
   /**
    * @brief Get editor grid
    *
    * @return Editor grid
    */
-  inline EditorGrid &getEditorGrid() { return editorGrid; }
+  inline EditorGrid &getEditorGrid() { return mEditorGrid; }
 
   /**
    * @brief Creates a new scene and sets it as active
@@ -64,11 +64,11 @@ public:
   void createNewScene();
 
 private:
-  liquid::Scene *activeScene = nullptr;
-  bool newSceneRequested = true;
-  liquid::EntityContext &context;
-  EditorCamera &editorCamera;
-  EditorGrid &editorGrid;
+  liquid::Scene *mActiveScene = nullptr;
+  bool mNewSceneRequested = true;
+  liquid::EntityContext &mEntityContext;
+  EditorCamera &mEditorCamera;
+  EditorGrid &mEditorGrid;
 };
 
 } // namespace liquidator

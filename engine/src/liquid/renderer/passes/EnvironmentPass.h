@@ -39,10 +39,10 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  GraphResourceId pipelineId = 0;
-  EntityContext &entityContext;
-  ShaderLibrary &shaderLibrary;
-  SharedPtr<RenderData> renderData;
+  GraphResourceId mPipelineId = 0;
+  EntityContext &mEntityContext;
+  ShaderLibrary &mShaderLibrary;
+  SharedPtr<RenderData> mRenderData;
 };
 
 } // namespace liquid

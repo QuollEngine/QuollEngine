@@ -7,31 +7,31 @@
 
 namespace liquid {
 
-RenderGraphBuilder::RenderGraphBuilder(RenderGraph &graph_,
-                                       RenderGraphPassBase *pass_)
-    : graph(graph_), pass(pass_) {}
+RenderGraphBuilder::RenderGraphBuilder(RenderGraph &graph,
+                                       RenderGraphPassBase *pass)
+    : mGraph(graph), mPass(pass) {}
 
 rhi::TextureHandle RenderGraphBuilder::write(const String &name) {
-  LIQUID_ASSERT(graph.hasResourceId(name),
+  LIQUID_ASSERT(mGraph.hasResourceId(name),
                 "Resource named \"" + name + "\" does not exist");
-  auto resourceId = graph.getResourceId(name);
-  pass->addOutput(resourceId, {});
+  auto resourceId = mGraph.getResourceId(name);
+  mPass->addOutput(resourceId, {});
 
   return resourceId;
 }
 
 rhi::TextureHandle RenderGraphBuilder::read(const String &name) {
-  LIQUID_ASSERT(graph.hasResourceId(name),
+  LIQUID_ASSERT(mGraph.hasResourceId(name),
                 "Resource named \"" + name + "\" does not exist");
-  auto resourceId = graph.getResourceId(name);
-  pass->addInput(resourceId);
+  auto resourceId = mGraph.getResourceId(name);
+  mPass->addInput(resourceId);
   return resourceId;
 }
 
 GraphResourceId
 RenderGraphBuilder::create(const RenderGraphPipelineDescription &descriptor) {
-  auto resourceId = graph.addPipeline(descriptor);
-  pass->addResource(resourceId);
+  auto resourceId = mGraph.addPipeline(descriptor);
+  mPass->addResource(resourceId);
   return resourceId;
 }
 

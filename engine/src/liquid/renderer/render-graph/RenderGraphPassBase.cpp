@@ -2,28 +2,28 @@
 #include "RenderGraphPassBase.h"
 
 namespace liquid {
-RenderGraphPassBase::RenderGraphPassBase(const String &name_,
-                                         GraphResourceId renderPass_)
-    : name(name_), renderPass(renderPass_) {}
+RenderGraphPassBase::RenderGraphPassBase(const String &name,
+                                         GraphResourceId renderPass)
+    : mName(name), mRenderPass(renderPass) {}
 
 void RenderGraphPassBase::build(RenderGraphBuilder &&builder) {
-  if (dirty) {
+  if (mDirty) {
     buildInternal(builder);
-    dirty = false;
+    mDirty = false;
   }
 }
 
 void RenderGraphPassBase::addInput(rhi::TextureHandle resourceId) {
-  inputs.push_back(resourceId);
+  mInputs.push_back(resourceId);
 }
 
 void RenderGraphPassBase::addOutput(rhi::TextureHandle resourceId,
                                     const RenderPassAttachment &attachment) {
-  outputs.insert({resourceId, attachment});
+  mOutputs.insert({resourceId, attachment});
 }
 
 void RenderGraphPassBase::addResource(GraphResourceId resourceId) {
-  resources.push_back(resourceId);
+  mResources.push_back(resourceId);
 }
 
 } // namespace liquid

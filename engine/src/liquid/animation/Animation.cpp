@@ -4,11 +4,11 @@
 
 namespace liquid {
 
-Animation::Animation(const String &name_, float time_)
-    : name(name_), time(time_) {}
+Animation::Animation(const String &name, float time)
+    : mName(name), mTime(time) {}
 
 void Animation::addKeyframeSequence(const KeyframeSequence &sequence) {
-  keyframeSequences.push_back(sequence);
+  mKeyframeSequences.push_back(sequence);
 }
 
 } // namespace liquid

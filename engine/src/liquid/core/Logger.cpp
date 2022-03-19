@@ -11,15 +11,15 @@ std::streamsize NullOutStreamBuf::xsputn(const char *s, std::streamsize n) {
 
 int NullOutStreamBuf::overflow(int c) { return 1; }
 
-NullOutStream::NullOutStream() : std::ostream(&buf) {}
+NullOutStream::NullOutStream() : std::ostream(&mBuf) {}
 
-LoggerStream::LoggerStream(std::ostream &stream_) : stream(stream_){};
-LoggerStream::LoggerStream(LoggerStream &&rhs) : stream(rhs.stream) {
-  rhs.alive = false;
+LoggerStream::LoggerStream(std::ostream &stream) : mStream(stream){};
+LoggerStream::LoggerStream(LoggerStream &&rhs) : mStream(rhs.mStream) {
+  rhs.mAlive = false;
 }
 LoggerStream::~LoggerStream() {
-  if (alive) {
-    stream << std::endl;
+  if (mAlive) {
+    mStream << std::endl;
   }
 }
 
@@ -40,7 +40,7 @@ std::string Logger::getSeverityString(Severity severity) {
   }
 }
 
-Logger::Logger(Severity minSeverity_) : minSeverity(minSeverity_) {}
+Logger::Logger(Severity minSeverity) : mMinSeverity(minSeverity) {}
 
 String
 Logger::format(Severity severity,
@@ -56,7 +56,7 @@ Logger::format(Severity severity,
 
 LoggerStream Logger::log(Severity severity) {
   auto timestamp = std::chrono::system_clock::now();
-  auto &&stream = LoggerStream(severity >= minSeverity ? std::cout : nullOut);
+  auto &&stream = LoggerStream(severity >= mMinSeverity ? std::cout : mNullOut);
   return std::move(stream << format(severity, std::move(timestamp)));
 }
 

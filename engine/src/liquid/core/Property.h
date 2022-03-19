@@ -77,7 +77,7 @@ public:
    *
    * @return Property type
    */
-  inline PropertyType getType() const { return type; }
+  inline PropertyType getType() const { return mType; }
 
   /**
    * @brief Get size
@@ -102,61 +102,61 @@ public:
   template <class ValueType> inline const ValueType getValue() const {
     LIQUID_ASSERT(false, "Property type is not supported");
 
-    return std::any_cast<ValueType>(value);
+    return std::any_cast<ValueType>(mValue);
   }
 
 private:
-  std::any value;
+  std::any mValue;
 
-  PropertyType type;
+  PropertyType mType;
 };
 
 template <> inline const int32_t Property::getValue() const {
-  LIQUID_ASSERT(type == INT32, "Property type is not int32");
+  LIQUID_ASSERT(mType == INT32, "Property type is not int32");
 
-  return std::any_cast<int32_t>(value);
+  return std::any_cast<int32_t>(mValue);
 }
 
 template <> inline const uint32_t Property::getValue() const {
-  LIQUID_ASSERT(type == UINT32, "Property type is not uint32");
+  LIQUID_ASSERT(mType == UINT32, "Property type is not uint32");
 
-  return std::any_cast<uint32_t>(value);
+  return std::any_cast<uint32_t>(mValue);
 }
 
 template <> inline const uint64_t Property::getValue() const {
-  LIQUID_ASSERT(type == UINT64, "Property type is not uint64");
+  LIQUID_ASSERT(mType == UINT64, "Property type is not uint64");
 
-  return std::any_cast<uint64_t>(value);
+  return std::any_cast<uint64_t>(mValue);
 }
 
 template <> inline const float Property::getValue() const {
-  LIQUID_ASSERT(type == REAL, "Property type is not a real number");
+  LIQUID_ASSERT(mType == REAL, "Property type is not a real number");
 
-  return std::any_cast<float>(value);
+  return std::any_cast<float>(mValue);
 }
 
 template <> inline const glm::vec2 Property::getValue() const {
-  LIQUID_ASSERT(type == VECTOR2, "Property type is not Vector2");
+  LIQUID_ASSERT(mType == VECTOR2, "Property type is not Vector2");
 
-  return std::any_cast<glm::vec2>(value);
+  return std::any_cast<glm::vec2>(mValue);
 }
 
 template <> inline const glm::vec3 Property::getValue() const {
-  LIQUID_ASSERT(type == VECTOR3, "Property type is not Vector3");
+  LIQUID_ASSERT(mType == VECTOR3, "Property type is not Vector3");
 
-  return std::any_cast<glm::vec3>(value);
+  return std::any_cast<glm::vec3>(mValue);
 }
 
 template <> inline const glm::vec4 Property::getValue() const {
-  LIQUID_ASSERT(type == VECTOR4, "Property type is not Vector4");
+  LIQUID_ASSERT(mType == VECTOR4, "Property type is not Vector4");
 
-  return std::any_cast<glm::vec4>(value);
+  return std::any_cast<glm::vec4>(mValue);
 }
 
 template <> inline const glm::mat4 Property::getValue() const {
-  LIQUID_ASSERT(type == MATRIX4, "Property type is not Matrix4");
+  LIQUID_ASSERT(mType == MATRIX4, "Property type is not Matrix4");
 
-  return std::any_cast<glm::mat4>(value);
+  return std::any_cast<glm::mat4>(mValue);
 }
 
 } // namespace liquid

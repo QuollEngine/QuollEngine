@@ -124,7 +124,7 @@ public:
    *
    * @return Swapchain color
    */
-  inline const glm::vec4 &getSwapchainColor() const { return swapchainColor; }
+  inline const glm::vec4 &getSwapchainColor() const { return mSwapchainColor; }
 
   /**
    * @brief Check if resource is swapchain
@@ -145,7 +145,7 @@ public:
    * @retval false Resource is not a pipeline
    */
   inline const bool isPipeline(GraphResourceId id) const {
-    return pipelines.find(id) != pipelines.end();
+    return mPipelines.find(id) != mPipelines.end();
   }
 
   /**
@@ -156,7 +156,7 @@ public:
    */
   inline const RenderGraphPipelineDescription &
   getPipeline(GraphResourceId id) const {
-    return pipelines.at(id);
+    return mPipelines.at(id);
   }
 
   /**
@@ -164,7 +164,7 @@ public:
    *
    * @return Resource registry
    */
-  inline RenderGraphRegistry &getResourceRegistry() { return registry; }
+  inline RenderGraphRegistry &getResourceRegistry() { return mRegistry; }
 
   /**
    * @brief Get all render passes
@@ -172,7 +172,7 @@ public:
    * @return Render passes
    */
   inline const std::vector<RenderGraphPassBase *> &getRenderPasses() const {
-    return passes;
+    return mPasses;
   }
 
 private:
@@ -205,21 +205,17 @@ private:
   void addPassInternal(RenderGraphPassBase *pass);
 
 private:
-  std::unordered_map<GraphResourceId, RenderGraphPipelineDescription> pipelines;
-  std::unordered_map<String, rhi::TextureHandle> mResourceMap{
-      {"SWAPCHAIN", rhi::TextureHandle(1)}};
-
+  RenderGraphRegistry mRegistry;
+  glm::vec4 mSwapchainColor{};
   std::unordered_map<rhi::TextureHandle,
                      std::variant<glm::vec4, DepthStencilClear>>
       mTextures;
-
-  std::vector<RenderGraphPassBase *> passes;
-
-  GraphResourceId lastId = 1;
-
-  RenderGraphRegistry registry;
-
-  glm::vec4 swapchainColor{};
+  std::unordered_map<GraphResourceId, RenderGraphPipelineDescription>
+      mPipelines;
+  std::unordered_map<String, rhi::TextureHandle> mResourceMap{
+      {"SWAPCHAIN", rhi::TextureHandle(1)}};
+  std::vector<RenderGraphPassBase *> mPasses;
+  GraphResourceId mLastId = 1;
 };
 
 } // namespace liquid

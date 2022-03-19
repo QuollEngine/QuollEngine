@@ -46,7 +46,7 @@ public:
    * @return Projection View matrix
    */
   inline const glm::mat4 &getProjectionViewMatrix() {
-    return data.projectionViewMatrix;
+    return mData.projectionViewMatrix;
   }
 
   /**
@@ -55,7 +55,7 @@ public:
    * @return Projection matrix
    */
   inline const glm::mat4 &getProjectionMatrix() {
-    return data.projectionMatrix;
+    return mData.projectionMatrix;
   }
 
   /**
@@ -63,21 +63,21 @@ public:
    *
    * @return View matrix
    */
-  inline const glm::mat4 &getViewMatrix() { return data.viewMatrix; }
+  inline const glm::mat4 &getViewMatrix() { return mData.viewMatrix; }
 
   /**
    * @brief Get uniform buffer
    *
    * @return Uniform buffer
    */
-  inline rhi::BufferHandle getUniformBuffer() { return uniformBuffer; }
+  inline rhi::BufferHandle getBuffer() { return mBuffer; }
 
   /**
    * @brief Get camera data
    *
    * @return Camera data
    */
-  inline const CameraData &getCameraData() { return data; }
+  inline const CameraData &getCameraData() { return mData; }
 
 private:
   /**
@@ -86,9 +86,9 @@ private:
   void updateProjectionViewMatrix();
 
 private:
-  CameraData data;
-  rhi::BufferHandle uniformBuffer;
-  rhi::ResourceRegistry *registry;
+  CameraData mData;
+  rhi::BufferHandle mBuffer;
+  rhi::ResourceRegistry *mRegistry;
 };
 
 } // namespace liquid

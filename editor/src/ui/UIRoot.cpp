@@ -3,26 +3,27 @@
 
 namespace liquidator {
 
-UIRoot::UIRoot(liquid::EntityContext &context,
+UIRoot::UIRoot(liquid::EntityContext &entityContext,
                const liquid::GLTFLoader &gltfLoader)
-    : menuBar(gltfLoader), sceneHierarchyPanel(context), entityPanel(context) {
-  sceneHierarchyPanel.setNodeClickHandler(
+    : mMenuBar(gltfLoader), mSceneHierarchyPanel(entityContext),
+      mEntityPanel(entityContext) {
+  mSceneHierarchyPanel.setNodeClickHandler(
       [this](liquid::SceneNode *node) { handleNodeClick(node); });
 }
 
 void UIRoot::render(SceneManager &sceneManager,
                     const liquid::AnimationSystem &animationSystem,
                     liquid::PhysicsSystem &physicsSystem) {
-  layout.setup();
-  menuBar.render(sceneManager);
-  statusBar.render(sceneManager);
-  sceneHierarchyPanel.render(sceneManager);
-  entityPanel.render(sceneManager, animationSystem, physicsSystem);
-  editorCameraPanel.render(sceneManager);
+  mLayout.setup();
+  mMenuBar.render(sceneManager);
+  mStatusBar.render(sceneManager);
+  mSceneHierarchyPanel.render(sceneManager);
+  mEntityPanel.render(sceneManager, animationSystem, physicsSystem);
+  mEditorCameraPanel.render(sceneManager);
 }
 
 void UIRoot::handleNodeClick(liquid::SceneNode *node) {
-  entityPanel.setSelectedEntity(node->getEntity());
+  mEntityPanel.setSelectedEntity(node->getEntity());
 }
 
 } // namespace liquidator

@@ -45,17 +45,17 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  ShaderLibrary &shaderLibrary;
-  SceneRenderer sceneRenderer;
+  ShaderLibrary &mShaderLibrary;
+  SceneRenderer mSceneRenderer;
 
-  GraphResourceId pipelineId = 0;
-  GraphResourceId wireframePipelineId = 0;
-  rhi::TextureHandle shadowMapTextureId = rhi::TextureHandle::Invalid;
+  GraphResourceId mPipelineId = 0;
+  GraphResourceId mWireframePipelineId = 0;
+  rhi::TextureHandle mShadowMapTextureId = rhi::TextureHandle::Invalid;
 
-  GraphResourceId skinnedPipelineId = 0;
+  GraphResourceId mSkinnedPipelineId = 0;
 
-  SharedPtr<RenderData> renderData;
-  DebugManager debugManager;
+  SharedPtr<RenderData> mRenderData;
+  DebugManager mDebugManager;
 };
 
 } // namespace liquid

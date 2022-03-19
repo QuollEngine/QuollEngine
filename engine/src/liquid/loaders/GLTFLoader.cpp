@@ -988,12 +988,12 @@ static AnimationData getAnimations(const tinygltf::Model &model,
   return animationData;
 }
 
-GLTFLoader::GLTFLoader(EntityContext &entityContext_, Renderer &renderer_,
-                       AnimationSystem &animationSystem_, bool debug_)
-    : entityContext(entityContext_), renderer(renderer_),
-      animationSystem(animationSystem_),
-      defaultMaterial(renderer.createMaterialPBR({}, CullMode::Back)),
-      debug(debug_) {}
+GLTFLoader::GLTFLoader(EntityContext &entityContext, Renderer &renderer,
+                       AnimationSystem &animationSystem, bool debug)
+    : mEntityContext(entityContext), mRenderer(renderer),
+      mAnimationSystem(animationSystem),
+      mDefaultMaterial(mRenderer.createMaterialPBR({}, CullMode::Back)),
+      mDebug(debug) {}
 
 GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
   tinygltf::TinyGLTF loader;
@@ -1014,13 +1014,13 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
     return Res(GLTFError::Error);
   }
 
-  auto &&skeletonData = getSkeletons(model, renderer.getRegistry());
-  auto &&animationData = getAnimations(model, skeletonData, animationSystem);
-  auto &&materials = getMaterials(model, renderer);
+  auto &&skeletonData = getSkeletons(model, mRenderer.getRegistry());
+  auto &&animationData = getAnimations(model, skeletonData, mAnimationSystem);
+  auto &&materials = getMaterials(model, mRenderer);
   auto &&meshes =
-      getMeshes(model, materials, entityContext, renderer, defaultMaterial);
+      getMeshes(model, materials, mEntityContext, mRenderer, mDefaultMaterial);
   auto *scene = getScene(model, meshes, animationData,
-                         skeletonData.skinSkeletonMap, debug, entityContext);
+                         skeletonData.skinSkeletonMap, mDebug, mEntityContext);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 

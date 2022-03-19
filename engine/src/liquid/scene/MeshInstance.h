@@ -34,26 +34,26 @@ public:
             registry.setBuffer({rhi::BufferType::Index,
                                 geometry.getIndices().size() * sizeof(uint32_t),
                                 (void *)geometry.getIndices().data()});
-        indexBuffers.push_back(indexBuffer);
+        mIndexBuffers.push_back(indexBuffer);
       } else {
-        indexBuffers.push_back(rhi::BufferHandle::Invalid);
+        mIndexBuffers.push_back(rhi::BufferHandle::Invalid);
       }
 
-      indexCounts.push_back(
+      mIndexCounts.push_back(
           static_cast<uint32_t>(geometry.getIndices().size()));
-      vertexCounts.push_back(
+      mVertexCounts.push_back(
           static_cast<uint32_t>(geometry.getVertices().size()));
-      vertexBuffers.push_back(vertexBuffer);
-      materials.push_back(geometry.getMaterial());
+      mVertexBuffers.push_back(vertexBuffer);
+      mMaterials.push_back(geometry.getMaterial());
     }
   }
 
   ~MeshInstance() {
-    for (auto &x : vertexBuffers) {
+    for (auto &x : mVertexBuffers) {
       mRegistry.deleteBuffer(x);
     }
 
-    for (auto &x : indexBuffers) {
+    for (auto &x : mIndexBuffers) {
       mRegistry.deleteBuffer(x);
     }
   }
@@ -70,7 +70,7 @@ public:
    * @param index Index
    */
   void setMaterial(const SharedPtr<Material> &material, size_t index = 0) {
-    materials.at(index) = material;
+    mMaterials.at(index) = material;
   }
 
   /**
@@ -79,7 +79,7 @@ public:
    * @return Vertex buffers
    */
   inline const std::vector<rhi::BufferHandle> &getVertexBuffers() const {
-    return vertexBuffers;
+    return mVertexBuffers;
   }
 
   /**
@@ -88,7 +88,7 @@ public:
    * @return Index buffers
    */
   inline const std::vector<rhi::BufferHandle> &getIndexBuffers() const {
-    return indexBuffers;
+    return mIndexBuffers;
   }
 
   /**
@@ -97,7 +97,7 @@ public:
    * @return List of materials
    */
   inline const std::vector<SharedPtr<Material>> &getMaterials() const {
-    return materials;
+    return mMaterials;
   }
 
   /**
@@ -106,7 +106,7 @@ public:
    * @return Vertex counts
    */
   inline const std::vector<uint32_t> &getVertexCounts() const {
-    return vertexCounts;
+    return mVertexCounts;
   }
 
   /**
@@ -115,15 +115,15 @@ public:
    * @return Index counts
    */
   inline const std::vector<uint32_t> &getIndexCounts() const {
-    return indexCounts;
+    return mIndexCounts;
   }
 
 private:
-  std::vector<rhi::BufferHandle> vertexBuffers;
-  std::vector<rhi::BufferHandle> indexBuffers;
-  std::vector<SharedPtr<Material>> materials;
-  std::vector<uint32_t> vertexCounts;
-  std::vector<uint32_t> indexCounts;
+  std::vector<rhi::BufferHandle> mVertexBuffers;
+  std::vector<rhi::BufferHandle> mIndexBuffers;
+  std::vector<SharedPtr<Material>> mMaterials;
+  std::vector<uint32_t> mVertexCounts;
+  std::vector<uint32_t> mIndexCounts;
 
   Mesh mMesh;
   rhi::ResourceRegistry &mRegistry;

@@ -9,14 +9,14 @@ constexpr size_t VEC3_ARRAY_SIZE = 3;
 constexpr size_t VEC4_ARRAY_SIZE = 4;
 
 EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
-    : context(entityContext) {}
+    : mEntityContext(entityContext) {}
 
 void EntityPanel::render(SceneManager &sceneManager,
                          const liquid::AnimationSystem &animationSystem,
                          liquid::PhysicsSystem &physicsSystem) {
   bool open = true;
   if (ImGui::Begin("Properties", &open)) {
-    if (context.hasEntity(selectedEntity)) {
+    if (mEntityContext.hasEntity(mSelectedEntity)) {
       renderName();
       renderLight();
       renderTransform();
@@ -30,20 +30,21 @@ void EntityPanel::render(SceneManager &sceneManager,
   }
 
   if (!open) {
-    selectedEntity = liquid::ENTITY_MAX;
+    mSelectedEntity = liquid::ENTITY_MAX;
   }
 }
 
 void EntityPanel::setSelectedEntity(liquid::Entity entity) {
-  selectedEntity = entity;
+  mSelectedEntity = entity;
 }
 
 void EntityPanel::renderName() {
-  if (!context.hasComponent<liquid::NameComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::NameComponent>(mSelectedEntity)) {
     return;
   }
 
-  auto &component = context.getComponent<liquid::NameComponent>(selectedEntity);
+  auto &component =
+      mEntityContext.getComponent<liquid::NameComponent>(mSelectedEntity);
 
   if (ImGui::CollapsingHeader("Name")) {
     if (ImGui::InputText(
@@ -65,12 +66,12 @@ void EntityPanel::renderName() {
 }
 
 void EntityPanel::renderLight() {
-  if (!context.hasComponent<liquid::LightComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity)) {
     return;
   }
 
   auto &component =
-      context.getComponent<liquid::LightComponent>(selectedEntity);
+      mEntityContext.getComponent<liquid::LightComponent>(mSelectedEntity);
 
   if (ImGui::CollapsingHeader("Light")) {
     ImGui::Text("Type: %s", component.light->getTypeName().c_str());
@@ -102,12 +103,13 @@ void EntityPanel::renderLight() {
 }
 
 void EntityPanel::renderTransform() {
-  if (!context.hasComponent<liquid::TransformComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::TransformComponent>(
+          mSelectedEntity)) {
     return;
   }
 
   auto &component =
-      context.getComponent<liquid::TransformComponent>(selectedEntity);
+      mEntityContext.getComponent<liquid::TransformComponent>(mSelectedEntity);
 
   if (ImGui::CollapsingHeader("Transform")) {
     ImGui::Text("Position");
@@ -157,14 +159,15 @@ void EntityPanel::renderTransform() {
 }
 
 void EntityPanel::renderSkeleton() {
-  if (!context.hasComponent<liquid::SkeletonComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::SkeletonComponent>(
+          mSelectedEntity)) {
     return;
   }
 
   if (ImGui::CollapsingHeader("Skeleton")) {
-    if (context.hasComponent<liquid::DebugComponent>(selectedEntity)) {
+    if (mEntityContext.hasComponent<liquid::DebugComponent>(mSelectedEntity)) {
       auto &component =
-          context.getComponent<liquid::DebugComponent>(selectedEntity);
+          mEntityContext.getComponent<liquid::DebugComponent>(mSelectedEntity);
 
       ImGui::Checkbox("Show bones", &component.showBones);
     }
@@ -173,13 +176,14 @@ void EntityPanel::renderSkeleton() {
 
 void EntityPanel::renderAnimation(
     const liquid::AnimationSystem &animationSystem) {
-  if (!context.hasComponent<liquid::AnimatorComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::AnimatorComponent>(
+          mSelectedEntity)) {
     return;
   }
 
   if (ImGui::CollapsingHeader("Animation")) {
     auto &component =
-        context.getComponent<liquid::AnimatorComponent>(selectedEntity);
+        mEntityContext.getComponent<liquid::AnimatorComponent>(mSelectedEntity);
 
     const auto &currentAnimation = animationSystem.getAnimation(
         component.animations.at(component.currentAnimation));
@@ -270,7 +274,8 @@ getDefaultGeometryFromType(const liquid::PhysicsGeometryType &type) {
 }
 
 void EntityPanel::renderCollidable() {
-  if (!context.hasComponent<liquid::CollidableComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::CollidableComponent>(
+          mSelectedEntity)) {
     return;
   }
 
@@ -283,8 +288,8 @@ void EntityPanel::renderCollidable() {
             liquid::PhysicsGeometryType::Plane,
         };
 
-    auto &collidable =
-        context.getComponent<liquid::CollidableComponent>(selectedEntity);
+    auto &collidable = mEntityContext.getComponent<liquid::CollidableComponent>(
+        mSelectedEntity);
 
     if (ImGui::BeginCombo(
             "###SelectGeometryType",
@@ -331,13 +336,14 @@ void EntityPanel::renderCollidable() {
 }
 
 void EntityPanel::renderRigidBody() {
-  if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::RigidBodyComponent>(
+          mSelectedEntity)) {
     return;
   }
 
   if (ImGui::CollapsingHeader("Rigid Body")) {
-    auto &rigidBody =
-        context.getComponent<liquid::RigidBodyComponent>(selectedEntity);
+    auto &rigidBody = mEntityContext.getComponent<liquid::RigidBodyComponent>(
+        mSelectedEntity);
 
     ImGui::Text("Mass");
     ImGui::InputFloat("###Mass", &rigidBody.dynamicDesc.mass);
@@ -402,14 +408,16 @@ void EntityPanel::renderRigidBody() {
 }
 
 void EntityPanel::renderAddComponent() {
-  if (!context.hasEntity(selectedEntity)) {
+  if (!mEntityContext.hasEntity(mSelectedEntity)) {
     return;
   }
 
   bool hasAllComponents =
-      context.hasComponent<liquid::TransformComponent>(selectedEntity) &&
-      context.hasComponent<liquid::RigidBodyComponent>(selectedEntity) &&
-      context.hasComponent<liquid::CollidableComponent>(selectedEntity);
+      mEntityContext.hasComponent<liquid::TransformComponent>(
+          mSelectedEntity) &&
+      mEntityContext.hasComponent<liquid::RigidBodyComponent>(
+          mSelectedEntity) &&
+      mEntityContext.hasComponent<liquid::CollidableComponent>(mSelectedEntity);
 
   if (hasAllComponents)
     return;
@@ -419,23 +427,28 @@ void EntityPanel::renderAddComponent() {
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!context.hasComponent<liquid::TransformComponent>(selectedEntity) &&
+    if (!mEntityContext.hasComponent<liquid::TransformComponent>(
+            mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      context.setComponent<liquid::TransformComponent>(selectedEntity, {});
+      mEntityContext.setComponent<liquid::TransformComponent>(mSelectedEntity,
+                                                              {});
     }
 
-    if (!context.hasComponent<liquid::RigidBodyComponent>(selectedEntity) &&
+    if (!mEntityContext.hasComponent<liquid::RigidBodyComponent>(
+            mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      context.setComponent<liquid::RigidBodyComponent>(selectedEntity, {});
+      mEntityContext.setComponent<liquid::RigidBodyComponent>(mSelectedEntity,
+                                                              {});
     }
 
-    if (!context.hasComponent<liquid::CollidableComponent>(selectedEntity) &&
+    if (!mEntityContext.hasComponent<liquid::CollidableComponent>(
+            mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
       constexpr glm::vec3 DEFAULT_VALUE(0.5f);
 
-      context.setComponent<liquid::CollidableComponent>(
-          selectedEntity, {liquid::PhysicsGeometryType::Box,
-                           liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
+      mEntityContext.setComponent<liquid::CollidableComponent>(
+          mSelectedEntity, {liquid::PhysicsGeometryType::Box,
+                            liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
     }
 
     ImGui::EndPopup();

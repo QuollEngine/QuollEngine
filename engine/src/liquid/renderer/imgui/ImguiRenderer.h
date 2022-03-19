@@ -44,12 +44,12 @@ private:
                          int fbHeight, rhi::PipelineHandle pipeline);
 
 private:
-  rhi::ResourceRegistry &registry;
+  rhi::ResourceRegistry &mRegistry;
 
-  rhi::TextureHandle fontTexture = rhi::TextureHandle::Invalid;
+  rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
 
-  std::vector<FrameData> frameData;
-  uint32_t currentFrame = 0;
+  std::vector<FrameData> mFrameData;
+  uint32_t mCurrentFrame = 0;
 };
 
 } // namespace liquid

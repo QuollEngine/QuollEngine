@@ -21,11 +21,11 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
       registry);
 
   const auto &description =
-      registry.getBufferMap().getDescription(material.getUniformBuffer());
+      registry.getBufferMap().getDescription(material.getBuffer());
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_TRUE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
+  EXPECT_TRUE(liquid::rhi::isHandleValid(material.getBuffer()));
   // Memory alignment
   EXPECT_EQ(description.size, sizeof(glm::vec4) * 2);
 
@@ -51,7 +51,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
+  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
   EXPECT_EQ(material.getDescriptor().getBindings().find(0),
             material.getDescriptor().getBindings().end());
   EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
@@ -63,7 +63,7 @@ TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
-  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getUniformBuffer()));
+  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
 }
 
 TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
@@ -84,7 +84,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
@@ -101,7 +101,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
@@ -129,7 +129,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
@@ -146,7 +146,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
@@ -174,7 +174,7 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
@@ -194,7 +194,7 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(1).getValue<float>() == newTestReal);
 
     const auto &description =
-        registry.getBufferMap().getDescription(material.getUniformBuffer());
+        registry.getBufferMap().getDescription(material.getBuffer());
     EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
     auto *data = static_cast<char *>(description.data);
 
