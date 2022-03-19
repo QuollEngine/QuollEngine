@@ -3,35 +3,36 @@
 
 namespace liquidator {
 
-SceneManager::SceneManager(liquid::EntityContext &context_,
-                           EditorCamera &editorCamera_, EditorGrid &editorGrid_)
-    : context(context_), editorCamera(editorCamera_), editorGrid(editorGrid_) {}
+SceneManager::SceneManager(liquid::EntityContext &entityContext,
+                           EditorCamera &editorCamera, EditorGrid &editorGrid)
+    : mEntityContext(entityContext), mEditorCamera(editorCamera),
+      mEditorGrid(editorGrid) {}
 
-void SceneManager::requestEmptyScene() { newSceneRequested = true; }
+void SceneManager::requestEmptyScene() { mNewSceneRequested = true; }
 
 void SceneManager::createNewScene() {
-  if (!newSceneRequested)
+  if (!mNewSceneRequested)
     return;
 
-  if (activeScene) {
-    delete activeScene;
-    context.destroy();
+  if (mActiveScene) {
+    delete mActiveScene;
+    mEntityContext.destroy();
   }
 
-  editorCamera.reset();
-  activeScene = new liquid::Scene(context);
-  activeScene->setActiveCamera(editorCamera.getCamera());
+  mEditorCamera.reset();
+  mActiveScene = new liquid::Scene(mEntityContext);
+  mActiveScene->setActiveCamera(mEditorCamera.getCamera());
 
-  auto light1 = context.createEntity();
-  context.setComponent<liquid::NameComponent>(light1, {"Light"});
-  context.setComponent<liquid::LightComponent>(
+  auto light1 = mEntityContext.createEntity();
+  mEntityContext.setComponent<liquid::NameComponent>(light1, {"Light"});
+  mEntityContext.setComponent<liquid::LightComponent>(
       light1, {std::make_shared<liquid::Light>(
                   liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
                   glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
 
-  activeScene->getRootNode()->addChild(light1);
+  mActiveScene->getRootNode()->addChild(light1);
 
-  newSceneRequested = false;
+  mNewSceneRequested = false;
 }
 
 } // namespace liquidator

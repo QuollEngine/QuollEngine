@@ -21,14 +21,16 @@ public:
    *
    * @return Number of draw calls
    */
-  inline uint32_t getDrawCallsCount() const { return drawCallsCount; }
+  inline uint32_t getDrawCallsCount() const { return mDrawCallsCount; }
 
   /**
    * @brief Get number of drawn primitives
    *
    * @return Number of drawn primitives
    */
-  inline size_t getDrawnPrimitivesCount() const { return drawnPrimitivesCount; }
+  inline size_t getDrawnPrimitivesCount() const {
+    return mDrawnPrimitivesCount;
+  }
 
   /**
    * @brief Add texture stats
@@ -50,7 +52,7 @@ public:
    * @return Number of textures
    */
   inline uint32_t getAllocatedTexturesCount() const {
-    return allocatedTexturesCount;
+    return mAllocatedTexturesCount;
   }
 
   /**
@@ -59,7 +61,7 @@ public:
    * @return Total size of textures
    */
   inline size_t getAllocatedTexturesSize() const {
-    return allocatedTexturesSize;
+    return mAllocatedTexturesSize;
   }
 
   /**
@@ -82,7 +84,7 @@ public:
    * @return Number of buffers
    */
   inline uint32_t getAllocatedBuffersCount() const {
-    return allocatedBuffersCount;
+    return mAllocatedBuffersCount;
   }
 
   /**
@@ -90,7 +92,9 @@ public:
    *
    * @return Total size of buffers
    */
-  inline size_t getAllocatedBuffersSize() const { return allocatedBuffersSize; }
+  inline size_t getAllocatedBuffersSize() const {
+    return mAllocatedBuffersSize;
+  }
 
   /**
    * @brief Collect frames per second
@@ -104,19 +108,19 @@ public:
    *
    * @return Frames per second
    */
-  inline uint32_t getFPS() const { return fps; }
+  inline uint32_t getFPS() const { return mFps; }
 
 private:
-  uint32_t drawCallsCount = 0;
-  size_t drawnPrimitivesCount = 0;
+  uint32_t mDrawCallsCount = 0;
+  size_t mDrawnPrimitivesCount = 0;
 
-  uint32_t allocatedTexturesCount = 0;
-  size_t allocatedTexturesSize = 0;
+  uint32_t mAllocatedTexturesCount = 0;
+  size_t mAllocatedTexturesSize = 0;
 
-  uint32_t allocatedBuffersCount = 0;
-  size_t allocatedBuffersSize = 0;
+  uint32_t mAllocatedBuffersCount = 0;
+  size_t mAllocatedBuffersSize = 0;
 
-  uint32_t fps = 0;
+  uint32_t mFps = 0;
 };
 
 } // namespace liquid

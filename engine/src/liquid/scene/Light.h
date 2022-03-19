@@ -57,7 +57,7 @@ public:
    *
    * @return Light color
    */
-  inline const glm::vec4 &getColor() { return color; }
+  inline const glm::vec4 &getColor() { return mColor; }
 
   /**
    * @brief Get light intensity
@@ -67,7 +67,7 @@ public:
    *
    * @return Light intensity
    */
-  inline float getIntensity() { return intensity; }
+  inline float getIntensity() { return mIntensity; }
 
   /**
    * @brief Get light direction
@@ -76,14 +76,14 @@ public:
    *
    * @return Light direction
    */
-  inline const glm::vec3 &getDirection() { return direction; }
+  inline const glm::vec3 &getDirection() { return mDirection; }
 
   /**
    * @brief Get light type
    *
    * @return Light type
    */
-  inline LightType getType() { return type; }
+  inline LightType getType() { return mType; }
 
   /**
    * @brief Get light type name
@@ -97,14 +97,14 @@ public:
    *
    * @return Light position
    */
-  inline const glm::vec3 &getPosition() const { return position; }
+  inline const glm::vec3 &getPosition() const { return mPosition; }
 
 private:
-  glm::vec3 position{0.0f};
-  glm::vec4 color;
-  glm::vec3 direction;
-  float intensity;
-  LightType type;
+  glm::vec3 mPosition{0.0f};
+  glm::vec4 mColor;
+  glm::vec3 mDirection;
+  float mIntensity;
+  LightType mType;
 };
 
 } // namespace liquid

@@ -14,14 +14,14 @@ VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
 
   for (uint32_t i = 0; i < queueFamilies.size(); ++i) {
     if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-      graphicsFamily = i;
+      mGraphicsFamily = i;
     }
 
     VkBool32 presentSupport = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 
     if (presentSupport) {
-      presentFamily = i;
+      mPresentFamily = i;
     }
 
     if (isComplete()) {

@@ -14,7 +14,7 @@ public:
   int run(RenderGraph &graph, const std::function<bool(float)> &update);
 
 private:
-  Renderer &renderer;
-  Window &window;
+  Renderer &mRenderer;
+  Window &mWindow;
 };
 } // namespace liquid

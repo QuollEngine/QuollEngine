@@ -19,7 +19,7 @@ public:
    * @return List of framebuffers
    */
   inline const std::vector<rhi::FramebufferHandle> &getFramebuffers() const {
-    return framebuffers;
+    return mFramebuffers;
   };
 
   /**
@@ -27,7 +27,7 @@ public:
    *
    * @return Render pass handle
    */
-  inline rhi::RenderPassHandle getRenderPass() const { return renderPass; }
+  inline rhi::RenderPassHandle getRenderPass() const { return mRenderPass; }
 
   /**
    * @brief Get clear values
@@ -35,7 +35,7 @@ public:
    * @return List of clear values
    */
   inline const std::vector<VkClearValue> &getClearValues() const {
-    return clearValues;
+    return mClearValues;
   }
 
   /**
@@ -43,17 +43,17 @@ public:
    *
    * @return Extent
    */
-  inline glm::uvec2 getExtent() const { return extent; }
+  inline glm::uvec2 getExtent() const { return mExtent; }
 
 private:
-  rhi::RenderPassHandle renderPass;
-  std::vector<rhi::FramebufferHandle> framebuffers;
-  std::vector<VkClearValue> clearValues;
-  bool swapchainRelative = false;
+  rhi::RenderPassHandle mRenderPass;
+  std::vector<rhi::FramebufferHandle> mFramebuffers;
+  std::vector<VkClearValue> mClearValues;
+  bool mSwapchainRelative = false;
 
-  glm::uvec2 extent;
+  glm::uvec2 mExtent;
 
-  uint32_t layers;
+  uint32_t mLayers;
 };
 
 } // namespace liquid

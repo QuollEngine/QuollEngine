@@ -18,7 +18,7 @@ VulkanDeviceObject::VulkanDeviceObject(
   createGraphicsQueueInfo.flags = 0;
   createGraphicsQueueInfo.pNext = nullptr;
   createGraphicsQueueInfo.queueFamilyIndex =
-      physicalDevice.getQueueFamilyIndices().graphicsFamily.value();
+      physicalDevice.getQueueFamilyIndices().getGraphicsFamily();
   createGraphicsQueueInfo.queueCount = 1;
   createGraphicsQueueInfo.pQueuePriorities = &queuePriority;
 
@@ -27,14 +27,14 @@ VulkanDeviceObject::VulkanDeviceObject(
   createPresentQueueInfo.flags = 0;
   createPresentQueueInfo.pNext = nullptr;
   createPresentQueueInfo.queueFamilyIndex =
-      physicalDevice.getQueueFamilyIndices().presentFamily.value();
+      physicalDevice.getQueueFamilyIndices().getPresentFamily();
   createPresentQueueInfo.queueCount = 1;
   createPresentQueueInfo.pQueuePriorities = &queuePriority;
 
   std::vector<VkDeviceQueueCreateInfo> queueInfos;
   queueInfos.push_back(createGraphicsQueueInfo);
-  if (physicalDevice.getQueueFamilyIndices().graphicsFamily.value() !=
-      physicalDevice.getQueueFamilyIndices().presentFamily.value()) {
+  if (physicalDevice.getQueueFamilyIndices().getGraphicsFamily() !=
+      physicalDevice.getQueueFamilyIndices().getPresentFamily()) {
   }
 
   const auto &pdExtensions = physicalDevice.getSupportedExtensions();

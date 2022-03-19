@@ -37,7 +37,7 @@ public:
   NullOutStream();
 
 private:
-  NullOutStreamBuf buf;
+  NullOutStreamBuf mBuf;
 };
 
 /**
@@ -78,13 +78,13 @@ public:
    * @return Rvalue reference of itself
    */
   template <typename T> LoggerStream &&operator<<(T &&val) {
-    stream << std::forward<T>(val);
+    mStream << std::forward<T>(val);
     return std::move(*this);
   }
 
 private:
-  std::ostream &stream;
-  bool alive = true;
+  std::ostream &mStream;
+  bool mAlive = true;
 };
 
 /**
@@ -136,8 +136,8 @@ public:
   LoggerStream log(Severity severity);
 
 private:
-  Severity minSeverity;
-  NullOutStream nullOut;
+  Severity mMinSeverity;
+  NullOutStream mNullOut;
 };
 
 } // namespace liquid

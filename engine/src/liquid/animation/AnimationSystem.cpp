@@ -3,27 +3,27 @@
 
 namespace liquid {
 
-AnimationSystem::AnimationSystem(EntityContext &entityContext_)
-    : entityContext(entityContext_) {}
+AnimationSystem::AnimationSystem(EntityContext &entityContext)
+    : mEntityContext(entityContext) {}
 
 uint32_t AnimationSystem::addAnimation(const Animation &animation) {
-  uint32_t lastId = static_cast<uint32_t>(animations.size());
+  uint32_t lastId = static_cast<uint32_t>(mAnimations.size());
 
-  animations.push_back(animation);
+  mAnimations.push_back(animation);
   return lastId;
 }
 
 void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
-  entityContext.iterateEntities<TransformComponent, AnimatorComponent>(
+  mEntityContext.iterateEntities<TransformComponent, AnimatorComponent>(
       [this, dt](Entity entity, auto &transform, auto &animComp) {
         uint32_t index = animComp.animations.at(animComp.currentAnimation);
 
-        if (index >= animations.size()) {
+        if (index >= mAnimations.size()) {
           return;
         }
 
-        const Animation &animation = animations.at(index);
+        const Animation &animation = mAnimations.at(index);
 
         if (animComp.playing) {
           animComp.normalizedTime = std::min(
@@ -36,7 +36,7 @@ void AnimationSystem::update(float dt) {
         }
 
         bool hasSkeleton =
-            entityContext.hasComponent<SkeletonComponent>(entity);
+            mEntityContext.hasComponent<SkeletonComponent>(entity);
 
         for (auto &sequence : animation.getKeyframeSequences()) {
           const auto &value =
@@ -44,7 +44,7 @@ void AnimationSystem::update(float dt) {
 
           if (sequence.isJointTarget() && hasSkeleton) {
             auto &skeleton =
-                entityContext.getComponent<SkeletonComponent>(entity).skeleton;
+                mEntityContext.getComponent<SkeletonComponent>(entity).skeleton;
             if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
               skeleton.setJointPosition(sequence.getJoint(), glm::vec3(value));
             } else if (sequence.getTarget() ==

@@ -16,8 +16,8 @@ public:
                      rhi::PipelineHandle pipeline, uint32_t desciptorSet);
 
 private:
-  EntityContext &entityContext;
-  bool bindMaterialData;
+  EntityContext &mEntityContext;
+  bool mBindMaterialData;
 };
 
 } // namespace liquid

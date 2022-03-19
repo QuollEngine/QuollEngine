@@ -225,11 +225,11 @@ private:
 
 private:
   std::tuple<EntityStorageSparseSetComponentPool<ComponentTypes>...>
-      componentPools;
+      mComponentPools;
 
-  Entity lastEntity = 0;
-  std::list<Entity> deleted;
-  size_t numEntities = 0;
+  Entity mLastEntity = 0;
+  std::list<Entity> mDeleted;
+  size_t mNumEntities = 0;
 };
 
 #include "EntityStorageSparseSet.impl.h"

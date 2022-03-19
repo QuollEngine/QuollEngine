@@ -100,11 +100,9 @@ private:
                 void *pUserData);
 
 private:
-  VkInstance instance = nullptr;
-  VkDebugUtilsMessengerEXT messenger = VK_NULL_HANDLE;
-
-  std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
-  VkDebugUtilsMessengerCreateInfoEXT messengerCreateInfo{};
+  VkDebugUtilsMessengerEXT mMessenger = VK_NULL_HANDLE;
+  std::vector<const char *> mValidationLayers{"VK_LAYER_KHRONOS_validation"};
+  VkDebugUtilsMessengerCreateInfoEXT mMessengerCreateInfo{};
 };
 
 } // namespace liquid::rhi

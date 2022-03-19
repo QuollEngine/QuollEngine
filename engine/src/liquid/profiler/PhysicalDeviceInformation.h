@@ -34,14 +34,14 @@ public:
    *
    * @return Physical device type
    */
-  inline const PhysicalDeviceType getType() const { return type; }
+  inline const PhysicalDeviceType getType() const { return mType; }
 
   /**
    * @brief Get device name
    *
    * @return Physical device name
    */
-  inline const String &getName() const { return name; }
+  inline const String &getName() const { return mName; }
 
   /**
    * @brief Get device properties
@@ -49,7 +49,7 @@ public:
    * @return Device properties
    */
   inline const UnorderedPropertyMap &getProperties() const {
-    return properties;
+    return mProperties;
   }
 
   /**
@@ -57,7 +57,7 @@ public:
    *
    * @return Device limits
    */
-  inline const UnorderedPropertyMap &getLimits() const { return limits; }
+  inline const UnorderedPropertyMap &getLimits() const { return mLimits; }
 
   /**
    * @brief Get type string proeprties
@@ -67,11 +67,11 @@ public:
   const String getTypeString() const;
 
 private:
-  String name;
-  PhysicalDeviceType type;
+  String mName;
+  PhysicalDeviceType mType;
 
-  UnorderedPropertyMap properties;
-  UnorderedPropertyMap limits;
+  UnorderedPropertyMap mProperties;
+  UnorderedPropertyMap mLimits;
 };
 
 } // namespace liquid

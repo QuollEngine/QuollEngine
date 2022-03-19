@@ -6,11 +6,11 @@
 namespace liquid {
 
 RenderGraphPassResult::RenderGraphPassResult(
-    rhi::RenderPassHandle renderPass_,
-    const std::vector<rhi::FramebufferHandle> &framebuffers_,
-    const std::vector<VkClearValue> &clearValues_, uint32_t width_,
-    uint32_t height_, uint32_t layers_)
-    : renderPass(renderPass_), framebuffers(framebuffers_),
-      clearValues(clearValues_), extent{width_, height_}, layers(layers_) {}
+    rhi::RenderPassHandle renderPass,
+    const std::vector<rhi::FramebufferHandle> &framebuffers,
+    const std::vector<VkClearValue> &clearValues, uint32_t width,
+    uint32_t height, uint32_t layers)
+    : mRenderPass(renderPass), mFramebuffers(framebuffers),
+      mClearValues(clearValues), mExtent{width, height}, mLayers(layers) {}
 
 } // namespace liquid

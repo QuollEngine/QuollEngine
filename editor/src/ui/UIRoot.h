@@ -18,10 +18,11 @@ public:
   /**
    * @brief Create UI Root
    *
-   * @param context Entity context
+   * @param entityContext Entity context
    * @param gltfLoader GLTF loader
    */
-  UIRoot(liquid::EntityContext &context, const liquid::GLTFLoader &gltfLoader);
+  UIRoot(liquid::EntityContext &entityContext,
+         const liquid::GLTFLoader &gltfLoader);
 
   /**
    * @brief Render UI Root
@@ -45,12 +46,12 @@ private:
   void handleNodeClick(liquid::SceneNode *node);
 
 private:
-  MenuBar menuBar;
-  SceneHierarchyPanel sceneHierarchyPanel;
-  EntityPanel entityPanel;
-  EditorGridPanel editorCameraPanel;
-  StatusBar statusBar;
-  Layout layout;
+  MenuBar mMenuBar;
+  SceneHierarchyPanel mSceneHierarchyPanel;
+  EntityPanel mEntityPanel;
+  EditorGridPanel mEditorCameraPanel;
+  StatusBar mStatusBar;
+  Layout mLayout;
 };
 
 } // namespace liquidator

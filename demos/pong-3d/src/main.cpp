@@ -105,7 +105,7 @@ public:
           commandList.bindPipeline(pipeline);
 
           liquid::rhi::Descriptor descriptor;
-          descriptor.bind(0, camera->getUniformBuffer(),
+          descriptor.bind(0, camera->getBuffer(),
                           liquid::rhi::DescriptorType::UniformBuffer);
 
           commandList.bindDescriptor(pipeline, 0, descriptor);

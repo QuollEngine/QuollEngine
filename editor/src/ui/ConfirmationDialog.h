@@ -35,14 +35,14 @@ public:
   void render(SceneManager &sceneManager);
 
 private:
-  bool open = false;
+  bool mOpen = false;
 
-  ConfirmHandler confirmHandler;
+  ConfirmHandler mConfirmHandler;
 
-  liquid::String title;
-  liquid::String prompt;
-  liquid::String confirmButtonLabel;
-  liquid::String cancelButtonLabel;
+  liquid::String mTitle;
+  liquid::String mPrompt;
+  liquid::String mConfirmButtonLabel;
+  liquid::String mCancelButtonLabel;
 };
 
 } // namespace liquidator

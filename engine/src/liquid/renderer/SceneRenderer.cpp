@@ -4,16 +4,16 @@
 
 namespace liquid {
 
-SceneRenderer::SceneRenderer(EntityContext &entityContext_,
-                             bool bindMaterialData_)
-    : entityContext(entityContext_), bindMaterialData(bindMaterialData_) {}
+SceneRenderer::SceneRenderer(EntityContext &entityContext,
+                             bool bindMaterialData)
+    : mEntityContext(entityContext), mBindMaterialData(bindMaterialData) {}
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
                            rhi::PipelineHandle pipeline) {
-  entityContext.iterateEntities<MeshComponent, TransformComponent>(
+  mEntityContext.iterateEntities<MeshComponent, TransformComponent>(
       [&commandList, &pipeline, this](Entity entity, const MeshComponent &mesh,
                                       const TransformComponent &transform) {
-        if (entityContext.hasComponent<EnvironmentComponent>(entity)) {
+        if (mEntityContext.hasComponent<EnvironmentComponent>(entity)) {
           return;
         }
         const auto &instance = mesh.instance;
@@ -28,7 +28,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
         for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
 
-          if (instance->getMaterials().at(i) && bindMaterialData) {
+          if (instance->getMaterials().at(i) && mBindMaterialData) {
             commandList.bindDescriptor(
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }
@@ -47,8 +47,8 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                   rhi::PipelineHandle pipeline,
                                   uint32_t descriptorSet) {
-  entityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
-                                TransformComponent>(
+  mEntityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
+                                 TransformComponent>(
       [&pipeline, &commandList, descriptorSet,
        this](Entity entity, const auto &mesh, const SkeletonComponent &skeleton,
              const auto &transform) {
@@ -70,7 +70,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
         for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
 
-          if (instance->getMaterials().at(i) && bindMaterialData) {
+          if (instance->getMaterials().at(i) && mBindMaterialData) {
             commandList.bindDescriptor(
                 pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
           }

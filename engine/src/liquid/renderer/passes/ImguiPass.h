@@ -46,13 +46,13 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  ShaderLibrary &shaderLibrary;
-  String previousColor;
-  ImguiRenderer &imguiRenderer;
-  GraphResourceId pipelineId = 0;
-  ImguiDebugLayer debugLayer;
-  rhi::TextureHandle sceneTextureId = rhi::TextureHandle::Invalid;
-  std::function<void(rhi::TextureHandle)> imguiUpdateFn;
+  ShaderLibrary &mShaderLibrary;
+  String mPreviousColor;
+  ImguiRenderer &mImguiRenderer;
+  GraphResourceId mPipelineId = 0;
+  ImguiDebugLayer mDebugLayer;
+  rhi::TextureHandle mSceneTextureId = rhi::TextureHandle::Invalid;
+  std::function<void(rhi::TextureHandle)> mImguiUpdateFn;
 };
 
 } // namespace liquid

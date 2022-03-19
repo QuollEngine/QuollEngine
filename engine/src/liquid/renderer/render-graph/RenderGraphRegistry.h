@@ -33,7 +33,7 @@ public:
    * @return Pipeline
    */
   inline rhi::PipelineHandle getPipeline(GraphResourceId resourceId) {
-    return pipelines.at(resourceId);
+    return mPipelines.at(resourceId);
   }
 
   /**
@@ -44,7 +44,7 @@ public:
    * @retval false Resource does not exist
    */
   inline bool hasPipeline(GraphResourceId resourceId) const {
-    return pipelines.find(resourceId) != pipelines.end();
+    return mPipelines.find(resourceId) != mPipelines.end();
   }
 
   /**
@@ -54,7 +54,7 @@ public:
    * @return Render pass
    */
   inline RenderGraphPassResult &getRenderPass(GraphResourceId resourceId) {
-    return renderPasses.at(resourceId);
+    return mRenderPasses.at(resourceId);
   }
 
   /**
@@ -65,12 +65,12 @@ public:
    * @retval false Resource does not exist
    */
   inline bool hasRenderPass(GraphResourceId resourceId) const {
-    return renderPasses.find(resourceId) != renderPasses.end();
+    return mRenderPasses.find(resourceId) != mRenderPasses.end();
   }
 
 private:
-  std::unordered_map<GraphResourceId, RenderGraphPassResult> renderPasses;
-  std::unordered_map<GraphResourceId, rhi::PipelineHandle> pipelines;
+  std::unordered_map<GraphResourceId, RenderGraphPassResult> mRenderPasses;
+  std::unordered_map<GraphResourceId, rhi::PipelineHandle> mPipelines;
 };
 
 } // namespace liquid

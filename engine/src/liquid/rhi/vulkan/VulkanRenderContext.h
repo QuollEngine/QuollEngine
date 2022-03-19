@@ -61,7 +61,7 @@ public:
    * @return Image available semaphore
    */
   inline VkSemaphore getImageAvailableSemaphore() {
-    return imageAvailableSemaphores.at(currentFrame);
+    return mImageAvailableSemaphores.at(mCurrentFrame);
   }
 
   /**
@@ -92,12 +92,12 @@ private:
   void createFences();
 
 private:
-  uint32_t currentFrame = 0;
+  uint32_t mCurrentFrame = 0;
 
-  std::array<VkSemaphore, NUM_FRAMES> imageAvailableSemaphores{};
-  std::array<VkSemaphore, NUM_FRAMES> renderFinishedSemaphores{};
-  std::array<VkFence, NUM_FRAMES> renderFences{};
-  std::vector<RenderCommandList> renderCommandLists;
+  std::array<VkSemaphore, NUM_FRAMES> mImageAvailableSemaphores{};
+  std::array<VkSemaphore, NUM_FRAMES> mRenderFinishedSemaphores{};
+  std::array<VkFence, NUM_FRAMES> mRenderFences{};
+  std::vector<RenderCommandList> mRenderCommandLists;
 
   VulkanQueue &mGraphicsQueue;
   VulkanQueue &mPresentQueue;

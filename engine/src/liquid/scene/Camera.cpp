@@ -3,34 +3,34 @@
 
 namespace liquid {
 
-Camera::Camera(rhi::ResourceRegistry *registry_) : registry(registry_) {
-  uniformBuffer =
-      registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData)});
+Camera::Camera(rhi::ResourceRegistry *registry) : mRegistry(registry) {
+  mBuffer =
+      mRegistry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData)});
 }
 
 void Camera::setPerspective(float fovY, float aspectRatio, float near,
                             float far) {
-  data.projectionMatrix =
+  mData.projectionMatrix =
       glm::perspective(glm::radians(fovY), aspectRatio, near, far);
 
-  data.projectionMatrix[1][1] *= -1;
+  mData.projectionMatrix[1][1] *= -1;
 
   updateProjectionViewMatrix();
 
-  registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &data},
-                      uniformBuffer);
+  mRegistry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &mData},
+                       mBuffer);
 }
 
 void Camera::lookAt(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
-  data.viewMatrix = glm::lookAt(position, direction, up);
+  mData.viewMatrix = glm::lookAt(position, direction, up);
   updateProjectionViewMatrix();
 
-  registry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &data},
-                      uniformBuffer);
+  mRegistry->setBuffer({rhi::BufferType::Uniform, sizeof(CameraData), &mData},
+                       mBuffer);
 }
 
 void Camera::updateProjectionViewMatrix() {
-  data.projectionViewMatrix = data.projectionMatrix * data.viewMatrix;
+  mData.projectionViewMatrix = mData.projectionMatrix * mData.viewMatrix;
 }
 
 } // namespace liquid

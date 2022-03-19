@@ -20,7 +20,9 @@ public:
    *
    * @param geometry Geometry
    */
-  void addGeometry(const Geometry &geometry) { geometries.push_back(geometry); }
+  void addGeometry(const Geometry &geometry) {
+    mGeometries.push_back(geometry);
+  }
 
   /**
    * @brief Get geometries
@@ -28,11 +30,11 @@ public:
    * @return List of geometries
    */
   inline const std::vector<Geometry> &getGeometries() const {
-    return geometries;
+    return mGeometries;
   }
 
 private:
-  std::vector<Geometry> geometries;
+  std::vector<Geometry> mGeometries;
 };
 
 } // namespace liquid

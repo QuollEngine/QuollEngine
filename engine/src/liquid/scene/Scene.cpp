@@ -3,111 +3,111 @@
 
 namespace liquid {
 
-SceneNode::SceneNode(Entity entity_, const TransformComponent &transform,
-                     SceneNode *parent_, EntityContext &entityContext_)
-    : entity(entity_), parent(parent_), entityContext(entityContext_) {
+SceneNode::SceneNode(Entity entity, const TransformComponent &transform,
+                     SceneNode *parent, EntityContext &entityContext)
+    : mEntity(entity), mParent(parent), mEntityContext(entityContext) {
   TransformComponent newTransform = transform;
-  if (parent) {
-    newTransform.parent = parent->getEntity();
+  if (mParent) {
+    newTransform.parent = mParent->getEntity();
   }
-  entityContext.setComponent<TransformComponent>(entity, newTransform);
+  mEntityContext.setComponent<TransformComponent>(mEntity, newTransform);
 }
 
 SceneNode::~SceneNode() {
-  if (entityContext.hasComponent<TransformComponent>(entity)) {
-    entityContext.deleteComponent<TransformComponent>(entity);
+  if (mEntityContext.hasComponent<TransformComponent>(mEntity)) {
+    mEntityContext.deleteComponent<TransformComponent>(mEntity);
   }
 
-  for (auto &x : children) {
+  for (auto &x : mChildren) {
     delete x;
   }
 
-  children.clear();
+  mChildren.clear();
 }
 
 SceneNode *SceneNode::addChild(Entity entity,
                                const TransformComponent &transform) {
-  addChild(new SceneNode(entity, transform, this, entityContext));
-  return children.back();
+  addChild(new SceneNode(entity, transform, this, mEntityContext));
+  return mChildren.back();
 }
 
 void SceneNode::addChild(SceneNode *node) {
-  node->parent = this;
-  children.push_back(node);
+  node->mParent = this;
+  mChildren.push_back(node);
 }
 
 void SceneNode::removeChild(SceneNode *node) {
-  auto it = std::find(children.begin(), children.end(), node);
+  auto it = std::find(mChildren.begin(), mChildren.end(), node);
 
-  if (it != children.end()) {
-    children.erase(it);
+  if (it != mChildren.end()) {
+    mChildren.erase(it);
     delete node;
   }
 }
 
-void SceneNode::setEntity(Entity entity_) {
-  auto &component = entityContext.getComponent<TransformComponent>(entity);
+void SceneNode::setEntity(Entity entity) {
+  auto &component = mEntityContext.getComponent<TransformComponent>(mEntity);
 
-  entityContext.setComponent<TransformComponent>(entity_, component);
-  entity = entity_;
+  mEntityContext.setComponent<TransformComponent>(entity, component);
+  mEntity = entity;
 }
 
 void SceneNode::update() {
   LIQUID_PROFILE_EVENT("SceneNode::Update");
-  auto &component = entityContext.getComponent<TransformComponent>(entity);
+  auto &component = mEntityContext.getComponent<TransformComponent>(mEntity);
 
   glm::mat4 identity{1.0f};
   glm::mat4 localTransform = glm::translate(identity, component.localPosition) *
                              glm::toMat4(component.localRotation) *
                              glm::scale(identity, component.localScale);
 
-  if (parent) {
+  if (mParent) {
     component.worldTransform =
-        entityContext.getComponent<TransformComponent>(parent->getEntity())
+        mEntityContext.getComponent<TransformComponent>(mParent->getEntity())
             .worldTransform *
         localTransform;
   } else {
     component.worldTransform = localTransform;
   }
 
-  if (entityContext.hasComponent<LightComponent>(entity)) {
-    entityContext.getComponent<LightComponent>(entity).light->setPosition(
+  if (mEntityContext.hasComponent<LightComponent>(mEntity)) {
+    mEntityContext.getComponent<LightComponent>(mEntity).light->setPosition(
         component.worldTransform[3]);
   }
 
-  for (auto &node : children) {
+  for (auto &node : mChildren) {
     node->update();
   }
 }
 
-Scene::Scene(EntityContext &entityContext_) : entityContext(entityContext_) {
-  rootNode =
-      new SceneNode(entityContext.createEntity(), {}, nullptr, entityContext);
+Scene::Scene(EntityContext &entityContext) : mEntityContext(entityContext) {
+  mRootNode =
+      new SceneNode(mEntityContext.createEntity(), {}, nullptr, mEntityContext);
 }
 
 Scene::~Scene() {
-  if (rootNode) {
-    delete rootNode;
-    rootNode = nullptr;
+  if (mRootNode) {
+    delete mRootNode;
+    mRootNode = nullptr;
   }
 }
 
 void Scene::setActiveCamera(Entity camera) {
-  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(camera),
+  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(camera),
                 "Entity " + std::to_string(camera) +
                     " does not have a camera component");
 
-  cameraEntity = camera;
+  mCameraEntity = camera;
 }
 
 const SharedPtr<Camera> &Scene::getActiveCamera() {
-  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(cameraEntity),
-                "Entity " + std::to_string(cameraEntity) +
+  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(mCameraEntity),
+                "Entity " + std::to_string(mCameraEntity) +
                     " does not have a camera component");
 
-  return entityContext.getComponent<CameraComponent>(cameraEntity).camera;
+  return mEntityContext.getComponent<CameraComponent>(mCameraEntity).camera;
 }
 
-void Scene::update() { rootNode->update(); }
+void Scene::update() { mRootNode->update(); }
 
 } // namespace liquid

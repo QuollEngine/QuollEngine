@@ -31,12 +31,12 @@ public:
   Res loadFromFile(const String &filename);
 
 private:
-  EntityContext &entityContext;
-  AnimationSystem &animationSystem;
-  Renderer &renderer;
-  bool debug = false;
+  EntityContext &mEntityContext;
+  AnimationSystem &mAnimationSystem;
+  Renderer &mRenderer;
+  bool mDebug = false;
 
-  SharedPtr<Material> defaultMaterial;
+  SharedPtr<Material> mDefaultMaterial;
 };
 
 } // namespace liquid

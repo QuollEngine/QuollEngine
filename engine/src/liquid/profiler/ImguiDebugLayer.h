@@ -16,8 +16,7 @@ public:
    * @param debugManager Debug manager
    */
   ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
-                  const StatsManager &statsManager,
-                  DebugManager &debugManager_);
+                  const StatsManager &statsManager, DebugManager &debugManager);
 
   /**
    * @brief Render debug UI
@@ -57,14 +56,14 @@ private:
       const std::vector<std::pair<String, Property>> &properties);
 
 private:
-  PhysicalDeviceInformation physicalDeviceInfo;
-  const StatsManager &statsManager;
-  DebugManager &debugManager;
+  PhysicalDeviceInformation mPhysicalDeviceInfo;
+  const StatsManager &mStatsManager;
+  DebugManager &mDebugManager;
 
-  bool usageMetricsVisible = false;
-  bool physicalDeviceInfoVisible = false;
-  bool performanceMetricsVisible = false;
-  bool wireframeModeEnabled = false;
+  bool mUsageMetricsVisible = false;
+  bool mPhysicalDeviceInfoVisible = false;
+  bool mPerformanceMetricsVisible = false;
+  bool mWireframeModeEnabled = false;
 };
 
 } // namespace liquid

@@ -7,8 +7,8 @@
 
 namespace liquidator {
 
-SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &context_)
-    : context(context_) {}
+SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &entityContext)
+    : mEntityContext(entityContext) {}
 
 void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::Begin("Scene");
@@ -21,14 +21,15 @@ void SceneHierarchyPanel::render(SceneManager &sceneManager) {
 }
 
 void SceneHierarchyPanel::setNodeClickHandler(const NodeClickHandler &handler) {
-  nodeClickHandler = handler;
+  mNodeClickHandler = handler;
 }
 
 void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
                                      SceneManager &sceneManager) {
   liquid::String name;
-  if (context.hasComponent<liquid::NameComponent>(node->getEntity())) {
-    name = context.getComponent<liquid::NameComponent>(node->getEntity()).name;
+  if (mEntityContext.hasComponent<liquid::NameComponent>(node->getEntity())) {
+    name = mEntityContext.getComponent<liquid::NameComponent>(node->getEntity())
+               .name;
   } else {
     name = "Entity " + std::to_string(node->getEntity());
   }
@@ -41,7 +42,7 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
         ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
   }
 
-  if (selectedNode == node) {
+  if (mSelectedNode == node) {
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
 
@@ -49,8 +50,8 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
     open = !isLeaf;
     if (ImGui::IsItemClicked()) {
-      nodeClickHandler(node);
-      selectedNode = node;
+      mNodeClickHandler(node);
+      mSelectedNode = node;
     }
   }
 
@@ -90,17 +91,18 @@ void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node) {
     parent->removeChild(node);
   }
 
-  context.deleteEntity(entity);
+  mEntityContext.deleteEntity(entity);
 }
 
 void SceneHierarchyPanel::handleMoveToNode(liquid::SceneNode *node,
                                            EditorCamera &camera) {
-  LIQUID_ASSERT(
-      context.hasComponent<liquid::TransformComponent>(node->getEntity()),
-      "Scene node must have transform component");
+  LIQUID_ASSERT(mEntityContext.hasComponent<liquid::TransformComponent>(
+                    node->getEntity()),
+                "Scene node must have transform component");
 
   auto &transformComponent =
-      context.getComponent<liquid::TransformComponent>(node->getEntity());
+      mEntityContext.getComponent<liquid::TransformComponent>(
+          node->getEntity());
 
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));

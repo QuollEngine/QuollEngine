@@ -36,16 +36,16 @@ public:
    * @return Animation
    */
   inline const Animation &getAnimation(uint32_t index) const {
-    LIQUID_ASSERT(index < animations.size(), "Animation at index " +
-                                                 std::to_string(index) +
-                                                 " does not exist");
-    return animations.at(index);
+    LIQUID_ASSERT(index < mAnimations.size(), "Animation at index " +
+                                                  std::to_string(index) +
+                                                  " does not exist");
+    return mAnimations.at(index);
   }
 
 private:
-  EntityContext &entityContext;
+  EntityContext &mEntityContext;
 
-  std::vector<Animation> animations;
+  std::vector<Animation> mAnimations;
 };
 
 } // namespace liquid

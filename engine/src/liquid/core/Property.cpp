@@ -3,17 +3,17 @@
 
 namespace liquid {
 
-Property::Property(int32_t value_) : type(INT32), value(value_) {}
-Property::Property(uint32_t value_) : type(UINT32), value(value_) {}
-Property::Property(uint64_t value_) : type(UINT64), value(value_) {}
-Property::Property(float value_) : type(REAL), value(value_) {}
-Property::Property(const glm::vec2 &value_) : type(VECTOR2), value(value_) {}
-Property::Property(const glm::vec3 &value_) : type(VECTOR3), value(value_) {}
-Property::Property(const glm::vec4 &value_) : type(VECTOR4), value(value_) {}
-Property::Property(const glm::mat4 &value_) : type(MATRIX4), value(value_) {}
+Property::Property(int32_t value) : mType(INT32), mValue(value) {}
+Property::Property(uint32_t value) : mType(UINT32), mValue(value) {}
+Property::Property(uint64_t value) : mType(UINT64), mValue(value) {}
+Property::Property(float value) : mType(REAL), mValue(value) {}
+Property::Property(const glm::vec2 &value) : mType(VECTOR2), mValue(value) {}
+Property::Property(const glm::vec3 &value) : mType(VECTOR3), mValue(value) {}
+Property::Property(const glm::vec4 &value) : mType(VECTOR4), mValue(value) {}
+Property::Property(const glm::mat4 &value) : mType(MATRIX4), mValue(value) {}
 
 size_t Property::getSize() const {
-  switch (type) {
+  switch (mType) {
   case INT32:
     return sizeof(int32_t);
   case UINT32:
@@ -36,7 +36,7 @@ size_t Property::getSize() const {
 }
 
 const String Property::toString() const {
-  switch (type) {
+  switch (mType) {
   case INT32:
     return std::to_string(getValue<int32_t>());
   case UINT32:

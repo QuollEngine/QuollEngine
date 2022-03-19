@@ -3,20 +3,20 @@
 
 namespace liquid {
 
-RenderData::RenderData(EntityContext &entityContext_, Scene *scene_,
-                       const std::vector<SharedPtr<Material>> &shadowMaterials_,
-                       rhi::ResourceRegistry &registry_)
-    : entityContext(entityContext_), scene(scene_),
-      shadowMaterials(shadowMaterials_), registry(registry_) {
+RenderData::RenderData(EntityContext &entityContext, Scene *scene,
+                       const std::vector<SharedPtr<Material>> &shadowMaterials,
+                       rhi::ResourceRegistry &registry)
+    : mEntityContext(entityContext), mScene(scene),
+      mShadowMaterials(shadowMaterials), mRegistry(registry) {
 
-  sceneBuffer =
-      registry.setBuffer({rhi::BufferType::Uniform, sizeof(SceneBufferObject)});
+  mSceneBuffer = mRegistry.setBuffer(
+      {rhi::BufferType::Uniform, sizeof(SceneBufferObject)});
 }
 
 void RenderData::update() {
-  Entity entity = environmentMapEntity;
+  Entity entity = mEnvironmentMapEntity;
 
-  entityContext.iterateEntities<EnvironmentComponent>(
+  mEntityContext.iterateEntities<EnvironmentComponent>(
       [&entity](Entity e,
                 const EnvironmentComponent &environmentComponent) mutable {
         if (entity != e) {
@@ -24,47 +24,49 @@ void RenderData::update() {
         }
       });
 
-  if (entity < ENTITY_MAX && entity != environmentMapEntity) {
+  if (entity < ENTITY_MAX && entity != mEnvironmentMapEntity) {
 
-    if (entityContext.hasEntity(environmentMapEntity)) {
-      entityContext.deleteEntity(environmentMapEntity);
+    if (mEntityContext.hasEntity(mEnvironmentMapEntity)) {
+      mEntityContext.deleteEntity(mEnvironmentMapEntity);
     }
-    environmentChanged = true;
-    environmentMapEntity = entity;
+    mEnvironmentChanged = true;
+    mEnvironmentMapEntity = entity;
   }
 
-  if (entityContext.hasEntity(environmentMapEntity) &&
-      entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
-    sceneData.hasIBL.x = 1;
+  if (mEntityContext.hasEntity(mEnvironmentMapEntity) &&
+      mEntityContext.hasComponent<EnvironmentComponent>(
+          mEnvironmentMapEntity)) {
+    mSceneData.hasIBL.x = 1;
   }
 
   size_t i = 0;
-  entityContext.iterateEntities<LightComponent>(
+  mEntityContext.iterateEntities<LightComponent>(
       [&i, this](Entity entity, const LightComponent &lightComponent) {
         const auto &light = lightComponent.light;
-        sceneData.lights.at(i).color = light->getColor();
-        sceneData.lights.at(i).direction =
+        mSceneData.lights.at(i).color = light->getColor();
+        mSceneData.lights.at(i).direction =
             glm::vec4(light->getDirection(), light->getIntensity());
-        sceneData.lights.at(i).type.x = light->getType();
-        sceneData.lights.at(i).lightSpaceMatrix =
+        mSceneData.lights.at(i).type.x = light->getType();
+        mSceneData.lights.at(i).lightSpaceMatrix =
             light->getProjectionViewMatrix();
-        shadowMaterials.at(i)->updateProperty(
-            "lightMatrix", sceneData.lights.at(i).lightSpaceMatrix);
+        mShadowMaterials.at(i)->updateProperty(
+            "lightMatrix", mSceneData.lights.at(i).lightSpaceMatrix);
         i++;
       });
 
-  sceneData.numLights.x = static_cast<uint32_t>(i);
-  registry.setBuffer(
-      {rhi::BufferType::Uniform, sizeof(SceneBufferObject), &sceneData},
-      sceneBuffer);
+  mSceneData.numLights.x = static_cast<uint32_t>(i);
+  mRegistry.setBuffer(
+      {rhi::BufferType::Uniform, sizeof(SceneBufferObject), &mSceneData},
+      mSceneBuffer);
 }
 
 std::array<rhi::TextureHandle, 3> RenderData::getEnvironmentTextures() const {
-  if (entityContext.hasEntity(environmentMapEntity) &&
-      entityContext.hasComponent<EnvironmentComponent>(environmentMapEntity)) {
+  if (mEntityContext.hasEntity(mEnvironmentMapEntity) &&
+      mEntityContext.hasComponent<EnvironmentComponent>(
+          mEnvironmentMapEntity)) {
 
-    const auto &environment =
-        entityContext.getComponent<EnvironmentComponent>(environmentMapEntity);
+    const auto &environment = mEntityContext.getComponent<EnvironmentComponent>(
+        mEnvironmentMapEntity);
 
     return {environment.irradianceMap, environment.specularMap,
             environment.brdfLUT};
@@ -73,6 +75,6 @@ std::array<rhi::TextureHandle, 3> RenderData::getEnvironmentTextures() const {
   return {};
 }
 
-void RenderData::cleanEnvironmentChangeFlag() { environmentChanged = false; }
+void RenderData::cleanEnvironmentChangeFlag() { mEnvironmentChanged = false; }
 
 } // namespace liquid

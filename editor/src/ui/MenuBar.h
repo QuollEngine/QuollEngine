@@ -13,7 +13,7 @@ public:
   /**
    * @brief Create menu bar
    *
-   * @param loader GLTF loader
+   * @param loader GLTF mLoader
    */
   MenuBar(const liquid::GLTFLoader &loader);
 
@@ -41,8 +41,8 @@ private:
   void handleNewScene(SceneManager &sceneManager);
 
 private:
-  liquid::platform_tools::NativeFileDialog fileDialog;
-  liquid::GLTFLoader loader;
+  liquid::platform_tools::NativeFileDialog mFileDialog;
+  liquid::GLTFLoader mLoader;
 };
 
 } // namespace liquidator

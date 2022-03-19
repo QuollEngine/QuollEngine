@@ -3,27 +3,27 @@
 
 namespace liquidator {
 
-EditorGrid::EditorGrid(liquid::rhi::ResourceRegistry &registry_)
-    : registry(registry_) {
-  buffer = registry.setBuffer(
-      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &data});
-  updateUniformBuffer();
+EditorGrid::EditorGrid(liquid::rhi::ResourceRegistry &registry)
+    : mRegistry(registry) {
+  mBuffer = mRegistry.setBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &mData});
+  updateBuffer();
 }
 
 void EditorGrid::setGridLinesFlag(bool flag) {
-  data.gridLines.x = static_cast<uint32_t>(flag);
-  updateUniformBuffer();
+  mData.gridLines.x = static_cast<uint32_t>(flag);
+  updateBuffer();
 }
 
 void EditorGrid::setAxisLinesFlag(bool flag) {
-  data.gridLines.y = static_cast<uint32_t>(flag);
-  updateUniformBuffer();
+  mData.gridLines.y = static_cast<uint32_t>(flag);
+  updateBuffer();
 }
 
-void EditorGrid::updateUniformBuffer() {
-  registry.setBuffer(
-      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &data},
-      buffer);
+void EditorGrid::updateBuffer() {
+  mRegistry.setBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData), &mData},
+      mBuffer);
 }
 
 } // namespace liquidator

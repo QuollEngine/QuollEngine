@@ -1,10 +1,14 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-cplusplus-*,-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-const-cast,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,llvm-*,-llvm-include-order,-llvm-header-guard'
+Checks:          'clang-diagnostic-*,clang-analyzer-cplusplus-*,-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-const-cast,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,llvm-*,-llvm-include-order,-llvm-header-guard, readability-identifier-naming'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     none
 CheckOptions:
+  - key:             readability-identifier-naming.PrivateMemberCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.PrivateMemberPrefix
+    value:           m
   - key:             modernize-replace-auto-ptr.IncludeStyle
     value:           llvm
   - key:             cppcoreguidelines-no-malloc.Reallocations

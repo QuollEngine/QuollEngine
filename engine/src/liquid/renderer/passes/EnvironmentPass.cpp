@@ -5,16 +5,16 @@ namespace liquid {
 
 EnvironmentPass::EnvironmentPass(const String &name,
                                  GraphResourceId renderPassId,
-                                 EntityContext &entityContext_,
-                                 ShaderLibrary &shaderLibrary_,
-                                 const SharedPtr<RenderData> &renderData_)
-    : RenderGraphPassBase(name, renderPassId), entityContext(entityContext_),
-      shaderLibrary(shaderLibrary_), renderData(renderData_) {}
+                                 EntityContext &entityContext,
+                                 ShaderLibrary &shaderLibrary,
+                                 const SharedPtr<RenderData> &renderData)
+    : RenderGraphPassBase(name, renderPassId), mEntityContext(entityContext),
+      mShaderLibrary(shaderLibrary), mRenderData(renderData) {}
 
 void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
-  pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary.getShader("__engine.skybox.default.vertex"),
-      shaderLibrary.getShader("__engine.skybox.default.fragment"),
+  mPipelineId = builder.create(RenderGraphPipelineDescription{
+      mShaderLibrary.getShader("__engine.skybox.default.vertex"),
+      mShaderLibrary.getShader("__engine.skybox.default.fragment"),
       PipelineVertexInputLayout::create<Vertex>(), PipelineInputAssembly{},
       PipelineRasterizer{PolygonMode::Fill, CullMode::Front,
                          FrontFace::Clockwise},
@@ -26,18 +26,17 @@ void EnvironmentPass::buildInternal(RenderGraphBuilder &builder) {
 
 void EnvironmentPass::execute(rhi::RenderCommandList &commandList,
                               RenderGraphRegistry &registry) {
-  const auto &pipeline = registry.getPipeline(pipelineId);
+  const auto &pipeline = registry.getPipeline(mPipelineId);
 
   commandList.bindPipeline(pipeline);
 
   rhi::Descriptor descriptor;
-  descriptor.bind(0,
-                  renderData->getScene()->getActiveCamera()->getUniformBuffer(),
+  descriptor.bind(0, mRenderData->getScene()->getActiveCamera()->getBuffer(),
                   rhi::DescriptorType::UniformBuffer);
 
   commandList.bindDescriptor(pipeline, 0, descriptor);
 
-  entityContext.iterateEntities<EnvironmentComponent, MeshComponent>(
+  mEntityContext.iterateEntities<EnvironmentComponent, MeshComponent>(
       [this, &pipeline, &commandList](Entity entity,
                                       const EnvironmentComponent &,
                                       const MeshComponent &mesh) {

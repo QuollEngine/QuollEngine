@@ -40,7 +40,7 @@ private:
   Engine() = default;
 
 private:
-  String assetsPath;
+  String mAssetsPath;
 };
 
 } // namespace liquid

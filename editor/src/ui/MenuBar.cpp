@@ -8,7 +8,7 @@
 
 namespace liquidator {
 
-MenuBar::MenuBar(const liquid::GLTFLoader &loader_) : loader(loader_) {}
+MenuBar::MenuBar(const liquid::GLTFLoader &loader) : mLoader(loader) {}
 
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(
@@ -22,7 +22,7 @@ void MenuBar::render(SceneManager &sceneManager) {
       }
 
       if (ImGui::MenuItem("Import GLTF...", nullptr)) {
-        handleGLTFImport(fileDialog.getFilePathFromDialog({"gltf"}),
+        handleGLTFImport(mFileDialog.getFilePathFromDialog({"gltf"}),
                          sceneManager.getActiveScene());
       }
 
@@ -38,7 +38,7 @@ void MenuBar::render(SceneManager &sceneManager) {
 void MenuBar::handleGLTFImport(const liquid::String &filePath,
                                liquid::Scene *scene) {
   constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-  auto &&result = loader.loadFromFile(filePath);
+  auto &&result = mLoader.loadFromFile(filePath);
 
   if (result.hasError())
     return;

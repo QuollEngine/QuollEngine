@@ -18,14 +18,14 @@ public:
    *
    * @param name Pass name
    * @param renderPassId Render pass resource ID
-   * @param builderFn_ Builder function
-   * @param executorFn_ Executor function
+   * @param builderFn Builder function
+   * @param executorFn Executor function
    */
   RenderGraphInlinePass(const String &name, GraphResourceId renderPassId,
-                        const BuilderFn &builderFn_,
-                        const ExecutorFn &executorFn_)
-      : RenderGraphPassBase(name, renderPassId), builderFn(builderFn_),
-        executorFn(executorFn_) {}
+                        const BuilderFn &builderFn,
+                        const ExecutorFn &executorFn)
+      : RenderGraphPassBase(name, renderPassId), mBuilderFn(builderFn),
+        mExecutorFn(executorFn) {}
 
   /**
    * @brief Build pass
@@ -33,7 +33,7 @@ public:
    * @param builder Graph builder
    */
   void buildInternal(RenderGraphBuilder &builder) override {
-    builderFn(builder, scope);
+    mBuilderFn(builder, mScope);
   }
 
   /**
@@ -44,13 +44,13 @@ public:
    */
   void execute(rhi::RenderCommandList &commandList,
                RenderGraphRegistry &registry) override {
-    executorFn(commandList, scope, registry);
+    mExecutorFn(commandList, mScope, registry);
   }
 
 private:
-  BuilderFn builderFn;
-  ExecutorFn executorFn;
-  TScope scope{};
+  BuilderFn mBuilderFn;
+  ExecutorFn mExecutorFn;
+  TScope mScope{};
 };
 
 } // namespace liquid

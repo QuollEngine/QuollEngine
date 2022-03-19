@@ -14,7 +14,7 @@ VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
     : mDevice(device), mGraphicsQueue(graphicsQueue),
       mPresentQueue(presentQueue) {
 
-  renderCommandLists = std::move(pool.createCommandLists(NUM_FRAMES));
+  mRenderCommandLists = std::move(pool.createCommandLists(NUM_FRAMES));
 
   createSemaphores();
   createFences();
@@ -22,22 +22,22 @@ VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
 
 VulkanRenderContext::~VulkanRenderContext() {
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
-    if (renderFences.at(i)) {
-      vkDestroyFence(mDevice, renderFences.at(i), nullptr);
-      renderFences.at(i) = VK_NULL_HANDLE;
+    if (mRenderFences.at(i)) {
+      vkDestroyFence(mDevice, mRenderFences.at(i), nullptr);
+      mRenderFences.at(i) = VK_NULL_HANDLE;
     }
   }
   LOG_DEBUG("[Vulkan] Render fences destroyed");
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
-    if (imageAvailableSemaphores.at(i)) {
-      vkDestroySemaphore(mDevice, imageAvailableSemaphores.at(i), nullptr);
-      imageAvailableSemaphores.at(i) = VK_NULL_HANDLE;
+    if (mImageAvailableSemaphores.at(i)) {
+      vkDestroySemaphore(mDevice, mImageAvailableSemaphores.at(i), nullptr);
+      mImageAvailableSemaphores.at(i) = VK_NULL_HANDLE;
     }
 
-    if (renderFinishedSemaphores.at(i)) {
-      vkDestroySemaphore(mDevice, renderFinishedSemaphores.at(i), nullptr);
-      renderFinishedSemaphores.at(i) = VK_NULL_HANDLE;
+    if (mRenderFinishedSemaphores.at(i)) {
+      vkDestroySemaphore(mDevice, mRenderFinishedSemaphores.at(i), nullptr);
+      mRenderFinishedSemaphores.at(i) = VK_NULL_HANDLE;
     }
   }
   LOG_DEBUG("[Vulkan] Render semaphores destroyed");
@@ -47,7 +47,7 @@ VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
                                       uint32_t imageIdx) {
   LIQUID_PROFILE_EVENT("VulkanRenderContext::present");
   std::array<VkSemaphore, 1> waitSemaphores{
-      renderFinishedSemaphores.at(currentFrame)};
+      mRenderFinishedSemaphores.at(mCurrentFrame)};
   std::array<VkSwapchainKHR, 1> swapchains{swapchain.getSwapchain()};
   VkPresentInfoKHR presentInfo{};
 
@@ -59,18 +59,18 @@ VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
   presentInfo.pImageIndices = &imageIdx;
   presentInfo.pResults = nullptr;
 
-  currentFrame = (currentFrame + 1) % NUM_FRAMES;
+  mCurrentFrame = (mCurrentFrame + 1) % NUM_FRAMES;
 
   return vkQueuePresentKHR(mPresentQueue, &presentInfo);
 }
 
 RenderCommandList &VulkanRenderContext::beginRendering() {
-  vkWaitForFences(mDevice, 1, &renderFences.at(currentFrame), true,
+  vkWaitForFences(mDevice, 1, &mRenderFences.at(mCurrentFrame), true,
                   std::numeric_limits<uint32_t>::max());
-  vkResetFences(mDevice, 1, &renderFences.at(currentFrame));
+  vkResetFences(mDevice, 1, &mRenderFences.at(mCurrentFrame));
 
   auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
-                            renderCommandLists.at(currentFrame)
+                            mRenderCommandLists.at(mCurrentFrame)
                                 .getNativeRenderCommandList()
                                 .get())
                             ->getVulkanCommandBuffer();
@@ -83,7 +83,7 @@ RenderCommandList &VulkanRenderContext::beginRendering() {
   checkForVulkanError(vkBeginCommandBuffer(commandBuffer, &beginInfo),
                       "Failed to begin recording command buffer");
 
-  return renderCommandLists.at(currentFrame);
+  return mRenderCommandLists.at(mCurrentFrame);
 }
 
 void VulkanRenderContext::endRendering() {
@@ -91,7 +91,7 @@ void VulkanRenderContext::endRendering() {
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
   auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
-                            renderCommandLists.at(currentFrame)
+                            mRenderCommandLists.at(mCurrentFrame)
                                 .getNativeRenderCommandList()
                                 .get())
                             ->getVulkanCommandBuffer();
@@ -101,7 +101,7 @@ void VulkanRenderContext::endRendering() {
   std::array<VkCommandBuffer, 1> commandBuffers{commandBuffer};
 
   std::array<VkSemaphore, 1> waitSemaphores{
-      imageAvailableSemaphores.at(currentFrame)};
+      mImageAvailableSemaphores.at(mCurrentFrame)};
   std::array<VkPipelineStageFlags, 1> waitStages{
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
   submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
@@ -111,13 +111,13 @@ void VulkanRenderContext::endRendering() {
   submitInfo.pCommandBuffers = commandBuffers.data();
 
   std::array<VkSemaphore, 1> signalSemaphores{
-      renderFinishedSemaphores.at(currentFrame)};
+      mRenderFinishedSemaphores.at(mCurrentFrame)};
   submitInfo.signalSemaphoreCount =
       static_cast<uint32_t>(signalSemaphores.size());
   submitInfo.pSignalSemaphores = signalSemaphores.data();
 
   checkForVulkanError(vkQueueSubmit(mGraphicsQueue, 1, &submitInfo,
-                                    renderFences.at(currentFrame)),
+                                    mRenderFences.at(mCurrentFrame)),
                       "Failed to submit graphics queue");
 }
 
@@ -129,11 +129,11 @@ void VulkanRenderContext::createSemaphores() {
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     checkForVulkanError(vkCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
-                                          &imageAvailableSemaphores.at(i)),
+                                          &mImageAvailableSemaphores.at(i)),
                         "Failed to create image available semaphore");
 
     checkForVulkanError(vkCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
-                                          &renderFinishedSemaphores.at(i)),
+                                          &mRenderFinishedSemaphores.at(i)),
                         "Failed to create render finished semaphores");
   }
 
@@ -148,7 +148,7 @@ void VulkanRenderContext::createFences() {
 
   for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
     checkForVulkanError(
-        vkCreateFence(mDevice, &fenceInfo, nullptr, &renderFences.at(i)),
+        vkCreateFence(mDevice, &fenceInfo, nullptr, &mRenderFences.at(i)),
         "Failed to create render fence");
   }
 

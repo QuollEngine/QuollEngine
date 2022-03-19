@@ -36,7 +36,7 @@ public:
    *
    * @return GLFWwindow Pointer to GLFW window instance
    */
-  inline ::GLFWwindow *getInstance() { return windowInstance; }
+  inline ::GLFWwindow *getInstance() { return mWindowInstance; }
 
   /**
    * @brief Gets framebuffer size
@@ -175,16 +175,16 @@ public:
   void focus();
 
 private:
-  ::GLFWwindow *windowInstance;
+  ::GLFWwindow *mWindowInstance;
 
   template <class FunctionType>
   using HandlerMap = std::map<uint32_t, std::function<FunctionType>>;
 
-  HandlerMap<void(uint32_t, uint32_t)> resizeHandlers;
-  HandlerMap<void(int key, int scancode, int action, int mods)> keyHandlers;
-  HandlerMap<void(int button, int action, int mods)> mouseButtonHandlers;
-  HandlerMap<void(double xpos, double ypos)> mouseMoveHandlers;
-  HandlerMap<void(double xoffset, double yoffset)> scrollWheelHandlers;
+  HandlerMap<void(uint32_t, uint32_t)> mResizeHandlers;
+  HandlerMap<void(int key, int scancode, int action, int mods)> mKeyHandlers;
+  HandlerMap<void(int button, int action, int mods)> mMouseButtonHandlers;
+  HandlerMap<void(double xpos, double ypos)> mMouseMoveHandlers;
+  HandlerMap<void(double xoffset, double yoffset)> mScrollWheelHandlers;
 };
 
 } // namespace liquid

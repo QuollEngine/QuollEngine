@@ -8,97 +8,97 @@ Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
                    std::vector<glm::vec3> &&scales,
                    std::vector<JointId> &&parents,
                    std::vector<glm::mat4> &&inverseBindMatrices,
-                   std::vector<String> &&names,
-                   rhi::ResourceRegistry *registry_)
-    : jointLocalPositions(positions), jointLocalRotations(rotations),
-      jointLocalScales(scales), jointParents(parents),
-      jointInverseBindMatrices(inverseBindMatrices), jointNames(names),
-      numJoints(positions.size()), registry(registry_) {
-  LIQUID_ASSERT(numJoints > 0, "No joints provided");
-  LIQUID_ASSERT(jointLocalPositions.size() == numJoints &&
-                    jointLocalRotations.size() == numJoints &&
-                    jointLocalScales.size() == numJoints &&
-                    jointParents.size() == numJoints &&
-                    jointInverseBindMatrices.size() == numJoints &&
-                    jointNames.size() == numJoints,
+                   std::vector<String> &&names, rhi::ResourceRegistry *registry)
+    : mJointLocalPositions(positions), mJointLocalRotations(rotations),
+      mJointLocalScales(scales), mJointParents(parents),
+      mJointInverseBindMatrices(inverseBindMatrices), mJointNames(names),
+      mNumJoints(positions.size()), mRegistry(registry) {
+  LIQUID_ASSERT(mNumJoints > 0, "No joints provided");
+  LIQUID_ASSERT(mJointLocalPositions.size() == mNumJoints &&
+                    mJointLocalRotations.size() == mNumJoints &&
+                    mJointLocalScales.size() == mNumJoints &&
+                    mJointParents.size() == mNumJoints &&
+                    mJointInverseBindMatrices.size() == mNumJoints &&
+                    mJointNames.size() == mNumJoints,
                 "All joint parameter arrays must have the same size");
 
-  jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
-  jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
+  mJointWorldTransforms.resize(mNumJoints, glm::mat4{1.0f});
+  mJointFinalTransforms.resize(mNumJoints, glm::mat4{1.0f});
 
-  buffer = registry->setBuffer(
-      {rhi::BufferType::Uniform, sizeof(glm::mat4) * numJoints});
+  mBuffer = registry->setBuffer(
+      {rhi::BufferType::Uniform, sizeof(glm::mat4) * mNumJoints});
 
   // Debug data
-  for (JointId joint = 0; joint < static_cast<uint32_t>(numJoints); ++joint) {
-    debugBones.push_back(jointParents.at(joint));
-    debugBones.push_back(joint);
+  for (JointId joint = 0; joint < static_cast<uint32_t>(mNumJoints); ++joint) {
+    mDebugBones.push_back(mJointParents.at(joint));
+    mDebugBones.push_back(joint);
   }
 
-  const size_t numDebugBones = numJoints * 2;
+  const size_t numDebugBones = mNumJoints * 2;
 
-  debugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
+  mDebugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
 
-  debugBuffer = registry->setBuffer(
+  mDebugBuffer = registry->setBuffer(
       {rhi::BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
 }
 
 const glm::mat4 Skeleton::getJointLocalTransform(JointId joint) const {
-  LIQUID_ASSERT(joint < numJoints, "Joint does not exist");
+  LIQUID_ASSERT(joint < mNumJoints, "Joint does not exist");
 
   glm::mat4 identity{1.0f};
-  return glm::translate(identity, jointLocalPositions.at(joint)) *
-         glm::toMat4(jointLocalRotations.at(joint)) *
-         glm::scale(identity, jointLocalScales.at(joint));
+  return glm::translate(identity, mJointLocalPositions.at(joint)) *
+         glm::toMat4(mJointLocalRotations.at(joint)) *
+         glm::scale(identity, mJointLocalScales.at(joint));
 }
 
 void Skeleton::setJointPosition(JointId joint, const glm::vec3 &position) {
-  LIQUID_ASSERT(joint < numJoints, "Joint does not exist");
+  LIQUID_ASSERT(joint < mNumJoints, "Joint does not exist");
 
-  jointLocalPositions.at(joint) = position;
+  mJointLocalPositions.at(joint) = position;
 }
 
 void Skeleton::setJointRotation(JointId joint, const glm::quat &rotation) {
-  LIQUID_ASSERT(joint < numJoints, "Joint does not exist");
+  LIQUID_ASSERT(joint < mNumJoints, "Joint does not exist");
 
-  jointLocalRotations.at(joint) = rotation;
+  mJointLocalRotations.at(joint) = rotation;
 }
 
 void Skeleton::setJointScale(JointId joint, const glm::vec3 &scale) {
-  LIQUID_ASSERT(joint < numJoints, "Joint does not exist");
+  LIQUID_ASSERT(joint < mNumJoints, "Joint does not exist");
 
-  jointLocalScales.at(joint) = scale;
+  mJointLocalScales.at(joint) = scale;
 }
 
 void Skeleton::update() {
   LIQUID_PROFILE_EVENT("Skeleton::update");
 
-  for (uint32_t i = 0; i < static_cast<uint32_t>(numJoints); ++i) {
-    const auto &parentWorld = jointWorldTransforms.at(jointParents.at(i));
-    jointWorldTransforms.at(i) = parentWorld * getJointLocalTransform(i);
+  for (uint32_t i = 0; i < static_cast<uint32_t>(mNumJoints); ++i) {
+    const auto &parentWorld = mJointWorldTransforms.at(mJointParents.at(i));
+    mJointWorldTransforms.at(i) = parentWorld * getJointLocalTransform(i);
   }
 
-  for (size_t i = 0; i < numJoints; ++i) {
-    jointFinalTransforms.at(i) =
-        jointWorldTransforms.at(i) * jointInverseBindMatrices.at(i);
+  for (size_t i = 0; i < mNumJoints; ++i) {
+    mJointFinalTransforms.at(i) =
+        mJointWorldTransforms.at(i) * mJointInverseBindMatrices.at(i);
   }
 
-  registry->setBuffer({rhi::BufferType::Uniform, sizeof(glm::mat4) * numJoints,
-                       jointFinalTransforms.data()},
-                      buffer);
+  mRegistry->setBuffer({rhi::BufferType::Uniform,
+                        sizeof(glm::mat4) * mNumJoints,
+                        mJointFinalTransforms.data()},
+                       mBuffer);
 }
 
 void Skeleton::updateDebug() {
   LIQUID_PROFILE_EVENT("Skeleton::updateDebug");
 
-  for (size_t i = 0; i < debugBones.size(); ++i) {
-    debugBoneTransforms.at(i) = jointWorldTransforms.at(debugBones.at(i));
+  for (size_t i = 0; i < mDebugBones.size(); ++i) {
+    mDebugBoneTransforms.at(i) = mJointWorldTransforms.at(mDebugBones.at(i));
   }
 
-  registry->setBuffer({rhi::BufferType::Uniform,
-                       sizeof(glm::mat4) * debugBones.size(),
-                       debugBoneTransforms.data()},
-                      buffer);
+  mRegistry->setBuffer({rhi::BufferType::Uniform,
+                        sizeof(glm::mat4) * mDebugBones.size(),
+                        mDebugBoneTransforms.data()},
+                       mDebugBuffer);
 }
 
 } // namespace liquid

@@ -23,7 +23,7 @@ public:
   rhi::ShaderHandle getShader(const String &name) const;
 
 private:
-  std::unordered_map<String, rhi::ShaderHandle> shaders;
+  std::unordered_map<String, rhi::ShaderHandle> mShaders;
 };
 
 } // namespace liquid

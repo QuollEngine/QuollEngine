@@ -11,9 +11,8 @@ public:
 TEST_F(CameraTest, CreatesUniformBufferOnConstruct) {
   liquid::Camera camera(&registry);
 
-  EXPECT_EQ(
-      registry.getBufferMap().getDescription(camera.getUniformBuffer()).type,
-      liquid::rhi::BufferType::Uniform);
+  EXPECT_EQ(registry.getBufferMap().getDescription(camera.getBuffer()).type,
+            liquid::rhi::BufferType::Uniform);
 }
 
 TEST_F(CameraTest, SetsPerspectiveProjectionAndUpdatesProjectionView) {
@@ -57,14 +56,12 @@ TEST_F(CameraTest, SetsViewAndUpdatesProjectionView) {
 TEST_F(CameraTest, UpdatesBufferOnSetProjectionView) {
   liquid::Camera camera(&registry);
 
-  EXPECT_EQ(
-      registry.getBufferMap().getDescription(camera.getUniformBuffer()).data,
-      nullptr);
+  EXPECT_EQ(registry.getBufferMap().getDescription(camera.getBuffer()).data,
+            nullptr);
 
   camera.setPerspective(90.0f, 0.5f, 0.1f, 100.0f);
 
-  auto *data =
-      registry.getBufferMap().getDescription(camera.getUniformBuffer()).data;
+  auto *data = registry.getBufferMap().getDescription(camera.getBuffer()).data;
 
   EXPECT_NE(data, nullptr);
   auto &cameraData = *static_cast<liquid::CameraData *>(data);
@@ -78,14 +75,12 @@ TEST_F(CameraTest, UpdatesBufferOnSetProjectionView) {
 TEST_F(CameraTest, UpdatesBufferOnLookAt) {
   liquid::Camera camera(&registry);
 
-  EXPECT_EQ(
-      registry.getBufferMap().getDescription(camera.getUniformBuffer()).data,
-      nullptr);
+  EXPECT_EQ(registry.getBufferMap().getDescription(camera.getBuffer()).data,
+            nullptr);
 
   camera.lookAt({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f});
 
-  auto *data =
-      registry.getBufferMap().getDescription(camera.getUniformBuffer()).data;
+  auto *data = registry.getBufferMap().getDescription(camera.getBuffer()).data;
 
   EXPECT_NE(data, nullptr);
 

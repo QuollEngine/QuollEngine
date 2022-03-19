@@ -3,8 +3,8 @@
 
 namespace liquid {
 
-void DebugManager::setWireframeMode(bool wireframeMode_) {
-  wireframeMode = wireframeMode_;
+void DebugManager::setWireframeMode(bool wireframeMode) {
+  mWireframeMode = wireframeMode;
 }
 
 } // namespace liquid

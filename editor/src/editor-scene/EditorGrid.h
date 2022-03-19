@@ -37,7 +37,7 @@ public:
    * @retval true Grid lines are shown
    * @retval false Grid lines are not shown
    */
-  inline bool gridLinesShown() const { return data.gridLines.x == 1; }
+  inline bool gridLinesShown() const { return mData.gridLines.x == 1; }
 
   /**
    * @brief Check if axis lines are shown
@@ -45,25 +45,25 @@ public:
    * @retval true Axis lines are shown
    * @retval false Axis lines are not shown
    */
-  inline bool axisLinesShown() const { return data.gridLines.y == 1; }
+  inline bool axisLinesShown() const { return mData.gridLines.y == 1; }
 
   /**
-   * @brief Get uniform buffer
+   * @brief Get buffer
    *
-   * @return Uniform buffer
+   * @return Buffer
    */
-  inline liquid::rhi::BufferHandle getUniformBuffer() const { return buffer; }
+  inline liquid::rhi::BufferHandle getBuffer() const { return mBuffer; }
 
 private:
   /**
-   * @brief Update uniform buffer
+   * @brief Update buffer
    */
-  void updateUniformBuffer();
+  void updateBuffer();
 
 private:
-  EditorGridData data;
-  liquid::rhi::BufferHandle buffer;
-  liquid::rhi::ResourceRegistry &registry;
+  EditorGridData mData;
+  liquid::rhi::BufferHandle mBuffer;
+  liquid::rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquidator

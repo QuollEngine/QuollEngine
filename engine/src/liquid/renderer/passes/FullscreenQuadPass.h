@@ -37,10 +37,10 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  GraphResourceId pipelineId = 0;
-  rhi::TextureHandle inputTexture = rhi::TextureHandle::Invalid;
-  ShaderLibrary &shaderLibrary;
-  String inputDep;
+  GraphResourceId mPipelineId = 0;
+  rhi::TextureHandle mInputTexture = rhi::TextureHandle::Invalid;
+  ShaderLibrary &mShaderLibrary;
+  String mInputDep;
 };
 
 } // namespace liquid

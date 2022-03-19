@@ -32,14 +32,14 @@ int main() {
 
   liquid::Engine::setAssetsPath(
       std::filesystem::path("../../../engine/bin/Debug/assets").string());
-  liquid::EntityContext context;
+  liquid::EntityContext entityContext;
   liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
 
   liquid::rhi::VulkanRenderBackend backend(window);
 
-  liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
-  liquid::AnimationSystem animationSystem(context);
-  liquid::PhysicsSystem physicsSystem(context);
+  liquid::Renderer renderer(entityContext, window, backend.getOrCreateDevice());
+  liquid::AnimationSystem animationSystem(entityContext);
+  liquid::PhysicsSystem physicsSystem(entityContext);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(
@@ -56,18 +56,20 @@ int main() {
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
   liquid::MainLoop mainLoop(renderer, window);
-  liquid::GLTFLoader loader(context, renderer, animationSystem, true);
-  liquidator::EditorCamera editorCamera(context, renderer, window);
+  liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
+  liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
-  liquidator::SceneManager sceneManager(context, editorCamera, editorGrid);
+  liquidator::SceneManager sceneManager(entityContext, editorCamera,
+                                        editorGrid);
 
-  liquidator::UIRoot ui(context, loader);
+  liquidator::UIRoot ui(entityContext, loader);
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
 
     const auto &cameraObj =
-        context.getComponent<liquid::CameraComponent>(editorCamera.getCamera())
+        entityContext
+            .getComponent<liquid::CameraComponent>(editorCamera.getCamera())
             .camera;
 
     const auto &renderData =
@@ -137,17 +139,17 @@ int main() {
                           liquid::BlendFactor::DstAlpha,
                           liquid::BlendOp::Add}}}});
         },
-        [&renderer, &cameraObj, &editorCamera, &editorGrid, &context](
+        [&renderer, &cameraObj, &editorCamera, &editorGrid, &entityContext](
             liquid::rhi::RenderCommandList &commandList,
             EditorDebugScope &scope, liquid::RenderGraphRegistry &registry) {
           const auto &pipeline = registry.getPipeline(scope.editorGridPipeline);
 
           liquid::rhi::Descriptor sceneDescriptor;
-          sceneDescriptor.bind(0, cameraObj->getUniformBuffer(),
+          sceneDescriptor.bind(0, cameraObj->getBuffer(),
                                liquid::rhi::DescriptorType::UniformBuffer);
 
           liquid::rhi::Descriptor gridDescriptor;
-          gridDescriptor.bind(0, editorGrid.getUniformBuffer(),
+          gridDescriptor.bind(0, editorGrid.getBuffer(),
                               liquid::rhi::DescriptorType::UniformBuffer);
 
           commandList.bindPipeline(pipeline);
@@ -161,9 +163,9 @@ int main() {
               registry.getPipeline(scope.skeletonLinesPipeline);
           commandList.bindPipeline(skeletonPipeline);
 
-          context.iterateEntities<liquid::TransformComponent,
-                                  liquid::SkeletonComponent,
-                                  liquid::DebugComponent>(
+          entityContext.iterateEntities<liquid::TransformComponent,
+                                        liquid::SkeletonComponent,
+                                        liquid::DebugComponent>(
               [&commandList, &skeletonPipeline,
                &cameraObj](auto entity, auto &transform,
                            const liquid::SkeletonComponent &skeleton,
@@ -173,7 +175,7 @@ int main() {
 
                 liquid::rhi::Descriptor sceneDescriptor;
                 sceneDescriptor.bind(
-                    0, cameraObj->getUniformBuffer(),
+                    0, cameraObj->getBuffer(),
                     liquid::rhi::DescriptorType::UniformBuffer);
 
                 liquid::rhi::Descriptor skeletonDescriptor;
@@ -199,13 +201,13 @@ int main() {
 
     mainLoop.run(graph,
                  [&editorCamera, &sceneManager, &renderData, &animationSystem,
-                  &physicsSystem, &context](double dt) mutable {
+                  &physicsSystem, &entityContext](double dt) mutable {
                    editorCamera.update();
 
                    animationSystem.update(static_cast<float>(dt));
                    renderData->update();
 
-                   context.iterateEntities<liquid::SkeletonComponent>(
+                   entityContext.iterateEntities<liquid::SkeletonComponent>(
                        [](auto entity, auto &component) {
                          component.skeleton.updateDebug();
                        });

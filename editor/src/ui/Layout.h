@@ -7,7 +7,7 @@ public:
   void setup();
 
 private:
-  bool firstTime = true;
+  bool mFirstTime = true;
 };
 
 } // namespace liquidator

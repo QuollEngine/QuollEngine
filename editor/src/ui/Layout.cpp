@@ -33,7 +33,7 @@ void Layout::setup() {
   ImGui::DockSpace(dockspaceId, ImVec2{0.0f, 0.0f},
                    ImGuiDockNodeFlags_PassthruCentralNode);
 
-  if (firstTime) {
+  if (mFirstTime) {
     ImGui::DockBuilderRemoveNode(dockspaceId);
     ImGui::DockBuilderAddNode(dockspaceId,
                               ImGuiDockNodeFlags_DockSpace |
@@ -55,7 +55,7 @@ void Layout::setup() {
     ImGui::DockBuilderDockWindow("View", viewId);
 
     ImGui::DockBuilderFinish(dockspaceId);
-    firstTime = false;
+    mFirstTime = false;
   }
 
   ImGui::End();

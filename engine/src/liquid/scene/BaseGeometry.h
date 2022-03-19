@@ -27,17 +27,17 @@ public:
    * @param indices List of indices
    * @param material Material
    */
-  BaseGeometry(const std::vector<Vertex> &vertices_,
-               const std::vector<uint32_t> &indices_,
-               const SharedPtr<Material> &material_)
-      : vertices(vertices_), indices(indices_), material(material_) {}
+  BaseGeometry(const std::vector<Vertex> &vertices,
+               const std::vector<uint32_t> &indices,
+               const SharedPtr<Material> &material)
+      : mVertices(vertices), mIndices(indices), mMaterial(material) {}
 
   /**
    * @brief Add vertex
    *
    * @param vertex Vertex
    */
-  void addVertex(const Vertex &vertex) { vertices.push_back(vertex); }
+  void addVertex(const Vertex &vertex) { mVertices.push_back(vertex); }
 
   /**
    * @brief Add triangle
@@ -47,9 +47,9 @@ public:
    * @param p3 Vertex index of third point
    */
   void addTriangle(uint32_t p1, uint32_t p2, uint32_t p3) {
-    indices.push_back(p1);
-    indices.push_back(p2);
-    indices.push_back(p3);
+    mIndices.push_back(p1);
+    mIndices.push_back(p2);
+    mIndices.push_back(p3);
   }
 
   /**
@@ -57,8 +57,8 @@ public:
    *
    * @param material Material
    */
-  void setMaterial(const SharedPtr<Material> &material_) {
-    material = material_;
+  void setMaterial(const SharedPtr<Material> &material) {
+    mMaterial = material;
   }
 
   /**
@@ -66,26 +66,26 @@ public:
    *
    * @return List of vertices
    */
-  inline const std::vector<Vertex> &getVertices() const { return vertices; }
+  inline const std::vector<Vertex> &getVertices() const { return mVertices; }
 
   /**
    * @brief Get indices
    *
    * @return List of indices
    */
-  inline const std::vector<uint32_t> &getIndices() const { return indices; }
+  inline const std::vector<uint32_t> &getIndices() const { return mIndices; }
 
   /**
    * @brief Get material
    *
    * @return Material
    */
-  inline const SharedPtr<Material> &getMaterial() const { return material; }
+  inline const SharedPtr<Material> &getMaterial() const { return mMaterial; }
 
 private:
-  std::vector<Vertex> vertices;
-  std::vector<uint32_t> indices;
-  SharedPtr<Material> material;
+  std::vector<Vertex> mVertices;
+  std::vector<uint32_t> mIndices;
+  SharedPtr<Material> mMaterial;
 };
 
 } // namespace liquid

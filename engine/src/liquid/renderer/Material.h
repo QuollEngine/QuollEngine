@@ -35,7 +35,7 @@ public:
    * @return List of texture handles
    */
   inline const std::vector<rhi::TextureHandle> &getTextures() const {
-    return textures;
+    return mTextures;
   }
 
   /**
@@ -44,14 +44,14 @@ public:
    * @retval true Has textures
    * @retval false Does not have textures
    */
-  inline bool hasTextures() const { return !textures.empty(); }
+  inline bool hasTextures() const { return !mTextures.empty(); }
 
   /**
    * @brief Gets uniform buffer
    *
    * @return Uniform buffer
    */
-  inline rhi::BufferHandle getUniformBuffer() const { return uniformBuffer; }
+  inline rhi::BufferHandle getBuffer() const { return mBuffer; }
 
   /**
    * @brief Get properties
@@ -59,7 +59,7 @@ public:
    * @return Unordered list of properties
    */
   inline const std::vector<Property> &getProperties() const {
-    return properties;
+    return mProperties;
   }
 
   /**
@@ -67,7 +67,7 @@ public:
    *
    * @return rhi::Descriptor
    */
-  inline const rhi::Descriptor &getDescriptor() const { return descriptor; }
+  inline const rhi::Descriptor &getDescriptor() const { return mDescriptor; }
 
 private:
   /**
@@ -80,16 +80,16 @@ private:
   size_t updateBufferData();
 
 private:
-  std::vector<rhi::TextureHandle> textures;
-  rhi::BufferHandle uniformBuffer = rhi::BufferHandle::Invalid;
+  std::vector<rhi::TextureHandle> mTextures;
+  rhi::BufferHandle mBuffer = rhi::BufferHandle::Invalid;
 
-  rhi::ResourceRegistry &registry;
-  char *data = nullptr;
+  rhi::ResourceRegistry &mRegistry;
+  char *mData = nullptr;
 
-  rhi::Descriptor descriptor;
+  rhi::Descriptor mDescriptor;
 
-  std::vector<Property> properties;
-  std::map<String, size_t> propertyMap;
+  std::vector<Property> mProperties;
+  std::map<String, size_t> mPropertyMap;
 };
 
 } // namespace liquid

@@ -5,24 +5,23 @@
 namespace liquid {
 
 ImguiPass::ImguiPass(const String &name, GraphResourceId renderPassId,
-                     ImguiRenderer &imguiRenderer_,
-                     ShaderLibrary &shaderLibrary_,
+                     ImguiRenderer &imguiRenderer, ShaderLibrary &shaderLibrary,
                      const PhysicalDeviceInformation &deviceInfo,
                      StatsManager &statsManager, DebugManager &debugManager,
-                     const String &previousColor_,
+                     const String &previousColor,
                      const std::function<void(rhi::TextureHandle)> &imUpdate)
-    : RenderGraphPassBase(name, renderPassId), imguiRenderer(imguiRenderer_),
-      shaderLibrary(shaderLibrary_),
-      debugLayer(deviceInfo, statsManager, debugManager),
-      previousColor(previousColor_), imguiUpdateFn(imUpdate) {}
+    : RenderGraphPassBase(name, renderPassId), mImguiRenderer(imguiRenderer),
+      mShaderLibrary(shaderLibrary),
+      mDebugLayer(deviceInfo, statsManager, debugManager),
+      mPreviousColor(previousColor), mImguiUpdateFn(imUpdate) {}
 
 void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
-  sceneTextureId = builder.read(previousColor);
+  mSceneTextureId = builder.read(mPreviousColor);
   builder.write("SWAPCHAIN");
 
-  pipelineId = builder.create(RenderGraphPipelineDescription{
-      shaderLibrary.getShader("__engine.imgui.default.vertex"),
-      shaderLibrary.getShader("__engine.imgui.default.fragment"),
+  mPipelineId = builder.create(RenderGraphPipelineDescription{
+      mShaderLibrary.getShader("__engine.imgui.default.vertex"),
+      mShaderLibrary.getShader("__engine.imgui.default.fragment"),
       PipelineVertexInputLayout{
           {PipelineVertexInputBinding{0, sizeof(ImDrawVert),
                                       VertexInputRate::Vertex}},
@@ -45,16 +44,16 @@ void ImguiPass::buildInternal(RenderGraphBuilder &builder) {
 
 void ImguiPass::execute(rhi::RenderCommandList &commandList,
                         RenderGraphRegistry &registry) {
-  const auto &pipeline = registry.getPipeline(pipelineId);
+  const auto &pipeline = registry.getPipeline(mPipelineId);
 
-  imguiRenderer.beginRendering();
+  mImguiRenderer.beginRendering();
 
-  imguiUpdateFn(sceneTextureId);
+  mImguiUpdateFn(mSceneTextureId);
 
-  debugLayer.render();
-  imguiRenderer.endRendering();
+  mDebugLayer.render();
+  mImguiRenderer.endRendering();
 
-  imguiRenderer.draw(commandList, pipeline);
+  mImguiRenderer.draw(commandList, pipeline);
 }
 
 } // namespace liquid

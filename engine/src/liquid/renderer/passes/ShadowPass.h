@@ -40,14 +40,14 @@ public:
                RenderGraphRegistry &registry) override;
 
 private:
-  GraphResourceId pipelineId = 0;
-  GraphResourceId skinnedPipelineId = 0;
-  rhi::TextureHandle shadowMapId = rhi::TextureHandle::Invalid;
+  GraphResourceId mPipelineId = 0;
+  GraphResourceId mSkinnedPipelineId = 0;
+  rhi::TextureHandle mShadowMapId = rhi::TextureHandle::Invalid;
 
-  ShaderLibrary &shaderLibrary;
-  SceneRenderer sceneRenderer;
+  ShaderLibrary &mShaderLibrary;
+  SceneRenderer mSceneRenderer;
 
-  std::vector<SharedPtr<Material>> shadowMaterials;
+  std::vector<SharedPtr<Material>> mShadowMaterials;
 };
 
 } // namespace liquid

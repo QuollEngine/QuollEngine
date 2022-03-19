@@ -48,8 +48,8 @@ private:
   void synchronizeTransforms();
 
 private:
-  PhysicsSystemImpl *impl;
-  EntityContext &entityContext;
+  PhysicsSystemImpl *mImpl = nullptr;
+  EntityContext &mEntityContext;
 };
 
 } // namespace liquid

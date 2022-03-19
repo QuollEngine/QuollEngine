@@ -8,17 +8,17 @@ namespace liquidator {
 void EditorGridPanel::render(SceneManager &sceneManager) {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Editor")) {
-      ImGui::MenuItem("Grid", nullptr, &open);
+      ImGui::MenuItem("Grid", nullptr, &mOpen);
       ImGui::EndMenu();
     }
     ImGui::EndMainMenuBar();
   }
 
-  if (!open) {
+  if (!mOpen) {
     return;
   }
 
-  if (ImGui::Begin("Editor Grid", &open, ImGuiWindowFlags_NoDocking)) {
+  if (ImGui::Begin("Editor Grid", &mOpen, ImGuiWindowFlags_NoDocking)) {
     bool showGridLines = sceneManager.getEditorGrid().gridLinesShown();
     if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
       sceneManager.getEditorGrid().setGridLinesFlag(showGridLines);
