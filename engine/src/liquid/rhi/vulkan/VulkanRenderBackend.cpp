@@ -47,7 +47,7 @@ VulkanRenderBackend::~VulkanRenderBackend() {
   }
 }
 
-VulkanRenderDevice *VulkanRenderBackend::getOrCreateDevice() {
+RenderDevice *VulkanRenderBackend::createDefaultDevice() {
   if (!mDevice) {
     auto &&physicalDevice = pickPhysicalDevice();
     mDevice.reset(new VulkanRenderDevice(*this, physicalDevice));

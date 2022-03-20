@@ -19,7 +19,7 @@
 namespace liquid {
 
 Renderer::Renderer(EntityContext &entityContext, Window &window,
-                   rhi::VulkanRenderDevice *device)
+                   rhi::RenderDevice *device)
     : mEntityContext(entityContext), mGraphEvaluator(mRegistry),
       mDevice(device), mImguiRenderer(window, mRegistry) {
   loadShaders();

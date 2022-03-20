@@ -21,13 +21,15 @@
 #include "cube.h"
 #include "sphere.h"
 
+#include "liquid/rhi/vulkan/VulkanRenderBackend.h"
+
 #include <GLFW/glfw3.h>
 
 class Game {
 public:
   Game()
       : window("Pong 3D", 800, 600), backend(window),
-        renderer(entityContext, window, backend.getOrCreateDevice()),
+        renderer(entityContext, window, backend.createDefaultDevice()),
         vertexShader(
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(

@@ -24,6 +24,8 @@
 #include "ui/UILayer.h"
 #include "EditorCamera.h"
 
+#include "liquid/rhi/vulkan/VulkanRenderBackend.h"
+
 #include <GLFW/glfw3.h>
 
 static liquid::platform_tools::NativeFileDialog fileDialog;
@@ -95,7 +97,7 @@ int main() {
   liquid::Window window("Scene Viewer", 1024, 768);
   liquid::rhi::VulkanRenderBackend backend(window);
 
-  liquid::Renderer renderer(context, window, backend.getOrCreateDevice());
+  liquid::Renderer renderer(context, window, backend.createDefaultDevice());
   liquid::AnimationSystem animationSystem(context);
 
   window.addMouseButtonHandler([](int button, int action, int mods) {
