@@ -38,15 +38,14 @@ int main() {
   liquid::rhi::VulkanRenderBackend backend(window);
   liquid::DebugManager debugManager;
 
-  auto *device = backend.getOrCreateDevice();
+  auto *device = backend.createDefaultDevice();
 
   liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext);
   liquid::PhysicsSystem physicsSystem(entityContext);
 
-  liquid::ImguiDebugLayer debugLayer(
-      device->getPhysicalDevice().getDeviceInfo(), renderer.getStatsManager(),
-      debugManager);
+  liquid::ImguiDebugLayer debugLayer(device->getDeviceInformation(),
+                                     renderer.getStatsManager(), debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(

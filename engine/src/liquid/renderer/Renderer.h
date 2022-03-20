@@ -7,7 +7,7 @@
 #include "render-graph/RenderGraph.h"
 #include "render-graph/RenderGraphEvaluator.h"
 
-#include "liquid/rhi/vulkan/VulkanRenderDevice.h"
+#include "liquid/rhi/base/RenderDevice.h"
 
 #include "liquid/entity/EntityContext.h"
 
@@ -23,8 +23,7 @@ class Window;
 
 class Renderer {
 public:
-  Renderer(EntityContext &context, Window &window,
-           rhi::VulkanRenderDevice *device);
+  Renderer(EntityContext &context, Window &window, rhi::RenderDevice *device);
   ~Renderer();
 
   Renderer(const Renderer &rhs) = delete;
@@ -46,7 +45,7 @@ public:
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
   inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
-  inline rhi::VulkanRenderDevice *getRenderDevice() { return mDevice; }
+  inline rhi::RenderDevice *getRenderDevice() { return mDevice; }
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   RenderGraph createRenderGraph(const SharedPtr<RenderData> &renderData,
@@ -54,7 +53,7 @@ public:
 
   void render(RenderGraph &graph);
 
-  inline void wait() { mDevice->wait(); }
+  inline void wait() { mDevice->waitForIdle(); }
 
 private:
   void loadShaders();
@@ -63,7 +62,7 @@ private:
   EntityContext &mEntityContext;
   rhi::ResourceRegistry mRegistry;
   RenderGraphEvaluator mGraphEvaluator;
-  rhi::VulkanRenderDevice *mDevice;
+  rhi::RenderDevice *mDevice;
   ImguiRenderer mImguiRenderer;
   StatsManager mStatsManager;
   ShaderLibrary mShaderLibrary;

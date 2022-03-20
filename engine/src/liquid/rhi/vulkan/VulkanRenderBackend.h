@@ -49,7 +49,7 @@ public:
    *
    * @return Render device
    */
-  VulkanRenderDevice *getOrCreateDevice();
+  RenderDevice *createDefaultDevice() override;
 
   /**
    * @brief Get Vulkan instance

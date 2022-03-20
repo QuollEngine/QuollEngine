@@ -38,27 +38,20 @@ public:
    * @param graph Render graph
    * @param evaluator Render graph evaluator
    */
-  void execute(RenderGraph &graph, RenderGraphEvaluator &evaluator);
+  void execute(RenderGraph &graph, RenderGraphEvaluator &evaluator) override;
 
   /**
    * @brief Wait for idle
    */
-  void wait();
+  void waitForIdle() override;
 
   /**
-   * @brief Get Vulkan device handle
+   * @brief Get physical device information
    *
-   * @return Vulkan device handle
+   * @return Physical device information
    */
-  inline VulkanDeviceObject &getVulkanDevice() { return mDevice; }
-
-  /**
-   * @brief Get physical device
-   *
-   * @return Physical device
-   */
-  inline const VulkanPhysicalDevice &getPhysicalDevice() const {
-    return mPhysicalDevice;
+  const PhysicalDeviceInformation getDeviceInformation() override {
+    return mPhysicalDevice.getDeviceInfo();
   }
 
 private:

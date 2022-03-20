@@ -72,10 +72,10 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
   }
 }
 
-void VulkanRenderDevice::wait() { vkDeviceWaitIdle(mDevice); }
+void VulkanRenderDevice::waitForIdle() { vkDeviceWaitIdle(mDevice); }
 
 void VulkanRenderDevice::recreateSwapchain() {
-  wait();
+  waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();
 
   mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice,
