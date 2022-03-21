@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../base/RenderBackend.h"
-#include "../base/RenderDevice.h"
+#include "liquid/rhi/RenderBackend.h"
+#include "liquid/rhi/RenderDevice.h"
 
 #include "VulkanPhysicalDevice.h"
 #include "VulkanValidator.h"

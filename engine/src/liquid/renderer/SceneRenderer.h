@@ -7,13 +7,14 @@ namespace liquid {
 
 class SceneRenderer {
 public:
-  SceneRenderer(EntityContext &entityContext, bool bindMaterialData);
+  SceneRenderer(EntityContext &entityContext, bool bindMaterialData = false);
 
-  void render(rhi::RenderCommandList &commandList,
-              rhi::PipelineHandle pipeline);
+  void render(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
+              bool bindMaterialData = false);
 
   void renderSkinned(rhi::RenderCommandList &commandList,
-                     rhi::PipelineHandle pipeline, uint32_t desciptorSet);
+                     rhi::PipelineHandle pipeline, uint32_t desciptorSet,
+                     bool bindMaterialData = true);
 
 private:
   EntityContext &mEntityContext;

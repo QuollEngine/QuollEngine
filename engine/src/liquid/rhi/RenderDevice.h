@@ -1,8 +1,9 @@
 #pragma once
 
-#include "liquid/renderer/render-graph/RenderGraph.h"
-#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
 #include "liquid/profiler/PhysicalDeviceInformation.h"
+
+#include "RenderGraph.h"
+#include "RenderGraphEvaluator.h"
 
 namespace liquid::rhi {
 

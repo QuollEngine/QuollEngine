@@ -1,10 +1,7 @@
 #pragma once
 
-#include "liquid/rhi/base/RenderDevice.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/ResourceRegistry.h"
-
-#include "liquid/renderer/render-graph/RenderGraph.h"
-#include "liquid/renderer/render-graph/RenderGraphEvaluator.h"
 
 #include "VulkanPhysicalDevice.h"
 #include "VulkanDeviceObject.h"

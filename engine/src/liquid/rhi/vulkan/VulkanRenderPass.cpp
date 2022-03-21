@@ -13,20 +13,17 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    const VulkanResourceRegistry &registry)
     : mDevice(device) {
 
-  std::vector<VkAttachmentReference> colorReferences(
-      description.colorAttachments.size());
-  VkAttachmentReference depthReference;
-
-  bool hasDepthAttachment =
-      rhi::isHandleValid(description.depthAttachment.texture);
-
   std::vector<VkAttachmentDescription> attachments(
-      description.colorAttachments.size() + (hasDepthAttachment ? 1 : 0));
+      description.attachments.size());
+  mClearValues.resize(attachments.size());
 
-  for (size_t i = 0; i < description.colorAttachments.size(); ++i) {
+  std::vector<VkAttachmentReference> colorReferences;
+  std::optional<VkAttachmentReference> depthReference;
+
+  for (size_t i = 0; i < description.attachments.size(); ++i) {
     auto &attachment = attachments.at(i);
-    auto &desc = description.colorAttachments.at(i);
-    auto &ref = colorReferences.at(i);
+    auto &desc = description.attachments.at(i);
+    const auto &texture = registry.getTextures().at(desc.texture);
 
     attachment.flags = 0;
     attachment.loadOp = VulkanMapping::getAttachmentLoadOp(desc.loadOp);
@@ -34,32 +31,42 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.format = registry.getTextures().at(desc.texture)->getFormat();
-    attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment.finalLayout = desc.layout != VK_IMAGE_LAYOUT_MAX_ENUM
-                                 ? desc.layout
-                                 : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    attachment.format = texture->getFormat();
 
-    ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    VkAttachmentReference ref;
     ref.attachment = static_cast<uint32_t>(i);
-  }
 
-  if (hasDepthAttachment) {
-    auto &attachment = attachments.at(attachments.size() - 1);
-    auto &desc = description.depthAttachment;
+    if ((texture->getDescription().usage & TextureUsage::Color) ==
+        TextureUsage::Color) {
 
-    attachment.flags = 0;
-    attachment.loadOp = VulkanMapping::getAttachmentLoadOp(desc.loadOp);
-    attachment.storeOp = VulkanMapping::getAttachmentStoreOp(desc.storeOp);
-    attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.format = registry.getTextures().at(desc.texture)->getFormat();
-    attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      mClearValues.at(i).color.float32[0] =
+          std::get<glm::vec4>(desc.clearValue).x;
+      mClearValues.at(i).color.float32[1] =
+          std::get<glm::vec4>(desc.clearValue).y;
+      mClearValues.at(i).color.float32[2] =
+          std::get<glm::vec4>(desc.clearValue).z;
+      mClearValues.at(i).color.float32[3] =
+          std::get<glm::vec4>(desc.clearValue).w;
 
-    depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    depthReference.attachment = static_cast<uint32_t>(attachments.size() - 1);
+      attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      attachment.finalLayout = desc.layout != VK_IMAGE_LAYOUT_MAX_ENUM
+                                   ? desc.layout
+                                   : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+      ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+      colorReferences.push_back(ref);
+    } else if ((texture->getDescription().usage & TextureUsage::Depth) ==
+               TextureUsage::Depth) {
+
+      mClearValues.at(i).depthStencil.depth =
+          std::get<DepthStencilClear>(desc.clearValue).clearDepth;
+      mClearValues.at(i).depthStencil.stencil =
+          std::get<DepthStencilClear>(desc.clearValue).clearStencil;
+
+      attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      depthReference.emplace(ref);
+    }
   }
 
   VkSubpassDescription subpass{};
@@ -67,7 +74,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
   subpass.colorAttachmentCount = static_cast<uint32_t>(colorReferences.size());
   subpass.pColorAttachments = colorReferences.data();
   subpass.pDepthStencilAttachment =
-      hasDepthAttachment ? &depthReference : nullptr;
+      depthReference.has_value() ? &depthReference.value() : nullptr;
   subpass.inputAttachmentCount = 0;
   subpass.pInputAttachments = nullptr;
   subpass.preserveAttachmentCount = 0;

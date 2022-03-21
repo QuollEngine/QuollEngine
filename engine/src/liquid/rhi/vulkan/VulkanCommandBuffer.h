@@ -35,13 +35,11 @@ public:
    * @param framebuffer Framebuffer
    * @param renderAreaOffset Render area offset
    * @param renderAreaSize Render area size
-   * @param clearValues Clear values
    */
   void beginRenderPass(rhi::RenderPassHandle renderPass,
                        FramebufferHandle framebuffer,
                        const glm::ivec2 &renderAreaOffset,
-                       const glm::uvec2 &renderAreaSize,
-                       const std::vector<VkClearValue> &clearValues) override;
+                       const glm::uvec2 &renderAreaSize) override;
 
   /**
    * @brief End render pass

@@ -15,21 +15,24 @@ VulkanCommandBuffer::VulkanCommandBuffer(
     : mCommandBuffer(commandBuffer), mRegistry(registry),
       mDescriptorManager(descriptorManager) {}
 
-void VulkanCommandBuffer::beginRenderPass(
-    rhi::RenderPassHandle renderPass, FramebufferHandle framebuffer,
-    const glm::ivec2 &renderAreaOffset, const glm::uvec2 &renderAreaSize,
-    const std::vector<VkClearValue> &clearValues) {
+void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
+                                          FramebufferHandle framebuffer,
+                                          const glm::ivec2 &renderAreaOffset,
+                                          const glm::uvec2 &renderAreaSize) {
+
+  const auto &vulkanRenderPass = mRegistry.getRenderPasses().at(renderPass);
+
   VkRenderPassBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   beginInfo.pNext = nullptr;
   beginInfo.framebuffer =
       mRegistry.getFramebuffers().at(framebuffer)->getFramebuffer();
-  beginInfo.renderPass =
-      mRegistry.getRenderPasses().at(renderPass)->getRenderPass();
+  beginInfo.renderPass = vulkanRenderPass->getRenderPass();
   beginInfo.renderArea.offset = {renderAreaOffset.x, renderAreaOffset.y};
   beginInfo.renderArea.extent = {renderAreaSize.x, renderAreaSize.y};
-  beginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-  beginInfo.pClearValues = clearValues.data();
+  beginInfo.clearValueCount =
+      static_cast<uint32_t>(vulkanRenderPass->getClearValues().size());
+  beginInfo.pClearValues = vulkanRenderPass->getClearValues().data();
 
   vkCmdBeginRenderPass(mCommandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 }

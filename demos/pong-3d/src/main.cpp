@@ -7,8 +7,6 @@
 #include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/SceneRenderer.h"
 #include "liquid/window/Window.h"
-#include "liquid/renderer/passes/ImguiPass.h"
-#include "liquid/renderer/passes/FullscreenQuadPass.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
@@ -34,7 +32,7 @@ public:
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
             renderer.getRegistry().setShader({"basic-shader.frag.spv"})),
-        material(renderer.createMaterial({}, {}, liquid::CullMode::None)),
+        material(renderer.createMaterial({}, {}, liquid::rhi::CullMode::None)),
         camera(new liquid::Camera(&renderer.getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
@@ -60,11 +58,7 @@ public:
   int run() {
     liquid::MainLoop mainLoop(window, renderer.getStatsManager());
 
-    liquid::RenderGraph graph;
-
-    struct PongScope {
-      liquid::GraphResourceId pipeline = 0;
-    };
+    liquid::rhi::RenderGraph graph;
 
     liquid::SceneRenderer sceneRenderer(entityContext, false);
 
@@ -76,47 +70,34 @@ public:
     desc.height = 100;
     desc.layers = 1;
     desc.format = VK_FORMAT_D32_SFLOAT;
-
     auto depthBuffer = renderer.getRegistry().setTexture(desc);
 
-    graph.import("depthBuffer", depthBuffer,
-                 liquid::DepthStencilClear{1.0f, 0});
+    auto pipeline = renderer.getRegistry().setPipeline(
+        {vertexShader, fragmentShader,
+         liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
+         liquid::rhi::PipelineInputAssembly{
+             liquid::rhi::PrimitiveTopology::TriangleList},
+         liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
+                                         liquid::rhi::CullMode::None,
+                                         liquid::rhi::FrontFace::Clockwise},
+         liquid::rhi::PipelineColorBlend{
+             {liquid::rhi::PipelineColorBlendAttachment{}}}});
 
-    graph.addInlinePass<PongScope>(
-        "mainPass",
-        [this](liquid::RenderGraphBuilder &builder, PongScope &scope) {
-          builder.write("SWAPCHAIN");
-          builder.write("depthBuffer");
+    auto &pass = graph.addPass("mainPass");
+    pass.write(graph.getSwapchain(), glm::vec4{0.0f});
+    pass.write(depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
+    pass.addPipeline(pipeline);
+    pass.setExecutor([pipeline, this, &sceneRenderer](auto &commandList) {
+      commandList.bindPipeline(pipeline);
 
-          scope.pipeline =
-              builder.create(liquid::RenderGraphPipelineDescription{
-                  vertexShader, fragmentShader,
-                  liquid::PipelineVertexInputLayout::create<liquid::Vertex>(),
-                  liquid::PipelineInputAssembly{
-                      liquid::PrimitiveTopology::TriangleList},
-                  liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
-                                             liquid::CullMode::None,
-                                             liquid::FrontFace::Clockwise},
-                  liquid::PipelineColorBlend{
-                      {liquid::PipelineColorBlendAttachment{}}}});
-        },
-        [&sceneRenderer, this](liquid::rhi::RenderCommandList &commandList,
-                               PongScope &scope,
-                               liquid::RenderGraphRegistry &registry) {
-          const auto &pipeline = registry.getPipeline(scope.pipeline);
-          commandList.bindPipeline(pipeline);
+      liquid::rhi::Descriptor descriptor;
+      descriptor.bind(0, camera->getBuffer(),
+                      liquid::rhi::DescriptorType::UniformBuffer);
 
-          liquid::rhi::Descriptor descriptor;
-          descriptor.bind(0, camera->getBuffer(),
-                          liquid::rhi::DescriptorType::UniformBuffer);
+      commandList.bindDescriptor(pipeline, 0, descriptor);
 
-          commandList.bindDescriptor(pipeline, 0, descriptor);
-
-          sceneRenderer.render(commandList, pipeline);
-        });
-
-    graph.addPass<liquid::ImguiPass>("imguiPass", renderer.getImguiRenderer(),
-                                     renderer.getShaderLibrary(), "SWAPCHAIN");
+      sceneRenderer.render(commandList, pipeline);
+    });
 
     mainLoop.setUpdateFn([=](float dt) mutable {
       updateGameLogic(0.15f);

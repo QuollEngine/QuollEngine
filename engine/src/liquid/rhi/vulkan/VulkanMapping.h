@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquid/renderer/render-graph/RenderGraphPipelineDescription.h"
-#include "liquid/renderer/render-graph/RenderGraphAttachmentDescription.h"
+#include "liquid/rhi/RenderPassDescription.h"
+#include "liquid/rhi/PipelineDescription.h"
 #include "liquid/rhi/Descriptor.h"
 
 #include <vulkan/vulkan.hpp>

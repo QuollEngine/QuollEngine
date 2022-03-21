@@ -64,15 +64,13 @@ public:
    * @param framebuffer Framebuffer
    * @param renderAreaOffset Render area offset
    * @param renderAreaSize Render area size
-   * @param clearValues Clear values
    */
   inline void beginRenderPass(rhi::RenderPassHandle renderPass,
                               FramebufferHandle framebuffer,
                               const glm::ivec2 &renderAreaOffset,
-                              const glm::uvec2 &renderAreaSize,
-                              const std::vector<VkClearValue> &clearValues) {
-    mNativeRenderCommandList->beginRenderPass(
-        renderPass, framebuffer, renderAreaOffset, renderAreaSize, clearValues);
+                              const glm::uvec2 &renderAreaSize) {
+    mNativeRenderCommandList->beginRenderPass(renderPass, framebuffer,
+                                              renderAreaOffset, renderAreaSize);
   }
 
   /**
@@ -182,11 +180,5 @@ public:
 private:
   std::unique_ptr<NativeRenderCommandListInterface> mNativeRenderCommandList;
 };
-
-} // namespace liquid::rhi
-
-namespace liquid::rhi {
-
-using RenderCommandList = rhi::RenderCommandList;
 
 } // namespace liquid::rhi

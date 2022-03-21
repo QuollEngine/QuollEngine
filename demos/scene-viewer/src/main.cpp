@@ -4,7 +4,6 @@
 #include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/Material.h"
 #include "liquid/renderer/ShaderLibrary.h"
-#include "liquid/renderer/passes/FullscreenQuadPass.h"
 
 #include "liquid/window/Window.h"
 
@@ -72,7 +71,7 @@ liquid::Entity getNewSkybox(liquid::Window &window, const liquid::Mesh &mesh,
   auto entity = context.createEntity();
 
   const auto &material = renderer.createMaterial({environmentTexture}, {},
-                                                 liquid::CullMode::Front);
+                                                 liquid::rhi::CullMode::Front);
 
   auto instance = std::make_shared<liquid::MeshInstance<liquid::Mesh>>(
       mesh, renderer.getRegistry());
@@ -233,17 +232,44 @@ int main() {
     static double prevX = 0.0, prevY = 0.0;
 
     const auto &renderData = renderer.prepareScene(scene.get());
-    liquid::RenderGraph graph =
-        renderer.createRenderGraph(renderData, "SWAPCHAIN");
+    auto graph = renderer.createRenderGraph(renderData, true);
 
-    graph.addPass<liquid::FullscreenQuadPass>(
-        "fullscreenQuad", renderer.getShaderLibrary(), "mainColor");
+    {
+      auto &pass = graph.first.addPass("fullscreenQuad");
+      pass.write(graph.first.getSwapchain(), graph.second.defaultColor);
+      pass.read(graph.second.mainColor);
+
+      auto pipeline = renderer.getRegistry().setPipeline(
+          {renderer.getShaderLibrary().getShader(
+               "__engine.fullscreenQuad.default.vertex"),
+           renderer.getShaderLibrary().getShader(
+               "__engine.fullscreenQuad.default.fragment"),
+           liquid::rhi::PipelineVertexInputLayout{},
+           liquid::rhi::PipelineInputAssembly{},
+           liquid::rhi::PipelineRasterizer{
+               liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
+               liquid::rhi::FrontFace::CounterClockwise},
+           liquid::rhi::PipelineColorBlend{
+               {liquid::rhi::PipelineColorBlendAttachment{}}}});
+
+      pass.addPipeline(pipeline);
+      pass.setExecutor([pipeline, &graph](auto &commandList) {
+        commandList.bindPipeline(pipeline);
+
+        liquid::rhi::Descriptor descriptor;
+        descriptor.bind(0, {graph.second.mainColor},
+                        liquid::rhi::DescriptorType::CombinedImageSampler);
+        commandList.bindDescriptor(pipeline, 0, descriptor);
+
+        commandList.draw(3, 0);
+      });
+    }
 
     mainLoop.setRenderFn([&renderer, &ui, &graph]() {
       renderer.getImguiRenderer().beginRendering();
       ui.render();
       renderer.getImguiRenderer().endRendering();
-      renderer.render(graph);
+      renderer.render(graph.first);
     });
 
     mainLoop.setUpdateFn([&ui, &scene, node, &editorCamera, &window,
