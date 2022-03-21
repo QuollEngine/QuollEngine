@@ -784,8 +784,8 @@ getMaterials(const tinygltf::Model &model, Renderer &renderer) {
     properties.emissiveFactor =
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
 
-    CullMode cullMode =
-        gltfMaterial.doubleSided ? CullMode::None : CullMode::Back;
+    auto cullMode =
+        gltfMaterial.doubleSided ? rhi::CullMode::None : rhi::CullMode::Back;
     materials.push_back(renderer.createMaterialPBR(properties, cullMode));
   }
 
@@ -992,7 +992,7 @@ GLTFLoader::GLTFLoader(EntityContext &entityContext, Renderer &renderer,
                        AnimationSystem &animationSystem, bool debug)
     : mEntityContext(entityContext), mRenderer(renderer),
       mAnimationSystem(animationSystem),
-      mDefaultMaterial(mRenderer.createMaterialPBR({}, CullMode::Back)),
+      mDefaultMaterial(mRenderer.createMaterialPBR({}, rhi::CullMode::Back)),
       mDebug(debug) {}
 
 GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {

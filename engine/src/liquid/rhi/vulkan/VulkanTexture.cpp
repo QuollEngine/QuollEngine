@@ -11,7 +11,13 @@ VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
                              VulkanResourceAllocator &allocator,
                              VulkanDeviceObject &device)
     : mAllocator(allocator), mDevice(device), mImage(image),
-      mImageView(imageView), mSampler(sampler), mFormat(format) {}
+      mImageView(imageView), mSampler(sampler), mFormat(format) {
+
+  // Note: This constructor is ONLY used
+  // for defining swapchain; so, its usage
+  // will always be Color
+  mDescription.usage = TextureUsage::Color;
+}
 
 VulkanTexture::VulkanTexture(const TextureDescription &description,
                              VulkanResourceAllocator &allocator,

@@ -36,9 +36,19 @@ public:
    */
   inline VkRenderPass getRenderPass() const { return mRenderPass; }
 
+  /**
+   * @brief Get clear values
+   *
+   * @return Clear values
+   */
+  inline const std::vector<VkClearValue> &getClearValues() const {
+    return mClearValues;
+  }
+
 private:
   VulkanDeviceObject &mDevice;
   VkRenderPass mRenderPass = VK_NULL_HANDLE;
+  std::vector<VkClearValue> mClearValues;
 };
 
 } // namespace liquid::rhi

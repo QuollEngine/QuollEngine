@@ -1,23 +1,20 @@
 #pragma once
 
+#include "PipelineDescription.h"
+#include "RenderPassDescription.h"
+#include "ResourceRegistry.h"
 #include "RenderGraph.h"
-#include "RenderGraphPipelineDescription.h"
+#include "RenderCommandList.h"
 
-#include "liquid/rhi/RenderCommandList.h"
-#include "liquid/rhi/RenderPassDescription.h"
-#include "liquid/rhi/ResourceRegistry.h"
-
-namespace liquid {
+namespace liquid::rhi {
 
 class RenderGraphEvaluator {
-  struct VulkanAttachmentInfo {
-    VkClearValue clearValue;
-    std::vector<rhi::TextureHandle> framebufferAttachments;
+  struct RenderPassAttachmentInfo {
+    std::vector<TextureHandle> framebufferAttachments;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t layers = 0;
-
-    rhi::RenderPassAttachmentDescription attachment;
+    RenderPassAttachmentDescription attachment;
   };
 
 public:
@@ -26,18 +23,18 @@ public:
    *
    * @param registry Resource registry
    */
-  RenderGraphEvaluator(rhi::ResourceRegistry &registry);
+  RenderGraphEvaluator(ResourceRegistry &registry);
 
   /**
    * @brief Build passes
    *
-   * @param compiled Compiled passes
+   * @param sorted Topologically sorted passes
    * @param graph Render graph
    * @param swapchainRecreated Rebuild swapchain related passes
    * @param numSwapchainImages Number of swapchain images
    * @param extent Swapchain extent
    */
-  void build(std::vector<RenderGraphPassBase *> &compiled, RenderGraph &graph,
+  void build(std::vector<size_t> &sorted, RenderGraph &graph,
              bool swapchainRecreated, uint32_t numSwapchainImages,
              const glm::uvec2 &extent);
 
@@ -49,28 +46,28 @@ public:
    * @param graph Render graph
    * @param imageIdx Swapchain image index
    */
-  void execute(rhi::RenderCommandList &commandList,
-               const std::vector<RenderGraphPassBase *> &passes,
-               RenderGraph &graph, uint32_t imageIdx);
+  void execute(RenderCommandList &commandList,
+               const std::vector<size_t> &passes, RenderGraph &graph,
+               uint32_t imageIdx);
 
   /**
    * @brief Get resource registry
    *
    * @return Resouce registry
    */
-  inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
+  inline ResourceRegistry &getRegistry() { return mRegistry; }
 
 private:
   /**
    * @brief Build render pass resources
    *
-   * @param pass Render pass
+   * @param index Render pass index
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
    * @param numSwapchainImages Number of swapchain images
    * @param extent Swapchain extent
    */
-  void buildPass(RenderGraphPassBase *pass, RenderGraph &graph, bool force,
+  void buildPass(size_t index, RenderGraph &graph, bool force,
                  uint32_t numSwapchainImages, const glm::uvec2 &extent);
 
   /**
@@ -81,8 +78,8 @@ private:
    * @param extent Swapchain extent
    * @return Attachment info
    */
-  VulkanAttachmentInfo
-  createSwapchainAttachment(const RenderPassAttachment &attachment,
+  RenderPassAttachmentInfo
+  createSwapchainAttachment(const AttachmentData &attachment,
                             uint32_t numSwapchainAttachments,
                             const glm::uvec2 &extent);
 
@@ -94,9 +91,9 @@ private:
    * @param extent Swapchain extent
    * @return Attachment info
    */
-  VulkanAttachmentInfo
-  createColorAttachment(const RenderPassAttachment &attachment,
-                        rhi::TextureHandle texture, const glm::uvec2 &extent);
+  RenderPassAttachmentInfo
+  createColorAttachment(const AttachmentData &attachment, TextureHandle texture,
+                        const glm::uvec2 &extent);
 
   /**
    * @brief Create depth attachment
@@ -106,9 +103,9 @@ private:
    * @param extent Swapchain extent
    * @return Attachment info
    */
-  VulkanAttachmentInfo
-  createDepthAttachment(const RenderPassAttachment &attachment,
-                        rhi::TextureHandle texture, const glm::uvec2 &extent);
+  RenderPassAttachmentInfo
+  createDepthAttachment(const AttachmentData &attachment, TextureHandle texture,
+                        const glm::uvec2 &extent);
 
   /**
    * @brief Check if pass is has swapchain relative resources
@@ -117,10 +114,10 @@ private:
    * @retval true Has swapchain resources
    * @retval false Does not have swapchain relative resources
    */
-  bool hasSwapchainRelativeResources(RenderGraphPassBase *pass);
+  bool hasSwapchainRelativeResources(RenderGraphPass &pass);
 
 private:
-  rhi::ResourceRegistry &mRegistry;
+  ResourceRegistry &mRegistry;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

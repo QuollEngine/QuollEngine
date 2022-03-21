@@ -3,13 +3,11 @@
 #include "RenderData.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
+#include "SceneRenderer.h"
 #include "imgui/ImguiRenderer.h"
-#include "render-graph/RenderGraph.h"
-#include "render-graph/RenderGraphEvaluator.h"
-
-#include "liquid/rhi/base/RenderDevice.h"
 
 #include "liquid/entity/EntityContext.h"
+#include "liquid/rhi/RenderDevice.h"
 
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
@@ -20,6 +18,12 @@
 namespace liquid {
 
 class Window;
+
+struct DefaultGraphResources {
+  rhi::TextureHandle mainColor;
+  rhi::TextureHandle depthBuffer;
+  glm::vec4 defaultColor;
+};
 
 class Renderer {
 public:
@@ -34,10 +38,10 @@ public:
   SharedPtr<Material>
   createMaterial(const std::vector<rhi::TextureHandle> &textures,
                  const std::vector<std::pair<String, Property>> &properties,
-                 const CullMode &cullMode);
+                 const rhi::CullMode &cullMode);
   SharedPtr<Material>
   createMaterialPBR(const MaterialPBR::Properties &properties,
-                    const CullMode &cullMode);
+                    const rhi::CullMode &cullMode);
 
   SharedPtr<RenderData> prepareScene(Scene *scene);
 
@@ -48,10 +52,11 @@ public:
   inline rhi::RenderDevice *getRenderDevice() { return mDevice; }
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
-  RenderGraph createRenderGraph(const SharedPtr<RenderData> &renderData,
-                                const String &imguiDep);
+  std::pair<rhi::RenderGraph, DefaultGraphResources>
+  createRenderGraph(const SharedPtr<RenderData> &renderData,
+                    bool useSwapchainForImgui);
 
-  void render(RenderGraph &graph);
+  void render(rhi::RenderGraph &graph);
 
   inline void wait() { mDevice->waitForIdle(); }
 
@@ -61,12 +66,13 @@ private:
 private:
   EntityContext &mEntityContext;
   rhi::ResourceRegistry mRegistry;
-  RenderGraphEvaluator mGraphEvaluator;
+  rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
   ImguiRenderer mImguiRenderer;
   StatsManager mStatsManager;
   ShaderLibrary mShaderLibrary;
   DebugManager mDebugManager;
+  SceneRenderer mSceneRenderer;
 
   std::vector<SharedPtr<Material>> mShadowMaterials;
 };

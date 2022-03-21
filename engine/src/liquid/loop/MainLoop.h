@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/renderer/render-graph/RenderGraph.h"
-
 namespace liquid {
 
 class Window;

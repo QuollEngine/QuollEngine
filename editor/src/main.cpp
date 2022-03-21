@@ -81,115 +81,108 @@ int main() {
     const auto &renderData =
         renderer.prepareScene(sceneManager.getActiveScene());
 
-    liquid::RenderGraph graph =
-        renderer.createRenderGraph(renderData, "mainColor");
+    auto graph = renderer.createRenderGraph(renderData, false);
 
-    struct EditorDebugScope {
-      liquid::GraphResourceId editorGridPipeline = 0;
-      liquid::GraphResourceId skeletonLinesPipeline = 0;
-    };
+    {
+      auto &pass = graph.first.addPass("editorDebug");
+      pass.write(graph.second.mainColor, graph.second.defaultColor);
+      pass.write(graph.second.depthBuffer,
+                 liquid::rhi::DepthStencilClear{1.0f, 0});
 
-    graph.addInlinePass<EditorDebugScope>(
-        "editorDebug",
-        [&renderer](liquid::RenderGraphBuilder &builder,
-                    EditorDebugScope &scope) {
-          builder.write("mainColor");
-          builder.write("depthBuffer");
+      auto editorGridPipeline = renderer.getRegistry().setPipeline(
+          {renderer.getShaderLibrary().getShader("editor-grid.vert"),
+           renderer.getShaderLibrary().getShader("editor-grid.frag"),
+           {},
+           liquid::rhi::PipelineInputAssembly{},
+           liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
+                                           liquid::rhi::CullMode::None,
+                                           liquid::rhi::FrontFace::Clockwise},
+           liquid::rhi::PipelineColorBlend{
+               {liquid::rhi::PipelineColorBlendAttachment{
+                   true, liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add,
+                   liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add}}}});
 
-          scope.editorGridPipeline =
-              builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer.getShaderLibrary().getShader("editor-grid.vert"),
-                  renderer.getShaderLibrary().getShader("editor-grid.frag"),
-                  {},
-                  liquid::PipelineInputAssembly{},
-                  liquid::PipelineRasterizer{liquid::PolygonMode::Fill,
-                                             liquid::CullMode::None,
-                                             liquid::FrontFace::Clockwise},
-                  liquid::PipelineColorBlend{
-                      {liquid::PipelineColorBlendAttachment{
-                          true, liquid::BlendFactor::SrcAlpha,
-                          liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
-                          liquid::BlendFactor::SrcAlpha,
-                          liquid::BlendFactor::DstAlpha,
-                          liquid::BlendOp::Add}}}});
+      auto skeletonLinesPipeline = renderer.getRegistry().setPipeline(
+          {renderer.getShaderLibrary().getShader("skeleton-lines.vert"),
+           renderer.getShaderLibrary().getShader("skeleton-lines.frag"),
+           {},
+           liquid::rhi::PipelineInputAssembly{
+               liquid::rhi::PrimitiveTopology::LineList},
+           liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Line,
+                                           liquid::rhi::CullMode::None,
+                                           liquid::rhi::FrontFace::Clockwise},
+           liquid::rhi::PipelineColorBlend{
+               {liquid::rhi::PipelineColorBlendAttachment{
+                   true, liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add,
+                   liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add}}}});
 
-          scope.skeletonLinesPipeline =
-              builder.create(liquid::RenderGraphPipelineDescription{
-                  renderer.getShaderLibrary().getShader("skeleton-lines.vert"),
-                  renderer.getShaderLibrary().getShader("skeleton-lines.frag"),
-                  {},
-                  liquid::PipelineInputAssembly{
-                      liquid::PrimitiveTopology::LineList},
-                  liquid::PipelineRasterizer{liquid::PolygonMode::Line,
-                                             liquid::CullMode::None,
-                                             liquid::FrontFace::Clockwise},
-                  liquid::PipelineColorBlend{
-                      {liquid::PipelineColorBlendAttachment{
-                          true, liquid::BlendFactor::SrcAlpha,
-                          liquid::BlendFactor::DstAlpha, liquid::BlendOp::Add,
-                          liquid::BlendFactor::SrcAlpha,
-                          liquid::BlendFactor::DstAlpha,
-                          liquid::BlendOp::Add}}}});
-        },
-        [&renderer, &cameraObj, &editorCamera, &editorGrid, &entityContext](
-            liquid::rhi::RenderCommandList &commandList,
-            EditorDebugScope &scope, liquid::RenderGraphRegistry &registry) {
-          const auto &pipeline = registry.getPipeline(scope.editorGridPipeline);
+      pass.addPipeline(editorGridPipeline);
+      pass.addPipeline(skeletonLinesPipeline);
 
-          liquid::rhi::Descriptor sceneDescriptor;
-          sceneDescriptor.bind(0, cameraObj->getBuffer(),
-                               liquid::rhi::DescriptorType::UniformBuffer);
+      pass.setExecutor([editorGridPipeline, skeletonLinesPipeline, &renderer,
+                        &cameraObj, &editorCamera, &editorGrid, &entityContext](
+                           liquid::rhi::RenderCommandList &commandList) {
+        liquid::rhi::Descriptor sceneDescriptor;
+        sceneDescriptor.bind(0, cameraObj->getBuffer(),
+                             liquid::rhi::DescriptorType::UniformBuffer);
 
-          liquid::rhi::Descriptor gridDescriptor;
-          gridDescriptor.bind(0, editorGrid.getBuffer(),
-                              liquid::rhi::DescriptorType::UniformBuffer);
+        liquid::rhi::Descriptor gridDescriptor;
+        gridDescriptor.bind(0, editorGrid.getBuffer(),
+                            liquid::rhi::DescriptorType::UniformBuffer);
 
-          commandList.bindPipeline(pipeline);
-          commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
-          commandList.bindDescriptor(pipeline, 1, gridDescriptor);
+        commandList.bindPipeline(editorGridPipeline);
+        commandList.bindDescriptor(editorGridPipeline, 0, sceneDescriptor);
+        commandList.bindDescriptor(editorGridPipeline, 1, gridDescriptor);
 
-          constexpr uint32_t PLANE_VERTICES = 6;
-          commandList.draw(PLANE_VERTICES, 0);
+        constexpr uint32_t PLANE_VERTICES = 6;
+        commandList.draw(PLANE_VERTICES, 0);
 
-          const auto &skeletonPipeline =
-              registry.getPipeline(scope.skeletonLinesPipeline);
-          commandList.bindPipeline(skeletonPipeline);
+        commandList.bindPipeline(skeletonLinesPipeline);
 
-          entityContext.iterateEntities<liquid::TransformComponent,
-                                        liquid::SkeletonComponent,
-                                        liquid::DebugComponent>(
-              [&commandList, &skeletonPipeline,
-               &cameraObj](auto entity, auto &transform,
-                           const liquid::SkeletonComponent &skeleton,
-                           const liquid::DebugComponent &debug) {
-                if (!debug.showBones)
-                  return;
+        entityContext
+            .iterateEntities<liquid::TransformComponent,
+                             liquid::SkeletonComponent, liquid::DebugComponent>(
+                [&commandList, &skeletonLinesPipeline,
+                 &cameraObj](auto entity, auto &transform,
+                             const liquid::SkeletonComponent &skeleton,
+                             const liquid::DebugComponent &debug) {
+                  if (!debug.showBones)
+                    return;
 
-                liquid::rhi::Descriptor sceneDescriptor;
-                sceneDescriptor.bind(
-                    0, cameraObj->getBuffer(),
-                    liquid::rhi::DescriptorType::UniformBuffer);
+                  liquid::rhi::Descriptor sceneDescriptor;
+                  sceneDescriptor.bind(
+                      0, cameraObj->getBuffer(),
+                      liquid::rhi::DescriptorType::UniformBuffer);
 
-                liquid::rhi::Descriptor skeletonDescriptor;
-                skeletonDescriptor.bind(
-                    0, skeleton.skeleton.getDebugBuffer(),
-                    liquid::rhi::DescriptorType::UniformBuffer);
+                  liquid::rhi::Descriptor skeletonDescriptor;
+                  skeletonDescriptor.bind(
+                      0, skeleton.skeleton.getDebugBuffer(),
+                      liquid::rhi::DescriptorType::UniformBuffer);
 
-                auto *transformConstant = new liquid::StandardPushConstants;
-                transformConstant->modelMatrix = transform.worldTransform;
+                  auto *transformConstant = new liquid::StandardPushConstants;
+                  transformConstant->modelMatrix = transform.worldTransform;
 
-                commandList.bindDescriptor(skeletonPipeline, 0,
-                                           sceneDescriptor);
-                commandList.bindDescriptor(skeletonPipeline, 1,
-                                           skeletonDescriptor);
+                  commandList.bindDescriptor(skeletonLinesPipeline, 0,
+                                             sceneDescriptor);
+                  commandList.bindDescriptor(skeletonLinesPipeline, 1,
+                                             skeletonDescriptor);
 
-                commandList.pushConstants(
-                    skeletonPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                    sizeof(liquid::StandardPushConstants), transformConstant);
+                  commandList.pushConstants(
+                      skeletonLinesPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                      sizeof(liquid::StandardPushConstants), transformConstant);
 
-                commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
-              });
-        });
+                  commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
+                });
+      });
+    }
 
     mainLoop.setUpdateFn([&editorCamera, &sceneManager, &renderData,
                           &animationSystem, &physicsSystem,
@@ -221,8 +214,8 @@ int main() {
         const auto &pos = ImGui::GetWindowPos();
         sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
                                                    size.y);
-        ImGui::Image(reinterpret_cast<void *>(static_cast<uintptr_t>(
-                         graph.getResourceId("mainColor"))),
+        ImGui::Image(reinterpret_cast<void *>(
+                         static_cast<uintptr_t>(graph.second.mainColor)),
                      size);
         ImGui::End();
       }
@@ -230,7 +223,7 @@ int main() {
       debugLayer.render();
       imgui.endRendering();
 
-      return renderer.render(graph);
+      return renderer.render(graph.first);
     });
 
     mainLoop.run();
