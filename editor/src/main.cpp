@@ -8,6 +8,7 @@
 #include "liquid/scene/Mesh.h"
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/entity/EntityContext.h"
+#include "liquid/events/EventSystem.h"
 #include "liquid/window/Window.h"
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
@@ -40,9 +41,10 @@ int main() {
 
   auto *device = backend.createDefaultDevice();
 
+  liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext);
-  liquid::PhysicsSystem physicsSystem(entityContext);
+  liquid::PhysicsSystem physicsSystem(entityContext, eventSystem);
 
   liquid::ImguiDebugLayer debugLayer(device->getDeviceInformation(),
                                      renderer.getStatsManager(), debugManager);
@@ -185,8 +187,9 @@ int main() {
     }
 
     mainLoop.setUpdateFn([&editorCamera, &sceneManager, &renderData,
-                          &animationSystem, &physicsSystem,
-                          &entityContext](double dt) mutable {
+                          &animationSystem, &physicsSystem, &entityContext,
+                          &eventSystem](double dt) mutable {
+      eventSystem.poll();
       editorCamera.update();
 
       animationSystem.update(static_cast<float>(dt));

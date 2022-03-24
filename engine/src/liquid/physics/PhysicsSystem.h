@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/entity/EntityContext.h"
+#include "liquid/events/EventSystem.h"
 
 #include "PhysicsObjects.h"
 
@@ -14,8 +15,9 @@ public:
    * @brief Create physics system
    *
    * @param entityContext Entity context
+   * @param eventSystem Event system
    */
-  PhysicsSystem(EntityContext &entityContext);
+  PhysicsSystem(EntityContext &entityContext, EventSystem &eventSystem);
 
   /**
    * @brief Destroy physics system
@@ -50,6 +52,7 @@ private:
 private:
   PhysicsSystemImpl *mImpl = nullptr;
   EntityContext &mEntityContext;
+  EventSystem &mEventSystem;
 };
 
 } // namespace liquid

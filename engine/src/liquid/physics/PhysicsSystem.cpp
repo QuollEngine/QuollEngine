@@ -20,14 +20,123 @@ using namespace physx;
 
 namespace liquid {
 
+class PhysxSimulationEventCallback : public PxSimulationEventCallback {
+public:
+  /**
+   * @brief Create simulation event callback
+   *
+   * @param eventSystem Event system
+   */
+  PhysxSimulationEventCallback(EventSystem &eventSystem)
+      : mEventSystem(eventSystem) {}
+
+  /**
+   * @brief Event when constraint is broken
+   *
+   * @param constraints Constraints
+   * @param count Number of constraints
+   */
+  void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override {}
+
+  /**
+   * @brief Event when actors are awoken
+   *
+   * @param actors Actors
+   * @param count Number of actors
+   */
+  void onWake(PxActor **actors, PxU32 count) override {}
+
+  /**
+   * @brief Event when actors are asleep
+   *
+   * @param actors Actors
+   * @param count Number of actors
+   */
+  void onSleep(PxActor **actors, PxU32 count) override {}
+
+  /**
+   * @brief Event when actors are in contact
+   *
+   * @param pairHeader Contact pair header
+   * @param pairs Contact pairs
+   * @param nbPairs Number of pairs
+   */
+  void onContact(const PxContactPairHeader &pairHeader,
+                 const PxContactPair *pairs, PxU32 nbPairs) override {
+    auto *actor1 = pairHeader.actors[0];
+    auto *actor2 = pairHeader.actors[1];
+
+    Entity e1 =
+        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor1->userData));
+    Entity e2 =
+        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor2->userData));
+
+    for (PxU32 i = 0; i < nbPairs; ++i) {
+      const PxContactPair &cp = pairs[i];
+
+      if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND) {
+        mEventSystem.dispatch(CollisionEvent::CollisionStarted, {e1, e2});
+
+      } else if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST) {
+        mEventSystem.dispatch(CollisionEvent::CollisionEnded, {e1, e2});
+      }
+    }
+  }
+
+  /**
+   * @brief Event when actors are triggered
+   *
+   * @param pairs Trigger pairs
+   * @param count Number of pairs
+   */
+  void onTrigger(PxTriggerPair *pairs, PxU32 count) override {}
+
+  /**
+   * @brief Event when simulation is running
+   *
+   * @param bodyBuffer Rigid body buffer
+   * @param poseBuffer Pose buffer
+   * @param count Number of items
+   */
+  void onAdvance(const PxRigidBody *const *bodyBuffer,
+                 const PxTransform *poseBuffer, const PxU32 count) override {}
+
+private:
+  EventSystem &mEventSystem;
+};
+
+/**
+ * @brief Shader that notifies on any collision
+ */
+static PxFilterFlags phyxFilterAllCollisionShader(
+    PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+    PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+    PxPairFlags &pairFlags, const void *constantBlock,
+    PxU32 constantBlockSize) {
+
+  if (PxFilterObjectIsTrigger(attributes0) ||
+      PxFilterObjectIsTrigger(attributes1)) {
+    pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+    return PxFilterFlag::eDEFAULT;
+  }
+
+  pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_FOUND |
+              PxPairFlag::eNOTIFY_TOUCH_LOST;
+
+  return PxFilterFlag::eDEFAULT;
+}
+
 class PhysicsSystem::PhysicsSystemImpl {
 public:
   /**
    * @brief Create physics system
    *
    * Initialize Physx
+   *
+   * @param eventSystem Event system
    */
-  PhysicsSystemImpl() {
+  PhysicsSystemImpl(EventSystem &eventSystem)
+      : mEventSystem(eventSystem), mSimulationEventCallback(mEventSystem) {
     constexpr uint32_t PVD_PORT = 5425;
     constexpr uint32_t PVD_TIMEOUT_IN_MS = 2000;
     constexpr glm::vec3 GRAVITY(0.0f, -9.8f, 0.0f);
@@ -47,9 +156,11 @@ public:
     PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
     mDispatcher = PxDefaultCpuDispatcherCreate(1);
     sceneDesc.cpuDispatcher = mDispatcher;
-    sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+    sceneDesc.filterShader = phyxFilterAllCollisionShader;
     sceneDesc.gravity = PxVec3(GRAVITY.x, GRAVITY.y, GRAVITY.z);
     sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
+    sceneDesc.simulationEventCallback = &mSimulationEventCallback;
+
     mScene = mPhysics->createScene(sceneDesc);
 
     auto *pvdClient = mScene->getScenePvdClient();
@@ -87,11 +198,13 @@ public:
    */
   PxShape *createShape(const PhysicsGeometryDesc &geometryDesc,
                        PxMaterial &material) {
+
+    PxShape *shape = nullptr;
     if (geometryDesc.type == PhysicsGeometryType::Sphere) {
       const auto &[radius] =
           std::get<PhysicsGeometrySphere>(geometryDesc.params);
       const auto &geometry = PxSphereGeometry(radius);
-      return mPhysics->createShape(geometry, material, true);
+      shape = mPhysics->createShape(geometry, material, true);
     }
 
     if (geometryDesc.type == PhysicsGeometryType::Box) {
@@ -99,22 +212,25 @@ public:
           std::get<PhysicsGeometryBox>(geometryDesc.params);
       const auto &geometry =
           PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
-      return mPhysics->createShape(geometry, material, true);
-    }
+      shape = mPhysics->createShape(geometry, material, true);
+    } /**
+       * @brief Send collision events
+       */
+    void sendCollisionEvents();
 
     if (geometryDesc.type == PhysicsGeometryType::Capsule) {
       const auto &[radius, halfHeight] =
           std::get<PhysicsGeometryCapsule>(geometryDesc.params);
       const auto &geometry = PxCapsuleGeometry(radius, halfHeight);
-      return mPhysics->createShape(geometry, material, true);
+      shape = mPhysics->createShape(geometry, material, true);
     }
 
     if (geometryDesc.type == PhysicsGeometryType::Plane) {
       const auto &geometry = PxPlaneGeometry();
-      return mPhysics->createShape(geometry, material, true);
+      shape = mPhysics->createShape(geometry, material, true);
     }
 
-    return nullptr;
+    return shape;
   }
 
   /**
@@ -161,8 +277,11 @@ public:
   inline PxPhysics *getPhysics() { return mPhysics; }
 
 private:
+  EventSystem &mEventSystem;
+
   PxDefaultAllocator mDefaultAllocator;
   PxDefaultErrorCallback mDefaultErrorCallback;
+  PhysxSimulationEventCallback mSimulationEventCallback;
 
   PxPvd *mPvd = nullptr;
   PxFoundation *mFoundation = nullptr;
@@ -172,9 +291,10 @@ private:
   PxScene *mScene = nullptr;
 };
 
-PhysicsSystem::PhysicsSystem(EntityContext &entityContext)
-    : mEntityContext(entityContext) {
-  mImpl = new PhysicsSystemImpl;
+PhysicsSystem::PhysicsSystem(EntityContext &entityContext,
+                             EventSystem &eventSystem)
+    : mEntityContext(entityContext), mEventSystem(eventSystem) {
+  mImpl = new PhysicsSystemImpl(mEventSystem);
 }
 
 PhysicsSystem::~PhysicsSystem() { delete mImpl; }
@@ -276,6 +396,7 @@ void PhysicsSystem::synchronizeComponents() {
           if (!collidable.shape) {
             collidable.shape = mImpl->createShape(collidable.geometryDesc,
                                                   *collidable.material);
+
             collidable.material->release();
           } else if (PhysxMapping::getPhysxGeometryType(
                          collidable.geometryDesc.type) ==
