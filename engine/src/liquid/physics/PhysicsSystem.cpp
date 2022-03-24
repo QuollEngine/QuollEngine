@@ -456,9 +456,11 @@ void PhysicsSystem::synchronizeComponents() {
             if (mEntityContext.hasComponent<CollidableComponent>(entity)) {
               CollidableComponent &collidable =
                   mEntityContext.getComponent<CollidableComponent>(entity);
-              mImpl->getScene()->removeActor(*collidable.rigidStatic, false);
-              collidable.rigidStatic->release();
-              collidable.rigidStatic = nullptr;
+              if (collidable.rigidStatic) {
+                mImpl->getScene()->removeActor(*collidable.rigidStatic, false);
+                collidable.rigidStatic->release();
+                collidable.rigidStatic = nullptr;
+              }
             }
           }
 
@@ -469,6 +471,8 @@ void PhysicsSystem::synchronizeComponents() {
                      .shape);
           }
 
+          rigidBody.actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,
+                                        !rigidBody.dynamicDesc.applyGravity);
           rigidBody.actor->setMass(rigidBody.dynamicDesc.mass);
           rigidBody.actor->setMassSpaceInertiaTensor(
               {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,

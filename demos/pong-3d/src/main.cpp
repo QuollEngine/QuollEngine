@@ -21,6 +21,8 @@
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
 
+#include "liquid/physics/PhysicsSystem.h"
+
 #include <GLFW/glfw3.h>
 
 class Game {
@@ -28,6 +30,7 @@ public:
   Game()
       : window("Pong 3D", 800, 600), backend(window),
         renderer(entityContext, window, backend.createDefaultDevice()),
+        physicsSystem(entityContext, eventSystem),
         vertexShader(
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
@@ -100,8 +103,17 @@ public:
     });
 
     mainLoop.setUpdateFn([=](float dt) mutable {
-      updateGameLogic(0.15f);
-      updateScene(0.15f);
+      eventSystem.poll();
+      if (gameEnded) {
+        auto &transform =
+            entityContext.getComponent<liquid::TransformComponent>(
+                ball->getEntity());
+        transform.localPosition = glm::vec3{0.0f, 0.0f, 0.0f};
+        gameEnded = false;
+      }
+      updateScene();
+      physicsSystem.update(dt);
+      updateGameLogic(dt);
 
       return true;
     });
@@ -133,74 +145,38 @@ private:
     }
   }
 
-  void updateScene(float dt) {
+  void updateScene() {
     {
       auto &transform = p2->getTransform();
-      transform.localPosition = glm::vec3(botPosition, 0.0f, 3.0f);
-      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+      transform.localPosition.x = botPosition;
     }
 
     {
       auto &transform = p1->getTransform();
-      transform.localPosition = glm::vec3(playerPosition, 0.0f, -3.0f);
-      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
-    }
-
-    {
-      auto &transform = ball->getTransform();
-      transform.localPosition = ballPosition;
+      transform.localPosition.x = playerPosition;
     }
 
     scene->update();
   }
 
   void updateGameLogic(float dt) {
-    if (abs(botPosition - ballPosition.x) < 0.2f) {
+
+    static bool firstTime = true;
+    if (firstTime) {
+      auto &rigidBody = entityContext.getComponent<liquid::RigidBodyComponent>(
+          ball->getEntity());
+      rigidBody.actor->addForce({0.0f, 0.0f, 800.0f});
+      rigidBody.actor->addTorque({10.0f, 0.0f, 0.0f});
+
+      firstTime = !firstTime;
+    }
+
+    if (abs(botPosition - ball->getTransform().localPosition.x) < 0.2f) {
       botVelocity = 0.0;
-    } else if (botPosition > ballPosition.x) {
+    } else if (botPosition > ball->getTransform().localPosition.x) {
       botVelocity = -velocity;
     } else {
       botVelocity = velocity;
-    }
-
-    // TODO: Better movement in x direction
-    // This "easy" method has caveats and it would be
-    // better to calculate position based on incoming angle
-    // and output it based on the angle
-    // TODO: Changing Z velocity for more fun
-    if (ballPosition.z > safeAreaTop) {
-      if ((ballPosition.x - ballRadius - botPosition - paddleWidth < 0.1f) &&
-          (ballPosition.x + ballRadius - botPosition + paddleWidth) > -0.1f) {
-        ballVelocity.z = -ballVelocity.z;
-        ballVelocity.x *= 1.04f;
-
-        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0.0f) {
-          ballVelocity.x *= -1;
-        }
-      } else {
-        ballPosition = {0, 0, 0};
-        ballVelocity = {0.1, 0.0, 0.3};
-      }
-    } else if (ballPosition.z < safeAreaBottom) {
-      if ((ballPosition.x - ballRadius - playerPosition - paddleWidth < 0.1f) &&
-          (ballPosition.x + ballRadius - playerPosition + paddleWidth) >
-              -0.1f) {
-        ballVelocity.z = -ballVelocity.z;
-
-        ballVelocity.x *= 1.04f;
-
-        if ((ballPosition.x - playerPosition) * ballVelocity.x <= 0.0f) {
-          ballVelocity.x *= -1.0f;
-        }
-      } else {
-        ballPosition = {0.0f, 0.0f, 0.0f};
-        ballVelocity = {0.1f, 0.0f, -0.3f};
-      }
-    }
-
-    if (ballPosition.x + ballRadius > wallLineLeft ||
-        ballPosition.x - ballRadius < wallLineRight) {
-      ballVelocity.x *= -1;
     }
 
     float newBotPosition = botPosition + botVelocity * dt;
@@ -214,8 +190,6 @@ private:
         newPlayerPosition + paddleWidth < wallLineLeft) {
       playerPosition = newPlayerPosition;
     }
-
-    ballPosition += ballVelocity * dt;
   }
 
   void setupScene() {
@@ -248,6 +222,35 @@ private:
     entityContext.setComponent<liquid::MeshComponent>(e3, {barInstance});
     entityContext.setComponent<liquid::MeshComponent>(e4, {barInstance});
 
+    entityContext.setComponent<liquid::CollidableComponent>(
+        e1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                liquid::PhysicsGeometryType::Box,
+                liquid::PhysicsGeometryBox{glm::vec3(5.0f, 0.2f, 0.1f)}}});
+
+    entityContext.setComponent<liquid::CollidableComponent>(
+        e2, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                liquid::PhysicsGeometryType::Box,
+                liquid::PhysicsGeometryBox{glm::vec3(3.6f, 0.2f, 0.1f)}}});
+
+    entityContext.setComponent<liquid::CollidableComponent>(
+        e3, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                liquid::PhysicsGeometryType::Box,
+                liquid::PhysicsGeometryBox{glm::vec3(3.6f, 0.2f, 0.1f)}}});
+
+    entityContext.setComponent<liquid::CollidableComponent>(
+        e4, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                liquid::PhysicsGeometryType::Box,
+                liquid::PhysicsGeometryBox{glm::vec3(5.0f, 0.2f, 0.1f)}}});
+
+    entityContext.setComponent<liquid::CollidableComponent>(
+        ballEntity, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                        liquid::PhysicsGeometryType::Sphere,
+                        liquid::PhysicsGeometrySphere{ballRadius}}});
+
+    entityContext.setComponent<liquid::RigidBodyComponent>(
+        ballEntity,
+        liquid::RigidBodyComponent{{1.0f, {0.05f, 100.0f, 100.0f}, false}});
+
     entityContext.setComponent<liquid::MeshComponent>(pe1, {barInstance});
     entityContext.setComponent<liquid::MeshComponent>(pe2, {barInstance});
     entityContext.setComponent<liquid::MeshComponent>(ballEntity,
@@ -263,9 +266,43 @@ private:
     scene->getRootNode()->addChild(
         e4, createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
 
+    eventSystem.observe(
+        liquid::CollisionEvent::CollisionStarted,
+        [ballEntity, e1, e4, this](const liquid::CollisionObject &data) {
+          if ((data.a == ballEntity || data.b == ballEntity) &&
+              (data.a == e1 || data.b == e1 || data.a == e4 || data.b == e4)) {
+            gameEnded = true;
+          }
+        });
+
     // Create paddles
-    p1 = scene->getRootNode()->addChild(pe1);
-    p2 = scene->getRootNode()->addChild(pe2);
+    {
+      liquid::TransformComponent transform;
+      transform.localPosition = glm::vec3(playerPosition, 0.0f, -3.0f);
+      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+
+      entityContext.setComponent<liquid::CollidableComponent>(
+          pe1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                   liquid::PhysicsGeometryType::Box,
+                   liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
+
+      p1 = scene->getRootNode()->addChild(pe1, transform);
+    }
+
+    {
+      liquid::TransformComponent transform;
+      transform.localPosition = glm::vec3(playerPosition, 0.0f, 3.0f);
+      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+
+      entityContext.setComponent<liquid::CollidableComponent>(
+          pe2, liquid::CollidableComponent{
+                   liquid::PhysicsGeometryDesc{
+                       liquid::PhysicsGeometryType::Box,
+                       liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}},
+                   liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
+
+      p2 = scene->getRootNode()->addChild(pe2, transform);
+    }
 
     // create ball
     ball = scene->getRootNode()->addChild(ballEntity);
@@ -283,9 +320,12 @@ private:
   }
 
 private:
+  liquid::EventSystem eventSystem;
+  liquid::EntityContext entityContext;
   liquid::Window window;
   liquid::rhi::VulkanRenderBackend backend;
   liquid::Renderer renderer;
+  liquid::PhysicsSystem physicsSystem;
 
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
@@ -300,8 +340,9 @@ private:
   liquid::SceneNode *p1, *p2, *ball;
 
 private:
+  bool gameEnded = false;
   // Game specific parameters
-  float velocity = 0.4f;
+  float velocity = 5.0f;
 
   float ballRadius = 0.3f;
 
@@ -322,8 +363,6 @@ private:
   float botPosition = 0.0f;
   glm::vec3 ballPosition{0.0f, 0.0f, 0.0f};
   glm::vec3 ballVelocity{0.2f, 0.0f, 0.3f};
-
-  liquid::EntityContext entityContext;
 };
 
 int main() {
