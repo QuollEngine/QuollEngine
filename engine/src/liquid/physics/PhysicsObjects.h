@@ -6,8 +6,8 @@ namespace liquid {
  * @brief Describes material attached to a shape
  */
 struct PhysicsMaterialDesc {
-  float staticFriction = 1.0f;
-  float dynamicFriction = 1.0f;
+  float staticFriction = 0.0f;
+  float dynamicFriction = 0.0f;
   float restitution = 1.0f;
 };
 
@@ -64,6 +64,7 @@ struct PhysicsGeometryDesc {
 struct PhysicsDynamicRigidBodyDesc {
   float mass = 1.0f;
   glm::vec3 inertia;
+  bool applyGravity = true;
 };
 
 } // namespace liquid
