@@ -1,5 +1,15 @@
 {
   "dependencies": [
+     {
+      "name": "pybind11",
+      "url": "https://github.com/pybind/pybind11/archive/refs/tags/v2.9.1.zip",
+      "buildSource": "pybind11-2.9.1",
+      "cmd": [
+        "cmake . -B build -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}} -DPYBIND11_TEST=OFF",
+        "cmake --build build --config {{BUILD_MODE}}",
+        "cmake --install build --config {{BUILD_MODE}}"
+      ]
+    },
     {
       "name": "glfw",
       "url": "https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.zip",

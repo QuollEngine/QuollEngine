@@ -20,11 +20,13 @@ function setupLibraryDirectories()
         -- variable that points to Vulkan SDK
         -- installation
         sysincludedirs {
-            "$(VULKAN_SDK)/Include"
+            "$(VULKAN_SDK)/Include",
+            "$(PYTHONPATH)/include"
         }
 
         libdirs {
-            "$(VULKAN_SDK)/Lib"
+            "$(VULKAN_SDK)/Lib",
+            "$(PYTHONPATH)/libs"
         }
 
     filter { "system:macosx" }
@@ -38,5 +40,8 @@ function setupLibraryDirectories()
             "/usr/local/lib"
         }
 
-    filter{}
+    filter{ "system:linux" }
+        sysincludedirs {
+            "/usr/include/python*"
+        }
 end

@@ -21,7 +21,7 @@ function linkDependenciesWithoutVulkan()
     -- These libs must be linked after
     -- all libraries are linked
     filter { "system:linux" }
-        links { "Xrandr", "Xi", "X11", "dl" }
+        links { "python3.8", "Xrandr", "Xi", "X11", "dl" }
 
     filter{}
 end
