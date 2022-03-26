@@ -27,6 +27,24 @@ public:
    * @param scope Scope
    */
   void evaluate(const std::vector<char> &bytes, void *scope);
+
+  /**
+   * @brief Call function
+   *
+   * @param scope Lua scope
+   * @param name Function name
+   */
+  void callFunction(void *scope, const char *name);
+
+  /**
+   * @brief Check if scope has function
+   *
+   * @param scope Lua scope
+   * @param name Function name
+   * @retval true Scope has function
+   * @retval false Scope does not have function
+   */
+  bool hasFunction(void *scope, const char *name);
 };
 
 } // namespace liquid

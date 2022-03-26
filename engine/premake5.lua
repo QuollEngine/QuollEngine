@@ -64,5 +64,6 @@ project "LiquidEngineTest"
         "{COPYFILE} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
         "{COPYFILE} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
         "{COPYFILE} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx",
-        "{COPYFILE} ../../engine/tests/fixtures/component-script.lua %{cfg.buildtarget.directory}/component-script.lua"
+        "{COPYFILE} ../../engine/tests/fixtures/component-script.lua %{cfg.buildtarget.directory}/component-script.lua",
+        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-tester.lua %{cfg.buildtarget.directory}/scripting-system-tester.lua"
     }
