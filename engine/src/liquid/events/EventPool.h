@@ -2,10 +2,9 @@
 
 #include "liquid/core/RingBuffer.h"
 #include "liquid/core/SwappableVector.h"
+#include "EventObserver.h"
 
 namespace liquid {
-
-using EventObserverId = size_t;
 
 /**
  * @brief Event pool

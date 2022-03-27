@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/scripting/LuaInterpreter.h"
+#include "liquid/scripting/ScriptingUtils.h"
 
 #include <gtest/gtest.h>
 
@@ -16,15 +17,7 @@ public:
 TEST_F(LuaInterpreterTest, EvaluateScript) {
   auto *scope = interpreter.createScope();
 
-  std::ifstream file("component-script.lua", std::ios::ate);
-  EXPECT_TRUE(file.good());
-
-  std::streamsize fileSize = file.tellg();
-  std::vector<char> buffer(fileSize);
-
-  file.seekg(0);
-  file.read(buffer.data(), fileSize);
-  file.close();
+  auto buffer = liquid::utils::readFileIntoBuffer("component-script.lua");
 
   interpreter.evaluate(buffer, scope);
 

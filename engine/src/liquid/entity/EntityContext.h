@@ -14,6 +14,7 @@
 #include "liquid/physics/RigidBodyComponent.h"
 #include "liquid/physics/CollidableComponent.h"
 #include "liquid/profiler/DebugComponent.h"
+#include "liquid/scripting/ScriptingComponent.h"
 
 #include "EntityError.h"
 #include "EntityStorageSparseSet.h"
@@ -24,6 +25,6 @@ using EntityContext = EntityStorageSparseSet<
     MeshComponent, LightComponent, CameraComponent, TransformComponent,
     EnvironmentComponent, AnimatorComponent, NameComponent,
     SkinnedMeshComponent, SkeletonComponent, RigidBodyComponent,
-    CollidableComponent, DebugComponent>;
+    CollidableComponent, ScriptingComponent, DebugComponent>;
 
 } // namespace liquid

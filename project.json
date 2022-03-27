@@ -8,7 +8,6 @@
         "{MKDIR} {{VENDOR_DIR}}/projects/lua",
         "{COPY} LICENSE.txt *.c {{VENDOR_DIR}}/projects/lua",
         "{COPY} *.h {{VENDOR_DIR}}/include"
-        
       ]
     },
     {
