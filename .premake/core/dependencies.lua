@@ -16,12 +16,12 @@ end
 
 -- Link dependencies without Vulkan
 function linkDependenciesWithoutVulkan()
-    links { "vendor-libimgui", "vendor-libspirv-reflect", "glfw3", "ktx", "PhysX_static", "PhysXPvdSDK_static", "PhysXExtensions_static", "PhysXCommon_static", "PhysXFoundation_static" }
+    links { "vendor-libimgui", "vendor-libspirv-reflect", "vendor-liblua", "glfw3", "ktx", "PhysX_static", "PhysXPvdSDK_static", "PhysXExtensions_static", "PhysXCommon_static", "PhysXFoundation_static" }
 
     -- These libs must be linked after
     -- all libraries are linked
     filter { "system:linux" }
-        links { "python3.8", "Xrandr", "Xi", "X11", "dl" }
+        links { "Xrandr", "Xi", "X11", "dl" }
 
     filter{}
 end

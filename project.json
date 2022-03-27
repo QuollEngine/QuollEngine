@@ -1,13 +1,14 @@
 {
   "dependencies": [
-     {
-      "name": "pybind11",
-      "url": "https://github.com/pybind/pybind11/archive/refs/tags/v2.9.1.zip",
-      "buildSource": "pybind11-2.9.1",
+    {
+      "name": "lua",
+      "url": "https://github.com/lua/lua/archive/refs/tags/v5.4.4.zip",
+      "buildSource": "lua-5.4.4",
       "cmd": [
-        "cmake . -B build -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}} -DPYBIND11_TEST=OFF",
-        "cmake --build build --config {{BUILD_MODE}}",
-        "cmake --install build --config {{BUILD_MODE}}"
+        "{MKDIR} {{VENDOR_DIR}}/projects/lua",
+        "{COPY} LICENSE.txt *.c {{VENDOR_DIR}}/projects/lua",
+        "{COPY} *.h {{VENDOR_DIR}}/include"
+        
       ]
     },
     {
