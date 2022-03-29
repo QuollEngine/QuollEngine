@@ -35,6 +35,7 @@ ScriptHandle ScriptingSystem::addScript(const String &name,
 }
 
 void ScriptingSystem::start() {
+  LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   mEntityContext.iterateEntities<ScriptingComponent>(
       [this](auto entity, ScriptingComponent &component) {
         if (component.started) {
@@ -59,6 +60,7 @@ void ScriptingSystem::start() {
 }
 
 void ScriptingSystem::update() {
+  LIQUID_PROFILE_EVENT("ScriptingSystem::update");
   mEntityContext.iterateEntities<ScriptingComponent>(
       [this](auto entity, const ScriptingComponent &component) {
         auto &script = mScripts.at(component.handle);
