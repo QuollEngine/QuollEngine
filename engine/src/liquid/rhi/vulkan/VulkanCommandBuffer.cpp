@@ -11,9 +11,9 @@ namespace liquid::rhi {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VkCommandBuffer commandBuffer, const VulkanResourceRegistry &registry,
-    VulkanDescriptorManager &descriptorManager)
+    VulkanDescriptorManager &descriptorManager, DeviceStats &stats)
     : mCommandBuffer(commandBuffer), mRegistry(registry),
-      mDescriptorManager(descriptorManager) {}
+      mDescriptorManager(descriptorManager), mStats(stats) {}
 
 void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
                                           FramebufferHandle framebuffer,
@@ -86,11 +86,13 @@ void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
 }
 
 void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex) {
+  mStats.addDrawCall(vertexCount / 3);
   vkCmdDraw(mCommandBuffer, vertexCount, 1, firstVertex, 0);
 }
 
 void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
                                       int32_t vertexOffset) {
+  mStats.addDrawCall(indexCount / 3);
   vkCmdDrawIndexed(mCommandBuffer, indexCount, 1, firstIndex, vertexOffset, 0);
 }
 

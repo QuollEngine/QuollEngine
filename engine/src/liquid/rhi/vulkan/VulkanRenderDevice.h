@@ -2,6 +2,7 @@
 
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/DeviceStats.h"
 
 #include "VulkanPhysicalDevice.h"
 #include "VulkanDeviceObject.h"
@@ -51,6 +52,13 @@ public:
     return mPhysicalDevice.getDeviceInfo();
   }
 
+  /**
+   * @brief Get device stats
+   *
+   * @return Device stats
+   */
+  const DeviceStats &getDeviceStats() const override { return mStats; }
+
 private:
   /**
    * @brief Recreate swapchain
@@ -72,6 +80,8 @@ private:
   void synchronize(ResourceRegistry &registry);
 
 private:
+  DeviceStats mStats;
+
   VulkanRenderBackend &mBackend;
   VulkanPhysicalDevice mPhysicalDevice;
   VulkanDeviceObject mDevice;

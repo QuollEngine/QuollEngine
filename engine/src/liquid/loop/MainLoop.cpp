@@ -1,13 +1,13 @@
 #include "liquid/core/Base.h"
 #include "liquid/window/Window.h"
-#include "liquid/profiler/StatsManager.h"
+#include "liquid/profiler/FPSCounter.h"
 
 #include "MainLoop.h"
 
 namespace liquid {
 
-MainLoop::MainLoop(Window &window, StatsManager &statsManager)
-    : mWindow(window), mStatsManager(statsManager) {}
+MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
+    : mWindow(window), mFpsCounter(fpsCounter) {}
 
 void MainLoop::setUpdateFn(const std::function<bool(float)> &updateFn) {
   mUpdateFn = updateFn;
@@ -57,7 +57,7 @@ void MainLoop::run() {
                                                               prevFrameTime)
             .count() >= ONE_SECOND_IN_MS) {
       prevFrameTime = currentTime;
-      mStatsManager.collectFPS(frames);
+      mFpsCounter.collectFPS(frames);
       frames = 0;
     } else {
       frames++;

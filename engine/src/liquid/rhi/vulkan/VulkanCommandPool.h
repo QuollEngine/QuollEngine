@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderCommandList.h"
+#include "liquid/rhi/DeviceStats.h"
 
 #include "VulkanDeviceObject.h"
 #include "VulkanDescriptorManager.h"
@@ -16,10 +17,12 @@ public:
    * @param queueFamilyIndex Queue family index
    * @param registry Vulkan registry
    * @param descriptorManager Descriptor manager
+   * @param stats Device stats
    */
   VulkanCommandPool(VulkanDeviceObject &device, uint32_t queueFamilyIndex,
                     const VulkanResourceRegistry &registry,
-                    VulkanDescriptorManager &descriptorManager);
+                    VulkanDescriptorManager &descriptorManager,
+                    DeviceStats &stats);
 
   /**
    * @brief Destroy command pool
@@ -43,6 +46,7 @@ private:
   VkCommandPool mCommandPool = VK_NULL_HANDLE;
   VulkanDeviceObject &mDevice;
   VulkanDescriptorManager &mDescriptorManager;
+  DeviceStats &mStats;
   const VulkanResourceRegistry &mRegistry;
 };
 

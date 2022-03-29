@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../base/NativeRenderCommandListInterface.h"
+#include "liquid/rhi/DeviceStats.h"
+#include "liquid/rhi/base/NativeRenderCommandListInterface.h"
+
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorManager.h"
 
@@ -14,10 +16,12 @@ public:
    * @param commandBuffer Command buffer
    * @param registry Resource registry
    * @param descriptorManager Vulkan descriptor manager
+   * @param stats Device stats
    */
   VulkanCommandBuffer(VkCommandBuffer commandBuffer,
                       const VulkanResourceRegistry &registry,
-                      VulkanDescriptorManager &descriptorManager);
+                      VulkanDescriptorManager &descriptorManager,
+                      DeviceStats &stats);
 
   /**
    * @brief Get Vulkan command buffer
@@ -130,6 +134,7 @@ private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 
   const VulkanResourceRegistry &mRegistry;
+  DeviceStats &mStats;
   VulkanDescriptorManager &mDescriptorManager;
 };
 

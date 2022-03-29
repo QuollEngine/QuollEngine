@@ -3,7 +3,7 @@
 namespace liquid {
 
 class Window;
-class StatsManager;
+class FPSCounter;
 
 class MainLoop {
 public:
@@ -11,9 +11,9 @@ public:
    * @brief Create main loop
    *
    * @param window Window
-   * @param statsManager Stats manager
+   * @param fpsCounter FPS counter
    */
-  MainLoop(Window &window, StatsManager &statsManager);
+  MainLoop(Window &window, FPSCounter &fpsCounter);
 
   /**
    * @brief Run main loop
@@ -36,7 +36,7 @@ public:
 
 private:
   Window &mWindow;
-  StatsManager &mStatsManager;
+  FPSCounter &mFpsCounter;
   std::function<bool(float)> mUpdateFn;
   std::function<void()> mRenderFn;
 };
