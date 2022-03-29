@@ -1,6 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ScriptingSystem.h"
 #include "ScriptingUtils.h"
+#include "LuaTable.h"
 
 #include "liquid/core/EngineGlobals.h"
 
@@ -52,7 +53,8 @@ void ScriptingSystem::start() {
 
         createScriptingData(component, entity);
 
-        mLuaInterpreter.callFunction(component.scope, "start");
+        mLuaInterpreter.getFunction(component.scope, "start");
+        mLuaInterpreter.callFunction(component.scope, 0);
       });
 }
 
@@ -61,7 +63,8 @@ void ScriptingSystem::update() {
       [this](auto entity, const ScriptingComponent &component) {
         auto &script = mScripts.at(component.handle);
 
-        mLuaInterpreter.callFunction(component.scope, "update");
+        mLuaInterpreter.getFunction(component.scope, "update");
+        mLuaInterpreter.callFunction(component.scope, 0);
       });
 }
 
@@ -72,7 +75,12 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
         CollisionEvent::CollisionStarted,
         [this, &component, entity](const CollisionObject &data) {
           if (data.a == entity || data.b == entity) {
-            mLuaInterpreter.callFunction(component.scope, "on_collision_start");
+            Entity target = data.a == entity ? data.b : data.a;
+
+            mLuaInterpreter.getFunction(component.scope, "on_collision_start");
+            LuaTable table(component.scope, 1);
+            table.set("target", target);
+            mLuaInterpreter.callFunction(component.scope, 1);
           }
         });
   }
@@ -82,7 +90,11 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
         CollisionEvent::CollisionEnded,
         [this, &component, entity](const CollisionObject &data) {
           if (data.a == entity || data.b == entity) {
-            mLuaInterpreter.callFunction(component.scope, "on_collision_end");
+            Entity target = data.a == entity ? data.b : data.a;
+            mLuaInterpreter.getFunction(component.scope, "on_collision_end");
+            LuaTable table(component.scope, 1);
+            table.set("target", target);
+            mLuaInterpreter.callFunction(component.scope, 1);
           }
         });
   }

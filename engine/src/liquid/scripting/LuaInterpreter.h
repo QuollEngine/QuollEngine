@@ -29,12 +29,20 @@ public:
   void evaluate(const std::vector<char> &bytes, void *scope);
 
   /**
-   * @brief Call function
+   * @brief Get function
    *
    * @param scope Lua scope
    * @param name Function name
    */
-  void callFunction(void *scope, const char *name);
+  void getFunction(void *scope, const char *name);
+
+  /**
+   * @brief Call function
+   *
+   * @param scope Lua scope
+   * @param numArgs Number of arguments
+   */
+  void callFunction(void *scope, uint32_t numArgs);
 
   /**
    * @brief Check if scope has function

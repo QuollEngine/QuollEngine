@@ -35,14 +35,19 @@ void LuaInterpreter::evaluate(const std::vector<char> &bytes, void *state) {
   lua_pop(luaState, lua_gettop(luaState));
 }
 
-void LuaInterpreter::callFunction(void *scope, const char *name) {
+void LuaInterpreter::getFunction(void *scope, const char *name) {
   auto *luaState = static_cast<lua_State *>(scope);
   lua_getglobal(luaState, name);
+}
 
-  if (lua_pcall(luaState, 0, 0, 0) == LUA_OK) {
+void LuaInterpreter::callFunction(void *scope, uint32_t numArgs) {
+  auto *luaState = static_cast<lua_State *>(scope);
+
+  if (lua_pcall(luaState, numArgs, 0, 0) == LUA_OK) {
     lua_pop(luaState, lua_gettop(luaState));
   } else {
     LOG_DEBUG("[Lua] Variable is not a function");
+    lua_pop(luaState, -1);
   }
 }
 

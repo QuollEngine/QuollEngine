@@ -200,9 +200,16 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
     lua_pop(luaScope, -1);
     EXPECT_EQ(value, 1);
   }
+
+  {
+    lua_getglobal(luaScope, "target");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 6);
+  }
 }
 
-TEST_F(ScriptingSystemTest, CallsScriptCollisionEventEventIfEntityCollided) {
+TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
   auto handle = scriptingSystem.addScript("scripting-system-tester.lua");
   auto entity = entityContext.createEntity();
   entityContext.setComponent<liquid::ScriptingComponent>(entity, {handle});
@@ -214,9 +221,6 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEventEventIfEntityCollided) {
 
   eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded, {5, entity});
   eventSystem.poll();
-  for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.update();
-  }
 
   auto *luaScope = static_cast<lua_State *>(component.scope);
   {
@@ -224,5 +228,12 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEventEventIfEntityCollided) {
     int value = static_cast<int>(lua_tointeger(luaScope, -1));
     lua_pop(luaScope, -1);
     EXPECT_EQ(value, 2);
+  }
+
+  {
+    lua_getglobal(luaScope, "target");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 5);
   }
 }
