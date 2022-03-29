@@ -53,7 +53,10 @@ public:
   /**
    * @brief Poll events
    */
-  inline void poll() { mCollisionPool.poll(); }
+  inline void poll() {
+    LIQUID_PROFILE_EVENT("EventSystem::poll");
+    mCollisionPool.poll();
+  }
 
 private:
   CollisionPool mCollisionPool;
