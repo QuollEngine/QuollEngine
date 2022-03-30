@@ -12,7 +12,6 @@
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
 
-#include "liquid/profiler/StatsManager.h"
 #include "liquid/profiler/DebugManager.h"
 
 namespace liquid {
@@ -45,7 +44,6 @@ public:
 
   SharedPtr<RenderData> prepareScene(Scene *scene);
 
-  inline StatsManager &getStatsManager() { return mStatsManager; }
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
   inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
@@ -69,7 +67,6 @@ private:
   rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
   ImguiRenderer mImguiRenderer;
-  StatsManager mStatsManager;
   ShaderLibrary mShaderLibrary;
   DebugManager mDebugManager;
   SceneRenderer mSceneRenderer;

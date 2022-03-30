@@ -11,8 +11,10 @@ template <class T> String convertToString(T value) {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo,
-    const StatsManager &statsManager, DebugManager &debugManager)
-    : mPhysicalDeviceInfo(physicalDeviceInfo), mStatsManager(statsManager),
+    const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
+    const FPSCounter &fpsCounter, DebugManager &debugManager)
+    : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
+      mFpsCounter(fpsCounter), mDeviceStats(deviceStats),
       mDebugManager(debugManager) {}
 
 void ImguiDebugLayer::render() {
@@ -46,7 +48,7 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
   if (!mPerformanceMetricsVisible)
     return;
 
-  uint32_t fps = mStatsManager.getFPS();
+  uint32_t fps = mFpsCounter.getFPS();
 
   ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
                ImGuiWindowFlags_NoDocking);
@@ -75,18 +77,35 @@ void ImguiDebugLayer::renderUsageMetrics() {
                             ImGuiTableColumnFlags_WidthStretch |
                             ImGuiTableFlags_RowBg)) {
 
-    renderTableRow("Number of buffers",
-                   convertToString(mStatsManager.getAllocatedBuffersCount()));
+    size_t bufferSize = 0;
+    for (auto &[_, description] :
+         mResourceRegistry.getBufferMap().getDescriptions()) {
+      bufferSize += description.size;
+    }
+
+    renderTableRow(
+        "Number of buffers",
+        convertToString(
+            mResourceRegistry.getBufferMap().getDescriptions().size()));
     renderTableRow("Total size of allocated buffer",
-                   convertToString(mStatsManager.getAllocatedBuffersSize()));
-    renderTableRow("Number of textures",
-                   convertToString(mStatsManager.getAllocatedTexturesCount()));
+                   convertToString(bufferSize));
+
+    size_t textureSize = 0;
+    for (auto &[_, description] :
+         mResourceRegistry.getBufferMap().getDescriptions()) {
+      textureSize += description.size;
+    }
+
+    renderTableRow(
+        "Number of textures",
+        convertToString(
+            mResourceRegistry.getBufferMap().getDescriptions().size()));
     renderTableRow("Total size of allocated textures",
-                   convertToString(mStatsManager.getAllocatedTexturesSize()));
+                   convertToString(textureSize));
     renderTableRow("Number of draw calls",
-                   convertToString(mStatsManager.getDrawCallsCount()));
+                   convertToString(mDeviceStats.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
-                   convertToString(mStatsManager.getDrawnPrimitivesCount()));
+                   convertToString(mDeviceStats.getDrawnPrimitivesCount()));
 
     ImGui::EndTable();
   }

@@ -11,6 +11,8 @@
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/scene/Light.h"
 
+#include "liquid/profiler/FPSCounter.h"
+
 #include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/KtxTextureLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
@@ -161,7 +163,8 @@ int main() {
 
   liquid::GLTFLoader loader(context, renderer, animationSystem);
 
-  liquid::MainLoop mainLoop(window, renderer.getStatsManager());
+  liquid::FPSCounter fpsCounter;
+  liquid::MainLoop mainLoop(window, fpsCounter);
 
   UILayer ui(context);
 

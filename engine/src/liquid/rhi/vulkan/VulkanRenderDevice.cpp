@@ -20,7 +20,7 @@ VulkanRenderDevice::VulkanRenderDevice(
     : mPhysicalDevice(physicalDevice), mBackend(backend),
       mCommandPool(mDevice,
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
-                   mRegistry, mDescriptorManager),
+                   mRegistry, mDescriptorManager, mStats),
       mDevice(mPhysicalDevice), mDescriptorManager(mDevice, mRegistry),
       mGraphicsQueue(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
@@ -37,6 +37,7 @@ VulkanRenderDevice::VulkanRenderDevice(
 void VulkanRenderDevice::execute(RenderGraph &graph,
                                  RenderGraphEvaluator &evaluator) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
+  mStats.resetDrawCalls();
 
   uint32_t imageIdx =
       mSwapchain.acquireNextImage(mRenderContext.getImageAvailableSemaphore());

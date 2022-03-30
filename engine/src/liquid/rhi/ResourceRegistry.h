@@ -103,6 +103,15 @@ public:
     return mDescriptions.find(handle) != mDescriptions.end();
   }
 
+  /**
+   * @brief Get all descriptions
+   *
+   * @return List of descriptions
+   */
+  const std::unordered_map<THandle, TDescription> &getDescriptions() const {
+    return mDescriptions;
+  }
+
 private:
   std::unordered_map<THandle, TDescription> mDescriptions;
   std::map<THandle, ResourceRegistryState> mStagedResources;

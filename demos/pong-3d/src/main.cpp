@@ -7,6 +7,7 @@
 #include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/SceneRenderer.h"
 #include "liquid/window/Window.h"
+#include "liquid/profiler/FPSCounter.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/Mesh.h"
@@ -59,7 +60,8 @@ public:
   }
 
   int run() {
-    liquid::MainLoop mainLoop(window, renderer.getStatsManager());
+    liquid::FPSCounter fpsCounter;
+    liquid::MainLoop mainLoop(window, fpsCounter);
 
     liquid::rhi::RenderGraph graph;
 

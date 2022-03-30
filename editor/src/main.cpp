@@ -38,6 +38,7 @@ int main() {
 
   liquid::rhi::VulkanRenderBackend backend(window);
   liquid::DebugManager debugManager;
+  liquid::FPSCounter fpsCounter;
 
   auto *device = backend.createDefaultDevice();
 
@@ -46,8 +47,9 @@ int main() {
   liquid::AnimationSystem animationSystem(entityContext);
   liquid::PhysicsSystem physicsSystem(entityContext, eventSystem);
 
-  liquid::ImguiDebugLayer debugLayer(device->getDeviceInformation(),
-                                     renderer.getStatsManager(), debugManager);
+  liquid::ImguiDebugLayer debugLayer(
+      device->getDeviceInformation(), device->getDeviceStats(),
+      renderer.getRegistry(), fpsCounter, debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(
@@ -63,7 +65,7 @@ int main() {
       "skeleton-lines.frag", renderer.getRegistry().setShader(
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
-  liquid::MainLoop mainLoop(window, renderer.getStatsManager());
+  liquid::MainLoop mainLoop(window, fpsCounter);
   liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());

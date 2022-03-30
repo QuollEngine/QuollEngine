@@ -1,8 +1,10 @@
 #pragma once
 
 #include "PhysicalDeviceInformation.h"
-#include "liquid/profiler/StatsManager.h"
+#include "liquid/profiler/FPSCounter.h"
 #include "liquid/profiler/DebugManager.h"
+#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/DeviceStats.h"
 
 namespace liquid {
 
@@ -12,11 +14,15 @@ public:
    * @brief Set properties for render
    *
    * @param physicalDeviceInfo Physical device information
-   * @param statsManager Stats manager
+   * @param deviceStats Device stats
+   * @param registry Resource registry
+   * @param fpsCounter FPS counter
    * @param debugManager Debug manager
    */
   ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
-                  const StatsManager &statsManager, DebugManager &debugManager);
+                  const rhi::DeviceStats &deviceStats,
+                  rhi::ResourceRegistry &registry, const FPSCounter &fpsCounter,
+                  DebugManager &debugManager);
 
   /**
    * @brief Render debug UI
@@ -57,8 +63,10 @@ private:
 
 private:
   PhysicalDeviceInformation mPhysicalDeviceInfo;
-  const StatsManager &mStatsManager;
+  const FPSCounter &mFpsCounter;
   DebugManager &mDebugManager;
+  const rhi::DeviceStats &mDeviceStats;
+  rhi::ResourceRegistry &mResourceRegistry;
 
   bool mUsageMetricsVisible = false;
   bool mPhysicalDeviceInfoVisible = false;

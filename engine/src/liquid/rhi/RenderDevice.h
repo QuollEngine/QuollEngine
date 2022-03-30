@@ -2,6 +2,7 @@
 
 #include "liquid/profiler/PhysicalDeviceInformation.h"
 
+#include "DeviceStats.h"
 #include "RenderGraph.h"
 #include "RenderGraphEvaluator.h"
 
@@ -43,6 +44,13 @@ public:
    * @return Physical device information
    */
   virtual const PhysicalDeviceInformation getDeviceInformation() = 0;
+
+  /**
+   * @brief Get device stats
+   *
+   * @return Device stats
+   */
+  virtual const DeviceStats &getDeviceStats() const = 0;
 };
 
 } // namespace liquid::rhi
