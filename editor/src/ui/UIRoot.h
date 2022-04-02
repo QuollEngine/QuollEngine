@@ -20,9 +20,10 @@ public:
    *
    * @param entityContext Entity context
    * @param gltfLoader GLTF loader
+   * @param gltfImporter GLTF importer
    */
   UIRoot(liquid::EntityContext &entityContext,
-         const liquid::GLTFLoader &gltfLoader);
+         const liquid::GLTFLoader &gltfLoader, GLTFImporter &importer);
 
   /**
    * @brief Render UI Root

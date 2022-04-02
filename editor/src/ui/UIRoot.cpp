@@ -4,8 +4,8 @@
 namespace liquidator {
 
 UIRoot::UIRoot(liquid::EntityContext &entityContext,
-               const liquid::GLTFLoader &gltfLoader)
-    : mMenuBar(gltfLoader), mSceneHierarchyPanel(entityContext),
+               const liquid::GLTFLoader &gltfLoader, GLTFImporter &gltfImporter)
+    : mMenuBar(gltfLoader, gltfImporter), mSceneHierarchyPanel(entityContext),
       mEntityPanel(entityContext) {
   mSceneHierarchyPanel.setNodeClickHandler(
       [this](liquid::SceneNode *node) { handleNodeClick(node); });

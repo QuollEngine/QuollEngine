@@ -42,6 +42,7 @@ int main() {
 
   auto *device = backend.createDefaultDevice();
 
+  liquid::AssetRegistry assetRegistry;
   liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext);
@@ -49,7 +50,7 @@ int main() {
 
   liquid::ImguiDebugLayer debugLayer(
       device->getDeviceInformation(), device->getDeviceStats(),
-      renderer.getRegistry(), fpsCounter, debugManager);
+      renderer.getRegistry(), assetRegistry, fpsCounter, debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(
@@ -67,12 +68,13 @@ int main() {
 
   liquid::MainLoop mainLoop(window, fpsCounter);
   liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
+  liquidator::GLTFImporter gltfImporter(assetRegistry);
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(entityContext, editorCamera,
                                         editorGrid);
 
-  liquidator::UIRoot ui(entityContext, loader);
+  liquidator::UIRoot ui(entityContext, loader, gltfImporter);
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();

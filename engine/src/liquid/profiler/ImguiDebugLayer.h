@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PhysicalDeviceInformation.h"
+#include "DebugAssetBrowser.h"
 #include "liquid/profiler/FPSCounter.h"
 #include "liquid/profiler/DebugManager.h"
 #include "liquid/rhi/ResourceRegistry.h"
@@ -16,13 +17,14 @@ public:
    * @param physicalDeviceInfo Physical device information
    * @param deviceStats Device stats
    * @param registry Resource registry
+   * @param assetRegistry Asset registry
    * @param fpsCounter FPS counter
    * @param debugManager Debug manager
    */
   ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
                   const rhi::DeviceStats &deviceStats,
-                  rhi::ResourceRegistry &registry, const FPSCounter &fpsCounter,
-                  DebugManager &debugManager);
+                  rhi::ResourceRegistry &registry, AssetRegistry &assetRegistry,
+                  const FPSCounter &fpsCounter, DebugManager &debugManager);
 
   /**
    * @brief Render debug UI
@@ -46,6 +48,11 @@ private:
   void renderUsageMetrics();
 
   /**
+   * @brief Render asset browser
+   */
+  void renderAssetBrowser();
+
+  /**
    * @brief Render two col row
    *
    * @param header Row header
@@ -67,11 +74,13 @@ private:
   DebugManager &mDebugManager;
   const rhi::DeviceStats &mDeviceStats;
   rhi::ResourceRegistry &mResourceRegistry;
+  DebugAssetBrowser mAssetBrowser;
 
   bool mUsageMetricsVisible = false;
   bool mPhysicalDeviceInfoVisible = false;
   bool mPerformanceMetricsVisible = false;
   bool mWireframeModeEnabled = false;
+  bool mAssetBrowserVisible = false;
 };
 
 } // namespace liquid

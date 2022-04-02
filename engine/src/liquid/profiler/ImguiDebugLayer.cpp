@@ -12,10 +12,11 @@ template <class T> String convertToString(T value) {
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo,
     const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
-    const FPSCounter &fpsCounter, DebugManager &debugManager)
+    AssetRegistry &assetRegistry, const FPSCounter &fpsCounter,
+    DebugManager &debugManager)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
       mFpsCounter(fpsCounter), mDeviceStats(deviceStats),
-      mDebugManager(debugManager) {}
+      mDebugManager(debugManager), mAssetBrowser(assetRegistry) {}
 
 void ImguiDebugLayer::render() {
   if (ImGui::BeginMainMenuBar()) {
@@ -27,6 +28,8 @@ void ImguiDebugLayer::render() {
 
       ImGui::MenuItem("Performance Metrics", nullptr,
                       &mPerformanceMetricsVisible);
+
+      ImGui::MenuItem("Asset browser", nullptr, &mAssetBrowserVisible);
 
       if (ImGui::MenuItem("Wireframe Mode", nullptr, &mWireframeModeEnabled)) {
         mDebugManager.setWireframeMode(mWireframeModeEnabled);
@@ -41,6 +44,7 @@ void ImguiDebugLayer::render() {
   renderPhysicalDeviceInfo();
   renderUsageMetrics();
   renderPerformanceMetrics();
+  renderAssetBrowser();
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
@@ -111,6 +115,13 @@ void ImguiDebugLayer::renderUsageMetrics() {
   }
 
   ImGui::End();
+}
+
+void ImguiDebugLayer::renderAssetBrowser() {
+  if (!mAssetBrowserVisible)
+    return;
+
+  mAssetBrowser.render();
 }
 
 void ImguiDebugLayer::renderPhysicalDeviceInfo() {
