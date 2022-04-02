@@ -8,7 +8,8 @@
 
 namespace liquidator {
 
-MenuBar::MenuBar(const liquid::GLTFLoader &loader) : mLoader(loader) {}
+MenuBar::MenuBar(const liquid::GLTFLoader &loader, GLTFImporter &importer)
+    : mLoader(loader), mImporter(importer) {}
 
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(
@@ -24,6 +25,10 @@ void MenuBar::render(SceneManager &sceneManager) {
       if (ImGui::MenuItem("Import GLTF...", nullptr)) {
         handleGLTFImport(mFileDialog.getFilePathFromDialog({"gltf"}),
                          sceneManager.getActiveScene());
+      }
+
+      if (ImGui::MenuItem("Import GLTF as asset...", nullptr)) {
+        handleAssetImport(mFileDialog.getFilePathFromDialog({"gltf"}));
       }
 
       ImGui::EndMenu();
@@ -52,6 +57,10 @@ void MenuBar::handleGLTFImport(const liquid::String &filePath,
   transform.localPosition = orientation[3];
 
   scene->getRootNode()->addChild(result.getResult());
+}
+
+void MenuBar::handleAssetImport(const liquid::String &filePath) {
+  mImporter.loadFromFile(filePath);
 }
 
 void MenuBar::handleNewScene(SceneManager &sceneManager) {

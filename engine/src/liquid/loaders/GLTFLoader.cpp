@@ -395,7 +395,7 @@ static SkeletonData getSkeletons(const tinygltf::Model &model,
  * @param i Mesh index
  * @param p Primitive index
  * @param model GLTF model
- * @param mesh Mesh
+ * @return Vertices and indices
  */
 template <class TVertex>
 std::pair<std::vector<TVertex>, std::vector<uint32_t>>
