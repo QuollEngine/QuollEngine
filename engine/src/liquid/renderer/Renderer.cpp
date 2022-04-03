@@ -345,10 +345,10 @@ SharedPtr<RenderData> Renderer::prepareScene(Scene *scene) {
                                       mRegistry);
 }
 
-template <class TVertex>
+template <class TVertex, class TMeshAsset>
 SharedPtr<MeshInstance<BaseMesh<TVertex>>>
-createMeshObject(const AssetData<MeshAsset<TVertex>> &mesh,
-                 AssetRegistry &registry, Renderer &renderer) {
+createMeshObject(const AssetData<TMeshAsset> &mesh, AssetRegistry &registry,
+                 Renderer &renderer) {
   auto getTextureFromRegistry = [&registry](TextureAssetHandle handle) {
     if (handle != TextureAssetHandle::Invalid) {
       return registry.getTextures().getAsset(handle).data.deviceHandle;

@@ -256,8 +256,6 @@ static SceneNode *getScene(const tinygltf::Model &model,
  */
 static SkeletonData getSkeletons(const tinygltf::Model &model,
                                  rhi::ResourceRegistry &registry) {
-  std::map<uint32_t, Skeleton> skeletons;
-
   SkeletonData skeletonData{};
 
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
