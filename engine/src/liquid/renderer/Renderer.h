@@ -13,6 +13,7 @@
 #include "liquid/scene/Scene.h"
 
 #include "liquid/profiler/DebugManager.h"
+#include "liquid/asset/AssetRegistry.h"
 
 namespace liquid {
 
@@ -43,6 +44,12 @@ public:
                     const rhi::CullMode &cullMode);
 
   SharedPtr<RenderData> prepareScene(Scene *scene);
+
+  SharedPtr<MeshInstance<Mesh>> createMeshInstance(MeshAssetHandle mesh,
+                                                   AssetRegistry &registry);
+
+  SharedPtr<MeshInstance<SkinnedMesh>>
+  createMeshInstance(SkinnedMeshAssetHandle handle, AssetRegistry &registry);
 
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }

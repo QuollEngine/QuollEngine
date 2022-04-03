@@ -10,6 +10,8 @@
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
 
+#include "liquid/rhi/ResourceRegistry.h"
+
 namespace liquid {
 
 class AssetRegistry {
@@ -31,6 +33,13 @@ public:
   AssetRegistry &operator=(const AssetRegistry &) = delete;
   AssetRegistry(AssetRegistry &&) = delete;
   AssetRegistry &operator=(AssetRegistry &&) = delete;
+
+  /**
+   * @brief Synchronize assets with device registry
+   *
+   * @param registry Device registry
+   */
+  void syncWithDeviceRegistry(rhi::ResourceRegistry &registry);
 
   /**
    * @brief Get textures

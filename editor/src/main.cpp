@@ -68,7 +68,7 @@ int main() {
 
   liquid::MainLoop mainLoop(window, fpsCounter);
   liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
-  liquidator::GLTFImporter gltfImporter(assetRegistry);
+  liquidator::GLTFImporter gltfImporter(assetRegistry, renderer.getRegistry());
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(entityContext, editorCamera,
@@ -78,6 +78,31 @@ int main() {
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
+
+    debugLayer.getAssetBrowser().setOnLoadToScene([&entityContext, &renderer,
+                                                   &sceneManager,
+                                                   &assetRegistry](
+                                                      liquid::AssetType type,
+                                                      uint32_t handle) {
+      constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
+      const auto &invViewMatrix = glm::inverse(
+          sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
+
+      const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
+
+      liquid::TransformComponent transform;
+      transform.localPosition = orientation[3];
+
+      auto entity = entityContext.createEntity();
+      sceneManager.getActiveScene()->getRootNode()->addChild(entity, transform);
+
+      if (type == liquid::AssetType::Mesh) {
+        entityContext.setComponent<liquid::MeshComponent>(
+            entity,
+            {renderer.createMeshInstance(
+                static_cast<liquid::MeshAssetHandle>(handle), assetRegistry)});
+      }
+    });
 
     const auto &cameraObj =
         entityContext

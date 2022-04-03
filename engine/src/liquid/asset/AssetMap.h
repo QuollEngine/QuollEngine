@@ -41,7 +41,17 @@ public:
    *
    * @return List of all assets
    */
-  inline const std::unordered_map<THandle, AssetData<TData>> &getAssets() {
+  inline const std::unordered_map<THandle, AssetData<TData>> &
+  getAssets() const {
+    return mAssets;
+  }
+
+  /**
+   * @brief Get all assets
+   *
+   * @return List of all assets
+   */
+  inline std::unordered_map<THandle, AssetData<TData>> &getAssets() {
     return mAssets;
   }
 
