@@ -8,6 +8,7 @@
 #include "MeshAsset.h"
 #include "SkeletonAsset.h"
 #include "AnimationAsset.h"
+#include "PrefabAsset.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
@@ -23,6 +24,7 @@ class AssetRegistry {
   using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, SkinnedMeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
+  using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
 
 public:
   AssetRegistry() = default;
@@ -86,6 +88,13 @@ public:
    */
   inline AnimationMap &getAnimations() { return mAnimations; }
 
+  /**
+   * @brief Get prefabs
+   *
+   * @return Prefabs asset map
+   */
+  inline PrefabMap &getPrefabs() { return mPrefabs; }
+
 private:
   TextureMap mTextures;
   MaterialMap mMaterials;
@@ -93,6 +102,7 @@ private:
   SkinnedMeshMap mSkinnedMeshes;
   SkeletonMap mSkeletons;
   AnimationMap mAnimations;
+  PrefabMap mPrefabs;
 };
 
 } // namespace liquid

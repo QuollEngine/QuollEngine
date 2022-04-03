@@ -49,6 +49,11 @@ void DebugAssetBrowser::render() {
         mSelectedObject = 0;
       }
 
+      if (ImGui::Selectable("Prefabs")) {
+        mSelectedType = AssetType::Prefab;
+        mSelectedObject = 0;
+      }
+
       ImGui::EndChild();
     }
     ImGui::SameLine();
@@ -96,6 +101,14 @@ void DebugAssetBrowser::render() {
         }
       } else if (mSelectedType == AssetType::Animation) {
         for (auto &[handle, asset] : mRegistry.getAnimations().getAssets()) {
+          uint32_t rawHandle = static_cast<uint32_t>(handle);
+          if (ImGui::Selectable(asset.name.c_str(),
+                                mSelectedObject == rawHandle)) {
+            mSelectedObject = rawHandle;
+          }
+        }
+      } else if (mSelectedType == AssetType::Prefab) {
+        for (auto &[handle, asset] : mRegistry.getPrefabs().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
                                 mSelectedObject == rawHandle)) {
@@ -181,6 +194,34 @@ void DebugAssetBrowser::render() {
                                     liquid::SkeletonAssetHandle value) {
         if (value != liquid::SkeletonAssetHandle::Invalid) {
           renderString(label, mRegistry.getSkeletons().getAsset(value).name);
+        } else {
+          renderString(label, "None");
+        }
+      };
+
+      auto renderMeshName = [=](const liquid::String &label,
+                                liquid::MeshAssetHandle value) {
+        if (value != liquid::MeshAssetHandle::Invalid) {
+          renderString(label, mRegistry.getMeshes().getAsset(value).name);
+        } else {
+          renderString(label, "None");
+        }
+      };
+
+      auto renderSkinnedMeshName = [=](const liquid::String &label,
+                                       liquid::SkinnedMeshAssetHandle value) {
+        if (value != liquid::SkinnedMeshAssetHandle::Invalid) {
+          renderString(label,
+                       mRegistry.getSkinnedMeshes().getAsset(value).name);
+        } else {
+          renderString(label, "None");
+        }
+      };
+
+      auto renderAnimationName = [=](const liquid::String &label,
+                                     liquid::AnimationAssetHandle value) {
+        if (value != liquid::AnimationAssetHandle::Invalid) {
+          renderString(label, mRegistry.getAnimations().getAsset(value).name);
         } else {
           renderString(label, "None");
         }
@@ -351,6 +392,37 @@ void DebugAssetBrowser::render() {
               } else {
                 ImGui::Text("%f %f %f", value.x, value.y, value.z);
               }
+            }
+
+            ImGui::EndTable();
+          }
+        }
+      } else if (mSelectedType == AssetType::Prefab) {
+        auto handle = static_cast<liquid::PrefabAssetHandle>(mSelectedObject);
+        auto &prefab = mRegistry.getPrefabs().getAsset(handle);
+
+        uint32_t index = 1;
+        for (auto &item : prefab.data.items) {
+          ImGui::Text("Item #%d", index++);
+
+          if (ImGui::BeginTable("texture-info", 2,
+                                ImGuiTableFlags_Borders |
+                                    ImGuiTableColumnFlags_WidthStretch |
+                                    ImGuiTableFlags_RowBg)) {
+            if (item.skinnedMesh != SkinnedMeshAssetHandle::Invalid) {
+              renderSkinnedMeshName("Mesh (skinned)", item.skinnedMesh);
+            } else {
+              renderMeshName("Mesh", item.mesh);
+            }
+
+            if (item.skeleton != SkeletonAssetHandle::Invalid) {
+              renderSkeletonName("Skeleton", item.skeleton);
+            }
+
+            uint32_t animationIndex = 1;
+            for (auto &animation : item.animations) {
+              renderAnimationName(
+                  "Animation #" + std::to_string(animationIndex++), animation);
             }
 
             ImGui::EndTable();
