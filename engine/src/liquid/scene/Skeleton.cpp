@@ -3,12 +3,13 @@
 
 namespace liquid {
 
-Skeleton::Skeleton(std::vector<glm::vec3> &&positions,
-                   std::vector<glm::quat> &&rotations,
-                   std::vector<glm::vec3> &&scales,
-                   std::vector<JointId> &&parents,
-                   std::vector<glm::mat4> &&inverseBindMatrices,
-                   std::vector<String> &&names, rhi::ResourceRegistry *registry)
+Skeleton::Skeleton(const std::vector<glm::vec3> &positions,
+                   const std::vector<glm::quat> &rotations,
+                   const std::vector<glm::vec3> &scales,
+                   const std::vector<JointId> &parents,
+                   const std::vector<glm::mat4> &inverseBindMatrices,
+                   const std::vector<String> &names,
+                   rhi::ResourceRegistry *registry)
     : mJointLocalPositions(positions), mJointLocalRotations(rotations),
       mJointLocalScales(scales), mJointParents(parents),
       mJointInverseBindMatrices(inverseBindMatrices), mJointNames(names),

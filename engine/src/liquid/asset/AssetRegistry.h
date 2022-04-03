@@ -6,6 +6,8 @@
 #include "MaterialAsset.h"
 #include "TextureAsset.h"
 #include "MeshAsset.h"
+#include "SkeletonAsset.h"
+#include "AnimationAsset.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
@@ -17,9 +19,10 @@ namespace liquid {
 class AssetRegistry {
   using TextureMap = AssetMap<TextureAssetHandle, TextureAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
-  using MeshMap = AssetMap<MeshAssetHandle, MeshAsset<Vertex>>;
-  using SkinnedMeshMap =
-      AssetMap<SkinnedMeshAssetHandle, MeshAsset<SkinnedVertex>>;
+  using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
+  using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, SkinnedMeshAsset>;
+  using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
+  using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
 
 public:
   AssetRegistry() = default;
@@ -69,11 +72,27 @@ public:
    */
   inline SkinnedMeshMap &getSkinnedMeshes() { return mSkinnedMeshes; }
 
+  /**
+   * @brief Get skeletons
+   *
+   * @return Skeleton asset map
+   */
+  inline SkeletonMap &getSkeletons() { return mSkeletons; }
+
+  /**
+   * @brief Get animations
+   *
+   * @return Animation asset map
+   */
+  inline AnimationMap &getAnimations() { return mAnimations; }
+
 private:
   TextureMap mTextures;
   MaterialMap mMaterials;
   MeshMap mMeshes;
   SkinnedMeshMap mSkinnedMeshes;
+  SkeletonMap mSkeletons;
+  AnimationMap mAnimations;
 };
 
 } // namespace liquid

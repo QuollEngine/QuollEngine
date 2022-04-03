@@ -84,10 +84,14 @@ int main() {
                                                    &assetRegistry](
                                                       liquid::AssetType type,
                                                       uint32_t handle) {
+      if (type != liquid::AssetType::Mesh &&
+          type != liquid::AssetType::SkinnedMesh) {
+        return;
+      }
+
       constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
       const auto &invViewMatrix = glm::inverse(
           sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
-
       const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
 
       liquid::TransformComponent transform;
@@ -95,12 +99,37 @@ int main() {
 
       auto entity = entityContext.createEntity();
       sceneManager.getActiveScene()->getRootNode()->addChild(entity, transform);
+      entityContext.setComponent<liquid::DebugComponent>(entity, {});
 
       if (type == liquid::AssetType::Mesh) {
         entityContext.setComponent<liquid::MeshComponent>(
             entity,
             {renderer.createMeshInstance(
                 static_cast<liquid::MeshAssetHandle>(handle), assetRegistry)});
+      } else if (type == liquid::AssetType::SkinnedMesh) {
+        auto skinnedMeshHandle =
+            static_cast<liquid::SkinnedMeshAssetHandle>(handle);
+        entityContext.setComponent<liquid::SkinnedMeshComponent>(
+            entity,
+            {renderer.createMeshInstance(skinnedMeshHandle, assetRegistry)});
+        auto skeletonHandle = assetRegistry.getSkinnedMeshes()
+                                  .getAsset(skinnedMeshHandle)
+                                  .data.skeleton;
+        if (skeletonHandle != liquid::SkeletonAssetHandle::Invalid) {
+          const auto &skeleton =
+              assetRegistry.getSkeletons().getAsset(skeletonHandle).data;
+          liquid::Skeleton skeletonInstance(
+              skeleton.jointLocalPositions, skeleton.jointLocalRotations,
+              skeleton.jointLocalScales, skeleton.jointParents,
+              skeleton.jointInverseBindMatrices, skeleton.jointNames,
+              &renderer.getRegistry());
+
+          entityContext.setComponent<liquid::SkeletonComponent>(
+              entity, {std::move(skeletonInstance)});
+
+          entityContext.getComponent<liquid::SkeletonComponent>(entity)
+              .skeleton.update();
+        }
       }
     });
 

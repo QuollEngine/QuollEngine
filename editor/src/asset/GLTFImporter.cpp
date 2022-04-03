@@ -23,6 +23,40 @@ struct BufferMeta {
   const unsigned char *rawData;
 };
 
+struct TransformData {
+  glm::vec3 localPosition{0.0f};
+  glm::quat localRotation{1.0f, 0.0f, 0.0f, 0.0f};
+  glm::vec3 localScale{1.0f};
+  glm::mat4 localTransform{1.0f};
+};
+
+struct SkeletonData {
+  std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
+  std::unordered_map<uint32_t, uint32_t> jointSkinMap;
+  GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
+};
+
+/**
+ * @brief Decomposes matrix into TRS values
+ *
+ * @param matrix Input matrix
+ * @param position Output position
+ * @param rotation Output rotation
+ * @param scale Output scale
+ */
+static void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
+                            glm::quat &rotation, glm::vec3 &scale) {
+  glm::mat4 temp = matrix;
+  position = temp[3];
+
+  for (glm::mat4::length_type i = 0; i < 3; ++i) {
+    scale[i] = glm::length(temp[i]);
+    temp[i] /= scale[i];
+  }
+
+  rotation = glm::toQuat(matrix);
+}
+
 /**
  * @brief Geta buffer metadata for accessor
  *
@@ -40,6 +74,64 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
       bufferStart + accessor.byteOffset + bufferView.byteOffset;
 
   return {accessor, bufferView, bufferOffset};
+}
+
+/**
+ * @brief Load transform data
+ *
+ * Load matrix or each transform
+ * attribute based on the given
+ * ones
+ *
+ * @param node
+ * @return
+ */
+TransformData loadTransformData(const tinygltf::Node &node) {
+  TransformData data{};
+
+  constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
+  constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
+  constexpr size_t SCALE_MATRIX_SIZE = 3;
+  constexpr size_t ROTATION_MATRIX_SIZE = 4;
+
+  glm::mat4 finalTransform = glm::mat4{1.0f};
+  if (node.matrix.size() == TRANSFORM_MATRIX_SIZE) {
+    finalTransform = glm::make_mat4(node.matrix.data());
+    decomposeMatrix(finalTransform, data.localPosition, data.localRotation,
+                    data.localScale);
+
+  } else if (node.matrix.size() > 0) {
+    liquid::engineLogger.log(Logger::Warning)
+        << "Node matrix data must have 16 values. Skipping...";
+  } else {
+    if (node.translation.size() == TRANSLATION_MATRIX_SIZE) {
+      data.localPosition = glm::make_vec3(node.translation.data());
+      finalTransform *= glm::translate(glm::mat4{1.0f}, data.localPosition);
+    } else if (node.translation.size() > 0) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Node translation data must have 3 values. Skipping...";
+    }
+
+    if (node.rotation.size() == ROTATION_MATRIX_SIZE) {
+      data.localRotation = glm::make_quat(node.rotation.data());
+      finalTransform *= glm::toMat4(data.localRotation);
+    } else if (node.rotation.size() > 0) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Node rotation data must have 4 values. Skipping...";
+    }
+
+    if (node.scale.size() == SCALE_MATRIX_SIZE) {
+      data.localScale = glm::make_vec3(node.scale.data());
+      finalTransform *= glm::scale(glm::mat4{1.0f}, data.localScale);
+    } else if (node.scale.size() > 0) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Node scale data must have 3 values. Skipping...";
+    }
+  }
+
+  data.localTransform = finalTransform;
+
+  return data;
 }
 
 /**
@@ -92,7 +184,7 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
     auto &gltfMaterial = model.materials.at(i);
 
     liquid::AssetData<liquid::MaterialAsset> material;
-    material.name = fileName + ":material " + std::to_string(i);
+    material.name = fileName + ":material" + std::to_string(i);
     material.type = liquid::AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
@@ -336,7 +428,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
 }
 
 /**
- * @brief Reads mesh data and creates mesh instances
+ * @brief Loads meshes into asset registry
  *
  * Conforms to on GLTF 2.0 spec
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
@@ -345,11 +437,22 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
  * @param fileName File name
  * @param registry Asset registry
  * @param materials Material map
+ * @param skeletons Skeleton map
  */
 static void
 loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
            liquid::AssetRegistry &registry,
-           const GLTFToAsset<liquid::MaterialAssetHandle> &materials) {
+           const GLTFToAsset<liquid::MaterialAssetHandle> &materials,
+           const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons) {
+
+  std::map<size_t, size_t> skeletonMeshMap;
+  for (auto &node : model.nodes) {
+    if (node.skin >= 0 && node.mesh >= 0) {
+      skeletonMeshMap.insert_or_assign(static_cast<size_t>(node.mesh),
+                                       static_cast<size_t>(node.skin));
+    }
+  }
+
   for (auto i = 0; i < model.meshes.size(); ++i) {
     const auto &gltfMesh = model.meshes.at(i);
 
@@ -366,8 +469,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
       }
     }
 
-    liquid::AssetData<liquid::MeshAsset<liquid::Vertex>> mesh;
-    liquid::AssetData<liquid::MeshAsset<liquid::SkinnedVertex>> skinnedMesh;
+    liquid::AssetData<liquid::MeshAsset> mesh;
+    liquid::AssetData<liquid::SkinnedMeshAsset> skinnedMesh;
 
     for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
       const auto &primitive = gltfMesh.primitives.at(p);
@@ -436,8 +539,14 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
 
         if (vertices.size() > 0) {
           skinnedMesh.data.geometries.push_back({vertices, indices, material});
-          skinnedMesh.name = fileName + ":mesh" + std::to_string(i);
+          skinnedMesh.name = fileName + ":skinnedmesh" + std::to_string(i);
           skinnedMesh.type = liquid::AssetType::SkinnedMesh;
+
+          auto it = skeletonMeshMap.find(i);
+          if (it != skeletonMeshMap.end() &&
+              skeletons.map.find(it->second) != skeletons.map.end()) {
+            skinnedMesh.data.skeleton = skeletons.map.at(it->second);
+          }
           registry.getSkinnedMeshes().addAsset(skinnedMesh);
         }
       } else {
@@ -451,6 +560,325 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
         }
       }
     }
+  }
+}
+
+/**
+ * @brief Load skeletons into asset registry
+ *
+ * Conforms to on GLTF 2.0 spec
+ * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+ *
+ * @param model TinyGLTF model
+ * @param fileName File name
+ * @param registry Asset registry
+ */
+SkeletonData loadSkeletons(const tinygltf::Model &model,
+                           const liquid::String &fileName,
+                           liquid::AssetRegistry &registry) {
+  SkeletonData skeletonData{};
+
+  for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
+    const auto &skin = model.skins.at(si);
+
+    std::unordered_map<uint32_t, int> jointParents;
+    std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
+
+    auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
+
+    if (ibMeta.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices accessor must be of type FLOAT. Skipping "
+             "skin #"
+          << si;
+
+      continue;
+    }
+
+    if (ibMeta.accessor.type != TINYGLTF_TYPE_MAT4) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices accessor must be MAT4. Skipping "
+             "skin #"
+          << si;
+      continue;
+    }
+
+    if (ibMeta.accessor.count < skin.joints.size()) {
+      liquid::engineLogger.log(Logger::Warning)
+          << "Inverse bind matrices cannot be fewer than number of joints. "
+             "Skipping "
+             "skin #"
+          << si;
+      continue;
+    }
+
+    bool success = true;
+
+    std::vector<glm::mat4> inverseBindMatrices(ibMeta.accessor.count);
+
+    {
+      const auto *data = reinterpret_cast<const glm::mat4 *>(ibMeta.rawData);
+      for (size_t i = 0; i < ibMeta.accessor.count; ++i) {
+        inverseBindMatrices.at(i) = data[i];
+      }
+    }
+
+    for (uint32_t i = 0; i < static_cast<uint32_t>(skin.joints.size()); ++i) {
+      const auto &joint = skin.joints.at(i);
+
+      if (skeletonData.gltfToNormalizedJointMap.find(joint) !=
+          skeletonData.gltfToNormalizedJointMap.end()) {
+        liquid::engineLogger.log(Logger::Warning)
+            << "Single joint cannot be a child of multiple skins. Skipping "
+               "joint #"
+            << joint
+            << " for "
+               "skin #"
+            << si;
+        continue;
+      }
+      LIQUID_ASSERT(skeletonData.gltfToNormalizedJointMap.find(joint) ==
+                        skeletonData.gltfToNormalizedJointMap.end(),
+                    "Single joint cannot be accessed by multiple skins");
+      normalizedJointMap.insert({joint, i});
+      skeletonData.gltfToNormalizedJointMap.insert({joint, i});
+      skeletonData.jointSkinMap.insert({joint, si});
+
+      jointParents.insert({i, -1});
+    }
+
+    for (uint32_t j = 0; j < static_cast<uint32_t>(model.nodes.size()); ++j) {
+      if (normalizedJointMap.find(j) == normalizedJointMap.end()) {
+        continue;
+      }
+
+      uint32_t nJ = normalizedJointMap.at(j);
+
+      const auto &node = model.nodes.at(j);
+      for (auto &child : node.children) {
+        if (normalizedJointMap.find(child) == normalizedJointMap.end()) {
+          continue;
+        }
+
+        uint32_t nChild = normalizedJointMap.at(child);
+        jointParents.at(nChild) = static_cast<int>(nJ);
+      }
+    }
+
+    uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
+
+    liquid::AssetData<liquid::SkeletonAsset> asset;
+    asset.name = fileName + ":skeleton" + std::to_string(si);
+    asset.type = liquid::AssetType::Skeleton;
+
+    for (auto &joint : skin.joints) {
+      uint32_t nJoint = normalizedJointMap.at(joint);
+      int parent = jointParents.at(nJoint);
+      const auto &node = model.nodes.at(joint);
+      const auto &data = loadTransformData(node);
+
+      asset.data.jointLocalPositions.push_back(data.localPosition);
+      asset.data.jointLocalRotations.push_back(data.localRotation);
+      asset.data.jointLocalScales.push_back(data.localScale);
+      asset.data.jointInverseBindMatrices.push_back(
+          inverseBindMatrices.at(nJoint));
+      asset.data.jointNames.push_back(node.name);
+      asset.data.jointParents.push_back(parent >= 0 ? parent : 0);
+    }
+
+    auto handle = registry.getSkeletons().addAsset(asset);
+
+    skeletonData.skeletonMap.map.insert_or_assign(static_cast<size_t>(si),
+                                                  handle);
+  }
+
+  return skeletonData;
+}
+
+/**
+ * @brief Load animations into asset registry
+ *
+ * Conforms to on GLTF 2.0 spec
+ * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
+ *
+ * @param model TinyGLTF model
+ * @param fileName File name
+ * @param registry Asset registry
+ * @param skeletonData Skeleton data
+ */
+void loadAnimations(const tinygltf::Model &model,
+                    const liquid::String &fileName,
+                    liquid::AssetRegistry &registry,
+                    const SkeletonData &skeletonData) {
+  for (size_t i = 0; i < model.animations.size(); ++i) {
+    const auto &gltfAnimation = model.animations.at(i);
+
+    struct SamplerInfo {
+      std::vector<float> times;
+      std::vector<glm::vec4> values;
+      liquid::KeyframeSequenceAssetInterpolation interpolation =
+          liquid::KeyframeSequenceAssetInterpolation::Linear;
+    };
+
+    std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
+
+    float maxTime = 0.0f;
+
+    for (size_t i = 0; i < gltfAnimation.samplers.size(); ++i) {
+      const auto &sampler = gltfAnimation.samplers.at(i);
+      const auto &input = getBufferMetaForAccessor(model, sampler.input);
+      const auto &output = getBufferMetaForAccessor(model, sampler.output);
+
+      if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
+        liquid::engineLogger.log(Logger::Warning)
+            << "Animation time accessor must be in SCALAR format. Skipping...";
+        continue;
+      }
+
+      if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        liquid::engineLogger.log(Logger::Warning)
+            << "Animation time accessor component type must be FLOAT";
+        continue;
+      }
+
+      if (input.accessor.count != output.accessor.count) {
+        liquid::engineLogger.log(Logger::Warning)
+            << "Sampler input and output must have the same number of items";
+        continue;
+      }
+
+      if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
+        liquid::engineLogger.log(Logger::Warning)
+            << "Animation output accessor component type must be FLOAT";
+        continue;
+      }
+
+      std::vector<float> &times = samplers.at(i).times;
+      times.resize(input.accessor.count);
+
+      std::vector<glm::vec4> &values = samplers.at(i).values;
+      values.resize(output.accessor.count);
+
+      if (sampler.interpolation == "LINEAR") {
+        samplers.at(i).interpolation =
+            liquid::KeyframeSequenceAssetInterpolation::Linear;
+      } else if (sampler.interpolation == "STEP") {
+        samplers.at(i).interpolation =
+            liquid::KeyframeSequenceAssetInterpolation::Step;
+      }
+
+      float max = 0.0f;
+
+      {
+        const float *inputData = reinterpret_cast<const float *>(input.rawData);
+        for (size_t i = 0; i < input.accessor.count; ++i) {
+          times.at(i) = inputData[i];
+          max = std::max(max, inputData[i]);
+        }
+      }
+
+      maxTime = std::max(max, maxTime);
+
+      // Normalize the time
+      {
+        for (size_t i = 0; i < times.size(); ++i) {
+          times.at(i) = times.at(i) / max;
+        }
+      }
+
+      if (output.accessor.type == TINYGLTF_TYPE_VEC3) {
+        const glm::vec3 *outputData =
+            reinterpret_cast<const glm::vec3 *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = glm::vec4(outputData[i], 0.0f);
+        }
+      } else if (output.accessor.type == TINYGLTF_TYPE_VEC4) {
+        const glm::vec4 *outputData =
+            reinterpret_cast<const glm::vec4 *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = outputData[i];
+        }
+      } else if (output.accessor.type == TINYGLTF_TYPE_SCALAR) {
+        const float *outputData =
+            reinterpret_cast<const float *>(output.rawData);
+        for (size_t i = 0; i < output.accessor.count; ++i) {
+          values.at(i) = glm::vec4(outputData[i], 0, 0, 0);
+        }
+      }
+    }
+
+    liquid::AssetData<liquid::AnimationAsset> animation;
+    animation.name = gltfAnimation.name;
+    animation.data.time = maxTime;
+
+    int32_t targetNode = -1;
+    int32_t targetSkin = -1;
+
+    for (const auto &channel : gltfAnimation.channels) {
+      const auto &sampler = samplers.at(channel.sampler);
+
+      if (channel.target_node == -1) {
+        // Ignore channel if target node is not specified
+        continue;
+      }
+
+      auto target = liquid::KeyframeSequenceAssetTarget::Position;
+      if (channel.target_path == "rotation") {
+        target = liquid::KeyframeSequenceAssetTarget::Rotation;
+      } else if (channel.target_path == "scale") {
+        target = liquid::KeyframeSequenceAssetTarget::Scale;
+      } else if (channel.target_path == "position") {
+        target = liquid::KeyframeSequenceAssetTarget::Position;
+      }
+
+      uint32_t targetJoint = 0;
+
+      auto it = skeletonData.jointSkinMap.find(channel.target_node);
+      bool skinFound = it != skeletonData.jointSkinMap.end();
+      if (targetSkin == -1 && skinFound) {
+        targetSkin = static_cast<int32_t>(it->second);
+        targetJoint =
+            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+      } else if (skinFound) {
+        LIQUID_ASSERT(
+            it->second == targetSkin,
+            "All channels in animation must point to the same target skin");
+        targetJoint =
+            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+      }
+
+      if (targetSkin == -1 && targetNode == -1) {
+        targetNode = channel.target_node;
+      } else {
+        LIQUID_ASSERT(targetNode == -1, "All channels in animation must either "
+                                        "animate skin or node, not both");
+        LIQUID_ASSERT(
+            targetNode == -1 || targetNode == channel.target_node,
+            "All channels in animation must point to the same target node");
+      }
+
+      LIQUID_ASSERT(targetSkin == -1 || targetNode == -1,
+                    "A channel must point to a node or a skin");
+
+      liquid::KeyframeSequenceAsset sequence;
+      sequence.interpolation = sampler.interpolation;
+      sequence.target = target;
+
+      if (targetSkin >= 0) {
+        sequence.joint = targetJoint;
+        sequence.jointTarget = true;
+      }
+
+      for (size_t i = 0; i < sampler.times.size(); ++i) {
+        sequence.keyframeTimes.push_back(sampler.times.at(i));
+        sequence.keyframeValues.push_back(sampler.values.at(i));
+      }
+      animation.data.keyframes.push_back(sequence);
+    }
+
+    LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
+                  "Animation must have a target node or skin");
+    registry.getAnimations().addAsset(animation);
   }
 }
 
@@ -481,7 +909,10 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
 
   auto &&textures = loadTextures(model, baseName, mAssetRegistry);
   auto &&materials = loadMaterials(model, baseName, mAssetRegistry, textures);
-  loadMeshes(model, baseName, mAssetRegistry, materials);
+  auto &&skeletonData = loadSkeletons(model, baseName, mAssetRegistry);
+  loadAnimations(model, baseName, mAssetRegistry, skeletonData);
+  loadMeshes(model, baseName, mAssetRegistry, materials,
+             skeletonData.skeletonMap);
 
   mAssetRegistry.syncWithDeviceRegistry(mDeviceRegistry);
 }

@@ -37,6 +37,18 @@ void DebugAssetBrowser::render() {
         mSelectedObject = 0;
       }
 
+      if (ImGui::Selectable("Skeletons",
+                            mSelectedType == AssetType::Skeleton)) {
+        mSelectedType = AssetType::Skeleton;
+        mSelectedObject = 0;
+      }
+
+      if (ImGui::Selectable("Animations",
+                            mSelectedType == AssetType::Skeleton)) {
+        mSelectedType = AssetType::Animation;
+        mSelectedObject = 0;
+      }
+
       ImGui::EndChild();
     }
     ImGui::SameLine();
@@ -68,6 +80,22 @@ void DebugAssetBrowser::render() {
         }
       } else if (mSelectedType == AssetType::SkinnedMesh) {
         for (auto &[handle, asset] : mRegistry.getSkinnedMeshes().getAssets()) {
+          uint32_t rawHandle = static_cast<uint32_t>(handle);
+          if (ImGui::Selectable(asset.name.c_str(),
+                                mSelectedObject == rawHandle)) {
+            mSelectedObject = rawHandle;
+          }
+        }
+      } else if (mSelectedType == AssetType::Skeleton) {
+        for (auto &[handle, asset] : mRegistry.getSkeletons().getAssets()) {
+          uint32_t rawHandle = static_cast<uint32_t>(handle);
+          if (ImGui::Selectable(asset.name.c_str(),
+                                mSelectedObject == rawHandle)) {
+            mSelectedObject = rawHandle;
+          }
+        }
+      } else if (mSelectedType == AssetType::Animation) {
+        for (auto &[handle, asset] : mRegistry.getAnimations().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
                                 mSelectedObject == rawHandle)) {
@@ -149,6 +177,15 @@ void DebugAssetBrowser::render() {
         }
       };
 
+      auto renderSkeletonName = [=](const liquid::String &label,
+                                    liquid::SkeletonAssetHandle value) {
+        if (value != liquid::SkeletonAssetHandle::Invalid) {
+          renderString(label, mRegistry.getSkeletons().getAsset(value).name);
+        } else {
+          renderString(label, "None");
+        }
+      };
+
       if (mSelectedType == AssetType::Texture) {
         auto handle = static_cast<liquid::TextureAssetHandle>(mSelectedObject);
         auto &texture = mRegistry.getTextures().getAsset(handle);
@@ -217,6 +254,15 @@ void DebugAssetBrowser::render() {
             static_cast<liquid::SkinnedMeshAssetHandle>(mSelectedObject);
         auto &mesh = mRegistry.getSkinnedMeshes().getAsset(handle);
 
+        if (ImGui::BeginTable("texture-info", 2,
+                              ImGuiTableFlags_Borders |
+                                  ImGuiTableColumnFlags_WidthStretch |
+                                  ImGuiTableFlags_RowBg)) {
+
+          renderSkeletonName("Skeleton", mesh.data.skeleton);
+          ImGui::EndTable();
+        }
+
         uint32_t geom = 1;
         for (auto &geometry : mesh.data.geometries) {
           ImGui::Text("Geometry #%d", geom++);
@@ -229,6 +275,83 @@ void DebugAssetBrowser::render() {
             renderInt("Number of indices",
                       static_cast<uint32_t>(geometry.indices.size()));
             renderMaterialName("Material", geometry.material);
+
+            ImGui::EndTable();
+          }
+        }
+      } else if (mSelectedType == AssetType::Skeleton) {
+        auto handle = static_cast<liquid::SkeletonAssetHandle>(mSelectedObject);
+        auto &skeleton = mRegistry.getSkeletons().getAsset(handle);
+
+        if (ImGui::BeginTable("texture-info", 1,
+                              ImGuiTableFlags_Borders |
+                                  ImGuiTableColumnFlags_WidthStretch |
+                                  ImGuiTableFlags_RowBg)) {
+
+          for (auto &label : skeleton.data.jointNames) {
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", label.c_str());
+          }
+
+          ImGui::EndTable();
+        }
+      } else if (mSelectedType == AssetType::Animation) {
+        auto handle = static_cast<AnimationAssetHandle>(mSelectedObject);
+        auto &animation = mRegistry.getAnimations().getAsset(handle);
+
+        ImGui::Text("Name: %s, Time: %f", animation.name.c_str(),
+                    animation.data.time);
+
+        uint32_t index = 1;
+        for (auto &sequence : animation.data.keyframes) {
+          auto getTargetName = [](KeyframeSequenceAssetTarget target) {
+            switch (target) {
+            case KeyframeSequenceAssetTarget::Position:
+              return "Position";
+            case KeyframeSequenceAssetTarget::Rotation:
+              return "Rotation";
+            case KeyframeSequenceAssetTarget::Scale:
+              return "Scale";
+            }
+
+            return "None";
+          };
+
+          auto getInterpolationName =
+              [](KeyframeSequenceAssetInterpolation interpolation) {
+                switch (interpolation) {
+                case KeyframeSequenceAssetInterpolation::Step:
+                  return "Step";
+                case KeyframeSequenceAssetInterpolation::Linear:
+                  return "Linear";
+                }
+                return "None";
+              };
+
+          ImGui::Text("Sequence #%d - %s - %s", index++,
+                      getTargetName(sequence.target),
+                      getInterpolationName(sequence.interpolation));
+          if (sequence.jointTarget) {
+            ImGui::Text("Joint: %d", sequence.joint);
+          }
+
+          if (ImGui::BeginTable("texture-info", 2,
+                                ImGuiTableFlags_Borders |
+                                    ImGuiTableColumnFlags_WidthStretch |
+                                    ImGuiTableFlags_RowBg)) {
+            for (size_t i = 0; i < sequence.keyframeTimes.size(); ++i) {
+              const auto &value = sequence.keyframeValues.at(i);
+              ImGui::TableNextRow();
+              ImGui::TableNextColumn();
+              ImGui::Text("%f", sequence.keyframeTimes.at(i));
+              ImGui::TableNextColumn();
+              if (sequence.target == KeyframeSequenceAssetTarget::Rotation) {
+                ImGui::Text("%f %f %f %f", value.x, value.y, value.z, value.w);
+              } else {
+                ImGui::Text("%f %f %f", value.x, value.y, value.z);
+              }
+            }
 
             ImGui::EndTable();
           }
