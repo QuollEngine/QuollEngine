@@ -32,7 +32,7 @@ public:
    * @param handle Asset handle
    * @return Asset
    */
-  const AssetData<TData> &getAsset(THandle handle) {
+  const AssetData<TData> &getAsset(THandle handle) const {
     return mAssets.at(handle);
   }
 
@@ -53,6 +53,16 @@ public:
    */
   inline std::unordered_map<THandle, AssetData<TData>> &getAssets() {
     return mAssets;
+  }
+
+  /**
+   * @brief Check if asset exists
+   *
+   * @retval true Asset exists
+   * @retval false Asset does not exist
+   */
+  inline bool hasAsset(THandle handle) const {
+    return mAssets.find(handle) != mAssets.end();
   }
 
 private:

@@ -21,11 +21,10 @@ public:
    * @brief Render panel
    *
    * @param sceneManager Scene manager
-   * @param animationSystem Animation system
+   * @param assetRegistry Asset registry
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager,
-              const liquid::AnimationSystem &animationSystem,
+  void render(SceneManager &sceneManager, liquid::AssetRegistry &assetRegistry,
               liquid::PhysicsSystem &physicsSystem);
 
   /**
@@ -54,9 +53,9 @@ private:
   /**
    * @brief Render animation component
    *
-   * @param animationSystem Animation system
+   * @param assetRegistry Asset registry
    */
-  void renderAnimation(const liquid::AnimationSystem &animationSystem);
+  void renderAnimation(liquid::AssetRegistry &assetRegistry);
 
   /**
    * @brief Render skeleton component

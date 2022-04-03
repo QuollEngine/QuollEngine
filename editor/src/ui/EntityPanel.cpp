@@ -12,7 +12,7 @@ EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : mEntityContext(entityContext) {}
 
 void EntityPanel::render(SceneManager &sceneManager,
-                         const liquid::AnimationSystem &animationSystem,
+                         liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
   bool open = true;
   if (ImGui::Begin("Properties", &open)) {
@@ -20,7 +20,7 @@ void EntityPanel::render(SceneManager &sceneManager,
       renderName();
       renderLight();
       renderTransform();
-      renderAnimation(animationSystem);
+      renderAnimation(assetRegistry);
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
@@ -174,8 +174,7 @@ void EntityPanel::renderSkeleton() {
   }
 }
 
-void EntityPanel::renderAnimation(
-    const liquid::AnimationSystem &animationSystem) {
+void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
   if (!mEntityContext.hasComponent<liquid::AnimatorComponent>(
           mSelectedEntity)) {
     return;
@@ -185,16 +184,18 @@ void EntityPanel::renderAnimation(
     auto &component =
         mEntityContext.getComponent<liquid::AnimatorComponent>(mSelectedEntity);
 
-    const auto &currentAnimation = animationSystem.getAnimation(
-        component.animations.at(component.currentAnimation));
+    const auto &animations = assetRegistry.getAnimations().getAssets();
 
-    if (ImGui::BeginCombo("###SelectAnimation",
-                          currentAnimation.getName().c_str(), 0)) {
+    const auto &currentAnimation =
+        animations.at(component.animations.at(component.currentAnimation));
+
+    if (ImGui::BeginCombo("###SelectAnimation", currentAnimation.name.c_str(),
+                          0)) {
       for (size_t i = 0; i < component.animations.size(); ++i) {
         bool selectable = component.currentAnimation == i;
 
         const auto &animationName =
-            animationSystem.getAnimation(component.animations.at(i)).getName();
+            animations.at(component.animations.at(i)).name;
 
         if (ImGui::Selectable(animationName.c_str(), &selectable)) {
           component.currentAnimation = static_cast<uint32_t>(i);
@@ -205,10 +206,10 @@ void EntityPanel::renderAnimation(
 
     ImGui::Text("Time");
 
-    float animationTime = component.normalizedTime * currentAnimation.getTime();
+    float animationTime = component.normalizedTime * currentAnimation.data.time;
     if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
-                           currentAnimation.getTime())) {
-      component.normalizedTime = animationTime / currentAnimation.getTime();
+                           currentAnimation.data.time)) {
+      component.normalizedTime = animationTime / currentAnimation.data.time;
     }
 
     ImGui::Checkbox("Loop", &component.loop);

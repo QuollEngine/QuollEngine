@@ -3,33 +3,28 @@
 
 namespace liquid {
 
-AnimationSystem::AnimationSystem(EntityContext &entityContext)
-    : mEntityContext(entityContext) {}
-
-uint32_t AnimationSystem::addAnimation(const Animation &animation) {
-  uint32_t lastId = static_cast<uint32_t>(mAnimations.size());
-
-  mAnimations.push_back(animation);
-  return lastId;
-}
+AnimationSystem::AnimationSystem(EntityContext &entityContext,
+                                 AssetRegistry &assetRegistry)
+    : mEntityContext(entityContext), mAssetRegistry(assetRegistry) {}
 
 void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
+  const auto &animMap = mAssetRegistry.getAnimations();
   mEntityContext.iterateEntities<TransformComponent, AnimatorComponent>(
-      [this, dt](Entity entity, auto &transform, auto &animComp) {
-        uint32_t index = animComp.animations.at(animComp.currentAnimation);
+      [=](Entity entity, auto &transform, auto &animComp) {
+        auto handle = animComp.animations.at(animComp.currentAnimation);
 
-        if (index >= mAnimations.size()) {
+        if (!animMap.hasAsset(handle)) {
           return;
         }
 
-        const Animation &animation = mAnimations.at(index);
+        const auto &animation = animMap.getAsset(handle);
 
         if (animComp.playing) {
           animComp.normalizedTime = std::min(
               // Divide delta time by animation time
               // to advance time at a constant speed
-              animComp.normalizedTime + (dt / animation.getTime()), 1.0f);
+              animComp.normalizedTime + (dt / animation.data.time), 1.0f);
           if (animComp.loop && animComp.normalizedTime >= 1.0f) {
             animComp.normalizedTime = 0.0f;
           }
@@ -38,32 +33,31 @@ void AnimationSystem::update(float dt) {
         bool hasSkeleton =
             mEntityContext.hasComponent<SkeletonComponent>(entity);
 
-        for (auto &sequence : animation.getKeyframeSequences()) {
-          const auto &value =
-              sequence.getInterpolatedValue(animComp.normalizedTime);
+        for (const auto &sequence : animation.data.keyframes) {
+          const auto &value = mKeyframeInterpolator.interpolate(
+              sequence, animComp.normalizedTime);
 
-          if (sequence.isJointTarget() && hasSkeleton) {
+          if (sequence.jointTarget && hasSkeleton) {
             auto &skeleton =
                 mEntityContext.getComponent<SkeletonComponent>(entity).skeleton;
-            if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
-              skeleton.setJointPosition(sequence.getJoint(), glm::vec3(value));
-            } else if (sequence.getTarget() ==
-                       KeyframeSequenceTarget::Rotation) {
+            if (sequence.target == KeyframeSequenceAssetTarget::Position) {
+              skeleton.setJointPosition(sequence.joint, glm::vec3(value));
+            } else if (sequence.target ==
+                       KeyframeSequenceAssetTarget::Rotation) {
               skeleton.setJointRotation(
-                  sequence.getJoint(),
+                  sequence.joint,
                   glm::quat(value.w, value.x, value.y, value.z));
-            } else if (sequence.getTarget() == KeyframeSequenceTarget::Scale) {
-              skeleton.setJointScale(sequence.getJoint(), glm::vec3(value));
+            } else if (sequence.target == KeyframeSequenceAssetTarget::Scale) {
+              skeleton.setJointScale(sequence.joint, glm::vec3(value));
             }
-            skeleton.update();
           } else {
-            if (sequence.getTarget() == KeyframeSequenceTarget::Position) {
+            if (sequence.target == KeyframeSequenceAssetTarget::Position) {
               transform.localPosition = glm::vec3(value);
-            } else if (sequence.getTarget() ==
-                       KeyframeSequenceTarget::Rotation) {
+            } else if (sequence.target ==
+                       KeyframeSequenceAssetTarget::Rotation) {
               transform.localRotation =
                   glm::quat(value.w, value.x, value.y, value.z);
-            } else if (sequence.getTarget() == KeyframeSequenceTarget::Scale) {
+            } else if (sequence.target == KeyframeSequenceAssetTarget::Scale) {
               transform.localScale = glm::vec3(value);
             }
           }

@@ -3,22 +3,21 @@
 
 namespace liquidator {
 
-UIRoot::UIRoot(liquid::EntityContext &entityContext,
-               const liquid::GLTFLoader &gltfLoader, GLTFImporter &gltfImporter)
-    : mMenuBar(gltfLoader, gltfImporter), mSceneHierarchyPanel(entityContext),
+UIRoot::UIRoot(liquid::EntityContext &entityContext, GLTFImporter &gltfImporter)
+    : mMenuBar(gltfImporter), mSceneHierarchyPanel(entityContext),
       mEntityPanel(entityContext) {
   mSceneHierarchyPanel.setNodeClickHandler(
       [this](liquid::SceneNode *node) { handleNodeClick(node); });
 }
 
 void UIRoot::render(SceneManager &sceneManager,
-                    const liquid::AnimationSystem &animationSystem,
+                    liquid::AssetRegistry &assetRegistry,
                     liquid::PhysicsSystem &physicsSystem) {
   mLayout.setup();
   mMenuBar.render(sceneManager);
   mStatusBar.render(sceneManager);
   mSceneHierarchyPanel.render(sceneManager);
-  mEntityPanel.render(sceneManager, animationSystem, physicsSystem);
+  mEntityPanel.render(sceneManager, assetRegistry, physicsSystem);
   mEditorCameraPanel.render(sceneManager);
 }
 

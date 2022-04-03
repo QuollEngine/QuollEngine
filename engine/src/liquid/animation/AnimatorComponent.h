@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/asset/Asset.h"
+
 namespace liquid {
 
 struct AnimatorComponent {
@@ -8,7 +10,7 @@ struct AnimatorComponent {
   float normalizedTime = 0.0f;
   bool playing = false;
 
-  std::vector<uint32_t> animations;
+  std::vector<AnimationAssetHandle> animations;
 };
 
 } // namespace liquid

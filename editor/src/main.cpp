@@ -45,7 +45,7 @@ int main() {
   liquid::AssetRegistry assetRegistry;
   liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
-  liquid::AnimationSystem animationSystem(entityContext);
+  liquid::AnimationSystem animationSystem(entityContext, assetRegistry);
   liquid::PhysicsSystem physicsSystem(entityContext, eventSystem);
 
   liquid::ImguiDebugLayer debugLayer(
@@ -67,14 +67,13 @@ int main() {
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
   liquid::MainLoop mainLoop(window, fpsCounter);
-  liquid::GLTFLoader loader(entityContext, renderer, animationSystem, true);
   liquidator::GLTFImporter gltfImporter(assetRegistry, renderer.getRegistry());
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(entityContext, editorCamera,
                                         editorGrid);
 
-  liquidator::UIRoot ui(entityContext, loader, gltfImporter);
+  liquidator::UIRoot ui(entityContext, gltfImporter);
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
@@ -111,6 +110,7 @@ int main() {
 
         for (auto &item : asset.data.items) {
           auto entity = entityContext.createEntity();
+          entityContext.setComponent<liquid::DebugComponent>(entity, {});
 
           parent->addChild(entity, transform);
 
@@ -135,46 +135,11 @@ int main() {
 
             entityContext.setComponent<liquid::SkeletonComponent>(
                 entity, {std::move(skeletonInstance)});
-
-            entityContext.getComponent<liquid::SkeletonComponent>(entity)
-                .skeleton.update();
           }
 
-          std::vector<uint32_t> animations;
-          for (auto &animationHandle : item.animations) {
-            const auto &animation =
-                assetRegistry.getAnimations().getAsset(animationHandle);
-            liquid::Animation anim(animation.name, animation.data.time);
-            for (auto &kf : animation.data.keyframes) {
-              auto &&sequence =
-                  kf.jointTarget
-                      ? liquid::KeyframeSequence(
-                            static_cast<liquid::KeyframeSequenceTarget>(
-                                kf.target),
-                            static_cast<liquid::KeyframeSequenceInterpolation>(
-                                kf.interpolation),
-                            kf.joint)
-                      : liquid::KeyframeSequence(
-                            static_cast<liquid::KeyframeSequenceTarget>(
-                                kf.target),
-                            static_cast<liquid::KeyframeSequenceInterpolation>(
-                                kf.interpolation));
-
-              for (size_t i = 0; i < kf.keyframeTimes.size(); ++i) {
-                sequence.addKeyframe(kf.keyframeTimes.at(i),
-                                     kf.keyframeValues.at(i));
-              }
-
-              anim.addKeyframeSequence(sequence);
-            }
-
-            auto index = animationSystem.addAnimation(anim);
-            animations.push_back(index);
-          }
-
-          if (!animations.empty()) {
+          if (!item.animations.empty()) {
             liquid::AnimatorComponent component;
-            component.animations = animations;
+            component.animations = item.animations;
             entityContext.setComponent(entity, component);
           }
         }
@@ -335,6 +300,9 @@ int main() {
       renderData->update();
 
       entityContext.iterateEntities<liquid::SkeletonComponent>(
+          [](auto entity, auto &component) { component.skeleton.update(); });
+
+      entityContext.iterateEntities<liquid::SkeletonComponent>(
           [](auto entity, auto &component) {
             component.skeleton.updateDebug();
           });
@@ -344,12 +312,13 @@ int main() {
       return !sceneManager.hasNewScene();
     });
 
-    mainLoop.setRenderFn([&renderer, &graph, &ui, &sceneManager,
-                          &animationSystem, &physicsSystem, &debugLayer]() {
+    mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
+                          &assetRegistry, &graph, &physicsSystem, &ui,
+                          &debugLayer]() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
-      ui.render(sceneManager, animationSystem, physicsSystem);
+      ui.render(sceneManager, assetRegistry, physicsSystem);
 
       if (ImGui::Begin("View")) {
         const auto &size = ImGui::GetContentRegionAvail();

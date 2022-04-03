@@ -14,10 +14,9 @@ public:
   /**
    * @brief Create menu bar
    *
-   * @param loader GLTF mLoader
    * @param importer GLTF Importer (new)
    */
-  MenuBar(const liquid::GLTFLoader &loader, GLTFImporter &importer);
+  MenuBar(GLTFImporter &importer);
 
   /**
    * @brief Render menu bar
@@ -27,14 +26,6 @@ public:
   void render(SceneManager &sceneManager);
 
 private:
-  /**
-   * @brief Handler for GLTF import item click
-   *
-   * @param filePath GLTF file path
-   * @param scene Target scene
-   */
-  void handleGLTFImport(const liquid::String &filePath, liquid::Scene *scene);
-
   /**
    * @brief Handler for new GLTF import item click
    *
@@ -51,7 +42,6 @@ private:
 
 private:
   liquid::platform_tools::NativeFileDialog mFileDialog;
-  liquid::GLTFLoader mLoader;
   GLTFImporter &mImporter;
 };
 

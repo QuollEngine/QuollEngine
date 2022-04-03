@@ -8,12 +8,15 @@ class AnimationSystemTest : public ::testing::Test {
 public:
   liquid::EntityContext context;
   liquid::AnimationSystem system;
+  liquid::AssetRegistry assetRegistry;
   liquid::rhi::ResourceRegistry registry;
 
-  AnimationSystemTest() : system(context) {}
+  AnimationSystemTest() : system(context, assetRegistry) {}
 
-  liquid::Entity createEntity(bool loop, uint32_t animIndex = 0,
-                              bool playing = true) {
+  liquid::Entity createEntity(
+      bool loop,
+      liquid::AnimationAssetHandle animIndex = liquid::AnimationAssetHandle{1},
+      bool playing = true) {
     auto entity = context.createEntity();
     context.setComponent<liquid::TransformComponent>(entity, {});
     context.setComponent<liquid::AnimatorComponent>(
@@ -22,8 +25,10 @@ public:
     return entity;
   }
 
-  liquid::Entity createEntityWithSkeleton(bool loop, uint32_t animIndex = 0,
-                                          bool playing = true) {
+  liquid::Entity createEntityWithSkeleton(
+      bool loop,
+      liquid::AnimationAssetHandle animIndex = liquid::AnimationAssetHandle{1},
+      bool playing = true) {
     auto entity = createEntity(loop, animIndex, playing);
 
     liquid::Skeleton skeleton(
@@ -35,51 +40,53 @@ public:
     return entity;
   }
 
-  uint32_t createAnimation(liquid::KeyframeSequenceTarget target, float time) {
-    liquid::Animation animation("testAnim", time);
-    liquid::KeyframeSequence sequence(
-        target, liquid::KeyframeSequenceInterpolation::Step);
+  liquid::AnimationAssetHandle
+  createAnimation(liquid::KeyframeSequenceAssetTarget target, float time) {
+    liquid::AssetData<liquid::AnimationAsset> animation;
+    animation.name = "testAnim";
+    animation.data.time = time;
 
-    sequence.addKeyframe(0.0f, glm::vec4(0.0f));
-    sequence.addKeyframe(0.5f, glm::vec4(0.5f));
-    sequence.addKeyframe(1.0f, glm::vec4(1.0f));
+    liquid::KeyframeSequenceAsset sequence;
+    sequence.target = target;
+    sequence.interpolation = liquid::KeyframeSequenceAssetInterpolation::Step;
 
-    animation.addKeyframeSequence(sequence);
-    return system.addAnimation(animation);
+    sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
+    sequence.keyframeValues = {glm::vec4(0.0f), glm::vec4(0.5f),
+                               glm::vec4(1.0f)};
+
+    animation.data.keyframes.push_back(sequence);
+
+    return assetRegistry.getAnimations().addAsset(animation);
   }
 
-  uint32_t createSkeletonAnimation(liquid::KeyframeSequenceTarget target,
-                                   float time) {
-    liquid::Animation animation("testAnim", time);
-    liquid::KeyframeSequence sequence(
-        target, liquid::KeyframeSequenceInterpolation::Step, 0);
+  liquid::AnimationAssetHandle
+  createSkeletonAnimation(liquid::KeyframeSequenceAssetTarget target,
+                          float time) {
+    liquid::AssetData<liquid::AnimationAsset> animation;
+    animation.name = "testAnim";
+    animation.data.time = time;
 
-    sequence.addKeyframe(0.0f, glm::vec4(0.0f));
-    sequence.addKeyframe(0.5f, glm::vec4(0.5f));
-    sequence.addKeyframe(1.0f, glm::vec4(1.0f));
+    liquid::KeyframeSequenceAsset sequence;
+    sequence.target = target;
+    sequence.interpolation = liquid::KeyframeSequenceAssetInterpolation::Step;
+    sequence.joint = 0;
+    sequence.jointTarget = true;
 
-    animation.addKeyframeSequence(sequence);
-    return system.addAnimation(animation);
+    sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
+    sequence.keyframeValues = {glm::vec4(0.0f), glm::vec4(0.5f),
+                               glm::vec4(1.0f)};
+
+    animation.data.keyframes.push_back(sequence);
+
+    return assetRegistry.getAnimations().addAsset(animation);
   }
 };
 
 using AnimationSystemDeathTest = AnimationSystemTest;
 
-TEST_F(AnimationSystemTest, AddsAnimation) {
-  uint32_t index =
-      createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
-
-  EXPECT_EQ(system.getAnimation(index).getName(), "testAnim");
-  EXPECT_EQ(system.getAnimation(index).getTime(), 2.0f);
-}
-
-TEST_F(AnimationSystemDeathTest, FailsIfNonExistentAnimationIsRequested) {
-  EXPECT_DEATH(system.getAnimation(12), ".*");
-}
-
 TEST_F(AnimationSystemTest,
        DoesNotAdvanceEntityAnimationIfAnimationDoesNotExist) {
-  auto entity = createEntity(false, 1);
+  auto entity = createEntity(false, liquid::AnimationAssetHandle::Invalid);
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
 
@@ -90,7 +97,7 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
   auto animIndex =
-      createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
+      createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = createEntity(false, animIndex, false);
 
   const auto &animation =
@@ -102,7 +109,7 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
 
 TEST_F(AnimationSystemTest,
        AdvancedEntityAnimationNormalizedTimeByDeltaTimeAndAnimationSpeed) {
-  createAnimation(liquid::KeyframeSequenceTarget::Position, 2.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 2.0f);
   auto entity = createEntity(false);
 
   const auto &animation =
@@ -113,7 +120,7 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
-  createAnimation(liquid::KeyframeSequenceTarget::Position, 1.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = createEntity(false);
 
   const auto &animation =
@@ -126,7 +133,7 @@ TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
 }
 
 TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
-  createAnimation(liquid::KeyframeSequenceTarget::Position, 1.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = createEntity(true);
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
@@ -136,7 +143,7 @@ TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
-  createAnimation(liquid::KeyframeSequenceTarget::Position, 1.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = createEntity(false);
 
   const auto &transform =
@@ -153,7 +160,7 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
-  createAnimation(liquid::KeyframeSequenceTarget::Rotation, 1.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Rotation, 1.0f);
   auto entity = createEntity(false);
 
   const auto &transform =
@@ -170,7 +177,7 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
 }
 
 TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
-  createAnimation(liquid::KeyframeSequenceTarget::Scale, 1.0f);
+  createAnimation(liquid::KeyframeSequenceAssetTarget::Scale, 1.0f);
   auto entity = createEntity(false);
 
   const auto &transform =
@@ -188,7 +195,7 @@ TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonPositionBasedOnPositionKeyframeWithJointTarget) {
-  createSkeletonAnimation(liquid::KeyframeSequenceTarget::Position, 1.0f);
+  createSkeletonAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
@@ -213,7 +220,7 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonRotationBasedOnRotationKeyframeWithJointTarget) {
-  createSkeletonAnimation(liquid::KeyframeSequenceTarget::Rotation, 1.0f);
+  createSkeletonAnimation(liquid::KeyframeSequenceAssetTarget::Rotation, 1.0f);
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
@@ -238,7 +245,7 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest,
        UpdateSkeletonScaleBasedOnScaleKeyframeWithJointTarget) {
-  createSkeletonAnimation(liquid::KeyframeSequenceTarget::Scale, 1.0f);
+  createSkeletonAnimation(liquid::KeyframeSequenceAssetTarget::Scale, 1.0f);
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =

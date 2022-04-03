@@ -99,7 +99,6 @@ int main() {
   liquid::rhi::VulkanRenderBackend backend(window);
 
   liquid::Renderer renderer(context, window, backend.createDefaultDevice());
-  liquid::AnimationSystem animationSystem(context);
 
   window.addMouseButtonHandler([](int button, int action, int mods) {
     if (action == GLFW_RELEASE) {
@@ -161,7 +160,7 @@ int main() {
 
   auto cubeMesh = createCube();
 
-  liquid::GLTFLoader loader(context, renderer, animationSystem);
+  liquid::GLTFLoader loader(context, renderer);
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(window, fpsCounter);
