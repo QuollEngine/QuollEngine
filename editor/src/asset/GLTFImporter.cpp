@@ -36,6 +36,13 @@ struct SkeletonData {
   GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
 };
 
+struct AnimationData {
+  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
+      nodeAnimationMap;
+  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
+      skinAnimationMap;
+};
+
 /**
  * @brief Decomposes matrix into TRS values
  *
@@ -443,7 +450,9 @@ static void
 loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
            liquid::AssetRegistry &registry,
            const GLTFToAsset<liquid::MaterialAssetHandle> &materials,
-           const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons) {
+           const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons,
+           GLTFToAsset<liquid::MeshAssetHandle> &outMeshes,
+           GLTFToAsset<liquid::SkinnedMeshAssetHandle> &outSkinnedMeshes) {
 
   std::map<size_t, size_t> skeletonMeshMap;
   for (auto &node : model.nodes) {
@@ -547,7 +556,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
               skeletons.map.find(it->second) != skeletons.map.end()) {
             skinnedMesh.data.skeleton = skeletons.map.at(it->second);
           }
-          registry.getSkinnedMeshes().addAsset(skinnedMesh);
+          auto handle = registry.getSkinnedMeshes().addAsset(skinnedMesh);
+          outSkinnedMeshes.map.insert_or_assign(i, handle);
         }
       } else {
         const auto &[vertices, indices] =
@@ -556,7 +566,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
           mesh.name = fileName + ":mesh" + std::to_string(i);
           mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
-          registry.getMeshes().addAsset(mesh);
+          auto handle = registry.getMeshes().addAsset(mesh);
+          outMeshes.map.insert_or_assign(i, handle);
         }
       }
     }
@@ -706,10 +717,11 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
  * @param registry Asset registry
  * @param skeletonData Skeleton data
  */
-void loadAnimations(const tinygltf::Model &model,
-                    const liquid::String &fileName,
-                    liquid::AssetRegistry &registry,
-                    const SkeletonData &skeletonData) {
+AnimationData loadAnimations(const tinygltf::Model &model,
+                             const liquid::String &fileName,
+                             liquid::AssetRegistry &registry,
+                             const SkeletonData &skeletonData) {
+  AnimationData animationData;
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
@@ -878,8 +890,90 @@ void loadAnimations(const tinygltf::Model &model,
 
     LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
                   "Animation must have a target node or skin");
-    registry.getAnimations().addAsset(animation);
+    auto handle = registry.getAnimations().addAsset(animation);
+
+    if (targetSkin >= 0) {
+      if (animationData.skinAnimationMap.find(targetSkin) ==
+          animationData.skinAnimationMap.end()) {
+        animationData.skinAnimationMap.insert(
+            {static_cast<uint32_t>(targetSkin), {}});
+      }
+      animationData.skinAnimationMap.at(targetSkin).push_back(handle);
+    } else {
+      if (animationData.nodeAnimationMap.find(targetSkin) ==
+          animationData.nodeAnimationMap.end()) {
+        animationData.nodeAnimationMap.insert(
+            {static_cast<uint32_t>(targetNode), {}});
+      }
+
+      animationData.nodeAnimationMap.at(targetNode).push_back(handle);
+    }
   }
+  return animationData;
+}
+
+void loadPrefabs(
+    const tinygltf::Model &model, const liquid::String &fileName,
+    liquid::AssetRegistry &registry,
+    const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
+    const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
+    const SkeletonData &skeletons, const AnimationData &animations) {
+
+  liquid::AssetData<liquid::PrefabAsset> prefab;
+  prefab.name = fileName;
+  prefab.type = liquid::AssetType::Prefab;
+
+  auto &gltfNodes = model.scenes.at(model.defaultScene);
+
+  std::unordered_map<int, bool> jointNodes;
+  for (auto &skin : model.skins) {
+    for (auto &joint : skin.joints) {
+      jointNodes.insert({joint, true});
+    }
+  }
+
+  std::list<std::pair<int, int>> nodesToProcess;
+
+  for (auto &nodeIndex : gltfNodes.nodes) {
+    if (jointNodes.find(nodeIndex) == jointNodes.end()) {
+      nodesToProcess.push_back(std::make_pair(nodeIndex, -1));
+    }
+  }
+
+  while (!nodesToProcess.empty()) {
+    auto [nodeIndex, parentIndex] = nodesToProcess.front();
+    nodesToProcess.pop_front();
+
+    auto &node = model.nodes.at(nodeIndex);
+
+    for (auto child : node.children) {
+      if (jointNodes.find(child) == jointNodes.end()) {
+        nodesToProcess.push_back(std::make_pair(child, nodeIndex));
+      }
+    }
+
+    if (node.mesh < 0)
+      continue;
+
+    liquid::PrefabAssetItem item;
+    if (node.skin >= 0) {
+      item.skinnedMesh = skinnedMeshes.map.at(node.mesh);
+      item.skeleton = skeletons.skeletonMap.map.at(node.skin);
+      auto it = animations.skinAnimationMap.find(node.skin);
+      if (it != animations.skinAnimationMap.end()) {
+        item.animations = it->second;
+      }
+    } else {
+      item.mesh = meshes.map.at(node.mesh);
+      auto it = animations.nodeAnimationMap.find(nodeIndex);
+      if (it != animations.nodeAnimationMap.end()) {
+        item.animations = it->second;
+      }
+    }
+    prefab.data.items.push_back(item);
+  }
+
+  registry.getPrefabs().addAsset(prefab);
 }
 
 GLTFImporter::GLTFImporter(liquid::AssetRegistry &assetRegistry,
@@ -907,12 +1001,19 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
 
   auto baseName = std::filesystem::path(filename).filename().string();
 
+  GLTFToAsset<liquid::MeshAssetHandle> meshMap;
+  GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
+
   auto &&textures = loadTextures(model, baseName, mAssetRegistry);
   auto &&materials = loadMaterials(model, baseName, mAssetRegistry, textures);
   auto &&skeletonData = loadSkeletons(model, baseName, mAssetRegistry);
-  loadAnimations(model, baseName, mAssetRegistry, skeletonData);
+  auto &&animationData =
+      loadAnimations(model, baseName, mAssetRegistry, skeletonData);
   loadMeshes(model, baseName, mAssetRegistry, materials,
-             skeletonData.skeletonMap);
+             skeletonData.skeletonMap, meshMap, skinnedMeshMap);
+
+  loadPrefabs(model, baseName, mAssetRegistry, meshMap, skinnedMeshMap,
+              skeletonData, animationData);
 
   mAssetRegistry.syncWithDeviceRegistry(mDeviceRegistry);
 }

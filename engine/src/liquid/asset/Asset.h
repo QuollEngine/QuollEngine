@@ -14,6 +14,8 @@ enum class SkeletonAssetHandle : uint32_t { Invalid = 0 };
 
 enum class AnimationAssetHandle : uint32_t { Invalid = 0 };
 
+enum class PrefabAssetHandle : uint32_t { Invalid = 0 };
+
 enum class AssetType {
   None,
   Material,
@@ -21,7 +23,8 @@ enum class AssetType {
   Mesh,
   SkinnedMesh,
   Skeleton,
-  Animation
+  Animation,
+  Prefab
 };
 
 } // namespace liquid

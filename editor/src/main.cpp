@@ -81,11 +81,13 @@ int main() {
 
     debugLayer.getAssetBrowser().setOnLoadToScene([&entityContext, &renderer,
                                                    &sceneManager,
+                                                   &animationSystem,
                                                    &assetRegistry](
                                                       liquid::AssetType type,
                                                       uint32_t handle) {
       if (type != liquid::AssetType::Mesh &&
-          type != liquid::AssetType::SkinnedMesh) {
+          type != liquid::AssetType::SkinnedMesh &&
+          type != liquid::AssetType::Prefab) {
         return;
       }
 
@@ -98,8 +100,87 @@ int main() {
       transform.localPosition = orientation[3];
 
       auto entity = entityContext.createEntity();
-      sceneManager.getActiveScene()->getRootNode()->addChild(entity, transform);
       entityContext.setComponent<liquid::DebugComponent>(entity, {});
+      auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
+          entity, transform);
+
+      if (type == liquid::AssetType::Prefab) {
+        auto &asset = assetRegistry.getPrefabs().getAsset(
+            static_cast<liquid::PrefabAssetHandle>(handle));
+        entityContext.setComponent<liquid::NameComponent>(entity, {asset.name});
+
+        for (auto &item : asset.data.items) {
+          auto entity = entityContext.createEntity();
+
+          parent->addChild(entity, transform);
+
+          if (item.skinnedMesh != liquid::SkinnedMeshAssetHandle::Invalid) {
+            entityContext.setComponent<liquid::SkinnedMeshComponent>(
+                entity,
+                {renderer.createMeshInstance(item.skinnedMesh, assetRegistry)});
+          } else {
+            entityContext.setComponent<liquid::MeshComponent>(
+                entity,
+                {renderer.createMeshInstance(item.mesh, assetRegistry)});
+          }
+
+          if (item.skeleton != liquid::SkeletonAssetHandle::Invalid) {
+            const auto &skeleton =
+                assetRegistry.getSkeletons().getAsset(item.skeleton).data;
+            liquid::Skeleton skeletonInstance(
+                skeleton.jointLocalPositions, skeleton.jointLocalRotations,
+                skeleton.jointLocalScales, skeleton.jointParents,
+                skeleton.jointInverseBindMatrices, skeleton.jointNames,
+                &renderer.getRegistry());
+
+            entityContext.setComponent<liquid::SkeletonComponent>(
+                entity, {std::move(skeletonInstance)});
+
+            entityContext.getComponent<liquid::SkeletonComponent>(entity)
+                .skeleton.update();
+          }
+
+          std::vector<uint32_t> animations;
+          for (auto &animationHandle : item.animations) {
+            const auto &animation =
+                assetRegistry.getAnimations().getAsset(animationHandle);
+            liquid::Animation anim(animation.name, animation.data.time);
+            for (auto &kf : animation.data.keyframes) {
+              auto &&sequence =
+                  kf.jointTarget
+                      ? liquid::KeyframeSequence(
+                            static_cast<liquid::KeyframeSequenceTarget>(
+                                kf.target),
+                            static_cast<liquid::KeyframeSequenceInterpolation>(
+                                kf.interpolation),
+                            kf.joint)
+                      : liquid::KeyframeSequence(
+                            static_cast<liquid::KeyframeSequenceTarget>(
+                                kf.target),
+                            static_cast<liquid::KeyframeSequenceInterpolation>(
+                                kf.interpolation));
+
+              for (size_t i = 0; i < kf.keyframeTimes.size(); ++i) {
+                sequence.addKeyframe(kf.keyframeTimes.at(i),
+                                     kf.keyframeValues.at(i));
+              }
+
+              anim.addKeyframeSequence(sequence);
+            }
+
+            auto index = animationSystem.addAnimation(anim);
+            animations.push_back(index);
+          }
+
+          if (!animations.empty()) {
+            liquid::AnimatorComponent component;
+            component.animations = animations;
+            entityContext.setComponent(entity, component);
+          }
+        }
+
+        return;
+      }
 
       if (type == liquid::AssetType::Mesh) {
         entityContext.setComponent<liquid::MeshComponent>(
