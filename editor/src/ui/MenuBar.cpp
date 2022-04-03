@@ -8,8 +8,7 @@
 
 namespace liquidator {
 
-MenuBar::MenuBar(const liquid::GLTFLoader &loader, GLTFImporter &importer)
-    : mLoader(loader), mImporter(importer) {}
+MenuBar::MenuBar(GLTFImporter &importer) : mImporter(importer) {}
 
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(
@@ -23,11 +22,6 @@ void MenuBar::render(SceneManager &sceneManager) {
       }
 
       if (ImGui::MenuItem("Import GLTF...", nullptr)) {
-        handleGLTFImport(mFileDialog.getFilePathFromDialog({"gltf"}),
-                         sceneManager.getActiveScene());
-      }
-
-      if (ImGui::MenuItem("Import GLTF as asset...", nullptr)) {
         handleAssetImport(mFileDialog.getFilePathFromDialog({"gltf"}));
       }
 
@@ -38,25 +32,6 @@ void MenuBar::render(SceneManager &sceneManager) {
   }
 
   confirmCreateNewScene.render(sceneManager);
-}
-
-void MenuBar::handleGLTFImport(const liquid::String &filePath,
-                               liquid::Scene *scene) {
-  constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-  auto &&result = mLoader.loadFromFile(filePath);
-
-  if (result.hasError())
-    return;
-
-  const auto &invViewMatrix =
-      glm::inverse(scene->getActiveCamera()->getViewMatrix());
-
-  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
-
-  auto &transform = result.getResult()->getTransform();
-  transform.localPosition = orientation[3];
-
-  scene->getRootNode()->addChild(result.getResult());
 }
 
 void MenuBar::handleAssetImport(const liquid::String &filePath) {

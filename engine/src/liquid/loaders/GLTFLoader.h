@@ -2,11 +2,13 @@
 
 #include "liquid/entity/EntityContext.h"
 #include "liquid/renderer/Renderer.h"
-#include "liquid/animation/AnimationSystem.h"
 #include "GLTFError.h"
 
 namespace liquid {
 
+/**
+ * @deprecated This component should not be used anymore
+ */
 class GLTFLoader {
   using Res = Errorable<SceneNode *, GLTFError>;
 
@@ -16,11 +18,10 @@ public:
    *
    * @param entityContext Entity context
    * @param renderer Vulkan renderer
-   * @param animationSystem Animation system
    * @param debug Enable debugging parameters
    */
   GLTFLoader(EntityContext &entityContext, Renderer &renderer,
-             AnimationSystem &animationSystem, bool debug = false);
+             bool debug = false);
 
   /**
    * @brief Load GLTF from ASCII file
@@ -32,7 +33,6 @@ public:
 
 private:
   EntityContext &mEntityContext;
-  AnimationSystem &mAnimationSystem;
   Renderer &mRenderer;
   bool mDebug = false;
 

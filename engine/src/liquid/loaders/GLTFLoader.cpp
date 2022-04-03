@@ -42,11 +42,6 @@ struct SkeletonData {
   std::unordered_map<uint32_t, uint32_t> jointSkinMap;
 };
 
-struct AnimationData {
-  std::map<uint32_t, std::vector<uint32_t>> nodeAnimationMap;
-  std::map<uint32_t, std::vector<uint32_t>> skinAnimationMap;
-};
-
 /**
  * @brief Decomposes matrix into TRS values
  *
@@ -161,7 +156,6 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
  */
 static SceneNode *getScene(const tinygltf::Model &model,
                            const std::map<uint32_t, Entity> &meshEntityMap,
-                           const AnimationData &animationData,
                            const std::map<uint32_t, Skeleton> &skeletons,
                            bool createDebugComponent,
                            EntityContext &entityContext) {
@@ -207,21 +201,6 @@ static SceneNode *getScene(const tinygltf::Model &model,
     const auto &skeleton = skeletons.find(gltfNode.skin);
     if (skeleton != skeletons.end()) {
       entityContext.setComponent<SkeletonComponent>(entity, {skeleton->second});
-    }
-
-    auto skinAnimation = animationData.skinAnimationMap.find(gltfNode.skin);
-    AnimatorComponent animator{};
-    if (skinAnimation != animationData.skinAnimationMap.end()) {
-      animator.animations = skinAnimation->second;
-    } else {
-      auto animation = animationData.nodeAnimationMap.find(nodeIndex);
-      if (animation != animationData.nodeAnimationMap.end()) {
-        animator.animations = animation->second;
-      }
-    }
-
-    if (!animator.animations.empty()) {
-      entityContext.setComponent<AnimatorComponent>(entity, animator);
     }
 
     TransformComponent transform;
@@ -790,206 +769,9 @@ getMaterials(const tinygltf::Model &model, Renderer &renderer) {
   return materials;
 }
 
-/**
- * @brief Read animation dataa and return them for usage
- *
- * Conforms to on GLTF 2.0 spec
- * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
- *
- * @param model TinyGLTF model
- * @param skeletonData Skeleton data
- * @return Animation data
- */
-static AnimationData getAnimations(const tinygltf::Model &model,
-                                   const SkeletonData &skeletonData,
-                                   AnimationSystem &animationSystem) {
-  AnimationData animationData;
-
-  for (size_t i = 0; i < model.animations.size(); ++i) {
-    const auto &gltfAnimation = model.animations.at(i);
-
-    struct SamplerInfo {
-      std::vector<float> times;
-      std::vector<glm::vec4> values;
-      KeyframeSequenceInterpolation interpolation =
-          KeyframeSequenceInterpolation::Linear;
-    };
-
-    std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
-
-    float maxTime = 0.0f;
-
-    for (size_t i = 0; i < gltfAnimation.samplers.size(); ++i) {
-      const auto &sampler = gltfAnimation.samplers.at(i);
-      const auto &input = getBufferMetaForAccessor(model, sampler.input);
-      const auto &output = getBufferMetaForAccessor(model, sampler.output);
-
-      if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
-        engineLogger.log(Logger::Warning)
-            << "Animation time accessor must be in SCALAR format. Skipping...";
-        continue;
-      }
-
-      if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        engineLogger.log(Logger::Warning)
-            << "Animation time accessor component type must be FLOAT";
-        continue;
-      }
-
-      if (input.accessor.count != output.accessor.count) {
-        engineLogger.log(Logger::Warning)
-            << "Sampler input and output must have the same number of items";
-        continue;
-      }
-
-      if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        engineLogger.log(Logger::Warning)
-            << "Animation output accessor component type must be FLOAT";
-        continue;
-      }
-
-      std::vector<float> &times = samplers.at(i).times;
-      times.resize(input.accessor.count);
-
-      std::vector<glm::vec4> &values = samplers.at(i).values;
-      values.resize(output.accessor.count);
-
-      if (sampler.interpolation == "LINEAR") {
-        samplers.at(i).interpolation = KeyframeSequenceInterpolation::Linear;
-      } else if (sampler.interpolation == "STEP") {
-        samplers.at(i).interpolation = KeyframeSequenceInterpolation::Step;
-      }
-
-      float max = 0.0f;
-
-      {
-        const float *inputData = reinterpret_cast<const float *>(input.rawData);
-        for (size_t i = 0; i < input.accessor.count; ++i) {
-          times.at(i) = inputData[i];
-          max = std::max(max, inputData[i]);
-        }
-      }
-
-      maxTime = std::max(max, maxTime);
-
-      // Normalize the time
-      {
-        for (size_t i = 0; i < times.size(); ++i) {
-          times.at(i) = times.at(i) / max;
-        }
-      }
-
-      if (output.accessor.type == TINYGLTF_TYPE_VEC3) {
-        const glm::vec3 *outputData =
-            reinterpret_cast<const glm::vec3 *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
-          values.at(i) = glm::vec4(outputData[i], 0.0f);
-        }
-      } else if (output.accessor.type == TINYGLTF_TYPE_VEC4) {
-        const glm::vec4 *outputData =
-            reinterpret_cast<const glm::vec4 *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
-          values.at(i) = outputData[i];
-        }
-      } else if (output.accessor.type == TINYGLTF_TYPE_SCALAR) {
-        const float *outputData =
-            reinterpret_cast<const float *>(output.rawData);
-        for (size_t i = 0; i < output.accessor.count; ++i) {
-          values.at(i) = glm::vec4(outputData[i], 0, 0, 0);
-        }
-      }
-    }
-
-    Animation animation(gltfAnimation.name, maxTime);
-    int32_t targetNode = -1;
-    int32_t targetSkin = -1;
-
-    for (const auto &channel : gltfAnimation.channels) {
-      const auto &sampler = samplers.at(channel.sampler);
-
-      if (channel.target_node == -1) {
-        // Ignore channel if target node is not specified
-        continue;
-      }
-
-      KeyframeSequenceTarget target = KeyframeSequenceTarget::Position;
-      if (channel.target_path == "rotation") {
-        target = KeyframeSequenceTarget::Rotation;
-      } else if (channel.target_path == "scale") {
-        target = KeyframeSequenceTarget::Scale;
-      } else if (channel.target_path == "position") {
-        target = KeyframeSequenceTarget::Position;
-      }
-
-      uint32_t targetJoint = 0;
-
-      auto it = skeletonData.jointSkinMap.find(channel.target_node);
-      bool skinFound = it != skeletonData.jointSkinMap.end();
-      if (targetSkin == -1 && skinFound) {
-        targetSkin = static_cast<int32_t>(it->second);
-        targetJoint =
-            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
-      } else if (skinFound) {
-        LIQUID_ASSERT(
-            it->second == targetSkin,
-            "All channels in animation must point to the same target skin");
-        targetJoint =
-            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
-      }
-
-      if (targetSkin == -1 && targetNode == -1) {
-        targetNode = channel.target_node;
-      } else {
-        LIQUID_ASSERT(targetNode == -1, "All channels in animation must either "
-                                        "animate skin or node, not both");
-        LIQUID_ASSERT(
-            targetNode == -1 || targetNode == channel.target_node,
-            "All channels in animation must point to the same target node");
-      }
-
-      LIQUID_ASSERT(targetSkin == -1 || targetNode == -1,
-                    "A channel must point to a node or a skin");
-
-      auto &&sequence =
-          targetSkin != -1
-              ? KeyframeSequence(target, sampler.interpolation, targetJoint)
-              : KeyframeSequence(target, sampler.interpolation);
-
-      for (size_t i = 0; i < sampler.times.size(); ++i) {
-        sequence.addKeyframe(sampler.times.at(i), sampler.values.at(i));
-      }
-      animation.addKeyframeSequence(sequence);
-    }
-
-    LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
-                  "Animation must have a target node or skin");
-
-    uint32_t index = animationSystem.addAnimation(animation);
-    if (targetSkin >= 0) {
-      if (animationData.skinAnimationMap.find(targetSkin) ==
-          animationData.skinAnimationMap.end()) {
-        animationData.skinAnimationMap.insert(
-            {static_cast<uint32_t>(targetSkin), {}});
-      }
-
-      animationData.skinAnimationMap.at(targetSkin).push_back(index);
-    } else {
-      if (animationData.nodeAnimationMap.find(targetSkin) ==
-          animationData.nodeAnimationMap.end()) {
-        animationData.nodeAnimationMap.insert(
-            {static_cast<uint32_t>(targetNode), {}});
-      }
-
-      animationData.nodeAnimationMap.at(targetNode).push_back(index);
-    }
-  }
-  return animationData;
-}
-
 GLTFLoader::GLTFLoader(EntityContext &entityContext, Renderer &renderer,
-                       AnimationSystem &animationSystem, bool debug)
+                       bool debug)
     : mEntityContext(entityContext), mRenderer(renderer),
-      mAnimationSystem(animationSystem),
       mDefaultMaterial(mRenderer.createMaterialPBR({}, rhi::CullMode::Back)),
       mDebug(debug) {}
 
@@ -1013,12 +795,11 @@ GLTFLoader::Res GLTFLoader::loadFromFile(const String &filename) {
   }
 
   auto &&skeletonData = getSkeletons(model, mRenderer.getRegistry());
-  auto &&animationData = getAnimations(model, skeletonData, mAnimationSystem);
   auto &&materials = getMaterials(model, mRenderer);
   auto &&meshes =
       getMeshes(model, materials, mEntityContext, mRenderer, mDefaultMaterial);
-  auto *scene = getScene(model, meshes, animationData,
-                         skeletonData.skinSkeletonMap, mDebug, mEntityContext);
+  auto *scene = getScene(model, meshes, skeletonData.skinSkeletonMap, mDebug,
+                         mEntityContext);
 
   LOG_DEBUG("[GLTF] Loaded GLTF scene from " << filename);
 

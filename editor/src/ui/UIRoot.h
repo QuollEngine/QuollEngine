@@ -19,11 +19,9 @@ public:
    * @brief Create UI Root
    *
    * @param entityContext Entity context
-   * @param gltfLoader GLTF loader
    * @param gltfImporter GLTF importer
    */
-  UIRoot(liquid::EntityContext &entityContext,
-         const liquid::GLTFLoader &gltfLoader, GLTFImporter &importer);
+  UIRoot(liquid::EntityContext &entityContext, GLTFImporter &importer);
 
   /**
    * @brief Render UI Root
@@ -34,8 +32,7 @@ public:
    * @param animationSystem Animation system
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager,
-              const liquid::AnimationSystem &animationSystem,
+  void render(SceneManager &sceneManager, liquid::AssetRegistry &assetRegistry,
               liquid::PhysicsSystem &physicsSystem);
 
 private:
