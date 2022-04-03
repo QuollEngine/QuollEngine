@@ -345,4 +345,75 @@ SharedPtr<RenderData> Renderer::prepareScene(Scene *scene) {
                                       mRegistry);
 }
 
+template <class TVertex>
+SharedPtr<MeshInstance<BaseMesh<TVertex>>>
+createMeshObject(const AssetData<MeshAsset<TVertex>> &mesh,
+                 AssetRegistry &registry, Renderer &renderer) {
+  auto getTextureFromRegistry = [&registry](TextureAssetHandle handle) {
+    if (handle != TextureAssetHandle::Invalid) {
+      return registry.getTextures().getAsset(handle).data.deviceHandle;
+    }
+
+    return rhi::TextureHandle::Invalid;
+  };
+
+  BaseMesh<TVertex> tempMesh;
+
+  for (auto &geometry : mesh.data.geometries) {
+    auto &material = registry.getMaterials().getAsset(geometry.material).data;
+
+    auto invalidHandle = TextureAssetHandle::Invalid;
+
+    MaterialPBR::Properties properties;
+    properties.baseColorFactor = material.baseColorFactor;
+    properties.baseColorTexture =
+        getTextureFromRegistry(material.baseColorTexture);
+    properties.baseColorTextureCoord = material.baseColorTextureCoord;
+
+    properties.metallicFactor = material.metallicFactor;
+    properties.metallicRoughnessTexture =
+        getTextureFromRegistry(material.metallicRoughnessTexture);
+    properties.metallicRoughnessTextureCoord =
+        material.metallicRoughnessTextureCoord;
+
+    properties.normalScale = material.normalScale;
+    properties.normalTexture = getTextureFromRegistry(material.normalTexture);
+
+    properties.normalTextureCoord = material.normalTextureCoord;
+
+    properties.occlusionStrength = material.occlusionStrength;
+    properties.occlusionTexture =
+        getTextureFromRegistry(material.occlusionTexture);
+    properties.occlusionTextureCoord = material.occlusionTextureCoord;
+
+    properties.emissiveFactor = material.emissiveFactor;
+    properties.emissiveTexture =
+        getTextureFromRegistry(material.emissiveTexture);
+    properties.emissiveTextureCoord = material.emissiveTextureCoord;
+
+    auto materialInstance =
+        renderer.createMaterialPBR(properties, rhi::CullMode::None);
+
+    BaseGeometry<TVertex> tempGeometry(geometry.vertices, geometry.indices,
+                                       materialInstance);
+    tempMesh.addGeometry(tempGeometry);
+  }
+
+  return std::make_shared<MeshInstance<BaseMesh<TVertex>>>(
+      tempMesh, renderer.getRegistry());
+}
+
+SharedPtr<MeshInstance<Mesh>>
+Renderer::createMeshInstance(MeshAssetHandle handle, AssetRegistry &registry) {
+  return createMeshObject<Mesh::Vertex>(registry.getMeshes().getAsset(handle),
+                                        registry, *this);
+}
+
+SharedPtr<MeshInstance<SkinnedMesh>>
+Renderer::createMeshInstance(SkinnedMeshAssetHandle handle,
+                             AssetRegistry &registry) {
+  return createMeshObject<SkinnedMesh::Vertex>(
+      registry.getSkinnedMeshes().getAsset(handle), registry, *this);
+}
+
 } // namespace liquid

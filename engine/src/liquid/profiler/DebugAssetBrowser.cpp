@@ -15,23 +15,25 @@ void DebugAssetBrowser::render() {
                    ImGuiWindowFlags_NoDocking)) {
     if (ImGui::BeginChild("asset-type", ImVec2(ASSET_TYPE_WIDTH, 0))) {
 
-      if (ImGui::Selectable("Textures", mSelectedType == 1)) {
-        mSelectedType = 1;
+      if (ImGui::Selectable("Textures", mSelectedType == AssetType::Texture)) {
+        mSelectedType = AssetType::Texture;
         mSelectedObject = 0;
       }
 
-      if (ImGui::Selectable("Materials", mSelectedType == 2)) {
-        mSelectedType = 2;
+      if (ImGui::Selectable("Materials",
+                            mSelectedType == AssetType::Material)) {
+        mSelectedType = AssetType::Material;
         mSelectedObject = 0;
       }
 
-      if (ImGui::Selectable("Meshes", mSelectedType == 3)) {
-        mSelectedType = 3;
+      if (ImGui::Selectable("Meshes", mSelectedType == AssetType::Mesh)) {
+        mSelectedType = AssetType::Mesh;
         mSelectedObject = 0;
       }
 
-      if (ImGui::Selectable("Skinned meshes", mSelectedType == 4)) {
-        mSelectedType = 4;
+      if (ImGui::Selectable("Skinned meshes",
+                            mSelectedType == AssetType::SkinnedMesh)) {
+        mSelectedType = AssetType::SkinnedMesh;
         mSelectedObject = 0;
       }
 
@@ -40,7 +42,7 @@ void DebugAssetBrowser::render() {
     ImGui::SameLine();
 
     if (ImGui::BeginChild("asset-list", ImVec2(ASSET_LIST_WIDTH, 0))) {
-      if (mSelectedType == 1) {
+      if (mSelectedType == AssetType::Texture) {
         for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
@@ -48,7 +50,7 @@ void DebugAssetBrowser::render() {
             mSelectedObject = rawHandle;
           }
         }
-      } else if (mSelectedType == 2) {
+      } else if (mSelectedType == AssetType::Material) {
         for (auto &[handle, asset] : mRegistry.getMaterials().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
@@ -56,7 +58,7 @@ void DebugAssetBrowser::render() {
             mSelectedObject = rawHandle;
           }
         }
-      } else if (mSelectedType == 3) {
+      } else if (mSelectedType == AssetType::Mesh) {
         for (auto &[handle, asset] : mRegistry.getMeshes().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
@@ -64,7 +66,7 @@ void DebugAssetBrowser::render() {
             mSelectedObject = rawHandle;
           }
         }
-      } else if (mSelectedType == 4) {
+      } else if (mSelectedType == AssetType::SkinnedMesh) {
         for (auto &[handle, asset] : mRegistry.getSkinnedMeshes().getAssets()) {
           uint32_t rawHandle = static_cast<uint32_t>(handle);
           if (ImGui::Selectable(asset.name.c_str(),
@@ -80,6 +82,11 @@ void DebugAssetBrowser::render() {
     ImGui::SameLine();
 
     if (mSelectedObject > 0 && ImGui::BeginChild("asset-info")) {
+
+      if (mOnLoadToScene && ImGui::Button("Load to scene")) {
+        mOnLoadToScene(mSelectedType, mSelectedObject);
+      }
+
       auto renderScalar = [](const liquid::String &label, float value) {
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
@@ -142,7 +149,7 @@ void DebugAssetBrowser::render() {
         }
       };
 
-      if (mSelectedType == 1) {
+      if (mSelectedType == AssetType::Texture) {
         auto handle = static_cast<liquid::TextureAssetHandle>(mSelectedObject);
         auto &texture = mRegistry.getTextures().getAsset(handle);
         if (ImGui::BeginTable("texture-info", 2,
@@ -153,10 +160,12 @@ void DebugAssetBrowser::render() {
           renderInt("Size", static_cast<uint32_t>(texture.size));
           renderInt("Width", texture.data.width);
           renderInt("Height", texture.data.width);
+          renderInt("Device handle",
+                    static_cast<uint32_t>(texture.data.deviceHandle));
 
           ImGui::EndTable();
         }
-      } else if (mSelectedType == 2) {
+      } else if (mSelectedType == AssetType::Material) {
         auto handle = static_cast<liquid::MaterialAssetHandle>(mSelectedObject);
         auto &material = mRegistry.getMaterials().getAsset(handle);
         if (ImGui::BeginTable("texture-info", 2,
@@ -183,7 +192,7 @@ void DebugAssetBrowser::render() {
 
           ImGui::EndTable();
         }
-      } else if (mSelectedType == 3) {
+      } else if (mSelectedType == AssetType::Mesh) {
         auto handle = static_cast<liquid::MeshAssetHandle>(mSelectedObject);
         auto &mesh = mRegistry.getMeshes().getAsset(handle);
 
@@ -203,7 +212,7 @@ void DebugAssetBrowser::render() {
             ImGui::EndTable();
           }
         }
-      } else if (mSelectedType == 4) {
+      } else if (mSelectedType == AssetType::SkinnedMesh) {
         auto handle =
             static_cast<liquid::SkinnedMeshAssetHandle>(mSelectedObject);
         auto &mesh = mRegistry.getSkinnedMeshes().getAsset(handle);
@@ -228,9 +237,13 @@ void DebugAssetBrowser::render() {
 
       ImGui::EndChild();
     }
-
-    ImGui::End();
   }
+  ImGui::End();
+}
+
+void DebugAssetBrowser::setOnLoadToScene(
+    std::function<void(AssetType, uint32_t)> &&handler) {
+  mOnLoadToScene = handler;
 }
 
 } // namespace liquid

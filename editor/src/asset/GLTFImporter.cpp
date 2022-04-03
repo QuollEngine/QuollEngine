@@ -454,8 +454,9 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
   }
 }
 
-GLTFImporter::GLTFImporter(liquid::AssetRegistry &registry)
-    : mRegistry(registry) {}
+GLTFImporter::GLTFImporter(liquid::AssetRegistry &assetRegistry,
+                           liquid::rhi::ResourceRegistry &deviceRegistry)
+    : mAssetRegistry(assetRegistry), mDeviceRegistry(deviceRegistry) {}
 
 void GLTFImporter::loadFromFile(const liquid::String &filename) {
   tinygltf::TinyGLTF loader;
@@ -478,9 +479,11 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
 
   auto baseName = std::filesystem::path(filename).filename().string();
 
-  auto &&textures = loadTextures(model, baseName, mRegistry);
-  auto &&materials = loadMaterials(model, baseName, mRegistry, textures);
-  loadMeshes(model, baseName, mRegistry, materials);
+  auto &&textures = loadTextures(model, baseName, mAssetRegistry);
+  auto &&materials = loadMaterials(model, baseName, mAssetRegistry, textures);
+  loadMeshes(model, baseName, mAssetRegistry, materials);
+
+  mAssetRegistry.syncWithDeviceRegistry(mDeviceRegistry);
 }
 
 } // namespace liquidator

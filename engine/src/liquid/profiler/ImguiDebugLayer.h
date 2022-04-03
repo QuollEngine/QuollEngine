@@ -31,6 +31,13 @@ public:
    */
   void render();
 
+  /**
+   * @brief Get debug asset browser
+   *
+   * @return Debug asset browser
+   */
+  inline DebugAssetBrowser &getAssetBrowser() { return mAssetBrowser; }
+
 private:
   /**
    * @brief Render performance metrics

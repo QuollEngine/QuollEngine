@@ -26,7 +26,7 @@ public:
   public:
     rhi::TextureHandle baseColorTexture = rhi::TextureHandle::Invalid;
     int baseColorTextureCoord = -1;
-    glm::vec4 baseColorFactor;
+    glm::vec4 baseColorFactor{};
 
     rhi::TextureHandle metallicRoughnessTexture = rhi::TextureHandle::Invalid;
     int metallicRoughnessTextureCoord = -1;
@@ -43,7 +43,7 @@ public:
 
     rhi::TextureHandle emissiveTexture = rhi::TextureHandle::Invalid;
     int emissiveTextureCoord = -1;
-    glm::vec3 emissiveFactor;
+    glm::vec3 emissiveFactor{};
   };
 
 public:
