@@ -16,6 +16,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
 
       description.data = texture.data.data;
       description.width = texture.data.width;
+      description.layers = texture.data.layers;
       description.height = texture.data.height;
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |

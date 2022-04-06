@@ -16,7 +16,7 @@ enum class AnimationAssetHandle : uint32_t { Invalid = 0 };
 
 enum class PrefabAssetHandle : uint32_t { Invalid = 0 };
 
-enum class AssetType {
+enum class AssetType : uint8_t {
   None,
   Material,
   Texture,

@@ -47,6 +47,7 @@ function setupToolsetOptions()
     filter { "toolset:msc-*" }
         debugdir "$(TargetDir)"
         flags { "MultiProcessorCompile" }
+        defines { "_CRT_SECURE_NO_WARNINGS" }
 
     filter{}
 

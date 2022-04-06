@@ -42,15 +42,17 @@ int main() {
 
   auto *device = backend.createDefaultDevice();
 
-  liquid::AssetRegistry assetRegistry;
+  liquid::AssetManager assetManager(std::filesystem::current_path());
   liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
-  liquid::AnimationSystem animationSystem(entityContext, assetRegistry);
+  liquid::AnimationSystem animationSystem(entityContext,
+                                          assetManager.getRegistry());
   liquid::PhysicsSystem physicsSystem(entityContext, eventSystem);
 
   liquid::ImguiDebugLayer debugLayer(
       device->getDeviceInformation(), device->getDeviceStats(),
-      renderer.getRegistry(), assetRegistry, fpsCounter, debugManager);
+      renderer.getRegistry(), assetManager.getRegistry(), fpsCounter,
+      debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(
@@ -67,7 +69,7 @@ int main() {
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
   liquid::MainLoop mainLoop(window, fpsCounter);
-  liquidator::GLTFImporter gltfImporter(assetRegistry, renderer.getRegistry());
+  liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(entityContext, editorCamera,
@@ -81,7 +83,7 @@ int main() {
     debugLayer.getAssetBrowser().setOnLoadToScene([&entityContext, &renderer,
                                                    &sceneManager,
                                                    &animationSystem,
-                                                   &assetRegistry](
+                                                   &assetManager](
                                                       liquid::AssetType type,
                                                       uint32_t handle) {
       if (type != liquid::AssetType::Mesh &&
@@ -104,7 +106,7 @@ int main() {
           entity, transform);
 
       if (type == liquid::AssetType::Prefab) {
-        auto &asset = assetRegistry.getPrefabs().getAsset(
+        auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
             static_cast<liquid::PrefabAssetHandle>(handle));
         entityContext.setComponent<liquid::NameComponent>(entity, {asset.name});
 
@@ -116,17 +118,19 @@ int main() {
 
           if (item.skinnedMesh != liquid::SkinnedMeshAssetHandle::Invalid) {
             entityContext.setComponent<liquid::SkinnedMeshComponent>(
-                entity,
-                {renderer.createMeshInstance(item.skinnedMesh, assetRegistry)});
+                entity, {renderer.createMeshInstance(
+                            item.skinnedMesh, assetManager.getRegistry())});
           } else {
             entityContext.setComponent<liquid::MeshComponent>(
-                entity,
-                {renderer.createMeshInstance(item.mesh, assetRegistry)});
+                entity, {renderer.createMeshInstance(
+                            item.mesh, assetManager.getRegistry())});
           }
 
           if (item.skeleton != liquid::SkeletonAssetHandle::Invalid) {
-            const auto &skeleton =
-                assetRegistry.getSkeletons().getAsset(item.skeleton).data;
+            const auto &skeleton = assetManager.getRegistry()
+                                       .getSkeletons()
+                                       .getAsset(item.skeleton)
+                                       .data;
             liquid::Skeleton skeletonInstance(
                 skeleton.jointLocalPositions, skeleton.jointLocalRotations,
                 skeleton.jointLocalScales, skeleton.jointParents,
@@ -149,21 +153,24 @@ int main() {
 
       if (type == liquid::AssetType::Mesh) {
         entityContext.setComponent<liquid::MeshComponent>(
-            entity,
-            {renderer.createMeshInstance(
-                static_cast<liquid::MeshAssetHandle>(handle), assetRegistry)});
+            entity, {renderer.createMeshInstance(
+                        static_cast<liquid::MeshAssetHandle>(handle),
+                        assetManager.getRegistry())});
       } else if (type == liquid::AssetType::SkinnedMesh) {
         auto skinnedMeshHandle =
             static_cast<liquid::SkinnedMeshAssetHandle>(handle);
         entityContext.setComponent<liquid::SkinnedMeshComponent>(
-            entity,
-            {renderer.createMeshInstance(skinnedMeshHandle, assetRegistry)});
-        auto skeletonHandle = assetRegistry.getSkinnedMeshes()
+            entity, {renderer.createMeshInstance(skinnedMeshHandle,
+                                                 assetManager.getRegistry())});
+        auto skeletonHandle = assetManager.getRegistry()
+                                  .getSkinnedMeshes()
                                   .getAsset(skinnedMeshHandle)
                                   .data.skeleton;
         if (skeletonHandle != liquid::SkeletonAssetHandle::Invalid) {
-          const auto &skeleton =
-              assetRegistry.getSkeletons().getAsset(skeletonHandle).data;
+          const auto &skeleton = assetManager.getRegistry()
+                                     .getSkeletons()
+                                     .getAsset(skeletonHandle)
+                                     .data;
           liquid::Skeleton skeletonInstance(
               skeleton.jointLocalPositions, skeleton.jointLocalRotations,
               skeleton.jointLocalScales, skeleton.jointParents,
@@ -313,12 +320,12 @@ int main() {
     });
 
     mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
-                          &assetRegistry, &graph, &physicsSystem, &ui,
+                          &assetManager, &graph, &physicsSystem, &ui,
                           &debugLayer]() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
-      ui.render(sceneManager, assetRegistry, physicsSystem);
+      ui.render(sceneManager, assetManager.getRegistry(), physicsSystem);
 
       if (ImGui::Begin("View")) {
         const auto &size = ImGui::GetContentRegionAvail();
