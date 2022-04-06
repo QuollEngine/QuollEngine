@@ -1,3 +1,21 @@
+function copyEngineAssets(assetsPath, outputPath)
+    postbuildcommands {
+        "{MKDIR} %{cfg.buildtarget.directory}/engine/assets/shaders/",
+        "glslc "..assetsPath.."/shaders/geometry.vert -o "..outputPath.."/shaders/geometry.vert.spv",
+        "glslc "..assetsPath.."/shaders/skinnedGeometry.vert -o"..outputPath.."/shaders/skinnedGeometry.vert.spv",
+        "glslc "..assetsPath.."/shaders/pbr.frag -o"..outputPath.."/shaders/pbr.frag.spv",
+        "glslc "..assetsPath.."/shaders/skybox.frag -o"..outputPath.."/shaders/skybox.frag.spv",
+        "glslc "..assetsPath.."/shaders/skybox.vert -o"..outputPath.."/shaders/skybox.vert.spv",
+        "glslc "..assetsPath.."/shaders/shadowmap.frag -o"..outputPath.."/shaders/shadowmap.frag.spv",
+        "glslc "..assetsPath.."/shaders/shadowmap.vert -o"..outputPath.."/shaders/shadowmap.vert.spv", 
+        "glslc "..assetsPath.."/shaders/skinnedShadowmap.vert -o"..outputPath.."/shaders/skinnedShadowmap.vert.spv",
+        "glslc "..assetsPath.."/shaders/imgui.frag -o"..outputPath.."/shaders/imgui.frag.spv",
+        "glslc "..assetsPath.."/shaders/imgui.vert -o"..outputPath.."/shaders/imgui.vert.spv",
+        "glslc "..assetsPath.."/shaders/fullscreenQuad.frag -o"..outputPath.."/shaders/fullscreenQuad.frag.spv",
+        "glslc "..assetsPath.."/shaders/fullscreenQuad.vert -o"..outputPath.."/shaders/fullscreenQuad.vert.spv"
+    }
+end
+
 project "LiquidEngine"
     basedir "../workspace/engine"
     kind "StaticLib"
@@ -13,28 +31,15 @@ project "LiquidEngine"
     loadSourceFiles{}
     linkDependenciesWith{}
 
-    postbuildcommands {
-        "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
-        "glslc ../../engine/assets/shaders/geometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/geometry.vert.spv",
-        "glslc ../../engine/assets/shaders/skinnedGeometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/skinnedGeometry.vert.spv",
-        "glslc ../../engine/assets/shaders/pbr.frag -o %{cfg.buildtarget.directory}/assets/shaders/pbr.frag.spv",
-        "glslc ../../engine/assets/shaders/skybox.frag -o %{cfg.buildtarget.directory}/assets/shaders/skybox.frag.spv",
-        "glslc ../../engine/assets/shaders/skybox.vert -o %{cfg.buildtarget.directory}/assets/shaders/skybox.vert.spv",
-        "glslc ../../engine/assets/shaders/shadowmap.frag -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.frag.spv",
-        "glslc ../../engine/assets/shaders/shadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/shadowmap.vert.spv", 
-        "glslc ../../engine/assets/shaders/skinnedShadowmap.vert -o %{cfg.buildtarget.directory}/assets/shaders/skinnedShadowmap.vert.spv",
-        "glslc ../../engine/assets/shaders/imgui.frag -o %{cfg.buildtarget.directory}/assets/shaders/imgui.frag.spv",
-        "glslc ../../engine/assets/shaders/imgui.vert -o %{cfg.buildtarget.directory}/assets/shaders/imgui.vert.spv",
-        "glslc ../../engine/assets/shaders/fullscreenQuad.frag -o %{cfg.buildtarget.directory}/assets/shaders/fullscreenQuad.frag.spv",
-        "glslc ../../engine/assets/shaders/fullscreenQuad.vert -o %{cfg.buildtarget.directory}/assets/shaders/fullscreenQuad.vert.spv"
-    }
-
 project "LiquidEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
-    -- Disable profiler in tests
-    undefines { "LIQUID_PROFILER" }
+    configmap {
+        ["Release"] = "Debug",
+        ["Profile-Release"] = "Debug",
+        ["Profile-Debug"] = "Debug"
+    }
 
     pchheader "../../engine/src/liquid/core/Base.h"
 

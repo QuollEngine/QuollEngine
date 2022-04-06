@@ -11,9 +11,14 @@ function setupLibraryDirectories()
     }
 
     libdirs {
-        "../vendor/lib",
-        "../vendor/lib/debug"
+        "../vendor/lib"
     }
+
+    filter { "configurations:Debug" }
+        libdirs { "../vendor/lib/debug" }
+    
+    filter { "configurations:Release" }
+        libdirs { "../vendor/lib/release" }
 
     filter { "system:windows" }
         -- Vulkan SDK for Windows adds environment

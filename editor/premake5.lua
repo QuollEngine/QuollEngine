@@ -12,3 +12,5 @@ project "Liquidator"
         "glslc ../../editor/assets/shaders/skeleton-lines.vert -o %{cfg.buildtarget.directory}/assets/shaders/skeleton-lines.vert.spv",
         "glslc ../../editor/assets/shaders/skeleton-lines.frag -o %{cfg.buildtarget.directory}/assets/shaders/skeleton-lines.frag.spv",
     }
+
+    copyEngineAssets("../../engine/assets", "%{cfg.buildtarget.directory}/engine/assets")

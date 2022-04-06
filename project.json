@@ -15,9 +15,14 @@
       "url": "https://github.com/glfw/glfw/releases/download/3.3.4/glfw-3.3.4.zip",
       "buildSource": "glfw-3.3.4",
       "cmd": [
-        "cmake . -B build -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}}",
-        "cmake --build build --config {{BUILD_MODE}}",
-        "cmake --install build --config {{BUILD_MODE}}"
+        {
+          "type": "cmake",
+          "options": {
+            "common": {
+              "BUILD_SHARED_LIBS": "OFF"
+            }
+          }
+        }
       ]
     },
     {
@@ -25,9 +30,20 @@
       "url": "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.0.0.zip",
       "buildSource": "KTX-Software-4.0.0",
       "cmd": [
-        "cmake . -B build -DKTX_FEATURE_TESTS=OFF -DKTX_FEATURE_TOOLS=OFF -DKTX_FEATURE_VULKAN=OFF -DKTX_FEATURE_KTX1=OFF -DKTX_FEATURE_STATIC_LIBRARY=ON -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}}",
-        "cmake --build build --config {{BUILD_MODE}}",
-        "cmake --install build --config {{BUILD_MODE}}"
+        {
+          "type": "cmake",
+          "source": ".",
+          "options": {
+            "common": {
+              "KTX_FEATURE_TESTS": "OFF",
+              "KTX_FEATURE_TOOLS": "OFF",
+              "KTX_FEATURE_VULKAN": "OFF",
+              "KTX_FEATURE_KTX1": "OFF",
+              "KTX_FEATURE_STATIC_LIBRARY": "ON",
+              "CMAKE_BUILD_TYPE": "{{BUILD_MODE}}"
+            }
+          }
+        }
       ]
     },
     {
@@ -51,8 +67,7 @@
               "PX_OUTPUT_BIN_DIR": "{{SOURCE_DIR}}/bin",
               "PXSHARED_PATH": "{{SOURCE_DIR}}/pxshared",
               "TARGET_BUILD_PLATFORM": "{{PLATFORM}}",
-              "PX_GENERATE_STATIC_LIBRARIES": "ON",
-              "CMAKE_INSTALL_PREFIX": "{{VENDOR_DIR}}"
+              "PX_GENERATE_STATIC_LIBRARIES": "ON"
             },
             "linux": {
               "CMAKE_CXX_FLAGS": "\"-Wno-restrict -Wno-class-memaccess\""
@@ -66,9 +81,14 @@
       "buildSource": "googletest-release-1.11.0",
       "url": "https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip",
       "cmd": [
-        "cmake . -B build -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}} -Dgtest_force_shared_crt=ON",
-        "cmake --build build --config {{BUILD_MODE}}",
-        "cmake --install build --config {{BUILD_MODE}}"
+        {
+          "type": "cmake",
+          "options": {
+            "common": {
+              "gtest_force_shared_crt": "ON"
+            }
+          }
+        }
       ]
     },
     {
@@ -76,9 +96,9 @@
       "buildSource": "optick-1.3.3.0",
       "url": "https://github.com/bombomby/optick/archive/refs/tags/1.3.3.0.zip",
       "cmd": [
-        "cmake . -B build -DCMAKE_INSTALL_PREFIX={{VENDOR_DIR}}",
-        "cmake --build build --config {{BUILD_MODE}}",
-        "cmake --install build --config {{BUILD_MODE}}"
+        {
+          "type": "cmake"
+        }
       ]
     },
     {
