@@ -32,7 +32,7 @@ static const uint32_t INITIAL_HEIGHT = 768;
 
 int main() {
   liquid::Engine::setAssetsPath(
-      std::filesystem::path("../../../engine/bin/Debug/assets").string());
+      std::filesystem::path("./engine/assets").string());
   liquid::EntityContext entityContext;
   liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
 

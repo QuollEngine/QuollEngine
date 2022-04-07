@@ -46,8 +46,11 @@ end
 
 -- Link Google Test
 function linkGoogleTest()
-    filter { "system:windows" }
+    filter { "system:windows", "configurations:Debug" }
         links { "gtestd", "gtest_maind", "gmockd" }
+
+    filter {"system:windows", "configurations:Release"}
+        links { "gtest", "gtest_main", "gmock" }
 
     filter { "system:macosx or system:linux" }
         links { "gtest_main", "gtest", "gmock" }

@@ -369,7 +369,7 @@ private:
 
 int main() {
   liquid::Engine::setAssetsPath(
-      std::filesystem::path("../../../../engine/bin/Debug/assets").string());
+      std::filesystem::path("./engine/assets").string());
   Game game;
   return game.run();
 }

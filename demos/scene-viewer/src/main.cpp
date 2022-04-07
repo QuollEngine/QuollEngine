@@ -92,7 +92,7 @@ const auto timeDelta = 1.0f;
 
 int main() {
   liquid::Engine::setAssetsPath(
-      std::filesystem::path("../../../../engine/bin/Debug/assets").string());
+      std::filesystem::path("./engine/assets").string());
 
   liquid::EntityContext context;
   liquid::Window window("Scene Viewer", 1024, 768);

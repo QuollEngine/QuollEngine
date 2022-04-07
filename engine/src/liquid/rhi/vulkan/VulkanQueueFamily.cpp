@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "VulkanQueueFamily.h"
+#include "VulkanError.h"
 
 namespace liquid::rhi {
 
@@ -18,7 +19,9 @@ VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
     }
 
     VkBool32 presentSupport = false;
-    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+    checkForVulkanError(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface,
+                                                             &presentSupport),
+                        "Cannot query physics device surface support");
 
     if (presentSupport) {
       mPresentFamily = i;

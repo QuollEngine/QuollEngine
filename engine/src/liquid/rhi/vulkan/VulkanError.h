@@ -22,6 +22,10 @@ inline void checkForVulkanError(VkResult resultCode,
                                 const String &errorMessage) {
   LIQUID_ASSERT(resultCode == VK_SUCCESS,
                 createVulkanErrorMessage(resultCode, errorMessage));
+  if (resultCode != VK_SUCCESS) {
+    std::cout << createVulkanErrorMessage(resultCode, errorMessage);
+    std::terminate();
+  }
 }
 
 } // namespace liquid::rhi

@@ -4,3 +4,5 @@ project "DemoSceneViewer"
 
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEnginePlatformTools"}
+
+    copyEngineAssets("../../../engine/assets", "%{cfg.buildtarget.directory}/engine/assets")

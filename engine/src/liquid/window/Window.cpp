@@ -7,7 +7,16 @@
 namespace liquid {
 
 Window::Window(const String &title, uint32_t width, uint32_t height) {
-  LIQUID_ASSERT(glfwInit(), "[GLFW] Failed to initialize GLFW");
+
+  auto initReturnValue = glfwInit();
+  if (initReturnValue == GLFW_FALSE) {
+    const char *errorMsg = nullptr;
+    glfwGetError(&errorMsg);
+    LIQUID_ASSERT(initReturnValue,
+                  "[GLFW] Failed to initialize GLFW: " + String(errorMsg));
+    engineLogger.log(Logger::Error)
+        << "Failed to initialize GLFW: " << errorMsg;
+  }
 
   // Do not create OpenGL context
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

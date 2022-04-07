@@ -18,7 +18,7 @@ workingDir = os.getcwd()
 projectFile = os.path.join(workingDir, 'project.json')
 vendorDir = os.path.join(workingDir, 'vendor')
 tempDir = os.path.join(vendorDir, 'tmp')
-buildMode = 'Debug'
+buildModes = ['Debug', 'Release']
 
 profiler_data = {}
 
@@ -91,7 +91,7 @@ def cmd_copy(cmdLine):
     includedFiles = [os.path.normpath(p) for p in includedFiles]
     for file in includedFiles:
         if os.path.isdir(file):
-            shutil.copytree(file, destination)
+            shutil.copytree(file, destination, dirs_exist_ok=True)
         elif os.path.isfile(file):       
             shutil.copy2(file, destination)
         else:
@@ -109,7 +109,7 @@ def cmd_mkdir(cmdLine):
     mainParts = parts[1:len(parts)]
     includedDirs = [os.path.normpath(p) for p in mainParts]
     for directory in includedDirs:
-        os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
 
 #
@@ -119,7 +119,7 @@ def parse_placeholders(cmdLine, params):
     placeholders = {
         'VENDOR_DIR': params['VENDOR_DIR'],
         'SOURCE_DIR': params['SOURCE_DIR'],
-        'BUILD_MODE': buildMode,
+        'BUILD_MODE': params['BUILD_MODE'],
         'PLATFORM': platform.system().lower(),
         'OS_NAME': os.name,
         'ARCHITECTURE': platform.machine()
@@ -131,8 +131,18 @@ def parse_placeholders(cmdLine, params):
 
     return Path(line).as_posix()
 
+#
+# Runs process by splitting
+# it the command line into an array
+#
 def run_process(cmdLine, cwd):
     subprocess.run(shlex.split(cmdLine), shell=platform.system() == 'windows', cwd=cwd).check_returncode()
+
+#
+# Check if object is a dictionary
+#
+def is_dict(obj, key):
+    return key in obj and type(obj[key]) is dict
 
 project = open_project(projectFile)
 clean_make_dir(vendorDir)
@@ -143,66 +153,76 @@ clean_make_dir(os.path.join(vendorDir, 'lib'))
 clean_make_dir(os.path.join(vendorDir, 'bin'))
 fetch_dependencies(project)
 
-for x in project['dependencies']:
-    print(f'Building {x["name"]}...')
-    start = time.time()
-    
-    for cmdLine in x['cmd']:
-        params = {
-            'VENDOR_DIR': vendorDir,
-            'SOURCE_DIR': x['sourceDir']
-        }
-        if isinstance(cmdLine, str):
-            parsedCmdLine = parse_placeholders(cmdLine, params)
-            printedCmdLine = parse_placeholders(cmdLine, {
-                'VENDOR_DIR': 'vendor/',
-                'SOURCE_DIR': f'{x["name"]}/'
-            })
-            print('\t', printedCmdLine)
+for buildMode in buildModes:
+    for x in project['dependencies']:
+        print(f'Building {x["name"]}...')
+        start = time.time()
+        
+        for cmdLine in x['cmd']:
+            params = {
+                'VENDOR_DIR': vendorDir,
+                'SOURCE_DIR': x['sourceDir'],
+                'BUILD_MODE': buildMode
+            }
+            if isinstance(cmdLine, str):
+                parsedCmdLine = parse_placeholders(cmdLine, params)
+                printedCmdLine = parse_placeholders(cmdLine, {
+                    'VENDOR_DIR': 'vendor/',
+                    'SOURCE_DIR': f'{x["name"]}/',
+                    'BUILD_MODE': buildMode
+                })
+                print('\t', printedCmdLine)
 
-            if parsedCmdLine.startswith('{COPY}'):
-                cmd_copy(parsedCmdLine)
-            elif parsedCmdLine.startswith('{MKDIR}'):
-                cmd_mkdir(parsedCmdLine)
-            else:
-                run_process(parsedCmdLine, x['sourceDir'])
-        elif cmdLine['type'] == 'cmake':
-            print('CMake build')
-            options = {}
-            for k, v in cmdLine['options']['common'].items():
-                options[k] = parse_placeholders(v, params)
+                if parsedCmdLine.startswith('{COPY}'):
+                    cmd_copy(parsedCmdLine)
+                elif parsedCmdLine.startswith('{MKDIR}'):
+                    cmd_mkdir(parsedCmdLine)
+                else:
+                    run_process(parsedCmdLine, x['sourceDir'])
+            elif cmdLine['type'] == 'cmake':
+                print('CMake build')
+                options = {
+                    'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_DIR}}', params)
+                }
+                source = '.'
+                if 'source' in cmdLine:
+                    source = cmdLine['source']
 
-            if sys.platform == 'linux' and 'linux' in cmdLine['options']:
-                for k, v in cmdLine['options']['linux'].items():
-                    options[k] = parse_placeholders(v, params)
-            elif sys.platform == 'win32' and 'windows' in cmdLine['options']:
-                for k, v in cmdLine['options']['windows'].items():
-                    options[k] = parse_placeholders(v, params)
-            elif sys.platform == 'darwin' and 'macos' in cmdLine['options']:
-                for k, v in cmdLine['options']['macos'].items():
-                    options[k] = parse_placeholders(v, params)
+                if is_dict(cmdLine, 'options'):
+                    if is_dict(cmdLine['options'], 'common'):
+                        for k, v in cmdLine['options']['common'].items():
+                            options[k] = parse_placeholders(v, params)
 
-            print("The following options are being used")
-            for k, v in options.items():
-                print(f'{k:<40} {v}')
+                    if sys.platform == 'linux' and is_dict(cmdLine['options'], 'linux'):
+                        for k, v in cmdLine['options']['linux'].items():
+                            options[k] = parse_placeholders(v, params)
+                    elif sys.platform == 'win32' and is_dict(cmdLine['options'], 'windows'):
+                        for k, v in cmdLine['options']['windows'].items():
+                            options[k] = parse_placeholders(v, params)
+                    elif sys.platform == 'darwin' and is_dict(cmdLine['options'], 'macos'):
+                        for k, v in cmdLine['options']['macos'].items():
+                            options[k] = parse_placeholders(v, params)
 
-            cmdOptions = ''
-            for k, v in options.items():
-                cmdOptions = f'{cmdOptions} -D{k}={v}'
+                print("The following options are being used")
+                for k, v in options.items():
+                    print(f'{k:<40} {v}')
 
-            run_process(f'cmake {cmdLine["source"]} -B build {cmdOptions}', x['sourceDir'])
-            run_process(f'cmake --build build --config {buildMode}', x['sourceDir'])
-            run_process(f'cmake --install build --config {buildMode}', x['sourceDir'])
+                cmdOptions = ''
+                for k, v in options.items():
+                    cmdOptions = f'{cmdOptions} -D{k}={v}'
 
-    profiler_data[x['name']]['build'] = time.time() - start
+                run_process(f'cmake {source} -B build {cmdOptions}', x['sourceDir'])
+                run_process(f'cmake --build build --config {buildMode}', x['sourceDir'])
+                run_process(f'cmake --install build --config {buildMode}', x['sourceDir'])
+
+        profiler_data[x['name']][f'build-{buildMode}'] = time.time() - start
 
 shutil.rmtree(tempDir)
 
-profiler_table = [[k, v['fetch'], v['build']] for k,v in profiler_data.items()]
-
-print(f'{"Name":<14} {"Fetch":<8} {"Build":<8}')
+print(f'{"Name":<14} {"Fetch":<8} {"Build (Debug)":<12} {"Build (Release)":<12}')
 for k, v in profiler_data.items():
     fixed_fetch = f'{v["fetch"]:.4f}'
-    fixed_build = f'{v["build"]:.4f}'
+    fixed_build_debug = f'{v["build-Debug"]:.4f}'
+    fixed_build_release = f'{v["build-Release"]:.4f}'
 
-    print(f'{k:<14} {fixed_fetch:<8} {fixed_build:<8}')
+    print(f'{k:<14} {fixed_fetch:<8} {fixed_build_debug:<12} {fixed_build_release:<12}')
