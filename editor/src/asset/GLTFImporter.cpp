@@ -185,7 +185,7 @@ loadTextures(const tinygltf::Model &model, const liquid::String &fileName,
  */
 static GLTFToAsset<liquid::MaterialAssetHandle>
 loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
-              liquid::AssetRegistry &registry,
+              liquid::AssetManager &assetManager,
               const GLTFToAsset<liquid::TextureAssetHandle> &textures) {
   std::map<size_t, liquid::MaterialAssetHandle> map;
 
@@ -193,15 +193,15 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
     auto &gltfMaterial = model.materials.at(i);
 
     liquid::AssetData<liquid::MaterialAsset> material;
-    material.name = fileName + ":material" + std::to_string(i);
+    material.name = fileName + "-material" + std::to_string(i);
     material.type = liquid::AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
       material.data.baseColorTexture = textures.map.at(
           gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
     }
-    material.data.baseColorTextureCoord =
-        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
+    material.data.baseColorTextureCoord = static_cast<int8_t>(
+        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
     auto &colorFactor = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
     material.data.baseColorFactor = glm::vec4{colorFactor[0], colorFactor[1],
                                               colorFactor[2], colorFactor[3]};
@@ -210,8 +210,8 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
       material.data.metallicRoughnessTexture = textures.map.at(
           gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index);
     }
-    material.data.metallicRoughnessTextureCoord =
-        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord;
+    material.data.metallicRoughnessTextureCoord = static_cast<int8_t>(
+        gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
     material.data.metallicFactor =
         static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor);
     material.data.roughnessFactor =
@@ -221,7 +221,8 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
       material.data.normalTexture =
           textures.map.at(gltfMaterial.normalTexture.index);
     }
-    material.data.normalTextureCoord = gltfMaterial.normalTexture.texCoord;
+    material.data.normalTextureCoord =
+        static_cast<int8_t>(gltfMaterial.normalTexture.texCoord);
     material.data.normalScale =
         static_cast<float>(gltfMaterial.normalTexture.scale);
 
@@ -230,7 +231,7 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
           textures.map.at(gltfMaterial.occlusionTexture.index);
     }
     material.data.occlusionTextureCoord =
-        gltfMaterial.occlusionTexture.texCoord;
+        static_cast<int8_t>(gltfMaterial.occlusionTexture.texCoord);
     material.data.occlusionStrength =
         static_cast<float>(gltfMaterial.occlusionTexture.strength);
 
@@ -238,12 +239,14 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
       material.data.emissiveTexture =
           textures.map.at(gltfMaterial.emissiveTexture.index);
     }
-    material.data.emissiveTextureCoord = gltfMaterial.emissiveTexture.texCoord;
+    material.data.emissiveTextureCoord =
+        static_cast<int8_t>(gltfMaterial.emissiveTexture.texCoord);
     auto &emissiveFactor = gltfMaterial.emissiveFactor;
     material.data.emissiveFactor =
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
 
-    auto handle = registry.getMaterials().addAsset(material);
+    auto path = assetManager.createMaterialFromAsset(material);
+    auto handle = assetManager.loadMaterialFromFile(path);
     map.insert_or_assign(i, handle);
   }
 
@@ -1007,8 +1010,7 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
   GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
 
   auto &&textures = loadTextures(model, baseName, mAssetManager);
-  auto &&materials =
-      loadMaterials(model, baseName, mAssetManager.getRegistry(), textures);
+  auto &&materials = loadMaterials(model, baseName, mAssetManager, textures);
   auto &&skeletonData =
       loadSkeletons(model, baseName, mAssetManager.getRegistry());
   auto &&animationData = loadAnimations(

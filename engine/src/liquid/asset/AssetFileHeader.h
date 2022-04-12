@@ -4,9 +4,11 @@
 
 namespace liquid {
 
+constexpr size_t ASSET_FILE_MAGIC_LENGTH = 11;
+
 struct AssetFileHeader {
-  const char magic[11] = "LASSETFILE";
-  uint32_t version = 0;
+  const char *magic = "LQASSETFILE";
+  uint64_t version = 0;
   AssetType type = AssetType::None;
 };
 

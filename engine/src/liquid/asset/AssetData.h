@@ -9,6 +9,7 @@ template <class TData> struct AssetData {
   String name;
   size_t size = 0;
   TData data;
+  std::filesystem::path path;
 };
 
 } // namespace liquid
