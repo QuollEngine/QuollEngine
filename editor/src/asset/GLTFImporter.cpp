@@ -151,8 +151,9 @@ TransformData loadTransformData(const tinygltf::Node &node) {
  */
 static GLTFToAsset<liquid::TextureAssetHandle>
 loadTextures(const tinygltf::Model &model, const liquid::String &fileName,
-             liquid::AssetRegistry &registry) {
+             liquid::AssetManager &assetManager) {
   std::map<size_t, liquid::TextureAssetHandle> map;
+
   for (size_t i = 0; i < model.textures.size(); ++i) {
     // TODO: Support creating different samplers
     auto &image = model.images.at(model.textures.at(i).source);
@@ -160,12 +161,13 @@ loadTextures(const tinygltf::Model &model, const liquid::String &fileName,
     texture.name = image.uri;
     texture.type = liquid::AssetType::Texture;
     texture.size = image.width * image.height * 4;
-    texture.data.data = new char[texture.size];
+    texture.data.data =
+        const_cast<void *>(static_cast<const void *>(image.image.data()));
     texture.data.width = image.width;
     texture.data.height = image.height;
-    memcpy(texture.data.data, image.image.data(), texture.size);
 
-    auto handle = registry.getTextures().addAsset(texture);
+    auto &&texturePath = assetManager.createTextureFromAsset(texture);
+    auto handle = assetManager.loadTextureFromFile(texturePath);
     map.insert_or_assign(i, handle);
   }
 
@@ -976,9 +978,9 @@ void loadPrefabs(
   registry.getPrefabs().addAsset(prefab);
 }
 
-GLTFImporter::GLTFImporter(liquid::AssetRegistry &assetRegistry,
+GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
                            liquid::rhi::ResourceRegistry &deviceRegistry)
-    : mAssetRegistry(assetRegistry), mDeviceRegistry(deviceRegistry) {}
+    : mAssetManager(assetManager), mDeviceRegistry(deviceRegistry) {}
 
 void GLTFImporter::loadFromFile(const liquid::String &filename) {
   tinygltf::TinyGLTF loader;
@@ -1004,18 +1006,20 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
   GLTFToAsset<liquid::MeshAssetHandle> meshMap;
   GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
 
-  auto &&textures = loadTextures(model, baseName, mAssetRegistry);
-  auto &&materials = loadMaterials(model, baseName, mAssetRegistry, textures);
-  auto &&skeletonData = loadSkeletons(model, baseName, mAssetRegistry);
-  auto &&animationData =
-      loadAnimations(model, baseName, mAssetRegistry, skeletonData);
-  loadMeshes(model, baseName, mAssetRegistry, materials,
+  auto &&textures = loadTextures(model, baseName, mAssetManager);
+  auto &&materials =
+      loadMaterials(model, baseName, mAssetManager.getRegistry(), textures);
+  auto &&skeletonData =
+      loadSkeletons(model, baseName, mAssetManager.getRegistry());
+  auto &&animationData = loadAnimations(
+      model, baseName, mAssetManager.getRegistry(), skeletonData);
+  loadMeshes(model, baseName, mAssetManager.getRegistry(), materials,
              skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 
-  loadPrefabs(model, baseName, mAssetRegistry, meshMap, skinnedMeshMap,
-              skeletonData, animationData);
+  loadPrefabs(model, baseName, mAssetManager.getRegistry(), meshMap,
+              skinnedMeshMap, skeletonData, animationData);
 
-  mAssetRegistry.syncWithDeviceRegistry(mDeviceRegistry);
+  mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
 }
 
 } // namespace liquidator

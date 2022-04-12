@@ -1,19 +1,19 @@
 #pragma once
 
-#include "liquid/asset/AssetRegistry.h"
+#include "liquid/asset/AssetManager.h"
 #include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquidator {
 
 class GLTFImporter {
 public:
-  GLTFImporter(liquid::AssetRegistry &registry,
+  GLTFImporter(liquid::AssetManager &assetManager,
                liquid::rhi::ResourceRegistry &deviceRegistry);
 
   void loadFromFile(const liquid::String &filename);
 
 private:
-  liquid::AssetRegistry &mAssetRegistry;
+  liquid::AssetManager &mAssetManager;
   liquid::rhi::ResourceRegistry &mDeviceRegistry;
 };
 
