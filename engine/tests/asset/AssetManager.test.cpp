@@ -1,9 +1,13 @@
 #include "liquid/core/Base.h"
+#include <random>
+
 #include "liquid/core/Version.h"
 #include "liquid/asset/AssetManager.h"
 #include "liquid/asset/AssetFileHeader.h"
+#include "liquid/asset/InputBinaryStream.h"
 
 #include <gtest/gtest.h>
+#include <glm/gtx/string_cast.hpp>
 
 class AssetManagerTest : public ::testing::Test {
 public:
@@ -107,100 +111,80 @@ TEST_F(AssetManagerTest, CreatesMaterialWithTexturesFromAsset) {
 
   auto assetFile = manager.createMaterialFromAsset(asset);
 
-  std::ifstream file(assetFile, std::ios::binary | std::ios::in);
-  EXPECT_TRUE(file.good());
+  {
+    liquid::InputBinaryStream file(assetFile);
+    EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+    liquid::AssetFileHeader header;
 
-  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
-  file.read(magic.data(), magic.size());
+    liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+    file.read(magic.data(), magic.size());
 
-  file.read(reinterpret_cast<char *>(&header.version), sizeof(header.version));
-  file.read(reinterpret_cast<char *>(&header.type), sizeof(header.type));
+    file.read(header.version);
+    file.read(header.type);
 
-  // Base color
-  uint32_t baseTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&baseTextureLength), sizeof(uint32_t));
-  liquid::String baseTexturePath(baseTextureLength, '$');
-  file.read(baseTexturePath.data(), baseTextureLength);
-  int8_t baseTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&baseTextureCoord), sizeof(int8_t));
-  glm::vec4 baseColorFactor;
-  file.read(reinterpret_cast<char *>(&baseColorFactor), sizeof(float) * 4);
+    // Base color
+    liquid::String baseTexturePath;
+    file.read(baseTexturePath);
+    int8_t baseTextureCoord = -1;
+    file.read(baseTextureCoord);
+    glm::vec4 baseColorFactor;
+    file.read(baseColorFactor);
 
-  // Metallic roughness
-  uint32_t metallicRoughnessTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&metallicRoughnessTextureLength),
-            sizeof(uint32_t));
-  liquid::String metallicRoughnessTexturePath(metallicRoughnessTextureLength,
-                                              '$');
-  file.read(metallicRoughnessTexturePath.data(),
-            metallicRoughnessTextureLength);
-  int8_t metallicRoughnessTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&metallicRoughnessTextureCoord),
-            sizeof(int8_t));
-  float metallicFactor = 0.0f;
-  file.read(reinterpret_cast<char *>(&metallicFactor), sizeof(float));
-  float roughnessFactor = 0.0f;
-  file.read(reinterpret_cast<char *>(&roughnessFactor), sizeof(float));
+    // Metallic roughness
+    liquid::String metallicRoughnessTexturePath;
+    file.read(metallicRoughnessTexturePath);
+    int8_t metallicRoughnessTextureCoord = -1;
+    file.read(metallicRoughnessTextureCoord);
+    float metallicFactor = 0.0f;
+    file.read(metallicFactor);
+    float roughnessFactor = 0.0f;
+    file.read(roughnessFactor);
 
-  // Normal
-  uint32_t normalTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&normalTextureLength), sizeof(uint32_t));
-  liquid::String normalTexturePath(normalTextureLength, '$');
-  file.read(normalTexturePath.data(), normalTextureLength);
-  int8_t normalTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&normalTextureCoord), sizeof(int8_t));
-  float normalScale = 0.0f;
-  file.read(reinterpret_cast<char *>(&normalScale), sizeof(float));
+    // Normal
+    liquid::String normalTexturePath;
+    file.read(normalTexturePath);
+    int8_t normalTextureCoord = -1;
+    file.read(normalTextureCoord);
+    float normalScale = 0.0f;
+    file.read(normalScale);
 
-  // Occlusion
-  uint32_t occlusionTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&occlusionTextureLength),
-            sizeof(uint32_t));
-  liquid::String occlusionTexturePath(occlusionTextureLength, '$');
-  file.read(occlusionTexturePath.data(), occlusionTextureLength);
-  int8_t occlusionTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&occlusionTextureCoord), sizeof(int8_t));
-  float occlusionStrength = 0.0f;
-  file.read(reinterpret_cast<char *>(&occlusionStrength), sizeof(float));
+    // Occlusion
+    liquid::String occlusionTexturePath;
+    file.read(occlusionTexturePath);
+    int8_t occlusionTextureCoord = -1;
+    file.read(occlusionTextureCoord);
+    float occlusionStrength = 0.0f;
+    file.read(occlusionStrength);
 
-  // Emissive
-  uint32_t emissiveTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&emissiveTextureLength), sizeof(uint32_t));
-  liquid::String emissiveTexturePath(emissiveTextureLength, '$');
-  file.read(emissiveTexturePath.data(), emissiveTextureLength);
-  int8_t emissiveTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&emissiveTextureCoord), sizeof(int8_t));
-  glm::vec3 emissiveFactor;
-  file.read(reinterpret_cast<char *>(&emissiveFactor), sizeof(float) * 3);
+    // Emissive
+    liquid::String emissiveTexturePath;
+    file.read(emissiveTexturePath);
+    int8_t emissiveTextureCoord = -1;
+    file.read(emissiveTextureCoord);
+    glm::vec3 emissiveFactor;
+    file.read(emissiveFactor);
 
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.type, liquid::AssetType::Material);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
-  EXPECT_EQ(baseTextureLength, 18);
-  EXPECT_EQ(baseTexturePath, "textures/test.ktx2");
-  EXPECT_EQ(baseTextureCoord, 2);
-  EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
-  EXPECT_EQ(metallicRoughnessTextureLength, 16);
-  EXPECT_EQ(metallicRoughnessTexturePath, "textures/mr.ktx2");
-  EXPECT_EQ(metallicRoughnessTextureCoord, 3);
-  EXPECT_EQ(metallicFactor, 1.0f);
-  EXPECT_EQ(roughnessFactor, 2.5f);
-  EXPECT_EQ(normalTextureLength, 20);
-  EXPECT_EQ(normalTexturePath, "textures/normal.ktx2");
-  EXPECT_EQ(normalTextureCoord, 4);
-  EXPECT_EQ(normalScale, 0.6f);
-  EXPECT_EQ(occlusionTextureLength, 23);
-  EXPECT_EQ(occlusionTexturePath, "textures/occlusion.ktx2");
-  EXPECT_EQ(occlusionTextureCoord, 5);
-  EXPECT_EQ(occlusionStrength, 0.4f);
-  EXPECT_EQ(emissiveTextureLength, 22);
-  EXPECT_EQ(emissiveTexturePath, "textures/emissive.ktx2");
-  EXPECT_EQ(emissiveTextureCoord, 6);
-  EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
-
-  file.close();
+    EXPECT_EQ(magic, header.magic);
+    EXPECT_EQ(header.type, liquid::AssetType::Material);
+    EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+    EXPECT_EQ(baseTexturePath, "textures/test.ktx2");
+    EXPECT_EQ(baseTextureCoord, 2);
+    EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
+    EXPECT_EQ(metallicRoughnessTexturePath, "textures/mr.ktx2");
+    EXPECT_EQ(metallicRoughnessTextureCoord, 3);
+    EXPECT_EQ(metallicFactor, 1.0f);
+    EXPECT_EQ(roughnessFactor, 2.5f);
+    EXPECT_EQ(normalTexturePath, "textures/normal.ktx2");
+    EXPECT_EQ(normalTextureCoord, 4);
+    EXPECT_EQ(normalScale, 0.6f);
+    EXPECT_EQ(occlusionTexturePath, "textures/occlusion.ktx2");
+    EXPECT_EQ(occlusionTextureCoord, 5);
+    EXPECT_EQ(occlusionStrength, 0.4f);
+    EXPECT_EQ(emissiveTexturePath, "textures/emissive.ktx2");
+    EXPECT_EQ(emissiveTextureCoord, 6);
+    EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
+  }
   std::filesystem::remove(assetFile);
 }
 
@@ -223,98 +207,79 @@ TEST_F(AssetManagerTest,
 
   auto assetFile = manager.createMaterialFromAsset(asset);
 
-  std::ifstream file(assetFile, std::ios::binary | std::ios::in);
-  EXPECT_TRUE(file.good());
+  {
+    liquid::InputBinaryStream file(assetFile);
+    EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
-  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
-  file.read(magic.data(), magic.length());
-  file.read(reinterpret_cast<char *>(&header.version), sizeof(header.version));
-  file.read(reinterpret_cast<char *>(&header.type), sizeof(header.type));
+    liquid::AssetFileHeader header;
+    liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+    file.read(magic.data(), magic.length());
+    file.read(header.version);
+    file.read(header.type);
 
-  // Base color
-  uint32_t baseTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&baseTextureLength), sizeof(uint32_t));
-  liquid::String baseTexturePath(baseTextureLength, '$');
-  file.read(baseTexturePath.data(), baseTextureLength);
-  int8_t baseTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&baseTextureCoord), sizeof(int8_t));
-  glm::vec4 baseColorFactor;
-  file.read(reinterpret_cast<char *>(&baseColorFactor), sizeof(float) * 4);
+    // Base color
+    liquid::String baseTexturePath;
+    file.read(baseTexturePath);
+    int8_t baseTextureCoord = -1;
+    file.read(baseTextureCoord);
+    glm::vec4 baseColorFactor;
+    file.read(baseColorFactor);
 
-  // Metallic roughness
-  uint32_t metallicRoughnessTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&metallicRoughnessTextureLength),
-            sizeof(uint32_t));
-  liquid::String metallicRoughnessTexturePath(metallicRoughnessTextureLength,
-                                              '$');
-  file.read(metallicRoughnessTexturePath.data(),
-            metallicRoughnessTextureLength);
-  int8_t metallicRoughnessTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&metallicRoughnessTextureCoord),
-            sizeof(int8_t));
-  float metallicFactor = 0.0f;
-  file.read(reinterpret_cast<char *>(&metallicFactor), sizeof(float));
-  float roughnessFactor = 0.0f;
-  file.read(reinterpret_cast<char *>(&roughnessFactor), sizeof(float));
+    // Metallic roughness
+    liquid::String metallicRoughnessTexturePath;
+    file.read(metallicRoughnessTexturePath);
+    int8_t metallicRoughnessTextureCoord = -1;
+    file.read(metallicRoughnessTextureCoord);
+    float metallicFactor = 0.0f;
+    file.read(metallicFactor);
+    float roughnessFactor = 0.0f;
+    file.read(roughnessFactor);
 
-  // Normal
-  uint32_t normalTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&normalTextureLength), sizeof(uint32_t));
-  liquid::String normalTexturePath(normalTextureLength, '$');
-  file.read(normalTexturePath.data(), normalTextureLength);
-  int8_t normalTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&normalTextureCoord), sizeof(int8_t));
-  float normalScale = 0.0f;
-  file.read(reinterpret_cast<char *>(&normalScale), sizeof(float));
+    // Normal
+    liquid::String normalTexturePath;
+    file.read(normalTexturePath);
+    int8_t normalTextureCoord = -1;
+    file.read(normalTextureCoord);
+    float normalScale = 0.0f;
+    file.read(normalScale);
 
-  // Occlusion
-  uint32_t occlusionTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&occlusionTextureLength),
-            sizeof(uint32_t));
-  liquid::String occlusionTexturePath(occlusionTextureLength, '$');
-  file.read(occlusionTexturePath.data(), occlusionTextureLength);
-  int8_t occlusionTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&occlusionTextureCoord), sizeof(int8_t));
-  float occlusionStrength = 0.0f;
-  file.read(reinterpret_cast<char *>(&occlusionStrength), sizeof(float));
+    // Occlusion
+    liquid::String occlusionTexturePath;
+    file.read(occlusionTexturePath);
+    int8_t occlusionTextureCoord = -1;
+    file.read(occlusionTextureCoord);
+    float occlusionStrength = 0.0f;
+    file.read(occlusionStrength);
 
-  // Emissive
-  uint32_t emissiveTextureLength = 0;
-  file.read(reinterpret_cast<char *>(&emissiveTextureLength), sizeof(uint32_t));
-  liquid::String emissiveTexturePath(emissiveTextureLength, '$');
-  file.read(emissiveTexturePath.data(), emissiveTextureLength);
-  int8_t emissiveTextureCoord = -1;
-  file.read(reinterpret_cast<char *>(&emissiveTextureCoord), sizeof(int8_t));
-  glm::vec3 emissiveFactor;
-  file.read(reinterpret_cast<char *>(&emissiveFactor), sizeof(float) * 3);
+    // Emissive
+    liquid::String emissiveTexturePath;
+    file.read(emissiveTexturePath);
+    int8_t emissiveTextureCoord = -1;
+    file.read(emissiveTextureCoord);
+    glm::vec3 emissiveFactor;
+    file.read(emissiveFactor);
 
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.type, liquid::AssetType::Material);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
-  EXPECT_EQ(baseTextureLength, 0);
-  EXPECT_EQ(baseTexturePath, "");
-  EXPECT_EQ(baseTextureCoord, 2);
-  EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
-  EXPECT_EQ(metallicRoughnessTextureLength, 0);
-  EXPECT_EQ(metallicRoughnessTexturePath, "");
-  EXPECT_EQ(metallicRoughnessTextureCoord, 3);
-  EXPECT_EQ(metallicFactor, 1.0f);
-  EXPECT_EQ(roughnessFactor, 2.5f);
-  EXPECT_EQ(normalTextureLength, 0);
-  EXPECT_EQ(normalTexturePath, "");
-  EXPECT_EQ(normalTextureCoord, 4);
-  EXPECT_EQ(normalScale, 0.6f);
-  EXPECT_EQ(occlusionTextureLength, 0);
-  EXPECT_EQ(occlusionTexturePath, "");
-  EXPECT_EQ(occlusionTextureCoord, 5);
-  EXPECT_EQ(occlusionStrength, 0.4f);
-  EXPECT_EQ(emissiveTextureLength, 0);
-  EXPECT_EQ(emissiveTexturePath, "");
-  EXPECT_EQ(emissiveTextureCoord, 6);
-  EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
+    EXPECT_EQ(magic, header.magic);
+    EXPECT_EQ(header.type, liquid::AssetType::Material);
+    EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+    EXPECT_EQ(baseTexturePath, "");
+    EXPECT_EQ(baseTextureCoord, 2);
+    EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
+    EXPECT_EQ(metallicRoughnessTexturePath, "");
+    EXPECT_EQ(metallicRoughnessTextureCoord, 3);
+    EXPECT_EQ(metallicFactor, 1.0f);
+    EXPECT_EQ(roughnessFactor, 2.5f);
+    EXPECT_EQ(normalTexturePath, "");
+    EXPECT_EQ(normalTextureCoord, 4);
+    EXPECT_EQ(normalScale, 0.6f);
+    EXPECT_EQ(occlusionTexturePath, "");
+    EXPECT_EQ(occlusionTextureCoord, 5);
+    EXPECT_EQ(occlusionStrength, 0.4f);
+    EXPECT_EQ(emissiveTexturePath, "");
+    EXPECT_EQ(emissiveTextureCoord, 6);
+    EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
+  }
 
-  file.close();
   std::filesystem::remove(assetFile);
 }
 
@@ -410,4 +375,243 @@ TEST_F(AssetManagerTest, LoadsMaterialWithTexturesFromFile) {
   EXPECT_EQ(material.data.emissiveTextureCoord,
             asset.data.emissiveTextureCoord);
   EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
+
+  std::filesystem::remove(assetFile);
+}
+
+TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
+  liquid::AssetData<liquid::MeshAsset> asset;
+  asset.name = "test-mesh0";
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    size_t countGeometries = 2;
+    size_t countVertices = 10;
+    size_t countIndices = 20;
+
+    for (size_t i = 0; i < countGeometries; ++i) {
+      liquid::BaseGeometryAsset<liquid::Vertex> geometry;
+      for (size_t i = 0; i < countVertices; ++i) {
+        geometry.vertices.push_back({// positions
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // normals
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // colors
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // tangents
+                                     dist(mt), dist(mt), dist(mt), dist(mt),
+
+                                     // texcoords0
+                                     dist(mt), dist(mt),
+
+                                     // texcoords1
+                                     dist(mt), dist(mt)});
+      }
+
+      for (size_t i = 0; i < countIndices; ++i) {
+        geometry.indices.push_back(udist(mt));
+      }
+
+      liquid::AssetData<liquid::MaterialAsset> material;
+      material.path = std::filesystem::path(
+          std::filesystem::current_path() / "materials" /
+          ("material-geom-" + std::to_string(i) + ".lqmat"));
+
+      geometry.material =
+          manager.getRegistry().getMaterials().addAsset(material);
+
+      asset.data.geometries.push_back(geometry);
+    }
+  }
+
+  auto filePath = manager.createMeshFromAsset(asset);
+
+  liquid::InputBinaryStream file(filePath);
+  EXPECT_TRUE(file.good());
+
+  liquid::AssetFileHeader header;
+  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), magic.length());
+  file.read(header.version);
+  file.read(header.type);
+  EXPECT_EQ(magic, header.magic);
+  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  EXPECT_EQ(header.type, liquid::AssetType::Mesh);
+
+  uint32_t numGeometries = 0;
+  file.read(numGeometries);
+
+  EXPECT_EQ(numGeometries, 2);
+
+  for (uint32_t i = 0; i < numGeometries; ++i) {
+    uint32_t numVertices = 0;
+    file.read(numVertices);
+    EXPECT_EQ(numVertices, 10);
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec3 valueExpected(vertex.x, vertex.y, vertex.z);
+      glm::vec3 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Position"
+          << "(" << i << ", " << v << "): " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec3 valueExpected(vertex.nx, vertex.ny, vertex.nz);
+      glm::vec3 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Normal: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec4 valueExpected(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      glm::vec4 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Tangent: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec2 valueExpected(vertex.u0, vertex.v0);
+      glm::vec2 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "TexCoord0: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec2 valueExpected(vertex.u1, vertex.v1);
+      glm::vec2 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "TexCoord1: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    uint32_t numIndices = 0;
+    file.read(numIndices);
+    EXPECT_EQ(numIndices, 20);
+
+    for (uint32_t idx = 0; idx < numIndices; ++idx) {
+      const auto valueExpected = asset.data.geometries.at(i).indices.at(idx);
+      uint32_t valueActual = 100000;
+      file.read(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
+    }
+
+    liquid::String materialPath;
+    file.read(materialPath);
+    EXPECT_EQ(materialPath,
+              "materials/material-geom-" + std::to_string(i) + ".lqmat");
+  }
+}
+
+TEST_F(AssetManagerTest, LoadsMeshFromFile) {
+  liquid::AssetData<liquid::MeshAsset> asset;
+  asset.name = "test-mesh0";
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    size_t countGeometries = 2;
+    size_t countVertices = 10;
+    size_t countIndices = 20;
+
+    for (size_t i = 0; i < countGeometries; ++i) {
+      liquid::BaseGeometryAsset<liquid::Vertex> geometry;
+      for (size_t i = 0; i < countVertices; ++i) {
+        geometry.vertices.push_back({// positions
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // normals
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // colors
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // tangents
+                                     dist(mt), dist(mt), dist(mt), dist(mt),
+
+                                     // texcoords0
+                                     dist(mt), dist(mt),
+
+                                     // texcoords1
+                                     dist(mt), dist(mt)});
+      }
+
+      for (size_t i = 0; i < countIndices; ++i) {
+        geometry.indices.push_back(udist(mt));
+      }
+
+      liquid::AssetData<liquid::MaterialAsset> material;
+      material.path = std::filesystem::path(
+          std::filesystem::current_path() / "materials" /
+          ("material-geom-" + std::to_string(i) + ".lqmat"));
+
+      geometry.material =
+          manager.getRegistry().getMaterials().addAsset(material);
+
+      asset.data.geometries.push_back(geometry);
+    }
+  }
+
+  auto filePath = manager.createMeshFromAsset(asset);
+
+  auto handle = manager.loadMeshFromFile(filePath);
+
+  EXPECT_NE(handle, liquid::MeshAssetHandle::Invalid);
+
+  auto &mesh = manager.getRegistry().getMeshes().getAsset(handle);
+
+  for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
+    auto &expectedGeometry = asset.data.geometries.at(g);
+    auto &actualGeometry = mesh.data.geometries.at(g);
+
+    for (size_t v = 0; v < expectedGeometry.vertices.size(); ++v) {
+      auto &expected = expectedGeometry.vertices.at(v);
+      auto &actual = actualGeometry.vertices.at(v);
+
+      EXPECT_EQ(glm::vec3(expected.x, expected.y, expected.z),
+                glm::vec3(actual.x, actual.y, actual.z));
+      EXPECT_EQ(glm::vec3(expected.nx, expected.ny, expected.nz),
+                glm::vec3(actual.nx, actual.ny, actual.nz));
+      EXPECT_EQ(glm::vec4(expected.tx, expected.ty, expected.tz, expected.tw),
+                glm::vec4(actual.tx, actual.ty, actual.tz, actual.tw));
+      EXPECT_EQ(glm::vec2(expected.u0, expected.v0),
+                glm::vec2(actual.u0, actual.v0));
+      EXPECT_EQ(glm::vec2(expected.u1, expected.v1),
+                glm::vec2(actual.u1, actual.v1));
+    }
+
+    for (size_t i = 0; i < expectedGeometry.indices.size(); ++i) {
+      auto expected = expectedGeometry.indices.at(i);
+      auto actual = actualGeometry.indices.at(i);
+      EXPECT_EQ(expected, actual);
+    }
+
+    EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
+  }
 }

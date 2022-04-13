@@ -447,13 +447,13 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
  *
  * @param model TinyGLTF model
  * @param fileName File name
- * @param registry Asset registry
+ * @param manager Asset manager
  * @param materials Material map
  * @param skeletons Skeleton map
  */
 static void
 loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
-           liquid::AssetRegistry &registry,
+           liquid::AssetManager &manager,
            const GLTFToAsset<liquid::MaterialAssetHandle> &materials,
            const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons,
            GLTFToAsset<liquid::MeshAssetHandle> &outMeshes,
@@ -561,17 +561,21 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
               skeletons.map.find(it->second) != skeletons.map.end()) {
             skinnedMesh.data.skeleton = skeletons.map.at(it->second);
           }
-          auto handle = registry.getSkinnedMeshes().addAsset(skinnedMesh);
+          auto handle =
+              manager.getRegistry().getSkinnedMeshes().addAsset(skinnedMesh);
           outSkinnedMeshes.map.insert_or_assign(i, handle);
         }
       } else {
         const auto &[vertices, indices] =
             loadStandardMeshAttributes<liquid::Vertex>(primitive, i, p, model);
         if (vertices.size() > 0) {
-          mesh.name = fileName + ":mesh" + std::to_string(i);
+          mesh.name = fileName + "-mesh" + std::to_string(i);
           mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
-          auto handle = registry.getMeshes().addAsset(mesh);
+          auto path = manager.createMeshFromAsset(mesh);
+
+          auto handle = manager.loadMeshFromFile(path);
+
           outMeshes.map.insert_or_assign(i, handle);
         }
       }
@@ -1015,7 +1019,7 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
       loadSkeletons(model, baseName, mAssetManager.getRegistry());
   auto &&animationData = loadAnimations(
       model, baseName, mAssetManager.getRegistry(), skeletonData);
-  loadMeshes(model, baseName, mAssetManager.getRegistry(), materials,
+  loadMeshes(model, baseName, mAssetManager, materials,
              skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 
   loadPrefabs(model, baseName, mAssetManager.getRegistry(), meshMap,
