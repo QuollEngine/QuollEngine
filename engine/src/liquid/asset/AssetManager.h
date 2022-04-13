@@ -34,6 +34,27 @@ public:
   TextureAssetHandle loadTextureFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Create material from asset
+   *
+   * Create engine specific material asset
+   * from material data
+   *
+   * @param asset Material asset
+   * @return Path to new material asset
+   */
+  std::filesystem::path
+  createMaterialFromAsset(const AssetData<MaterialAsset> &asset);
+
+  /**
+   * @brief Load material from file
+   *
+   * @param filePath Path to asset
+   * @return Material asset handle
+   */
+  MaterialAssetHandle
+  loadMaterialFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry
