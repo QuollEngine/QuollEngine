@@ -74,6 +74,48 @@ public:
   MeshAssetHandle loadMeshFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Create skinned mesh from asset
+   *
+   * Create engine specific skinned mesh asset
+   * from mesh data
+   *
+   * @param asset Mesh asset
+   * @return Path to new mesh asset
+   */
+  std::filesystem::path
+  createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset);
+
+  /**
+   * @brief Load skinned mesh from file
+   *
+   * @param filePath Path to asset
+   * @return Skinned mesh asset handle
+   */
+  SkinnedMeshAssetHandle
+  loadSkinnedMeshFromFile(const std::filesystem::path &filePath);
+
+  /**
+   * @brief Create skeleton from asset
+   *
+   * Create engine specific skeleton asset
+   * from mesh data
+   *
+   * @param asset Skeleton asset
+   * @return Path to new skeleton asset
+   */
+  std::filesystem::path
+  createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset);
+
+  /**
+   * @brief Load skeleton from file
+   *
+   * @param filePath Path to asset
+   * @return Skeleton asset handle
+   */
+  SkeletonAssetHandle
+  loadSkeletonFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry

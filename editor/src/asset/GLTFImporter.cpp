@@ -553,7 +553,7 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
 
         if (vertices.size() > 0) {
           skinnedMesh.data.geometries.push_back({vertices, indices, material});
-          skinnedMesh.name = fileName + ":skinnedmesh" + std::to_string(i);
+          skinnedMesh.name = fileName + "-skinnedmesh" + std::to_string(i);
           skinnedMesh.type = liquid::AssetType::SkinnedMesh;
 
           auto it = skeletonMeshMap.find(i);
@@ -561,8 +561,9 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
               skeletons.map.find(it->second) != skeletons.map.end()) {
             skinnedMesh.data.skeleton = skeletons.map.at(it->second);
           }
-          auto handle =
-              manager.getRegistry().getSkinnedMeshes().addAsset(skinnedMesh);
+
+          auto path = manager.createSkinnedMeshFromAsset(skinnedMesh);
+          auto handle = manager.loadSkinnedMeshFromFile(path);
           outSkinnedMeshes.map.insert_or_assign(i, handle);
         }
       } else {
@@ -572,10 +573,9 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
           mesh.name = fileName + "-mesh" + std::to_string(i);
           mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
+
           auto path = manager.createMeshFromAsset(mesh);
-
           auto handle = manager.loadMeshFromFile(path);
-
           outMeshes.map.insert_or_assign(i, handle);
         }
       }
@@ -591,11 +591,11 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
  *
  * @param model TinyGLTF model
  * @param fileName File name
- * @param registry Asset registry
+ * @param manager Asset manager
  */
 SkeletonData loadSkeletons(const tinygltf::Model &model,
                            const liquid::String &fileName,
-                           liquid::AssetRegistry &registry) {
+                           liquid::AssetManager &manager) {
   SkeletonData skeletonData{};
 
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
@@ -706,7 +706,8 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
       asset.data.jointParents.push_back(parent >= 0 ? parent : 0);
     }
 
-    auto handle = registry.getSkeletons().addAsset(asset);
+    auto path = manager.createSkeletonFromAsset(asset);
+    auto handle = manager.loadSkeletonFromFile(path);
 
     skeletonData.skeletonMap.map.insert_or_assign(static_cast<size_t>(si),
                                                   handle);
@@ -923,7 +924,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
 
 void loadPrefabs(
     const tinygltf::Model &model, const liquid::String &fileName,
-    liquid::AssetRegistry &registry,
+    liquid::AssetManager &manager,
     const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
     const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
     const SkeletonData &skeletons, const AnimationData &animations) {
@@ -982,7 +983,7 @@ void loadPrefabs(
     prefab.data.items.push_back(item);
   }
 
-  registry.getPrefabs().addAsset(prefab);
+  manager.getRegistry().getPrefabs().addAsset(prefab);
 }
 
 GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
@@ -1015,15 +1016,14 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
 
   auto &&textures = loadTextures(model, baseName, mAssetManager);
   auto &&materials = loadMaterials(model, baseName, mAssetManager, textures);
-  auto &&skeletonData =
-      loadSkeletons(model, baseName, mAssetManager.getRegistry());
+  auto &&skeletonData = loadSkeletons(model, baseName, mAssetManager);
   auto &&animationData = loadAnimations(
       model, baseName, mAssetManager.getRegistry(), skeletonData);
   loadMeshes(model, baseName, mAssetManager, materials,
              skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 
-  loadPrefabs(model, baseName, mAssetManager.getRegistry(), meshMap,
-              skinnedMeshMap, skeletonData, animationData);
+  loadPrefabs(model, baseName, mAssetManager, meshMap, skinnedMeshMap,
+              skeletonData, animationData);
 
   mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
 }
