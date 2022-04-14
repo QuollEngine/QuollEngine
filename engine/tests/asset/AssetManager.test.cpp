@@ -579,11 +579,8 @@ TEST_F(AssetManagerTest, LoadsMeshFromFile) {
   }
 
   auto filePath = manager.createMeshFromAsset(asset);
-
   auto handle = manager.loadMeshFromFile(filePath);
-
   EXPECT_NE(handle, liquid::MeshAssetHandle::Invalid);
-
   auto &mesh = manager.getRegistry().getMeshes().getAsset(handle);
 
   for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
@@ -613,5 +610,430 @@ TEST_F(AssetManagerTest, LoadsMeshFromFile) {
     }
 
     EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
+  }
+}
+
+TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
+  liquid::AssetData<liquid::SkinnedMeshAsset> asset;
+  asset.name = "test-mesh0";
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    size_t countGeometries = 2;
+    size_t countVertices = 10;
+    size_t countIndices = 20;
+
+    for (size_t i = 0; i < countGeometries; ++i) {
+      liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
+      for (size_t i = 0; i < countVertices; ++i) {
+        geometry.vertices.push_back({// positions
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // normals
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // colors
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // tangents
+                                     dist(mt), dist(mt), dist(mt), dist(mt),
+
+                                     // texcoords0
+                                     dist(mt), dist(mt),
+
+                                     // texcoords1
+                                     dist(mt), dist(mt),
+
+                                     // joints
+                                     udist(mt), udist(mt), udist(mt), udist(mt),
+
+                                     // weights
+                                     dist(mt), dist(mt), dist(mt), dist(mt)});
+      }
+
+      for (size_t i = 0; i < countIndices; ++i) {
+        geometry.indices.push_back(udist(mt));
+      }
+
+      liquid::AssetData<liquid::MaterialAsset> material;
+      material.path = std::filesystem::path(
+          std::filesystem::current_path() / "materials" /
+          ("material-geom-" + std::to_string(i) + ".lqmat"));
+
+      geometry.material =
+          manager.getRegistry().getMaterials().addAsset(material);
+
+      asset.data.geometries.push_back(geometry);
+    }
+  }
+
+  auto filePath = manager.createSkinnedMeshFromAsset(asset);
+
+  liquid::InputBinaryStream file(filePath);
+  EXPECT_TRUE(file.good());
+
+  liquid::AssetFileHeader header;
+  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), magic.length());
+  file.read(header.version);
+  file.read(header.type);
+  EXPECT_EQ(magic, header.magic);
+  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  EXPECT_EQ(header.type, liquid::AssetType::SkinnedMesh);
+
+  uint32_t numGeometries = 0;
+  file.read(numGeometries);
+
+  EXPECT_EQ(numGeometries, 2);
+
+  for (uint32_t i = 0; i < numGeometries; ++i) {
+    uint32_t numVertices = 0;
+    file.read(numVertices);
+    EXPECT_EQ(numVertices, 10);
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec3 valueExpected(vertex.x, vertex.y, vertex.z);
+      glm::vec3 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Position: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec3 valueExpected(vertex.nx, vertex.ny, vertex.nz);
+      glm::vec3 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Normal: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec4 valueExpected(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      glm::vec4 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Tangent: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec2 valueExpected(vertex.u0, vertex.v0);
+      glm::vec2 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "TexCoord0: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec2 valueExpected(vertex.u1, vertex.v1);
+      glm::vec2 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "TexCoord1: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::uvec4 valueExpected(vertex.j0, vertex.j1, vertex.j2, vertex.j3);
+      glm::uvec4 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Joints: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      glm::vec4 valueExpected(vertex.w0, vertex.w1, vertex.w2, vertex.w3);
+      glm::vec4 valueActual;
+      file.read(valueActual);
+
+      EXPECT_EQ(valueExpected, valueActual)
+          << "Weights: " << glm::to_string(valueExpected)
+          << " != " << glm::to_string(valueActual);
+    }
+
+    uint32_t numIndices = 0;
+    file.read(numIndices);
+    EXPECT_EQ(numIndices, 20);
+
+    for (uint32_t idx = 0; idx < numIndices; ++idx) {
+      const auto valueExpected = asset.data.geometries.at(i).indices.at(idx);
+      uint32_t valueActual = 100000;
+      file.read(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
+    }
+
+    liquid::String materialPath;
+    file.read(materialPath);
+    EXPECT_EQ(materialPath,
+              "materials/material-geom-" + std::to_string(i) + ".lqmat");
+  }
+}
+
+TEST_F(AssetManagerTest, LoadsSkinnedMeshFromFile) {
+  liquid::AssetData<liquid::SkinnedMeshAsset> asset;
+  asset.name = "test-mesh0";
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+    size_t countGeometries = 2;
+    size_t countVertices = 10;
+    size_t countIndices = 20;
+
+    for (size_t i = 0; i < countGeometries; ++i) {
+      liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
+      for (size_t i = 0; i < countVertices; ++i) {
+        geometry.vertices.push_back({// positions
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // normals
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // colors
+                                     dist(mt), dist(mt), dist(mt),
+
+                                     // tangents
+                                     dist(mt), dist(mt), dist(mt), dist(mt),
+
+                                     // texcoords0
+                                     dist(mt), dist(mt),
+
+                                     // texcoords1
+                                     dist(mt), dist(mt),
+
+                                     // joints
+                                     udist(mt), udist(mt), udist(mt), udist(mt),
+
+                                     // weights
+                                     dist(mt), dist(mt), dist(mt), dist(mt)});
+      }
+
+      for (size_t i = 0; i < countIndices; ++i) {
+        geometry.indices.push_back(udist(mt));
+      }
+
+      liquid::AssetData<liquid::MaterialAsset> material;
+      material.path = std::filesystem::path(
+          std::filesystem::current_path() / "materials" /
+          ("material-geom-" + std::to_string(i) + ".lqmat"));
+
+      geometry.material =
+          manager.getRegistry().getMaterials().addAsset(material);
+
+      asset.data.geometries.push_back(geometry);
+    }
+  }
+
+  auto filePath = manager.createSkinnedMeshFromAsset(asset);
+  auto handle = manager.loadSkinnedMeshFromFile(filePath);
+  EXPECT_NE(handle, liquid::SkinnedMeshAssetHandle::Invalid);
+  auto &mesh = manager.getRegistry().getSkinnedMeshes().getAsset(handle);
+
+  for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
+    auto &expectedGeometry = asset.data.geometries.at(g);
+    auto &actualGeometry = mesh.data.geometries.at(g);
+
+    for (size_t v = 0; v < expectedGeometry.vertices.size(); ++v) {
+      auto &expected = expectedGeometry.vertices.at(v);
+      auto &actual = actualGeometry.vertices.at(v);
+
+      EXPECT_EQ(glm::vec3(expected.x, expected.y, expected.z),
+                glm::vec3(actual.x, actual.y, actual.z));
+      EXPECT_EQ(glm::vec3(expected.nx, expected.ny, expected.nz),
+                glm::vec3(actual.nx, actual.ny, actual.nz));
+      EXPECT_EQ(glm::vec4(expected.tx, expected.ty, expected.tz, expected.tw),
+                glm::vec4(actual.tx, actual.ty, actual.tz, actual.tw));
+      EXPECT_EQ(glm::vec2(expected.u0, expected.v0),
+                glm::vec2(actual.u0, actual.v0));
+      EXPECT_EQ(glm::vec2(expected.u1, expected.v1),
+                glm::vec2(actual.u1, actual.v1));
+    }
+
+    for (size_t i = 0; i < expectedGeometry.indices.size(); ++i) {
+      auto expected = expectedGeometry.indices.at(i);
+      auto actual = actualGeometry.indices.at(i);
+      EXPECT_EQ(expected, actual);
+    }
+
+    EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
+  }
+}
+
+TEST_F(AssetManagerTest, CreatesSkeletonFileFromSkeletonAsset) {
+  liquid::AssetData<liquid::SkeletonAsset> asset;
+  asset.name = "test-skel0";
+
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+
+    size_t countJoints = 20;
+    for (size_t i = 0; i < countJoints; ++i) {
+      asset.data.jointLocalPositions.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalRotations.push_back(
+          glm::quat(dist(mt), dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalScales.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointInverseBindMatrices.push_back(glm::mat4{
+          // row 0
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          // row 1
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row 2
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row3
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+      });
+
+      asset.data.jointParents.push_back(udist(mt));
+      asset.data.jointNames.push_back("Joint " + std::to_string(i));
+    }
+  }
+
+  auto filePath = manager.createSkeletonFromAsset(asset);
+
+  liquid::InputBinaryStream file(filePath);
+  EXPECT_TRUE(file.good());
+
+  liquid::AssetFileHeader header;
+  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), magic.length());
+  file.read(header.version);
+  file.read(header.type);
+  EXPECT_EQ(magic, header.magic);
+  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  EXPECT_EQ(header.type, liquid::AssetType::Skeleton);
+
+  uint32_t numJoints = 0;
+  file.read(numJoints);
+  EXPECT_EQ(numJoints, 20);
+
+  std::vector<glm::vec3> actualPositions(numJoints);
+  std::vector<glm::quat> actualRotations(numJoints);
+  std::vector<glm::vec3> actualScales(numJoints);
+  std::vector<glm::mat4> actualInverseBindMatrices(numJoints);
+  std::vector<liquid::JointId> actualParents(numJoints);
+  std::vector<liquid::String> actualNames(numJoints);
+  file.read(actualPositions);
+  file.read(actualRotations);
+  file.read(actualScales);
+  file.read(actualParents);
+  file.read(actualInverseBindMatrices);
+  file.read(actualNames);
+
+  for (uint32_t i = 0; i < numJoints; ++i) {
+    EXPECT_EQ(actualPositions.at(i), asset.data.jointLocalPositions.at(i));
+    EXPECT_EQ(actualRotations.at(i), asset.data.jointLocalRotations.at(i));
+    EXPECT_EQ(actualScales.at(i), asset.data.jointLocalScales.at(i));
+    EXPECT_EQ(actualParents.at(i), asset.data.jointParents.at(i));
+    EXPECT_EQ(actualInverseBindMatrices.at(i),
+              asset.data.jointInverseBindMatrices.at(i));
+    EXPECT_EQ(actualNames.at(i), asset.data.jointNames.at(i));
+  }
+}
+
+TEST_F(AssetManagerTest, LoadsSkeletonAssetFromFile) {
+  liquid::AssetData<liquid::SkeletonAsset> asset;
+  asset.name = "test-skel0";
+  {
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<uint32_t> udist(0, 20);
+
+    size_t countJoints = 20;
+    for (size_t i = 0; i < countJoints; ++i) {
+      asset.data.jointLocalPositions.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalRotations.push_back(
+          glm::quat(dist(mt), dist(mt), dist(mt), dist(mt)));
+      asset.data.jointLocalScales.push_back(
+          glm::vec3(dist(mt), dist(mt), dist(mt)));
+      asset.data.jointInverseBindMatrices.push_back(glm::mat4{
+          // row 0
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          // row 1
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row 2
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+
+          // row3
+          dist(mt),
+          dist(mt),
+          dist(mt),
+          dist(mt),
+      });
+
+      asset.data.jointParents.push_back(udist(mt));
+      asset.data.jointNames.push_back("Joint " + std::to_string(i));
+    }
+  }
+
+  auto filePath = manager.createSkeletonFromAsset(asset);
+  auto handle = manager.loadSkeletonFromFile(filePath);
+
+  EXPECT_NE(handle, liquid::SkeletonAssetHandle::Invalid);
+
+  auto &actual = manager.getRegistry().getSkeletons().getAsset(handle);
+
+  for (size_t i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
+    EXPECT_EQ(actual.data.jointLocalPositions.at(i),
+              asset.data.jointLocalPositions.at(i));
+    EXPECT_EQ(actual.data.jointLocalRotations.at(i),
+              asset.data.jointLocalRotations.at(i));
+    EXPECT_EQ(actual.data.jointLocalScales.at(i),
+              asset.data.jointLocalScales.at(i));
+    EXPECT_EQ(actual.data.jointParents.at(i), asset.data.jointParents.at(i));
+    EXPECT_EQ(actual.data.jointInverseBindMatrices.at(i),
+              asset.data.jointInverseBindMatrices.at(i));
+    EXPECT_EQ(actual.data.jointNames.at(i), asset.data.jointNames.at(i));
   }
 }

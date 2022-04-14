@@ -437,4 +437,242 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
   return mRegistry.getMeshes().addAsset(mesh);
 }
 
+std::filesystem::path AssetManager::createSkinnedMeshFromAsset(
+    const AssetData<SkinnedMeshAsset> &asset) {
+
+  String extension = ".lqmesh";
+  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  OutputBinaryStream file(assetPath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
+
+  AssetFileHeader header{};
+  header.type = AssetType::SkinnedMesh;
+  header.version = createVersion(0, 1);
+  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.version);
+  file.write(header.type);
+
+  auto numGeometries = static_cast<uint32_t>(asset.data.geometries.size());
+  file.write(numGeometries);
+
+  auto getMaterialRelativePath = [=](MaterialAssetHandle handle) {
+    if (handle != MaterialAssetHandle::Invalid) {
+      auto &texture = mRegistry.getMaterials().getAsset(handle);
+      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+      return path;
+    }
+
+    return String("");
+  };
+
+  for (auto &geometry : asset.data.geometries) {
+    auto numVertices = static_cast<uint32_t>(geometry.vertices.size());
+    file.write(numVertices);
+    std::vector<glm::vec3> positions(numVertices);
+    std::vector<glm::vec3> normals(numVertices);
+    std::vector<glm::vec4> tangents(numVertices);
+    std::vector<glm::vec2> texCoords0(numVertices);
+    std::vector<glm::vec2> texCoords1(numVertices);
+    std::vector<glm::uvec4> joints(numVertices);
+    std::vector<glm::vec4> weights(numVertices);
+
+    for (uint32_t i = 0; i < numVertices; ++i) {
+      const auto &vertex = geometry.vertices.at(i);
+      positions.at(i) = glm::vec3(vertex.x, vertex.y, vertex.z);
+      normals.at(i) = glm::vec3(vertex.nx, vertex.ny, vertex.nz);
+      tangents.at(i) = glm::vec4(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      texCoords0.at(i) = glm::vec2(vertex.u0, vertex.v0);
+      texCoords1.at(i) = glm::vec2(vertex.u1, vertex.v1);
+      joints.at(i) = glm::uvec4(vertex.j0, vertex.j1, vertex.j2, vertex.j3);
+      weights.at(i) = glm::vec4(vertex.w0, vertex.w1, vertex.w2, vertex.w3);
+    }
+
+    file.write(positions);
+    file.write(normals);
+    file.write(tangents);
+    file.write(texCoords0);
+    file.write(texCoords1);
+    file.write(joints);
+    file.write(weights);
+
+    auto numIndices = static_cast<uint32_t>(geometry.indices.size());
+    file.write(numIndices);
+    file.write(geometry.indices);
+
+    auto materialPath = getMaterialRelativePath(geometry.material);
+    file.write(materialPath);
+  }
+
+  return assetPath;
+}
+
+SkinnedMeshAssetHandle
+AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream file(filePath);
+
+  AssetFileHeader header;
+
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  file.read(header.version);
+  file.read(header.type);
+
+  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
+  LIQUID_ASSERT(header.type == AssetType::SkinnedMesh,
+                "File is not a skinned mesh");
+
+  AssetData<SkinnedMeshAsset> mesh{};
+  mesh.path = filePath;
+  mesh.name = filePath.filename().string();
+  mesh.type = header.type;
+
+  uint32_t numGeometries = 0;
+  file.read(numGeometries);
+
+  mesh.data.geometries.resize(numGeometries);
+
+  for (uint32_t i = 0; i < numGeometries; ++i) {
+    uint32_t numVertices = 0;
+    file.read(numVertices);
+    mesh.data.geometries.at(i).vertices.resize(numVertices);
+
+    std::vector<glm::vec3> positions(numVertices);
+    std::vector<glm::vec3> normals(numVertices);
+    std::vector<glm::vec4> tangents(numVertices);
+    std::vector<glm::vec2> texCoords0(numVertices);
+    std::vector<glm::vec2> texCoords1(numVertices);
+    std::vector<glm::uvec4> joints(numVertices);
+    std::vector<glm::vec4> weights(numVertices);
+
+    file.read(positions);
+    file.read(normals);
+    file.read(tangents);
+    file.read(texCoords0);
+    file.read(texCoords1);
+    file.read(joints);
+    file.read(weights);
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
+      vertex.x = positions.at(v).x;
+      vertex.y = positions.at(v).y;
+      vertex.z = positions.at(v).z;
+
+      vertex.nx = normals.at(v).x;
+      vertex.ny = normals.at(v).y;
+      vertex.nz = normals.at(v).z;
+
+      vertex.tx = tangents.at(v).x;
+      vertex.ty = tangents.at(v).y;
+      vertex.tz = tangents.at(v).z;
+      vertex.tw = tangents.at(v).w;
+
+      vertex.u0 = texCoords0.at(v).x;
+      vertex.v0 = texCoords0.at(v).y;
+
+      vertex.u1 = texCoords1.at(v).x;
+      vertex.v1 = texCoords1.at(v).y;
+
+      vertex.j0 = joints.at(v).x;
+      vertex.j1 = joints.at(v).y;
+      vertex.j2 = joints.at(v).z;
+      vertex.j3 = joints.at(v).w;
+
+      vertex.w0 = weights.at(v).x;
+      vertex.w1 = weights.at(v).y;
+      vertex.w2 = weights.at(v).z;
+      vertex.w3 = weights.at(v).w;
+    }
+
+    uint32_t numIndices = 0;
+    file.read(numIndices);
+
+    mesh.data.geometries.at(i).indices.resize(numIndices);
+    file.read(mesh.data.geometries.at(i).indices);
+
+    String materialPathStr;
+    file.read(materialPathStr);
+
+    std::filesystem::path materialPath =
+        (mAssetsPath / materialPathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getMaterials().getAssets()) {
+      if (asset.path == materialPath) {
+        mesh.data.geometries.at(i).material = handle;
+        break;
+      }
+    }
+  }
+
+  return mRegistry.getSkinnedMeshes().addAsset(mesh);
+}
+
+std::filesystem::path
+AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
+  String extension = ".lqskel";
+  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  OutputBinaryStream file(assetPath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
+
+  AssetFileHeader header{};
+  header.type = AssetType::Skeleton;
+  header.version = createVersion(0, 1);
+  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.version);
+  file.write(header.type);
+
+  auto numJoints = static_cast<uint32_t>(asset.data.jointLocalPositions.size());
+  file.write(numJoints);
+
+  file.write(asset.data.jointLocalPositions);
+  file.write(asset.data.jointLocalRotations);
+  file.write(asset.data.jointLocalScales);
+  file.write(asset.data.jointParents);
+  file.write(asset.data.jointInverseBindMatrices);
+  file.write(asset.data.jointNames);
+
+  return assetPath;
+}
+
+SkeletonAssetHandle
+AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream file(filePath);
+
+  AssetFileHeader header;
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  file.read(header.version);
+  file.read(header.type);
+
+  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
+  LIQUID_ASSERT(header.type == AssetType::Skeleton, "File is not a skeleton");
+
+  AssetData<SkeletonAsset> skeleton{};
+  skeleton.path = filePath;
+  skeleton.name = filePath.filename().string();
+  skeleton.type = header.type;
+
+  uint32_t numJoints = 0;
+  file.read(numJoints);
+
+  skeleton.data.jointLocalPositions.resize(numJoints);
+  skeleton.data.jointLocalRotations.resize(numJoints);
+  skeleton.data.jointLocalScales.resize(numJoints);
+  skeleton.data.jointParents.resize(numJoints);
+  skeleton.data.jointInverseBindMatrices.resize(numJoints);
+  skeleton.data.jointNames.resize(numJoints);
+
+  file.read(skeleton.data.jointLocalPositions);
+  file.read(skeleton.data.jointLocalRotations);
+  file.read(skeleton.data.jointLocalScales);
+  file.read(skeleton.data.jointParents);
+  file.read(skeleton.data.jointInverseBindMatrices);
+  file.read(skeleton.data.jointNames);
+
+  return mRegistry.getSkeletons().addAsset(skeleton);
+}
+
 } // namespace liquid

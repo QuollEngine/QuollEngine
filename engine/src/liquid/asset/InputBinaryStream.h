@@ -105,4 +105,18 @@ template <> inline void InputBinaryStream::read(glm::vec4 &value) {
   read(glm::value_ptr(value), sizeof(glm::vec4));
 }
 
+/**
+ * @brief Read binary data into vector of strings
+ *
+ * @param value String vector
+ */
+template <> inline void InputBinaryStream::read(std::vector<String> &value) {
+  for (size_t i = 0; i < value.size(); ++i) {
+    uint32_t length = 0;
+    read(&length, sizeof(uint32_t));
+    value.at(i).resize(length);
+    read(value.at(i).data(), length);
+  }
+}
+
 } // namespace liquid

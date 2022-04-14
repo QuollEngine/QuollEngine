@@ -105,4 +105,16 @@ template <> inline void OutputBinaryStream::write(const glm::vec4 &value) {
   write(glm::value_ptr(value), sizeof(glm::vec4));
 }
 
+/**
+ * @brief Write vector of dynamic strings to file
+ *
+ * @param value String vector
+ */
+template <>
+inline void OutputBinaryStream::write(const std::vector<String> &value) {
+  for (auto &v : value) {
+    write(v);
+  }
+}
+
 } // namespace liquid
