@@ -7,6 +7,8 @@
 #include <vulkan/vulkan.h>
 
 #include "liquid/loaders/KtxError.h"
+#include "OutputBinaryStream.h"
+#include "InputBinaryStream.h"
 
 namespace liquid {
 
@@ -51,250 +53,6 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   ktxTexture_Destroy(baseTexture);
 
   return assetPath;
-}
-
-std::filesystem::path
-AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
-  String extension = ".lqmat";
-
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
-
-  std::ofstream file(assetPath, std::ios::binary | std::ios::out);
-
-  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
-
-  AssetFileHeader header{};
-  header.type = AssetType::Material;
-  header.version = createVersion(0, 1);
-
-  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
-  file.write(reinterpret_cast<const char *>(&(header.version)),
-             sizeof(header.version));
-  file.write(reinterpret_cast<const char *>(&header.type), sizeof(header.type));
-
-  auto getTextureRelativePath = [=](TextureAssetHandle handle) {
-    if (handle != TextureAssetHandle::Invalid) {
-      auto &texture = mRegistry.getTextures().getAsset(handle);
-      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
-      std::replace(path.begin(), path.end(), '\\', '/');
-      return path;
-    }
-
-    return String("");
-  };
-
-  auto baseColorTexturePath =
-      getTextureRelativePath(asset.data.baseColorTexture);
-  uint32_t baseColorTexturePathLength =
-      static_cast<uint32_t>(baseColorTexturePath.length());
-  file.write(reinterpret_cast<const char *>(&baseColorTexturePathLength),
-             sizeof(uint32_t));
-  file.write(baseColorTexturePath.c_str(), baseColorTexturePathLength);
-  file.write(reinterpret_cast<const char *>(&asset.data.baseColorTextureCoord),
-             sizeof(int8_t));
-  file.write(reinterpret_cast<const char *>(
-                 glm::value_ptr(asset.data.baseColorFactor)),
-             sizeof(float) * 4);
-
-  auto metallicRoughnessTexturePath =
-      getTextureRelativePath(asset.data.metallicRoughnessTexture);
-  uint32_t metallicRoughnessTexturePathLength =
-      static_cast<uint32_t>(metallicRoughnessTexturePath.length());
-  file.write(
-      reinterpret_cast<const char *>(&metallicRoughnessTexturePathLength),
-      sizeof(uint32_t));
-  file.write(metallicRoughnessTexturePath.c_str(),
-             metallicRoughnessTexturePathLength);
-  file.write(
-      reinterpret_cast<const char *>(&asset.data.metallicRoughnessTextureCoord),
-      sizeof(int8_t));
-  file.write(reinterpret_cast<const char *>(&asset.data.metallicFactor),
-             sizeof(float));
-  file.write(reinterpret_cast<const char *>(&asset.data.roughnessFactor),
-             sizeof(float));
-
-  auto normalTexturePath = getTextureRelativePath(asset.data.normalTexture);
-  uint32_t normalTexturePathLength =
-      static_cast<uint32_t>(normalTexturePath.length());
-  file.write(reinterpret_cast<const char *>(&normalTexturePathLength),
-             sizeof(uint32_t));
-  file.write(normalTexturePath.c_str(), normalTexturePathLength);
-  file.write(reinterpret_cast<const char *>(&asset.data.normalTextureCoord),
-             sizeof(int8_t));
-  file.write(reinterpret_cast<const char *>(&asset.data.normalScale),
-             sizeof(float));
-
-  auto occlusionTexturePath =
-      getTextureRelativePath(asset.data.occlusionTexture);
-  uint32_t occlusionTexturePathLength =
-      static_cast<uint32_t>(occlusionTexturePath.length());
-  file.write(reinterpret_cast<const char *>(&occlusionTexturePathLength),
-             sizeof(uint32_t));
-  file.write(occlusionTexturePath.c_str(), occlusionTexturePathLength);
-  file.write(reinterpret_cast<const char *>(&asset.data.occlusionTextureCoord),
-             sizeof(int8_t));
-  file.write(reinterpret_cast<const char *>(&asset.data.occlusionStrength),
-             sizeof(float));
-
-  auto emissiveTexturePath = getTextureRelativePath(asset.data.emissiveTexture);
-  uint32_t emissiveTexturePathLength =
-      static_cast<uint32_t>(emissiveTexturePath.length());
-  file.write(reinterpret_cast<const char *>(&emissiveTexturePathLength),
-             sizeof(uint32_t));
-  file.write(emissiveTexturePath.c_str(), emissiveTexturePathLength);
-  file.write(reinterpret_cast<const char *>(&asset.data.emissiveTextureCoord),
-             sizeof(int8_t));
-  file.write(
-      reinterpret_cast<const char *>(glm::value_ptr(asset.data.emissiveFactor)),
-      sizeof(float) * 3);
-
-  file.close();
-
-  return assetPath;
-}
-
-MaterialAssetHandle
-AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
-  std::ifstream file(filePath, std::ios::binary | std::ios::in);
-
-  LIQUID_ASSERT(file.good(), "File cannot be opened for reading");
-
-  AssetFileHeader header;
-
-  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
-  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
-  file.read(reinterpret_cast<char *>(&header.version), sizeof(header.version));
-  file.read(reinterpret_cast<char *>(&header.type), sizeof(header.type));
-
-  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
-  LIQUID_ASSERT(header.type == AssetType::Material, "File is not a material");
-
-  AssetData<MaterialAsset> material{};
-  material.path = filePath;
-  material.name = filePath.filename().string();
-  material.type = header.type;
-
-  // Base color
-  {
-    uint32_t pathLength = 0;
-    file.read(reinterpret_cast<char *>(&pathLength), sizeof(uint32_t));
-    liquid::String texturePathStr(pathLength, '$');
-    file.read(texturePathStr.data(), pathLength);
-
-    std::filesystem::path texturePath =
-        (mAssetsPath / texturePathStr).make_preferred();
-
-    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-      if (asset.path == texturePath) {
-        material.data.baseColorTexture = handle;
-        break;
-      }
-    }
-
-    file.read(reinterpret_cast<char *>(&material.data.baseColorTextureCoord),
-              sizeof(int8_t));
-    file.read(reinterpret_cast<char *>(&material.data.baseColorFactor),
-              sizeof(float) * 4);
-  }
-
-  // Metallic roughness
-  {
-    uint32_t pathLength = 0;
-    file.read(reinterpret_cast<char *>(&pathLength), sizeof(uint32_t));
-    liquid::String texturePathStr(pathLength, '$');
-    file.read(texturePathStr.data(), pathLength);
-
-    std::filesystem::path texturePath =
-        (mAssetsPath / texturePathStr).make_preferred();
-
-    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-      if (asset.path == texturePath) {
-        material.data.metallicRoughnessTexture = handle;
-        break;
-      }
-    }
-
-    file.read(
-        reinterpret_cast<char *>(&material.data.metallicRoughnessTextureCoord),
-        sizeof(int8_t));
-    file.read(reinterpret_cast<char *>(&material.data.metallicFactor),
-              sizeof(float));
-    file.read(reinterpret_cast<char *>(&material.data.roughnessFactor),
-              sizeof(float));
-  }
-
-  // Normal
-  {
-    uint32_t pathLength = 0;
-    file.read(reinterpret_cast<char *>(&pathLength), sizeof(uint32_t));
-    liquid::String texturePathStr(pathLength, '$');
-    file.read(texturePathStr.data(), pathLength);
-
-    std::filesystem::path texturePath =
-        (mAssetsPath / texturePathStr).make_preferred();
-
-    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-      if (asset.path == texturePath) {
-        material.data.normalTexture = handle;
-        break;
-      }
-    }
-
-    file.read(reinterpret_cast<char *>(&material.data.normalTextureCoord),
-              sizeof(int8_t));
-    file.read(reinterpret_cast<char *>(&material.data.normalScale),
-              sizeof(float));
-  }
-
-  // Occlusion
-  {
-    uint32_t pathLength = 0;
-    file.read(reinterpret_cast<char *>(&pathLength), sizeof(uint32_t));
-    liquid::String texturePathStr(pathLength, '$');
-    file.read(texturePathStr.data(), pathLength);
-
-    std::filesystem::path texturePath =
-        (mAssetsPath / texturePathStr).make_preferred();
-
-    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-      if (asset.path == texturePath) {
-        material.data.occlusionTexture = handle;
-        break;
-      }
-    }
-
-    file.read(reinterpret_cast<char *>(&material.data.occlusionTextureCoord),
-              sizeof(int8_t));
-    file.read(reinterpret_cast<char *>(&material.data.occlusionStrength),
-              sizeof(float));
-  }
-
-  // Emissive
-  {
-    uint32_t pathLength = 0;
-    file.read(reinterpret_cast<char *>(&pathLength), sizeof(uint32_t));
-    liquid::String texturePathStr(pathLength, '$');
-    file.read(texturePathStr.data(), pathLength);
-
-    std::filesystem::path texturePath =
-        (mAssetsPath / texturePathStr).make_preferred();
-
-    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-      if (asset.path == texturePath) {
-        material.data.emissiveTexture = handle;
-        break;
-      }
-    }
-
-    file.read(reinterpret_cast<char *>(&material.data.emissiveTextureCoord),
-              sizeof(int8_t));
-    file.read(reinterpret_cast<char *>(&material.data.emissiveFactor),
-              sizeof(float) * 3);
-  }
-
-  file.close();
-
-  return mRegistry.getMaterials().addAsset(material);
 }
 
 TextureAssetHandle
@@ -348,6 +106,335 @@ AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
   ktxTexture_Destroy(ktxTextureData);
 
   return mRegistry.getTextures().addAsset(texture);
+}
+
+std::filesystem::path
+AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
+  String extension = ".lqmat";
+
+  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+
+  OutputBinaryStream file(assetPath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
+
+  AssetFileHeader header{};
+  header.type = AssetType::Material;
+  header.version = createVersion(0, 1);
+
+  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.version);
+  file.write(header.type);
+
+  auto getTextureRelativePath = [=](TextureAssetHandle handle) {
+    if (handle != TextureAssetHandle::Invalid) {
+      auto &texture = mRegistry.getTextures().getAsset(handle);
+      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+      return path;
+    }
+
+    return String("");
+  };
+
+  auto baseColorTexturePath =
+      getTextureRelativePath(asset.data.baseColorTexture);
+  file.write(baseColorTexturePath);
+  file.write(asset.data.baseColorTextureCoord);
+  file.write(asset.data.baseColorFactor);
+
+  auto metallicRoughnessTexturePath =
+      getTextureRelativePath(asset.data.metallicRoughnessTexture);
+  file.write(metallicRoughnessTexturePath);
+  file.write(asset.data.metallicRoughnessTextureCoord);
+  file.write(asset.data.metallicFactor);
+  file.write(asset.data.roughnessFactor);
+
+  auto normalTexturePath = getTextureRelativePath(asset.data.normalTexture);
+  file.write(normalTexturePath);
+  file.write(asset.data.normalTextureCoord);
+  file.write(asset.data.normalScale);
+
+  auto occlusionTexturePath =
+      getTextureRelativePath(asset.data.occlusionTexture);
+  file.write(occlusionTexturePath);
+  file.write(asset.data.occlusionTextureCoord);
+  file.write(asset.data.occlusionStrength);
+
+  auto emissiveTexturePath = getTextureRelativePath(asset.data.emissiveTexture);
+  file.write(emissiveTexturePath);
+  file.write(asset.data.emissiveTextureCoord);
+  file.write(asset.data.emissiveFactor);
+
+  return assetPath;
+}
+
+MaterialAssetHandle
+AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream file(filePath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be opened for reading");
+
+  AssetFileHeader header;
+
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  file.read(header.version);
+  file.read(header.type);
+
+  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
+  LIQUID_ASSERT(header.type == AssetType::Material, "File is not a material");
+
+  AssetData<MaterialAsset> material{};
+  material.path = filePath;
+  material.name = filePath.filename().string();
+  material.type = header.type;
+
+  // Base color
+  {
+
+    String texturePathStr;
+    file.read(texturePathStr);
+    std::filesystem::path texturePath =
+        (mAssetsPath / texturePathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
+      if (asset.path == texturePath) {
+        material.data.baseColorTexture = handle;
+        break;
+      }
+    }
+
+    file.read(material.data.baseColorTextureCoord);
+    file.read(material.data.baseColorFactor);
+  }
+
+  // Metallic roughness
+  {
+    String texturePathStr;
+    file.read(texturePathStr);
+    std::filesystem::path texturePath =
+        (mAssetsPath / texturePathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
+      if (asset.path == texturePath) {
+        material.data.metallicRoughnessTexture = handle;
+        break;
+      }
+    }
+
+    file.read(material.data.metallicRoughnessTextureCoord);
+    file.read(material.data.metallicFactor);
+    file.read(material.data.roughnessFactor);
+  }
+
+  // Normal
+  {
+    String texturePathStr;
+    file.read(texturePathStr);
+
+    std::filesystem::path texturePath =
+        (mAssetsPath / texturePathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
+      if (asset.path == texturePath) {
+        material.data.normalTexture = handle;
+        break;
+      }
+    }
+
+    file.read(material.data.normalTextureCoord);
+    file.read(material.data.normalScale);
+  }
+
+  // Occlusion
+  {
+    String texturePathStr;
+    file.read(texturePathStr);
+    std::filesystem::path texturePath =
+        (mAssetsPath / texturePathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
+      if (asset.path == texturePath) {
+        material.data.occlusionTexture = handle;
+        break;
+      }
+    }
+
+    file.read(material.data.occlusionTextureCoord);
+    file.read(material.data.occlusionStrength);
+  }
+
+  // Emissive
+  {
+    String texturePathStr;
+    file.read(texturePathStr);
+
+    std::filesystem::path texturePath =
+        (mAssetsPath / texturePathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
+      if (asset.path == texturePath) {
+        material.data.emissiveTexture = handle;
+        break;
+      }
+    }
+
+    file.read(material.data.emissiveTextureCoord);
+    file.read(material.data.emissiveFactor);
+  }
+
+  return mRegistry.getMaterials().addAsset(material);
+}
+
+std::filesystem::path
+AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
+  String extension = ".lqmesh";
+  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  OutputBinaryStream file(assetPath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
+
+  AssetFileHeader header{};
+  header.type = AssetType::Mesh;
+  header.version = createVersion(0, 1);
+  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.version);
+  file.write(header.type);
+
+  auto numGeometries = static_cast<uint32_t>(asset.data.geometries.size());
+  file.write(numGeometries);
+
+  auto getMaterialRelativePath = [=](MaterialAssetHandle handle) {
+    if (handle != MaterialAssetHandle::Invalid) {
+      auto &texture = mRegistry.getMaterials().getAsset(handle);
+      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+      return path;
+    }
+
+    return String("");
+  };
+
+  for (auto &geometry : asset.data.geometries) {
+    auto numVertices = static_cast<uint32_t>(geometry.vertices.size());
+    file.write(numVertices);
+    std::vector<glm::vec3> positions(numVertices);
+    std::vector<glm::vec3> normals(numVertices);
+    std::vector<glm::vec4> tangents(numVertices);
+    std::vector<glm::vec2> texCoords0(numVertices);
+    std::vector<glm::vec2> texCoords1(numVertices);
+
+    for (uint32_t i = 0; i < numVertices; ++i) {
+      const auto &vertex = geometry.vertices.at(i);
+      positions.at(i) = glm::vec3(vertex.x, vertex.y, vertex.z);
+      normals.at(i) = glm::vec3(vertex.nx, vertex.ny, vertex.nz);
+      tangents.at(i) = glm::vec4(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      texCoords0.at(i) = glm::vec2(vertex.u0, vertex.v0);
+      texCoords1.at(i) = glm::vec2(vertex.u1, vertex.v1);
+    }
+
+    file.write(positions);
+    file.write(normals);
+    file.write(tangents);
+    file.write(texCoords0);
+    file.write(texCoords1);
+
+    auto numIndices = static_cast<uint32_t>(geometry.indices.size());
+    file.write(numIndices);
+    file.write(geometry.indices);
+
+    auto materialPath = getMaterialRelativePath(geometry.material);
+    file.write(materialPath);
+  }
+
+  return assetPath;
+}
+
+MeshAssetHandle
+AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream file(filePath);
+
+  AssetFileHeader header;
+
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  file.read(header.version);
+  file.read(header.type);
+
+  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
+  LIQUID_ASSERT(header.type == AssetType::Mesh, "File is not a mesh");
+
+  AssetData<MeshAsset> mesh{};
+  mesh.path = filePath;
+  mesh.name = filePath.filename().string();
+  mesh.type = header.type;
+
+  uint32_t numGeometries = 0;
+  file.read(numGeometries);
+
+  mesh.data.geometries.resize(numGeometries);
+
+  for (uint32_t i = 0; i < numGeometries; ++i) {
+    uint32_t numVertices = 0;
+    file.read(numVertices);
+    mesh.data.geometries.at(i).vertices.resize(numVertices);
+
+    std::vector<glm::vec3> positions(numVertices);
+    std::vector<glm::vec3> normals(numVertices);
+    std::vector<glm::vec4> tangents(numVertices);
+    std::vector<glm::vec2> texCoords0(numVertices);
+    std::vector<glm::vec2> texCoords1(numVertices);
+
+    file.read(positions);
+    file.read(normals);
+    file.read(tangents);
+    file.read(texCoords0);
+    file.read(texCoords1);
+
+    for (uint32_t v = 0; v < numVertices; ++v) {
+      auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
+      vertex.x = positions.at(v).x;
+      vertex.y = positions.at(v).y;
+      vertex.z = positions.at(v).z;
+
+      vertex.nx = normals.at(v).x;
+      vertex.ny = normals.at(v).y;
+      vertex.nz = normals.at(v).z;
+
+      vertex.tx = tangents.at(v).x;
+      vertex.ty = tangents.at(v).y;
+      vertex.tz = tangents.at(v).z;
+      vertex.tw = tangents.at(v).w;
+
+      vertex.u0 = texCoords0.at(v).x;
+      vertex.v0 = texCoords0.at(v).y;
+
+      vertex.u1 = texCoords1.at(v).x;
+      vertex.v1 = texCoords1.at(v).y;
+    }
+
+    uint32_t numIndices = 0;
+    file.read(numIndices);
+
+    mesh.data.geometries.at(i).indices.resize(numIndices);
+    file.read(mesh.data.geometries.at(i).indices);
+
+    String materialPathStr;
+    file.read(materialPathStr);
+
+    std::filesystem::path materialPath =
+        (mAssetsPath / materialPathStr).make_preferred();
+
+    for (auto &[handle, asset] : mRegistry.getMaterials().getAssets()) {
+      if (asset.path == materialPath) {
+        mesh.data.geometries.at(i).material = handle;
+        break;
+      }
+    }
+  }
+
+  return mRegistry.getMeshes().addAsset(mesh);
 }
 
 } // namespace liquid

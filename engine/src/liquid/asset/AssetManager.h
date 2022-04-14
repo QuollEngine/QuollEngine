@@ -55,6 +55,25 @@ public:
   loadMaterialFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Create mesh from asset
+   *
+   * Create engine specific mesh asset
+   * from mesh data
+   *
+   * @param asset Mesh asset
+   * @return Path to new mesh asset
+   */
+  std::filesystem::path createMeshFromAsset(const AssetData<MeshAsset> &asset);
+
+  /**
+   * @brief Load mesh from file
+   *
+   * @param filePath Path to asset
+   * @return Mesh asset handle
+   */
+  MeshAssetHandle loadMeshFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry
