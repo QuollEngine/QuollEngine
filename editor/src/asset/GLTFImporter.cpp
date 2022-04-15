@@ -966,22 +966,38 @@ void loadPrefabs(
     if (node.mesh < 0)
       continue;
 
-    liquid::PrefabAssetItem item;
+    auto localEntityId = static_cast<uint32_t>(nodeIndex);
+
     if (node.skin >= 0) {
-      item.skinnedMesh = skinnedMeshes.map.at(node.mesh);
-      item.skeleton = skeletons.skeletonMap.map.at(node.skin);
+      prefab.data.skinnedMeshes.push_back(
+          {localEntityId, skinnedMeshes.map.at(node.mesh)});
+      prefab.data.skeletons.push_back(
+          {localEntityId, skeletons.skeletonMap.map.at(node.skin)});
+
+      liquid::AnimatorComponent component;
+
       auto it = animations.skinAnimationMap.find(node.skin);
       if (it != animations.skinAnimationMap.end()) {
-        item.animations = it->second;
+        component.animations = it->second;
+      }
+
+      if (component.animations.size() > 0) {
+        prefab.data.animators.push_back({localEntityId, component});
       }
     } else {
-      item.mesh = meshes.map.at(node.mesh);
+      prefab.data.meshes.push_back({localEntityId, meshes.map.at(node.mesh)});
+
+      liquid::AnimatorComponent component;
+
       auto it = animations.nodeAnimationMap.find(nodeIndex);
       if (it != animations.nodeAnimationMap.end()) {
-        item.animations = it->second;
+        component.animations = it->second;
+      }
+
+      if (component.animations.size() > 0) {
+        prefab.data.animators.push_back({localEntityId, component});
       }
     }
-    prefab.data.items.push_back(item);
   }
 
   manager.getRegistry().getPrefabs().addAsset(prefab);
