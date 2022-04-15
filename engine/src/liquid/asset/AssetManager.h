@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Result.h"
 #include "AssetRegistry.h"
 
 namespace liquid {
+
+class InputBinaryStream;
 
 class AssetManager {
 public:
@@ -22,7 +25,7 @@ public:
    * @param asset Texture asset
    * @return Path to new texture asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createTextureFromAsset(const AssetData<TextureAsset> &asset);
 
   /**
@@ -31,7 +34,8 @@ public:
    * @param filePath Path to asset
    * @return Texture asset handle
    */
-  TextureAssetHandle loadTextureFromFile(const std::filesystem::path &filePath);
+  Result<TextureAssetHandle>
+  loadTextureFromFile(const std::filesystem::path &filePath);
 
   /**
    * @brief Create material from asset
@@ -42,7 +46,7 @@ public:
    * @param asset Material asset
    * @return Path to new material asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createMaterialFromAsset(const AssetData<MaterialAsset> &asset);
 
   /**
@@ -51,7 +55,7 @@ public:
    * @param filePath Path to asset
    * @return Material asset handle
    */
-  MaterialAssetHandle
+  Result<MaterialAssetHandle>
   loadMaterialFromFile(const std::filesystem::path &filePath);
 
   /**
@@ -63,7 +67,8 @@ public:
    * @param asset Mesh asset
    * @return Path to new mesh asset
    */
-  std::filesystem::path createMeshFromAsset(const AssetData<MeshAsset> &asset);
+  Result<std::filesystem::path>
+  createMeshFromAsset(const AssetData<MeshAsset> &asset);
 
   /**
    * @brief Load mesh from file
@@ -71,7 +76,8 @@ public:
    * @param filePath Path to asset
    * @return Mesh asset handle
    */
-  MeshAssetHandle loadMeshFromFile(const std::filesystem::path &filePath);
+  Result<MeshAssetHandle>
+  loadMeshFromFile(const std::filesystem::path &filePath);
 
   /**
    * @brief Create skinned mesh from asset
@@ -82,7 +88,7 @@ public:
    * @param asset Mesh asset
    * @return Path to new mesh asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset);
 
   /**
@@ -91,7 +97,7 @@ public:
    * @param filePath Path to asset
    * @return Skinned mesh asset handle
    */
-  SkinnedMeshAssetHandle
+  Result<SkinnedMeshAssetHandle>
   loadSkinnedMeshFromFile(const std::filesystem::path &filePath);
 
   /**
@@ -103,7 +109,7 @@ public:
    * @param asset Skeleton asset
    * @return Path to new skeleton asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset);
 
   /**
@@ -112,7 +118,7 @@ public:
    * @param filePath Path to asset
    * @return Skeleton asset handle
    */
-  SkeletonAssetHandle
+  Result<SkeletonAssetHandle>
   loadSkeletonFromFile(const std::filesystem::path &filePath);
 
   /**
@@ -124,7 +130,7 @@ public:
    * @param asset Animation asset
    * @return Path to new animation asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createAnimationFromAsset(const AssetData<AnimationAsset> &asset);
 
   /**
@@ -133,7 +139,7 @@ public:
    * @param filePath Path to asset
    * @return Animation asset handle
    */
-  AnimationAssetHandle
+  Result<AnimationAssetHandle>
   loadAnimationFromFile(const std::filesystem::path &filePath);
 
   /**
@@ -145,7 +151,7 @@ public:
    * @param asset Prefab asset
    * @return Path to new prefab asset
    */
-  std::filesystem::path
+  Result<std::filesystem::path>
   createPrefabFromAsset(const AssetData<PrefabAsset> &asset);
 
   /**
@@ -154,7 +160,8 @@ public:
    * @param filePath Path to asset
    * @return Prefab asset handle
    */
-  PrefabAssetHandle loadPrefabFromFile(const std::filesystem::path &filePath);
+  Result<PrefabAssetHandle>
+  loadPrefabFromFile(const std::filesystem::path &filePath);
 
   /**
    * @brief Get asset registry
@@ -162,6 +169,94 @@ public:
    * @return Asset registry
    */
   inline AssetRegistry &getRegistry() { return mRegistry; }
+
+private:
+  /**
+   * @brief Get relative path of the asset
+   *
+   * @tparam TAssetMap Asset map type
+   * @param map Asset map
+   * @param handle Asset handle
+   * @return Relative path of asset
+   */
+  template <class TAssetMap>
+  String getAssetRelativePath(TAssetMap &map,
+                              typename TAssetMap::Handle handle) {
+    if (handle != TAssetMap::Handle::Invalid) {
+      auto &texture = map.getAsset(handle);
+      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+      return path;
+    }
+
+    return String("");
+  }
+
+  /**
+   * @brief Check asset file for validity
+   *
+   * Check if the binary stream did not fail,
+   * the header has the correct magic word,
+   * and the asset type is correct
+   *
+   * @return Result
+   */
+  Result<bool> checkAssetFile(InputBinaryStream &file,
+                              const std::filesystem::path &filePath,
+                              AssetType assetType);
+
+  /**
+   * @brief Get or load texture from path
+   *
+   * @param relativePath Path to texture
+   * @return Existing or newly loaded texture
+   */
+  Result<TextureAssetHandle>
+  getOrLoadTextureFromPath(const String &relativePath);
+
+  /**
+   * @brief Get or load material from path
+   *
+   * @param relativePath Path to material
+   * @return Existing or newly loaded material
+   */
+  Result<MaterialAssetHandle>
+  getOrLoadMaterialFromPath(const String &relativePath);
+
+  /**
+   * @brief Get or load mesh from path
+   *
+   * @param relativePath Path to mesh
+   * @return Existing or newly loaded mesh
+   */
+  Result<MeshAssetHandle> getOrLoadMeshFromPath(const String &relativePath);
+
+  /**
+   * @brief Get or load skinned mesh from path
+   *
+   * @param relativePath Path to skinned mesh
+   * @return Existing or newly loaded skinned mesh
+   */
+  Result<SkinnedMeshAssetHandle>
+  getOrLoadSkinnedMeshFromPath(const String &relativePath);
+
+  /**
+   * @brief Get or load skeleton from path
+   *
+   * @param relativePath Path to skeleton
+   * @return Existing or newly loaded skeleton
+   */
+  Result<SkeletonAssetHandle>
+  getOrLoadSkeletonFromPath(const String &relativePath);
+
+  /**
+   * @brief Get or load animation from path
+   *
+   * @param relativePath Path to animation
+   * @return Existing or newly loaded animation
+   */
+  Result<AnimationAssetHandle>
+  getOrLoadAnimationFromPath(const String &relativePath);
 
 private:
   AssetRegistry mRegistry;
