@@ -110,42 +110,56 @@ int main() {
             static_cast<liquid::PrefabAssetHandle>(handle));
         entityContext.setComponent<liquid::NameComponent>(entity, {asset.name});
 
-        for (auto &item : asset.data.items) {
-          auto entity = entityContext.createEntity();
-          entityContext.setComponent<liquid::DebugComponent>(entity, {});
+        std::map<uint32_t, liquid::Entity> entityMap;
 
-          parent->addChild(entity, transform);
+        auto getOrCreateEntity = [&entityMap, &entityContext, &parent,
+                                  &transform](uint32_t localId) mutable {
+          if (entityMap.find(localId) == entityMap.end()) {
+            auto entity = entityContext.createEntity();
+            entityMap.insert_or_assign(localId, entity);
+            entityContext.setComponent<liquid::DebugComponent>(entity, {});
 
-          if (item.skinnedMesh != liquid::SkinnedMeshAssetHandle::Invalid) {
-            entityContext.setComponent<liquid::SkinnedMeshComponent>(
-                entity, {renderer.createMeshInstance(
-                            item.skinnedMesh, assetManager.getRegistry())});
-          } else {
-            entityContext.setComponent<liquid::MeshComponent>(
-                entity, {renderer.createMeshInstance(
-                            item.mesh, assetManager.getRegistry())});
+            parent->addChild(entity);
           }
 
-          if (item.skeleton != liquid::SkeletonAssetHandle::Invalid) {
-            const auto &skeleton = assetManager.getRegistry()
-                                       .getSkeletons()
-                                       .getAsset(item.skeleton)
-                                       .data;
-            liquid::Skeleton skeletonInstance(
-                skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-                skeleton.jointLocalScales, skeleton.jointParents,
-                skeleton.jointInverseBindMatrices, skeleton.jointNames,
-                &renderer.getRegistry());
+          return entityMap.at(localId);
+        };
 
-            entityContext.setComponent<liquid::SkeletonComponent>(
-                entity, {std::move(skeletonInstance)});
-          }
+        for (auto &item : asset.data.meshes) {
+          auto entity = getOrCreateEntity(item.entity);
+          entityContext.setComponent<liquid::MeshComponent>(
+              entity, {renderer.createMeshInstance(
+                          item.value, assetManager.getRegistry())});
+        }
 
-          if (!item.animations.empty()) {
-            liquid::AnimatorComponent component;
-            component.animations = item.animations;
-            entityContext.setComponent(entity, component);
-          }
+        for (auto &item : asset.data.skinnedMeshes) {
+          auto entity = getOrCreateEntity(item.entity);
+          entityContext.setComponent<liquid::SkinnedMeshComponent>(
+              entity, {renderer.createMeshInstance(
+                          item.value, assetManager.getRegistry())});
+        }
+
+        for (auto &item : asset.data.skeletons) {
+          auto entity = getOrCreateEntity(item.entity);
+
+          const auto &skeleton = assetManager.getRegistry()
+                                     .getSkeletons()
+                                     .getAsset(item.value)
+                                     .data;
+          liquid::Skeleton skeletonInstance(
+              skeleton.jointLocalPositions, skeleton.jointLocalRotations,
+              skeleton.jointLocalScales, skeleton.jointParents,
+              skeleton.jointInverseBindMatrices, skeleton.jointNames,
+              &renderer.getRegistry());
+
+          entityContext.setComponent<liquid::SkeletonComponent>(
+              entity, {std::move(skeletonInstance)});
+        }
+
+        for (auto &item : asset.data.animators) {
+          auto entity = getOrCreateEntity(item.entity);
+
+          entityContext.setComponent(entity, item.value);
         }
 
         return;

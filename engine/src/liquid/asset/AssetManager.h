@@ -137,6 +137,26 @@ public:
   loadAnimationFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Create prefab from asset
+   *
+   * Create engine specific prefab asset
+   * from prefab data
+   *
+   * @param asset Prefab asset
+   * @return Path to new prefab asset
+   */
+  std::filesystem::path
+  createPrefabFromAsset(const AssetData<PrefabAsset> &asset);
+
+  /**
+   * @brief Load prefab from file
+   *
+   * @param filePath Path to asset
+   * @return Prefab asset handle
+   */
+  PrefabAssetHandle loadPrefabFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry

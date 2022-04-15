@@ -397,39 +397,7 @@ void DebugAssetBrowser::render() {
             ImGui::EndTable();
           }
         }
-      } else if (mSelectedType == AssetType::Prefab) {
-        auto handle = static_cast<liquid::PrefabAssetHandle>(mSelectedObject);
-        auto &prefab = mRegistry.getPrefabs().getAsset(handle);
-
-        uint32_t index = 1;
-        for (auto &item : prefab.data.items) {
-          ImGui::Text("Item #%d", index++);
-
-          if (ImGui::BeginTable("texture-info", 2,
-                                ImGuiTableFlags_Borders |
-                                    ImGuiTableColumnFlags_WidthStretch |
-                                    ImGuiTableFlags_RowBg)) {
-            if (item.skinnedMesh != SkinnedMeshAssetHandle::Invalid) {
-              renderSkinnedMeshName("Mesh (skinned)", item.skinnedMesh);
-            } else {
-              renderMeshName("Mesh", item.mesh);
-            }
-
-            if (item.skeleton != SkeletonAssetHandle::Invalid) {
-              renderSkeletonName("Skeleton", item.skeleton);
-            }
-
-            uint32_t animationIndex = 1;
-            for (auto &animation : item.animations) {
-              renderAnimationName(
-                  "Animation #" + std::to_string(animationIndex++), animation);
-            }
-
-            ImGui::EndTable();
-          }
-        }
       }
-
       ImGui::EndChild();
     }
   }
