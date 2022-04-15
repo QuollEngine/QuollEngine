@@ -675,4 +675,79 @@ AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
   return mRegistry.getSkeletons().addAsset(skeleton);
 }
 
+std::filesystem::path
+AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
+  String extension = ".lqanim";
+  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  OutputBinaryStream file(assetPath);
+
+  LIQUID_ASSERT(file.good(), "File cannot be created for writing");
+
+  AssetFileHeader header{};
+  header.type = AssetType::Animation;
+  header.version = createVersion(0, 1);
+  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.version);
+  file.write(header.type);
+
+  file.write(asset.data.time);
+  uint32_t numKeyframes = static_cast<uint32_t>(asset.data.keyframes.size());
+  file.write(numKeyframes);
+
+  for (auto &keyframe : asset.data.keyframes) {
+    file.write(keyframe.target);
+    file.write(keyframe.interpolation);
+    file.write(keyframe.jointTarget);
+    file.write(keyframe.joint);
+
+    uint32_t numValues = static_cast<uint32_t>(keyframe.keyframeTimes.size());
+    file.write(numValues);
+    file.write(keyframe.keyframeTimes);
+    file.write(keyframe.keyframeValues);
+  }
+
+  return assetPath;
+}
+
+AnimationAssetHandle
+AssetManager::loadAnimationFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream file(filePath);
+
+  AssetFileHeader header;
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  file.read(header.version);
+  file.read(header.type);
+
+  LIQUID_ASSERT(magic == header.magic, "Data is not a liquid file");
+  LIQUID_ASSERT(header.type == AssetType::Animation,
+                "File is not an animation");
+
+  AssetData<AnimationAsset> animation{};
+  animation.path = filePath;
+  animation.name = filePath.filename().string();
+  animation.type = header.type;
+
+  file.read(animation.data.time);
+  uint32_t numKeyframes = 0;
+  file.read(numKeyframes);
+  animation.data.keyframes.resize(numKeyframes);
+
+  for (auto &keyframe : animation.data.keyframes) {
+    file.read(keyframe.target);
+    file.read(keyframe.interpolation);
+    file.read(keyframe.jointTarget);
+    file.read(keyframe.joint);
+
+    uint32_t numValues = 0;
+    file.read(numValues);
+    keyframe.keyframeTimes.resize(numValues);
+    keyframe.keyframeValues.resize(numValues);
+    file.read(keyframe.keyframeTimes);
+    file.read(keyframe.keyframeValues);
+  }
+
+  return mRegistry.getAnimations().addAsset(animation);
+}
+
 } // namespace liquid

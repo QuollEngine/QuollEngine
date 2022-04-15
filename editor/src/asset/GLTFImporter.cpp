@@ -724,12 +724,12 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
  *
  * @param model TinyGLTF model
  * @param fileName File name
- * @param registry Asset registry
+ * @param manager Asset manager
  * @param skeletonData Skeleton data
  */
 AnimationData loadAnimations(const tinygltf::Model &model,
                              const liquid::String &fileName,
-                             liquid::AssetRegistry &registry,
+                             liquid::AssetManager &manager,
                              const SkeletonData &skeletonData) {
   AnimationData animationData;
   for (size_t i = 0; i < model.animations.size(); ++i) {
@@ -900,7 +900,8 @@ AnimationData loadAnimations(const tinygltf::Model &model,
 
     LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
                   "Animation must have a target node or skin");
-    auto handle = registry.getAnimations().addAsset(animation);
+    auto filePath = manager.createAnimationFromAsset(animation);
+    auto handle = manager.loadAnimationFromFile(filePath);
 
     if (targetSkin >= 0) {
       if (animationData.skinAnimationMap.find(targetSkin) ==
@@ -1017,8 +1018,8 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
   auto &&textures = loadTextures(model, baseName, mAssetManager);
   auto &&materials = loadMaterials(model, baseName, mAssetManager, textures);
   auto &&skeletonData = loadSkeletons(model, baseName, mAssetManager);
-  auto &&animationData = loadAnimations(
-      model, baseName, mAssetManager.getRegistry(), skeletonData);
+  auto &&animationData =
+      loadAnimations(model, baseName, mAssetManager, skeletonData);
   loadMeshes(model, baseName, mAssetManager, materials,
              skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 

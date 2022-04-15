@@ -116,6 +116,27 @@ public:
   loadSkeletonFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Create animation from asset
+   *
+   * Create engine specific animation asset
+   * from animation data
+   *
+   * @param asset Animation asset
+   * @return Path to new animation asset
+   */
+  std::filesystem::path
+  createAnimationFromAsset(const AssetData<AnimationAsset> &asset);
+
+  /**
+   * @brief Load animation from file
+   *
+   * @param filePath Path to asset
+   * @return Animation asset handle
+   */
+  AnimationAssetHandle
+  loadAnimationFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry
