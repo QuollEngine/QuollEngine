@@ -4,9 +4,9 @@
 
 namespace liquid {
 
-enum class KeyframeSequenceAssetTarget { Position, Rotation, Scale };
+enum class KeyframeSequenceAssetTarget : uint8_t { Position, Rotation, Scale };
 
-enum class KeyframeSequenceAssetInterpolation { Step, Linear };
+enum class KeyframeSequenceAssetInterpolation : uint8_t { Step, Linear };
 
 struct KeyframeSequenceAsset {
   std::vector<float> keyframeTimes;
@@ -14,8 +14,9 @@ struct KeyframeSequenceAsset {
 
   JointId joint = 0;
   bool jointTarget = false;
-  KeyframeSequenceAssetTarget target;
-  KeyframeSequenceAssetInterpolation interpolation;
+  KeyframeSequenceAssetTarget target = KeyframeSequenceAssetTarget::Position;
+  KeyframeSequenceAssetInterpolation interpolation =
+      KeyframeSequenceAssetInterpolation::Step;
 };
 
 struct AnimationAsset {
