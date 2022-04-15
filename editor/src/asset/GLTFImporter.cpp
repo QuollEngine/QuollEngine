@@ -167,8 +167,8 @@ loadTextures(const tinygltf::Model &model, const liquid::String &fileName,
     texture.data.height = image.height;
 
     auto &&texturePath = assetManager.createTextureFromAsset(texture);
-    auto handle = assetManager.loadTextureFromFile(texturePath);
-    map.insert_or_assign(i, handle);
+    auto handle = assetManager.loadTextureFromFile(texturePath.getData());
+    map.insert_or_assign(i, handle.getData());
   }
 
   return {map};
@@ -246,8 +246,8 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
 
     auto path = assetManager.createMaterialFromAsset(material);
-    auto handle = assetManager.loadMaterialFromFile(path);
-    map.insert_or_assign(i, handle);
+    auto handle = assetManager.loadMaterialFromFile(path.getData());
+    map.insert_or_assign(i, handle.getData());
   }
 
   return {map};
@@ -563,8 +563,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
           }
 
           auto path = manager.createSkinnedMeshFromAsset(skinnedMesh);
-          auto handle = manager.loadSkinnedMeshFromFile(path);
-          outSkinnedMeshes.map.insert_or_assign(i, handle);
+          auto handle = manager.loadSkinnedMeshFromFile(path.getData());
+          outSkinnedMeshes.map.insert_or_assign(i, handle.getData());
         }
       } else {
         const auto &[vertices, indices] =
@@ -575,8 +575,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
           mesh.data.geometries.push_back({vertices, indices, material});
 
           auto path = manager.createMeshFromAsset(mesh);
-          auto handle = manager.loadMeshFromFile(path);
-          outMeshes.map.insert_or_assign(i, handle);
+          auto handle = manager.loadMeshFromFile(path.getData());
+          outMeshes.map.insert_or_assign(i, handle.getData());
         }
       }
     }
@@ -707,10 +707,10 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     }
 
     auto path = manager.createSkeletonFromAsset(asset);
-    auto handle = manager.loadSkeletonFromFile(path);
+    auto handle = manager.loadSkeletonFromFile(path.getData());
 
     skeletonData.skeletonMap.map.insert_or_assign(static_cast<size_t>(si),
-                                                  handle);
+                                                  handle.getData());
   }
 
   return skeletonData;
@@ -901,7 +901,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
     LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
                   "Animation must have a target node or skin");
     auto filePath = manager.createAnimationFromAsset(animation);
-    auto handle = manager.loadAnimationFromFile(filePath);
+    auto handle = manager.loadAnimationFromFile(filePath.getData());
 
     if (targetSkin >= 0) {
       if (animationData.skinAnimationMap.find(targetSkin) ==
@@ -909,7 +909,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
         animationData.skinAnimationMap.insert(
             {static_cast<uint32_t>(targetSkin), {}});
       }
-      animationData.skinAnimationMap.at(targetSkin).push_back(handle);
+      animationData.skinAnimationMap.at(targetSkin).push_back(handle.getData());
     } else {
       if (animationData.nodeAnimationMap.find(targetSkin) ==
           animationData.nodeAnimationMap.end()) {
@@ -917,7 +917,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
             {static_cast<uint32_t>(targetNode), {}});
       }
 
-      animationData.nodeAnimationMap.at(targetNode).push_back(handle);
+      animationData.nodeAnimationMap.at(targetNode).push_back(handle.getData());
     }
   }
   return animationData;

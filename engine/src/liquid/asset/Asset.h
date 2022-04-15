@@ -27,4 +27,23 @@ enum class AssetType : uint8_t {
   Prefab
 };
 
+inline const String getAssetTypeString(AssetType type) {
+  switch (type) {
+  case AssetType::Material:
+    return "material";
+  case AssetType::Texture:
+    return "texture";
+  case AssetType::Mesh:
+    return "mesh";
+  case AssetType::SkinnedMesh:
+    return "skinned mesh";
+  case AssetType::Animation:
+    return "animation";
+  case AssetType::Prefab:
+    return "prefab";
+  default:
+    return "none";
+  }
+}
+
 } // namespace liquid
