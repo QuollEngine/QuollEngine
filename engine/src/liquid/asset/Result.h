@@ -31,6 +31,8 @@ public:
 
   inline bool hasData() const { return mData.has_value(); }
 
+  inline const std::vector<String> &getWarnings() const { return mWarnings; }
+
 private:
   std::optional<TData> mData;
   std::vector<String> mWarnings;

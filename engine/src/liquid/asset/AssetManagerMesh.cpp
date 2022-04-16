@@ -138,9 +138,9 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadMaterialFromPath(materialPathStr);
     if (res.hasData()) {
       mesh.data.geometries.at(i).material = res.getData();
-    }
-
-    if (mesh.data.geometries.at(i).material != MaterialAssetHandle::Invalid) {
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
+    } else {
       warnings.push_back("Mesh does not have material");
     }
   }
@@ -298,9 +298,9 @@ AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadMaterialFromPath(materialPathStr);
     if (res.hasData()) {
       mesh.data.geometries.at(i).material = res.getData();
-    }
-
-    if (mesh.data.geometries.at(i).material != MaterialAssetHandle::Invalid) {
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
+    } else {
       warnings.push_back("Mesh does not have material");
     }
   }
