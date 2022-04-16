@@ -12,7 +12,8 @@ namespace liquid {
 Result<std::filesystem::path>
 AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   String extension = ".lqmesh";
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -66,30 +67,25 @@ AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   return Result<std::filesystem::path>::Ok(assetPath);
 }
 
-Result<MeshAssetHandle>
-AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
-  InputBinaryStream file(filePath);
-
-  const auto &result = checkAssetFile(file, filePath, AssetType::Mesh);
-  if (result.hasError()) {
-    return Result<MeshAssetHandle>::Error(result.getError());
-  }
-
+Result<MeshAssetHandle> AssetManager::loadMeshDataFromInputStream(
+    InputBinaryStream &stream, const std::filesystem::path &filePath) {
   std::vector<String> warnings;
+
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<MeshAsset> mesh{};
   mesh.path = filePath;
-  mesh.name = filePath.filename().string();
+  mesh.name = assetName;
   mesh.type = AssetType::Mesh;
 
   uint32_t numGeometries = 0;
-  file.read(numGeometries);
+  stream.read(numGeometries);
 
   mesh.data.geometries.resize(numGeometries);
 
   for (uint32_t i = 0; i < numGeometries; ++i) {
     uint32_t numVertices = 0;
-    file.read(numVertices);
+    stream.read(numVertices);
     mesh.data.geometries.at(i).vertices.resize(numVertices);
 
     std::vector<glm::vec3> positions(numVertices);
@@ -98,11 +94,11 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
     std::vector<glm::vec2> texCoords0(numVertices);
     std::vector<glm::vec2> texCoords1(numVertices);
 
-    file.read(positions);
-    file.read(normals);
-    file.read(tangents);
-    file.read(texCoords0);
-    file.read(texCoords1);
+    stream.read(positions);
+    stream.read(normals);
+    stream.read(tangents);
+    stream.read(texCoords0);
+    stream.read(texCoords1);
 
     for (uint32_t v = 0; v < numVertices; ++v) {
       auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
@@ -127,13 +123,13 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
     }
 
     uint32_t numIndices = 0;
-    file.read(numIndices);
+    stream.read(numIndices);
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
-    file.read(mesh.data.geometries.at(i).indices);
+    stream.read(mesh.data.geometries.at(i).indices);
 
     String materialPathStr;
-    file.read(materialPathStr);
+    stream.read(materialPathStr);
 
     const auto &res = getOrLoadMaterialFromPath(materialPathStr);
     if (res.hasData()) {
@@ -149,11 +145,24 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
                                      warnings);
 }
 
+Result<MeshAssetHandle>
+AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream stream(filePath);
+
+  const auto &result = checkAssetFile(stream, filePath, AssetType::Mesh);
+  if (result.hasError()) {
+    return Result<MeshAssetHandle>::Error(result.getError());
+  }
+
+  return loadMeshDataFromInputStream(stream, filePath);
+}
+
 Result<std::filesystem::path> AssetManager::createSkinnedMeshFromAsset(
     const AssetData<SkinnedMeshAsset> &asset) {
 
   String extension = ".lqmesh";
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -213,30 +222,26 @@ Result<std::filesystem::path> AssetManager::createSkinnedMeshFromAsset(
   return Result<std::filesystem::path>::Ok(assetPath);
 }
 
-Result<SkinnedMeshAssetHandle>
-AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
-  InputBinaryStream file(filePath);
-
-  const auto &header = checkAssetFile(file, filePath, AssetType::SkinnedMesh);
-  if (header.hasError()) {
-    return Result<SkinnedMeshAssetHandle>::Error(header.getError());
-  }
+Result<SkinnedMeshAssetHandle> AssetManager::loadSkinnedMeshDataFromInputStream(
+    InputBinaryStream &stream, const std::filesystem::path &filePath) {
 
   std::vector<String> warnings;
 
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
+
   AssetData<SkinnedMeshAsset> mesh{};
   mesh.path = filePath;
-  mesh.name = filePath.filename().string();
+  mesh.name = assetName;
   mesh.type = AssetType::Material;
 
   uint32_t numGeometries = 0;
-  file.read(numGeometries);
+  stream.read(numGeometries);
 
   mesh.data.geometries.resize(numGeometries);
 
   for (uint32_t i = 0; i < numGeometries; ++i) {
     uint32_t numVertices = 0;
-    file.read(numVertices);
+    stream.read(numVertices);
     mesh.data.geometries.at(i).vertices.resize(numVertices);
 
     std::vector<glm::vec3> positions(numVertices);
@@ -247,13 +252,13 @@ AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
     std::vector<glm::uvec4> joints(numVertices);
     std::vector<glm::vec4> weights(numVertices);
 
-    file.read(positions);
-    file.read(normals);
-    file.read(tangents);
-    file.read(texCoords0);
-    file.read(texCoords1);
-    file.read(joints);
-    file.read(weights);
+    stream.read(positions);
+    stream.read(normals);
+    stream.read(tangents);
+    stream.read(texCoords0);
+    stream.read(texCoords1);
+    stream.read(joints);
+    stream.read(weights);
 
     for (uint32_t v = 0; v < numVertices; ++v) {
       auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
@@ -288,13 +293,13 @@ AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
     }
 
     uint32_t numIndices = 0;
-    file.read(numIndices);
+    stream.read(numIndices);
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
-    file.read(mesh.data.geometries.at(i).indices);
+    stream.read(mesh.data.geometries.at(i).indices);
 
     String materialPathStr;
-    file.read(materialPathStr);
+    stream.read(materialPathStr);
     const auto &res = getOrLoadMaterialFromPath(materialPathStr);
     if (res.hasData()) {
       mesh.data.geometries.at(i).material = res.getData();
@@ -307,6 +312,18 @@ AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
 
   return Result<SkinnedMeshAssetHandle>::Ok(
       mRegistry.getSkinnedMeshes().addAsset(mesh), warnings);
+}
+
+Result<SkinnedMeshAssetHandle>
+AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream stream(filePath);
+
+  const auto &header = checkAssetFile(stream, filePath, AssetType::SkinnedMesh);
+  if (header.hasError()) {
+    return Result<SkinnedMeshAssetHandle>::Error(header.getError());
+  }
+
+  return loadSkinnedMeshDataFromInputStream(stream, filePath);
 }
 
 Result<MeshAssetHandle>

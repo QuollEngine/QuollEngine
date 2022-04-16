@@ -170,6 +170,20 @@ public:
    */
   inline AssetRegistry &getRegistry() { return mRegistry; }
 
+  /**
+   * @brief Get assets path
+   *
+   * @return Assets path
+   */
+  inline const std::filesystem::path &getAssetsPath() const {
+    return mAssetsPath;
+  }
+
+  /**
+   * @brief Preload all assets in assets directory
+   */
+  void preloadAssets();
+
 private:
   /**
    * @brief Get relative path of the asset
@@ -205,6 +219,73 @@ private:
                               const std::filesystem::path &filePath,
                               AssetType assetType);
 
+private:
+  /**
+   * @brief Load material from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Material asset handle
+   */
+  Result<MaterialAssetHandle>
+  loadMaterialDataFromInputStream(InputBinaryStream &stream,
+                                  const std::filesystem::path &filePath);
+
+  /**
+   * @brief Load mesh from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Mesh asset handle
+   */
+  Result<MeshAssetHandle>
+  loadMeshDataFromInputStream(InputBinaryStream &stream,
+                              const std::filesystem::path &filePath);
+
+  /**
+   * @brief Load skinned mesh from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Skinned mesh asset handle
+   */
+  Result<SkinnedMeshAssetHandle>
+  loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
+                                     const std::filesystem::path &filePath);
+
+  /**
+   * @brief Load skeleton from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Skeleton asset handle
+   */
+  Result<SkeletonAssetHandle>
+  loadSkeletonDataFromInputStream(InputBinaryStream &stream,
+                                  const std::filesystem::path &filePath);
+  /**
+   * @brief Load animation from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Animation asset handle
+   */
+  Result<AnimationAssetHandle>
+  loadAnimationDataFromInputStream(InputBinaryStream &stream,
+                                   const std::filesystem::path &filePath);
+
+  /**
+   * @brief Load prefab from input stream
+   *
+   * @param stream Input stream
+   * @param filePath Path to asset
+   * @return Prefab asset handle
+   */
+  Result<PrefabAssetHandle>
+  loadPrefabDataFromInputStream(InputBinaryStream &stream,
+                                const std::filesystem::path &filePath);
+
+private:
   /**
    * @brief Get or load texture from path
    *

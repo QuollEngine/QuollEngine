@@ -13,7 +13,8 @@ Result<std::filesystem::path>
 AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   String extension = ".lqmat";
 
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + extension)).make_preferred();
 
   OutputBinaryStream file(assetPath);
 
@@ -64,45 +65,34 @@ AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   return Result<std::filesystem::path>::Ok(assetPath);
 }
 
-Result<MaterialAssetHandle>
-AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
-  InputBinaryStream file(filePath);
-
-  if (!file.good()) {
-    return Result<MaterialAssetHandle>::Error(
-        "File cannot be opened for reading: " + filePath.string());
-  }
-
-  const auto &header = checkAssetFile(file, filePath, AssetType::Material);
-  if (header.hasError()) {
-    return Result<MaterialAssetHandle>::Error(header.getError());
-  }
-
-  std::vector<String> warnings{};
+Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
+    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<MaterialAsset> material{};
   material.path = filePath;
-  material.name = filePath.filename().string();
+  material.name = assetName;
   material.type = AssetType::Material;
+  std::vector<String> warnings{};
 
   // Base color
   {
     String texturePathStr;
-    file.read(texturePathStr);
+    stream.read(texturePathStr);
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.baseColorTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     }
-    file.read(material.data.baseColorTextureCoord);
-    file.read(material.data.baseColorFactor);
+    stream.read(material.data.baseColorTextureCoord);
+    stream.read(material.data.baseColorFactor);
   }
 
   // Metallic roughness
   {
     String texturePathStr;
-    file.read(texturePathStr);
+    stream.read(texturePathStr);
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.metallicRoughnessTexture = res.getData();
@@ -110,51 +100,51 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
                       res.getWarnings().end());
     }
 
-    file.read(material.data.metallicRoughnessTextureCoord);
-    file.read(material.data.metallicFactor);
-    file.read(material.data.roughnessFactor);
+    stream.read(material.data.metallicRoughnessTextureCoord);
+    stream.read(material.data.metallicFactor);
+    stream.read(material.data.roughnessFactor);
   }
 
   // Normal
   {
     String texturePathStr;
-    file.read(texturePathStr);
+    stream.read(texturePathStr);
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.normalTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     }
-    file.read(material.data.normalTextureCoord);
-    file.read(material.data.normalScale);
+    stream.read(material.data.normalTextureCoord);
+    stream.read(material.data.normalScale);
   }
 
   // Occlusion
   {
     String texturePathStr;
-    file.read(texturePathStr);
+    stream.read(texturePathStr);
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.occlusionTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     }
-    file.read(material.data.occlusionTextureCoord);
-    file.read(material.data.occlusionStrength);
+    stream.read(material.data.occlusionTextureCoord);
+    stream.read(material.data.occlusionStrength);
   }
 
   // Emissive
   {
     String texturePathStr;
-    file.read(texturePathStr);
+    stream.read(texturePathStr);
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.emissiveTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     }
-    file.read(material.data.emissiveTextureCoord);
-    file.read(material.data.emissiveFactor);
+    stream.read(material.data.emissiveTextureCoord);
+    stream.read(material.data.emissiveFactor);
   }
 
   if (material.data.baseColorTexture == TextureAssetHandle::Invalid) {
@@ -179,6 +169,23 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
 
   return Result<MaterialAssetHandle>::Ok(
       mRegistry.getMaterials().addAsset(material), warnings);
+}
+
+Result<MaterialAssetHandle>
+AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream stream(filePath);
+
+  if (!stream.good()) {
+    return Result<MaterialAssetHandle>::Error(
+        "File cannot be opened for reading: " + filePath.string());
+  }
+
+  const auto &header = checkAssetFile(stream, filePath, AssetType::Material);
+  if (header.hasError()) {
+    return Result<MaterialAssetHandle>::Error(header.getError());
+  }
+
+  return loadMaterialDataFromInputStream(stream, filePath);
 }
 
 Result<MaterialAssetHandle>
