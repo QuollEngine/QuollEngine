@@ -264,6 +264,42 @@ TEST_F(AssetManagerTest, LoadsMeshFromFile) {
   }
 }
 
+TEST_F(AssetManagerTest, LoadsMeshWithMaterials) {
+  auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
+  liquid::AssetData<liquid::MaterialAsset> materialData{};
+  materialData.name = "test-mesh-material";
+  materialData.data.baseColorTexture = textureHandle.getData();
+  auto materialPath = manager.createMaterialFromAsset(materialData);
+  auto materialHandle = manager.loadMaterialFromFile(materialPath.getData());
+
+  liquid::AssetData<liquid::MeshAsset> meshData{};
+  meshData.name = "test-mesh";
+
+  liquid::BaseGeometryAsset<liquid::Vertex> geometry;
+  geometry.material = materialHandle.getData();
+  meshData.data.geometries.push_back(geometry);
+
+  auto meshPath = manager.createMeshFromAsset(meshData);
+
+  manager.getRegistry().getTextures().deleteAsset(textureHandle.getData());
+  manager.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
+
+  auto meshHandle = manager.loadMeshFromFile(meshPath.getData()).getData();
+  auto &newMesh = manager.getRegistry().getMeshes().getAsset(meshHandle);
+
+  EXPECT_NE(newMesh.data.geometries.at(0).material,
+            liquid::MaterialAssetHandle::Invalid);
+
+  auto &newMaterial = manager.getRegistry().getMaterials().getAsset(
+      newMesh.data.geometries.at(0).material);
+  EXPECT_NE(newMaterial.data.baseColorTexture,
+            liquid::TextureAssetHandle::Invalid);
+
+  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+      newMaterial.data.baseColorTexture);
+  EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
+}
+
 TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
@@ -422,4 +458,40 @@ TEST_F(AssetManagerTest, LoadsSkinnedMeshFromFile) {
 
     EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
   }
+}
+
+TEST_F(AssetManagerTest, LoadsSkinnedMeshWithMaterials) {
+  auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
+  liquid::AssetData<liquid::MaterialAsset> materialData{};
+  materialData.name = "test-mesh-material";
+  materialData.data.baseColorTexture = textureHandle.getData();
+  auto materialPath = manager.createMaterialFromAsset(materialData);
+  auto materialHandle = manager.loadMaterialFromFile(materialPath.getData());
+
+  liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
+  meshData.name = "test-smesh";
+  liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
+  geometry.material = materialHandle.getData();
+  meshData.data.geometries.push_back(geometry);
+
+  auto meshPath = manager.createSkinnedMeshFromAsset(meshData);
+
+  manager.getRegistry().getTextures().deleteAsset(textureHandle.getData());
+  manager.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
+
+  auto meshHandle =
+      manager.loadSkinnedMeshFromFile(meshPath.getData()).getData();
+  auto &newMesh = manager.getRegistry().getSkinnedMeshes().getAsset(meshHandle);
+
+  EXPECT_NE(newMesh.data.geometries.at(0).material,
+            liquid::MaterialAssetHandle::Invalid);
+
+  auto &newMaterial = manager.getRegistry().getMaterials().getAsset(
+      newMesh.data.geometries.at(0).material);
+  EXPECT_NE(newMaterial.data.baseColorTexture,
+            liquid::TextureAssetHandle::Invalid);
+
+  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+      newMaterial.data.baseColorTexture);
+  EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
 }

@@ -281,3 +281,26 @@ TEST_F(AssetManagerTest, LoadsMaterialWithTexturesFromFile) {
             asset.data.emissiveTextureCoord);
   EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
 }
+
+TEST_F(AssetManagerTest, LoadsTexturesWithMaterials) {
+  auto texture = manager.loadTextureFromFile("1x1-2d.ktx");
+  liquid::AssetData<liquid::MaterialAsset> material{};
+  material.name = "test-material";
+  material.data.baseColorTexture = texture.getData();
+  auto path = manager.createMaterialFromAsset(material);
+
+  manager.getRegistry().getTextures().deleteAsset(texture.getData());
+  EXPECT_FALSE(manager.getRegistry().getTextures().hasAsset(texture.getData()));
+
+  auto handle = manager.loadMaterialFromFile(path.getData());
+
+  auto &newMaterial =
+      manager.getRegistry().getMaterials().getAsset(handle.getData());
+
+  EXPECT_NE(newMaterial.data.baseColorTexture,
+            liquid::TextureAssetHandle::Invalid);
+
+  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+      newMaterial.data.baseColorTexture);
+  EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
+}
