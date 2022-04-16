@@ -12,7 +12,8 @@ namespace liquid {
 Result<std::filesystem::path>
 AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   String extension = ".lqanim";
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -46,41 +47,48 @@ AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   return Result<std::filesystem::path>::Ok(assetPath, {});
 }
 
-Result<AnimationAssetHandle>
-AssetManager::loadAnimationFromFile(const std::filesystem::path &filePath) {
-  InputBinaryStream file(filePath);
-
-  const auto &header = checkAssetFile(file, filePath, AssetType::Animation);
-  if (header.hasError()) {
-    return Result<AnimationAssetHandle>::Error(header.getError());
-  }
+Result<AnimationAssetHandle> AssetManager::loadAnimationDataFromInputStream(
+    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
-  animation.name = filePath.filename().string();
+  animation.name = assetName;
   animation.type = AssetType::Animation;
 
-  file.read(animation.data.time);
+  stream.read(animation.data.time);
   uint32_t numKeyframes = 0;
-  file.read(numKeyframes);
+  stream.read(numKeyframes);
   animation.data.keyframes.resize(numKeyframes);
 
   for (auto &keyframe : animation.data.keyframes) {
-    file.read(keyframe.target);
-    file.read(keyframe.interpolation);
-    file.read(keyframe.jointTarget);
-    file.read(keyframe.joint);
+    stream.read(keyframe.target);
+    stream.read(keyframe.interpolation);
+    stream.read(keyframe.jointTarget);
+    stream.read(keyframe.joint);
 
     uint32_t numValues = 0;
-    file.read(numValues);
+    stream.read(numValues);
     keyframe.keyframeTimes.resize(numValues);
     keyframe.keyframeValues.resize(numValues);
-    file.read(keyframe.keyframeTimes);
-    file.read(keyframe.keyframeValues);
+    stream.read(keyframe.keyframeTimes);
+    stream.read(keyframe.keyframeValues);
   }
 
   return Result<AnimationAssetHandle>::Ok(
       mRegistry.getAnimations().addAsset(animation));
+}
+
+Result<AnimationAssetHandle>
+AssetManager::loadAnimationFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream stream(filePath);
+
+  const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
+  if (header.hasError()) {
+    return Result<AnimationAssetHandle>::Error(header.getError());
+  }
+
+  return loadAnimationDataFromInputStream(stream, filePath);
 }
 
 Result<AnimationAssetHandle>

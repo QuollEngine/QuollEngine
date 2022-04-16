@@ -12,7 +12,8 @@ namespace liquid {
 Result<std::filesystem::path>
 AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   String extension = ".lqskel";
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + extension));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -40,22 +41,17 @@ AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   return Result<std::filesystem::path>::Ok(assetPath);
 }
 
-Result<SkeletonAssetHandle>
-AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
-  InputBinaryStream file(filePath);
-
-  const auto &header = checkAssetFile(file, filePath, AssetType::Skeleton);
-  if (header.hasError()) {
-    return Result<SkeletonAssetHandle>::Error(header.getError());
-  }
+Result<SkeletonAssetHandle> AssetManager::loadSkeletonDataFromInputStream(
+    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<SkeletonAsset> skeleton{};
   skeleton.path = filePath;
-  skeleton.name = filePath.filename().string();
+  skeleton.name = assetName;
   skeleton.type = AssetType::Skeleton;
 
   uint32_t numJoints = 0;
-  file.read(numJoints);
+  stream.read(numJoints);
 
   skeleton.data.jointLocalPositions.resize(numJoints);
   skeleton.data.jointLocalRotations.resize(numJoints);
@@ -64,15 +60,27 @@ AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
   skeleton.data.jointInverseBindMatrices.resize(numJoints);
   skeleton.data.jointNames.resize(numJoints);
 
-  file.read(skeleton.data.jointLocalPositions);
-  file.read(skeleton.data.jointLocalRotations);
-  file.read(skeleton.data.jointLocalScales);
-  file.read(skeleton.data.jointParents);
-  file.read(skeleton.data.jointInverseBindMatrices);
-  file.read(skeleton.data.jointNames);
+  stream.read(skeleton.data.jointLocalPositions);
+  stream.read(skeleton.data.jointLocalRotations);
+  stream.read(skeleton.data.jointLocalScales);
+  stream.read(skeleton.data.jointParents);
+  stream.read(skeleton.data.jointInverseBindMatrices);
+  stream.read(skeleton.data.jointNames);
 
   return Result<SkeletonAssetHandle>::Ok(
       mRegistry.getSkeletons().addAsset(skeleton));
+}
+
+Result<SkeletonAssetHandle>
+AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
+  InputBinaryStream stream(filePath);
+
+  const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
+  if (header.hasError()) {
+    return Result<SkeletonAssetHandle>::Error(header.getError());
+  }
+
+  return loadSkeletonDataFromInputStream(stream, filePath);
 }
 
 Result<SkeletonAssetHandle>

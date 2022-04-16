@@ -27,7 +27,8 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.generateMipmaps = KTX_FALSE;
   createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
 
-  std::filesystem::path assetPath = (mAssetsPath / (asset.name + ".ktx2"));
+  std::filesystem::path assetPath =
+      (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
 
   ktxTexture2 *texture = nullptr;
   {
@@ -51,8 +52,11 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   {
     auto res =
         ktxTexture_WriteToNamedFile(baseTexture, assetPath.string().c_str());
-    return Result<std::filesystem::path>::Error(
-        KtxError("Cannot write KTX texture to a file", res).what());
+
+    if (res != KTX_SUCCESS) {
+      return Result<std::filesystem::path>::Error(
+          KtxError("Cannot write KTX texture to a file", res).what());
+    }
   }
 
   ktxTexture_Destroy(baseTexture);
@@ -83,8 +87,10 @@ AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
         "Texture arrays are not supported");
   }
 
+  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
+
   AssetData<TextureAsset> texture{};
-  texture.name = filePath.filename().string();
+  texture.name = assetName;
   texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
   texture.path = filePath;
   texture.data.data = new char[texture.size];

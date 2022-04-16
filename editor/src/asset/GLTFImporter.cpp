@@ -158,7 +158,7 @@ loadTextures(const tinygltf::Model &model, const liquid::String &fileName,
     // TODO: Support creating different samplers
     auto &image = model.images.at(model.textures.at(i).source);
     liquid::AssetData<liquid::TextureAsset> texture{};
-    texture.name = image.uri;
+    texture.name = fileName + "/" + image.uri;
     texture.type = liquid::AssetType::Texture;
     texture.size = image.width * image.height * 4;
     texture.data.data =
@@ -193,7 +193,7 @@ loadMaterials(const tinygltf::Model &model, const liquid::String &fileName,
     auto &gltfMaterial = model.materials.at(i);
 
     liquid::AssetData<liquid::MaterialAsset> material;
-    material.name = fileName + "-material" + std::to_string(i);
+    material.name = fileName + "/" + fileName + "-material" + std::to_string(i);
     material.type = liquid::AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
@@ -553,7 +553,8 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
 
         if (vertices.size() > 0) {
           skinnedMesh.data.geometries.push_back({vertices, indices, material});
-          skinnedMesh.name = fileName + "-skinnedmesh" + std::to_string(i);
+          skinnedMesh.name =
+              fileName + "/" + fileName + "-skinnedmesh" + std::to_string(i);
           skinnedMesh.type = liquid::AssetType::SkinnedMesh;
 
           auto it = skeletonMeshMap.find(i);
@@ -570,7 +571,7 @@ loadMeshes(const tinygltf::Model &model, const liquid::String &fileName,
         const auto &[vertices, indices] =
             loadStandardMeshAttributes<liquid::Vertex>(primitive, i, p, model);
         if (vertices.size() > 0) {
-          mesh.name = fileName + "-mesh" + std::to_string(i);
+          mesh.name = fileName + "/" + fileName + "-mesh" + std::to_string(i);
           mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
 
@@ -688,7 +689,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
 
     liquid::AssetData<liquid::SkeletonAsset> asset;
-    asset.name = fileName + ":skeleton" + std::to_string(si);
+    asset.name = fileName + "/" + fileName + ":skeleton" + std::to_string(si);
     asset.type = liquid::AssetType::Skeleton;
 
     for (auto &joint : skin.joints) {
@@ -830,7 +831,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
     }
 
     liquid::AssetData<liquid::AnimationAsset> animation;
-    animation.name = gltfAnimation.name;
+    animation.name = fileName + "/" + gltfAnimation.name;
     animation.data.time = maxTime;
 
     int32_t targetNode = -1;
@@ -931,7 +932,7 @@ void loadPrefabs(
     const SkeletonData &skeletons, const AnimationData &animations) {
 
   liquid::AssetData<liquid::PrefabAsset> prefab;
-  prefab.name = fileName;
+  prefab.name = fileName + "/" + fileName;
   prefab.type = liquid::AssetType::Prefab;
 
   auto &gltfNodes = model.scenes.at(model.defaultScene);
@@ -1000,7 +1001,8 @@ void loadPrefabs(
     }
   }
 
-  manager.getRegistry().getPrefabs().addAsset(prefab);
+  auto path = manager.createPrefabFromAsset(prefab);
+  manager.loadPrefabFromFile(path.getData());
 }
 
 GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
@@ -1027,6 +1029,22 @@ void GLTFImporter::loadFromFile(const liquid::String &filename) {
   }
 
   auto baseName = std::filesystem::path(filename).filename().string();
+
+  auto &assetsPath = mAssetManager.getAssetsPath();
+
+  auto prefabPath = assetsPath / baseName;
+  uint32_t index = 1;
+  auto tmpPath = prefabPath;
+  while (std::filesystem::exists(tmpPath)) {
+    tmpPath = prefabPath;
+    liquid::String uniqueSuffix = "-" + std::to_string(index++);
+    tmpPath += uniqueSuffix;
+  }
+
+  prefabPath = tmpPath;
+  baseName = std::filesystem::path(prefabPath).filename().string();
+
+  std::filesystem::create_directory(prefabPath);
 
   GLTFToAsset<liquid::MeshAssetHandle> meshMap;
   GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;

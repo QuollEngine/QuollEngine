@@ -42,7 +42,15 @@ int main() {
 
   auto *device = backend.createDefaultDevice();
 
-  liquid::AssetManager assetManager(std::filesystem::current_path());
+  auto tmpProjectPath = std::filesystem::current_path() / "tmp-project";
+  if (!std::filesystem::exists(tmpProjectPath)) {
+    std::filesystem::create_directory(tmpProjectPath);
+  }
+
+  liquid::AssetManager assetManager(tmpProjectPath);
+
+  assetManager.preloadAssets();
+
   liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext,
@@ -86,9 +94,7 @@ int main() {
                                                    &assetManager](
                                                       liquid::AssetType type,
                                                       uint32_t handle) {
-      if (type != liquid::AssetType::Mesh &&
-          type != liquid::AssetType::SkinnedMesh &&
-          type != liquid::AssetType::Prefab) {
+      if (type != liquid::AssetType::Prefab) {
         return;
       }
 
@@ -100,15 +106,16 @@ int main() {
       liquid::TransformComponent transform;
       transform.localPosition = orientation[3];
 
-      auto entity = entityContext.createEntity();
-      entityContext.setComponent<liquid::DebugComponent>(entity, {});
+      auto parentEntity = entityContext.createEntity();
+      entityContext.setComponent<liquid::DebugComponent>(parentEntity, {});
       auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
-          entity, transform);
+          parentEntity, transform);
 
       if (type == liquid::AssetType::Prefab) {
         auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
             static_cast<liquid::PrefabAssetHandle>(handle));
-        entityContext.setComponent<liquid::NameComponent>(entity, {asset.name});
+        entityContext.setComponent<liquid::NameComponent>(parentEntity,
+                                                          {asset.name});
 
         std::map<uint32_t, liquid::Entity> entityMap;
 
@@ -163,40 +170,6 @@ int main() {
         }
 
         return;
-      }
-
-      if (type == liquid::AssetType::Mesh) {
-        entityContext.setComponent<liquid::MeshComponent>(
-            entity, {renderer.createMeshInstance(
-                        static_cast<liquid::MeshAssetHandle>(handle),
-                        assetManager.getRegistry())});
-      } else if (type == liquid::AssetType::SkinnedMesh) {
-        auto skinnedMeshHandle =
-            static_cast<liquid::SkinnedMeshAssetHandle>(handle);
-        entityContext.setComponent<liquid::SkinnedMeshComponent>(
-            entity, {renderer.createMeshInstance(skinnedMeshHandle,
-                                                 assetManager.getRegistry())});
-        auto skeletonHandle = assetManager.getRegistry()
-                                  .getSkinnedMeshes()
-                                  .getAsset(skinnedMeshHandle)
-                                  .data.skeleton;
-        if (skeletonHandle != liquid::SkeletonAssetHandle::Invalid) {
-          const auto &skeleton = assetManager.getRegistry()
-                                     .getSkeletons()
-                                     .getAsset(skeletonHandle)
-                                     .data;
-          liquid::Skeleton skeletonInstance(
-              skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-              skeleton.jointLocalScales, skeleton.jointParents,
-              skeleton.jointInverseBindMatrices, skeleton.jointNames,
-              &renderer.getRegistry());
-
-          entityContext.setComponent<liquid::SkeletonComponent>(
-              entity, {std::move(skeletonInstance)});
-
-          entityContext.getComponent<liquid::SkeletonComponent>(entity)
-              .skeleton.update();
-        }
       }
     });
 
