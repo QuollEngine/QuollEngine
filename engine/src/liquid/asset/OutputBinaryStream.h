@@ -106,6 +106,15 @@ template <> inline void OutputBinaryStream::write(const glm::vec4 &value) {
 }
 
 /**
+ * @brief Write GLM quat to file
+ *
+ * @param value GLM quat value
+ */
+template <> inline void OutputBinaryStream::write(const glm::quat &value) {
+  write(glm::value_ptr(value), sizeof(glm::quat));
+}
+
+/**
  * @brief Write vector of dynamic strings to file
  *
  * @param value String vector

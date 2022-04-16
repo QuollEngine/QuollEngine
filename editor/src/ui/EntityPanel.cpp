@@ -15,7 +15,7 @@ void EntityPanel::render(SceneManager &sceneManager,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
   bool open = true;
-  if (ImGui::Begin("Properties", &open)) {
+  if (ImGui::Begin("Inspector", &open)) {
     if (mEntityContext.hasEntity(mSelectedEntity)) {
       renderName();
       renderLight();

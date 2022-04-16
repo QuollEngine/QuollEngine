@@ -184,6 +184,14 @@ public:
    */
   void preloadAssets();
 
+  /**
+   * @brief Get asset name from path
+   *
+   * @param path Absolute path
+   * @return Asset name
+   */
+  String getAssetNameFromPath(const std::filesystem::path &path);
+
 private:
   /**
    * @brief Get relative path of the asset

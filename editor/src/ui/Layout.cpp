@@ -9,6 +9,7 @@ namespace liquidator {
 void Layout::setup() {
   const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
   const auto &viewport = ImGui::GetMainViewport();
+
   ImGui::SetNextWindowPos(
       ImVec2(viewport->Pos.x, viewport->Pos.y + ImGui::GetFrameHeight()));
   ImGui::SetNextWindowSize(ImVec2(
@@ -40,22 +41,31 @@ void Layout::setup() {
                                   ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 
-    constexpr float TWENTY_EIGHTY_SPLIT = 0.2f;
-    constexpr float HALF_SPLIT = 0.5f;
+    constexpr float RATIO_1_5 = 0.8f;
+    constexpr float RATIO_5_1 = 0.2f;
+    constexpr float RATIO_1_4 = 0.25;
 
-    ImGuiID viewId = -1;
-    ImGuiID leftSidebarBottomId = -1;
-    auto leftSidebarId = ImGui::DockBuilderSplitNode(
-        dockspaceId, ImGuiDir_Left, TWENTY_EIGHTY_SPLIT, nullptr, &viewId);
-    auto leftSidebarTopId = ImGui::DockBuilderSplitNode(
-        leftSidebarId, ImGuiDir_Up, HALF_SPLIT, nullptr, &leftSidebarBottomId);
+    ImGuiID topAreaId = -1;
+    auto browserId = ImGui::DockBuilderSplitNode(
+        dockspaceId, ImGuiDir_Down, RATIO_1_4, nullptr, &topAreaId);
 
-    ImGui::DockBuilderDockWindow("Scene", leftSidebarTopId);
-    ImGui::DockBuilderDockWindow("Properties", leftSidebarBottomId);
+    ImGuiID topRightAreaId = -1;
+    auto hierarchyId = ImGui::DockBuilderSplitNode(
+        topAreaId, ImGuiDir_Left, RATIO_5_1, nullptr, &topRightAreaId);
+
+    ImGuiID inspectorId = -1;
+    auto viewId = ImGui::DockBuilderSplitNode(topRightAreaId, ImGuiDir_Left,
+                                              RATIO_1_5, nullptr, &inspectorId);
+
+    ImGui::DockBuilderDockWindow("Hierarchy", hierarchyId);
+    ImGui::DockBuilderDockWindow("Inspector", inspectorId);
     ImGui::DockBuilderDockWindow("View", viewId);
+    ImGui::DockBuilderDockWindow("Asset Browser", browserId);
 
     ImGui::DockBuilderFinish(dockspaceId);
     mFirstTime = false;
+  } else {
+    ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
   }
 
   ImGui::End();

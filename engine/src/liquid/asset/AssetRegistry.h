@@ -96,13 +96,14 @@ public:
   inline PrefabMap &getPrefabs() { return mPrefabs; }
 
   /**
-   * @brief Get asset type located at path
+   * @brief Get asset located at path
    *
    * @param filePath Path to asset
-   * @retval AssetType::None Asset does not exist
-   * @return Asset type
+   * @retval {AssetType::None, 0} Asset does not exist
+   * @return Asset type and ID
    */
-  AssetType getAssetType(const std::filesystem::path &filePath);
+  std::pair<AssetType, uint32_t>
+  getAssetByPath(const std::filesystem::path &filePath);
 
 private:
   TextureMap mTextures;

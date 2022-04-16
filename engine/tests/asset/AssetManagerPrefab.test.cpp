@@ -17,10 +17,27 @@ public:
     liquid::AssetData<liquid::PrefabAsset> asset;
     asset.name = "test-prefab0";
 
+    std::random_device device;
+    std::mt19937 mt(device());
+    std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
+    std::uniform_int_distribution<int32_t> idist(-1, 2);
+
+    uint32_t numTransforms = 5;
     uint32_t numMeshes = 5;
     uint32_t numAnimators = 4;
     uint32_t numAnimationsPerAnimator = 3;
     uint32_t numSkeletons = 3;
+
+    for (uint32_t i = 0; i < numTransforms; ++i) {
+      liquid::PrefabTransformData transform{};
+      transform.position = {dist(mt), dist(mt), dist(mt)};
+      transform.rotation = {dist(mt), dist(mt), dist(mt), dist(mt)};
+      transform.scale = {dist(mt), dist(mt), dist(mt)};
+      transform.parent = idist(mt);
+
+      asset.data.transforms.push_back({i, transform});
+    }
+
     for (uint32_t i = 0; i < numMeshes; ++i) {
       liquid::AssetData<liquid::MeshAsset> mesh;
       mesh.path = std::filesystem::current_path() /
@@ -168,8 +185,31 @@ TEST_F(AssetManagerTest, CreatesPrefabFile) {
     }
   }
 
-  uint32_t dummy = 0;
-  file.read(dummy);
+  {
+    uint32_t numComponents = 0;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 5);
+    std::vector<liquid::PrefabTransformData> transforms(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      file.read(entity);
+
+      glm::vec3 position;
+      glm::quat rotation;
+      glm::vec3 scale;
+      int32_t parent = -1;
+      file.read(position);
+      file.read(rotation);
+      file.read(scale);
+      file.read(parent);
+
+      EXPECT_EQ(asset.data.transforms.at(i).entity, entity);
+      EXPECT_EQ(asset.data.transforms.at(i).value.position, position);
+      EXPECT_EQ(asset.data.transforms.at(i).value.rotation, rotation);
+      EXPECT_EQ(asset.data.transforms.at(i).value.scale, scale);
+      EXPECT_EQ(asset.data.transforms.at(i).value.parent, parent);
+    }
+  }
 
   {
     uint32_t numComponents = 0;
@@ -290,6 +330,17 @@ TEST_F(AssetManagerTest, LoadsPrefabFile) {
   EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Invalid);
 
   auto &prefab = manager.getRegistry().getPrefabs().getAsset(handle.getData());
+
+  EXPECT_EQ(asset.data.transforms.size(), prefab.data.transforms.size());
+  for (size_t i = 0; i < prefab.data.transforms.size(); ++i) {
+    auto &expected = asset.data.transforms.at(i);
+    auto &actual = prefab.data.transforms.at(i);
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value.position, actual.value.position);
+    EXPECT_EQ(expected.value.rotation, actual.value.rotation);
+    EXPECT_EQ(expected.value.scale, actual.value.scale);
+    EXPECT_EQ(expected.value.parent, actual.value.parent);
+  }
 
   EXPECT_EQ(asset.data.meshes.size(), prefab.data.meshes.size());
   for (size_t i = 0; i < prefab.data.meshes.size(); ++i) {

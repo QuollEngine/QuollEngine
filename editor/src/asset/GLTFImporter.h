@@ -10,7 +10,8 @@ public:
   GLTFImporter(liquid::AssetManager &assetManager,
                liquid::rhi::ResourceRegistry &deviceRegistry);
 
-  void loadFromFile(const liquid::String &filename);
+  void loadFromFile(const liquid::String &filename,
+                    const std::filesystem::path &directory);
 
 private:
   liquid::AssetManager &mAssetManager;

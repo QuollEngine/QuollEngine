@@ -106,6 +106,15 @@ template <> inline void InputBinaryStream::read(glm::vec4 &value) {
 }
 
 /**
+ * @brief Read binary data into GLM quat
+ *
+ * @param value GLM quat value
+ */
+template <> inline void InputBinaryStream::read(glm::quat &value) {
+  read(glm::value_ptr(value), sizeof(glm::quat));
+}
+
+/**
  * @brief Read binary data into vector of strings
  *
  * @param value String vector

@@ -9,7 +9,16 @@ template <class T> struct PrefabComponent {
   T value{};
 };
 
+struct PrefabTransformData {
+  glm::vec3 position;
+  glm::quat rotation;
+  glm::vec3 scale;
+
+  int32_t parent = -1;
+};
+
 struct PrefabAsset {
+  std::vector<PrefabComponent<PrefabTransformData>> transforms;
   std::vector<PrefabComponent<MeshAssetHandle>> meshes;
   std::vector<PrefabComponent<SkinnedMeshAssetHandle>> skinnedMeshes;
   std::vector<PrefabComponent<SkeletonAssetHandle>> skeletons;
