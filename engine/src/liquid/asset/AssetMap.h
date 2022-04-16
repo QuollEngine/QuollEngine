@@ -61,12 +61,20 @@ public:
   /**
    * @brief Check if asset exists
    *
+   * @param handle Asset handle
    * @retval true Asset exists
    * @retval false Asset does not exist
    */
   inline bool hasAsset(THandle handle) const {
     return mAssets.find(handle) != mAssets.end();
   }
+
+  /**
+   * @brief Delete asset
+   *
+   * @param handle Asset handle
+   */
+  void deleteAsset(THandle handle) { mAssets.erase(handle); }
 
 private:
   THandle getNewHandle() {

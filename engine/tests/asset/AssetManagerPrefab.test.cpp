@@ -252,3 +252,97 @@ TEST_F(AssetManagerTest, LoadsPrefabFile) {
     }
   }
 }
+
+TEST_F(AssetManagerTest, LoadsPrefabWithMeshAnimationSkeleton) {
+
+  // Create texture
+  auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
+
+  // Create material
+  liquid::AssetData<liquid::MaterialAsset> materialData{};
+  materialData.name = "test-prefab-mesh-material";
+  materialData.data.baseColorTexture = textureHandle.getData();
+  auto materialPath = manager.createMaterialFromAsset(materialData);
+  auto materialHandle = manager.loadMaterialFromFile(materialPath.getData());
+
+  // Create mesh
+  liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
+  meshData.name = "test-prefab-mesh";
+  liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
+  geometry.material = materialHandle.getData();
+  meshData.data.geometries.push_back(geometry);
+  auto meshPath = manager.createSkinnedMeshFromAsset(meshData);
+  auto meshHandle = manager.loadSkinnedMeshFromFile(meshPath.getData());
+
+  // Create skeleton
+  liquid::AssetData<liquid::SkeletonAsset> skeletonData{};
+  skeletonData.name = "test-prefab-skeleton";
+  auto skeletonPath = manager.createSkeletonFromAsset(skeletonData);
+  auto skeletonHandle = manager.loadSkeletonFromFile(skeletonPath.getData());
+
+  // Create animation
+  liquid::AssetData<liquid::AnimationAsset> animationData{};
+  animationData.name = "test-prefab-animation";
+  animationData.data.time = 2.5;
+  auto animationPath =
+      manager.createAnimationFromAsset(animationData).getData();
+  auto animationHandle = manager.loadAnimationFromFile(animationPath);
+
+  // Create prefab
+  liquid::AssetData<liquid::PrefabAsset> prefabData{};
+  prefabData.data.skinnedMeshes.push_back({0U, meshHandle.getData()});
+  prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
+  liquid::PrefabComponent<liquid::AnimatorComponent> animator{};
+  animator.entity = 0;
+  animator.value.animations.push_back(animationHandle.getData());
+  prefabData.data.animators.push_back(animator);
+
+  auto prefabPath = manager.createPrefabFromAsset(prefabData);
+
+  // Delete all existing assets
+  manager.getRegistry().getTextures().deleteAsset(textureHandle.getData());
+  manager.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
+  manager.getRegistry().getSkinnedMeshes().deleteAsset(meshHandle.getData());
+  manager.getRegistry().getSkeletons().deleteAsset(skeletonHandle.getData());
+  manager.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
+
+  auto prefabHandle = manager.loadPrefabFromFile(prefabPath.getData());
+  EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Invalid);
+
+  auto &newPrefab =
+      manager.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
+
+  // Validate mesh
+  EXPECT_NE(newPrefab.data.skinnedMeshes.at(0).value,
+            liquid::SkinnedMeshAssetHandle::Invalid);
+  auto &newMesh = manager.getRegistry().getSkinnedMeshes().getAsset(
+      newPrefab.data.skinnedMeshes.at(0).value);
+  EXPECT_NE(newMesh.data.geometries.at(0).material,
+            liquid::MaterialAssetHandle::Invalid);
+
+  // Validate material
+  auto &newMaterial = manager.getRegistry().getMaterials().getAsset(
+      newMesh.data.geometries.at(0).material);
+  EXPECT_NE(newMaterial.data.baseColorTexture,
+            liquid::TextureAssetHandle::Invalid);
+
+  // Validate texture
+  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+      newMaterial.data.baseColorTexture);
+  EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
+
+  // Validate skeleton
+  EXPECT_NE(newPrefab.data.skeletons.at(0).value,
+            liquid::SkeletonAssetHandle::Invalid);
+  auto &newSkeleton = manager.getRegistry().getSkeletons().getAsset(
+      newPrefab.data.skeletons.at(0).value);
+  EXPECT_EQ(newSkeleton.name, "test-prefab-skeleton.lqskel");
+
+  // Validate animation
+  auto newAnimationHandle =
+      newPrefab.data.animators.at(0).value.animations.at(0);
+  EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Invalid);
+  auto &newAnimation =
+      manager.getRegistry().getAnimations().getAsset(newAnimationHandle);
+  EXPECT_EQ(newAnimation.name, "test-prefab-animation.lqanim");
+}
