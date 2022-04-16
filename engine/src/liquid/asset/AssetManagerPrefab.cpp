@@ -122,6 +122,8 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
     return Result<PrefabAssetHandle>::Error(header.getError());
   }
 
+  std::vector<String> warnings;
+
   AssetData<PrefabAsset> prefab{};
   prefab.path = filePath;
   prefab.name = filePath.filename().string();
@@ -140,6 +142,10 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
       const auto &res = getOrLoadMeshFromPath(assetPathStr);
       if (res.hasData()) {
         component.at(i).value = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+      } else {
+        warnings.push_back("Cannot load mesh in path: " + assetPathStr);
       }
     }
   }
@@ -158,6 +164,10 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
       const auto &res = getOrLoadSkinnedMeshFromPath(assetPathStr);
       if (res.hasData()) {
         component.at(i).value = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+      } else {
+        warnings.push_back("Cannot skinned load mesh in path: " + assetPathStr);
       }
     }
   }
@@ -175,6 +185,10 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
       const auto &res = getOrLoadSkeletonFromPath(assetPathStr);
       if (res.hasData()) {
         component.at(i).value = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+      } else {
+        warnings.push_back("Cannot load skeleton in path: " + assetPathStr);
       }
     }
   }
@@ -194,6 +208,11 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
       const auto &res = getOrLoadAnimationFromPath(assetPathStr);
       if (res.hasData()) {
         localMap.at(i) = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+
+      } else {
+        warnings.push_back("Cannot load animation in path: " + assetPathStr);
       }
     }
   }
@@ -230,7 +249,8 @@ AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
     }
   }
 
-  return Result<PrefabAssetHandle>::Ok(mRegistry.getPrefabs().addAsset(prefab));
+  return Result<PrefabAssetHandle>::Ok(mRegistry.getPrefabs().addAsset(prefab),
+                                       warnings);
 }
 
 } // namespace liquid

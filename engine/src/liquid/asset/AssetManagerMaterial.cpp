@@ -92,6 +92,8 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.baseColorTexture = res.getData();
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
     file.read(material.data.baseColorTextureCoord);
     file.read(material.data.baseColorFactor);
@@ -104,7 +106,10 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.metallicRoughnessTexture = res.getData();
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
+
     file.read(material.data.metallicRoughnessTextureCoord);
     file.read(material.data.metallicFactor);
     file.read(material.data.roughnessFactor);
@@ -117,6 +122,8 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.normalTexture = res.getData();
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
     file.read(material.data.normalTextureCoord);
     file.read(material.data.normalScale);
@@ -129,6 +136,8 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.occlusionTexture = res.getData();
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
     file.read(material.data.occlusionTextureCoord);
     file.read(material.data.occlusionStrength);
@@ -141,6 +150,8 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
     const auto &res = getOrLoadTextureFromPath(texturePathStr);
     if (res.hasData()) {
       material.data.emissiveTexture = res.getData();
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
     file.read(material.data.emissiveTextureCoord);
     file.read(material.data.emissiveFactor);
