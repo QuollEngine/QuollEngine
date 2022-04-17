@@ -360,37 +360,37 @@ createMeshObject(const AssetData<TMeshAsset> &mesh, AssetRegistry &registry,
   BaseMesh<TVertex> tempMesh;
 
   for (auto &geometry : mesh.data.geometries) {
-    auto &material = registry.getMaterials().getAsset(geometry.material).data;
-
-    auto invalidHandle = TextureAssetHandle::Invalid;
-
     MaterialPBR::Properties properties;
-    properties.baseColorFactor = material.baseColorFactor;
-    properties.baseColorTexture =
-        getTextureFromRegistry(material.baseColorTexture);
-    properties.baseColorTextureCoord = material.baseColorTextureCoord;
 
-    properties.metallicFactor = material.metallicFactor;
-    properties.metallicRoughnessTexture =
-        getTextureFromRegistry(material.metallicRoughnessTexture);
-    properties.metallicRoughnessTextureCoord =
-        material.metallicRoughnessTextureCoord;
+    if (registry.getMaterials().hasAsset(geometry.material)) {
+      auto &material = registry.getMaterials().getAsset(geometry.material).data;
 
-    properties.normalScale = material.normalScale;
-    properties.normalTexture = getTextureFromRegistry(material.normalTexture);
+      properties.baseColorFactor = material.baseColorFactor;
+      properties.baseColorTexture =
+          getTextureFromRegistry(material.baseColorTexture);
+      properties.baseColorTextureCoord = material.baseColorTextureCoord;
 
-    properties.normalTextureCoord = material.normalTextureCoord;
+      properties.metallicFactor = material.metallicFactor;
+      properties.metallicRoughnessTexture =
+          getTextureFromRegistry(material.metallicRoughnessTexture);
+      properties.metallicRoughnessTextureCoord =
+          material.metallicRoughnessTextureCoord;
 
-    properties.occlusionStrength = material.occlusionStrength;
-    properties.occlusionTexture =
-        getTextureFromRegistry(material.occlusionTexture);
-    properties.occlusionTextureCoord = material.occlusionTextureCoord;
+      properties.normalScale = material.normalScale;
+      properties.normalTexture = getTextureFromRegistry(material.normalTexture);
 
-    properties.emissiveFactor = material.emissiveFactor;
-    properties.emissiveTexture =
-        getTextureFromRegistry(material.emissiveTexture);
-    properties.emissiveTextureCoord = material.emissiveTextureCoord;
+      properties.normalTextureCoord = material.normalTextureCoord;
 
+      properties.occlusionStrength = material.occlusionStrength;
+      properties.occlusionTexture =
+          getTextureFromRegistry(material.occlusionTexture);
+      properties.occlusionTextureCoord = material.occlusionTextureCoord;
+
+      properties.emissiveFactor = material.emissiveFactor;
+      properties.emissiveTexture =
+          getTextureFromRegistry(material.emissiveTexture);
+      properties.emissiveTextureCoord = material.emissiveTextureCoord;
+    }
     auto materialInstance =
         renderer.createMaterialPBR(properties, rhi::CullMode::None);
 

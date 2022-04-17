@@ -31,51 +31,52 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
   }
 }
 
-AssetType AssetRegistry::getAssetType(const std::filesystem::path &filePath) {
+std::pair<AssetType, uint32_t>
+AssetRegistry::getAssetByPath(const std::filesystem::path &filePath) {
   LIQUID_PROFILE_EVENT("AssetRegistry::getAssetType");
-  for (auto &[_, asset] : mTextures.getAssets()) {
+  for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Texture;
+      return {AssetType::Texture, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mMaterials.getAssets()) {
+  for (auto &[handle, asset] : mMaterials.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Material;
+      return {AssetType::Material, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mMeshes.getAssets()) {
+  for (auto &[handle, asset] : mMeshes.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Mesh;
+      return {AssetType::Mesh, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mSkinnedMeshes.getAssets()) {
+  for (auto &[handle, asset] : mSkinnedMeshes.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::SkinnedMesh;
+      return {AssetType::SkinnedMesh, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mSkeletons.getAssets()) {
+  for (auto &[handle, asset] : mSkeletons.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Skeleton;
+      return {AssetType::Skeleton, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mAnimations.getAssets()) {
+  for (auto &[handle, asset] : mAnimations.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Animation;
+      return {AssetType::Animation, static_cast<uint32_t>(handle)};
     }
   }
 
-  for (auto &[_, asset] : mPrefabs.getAssets()) {
+  for (auto &[handle, asset] : mPrefabs.getAssets()) {
     if (asset.path == filePath) {
-      return AssetType::Prefab;
+      return {AssetType::Prefab, static_cast<uint32_t>(handle)};
     }
   }
 
-  return AssetType::None;
+  return {AssetType::None, 0};
 }
 
 } // namespace liquid

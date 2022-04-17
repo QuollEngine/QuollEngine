@@ -84,16 +84,18 @@ int main() {
                                         editorGrid);
 
   liquidator::UIRoot ui(entityContext, gltfImporter);
+  ui.getIconRegistry().loadIcons(renderer.getRegistry(),
+                                 std::filesystem::current_path() / "assets" /
+                                     "icons");
 
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
 
-    debugLayer.getAssetBrowser().setOnLoadToScene([&entityContext, &renderer,
-                                                   &sceneManager,
-                                                   &animationSystem,
-                                                   &assetManager](
-                                                      liquid::AssetType type,
-                                                      uint32_t handle) {
+    ui.getAssetBrowser().setOnItemOpenHandler([&entityContext, &renderer,
+                                               &sceneManager, &animationSystem,
+                                               &assetManager](
+                                                  liquid::AssetType type,
+                                                  uint32_t handle) {
       if (type != liquid::AssetType::Prefab) {
         return;
       }
@@ -103,13 +105,13 @@ int main() {
           sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
       const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
 
-      liquid::TransformComponent transform;
-      transform.localPosition = orientation[3];
+      liquid::TransformComponent parentTransform;
+      parentTransform.localPosition = orientation[3];
 
       auto parentEntity = entityContext.createEntity();
       entityContext.setComponent<liquid::DebugComponent>(parentEntity, {});
       auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
-          parentEntity, transform);
+          parentEntity, parentTransform);
 
       if (type == liquid::AssetType::Prefab) {
         auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
@@ -119,18 +121,37 @@ int main() {
 
         std::map<uint32_t, liquid::Entity> entityMap;
 
-        auto getOrCreateEntity = [&entityMap, &entityContext, &parent,
-                                  &transform](uint32_t localId) mutable {
-          if (entityMap.find(localId) == entityMap.end()) {
-            auto entity = entityContext.createEntity();
-            entityMap.insert_or_assign(localId, entity);
-            entityContext.setComponent<liquid::DebugComponent>(entity, {});
+        auto getOrCreateEntity =
+            [&entityMap, &entityContext, &parent](
+                uint32_t localId,
+                const liquid::TransformComponent &transform = {}) mutable {
+              if (entityMap.find(localId) == entityMap.end()) {
+                auto entity = entityContext.createEntity();
+                entityMap.insert_or_assign(localId, entity);
+                entityContext.setComponent<liquid::DebugComponent>(entity, {});
 
-            parent->addChild(entity);
+                parent->addChild(entity, transform);
+              }
+
+              return entityMap.at(localId);
+            };
+
+        for (auto &item : asset.data.transforms) {
+          liquid::TransformComponent transform{};
+          transform.localPosition = item.value.position;
+          transform.localRotation = item.value.rotation;
+          transform.localScale = item.value.scale;
+          getOrCreateEntity(item.entity, transform);
+        }
+
+        for (auto &item : asset.data.transforms) {
+          auto &transform =
+              entityContext.getComponent<liquid::TransformComponent>(
+                  item.entity);
+          if (item.value.parent >= 0) {
+            transform.parent = getOrCreateEntity(item.value.parent);
           }
-
-          return entityMap.at(localId);
-        };
+        }
 
         for (auto &item : asset.data.meshes) {
           auto entity = getOrCreateEntity(item.entity);
@@ -312,7 +333,7 @@ int main() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
-      ui.render(sceneManager, assetManager.getRegistry(), physicsSystem);
+      ui.render(sceneManager, assetManager, physicsSystem);
 
       if (ImGui::Begin("View")) {
         const auto &size = ImGui::GetContentRegionAvail();

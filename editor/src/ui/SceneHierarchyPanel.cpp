@@ -11,7 +11,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &entityContext)
     : mEntityContext(entityContext) {}
 
 void SceneHierarchyPanel::render(SceneManager &sceneManager) {
-  ImGui::Begin("Scene");
+  ImGui::Begin("Hierarchy");
   for (auto *child :
        sceneManager.getActiveScene()->getRootNode()->getChildren()) {
     renderNode(child, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);

@@ -7,7 +7,9 @@
 #include "EntityPanel.h"
 #include "EditorGridPanel.h"
 #include "StatusBar.h"
+#include "AssetBrowser.h"
 #include "Layout.h"
+#include "IconRegistry.h"
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
 
@@ -29,11 +31,25 @@ public:
    * Renders all components inside the root
    *
    * @param sceneManager Scene manager
-   * @param animationSystem Animation system
+   * @param assetManager Asset manager
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager, liquid::AssetRegistry &assetRegistry,
+  void render(SceneManager &sceneManager, liquid::AssetManager &assetManager,
               liquid::PhysicsSystem &physicsSystem);
+
+  /**
+   * @brief Get icon registry
+   *
+   * @return Icon registry
+   */
+  inline IconRegistry &getIconRegistry() { return mIconRegistry; }
+
+  /**
+   * @brief Get asset browser panel
+   *
+   * @return Asset browser panel
+   */
+  inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
 private:
   /**
@@ -48,8 +64,10 @@ private:
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
   EditorGridPanel mEditorCameraPanel;
+  AssetBrowser mAssetBrowser;
   StatusBar mStatusBar;
   Layout mLayout;
+  IconRegistry mIconRegistry;
 };
 
 } // namespace liquidator

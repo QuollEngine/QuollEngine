@@ -47,7 +47,7 @@ void AssetManager::preloadAssets() {
       continue;
     }
 
-    if (mRegistry.getAssetType(entry.path()) != AssetType::None) {
+    if (mRegistry.getAssetByPath(entry.path()).first != AssetType::None) {
       continue;
     }
 
@@ -84,6 +84,12 @@ void AssetManager::preloadAssets() {
       loadPrefabDataFromInputStream(stream, entry.path());
     }
   }
+}
+
+String AssetManager::getAssetNameFromPath(const std::filesystem::path &path) {
+  auto relativePath = std::filesystem::relative(path, mAssetsPath).string();
+  std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
+  return relativePath;
 }
 
 } // namespace liquid

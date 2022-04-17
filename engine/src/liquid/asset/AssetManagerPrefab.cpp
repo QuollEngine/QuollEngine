@@ -107,10 +107,20 @@ AssetManager::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   // Load component data
+  {
+    auto numComponents = static_cast<uint32_t>(asset.data.transforms.size());
 
-  // Size for transforms
-  uint32_t dummySize = 0;
-  file.write(dummySize);
+    file.write(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      const auto &transform = asset.data.transforms.at(i).value;
+      file.write(asset.data.transforms.at(i).entity);
+
+      file.write(transform.position);
+      file.write(transform.rotation);
+      file.write(transform.scale);
+      file.write(transform.parent);
+    }
+  }
 
   {
     auto numComponents = static_cast<uint32_t>(asset.data.meshes.size());
@@ -257,8 +267,27 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     }
   }
 
-  uint32_t dummy = 0;
-  stream.read(dummy);
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+    prefab.data.transforms.resize(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      glm::vec3 position;
+      glm::quat rotation;
+      glm::vec3 scale;
+      int32_t parent = -1;
+      stream.read(position);
+      stream.read(rotation);
+      stream.read(scale);
+      stream.read(parent);
+
+      prefab.data.transforms.at(i).entity = entity;
+      prefab.data.transforms.at(i).value = {position, rotation, scale, parent};
+    }
+  }
 
   {
     uint32_t numComponents = 0;

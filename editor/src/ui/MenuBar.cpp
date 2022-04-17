@@ -8,8 +8,6 @@
 
 namespace liquidator {
 
-MenuBar::MenuBar(GLTFImporter &importer) : mImporter(importer) {}
-
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(
       "Create New Scene", "Are you sure you want to create a new scene?",
@@ -21,10 +19,6 @@ void MenuBar::render(SceneManager &sceneManager) {
         confirmCreateNewScene.show();
       }
 
-      if (ImGui::MenuItem("Import GLTF...", nullptr)) {
-        handleAssetImport(mFileDialog.getFilePathFromDialog({"gltf"}));
-      }
-
       ImGui::EndMenu();
     }
 
@@ -32,10 +26,6 @@ void MenuBar::render(SceneManager &sceneManager) {
   }
 
   confirmCreateNewScene.render(sceneManager);
-}
-
-void MenuBar::handleAssetImport(const liquid::String &filePath) {
-  mImporter.loadFromFile(filePath);
 }
 
 void MenuBar::handleNewScene(SceneManager &sceneManager) {
