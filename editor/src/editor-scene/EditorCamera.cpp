@@ -88,6 +88,12 @@ EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
 
   mScrollWheelHandler =
       mWindow.addScrollWheelHandler([this](double xoffset, double yoffset) {
+        const auto &pos = mWindow.getCurrentMousePosition();
+        if (pos.x < mX || pos.x > mX + mWidth || pos.y < mY ||
+            pos.y > mY + mHeight) {
+          return;
+        }
+
         if (mInputState != InputState::None) {
           return;
         }
