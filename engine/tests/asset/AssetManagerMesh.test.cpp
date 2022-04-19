@@ -159,10 +159,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
       glm::vec3 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Position"
-          << "(" << i << ", " << v << "): " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -171,9 +168,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
       glm::vec3 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Normal: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -182,9 +177,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
       glm::vec4 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Tangent: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -193,9 +186,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
       glm::vec2 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "TexCoord0: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -204,9 +195,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
       glm::vec2 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "TexCoord1: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     uint32_t numIndices = 0;
@@ -332,9 +321,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec3 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Position: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -343,9 +330,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec3 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Normal: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -354,9 +339,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec4 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Tangent: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -365,9 +348,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec2 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "TexCoord0: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -376,9 +357,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec2 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "TexCoord1: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -387,9 +366,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::uvec4 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Joints: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
@@ -398,9 +375,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       glm::vec4 valueActual;
       file.read(valueActual);
 
-      EXPECT_EQ(valueExpected, valueActual)
-          << "Weights: " << glm::to_string(valueExpected)
-          << " != " << glm::to_string(valueActual);
+      EXPECT_EQ(valueExpected, valueActual);
     }
 
     uint32_t numIndices = 0;

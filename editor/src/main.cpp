@@ -26,6 +26,7 @@
 #include "editor-scene/SceneManager.h"
 #include "editor-scene/EditorGrid.h"
 #include "ui/UIRoot.h"
+#include "ui/AssetLoadStatusDialog.h"
 
 static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
@@ -49,7 +50,13 @@ int main() {
 
   liquid::AssetManager assetManager(tmpProjectPath);
 
-  assetManager.preloadAssets();
+  auto res = assetManager.preloadAssets();
+  liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
+  preloadStatusDialog.setMessages(res.getWarnings());
+
+  if (res.hasWarnings()) {
+    preloadStatusDialog.show();
+  }
 
   liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
@@ -147,13 +154,17 @@ int main() {
         for (auto &item : asset.data.transforms) {
           auto &transform =
               entityContext.getComponent<liquid::TransformComponent>(
-                  item.entity);
+                  entityMap.at(item.entity));
           if (item.value.parent >= 0) {
             transform.parent = getOrCreateEntity(item.value.parent);
           }
         }
 
         for (auto &item : asset.data.meshes) {
+          if (!assetManager.getRegistry().getMeshes().hasAsset(item.value)) {
+            continue;
+          }
+
           auto entity = getOrCreateEntity(item.entity);
           entityContext.setComponent<liquid::MeshComponent>(
               entity, {renderer.createMeshInstance(
@@ -161,6 +172,11 @@ int main() {
         }
 
         for (auto &item : asset.data.skinnedMeshes) {
+          if (!assetManager.getRegistry().getSkinnedMeshes().hasAsset(
+                  item.value)) {
+            continue;
+          }
+
           auto entity = getOrCreateEntity(item.entity);
           entityContext.setComponent<liquid::SkinnedMeshComponent>(
               entity, {renderer.createMeshInstance(
@@ -168,6 +184,10 @@ int main() {
         }
 
         for (auto &item : asset.data.skeletons) {
+          if (!assetManager.getRegistry().getSkeletons().hasAsset(item.value)) {
+            continue;
+          }
+
           auto entity = getOrCreateEntity(item.entity);
 
           const auto &skeleton = assetManager.getRegistry()
@@ -329,7 +349,7 @@ int main() {
 
     mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
                           &assetManager, &graph, &physicsSystem, &ui,
-                          &debugLayer]() {
+                          &debugLayer, &preloadStatusDialog]() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
@@ -346,6 +366,7 @@ int main() {
         ImGui::End();
       }
 
+      preloadStatusDialog.render();
       debugLayer.render();
       imgui.endRendering();
 

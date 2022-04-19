@@ -306,7 +306,7 @@ Result<SkinnedMeshAssetHandle> AssetManager::loadSkinnedMeshDataFromInputStream(
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     } else {
-      warnings.push_back("Mesh does not have material");
+      warnings.push_back(res.getError());
     }
   }
 

@@ -6,6 +6,8 @@
 #include "../asset/GLTFImporter.h"
 #include "IconRegistry.h"
 
+#include "AssetLoadStatusDialog.h"
+
 namespace liquidator {
 
 class AssetBrowser {
@@ -51,6 +53,12 @@ public:
   void reload();
 
 private:
+  /**
+   * @brief Handle GLTF import
+   */
+  void handleGLTFImport();
+
+private:
   std::vector<Entry> mEntries;
   std::filesystem::path mCurrentDirectory;
   bool mDirectoryChanged = true;
@@ -59,6 +67,8 @@ private:
   liquid::platform_tools::NativeFileDialog mFileDialog;
 
   std::function<void(liquid::AssetType, uint32_t)> mOnItemOpenHandler;
+
+  AssetLoadStatusDialog mStatusDialog;
 };
 
 } // namespace liquidator
