@@ -13,13 +13,13 @@ const glm::mat4 Light::getProjectionViewMatrix() const {
   const float DIR_LIGHT_NEAR = 0.001f;
   const float DIR_LIGHT_FAR = 100.0f;
   const float DIR_LIGHT_Z = 0.01f;
-  glm::vec3 mPosition{mDirection + mDirection * DIR_LIGHT_SIZE};
+  glm::vec3 mPosition{-mDirection - mDirection * DIR_LIGHT_SIZE};
   mPosition.z = DIR_LIGHT_Z;
   glm::mat4 lightProjectionMatrix =
       glm::ortho(-DIR_LIGHT_SIZE, DIR_LIGHT_SIZE, -DIR_LIGHT_SIZE,
                  DIR_LIGHT_SIZE, DIR_LIGHT_NEAR, DIR_LIGHT_FAR);
   glm::mat4 lightViewMatrix = glm::lookAt(
-      mPosition, mPosition - mDirection - glm::vec3(0.0f, 0.0f, DIR_LIGHT_Z),
+      mPosition, mPosition + mDirection - glm::vec3(0.0f, 0.0f, DIR_LIGHT_Z),
       {0.0f, 1.0f, 0.0f});
   return lightProjectionMatrix * lightViewMatrix;
 }

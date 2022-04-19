@@ -11,6 +11,8 @@ SceneManager::SceneManager(liquid::EntityContext &entityContext,
 void SceneManager::requestEmptyScene() { mNewSceneRequested = true; }
 
 void SceneManager::createNewScene() {
+  static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
+
   if (!mNewSceneRequested)
     return;
 
@@ -29,8 +31,13 @@ void SceneManager::createNewScene() {
       light1, {std::make_shared<liquid::Light>(
                   liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
                   glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
+  mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
 
-  mActiveScene->getRootNode()->addChild(light1);
+  liquid::TransformComponent transform{};
+  transform.localPosition = LIGHT_START_POS;
+  transform.localRotation = glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
+
+  mActiveScene->getRootNode()->addChild(light1, transform);
 
   mNewSceneRequested = false;
 }

@@ -309,7 +309,7 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
     });
   }
 
-  return {graph, {mainColor, depthBuffer, BLUEISH_CLEAR_VALUE}};
+  return {graph, {mainColor, depthBuffer, shadowmap, BLUEISH_CLEAR_VALUE}};
 }
 
 SharedPtr<Material> Renderer::createMaterial(

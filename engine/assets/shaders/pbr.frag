@@ -225,7 +225,7 @@ struct LightCalculations {
  */
 LightCalculations getDirectionalLightSurfaceCalculations(LightData light,
                                                          vec3 n, vec3 v) {
-  vec3 direction = light.direction.xyz;
+  vec3 direction = -light.direction.xyz;
   vec3 l = normalize(direction);
   vec3 h = normalize(v + l);
 
@@ -238,11 +238,10 @@ LightCalculations getDirectionalLightSurfaceCalculations(LightData light,
  * Calculate shadow factor
  *
  * @param fragLightPosition Light position
- * @param lightDirection Light direction
  * @param layer Shadowmap layer
  * @return Shadow factor
  */
-float calculateShadow(vec4 fragLightPosition, vec3 lightDirection, uint layer) {
+float calculateShadow(vec4 fragLightPosition, uint layer) {
   vec3 shadowCoords = fragLightPosition.xyz / fragLightPosition.w;
 
   float closestDepth = texture(uShadowmap, vec3(shadowCoords.xy, layer)).r;
@@ -323,8 +322,7 @@ void main() {
     vec3 diffuseBRDF = (vec3(1.0) - F) * (1 / PI) * diffuseColor;
     vec3 specularBRDF = F * D * G / (4 * NdotL * NdotV);
 
-    float shadow = calculateShadow(fragLightPosition,
-                                   uSceneData.lights[i].direction.xyz, i);
+    float shadow = calculateShadow(fragLightPosition, i);
     color += vec3(lightColor) * shadow * NdotL * lightIntensity *
              (diffuseBRDF + specularBRDF);
   }

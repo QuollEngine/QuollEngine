@@ -144,6 +144,8 @@ TEST(SceneNodeTest, UpdatesLightIfExists) {
 
   liquid::TransformComponent transform;
   transform.localPosition = glm::vec3(1.0f, 0.5f, 1.0f);
+  transform.localRotation = glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
+  transform.localScale = glm::vec3(1.5f, 1.5f, 1.5f);
 
   auto entity = context.createEntity();
 
@@ -156,9 +158,13 @@ TEST(SceneNodeTest, UpdatesLightIfExists) {
   liquid::SceneNode sceneNode(entity, transform, nullptr, context);
   sceneNode.update();
 
-  EXPECT_EQ(
-      context.getComponent<liquid::LightComponent>(entity).light->getPosition(),
-      transform.localPosition);
+  const auto &light =
+      context.getComponent<liquid::LightComponent>(entity).light;
+
+  EXPECT_EQ(light->getPosition(), transform.localPosition);
+  EXPECT_LT(std::abs(light->getDirection().x), 0.000001f);
+  EXPECT_LT(std::abs(light->getDirection().z), 0.000001f);
+  EXPECT_EQ(light->getDirection().y, -1.0f);
 }
 
 TEST(SceneNodeTest, DeletesChildIfExists) {

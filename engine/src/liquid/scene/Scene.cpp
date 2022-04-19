@@ -71,8 +71,23 @@ void SceneNode::update() {
   }
 
   if (mEntityContext.hasComponent<LightComponent>(mEntity)) {
+    glm::quat rotation;
+    glm::vec3 empty3;
+    glm::vec4 empty4;
+    glm::vec3 position;
+
+    glm::decompose(component.worldTransform, empty3, rotation, position, empty3,
+                   empty4);
+
+    rotation = glm::conjugate(rotation);
+
     mEntityContext.getComponent<LightComponent>(mEntity).light->setPosition(
-        component.worldTransform[3]);
+        position);
+    auto direction =
+        glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
+
+    mEntityContext.getComponent<LightComponent>(mEntity).light->setDirection(
+        direction);
   }
 
   for (auto &node : mChildren) {
