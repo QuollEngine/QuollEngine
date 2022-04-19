@@ -30,7 +30,7 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
 }
 
 AssetBrowser::AssetBrowser(GLTFImporter &gltfImporter)
-    : mGltfImporter(gltfImporter) {}
+    : mGltfImporter(gltfImporter), mStatusDialog("AssetLoadStatus") {}
 
 void AssetBrowser::render(liquid::AssetManager &assetManager,
                           IconRegistry &iconRegistry) {
@@ -77,9 +77,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
   if (ImGui::Begin("Asset Browser")) {
     if (ImGui::BeginPopupContextWindow()) {
       if (ImGui::MenuItem("Import GLTF")) {
-        auto filePath = mFileDialog.getFilePathFromDialog({"gltf"});
-        mGltfImporter.loadFromFile(filePath, mCurrentDirectory);
-        reload();
+        handleGLTFImport();
       }
       ImGui::EndPopup();
     }
@@ -142,6 +140,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
   }
 
   ImGui::End();
+
+  mStatusDialog.render();
 }
 
 void AssetBrowser::setOnItemOpenHandler(
@@ -150,5 +150,29 @@ void AssetBrowser::setOnItemOpenHandler(
 }
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
+
+void AssetBrowser::handleGLTFImport() {
+  auto filePath = mFileDialog.getFilePathFromDialog({"gltf"});
+  if (filePath.empty())
+    return;
+
+  auto res = mGltfImporter.loadFromFile(filePath, mCurrentDirectory);
+
+  if (res.hasError()) {
+    mStatusDialog.setTitle("GLTF import Error");
+    mStatusDialog.setMessages({res.getError()});
+    mStatusDialog.show();
+
+    return;
+  }
+
+  if (res.hasWarnings()) {
+    mStatusDialog.setTitle("GLTF Import: Warnings");
+    mStatusDialog.setMessages(res.getWarnings());
+    mStatusDialog.show();
+  }
+
+  reload();
+}
 
 } // namespace liquidator

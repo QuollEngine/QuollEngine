@@ -186,7 +186,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localMeshMap.resize(numAssets);
+    localMeshMap.resize(numAssets, MeshAssetHandle::Invalid);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -196,7 +196,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
         warnings.insert(warnings.end(), res.getWarnings().begin(),
                         res.getWarnings().end());
       } else {
-        warnings.push_back("Cannot load mesh in path: " + assetPathStr);
+        warnings.push_back(res.getError());
       }
     }
   }
@@ -207,7 +207,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localSkinnedMeshMap.resize(numAssets);
+    localSkinnedMeshMap.resize(numAssets, SkinnedMeshAssetHandle::Invalid);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -217,7 +217,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
         warnings.insert(warnings.end(), res.getWarnings().begin(),
                         res.getWarnings().end());
       } else {
-        warnings.push_back("Cannot skinned load mesh in path: " + assetPathStr);
+        warnings.push_back(res.getError());
       }
     }
   }
@@ -228,7 +228,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localSkeletonMap.resize(numAssets);
+    localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Invalid);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -238,7 +238,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
         warnings.insert(warnings.end(), res.getWarnings().begin(),
                         res.getWarnings().end());
       } else {
-        warnings.push_back("Cannot load skeleton in path: " + assetPathStr);
+        warnings.push_back(res.getError());
       }
     }
   }
@@ -251,7 +251,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localAnimationMap.resize(numAssets);
+    localAnimationMap.resize(numAssets, AnimationAssetHandle::Invalid);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -262,7 +262,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
                         res.getWarnings().end());
 
       } else {
-        warnings.push_back("Cannot load animation in path: " + assetPathStr);
+        warnings.push_back(res.getError());
       }
     }
   }

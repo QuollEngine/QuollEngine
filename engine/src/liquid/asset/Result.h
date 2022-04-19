@@ -23,6 +23,8 @@ public:
 
   const TData &getData() const { return mData.value(); }
 
+  TData &getData() { return mData.value(); }
+
   inline bool hasWarnings() const { return !mWarnings.empty(); }
 
   inline bool hasError() const { return !mError.empty(); }

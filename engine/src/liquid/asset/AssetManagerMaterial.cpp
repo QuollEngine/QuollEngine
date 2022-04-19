@@ -84,6 +84,8 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
       material.data.baseColorTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
+    } else {
+      warnings.push_back(res.getError());
     }
     stream.read(material.data.baseColorTextureCoord);
     stream.read(material.data.baseColorFactor);
@@ -98,6 +100,8 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
       material.data.metallicRoughnessTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
+    } else {
+      warnings.push_back(res.getError());
     }
 
     stream.read(material.data.metallicRoughnessTextureCoord);
@@ -114,6 +118,8 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
       material.data.normalTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
+    } else {
+      warnings.push_back(res.getError());
     }
     stream.read(material.data.normalTextureCoord);
     stream.read(material.data.normalScale);
@@ -128,6 +134,8 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
       material.data.occlusionTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
+    } else {
+      warnings.push_back(res.getError());
     }
     stream.read(material.data.occlusionTextureCoord);
     stream.read(material.data.occlusionStrength);
@@ -142,29 +150,11 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
       material.data.emissiveTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
+    } else {
+      warnings.push_back(res.getError());
     }
     stream.read(material.data.emissiveTextureCoord);
     stream.read(material.data.emissiveFactor);
-  }
-
-  if (material.data.baseColorTexture == TextureAssetHandle::Invalid) {
-    warnings.push_back("Base color texture does not exist");
-  }
-
-  if (material.data.baseColorTexture == TextureAssetHandle::Invalid) {
-    warnings.push_back("Metallic roughness map does not exist");
-  }
-
-  if (material.data.baseColorTexture == TextureAssetHandle::Invalid) {
-    warnings.push_back("Normal map does not exist");
-  }
-
-  if (material.data.baseColorTexture == TextureAssetHandle::Invalid) {
-    warnings.push_back("Occlusion map does not exist");
-  }
-
-  if (material.data.emissiveTexture == TextureAssetHandle::Invalid) {
-    warnings.push_back("Emissive map does not exist");
   }
 
   return Result<MaterialAssetHandle>::Ok(

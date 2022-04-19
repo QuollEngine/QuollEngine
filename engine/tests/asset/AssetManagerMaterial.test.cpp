@@ -246,7 +246,62 @@ TEST_F(AssetManagerTest, LoadsMaterialWithTexturesFromFile) {
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto handle = manager.loadMaterialFromFile(assetFile.getData()).getData();
+  auto res = manager.loadMaterialFromFile(assetFile.getData());
+
+  EXPECT_FALSE(res.hasError());
+  EXPECT_FALSE(res.hasWarnings());
+
+  auto handle = res.getData();
+
+  EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
+
+  auto &material = manager.getRegistry().getMaterials().getAsset(handle);
+  EXPECT_EQ(material.name, "material1.lqmat");
+  EXPECT_EQ(material.path, std::filesystem::current_path() / "material1.lqmat");
+  EXPECT_EQ(material.type, liquid::AssetType::Material);
+
+  EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
+  EXPECT_EQ(material.data.baseColorTextureCoord,
+            asset.data.baseColorTextureCoord);
+  EXPECT_EQ(material.data.baseColorFactor, asset.data.baseColorFactor);
+
+  EXPECT_EQ(material.data.metallicRoughnessTexture,
+            asset.data.metallicRoughnessTexture);
+  EXPECT_EQ(material.data.metallicRoughnessTextureCoord,
+            asset.data.metallicRoughnessTextureCoord);
+  EXPECT_EQ(material.data.metallicFactor, asset.data.metallicFactor);
+  EXPECT_EQ(material.data.roughnessFactor, asset.data.roughnessFactor);
+
+  EXPECT_EQ(material.data.normalTexture, asset.data.normalTexture);
+  EXPECT_EQ(material.data.normalTextureCoord, asset.data.normalTextureCoord);
+  EXPECT_EQ(material.data.normalScale, asset.data.normalScale);
+
+  EXPECT_EQ(material.data.occlusionTexture, asset.data.occlusionTexture);
+  EXPECT_EQ(material.data.occlusionTextureCoord,
+            asset.data.occlusionTextureCoord);
+  EXPECT_EQ(material.data.occlusionStrength, asset.data.occlusionStrength);
+
+  EXPECT_EQ(material.data.emissiveTexture, asset.data.emissiveTexture);
+  EXPECT_EQ(material.data.emissiveTextureCoord,
+            asset.data.emissiveTextureCoord);
+  EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
+}
+
+TEST_F(AssetManagerTest, LoadsMaterialWithoutTexturesFromFile) {
+  auto asset = createMaterialAsset(false);
+
+  auto assetFile = manager.createMaterialFromAsset(asset);
+  EXPECT_FALSE(assetFile.hasError());
+  EXPECT_FALSE(assetFile.hasWarnings());
+
+  auto res = manager.loadMaterialFromFile(assetFile.getData());
+
+  EXPECT_FALSE(res.hasError());
+  EXPECT_FALSE(res.hasWarnings());
+
+  EXPECT_EQ(res.getWarnings().size(), 0);
+
+  auto handle = res.getData();
 
   EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
 

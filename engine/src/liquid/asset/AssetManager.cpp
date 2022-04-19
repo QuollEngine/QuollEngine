@@ -15,7 +15,7 @@ Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
                                           const std::filesystem::path &filePath,
                                           AssetType assetType) {
   if (!file.good()) {
-    return Result<bool>::Error("File cannot be opened for writing: " +
+    return Result<bool>::Error("File cannot be opened for reading: " +
                                filePath.string());
   }
 
@@ -39,8 +39,10 @@ Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
   return Result<bool>::Ok(true);
 }
 
-void AssetManager::preloadAssets() {
+Result<bool> AssetManager::preloadAssets() {
   LIQUID_PROFILE_EVENT("AssetManager::preloadAssets");
+  std::vector<String> warnings;
+
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
     if (!entry.is_regular_file()) {
@@ -71,19 +73,33 @@ void AssetManager::preloadAssets() {
     stream.read(header.type);
 
     if (header.type == AssetType::Material) {
-      loadMaterialDataFromInputStream(stream, entry.path());
+      auto res = loadMaterialDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     } else if (header.type == AssetType::Mesh) {
-      loadMeshDataFromInputStream(stream, entry.path());
+      auto res = loadMeshDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     } else if (header.type == AssetType::SkinnedMesh) {
-      loadSkinnedMeshDataFromInputStream(stream, entry.path());
+      auto res = loadSkinnedMeshDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     } else if (header.type == AssetType::Skeleton) {
-      loadSkeletonDataFromInputStream(stream, entry.path());
+      auto res = loadSkeletonDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     } else if (header.type == AssetType::Animation) {
-      loadAnimationDataFromInputStream(stream, entry.path());
+      auto res = loadAnimationDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     } else if (header.type == AssetType::Prefab) {
-      loadPrefabDataFromInputStream(stream, entry.path());
+      auto res = loadPrefabDataFromInputStream(stream, entry.path());
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
     }
   }
+
+  return Result<bool>::Ok(true, warnings);
 }
 
 String AssetManager::getAssetNameFromPath(const std::filesystem::path &path) {

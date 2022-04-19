@@ -181,8 +181,10 @@ public:
 
   /**
    * @brief Preload all assets in assets directory
+   *
+   * @return Preload result
    */
-  void preloadAssets();
+  Result<bool> preloadAssets();
 
   /**
    * @brief Get asset name from path

@@ -269,17 +269,20 @@ loadMaterials(const tinygltf::Model &model,
  * @return Vertices and indices
  */
 template <class TVertex>
-std::pair<std::vector<TVertex>, std::vector<uint32_t>>
+liquid::Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>
 loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                            size_t p, const tinygltf::Model &model) {
   std::vector<uint32_t> indices;
   std::vector<TVertex> vertices;
+  std::vector<liquid::String> warnings;
 
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
     liquid::engineLogger.log(Logger::Warning)
         << "Mesh #" << i << ", Primitive #" << p
         << " does not have a position attribute. Skipping...";
-    return {};
+    return liquid::
+        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
+            "Mesh primitive not have position attribute");
   }
 
   if (primitive.indices >= 0) {
@@ -310,7 +313,9 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       liquid::engineLogger.log(Logger::Warning)
           << "Mesh #" << i << ", Primitive #" << p
           << " has invalid index format. Skipping...";
-      return {};
+      return liquid::
+          Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
+              "Mesh primitive has invalid index format");
     }
   }
 
@@ -333,7 +338,9 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     liquid::engineLogger.log(Logger::Warning)
         << "Mesh #" << i << ", Primitive #0"
         << " has invalid position format. Skipping...";
-    return {};
+    return liquid::
+        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
+            "Mesh primitive has invalid position format");
   }
 
   if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
@@ -352,9 +359,9 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       }
     }
   } else {
+    warnings.push_back("Mesh does not have normals");
     liquid::engineLogger.log(Logger::Warning)
         << "Calculating flat normals is not supported";
-    // TODO: Calculate flat normals
   }
 
   if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
@@ -375,6 +382,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     }
   } else {
     // TODO: Calculate tangents using MikkTSpace algorithms
+    warnings.push_back("Mesh does not have tangents");
     liquid::engineLogger.log(Logger::Warning)
         << "Tangents will be calculated using derivative functions in "
            "pixel shader. For more accurate results, you need to provide "
@@ -405,6 +413,8 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         liquid::engineLogger.log(Logger::Warning)
             << "Integer based texture coordinates are not supported for "
                "TEXCOORD0";
+        warnings.push_back("Integer based texture coordinates are not "
+                           "supported for TEXCOORD0");
       }
     }
   }
@@ -433,11 +443,16 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         liquid::engineLogger.log(Logger::Warning)
             << "Integer based texture coordinates are not supported for "
                "TEXCOORD1";
+        warnings.push_back("Integer based texture coordinates are not "
+                           "supported for TEXCOORD1");
       }
     }
   }
 
-  return {vertices, indices};
+  return liquid::Result<
+      std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Ok({vertices,
+                                                                   indices},
+                                                                  warnings);
 }
 
 /**
@@ -452,7 +467,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
  * @param materials Material map
  * @param skeletons Skeleton map
  */
-static void
+static liquid::Result<bool>
 loadMeshes(const tinygltf::Model &model,
            const std::filesystem::path &pathDirectory,
            liquid::AssetManager &manager,
@@ -460,6 +475,7 @@ loadMeshes(const tinygltf::Model &model,
            const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons,
            GLTFToAsset<liquid::MeshAssetHandle> &outMeshes,
            GLTFToAsset<liquid::SkinnedMeshAssetHandle> &outSkinnedMeshes) {
+  std::vector<liquid::String> warnings;
 
   std::map<size_t, size_t> skeletonMeshMap;
   for (auto &node : model.nodes) {
@@ -472,7 +488,6 @@ loadMeshes(const tinygltf::Model &model,
   for (auto i = 0; i < model.meshes.size(); ++i) {
     const auto &gltfMesh = model.meshes.at(i);
 
-    // TODO: Support multiple primitives
     if (gltfMesh.primitives.empty()) {
       // TODO: Add warning
       continue;
@@ -496,9 +511,19 @@ loadMeshes(const tinygltf::Model &model,
                           : liquid::MaterialAssetHandle::Invalid;
 
       if (isSkinnedMesh) {
-        auto &&[vertices, indices] =
-            loadStandardMeshAttributes<liquid::SkinnedVertex>(primitive, i, p,
-                                                              model);
+        auto &&result = loadStandardMeshAttributes<liquid::SkinnedVertex>(
+            primitive, i, p, model);
+
+        if (result.hasError()) {
+          warnings.push_back(result.getError());
+          continue;
+        }
+
+        warnings.insert(warnings.end(), result.getWarnings().begin(),
+                        result.getWarnings().end());
+
+        auto &vertices = result.getData().first;
+        auto &indices = result.getData().second;
 
         if (primitive.attributes.find("JOINTS_0") !=
             primitive.attributes.end()) {
@@ -570,8 +595,20 @@ loadMeshes(const tinygltf::Model &model,
           outSkinnedMeshes.map.insert_or_assign(i, handle.getData());
         }
       } else {
-        const auto &[vertices, indices] =
+        auto &&result =
             loadStandardMeshAttributes<liquid::Vertex>(primitive, i, p, model);
+
+        if (result.hasError()) {
+          warnings.push_back(result.getError());
+          continue;
+        }
+
+        warnings.insert(warnings.end(), result.getWarnings().begin(),
+                        result.getWarnings().end());
+
+        auto &vertices = result.getData().first;
+        auto &indices = result.getData().second;
+
         if (vertices.size() > 0) {
           mesh.name = pathDirectory.string() + "/mesh" + std::to_string(i);
           mesh.type = liquid::AssetType::Mesh;
@@ -584,6 +621,8 @@ loadMeshes(const tinygltf::Model &model,
       }
     }
   }
+
+  return liquid::Result<bool>::Ok(true, warnings);
 }
 
 /**
@@ -1021,8 +1060,9 @@ GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
                            liquid::rhi::ResourceRegistry &deviceRegistry)
     : mAssetManager(assetManager), mDeviceRegistry(deviceRegistry) {}
 
-void GLTFImporter::loadFromFile(const liquid::String &filename,
-                                const std::filesystem::path &directory) {
+liquid::Result<bool>
+GLTFImporter::loadFromFile(const liquid::String &filename,
+                           const std::filesystem::path &directory) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   liquid::String error, warning;
@@ -1030,17 +1070,17 @@ void GLTFImporter::loadFromFile(const liquid::String &filename,
   bool ret = loader.LoadASCIIFromFile(&model, &error, &warning, filename);
 
   if (!warning.empty()) {
+    return liquid::Result<bool>::Error(warning);
     // TODO: Show warning (in a dialog)
   }
 
   if (!error.empty()) {
-    return;
+    return liquid::Result<bool>::Error(error);
     // TODO: Show error (in a dialog)
   }
 
   if (!ret) {
-    return;
-    // TODO: Show error (in a dialog)
+    return liquid::Result<bool>::Error("Cannot load GLTF file");
   }
 
   auto baseName = std::filesystem::path(filename).filename().string();
@@ -1062,18 +1102,27 @@ void GLTFImporter::loadFromFile(const liquid::String &filename,
   GLTFToAsset<liquid::MeshAssetHandle> meshMap;
   GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
 
+  std::vector<liquid::String> warnings;
+
   auto &&textures = loadTextures(model, prefabPath, mAssetManager);
   auto &&materials = loadMaterials(model, prefabPath, mAssetManager, textures);
   auto &&skeletonData = loadSkeletons(model, prefabPath, mAssetManager);
   auto &&animationData =
       loadAnimations(model, prefabPath, mAssetManager, skeletonData);
-  loadMeshes(model, prefabPath, mAssetManager, materials,
-             skeletonData.skeletonMap, meshMap, skinnedMeshMap);
+
+  const auto &meshResult =
+      loadMeshes(model, prefabPath, mAssetManager, materials,
+                 skeletonData.skeletonMap, meshMap, skinnedMeshMap);
+
+  warnings.insert(warnings.end(), meshResult.getWarnings().begin(),
+                  meshResult.getWarnings().end());
 
   loadPrefabs(model, prefabPath, mAssetManager, meshMap, skinnedMeshMap,
               skeletonData, animationData);
 
   mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
+
+  return liquid::Result<bool>::Ok(true, warnings);
 }
 
 } // namespace liquidator
