@@ -78,12 +78,7 @@ void EntityPanel::renderLight() {
 
     ImGui::Text("Direction");
     const glm::vec3 &direction = component.light->getDirection();
-    std::array<float, VEC3_ARRAY_SIZE> imguiDirection{direction.x, direction.y,
-                                                      direction.z};
-    if (ImGui::InputFloat3("###InputDirection", imguiDirection.data())) {
-      component.light->setDirection(
-          {imguiDirection.at(0), imguiDirection.at(1), imguiDirection.at(2)});
-    }
+    ImGui::Text("%f %f %f", direction.x, direction.y, direction.z);
 
     ImGui::Text("Color");
     const glm::vec4 &color = component.light->getColor();
@@ -98,6 +93,13 @@ void EntityPanel::renderLight() {
     float imguiIntensity = component.light->getIntensity();
     if (ImGui::InputFloat("###InputIntensity", &imguiIntensity)) {
       component.light->setIntensity(imguiIntensity);
+    }
+
+    if (mEntityContext.hasComponent<liquid::DebugComponent>(mSelectedEntity)) {
+      auto &component =
+          mEntityContext.getComponent<liquid::DebugComponent>(mSelectedEntity);
+
+      ImGui::Checkbox("Show direction", &component.showDirection);
     }
   }
 }
@@ -122,9 +124,8 @@ void EntityPanel::renderTransform() {
     }
 
     ImGui::Text("Rotation");
-    std::array<float, VEC3_ARRAY_SIZE> imguiRotation{component.localRotation.x,
-                                                     component.localRotation.y,
-                                                     component.localRotation.z};
+    const auto &euler = glm::eulerAngles(component.localRotation);
+    std::array<float, VEC3_ARRAY_SIZE> imguiRotation{euler.x, euler.y, euler.z};
     if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
       component.localRotation = glm::quat(glm::vec3(
           imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));

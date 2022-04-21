@@ -83,6 +83,13 @@ int main() {
       "skeleton-lines.frag", renderer.getRegistry().setShader(
                                  {"assets/shaders/skeleton-lines.frag.spv"}));
 
+  renderer.getShaderLibrary().addShader(
+      "object-icons.vert", renderer.getRegistry().setShader(
+                               {"assets/shaders/object-icons.vert.spv"}));
+  renderer.getShaderLibrary().addShader(
+      "object-icons.frag", renderer.getRegistry().setShader(
+                               {"assets/shaders/object-icons.frag.spv"}));
+
   liquid::MainLoop mainLoop(window, fpsCounter);
   liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
   liquidator::EditorCamera editorCamera(entityContext, renderer, window);
@@ -265,12 +272,32 @@ int main() {
                    liquid::rhi::BlendFactor::DstAlpha,
                    liquid::rhi::BlendOp::Add}}}});
 
+      auto objectIconsPipeline = renderer.getRegistry().setPipeline(
+          {renderer.getShaderLibrary().getShader("object-icons.vert"),
+           renderer.getShaderLibrary().getShader("object-icons.frag"),
+           {},
+           liquid::rhi::PipelineInputAssembly{
+               liquid::rhi::PrimitiveTopology::TriangleStrip},
+           liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
+                                           liquid::rhi::CullMode::None,
+                                           liquid::rhi::FrontFace::Clockwise},
+           liquid::rhi::PipelineColorBlend{
+               {liquid::rhi::PipelineColorBlendAttachment{
+                   true, liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add,
+                   liquid::rhi::BlendFactor::SrcAlpha,
+                   liquid::rhi::BlendFactor::DstAlpha,
+                   liquid::rhi::BlendOp::Add}}}});
+
       pass.addPipeline(editorGridPipeline);
       pass.addPipeline(skeletonLinesPipeline);
+      pass.addPipeline(objectIconsPipeline);
 
-      pass.setExecutor([editorGridPipeline, skeletonLinesPipeline, &renderer,
-                        &cameraObj, &editorCamera, &editorGrid, &entityContext](
-                           liquid::rhi::RenderCommandList &commandList) {
+      pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
+                        &objectIconsPipeline, &renderer, &cameraObj,
+                        &editorCamera, &editorGrid, &entityContext,
+                        &ui](liquid::rhi::RenderCommandList &commandList) {
         liquid::rhi::Descriptor sceneDescriptor;
         sceneDescriptor.bind(0, cameraObj->getBuffer(),
                              liquid::rhi::DescriptorType::UniformBuffer);
@@ -322,6 +349,62 @@ int main() {
 
                   commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
                 });
+
+        entityContext.iterateEntities<liquid::TransformComponent,
+                                      liquid::LightComponent>(
+            [&objectIconsPipeline, &commandList, &cameraObj, &ui,
+             &entityContext](auto entity, const auto &transform,
+                             const auto &light) {
+              commandList.bindPipeline(objectIconsPipeline);
+
+              liquid::rhi::Descriptor sceneDescriptor;
+              sceneDescriptor.bind(0, cameraObj->getBuffer(),
+                                   liquid::rhi::DescriptorType::UniformBuffer);
+
+              commandList.bindDescriptor(objectIconsPipeline, 0,
+                                         sceneDescriptor);
+
+              liquid::rhi::Descriptor sunDescriptor;
+              sunDescriptor.bind(
+                  0,
+                  {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Sun)},
+                  liquid::rhi::DescriptorType::CombinedImageSampler);
+              commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
+
+              liquid::StandardPushConstants transformConstant{};
+              transformConstant.modelMatrix = transform.worldTransform;
+
+              commandList.pushConstants(
+                  objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                  sizeof(liquid::StandardPushConstants), &transformConstant);
+
+              commandList.draw(4, 0);
+
+              if (entityContext.hasComponent<liquid::DebugComponent>(entity) &&
+                  entityContext.getComponent<liquid::DebugComponent>(entity)
+                      .showDirection) {
+                liquid::rhi::Descriptor directionDescriptor;
+                directionDescriptor.bind(
+                    0,
+                    {ui.getIconRegistry().getIcon(
+                        liquidator::EditorIcon::Direction)},
+                    liquid::rhi::DescriptorType::CombinedImageSampler);
+                commandList.bindDescriptor(objectIconsPipeline, 1,
+                                           directionDescriptor);
+
+                liquid::StandardPushConstants pcDirection{};
+                static constexpr glm::vec3 LIGHT_DIR_ICON_POSITION{0.0f, 2.0f,
+                                                                   0.0f};
+                pcDirection.modelMatrix = glm::translate(
+                    transform.worldTransform, LIGHT_DIR_ICON_POSITION);
+
+                commandList.pushConstants(
+                    objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                    sizeof(liquid::StandardPushConstants), &pcDirection);
+
+                commandList.draw(4, 0);
+              }
+            });
       });
     }
 

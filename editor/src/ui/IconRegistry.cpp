@@ -34,6 +34,11 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
   mIconMap.insert_or_assign(
       EditorIcon::Prefab,
       loader.loadFromFile((iconsPath / "prefab.png").string()));
+  mIconMap.insert_or_assign(
+      EditorIcon::Sun, loader.loadFromFile((iconsPath / "sun.png").string()));
+  mIconMap.insert_or_assign(
+      EditorIcon::Direction,
+      loader.loadFromFile((iconsPath / "direction.png").string()));
 }
 
 } // namespace liquidator

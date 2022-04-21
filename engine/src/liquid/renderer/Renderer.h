@@ -22,6 +22,7 @@ class Window;
 struct DefaultGraphResources {
   rhi::TextureHandle mainColor;
   rhi::TextureHandle depthBuffer;
+  rhi::TextureHandle shadowmap;
   glm::vec4 defaultColor;
 };
 
