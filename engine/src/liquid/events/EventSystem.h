@@ -1,12 +1,30 @@
 #pragma once
 
 #include "EventPool.h"
-#include "liquid/physics/CollisionEvent.h"
+#include "EventDetails.h"
 
 namespace liquid {
 
 class EventSystem {
-  using CollisionPool = EventPool<CollisionEvent, CollisionObject>;
+  /**
+   * @brief Type "function" that provides event pool
+   *
+   * @tparam TEvent Event type
+   * @return Event pool with intended type and data
+   */
+  template <class TEvent>
+  using GetEventPool =
+      EventPool<TEvent, typename event_detail::GetEventData<TEvent>::Data>;
+
+  /**
+   * @brief Tuple that wraps every element with EventPool
+   *
+   * @tparam ...TEvents
+   * @example This tuple can be defined in the following way
+   *          PoolTuple<CollisionEvent, MouseButtonEvent, ...> mPools;
+   */
+  template <class... TEvents>
+  using PoolTuple = std::tuple<GetEventPool<TEvents>...>;
 
 public:
   EventSystem() = default;
@@ -19,35 +37,45 @@ public:
   EventSystem &operator=(EventSystem &&) = delete;
 
   /**
-   * @brief Add observer for collision events
+   * @brief Add observer for specified event
    *
-   * @param type Collision event type
-   * @param observer Collision event observer
+   * @tparam TEvent Event type num
+   * @param type Event type
+   * @param observer Event observer
    * @return Observer Id
    */
-  inline EventObserverId observe(CollisionEvent type,
-                                 const CollisionPool::EventObserver &observer) {
-    return mCollisionPool.observe(type, observer);
+  template <class TEvent>
+  inline EventObserverId
+  observe(TEvent type,
+          typename GetEventPool<TEvent>::EventObserver &&observer) {
+    return std::get<GetEventPool<TEvent>>(mPools).observe(type, observer);
   }
 
   /**
    * @brief Remove collision event observer
    *
-   * @param type Collision event type
+   * @tparam TEvent Event type enum
+   * @param type Event type
    * @param id Observer Id
    */
-  inline void removeObserver(CollisionEvent type, EventObserverId id) {
-    mCollisionPool.removeObserver(type, id);
+  template <class TEvent>
+  inline void removeObserver(TEvent type, EventObserverId id) {
+    using CurrentPool = GetEventPool<TEvent>;
+    std::get<CurrentPool>(mPools).removeObserver(type, id);
   }
 
   /**
    * @brief Dispatch collision event
    *
-   * @param type Collision event
-   * @param collision Collision object
+   * @tparam TEvent Event type enum
+   * @param type Event type
+   * @param data Event data
    */
-  inline void dispatch(CollisionEvent type, const CollisionObject &collision) {
-    mCollisionPool.dispatch(type, collision);
+  template <class TEvent>
+  inline void dispatch(TEvent type,
+                       const typename GetEventPool<TEvent>::EventData &data) {
+    using CurrentPool = GetEventPool<TEvent>;
+    std::get<CurrentPool>(mPools).dispatch(type, data);
   }
 
   /**
@@ -55,11 +83,29 @@ public:
    */
   inline void poll() {
     LIQUID_PROFILE_EVENT("EventSystem::poll");
-    mCollisionPool.poll();
+    poll<0, std::tuple_size<decltype(mPools)>::value>();
   }
 
 private:
-  CollisionPool mCollisionPool;
+  /**
+   * @brief Poll events
+   *
+   * Recursive template function
+   *
+   * @tparam Index Tuple index to loop
+   * @tparam Size Tuple size
+   */
+  template <size_t Index, size_t Size> inline void poll() {
+    if constexpr (Index < Size) {
+      std::get<Index>(mPools).poll();
+      poll<Index + 1, Size>();
+    }
+  }
+
+private:
+  PoolTuple<CollisionEvent, MouseButtonEvent, MouseCursorEvent,
+            MouseScrollEvent, KeyboardEvent>
+      mPools;
 };
 
 } // namespace liquid

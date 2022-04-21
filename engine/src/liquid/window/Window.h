@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/events/EventSystem.h"
+
 struct GLFWwindow;
 
 namespace liquid {
@@ -18,8 +20,10 @@ public:
    * @param title Window title
    * @param width Window width
    * @param height Window height
+   * @param eventSystem Event system
    */
-  Window(const String &title, uint32_t width, uint32_t height);
+  Window(const String &title, uint32_t width, uint32_t height,
+         EventSystem &eventSystem);
 
   /**
    * @brief Destroys window
@@ -82,71 +86,6 @@ public:
   void removeResizeHandler(uint32_t handle);
 
   /**
-   * @brief Add key handler
-   *
-   * @param handler Key handler
-   * @return Key handler ID
-   */
-  uint32_t addKeyHandler(
-      const std::function<void(int key, int scancode, int action, int mods)>
-          &handler);
-
-  /**
-   * @brief Remove key down handler
-   *
-   * @param handle Handle
-   */
-  void removeKeyHandler(uint32_t handle);
-
-  /**
-   * @brief Add mouse move handler
-   *
-   * @param handler Mouse move handler
-   * @return Mouse move handler ID
-   */
-  uint32_t addMouseMoveHandler(
-      const std::function<void(double xpos, double ypos)> &handler);
-
-  /**
-   * @brief Remove mouse move handler
-   *
-   * @param handle Mouse move handle
-   */
-  void removeMouseMoveHandler(uint32_t handle);
-
-  /**
-   * @brief Add mouse button handler
-   *
-   * @param handler Mouse button handler
-   * @return Mouse button handler ID
-   */
-  uint32_t addMouseButtonHandler(
-      const std::function<void(int button, int action, int mods)> &handler);
-
-  /**
-   * @brief Remove mouse button handler
-   *
-   * @param handle Mouse button handle
-   */
-  void removeMouseButtonHandler(uint32_t handle);
-
-  /**
-   * @brief Add scroll whell handler
-   *
-   * @param handler Scroll wheel handler
-   * @return Scroll wheel handler ID
-   */
-  uint32_t addScrollWheelHandler(
-      const std::function<void(double xoffset, double yoffset)> &handler);
-
-  /**
-   * @brief Remove scroll wheel handler
-   *
-   * @param handler Scroll wheel handle
-   */
-  void removeScrollWheelHandler(uint32_t handle);
-
-  /**
    * @brief Get current mouse position
    *
    * @return Current mouse position
@@ -175,16 +114,13 @@ public:
   void focus();
 
 private:
+  EventSystem &mEventSystem;
   ::GLFWwindow *mWindowInstance;
 
   template <class FunctionType>
   using HandlerMap = std::map<uint32_t, std::function<FunctionType>>;
 
   HandlerMap<void(uint32_t, uint32_t)> mResizeHandlers;
-  HandlerMap<void(int key, int scancode, int action, int mods)> mKeyHandlers;
-  HandlerMap<void(int button, int action, int mods)> mMouseButtonHandlers;
-  HandlerMap<void(double xpos, double ypos)> mMouseMoveHandlers;
-  HandlerMap<void(double xoffset, double yoffset)> mScrollWheelHandlers;
 };
 
 } // namespace liquid

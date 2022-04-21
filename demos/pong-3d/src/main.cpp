@@ -29,7 +29,7 @@
 class Game {
 public:
   Game()
-      : window("Pong 3D", 800, 600), backend(window),
+      : window("Pong 3D", 800, 600, eventSystem), backend(window),
         renderer(entityContext, window, backend.createDefaultDevice()),
         physicsSystem(entityContext, eventSystem),
         vertexShader(
@@ -44,9 +44,11 @@ public:
     liquid::Mesh barMesh = createCube();
     liquid::Mesh ballMesh = createSphere(ballRadius, 10, 10, RED);
 
-    window.addKeyHandler([this](int key, int scancode, int action, int mods) {
-      handleKeyClick(key, scancode, action, mods);
-    });
+    eventSystem.observe(liquid::KeyboardEvent::Pressed,
+                        [this](const auto &data) { handleKeyClick(data.key); });
+
+    eventSystem.observe(liquid::KeyboardEvent::Released,
+                        [this](const auto &data) { handleKeyRelease(); });
 
     barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
         barMesh, renderer.getRegistry()));
@@ -128,21 +130,19 @@ public:
   }
 
 private:
-  void handleKeyClick(int key, int scancode, int action, int mods) {
-    if (action == GLFW_RELEASE) {
-      playerVelocity = 0.0;
-    }
+  void handleKeyRelease() { playerVelocity = 0.0; }
 
+  void handleKeyClick(int key) {
     // TODO: Smoother input handling
     // When switching between input clicks, the input gets confused
     // We might need some kind of a queue here to make sure that multiple
     // input clicks are handled
 
-    if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_D) {
       playerVelocity = -velocity;
     }
 
-    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_A) {
       playerVelocity = velocity;
     }
   }

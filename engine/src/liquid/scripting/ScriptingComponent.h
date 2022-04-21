@@ -12,6 +12,8 @@ struct ScriptingComponent {
 
   EventObserverId onCollisionStart = EVENT_OBSERVER_MAX;
   EventObserverId onCollisionEnd = EVENT_OBSERVER_MAX;
+  EventObserverId onKeyPress = EVENT_OBSERVER_MAX;
+  EventObserverId onKeyRelease = EVENT_OBSERVER_MAX;
 };
 
 } // namespace liquid

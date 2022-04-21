@@ -32,10 +32,13 @@ static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
 int main() {
+  liquid::EventSystem eventSystem;
+
   liquid::Engine::setAssetsPath(
       std::filesystem::path("./engine/assets").string());
   liquid::EntityContext entityContext;
-  liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT);
+  liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT,
+                        eventSystem);
 
   liquid::rhi::VulkanRenderBackend backend(window);
   liquid::DebugManager debugManager;
@@ -58,7 +61,6 @@ int main() {
     preloadStatusDialog.show();
   }
 
-  liquid::EventSystem eventSystem;
   liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext,
                                           assetManager.getRegistry());
@@ -92,7 +94,8 @@ int main() {
 
   liquid::MainLoop mainLoop(window, fpsCounter);
   liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
-  liquidator::EditorCamera editorCamera(entityContext, renderer, window);
+  liquidator::EditorCamera editorCamera(entityContext, eventSystem, renderer,
+                                        window);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
   liquidator::SceneManager sceneManager(entityContext, editorCamera,
                                         editorGrid);
