@@ -8,8 +8,10 @@
 namespace liquid {
 
 ScriptingSystem::ScriptingSystem(EntityContext &entityContext,
-                                 EventSystem &eventSystem)
-    : mEntityContext(entityContext), mEventSystem(eventSystem) {}
+                                 EventSystem &eventSystem,
+                                 AssetManager &assetManager)
+    : mEntityContext(entityContext), mEventSystem(eventSystem),
+      mAssetManager(assetManager) {}
 
 ScriptingSystem::~ScriptingSystem() {
   mEntityContext.iterateEntities<ScriptingComponent>(
@@ -17,21 +19,6 @@ ScriptingSystem::~ScriptingSystem() {
         destroyScriptingData(scripting);
       });
   mEntityContext.destroyComponents<ScriptingComponent>();
-}
-
-ScriptHandle ScriptingSystem::addScript(const String &fileName) {
-  auto bytes = utils::readFileIntoBuffer(fileName);
-  return addScript(fileName, bytes);
-}
-
-ScriptHandle ScriptingSystem::addScript(const String &name,
-                                        const std::vector<char> &bytes) {
-  ScriptHandle current = mLastHandle;
-
-  mScripts.insert_or_assign(current, Script{ScriptType::Lua, name, bytes});
-
-  mLastHandle = ScriptHandle{static_cast<uint32_t>(mLastHandle) + 1};
-  return current;
 }
 
 void ScriptingSystem::start() {
@@ -49,8 +36,9 @@ void ScriptingSystem::start() {
         }
         component.scope = mLuaInterpreter.createScope();
 
-        auto &script = mScripts.at(component.handle);
-        mLuaInterpreter.evaluate(script.bytes, component.scope);
+        auto &script = mAssetManager.getRegistry().getLuaScripts().getAsset(
+            component.handle);
+        mLuaInterpreter.evaluate(script.data.bytes, component.scope);
 
         createScriptingData(component, entity);
 
@@ -63,8 +51,6 @@ void ScriptingSystem::update() {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
   mEntityContext.iterateEntities<ScriptingComponent>(
       [this](auto entity, const ScriptingComponent &component) {
-        auto &script = mScripts.at(component.handle);
-
         mLuaInterpreter.getFunction(component.scope, "update");
         mLuaInterpreter.callFunction(component.scope, 0);
       });

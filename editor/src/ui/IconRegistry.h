@@ -12,6 +12,7 @@ enum class EditorIcon {
   Skeleton,
   Animation,
   Prefab,
+  Script,
   Sun,
   Direction
 };

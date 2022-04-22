@@ -2,18 +2,11 @@
 
 #include "liquid/entity/EntityContext.h"
 #include "liquid/events/EventSystem.h"
+#include "liquid/asset/AssetManager.h"
 
 #include "LuaInterpreter.h"
 
 namespace liquid {
-
-enum class ScriptType { Lua };
-
-struct Script {
-  ScriptType type = ScriptType::Lua;
-  String name;
-  std::vector<char> bytes;
-};
 
 class ScriptingSystem {
 public:
@@ -22,8 +15,10 @@ public:
    *
    * @param entityContext Entity context
    * @param eventSystem Event system
+   * @param assetManager Asset manager
    */
-  ScriptingSystem(EntityContext &entityContext, EventSystem &eventSystem);
+  ScriptingSystem(EntityContext &entityContext, EventSystem &eventSystem,
+                  AssetManager &assetManager);
 
   /**
    * @brief Destroy scripting system
@@ -36,35 +31,6 @@ public:
   ScriptingSystem &operator=(const ScriptingSystem &) = delete;
   ScriptingSystem(ScriptingSystem &&) = delete;
   ScriptingSystem &operator=(ScriptingSystem &&) = delete;
-
-  /**
-   * @brief Add script from file
-   *
-   * Sets script filename as script name
-   * internally
-   *
-   * @param fileName File name
-   * @return New script handle
-   */
-  ScriptHandle addScript(const String &fileName);
-
-  /**
-   * @brief Add script from buffer
-   *
-   * @param name Script name
-   * @param bytes Buffer data
-   * @return New script handle
-   */
-  ScriptHandle addScript(const String &name, const std::vector<char> &bytes);
-
-  /**
-   * @brief Get all scripts
-   *
-   * @return List of scripts
-   */
-  inline const std::unordered_map<ScriptHandle, Script> &getScripts() const {
-    return mScripts;
-  }
 
   /**
    * @brief Call script start on new scripts
@@ -93,10 +59,9 @@ private:
   void createScriptingData(ScriptingComponent &component, Entity event);
 
 private:
-  ScriptHandle mLastHandle{0};
-  std::unordered_map<ScriptHandle, Script> mScripts;
   EntityContext &mEntityContext;
   EventSystem &mEventSystem;
+  AssetManager &mAssetManager;
   LuaInterpreter mLuaInterpreter;
 };
 

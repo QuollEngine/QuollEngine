@@ -60,6 +60,14 @@ Result<bool> AssetManager::preloadAssets() {
       continue;
     }
 
+    if (ext == ".lua") {
+      auto res = loadLuaScriptFromFile(entry.path());
+      if (res.hasError()) {
+        warnings.push_back(res.getError());
+      }
+      continue;
+    }
+
     InputBinaryStream stream(entry.path());
     AssetFileHeader header;
     String magic(ASSET_FILE_MAGIC_LENGTH, '$');

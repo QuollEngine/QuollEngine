@@ -35,6 +35,9 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
       EditorIcon::Prefab,
       loader.loadFromFile((iconsPath / "prefab.png").string()));
   mIconMap.insert_or_assign(
+      EditorIcon::Script,
+      loader.loadFromFile((iconsPath / "script.png").string()));
+  mIconMap.insert_or_assign(
       EditorIcon::Sun, loader.loadFromFile((iconsPath / "sun.png").string()));
   mIconMap.insert_or_assign(
       EditorIcon::Direction,

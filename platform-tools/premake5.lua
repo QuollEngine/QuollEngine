@@ -15,7 +15,7 @@ project "LiquidEnginePlatformTools"
     }
 
     filter { "system:linux" }
-    removefiles { "src/**.win32.cpp" }
+        removefiles { "src/**.win32.cpp" }
 
     filter { "system:windows" }
         removefiles { "src/**.linux.cpp" }
@@ -24,5 +24,4 @@ project "LiquidEnginePlatformTools"
         files {
             "src/**.mm"
         }
-
-    removefiles { "src/**.linux.cpp", "src/**.win32.cpp" }
+        removefiles { "src/**.linux.cpp", "src/**.win32.cpp" }

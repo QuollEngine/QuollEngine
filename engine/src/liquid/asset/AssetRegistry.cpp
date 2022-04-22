@@ -76,6 +76,12 @@ AssetRegistry::getAssetByPath(const std::filesystem::path &filePath) {
     }
   }
 
+  for (auto &[handle, asset] : mLuaScripts.getAssets()) {
+    if (asset.path == filePath) {
+      return {AssetType::LuaScript, static_cast<uint32_t>(handle)};
+    }
+  }
+
   return {AssetType::None, 0};
 }
 
