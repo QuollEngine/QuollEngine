@@ -10,18 +10,18 @@ using liquid::Window;
 namespace liquidator {
 
 EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
+                           liquid::EventSystem &eventSystem,
                            liquid::Renderer &renderer, liquid::Window &window)
-    : mEntityContext(entityContext), mWindow(window),
+    : mEntityContext(entityContext), mEventSystem(eventSystem), mWindow(window),
       mCamera(new Camera(&renderer.getRegistry())) {
 
-  mMouseButtonHandler = mWindow.addMouseButtonHandler(
-      [this](int button, int action, int mods) mutable {
-        if (button != GLFW_MOUSE_BUTTON_MIDDLE) {
-          return;
-        }
+  mMouseButtonReleaseHandler = mEventSystem.observe(
+      liquid::MouseButtonEvent::Released,
+      [this](const auto &data) { mInputState = InputState::None; });
 
-        if (action == GLFW_RELEASE) {
-          mInputState = InputState::None;
+  mMouseButtonPressHandler = mEventSystem.observe(
+      liquid::MouseButtonEvent::Pressed, [this](const auto &data) {
+        if (data.button != GLFW_MOUSE_BUTTON_MIDDLE) {
           return;
         }
 
@@ -46,9 +46,8 @@ EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
         }
       });
 
-  // Out of bounds handler
-  mMouseMoveHandler =
-      mWindow.addMouseMoveHandler([this](double xpos, double ypos) mutable {
+  mMouseCursorMoveHandler = mEventSystem.observe(
+      liquid::MouseCursorEvent::Moved, [this](const auto &data) {
         if (mInputState == InputState::None) {
           return;
         }
@@ -61,21 +60,22 @@ EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
         float minY = 0;
         float maxY = static_cast<float>(size.y);
 
-        glm::vec2 newPos{xpos, ypos};
         bool outOfBounds = false;
 
-        if (xpos <= minX) {
+        glm::vec2 newPos{data.xpos, data.ypos};
+
+        if (data.xpos <= minX) {
           newPos.x = maxX - MIN_OOB_THRESHOLD;
           outOfBounds = true;
-        } else if (xpos >= maxX) {
+        } else if (data.xpos >= maxX) {
           newPos.x = minX + MIN_OOB_THRESHOLD;
           outOfBounds = true;
         }
 
-        if (ypos <= minY) {
+        if (data.ypos <= minY) {
           newPos.y = maxY - MIN_OOB_THRESHOLD;
           outOfBounds = true;
-        } else if (ypos >= maxY) {
+        } else if (data.ypos >= maxY) {
           newPos.y = minY + MIN_OOB_THRESHOLD;
           outOfBounds = true;
         }
@@ -86,8 +86,8 @@ EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
         }
       });
 
-  mScrollWheelHandler =
-      mWindow.addScrollWheelHandler([this](double xoffset, double yoffset) {
+  mMouseScrollHandler = mEventSystem.observe(
+      liquid::MouseScrollEvent::Scroll, [this](const auto &event) {
         const auto &pos = mWindow.getCurrentMousePosition();
         if (pos.x < mX || pos.x > mX + mWidth || pos.y < mY ||
             pos.y > mY + mHeight) {
@@ -97,17 +97,22 @@ EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
         if (mInputState != InputState::None) {
           return;
         }
-        glm::vec3 change = glm::vec3(mEye - mCenter) *
-                           static_cast<float>(yoffset) * ZOOM_SPEED;
+        glm::vec3 change =
+            glm::vec3(mEye - mCenter) * event.yoffset * ZOOM_SPEED;
         mCenter += change;
         mEye += change;
       });
 }
 
 EditorCamera::~EditorCamera() {
-  mWindow.removeMouseButtonHandler(mMouseButtonHandler);
-  mWindow.removeMouseMoveHandler(mMouseMoveHandler);
-  mWindow.removeScrollWheelHandler(mScrollWheelHandler);
+  mEventSystem.removeObserver(liquid::MouseButtonEvent::Pressed,
+                              mMouseButtonPressHandler);
+  mEventSystem.removeObserver(liquid::MouseButtonEvent::Released,
+                              mMouseButtonReleaseHandler);
+  mEventSystem.removeObserver(liquid::MouseCursorEvent::Moved,
+                              mMouseCursorMoveHandler);
+  mEventSystem.removeObserver(liquid::MouseScrollEvent::Scroll,
+                              mMouseScrollHandler);
 
   mEntityContext.deleteComponent<liquid::CameraComponent>(mCameraEntity);
 }

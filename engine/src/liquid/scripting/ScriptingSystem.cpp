@@ -100,6 +100,26 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
           }
         });
   }
+
+  if (mLuaInterpreter.hasFunction(component.scope, "on_key_press")) {
+    component.onKeyPress = mEventSystem.observe(
+        KeyboardEvent::Pressed, [this, &component](const auto &data) {
+          mLuaInterpreter.getFunction(component.scope, "on_key_press");
+          LuaTable table(component.scope, 1);
+          table.set("key", data.key);
+          mLuaInterpreter.callFunction(component.scope, 1);
+        });
+  }
+
+  if (mLuaInterpreter.hasFunction(component.scope, "on_key_release")) {
+    component.onKeyRelease = mEventSystem.observe(
+        KeyboardEvent::Released, [this, &component](const auto &data) {
+          mLuaInterpreter.getFunction(component.scope, "on_key_release");
+          LuaTable table(component.scope, 1);
+          table.set("key", data.key);
+          mLuaInterpreter.callFunction(component.scope, 1);
+        });
+  }
 }
 
 void ScriptingSystem::destroyScriptingData(ScriptingComponent &component) {
@@ -112,6 +132,15 @@ void ScriptingSystem::destroyScriptingData(ScriptingComponent &component) {
   if (component.onCollisionEnd != EVENT_OBSERVER_MAX) {
     mEventSystem.removeObserver(CollisionEvent::CollisionEnded,
                                 component.onCollisionEnd);
+  }
+
+  if (component.onKeyPress != EVENT_OBSERVER_MAX) {
+    mEventSystem.removeObserver(KeyboardEvent::Pressed, component.onKeyPress);
+  }
+
+  if (component.onKeyRelease != EVENT_OBSERVER_MAX) {
+    mEventSystem.removeObserver(KeyboardEvent::Released,
+                                component.onKeyRelease);
   }
 }
 

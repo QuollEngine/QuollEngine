@@ -4,6 +4,7 @@
 #include "liquid/renderer/Renderer.h"
 #include "liquid/window/Window.h"
 #include "liquid/entity/EntityContext.h"
+#include "liquid/events/EventSystem.h"
 
 namespace liquidator {
 
@@ -24,10 +25,12 @@ public:
    * @brief Create editor camera
    *
    * @param entityContext Entity context
+   * @param eventSystem Event system
    * @param renderer Renderer
    * @param window Window
    */
-  EditorCamera(liquid::EntityContext &entityContext, liquid::Renderer &renderer,
+  EditorCamera(liquid::EntityContext &entityContext,
+               liquid::EventSystem &eventSystem, liquid::Renderer &renderer,
                liquid::Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
@@ -172,13 +175,15 @@ private:
   glm::vec3 mCenter = DEFAULT_CENTER;
   glm::vec3 mUp = DEFAULT_UP;
 
-  uint32_t mMouseButtonHandler = 0;
-  uint32_t mMouseMoveHandler = 0;
-  uint32_t mScrollWheelHandler = 0;
+  liquid::EventObserverId mMouseButtonPressHandler = 0;
+  liquid::EventObserverId mMouseButtonReleaseHandler = 0;
+  liquid::EventObserverId mMouseCursorMoveHandler = 0;
+  liquid::EventObserverId mMouseScrollHandler = 0;
 
   liquid::Window &mWindow;
   liquid::SharedPtr<liquid::Camera> mCamera;
   liquid::EntityContext &mEntityContext;
+  liquid::EventSystem &mEventSystem;
   liquid::Entity mCameraEntity = liquid::ENTITY_MAX;
 };
 

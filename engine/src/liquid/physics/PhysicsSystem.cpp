@@ -76,7 +76,6 @@ public:
 
       if (cp.events & PxPairFlag::eNOTIFY_TOUCH_FOUND) {
         mEventSystem.dispatch(CollisionEvent::CollisionStarted, {e1, e2});
-
       } else if (cp.events & PxPairFlag::eNOTIFY_TOUCH_LOST) {
         mEventSystem.dispatch(CollisionEvent::CollisionEnded, {e1, e2});
       }

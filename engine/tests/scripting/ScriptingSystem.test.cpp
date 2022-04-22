@@ -155,6 +155,8 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
 
   EXPECT_LT(component.onCollisionStart, liquid::EVENT_OBSERVER_MAX);
   EXPECT_LT(component.onCollisionEnd, liquid::EVENT_OBSERVER_MAX);
+  EXPECT_LT(component.onKeyPress, liquid::EVENT_OBSERVER_MAX);
+  EXPECT_LT(component.onKeyRelease, liquid::EVENT_OBSERVER_MAX);
 }
 
 TEST_F(ScriptingSystemTest,
@@ -235,5 +237,63 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
     int value = static_cast<int>(lua_tointeger(luaScope, -1));
     lua_pop(luaScope, -1);
     EXPECT_EQ(value, 5);
+  }
+}
+
+TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
+  auto handle = scriptingSystem.addScript("scripting-system-tester.lua");
+  auto entity = entityContext.createEntity();
+  entityContext.setComponent<liquid::ScriptingComponent>(entity, {handle});
+
+  auto &component =
+      entityContext.getComponent<liquid::ScriptingComponent>(entity);
+
+  scriptingSystem.start();
+
+  eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15});
+  eventSystem.poll();
+
+  auto *luaScope = static_cast<lua_State *>(component.scope);
+  {
+    lua_getglobal(luaScope, "event");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 3);
+  }
+
+  {
+    lua_getglobal(luaScope, "key_value");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 15);
+  }
+}
+
+TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
+  auto handle = scriptingSystem.addScript("scripting-system-tester.lua");
+  auto entity = entityContext.createEntity();
+  entityContext.setComponent<liquid::ScriptingComponent>(entity, {handle});
+
+  auto &component =
+      entityContext.getComponent<liquid::ScriptingComponent>(entity);
+
+  scriptingSystem.start();
+
+  eventSystem.dispatch(liquid::KeyboardEvent::Released, {35});
+  eventSystem.poll();
+
+  auto *luaScope = static_cast<lua_State *>(component.scope);
+  {
+    lua_getglobal(luaScope, "event");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 4);
+  }
+
+  {
+    lua_getglobal(luaScope, "key_value");
+    int value = static_cast<int>(lua_tointeger(luaScope, -1));
+    lua_pop(luaScope, -1);
+    EXPECT_EQ(value, 35);
   }
 }

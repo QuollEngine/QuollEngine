@@ -33,8 +33,6 @@ static liquid::platform_tools::NativeFileDialog fileDialog;
 std::list<liquid::String> sceneQueue;
 bool changed = true;
 
-bool leftMouseBtnPressed = false;
-
 liquid::Entity getNewSkybox(liquid::Window &window, const liquid::Mesh &mesh,
                             liquid::Renderer &renderer,
                             liquid::EntityContext &context) {
@@ -91,72 +89,65 @@ const auto strafeSpeed = 0.5f; // m/s
 const auto timeDelta = 1.0f;
 
 int main() {
+  liquid::EventSystem eventSystem;
   liquid::Engine::setAssetsPath(
       std::filesystem::path("./engine/assets").string());
 
   liquid::EntityContext context;
-  liquid::Window window("Scene Viewer", 1024, 768);
+  liquid::Window window("Scene Viewer", 1024, 768, eventSystem);
   liquid::rhi::VulkanRenderBackend backend(window);
 
   liquid::Renderer renderer(context, window, backend.createDefaultDevice());
 
-  window.addMouseButtonHandler([](int button, int action, int mods) {
-    if (action == GLFW_RELEASE) {
-      leftMouseBtnPressed = false;
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-      leftMouseBtnPressed = true;
-    }
-  });
-
   EditorCamera editorCamera(context, renderer, window);
 
-  window.addKeyHandler(
-      [&editorCamera](int key, int scancode, int action, int mods) {
-        if (action == GLFW_RELEASE) {
-          if (key == GLFW_KEY_W || key == GLFW_KEY_S) {
-            editorCamera.move(0.0f);
-          }
+  eventSystem.observe(liquid::KeyboardEvent::Released,
+                      [&editorCamera](const auto &data) {
+                        int key = data.key;
+                        if (key == GLFW_KEY_W || key == GLFW_KEY_S) {
+                          editorCamera.move(0.0f);
+                        }
 
-          if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
-            editorCamera.strafe(0.0f);
-          }
+                        if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
+                          editorCamera.strafe(0.0f);
+                        }
 
-          if (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) {
-            editorCamera.yaw(0.0f);
-          }
-          if (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) {
-            editorCamera.pitch(0.0f);
-          }
+                        if (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) {
+                          editorCamera.yaw(0.0f);
+                        }
+                        if (key == GLFW_KEY_UP || key == GLFW_KEY_DOWN) {
+                          editorCamera.pitch(0.0f);
+                        }
+                      });
 
-          return;
-        }
+  eventSystem.observe(liquid::KeyboardEvent::Pressed,
+                      [&editorCamera](const auto &data) {
+                        int key = data.key;
 
-        if (key == GLFW_KEY_W) {
-          editorCamera.move(moveSpeed * timeDelta);
-        } else if (key == GLFW_KEY_S) {
-          editorCamera.move(-moveSpeed * timeDelta);
-        }
+                        if (key == GLFW_KEY_W) {
+                          editorCamera.move(moveSpeed * timeDelta);
+                        } else if (key == GLFW_KEY_S) {
+                          editorCamera.move(-moveSpeed * timeDelta);
+                        }
 
-        if (key == GLFW_KEY_A) {
-          editorCamera.strafe(-strafeSpeed * timeDelta);
-        } else if (key == GLFW_KEY_D) {
-          editorCamera.strafe(strafeSpeed * timeDelta);
-        }
+                        if (key == GLFW_KEY_A) {
+                          editorCamera.strafe(-strafeSpeed * timeDelta);
+                        } else if (key == GLFW_KEY_D) {
+                          editorCamera.strafe(strafeSpeed * timeDelta);
+                        }
 
-        if (key == GLFW_KEY_LEFT) {
-          editorCamera.yaw(-2.0f * timeDelta);
-        } else if (key == GLFW_KEY_RIGHT) {
-          editorCamera.yaw(2.0f * timeDelta);
-        }
+                        if (key == GLFW_KEY_LEFT) {
+                          editorCamera.yaw(-2.0f * timeDelta);
+                        } else if (key == GLFW_KEY_RIGHT) {
+                          editorCamera.yaw(2.0f * timeDelta);
+                        }
 
-        if (key == GLFW_KEY_DOWN) {
-          editorCamera.pitch(-2.0f * timeDelta);
-        } else if (key == GLFW_KEY_UP) {
-          editorCamera.pitch(2.0f * timeDelta);
-        }
-      });
+                        if (key == GLFW_KEY_DOWN) {
+                          editorCamera.pitch(-2.0f * timeDelta);
+                        } else if (key == GLFW_KEY_UP) {
+                          editorCamera.pitch(2.0f * timeDelta);
+                        }
+                      });
 
   auto cubeMesh = createCube();
 
@@ -207,9 +198,10 @@ int main() {
                     liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 0.5f, 0.5f},
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
     context.setComponent<liquid::NameComponent>(light1, {"Light 1"});
-
+    liquid::TransformComponent ltransform{};
+    ltransform.localRotation = glm::quat(glm::vec3(0, 0, glm::pi<float>()));
     auto *node = scene->getRootNode();
-    node->addChild(light1);
+    node->addChild(light1, ltransform);
 
     liquid::SceneNode *environmentNode = nullptr;
 
@@ -275,42 +267,11 @@ int main() {
     });
 
     mainLoop.setUpdateFn([&ui, &scene, node, &editorCamera, &window,
-                          &renderData](double dt) mutable {
+                          &renderData, &eventSystem](double dt) mutable {
+      eventSystem.poll();
       ImGuiIO &io = ImGui::GetIO();
       scene->update();
       renderData->update();
-
-      if (leftMouseBtnPressed && !io.WantCaptureMouse) {
-        const auto &pos = window.getCurrentMousePosition();
-
-        const auto &size = window.getWindowSize();
-        float width = (float)size.x;
-        float height = (float)size.y;
-
-        if (pos.x < width && pos.x >= 0 && pos.y < height && pos.y >= 0) {
-          float x = (pos.x / width) * 5.0f;
-          float y = (pos.y / height) * 5.0f;
-
-          if (abs(pos.x - prevX) > 1.0f) {
-            if (pos.x < prevX) {
-              horizontalAngle -= x;
-            } else {
-              horizontalAngle += x;
-            }
-          }
-
-          if (abs(pos.y - prevY) > 1.0f) {
-            if (pos.y < prevY) {
-              verticalAngle -= y;
-            } else {
-              verticalAngle += y;
-            }
-          }
-
-          prevX = pos.x;
-          prevY = pos.y;
-        }
-      }
 
       editorCamera.update();
 

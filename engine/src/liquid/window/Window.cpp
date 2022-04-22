@@ -6,8 +6,9 @@
 
 namespace liquid {
 
-Window::Window(const String &title, uint32_t width, uint32_t height) {
-
+Window::Window(const String &title, uint32_t width, uint32_t height,
+               EventSystem &eventSystem)
+    : mEventSystem(eventSystem) {
   auto initReturnValue = glfwInit();
   if (initReturnValue == GLFW_FALSE) {
     const char *errorMsg = nullptr;
@@ -45,8 +46,16 @@ Window::Window(const String &title, uint32_t width, uint32_t height) {
     auto *window =
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-    for (auto &[_, handler] : window->mKeyHandlers) {
-      handler(key, scancode, action, mods);
+    if (action == GLFW_PRESS) {
+      window->mEventSystem.dispatch(KeyboardEvent::Pressed,
+                                    {key, scancode, mods});
+    } else if (action == GLFW_RELEASE) {
+      window->mEventSystem.dispatch(KeyboardEvent::Released,
+                                    {key, scancode, mods});
+    } else if (action == GLFW_REPEAT) {
+
+      window->mEventSystem.dispatch(KeyboardEvent::Pressed,
+                                    {key, scancode, mods});
     }
   });
 
@@ -55,35 +64,36 @@ Window::Window(const String &title, uint32_t width, uint32_t height) {
     auto *window =
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-    for (auto &[_, handler] : window->mMouseMoveHandlers) {
-      handler(xpos, ypos);
-    }
+    window->mEventSystem.dispatch(
+        MouseCursorEvent::Moved,
+        {static_cast<float>(xpos), static_cast<float>(ypos)});
   });
 
-  glfwSetMouseButtonCallback(
-      mWindowInstance,
-      [](::GLFWwindow *windowInstance, int button, int action, int mods) {
-        auto *window =
-            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
+  glfwSetMouseButtonCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
+                                                 int button, int action,
+                                                 int mods) {
+    auto *window =
+        static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
 
-        for (auto &[_, handler] : window->mMouseButtonHandlers) {
-          handler(button, action, mods);
-        }
-      });
+    if (action == GLFW_RELEASE) {
+      window->mEventSystem.dispatch(MouseButtonEvent::Released, {button, mods});
+    } else if (action == GLFW_PRESS) {
+      window->mEventSystem.dispatch(MouseButtonEvent::Pressed, {button, mods});
+    }
+  });
 
   glfwSetScrollCallback(mWindowInstance, [](::GLFWwindow *windowInstance,
                                             double xoffset, double yoffset) {
     auto *window =
         static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
-    for (auto &[_, handler] : window->mScrollWheelHandlers) {
-      handler(xoffset, yoffset);
-    }
+    window->mEventSystem.dispatch(
+        MouseScrollEvent::Scroll,
+        {static_cast<float>(xoffset), static_cast<float>(yoffset)});
   });
 }
 
 Window::~Window() {
   mResizeHandlers.clear();
-  mKeyHandlers.clear();
 
   if (mWindowInstance) {
     glfwDestroyWindow(mWindowInstance);
@@ -127,51 +137,6 @@ uint32_t Window::addResizeHandler(
 
 void Window::removeResizeHandler(uint32_t handle) {
   mResizeHandlers.erase(mResizeHandlers.find(handle));
-}
-
-uint32_t
-Window::addKeyHandler(const std::function<void(int, int, int, int)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mKeyHandlers.size());
-
-  mKeyHandlers.insert(std::make_pair(id, handler));
-  return id;
-}
-
-void Window::removeKeyHandler(uint32_t handle) {
-  mKeyHandlers.erase(mKeyHandlers.find(handle));
-}
-
-uint32_t Window::addMouseMoveHandler(
-    const std::function<void(double xpos, double ypos)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mMouseMoveHandlers.size());
-  mMouseMoveHandlers.insert(std::make_pair(id, handler));
-  return id;
-}
-
-void Window::removeMouseMoveHandler(uint32_t handle) {
-  mMouseMoveHandlers.erase(mMouseMoveHandlers.find(handle));
-}
-
-uint32_t Window::addMouseButtonHandler(
-    const std::function<void(int button, int action, int mods)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mMouseButtonHandlers.size());
-  mMouseButtonHandlers.insert(std::make_pair(id, handler));
-  return id;
-}
-
-void Window::removeMouseButtonHandler(uint32_t handle) {
-  mMouseButtonHandlers.erase(mMouseButtonHandlers.find(handle));
-}
-
-uint32_t Window::addScrollWheelHandler(
-    const std::function<void(double xoffset, double yoffset)> &handler) {
-  uint32_t id = static_cast<uint32_t>(mScrollWheelHandlers.size());
-  mScrollWheelHandlers.insert(std::make_pair(id, handler));
-  return id;
-}
-
-void Window::removeScrollWheelHandler(uint32_t handle) {
-  mScrollWheelHandlers.erase(mScrollWheelHandlers.find(handle));
 }
 
 glm::vec2 Window::getCurrentMousePosition() const {
