@@ -9,6 +9,7 @@
 #include "SkeletonAsset.h"
 #include "AnimationAsset.h"
 #include "PrefabAsset.h"
+#include "LuaScriptAsset.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
@@ -25,6 +26,7 @@ class AssetRegistry {
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
   using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
+  using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
 
 public:
   AssetRegistry() = default;
@@ -96,6 +98,13 @@ public:
   inline PrefabMap &getPrefabs() { return mPrefabs; }
 
   /**
+   * @brief Get Lua scripts
+   *
+   * @return Get Lua scripts
+   */
+  inline LuaScriptMap &getLuaScripts() { return mLuaScripts; }
+
+  /**
    * @brief Get asset located at path
    *
    * @param filePath Path to asset
@@ -113,6 +122,7 @@ private:
   SkeletonMap mSkeletons;
   AnimationMap mAnimations;
   PrefabMap mPrefabs;
+  LuaScriptMap mLuaScripts;
 };
 
 } // namespace liquid

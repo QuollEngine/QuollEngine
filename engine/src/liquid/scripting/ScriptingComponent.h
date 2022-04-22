@@ -1,12 +1,13 @@
 #pragma once
 
 #include "ScriptHandle.h"
+#include "liquid/asset/Asset.h"
 #include "liquid/events/EventObserver.h"
 
 namespace liquid {
 
 struct ScriptingComponent {
-  ScriptHandle handle{0};
+  LuaScriptAssetHandle handle = LuaScriptAssetHandle::Invalid;
   bool started = false;
   void *scope = nullptr;
 

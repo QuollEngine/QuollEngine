@@ -24,6 +24,8 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
     return EditorIcon::Animation;
   case liquid::AssetType::Prefab:
     return EditorIcon::Prefab;
+  case liquid::AssetType::LuaScript:
+    return EditorIcon::Script;
   default:
     return EditorIcon::Unknown;
   }
@@ -126,6 +128,12 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
               mOnItemOpenHandler(entry.assetType, entry.asset);
             }
           }
+        }
+
+        if (ImGui::IsItemHovered()) {
+          ImGui::BeginTooltip();
+          ImGui::Text("%s", entry.path.filename().string().c_str());
+          ImGui::EndTooltip();
         }
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ITEM_HEIGHT);

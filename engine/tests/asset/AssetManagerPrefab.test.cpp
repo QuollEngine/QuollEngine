@@ -381,7 +381,6 @@ TEST_F(AssetManagerTest, LoadsPrefabFile) {
 }
 
 TEST_F(AssetManagerTest, LoadsPrefabWithMeshAnimationSkeleton) {
-
   // Create texture
   auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
 

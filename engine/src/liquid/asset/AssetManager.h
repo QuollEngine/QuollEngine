@@ -164,6 +164,15 @@ public:
   loadPrefabFromFile(const std::filesystem::path &filePath);
 
   /**
+   * @brief Load Lua script from file
+   *
+   * @param filePath Path to asset
+   * @return Lua script handle
+   */
+  Result<LuaScriptAssetHandle>
+  loadLuaScriptFromFile(const std::filesystem::path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry
