@@ -12,9 +12,14 @@ public:
   void addDrawCall(size_t primitiveCount);
 
   /**
-   * @brief Resets draw calls
+   * @brief Resets calls
    */
-  void resetDrawCalls();
+  void resetCalls();
+
+  /**
+   * @brief Add command call
+   */
+  void addCommandCall();
 
   /**
    * @brief Get number of draw calls
@@ -32,9 +37,17 @@ public:
     return mDrawnPrimitivesCount;
   }
 
+  /**
+   * @brief Get command calls count
+   *
+   * @return Number of command calls
+   */
+  inline uint32_t getCommandCallsCount() const { return mCommandCallsCount; }
+
 private:
   uint32_t mDrawCallsCount = 0;
   size_t mDrawnPrimitivesCount = 0;
+  uint32_t mCommandCallsCount = 0;
 };
 
 } // namespace liquid::rhi

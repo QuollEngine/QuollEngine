@@ -46,7 +46,7 @@ VulkanRenderDevice::VulkanRenderDevice(
 void VulkanRenderDevice::execute(RenderGraph &graph,
                                  RenderGraphEvaluator &evaluator) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
-  mStats.resetDrawCalls();
+  mStats.resetCalls();
 
   uint32_t imageIdx =
       mSwapchain.acquireNextImage(mRenderContext.getImageAvailableSemaphore());

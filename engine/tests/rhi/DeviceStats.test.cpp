@@ -14,13 +14,25 @@ TEST_F(DeviceStatsTest, AddsDrawCalls) {
 
   EXPECT_EQ(stats.getDrawCallsCount(), 2);
   EXPECT_EQ(stats.getDrawnPrimitivesCount(), 205);
+  EXPECT_EQ(stats.getCommandCallsCount(), 2);
 }
 
-TEST_F(DeviceStatsTest, ResetsDrawCalls) {
-  stats.addDrawCall(80);
-  stats.addDrawCall(125);
+TEST_F(DeviceStatsTest, AddCommandCalls) {
+  stats.addCommandCall();
+  stats.addCommandCall();
 
-  stats.resetDrawCalls();
   EXPECT_EQ(stats.getDrawCallsCount(), 0);
   EXPECT_EQ(stats.getDrawnPrimitivesCount(), 0);
+  EXPECT_EQ(stats.getCommandCallsCount(), 2);
+}
+
+TEST_F(DeviceStatsTest, ResetsCalls) {
+  stats.addDrawCall(80);
+  stats.addDrawCall(125);
+  stats.addCommandCall();
+
+  stats.resetCalls();
+  EXPECT_EQ(stats.getDrawCallsCount(), 0);
+  EXPECT_EQ(stats.getDrawnPrimitivesCount(), 0);
+  EXPECT_EQ(stats.getCommandCallsCount(), 0);
 }
