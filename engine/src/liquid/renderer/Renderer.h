@@ -46,11 +46,11 @@ public:
 
   SharedPtr<RenderData> prepareScene(Scene *scene);
 
-  SharedPtr<MeshInstance<Mesh>> createMeshInstance(MeshAssetHandle mesh,
-                                                   AssetRegistry &registry);
+  SharedPtr<MeshInstance> createMeshInstance(MeshAssetHandle mesh,
+                                             AssetRegistry &registry);
 
-  SharedPtr<MeshInstance<SkinnedMesh>>
-  createMeshInstance(SkinnedMeshAssetHandle handle, AssetRegistry &registry);
+  SharedPtr<MeshInstance> createMeshInstance(SkinnedMeshAssetHandle handle,
+                                             AssetRegistry &registry);
 
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }

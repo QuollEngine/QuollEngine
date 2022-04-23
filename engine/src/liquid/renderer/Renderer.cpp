@@ -345,10 +345,10 @@ SharedPtr<RenderData> Renderer::prepareScene(Scene *scene) {
                                       mRegistry);
 }
 
-template <class TVertex, class TMeshAsset>
-SharedPtr<MeshInstance<BaseMesh<TVertex>>>
-createMeshObject(const AssetData<TMeshAsset> &mesh, AssetRegistry &registry,
-                 Renderer &renderer) {
+template <class TMeshAsset>
+std::vector<SharedPtr<Material>> createMeshMaterials(const TMeshAsset &mesh,
+                                                     AssetRegistry &registry,
+                                                     Renderer &renderer) {
   auto getTextureFromRegistry = [&registry](TextureAssetHandle handle) {
     if (handle != TextureAssetHandle::Invalid) {
       return registry.getTextures().getAsset(handle).data.deviceHandle;
@@ -357,7 +357,7 @@ createMeshObject(const AssetData<TMeshAsset> &mesh, AssetRegistry &registry,
     return rhi::TextureHandle::Invalid;
   };
 
-  BaseMesh<TVertex> tempMesh;
+  std::vector<SharedPtr<Material>> materials;
 
   for (auto &geometry : mesh.data.geometries) {
     MaterialPBR::Properties properties;
@@ -394,26 +394,28 @@ createMeshObject(const AssetData<TMeshAsset> &mesh, AssetRegistry &registry,
     auto materialInstance =
         renderer.createMaterialPBR(properties, rhi::CullMode::None);
 
-    BaseGeometry<TVertex> tempGeometry(geometry.vertices, geometry.indices,
-                                       materialInstance);
-    tempMesh.addGeometry(tempGeometry);
+    materials.push_back(materialInstance);
   }
 
-  return std::make_shared<MeshInstance<BaseMesh<TVertex>>>(
-      tempMesh, renderer.getRegistry());
+  return materials;
 }
 
-SharedPtr<MeshInstance<Mesh>>
-Renderer::createMeshInstance(MeshAssetHandle handle, AssetRegistry &registry) {
-  return createMeshObject<Mesh::Vertex>(registry.getMeshes().getAsset(handle),
-                                        registry, *this);
+SharedPtr<MeshInstance> Renderer::createMeshInstance(MeshAssetHandle handle,
+                                                     AssetRegistry &registry) {
+  const auto &mesh = registry.getMeshes().getAsset(handle);
+  const auto &materials = createMeshMaterials(mesh, registry, *this);
+
+  return std::make_shared<MeshInstance>(mesh, materials);
 }
 
-SharedPtr<MeshInstance<SkinnedMesh>>
+SharedPtr<MeshInstance>
 Renderer::createMeshInstance(SkinnedMeshAssetHandle handle,
                              AssetRegistry &registry) {
-  return createMeshObject<SkinnedMesh::Vertex>(
-      registry.getSkinnedMeshes().getAsset(handle), registry, *this);
+
+  const auto &mesh = registry.getSkinnedMeshes().getAsset(handle);
+  const auto &materials = createMeshMaterials(mesh, registry, *this);
+
+  return std::make_shared<MeshInstance>(mesh, materials);
 }
 
 } // namespace liquid

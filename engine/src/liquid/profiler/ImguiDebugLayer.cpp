@@ -12,11 +12,10 @@ template <class T> String convertToString(T value) {
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo,
     const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
-    AssetRegistry &assetRegistry, const FPSCounter &fpsCounter,
-    DebugManager &debugManager)
+    const FPSCounter &fpsCounter, DebugManager &debugManager)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
       mFpsCounter(fpsCounter), mDeviceStats(deviceStats),
-      mDebugManager(debugManager), mAssetBrowser(assetRegistry) {}
+      mDebugManager(debugManager) {}
 
 void ImguiDebugLayer::render() {
   if (ImGui::BeginMainMenuBar()) {
@@ -28,8 +27,6 @@ void ImguiDebugLayer::render() {
 
       ImGui::MenuItem("Performance Metrics", nullptr,
                       &mPerformanceMetricsVisible);
-
-      ImGui::MenuItem("Asset browser", nullptr, &mAssetBrowserVisible);
 
       if (ImGui::MenuItem("Wireframe Mode", nullptr, &mWireframeModeEnabled)) {
         mDebugManager.setWireframeMode(mWireframeModeEnabled);
@@ -44,7 +41,6 @@ void ImguiDebugLayer::render() {
   renderPhysicalDeviceInfo();
   renderUsageMetrics();
   renderPerformanceMetrics();
-  renderAssetBrowser();
 }
 
 void ImguiDebugLayer::renderPerformanceMetrics() {
@@ -81,6 +77,7 @@ void ImguiDebugLayer::renderUsageMetrics() {
                             ImGuiTableColumnFlags_WidthStretch |
                             ImGuiTableFlags_RowBg)) {
 
+    // Buffers
     size_t bufferSize = 0;
     for (auto &[_, description] :
          mResourceRegistry.getBufferMap().getDescriptions()) {
@@ -94,18 +91,21 @@ void ImguiDebugLayer::renderUsageMetrics() {
     renderTableRow("Total size of allocated buffer",
                    convertToString(bufferSize));
 
+    // Textures
     size_t textureSize = 0;
     for (auto &[_, description] :
-         mResourceRegistry.getBufferMap().getDescriptions()) {
+         mResourceRegistry.getTextureMap().getDescriptions()) {
       textureSize += description.size;
     }
 
     renderTableRow(
         "Number of textures",
         convertToString(
-            mResourceRegistry.getBufferMap().getDescriptions().size()));
+            mResourceRegistry.getTextureMap().getDescriptions().size()));
     renderTableRow("Total size of allocated textures",
                    convertToString(textureSize));
+
+    // Draw calls
     renderTableRow("Number of draw calls",
                    convertToString(mDeviceStats.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
@@ -115,13 +115,6 @@ void ImguiDebugLayer::renderUsageMetrics() {
   }
 
   ImGui::End();
-}
-
-void ImguiDebugLayer::renderAssetBrowser() {
-  if (!mAssetBrowserVisible)
-    return;
-
-  mAssetBrowser.render();
 }
 
 void ImguiDebugLayer::renderPhysicalDeviceInfo() {

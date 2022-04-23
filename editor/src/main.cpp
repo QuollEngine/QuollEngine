@@ -4,8 +4,6 @@
 #include "liquid/renderer/Material.h"
 
 #include "liquid/renderer/Renderer.h"
-#include "liquid/scene/Vertex.h"
-#include "liquid/scene/Mesh.h"
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/entity/EntityContext.h"
 #include "liquid/events/EventSystem.h"
@@ -15,7 +13,6 @@
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
 
-#include "liquid/loaders/GLTFLoader.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
 #include "liquid/physics/PhysicsSystem.h"
@@ -52,8 +49,9 @@ int main() {
   }
 
   liquid::AssetManager assetManager(tmpProjectPath);
+  liquid::Renderer renderer(entityContext, window, device);
 
-  auto res = assetManager.preloadAssets();
+  auto res = assetManager.preloadAssets(renderer.getRegistry());
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
   preloadStatusDialog.setMessages(res.getWarnings());
 
@@ -61,15 +59,13 @@ int main() {
     preloadStatusDialog.show();
   }
 
-  liquid::Renderer renderer(entityContext, window, device);
   liquid::AnimationSystem animationSystem(entityContext,
                                           assetManager.getRegistry());
   liquid::PhysicsSystem physicsSystem(entityContext, eventSystem);
 
   liquid::ImguiDebugLayer debugLayer(
       device->getDeviceInformation(), device->getDeviceStats(),
-      renderer.getRegistry(), assetManager.getRegistry(), fpsCounter,
-      debugManager);
+      renderer.getRegistry(), fpsCounter, debugManager);
 
   renderer.getShaderLibrary().addShader(
       "editor-grid.vert", renderer.getRegistry().setShader(

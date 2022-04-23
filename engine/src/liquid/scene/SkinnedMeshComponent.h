@@ -1,12 +1,11 @@
 #pragma once
 
-#include "SkinnedMesh.h"
 #include "MeshInstance.h"
 
 namespace liquid {
 
 struct SkinnedMeshComponent {
-  SharedPtr<MeshInstance<SkinnedMesh>> instance;
+  SharedPtr<MeshInstance> instance;
 };
 
 } // namespace liquid
