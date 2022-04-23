@@ -6,11 +6,15 @@ namespace liquid::rhi {
 void DeviceStats::addDrawCall(size_t primitiveCount) {
   mDrawCallsCount++;
   mDrawnPrimitivesCount += primitiveCount;
+  mCommandCallsCount++;
 }
 
-void DeviceStats::resetDrawCalls() {
+void DeviceStats::resetCalls() {
   mDrawCallsCount = 0;
   mDrawnPrimitivesCount = 0;
+  mCommandCallsCount = 0;
 }
+
+void DeviceStats::addCommandCall() { mCommandCallsCount++; }
 
 } // namespace liquid::rhi

@@ -35,10 +35,12 @@ void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
   beginInfo.pClearValues = vulkanRenderPass->getClearValues().data();
 
   vkCmdBeginRenderPass(mCommandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::endRenderPass() {
   vkCmdEndRenderPass(mCommandBuffer);
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
@@ -46,6 +48,7 @@ void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
 
   vkCmdBindPipeline(mCommandBuffer, vulkanPipeline->getBindPoint(),
                     vulkanPipeline->getPipeline());
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
@@ -58,6 +61,7 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
   vkCmdBindDescriptorSets(mCommandBuffer, vulkanPipeline->getBindPoint(),
                           vulkanPipeline->getPipelineLayout(), firstSet, 1,
                           &descriptorSet, 0, {});
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
@@ -66,6 +70,7 @@ void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
   std::array<VkBuffer, 1> buffers{vulkanBuffer->getBuffer()};
 
   vkCmdBindVertexBuffers(mCommandBuffer, 0, 1, buffers.data(), offsets.data());
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
@@ -73,6 +78,7 @@ void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
   const auto &vulkanBuffer = mRegistry.getBuffers().at(buffer);
 
   vkCmdBindIndexBuffer(mCommandBuffer, vulkanBuffer->getBuffer(), 0, indexType);
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
@@ -83,17 +89,18 @@ void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
 
   vkCmdPushConstants(mCommandBuffer, vulkanPipeline->getPipelineLayout(),
                      stageFlags, offset, size, data);
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex) {
-  mStats.addDrawCall(vertexCount / 3);
   vkCmdDraw(mCommandBuffer, vertexCount, 1, firstVertex, 0);
+  mStats.addDrawCall(vertexCount / 3);
 }
 
 void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
                                       int32_t vertexOffset) {
-  mStats.addDrawCall(indexCount / 3);
   vkCmdDrawIndexed(mCommandBuffer, indexCount, 1, firstIndex, vertexOffset, 0);
+  mStats.addDrawCall(indexCount / 3);
 }
 
 void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
@@ -103,6 +110,7 @@ void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
                       size.y,   depthRange.x, depthRange.y};
 
   vkCmdSetViewport(mCommandBuffer, 0, 1, &viewport);
+  mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
@@ -110,6 +118,7 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
   VkRect2D scissor{VkOffset2D{offset.x, offset.y}, VkExtent2D{size.x, size.y}};
 
   vkCmdSetScissor(mCommandBuffer, 0, 1, &scissor);
+  mStats.addCommandCall();
 }
 
 } // namespace liquid::rhi

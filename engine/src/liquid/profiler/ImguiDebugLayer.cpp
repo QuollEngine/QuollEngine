@@ -110,6 +110,8 @@ void ImguiDebugLayer::renderUsageMetrics() {
                    convertToString(mDeviceStats.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
                    convertToString(mDeviceStats.getDrawnPrimitivesCount()));
+    renderTableRow("Number of command calls",
+                   convertToString(mDeviceStats.getCommandCallsCount()));
 
     ImGui::EndTable();
   }
