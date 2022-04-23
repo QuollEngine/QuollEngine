@@ -126,9 +126,9 @@ VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {
-  constexpr uint32_t NUM_UNIFORM_BUFFERS = 500;
-  constexpr uint32_t NUM_SAMPLERS = 100;
-  constexpr uint32_t NUM_DESCRIPTORS = 100;
+  constexpr uint32_t NUM_UNIFORM_BUFFERS = 1500;
+  constexpr uint32_t NUM_SAMPLERS = 500;
+  constexpr uint32_t NUM_DESCRIPTORS = 2000;
   constexpr uint32_t MAX_TEXTURE_DESCRIPTORS = 8;
 
   std::array<VkDescriptorPoolSize, 2> poolSizes{

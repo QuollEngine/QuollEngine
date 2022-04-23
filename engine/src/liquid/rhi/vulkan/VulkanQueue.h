@@ -15,6 +15,13 @@ public:
   VulkanQueue(VulkanDeviceObject &device, uint32_t queueIndex);
 
   /**
+   * @brief Get queue index
+   *
+   * @return Queue index
+   */
+  inline uint32_t getQueueIndex() const { return mQueueIndex; }
+
+  /**
    * @brief Get Vulkan queue handle
    *
    * @return Vulkan queue handle
@@ -22,11 +29,11 @@ public:
   inline operator VkQueue() const { return mQueue; }
 
   /**
-   * @brief Get queue index
+   * @brief Get Vulkan queue handle
    *
-   * @return Queue index
+   * @return Vulkan queue handle
    */
-  inline uint32_t getQueueIndex() const { return mQueueIndex; }
+  inline VkQueue getVulkanHandle() const { return mQueue; }
 
 private:
   VkQueue mQueue = VK_NULL_HANDLE;

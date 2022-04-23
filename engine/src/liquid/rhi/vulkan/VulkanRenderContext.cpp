@@ -48,7 +48,7 @@ VkResult VulkanRenderContext::present(const VulkanSwapchain &swapchain,
   LIQUID_PROFILE_EVENT("VulkanRenderContext::present");
   std::array<VkSemaphore, 1> waitSemaphores{
       mRenderFinishedSemaphores.at(mCurrentFrame)};
-  std::array<VkSwapchainKHR, 1> swapchains{swapchain.getSwapchain()};
+  std::array<VkSwapchainKHR, 1> swapchains{swapchain};
   VkPresentInfoKHR presentInfo{};
 
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

@@ -125,6 +125,9 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     const auto &size = ImGui::GetContentRegionAvail();
     auto itemsPerRow = static_cast<int32_t>(size.x / ITEM_WIDTH);
 
+    if (itemsPerRow == 0)
+      itemsPerRow = 1;
+
     auto relativePath = std::filesystem::relative(mCurrentDirectory,
                                                   assetManager.getAssetsPath());
 

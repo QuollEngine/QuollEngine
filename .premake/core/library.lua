@@ -14,10 +14,10 @@ function setupLibraryDirectories()
         "../vendor/lib"
     }
 
-    filter { "configurations:Debug" }
+    filter { "configurations:Debug or configurations:Profile-Debug" }
         libdirs { "../vendor/lib/debug" }
     
-    filter { "configurations:Release" }
+    filter { "configurations:Release or configurations:Profile-Release" }
         libdirs { "../vendor/lib/release" }
 
     filter { "system:windows" }

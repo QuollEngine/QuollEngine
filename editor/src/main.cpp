@@ -318,40 +318,39 @@ int main() {
 
         commandList.bindPipeline(skeletonLinesPipeline);
 
-        entityContext
-            .iterateEntities<liquid::TransformComponent,
-                             liquid::SkeletonComponent, liquid::DebugComponent>(
-                [&commandList, &skeletonLinesPipeline,
-                 &cameraObj](auto entity, auto &transform,
-                             const liquid::SkeletonComponent &skeleton,
-                             const liquid::DebugComponent &debug) {
-                  if (!debug.showBones)
-                    return;
+        entityContext.iterateEntities<liquid::TransformComponent,
+                                      liquid::SkeletonComponent,
+                                      liquid::DebugComponent>(
+            [&commandList, &skeletonLinesPipeline,
+             &cameraObj](auto entity, auto &transform,
+                         const liquid::SkeletonComponent &skeleton,
+                         const liquid::DebugComponent &debug) {
+              if (!debug.showBones)
+                return;
 
-                  liquid::rhi::Descriptor sceneDescriptor;
-                  sceneDescriptor.bind(
-                      0, cameraObj->getBuffer(),
-                      liquid::rhi::DescriptorType::UniformBuffer);
+              liquid::rhi::Descriptor sceneDescriptor;
+              sceneDescriptor.bind(0, cameraObj->getBuffer(),
+                                   liquid::rhi::DescriptorType::UniformBuffer);
 
-                  liquid::rhi::Descriptor skeletonDescriptor;
-                  skeletonDescriptor.bind(
-                      0, skeleton.skeleton.getDebugBuffer(),
-                      liquid::rhi::DescriptorType::UniformBuffer);
+              liquid::rhi::Descriptor skeletonDescriptor;
+              skeletonDescriptor.bind(
+                  0, skeleton.skeleton.getDebugBuffer(),
+                  liquid::rhi::DescriptorType::UniformBuffer);
 
-                  auto *transformConstant = new liquid::StandardPushConstants;
-                  transformConstant->modelMatrix = transform.worldTransform;
+              liquid::StandardPushConstants transformConstant{};
+              transformConstant.modelMatrix = transform.worldTransform;
 
-                  commandList.bindDescriptor(skeletonLinesPipeline, 0,
-                                             sceneDescriptor);
-                  commandList.bindDescriptor(skeletonLinesPipeline, 1,
-                                             skeletonDescriptor);
+              commandList.bindDescriptor(skeletonLinesPipeline, 0,
+                                         sceneDescriptor);
+              commandList.bindDescriptor(skeletonLinesPipeline, 1,
+                                         skeletonDescriptor);
 
-                  commandList.pushConstants(
-                      skeletonLinesPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                      sizeof(liquid::StandardPushConstants), transformConstant);
+              commandList.pushConstants(
+                  skeletonLinesPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                  sizeof(liquid::StandardPushConstants), &transformConstant);
 
-                  commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
-                });
+              commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
+            });
 
         entityContext.iterateEntities<liquid::TransformComponent,
                                       liquid::LightComponent>(

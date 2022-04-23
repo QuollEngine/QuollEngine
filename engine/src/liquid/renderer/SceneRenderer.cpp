@@ -20,12 +20,12 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
         }
         const auto &instance = mesh.instance;
 
-        auto *transformConstant = new StandardPushConstants;
-        transformConstant->modelMatrix = transform.worldTransform;
+        StandardPushConstants transformConstant{};
+        transformConstant.modelMatrix = transform.worldTransform;
 
         commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
                                   sizeof(StandardPushConstants),
-                                  transformConstant);
+                                  &transformConstant);
 
         for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
@@ -57,12 +57,12 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
              const auto &transform) {
         const auto &instance = mesh.instance;
 
-        auto *transformConstant = new StandardPushConstants;
-        transformConstant->modelMatrix = transform.worldTransform;
+        StandardPushConstants transformConstant{};
+        transformConstant.modelMatrix = transform.worldTransform;
 
         commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
                                   sizeof(StandardPushConstants),
-                                  transformConstant);
+                                  &transformConstant);
 
         rhi::Descriptor skeletonDescriptor;
         skeletonDescriptor.bind(0, skeleton.skeleton.getBuffer(),

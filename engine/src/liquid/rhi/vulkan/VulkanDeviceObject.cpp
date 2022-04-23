@@ -64,10 +64,16 @@ VulkanDeviceObject::VulkanDeviceObject(
               << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
   }
 
+  VkPhysicalDeviceHostQueryResetFeatures queryResetFeatures{};
+  queryResetFeatures.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES;
+  queryResetFeatures.pNext = nullptr;
+  queryResetFeatures.hostQueryReset = VK_TRUE;
+
   VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures{};
   descriptorIndexingFeatures.sType =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
-  descriptorIndexingFeatures.pNext = nullptr;
+  descriptorIndexingFeatures.pNext = &queryResetFeatures;
   descriptorIndexingFeatures.descriptorBindingPartiallyBound = true;
 
   auto &features = physicalDevice.getFeatures();
@@ -87,9 +93,9 @@ VulkanDeviceObject::VulkanDeviceObject(
       static_cast<uint32_t>(extensions.size());
   createDeviceInfo.ppEnabledExtensionNames = extensions.data();
 
-  checkForVulkanError(vkCreateDevice(physicalDevice.getVulkanDevice(),
-                                     &createDeviceInfo, nullptr, &mDevice),
-                      "Failed to create device");
+  checkForVulkanError(
+      vkCreateDevice(physicalDevice, &createDeviceInfo, nullptr, &mDevice),
+      "Failed to create device");
 
   LOG_DEBUG("[Vulkan] Vulkan device created for " << physicalDevice.getName());
 }

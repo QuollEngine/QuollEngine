@@ -13,7 +13,7 @@ VulkanResourceAllocator::VulkanResourceAllocator(
 
   VmaAllocatorCreateInfo createInfo{};
   createInfo.instance = backend.getVulkanInstance();
-  createInfo.physicalDevice = physicalDevice.getVulkanDevice();
+  createInfo.physicalDevice = physicalDevice;
   createInfo.device = device;
 
   checkForVulkanError(vmaCreateAllocator(&createInfo, &mAllocator),
