@@ -1,76 +1,35 @@
 #pragma once
 
 #include "liquid/renderer/Material.h"
-
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/asset/MeshAsset.h"
+#include "liquid/asset/AssetData.h"
 
 namespace liquid {
 
-template <class Mesh> class MeshInstance {
+class MeshInstance {
 public:
-  /**
-   * @brief Creates mesh instance from mesh
-   *
-   * Uses resource allocator to create
-   * hardware buffers from mesh data
-   *
-   * @param mesh Mesh
-   * @param registry Resource registry
-   */
-  MeshInstance(const Mesh &mesh, rhi::ResourceRegistry &registry)
-      : mRegistry(registry), mMesh(mesh) {
-    for (auto &geometry : mMesh.getGeometries()) {
-      size_t bufferSize =
-          geometry.getVertices().size() * sizeof(typename Mesh::Vertex);
+  template <class TMeshAsset>
+  MeshInstance(const AssetData<TMeshAsset> &asset,
+               const std::vector<SharedPtr<Material>> &materials) {
 
-      auto vertexBuffer =
-          registry.setBuffer({rhi::BufferType::Vertex, bufferSize,
-                              (void *)geometry.getVertices().data()});
+    LIQUID_ASSERT(asset.data.vertexBuffers.size() ==
+                      asset.data.indexBuffers.size(),
+                  "Vertex and index buffer sizes must match");
+    LIQUID_ASSERT(asset.data.vertexBuffers.size() == materials.size(),
+                  "Materials size must match buffer sizes");
 
-      if (geometry.getIndices().size() > 0) {
-        size_t bufferSize = geometry.getIndices().size() * sizeof(uint32_t);
+    mVertexBuffers = asset.data.vertexBuffers;
+    mIndexBuffers = asset.data.indexBuffers;
+    mMaterials = materials;
 
-        auto indexBuffer =
-            registry.setBuffer({rhi::BufferType::Index,
-                                geometry.getIndices().size() * sizeof(uint32_t),
-                                (void *)geometry.getIndices().data()});
-        mIndexBuffers.push_back(indexBuffer);
-      } else {
-        mIndexBuffers.push_back(rhi::BufferHandle::Invalid);
-      }
-
-      mIndexCounts.push_back(
-          static_cast<uint32_t>(geometry.getIndices().size()));
-      mVertexCounts.push_back(
-          static_cast<uint32_t>(geometry.getVertices().size()));
-      mVertexBuffers.push_back(vertexBuffer);
-      mMaterials.push_back(geometry.getMaterial());
+    mVertexCounts.resize(asset.data.geometries.size());
+    mIndexCounts.resize(asset.data.geometries.size());
+    for (size_t i = 0; i < asset.data.geometries.size(); ++i) {
+      const auto &geometry = asset.data.geometries.at(i);
+      mVertexCounts.at(i) = static_cast<uint32_t>(geometry.vertices.size());
+      mIndexCounts.at(i) = static_cast<uint32_t>(geometry.indices.size());
     }
-  }
-
-  ~MeshInstance() {
-    for (auto &x : mVertexBuffers) {
-      mRegistry.deleteBuffer(x);
-    }
-
-    for (auto &x : mIndexBuffers) {
-      mRegistry.deleteBuffer(x);
-    }
-  }
-
-  MeshInstance(const MeshInstance &rhs) = delete;
-  MeshInstance(MeshInstance &&rhs) = delete;
-  MeshInstance &operator=(const MeshInstance &rhs) = delete;
-  MeshInstance &operator=(MeshInstance &&rhs) = delete;
-
-  /**
-   * @brief Set material
-   *
-   * @param material Material
-   * @param index Index
-   */
-  void setMaterial(const SharedPtr<Material> &material, size_t index = 0) {
-    mMaterials.at(index) = material;
   }
 
   /**
@@ -124,9 +83,6 @@ private:
   std::vector<SharedPtr<Material>> mMaterials;
   std::vector<uint32_t> mVertexCounts;
   std::vector<uint32_t> mIndexCounts;
-
-  Mesh mMesh;
-  rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquid

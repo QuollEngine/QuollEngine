@@ -10,15 +10,12 @@
 #include "liquid/profiler/FPSCounter.h"
 
 #include "liquid/scene/Vertex.h"
-#include "liquid/scene/Mesh.h"
 #include "liquid/scene/MeshInstance.h"
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
+#include "liquid/asset/AssetManager.h"
 
 #include "liquid/loop/MainLoop.h"
-
-#include "cube.h"
-#include "sphere.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
 
@@ -32,6 +29,7 @@ public:
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
         renderer(entityContext, window, backend.createDefaultDevice()),
         physicsSystem(entityContext, eventSystem),
+        assetManager(std::filesystem::current_path()),
         vertexShader(
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
@@ -41,22 +39,24 @@ public:
 
     scene.reset(new liquid::Scene(entityContext));
 
-    liquid::Mesh barMesh = createCube();
-    liquid::Mesh ballMesh = createSphere(ballRadius, 10, 10, RED);
+    assetManager.preloadAssets(renderer.getRegistry());
+
+    for (auto &[handle, mesh] :
+         assetManager.getRegistry().getMeshes().getAssets()) {
+      if (mesh.name == "cube.lqmesh") {
+        barInstance =
+            renderer.createMeshInstance(handle, assetManager.getRegistry());
+      } else if (mesh.name == "sphere.lqmesh") {
+        ballInstance =
+            renderer.createMeshInstance(handle, assetManager.getRegistry());
+      }
+    }
 
     eventSystem.observe(liquid::KeyboardEvent::Pressed,
                         [this](const auto &data) { handleKeyClick(data.key); });
 
     eventSystem.observe(liquid::KeyboardEvent::Released,
                         [this](const auto &data) { handleKeyRelease(); });
-
-    barInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        barMesh, renderer.getRegistry()));
-    barInstance->setMaterial(material);
-
-    ballInstance.reset(new liquid::MeshInstance<liquid::Mesh>(
-        ballMesh, renderer.getRegistry()));
-    ballInstance->setMaterial(material);
 
     setupScene();
   }
@@ -91,7 +91,7 @@ public:
              {liquid::rhi::PipelineColorBlendAttachment{}}}});
 
     auto &pass = graph.addPass("mainPass");
-    pass.write(graph.getSwapchain(), glm::vec4{0.0f});
+    pass.write(graph.getSwapchain(), glm::vec4{1.0f});
     pass.write(depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
     pass.addPipeline(pipeline);
     pass.setExecutor([pipeline, this, &sceneRenderer](auto &commandList) {
@@ -307,7 +307,9 @@ private:
     }
 
     // create ball
-    ball = scene->getRootNode()->addChild(ballEntity);
+    liquid::TransformComponent ballTransform{};
+    ballTransform.localScale = glm::vec3(0.3f);
+    ball = scene->getRootNode()->addChild(ballEntity, ballTransform);
   }
 
   liquid::TransformComponent createWallTransform(glm::vec3 position,
@@ -328,6 +330,7 @@ private:
   liquid::rhi::VulkanRenderBackend backend;
   liquid::Renderer renderer;
   liquid::PhysicsSystem physicsSystem;
+  liquid::AssetManager assetManager;
 
   liquid::SharedPtr<liquid::Camera> camera;
   std::unique_ptr<liquid::Scene> scene;
@@ -336,8 +339,8 @@ private:
   liquid::rhi::ShaderHandle fragmentShader;
   liquid::SharedPtr<liquid::Material> material;
 
-  liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> barInstance;
-  liquid::SharedPtr<liquid::MeshInstance<liquid::Mesh>> ballInstance;
+  liquid::SharedPtr<liquid::MeshInstance> barInstance;
+  liquid::SharedPtr<liquid::MeshInstance> ballInstance;
 
   liquid::SceneNode *p1, *p2, *ball;
 

@@ -191,9 +191,10 @@ public:
   /**
    * @brief Preload all assets in assets directory
    *
+   * @param resourceRegistry Resource registry
    * @return Preload result
    */
-  Result<bool> preloadAssets();
+  Result<bool> preloadAssets(rhi::ResourceRegistry &resourceRegistry);
 
   /**
    * @brief Get asset name from path

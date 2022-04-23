@@ -11,6 +11,8 @@ AssetRegistry::~AssetRegistry() {
 
 void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
   LIQUID_PROFILE_EVENT("AssetRegistry::syncWithDeviceRegistry");
+
+  // Synchronize textures
   for (auto &[_, texture] : mTextures.getAssets()) {
     if (texture.data.deviceHandle == rhi::TextureHandle::Invalid) {
       rhi::TextureDescription description;
@@ -27,6 +29,66 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
       description.format = VK_FORMAT_R8G8B8A8_SRGB;
 
       texture.data.deviceHandle = registry.setTexture(description);
+    }
+  }
+
+  // Synchronize meshes
+  for (auto &[_, mesh] : mMeshes.getAssets()) {
+    if (mesh.data.vertexBuffers.empty()) {
+      mesh.data.vertexBuffers.resize(mesh.data.geometries.size(),
+                                     rhi::BufferHandle::Invalid);
+      mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
+                                    rhi::BufferHandle::Invalid);
+    }
+
+    for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
+      auto &geometry = mesh.data.geometries.at(i);
+
+      {
+        rhi::BufferDescription description;
+        description.type = rhi::BufferType::Vertex;
+        description.size = geometry.vertices.size() * sizeof(Vertex);
+        description.data = geometry.vertices.data();
+        mesh.data.vertexBuffers.at(i) = registry.setBuffer(description);
+      }
+
+      if (!geometry.indices.empty()) {
+        rhi::BufferDescription description;
+        description.type = rhi::BufferType::Index;
+        description.size = geometry.indices.size() * sizeof(uint32_t);
+        description.data = geometry.indices.data();
+        mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
+      }
+    }
+  }
+
+  // Synchronize skinned meshes
+  for (auto &[_, mesh] : mSkinnedMeshes.getAssets()) {
+    if (mesh.data.vertexBuffers.empty()) {
+      mesh.data.vertexBuffers.resize(mesh.data.geometries.size(),
+                                     rhi::BufferHandle::Invalid);
+      mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
+                                    rhi::BufferHandle::Invalid);
+    }
+
+    for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
+      auto &geometry = mesh.data.geometries.at(i);
+
+      {
+        rhi::BufferDescription description;
+        description.type = rhi::BufferType::Vertex;
+        description.size = geometry.vertices.size() * sizeof(SkinnedVertex);
+        description.data = geometry.vertices.data();
+        mesh.data.vertexBuffers.at(i) = registry.setBuffer(description);
+      }
+
+      if (!geometry.indices.empty()) {
+        rhi::BufferDescription description;
+        description.type = rhi::BufferType::Index;
+        description.size = geometry.indices.size() * sizeof(uint32_t);
+        description.data = geometry.indices.data();
+        mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
+      }
     }
   }
 }
