@@ -9,6 +9,37 @@ static void ImguiImage(liquid::rhi::TextureHandle handle, const ImVec2 &size) {
   ImGui::Image(reinterpret_cast<void *>(static_cast<uintptr_t>(handle)), size);
 }
 
+struct ImguiInputTextCallbackUserData {
+  liquid::String &value;
+};
+
+static int InputTextCallback(ImGuiInputTextCallbackData *data) {
+  auto *userData =
+      static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
+  if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+    auto &str = userData->value;
+    LIQUID_ASSERT(data->Buf == str.c_str(),
+                  "Buffer and string value must point to the same address");
+    str.resize(data->BufTextLen);
+    data->Buf = str.data();
+  }
+  return 0;
+}
+
+static bool ImguiInputText(const liquid::String &label, liquid::String &value,
+                           ImGuiInputTextFlags flags = 0) {
+  LIQUID_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0,
+                "Do not back callback resize flag");
+
+  flags |= ImGuiInputTextFlags_CallbackResize;
+
+  ImguiInputTextCallbackUserData userData{
+      value,
+  };
+  return ImGui::InputText(label.c_str(), value.data(), value.capacity() + 1,
+                          flags, InputTextCallback, &userData);
+}
+
 static EditorIcon getIconFromAssetType(liquid::AssetType type) {
   switch (type) {
   case liquid::AssetType::Texture:
@@ -81,6 +112,13 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
       if (ImGui::MenuItem("Import GLTF")) {
         handleGLTFImport();
       }
+
+      if (ImGui::MenuItem("Create directory")) {
+        mHasStagingEntry = true;
+        mStagingEntry.icon = EditorIcon::Directory;
+        mStagingEntry.isDirectory = true;
+        mStagingEntry.isEditable = true;
+      }
       ImGui::EndPopup();
     }
 
@@ -101,7 +139,30 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
     if (ImGui::BeginTable("CurrentDir", itemsPerRow,
                           ImGuiTableFlags_NoPadInnerX)) {
-      for (size_t i = 0; i < mEntries.size(); ++i) {
+
+      size_t startIndex = 0;
+      if (mHasStagingEntry) {
+        startIndex = 1;
+
+        ImGui::TableNextRow(ImGuiTableRowFlags_None, ITEM_HEIGHT * 1.0f);
+        ImGui::TableNextColumn();
+
+        ImguiImage(iconRegistry.getIcon(mStagingEntry.icon), ICON_SIZE);
+        ImGui::PushItemWidth(ITEM_WIDTH);
+
+        if (!mInitialFocusSet) {
+          ImGui::SetKeyboardFocusHere();
+          mInitialFocusSet = true;
+        }
+
+        ImguiInputText("###StagingEntryName", mStagingEntry.clippedName);
+
+        if (ImGui::IsItemDeactivatedAfterEdit()) {
+          handleCreateEntry();
+        }
+      }
+
+      for (size_t i = startIndex; i < mEntries.size(); ++i) {
         const auto &entry = mEntries.at(i);
         auto colIndex = (i % itemsPerRow);
         if (colIndex == 0) {
@@ -139,7 +200,6 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ITEM_HEIGHT);
 
         ImguiImage(iconRegistry.getIcon(entry.icon), ICON_SIZE);
-
         ImGui::Text("%s", entry.clippedName.c_str());
       }
       ImGui::TableNextRow();
@@ -181,6 +241,20 @@ void AssetBrowser::handleGLTFImport() {
   }
 
   reload();
+}
+
+void AssetBrowser::handleCreateEntry() {
+  // Create directory
+  auto path = mCurrentDirectory / mStagingEntry.clippedName;
+  std::filesystem::create_directory(path);
+
+  // Reset values and hide staging
+  mStagingEntry.clippedName = "";
+  mHasStagingEntry = false;
+  mInitialFocusSet = false;
+
+  // Trigger directory refresh
+  mDirectoryChanged = true;
 }
 
 } // namespace liquidator

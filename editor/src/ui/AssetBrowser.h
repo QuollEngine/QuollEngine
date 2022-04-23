@@ -18,6 +18,7 @@ class AssetBrowser {
     EditorIcon icon = EditorIcon::Unknown;
     liquid::AssetType assetType = liquid::AssetType::None;
     uint32_t asset = 0;
+    bool isEditable = false;
   };
 
 public:
@@ -58,7 +59,16 @@ private:
    */
   void handleGLTFImport();
 
+  /**
+   * @brief Handle entry creation
+   */
+  void handleCreateEntry();
+
 private:
+  Entry mStagingEntry;
+  bool mHasStagingEntry = false;
+  bool mInitialFocusSet = false;
+
   std::vector<Entry> mEntries;
   std::filesystem::path mCurrentDirectory;
   bool mDirectoryChanged = true;
