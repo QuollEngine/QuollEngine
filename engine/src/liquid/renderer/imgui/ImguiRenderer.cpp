@@ -226,16 +226,10 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
   uint32_t translateDataSize =
       static_cast<uint32_t>(sizeof(float) * translate.size());
 
-  float *scaleConstant = new float[2];
-
-  memcpy(scaleConstant, scale.data(), scaleDataSize);
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                            scaleDataSize, scaleConstant);
-
-  float *translateConstant = new float[2];
-  memcpy(translateConstant, translate.data(), scaleDataSize);
+                            scaleDataSize, scale.data());
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, scaleDataSize,
-                            translateDataSize, translateConstant);
+                            translateDataSize, translate.data());
 }
 
 void ImguiRenderer::loadFonts() {

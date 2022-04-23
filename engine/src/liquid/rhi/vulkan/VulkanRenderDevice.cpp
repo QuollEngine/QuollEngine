@@ -9,6 +9,7 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
+#include "VulkanCommandBuffer.h"
 
 #include "VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
@@ -30,6 +31,14 @@ VulkanRenderDevice::VulkanRenderDevice(
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, VK_NULL_HANDLE),
       mAllocator(mBackend, mPhysicalDevice, mDevice) {
+
+  VkDevice device = mDevice.getVulkanHandle();
+  VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
+  VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
+  uint32_t queueIndex = mGraphicsQueue.getQueueIndex();
+
+  LIQUID_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
+                                 &queueIndex, 1, nullptr);
 
   synchronizeSwapchain(0);
 }
@@ -61,8 +70,20 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
   }
 
   auto &commandBuffer = mRenderContext.beginRendering();
-  evaluator.execute(commandBuffer, compiled, graph, imageIdx);
+
+  auto *commandBufferHandle =
+      dynamic_cast<VulkanCommandBuffer *>(
+          commandBuffer.getNativeRenderCommandList().get())
+          ->getVulkanCommandBuffer();
+  LIQUID_PROFILE_GPU_CONTEXT(commandBufferHandle);
+  {
+    LIQUID_PROFILE_GPU_EVENT("GPU event");
+    evaluator.execute(commandBuffer, compiled, graph, imageIdx);
+  }
   mRenderContext.endRendering();
+
+  VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
+  LIQUID_PROFILE_GPU_FLIP(&mSwapchain);
 
   auto queuePresentResult = mRenderContext.present(mSwapchain, imageIdx);
 
@@ -79,8 +100,7 @@ void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();
 
-  mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice,
-                               mSwapchain.getSwapchain());
+  mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice, mSwapchain);
 
   synchronizeSwapchain(prevNumSwapchainImages);
   mBackend.finishFramebufferResize();

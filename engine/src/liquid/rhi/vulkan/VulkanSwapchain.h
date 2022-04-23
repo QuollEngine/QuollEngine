@@ -70,13 +70,6 @@ public:
   inline VkPresentModeKHR getPresentMode() const { return mPresentMode; }
 
   /**
-   * @brief Gets Vulkan swapchain
-   *
-   * @return Vulkan swapchain handle
-   */
-  inline VkSwapchainKHR getSwapchain() const { return mSwapchain; }
-
-  /**
    * @brief Gets extent
    *
    * @return Vulkan extent
@@ -98,6 +91,20 @@ public:
    * @return Vulkan images
    */
   inline const std::vector<VkImage> &getImages() const { return mImages; }
+
+  /**
+   * @brief Gets Vulkan swapchain handle
+   *
+   * @return Vulkan swapchain handle
+   */
+  inline operator VkSwapchainKHR() const { return mSwapchain; }
+
+  /**
+   * @brief Gets Vulkan swapchain handle
+   *
+   * @return Vulkan swapchain handle
+   */
+  inline VkSwapchainKHR getVulkanHandle() const { return mSwapchain; }
 
 private:
   /**

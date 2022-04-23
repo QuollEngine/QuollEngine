@@ -32,6 +32,13 @@ public:
    */
   inline operator VkDevice() const { return mDevice; }
 
+  /**
+   * @brief Get Vulkan device handle
+   *
+   * @return Vulkan device handle
+   */
+  inline VkDevice getVulkanHandle() const { return mDevice; }
+
 private:
   VkDevice mDevice = VK_NULL_HANDLE;
 };

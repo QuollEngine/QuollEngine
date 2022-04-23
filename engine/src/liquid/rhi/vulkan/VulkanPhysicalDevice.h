@@ -56,13 +56,6 @@ public:
   inline const String &getName() const { return mName; }
 
   /**
-   * @brief Gets Vulkan device handle
-   *
-   * @return Vulkan device handle
-   */
-  inline VkPhysicalDevice getVulkanDevice() const { return mDevice; }
-
-  /**
    * @brief Get device features
    *
    * @return Device features
@@ -120,6 +113,20 @@ public:
    * @return Physical device information
    */
   const PhysicalDeviceInformation getDeviceInfo() const;
+
+  /**
+   * @brief Gets Vulkan physical device handle
+   *
+   * @return Vulkan physical device handle
+   */
+  inline operator VkPhysicalDevice() const { return mDevice; }
+
+  /**
+   * @brief Gets Vulkan physical device handle
+   *
+   * @return Vulkan physical device handle
+   */
+  inline VkPhysicalDevice getVulkanHandle() const { return mDevice; }
 
 private:
   VulkanQueueFamily mQueueFamilyIndices;
