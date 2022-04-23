@@ -14,8 +14,10 @@ class AssetBrowser {
   struct Entry {
     std::filesystem::path path;
     liquid::String clippedName;
+    float textWidth = 0.0f;
     bool isDirectory = false;
     EditorIcon icon = EditorIcon::Unknown;
+    liquid::rhi::TextureHandle preview = liquid::rhi::TextureHandle::Invalid;
     liquid::AssetType assetType = liquid::AssetType::None;
     uint32_t asset = 0;
     bool isEditable = false;

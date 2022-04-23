@@ -67,9 +67,10 @@ AssetBrowser::AssetBrowser(GLTFImporter &gltfImporter)
 
 void AssetBrowser::render(liquid::AssetManager &assetManager,
                           IconRegistry &iconRegistry) {
-  constexpr uint32_t ITEM_WIDTH = 80;
+  constexpr uint32_t ITEM_WIDTH = 90;
   constexpr uint32_t ITEM_HEIGHT = 100;
-  const ImVec2 ICON_SIZE(80.0f, 80.0f);
+  constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
+  constexpr float IMAGE_PADDING = ((ITEM_WIDTH * 1.0f) - ICON_SIZE.x) / 2.0f;
   constexpr uint32_t TEXT_WIDTH = ITEM_WIDTH - 8;
 
   if (mDirectoryChanged) {
@@ -85,19 +86,41 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
       entry.isDirectory = dirEntry.is_directory();
       entry.assetType = pair.first;
       entry.asset = pair.second;
+
       entry.icon = entry.isDirectory ? EditorIcon::Directory
                                      : getIconFromAssetType(entry.assetType);
+
+      entry.preview = iconRegistry.getIcon(entry.icon);
+
+      if (entry.assetType == liquid::AssetType::Texture) {
+        auto handle =
+            assetManager.getRegistry()
+                .getTextures()
+                .getAsset(static_cast<liquid::TextureAssetHandle>(pair.second))
+                .data.deviceHandle;
+
+        if (handle != liquid::rhi::TextureHandle::Invalid) {
+          entry.preview = handle;
+        }
+      }
+
       entry.clippedName = entry.path.filename().stem().string();
 
-      if (ImGui::CalcTextSize(entry.clippedName.c_str()).x > TEXT_WIDTH) {
-        liquid::String ellipsis = "..";
+      liquid::String ellipsis = "..";
+      auto calculateTextWidth = [&ellipsis](Entry &entry) {
+        return ImGui::CalcTextSize((entry.clippedName + ellipsis).c_str()).x;
+      };
 
+      entry.textWidth = calculateTextWidth(entry);
+
+      if (ImGui::CalcTextSize(entry.clippedName.c_str()).x > TEXT_WIDTH) {
         bool changed = false;
-        while (ImGui::CalcTextSize((entry.clippedName + ellipsis).c_str()).x >
-               TEXT_WIDTH) {
+
+        while (calculateTextWidth(entry) > TEXT_WIDTH) {
           entry.clippedName.pop_back();
         }
 
+        entry.textWidth = calculateTextWidth(entry);
         entry.clippedName += ellipsis;
       }
 
@@ -202,8 +225,22 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ITEM_HEIGHT);
 
-        ImguiImage(iconRegistry.getIcon(entry.icon), ICON_SIZE);
-        ImGui::Text("%s", entry.clippedName.c_str());
+        {
+          float initialCursorPos = ImGui::GetCursorPosX();
+          ImGui::SetCursorPosX(initialCursorPos + IMAGE_PADDING);
+          ImguiImage(entry.preview, ICON_SIZE);
+          ImGui::SetCursorPosX(initialCursorPos);
+        }
+
+        {
+          static constexpr float HALF = 0.5f;
+          float initialCursorPos = ImGui::GetCursorPosX();
+          float centerPos =
+              initialCursorPos + (ITEM_WIDTH * 1.0f - entry.textWidth) * HALF;
+          ImGui::SetCursorPosX(centerPos);
+          ImGui::Text("%s", entry.clippedName.c_str());
+          ImGui::SetCursorPosX(initialCursorPos);
+        }
       }
       ImGui::TableNextRow();
     }
