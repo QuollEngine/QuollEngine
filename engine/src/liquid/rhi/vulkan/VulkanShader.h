@@ -82,6 +82,7 @@ private:
   VkShaderStageFlagBits mStage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
 
   ReflectionData mReflectionData{};
+  String mPath;
 };
 
 } // namespace liquid::rhi

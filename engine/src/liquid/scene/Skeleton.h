@@ -145,11 +145,13 @@ public:
   }
 
   /**
-   * @brief Get buffer
+   * @brief Get joint final transforms
    *
-   * @return Buffer
+   * @return Joint final transforms
    */
-  inline rhi::BufferHandle getBuffer() const { return mBuffer; }
+  inline const std::vector<glm::mat4> &getJointFinalTransforms() const {
+    return mJointFinalTransforms;
+  }
 
   /**
    * @brief Get debug buffer
@@ -204,7 +206,6 @@ private:
   std::vector<glm::mat4> mJointFinalTransforms;
 
   std::vector<String> mJointNames;
-  rhi::BufferHandle mBuffer;
 
   std::vector<JointId> mDebugBones;
   std::vector<glm::mat4> mDebugBoneTransforms;

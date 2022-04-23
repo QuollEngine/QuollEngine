@@ -11,7 +11,7 @@ layout(location = 9) in mat4 inModelMatrix;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 1, binding = 0) uniform CameraData {
+layout(set = 2, binding = 0) uniform CameraData {
   mat4 proj;
   mat4 view;
   mat4 viewProj;
@@ -25,18 +25,18 @@ struct LightData {
   mat4 lightSpaceMatrix;
 };
 
-layout(std140, set = 1, binding = 1) uniform SceneData {
+layout(std140, set = 2, binding = 1) uniform SceneData {
   LightData lights[16];
   uvec4 numLights;
   uvec4 hasIBL;
 }
 uSceneData;
 
-layout(set = 1, binding = 2) uniform sampler2DArray uShadowmap;
-layout(set = 1, binding = 3) uniform samplerCube uIblMaps[2];
-layout(set = 1, binding = 4) uniform sampler2D uBrdfLUT;
+layout(set = 2, binding = 2) uniform sampler2DArray uShadowmap;
+layout(set = 2, binding = 3) uniform samplerCube uIblMaps[2];
+layout(set = 2, binding = 4) uniform sampler2D uBrdfLUT;
 
-layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
+layout(std140, set = 3, binding = 0) uniform MaterialDataRaw {
   int baseColorTexture[1];
   int baseColorTextureCoord[1];
   vec4 baseColorFactor;
@@ -87,7 +87,7 @@ MaterialData uMaterialData = MaterialData(
     uMaterialDataRaw.occlusionStrength[0], uMaterialDataRaw.emissiveTexture[0],
     uMaterialDataRaw.emissiveTextureCoord[0], uMaterialDataRaw.emissiveFactor);
 
-layout(set = 2, binding = 1) uniform sampler2D uTextures[8];
+layout(set = 3, binding = 1) uniform sampler2D uTextures[8];
 
 const float PI = 3.141592653589793;
 const mat4 DEPTH_BIAS = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,

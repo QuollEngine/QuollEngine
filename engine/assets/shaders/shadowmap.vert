@@ -1,4 +1,4 @@
-#version 450
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shader_viewport_layer_array : enable
 
@@ -10,11 +10,18 @@ layout(std140, set = 0, binding = 0) uniform MaterialData {
 }
 uMaterialData;
 
-layout(push_constant) uniform TransfromConstant { mat4 modelMatrix; }
-pcTransform;
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
 
 void main() {
-  gl_Position = uMaterialData.lightMatrix * pcTransform.modelMatrix *
-                vec4(inPosition, 1.0);
+  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+
+  gl_Position = uMaterialData.lightMatrix * modelMatrix * vec4(inPosition, 1.0);
   gl_Layer = uMaterialData.lightIndex[0];
 }

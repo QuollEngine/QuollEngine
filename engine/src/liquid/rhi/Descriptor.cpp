@@ -22,9 +22,10 @@ Descriptor &Descriptor::bind(uint32_t binding,
 
 Descriptor &Descriptor::bind(uint32_t binding, BufferHandle buffer,
                              DescriptorType type) {
-  LIQUID_ASSERT(type == DescriptorType::UniformBuffer,
+  LIQUID_ASSERT(type == DescriptorType::UniformBuffer ||
+                    type == DescriptorType::StorageBuffer,
                 "Descriptor type for binding " + std::to_string(binding) +
-                    " must be uniform buffer");
+                    " must be uniform or storage buffer");
 
   bindings.insert({binding, DescriptorBinding{type, buffer}});
   std::stringstream ss;

@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -22,21 +22,29 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
-layout(push_constant) uniform TransformConstant { mat4 modelMatrix; }
-pcTransform;
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
 
 void main() {
-  vec4 worldPosition =
-      uCameraData.viewProj * pcTransform.modelMatrix * vec4(inPosition, 1.0f);
+  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
 
-  mat3 m3ModelMatrix = mat3(pcTransform.modelMatrix);
+  vec4 worldPosition =
+      uCameraData.viewProj * modelMatrix * vec4(inPosition, 1.0f);
+
+  mat3 m3ModelMatrix = mat3(modelMatrix);
   mat3 normalMatrix = transpose(inverse(m3ModelMatrix));
 
   vec3 normal = normalize(normalMatrix * inNormal);
   vec3 tangent = normalize(m3ModelMatrix * inTangent.xyz);
   vec3 bitangent = cross(normal, tangent) * inTangent.w;
 
-  outModelMatrix = pcTransform.modelMatrix;
+  outModelMatrix = modelMatrix;
   outModelPosition = vec4(inPosition, 1.0f);
   outWorldPosition = worldPosition.xyz;
   outNormal = normal;

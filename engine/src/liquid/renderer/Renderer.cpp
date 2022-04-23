@@ -29,6 +29,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render(rhi::RenderGraph &graph) {
+  updateStorageBuffers();
   mDevice->execute(graph, mGraphEvaluator);
 }
 
@@ -76,6 +77,29 @@ void Renderer::loadShaders() {
       "__engine.fullscreenQuad.default.fragment",
       mRegistry.setShader(
           {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
+}
+
+void Renderer::updateStorageBuffers() {
+  LIQUID_PROFILE_EVENT("Renderer::updateStorageBuffers");
+  mRenderStorage.clear();
+
+  // Meshes
+  mEntityContext.iterateEntities<TransformComponent, MeshComponent>(
+      [this](auto entity, const auto &transform, const auto &mesh) {
+        mRenderStorage.addMeshData(transform.worldTransform);
+      });
+
+  // Skinned Meshes
+  mEntityContext.iterateEntities<SkeletonComponent, TransformComponent,
+                                 SkinnedMeshComponent>(
+      [this](auto entity, const auto &skeleton, const auto &transform,
+             const auto &mesh) {
+        mRenderStorage.addSkinnedMeshData(
+            transform.worldTransform,
+            skeleton.skeleton.getJointFinalTransforms());
+      });
+
+  mRenderStorage.updateBuffers(mRegistry);
 }
 
 std::pair<rhi::RenderGraph, DefaultGraphResources>
@@ -146,7 +170,7 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
         commandList.bindDescriptor(pipeline, 0,
                                    shadowMaterial->getDescriptor());
 
-        mSceneRenderer.render(commandList, pipeline, false);
+        mSceneRenderer.render(commandList, pipeline, mRenderStorage, false);
       }
 
       commandList.bindPipeline(skinnedPipeline);
@@ -155,7 +179,8 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
         commandList.bindDescriptor(skinnedPipeline, 0,
                                    shadowMaterial->getDescriptor());
 
-        mSceneRenderer.renderSkinned(commandList, skinnedPipeline, 1, false);
+        mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
+                                     mRenderStorage, false);
       }
     });
   }
@@ -212,15 +237,16 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
 
       commandList.bindPipeline(pipeline);
       commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
-      commandList.bindDescriptor(pipeline, 1, sceneDescriptorFragment);
+      commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
 
-      mSceneRenderer.render(commandList, pipeline, true);
+      mSceneRenderer.render(commandList, pipeline, mRenderStorage, true);
 
       commandList.bindPipeline(skinnedPipeline);
       commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
-      commandList.bindDescriptor(skinnedPipeline, 1, sceneDescriptorFragment);
+      commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
 
-      mSceneRenderer.renderSkinned(commandList, skinnedPipeline, 3, true);
+      mSceneRenderer.renderSkinned(commandList, skinnedPipeline, mRenderStorage,
+                                   true);
     });
   }
 

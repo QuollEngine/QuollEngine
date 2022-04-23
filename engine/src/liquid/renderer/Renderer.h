@@ -1,13 +1,14 @@
 #pragma once
 
+#include "liquid/rhi/RenderDevice.h"
 #include "RenderData.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"
+#include "RenderStorage.h"
 #include "imgui/ImguiRenderer.h"
 
 #include "liquid/entity/EntityContext.h"
-#include "liquid/rhi/RenderDevice.h"
 
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
@@ -69,6 +70,8 @@ public:
 private:
   void loadShaders();
 
+  void updateStorageBuffers();
+
 private:
   EntityContext &mEntityContext;
   rhi::ResourceRegistry mRegistry;
@@ -80,6 +83,7 @@ private:
   SceneRenderer mSceneRenderer;
 
   std::vector<SharedPtr<Material>> mShadowMaterials;
+  RenderStorage mRenderStorage;
 };
 
 } // namespace liquid

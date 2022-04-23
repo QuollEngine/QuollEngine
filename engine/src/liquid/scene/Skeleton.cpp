@@ -26,9 +26,6 @@ Skeleton::Skeleton(const std::vector<glm::vec3> &positions,
   mJointWorldTransforms.resize(mNumJoints, glm::mat4{1.0f});
   mJointFinalTransforms.resize(mNumJoints, glm::mat4{1.0f});
 
-  mBuffer = registry->setBuffer(
-      {rhi::BufferType::Uniform, sizeof(glm::mat4) * mNumJoints});
-
   // Debug data
   for (JointId joint = 0; joint < static_cast<uint32_t>(mNumJoints); ++joint) {
     mDebugBones.push_back(mJointParents.at(joint));
@@ -82,11 +79,6 @@ void Skeleton::update() {
     mJointFinalTransforms.at(i) =
         mJointWorldTransforms.at(i) * mJointInverseBindMatrices.at(i);
   }
-
-  mRegistry->setBuffer({rhi::BufferType::Uniform,
-                        sizeof(glm::mat4) * mNumJoints,
-                        mJointFinalTransforms.data()},
-                       mBuffer);
 }
 
 void Skeleton::updateDebug() {

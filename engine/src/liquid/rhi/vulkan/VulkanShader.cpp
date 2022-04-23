@@ -10,7 +10,7 @@ namespace liquid::rhi {
 
 VulkanShader::VulkanShader(const ShaderDescription &description,
                            VulkanDeviceObject &device)
-    : mDevice(device) {
+    : mDevice(device), mPath(description.path) {
   const auto &shaderBytes = VulkanShader::readShaderFile(description.path);
 
   VkShaderModuleCreateInfo createInfo{};
