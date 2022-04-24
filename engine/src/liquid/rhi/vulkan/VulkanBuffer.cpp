@@ -40,6 +40,8 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     bufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
   } else if (description.type == rhi::BufferType::Uniform) {
     bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+  } else if (description.type == rhi::BufferType::Storage) {
+    bufferUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
   } else if (description.type == rhi::BufferType::Transfer) {
     bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY;

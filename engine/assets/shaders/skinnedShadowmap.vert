@@ -1,4 +1,4 @@
-#version 450
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shader_viewport_layer_array : enable
 
@@ -12,20 +12,34 @@ layout(std140, set = 0, binding = 0) uniform MaterialData {
 }
 uMaterialData;
 
-layout(set = 1, binding = 0) uniform SkeletonData { mat4 joints[16]; }
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+struct SkeletonItem {
+  mat4 joints[16];
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
+
+layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
+  SkeletonItem items[];
+}
 uSkeletonData;
 
-layout(push_constant) uniform TransfromConstant { mat4 modelMatrix; }
-pcTransform;
-
 void main() {
+  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
 
-  mat4 skinMatrix = inWeights.x * uSkeletonData.joints[inJoints.x] +
-                    inWeights.y * uSkeletonData.joints[inJoints.y] +
-                    inWeights.z * uSkeletonData.joints[inJoints.z] +
-                    inWeights.w * uSkeletonData.joints[inJoints.w];
+  mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
+                    inWeights.y * item.joints[inJoints.y] +
+                    inWeights.z * item.joints[inJoints.z] +
+                    inWeights.w * item.joints[inJoints.w];
 
-  gl_Position = uMaterialData.lightMatrix * pcTransform.modelMatrix *
-                skinMatrix * vec4(inPosition, 1.0);
+  gl_Position = uMaterialData.lightMatrix * modelMatrix * skinMatrix *
+                vec4(inPosition, 1.0);
   gl_Layer = uMaterialData.lightIndex[0];
 }

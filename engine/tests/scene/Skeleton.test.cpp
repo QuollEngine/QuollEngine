@@ -125,16 +125,6 @@ TEST_F(SkeletonTest, CreatesDebugParametersOnConstruct) {
   EXPECT_EQ(skeleton.getNumDebugBones(), 4);
 }
 
-TEST_F(SkeletonTest, CreatesUniformBufferOnConstruct) {
-  auto &&skeleton = createSkeleton(5);
-
-  const auto &description =
-      registry.getBufferMap().getDescription(skeleton.getBuffer());
-
-  EXPECT_EQ(description.type, liquid::rhi::BufferType::Uniform);
-  EXPECT_EQ(description.size, sizeof(glm::mat4) * 5);
-}
-
 TEST_F(SkeletonTest, CreatesDebugUniformBufferOnConstruct) {
   auto &&skeleton = createSkeleton(5);
 

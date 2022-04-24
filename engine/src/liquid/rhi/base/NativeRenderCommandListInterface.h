@@ -77,8 +77,11 @@ public:
    *
    * @param vertexCount Vertex count
    * @param firstVertex First vertex
+   * @param instanceCount Instance count
+   * @param firstInstance First instance
    */
-  virtual void draw(uint32_t vertexCount, uint32_t firstVertex) = 0;
+  virtual void draw(uint32_t vertexCount, uint32_t firstVertex,
+                    uint32_t instanceCount, uint32_t firstInstance) = 0;
 
   /**
    * @brief Draw indexed
@@ -86,9 +89,12 @@ public:
    * @param indexCount Index count
    * @param firstIndex Offset of first index
    * @param vertexOffset Vertex offset
+   * @param instanceCount Instance count
+   * @param firstInstance First instance
    */
   virtual void drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                           int32_t vertexOffset) = 0;
+                           int32_t vertexOffset, uint32_t instanceCount,
+                           uint32_t firstInstance) = 0;
 
   /**
    * @brief Set viewport

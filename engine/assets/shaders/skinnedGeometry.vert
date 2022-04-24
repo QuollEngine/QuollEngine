@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -24,29 +24,44 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
-layout(set = 3, binding = 0) uniform SkeletonData { mat4 joints[16]; }
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+struct SkeletonItem {
+  mat4 joints[32];
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
+
+layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
+  SkeletonItem items[];
+}
 uSkeletonData;
 
-layout(push_constant) uniform TransformConstant { mat4 modelMatrix; }
-pcTransform;
-
 void main() {
-  mat4 skinMatrix = inWeights.x * uSkeletonData.joints[inJoints.x] +
-                    inWeights.y * uSkeletonData.joints[inJoints.y] +
-                    inWeights.z * uSkeletonData.joints[inJoints.z] +
-                    inWeights.w * uSkeletonData.joints[inJoints.w];
+  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
 
-  vec4 worldPosition = uCameraData.viewProj * pcTransform.modelMatrix *
-                       skinMatrix * vec4(inPosition, 1.0f);
+  mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
+                    inWeights.y * item.joints[inJoints.y] +
+                    inWeights.z * item.joints[inJoints.z] +
+                    inWeights.w * item.joints[inJoints.w];
 
-  mat3 m3ModelMatrix = mat3(pcTransform.modelMatrix);
+  vec4 worldPosition =
+      uCameraData.viewProj * modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
+
+  mat3 m3ModelMatrix = mat3(modelMatrix);
   mat3 normalMatrix = transpose(inverse(m3ModelMatrix));
 
   vec3 normal = normalize(normalMatrix * inNormal);
   vec3 tangent = normalize(m3ModelMatrix * inTangent.xyz);
   vec3 bitangent = cross(normal, tangent) * inTangent.w;
 
-  outModelMatrix = pcTransform.modelMatrix;
+  outModelMatrix = modelMatrix;
   outModelPosition = vec4(inPosition, 1.0f);
   outWorldPosition = worldPosition.xyz;
   outNormal = normal;

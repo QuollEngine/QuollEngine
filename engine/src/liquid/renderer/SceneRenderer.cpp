@@ -4,9 +4,8 @@
 
 namespace liquid {
 
-SceneRenderer::SceneRenderer(EntityContext &entityContext,
-                             bool bindMaterialData)
-    : mEntityContext(entityContext), mBindMaterialData(bindMaterialData) {}
+SceneRenderer::SceneRenderer(EntityContext &entityContext)
+    : mEntityContext(entityContext) {}
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
                            rhi::PipelineHandle pipeline,
@@ -46,46 +45,85 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       });
 }
 
-void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
-                                  rhi::PipelineHandle pipeline,
-                                  uint32_t descriptorSet,
-                                  bool bindMaterialData) {
-  mEntityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
-                                 TransformComponent>(
-      [&pipeline, &commandList, descriptorSet, bindMaterialData,
-       this](Entity entity, const auto &mesh, const SkeletonComponent &skeleton,
-             const auto &transform) {
+void SceneRenderer::render(rhi::RenderCommandList &commandList,
+                           rhi::PipelineHandle pipeline,
+                           RenderStorage &renderStorage,
+                           bool bindMaterialData) {
+  rhi::Descriptor descriptor;
+  descriptor.bind(0, renderStorage.getMeshTransformsBuffer(),
+                  rhi::DescriptorType::StorageBuffer);
+  commandList.bindDescriptor(pipeline, 1, descriptor);
+
+  uint32_t index = 0;
+
+  mEntityContext.iterateEntities<MeshComponent, TransformComponent>(
+      [&commandList, &pipeline, bindMaterialData, &index,
+       this](Entity entity, const MeshComponent &mesh,
+             const TransformComponent &transform) mutable {
+        if (mEntityContext.hasComponent<EnvironmentComponent>(entity)) {
+          return;
+        }
         const auto &instance = mesh.instance;
-
-        StandardPushConstants transformConstant{};
-        transformConstant.modelMatrix = transform.worldTransform;
-
-        commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                  sizeof(StandardPushConstants),
-                                  &transformConstant);
-
-        rhi::Descriptor skeletonDescriptor;
-        skeletonDescriptor.bind(0, skeleton.skeleton.getBuffer(),
-                                rhi::DescriptorType::UniformBuffer);
-
-        commandList.bindDescriptor(pipeline, descriptorSet, skeletonDescriptor);
 
         for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
           commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
 
           if (instance->getMaterials().at(i) && bindMaterialData) {
             commandList.bindDescriptor(
-                pipeline, 2, instance->getMaterials().at(i)->getDescriptor());
+                pipeline, 3, instance->getMaterials().at(i)->getDescriptor());
           }
 
           if (rhi::isHandleValid(instance->getIndexBuffers().at(i))) {
             commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
                                         VK_INDEX_TYPE_UINT32);
-            commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0);
+            commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0, 1,
+                                    index);
           } else {
-            commandList.draw(instance->getVertexCounts().at(i), 0);
+            commandList.draw(instance->getVertexCounts().at(i), 0, 1, index);
           }
         }
+        index++;
+      });
+}
+
+void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
+                                  rhi::PipelineHandle pipeline,
+                                  RenderStorage &renderStorage,
+                                  bool bindMaterialData) {
+  rhi::Descriptor descriptor;
+  descriptor.bind(0, renderStorage.getSkinnedMeshTransformsBuffer(),
+                  rhi::DescriptorType::StorageBuffer);
+  descriptor.bind(1, renderStorage.getSkeletonsBuffer(),
+                  rhi::DescriptorType::StorageBuffer);
+  commandList.bindDescriptor(pipeline, 1, descriptor);
+
+  uint32_t index = 0;
+
+  mEntityContext.iterateEntities<SkinnedMeshComponent, SkeletonComponent,
+                                 TransformComponent>(
+      [&pipeline, &commandList, &index, bindMaterialData,
+       this](Entity entity, const auto &mesh, const SkeletonComponent &skeleton,
+             const auto &transform) mutable {
+        const auto &instance = mesh.instance;
+
+        for (size_t i = 0; i < instance->getVertexBuffers().size(); ++i) {
+          commandList.bindVertexBuffer(instance->getVertexBuffers().at(i));
+
+          if (instance->getMaterials().at(i) && bindMaterialData) {
+            commandList.bindDescriptor(
+                pipeline, 3, instance->getMaterials().at(i)->getDescriptor());
+          }
+
+          if (rhi::isHandleValid(instance->getIndexBuffers().at(i))) {
+            commandList.bindIndexBuffer(instance->getIndexBuffers().at(i),
+                                        VK_INDEX_TYPE_UINT32);
+            commandList.drawIndexed(instance->getIndexCounts().at(i), 0, 0, 1,
+                                    index);
+          } else {
+            commandList.draw(instance->getVertexCounts().at(i), 0, 1, index);
+          }
+        }
+        index++;
       });
 }
 

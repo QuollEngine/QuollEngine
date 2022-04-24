@@ -63,7 +63,8 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
     write.descriptorType =
         VulkanMapping::getDescriptorType(binding.second.type);
 
-    if (binding.second.type == DescriptorType::UniformBuffer) {
+    if (binding.second.type == DescriptorType::UniformBuffer ||
+        binding.second.type == DescriptorType::StorageBuffer) {
       const auto &vkBuffer = mRegistry.getBuffers().at(
           std::get<BufferHandle>(binding.second.data));
       bufferInfos.push_back(VkDescriptorBufferInfo{vkBuffer->getBuffer(), 0,
@@ -73,7 +74,6 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
       write.pBufferInfo = &bufferObj;
       write.descriptorCount = 1;
       writes.push_back(write);
-
     } else if (binding.second.type == DescriptorType::CombinedImageSampler) {
       imageInfos.push_back({});
       auto &imageInfoObjects = imageInfos.at(imageInfos.size() - 1);
@@ -126,14 +126,17 @@ VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {
-  constexpr uint32_t NUM_UNIFORM_BUFFERS = 1500;
+  constexpr uint32_t NUM_UNIFORM_BUFFERS = 15000;
+  constexpr uint32_t NUM_STORAGE_BUFFERS = 500;
   constexpr uint32_t NUM_SAMPLERS = 500;
-  constexpr uint32_t NUM_DESCRIPTORS = 2000;
+  constexpr uint32_t NUM_DESCRIPTORS = 20000;
   constexpr uint32_t MAX_TEXTURE_DESCRIPTORS = 8;
 
-  std::array<VkDescriptorPoolSize, 2> poolSizes{
+  std::array<VkDescriptorPoolSize, 3> poolSizes{
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                            NUM_UNIFORM_BUFFERS},
+      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                           NUM_STORAGE_BUFFERS},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                            MAX_TEXTURE_DESCRIPTORS * NUM_SAMPLERS}};
 

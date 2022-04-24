@@ -67,7 +67,7 @@ public:
 
     liquid::rhi::RenderGraph graph;
 
-    liquid::SceneRenderer sceneRenderer(entityContext, false);
+    liquid::SceneRenderer sceneRenderer(entityContext);
 
     liquid::rhi::TextureDescription desc;
     desc.usage =

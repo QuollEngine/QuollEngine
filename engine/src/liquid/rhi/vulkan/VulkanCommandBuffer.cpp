@@ -92,14 +92,19 @@ void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex) {
-  vkCmdDraw(mCommandBuffer, vertexCount, 1, firstVertex, 0);
+void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex,
+                               uint32_t instanceCount, uint32_t firstInstance) {
+  vkCmdDraw(mCommandBuffer, vertexCount, instanceCount, firstVertex,
+            firstInstance);
   mStats.addDrawCall(vertexCount / 3);
 }
 
 void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                                      int32_t vertexOffset) {
-  vkCmdDrawIndexed(mCommandBuffer, indexCount, 1, firstIndex, vertexOffset, 0);
+                                      int32_t vertexOffset,
+                                      uint32_t instanceCount,
+                                      uint32_t firstInstance) {
+  vkCmdDrawIndexed(mCommandBuffer, indexCount, instanceCount, firstIndex,
+                   vertexOffset, firstInstance);
   mStats.addDrawCall(indexCount / 3);
 }
 

@@ -104,7 +104,7 @@ public:
    *
    * @param buffer Vertex buffer
    */
-  void bindVertexBuffer(BufferHandle buffer) {
+  inline void bindVertexBuffer(BufferHandle buffer) {
     mNativeRenderCommandList->bindVertexBuffer(buffer);
   }
 
@@ -114,7 +114,7 @@ public:
    * @param buffer Index buffer
    * @param indexType Index buffer data type
    */
-  void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType) {
+  inline void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType) {
     mNativeRenderCommandList->bindIndexBuffer(buffer, indexType);
   }
 
@@ -127,8 +127,9 @@ public:
    * @param size Size
    * @param data Data
    */
-  void pushConstants(PipelineHandle pipeline, VkShaderStageFlags stageFlags,
-                     uint32_t offset, uint32_t size, void *data) {
+  inline void pushConstants(PipelineHandle pipeline,
+                            VkShaderStageFlags stageFlags, uint32_t offset,
+                            uint32_t size, void *data) {
     mNativeRenderCommandList->pushConstants(pipeline, stageFlags, offset, size,
                                             data);
   }
@@ -138,9 +139,13 @@ public:
    *
    * @param vertexCount Vertex count
    * @param firstVertex First vertex
+   * @param instanceCount Instance count
+   * @param firstInstance First instance
    */
-  void draw(uint32_t vertexCount, uint32_t firstVertex) {
-    mNativeRenderCommandList->draw(vertexCount, firstVertex);
+  inline void draw(uint32_t vertexCount, uint32_t firstVertex,
+                   uint32_t instanceCount = 1, uint32_t firstInstance = 0) {
+    mNativeRenderCommandList->draw(vertexCount, firstVertex, instanceCount,
+                                   firstInstance);
   }
 
   /**
@@ -149,10 +154,14 @@ public:
    * @param indexCount Index count
    * @param firstIndex Offset of first index
    * @param vertexOffset Vertex offset
+   * @param instanceCount Instance count
+   * @param firstInstance First instance
    */
-  void drawIndexed(uint32_t indexCount, uint32_t firstIndex,
-                   int32_t vertexOffset) {
-    mNativeRenderCommandList->drawIndexed(indexCount, firstIndex, vertexOffset);
+  inline void drawIndexed(uint32_t indexCount, uint32_t firstIndex,
+                          int32_t vertexOffset, uint32_t instanceCount = 1,
+                          uint32_t firstInstance = 0) {
+    mNativeRenderCommandList->drawIndexed(indexCount, firstIndex, vertexOffset,
+                                          instanceCount, firstInstance);
   }
 
   /**
@@ -162,8 +171,8 @@ public:
    * @param size Viewport size
    * @param depthRange Viewport depth range
    */
-  void setViewport(const glm::vec2 &offset, const glm::vec2 &size,
-                   const glm::vec2 &depthRange) {
+  inline void setViewport(const glm::vec2 &offset, const glm::vec2 &size,
+                          const glm::vec2 &depthRange) {
     mNativeRenderCommandList->setViewport(offset, size, depthRange);
   }
 
@@ -173,7 +182,7 @@ public:
    * @param offset Scissor offset
    * @param size Scissor size
    */
-  void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) {
+  inline void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) {
     mNativeRenderCommandList->setScissor(offset, size);
   }
 

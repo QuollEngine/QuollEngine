@@ -28,6 +28,144 @@
 static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
+liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
+                           liquid::Renderer &renderer,
+                           liquidator::SceneManager &sceneManager,
+                           liquid::AnimationSystem &animationSystem,
+                           liquid::AssetManager &assetManager,
+                           liquid::AssetType type, uint32_t handle) {
+  if (type != liquid::AssetType::Prefab) {
+    return liquid::ENTITY_MAX;
+  }
+
+  constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
+  const auto &invViewMatrix = glm::inverse(
+      sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
+  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
+
+  liquid::TransformComponent parentTransform;
+  parentTransform.localPosition = orientation[3];
+
+  auto parentEntity = entityContext.createEntity();
+  entityContext.setComponent<liquid::DebugComponent>(parentEntity, {});
+  auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
+      parentEntity, parentTransform);
+
+  if (type == liquid::AssetType::Prefab) {
+    auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
+        static_cast<liquid::PrefabAssetHandle>(handle));
+    entityContext.setComponent<liquid::NameComponent>(parentEntity,
+                                                      {asset.name});
+
+    std::map<uint32_t, liquid::Entity> entityMap;
+
+    auto getOrCreateEntity =
+        [&entityMap, &entityContext,
+         &parent](uint32_t localId,
+                  const liquid::TransformComponent &transform = {}) mutable {
+          if (entityMap.find(localId) == entityMap.end()) {
+            auto entity = entityContext.createEntity();
+            entityMap.insert_or_assign(localId, entity);
+            entityContext.setComponent<liquid::DebugComponent>(entity, {});
+
+            parent->addChild(entity, transform);
+          }
+
+          return entityMap.at(localId);
+        };
+
+    for (auto &item : asset.data.transforms) {
+      liquid::TransformComponent transform{};
+      transform.localPosition = item.value.position;
+      transform.localRotation = item.value.rotation;
+      transform.localScale = item.value.scale;
+      getOrCreateEntity(item.entity, transform);
+    }
+
+    for (auto &item : asset.data.transforms) {
+      auto &transform = entityContext.getComponent<liquid::TransformComponent>(
+          entityMap.at(item.entity));
+      if (item.value.parent >= 0) {
+        transform.parent = getOrCreateEntity(item.value.parent);
+      }
+    }
+
+    for (auto &item : asset.data.meshes) {
+      if (!assetManager.getRegistry().getMeshes().hasAsset(item.value)) {
+        continue;
+      }
+
+      auto entity = getOrCreateEntity(item.entity);
+      entityContext.setComponent<liquid::MeshComponent>(
+          entity, {renderer.createMeshInstance(item.value,
+                                               assetManager.getRegistry())});
+    }
+
+    for (auto &item : asset.data.skinnedMeshes) {
+      if (!assetManager.getRegistry().getSkinnedMeshes().hasAsset(item.value)) {
+        continue;
+      }
+
+      auto entity = getOrCreateEntity(item.entity);
+      entityContext.setComponent<liquid::SkinnedMeshComponent>(
+          entity, {renderer.createMeshInstance(item.value,
+                                               assetManager.getRegistry())});
+    }
+
+    for (auto &item : asset.data.skeletons) {
+      if (!assetManager.getRegistry().getSkeletons().hasAsset(item.value)) {
+        continue;
+      }
+
+      auto entity = getOrCreateEntity(item.entity);
+
+      const auto &skeleton =
+          assetManager.getRegistry().getSkeletons().getAsset(item.value).data;
+      liquid::Skeleton skeletonInstance(
+          skeleton.jointLocalPositions, skeleton.jointLocalRotations,
+          skeleton.jointLocalScales, skeleton.jointParents,
+          skeleton.jointInverseBindMatrices, skeleton.jointNames,
+          &renderer.getRegistry());
+
+      entityContext.setComponent<liquid::SkeletonComponent>(
+          entity, {std::move(skeletonInstance)});
+    }
+
+    for (auto &item : asset.data.animators) {
+      auto entity = getOrCreateEntity(item.entity);
+
+      entityContext.setComponent(entity, item.value);
+    }
+  }
+  return parentEntity;
+}
+
+void randomSpawn(liquid::EntityContext &entityContext,
+                 liquid::Renderer &renderer,
+                 liquidator::SceneManager &sceneManager,
+                 liquid::AnimationSystem &animationSystem,
+                 liquid::AssetManager &assetManager) {
+
+  constexpr float DISTRIBUTION_EDGE = 500.0f;
+  std::random_device device;
+  std::mt19937 mt(device());
+  std::uniform_real_distribution<float> dist(-DISTRIBUTION_EDGE,
+                                             DISTRIBUTION_EDGE);
+  constexpr size_t NUM_SPAWNS = 1000;
+
+  for (auto &[handle, _] :
+       assetManager.getRegistry().getPrefabs().getAssets()) {
+    for (size_t i = 0; i < NUM_SPAWNS; ++i) {
+      auto parent = spawnEntity(
+          entityContext, renderer, sceneManager, animationSystem, assetManager,
+          liquid::AssetType::Prefab, static_cast<uint32_t>(handle));
+
+      entityContext.getComponent<liquid::TransformComponent>(parent)
+          .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
+    }
+  }
+}
+
 int main() {
   liquid::EventSystem eventSystem;
 
@@ -104,121 +242,12 @@ int main() {
   while (sceneManager.hasNewScene()) {
     sceneManager.createNewScene();
 
-    ui.getAssetBrowser().setOnItemOpenHandler([&entityContext, &renderer,
-                                               &sceneManager, &animationSystem,
-                                               &assetManager](
-                                                  liquid::AssetType type,
-                                                  uint32_t handle) {
-      if (type != liquid::AssetType::Prefab) {
-        return;
-      }
-
-      constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-      const auto &invViewMatrix = glm::inverse(
-          sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
-      const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
-
-      liquid::TransformComponent parentTransform;
-      parentTransform.localPosition = orientation[3];
-
-      auto parentEntity = entityContext.createEntity();
-      entityContext.setComponent<liquid::DebugComponent>(parentEntity, {});
-      auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
-          parentEntity, parentTransform);
-
-      if (type == liquid::AssetType::Prefab) {
-        auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
-            static_cast<liquid::PrefabAssetHandle>(handle));
-        entityContext.setComponent<liquid::NameComponent>(parentEntity,
-                                                          {asset.name});
-
-        std::map<uint32_t, liquid::Entity> entityMap;
-
-        auto getOrCreateEntity =
-            [&entityMap, &entityContext, &parent](
-                uint32_t localId,
-                const liquid::TransformComponent &transform = {}) mutable {
-              if (entityMap.find(localId) == entityMap.end()) {
-                auto entity = entityContext.createEntity();
-                entityMap.insert_or_assign(localId, entity);
-                entityContext.setComponent<liquid::DebugComponent>(entity, {});
-
-                parent->addChild(entity, transform);
-              }
-
-              return entityMap.at(localId);
-            };
-
-        for (auto &item : asset.data.transforms) {
-          liquid::TransformComponent transform{};
-          transform.localPosition = item.value.position;
-          transform.localRotation = item.value.rotation;
-          transform.localScale = item.value.scale;
-          getOrCreateEntity(item.entity, transform);
-        }
-
-        for (auto &item : asset.data.transforms) {
-          auto &transform =
-              entityContext.getComponent<liquid::TransformComponent>(
-                  entityMap.at(item.entity));
-          if (item.value.parent >= 0) {
-            transform.parent = getOrCreateEntity(item.value.parent);
-          }
-        }
-
-        for (auto &item : asset.data.meshes) {
-          if (!assetManager.getRegistry().getMeshes().hasAsset(item.value)) {
-            continue;
-          }
-
-          auto entity = getOrCreateEntity(item.entity);
-          entityContext.setComponent<liquid::MeshComponent>(
-              entity, {renderer.createMeshInstance(
-                          item.value, assetManager.getRegistry())});
-        }
-
-        for (auto &item : asset.data.skinnedMeshes) {
-          if (!assetManager.getRegistry().getSkinnedMeshes().hasAsset(
-                  item.value)) {
-            continue;
-          }
-
-          auto entity = getOrCreateEntity(item.entity);
-          entityContext.setComponent<liquid::SkinnedMeshComponent>(
-              entity, {renderer.createMeshInstance(
-                          item.value, assetManager.getRegistry())});
-        }
-
-        for (auto &item : asset.data.skeletons) {
-          if (!assetManager.getRegistry().getSkeletons().hasAsset(item.value)) {
-            continue;
-          }
-
-          auto entity = getOrCreateEntity(item.entity);
-
-          const auto &skeleton = assetManager.getRegistry()
-                                     .getSkeletons()
-                                     .getAsset(item.value)
-                                     .data;
-          liquid::Skeleton skeletonInstance(
-              skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-              skeleton.jointLocalScales, skeleton.jointParents,
-              skeleton.jointInverseBindMatrices, skeleton.jointNames,
-              &renderer.getRegistry());
-
-          entityContext.setComponent<liquid::SkeletonComponent>(
-              entity, {std::move(skeletonInstance)});
-        }
-
-        for (auto &item : asset.data.animators) {
-          auto entity = getOrCreateEntity(item.entity);
-
-          entityContext.setComponent(entity, item.value);
-        }
-
-        return;
-      }
-    });
+    ui.getAssetBrowser().setOnItemOpenHandler(
+        [&entityContext, &renderer, &sceneManager, &animationSystem,
+         &assetManager](liquid::AssetType type, uint32_t handle) {
+          spawnEntity(entityContext, renderer, sceneManager, animationSystem,
+                      assetManager, type, handle);
+        });
 
     const auto &cameraObj =
         entityContext
@@ -429,8 +458,8 @@ int main() {
     });
 
     mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
-                          &assetManager, &graph, &physicsSystem, &ui,
-                          &debugLayer, &preloadStatusDialog]() {
+                          &entityContext, &assetManager, &graph, &physicsSystem,
+                          &ui, &debugLayer, &preloadStatusDialog]() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
@@ -446,6 +475,16 @@ int main() {
                      size);
         ImGui::End();
       }
+
+      // if (ImGui::Begin("Benchmark")) {
+
+      //   if (ImGui::Button("Spawn prefabs")) {
+      //     randomSpawn(entityContext, renderer, sceneManager, animationSystem,
+      //                 assetManager);
+      //   }
+
+      //   ImGui::End();
+      // }
 
       preloadStatusDialog.render();
       debugLayer.render();

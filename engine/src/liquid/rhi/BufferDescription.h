@@ -2,7 +2,7 @@
 
 namespace liquid::rhi {
 
-enum class BufferType { Vertex, Index, Uniform, Transfer };
+enum class BufferType { Vertex, Index, Uniform, Storage, Transfer };
 
 struct BufferDescription {
   BufferType type = rhi::BufferType::Vertex;

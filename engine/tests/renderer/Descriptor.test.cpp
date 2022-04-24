@@ -47,11 +47,11 @@ TEST_F(DescriptorTest, CreatesHashFromBindings) {
   descriptor.bind(0, {tex1, tex2},
                   liquid::rhi::DescriptorType::CombinedImageSampler);
   descriptor.bind(1, buffer1, liquid::rhi::DescriptorType::UniformBuffer);
-  descriptor.bind(2, buffer2, liquid::rhi::DescriptorType::UniformBuffer);
+  descriptor.bind(2, buffer2, liquid::rhi::DescriptorType::StorageBuffer);
 
   std::stringstream ss;
-  ss << "b:0;t:1;d:" << 1 << ";d:" << 2 << ";|b:1;t:0;d:" << 1
-     << "|b:2;t:0;d:" << 2 << "|";
+  ss << "b:0;t:2;d:" << 1 << ";d:" << 2 << ";|b:1;t:0;d:" << 1
+     << "|b:2;t:1;d:" << 2 << "|";
 
   EXPECT_EQ(descriptor.getHashCode(), ss.str());
 }
