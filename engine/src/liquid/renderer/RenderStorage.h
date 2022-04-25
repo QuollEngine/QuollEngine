@@ -2,6 +2,9 @@
 
 #include "liquid/scene/Light.h"
 #include "liquid/scene/Camera.h"
+#include "liquid/asset/MeshAsset.h"
+#include "liquid/entity/Entity.h"
+#include "liquid/renderer/Material.h"
 
 namespace liquid {
 
@@ -17,7 +20,12 @@ class RenderStorage {
   };
 
   struct SceneData {
-    glm::uvec4 data{0};
+    glm::ivec4 data{0};
+  };
+
+  struct MeshData {
+    std::vector<uint32_t> indices;
+    std::vector<SharedPtr<Material>> materials;
   };
 
 public:
@@ -86,6 +94,26 @@ public:
   }
 
   /**
+   * @brief Get mesh groups
+   *
+   * @return Mesh groups
+   */
+  inline const std::unordered_map<MeshAssetHandle, MeshData> &
+  getMeshGroups() const {
+    return mMeshGroups;
+  }
+
+  /**
+   * @brief Get skinned mesh groups
+   *
+   * @return Skinned mesh groups
+   */
+  inline const std::unordered_map<SkinnedMeshAssetHandle, MeshData> &
+  getSkinnedMeshGroups() const {
+    return mSkinnedMeshGroups;
+  }
+
+  /**
    * @brief Get irradiance map
    *
    * @return Irradiance map
@@ -107,20 +135,35 @@ public:
   inline rhi::TextureHandle getBrdfLUT() const { return mBrdfLUT; }
 
   /**
+   * @brief Get number of lights
+   *
+   * @return Number of lights
+   */
+  inline int32_t getNumLights() const { return mSceneData.data.x; }
+
+  /**
    * @brief Add mesh data
    *
+   * @param handle Mesh handle
+   * @param materials Materials
    * @param transform Mesh world transform
    */
-  void addMeshData(const glm::mat4 &transform);
+  void addMesh(MeshAssetHandle handle,
+               const std::vector<SharedPtr<Material>> &materials,
+               const glm::mat4 &transform);
 
   /**
    * @brief Add skinned mesh data
    *
+   * @param handle Skinned mesh handle
+   * @param materials Materials
    * @param transform Skinned mesh world transform
    * @param skeleton Skeleton joint transforms
    */
-  void addSkinnedMeshData(const glm::mat4 &transform,
-                          const std::vector<glm::mat4> &skeleton);
+  void addSkinnedMesh(SkinnedMeshAssetHandle handle,
+                      const std::vector<SharedPtr<Material>> &materials,
+                      const glm::mat4 &transform,
+                      const std::vector<glm::mat4> &skeleton);
 
   /**
    * @brief Add light
@@ -171,6 +214,9 @@ private:
   rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mSpecularMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mBrdfLUT = rhi::TextureHandle::Invalid;
+
+  std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
+  std::unordered_map<SkinnedMeshAssetHandle, MeshData> mSkinnedMeshGroups;
 
   size_t mReservedSpace = 0;
 };

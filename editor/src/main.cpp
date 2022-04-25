@@ -191,7 +191,8 @@ int main() {
   }
 
   liquid::AssetManager assetManager(tmpProjectPath);
-  liquid::Renderer renderer(entityContext, window, device);
+  liquid::Renderer renderer(entityContext, assetManager.getRegistry(), window,
+                            device);
 
   auto res = assetManager.preloadAssets(renderer.getRegistry());
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");

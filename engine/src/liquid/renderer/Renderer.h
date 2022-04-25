@@ -28,7 +28,8 @@ struct DefaultGraphResources {
 
 class Renderer {
 public:
-  Renderer(EntityContext &context, Window &window, rhi::RenderDevice *device);
+  Renderer(EntityContext &context, AssetRegistry &assetRegistry, Window &window,
+           rhi::RenderDevice *device);
   ~Renderer();
 
   Renderer(const Renderer &rhs) = delete;
@@ -77,6 +78,7 @@ private:
   ShaderLibrary mShaderLibrary;
   DebugManager mDebugManager;
   SceneRenderer mSceneRenderer;
+  AssetRegistry &mAssetRegistry;
 
   std::vector<SharedPtr<Material>> mShadowMaterials;
   RenderStorage mRenderStorage;

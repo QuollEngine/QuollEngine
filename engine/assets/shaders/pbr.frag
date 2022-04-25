@@ -18,7 +18,7 @@ layout(std140, set = 2, binding = 0) uniform CameraData {
 }
 uCameraData;
 
-layout(std140, set = 2, binding = 1) uniform SceneData { uvec4 data; }
+layout(std140, set = 2, binding = 1) uniform SceneData { ivec4 data; }
 uSceneData;
 
 struct LightItem {
