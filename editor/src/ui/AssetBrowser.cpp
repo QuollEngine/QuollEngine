@@ -1,13 +1,10 @@
 #include "liquid/core/Base.h"
+#include "liquid/imgui/ImguiUtils.h"
 #include "AssetBrowser.h"
 
 #include <imgui.h>
 
 namespace liquidator {
-
-static void ImguiImage(liquid::rhi::TextureHandle handle, const ImVec2 &size) {
-  ImGui::Image(reinterpret_cast<void *>(static_cast<uintptr_t>(handle)), size);
-}
 
 struct ImguiInputTextCallbackUserData {
   liquid::String &value;
@@ -173,7 +170,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         ImGui::TableNextRow(ImGuiTableRowFlags_None, ITEM_HEIGHT * 1.0f);
         ImGui::TableNextColumn();
 
-        ImguiImage(iconRegistry.getIcon(mStagingEntry.icon), ICON_SIZE);
+        liquid::imgui::image(iconRegistry.getIcon(mStagingEntry.icon),
+                             ICON_SIZE);
         ImGui::PushItemWidth(ITEM_WIDTH);
 
         if (!mInitialFocusSet) {
@@ -228,7 +226,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         {
           float initialCursorPos = ImGui::GetCursorPosX();
           ImGui::SetCursorPosX(initialCursorPos + IMAGE_PADDING);
-          ImguiImage(entry.preview, ICON_SIZE);
+          liquid::imgui::image(entry.preview, ICON_SIZE);
           ImGui::SetCursorPosX(initialCursorPos);
         }
 

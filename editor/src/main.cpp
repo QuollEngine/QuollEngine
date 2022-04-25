@@ -25,6 +25,8 @@
 #include "ui/UIRoot.h"
 #include "ui/AssetLoadStatusDialog.h"
 
+#include "liquid/imgui/ImguiUtils.h"
+
 static const uint32_t INITIAL_WIDTH = 1024;
 static const uint32_t INITIAL_HEIGHT = 768;
 
@@ -471,9 +473,7 @@ int main() {
         const auto &pos = ImGui::GetWindowPos();
         sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x,
                                                    size.y);
-        ImGui::Image(reinterpret_cast<void *>(
-                         static_cast<uintptr_t>(graph.second.mainColor)),
-                     size);
+        liquid::imgui::image(graph.second.mainColor, size);
         ImGui::End();
       }
 
