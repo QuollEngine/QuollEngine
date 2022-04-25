@@ -3,10 +3,8 @@
 
 namespace liquid {
 
-Light::Light(Light::LightType type, glm::vec3 direction, glm::vec4 color,
-             float intensity)
-    : mType(type), mColor(color), mIntensity(intensity), mDirection(direction) {
-}
+Light::Light(Light::LightType type, glm::vec4 color, float intensity)
+    : mType(type), mColor(color), mIntensity(intensity) {}
 
 const glm::mat4 Light::getProjectionViewMatrix() const {
   const float DIR_LIGHT_SIZE = 20.0f;

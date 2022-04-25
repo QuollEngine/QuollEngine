@@ -122,7 +122,8 @@ public:
       return true;
     });
 
-    mainLoop.setRenderFn([this, &graph]() { renderer.render(graph); });
+    mainLoop.setRenderFn(
+        [this, &graph]() { renderer.render(graph, cameraEntity); });
 
     mainLoop.run();
     renderer.wait();
@@ -195,9 +196,8 @@ private:
   }
 
   void setupScene() {
-    auto cameraEntity = entityContext.createEntity();
+    cameraEntity = entityContext.createEntity();
     entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
-    scene->setActiveCamera(cameraEntity);
 
     const auto &fbSize = window.getFramebufferSize();
 
@@ -333,6 +333,7 @@ private:
   liquid::AssetManager assetManager;
 
   liquid::SharedPtr<liquid::Camera> camera;
+  liquid::Entity cameraEntity = liquid::ENTITY_MAX;
   std::unique_ptr<liquid::Scene> scene;
 
   liquid::rhi::ShaderHandle vertexShader;

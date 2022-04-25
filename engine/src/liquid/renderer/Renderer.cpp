@@ -28,7 +28,9 @@ Renderer::~Renderer() {
   mShadowMaterials.clear();
 }
 
-void Renderer::render(rhi::RenderGraph &graph) {
+void Renderer::render(rhi::RenderGraph &graph, Entity camera) {
+  mRenderStorage.setActiveCamera(
+      mEntityContext.getComponent<CameraComponent>(camera).camera);
   updateStorageBuffers();
   mDevice->execute(graph, mGraphEvaluator);
 }
@@ -99,12 +101,25 @@ void Renderer::updateStorageBuffers() {
             skeleton.skeleton.getJointFinalTransforms());
       });
 
+  // Lights
+  mEntityContext.iterateEntities<LightComponent>(
+      [this](auto entity, const auto &light) {
+        mRenderStorage.addLight(*light.light.get());
+      });
+
+  // Environments
+  mEntityContext.iterateEntities<EnvironmentComponent>(
+      [this](auto entity, const auto &environment) {
+        mRenderStorage.setEnvironmentTextures(environment.irradianceMap,
+                                              environment.specularMap,
+                                              environment.brdfLUT);
+      });
+
   mRenderStorage.updateBuffers(mRegistry);
 }
 
 std::pair<rhi::RenderGraph, DefaultGraphResources>
-Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
-                            bool useSwapchainForImgui) {
+Renderer::createRenderGraph(bool useSwapchainForImgui) {
 
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
@@ -166,22 +181,41 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
                       this](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
 
-      for (auto &shadowMaterial : mShadowMaterials) {
-        commandList.bindDescriptor(pipeline, 0,
-                                   shadowMaterial->getDescriptor());
+      rhi::Descriptor descriptor;
+      descriptor.bind(0, mRenderStorage.getLightsBuffer(),
+                      rhi::DescriptorType::StorageBuffer);
 
-        mSceneRenderer.render(commandList, pipeline, mRenderStorage, false);
-      }
+      commandList.bindDescriptor(pipeline, 0, descriptor);
+
+      int32_t index = 0;
+      mEntityContext.iterateEntities<LightComponent>(
+          [&index, this, pipeline, &commandList](auto entity,
+                                                 const auto &light) mutable {
+            glm::ivec4 pcIndex{index};
+
+            commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                      sizeof(glm::ivec4), &pcIndex);
+            mSceneRenderer.render(commandList, pipeline, mRenderStorage, false);
+            index++;
+          });
 
       commandList.bindPipeline(skinnedPipeline);
 
-      for (auto &shadowMaterial : mShadowMaterials) {
-        commandList.bindDescriptor(skinnedPipeline, 0,
-                                   shadowMaterial->getDescriptor());
+      commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
 
-        mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
-                                     mRenderStorage, false);
-      }
+      index = 0;
+      mEntityContext.iterateEntities<LightComponent>(
+          [&index, this, skinnedPipeline,
+           &commandList](auto entity, const auto &light) mutable {
+            glm::ivec4 pcIndex{index};
+
+            commandList.pushConstants(skinnedPipeline,
+                                      VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                      sizeof(glm::ivec4), &pcIndex);
+            mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
+                                         mRenderStorage, false);
+            index++;
+          });
     });
   }
 
@@ -212,28 +246,30 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
 
-    pass.setExecutor([this, pipeline, skinnedPipeline, shadowmap,
-                      renderData](rhi::RenderCommandList &commandList) {
+    pass.setExecutor([this, pipeline, skinnedPipeline,
+                      shadowmap](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
-
-      auto cameraBuffer =
-          renderData->getScene()->getActiveCamera()->getBuffer();
 
       rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
 
-      const auto &iblMaps = renderData->getEnvironmentTextures();
+      static constexpr uint32_t BRDF_BINDING = 5;
 
-      sceneDescriptor.bind(0, cameraBuffer, rhi::DescriptorType::UniformBuffer);
+      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+                           rhi::DescriptorType::UniformBuffer);
       sceneDescriptorFragment
-          .bind(0, cameraBuffer, rhi::DescriptorType::UniformBuffer)
-          .bind(1, renderData->getSceneBuffer(),
+          .bind(0, mRenderStorage.getActiveCameraBuffer(),
                 rhi::DescriptorType::UniformBuffer)
-          .bind(2, {shadowmap}, rhi::DescriptorType::CombinedImageSampler);
-
-      sceneDescriptorFragment
-          .bind(3, {iblMaps.at(0), iblMaps.at(1)},
+          .bind(1, mRenderStorage.getSceneBuffer(),
+                rhi::DescriptorType::UniformBuffer)
+          .bind(2, mRenderStorage.getLightsBuffer(),
+                rhi::DescriptorType::StorageBuffer)
+          .bind(3, {shadowmap}, rhi::DescriptorType::CombinedImageSampler)
+          .bind(4,
+                {mRenderStorage.getIrradianceMap(),
+                 mRenderStorage.getSpecularMap()},
                 rhi::DescriptorType::CombinedImageSampler)
-          .bind(4, {iblMaps.at(2)}, rhi::DescriptorType::CombinedImageSampler);
+          .bind(BRDF_BINDING, {mRenderStorage.getBrdfLUT()},
+                rhi::DescriptorType::CombinedImageSampler);
 
       commandList.bindPipeline(pipeline);
       commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
@@ -263,12 +299,11 @@ Renderer::createRenderGraph(const SharedPtr<RenderData> &renderData,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
     pass.addPipeline(pipeline);
-    pass.setExecutor([pipeline, &renderData,
-                      this](rhi::RenderCommandList &commandList) {
+    pass.setExecutor([pipeline, this](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
 
       rhi::Descriptor descriptor;
-      descriptor.bind(0, renderData->getScene()->getActiveCamera()->getBuffer(),
+      descriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
                       rhi::DescriptorType::UniformBuffer);
 
       commandList.bindDescriptor(pipeline, 0, descriptor);
@@ -349,26 +384,6 @@ SharedPtr<Material>
 Renderer::createMaterialPBR(const MaterialPBR::Properties &properties,
                             const rhi::CullMode &cullMode) {
   return std::make_shared<MaterialPBR>(properties, mRegistry);
-}
-
-SharedPtr<RenderData> Renderer::prepareScene(Scene *scene) {
-  mShadowMaterials.reserve(
-      mEntityContext.getEntityCountForComponent<LightComponent>());
-
-  size_t i = 0;
-  mEntityContext.iterateEntities<LightComponent>(
-      [&i, this](Entity entity, const LightComponent &light) {
-        mShadowMaterials.push_back(SharedPtr<Material>(
-            new Material({},
-                         {{"lightMatrix", glm::mat4{1.0f}},
-                          {"lightIndex", static_cast<int>(i)}},
-                         mRegistry)));
-
-        i++;
-      });
-
-  return std::make_shared<RenderData>(mEntityContext, scene, mShadowMaterials,
-                                      mRegistry);
 }
 
 template <class TMeshAsset>

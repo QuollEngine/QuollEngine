@@ -12,9 +12,12 @@ RenderStorage::RenderStorage(size_t reservedSpace)
   mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
 
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MAX_NUM_JOINTS]);
+  mLights.reserve(MAX_NUM_LIGHTS);
 }
 
 void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
+  LIQUID_ASSERT(rhi::isHandleValid(mCameraBuffer), "Camera is not set");
+
   mMeshTransformsBuffer = registry.setBuffer(
       {
           rhi::BufferType::Storage,
@@ -38,6 +41,14 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
           mSkeletonVector.get(),
       },
       mSkeletonsBuffer);
+
+  mLightsBuffer = registry.setBuffer({rhi::BufferType::Storage,
+                                      mLights.capacity() * sizeof(LightData),
+                                      mLights.data()},
+                                     mLightsBuffer);
+
+  mSceneBuffer = registry.setBuffer(
+      {rhi::BufferType::Uniform, sizeof(SceneData), &mSceneData}, mSceneBuffer);
 }
 
 void RenderStorage::addMeshData(const glm::mat4 &transform) {
@@ -56,10 +67,40 @@ void RenderStorage::addSkinnedMeshData(const glm::mat4 &transform,
   mLastSkeleton++;
 }
 
+void RenderStorage::addLight(const Light &light) {
+  LightData data{
+      glm::vec4(light.getDirection(), light.getIntensity()),
+      light.getColor(),
+      light.getProjectionViewMatrix(),
+  };
+  mLights.push_back(data);
+
+  mSceneData.data.x = static_cast<uint32_t>(mLights.size());
+}
+
+void RenderStorage::setEnvironmentTextures(rhi::TextureHandle irradianceMap,
+                                           rhi::TextureHandle specularMap,
+                                           rhi::TextureHandle brdfLUT) {
+  mIrradianceMap = irradianceMap;
+  mSpecularMap = specularMap;
+  mBrdfLUT = brdfLUT;
+  mSceneData.data.y = 1;
+}
+
+void RenderStorage::setActiveCamera(const SharedPtr<Camera> &camera) {
+  mCameraBuffer = camera->getBuffer();
+}
+
 void RenderStorage::clear() {
   mMeshTransformMatrices.clear();
   mSkinnedMeshTransformMatrices.clear();
+  mLights.clear();
+  mSceneData.data.x = 0;
+  mSceneData.data.y = 0;
   mLastSkeleton = 0;
+  mIrradianceMap = rhi::TextureHandle::Invalid;
+  mSpecularMap = rhi::TextureHandle::Invalid;
+  mBrdfLUT = rhi::TextureHandle::Invalid;
 }
 
 } // namespace liquid

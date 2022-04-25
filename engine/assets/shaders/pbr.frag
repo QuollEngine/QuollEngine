@@ -11,30 +11,30 @@ layout(location = 9) in mat4 inModelMatrix;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 2, binding = 0) uniform CameraData {
+layout(std140, set = 2, binding = 0) uniform CameraData {
   mat4 proj;
   mat4 view;
   mat4 viewProj;
 }
 uCameraData;
 
-struct LightData {
-  vec4 color;
-  vec4 direction;
-  uvec4 type;
-  mat4 lightSpaceMatrix;
-};
-
-layout(std140, set = 2, binding = 1) uniform SceneData {
-  LightData lights[16];
-  uvec4 numLights;
-  uvec4 hasIBL;
-}
+layout(std140, set = 2, binding = 1) uniform SceneData { uvec4 data; }
 uSceneData;
 
-layout(set = 2, binding = 2) uniform sampler2DArray uShadowmap;
-layout(set = 2, binding = 3) uniform samplerCube uIblMaps[2];
-layout(set = 2, binding = 4) uniform sampler2D uBrdfLUT;
+struct LightItem {
+  vec4 data;
+  vec4 color;
+  mat4 lightMatrix;
+};
+
+layout(std140, set = 2, binding = 2) readonly buffer LightData {
+  LightItem items[];
+}
+uLightData;
+
+layout(set = 2, binding = 3) uniform sampler2DArray uShadowmap;
+layout(set = 2, binding = 4) uniform samplerCube uIblMaps[2];
+layout(set = 2, binding = 5) uniform sampler2D uBrdfLUT;
 
 layout(std140, set = 3, binding = 0) uniform MaterialDataRaw {
   int baseColorTexture[1];
@@ -223,15 +223,15 @@ struct LightCalculations {
  * @param v View
  * @return Light calculations
  */
-LightCalculations getDirectionalLightSurfaceCalculations(LightData light,
+LightCalculations getDirectionalLightSurfaceCalculations(LightItem light,
                                                          vec3 n, vec3 v) {
-  vec3 direction = -light.direction.xyz;
+  vec3 direction = -light.data.xyz;
   vec3 l = normalize(direction);
   vec3 h = normalize(v + l);
 
   return LightCalculations(clamp(dot(n, l), 0.0, 1.0),
                            clamp(dot(n, h), 0.0, 1.0),
-                           clamp(dot(v, h), 0.0, 1.0), light.direction.w);
+                           clamp(dot(v, h), 0.0, 1.0), light.data.w);
 }
 
 /**
@@ -251,8 +251,6 @@ float calculateShadow(vec4 fragLightPosition, uint layer) {
 }
 
 void main() {
-  uint num = uSceneData.numLights.x;
-
   float metallic = uMaterialData.metallicFactor;
   float roughness = uMaterialData.roughnessFactor;
 
@@ -295,25 +293,25 @@ void main() {
 
   float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
 
-  for (int i = 0; i < num; i++) {
+  uint num = uSceneData.data.x;
+  for (uint i = 0; i < num; i++) {
     LightCalculations calc;
+    LightItem item = uLightData.items[i];
+    calc = getDirectionalLightSurfaceCalculations(item, n, v);
 
-    if (uSceneData.lights[i].type.x == 0) {
-      calc = getDirectionalLightSurfaceCalculations(uSceneData.lights[i], n, v);
-    } else {
-      continue;
-    }
+    vec4 fragLightPosition = DEPTH_BIAS * item.lightMatrix * inModelMatrix *
+                             vec4(inModelPosition.xyz, 1.0);
 
-    vec4 fragLightPosition = DEPTH_BIAS *
-                             uSceneData.lights[i].lightSpaceMatrix *
-                             inModelMatrix * vec4(inModelPosition.xyz, 1.0);
-
-    const vec4 lightColor = uSceneData.lights[i].color;
+    const vec4 lightColor = item.color;
     const float lightIntensity = calc.intensity;
 
     float NdotL = calc.NdotL;
     float NdotH = calc.NdotH;
     float VdotH = calc.VdotH;
+
+    if (NdotL < 0.001) {
+      continue;
+    }
 
     vec3 F = schlickFresnel(f0, VdotH);
     float G = schlickSpecularGeometricAttenuation(alpha, NdotV, NdotL);
@@ -327,7 +325,7 @@ void main() {
              (diffuseBRDF + specularBRDF);
   }
 
-  if (uSceneData.hasIBL.x == 1) {
+  if (uSceneData.data.y == 1) {
     vec3 reflection = -normalize(reflect(v, n));
     vec3 diffuse = texture(uIblMaps[0], n).rgb * diffuseColor;
     vec3 brdf = texture(uBrdfLUT, vec2(NdotV, 1.0 - roughness)).rgb;

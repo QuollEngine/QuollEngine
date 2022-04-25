@@ -6,11 +6,16 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 6) in uvec4 inJoints;
 layout(location = 7) in vec4 inWeights;
 
-layout(std140, set = 0, binding = 0) uniform MaterialData {
+struct LightItem {
+  vec4 data;
+  vec4 color;
   mat4 lightMatrix;
-  int lightIndex[1];
+};
+
+layout(std140, set = 0, binding = 0) readonly buffer LightData {
+  LightItem items[];
 }
-uMaterialData;
+uLightData;
 
 struct ObjectItem {
   mat4 modelMatrix;
@@ -30,6 +35,9 @@ layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
 }
 uSkeletonData;
 
+layout(push_constant) uniform PushConstants { ivec4 index; }
+pcLightRef;
+
 void main() {
   mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
   SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
@@ -39,7 +47,7 @@ void main() {
                     inWeights.z * item.joints[inJoints.z] +
                     inWeights.w * item.joints[inJoints.w];
 
-  gl_Position = uMaterialData.lightMatrix * modelMatrix * skinMatrix *
-                vec4(inPosition, 1.0);
-  gl_Layer = uMaterialData.lightIndex[0];
+  gl_Position = uLightData.items[pcLightRef.index.x].lightMatrix * modelMatrix *
+                skinMatrix * vec4(inPosition, 1.0);
+  gl_Layer = pcLightRef.index.x;
 }
