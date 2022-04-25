@@ -2,6 +2,7 @@
 
 #include "liquid/entity/EntityContext.h"
 #include "liquid/rhi/RenderCommandList.h"
+#include "liquid/asset/AssetRegistry.h"
 #include "RenderStorage.h"
 
 namespace liquid {
@@ -19,10 +20,12 @@ public:
               bool bindMaterialData = false);
 
   void render(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-              RenderStorage &renderStorage, bool bindMaterialData = false);
+              RenderStorage &renderStorage, AssetRegistry &assetRegistry,
+              bool bindMaterialData = false);
 
   void renderSkinned(rhi::RenderCommandList &commandList,
                      rhi::PipelineHandle pipeline, RenderStorage &renderStorage,
+                     AssetRegistry &assetRegistry,
                      bool bindMaterialData = true);
 
 private:

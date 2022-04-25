@@ -10,8 +10,9 @@ namespace liquid {
 class MeshInstance {
 public:
   template <class TMeshAsset>
-  MeshInstance(const AssetData<TMeshAsset> &asset,
-               const std::vector<SharedPtr<Material>> &materials) {
+  MeshInstance(uint32_t handle, const AssetData<TMeshAsset> &asset,
+               const std::vector<SharedPtr<Material>> &materials)
+      : mMesh(handle) {
 
     LIQUID_ASSERT(asset.data.vertexBuffers.size() ==
                       asset.data.indexBuffers.size(),
@@ -77,12 +78,21 @@ public:
     return mIndexCounts;
   }
 
+  /**
+   * @brief Get mesh handle
+   *
+   * @return Mesh handle
+   */
+  inline uint32_t getMesh() const { return mMesh; }
+
 private:
   std::vector<rhi::BufferHandle> mVertexBuffers;
   std::vector<rhi::BufferHandle> mIndexBuffers;
   std::vector<SharedPtr<Material>> mMaterials;
   std::vector<uint32_t> mVertexCounts;
   std::vector<uint32_t> mIndexCounts;
+
+  uint32_t mMesh = 0;
 };
 
 } // namespace liquid

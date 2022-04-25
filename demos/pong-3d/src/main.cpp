@@ -27,7 +27,8 @@ class Game {
 public:
   Game()
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
-        renderer(entityContext, window, backend.createDefaultDevice()),
+        renderer(entityContext, assetManager.getRegistry(), window,
+                 backend.createDefaultDevice()),
         physicsSystem(entityContext, eventSystem),
         assetManager(std::filesystem::current_path()),
         vertexShader(
@@ -326,11 +327,11 @@ private:
 private:
   liquid::EventSystem eventSystem;
   liquid::EntityContext entityContext;
+  liquid::AssetManager assetManager;
   liquid::Window window;
   liquid::rhi::VulkanRenderBackend backend;
   liquid::Renderer renderer;
   liquid::PhysicsSystem physicsSystem;
-  liquid::AssetManager assetManager;
 
   liquid::SharedPtr<liquid::Camera> camera;
   liquid::Entity cameraEntity = liquid::ENTITY_MAX;

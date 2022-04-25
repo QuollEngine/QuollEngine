@@ -7,6 +7,7 @@
 class MeshInstanceTest : public ::testing::Test {
 public:
   liquid::rhi::ResourceRegistry registry;
+  uint32_t testHandle = 2;
 };
 
 using MeshInstanceDeathTest = MeshInstanceTest;
@@ -35,7 +36,7 @@ TEST_F(MeshInstanceTest, SetsMeshBuffersAndMaterial) {
   materials.at(1) = liquid::SharedPtr<liquid::Material>(
       new liquid::Material({}, {}, registry));
 
-  liquid::MeshInstance instance(mesh, materials);
+  liquid::MeshInstance instance(testHandle, mesh, materials);
 
   EXPECT_EQ(instance.getVertexBuffers().size(), 2);
   EXPECT_EQ(instance.getIndexBuffers().size(), 2);
@@ -79,7 +80,7 @@ TEST_F(MeshInstanceTest, SetsSkinnedMeshBuffersAndMaterial) {
   materials.at(1) = liquid::SharedPtr<liquid::Material>(
       new liquid::Material({}, {}, registry));
 
-  liquid::MeshInstance instance(mesh, materials);
+  liquid::MeshInstance instance(testHandle, mesh, materials);
 
   EXPECT_EQ(instance.getVertexBuffers().size(), 2);
   EXPECT_EQ(instance.getIndexBuffers().size(), 2);
@@ -107,7 +108,8 @@ TEST_F(MeshInstanceDeathTest, FailsToCreateInstanceIfBufferSizesDoNotMatch) {
   mesh.data.indexBuffers.resize(3);
   materials.resize(2);
 
-  EXPECT_DEATH({ liquid::MeshInstance instance(mesh, materials); }, ".*");
+  EXPECT_DEATH({ liquid::MeshInstance instance(testHandle, mesh, materials); },
+               ".*");
 }
 
 TEST_F(MeshInstanceDeathTest,
@@ -119,5 +121,6 @@ TEST_F(MeshInstanceDeathTest,
   mesh.data.indexBuffers.resize(2);
   materials.resize(3);
 
-  EXPECT_DEATH({ liquid::MeshInstance instance(mesh, materials); }, ".*");
+  EXPECT_DEATH({ liquid::MeshInstance instance(testHandle, mesh, materials); },
+               ".*");
 }

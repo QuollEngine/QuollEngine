@@ -51,13 +51,36 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
       {rhi::BufferType::Uniform, sizeof(SceneData), &mSceneData}, mSceneBuffer);
 }
 
-void RenderStorage::addMeshData(const glm::mat4 &transform) {
+void RenderStorage::addMesh(MeshAssetHandle handle,
+                            const std::vector<SharedPtr<Material>> &materials,
+                            const glm::mat4 &transform) {
   mMeshTransformMatrices.push_back(transform);
+  uint32_t index = static_cast<uint32_t>(mMeshTransformMatrices.size() - 1);
+
+  if (mMeshGroups.find(handle) == mMeshGroups.end()) {
+    MeshData data{};
+    data.materials = materials;
+    mMeshGroups.insert_or_assign(handle, data);
+  }
+
+  mMeshGroups.at(handle).indices.push_back(index);
 }
 
-void RenderStorage::addSkinnedMeshData(const glm::mat4 &transform,
-                                       const std::vector<glm::mat4> &skeleton) {
+void RenderStorage::addSkinnedMesh(
+    SkinnedMeshAssetHandle handle,
+    const std::vector<SharedPtr<Material>> &materials,
+    const glm::mat4 &transform, const std::vector<glm::mat4> &skeleton) {
   mSkinnedMeshTransformMatrices.push_back(transform);
+  uint32_t index =
+      static_cast<uint32_t>(mSkinnedMeshTransformMatrices.size() - 1);
+
+  if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
+    MeshData data{};
+    data.materials = materials;
+    mSkinnedMeshGroups.insert_or_assign(handle, data);
+  }
+
+  mSkinnedMeshGroups.at(handle).indices.push_back(index);
 
   auto *currentSkeleton =
       mSkeletonVector.get() + (mLastSkeleton * MAX_NUM_JOINTS);
@@ -75,7 +98,7 @@ void RenderStorage::addLight(const Light &light) {
   };
   mLights.push_back(data);
 
-  mSceneData.data.x = static_cast<uint32_t>(mLights.size());
+  mSceneData.data.x = static_cast<int32_t>(mLights.size());
 }
 
 void RenderStorage::setEnvironmentTextures(rhi::TextureHandle irradianceMap,
@@ -101,6 +124,9 @@ void RenderStorage::clear() {
   mIrradianceMap = rhi::TextureHandle::Invalid;
   mSpecularMap = rhi::TextureHandle::Invalid;
   mBrdfLUT = rhi::TextureHandle::Invalid;
+
+  mMeshGroups.clear();
+  mSkinnedMeshGroups.clear();
 }
 
 } // namespace liquid

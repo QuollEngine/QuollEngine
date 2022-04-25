@@ -12,11 +12,11 @@
 
 namespace liquid {
 
-Renderer::Renderer(EntityContext &entityContext, Window &window,
-                   rhi::RenderDevice *device)
+Renderer::Renderer(EntityContext &entityContext, AssetRegistry &assetRegistry,
+                   Window &window, rhi::RenderDevice *device)
     : mEntityContext(entityContext), mGraphEvaluator(mRegistry),
       mDevice(device), mImguiRenderer(window, mRegistry),
-      mSceneRenderer(mEntityContext) {
+      mSceneRenderer(mEntityContext), mAssetRegistry(assetRegistry) {
   loadShaders();
 }
 
@@ -88,7 +88,9 @@ void Renderer::updateStorageBuffers() {
   // Meshes
   mEntityContext.iterateEntities<TransformComponent, MeshComponent>(
       [this](auto entity, const auto &transform, const auto &mesh) {
-        mRenderStorage.addMeshData(transform.worldTransform);
+        auto handle = static_cast<MeshAssetHandle>(mesh.instance->getMesh());
+        mRenderStorage.addMesh(handle, mesh.instance->getMaterials(),
+                               transform.worldTransform);
       });
 
   // Skinned Meshes
@@ -96,8 +98,11 @@ void Renderer::updateStorageBuffers() {
                                  SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &transform,
              const auto &mesh) {
-        mRenderStorage.addSkinnedMeshData(
-            transform.worldTransform,
+        auto handle =
+            static_cast<SkinnedMeshAssetHandle>(mesh.instance->getMesh());
+
+        mRenderStorage.addSkinnedMesh(
+            handle, mesh.instance->getMaterials(), transform.worldTransform,
             skeleton.skeleton.getJointFinalTransforms());
       });
 
@@ -120,7 +125,6 @@ void Renderer::updateStorageBuffers() {
 
 std::pair<rhi::RenderGraph, DefaultGraphResources>
 Renderer::createRenderGraph(bool useSwapchainForImgui) {
-
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
   constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
@@ -187,35 +191,27 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
 
       commandList.bindDescriptor(pipeline, 0, descriptor);
 
-      int32_t index = 0;
-      mEntityContext.iterateEntities<LightComponent>(
-          [&index, this, pipeline, &commandList](auto entity,
-                                                 const auto &light) mutable {
-            glm::ivec4 pcIndex{index};
+      for (int32_t index = 0; index < mRenderStorage.getNumLights(); ++index) {
+        glm::ivec4 pcIndex{index};
 
-            commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                      sizeof(glm::ivec4), &pcIndex);
-            mSceneRenderer.render(commandList, pipeline, mRenderStorage, false);
-            index++;
-          });
+        commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                  sizeof(glm::ivec4), &pcIndex);
+        mSceneRenderer.render(commandList, pipeline, mRenderStorage,
+                              mAssetRegistry, false);
+      }
 
       commandList.bindPipeline(skinnedPipeline);
-
       commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
 
-      index = 0;
-      mEntityContext.iterateEntities<LightComponent>(
-          [&index, this, skinnedPipeline,
-           &commandList](auto entity, const auto &light) mutable {
-            glm::ivec4 pcIndex{index};
+      for (int32_t index = 0; index < mRenderStorage.getNumLights(); ++index) {
+        glm::ivec4 pcIndex{index};
 
-            commandList.pushConstants(skinnedPipeline,
-                                      VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                      sizeof(glm::ivec4), &pcIndex);
-            mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
-                                         mRenderStorage, false);
-            index++;
-          });
+        commandList.pushConstants(skinnedPipeline, VK_SHADER_STAGE_VERTEX_BIT,
+                                  0, sizeof(glm::ivec4), &pcIndex);
+        mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
+                                     mRenderStorage, mAssetRegistry, false);
+        index++;
+      }
     });
   }
 
@@ -275,14 +271,15 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
       commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
       commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
 
-      mSceneRenderer.render(commandList, pipeline, mRenderStorage, true);
+      mSceneRenderer.render(commandList, pipeline, mRenderStorage,
+                            mAssetRegistry, true);
 
       commandList.bindPipeline(skinnedPipeline);
       commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
       commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
 
       mSceneRenderer.renderSkinned(commandList, skinnedPipeline, mRenderStorage,
-                                   true);
+                                   mAssetRegistry, true);
     });
   }
 
@@ -446,7 +443,8 @@ SharedPtr<MeshInstance> Renderer::createMeshInstance(MeshAssetHandle handle,
   const auto &mesh = registry.getMeshes().getAsset(handle);
   const auto &materials = createMeshMaterials(mesh, registry, *this);
 
-  return std::make_shared<MeshInstance>(mesh, materials);
+  return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
+                                        materials);
 }
 
 SharedPtr<MeshInstance>
@@ -456,7 +454,8 @@ Renderer::createMeshInstance(SkinnedMeshAssetHandle handle,
   const auto &mesh = registry.getSkinnedMeshes().getAsset(handle);
   const auto &materials = createMeshMaterials(mesh, registry, *this);
 
-  return std::make_shared<MeshInstance>(mesh, materials);
+  return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
+                                        materials);
 }
 
 } // namespace liquid
