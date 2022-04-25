@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/rhi/RenderDevice.h"
-#include "RenderData.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"
@@ -45,8 +44,6 @@ public:
   createMaterialPBR(const MaterialPBR::Properties &properties,
                     const rhi::CullMode &cullMode);
 
-  SharedPtr<RenderData> prepareScene(Scene *scene);
-
   SharedPtr<MeshInstance> createMeshInstance(MeshAssetHandle mesh,
                                              AssetRegistry &registry);
 
@@ -60,10 +57,9 @@ public:
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   std::pair<rhi::RenderGraph, DefaultGraphResources>
-  createRenderGraph(const SharedPtr<RenderData> &renderData,
-                    bool useSwapchainForImgui);
+  createRenderGraph(bool useSwapchainForImgui);
 
-  void render(rhi::RenderGraph &graph);
+  void render(rhi::RenderGraph &graph, Entity entity);
 
   inline void wait() { mDevice->waitForIdle(); }
 

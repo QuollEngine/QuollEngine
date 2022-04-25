@@ -107,22 +107,6 @@ Scene::~Scene() {
   }
 }
 
-void Scene::setActiveCamera(Entity camera) {
-  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(camera),
-                "Entity " + std::to_string(camera) +
-                    " does not have a camera component");
-
-  mCameraEntity = camera;
-}
-
-const SharedPtr<Camera> &Scene::getActiveCamera() {
-  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(mCameraEntity),
-                "Entity " + std::to_string(mCameraEntity) +
-                    " does not have a camera component");
-
-  return mEntityContext.getComponent<CameraComponent>(mCameraEntity).camera;
-}
-
 void Scene::update() { mRootNode->update(); }
 
 } // namespace liquid

@@ -143,20 +143,6 @@ public:
   void update();
 
   /**
-   * @brief Sets active camera
-   *
-   * @param entity Entity with camera
-   */
-  void setActiveCamera(Entity camera);
-
-  /**
-   * @brief Gets active camera
-   *
-   * @return Camera
-   */
-  const SharedPtr<Camera> &getActiveCamera();
-
-  /**
    * @brief Get root node
    *
    * @return Root scene node
@@ -172,7 +158,6 @@ public:
 
 private:
   SceneNode *mRootNode = nullptr;
-  Entity mCameraEntity = ENTITY_MAX;
   EntityContext &mEntityContext;
 };
 

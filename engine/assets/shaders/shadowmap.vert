@@ -4,11 +4,16 @@
 
 layout(location = 0) in vec3 inPosition;
 
-layout(std140, set = 0, binding = 0) uniform MaterialData {
+struct LightItem {
+  vec4 data;
+  vec4 color;
   mat4 lightMatrix;
-  int lightIndex[1];
+};
+
+layout(std140, set = 0, binding = 0) readonly buffer LightData {
+  LightItem items[];
 }
-uMaterialData;
+uLightData;
 
 struct ObjectItem {
   mat4 modelMatrix;
@@ -19,9 +24,13 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
 }
 uObjectData;
 
+layout(push_constant) uniform PushConstants { ivec4 index; }
+pcLightRef;
+
 void main() {
   mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
 
-  gl_Position = uMaterialData.lightMatrix * modelMatrix * vec4(inPosition, 1.0);
-  gl_Layer = uMaterialData.lightIndex[0];
+  gl_Position = uLightData.items[pcLightRef.index.x].lightMatrix * modelMatrix *
+                vec4(inPosition, 1.0);
+  gl_Layer = pcLightRef.index.x;
 }

@@ -11,11 +11,10 @@ public:
    * @brief Create light
    *
    * @param type Light type
-   * @param direction Light direction
    * @param color Light color
    * @param intensity Light intensity
    */
-  Light(LightType type, glm::vec3 direction, glm::vec4 color, float intensity);
+  Light(LightType type, glm::vec4 color, float intensity);
 
   /**
    * @brief Get projection view matrix of light
@@ -57,7 +56,7 @@ public:
    *
    * @return Light color
    */
-  inline const glm::vec4 &getColor() { return mColor; }
+  inline const glm::vec4 &getColor() const { return mColor; }
 
   /**
    * @brief Get light intensity
@@ -67,7 +66,7 @@ public:
    *
    * @return Light intensity
    */
-  inline float getIntensity() { return mIntensity; }
+  inline float getIntensity() const { return mIntensity; }
 
   /**
    * @brief Get light direction
@@ -76,14 +75,14 @@ public:
    *
    * @return Light direction
    */
-  inline const glm::vec3 &getDirection() { return mDirection; }
+  inline const glm::vec3 &getDirection() const { return mDirection; }
 
   /**
    * @brief Get light type
    *
    * @return Light type
    */
-  inline LightType getType() { return mType; }
+  inline LightType getType() const { return mType; }
 
   /**
    * @brief Get light type name
@@ -102,7 +101,7 @@ public:
 private:
   glm::vec3 mPosition{0.0f};
   glm::vec4 mColor;
-  glm::vec3 mDirection;
+  glm::vec3 mDirection{0.0f};
   float mIntensity;
   LightType mType;
 };

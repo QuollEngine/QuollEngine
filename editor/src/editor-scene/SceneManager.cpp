@@ -23,21 +23,23 @@ void SceneManager::createNewScene() {
 
   mEditorCamera.reset();
   mActiveScene = new liquid::Scene(mEntityContext);
-  mActiveScene->setActiveCamera(mEditorCamera.getCamera());
 
-  auto light1 = mEntityContext.createEntity();
-  mEntityContext.setComponent<liquid::NameComponent>(light1, {"Light"});
-  mEntityContext.setComponent<liquid::LightComponent>(
-      light1, {std::make_shared<liquid::Light>(
-                  liquid::Light::DIRECTIONAL, glm::vec3{0.0f, 1.0f, 1.0f},
-                  glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
-  mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
+  {
+    auto light1 = mEntityContext.createEntity();
+    mEntityContext.setComponent<liquid::NameComponent>(light1, {"Light"});
+    mEntityContext.setComponent<liquid::LightComponent>(
+        light1, {std::make_shared<liquid::Light>(
+                    liquid::Light::DIRECTIONAL,
+                    glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
+    mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
 
-  liquid::TransformComponent transform{};
-  transform.localPosition = LIGHT_START_POS;
-  transform.localRotation = glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
+    liquid::TransformComponent transform{};
+    transform.localPosition = LIGHT_START_POS;
+    transform.localRotation =
+        glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
-  mActiveScene->getRootNode()->addChild(light1, transform);
+    mActiveScene->getRootNode()->addChild(light1, transform);
+  }
 
   mNewSceneRequested = false;
 }

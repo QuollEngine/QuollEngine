@@ -38,9 +38,13 @@ liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
     return liquid::ENTITY_MAX;
   }
 
+  const auto &viewMatrix = entityContext
+                               .getComponent<liquid::CameraComponent>(
+                                   sceneManager.getEditorCamera().getCamera())
+                               .camera->getViewMatrix();
+
   constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-  const auto &invViewMatrix = glm::inverse(
-      sceneManager.getActiveScene()->getActiveCamera()->getViewMatrix());
+  const auto &invViewMatrix = glm::inverse(viewMatrix);
   const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
 
   liquid::TransformComponent parentTransform;
@@ -254,10 +258,7 @@ int main() {
             .getComponent<liquid::CameraComponent>(editorCamera.getCamera())
             .camera;
 
-    const auto &renderData =
-        renderer.prepareScene(sceneManager.getActiveScene());
-
-    auto graph = renderer.createRenderGraph(renderData, false);
+    auto graph = renderer.createRenderGraph(false);
 
     {
       auto &pass = graph.first.addPass("editorDebug");
@@ -435,14 +436,13 @@ int main() {
       });
     }
 
-    mainLoop.setUpdateFn([&editorCamera, &sceneManager, &renderData,
-                          &animationSystem, &physicsSystem, &entityContext,
+    mainLoop.setUpdateFn([&editorCamera, &sceneManager, &animationSystem,
+                          &physicsSystem, &entityContext,
                           &eventSystem](double dt) mutable {
       eventSystem.poll();
       editorCamera.update();
 
       animationSystem.update(static_cast<float>(dt));
-      renderData->update();
 
       entityContext.iterateEntities<liquid::SkeletonComponent>(
           [](auto entity, auto &component) { component.skeleton.update(); });
@@ -490,7 +490,8 @@ int main() {
       debugLayer.render();
       imgui.endRendering();
 
-      return renderer.render(graph.first);
+      return renderer.render(graph.first,
+                             sceneManager.getEditorCamera().getCamera());
     });
 
     mainLoop.run();
