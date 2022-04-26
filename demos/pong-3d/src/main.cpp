@@ -45,11 +45,9 @@ public:
     for (auto &[handle, mesh] :
          assetManager.getRegistry().getMeshes().getAssets()) {
       if (mesh.name == "cube.lqmesh") {
-        barInstance =
-            renderer.createMeshInstance(handle, assetManager.getRegistry());
+        barInstance = renderer.createMeshInstance(handle);
       } else if (mesh.name == "sphere.lqmesh") {
-        ballInstance =
-            renderer.createMeshInstance(handle, assetManager.getRegistry());
+        ballInstance = renderer.createMeshInstance(handle);
       }
     }
 

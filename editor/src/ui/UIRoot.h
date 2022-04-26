@@ -12,6 +12,7 @@
 #include "IconRegistry.h"
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
+#include "liquid/renderer/Renderer.h"
 
 namespace liquidator {
 
@@ -31,10 +32,12 @@ public:
    * Renders all components inside the root
    *
    * @param sceneManager Scene manager
+   * @param renderer Renderer
    * @param assetManager Asset manager
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager, liquid::AssetManager &assetManager,
+  void render(SceneManager &sceneManager, liquid::Renderer &renderer,
+              liquid::AssetManager &assetManager,
               liquid::PhysicsSystem &physicsSystem);
 
   /**

@@ -14,14 +14,6 @@ public:
    * @param sceneManager Scene manager
    */
   void render(SceneManager &sceneManager);
-
-private:
-  /**
-   * @brief Handle new scene item click
-   *
-   * @param sceneManager Scene manager
-   */
-  void handleNewScene(SceneManager &sceneManager);
 };
 
 } // namespace liquidator

@@ -11,21 +11,24 @@ constexpr size_t VEC4_ARRAY_SIZE = 4;
 EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
     : mEntityContext(entityContext) {}
 
-void EntityPanel::render(SceneManager &sceneManager,
+void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
   bool open = true;
   if (ImGui::Begin("Inspector", &open)) {
     if (mEntityContext.hasEntity(mSelectedEntity)) {
       renderName();
-      renderLight();
       renderTransform();
+      renderMesh(assetRegistry);
+      renderLight();
       renderAnimation(assetRegistry);
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
+      renderAddComponent();
+      handleDragAndDrop(renderer, assetRegistry);
     }
-    renderAddComponent();
+
     ImGui::End();
   }
 
@@ -154,6 +157,50 @@ void EntityPanel::renderTransform() {
         }
       }
 
+      ImGui::EndTable();
+    }
+  }
+}
+
+void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
+  if (mEntityContext.hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
+
+    auto handle = static_cast<liquid::MeshAssetHandle>(
+        mEntityContext.getComponent<liquid::MeshComponent>(mSelectedEntity)
+            .instance->getMesh());
+
+    const auto &asset = assetRegistry.getMeshes().getAsset(handle);
+
+    if (ImGui::BeginTable("table-mesh", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
+
+      liquid::imgui::renderRow("Name", asset.name);
+      liquid::imgui::renderRow(
+          "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
+      ImGui::EndTable();
+    }
+  }
+
+  if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
+          mSelectedEntity)) {
+
+    auto handle = static_cast<liquid::SkinnedMeshAssetHandle>(
+        mEntityContext
+            .getComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)
+            .instance->getMesh());
+
+    const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
+
+    if (ImGui::BeginTable("table-mesh", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
+
+      liquid::imgui::renderRow("Name", asset.name);
+      liquid::imgui::renderRow(
+          "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
       ImGui::EndTable();
     }
   }
@@ -448,6 +495,62 @@ void EntityPanel::renderAddComponent() {
     }
 
     ImGui::EndPopup();
+  }
+}
+
+void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
+                                    liquid::AssetRegistry &assetRegistry) {
+  static constexpr float HALF = 0.5f;
+  auto width = ImGui::GetWindowContentRegionWidth();
+
+  ImGui::Button("Drag asset here", ImVec2(width, width * HALF));
+
+  if (ImGui::BeginDragDropTarget()) {
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            liquid::getAssetTypeString(liquid::AssetType::Mesh).c_str())) {
+      auto asset = *static_cast<liquid::MeshAssetHandle *>(payload->Data);
+
+      const auto &instance = renderer.createMeshInstance(asset);
+      if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
+              mSelectedEntity)) {
+        mEntityContext.deleteComponent<liquid::SkinnedMeshComponent>(
+            mSelectedEntity);
+      }
+      mEntityContext.setComponent<liquid::MeshComponent>(mSelectedEntity,
+                                                         {instance});
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            liquid::getAssetTypeString(liquid::AssetType::SkinnedMesh)
+                .c_str())) {
+      auto asset =
+          *static_cast<liquid::SkinnedMeshAssetHandle *>(payload->Data);
+
+      const auto &instance = renderer.createMeshInstance(asset);
+      if (mEntityContext.hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
+        mEntityContext.deleteComponent<liquid::MeshComponent>(mSelectedEntity);
+      }
+      mEntityContext.setComponent<liquid::SkinnedMeshComponent>(mSelectedEntity,
+                                                                {instance});
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            liquid::getAssetTypeString(liquid::AssetType::Skeleton).c_str())) {
+      auto asset = *static_cast<liquid::SkeletonAssetHandle *>(payload->Data);
+
+      const auto &skeleton = assetRegistry.getSkeletons().getAsset(asset).data;
+
+      liquid::Skeleton skeletonInstance(
+          skeleton.jointLocalPositions, skeleton.jointLocalRotations,
+          skeleton.jointLocalScales, skeleton.jointParents,
+          skeleton.jointInverseBindMatrices, skeleton.jointNames,
+          &renderer.getRegistry());
+
+      mEntityContext.setComponent<liquid::SkeletonComponent>(
+          mSelectedEntity, {std::move(skeletonInstance)});
+    }
+
+    ImGui::EndDragDropTarget();
   }
 }
 

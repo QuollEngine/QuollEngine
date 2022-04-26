@@ -10,14 +10,15 @@ UIRoot::UIRoot(liquid::EntityContext &entityContext, GLTFImporter &gltfImporter)
       [this](liquid::SceneNode *node) { handleNodeClick(node); });
 }
 
-void UIRoot::render(SceneManager &sceneManager,
+void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
                     liquid::AssetManager &assetManager,
                     liquid::PhysicsSystem &physicsSystem) {
   mLayout.setup();
   mMenuBar.render(sceneManager);
   mStatusBar.render(sceneManager);
   mSceneHierarchyPanel.render(sceneManager);
-  mEntityPanel.render(sceneManager, assetManager.getRegistry(), physicsSystem);
+  mEntityPanel.render(sceneManager, renderer, assetManager.getRegistry(),
+                      physicsSystem);
   mEditorCameraPanel.render(sceneManager);
   mAssetBrowser.render(assetManager, mIconRegistry);
 }
