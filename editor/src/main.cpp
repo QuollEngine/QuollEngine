@@ -40,22 +40,8 @@ liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
     return liquid::ENTITY_MAX;
   }
 
-  const auto &viewMatrix = entityContext
-                               .getComponent<liquid::CameraComponent>(
-                                   sceneManager.getEditorCamera().getCamera())
-                               .camera->getViewMatrix();
-
-  constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
-  const auto &invViewMatrix = glm::inverse(viewMatrix);
-  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
-
-  liquid::TransformComponent parentTransform;
-  parentTransform.localPosition = orientation[3];
-
-  auto parentEntity = entityContext.createEntity();
-  entityContext.setComponent<liquid::DebugComponent>(parentEntity, {});
-  auto *parent = sceneManager.getActiveScene()->getRootNode()->addChild(
-      parentEntity, parentTransform);
+  auto *parent = sceneManager.createEntityAtView();
+  auto parentEntity = parent->getEntity();
 
   if (type == liquid::AssetType::Prefab) {
     auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
@@ -103,8 +89,7 @@ liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
 
       auto entity = getOrCreateEntity(item.entity);
       entityContext.setComponent<liquid::MeshComponent>(
-          entity, {renderer.createMeshInstance(item.value,
-                                               assetManager.getRegistry())});
+          entity, {renderer.createMeshInstance(item.value)});
     }
 
     for (auto &item : asset.data.skinnedMeshes) {
@@ -114,8 +99,7 @@ liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
 
       auto entity = getOrCreateEntity(item.entity);
       entityContext.setComponent<liquid::SkinnedMeshComponent>(
-          entity, {renderer.createMeshInstance(item.value,
-                                               assetManager.getRegistry())});
+          entity, {renderer.createMeshInstance(item.value)});
     }
 
     for (auto &item : asset.data.skeletons) {
@@ -466,7 +450,7 @@ int main() {
       auto &imgui = renderer.getImguiRenderer();
 
       imgui.beginRendering();
-      ui.render(sceneManager, assetManager, physicsSystem);
+      ui.render(sceneManager, renderer, assetManager, physicsSystem);
 
       if (ImGui::Begin("View")) {
         const auto &size = ImGui::GetContentRegionAvail();

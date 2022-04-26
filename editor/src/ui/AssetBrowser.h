@@ -66,6 +66,13 @@ private:
    */
   void handleCreateEntry();
 
+  /**
+   * @brief Render entry
+   *
+   * @param entry Entry
+   */
+  void renderEntry(const Entry &entry);
+
 private:
   Entry mStagingEntry;
   bool mHasStagingEntry = false;

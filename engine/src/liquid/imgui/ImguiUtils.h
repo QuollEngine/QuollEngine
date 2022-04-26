@@ -18,6 +18,8 @@ void renderColumn(float value);
 
 void renderColumn(const String &value);
 
+void renderColumn(uint32_t value);
+
 template <class... Args> void renderRow(const Args &...args) {
   ImGui::TableNextRow();
   (renderColumn(args), ...);

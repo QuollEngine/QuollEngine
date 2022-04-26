@@ -30,4 +30,9 @@ void renderColumn(const String &value) {
   ImGui::Text("%s", value.c_str());
 }
 
+void renderColumn(uint32_t value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", value);
+}
+
 } // namespace liquid::imgui

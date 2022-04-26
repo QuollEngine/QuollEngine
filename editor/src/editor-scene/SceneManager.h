@@ -30,6 +30,13 @@ public:
   void requestEmptyScene();
 
   /**
+   * @brief Create empty entity in camera view
+   *
+   * @return Scene node
+   */
+  liquid::SceneNode *createEntityAtView();
+
+  /**
    * @brief Get active scene
    *
    * @return Active scene

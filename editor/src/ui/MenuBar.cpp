@@ -11,7 +11,7 @@ namespace liquidator {
 void MenuBar::render(SceneManager &sceneManager) {
   ConfirmationDialog confirmCreateNewScene(
       "Create New Scene", "Are you sure you want to create a new scene?",
-      [this](SceneManager &sceneManager) { handleNewScene(sceneManager); });
+      [](SceneManager &sceneManager) { sceneManager.requestEmptyScene(); });
 
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
@@ -22,14 +22,18 @@ void MenuBar::render(SceneManager &sceneManager) {
       ImGui::EndMenu();
     }
 
+    if (ImGui::BeginMenu("Objects")) {
+      if (ImGui::MenuItem("Create empty entity", nullptr)) {
+        sceneManager.createEntityAtView();
+      }
+
+      ImGui::EndMenu();
+    }
+
     ImGui::EndMainMenuBar();
   }
 
   confirmCreateNewScene.render(sceneManager);
-}
-
-void MenuBar::handleNewScene(SceneManager &sceneManager) {
-  sceneManager.requestEmptyScene();
 }
 
 } // namespace liquidator

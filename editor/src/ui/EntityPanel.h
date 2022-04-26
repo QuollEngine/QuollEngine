@@ -21,10 +21,12 @@ public:
    * @brief Render panel
    *
    * @param sceneManager Scene manager
+   * @param renderer Renderer
    * @param assetRegistry Asset registry
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager, liquid::AssetRegistry &assetRegistry,
+  void render(SceneManager &sceneManager, liquid::Renderer &renderer,
+              liquid::AssetRegistry &assetRegistry,
               liquid::PhysicsSystem &physicsSystem);
 
   /**
@@ -49,6 +51,13 @@ private:
    * @brief Render transform component
    */
   void renderTransform();
+
+  /**
+   * @brief Render mesh
+   *
+   * @param assetRegistry Asset registry
+   */
+  void renderMesh(liquid::AssetRegistry &assetRegistry);
 
   /**
    * @brief Render animation component
@@ -76,6 +85,15 @@ private:
    * @brief Render add component button
    */
   void renderAddComponent();
+
+  /**
+   * @brief Handle drag and drop
+   *
+   * @param renderer Renderer
+   * @param assetRegistry Asset registry
+   */
+  void handleDragAndDrop(liquid::Renderer &renderer,
+                         liquid::AssetRegistry &assetRegistry);
 
 private:
   liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;

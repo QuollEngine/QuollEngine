@@ -197,7 +197,9 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        liquid::String id = "###" + filename.string();
+        liquid::String id =
+            "###" + std::to_string(entry.asset) + "-" +
+            std::to_string(static_cast<uint32_t>(entry.assetType));
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(ITEM_WIDTH, ITEM_HEIGHT))) {
@@ -215,6 +217,19 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
           }
         }
 
+        bool dndAllowed = entry.assetType == liquid::AssetType::Mesh ||
+                          entry.assetType == liquid::AssetType::SkinnedMesh ||
+                          entry.assetType == liquid::AssetType::Skeleton;
+        if (dndAllowed) {
+          if (ImGui::BeginDragDropSource()) {
+            ImGui::SetDragDropPayload(
+                liquid::getAssetTypeString(entry.assetType).c_str(),
+                &entry.asset, sizeof(uint32_t));
+            renderEntry(entry);
+            ImGui::EndDragDropSource();
+          }
+        }
+
         if (ImGui::IsItemHovered()) {
           ImGui::BeginTooltip();
           ImGui::Text("%s", entry.path.filename().string().c_str());
@@ -223,22 +238,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ITEM_HEIGHT);
 
-        {
-          float initialCursorPos = ImGui::GetCursorPosX();
-          ImGui::SetCursorPosX(initialCursorPos + IMAGE_PADDING);
-          liquid::imgui::image(entry.preview, ICON_SIZE);
-          ImGui::SetCursorPosX(initialCursorPos);
-        }
-
-        {
-          static constexpr float HALF = 0.5f;
-          float initialCursorPos = ImGui::GetCursorPosX();
-          float centerPos =
-              initialCursorPos + (ITEM_WIDTH * 1.0f - entry.textWidth) * HALF;
-          ImGui::SetCursorPosX(centerPos);
-          ImGui::Text("%s", entry.clippedName.c_str());
-          ImGui::SetCursorPosX(initialCursorPos);
-        }
+        renderEntry(entry);
       }
       ImGui::TableNextRow();
     }
@@ -293,6 +293,31 @@ void AssetBrowser::handleCreateEntry() {
 
   // Trigger directory refresh
   mDirectoryChanged = true;
+}
+
+void AssetBrowser::renderEntry(const Entry &entry) {
+  constexpr uint32_t ITEM_WIDTH = 90;
+  constexpr uint32_t ITEM_HEIGHT = 100;
+  constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
+  constexpr float IMAGE_PADDING = ((ITEM_WIDTH * 1.0f) - ICON_SIZE.x) / 2.0f;
+  constexpr uint32_t TEXT_WIDTH = ITEM_WIDTH - 8;
+
+  {
+    float initialCursorPos = ImGui::GetCursorPosX();
+    ImGui::SetCursorPosX(initialCursorPos + IMAGE_PADDING);
+    liquid::imgui::image(entry.preview, ICON_SIZE);
+    ImGui::SetCursorPosX(initialCursorPos);
+  }
+
+  {
+    static constexpr float HALF = 0.5f;
+    float initialCursorPos = ImGui::GetCursorPosX();
+    float centerPos =
+        initialCursorPos + (ITEM_WIDTH * 1.0f - entry.textWidth) * HALF;
+    ImGui::SetCursorPosX(centerPos);
+    ImGui::Text("%s", entry.clippedName.c_str());
+    ImGui::SetCursorPosX(initialCursorPos);
+  }
 }
 
 } // namespace liquidator

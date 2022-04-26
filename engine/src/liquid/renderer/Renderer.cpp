@@ -438,21 +438,18 @@ std::vector<SharedPtr<Material>> createMeshMaterials(const TMeshAsset &mesh,
   return materials;
 }
 
-SharedPtr<MeshInstance> Renderer::createMeshInstance(MeshAssetHandle handle,
-                                                     AssetRegistry &registry) {
-  const auto &mesh = registry.getMeshes().getAsset(handle);
-  const auto &materials = createMeshMaterials(mesh, registry, *this);
+SharedPtr<MeshInstance> Renderer::createMeshInstance(MeshAssetHandle handle) {
+  const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle);
+  const auto &materials = createMeshMaterials(mesh, mAssetRegistry, *this);
 
   return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
                                         materials);
 }
 
 SharedPtr<MeshInstance>
-Renderer::createMeshInstance(SkinnedMeshAssetHandle handle,
-                             AssetRegistry &registry) {
-
-  const auto &mesh = registry.getSkinnedMeshes().getAsset(handle);
-  const auto &materials = createMeshMaterials(mesh, registry, *this);
+Renderer::createMeshInstance(SkinnedMeshAssetHandle handle) {
+  const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle);
+  const auto &materials = createMeshMaterials(mesh, mAssetRegistry, *this);
 
   return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
                                         materials);

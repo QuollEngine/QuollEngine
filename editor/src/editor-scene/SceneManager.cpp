@@ -10,6 +10,27 @@ SceneManager::SceneManager(liquid::EntityContext &entityContext,
 
 void SceneManager::requestEmptyScene() { mNewSceneRequested = true; }
 
+liquid::SceneNode *SceneManager::createEntityAtView() {
+  const auto &viewMatrix =
+      mEntityContext
+          .getComponent<liquid::CameraComponent>(mEditorCamera.getCamera())
+          .camera->getViewMatrix();
+
+  constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
+  const auto &invViewMatrix = glm::inverse(viewMatrix);
+  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
+
+  liquid::TransformComponent transform;
+  transform.localPosition = orientation[3];
+
+  auto entity = mEntityContext.createEntity();
+  mEntityContext.setComponent<liquid::DebugComponent>(entity, {});
+
+  auto *node = mActiveScene->getRootNode()->addChild(entity, transform);
+
+  return node;
+}
+
 void SceneManager::createNewScene() {
   static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
 
