@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityPanel.h"
 
-#include <imgui.h>
+#include "liquid/imgui/ImguiUtils.h"
 
 namespace liquidator {
 
@@ -362,47 +362,41 @@ void EntityPanel::renderRigidBody() {
 
     rigidBody.actor->getLinearVelocity();
 
-    auto renderRow3 = [](const liquid::String &label,
-                         const physx::PxVec3 &value) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text(label.c_str());
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f, %.2f, %.2f", value.x, value.y, value.z);
-    };
-
-    auto renderRowQuat = [](const liquid::String &label,
-                            const physx::PxQuat &value) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text(label.c_str());
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f, %.2f, %.2f, 0.2f", value.w, value.x, value.y, value.z);
-    };
-
-    auto renderScalar = [](const liquid::String &label, float value) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text(label.c_str());
-      ImGui::TableNextColumn();
-      ImGui::Text("%0.2f", value);
-    };
-
     if (ImGui::BeginTable("TableRigidBodyDetails", 2,
                           ImGuiTableFlags_Borders |
                               ImGuiTableColumnFlags_WidthStretch |
                               ImGuiTableFlags_RowBg)) {
       auto *actor = rigidBody.actor;
-      renderRow3("Pose position", actor->getGlobalPose().p);
-      renderRowQuat("Pose rotation", actor->getGlobalPose().q);
-      renderRow3("CMass position", actor->getCMassLocalPose().p);
-      renderRowQuat("CMass rotation", actor->getCMassLocalPose().q);
-      renderRow3("Inverse inertia tensor",
-                 actor->getMassSpaceInvInertiaTensor());
-      renderScalar("Linear damping", actor->getLinearDamping());
-      renderScalar("Angular damping", actor->getAngularDamping());
-      renderRow3("Linear velocity", actor->getLinearVelocity());
-      renderRow3("Angular velocity", actor->getAngularVelocity());
+
+      const auto &pose = actor->getGlobalPose();
+      const auto &cmass = actor->getCMassLocalPose();
+      const auto &invInertia = actor->getMassSpaceInvInertiaTensor();
+      const auto &linearVelocity = actor->getLinearVelocity();
+      const auto &angularVelocity = actor->getAngularVelocity();
+
+      liquid::imgui::renderRow("Pose position",
+                               glm::vec3(pose.p.x, pose.p.y, pose.p.y));
+      liquid::imgui::renderRow(
+          "Pose rotation",
+          glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+      liquid::imgui::renderRow("CMass position",
+                               glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
+      liquid::imgui::renderRow(
+          "CMass rotation",
+          glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+      liquid::imgui::renderRow(
+          "Inverse inertia tensor position",
+          glm::vec3(invInertia.x, invInertia.y, invInertia.y));
+      liquid::imgui::renderRow("Linear damping",
+                               static_cast<float>(actor->getLinearDamping()));
+      liquid::imgui::renderRow("Angular damping",
+                               static_cast<float>(actor->getAngularDamping()));
+      liquid::imgui::renderRow(
+          "Linear velocity",
+          glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
+      liquid::imgui::renderRow(
+          "Angular velocity",
+          glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
 
       ImGui::EndTable();
     }
