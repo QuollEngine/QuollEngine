@@ -92,7 +92,7 @@ void SceneManager::createNewScene() {
     mEntityContext.setComponent<liquid::NameComponent>(light1, {"Light"});
     mEntityContext.setComponent<liquid::LightComponent>(
         light1, {std::make_shared<liquid::Light>(
-                    liquid::Light::DIRECTIONAL,
+                    liquid::LightType::Directional,
                     glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
     mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
 

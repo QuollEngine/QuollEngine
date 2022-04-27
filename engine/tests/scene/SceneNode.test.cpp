@@ -152,7 +152,7 @@ TEST(SceneNodeTest, UpdatesLightIfExists) {
   liquid::Scene scene(context);
 
   context.setComponent<liquid::LightComponent>(
-      entity, {std::make_shared<liquid::Light>(liquid::Light::DIRECTIONAL,
+      entity, {std::make_shared<liquid::Light>(liquid::LightType::Directional,
                                                glm::vec4{}, 1.0f)});
 
   liquid::SceneNode sceneNode(entity, transform, nullptr, context);

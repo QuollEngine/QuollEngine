@@ -51,6 +51,10 @@ VulkanDeviceObject::VulkanDeviceObject(
   LOG_DEBUG("[Vulkan] Extension enabled: "
             << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
 
+  extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+  LOG_DEBUG("[Vulkan] Extension enabled: "
+            << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
         return String(static_cast<const char *>(ext.extensionName)) ==

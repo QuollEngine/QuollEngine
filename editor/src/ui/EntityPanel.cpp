@@ -494,6 +494,14 @@ void EntityPanel::renderAddComponent() {
                             liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
     }
 
+    if (!mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity) &&
+        ImGui::Selectable("Light")) {
+      auto light =
+          std::make_shared<liquid::Light>(liquid::LightType::Directional);
+      mEntityContext.setComponent<liquid::LightComponent>(mSelectedEntity,
+                                                          {light});
+    }
+
     ImGui::EndPopup();
   }
 }

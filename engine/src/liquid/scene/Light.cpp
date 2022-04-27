@@ -3,7 +3,7 @@
 
 namespace liquid {
 
-Light::Light(Light::LightType type, glm::vec4 color, float intensity)
+Light::Light(LightType type, glm::vec4 color, float intensity)
     : mType(type), mColor(color), mIntensity(intensity) {}
 
 const glm::mat4 Light::getProjectionViewMatrix() const {
@@ -32,7 +32,7 @@ void Light::setIntensity(float intensity) { mIntensity = intensity; }
 
 const String Light::getTypeName() const {
   switch (mType) {
-  case DIRECTIONAL:
+  case LightType::Directional:
     return "Directional";
   default:
     return "Unknown";

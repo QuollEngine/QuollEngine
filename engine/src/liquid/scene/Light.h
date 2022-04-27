@@ -2,10 +2,9 @@
 
 namespace liquid {
 
-class Light {
-public:
-  enum LightType { DIRECTIONAL = 0 };
+enum class LightType : uint32_t { Directional = 0 };
 
+class Light {
 public:
   /**
    * @brief Create light
@@ -14,7 +13,8 @@ public:
    * @param color Light color
    * @param intensity Light intensity
    */
-  Light(LightType type, glm::vec4 color, float intensity);
+  Light(LightType type, glm::vec4 color = glm::vec4{1.0f, 1.0f, 1.0f, 1.0f},
+        float intensity = 1.0f);
 
   /**
    * @brief Get projection view matrix of light
