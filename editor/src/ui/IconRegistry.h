@@ -5,6 +5,7 @@ namespace liquidator {
 enum class EditorIcon {
   Unknown,
   Directory,
+  CreateDirectory,
   Material,
   Texture,
   Mesh,
@@ -14,7 +15,7 @@ enum class EditorIcon {
   Prefab,
   Script,
   Sun,
-  Direction
+  Direction,
 };
 
 class IconRegistry {

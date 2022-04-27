@@ -9,4 +9,10 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   return "";
 }
 
+std::filesystem::path NativeFileDialog::getFilePathFromCreateDialog(
+    const std::vector<liquid::String> &extensions) {
+  LIQUID_ASSERT(false, "Not implemented");
+  return "";
+}
+
 } // namespace liquid::platform_tools

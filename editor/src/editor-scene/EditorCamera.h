@@ -88,6 +88,27 @@ public:
   inline float getFar() { return mFar; }
 
   /**
+   * @brief Get position
+   *
+   * @return Camera position
+   */
+  inline const glm::vec3 &getEye() const { return mEye; }
+
+  /**
+   * @brief Get camera center
+   *
+   * @return Camera center
+   */
+  inline const glm::vec3 &getCenter() const { return mCenter; }
+
+  /**
+   * @brief Get camera up vector
+   *
+   * @return Camera up vector
+   */
+  inline const glm::vec3 &getUp() const { return mUp; }
+
+  /**
    * @brief Get camera
    *
    * @return Camera
@@ -97,7 +118,7 @@ public:
   /**
    * @brief Set camera center
    *
-   * @param center Center vector
+   * @param center Camera center
    */
   void setCenter(const glm::vec3 &center);
 
@@ -107,6 +128,13 @@ public:
    * @param eye Eye vector
    */
   void setEye(const glm::vec3 &eye);
+
+  /**
+   * @brief Set camera up vector
+   *
+   * @param up Up vector
+   */
+  void setUp(const glm::vec3 &up);
 
   /**
    * @brief Update camera

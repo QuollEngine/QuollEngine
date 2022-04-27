@@ -18,6 +18,9 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
       EditorIcon::Directory,
       loader.loadFromFile((iconsPath / "directory.png").string()));
   mIconMap.insert_or_assign(
+      EditorIcon::CreateDirectory,
+      loader.loadFromFile((iconsPath / "create-directory.png").string()));
+  mIconMap.insert_or_assign(
       EditorIcon::Material,
       loader.loadFromFile((iconsPath / "material.png").string()));
   mIconMap.insert_or_assign(

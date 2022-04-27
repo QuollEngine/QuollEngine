@@ -25,11 +25,6 @@ public:
   ~SceneManager() = default;
 
   /**
-   * @brief Request a new empty scene
-   */
-  void requestEmptyScene();
-
-  /**
    * @brief Create empty entity in camera view
    *
    * @return Scene node
@@ -37,19 +32,25 @@ public:
   liquid::SceneNode *createEntityAtView();
 
   /**
+   * @brief Save editor state to a file
+   *
+   * @param path Path to editor state file
+   */
+  void saveEditorState(const std::filesystem::path &path);
+
+  /**
+   * @brief Load editor state from file
+   *
+   * @param path Path to editor state file
+   */
+  void loadEditorState(const std::filesystem::path &path);
+
+  /**
    * @brief Get active scene
    *
    * @return Active scene
    */
   inline liquid::Scene *getActiveScene() { return mActiveScene; }
-
-  /**
-   * @brief Check if new scene has been requested
-   *
-   * @retval true New scene is requested
-   * @retval false New scene is not requested
-   */
-  inline bool hasNewScene() const { return mNewSceneRequested; }
 
   /**
    * @brief Get editor camera
@@ -72,7 +73,6 @@ public:
 
 private:
   liquid::Scene *mActiveScene = nullptr;
-  bool mNewSceneRequested = true;
   liquid::EntityContext &mEntityContext;
   EditorCamera &mEditorCamera;
   EditorGrid &mEditorGrid;

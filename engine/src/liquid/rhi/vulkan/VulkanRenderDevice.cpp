@@ -96,6 +96,11 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
 
 void VulkanRenderDevice::waitForIdle() { vkDeviceWaitIdle(mDevice); }
 
+void VulkanRenderDevice::destroyResources() {
+  mRegistry = VulkanResourceRegistry();
+  recreateSwapchain();
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();

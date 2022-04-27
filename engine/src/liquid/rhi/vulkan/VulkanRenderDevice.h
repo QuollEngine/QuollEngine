@@ -59,6 +59,13 @@ public:
    */
   const DeviceStats &getDeviceStats() const override { return mStats; }
 
+  /**
+   * @brief Destroy all resources in the device
+   *
+   * This does not destroy the device
+   */
+  void destroyResources() override;
+
 private:
   /**
    * @brief Recreate swapchain
