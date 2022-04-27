@@ -5,16 +5,18 @@
 #include <gtest/gtest.h>
 
 TEST(Light, TypeColorAndPowerIsSet) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
 
   EXPECT_TRUE(light.getColor() == glm::vec4(1.0f, 0.0, 1.0, 1.0));
   EXPECT_EQ(light.getIntensity(), 500);
-  EXPECT_EQ(light.getType(), liquid::Light::DIRECTIONAL);
+  EXPECT_EQ(light.getType(), liquid::LightType::Directional);
   EXPECT_EQ(light.getTypeName(), "Directional");
 }
 
 TEST(Light, PositionSetter) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
 
   EXPECT_TRUE(light.getPosition() == glm::vec3(0.0f, 0.0f, 0.0f));
 
@@ -23,7 +25,8 @@ TEST(Light, PositionSetter) {
 }
 
 TEST(Light, DirectionSetter) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
 
   EXPECT_TRUE(light.getDirection() == glm::vec3(0.0, 0.0, 0.0));
 
@@ -32,7 +35,8 @@ TEST(Light, DirectionSetter) {
 }
 
 TEST(Light, ColorSetter) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
 
   EXPECT_TRUE(light.getColor() == glm::vec4(1.0, 0.0, 1.0, 1.0));
 
@@ -41,7 +45,8 @@ TEST(Light, ColorSetter) {
 }
 
 TEST(Light, IntensitySetter) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
 
   EXPECT_TRUE(light.getIntensity() == 500.0f);
 
@@ -50,7 +55,8 @@ TEST(Light, IntensitySetter) {
 }
 
 TEST(Light, CalculatesProjectionViewMatrix) {
-  liquid::Light light(liquid::Light::DIRECTIONAL, {1.0, 0.0, 1.0, 1.0}, 500);
+  liquid::Light light(liquid::LightType::Directional, {1.0, 0.0, 1.0, 1.0},
+                      500);
   light.setDirection({2.0, 2.5, -1.5});
 
   auto expectedString =
