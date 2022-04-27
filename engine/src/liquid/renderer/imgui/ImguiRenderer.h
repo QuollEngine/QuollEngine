@@ -59,6 +59,13 @@ public:
    */
   void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline);
 
+  /**
+   * @brief Use config path for saving settings
+   *
+   * @param path Config path
+   */
+  void useConfigPath(const String &path);
+
 private:
   /**
    * @brief Load fonts

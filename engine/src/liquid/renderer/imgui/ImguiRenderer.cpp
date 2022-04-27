@@ -29,6 +29,7 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
   ImGuiIO &io = ImGui::GetIO();
   io.BackendRendererName = "ImguiCustomBackend";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
+  io.IniFilename = nullptr;
 
   static constexpr size_t FRAMES_IN_FLIGHT = 3;
   mFrameData.resize(FRAMES_IN_FLIGHT);
@@ -230,6 +231,12 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                             scaleDataSize, scale.data());
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, scaleDataSize,
                             translateDataSize, translate.data());
+}
+
+void ImguiRenderer::useConfigPath(const String &path) {
+  ImGuiIO &io = ImGui::GetIO();
+  io.IniFilename = path.c_str();
+  ImGui::LoadIniSettingsFromDisk(io.IniFilename);
 }
 
 void ImguiRenderer::loadFonts() {

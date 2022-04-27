@@ -121,6 +121,8 @@ void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
 
 void EditorCamera::setEye(const glm::vec3 &eye) { mEye = eye; }
 
+void EditorCamera::setUp(const glm::vec3 &up) { mUp = up; }
+
 void EditorCamera::update() {
   if (mInputState == InputState::Pan) {
     pan();

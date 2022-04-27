@@ -51,6 +51,13 @@ public:
    * @return Device stats
    */
   virtual const DeviceStats &getDeviceStats() const = 0;
+
+  /**
+   * @brief Destroy all resources in the device
+   *
+   * This does not destroy the device
+   */
+  virtual void destroyResources() = 0;
 };
 
 } // namespace liquid::rhi
