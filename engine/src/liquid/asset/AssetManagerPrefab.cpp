@@ -172,11 +172,11 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
     InputBinaryStream &stream, const std::filesystem::path &filePath) {
 
   std::vector<String> warnings;
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<PrefabAsset> prefab{};
   prefab.path = filePath;
-  prefab.name = assetName;
+  prefab.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  prefab.name = prefab.relativePath.string();
   prefab.type = AssetType::Prefab;
 
   std::vector<MeshAssetHandle> localMeshMap;

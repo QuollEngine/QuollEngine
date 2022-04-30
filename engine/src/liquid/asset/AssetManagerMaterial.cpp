@@ -67,11 +67,11 @@ AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 
 Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
     InputBinaryStream &stream, const std::filesystem::path &filePath) {
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<MaterialAsset> material{};
   material.path = filePath;
-  material.name = assetName;
+  material.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  material.name = material.relativePath.string();
   material.type = AssetType::Material;
   std::vector<String> warnings{};
 

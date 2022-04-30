@@ -49,11 +49,11 @@ AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 
 Result<AnimationAssetHandle> AssetManager::loadAnimationDataFromInputStream(
     InputBinaryStream &stream, const std::filesystem::path &filePath) {
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
-  animation.name = assetName;
+  animation.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  animation.name = animation.relativePath.string();
   animation.type = AssetType::Animation;
 
   stream.read(animation.data.time);

@@ -12,7 +12,9 @@ void MenuBar::render(SceneManager &sceneManager) {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Objects")) {
       if (ImGui::MenuItem("Create empty entity", nullptr)) {
-        sceneManager.createEntityAtView();
+        sceneManager.getEntityManager().createEmptyEntity(
+            sceneManager.getEditorCamera(),
+            sceneManager.getActiveScene()->getRootNode());
       }
 
       ImGui::EndMenu();

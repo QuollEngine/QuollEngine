@@ -50,6 +50,23 @@ public:
   }
 
   /**
+   * @brief Find handle by relative path
+   *
+   * @param path Relative path
+   * @return Handle
+   */
+  inline THandle
+  findHandleByRelativePath(const std::filesystem::path &path) const {
+    for (auto &[handle, data] : mAssets) {
+      if (data.relativePath == path) {
+        return handle;
+      }
+    }
+
+    return THandle::Invalid;
+  }
+
+  /**
    * @brief Get all assets
    *
    * @return List of all assets

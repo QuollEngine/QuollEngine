@@ -6,6 +6,7 @@ struct Project {
   liquid::String name;
   liquid::String version;
   std::filesystem::path assetsPath;
+  std::filesystem::path scenePath;
   std::filesystem::path settingsPath;
 };
 

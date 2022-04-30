@@ -63,7 +63,8 @@ AssetBrowser::AssetBrowser(GLTFImporter &gltfImporter)
     : mGltfImporter(gltfImporter), mStatusDialog("AssetLoadStatus") {}
 
 void AssetBrowser::render(liquid::AssetManager &assetManager,
-                          IconRegistry &iconRegistry) {
+                          IconRegistry &iconRegistry,
+                          SceneManager &sceneManager) {
   constexpr uint32_t ITEM_WIDTH = 90;
   constexpr uint32_t ITEM_HEIGHT = 100;
   constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
@@ -211,8 +212,11 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
             if (entry.isDirectory) {
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
-            } else if (mOnItemOpenHandler) {
-              mOnItemOpenHandler(entry.assetType, entry.asset);
+            } else {
+              sceneManager.getEntityManager().spawnAsset(
+                  sceneManager.getEditorCamera(),
+                  sceneManager.getActiveScene()->getRootNode(), entry.asset,
+                  entry.assetType);
             }
           }
         }
@@ -248,11 +252,6 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
   ImGui::End();
 
   mStatusDialog.render();
-}
-
-void AssetBrowser::setOnItemOpenHandler(
-    const std::function<void(liquid::AssetType, uint32_t)> &itemOpenHandler) {
-  mOnItemOpenHandler = itemOpenHandler;
 }
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }

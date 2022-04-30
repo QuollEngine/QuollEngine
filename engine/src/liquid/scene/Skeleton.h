@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/asset/Asset.h"
 #include "Joint.h"
 
 namespace liquid {
@@ -10,6 +11,7 @@ public:
   /**
    * @brief Create skeleton
    *
+   * @param assetHandle Skeleton asset handle
    * @param positions Joint positions
    * @param rotations Joint rotations
    * @param scales Joint scales
@@ -18,7 +20,8 @@ public:
    * @param names Joint names
    * @param registry Resource registry
    */
-  Skeleton(const std::vector<glm::vec3> &positions,
+  Skeleton(SkeletonAssetHandle assetHandle,
+           const std::vector<glm::vec3> &positions,
            const std::vector<glm::quat> &rotations,
            const std::vector<glm::vec3> &scales,
            const std::vector<JointId> &parents,
@@ -81,6 +84,13 @@ public:
     LIQUID_ASSERT(joint < mNumJoints, "Joint does not exist");
     return mJointLocalScales.at(joint);
   }
+
+  /**
+   * @brief Get asset handle
+   *
+   * @return Skeleton asset handle
+   */
+  inline SkeletonAssetHandle getAssetHandle() const { return mAssetHandle; }
 
   /**
    * @brief Get joint local transform
@@ -212,6 +222,8 @@ private:
   rhi::BufferHandle mDebugBuffer;
 
   rhi::ResourceRegistry *mRegistry;
+
+  SkeletonAssetHandle mAssetHandle;
 };
 
 } // namespace liquid

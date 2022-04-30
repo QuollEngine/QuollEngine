@@ -48,16 +48,17 @@ private:
    * @brief Handle node deletion
    *
    * @param node Scene node
+   * @param entityManager Entity manager
    */
-  void handleDelete(liquid::SceneNode *node);
+  void handleDelete(liquid::SceneNode *node, EntityManager &entityManager);
 
   /**
    * @brief Handle moving to node
    *
    * @param node Scene node
-   * @param camera Editor camera
+   * @param sceneManager Scene manager
    */
-  void handleMoveToNode(liquid::SceneNode *node, EditorCamera &camera);
+  void handleMoveToNode(liquid::SceneNode *node, SceneManager &sceneManager);
 
 private:
   liquid::EntityContext &mEntityContext;

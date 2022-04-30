@@ -17,105 +17,6 @@
 #include "../ui/UIRoot.h"
 #include "../ui/AssetLoadStatusDialog.h"
 
-liquid::Entity spawnEntity(liquid::EntityContext &entityContext,
-                           liquid::Renderer &renderer,
-                           liquidator::SceneManager &sceneManager,
-                           liquid::AssetManager &assetManager,
-                           liquid::AssetType type, uint32_t handle) {
-  if (type != liquid::AssetType::Prefab) {
-    return liquid::ENTITY_MAX;
-  }
-
-  auto *parent = sceneManager.createEntityAtView();
-  auto parentEntity = parent->getEntity();
-
-  if (type == liquid::AssetType::Prefab) {
-    auto &asset = assetManager.getRegistry().getPrefabs().getAsset(
-        static_cast<liquid::PrefabAssetHandle>(handle));
-    entityContext.setComponent<liquid::NameComponent>(parentEntity,
-                                                      {asset.name});
-
-    std::map<uint32_t, liquid::Entity> entityMap;
-
-    auto getOrCreateEntity =
-        [&entityMap, &entityContext,
-         &parent](uint32_t localId,
-                  const liquid::TransformComponent &transform = {}) mutable {
-          if (entityMap.find(localId) == entityMap.end()) {
-            auto entity = entityContext.createEntity();
-            entityMap.insert_or_assign(localId, entity);
-            entityContext.setComponent<liquid::DebugComponent>(entity, {});
-
-            parent->addChild(entity, transform);
-          }
-
-          return entityMap.at(localId);
-        };
-
-    for (auto &item : asset.data.transforms) {
-      liquid::TransformComponent transform{};
-      transform.localPosition = item.value.position;
-      transform.localRotation = item.value.rotation;
-      transform.localScale = item.value.scale;
-      getOrCreateEntity(item.entity, transform);
-    }
-
-    for (auto &item : asset.data.transforms) {
-      auto &transform = entityContext.getComponent<liquid::TransformComponent>(
-          entityMap.at(item.entity));
-      if (item.value.parent >= 0) {
-        transform.parent = getOrCreateEntity(item.value.parent);
-      }
-    }
-
-    for (auto &item : asset.data.meshes) {
-      if (!assetManager.getRegistry().getMeshes().hasAsset(item.value)) {
-        continue;
-      }
-
-      auto entity = getOrCreateEntity(item.entity);
-      entityContext.setComponent<liquid::MeshComponent>(
-          entity, {renderer.createMeshInstance(item.value)});
-    }
-
-    for (auto &item : asset.data.skinnedMeshes) {
-      if (!assetManager.getRegistry().getSkinnedMeshes().hasAsset(item.value)) {
-        continue;
-      }
-
-      auto entity = getOrCreateEntity(item.entity);
-      entityContext.setComponent<liquid::SkinnedMeshComponent>(
-          entity, {renderer.createMeshInstance(item.value)});
-    }
-
-    for (auto &item : asset.data.skeletons) {
-      if (!assetManager.getRegistry().getSkeletons().hasAsset(item.value)) {
-        continue;
-      }
-
-      auto entity = getOrCreateEntity(item.entity);
-
-      const auto &skeleton =
-          assetManager.getRegistry().getSkeletons().getAsset(item.value).data;
-      liquid::Skeleton skeletonInstance(
-          skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-          skeleton.jointLocalScales, skeleton.jointParents,
-          skeleton.jointInverseBindMatrices, skeleton.jointNames,
-          &renderer.getRegistry());
-
-      entityContext.setComponent<liquid::SkeletonComponent>(
-          entity, {std::move(skeletonInstance)});
-    }
-
-    for (auto &item : asset.data.animators) {
-      auto entity = getOrCreateEntity(item.entity);
-
-      entityContext.setComponent(entity, item.value);
-    }
-  }
-  return parentEntity;
-}
-
 void randomSpawn(liquid::EntityContext &entityContext,
                  liquid::Renderer &renderer,
                  liquidator::SceneManager &sceneManager,
@@ -132,10 +33,10 @@ void randomSpawn(liquid::EntityContext &entityContext,
   for (auto &[handle, _] :
        assetManager.getRegistry().getPrefabs().getAssets()) {
     for (size_t i = 0; i < NUM_SPAWNS; ++i) {
-      auto parent =
-          spawnEntity(entityContext, renderer, sceneManager, assetManager,
-                      liquid::AssetType::Prefab, static_cast<uint32_t>(handle));
-
+      auto parent = sceneManager.getEntityManager().spawnAsset(
+          sceneManager.getEditorCamera(),
+          sceneManager.getActiveScene()->getRootNode(),
+          static_cast<uint32_t>(handle), liquid::AssetType::Prefab);
       entityContext.getComponent<liquid::TransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
     }
@@ -156,6 +57,7 @@ void EditorScreen::start(const Project &project) {
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqpath";
+
   liquid::AssetManager assetManager(project.assetsPath);
   liquid::Renderer renderer(entityContext, assetManager.getRegistry(), mWindow,
                             mDevice);
@@ -173,10 +75,12 @@ void EditorScreen::start(const Project &project) {
   liquidator::EditorCamera editorCamera(entityContext, mEventSystem, renderer,
                                         mWindow);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
-  liquidator::SceneManager sceneManager(entityContext, editorCamera,
-                                        editorGrid);
+  liquidator::EntityManager entityManager(entityContext, assetManager, renderer,
+                                          project.scenePath);
+  liquidator::SceneManager sceneManager(entityContext, editorCamera, editorGrid,
+                                        entityManager);
 
-  sceneManager.createNewScene();
+  sceneManager.loadOrCreateScene();
   sceneManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
@@ -211,17 +115,10 @@ void EditorScreen::start(const Project &project) {
       "object-icons.frag", renderer.getRegistry().setShader(
                                {"assets/shaders/object-icons.frag.spv"}));
 
-  liquidator::UIRoot ui(entityContext, gltfImporter);
+  liquidator::UIRoot ui(entityContext, entityManager, gltfImporter);
   ui.getIconRegistry().loadIcons(renderer.getRegistry(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
-
-  ui.getAssetBrowser().setOnItemOpenHandler(
-      [&entityContext, &renderer, &sceneManager, &animationSystem,
-       &assetManager](liquid::AssetType type, uint32_t handle) {
-        spawnEntity(entityContext, renderer, sceneManager, assetManager, type,
-                    handle);
-      });
 
   const auto &cameraObj =
       entityContext

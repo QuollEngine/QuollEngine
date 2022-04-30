@@ -14,8 +14,10 @@ public:
    * @brief Create entity panel
    *
    * @param entityContext Entity context
+   * @param entityManager Entity manager
    */
-  EntityPanel(liquid::EntityContext &entityContext);
+  EntityPanel(liquid::EntityContext &entityContext,
+              EntityManager &entityManager);
 
   /**
    * @brief Render panel
@@ -91,13 +93,17 @@ private:
    *
    * @param renderer Renderer
    * @param assetRegistry Asset registry
+   * @param sceneManager Scene manager
    */
   void handleDragAndDrop(liquid::Renderer &renderer,
-                         liquid::AssetRegistry &assetRegistry);
+                         liquid::AssetRegistry &assetRegistry,
+                         SceneManager &sceneManager);
 
 private:
   liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
   liquid::EntityContext &mEntityContext;
+  liquid::String mName;
+  EntityManager &mEntityManager;
 };
 
 } // namespace liquidator

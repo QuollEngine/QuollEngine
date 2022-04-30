@@ -17,17 +17,16 @@ bool ProjectManager::createProjectInPath() {
     return false;
   }
 
-  auto assetsPath = projectPath / "assets";
-  auto settingsPath = projectPath / "settings";
-
-  std::filesystem::create_directory(projectPath);
-  std::filesystem::create_directory(assetsPath);
-  std::filesystem::create_directory(settingsPath);
-
   mProject.name = projectPath.stem().filename().string();
   mProject.version = "0.0.1";
-  mProject.assetsPath = assetsPath;
-  mProject.settingsPath = settingsPath;
+  mProject.assetsPath = projectPath / "assets";
+  mProject.settingsPath = projectPath / "settings";
+  mProject.scenePath = projectPath / "scene";
+
+  std::filesystem::create_directory(projectPath);
+  std::filesystem::create_directory(mProject.assetsPath);
+  std::filesystem::create_directory(mProject.settingsPath);
+  std::filesystem::create_directory(mProject.scenePath);
 
   json projectObj;
   projectObj["name"] = mProject.name;
@@ -36,6 +35,8 @@ bool ProjectManager::createProjectInPath() {
       std::filesystem::relative(mProject.assetsPath, projectPath).string();
   projectObj["paths"]["settings"] =
       std::filesystem::relative(mProject.settingsPath, projectPath).string();
+  projectObj["paths"]["scene"] =
+      std::filesystem::relative(mProject.scenePath, projectPath).string();
 
   auto projectFile = projectPath / (mProject.name + ".lqproj");
 
@@ -70,6 +71,7 @@ bool ProjectManager::openProjectInPath() {
       directory / liquid::String(projectObj["paths"]["assets"]);
   mProject.settingsPath =
       directory / liquid::String(projectObj["paths"]["settings"]);
+  mProject.scenePath = directory / liquid::String(projectObj["paths"]["scene"]);
 
   return true;
 }

@@ -3,7 +3,8 @@
 
 namespace liquid {
 
-Skeleton::Skeleton(const std::vector<glm::vec3> &positions,
+Skeleton::Skeleton(SkeletonAssetHandle assetHandle,
+                   const std::vector<glm::vec3> &positions,
                    const std::vector<glm::quat> &rotations,
                    const std::vector<glm::vec3> &scales,
                    const std::vector<JointId> &parents,
@@ -13,7 +14,8 @@ Skeleton::Skeleton(const std::vector<glm::vec3> &positions,
     : mJointLocalPositions(positions), mJointLocalRotations(rotations),
       mJointLocalScales(scales), mJointParents(parents),
       mJointInverseBindMatrices(inverseBindMatrices), mJointNames(names),
-      mNumJoints(positions.size()), mRegistry(registry) {
+      mNumJoints(positions.size()), mRegistry(registry),
+      mAssetHandle(assetHandle) {
   LIQUID_ASSERT(mNumJoints > 0, "No joints provided");
   LIQUID_ASSERT(mJointLocalPositions.size() == mNumJoints &&
                     mJointLocalRotations.size() == mNumJoints &&

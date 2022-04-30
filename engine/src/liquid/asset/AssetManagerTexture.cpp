@@ -87,12 +87,11 @@ AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
         "Texture arrays are not supported");
   }
 
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
-
   AssetData<TextureAsset> texture{};
-  texture.name = assetName;
   texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
   texture.path = filePath;
+  texture.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  texture.name = texture.relativePath.string();
   texture.data.data = new char[texture.size];
   texture.data.width = ktxTextureData->baseWidth;
   texture.data.height = ktxTextureData->baseHeight;

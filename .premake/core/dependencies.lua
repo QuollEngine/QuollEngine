@@ -18,6 +18,15 @@ end
 function linkDependenciesWithoutVulkan()
     links { "vendor-libimgui", "vendor-libspirv-reflect", "vendor-liblua", "glfw3", "ktx", "PhysX_static", "PhysXPvdSDK_static", "PhysXExtensions_static", "PhysXCommon_static", "PhysXFoundation_static" }
 
+    filter { "system:windows", "configurations:Debug or configurations:Profile-Debug" }
+        links { "yaml-cppd" }
+
+    filter { "system:windows", "configurations:Release or configurations:Profile-Release" }
+        links { "yaml-cpp" }
+
+    filter {"system:linux or system:macosx"}
+        links { "yaml-cpp" }
+
     -- These libs must be linked after
     -- all libraries are linked
     filter { "system:linux" }
