@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include <json/json.hpp>
+#include "liquid/yaml/Yaml.h"
 #include "ProjectManager.h"
 
 #include "platform-tools/NativeFileDialog.h"
@@ -7,8 +7,6 @@
 namespace liquidator {
 
 bool ProjectManager::createProjectInPath() {
-  using json = nlohmann::json;
-
   liquid::platform_tools::NativeFileDialog dialog;
 
   auto projectPath = dialog.getFilePathFromCreateDialog({});
@@ -28,7 +26,7 @@ bool ProjectManager::createProjectInPath() {
   std::filesystem::create_directory(mProject.settingsPath);
   std::filesystem::create_directory(mProject.scenePath);
 
-  json projectObj;
+  YAML::Node projectObj;
   projectObj["name"] = mProject.name;
   projectObj["version"] = mProject.version;
   projectObj["paths"]["assets"] =
@@ -48,8 +46,6 @@ bool ProjectManager::createProjectInPath() {
 }
 
 bool ProjectManager::openProjectInPath() {
-  using json = nlohmann::json;
-
   liquid::platform_tools::NativeFileDialog dialog;
 
   auto projectFilePath = dialog.getFilePathFromDialog({"lqproj"});
@@ -59,19 +55,29 @@ bool ProjectManager::openProjectInPath() {
 
   auto directory = std::filesystem::path(projectFilePath).parent_path();
 
-  json projectObj;
+  YAML::Node projectObj;
 
   std::ifstream in(projectFilePath, std::ios::in);
-  in >> projectObj;
-  in.close();
 
-  mProject.name = projectObj["name"];
-  mProject.version = projectObj["version"];
+  try {
+    projectObj = YAML::Load(in);
+    in.close();
+  } catch (std::exception &) {
+    in.close();
+    return false;
+  }
+
+  mProject.name = projectObj["name"].as<liquid::String>();
+  mProject.version = projectObj["version"].as<liquid::String>();
   mProject.assetsPath =
-      directory / liquid::String(projectObj["paths"]["assets"]);
+      directory /
+      liquid::String(projectObj["paths"]["assets"].as<liquid::String>());
   mProject.settingsPath =
-      directory / liquid::String(projectObj["paths"]["settings"]);
-  mProject.scenePath = directory / liquid::String(projectObj["paths"]["scene"]);
+      directory /
+      liquid::String(projectObj["paths"]["settings"].as<liquid::String>());
+  mProject.scenePath =
+      directory /
+      liquid::String(projectObj["paths"]["scene"].as<liquid::String>());
 
   return true;
 }

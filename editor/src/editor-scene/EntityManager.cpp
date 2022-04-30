@@ -120,11 +120,11 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
   std::unordered_map<uint32_t, YAML::Node> mapping;
   for (auto entry : std::filesystem::directory_iterator(mScenePath)) {
     std::ifstream stream(entry.path(), std::ios::in);
-    auto docs = YAML::Load(stream);
+    auto node = YAML::Load(stream);
     stream.close();
 
-    if (docs["id"].IsScalar() && docs["components"].IsMap()) {
-      mapping.insert_or_assign(docs["id"].as<uint32_t>(), docs);
+    if (node["id"].IsScalar() && node["components"].IsMap()) {
+      mapping.insert_or_assign(node["id"].as<uint32_t>(), node);
     }
   }
 

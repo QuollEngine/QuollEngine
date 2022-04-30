@@ -1,9 +1,6 @@
 #include "liquid/core/Base.h"
 #include "SceneManager.h"
-
-#include "liquid/asset/OutputBinaryStream.h"
-#include "liquid/asset/InputBinaryStream.h"
-#include <json/json.hpp>
+#include "liquid/yaml/Yaml.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
@@ -16,37 +13,73 @@ SceneManager::SceneManager(liquid::EntityContext &entityContext,
       mEditorGrid(editorGrid), mEntityManager(entityManager) {}
 
 void SceneManager::saveEditorState(const std::filesystem::path &path) {
-  liquid::OutputBinaryStream stream(path);
+  YAML::Node node;
+  node["camera"]["fov"] = mEditorCamera.getFOV();
+  node["camera"]["near"] = mEditorCamera.getNear();
+  node["camera"]["far"] = mEditorCamera.getFar();
+  node["camera"]["eye"] = mEditorCamera.getEye();
+  node["camera"]["center"] = mEditorCamera.getCenter();
+  node["camera"]["up"] = mEditorCamera.getUp();
 
-  stream.write(mEditorCamera.getFOV());
-  stream.write(mEditorCamera.getNear());
-  stream.write(mEditorCamera.getFar());
-  stream.write(mEditorCamera.getEye());
-  stream.write(mEditorCamera.getCenter());
-  stream.write(mEditorCamera.getUp());
+  node["grid"]["axisLines"] = mEditorGrid.axisLinesShown();
+  node["grid"]["gridLines"] = mEditorGrid.gridLinesShown();
 
-  stream.write(static_cast<uint32_t>(mEditorGrid.axisLinesShown()));
-  stream.write(static_cast<uint32_t>(mEditorGrid.gridLinesShown()));
+  std::ofstream stream(path, std::ios::out);
+  stream << node;
+  stream.close();
 }
 
 void SceneManager::loadEditorState(const std::filesystem::path &path) {
-  liquid::InputBinaryStream stream(path);
 
-  if (stream.good()) {
-    float fov = 0.0f, near = 0.0f, far = 0.0f;
-    glm::vec3 eye{}, center{}, up{};
+  std::ifstream stream(path, std::ios::in);
 
-    uint32_t axisLinesShown = 0, gridLinesShown = 0;
+  if (!stream.good()) {
+    return;
+  }
 
-    stream.read(fov);
-    stream.read(near);
-    stream.read(far);
-    stream.read(eye);
-    stream.read(center);
-    stream.read(up);
+  YAML::Node node;
+  try {
+    node = YAML::Load(stream);
+    stream.close();
+  } catch (std::exception &) {
+    stream.close();
+    return;
+  }
 
-    stream.read(axisLinesShown);
-    stream.read(gridLinesShown);
+  stream.close();
+  if (node["camera"].IsMap()) {
+    const auto &camera = node["camera"];
+
+    // defaults
+    float fov = EditorCamera::DEFAULT_FOV, near = EditorCamera::DEFAULT_NEAR,
+          far = EditorCamera::DEFAULT_FAR;
+    glm::vec3 eye = EditorCamera::DEFAULT_EYE,
+              center = EditorCamera::DEFAULT_CENTER,
+              up = EditorCamera::DEFAULT_UP;
+
+    if (camera["fov"].IsScalar()) {
+      fov = camera["fov"].as<float>();
+    }
+
+    if (camera["near"].IsScalar()) {
+      near = camera["near"].as<float>();
+    }
+
+    if (camera["far"].IsScalar()) {
+      far = camera["far"].as<float>();
+    }
+
+    if (camera["eye"].IsSequence()) {
+      eye = camera["eye"].as<glm::vec3>();
+    }
+
+    if (camera["center"].IsSequence()) {
+      center = camera["center"].as<glm::vec3>();
+    }
+
+    if (camera["up"].IsSequence()) {
+      up = camera["up"].as<glm::vec3>();
+    }
 
     mEditorCamera.setFOV(fov);
     mEditorCamera.setNear(near);
@@ -54,9 +87,24 @@ void SceneManager::loadEditorState(const std::filesystem::path &path) {
     mEditorCamera.setEye(eye);
     mEditorCamera.setCenter(center);
     mEditorCamera.setUp(up);
+  }
 
-    mEditorGrid.setAxisLinesFlag(axisLinesShown == 1);
-    mEditorGrid.setGridLinesFlag(gridLinesShown == 1);
+  if (node["grid"].IsMap()) {
+    bool axisLinesShown = true;
+    bool gridLinesShown = true;
+
+    const auto &grid = node["grid"];
+
+    if (grid["axisLines"].IsScalar()) {
+      axisLinesShown = grid["axisLines"].as<bool>();
+    }
+
+    if (grid["gridLines"].IsScalar()) {
+      gridLinesShown = grid["gridLines"].as<bool>();
+    }
+
+    mEditorGrid.setAxisLinesFlag(axisLinesShown);
+    mEditorGrid.setGridLinesFlag(gridLinesShown);
   }
 }
 
