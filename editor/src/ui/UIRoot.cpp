@@ -3,9 +3,10 @@
 
 namespace liquidator {
 
-UIRoot::UIRoot(liquid::EntityContext &entityContext, GLTFImporter &gltfImporter)
+UIRoot::UIRoot(liquid::EntityContext &entityContext,
+               EntityManager &entityManager, GLTFImporter &gltfImporter)
     : mAssetBrowser(gltfImporter), mSceneHierarchyPanel(entityContext),
-      mEntityPanel(entityContext) {
+      mEntityPanel(entityContext, entityManager) {
   mSceneHierarchyPanel.setNodeClickHandler(
       [this](liquid::SceneNode *node) { handleNodeClick(node); });
 }
@@ -20,7 +21,7 @@ void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
   mEntityPanel.render(sceneManager, renderer, assetManager.getRegistry(),
                       physicsSystem);
   mEditorCameraPanel.render(sceneManager);
-  mAssetBrowser.render(assetManager, mIconRegistry);
+  mAssetBrowser.render(assetManager, mIconRegistry, sceneManager);
 }
 
 void UIRoot::handleNodeClick(liquid::SceneNode *node) {

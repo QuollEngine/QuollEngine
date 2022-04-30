@@ -47,7 +47,8 @@ Result<SkeletonAssetHandle> AssetManager::loadSkeletonDataFromInputStream(
 
   AssetData<SkeletonAsset> skeleton{};
   skeleton.path = filePath;
-  skeleton.name = assetName;
+  skeleton.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  skeleton.name = skeleton.relativePath.string();
   skeleton.type = AssetType::Skeleton;
 
   uint32_t numJoints = 0;

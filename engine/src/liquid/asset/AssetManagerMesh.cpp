@@ -71,11 +71,10 @@ Result<MeshAssetHandle> AssetManager::loadMeshDataFromInputStream(
     InputBinaryStream &stream, const std::filesystem::path &filePath) {
   std::vector<String> warnings;
 
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
-
   AssetData<MeshAsset> mesh{};
   mesh.path = filePath;
-  mesh.name = assetName;
+  mesh.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  mesh.name = mesh.relativePath.string();
   mesh.type = AssetType::Mesh;
 
   uint32_t numGeometries = 0;
@@ -227,11 +226,10 @@ Result<SkinnedMeshAssetHandle> AssetManager::loadSkinnedMeshDataFromInputStream(
 
   std::vector<String> warnings;
 
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
-
   AssetData<SkinnedMeshAsset> mesh{};
   mesh.path = filePath;
-  mesh.name = assetName;
+  mesh.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  mesh.name = mesh.relativePath.string();
   mesh.type = AssetType::Material;
 
   uint32_t numGeometries = 0;

@@ -3,7 +3,6 @@
 #include "ConfirmationDialog.h"
 
 #include <imgui.h>
-#include <glm/gtc/matrix_access.hpp>
 
 namespace liquidator {
 
@@ -58,12 +57,14 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   ConfirmationDialog confirmDeleteSceneNode(
       "Delete scene node#" + std::to_string(node->getEntity()),
       "Are you sure you want to delete node \"" + name + "\"?",
-      [this, node](SceneManager &sceneManager) { handleDelete(node); },
+      [this, node](SceneManager &sceneManager) {
+        handleDelete(node, sceneManager.getEntityManager());
+      },
       "Delete");
 
   if (ImGui::BeginPopupContextItem()) {
     if (ImGui::MenuItem("Go to view")) {
-      handleMoveToNode(node, sceneManager.getEditorCamera());
+      handleMoveToNode(node, sceneManager);
     }
 
     if (ImGui::MenuItem("Delete")) {
@@ -83,7 +84,8 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   }
 }
 
-void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node) {
+void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node,
+                                       EntityManager &entityManager) {
   auto entity = node->getEntity();
   auto *parent = node->getParent();
 
@@ -91,27 +93,12 @@ void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node) {
     parent->removeChild(node);
   }
 
-  mEntityContext.deleteEntity(entity);
+  entityManager.deleteEntity(entity);
 }
 
 void SceneHierarchyPanel::handleMoveToNode(liquid::SceneNode *node,
-                                           EditorCamera &camera) {
-  LIQUID_ASSERT(mEntityContext.hasComponent<liquid::TransformComponent>(
-                    node->getEntity()),
-                "Scene node must have transform component");
-
-  auto &transformComponent =
-      mEntityContext.getComponent<liquid::TransformComponent>(
-          node->getEntity());
-
-  const auto &translation =
-      glm::vec3(glm::column(transformComponent.worldTransform, 3));
-
-  constexpr glm::vec3 distanceFromCenter{0.0f, 0.0f, 10.0f};
-
-  camera.reset();
-  camera.setCenter(translation);
-  camera.setEye(translation - distanceFromCenter);
+                                           SceneManager &sceneManager) {
+  sceneManager.moveCameraToEntity(node->getEntity());
 }
 
 } // namespace liquidator

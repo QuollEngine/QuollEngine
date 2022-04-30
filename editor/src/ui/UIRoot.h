@@ -22,9 +22,11 @@ public:
    * @brief Create UI Root
    *
    * @param entityContext Entity context
+   * @param entityManager Entity manager
    * @param gltfImporter GLTF importer
    */
-  UIRoot(liquid::EntityContext &entityContext, GLTFImporter &importer);
+  UIRoot(liquid::EntityContext &entityContext, EntityManager &entityManager,
+         GLTFImporter &importer);
 
   /**
    * @brief Render UI Root

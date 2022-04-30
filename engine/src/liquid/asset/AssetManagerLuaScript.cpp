@@ -28,11 +28,10 @@ AssetManager::loadLuaScriptFromFile(const std::filesystem::path &filePath) {
         "File cannot be opened for reading: " + filePath.string());
   }
 
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
-
   AssetData<LuaScriptAsset> asset;
-  asset.name = assetName;
   asset.path = filePath;
+  asset.relativePath = std::filesystem::relative(filePath, mAssetsPath);
+  asset.name = asset.relativePath.string();
   asset.type = AssetType::LuaScript;
   asset.data.bytes = readFileIntoBuffer(stream);
 

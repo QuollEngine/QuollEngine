@@ -31,9 +31,10 @@ public:
       bool playing = true) {
     auto entity = createEntity(loop, animIndex, playing);
 
-    liquid::Skeleton skeleton(
-        {glm::vec3{0.0f}}, {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
-        {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}}, {"Joint0"}, &registry);
+    liquid::Skeleton skeleton(liquid::SkeletonAssetHandle{2}, {glm::vec3{0.0f}},
+                              {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
+                              {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}},
+                              {"Joint0"}, &registry);
 
     context.setComponent<liquid::SkeletonComponent>(entity, {skeleton});
 

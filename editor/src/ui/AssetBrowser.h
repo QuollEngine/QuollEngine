@@ -4,8 +4,9 @@
 #include "platform-tools/NativeFileDialog.h"
 
 #include "../asset/GLTFImporter.h"
-#include "IconRegistry.h"
+#include "../editor-scene/SceneManager.h"
 
+#include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"
 
 namespace liquidator {
@@ -36,19 +37,10 @@ public:
    *
    * @param assetManager Asset manager
    * @param iconRegistry Icon registry
+   * @param sceneManager Scene manager
    */
-  void render(liquid::AssetManager &assetManager, IconRegistry &iconRegistry);
-
-  /**
-   * @brief Set on item open handler
-   *
-   * Called when item is opened (double
-   * clicked) in the editor
-   *
-   * @param itemOpenHandler Item open handler
-   */
-  void setOnItemOpenHandler(
-      const std::function<void(liquid::AssetType, uint32_t)> &itemOpenhandler);
+  void render(liquid::AssetManager &assetManager, IconRegistry &iconRegistry,
+              SceneManager &sceneManager);
 
   /**
    * @brief Reload contents in current directory
@@ -84,8 +76,6 @@ private:
   size_t mSelected = std::numeric_limits<size_t>::max();
   GLTFImporter &mGltfImporter;
   liquid::platform_tools::NativeFileDialog mFileDialog;
-
-  std::function<void(liquid::AssetType, uint32_t)> mOnItemOpenHandler;
 
   AssetLoadStatusDialog mStatusDialog;
 };

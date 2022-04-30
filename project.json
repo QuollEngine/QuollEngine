@@ -144,6 +144,21 @@
       ]
     },
     {
+      "name": "yaml-cpp",
+      "buildSource": "yaml-cpp-yaml-cpp-0.7.0",
+      "url": "https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip",
+      "cmd": [
+        {
+          "type": "cmake",
+          "options": {
+            "common": {
+              "YAML_BUILD_SHARED_LIBS": "OFF"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "json",
       "buildSource": ".",
       "url": "https://github.com/nlohmann/json/releases/download/v3.9.1/include.zip",

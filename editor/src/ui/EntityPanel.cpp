@@ -8,8 +8,9 @@ namespace liquidator {
 constexpr size_t VEC3_ARRAY_SIZE = 3;
 constexpr size_t VEC4_ARRAY_SIZE = 4;
 
-EntityPanel::EntityPanel(liquid::EntityContext &entityContext)
-    : mEntityContext(entityContext) {}
+EntityPanel::EntityPanel(liquid::EntityContext &entityContext,
+                         EntityManager &entityManager)
+    : mEntityContext(entityContext), mEntityManager(entityManager) {}
 
 void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
@@ -26,7 +27,7 @@ void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
       renderCollidable();
       renderRigidBody();
       renderAddComponent();
-      handleDragAndDrop(renderer, assetRegistry);
+      handleDragAndDrop(renderer, assetRegistry, sceneManager);
     }
 
     ImGui::End();
@@ -39,31 +40,32 @@ void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
 
 void EntityPanel::setSelectedEntity(liquid::Entity entity) {
   mSelectedEntity = entity;
+  mName =
+      mEntityContext.getComponent<liquid::NameComponent>(mSelectedEntity).name;
 }
 
 void EntityPanel::renderName() {
-  if (!mEntityContext.hasComponent<liquid::NameComponent>(mSelectedEntity)) {
-    return;
-  }
-
-  auto &component =
-      mEntityContext.getComponent<liquid::NameComponent>(mSelectedEntity);
-
   if (ImGui::CollapsingHeader("Name")) {
-    if (ImGui::InputText(
-            "##Input", const_cast<char *>(component.name.c_str()),
-            component.name.capacity() + 1, ImGuiInputTextFlags_CallbackResize,
-            [](ImGuiInputTextCallbackData *data) -> int {
-              if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-                liquid::String *str =
-                    static_cast<liquid::String *>(data->UserData);
+    ImGui::InputText(
+        "##Input", const_cast<char *>(mName.c_str()), mName.capacity() + 1,
+        ImGuiInputTextFlags_CallbackResize,
+        [](ImGuiInputTextCallbackData *data) -> int {
+          if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+            liquid::String *str = static_cast<liquid::String *>(data->UserData);
 
-                str->resize(data->BufTextLen);
-                data->Buf = const_cast<char *>(str->c_str());
-              }
-              return 0;
-            },
-            &component.name)) {
+            str->resize(data->BufTextLen);
+            data->Buf = const_cast<char *>(str->c_str());
+          }
+          return 0;
+        },
+        &mName);
+
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.setName(mSelectedEntity, mName);
+      mEntityManager.save(mSelectedEntity);
+      mName =
+          mEntityContext.getComponent<liquid::NameComponent>(mSelectedEntity)
+              .name;
     }
   }
 }
@@ -126,6 +128,10 @@ void EntityPanel::renderTransform() {
                                  imguiPosition.at(2)};
     }
 
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
     ImGui::Text("Rotation");
     const auto &euler = glm::eulerAngles(component.localRotation);
     std::array<float, VEC3_ARRAY_SIZE> imguiRotation{euler.x, euler.y, euler.z};
@@ -134,12 +140,21 @@ void EntityPanel::renderTransform() {
           imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
     }
 
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
     ImGui::Text("Scale");
     std::array<float, VEC3_ARRAY_SIZE> imguiScale{
         component.localScale.x, component.localScale.y, component.localScale.z};
     if (ImGui::InputFloat3("###InputTransformScale", imguiScale.data())) {
       component.localScale = {imguiScale.at(0), imguiScale.at(1),
                               imguiScale.at(2)};
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
     }
 
     ImGui::Text("World Transform");
@@ -475,6 +490,7 @@ void EntityPanel::renderAddComponent() {
         ImGui::Selectable("Transform")) {
       mEntityContext.setComponent<liquid::TransformComponent>(mSelectedEntity,
                                                               {});
+      mEntityManager.save(mSelectedEntity);
     }
 
     if (!mEntityContext.hasComponent<liquid::RigidBodyComponent>(
@@ -482,6 +498,7 @@ void EntityPanel::renderAddComponent() {
         ImGui::Selectable("Rigid body")) {
       mEntityContext.setComponent<liquid::RigidBodyComponent>(mSelectedEntity,
                                                               {});
+      mEntityManager.save(mSelectedEntity);
     }
 
     if (!mEntityContext.hasComponent<liquid::CollidableComponent>(
@@ -492,6 +509,7 @@ void EntityPanel::renderAddComponent() {
       mEntityContext.setComponent<liquid::CollidableComponent>(
           mSelectedEntity, {liquid::PhysicsGeometryType::Box,
                             liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
+      mEntityManager.save(mSelectedEntity);
     }
 
     if (!mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity) &&
@@ -500,6 +518,7 @@ void EntityPanel::renderAddComponent() {
           std::make_shared<liquid::Light>(liquid::LightType::Directional);
       mEntityContext.setComponent<liquid::LightComponent>(mSelectedEntity,
                                                           {light});
+      mEntityManager.save(mSelectedEntity);
     }
 
     ImGui::EndPopup();
@@ -507,7 +526,8 @@ void EntityPanel::renderAddComponent() {
 }
 
 void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
-                                    liquid::AssetRegistry &assetRegistry) {
+                                    liquid::AssetRegistry &assetRegistry,
+                                    SceneManager &sceneManager) {
   static constexpr float HALF = 0.5f;
   auto width = ImGui::GetWindowContentRegionWidth();
 
@@ -518,14 +538,8 @@ void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
             liquid::getAssetTypeString(liquid::AssetType::Mesh).c_str())) {
       auto asset = *static_cast<liquid::MeshAssetHandle *>(payload->Data);
 
-      const auto &instance = renderer.createMeshInstance(asset);
-      if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
-              mSelectedEntity)) {
-        mEntityContext.deleteComponent<liquid::SkinnedMeshComponent>(
-            mSelectedEntity);
-      }
-      mEntityContext.setComponent<liquid::MeshComponent>(mSelectedEntity,
-                                                         {instance});
+      sceneManager.getEntityManager().setMeshForEntity(mSelectedEntity, asset);
+      sceneManager.getEntityManager().save(mSelectedEntity);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
@@ -533,13 +547,9 @@ void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
                 .c_str())) {
       auto asset =
           *static_cast<liquid::SkinnedMeshAssetHandle *>(payload->Data);
-
-      const auto &instance = renderer.createMeshInstance(asset);
-      if (mEntityContext.hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
-        mEntityContext.deleteComponent<liquid::MeshComponent>(mSelectedEntity);
-      }
-      mEntityContext.setComponent<liquid::SkinnedMeshComponent>(mSelectedEntity,
-                                                                {instance});
+      sceneManager.getEntityManager().setSkinnedMeshForEntity(mSelectedEntity,
+                                                              asset);
+      sceneManager.getEntityManager().save(mSelectedEntity);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
@@ -548,14 +558,9 @@ void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
 
       const auto &skeleton = assetRegistry.getSkeletons().getAsset(asset).data;
 
-      liquid::Skeleton skeletonInstance(
-          skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-          skeleton.jointLocalScales, skeleton.jointParents,
-          skeleton.jointInverseBindMatrices, skeleton.jointNames,
-          &renderer.getRegistry());
-
-      mEntityContext.setComponent<liquid::SkeletonComponent>(
-          mSelectedEntity, {std::move(skeletonInstance)});
+      sceneManager.getEntityManager().setSkeletonForEntity(mSelectedEntity,
+                                                           asset);
+      sceneManager.getEntityManager().save(mSelectedEntity);
     }
 
     ImGui::EndDragDropTarget();
