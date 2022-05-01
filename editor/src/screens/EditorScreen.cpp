@@ -36,7 +36,7 @@ void randomSpawn(liquid::EntityContext &entityContext,
       auto parent = sceneManager.getEntityManager().spawnAsset(
           sceneManager.getEditorCamera(),
           sceneManager.getActiveScene()->getRootNode(),
-          static_cast<uint32_t>(handle), liquid::AssetType::Prefab);
+          static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
       entityContext.getComponent<liquid::TransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
     }
@@ -331,16 +331,17 @@ void EditorScreen::start(const Project &project) {
       ImGui::End();
     }
 
-    // if (ImGui::Begin("Benchmark")) {
+#ifdef LIQUID_PROFILER
+    if (ImGui::Begin("Benchmark")) {
 
-    //   if (ImGui::Button("Spawn prefabs")) {
-    //     randomSpawn(entityContext, renderer, sceneManager,
-    //     animationSystem,
-    //                 assetManager);
-    //   }
+      if (ImGui::Button("Spawn prefabs")) {
+        randomSpawn(entityContext, renderer, sceneManager, animationSystem,
+                    assetManager);
+      }
 
-    //   ImGui::End();
-    // }
+      ImGui::End();
+    }
+#endif
 
     preloadStatusDialog.render();
     debugLayer.render();

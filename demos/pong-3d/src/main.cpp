@@ -35,7 +35,6 @@ public:
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
             renderer.getRegistry().setShader({"basic-shader.frag.spv"})),
-        material(renderer.createMaterial({}, {}, liquid::rhi::CullMode::None)),
         camera(new liquid::Camera(&renderer.getRegistry())) {
 
     scene.reset(new liquid::Scene(entityContext));
@@ -45,9 +44,9 @@ public:
     for (auto &[handle, mesh] :
          assetManager.getRegistry().getMeshes().getAssets()) {
       if (mesh.name == "cube.lqmesh") {
-        barInstance = renderer.createMeshInstance(handle);
+        barMesh = handle;
       } else if (mesh.name == "sphere.lqmesh") {
-        ballInstance = renderer.createMeshInstance(handle);
+        ballMesh = handle;
       }
     }
 
@@ -66,7 +65,7 @@ public:
 
     liquid::rhi::RenderGraph graph;
 
-    liquid::SceneRenderer sceneRenderer(entityContext);
+    liquid::SceneRenderer sceneRenderer;
 
     liquid::rhi::TextureDescription desc;
     desc.usage =
@@ -102,7 +101,8 @@ public:
 
       commandList.bindDescriptor(pipeline, 0, descriptor);
 
-      sceneRenderer.render(commandList, pipeline);
+      sceneRenderer.render(commandList, pipeline, renderer.getRenderStorage(),
+                           assetManager.getRegistry(), false);
     });
 
     mainLoop.setUpdateFn([=](float dt) mutable {
@@ -218,10 +218,10 @@ private:
     auto pe2 = entityContext.createEntity();
     auto ballEntity = entityContext.createEntity();
 
-    entityContext.setComponent<liquid::MeshComponent>(e1, {barInstance});
-    entityContext.setComponent<liquid::MeshComponent>(e2, {barInstance});
-    entityContext.setComponent<liquid::MeshComponent>(e3, {barInstance});
-    entityContext.setComponent<liquid::MeshComponent>(e4, {barInstance});
+    entityContext.setComponent<liquid::MeshComponent>(e1, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(e2, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(e3, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(e4, {barMesh});
 
     entityContext.setComponent<liquid::CollidableComponent>(
         e1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
@@ -252,10 +252,9 @@ private:
         ballEntity,
         liquid::RigidBodyComponent{{1.0f, {0.05f, 100.0f, 100.0f}, false}});
 
-    entityContext.setComponent<liquid::MeshComponent>(pe1, {barInstance});
-    entityContext.setComponent<liquid::MeshComponent>(pe2, {barInstance});
-    entityContext.setComponent<liquid::MeshComponent>(ballEntity,
-                                                      {ballInstance});
+    entityContext.setComponent<liquid::MeshComponent>(pe1, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(pe2, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(ballEntity, {ballMesh});
 
     // Create walls
     scene->getRootNode()->addChild(
@@ -337,10 +336,8 @@ private:
 
   liquid::rhi::ShaderHandle vertexShader;
   liquid::rhi::ShaderHandle fragmentShader;
-  liquid::SharedPtr<liquid::Material> material;
 
-  liquid::SharedPtr<liquid::MeshInstance> barInstance;
-  liquid::SharedPtr<liquid::MeshInstance> ballInstance;
+  liquid::MeshAssetHandle barMesh, ballMesh;
 
   liquid::SceneNode *p1, *p2, *ball;
 

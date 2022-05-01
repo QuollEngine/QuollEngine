@@ -37,18 +37,6 @@ public:
   Renderer &operator=(const Renderer &rhs) = delete;
   Renderer &operator=(Renderer &&rhs) = delete;
 
-  SharedPtr<Material>
-  createMaterial(const std::vector<rhi::TextureHandle> &textures,
-                 const std::vector<std::pair<String, Property>> &properties,
-                 const rhi::CullMode &cullMode);
-  SharedPtr<Material>
-  createMaterialPBR(const MaterialPBR::Properties &properties,
-                    const rhi::CullMode &cullMode);
-
-  SharedPtr<MeshInstance> createMeshInstance(MeshAssetHandle mesh);
-
-  SharedPtr<MeshInstance> createMeshInstance(SkinnedMeshAssetHandle handle);
-
   inline DebugManager &getDebugManager() { return mDebugManager; }
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
   inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
@@ -61,6 +49,10 @@ public:
   void render(rhi::RenderGraph &graph, Entity entity);
 
   inline void wait() { mDevice->waitForIdle(); }
+
+  inline const RenderStorage &getRenderStorage() const {
+    return mRenderStorage;
+  }
 
 private:
   void loadShaders();

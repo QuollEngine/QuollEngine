@@ -8,6 +8,8 @@
 
 namespace liquid {
 
+class Material;
+
 template <class TVertex> struct BaseGeometryAsset {
   std::vector<TVertex> vertices;
   std::vector<uint32_t> indices;
@@ -18,6 +20,7 @@ struct MeshAsset {
   std::vector<BaseGeometryAsset<Vertex>> geometries;
   std::vector<rhi::BufferHandle> vertexBuffers;
   std::vector<rhi::BufferHandle> indexBuffers;
+  std::vector<SharedPtr<Material>> materials;
 };
 
 struct SkinnedMeshAsset {
@@ -25,6 +28,7 @@ struct SkinnedMeshAsset {
   SkeletonAssetHandle skeleton = SkeletonAssetHandle::Invalid;
   std::vector<rhi::BufferHandle> vertexBuffers;
   std::vector<rhi::BufferHandle> indexBuffers;
+  std::vector<SharedPtr<Material>> materials;
 };
 
 } // namespace liquid

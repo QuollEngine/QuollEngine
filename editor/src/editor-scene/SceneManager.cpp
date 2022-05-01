@@ -140,7 +140,7 @@ void SceneManager::loadOrCreateScene() {
 }
 
 void SceneManager::moveCameraToEntity(liquid::Entity entity) {
-  if (mEntityContext.hasComponent<liquid::TransformComponent>(entity)) {
+  if (!mEntityContext.hasComponent<liquid::TransformComponent>(entity)) {
     return;
   }
 

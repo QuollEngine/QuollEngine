@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 3) in vec3 inColor;
@@ -12,11 +12,17 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
-layout(push_constant) uniform TransformConstant { mat4 modelMatrix; }
-pcTransform;
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
 
 void main() {
-  gl_Position =
-      uCameraData.viewProj * pcTransform.modelMatrix * vec4(inPosition, 1.0f);
+  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  gl_Position = uCameraData.viewProj * modelMatrix * vec4(inPosition, 1.0f);
   outColor = inColor;
 }

@@ -175,9 +175,9 @@ void EntityPanel::renderTransform() {
 void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
   if (mEntityContext.hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
 
-    auto handle = static_cast<liquid::MeshAssetHandle>(
+    auto handle =
         mEntityContext.getComponent<liquid::MeshComponent>(mSelectedEntity)
-            .instance->getMesh());
+            .handle;
 
     const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
@@ -196,10 +196,10 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
   if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
           mSelectedEntity)) {
 
-    auto handle = static_cast<liquid::SkinnedMeshAssetHandle>(
+    auto handle =
         mEntityContext
             .getComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)
-            .instance->getMesh());
+            .handle;
 
     const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
 
