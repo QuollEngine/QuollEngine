@@ -153,6 +153,7 @@ void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
 }
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
+  LIQUID_PROFILE_EVENT("VulkanRenderDevice::synchronize");
   // Shaders
   for (auto [handle, state] : registry.getShaderMap().getStagedResources()) {
     if (state == ResourceRegistryState::Set) {

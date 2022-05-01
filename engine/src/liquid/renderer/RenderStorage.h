@@ -9,7 +9,7 @@
 namespace liquid {
 
 class RenderStorage {
-  static constexpr size_t DEFAULT_RESERVED_SPACE = 10000;
+  static constexpr size_t DEFAULT_RESERVED_SPACE = 40000;
   static constexpr size_t MAX_NUM_JOINTS = 32;
   static constexpr size_t MAX_NUM_LIGHTS = 256;
 
@@ -25,7 +25,6 @@ class RenderStorage {
 
   struct MeshData {
     std::vector<uint32_t> indices;
-    std::vector<SharedPtr<Material>> materials;
   };
 
 public:
@@ -145,24 +144,18 @@ public:
    * @brief Add mesh data
    *
    * @param handle Mesh handle
-   * @param materials Materials
    * @param transform Mesh world transform
    */
-  void addMesh(MeshAssetHandle handle,
-               const std::vector<SharedPtr<Material>> &materials,
-               const glm::mat4 &transform);
+  void addMesh(MeshAssetHandle handle, const glm::mat4 &transform);
 
   /**
    * @brief Add skinned mesh data
    *
    * @param handle Skinned mesh handle
-   * @param materials Materials
    * @param transform Skinned mesh world transform
    * @param skeleton Skeleton joint transforms
    */
-  void addSkinnedMesh(SkinnedMeshAssetHandle handle,
-                      const std::vector<SharedPtr<Material>> &materials,
-                      const glm::mat4 &transform,
+  void addSkinnedMesh(SkinnedMeshAssetHandle handle, const glm::mat4 &transform,
                       const std::vector<glm::mat4> &skeleton);
 
   /**

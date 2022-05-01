@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/renderer/MaterialPBR.h"
 #include "AssetRegistry.h"
 
 #include "DefaultObjects.h"
@@ -14,6 +15,8 @@ AssetRegistry::~AssetRegistry() {
 void AssetRegistry::createDefaultObjects() {
   auto mesh = default_objects::createCube();
   mDefaultObjects.cube = mMeshes.addAsset(mesh);
+  mDefaultObjects.defaultMaterial =
+      mMaterials.addAsset(default_objects::createDefaultMaterial());
 }
 
 void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
@@ -41,6 +44,50 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
     }
   }
 
+  // Synchronize materials
+  auto getTextureFromRegistry = [this](TextureAssetHandle handle) {
+    if (handle != TextureAssetHandle::Invalid) {
+      return mTextures.getAsset(handle).data.deviceHandle;
+    }
+
+    return rhi::TextureHandle::Invalid;
+  };
+
+  for (auto &[_, asset] : mMaterials.getAssets()) {
+    auto &material = asset.data;
+    if (!material.deviceHandle) {
+      liquid::MaterialPBR::Properties properties{};
+
+      properties.baseColorFactor = material.baseColorFactor;
+      properties.baseColorTexture =
+          getTextureFromRegistry(material.baseColorTexture);
+      properties.baseColorTextureCoord = material.baseColorTextureCoord;
+
+      properties.metallicFactor = material.metallicFactor;
+      properties.metallicRoughnessTexture =
+          getTextureFromRegistry(material.metallicRoughnessTexture);
+      properties.metallicRoughnessTextureCoord =
+          material.metallicRoughnessTextureCoord;
+
+      properties.normalScale = material.normalScale;
+      properties.normalTexture = getTextureFromRegistry(material.normalTexture);
+
+      properties.normalTextureCoord = material.normalTextureCoord;
+
+      properties.occlusionStrength = material.occlusionStrength;
+      properties.occlusionTexture =
+          getTextureFromRegistry(material.occlusionTexture);
+      properties.occlusionTextureCoord = material.occlusionTextureCoord;
+
+      properties.emissiveFactor = material.emissiveFactor;
+      properties.emissiveTexture =
+          getTextureFromRegistry(material.emissiveTexture);
+      properties.emissiveTextureCoord = material.emissiveTextureCoord;
+
+      material.deviceHandle.reset(new MaterialPBR(properties, registry));
+    }
+  }
+
   // Synchronize meshes
   for (auto &[_, mesh] : mMeshes.getAssets()) {
     if (mesh.data.vertexBuffers.empty()) {
@@ -48,6 +95,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
                                      rhi::BufferHandle::Invalid);
       mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
                                     rhi::BufferHandle::Invalid);
+      mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     }
 
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
@@ -68,6 +116,12 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.data = geometry.indices.data();
         mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
       }
+
+      auto material = geometry.material != MaterialAssetHandle::Invalid
+                          ? geometry.material
+                          : mDefaultObjects.defaultMaterial;
+      mesh.data.materials.at(i) =
+          mMaterials.getAsset(material).data.deviceHandle;
     }
   }
 
@@ -78,6 +132,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
                                      rhi::BufferHandle::Invalid);
       mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
                                     rhi::BufferHandle::Invalid);
+      mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     }
 
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
@@ -98,6 +153,12 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.data = geometry.indices.data();
         mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
       }
+
+      auto material = geometry.material != MaterialAssetHandle::Invalid
+                          ? geometry.material
+                          : mDefaultObjects.defaultMaterial;
+      mesh.data.materials.at(i) =
+          mMaterials.getAsset(material).data.deviceHandle;
     }
   }
 }

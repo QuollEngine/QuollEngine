@@ -30,6 +30,7 @@ class AssetRegistry {
 
   struct DefaultObjects {
     MeshAssetHandle cube = MeshAssetHandle::Invalid;
+    MaterialAssetHandle defaultMaterial = MaterialAssetHandle::Invalid;
   };
 
 public:

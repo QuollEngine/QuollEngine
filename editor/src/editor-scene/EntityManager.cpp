@@ -43,21 +43,18 @@ void EntityManager::save(liquid::Entity entity) {
   }
 
   if (mEntityContext.hasComponent<liquid::MeshComponent>(entity)) {
-    auto handle = static_cast<liquid::MeshAssetHandle>(
-        mEntityContext.getComponent<liquid::MeshComponent>(entity)
-            .instance->getMesh());
+    auto handle =
+        mEntityContext.getComponent<liquid::MeshComponent>(entity).handle;
 
     node["components"]["mesh"] = mAssetManager.getRegistry()
                                      .getMeshes()
                                      .getAsset(handle)
                                      .relativePath.string();
-  }
-
-  if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(entity)) {
-    auto handle = static_cast<liquid::SkinnedMeshAssetHandle>(
+  } else if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
+                 entity)) {
+    auto handle =
         mEntityContext.getComponent<liquid::SkinnedMeshComponent>(entity)
-            .instance->getMesh());
-
+            .handle;
     node["components"]["skinnedMesh"] = mAssetManager.getRegistry()
                                             .getSkinnedMeshes()
                                             .getAsset(handle)
@@ -106,12 +103,15 @@ EntityManager::createEmptyEntity(liquid::SceneNode *parent,
   return node;
 }
 
-liquid::SceneNode *
-EntityManager::createEmptyEntity(EditorCamera &camera,
-                                 liquid::SceneNode *parent,
-                                 const liquid::String &name) {
+liquid::SceneNode *EntityManager::createEmptyEntity(EditorCamera &camera,
+                                                    liquid::SceneNode *parent,
+                                                    const liquid::String &name,
+                                                    bool saveToFile) {
   auto *node = createEmptyEntity(parent, getTransformFromCamera(camera), name);
-  save(node->getEntity());
+
+  if (saveToFile) {
+    save(node->getEntity());
+  }
 
   return node;
 }
@@ -175,9 +175,7 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
           mAssetManager.getRegistry().getMeshes().findHandleByRelativePath(
               relativePath);
       setMeshForEntity(entity, handle);
-    }
-
-    if (node["components"]["skinnedMesh"].IsScalar()) {
+    } else if (node["components"]["skinnedMesh"].IsScalar()) {
       auto relativePathStr =
           node["components"]["skinnedMesh"].as<liquid::String>();
       auto relativePath = std::filesystem::path(relativePathStr);
@@ -256,20 +254,15 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
 
 void EntityManager::setMeshForEntity(liquid::Entity entity,
                                      liquid::MeshAssetHandle handle) {
-  const auto &instance = mRenderer.createMeshInstance(handle);
-  if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(entity)) {
-    mEntityContext.deleteComponent<liquid::SkinnedMeshComponent>(entity);
-  }
-  mEntityContext.setComponent<liquid::MeshComponent>(entity, {instance});
+  mEntityContext.setComponent<liquid::MeshComponent>(entity, {handle});
 }
 
 void EntityManager::setSkinnedMeshForEntity(
     liquid::Entity entity, liquid::SkinnedMeshAssetHandle handle) {
-  const auto &instance = mRenderer.createMeshInstance(handle);
   if (mEntityContext.hasComponent<liquid::MeshComponent>(entity)) {
     mEntityContext.deleteComponent<liquid::MeshComponent>(entity);
   }
-  mEntityContext.setComponent<liquid::SkinnedMeshComponent>(entity, {instance});
+  mEntityContext.setComponent<liquid::SkinnedMeshComponent>(entity, {handle});
 }
 
 void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
@@ -301,14 +294,15 @@ void EntityManager::deleteEntity(liquid::Entity entity) {
 liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
                                          liquid::SceneNode *root,
                                          uint32_t handle,
-                                         liquid::AssetType type) {
+                                         liquid::AssetType type,
+                                         bool saveToFile) {
   if (type != liquid::AssetType::Prefab) {
     return liquid::ENTITY_MAX;
   }
 
   auto &asset = mAssetManager.getRegistry().getPrefabs().getAsset(
       static_cast<liquid::PrefabAssetHandle>(handle));
-  auto *parent = createEmptyEntity(camera, root, asset.name);
+  auto *parent = createEmptyEntity(camera, root, asset.name, saveToFile);
   auto parentEntity = parent->getEntity();
 
   std::map<uint32_t, liquid::Entity> entityMap;
@@ -370,9 +364,12 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
     mEntityContext.setComponent(entity, item.value);
   }
 
-  for (auto [_, entity] : entityMap) {
-    save(entity);
+  if (saveToFile) {
+    for (auto [_, entity] : entityMap) {
+      save(entity);
+    }
   }
+
   return parentEntity;
 }
 

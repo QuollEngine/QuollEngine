@@ -1,11 +1,11 @@
 #pragma once
 
-#include "MeshInstance.h"
+#include "liquid/asset/Asset.h"
 
 namespace liquid {
 
 struct MeshComponent {
-  SharedPtr<MeshInstance> instance;
+  MeshAssetHandle handle = MeshAssetHandle::Invalid;
 };
 
 } // namespace liquid

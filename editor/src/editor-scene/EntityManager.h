@@ -48,11 +48,13 @@ public:
    * @param camera Editor camera
    * @param parent Parent node
    * @param name Entity name
+   * @param saveToFile Save the created entities
    * @return New entity node
    */
   liquid::SceneNode *createEmptyEntity(EditorCamera &camera,
                                        liquid::SceneNode *parent,
-                                       const liquid::String &name = "");
+                                       const liquid::String &name = "",
+                                       bool saveToFile = true);
 
   /**
    * @brief Load scene
@@ -111,10 +113,12 @@ public:
    * @param parent Parent node
    * @param asset Asset handle
    * @param type Asset type
+   * @param saveToFile Save the spawned entities
    * @return New entity
    */
   liquid::Entity spawnAsset(EditorCamera &camera, liquid::SceneNode *parent,
-                            uint32_t asset, liquid::AssetType type);
+                            uint32_t asset, liquid::AssetType type,
+                            bool saveToFile = true);
 
 private:
   /**

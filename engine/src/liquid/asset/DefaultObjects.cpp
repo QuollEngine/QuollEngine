@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
 #include "AssetData.h"
 #include "MeshAsset.h"
+#include "MaterialAsset.h"
+#include "DefaultObjects.h"
 
 namespace liquid::default_objects {
 
@@ -82,6 +84,13 @@ AssetData<MeshAsset> createCube() {
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
+}
+
+AssetData<MaterialAsset> createDefaultMaterial() {
+  AssetData<MaterialAsset> material;
+  material.name = "__liquid.engine.defaultMaterial";
+
+  return material;
 }
 
 } // namespace liquid::default_objects

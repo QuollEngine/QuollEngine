@@ -52,31 +52,27 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
 }
 
 void RenderStorage::addMesh(MeshAssetHandle handle,
-                            const std::vector<SharedPtr<Material>> &materials,
                             const glm::mat4 &transform) {
   mMeshTransformMatrices.push_back(transform);
   uint32_t index = static_cast<uint32_t>(mMeshTransformMatrices.size() - 1);
 
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
     MeshData data{};
-    data.materials = materials;
     mMeshGroups.insert_or_assign(handle, data);
   }
 
   mMeshGroups.at(handle).indices.push_back(index);
 }
 
-void RenderStorage::addSkinnedMesh(
-    SkinnedMeshAssetHandle handle,
-    const std::vector<SharedPtr<Material>> &materials,
-    const glm::mat4 &transform, const std::vector<glm::mat4> &skeleton) {
+void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle,
+                                   const glm::mat4 &transform,
+                                   const std::vector<glm::mat4> &skeleton) {
   mSkinnedMeshTransformMatrices.push_back(transform);
   uint32_t index =
       static_cast<uint32_t>(mSkinnedMeshTransformMatrices.size() - 1);
 
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
     MeshData data{};
-    data.materials = materials;
     mSkinnedMeshGroups.insert_or_assign(handle, data);
   }
 

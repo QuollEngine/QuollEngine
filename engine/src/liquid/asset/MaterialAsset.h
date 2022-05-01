@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/renderer/Material.h"
+
 namespace liquid {
 
 struct MaterialAsset {
@@ -23,6 +25,8 @@ struct MaterialAsset {
   TextureAssetHandle emissiveTexture = TextureAssetHandle::Invalid;
   int8_t emissiveTextureCoord = -1;
   glm::vec3 emissiveFactor{};
+
+  SharedPtr<Material> deviceHandle;
 };
 
 } // namespace liquid

@@ -16,7 +16,7 @@ Renderer::Renderer(EntityContext &entityContext, AssetRegistry &assetRegistry,
                    Window &window, rhi::RenderDevice *device)
     : mEntityContext(entityContext), mGraphEvaluator(mRegistry),
       mDevice(device), mImguiRenderer(window, mRegistry),
-      mSceneRenderer(mEntityContext), mAssetRegistry(assetRegistry) {
+      mAssetRegistry(assetRegistry) {
   loadShaders();
 }
 
@@ -88,9 +88,7 @@ void Renderer::updateStorageBuffers() {
   // Meshes
   mEntityContext.iterateEntities<TransformComponent, MeshComponent>(
       [this](auto entity, const auto &transform, const auto &mesh) {
-        auto handle = static_cast<MeshAssetHandle>(mesh.instance->getMesh());
-        mRenderStorage.addMesh(handle, mesh.instance->getMaterials(),
-                               transform.worldTransform);
+        mRenderStorage.addMesh(mesh.handle, transform.worldTransform);
       });
 
   // Skinned Meshes
@@ -98,11 +96,8 @@ void Renderer::updateStorageBuffers() {
                                  SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &transform,
              const auto &mesh) {
-        auto handle =
-            static_cast<SkinnedMeshAssetHandle>(mesh.instance->getMesh());
-
         mRenderStorage.addSkinnedMesh(
-            handle, mesh.instance->getMaterials(), transform.worldTransform,
+            mesh.handle, transform.worldTransform,
             skeleton.skeleton.getJointFinalTransforms());
       });
 
@@ -362,91 +357,6 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
   } // imgui
 
   return {graph, {mainColor, depthBuffer, shadowmap, BLUEISH_CLEAR_VALUE}};
-}
-
-SharedPtr<Material> Renderer::createMaterial(
-    const std::vector<rhi::TextureHandle> &textures,
-    const std::vector<std::pair<String, Property>> &properties,
-    const rhi::CullMode &cullMode) {
-  return std::make_shared<Material>(textures, properties, mRegistry);
-}
-
-SharedPtr<Material>
-Renderer::createMaterialPBR(const MaterialPBR::Properties &properties,
-                            const rhi::CullMode &cullMode) {
-  return std::make_shared<MaterialPBR>(properties, mRegistry);
-}
-
-template <class TMeshAsset>
-std::vector<SharedPtr<Material>> createMeshMaterials(const TMeshAsset &mesh,
-                                                     AssetRegistry &registry,
-                                                     Renderer &renderer) {
-  auto getTextureFromRegistry = [&registry](TextureAssetHandle handle) {
-    if (handle != TextureAssetHandle::Invalid) {
-      return registry.getTextures().getAsset(handle).data.deviceHandle;
-    }
-
-    return rhi::TextureHandle::Invalid;
-  };
-
-  std::vector<SharedPtr<Material>> materials;
-
-  for (auto &geometry : mesh.data.geometries) {
-    MaterialPBR::Properties properties;
-
-    if (registry.getMaterials().hasAsset(geometry.material)) {
-      auto &material = registry.getMaterials().getAsset(geometry.material).data;
-
-      properties.baseColorFactor = material.baseColorFactor;
-      properties.baseColorTexture =
-          getTextureFromRegistry(material.baseColorTexture);
-      properties.baseColorTextureCoord = material.baseColorTextureCoord;
-
-      properties.metallicFactor = material.metallicFactor;
-      properties.metallicRoughnessTexture =
-          getTextureFromRegistry(material.metallicRoughnessTexture);
-      properties.metallicRoughnessTextureCoord =
-          material.metallicRoughnessTextureCoord;
-
-      properties.normalScale = material.normalScale;
-      properties.normalTexture = getTextureFromRegistry(material.normalTexture);
-
-      properties.normalTextureCoord = material.normalTextureCoord;
-
-      properties.occlusionStrength = material.occlusionStrength;
-      properties.occlusionTexture =
-          getTextureFromRegistry(material.occlusionTexture);
-      properties.occlusionTextureCoord = material.occlusionTextureCoord;
-
-      properties.emissiveFactor = material.emissiveFactor;
-      properties.emissiveTexture =
-          getTextureFromRegistry(material.emissiveTexture);
-      properties.emissiveTextureCoord = material.emissiveTextureCoord;
-    }
-    auto materialInstance =
-        renderer.createMaterialPBR(properties, rhi::CullMode::None);
-
-    materials.push_back(materialInstance);
-  }
-
-  return materials;
-}
-
-SharedPtr<MeshInstance> Renderer::createMeshInstance(MeshAssetHandle handle) {
-  const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle);
-  const auto &materials = createMeshMaterials(mesh, mAssetRegistry, *this);
-
-  return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
-                                        materials);
-}
-
-SharedPtr<MeshInstance>
-Renderer::createMeshInstance(SkinnedMeshAssetHandle handle) {
-  const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle);
-  const auto &materials = createMeshMaterials(mesh, mAssetRegistry, *this);
-
-  return std::make_shared<MeshInstance>(static_cast<uint32_t>(handle), mesh,
-                                        materials);
 }
 
 } // namespace liquid

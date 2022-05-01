@@ -10,19 +10,15 @@ namespace liquid {
 class MeshInstance {
 public:
   template <class TMeshAsset>
-  MeshInstance(uint32_t handle, const AssetData<TMeshAsset> &asset,
-               const std::vector<SharedPtr<Material>> &materials)
+  MeshInstance(uint32_t handle, const AssetData<TMeshAsset> &asset)
       : mMesh(handle) {
 
     LIQUID_ASSERT(asset.data.vertexBuffers.size() ==
                       asset.data.indexBuffers.size(),
                   "Vertex and index buffer sizes must match");
-    LIQUID_ASSERT(asset.data.vertexBuffers.size() == materials.size(),
-                  "Materials size must match buffer sizes");
 
     mVertexBuffers = asset.data.vertexBuffers;
     mIndexBuffers = asset.data.indexBuffers;
-    mMaterials = materials;
 
     mVertexCounts.resize(asset.data.geometries.size());
     mIndexCounts.resize(asset.data.geometries.size());
@@ -49,15 +45,6 @@ public:
    */
   inline const std::vector<rhi::BufferHandle> &getIndexBuffers() const {
     return mIndexBuffers;
-  }
-
-  /**
-   * @brief Get materials
-   *
-   * @return List of materials
-   */
-  inline const std::vector<SharedPtr<Material>> &getMaterials() const {
-    return mMaterials;
   }
 
   /**
