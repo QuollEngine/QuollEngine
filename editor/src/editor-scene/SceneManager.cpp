@@ -157,4 +157,20 @@ void SceneManager::moveCameraToEntity(liquid::Entity entity) {
   mEditorCamera.setEye(translation - distanceFromCenter);
 }
 
+bool SceneManager::hasEnvironment() {
+  return mEntityContext.hasComponent<liquid::EnvironmentComponent>(
+      mEnvironmentEntity);
+}
+
+liquid::EnvironmentComponent &SceneManager::getEnvironment() {
+  if (!mEntityContext.hasEntity(mEnvironmentEntity)) {
+    mEnvironmentEntity = mEntityContext.createEntity();
+    mEntityContext.setComponent<liquid::EnvironmentComponent>(
+        mEnvironmentEntity, {});
+  }
+
+  return mEntityContext.getComponent<liquid::EnvironmentComponent>(
+      mEnvironmentEntity);
+}
+
 } // namespace liquidator

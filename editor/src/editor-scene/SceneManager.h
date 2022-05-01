@@ -87,6 +87,21 @@ public:
    */
   void moveCameraToEntity(liquid::Entity entity);
 
+  /**
+   * @brief Check if environment exists
+   *
+   * @retval true Environment exists
+   * @retval false Environment does not exist
+   */
+  bool hasEnvironment();
+
+  /**
+   * @brief Get environment
+   *
+   * @return Environment component
+   */
+  liquid::EnvironmentComponent &getEnvironment();
+
 private:
   liquid::Scene *mActiveScene = nullptr;
   liquid::EntityContext &mEntityContext;
@@ -95,6 +110,8 @@ private:
   std::filesystem::path mScenePath;
   EntityManager &mEntityManager;
   uint32_t mLastId = 1;
+
+  liquid::Entity mEnvironmentEntity = liquid::ENTITY_MAX;
 };
 
 } // namespace liquidator

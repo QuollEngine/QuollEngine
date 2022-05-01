@@ -223,7 +223,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
         bool dndAllowed = entry.assetType == liquid::AssetType::Mesh ||
                           entry.assetType == liquid::AssetType::SkinnedMesh ||
-                          entry.assetType == liquid::AssetType::Skeleton;
+                          entry.assetType == liquid::AssetType::Skeleton ||
+                          entry.assetType == liquid::AssetType::Texture;
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
             ImGui::SetDragDropPayload(

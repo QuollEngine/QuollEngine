@@ -9,6 +9,7 @@
 
 #include <ktx.h>
 #include <vulkan/vulkan.h>
+#include <ktxvulkan.h>
 #include "liquid/loaders/KtxError.h"
 
 namespace liquid {
@@ -97,6 +98,9 @@ AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
   texture.data.height = ktxTextureData->baseHeight;
   texture.data.layers = ktxTextureData->numLayers *
                         (ktxTextureData->isCubemap ? CUBEMAP_SIDES : 1);
+  texture.data.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
+                                                : TextureAssetType::Standard;
+  texture.data.format = ktxTexture_GetVkFormat(ktxTextureData);
 
   char *srcData = reinterpret_cast<char *>(ktxTexture_GetData(ktxTextureData));
 

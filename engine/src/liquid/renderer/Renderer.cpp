@@ -213,7 +213,7 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
         index++;
       }
     });
-  }
+  } // shadowmap
 
   {
     auto &pass = graph.addPass("mainColor");
@@ -281,7 +281,7 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
       mSceneRenderer.renderSkinned(commandList, skinnedPipeline, mRenderStorage,
                                    mAssetRegistry, true);
     });
-  }
+  } // scene
 
   {
     auto &pass = graph.addPass("environmentPass");
@@ -297,39 +297,33 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
     pass.addPipeline(pipeline);
     pass.setExecutor([pipeline, this](rhi::RenderCommandList &commandList) {
+      if (!rhi::isHandleValid(mRenderStorage.getIrradianceMap()))
+        return;
+
       commandList.bindPipeline(pipeline);
 
-      rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
-                      rhi::DescriptorType::UniformBuffer);
+      rhi::Descriptor sceneDescriptor;
+      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+                           rhi::DescriptorType::UniformBuffer);
 
-      commandList.bindDescriptor(pipeline, 0, descriptor);
+      rhi::Descriptor skyboxDescriptor;
+      skyboxDescriptor.bind(0, {mRenderStorage.getIrradianceMap()},
+                            rhi::DescriptorType::CombinedImageSampler);
 
-      mEntityContext.iterateEntities<EnvironmentComponent, MeshComponent>(
-          [this, pipeline, &commandList](Entity entity,
-                                         const EnvironmentComponent &,
-                                         const MeshComponent &mesh) {
-            for (size_t i = 0; i < mesh.instance->getVertexBuffers().size();
-                 ++i) {
-              commandList.bindVertexBuffer(
-                  mesh.instance->getVertexBuffers().at(i));
-              commandList.bindDescriptor(
-                  pipeline, 1,
-                  mesh.instance->getMaterials().at(i)->getDescriptor());
+      commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
+      commandList.bindDescriptor(pipeline, 1, skyboxDescriptor);
 
-              if (rhi::isHandleValid(mesh.instance->getIndexBuffers().at(i))) {
-                commandList.bindIndexBuffer(
-                    mesh.instance->getIndexBuffers().at(i),
-                    VK_INDEX_TYPE_UINT32);
-                commandList.drawIndexed(mesh.instance->getIndexCounts().at(i),
-                                        0, 0);
-              } else {
-                commandList.draw(mesh.instance->getVertexCounts().at(i), 0);
-              }
-            }
-          });
+      const auto &cube = mAssetRegistry.getMeshes()
+                             .getAsset(mAssetRegistry.getDefaultObjects().cube)
+                             .data;
+
+      commandList.bindVertexBuffer(cube.vertexBuffers.at(0));
+      commandList.bindIndexBuffer(cube.indexBuffers.at(0),
+                                  VK_INDEX_TYPE_UINT32);
+      commandList.drawIndexed(
+          static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
     });
-  }
+  } // environment
 
   {
     auto &pass = graph.addPass("imgui");
@@ -365,7 +359,7 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
     pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList) {
       mImguiRenderer.draw(commandList, pipeline);
     });
-  }
+  } // imgui
 
   return {graph, {mainColor, depthBuffer, shadowmap, BLUEISH_CLEAR_VALUE}};
 }
