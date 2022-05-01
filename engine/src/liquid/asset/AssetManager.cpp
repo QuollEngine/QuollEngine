@@ -9,7 +9,9 @@
 namespace liquid {
 
 AssetManager::AssetManager(const std::filesystem::path &assetsPath)
-    : mAssetsPath(assetsPath) {}
+    : mAssetsPath(assetsPath) {
+  mRegistry.createDefaultObjects();
+}
 
 Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
                                           const std::filesystem::path &filePath,

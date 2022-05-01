@@ -18,8 +18,14 @@ void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
   mMenuBar.render(sceneManager);
   mStatusBar.render(sceneManager);
   mSceneHierarchyPanel.render(sceneManager);
-  mEntityPanel.render(sceneManager, renderer, assetManager.getRegistry(),
-                      physicsSystem);
+
+  mInspector.render(
+      [&sceneManager, &renderer, &assetManager, &physicsSystem, this]() {
+        mEntityPanel.render(sceneManager, renderer, assetManager.getRegistry(),
+                            physicsSystem);
+        mEnvironmentPanel.render(sceneManager, assetManager);
+      });
+
   mEditorCameraPanel.render(sceneManager);
   mAssetBrowser.render(assetManager, mIconRegistry, sceneManager);
 }

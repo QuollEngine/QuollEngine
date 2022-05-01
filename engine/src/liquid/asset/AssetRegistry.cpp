@@ -1,12 +1,19 @@
 #include "liquid/core/Base.h"
 #include "AssetRegistry.h"
 
+#include "DefaultObjects.h"
+
 namespace liquid {
 
 AssetRegistry::~AssetRegistry() {
   for (auto &[_, texture] : mTextures.getAssets()) {
     delete[](texture.data.data);
   }
+}
+
+void AssetRegistry::createDefaultObjects() {
+  auto mesh = default_objects::createCube();
+  mDefaultObjects.cube = mMeshes.addAsset(mesh);
 }
 
 void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
@@ -24,9 +31,11 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
                           rhi::TextureUsage::Sampled;
-      description.type = rhi::TextureType::Standard;
+      description.type = texture.data.type == TextureAssetType::Cubemap
+                             ? rhi::TextureType::Cubemap
+                             : rhi::TextureType::Standard;
       description.size = texture.size;
-      description.format = VK_FORMAT_R8G8B8A8_SRGB;
+      description.format = texture.data.format;
 
       texture.data.deviceHandle = registry.setTexture(description);
     }

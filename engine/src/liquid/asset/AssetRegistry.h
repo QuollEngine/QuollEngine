@@ -28,6 +28,10 @@ class AssetRegistry {
   using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
   using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
 
+  struct DefaultObjects {
+    MeshAssetHandle cube = MeshAssetHandle::Invalid;
+  };
+
 public:
   AssetRegistry() = default;
 
@@ -40,6 +44,23 @@ public:
   AssetRegistry &operator=(const AssetRegistry &) = delete;
   AssetRegistry(AssetRegistry &&) = delete;
   AssetRegistry &operator=(AssetRegistry &&) = delete;
+
+  /**
+   * @brief Create default objects
+   *
+   * Handles for default objects are
+   * stored for easy access
+   */
+  void createDefaultObjects();
+
+  /**
+   * @brief Get default objects
+   *
+   * @return Default objects
+   */
+  inline const DefaultObjects &getDefaultObjects() const {
+    return mDefaultObjects;
+  }
 
   /**
    * @brief Synchronize assets with device registry
@@ -123,6 +144,8 @@ private:
   AnimationMap mAnimations;
   PrefabMap mPrefabs;
   LuaScriptMap mLuaScripts;
+
+  DefaultObjects mDefaultObjects;
 };
 
 } // namespace liquid

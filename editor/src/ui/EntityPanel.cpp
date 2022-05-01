@@ -15,8 +15,7 @@ EntityPanel::EntityPanel(liquid::EntityContext &entityContext,
 void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
-  bool open = true;
-  if (ImGui::Begin("Inspector", &open)) {
+  if (ImGui::BeginTabItem("Entity", 0)) {
     if (mEntityContext.hasEntity(mSelectedEntity)) {
       renderName();
       renderTransform();
@@ -30,11 +29,7 @@ void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
       handleDragAndDrop(renderer, assetRegistry, sceneManager);
     }
 
-    ImGui::End();
-  }
-
-  if (!open) {
-    mSelectedEntity = liquid::ENTITY_MAX;
+    ImGui::EndTabItem();
   }
 }
 

@@ -2,6 +2,10 @@
 
 #include "../editor-scene/SceneManager.h"
 
+#include "liquid/animation/AnimationSystem.h"
+#include "liquid/physics/PhysicsSystem.h"
+#include "liquid/renderer/Renderer.h"
+
 #include "MenuBar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
@@ -10,9 +14,8 @@
 #include "AssetBrowser.h"
 #include "Layout.h"
 #include "IconRegistry.h"
-#include "liquid/animation/AnimationSystem.h"
-#include "liquid/physics/PhysicsSystem.h"
-#include "liquid/renderer/Renderer.h"
+#include "Inspector.h"
+#include "EnvironmentPanel.h"
 
 namespace liquidator {
 
@@ -65,9 +68,11 @@ private:
   void handleNodeClick(liquid::SceneNode *node);
 
 private:
+  Inspector mInspector;
   MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
+  EnvironmentPanel mEnvironmentPanel;
   EditorGridPanel mEditorCameraPanel;
   AssetBrowser mAssetBrowser;
   StatusBar mStatusBar;
