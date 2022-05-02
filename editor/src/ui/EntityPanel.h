@@ -50,6 +50,11 @@ private:
   void renderLight();
 
   /**
+   * @brief Render camera component
+   */
+  void renderCamera();
+
+  /**
    * @brief Render transform component
    */
   void renderTransform();

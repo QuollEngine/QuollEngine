@@ -16,6 +16,9 @@ bool imageButton(liquid::rhi::TextureHandle handle, const ImVec2 &size,
                  const ImVec4 &bg_col = ImVec4(0, 0, 0, 0),
                  const ImVec4 &tint_col = ImVec4(1, 1, 1, 1));
 
+bool input(const char *label, glm::vec3 &value, const char *format = "%0.3f",
+           ImGuiInputTextFlags flags = 0);
+
 void renderColumn(const glm::vec3 &value);
 
 void renderColumn(const glm::quat &value);

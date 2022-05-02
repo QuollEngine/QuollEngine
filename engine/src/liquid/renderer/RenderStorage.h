@@ -9,7 +9,7 @@
 namespace liquid {
 
 class RenderStorage {
-  static constexpr size_t DEFAULT_RESERVED_SPACE = 40000;
+  static constexpr size_t DEFAULT_RESERVED_SPACE = 10000;
   static constexpr size_t MAX_NUM_JOINTS = 32;
   static constexpr size_t MAX_NUM_LIGHTS = 256;
 

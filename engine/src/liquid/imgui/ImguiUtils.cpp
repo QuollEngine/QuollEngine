@@ -20,6 +20,14 @@ bool imageButton(liquid::rhi::TextureHandle handle, const ImVec2 &size,
                             frame_padding, bg_col, tint_col);
 }
 
+bool input(const char *label, glm::vec3 &value, const char *format,
+           ImGuiInputTextFlags flags) {
+  ImGui::InputScalarN(label, ImGuiDataType_Float, glm::value_ptr(value), 3,
+                      NULL, NULL, format, flags);
+
+  return ImGui::IsItemDeactivatedAfterEdit();
+}
+
 void renderColumn(const glm::vec3 &value) {
   ImGui::TableNextColumn();
   ImGui::Text("%.2f %.2f %.2f", value.x, value.y, value.z);
