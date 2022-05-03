@@ -15,6 +15,7 @@ enum class EditorIcon {
   Prefab,
   Script,
   Sun,
+  Camera,
   Direction,
 };
 

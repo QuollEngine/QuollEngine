@@ -241,20 +241,21 @@ void EditorScreen::start(const Project &project) {
             commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
           });
 
+      commandList.bindPipeline(objectIconsPipeline);
+
+      liquid::rhi::Descriptor objectListSceneDescriptor;
+      objectListSceneDescriptor.bind(
+          0, cameraObj->getBuffer(),
+          liquid::rhi::DescriptorType::UniformBuffer);
+      commandList.bindDescriptor(objectIconsPipeline, 0,
+                                 objectListSceneDescriptor);
+
       entityContext.iterateEntities<
           liquid::TransformComponent,
-          liquid::LightComponent>([&objectIconsPipeline, &commandList,
-                                   &cameraObj, &ui, &entityContext](
-                                      auto entity, const auto &transform,
-                                      const auto &light) {
-        commandList.bindPipeline(objectIconsPipeline);
-
-        liquid::rhi::Descriptor sceneDescriptor;
-        sceneDescriptor.bind(0, cameraObj->getBuffer(),
-                             liquid::rhi::DescriptorType::UniformBuffer);
-
-        commandList.bindDescriptor(objectIconsPipeline, 0, sceneDescriptor);
-
+          liquid::LightComponent>([&objectIconsPipeline, &commandList, &ui,
+                                   &entityContext](auto entity,
+                                                   const auto &transform,
+                                                   const auto &light) {
         liquid::rhi::Descriptor sunDescriptor;
         sunDescriptor.bind(
             0, {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Sun)},
@@ -293,6 +294,27 @@ void EditorScreen::start(const Project &project) {
           commandList.draw(4, 0);
         }
       });
+
+      entityContext.iterateEntities<liquid::TransformComponent,
+                                    liquid::PerspectiveLensComponent>(
+          [&objectIconsPipeline, &commandList, &ui, &entityContext](
+              auto entity, const auto &transform, const auto &camera) {
+            liquid::rhi::Descriptor sunDescriptor;
+            sunDescriptor.bind(
+                0,
+                {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Camera)},
+                liquid::rhi::DescriptorType::CombinedImageSampler);
+            commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
+
+            liquid::StandardPushConstants transformConstant{};
+            transformConstant.modelMatrix = transform.worldTransform;
+
+            commandList.pushConstants(
+                objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                sizeof(liquid::StandardPushConstants), &transformConstant);
+
+            commandList.draw(4, 0);
+          });
     });
   }
 

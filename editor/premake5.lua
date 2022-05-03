@@ -25,7 +25,8 @@ project "Liquidator"
         "{COPYFILE} ../../editor/assets/icons/unknown.png %{cfg.buildtarget.directory}/assets/icons/unknown.png",
         "{COPYFILE} ../../editor/assets/icons/script.png %{cfg.buildtarget.directory}/assets/icons/script.png",
         "{COPYFILE} ../../editor/assets/icons/sun.png %{cfg.buildtarget.directory}/assets/icons/sun.png",
-        "{COPYFILE} ../../editor/assets/icons/direction.png %{cfg.buildtarget.directory}/assets/icons/direction.png"
+        "{COPYFILE} ../../editor/assets/icons/direction.png %{cfg.buildtarget.directory}/assets/icons/direction.png",
+        "{COPYFILE} ../../editor/assets/icons/camera.png %{cfg.buildtarget.directory}/assets/icons/camera.png"
     }
 
     copyEngineAssets("../../engine/assets", "%{cfg.buildtarget.directory}/engine/assets")

@@ -81,6 +81,17 @@ void EntityManager::save(liquid::Entity entity) {
     node["components"]["light"]["intensity"] = light->getIntensity();
   }
 
+  if (mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(entity)) {
+    const auto &lens =
+        mEntityContext.getComponent<liquid::PerspectiveLensComponent>(entity);
+
+    node["components"]["camera"]["type"] = 0; // ZERO = Perspective
+    node["components"]["camera"]["fov"] = lens.fovY;
+    node["components"]["camera"]["near"] = lens.near;
+    node["components"]["camera"]["far"] = lens.far;
+    node["components"]["camera"]["aspectRatio"] = lens.aspectRatio;
+  }
+
   auto fileName = std::to_string(entity) + ".lqnode";
   std::ofstream out(mScenePath / fileName, std::ios::out);
   out << node;
@@ -215,6 +226,28 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
 
       auto light = std::make_shared<liquid::Light>(type, color, intensity);
       mEntityContext.setComponent<liquid::LightComponent>(entity, {light});
+    }
+
+    if (node["components"]["camera"].IsMap()) {
+      const auto &camera = node["components"]["camera"];
+      liquid::PerspectiveLensComponent component;
+      if (camera["fov"].IsScalar()) {
+        component.fovY = camera["fov"].as<float>();
+      }
+
+      if (camera["near"].IsScalar()) {
+        component.near = camera["near"].as<float>();
+      }
+
+      if (camera["far"].IsScalar()) {
+        component.far = camera["far"].as<float>();
+      }
+
+      if (camera["aspectRatio"].IsScalar()) {
+        component.aspectRatio = camera["aspectRatio"].as<float>();
+      }
+
+      mEntityContext.setComponent(entity, component);
     }
   }
 
