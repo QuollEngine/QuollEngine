@@ -105,9 +105,9 @@ void Renderer::updateStorageBuffers() {
       });
 
   // Lights
-  mEntityContext.iterateEntities<LightComponent>(
+  mEntityContext.iterateEntities<DirectionalLightComponent>(
       [this](auto entity, const auto &light) {
-        mRenderStorage.addLight(*light.light.get());
+        mRenderStorage.addLight(light);
       });
 
   // Environments

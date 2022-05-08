@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "liquid/scene/Scene.h"
-#include "liquid/scene/Light.h"
 
 #include <gtest/gtest.h>
 
@@ -54,4 +53,37 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   EXPECT_EQ(camera.projectionMatrix, expectedPerspective);
   EXPECT_EQ(camera.projectionViewMatrix,
             camera.projectionMatrix * camera.viewMatrix);
+}
+
+TEST_F(SceneTest, UpdateDirectionalLightsBasedOnTransforms) {
+  liquid::Scene scene(context);
+  auto entity = context.createEntity();
+
+  {
+    liquid::TransformComponent transform{};
+    transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+
+    liquid::DirectionalLightComponent light{};
+    context.setComponent(entity, light);
+
+    scene.getRootNode()->addChild(entity, transform);
+  }
+  scene.update();
+
+  auto &transform = context.getComponent<liquid::TransformComponent>(entity);
+  auto &light = context.getComponent<liquid::DirectionalLightComponent>(entity);
+
+  glm::quat rotation;
+  glm::vec3 empty3;
+  glm::vec4 empty4;
+  glm::vec3 position;
+
+  glm::decompose(transform.worldTransform, empty3, rotation, position, empty3,
+                 empty4);
+
+  rotation = glm::conjugate(rotation);
+  auto expected =
+      glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
+
+  EXPECT_EQ(light.direction, expected);
 }

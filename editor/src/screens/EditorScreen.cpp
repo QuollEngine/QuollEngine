@@ -252,10 +252,12 @@ void EditorScreen::start(const Project &project) {
 
       entityContext.iterateEntities<
           liquid::TransformComponent,
-          liquid::LightComponent>([&objectIconsPipeline, &commandList, &ui,
-                                   &entityContext](auto entity,
-                                                   const auto &transform,
-                                                   const auto &light) {
+          liquid::DirectionalLightComponent>([&objectIconsPipeline,
+                                              &commandList, &ui,
+                                              &entityContext](
+                                                 auto entity,
+                                                 const auto &transform,
+                                                 const auto &light) {
         liquid::rhi::Descriptor sunDescriptor;
         sunDescriptor.bind(
             0, {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Sun)},

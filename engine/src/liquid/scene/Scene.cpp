@@ -70,26 +70,6 @@ void SceneNode::update() {
     component.worldTransform = localTransform;
   }
 
-  if (mEntityContext.hasComponent<LightComponent>(mEntity)) {
-    glm::quat rotation;
-    glm::vec3 empty3;
-    glm::vec4 empty4;
-    glm::vec3 position;
-
-    glm::decompose(component.worldTransform, empty3, rotation, position, empty3,
-                   empty4);
-
-    rotation = glm::conjugate(rotation);
-
-    mEntityContext.getComponent<LightComponent>(mEntity).light->setPosition(
-        position);
-    auto direction =
-        glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
-
-    mEntityContext.getComponent<LightComponent>(mEntity).light->setDirection(
-        direction);
-  }
-
   for (auto &node : mChildren) {
     node->update();
   }
@@ -108,8 +88,10 @@ Scene::~Scene() {
 }
 
 void Scene::update() {
+  LIQUID_PROFILE_EVENT("Scene::update");
   mRootNode->update();
   updateCameras();
+  updateLights();
 }
 
 void Scene::updateCameras() {
@@ -127,6 +109,27 @@ void Scene::updateCameras() {
         camera.viewMatrix = glm::inverse(transform.worldTransform);
         camera.projectionViewMatrix =
             camera.projectionMatrix * camera.viewMatrix;
+      });
+}
+
+void Scene::updateLights() {
+  LIQUID_PROFILE_EVENT("Scene::updateLights");
+
+  mEntityContext.iterateEntities<TransformComponent, DirectionalLightComponent>(
+      [](auto entity, const TransformComponent &transform,
+         DirectionalLightComponent &light) {
+        glm::quat rotation;
+        glm::vec3 empty3;
+        glm::vec4 empty4;
+        glm::vec3 position;
+
+        glm::decompose(transform.worldTransform, empty3, rotation, position,
+                       empty3, empty4);
+
+        rotation = glm::conjugate(rotation);
+
+        light.direction = glm::normalize(
+            glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
       });
 }
 

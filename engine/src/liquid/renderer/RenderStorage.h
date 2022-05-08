@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/rhi/ResourceRegistry.h"
-#include "liquid/scene/Light.h"
 #include "liquid/asset/MeshAsset.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/renderer/Material.h"
@@ -160,11 +159,11 @@ public:
                       const std::vector<glm::mat4> &skeleton);
 
   /**
-   * @brief Add light
+   * @brief Add directional light
    *
-   * @param light Light
+   * @param light Directional light component
    */
-  void addLight(const Light &light);
+  void addLight(const DirectionalLightComponent &light);
 
   /**
    * @brief Set environment textures

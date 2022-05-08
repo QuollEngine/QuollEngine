@@ -68,7 +68,8 @@ void EntityPanel::renderName() {
 }
 
 void EntityPanel::renderLight() {
-  if (!mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity)) {
+  if (!mEntityContext.hasComponent<liquid::DirectionalLightComponent>(
+          mSelectedEntity)) {
     return;
   }
 
@@ -77,27 +78,28 @@ void EntityPanel::renderLight() {
   }
 
   auto &component =
-      mEntityContext.getComponent<liquid::LightComponent>(mSelectedEntity);
+      mEntityContext.getComponent<liquid::DirectionalLightComponent>(
+          mSelectedEntity);
 
-  ImGui::Text("Type: %s", component.light->getTypeName().c_str());
+  ImGui::Text("Type");
+  if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
+    if (ImGui::Selectable("Directional")) {
+    }
+    ImGui::EndCombo();
+  }
 
   ImGui::Text("Direction");
-  const glm::vec3 &direction = component.light->getDirection();
-  ImGui::Text("%f %f %f", direction.x, direction.y, direction.z);
+  ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
+              component.direction.z);
 
   ImGui::Text("Color");
-  const glm::vec4 &color = component.light->getColor();
-  std::array<float, VEC4_ARRAY_SIZE> imguiColor{color.r, color.g, color.b,
-                                                color.a};
-  if (ImGui::ColorEdit4("###InputColor", imguiColor.data())) {
-    component.light->setColor({imguiColor.at(0), imguiColor.at(1),
-                               imguiColor.at(2), imguiColor.at(3)});
+  if (liquid::imgui::inputColor("###InputColor", component.color)) {
+    mEntityManager.save(mSelectedEntity);
   }
 
   ImGui::Text("Intensity");
-  float imguiIntensity = component.light->getIntensity();
-  if (ImGui::InputFloat("###InputIntensity", &imguiIntensity)) {
-    component.light->setIntensity(imguiIntensity);
+  if (liquid::imgui::input("###InputIntensity", component.intensity)) {
+    mEntityManager.save(mSelectedEntity);
   }
 
   if (mEntityContext.hasComponent<liquid::DebugComponent>(mSelectedEntity)) {
@@ -557,7 +559,8 @@ void EntityPanel::renderAddComponent() {
           mSelectedEntity) &&
       mEntityContext.hasComponent<liquid::CollidableComponent>(
           mSelectedEntity) &&
-      mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity) &&
+      mEntityContext.hasComponent<liquid::DirectionalLightComponent>(
+          mSelectedEntity) &&
       mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(
           mSelectedEntity);
 
@@ -596,12 +599,11 @@ void EntityPanel::renderAddComponent() {
       mEntityManager.save(mSelectedEntity);
     }
 
-    if (!mEntityContext.hasComponent<liquid::LightComponent>(mSelectedEntity) &&
+    if (!mEntityContext.hasComponent<liquid::DirectionalLightComponent>(
+            mSelectedEntity) &&
         ImGui::Selectable("Light")) {
-      auto light =
-          std::make_shared<liquid::Light>(liquid::LightType::Directional);
-      mEntityContext.setComponent<liquid::LightComponent>(mSelectedEntity,
-                                                          {light});
+      mEntityContext.setComponent<liquid::DirectionalLightComponent>(
+          mSelectedEntity, {});
       mEntityManager.save(mSelectedEntity);
     }
 
