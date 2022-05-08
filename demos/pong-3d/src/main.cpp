@@ -8,10 +8,10 @@
 #include "liquid/renderer/SceneRenderer.h"
 #include "liquid/window/Window.h"
 #include "liquid/profiler/FPSCounter.h"
+#include "liquid/scene/AutoAspectRatioComponent.h"
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/MeshInstance.h"
-#include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
 #include "liquid/asset/AssetManager.h"
 
@@ -34,8 +34,7 @@ public:
         vertexShader(
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
-            renderer.getRegistry().setShader({"basic-shader.frag.spv"})),
-        camera(new liquid::Camera(&renderer.getRegistry())) {
+            renderer.getRegistry().setShader({"basic-shader.frag.spv"})) {
 
     scene.reset(new liquid::Scene(entityContext));
 
@@ -92,11 +91,20 @@ public:
     pass.write(graph.getSwapchain(), glm::vec4{1.0f});
     pass.write(depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
     pass.addPipeline(pipeline);
-    pass.setExecutor([pipeline, this, &sceneRenderer](auto &commandList) {
+
+    auto &component =
+        entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
+
+    auto cameraBuffer = renderer.getRegistry().setBuffer(
+        {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent),
+         &component});
+
+    pass.setExecutor([cameraBuffer, pipeline, this,
+                      &sceneRenderer](auto &commandList) {
       commandList.bindPipeline(pipeline);
 
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, camera->getBuffer(),
+      descriptor.bind(0, cameraBuffer,
                       liquid::rhi::DescriptorType::UniformBuffer);
 
       commandList.bindDescriptor(pipeline, 0, descriptor);
@@ -107,6 +115,14 @@ public:
 
     mainLoop.setUpdateFn([=](float dt) mutable {
       eventSystem.poll();
+
+      auto &component =
+          entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
+      cameraBuffer = renderer.getRegistry().setBuffer(
+          {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent),
+           &component},
+          cameraBuffer);
+
       if (gameEnded) {
         auto &transform =
             entityContext.getComponent<liquid::TransformComponent>(
@@ -196,17 +212,28 @@ private:
 
   void setupScene() {
     cameraEntity = entityContext.createEntity();
-    entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {camera});
+    entityContext.setComponent<liquid::CameraComponent>(cameraEntity, {});
 
     const auto &fbSize = window.getFramebufferSize();
 
-    camera->setPerspective(70.0, static_cast<float>(fbSize.x) / fbSize.y, 0.1f,
-                           200.0f);
-    camera->lookAt({0.0f, 4.0f, -8.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
+    auto &camera =
+        entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
 
-    window.addResizeHandler([this](uint32_t width, uint32_t height) {
-      this->camera->setPerspective(70.0f, static_cast<float>(width) / height,
-                                   0.1f, 200.0f);
+    camera.projectionMatrix = glm::perspective(
+        70.0f, static_cast<float>(fbSize.x) / static_cast<float>(fbSize.y),
+        0.1f, 200.0f);
+    camera.projectionMatrix[1][1] *= -1.0f;
+    camera.viewMatrix = glm::lookAt(glm::vec3{0.0f, 4.0f, -8.0f},
+                                    {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
+    camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
+
+    window.addResizeHandler([this, &camera, &fbSize](uint32_t width,
+                                                     uint32_t height) mutable {
+      camera.projectionMatrix = glm::perspective(
+          70.0f, static_cast<float>(fbSize.x) / static_cast<float>(fbSize.y),
+          0.1f, 200.0f);
+      camera.projectionMatrix[1][1] *= -1.0f;
+      camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
     });
 
     auto e1 = entityContext.createEntity();
@@ -330,7 +357,6 @@ private:
   liquid::Renderer renderer;
   liquid::PhysicsSystem physicsSystem;
 
-  liquid::SharedPtr<liquid::Camera> camera;
   liquid::Entity cameraEntity = liquid::ENTITY_MAX;
   std::unique_ptr<liquid::Scene> scene;
 

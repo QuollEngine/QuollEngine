@@ -107,6 +107,27 @@ Scene::~Scene() {
   }
 }
 
-void Scene::update() { mRootNode->update(); }
+void Scene::update() {
+  mRootNode->update();
+  updateCameras();
+}
+
+void Scene::updateCameras() {
+  LIQUID_PROFILE_EVENT("Scene::updateCameras");
+
+  mEntityContext.iterateEntities<PerspectiveLensComponent, TransformComponent,
+                                 CameraComponent>(
+      [](auto entity, const PerspectiveLensComponent &lens,
+         const TransformComponent &transform, CameraComponent &camera) {
+        camera.projectionMatrix =
+            glm::perspective(lens.fovY, lens.aspectRatio, lens.near, lens.far);
+
+        camera.projectionMatrix[1][1] *= -1.0f;
+
+        camera.viewMatrix = glm::inverse(transform.worldTransform);
+        camera.projectionViewMatrix =
+            camera.projectionMatrix * camera.viewMatrix;
+      });
+}
 
 } // namespace liquid

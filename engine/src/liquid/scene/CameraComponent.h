@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Camera.h"
-
 namespace liquid {
 
 struct CameraComponent {
-  SharedPtr<Camera> camera;
+  glm::mat4 projectionMatrix{1.0};
+  glm::mat4 viewMatrix{1.0};
+  glm::mat4 projectionViewMatrix{1.0};
 };
 
 } // namespace liquid

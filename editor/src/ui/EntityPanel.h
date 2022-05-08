@@ -51,8 +51,10 @@ private:
 
   /**
    * @brief Render camera component
+   *
+   * @param sceneManager Scene manager
    */
-  void renderCamera();
+  void renderCamera(SceneManager &sceneManager);
 
   /**
    * @brief Render transform component

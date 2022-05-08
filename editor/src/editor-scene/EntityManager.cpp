@@ -89,7 +89,12 @@ void EntityManager::save(liquid::Entity entity) {
     node["components"]["camera"]["fov"] = lens.fovY;
     node["components"]["camera"]["near"] = lens.near;
     node["components"]["camera"]["far"] = lens.far;
-    node["components"]["camera"]["aspectRatio"] = lens.aspectRatio;
+
+    if (mEntityContext.hasComponent<liquid::AutoAspectRatioComponent>(entity)) {
+      node["components"]["camera"]["aspectRatio"] = "auto";
+    } else {
+      node["components"]["camera"]["aspectRatio"] = lens.aspectRatio;
+    }
   }
 
   auto fileName = std::to_string(entity) + ".lqnode";
@@ -230,6 +235,8 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
 
     if (node["components"]["camera"].IsMap()) {
       const auto &camera = node["components"]["camera"];
+      bool autoRatio = false;
+
       liquid::PerspectiveLensComponent component;
       if (camera["fov"].IsScalar()) {
         component.fovY = camera["fov"].as<float>();
@@ -244,10 +251,14 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
       }
 
       if (camera["aspectRatio"].IsScalar()) {
-        component.aspectRatio = camera["aspectRatio"].as<float>();
+        autoRatio = camera["aspectRatio"].as<liquid::String>() == "auto";
+
+        if (!autoRatio) {
+          component.aspectRatio = camera["aspectRatio"].as<float>();
+        }
       }
 
-      mEntityContext.setComponent(entity, component);
+      createCamera(entity, component, autoRatio);
     }
   }
 
@@ -313,6 +324,16 @@ void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
             mEntityContext.getComponent<liquid::IdComponent>(entity).id);
   } else {
     component.name = name;
+  }
+}
+
+void EntityManager::createCamera(liquid::Entity entity,
+                                 const liquid::PerspectiveLensComponent &lens,
+                                 bool autoRatio) {
+  mEntityContext.setComponent<liquid::CameraComponent>(entity, {});
+  mEntityContext.setComponent<liquid::PerspectiveLensComponent>(entity, lens);
+  if (autoRatio) {
+    mEntityContext.setComponent<liquid::AutoAspectRatioComponent>(entity, {});
   }
 }
 
@@ -410,7 +431,7 @@ liquid::TransformComponent
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   const auto &viewMatrix =
       mEntityContext.getComponent<liquid::CameraComponent>(camera.getCamera())
-          .camera->getViewMatrix();
+          .viewMatrix;
 
   constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/scene/Camera.h"
 #include "liquid/renderer/Renderer.h"
 #include "liquid/window/Window.h"
 #include "liquid/entity/EntityContext.h"
@@ -179,13 +178,6 @@ private:
    */
   void zoom();
 
-  /**
-   * @brief Update perspective
-   *
-   * @param aspectRatio Aspect ratio
-   */
-  void updatePerspective(float aspectRatio);
-
 private:
   float mFov = DEFAULT_FOV;
   float mNear = DEFAULT_NEAR;
@@ -209,7 +201,6 @@ private:
   liquid::EventObserverId mMouseScrollHandler = 0;
 
   liquid::Window &mWindow;
-  liquid::SharedPtr<liquid::Camera> mCamera;
   liquid::EntityContext &mEntityContext;
   liquid::EventSystem &mEventSystem;
   liquid::Entity mCameraEntity = liquid::ENTITY_MAX;

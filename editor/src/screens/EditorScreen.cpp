@@ -2,7 +2,6 @@
 #include "EditorScreen.h"
 
 #include "liquid/renderer/Renderer.h"
-#include "liquid/scene/MeshInstance.h"
 #include "liquid/entity/EntityContext.h"
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
@@ -10,6 +9,7 @@
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
 #include "liquid/imgui/ImguiUtils.h"
+#include "liquid/scene/CameraAspectRatioUpdater.h"
 
 #include "../editor-scene/EditorCamera.h"
 #include "../editor-scene/SceneManager.h"
@@ -54,6 +54,8 @@ void EditorScreen::start(const Project &project) {
   liquid::EntityContext entityContext;
   liquid::DebugManager debugManager;
   liquid::FPSCounter fpsCounter;
+
+  liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow, entityContext);
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqpath";
@@ -120,11 +122,6 @@ void EditorScreen::start(const Project &project) {
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
 
-  const auto &cameraObj =
-      entityContext
-          .getComponent<liquid::CameraComponent>(editorCamera.getCamera())
-          .camera;
-
   auto graph = renderer.createRenderGraph(false);
 
   {
@@ -188,11 +185,12 @@ void EditorScreen::start(const Project &project) {
     pass.addPipeline(objectIconsPipeline);
 
     pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
-                      &objectIconsPipeline, &renderer, &cameraObj,
-                      &editorCamera, &editorGrid, &entityContext,
+                      &objectIconsPipeline, &renderer, &editorCamera,
+                      &editorGrid, &entityContext, &sceneManager,
                       &ui](liquid::rhi::RenderCommandList &commandList) {
       liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, cameraObj->getBuffer(),
+      sceneDescriptor.bind(0,
+                           renderer.getRenderStorage().getActiveCameraBuffer(),
                            liquid::rhi::DescriptorType::UniformBuffer);
 
       liquid::rhi::Descriptor gridDescriptor;
@@ -208,44 +206,46 @@ void EditorScreen::start(const Project &project) {
 
       commandList.bindPipeline(skeletonLinesPipeline);
 
-      entityContext.iterateEntities<liquid::TransformComponent,
-                                    liquid::SkeletonComponent,
-                                    liquid::DebugComponent>(
-          [&commandList, &skeletonLinesPipeline,
-           &cameraObj](auto entity, auto &transform,
-                       const liquid::SkeletonComponent &skeleton,
-                       const liquid::DebugComponent &debug) {
-            if (!debug.showBones)
-              return;
+      entityContext
+          .iterateEntities<liquid::TransformComponent,
+                           liquid::SkeletonComponent, liquid::DebugComponent>(
+              [&commandList, &skeletonLinesPipeline,
+               &renderer](auto entity, auto &transform,
+                          const liquid::SkeletonComponent &skeleton,
+                          const liquid::DebugComponent &debug) {
+                if (!debug.showBones)
+                  return;
 
-            liquid::rhi::Descriptor sceneDescriptor;
-            sceneDescriptor.bind(0, cameraObj->getBuffer(),
-                                 liquid::rhi::DescriptorType::UniformBuffer);
+                liquid::rhi::Descriptor sceneDescriptor;
+                sceneDescriptor.bind(
+                    0, renderer.getRenderStorage().getActiveCameraBuffer(),
+                    liquid::rhi::DescriptorType::UniformBuffer);
 
-            liquid::rhi::Descriptor skeletonDescriptor;
-            skeletonDescriptor.bind(0, skeleton.skeleton.getDebugBuffer(),
-                                    liquid::rhi::DescriptorType::UniformBuffer);
+                liquid::rhi::Descriptor skeletonDescriptor;
+                skeletonDescriptor.bind(
+                    0, skeleton.skeleton.getDebugBuffer(),
+                    liquid::rhi::DescriptorType::UniformBuffer);
 
-            liquid::StandardPushConstants transformConstant{};
-            transformConstant.modelMatrix = transform.worldTransform;
+                liquid::StandardPushConstants transformConstant{};
+                transformConstant.modelMatrix = transform.worldTransform;
 
-            commandList.bindDescriptor(skeletonLinesPipeline, 0,
-                                       sceneDescriptor);
-            commandList.bindDescriptor(skeletonLinesPipeline, 1,
-                                       skeletonDescriptor);
+                commandList.bindDescriptor(skeletonLinesPipeline, 0,
+                                           sceneDescriptor);
+                commandList.bindDescriptor(skeletonLinesPipeline, 1,
+                                           skeletonDescriptor);
 
-            commandList.pushConstants(
-                skeletonLinesPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                sizeof(liquid::StandardPushConstants), &transformConstant);
+                commandList.pushConstants(
+                    skeletonLinesPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                    sizeof(liquid::StandardPushConstants), &transformConstant);
 
-            commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
-          });
+                commandList.draw(skeleton.skeleton.getNumDebugBones(), 0);
+              });
 
       commandList.bindPipeline(objectIconsPipeline);
 
       liquid::rhi::Descriptor objectListSceneDescriptor;
       objectListSceneDescriptor.bind(
-          0, cameraObj->getBuffer(),
+          0, renderer.getRenderStorage().getActiveCameraBuffer(),
           liquid::rhi::DescriptorType::UniformBuffer);
       commandList.bindDescriptor(objectIconsPipeline, 0,
                                  objectListSceneDescriptor);
@@ -306,8 +306,13 @@ void EditorScreen::start(const Project &project) {
                 liquid::rhi::DescriptorType::CombinedImageSampler);
             commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
 
+            static constexpr float NINETY_DEGREES_IN_RADIANS =
+                glm::pi<float>() / 2.0f;
+
             liquid::StandardPushConstants transformConstant{};
-            transformConstant.modelMatrix = transform.worldTransform;
+            transformConstant.modelMatrix =
+                glm::rotate(transform.worldTransform, NINETY_DEGREES_IN_RADIANS,
+                            glm::vec3(0, 1, 0));
 
             commandList.pushConstants(
                 objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
@@ -319,9 +324,10 @@ void EditorScreen::start(const Project &project) {
   }
 
   mainLoop.setUpdateFn([&editorCamera, &sceneManager, &animationSystem,
-                        &physicsSystem, &entityContext,
+                        &physicsSystem, &entityContext, &aspectRatioUpdater,
                         this](double dt) mutable {
     mEventSystem.poll();
+    aspectRatioUpdater.update();
     editorCamera.update();
 
     animationSystem.update(static_cast<float>(dt));
@@ -345,17 +351,34 @@ void EditorScreen::start(const Project &project) {
     imgui.beginRendering();
     ui.render(sceneManager, renderer, assetManager, physicsSystem);
 
+    ImVec2 pos{};
+    ImVec2 size{};
     if (ImGui::Begin("View")) {
-      const auto &size = ImGui::GetContentRegionAvail();
-      const auto &pos = ImGui::GetWindowPos();
+      size = ImGui::GetContentRegionAvail();
+      pos = ImGui::GetWindowPos();
       sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y);
       liquid::imgui::image(graph.second.mainColor, size);
+
       ImGui::End();
+    }
+
+    if (!sceneManager.isUsingEditorCamera()) {
+      ImGui::SetNextWindowPos(ImVec2(pos.x + size.x, pos.y + size.y), 0,
+                              ImVec2(1.0f, 1.0f));
+
+      if (ImGui::Begin("Reset editor button", nullptr,
+                       ImGuiWindowFlags_NoDecoration |
+                           ImGuiWindowFlags_NoSavedSettings |
+                           ImGuiWindowFlags_NoDocking)) {
+        if (ImGui::Button("Reset to editor camera")) {
+          sceneManager.switchToEditorCamera();
+        }
+        ImGui::End();
+      }
     }
 
 #ifdef LIQUID_PROFILER
     if (ImGui::Begin("Benchmark")) {
-
       if (ImGui::Button("Spawn prefabs")) {
         randomSpawn(entityContext, renderer, sceneManager, animationSystem,
                     assetManager);
@@ -369,8 +392,7 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
     imgui.endRendering();
 
-    return renderer.render(graph.first,
-                           sceneManager.getEditorCamera().getCamera());
+    return renderer.render(graph.first, sceneManager.getCamera());
   });
 
   mainLoop.run();

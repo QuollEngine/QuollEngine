@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/rhi/RenderHandle.h"
+
 namespace liquid {
 
 struct EnvironmentComponent {

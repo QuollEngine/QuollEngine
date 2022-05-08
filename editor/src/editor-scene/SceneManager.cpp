@@ -30,7 +30,6 @@ void SceneManager::saveEditorState(const std::filesystem::path &path) {
 }
 
 void SceneManager::loadEditorState(const std::filesystem::path &path) {
-
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {
@@ -108,6 +107,18 @@ void SceneManager::loadEditorState(const std::filesystem::path &path) {
   }
 }
 
+void SceneManager::setCamera(liquid::Entity camera) {
+  if (!mEntityContext.hasComponent<liquid::CameraComponent>(camera)) {
+    return;
+  }
+
+  mCameraEntity = camera;
+}
+
+void SceneManager::switchToEditorCamera() {
+  mCameraEntity = mEditorCamera.getCamera();
+}
+
 void SceneManager::createNewScene() {
   static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
 
@@ -132,6 +143,8 @@ void SceneManager::createNewScene() {
 
 void SceneManager::loadOrCreateScene() {
   mEditorCamera.reset();
+  mCameraEntity = mEditorCamera.getCamera();
+
   mActiveScene = new liquid::Scene(mEntityContext);
 
   if (!mEntityManager.loadScene(mActiveScene->getRootNode())) {
