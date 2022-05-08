@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Light.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/entity/EntityContext.h"
 
@@ -160,6 +159,11 @@ private:
    * @brief Update all cameras using transforms
    */
   void updateCameras();
+
+  /**
+   * @brief Update all lights using transforms
+   */
+  void updateLights();
 
 private:
   SceneNode *mRootNode = nullptr;

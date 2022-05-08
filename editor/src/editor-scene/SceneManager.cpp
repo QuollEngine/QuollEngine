@@ -132,10 +132,7 @@ void SceneManager::createNewScene() {
         mEntityManager
             .createEmptyEntity(mActiveScene->getRootNode(), transform, "Light")
             ->getEntity();
-    mEntityContext.setComponent<liquid::LightComponent>(
-        light1, {std::make_shared<liquid::Light>(
-                    liquid::LightType::Directional,
-                    glm::vec4{1.0f, 1.0f, 1.0f, 1.0f}, 1.0f)});
+    mEntityContext.setComponent<liquid::DirectionalLightComponent>(light1, {});
     mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
     mEntityManager.save(light1);
   }

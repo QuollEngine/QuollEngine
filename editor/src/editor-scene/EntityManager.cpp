@@ -71,14 +71,14 @@ void EntityManager::save(liquid::Entity entity) {
                                          .relativePath.string();
   }
 
-  if (mEntityContext.hasComponent<liquid::LightComponent>(entity)) {
+  if (mEntityContext.hasComponent<liquid::DirectionalLightComponent>(entity)) {
     const auto &light =
-        mEntityContext.getComponent<liquid::LightComponent>(entity).light;
+        mEntityContext.getComponent<liquid::DirectionalLightComponent>(entity);
 
-    node["components"]["light"]["type"] =
-        static_cast<uint32_t>(light->getType());
-    node["components"]["light"]["color"] = light->getColor();
-    node["components"]["light"]["intensity"] = light->getIntensity();
+    // Directional light
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["color"] = light.color;
+    node["components"]["light"]["intensity"] = light.intensity;
   }
 
   if (mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(entity)) {
@@ -214,11 +214,9 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
     if (node["components"]["light"].IsMap()) {
       float intensity = 1.0f;
       glm::vec4 color{1.0f};
-      liquid::LightType type = liquid::LightType::Directional;
 
-      if (node["components"]["light"]["type"].IsScalar()) {
-        type = static_cast<liquid::LightType>(
-            node["components"]["light"]["type"].as<uint32_t>());
+      if (!node["components"]["light"]["type"].IsScalar()) {
+        continue;
       }
 
       if (node["components"]["light"]["intensity"].IsScalar()) {
@@ -229,8 +227,15 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
         color = node["components"]["light"]["color"].as<glm::vec4>();
       }
 
-      auto light = std::make_shared<liquid::Light>(type, color, intensity);
-      mEntityContext.setComponent<liquid::LightComponent>(entity, {light});
+      auto type = node["components"]["light"]["type"].as<uint32_t>();
+
+      // Directional
+      if (type == 0) {
+        liquid::DirectionalLightComponent component;
+        component.color = color;
+        component.intensity = intensity;
+        mEntityContext.setComponent(entity, component);
+      }
     }
 
     if (node["components"]["camera"].IsMap()) {
@@ -260,6 +265,8 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
 
       createCamera(entity, component, autoRatio);
     }
+
+    mEntityContext.setComponent<liquid::DebugComponent>(entity, {});
   }
 
   for (auto &[id, node] : mapping) {
