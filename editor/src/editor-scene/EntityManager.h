@@ -100,6 +100,17 @@ public:
   void setName(liquid::Entity entity, const liquid::String &name);
 
   /**
+   * @brief Set camera
+   *
+   * @param entity Entity
+   * @param lens Perspective lens component
+   * @param autoRatio Calculate aspect ratio automatically
+   */
+  void createCamera(liquid::Entity entity,
+                    const liquid::PerspectiveLensComponent &lens,
+                    bool autoRatio);
+
+  /**
    * @brief Delete entity
    *
    * @param entity Entity

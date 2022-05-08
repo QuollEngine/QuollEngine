@@ -71,6 +71,35 @@ public:
   inline EntityManager &getEntityManager() { return mEntityManager; }
 
   /**
+   * @brief Get camera
+   *
+   * @return Camera entity
+   */
+  inline liquid::Entity getCamera() { return mCameraEntity; }
+
+  /**
+   * @brief Set camera
+   *
+   * @param camera Camera entity
+   */
+  void setCamera(liquid::Entity camera);
+
+  /**
+   * @brief Switch to editor camera
+   */
+  void switchToEditorCamera();
+
+  /**
+   * @brief Check if editor camera is active
+   *
+   * @retval true Editor camera is active
+   * @retval false Editor camera is not active
+   */
+  inline bool isUsingEditorCamera() const {
+    return mCameraEntity == mEditorCamera.getCamera();
+  }
+
+  /**
    * @brief Creates a new scene and sets it as active
    */
   void createNewScene();
@@ -112,6 +141,7 @@ private:
   uint32_t mLastId = 1;
 
   liquid::Entity mEnvironmentEntity = liquid::ENTITY_MAX;
+  liquid::Entity mCameraEntity = liquid::ENTITY_MAX;
 };
 
 } // namespace liquidator

@@ -29,8 +29,11 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render(rhi::RenderGraph &graph, Entity camera) {
-  mRenderStorage.setActiveCamera(
-      mEntityContext.getComponent<CameraComponent>(camera).camera);
+  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(camera),
+                "Entity does not have a camera");
+  mRenderStorage.setCameraData(
+      mEntityContext.getComponent<CameraComponent>(camera));
+
   updateStorageBuffers();
   mDevice->execute(graph, mGraphEvaluator);
 }

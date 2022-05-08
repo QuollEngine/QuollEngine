@@ -1,10 +1,11 @@
 #pragma once
 
+#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/scene/Light.h"
-#include "liquid/scene/Camera.h"
 #include "liquid/asset/MeshAsset.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/renderer/Material.h"
+#include "liquid/entity/EntityContext.h"
 
 namespace liquid {
 
@@ -176,12 +177,7 @@ public:
                               rhi::TextureHandle specularMap,
                               rhi::TextureHandle brdfLUT);
 
-  /**
-   * @brief Set active camera
-   *
-   * @param camera Camera
-   */
-  void setActiveCamera(const SharedPtr<Camera> &camera);
+  void setCameraData(const CameraComponent &data);
 
   /**
    * @brief Clear intermediary buffers
@@ -194,6 +190,7 @@ private:
   std::unique_ptr<glm::mat4> mSkeletonVector;
   std::vector<LightData> mLights;
   SceneData mSceneData{};
+  CameraComponent mCameraData;
 
   size_t mLastSkeleton = 0;
 

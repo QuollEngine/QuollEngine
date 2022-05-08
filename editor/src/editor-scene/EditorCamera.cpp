@@ -3,7 +3,6 @@
 
 #include <GLFW/glfw3.h>
 
-using liquid::Camera;
 using liquid::Renderer;
 using liquid::Window;
 
@@ -12,8 +11,8 @@ namespace liquidator {
 EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
                            liquid::EventSystem &eventSystem,
                            liquid::Renderer &renderer, liquid::Window &window)
-    : mEntityContext(entityContext), mEventSystem(eventSystem), mWindow(window),
-      mCamera(new Camera(&renderer.getRegistry())) {
+    : mEntityContext(entityContext), mEventSystem(eventSystem),
+      mWindow(window) {
 
   mMouseButtonReleaseHandler = mEventSystem.observe(
       liquid::MouseButtonEvent::Released,
@@ -132,10 +131,16 @@ void EditorCamera::update() {
     zoom();
   }
 
-  mCamera->lookAt(mEye, mCenter, mUp);
-  mCamera->setPerspective(
+  auto &camera =
+      mEntityContext.getComponent<liquid::CameraComponent>(mCameraEntity);
+
+  camera.projectionMatrix = glm::perspective(
       mFov, static_cast<float>(mWidth) / static_cast<float>(mHeight), mNear,
       mFar);
+  camera.projectionMatrix[1][1] *= -1;
+
+  camera.viewMatrix = glm::lookAt(mEye, mCenter, mUp);
+  camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
 }
 
 void EditorCamera::reset() {
@@ -148,9 +153,8 @@ void EditorCamera::reset() {
 
   if (!mEntityContext.hasEntity(mCameraEntity)) {
     mCameraEntity = mEntityContext.createEntity();
-    mEntityContext.setComponent<liquid::CameraComponent>(mCameraEntity,
-                                                         {mCamera});
   }
+  mEntityContext.setComponent<liquid::CameraComponent>(mCameraEntity, {});
 }
 
 void EditorCamera::pan() {
@@ -210,10 +214,6 @@ void EditorCamera::setViewport(float x, float y, float width, float height) {
   mY = y;
   mWidth = width;
   mHeight = height;
-}
-
-void EditorCamera::updatePerspective(float aspectRatio) {
-  mCamera->setPerspective(mFov, aspectRatio, mNear, mFar);
 }
 
 } // namespace liquidator

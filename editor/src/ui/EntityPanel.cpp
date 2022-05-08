@@ -21,7 +21,7 @@ void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
       renderTransform();
       renderMesh(assetRegistry);
       renderLight();
-      renderCamera();
+      renderCamera(sceneManager);
       renderAnimation(assetRegistry);
       renderSkeleton();
       renderCollidable();
@@ -108,7 +108,7 @@ void EntityPanel::renderLight() {
   }
 }
 
-void EntityPanel::renderCamera() {
+void EntityPanel::renderCamera(SceneManager &sceneManager) {
   if (!mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(
           mSelectedEntity)) {
     return;
@@ -151,34 +151,45 @@ void EntityPanel::renderCamera() {
 
   ImGui::Text("Aspect Ratio");
   static constexpr float MIN_CUSTOM_ASPECT_RATIO = 0.01f;
+  static constexpr float MAX_CUSTOM_ASPECT_RATIO = 1000.0f;
 
-  if (ImGui::BeginCombo(
-          "###AspectRatioType",
-          component.aspectRatio == 0.0f ? "Viewport ratio" : "Custom", 0)) {
+  bool hasViewportAspectRatio =
+      mEntityContext.hasComponent<liquid::AutoAspectRatioComponent>(
+          mSelectedEntity);
+
+  if (ImGui::BeginCombo("###AspectRatioType",
+                        hasViewportAspectRatio ? "Viewport ratio" : "Custom",
+                        0)) {
 
     if (ImGui::Selectable("Viewport ratio")) {
-      component.aspectRatio = 0.0f;
+      mEntityContext.setComponent<liquid::AutoAspectRatioComponent>(
+          mSelectedEntity, {});
       mEntityManager.save(mSelectedEntity);
     }
 
     if (ImGui::Selectable("Custom")) {
-      component.aspectRatio = MIN_CUSTOM_ASPECT_RATIO;
+      mEntityContext.deleteComponent<liquid::AutoAspectRatioComponent>(
+          mSelectedEntity);
       mEntityManager.save(mSelectedEntity);
     }
 
     ImGui::EndCombo();
   }
 
-  if (component.aspectRatio > 0.0f) {
+  if (!hasViewportAspectRatio) {
     ImGui::Text("Custom aspect ratio");
     if (ImGui::DragFloat("###CustomAspectRatio", &component.aspectRatio,
-                         MIN_CUSTOM_ASPECT_RATIO, MIN_CUSTOM_ASPECT_RATIO, 1.0f,
-                         "%.2f")) {
+                         MIN_CUSTOM_ASPECT_RATIO, MIN_CUSTOM_ASPECT_RATIO,
+                         MAX_CUSTOM_ASPECT_RATIO, "%.2f")) {
     }
 
     if (ImGui::IsItemDeactivatedAfterEdit()) {
       mEntityManager.save(mSelectedEntity);
     }
+  }
+
+  if (ImGui::Button("Set as active camera")) {
+    sceneManager.setCamera(mSelectedEntity);
   }
 }
 
@@ -597,8 +608,7 @@ void EntityPanel::renderAddComponent() {
     if (!mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(
             mSelectedEntity) &&
         ImGui::Selectable("Camera")) {
-      mEntityContext.setComponent<liquid::PerspectiveLensComponent>(
-          mSelectedEntity, {});
+      mEntityManager.createCamera(mSelectedEntity, {}, true);
       mEntityManager.save(mSelectedEntity);
     }
 

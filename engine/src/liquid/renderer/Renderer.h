@@ -9,7 +9,6 @@
 
 #include "liquid/entity/EntityContext.h"
 
-#include "liquid/scene/Camera.h"
 #include "liquid/scene/Scene.h"
 
 #include "liquid/profiler/DebugManager.h"

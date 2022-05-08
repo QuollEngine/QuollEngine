@@ -16,8 +16,6 @@ RenderStorage::RenderStorage(size_t reservedSpace)
 }
 
 void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
-  LIQUID_ASSERT(rhi::isHandleValid(mCameraBuffer), "Camera is not set");
-
   mMeshTransformsBuffer = registry.setBuffer(
       {
           rhi::BufferType::Storage,
@@ -46,6 +44,10 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
                                       mLights.capacity() * sizeof(LightData),
                                       mLights.data()},
                                      mLightsBuffer);
+
+  mCameraBuffer = registry.setBuffer(
+      {rhi::BufferType::Uniform, sizeof(CameraComponent), &mCameraData},
+      mCameraBuffer);
 
   mSceneBuffer = registry.setBuffer(
       {rhi::BufferType::Uniform, sizeof(SceneData), &mSceneData}, mSceneBuffer);
@@ -106,8 +108,8 @@ void RenderStorage::setEnvironmentTextures(rhi::TextureHandle irradianceMap,
   mSceneData.data.y = 1;
 }
 
-void RenderStorage::setActiveCamera(const SharedPtr<Camera> &camera) {
-  mCameraBuffer = camera->getBuffer();
+void RenderStorage::setCameraData(const CameraComponent &data) {
+  mCameraData = data;
 }
 
 void RenderStorage::clear() {

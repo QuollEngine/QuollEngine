@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Camera.h"
 #include "Light.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/entity/EntityContext.h"
@@ -155,6 +154,12 @@ public:
    * @return Entity context
    */
   inline EntityContext &getEntityContext() { return mEntityContext; }
+
+private:
+  /**
+   * @brief Update all cameras using transforms
+   */
+  void updateCameras();
 
 private:
   SceneNode *mRootNode = nullptr;
