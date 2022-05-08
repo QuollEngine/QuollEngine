@@ -214,9 +214,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
               mDirectoryChanged = true;
             } else {
               sceneManager.getEntityManager().spawnAsset(
-                  sceneManager.getEditorCamera(),
-                  sceneManager.getActiveScene()->getRootNode(), entry.asset,
-                  entry.assetType);
+                  sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
+                  entry.asset, entry.assetType);
             }
           }
         }

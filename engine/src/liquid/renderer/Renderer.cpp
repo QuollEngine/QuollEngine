@@ -20,14 +20,6 @@ Renderer::Renderer(EntityContext &entityContext, AssetRegistry &assetRegistry,
   loadShaders();
 }
 
-Renderer::~Renderer() {
-  mEntityContext.destroyComponents<MeshComponent>();
-  mEntityContext.destroyComponents<SkinnedMeshComponent>();
-  mEntityContext.destroyComponents<SkeletonComponent>();
-
-  mShadowMaterials.clear();
-}
-
 void Renderer::render(rhi::RenderGraph &graph, Entity camera) {
   LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(camera),
                 "Entity does not have a camera");

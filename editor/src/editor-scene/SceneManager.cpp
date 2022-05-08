@@ -128,10 +128,8 @@ void SceneManager::createNewScene() {
     transform.localRotation =
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
-    auto light1 =
-        mEntityManager
-            .createEmptyEntity(mActiveScene->getRootNode(), transform, "Light")
-            ->getEntity();
+    auto light1 = mEntityManager.createEmptyEntity(liquid::ENTITY_MAX,
+                                                   transform, "Light");
     mEntityContext.setComponent<liquid::DirectionalLightComponent>(light1, {});
     mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
     mEntityManager.save(light1);
@@ -144,7 +142,7 @@ void SceneManager::loadOrCreateScene() {
 
   mActiveScene = new liquid::Scene(mEntityContext);
 
-  if (!mEntityManager.loadScene(mActiveScene->getRootNode())) {
+  if (!mEntityManager.loadScene()) {
     createNewScene();
   }
 }

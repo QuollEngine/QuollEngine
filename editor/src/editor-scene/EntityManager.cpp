@@ -30,16 +30,13 @@ void EntityManager::save(liquid::Entity entity) {
     node["components"]["transform"]["position"] = transform.localPosition;
     node["components"]["transform"]["rotation"] = transform.localRotation;
     node["components"]["transform"]["scale"] = transform.localScale;
-    if (mEntityContext.hasComponent<liquid::TransformComponent>(
-            transform.parent) &&
-        mEntityContext.hasComponent<liquid::IdComponent>(transform.parent)) {
-      auto parentId =
-          mEntityContext.getComponent<liquid::IdComponent>(transform.parent).id;
+  }
 
-      node["components"]["transform"]["parent"] = parentId;
-    } else {
-      node["components"]["transform"]["parent"] = 0;
-    }
+  if (mEntityContext.hasComponent<liquid::ParentComponent>(entity)) {
+    node["components"]["transform"]["parent"] =
+        mEntityContext.getComponent<liquid::ParentComponent>(entity).parent;
+  } else {
+    node["components"]["transform"]["parent"] = 0;
   }
 
   if (mEntityContext.hasComponent<liquid::MeshComponent>(entity)) {
@@ -103,36 +100,47 @@ void EntityManager::save(liquid::Entity entity) {
   out.close();
 }
 
-liquid::SceneNode *
-EntityManager::createEmptyEntity(liquid::SceneNode *parent,
+liquid::Entity
+EntityManager::createEmptyEntity(liquid::Entity parent,
                                  const liquid::TransformComponent &transform,
                                  const liquid::String &name) {
   auto entity = mEntityContext.createEntity();
   mEntityContext.setComponent<liquid::DebugComponent>(entity, {});
   mEntityContext.setComponent<liquid::IdComponent>(entity, {mLastId});
-  setName(entity, name);
+  mEntityContext.setComponent(entity, transform);
 
-  auto *node = parent->addChild(entity, transform);
+  if (mEntityContext.hasEntity(parent)) {
+    mEntityContext.setComponent<liquid::ParentComponent>(entity, {parent});
+
+    if (!mEntityContext.hasComponent<liquid::ChildrenComponent>(parent)) {
+      mEntityContext.setComponent<liquid::ChildrenComponent>(parent, {});
+    }
+
+    mEntityContext.getComponent<liquid::ChildrenComponent>(parent)
+        .children.push_back(entity);
+  }
+
+  setName(entity, name);
 
   mLastId++;
 
-  return node;
+  return entity;
 }
 
-liquid::SceneNode *EntityManager::createEmptyEntity(EditorCamera &camera,
-                                                    liquid::SceneNode *parent,
-                                                    const liquid::String &name,
-                                                    bool saveToFile) {
-  auto *node = createEmptyEntity(parent, getTransformFromCamera(camera), name);
+liquid::Entity EntityManager::createEmptyEntity(EditorCamera &camera,
+                                                liquid::Entity parent,
+                                                const liquid::String &name,
+                                                bool saveToFile) {
+  auto entity = createEmptyEntity(parent, getTransformFromCamera(camera), name);
 
   if (saveToFile) {
-    save(node->getEntity());
+    save(entity);
   }
 
-  return node;
+  return entity;
 }
 
-bool EntityManager::loadScene(liquid::SceneNode *root) {
+bool EntityManager::loadScene() {
   std::unordered_map<uint32_t, YAML::Node> mapping;
   for (auto entry : std::filesystem::directory_iterator(mScenePath)) {
     std::ifstream stream(entry.path(), std::ios::in);
@@ -148,15 +156,13 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
     return false;
   }
 
-  std::map<uint64_t, liquid::SceneNode *> entityMap;
+  std::map<uint64_t, liquid::Entity> newEntityMap;
 
   for (auto &[id, node] : mapping) {
     auto entity = mEntityContext.createEntity();
     liquid::IdComponent idComponent = {node["id"].as<uint64_t>()};
     mEntityContext.setComponent(entity, idComponent);
-    entityMap.insert_or_assign(
-        idComponent.id,
-        new liquid::SceneNode(entity, {}, nullptr, mEntityContext));
+    newEntityMap.insert_or_assign(idComponent.id, entity);
 
     mLastId = std::max(idComponent.id, mLastId);
 
@@ -269,19 +275,25 @@ bool EntityManager::loadScene(liquid::SceneNode *root) {
     mEntityContext.setComponent<liquid::DebugComponent>(entity, {});
   }
 
+  std::unordered_map<liquid::Entity, std::vector<liquid::Entity>> childrenMap;
+
   for (auto &[id, node] : mapping) {
     if (node["components"]["transform"]["parent"].IsScalar()) {
-      auto *sceneNode = entityMap.at(id);
-      auto &transform = sceneNode->getTransform();
       auto parent = node["components"]["transform"]["parent"].as<uint64_t>();
+      auto entity = newEntityMap.at(id);
 
-      if (entityMap.find(parent) != entityMap.end()) {
-        transform.parent = entityMap.at(parent)->getEntity();
-        entityMap.at(parent)->addChild(sceneNode);
-      } else {
-        root->addChild(sceneNode);
+      if (newEntityMap.find(parent) != newEntityMap.end()) {
+        auto parentEntity = newEntityMap.at(parent);
+        mEntityContext.setComponent<liquid::ParentComponent>(
+            entity, {newEntityMap.at(parent)});
+
+        childrenMap[parentEntity].push_back(entity);
       }
     }
+  }
+
+  for (auto &[entity, children] : childrenMap) {
+    mEntityContext.setComponent<liquid::ChildrenComponent>(entity, {children});
   }
 
   mLastId++;
@@ -350,11 +362,18 @@ void EntityManager::deleteEntity(liquid::Entity entity) {
   auto fileName = std::to_string(id.id) + ".lqnode";
   mEntityContext.deleteEntity(entity);
   std::filesystem::remove(std::filesystem::path(mScenePath / fileName));
+
+  if (mEntityContext.hasComponent<liquid::ChildrenComponent>(entity)) {
+    for (auto child :
+         mEntityContext.getComponent<liquid::ChildrenComponent>(entity)
+             .children) {
+      deleteEntity(child);
+    }
+  }
 }
 
 liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
-                                         liquid::SceneNode *root,
-                                         uint32_t handle,
+                                         liquid::Entity root, uint32_t handle,
                                          liquid::AssetType type,
                                          bool saveToFile) {
   if (type != liquid::AssetType::Prefab) {
@@ -363,18 +382,17 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
 
   auto &asset = mAssetManager.getRegistry().getPrefabs().getAsset(
       static_cast<liquid::PrefabAssetHandle>(handle));
-  auto *parent = createEmptyEntity(camera, root, asset.name, saveToFile);
-  auto parentEntity = parent->getEntity();
+  auto parent = createEmptyEntity(camera, root, asset.name, saveToFile);
 
   std::map<uint32_t, liquid::Entity> entityMap;
 
   auto getOrCreateEntity =
-      [&entityMap, this, &camera,
-       &parent](uint32_t localId,
+      [&entityMap, this, parent,
+       &camera](uint32_t localId,
                 const liquid::TransformComponent &transform = {}) mutable {
         if (entityMap.find(localId) == entityMap.end()) {
-          auto *node = createEmptyEntity(parent, transform);
-          entityMap.insert_or_assign(localId, node->getEntity());
+          auto entity = createEmptyEntity(parent, transform);
+          entityMap.insert_or_assign(localId, entity);
         }
 
         return entityMap.at(localId);
@@ -385,15 +403,8 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
     transform.localPosition = item.value.position;
     transform.localRotation = item.value.rotation;
     transform.localScale = item.value.scale;
-    getOrCreateEntity(item.entity, transform);
-  }
 
-  for (auto &item : asset.data.transforms) {
-    auto &transform = mEntityContext.getComponent<liquid::TransformComponent>(
-        entityMap.at(item.entity));
-    if (item.value.parent >= 0) {
-      transform.parent = getOrCreateEntity(item.value.parent);
-    }
+    getOrCreateEntity(item.entity, transform);
   }
 
   for (auto &item : asset.data.meshes) {
@@ -431,7 +442,7 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
     }
   }
 
-  return parentEntity;
+  return parent;
 }
 
 liquid::TransformComponent

@@ -10,6 +10,8 @@
 #include "liquid/scene/PerspectiveLensComponent.h"
 #include "liquid/scene/AutoAspectRatioComponent.h"
 #include "liquid/scene/CameraComponent.h"
+#include "liquid/scene/ParentComponent.h"
+#include "liquid/scene/ChildrenComponent.h"
 #include "liquid/scene/TransformComponent.h"
 #include "liquid/scene/EnvironmentComponent.h"
 #include "liquid/animation/AnimatorComponent.h"
@@ -27,8 +29,8 @@ namespace liquid {
 using EntityContext = EntityStorageSparseSet<
     IdComponent, MeshComponent, DirectionalLightComponent, CameraComponent,
     AutoAspectRatioComponent, PerspectiveLensComponent, TransformComponent,
-    EnvironmentComponent, AnimatorComponent, NameComponent,
-    SkinnedMeshComponent, SkeletonComponent, RigidBodyComponent,
+    ParentComponent, ChildrenComponent, EnvironmentComponent, AnimatorComponent,
+    NameComponent, SkinnedMeshComponent, SkeletonComponent, RigidBodyComponent,
     CollidableComponent, ScriptingComponent, DebugComponent>;
 
 } // namespace liquid

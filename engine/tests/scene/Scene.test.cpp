@@ -11,16 +11,73 @@ public:
 
 using SceneDeathTest = SceneTest;
 
-TEST_F(SceneTest, CreatesEmptyRootNodeOnConstruct) {
+glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
+  return glm::translate(glm::mat4(1.0f), transform.localPosition) *
+         glm::toMat4(transform.localRotation) *
+         glm::scale(glm::mat4(1.0f), transform.localScale);
+}
+
+TEST_F(SceneTest, SetsLocalTransformToWorldTransformIfNoParent) {
   liquid::Scene scene(context);
 
-  auto *rootNode = scene.getRootNode();
+  auto entity = context.createEntity();
+  liquid::TransformComponent transform{};
+  transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
+  transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+  transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
+
+  context.setComponent(entity, transform);
 
   scene.update();
 
-  EXPECT_NE(rootNode->getEntity(), std::numeric_limits<liquid::Entity>::max());
-  EXPECT_EQ(rootNode->getParent(), nullptr);
-  EXPECT_TRUE(rootNode->getWorldTransform() == glm::mat4{1.0f});
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(entity).worldTransform,
+      getLocalTransform(transform));
+}
+
+TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
+  liquid::Scene scene(context);
+
+  // parent
+  auto parent = context.createEntity();
+  liquid::TransformComponent parentTransform{};
+  parentTransform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
+  parentTransform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+  parentTransform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
+  context.setComponent(parent, parentTransform);
+
+  // parent -> child1
+  auto child1 = context.createEntity();
+  liquid::TransformComponent child1Transform{};
+  child1Transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
+  child1Transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+  child1Transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
+  context.setComponent(child1, child1Transform);
+  context.setComponent<liquid::ParentComponent>(child1, {parent});
+
+  // parent -> child1 -> child2
+  auto child2 = context.createEntity();
+  liquid::TransformComponent child2Transform{};
+  child2Transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
+  child2Transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+  child2Transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
+  context.setComponent(child2, child2Transform);
+  context.setComponent<liquid::ParentComponent>(child2, {child1});
+
+  scene.update();
+
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(parent).worldTransform,
+      getLocalTransform(parentTransform));
+
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(child1).worldTransform,
+      getLocalTransform(parentTransform) * getLocalTransform(child1Transform));
+
+  EXPECT_EQ(
+      context.getComponent<liquid::TransformComponent>(child2).worldTransform,
+      getLocalTransform(parentTransform) * getLocalTransform(child1Transform) *
+          getLocalTransform(child2Transform));
 }
 
 TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
@@ -30,14 +87,13 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   {
     liquid::TransformComponent transform{};
     transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
+    context.setComponent(entity, transform);
 
     liquid::PerspectiveLensComponent lens{};
-    liquid::CameraComponent camera{};
-
     context.setComponent(entity, lens);
-    context.setComponent(entity, camera);
 
-    scene.getRootNode()->addChild(entity, transform);
+    liquid::CameraComponent camera{};
+    context.setComponent(entity, camera);
   }
   scene.update();
 
@@ -62,11 +118,10 @@ TEST_F(SceneTest, UpdateDirectionalLightsBasedOnTransforms) {
   {
     liquid::TransformComponent transform{};
     transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
+    context.setComponent(entity, transform);
 
     liquid::DirectionalLightComponent light{};
     context.setComponent(entity, light);
-
-    scene.getRootNode()->addChild(entity, transform);
   }
   scene.update();
 

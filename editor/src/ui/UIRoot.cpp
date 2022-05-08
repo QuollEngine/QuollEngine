@@ -7,8 +7,9 @@ UIRoot::UIRoot(liquid::EntityContext &entityContext,
                EntityManager &entityManager, GLTFImporter &gltfImporter)
     : mAssetBrowser(gltfImporter), mSceneHierarchyPanel(entityContext),
       mEntityPanel(entityContext, entityManager) {
-  mSceneHierarchyPanel.setNodeClickHandler(
-      [this](liquid::SceneNode *node) { handleNodeClick(node); });
+  mSceneHierarchyPanel.setEntityClickHandler([this](liquid::Entity entity) {
+    mEntityPanel.setSelectedEntity(entity);
+  });
 }
 
 void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
@@ -28,10 +29,6 @@ void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
 
   mEditorCameraPanel.render(sceneManager);
   mAssetBrowser.render(assetManager, mIconRegistry, sceneManager);
-}
-
-void UIRoot::handleNodeClick(liquid::SceneNode *node) {
-  mEntityPanel.setSelectedEntity(node->getEntity());
 }
 
 } // namespace liquidator

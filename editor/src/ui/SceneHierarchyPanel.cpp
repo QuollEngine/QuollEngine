@@ -11,29 +11,32 @@ SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &entityContext)
 
 void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::Begin("Hierarchy");
-  for (auto *child :
-       sceneManager.getActiveScene()->getRootNode()->getChildren()) {
-    renderNode(child, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
-  }
+
+  mEntityContext.iterateEntities<liquid::TransformComponent>(
+      [this, &sceneManager](auto entity, const auto &transform) {
+        if (mEntityContext.hasComponent<liquid::ParentComponent>(entity)) {
+          return;
+        }
+
+        renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
+      });
 
   ImGui::End();
 }
 
-void SceneHierarchyPanel::setNodeClickHandler(const NodeClickHandler &handler) {
-  mNodeClickHandler = handler;
+void SceneHierarchyPanel::setEntityClickHandler(
+    const EntityClickHandler &handler) {
+  mEntityClickHandler = handler;
 }
 
-void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
-                                     SceneManager &sceneManager) {
-  liquid::String name;
-  if (mEntityContext.hasComponent<liquid::NameComponent>(node->getEntity())) {
-    name = mEntityContext.getComponent<liquid::NameComponent>(node->getEntity())
-               .name;
-  } else {
-    name = "Entity " + std::to_string(node->getEntity());
-  }
+void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
+                                       SceneManager &sceneManager) {
+  liquid::String name =
+      mEntityContext.hasComponent<liquid::NameComponent>(entity)
+          ? mEntityContext.getComponent<liquid::NameComponent>(entity).name
+          : "Entity #" + std::to_string(entity);
 
-  bool isLeaf = node->getChildren().empty();
+  bool isLeaf = !mEntityContext.hasComponent<liquid::ChildrenComponent>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -41,7 +44,7 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
         ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
   }
 
-  if (mSelectedNode == node) {
+  if (mSelectedEntity == entity) {
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
 
@@ -49,22 +52,22 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
     open = !isLeaf;
     if (ImGui::IsItemClicked()) {
-      mNodeClickHandler(node);
-      mSelectedNode = node;
+      mEntityClickHandler(entity);
+      mSelectedEntity = entity;
     }
   }
 
   ConfirmationDialog confirmDeleteSceneNode(
-      "Delete scene node#" + std::to_string(node->getEntity()),
+      "Delete entity ",
       "Are you sure you want to delete node \"" + name + "\"?",
-      [this, node](SceneManager &sceneManager) {
-        handleDelete(node, sceneManager.getEntityManager());
+      [this, entity](SceneManager &sceneManager) {
+        sceneManager.getEntityManager().deleteEntity(entity);
       },
       "Delete");
 
   if (ImGui::BeginPopupContextItem()) {
     if (ImGui::MenuItem("Go to view")) {
-      handleMoveToNode(node, sceneManager);
+      sceneManager.moveCameraToEntity(entity);
     }
 
     if (ImGui::MenuItem("Delete")) {
@@ -77,28 +80,16 @@ void SceneHierarchyPanel::renderNode(liquid::SceneNode *node, int flags,
   confirmDeleteSceneNode.render(sceneManager);
 
   if (open) {
-    for (auto *child : node->getChildren()) {
-      renderNode(child, 0, sceneManager);
+    if (mEntityContext.hasComponent<liquid::ChildrenComponent>(entity)) {
+      for (auto childEntity :
+           mEntityContext.getComponent<liquid::ChildrenComponent>(entity)
+               .children) {
+        renderEntity(childEntity, 0, sceneManager);
+      }
     }
+
     ImGui::TreePop();
   }
-}
-
-void SceneHierarchyPanel::handleDelete(liquid::SceneNode *node,
-                                       EntityManager &entityManager) {
-  auto entity = node->getEntity();
-  auto *parent = node->getParent();
-
-  if (parent) {
-    parent->removeChild(node);
-  }
-
-  entityManager.deleteEntity(entity);
-}
-
-void SceneHierarchyPanel::handleMoveToNode(liquid::SceneNode *node,
-                                           SceneManager &sceneManager) {
-  sceneManager.moveCameraToEntity(node->getEntity());
 }
 
 } // namespace liquidator

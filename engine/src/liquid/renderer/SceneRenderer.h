@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "RenderStorage.h"
