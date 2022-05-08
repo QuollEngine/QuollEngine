@@ -125,8 +125,7 @@ public:
 
       if (gameEnded) {
         auto &transform =
-            entityContext.getComponent<liquid::TransformComponent>(
-                ball->getEntity());
+            entityContext.getComponent<liquid::TransformComponent>(ball);
         transform.localPosition = glm::vec3{0.0f, 0.0f, 0.0f};
         gameEnded = false;
       }
@@ -165,12 +164,13 @@ private:
 
   void updateScene() {
     {
-      auto &transform = p2->getTransform();
+      auto &transform =
+          entityContext.getComponent<liquid::TransformComponent>(p2);
       transform.localPosition.x = botPosition;
     }
-
     {
-      auto &transform = p1->getTransform();
+      auto &transform =
+          entityContext.getComponent<liquid::TransformComponent>(p1);
       transform.localPosition.x = playerPosition;
     }
 
@@ -181,17 +181,20 @@ private:
 
     static bool firstTime = true;
     if (firstTime) {
-      auto &rigidBody = entityContext.getComponent<liquid::RigidBodyComponent>(
-          ball->getEntity());
+      auto &rigidBody =
+          entityContext.getComponent<liquid::RigidBodyComponent>(ball);
       rigidBody.actor->addForce({0.0f, 0.0f, 800.0f});
       rigidBody.actor->addTorque({10.0f, 0.0f, 0.0f});
 
       firstTime = !firstTime;
     }
 
-    if (abs(botPosition - ball->getTransform().localPosition.x) < 0.2f) {
+    auto &ballTransform =
+        entityContext.getComponent<liquid::TransformComponent>(ball);
+
+    if (abs(botPosition - ballTransform.localPosition.x) < 0.2f) {
       botVelocity = 0.0;
-    } else if (botPosition > ball->getTransform().localPosition.x) {
+    } else if (botPosition > ballTransform.localPosition.x) {
       botVelocity = -velocity;
     } else {
       botVelocity = velocity;
@@ -241,9 +244,9 @@ private:
     auto e3 = entityContext.createEntity();
     auto e4 = entityContext.createEntity();
 
-    auto pe1 = entityContext.createEntity();
-    auto pe2 = entityContext.createEntity();
-    auto ballEntity = entityContext.createEntity();
+    ball = entityContext.createEntity();
+    p1 = entityContext.createEntity();
+    p2 = entityContext.createEntity();
 
     entityContext.setComponent<liquid::MeshComponent>(e1, {barMesh});
     entityContext.setComponent<liquid::MeshComponent>(e2, {barMesh});
@@ -271,32 +274,31 @@ private:
                 liquid::PhysicsGeometryBox{glm::vec3(5.0f, 0.2f, 0.1f)}}});
 
     entityContext.setComponent<liquid::CollidableComponent>(
-        ballEntity, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
-                        liquid::PhysicsGeometryType::Sphere,
-                        liquid::PhysicsGeometrySphere{ballRadius}}});
+        ball, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                  liquid::PhysicsGeometryType::Sphere,
+                  liquid::PhysicsGeometrySphere{ballRadius}}});
 
     entityContext.setComponent<liquid::RigidBodyComponent>(
-        ballEntity,
+        ball,
         liquid::RigidBodyComponent{{1.0f, {0.05f, 100.0f, 100.0f}, false}});
 
-    entityContext.setComponent<liquid::MeshComponent>(pe1, {barMesh});
-    entityContext.setComponent<liquid::MeshComponent>(pe2, {barMesh});
-    entityContext.setComponent<liquid::MeshComponent>(ballEntity, {ballMesh});
+    entityContext.setComponent<liquid::MeshComponent>(p1, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(p2, {barMesh});
+    entityContext.setComponent<liquid::MeshComponent>(ball, {ballMesh});
 
-    // Create walls
-    scene->getRootNode()->addChild(
+    entityContext.setComponent(
         e1, createWallTransform({0.0f, 0.0f, 3.5f}, 0.0f, 5.0f));
-    scene->getRootNode()->addChild(
+    entityContext.setComponent(
         e2, createWallTransform({-5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
-    scene->getRootNode()->addChild(
+    entityContext.setComponent(
         e3, createWallTransform({5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
-    scene->getRootNode()->addChild(
+    entityContext.setComponent(
         e4, createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
 
     eventSystem.observe(
         liquid::CollisionEvent::CollisionStarted,
-        [ballEntity, e1, e4, this](const liquid::CollisionObject &data) {
-          if ((data.a == ballEntity || data.b == ballEntity) &&
+        [e1, e4, this](const liquid::CollisionObject &data) {
+          if ((data.a == ball || data.b == ball) &&
               (data.a == e1 || data.b == e1 || data.a == e4 || data.b == e4)) {
             gameEnded = true;
           }
@@ -309,11 +311,11 @@ private:
       transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
 
       entityContext.setComponent<liquid::CollidableComponent>(
-          pe1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
-                   liquid::PhysicsGeometryType::Box,
-                   liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
+          p1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
+                  liquid::PhysicsGeometryType::Box,
+                  liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
 
-      p1 = scene->getRootNode()->addChild(pe1, transform);
+      entityContext.setComponent(p1, transform);
     }
 
     {
@@ -322,19 +324,19 @@ private:
       transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
 
       entityContext.setComponent<liquid::CollidableComponent>(
-          pe2, liquid::CollidableComponent{
-                   liquid::PhysicsGeometryDesc{
-                       liquid::PhysicsGeometryType::Box,
-                       liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}},
-                   liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
+          p2, liquid::CollidableComponent{
+                  liquid::PhysicsGeometryDesc{
+                      liquid::PhysicsGeometryType::Box,
+                      liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}},
+                  liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
 
-      p2 = scene->getRootNode()->addChild(pe2, transform);
+      entityContext.setComponent(p2, transform);
     }
 
     // create ball
     liquid::TransformComponent ballTransform{};
     ballTransform.localScale = glm::vec3(0.3f);
-    ball = scene->getRootNode()->addChild(ballEntity, ballTransform);
+    entityContext.setComponent(ball, ballTransform);
   }
 
   liquid::TransformComponent createWallTransform(glm::vec3 position,
@@ -365,7 +367,7 @@ private:
 
   liquid::MeshAssetHandle barMesh, ballMesh;
 
-  liquid::SceneNode *p1, *p2, *ball;
+  liquid::Entity p1, p2, ball;
 
 private:
   bool gameEnded = false;

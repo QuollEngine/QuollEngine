@@ -8,7 +8,7 @@
 namespace liquidator {
 
 class SceneHierarchyPanel {
-  using NodeClickHandler = std::function<void(liquid::SceneNode *)>;
+  using EntityClickHandler = std::function<void(liquid::Entity)>;
 
 public:
   /**
@@ -30,40 +30,23 @@ public:
    *
    * @param handler Node click handler
    */
-  void setNodeClickHandler(const NodeClickHandler &handler);
+  void setEntityClickHandler(const EntityClickHandler &handler);
 
 private:
   /**
-   * @brief Render scene node as tree node
+   * @brief Render entity as tree item
    *
-   * @param node Scene node
+   * @param entity Entity
    * @param flags Flags
    * @param sceneManager Scene manager
    */
-  void renderNode(liquid::SceneNode *node, int flags,
-                  SceneManager &sceneManager);
-
-private:
-  /**
-   * @brief Handle node deletion
-   *
-   * @param node Scene node
-   * @param entityManager Entity manager
-   */
-  void handleDelete(liquid::SceneNode *node, EntityManager &entityManager);
-
-  /**
-   * @brief Handle moving to node
-   *
-   * @param node Scene node
-   * @param sceneManager Scene manager
-   */
-  void handleMoveToNode(liquid::SceneNode *node, SceneManager &sceneManager);
+  void renderEntity(liquid::Entity entity, int flags,
+                    SceneManager &sceneManager);
 
 private:
   liquid::EntityContext &mEntityContext;
-  NodeClickHandler mNodeClickHandler;
-  liquid::SceneNode *mSelectedNode = nullptr;
+  EntityClickHandler mEntityClickHandler;
+  liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
 };
 
 } // namespace liquidator

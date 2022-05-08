@@ -60,14 +60,6 @@ public:
   inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
 private:
-  /**
-   * @brief Handle node click from scene hierarchy panel
-   *
-   * @param node Clicked node item
-   */
-  void handleNodeClick(liquid::SceneNode *node);
-
-private:
   Inspector mInspector;
   MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;

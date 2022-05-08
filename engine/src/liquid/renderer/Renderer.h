@@ -29,8 +29,8 @@ class Renderer {
 public:
   Renderer(EntityContext &context, AssetRegistry &assetRegistry, Window &window,
            rhi::RenderDevice *device);
-  ~Renderer();
 
+  ~Renderer() = default;
   Renderer(const Renderer &rhs) = delete;
   Renderer(Renderer &&rhs) = delete;
   Renderer &operator=(const Renderer &rhs) = delete;
@@ -69,7 +69,6 @@ private:
   SceneRenderer mSceneRenderer;
   AssetRegistry &mAssetRegistry;
 
-  std::vector<SharedPtr<Material>> mShadowMaterials;
   RenderStorage mRenderStorage;
 };
 

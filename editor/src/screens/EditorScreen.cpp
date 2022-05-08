@@ -34,8 +34,7 @@ void randomSpawn(liquid::EntityContext &entityContext,
        assetManager.getRegistry().getPrefabs().getAssets()) {
     for (size_t i = 0; i < NUM_SPAWNS; ++i) {
       auto parent = sceneManager.getEntityManager().spawnAsset(
-          sceneManager.getEditorCamera(),
-          sceneManager.getActiveScene()->getRootNode(),
+          sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
       entityContext.getComponent<liquid::TransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));

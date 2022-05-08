@@ -32,38 +32,35 @@ public:
   /**
    * @brief Create empty entity
    *
-   * @param parent Parent node
+   * @param parent Parent entity
    * @param transform Transform component
    * @param name Entity name
-   * @return New entity node
+   * @return New entity
    */
-  liquid::SceneNode *
-  createEmptyEntity(liquid::SceneNode *parent,
-                    const liquid::TransformComponent &transform,
-                    const liquid::String &name = "");
+  liquid::Entity createEmptyEntity(liquid::Entity parent,
+                                   const liquid::TransformComponent &transform,
+                                   const liquid::String &name = "");
 
   /**
    * @brief Create empty entity at camera view
    *
    * @param camera Editor camera
-   * @param parent Parent node
+   * @param parent Parent entity
    * @param name Entity name
    * @param saveToFile Save the created entities
-   * @return New entity node
+   * @return New entity
    */
-  liquid::SceneNode *createEmptyEntity(EditorCamera &camera,
-                                       liquid::SceneNode *parent,
-                                       const liquid::String &name = "",
-                                       bool saveToFile = true);
+  liquid::Entity createEmptyEntity(EditorCamera &camera, liquid::Entity parent,
+                                   const liquid::String &name = "",
+                                   bool saveToFile = true);
 
   /**
    * @brief Load scene
    *
-   * @param parent Parent node to render to
    * @retval true Scene loaded
    * @retval false Scene did not load
    */
-  bool loadScene(liquid::SceneNode *parent);
+  bool loadScene();
 
   /**
    * @brief Set skeleton for entity
@@ -121,13 +118,13 @@ public:
    * @brief Spawn entity at view
    *
    * @param camera Editor camera
-   * @param parent Parent node
+   * @param parent Parent entity
    * @param asset Asset handle
    * @param type Asset type
    * @param saveToFile Save the spawned entities
    * @return New entity
    */
-  liquid::Entity spawnAsset(EditorCamera &camera, liquid::SceneNode *parent,
+  liquid::Entity spawnAsset(EditorCamera &camera, liquid::Entity parent,
                             uint32_t asset, liquid::AssetType type,
                             bool saveToFile = true);
 

@@ -548,9 +548,10 @@ void PhysicsSystem::synchronizeTransforms() {
         auto &transform =
             mEntityContext.getComponent<TransformComponent>(entity);
 
-        if (mEntityContext.hasComponent<TransformComponent>(transform.parent)) {
+        if (mEntityContext.hasComponent<ParentComponent>(entity)) {
           const auto &parentTransform =
-              mEntityContext.getComponent<TransformComponent>(transform.parent);
+              mEntityContext.getComponent<TransformComponent>(
+                  mEntityContext.getComponent<ParentComponent>(entity).parent);
 
           const auto &invParentTransform =
               glm::inverse(parentTransform.worldTransform);
