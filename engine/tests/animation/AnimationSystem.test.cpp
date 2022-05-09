@@ -18,7 +18,7 @@ public:
       liquid::AnimationAssetHandle animIndex = liquid::AnimationAssetHandle{1},
       bool playing = true) {
     auto entity = context.createEntity();
-    context.setComponent<liquid::TransformComponent>(entity, {});
+    context.setComponent<liquid::LocalTransformComponent>(entity, {});
     context.setComponent<liquid::AnimatorComponent>(
         entity, {0, loop, 0.0f, playing, {animIndex}});
 
@@ -148,7 +148,7 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
   auto entity = createEntity(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -165,7 +165,7 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
   auto entity = createEntity(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -182,7 +182,7 @@ TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
   auto entity = createEntity(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -200,7 +200,7 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
@@ -225,7 +225,7 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
@@ -250,7 +250,7 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      context.getComponent<liquid::TransformComponent>(entity);
+      context.getComponent<liquid::LocalTransformComponent>(entity);
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);

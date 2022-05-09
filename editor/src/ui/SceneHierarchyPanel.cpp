@@ -12,7 +12,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &entityContext)
 void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::Begin("Hierarchy");
 
-  mEntityContext.iterateEntities<liquid::TransformComponent>(
+  mEntityContext.iterateEntities<liquid::LocalTransformComponent>(
       [this, &sceneManager](auto entity, const auto &transform) {
         if (mEntityContext.hasComponent<liquid::ParentComponent>(entity)) {
           return;

@@ -81,18 +81,18 @@ void Renderer::updateStorageBuffers() {
   mRenderStorage.clear();
 
   // Meshes
-  mEntityContext.iterateEntities<TransformComponent, MeshComponent>(
-      [this](auto entity, const auto &transform, const auto &mesh) {
-        mRenderStorage.addMesh(mesh.handle, transform.worldTransform);
+  mEntityContext.iterateEntities<WorldTransformComponent, MeshComponent>(
+      [this](auto entity, const auto &world, const auto &mesh) {
+        mRenderStorage.addMesh(mesh.handle, world.worldTransform);
       });
 
   // Skinned Meshes
-  mEntityContext.iterateEntities<SkeletonComponent, TransformComponent,
+  mEntityContext.iterateEntities<SkeletonComponent, WorldTransformComponent,
                                  SkinnedMeshComponent>(
-      [this](auto entity, const auto &skeleton, const auto &transform,
+      [this](auto entity, const auto &skeleton, const auto &world,
              const auto &mesh) {
         mRenderStorage.addSkinnedMesh(
-            mesh.handle, transform.worldTransform,
+            mesh.handle, world.worldTransform,
             skeleton.skeleton.getJointFinalTransforms());
       });
 

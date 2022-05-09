@@ -196,7 +196,9 @@ void EntityPanel::renderCamera(SceneManager &sceneManager) {
 }
 
 void EntityPanel::renderTransform() {
-  if (!mEntityContext.hasComponent<liquid::TransformComponent>(
+  if (!mEntityContext.hasComponent<liquid::LocalTransformComponent>(
+          mSelectedEntity) ||
+      !mEntityContext.hasComponent<liquid::WorldTransformComponent>(
           mSelectedEntity)) {
     return;
   }
@@ -206,7 +208,10 @@ void EntityPanel::renderTransform() {
   }
 
   auto &component =
-      mEntityContext.getComponent<liquid::TransformComponent>(mSelectedEntity);
+      mEntityContext.getComponent<liquid::LocalTransformComponent>(
+          mSelectedEntity);
+  auto &world = mEntityContext.getComponent<liquid::WorldTransformComponent>(
+      mSelectedEntity);
 
   ImGui::Text("Position");
 
@@ -240,8 +245,8 @@ void EntityPanel::renderTransform() {
 
     for (glm::mat4::length_type i = 0; i < 4; ++i) {
       liquid::imgui::renderRow(
-          component.worldTransform[i].x, component.worldTransform[i].y,
-          component.worldTransform[i].z, component.worldTransform[i].w);
+          world.worldTransform[i].x, world.worldTransform[i].y,
+          world.worldTransform[i].z, world.worldTransform[i].w);
     }
 
     ImGui::EndTable();
@@ -553,7 +558,7 @@ void EntityPanel::renderAddComponent() {
   }
 
   bool hasAllComponents =
-      mEntityContext.hasComponent<liquid::TransformComponent>(
+      mEntityContext.hasComponent<liquid::LocalTransformComponent>(
           mSelectedEntity) &&
       mEntityContext.hasComponent<liquid::RigidBodyComponent>(
           mSelectedEntity) &&
@@ -572,11 +577,11 @@ void EntityPanel::renderAddComponent() {
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!mEntityContext.hasComponent<liquid::TransformComponent>(
+    if (!mEntityContext.hasComponent<liquid::LocalTransformComponent>(
             mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      mEntityContext.setComponent<liquid::TransformComponent>(mSelectedEntity,
-                                                              {});
+      mEntityContext.setComponent<liquid::LocalTransformComponent>(
+          mSelectedEntity, {});
       mEntityManager.save(mSelectedEntity);
     }
 

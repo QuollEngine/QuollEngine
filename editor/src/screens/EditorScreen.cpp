@@ -36,7 +36,7 @@ void randomSpawn(liquid::EntityContext &entityContext,
       auto parent = sceneManager.getEntityManager().spawnAsset(
           sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
-      entityContext.getComponent<liquid::TransformComponent>(parent)
+      entityContext.getComponent<liquid::LocalTransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
     }
   }
@@ -206,10 +206,10 @@ void EditorScreen::start(const Project &project) {
       commandList.bindPipeline(skeletonLinesPipeline);
 
       entityContext
-          .iterateEntities<liquid::TransformComponent,
+          .iterateEntities<liquid::WorldTransformComponent,
                            liquid::SkeletonComponent, liquid::DebugComponent>(
               [&commandList, &skeletonLinesPipeline,
-               &renderer](auto entity, auto &transform,
+               &renderer](auto entity, auto &world,
                           const liquid::SkeletonComponent &skeleton,
                           const liquid::DebugComponent &debug) {
                 if (!debug.showBones)
@@ -226,7 +226,7 @@ void EditorScreen::start(const Project &project) {
                     liquid::rhi::DescriptorType::UniformBuffer);
 
                 liquid::StandardPushConstants transformConstant{};
-                transformConstant.modelMatrix = transform.worldTransform;
+                transformConstant.modelMatrix = world.worldTransform;
 
                 commandList.bindDescriptor(skeletonLinesPipeline, 0,
                                            sceneDescriptor);
@@ -250,12 +250,11 @@ void EditorScreen::start(const Project &project) {
                                  objectListSceneDescriptor);
 
       entityContext.iterateEntities<
-          liquid::TransformComponent,
+          liquid::WorldTransformComponent,
           liquid::DirectionalLightComponent>([&objectIconsPipeline,
                                               &commandList, &ui,
                                               &entityContext](
-                                                 auto entity,
-                                                 const auto &transform,
+                                                 auto entity, const auto &world,
                                                  const auto &light) {
         liquid::rhi::Descriptor sunDescriptor;
         sunDescriptor.bind(
@@ -264,7 +263,7 @@ void EditorScreen::start(const Project &project) {
         commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
 
         liquid::StandardPushConstants transformConstant{};
-        transformConstant.modelMatrix = transform.worldTransform;
+        transformConstant.modelMatrix = world.worldTransform;
 
         commandList.pushConstants(
             objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
@@ -286,7 +285,7 @@ void EditorScreen::start(const Project &project) {
           liquid::StandardPushConstants pcDirection{};
           static constexpr glm::vec3 LIGHT_DIR_ICON_POSITION{0.0f, 2.0f, 0.0f};
           pcDirection.modelMatrix =
-              glm::translate(transform.worldTransform, LIGHT_DIR_ICON_POSITION);
+              glm::translate(world.worldTransform, LIGHT_DIR_ICON_POSITION);
 
           commandList.pushConstants(
               objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
@@ -296,10 +295,10 @@ void EditorScreen::start(const Project &project) {
         }
       });
 
-      entityContext.iterateEntities<liquid::TransformComponent,
+      entityContext.iterateEntities<liquid::WorldTransformComponent,
                                     liquid::PerspectiveLensComponent>(
-          [&objectIconsPipeline, &commandList, &ui, &entityContext](
-              auto entity, const auto &transform, const auto &camera) {
+          [&objectIconsPipeline, &commandList, &ui,
+           &entityContext](auto entity, const auto &world, const auto &camera) {
             liquid::rhi::Descriptor sunDescriptor;
             sunDescriptor.bind(
                 0,
@@ -312,7 +311,7 @@ void EditorScreen::start(const Project &project) {
 
             liquid::StandardPushConstants transformConstant{};
             transformConstant.modelMatrix =
-                glm::rotate(transform.worldTransform, NINETY_DEGREES_IN_RADIANS,
+                glm::rotate(world.worldTransform, NINETY_DEGREES_IN_RADIANS,
                             glm::vec3(0, 1, 0));
 
             commandList.pushConstants(
