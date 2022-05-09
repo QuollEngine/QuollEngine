@@ -12,21 +12,21 @@
 
 namespace liquid {
 
-Renderer::Renderer(EntityContext &entityContext, AssetRegistry &assetRegistry,
-                   Window &window, rhi::RenderDevice *device)
-    : mEntityContext(entityContext), mGraphEvaluator(mRegistry),
-      mDevice(device), mImguiRenderer(window, mRegistry),
-      mAssetRegistry(assetRegistry) {
+Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
+                   rhi::RenderDevice *device)
+    : mGraphEvaluator(mRegistry), mDevice(device),
+      mImguiRenderer(window, mRegistry), mAssetRegistry(assetRegistry) {
   loadShaders();
 }
 
-void Renderer::render(rhi::RenderGraph &graph, Entity camera) {
-  LIQUID_ASSERT(mEntityContext.hasComponent<CameraComponent>(camera),
+void Renderer::render(rhi::RenderGraph &graph, Entity camera,
+                      EntityContext &entityContext) {
+  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(camera),
                 "Entity does not have a camera");
   mRenderStorage.setCameraData(
-      mEntityContext.getComponent<CameraComponent>(camera));
+      entityContext.getComponent<CameraComponent>(camera));
 
-  updateStorageBuffers();
+  updateStorageBuffers(entityContext);
   mDevice->execute(graph, mGraphEvaluator);
 }
 
@@ -76,19 +76,19 @@ void Renderer::loadShaders() {
           {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
 }
 
-void Renderer::updateStorageBuffers() {
+void Renderer::updateStorageBuffers(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("Renderer::updateStorageBuffers");
   mRenderStorage.clear();
 
   // Meshes
-  mEntityContext.iterateEntities<WorldTransformComponent, MeshComponent>(
+  entityContext.iterateEntities<WorldTransformComponent, MeshComponent>(
       [this](auto entity, const auto &world, const auto &mesh) {
         mRenderStorage.addMesh(mesh.handle, world.worldTransform);
       });
 
   // Skinned Meshes
-  mEntityContext.iterateEntities<SkeletonComponent, WorldTransformComponent,
-                                 SkinnedMeshComponent>(
+  entityContext.iterateEntities<SkeletonComponent, WorldTransformComponent,
+                                SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &world,
              const auto &mesh) {
         mRenderStorage.addSkinnedMesh(
@@ -97,13 +97,13 @@ void Renderer::updateStorageBuffers() {
       });
 
   // Lights
-  mEntityContext.iterateEntities<DirectionalLightComponent>(
+  entityContext.iterateEntities<DirectionalLightComponent>(
       [this](auto entity, const auto &light) {
         mRenderStorage.addLight(light);
       });
 
   // Environments
-  mEntityContext.iterateEntities<EnvironmentComponent>(
+  entityContext.iterateEntities<EnvironmentComponent>(
       [this](auto entity, const auto &environment) {
         mRenderStorage.setEnvironmentTextures(environment.irradianceMap,
                                               environment.specularMap,

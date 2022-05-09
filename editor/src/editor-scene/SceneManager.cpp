@@ -140,8 +140,6 @@ void SceneManager::loadOrCreateScene() {
   mEditorCamera.reset();
   mCameraEntity = mEditorCamera.getCamera();
 
-  mActiveScene = new liquid::Scene(mEntityContext);
-
   if (!mEntityManager.loadScene()) {
     createNewScene();
   }

@@ -1,27 +1,23 @@
 #include "liquid/core/Base.h"
-#include "Scene.h"
+#include "SceneUpdater.h"
 
 namespace liquid {
 
-Scene::Scene(EntityContext &entityContext) : mEntityContext(entityContext) {}
-
-Scene::~Scene() {}
-
-void Scene::update() {
-  LIQUID_PROFILE_EVENT("Scene::update");
-  updateTransforms();
-  updateCameras();
-  updateLights();
+void SceneUpdater::update(EntityContext &entityContext) {
+  LIQUID_PROFILE_EVENT("SceneUpdater::update");
+  updateTransforms(entityContext);
+  updateCameras(entityContext);
+  updateLights(entityContext);
 }
 
-void Scene::updateTransforms() {
-  LIQUID_PROFILE_EVENT("Scene::updateTransforms");
+void SceneUpdater::updateTransforms(EntityContext &entityContext) {
+  LIQUID_PROFILE_EVENT("SceneUpdater::updateTransforms");
 
-  mEntityContext
+  entityContext
       .iterateEntities<LocalTransformComponent, WorldTransformComponent>(
-          [this](auto entity, LocalTransformComponent &local,
-                 WorldTransformComponent &world) {
-            if (mEntityContext.hasComponent<ParentComponent>(entity))
+          [this, &entityContext](auto entity, LocalTransformComponent &local,
+                                 WorldTransformComponent &world) {
+            if (entityContext.hasComponent<ParentComponent>(entity))
               return;
 
             glm::mat4 identity{1.0f};
@@ -33,12 +29,13 @@ void Scene::updateTransforms() {
             world.worldTransform = localTransform;
           });
 
-  mEntityContext.iterateEntities<LocalTransformComponent,
-                                 WorldTransformComponent, ParentComponent>(
-      [this](auto entity, LocalTransformComponent &local,
-             WorldTransformComponent &world, const ParentComponent &parent) {
+  entityContext.iterateEntities<LocalTransformComponent,
+                                WorldTransformComponent, ParentComponent>(
+      [this, &entityContext](auto entity, LocalTransformComponent &local,
+                             WorldTransformComponent &world,
+                             const ParentComponent &parent) {
         auto &parentTransform =
-            mEntityContext.getComponent<WorldTransformComponent>(parent.parent);
+            entityContext.getComponent<WorldTransformComponent>(parent.parent);
 
         glm::mat4 identity{1.0f};
         glm::mat4 localTransform =
@@ -50,11 +47,11 @@ void Scene::updateTransforms() {
       });
 }
 
-void Scene::updateCameras() {
-  LIQUID_PROFILE_EVENT("Scene::updateCameras");
+void SceneUpdater::updateCameras(EntityContext &entityContext) {
+  LIQUID_PROFILE_EVENT("SceneUpdater::updateCameras");
 
-  mEntityContext.iterateEntities<PerspectiveLensComponent,
-                                 WorldTransformComponent, CameraComponent>(
+  entityContext.iterateEntities<PerspectiveLensComponent,
+                                WorldTransformComponent, CameraComponent>(
       [](auto entity, const PerspectiveLensComponent &lens,
          const WorldTransformComponent &world, CameraComponent &camera) {
         camera.projectionMatrix =
@@ -68,10 +65,10 @@ void Scene::updateCameras() {
       });
 }
 
-void Scene::updateLights() {
-  LIQUID_PROFILE_EVENT("Scene::updateLights");
+void SceneUpdater::updateLights(EntityContext &entityContext) {
+  LIQUID_PROFILE_EVENT("SceneUpdater::updateLights");
 
-  mEntityContext
+  entityContext
       .iterateEntities<WorldTransformComponent, DirectionalLightComponent>(
           [](auto entity, const WorldTransformComponent &world,
              DirectionalLightComponent &light) {

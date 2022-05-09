@@ -11,20 +11,19 @@ public:
   /**
    * @brief Create animation system
    *
-   * @param entityContext Entity context
    * @param assetRegistry Asset registry
    */
-  AnimationSystem(EntityContext &entityContext, AssetRegistry &assetRegistry);
+  AnimationSystem(AssetRegistry &assetRegistry);
 
   /**
    * @brief Update all animations
    *
    * @param dt Time delta
+   * @param entityContext Entity context
    */
-  void update(float dt);
+  void update(float dt, EntityContext &entityContext);
 
 private:
-  EntityContext &mEntityContext;
   AssetRegistry &mAssetRegistry;
   KeyframeInterpolator mKeyframeInterpolator;
 };

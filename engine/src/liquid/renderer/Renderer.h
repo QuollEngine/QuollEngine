@@ -9,8 +9,6 @@
 
 #include "liquid/entity/EntityContext.h"
 
-#include "liquid/scene/Scene.h"
-
 #include "liquid/profiler/DebugManager.h"
 #include "liquid/asset/AssetRegistry.h"
 
@@ -27,7 +25,7 @@ struct DefaultGraphResources {
 
 class Renderer {
 public:
-  Renderer(EntityContext &context, AssetRegistry &assetRegistry, Window &window,
+  Renderer(AssetRegistry &assetRegistry, Window &window,
            rhi::RenderDevice *device);
 
   ~Renderer() = default;
@@ -45,7 +43,8 @@ public:
   std::pair<rhi::RenderGraph, DefaultGraphResources>
   createRenderGraph(bool useSwapchainForImgui);
 
-  void render(rhi::RenderGraph &graph, Entity entity);
+  void render(rhi::RenderGraph &graph, Entity camera,
+              liquid::EntityContext &entityContext);
 
   inline void wait() { mDevice->waitForIdle(); }
 
@@ -56,10 +55,9 @@ public:
 private:
   void loadShaders();
 
-  void updateStorageBuffers();
+  void updateStorageBuffers(EntityContext &entityContext);
 
 private:
-  EntityContext &mEntityContext;
   rhi::ResourceRegistry mRegistry;
   rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;

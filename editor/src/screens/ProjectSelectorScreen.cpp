@@ -21,7 +21,7 @@ ProjectSelectorScreen::ProjectSelectorScreen(liquid::Window &window,
 std::optional<Project> ProjectSelectorScreen::start() {
   liquid::EntityContext entityContext;
   liquid::AssetRegistry assetRegistry;
-  liquid::Renderer renderer(entityContext, assetRegistry, mWindow, mDevice);
+  liquid::Renderer renderer(assetRegistry, mWindow, mDevice);
   liquidator::ProjectManager projectManager;
 
   liquid::FPSCounter fpsCounter;
@@ -46,7 +46,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
   });
 
   mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &project,
-                        &projectManager, &iconRegistry, this]() mutable {
+                        &projectManager, &iconRegistry, &entityContext,
+                        this]() mutable {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
@@ -89,7 +90,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
     ImGui::End();
 
     imgui.endRendering();
-    renderer.render(graph.first, editorCamera.getCamera());
+    renderer.render(graph.first, editorCamera.getCamera(), entityContext);
   });
 
   mainLoop.run();

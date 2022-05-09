@@ -5,6 +5,7 @@
 #include "liquid/entity/EntityContext.h"
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
+#include "liquid/scene/SceneUpdater.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -54,14 +55,13 @@ void EditorScreen::start(const Project &project) {
   liquid::DebugManager debugManager;
   liquid::FPSCounter fpsCounter;
 
-  liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow, entityContext);
+  liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow);
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqpath";
 
   liquid::AssetManager assetManager(project.assetsPath);
-  liquid::Renderer renderer(entityContext, assetManager.getRegistry(), mWindow,
-                            mDevice);
+  liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
 
   auto res = assetManager.preloadAssets(renderer.getRegistry());
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
@@ -87,9 +87,9 @@ void EditorScreen::start(const Project &project) {
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
   liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
 
-  liquid::AnimationSystem animationSystem(entityContext,
-                                          assetManager.getRegistry());
-  liquid::PhysicsSystem physicsSystem(entityContext, mEventSystem);
+  liquid::AnimationSystem animationSystem(assetManager.getRegistry());
+  liquid::PhysicsSystem physicsSystem(mEventSystem);
+  liquid::SceneUpdater sceneUpdater;
 
   liquid::ImguiDebugLayer debugLayer(
       mDevice->getDeviceInformation(), mDevice->getDeviceStats(),
@@ -325,12 +325,12 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.setUpdateFn([&editorCamera, &sceneManager, &animationSystem,
                         &physicsSystem, &entityContext, &aspectRatioUpdater,
-                        this](double dt) mutable {
+                        &sceneUpdater, this](double dt) mutable {
     mEventSystem.poll();
-    aspectRatioUpdater.update();
+    aspectRatioUpdater.update(entityContext);
     editorCamera.update();
 
-    animationSystem.update(static_cast<float>(dt));
+    animationSystem.update(static_cast<float>(dt), entityContext);
 
     entityContext.iterateEntities<liquid::SkeletonComponent>(
         [](auto entity, auto &component) { component.skeleton.update(); });
@@ -338,8 +338,8 @@ void EditorScreen::start(const Project &project) {
     entityContext.iterateEntities<liquid::SkeletonComponent>(
         [](auto entity, auto &component) { component.skeleton.updateDebug(); });
 
-    sceneManager.getActiveScene()->update();
-    physicsSystem.update(static_cast<float>(dt));
+    sceneUpdater.update(entityContext);
+    physicsSystem.update(static_cast<float>(dt), entityContext);
     return true;
   });
 
@@ -392,7 +392,8 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
     imgui.endRendering();
 
-    return renderer.render(graph.first, sceneManager.getCamera());
+    return renderer.render(graph.first, sceneManager.getCamera(),
+                           entityContext);
   });
 
   mainLoop.run();

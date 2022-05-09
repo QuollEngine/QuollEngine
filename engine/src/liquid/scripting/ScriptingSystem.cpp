@@ -7,23 +7,13 @@
 
 namespace liquid {
 
-ScriptingSystem::ScriptingSystem(EntityContext &entityContext,
-                                 EventSystem &eventSystem,
+ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
                                  AssetManager &assetManager)
-    : mEntityContext(entityContext), mEventSystem(eventSystem),
-      mAssetManager(assetManager) {}
+    : mEventSystem(eventSystem), mAssetManager(assetManager) {}
 
-ScriptingSystem::~ScriptingSystem() {
-  mEntityContext.iterateEntities<ScriptingComponent>(
-      [this](auto entity, ScriptingComponent &scripting) {
-        destroyScriptingData(scripting);
-      });
-  mEntityContext.destroyComponents<ScriptingComponent>();
-}
-
-void ScriptingSystem::start() {
+void ScriptingSystem::start(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
-  mEntityContext.iterateEntities<ScriptingComponent>(
+  entityContext.iterateEntities<ScriptingComponent>(
       [this](auto entity, ScriptingComponent &component) {
         if (component.started) {
           return;
@@ -47,12 +37,19 @@ void ScriptingSystem::start() {
       });
 }
 
-void ScriptingSystem::update() {
+void ScriptingSystem::update(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
-  mEntityContext.iterateEntities<ScriptingComponent>(
+  entityContext.iterateEntities<ScriptingComponent>(
       [this](auto entity, const ScriptingComponent &component) {
         mLuaInterpreter.getFunction(component.scope, "update");
         mLuaInterpreter.callFunction(component.scope, 0);
+      });
+}
+
+void ScriptingSystem::cleanup(EntityContext &entityContext) {
+  entityContext.iterateEntities<ScriptingComponent>(
+      [this](auto entity, ScriptingComponent &scripting) {
+        destroyScriptingData(scripting);
       });
 }
 
