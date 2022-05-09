@@ -11,7 +11,7 @@ public:
 
 using SceneDeathTest = SceneTest;
 
-glm::mat4 getLocalTransform(const liquid::TransformComponent &transform) {
+glm::mat4 getLocalTransform(const liquid::LocalTransformComponent &transform) {
   return glm::translate(glm::mat4(1.0f), transform.localPosition) *
          glm::toMat4(transform.localRotation) *
          glm::scale(glm::mat4(1.0f), transform.localScale);
@@ -21,18 +21,19 @@ TEST_F(SceneTest, SetsLocalTransformToWorldTransformIfNoParent) {
   liquid::Scene scene(context);
 
   auto entity = context.createEntity();
-  liquid::TransformComponent transform{};
+  liquid::LocalTransformComponent transform{};
   transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
   transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
   transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
 
+  context.setComponent<liquid::WorldTransformComponent>(entity, {});
   context.setComponent(entity, transform);
 
   scene.update();
 
-  EXPECT_EQ(
-      context.getComponent<liquid::TransformComponent>(entity).worldTransform,
-      getLocalTransform(transform));
+  EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(entity)
+                .worldTransform,
+            getLocalTransform(transform));
 }
 
 TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
@@ -40,44 +41,49 @@ TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
 
   // parent
   auto parent = context.createEntity();
-  liquid::TransformComponent parentTransform{};
+  liquid::LocalTransformComponent parentTransform{};
   parentTransform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
   parentTransform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
   parentTransform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
   context.setComponent(parent, parentTransform);
+  context.setComponent<liquid::WorldTransformComponent>(parent, {});
 
   // parent -> child1
   auto child1 = context.createEntity();
-  liquid::TransformComponent child1Transform{};
+  liquid::LocalTransformComponent child1Transform{};
   child1Transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
   child1Transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
   child1Transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
   context.setComponent(child1, child1Transform);
   context.setComponent<liquid::ParentComponent>(child1, {parent});
+  context.setComponent<liquid::WorldTransformComponent>(child1, {});
 
   // parent -> child1 -> child2
   auto child2 = context.createEntity();
-  liquid::TransformComponent child2Transform{};
+  liquid::LocalTransformComponent child2Transform{};
   child2Transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
   child2Transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
   child2Transform.localScale = glm::vec3(0.2f, 0.5f, 1.5f);
   context.setComponent(child2, child2Transform);
   context.setComponent<liquid::ParentComponent>(child2, {child1});
+  context.setComponent<liquid::WorldTransformComponent>(child2, {});
 
   scene.update();
 
-  EXPECT_EQ(
-      context.getComponent<liquid::TransformComponent>(parent).worldTransform,
-      getLocalTransform(parentTransform));
+  EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(parent)
+                .worldTransform,
+            getLocalTransform(parentTransform));
 
-  EXPECT_EQ(
-      context.getComponent<liquid::TransformComponent>(child1).worldTransform,
-      getLocalTransform(parentTransform) * getLocalTransform(child1Transform));
+  EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(child1)
+                .worldTransform,
+            getLocalTransform(parentTransform) *
+                getLocalTransform(child1Transform));
 
-  EXPECT_EQ(
-      context.getComponent<liquid::TransformComponent>(child2).worldTransform,
-      getLocalTransform(parentTransform) * getLocalTransform(child1Transform) *
-          getLocalTransform(child2Transform));
+  EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(child2)
+                .worldTransform,
+            getLocalTransform(parentTransform) *
+                getLocalTransform(child1Transform) *
+                getLocalTransform(child2Transform));
 }
 
 TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
@@ -85,9 +91,10 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   auto entity = context.createEntity();
 
   {
-    liquid::TransformComponent transform{};
+    liquid::LocalTransformComponent transform{};
     transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);
     context.setComponent(entity, transform);
+    context.setComponent<liquid::WorldTransformComponent>(entity, {});
 
     liquid::PerspectiveLensComponent lens{};
     context.setComponent(entity, lens);
@@ -97,7 +104,8 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   }
   scene.update();
 
-  auto &transform = context.getComponent<liquid::TransformComponent>(entity);
+  auto &transform =
+      context.getComponent<liquid::WorldTransformComponent>(entity);
   auto &lens = context.getComponent<liquid::PerspectiveLensComponent>(entity);
   auto &camera = context.getComponent<liquid::CameraComponent>(entity);
 
@@ -116,16 +124,18 @@ TEST_F(SceneTest, UpdateDirectionalLightsBasedOnTransforms) {
   auto entity = context.createEntity();
 
   {
-    liquid::TransformComponent transform{};
+    liquid::LocalTransformComponent transform{};
     transform.localRotation = glm::quat(-0.361f, 0.697f, -0.391f, 0.481f);
     context.setComponent(entity, transform);
+    context.setComponent<liquid::WorldTransformComponent>(entity, {});
 
     liquid::DirectionalLightComponent light{};
     context.setComponent(entity, light);
   }
   scene.update();
 
-  auto &transform = context.getComponent<liquid::TransformComponent>(entity);
+  auto &transform =
+      context.getComponent<liquid::WorldTransformComponent>(entity);
   auto &light = context.getComponent<liquid::DirectionalLightComponent>(entity);
 
   glm::quat rotation;

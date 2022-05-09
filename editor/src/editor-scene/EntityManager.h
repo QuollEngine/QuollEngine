@@ -37,9 +37,10 @@ public:
    * @param name Entity name
    * @return New entity
    */
-  liquid::Entity createEmptyEntity(liquid::Entity parent,
-                                   const liquid::TransformComponent &transform,
-                                   const liquid::String &name = "");
+  liquid::Entity
+  createEmptyEntity(liquid::Entity parent,
+                    const liquid::LocalTransformComponent &transform,
+                    const liquid::String &name = "");
 
   /**
    * @brief Create empty entity at camera view
@@ -135,7 +136,8 @@ private:
    * @param camera Editor camera
    * @return Transform component
    */
-  liquid::TransformComponent getTransformFromCamera(EditorCamera &camera) const;
+  liquid::LocalTransformComponent
+  getTransformFromCamera(EditorCamera &camera) const;
 
 private:
   liquid::EntityContext &mEntityContext;

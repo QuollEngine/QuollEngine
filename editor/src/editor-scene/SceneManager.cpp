@@ -123,7 +123,7 @@ void SceneManager::createNewScene() {
   static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
 
   {
-    liquid::TransformComponent transform{};
+    liquid::LocalTransformComponent transform{};
     transform.localPosition = LIGHT_START_POS;
     transform.localRotation =
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
@@ -148,12 +148,12 @@ void SceneManager::loadOrCreateScene() {
 }
 
 void SceneManager::moveCameraToEntity(liquid::Entity entity) {
-  if (!mEntityContext.hasComponent<liquid::TransformComponent>(entity)) {
+  if (!mEntityContext.hasComponent<liquid::LocalTransformComponent>(entity)) {
     return;
   }
 
   auto &transformComponent =
-      mEntityContext.getComponent<liquid::TransformComponent>(entity);
+      mEntityContext.getComponent<liquid::WorldTransformComponent>(entity);
 
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));

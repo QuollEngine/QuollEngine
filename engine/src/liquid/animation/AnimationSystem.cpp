@@ -10,7 +10,7 @@ AnimationSystem::AnimationSystem(EntityContext &entityContext,
 void AnimationSystem::update(float dt) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
-  mEntityContext.iterateEntities<TransformComponent, AnimatorComponent>(
+  mEntityContext.iterateEntities<LocalTransformComponent, AnimatorComponent>(
       [=](Entity entity, auto &transform, auto &animComp) {
         auto handle = animComp.animations.at(animComp.currentAnimation);
 

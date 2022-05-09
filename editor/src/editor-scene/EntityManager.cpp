@@ -23,9 +23,9 @@ void EntityManager::save(liquid::Entity entity) {
     node["components"]["name"] = name;
   }
 
-  if (mEntityContext.hasComponent<liquid::TransformComponent>(entity)) {
+  if (mEntityContext.hasComponent<liquid::LocalTransformComponent>(entity)) {
     const auto &transform =
-        mEntityContext.getComponent<liquid::TransformComponent>(entity);
+        mEntityContext.getComponent<liquid::LocalTransformComponent>(entity);
 
     node["components"]["transform"]["position"] = transform.localPosition;
     node["components"]["transform"]["rotation"] = transform.localRotation;
@@ -100,14 +100,14 @@ void EntityManager::save(liquid::Entity entity) {
   out.close();
 }
 
-liquid::Entity
-EntityManager::createEmptyEntity(liquid::Entity parent,
-                                 const liquid::TransformComponent &transform,
-                                 const liquid::String &name) {
+liquid::Entity EntityManager::createEmptyEntity(
+    liquid::Entity parent, const liquid::LocalTransformComponent &transform,
+    const liquid::String &name) {
   auto entity = mEntityContext.createEntity();
   mEntityContext.setComponent<liquid::DebugComponent>(entity, {});
   mEntityContext.setComponent<liquid::IdComponent>(entity, {mLastId});
   mEntityContext.setComponent(entity, transform);
+  mEntityContext.setComponent<liquid::WorldTransformComponent>(entity, {});
 
   if (mEntityContext.hasEntity(parent)) {
     mEntityContext.setComponent<liquid::ParentComponent>(entity, {parent});
@@ -174,7 +174,7 @@ bool EntityManager::loadScene() {
 
     if (node["components"]["transform"].IsMap()) {
       auto parsed = node["components"]["transform"];
-      liquid::TransformComponent component{};
+      liquid::LocalTransformComponent component{};
       if (parsed["position"].IsSequence()) {
         component.localPosition = parsed["position"].as<glm::vec3>();
       }
@@ -188,6 +188,7 @@ bool EntityManager::loadScene() {
       }
 
       mEntityContext.setComponent(entity, component);
+      mEntityContext.setComponent<liquid::WorldTransformComponent>(entity, {});
     }
 
     if (node["components"]["mesh"].IsScalar()) {
@@ -389,7 +390,7 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
   auto getOrCreateEntity =
       [&entityMap, this, parent,
        &camera](uint32_t localId,
-                const liquid::TransformComponent &transform = {}) mutable {
+                const liquid::LocalTransformComponent &transform = {}) mutable {
         if (entityMap.find(localId) == entityMap.end()) {
           auto entity = createEmptyEntity(parent, transform);
           entityMap.insert_or_assign(localId, entity);
@@ -399,7 +400,7 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
       };
 
   for (auto &item : asset.data.transforms) {
-    liquid::TransformComponent transform{};
+    liquid::LocalTransformComponent transform{};
     transform.localPosition = item.value.position;
     transform.localRotation = item.value.rotation;
     transform.localScale = item.value.scale;
@@ -445,7 +446,7 @@ liquid::Entity EntityManager::spawnAsset(EditorCamera &camera,
   return parent;
 }
 
-liquid::TransformComponent
+liquid::LocalTransformComponent
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   const auto &viewMatrix =
       mEntityContext.getComponent<liquid::CameraComponent>(camera.getCamera())
@@ -455,7 +456,7 @@ EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   const auto &invViewMatrix = glm::inverse(viewMatrix);
   const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
 
-  liquid::TransformComponent transform;
+  liquid::LocalTransformComponent transform;
   transform.localPosition = orientation[3];
   return transform;
 }

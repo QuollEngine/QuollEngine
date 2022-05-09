@@ -125,7 +125,7 @@ public:
 
       if (gameEnded) {
         auto &transform =
-            entityContext.getComponent<liquid::TransformComponent>(ball);
+            entityContext.getComponent<liquid::LocalTransformComponent>(ball);
         transform.localPosition = glm::vec3{0.0f, 0.0f, 0.0f};
         gameEnded = false;
       }
@@ -165,12 +165,12 @@ private:
   void updateScene() {
     {
       auto &transform =
-          entityContext.getComponent<liquid::TransformComponent>(p2);
+          entityContext.getComponent<liquid::LocalTransformComponent>(p2);
       transform.localPosition.x = botPosition;
     }
     {
       auto &transform =
-          entityContext.getComponent<liquid::TransformComponent>(p1);
+          entityContext.getComponent<liquid::LocalTransformComponent>(p1);
       transform.localPosition.x = playerPosition;
     }
 
@@ -178,7 +178,6 @@ private:
   }
 
   void updateGameLogic(float dt) {
-
     static bool firstTime = true;
     if (firstTime) {
       auto &rigidBody =
@@ -190,7 +189,7 @@ private:
     }
 
     auto &ballTransform =
-        entityContext.getComponent<liquid::TransformComponent>(ball);
+        entityContext.getComponent<liquid::LocalTransformComponent>(ball);
 
     if (abs(botPosition - ballTransform.localPosition.x) < 0.2f) {
       botVelocity = 0.0;
@@ -295,6 +294,11 @@ private:
     entityContext.setComponent(
         e4, createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
 
+    entityContext.setComponent<liquid::WorldTransformComponent>(e1, {});
+    entityContext.setComponent<liquid::WorldTransformComponent>(e2, {});
+    entityContext.setComponent<liquid::WorldTransformComponent>(e3, {});
+    entityContext.setComponent<liquid::WorldTransformComponent>(e4, {});
+
     eventSystem.observe(
         liquid::CollisionEvent::CollisionStarted,
         [e1, e4, this](const liquid::CollisionObject &data) {
@@ -306,7 +310,7 @@ private:
 
     // Create paddles
     {
-      liquid::TransformComponent transform;
+      liquid::LocalTransformComponent transform;
       transform.localPosition = glm::vec3(playerPosition, 0.0f, -3.0f);
       transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
 
@@ -316,10 +320,11 @@ private:
                   liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
 
       entityContext.setComponent(p1, transform);
+      entityContext.setComponent<liquid::WorldTransformComponent>(p1, {});
     }
 
     {
-      liquid::TransformComponent transform;
+      liquid::LocalTransformComponent transform;
       transform.localPosition = glm::vec3(playerPosition, 0.0f, 3.0f);
       transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
 
@@ -331,17 +336,19 @@ private:
                   liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
 
       entityContext.setComponent(p2, transform);
+      entityContext.setComponent<liquid::WorldTransformComponent>(p2, {});
     }
 
     // create ball
-    liquid::TransformComponent ballTransform{};
+    liquid::LocalTransformComponent ballTransform{};
     ballTransform.localScale = glm::vec3(0.3f);
     entityContext.setComponent(ball, ballTransform);
+    entityContext.setComponent<liquid::WorldTransformComponent>(ball, {});
   }
 
-  liquid::TransformComponent createWallTransform(glm::vec3 position,
-                                                 float rotation, float scaleX) {
-    liquid::TransformComponent transform{};
+  liquid::LocalTransformComponent
+  createWallTransform(glm::vec3 position, float rotation, float scaleX) {
+    liquid::LocalTransformComponent transform{};
     transform.localPosition = position;
     transform.localRotation =
         glm::angleAxis(glm::radians(rotation), glm::vec3(0, 1, 0));
