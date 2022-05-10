@@ -4,7 +4,13 @@
 
 namespace liquid {
 
+/**
+ * @brief Skinned mesh component
+ */
 struct SkinnedMeshComponent {
+  /**
+   * Skinned mesh asset handle
+   */
   SkinnedMeshAssetHandle handle = SkinnedMeshAssetHandle::Invalid;
 };
 

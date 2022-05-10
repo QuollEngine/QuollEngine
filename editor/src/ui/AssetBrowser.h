@@ -11,6 +11,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Asset browser component
+ */
 class AssetBrowser {
   struct Entry {
     std::filesystem::path path;

@@ -8,6 +8,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan command pool
+ */
 class VulkanCommandPool {
 public:
   /**

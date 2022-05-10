@@ -7,6 +7,12 @@
 
 namespace liquidator {
 
+/**
+ * @brief Entity manager
+ *
+ * Creates, saves, and loads
+ * entities
+ */
 class EntityManager {
 public:
   /**

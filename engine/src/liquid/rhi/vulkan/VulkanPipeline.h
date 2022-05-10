@@ -9,6 +9,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan pipeline
+ */
 class VulkanPipeline {
 public:
   /**

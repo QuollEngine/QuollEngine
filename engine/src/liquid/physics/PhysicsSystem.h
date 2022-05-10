@@ -7,6 +7,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Physics system
+ */
 class PhysicsSystem {
   class PhysicsSystemImpl;
 

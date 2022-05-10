@@ -8,6 +8,12 @@
 
 namespace liquidator {
 
+/**
+ * @brief Editor screen
+ *
+ * Main screen that shows the entire
+ * editor
+ */
 class EditorScreen {
 public:
   /**

@@ -2,6 +2,13 @@
 
 namespace liquid::platform_tools {
 
+/**
+ * @brief Native file dialog
+ *
+ * Abstracts away platform specific
+ * file dialog implementation over
+ * a common API
+ */
 class NativeFileDialog {
 public:
   /**

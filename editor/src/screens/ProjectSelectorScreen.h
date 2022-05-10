@@ -8,6 +8,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Project selector screen
+ */
 class ProjectSelectorScreen {
 public:
   /**

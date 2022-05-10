@@ -2,6 +2,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Lua interpreter
+ */
 class LuaInterpreter {
 public:
   /**

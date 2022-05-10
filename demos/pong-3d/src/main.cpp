@@ -11,7 +11,6 @@
 #include "liquid/scene/AutoAspectRatioComponent.h"
 
 #include "liquid/scene/Vertex.h"
-#include "liquid/scene/MeshInstance.h"
 #include "liquid/scene/SceneUpdater.h"
 #include "liquid/asset/AssetManager.h"
 

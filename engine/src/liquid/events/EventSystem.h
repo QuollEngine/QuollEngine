@@ -5,6 +5,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Event system
+ */
 class EventSystem {
   /**
    * @brief Type "function" that provides event pool
@@ -19,9 +22,10 @@ class EventSystem {
   /**
    * @brief Tuple that wraps every element with EventPool
    *
-   * @tparam ...TEvents
-   * @example This tuple can be defined in the following way
+   * This tuple can be defined in the following way
    *          PoolTuple<CollisionEvent, MouseButtonEvent, ...> mPools;
+   *
+   * @tparam ...TEvents Event types
    */
   template <class... TEvents>
   using PoolTuple = std::tuple<GetEventPool<TEvents>...>;

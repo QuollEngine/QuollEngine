@@ -5,6 +5,13 @@ namespace liquid {
 class Window;
 class FPSCounter;
 
+/**
+ * @brief Main loop
+ *
+ * Calls updater and renderer
+ * in a loop and provides
+ * performance metrics
+ */
 class MainLoop {
 public:
   /**

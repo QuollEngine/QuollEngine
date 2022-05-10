@@ -9,6 +9,12 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan descriptor manager
+ *
+ * Automatically creates and retrieves
+ * descriptors based on hash
+ */
 class VulkanDescriptorManager {
 public:
   /**

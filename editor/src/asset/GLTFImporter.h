@@ -6,11 +6,29 @@
 
 namespace liquidator {
 
+/**
+ * @brief GLTF importer
+ *
+ * Imports GLTF into asset registry
+ */
 class GLTFImporter {
 public:
+  /**
+   * @brief Create GLTF importer
+   *
+   * @param assetManager Asset manager
+   * @param deviceRegistry Device registry
+   */
   GLTFImporter(liquid::AssetManager &assetManager,
                liquid::rhi::ResourceRegistry &deviceRegistry);
 
+  /**
+   * @brief Load GLTF from file
+   *
+   * @param filename File name
+   * @param directory Destination path
+   * @return Load result
+   */
   liquid::Result<bool> loadFromFile(const liquid::String &filename,
                                     const std::filesystem::path &directory);
 

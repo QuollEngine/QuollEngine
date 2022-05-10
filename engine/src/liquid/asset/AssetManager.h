@@ -7,6 +7,12 @@ namespace liquid {
 
 class InputBinaryStream;
 
+/**
+ * @brief Asset manager
+ *
+ * Loads and saves assets to the
+ * assets path
+ */
 class AssetManager {
 public:
   /**

@@ -7,16 +7,53 @@
 
 namespace liquidator {
 
+/**
+ * @brief Editor camera
+ *
+ * Used as a controller that handles
+ * mouse an keyboard events for panning,
+ * rotating, and zooming.
+ */
 class EditorCamera {
 public:
+  /**
+   * Current camera input state
+   */
   enum class InputState { None = 0, Pan = 1, Rotate = 2, Zoom = 3 };
 
+  /**
+   * Zoom speed when scrolling
+   */
   static constexpr float ZOOM_SPEED = 0.03f;
+
+  /**
+   * Default Field of view value
+   */
   static constexpr float DEFAULT_FOV = 70.0f;
+
+  /**
+   * Default near perspective plane
+   */
   static constexpr float DEFAULT_NEAR = 0.001f;
+
+  /**
+   * Default far perspective plane
+   */
   static constexpr float DEFAULT_FAR = 1000.0f;
+
+  /**
+   * Default camera position
+   */
   static constexpr glm::vec3 DEFAULT_EYE{0.0f, 5.0f, -10.0f};
+
+  /**
+   * Default camera center
+   */
   static constexpr glm::vec3 DEFAULT_CENTER{0.0f, 0.0f, 0.0f};
+
+  /**
+   * Default camera up vector
+   */
   static constexpr glm::vec3 DEFAULT_UP{0.0f, 1.0f, 0.0f};
 
 public:
@@ -61,7 +98,7 @@ public:
   /**
    * @brief Set far plane
    *
-   * @param Far plane
+   * @param far Far plane
    */
   inline void setFar(float far) { mFar = far; }
 

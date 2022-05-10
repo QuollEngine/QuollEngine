@@ -2,6 +2,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Debug manager
+ */
 class DebugManager {
 public:
   /**

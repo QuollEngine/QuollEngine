@@ -4,6 +4,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Confirmation dialog component
+ */
 class ConfirmationDialog {
   using ConfirmHandler = std::function<void(SceneManager &)>;
 

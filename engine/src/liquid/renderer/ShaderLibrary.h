@@ -4,6 +4,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Shader library
+ */
 class ShaderLibrary {
 public:
   /**

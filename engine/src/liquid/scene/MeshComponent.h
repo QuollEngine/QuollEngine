@@ -4,7 +4,13 @@
 
 namespace liquid {
 
+/**
+ * @brief Mesh component
+ */
 struct MeshComponent {
+  /**
+   * Mesh asset handle
+   */
   MeshAssetHandle handle = MeshAssetHandle::Invalid;
 };
 

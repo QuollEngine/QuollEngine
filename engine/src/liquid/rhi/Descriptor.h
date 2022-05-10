@@ -10,11 +10,29 @@ enum class DescriptorType {
   CombinedImageSampler,
 };
 
+/**
+ * @brief Descriptor binding
+ */
 struct DescriptorBinding {
+  /**
+   * Descriptor type
+   */
   DescriptorType type;
+
+  /**
+   * Descriptor data
+   */
   std::variant<std::vector<TextureHandle>, BufferHandle> data;
 };
 
+/**
+ * @brief Descriptor
+ *
+ * Creates descriptor information
+ * int the CPU and is used by
+ * descriptor manager to get the hash
+ * data
+ */
 class Descriptor {
 public:
   /**

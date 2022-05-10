@@ -6,6 +6,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Scene hierarchy panel component
+ */
 class SceneHierarchyPanel {
   using EntityClickHandler = std::function<void(liquid::Entity)>;
 

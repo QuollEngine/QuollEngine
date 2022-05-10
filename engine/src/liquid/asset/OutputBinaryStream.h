@@ -2,6 +2,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Output binary stream
+ */
 class OutputBinaryStream {
 public:
   /**

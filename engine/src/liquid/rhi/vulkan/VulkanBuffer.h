@@ -7,6 +7,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan hardware buffer
+ */
 class VulkanBuffer {
 public:
   /**

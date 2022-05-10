@@ -7,6 +7,12 @@
 
 namespace liquidator {
 
+/**
+ * @brief Scene manager
+ *
+ * Manages, saves, and loads the
+ * scene and its settings
+ */
 class SceneManager {
 public:
   /**
@@ -15,7 +21,6 @@ public:
    * @param entityContext Entity context
    * @param editorCamera Editor camera
    * @param editorGrid Editor grid
-   * @param scenePath Scene path
    * @param entityManager Entity manager
    */
   SceneManager(liquid::EntityContext &entityContext, EditorCamera &editorCamera,

@@ -4,6 +4,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Menu bar component
+ */
 class MenuBar {
 public:
   /**

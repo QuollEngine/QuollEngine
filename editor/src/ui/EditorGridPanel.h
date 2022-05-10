@@ -4,6 +4,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Editor grid panel component
+ */
 class EditorGridPanel {
 public:
   /**

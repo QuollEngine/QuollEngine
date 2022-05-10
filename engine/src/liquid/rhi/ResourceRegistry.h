@@ -120,6 +120,11 @@ private:
   THandle mLastHandle = TStartingHandleId;
 };
 
+/**
+ * @brief Resource registry
+ *
+ * Stores descriptions of all the resources
+ */
 class ResourceRegistry {
 public:
   /**

@@ -4,21 +4,53 @@ namespace liquid {
 
 enum class MouseButtonEvent { Pressed, Released, Moved };
 
+/**
+ * @brief Mouse button event data
+ */
 struct MouseButtonEventObject {
+  /**
+   * Button
+   */
   int button = -1;
+
+  /**
+   * Mods
+   */
   int mods = 0;
 };
 
 enum class MouseCursorEvent { Moved };
 
+/**
+ * @brief Mouse cursor event data
+ */
 struct MouseCursorEventObject {
-  float xpos = 0.0f, ypos = 0.0f;
+  /**
+   * Cursor x position
+   */
+  float xpos = 0.0f;
+
+  /**
+   * Cursor y position
+   */
+  float ypos = 0.0f;
 };
 
 enum class MouseScrollEvent { Scroll };
 
+/**
+ * @brief Mouse scroll event data
+ */
 struct MouseScrollEventObject {
-  float xoffset = 0.0f, yoffset = 0.0f;
+  /**
+   * Scroll x offset
+   */
+  float xoffset = 0.0f;
+
+  /**
+   * Scroll y offset
+   */
+  float yoffset = 0.0f;
 };
 
 } // namespace liquid

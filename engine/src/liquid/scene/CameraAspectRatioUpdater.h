@@ -5,6 +5,12 @@
 
 namespace liquid {
 
+/**
+ * @brief Camera aspect ratio updater
+ *
+ * Updates camera with auto aspect ratio
+ * based on Window aspect ratio
+ */
 class CameraAspectRatioUpdater {
 public:
   /**

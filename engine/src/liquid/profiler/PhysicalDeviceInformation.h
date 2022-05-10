@@ -12,8 +12,14 @@ enum class PhysicalDeviceType {
   UNKNOWN
 };
 
+/**
+ * @brief Physical device information
+ */
 class PhysicalDeviceInformation {
 public:
+  /**
+   * Unordered property map
+   */
   using UnorderedPropertyMap = std::vector<std::pair<String, Property>>;
 
 public:

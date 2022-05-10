@@ -8,6 +8,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Material instance
+ */
 class Material {
 public:
   /**
@@ -25,7 +28,7 @@ public:
    * @brief Update property
    *
    * @param name Property name
-   * @param property Property value
+   * @param value Property value
    */
   void updateProperty(const String &name, const Property &value);
 

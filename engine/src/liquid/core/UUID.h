@@ -2,6 +2,9 @@
 
 namespace liquid {
 
+/**
+ * @brief UUID object
+ */
 class UUID {
   // UUID string + dashes
   static constexpr size_t UUID_LENGTH = 36;

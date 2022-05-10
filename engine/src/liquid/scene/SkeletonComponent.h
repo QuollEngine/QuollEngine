@@ -4,7 +4,13 @@
 
 namespace liquid {
 
+/**
+ * @brief Skeleton component
+ */
 struct SkeletonComponent {
+  /**
+   * Skeleton
+   */
   Skeleton skeleton;
 };
 

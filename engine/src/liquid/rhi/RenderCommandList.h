@@ -4,6 +4,12 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Render command list
+ *
+ * Public interface over native
+ * command list
+ */
 class RenderCommandList {
 public:
   /**
@@ -21,8 +27,8 @@ public:
    *
    * @param nativeRenderCommandList Native render command list
    */
-  RenderCommandList(NativeRenderCommandListInterface *nativeCommandBuffer)
-      : mNativeRenderCommandList(nativeCommandBuffer) {}
+  RenderCommandList(NativeRenderCommandListInterface *nativeRenderCommandList)
+      : mNativeRenderCommandList(nativeRenderCommandList) {}
 
   /**
    * @brief Move constructor

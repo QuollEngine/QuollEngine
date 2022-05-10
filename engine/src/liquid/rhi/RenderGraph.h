@@ -4,6 +4,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Render graph
+ */
 class RenderGraph {
 public:
   /**

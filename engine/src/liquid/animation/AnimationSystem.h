@@ -6,6 +6,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Animation system
+ */
 class AnimationSystem {
 public:
   /**

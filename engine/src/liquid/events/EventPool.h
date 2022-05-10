@@ -24,8 +24,19 @@ template <class TEvent, class TData> class EventPool {
   };
 
 public:
+  /**
+   * Event observer
+   */
   using EventObserver = std::function<void(const TData &data)>;
+
+  /**
+   * Event data
+   */
   using EventData = TData;
+
+  /**
+   * Default pool size
+   */
   static constexpr size_t DEFAULT_SIZE = 500;
 
 public:

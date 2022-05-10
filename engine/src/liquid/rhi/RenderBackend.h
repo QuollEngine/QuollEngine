@@ -4,6 +4,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Render backend
+ */
 class RenderBackend {
 public:
   RenderBackend(const RenderBackend &) = delete;

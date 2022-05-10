@@ -6,6 +6,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan upload context
+ */
 class VulkanUploadContext {
   using SubmitFn = std::function<void(VkCommandBuffer)>;
 

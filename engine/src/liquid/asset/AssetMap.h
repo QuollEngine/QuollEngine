@@ -14,6 +14,9 @@ namespace liquid {
  */
 template <class THandle, class TData> class AssetMap {
 public:
+  /**
+   * Asset handle
+   */
   using Handle = THandle;
 
 public:

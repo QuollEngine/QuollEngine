@@ -2,12 +2,18 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Device statistics collector
+ *
+ * Stores information about how many
+ * draw calls etc are done by the device
+ */
 class DeviceStats {
 public:
   /**
    * @brief Add draw call
    *
-   * @brief primitiveCount Number of primitives
+   * @param primitiveCount Number of primitives
    */
   void addDrawCall(size_t primitiveCount);
 
