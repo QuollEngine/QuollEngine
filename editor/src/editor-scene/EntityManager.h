@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/entity/EntityContext.h"
-#include "liquid/scene/Scene.h"
 #include "liquid/asset/AssetManager.h"
 #include "liquid/renderer/Renderer.h"
 #include "EditorCamera.h"

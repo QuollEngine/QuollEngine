@@ -1,15 +1,14 @@
 #include "liquid/core/Base.h"
-#include "liquid/scene/Scene.h"
+#include "liquid/scene/SceneUpdater.h"
 
 #include <gtest/gtest.h>
 
-class SceneTest : public ::testing::Test {
+class SceneUpdaterTest : public ::testing::Test {
 public:
   liquid::rhi::ResourceRegistry registry;
   liquid::EntityContext context;
+  liquid::SceneUpdater sceneUpdater;
 };
-
-using SceneDeathTest = SceneTest;
 
 glm::mat4 getLocalTransform(const liquid::LocalTransformComponent &transform) {
   return glm::translate(glm::mat4(1.0f), transform.localPosition) *
@@ -17,8 +16,7 @@ glm::mat4 getLocalTransform(const liquid::LocalTransformComponent &transform) {
          glm::scale(glm::mat4(1.0f), transform.localScale);
 }
 
-TEST_F(SceneTest, SetsLocalTransformToWorldTransformIfNoParent) {
-  liquid::Scene scene(context);
+TEST_F(SceneUpdaterTest, SetsLocalTransformToWorldTransformIfNoParent) {
 
   auto entity = context.createEntity();
   liquid::LocalTransformComponent transform{};
@@ -29,15 +27,14 @@ TEST_F(SceneTest, SetsLocalTransformToWorldTransformIfNoParent) {
   context.setComponent<liquid::WorldTransformComponent>(entity, {});
   context.setComponent(entity, transform);
 
-  scene.update();
+  sceneUpdater.update(context);
 
   EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(entity)
                 .worldTransform,
             getLocalTransform(transform));
 }
 
-TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
-  liquid::Scene scene(context);
+TEST_F(SceneUpdaterTest, CalculatesWorldTransformFromParentWorldTransform) {
 
   // parent
   auto parent = context.createEntity();
@@ -68,7 +65,7 @@ TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
   context.setComponent<liquid::ParentComponent>(child2, {child1});
   context.setComponent<liquid::WorldTransformComponent>(child2, {});
 
-  scene.update();
+  sceneUpdater.update(context);
 
   EXPECT_EQ(context.getComponent<liquid::WorldTransformComponent>(parent)
                 .worldTransform,
@@ -86,8 +83,7 @@ TEST_F(SceneTest, CalculatesWorldTransformFromParentWorldTransform) {
                 getLocalTransform(child2Transform));
 }
 
-TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
-  liquid::Scene scene(context);
+TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   auto entity = context.createEntity();
 
   {
@@ -102,7 +98,7 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
     liquid::CameraComponent camera{};
     context.setComponent(entity, camera);
   }
-  scene.update();
+  sceneUpdater.update(context);
 
   auto &transform =
       context.getComponent<liquid::WorldTransformComponent>(entity);
@@ -119,8 +115,7 @@ TEST_F(SceneTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
             camera.projectionMatrix * camera.viewMatrix);
 }
 
-TEST_F(SceneTest, UpdateDirectionalLightsBasedOnTransforms) {
-  liquid::Scene scene(context);
+TEST_F(SceneUpdaterTest, UpdateDirectionalLightsBasedOnTransforms) {
   auto entity = context.createEntity();
 
   {
@@ -132,7 +127,7 @@ TEST_F(SceneTest, UpdateDirectionalLightsBasedOnTransforms) {
     liquid::DirectionalLightComponent light{};
     context.setComponent(entity, light);
   }
-  scene.update();
+  sceneUpdater.update(context);
 
   auto &transform =
       context.getComponent<liquid::WorldTransformComponent>(entity);

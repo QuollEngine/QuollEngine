@@ -14,7 +14,7 @@ class ScriptingSystemTest : public ::testing::Test {
 public:
   ScriptingSystemTest()
       : assetManager(std::filesystem::current_path()),
-        scriptingSystem(entityContext, eventSystem, assetManager) {}
+        scriptingSystem(eventSystem, assetManager) {}
 
   liquid::EntityContext entityContext;
   liquid::EventSystem eventSystem;
@@ -37,10 +37,10 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
   EXPECT_EQ(component.scope, nullptr);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
   EXPECT_NE(component.scope, nullptr);
 
-  scriptingSystem.update();
+  scriptingSystem.update(entityContext);
   auto *luaScope = static_cast<lua_State *>(component.scope);
   {
     lua_getglobal(luaScope, "value");
@@ -62,11 +62,11 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
   EXPECT_EQ(component.scope, nullptr);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
   EXPECT_NE(component.scope, nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.update();
+    scriptingSystem.update(entityContext);
   }
 
   auto *luaScope = static_cast<lua_State *>(component.scope);
@@ -90,7 +90,7 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
   EXPECT_EQ(component.scope, nullptr);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
   EXPECT_NE(component.scope, nullptr);
 
   auto *luaScope = static_cast<lua_State *>(component.scope);
@@ -116,7 +116,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
 
   // Call 10 times
   for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.start();
+    scriptingSystem.start(entityContext);
   }
   EXPECT_NE(component.scope, nullptr);
 
@@ -140,7 +140,7 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   EXPECT_LT(component.onCollisionStart, liquid::EVENT_OBSERVER_MAX);
   EXPECT_LT(component.onCollisionEnd, liquid::EVENT_OBSERVER_MAX);
@@ -160,7 +160,7 @@ TEST_F(ScriptingSystemTest,
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {5, 6});
   eventSystem.poll();
@@ -185,7 +185,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {entity, 6});
   eventSystem.poll();
@@ -217,7 +217,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded, {5, entity});
   eventSystem.poll();
@@ -249,7 +249,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15});
   eventSystem.poll();
@@ -281,7 +281,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
 
-  scriptingSystem.start();
+  scriptingSystem.start(entityContext);
 
   eventSystem.dispatch(liquid::KeyboardEvent::Released, {35});
   eventSystem.poll();

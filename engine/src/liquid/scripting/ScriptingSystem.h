@@ -13,19 +13,12 @@ public:
   /**
    * @brief Create scripting system
    *
-   * @param entityContext Entity context
    * @param eventSystem Event system
    * @param assetManager Asset manager
    */
-  ScriptingSystem(EntityContext &entityContext, EventSystem &eventSystem,
-                  AssetManager &assetManager);
+  ScriptingSystem(EventSystem &eventSystem, AssetManager &assetManager);
 
-  /**
-   * @brief Destroy scripting system
-   *
-   * Destroy all the scripts and their handles
-   */
-  ~ScriptingSystem();
+  ~ScriptingSystem() = default;
 
   ScriptingSystem(const ScriptingSystem &) = delete;
   ScriptingSystem &operator=(const ScriptingSystem &) = delete;
@@ -34,13 +27,27 @@ public:
 
   /**
    * @brief Call script start on new scripts
+   *
+   * @param entityContext Entity context
    */
-  void start();
+  void start(EntityContext &entityContext);
 
   /**
    * @brief Call script update on new scripts
+   *
+   * @param entityContext Entity context
    */
-  void update();
+  void update(EntityContext &entityContext);
+
+  /**
+   * @brief Cleanup components
+   *
+   * Destroys all scripting data and
+   * removes event observers
+   *
+   * @param entityContext Entity context
+   */
+  void cleanup(EntityContext &entityContext);
 
 private:
   /**
@@ -59,7 +66,6 @@ private:
   void createScriptingData(ScriptingComponent &component, Entity event);
 
 private:
-  EntityContext &mEntityContext;
   EventSystem &mEventSystem;
   AssetManager &mAssetManager;
   LuaInterpreter mLuaInterpreter;

@@ -12,7 +12,7 @@
 
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/MeshInstance.h"
-#include "liquid/scene/Scene.h"
+#include "liquid/scene/SceneUpdater.h"
 #include "liquid/asset/AssetManager.h"
 
 #include "liquid/loop/MainLoop.h"
@@ -27,16 +27,14 @@ class Game {
 public:
   Game()
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
-        renderer(entityContext, assetManager.getRegistry(), window,
+        renderer(assetManager.getRegistry(), window,
                  backend.createDefaultDevice()),
-        physicsSystem(entityContext, eventSystem),
+        physicsSystem(eventSystem),
         assetManager(std::filesystem::current_path()),
         vertexShader(
             renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
         fragmentShader(
             renderer.getRegistry().setShader({"basic-shader.frag.spv"})) {
-
-    scene.reset(new liquid::Scene(entityContext));
 
     assetManager.preloadAssets(renderer.getRegistry());
 
@@ -130,14 +128,15 @@ public:
         gameEnded = false;
       }
       updateScene();
-      physicsSystem.update(dt);
+      physicsSystem.update(dt, entityContext);
       updateGameLogic(dt);
 
       return true;
     });
 
-    mainLoop.setRenderFn(
-        [this, &graph]() { renderer.render(graph, cameraEntity); });
+    mainLoop.setRenderFn([this, &graph]() {
+      renderer.render(graph, cameraEntity, entityContext);
+    });
 
     mainLoop.run();
     renderer.wait();
@@ -174,7 +173,7 @@ private:
       transform.localPosition.x = playerPosition;
     }
 
-    scene->update();
+    sceneUpdater.update(entityContext);
   }
 
   void updateGameLogic(float dt) {
@@ -367,7 +366,7 @@ private:
   liquid::PhysicsSystem physicsSystem;
 
   liquid::Entity cameraEntity = liquid::ENTITY_MAX;
-  std::unique_ptr<liquid::Scene> scene;
+  liquid::SceneUpdater sceneUpdater;
 
   liquid::rhi::ShaderHandle vertexShader;
   liquid::rhi::ShaderHandle fragmentShader;

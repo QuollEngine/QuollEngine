@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/scene/Scene.h"
 #include "EditorCamera.h"
 #include "EditorGrid.h"
 
@@ -41,13 +40,6 @@ public:
    * @param path Path to editor state file
    */
   void loadEditorState(const std::filesystem::path &path);
-
-  /**
-   * @brief Get active scene
-   *
-   * @return Active scene
-   */
-  inline liquid::Scene *getActiveScene() { return mActiveScene; }
 
   /**
    * @brief Get editor camera
@@ -132,7 +124,6 @@ public:
   liquid::EnvironmentComponent &getEnvironment();
 
 private:
-  liquid::Scene *mActiveScene = nullptr;
   liquid::EntityContext &mEntityContext;
   EditorCamera &mEditorCamera;
   EditorGrid &mEditorGrid;

@@ -7,13 +7,22 @@ namespace liquid {
 
 class CameraAspectRatioUpdater {
 public:
-  CameraAspectRatioUpdater(Window &window, EntityContext &entityContext);
+  /**
+   * @brief Create camera aspect ratio updater
+   *
+   * @param window Window
+   */
+  CameraAspectRatioUpdater(Window &window);
 
-  void update();
+  /**
+   * @brief Update aspect ratios
+   *
+   * @param entityContext Entity context
+   */
+  void update(EntityContext &entityContext);
 
 private:
   Window &mWindow;
-  EntityContext &mEntityContext;
 };
 
 } // namespace liquid

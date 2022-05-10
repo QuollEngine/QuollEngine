@@ -11,7 +11,7 @@ public:
   liquid::AssetRegistry assetRegistry;
   liquid::rhi::ResourceRegistry registry;
 
-  AnimationSystemTest() : system(context, assetRegistry) {}
+  AnimationSystemTest() : system(assetRegistry) {}
 
   liquid::Entity createEntity(
       bool loop,
@@ -92,7 +92,7 @@ TEST_F(AnimationSystemTest,
       context.getComponent<liquid::AnimatorComponent>(entity);
 
   EXPECT_EQ(animation.normalizedTime, 0.0f);
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
 }
 
@@ -104,7 +104,7 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
 }
 
@@ -116,7 +116,7 @@ TEST_F(AnimationSystemTest,
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(animation.normalizedTime, 0.25f);
 }
 
@@ -127,9 +127,9 @@ TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
-  system.update(1.5f);
+  system.update(1.5f, context);
   EXPECT_EQ(animation.normalizedTime, 1.0f);
-  system.update(1.5f);
+  system.update(1.5f, context);
   EXPECT_EQ(animation.normalizedTime, 1.0f);
 }
 
@@ -139,7 +139,7 @@ TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
   const auto &animation =
       context.getComponent<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
-  system.update(1.0f);
+  system.update(1.0f, context);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
 }
 
@@ -153,7 +153,7 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.5f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -170,7 +170,7 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
@@ -187,7 +187,7 @@ TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(transform.localScale, glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -208,7 +208,7 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.5f));
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -233,7 +233,7 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
@@ -258,7 +258,7 @@ TEST_F(AnimationSystemTest,
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
   EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
-  system.update(0.5f);
+  system.update(0.5f, context);
   EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));

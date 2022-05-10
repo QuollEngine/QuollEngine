@@ -14,10 +14,9 @@ public:
   /**
    * @brief Create physics system
    *
-   * @param entityContext Entity context
    * @param eventSystem Event system
    */
-  PhysicsSystem(EntityContext &entityContext, EventSystem &eventSystem);
+  PhysicsSystem(EventSystem &eventSystem);
 
   /**
    * @brief Destroy physics system
@@ -35,23 +34,27 @@ public:
    * Performs physics simulation
    *
    * @param dt Time delta
+   * @param entityContext Entity context
    */
-  void update(float dt);
+  void update(float dt, EntityContext &entityContext);
 
 private:
   /**
    * @brief Synchronize physics components
+   *
+   * @param entityContext Entity context
    */
-  void synchronizeComponents();
+  void synchronizeComponents(EntityContext &entityContext);
 
   /**
    * @brief Synchronize transforms
+   *
+   * @param entityContext Entity context
    */
-  void synchronizeTransforms();
+  void synchronizeTransforms(EntityContext &entityContext);
 
 private:
   PhysicsSystemImpl *mImpl = nullptr;
-  EntityContext &mEntityContext;
   EventSystem &mEventSystem;
 };
 
