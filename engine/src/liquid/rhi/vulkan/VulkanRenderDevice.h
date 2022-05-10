@@ -18,6 +18,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan render device
+ */
 class VulkanRenderDevice : public RenderDevice {
 public:
   /**
@@ -25,7 +28,6 @@ public:
    *
    * @param backend Render backend
    * @param physicalDevice Physical device
-   * @param framebufferSize Framebuffer size
    */
   VulkanRenderDevice(VulkanRenderBackend &backend,
                      const VulkanPhysicalDevice &physicalDevice);

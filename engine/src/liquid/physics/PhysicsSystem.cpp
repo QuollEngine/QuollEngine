@@ -20,6 +20,11 @@ using namespace physx;
 
 namespace liquid {
 
+/**
+ * @brief Physx simulation event callback
+ *
+ * Used for finding collisions
+ */
 class PhysxSimulationEventCallback : public PxSimulationEventCallback {
 public:
   /**
@@ -125,6 +130,9 @@ static PxFilterFlags phyxFilterAllCollisionShader(
   return PxFilterFlag::eDEFAULT;
 }
 
+/**
+ * @brief PhysX system implemenation
+ */
 class PhysicsSystem::PhysicsSystemImpl {
 public:
   /**

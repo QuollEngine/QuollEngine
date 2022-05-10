@@ -19,6 +19,12 @@ enum class EditorIcon {
   Direction,
 };
 
+/**
+ * @brief Icon registry
+ *
+ * Provides a way to select and render
+ * icons
+ */
 class IconRegistry {
 public:
   /**

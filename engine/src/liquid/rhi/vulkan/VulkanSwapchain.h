@@ -29,6 +29,7 @@ public:
    * @brief Move operator for swapchain
    *
    * @param rhs Right hand side value
+   * @return This swapchain
    */
   VulkanSwapchain &operator=(VulkanSwapchain &&rhs);
 

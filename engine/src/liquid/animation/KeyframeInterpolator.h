@@ -4,6 +4,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Interpolates keyframes
+ */
 class KeyframeInterpolator {
 public:
   /**

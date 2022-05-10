@@ -4,6 +4,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Status bar component
+ */
 class StatusBar {
 public:
   /**

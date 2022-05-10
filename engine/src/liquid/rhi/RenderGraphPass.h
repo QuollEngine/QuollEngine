@@ -10,12 +10,29 @@ namespace liquid::rhi {
 class RenderGraphEvaluator;
 class RenderGraph;
 
+/**
+ * @brief Render graph attachment data
+ */
 struct AttachmentData {
+  /**
+   * Clear value
+   */
   AttachmentClearValue clearValue;
+
+  /**
+   * Load operation
+   */
   AttachmentLoadOp loadOp = AttachmentLoadOp::DontCare;
+
+  /**
+   * Store operation
+   */
   AttachmentStoreOp storeOp = AttachmentStoreOp::DontCare;
 };
 
+/**
+ * @brief Render graph pass
+ */
 class RenderGraphPass {
   using ExecutorFn = std::function<void(RenderCommandList &)>;
   friend RenderGraph;

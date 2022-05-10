@@ -1,5 +1,5 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-cplusplus-*,-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-const-cast,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,llvm-*,-llvm-include-order,-llvm-header-guard, readability-identifier-naming'
+Checks:          'clang-diagnostic-*,clang-analyzer-cplusplus-*,-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-static-cast-downcast,-cppcoreguidelines-pro-type-const-cast,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,llvm-*,-llvm-include-order,-llvm-header-guard, -cppcoreguidelines-prefer-member-initializer, readability-identifier-naming'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

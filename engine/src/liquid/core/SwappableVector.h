@@ -18,15 +18,41 @@ namespace liquid {
  */
 template <class TItem> class SwappableVector {
 public:
+  /**
+   * @brief Swappable vector iterator
+   */
   class Iterator {
   public:
+    /**
+     * @brief Create iterator
+     *
+     * @param container Swappaple vector container
+     * @param index Index
+     */
     Iterator(const SwappableVector<TItem> &container, size_t index)
         : mContainer(container), mIndex(index) {}
 
+    /**
+     * @brief Check if iterators are not equal
+     *
+     * @param rhs Other iterator
+     * @retval true Iterators are not equal
+     * @retval false Iterators are equal
+     */
     bool operator!=(const Iterator &rhs) const { return mIndex != rhs.mIndex; }
 
+    /**
+     * @brief Get item
+     *
+     * @return Item
+     */
     const TItem &operator*() const { return mContainer.at(mIndex); }
 
+    /**
+     * @brief Advance iterator
+     *
+     * @return This iterator
+     */
     const Iterator &operator++() {
       mIndex++;
       return *this;

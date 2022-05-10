@@ -4,8 +4,24 @@
 
 namespace liquidator {
 
+/**
+ * @brief Editor grid
+ *
+ * Controls editor grid
+ */
 class EditorGrid {
+  /**
+   * @brief Editor grid data
+   *
+   * Passed to hardware buffers
+   */
   struct EditorGridData {
+    /**
+     * Grid lines information
+     *
+     * First value toggles grid lines
+     * Second value toggles axis lines
+     */
     glm::uvec4 gridLines{1, 1, 0, 0};
   };
 

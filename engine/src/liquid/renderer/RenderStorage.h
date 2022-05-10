@@ -8,22 +8,64 @@
 
 namespace liquid {
 
+/**
+ * @brief Render storage
+ *
+ * Stores everything necessary to
+ * render the scene
+ */
 class RenderStorage {
+  /**
+   * Default reserved space for buffers
+   */
   static constexpr size_t DEFAULT_RESERVED_SPACE = 10000;
+
+  /**
+   * Maximum number of joints
+   */
   static constexpr size_t MAX_NUM_JOINTS = 32;
+
+  /**
+   * Maximum number of lights
+   */
   static constexpr size_t MAX_NUM_LIGHTS = 256;
 
   struct LightData {
+    /**
+     * Light data
+     *
+     * Changes based on type of light
+     */
     glm::vec4 data;
+
+    /**
+     * Light color
+     */
     glm::vec4 color;
+
+    /**
+     * Light view projection matrix
+     *
+     * Used for shadow mapping
+     */
     glm::mat4 lightMatrix;
   };
 
   struct SceneData {
+    /**
+     * Scene data
+     *
+     * First value is number of lights
+     * Second value represents if IBL is active
+     */
     glm::ivec4 data{0};
   };
 
   struct MeshData {
+    /**
+     * List of indices that point items in
+     * storage
+     */
     std::vector<uint32_t> indices;
   };
 
@@ -176,6 +218,11 @@ public:
                               rhi::TextureHandle specularMap,
                               rhi::TextureHandle brdfLUT);
 
+  /**
+   * @brief Set camera data
+   *
+   * @param data Camera component data
+   */
   void setCameraData(const CameraComponent &data);
 
   /**

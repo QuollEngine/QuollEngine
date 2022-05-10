@@ -7,8 +7,30 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Native render command list interface
+ */
 class NativeRenderCommandListInterface {
 public:
+  /**
+   * @brief Create native render command list interface
+   */
+  NativeRenderCommandListInterface() = default;
+
+  /**
+   * @brief Destructor
+   */
+  virtual ~NativeRenderCommandListInterface() = default;
+
+  NativeRenderCommandListInterface(const NativeRenderCommandListInterface &) =
+      delete;
+  NativeRenderCommandListInterface &
+  operator=(const NativeRenderCommandListInterface &) = delete;
+  NativeRenderCommandListInterface(NativeRenderCommandListInterface &&) =
+      delete;
+  NativeRenderCommandListInterface &
+  operator=(NativeRenderCommandListInterface &&) = delete;
+
   /**
    * @brief Begin render pass
    *

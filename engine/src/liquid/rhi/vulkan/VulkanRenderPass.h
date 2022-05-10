@@ -6,6 +6,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan render pass
+ */
 class VulkanRenderPass {
 public:
   /**

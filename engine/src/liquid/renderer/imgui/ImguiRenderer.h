@@ -9,15 +9,43 @@
 
 namespace liquid {
 
+/**
+ * @brief Imgui renderer
+ */
 class ImguiRenderer {
+  /**
+   * @brief Imgui frame data
+   */
   struct FrameData {
+    /**
+     * Vertex buffer
+     */
     rhi::BufferHandle vertexBuffer = rhi::BufferHandle::Invalid;
+
+    /**
+     * Vertex buffer size
+     */
     size_t vertexBufferSize = 0;
+
+    /**
+     * Vertex buffer data
+     */
     void *vertexBufferData = nullptr;
 
+    /**
+     * Index buffer
+     */
     rhi::BufferHandle indexBuffer = rhi::BufferHandle::Invalid;
-    void *indexBufferData = nullptr;
+
+    /**
+     * Index buffer size
+     */
     size_t indexBufferSize = 0;
+
+    /**
+     * Index buffer data
+     */
+    void *indexBufferData = nullptr;
   };
 
 public:

@@ -16,30 +16,109 @@ namespace liquidator {
 
 using Logger = liquid::Logger;
 
-template <class THandle> struct GLTFToAsset { std::map<size_t, THandle> map; };
+/**
+ * @brief Mapping for GLTF index to
+ * engine specific asset
+ *
+ * @tparam THandle Asset handle
+ */
+template <class THandle> struct GLTFToAsset {
+  /**
+   * GLTF index to asset handle map
+   */
+  std::map<size_t, THandle> map;
+};
 
+/**
+ * @brief Transient buffer meta data
+ *
+ * Stores accessor, bufferview, and raw data
+ * for easy operations
+ */
 struct BufferMeta {
+  /**
+   * TinyGLTF accessor
+   */
   tinygltf::Accessor accessor;
+
+  /**
+   * TinyGLTF buffer view
+   */
   tinygltf::BufferView bufferView;
+
+  /**
+   * Raw data
+   */
   const unsigned char *rawData;
 };
 
+/**
+ * @brief Transient transform data
+ *
+ * Stores transform information
+ * for all nodes in a GLTF file
+ */
 struct TransformData {
+  /**
+   * Local position
+   */
   glm::vec3 localPosition{0.0f};
+
+  /**
+   * Local rotation
+   */
   glm::quat localRotation{1.0f, 0.0f, 0.0f, 0.0f};
+
+  /**
+   * Local scale
+   */
   glm::vec3 localScale{1.0f};
+
+  /**
+   * Local transform matrix
+   */
   glm::mat4 localTransform{1.0f};
 };
 
+/**
+ * @brief Transient skeleton data
+ *
+ * Used to store GLTF skins an joints with engine
+ * specific skeleton handles
+ */
 struct SkeletonData {
+  /**
+   * GLTF joint to engine specific joint I
+   */
   std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
+
+  /**
+   * Joints that are associated with skins
+   */
   std::unordered_map<uint32_t, uint32_t> jointSkinMap;
+
+  /**
+   * Skin map
+   */
   GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
 };
 
+/**
+ * @brief Transient animation data
+ *
+ * Used to store GLTF animations with engine
+ * specific animation handles
+ */
 struct AnimationData {
+  /**
+   * Node to animation map
+   */
   std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
       nodeAnimationMap;
+
+  /**
+   * Skin to animation map
+   */
   std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
       skinAnimationMap;
 };

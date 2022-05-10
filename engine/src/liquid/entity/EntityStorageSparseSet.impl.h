@@ -42,6 +42,12 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteEntity(Entity entity) {
   this->mNumEntities--;
 }
 
+/**
+ * @brief Set component
+ *
+ * @param entity Entity
+ * @param value Component value
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 void EntityStorageSparseSet<ComponentTypes...>::setComponent(
@@ -67,6 +73,13 @@ void EntityStorageSparseSet<ComponentTypes...>::setComponent(
   }
 }
 
+/**
+ * @brief Get component
+ *
+ * @tparam ComponentType Component type
+ * @param entity Entity
+ * @return Component
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 const ComponentType &
@@ -79,6 +92,13 @@ EntityStorageSparseSet<ComponentTypes...>::getComponent(Entity entity) const {
   return pool.components[pool.entityIndices[entity]];
 }
 
+/**
+ * @brief Get component
+ *
+ * @tparam ComponentType Component type
+ * @param entity Entity
+ * @return Component
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 ComponentType &
@@ -91,6 +111,14 @@ EntityStorageSparseSet<ComponentTypes...>::getComponent(Entity entity) {
   return pool.components[pool.entityIndices[entity]];
 }
 
+/**
+ * @brief Check if entity has component
+ *
+ * @tparam ComponentType Component type
+ * @param entity Entity
+ * @retval true Entity has component
+ * @retval false Entity does not have component
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 bool EntityStorageSparseSet<ComponentTypes...>::hasComponent(
@@ -100,6 +128,12 @@ bool EntityStorageSparseSet<ComponentTypes...>::hasComponent(
          pool.entityIndices[entity] != DEAD_INDEX;
 }
 
+/**
+ * @brief Delete component from entity
+ *
+ * @tparam ComponentType Component type
+ * @param entity Entity
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 void EntityStorageSparseSet<ComponentTypes...>::deleteComponent(Entity entity) {
@@ -129,6 +163,12 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteComponent(Entity entity) {
   pool.entityIndices[entity] = DEAD_INDEX;
 }
 
+/**
+ * @brief Get entity count for component
+ *
+ * @tparam ComponentType Component type
+ * @return Entity count
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 size_t
@@ -136,12 +176,22 @@ EntityStorageSparseSet<ComponentTypes...>::getEntityCountForComponent() const {
   return getPoolForComponent<ComponentType>().entities.size();
 }
 
+/**
+ * @brief destroy storage
+ *
+ * Delete all components and entities
+ */
 template <class... ComponentTypes>
 void EntityStorageSparseSet<ComponentTypes...>::destroy() {
   deleteAllComponents();
   deleteAllEntities();
 }
 
+/**
+ * @brief Destroy all components
+ *
+ * @tparam ComponentType Component type
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 void EntityStorageSparseSet<ComponentTypes...>::destroyComponents() {
@@ -150,6 +200,15 @@ void EntityStorageSparseSet<ComponentTypes...>::destroyComponents() {
   getPoolForComponent<ComponentType>().entityIndices.clear();
 }
 
+/**
+ * @brief Get smallest entity list
+ *
+ * @tparam Index Index
+ * @tparam IndexforSmallest Index for smallest entity
+ * @tparam PickComponents Pick components
+ * @param pools Pools
+ * @return List of entities
+ */
 template <class... ComponentTypes>
 template <size_t Index, size_t IndexForSmallest, class... PickComponents>
 inline const std::vector<Entity> &
@@ -170,6 +229,14 @@ EntityStorageSparseSet<ComponentTypes...>::getSmallestEntityListFromPools(
   return std::get<IndexForSmallest>(pools).entities;
 }
 
+/**
+ * @brief Iterate entities recursively
+ *
+ * @tparam PickComponents Pick components
+ * @tparam PickComponentIndices Pick component indices
+ * @param iterFn Iteration function
+ * @param sequence Index sequence
+ */
 template <class... ComponentTypes>
 template <class... PickComponents, size_t... PickComponentIndices>
 void EntityStorageSparseSet<ComponentTypes...>::iterateEntitiesInternal(
@@ -206,6 +273,11 @@ void EntityStorageSparseSet<ComponentTypes...>::iterateEntitiesInternal(
   }
 }
 
+/**
+ * @brief Iterate over entities
+ *
+ * @param iterFn Iterator function
+ */
 template <class... ComponentTypes>
 template <class... PickComponents>
 void EntityStorageSparseSet<ComponentTypes...>::iterateEntities(
@@ -214,6 +286,12 @@ void EntityStorageSparseSet<ComponentTypes...>::iterateEntities(
   iterateEntitiesInternal(iterFn, std::index_sequence_for<PickComponents...>{});
 }
 
+/**
+ * @brief Get pool for component
+ *
+ * @tparam ComponentType Component type
+ * @return Component pool
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 const EntityStorageSparseSetComponentPool<ComponentType> &
@@ -222,6 +300,12 @@ EntityStorageSparseSet<ComponentTypes...>::getPoolForComponent() const {
       mComponentPools);
 }
 
+/**
+ * @brief Get pool for component
+ *
+ * @tparam ComponentType Component type
+ * @return Component pool
+ */
 template <class... ComponentTypes>
 template <class ComponentType>
 EntityStorageSparseSetComponentPool<ComponentType> &
@@ -230,6 +314,12 @@ EntityStorageSparseSet<ComponentTypes...>::getPoolForComponent() {
       mComponentPools);
 }
 
+/**
+ * @brief Delete all entity components
+ *
+ * @tparam Index Index
+ * @param entity Entity
+ */
 template <class... ComponentTypes>
 template <size_t Index>
 void EntityStorageSparseSet<ComponentTypes...>::deleteAllEntityComponents(
@@ -264,6 +354,11 @@ void EntityStorageSparseSet<ComponentTypes...>::deleteAllEntityComponents(
   }
 }
 
+/**
+ * @brief Delete all components
+ *
+ * @tparam Index Index
+ */
 template <class... ComponentTypes>
 template <size_t Index>
 void EntityStorageSparseSet<ComponentTypes...>::deleteAllComponents() {

@@ -8,6 +8,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Scripting system
+ */
 class ScriptingSystem {
 public:
   /**

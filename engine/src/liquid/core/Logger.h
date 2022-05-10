@@ -57,6 +57,12 @@ public:
    * @param stream Output Stream
    */
   LoggerStream(std::ostream &stream);
+
+  /**
+   * @brief Move logger stream
+   *
+   * @param rhs Logger stream
+   */
   LoggerStream(LoggerStream &&rhs);
 
   /**
@@ -74,11 +80,11 @@ public:
    * @brief Output stream operator overload
 
    * @tparam T Value to write to stream
-   * @param value Output Stream
+   * @param stream Output Stream
    * @return Rvalue reference of itself
    */
-  template <typename T> LoggerStream &&operator<<(T &&val) {
-    mStream << std::forward<T>(val);
+  template <typename T> LoggerStream &&operator<<(T &&stream) {
+    mStream << std::forward<T>(stream);
     return std::move(*this);
   }
 
@@ -94,6 +100,9 @@ private:
  */
 class Logger {
 public:
+  /**
+   * Logger severity
+   */
   enum Severity { Debug = 0, Info = 1, Warning = 2, Error = 3, Fatal = 4 };
 
   /**
@@ -118,7 +127,8 @@ public:
    * @brief Formats timestamp and severity
    *
    * @param severity Log severity
-   * @return timestamp Log timestamp
+   * @param timestamp Log timestamp
+   * @return Formatted string
    */
   String format(Severity severity,
                 std::chrono::time_point<std::chrono::system_clock> &&timestamp);

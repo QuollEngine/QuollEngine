@@ -2,6 +2,9 @@
 
 namespace liquid {
 
+/**
+ * @brief FPS counter
+ */
 class FPSCounter {
 public:
   /**

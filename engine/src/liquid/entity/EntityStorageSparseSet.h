@@ -6,13 +6,38 @@
 
 namespace liquid {
 
-template <class ComponentType> struct EntityStorageSparseSetComponentPool {
+/**
+ * @brief Sparse set pool for entity storage
+ *
+ * @tparam TComponentType Component type
+ */
+template <class TComponentType> struct EntityStorageSparseSetComponentPool {
+  /**
+   * List of entity indices
+   */
   std::vector<size_t> entityIndices;
+
+  /**
+   * List of Entities
+   */
   std::vector<Entity> entities;
-  std::vector<ComponentType> components;
+
+  /**
+   * List of components
+   */
+  std::vector<TComponentType> components;
+
+  /**
+   * Pool size
+   */
   size_t size;
 };
 
+/**
+ * @brief Sparse set based entity storage
+ *
+ * @tparam ComponentTypes Component types
+ */
 template <class... ComponentTypes> class EntityStorageSparseSet {
   static_assert(entity_utils::are_types_unique<ComponentTypes...>,
                 "All types must be unique");
@@ -119,6 +144,7 @@ public:
    * @brief Count entities with component type
    *
    * @tparam ComponentType Component type
+   * @return Number of entities
    */
   template <class ComponentType> size_t getEntityCountForComponent() const;
 

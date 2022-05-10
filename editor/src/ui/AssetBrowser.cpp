@@ -6,10 +6,21 @@
 
 namespace liquidator {
 
+/**
+ * @brief Imgui text callback user data
+ */
 struct ImguiInputTextCallbackUserData {
+  /**
+   * Passed string value ref
+   */
   liquid::String &value;
 };
 
+/**
+ * @brief ImGui input text resize callback
+ *
+ * @param data Imgui input text callback data
+ */
 static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   auto *userData =
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
@@ -23,6 +34,13 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
   return 0;
 }
 
+/**
+ * @brief Input text for std::string
+ *
+ * @param label Label
+ * @param value String value
+ * @param flags Input text flags
+ */
 static bool ImguiInputText(const liquid::String &label, liquid::String &value,
                            ImGuiInputTextFlags flags = 0) {
   LIQUID_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0,
@@ -37,6 +55,12 @@ static bool ImguiInputText(const liquid::String &label, liquid::String &value,
                           flags, InputTextCallback, &userData);
 }
 
+/**
+ * @brief Get icon type from asset type
+ *
+ * @param type Asset type
+ * @return Icon type
+ */
 static EditorIcon getIconFromAssetType(liquid::AssetType type) {
   switch (type) {
   case liquid::AssetType::Texture:

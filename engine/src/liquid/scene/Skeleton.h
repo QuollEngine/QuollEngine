@@ -6,6 +6,9 @@
 
 namespace liquid {
 
+/**
+ * @brief Skeleton instance
+ */
 class Skeleton {
 public:
   /**
@@ -183,7 +186,7 @@ public:
   /**
    * @brief Get number of bones
    *
-   * @used for debugging purposes only
+   * Used for debugging purposes only
    *
    * @return Number for bones
    */

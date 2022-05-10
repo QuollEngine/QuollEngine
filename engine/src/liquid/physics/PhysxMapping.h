@@ -2,6 +2,10 @@
 
 namespace liquid {
 
+/**
+ * @brief Maps physx data with engine
+ * specific data
+ */
 class PhysxMapping {
 public:
   /**

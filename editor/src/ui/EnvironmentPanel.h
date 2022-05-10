@@ -5,6 +5,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Environment panel component
+ */
 class EnvironmentPanel {
 public:
   /**

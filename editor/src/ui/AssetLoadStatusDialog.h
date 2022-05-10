@@ -2,6 +2,11 @@
 
 namespace liquidator {
 
+/**
+ * @brief Asset loading status dialog component
+ *
+ * Shows the dialog if it has warnings or error
+ */
 class AssetLoadStatusDialog {
   using RenderFn = std::function<void()>;
 

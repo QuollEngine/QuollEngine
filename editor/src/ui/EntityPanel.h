@@ -8,6 +8,9 @@
 
 namespace liquidator {
 
+/**
+ * @brief Entity panel component
+ */
 class EntityPanel {
 public:
   /**

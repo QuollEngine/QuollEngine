@@ -6,6 +6,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan device
+ */
 class VulkanDeviceObject {
 public:
   /**

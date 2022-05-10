@@ -8,6 +8,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Render graph evaluator
+ */
 class RenderGraphEvaluator {
   struct RenderPassAttachmentInfo {
     std::vector<TextureHandle> framebufferAttachments;

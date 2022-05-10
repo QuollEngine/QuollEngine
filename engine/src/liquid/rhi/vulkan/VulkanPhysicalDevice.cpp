@@ -102,7 +102,7 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
   VkPhysicalDeviceProperties mProperties;
   vkGetPhysicalDeviceProperties(mDevice, &mProperties);
 
-  PhysicalDeviceType type;
+  PhysicalDeviceType type = PhysicalDeviceType::UNKNOWN;
   switch (mProperties.deviceType) {
   case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
     type = PhysicalDeviceType::DISCRETE_GPU;

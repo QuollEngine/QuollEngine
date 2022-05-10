@@ -7,22 +7,26 @@ on:
 jobs:
   format-check:
     name: Format Check
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install clang-format
       - name: Verify Clang Format
-        run: ./scripts/clang-format-all.sh 12 verify
+        run: ./scripts/clang-format-all.sh 14 verify
 
   static-analysis:
     name: Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies
         run: |
           sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
           sudo apt update
-          sudo apt install vulkan-sdk xorg-dev clang-tidy-12
+          sudo apt install vulkan-sdk xorg-dev libx11-dev clang-tidy
 
       - uses: actions/checkout@v2
 
@@ -32,19 +36,38 @@ jobs:
 
       - name: Static Analysis
         run: |
-          ./scripts/clang-tidy-all.sh 12
+          ./scripts/clang-tidy-all.sh 14
 
-  build-and-test-linux:
-    name: Build and Test
-    runs-on: ubuntu-20.04
+  docs-checker:
+    name: Documentation checker
+    runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies
         run: |
           sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
           sudo apt update
-          sudo apt install vulkan-sdk xorg-dev lcov
+          sudo apt install vulkan-sdk xorg-dev libx11-dev clang-tidy doxygen
 
+      - uses: actions/checkout@v2
+
+      - name: Doxygen checks
+        run: |
+          ./scripts/doxygen-validate.sh
+
+  build-and-test-linux:
+    name: Build and Test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+          sudo apt update
+          sudo apt install vulkan-sdk xorg-dev libx11-dev clang-tidy lcov
+
+      - name: Install premake
+        run: |
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
           tar xvzf premake-5.0.0-alpha16-linux.tar.gz
           chmod +x premake5

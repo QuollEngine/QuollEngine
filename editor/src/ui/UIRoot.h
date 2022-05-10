@@ -19,6 +19,11 @@
 
 namespace liquidator {
 
+/**
+ * @brief Root UI entry point
+ *
+ * Renders all the UI in the scene
+ */
 class UIRoot {
 public:
   /**
@@ -29,7 +34,7 @@ public:
    * @param gltfImporter GLTF importer
    */
   UIRoot(liquid::EntityContext &entityContext, EntityManager &entityManager,
-         GLTFImporter &importer);
+         GLTFImporter &gltfImporter);
 
   /**
    * @brief Render UI Root

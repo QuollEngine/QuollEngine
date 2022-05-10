@@ -5,10 +5,15 @@
 
 namespace liquid {
 
+/**
+ * @brief Scene updater
+ */
 class SceneUpdater {
 public:
   /**
    * @brief Updates scene
+   *
+   * @param entityContext Entity context
    */
   void update(EntityContext &entityContext);
 

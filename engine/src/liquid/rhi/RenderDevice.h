@@ -8,6 +8,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Render device interface
+ */
 class RenderDevice {
 public:
   RenderDevice(const RenderDevice &) = delete;

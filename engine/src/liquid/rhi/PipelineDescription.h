@@ -26,13 +26,33 @@ enum class CullMode { None, Front, Back, FrontAndBack };
 
 enum class FrontFace { Clockwise, CounterClockwise };
 
+/**
+ * @brief Pipeline input assembly
+ */
 struct PipelineInputAssembly {
+  /**
+   * Primitive topology
+   */
   PrimitiveTopology primitiveTopology = PrimitiveTopology::TriangleList;
 };
 
+/**
+ * @brief Pipeline rasterizer
+ */
 struct PipelineRasterizer {
+  /**
+   * Polygon mode
+   */
   PolygonMode polygonMode = PolygonMode::Fill;
+
+  /**
+   * Cull mode
+   */
   CullMode cullMode = CullMode::None;
+
+  /**
+   * Front face direction
+   */
   FrontFace frontFace = FrontFace::Clockwise;
 };
 
@@ -58,28 +78,83 @@ enum class BlendOp { Add, Subtract, ReverseSubtract, Min, Max };
 
 enum class VertexInputRate { Vertex, Instance };
 
+/**
+ * @brief Pipeline vertex input binding
+ */
 struct PipelineVertexInputBinding {
+  /**
+   * Vertex input binding
+   */
   uint32_t binding = 0;
+
+  /**
+   * Vertex input stride
+   */
   uint32_t stride = 0;
+
+  /**
+   * Vertex input rate
+   */
   VertexInputRate inputRate = VertexInputRate::Vertex;
 };
 
+/**
+ * @brief Pipeline vertex input attribute
+ */
 struct PipelineVertexInputAttribute {
+  /**
+   * Attribute slot
+   */
   uint32_t slot = 0;
+
+  /**
+   * Attribute binding
+   */
   uint32_t binding = 0;
+
+  /**
+   * Attribute format
+   */
   uint32_t format = 0;
+
+  /**
+   * Attribute offset
+   */
   uint32_t offset = 0;
 };
 
+/**
+ * @brief Pipeline vertex input layout
+ */
 struct PipelineVertexInputLayout {
+  /**
+   * Input layout bindings
+   */
   std::vector<PipelineVertexInputBinding> bindings;
+
+  /**
+   * Input layout attributes
+   */
   std::vector<PipelineVertexInputAttribute> attributes;
 
+  /**
+   * @brief Create vertex input layout
+   *
+   * Generic function that returns empty layout
+   *
+   * @tparam InputType Vertex type
+   * @return Pipeline vertex input layout
+   */
   template <class InputType> static PipelineVertexInputLayout create() {
     return PipelineVertexInputLayout{};
   };
 };
 
+/**
+ * @brief Create vertex input layout for Vertex
+ *
+ * @return Pipeline vertex input layout
+ */
 template <>
 inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
   const uint32_t POSITION_LOCATION = 0;
@@ -110,6 +185,11 @@ inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
                                     offsetof(Vertex, u1)}}};
 }
 
+/**
+ * @brief Create vertex input layout for Skinned vertex
+ *
+ * @return Pipeline vertex input layout
+ */
 template <>
 inline PipelineVertexInputLayout
 PipelineVertexInputLayout::create<SkinnedVertex>() {
@@ -149,27 +229,93 @@ PipelineVertexInputLayout::create<SkinnedVertex>() {
                                     offsetof(SkinnedVertex, w0)}}};
 }
 
+/**
+ * @brief Pipeline color blend attachment
+ */
 struct PipelineColorBlendAttachment {
+  /**
+   * Color blend attachment enabled
+   */
   bool enabled = false;
+
+  /**
+   * Source color factor
+   */
   BlendFactor srcColor = BlendFactor::Zero;
+
+  /**
+   * Destination color factor
+   */
   BlendFactor dstColor = BlendFactor::Zero;
+
+  /**
+   * Color blend operation
+   */
   BlendOp colorOp = BlendOp::Add;
+
+  /**
+   * Source alpha factor
+   */
   BlendFactor srcAlpha = BlendFactor::Zero;
+
+  /**
+   * Destination alpha factor
+   */
   BlendFactor dstAlpha = BlendFactor::Zero;
+
+  /**
+   * Alpha blend operation
+   */
   BlendOp alphaOp = BlendOp::Add;
 };
 
+/**
+ * @brief Pipeline color blending description
+ */
 struct PipelineColorBlend {
+  /**
+   * Color blend attachments
+   */
   std::vector<PipelineColorBlendAttachment> attachments;
 };
 
+/**
+ * @brief Pipeline description
+ */
 struct PipelineDescription {
+  /**
+   * Vertex shader
+   */
   ShaderHandle vertexShader = ShaderHandle::Invalid;
+
+  /**
+   * Fragment shader
+   */
   ShaderHandle fragmentShader = ShaderHandle::Invalid;
+
+  /**
+   * Vertex input layout
+   */
   PipelineVertexInputLayout inputLayout;
+
+  /**
+   * Input assembly
+   */
   PipelineInputAssembly inputAssembly;
+
+  /**
+   * Rasterizer
+   */
   PipelineRasterizer rasterizer;
+
+  /**
+   * Color blending
+   */
   PipelineColorBlend colorBlend;
+
+  /**
+   * Render pass
+   */
   RenderPassHandle renderPass = RenderPassHandle::Invalid;
 };
 

@@ -8,6 +8,12 @@
 
 namespace liquid {
 
+/**
+ * @brief Imgui debug layer
+ *
+ * Provides performance and debug
+ * information for the engine
+ */
 class ImguiDebugLayer {
 public:
   /**

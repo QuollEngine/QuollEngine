@@ -11,6 +11,12 @@ class VulkanFramebuffer;
 class VulkanPipeline;
 class VulkanShader;
 
+/**
+ * @brief Vulkan resource registry
+ *
+ * Stores all the resources associated
+ * with a device
+ */
 class VulkanResourceRegistry {
   template <class THandle, class TVulkanObject>
   using VulkanResourceMap =

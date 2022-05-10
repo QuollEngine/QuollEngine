@@ -9,3 +9,7 @@ vendor/
 
 # Visual Studio
 .vs
+
+# Doxygen
+autodocs/
+doxy.warn

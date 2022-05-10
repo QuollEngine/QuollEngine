@@ -4,6 +4,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan queue
+ */
 class VulkanQueue {
 public:
   /**

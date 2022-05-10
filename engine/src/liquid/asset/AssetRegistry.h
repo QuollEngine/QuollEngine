@@ -18,6 +18,12 @@
 
 namespace liquid {
 
+/**
+ * @brief Asset registry
+ *
+ * Stores all the loaded assets
+ * in the engine
+ */
 class AssetRegistry {
   using TextureMap = AssetMap<TextureAssetHandle, TextureAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;

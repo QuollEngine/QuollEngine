@@ -70,7 +70,7 @@
               "PX_GENERATE_STATIC_LIBRARIES": "ON"
             },
             "linux": {
-              "CMAKE_CXX_FLAGS": "\"-Wno-restrict -Wno-class-memaccess\""
+              "CMAKE_CXX_FLAGS": "\"-Wno-restrict -Wno-class-memaccess -Wno-mismatched-new-delete -Wno-array-bounds -Wno-stringop-overread\""
             }
           }
         }
@@ -153,6 +153,9 @@
           "options": {
             "common": {
               "YAML_BUILD_SHARED_LIBS": "OFF"
+            },
+            "linux": {
+              "CMAKE_CXX_FLAGS": "\"-Wno-maybe-uninitialized\""
             }
           }
         }

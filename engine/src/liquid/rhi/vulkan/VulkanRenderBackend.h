@@ -18,6 +18,9 @@ namespace liquid::rhi {
 
 class VulkanRenderDevice;
 
+/**
+ * @brief Vulkan render backend
+ */
 class VulkanRenderBackend : public RenderBackend {
 public:
   /**

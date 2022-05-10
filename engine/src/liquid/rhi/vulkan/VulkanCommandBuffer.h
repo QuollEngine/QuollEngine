@@ -8,6 +8,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan command buffer
+ */
 class VulkanCommandBuffer : public NativeRenderCommandListInterface {
 public:
   /**
@@ -22,6 +25,16 @@ public:
                       const VulkanResourceRegistry &registry,
                       VulkanDescriptorManager &descriptorManager,
                       DeviceStats &stats);
+
+  /**
+   * @brief Destructor
+   */
+  ~VulkanCommandBuffer() = default;
+
+  VulkanCommandBuffer(const VulkanCommandBuffer &) = delete;
+  VulkanCommandBuffer &operator=(const VulkanCommandBuffer &) = delete;
+  VulkanCommandBuffer(VulkanCommandBuffer &&) = delete;
+  VulkanCommandBuffer &operator=(VulkanCommandBuffer &&) = delete;
 
   /**
    * @brief Get Vulkan command buffer

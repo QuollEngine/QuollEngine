@@ -8,12 +8,33 @@
 
 namespace liquid {
 
+/**
+ * @brief Collidable component
+ */
 struct CollidableComponent {
+  /**
+   * Geometry description
+   */
   PhysicsGeometryDesc geometryDesc;
+
+  /**
+   * Physics material description
+   */
   PhysicsMaterialDesc materialDesc;
 
+  /**
+   * PhysX shape
+   */
   physx::PxShape *shape = nullptr;
+
+  /**
+   * PhysX material
+   */
   physx::PxMaterial *material = nullptr;
+
+  /**
+   * PhysX rigid body
+   */
   physx::PxRigidStatic *rigidStatic = nullptr;
 };
 

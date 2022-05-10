@@ -2,6 +2,11 @@
 
 namespace liquid {
 
+/**
+ * @brief Entity error
+ *
+ * @deprecated
+ */
 class EntityError : public std::runtime_error {
 public:
   /**

@@ -13,8 +13,14 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan render context
+ */
 class VulkanRenderContext {
 public:
+  /**
+   * Number of frames
+   */
   static constexpr uint32_t NUM_FRAMES = 2;
 
 public:

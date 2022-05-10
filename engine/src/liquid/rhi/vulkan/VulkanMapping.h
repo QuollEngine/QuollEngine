@@ -8,6 +8,12 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan mapper
+ *
+ * Maps engine specific types
+ * with Vulkan types
+ */
 class VulkanMapping {
 public:
   /**

@@ -6,6 +6,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan framebuffer
+ */
 class VulkanFramebuffer {
 public:
   /**

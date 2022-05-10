@@ -10,6 +10,9 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan texture
+ */
 class VulkanTexture {
 public:
   /**
@@ -20,7 +23,7 @@ public:
    * @param imageView Vulkan image view
    * @param sampler Vulkan sampler
    * @param format Vulkan format
-   * @param resourceAllocator Resource allocator
+   * @param allocator Vulkan Resource allocator
    * @param device Vulkan device
    */
   VulkanTexture(VkImage image, VkImageView imageView, VkSampler sampler,
@@ -81,6 +84,8 @@ public:
 
   /**
    * @brief Get Vulkan format
+   *
+   * @return Vulkan format
    */
   inline VkFormat getFormat() const { return mFormat; }
 

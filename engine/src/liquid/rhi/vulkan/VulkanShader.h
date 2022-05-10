@@ -7,9 +7,22 @@
 
 namespace liquid::rhi {
 
+/**
+ * @brief Vulkan shader
+ */
 class VulkanShader {
+  /**
+   * @brief Shader reflection data
+   */
   struct ReflectionData {
+    /**
+     * Push constant ranges
+     */
     std::vector<VkPushConstantRange> pushConstantRanges;
+
+    /**
+     * Descriptor set layouts
+     */
     std::map<uint32_t, std::vector<VkDescriptorSetLayoutBinding>>
         descriptorSetLayouts;
   };

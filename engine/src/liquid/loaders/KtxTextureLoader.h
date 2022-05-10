@@ -4,6 +4,9 @@
 
 namespace liquid {
 
+/**
+ * @brief KTX texture loader
+ */
 class KtxTextureLoader {
 public:
   /**
