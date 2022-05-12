@@ -18,13 +18,12 @@ public:
   /**
    * @brief Create scene manager
    *
-   * @param entityContext Entity context
    * @param editorCamera Editor camera
    * @param editorGrid Editor grid
    * @param entityManager Entity manager
    */
-  SceneManager(liquid::EntityContext &entityContext, EditorCamera &editorCamera,
-               EditorGrid &editorGrid, EntityManager &entityManager);
+  SceneManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
+               EntityManager &entityManager);
 
   SceneManager(const SceneManager &) = delete;
   SceneManager(SceneManager &&) = delete;
@@ -59,13 +58,6 @@ public:
    * @return Editor grid
    */
   inline EditorGrid &getEditorGrid() { return mEditorGrid; }
-
-  /**
-   * @brief Get entity manager
-   *
-   * @return Entity manager
-   */
-  inline EntityManager &getEntityManager() { return mEntityManager; }
 
   /**
    * @brief Get camera
@@ -129,7 +121,6 @@ public:
   liquid::EnvironmentComponent &getEnvironment();
 
 private:
-  liquid::EntityContext &mEntityContext;
   EditorCamera &mEditorCamera;
   EditorGrid &mEditorGrid;
   std::filesystem::path mScenePath;

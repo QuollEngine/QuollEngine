@@ -3,10 +3,9 @@
 
 namespace liquidator {
 
-UIRoot::UIRoot(liquid::EntityContext &entityContext,
-               EntityManager &entityManager, GLTFImporter &gltfImporter)
-    : mAssetBrowser(gltfImporter), mSceneHierarchyPanel(entityContext),
-      mEntityPanel(entityContext, entityManager) {
+UIRoot::UIRoot(EntityManager &entityManager, GLTFImporter &gltfImporter)
+    : mAssetBrowser(gltfImporter), mSceneHierarchyPanel(entityManager),
+      mEntityPanel(entityManager) {
   mSceneHierarchyPanel.setEntityClickHandler([this](liquid::Entity entity) {
     mEntityPanel.setSelectedEntity(entity);
   });
@@ -14,9 +13,10 @@ UIRoot::UIRoot(liquid::EntityContext &entityContext,
 
 void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
                     liquid::AssetManager &assetManager,
-                    liquid::PhysicsSystem &physicsSystem) {
+                    liquid::PhysicsSystem &physicsSystem,
+                    EntityManager &entityManager) {
   mLayout.setup();
-  mMenuBar.render(sceneManager);
+  mMenuBar.render(sceneManager, entityManager);
   mStatusBar.render(sceneManager);
   mSceneHierarchyPanel.render(sceneManager);
 
@@ -28,7 +28,8 @@ void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
       });
 
   mEditorCameraPanel.render(sceneManager);
-  mAssetBrowser.render(assetManager, mIconRegistry, sceneManager);
+  mAssetBrowser.render(assetManager, mIconRegistry, sceneManager,
+                       entityManager);
 }
 
 } // namespace liquidator

@@ -140,6 +140,10 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   auto &frameObj = mFrameData.at(mCurrentFrame);
   int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
   int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
+
+  float realFbWidth = static_cast<float>(fbWidth);
+  float realFbHeight = static_cast<float>(fbHeight);
+
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
@@ -159,44 +163,49 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
           cmd->UserCallback(cmdList, cmd);
         }
       } else {
-        glm::vec2 clipRectOffset;
-        glm::vec4 clipRectSize;
+        glm::vec2 clipRectMin;
+        glm::vec2 clipRectMax;
 
-        clipRectOffset.x =
+        clipRectMin.x =
             (cmd->ClipRect.x - data->DisplayPos.x) * data->FramebufferScale.x;
-        clipRectOffset.y =
+        clipRectMin.y =
             (cmd->ClipRect.y - data->DisplayPos.y) * data->FramebufferScale.y;
-        clipRectSize.x =
+        clipRectMax.x =
             (cmd->ClipRect.z - data->DisplayPos.x) * data->FramebufferScale.x;
-        clipRectSize.y =
+        clipRectMax.y =
             (cmd->ClipRect.w - data->DisplayPos.y) * data->FramebufferScale.y;
 
-        if (clipRectOffset.x < (float)fbWidth &&
-            clipRectOffset.y < (float)fbHeight && clipRectSize.x >= 0.0f &&
-            clipRectSize.y >= 0.0f) {
-
-          if (clipRectOffset.x < 0.0f) {
-            clipRectOffset.x = 0.0f;
-          }
-          if (clipRectOffset.y < 0.0f) {
-            clipRectOffset.y = 0.0f;
-          }
-
-          commandList.setScissor(clipRectOffset, clipRectSize);
-          commandList.bindPipeline(pipeline);
-
-          auto handle = static_cast<rhi::TextureHandle>(
-              reinterpret_cast<uintptr_t>(cmd->TextureId));
-
-          rhi::Descriptor descriptor;
-          descriptor.bind(0, std::vector<rhi::TextureHandle>{handle},
-                          rhi::DescriptorType::CombinedImageSampler);
-
-          commandList.bindDescriptor(pipeline, 0, descriptor);
-          commandList.drawIndexed(
-              cmd->ElemCount, cmd->IdxOffset + indexOffset,
-              static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
+        if (clipRectMin.x < 0.0f) {
+          clipRectMin.x = 0.0f;
         }
+        if (clipRectMin.y < 0.0f) {
+          clipRectMin.y = 0.0f;
+        }
+
+        if (clipRectMax.x > realFbWidth) {
+          clipRectMax.x = realFbWidth;
+        }
+        if (clipRectMax.y > realFbHeight) {
+          clipRectMax.y = realFbHeight;
+        }
+
+        if (clipRectMax.x <= clipRectMin.x || clipRectMax.y <= clipRectMin.y)
+          continue;
+
+        commandList.setScissor(clipRectMin, clipRectMax - clipRectMin);
+        commandList.bindPipeline(pipeline);
+
+        auto handle = static_cast<rhi::TextureHandle>(
+            reinterpret_cast<uintptr_t>(cmd->TextureId));
+
+        rhi::Descriptor descriptor;
+        descriptor.bind(0, std::vector<rhi::TextureHandle>{handle},
+                        rhi::DescriptorType::CombinedImageSampler);
+
+        commandList.bindDescriptor(pipeline, 0, descriptor);
+        commandList.drawIndexed(
+            cmd->ElemCount, cmd->IdxOffset + indexOffset,
+            static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
       }
     }
     indexOffset += cmdList->IdxBuffer.Size;
