@@ -1,17 +1,17 @@
 #include "liquid/core/Base.h"
-#include "SceneManager.h"
+#include "EditorManager.h"
 #include "liquid/yaml/Yaml.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
 namespace liquidator {
 
-SceneManager::SceneManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
-                           EntityManager &entityManager)
+EditorManager::EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
+                             EntityManager &entityManager)
     : mEditorCamera(editorCamera), mEditorGrid(editorGrid),
       mEntityManager(entityManager) {}
 
-void SceneManager::saveEditorState(const std::filesystem::path &path) {
+void EditorManager::saveEditorState(const std::filesystem::path &path) {
   YAML::Node node;
   node["camera"]["fov"] = mEditorCamera.getFOV();
   node["camera"]["near"] = mEditorCamera.getNear();
@@ -28,7 +28,7 @@ void SceneManager::saveEditorState(const std::filesystem::path &path) {
   stream.close();
 }
 
-void SceneManager::loadEditorState(const std::filesystem::path &path) {
+void EditorManager::loadEditorState(const std::filesystem::path &path) {
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {
@@ -106,7 +106,7 @@ void SceneManager::loadEditorState(const std::filesystem::path &path) {
   }
 }
 
-void SceneManager::setCamera(liquid::Entity camera) {
+void EditorManager::setCamera(liquid::Entity camera) {
   if (!mEntityManager.getActiveEntityContext()
            .hasComponent<liquid::CameraComponent>(camera)) {
     return;
@@ -115,11 +115,11 @@ void SceneManager::setCamera(liquid::Entity camera) {
   mCameraEntity = camera;
 }
 
-void SceneManager::switchToEditorCamera() {
+void EditorManager::switchToEditorCamera() {
   mCameraEntity = mEditorCamera.getCamera();
 }
 
-void SceneManager::createNewScene() {
+void EditorManager::createNewScene() {
   static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
 
   {
@@ -138,7 +138,7 @@ void SceneManager::createNewScene() {
   }
 }
 
-void SceneManager::loadOrCreateScene() {
+void EditorManager::loadOrCreateScene() {
   mEditorCamera.reset();
   mCameraEntity = mEditorCamera.getCamera();
 
@@ -147,7 +147,7 @@ void SceneManager::loadOrCreateScene() {
   }
 }
 
-void SceneManager::moveCameraToEntity(liquid::Entity entity) {
+void EditorManager::moveCameraToEntity(liquid::Entity entity) {
   if (!mEntityManager.getActiveEntityContext()
            .hasComponent<liquid::LocalTransformComponent>(entity)) {
     return;
@@ -167,12 +167,12 @@ void SceneManager::moveCameraToEntity(liquid::Entity entity) {
   mEditorCamera.setEye(translation - distanceFromCenter);
 }
 
-bool SceneManager::hasEnvironment() {
+bool EditorManager::hasEnvironment() {
   return mEntityManager.getActiveEntityContext()
       .hasComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
-liquid::EnvironmentComponent &SceneManager::getEnvironment() {
+liquid::EnvironmentComponent &EditorManager::getEnvironment() {
   if (!mEntityManager.getActiveEntityContext().hasEntity(mEnvironmentEntity)) {
     mEnvironmentEntity = mEntityManager.getActiveEntityContext().createEntity();
     mEntityManager.getActiveEntityContext()

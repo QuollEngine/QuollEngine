@@ -11,7 +11,8 @@ constexpr size_t VEC4_ARRAY_SIZE = 4;
 EntityPanel::EntityPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
-void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
+void EntityPanel::render(EditorManager &editorManager,
+                         liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
   if (ImGui::BeginTabItem("Entity")) {
@@ -20,7 +21,7 @@ void EntityPanel::render(SceneManager &sceneManager, liquid::Renderer &renderer,
       renderTransform();
       renderMesh(assetRegistry);
       renderLight();
-      renderCamera(sceneManager);
+      renderCamera(editorManager);
       renderAnimation(assetRegistry);
       renderSkeleton();
       renderCollidable();
@@ -121,7 +122,7 @@ void EntityPanel::renderLight() {
   }
 }
 
-void EntityPanel::renderCamera(SceneManager &sceneManager) {
+void EntityPanel::renderCamera(EditorManager &editorManager) {
   if (!mEntityManager.getActiveEntityContext()
            .hasComponent<liquid::PerspectiveLensComponent>(mSelectedEntity)) {
     return;
@@ -202,7 +203,7 @@ void EntityPanel::renderCamera(SceneManager &sceneManager) {
   }
 
   if (ImGui::Button("Set as active camera")) {
-    sceneManager.setCamera(mSelectedEntity);
+    editorManager.setCamera(mSelectedEntity);
   }
 }
 

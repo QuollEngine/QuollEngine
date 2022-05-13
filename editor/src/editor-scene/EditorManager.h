@@ -8,28 +8,28 @@
 namespace liquidator {
 
 /**
- * @brief Scene manager
+ * @brief Editor manager
  *
  * Manages, saves, and loads the
- * scene and its settings
+ * scene with editor settings
  */
-class SceneManager {
+class EditorManager {
 public:
   /**
-   * @brief Create scene manager
+   * @brief Create editor manager
    *
    * @param editorCamera Editor camera
    * @param editorGrid Editor grid
    * @param entityManager Entity manager
    */
-  SceneManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
-               EntityManager &entityManager);
+  EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
+                EntityManager &entityManager);
 
-  SceneManager(const SceneManager &) = delete;
-  SceneManager(SceneManager &&) = delete;
-  SceneManager &operator=(const SceneManager &) = delete;
-  SceneManager &operator=(SceneManager &&) = delete;
-  ~SceneManager() = default;
+  EditorManager(const EditorManager &) = delete;
+  EditorManager(EditorManager &&) = delete;
+  EditorManager &operator=(const EditorManager &) = delete;
+  EditorManager &operator=(EditorManager &&) = delete;
+  ~EditorManager() = default;
 
   /**
    * @brief Save editor state to a file

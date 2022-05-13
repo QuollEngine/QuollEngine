@@ -5,7 +5,7 @@
 
 namespace liquidator {
 
-void EnvironmentPanel::render(SceneManager &sceneManager,
+void EnvironmentPanel::render(EditorManager &editorManager,
                               liquid::AssetManager &assetManager) {
   static constexpr float HALF = 0.5f;
   if (ImGui::BeginTabItem("Environment", 0)) {
@@ -13,7 +13,7 @@ void EnvironmentPanel::render(SceneManager &sceneManager,
     float height = width * HALF;
 
     if (liquid::rhi::isHandleValid(
-            sceneManager.getEnvironment().irradianceMap)) {
+            editorManager.getEnvironment().irradianceMap)) {
       ImGui::Button("Set irradiance (texture set)", ImVec2(width, height));
     } else {
       ImGui::Button("Set irradiance", ImVec2(width, height));
@@ -25,11 +25,12 @@ void EnvironmentPanel::render(SceneManager &sceneManager,
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
         auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
 
-        sceneManager.getEnvironment().irradianceMap = asset.data.deviceHandle;
+        editorManager.getEnvironment().irradianceMap = asset.data.deviceHandle;
       }
     }
 
-    if (liquid::rhi::isHandleValid(sceneManager.getEnvironment().specularMap)) {
+    if (liquid::rhi::isHandleValid(
+            editorManager.getEnvironment().specularMap)) {
       ImGui::Button("Set specular (texture set)", ImVec2(width, height));
     } else {
       ImGui::Button("Set specular", ImVec2(width, height));
@@ -41,12 +42,12 @@ void EnvironmentPanel::render(SceneManager &sceneManager,
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
         auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
 
-        sceneManager.getEnvironment().specularMap = asset.data.deviceHandle;
+        editorManager.getEnvironment().specularMap = asset.data.deviceHandle;
       }
     }
 
-    if (liquid::rhi::isHandleValid(sceneManager.getEnvironment().brdfLUT)) {
-      liquid::imgui::imageButton(sceneManager.getEnvironment().brdfLUT,
+    if (liquid::rhi::isHandleValid(editorManager.getEnvironment().brdfLUT)) {
+      liquid::imgui::imageButton(editorManager.getEnvironment().brdfLUT,
                                  ImVec2(width, height));
     } else {
       ImGui::Button("Set BRDF", ImVec2(width, height));
@@ -58,7 +59,7 @@ void EnvironmentPanel::render(SceneManager &sceneManager,
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
         auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
 
-        sceneManager.getEnvironment().brdfLUT = asset.data.deviceHandle;
+        editorManager.getEnvironment().brdfLUT = asset.data.deviceHandle;
       }
     }
 

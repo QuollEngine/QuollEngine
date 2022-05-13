@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 
 namespace liquidator {
 
@@ -12,9 +12,9 @@ public:
   /**
    * @brief Render editor grid panel
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    */
-  void render(SceneManager &sceneManager);
+  void render(EditorManager &editorManager);
 
 private:
   bool mOpen = false;

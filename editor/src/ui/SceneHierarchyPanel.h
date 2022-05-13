@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/entity/EntityContext.h"
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 #include "../editor-scene/EditorCamera.h"
 
 namespace liquidator {
@@ -23,9 +23,9 @@ public:
   /**
    * @brief Render the UI
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    */
-  void render(SceneManager &sceneManager);
+  void render(EditorManager &editorManager);
 
   /**
    * @brief Set node click handler
@@ -40,10 +40,10 @@ private:
    *
    * @param entity Entity
    * @param flags Flags
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    */
   void renderEntity(liquid::Entity entity, int flags,
-                    SceneManager &sceneManager);
+                    EditorManager &editorManager);
 
 private:
   EntityManager &mEntityManager;

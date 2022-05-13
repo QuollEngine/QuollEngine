@@ -4,7 +4,7 @@
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
 
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 
 namespace liquidator {
 
@@ -23,12 +23,12 @@ public:
   /**
    * @brief Render panel
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    * @param renderer Renderer
    * @param assetRegistry Asset registry
    * @param physicsSystem Physics system
    */
-  void render(SceneManager &sceneManager, liquid::Renderer &renderer,
+  void render(EditorManager &editorManager, liquid::Renderer &renderer,
               liquid::AssetRegistry &assetRegistry,
               liquid::PhysicsSystem &physicsSystem);
 
@@ -53,9 +53,9 @@ private:
   /**
    * @brief Render camera component
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    */
-  void renderCamera(SceneManager &sceneManager);
+  void renderCamera(EditorManager &editorManager);
 
   /**
    * @brief Render transform component

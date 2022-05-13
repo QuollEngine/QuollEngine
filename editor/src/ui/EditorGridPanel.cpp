@@ -5,7 +5,7 @@
 
 namespace liquidator {
 
-void EditorGridPanel::render(SceneManager &sceneManager) {
+void EditorGridPanel::render(EditorManager &editorManager) {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Editor")) {
       ImGui::MenuItem("Grid", nullptr, &mOpen);
@@ -19,14 +19,14 @@ void EditorGridPanel::render(SceneManager &sceneManager) {
   }
 
   if (ImGui::Begin("Editor Grid", &mOpen, ImGuiWindowFlags_NoDocking)) {
-    bool showGridLines = sceneManager.getEditorGrid().gridLinesShown();
+    bool showGridLines = editorManager.getEditorGrid().gridLinesShown();
     if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
-      sceneManager.getEditorGrid().setGridLinesFlag(showGridLines);
+      editorManager.getEditorGrid().setGridLinesFlag(showGridLines);
     }
 
-    bool showAxisLines = sceneManager.getEditorGrid().axisLinesShown();
+    bool showAxisLines = editorManager.getEditorGrid().axisLinesShown();
     if (ImGui::Checkbox("Show axis lines", &showAxisLines)) {
-      sceneManager.getEditorGrid().setAxisLinesFlag(showAxisLines);
+      editorManager.getEditorGrid().setAxisLinesFlag(showAxisLines);
     }
   }
 
