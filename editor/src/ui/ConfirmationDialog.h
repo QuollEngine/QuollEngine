@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 
 namespace liquidator {
 
@@ -8,7 +8,7 @@ namespace liquidator {
  * @brief Confirmation dialog component
  */
 class ConfirmationDialog {
-  using ConfirmHandler = std::function<void(SceneManager &)>;
+  using ConfirmHandler = std::function<void(EditorManager &)>;
 
 public:
   /**
@@ -33,9 +33,9 @@ public:
   /**
    * @brief Render confirmation dialog
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    */
-  void render(SceneManager &sceneManager);
+  void render(EditorManager &editorManager);
 
 private:
   bool mOpen = false;

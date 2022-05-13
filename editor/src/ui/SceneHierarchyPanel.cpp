@@ -9,18 +9,18 @@ namespace liquidator {
 SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
-void SceneHierarchyPanel::render(SceneManager &sceneManager) {
+void SceneHierarchyPanel::render(EditorManager &editorManager) {
   ImGui::Begin("Hierarchy");
 
   mEntityManager.getActiveEntityContext()
       .iterateEntities<liquid::LocalTransformComponent>(
-          [this, &sceneManager](auto entity, const auto &transform) {
+          [this, &editorManager](auto entity, const auto &transform) {
             if (mEntityManager.getActiveEntityContext()
                     .hasComponent<liquid::ParentComponent>(entity)) {
               return;
             }
 
-            renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
+            renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
           });
 
   ImGui::End();
@@ -32,7 +32,7 @@ void SceneHierarchyPanel::setEntityClickHandler(
 }
 
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
-                                       SceneManager &sceneManager) {
+                                       EditorManager &editorManager) {
   liquid::String name = mEntityManager.getActiveEntityContext()
                                 .hasComponent<liquid::NameComponent>(entity)
                             ? mEntityManager.getActiveEntityContext()
@@ -65,14 +65,14 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   ConfirmationDialog confirmDeleteSceneNode(
       "Delete entity ",
       "Are you sure you want to delete node \"" + name + "\"?",
-      [this, entity](SceneManager &sceneManager) {
+      [this, entity](EditorManager &editorManager) {
         mEntityManager.deleteEntity(entity);
       },
       "Delete");
 
   if (ImGui::BeginPopupContextItem()) {
     if (ImGui::MenuItem("Go to view")) {
-      sceneManager.moveCameraToEntity(entity);
+      editorManager.moveCameraToEntity(entity);
     }
 
     if (ImGui::MenuItem("Delete")) {
@@ -82,7 +82,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
     ImGui::EndPopup();
   }
 
-  confirmDeleteSceneNode.render(sceneManager);
+  confirmDeleteSceneNode.render(editorManager);
 
   if (open) {
     if (mEntityManager.getActiveEntityContext()
@@ -91,7 +91,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
            mEntityManager.getActiveEntityContext()
                .getComponent<liquid::ChildrenComponent>(entity)
                .children) {
-        renderEntity(childEntity, 0, sceneManager);
+        renderEntity(childEntity, 0, editorManager);
       }
     }
 

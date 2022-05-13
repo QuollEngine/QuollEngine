@@ -13,13 +13,13 @@
 #include "liquid/scene/CameraAspectRatioUpdater.h"
 
 #include "../editor-scene/EditorCamera.h"
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 #include "../editor-scene/EditorGrid.h"
 #include "../ui/UIRoot.h"
 #include "../ui/AssetLoadStatusDialog.h"
 
 void randomSpawn(liquidator::EntityManager &entityManager,
-                 liquidator::SceneManager &sceneManager,
+                 liquidator::EditorManager &editorManager,
                  liquid::AssetManager &assetManager) {
 
   constexpr float DISTRIBUTION_EDGE = 500.0f;
@@ -33,7 +33,7 @@ void randomSpawn(liquidator::EntityManager &entityManager,
        assetManager.getRegistry().getPrefabs().getAssets()) {
     for (size_t i = 0; i < NUM_SPAWNS; ++i) {
       auto parent = entityManager.spawnEntity(
-          sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
+          editorManager.getEditorCamera(), liquid::ENTITY_MAX,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
       entityManager.getActiveEntityContext()
           .getComponent<liquid::LocalTransformComponent>(parent)
@@ -76,11 +76,11 @@ void EditorScreen::start(const Project &project) {
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityContext(),
                                         mEventSystem, renderer, mWindow);
   liquidator::EditorGrid editorGrid(renderer.getRegistry());
-  liquidator::SceneManager sceneManager(editorCamera, editorGrid,
-                                        entityManager);
+  liquidator::EditorManager editorManager(editorCamera, editorGrid,
+                                          entityManager);
 
-  sceneManager.loadOrCreateScene();
-  sceneManager.loadEditorState(statePath);
+  editorManager.loadOrCreateScene();
+  editorManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
   liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
@@ -184,7 +184,7 @@ void EditorScreen::start(const Project &project) {
 
     pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
                       &objectIconsPipeline, &renderer, &editorCamera,
-                      &editorGrid, &entityManager, &sceneManager,
+                      &editorGrid, &entityManager, &editorManager,
                       &ui](liquid::rhi::RenderCommandList &commandList) {
       liquid::rhi::Descriptor sceneDescriptor;
       sceneDescriptor.bind(0,
@@ -358,13 +358,13 @@ void EditorScreen::start(const Project &project) {
     return true;
   });
 
-  mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
+  mainLoop.setRenderFn([&renderer, &editorManager, &animationSystem,
                         &entityManager, &assetManager, &graph, &physicsSystem,
                         &ui, &debugLayer, &preloadStatusDialog]() {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
-    ui.render(sceneManager, renderer, assetManager, physicsSystem,
+    ui.render(editorManager, renderer, assetManager, physicsSystem,
               entityManager);
 
     ImVec2 pos{};
@@ -389,14 +389,14 @@ void EditorScreen::start(const Project &project) {
       }
 
       ImVec2 viewportSize(size.x, size.y - ICON_SIZE - ImGui::GetFrameHeight());
-      sceneManager.getEditorCamera().setViewport(
+      editorManager.getEditorCamera().setViewport(
           pos.x, pos.y + ICON_SIZE, viewportSize.x, viewportSize.y);
 
       liquid::imgui::image(graph.second.mainColor, viewportSize);
       ImGui::End();
     }
 
-    if (!sceneManager.isUsingEditorCamera()) {
+    if (!editorManager.isUsingEditorCamera()) {
       ImGui::SetNextWindowPos(ImVec2(pos.x + size.x, pos.y + size.y), 0,
                               ImVec2(1.0f, 1.0f));
 
@@ -405,7 +405,7 @@ void EditorScreen::start(const Project &project) {
                            ImGuiWindowFlags_NoSavedSettings |
                            ImGuiWindowFlags_NoDocking)) {
         if (ImGui::Button("Reset to editor camera")) {
-          sceneManager.switchToEditorCamera();
+          editorManager.switchToEditorCamera();
         }
         ImGui::End();
       }
@@ -414,7 +414,7 @@ void EditorScreen::start(const Project &project) {
 #ifdef LIQUID_PROFILER
     if (ImGui::Begin("Benchmark")) {
       if (ImGui::Button("Spawn prefabs")) {
-        randomSpawn(entityContext, sceneManager, assetManager);
+        randomSpawn(entityContext, editorManager, assetManager);
       }
 
       ImGui::End();
@@ -425,12 +425,12 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
     imgui.endRendering();
 
-    return renderer.render(graph.first, sceneManager.getCamera(),
+    return renderer.render(graph.first, editorManager.getCamera(),
                            entityManager.getActiveEntityContext());
   });
 
   mainLoop.run();
-  sceneManager.saveEditorState(statePath);
+  editorManager.saveEditorState(statePath);
 }
 
 } // namespace liquidator

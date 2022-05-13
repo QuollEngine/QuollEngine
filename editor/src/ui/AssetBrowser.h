@@ -4,7 +4,7 @@
 #include "platform-tools/NativeFileDialog.h"
 
 #include "../asset/GLTFImporter.h"
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 
 #include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"
@@ -40,11 +40,11 @@ public:
    *
    * @param assetManager Asset manager
    * @param iconRegistry Icon registry
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    * @param entityManager Entity manager
    */
   void render(liquid::AssetManager &assetManager, IconRegistry &iconRegistry,
-              SceneManager &sceneManager, EntityManager &entityManager);
+              EditorManager &editorManager, EntityManager &entityManager);
 
   /**
    * @brief Reload contents in current directory

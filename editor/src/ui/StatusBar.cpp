@@ -5,11 +5,11 @@
 
 namespace liquidator {
 
-void StatusBar::render(SceneManager &sceneManager) {
+void StatusBar::render(EditorManager &editorManager) {
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
 
   liquid::String state = "";
-  switch (sceneManager.getEditorCamera().getInputState()) {
+  switch (editorManager.getEditorCamera().getInputState()) {
   case EditorCamera::InputState::Pan:
     state = "Panning";
     break;

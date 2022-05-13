@@ -11,24 +11,24 @@ UIRoot::UIRoot(EntityManager &entityManager, GLTFImporter &gltfImporter)
   });
 }
 
-void UIRoot::render(SceneManager &sceneManager, liquid::Renderer &renderer,
+void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
                     liquid::AssetManager &assetManager,
                     liquid::PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
   mLayout.setup();
-  mMenuBar.render(sceneManager, entityManager);
-  mStatusBar.render(sceneManager);
-  mSceneHierarchyPanel.render(sceneManager);
+  mMenuBar.render(editorManager, entityManager);
+  mStatusBar.render(editorManager);
+  mSceneHierarchyPanel.render(editorManager);
 
   mInspector.render(
-      [&sceneManager, &renderer, &assetManager, &physicsSystem, this]() {
-        mEntityPanel.render(sceneManager, renderer, assetManager.getRegistry(),
+      [&editorManager, &renderer, &assetManager, &physicsSystem, this]() {
+        mEntityPanel.render(editorManager, renderer, assetManager.getRegistry(),
                             physicsSystem);
-        mEnvironmentPanel.render(sceneManager, assetManager);
+        mEnvironmentPanel.render(editorManager, assetManager);
       });
 
-  mEditorCameraPanel.render(sceneManager);
-  mAssetBrowser.render(assetManager, mIconRegistry, sceneManager,
+  mEditorCameraPanel.render(editorManager);
+  mAssetBrowser.render(assetManager, mIconRegistry, editorManager,
                        entityManager);
 }
 

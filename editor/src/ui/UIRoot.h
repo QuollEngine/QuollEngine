@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../editor-scene/SceneManager.h"
+#include "../editor-scene/EditorManager.h"
 
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
@@ -39,13 +39,13 @@ public:
    *
    * Renders all components inside the root
    *
-   * @param sceneManager Scene manager
+   * @param editorManager Editor manager
    * @param renderer Renderer
    * @param assetManager Asset manager
    * @param physicsSystem Physics system
    * @param entityManager Entity manager
    */
-  void render(SceneManager &sceneManager, liquid::Renderer &renderer,
+  void render(EditorManager &editorManager, liquid::Renderer &renderer,
               liquid::AssetManager &assetManager,
               liquid::PhysicsSystem &physicsSystem,
               EntityManager &entityManager);

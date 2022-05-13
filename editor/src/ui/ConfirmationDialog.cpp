@@ -16,7 +16,7 @@ ConfirmationDialog::ConfirmationDialog(const liquid::String &title,
 
 void ConfirmationDialog::show() { mOpen = true; }
 
-void ConfirmationDialog::render(SceneManager &sceneManager) {
+void ConfirmationDialog::render(EditorManager &editorManager) {
   if (mOpen) {
     ImGui::OpenPopup(mTitle.c_str());
   }
@@ -24,7 +24,7 @@ void ConfirmationDialog::render(SceneManager &sceneManager) {
   if (ImGui::BeginPopupModal(mTitle.c_str())) {
     ImGui::Text("%s", mPrompt.c_str());
     if (ImGui::Button(mConfirmButtonLabel.c_str())) {
-      mConfirmHandler(sceneManager);
+      mConfirmHandler(editorManager);
       ImGui::CloseCurrentPopup();
     }
 

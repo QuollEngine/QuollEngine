@@ -8,11 +8,12 @@
 
 namespace liquidator {
 
-void MenuBar::render(SceneManager &sceneManager, EntityManager &entityManager) {
+void MenuBar::render(EditorManager &editorManager,
+                     EntityManager &entityManager) {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Objects")) {
       if (ImGui::MenuItem("Create empty entity", nullptr)) {
-        entityManager.createEmptyEntity(sceneManager.getEditorCamera(),
+        entityManager.createEmptyEntity(editorManager.getEditorCamera(),
                                         liquid::ENTITY_MAX);
       }
 
