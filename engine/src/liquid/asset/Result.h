@@ -32,7 +32,7 @@ public:
    * @param error Error
    * @return Error result
    */
-  static Result<TData> Error(const String &error) {
+  static Result<TData> Error(StringView error) {
     return Result<TData>(ErrorEnum{}, error);
   }
 
@@ -53,7 +53,7 @@ public:
    * @param _ Error enum
    * @param error Error
    */
-  Result(ErrorEnum _, const String &error) : mError(error) {}
+  Result(ErrorEnum _, StringView error) : mError(error) {}
 
   /**
    * @brief Check if result has data

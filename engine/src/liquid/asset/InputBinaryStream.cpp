@@ -3,7 +3,7 @@
 
 namespace liquid {
 
-InputBinaryStream::InputBinaryStream(const std::filesystem::path &path)
+InputBinaryStream::InputBinaryStream(const Path &path)
     : mStream(path, std::ios::binary | std::ios::in) {}
 
 InputBinaryStream::~InputBinaryStream() { mStream.close(); }

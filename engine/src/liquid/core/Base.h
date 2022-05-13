@@ -35,6 +35,7 @@
 #include <type_traits>
 #include <variant>
 #include <random>
+#include <string_view>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -52,6 +53,8 @@
 namespace liquid {
 
 using String = std::string;
+using StringView = std::string_view;
+using Path = std::filesystem::path;
 
 template <class T> using SharedPtr = std::shared_ptr<T>;
 

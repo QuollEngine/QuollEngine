@@ -9,16 +9,15 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   String extension = ".lqskel";
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -38,11 +37,12 @@ AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   file.write(asset.data.jointInverseBindMatrices);
   file.write(asset.data.jointNames);
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
-Result<SkeletonAssetHandle> AssetManager::loadSkeletonDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+Result<SkeletonAssetHandle>
+AssetManager::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
+                                              const Path &filePath) {
   auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<SkeletonAsset> skeleton{};
@@ -73,7 +73,7 @@ Result<SkeletonAssetHandle> AssetManager::loadSkeletonDataFromInputStream(
 }
 
 Result<SkeletonAssetHandle>
-AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadSkeletonFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
@@ -85,13 +85,12 @@ AssetManager::loadSkeletonFromFile(const std::filesystem::path &filePath) {
 }
 
 Result<SkeletonAssetHandle>
-AssetManager::getOrLoadSkeletonFromPath(const String &relativePath) {
+AssetManager::getOrLoadSkeletonFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getSkeletons().getAssets()) {
     if (asset.path == fullPath) {

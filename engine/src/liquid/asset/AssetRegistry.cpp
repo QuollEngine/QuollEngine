@@ -164,7 +164,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
 }
 
 std::pair<AssetType, uint32_t>
-AssetRegistry::getAssetByPath(const std::filesystem::path &filePath) {
+AssetRegistry::getAssetByPath(const Path &filePath) {
   LIQUID_PROFILE_EVENT("AssetRegistry::getAssetType");
   for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.path == filePath) {

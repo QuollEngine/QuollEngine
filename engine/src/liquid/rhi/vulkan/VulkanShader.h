@@ -74,19 +74,19 @@ private:
   /**
    * @brief Read shader file
    *
-   * @param shaderFile Shader file
+   * @param filepath File path
    * @return Shader data in bytes
    */
-  static std::vector<char> readShaderFile(const String &shaderFile);
+  static std::vector<char> readShaderFile(const String &filepath);
 
   /**
    * @brief Create reflection info
    *
    * @param bytes SpirV Bytes
-   * @param shaderFile Shader filename
+   * @param filepath File path
    */
   void createReflectionInfo(const std::vector<char> &bytes,
-                            const String &shaderFile);
+                            const String &filepath);
 
 private:
   VulkanDeviceObject &mDevice;

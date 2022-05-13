@@ -5,10 +5,6 @@
 
 namespace liquid {
 
-template <class T> String convertToString(T value) {
-  return std::to_string(value);
-}
-
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo,
     const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
@@ -86,10 +82,10 @@ void ImguiDebugLayer::renderUsageMetrics() {
 
     renderTableRow(
         "Number of buffers",
-        convertToString(
+        std::to_string(
             mResourceRegistry.getBufferMap().getDescriptions().size()));
     renderTableRow("Total size of allocated buffer",
-                   convertToString(bufferSize));
+                   std::to_string(bufferSize));
 
     // Textures
     size_t textureSize = 0;
@@ -100,18 +96,18 @@ void ImguiDebugLayer::renderUsageMetrics() {
 
     renderTableRow(
         "Number of textures",
-        convertToString(
+        std::to_string(
             mResourceRegistry.getTextureMap().getDescriptions().size()));
     renderTableRow("Total size of allocated textures",
-                   convertToString(textureSize));
+                   std::to_string(textureSize));
 
     // Draw calls
     renderTableRow("Number of draw calls",
-                   convertToString(mDeviceStats.getDrawCallsCount()));
+                   std::to_string(mDeviceStats.getDrawCallsCount()));
     renderTableRow("Number of drawn primitives",
-                   convertToString(mDeviceStats.getDrawnPrimitivesCount()));
+                   std::to_string(mDeviceStats.getDrawnPrimitivesCount()));
     renderTableRow("Number of command calls",
-                   convertToString(mDeviceStats.getCommandCallsCount()));
+                   std::to_string(mDeviceStats.getCommandCallsCount()));
 
     ImGui::EndTable();
   }
@@ -156,13 +152,12 @@ void ImguiDebugLayer::renderPropertyMapAsTable(
   }
 }
 
-void ImguiDebugLayer::renderTableRow(const String &header,
-                                     const String &value) {
+void ImguiDebugLayer::renderTableRow(StringView header, StringView value) {
   ImGui::TableNextRow();
   ImGui::TableSetColumnIndex(0);
-  ImGui::Text("%s", header.c_str());
+  ImGui::Text("%s", String(header).c_str());
   ImGui::TableSetColumnIndex(1);
-  ImGui::Text("%s", value.c_str());
+  ImGui::Text("%s", String(value).c_str());
 }
 
 } // namespace liquid

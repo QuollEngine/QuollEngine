@@ -57,7 +57,7 @@ private:
    * @param header Row header
    * @param value Row value
    */
-  void renderTableRow(const String &header, const String &value);
+  void renderTableRow(StringView header, StringView value);
 
   /**
    * @brief Render property map as a table

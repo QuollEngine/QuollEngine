@@ -15,7 +15,7 @@ public:
    * @param name Shader name
    * @param shader Shader object
    */
-  void addShader(const String &name, rhi::ShaderHandle shader);
+  void addShader(StringView name, rhi::ShaderHandle shader);
 
   /**
    * @brief Get shader
@@ -23,7 +23,7 @@ public:
    * @param name Shader name
    * @return Shader
    */
-  rhi::ShaderHandle getShader(const String &name) const;
+  rhi::ShaderHandle getShader(StringView name) const;
 
 private:
   std::unordered_map<String, rhi::ShaderHandle> mShaders;

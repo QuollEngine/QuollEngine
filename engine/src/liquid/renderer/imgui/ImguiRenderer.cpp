@@ -4,8 +4,6 @@
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
 
-#include "ImguiError.h"
-
 static const VkDeviceSize BUFFER_MEMORY_ALIGNMENT = 256;
 
 /**

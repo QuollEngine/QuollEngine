@@ -9,16 +9,15 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   String extension = ".lqmesh";
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -64,11 +63,12 @@ AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
     file.write(materialPath);
   }
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
-Result<MeshAssetHandle> AssetManager::loadMeshDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+Result<MeshAssetHandle>
+AssetManager::loadMeshDataFromInputStream(InputBinaryStream &stream,
+                                          const Path &filePath) {
   std::vector<String> warnings;
 
   AssetData<MeshAsset> mesh{};
@@ -144,8 +144,7 @@ Result<MeshAssetHandle> AssetManager::loadMeshDataFromInputStream(
                                      warnings);
 }
 
-Result<MeshAssetHandle>
-AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
+Result<MeshAssetHandle> AssetManager::loadMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &result = checkAssetFile(stream, filePath, AssetType::Mesh);
@@ -156,17 +155,16 @@ AssetManager::loadMeshFromFile(const std::filesystem::path &filePath) {
   return loadMeshDataFromInputStream(stream, filePath);
 }
 
-Result<std::filesystem::path> AssetManager::createSkinnedMeshFromAsset(
+Result<Path> AssetManager::createSkinnedMeshFromAsset(
     const AssetData<SkinnedMeshAsset> &asset) {
 
   String extension = ".lqmesh";
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -218,12 +216,12 @@ Result<std::filesystem::path> AssetManager::createSkinnedMeshFromAsset(
     file.write(materialPath);
   }
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
-Result<SkinnedMeshAssetHandle> AssetManager::loadSkinnedMeshDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
-
+Result<SkinnedMeshAssetHandle>
+AssetManager::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
+                                                 const Path &filePath) {
   std::vector<String> warnings;
 
   AssetData<SkinnedMeshAsset> mesh{};
@@ -313,7 +311,7 @@ Result<SkinnedMeshAssetHandle> AssetManager::loadSkinnedMeshDataFromInputStream(
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadSkinnedMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::SkinnedMesh);
@@ -325,13 +323,12 @@ AssetManager::loadSkinnedMeshFromFile(const std::filesystem::path &filePath) {
 }
 
 Result<MeshAssetHandle>
-AssetManager::getOrLoadMeshFromPath(const String &relativePath) {
+AssetManager::getOrLoadMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getMeshes().getAssets()) {
     if (asset.path == fullPath) {
@@ -343,13 +340,12 @@ AssetManager::getOrLoadMeshFromPath(const String &relativePath) {
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetManager::getOrLoadSkinnedMeshFromPath(const String &relativePath) {
+AssetManager::getOrLoadSkinnedMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getSkinnedMeshes().getAssets()) {
     if (asset.path == fullPath) {

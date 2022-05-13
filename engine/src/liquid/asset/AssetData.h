@@ -33,12 +33,12 @@ template <class TData> struct AssetData {
   /**
    * Asset path
    */
-  std::filesystem::path path;
+  Path path;
 
   /**
    * Asset relative path
    */
-  std::filesystem::path relativePath;
+  Path relativePath;
 };
 
 } // namespace liquid

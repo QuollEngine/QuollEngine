@@ -58,8 +58,7 @@ public:
    * @param path Relative path
    * @return Handle
    */
-  inline THandle
-  findHandleByRelativePath(const std::filesystem::path &path) const {
+  inline THandle findHandleByRelativePath(const Path &path) const {
     for (auto &[handle, data] : mAssets) {
       if (data.relativePath == path) {
         return handle;

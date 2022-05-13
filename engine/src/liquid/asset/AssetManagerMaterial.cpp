@@ -9,18 +9,17 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   String extension = ".lqmat";
 
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
 
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -62,11 +61,12 @@ AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   file.write(asset.data.emissiveTextureCoord);
   file.write(asset.data.emissiveFactor);
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
-Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+Result<MaterialAssetHandle>
+AssetManager::loadMaterialDataFromInputStream(InputBinaryStream &stream,
+                                              const Path &filePath) {
 
   AssetData<MaterialAsset> material{};
   material.path = filePath;
@@ -162,7 +162,7 @@ Result<MaterialAssetHandle> AssetManager::loadMaterialDataFromInputStream(
 }
 
 Result<MaterialAssetHandle>
-AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadMaterialFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   if (!stream.good()) {
@@ -179,13 +179,12 @@ AssetManager::loadMaterialFromFile(const std::filesystem::path &filePath) {
 }
 
 Result<MaterialAssetHandle>
-AssetManager::getOrLoadMaterialFromPath(const String &relativePath) {
+AssetManager::getOrLoadMaterialFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getMaterials().getAssets()) {
     if (asset.path == fullPath) {

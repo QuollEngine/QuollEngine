@@ -9,16 +9,15 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   String extension = ".lqanim";
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -44,11 +43,12 @@ AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
     file.write(keyframe.keyframeValues);
   }
 
-  return Result<std::filesystem::path>::Ok(assetPath, {});
+  return Result<Path>::Ok(assetPath, {});
 }
 
-Result<AnimationAssetHandle> AssetManager::loadAnimationDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+Result<AnimationAssetHandle>
+AssetManager::loadAnimationDataFromInputStream(InputBinaryStream &stream,
+                                               const Path &filePath) {
 
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
@@ -80,7 +80,7 @@ Result<AnimationAssetHandle> AssetManager::loadAnimationDataFromInputStream(
 }
 
 Result<AnimationAssetHandle>
-AssetManager::loadAnimationFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadAnimationFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
@@ -92,13 +92,12 @@ AssetManager::loadAnimationFromFile(const std::filesystem::path &filePath) {
 }
 
 Result<AnimationAssetHandle>
-AssetManager::getOrLoadAnimationFromPath(const String &relativePath) {
+AssetManager::getOrLoadAnimationFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getAnimations().getAssets()) {
     if (asset.path == fullPath) {

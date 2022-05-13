@@ -3,7 +3,7 @@
 
 namespace liquid {
 
-OutputBinaryStream::OutputBinaryStream(std::filesystem::path path)
+OutputBinaryStream::OutputBinaryStream(Path path)
     : mStream(path, std::ios::binary | std::ios::out) {}
 
 OutputBinaryStream::~OutputBinaryStream() { mStream.close(); }
