@@ -6,20 +6,22 @@
 
 namespace liquidator {
 
-SceneHierarchyPanel::SceneHierarchyPanel(liquid::EntityContext &entityContext)
-    : mEntityContext(entityContext) {}
+SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
+    : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(SceneManager &sceneManager) {
   ImGui::Begin("Hierarchy");
 
-  mEntityContext.iterateEntities<liquid::LocalTransformComponent>(
-      [this, &sceneManager](auto entity, const auto &transform) {
-        if (mEntityContext.hasComponent<liquid::ParentComponent>(entity)) {
-          return;
-        }
+  mEntityManager.getActiveEntityContext()
+      .iterateEntities<liquid::LocalTransformComponent>(
+          [this, &sceneManager](auto entity, const auto &transform) {
+            if (mEntityManager.getActiveEntityContext()
+                    .hasComponent<liquid::ParentComponent>(entity)) {
+              return;
+            }
 
-        renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
-      });
+            renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, sceneManager);
+          });
 
   ImGui::End();
 }
@@ -31,12 +33,15 @@ void SceneHierarchyPanel::setEntityClickHandler(
 
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
                                        SceneManager &sceneManager) {
-  liquid::String name =
-      mEntityContext.hasComponent<liquid::NameComponent>(entity)
-          ? mEntityContext.getComponent<liquid::NameComponent>(entity).name
-          : "Entity #" + std::to_string(entity);
+  liquid::String name = mEntityManager.getActiveEntityContext()
+                                .hasComponent<liquid::NameComponent>(entity)
+                            ? mEntityManager.getActiveEntityContext()
+                                  .getComponent<liquid::NameComponent>(entity)
+                                  .name
+                            : "Entity #" + std::to_string(entity);
 
-  bool isLeaf = !mEntityContext.hasComponent<liquid::ChildrenComponent>(entity);
+  bool isLeaf = !mEntityManager.getActiveEntityContext()
+                     .hasComponent<liquid::ChildrenComponent>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -61,7 +66,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
       "Delete entity ",
       "Are you sure you want to delete node \"" + name + "\"?",
       [this, entity](SceneManager &sceneManager) {
-        sceneManager.getEntityManager().deleteEntity(entity);
+        mEntityManager.deleteEntity(entity);
       },
       "Delete");
 
@@ -80,9 +85,11 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   confirmDeleteSceneNode.render(sceneManager);
 
   if (open) {
-    if (mEntityContext.hasComponent<liquid::ChildrenComponent>(entity)) {
+    if (mEntityManager.getActiveEntityContext()
+            .hasComponent<liquid::ChildrenComponent>(entity)) {
       for (auto childEntity :
-           mEntityContext.getComponent<liquid::ChildrenComponent>(entity)
+           mEntityManager.getActiveEntityContext()
+               .getComponent<liquid::ChildrenComponent>(entity)
                .children) {
         renderEntity(childEntity, 0, sceneManager);
       }

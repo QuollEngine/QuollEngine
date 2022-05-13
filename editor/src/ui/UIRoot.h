@@ -29,12 +29,10 @@ public:
   /**
    * @brief Create UI Root
    *
-   * @param entityContext Entity context
    * @param entityManager Entity manager
    * @param gltfImporter GLTF importer
    */
-  UIRoot(liquid::EntityContext &entityContext, EntityManager &entityManager,
-         GLTFImporter &gltfImporter);
+  UIRoot(EntityManager &entityManager, GLTFImporter &gltfImporter);
 
   /**
    * @brief Render UI Root
@@ -45,10 +43,12 @@ public:
    * @param renderer Renderer
    * @param assetManager Asset manager
    * @param physicsSystem Physics system
+   * @param entityManager Entity manager
    */
   void render(SceneManager &sceneManager, liquid::Renderer &renderer,
               liquid::AssetManager &assetManager,
-              liquid::PhysicsSystem &physicsSystem);
+              liquid::PhysicsSystem &physicsSystem,
+              EntityManager &entityManager);
 
   /**
    * @brief Get icon registry

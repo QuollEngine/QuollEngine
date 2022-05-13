@@ -41,6 +41,13 @@ public:
    */
   void update(float dt, EntityContext &entityContext);
 
+  /**
+   * @brief Cleanup Physx actors and shapes
+   *
+   * @param entityContext Entity context
+   */
+  void cleanup(EntityContext &entityContext);
+
 private:
   /**
    * @brief Synchronize physics components

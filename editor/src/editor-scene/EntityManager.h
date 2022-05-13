@@ -18,13 +18,11 @@ public:
   /**
    * @brief Create entity manager
    *
-   * @param entityContext Entity context
    * @param assetManager Asset manager
    * @param renderer Renderer
    * @param scenePath Scene path
    */
-  EntityManager(liquid::EntityContext &entityContext,
-                liquid::AssetManager &assetManager, liquid::Renderer &renderer,
+  EntityManager(liquid::AssetManager &assetManager, liquid::Renderer &renderer,
                 const std::filesystem::path &scenePath);
 
   /**
@@ -83,7 +81,7 @@ public:
    * @param entity Entity
    * @param handle Mesh asset handle
    */
-  void setMeshForEntity(liquid::Entity entity, liquid::MeshAssetHandle handle);
+  void setMesh(liquid::Entity entity, liquid::MeshAssetHandle handle);
 
   /**
    * @brief Set skinned mesh for entity
@@ -91,8 +89,8 @@ public:
    * @param entity Entity
    * @param handle Skinned mesh asset handle
    */
-  void setSkinnedMeshForEntity(liquid::Entity entity,
-                               liquid::SkinnedMeshAssetHandle handle);
+  void setSkinnedMesh(liquid::Entity entity,
+                      liquid::SkinnedMeshAssetHandle handle);
 
   /**
    * @brief Set entity name
@@ -103,15 +101,14 @@ public:
   void setName(liquid::Entity entity, const liquid::String &name);
 
   /**
-   * @brief Set camera
+   * @brief Set camera for entity
    *
    * @param entity Entity
    * @param lens Perspective lens component
    * @param autoRatio Calculate aspect ratio automatically
    */
-  void createCamera(liquid::Entity entity,
-                    const liquid::PerspectiveLensComponent &lens,
-                    bool autoRatio);
+  void setCamera(liquid::Entity entity,
+                 const liquid::PerspectiveLensComponent &lens, bool autoRatio);
 
   /**
    * @brief Delete entity
@@ -130,9 +127,36 @@ public:
    * @param saveToFile Save the spawned entities
    * @return New entity
    */
-  liquid::Entity spawnAsset(EditorCamera &camera, liquid::Entity parent,
-                            uint32_t asset, liquid::AssetType type,
-                            bool saveToFile = true);
+  liquid::Entity spawnEntity(EditorCamera &camera, liquid::Entity parent,
+                             uint32_t asset, liquid::AssetType type,
+                             bool saveToFile = true);
+
+  /**
+   * @brief Get active entity context
+   *
+   * @return Active entity context
+   */
+  inline liquid::EntityContext &getActiveEntityContext() {
+    return mInSimulation ? mSimulationEntityContext : mEntityContext;
+  }
+
+  /**
+   * @brief Use simulation context
+   */
+  void useSimulationContext();
+
+  /**
+   * @brief Use editing context
+   */
+  void useEditingContext();
+
+  /**
+   * @brief Check if using simulation context
+   *
+   * @retval true Using simulation context
+   * @retval false Using editing context
+   */
+  inline bool isUsingSimulationContext() const { return mInSimulation; }
 
 private:
   /**
@@ -144,9 +168,19 @@ private:
   liquid::LocalTransformComponent
   getTransformFromCamera(EditorCamera &camera) const;
 
+  /**
+   * @brief Update simulation entity context
+   *
+   * Copies entity context to simulation
+   * entity context
+   */
+  void updateSimulationEntityContext();
+
 private:
-  liquid::EntityContext &mEntityContext;
+  liquid::EntityContext mEntityContext;
+  liquid::EntityContext mSimulationEntityContext;
   liquid::AssetManager &mAssetManager;
+  bool mInSimulation = false;
   liquid::Renderer &mRenderer;
   uint64_t mLastId = 1;
   std::filesystem::path mScenePath;

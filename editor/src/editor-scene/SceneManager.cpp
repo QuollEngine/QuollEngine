@@ -6,11 +6,10 @@
 
 namespace liquidator {
 
-SceneManager::SceneManager(liquid::EntityContext &entityContext,
-                           EditorCamera &editorCamera, EditorGrid &editorGrid,
+SceneManager::SceneManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
                            EntityManager &entityManager)
-    : mEntityContext(entityContext), mEditorCamera(editorCamera),
-      mEditorGrid(editorGrid), mEntityManager(entityManager) {}
+    : mEditorCamera(editorCamera), mEditorGrid(editorGrid),
+      mEntityManager(entityManager) {}
 
 void SceneManager::saveEditorState(const std::filesystem::path &path) {
   YAML::Node node;
@@ -108,7 +107,8 @@ void SceneManager::loadEditorState(const std::filesystem::path &path) {
 }
 
 void SceneManager::setCamera(liquid::Entity camera) {
-  if (!mEntityContext.hasComponent<liquid::CameraComponent>(camera)) {
+  if (!mEntityManager.getActiveEntityContext()
+           .hasComponent<liquid::CameraComponent>(camera)) {
     return;
   }
 
@@ -130,8 +130,10 @@ void SceneManager::createNewScene() {
 
     auto light1 = mEntityManager.createEmptyEntity(liquid::ENTITY_MAX,
                                                    transform, "Light");
-    mEntityContext.setComponent<liquid::DirectionalLightComponent>(light1, {});
-    mEntityContext.setComponent<liquid::DebugComponent>(light1, {});
+    mEntityManager.getActiveEntityContext()
+        .setComponent<liquid::DirectionalLightComponent>(light1, {});
+    mEntityManager.getActiveEntityContext()
+        .setComponent<liquid::DebugComponent>(light1, {});
     mEntityManager.save(light1);
   }
 }
@@ -146,12 +148,14 @@ void SceneManager::loadOrCreateScene() {
 }
 
 void SceneManager::moveCameraToEntity(liquid::Entity entity) {
-  if (!mEntityContext.hasComponent<liquid::LocalTransformComponent>(entity)) {
+  if (!mEntityManager.getActiveEntityContext()
+           .hasComponent<liquid::LocalTransformComponent>(entity)) {
     return;
   }
 
   auto &transformComponent =
-      mEntityContext.getComponent<liquid::WorldTransformComponent>(entity);
+      mEntityManager.getActiveEntityContext()
+          .getComponent<liquid::WorldTransformComponent>(entity);
 
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));
@@ -164,19 +168,19 @@ void SceneManager::moveCameraToEntity(liquid::Entity entity) {
 }
 
 bool SceneManager::hasEnvironment() {
-  return mEntityContext.hasComponent<liquid::EnvironmentComponent>(
-      mEnvironmentEntity);
+  return mEntityManager.getActiveEntityContext()
+      .hasComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
 liquid::EnvironmentComponent &SceneManager::getEnvironment() {
-  if (!mEntityContext.hasEntity(mEnvironmentEntity)) {
-    mEnvironmentEntity = mEntityContext.createEntity();
-    mEntityContext.setComponent<liquid::EnvironmentComponent>(
-        mEnvironmentEntity, {});
+  if (!mEntityManager.getActiveEntityContext().hasEntity(mEnvironmentEntity)) {
+    mEnvironmentEntity = mEntityManager.getActiveEntityContext().createEntity();
+    mEntityManager.getActiveEntityContext()
+        .setComponent<liquid::EnvironmentComponent>(mEnvironmentEntity, {});
   }
 
-  return mEntityContext.getComponent<liquid::EnvironmentComponent>(
-      mEnvironmentEntity);
+  return mEntityManager.getActiveEntityContext()
+      .getComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
 } // namespace liquidator

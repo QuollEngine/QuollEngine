@@ -220,9 +220,11 @@ public:
       const auto &geometry =
           PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
       shape = mPhysics->createShape(geometry, material, true);
-    } /**
-       * @brief Send collision events
-       */
+    }
+
+    /**
+     * @brief Send collision events
+     */
     void sendCollisionEvents();
 
     if (geometryDesc.type == PhysicsGeometryType::Capsule) {
@@ -314,6 +316,29 @@ void PhysicsSystem::update(float dt, EntityContext &entityContext) {
   mImpl->getScene()->fetchResults(true);
 
   synchronizeTransforms(entityContext);
+}
+
+void PhysicsSystem::cleanup(EntityContext &entityContext) {
+  entityContext.iterateEntities<RigidBodyComponent>(
+      [this](auto entity, RigidBodyComponent &rigidBody) {
+        if (rigidBody.actor) {
+          mImpl->getScene()->removeActor(*rigidBody.actor);
+          rigidBody.actor = nullptr;
+        }
+      });
+
+  entityContext.iterateEntities<CollidableComponent>(
+      [](auto entity, CollidableComponent &collidable) {
+        if (collidable.shape) {
+          collidable.shape->release();
+          collidable.shape = nullptr;
+        }
+
+        if (collidable.rigidStatic) {
+          collidable.rigidStatic->release();
+          collidable.rigidStatic = nullptr;
+        }
+      });
 }
 
 void PhysicsSystem::synchronizeComponents(EntityContext &entityContext) {

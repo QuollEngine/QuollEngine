@@ -18,10 +18,8 @@
 #include "../ui/UIRoot.h"
 #include "../ui/AssetLoadStatusDialog.h"
 
-void randomSpawn(liquid::EntityContext &entityContext,
-                 liquid::Renderer &renderer,
+void randomSpawn(liquidator::EntityManager &entityManager,
                  liquidator::SceneManager &sceneManager,
-                 liquid::AnimationSystem &animationSystem,
                  liquid::AssetManager &assetManager) {
 
   constexpr float DISTRIBUTION_EDGE = 500.0f;
@@ -34,10 +32,11 @@ void randomSpawn(liquid::EntityContext &entityContext,
   for (auto &[handle, _] :
        assetManager.getRegistry().getPrefabs().getAssets()) {
     for (size_t i = 0; i < NUM_SPAWNS; ++i) {
-      auto parent = sceneManager.getEntityManager().spawnAsset(
+      auto parent = entityManager.spawnEntity(
           sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
-      entityContext.getComponent<liquid::LocalTransformComponent>(parent)
+      entityManager.getActiveEntityContext()
+          .getComponent<liquid::LocalTransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
     }
   }
@@ -51,7 +50,6 @@ EditorScreen::EditorScreen(liquid::Window &window,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
-  liquid::EntityContext entityContext;
   liquid::DebugManager debugManager;
   liquid::FPSCounter fpsCounter;
 
@@ -73,12 +71,12 @@ void EditorScreen::start(const Project &project) {
     preloadStatusDialog.show();
   }
 
-  liquidator::EditorCamera editorCamera(entityContext, mEventSystem, renderer,
-                                        mWindow);
-  liquidator::EditorGrid editorGrid(renderer.getRegistry());
-  liquidator::EntityManager entityManager(entityContext, assetManager, renderer,
+  liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenePath);
-  liquidator::SceneManager sceneManager(entityContext, editorCamera, editorGrid,
+  liquidator::EditorCamera editorCamera(entityManager.getActiveEntityContext(),
+                                        mEventSystem, renderer, mWindow);
+  liquidator::EditorGrid editorGrid(renderer.getRegistry());
+  liquidator::SceneManager sceneManager(editorCamera, editorGrid,
                                         entityManager);
 
   sceneManager.loadOrCreateScene();
@@ -116,13 +114,14 @@ void EditorScreen::start(const Project &project) {
       "object-icons.frag", renderer.getRegistry().setShader(
                                {"assets/shaders/object-icons.frag.spv"}));
 
-  liquidator::UIRoot ui(entityContext, entityManager, gltfImporter);
+  liquidator::UIRoot ui(entityManager, gltfImporter);
   ui.getIconRegistry().loadIcons(renderer.getRegistry(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
 
   auto graph = renderer.createRenderGraph(false);
 
+  // Editor renderer
   {
     auto &pass = graph.first.addPass("editorDebug");
     pass.write(graph.second.mainColor, graph.second.defaultColor);
@@ -185,7 +184,7 @@ void EditorScreen::start(const Project &project) {
 
     pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
                       &objectIconsPipeline, &renderer, &editorCamera,
-                      &editorGrid, &entityContext, &sceneManager,
+                      &editorGrid, &entityManager, &sceneManager,
                       &ui](liquid::rhi::RenderCommandList &commandList) {
       liquid::rhi::Descriptor sceneDescriptor;
       sceneDescriptor.bind(0,
@@ -205,7 +204,7 @@ void EditorScreen::start(const Project &project) {
 
       commandList.bindPipeline(skeletonLinesPipeline);
 
-      entityContext
+      entityManager.getActiveEntityContext()
           .iterateEntities<liquid::WorldTransformComponent,
                            liquid::SkeletonComponent, liquid::DebugComponent>(
               [&commandList, &skeletonLinesPipeline,
@@ -249,88 +248,101 @@ void EditorScreen::start(const Project &project) {
       commandList.bindDescriptor(objectIconsPipeline, 0,
                                  objectListSceneDescriptor);
 
-      entityContext.iterateEntities<
-          liquid::WorldTransformComponent,
-          liquid::DirectionalLightComponent>([&objectIconsPipeline,
-                                              &commandList, &ui,
-                                              &entityContext](
-                                                 auto entity, const auto &world,
-                                                 const auto &light) {
-        liquid::rhi::Descriptor sunDescriptor;
-        sunDescriptor.bind(
-            0, {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Sun)},
-            liquid::rhi::DescriptorType::CombinedImageSampler);
-        commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
+      entityManager.getActiveEntityContext()
+          .iterateEntities<liquid::WorldTransformComponent,
+                           liquid::DirectionalLightComponent>(
+              [&objectIconsPipeline, &commandList, &ui, &entityManager](
+                  auto entity, const auto &world, const auto &light) {
+                liquid::rhi::Descriptor sunDescriptor;
+                sunDescriptor.bind(
+                    0,
+                    {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Sun)},
+                    liquid::rhi::DescriptorType::CombinedImageSampler);
+                commandList.bindDescriptor(objectIconsPipeline, 1,
+                                           sunDescriptor);
 
-        liquid::StandardPushConstants transformConstant{};
-        transformConstant.modelMatrix = world.worldTransform;
+                liquid::StandardPushConstants transformConstant{};
+                transformConstant.modelMatrix = world.worldTransform;
 
-        commandList.pushConstants(
-            objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-            sizeof(liquid::StandardPushConstants), &transformConstant);
+                commandList.pushConstants(
+                    objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                    sizeof(liquid::StandardPushConstants), &transformConstant);
 
-        commandList.draw(4, 0);
+                commandList.draw(4, 0);
 
-        if (entityContext.hasComponent<liquid::DebugComponent>(entity) &&
-            entityContext.getComponent<liquid::DebugComponent>(entity)
-                .showDirection) {
-          liquid::rhi::Descriptor directionDescriptor;
-          directionDescriptor.bind(
-              0,
-              {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Direction)},
-              liquid::rhi::DescriptorType::CombinedImageSampler);
-          commandList.bindDescriptor(objectIconsPipeline, 1,
-                                     directionDescriptor);
+                if (entityManager.getActiveEntityContext()
+                        .hasComponent<liquid::DebugComponent>(entity) &&
+                    entityManager.getActiveEntityContext()
+                        .getComponent<liquid::DebugComponent>(entity)
+                        .showDirection) {
+                  liquid::rhi::Descriptor directionDescriptor;
+                  directionDescriptor.bind(
+                      0,
+                      {ui.getIconRegistry().getIcon(
+                          liquidator::EditorIcon::Direction)},
+                      liquid::rhi::DescriptorType::CombinedImageSampler);
+                  commandList.bindDescriptor(objectIconsPipeline, 1,
+                                             directionDescriptor);
 
-          liquid::StandardPushConstants pcDirection{};
-          static constexpr glm::vec3 LIGHT_DIR_ICON_POSITION{0.0f, 2.0f, 0.0f};
-          pcDirection.modelMatrix =
-              glm::translate(world.worldTransform, LIGHT_DIR_ICON_POSITION);
+                  liquid::StandardPushConstants pcDirection{};
+                  static constexpr glm::vec3 LIGHT_DIR_ICON_POSITION{0.0f, 2.0f,
+                                                                     0.0f};
+                  pcDirection.modelMatrix = glm::translate(
+                      world.worldTransform, LIGHT_DIR_ICON_POSITION);
 
-          commandList.pushConstants(
-              objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-              sizeof(liquid::StandardPushConstants), &pcDirection);
+                  commandList.pushConstants(
+                      objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                      sizeof(liquid::StandardPushConstants), &pcDirection);
 
-          commandList.draw(4, 0);
-        }
-      });
+                  commandList.draw(4, 0);
+                }
+              });
 
-      entityContext.iterateEntities<liquid::WorldTransformComponent,
-                                    liquid::PerspectiveLensComponent>(
-          [&objectIconsPipeline, &commandList, &ui,
-           &entityContext](auto entity, const auto &world, const auto &camera) {
-            liquid::rhi::Descriptor sunDescriptor;
-            sunDescriptor.bind(
-                0,
-                {ui.getIconRegistry().getIcon(liquidator::EditorIcon::Camera)},
-                liquid::rhi::DescriptorType::CombinedImageSampler);
-            commandList.bindDescriptor(objectIconsPipeline, 1, sunDescriptor);
+      entityManager.getActiveEntityContext()
+          .iterateEntities<liquid::WorldTransformComponent,
+                           liquid::PerspectiveLensComponent>(
+              [&objectIconsPipeline, &commandList,
+               &ui](auto entity, const auto &world, const auto &camera) {
+                liquid::rhi::Descriptor sunDescriptor;
+                sunDescriptor.bind(
+                    0,
+                    {ui.getIconRegistry().getIcon(
+                        liquidator::EditorIcon::Camera)},
+                    liquid::rhi::DescriptorType::CombinedImageSampler);
+                commandList.bindDescriptor(objectIconsPipeline, 1,
+                                           sunDescriptor);
 
-            static constexpr float NINETY_DEGREES_IN_RADIANS =
-                glm::pi<float>() / 2.0f;
+                static constexpr float NINETY_DEGREES_IN_RADIANS =
+                    glm::pi<float>() / 2.0f;
 
-            liquid::StandardPushConstants transformConstant{};
-            transformConstant.modelMatrix =
-                glm::rotate(world.worldTransform, NINETY_DEGREES_IN_RADIANS,
-                            glm::vec3(0, 1, 0));
+                liquid::StandardPushConstants transformConstant{};
+                transformConstant.modelMatrix =
+                    glm::rotate(world.worldTransform, NINETY_DEGREES_IN_RADIANS,
+                                glm::vec3(0, 1, 0));
 
-            commandList.pushConstants(
-                objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                sizeof(liquid::StandardPushConstants), &transformConstant);
+                commandList.pushConstants(
+                    objectIconsPipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                    sizeof(liquid::StandardPushConstants), &transformConstant);
 
-            commandList.draw(4, 0);
-          });
+                commandList.draw(4, 0);
+              });
     });
   }
 
-  mainLoop.setUpdateFn([&editorCamera, &sceneManager, &animationSystem,
-                        &physicsSystem, &entityContext, &aspectRatioUpdater,
-                        &sceneUpdater, this](double dt) mutable {
+  mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
+                        &entityManager, &aspectRatioUpdater, &sceneUpdater,
+                        this](float dt) mutable {
+    bool isPlaying = entityManager.isUsingSimulationContext();
+
+    auto &entityContext = entityManager.getActiveEntityContext();
+
     mEventSystem.poll();
     aspectRatioUpdater.update(entityContext);
     editorCamera.update();
 
-    animationSystem.update(static_cast<float>(dt), entityContext);
+    if (isPlaying) {
+      animationSystem.update(dt, entityContext);
+    }
 
     entityContext.iterateEntities<liquid::SkeletonComponent>(
         [](auto entity, auto &component) { component.skeleton.update(); });
@@ -339,26 +351,48 @@ void EditorScreen::start(const Project &project) {
         [](auto entity, auto &component) { component.skeleton.updateDebug(); });
 
     sceneUpdater.update(entityContext);
-    physicsSystem.update(static_cast<float>(dt), entityContext);
+
+    if (isPlaying) {
+      physicsSystem.update(dt, entityContext);
+    }
     return true;
   });
 
   mainLoop.setRenderFn([&renderer, &sceneManager, &animationSystem,
-                        &entityContext, &assetManager, &graph, &physicsSystem,
+                        &entityManager, &assetManager, &graph, &physicsSystem,
                         &ui, &debugLayer, &preloadStatusDialog]() {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
-    ui.render(sceneManager, renderer, assetManager, physicsSystem);
+    ui.render(sceneManager, renderer, assetManager, physicsSystem,
+              entityManager);
 
     ImVec2 pos{};
     ImVec2 size{};
-    if (ImGui::Begin("View")) {
-      size = ImGui::GetContentRegionAvail();
+    static constexpr float ICON_SIZE = 20.0f;
+    if (ImGui::Begin("View", nullptr)) {
       pos = ImGui::GetWindowPos();
-      sceneManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y);
-      liquid::imgui::image(graph.second.mainColor, size);
+      size = ImGui::GetContentRegionAvail();
 
+      auto icon =
+          entityManager.isUsingSimulationContext()
+              ? ui.getIconRegistry().getIcon(liquidator::EditorIcon::Stop)
+              : ui.getIconRegistry().getIcon(liquidator::EditorIcon::Play);
+
+      if (liquid::imgui::imageButton(icon, ImVec2(ICON_SIZE, ICON_SIZE))) {
+        if (entityManager.isUsingSimulationContext()) {
+          physicsSystem.cleanup(entityManager.getActiveEntityContext());
+          entityManager.useEditingContext();
+        } else {
+          entityManager.useSimulationContext();
+        }
+      }
+
+      ImVec2 viewportSize(size.x, size.y - ICON_SIZE - ImGui::GetFrameHeight());
+      sceneManager.getEditorCamera().setViewport(
+          pos.x, pos.y + ICON_SIZE, viewportSize.x, viewportSize.y);
+
+      liquid::imgui::image(graph.second.mainColor, viewportSize);
       ImGui::End();
     }
 
@@ -380,8 +414,7 @@ void EditorScreen::start(const Project &project) {
 #ifdef LIQUID_PROFILER
     if (ImGui::Begin("Benchmark")) {
       if (ImGui::Button("Spawn prefabs")) {
-        randomSpawn(entityContext, renderer, sceneManager, animationSystem,
-                    assetManager);
+        randomSpawn(entityContext, sceneManager, assetManager);
       }
 
       ImGui::End();
@@ -393,7 +426,7 @@ void EditorScreen::start(const Project &project) {
     imgui.endRendering();
 
     return renderer.render(graph.first, sceneManager.getCamera(),
-                           entityContext);
+                           entityManager.getActiveEntityContext());
   });
 
   mainLoop.run();

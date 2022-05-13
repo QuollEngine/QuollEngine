@@ -16,9 +16,9 @@ public:
   /**
    * @brief Create scene hierarchy panel
    *
-   * @param entityContext Entity entityContext
+   * @param entityManager Entity manager
    */
-  SceneHierarchyPanel(liquid::EntityContext &entityContext);
+  SceneHierarchyPanel(EntityManager &entityManager);
 
   /**
    * @brief Render the UI
@@ -46,7 +46,7 @@ private:
                     SceneManager &sceneManager);
 
 private:
-  liquid::EntityContext &mEntityContext;
+  EntityManager &mEntityManager;
   EntityClickHandler mEntityClickHandler;
   liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
 };

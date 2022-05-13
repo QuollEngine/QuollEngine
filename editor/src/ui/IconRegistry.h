@@ -17,6 +17,8 @@ enum class EditorIcon {
   Sun,
   Camera,
   Direction,
+  Play,
+  Stop
 };
 
 /**

@@ -41,9 +41,10 @@ public:
    * @param assetManager Asset manager
    * @param iconRegistry Icon registry
    * @param sceneManager Scene manager
+   * @param entityManager Entity manager
    */
   void render(liquid::AssetManager &assetManager, IconRegistry &iconRegistry,
-              SceneManager &sceneManager);
+              SceneManager &sceneManager, EntityManager &entityManager);
 
   /**
    * @brief Reload contents in current directory

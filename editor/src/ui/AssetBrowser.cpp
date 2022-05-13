@@ -88,7 +88,8 @@ AssetBrowser::AssetBrowser(GLTFImporter &gltfImporter)
 
 void AssetBrowser::render(liquid::AssetManager &assetManager,
                           IconRegistry &iconRegistry,
-                          SceneManager &sceneManager) {
+                          SceneManager &sceneManager,
+                          EntityManager &entityManager) {
   constexpr uint32_t ITEM_WIDTH = 90;
   constexpr uint32_t ITEM_HEIGHT = 100;
   constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
@@ -237,9 +238,9 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
             } else {
-              sceneManager.getEntityManager().spawnAsset(
-                  sceneManager.getEditorCamera(), liquid::ENTITY_MAX,
-                  entry.asset, entry.assetType);
+              entityManager.spawnEntity(sceneManager.getEditorCamera(),
+                                        liquid::ENTITY_MAX, entry.asset,
+                                        entry.assetType);
             }
           }
         }
