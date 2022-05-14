@@ -127,8 +127,8 @@ private:
   EntityManager &mEntityManager;
   uint32_t mLastId = 1;
 
-  liquid::Entity mEnvironmentEntity = liquid::ENTITY_MAX;
-  liquid::Entity mCameraEntity = liquid::ENTITY_MAX;
+  liquid::Entity mEnvironmentEntity = liquid::EntityNull;
+  liquid::Entity mCameraEntity = liquid::EntityNull;
 };
 
 } // namespace liquidator

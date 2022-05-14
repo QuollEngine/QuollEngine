@@ -33,7 +33,7 @@ void randomSpawn(liquidator::EntityManager &entityManager,
        assetManager.getRegistry().getPrefabs().getAssets()) {
     for (size_t i = 0; i < NUM_SPAWNS; ++i) {
       auto parent = entityManager.spawnEntity(
-          editorManager.getEditorCamera(), liquid::ENTITY_MAX,
+          editorManager.getEditorCamera(), liquid::EntityNull,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
       entityManager.getActiveEntityContext()
           .getComponent<liquid::LocalTransformComponent>(parent)

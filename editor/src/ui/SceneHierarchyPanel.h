@@ -48,7 +48,7 @@ private:
 private:
   EntityManager &mEntityManager;
   EntityClickHandler mEntityClickHandler;
-  liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
+  liquid::Entity mSelectedEntity = liquid::EntityNull;
 };
 
 } // namespace liquidator

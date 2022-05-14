@@ -12,7 +12,7 @@ struct ParentComponent {
   /**
    * Parent entity
    */
-  Entity parent = ENTITY_MAX;
+  Entity parent = EntityNull;
 };
 
 } // namespace liquid

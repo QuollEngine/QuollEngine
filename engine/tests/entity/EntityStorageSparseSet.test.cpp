@@ -192,10 +192,10 @@ TEST(EntityStorageSparseSetTests, UseRecyclesEntity) {
 
 TEST(EntityStorageSparseSetTests, DoesNotDeleteNonExistentEntity) {
   liquid::EntityStorageSparseSet<IntComponent, FloatComponent> storage;
-  storage.deleteEntity(liquid::ENTITY_MAX);
+  storage.deleteEntity(liquid::EntityNull);
 
   auto e1 = storage.createEntity();
-  EXPECT_NE(e1, liquid::ENTITY_MAX);
+  EXPECT_NE(e1, liquid::EntityNull);
 }
 
 TEST(EntityStorageSparseSetTests, DeletesEntityAndItsComponentsIfExists) {

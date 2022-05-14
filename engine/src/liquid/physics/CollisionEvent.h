@@ -13,12 +13,12 @@ struct CollisionObject {
   /**
    * Collided entity A
    */
-  Entity a = ENTITY_MAX;
+  Entity a = EntityNull;
 
   /**
    * Collided entity B
    */
-  Entity b = ENTITY_MAX;
+  Entity b = EntityNull;
 };
 
 } // namespace liquid

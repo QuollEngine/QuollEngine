@@ -100,7 +100,7 @@ public:
         return false;
     }
 
-    return entity < mLastEntity;
+    return entity > EntityNull && entity < mLastEntity;
   }
 
   /**
@@ -116,7 +116,7 @@ public:
    * @param entity Entity
    */
   void deleteEntity(Entity entity) {
-    if (entity >= ENTITY_MAX)
+    if (entity == EntityNull)
       return;
 
     deleteAllEntityComponents(entity);
@@ -415,7 +415,7 @@ private:
    * @brief Delete all entities
    */
   void deleteAllEntities() {
-    mLastEntity = 0;
+    mLastEntity = 1;
     mDeleted.clear();
     mNumEntities = 0;
   }
@@ -453,7 +453,7 @@ private:
   std::tuple<EntityStorageSparseSetComponentPool<ComponentTypes>...>
       mComponentPools;
 
-  Entity mLastEntity = 0;
+  Entity mLastEntity = 1;
   std::list<Entity> mDeleted;
   size_t mNumEntities = 0;
 };

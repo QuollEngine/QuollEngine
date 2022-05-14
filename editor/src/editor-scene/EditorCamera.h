@@ -240,7 +240,7 @@ private:
   liquid::Window &mWindow;
   liquid::EntityContext &mEntityContext;
   liquid::EventSystem &mEventSystem;
-  liquid::Entity mCameraEntity = liquid::ENTITY_MAX;
+  liquid::Entity mCameraEntity = liquid::EntityNull;
 };
 
 } // namespace liquidator
