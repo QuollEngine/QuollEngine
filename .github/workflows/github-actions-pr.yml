@@ -101,3 +101,4 @@ jobs:
           files: ./coverage-report.info
           flags: engine-unit
           verbose: true
+          fail_ci_if_error: true
