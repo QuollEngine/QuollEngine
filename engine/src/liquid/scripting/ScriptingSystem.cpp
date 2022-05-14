@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "ScriptingSystem.h"
-#include "ScriptingUtils.h"
 #include "LuaTable.h"
 
 #include "liquid/core/EngineGlobals.h"

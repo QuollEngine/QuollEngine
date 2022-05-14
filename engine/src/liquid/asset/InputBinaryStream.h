@@ -12,7 +12,7 @@ public:
    *
    * @param path Path to file
    */
-  InputBinaryStream(const std::filesystem::path &path);
+  InputBinaryStream(const Path &path);
 
   InputBinaryStream(const InputBinaryStream &) = delete;
   InputBinaryStream(InputBinaryStream &&) = delete;

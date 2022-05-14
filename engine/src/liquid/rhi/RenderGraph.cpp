@@ -6,7 +6,7 @@
 
 namespace liquid::rhi {
 
-RenderGraphPass &RenderGraph::addPass(const String &name) {
+RenderGraphPass &RenderGraph::addPass(StringView name) {
   mPasses.push_back(name);
   return mPasses.back();
 }

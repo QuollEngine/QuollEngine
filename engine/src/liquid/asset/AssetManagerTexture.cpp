@@ -14,7 +14,7 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   ktxTextureCreateInfo createInfo{};
   createInfo.baseWidth = asset.data.width;
@@ -28,8 +28,7 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.generateMipmaps = KTX_FALSE;
   createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
 
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
 
   ktxTexture2 *texture = nullptr;
   {
@@ -37,7 +36,7 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
                                   &texture);
 
     if (res != KTX_SUCCESS) {
-      return Result<std::filesystem::path>::Error(
+      return Result<Path>::Error(
           KtxError("Cannot create KTX texture", res).what());
     }
 
@@ -55,18 +54,18 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
         ktxTexture_WriteToNamedFile(baseTexture, assetPath.string().c_str());
 
     if (res != KTX_SUCCESS) {
-      return Result<std::filesystem::path>::Error(
+      return Result<Path>::Error(
           KtxError("Cannot write KTX texture to a file", res).what());
     }
   }
 
   ktxTexture_Destroy(baseTexture);
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
 Result<TextureAssetHandle>
-AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadTextureFromFile(const Path &filePath) {
   constexpr uint32_t CUBEMAP_SIDES = 6;
 
   ktxTexture *ktxTextureData = nullptr;
@@ -127,13 +126,12 @@ AssetManager::loadTextureFromFile(const std::filesystem::path &filePath) {
 }
 
 Result<TextureAssetHandle>
-AssetManager::getOrLoadTextureFromPath(const String &relativePath) {
+AssetManager::getOrLoadTextureFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Invalid);
   }
 
-  std::filesystem::path fullPath =
-      (mAssetsPath / relativePath).make_preferred();
+  Path fullPath = (mAssetsPath / relativePath).make_preferred();
 
   for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
     if (asset.path == fullPath) {

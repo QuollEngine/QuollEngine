@@ -24,8 +24,8 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
   mDescriptor.bind(1, mTextures, rhi::DescriptorType::CombinedImageSampler);
 }
 
-void Material::updateProperty(const String &name, const Property &value) {
-  const auto &it = mPropertyMap.find(name);
+void Material::updateProperty(StringView name, const Property &value) {
+  const auto &it = mPropertyMap.find(String(name));
   if (it == mPropertyMap.end() || (*it).second > mProperties.size()) {
     LOG_DEBUG("Property \"" << name
                             << "\" does not exist in material. Skipping...");

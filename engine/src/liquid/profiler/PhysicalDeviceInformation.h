@@ -31,7 +31,7 @@ public:
    * @param properties Device properties
    * @param limits Device limits
    */
-  PhysicalDeviceInformation(const String &name, PhysicalDeviceType type,
+  PhysicalDeviceInformation(StringView name, PhysicalDeviceType type,
                             const UnorderedPropertyMap &properties,
                             const UnorderedPropertyMap &limits);
 

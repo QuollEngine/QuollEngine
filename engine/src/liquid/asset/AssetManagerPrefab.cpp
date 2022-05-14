@@ -9,16 +9,15 @@
 
 namespace liquid {
 
-Result<std::filesystem::path>
+Result<Path>
 AssetManager::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   String extension = ".lqprefab";
-  std::filesystem::path assetPath =
-      (mAssetsPath / (asset.name + extension)).make_preferred();
+  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
-    return Result<std::filesystem::path>::Error(
-        "File cannot be opened for writing: " + assetPath.string());
+    return Result<Path>::Error("File cannot be opened for writing: " +
+                               assetPath.string());
   }
 
   AssetFileHeader header{};
@@ -165,11 +164,12 @@ AssetManager::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     }
   }
 
-  return Result<std::filesystem::path>::Ok(assetPath);
+  return Result<Path>::Ok(assetPath);
 }
 
-Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
-    InputBinaryStream &stream, const std::filesystem::path &filePath) {
+Result<PrefabAssetHandle>
+AssetManager::loadPrefabDataFromInputStream(InputBinaryStream &stream,
+                                            const Path &filePath) {
 
   std::vector<String> warnings;
 
@@ -378,7 +378,7 @@ Result<PrefabAssetHandle> AssetManager::loadPrefabDataFromInputStream(
 }
 
 Result<PrefabAssetHandle>
-AssetManager::loadPrefabFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadPrefabFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Prefab);

@@ -22,7 +22,7 @@ public:
    * @param height Window height
    * @param eventSystem Event system
    */
-  Window(const String &title, uint32_t width, uint32_t height,
+  Window(StringView title, uint32_t width, uint32_t height,
          EventSystem &eventSystem);
 
   /**

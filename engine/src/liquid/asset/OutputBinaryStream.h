@@ -12,7 +12,7 @@ public:
    *
    * @param path Path to file
    */
-  OutputBinaryStream(std::filesystem::path path);
+  OutputBinaryStream(Path path);
 
   /**
    * @brief Close output binary stream

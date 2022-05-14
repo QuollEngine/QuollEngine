@@ -97,7 +97,7 @@ private:
    * @param applicationName Application name
    * @param enableValidations Enable validations
    */
-  void createInstance(const String &applicationName, bool enableValidations);
+  void createInstance(StringView applicationName, bool enableValidations);
 
   /**
    * @brief Pick physical device

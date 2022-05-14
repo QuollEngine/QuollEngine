@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Entity.h"
-#include "EntityError.h"
 #include "EntityUtils.h"
 
 namespace liquid {

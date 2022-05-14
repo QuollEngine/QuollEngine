@@ -30,7 +30,7 @@ public:
    * @param name Property name
    * @param value Property value
    */
-  void updateProperty(const String &name, const Property &value);
+  void updateProperty(StringView name, const Property &value);
 
   /**
    * @brief Get texture handles

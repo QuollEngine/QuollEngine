@@ -20,7 +20,7 @@ static std::vector<char> readFileIntoBuffer(std::ifstream &stream) {
 }
 
 Result<LuaScriptAssetHandle>
-AssetManager::loadLuaScriptFromFile(const std::filesystem::path &filePath) {
+AssetManager::loadLuaScriptFromFile(const Path &filePath) {
   std::ifstream stream(filePath);
 
   if (!stream.good()) {

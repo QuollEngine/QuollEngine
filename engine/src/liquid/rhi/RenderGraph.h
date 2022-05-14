@@ -15,7 +15,7 @@ public:
    * @param name Pass name
    * @return Render graph pass
    */
-  RenderGraphPass &addPass(const String &name);
+  RenderGraphPass &addPass(StringView name);
 
   /**
    * @brief Get swapchain handle

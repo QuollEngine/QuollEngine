@@ -60,7 +60,7 @@ void VulkanRenderBackend::finishFramebufferResize() {
   mFramebufferResized = false;
 }
 
-void VulkanRenderBackend::createInstance(const String &applicationName,
+void VulkanRenderBackend::createInstance(StringView applicationName,
                                          bool enableValidations) {
   std::vector<const char *> extensions;
   extensions.resize(vulkanWindowExtensions.size());
@@ -71,7 +71,7 @@ void VulkanRenderBackend::createInstance(const String &applicationName,
   VkApplicationInfo appInfo{};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pNext = nullptr;
-  appInfo.pApplicationName = applicationName.c_str();
+  appInfo.pApplicationName = String(applicationName).c_str();
   appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);
   appInfo.pEngineName = LIQUID_ENGINE_NAME.c_str();
   appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);

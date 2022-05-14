@@ -4,7 +4,7 @@
 namespace liquid {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
-    const String &name, PhysicalDeviceType type,
+    StringView name, PhysicalDeviceType type,
     const UnorderedPropertyMap &properties, const UnorderedPropertyMap &limits)
     : mName(name), mType(type), mProperties(properties), mLimits(limits) {}
 

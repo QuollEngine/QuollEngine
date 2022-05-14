@@ -1,12 +1,25 @@
 #include "liquid/core/Base.h"
 #include "liquid/scripting/LuaInterpreter.h"
-#include "liquid/scripting/ScriptingUtils.h"
 
 #include <gtest/gtest.h>
 
 extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
+}
+
+inline std::vector<char> readFileIntoBuffer(const liquid::String &fileName) {
+  std::ifstream file(fileName);
+
+  LIQUID_ASSERT(file.good(), "File cannot be opened");
+
+  std::ostringstream ss;
+  ss << file.rdbuf();
+  const std::string &s = ss.str();
+  std::vector<char> bytes(s.begin(), s.end());
+  file.close();
+
+  return bytes;
 }
 
 class LuaInterpreterTest : public ::testing::Test {
@@ -17,7 +30,7 @@ public:
 TEST_F(LuaInterpreterTest, EvaluateScript) {
   auto *scope = interpreter.createScope();
 
-  auto buffer = liquid::utils::readFileIntoBuffer("component-script.lua");
+  auto buffer = readFileIntoBuffer("component-script.lua");
 
   interpreter.evaluate(buffer, scope);
 

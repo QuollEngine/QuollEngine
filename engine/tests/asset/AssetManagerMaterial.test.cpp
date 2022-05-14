@@ -23,8 +23,8 @@ public:
 
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = std::filesystem::path(std::filesystem::current_path() /
-                                           "textures" / "test.ktx2");
+      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
+                                  "test.ktx2");
       asset.data.baseColorTexture =
           manager.getRegistry().getTextures().addAsset(texture);
     }
@@ -34,8 +34,8 @@ public:
     asset.data.metallicRoughnessTextureCoord = 3;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = std::filesystem::path(std::filesystem::current_path() /
-                                           "textures" / "mr.ktx2");
+      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
+                                  "mr.ktx2");
       asset.data.metallicRoughnessTexture =
           manager.getRegistry().getTextures().addAsset(texture);
     }
@@ -44,8 +44,8 @@ public:
     asset.data.normalTextureCoord = 4;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = std::filesystem::path(std::filesystem::current_path() /
-                                           "textures" / "normal.ktx2");
+      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
+                                  "normal.ktx2");
       asset.data.normalTexture =
           manager.getRegistry().getTextures().addAsset(texture);
     }
@@ -54,8 +54,8 @@ public:
     asset.data.occlusionTextureCoord = 5;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = std::filesystem::path(std::filesystem::current_path() /
-                                           "textures" / "occlusion.ktx2");
+      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
+                                  "occlusion.ktx2");
       asset.data.occlusionTexture =
           manager.getRegistry().getTextures().addAsset(texture);
     }
@@ -64,8 +64,8 @@ public:
     asset.data.emissiveTextureCoord = 6;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = std::filesystem::path(std::filesystem::current_path() /
-                                           "textures" / "emissive.ktx2");
+      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
+                                  "emissive.ktx2");
       asset.data.emissiveTexture =
           manager.getRegistry().getTextures().addAsset(texture);
     }

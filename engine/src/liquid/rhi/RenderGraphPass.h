@@ -44,7 +44,7 @@ public:
    *
    * @param name Pass name
    */
-  RenderGraphPass(const String &name);
+  RenderGraphPass(StringView name);
 
   /**
    * @brief Execute pass

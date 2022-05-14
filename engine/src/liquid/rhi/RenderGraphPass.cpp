@@ -3,7 +3,7 @@
 
 namespace liquid::rhi {
 
-RenderGraphPass::RenderGraphPass(const String &name) : mName(name) {}
+RenderGraphPass::RenderGraphPass(StringView name) : mName(name) {}
 
 void RenderGraphPass::write(TextureHandle handle,
                             const AttachmentClearValue &clearValue) {

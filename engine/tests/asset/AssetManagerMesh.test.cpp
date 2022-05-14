@@ -53,9 +53,9 @@ public:
         }
 
         liquid::AssetData<liquid::MaterialAsset> material;
-        material.path = std::filesystem::path(
-            std::filesystem::current_path() / "materials" /
-            ("material-geom-" + std::to_string(i) + ".lqmat"));
+        material.path =
+            liquid::Path(std::filesystem::current_path() / "materials" /
+                         ("material-geom-" + std::to_string(i) + ".lqmat"));
 
         geometry.material =
             manager.getRegistry().getMaterials().addAsset(material);
@@ -113,9 +113,9 @@ public:
       }
 
       liquid::AssetData<liquid::MaterialAsset> material;
-      material.path = std::filesystem::path(
-          std::filesystem::current_path() / "materials" /
-          ("material-geom-" + std::to_string(i) + ".lqmat"));
+      material.path =
+          liquid::Path(std::filesystem::current_path() / "materials" /
+                       ("material-geom-" + std::to_string(i) + ".lqmat"));
 
       geometry.material =
           manager.getRegistry().getMaterials().addAsset(material);

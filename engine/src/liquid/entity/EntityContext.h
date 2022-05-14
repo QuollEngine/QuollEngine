@@ -22,7 +22,6 @@
 #include "liquid/profiler/DebugComponent.h"
 #include "liquid/scripting/ScriptingComponent.h"
 
-#include "EntityError.h"
 #include "EntityStorageSparseSet.h"
 
 namespace liquid {

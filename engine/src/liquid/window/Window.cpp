@@ -6,7 +6,7 @@
 
 namespace liquid {
 
-Window::Window(const String &title, uint32_t width, uint32_t height,
+Window::Window(StringView title, uint32_t width, uint32_t height,
                EventSystem &eventSystem)
     : mEventSystem(eventSystem) {
   auto initReturnValue = glfwInit();
@@ -24,7 +24,7 @@ Window::Window(const String &title, uint32_t width, uint32_t height,
 
   mWindowInstance =
       glfwCreateWindow(static_cast<int>(width), static_cast<int>(height),
-                       title.c_str(), nullptr, nullptr);
+                       String(title).c_str(), nullptr, nullptr);
 
   LIQUID_ASSERT(mWindowInstance, "[GLFW] Failed to create windows");
 

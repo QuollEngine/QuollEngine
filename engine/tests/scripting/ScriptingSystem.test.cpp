@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "liquid/scripting/ScriptingSystem.h"
-#include "liquid/scripting/ScriptingUtils.h"
 
 #include <gtest/gtest.h>
 

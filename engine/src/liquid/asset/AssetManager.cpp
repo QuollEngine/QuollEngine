@@ -8,13 +8,12 @@
 
 namespace liquid {
 
-AssetManager::AssetManager(const std::filesystem::path &assetsPath)
-    : mAssetsPath(assetsPath) {
+AssetManager::AssetManager(const Path &assetsPath) : mAssetsPath(assetsPath) {
   mRegistry.createDefaultObjects();
 }
 
 Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
-                                          const std::filesystem::path &filePath,
+                                          const Path &filePath,
                                           AssetType assetType) {
   if (!file.good()) {
     return Result<bool>::Error("File cannot be opened for reading: " +
@@ -115,7 +114,7 @@ AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry) {
   return Result<bool>::Ok(true, warnings);
 }
 
-String AssetManager::getAssetNameFromPath(const std::filesystem::path &path) {
+String AssetManager::getAssetNameFromPath(const Path &path) {
   auto relativePath = std::filesystem::relative(path, mAssetsPath).string();
   std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
   return relativePath;
