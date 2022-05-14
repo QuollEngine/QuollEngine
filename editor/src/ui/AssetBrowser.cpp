@@ -239,7 +239,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
               mDirectoryChanged = true;
             } else {
               entityManager.spawnEntity(editorManager.getEditorCamera(),
-                                        liquid::ENTITY_MAX, entry.asset,
+                                        liquid::EntityNull, entry.asset,
                                         entry.assetType);
             }
           }

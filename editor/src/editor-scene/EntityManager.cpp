@@ -402,7 +402,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
                                           liquid::AssetType type,
                                           bool saveToFile) {
   if (type != liquid::AssetType::Prefab) {
-    return liquid::ENTITY_MAX;
+    return liquid::EntityNull;
   }
 
   auto &asset = mAssetManager.getRegistry().getPrefabs().getAsset(

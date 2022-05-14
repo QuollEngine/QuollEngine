@@ -106,7 +106,7 @@ private:
                          liquid::AssetRegistry &assetRegistry);
 
 private:
-  liquid::Entity mSelectedEntity = liquid::ENTITY_MAX;
+  liquid::Entity mSelectedEntity = liquid::EntityNull;
   liquid::String mName;
   EntityManager &mEntityManager;
   bool mIsNameActivated = false;

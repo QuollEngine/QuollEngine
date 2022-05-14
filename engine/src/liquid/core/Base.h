@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LIQUID_CORE_BASE_H_
+#define LIQUID_CORE_BASE_H_
 
 #ifdef LIQUID_DEBUG
 #ifndef _DEBUG
@@ -59,3 +60,5 @@ using Path = std::filesystem::path;
 template <class T> using SharedPtr = std::shared_ptr<T>;
 
 } // namespace liquid
+
+#endif

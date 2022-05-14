@@ -14,7 +14,7 @@ void MenuBar::render(EditorManager &editorManager,
     if (ImGui::BeginMenu("Objects")) {
       if (ImGui::MenuItem("Create empty entity", nullptr)) {
         entityManager.createEmptyEntity(editorManager.getEditorCamera(),
-                                        liquid::ENTITY_MAX);
+                                        liquid::EntityNull);
       }
 
       ImGui::EndMenu();

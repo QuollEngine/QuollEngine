@@ -128,7 +128,7 @@ void EditorManager::createNewScene() {
     transform.localRotation =
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
-    auto light1 = mEntityManager.createEmptyEntity(liquid::ENTITY_MAX,
+    auto light1 = mEntityManager.createEmptyEntity(liquid::EntityNull,
                                                    transform, "Light");
     mEntityManager.getActiveEntityContext()
         .setComponent<liquid::DirectionalLightComponent>(light1, {});

@@ -364,7 +364,7 @@ private:
   liquid::Renderer renderer;
   liquid::PhysicsSystem physicsSystem;
 
-  liquid::Entity cameraEntity = liquid::ENTITY_MAX;
+  liquid::Entity cameraEntity = liquid::EntityNull;
   liquid::SceneUpdater sceneUpdater;
 
   liquid::rhi::ShaderHandle vertexShader;
