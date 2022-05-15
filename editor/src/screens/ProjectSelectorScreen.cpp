@@ -90,7 +90,10 @@ std::optional<Project> ProjectSelectorScreen::start() {
     ImGui::End();
 
     imgui.endRendering();
+
+    mDevice->beginFrame();
     renderer.render(graph.first, editorCamera.getCamera(), entityContext);
+    mDevice->endFrame();
   });
 
   mainLoop.run();

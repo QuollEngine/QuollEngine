@@ -134,7 +134,9 @@ public:
     });
 
     mainLoop.setRenderFn([this, &graph]() {
+      renderer.getRenderDevice()->beginFrame();
       renderer.render(graph, cameraEntity, entityContext);
+      renderer.getRenderDevice()->endFrame();
     });
 
     mainLoop.run();

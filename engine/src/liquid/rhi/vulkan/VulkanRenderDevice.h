@@ -33,6 +33,18 @@ public:
                      const VulkanPhysicalDevice &physicalDevice);
 
   /**
+   * @brief Begin frame
+   *
+   * @return Frame index
+   */
+  uint32_t beginFrame() override;
+
+  /**
+   * @brief End frame
+   */
+  void endFrame() override;
+
+  /**
    * @brief Execute render graph
    *
    * @param graph Render graph
@@ -97,6 +109,7 @@ private:
   VulkanQueue mPresentQueue;
   VulkanQueue mGraphicsQueue;
 
+  VulkanFrameManager mFrameManager;
   VulkanResourceAllocator mAllocator;
   VulkanResourceRegistry mRegistry;
   VulkanDescriptorManager mDescriptorManager;

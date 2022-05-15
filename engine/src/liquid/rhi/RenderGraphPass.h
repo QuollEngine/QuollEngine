@@ -144,7 +144,7 @@ private:
   std::vector<TextureHandle> mOutputs;
   std::vector<TextureHandle> mInputs;
   std::vector<PipelineHandle> mPipelines;
-  std::function<void(RenderCommandList &commandList)> mExecutor;
+  ExecutorFn mExecutor;
 
   rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
   std::vector<FramebufferHandle> mFramebuffers;

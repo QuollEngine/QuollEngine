@@ -360,7 +360,7 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.setRenderFn([&renderer, &editorManager, &animationSystem,
                         &entityManager, &assetManager, &graph, &physicsSystem,
-                        &ui, &debugLayer, &preloadStatusDialog]() {
+                        &ui, &debugLayer, &preloadStatusDialog, this]() {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
@@ -414,7 +414,7 @@ void EditorScreen::start(const Project &project) {
 #ifdef LIQUID_PROFILER
     if (ImGui::Begin("Benchmark")) {
       if (ImGui::Button("Spawn prefabs")) {
-        randomSpawn(entityContext, editorManager, assetManager);
+        randomSpawn(entityManager, editorManager, assetManager);
       }
 
       ImGui::End();
@@ -425,8 +425,12 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
     imgui.endRendering();
 
-    return renderer.render(graph.first, editorManager.getCamera(),
-                           entityManager.getActiveEntityContext());
+    mDevice->beginFrame();
+
+    renderer.render(graph.first, editorManager.getCamera(),
+                    entityManager.getActiveEntityContext());
+
+    mDevice->endFrame();
   });
 
   mainLoop.run();

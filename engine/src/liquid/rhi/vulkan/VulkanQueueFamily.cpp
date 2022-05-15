@@ -14,8 +14,12 @@ VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
                                            queueFamilies.data());
 
   for (uint32_t i = 0; i < queueFamilies.size(); ++i) {
-    if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+    if (queueFamilies.at(i).queueFlags & VK_QUEUE_GRAPHICS_BIT) {
       mGraphicsFamily = i;
+    }
+
+    if (queueFamilies.at(i).queueFlags & VK_QUEUE_TRANSFER_BIT) {
+      mTransferFamily = i;
     }
 
     VkBool32 presentSupport = false;
