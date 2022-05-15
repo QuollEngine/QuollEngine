@@ -8,6 +8,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanQueue.h"
+#include "VulkanFrameManager.h"
 
 #include "liquid/rhi/RenderCommandList.h"
 
@@ -17,12 +18,6 @@ namespace liquid::rhi {
  * @brief Vulkan render context
  */
 class VulkanRenderContext {
-public:
-  /**
-   * Number of frames
-   */
-  static constexpr uint32_t NUM_FRAMES = 2;
-
 public:
   /**
    * @brief Create render context
@@ -39,68 +34,36 @@ public:
                       VulkanQueue &graphicsQueue, VulkanQueue &presentQueue);
 
   /**
-   * @brief Destroy render context
-   *
-   * Destroys render semaphores, fences, and command buffers
-   */
-  ~VulkanRenderContext();
-
-  VulkanRenderContext(const VulkanRenderContext &) = delete;
-  VulkanRenderContext(VulkanRenderContext &&) = delete;
-  VulkanRenderContext &operator=(const VulkanRenderContext &) = delete;
-  VulkanRenderContext &operator=(VulkanRenderContext &&) = delete;
-
-  /**
    * @brief Present to screen
    *
+   * @param frameManager Frame manager
    * @param swapchain Vulkan swapchain
    * @param imageIdx Swapchain image index
    * @return Present queue submit result
    */
-  VkResult present(const VulkanSwapchain &swapchain, uint32_t imageIdx);
-
-  /**
-   * @brief Get image available semaphoer
-   *
-   * @return Image available semaphore
-   */
-  inline VkSemaphore getImageAvailableSemaphore() {
-    return mImageAvailableSemaphores.at(mCurrentFrame);
-  }
+  VkResult present(VulkanFrameManager &frameManager,
+                   const VulkanSwapchain &swapchain, uint32_t imageIdx);
 
   /**
    * @brief Begin Rendering
    *
    * Waits for fences and semaphores; and begins command buffers
    *
+   * @param frameManager Frame manager
    * @return Command buffer for current frame
    */
-  RenderCommandList &beginRendering();
+  RenderCommandList &beginRendering(VulkanFrameManager &frameManager);
 
   /**
    * @brief End rendering
    *
    * Ends command buffer and submits it to the graphics queue
+   *
+   * @param frameManager Frame manager
    */
-  void endRendering();
+  void endRendering(VulkanFrameManager &frameManager);
 
 private:
-  /**
-   * @brief Create render semaphores
-   */
-  void createSemaphores();
-
-  /**
-   * @brief Create render fences
-   */
-  void createFences();
-
-private:
-  uint32_t mCurrentFrame = 0;
-
-  std::array<VkSemaphore, NUM_FRAMES> mImageAvailableSemaphores{};
-  std::array<VkSemaphore, NUM_FRAMES> mRenderFinishedSemaphores{};
-  std::array<VkFence, NUM_FRAMES> mRenderFences{};
   std::vector<RenderCommandList> mRenderCommandLists;
 
   VulkanQueue &mGraphicsQueue;

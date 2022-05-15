@@ -27,6 +27,7 @@ VulkanRenderDevice::VulkanRenderDevice(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
       mPresentQueue(mDevice,
                     mPhysicalDevice.getQueueFamilyIndices().getPresentFamily()),
+      mFrameManager(mDevice),
       mRenderContext(mDevice, mCommandPool, mGraphicsQueue, mPresentQueue),
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, VK_NULL_HANDLE),
@@ -43,13 +44,29 @@ VulkanRenderDevice::VulkanRenderDevice(
   synchronizeSwapchain(0);
 }
 
+uint32_t VulkanRenderDevice::beginFrame() {
+  LIQUID_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
+  mFrameManager.waitForFrame();
+
+  return mFrameManager.getCurrentFrameIndex();
+}
+
+void VulkanRenderDevice::endFrame() {
+  LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
+  mFrameManager.nextFrame();
+}
+
 void VulkanRenderDevice::execute(RenderGraph &graph,
                                  RenderGraphEvaluator &evaluator) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
   mStats.resetCalls();
 
+  if (mBackend.isFramebufferResized()) {
+    recreateSwapchain();
+  }
+
   uint32_t imageIdx =
-      mSwapchain.acquireNextImage(mRenderContext.getImageAvailableSemaphore());
+      mSwapchain.acquireNextImage(mFrameManager.getImageAvailableSemaphore());
 
   if (imageIdx == std::numeric_limits<uint32_t>::max()) {
     synchronize(evaluator.getRegistry());
@@ -69,7 +86,7 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
     mSwapchainRecreated = false;
   }
 
-  auto &commandBuffer = mRenderContext.beginRendering();
+  auto &commandBuffer = mRenderContext.beginRendering(mFrameManager);
 
   auto *commandBufferHandle =
       dynamic_cast<VulkanCommandBuffer *>(
@@ -80,12 +97,13 @@ void VulkanRenderDevice::execute(RenderGraph &graph,
     LIQUID_PROFILE_GPU_EVENT("GPU event");
     evaluator.execute(commandBuffer, compiled, graph, imageIdx);
   }
-  mRenderContext.endRendering();
+  mRenderContext.endRendering(mFrameManager);
 
   VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
   LIQUID_PROFILE_GPU_FLIP(&mSwapchain);
 
-  auto queuePresentResult = mRenderContext.present(mSwapchain, imageIdx);
+  auto queuePresentResult =
+      mRenderContext.present(mFrameManager, mSwapchain, imageIdx);
 
   if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
       queuePresentResult == VK_SUBOPTIMAL_KHR ||

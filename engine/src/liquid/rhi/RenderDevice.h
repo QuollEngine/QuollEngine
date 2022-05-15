@@ -29,6 +29,18 @@ public:
   virtual ~RenderDevice() = default;
 
   /**
+   * @brief Begin frame
+   *
+   * @return Frame index
+   */
+  virtual uint32_t beginFrame() = 0;
+
+  /**
+   * @brief End frame
+   */
+  virtual void endFrame() = 0;
+
+  /**
    * @brief Execute render graph
    *
    * @param graph Render graph

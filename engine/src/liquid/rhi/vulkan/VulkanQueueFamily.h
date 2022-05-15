@@ -28,23 +28,24 @@ public:
   /**
    * @brief Checks if queue family is complete
    *
-   * Queue family is complete if it has both graphics
-   * and present family available
+   * Queue family is complete if it has graphics,
+   * transfer, and present family available
    *
    * @retval true Complete
    * @retval false Not complete
    */
   inline bool isComplete() const {
-    return mGraphicsFamily.has_value() && mPresentFamily.has_value();
+    return mGraphicsFamily.has_value() && mPresentFamily.has_value() &&
+           mTransferFamily.has_value();
   }
 
   /**
    * @brief Returns queue families in array
    *
-   * @return Array with graphics and present family indices
+   * @return Array of all queue families
    */
-  inline const std::vector<uint32_t> toArray() const {
-    return {mGraphicsFamily.value(), mPresentFamily.value()};
+  inline const std::array<uint32_t, 3> toArray() const {
+    return {getGraphicsFamily(), getTransferFamily(), getPresentFamily()};
   }
 
   /**
@@ -61,9 +62,17 @@ public:
    */
   inline uint32_t getPresentFamily() const { return mPresentFamily.value(); }
 
+  /**
+   * @brief Get transfer queue index
+   *
+   * @return Transfer queue index
+   */
+  inline uint32_t getTransferFamily() const { return mTransferFamily.value(); }
+
 private:
   std::optional<uint32_t> mGraphicsFamily;
   std::optional<uint32_t> mPresentFamily;
+  std::optional<uint32_t> mTransferFamily;
 };
 
 } // namespace liquid::rhi
