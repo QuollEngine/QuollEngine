@@ -124,13 +124,11 @@ public:
   }
 
   /**
-   * @brief Get framebuffers
+   * @brief Get framebuffer
    *
-   * @return Framebuffers
+   * @return Framebuffer
    */
-  inline const std::vector<FramebufferHandle> &getFramebuffers() const {
-    return mFramebuffers;
-  }
+  inline FramebufferHandle getFramebuffer() const { return mFramebuffer; }
 
   /**
    * @brief Get dimensions
@@ -147,7 +145,7 @@ private:
   ExecutorFn mExecutor;
 
   rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
-  std::vector<FramebufferHandle> mFramebuffers;
+  FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
   glm::uvec3 mDimensions{};
 
   String mName;

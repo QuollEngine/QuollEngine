@@ -37,20 +37,14 @@ public:
    *
    * @return Frame index
    */
-  uint32_t beginFrame() override;
+  RenderFrame beginFrame() override;
 
   /**
    * @brief End frame
-   */
-  void endFrame() override;
-
-  /**
-   * @brief Execute render graph
    *
-   * @param graph Render graph
-   * @param evaluator Render graph evaluator
+   * @param renderFrame Render frame
    */
-  void execute(RenderGraph &graph, RenderGraphEvaluator &evaluator) override;
+  void endFrame(const RenderFrame &renderFrame) override;
 
   /**
    * @brief Wait for idle
@@ -67,6 +61,20 @@ public:
   }
 
   /**
+   * @brief Destroy all resources in the device
+   *
+   * This does not destroy the device
+   */
+  void destroyResources() override;
+
+  /**
+   * @brief Get swapchain
+   *
+   * @return Swapchain
+   */
+  Swapchain getSwapchain() override;
+
+  /**
    * @brief Get device stats
    *
    * @return Device stats
@@ -74,11 +82,11 @@ public:
   const DeviceStats &getDeviceStats() const override { return mStats; }
 
   /**
-   * @brief Destroy all resources in the device
+   * @brief Synchronize resources
    *
-   * This does not destroy the device
+   * @param registry Resource registry
    */
-  void destroyResources() override;
+  void synchronize(ResourceRegistry &registry) override;
 
 private:
   /**
@@ -87,18 +95,9 @@ private:
   void recreateSwapchain();
 
   /**
-   * @brief Synchronize swapchain images
-   *
-   * @param prevNumSwapchainImages Previous swapchain image count
+   * @brief Update framebuffer relative textures
    */
-  void synchronizeSwapchain(size_t prevNumSwapchainImages);
-
-  /**
-   * @brief Synchronize resources
-   *
-   * @param registry Resource registry
-   */
-  void synchronize(ResourceRegistry &registry);
+  void updateFramebufferRelativeTextures();
 
 private:
   DeviceStats mStats;

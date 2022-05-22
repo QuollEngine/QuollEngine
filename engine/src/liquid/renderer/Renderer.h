@@ -31,6 +31,11 @@ struct DefaultGraphResources {
   rhi::TextureHandle depthBuffer;
 
   /**
+   * Depth buffer texture
+   */
+  rhi::TextureHandle imguiColor;
+
+  /**
    * Shadow map texture
    */
   rhi::TextureHandle shadowmap;
@@ -112,11 +117,12 @@ public:
    * @brief Render
    *
    * @param graph Render graph
+   * @param commandList Render command list
    * @param camera Camera entity
    * @param entityContext Entity context
    */
-  void render(rhi::RenderGraph &graph, Entity camera,
-              liquid::EntityContext &entityContext);
+  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList,
+              Entity camera, liquid::EntityContext &entityContext);
 
   /**
    * @brief Wait for device

@@ -33,13 +33,8 @@ public:
    *
    * @param sorted Topologically sorted passes
    * @param graph Render graph
-   * @param swapchainRecreated Rebuild swapchain related passes
-   * @param numSwapchainImages Number of swapchain images
-   * @param extent Swapchain extent
    */
-  void build(std::vector<size_t> &sorted, RenderGraph &graph,
-             bool swapchainRecreated, uint32_t numSwapchainImages,
-             const glm::uvec2 &extent);
+  void build(std::vector<size_t> &sorted, RenderGraph &graph);
 
   /**
    * @brief Execute render graph
@@ -47,18 +42,9 @@ public:
    * @param commandList Command list
    * @param passes Topologically sorted passes
    * @param graph Render graph
-   * @param imageIdx Swapchain image index
    */
   void execute(RenderCommandList &commandList,
-               const std::vector<size_t> &passes, RenderGraph &graph,
-               uint32_t imageIdx);
-
-  /**
-   * @brief Get resource registry
-   *
-   * @return Resouce registry
-   */
-  inline ResourceRegistry &getRegistry() { return mRegistry; }
+               const std::vector<size_t> &passes, RenderGraph &graph);
 
 private:
   /**
@@ -67,24 +53,8 @@ private:
    * @param index Render pass index
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
-   * @param numSwapchainImages Number of swapchain images
-   * @param extent Swapchain extent
    */
-  void buildPass(size_t index, RenderGraph &graph, bool force,
-                 uint32_t numSwapchainImages, const glm::uvec2 &extent);
-
-  /**
-   * @brief Create swapchain attachment
-   *
-   * @param attachment Attachment description
-   * @param numSwapchainAttachments Number of swapchain attachments
-   * @param extent Swapchain extent
-   * @return Attachment info
-   */
-  RenderPassAttachmentInfo
-  createSwapchainAttachment(const AttachmentData &attachment,
-                            uint32_t numSwapchainAttachments,
-                            const glm::uvec2 &extent);
+  void buildPass(size_t index, RenderGraph &graph, bool force);
 
   /**
    * @brief Create color attachment

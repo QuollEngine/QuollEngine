@@ -41,7 +41,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       {"b-g", TextureHandle(6)},  {"h-c", TextureHandle(7)},
       {"c-e", TextureHandle(8)},  {"d-e", TextureHandle(9)},
       {"d-g", TextureHandle(10)}, {"e-f", TextureHandle(11)},
-      {"f-g", TextureHandle(12)}};
+      {"f-g", TextureHandle(12)}, {"final-color", TextureHandle(13)}};
 
   {
     auto &pass = graph.addPass("A");
@@ -90,7 +90,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
     pass.read(handles.at("f-g"));
     pass.read(handles.at("d-g"));
     pass.read(handles.at("b-g"));
-    pass.write(graph.getSwapchain(), glm::vec4());
+    pass.write(handles.at("final-color"), glm::vec4());
   }
 
   {

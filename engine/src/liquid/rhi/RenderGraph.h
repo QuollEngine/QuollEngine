@@ -18,13 +18,6 @@ public:
   RenderGraphPass &addPass(StringView name);
 
   /**
-   * @brief Get swapchain handle
-   *
-   * @return Swapchain handle
-   */
-  inline TextureHandle getSwapchain() const { return mSwapchain; }
-
-  /**
    * @brief Compile pass
    *
    * @return List of indexes that point to passes
@@ -39,19 +32,38 @@ public:
   inline std::vector<RenderGraphPass> &getPasses() { return mPasses; }
 
   /**
-   * @brief Check if texture is swapchain
+   * @brief Set framebuffer extent
    *
-   * @param handle Texture handle
-   * @retval true Texture is swapchain
-   * @retval false Texture is not swapchain
+   * @param framebufferExtent Framebuffer extent
    */
-  inline bool isSwapchain(TextureHandle handle) const {
-    return handle == mSwapchain;
+  void setFramebufferExtent(glm::uvec2 framebufferExtent);
+
+  /**
+   * @brief Get framebuffer extent
+   *
+   * @return Framebuffer extent
+   */
+  inline const glm::uvec2 &getFramebufferExtent() const {
+    return mFramebufferExtent;
   }
+
+  /**
+   * @brief Check if recreate is necessary
+   *
+   * @retval true Passes have changed
+   * @retval false Passes have not changed
+   */
+  inline bool isDirty() const { return mDirty; }
+
+  /**
+   * @brief Update dirty flag
+   */
+  void updateDirtyFlag();
 
 private:
   std::vector<RenderGraphPass> mPasses;
-  TextureHandle mSwapchain{1};
+  glm::uvec2 mFramebufferExtent{};
+  bool mDirty = false;
 };
 
 } // namespace liquid::rhi

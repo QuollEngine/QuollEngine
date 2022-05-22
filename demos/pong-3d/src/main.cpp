@@ -5,6 +5,7 @@
 #include <glm/gtx/transform.hpp>
 
 #include "liquid/renderer/Renderer.h"
+#include "liquid/renderer/Presenter.h"
 #include "liquid/renderer/SceneRenderer.h"
 #include "liquid/window/Window.h"
 #include "liquid/profiler/FPSCounter.h"
@@ -28,6 +29,7 @@ public:
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
         renderer(assetManager.getRegistry(), window,
                  backend.createDefaultDevice()),
+        presenter(renderer.getShaderLibrary(), renderer.getRegistry()),
         physicsSystem(eventSystem),
         assetManager(std::filesystem::current_path()),
         vertexShader(
@@ -59,19 +61,37 @@ public:
     liquid::FPSCounter fpsCounter;
     liquid::MainLoop mainLoop(window, fpsCounter);
 
+    presenter.updateFramebuffers(renderer.getRenderDevice()->getSwapchain());
+
     liquid::rhi::RenderGraph graph;
+
+    graph.setFramebufferExtent(window.getFramebufferSize());
+
+    window.addResizeHandler([&graph](auto width, auto height) {
+      graph.setFramebufferExtent({width, height});
+    });
 
     liquid::SceneRenderer sceneRenderer;
 
     liquid::rhi::TextureDescription desc;
     desc.usage =
         liquid::rhi::TextureUsage::Depth | liquid::rhi::TextureUsage::Sampled;
-    desc.sizeMethod = liquid::rhi::TextureSizeMethod::SwapchainRatio;
+    desc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
     desc.width = 100;
     desc.height = 100;
     desc.layers = 1;
     desc.format = VK_FORMAT_D32_SFLOAT;
     auto depthBuffer = renderer.getRegistry().setTexture(desc);
+
+    liquid::rhi::TextureDescription mainColorDesc{};
+    mainColorDesc.usage =
+        liquid::rhi::TextureUsage::Color | liquid::rhi::TextureUsage::Sampled;
+    mainColorDesc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
+    mainColorDesc.width = 100;
+    mainColorDesc.height = 100;
+    mainColorDesc.layers = 1;
+    mainColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+    auto mainColor = renderer.getRegistry().setTexture(mainColorDesc);
 
     auto pipeline = renderer.getRegistry().setPipeline(
         {vertexShader, fragmentShader,
@@ -85,7 +105,7 @@ public:
              {liquid::rhi::PipelineColorBlendAttachment{}}}});
 
     auto &pass = graph.addPass("mainPass");
-    pass.write(graph.getSwapchain(), glm::vec4{1.0f});
+    pass.write(mainColor, glm::vec4{1.0f});
     pass.write(depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
     pass.addPipeline(pipeline);
 
@@ -133,10 +153,21 @@ public:
       return true;
     });
 
-    mainLoop.setRenderFn([this, &graph]() {
-      renderer.getRenderDevice()->beginFrame();
-      renderer.render(graph, cameraEntity, entityContext);
-      renderer.getRenderDevice()->endFrame();
+    mainLoop.setRenderFn([this, &graph, mainColor]() {
+      const auto &renderFrame = renderer.getRenderDevice()->beginFrame();
+
+      if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+        renderer.render(graph, renderFrame.commandList, cameraEntity,
+                        entityContext);
+
+        presenter.present(renderFrame.commandList, mainColor,
+                          renderFrame.swapchainImageIndex);
+
+        renderer.getRenderDevice()->endFrame(renderFrame);
+      } else {
+        presenter.updateFramebuffers(
+            renderer.getRenderDevice()->getSwapchain());
+      }
     });
 
     mainLoop.run();
@@ -229,11 +260,11 @@ private:
                                     {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
     camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
 
-    window.addResizeHandler([this, &camera, &fbSize](uint32_t width,
-                                                     uint32_t height) mutable {
+    window.addResizeHandler([this, &camera](uint32_t width,
+                                            uint32_t height) mutable {
       camera.projectionMatrix = glm::perspective(
-          70.0f, static_cast<float>(fbSize.x) / static_cast<float>(fbSize.y),
-          0.1f, 200.0f);
+          70.0f, static_cast<float>(width) / static_cast<float>(height), 0.1f,
+          200.0f);
       camera.projectionMatrix[1][1] *= -1.0f;
       camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
     });
@@ -364,6 +395,7 @@ private:
   liquid::Window window;
   liquid::rhi::VulkanRenderBackend backend;
   liquid::Renderer renderer;
+  liquid::Presenter presenter;
   liquid::PhysicsSystem physicsSystem;
 
   liquid::Entity cameraEntity = liquid::EntityNull;

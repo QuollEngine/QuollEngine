@@ -2,6 +2,7 @@
 #include "ProjectSelectorScreen.h"
 
 #include "liquid/renderer/Renderer.h"
+#include "liquid/renderer/Presenter.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "liquid/loop/MainLoop.h"
 #include "liquid/profiler/FPSCounter.h"
@@ -21,7 +22,11 @@ ProjectSelectorScreen::ProjectSelectorScreen(liquid::Window &window,
 std::optional<Project> ProjectSelectorScreen::start() {
   liquid::EntityContext entityContext;
   liquid::AssetRegistry assetRegistry;
+
   liquid::Renderer renderer(assetRegistry, mWindow, mDevice);
+  liquid::Presenter presenter(renderer.getShaderLibrary(),
+                              renderer.getRegistry());
+
   liquidator::ProjectManager projectManager;
 
   liquid::FPSCounter fpsCounter;
@@ -34,8 +39,17 @@ std::optional<Project> ProjectSelectorScreen::start() {
   static constexpr float HALF = 0.5f;
   static constexpr float ICON_SIZE = 80.0f;
 
+  presenter.updateFramebuffers(mDevice->getSwapchain());
+
   editorCamera.reset();
   auto graph = renderer.createRenderGraph(false);
+
+  graph.first.setFramebufferExtent(mWindow.getFramebufferSize());
+
+  auto resizeHandler = mWindow.addResizeHandler(
+      [&graph, this, &presenter](auto width, auto height) {
+        graph.first.setFramebufferExtent({width, height});
+      });
 
   iconRegistry.loadIcons(renderer.getRegistry(),
                          std::filesystem::current_path() / "assets" / "icons");
@@ -47,7 +61,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &project,
                         &projectManager, &iconRegistry, &entityContext,
-                        this]() mutable {
+                        &presenter, this]() mutable {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
@@ -91,13 +105,23 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     imgui.endRendering();
 
-    mDevice->beginFrame();
-    renderer.render(graph.first, editorCamera.getCamera(), entityContext);
-    mDevice->endFrame();
+    const auto &renderFrame = mDevice->beginFrame();
+
+    if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+      renderer.render(graph.first, renderFrame.commandList,
+                      editorCamera.getCamera(), entityContext);
+
+      presenter.present(renderFrame.commandList, graph.second.imguiColor,
+                        renderFrame.swapchainImageIndex);
+      mDevice->endFrame(renderFrame);
+    } else {
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+    }
   });
 
   mainLoop.run();
 
+  mWindow.removeResizeHandler(resizeHandler);
   return project;
 }
 

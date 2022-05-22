@@ -1,0 +1,91 @@
+#include "liquid/core/Base.h"
+#include "liquid/core/EngineGlobals.h"
+#include "liquid/rhi/Descriptor.h"
+#include "Presenter.h"
+
+namespace liquid {
+
+Presenter::Presenter(ShaderLibrary &shaderLibrary,
+                     rhi::ResourceRegistry &registry)
+    : mRegistry(registry), mShaderLibrary(shaderLibrary) {}
+
+void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
+  mExtent = swapchain.extent;
+
+  rhi::RenderPassAttachmentDescription attachment{};
+  attachment.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  attachment.loadOp = rhi::AttachmentLoadOp::Clear;
+  attachment.storeOp = rhi::AttachmentStoreOp::Store;
+  attachment.texture = swapchain.textures.at(0);
+  attachment.clearValue = rhi::AttachmentClearValue(glm::vec4{0.0f});
+
+  rhi::RenderPassDescription renderPassDescription{};
+  renderPassDescription.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  renderPassDescription.attachments.push_back(attachment);
+
+  mPresentPass = mRegistry.setRenderPass(renderPassDescription, mPresentPass);
+
+  LOG_DEBUG("Present pass created");
+
+  auto vertexShader =
+      mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+  auto fragmentShader =
+      mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
+
+  rhi::PipelineDescription pipelineDescription{};
+  pipelineDescription.vertexShader = vertexShader;
+  pipelineDescription.fragmentShader = fragmentShader;
+  pipelineDescription.renderPass = mPresentPass;
+  pipelineDescription.rasterizer = rhi::PipelineRasterizer{
+      liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
+      liquid::rhi::FrontFace::CounterClockwise};
+  pipelineDescription.colorBlend.attachments = {
+      liquid::rhi::PipelineColorBlendAttachment{}};
+
+  mPresentPipeline =
+      mRegistry.setPipeline(pipelineDescription, mPresentPipeline);
+
+  LOG_DEBUG("Present pipeline created");
+
+  for (size_t i = swapchain.textures.size(); i < mFramebuffers.size(); ++i) {
+    mRegistry.deleteFramebuffer(mFramebuffers.at(i));
+  }
+
+  mFramebuffers.resize(swapchain.textures.size());
+
+  for (size_t i = 0; i < mFramebuffers.size(); ++i) {
+    rhi::FramebufferDescription framebufferDescription{};
+    framebufferDescription.width = mExtent.x;
+    framebufferDescription.height = mExtent.y;
+    framebufferDescription.layers = 1;
+    framebufferDescription.renderPass = mPresentPass;
+    framebufferDescription.attachments = {swapchain.textures.at(i)};
+
+    mFramebuffers.at(i) =
+        mRegistry.setFramebuffer(framebufferDescription, mFramebuffers.at(i));
+  }
+
+  LOG_DEBUG("Present framebuffers created");
+}
+
+void Presenter::present(rhi::RenderCommandList &commandList,
+                        rhi::TextureHandle handle, uint32_t imageIndex) {
+  commandList.beginRenderPass(
+      mPresentPass, mFramebuffers.at(imageIndex % mFramebuffers.size()), {0, 0},
+      mExtent);
+
+  commandList.setViewport({0.0f, 0.0f}, mExtent, {0.0f, 1.0f});
+  commandList.setScissor({0.0f, 0.0f}, mExtent);
+
+  commandList.bindPipeline(mPresentPipeline);
+
+  rhi::Descriptor descriptor;
+  descriptor.bind(0, {handle}, rhi::DescriptorType::CombinedImageSampler);
+  commandList.bindDescriptor(mPresentPipeline, 0, descriptor);
+
+  commandList.draw(3, 0);
+
+  commandList.endRenderPass();
+}
+
+} // namespace liquid

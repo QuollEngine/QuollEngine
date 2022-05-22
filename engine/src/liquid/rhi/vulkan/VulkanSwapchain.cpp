@@ -9,8 +9,37 @@ namespace liquid::rhi {
 VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
                                  const VulkanPhysicalDevice &physicalDevice,
                                  VulkanDeviceObject &device,
-                                 VkSwapchainKHR oldSwapchain)
-    : mDevice(device) {
+                                 VulkanResourceRegistry &registry,
+                                 VulkanResourceAllocator &allocator)
+    : mDevice(device), mRegistry(registry) {
+  create(backend, physicalDevice, allocator);
+}
+
+VulkanSwapchain::~VulkanSwapchain() { destroy(); }
+
+void VulkanSwapchain::recreate(VulkanRenderBackend &backend,
+                               const VulkanPhysicalDevice &physicalDevice,
+                               VulkanResourceAllocator &allocator) {
+  VkSwapchainKHR oldSwapchain = mSwapchain;
+
+  create(backend, physicalDevice, allocator);
+
+  vkDestroySwapchainKHR(mDevice, oldSwapchain, nullptr);
+  LOG_DEBUG("[Vulkan] Old swapchain destroyed");
+}
+
+void VulkanSwapchain::destroy() {
+  if (mSwapchain) {
+    vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
+    mSwapchain = VK_NULL_HANDLE;
+    LOG_DEBUG("[Vulkan] Swapchain destroyed");
+  }
+}
+
+void VulkanSwapchain::create(VulkanRenderBackend &backend,
+                             const VulkanPhysicalDevice &physicalDevice,
+                             VulkanResourceAllocator &allocator) {
+  VkSwapchainKHR oldSwapchain = mSwapchain;
   const auto &surfaceCapabilities =
       physicalDevice.getSurfaceCapabilities(backend.getSurface());
 
@@ -59,19 +88,32 @@ VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
   createInfo.oldSwapchain = oldSwapchain;
 
   checkForVulkanError(
-      vkCreateSwapchainKHR(device, &createInfo, nullptr, &mSwapchain),
+      vkCreateSwapchainKHR(mDevice, &createInfo, nullptr, &mSwapchain),
       "Failed to create swapchain");
 
-  vkGetSwapchainImagesKHR(device, mSwapchain, &imageCount, nullptr);
-  mImages.resize(imageCount);
-  vkGetSwapchainImagesKHR(device, mSwapchain, &imageCount, mImages.data());
+  vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, nullptr);
+  std::vector<VkImage> images(imageCount, VK_NULL_HANDLE);
+  vkGetSwapchainImagesKHR(mDevice, mSwapchain, &imageCount, images.data());
 
-  mImageViews.resize(mImages.size());
+  size_t oldSize = mTextures.size();
 
-  for (size_t i = 0; i < mImages.size(); ++i) {
+  // Delete old textures
+  for (size_t i = oldSize + 1; i < images.size(); ++i) {
+    mRegistry.deleteTexture(static_cast<TextureHandle>(i));
+  }
+
+  mTextures.resize(images.size());
+  for (size_t i = 0; i < mTextures.size(); ++i) {
+    mTextures.at(i) = static_cast<TextureHandle>(i + 1);
+  }
+
+  for (size_t i = 0; i < mTextures.size(); ++i) {
+    VkImage image = images.at(i);
+    VkImageView imageView = VK_NULL_HANDLE;
+
     VkImageViewCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    createInfo.image = mImages.at(i);
+    createInfo.image = image;
 
     createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     createInfo.format = mSurfaceFormat.format;
@@ -87,56 +129,16 @@ VulkanSwapchain::VulkanSwapchain(VulkanRenderBackend &backend,
     createInfo.subresourceRange.layerCount = 1;
 
     checkForVulkanError(
-        vkCreateImageView(device, &createInfo, nullptr, &mImageViews.at(i)),
+        vkCreateImageView(mDevice, &createInfo, nullptr, &imageView),
         "Failed to create image views for swapchain");
+
+    mRegistry.setTexture(mTextures.at(i),
+                         std::make_unique<VulkanTexture>(
+                             image, imageView, VK_NULL_HANDLE,
+                             mSurfaceFormat.format, allocator, mDevice));
   }
 
-  LOG_DEBUG("[Vulkan] Swapchain created (" << mImages.size() << " images)");
-}
-
-VulkanSwapchain::VulkanSwapchain(VulkanSwapchain &&rhs) : mDevice(rhs.mDevice) {
-  destroy();
-
-  mSwapchain = rhs.mSwapchain;
-  mImageViews = rhs.mImageViews;
-  mImages = rhs.mImages;
-
-  mExtent = rhs.mExtent;
-  mSurfaceFormat = rhs.mSurfaceFormat;
-  mPresentMode = rhs.mPresentMode;
-
-  rhs.mSwapchain = VK_NULL_HANDLE;
-  rhs.mImageViews.clear();
-  rhs.mImages.clear();
-}
-
-VulkanSwapchain &VulkanSwapchain::operator=(VulkanSwapchain &&rhs) {
-  // Destroy existing swapchain
-  // before moving other swapchain data
-  // to this one
-  destroy();
-
-  mSwapchain = rhs.mSwapchain;
-  mImageViews = rhs.mImageViews;
-
-  mExtent = rhs.mExtent;
-  mSurfaceFormat = rhs.mSurfaceFormat;
-  mPresentMode = rhs.mPresentMode;
-
-  rhs.mSwapchain = VK_NULL_HANDLE;
-  rhs.mImageViews.clear();
-
-  return *this;
-}
-
-VulkanSwapchain::~VulkanSwapchain() { destroy(); }
-
-void VulkanSwapchain::destroy() {
-  if (mSwapchain) {
-    vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
-    mSwapchain = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Swapchain destroyed");
-  }
+  LOG_DEBUG("[Vulkan] Swapchain created (" << mTextures.size() << " images)");
 }
 
 void VulkanSwapchain::pickMostSuitableSurfaceFormat(
