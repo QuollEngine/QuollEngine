@@ -30,7 +30,7 @@ VulkanRenderDevice::VulkanRenderDevice(
       mFrameManager(mDevice),
       mRenderContext(mDevice, mCommandPool, mGraphicsQueue, mPresentQueue),
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
-      mSwapchain(mBackend, mPhysicalDevice, mDevice, VK_NULL_HANDLE),
+      mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
       mAllocator(mBackend, mPhysicalDevice, mDevice) {
 
   VkDevice device = mDevice.getVulkanHandle();
@@ -40,125 +40,80 @@ VulkanRenderDevice::VulkanRenderDevice(
 
   LIQUID_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
                                  &queueIndex, 1, nullptr);
-
-  synchronizeSwapchain(0);
 }
 
-uint32_t VulkanRenderDevice::beginFrame() {
+RenderFrame VulkanRenderDevice::beginFrame() {
+  static constexpr auto SKIP_FRAME = std::numeric_limits<uint32_t>::max();
+  static RenderCommandList emptyCommandList;
+
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
-  mFrameManager.waitForFrame();
-
-  return mFrameManager.getCurrentFrameIndex();
-}
-
-void VulkanRenderDevice::endFrame() {
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
-  mFrameManager.nextFrame();
-}
-
-void VulkanRenderDevice::execute(RenderGraph &graph,
-                                 RenderGraphEvaluator &evaluator) {
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::execute");
-  mStats.resetCalls();
 
   if (mBackend.isFramebufferResized()) {
     recreateSwapchain();
+    return {SKIP_FRAME, SKIP_FRAME, emptyCommandList};
   }
 
-  uint32_t imageIdx =
+  mStats.resetCalls();
+  mFrameManager.waitForFrame();
+
+  uint32_t imageIndex =
       mSwapchain.acquireNextImage(mFrameManager.getImageAvailableSemaphore());
 
-  if (imageIdx == std::numeric_limits<uint32_t>::max()) {
-    synchronize(evaluator.getRegistry());
+  if (imageIndex == std::numeric_limits<uint32_t>::max()) {
     recreateSwapchain();
-    return;
-  }
-
-  auto &&compiled = graph.compile();
-
-  evaluator.build(compiled, graph, mSwapchainRecreated,
-                  static_cast<uint32_t>(mSwapchain.getImages().size()),
-                  mSwapchain.getExtent());
-
-  synchronize(evaluator.getRegistry());
-
-  if (mSwapchainRecreated) {
-    mSwapchainRecreated = false;
+    return {SKIP_FRAME, SKIP_FRAME, emptyCommandList};
   }
 
   auto &commandBuffer = mRenderContext.beginRendering(mFrameManager);
 
-  auto *commandBufferHandle =
-      dynamic_cast<VulkanCommandBuffer *>(
-          commandBuffer.getNativeRenderCommandList().get())
-          ->getVulkanCommandBuffer();
-  LIQUID_PROFILE_GPU_CONTEXT(commandBufferHandle);
-  {
-    LIQUID_PROFILE_GPU_EVENT("GPU event");
-    evaluator.execute(commandBuffer, compiled, graph, imageIdx);
-  }
+  return {mFrameManager.getCurrentFrameIndex(), imageIndex, commandBuffer};
+}
+
+void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
+  static constexpr auto SKIP_FRAME = std::numeric_limits<uint32_t>::max();
+
+  LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
+  mSwapchainRecreated = false;
+
   mRenderContext.endRendering(mFrameManager);
 
   VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
   LIQUID_PROFILE_GPU_FLIP(&mSwapchain);
 
-  auto queuePresentResult =
-      mRenderContext.present(mFrameManager, mSwapchain, imageIdx);
+  auto queuePresentResult = mRenderContext.present(
+      mFrameManager, mSwapchain, renderFrame.swapchainImageIndex);
 
   if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR ||
-      queuePresentResult == VK_SUBOPTIMAL_KHR ||
-      mBackend.isFramebufferResized()) {
+      queuePresentResult == VK_SUBOPTIMAL_KHR) {
     recreateSwapchain();
   }
+  mFrameManager.nextFrame();
 }
 
 void VulkanRenderDevice::waitForIdle() { vkDeviceWaitIdle(mDevice); }
 
 void VulkanRenderDevice::destroyResources() {
+  waitForIdle();
   mRegistry = VulkanResourceRegistry();
-  recreateSwapchain();
+  mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
+}
+
+Swapchain VulkanRenderDevice::getSwapchain() {
+  return Swapchain{mSwapchain.getTextures(), mSwapchain.getExtent()};
 }
 
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
-  size_t prevNumSwapchainImages = mSwapchain.getImageViews().size();
+  size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
 
-  mSwapchain = VulkanSwapchain(mBackend, mPhysicalDevice, mDevice, mSwapchain);
+  mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 
-  synchronizeSwapchain(prevNumSwapchainImages);
+  updateFramebufferRelativeTextures();
   mBackend.finishFramebufferResize();
   mSwapchainRecreated = true;
-
-  for (auto handle : mRegistry.getSwapchainRelativeTextures()) {
-    auto &texture = mRegistry.getTextures().at(handle);
-    mRegistry.setTexture(handle,
-                         std::make_unique<VulkanTexture>(
-                             texture->getDescription(), mAllocator, mDevice,
-                             mUploadContext, mSwapchain.getExtent()));
-  }
 }
 
-void VulkanRenderDevice::synchronizeSwapchain(size_t prevNumSwapchainImages) {
-  auto numNewSwapchainImages = mSwapchain.getImages().size();
-
-  // Remove unused swapchain images if
-  // new swapchain has fewer images than
-  // previous one
-  for (size_t i = numNewSwapchainImages + 1; i < prevNumSwapchainImages; ++i) {
-    mRegistry.deleteTexture(static_cast<TextureHandle>(i));
-  }
-
-  for (size_t i = 0; i < numNewSwapchainImages; ++i) {
-    TextureHandle handle = static_cast<TextureHandle>(i + 1);
-
-    mRegistry.setTexture(
-        handle, std::make_unique<VulkanTexture>(
-                    mSwapchain.getImages().at(i),
-                    mSwapchain.getImageViews().at(i), VK_NULL_HANDLE,
-                    mSwapchain.getSurfaceFormat().format, mAllocator, mDevice));
-  }
-
-  // Recreate swapchain relative textures
+void VulkanRenderDevice::updateFramebufferRelativeTextures() {
   mRegistry.deleteDanglingSwapchainRelativeTextures();
 
   for (auto handle : mRegistry.getSwapchainRelativeTextures()) {

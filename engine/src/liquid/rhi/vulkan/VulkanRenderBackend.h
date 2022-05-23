@@ -8,12 +8,6 @@
 
 #include "liquid/window/Window.h"
 
-#ifdef LIQUID_DEBUG
-constexpr bool ENABLE_VALIDATIONS_DEFAULT = true;
-#else
-constexpr bool ENABLE_VALIDATIONS_DEFAULT = false;
-#endif
-
 namespace liquid::rhi {
 
 class VulkanRenderDevice;
@@ -32,8 +26,7 @@ public:
    * @param window Window
    * @param enableValidations Enable validations
    */
-  VulkanRenderBackend(Window &window,
-                      bool enableValidations = ENABLE_VALIDATIONS_DEFAULT);
+  VulkanRenderBackend(Window &window, bool enableValidations = true);
 
   VulkanRenderBackend(const VulkanRenderBackend &) = delete;
   VulkanRenderBackend &operator=(const VulkanRenderBackend &) = delete;

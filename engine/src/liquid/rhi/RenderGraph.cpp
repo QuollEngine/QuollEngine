@@ -131,4 +131,11 @@ std::vector<size_t> RenderGraph::compile() {
   return sortedPasses;
 }
 
+void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {
+  mFramebufferExtent = framebufferExtent;
+  mDirty = true;
+}
+
+void RenderGraph::updateDirtyFlag() { mDirty = false; }
+
 } // namespace liquid::rhi

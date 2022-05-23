@@ -90,13 +90,13 @@ public:
   inline VkFormat getFormat() const { return mFormat; }
 
   /**
-   * @brief Check if texture resizes with swapchain
+   * @brief Check if texture resizes with framebuffer
    *
-   * @retval true Texture resizes with swapchain
-   * @retval false Texture does not resize with swapchain
+   * @retval true Texture resizes with framebuffer
+   * @retval false Texture does not resize with framebuffer
    */
-  inline bool isSwapchainRelative() const {
-    return mDescription.sizeMethod == TextureSizeMethod::SwapchainRatio;
+  inline bool isFramebufferRelative() const {
+    return mDescription.sizeMethod == TextureSizeMethod::FramebufferRatio;
   }
 
   /**

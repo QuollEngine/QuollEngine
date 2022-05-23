@@ -5,6 +5,8 @@
 #include "VulkanRenderBackend.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanPhysicalDevice.h"
+#include "VulkanResourceRegistry.h"
+#include "VulkanTexture.h"
 
 namespace liquid::rhi {
 
@@ -19,26 +21,13 @@ public:
    * @param backend Vulkan backend
    * @param physicalDevice Physical device
    * @param device Vulkan device object
-   * @param oldSwapchain Old swapchain
+   * @param registry Vulkan resource registry
+   * @param allocator Vulkan resource allocator
    */
   VulkanSwapchain(VulkanRenderBackend &backend,
                   const VulkanPhysicalDevice &physicalDevice,
-                  VulkanDeviceObject &device, VkSwapchainKHR oldSwapchain);
-
-  /**
-   * @brief Move operator for swapchain
-   *
-   * @param rhs Right hand side value
-   * @return This swapchain
-   */
-  VulkanSwapchain &operator=(VulkanSwapchain &&rhs);
-
-  /**
-   * @brief Move constructor for swapchain
-   *
-   * @param rhs Right hand side value
-   */
-  VulkanSwapchain(VulkanSwapchain &&rhs);
+                  VulkanDeviceObject &device, VulkanResourceRegistry &registry,
+                  VulkanResourceAllocator &allocator);
 
   /**
    * @brief Destroys Vulkan swapchain
@@ -47,6 +36,19 @@ public:
 
   VulkanSwapchain &operator=(const VulkanSwapchain &) = delete;
   VulkanSwapchain(const VulkanSwapchain &) = delete;
+  VulkanSwapchain &operator=(VulkanSwapchain &&rhs) = delete;
+  VulkanSwapchain(VulkanSwapchain &&rhs) = delete;
+
+  /**
+   * @brief Recreate swapchain
+   *
+   * @param backend Vulkan backend
+   * @param physicalDevice Physical device
+   * @param allocator Vulkan resource allocator
+   */
+  void recreate(VulkanRenderBackend &backend,
+                const VulkanPhysicalDevice &physicalDevice,
+                VulkanResourceAllocator &allocator);
 
   /**
    * @brief Acquires next image and signals semaphore
@@ -78,20 +80,13 @@ public:
   inline const glm::uvec2 &getExtent() { return mExtent; }
 
   /**
-   * @brief Gets Vulkan image views
+   * @brief Get swapchain textures
    *
-   * @return Vulkan image views
+   * @return Swapchain textures
    */
-  inline const std::vector<VkImageView> &getImageViews() const {
-    return mImageViews;
+  inline const std::vector<TextureHandle> &getTextures() const {
+    return mTextures;
   }
-
-  /**
-   * @brief Get Vulkan images
-   *
-   * @return Vulkan images
-   */
-  inline const std::vector<VkImage> &getImages() const { return mImages; }
 
   /**
    * @brief Gets Vulkan swapchain handle
@@ -112,6 +107,17 @@ private:
    * @brief Destroys Vulkan swapchain
    */
   void destroy();
+
+  /**
+   * @brief Create swapchain
+   *
+   * @param backend Vulkan backend
+   * @param physicalDevice Physical device
+   * @param allocator Vulkan resource allocator
+   */
+  void create(VulkanRenderBackend &backend,
+              const VulkanPhysicalDevice &physicalDevice,
+              VulkanResourceAllocator &allocator);
 
   /**
    * @brief Picks most suitable surface format
@@ -149,13 +155,13 @@ private:
 
 private:
   VkSwapchainKHR mSwapchain = VK_NULL_HANDLE;
-  std::vector<VkImageView> mImageViews;
-  std::vector<VkImage> mImages;
+  std::vector<TextureHandle> mTextures;
 
   glm::uvec2 mExtent{};
   VkSurfaceFormatKHR mSurfaceFormat{};
   VkPresentModeKHR mPresentMode{};
 
+  VulkanResourceRegistry &mRegistry;
   VulkanDeviceObject &mDevice;
 };
 

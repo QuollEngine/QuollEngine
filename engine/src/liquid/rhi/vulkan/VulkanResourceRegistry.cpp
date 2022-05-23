@@ -29,7 +29,7 @@ void VulkanResourceRegistry::deleteBuffer(BufferHandle handle) {
 
 void VulkanResourceRegistry::setTexture(
     TextureHandle handle, std::unique_ptr<VulkanTexture> &&texture) {
-  if (texture->isSwapchainRelative()) {
+  if (texture->isFramebufferRelative()) {
     mSwapchainRelativeTextures.insert(handle);
   }
 
@@ -45,7 +45,7 @@ void VulkanResourceRegistry::deleteDanglingSwapchainRelativeTextures() {
        it != mSwapchainRelativeTextures.end(); ++it) {
     auto textureIt = mTextures.find(*it);
     if (textureIt == mTextures.end() ||
-        !textureIt->second->isSwapchainRelative()) {
+        !textureIt->second->isFramebufferRelative()) {
       it = mSwapchainRelativeTextures.erase(it);
     }
   }

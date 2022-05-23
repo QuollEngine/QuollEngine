@@ -19,7 +19,8 @@ Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
   loadShaders();
 }
 
-void Renderer::render(rhi::RenderGraph &graph, Entity camera,
+void Renderer::render(rhi::RenderGraph &graph,
+                      rhi::RenderCommandList &commandList, Entity camera,
                       EntityContext &entityContext) {
   LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(camera),
                 "Entity does not have a camera");
@@ -27,7 +28,13 @@ void Renderer::render(rhi::RenderGraph &graph, Entity camera,
       entityContext.getComponent<CameraComponent>(camera));
 
   updateStorageBuffers(entityContext);
-  mDevice->execute(graph, mGraphEvaluator);
+
+  auto &&compiled = graph.compile();
+
+  mGraphEvaluator.build(compiled, graph);
+
+  mDevice->synchronize(mRegistry);
+  mGraphEvaluator.execute(commandList, compiled, graph);
 }
 
 void Renderer::loadShaders() {
@@ -130,7 +137,7 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
   auto shadowmap = mRegistry.setTexture(shadowMapDesc);
 
   rhi::TextureDescription mainColorDesc{};
-  mainColorDesc.sizeMethod = rhi::TextureSizeMethod::SwapchainRatio;
+  mainColorDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   mainColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   mainColorDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
   mainColorDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
@@ -138,8 +145,17 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
   mainColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
   auto mainColor = mRegistry.setTexture(mainColorDesc);
 
+  rhi::TextureDescription imguiDesc{};
+  imguiDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
+  imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+  imguiDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
+  imguiDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
+  imguiDesc.layers = 1;
+  imguiDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+  auto imgui = mRegistry.setTexture(imguiDesc);
+
   rhi::TextureDescription depthBufferDesc{};
-  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::SwapchainRatio;
+  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   depthBufferDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
   depthBufferDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
@@ -318,8 +334,8 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
   {
     auto &pass = graph.addPass("imgui");
 
-    pass.read(useSwapchainForImgui ? graph.getSwapchain() : mainColor);
-    pass.write(graph.getSwapchain(), BLUEISH_CLEAR_VALUE);
+    pass.read(mainColor);
+    pass.write(imgui, BLUEISH_CLEAR_VALUE);
 
     auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
         mShaderLibrary.getShader("__engine.imgui.default.vertex"),
@@ -351,7 +367,8 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
     });
   } // imgui
 
-  return {graph, {mainColor, depthBuffer, shadowmap, BLUEISH_CLEAR_VALUE}};
+  return {graph,
+          {mainColor, depthBuffer, imgui, shadowmap, BLUEISH_CLEAR_VALUE}};
 }
 
 } // namespace liquid

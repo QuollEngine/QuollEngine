@@ -149,13 +149,6 @@ public:
    */
   void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) override;
 
-  /**
-   * @brief Get Vulkan command buffer handle
-   *
-   * @return Vulkan command buffer handle
-   */
-  inline VkCommandBuffer getVulkanHandle() { return mCommandBuffer; }
-
 private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 

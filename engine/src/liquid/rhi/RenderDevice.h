@@ -5,6 +5,8 @@
 #include "DeviceStats.h"
 #include "RenderGraph.h"
 #include "RenderGraphEvaluator.h"
+#include "Swapchain.h"
+#include "RenderFrame.h"
 
 namespace liquid::rhi {
 
@@ -31,27 +33,28 @@ public:
   /**
    * @brief Begin frame
    *
-   * @return Frame index
+   * @return Frame data
    */
-  virtual uint32_t beginFrame() = 0;
+  virtual RenderFrame beginFrame() = 0;
 
   /**
    * @brief End frame
-   */
-  virtual void endFrame() = 0;
-
-  /**
-   * @brief Execute render graph
    *
-   * @param graph Render graph
-   * @param evaluator Render graph evaluator
+   * @param renderFrame Render frame
    */
-  virtual void execute(RenderGraph &graph, RenderGraphEvaluator &evaluator) = 0;
+  virtual void endFrame(const RenderFrame &renderFrame) = 0;
 
   /**
    * @brief Wait for device to be idle
    */
   virtual void waitForIdle() = 0;
+
+  /**
+   * @brief Synchronize resources
+   *
+   * @param registry Resource registry
+   */
+  virtual void synchronize(ResourceRegistry &registry) = 0;
 
   /**
    * @brief Get physical device information
@@ -73,6 +76,13 @@ public:
    * This does not destroy the device
    */
   virtual void destroyResources() = 0;
+
+  /**
+   * @brief Get swapchain
+   *
+   * @return Swapchain
+   */
+  virtual Swapchain getSwapchain() = 0;
 };
 
 } // namespace liquid::rhi

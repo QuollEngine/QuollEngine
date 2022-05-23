@@ -6,6 +6,7 @@
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/scene/SceneUpdater.h"
+#include "liquid/renderer/Presenter.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -60,6 +61,11 @@ void EditorScreen::start(const Project &project) {
 
   liquid::AssetManager assetManager(project.assetsPath);
   liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
+
+  liquid::Presenter presenter(renderer.getShaderLibrary(),
+                              renderer.getRegistry());
+
+  presenter.updateFramebuffers(mDevice->getSwapchain());
 
   auto res = assetManager.preloadAssets(renderer.getRegistry());
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
@@ -120,6 +126,12 @@ void EditorScreen::start(const Project &project) {
                                      "icons");
 
   auto graph = renderer.createRenderGraph(false);
+
+  graph.first.setFramebufferExtent(mWindow.getFramebufferSize());
+
+  mWindow.addResizeHandler([&graph](auto width, auto height) {
+    graph.first.setFramebufferExtent({width, height});
+  });
 
   // Editor renderer
   {
@@ -360,7 +372,8 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.setRenderFn([&renderer, &editorManager, &animationSystem,
                         &entityManager, &assetManager, &graph, &physicsSystem,
-                        &ui, &debugLayer, &preloadStatusDialog, this]() {
+                        &ui, &debugLayer, &preloadStatusDialog, &presenter,
+                        this]() {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
@@ -425,12 +438,20 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
     imgui.endRendering();
 
-    mDevice->beginFrame();
+    const auto &renderFrame = mDevice->beginFrame();
 
-    renderer.render(graph.first, editorManager.getCamera(),
-                    entityManager.getActiveEntityContext());
+    if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
+      renderer.render(graph.first, renderFrame.commandList,
+                      editorManager.getCamera(),
+                      entityManager.getActiveEntityContext());
 
-    mDevice->endFrame();
+      presenter.present(renderFrame.commandList, graph.second.imguiColor,
+                        renderFrame.swapchainImageIndex);
+
+      mDevice->endFrame(renderFrame);
+    } else {
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+    }
   });
 
   mainLoop.run();

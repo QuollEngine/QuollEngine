@@ -49,7 +49,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   static constexpr uint32_t HUNDRED_PERCENT = 100;
 
   VkExtent3D extent{};
-  if (isSwapchainRelative()) {
+  if (isFramebufferRelative()) {
     extent.width = description.width * swapchainExtent.x / HUNDRED_PERCENT;
     extent.height = description.height * swapchainExtent.y / HUNDRED_PERCENT;
   } else {
