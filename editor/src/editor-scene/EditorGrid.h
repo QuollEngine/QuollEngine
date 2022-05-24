@@ -5,34 +5,28 @@
 namespace liquidator {
 
 /**
+ * @brief Editor grid data
+ *
+ * Passed to hardware buffers
+ */
+struct EditorGridData {
+  /**
+   * Grid lines information
+   *
+   * First value toggles grid lines
+   * Second value toggles axis lines
+   */
+  glm::uvec4 gridLines{1, 1, 0, 0};
+};
+
+/**
  * @brief Editor grid
  *
  * Controls editor grid
  */
 class EditorGrid {
-  /**
-   * @brief Editor grid data
-   *
-   * Passed to hardware buffers
-   */
-  struct EditorGridData {
-    /**
-     * Grid lines information
-     *
-     * First value toggles grid lines
-     * Second value toggles axis lines
-     */
-    glm::uvec4 gridLines{1, 1, 0, 0};
-  };
 
 public:
-  /**
-   * @brief Create editor grid
-   *
-   * @param registry Resource registry
-   */
-  EditorGrid(liquid::rhi::ResourceRegistry &registry);
-
   /**
    * @brief Set grid lines display flag
    *
@@ -64,22 +58,14 @@ public:
   inline bool axisLinesShown() const { return mData.gridLines.y == 1; }
 
   /**
-   * @brief Get buffer
+   * @brief Get editor grid data
    *
-   * @return Buffer
+   * @return Editor grid data
    */
-  inline liquid::rhi::BufferHandle getBuffer() const { return mBuffer; }
-
-private:
-  /**
-   * @brief Update buffer
-   */
-  void updateBuffer();
+  inline const EditorGridData &getData() const { return mData; }
 
 private:
   EditorGridData mData;
-  liquid::rhi::BufferHandle mBuffer;
-  liquid::rhi::ResourceRegistry &mRegistry;
 };
 
 } // namespace liquidator

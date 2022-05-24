@@ -8,7 +8,6 @@ namespace liquidator {
 
 void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
                              const std::filesystem::path &iconsPath) {
-
   liquid::ImageTextureLoader loader(registry);
 
   mIconMap.insert_or_assign(

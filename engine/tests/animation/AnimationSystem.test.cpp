@@ -34,7 +34,7 @@ public:
     liquid::Skeleton skeleton(liquid::SkeletonAssetHandle{2}, {glm::vec3{0.0f}},
                               {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
                               {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}},
-                              {"Joint0"}, &registry);
+                              {"Joint0"});
 
     context.setComponent<liquid::SkeletonComponent>(entity, {skeleton});
 

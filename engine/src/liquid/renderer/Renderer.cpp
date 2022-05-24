@@ -189,34 +189,43 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
 
     pass.setExecutor([pipeline, skinnedPipeline, shadowmap,
                       this](rhi::RenderCommandList &commandList) {
-      commandList.bindPipeline(pipeline);
-
+      LIQUID_PROFILE_EVENT("ShadowPass");
       rhi::Descriptor descriptor;
       descriptor.bind(0, mRenderStorage.getLightsBuffer(),
                       rhi::DescriptorType::StorageBuffer);
 
-      commandList.bindDescriptor(pipeline, 0, descriptor);
+      {
+        LIQUID_PROFILE_EVENT("ShadowPass::Meshes");
+        commandList.bindPipeline(pipeline);
 
-      for (int32_t index = 0; index < mRenderStorage.getNumLights(); ++index) {
-        glm::ivec4 pcIndex{index};
+        commandList.bindDescriptor(pipeline, 0, descriptor);
 
-        commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                                  sizeof(glm::ivec4), &pcIndex);
-        mSceneRenderer.render(commandList, pipeline, mRenderStorage,
-                              mAssetRegistry, false);
+        for (int32_t index = 0; index < mRenderStorage.getNumLights();
+             ++index) {
+          glm::ivec4 pcIndex{index};
+
+          commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                                    sizeof(glm::ivec4), &pcIndex);
+          mSceneRenderer.render(commandList, pipeline, mRenderStorage,
+                                mAssetRegistry, false);
+        }
       }
 
-      commandList.bindPipeline(skinnedPipeline);
-      commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
+      {
+        LIQUID_PROFILE_EVENT("ShadowPass::SkinnedMeshes");
+        commandList.bindPipeline(skinnedPipeline);
+        commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
 
-      for (int32_t index = 0; index < mRenderStorage.getNumLights(); ++index) {
-        glm::ivec4 pcIndex{index};
+        for (int32_t index = 0; index < mRenderStorage.getNumLights();
+             ++index) {
+          glm::ivec4 pcIndex{index};
 
-        commandList.pushConstants(skinnedPipeline, VK_SHADER_STAGE_VERTEX_BIT,
-                                  0, sizeof(glm::ivec4), &pcIndex);
-        mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
-                                     mRenderStorage, mAssetRegistry, false);
-        index++;
+          commandList.pushConstants(skinnedPipeline, VK_SHADER_STAGE_VERTEX_BIT,
+                                    0, sizeof(glm::ivec4), &pcIndex);
+          mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
+                                       mRenderStorage, mAssetRegistry, false);
+          index++;
+        }
       }
     });
   } // shadowmap
@@ -250,6 +259,8 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
 
     pass.setExecutor([this, pipeline, skinnedPipeline,
                       shadowmap](rhi::RenderCommandList &commandList) {
+      LIQUID_PROFILE_EVENT("MeshPass");
+
       commandList.bindPipeline(pipeline);
 
       rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
@@ -273,19 +284,27 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
           .bind(BRDF_BINDING, {mRenderStorage.getBrdfLUT()},
                 rhi::DescriptorType::CombinedImageSampler);
 
-      commandList.bindPipeline(pipeline);
-      commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
-      commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
+      {
+        LIQUID_PROFILE_EVENT("MeshPass::Meshes");
 
-      mSceneRenderer.render(commandList, pipeline, mRenderStorage,
-                            mAssetRegistry, true);
+        commandList.bindPipeline(pipeline);
+        commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
+        commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
 
-      commandList.bindPipeline(skinnedPipeline);
-      commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
-      commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
+        mSceneRenderer.render(commandList, pipeline, mRenderStorage,
+                              mAssetRegistry, true);
+      }
 
-      mSceneRenderer.renderSkinned(commandList, skinnedPipeline, mRenderStorage,
-                                   mAssetRegistry, true);
+      {
+        LIQUID_PROFILE_EVENT("MeshPass::SkinnedMeshes");
+
+        commandList.bindPipeline(skinnedPipeline);
+        commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
+        commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
+
+        mSceneRenderer.renderSkinned(commandList, skinnedPipeline,
+                                     mRenderStorage, mAssetRegistry, true);
+      }
     });
   } // scene
 
@@ -303,6 +322,7 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
     pass.addPipeline(pipeline);
     pass.setExecutor([pipeline, this](rhi::RenderCommandList &commandList) {
+      LIQUID_PROFILE_EVENT("EnvironmentPass");
       if (!rhi::isHandleValid(mRenderStorage.getIrradianceMap()))
         return;
 
@@ -363,6 +383,8 @@ Renderer::createRenderGraph(bool useSwapchainForImgui) {
     pass.addPipeline(pipeline);
 
     pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList) {
+      LIQUID_PROFILE_EVENT("ImguiPass");
+
       mImguiRenderer.draw(commandList, pipeline);
     });
   } // imgui

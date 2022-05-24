@@ -21,7 +21,6 @@ public:
    * @param parents Joint parents
    * @param inverseBindMatrices Joint inverse bind matrices
    * @param names Joint names
-   * @param registry Resource registry
    */
   Skeleton(SkeletonAssetHandle assetHandle,
            const std::vector<glm::vec3> &positions,
@@ -29,7 +28,7 @@ public:
            const std::vector<glm::vec3> &scales,
            const std::vector<JointId> &parents,
            const std::vector<glm::mat4> &inverseBindMatrices,
-           const std::vector<String> &names, rhi::ResourceRegistry *registry);
+           const std::vector<String> &names);
 
   /**
    * @brief Set joint position
@@ -167,14 +166,13 @@ public:
   }
 
   /**
-   * @brief Get debug buffer
+   * @brief Get debug bone transforms
    *
-   * This buffer does not have inverse
-   * bind matrices applied to it
-   *
-   * @return Debug buffer
+   * @return Debug bone transforms
    */
-  inline rhi::BufferHandle getDebugBuffer() const { return mDebugBuffer; }
+  inline const std::vector<glm::mat4> &getDebugBoneTransforms() const {
+    return mDebugBoneTransforms;
+  }
 
   /**
    * @brief Get number of joints
@@ -222,9 +220,6 @@ private:
 
   std::vector<JointId> mDebugBones;
   std::vector<glm::mat4> mDebugBoneTransforms;
-  rhi::BufferHandle mDebugBuffer;
-
-  rhi::ResourceRegistry *mRegistry;
 
   SkeletonAssetHandle mAssetHandle;
 };

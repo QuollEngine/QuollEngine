@@ -28,8 +28,7 @@ struct SkeletonTest : public ::testing::Test {
 
     return liquid::Skeleton(handle, std::move(positions), std::move(rotations),
                             std::move(scales), std::move(parents),
-                            std::move(inverseBindMatrices), std::move(names),
-                            &registry);
+                            std::move(inverseBindMatrices), std::move(names));
   }
 
   template <class T> std::vector<T> createItems(uint32_t numJoints) {
@@ -49,8 +48,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(2), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
-            createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &registry);
+            createItems<glm::mat4>(1), createItems<liquid::String>(1));
       },
       ".*");
   EXPECT_DEATH(
@@ -58,8 +56,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(1), createItems<glm::quat>(2),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
-            createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &registry);
+            createItems<glm::mat4>(1), createItems<liquid::String>(1));
       },
       ".*");
   EXPECT_DEATH(
@@ -67,8 +64,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(2), createItems<liquid::JointId>(1),
-            createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &registry);
+            createItems<glm::mat4>(1), createItems<liquid::String>(1));
       },
       ".*");
   EXPECT_DEATH(
@@ -76,8 +72,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(2),
-            createItems<glm::mat4>(1), createItems<liquid::String>(1),
-            &registry);
+            createItems<glm::mat4>(1), createItems<liquid::String>(1));
       },
       ".*");
   EXPECT_DEATH(
@@ -85,8 +80,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(1), createItems<glm::quat>(1),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
-            createItems<glm::mat4>(2), createItems<liquid::String>(1),
-            &registry);
+            createItems<glm::mat4>(2), createItems<liquid::String>(1));
       },
       ".*");
   EXPECT_DEATH(
@@ -94,8 +88,7 @@ TEST_F(SkeletonDeathTest, FailsIfSizeMismatchBetweenJointParameters) {
         liquid::Skeleton skeleton(
             handle, createItems<glm::vec3>(1), createItems<glm::quat>(2),
             createItems<glm::vec3>(1), createItems<liquid::JointId>(1),
-            createItems<glm::mat4>(1), createItems<liquid::String>(2),
-            &registry);
+            createItems<glm::mat4>(1), createItems<liquid::String>(2));
       },
       ".*");
 }
@@ -124,16 +117,6 @@ TEST_F(SkeletonTest, CreatesAllJointPrametersOnConstruct) {
 TEST_F(SkeletonTest, CreatesDebugParametersOnConstruct) {
   auto &&skeleton = createSkeleton(2);
   EXPECT_EQ(skeleton.getNumDebugBones(), 4);
-}
-
-TEST_F(SkeletonTest, CreatesDebugUniformBufferOnConstruct) {
-  auto &&skeleton = createSkeleton(5);
-
-  const auto &description =
-      registry.getBufferMap().getDescription(skeleton.getDebugBuffer());
-
-  EXPECT_EQ(description.type, liquid::rhi::BufferType::Uniform);
-  EXPECT_EQ(description.size, sizeof(glm::mat4) * 10);
 }
 
 TEST_F(SkeletonTest, UpdatesWorldTransformsOnUpdate) {
