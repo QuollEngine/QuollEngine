@@ -41,13 +41,12 @@ void RenderGraphEvaluator::execute(RenderCommandList &commandList,
 
 void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
                                      bool force) {
+  LIQUID_PROFILE_EVENT("RenderGraphEvaluator::buildPass");
   auto &pass = graph.getPasses().at(index);
 
   if (!force && isHandleValid(pass.mRenderPass)) {
     return;
   }
-
-  LIQUID_PROFILE_EVENT("RenderGraphEvaluator::buildPass");
 
   uint32_t width = 0;
   uint32_t height = 0;

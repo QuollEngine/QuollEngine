@@ -11,7 +11,7 @@ EntityManager::EntityManager(liquid::AssetManager &assetManager,
     : mScenePath(scenePath), mRenderer(renderer), mAssetManager(assetManager) {}
 
 void EntityManager::save(liquid::Entity entity) {
-  if (!mInSimulation)
+  if (mInSimulation)
     return;
 
   YAML::Node node;
@@ -318,8 +318,7 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
   liquid::Skeleton skeletonInstance(
       handle, skeleton.jointLocalPositions, skeleton.jointLocalRotations,
       skeleton.jointLocalScales, skeleton.jointParents,
-      skeleton.jointInverseBindMatrices, skeleton.jointNames,
-      &mRenderer.getRegistry());
+      skeleton.jointInverseBindMatrices, skeleton.jointNames);
   getActiveEntityContext().setComponent<liquid::SkeletonComponent>(
       entity, {std::move(skeletonInstance)});
 }

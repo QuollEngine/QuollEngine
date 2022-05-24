@@ -9,13 +9,11 @@ Skeleton::Skeleton(SkeletonAssetHandle assetHandle,
                    const std::vector<glm::vec3> &scales,
                    const std::vector<JointId> &parents,
                    const std::vector<glm::mat4> &inverseBindMatrices,
-                   const std::vector<String> &names,
-                   rhi::ResourceRegistry *registry)
+                   const std::vector<String> &names)
     : mJointLocalPositions(positions), mJointLocalRotations(rotations),
       mJointLocalScales(scales), mJointParents(parents),
       mJointInverseBindMatrices(inverseBindMatrices), mJointNames(names),
-      mNumJoints(positions.size()), mRegistry(registry),
-      mAssetHandle(assetHandle) {
+      mNumJoints(positions.size()), mAssetHandle(assetHandle) {
   LIQUID_ASSERT(mNumJoints > 0, "No joints provided");
   LIQUID_ASSERT(mJointLocalPositions.size() == mNumJoints &&
                     mJointLocalRotations.size() == mNumJoints &&
@@ -37,9 +35,6 @@ Skeleton::Skeleton(SkeletonAssetHandle assetHandle,
   const size_t numDebugBones = mNumJoints * 2;
 
   mDebugBoneTransforms.resize(numDebugBones, glm::mat4{1.0f});
-
-  mDebugBuffer = registry->setBuffer(
-      {rhi::BufferType::Uniform, sizeof(glm::mat4) * numDebugBones});
 }
 
 const glm::mat4 Skeleton::getJointLocalTransform(JointId joint) const {
@@ -89,11 +84,6 @@ void Skeleton::updateDebug() {
   for (size_t i = 0; i < mDebugBones.size(); ++i) {
     mDebugBoneTransforms.at(i) = mJointWorldTransforms.at(mDebugBones.at(i));
   }
-
-  mRegistry->setBuffer({rhi::BufferType::Uniform,
-                        sizeof(glm::mat4) * mDebugBones.size(),
-                        mDebugBoneTransforms.data()},
-                       mDebugBuffer);
 }
 
 } // namespace liquid

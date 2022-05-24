@@ -1,4 +1,4 @@
-#version 450
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(set = 0, binding = 0) uniform CameraData {
@@ -8,13 +8,27 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
-layout(set = 1, binding = 0) uniform SkeletonData { mat4 joints[44]; }
+struct ObjectItem {
+  mat4 modelMatrix;
+};
+
+struct SkeletonItem {
+  mat4 bones[64];
+};
+
+layout(std140, set = 0, binding = 1) readonly buffer ObjectData {
+  ObjectItem items[];
+}
+uObjectData;
+
+layout(std140, set = 0, binding = 2) readonly buffer SkeletonData {
+  SkeletonItem items[];
+}
 uSkeletonData;
 
-layout(push_constant) uniform TransformConstant { mat4 modelMatrix; }
-pcTransform;
-
 void main() {
-  gl_Position = uCameraData.viewProj * pcTransform.modelMatrix *
-                uSkeletonData.joints[gl_VertexIndex] * vec4(0.0, 0.0, 0.0, 1.0);
+  gl_Position = uCameraData.viewProj *
+                uObjectData.items[gl_BaseInstance].modelMatrix *
+                uSkeletonData.items[gl_BaseInstance].bones[gl_VertexIndex] *
+                vec4(0.0, 0.0, 0.0, 1.0);
 }
