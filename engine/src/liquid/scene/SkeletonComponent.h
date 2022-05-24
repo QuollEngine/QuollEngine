@@ -1,17 +1,85 @@
 #pragma once
 
-#include "Skeleton.h"
+#include "liquid/asset/Asset.h"
+#include "Joint.h"
 
 namespace liquid {
 
 /**
  * @brief Skeleton component
+ *
+ * Stores all local and final
+ * transforms for the skeleton
+ * joints
  */
 struct SkeletonComponent {
   /**
-   * Skeleton
+   * Number of joints
    */
-  Skeleton skeleton;
+  uint32_t numJoints = 0;
+
+  /**
+   * List of joint parents
+   */
+  std::vector<JointId> jointParents;
+
+  /**
+   * Joint local positions
+   */
+  std::vector<glm::vec3> jointLocalPositions;
+
+  /**
+   * Joint local rotations
+   */
+  std::vector<glm::quat> jointLocalRotations;
+
+  /**
+   * Joint local scales
+   */
+  std::vector<glm::vec3> jointLocalScales;
+
+  /**
+   * Joint world transforms
+   */
+  std::vector<glm::mat4> jointWorldTransforms;
+
+  /**
+   * Joint inverse bind matrices
+   */
+  std::vector<glm::mat4> jointInverseBindMatrices;
+
+  /**
+   * Joint final transforms
+   */
+  std::vector<glm::mat4> jointFinalTransforms;
+
+  /**
+   * Joint names
+   */
+  std::vector<String> jointNames;
+
+  /**
+   * Skeleton asset
+   */
+  SkeletonAssetHandle assetHandle;
+};
+
+/**
+ * @brief Skeleton debug component
+ *
+ * Stores skeleton debug bone transforms
+ * for rendering debug lines
+ */
+struct SkeletonDebugComponent {
+  /**
+   * Debug bones
+   */
+  std::vector<JointId> bones;
+
+  /**
+   * Debug bone transforms
+   */
+  std::vector<glm::mat4> boneTransforms;
 };
 
 } // namespace liquid

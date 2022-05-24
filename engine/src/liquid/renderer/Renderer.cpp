@@ -98,9 +98,8 @@ void Renderer::updateStorageBuffers(EntityContext &entityContext) {
                                 SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &world,
              const auto &mesh) {
-        mRenderStorage.addSkinnedMesh(
-            mesh.handle, world.worldTransform,
-            skeleton.skeleton.getJointFinalTransforms());
+        mRenderStorage.addSkinnedMesh(mesh.handle, world.worldTransform,
+                                      skeleton.jointFinalTransforms);
       });
 
   // Lights

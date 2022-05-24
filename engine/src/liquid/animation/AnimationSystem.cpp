@@ -39,16 +39,16 @@ void AnimationSystem::update(float dt, EntityContext &entityContext) {
 
           if (sequence.jointTarget && hasSkeleton) {
             auto &skeleton =
-                entityContext.getComponent<SkeletonComponent>(entity).skeleton;
+                entityContext.getComponent<SkeletonComponent>(entity);
             if (sequence.target == KeyframeSequenceAssetTarget::Position) {
-              skeleton.setJointPosition(sequence.joint, glm::vec3(value));
+              skeleton.jointLocalPositions.at(sequence.joint) =
+                  glm::vec3(value);
             } else if (sequence.target ==
                        KeyframeSequenceAssetTarget::Rotation) {
-              skeleton.setJointRotation(
-                  sequence.joint,
-                  glm::quat(value.w, value.x, value.y, value.z));
+              skeleton.jointLocalRotations.at(sequence.joint) =
+                  glm::quat(value.w, value.x, value.y, value.z);
             } else if (sequence.target == KeyframeSequenceAssetTarget::Scale) {
-              skeleton.setJointScale(sequence.joint, glm::vec3(value));
+              skeleton.jointLocalScales.at(sequence.joint) = glm::vec3(value);
             }
           } else {
             if (sequence.target == KeyframeSequenceAssetTarget::Position) {

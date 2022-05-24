@@ -1,6 +1,5 @@
 #include "liquid/core/Base.h"
 #include "liquid/animation/AnimationSystem.h"
-#include "liquid/scene/Skeleton.h"
 
 #include <gtest/gtest.h>
 
@@ -31,12 +30,15 @@ public:
       bool playing = true) {
     auto entity = createEntity(loop, animIndex, playing);
 
-    liquid::Skeleton skeleton(liquid::SkeletonAssetHandle{2}, {glm::vec3{0.0f}},
-                              {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}},
-                              {glm::vec3{1.0f}}, {0}, {glm::mat4{1.0f}},
-                              {"Joint0"});
+    liquid::SkeletonComponent skeleton{};
+    skeleton.jointFinalTransforms = {glm::mat4{1.0f}};
+    skeleton.jointWorldTransforms = {glm::mat4{1.0f}};
+    skeleton.jointLocalPositions = {glm::vec3{0.0f}};
+    skeleton.jointLocalRotations = {glm::quat{1.0f, 0.0f, 0.0f, 0.0f}};
+    skeleton.jointLocalScales = {glm::vec3{1.0f}};
+    skeleton.jointNames = {"Joint0"};
 
-    context.setComponent<liquid::SkeletonComponent>(entity, {skeleton});
+    context.setComponent(entity, skeleton);
 
     return entity;
   }
@@ -204,15 +206,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
   system.update(0.5f, context);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.5f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -229,15 +231,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
   system.update(0.5f, context);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(0.5f, 0.5f, 0.5f, 0.5f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -254,15 +256,15 @@ TEST_F(AnimationSystemTest,
 
   const auto &skeleton =
       context.getComponent<liquid::SkeletonComponent>(entity);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(1.0f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(1.0f));
   system.update(0.5f, context);
-  EXPECT_EQ(skeleton.skeleton.getLocalPosition(0), glm::vec3(0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalRotation(0),
+  EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
+  EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
-  EXPECT_EQ(skeleton.skeleton.getLocalScale(0), glm::vec3(0.5f));
+  EXPECT_EQ(skeleton.jointLocalScales.at(0), glm::vec3(0.5f));
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));

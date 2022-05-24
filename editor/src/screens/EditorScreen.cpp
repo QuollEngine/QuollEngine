@@ -6,6 +6,7 @@
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/scene/SceneUpdater.h"
+#include "liquid/scene/SkeletonUpdater.h"
 #include "liquid/renderer/Presenter.h"
 
 #include "liquid/physics/PhysicsSystem.h"
@@ -95,6 +96,7 @@ void EditorScreen::start(const Project &project) {
   liquid::AnimationSystem animationSystem(assetManager.getRegistry());
   liquid::PhysicsSystem physicsSystem(mEventSystem);
   liquid::SceneUpdater sceneUpdater;
+  liquid::SkeletonUpdater skeletonUpdater;
 
   liquid::ImguiDebugLayer debugLayer(
       mDevice->getDeviceInformation(), mDevice->getDeviceStats(),
@@ -125,8 +127,8 @@ void EditorScreen::start(const Project &project) {
   pass.write(graph.second.depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
-                        &entityManager, &aspectRatioUpdater, &sceneUpdater,
-                        this](float dt) mutable {
+                        &entityManager, &aspectRatioUpdater, &skeletonUpdater,
+                        &sceneUpdater, this](float dt) mutable {
     bool isPlaying = entityManager.isUsingSimulationContext();
 
     auto &entityContext = entityManager.getActiveEntityContext();
@@ -139,12 +141,7 @@ void EditorScreen::start(const Project &project) {
       animationSystem.update(dt, entityContext);
     }
 
-    entityContext.iterateEntities<liquid::SkeletonComponent>(
-        [](auto entity, auto &component) { component.skeleton.update(); });
-
-    entityContext.iterateEntities<liquid::SkeletonComponent>(
-        [](auto entity, auto &component) { component.skeleton.updateDebug(); });
-
+    skeletonUpdater.update(entityContext);
     sceneUpdater.update(entityContext);
 
     if (isPlaying) {
