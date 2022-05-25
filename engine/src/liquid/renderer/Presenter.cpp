@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 #include "liquid/rhi/Descriptor.h"
 #include "Presenter.h"
 
@@ -7,7 +8,16 @@ namespace liquid {
 
 Presenter::Presenter(ShaderLibrary &shaderLibrary,
                      rhi::ResourceRegistry &registry)
-    : mRegistry(registry), mShaderLibrary(shaderLibrary) {}
+    : mRegistry(registry), mShaderLibrary(shaderLibrary) {
+  mShaderLibrary.addShader(
+      "__engine.fullscreenQuad.default.vertex",
+      mRegistry.setShader(
+          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.vert.spv"}));
+  mShaderLibrary.addShader(
+      "__engine.fullscreenQuad.default.fragment",
+      mRegistry.setShader(
+          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
+}
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   mExtent = swapchain.extent;

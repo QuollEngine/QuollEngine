@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "ImguiRenderer.h"
 #include <imgui_impl_glfw.h>
@@ -18,8 +19,9 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 
 namespace liquid {
 
-ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
-    : mRegistry(registry) {
+ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
+                             rhi::ResourceRegistry &registry)
+    : mRegistry(registry), mShaderLibrary(shaderLibrary) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -29,7 +31,7 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.IniFilename = nullptr;
 
-  static constexpr size_t FRAMES_IN_FLIGHT = 3;
+  static constexpr size_t FRAMES_IN_FLIGHT = 2;
   mFrameData.resize(FRAMES_IN_FLIGHT);
 
   loadFonts();
@@ -37,6 +39,13 @@ ImguiRenderer::ImguiRenderer(Window &window, rhi::ResourceRegistry &registry)
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
+
+  mShaderLibrary.addShader("__engine.imgui.default.vertex",
+                           mRegistry.setShader({Engine::getAssetsPath() +
+                                                "/shaders/imgui.vert.spv"}));
+  mShaderLibrary.addShader("__engine.imgui.default.fragment",
+                           mRegistry.setShader({Engine::getAssetsPath() +
+                                                "/shaders/imgui.frag.spv"}));
 }
 
 ImguiRenderer::~ImguiRenderer() {
@@ -59,14 +68,61 @@ ImguiRenderer::~ImguiRenderer() {
   ImGui::DestroyContext();
 }
 
+ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
+  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+  constexpr uint32_t FRAMEBUFFER_SIZE_PERCENTAGE = 100;
+
+  rhi::TextureDescription imguiDesc{};
+  imguiDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
+  imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+  imguiDesc.width = FRAMEBUFFER_SIZE_PERCENTAGE;
+  imguiDesc.height = FRAMEBUFFER_SIZE_PERCENTAGE;
+  imguiDesc.layers = 1;
+  imguiDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+  auto imgui = mRegistry.setTexture(imguiDesc);
+
+  auto &pass = graph.addPass("imgui");
+  pass.write(imgui, BLUEISH_CLEAR_VALUE);
+
+  auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+      mShaderLibrary.getShader("__engine.imgui.default.vertex"),
+      mShaderLibrary.getShader("__engine.imgui.default.fragment"),
+      rhi::PipelineVertexInputLayout{
+          {rhi::PipelineVertexInputBinding{0, sizeof(ImDrawVert),
+                                           rhi::VertexInputRate::Vertex}},
+          {rhi::PipelineVertexInputAttribute{0, 0, VK_FORMAT_R32G32_SFLOAT,
+                                             IM_OFFSETOF(ImDrawVert, pos)},
+           rhi::PipelineVertexInputAttribute{1, 0, VK_FORMAT_R32G32_SFLOAT,
+                                             IM_OFFSETOF(ImDrawVert, uv)},
+           rhi::PipelineVertexInputAttribute{2, 0, VK_FORMAT_R8G8B8A8_UNORM,
+                                             IM_OFFSETOF(ImDrawVert, col)}}
+
+      },
+      rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+      rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                              rhi::FrontFace::CounterClockwise},
+      rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+          true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::OneMinusSrcAlpha,
+          rhi::BlendOp::Add, rhi::BlendFactor::One,
+          rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
+
+  pass.addPipeline(pipeline);
+
+  pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList) {
+    draw(commandList, pipeline);
+  });
+
+  return {pass, imgui};
+}
+
 void ImguiRenderer::beginRendering() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 }
 
-void ImguiRenderer::endRendering() {
-  ImGui::Render();
+void ImguiRenderer::endRendering() { ImGui::Render(); }
 
+void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -77,54 +133,56 @@ void ImguiRenderer::endRendering() {
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
-  mCurrentFrame = (mCurrentFrame + 1) % mFrameData.size();
+  mCurrentFrame = frameIndex;
   auto &frameObj = mFrameData.at(mCurrentFrame);
 
-  if (data->TotalVtxCount > 0) {
-    size_t vertexSize =
-        getAlignedBufferSize(data->TotalVtxCount * sizeof(ImDrawVert));
-    size_t indexSize =
-        getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
-
-    if (frameObj.vertexBufferSize < vertexSize) {
-      if (frameObj.vertexBufferData) {
-        delete[] frameObj.vertexBufferData;
-      }
-      frameObj.vertexBufferData = new char[vertexSize];
-      frameObj.vertexBufferSize = vertexSize;
-    }
-
-    if (frameObj.indexBufferSize < indexSize) {
-      if (frameObj.indexBufferData) {
-        delete[] frameObj.indexBufferData;
-      }
-      frameObj.indexBufferData = new char[indexSize];
-      frameObj.indexBufferSize = indexSize;
-    }
-
-    auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBufferData);
-    auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBufferData);
-
-    for (int n = 0; n < data->CmdListsCount; n++) {
-      const ImDrawList *cmd_list = data->CmdLists[n];
-      memcpy(vbDst, cmd_list->VtxBuffer.Data,
-             cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
-      memcpy(ibDst, cmd_list->IdxBuffer.Data,
-             cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
-      vbDst += cmd_list->VtxBuffer.Size;
-      ibDst += cmd_list->IdxBuffer.Size;
-    }
-
-    frameObj.vertexBuffer =
-        mRegistry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
-                             frameObj.vertexBufferData},
-                            frameObj.vertexBuffer);
-
-    frameObj.indexBuffer =
-        mRegistry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
-                             frameObj.indexBufferData},
-                            frameObj.indexBuffer);
+  if (data->TotalVtxCount <= 0) {
+    return;
   }
+
+  size_t vertexSize =
+      getAlignedBufferSize(data->TotalVtxCount * sizeof(ImDrawVert));
+  size_t indexSize =
+      getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
+
+  if (frameObj.vertexBufferSize < vertexSize) {
+    if (frameObj.vertexBufferData) {
+      delete[] frameObj.vertexBufferData;
+    }
+    frameObj.vertexBufferData = new char[vertexSize];
+    frameObj.vertexBufferSize = vertexSize;
+  }
+
+  if (frameObj.indexBufferSize < indexSize) {
+    if (frameObj.indexBufferData) {
+      delete[] frameObj.indexBufferData;
+    }
+    frameObj.indexBufferData = new char[indexSize];
+    frameObj.indexBufferSize = indexSize;
+  }
+
+  auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBufferData);
+  auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBufferData);
+
+  for (int n = 0; n < data->CmdListsCount; n++) {
+    const ImDrawList *cmd_list = data->CmdLists[n];
+    memcpy(vbDst, cmd_list->VtxBuffer.Data,
+           cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
+    memcpy(ibDst, cmd_list->IdxBuffer.Data,
+           cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
+    vbDst += cmd_list->VtxBuffer.Size;
+    ibDst += cmd_list->IdxBuffer.Size;
+  }
+
+  frameObj.vertexBuffer =
+      mRegistry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
+                           frameObj.vertexBufferData},
+                          frameObj.vertexBuffer);
+
+  frameObj.indexBuffer =
+      mRegistry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
+                           frameObj.indexBufferData},
+                          frameObj.indexBuffer);
 }
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,

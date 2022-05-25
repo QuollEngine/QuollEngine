@@ -170,9 +170,9 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
   return pass;
 }
 
-void EditorRenderer::update(liquid::EntityContext &entityContext,
-                            liquid::Entity camera,
-                            const EditorGrid &editorGrid) {
+void EditorRenderer::updateFrameData(liquid::EntityContext &entityContext,
+                                     liquid::Entity camera,
+                                     const EditorGrid &editorGrid) {
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   mRenderStorage.clear();
 
