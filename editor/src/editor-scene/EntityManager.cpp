@@ -61,7 +61,7 @@ void EntityManager::save(liquid::Entity entity) {
 
   if (mEntityContext.hasComponent<liquid::SkeletonComponent>(entity)) {
     auto handle = mEntityContext.getComponent<liquid::SkeletonComponent>(entity)
-                      .skeleton.getAssetHandle();
+                      .assetHandle;
 
     node["components"]["skeleton"] = mAssetManager.getRegistry()
                                          .getSkeletons()
@@ -105,7 +105,6 @@ liquid::Entity EntityManager::createEmptyEntity(
     liquid::Entity parent, const liquid::LocalTransformComponent &transform,
     const liquid::String &name) {
   auto entity = getActiveEntityContext().createEntity();
-  getActiveEntityContext().setComponent<liquid::DebugComponent>(entity, {});
   getActiveEntityContext().setComponent<liquid::IdComponent>(entity, {mLastId});
   getActiveEntityContext().setComponent(entity, transform);
   getActiveEntityContext().setComponent<liquid::WorldTransformComponent>(entity,
@@ -279,8 +278,6 @@ bool EntityManager::loadScene() {
 
       setCamera(entity, component, autoRatio);
     }
-
-    getActiveEntityContext().setComponent<liquid::DebugComponent>(entity, {});
   }
 
   std::unordered_map<liquid::Entity, std::vector<liquid::Entity>> childrenMap;
@@ -315,12 +312,50 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
   const auto &skeleton =
       mAssetManager.getRegistry().getSkeletons().getAsset(handle).data;
 
-  liquid::Skeleton skeletonInstance(
-      handle, skeleton.jointLocalPositions, skeleton.jointLocalRotations,
-      skeleton.jointLocalScales, skeleton.jointParents,
-      skeleton.jointInverseBindMatrices, skeleton.jointNames);
-  getActiveEntityContext().setComponent<liquid::SkeletonComponent>(
-      entity, {std::move(skeletonInstance)});
+  liquid::SkeletonComponent skeletonInstance{};
+  skeletonInstance.jointLocalPositions = skeleton.jointLocalPositions;
+  skeletonInstance.jointLocalRotations = skeleton.jointLocalRotations;
+  skeletonInstance.jointLocalScales = skeleton.jointLocalScales;
+  skeletonInstance.jointParents = skeleton.jointParents;
+  skeletonInstance.jointInverseBindMatrices = skeleton.jointInverseBindMatrices;
+  skeletonInstance.jointNames = skeleton.jointNames;
+  skeletonInstance.assetHandle = handle;
+  skeletonInstance.numJoints =
+      static_cast<uint32_t>(skeleton.jointLocalPositions.size());
+  skeletonInstance.jointFinalTransforms.resize(skeletonInstance.numJoints,
+                                               glm::mat4{1.0f});
+  skeletonInstance.jointWorldTransforms.resize(skeletonInstance.numJoints,
+                                               glm::mat4{1.0f});
+
+  getActiveEntityContext().setComponent(entity, skeletonInstance);
+}
+
+void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
+  auto &entityContext = getActiveEntityContext();
+  if (!entityContext.hasComponent<liquid::SkeletonComponent>(entity)) {
+    return;
+  }
+
+  if (entityContext.hasComponent<liquid::SkeletonDebugComponent>(entity)) {
+    entityContext.deleteComponent<liquid::SkeletonDebugComponent>(entity);
+    return;
+  }
+
+  auto &skeleton =
+      entityContext.getComponent<liquid::SkeletonComponent>(entity);
+
+  liquid::SkeletonDebugComponent skeletonDebug{};
+  auto numBones = skeleton.numJoints * 2;
+  skeletonDebug.bones.reserve(numBones);
+
+  for (uint32_t joint = 0; joint < skeleton.numJoints; ++joint) {
+    skeletonDebug.bones.push_back(skeleton.jointParents.at(joint));
+    skeletonDebug.bones.push_back(joint);
+  }
+
+  skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
+
+  entityContext.setComponent(entity, skeletonDebug);
 }
 
 void EntityManager::setMesh(liquid::Entity entity,

@@ -181,19 +181,13 @@ void EditorRenderer::update(liquid::EntityContext &entityContext,
 
   mRenderStorage.setEditorGrid(editorGrid.getData());
 
-  entityContext
-      .iterateEntities<liquid::WorldTransformComponent,
-                       liquid::SkeletonComponent, liquid::DebugComponent>(
-          [this](auto entity, liquid::WorldTransformComponent &worldTransform,
-                 liquid::SkeletonComponent &skeleton, auto &debug) {
-            if (!debug.showBones) {
-              return;
-            }
-
-            mRenderStorage.addSkeleton(
-                worldTransform.worldTransform,
-                skeleton.skeleton.getDebugBoneTransforms());
-          });
+  entityContext.iterateEntities<liquid::WorldTransformComponent,
+                                liquid::SkeletonDebugComponent>(
+      [this](auto entity, liquid::WorldTransformComponent &worldTransform,
+             liquid::SkeletonDebugComponent &skeleton) {
+        mRenderStorage.addSkeleton(worldTransform.worldTransform,
+                                   skeleton.boneTransforms);
+      });
 
   entityContext.iterateEntities<liquid::WorldTransformComponent,
                                 liquid::DirectionalLightComponent>(

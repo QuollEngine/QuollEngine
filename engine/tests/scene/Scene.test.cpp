@@ -5,7 +5,6 @@
 
 class SceneUpdaterTest : public ::testing::Test {
 public:
-  liquid::rhi::ResourceRegistry registry;
   liquid::EntityContext context;
   liquid::SceneUpdater sceneUpdater;
 };
@@ -17,7 +16,6 @@ glm::mat4 getLocalTransform(const liquid::LocalTransformComponent &transform) {
 }
 
 TEST_F(SceneUpdaterTest, SetsLocalTransformToWorldTransformIfNoParent) {
-
   auto entity = context.createEntity();
   liquid::LocalTransformComponent transform{};
   transform.localPosition = glm::vec3(1.0f, 0.5f, 2.5f);

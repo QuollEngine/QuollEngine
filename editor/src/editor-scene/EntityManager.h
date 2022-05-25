@@ -76,6 +76,13 @@ public:
                             liquid::SkeletonAssetHandle handle);
 
   /**
+   * @brief Toggle debug skeleton for entity
+   *
+   * @param entity Entity
+   */
+  void toggleSkeletonDebugForEntity(liquid::Entity entity);
+
+  /**
    * @brief Set mesh for entiy
    *
    * @param entity Entity

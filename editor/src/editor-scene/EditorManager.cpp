@@ -132,8 +132,6 @@ void EditorManager::createNewScene() {
                                                    transform, "Light");
     mEntityManager.getActiveEntityContext()
         .setComponent<liquid::DirectionalLightComponent>(light1, {});
-    mEntityManager.getActiveEntityContext()
-        .setComponent<liquid::DebugComponent>(light1, {});
     mEntityManager.save(light1);
   }
 }

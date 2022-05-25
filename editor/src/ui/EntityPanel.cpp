@@ -111,15 +111,6 @@ void EntityPanel::renderLight() {
   if (liquid::imgui::input("###InputIntensity", component.intensity)) {
     mEntityManager.save(mSelectedEntity);
   }
-
-  if (mEntityManager.getActiveEntityContext()
-          .hasComponent<liquid::DebugComponent>(mSelectedEntity)) {
-    auto &component =
-        mEntityManager.getActiveEntityContext()
-            .getComponent<liquid::DebugComponent>(mSelectedEntity);
-
-    ImGui::Checkbox("Show direction", &component.showDirection);
-  }
 }
 
 void EntityPanel::renderCamera(EditorManager &editorManager) {
@@ -323,15 +314,13 @@ void EntityPanel::renderSkeleton() {
     return;
   }
 
-  if (!mEntityManager.getActiveEntityContext()
-           .hasComponent<liquid::DebugComponent>(mSelectedEntity)) {
-    return;
+  bool showBones =
+      mEntityManager.getActiveEntityContext()
+          .hasComponent<liquid::SkeletonDebugComponent>(mSelectedEntity);
+
+  if (ImGui::Checkbox("Show bones", &showBones)) {
+    mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
   }
-
-  auto &component = mEntityManager.getActiveEntityContext()
-                        .getComponent<liquid::DebugComponent>(mSelectedEntity);
-
-  ImGui::Checkbox("Show bones", &component.showBones);
 }
 
 void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
