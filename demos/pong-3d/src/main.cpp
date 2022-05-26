@@ -1,8 +1,5 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
-#include <math.h>
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
 
 #include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/Presenter.h"
@@ -10,16 +7,14 @@
 #include "liquid/window/Window.h"
 #include "liquid/profiler/FPSCounter.h"
 #include "liquid/scene/AutoAspectRatioComponent.h"
+#include "liquid/physics/PhysicsSystem.h"
 
-#include "liquid/scene/Vertex.h"
 #include "liquid/scene/SceneUpdater.h"
 #include "liquid/asset/AssetManager.h"
 
 #include "liquid/loop/MainLoop.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
-
-#include "liquid/physics/PhysicsSystem.h"
 
 #include <GLFW/glfw3.h>
 
@@ -71,74 +66,17 @@ public:
       graph.setFramebufferExtent({width, height});
     });
 
-    liquid::SceneRenderer sceneRenderer;
+    liquid::SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
+                                        renderer.getRegistry(),
+                                        assetManager.getRegistry());
 
-    liquid::rhi::TextureDescription desc;
-    desc.usage =
-        liquid::rhi::TextureUsage::Depth | liquid::rhi::TextureUsage::Sampled;
-    desc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
-    desc.width = 100;
-    desc.height = 100;
-    desc.layers = 1;
-    desc.format = VK_FORMAT_D32_SFLOAT;
-    auto depthBuffer = renderer.getRegistry().setTexture(desc);
-
-    liquid::rhi::TextureDescription mainColorDesc{};
-    mainColorDesc.usage =
-        liquid::rhi::TextureUsage::Color | liquid::rhi::TextureUsage::Sampled;
-    mainColorDesc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
-    mainColorDesc.width = 100;
-    mainColorDesc.height = 100;
-    mainColorDesc.layers = 1;
-    mainColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
-    auto mainColor = renderer.getRegistry().setTexture(mainColorDesc);
-
-    auto pipeline = renderer.getRegistry().setPipeline(
-        {vertexShader, fragmentShader,
-         liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-         liquid::rhi::PipelineInputAssembly{
-             liquid::rhi::PrimitiveTopology::TriangleList},
-         liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
-                                         liquid::rhi::CullMode::None,
-                                         liquid::rhi::FrontFace::Clockwise},
-         liquid::rhi::PipelineColorBlend{
-             {liquid::rhi::PipelineColorBlendAttachment{}}}});
-
-    auto &pass = graph.addPass("mainPass");
-    pass.write(mainColor, glm::vec4{1.0f});
-    pass.write(depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
-    pass.addPipeline(pipeline);
-
-    auto &component =
-        entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
-
-    auto cameraBuffer = renderer.getRegistry().setBuffer(
-        {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent),
-         &component});
-
-    pass.setExecutor([cameraBuffer, pipeline, this,
-                      &sceneRenderer](auto &commandList) {
-      commandList.bindPipeline(pipeline);
-
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, cameraBuffer,
-                      liquid::rhi::DescriptorType::UniformBuffer);
-
-      commandList.bindDescriptor(pipeline, 0, descriptor);
-
-      sceneRenderer.render(commandList, pipeline, renderer.getRenderStorage(),
-                           assetManager.getRegistry(), false);
-    });
+    const auto &passData = sceneRenderer.attach(graph);
 
     mainLoop.setUpdateFn([=](float dt) mutable {
       eventSystem.poll();
 
       auto &component =
           entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
-      cameraBuffer = renderer.getRegistry().setBuffer(
-          {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent),
-           &component},
-          cameraBuffer);
 
       if (gameEnded) {
         auto &transform =
@@ -153,14 +91,15 @@ public:
       return true;
     });
 
-    mainLoop.setRenderFn([this, &graph, mainColor]() {
+    mainLoop.setRenderFn([this, &graph, &passData, &sceneRenderer]() {
       const auto &renderFrame = renderer.getRenderDevice()->beginFrame();
 
       if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-        renderer.render(graph, renderFrame.commandList, cameraEntity,
-                        entityContext);
+        sceneRenderer.updateFrameData(entityContext, cameraEntity);
 
-        presenter.present(renderFrame.commandList, mainColor,
+        renderer.render(graph, renderFrame.commandList);
+
+        presenter.present(renderFrame.commandList, passData.sceneColor,
                           renderFrame.swapchainImageIndex);
 
         renderer.getRenderDevice()->endFrame(renderFrame);

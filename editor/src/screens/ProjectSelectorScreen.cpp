@@ -42,13 +42,15 @@ std::optional<Project> ProjectSelectorScreen::start() {
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
   editorCamera.reset();
-  auto graph = renderer.createRenderGraph(false);
 
-  graph.first.setFramebufferExtent(mWindow.getFramebufferSize());
+  liquid::rhi::RenderGraph graph;
+  auto imguiPassData = renderer.getImguiRenderer().attach(graph);
+
+  graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
   auto resizeHandler = mWindow.addResizeHandler(
       [&graph, this, &presenter](auto width, auto height) {
-        graph.first.setFramebufferExtent({width, height});
+        graph.setFramebufferExtent({width, height});
       });
 
   iconRegistry.loadIcons(renderer.getRegistry(),
@@ -59,9 +61,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
     return !project.has_value();
   });
 
-  mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &project,
-                        &projectManager, &iconRegistry, &entityContext,
-                        &presenter, this]() mutable {
+  mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &imguiPassData,
+                        &project, &projectManager, &iconRegistry,
+                        &entityContext, &presenter, this]() mutable {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();
@@ -108,10 +110,10 @@ std::optional<Project> ProjectSelectorScreen::start() {
     const auto &renderFrame = mDevice->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      renderer.render(graph.first, renderFrame.commandList,
-                      editorCamera.getCamera(), entityContext);
+      imgui.updateFrameData(renderFrame.frameIndex);
+      renderer.render(graph, renderFrame.commandList);
 
-      presenter.present(renderFrame.commandList, graph.second.imguiColor,
+      presenter.present(renderFrame.commandList, imguiPassData.imguiColor,
                         renderFrame.swapchainImageIndex);
       mDevice->endFrame(renderFrame);
     } else {

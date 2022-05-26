@@ -6,8 +6,25 @@
 
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/ShaderLibrary.h"
 
 namespace liquid {
+
+/**
+ * @brief Imgui render pass data
+ */
+struct ImguiRenderPassData {
+  /**
+   * @brief Imgui pass
+   */
+  rhi::RenderGraphPass &pass;
+
+  /**
+   * Imgui texture
+   */
+  rhi::TextureHandle imguiColor;
+};
 
 /**
  * @brief Imgui renderer
@@ -54,8 +71,10 @@ public:
    *
    * @param window Window
    * @param registry Resource registry
+   * @param shaderLibrary Shader library
    */
-  ImguiRenderer(Window &window, rhi::ResourceRegistry &registry);
+  ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
+                rhi::ResourceRegistry &registry);
 
   /**
    * @brief Destroy imgui renderer
@@ -68,6 +87,14 @@ public:
   ImguiRenderer &operator=(ImguiRenderer &&rhs) = delete;
 
   /**
+   * @brief Attach render passes to render graph
+   *
+   * @param graph Render graph
+   * @return Imgui render pass data
+   */
+  ImguiRenderPassData attach(rhi::RenderGraph &graph);
+
+  /**
    * @brief Begin imgui rendering
    */
   void beginRendering();
@@ -78,6 +105,13 @@ public:
    * Prepares all the buffers for drawing
    */
   void endRendering();
+
+  /**
+   * @brief Update frame data
+   *
+   * @param frameIndex
+   */
+  void updateFrameData(uint32_t frameIndex);
 
   /**
    * @brief Send imgui data to command list
@@ -115,6 +149,7 @@ private:
 
 private:
   rhi::ResourceRegistry &mRegistry;
+  ShaderLibrary &mShaderLibrary;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
   std::vector<FrameData> mFrameData;
   uint32_t mCurrentFrame = 0;

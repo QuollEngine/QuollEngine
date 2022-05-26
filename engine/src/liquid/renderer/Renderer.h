@@ -5,7 +5,7 @@
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"
 #include "RenderStorage.h"
-#include "imgui/ImguiRenderer.h"
+#include "liquid/imgui/ImguiRenderer.h"
 
 #include "liquid/entity/EntityContext.h"
 
@@ -21,9 +21,9 @@ class Window;
  */
 struct DefaultGraphResources {
   /**
-   * Main color texture
+   * Scene color texture
    */
-  rhi::TextureHandle mainColor;
+  rhi::TextureHandle sceneColor;
 
   /**
    * Depth buffer texture
@@ -31,14 +31,9 @@ struct DefaultGraphResources {
   rhi::TextureHandle depthBuffer;
 
   /**
-   * Depth buffer texture
+   * Imgui texture
    */
   rhi::TextureHandle imguiColor;
-
-  /**
-   * Shadow map texture
-   */
-  rhi::TextureHandle shadowmap;
 
   /**
    * Default color
@@ -105,63 +100,34 @@ public:
   inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
 
   /**
-   * @brief Create render graph
+   * @brief Get scene renderer
    *
-   * @param useSwapchainForImgui Use swapchain for imgui
-   * @return Render graph and resources
+   * @return Scene renderer
    */
-  std::pair<rhi::RenderGraph, DefaultGraphResources>
-  createRenderGraph(bool useSwapchainForImgui);
+  inline SceneRenderer &getSceneRenderer() { return mSceneRenderer; }
 
   /**
    * @brief Render
    *
    * @param graph Render graph
    * @param commandList Render command list
-   * @param camera Camera entity
-   * @param entityContext Entity context
    */
-  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList,
-              Entity camera, liquid::EntityContext &entityContext);
+  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList);
 
   /**
    * @brief Wait for device
    */
   inline void wait() { mDevice->waitForIdle(); }
 
-  /**
-   * @brief Get render storage
-   *
-   * @return Render storage
-   */
-  inline const RenderStorage &getRenderStorage() const {
-    return mRenderStorage;
-  }
-
-private:
-  /**
-   * @brief Load engine shaders
-   */
-  void loadShaders();
-
-  /**
-   * @brief Update storage buffers
-   *
-   * @param entityContext Entity context
-   */
-  void updateStorageBuffers(EntityContext &entityContext);
-
 private:
   rhi::ResourceRegistry mRegistry;
   rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
-  ImguiRenderer mImguiRenderer;
   ShaderLibrary mShaderLibrary;
   DebugManager mDebugManager;
-  SceneRenderer mSceneRenderer;
   AssetRegistry &mAssetRegistry;
-
-  RenderStorage mRenderStorage;
+  ImguiRenderer mImguiRenderer;
+  SceneRenderer mSceneRenderer;
 };
 
 } // namespace liquid

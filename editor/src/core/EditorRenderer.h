@@ -37,14 +37,14 @@ public:
   liquid::rhi::RenderGraphPass &attach(liquid::rhi::RenderGraph &graph);
 
   /**
-   * @brief Update internal buffers
+   * @brief Update frame data
    *
    * @param entityContext Entity context
    * @param camera Camerae
    * @param editorGrid Editor grid
    */
-  void update(liquid::EntityContext &entityContext, liquid::Entity camera,
-              const EditorGrid &editorGrid);
+  void updateFrameData(liquid::EntityContext &entityContext,
+                       liquid::Entity camera, const EditorGrid &editorGrid);
 
 private:
   EditorRendererStorage mRenderStorage;

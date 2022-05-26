@@ -59,7 +59,7 @@ void EditorScreen::start(const Project &project) {
   liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow);
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
-  auto statePath = project.settingsPath / "state.lqpath";
+  auto statePath = project.settingsPath / "state.lqstate";
 
   liquid::AssetManager assetManager(project.assetsPath);
   liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
@@ -113,18 +113,25 @@ void EditorScreen::start(const Project &project) {
                                             renderer.getShaderLibrary(),
                                             ui.getIconRegistry());
 
-  auto graph = renderer.createRenderGraph(false);
+  liquid::rhi::RenderGraph graph;
 
-  graph.first.setFramebufferExtent(mWindow.getFramebufferSize());
+  auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
+  auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);
+
+  imguiPassGroup.pass.read(scenePassGroup.sceneColor);
+
+  graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
   mWindow.addResizeHandler([&graph](auto width, auto height) {
-    graph.first.setFramebufferExtent({width, height});
+    graph.setFramebufferExtent({width, height});
   });
 
-  auto &pass = editorRenderer.attach(graph.first);
-  pass.read(graph.second.mainColor);
-  pass.write(graph.second.mainColor, graph.second.defaultColor);
-  pass.write(graph.second.depthBuffer, liquid::rhi::DepthStencilClear{1.0f, 0});
+  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+  auto &pass = editorRenderer.attach(graph);
+  pass.read(scenePassGroup.sceneColor);
+  pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
+  pass.write(scenePassGroup.depthBuffer,
+             liquid::rhi::DepthStencilClear{1.0f, 0});
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,
@@ -151,10 +158,12 @@ void EditorScreen::start(const Project &project) {
   });
 
   mainLoop.setRenderFn([&renderer, &editorManager, &animationSystem,
-                        &entityManager, &assetManager, &graph, &physicsSystem,
-                        &ui, &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, this]() {
+                        &entityManager, &assetManager, &graph, &scenePassGroup,
+                        &imguiPassGroup, &physicsSystem, &ui, &debugLayer,
+                        &preloadStatusDialog, &presenter, &editorRenderer,
+                        this]() {
     auto &imgui = renderer.getImguiRenderer();
+    auto &sceneRenderer = renderer.getSceneRenderer();
 
     imgui.beginRendering();
     ui.render(editorManager, renderer, assetManager, physicsSystem,
@@ -185,7 +194,7 @@ void EditorScreen::start(const Project &project) {
       editorManager.getEditorCamera().setViewport(
           pos.x, pos.y + ICON_SIZE, viewportSize.x, viewportSize.y);
 
-      liquid::imgui::image(graph.second.mainColor, viewportSize);
+      liquid::imgui::image(scenePassGroup.sceneColor, viewportSize);
       ImGui::End();
     }
 
@@ -222,15 +231,16 @@ void EditorScreen::start(const Project &project) {
     const auto &renderFrame = mDevice->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      editorRenderer.update(entityManager.getActiveEntityContext(),
-                            editorManager.getCamera(),
-                            editorManager.getEditorGrid());
+      imgui.updateFrameData(renderFrame.frameIndex);
+      sceneRenderer.updateFrameData(entityManager.getActiveEntityContext(),
+                                    editorManager.getCamera());
+      editorRenderer.updateFrameData(entityManager.getActiveEntityContext(),
+                                     editorManager.getCamera(),
+                                     editorManager.getEditorGrid());
 
-      renderer.render(graph.first, renderFrame.commandList,
-                      editorManager.getCamera(),
-                      entityManager.getActiveEntityContext());
+      renderer.render(graph, renderFrame.commandList);
 
-      presenter.present(renderFrame.commandList, graph.second.imguiColor,
+      presenter.present(renderFrame.commandList, imguiPassGroup.imguiColor,
                         renderFrame.swapchainImageIndex);
 
       mDevice->endFrame(renderFrame);
