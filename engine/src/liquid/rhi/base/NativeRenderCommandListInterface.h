@@ -2,6 +2,7 @@
 
 #include "liquid/rhi/Descriptor.h"
 #include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/PipelineBarrier.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -135,6 +136,19 @@ public:
    * @param size Scissor size
    */
   virtual void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) = 0;
+
+  /**
+   * @brief Pipeline barrier
+   *
+   * @param srcStage Source pipeline stage
+   * @param dstStage Destination pipeline stage
+   * @param memoryBarriers Memory barriers
+   * @param imageBarriers Image barriers
+   */
+  virtual void
+  pipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+                  const std::vector<MemoryBarrier> &memoryBarriers,
+                  const std::vector<ImageBarrier> &imageBarriers) = 0;
 };
 
 } // namespace liquid::rhi

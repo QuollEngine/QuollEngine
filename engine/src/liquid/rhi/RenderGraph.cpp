@@ -19,21 +19,25 @@ RenderGraphPass &RenderGraph::addPass(StringView name) {
  * @param adjacencyList Adjacency list
  * @param output Output array
  */
-static void topologicalSort(size_t index, std::vector<bool> &visited,
+static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
+                            size_t index, std::vector<bool> &visited,
                             const std::vector<std::list<size_t>> &adjacencyList,
-                            std::vector<size_t> &output) {
+                            std::vector<RenderGraphPass> &output) {
   visited.at(index) = true;
 
   for (size_t x : adjacencyList.at(index)) {
     if (!visited.at(x)) {
-      topologicalSort(x, visited, adjacencyList, output);
+      topologicalSort(inputs, x, visited, adjacencyList, output);
     }
   }
 
-  output.push_back(index);
+  output.push_back(inputs.at(index));
 }
 
-std::vector<size_t> RenderGraph::compile() {
+void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
+  if (!mDirty)
+    return;
+
   LIQUID_PROFILE_EVENT("RenderGraph::compile");
   std::vector<size_t> passIndices;
   passIndices.reserve(mPasses.size());
@@ -56,7 +60,7 @@ std::vector<size_t> RenderGraph::compile() {
   for (auto i = 0; i < mPasses.size(); ++i) {
     auto &pass = mPasses.at(i);
     if (pass.getInputs().size() == 0 && pass.getOutputs().size() == 0) {
-      LOG_DEBUG("Pass is ignored during compilation because it has not inputs, "
+      LOG_DEBUG("Pass is ignored during compilation because it has no inputs, "
                 "nor outputs: "
                 << pass.getName());
     } else {
@@ -70,7 +74,7 @@ std::vector<size_t> RenderGraph::compile() {
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto &resourceId : pass.getInputs()) {
-      passReads[resourceId].push_back(i);
+      passReads[resourceId.texture].push_back(i);
     }
   }
 
@@ -82,53 +86,126 @@ std::vector<size_t> RenderGraph::compile() {
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto resourceId : pass.getOutputs()) {
-      if (passReads.find(resourceId) != passReads.end()) {
-        for (auto read : passReads.at(resourceId)) {
+      if (passReads.find(resourceId.texture) != passReads.end()) {
+        for (auto read : passReads.at(resourceId.texture)) {
           adjacencyList.at(i).push_back(read);
         }
       }
     }
   }
 
-  // topological sort based on DFS
-  std::vector<size_t> sortedPasses;
-  sortedPasses.reserve(passIndices.size());
+  // Topological sort based on DFS
+  mCompiledPasses.reserve(passIndices.size());
   std::vector<bool> visited(passIndices.size(), false);
 
   for (size_t i = passIndices.size(); i-- > 0;) {
     if (!visited.at(i)) {
-      topologicalSort(i, visited, adjacencyList, sortedPasses);
+      topologicalSort(mPasses, i, visited, adjacencyList, mCompiledPasses);
     }
   }
 
-  std::reverse(sortedPasses.begin(), sortedPasses.end());
+  std::reverse(mCompiledPasses.begin(), mCompiledPasses.end());
 
-  std::unordered_map<rhi::TextureHandle, bool> visitedOutputs;
-  for (auto index : sortedPasses) {
-    auto &pass = mPasses.at(index);
-    for (auto output : pass.getOutputs()) {
-      visitedOutputs.insert({output, false});
+  static constexpr VkPipelineStageFlags STAGE_FRAGMENT_TEST =
+      VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+      VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  static constexpr VkPipelineStageFlags STAGE_COLOR =
+      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  static constexpr VkPipelineStageFlags STAGE_FRAGMENT_SHADER =
+      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+  // Determine attachments, image layouts, and barriers
+  std::unordered_map<rhi::TextureHandle, VkImageLayout> visitedOutputs;
+  for (auto &pass : mCompiledPasses) {
+    pass.mPreBarrier = RenderGraphPassBarrier{};
+    pass.mPostBarrier = RenderGraphPassBarrier{};
+
+    for (auto &input : pass.mInputs) {
+      LIQUID_ASSERT(visitedOutputs.find(input.texture) != visitedOutputs.end(),
+                    "Pass is reading from an empty texture");
+
+      input.srcLayout = visitedOutputs.at(input.texture);
+      input.dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+      VkPipelineStageFlags otherStage = 0;
+      VkAccessFlags otherAccess = 0;
+
+      if (input.srcLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        otherStage = STAGE_FRAGMENT_TEST;
+        otherAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+      } else if (input.srcLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+        otherStage = STAGE_COLOR;
+        otherAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      }
+
+      ImageBarrier preImageBarrier{};
+      preImageBarrier.srcLayout = input.srcLayout;
+      preImageBarrier.dstLayout = input.dstLayout;
+      preImageBarrier.texture = input.texture;
+      preImageBarrier.srcAccess = otherAccess;
+      preImageBarrier.dstAccess = VK_ACCESS_SHADER_READ_BIT;
+
+      ImageBarrier postImageBarrier{};
+      postImageBarrier.srcLayout = input.dstLayout;
+      postImageBarrier.dstLayout = input.srcLayout;
+      postImageBarrier.texture = input.texture;
+      postImageBarrier.srcAccess = VK_ACCESS_SHADER_READ_BIT;
+      postImageBarrier.dstAccess = otherAccess;
+
+      pass.mPreBarrier.enabled = true;
+      pass.mPreBarrier.srcStage |= otherStage;
+      pass.mPreBarrier.dstStage |= STAGE_FRAGMENT_SHADER;
+      pass.mPreBarrier.imageBarriers.push_back(preImageBarrier);
+
+      pass.mPostBarrier.enabled = true;
+      pass.mPostBarrier.srcStage |= STAGE_FRAGMENT_SHADER;
+      pass.mPostBarrier.dstStage |= otherStage;
+      pass.mPostBarrier.imageBarriers.push_back(postImageBarrier);
     }
-  }
 
-  // Determine attachment load and store ops
-  for (auto index : sortedPasses) {
-    auto &pass = mPasses.at(index);
-    for (size_t i = 0; i < pass.getOutputs().size(); ++i) {
-      auto output = pass.getOutputs().at(i);
+    for (size_t i = 0; i < pass.mOutputs.size(); ++i) {
+      auto &output = pass.mOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
-
-      if (!visitedOutputs.at(output)) {
+      if (visitedOutputs.find(output.texture) == visitedOutputs.end()) {
+        output.srcLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         attachment.loadOp = AttachmentLoadOp::Clear;
-        visitedOutputs.at(output) = true;
       } else {
+        output.srcLayout = visitedOutputs.at(output.texture);
         attachment.loadOp = AttachmentLoadOp::Load;
       }
 
       attachment.storeOp = AttachmentStoreOp::Store;
+
+      VkPipelineStageFlags stage = 0;
+      VkAccessFlags srcAccess = 0;
+      VkAccessFlags dstAccess = 0;
+
+      auto &texture =
+          resourceRegistry.getTextureMap().getDescription(output.texture);
+      if ((texture.usage & TextureUsage::Color) == TextureUsage::Color) {
+        output.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        stage = STAGE_COLOR;
+        srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dstAccess = srcAccess | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+      } else if ((texture.usage & TextureUsage::Depth) == TextureUsage::Depth) {
+        output.dstLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        stage = STAGE_FRAGMENT_TEST;
+        srcAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        dstAccess = srcAccess | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+      }
+
+      MemoryBarrier memoryBarrier{};
+      memoryBarrier.srcAccess = srcAccess;
+      memoryBarrier.dstAccess = dstAccess;
+
+      pass.mPostBarrier.enabled = true;
+      pass.mPostBarrier.srcStage |= stage;
+      pass.mPostBarrier.dstStage |= stage;
+      pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
+
+      visitedOutputs.insert_or_assign(output.texture, output.dstLayout);
     }
   }
-  return sortedPasses;
 }
 
 void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {

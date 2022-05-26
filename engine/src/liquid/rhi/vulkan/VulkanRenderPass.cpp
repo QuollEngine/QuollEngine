@@ -48,7 +48,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       mClearValues.at(i).color.float32[3] =
           std::get<glm::vec4>(desc.clearValue).w;
 
-      attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      attachment.initialLayout = desc.initialLayout;
       attachment.finalLayout = desc.layout != VK_IMAGE_LAYOUT_MAX_ENUM
                                    ? desc.layout
                                    : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -62,7 +62,7 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       mClearValues.at(i).depthStencil.stencil =
           std::get<DepthStencilClear>(desc.clearValue).clearStencil;
 
-      attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+      attachment.initialLayout = desc.initialLayout;
       attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
       ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
       depthReference.emplace(ref);

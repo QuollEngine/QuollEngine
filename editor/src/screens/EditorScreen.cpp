@@ -126,12 +126,13 @@ void EditorScreen::start(const Project &project) {
     graph.setFramebufferExtent({width, height});
   });
 
-  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
-  auto &pass = editorRenderer.attach(graph);
-  pass.read(scenePassGroup.sceneColor);
-  pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
-  pass.write(scenePassGroup.depthBuffer,
-             liquid::rhi::DepthStencilClear{1.0f, 0});
+  {
+    constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+    auto &pass = editorRenderer.attach(graph);
+    pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
+    pass.write(scenePassGroup.depthBuffer,
+               liquid::rhi::DepthStencilClear{1.0f, 0});
+  }
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,

@@ -46,6 +46,11 @@ struct RenderPassAttachmentDescription {
   TextureHandle texture = TextureHandle::Invalid;
 
   /**
+   * Attachment image initial layout
+   */
+  VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+  /**
    * Attachment image layout
    */
   VkImageLayout layout = VK_IMAGE_LAYOUT_MAX_ENUM;

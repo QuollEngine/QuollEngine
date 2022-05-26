@@ -31,6 +31,56 @@ struct AttachmentData {
 };
 
 /**
+ * @brief Render target data
+ */
+struct RenderTargetData {
+  /**
+   * Texture
+   */
+  TextureHandle texture = TextureHandle::Invalid;
+
+  /**
+   * Source image layout
+   */
+  VkImageLayout srcLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+
+  /**
+   * Destination image layout
+   */
+  VkImageLayout dstLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+};
+
+/**
+ * @brief Render graph pass barrier
+ */
+struct RenderGraphPassBarrier {
+  /**
+   * Barrier active
+   */
+  bool enabled = false;
+
+  /**
+   * Source pipeline stage
+   */
+  VkPipelineStageFlags srcStage = VK_PIPELINE_STAGE_NONE_KHR;
+
+  /**
+   * Destination pipeline stage
+   */
+  VkPipelineStageFlags dstStage = VK_PIPELINE_STAGE_NONE_KHR;
+
+  /**
+   * Memory barriers
+   */
+  std::vector<MemoryBarrier> memoryBarriers;
+
+  /**
+   * Image barriers
+   */
+  std::vector<ImageBarrier> imageBarriers;
+};
+
+/**
  * @brief Render graph pass
  */
 class RenderGraphPass {
@@ -45,6 +95,41 @@ public:
    * @param name Pass name
    */
   RenderGraphPass(StringView name);
+
+  /**
+   * @brief Copy another render pass into this
+   *
+   * @param rhs Render pass to copy
+   */
+  RenderGraphPass(const RenderGraphPass &rhs) = default;
+
+  /**
+   * @brief Copy another render pass into this
+   *
+   * @param rhs Render pass to copy
+   * @return This render pass
+   */
+  RenderGraphPass &operator=(const RenderGraphPass &rhs) = default;
+
+  /**
+   * @brief Move another render pass into this
+   *
+   * @param rhs Render pass to move
+   */
+  RenderGraphPass(RenderGraphPass &&rhs) = default;
+
+  /**
+   * @brief Move another render pass into this
+   *
+   * @param rhs Render pass to move
+   * @return This render pass
+   */
+  RenderGraphPass &operator=(RenderGraphPass &&rhs) = default;
+
+  /**
+   * @brief Destroy render pass
+   */
+  ~RenderGraphPass() = default;
 
   /**
    * @brief Execute pass
@@ -92,16 +177,18 @@ public:
   /**
    * @brief Get input textures
    *
-   * @return Input textures
+   * @return Input render targets
    */
-  inline const std::vector<TextureHandle> &getInputs() const { return mInputs; }
+  inline const std::vector<RenderTargetData> &getInputs() const {
+    return mInputs;
+  }
 
   /**
    * @brief Get output textures
    *
-   * @return Output textures
+   * @return Output render targets
    */
-  inline const std::vector<TextureHandle> &getOutputs() const {
+  inline const std::vector<RenderTargetData> &getOutputs() const {
     return mOutputs;
   }
 
@@ -137,11 +224,33 @@ public:
    */
   inline const glm::uvec3 &getDimensions() const { return mDimensions; }
 
+  /**
+   * @brief Get pass pre barrier
+   *
+   * @return Pass pre barrier
+   */
+  inline const RenderGraphPassBarrier &getPreBarrier() const {
+    return mPreBarrier;
+  }
+
+  /**
+   * @brief Get pass pre barrier
+   *
+   * @return Pass pre barrier
+   */
+  inline const RenderGraphPassBarrier &getPostBarrier() const {
+    return mPostBarrier;
+  }
+
 private:
   std::vector<AttachmentData> mAttachments;
-  std::vector<TextureHandle> mOutputs;
-  std::vector<TextureHandle> mInputs;
+  std::vector<RenderTargetData> mOutputs;
+  std::vector<RenderTargetData> mInputs;
   std::vector<PipelineHandle> mPipelines;
+
+  RenderGraphPassBarrier mPreBarrier;
+  RenderGraphPassBarrier mPostBarrier;
+
   ExecutorFn mExecutor;
 
   rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;

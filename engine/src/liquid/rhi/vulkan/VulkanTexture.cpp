@@ -59,16 +59,15 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   extent.depth = description.depth;
 
   VkImageUsageFlags usageFlags = 0;
-  VkImageAspectFlags aspectFlags = 0;
 
   if ((description.usage & TextureUsage::Color) == TextureUsage::Color) {
     usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    mAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
   }
 
   if ((description.usage & TextureUsage::Depth) == TextureUsage::Depth) {
     usageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+    mAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
   }
 
   if ((description.usage & TextureUsage::Sampled) == TextureUsage::Sampled) {
@@ -111,7 +110,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
   imageViewCreateInfo.subresourceRange.layerCount = description.layers;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
-  imageViewCreateInfo.subresourceRange.aspectMask = aspectFlags;
+  imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
   checkForVulkanError(
       vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
       "Failed to create image view");
@@ -134,10 +133,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
         {rhi::BufferType::Transfer, description.size, description.data},
         mAllocator);
 
-    uploadContext.submit([extent, this, &stagingBuffer, &description,
-                          aspectFlags](VkCommandBuffer commandBuffer) {
+    uploadContext.submit([extent, this, &stagingBuffer,
+                          &description](VkCommandBuffer commandBuffer) {
       VkImageSubresourceRange range{};
-      range.aspectMask = aspectFlags;
+      range.aspectMask = mAspectFlags;
       range.baseMipLevel = 0;
       range.levelCount = 1;
       range.baseArrayLayer = 0;

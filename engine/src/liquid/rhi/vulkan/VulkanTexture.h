@@ -90,6 +90,13 @@ public:
   inline VkFormat getFormat() const { return mFormat; }
 
   /**
+   * @brief Get image aspect flags
+   *
+   * @return Image aspect flags
+   */
+  inline VkImageAspectFlags getImageAspectFlags() const { return mAspectFlags; }
+
+  /**
    * @brief Check if texture resizes with framebuffer
    *
    * @retval true Texture resizes with framebuffer
@@ -114,6 +121,7 @@ private:
   VkImageView mImageView = VK_NULL_HANDLE;
   VkSampler mSampler = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
+  VkImageAspectFlags mAspectFlags = VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
   VulkanResourceAllocator &mAllocator;
   VulkanDeviceObject &mDevice;
   TextureDescription mDescription;

@@ -192,6 +192,22 @@ public:
     mNativeRenderCommandList->setScissor(offset, size);
   }
 
+  /**
+   * @brief Pipeline barrier
+   *
+   * @param srcStage Source pipeline stage
+   * @param dstStage Destination pipeline stage
+   * @param memoryBarriers Memory barriers
+   * @param imageBarriers Image barriers
+   */
+  void pipelineBarrier(VkPipelineStageFlags srcStage,
+                       VkPipelineStageFlags dstStage,
+                       const std::vector<MemoryBarrier> &memoryBarriers,
+                       const std::vector<ImageBarrier> &imageBarriers) {
+    mNativeRenderCommandList->pipelineBarrier(srcStage, dstStage,
+                                              memoryBarriers, imageBarriers);
+  }
+
 private:
   std::unique_ptr<NativeRenderCommandListInterface> mNativeRenderCommandList;
 };
