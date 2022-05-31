@@ -18,7 +18,7 @@ TEST_F(RenderGraphPassTest, AddsHandleToOutputOnWrite) {
 
   pass.write(handle, glm::vec4());
   EXPECT_EQ(pass.getOutputs().size(), 1);
-  EXPECT_EQ(pass.getOutputs().at(0), handle);
+  EXPECT_EQ(pass.getOutputs().at(0).texture, handle);
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
@@ -45,7 +45,7 @@ TEST_F(RenderGraphPassTest, AddsHandleToInputOnRead) {
   EXPECT_EQ(pass.getAttachments().size(), 0);
   EXPECT_EQ(pass.getOutputs().size(), 0);
   EXPECT_EQ(pass.getInputs().size(), 1);
-  EXPECT_EQ(pass.getInputs().at(0), handle);
+  EXPECT_EQ(pass.getInputs().at(0).texture, handle);
 }
 
 TEST_F(RenderGraphPassTest, AddsPipeline) {

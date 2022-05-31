@@ -29,22 +29,19 @@ public:
   RenderGraphEvaluator(ResourceRegistry &registry);
 
   /**
-   * @brief Build passes
+   * @brief Build render graph
    *
-   * @param sorted Topologically sorted passes
    * @param graph Render graph
    */
-  void build(std::vector<size_t> &sorted, RenderGraph &graph);
+  void build(RenderGraph &graph);
 
   /**
    * @brief Execute render graph
    *
    * @param commandList Command list
-   * @param passes Topologically sorted passes
    * @param graph Render graph
    */
-  void execute(RenderCommandList &commandList,
-               const std::vector<size_t> &passes, RenderGraph &graph);
+  void execute(RenderCommandList &commandList, RenderGraph &graph);
 
 private:
   /**
@@ -57,28 +54,16 @@ private:
   void buildPass(size_t index, RenderGraph &graph, bool force);
 
   /**
-   * @brief Create color attachment
+   * @brief Create attachment
    *
    * @param attachment Attachment description
-   * @param texture Texture
+   * @param renderTarget Render target data
    * @param extent Swapchain extent
    * @return Attachment info
    */
-  RenderPassAttachmentInfo
-  createColorAttachment(const AttachmentData &attachment, TextureHandle texture,
-                        const glm::uvec2 &extent);
-
-  /**
-   * @brief Create depth attachment
-   *
-   * @param attachment Attachment description
-   * @param texture Texture
-   * @param extent Swapchain extent
-   * @return Attachment info
-   */
-  RenderPassAttachmentInfo
-  createDepthAttachment(const AttachmentData &attachment, TextureHandle texture,
-                        const glm::uvec2 &extent);
+  RenderPassAttachmentInfo createAttachment(const AttachmentData &attachment,
+                                            RenderTargetData &renderTarget,
+                                            const glm::uvec2 &extent);
 
   /**
    * @brief Check if pass is has swapchain relative resources

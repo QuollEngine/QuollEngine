@@ -80,6 +80,20 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
 void Presenter::present(rhi::RenderCommandList &commandList,
                         rhi::TextureHandle handle, uint32_t imageIndex) {
+
+  {
+    rhi::ImageBarrier imageBarrier;
+    imageBarrier.srcLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    imageBarrier.dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageBarrier.srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    imageBarrier.dstAccess = VK_ACCESS_SHADER_READ_BIT;
+    imageBarrier.texture = handle;
+
+    commandList.pipelineBarrier(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, {},
+                                {imageBarrier});
+  }
+
   commandList.beginRenderPass(
       mPresentPass, mFramebuffers.at(imageIndex % mFramebuffers.size()), {0, 0},
       mExtent);
@@ -96,6 +110,19 @@ void Presenter::present(rhi::RenderCommandList &commandList,
   commandList.draw(3, 0);
 
   commandList.endRenderPass();
+
+  {
+    rhi::ImageBarrier imageBarrier;
+    imageBarrier.srcLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageBarrier.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    imageBarrier.texture = handle;
+    imageBarrier.srcAccess = VK_ACCESS_SHADER_READ_BIT;
+    imageBarrier.dstAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    commandList.pipelineBarrier(VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                                {}, {imageBarrier});
+  }
 }
 
 } // namespace liquid

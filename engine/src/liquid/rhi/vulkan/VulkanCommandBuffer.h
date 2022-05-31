@@ -149,6 +149,19 @@ public:
    */
   void setScissor(const glm::ivec2 &offset, const glm::uvec2 &size) override;
 
+  /**
+   * @brief Pipeline barrier
+   *
+   * @param srcStage Source pipeline stage
+   * @param dstStage Destination pipeline stage
+   * @param memoryBarriers Memory barriers
+   * @param imageBarriers Image barriers
+   */
+  void pipelineBarrier(VkPipelineStageFlags srcStage,
+                       VkPipelineStageFlags dstStage,
+                       const std::vector<MemoryBarrier> &memoryBarriers,
+                       const std::vector<ImageBarrier> &imageBarriers) override;
+
 private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 

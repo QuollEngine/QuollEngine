@@ -19,6 +19,8 @@ VulkanValidator::VulkanValidator() {
       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   mMessengerCreateInfo.pfnUserCallback = VulkanValidator::debugCallback;
   mMessengerCreateInfo.pUserData = nullptr;
+  mMessengerCreateInfo.flags = 0;
+  mMessengerCreateInfo.pNext = nullptr;
 }
 
 void VulkanValidator::detachFromInstance(VkInstance instance) {

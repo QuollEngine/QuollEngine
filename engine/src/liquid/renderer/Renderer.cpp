@@ -22,12 +22,12 @@ Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
 void Renderer::render(rhi::RenderGraph &graph,
                       rhi::RenderCommandList &commandList) {
 
-  auto &&compiled = graph.compile();
+  graph.compile(mRegistry);
 
-  mGraphEvaluator.build(compiled, graph);
+  mGraphEvaluator.build(graph);
 
   mDevice->synchronize(mRegistry);
-  mGraphEvaluator.execute(commandList, compiled, graph);
+  mGraphEvaluator.execute(commandList, graph);
 }
 
 } // namespace liquid

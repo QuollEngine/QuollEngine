@@ -126,4 +126,45 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
   mStats.addCommandCall();
 }
 
+void VulkanCommandBuffer::pipelineBarrier(
+    VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+    const std::vector<MemoryBarrier> &memoryBarriers,
+    const std::vector<ImageBarrier> &imageBarriers) {
+
+  std::vector<VkMemoryBarrier> vkMemoryBarriers(memoryBarriers.size());
+  for (size_t i = 0; i < memoryBarriers.size(); ++i) {
+    auto &barrier = memoryBarriers.at(i);
+    auto &vkBarrier = vkMemoryBarriers.at(i);
+    vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    vkBarrier.pNext = nullptr;
+    vkBarrier.srcAccessMask = barrier.srcAccess;
+    vkBarrier.dstAccessMask = barrier.dstAccess;
+  }
+
+  std::vector<VkImageMemoryBarrier> vkImageMemoryBarriers(imageBarriers.size());
+  for (size_t i = 0; i < imageBarriers.size(); ++i) {
+    auto &barrier = imageBarriers.at(i);
+    const auto &texture = mRegistry.getTextures().at(barrier.texture);
+    auto &vkBarrier = vkImageMemoryBarriers.at(i);
+    vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vkBarrier.pNext = nullptr;
+    vkBarrier.srcAccessMask = barrier.srcAccess;
+    vkBarrier.dstAccessMask = barrier.dstAccess;
+    vkBarrier.oldLayout = barrier.srcLayout;
+    vkBarrier.newLayout = barrier.dstLayout;
+    vkBarrier.image = texture->getImage();
+    vkBarrier.subresourceRange.baseArrayLayer = 0;
+    vkBarrier.subresourceRange.baseMipLevel = 0;
+    vkBarrier.subresourceRange.layerCount = texture->getDescription().layers;
+    vkBarrier.subresourceRange.levelCount = 1;
+    vkBarrier.subresourceRange.aspectMask = texture->getImageAspectFlags();
+  }
+
+  vkCmdPipelineBarrier(
+      mCommandBuffer, srcStage, dstStage, VK_DEPENDENCY_BY_REGION_BIT,
+      static_cast<uint32_t>(vkMemoryBarriers.size()), vkMemoryBarriers.data(),
+      0, nullptr, static_cast<uint32_t>(vkImageMemoryBarriers.size()),
+      vkImageMemoryBarriers.data());
+}
+
 } // namespace liquid::rhi

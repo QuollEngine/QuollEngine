@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderGraphPass.h"
+#include "ResourceRegistry.h"
 
 namespace liquid::rhi {
 
@@ -18,11 +19,14 @@ public:
   RenderGraphPass &addPass(StringView name);
 
   /**
-   * @brief Compile pass
+   * @brief Compile render graph
    *
-   * @return List of indexes that point to passes
+   * Topologically sorts and updates render
+   * passes in place
+   *
+   * @param resourceRegistry Resource registry
    */
-  std::vector<size_t> compile();
+  void compile(ResourceRegistry &resourceRegistry);
 
   /**
    * @brief Get passes
@@ -30,6 +34,15 @@ public:
    * @return Render graph passes
    */
   inline std::vector<RenderGraphPass> &getPasses() { return mPasses; }
+
+  /**
+   * @brief Get compiled passes
+   *
+   * @return Compiled render graph passes
+   */
+  inline std::vector<RenderGraphPass> &getCompiledPasses() {
+    return mCompiledPasses;
+  }
 
   /**
    * @brief Set framebuffer extent
@@ -62,8 +75,10 @@ public:
 
 private:
   std::vector<RenderGraphPass> mPasses;
+  std::vector<RenderGraphPass> mCompiledPasses;
+
   glm::uvec2 mFramebufferExtent{};
-  bool mDirty = false;
+  bool mDirty = true;
 };
 
 } // namespace liquid::rhi
