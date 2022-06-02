@@ -15,11 +15,6 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
   mEntityManager.getActiveEntityContext()
       .iterateEntities<liquid::LocalTransformComponent>(
           [this, &editorManager](auto entity, const auto &transform) {
-            if (mEntityManager.getActiveEntityContext()
-                    .hasComponent<liquid::ParentComponent>(entity)) {
-              return;
-            }
-
             renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
           });
 
