@@ -26,6 +26,7 @@ void EntityPanel::render(EditorManager &editorManager,
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
+      renderScripting(assetRegistry);
       renderAddComponent();
       handleDragAndDrop(renderer, assetRegistry);
     }
@@ -562,6 +563,25 @@ void EntityPanel::renderRigidBody() {
   }
 }
 
+void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
+  if (!mEntityManager.getActiveEntityContext()
+           .hasComponent<liquid::ScriptingComponent>(mSelectedEntity)) {
+    return;
+  }
+
+  if (!ImGui::CollapsingHeader("Scripting")) {
+    return;
+  }
+
+  const auto &scripting =
+      mEntityManager.getActiveEntityContext()
+          .getComponent<liquid::ScriptingComponent>(mSelectedEntity);
+
+  const auto &asset = assetRegistry.getLuaScripts().getAsset(scripting.handle);
+
+  ImGui::Text("Name: %s", asset.name.c_str());
+}
+
 void EntityPanel::renderAddComponent() {
   if (!mEntityManager.getActiveEntityContext().hasEntity(mSelectedEntity)) {
     return;
@@ -664,9 +684,15 @@ void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
             liquid::getAssetTypeString(liquid::AssetType::Skeleton).c_str())) {
       auto asset = *static_cast<liquid::SkeletonAssetHandle *>(payload->Data);
 
-      const auto &skeleton = assetRegistry.getSkeletons().getAsset(asset).data;
-
       mEntityManager.setSkeletonForEntity(mSelectedEntity, asset);
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            liquid::getAssetTypeString(liquid::AssetType::LuaScript).c_str())) {
+      auto asset = *static_cast<liquid::LuaScriptAssetHandle *>(payload->Data);
+
+      mEntityManager.setScript(mSelectedEntity, asset);
       mEntityManager.save(mSelectedEntity);
     }
 

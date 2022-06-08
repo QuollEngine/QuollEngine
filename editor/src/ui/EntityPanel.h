@@ -92,6 +92,13 @@ private:
   void renderRigidBody();
 
   /**
+   * @brief Render scripting component
+   *
+   * @param assetRegistry Asset registry
+   */
+  void renderScripting(liquid::AssetRegistry &assetRegistry);
+
+  /**
    * @brief Render add component button
    */
   void renderAddComponent();
