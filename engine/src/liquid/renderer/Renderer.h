@@ -6,10 +6,7 @@
 #include "SceneRenderer.h"
 #include "RenderStorage.h"
 #include "liquid/imgui/ImguiRenderer.h"
-
 #include "liquid/entity/EntityContext.h"
-
-#include "liquid/profiler/DebugManager.h"
 #include "liquid/asset/AssetRegistry.h"
 
 namespace liquid {
@@ -65,13 +62,6 @@ public:
   Renderer &operator=(Renderer &&rhs) = delete;
 
   /**
-   * @brief Get debug manager
-   *
-   * @return Debug manager
-   */
-  inline DebugManager &getDebugManager() { return mDebugManager; }
-
-  /**
    * @brief Get shader library
    *
    * @return Shader library
@@ -124,7 +114,6 @@ private:
   rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
   ShaderLibrary mShaderLibrary;
-  DebugManager mDebugManager;
   AssetRegistry &mAssetRegistry;
   ImguiRenderer mImguiRenderer;
   SceneRenderer mSceneRenderer;

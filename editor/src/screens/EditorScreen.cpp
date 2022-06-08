@@ -54,7 +54,6 @@ EditorScreen::EditorScreen(liquid::Window &window,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
-  liquid::DebugManager debugManager;
   liquid::FPSCounter fpsCounter;
 
   liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow);
@@ -101,9 +100,9 @@ void EditorScreen::start(const Project &project) {
   liquid::ScriptingSystem scriptingSystem(mEventSystem,
                                           assetManager.getRegistry());
 
-  liquid::ImguiDebugLayer debugLayer(
-      mDevice->getDeviceInformation(), mDevice->getDeviceStats(),
-      renderer.getRegistry(), fpsCounter, debugManager);
+  liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
+                                     mDevice->getDeviceStats(),
+                                     renderer.getRegistry(), fpsCounter);
 
   liquidator::UIRoot ui(entityManager, gltfImporter);
   ui.getIconRegistry().loadIcons(renderer.getRegistry(),
