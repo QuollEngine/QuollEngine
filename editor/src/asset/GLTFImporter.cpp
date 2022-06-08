@@ -1141,13 +1141,14 @@ GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
     : mAssetManager(assetManager), mDeviceRegistry(deviceRegistry) {}
 
 liquid::Result<bool>
-GLTFImporter::loadFromFile(const liquid::String &filename,
+GLTFImporter::loadFromFile(const liquid::Path &filePath,
                            const std::filesystem::path &directory) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   liquid::String error, warning;
 
-  bool ret = loader.LoadASCIIFromFile(&model, &error, &warning, filename);
+  bool ret =
+      loader.LoadASCIIFromFile(&model, &error, &warning, filePath.string());
 
   if (!warning.empty()) {
     return liquid::Result<bool>::Error(warning);
@@ -1163,7 +1164,7 @@ GLTFImporter::loadFromFile(const liquid::String &filename,
     return liquid::Result<bool>::Error("Cannot load GLTF file");
   }
 
-  auto baseName = std::filesystem::path(filename).filename().string();
+  auto baseName = filePath.filename().string();
 
   auto prefabPath = directory / baseName;
   uint32_t index = 1;

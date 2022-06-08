@@ -25,11 +25,11 @@ public:
   /**
    * @brief Load GLTF from file
    *
-   * @param filename File name
+   * @param filePath File path
    * @param directory Destination path
    * @return Load result
    */
-  liquid::Result<bool> loadFromFile(const liquid::String &filename,
+  liquid::Result<bool> loadFromFile(const liquid::Path &filePath,
                                     const std::filesystem::path &directory);
 
 private:

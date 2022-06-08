@@ -15,18 +15,18 @@ public:
    * @brief Get file path from OS file dialog
    *
    * @param extensions File extensions to show
-   * @return Chosen file path or empty string if cancelled
+   * @return Chosen or empty file path
    */
-  liquid::String
+  liquid::Path
   getFilePathFromDialog(const std::vector<liquid::String> &extensions);
 
   /**
    * @brief Get file path from OS create file dialog
    *
    * @param extensions File extensions to show
-   * @return Chosen file path or empty string if cancelled
+   * @return Chosen or empty file path
    */
-  std::filesystem::path
+  liquid::Path
   getFilePathFromCreateDialog(const std::vector<liquid::String> &extensions);
 };
 
