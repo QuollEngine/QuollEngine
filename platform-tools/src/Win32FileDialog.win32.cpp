@@ -9,7 +9,7 @@ static void checkWin32Error(HRESULT res, const liquid::String &message) {
   LIQUID_ASSERT(SUCCEEDED(res), "Failed to open file dialog " + message);
 }
 
-liquid::String NativeFileDialog::getFilePathFromDialog(
+liquid::Path NativeFileDialog::getFilePathFromDialog(
     const std::vector<liquid::String> &extensions) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileOpenDialog, nullptr,
@@ -59,13 +59,7 @@ liquid::String NativeFileDialog::getFilePathFromDialog(
   return filePath;
 }
 
-/**
- * @brief Get file path from OS create file dialog
- *
- * @param extensions File extensions to show
- * @return Chosen file path or empty string if cancelled
- */
-std::filesystem::path NativeFileDialog::getFilePathFromCreateDialog(
+liquid::Path NativeFileDialog::getFilePathFromCreateDialog(
     const std::vector<liquid::String> &extensions) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileSaveDialog, nullptr,

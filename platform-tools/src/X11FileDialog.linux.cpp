@@ -3,13 +3,13 @@
 
 namespace liquid::platform_tools {
 
-liquid::String NativeFileDialog::getFilePathFromDialog(
+liquid::Path NativeFileDialog::getFilePathFromDialog(
     const std::vector<liquid::String> &extensions) {
   LIQUID_ASSERT(false, "Not implemented");
   return "";
 }
 
-std::filesystem::path NativeFileDialog::getFilePathFromCreateDialog(
+liquid::Path NativeFileDialog::getFilePathFromCreateDialog(
     const std::vector<liquid::String> &extensions) {
   LIQUID_ASSERT(false, "Not implemented");
   return "";
