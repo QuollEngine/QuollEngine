@@ -7,8 +7,8 @@
 namespace liquid {
 
 ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
-                                 AssetManager &assetManager)
-    : mEventSystem(eventSystem), mAssetManager(assetManager) {}
+                                 AssetRegistry &assetRegistry)
+    : mEventSystem(eventSystem), mAssetRegistry(assetRegistry) {}
 
 void ScriptingSystem::start(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
@@ -25,8 +25,8 @@ void ScriptingSystem::start(EntityContext &entityContext) {
         }
         component.scope = mLuaInterpreter.createScope();
 
-        auto &script = mAssetManager.getRegistry().getLuaScripts().getAsset(
-            component.handle);
+        auto &script =
+            mAssetRegistry.getLuaScripts().getAsset(component.handle);
         mLuaInterpreter.evaluate(script.data.bytes, component.scope);
 
         createScriptingData(component, entity);

@@ -2,7 +2,7 @@
 
 #include "liquid/entity/EntityContext.h"
 #include "liquid/events/EventSystem.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetRegistry.h"
 
 #include "LuaInterpreter.h"
 
@@ -17,9 +17,9 @@ public:
    * @brief Create scripting system
    *
    * @param eventSystem Event system
-   * @param assetManager Asset manager
+   * @param assetRegistry Asset registry
    */
-  ScriptingSystem(EventSystem &eventSystem, AssetManager &assetManager);
+  ScriptingSystem(EventSystem &eventSystem, AssetRegistry &assetRegistry);
 
   ~ScriptingSystem() = default;
 
@@ -70,7 +70,7 @@ private:
 
 private:
   EventSystem &mEventSystem;
-  AssetManager &mAssetManager;
+  AssetRegistry &mAssetRegistry;
   LuaInterpreter mLuaInterpreter;
 };
 

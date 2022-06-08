@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/asset/AssetManager.h"
 #include "liquid/scripting/ScriptingSystem.h"
 
 #include <gtest/gtest.h>
@@ -13,7 +14,7 @@ class ScriptingSystemTest : public ::testing::Test {
 public:
   ScriptingSystemTest()
       : assetManager(std::filesystem::current_path()),
-        scriptingSystem(eventSystem, assetManager) {}
+        scriptingSystem(eventSystem, assetManager.getRegistry()) {}
 
   liquid::EntityContext entityContext;
   liquid::EventSystem eventSystem;
