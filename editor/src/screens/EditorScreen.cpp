@@ -7,6 +7,7 @@
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/scene/SceneUpdater.h"
 #include "liquid/scene/SkeletonUpdater.h"
+#include "liquid/scripting/ScriptingSystem.h"
 #include "liquid/renderer/Presenter.h"
 
 #include "liquid/physics/PhysicsSystem.h"
@@ -97,6 +98,8 @@ void EditorScreen::start(const Project &project) {
   liquid::PhysicsSystem physicsSystem(mEventSystem);
   liquid::SceneUpdater sceneUpdater;
   liquid::SkeletonUpdater skeletonUpdater;
+  liquid::ScriptingSystem scriptingSystem(mEventSystem,
+                                          assetManager.getRegistry());
 
   liquid::ImguiDebugLayer debugLayer(
       mDevice->getDeviceInformation(), mDevice->getDeviceStats(),
@@ -136,7 +139,8 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,
-                        &sceneUpdater, this](float dt) mutable {
+                        &scriptingSystem, &sceneUpdater,
+                        this](float dt) mutable {
     bool isPlaying = entityManager.isUsingSimulationContext();
 
     auto &entityContext = entityManager.getActiveEntityContext();
@@ -146,6 +150,7 @@ void EditorScreen::start(const Project &project) {
     editorCamera.update();
 
     if (isPlaying) {
+      scriptingSystem.update(entityContext);
       animationSystem.update(dt, entityContext);
     }
 
@@ -162,7 +167,7 @@ void EditorScreen::start(const Project &project) {
                         &entityManager, &assetManager, &graph, &scenePassGroup,
                         &imguiPassGroup, &physicsSystem, &ui, &debugLayer,
                         &preloadStatusDialog, &presenter, &editorRenderer,
-                        this]() {
+                        &scriptingSystem, this]() {
     auto &imgui = renderer.getImguiRenderer();
     auto &sceneRenderer = renderer.getSceneRenderer();
 
@@ -185,9 +190,11 @@ void EditorScreen::start(const Project &project) {
       if (liquid::imgui::imageButton(icon, ImVec2(ICON_SIZE, ICON_SIZE))) {
         if (entityManager.isUsingSimulationContext()) {
           physicsSystem.cleanup(entityManager.getActiveEntityContext());
+          scriptingSystem.cleanup(entityManager.getActiveEntityContext());
           entityManager.useEditingContext();
         } else {
           entityManager.useSimulationContext();
+          scriptingSystem.start(entityManager.getActiveEntityContext());
         }
       }
 
