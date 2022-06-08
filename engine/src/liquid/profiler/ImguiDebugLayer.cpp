@@ -8,10 +8,9 @@ namespace liquid {
 ImguiDebugLayer::ImguiDebugLayer(
     const PhysicalDeviceInformation &physicalDeviceInfo,
     const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
-    const FPSCounter &fpsCounter, DebugManager &debugManager)
+    const FPSCounter &fpsCounter)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
-      mFpsCounter(fpsCounter), mDeviceStats(deviceStats),
-      mDebugManager(debugManager) {}
+      mFpsCounter(fpsCounter), mDeviceStats(deviceStats) {}
 
 void ImguiDebugLayer::render() {
   if (ImGui::BeginMainMenuBar()) {
@@ -23,10 +22,6 @@ void ImguiDebugLayer::render() {
 
       ImGui::MenuItem("Performance Metrics", nullptr,
                       &mPerformanceMetricsVisible);
-
-      if (ImGui::MenuItem("Wireframe Mode", nullptr, &mWireframeModeEnabled)) {
-        mDebugManager.setWireframeMode(mWireframeModeEnabled);
-      }
 
       ImGui::EndMenu();
     }
