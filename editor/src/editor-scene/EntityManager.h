@@ -118,6 +118,14 @@ public:
                  const liquid::PerspectiveLensComponent &lens, bool autoRatio);
 
   /**
+   * @brief Set script for entity
+   *
+   * @param entity Entity
+   * @param handle Script handle
+   */
+  void setScript(liquid::Entity entity, liquid::LuaScriptAssetHandle handle);
+
+  /**
    * @brief Delete entity
    *
    * @param entity Entity

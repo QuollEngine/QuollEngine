@@ -95,6 +95,16 @@ void EntityManager::save(liquid::Entity entity) {
     }
   }
 
+  if (mEntityContext.hasComponent<liquid::ScriptingComponent>(entity)) {
+    const auto &script =
+        mEntityContext.getComponent<liquid::ScriptingComponent>(entity);
+
+    node["components"]["script"] = mAssetManager.getRegistry()
+                                       .getLuaScripts()
+                                       .getAsset(script.handle)
+                                       .relativePath.string();
+  }
+
   auto fileName = std::to_string(entity) + ".lqnode";
   std::ofstream out(mScenePath / fileName, std::ios::out);
   out << node;
@@ -278,6 +288,15 @@ bool EntityManager::loadScene() {
 
       setCamera(entity, component, autoRatio);
     }
+
+    if (node["components"]["script"].IsScalar()) {
+      auto relativePathStr = node["components"]["script"].as<liquid::String>();
+      auto relativePath = std::filesystem::path(relativePathStr);
+      auto handle =
+          mAssetManager.getRegistry().getLuaScripts().findHandleByRelativePath(
+              relativePath);
+      setScript(entity, handle);
+    }
   }
 
   std::unordered_map<liquid::Entity, std::vector<liquid::Entity>> childrenMap;
@@ -409,6 +428,13 @@ void EntityManager::setCamera(liquid::Entity entity,
     getActiveEntityContext().setComponent<liquid::AutoAspectRatioComponent>(
         entity, {});
   }
+}
+
+void EntityManager::setScript(liquid::Entity entity,
+                              liquid::LuaScriptAssetHandle handle) {
+  liquid::ScriptingComponent script{};
+  script.handle = handle;
+  getActiveEntityContext().setComponent(entity, script);
 }
 
 void EntityManager::deleteEntity(liquid::Entity entity) {
