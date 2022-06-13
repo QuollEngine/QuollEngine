@@ -33,6 +33,18 @@ public:
   }
 
   /**
+   * @brief Update asset
+   *
+   * @param handle Asset handle
+   * @param data Asset data
+   */
+  void updateAsset(THandle handle, const AssetData<TData> &data) {
+    LIQUID_ASSERT(mAssets.find(handle) != mAssets.end(),
+                  "Asset does not exist");
+    mAssets.at(handle) = data;
+  }
+
+  /**
    * @brief Get asset
    *
    * @param handle Asset handle

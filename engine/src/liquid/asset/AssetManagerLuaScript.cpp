@@ -20,7 +20,8 @@ static std::vector<char> readFileIntoBuffer(std::ifstream &stream) {
 }
 
 Result<LuaScriptAssetHandle>
-AssetManager::loadLuaScriptFromFile(const Path &filePath) {
+AssetManager::loadLuaScriptFromFile(const Path &filePath,
+                                    LuaScriptAssetHandle handle) {
   std::ifstream stream(filePath);
 
   if (!stream.good()) {
@@ -37,7 +38,12 @@ AssetManager::loadLuaScriptFromFile(const Path &filePath) {
 
   stream.close();
 
-  auto handle = mRegistry.getLuaScripts().addAsset(asset);
+  if (handle == LuaScriptAssetHandle::Invalid) {
+    auto newHandle = mRegistry.getLuaScripts().addAsset(asset);
+    return Result<LuaScriptAssetHandle>::Ok(newHandle);
+  }
+
+  mRegistry.getLuaScripts().updateAsset(handle, asset);
 
   return Result<LuaScriptAssetHandle>::Ok(handle);
 }

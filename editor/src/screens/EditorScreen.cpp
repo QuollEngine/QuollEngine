@@ -9,6 +9,7 @@
 #include "liquid/scene/SkeletonUpdater.h"
 #include "liquid/scripting/ScriptingSystem.h"
 #include "liquid/renderer/Presenter.h"
+#include "liquid/asset/FileTracker.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -78,6 +79,19 @@ void EditorScreen::start(const Project &project) {
   if (res.hasWarnings()) {
     preloadStatusDialog.show();
   }
+
+  liquid::FileTracker tracker(project.assetsPath);
+  tracker.trackForChanges();
+
+  mWindow.addFocusHandler([&tracker, &assetManager, &renderer](bool focused) {
+    if (!focused)
+      return;
+
+    const auto &changes = tracker.trackForChanges();
+    for (auto &change : changes) {
+      assetManager.loadAsset(change.path);
+    }
+  });
 
   liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenePath);
