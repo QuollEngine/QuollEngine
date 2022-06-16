@@ -41,6 +41,16 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
         }
       });
 
+  glfwSetWindowFocusCallback(
+      mWindowInstance, [](::GLFWwindow *windowInstance, int focused) {
+        auto *window =
+            static_cast<Window *>(glfwGetWindowUserPointer(windowInstance));
+
+        for (auto &[_, handler] : window->mFocusHandlers) {
+          handler(focused == GLFW_TRUE);
+        }
+      });
+
   glfwSetKeyCallback(mWindowInstance, [](::GLFWwindow *windowInstance, int key,
                                          int scancode, int action, int mods) {
     auto *window =
@@ -93,8 +103,6 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
 }
 
 Window::~Window() {
-  mResizeHandlers.clear();
-
   if (mWindowInstance) {
     glfwDestroyWindow(mWindowInstance);
     mWindowInstance = nullptr;
@@ -137,6 +145,17 @@ uint32_t Window::addResizeHandler(
 
 void Window::removeResizeHandler(uint32_t handle) {
   mResizeHandlers.erase(mResizeHandlers.find(handle));
+}
+
+uint32_t Window::addFocusHandler(const std::function<void(bool)> &handler) {
+  uint32_t id = static_cast<uint32_t>(mFocusHandlers.size());
+  mFocusHandlers.insert(std::make_pair(id, handler));
+
+  return id;
+}
+
+void Window::removeFocusHandler(uint32_t handle) {
+  mFocusHandlers.erase(handle);
 }
 
 glm::vec2 Window::getCurrentMousePosition() const {

@@ -86,6 +86,21 @@ public:
   void removeResizeHandler(uint32_t handle);
 
   /**
+   * @brief Add focus handler
+   *
+   * @param handler Focus handler
+   * @return Focus handler ID
+   */
+  uint32_t addFocusHandler(const std::function<void(bool)> &handler);
+
+  /**
+   * @brief Remove focus handler
+   *
+   * @param handle Handle
+   */
+  void removeFocusHandler(uint32_t handle);
+
+  /**
    * @brief Get current mouse position
    *
    * @return Current mouse position
@@ -121,6 +136,7 @@ private:
   using HandlerMap = std::map<uint32_t, std::function<FunctionType>>;
 
   HandlerMap<void(uint32_t, uint32_t)> mResizeHandlers;
+  HandlerMap<void(bool)> mFocusHandlers;
 };
 
 } // namespace liquid

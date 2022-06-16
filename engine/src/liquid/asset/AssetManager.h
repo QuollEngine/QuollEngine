@@ -160,9 +160,12 @@ public:
    * @brief Load Lua script from file
    *
    * @param filePath Path to asset
+   * @param handle Lua script handle
    * @return Lua script handle
    */
-  Result<LuaScriptAssetHandle> loadLuaScriptFromFile(const Path &filePath);
+  Result<LuaScriptAssetHandle> loadLuaScriptFromFile(
+      const Path &filePath,
+      LuaScriptAssetHandle handle = LuaScriptAssetHandle::Invalid);
 
   /**
    * @brief Get asset registry
@@ -193,6 +196,17 @@ public:
    * @return Asset name
    */
   String getAssetNameFromPath(const Path &path);
+
+  /**
+   * @brief Load single asset
+   *
+   * Automatically identifies the asset type
+   * and loads it to registry
+   *
+   * @param path Path to asset
+   * @return Load result
+   */
+  Result<bool> loadAsset(const Path &path);
 
 private:
   /**
@@ -227,6 +241,18 @@ private:
    */
   Result<bool> checkAssetFile(InputBinaryStream &file, const Path &filePath,
                               AssetType assetType);
+
+  /**
+   * @brief Load single asset
+   *
+   * Automatically identifies the asset type
+   * and loads it to registry
+   *
+   * @param path Path to asset
+   * @param updateExisting Update if asset already exists
+   * @return Load result
+   */
+  Result<bool> loadAsset(const Path &path, bool updateExisting);
 
 private:
   /**

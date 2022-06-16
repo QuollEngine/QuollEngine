@@ -51,59 +51,11 @@ AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry) {
       continue;
     }
 
-    if (mRegistry.getAssetByPath(entry.path()).first != AssetType::None) {
-      continue;
-    }
+    auto res = loadAsset(entry.path(), false);
 
-    const auto &ext = entry.path().extension().string();
-
-    if (ext == ".ktx2") {
-      loadTextureFromFile(entry.path());
-      continue;
-    }
-
-    if (ext == ".lua") {
-      auto res = loadLuaScriptFromFile(entry.path());
-      if (res.hasError()) {
-        warnings.push_back(res.getError());
-      }
-      continue;
-    }
-
-    InputBinaryStream stream(entry.path());
-    AssetFileHeader header;
-    String magic(ASSET_FILE_MAGIC_LENGTH, '$');
-    stream.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
-
-    if (magic != header.magic) {
-      continue;
-    }
-
-    stream.read(header.version);
-    stream.read(header.type);
-
-    if (header.type == AssetType::Material) {
-      auto res = loadMaterialDataFromInputStream(stream, entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else if (header.type == AssetType::Mesh) {
-      auto res = loadMeshDataFromInputStream(stream, entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else if (header.type == AssetType::SkinnedMesh) {
-      auto res = loadSkinnedMeshDataFromInputStream(stream, entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else if (header.type == AssetType::Skeleton) {
-      auto res = loadSkeletonDataFromInputStream(stream, entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else if (header.type == AssetType::Animation) {
-      auto res = loadAnimationDataFromInputStream(stream, entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else if (header.type == AssetType::Prefab) {
-      auto res = loadPrefabDataFromInputStream(stream, entry.path());
+    if (res.hasError()) {
+      warnings.push_back(res.getError());
+    } else {
       warnings.insert(warnings.end(), res.getWarnings().begin(),
                       res.getWarnings().end());
     }
@@ -112,6 +64,112 @@ AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry) {
   mRegistry.syncWithDeviceRegistry(resourceRegistry);
 
   return Result<bool>::Ok(true, warnings);
+}
+
+Result<bool> AssetManager::loadAsset(const Path &path) {
+  return loadAsset(path, true);
+}
+
+Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
+  const auto &asset = mRegistry.getAssetByPath(path);
+  const auto &ext = path.extension().string();
+
+  uint32_t handle = 0;
+
+  if (asset.first != AssetType::None && updateExisting) {
+    handle = asset.second;
+  }
+
+  if (updateExisting && asset.first != AssetType::LuaScript) {
+    return Result<bool>::Error("Can only reload Lua assets on watch");
+  }
+
+  if (ext == ".ktx2") {
+    auto res = loadTextureFromFile(path);
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (ext == ".lua") {
+    auto res =
+        loadLuaScriptFromFile(path, static_cast<LuaScriptAssetHandle>(handle));
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  InputBinaryStream stream(path);
+  AssetFileHeader header;
+  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
+  stream.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+
+  if (magic != header.magic) {
+    return Result<bool>::Error("Not a liquid asset");
+  }
+
+  stream.read(header.version);
+  stream.read(header.type);
+
+  if (header.type == AssetType::Material) {
+    auto res = loadMaterialDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (header.type == AssetType::Mesh) {
+    auto res = loadMeshDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (header.type == AssetType::SkinnedMesh) {
+    auto res = loadSkinnedMeshDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (header.type == AssetType::Skeleton) {
+    auto res = loadSkeletonDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (header.type == AssetType::Animation) {
+    auto res = loadAnimationDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (header.type == AssetType::Prefab) {
+    auto res = loadPrefabDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  return Result<bool>::Error("Unknown asset file");
 }
 
 String AssetManager::getAssetNameFromPath(const Path &path) {
