@@ -43,6 +43,10 @@ project "LiquidEngineTest"
 
     pchheader "../../engine/src/liquid/core/Base.h"
 
+    includedirs {
+        "../engine/tests",
+    }
+
     filter { "toolset:msc-*" }
         pchheader "liquid/core/Base.h"
         pchsource "src/liquid/core/Base.cpp"
