@@ -4,6 +4,8 @@
 #include "liquid/asset/Asset.h"
 #include "liquid/events/EventObserver.h"
 
+#include "LuaScope.h"
+
 namespace liquid {
 
 /**
@@ -26,7 +28,7 @@ struct ScriptingComponent {
   /**
    * Lua scope
    */
-  void *scope = nullptr;
+  LuaScope scope;
 
   /**
    * Collision start observer

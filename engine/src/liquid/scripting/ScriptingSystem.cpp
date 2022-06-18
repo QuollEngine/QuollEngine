@@ -13,15 +13,15 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 void ScriptingSystem::start(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   entityContext.iterateEntities<ScriptingComponent>(
-      [this](auto entity, ScriptingComponent &component) {
+      [this, &entityContext](auto entity, ScriptingComponent &component) {
         if (component.started) {
           return;
         }
 
         component.started = true;
 
-        if (component.scope) {
-          destroyScriptingData(component);
+        if (component.scope.getLuaState()) {
+          mLuaInterpreter.destroyScope(component.scope);
         }
         component.scope = mLuaInterpreter.createScope();
 
@@ -31,17 +31,17 @@ void ScriptingSystem::start(EntityContext &entityContext) {
 
         createScriptingData(component, entity);
 
-        mLuaInterpreter.getFunction(component.scope, "start");
-        mLuaInterpreter.callFunction(component.scope, 0);
+        component.scope.luaGetGlobal("start");
+        component.scope.call(0);
       });
 }
 
 void ScriptingSystem::update(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
   entityContext.iterateEntities<ScriptingComponent>(
-      [this](auto entity, const ScriptingComponent &component) {
-        mLuaInterpreter.getFunction(component.scope, "update");
-        mLuaInterpreter.callFunction(component.scope, 0);
+      [this](auto entity, ScriptingComponent &component) {
+        component.scope.luaGetGlobal("update");
+        component.scope.call(0);
       });
 }
 
@@ -54,58 +54,63 @@ void ScriptingSystem::cleanup(EntityContext &entityContext) {
 
 void ScriptingSystem::createScriptingData(ScriptingComponent &component,
                                           Entity entity) {
-  if (mLuaInterpreter.hasFunction(component.scope, "on_collision_start")) {
+  if (component.scope.hasFunction("on_collision_start")) {
     component.onCollisionStart = mEventSystem.observe(
         CollisionEvent::CollisionStarted,
         [this, &component, entity](const CollisionObject &data) {
           if (data.a == entity || data.b == entity) {
+            component.scope.luaGetGlobal("on_collision_start");
             Entity target = data.a == entity ? data.b : data.a;
-
-            mLuaInterpreter.getFunction(component.scope, "on_collision_start");
-            LuaTable table(component.scope, 1);
+            auto table = component.scope.createTable(1);
             table.set("target", target);
-            mLuaInterpreter.callFunction(component.scope, 1);
+
+            component.scope.call(1);
           }
         });
   }
 
-  if (mLuaInterpreter.hasFunction(component.scope, "on_collision_end")) {
+  if (component.scope.hasFunction("on_collision_start")) {
     component.onCollisionEnd = mEventSystem.observe(
         CollisionEvent::CollisionEnded,
         [this, &component, entity](const CollisionObject &data) {
           if (data.a == entity || data.b == entity) {
+            component.scope.luaGetGlobal("on_collision_end");
             Entity target = data.a == entity ? data.b : data.a;
-            mLuaInterpreter.getFunction(component.scope, "on_collision_end");
-            LuaTable table(component.scope, 1);
+            auto table = component.scope.createTable(1);
             table.set("target", target);
-            mLuaInterpreter.callFunction(component.scope, 1);
+
+            component.scope.call(1);
           }
         });
   }
 
-  if (mLuaInterpreter.hasFunction(component.scope, "on_key_press")) {
+  if (component.scope.hasFunction("on_key_press")) {
     component.onKeyPress = mEventSystem.observe(
         KeyboardEvent::Pressed, [this, &component](const auto &data) {
-          mLuaInterpreter.getFunction(component.scope, "on_key_press");
-          LuaTable table(component.scope, 1);
+          component.scope.luaGetGlobal("on_key_press");
+
+          auto table = component.scope.createTable(1);
           table.set("key", data.key);
-          mLuaInterpreter.callFunction(component.scope, 1);
+
+          component.scope.call(1);
         });
   }
 
-  if (mLuaInterpreter.hasFunction(component.scope, "on_key_release")) {
+  if (component.scope.hasFunction("on_key_release")) {
     component.onKeyRelease = mEventSystem.observe(
         KeyboardEvent::Released, [this, &component](const auto &data) {
-          mLuaInterpreter.getFunction(component.scope, "on_key_release");
-          LuaTable table(component.scope, 1);
+          component.scope.luaGetGlobal("on_key_release");
+          auto table = component.scope.createTable(1);
           table.set("key", data.key);
-          mLuaInterpreter.callFunction(component.scope, 1);
+
+          component.scope.call(1);
         });
   }
 }
 
 void ScriptingSystem::destroyScriptingData(ScriptingComponent &component) {
   mLuaInterpreter.destroyScope(component.scope);
+
   if (component.onCollisionStart != EVENT_OBSERVER_MAX) {
     mEventSystem.removeObserver(CollisionEvent::CollisionStarted,
                                 component.onCollisionStart);

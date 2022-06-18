@@ -2,6 +2,7 @@
 #include "liquid/core/EngineGlobals.h"
 
 #include "LuaInterpreter.h"
+#include "LuaScope.h"
 
 extern "C" {
 #include <lua.h>
@@ -11,19 +12,18 @@ extern "C" {
 
 namespace liquid {
 
-void *LuaInterpreter::createScope() {
+LuaScope LuaInterpreter::createScope() {
   auto *state = luaL_newstate();
   luaL_openlibs(state);
-
-  return state;
+  return LuaScope(state);
 }
 
-void LuaInterpreter::destroyScope(void *scope) {
-  lua_close(static_cast<lua_State *>(scope));
+void LuaInterpreter::destroyScope(LuaScope &scope) {
+  lua_close(scope.getLuaState());
 }
 
-void LuaInterpreter::evaluate(const std::vector<char> &bytes, void *state) {
-  auto *luaState = static_cast<lua_State *>(state);
+void LuaInterpreter::evaluate(const std::vector<char> &bytes, LuaScope &scope) {
+  auto *luaState = scope.getLuaState();
 
   auto ret = luaL_loadstring(
       luaState, liquid::String{bytes.begin(), bytes.end()}.c_str());
@@ -33,30 +33,6 @@ void LuaInterpreter::evaluate(const std::vector<char> &bytes, void *state) {
   LIQUID_ASSERT(ret == LUA_OK, "Cannot evaluate script");
 
   lua_pop(luaState, lua_gettop(luaState));
-}
-
-void LuaInterpreter::getFunction(void *scope, const char *name) {
-  auto *luaState = static_cast<lua_State *>(scope);
-  lua_getglobal(luaState, name);
-}
-
-void LuaInterpreter::callFunction(void *scope, uint32_t numArgs) {
-  auto *luaState = static_cast<lua_State *>(scope);
-
-  if (lua_pcall(luaState, numArgs, 0, 0) == LUA_OK) {
-    lua_pop(luaState, lua_gettop(luaState));
-  } else {
-    LOG_DEBUG("[Lua] Variable is not a function");
-    lua_pop(luaState, -1);
-  }
-}
-
-bool LuaInterpreter::hasFunction(void *scope, const char *name) {
-  auto *luaState = static_cast<lua_State *>(scope);
-  bool ret = lua_getglobal(luaState, name) && lua_isfunction(luaState, -1);
-
-  lua_pop(luaState, -1);
-  return ret;
 }
 
 } // namespace liquid

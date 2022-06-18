@@ -8,12 +8,11 @@ namespace liquid {
 class LuaTable {
 public:
   /**
-   * @brief Create Lua table
+   * @brief Create lua table wrapper
    *
-   * @param scope Scope
-   * @param size Table size
+   * @param scope Lua table wrapper
    */
-  LuaTable(void *scope, uint32_t size);
+  LuaTable(void *scope);
 
   /**
    * @brief Set number table value
@@ -22,6 +21,29 @@ public:
    * @param value Value column
    */
   void set(const char *key, uint32_t value);
+
+  /**
+   * @brief Set function table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, int (*value)(void *));
+
+  /**
+   * @brief Set table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, const LuaTable &value);
+
+  /**
+   * @brief Get field
+   *
+   * @param key Field key
+   */
+  void get(const char *key);
 
 private:
   uint32_t mSize = 0;

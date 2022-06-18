@@ -28,13 +28,13 @@ public:
 };
 
 TEST_F(LuaInterpreterTest, EvaluateScript) {
-  auto *scope = interpreter.createScope();
+  auto scope = interpreter.createScope();
 
   auto buffer = readFileIntoBuffer("component-script.lua");
 
   interpreter.evaluate(buffer, scope);
 
-  auto *luaScope = static_cast<lua_State *>(scope);
+  auto *luaScope = scope.getLuaState();
 
   lua_getglobal(luaScope, "state");
   EXPECT_TRUE(lua_isstring(luaScope, -1));
