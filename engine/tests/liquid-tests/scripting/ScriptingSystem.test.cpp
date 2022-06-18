@@ -35,19 +35,13 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
 
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
-  EXPECT_EQ(component.scope, nullptr);
+  EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityContext);
-  EXPECT_NE(component.scope, nullptr);
+  EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.update(entityContext);
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 0);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 0);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
@@ -60,22 +54,16 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
 
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
-  EXPECT_EQ(component.scope, nullptr);
+  EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityContext);
-  EXPECT_NE(component.scope, nullptr);
+  EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
     scriptingSystem.update(entityContext);
   }
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 9);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 9);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
@@ -88,18 +76,13 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
 
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
-  EXPECT_EQ(component.scope, nullptr);
+  EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityContext);
-  EXPECT_NE(component.scope, nullptr);
+  EXPECT_NE(component.scope.getLuaState(), nullptr);
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, -1);
-  }
+  auto *luaScope = component.scope.getLuaState();
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
@@ -112,21 +95,15 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
 
   auto &component =
       entityContext.getComponent<liquid::ScriptingComponent>(entity);
-  EXPECT_EQ(component.scope, nullptr);
+  EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   // Call 10 times
   for (size_t i = 0; i < 10; ++i) {
     scriptingSystem.start(entityContext);
   }
-  EXPECT_NE(component.scope, nullptr);
+  EXPECT_NE(component.scope.getLuaState(), nullptr);
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, -1);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
@@ -165,13 +142,7 @@ TEST_F(ScriptingSystemTest,
   eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {5, 6});
   eventSystem.poll();
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "event");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 0);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 0);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
@@ -190,20 +161,9 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
   eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {entity, 6});
   eventSystem.poll();
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "event");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 1);
-  }
-
-  {
-    lua_getglobal(luaScope, "target");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 6);
-  }
+  auto *luaScope = component.scope.getLuaState();
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 1);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("target"), 6);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
@@ -222,20 +182,8 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
   eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded, {5, entity});
   eventSystem.poll();
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "event");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 2);
-  }
-
-  {
-    lua_getglobal(luaScope, "target");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 5);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 2);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("target"), 5);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
@@ -254,20 +202,9 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
   eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15});
   eventSystem.poll();
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "event");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 3);
-  }
-
-  {
-    lua_getglobal(luaScope, "key_value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 15);
-  }
+  auto *luaScope = component.scope.getLuaState();
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 3);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 15);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
@@ -286,18 +223,6 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
   eventSystem.dispatch(liquid::KeyboardEvent::Released, {35});
   eventSystem.poll();
 
-  auto *luaScope = static_cast<lua_State *>(component.scope);
-  {
-    lua_getglobal(luaScope, "event");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 4);
-  }
-
-  {
-    lua_getglobal(luaScope, "key_value");
-    int value = static_cast<int>(lua_tointeger(luaScope, -1));
-    lua_pop(luaScope, -1);
-    EXPECT_EQ(value, 35);
-  }
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 4);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 35);
 }
