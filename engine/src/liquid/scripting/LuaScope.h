@@ -39,15 +39,34 @@ public:
   LuaScope(void *scope);
 
   /**
-   * @brief Get varible value
+   * @brief Get variable value from stack
    *
    * Assertion fails if a type is not
    * implemented
    *
    * @tparam T Variable type
+   * @param index Stack index
    * @return Variable value
    */
-  template <class T> T get() { LIQUID_ASSERT(false, "Not implemented"); }
+  template <class T> T get(int32_t index = -1) {
+    LIQUID_ASSERT(false, "Not implemented");
+  }
+
+  /**
+   * @brief Check if variable is not a correct type
+   *
+   * Assertion fails if a type is not
+   * implemented
+   *
+   * @tparam T Variable type to check for
+   * @param index Stack index
+   * @retval true Type matches
+   * @retval false Type does not match
+   */
+  template <class T> bool is(int32_t index = -1) {
+    LIQUID_ASSERT(false, "Not implemented");
+    return false;
+  }
 
   /**
    * @brief Generic variable setter
@@ -63,6 +82,18 @@ public:
   }
 
   /**
+   * @brief Pops last value from stack
+   *
+   * @tparam T Variable type
+   * @return Variable value
+   */
+  template <class T> T popLast() {
+    const auto &value = get<T>(-1);
+    pop(-1);
+    return value;
+  }
+
+  /**
    * @brief Get global variable
    *
    * @tparam T Variable type
@@ -71,7 +102,7 @@ public:
    */
   template <class T> T getGlobal(const String &name) {
     luaGetGlobal(name);
-    return get<T>();
+    return popLast<T>();
   }
 
   /**
@@ -132,6 +163,13 @@ public:
    */
   int luaGetGlobal(const String &name);
 
+  /**
+   * @brief Pop items from the stack
+   *
+   * @param count Number of elements to pop
+   */
+  void pop(int count);
+
 private:
   /**
    * @brief Convert stack value to integer
@@ -142,6 +180,22 @@ private:
   int32_t luaGetInteger(int index);
 
   /**
+   * @brief Convert stack value to decimal
+   *
+   * @param index Stack index
+   * @return Decimal
+   */
+  float luaGetNumber(int index);
+
+  /**
+   * @brief Convert stack value to string
+   *
+   * @param index Stack index
+   * @return String value
+   */
+  StringView luaGetString(int index);
+
+  /**
    * @brief Convert stack value to user data
    *
    * @param index Stack index
@@ -150,18 +204,43 @@ private:
   void *luaGetUserData(int index);
 
   /**
-   * @brief Push user data to the stack
+   * @brief Check if stack value is a number
    *
-   * @param data User data
+   * @param index Stack index
+   * @retval true Value is number
+   * @retval false Value is not a number
    */
-  void luaSetUserData(void *data);
+  bool luaIsNumber(int index);
 
   /**
-   * @brief Pop item from the stack
+   * @brief Check if stack value is a string
    *
-   * @param Item index
+   * @param index Stack index
+   * @retval true Value is string
+   * @retval false Value is not a string
    */
-  void luaPop(int index);
+  bool luaIsString(int index);
+
+  /**
+   * @brief Push floating point to stack
+   *
+   * @param value Floating point value
+   */
+  void luaSetNumber(float value);
+
+  /**
+   * @brief Push string to stack
+   *
+   * @param value String value
+   */
+  void luaSetString(const String &value);
+
+  /**
+   * @brief Push user data to the stack
+   *
+   * @param value User data value
+   */
+  void luaSetUserData(void *value);
 
 private:
   lua_State *mScope = nullptr;
@@ -170,46 +249,131 @@ private:
 /**
  * @brief Get integer
  *
+ * @param index Stack index
  * @return Integer value
  */
-template <> inline int32_t LuaScope::get<int32_t>() {
-  return luaGetInteger(-1);
+template <> inline int32_t LuaScope::get<int32_t>(int32_t index) {
+  return luaGetInteger(index);
 }
 
 /**
  * @brief Get unsigned integer
-
+ *
+ * @param index Stack index
  * @return Unsigned integer
  */
-template <> inline uint32_t LuaScope::get<uint32_t>() {
-  return static_cast<uint32_t>(luaGetInteger(-1));
+template <> inline uint32_t LuaScope::get<uint32_t>(int32_t index) {
+  return static_cast<uint32_t>(luaGetInteger(index));
+}
+
+/**
+ * @brief Get floating point
+ *
+ * @param index Stack index
+ * @return Floating point value
+ */
+template <> inline float LuaScope::get<float>(int32_t index) {
+  return luaGetNumber(index);
+}
+
+/**
+ * @brief Get string view
+ *
+ * @param index Stack index
+ * @return String view
+ */
+template <> inline StringView LuaScope::get<StringView>(int32_t index) {
+  return luaGetString(index);
+}
+
+/**
+ * @brief Get string
+ *
+ * @param index Stack index
+ * @return String
+ */
+template <> inline String LuaScope::get<String>(int32_t index) {
+  return String(luaGetString(index));
 }
 
 /**
  * @brief Get table
  *
+ * @param index Stack index
  * @return Lua table
  */
-template <> inline LuaTable LuaScope::get<LuaTable>() {
+template <> inline LuaTable LuaScope::get<LuaTable>(int32_t index) {
   return LuaTable(static_cast<void *>(mScope));
 }
 
 /**
  * @brief Get user data
  *
+ * @param index Stack index
  * @return User data
  */
-template <> inline LuaUserData LuaScope::get<LuaUserData>() {
-  return {luaGetUserData(-1)};
+template <> inline LuaUserData LuaScope::get<LuaUserData>(int32_t index) {
+  return {luaGetUserData(index)};
+}
+
+/**
+ * @brief Check if variable is a string
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<String>(int32_t index) {
+  return luaIsString(index);
+}
+
+/**
+ * @brief Check if variable is a floating point
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<float>(int32_t index) {
+  return luaIsNumber(index);
+}
+
+/**
+ * @brief Set floating point
+ *
+ * @param value Floating point value
+ */
+template <> inline void LuaScope::set<float>(const float &value) {
+  luaSetNumber(value);
+}
+
+/**
+ * @brief Set string
+ *
+ * @param value String value
+ */
+template <> inline void LuaScope::set<String>(const String &value) {
+  luaSetString(value);
 }
 
 /**
  * @brief Set user data
  *
- * @param data User data
+ * @param value User data value
  */
-template <> inline void LuaScope::set<LuaUserData>(const LuaUserData &data) {
-  luaSetUserData(data.pointer);
+template <> inline void LuaScope::set<LuaUserData>(const LuaUserData &value) {
+  luaSetUserData(value.pointer);
+}
+
+/**
+ * @brief Get global table variable
+ *
+ * @param name Variable global name
+ * @return Table value
+ */
+template <> inline LuaTable LuaScope::getGlobal<LuaTable>(const String &name) {
+  luaGetGlobal(name);
+  return get<LuaTable>();
 }
 
 } // namespace liquid

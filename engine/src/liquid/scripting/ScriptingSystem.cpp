@@ -1,6 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ScriptingSystem.h"
 #include "LuaTable.h"
+#include "EntityDecorator.h"
 
 #include "liquid/core/EngineGlobals.h"
 
@@ -12,8 +13,10 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 
 void ScriptingSystem::start(EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
+  EntityDecorator entityDecorator;
   entityContext.iterateEntities<ScriptingComponent>(
-      [this, &entityContext](auto entity, ScriptingComponent &component) {
+      [this, &entityContext, &entityDecorator](auto entity,
+                                               ScriptingComponent &component) {
         if (component.started) {
           return;
         }
@@ -24,6 +27,8 @@ void ScriptingSystem::start(EntityContext &entityContext) {
           mLuaInterpreter.destroyScope(component.scope);
         }
         component.scope = mLuaInterpreter.createScope();
+
+        entityDecorator.attachToScope(component.scope, entity, entityContext);
 
         auto &script =
             mAssetRegistry.getLuaScripts().getAsset(component.handle);
