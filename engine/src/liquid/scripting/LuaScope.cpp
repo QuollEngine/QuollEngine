@@ -12,18 +12,52 @@ namespace liquid {
 
 LuaScope::LuaScope(void *scope) : mScope(static_cast<lua_State *>(scope)) {}
 
-void LuaScope::setPreviousValueAsGlobal(const String &name) {
-  lua_setglobal(mScope, name.c_str());
+void LuaScope::pop(int count) { lua_pop(mScope, count); };
+
+int32_t LuaScope::luaGetInteger(int index) {
+  return static_cast<int32_t>(lua_tointeger(mScope, index));
+}
+
+float LuaScope::luaGetNumber(int index) {
+  return static_cast<float>(lua_tonumber(mScope, index));
+}
+
+StringView LuaScope::luaGetString(int index) {
+  return StringView(lua_tostring(mScope, index));
+}
+
+void *LuaScope::luaGetUserData(int index) {
+  return lua_touserdata(mScope, static_cast<int>(index));
+}
+
+bool LuaScope::luaIsNumber(int index) { return lua_isnumber(mScope, index); }
+
+bool LuaScope::luaIsString(int index) { return lua_isstring(mScope, index); }
+
+void LuaScope::luaSetNumber(float value) {
+  lua_pushnumber(mScope, static_cast<lua_Number>(value));
+}
+
+void LuaScope::luaSetString(const String &value) {
+  lua_pushstring(mScope, value.c_str());
 }
 
 void LuaScope::luaSetUserData(void *data) {
   lua_pushlightuserdata(mScope, data);
 }
 
+int LuaScope::luaGetGlobal(const String &name) {
+  return lua_getglobal(mScope, name.c_str());
+}
+
+void LuaScope::setPreviousValueAsGlobal(const String &name) {
+  lua_setglobal(mScope, name.c_str());
+}
+
 bool LuaScope::hasFunction(const String &name) {
   bool ret = luaGetGlobal(name) && lua_isfunction(mScope, -1);
 
-  luaPop(-1);
+  pop(-1);
   return ret;
 }
 
@@ -39,25 +73,6 @@ void LuaScope::call(uint32_t numArgs) {
 LuaTable LuaScope::createTable(uint32_t size) {
   lua_createtable(mScope, 0, static_cast<int>(size));
   return LuaTable(mScope);
-}
-
-int LuaScope::luaGetGlobal(const String &name) {
-  return lua_getglobal(mScope, name.c_str());
-}
-
-void *LuaScope::luaGetUserData(int index) {
-  auto *value = lua_touserdata(mScope, static_cast<int>(index));
-  luaPop(index);
-  return value;
-}
-
-void LuaScope::luaPop(int index) { lua_pop(mScope, index); };
-
-int32_t LuaScope::luaGetInteger(int index) {
-  auto value = static_cast<int32_t>(lua_tointeger(mScope, index));
-  luaPop(index);
-
-  return value;
 }
 
 } // namespace liquid

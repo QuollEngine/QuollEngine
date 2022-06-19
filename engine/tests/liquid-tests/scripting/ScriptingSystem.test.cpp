@@ -4,12 +4,6 @@
 
 #include "liquid-tests/Testing.h"
 
-extern "C" {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-}
-
 class ScriptingSystemTest : public ::testing::Test {
 public:
   ScriptingSystemTest()
