@@ -3,7 +3,7 @@ project "Liquidator"
     kind "ConsoleApp"
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidEnginePlatformTools"}
+    linkDependenciesWith{"LiquidEngineRHIVulkan", "LiquidEngine", "LiquidEngineRHICore", "LiquidEnginePlatformTools"}
 
     postbuildcommands {
         "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",

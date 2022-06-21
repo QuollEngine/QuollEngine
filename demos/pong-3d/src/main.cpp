@@ -15,7 +15,7 @@
 
 #include "liquid/loop/MainLoop.h"
 
-#include "liquid/rhi/vulkan/VulkanRenderBackend.h"
+#include "liquid/rhi-vulkan/VulkanRenderBackend.h"
 
 class Game {
 public:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/DeviceStats.h"
-#include "liquid/rhi/base/NativeRenderCommandListInterface.h"
+#include "liquid/rhi/NativeRenderCommandListInterface.h"
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorManager.h"

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "RenderHandle.h"
-#include "BufferDescription.h"
-#include "TextureDescription.h"
-#include "RenderPassDescription.h"
-#include "FramebufferDescription.h"
-#include "PipelineDescription.h"
-#include "ShaderDescription.h"
+#include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/BufferDescription.h"
+#include "liquid/rhi/TextureDescription.h"
+#include "liquid/rhi/RenderPassDescription.h"
+#include "liquid/rhi/FramebufferDescription.h"
+#include "liquid/rhi/PipelineDescription.h"
+#include "liquid/rhi/ShaderDescription.h"
 
 namespace liquid::rhi {
 

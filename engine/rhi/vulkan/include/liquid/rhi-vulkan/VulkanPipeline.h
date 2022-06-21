@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquid/rhi/vulkan/VulkanDeviceObject.h"
-#include "liquid/rhi/vulkan/VulkanResourceRegistry.h"
+#include "liquid/rhi-vulkan/VulkanDeviceObject.h"
+#include "liquid/rhi-vulkan/VulkanResourceRegistry.h"
 
 #include "liquid/rhi/PipelineDescription.h"
 

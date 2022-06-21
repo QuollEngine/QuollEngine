@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/asset/AssetManager.h"
-#include "platform-tools/NativeFileDialog.h"
+#include "liquid/platform-tools/NativeFileDialog.h"
 
 #include "../asset/GLTFImporter.h"
 #include "../editor-scene/EditorManager.h"

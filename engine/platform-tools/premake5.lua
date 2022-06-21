@@ -6,12 +6,12 @@ project "LiquidEnginePlatformTools"
     }
 
     includedirs {
-        "platform-tools/include"
+        "include/liquid/platform-tools"
     }
 
     files {
-        "src/*.cpp", 
-        "include/platform-tools/*.h", 
+        "src/**.cpp", 
+        "include/**.h", 
     }
 
     filter { "system:linux" }

@@ -3,7 +3,7 @@ project "DemoPong"
     kind "ConsoleApp"
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine"}
+    linkDependenciesWith{"LiquidEngineRHIVulkan", "LiquidEngine", "LiquidEngineRHICore"}
 
     postbuildcommands {
         "glslc ../../../demos/pong-3d/assets/basic-shader.vert -o %{cfg.buildtarget.directory}/basic-shader.vert.spv",
