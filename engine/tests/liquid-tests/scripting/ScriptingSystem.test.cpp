@@ -18,6 +18,8 @@ public:
 
 using ScriptingSystemDeathTest = ScriptingSystemTest;
 
+constexpr float DELTA_TIME = 0.2f;
+
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto handle = assetManager
                     .loadLuaScriptFromFile(std::filesystem::current_path() /
@@ -34,8 +36,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   scriptingSystem.start(entityContext);
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
-  scriptingSystem.update(entityContext);
+  scriptingSystem.update(DELTA_TIME, entityContext);
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 0);
+  EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), DELTA_TIME);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
@@ -54,7 +57,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.update(entityContext);
+    scriptingSystem.update(DELTA_TIME, entityContext);
   }
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 9);
