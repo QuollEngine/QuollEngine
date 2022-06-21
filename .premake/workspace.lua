@@ -15,7 +15,9 @@ workspace "LiquidEngine"
     
     includedirs {
         "../engine/src",
-        "../platform-tools/include"
+        "../engine/rhi/core/include",
+        "../engine/rhi/vulkan/include",
+        "../engine/platform-tools/include"
     }
     
     configurations { "Debug", "Release", "Profile-Debug", "Profile-Release" }

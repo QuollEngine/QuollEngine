@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RenderHandle.h"
-#include "PipelineDescription.h"
-#include "RenderPassDescription.h"
-#include "RenderCommandList.h"
+#include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/PipelineDescription.h"
+#include "liquid/rhi/RenderPassDescription.h"
+#include "liquid/rhi/RenderCommandList.h"
 
 namespace liquid::rhi {
 

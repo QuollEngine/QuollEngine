@@ -1,8 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
-#include "ProjectManager.h"
+#include "liquid/platform-tools/NativeFileDialog.h"
 
-#include "platform-tools/NativeFileDialog.h"
+#include "ProjectManager.h"
 
 namespace liquidator {
 

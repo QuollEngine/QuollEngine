@@ -41,21 +41,14 @@ project "LiquidEngineTest"
         ["Profile-Debug"] = "Debug"
     }
 
-    pchheader "../../engine/src/liquid/core/Base.h"
-
     includedirs {
         "../engine/tests",
+        "../engine/src"
     }
-
-    filter { "toolset:msc-*" }
-        pchheader "liquid/core/Base.h"
-        pchsource "src/liquid/core/Base.cpp"
 
     filter{}
 
     files {
-        "src/**.cpp",
-        "src/**.h",
         "tests/**.cpp",
         "tests/**.h"
     }
@@ -65,6 +58,7 @@ project "LiquidEngineTest"
     }
 
     setupTestingOptions{}
+    links { "LiquidEngine", "LiquidEngineRHICore" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
 

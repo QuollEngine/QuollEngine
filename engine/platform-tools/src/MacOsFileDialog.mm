@@ -1,5 +1,5 @@
 #include <AppKit/AppKit.h>
-#include "platform-tools/NativeFileDialog.h"
+#include "NativeFileDialog.h"
 
 namespace liquid::platform_tools {
 

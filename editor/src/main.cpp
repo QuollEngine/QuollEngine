@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
-#include "liquid/rhi/vulkan/VulkanRenderBackend.h"
+#include "liquid/rhi-vulkan/VulkanRenderBackend.h"
 #include "screens/EditorScreen.h"
 #include "screens/ProjectSelectorScreen.h"
 
