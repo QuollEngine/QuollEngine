@@ -163,7 +163,7 @@ void EditorScreen::start(const Project &project) {
     editorCamera.update();
 
     if (isPlaying) {
-      scriptingSystem.update(entityContext);
+      scriptingSystem.update(dt, entityContext);
       animationSystem.update(dt, entityContext);
     }
 

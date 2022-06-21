@@ -38,9 +38,10 @@ public:
   /**
    * @brief Call script update on new scripts
    *
+   * @param dt Delta time
    * @param entityContext Entity context
    */
-  void update(EntityContext &entityContext);
+  void update(float dt, EntityContext &entityContext);
 
   /**
    * @brief Cleanup components

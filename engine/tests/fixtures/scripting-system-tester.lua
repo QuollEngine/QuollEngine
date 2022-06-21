@@ -2,13 +2,15 @@ value = 0
 event = 0
 target = -1
 key_value = -1
+global_dt = 0.0
 
 function start()
     value = value - 1
 end
 
-function update()
+function update(dt)
     value = value + 1
+    global_dt = dt
 end
 
 function on_collision_start(collision)

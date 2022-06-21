@@ -41,12 +41,13 @@ void ScriptingSystem::start(EntityContext &entityContext) {
       });
 }
 
-void ScriptingSystem::update(EntityContext &entityContext) {
+void ScriptingSystem::update(float dt, EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
   entityContext.iterateEntities<ScriptingComponent>(
-      [this](auto entity, ScriptingComponent &component) {
+      [this, &dt](auto entity, ScriptingComponent &component) {
         component.scope.luaGetGlobal("update");
-        component.scope.call(0);
+        component.scope.set(dt);
+        component.scope.call(1);
       });
 }
 

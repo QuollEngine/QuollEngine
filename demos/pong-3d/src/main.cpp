@@ -11,12 +11,11 @@
 
 #include "liquid/scene/SceneUpdater.h"
 #include "liquid/asset/AssetManager.h"
+#include "liquid/scripting/ScriptingSystem.h"
 
 #include "liquid/loop/MainLoop.h"
 
 #include "liquid/rhi/vulkan/VulkanRenderBackend.h"
-
-#include <GLFW/glfw3.h>
 
 class Game {
 public:
@@ -27,10 +26,7 @@ public:
         presenter(renderer.getShaderLibrary(), renderer.getRegistry()),
         physicsSystem(eventSystem),
         assetManager(std::filesystem::current_path()),
-        vertexShader(
-            renderer.getRegistry().setShader({"basic-shader.vert.spv"})),
-        fragmentShader(
-            renderer.getRegistry().setShader({"basic-shader.frag.spv"})) {
+        scriptingSystem(eventSystem, assetManager.getRegistry()) {
 
     assetManager.preloadAssets(renderer.getRegistry());
 
@@ -42,12 +38,6 @@ public:
         ballMesh = handle;
       }
     }
-
-    eventSystem.observe(liquid::KeyboardEvent::Pressed,
-                        [this](const auto &data) { handleKeyClick(data.key); });
-
-    eventSystem.observe(liquid::KeyboardEvent::Released,
-                        [this](const auto &data) { handleKeyRelease(); });
 
     setupScene();
   }
@@ -73,7 +63,9 @@ public:
     const auto &passData = sceneRenderer.attach(graph);
 
     mainLoop.setUpdateFn([=](float dt) mutable {
+      scriptingSystem.start(entityContext);
       eventSystem.poll();
+      scriptingSystem.update(dt, entityContext);
 
       auto &component =
           entityContext.getComponent<liquid::CameraComponent>(cameraEntity);
@@ -115,33 +107,11 @@ public:
   }
 
 private:
-  void handleKeyRelease() { playerVelocity = 0.0; }
-
-  void handleKeyClick(int key) {
-    // TODO: Smoother input handling
-    // When switching between input clicks, the input gets confused
-    // We might need some kind of a queue here to make sure that multiple
-    // input clicks are handled
-
-    if (key == GLFW_KEY_D) {
-      playerVelocity = -velocity;
-    }
-
-    if (key == GLFW_KEY_A) {
-      playerVelocity = velocity;
-    }
-  }
-
   void updateScene() {
     {
       auto &transform =
           entityContext.getComponent<liquid::LocalTransformComponent>(p2);
       transform.localPosition.x = botPosition;
-    }
-    {
-      auto &transform =
-          entityContext.getComponent<liquid::LocalTransformComponent>(p1);
-      transform.localPosition.x = playerPosition;
     }
 
     sceneUpdater.update(entityContext);
@@ -173,12 +143,6 @@ private:
     if (newBotPosition - paddleWidth > wallLineRight &&
         newBotPosition + paddleWidth < wallLineLeft) {
       botPosition = newBotPosition;
-    }
-
-    float newPlayerPosition = playerPosition + playerVelocity * dt;
-    if (newPlayerPosition - paddleWidth > wallLineRight &&
-        newPlayerPosition + paddleWidth < wallLineLeft) {
-      playerPosition = newPlayerPosition;
     }
   }
 
@@ -280,22 +244,24 @@ private:
 
     // Create paddles
     {
-      liquid::LocalTransformComponent transform;
-      transform.localPosition = glm::vec3(playerPosition, 0.0f, -3.0f);
-      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+      auto [_, playerScriptHandle] = assetManager.getRegistry().getAssetByPath(
+          assetManager.getAssetsPath() / "player.lua");
+
+      entityContext.setComponent<liquid::ScriptingComponent>(
+          p1, {static_cast<liquid::LuaScriptAssetHandle>(playerScriptHandle)});
 
       entityContext.setComponent<liquid::CollidableComponent>(
           p1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
 
-      entityContext.setComponent(p1, transform);
+      entityContext.setComponent<liquid::LocalTransformComponent>(p1, {});
       entityContext.setComponent<liquid::WorldTransformComponent>(p1, {});
     }
 
     {
       liquid::LocalTransformComponent transform;
-      transform.localPosition = glm::vec3(playerPosition, 0.0f, 3.0f);
+      transform.localPosition = glm::vec3(0.0, 0.0f, 3.0f);
       transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
 
       entityContext.setComponent<liquid::CollidableComponent>(
@@ -336,12 +302,10 @@ private:
   liquid::Renderer renderer;
   liquid::Presenter presenter;
   liquid::PhysicsSystem physicsSystem;
+  liquid::ScriptingSystem scriptingSystem;
 
   liquid::Entity cameraEntity = liquid::EntityNull;
   liquid::SceneUpdater sceneUpdater;
-
-  liquid::rhi::ShaderHandle vertexShader;
-  liquid::rhi::ShaderHandle fragmentShader;
 
   liquid::MeshAssetHandle barMesh, ballMesh;
 
@@ -363,9 +327,6 @@ private:
 
   float safeAreaTop = 2.7f;
   float safeAreaBottom = -2.7f;
-
-  float playerVelocity = 0.0f;
-  float playerPosition = 0.0f;
 
   float botVelocity = 0.0f;
   float botPosition = 0.0f;
