@@ -10,6 +10,7 @@
 #include "liquid/scripting/ScriptingSystem.h"
 #include "liquid/renderer/Presenter.h"
 #include "liquid/asset/FileTracker.h"
+#include "liquid/core/EntityDeleter.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -113,6 +114,7 @@ void EditorScreen::start(const Project &project) {
   liquid::SkeletonUpdater skeletonUpdater;
   liquid::ScriptingSystem scriptingSystem(mEventSystem,
                                           assetManager.getRegistry());
+  liquid::EntityDeleter entityDeleter;
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                                      mDevice->getDeviceStats(),
@@ -152,7 +154,7 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,
-                        &scriptingSystem, &sceneUpdater,
+                        &scriptingSystem, &sceneUpdater, &entityDeleter,
                         this](float dt) mutable {
     bool isPlaying = entityManager.isUsingSimulationContext();
 
@@ -173,6 +175,8 @@ void EditorScreen::start(const Project &project) {
     if (isPlaying) {
       physicsSystem.update(dt, entityContext);
     }
+
+    entityDeleter.update(entityContext);
     return true;
   });
 

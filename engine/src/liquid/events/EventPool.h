@@ -2,6 +2,7 @@
 
 #include "liquid/core/RingBuffer.h"
 #include "liquid/core/SwappableVector.h"
+#include "liquid/core/SparseSet.h"
 #include "EventObserver.h"
 
 namespace liquid {
@@ -52,8 +53,7 @@ public:
       mObservers.insert({type, {}});
     }
 
-    mObservers.at(type).push_back(observer);
-    return mObservers.at(type).size() - 1;
+    return mObservers.at(type).insert(observer);
   }
 
   /**
@@ -107,7 +107,7 @@ public:
    * @param type Event type
    * @return Observers for event type
    */
-  inline const SwappableVector<EventObserver> &getObservers(TEvent type) const {
+  inline const SparseSet<EventObserver> &getObservers(TEvent type) const {
     LIQUID_ASSERT(mObservers.find(type) != mObservers.end(),
                   "No observers found for event");
     return mObservers.at(type);
@@ -115,7 +115,7 @@ public:
 
 private:
   RingBuffer<Event> mQueue{DEFAULT_SIZE};
-  std::map<TEvent, SwappableVector<EventObserver>> mObservers;
+  std::map<TEvent, SparseSet<EventObserver>> mObservers;
 };
 
 } // namespace liquid
