@@ -14,9 +14,11 @@ void EntityManager::save(liquid::Entity entity) {
   if (mInSimulation)
     return;
 
+  auto entityId = mEntityContext.getComponent<liquid::IdComponent>(entity).id;
+
   YAML::Node node;
   node["version"] = "0.1";
-  node["id"] = mEntityContext.getComponent<liquid::IdComponent>(entity).id;
+  node["id"] = entityId;
 
   if (mEntityContext.hasComponent<liquid::NameComponent>(entity)) {
     const auto &name =
@@ -105,7 +107,7 @@ void EntityManager::save(liquid::Entity entity) {
                                        .relativePath.string();
   }
 
-  auto fileName = std::to_string(entity) + ".lqnode";
+  auto fileName = std::to_string(entityId) + ".lqnode";
   std::ofstream out(mScenePath / fileName, std::ios::out);
   out << node;
   out.close();
@@ -441,9 +443,9 @@ void EntityManager::deleteEntity(liquid::Entity entity) {
   auto id = getActiveEntityContext().getComponent<liquid::IdComponent>(entity);
 
   auto fileName = std::to_string(id.id) + ".lqnode";
-  getActiveEntityContext().deleteEntity(entity);
+  getActiveEntityContext().setComponent<liquid::DeleteComponent>(entity, {});
 
-  if (mInSimulation) {
+  if (!mInSimulation) {
     std::filesystem::remove(std::filesystem::path(mScenePath / fileName));
   }
 

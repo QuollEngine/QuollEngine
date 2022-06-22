@@ -43,6 +43,14 @@ void ScriptingSystem::start(EntityContext &entityContext) {
 
 void ScriptingSystem::update(float dt, EntityContext &entityContext) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
+
+  entityContext.iterateEntities<ScriptingComponent, DeleteComponent>(
+      [this, &entityContext](auto entity, ScriptingComponent &scripting,
+                             auto &) {
+        destroyScriptingData(scripting);
+        entityContext.deleteComponent<ScriptingComponent>(entity);
+      });
+
   entityContext.iterateEntities<ScriptingComponent>(
       [this, &dt](auto entity, ScriptingComponent &component) {
         component.scope.luaGetGlobal("update");

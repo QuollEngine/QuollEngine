@@ -41,6 +41,36 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), DELTA_TIME);
 }
 
+TEST_F(ScriptingSystemTest,
+       DeleteScriptingComponentForEntitiesWithDeleteComponents) {
+  auto handle = assetManager
+                    .loadLuaScriptFromFile(std::filesystem::current_path() /
+                                           "scripting-system-tester.lua")
+                    .getData();
+
+  static constexpr size_t NUM_ENTITIES = 20;
+
+  std::vector<liquid::Entity> entities(NUM_ENTITIES, liquid::EntityNull);
+  for (size_t i = 0; i < entities.size(); ++i) {
+    auto entity = entityContext.createEntity();
+    entities.at(i) = entity;
+
+    entityContext.setComponent<liquid::ScriptingComponent>(entity, {handle});
+    if ((i % 2) == 0) {
+      entityContext.setComponent<liquid::DeleteComponent>(entity, {});
+    }
+  }
+
+  scriptingSystem.start(entityContext);
+  scriptingSystem.update(DELTA_TIME, entityContext);
+
+  for (size_t i = 0; i < entities.size(); ++i) {
+    auto entity = entities.at(i);
+    EXPECT_NE(entityContext.hasComponent<liquid::ScriptingComponent>(entity),
+              (i % 2) == 0);
+  }
+}
+
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto handle = assetManager
                     .loadLuaScriptFromFile(std::filesystem::current_path() /
