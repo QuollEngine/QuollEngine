@@ -2,6 +2,7 @@
 
 #include "liquid/asset/AssetManager.h"
 #include "liquid/platform-tools/NativeFileDialog.h"
+#include "liquid/platform-tools/NativeFileOpener.h"
 
 #include "../asset/GLTFImporter.h"
 #include "../editor-scene/EditorManager.h"
@@ -80,6 +81,7 @@ private:
   size_t mSelected = std::numeric_limits<size_t>::max();
   GLTFImporter &mGltfImporter;
   liquid::platform_tools::NativeFileDialog mFileDialog;
+  liquid::platform_tools::NativeFileOpener mFileOpener;
 
   AssetLoadStatusDialog mStatusDialog;
 };
