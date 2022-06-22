@@ -71,17 +71,14 @@ Result<bool> AssetManager::loadAsset(const Path &path) {
 }
 
 Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
-  const auto &asset = mRegistry.getAssetByPath(path);
   const auto &ext = path.extension().string();
+  const auto &asset = mRegistry.getAssetByPath(path);
 
-  uint32_t handle = 0;
+  uint32_t handle = updateExisting ? asset.second : 0;
 
-  if (asset.first != AssetType::None && updateExisting) {
-    handle = asset.second;
-  }
-
-  if (updateExisting && asset.first != AssetType::LuaScript) {
-    return Result<bool>::Error("Can only reload Lua assets on watch");
+  if (updateExisting && asset.first != AssetType::None &&
+      asset.first != AssetType::LuaScript) {
+    return Result<bool>::Error("Can only reload Lua scripts on watch");
   }
 
   if (ext == ".ktx2") {

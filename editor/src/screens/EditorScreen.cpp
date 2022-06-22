@@ -84,16 +84,6 @@ void EditorScreen::start(const Project &project) {
   liquid::FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  mWindow.addFocusHandler([&tracker, &assetManager, &renderer](bool focused) {
-    if (!focused)
-      return;
-
-    const auto &changes = tracker.trackForChanges();
-    for (auto &change : changes) {
-      assetManager.loadAsset(change.path);
-    }
-  });
-
   liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenePath);
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityContext(),
@@ -143,6 +133,19 @@ void EditorScreen::start(const Project &project) {
   mWindow.addResizeHandler([&graph](auto width, auto height) {
     graph.setFramebufferExtent({width, height});
   });
+
+  mWindow.addFocusHandler(
+      [&tracker, &assetManager, &renderer, &ui](bool focused) {
+        if (!focused)
+          return;
+
+        const auto &changes = tracker.trackForChanges();
+        for (auto &change : changes) {
+          assetManager.loadAsset(change.path);
+        }
+
+        ui.getAssetBrowser().reload();
+      });
 
   {
     constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
