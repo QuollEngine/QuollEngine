@@ -250,6 +250,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
                           entry.assetType == liquid::AssetType::Skeleton ||
                           entry.assetType == liquid::AssetType::Texture ||
                           entry.assetType == liquid::AssetType::LuaScript;
+
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
             ImGui::SetDragDropPayload(
