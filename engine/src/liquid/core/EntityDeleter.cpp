@@ -3,18 +3,18 @@
 
 namespace liquid {
 
-void EntityDeleter::update(EntityContext &entityContext) {
+void EntityDeleter::update(EntityDatabase &entityDatabase) {
 
-  auto count = entityContext.getEntityCountForComponent<DeleteComponent>();
+  auto count = entityDatabase.getEntityCountForComponent<DeleteComponent>();
 
   std::vector<Entity> deleteList;
   deleteList.reserve(count);
 
-  entityContext.iterateEntities<liquid::DeleteComponent>(
+  entityDatabase.iterateEntities<liquid::DeleteComponent>(
       [&deleteList](auto entity, auto &) { deleteList.push_back(entity); });
 
   for (auto entity : deleteList) {
-    entityContext.deleteEntity(entity);
+    entityDatabase.deleteEntity(entity);
   }
 }
 

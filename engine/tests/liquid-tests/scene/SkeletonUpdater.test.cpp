@@ -5,13 +5,13 @@
 
 struct SkeletonUpdaterTest : public ::testing::Test {
   liquid::SkeletonAssetHandle handle{2};
-  liquid::EntityContext entityContext;
+  liquid::EntityDatabase entityDatabase;
   liquid::SkeletonUpdater skeletonUpdater;
 
   std::tuple<liquid::SkeletonComponent &, liquid::SkeletonDebugComponent &,
              liquid::Entity>
   createSkeleton(uint32_t numJoints) {
-    auto entity = entityContext.createEntity();
+    auto entity = entityDatabase.createEntity();
 
     liquid::SkeletonComponent skeleton;
 
@@ -30,7 +30,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
       skeleton.jointNames.push_back("Joint " + std::to_string(i));
     }
 
-    entityContext.setComponent(entity, skeleton);
+    entityDatabase.setComponent(entity, skeleton);
 
     liquid::SkeletonDebugComponent skeletonDebug{};
     auto numBones = skeleton.numJoints * 2;
@@ -43,17 +43,17 @@ struct SkeletonUpdaterTest : public ::testing::Test {
 
     skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
 
-    entityContext.setComponent(entity, skeletonDebug);
+    entityDatabase.setComponent(entity, skeletonDebug);
 
     return {getSkeleton(entity), getDebugSkeleton(entity), entity};
   }
 
   liquid::SkeletonComponent &getSkeleton(liquid::Entity entity) {
-    return entityContext.getComponent<liquid::SkeletonComponent>(entity);
+    return entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
   }
 
   liquid::SkeletonDebugComponent &getDebugSkeleton(liquid::Entity entity) {
-    return entityContext.getComponent<liquid::SkeletonDebugComponent>(entity);
+    return entityDatabase.getComponent<liquid::SkeletonDebugComponent>(entity);
   }
 
   glm::mat4 getLocalTransform(liquid::SkeletonComponent &skeleton, uint32_t i) {
@@ -77,7 +77,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesWorldTransformsOnUpdate) {
   EXPECT_EQ(skeleton.jointWorldTransforms.at(1), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.jointWorldTransforms.at(2), glm::mat4(1.0f));
 
-  skeletonUpdater.update(entityContext);
+  skeletonUpdater.update(entityDatabase);
 
   EXPECT_EQ(skeleton.jointWorldTransforms.at(0),
             getLocalTransform(skeleton, 0));
@@ -96,7 +96,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesFinalTransformOnUpdate) {
   EXPECT_EQ(skeleton.jointFinalTransforms.at(1), glm::mat4(1.0f));
   EXPECT_EQ(skeleton.jointFinalTransforms.at(2), glm::mat4(1.0f));
 
-  skeletonUpdater.update(entityContext);
+  skeletonUpdater.update(entityDatabase);
 
   EXPECT_EQ(skeleton.jointFinalTransforms.at(0),
             skeleton.jointWorldTransforms.at(0) *
@@ -116,7 +116,7 @@ TEST_F(SkeletonUpdaterTest, UpdatesDebugBonesOnUpdate) {
     EXPECT_EQ(transform, glm::mat4{1.0f});
   }
 
-  skeletonUpdater.update(entityContext);
+  skeletonUpdater.update(entityDatabase);
 
   for (size_t i = 0; i < skeletonDebug.bones.size(); ++i) {
     EXPECT_EQ(skeletonDebug.boneTransforms.at(i),
@@ -128,7 +128,7 @@ TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
   const auto &[skeleton, _, entity] = createSkeleton(2);
 
-  entityContext.setComponent<liquid::SkeletonDebugComponent>(entity, {});
+  entityDatabase.setComponent<liquid::SkeletonDebugComponent>(entity, {});
 
-  EXPECT_DEATH(skeletonUpdater.update(entityContext), ".*");
+  EXPECT_DEATH(skeletonUpdater.update(entityDatabase), ".*");
 }

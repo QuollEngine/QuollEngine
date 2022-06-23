@@ -254,26 +254,26 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   return SceneRenderPassData{sceneColor, depthBuffer};
 }
 
-void SceneRenderer::updateFrameData(EntityContext &entityContext,
+void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                     Entity camera) {
-  LIQUID_ASSERT(entityContext.hasComponent<CameraComponent>(camera),
+  LIQUID_ASSERT(entityDatabase.hasComponent<CameraComponent>(camera),
                 "Entity does not have a camera");
 
   LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
   mRenderStorage.clear();
 
   mRenderStorage.setCameraData(
-      entityContext.getComponent<CameraComponent>(camera));
+      entityDatabase.getComponent<CameraComponent>(camera));
 
   // Meshes
-  entityContext.iterateEntities<WorldTransformComponent, MeshComponent>(
+  entityDatabase.iterateEntities<WorldTransformComponent, MeshComponent>(
       [this](auto entity, const auto &world, const auto &mesh) {
         mRenderStorage.addMesh(mesh.handle, world.worldTransform);
       });
 
   // Skinned Meshes
-  entityContext.iterateEntities<SkeletonComponent, WorldTransformComponent,
-                                SkinnedMeshComponent>(
+  entityDatabase.iterateEntities<SkeletonComponent, WorldTransformComponent,
+                                 SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &world,
              const auto &mesh) {
         mRenderStorage.addSkinnedMesh(mesh.handle, world.worldTransform,
@@ -281,13 +281,13 @@ void SceneRenderer::updateFrameData(EntityContext &entityContext,
       });
 
   // Lights
-  entityContext.iterateEntities<DirectionalLightComponent>(
+  entityDatabase.iterateEntities<DirectionalLightComponent>(
       [this](auto entity, const auto &light) {
         mRenderStorage.addLight(light);
       });
 
   // Environments
-  entityContext.iterateEntities<EnvironmentComponent>(
+  entityDatabase.iterateEntities<EnvironmentComponent>(
       [this](auto entity, const auto &environment) {
         mRenderStorage.setEnvironmentTextures(environment.irradianceMap,
                                               environment.specularMap,

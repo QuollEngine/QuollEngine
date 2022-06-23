@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
 
 #include "PhysicsObjects.h"
@@ -37,31 +37,31 @@ public:
    * Performs physics simulation
    *
    * @param dt Time delta
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(float dt, EntityContext &entityContext);
+  void update(float dt, EntityDatabase &entityDatabase);
 
   /**
    * @brief Cleanup Physx actors and shapes
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void cleanup(EntityContext &entityContext);
+  void cleanup(EntityDatabase &entityDatabase);
 
 private:
   /**
    * @brief Synchronize physics components
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void synchronizeComponents(EntityContext &entityContext);
+  void synchronizeComponents(EntityDatabase &entityDatabase);
 
   /**
    * @brief Synchronize transforms
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void synchronizeTransforms(EntityContext &entityContext);
+  void synchronizeTransforms(EntityDatabase &entityDatabase);
 
 private:
   PhysicsSystemImpl *mImpl = nullptr;

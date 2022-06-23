@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
 #include "liquid/asset/AssetRegistry.h"
 
@@ -31,17 +31,17 @@ public:
   /**
    * @brief Call script start on new scripts
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void start(EntityContext &entityContext);
+  void start(EntityDatabase &entityDatabase);
 
   /**
    * @brief Call script update on new scripts
    *
    * @param dt Delta time
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(float dt, EntityContext &entityContext);
+  void update(float dt, EntityDatabase &entityDatabase);
 
   /**
    * @brief Cleanup components
@@ -49,9 +49,9 @@ public:
    * Destroys all scripting data and
    * removes event observers
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void cleanup(EntityContext &entityContext);
+  void cleanup(EntityDatabase &entityDatabase);
 
 private:
   /**

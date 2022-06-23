@@ -2,7 +2,7 @@
 
 #include "liquid/renderer/Renderer.h"
 #include "liquid/window/Window.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
 
 namespace liquidator {
@@ -60,12 +60,12 @@ public:
   /**
    * @brief Create editor camera
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    * @param eventSystem Event system
    * @param renderer Renderer
    * @param window Window
    */
-  EditorCamera(liquid::EntityContext &entityContext,
+  EditorCamera(liquid::EntityDatabase &entityDatabase,
                liquid::EventSystem &eventSystem, liquid::Renderer &renderer,
                liquid::Window &window);
 
@@ -238,7 +238,7 @@ private:
   liquid::EventObserverId mMouseScrollHandler = 0;
 
   liquid::Window &mWindow;
-  liquid::EntityContext &mEntityContext;
+  liquid::EntityDatabase &mEntityDatabase;
   liquid::EventSystem &mEventSystem;
   liquid::Entity mCameraEntity = liquid::EntityNull;
 };

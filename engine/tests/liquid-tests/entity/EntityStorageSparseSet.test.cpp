@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/entity/EntityStorageSparseSet.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 #include "liquid-tests/Testing.h"
 

@@ -170,34 +170,34 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
   return pass;
 }
 
-void EditorRenderer::updateFrameData(liquid::EntityContext &entityContext,
+void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
                                      liquid::Entity camera,
                                      const EditorGrid &editorGrid) {
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   mRenderStorage.clear();
 
   mRenderStorage.setActiveCamera(
-      entityContext.getComponent<liquid::CameraComponent>(camera));
+      entityDatabase.getComponent<liquid::CameraComponent>(camera));
 
   mRenderStorage.setEditorGrid(editorGrid.getData());
 
-  entityContext.iterateEntities<liquid::WorldTransformComponent,
-                                liquid::SkeletonDebugComponent>(
+  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
+                                 liquid::SkeletonDebugComponent>(
       [this](auto entity, liquid::WorldTransformComponent &worldTransform,
              liquid::SkeletonDebugComponent &skeleton) {
         mRenderStorage.addSkeleton(worldTransform.worldTransform,
                                    skeleton.boneTransforms);
       });
 
-  entityContext.iterateEntities<liquid::WorldTransformComponent,
-                                liquid::DirectionalLightComponent>(
+  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
+                                 liquid::DirectionalLightComponent>(
       [this](auto entity, const auto &world, const auto &light) {
         mRenderStorage.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
                                 world.worldTransform);
       });
 
-  entityContext.iterateEntities<liquid::WorldTransformComponent,
-                                liquid::PerspectiveLensComponent>(
+  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
+                                 liquid::PerspectiveLensComponent>(
       [this](auto entity, const auto &world, const auto &camera) {
         static constexpr float NINETY_DEGREES_IN_RADIANS =
             glm::pi<float>() / 2.0f;

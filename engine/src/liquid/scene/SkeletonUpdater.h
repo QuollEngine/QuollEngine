@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
@@ -17,9 +17,9 @@ public:
    * Update skeleton joint transforms and
    * debug skeleton bone transforms
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(EntityContext &entityContext);
+  void update(EntityDatabase &entityDatabase);
 };
 
 } // namespace liquid

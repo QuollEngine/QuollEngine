@@ -6,12 +6,12 @@ namespace liquid {
 AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
-void AnimationSystem::update(float dt, EntityContext &entityContext) {
+void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
-  entityContext.iterateEntities<LocalTransformComponent, AnimatorComponent>(
-      [&entityContext, &animMap, this, dt](Entity entity, auto &transform,
-                                           auto &animComp) {
+  entityDatabase.iterateEntities<LocalTransformComponent, AnimatorComponent>(
+      [&entityDatabase, &animMap, this, dt](Entity entity, auto &transform,
+                                            auto &animComp) {
         auto handle = animComp.animations.at(animComp.currentAnimation);
 
         if (!animMap.hasAsset(handle)) {
@@ -31,7 +31,7 @@ void AnimationSystem::update(float dt, EntityContext &entityContext) {
         }
 
         bool hasSkeleton =
-            entityContext.hasComponent<SkeletonComponent>(entity);
+            entityDatabase.hasComponent<SkeletonComponent>(entity);
 
         for (const auto &sequence : animation.data.keyframes) {
           const auto &value = mKeyframeInterpolator.interpolate(
@@ -39,7 +39,7 @@ void AnimationSystem::update(float dt, EntityContext &entityContext) {
 
           if (sequence.jointTarget && hasSkeleton) {
             auto &skeleton =
-                entityContext.getComponent<SkeletonComponent>(entity);
+                entityDatabase.getComponent<SkeletonComponent>(entity);
             if (sequence.target == KeyframeSequenceAssetTarget::Position) {
               skeleton.jointLocalPositions.at(sequence.joint) =
                   glm::vec3(value);

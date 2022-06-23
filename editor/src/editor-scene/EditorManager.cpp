@@ -107,7 +107,7 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
 }
 
 void EditorManager::setCamera(liquid::Entity camera) {
-  if (!mEntityManager.getActiveEntityContext()
+  if (!mEntityManager.getActiveEntityDatabase()
            .hasComponent<liquid::CameraComponent>(camera)) {
     return;
   }
@@ -130,7 +130,7 @@ void EditorManager::createNewScene() {
 
     auto light1 = mEntityManager.createEmptyEntity(liquid::EntityNull,
                                                    transform, "Light");
-    mEntityManager.getActiveEntityContext()
+    mEntityManager.getActiveEntityDatabase()
         .setComponent<liquid::DirectionalLightComponent>(light1, {});
     mEntityManager.save(light1);
   }
@@ -146,13 +146,13 @@ void EditorManager::loadOrCreateScene() {
 }
 
 void EditorManager::moveCameraToEntity(liquid::Entity entity) {
-  if (!mEntityManager.getActiveEntityContext()
+  if (!mEntityManager.getActiveEntityDatabase()
            .hasComponent<liquid::LocalTransformComponent>(entity)) {
     return;
   }
 
   auto &transformComponent =
-      mEntityManager.getActiveEntityContext()
+      mEntityManager.getActiveEntityDatabase()
           .getComponent<liquid::WorldTransformComponent>(entity);
 
   const auto &translation =
@@ -166,18 +166,19 @@ void EditorManager::moveCameraToEntity(liquid::Entity entity) {
 }
 
 bool EditorManager::hasEnvironment() {
-  return mEntityManager.getActiveEntityContext()
+  return mEntityManager.getActiveEntityDatabase()
       .hasComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
 liquid::EnvironmentComponent &EditorManager::getEnvironment() {
-  if (!mEntityManager.getActiveEntityContext().hasEntity(mEnvironmentEntity)) {
-    mEnvironmentEntity = mEntityManager.getActiveEntityContext().createEntity();
-    mEntityManager.getActiveEntityContext()
+  if (!mEntityManager.getActiveEntityDatabase().hasEntity(mEnvironmentEntity)) {
+    mEnvironmentEntity =
+        mEntityManager.getActiveEntityDatabase().createEntity();
+    mEntityManager.getActiveEntityDatabase()
         .setComponent<liquid::EnvironmentComponent>(mEnvironmentEntity, {});
   }
 
-  return mEntityManager.getActiveEntityContext()
+  return mEntityManager.getActiveEntityDatabase()
       .getComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 

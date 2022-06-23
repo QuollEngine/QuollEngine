@@ -12,7 +12,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
 void SceneHierarchyPanel::render(EditorManager &editorManager) {
   ImGui::Begin("Hierarchy");
 
-  mEntityManager.getActiveEntityContext()
+  mEntityManager.getActiveEntityDatabase()
       .iterateEntities<liquid::LocalTransformComponent>(
           [this, &editorManager](auto entity, const auto &transform) {
             renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
@@ -28,14 +28,14 @@ void SceneHierarchyPanel::setEntityClickHandler(
 
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
                                        EditorManager &editorManager) {
-  liquid::String name = mEntityManager.getActiveEntityContext()
+  liquid::String name = mEntityManager.getActiveEntityDatabase()
                                 .hasComponent<liquid::NameComponent>(entity)
-                            ? mEntityManager.getActiveEntityContext()
+                            ? mEntityManager.getActiveEntityDatabase()
                                   .getComponent<liquid::NameComponent>(entity)
                                   .name
                             : "Entity #" + std::to_string(entity);
 
-  bool isLeaf = !mEntityManager.getActiveEntityContext()
+  bool isLeaf = !mEntityManager.getActiveEntityDatabase()
                      .hasComponent<liquid::ChildrenComponent>(entity);
 
   int treeNodeFlags = flags;
@@ -80,10 +80,10 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   confirmDeleteSceneNode.render(editorManager);
 
   if (open) {
-    if (mEntityManager.getActiveEntityContext()
+    if (mEntityManager.getActiveEntityDatabase()
             .hasComponent<liquid::ChildrenComponent>(entity)) {
       for (auto childEntity :
-           mEntityManager.getActiveEntityContext()
+           mEntityManager.getActiveEntityDatabase()
                .getComponent<liquid::ChildrenComponent>(entity)
                .children) {
         renderEntity(childEntity, 0, editorManager);

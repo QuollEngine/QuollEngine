@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/window/Window.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
@@ -23,9 +23,9 @@ public:
   /**
    * @brief Update aspect ratios
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(EntityContext &entityContext);
+  void update(EntityDatabase &entityDatabase);
 
 private:
   Window &mWindow;

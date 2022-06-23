@@ -3,10 +3,10 @@
 
 namespace liquid {
 
-void SkeletonUpdater::update(EntityContext &entityContext) {
+void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
   {
     LIQUID_PROFILE_EVENT("SkeletonUpdater::update");
-    entityContext.iterateEntities<SkeletonComponent>(
+    entityDatabase.iterateEntities<SkeletonComponent>(
         [](auto entity, SkeletonComponent &skeleton) {
           for (uint32_t i = 0; i < skeleton.numJoints; ++i) {
             glm::mat4 identity{1.0f};
@@ -30,7 +30,7 @@ void SkeletonUpdater::update(EntityContext &entityContext) {
 
   {
     LIQUID_PROFILE_EVENT("SkeletonUpdater::updateDebug");
-    entityContext.iterateEntities<SkeletonComponent, SkeletonDebugComponent>(
+    entityDatabase.iterateEntities<SkeletonComponent, SkeletonDebugComponent>(
         [](auto entity, SkeletonComponent &skeleton,
            SkeletonDebugComponent &debug) {
           LIQUID_ASSERT(

@@ -6,11 +6,11 @@ namespace liquid {
 CameraAspectRatioUpdater::CameraAspectRatioUpdater(Window &window)
     : mWindow(window) {}
 
-void CameraAspectRatioUpdater::update(EntityContext &entityContext) {
+void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("CameraAspectRatioUpdater::update");
   const auto &size = mWindow.getWindowSize();
 
-  entityContext
+  entityDatabase
       .iterateEntities<PerspectiveLensComponent, AutoAspectRatioComponent>(
           [&size](auto entity, auto &lens, auto &_) {
             lens.aspectRatio =

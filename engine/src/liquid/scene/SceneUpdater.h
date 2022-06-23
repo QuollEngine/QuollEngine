@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/entity/Entity.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
@@ -13,31 +13,31 @@ public:
   /**
    * @brief Updates scene
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(EntityContext &entityContext);
+  void update(EntityDatabase &entityDatabase);
 
 private:
   /**
    * @brief Update all transforms
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void updateTransforms(EntityContext &entityContext);
+  void updateTransforms(EntityDatabase &entityDatabase);
 
   /**
    * @brief Update all cameras using transforms
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void updateCameras(EntityContext &entityContext);
+  void updateCameras(EntityDatabase &entityDatabase);
 
   /**
    * @brief Update all lights using transforms
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void updateLights(EntityContext &entityContext);
+  void updateLights(EntityDatabase &entityDatabase);
 };
 
 } // namespace liquid

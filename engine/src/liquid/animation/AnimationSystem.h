@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "KeyframeInterpolator.h"
 
@@ -22,9 +22,9 @@ public:
    * @brief Update all animations
    *
    * @param dt Time delta
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
-  void update(float dt, EntityContext &entityContext);
+  void update(float dt, EntityDatabase &entityDatabase);
 
 private:
   AssetRegistry &mAssetRegistry;

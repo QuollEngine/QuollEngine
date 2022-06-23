@@ -20,7 +20,7 @@ ProjectSelectorScreen::ProjectSelectorScreen(liquid::Window &window,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 std::optional<Project> ProjectSelectorScreen::start() {
-  liquid::EntityContext entityContext;
+  liquid::EntityDatabase entityDatabase;
   liquid::AssetRegistry assetRegistry;
 
   liquid::Renderer renderer(assetRegistry, mWindow, mDevice);
@@ -31,7 +31,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::EditorCamera editorCamera(entityContext, mEventSystem, renderer,
+  liquidator::EditorCamera editorCamera(entityDatabase, mEventSystem, renderer,
                                         mWindow);
   liquidator::IconRegistry iconRegistry;
   std::optional<liquidator::Project> project;
@@ -63,7 +63,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &imguiPassData,
                         &project, &projectManager, &iconRegistry,
-                        &entityContext, &presenter, this]() mutable {
+                        &entityDatabase, &presenter, this]() mutable {
     auto &imgui = renderer.getImguiRenderer();
 
     imgui.beginRendering();

@@ -11,12 +11,12 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
                                  AssetRegistry &assetRegistry)
     : mEventSystem(eventSystem), mAssetRegistry(assetRegistry) {}
 
-void ScriptingSystem::start(EntityContext &entityContext) {
+void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   EntityDecorator entityDecorator;
-  entityContext.iterateEntities<ScriptingComponent>(
-      [this, &entityContext, &entityDecorator](auto entity,
-                                               ScriptingComponent &component) {
+  entityDatabase.iterateEntities<ScriptingComponent>(
+      [this, &entityDatabase, &entityDecorator](auto entity,
+                                                ScriptingComponent &component) {
         if (component.started) {
           return;
         }
@@ -28,7 +28,7 @@ void ScriptingSystem::start(EntityContext &entityContext) {
         }
         component.scope = mLuaInterpreter.createScope();
 
-        entityDecorator.attachToScope(component.scope, entity, entityContext);
+        entityDecorator.attachToScope(component.scope, entity, entityDatabase);
 
         auto &script =
             mAssetRegistry.getLuaScripts().getAsset(component.handle);
@@ -41,17 +41,17 @@ void ScriptingSystem::start(EntityContext &entityContext) {
       });
 }
 
-void ScriptingSystem::update(float dt, EntityContext &entityContext) {
+void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
 
-  entityContext.iterateEntities<ScriptingComponent, DeleteComponent>(
-      [this, &entityContext](auto entity, ScriptingComponent &scripting,
-                             auto &) {
+  entityDatabase.iterateEntities<ScriptingComponent, DeleteComponent>(
+      [this, &entityDatabase](auto entity, ScriptingComponent &scripting,
+                              auto &) {
         destroyScriptingData(scripting);
-        entityContext.deleteComponent<ScriptingComponent>(entity);
+        entityDatabase.deleteComponent<ScriptingComponent>(entity);
       });
 
-  entityContext.iterateEntities<ScriptingComponent>(
+  entityDatabase.iterateEntities<ScriptingComponent>(
       [this, &dt](auto entity, ScriptingComponent &component) {
         component.scope.luaGetGlobal("update");
         component.scope.set(dt);
@@ -59,8 +59,8 @@ void ScriptingSystem::update(float dt, EntityContext &entityContext) {
       });
 }
 
-void ScriptingSystem::cleanup(EntityContext &entityContext) {
-  entityContext.iterateEntities<ScriptingComponent>(
+void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
+  entityDatabase.iterateEntities<ScriptingComponent>(
       [this](auto entity, ScriptingComponent &scripting) {
         destroyScriptingData(scripting);
       });

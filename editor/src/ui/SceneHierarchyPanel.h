@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "../editor-scene/EditorManager.h"
 #include "../editor-scene/EditorCamera.h"
 

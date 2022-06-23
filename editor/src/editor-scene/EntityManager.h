@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetManager.h"
 #include "liquid/renderer/Renderer.h"
 #include "EditorCamera.h"
@@ -147,31 +147,31 @@ public:
                              bool saveToFile = true);
 
   /**
-   * @brief Get active entity context
+   * @brief Get active entity database
    *
-   * @return Active entity context
+   * @return Active entity database
    */
-  inline liquid::EntityContext &getActiveEntityContext() {
-    return mInSimulation ? mSimulationEntityContext : mEntityContext;
+  inline liquid::EntityDatabase &getActiveEntityDatabase() {
+    return mInSimulation ? mSimulationEntityDatabase : mEntityDatabase;
   }
 
   /**
-   * @brief Use simulation context
+   * @brief Use simulation database
    */
-  void useSimulationContext();
+  void useSimulationDatabase();
 
   /**
-   * @brief Use editing context
+   * @brief Use editing database
    */
-  void useEditingContext();
+  void useEditingDatabase();
 
   /**
-   * @brief Check if using simulation context
+   * @brief Check if using simulation database
    *
-   * @retval true Using simulation context
-   * @retval false Using editing context
+   * @retval true Using simulation databse
+   * @retval false Using editing database
    */
-  inline bool isUsingSimulationContext() const { return mInSimulation; }
+  inline bool isUsingSimulationDatabase() const { return mInSimulation; }
 
 private:
   /**
@@ -184,16 +184,16 @@ private:
   getTransformFromCamera(EditorCamera &camera) const;
 
   /**
-   * @brief Update simulation entity context
+   * @brief Update simulation entity database
    *
-   * Copies entity context to simulation
-   * entity context
+   * Copies entity database to simulation
+   * entity database
    */
-  void updateSimulationEntityContext();
+  void updateSimulationEntityDatabase();
 
 private:
-  liquid::EntityContext mEntityContext;
-  liquid::EntityContext mSimulationEntityContext;
+  liquid::EntityDatabase mEntityDatabase;
+  liquid::EntityDatabase mSimulationEntityDatabase;
   liquid::AssetManager &mAssetManager;
   bool mInSimulation = false;
   liquid::Renderer &mRenderer;

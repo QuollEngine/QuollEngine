@@ -50,10 +50,10 @@ public:
   /**
    * @brief Update frame data
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    * @param camera Camera entity
    */
-  void updateFrameData(EntityContext &entityContext, Entity camera);
+  void updateFrameData(EntityDatabase &entityDatabase, Entity camera);
 
 private:
   /**

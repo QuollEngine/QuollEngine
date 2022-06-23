@@ -2,7 +2,7 @@
 #include "EditorScreen.h"
 
 #include "liquid/renderer/Renderer.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/StandardPushConstants.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/scene/SceneUpdater.h"
@@ -41,7 +41,7 @@ void randomSpawn(liquidator::EntityManager &entityManager,
       auto parent = entityManager.spawnEntity(
           editorManager.getEditorCamera(), liquid::EntityNull,
           static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
-      entityManager.getActiveEntityContext()
+      entityManager.getActiveEntityDatabase()
           .getComponent<liquid::LocalTransformComponent>(parent)
           .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
     }
@@ -86,7 +86,7 @@ void EditorScreen::start(const Project &project) {
 
   liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenePath);
-  liquidator::EditorCamera editorCamera(entityManager.getActiveEntityContext(),
+  liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                                         mEventSystem, renderer, mWindow);
   liquidator::EditorGrid editorGrid;
   liquidator::EditorManager editorManager(editorCamera, editorGrid,
@@ -159,27 +159,27 @@ void EditorScreen::start(const Project &project) {
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,
                         &scriptingSystem, &sceneUpdater, &entityDeleter,
                         this](float dt) mutable {
-    bool isPlaying = entityManager.isUsingSimulationContext();
+    bool isPlaying = entityManager.isUsingSimulationDatabase();
 
-    auto &entityContext = entityManager.getActiveEntityContext();
+    auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
     mEventSystem.poll();
-    aspectRatioUpdater.update(entityContext);
+    aspectRatioUpdater.update(entityDatabase);
     editorCamera.update();
 
     if (isPlaying) {
-      scriptingSystem.update(dt, entityContext);
-      animationSystem.update(dt, entityContext);
+      scriptingSystem.update(dt, entityDatabase);
+      animationSystem.update(dt, entityDatabase);
     }
 
-    skeletonUpdater.update(entityContext);
-    sceneUpdater.update(entityContext);
+    skeletonUpdater.update(entityDatabase);
+    sceneUpdater.update(entityDatabase);
 
     if (isPlaying) {
-      physicsSystem.update(dt, entityContext);
+      physicsSystem.update(dt, entityDatabase);
     }
 
-    entityDeleter.update(entityContext);
+    entityDeleter.update(entityDatabase);
     return true;
   });
 
@@ -203,18 +203,18 @@ void EditorScreen::start(const Project &project) {
       size = ImGui::GetContentRegionAvail();
 
       auto icon =
-          entityManager.isUsingSimulationContext()
+          entityManager.isUsingSimulationDatabase()
               ? ui.getIconRegistry().getIcon(liquidator::EditorIcon::Stop)
               : ui.getIconRegistry().getIcon(liquidator::EditorIcon::Play);
 
       if (liquid::imgui::imageButton(icon, ImVec2(ICON_SIZE, ICON_SIZE))) {
-        if (entityManager.isUsingSimulationContext()) {
-          physicsSystem.cleanup(entityManager.getActiveEntityContext());
-          scriptingSystem.cleanup(entityManager.getActiveEntityContext());
-          entityManager.useEditingContext();
+        if (entityManager.isUsingSimulationDatabase()) {
+          physicsSystem.cleanup(entityManager.getActiveEntityDatabase());
+          scriptingSystem.cleanup(entityManager.getActiveEntityDatabase());
+          entityManager.useEditingDatabase();
         } else {
-          entityManager.useSimulationContext();
-          scriptingSystem.start(entityManager.getActiveEntityContext());
+          entityManager.useSimulationDatabase();
+          scriptingSystem.start(entityManager.getActiveEntityDatabase());
         }
       }
 
@@ -260,9 +260,9 @@ void EditorScreen::start(const Project &project) {
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      sceneRenderer.updateFrameData(entityManager.getActiveEntityContext(),
+      sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
                                     editorManager.getCamera());
-      editorRenderer.updateFrameData(entityManager.getActiveEntityContext(),
+      editorRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
                                      editorManager.getCamera(),
                                      editorManager.getEditorGrid());
 

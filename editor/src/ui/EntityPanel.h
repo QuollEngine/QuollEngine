@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
 

@@ -26,7 +26,7 @@
 
 namespace liquid {
 
-using EntityContext = EntityStorageSparseSet<
+using EntityDatabase = EntityStorageSparseSet<
     IdComponent, DeleteComponent, MeshComponent, DirectionalLightComponent,
     CameraComponent, AutoAspectRatioComponent, PerspectiveLensComponent,
     LocalTransformComponent, WorldTransformComponent, ParentComponent,

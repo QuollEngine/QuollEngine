@@ -2,22 +2,22 @@
 #include "NameComponent.h"
 
 #include "liquid/scripting/LuaScope.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
 int NameComponent::LuaInterface::get(void *state) {
   LuaScope scope(state);
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
 
-  if (entityContext.hasComponent<NameComponent>(entity)) {
-    scope.set(entityContext.getComponent<NameComponent>(entity).name);
+  if (entityDatabase.hasComponent<NameComponent>(entity)) {
+    scope.set(entityDatabase.getComponent<NameComponent>(entity).name);
   } else {
     scope.set<String>("");
   }
@@ -35,13 +35,13 @@ int NameComponent::LuaInterface::set(void *state) {
   auto string = scope.get<String>(1);
   scope.pop(1);
 
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
   Entity entity = scope.popLast<uint32_t>();
 
-  entityContext.setComponent<NameComponent>(entity, {string});
+  entityDatabase.setComponent<NameComponent>(entity, {string});
 
   return 0;
 };
