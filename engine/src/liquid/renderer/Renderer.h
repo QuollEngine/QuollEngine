@@ -6,7 +6,7 @@
 #include "SceneRenderer.h"
 #include "RenderStorage.h"
 #include "liquid/imgui/ImguiRenderer.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetRegistry.h"
 
 namespace liquid {

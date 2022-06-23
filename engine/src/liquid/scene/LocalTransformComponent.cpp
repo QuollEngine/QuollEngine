@@ -2,7 +2,7 @@
 #include "LocalTransformComponent.h"
 
 #include "liquid/scripting/LuaScope.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
@@ -20,15 +20,16 @@ int LocalTransformComponent::LuaInterface::setPosition(void *state) {
   newPosition.z = scope.get<float>(3);
   scope.pop(3);
 
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
 
-  auto &transform = entityContext.getComponent<LocalTransformComponent>(entity);
+  auto &transform =
+      entityDatabase.getComponent<LocalTransformComponent>(entity);
   transform.localPosition = newPosition;
 
   return 0;
@@ -36,8 +37,8 @@ int LocalTransformComponent::LuaInterface::setPosition(void *state) {
 
 int LocalTransformComponent::LuaInterface::getScale(void *state) {
   LuaScope scope(state);
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
@@ -45,7 +46,7 @@ int LocalTransformComponent::LuaInterface::getScale(void *state) {
   scope.pop(2);
 
   const auto &scale =
-      entityContext.getComponent<LocalTransformComponent>(entity).localScale;
+      entityDatabase.getComponent<LocalTransformComponent>(entity).localScale;
 
   scope.set(scale.x);
   scope.set(scale.y);
@@ -68,15 +69,16 @@ int LocalTransformComponent::LuaInterface::setScale(void *state) {
   newScale.z = scope.get<float>(3);
   scope.pop(3);
 
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
 
-  auto &transform = entityContext.getComponent<LocalTransformComponent>(entity);
+  auto &transform =
+      entityDatabase.getComponent<LocalTransformComponent>(entity);
   transform.localScale = newScale;
 
   return 0;
@@ -84,8 +86,8 @@ int LocalTransformComponent::LuaInterface::setScale(void *state) {
 
 int LocalTransformComponent::LuaInterface::getPosition(void *state) {
   LuaScope scope(state);
-  EntityContext &entityContext = *static_cast<EntityContext *>(
-      scope.getGlobal<LuaUserData>("__privateContext").pointer);
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   auto entityTable = scope.getGlobal<LuaTable>("entity");
   entityTable.get("id");
@@ -93,7 +95,8 @@ int LocalTransformComponent::LuaInterface::getPosition(void *state) {
   scope.pop(2);
 
   const auto &position =
-      entityContext.getComponent<LocalTransformComponent>(entity).localPosition;
+      entityDatabase.getComponent<LocalTransformComponent>(entity)
+          .localPosition;
 
   scope.set(position.x);
   scope.set(position.y);

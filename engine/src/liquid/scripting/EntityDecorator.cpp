@@ -28,9 +28,9 @@ void registerComponent(LuaScope &scope, LuaTable &table) {
 }
 
 void EntityDecorator::attachToScope(LuaScope &scope, Entity entity,
-                                    EntityContext &entityContext) {
-  scope.setGlobal<LuaUserData>("__privateContext",
-                               {static_cast<void *>(&entityContext)});
+                                    EntityDatabase &entityDatabase) {
+  scope.setGlobal<LuaUserData>("__privateDatabase",
+                               {static_cast<void *>(&entityDatabase)});
 
   auto table = scope.createTable(2);
   table.set("id", entity);

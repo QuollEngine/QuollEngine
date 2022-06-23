@@ -14,46 +14,46 @@ void EntityManager::save(liquid::Entity entity) {
   if (mInSimulation)
     return;
 
-  auto entityId = mEntityContext.getComponent<liquid::IdComponent>(entity).id;
+  auto entityId = mEntityDatabase.getComponent<liquid::IdComponent>(entity).id;
 
   YAML::Node node;
   node["version"] = "0.1";
   node["id"] = entityId;
 
-  if (mEntityContext.hasComponent<liquid::NameComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::NameComponent>(entity)) {
     const auto &name =
-        mEntityContext.getComponent<liquid::NameComponent>(entity).name;
+        mEntityDatabase.getComponent<liquid::NameComponent>(entity).name;
     node["components"]["name"] = name;
   }
 
-  if (mEntityContext.hasComponent<liquid::LocalTransformComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::LocalTransformComponent>(entity)) {
     const auto &transform =
-        mEntityContext.getComponent<liquid::LocalTransformComponent>(entity);
+        mEntityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
 
     node["components"]["transform"]["position"] = transform.localPosition;
     node["components"]["transform"]["rotation"] = transform.localRotation;
     node["components"]["transform"]["scale"] = transform.localScale;
   }
 
-  if (mEntityContext.hasComponent<liquid::ParentComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
     node["components"]["transform"]["parent"] =
-        mEntityContext.getComponent<liquid::ParentComponent>(entity).parent;
+        mEntityDatabase.getComponent<liquid::ParentComponent>(entity).parent;
   } else {
     node["components"]["transform"]["parent"] = 0;
   }
 
-  if (mEntityContext.hasComponent<liquid::MeshComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::MeshComponent>(entity)) {
     auto handle =
-        mEntityContext.getComponent<liquid::MeshComponent>(entity).handle;
+        mEntityDatabase.getComponent<liquid::MeshComponent>(entity).handle;
 
     node["components"]["mesh"] = mAssetManager.getRegistry()
                                      .getMeshes()
                                      .getAsset(handle)
                                      .relativePath.string();
-  } else if (mEntityContext.hasComponent<liquid::SkinnedMeshComponent>(
+  } else if (mEntityDatabase.hasComponent<liquid::SkinnedMeshComponent>(
                  entity)) {
     auto handle =
-        mEntityContext.getComponent<liquid::SkinnedMeshComponent>(entity)
+        mEntityDatabase.getComponent<liquid::SkinnedMeshComponent>(entity)
             .handle;
     node["components"]["skinnedMesh"] = mAssetManager.getRegistry()
                                             .getSkinnedMeshes()
@@ -61,9 +61,10 @@ void EntityManager::save(liquid::Entity entity) {
                                             .relativePath.string();
   }
 
-  if (mEntityContext.hasComponent<liquid::SkeletonComponent>(entity)) {
-    auto handle = mEntityContext.getComponent<liquid::SkeletonComponent>(entity)
-                      .assetHandle;
+  if (mEntityDatabase.hasComponent<liquid::SkeletonComponent>(entity)) {
+    auto handle =
+        mEntityDatabase.getComponent<liquid::SkeletonComponent>(entity)
+            .assetHandle;
 
     node["components"]["skeleton"] = mAssetManager.getRegistry()
                                          .getSkeletons()
@@ -71,9 +72,9 @@ void EntityManager::save(liquid::Entity entity) {
                                          .relativePath.string();
   }
 
-  if (mEntityContext.hasComponent<liquid::DirectionalLightComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::DirectionalLightComponent>(entity)) {
     const auto &light =
-        mEntityContext.getComponent<liquid::DirectionalLightComponent>(entity);
+        mEntityDatabase.getComponent<liquid::DirectionalLightComponent>(entity);
 
     // Directional light
     node["components"]["light"]["type"] = 0;
@@ -81,25 +82,26 @@ void EntityManager::save(liquid::Entity entity) {
     node["components"]["light"]["intensity"] = light.intensity;
   }
 
-  if (mEntityContext.hasComponent<liquid::PerspectiveLensComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::PerspectiveLensComponent>(entity)) {
     const auto &lens =
-        mEntityContext.getComponent<liquid::PerspectiveLensComponent>(entity);
+        mEntityDatabase.getComponent<liquid::PerspectiveLensComponent>(entity);
 
     node["components"]["camera"]["type"] = 0; // ZERO = Perspective
     node["components"]["camera"]["fov"] = lens.fovY;
     node["components"]["camera"]["near"] = lens.near;
     node["components"]["camera"]["far"] = lens.far;
 
-    if (mEntityContext.hasComponent<liquid::AutoAspectRatioComponent>(entity)) {
+    if (mEntityDatabase.hasComponent<liquid::AutoAspectRatioComponent>(
+            entity)) {
       node["components"]["camera"]["aspectRatio"] = "auto";
     } else {
       node["components"]["camera"]["aspectRatio"] = lens.aspectRatio;
     }
   }
 
-  if (mEntityContext.hasComponent<liquid::ScriptingComponent>(entity)) {
+  if (mEntityDatabase.hasComponent<liquid::ScriptingComponent>(entity)) {
     const auto &script =
-        mEntityContext.getComponent<liquid::ScriptingComponent>(entity);
+        mEntityDatabase.getComponent<liquid::ScriptingComponent>(entity);
 
     node["components"]["script"] = mAssetManager.getRegistry()
                                        .getLuaScripts()
@@ -116,23 +118,24 @@ void EntityManager::save(liquid::Entity entity) {
 liquid::Entity EntityManager::createEmptyEntity(
     liquid::Entity parent, const liquid::LocalTransformComponent &transform,
     const liquid::String &name) {
-  auto entity = getActiveEntityContext().createEntity();
-  getActiveEntityContext().setComponent<liquid::IdComponent>(entity, {mLastId});
-  getActiveEntityContext().setComponent(entity, transform);
-  getActiveEntityContext().setComponent<liquid::WorldTransformComponent>(entity,
-                                                                         {});
+  auto entity = getActiveEntityDatabase().createEntity();
+  getActiveEntityDatabase().setComponent<liquid::IdComponent>(entity,
+                                                              {mLastId});
+  getActiveEntityDatabase().setComponent(entity, transform);
+  getActiveEntityDatabase().setComponent<liquid::WorldTransformComponent>(
+      entity, {});
 
-  if (getActiveEntityContext().hasEntity(parent)) {
-    getActiveEntityContext().setComponent<liquid::ParentComponent>(entity,
-                                                                   {parent});
+  if (getActiveEntityDatabase().hasEntity(parent)) {
+    getActiveEntityDatabase().setComponent<liquid::ParentComponent>(entity,
+                                                                    {parent});
 
-    if (!getActiveEntityContext().hasComponent<liquid::ChildrenComponent>(
+    if (!getActiveEntityDatabase().hasComponent<liquid::ChildrenComponent>(
             parent)) {
-      getActiveEntityContext().setComponent<liquid::ChildrenComponent>(parent,
-                                                                       {});
+      getActiveEntityDatabase().setComponent<liquid::ChildrenComponent>(parent,
+                                                                        {});
     }
 
-    getActiveEntityContext()
+    getActiveEntityDatabase()
         .getComponent<liquid::ChildrenComponent>(parent)
         .children.push_back(entity);
   }
@@ -176,9 +179,9 @@ bool EntityManager::loadScene() {
   std::map<uint64_t, liquid::Entity> newEntityMap;
 
   for (auto &[id, node] : mapping) {
-    auto entity = getActiveEntityContext().createEntity();
+    auto entity = getActiveEntityDatabase().createEntity();
     liquid::IdComponent idComponent = {node["id"].as<uint64_t>()};
-    getActiveEntityContext().setComponent(entity, idComponent);
+    getActiveEntityDatabase().setComponent(entity, idComponent);
     newEntityMap.insert_or_assign(idComponent.id, entity);
 
     mLastId = std::max(idComponent.id, mLastId);
@@ -204,8 +207,8 @@ bool EntityManager::loadScene() {
         component.localScale = parsed["scale"].as<glm::vec3>();
       }
 
-      getActiveEntityContext().setComponent(entity, component);
-      getActiveEntityContext().setComponent<liquid::WorldTransformComponent>(
+      getActiveEntityDatabase().setComponent(entity, component);
+      getActiveEntityDatabase().setComponent<liquid::WorldTransformComponent>(
           entity, {});
     }
 
@@ -259,7 +262,7 @@ bool EntityManager::loadScene() {
         liquid::DirectionalLightComponent component;
         component.color = color;
         component.intensity = intensity;
-        getActiveEntityContext().setComponent(entity, component);
+        getActiveEntityDatabase().setComponent(entity, component);
       }
     }
 
@@ -310,7 +313,7 @@ bool EntityManager::loadScene() {
 
       if (newEntityMap.find(parent) != newEntityMap.end()) {
         auto parentEntity = newEntityMap.at(parent);
-        getActiveEntityContext().setComponent<liquid::ParentComponent>(
+        getActiveEntityDatabase().setComponent<liquid::ParentComponent>(
             entity, {newEntityMap.at(parent)});
 
         childrenMap[parentEntity].push_back(entity);
@@ -319,7 +322,7 @@ bool EntityManager::loadScene() {
   }
 
   for (auto &[entity, children] : childrenMap) {
-    getActiveEntityContext().setComponent<liquid::ChildrenComponent>(
+    getActiveEntityDatabase().setComponent<liquid::ChildrenComponent>(
         entity, {children});
   }
 
@@ -348,22 +351,22 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
   skeletonInstance.jointWorldTransforms.resize(skeletonInstance.numJoints,
                                                glm::mat4{1.0f});
 
-  getActiveEntityContext().setComponent(entity, skeletonInstance);
+  getActiveEntityDatabase().setComponent(entity, skeletonInstance);
 }
 
 void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
-  auto &entityContext = getActiveEntityContext();
-  if (!entityContext.hasComponent<liquid::SkeletonComponent>(entity)) {
+  auto &entityDatabase = getActiveEntityDatabase();
+  if (!entityDatabase.hasComponent<liquid::SkeletonComponent>(entity)) {
     return;
   }
 
-  if (entityContext.hasComponent<liquid::SkeletonDebugComponent>(entity)) {
-    entityContext.deleteComponent<liquid::SkeletonDebugComponent>(entity);
+  if (entityDatabase.hasComponent<liquid::SkeletonDebugComponent>(entity)) {
+    entityDatabase.deleteComponent<liquid::SkeletonDebugComponent>(entity);
     return;
   }
 
   auto &skeleton =
-      entityContext.getComponent<liquid::SkeletonComponent>(entity);
+      entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
 
   liquid::SkeletonDebugComponent skeletonDebug{};
   auto numBones = skeleton.numJoints * 2;
@@ -376,43 +379,43 @@ void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
 
   skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
 
-  entityContext.setComponent(entity, skeletonDebug);
+  entityDatabase.setComponent(entity, skeletonDebug);
 }
 
 void EntityManager::setMesh(liquid::Entity entity,
                             liquid::MeshAssetHandle handle) {
-  if (getActiveEntityContext().hasComponent<liquid::SkinnedMeshComponent>(
+  if (getActiveEntityDatabase().hasComponent<liquid::SkinnedMeshComponent>(
           entity)) {
-    getActiveEntityContext().deleteComponent<liquid::SkinnedMeshComponent>(
+    getActiveEntityDatabase().deleteComponent<liquid::SkinnedMeshComponent>(
         entity);
   }
 
-  getActiveEntityContext().setComponent<liquid::MeshComponent>(entity,
-                                                               {handle});
+  getActiveEntityDatabase().setComponent<liquid::MeshComponent>(entity,
+                                                                {handle});
 }
 
 void EntityManager::setSkinnedMesh(liquid::Entity entity,
                                    liquid::SkinnedMeshAssetHandle handle) {
-  if (getActiveEntityContext().hasComponent<liquid::MeshComponent>(entity)) {
-    getActiveEntityContext().deleteComponent<liquid::MeshComponent>(entity);
+  if (getActiveEntityDatabase().hasComponent<liquid::MeshComponent>(entity)) {
+    getActiveEntityDatabase().deleteComponent<liquid::MeshComponent>(entity);
   }
-  getActiveEntityContext().setComponent<liquid::SkinnedMeshComponent>(entity,
-                                                                      {handle});
+  getActiveEntityDatabase().setComponent<liquid::SkinnedMeshComponent>(
+      entity, {handle});
 }
 
 void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
-  if (!getActiveEntityContext().hasComponent<liquid::NameComponent>(entity)) {
+  if (!getActiveEntityDatabase().hasComponent<liquid::NameComponent>(entity)) {
     liquid::NameComponent component{};
-    getActiveEntityContext().setComponent(entity, component);
+    getActiveEntityDatabase().setComponent(entity, component);
   }
 
   auto &component =
-      getActiveEntityContext().getComponent<liquid::NameComponent>(entity);
+      getActiveEntityDatabase().getComponent<liquid::NameComponent>(entity);
 
   if (name.empty()) {
     component.name =
         "Untitled " +
-        std::to_string(getActiveEntityContext()
+        std::to_string(getActiveEntityDatabase()
                            .getComponent<liquid::IdComponent>(entity)
                            .id);
   } else {
@@ -423,11 +426,11 @@ void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
 void EntityManager::setCamera(liquid::Entity entity,
                               const liquid::PerspectiveLensComponent &lens,
                               bool autoRatio) {
-  getActiveEntityContext().setComponent<liquid::CameraComponent>(entity, {});
-  getActiveEntityContext().setComponent<liquid::PerspectiveLensComponent>(
+  getActiveEntityDatabase().setComponent<liquid::CameraComponent>(entity, {});
+  getActiveEntityDatabase().setComponent<liquid::PerspectiveLensComponent>(
       entity, lens);
   if (autoRatio) {
-    getActiveEntityContext().setComponent<liquid::AutoAspectRatioComponent>(
+    getActiveEntityDatabase().setComponent<liquid::AutoAspectRatioComponent>(
         entity, {});
   }
 }
@@ -436,22 +439,22 @@ void EntityManager::setScript(liquid::Entity entity,
                               liquid::LuaScriptAssetHandle handle) {
   liquid::ScriptingComponent script{};
   script.handle = handle;
-  getActiveEntityContext().setComponent(entity, script);
+  getActiveEntityDatabase().setComponent(entity, script);
 }
 
 void EntityManager::deleteEntity(liquid::Entity entity) {
-  auto id = getActiveEntityContext().getComponent<liquid::IdComponent>(entity);
+  auto id = getActiveEntityDatabase().getComponent<liquid::IdComponent>(entity);
 
   auto fileName = std::to_string(id.id) + ".lqnode";
-  getActiveEntityContext().setComponent<liquid::DeleteComponent>(entity, {});
+  getActiveEntityDatabase().setComponent<liquid::DeleteComponent>(entity, {});
 
   if (!mInSimulation) {
     std::filesystem::remove(std::filesystem::path(mScenePath / fileName));
   }
 
-  if (getActiveEntityContext().hasComponent<liquid::ChildrenComponent>(
+  if (getActiveEntityDatabase().hasComponent<liquid::ChildrenComponent>(
           entity)) {
-    for (auto child : getActiveEntityContext()
+    for (auto child : getActiveEntityDatabase()
                           .getComponent<liquid::ChildrenComponent>(entity)
                           .children) {
       deleteEntity(child);
@@ -520,7 +523,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
 
   for (auto &item : asset.data.animators) {
     auto entity = getOrCreateEntity(item.entity);
-    getActiveEntityContext().setComponent(entity, item.value);
+    getActiveEntityDatabase().setComponent(entity, item.value);
   }
 
   if (saveToFile) {
@@ -532,24 +535,24 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
   return parent;
 }
 
-void EntityManager::updateSimulationEntityContext() {
-  mSimulationEntityContext.destroy();
-  mEntityContext.duplicate(mSimulationEntityContext);
+void EntityManager::updateSimulationEntityDatabase() {
+  mSimulationEntityDatabase.destroy();
+  mEntityDatabase.duplicate(mSimulationEntityDatabase);
 }
 
-void EntityManager::useSimulationContext() {
-  updateSimulationEntityContext();
+void EntityManager::useSimulationDatabase() {
+  updateSimulationEntityDatabase();
   mInSimulation = true;
 }
 
-void EntityManager::useEditingContext() { mInSimulation = false; }
+void EntityManager::useEditingDatabase() { mInSimulation = false; }
 
 liquid::LocalTransformComponent
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
-  auto &entityContext =
-      mInSimulation ? mSimulationEntityContext : mEntityContext;
+  auto &entityDatabase =
+      mInSimulation ? mSimulationEntityDatabase : mEntityDatabase;
   const auto &viewMatrix =
-      entityContext.getComponent<liquid::CameraComponent>(camera.getCamera())
+      entityDatabase.getComponent<liquid::CameraComponent>(camera.getCamera())
           .viewMatrix;
 
   constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};

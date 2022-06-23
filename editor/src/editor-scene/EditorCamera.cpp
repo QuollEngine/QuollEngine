@@ -8,10 +8,10 @@ using liquid::Window;
 
 namespace liquidator {
 
-EditorCamera::EditorCamera(liquid::EntityContext &entityContext,
+EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
                            liquid::EventSystem &eventSystem,
                            liquid::Renderer &renderer, liquid::Window &window)
-    : mEntityContext(entityContext), mEventSystem(eventSystem),
+    : mEntityDatabase(entityDatabase), mEventSystem(eventSystem),
       mWindow(window) {
 
   mMouseButtonReleaseHandler = mEventSystem.observe(
@@ -113,7 +113,7 @@ EditorCamera::~EditorCamera() {
   mEventSystem.removeObserver(liquid::MouseScrollEvent::Scroll,
                               mMouseScrollHandler);
 
-  mEntityContext.deleteComponent<liquid::CameraComponent>(mCameraEntity);
+  mEntityDatabase.deleteComponent<liquid::CameraComponent>(mCameraEntity);
 }
 
 void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
@@ -132,7 +132,7 @@ void EditorCamera::update() {
   }
 
   auto &camera =
-      mEntityContext.getComponent<liquid::CameraComponent>(mCameraEntity);
+      mEntityDatabase.getComponent<liquid::CameraComponent>(mCameraEntity);
 
   camera.projectionMatrix = glm::perspective(
       mFov, static_cast<float>(mWidth) / static_cast<float>(mHeight), mNear,
@@ -151,10 +151,10 @@ void EditorCamera::reset() {
   mNear = DEFAULT_NEAR;
   mFar = DEFAULT_FAR;
 
-  if (!mEntityContext.hasEntity(mCameraEntity)) {
-    mCameraEntity = mEntityContext.createEntity();
+  if (!mEntityDatabase.hasEntity(mCameraEntity)) {
+    mCameraEntity = mEntityDatabase.createEntity();
   }
-  mEntityContext.setComponent<liquid::CameraComponent>(mCameraEntity, {});
+  mEntityDatabase.setComponent<liquid::CameraComponent>(mCameraEntity, {});
 }
 
 void EditorCamera::pan() {

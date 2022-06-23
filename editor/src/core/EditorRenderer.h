@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderGraph.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/ShaderLibrary.h"
 #include "../editor-scene/EditorGrid.h"
 #include "../ui/IconRegistry.h"
@@ -39,11 +39,11 @@ public:
   /**
    * @brief Update frame data
    *
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    * @param camera Camerae
    * @param editorGrid Editor grid
    */
-  void updateFrameData(liquid::EntityContext &entityContext,
+  void updateFrameData(liquid::EntityDatabase &entityDatabase,
                        liquid::Entity camera, const EditorGrid &editorGrid);
 
 private:

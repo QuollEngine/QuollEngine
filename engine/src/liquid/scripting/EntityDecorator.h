@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/entity/Entity.h"
-#include "liquid/entity/EntityContext.h"
+#include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
@@ -15,10 +15,10 @@ public:
    *
    * @param scope Lua scope
    * @param entity Entity
-   * @param entityContext Entity context
+   * @param entityDatabase Entity database
    */
   void attachToScope(LuaScope &scope, Entity entity,
-                     EntityContext &entityContext);
+                     EntityDatabase &entityDatabase);
 };
 
 } // namespace liquid

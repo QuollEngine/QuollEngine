@@ -18,12 +18,12 @@ public:
                                    "scripting-system-component-tester.lua")
             .getData();
 
-    entityContext.setComponent<liquid::ScriptingComponent>(entity, {handle});
+    entityDatabase.setComponent<liquid::ScriptingComponent>(entity, {handle});
 
-    scriptingSystem.start(entityContext);
+    scriptingSystem.start(entityDatabase);
 
     auto &scripting =
-        entityContext.getComponent<liquid::ScriptingComponent>(entity);
+        entityDatabase.getComponent<liquid::ScriptingComponent>(entity);
 
     scripting.scope.luaGetGlobal(functionName);
     scripting.scope.call(0);
@@ -31,7 +31,7 @@ public:
     return scripting.scope;
   }
 
-  liquid::EntityContext entityContext;
+  liquid::EntityDatabase entityDatabase;
   liquid::EventSystem eventSystem;
   liquid::AssetManager assetManager;
   liquid::ScriptingSystem scriptingSystem;
@@ -41,19 +41,19 @@ using ScriptingNameComponentIntegrationTest = ScriptingEntityIntegrationTest;
 
 TEST_F(ScriptingNameComponentIntegrationTest,
        ReturnsEmptyStringIfNameComponentDoesNotExist) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
 
   auto &scope = call(entity, "name_get");
 
-  EXPECT_FALSE(entityContext.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
   auto name = scope.getGlobal<liquid::String>("name");
   EXPECT_EQ(name, "");
 }
 
 TEST_F(ScriptingNameComponentIntegrationTest,
        ReturnsNameComponentDataIfExists) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::NameComponent>(entity, {"Test name"});
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::NameComponent>(entity, {"Test name"});
 
   auto &scope = call(entity, "name_get");
 
@@ -63,31 +63,31 @@ TEST_F(ScriptingNameComponentIntegrationTest,
 
 TEST_F(ScriptingNameComponentIntegrationTest,
        DoesNothingIfProvidedArgumentIsNotString) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
 
-  EXPECT_FALSE(entityContext.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
   call(entity, "name_set_invalid");
-  EXPECT_FALSE(entityContext.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
 }
 
 TEST_F(ScriptingNameComponentIntegrationTest, CreatesNameComponentOnSet) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
 
-  EXPECT_FALSE(entityContext.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
   call(entity, "name_set");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::NameComponent>(entity).name,
+  EXPECT_EQ(entityDatabase.getComponent<liquid::NameComponent>(entity).name,
             "Hello World");
 }
 
 TEST_F(ScriptingNameComponentIntegrationTest,
        UpdatesExistingNameComponentOnSet) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::NameComponent>(entity, {"Test name"});
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::NameComponent>(entity, {"Test name"});
 
   call(entity, "name_set");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::NameComponent>(entity).name,
+  EXPECT_EQ(entityDatabase.getComponent<liquid::NameComponent>(entity).name,
             "Hello World");
 }
 
@@ -97,13 +97,13 @@ using ScriptingLocalTransformComponentDeathTest =
 
 TEST_F(ScriptingLocalTransformComponentDeathTest,
        GetPositionFailsIfComponentDoesNotExist) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_position_get"), ".*");
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, GetsPositionValue) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_get");
@@ -115,44 +115,44 @@ TEST_F(ScriptingLocalTransformComponentTest, GetsPositionValue) {
 
 TEST_F(ScriptingLocalTransformComponentDeathTest,
        SetPositionFailsIfComponentDoesNotExist) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_position_set"), ".*");
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, SetsPositionValue) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::LocalTransformComponent>(entity)
+  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
                 .localPosition,
             glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(ScriptingLocalTransformComponentTest,
        DoesNothingIfSetPositionArgumentsAreNotNumbers) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set_invalid");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::LocalTransformComponent>(entity)
+  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
                 .localScale,
             glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
 TEST_F(ScriptingLocalTransformComponentDeathTest,
        GetScaleFailsIfComponentDoesNotExist) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_scale_get"), ".*");
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, GetsScaleValue) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_get");
@@ -164,31 +164,31 @@ TEST_F(ScriptingLocalTransformComponentTest, GetsScaleValue) {
 
 TEST_F(ScriptingLocalTransformComponentDeathTest,
        SetScaleFailsIfComponentDoesNotExist) {
-  auto entity = entityContext.createEntity();
+  auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_scale_set"), ".*");
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, SetsScaleValue) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::LocalTransformComponent>(entity)
+  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
                 .localScale,
             glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(ScriptingLocalTransformComponentTest,
        DoesNothingIfSetScaleArgumentsAreNotNumbers) {
-  auto entity = entityContext.createEntity();
-  entityContext.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set_invalid");
 
-  EXPECT_EQ(entityContext.getComponent<liquid::LocalTransformComponent>(entity)
+  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
                 .localScale,
             glm::vec3(1.5f, 0.2f, 0.5f));
 }
