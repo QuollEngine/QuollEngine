@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "PhysicalDeviceInformation.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
     StringView name, PhysicalDeviceType type,
@@ -10,11 +10,11 @@ PhysicalDeviceInformation::PhysicalDeviceInformation(
 
 const String PhysicalDeviceInformation::getTypeString() const {
   switch (mType) {
-  case PhysicalDeviceType::DISCRETE_GPU:
+  case PhysicalDeviceType::DiscreteGPU:
     return "Discrete GPU";
-  case PhysicalDeviceType::INTEGRATED_GPU:
+  case PhysicalDeviceType::IntegratedGPU:
     return "Integrated GPU";
-  case PhysicalDeviceType::VIRTUAL_GPU:
+  case PhysicalDeviceType::VirtualGPU:
     return "Virtual GPU";
   case PhysicalDeviceType::CPU:
     return "CPU";
@@ -23,4 +23,4 @@ const String PhysicalDeviceInformation::getTypeString() const {
   }
 }
 
-} // namespace liquid
+} // namespace liquid::rhi

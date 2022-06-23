@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 #include "VulkanQueueFamily.h"
-#include "liquid/profiler/PhysicalDeviceInformation.h"
+#include "liquid/rhi/PhysicalDeviceInformation.h"
 
 namespace liquid::rhi {
 

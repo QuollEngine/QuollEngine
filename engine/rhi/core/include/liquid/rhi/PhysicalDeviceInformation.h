@@ -2,14 +2,14 @@
 
 #include "liquid/core/Property.h"
 
-namespace liquid {
+namespace liquid::rhi {
 
 enum class PhysicalDeviceType {
-  DISCRETE_GPU,
-  INTEGRATED_GPU,
-  VIRTUAL_GPU,
+  DiscreteGPU,
+  IntegratedGPU,
+  VirtualGPU,
   CPU,
-  UNKNOWN
+  Unknown
 };
 
 /**
@@ -80,4 +80,4 @@ private:
   UnorderedPropertyMap mLimits;
 };
 
-} // namespace liquid
+} // namespace liquid::rhi

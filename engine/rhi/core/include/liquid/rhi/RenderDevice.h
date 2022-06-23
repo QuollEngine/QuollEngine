@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/profiler/PhysicalDeviceInformation.h"
+#include "liquid/rhi/PhysicalDeviceInformation.h"
 
 #include "DeviceStats.h"
 #include "RenderGraph.h"

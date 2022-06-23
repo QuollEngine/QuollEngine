@@ -6,7 +6,7 @@
 namespace liquid {
 
 ImguiDebugLayer::ImguiDebugLayer(
-    const PhysicalDeviceInformation &physicalDeviceInfo,
+    const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
     const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
     const FPSCounter &fpsCounter)
     : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
