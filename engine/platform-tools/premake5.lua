@@ -1,5 +1,5 @@
 project "LiquidEnginePlatformTools"
-    basedir "../workspace/platform-tools"
+    basedir "../../workspace/platform-tools"
     kind "StaticLib"
     configurations { 
         "Debug"

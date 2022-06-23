@@ -102,16 +102,16 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
   VkPhysicalDeviceProperties mProperties;
   vkGetPhysicalDeviceProperties(mDevice, &mProperties);
 
-  PhysicalDeviceType type = PhysicalDeviceType::UNKNOWN;
+  PhysicalDeviceType type = PhysicalDeviceType::Unknown;
   switch (mProperties.deviceType) {
   case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-    type = PhysicalDeviceType::DISCRETE_GPU;
+    type = PhysicalDeviceType::DiscreteGPU;
     break;
   case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-    type = PhysicalDeviceType::INTEGRATED_GPU;
+    type = PhysicalDeviceType::IntegratedGPU;
     break;
   case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-    type = PhysicalDeviceType::VIRTUAL_GPU;
+    type = PhysicalDeviceType::VirtualGPU;
     break;
   case VK_PHYSICAL_DEVICE_TYPE_CPU:
     type = PhysicalDeviceType::CPU;
@@ -119,7 +119,7 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
   case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM:
   case VK_PHYSICAL_DEVICE_TYPE_OTHER:
   default:
-    type = PhysicalDeviceType::UNKNOWN;
+    type = PhysicalDeviceType::Unknown;
     break;
   }
 

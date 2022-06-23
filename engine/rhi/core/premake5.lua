@@ -1,5 +1,5 @@
 project "LiquidEngineRHICore"
-    basedir "../../workspace/rhi-core"
+    basedir "../../../workspace/rhi-core"
     kind "StaticLib"
 
     includedirs {

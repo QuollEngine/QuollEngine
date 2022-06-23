@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PhysicalDeviceInformation.h"
 #include "liquid/profiler/FPSCounter.h"
+#include "liquid/rhi/PhysicalDeviceInformation.h"
 #include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/DeviceStats.h"
 
@@ -23,7 +23,7 @@ public:
    * @param registry Resource registry
    * @param fpsCounter FPS counter
    */
-  ImguiDebugLayer(const PhysicalDeviceInformation &physicalDeviceInfo,
+  ImguiDebugLayer(const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
                   const rhi::DeviceStats &deviceStats,
                   rhi::ResourceRegistry &registry,
                   const FPSCounter &fpsCounter);
@@ -66,7 +66,7 @@ private:
       const std::vector<std::pair<String, Property>> &properties);
 
 private:
-  PhysicalDeviceInformation mPhysicalDeviceInfo;
+  rhi::PhysicalDeviceInformation mPhysicalDeviceInfo;
   const FPSCounter &mFpsCounter;
   const rhi::DeviceStats &mDeviceStats;
   rhi::ResourceRegistry &mResourceRegistry;

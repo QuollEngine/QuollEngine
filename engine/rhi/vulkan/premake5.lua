@@ -1,5 +1,5 @@
 project "LiquidEngineRHIVulkan"
-    basedir "../../workspace/rhi-vulkan"
+    basedir "../../../workspace/rhi-vulkan"
     kind "StaticLib"
 
     includedirs {
