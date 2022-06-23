@@ -237,10 +237,12 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
             if (entry.isDirectory) {
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
-            } else {
+            } else if (entry.assetType == liquid::AssetType::Prefab) {
               entityManager.spawnEntity(editorManager.getEditorCamera(),
                                         liquid::EntityNull, entry.asset,
                                         entry.assetType);
+            } else if (entry.assetType == liquid::AssetType::LuaScript) {
+              mFileOpener.openFile(entry.path);
             }
           }
         }
