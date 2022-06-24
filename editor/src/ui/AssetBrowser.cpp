@@ -74,10 +74,13 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
     return EditorIcon::Skeleton;
   case liquid::AssetType::Animation:
     return EditorIcon::Animation;
+  case liquid::AssetType::Audio:
+    return EditorIcon::Audio;
   case liquid::AssetType::Prefab:
     return EditorIcon::Prefab;
   case liquid::AssetType::LuaScript:
     return EditorIcon::Script;
+
   default:
     return EditorIcon::Unknown;
   }

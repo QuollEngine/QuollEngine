@@ -12,6 +12,7 @@ enum class EditorIcon {
   SkinnedMesh,
   Skeleton,
   Animation,
+  Audio,
   Prefab,
   Script,
   Sun,

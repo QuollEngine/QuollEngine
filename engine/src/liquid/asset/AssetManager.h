@@ -138,6 +138,14 @@ public:
   Result<AnimationAssetHandle> loadAnimationFromFile(const Path &filePath);
 
   /**
+   * @brief Load audio from file
+   *
+   * @param filePath Path to asset
+   * @return Audio asset handle
+   */
+  Result<AudioAssetHandle> loadAudioFromFile(const Path &filePath);
+
+  /**
    * @brief Create prefab from asset
    *
    * Create engine specific prefab asset

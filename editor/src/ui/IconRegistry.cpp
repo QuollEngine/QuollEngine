@@ -31,6 +31,9 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
       EditorIcon::Skeleton,
       loader.loadFromFile((iconsPath / "skeleton.png").string()));
   mIconMap.insert_or_assign(
+      EditorIcon::Audio,
+      loader.loadFromFile((iconsPath / "audio.png").string()));
+  mIconMap.insert_or_assign(
       EditorIcon::Animation,
       loader.loadFromFile((iconsPath / "animation.png").string()));
   mIconMap.insert_or_assign(
