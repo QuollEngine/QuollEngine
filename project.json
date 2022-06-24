@@ -187,6 +187,15 @@
         "{MKDIR} {{VENDOR_DIR}}/include/stb",
         "{COPY} stb_image.h {{VENDOR_DIR}}/include/stb"
       ]
+    },
+    {
+      "name": "miniaudio",
+      "buildSource": "miniaudio-master",
+      "url": "https://github.com/mackron/miniaudio/archive/refs/heads/master.zip",
+      "cmd": [
+        "{MKDIR} {{VENDOR_DIR}}/include/miniaudio",
+        "{COPY} miniaudio.h {{VENDOR_DIR}}/include/miniaudio"
+      ]
     }
   ]
 }

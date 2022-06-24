@@ -202,6 +202,12 @@ AssetRegistry::getAssetByPath(const Path &filePath) {
     }
   }
 
+  for (auto &[handle, asset] : mAudios.getAssets()) {
+    if (asset.path == filePath) {
+      return {AssetType::Audio, static_cast<uint32_t>(handle)};
+    }
+  }
+
   for (auto &[handle, asset] : mPrefabs.getAssets()) {
     if (asset.path == filePath) {
       return {AssetType::Prefab, static_cast<uint32_t>(handle)};
