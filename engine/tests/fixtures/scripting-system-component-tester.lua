@@ -89,3 +89,11 @@ function local_transform_scale_set_invalid()
     entity.local_transform.set_scale(1.0, 1.0, {})
 end
 
+audio_is_playing_flag = false
+function audio_play()
+    entity.audio.play()
+end
+
+function audio_is_playing()
+    audio_is_playing_flag = entity.audio.is_playing()
+end

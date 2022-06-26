@@ -172,6 +172,14 @@ public:
 
 private:
   /**
+   * @brief Convert stack value to boolean
+   *
+   * @param index Stack index
+   * @return Boolean value
+   */
+  bool luaGetBoolean(int index);
+
+  /**
    * @brief Convert stack value to integer
    *
    * @param index Stack index
@@ -222,6 +230,13 @@ private:
   bool luaIsString(int index);
 
   /**
+   * @brief Push boolean to stack
+   *
+   * @param value Boolean value
+   */
+  void luaSetBoolean(bool value);
+
+  /**
    * @brief Push floating point to stack
    *
    * @param value Floating point value
@@ -245,6 +260,16 @@ private:
 private:
   lua_State *mScope = nullptr;
 };
+
+/**
+ * @brief Get integer
+ *
+ * @param index Stack index
+ * @return Integer value
+ */
+template <> inline bool LuaScope::get<bool>(int32_t index) {
+  return luaGetBoolean(index);
+}
 
 /**
  * @brief Get integer
@@ -336,6 +361,15 @@ template <> inline bool LuaScope::is<String>(int32_t index) {
  */
 template <> inline bool LuaScope::is<float>(int32_t index) {
   return luaIsNumber(index);
+}
+
+/**
+ * @brief Set boolean
+ *
+ * @param value Boolean value
+ */
+template <> inline void LuaScope::set<bool>(const bool &value) {
+  luaSetBoolean(value);
 }
 
 /**
