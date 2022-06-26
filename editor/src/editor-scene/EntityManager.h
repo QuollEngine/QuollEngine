@@ -118,6 +118,14 @@ public:
                  const liquid::PerspectiveLensComponent &lens, bool autoRatio);
 
   /**
+   * @brief Set audio for entity
+   *
+   * @param entity Entity
+   * @param source Audio source asset
+   */
+  void setAudio(liquid::Entity entity, liquid::AudioAssetHandle source);
+
+  /**
    * @brief Set script for entity
    *
    * @param entity Entity

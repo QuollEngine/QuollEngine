@@ -54,6 +54,18 @@ public:
   }
 
   /**
+   * @brief Cleanup all the audio instances
+   *
+   * @param entityDatabase Entity database
+   */
+  void cleanup(EntityDatabase &entityDatabase) {
+    entityDatabase.iterateEntities<AudioStatusComponent>(
+        [this](auto entity, const auto &status) {
+          mBackend.destroySound(status.instance);
+        });
+  }
+
+  /**
    * @brief Get audio backend
    *
    * @return Audio backend

@@ -109,6 +109,16 @@ void EntityManager::save(liquid::Entity entity) {
                                        .relativePath.string();
   }
 
+  if (mEntityDatabase.hasComponent<liquid::AudioSourceComponent>(entity)) {
+    const auto audioSource =
+        mEntityDatabase.getComponent<liquid::AudioSourceComponent>(entity);
+
+    node["components"]["audio"]["source"] = mAssetManager.getRegistry()
+                                                .getAudios()
+                                                .getAsset(audioSource.source)
+                                                .relativePath.string();
+  }
+
   auto fileName = std::to_string(entityId) + ".lqnode";
   std::ofstream out(mScenePath / fileName, std::ios::out);
   out << node;
@@ -294,6 +304,18 @@ bool EntityManager::loadScene() {
       setCamera(entity, component, autoRatio);
     }
 
+    if (node["components"]["audio"]["source"].IsScalar()) {
+      auto relativePathStr =
+          node["components"]["audio"]["source"].as<liquid::String>();
+      auto relativePath = std::filesystem::path(relativePathStr);
+
+      auto handle =
+          mAssetManager.getRegistry().getAudios().findHandleByRelativePath(
+              relativePath);
+
+      setAudio(entity, handle);
+    }
+
     if (node["components"]["script"].IsScalar()) {
       auto relativePathStr = node["components"]["script"].as<liquid::String>();
       auto relativePath = std::filesystem::path(relativePathStr);
@@ -433,6 +455,12 @@ void EntityManager::setCamera(liquid::Entity entity,
     getActiveEntityDatabase().setComponent<liquid::AutoAspectRatioComponent>(
         entity, {});
   }
+}
+
+void EntityManager::setAudio(liquid::Entity entity,
+                             liquid::AudioAssetHandle source) {
+  getActiveEntityDatabase().setComponent<liquid::AudioSourceComponent>(
+      entity, {source});
 }
 
 void EntityManager::setScript(liquid::Entity entity,
