@@ -17,10 +17,8 @@ public:
    * @brief Create GLTF importer
    *
    * @param assetManager Asset manager
-   * @param deviceRegistry Device registry
    */
-  GLTFImporter(liquid::AssetManager &assetManager,
-               liquid::rhi::ResourceRegistry &deviceRegistry);
+  GLTFImporter(liquid::AssetManager &assetManager);
 
   /**
    * @brief Load GLTF from file
@@ -34,7 +32,6 @@ public:
 
 private:
   liquid::AssetManager &mAssetManager;
-  liquid::rhi::ResourceRegistry &mDeviceRegistry;
 };
 
 } // namespace liquidator

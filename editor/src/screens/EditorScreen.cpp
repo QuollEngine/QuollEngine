@@ -97,7 +97,7 @@ void EditorScreen::start(const Project &project) {
   editorManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::GLTFImporter gltfImporter(assetManager, renderer.getRegistry());
+  liquidator::AssetLoader assetLoader(assetManager, renderer.getRegistry());
 
   liquid::AnimationSystem animationSystem(assetManager.getRegistry());
   liquid::PhysicsSystem physicsSystem(mEventSystem);
@@ -112,7 +112,7 @@ void EditorScreen::start(const Project &project) {
                                      mDevice->getDeviceStats(),
                                      renderer.getRegistry(), fpsCounter);
 
-  liquidator::UIRoot ui(entityManager, gltfImporter);
+  liquidator::UIRoot ui(entityManager, assetLoader);
   ui.getIconRegistry().loadIcons(renderer.getRegistry(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");

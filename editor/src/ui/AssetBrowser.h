@@ -4,7 +4,7 @@
 #include "liquid/platform-tools/NativeFileDialog.h"
 #include "liquid/platform-tools/NativeFileOpener.h"
 
-#include "../asset/GLTFImporter.h"
+#include "../asset/AssetLoader.h"
 #include "../editor-scene/EditorManager.h"
 
 #include "IconRegistry.h"
@@ -32,9 +32,9 @@ public:
   /**
    * @brief Create asset browser
    *
-   * @param gltfImporter GLTF importer
+   * @param assetLoader Asset loader
    */
-  AssetBrowser(GLTFImporter &gltfImporter);
+  AssetBrowser(AssetLoader &assetLoader);
 
   /**
    * @brief Render status bar
@@ -54,9 +54,9 @@ public:
 
 private:
   /**
-   * @brief Handle GLTF import
+   * @brief Handle importing assets
    */
-  void handleGLTFImport();
+  void handleAssetImport();
 
   /**
    * @brief Handle entry creation
@@ -79,7 +79,7 @@ private:
   std::filesystem::path mCurrentDirectory;
   bool mDirectoryChanged = true;
   size_t mSelected = std::numeric_limits<size_t>::max();
-  GLTFImporter &mGltfImporter;
+  AssetLoader &mAssetLoader;
   liquid::platform_tools::NativeFileDialog mFileDialog;
   liquid::platform_tools::NativeFileOpener mFileOpener;
 

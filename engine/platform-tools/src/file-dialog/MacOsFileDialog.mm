@@ -3,11 +3,16 @@
 
 namespace liquid::platform_tools {
 
-liquid::Path NativeFileDialog::getFilePathFromDialog(const std::vector<liquid::String> &extensions) {
-    std::vector<NSString *> nssExtensions(extensions.size());
-    std::transform(extensions.begin(), extensions.end(), nssExtensions.begin(), [](const liquid::String &ext) {
-        return [NSString stringWithUTF8String:ext.c_str()];
-    });
+liquid::Path NativeFileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
+    // TODO: Fix this in macOS
+    std::vector<NSString *> nssExtensions;
+
+    for (auto &fileType : fileTypes) {
+        for (auto &ext : fileType.extensions) {
+            nssExtensions.push_back([NSString stringWithUTF8String:ext.c_str()]);
+        }
+    }
+
     NSOpenPanel *fileDialog = [NSOpenPanel openPanel];
     fileDialog.canChooseDirectories = false;
     fileDialog.allowsMultipleSelection = false;
@@ -27,7 +32,7 @@ liquid::Path NativeFileDialog::getFilePathFromDialog(const std::vector<liquid::S
 }
 
 liquid::Path 
-NativeFileDialog::getFilePathFromCreateDialog(const std::vector<liquid::String> &extensions) {
+NativeFileDialog::getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes) {
     LIQUID_ASSERT(false, "Not implemented");
     return "";
 }
