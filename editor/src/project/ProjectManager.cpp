@@ -9,7 +9,8 @@ namespace liquidator {
 bool ProjectManager::createProjectInPath() {
   liquid::platform_tools::NativeFileDialog dialog;
 
-  auto projectPath = dialog.getFilePathFromCreateDialog({});
+  auto projectPath =
+      dialog.getFilePathFromCreateDialog({{"Liquid project", {"lqproj"}}});
 
   if (projectPath.empty()) {
     return false;
@@ -48,7 +49,8 @@ bool ProjectManager::createProjectInPath() {
 bool ProjectManager::openProjectInPath() {
   liquid::platform_tools::NativeFileDialog dialog;
 
-  auto projectFilePath = dialog.getFilePathFromDialog({"lqproj"});
+  auto projectFilePath =
+      dialog.getFilePathFromDialog({{"Liquid project", {"lqproj"}}});
   if (projectFilePath.empty()) {
     return false;
   }

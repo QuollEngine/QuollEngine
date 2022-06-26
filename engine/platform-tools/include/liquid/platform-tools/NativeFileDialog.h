@@ -12,22 +12,38 @@ namespace liquid::platform_tools {
 class NativeFileDialog {
 public:
   /**
+   * @brief File type entry
+   */
+  struct FileTypeEntry {
+    /**
+     * @brief Entry label
+     */
+    liquid::StringView label;
+
+    /**
+     * @brief Entry extensions
+     */
+    std::vector<liquid::String> extensions;
+  };
+
+public:
+  /**
    * @brief Get file path from OS file dialog
    *
-   * @param extensions File extensions to show
+   * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
   liquid::Path
-  getFilePathFromDialog(const std::vector<liquid::String> &extensions);
+  getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes);
 
   /**
    * @brief Get file path from OS create file dialog
    *
-   * @param extensions File extensions to show
+   * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
   liquid::Path
-  getFilePathFromCreateDialog(const std::vector<liquid::String> &extensions);
+  getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes);
 };
 
 } // namespace liquid::platform_tools

@@ -3,8 +3,8 @@
 
 namespace liquidator {
 
-UIRoot::UIRoot(EntityManager &entityManager, GLTFImporter &gltfImporter)
-    : mAssetBrowser(gltfImporter), mSceneHierarchyPanel(entityManager),
+UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
+    : mAssetBrowser(assetLoader), mSceneHierarchyPanel(entityManager),
       mEntityPanel(entityManager) {
   mSceneHierarchyPanel.setEntityClickHandler([this](liquid::Entity entity) {
     mEntityPanel.setSelectedEntity(entity);

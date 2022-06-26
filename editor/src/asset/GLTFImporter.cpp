@@ -1136,9 +1136,8 @@ void loadPrefabs(
   manager.loadPrefabFromFile(path.getData());
 }
 
-GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager,
-                           liquid::rhi::ResourceRegistry &deviceRegistry)
-    : mAssetManager(assetManager), mDeviceRegistry(deviceRegistry) {}
+GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager)
+    : mAssetManager(assetManager) {}
 
 liquid::Result<bool>
 GLTFImporter::loadFromFile(const liquid::Path &filePath,
@@ -1200,8 +1199,6 @@ GLTFImporter::loadFromFile(const liquid::Path &filePath,
 
   loadPrefabs(model, prefabPath, mAssetManager, meshMap, skinnedMeshMap,
               skeletonData, animationData);
-
-  mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
 
   return liquid::Result<bool>::Ok(true, warnings);
 }

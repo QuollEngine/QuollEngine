@@ -86,8 +86,8 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
   }
 }
 
-AssetBrowser::AssetBrowser(GLTFImporter &gltfImporter)
-    : mGltfImporter(gltfImporter), mStatusDialog("AssetLoadStatus") {}
+AssetBrowser::AssetBrowser(AssetLoader &assetLoader)
+    : mAssetLoader(assetLoader), mStatusDialog("AssetLoadStatus") {}
 
 void AssetBrowser::render(liquid::AssetManager &assetManager,
                           IconRegistry &iconRegistry,
@@ -158,8 +158,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
   if (ImGui::Begin("Asset Browser")) {
     if (ImGui::BeginPopupContextWindow()) {
-      if (ImGui::MenuItem("Import GLTF")) {
-        handleGLTFImport();
+      if (ImGui::MenuItem("Import asset")) {
+        handleAssetImport();
       }
 
       if (ImGui::MenuItem("Create directory")) {
@@ -289,12 +289,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
 
-void AssetBrowser::handleGLTFImport() {
-  auto filePath = mFileDialog.getFilePathFromDialog({"gltf"});
-  if (filePath.empty())
-    return;
-
-  auto res = mGltfImporter.loadFromFile(filePath, mCurrentDirectory);
+void AssetBrowser::handleAssetImport() {
+  auto res = mAssetLoader.loadFromFileDialog(mCurrentDirectory);
 
   if (res.hasError()) {
     mStatusDialog.setTitle("GLTF import Error");

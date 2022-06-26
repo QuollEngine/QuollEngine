@@ -30,9 +30,9 @@ public:
    * @brief Create UI Root
    *
    * @param entityManager Entity manager
-   * @param gltfImporter GLTF importer
+   * @param assetLoader Asset loader
    */
-  UIRoot(EntityManager &entityManager, GLTFImporter &gltfImporter);
+  UIRoot(EntityManager &entityManager, AssetLoader &assetLoader);
 
   /**
    * @brief Render UI Root
