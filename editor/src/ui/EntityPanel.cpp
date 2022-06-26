@@ -26,6 +26,7 @@ void EntityPanel::render(EditorManager &editorManager,
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
+      renderAudio(assetRegistry);
       renderScripting(assetRegistry);
       renderAddComponent();
       handleDragAndDrop(renderer, assetRegistry);
@@ -563,6 +564,25 @@ void EntityPanel::renderRigidBody() {
   }
 }
 
+void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
+  if (!mEntityManager.getActiveEntityDatabase()
+           .hasComponent<liquid::AudioSourceComponent>(mSelectedEntity)) {
+    return;
+  }
+
+  if (!ImGui::CollapsingHeader("Audio")) {
+    return;
+  }
+
+  const auto &audio =
+      mEntityManager.getActiveEntityDatabase()
+          .getComponent<liquid::AudioSourceComponent>(mSelectedEntity);
+
+  const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
+
+  ImGui::Text("Name: %s", asset.name.c_str());
+}
+
 void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
   if (!mEntityManager.getActiveEntityDatabase()
            .hasComponent<liquid::ScriptingComponent>(mSelectedEntity)) {
@@ -685,6 +705,14 @@ void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
       auto asset = *static_cast<liquid::SkeletonAssetHandle *>(payload->Data);
 
       mEntityManager.setSkeletonForEntity(mSelectedEntity, asset);
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            liquid::getAssetTypeString(liquid::AssetType::Audio).c_str())) {
+      auto asset = *static_cast<liquid::AudioAssetHandle *>(payload->Data);
+
+      mEntityManager.setAudio(mSelectedEntity, asset);
       mEntityManager.save(mSelectedEntity);
     }
 

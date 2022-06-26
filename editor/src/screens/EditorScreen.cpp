@@ -11,6 +11,7 @@
 #include "liquid/renderer/Presenter.h"
 #include "liquid/asset/FileTracker.h"
 #include "liquid/core/EntityDeleter.h"
+#include "liquid/audio/AudioSystem.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -102,6 +103,7 @@ void EditorScreen::start(const Project &project) {
   liquid::PhysicsSystem physicsSystem(mEventSystem);
   liquid::SceneUpdater sceneUpdater;
   liquid::SkeletonUpdater skeletonUpdater;
+  liquid::AudioSystem audioSystem(assetManager.getRegistry());
   liquid::ScriptingSystem scriptingSystem(mEventSystem,
                                           assetManager.getRegistry());
   liquid::EntityDeleter entityDeleter;
@@ -158,7 +160,7 @@ void EditorScreen::start(const Project &project) {
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,
                         &scriptingSystem, &sceneUpdater, &entityDeleter,
-                        this](float dt) mutable {
+                        &audioSystem, this](float dt) mutable {
     bool isPlaying = entityManager.isUsingSimulationDatabase();
 
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
@@ -168,6 +170,7 @@ void EditorScreen::start(const Project &project) {
     editorCamera.update();
 
     if (isPlaying) {
+      scriptingSystem.start(entityDatabase);
       scriptingSystem.update(dt, entityDatabase);
       animationSystem.update(dt, entityDatabase);
     }
@@ -177,6 +180,7 @@ void EditorScreen::start(const Project &project) {
 
     if (isPlaying) {
       physicsSystem.update(dt, entityDatabase);
+      audioSystem.output(entityDatabase);
     }
 
     entityDeleter.update(entityDatabase);
@@ -187,7 +191,7 @@ void EditorScreen::start(const Project &project) {
                         &entityManager, &assetManager, &graph, &scenePassGroup,
                         &imguiPassGroup, &physicsSystem, &ui, &debugLayer,
                         &preloadStatusDialog, &presenter, &editorRenderer,
-                        &scriptingSystem, this]() {
+                        &scriptingSystem, &audioSystem, this]() {
     auto &imgui = renderer.getImguiRenderer();
     auto &sceneRenderer = renderer.getSceneRenderer();
 
@@ -211,10 +215,10 @@ void EditorScreen::start(const Project &project) {
         if (entityManager.isUsingSimulationDatabase()) {
           physicsSystem.cleanup(entityManager.getActiveEntityDatabase());
           scriptingSystem.cleanup(entityManager.getActiveEntityDatabase());
+          audioSystem.cleanup(entityManager.getActiveEntityDatabase());
           entityManager.useEditingDatabase();
         } else {
           entityManager.useSimulationDatabase();
-          scriptingSystem.start(entityManager.getActiveEntityDatabase());
         }
       }
 

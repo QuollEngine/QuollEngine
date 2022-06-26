@@ -92,6 +92,13 @@ private:
   void renderRigidBody();
 
   /**
+   * @brief Render audio component
+   *
+   * @param assetRegistry Asset registry
+   */
+  void renderAudio(liquid::AssetRegistry &assetRegistry);
+
+  /**
    * @brief Render scripting component
    *
    * @param assetRegistry Asset registry
