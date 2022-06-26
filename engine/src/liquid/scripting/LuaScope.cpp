@@ -14,6 +14,10 @@ LuaScope::LuaScope(void *scope) : mScope(static_cast<lua_State *>(scope)) {}
 
 void LuaScope::pop(int count) { lua_pop(mScope, count); };
 
+bool LuaScope::luaGetBoolean(int index) {
+  return static_cast<bool>(lua_toboolean(mScope, index));
+}
+
 int32_t LuaScope::luaGetInteger(int index) {
   return static_cast<int32_t>(lua_tointeger(mScope, index));
 }
@@ -33,6 +37,10 @@ void *LuaScope::luaGetUserData(int index) {
 bool LuaScope::luaIsNumber(int index) { return lua_isnumber(mScope, index); }
 
 bool LuaScope::luaIsString(int index) { return lua_isstring(mScope, index); }
+
+void LuaScope::luaSetBoolean(bool value) {
+  lua_pushboolean(mScope, static_cast<int>(value));
+}
 
 void LuaScope::luaSetNumber(float value) {
   lua_pushnumber(mScope, static_cast<lua_Number>(value));

@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
 #include "EntityDecorator.h"
 
+#include "liquid/audio/AudioScriptingInterface.h"
+
 #include "LuaScope.h"
 
 namespace liquid {
@@ -37,6 +39,7 @@ void EntityDecorator::attachToScope(LuaScope &scope, Entity entity,
 
   registerComponent<NameComponent>(scope, table);
   registerComponent<LocalTransformComponent>(scope, table);
+  registerComponent<AudioScriptingInterface>(scope, table);
 
   scope.setPreviousValueAsGlobal("entity");
 }
