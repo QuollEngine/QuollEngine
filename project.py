@@ -11,6 +11,7 @@ from urllib.request import urlretrieve
 from urllib.parse import urlparse
 import shutil
 import subprocess
+import hashlib
 from pathlib import Path
 
 workingDir = os.getcwd()
@@ -18,6 +19,7 @@ workingDir = os.getcwd()
 projectFile = os.path.join(workingDir, 'project.json')
 vendorDir = os.path.join(workingDir, 'vendor')
 tempDir = os.path.join(vendorDir, 'tmp')
+projectHashFile = os.path.join(vendorDir, 'project_hash')
 buildModes = ['Debug', 'Release']
 
 profiler_data = {}
@@ -49,6 +51,35 @@ def open_project(path):
         x['sourceDir'] = os.path.normpath(os.path.join(x['archiveContentPath'], x['buildSource']))
 
     return project
+
+#
+# Creates sha384 hash of the project json file
+#
+def get_project_hash(projectFilePath):
+    with open(projectFilePath, 'r') as projectFile:
+        fileContents = projectFile.read()
+        return hashlib.sha384(fileContents.encode('utf-8')).hexdigest()
+
+#
+# Create project hash file 
+#
+def create_project_hash_file(projectFilePath, hashFilePath):
+    hash = get_project_hash(projectFilePath)
+    with open(hashFilePath, 'w') as hashFile:
+        hashFile.write(hash)
+
+#
+# Check if hashes match
+#
+def project_hash_matches(projectFilePath, hashFilePath):
+    hash = get_project_hash(projectFilePath)
+
+    try:
+        with open(hashFilePath, 'r') as hashFile:
+            fileContents = hashFile.read()
+            return fileContents == hash
+    except:
+        return False
 
 #
 # Fetches and extracts dependencies of a project
@@ -144,6 +175,10 @@ def run_process(cmdLine, cwd):
 def is_dict(obj, key):
     return key in obj and type(obj[key]) is dict
 
+if project_hash_matches(projectFile, projectHashFile):
+    print('Dependencies are up to date!')
+    sys.exit(0)
+
 project = open_project(projectFile)
 clean_make_dir(vendorDir)
 clean_make_dir(os.path.join(tempDir))
@@ -151,6 +186,7 @@ clean_make_dir(os.path.join(vendorDir, 'include'))
 clean_make_dir(os.path.join(vendorDir, 'projects'))
 clean_make_dir(os.path.join(vendorDir, 'lib'))
 clean_make_dir(os.path.join(vendorDir, 'bin'))
+create_project_hash_file(projectFile, projectHashFile)
 fetch_dependencies(project)
 
 for buildMode in buildModes:
