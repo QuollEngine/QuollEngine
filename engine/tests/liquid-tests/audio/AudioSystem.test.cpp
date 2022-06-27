@@ -136,3 +136,67 @@ TEST_F(AudioSystemTest, DeletesAudioStatusComponentFromFinishedAudios) {
 
   EXPECT_FALSE(backend.hasSound(sound));
 }
+
+TEST_F(AudioSystemTest, CleanupDeletesAllAudioStatuses) {
+  auto &backend = audioSystem.getBackend();
+
+  auto handle = createFakeAudio();
+
+  auto e1 = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  entityDatabase.setComponent<liquid::AudioSourceComponent>(e1, {handle});
+
+  audioSystem.output(entityDatabase);
+
+  auto *sound =
+      entityDatabase.getComponent<liquid::AudioStatusComponent>(e1).instance;
+  EXPECT_TRUE(backend.hasSound(sound));
+
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+
+  audioSystem.cleanup(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStatusComponent>(e1));
+  EXPECT_FALSE(backend.hasSound(sound));
+}
+
+TEST_F(AudioSystemTest, DeletesAudioStartComponentsWithDeleteComponents) {
+  auto &backend = audioSystem.getBackend();
+
+  auto handle = createFakeAudio();
+
+  auto e1 = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  entityDatabase.setComponent<liquid::AudioSourceComponent>(e1, {handle});
+  entityDatabase.setComponent<liquid::DeleteComponent>(e1, {});
+
+  audioSystem.output(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStatusComponent>(e1));
+}
+
+TEST_F(AudioSystemTest, DeletesAudioStatusComponentsWithDeleteComponents) {
+  auto &backend = audioSystem.getBackend();
+
+  auto handle = createFakeAudio();
+
+  auto e1 = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  entityDatabase.setComponent<liquid::AudioSourceComponent>(e1, {handle});
+
+  audioSystem.output(entityDatabase);
+
+  auto *sound =
+      entityDatabase.getComponent<liquid::AudioStatusComponent>(e1).instance;
+
+  entityDatabase.setComponent<liquid::DeleteComponent>(e1, {});
+
+  audioSystem.output(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStatusComponent>(e1));
+  EXPECT_FALSE(backend.hasSound(sound));
+}
