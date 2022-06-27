@@ -5,9 +5,24 @@
 namespace liquid {
 
 /**
+ * @brief Miniaudio sound interface
+ */
+struct MiniAudioSoundInstance {
+  /**
+   * @brief Miniaudio decoder
+   */
+  ma_decoder decoder;
+
+  /**
+   * @brief Miniaudio sound
+   */
+  ma_sound sound;
+};
+
+/**
  * @brief Miniaudio backend implementation
  *
- * Based on MiniAudio
+ * Based on miniaudio
  */
 class MiniAudioBackend::BackendImpl {
 public:
@@ -30,42 +45,71 @@ public:
   BackendImpl &operator=(BackendImpl &&) = delete;
 
   /**
+   * @brief Get encoding format
+   *
+   * @param format Asset format
+   * @return Encoding format
+   */
+  ma_encoding_format getEncodingFormat(AudioAssetFormat format) {
+    switch (format) {
+    case AudioAssetFormat::Wav:
+      return ma_encoding_format_wav;
+    case AudioAssetFormat::Mp3:
+      return ma_encoding_format_mp3;
+    }
+
+    return ma_encoding_format_unknown;
+  }
+
+  /**
    * @brief Play sound
    *
-   * @param dataSource Audio data source
-   * @return Sound object
+   * @param asset Audio asset data
+   * @return MiniAudio sound instance
    */
-  void *playSound(void *dataSource) {
-    auto *sound = new ma_sound;
+  void *playSound(const AudioAsset &asset) {
+    auto *instance = new MiniAudioSoundInstance;
 
-    auto res =
-        ma_sound_init_from_data_source(&mEngine, dataSource, 0, nullptr, sound);
-    LIQUID_ASSERT(res == MA_SUCCESS, "Cannot init sound");
+    {
+      auto config = ma_decoder_config_init_default();
+      config.encodingFormat = getEncodingFormat(asset.format);
+      auto res = ma_decoder_init_memory(asset.bytes.data(), asset.bytes.size(),
+                                        &config, &instance->decoder);
+      LIQUID_ASSERT(res == MA_SUCCESS,
+                    "Cannot initialize MiniAudio data source");
+    }
 
-    ma_sound_start(sound);
+    {
+      auto res = ma_sound_init_from_data_source(&mEngine, &instance->decoder, 0,
+                                                nullptr, &instance->sound);
+      LIQUID_ASSERT(res == MA_SUCCESS, "Cannot initialize MiniAudio sound");
+    }
 
-    return sound;
+    ma_sound_start(&instance->sound);
+
+    return instance;
   }
 
   /**
    * @brief Destroy sound
    *
-   * @param sound Sound object
+   * @param instance MiniAudio sound instance
    */
-  void destroySound(void *sound) {
-    ma_sound_uninit(static_cast<ma_sound *>(sound));
-    delete sound;
+  void destroySound(MiniAudioSoundInstance *instance) {
+    ma_sound_uninit(&instance->sound);
+    ma_decoder_uninit(&instance->decoder);
+    delete instance;
   }
 
   /**
    * @brief Check if sound is playing
    *
-   * @param sound Sound object
+   * @param instance MiniAudio sound instance
    * @retval true Sound is playing
    * @retval false Sound is not playing
    */
-  bool isPlaying(void *sound) {
-    return ma_sound_is_playing(static_cast<const ma_sound *>(sound));
+  bool isPlaying(MiniAudioSoundInstance *instance) {
+    return ma_sound_is_playing(&instance->sound);
   }
 
 private:
@@ -79,14 +123,16 @@ MiniAudioBackend::~MiniAudioBackend() {
   mImpl = nullptr;
 }
 
-void *MiniAudioBackend::playSound(void *data) { return mImpl->playSound(data); }
-
-void MiniAudioBackend::destroySound(void *sound) {
-  return mImpl->destroySound(sound);
+void *MiniAudioBackend::playSound(const AudioAsset &asset) {
+  return mImpl->playSound(asset);
 }
 
-bool MiniAudioBackend::isPlaying(void *sound) {
-  return mImpl->isPlaying(sound);
+void MiniAudioBackend::destroySound(void *instance) {
+  mImpl->destroySound(static_cast<MiniAudioSoundInstance *>(instance));
+}
+
+bool MiniAudioBackend::isPlaying(void *instance) {
+  return mImpl->isPlaying(static_cast<MiniAudioSoundInstance *>(instance));
 }
 
 } // namespace liquid

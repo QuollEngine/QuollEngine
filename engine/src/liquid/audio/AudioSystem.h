@@ -30,9 +30,9 @@ public:
     entityDatabase.iterateEntities<AudioSourceComponent, AudioStartComponent>(
         [this, &entityDatabase](auto entity, const auto &source,
                                 const auto &play) {
-          void *data =
-              mAssetRegistry.getAudios().getAsset(source.source).data.data;
-          void *sound = mBackend.playSound(data);
+          const auto &asset =
+              mAssetRegistry.getAudios().getAsset(source.source).data;
+          void *sound = mBackend.playSound(asset);
 
           entityDatabase.setComponent<AudioStatusComponent>(entity, {sound});
         });
