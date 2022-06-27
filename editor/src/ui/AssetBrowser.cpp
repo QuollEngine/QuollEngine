@@ -168,6 +168,14 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         mStagingEntry.isDirectory = true;
         mStagingEntry.isEditable = true;
       }
+
+      if (ImGui::MenuItem("Create Lua script")) {
+        mHasStagingEntry = true;
+        mStagingEntry.icon = EditorIcon::Script;
+        mStagingEntry.isDirectory = false;
+        mStagingEntry.isEditable = true;
+        mStagingEntry.assetType = liquid::AssetType::LuaScript;
+      }
       ImGui::EndPopup();
     }
 
@@ -289,6 +297,10 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
 
+void AssetBrowser::setOnCreateEntry(std::function<void(liquid::Path)> handler) {
+  mOnCreateEntry = handler;
+}
+
 void AssetBrowser::handleAssetImport() {
   auto res = mAssetLoader.loadFromFileDialog(mCurrentDirectory);
 
@@ -310,9 +322,15 @@ void AssetBrowser::handleAssetImport() {
 }
 
 void AssetBrowser::handleCreateEntry() {
-  // Create directory
   auto path = mCurrentDirectory / mStagingEntry.clippedName;
-  std::filesystem::create_directory(path);
+  path.replace_extension("lua");
+  if (mStagingEntry.isDirectory) {
+    std::filesystem::create_directory(path);
+  } else {
+    std::ofstream stream(path);
+    stream.close();
+    mOnCreateEntry(path);
+  }
 
   // Reset values and hide staging
   mStagingEntry.clippedName = "";

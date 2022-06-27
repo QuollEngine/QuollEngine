@@ -52,6 +52,13 @@ public:
    */
   void reload();
 
+  /**
+   * @brief Set create entry handler
+   *
+   * @param handler Create entry handler
+   */
+  void setOnCreateEntry(std::function<void(liquid::Path)> handler);
+
 private:
   /**
    * @brief Handle importing assets
@@ -82,6 +89,8 @@ private:
   AssetLoader &mAssetLoader;
   liquid::platform_tools::NativeFileDialog mFileDialog;
   liquid::platform_tools::NativeFileOpener mFileOpener;
+
+  std::function<void(liquid::Path)> mOnCreateEntry;
 
   AssetLoadStatusDialog mStatusDialog;
 };

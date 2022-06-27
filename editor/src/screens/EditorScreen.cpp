@@ -149,6 +149,9 @@ void EditorScreen::start(const Project &project) {
         ui.getAssetBrowser().reload();
       });
 
+  ui.getAssetBrowser().setOnCreateEntry(
+      [&assetManager](auto path) { assetManager.loadAsset(path); });
+
   {
     constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
     auto &pass = editorRenderer.attach(graph);
