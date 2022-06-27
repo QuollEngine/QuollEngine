@@ -64,6 +64,9 @@ public:
       entityDatabase.iterateEntities<AudioSourceComponent, AudioStartComponent>(
           [this, &entityDatabase](auto entity, const auto &source,
                                   const auto &play) {
+            if (entityDatabase.hasComponent<AudioStatusComponent>(entity)) {
+              return;
+            }
             const auto &asset =
                 mAssetRegistry.getAudios().getAsset(source.source).data;
             void *sound = mBackend.playSound(asset);

@@ -13,7 +13,8 @@ class TestAudioBackend {
 public:
   void *playSound(const liquid::AudioAsset &data) {
     auto *sound = new FakeAudioData;
-    mInstances.insert_or_assign(sound, AudioStatus{true});
+    mInstances.insert_or_assign(sound, AudioStatus());
+
     return sound;
   }
 
@@ -101,6 +102,32 @@ TEST_F(
   audioSystem.output(entityDatabase);
 
   EXPECT_TRUE(entityDatabase.hasComponent<liquid::AudioStatusComponent>(e1));
+}
+
+TEST_F(AudioSystemTest, DoesNotPlaySoundIfAudioStatusComponentExistsForEntity) {
+  auto handle = createFakeAudio();
+
+  auto e1 = entityDatabase.createEntity();
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  entityDatabase.setComponent<liquid::AudioSourceComponent>(e1, {handle});
+
+  audioSystem.output(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::AudioStatusComponent>(e1));
+
+  auto *prevInstance =
+      entityDatabase.getComponent<liquid::AudioStatusComponent>(e1).instance;
+
+  entityDatabase.setComponent<liquid::AudioStartComponent>(e1, {});
+  audioSystem.output(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::AudioStartComponent>(e1));
+
+  auto *newInstance =
+      entityDatabase.getComponent<liquid::AudioStatusComponent>(e1).instance;
+
+  EXPECT_EQ(prevInstance, newInstance);
 }
 
 TEST_F(AudioSystemTest,
