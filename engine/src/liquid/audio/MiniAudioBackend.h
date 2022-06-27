@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/asset/AudioAsset.h"
+
 namespace liquid {
 
 /**
@@ -27,26 +29,26 @@ public:
   /**
    * @brief Play sound
    *
-   * @param data Audio data
-   * @return Sound object
+   * @param asset Audio asset data
+   * @return Backend specific sound instance
    */
-  void *playSound(void *data);
+  void *playSound(const AudioAsset &asset);
 
   /**
    * @brief Destroy sound
    *
-   * @param sound
+   * @param instance Backend specific sound instance
    */
-  void destroySound(void *sound);
+  void destroySound(void *instance);
 
   /**
    * @brief Check if sound is playing
    *
-   * @param sound Sound
+   * @param instance Backend specific sound instance
    * @retval true Sound is playing
    * @retval false Sound is not playing
    */
-  bool isPlaying(void *sound);
+  bool isPlaying(void *instance);
 
 private:
   BackendImpl *mImpl = nullptr;

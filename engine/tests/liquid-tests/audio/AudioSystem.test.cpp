@@ -11,7 +11,7 @@ class TestAudioBackend {
   };
 
 public:
-  void *playSound(void *data) {
+  void *playSound(const liquid::AudioAsset &data) {
     auto *sound = new FakeAudioData;
     mInstances.insert_or_assign(sound, AudioStatus{true});
     return sound;
@@ -50,9 +50,10 @@ public:
   AudioSystemTest() : audioSystem(assetRegistry) {}
 
   liquid::AudioAssetHandle createFakeAudio() {
-    auto *data = new FakeAudioData;
+    std::vector<char> bytes;
     liquid::AssetData<liquid::AudioAsset> asset{};
-    asset.data.data = data;
+    asset.data.bytes = bytes;
+    asset.data.format = liquid::AudioAssetFormat::Wav;
     return assetRegistry.getAudios().addAsset(asset);
   }
 
