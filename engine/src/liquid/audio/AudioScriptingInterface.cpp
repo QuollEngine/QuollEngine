@@ -9,6 +9,11 @@ namespace liquid {
 int AudioScriptingInterface::LuaInterface::play(void *state) {
   LuaScope scope(state);
 
+  if (!scope.is<LuaTable>(1)) {
+    // TODO: Print error
+    return 0;
+  }
+
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
@@ -27,6 +32,12 @@ int AudioScriptingInterface::LuaInterface::play(void *state) {
 
 int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
   LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    // TODO: Print error
+    scope.set(false);
+    return 1;
+  }
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);

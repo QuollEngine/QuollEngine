@@ -67,8 +67,8 @@ public:
       eventSystem.poll();
       scriptingSystem.update(dt, entityDatabase);
 
-      auto &component =
-          entityDatabase.getComponent<liquid::CameraComponent>(cameraEntity);
+      auto &transform =
+          entityDatabase.getComponent<liquid::LocalTransformComponent>(ball);
 
       if (gameEnded) {
         auto &transform =
@@ -76,7 +76,7 @@ public:
         transform.localPosition = glm::vec3{0.0f, 0.0f, 0.0f};
         gameEnded = false;
       }
-      updateScene();
+      sceneUpdater.update(entityDatabase);
       physicsSystem.update(dt, entityDatabase);
       updateGameLogic(dt);
 
@@ -107,16 +107,6 @@ public:
   }
 
 private:
-  void updateScene() {
-    {
-      auto &transform =
-          entityDatabase.getComponent<liquid::LocalTransformComponent>(p2);
-      transform.localPosition.x = botPosition;
-    }
-
-    sceneUpdater.update(entityDatabase);
-  }
-
   void updateGameLogic(float dt) {
     static bool firstTime = true;
     if (firstTime) {
@@ -126,23 +116,6 @@ private:
       rigidBody.actor->addTorque({10.0f, 0.0f, 0.0f});
 
       firstTime = !firstTime;
-    }
-
-    auto &ballTransform =
-        entityDatabase.getComponent<liquid::LocalTransformComponent>(ball);
-
-    if (abs(botPosition - ballTransform.localPosition.x) < 0.2f) {
-      botVelocity = 0.0;
-    } else if (botPosition > ballTransform.localPosition.x) {
-      botVelocity = -velocity;
-    } else {
-      botVelocity = velocity;
-    }
-
-    float newBotPosition = botPosition + botVelocity * dt;
-    if (newBotPosition - paddleWidth > wallLineRight &&
-        newBotPosition + paddleWidth < wallLineLeft) {
-      botPosition = newBotPosition;
     }
   }
 
@@ -260,9 +233,11 @@ private:
     }
 
     {
-      liquid::LocalTransformComponent transform;
-      transform.localPosition = glm::vec3(0.0, 0.0f, 3.0f);
-      transform.localScale = glm::vec3{1.0f, 0.2f, 0.1f};
+      auto [_, botScriptHandle] = assetManager.getRegistry().getAssetByPath(
+          assetManager.getAssetsPath() / "bot.lua");
+
+      entityDatabase.setComponent<liquid::ScriptingComponent>(
+          p2, {static_cast<liquid::LuaScriptAssetHandle>(botScriptHandle)});
 
       entityDatabase.setComponent<liquid::CollidableComponent>(
           p2, liquid::CollidableComponent{
@@ -271,7 +246,7 @@ private:
                       liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}},
                   liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
 
-      entityDatabase.setComponent(p2, transform);
+      entityDatabase.setComponent<liquid::LocalTransformComponent>(p2, {});
       entityDatabase.setComponent<liquid::WorldTransformComponent>(p2, {});
     }
 
@@ -279,6 +254,7 @@ private:
     liquid::LocalTransformComponent ballTransform{};
     ballTransform.localScale = glm::vec3(0.3f);
     entityDatabase.setComponent(ball, ballTransform);
+    entityDatabase.setComponent<liquid::NameComponent>(ball, {"Ball"});
     entityDatabase.setComponent<liquid::WorldTransformComponent>(ball, {});
   }
 
@@ -313,8 +289,6 @@ private:
 
 private:
   bool gameEnded = false;
-  // Game specific parameters
-  float velocity = 5.0f;
 
   float ballRadius = 0.3f;
 
@@ -328,8 +302,6 @@ private:
   float safeAreaTop = 2.7f;
   float safeAreaBottom = -2.7f;
 
-  float botVelocity = 0.0f;
-  float botPosition = 0.0f;
   glm::vec3 ballPosition{0.0f, 0.0f, 0.0f};
   glm::vec3 ballVelocity{0.2f, 0.0f, 0.3f};
 };

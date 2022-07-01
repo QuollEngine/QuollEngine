@@ -53,7 +53,7 @@ public:
   }
 
   /**
-   * @brief Check if variable is not a correct type
+   * @brief Check if variable is correct type
    *
    * Assertion fails if a type is not
    * implemented
@@ -103,6 +103,21 @@ public:
   template <class T> T getGlobal(const String &name) {
     luaGetGlobal(name);
     return popLast<T>();
+  }
+
+  /**
+   * @brief Check if global variable is correct type
+   *
+   * @tparam T Variable type to check for
+   * @param name Global variable name
+   * @retval true Type matches
+   * @retval false Type does not match
+   */
+  template <class T> bool isGlobal(const String &name) {
+    luaGetGlobal(name);
+    auto val = is<T>();
+    pop(-1);
+    return val;
   }
 
   /**
@@ -170,7 +185,21 @@ public:
    */
   void pop(int count);
 
+  /**
+   * @brief Dump Lua stack
+   *
+   * Used for debugging purposes
+   */
+  void stackDump();
+
 private:
+  /**
+   * @brief Get table field
+   * @param key Field key
+   * @param index Table index in stack
+   */
+  void luaGetTableField(const String &key, int index);
+
   /**
    * @brief Convert stack value to boolean
    *
@@ -212,6 +241,24 @@ private:
   void *luaGetUserData(int index);
 
   /**
+   * @brief Check if stack value is nil
+   *
+   * @param index Stack index
+   * @retval true Value is nil
+   * @retval false Value is nil
+   */
+  bool luaIsNil(int index);
+
+  /**
+   * @brief Check if stack value is an integer
+   *
+   * @param index Stack index
+   * @retval true Value is an integer
+   * @retval false Value is not an integer
+   */
+  bool luaIsInteger(int index);
+
+  /**
    * @brief Check if stack value is a number
    *
    * @param index Stack index
@@ -228,6 +275,27 @@ private:
    * @retval false Value is not a string
    */
   bool luaIsString(int index);
+
+  /**
+   * @brief Check if stack value is table
+   *
+   * @param index Stack index
+   * @retval true Value is table
+   * @retval false Value is not a table
+   */
+  bool luaIsTable(int index);
+
+  /**
+   * @brief Push null value to stack
+   */
+  void luaSetNil();
+
+  /**
+   * @brief Push integer to stack
+   *
+   * @param value Integer value
+   */
+  void luaSetInteger(int32_t value);
 
   /**
    * @brief Push boolean to stack
@@ -328,7 +396,7 @@ template <> inline String LuaScope::get<String>(int32_t index) {
  * @return Lua table
  */
 template <> inline LuaTable LuaScope::get<LuaTable>(int32_t index) {
-  return LuaTable(static_cast<void *>(mScope));
+  return LuaTable(static_cast<void *>(mScope), index);
 }
 
 /**
@@ -353,6 +421,17 @@ template <> inline bool LuaScope::is<String>(int32_t index) {
 }
 
 /**
+ * @brief Check if variable is an unsigned int
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<uint32_t>(int32_t index) {
+  return luaIsNumber(index);
+}
+
+/**
  * @brief Check if variable is a floating point
  *
  * @param index Stack index
@@ -364,12 +443,53 @@ template <> inline bool LuaScope::is<float>(int32_t index) {
 }
 
 /**
+ * @brief Check if variable is nil
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<std::nullptr_t>(int32_t index) {
+  return luaIsNil(index);
+}
+
+/**
+ * @brief Check if variable is a table
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<LuaTable>(int32_t index) {
+  return luaIsTable(index);
+}
+
+/**
+ * @brief Set nullptr
+ *
+ * @param value Nullptr value
+ */
+template <>
+inline void LuaScope::set<std::nullptr_t>(const std::nullptr_t &ptr) {
+  luaSetNil();
+}
+
+/**
  * @brief Set boolean
  *
  * @param value Boolean value
  */
 template <> inline void LuaScope::set<bool>(const bool &value) {
   luaSetBoolean(value);
+}
+
+/**
+ * @brief Set unsigned integer
+ *
+ * @param value Unsigned integer value
+ */
+template <> inline void LuaScope::set<uint32_t>(const uint32_t &value) {
+  luaSetInteger(static_cast<int32_t>(value));
 }
 
 /**

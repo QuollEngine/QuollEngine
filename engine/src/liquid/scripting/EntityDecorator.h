@@ -19,6 +19,14 @@ public:
    */
   void attachToScope(LuaScope &scope, Entity entity,
                      EntityDatabase &entityDatabase);
+
+  /**
+   * @brief Create entity table for the given entity
+   *
+   * @param scope Lua scope
+   * @param entity Entity
+   */
+  static void createEntityTable(LuaScope &scope, Entity entity);
 };
 
 } // namespace liquid

@@ -11,8 +11,9 @@ public:
    * @brief Create lua table wrapper
    *
    * @param scope Lua table wrapper
+   * @param index Stack index
    */
-  LuaTable(void *scope);
+  LuaTable(void *scope, int32_t index);
 
   /**
    * @brief Set number table value
@@ -47,6 +48,7 @@ public:
 
 private:
   uint32_t mSize = 0;
+  int32_t mIndex = 0;
   void *mScope = nullptr;
 };
 
