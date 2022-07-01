@@ -12,7 +12,38 @@ namespace liquid {
 
 LuaScope::LuaScope(void *scope) : mScope(static_cast<lua_State *>(scope)) {}
 
-void LuaScope::pop(int count) { lua_pop(mScope, count); };
+void LuaScope::pop(int count) { lua_pop(mScope, count); }
+
+void LuaScope::stackDump() {
+  int top = lua_gettop(mScope);
+  for (int i = 1; i <= top; i++) {
+    std::cout << "[" << i << "]: ";
+    int t = lua_type(mScope, i);
+    switch (t) {
+    case LUA_TSTRING:
+      std::cout << luaGetString(i);
+      break;
+
+    case LUA_TBOOLEAN:
+      std::cout << luaGetBoolean(i);
+      break;
+
+    case LUA_TNUMBER:
+      std::cout << luaGetNumber(i);
+      break;
+
+    default:
+      std::cout << lua_typename(mScope, t);
+      break;
+    }
+
+    std::cout << "\n";
+  }
+}
+
+void LuaScope::luaGetTableField(const String &key, int index) {
+  lua_getfield(mScope, index, key.c_str());
+};
 
 bool LuaScope::luaGetBoolean(int index) {
   return static_cast<bool>(lua_toboolean(mScope, index));
@@ -34,9 +65,19 @@ void *LuaScope::luaGetUserData(int index) {
   return lua_touserdata(mScope, static_cast<int>(index));
 }
 
+bool LuaScope::luaIsNil(int index) { return lua_isnil(mScope, index); }
+
+bool LuaScope::luaIsInteger(int index) { return lua_isinteger(mScope, index); }
+
 bool LuaScope::luaIsNumber(int index) { return lua_isnumber(mScope, index); }
 
 bool LuaScope::luaIsString(int index) { return lua_isstring(mScope, index); }
+
+bool LuaScope::luaIsTable(int index) { return lua_istable(mScope, index); }
+
+void LuaScope::luaSetNil() { lua_pushnil(mScope); }
+
+void LuaScope::luaSetInteger(int32_t value) { lua_pushinteger(mScope, value); }
 
 void LuaScope::luaSetBoolean(bool value) {
   lua_pushboolean(mScope, static_cast<int>(value));
@@ -73,14 +114,16 @@ void LuaScope::call(uint32_t numArgs) {
   if (lua_pcall(mScope, numArgs, 0, 0) == LUA_OK) {
     lua_pop(mScope, lua_gettop(mScope));
   } else {
-    LOG_DEBUG("[Lua] Failed to call Lua function");
+    auto stringView = luaGetString(-1);
+
+    LOG_DEBUG("[Lua] Failed to call Lua function: " << stringView);
     lua_pop(mScope, -1);
   }
 }
 
 LuaTable LuaScope::createTable(uint32_t size) {
   lua_createtable(mScope, 0, static_cast<int>(size));
-  return LuaTable(mScope);
+  return LuaTable(mScope, -1);
 }
 
 } // namespace liquid

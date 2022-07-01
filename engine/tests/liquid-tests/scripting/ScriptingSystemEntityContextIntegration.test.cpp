@@ -50,6 +50,16 @@ TEST_F(ScriptingNameComponentIntegrationTest,
   EXPECT_EQ(name, "");
 }
 
+TEST_F(ScriptingNameComponentIntegrationTest, ReturnsEmptyStringIfNoSelf) {
+  auto entity = entityDatabase.createEntity();
+
+  auto &scope = call(entity, "name_get_invalid");
+
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  auto name = scope.getGlobal<liquid::String>("name");
+  EXPECT_EQ(name, "");
+}
+
 TEST_F(ScriptingNameComponentIntegrationTest,
        ReturnsNameComponentDataIfExists) {
   auto entity = entityDatabase.createEntity();
@@ -62,7 +72,7 @@ TEST_F(ScriptingNameComponentIntegrationTest,
 }
 
 TEST_F(ScriptingNameComponentIntegrationTest,
-       DoesNothingIfProvidedArgumentIsNotString) {
+       DoesNothingIfProvidedArgumentIsInvalid) {
   auto entity = entityDatabase.createEntity();
 
   EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
@@ -76,6 +86,7 @@ TEST_F(ScriptingNameComponentIntegrationTest, CreatesNameComponentOnSet) {
   EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
   call(entity, "name_set");
 
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
   EXPECT_EQ(entityDatabase.getComponent<liquid::NameComponent>(entity).name,
             "Hello World");
 }
@@ -99,6 +110,16 @@ TEST_F(ScriptingLocalTransformComponentDeathTest,
        GetPositionFailsIfComponentDoesNotExist) {
   auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_position_get"), ".*");
+}
+
+TEST_F(ScriptingLocalTransformComponentTest,
+       GetPositionReturnsNilIfValuesAreInvalid) {
+  auto entity = entityDatabase.createEntity();
+  auto &scope = call(entity, "local_transform_position_get_invalid");
+
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_x"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_y"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_z"));
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, GetsPositionValue) {
@@ -132,7 +153,7 @@ TEST_F(ScriptingLocalTransformComponentTest, SetsPositionValue) {
 }
 
 TEST_F(ScriptingLocalTransformComponentTest,
-       DoesNothingIfSetPositionArgumentsAreNotNumbers) {
+       DoesNothingIfSetPositionArgumentsAreInvalid) {
   auto entity = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
@@ -148,6 +169,16 @@ TEST_F(ScriptingLocalTransformComponentDeathTest,
        GetScaleFailsIfComponentDoesNotExist) {
   auto entity = entityDatabase.createEntity();
   EXPECT_DEATH(call(entity, "local_transform_scale_get"), ".*");
+}
+
+TEST_F(ScriptingLocalTransformComponentTest,
+       GetScaleReturnsNilIfValuesAreInvalid) {
+  auto entity = entityDatabase.createEntity();
+  auto &scope = call(entity, "local_transform_scale_get_invalid");
+
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_x"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_y"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_z"));
 }
 
 TEST_F(ScriptingLocalTransformComponentTest, GetsScaleValue) {

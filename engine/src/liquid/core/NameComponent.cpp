@@ -8,13 +8,20 @@ namespace liquid {
 
 int NameComponent::LuaInterface::get(void *state) {
   LuaScope scope(state);
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  auto entityTable = scope.getGlobal<LuaTable>("entity");
+  if (!scope.is<LuaTable>(1)) {
+    // TODO: Print error
+    scope.set<String>("");
+    return 1;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   if (entityDatabase.hasComponent<NameComponent>(entity)) {
     scope.set(entityDatabase.getComponent<NameComponent>(entity).name);
@@ -27,19 +34,21 @@ int NameComponent::LuaInterface::get(void *state) {
 
 int NameComponent::LuaInterface::set(void *state) {
   LuaScope scope(state);
-  if (!scope.is<String>(1)) {
+  if (!scope.is<LuaTable>(1) || !scope.is<String>(2)) {
     // TODO: Show logs here
     return 0;
   }
 
-  auto string = scope.get<String>(1);
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<uint32_t>();
   scope.pop(1);
+
+  auto string = scope.get<String>(2);
+  scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-  auto entityTable = scope.getGlobal<LuaTable>("entity");
-  entityTable.get("id");
-  Entity entity = scope.popLast<uint32_t>();
 
   entityDatabase.setComponent<NameComponent>(entity, {string});
 

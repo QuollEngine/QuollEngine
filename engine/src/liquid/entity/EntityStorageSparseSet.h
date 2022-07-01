@@ -29,7 +29,7 @@ template <class TComponentType> struct EntityStorageSparseSetComponentPool {
   /**
    * Pool size
    */
-  size_t size;
+  size_t size = 0;
 };
 
 /**
@@ -81,10 +81,10 @@ public:
       auto eid = mDeleted.front();
       mDeleted.pop_front();
       return eid;
-    } else {
-      auto eid = mLastEntity++;
-      return eid;
     }
+
+    auto eid = mLastEntity++;
+    return eid;
   }
 
   /**
@@ -440,10 +440,9 @@ private:
           std::get<IndexForSmallest>(pools).entities.size()) {
         return getSmallestEntityListFromPools<Index + 1, Index,
                                               PickComponents...>(pools);
-      } else {
-        return getSmallestEntityListFromPools<Index + 1, IndexForSmallest,
-                                              PickComponents...>(pools);
       }
+      return getSmallestEntityListFromPools<Index + 1, IndexForSmallest,
+                                            PickComponents...>(pools);
     }
 
     return std::get<IndexForSmallest>(pools).entities;

@@ -9,7 +9,7 @@ extern "C" {
 
 namespace liquid {
 
-LuaTable::LuaTable(void *scope) : mScope(scope) {}
+LuaTable::LuaTable(void *scope, int32_t index) : mScope(scope), mIndex(index) {}
 
 void LuaTable::set(const char *key, uint32_t value) {
   lua_pushinteger(static_cast<lua_State *>(mScope),
@@ -28,7 +28,7 @@ void LuaTable::set(const char *key, const LuaTable &value) {
 }
 
 void LuaTable::get(const char *key) {
-  lua_getfield(static_cast<lua_State *>(mScope), -1, key);
+  lua_getfield(static_cast<lua_State *>(mScope), mIndex, key);
 }
 
 } // namespace liquid
