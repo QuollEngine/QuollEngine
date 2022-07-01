@@ -359,6 +359,10 @@ void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
     ImGui::EndCombo();
   }
 
+  if (!mEntityManager.isUsingSimulationDatabase()) {
+    return;
+  }
+
   ImGui::Text("Time");
 
   float animationTime = component.normalizedTime * currentAnimation.data.time;
