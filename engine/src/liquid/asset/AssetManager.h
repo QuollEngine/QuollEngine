@@ -42,6 +42,14 @@ public:
   Result<TextureAssetHandle> loadTextureFromFile(const Path &filePath);
 
   /**
+   * @brief Load font from file
+   *
+   * @param filePath Path to asset
+   * @return Font asset handle
+   */
+  Result<FontAssetHandle> loadFontFromFile(const Path &filePath);
+
+  /**
    * @brief Create material from asset
    *
    * Create engine specific material asset

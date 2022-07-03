@@ -65,6 +65,8 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
   switch (type) {
   case liquid::AssetType::Texture:
     return EditorIcon::Texture;
+  case liquid::AssetType::Font:
+    return EditorIcon::Font;
   case liquid::AssetType::Material:
     return EditorIcon::Material;
   case liquid::AssetType::Mesh:

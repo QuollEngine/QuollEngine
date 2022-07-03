@@ -5,6 +5,7 @@
 
 #include "MaterialAsset.h"
 #include "TextureAsset.h"
+#include "FontAsset.h"
 #include "MeshAsset.h"
 #include "SkeletonAsset.h"
 #include "AnimationAsset.h"
@@ -27,6 +28,7 @@ namespace liquid {
  */
 class AssetRegistry {
   using TextureMap = AssetMap<TextureAssetHandle, TextureAsset>;
+  using FontMap = AssetMap<FontAssetHandle, FontAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
   using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
   using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, SkinnedMeshAsset>;
@@ -84,6 +86,13 @@ public:
    * @return Texture asset map
    */
   inline TextureMap &getTextures() { return mTextures; }
+
+  /**
+   * @brief Get fonts
+   *
+   * @return Font asset map
+   */
+  inline FontMap &getFonts() { return mFonts; }
 
   /**
    * @brief Get materials
@@ -152,6 +161,7 @@ public:
 
 private:
   TextureMap mTextures;
+  FontMap mFonts;
   MaterialMap mMaterials;
   MeshMap mMeshes;
   SkinnedMeshMap mSkinnedMeshes;

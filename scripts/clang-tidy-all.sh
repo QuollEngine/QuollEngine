@@ -14,19 +14,20 @@ ENGINE_FILES=$(find engine/src -type f -name "*.cpp")
 EDITOR_FILES=$(find editor -type f -name "*.cpp")
 RHI_CORE_FILES=$(find engine/rhi/core -type f -name "*.cpp")
 RHI_VULKAN_FILES=$(find engine/rhi/vulkan -type f -name "*.cpp")
+VENDOR_INCLUDES="-isystem/usr/local/include -isystem./vendor/Debug/include -isystem./vendor/Debug/include/msdfgen -isystem./vendor/Debug/include/freetype2"
 
 print_info "Checking Engine files"
 $CMD -header-filter=.* --p=file --quiet $ENGINE_FILES -- --std=c++17 \
-    -isystem./vendor/include -isystem./engine/src -isystem./engine/rhi/core/include -isystem/usr/local/include
+    $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include
 
 print_info "Checking RHICore files"
 $CMD -header-filter=.* --p=file --quiet $RHI_CORE_FILES -- --std=c++17 \
-    -isystem./vendor/include -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi -isystem/usr/local/include
+    $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi
 
 print_info "Checking RHIVulkan files"
 $CMD -header-filter=.* --p=file --quiet $RHI_VULKAN_FILES -- --std=c++17 \
-    -isystem./vendor/include -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan -isystem/usr/local/include
+    $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan
 
 print_info "Checking Editor files"
 $CMD -header-filter=.* --p=file --quiet $EDITOR_FILES -- --std=c++17 \
-    -isystem./vendor/include -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/platform-tools/include -isystem/usr/local/include
+    $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/platform-tools/include

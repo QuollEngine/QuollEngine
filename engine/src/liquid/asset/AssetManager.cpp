@@ -109,6 +109,15 @@ Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
+  if (ext == ".ttf" || ext == ".otf" || ext == ".woff" || ext == ".woff2") {
+    auto res = loadFontFromFile(path);
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
   InputBinaryStream stream(path);
   AssetFileHeader header;
   String magic(ASSET_FILE_MAGIC_LENGTH, '$');
