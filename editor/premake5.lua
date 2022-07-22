@@ -15,6 +15,7 @@ project "Liquidator"
         "glslc ../../editor/assets/shaders/object-icons.frag -o %{cfg.buildtarget.directory}/assets/shaders/object-icons.frag.spv",
         "{MKDIR} %{cfg.buildtarget.directory}/assets/icons",
         "{COPYFILE} ../../editor/assets/icons/texture.png %{cfg.buildtarget.directory}/assets/icons/texture.png",
+        "{COPYFILE} ../../editor/assets/icons/font.png %{cfg.buildtarget.directory}/assets/icons/font.png",
         "{COPYFILE} ../../editor/assets/icons/material.png %{cfg.buildtarget.directory}/assets/icons/material.png",
         "{COPYFILE} ../../editor/assets/icons/mesh.png %{cfg.buildtarget.directory}/assets/icons/mesh.png",
         "{COPYFILE} ../../editor/assets/icons/skeleton.png %{cfg.buildtarget.directory}/assets/icons/skeleton.png",

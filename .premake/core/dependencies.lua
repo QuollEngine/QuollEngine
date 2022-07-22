@@ -5,7 +5,7 @@ function linkProfilerDependencies()
         filter { "system:windows" }
             links { "OptickCored" }
             postbuildcommands {
-                '{COPY} %{wks.location}/../vendor/bin/OptickCored.dll %{cfg.buildtarget.directory}'
+                '{COPY} %{wks.location}/../vendor/Debug/bin/OptickCored.dll %{cfg.buildtarget.directory}'
             }
             
         filter {"system:linux or system:macosx"}
@@ -16,16 +16,29 @@ end
 
 -- Link dependencies without Vulkan
 function linkDependenciesWithoutVulkan()
-    links { "vendor-libimgui", "vendor-libspirv-reflect", "vendor-liblua", "glfw3", "ktx", "PhysX_static", "PhysXPvdSDK_static", "PhysXExtensions_static", "PhysXCommon_static", "PhysXFoundation_static" }
+    links {
+        "vendor-libimgui",
+        "vendor-libspirv-reflect",
+        "vendor-liblua",
+        "vendor-libmsdf-atlas-gen",
+        "vendor-libmsdfgen",
+        "glfw3",
+        "ktx",
+        "PhysX_static",
+        "PhysXPvdSDK_static",
+        "PhysXExtensions_static",
+        "PhysXCommon_static",
+        "PhysXFoundation_static"
+    }
 
     filter { "system:windows", "configurations:Debug or configurations:Profile-Debug" }
-        links { "yaml-cppd" }
+        links { "yaml-cppd", "freetyped" }
 
     filter { "system:windows", "configurations:Release or configurations:Profile-Release" }
-        links { "yaml-cpp" }
+        links { "yaml-cpp", "freetype" }
 
     filter {"system:linux or system:macosx"}
-        links { "yaml-cpp" }
+        links { "yaml-cpp", "freetype" }
 
     -- These libs must be linked after
     -- all libraries are linked

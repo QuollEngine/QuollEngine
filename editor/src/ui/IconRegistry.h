@@ -8,6 +8,7 @@ enum class EditorIcon {
   CreateDirectory,
   Material,
   Texture,
+  Font,
   Mesh,
   SkinnedMesh,
   Skeleton,

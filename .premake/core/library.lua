@@ -6,19 +6,21 @@ function setupLibraryDirectories()
         "KHRONOS_STATIC"
     }
 
-    sysincludedirs {
-        "../vendor/include"
-    }
-
-    libdirs {
-        "../vendor/lib"
-    }
-
     filter { "configurations:Debug or configurations:Profile-Debug" }
-        libdirs { "../vendor/lib/debug" }
+        sysincludedirs {
+            "../vendor/Debug/include",
+            "../vendor/Debug/include/freetype2",
+            "../vendor/Debug/include/msdfgen"
+        }
+        libdirs { "../vendor/Debug/lib", "../vendor/Debug/lib/debug" }
     
     filter { "configurations:Release or configurations:Profile-Release" }
-        libdirs { "../vendor/lib/release" }
+        sysincludedirs {
+            "../vendor/Release/include",
+            "../vendor/Release/include/freetype2",
+            "../vendor/Release/include/msdfgen"
+        }
+        libdirs { "../vendor/Release/lib", "../vendor/Release/lib/release" }
 
     filter { "system:windows" }
         -- Vulkan SDK for Windows adds environment

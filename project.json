@@ -5,9 +5,9 @@
       "url": "https://github.com/lua/lua/archive/refs/tags/v5.4.4.zip",
       "buildSource": "lua-5.4.4",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/projects/lua",
-        "{COPY} LICENSE.txt *.c {{VENDOR_DIR}}/projects/lua",
-        "{COPY} *.h {{VENDOR_DIR}}/include"
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/lua",
+        "{COPY} LICENSE.txt *.c {{VENDOR_PROJECTS_DIR}}/lua",
+        "{COPY} *.h {{VENDOR_INSTALL_DIR}}/include"
       ]
     },
     {
@@ -47,6 +47,52 @@
       ]
     },
     {
+      "name": "freetype",
+      "url": "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-12-1/freetype-VER-2-12-1.zip",
+      "buildSource": "freetype-VER-2-12-1",
+      "cmd": [
+        {
+          "type": "cmake",
+          "options": {
+            "common": {
+              "FT_DISABLE_PNG": "TRUE",
+              "FT_DISABLE_ZLIB": "TRUE",
+              "FT_DISABLE_BZIP2": "TRUE",
+              "FT_DISABLE_HARFBUZZ": "TRUE",
+              "FT_DISABLE_BROTLI": "TRUE"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "msdfgen",
+      "url": "https://github.com/Chlumsky/msdfgen/archive/refs/heads/master.zip",
+      "buildSource": "msdfgen-master",
+      "cmd": [
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdfgen",
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdfgen/core",
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdfgen/ext",
+        "{COPY} msdfgen.h msdfgen-ext.h {{VENDOR_INSTALL_DIR}}/include/msdfgen",
+        "{COPY} core/*.h core/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdfgen/core",
+        "{COPY} ext/*.h ext/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdfgen/ext",
+        "{COPY} core/*.cpp {{VENDOR_PROJECTS_DIR}}/msdfgen",
+        "{COPY} ext/*.cpp {{VENDOR_PROJECTS_DIR}}/msdfgen"
+      ]
+    },
+    {
+      "name": "msdf-atlas-gen",
+      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/refs/heads/master.zip",
+      "buildSource": "msdf-atlas-gen-master",
+      "cmd": [
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdf-atlas-gen",
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdf-atlas-gen",
+        "{RM} msdf-atlas-gen/artery-font-export.cpp msdf-atlas-gen/image-encode.cpp",
+        "{COPY} msdf-atlas-gen/*.cpp {{VENDOR_PROJECTS_DIR}}/msdf-atlas-gen",
+        "{COPY} msdf-atlas-gen/*.h msdf-atlas-gen/*.hpp {{VENDOR_INSTALL_DIR}}/include/msdf-atlas-gen"
+      ]
+    },
+    {
       "name": "physx",
       "url": "https://github.com/NVIDIAGameWorks/PhysX/archive/refs/heads/4.1.zip",
       "buildSource": "PhysX-4.1",
@@ -60,7 +106,7 @@
               "PHYSX_ROOT_DIR": "{{SOURCE_DIR}}/physx",
               "NV_USE_DEBUG_WINCRT": "ON",
               "NV_USE_STATIC_WINCRT": "OFF",
-              "PXSHARED_INSTALL_PREFIX": "{{VENDOR_DIR}}",
+              "PXSHARED_INSTALL_PREFIX": "{{VENDOR_INSTALL_DIR}}",
               "CMAKEMODULES_PATH": "{{SOURCE_DIR}}/externals/cmakemodules",
               "PX_ROOT_LIB_DIR": "lib",
               "PX_OUTPUT_LIB_DIR": "{{SOURCE_DIR}}/build",
@@ -111,9 +157,9 @@
       "url": "https://github.com/ocornut/imgui/archive/refs/heads/docking.zip",
       "buildSource": "imgui-docking",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/projects/imgui",
-        "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp {{VENDOR_DIR}}/projects/imgui",
-        "{COPY} *.h backends/imgui_impl_glfw.h {{VENDOR_DIR}}/include"
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imgui",
+        "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp {{VENDOR_PROJECTS_DIR}}/imgui",
+        "{COPY} *.h backends/imgui_impl_glfw.h {{VENDOR_INSTALL_DIR}}/include"
       ]
     },
     {
@@ -121,26 +167,26 @@
       "url": "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/heads/master.zip",
       "buildSource": "SPIRV-Reflect-master",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/projects/spirv-reflect",
-        "{MKDIR} {{VENDOR_DIR}}/include/include/spirv/unified1",
-        "{COPY} spirv_reflect.c {{VENDOR_DIR}}/projects/spirv-reflect",
-        "{COPY} spirv_reflect.h {{VENDOR_DIR}}/include/spirv_reflect.h",
-        "{COPY} include/spirv/unified1/spirv.h {{VENDOR_DIR}}/include/include/spirv/unified1"
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/spirv-reflect",
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/include/spirv/unified1",
+        "{COPY} spirv_reflect.c {{VENDOR_PROJECTS_DIR}}/spirv-reflect",
+        "{COPY} spirv_reflect.h {{VENDOR_INSTALL_DIR}}/include/spirv_reflect.h",
+        "{COPY} include/spirv/unified1/spirv.h {{VENDOR_INSTALL_DIR}}/include/include/spirv/unified1"
       ]
     },
     {
       "name": "glm",
       "buildSource": "glm",
       "url": "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip",
-      "cmd": ["{COPY} glm {{VENDOR_DIR}}/include/glm"]
+      "cmd": ["{COPY} glm {{VENDOR_INSTALL_DIR}}/include/glm"]
     },
     {
       "name": "tinygltf",
       "buildSource": "tinygltf-2.5.0",
       "url": "https://github.com/syoyo/tinygltf/archive/refs/tags/v2.5.0.zip",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/include/tinygltf",
-        "{COPY} tiny_gltf.h {{VENDOR_DIR}}/include/tinygltf"
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/tinygltf",
+        "{COPY} tiny_gltf.h {{VENDOR_INSTALL_DIR}}/include/tinygltf"
       ]
     },
     {
@@ -166,8 +212,8 @@
       "buildSource": ".",
       "url": "https://github.com/nlohmann/json/releases/download/v3.9.1/include.zip",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/include/json",
-        "{COPY} single_include/nlohmann/json.hpp {{VENDOR_DIR}}/include/json"
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/json",
+        "{COPY} single_include/nlohmann/json.hpp {{VENDOR_INSTALL_DIR}}/include/json"
       ]
     },
     {
@@ -175,8 +221,8 @@
       "buildSource": "VulkanMemoryAllocator-2.3.0-vs2017",
       "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v2.3.0+vs2017.zip",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/include/vma",
-        "{COPY} src/vk_mem_alloc.h {{VENDOR_DIR}}/include/vma"
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/vma",
+        "{COPY} src/vk_mem_alloc.h {{VENDOR_INSTALL_DIR}}/include/vma"
       ]
     },
     {
@@ -184,8 +230,8 @@
       "buildSource": "stb-master",
       "url": "https://github.com/nothings/stb/archive/refs/heads/master.zip",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/include/stb",
-        "{COPY} stb_image.h {{VENDOR_DIR}}/include/stb"
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/stb",
+        "{COPY} stb_image.h {{VENDOR_INSTALL_DIR}}/include/stb"
       ]
     },
     {
@@ -193,8 +239,8 @@
       "buildSource": "miniaudio-master",
       "url": "https://github.com/mackron/miniaudio/archive/refs/heads/master.zip",
       "cmd": [
-        "{MKDIR} {{VENDOR_DIR}}/include/miniaudio",
-        "{COPY} miniaudio.h {{VENDOR_DIR}}/include/miniaudio"
+        "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/miniaudio",
+        "{COPY} miniaudio.h {{VENDOR_INSTALL_DIR}}/include/miniaudio"
       ]
     }
   ]

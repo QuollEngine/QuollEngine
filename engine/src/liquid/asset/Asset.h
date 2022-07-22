@@ -6,6 +6,8 @@ enum class MaterialAssetHandle : uint32_t { Invalid = 0 };
 
 enum class TextureAssetHandle : uint32_t { Invalid = 0 };
 
+enum class FontAssetHandle : uint32_t { Invalid = 0 };
+
 enum class MeshAssetHandle : uint32_t { Invalid = 0 };
 
 enum class SkinnedMeshAssetHandle : uint32_t { Invalid = 0 };
@@ -24,6 +26,7 @@ enum class AssetType : uint8_t {
   None,
   Material,
   Texture,
+  Font,
   Mesh,
   SkinnedMesh,
   Skeleton,
@@ -39,6 +42,8 @@ inline const String getAssetTypeString(AssetType type) {
     return "material";
   case AssetType::Texture:
     return "texture";
+  case AssetType::Font:
+    return "font";
   case AssetType::Mesh:
     return "mesh";
   case AssetType::SkinnedMesh:

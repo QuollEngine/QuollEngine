@@ -17,9 +17,9 @@ from pathlib import Path
 workingDir = os.getcwd()
 
 projectFile = os.path.join(workingDir, 'project.json')
-vendorDir = os.path.join(workingDir, 'vendor')
-tempDir = os.path.join(vendorDir, 'tmp')
-projectHashFile = os.path.join(vendorDir, 'project_hash')
+vendorRootDir = os.path.join(workingDir, 'vendor')
+tempDir = os.path.join(vendorRootDir, 'tmp')
+projectHashFile = os.path.join(vendorRootDir, 'project_hash')
 buildModes = ['Debug', 'Release']
 
 profiler_data = {}
@@ -107,8 +107,8 @@ def fetch_dependencies(project):
 #
 # Command to copy files to directory
 #
-def cmd_copy(cmdLine):
-    parts = cmdLine.split(' ')
+def cmd_copy(cmdLine, x):
+    parts = shlex.split(cmdLine)
     if len(parts) < 3:
         print('COPY command must have at least two arguments')
         return
@@ -129,10 +129,33 @@ def cmd_copy(cmdLine):
             print(f'[COPY] Path is not a file or a directory')
 
 #
+# Command to remove files
+#
+def cmd_rm(cmdLine, x):
+    parts = shlex.split(cmdLine)
+    if len(parts) < 2:
+        print('RM command must have at least one argument')
+        return
+
+    mainParts = parts[1:len(parts)]
+    includedFiles = []
+    for p in mainParts:
+        includedFiles.extend(glob(f'{x["sourceDir"]}/{p}'))
+
+    includedFiles = [os.path.normpath(p) for p in includedFiles]
+    for file in includedFiles:
+        if os.path.isdir(file):
+            shutil.rmtree(file)
+        elif os.path.isfile(file):
+            os.remove(file)
+        else:
+            print(f'[COPY] Path is not a file or a directory')
+
+#
 # Command to make directory
 #
-def cmd_mkdir(cmdLine):
-    parts = cmdLine.split(' ')
+def cmd_mkdir(cmdLine, x):
+    parts = shlex.split(cmdLine)
     if len(parts) < 2:
         print('MKDIR command must have at least one argument')
         return
@@ -142,13 +165,14 @@ def cmd_mkdir(cmdLine):
     for directory in includedDirs:
         os.makedirs(directory, exist_ok=True)
 
-
 #
 # Parse placeholders
 #
 def parse_placeholders(cmdLine, params):
     placeholders = {
-        'VENDOR_DIR': params['VENDOR_DIR'],
+        'VENDOR_ROOT_DIR': params['VENDOR_ROOT_DIR'],
+        'VENDOR_INSTALL_DIR': params['VENDOR_INSTALL_DIR'],
+        'VENDOR_PROJECTS_DIR': params['VENDOR_PROJECTS_DIR'],
         'SOURCE_DIR': params['SOURCE_DIR'],
         'BUILD_MODE': params['BUILD_MODE'],
         'PLATFORM': platform.system().lower(),
@@ -180,12 +204,18 @@ if project_hash_matches(projectFile, projectHashFile):
     sys.exit(0)
 
 project = open_project(projectFile)
-clean_make_dir(vendorDir)
+clean_make_dir(vendorRootDir)
+
+for buildMode in buildModes:
+    vendorModeDir = os.path.join(vendorRootDir, buildMode)
+    clean_make_dir(vendorModeDir)
+    clean_make_dir(os.path.join(vendorModeDir, 'include'))
+    clean_make_dir(os.path.join(vendorModeDir, 'lib'))
+    clean_make_dir(os.path.join(vendorModeDir, 'bin'))
+
+clean_make_dir(os.path.join(vendorRootDir, 'projects'))
+
 clean_make_dir(os.path.join(tempDir))
-clean_make_dir(os.path.join(vendorDir, 'include'))
-clean_make_dir(os.path.join(vendorDir, 'projects'))
-clean_make_dir(os.path.join(vendorDir, 'lib'))
-clean_make_dir(os.path.join(vendorDir, 'bin'))
 create_project_hash_file(projectFile, projectHashFile)
 fetch_dependencies(project)
 
@@ -193,32 +223,38 @@ for buildMode in buildModes:
     for x in project['dependencies']:
         print(f'Building {x["name"]}...')
         start = time.time()
+        params = {
+            'VENDOR_ROOT_DIR': vendorRootDir,
+            'VENDOR_INSTALL_DIR': os.path.join(vendorRootDir, buildMode),
+            'VENDOR_PROJECTS_DIR': os.path.join(vendorRootDir, 'projects'),
+            'SOURCE_DIR': x['sourceDir'],
+            'BUILD_MODE': buildMode
+        }
         
         for cmdLine in x['cmd']:
-            params = {
-                'VENDOR_DIR': vendorDir,
-                'SOURCE_DIR': x['sourceDir'],
-                'BUILD_MODE': buildMode
-            }
             if isinstance(cmdLine, str):
                 parsedCmdLine = parse_placeholders(cmdLine, params)
                 printedCmdLine = parse_placeholders(cmdLine, {
-                    'VENDOR_DIR': 'vendor/',
+                    'VENDOR_ROOT_DIR': 'vendor/',
+                    'VENDOR_INSTALL_DIR': f'vendor/{buildMode}',
+                    'VENDOR_PROJECTS_DIR': 'vendor/projects',
                     'SOURCE_DIR': f'{x["name"]}/',
                     'BUILD_MODE': buildMode
                 })
                 print('\t', printedCmdLine)
 
                 if parsedCmdLine.startswith('{COPY}'):
-                    cmd_copy(parsedCmdLine)
+                    cmd_copy(parsedCmdLine, x)
                 elif parsedCmdLine.startswith('{MKDIR}'):
-                    cmd_mkdir(parsedCmdLine)
+                    cmd_mkdir(parsedCmdLine, x)
+                elif parsedCmdLine.startswith('{RM}'):
+                    cmd_rm(parsedCmdLine, x)
                 else:
                     run_process(parsedCmdLine, x['sourceDir'])
             elif cmdLine['type'] == 'cmake':
                 print('CMake build')
                 options = {
-                    'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_DIR}}', params)
+                    'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_INSTALL_DIR}}', params)
                 }
                 source = '.'
                 if 'source' in cmdLine:

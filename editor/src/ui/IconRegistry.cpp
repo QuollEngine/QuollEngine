@@ -26,6 +26,8 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
       EditorIcon::Texture,
       loader.loadFromFile((iconsPath / "texture.png").string()));
   mIconMap.insert_or_assign(
+      EditorIcon::Font, loader.loadFromFile((iconsPath / "font.png").string()));
+  mIconMap.insert_or_assign(
       EditorIcon::Mesh, loader.loadFromFile((iconsPath / "mesh.png").string()));
   mIconMap.insert_or_assign(
       EditorIcon::Skeleton,
