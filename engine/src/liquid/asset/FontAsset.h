@@ -1,23 +1,51 @@
 #pragma once
 
-#include <msdf-atlas-gen/BitmapAtlasStorage.h>
-#include <msdf-atlas-gen/GlyphGeometry.h>
-
 namespace liquid {
+
+/**
+ * @brief Font glyph data
+ */
+struct FontGlyph {
+
+  /**
+   * Atlas bounds
+   */
+  glm::vec4 bounds;
+
+  /**
+   * Quad bounds
+   */
+  glm::vec4 planeBounds;
+
+  /**
+   * Glyph advance
+   */
+  float advanceX = 0.0;
+};
 
 /**
  * @brief Font asset data
  */
 struct FontAsset {
   /**
-   * MSDF font atlas
+   * Font atlas raw data
    */
-  msdf_atlas::BitmapAtlasStorage<msdf_atlas::byte, 3> msdfAtlas;
+  std::vector<std::byte> atlas;
 
   /**
-   * Information about all glyphs
+   * Font atlas dimensions
    */
-  std::vector<msdf_atlas::GlyphGeometry> msdfGlyphs;
+  glm::uvec2 atlasDimensions;
+
+  /**
+   * Glyph data
+   */
+  std::unordered_map<uint32_t, FontGlyph> glyphs;
+
+  /**
+   * Font scale
+   */
+  float fontScale = 1.0f;
 
   /**
    * Device handle

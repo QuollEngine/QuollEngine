@@ -24,6 +24,7 @@
 #include "liquid/physics/RigidBodyComponent.h"
 #include "liquid/physics/CollidableComponent.h"
 #include "liquid/scripting/ScriptingComponent.h"
+#include "liquid/text/TextComponent.h"
 
 #include "EntityStorageSparseSet.h"
 
@@ -53,7 +54,8 @@ using EntityDatabase = EntityStorageSparseSet<
     SkeletonDebugComponent,
     RigidBodyComponent,
     CollidableComponent,
-    ScriptingComponent
+    ScriptingComponent,
+    TextComponent
 >;
 // clang-format on
 

@@ -109,6 +109,20 @@ void EntityManager::save(liquid::Entity entity) {
                                        .relativePath.string();
   }
 
+  if (mEntityDatabase.hasComponent<liquid::TextComponent>(entity)) {
+    const auto &text =
+        mEntityDatabase.getComponent<liquid::TextComponent>(entity);
+
+    auto path = mAssetManager.getRegistry()
+                    .getFonts()
+                    .getAsset(text.font)
+                    .relativePath.string();
+
+    node["components"]["text"]["content"] = text.text;
+    node["components"]["text"]["lineHeight"] = text.lineHeight;
+    node["components"]["text"]["font"] = path;
+  }
+
   if (mEntityDatabase.hasComponent<liquid::AudioSourceComponent>(entity)) {
     const auto audioSource =
         mEntityDatabase.getComponent<liquid::AudioSourceComponent>(entity);
@@ -323,6 +337,32 @@ bool EntityManager::loadScene() {
           mAssetManager.getRegistry().getLuaScripts().findHandleByRelativePath(
               relativePath);
       setScript(entity, handle);
+    }
+
+    if (node["components"]["text"].IsMap()) {
+      liquid::String contents;
+      float lineHeight = 1.0f;
+
+      if (node["components"]["text"]["content"].IsScalar()) {
+        contents = node["components"]["text"]["content"].as<liquid::String>();
+      }
+
+      if (node["components"]["text"]["lineHeight"].IsScalar()) {
+        lineHeight = node["components"]["text"]["lineHeight"].as<float>();
+      }
+
+      if (node["components"]["text"]["font"].IsScalar()) {
+        auto relativePathStr =
+            node["components"]["text"]["font"].as<liquid::String>();
+        auto relativePath = std::filesystem::path(relativePathStr);
+
+        auto handle =
+            mAssetManager.getRegistry().getFonts().findHandleByRelativePath(
+                relativePath);
+
+        getActiveEntityDatabase().setComponent<liquid::TextComponent>(
+            entity, {contents, lineHeight, handle});
+      }
     }
   }
 

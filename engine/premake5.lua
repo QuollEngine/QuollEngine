@@ -11,6 +11,8 @@ function copyEngineAssets(assetsPath, outputPath)
         "glslc "..assetsPath.."/shaders/skinnedShadowmap.vert -o"..outputPath.."/shaders/skinnedShadowmap.vert.spv",
         "glslc "..assetsPath.."/shaders/imgui.frag -o"..outputPath.."/shaders/imgui.frag.spv",
         "glslc "..assetsPath.."/shaders/imgui.vert -o"..outputPath.."/shaders/imgui.vert.spv",
+        "glslc "..assetsPath.."/shaders/text.vert -o"..outputPath.."/shaders/text.vert.spv",
+        "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreenQuad.frag -o"..outputPath.."/shaders/fullscreenQuad.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreenQuad.vert -o"..outputPath.."/shaders/fullscreenQuad.vert.spv"
     }

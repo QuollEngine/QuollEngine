@@ -156,19 +156,6 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
   depthStencilState.maxDepthBounds = 1.0f;
   depthStencilState.stencilTestEnable = VK_FALSE;
 
-  // Color blending
-  VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-  colorBlendAttachment.colorWriteMask =
-      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-  colorBlendAttachment.blendEnable = VK_FALSE;
-  colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;  // Optional
-  colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-  colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;             // Optional
-  colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;  // Optional
-  colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-  colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;             // Optional
-
   std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(
       description.colorBlend.attachments.size(),
       VkPipelineColorBlendAttachmentState{});
