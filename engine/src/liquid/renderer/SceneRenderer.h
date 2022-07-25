@@ -77,6 +77,15 @@ private:
                      rhi::PipelineHandle pipeline,
                      bool bindMaterialData = true);
 
+  /**
+   * @brief Render texts
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline handle
+   */
+  void renderText(rhi::RenderCommandList &commandList,
+                  rhi::PipelineHandle pipeline);
+
 private:
   ShaderLibrary &mShaderLibrary;
   rhi::ResourceRegistry &mRegistry;

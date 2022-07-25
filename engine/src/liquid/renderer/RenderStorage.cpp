@@ -9,10 +9,14 @@ namespace liquid {
 RenderStorage::RenderStorage(size_t reservedSpace)
     : mReservedSpace(reservedSpace) {
   mMeshTransformMatrices.reserve(mReservedSpace);
-  mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
 
+  mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MAX_NUM_JOINTS]);
+
   mLights.reserve(MAX_NUM_LIGHTS);
+
+  mTextTransforms.reserve(mReservedSpace);
+  mTextGlyphs.reserve(mReservedSpace);
 }
 
 void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
@@ -39,6 +43,16 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
           mSkeletonVector.get(),
       },
       mSkeletonsBuffer);
+
+  mTextTransformsBuffer = registry.setBuffer(
+      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4),
+       mTextTransforms.data()},
+      mTextTransformsBuffer);
+
+  mTextGlyphsBuffer = registry.setBuffer({rhi::BufferType::Storage,
+                                          mReservedSpace * sizeof(GlyphData),
+                                          mTextGlyphs.data()},
+                                         mTextGlyphsBuffer);
 
   mLightsBuffer = registry.setBuffer({rhi::BufferType::Storage,
                                       mLights.capacity() * sizeof(LightData),
@@ -116,6 +130,28 @@ void RenderStorage::addLight(const DirectionalLightComponent &light) {
   mSceneData.data.x = static_cast<int32_t>(mLights.size());
 }
 
+void RenderStorage::addText(FontAssetHandle font,
+                            const std::vector<GlyphData> &glyphs,
+                            const glm::mat4 &transform) {
+  mTextTransforms.push_back(transform);
+  uint32_t index = static_cast<uint32_t>(mTextTransforms.size() - 1);
+
+  TextData textData{};
+  textData.index = index;
+  textData.glyphStart = static_cast<uint32_t>(mTextGlyphs.size());
+  textData.length = static_cast<uint32_t>(glyphs.size());
+
+  for (auto &glyph : glyphs) {
+    mTextGlyphs.push_back(glyph);
+  }
+
+  if (mTextGroups.find(font) == mTextGroups.end()) {
+    mTextGroups.insert_or_assign(font, std::vector<TextData>{textData});
+  } else {
+    mTextGroups.at(font).push_back(textData);
+  }
+}
+
 void RenderStorage::setEnvironmentTextures(rhi::TextureHandle irradianceMap,
                                            rhi::TextureHandle specularMap,
                                            rhi::TextureHandle brdfLUT) {
@@ -132,6 +168,11 @@ void RenderStorage::setCameraData(const CameraComponent &data) {
 void RenderStorage::clear() {
   mMeshTransformMatrices.clear();
   mSkinnedMeshTransformMatrices.clear();
+
+  mTextTransforms.clear();
+  mTextGroups.clear();
+  mTextGlyphs.clear();
+
   mLights.clear();
   mSceneData.data.x = 0;
   mSceneData.data.y = 0;

@@ -15,6 +15,7 @@ namespace liquid {
  * render the scene
  */
 class RenderStorage {
+public:
   /**
    * Default reserved space for buffers
    */
@@ -30,6 +31,9 @@ class RenderStorage {
    */
   static constexpr size_t MAX_NUM_LIGHTS = 256;
 
+  /**
+   * @brief Light data
+   */
   struct LightData {
     /**
      * Light data
@@ -51,6 +55,9 @@ class RenderStorage {
     glm::mat4 lightMatrix;
   };
 
+  /**
+   * @brief Scene data
+   */
   struct SceneData {
     /**
      * Scene data
@@ -61,12 +68,55 @@ class RenderStorage {
     glm::ivec4 data{0};
   };
 
+  /**
+   * @brief Mesh data
+   */
   struct MeshData {
     /**
-     * List of indices that point items in
-     * storage
+     * List of indices that point to
+     * items in storage
      */
     std::vector<uint32_t> indices;
+  };
+
+  /**
+   * @brief Glyph data
+   *
+   * Used for storing glyph
+   * data in object buffers
+   */
+  struct GlyphData {
+    /**
+     * Atlas bounds
+     */
+    glm::vec4 bounds;
+
+    /**
+     * Plane bounds
+     */
+    glm::vec4 planeBounds;
+  };
+
+  /**
+   * @brief Text data
+   */
+  struct TextData {
+    /**
+     * Text index
+     *
+     * Used for finding transforms
+     */
+    uint32_t index = 0;
+
+    /**
+     * Glyph start position in glyphs buffer
+     */
+    uint32_t glyphStart = 0;
+
+    /**
+     * Text length
+     */
+    uint32_t length = 0;
   };
 
 public:
@@ -112,6 +162,24 @@ public:
   }
 
   /**
+   * @brief Get text transforms buffer
+   *
+   * @return Text transforms buffer
+   */
+  inline rhi::BufferHandle getTextTransformsBuffer() const {
+    return mTextTransformsBuffer;
+  }
+
+  /**
+   * @brief Get text glyphs buffer
+   *
+   * @return Text glyphs buffer
+   */
+  inline rhi::BufferHandle getTextGlyphsBuffer() const {
+    return mTextGlyphsBuffer;
+  }
+
+  /**
    * @brief Get light buffer
    *
    * @return Light buffer
@@ -119,9 +187,9 @@ public:
   inline rhi::BufferHandle getSceneBuffer() const { return mSceneBuffer; }
 
   /**
-   * @brief Get light buffer
+   * @brief Get lights buffer
    *
-   * @return Light buffer
+   * @return Lights buffer
    */
   inline rhi::BufferHandle getLightsBuffer() const { return mLightsBuffer; }
 
@@ -152,6 +220,16 @@ public:
   inline const std::unordered_map<SkinnedMeshAssetHandle, MeshData> &
   getSkinnedMeshGroups() const {
     return mSkinnedMeshGroups;
+  }
+
+  /**
+   * @brief Get text groups
+   *
+   * @return Text groups
+   */
+  inline const std::unordered_map<FontAssetHandle, std::vector<TextData>> &
+  getTextGroups() {
+    return mTextGroups;
   }
 
   /**
@@ -208,6 +286,16 @@ public:
   void addLight(const DirectionalLightComponent &light);
 
   /**
+   * @brief Add text
+   *
+   * @param fontHandle Font handle
+   * @param glyphs Text glyphs
+   * @param transform Text world transform
+   */
+  void addText(FontAssetHandle fontHandle, const std::vector<GlyphData> &glyphs,
+               const glm::mat4 &transform);
+
+  /**
    * @brief Set environment textures
    *
    * @param irradianceMap Irradiance map
@@ -253,6 +341,12 @@ private:
 
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
   std::unordered_map<SkinnedMeshAssetHandle, MeshData> mSkinnedMeshGroups;
+
+  std::vector<glm::mat4> mTextTransforms;
+  rhi::BufferHandle mTextTransformsBuffer = rhi::BufferHandle::Invalid;
+  std::vector<GlyphData> mTextGlyphs;
+  rhi::BufferHandle mTextGlyphsBuffer = rhi::BufferHandle::Invalid;
+  std::unordered_map<FontAssetHandle, std::vector<TextData>> mTextGroups;
 
   size_t mReservedSpace = 0;
 };

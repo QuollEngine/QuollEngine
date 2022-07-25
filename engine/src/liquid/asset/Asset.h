@@ -26,14 +26,14 @@ enum class AssetType : uint8_t {
   None,
   Material,
   Texture,
-  Font,
   Mesh,
   SkinnedMesh,
   Skeleton,
   Animation,
   Audio,
   Prefab,
-  LuaScript
+  LuaScript,
+  Font
 };
 
 inline const String getAssetTypeString(AssetType type) {

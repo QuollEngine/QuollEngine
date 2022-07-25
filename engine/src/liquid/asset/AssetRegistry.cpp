@@ -44,18 +44,18 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
     }
   }
 
+  // Synchronize fonts
   for (auto &[_, font] : mFonts.getAssets()) {
     if (font.data.deviceHandle == rhi::TextureHandle::Invalid) {
       rhi::TextureDescription description{};
-      msdfgen::BitmapRef<msdfgen::byte, 3> ref = font.data.msdfAtlas;
-      description.data = ref.pixels;
-      description.width = ref.width;
-      description.height = ref.height;
+      description.data = font.data.atlas.data();
+      description.size = font.size;
+      description.width = font.data.atlasDimensions.x;
+      description.height = font.data.atlasDimensions.y;
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
                           rhi::TextureUsage::Sampled;
-      description.format = VK_FORMAT_R8G8B8A8_UNORM;
-      description.size = sizeof(msdfgen::byte) * 3 * ref.width * ref.height;
+      description.format = VK_FORMAT_R8G8B8A8_SRGB;
 
       font.data.deviceHandle = registry.setTexture(description);
     }

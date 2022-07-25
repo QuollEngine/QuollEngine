@@ -5,6 +5,57 @@
 
 namespace liquidator {
 
+/**
+ * @brief Imgui text callback user data
+ */
+struct ImguiInputTextCallbackUserData {
+  /**
+   * Passed string value ref
+   */
+  liquid::String &value;
+};
+
+/**
+ * @brief ImGui input text resize callback
+ *
+ * @param data Imgui input text callback data
+ */
+static int InputTextCallback(ImGuiInputTextCallbackData *data) {
+  auto *userData =
+      static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
+  if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+    auto &str = userData->value;
+    LIQUID_ASSERT(data->Buf == str.c_str(),
+                  "Buffer and string value must point to the same address");
+    str.resize(data->BufTextLen);
+    data->Buf = str.data();
+  }
+  return 0;
+}
+
+/**
+ * @brief Multiline Input text for std::string
+ *
+ * @param label Label
+ * @param value String value
+ * @param flags Input text flags
+ */
+static bool ImguiMultilineInputText(const liquid::String &label,
+                                    liquid::String &value, const ImVec2 &size,
+                                    ImGuiInputTextFlags flags = 0) {
+  LIQUID_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0,
+                "Do not back callback resize flag");
+
+  flags |= ImGuiInputTextFlags_CallbackResize;
+
+  ImguiInputTextCallbackUserData userData{
+      value,
+  };
+  return ImGui::InputTextMultiline(label.c_str(), value.data(),
+                                   value.capacity() + 1, size, flags,
+                                   InputTextCallback, &userData);
+}
+
 constexpr size_t VEC3_ARRAY_SIZE = 3;
 constexpr size_t VEC4_ARRAY_SIZE = 4;
 
@@ -26,6 +77,7 @@ void EntityPanel::render(EditorManager &editorManager,
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
+      renderText(assetRegistry);
       renderAudio(assetRegistry);
       renderScripting(assetRegistry);
       renderAddComponent();
@@ -565,6 +617,51 @@ void EntityPanel::renderRigidBody() {
         glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
 
     ImGui::EndTable();
+  }
+}
+
+void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
+  if (!mEntityManager.getActiveEntityDatabase()
+           .hasComponent<liquid::TextComponent>(mSelectedEntity)) {
+    return;
+  }
+
+  if (!ImGui::CollapsingHeader("Text")) {
+    return;
+  }
+
+  auto &text = mEntityManager.getActiveEntityDatabase()
+                   .getComponent<liquid::TextComponent>(mSelectedEntity);
+
+  const auto &fonts = assetRegistry.getFonts().getAssets();
+
+  static constexpr float CONTENT_INPUT_HEIGHT = 50.0f;
+
+  ImGui::Text("Content");
+  if (ImguiMultilineInputText(
+          "###InputContent", text.text,
+          ImVec2(ImGui::GetWindowWidth(), CONTENT_INPUT_HEIGHT), 0)) {
+    mEntityManager.save(mSelectedEntity);
+  }
+
+  ImGui::Text("Line height");
+  if (liquid::imgui::input("###InputLineHeight", text.lineHeight)) {
+    mEntityManager.save(mSelectedEntity);
+  }
+
+  ImGui::Text("Select font");
+  if (ImGui::BeginCombo("###SelectFont", fonts.at(text.font).name.c_str(), 0)) {
+    for (const auto &[handle, data] : fonts) {
+      bool selectable = handle == text.font;
+
+      const auto &fontName = data.name;
+
+      if (ImGui::Selectable(fontName.c_str(), &selectable)) {
+        text.font = handle;
+        mEntityManager.save(mSelectedEntity);
+      }
+    }
+    ImGui::EndCombo();
   }
 }
 

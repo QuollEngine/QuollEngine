@@ -49,7 +49,7 @@ Logger::format(Severity severity,
   auto time = std::chrono::system_clock::to_time_t(timestamp);
 
   std::stringstream str;
-  str << std::put_time(std::localtime(&time), "%Y-%m-%d %X") << " ["
+  str << std::put_time(std::localtime(&time), "%X") << " ["
       << Logger::getSeverityString(severity) << "] ";
   return str.str();
 }

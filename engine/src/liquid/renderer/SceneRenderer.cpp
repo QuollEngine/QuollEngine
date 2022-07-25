@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
+
 #include "SceneRenderer.h"
+#include "StandardPushConstants.h"
 
 namespace liquid {
 
@@ -37,6 +39,14 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
       mRegistry.setShader({assetsPath + "/shaders/shadowmap.frag.spv"}));
+
+  mShaderLibrary.addShader(
+      "__engine.text.default.vertex",
+      mRegistry.setShader({assetsPath + "/shaders/text.vert.spv"}));
+
+  mShaderLibrary.addShader(
+      "__engine.text.default.fragment",
+      mRegistry.setShader({assetsPath + "/shaders/text.frag.spv"}));
 }
 
 SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
@@ -159,10 +169,29 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
+    rhi::PipelineVertexInputLayout textInputLayout{};
+    const uint32_t OFFSET_LOCATION = 0;
+    const uint32_t SIZE_LOCATION = 1;
+    const uint32_t R32G32_SFLOAT = 103;
+
+    auto textPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+        mShaderLibrary.getShader("__engine.text.default.vertex"),
+        mShaderLibrary.getShader("__engine.text.default.fragment"),
+        rhi::PipelineVertexInputLayout{},
+        rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+        rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                rhi::FrontFace::Clockwise},
+        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+            true, rhi::BlendFactor::SrcAlpha,
+            rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add,
+            rhi::BlendFactor::One, rhi::BlendFactor::OneMinusSrcAlpha,
+            rhi::BlendOp::Add}}}});
+
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
+    pass.addPipeline(textPipeline);
 
-    pass.setExecutor([this, pipeline, skinnedPipeline,
+    pass.setExecutor([this, pipeline, skinnedPipeline, textPipeline,
                       shadowmap](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
 
@@ -205,6 +234,17 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
 
         renderSkinned(commandList, skinnedPipeline, true);
+      }
+
+      {
+        LIQUID_PROFILE_EVENT("meshPass::text");
+
+        commandList.bindPipeline(textPipeline);
+        rhi::Descriptor sceneDescriptor;
+        sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+                             rhi::DescriptorType::UniformBuffer);
+        commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
+        renderText(commandList, textPipeline);
       }
     });
   } // mesh pass
@@ -278,6 +318,38 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
              const auto &mesh) {
         mRenderStorage.addSkinnedMesh(mesh.handle, world.worldTransform,
                                       skeleton.jointFinalTransforms);
+      });
+
+  // Texts
+  entityDatabase.iterateEntities<TextComponent, WorldTransformComponent>(
+      [this](auto entity, const auto &text, const auto &world) {
+        const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
+
+        std::vector<RenderStorage::GlyphData> glyphs(text.text.length());
+        float advanceX = 0;
+        float advanceY = 0;
+        for (size_t i = 0; i < text.text.length(); ++i) {
+          char c = text.text.at(i);
+
+          if (c == '\n') {
+            advanceX = 0.0f;
+            advanceY += text.lineHeight * font.fontScale;
+            continue;
+          }
+
+          const auto &fontGlyph = font.glyphs.at(c);
+          glyphs.at(i).bounds = fontGlyph.bounds;
+          glyphs.at(i).planeBounds = fontGlyph.planeBounds;
+
+          glyphs.at(i).planeBounds.x += advanceX;
+          glyphs.at(i).planeBounds.z += advanceX;
+          glyphs.at(i).planeBounds.y -= advanceY;
+          glyphs.at(i).planeBounds.w -= advanceY;
+
+          advanceX += fontGlyph.advanceX;
+        }
+
+        mRenderStorage.addText(text.font, glyphs, world.worldTransform);
       });
 
   // Lights
@@ -375,6 +447,42 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
           commandList.draw(vertexCount, 0, 1, index);
         }
       }
+    }
+  }
+}
+
+void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
+                               rhi::PipelineHandle pipeline) {
+  static constexpr uint32_t NUM_VERTICES = 6;
+  for (const auto &[font, texts] : mRenderStorage.getTextGroups()) {
+    auto textureHandle =
+        mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
+
+    rhi::Descriptor objectsDescriptor;
+    objectsDescriptor.bind(0, mRenderStorage.getTextTransformsBuffer(),
+                           rhi::DescriptorType::StorageBuffer);
+
+    rhi::Descriptor fontDescriptor;
+    fontDescriptor.bind(0, {textureHandle},
+                        rhi::DescriptorType::CombinedImageSampler);
+
+    rhi::Descriptor glyphsDescriptor;
+    glyphsDescriptor.bind(0, mRenderStorage.getTextGlyphsBuffer(),
+                          rhi::DescriptorType::StorageBuffer);
+
+    commandList.bindDescriptor(pipeline, 1, objectsDescriptor);
+    commandList.bindDescriptor(pipeline, 2, glyphsDescriptor);
+    commandList.bindDescriptor(pipeline, 3, fontDescriptor);
+
+    for (auto &text : texts) {
+      glm::uvec4 glyphStart{text.glyphStart};
+
+      commandList.pushConstants(
+          pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::uvec4),
+          static_cast<void *>(glm::value_ptr(glyphStart)));
+
+      commandList.draw(NUM_VERTICES * static_cast<uint32_t>(text.length), 0, 1,
+                       text.index);
     }
   }
 }
