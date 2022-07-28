@@ -1,7 +1,8 @@
 #include "liquid/core/Base.h"
 #include "EntityDecorator.h"
-#include "liquid/entity/EntityQueryScriptingInterface.h"
 
+#include "liquid/entity/EntityQueryScriptingInterface.h"
+#include "liquid/physics/RigidBodyScriptingInterface.h"
 #include "liquid/audio/AudioScriptingInterface.h"
 
 #include "LuaScope.h"
@@ -51,6 +52,7 @@ void EntityDecorator::createEntityTable(LuaScope &scope, Entity entity) {
 
   registerEntityInterface<NameComponent>(scope, table, entity);
   registerEntityInterface<LocalTransformComponent>(scope, table, entity);
+  registerEntityInterface<RigidBodyScriptingInterface>(scope, table, entity);
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
 }
 

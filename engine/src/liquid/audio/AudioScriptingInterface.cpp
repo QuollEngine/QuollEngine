@@ -14,13 +14,13 @@ int AudioScriptingInterface::LuaInterface::play(void *state) {
     return 0;
   }
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  auto entityTable = scope.getGlobal<LuaTable>("entity");
+  auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   if (!entityDatabase.hasComponent<AudioSourceComponent>(entity)) {
     return 0;
@@ -39,13 +39,13 @@ int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
     return 1;
   }
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  auto entityTable = scope.getGlobal<LuaTable>("entity");
+  auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
   Entity entity = scope.get<uint32_t>();
   scope.pop(2);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   bool isPlaying = entityDatabase.hasComponent<AudioStatusComponent>(entity);
   scope.set(isPlaying);

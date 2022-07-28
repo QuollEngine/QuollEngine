@@ -30,7 +30,7 @@ function entity_query_get_first_by_name()
     found_entity = entity_query.get_first_entity_by_name("Test")
 end
 
--- Name component
+-- Name 
 name = ''
 
 function name_get()
@@ -53,11 +53,10 @@ function name_set_invalid()
     entity.name:set({})
 end
 
--- Local transform component
+-- Local transform 
 local_position_x = 0
 local_position_y = 0
 local_position_z = 0
-
 
 function local_transform_position_get()
     local_position_x, local_position_y, local_position_z = entity.local_transform:get_position()
@@ -112,6 +111,7 @@ end
 
 function local_transform_scale_set_invalid()
     entity.local_transform.set_scale(1.0, 1.0, 1.0)
+
     entity.local_transform:set_scale(nil, 1.0, 1.0)
     entity.local_transform:set_scale(1.0, nil, 1.0)
     entity.local_transform:set_scale(1.0, 1.0, nil)
@@ -133,6 +133,64 @@ function local_transform_scale_set_invalid()
     entity.local_transform:set_scale(1.0, 1.0, {})
 end
 
+-- Rigid body
+function rigid_body_apply_force()
+    entity.rigid_body:apply_force(10.0, 0.2, 5.0);
+end
+
+function rigid_body_apply_force_invalid()
+    entity.rigid_body.apply_force(0.0, 1.0, 1.0)
+
+    entity.rigid_body:apply_force(nil, 0.0, 1.0)
+    entity.rigid_body:apply_force(0.0, nil, 1.0)
+    entity.rigid_body:apply_force(0.0, 1.0, nil)
+
+    entity.rigid_body:apply_force("string", 0.0, 1.0)
+    entity.rigid_body:apply_force(0.0, "string", 1.0)
+    entity.rigid_body:apply_force(0.0, 1.0, "string")
+
+    entity.rigid_body:apply_force(true, 0.0, 1.0)
+    entity.rigid_body:apply_force(0.0, true, 1.0)
+    entity.rigid_body:apply_force(0.0, 1.0, true)
+
+    entity.rigid_body:apply_force(local_transform_scale_set, 0.0, 1.0)
+    entity.rigid_body:apply_force(0.0, local_transform_scale_set, 1.0)
+    entity.rigid_body:apply_force(0.0, 1.0, local_transform_scale_set)
+
+    entity.rigid_body:apply_force({}, 0.0, 1.0)
+    entity.rigid_body:apply_force(0.0, {}, 1.0)
+    entity.rigid_body:apply_force(0.0, 1.0, {})
+end
+
+function rigid_body_apply_torque()
+    entity.rigid_body:apply_torque(2.5, 3.5, 1.2)
+end
+
+function rigid_body_apply_torque_invalid()
+    entity.rigid_body.apply_torque(1.0, 1.0, 1.0)
+
+    entity.rigid_body:apply_torque(nil, 1.0, 1.0)
+    entity.rigid_body:apply_torque(1.0, nil, 1.0)
+    entity.rigid_body:apply_torque(1.0, 1.0, nil)
+
+    entity.rigid_body:apply_torque("string", 1.0, 1.0)
+    entity.rigid_body:apply_torque(1.0, "string", 1.0)
+    entity.rigid_body:apply_torque(1.0, 1.0, "string")
+
+    entity.rigid_body:apply_torque(true, 1.0, 1.0)
+    entity.rigid_body:apply_torque(1.0, true, 1.0)
+    entity.rigid_body:apply_torque(1.0, 1.0, true)
+
+    entity.rigid_body:apply_torque(local_transform_scale_set, 1.0, 1.0)
+    entity.rigid_body:apply_torque(1.0, local_transform_scale_set, 1.0)
+    entity.rigid_body:apply_torque(1.0, 1.0, local_transform_scale_set)
+
+    entity.rigid_body:apply_torque({}, 1.0, 1.0)
+    entity.rigid_body:apply_torque(1.0, {}, 1.0)
+    entity.rigid_body:apply_torque(1.0, 1.0, {})
+end
+
+-- Audio 
 audio_is_playing_flag = false
 function audio_play()
     entity.audio:play()

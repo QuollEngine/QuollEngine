@@ -83,7 +83,7 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
         });
   }
 
-  if (component.scope.hasFunction("on_collision_start")) {
+  if (component.scope.hasFunction("on_collision_end")) {
     component.onCollisionEnd = mEventSystem.observe(
         CollisionEvent::CollisionEnded,
         [this, &component, entity](const CollisionObject &data) {
