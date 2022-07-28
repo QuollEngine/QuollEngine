@@ -15,6 +15,7 @@ class AssetLoader {
   static const std::vector<liquid::String> ScriptExtensions;
   static const std::vector<liquid::String> AudioExtensions;
   static const std::vector<liquid::String> SceneExtensions;
+  static const std::vector<liquid::String> FontExtensions;
 
 public:
   /**

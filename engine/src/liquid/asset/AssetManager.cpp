@@ -109,7 +109,7 @@ Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (ext == ".ttf" || ext == ".otf" || ext == ".woff" || ext == ".woff2") {
+  if (ext == ".ttf" || ext == ".otf") {
     auto res = loadFontFromFile(path);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
