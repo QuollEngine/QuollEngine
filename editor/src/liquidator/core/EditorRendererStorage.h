@@ -3,7 +3,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/scene/CameraComponent.h"
-#include "../editor-scene/EditorGrid.h"
+#include "liquidator/editor-scene/EditorGrid.h"
 
 namespace liquidator {
 

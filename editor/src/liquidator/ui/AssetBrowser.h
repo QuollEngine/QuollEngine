@@ -4,8 +4,8 @@
 #include "liquid/platform-tools/NativeFileDialog.h"
 #include "liquid/platform-tools/NativeFileOpener.h"
 
-#include "../asset/AssetLoader.h"
-#include "../editor-scene/EditorManager.h"
+#include "liquidator/asset/AssetLoader.h"
+#include "liquidator/editor-scene/EditorManager.h"
 
 #include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"

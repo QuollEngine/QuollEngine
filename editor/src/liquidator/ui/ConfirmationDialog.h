@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EditorManager.h"
 
 namespace liquidator {
 

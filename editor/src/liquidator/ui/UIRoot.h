@@ -1,11 +1,10 @@
 #pragma once
 
-#include "../editor-scene/EditorManager.h"
-
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/renderer/Renderer.h"
 
+#include "liquidator/editor-scene/EditorManager.h"
 #include "MenuBar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"

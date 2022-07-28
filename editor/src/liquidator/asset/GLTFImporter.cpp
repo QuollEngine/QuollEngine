@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
+
 #include "GLTFImporter.h"
 
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE

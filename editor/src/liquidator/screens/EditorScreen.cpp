@@ -18,12 +18,12 @@
 #include "liquid/imgui/ImguiUtils.h"
 #include "liquid/scene/CameraAspectRatioUpdater.h"
 
-#include "../editor-scene/EditorCamera.h"
-#include "../editor-scene/EditorManager.h"
-#include "../editor-scene/EditorGrid.h"
-#include "../ui/UIRoot.h"
-#include "../ui/AssetLoadStatusDialog.h"
-#include "../core/EditorRenderer.h"
+#include "liquidator/editor-scene/EditorCamera.h"
+#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EditorGrid.h"
+#include "liquidator/ui/UIRoot.h"
+#include "liquidator/ui/AssetLoadStatusDialog.h"
+#include "liquidator/core/EditorRenderer.h"
 
 void randomSpawn(liquidator::EntityManager &entityManager,
                  liquidator::EditorManager &editorManager,

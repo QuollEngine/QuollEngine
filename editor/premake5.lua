@@ -2,6 +2,10 @@ project "Liquidator"
     basedir "../workspace/editor"
     kind "ConsoleApp"
 
+    includedirs {
+        "./src"
+    }
+
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools"}
 

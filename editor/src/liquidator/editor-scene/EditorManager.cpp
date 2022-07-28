@@ -1,6 +1,7 @@
 #include "liquid/core/Base.h"
-#include "EditorManager.h"
 #include "liquid/yaml/Yaml.h"
+
+#include "EditorManager.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
