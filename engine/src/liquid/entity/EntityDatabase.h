@@ -23,6 +23,8 @@
 #include "liquid/audio/AudioStatusComponent.h"
 #include "liquid/physics/RigidBodyComponent.h"
 #include "liquid/physics/CollidableComponent.h"
+#include "liquid/physics/ForceComponent.h"
+#include "liquid/physics/TorqueComponent.h"
 #include "liquid/scripting/ScriptingComponent.h"
 #include "liquid/text/TextComponent.h"
 
@@ -54,6 +56,8 @@ using EntityDatabase = EntityStorageSparseSet<
     SkeletonDebugComponent,
     RigidBodyComponent,
     CollidableComponent,
+    ForceComponent,
+    TorqueComponent,
     ScriptingComponent,
     TextComponent
 >;

@@ -514,6 +514,31 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
               PhysxMapping::getPhysxTransform(world.worldTransform));
         });
   }
+
+  {
+    LIQUID_PROFILE_EVENT("Apply forces");
+
+    entityDatabase.iterateEntities<ForceComponent, RigidBodyComponent>(
+        [](auto entity, ForceComponent &force, RigidBodyComponent &rigidBody) {
+          rigidBody.actor->addForce(
+              PxVec3(force.force.x, force.force.y, force.force.z));
+        });
+
+    entityDatabase.destroyComponents<ForceComponent>();
+  }
+
+  {
+    LIQUID_PROFILE_EVENT("Apply torques");
+
+    entityDatabase.iterateEntities<TorqueComponent, RigidBodyComponent>(
+        [](auto entity, TorqueComponent &torque,
+           RigidBodyComponent &rigidBody) {
+          rigidBody.actor->addTorque(
+              PxVec3(torque.torque.x, torque.torque.y, torque.torque.z));
+        });
+
+    entityDatabase.destroyComponents<TorqueComponent>();
+  }
 }
 
 void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
