@@ -1,20 +1,23 @@
 #pragma once
 
-#include "../editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EditorManager.h"
 
 namespace liquidator {
 
 /**
- * @brief Status bar component
+ * @brief Editor grid panel component
  */
-class StatusBar {
+class EditorGridPanel {
 public:
   /**
-   * @brief Render status bar
+   * @brief Render editor grid panel
    *
    * @param editorManager Editor manager
    */
   void render(EditorManager &editorManager);
+
+private:
+  bool mOpen = false;
 };
 
 } // namespace liquidator

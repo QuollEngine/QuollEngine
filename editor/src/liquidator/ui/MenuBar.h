@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../editor-scene/EditorManager.h"
-#include "../editor-scene/EntityManager.h"
+#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EntityManager.h"
 
 namespace liquidator {
 

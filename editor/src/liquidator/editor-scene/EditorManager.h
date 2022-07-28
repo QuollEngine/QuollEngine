@@ -2,7 +2,6 @@
 
 #include "EditorCamera.h"
 #include "EditorGrid.h"
-
 #include "EntityManager.h"
 
 namespace liquidator {

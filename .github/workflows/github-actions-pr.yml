@@ -2,7 +2,7 @@ name: Pull Request Checks
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   format-check:
@@ -34,7 +34,7 @@ jobs:
         id: cache-vendor
         with:
           path: ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./project.json') }}
+          key: ${{ runner.os }}-static-analysis-${{ hashFiles('./project.json') }}
 
       - name: Install dependencies and setup project
         run: |
@@ -85,7 +85,7 @@ jobs:
         id: cache-vendor
         with:
           path: ./vendor
-          key: ${{ runner.os }}-${{ hashFiles('./project.json') }}
+          key: ${{ runner.os }}-build-and-test-${{ hashFiles('./project.json') }}
 
       - name: Install dependencies and setup project
         run: |

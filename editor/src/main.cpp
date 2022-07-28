@@ -2,8 +2,8 @@
 #include "liquid/core/Engine.h"
 
 #include "liquid/rhi-vulkan/VulkanRenderBackend.h"
-#include "screens/EditorScreen.h"
-#include "screens/ProjectSelectorScreen.h"
+#include "liquidator/screens/EditorScreen.h"
+#include "liquidator/screens/ProjectSelectorScreen.h"
 
 int main() {
   static constexpr uint32_t INITIAL_WIDTH = 1024;

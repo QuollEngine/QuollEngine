@@ -1,16 +1,15 @@
 #include "liquid/core/Base.h"
-#include "ProjectSelectorScreen.h"
-
 #include "liquid/renderer/Renderer.h"
 #include "liquid/renderer/Presenter.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "liquid/loop/MainLoop.h"
 #include "liquid/profiler/FPSCounter.h"
-
 #include "liquid/imgui/ImguiUtils.h"
 
-#include "../editor-scene/EditorCamera.h"
-#include "../ui/IconRegistry.h"
+#include "liquidator/editor-scene/EditorCamera.h"
+#include "liquidator/ui/IconRegistry.h"
+
+#include "ProjectSelectorScreen.h"
 
 namespace liquidator {
 

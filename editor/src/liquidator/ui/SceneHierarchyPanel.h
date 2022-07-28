@@ -1,8 +1,8 @@
 #pragma once
 
 #include "liquid/entity/EntityDatabase.h"
-#include "../editor-scene/EditorManager.h"
-#include "../editor-scene/EditorCamera.h"
+#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EditorCamera.h"
 
 namespace liquidator {
 

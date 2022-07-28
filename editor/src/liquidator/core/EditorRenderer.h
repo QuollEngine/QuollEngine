@@ -3,8 +3,8 @@
 #include "liquid/rhi/RenderGraph.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/ShaderLibrary.h"
-#include "../editor-scene/EditorGrid.h"
-#include "../ui/IconRegistry.h"
+#include "liquidator/editor-scene/EditorGrid.h"
+#include "liquidator/ui/IconRegistry.h"
 
 #include "EditorRendererStorage.h"
 
