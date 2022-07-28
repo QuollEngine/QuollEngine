@@ -307,7 +307,7 @@ void AssetBrowser::handleAssetImport() {
   auto res = mAssetLoader.loadFromFileDialog(mCurrentDirectory);
 
   if (res.hasError()) {
-    mStatusDialog.setTitle("GLTF import Error");
+    mStatusDialog.setTitle("Import failed");
     mStatusDialog.setMessages({res.getError()});
     mStatusDialog.show();
 
@@ -315,7 +315,7 @@ void AssetBrowser::handleAssetImport() {
   }
 
   if (res.hasWarnings()) {
-    mStatusDialog.setTitle("GLTF Import: Warnings");
+    mStatusDialog.setTitle("Import successful with warnings");
     mStatusDialog.setMessages(res.getWarnings());
     mStatusDialog.show();
   }

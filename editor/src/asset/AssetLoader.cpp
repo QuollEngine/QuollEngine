@@ -7,6 +7,7 @@ namespace liquidator {
 const std::vector<liquid::String> AssetLoader::ScriptExtensions{"lua"};
 const std::vector<liquid::String> AssetLoader::AudioExtensions{"wav", "mp3"};
 const std::vector<liquid::String> AssetLoader::SceneExtensions{"gltf"};
+const std::vector<liquid::String> AssetLoader::FontExtensions{"ttf", "otf"};
 
 /**
  * @brief Get unique path for a given path
@@ -49,32 +50,32 @@ liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
            extensions.end();
   };
 
+  auto res = liquid::Result<bool>::Error("Loaded file is not supported");
+
   if (isExtension(SceneExtensions)) {
-    auto res = GLTFImporter(mAssetManager).loadFromFile(path, directory);
-    mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
-    return res;
-  }
-
-  auto targetPath = getUniquePath(directory / path.filename());
-
-  if (isExtension(ScriptExtensions) || isExtension(AudioExtensions)) {
+    res = GLTFImporter(mAssetManager).loadFromFile(path, directory);
+  } else if (isExtension(ScriptExtensions) || isExtension(AudioExtensions) ||
+             isExtension(FontExtensions)) {
+    auto targetPath = getUniquePath(directory / path.filename());
     if (std::filesystem::copy_file(path, targetPath)) {
-      return mAssetManager.loadAsset(targetPath);
+      res = mAssetManager.loadAsset(targetPath);
     }
   }
 
-  return liquid::Result<bool>::Error("Loaded file is not supported");
+  mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
+
+  return res;
 }
 
 liquid::Result<bool>
 AssetLoader::loadFromFileDialog(const liquid::Path &directory) {
-
   using FileTypeEntry = liquid::platform_tools::NativeFileDialog::FileTypeEntry;
 
   std::vector<FileTypeEntry> entries{
       FileTypeEntry{"Scene files", SceneExtensions},
       FileTypeEntry{"Audio files", AudioExtensions},
-      FileTypeEntry{"Script files", ScriptExtensions}};
+      FileTypeEntry{"Script files", ScriptExtensions},
+      FileTypeEntry{"Font files", FontExtensions}};
 
   auto filePath = mNativeFileDialog.getFilePathFromDialog(entries);
   if (filePath.empty())
