@@ -61,6 +61,7 @@ public:
                                         assetManager.getRegistry());
 
     const auto &passData = sceneRenderer.attach(graph);
+    sceneRenderer.attachText(graph, passData);
 
     mainLoop.setUpdateFn([=](float dt) mutable {
       scriptingSystem.start(entityDatabase);

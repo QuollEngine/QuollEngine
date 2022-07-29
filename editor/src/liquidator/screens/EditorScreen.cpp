@@ -127,8 +127,17 @@ void EditorScreen::start(const Project &project) {
 
   auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
   auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);
-
   imguiPassGroup.pass.read(scenePassGroup.sceneColor);
+
+  {
+    constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+    auto &pass = editorRenderer.attach(graph);
+    pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
+    pass.write(scenePassGroup.depthBuffer,
+               liquid::rhi::DepthStencilClear{1.0f, 0});
+  }
+
+  renderer.getSceneRenderer().attachText(graph, scenePassGroup);
 
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
@@ -151,14 +160,6 @@ void EditorScreen::start(const Project &project) {
 
   ui.getAssetBrowser().setOnCreateEntry(
       [&assetManager](auto path) { assetManager.loadAsset(path); });
-
-  {
-    constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
-    auto &pass = editorRenderer.attach(graph);
-    pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
-    pass.write(scenePassGroup.depthBuffer,
-               liquid::rhi::DepthStencilClear{1.0f, 0});
-  }
 
   mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
                         &entityManager, &aspectRatioUpdater, &skeletonUpdater,

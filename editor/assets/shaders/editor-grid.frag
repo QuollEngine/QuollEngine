@@ -57,6 +57,10 @@ void main() {
     }
 
     outColor = color;
+
+    if (outColor.w == 0.0) {
+      discard;
+    }
   }
 
   // Compute depth
