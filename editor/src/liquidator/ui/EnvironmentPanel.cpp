@@ -2,13 +2,15 @@
 #include "EnvironmentPanel.h"
 
 #include "liquid/imgui/ImguiUtils.h"
+#include "Widgets.h"
 
 namespace liquidator {
 
 void EnvironmentPanel::render(EditorManager &editorManager,
                               liquid::AssetManager &assetManager) {
   static constexpr float HALF = 0.5f;
-  if (ImGui::BeginTabItem("Environment", 0)) {
+
+  if (widgets::Window::begin("Environment")) {
     float width = ImGui::GetWindowWidth();
     float height = width * HALF;
 
@@ -62,9 +64,8 @@ void EnvironmentPanel::render(EditorManager &editorManager,
         editorManager.getEnvironment().brdfLUT = asset.data.deviceHandle;
       }
     }
-
-    ImGui::EndTabItem();
   }
+  widgets::Window::end();
 }
 
 } // namespace liquidator

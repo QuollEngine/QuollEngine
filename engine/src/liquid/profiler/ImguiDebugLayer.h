@@ -29,6 +29,11 @@ public:
                   const FPSCounter &fpsCounter);
 
   /**
+   * @brief Render debug menu
+   */
+  void renderMenu();
+
+  /**
    * @brief Render debug UI
    */
   void render();

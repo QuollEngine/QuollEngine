@@ -6,8 +6,6 @@
 
 namespace liquid {
 
-static constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
-
 SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
                              rhi::ResourceRegistry &resourceRegistry,
                              AssetRegistry &assetRegistry)
@@ -49,6 +47,10 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
   mShaderLibrary.addShader(
       "__engine.text.default.fragment",
       mRegistry.setShader({assetsPath + "/shaders/text.frag.spv"}));
+}
+
+void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
+  mClearColor = clearColor;
 }
 
 SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
@@ -149,7 +151,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   {
     auto &pass = graph.addPass("meshPass");
     pass.read(shadowmap);
-    pass.write(sceneColor, BLUEISH_CLEAR_VALUE);
+    pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0, 0});
 
     auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
@@ -222,7 +224,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
   {
     auto &pass = graph.addPass("environmentPass");
-    pass.write(sceneColor, BLUEISH_CLEAR_VALUE);
+    pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
     auto pipeline = mRegistry.setPipeline(
         {mShaderLibrary.getShader("__engine.skybox.default.vertex"),
@@ -268,7 +270,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 void SceneRenderer::attachText(rhi::RenderGraph &graph,
                                const SceneRenderPassData &passData) {
   auto &pass = graph.addPass("textPass");
-  pass.write(passData.sceneColor, BLUEISH_CLEAR_VALUE);
+  pass.write(passData.sceneColor, mClearColor);
   pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
 
   auto textPipeline = mRegistry.setPipeline(rhi::PipelineDescription{

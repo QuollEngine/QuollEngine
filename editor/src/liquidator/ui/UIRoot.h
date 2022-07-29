@@ -6,6 +6,7 @@
 
 #include "liquidator/editor-scene/EditorManager.h"
 #include "MenuBar.h"
+#include "Toolbar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
 #include "EditorGridPanel.h"
@@ -13,8 +14,8 @@
 #include "AssetBrowser.h"
 #include "Layout.h"
 #include "IconRegistry.h"
-#include "Inspector.h"
 #include "EnvironmentPanel.h"
+#include "SceneView.h"
 
 namespace liquidator {
 
@@ -64,7 +65,6 @@ public:
   inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
 private:
-  Inspector mInspector;
   MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;

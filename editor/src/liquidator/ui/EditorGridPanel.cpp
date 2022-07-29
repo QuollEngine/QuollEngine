@@ -2,23 +2,24 @@
 #include "EditorGridPanel.h"
 
 #include "liquid/imgui/Imgui.h"
+#include "Widgets.h"
 
 namespace liquidator {
 
 void EditorGridPanel::render(EditorManager &editorManager) {
-  if (ImGui::BeginMainMenuBar()) {
+  if (widgets::MainMenuBar::begin()) {
     if (ImGui::BeginMenu("Editor")) {
       ImGui::MenuItem("Grid", nullptr, &mOpen);
       ImGui::EndMenu();
     }
-    ImGui::EndMainMenuBar();
+    widgets::MainMenuBar::end();
   }
 
   if (!mOpen) {
     return;
   }
 
-  if (ImGui::Begin("Editor Grid", &mOpen, ImGuiWindowFlags_NoDocking)) {
+  if (widgets::Window::begin("Editor Grid")) {
     bool showGridLines = editorManager.getEditorGrid().gridLinesShown();
     if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
       editorManager.getEditorGrid().setGridLinesFlag(showGridLines);
@@ -30,7 +31,7 @@ void EditorGridPanel::render(EditorManager &editorManager) {
     }
   }
 
-  ImGui::End();
+  widgets::Window::end();
 }
 
 } // namespace liquidator

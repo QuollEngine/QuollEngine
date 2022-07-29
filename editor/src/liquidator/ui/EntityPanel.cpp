@@ -3,6 +3,8 @@
 
 #include "EntityPanel.h"
 
+#include "Widgets.h"
+
 namespace liquidator {
 
 /**
@@ -66,10 +68,11 @@ void EntityPanel::render(EditorManager &editorManager,
                          liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
-  if (ImGui::BeginTabItem("Entity")) {
+  if (widgets::Window::begin("Entity")) {
     if (mEntityManager.getActiveEntityDatabase().hasEntity(mSelectedEntity)) {
       renderName();
       renderTransform();
+      renderText(assetRegistry);
       renderMesh(assetRegistry);
       renderLight();
       renderCamera(editorManager);
@@ -77,15 +80,13 @@ void EntityPanel::render(EditorManager &editorManager,
       renderSkeleton();
       renderCollidable();
       renderRigidBody();
-      renderText(assetRegistry);
       renderAudio(assetRegistry);
       renderScripting(assetRegistry);
       renderAddComponent();
       handleDragAndDrop(renderer, assetRegistry);
     }
-
-    ImGui::EndTabItem();
   }
+  widgets::Window::end();
 }
 
 void EntityPanel::setSelectedEntity(liquid::Entity entity) {
@@ -96,39 +97,38 @@ void EntityPanel::setSelectedEntity(liquid::Entity entity) {
 }
 
 void EntityPanel::renderName() {
-  if (!ImGui::CollapsingHeader("Name")) {
-    return;
-  }
-
   if (!mIsNameActivated) {
     mName = mEntityManager.getActiveEntityDatabase()
                 .getComponent<liquid::NameComponent>(mSelectedEntity)
                 .name;
   }
 
-  ImGui::InputText(
-      "##Input", const_cast<char *>(mName.c_str()), mName.capacity() + 1,
-      ImGuiInputTextFlags_CallbackResize,
-      [](ImGuiInputTextCallbackData *data) -> int {
-        if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-          liquid::String *str = static_cast<liquid::String *>(data->UserData);
+  if (widgets::Section::begin("Name")) {
+    ImGui::InputText(
+        "##Input", const_cast<char *>(mName.c_str()), mName.capacity() + 1,
+        ImGuiInputTextFlags_CallbackResize,
+        [](ImGuiInputTextCallbackData *data) -> int {
+          if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+            liquid::String *str = static_cast<liquid::String *>(data->UserData);
 
-          str->resize(data->BufTextLen);
-          data->Buf = const_cast<char *>(str->c_str());
-        }
-        return 0;
-      },
-      &mName);
+            str->resize(data->BufTextLen);
+            data->Buf = const_cast<char *>(str->c_str());
+          }
+          return 0;
+        },
+        &mName);
 
-  mIsNameActivated = ImGui::IsItemActivated();
+    mIsNameActivated = ImGui::IsItemActivated();
 
-  if (ImGui::IsItemDeactivatedAfterEdit()) {
-    mEntityManager.setName(mSelectedEntity, mName);
-    mEntityManager.save(mSelectedEntity);
-    mName = mEntityManager.getActiveEntityDatabase()
-                .getComponent<liquid::NameComponent>(mSelectedEntity)
-                .name;
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.setName(mSelectedEntity, mName);
+      mEntityManager.save(mSelectedEntity);
+      mName = mEntityManager.getActiveEntityDatabase()
+                  .getComponent<liquid::NameComponent>(mSelectedEntity)
+                  .name;
+    }
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderLight() {
@@ -137,34 +137,33 @@ void EntityPanel::renderLight() {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Light")) {
-    return;
-  }
+  if (widgets::Section::begin("Light")) {
+    auto &component =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::DirectionalLightComponent>(mSelectedEntity);
 
-  auto &component =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::DirectionalLightComponent>(mSelectedEntity);
-
-  ImGui::Text("Type");
-  if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
-    if (ImGui::Selectable("Directional")) {
+    ImGui::Text("Type");
+    if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
+      if (ImGui::Selectable("Directional")) {
+      }
+      ImGui::EndCombo();
     }
-    ImGui::EndCombo();
-  }
 
-  ImGui::Text("Direction");
-  ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
-              component.direction.z);
+    ImGui::Text("Direction");
+    ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
+                component.direction.z);
 
-  ImGui::Text("Color");
-  if (liquid::imgui::inputColor("###InputColor", component.color)) {
-    mEntityManager.save(mSelectedEntity);
-  }
+    ImGui::Text("Color");
+    if (liquid::imgui::inputColor("###InputColor", component.color)) {
+      mEntityManager.save(mSelectedEntity);
+    }
 
-  ImGui::Text("Intensity");
-  if (liquid::imgui::input("###InputIntensity", component.intensity)) {
-    mEntityManager.save(mSelectedEntity);
+    ImGui::Text("Intensity");
+    if (liquid::imgui::input("###InputIntensity", component.intensity)) {
+      mEntityManager.save(mSelectedEntity);
+    }
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderCamera(EditorManager &editorManager) {
@@ -173,83 +172,84 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Camera")) {
-    return;
-  }
+  if (widgets::Section::begin("Camera")) {
+    auto &component =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::PerspectiveLensComponent>(mSelectedEntity);
 
-  auto &component =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::PerspectiveLensComponent>(mSelectedEntity);
-
-  ImGui::Text("FOV");
-  ImGui::InputFloat("###InputFOV", &component.fovY);
-  if (component.fovY < 0.0f) {
-    component.fovY = 0.0f;
-  }
-  if (ImGui::IsItemDeactivatedAfterEdit()) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Near");
-  ImGui::InputFloat("###InputNear", &component.near);
-  if (component.near < 0.0f) {
-    component.near = 0.0f;
-  }
-  if (ImGui::IsItemDeactivatedAfterEdit()) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Far");
-  ImGui::InputFloat("###InputFar", &component.far);
-  if (component.far < 0.0f) {
-    component.far = 0.0f;
-  }
-  if (ImGui::IsItemDeactivatedAfterEdit()) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Aspect Ratio");
-  static constexpr float MIN_CUSTOM_ASPECT_RATIO = 0.01f;
-  static constexpr float MAX_CUSTOM_ASPECT_RATIO = 1000.0f;
-
-  bool hasViewportAspectRatio =
-      mEntityManager.getActiveEntityDatabase()
-          .hasComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity);
-
-  if (ImGui::BeginCombo("###AspectRatioType",
-                        hasViewportAspectRatio ? "Viewport ratio" : "Custom",
-                        0)) {
-
-    if (ImGui::Selectable("Viewport ratio")) {
-      mEntityManager.getActiveEntityDatabase()
-          .setComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity, {});
-      mEntityManager.save(mSelectedEntity);
+    ImGui::Text("FOV");
+    ImGui::InputFloat("###InputFOV", &component.fovY);
+    if (component.fovY < 0.0f) {
+      component.fovY = 0.0f;
     }
-
-    if (ImGui::Selectable("Custom")) {
-      mEntityManager.getActiveEntityDatabase()
-          .deleteComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity);
-      mEntityManager.save(mSelectedEntity);
-    }
-
-    ImGui::EndCombo();
-  }
-
-  if (!hasViewportAspectRatio) {
-    ImGui::Text("Custom aspect ratio");
-    if (ImGui::DragFloat("###CustomAspectRatio", &component.aspectRatio,
-                         MIN_CUSTOM_ASPECT_RATIO, MIN_CUSTOM_ASPECT_RATIO,
-                         MAX_CUSTOM_ASPECT_RATIO, "%.2f")) {
-    }
-
     if (ImGui::IsItemDeactivatedAfterEdit()) {
       mEntityManager.save(mSelectedEntity);
     }
-  }
 
-  if (ImGui::Button("Set as active camera")) {
-    editorManager.setCamera(mSelectedEntity);
+    ImGui::Text("Near");
+    ImGui::InputFloat("###InputNear", &component.near);
+    if (component.near < 0.0f) {
+      component.near = 0.0f;
+    }
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("Far");
+    ImGui::InputFloat("###InputFar", &component.far);
+    if (component.far < 0.0f) {
+      component.far = 0.0f;
+    }
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("Aspect Ratio");
+    static constexpr float MIN_CUSTOM_ASPECT_RATIO = 0.01f;
+    static constexpr float MAX_CUSTOM_ASPECT_RATIO = 1000.0f;
+
+    bool hasViewportAspectRatio =
+        mEntityManager.getActiveEntityDatabase()
+            .hasComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity);
+
+    if (ImGui::BeginCombo("###AspectRatioType",
+                          hasViewportAspectRatio ? "Viewport ratio" : "Custom",
+                          0)) {
+
+      if (ImGui::Selectable("Viewport ratio")) {
+        mEntityManager.getActiveEntityDatabase()
+            .setComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity,
+                                                            {});
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      if (ImGui::Selectable("Custom")) {
+        mEntityManager.getActiveEntityDatabase()
+            .deleteComponent<liquid::AutoAspectRatioComponent>(mSelectedEntity);
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      ImGui::EndCombo();
+    }
+
+    if (!hasViewportAspectRatio) {
+      ImGui::Text("Custom aspect ratio");
+      if (ImGui::DragFloat("###CustomAspectRatio", &component.aspectRatio,
+                           MIN_CUSTOM_ASPECT_RATIO, MIN_CUSTOM_ASPECT_RATIO,
+                           MAX_CUSTOM_ASPECT_RATIO, "%.2f")) {
+      }
+
+      if (ImGui::IsItemDeactivatedAfterEdit()) {
+        mEntityManager.save(mSelectedEntity);
+      }
+    }
+
+    if (!editorManager.isUsingCamera(mSelectedEntity) &&
+        ImGui::Button("Set as active camera")) {
+      editorManager.setActiveCamera(mSelectedEntity);
+    }
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderTransform() {
@@ -260,61 +260,60 @@ void EntityPanel::renderTransform() {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Transform")) {
-    return;
-  }
+  if (widgets::Section::begin("Transform")) {
+    auto &component =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::LocalTransformComponent>(mSelectedEntity);
+    auto &world =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::WorldTransformComponent>(mSelectedEntity);
 
-  auto &component =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::LocalTransformComponent>(mSelectedEntity);
-  auto &world =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::WorldTransformComponent>(mSelectedEntity);
+    ImGui::Text("Position");
 
-  ImGui::Text("Position");
-
-  if (liquid::imgui::input("###InputTransformPosition",
-                           component.localPosition)) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Rotation");
-  const auto &euler = glm::eulerAngles(component.localRotation);
-  std::array<float, VEC3_ARRAY_SIZE> imguiRotation{euler.x, euler.y, euler.z};
-  if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
-    component.localRotation = glm::quat(glm::vec3(
-        imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
-  }
-
-  if (ImGui::IsItemDeactivatedAfterEdit()) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Scale");
-  if (liquid::imgui::input("###InputTransformScale", component.localScale)) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("World Transform");
-  if (ImGui::BeginTable("table-transformWorld", 4,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch |
-                            ImGuiTableFlags_RowBg)) {
-
-    for (glm::mat4::length_type i = 0; i < 4; ++i) {
-      liquid::imgui::renderRow(
-          world.worldTransform[i].x, world.worldTransform[i].y,
-          world.worldTransform[i].z, world.worldTransform[i].w);
+    if (liquid::imgui::input("###InputTransformPosition",
+                             component.localPosition)) {
+      mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::EndTable();
+    ImGui::Text("Rotation");
+    const auto &euler = glm::eulerAngles(component.localRotation);
+    std::array<float, VEC3_ARRAY_SIZE> imguiRotation{euler.x, euler.y, euler.z};
+    if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
+      component.localRotation = glm::quat(glm::vec3(
+          imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
+    }
+
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("Scale");
+    if (liquid::imgui::input("###InputTransformScale", component.localScale)) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("World Transform");
+    if (ImGui::BeginTable("table-transformWorld", 4,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
+
+      for (glm::mat4::length_type i = 0; i < 4; ++i) {
+        liquid::imgui::renderRow(
+            world.worldTransform[i].x, world.worldTransform[i].y,
+            world.worldTransform[i].z, world.worldTransform[i].w);
+      }
+
+      ImGui::EndTable();
+    }
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
   if (mEntityManager.getActiveEntityDatabase()
           .hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
-    if (ImGui::CollapsingHeader("Mesh")) {
+    if (widgets::Section::begin("Mesh")) {
       auto handle = mEntityManager.getActiveEntityDatabase()
                         .getComponent<liquid::MeshComponent>(mSelectedEntity)
                         .handle;
@@ -332,11 +331,12 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
         ImGui::EndTable();
       }
     }
+    widgets::Section::end();
   }
 
   if (mEntityManager.getActiveEntityDatabase()
           .hasComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)) {
-    if (ImGui::CollapsingHeader("Skinned mesh")) {
+    if (widgets::Section::begin("Mesh")) {
       auto handle =
           mEntityManager.getActiveEntityDatabase()
               .getComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)
@@ -355,6 +355,7 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
         ImGui::EndTable();
       }
     }
+    widgets::Section::end();
   }
 }
 
@@ -364,17 +365,16 @@ void EntityPanel::renderSkeleton() {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Skeleton")) {
-    return;
-  }
+  if (widgets::Section::begin("Skeleton")) {
+    bool showBones =
+        mEntityManager.getActiveEntityDatabase()
+            .hasComponent<liquid::SkeletonDebugComponent>(mSelectedEntity);
 
-  bool showBones =
-      mEntityManager.getActiveEntityDatabase()
-          .hasComponent<liquid::SkeletonDebugComponent>(mSelectedEntity);
-
-  if (ImGui::Checkbox("Show bones", &showBones)) {
-    mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
+    if (ImGui::Checkbox("Show bones", &showBones)) {
+      mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
+    }
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
@@ -383,63 +383,61 @@ void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Animation")) {
-    return;
-  }
+  if (widgets::Section::begin("Animation")) {
+    auto &component =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::AnimatorComponent>(mSelectedEntity);
 
-  auto &component =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::AnimatorComponent>(mSelectedEntity);
+    const auto &animations = assetRegistry.getAnimations().getAssets();
 
-  const auto &animations = assetRegistry.getAnimations().getAssets();
+    const auto &currentAnimation =
+        animations.at(component.animations.at(component.currentAnimation));
 
-  const auto &currentAnimation =
-      animations.at(component.animations.at(component.currentAnimation));
+    if (ImGui::BeginCombo("###SelectAnimation", currentAnimation.name.c_str(),
+                          0)) {
+      for (size_t i = 0; i < component.animations.size(); ++i) {
+        bool selectable = component.currentAnimation == i;
 
-  if (ImGui::BeginCombo("###SelectAnimation", currentAnimation.name.c_str(),
-                        0)) {
-    for (size_t i = 0; i < component.animations.size(); ++i) {
-      bool selectable = component.currentAnimation == i;
+        const auto &animationName =
+            animations.at(component.animations.at(i)).name;
 
-      const auto &animationName =
-          animations.at(component.animations.at(i)).name;
+        if (ImGui::Selectable(animationName.c_str(), &selectable)) {
+          component.currentAnimation = static_cast<uint32_t>(i);
+        }
+      }
+      ImGui::EndCombo();
+    }
 
-      if (ImGui::Selectable(animationName.c_str(), &selectable)) {
-        component.currentAnimation = static_cast<uint32_t>(i);
+    if (mEntityManager.isUsingSimulationDatabase()) {
+      ImGui::Text("Time");
+
+      float animationTime =
+          component.normalizedTime * currentAnimation.data.time;
+      if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
+                             currentAnimation.data.time)) {
+        component.normalizedTime = animationTime / currentAnimation.data.time;
+      }
+
+      ImGui::Checkbox("Loop", &component.loop);
+
+      if (!component.playing) {
+        if (ImGui::Button("Play")) {
+          component.playing = true;
+        }
+      } else {
+        if (ImGui::Button("Pause")) {
+          component.playing = false;
+        }
+      }
+
+      ImGui::SameLine();
+
+      if (ImGui::Button("Reset")) {
+        component.normalizedTime = 0.0f;
       }
     }
-    ImGui::EndCombo();
   }
-
-  if (!mEntityManager.isUsingSimulationDatabase()) {
-    return;
-  }
-
-  ImGui::Text("Time");
-
-  float animationTime = component.normalizedTime * currentAnimation.data.time;
-  if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
-                         currentAnimation.data.time)) {
-    component.normalizedTime = animationTime / currentAnimation.data.time;
-  }
-
-  ImGui::Checkbox("Loop", &component.loop);
-
-  if (!component.playing) {
-    if (ImGui::Button("Play")) {
-      component.playing = true;
-    }
-  } else {
-    if (ImGui::Button("Pause")) {
-      component.playing = false;
-    }
-  }
-
-  ImGui::SameLine();
-
-  if (ImGui::Button("Reset")) {
-    component.normalizedTime = 0.0f;
-  }
+  widgets::Section::end();
 }
 
 /**
@@ -490,63 +488,62 @@ void EntityPanel::renderCollidable() {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Collidable")) {
-    return;
-  }
+  if (widgets::Section::begin("Collidable")) {
+    std::array<liquid::PhysicsGeometryType, sizeof(liquid::PhysicsGeometryType)>
+        types{
+            liquid::PhysicsGeometryType::Box,
+            liquid::PhysicsGeometryType::Sphere,
+            liquid::PhysicsGeometryType::Capsule,
+            liquid::PhysicsGeometryType::Plane,
+        };
 
-  std::array<liquid::PhysicsGeometryType, sizeof(liquid::PhysicsGeometryType)>
-      types{
-          liquid::PhysicsGeometryType::Box,
-          liquid::PhysicsGeometryType::Sphere,
-          liquid::PhysicsGeometryType::Capsule,
-          liquid::PhysicsGeometryType::Plane,
-      };
+    auto &collidable =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::CollidableComponent>(mSelectedEntity);
 
-  auto &collidable =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::CollidableComponent>(mSelectedEntity);
+    if (ImGui::BeginCombo(
+            "###SelectGeometryType",
+            getGeometryName(collidable.geometryDesc.type).c_str())) {
 
-  if (ImGui::BeginCombo(
-          "###SelectGeometryType",
-          getGeometryName(collidable.geometryDesc.type).c_str())) {
-
-    for (auto type : types) {
-      if (type != collidable.geometryDesc.type &&
-          ImGui::Selectable(getGeometryName(type).c_str())) {
-        collidable.geometryDesc.type = type;
-        collidable.geometryDesc.params = getDefaultGeometryFromType(type);
+      for (auto type : types) {
+        if (type != collidable.geometryDesc.type &&
+            ImGui::Selectable(getGeometryName(type).c_str())) {
+          collidable.geometryDesc.type = type;
+          collidable.geometryDesc.params = getDefaultGeometryFromType(type);
+        }
       }
+      ImGui::EndCombo();
     }
-    ImGui::EndCombo();
-  }
 
-  if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
-    auto &box =
-        std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
-    std::array<float, 3> extents{box.halfExtents.x, box.halfExtents.y,
-                                 box.halfExtents.z};
-    ImGui::Text("Half extents");
-    if (ImGui::InputFloat3("###HalfExtents", extents.data())) {
-      box.halfExtents.x = extents.at(0);
-      box.halfExtents.y = extents.at(1);
-      box.halfExtents.z = extents.at(2);
+    if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
+      auto &box =
+          std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
+      std::array<float, 3> extents{box.halfExtents.x, box.halfExtents.y,
+                                   box.halfExtents.z};
+      ImGui::Text("Half extents");
+      if (ImGui::InputFloat3("###HalfExtents", extents.data())) {
+        box.halfExtents.x = extents.at(0);
+        box.halfExtents.y = extents.at(1);
+        box.halfExtents.z = extents.at(2);
+      }
+    } else if (collidable.geometryDesc.type ==
+               liquid::PhysicsGeometryType::Sphere) {
+      auto &sphere = std::get<liquid::PhysicsGeometrySphere>(
+          collidable.geometryDesc.params);
+      ImGui::Text("Radius");
+      ImGui::InputFloat("###Radius", &sphere.radius);
+    } else if (collidable.geometryDesc.type ==
+               liquid::PhysicsGeometryType::Capsule) {
+      auto &capsule = std::get<liquid::PhysicsGeometryCapsule>(
+          collidable.geometryDesc.params);
+      ImGui::Text("Radius");
+      ImGui::InputFloat("###Radius", &capsule.radius);
+
+      ImGui::Text("Half height");
+      ImGui::InputFloat("###HalfHeight", &capsule.halfHeight);
     }
-  } else if (collidable.geometryDesc.type ==
-             liquid::PhysicsGeometryType::Sphere) {
-    auto &sphere =
-        std::get<liquid::PhysicsGeometrySphere>(collidable.geometryDesc.params);
-    ImGui::Text("Radius");
-    ImGui::InputFloat("###Radius", &sphere.radius);
-  } else if (collidable.geometryDesc.type ==
-             liquid::PhysicsGeometryType::Capsule) {
-    auto &capsule = std::get<liquid::PhysicsGeometryCapsule>(
-        collidable.geometryDesc.params);
-    ImGui::Text("Radius");
-    ImGui::InputFloat("###Radius", &capsule.radius);
-
-    ImGui::Text("Half height");
-    ImGui::InputFloat("###HalfHeight", &capsule.halfHeight);
   }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderRigidBody() {
@@ -555,69 +552,67 @@ void EntityPanel::renderRigidBody() {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Rigid Body")) {
+  if (widgets::Section::begin("Rigid body")) {
+    auto &rigidBody =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::RigidBodyComponent>(mSelectedEntity);
 
-    return;
+    ImGui::Text("Mass");
+    ImGui::InputFloat("###Mass", &rigidBody.dynamicDesc.mass);
+
+    std::array<float, 3> inertia{rigidBody.dynamicDesc.inertia.x,
+                                 rigidBody.dynamicDesc.inertia.y,
+                                 rigidBody.dynamicDesc.inertia.z};
+
+    if (ImGui::InputFloat3("###Inertia", inertia.data())) {
+      rigidBody.dynamicDesc.inertia.x = inertia.at(0);
+      rigidBody.dynamicDesc.inertia.y = inertia.at(1);
+      rigidBody.dynamicDesc.inertia.z = inertia.at(2);
+    }
+
+    if (rigidBody.actor) {
+      rigidBody.actor->getLinearVelocity();
+      if (ImGui::BeginTable("TableRigidBodyDetails", 2,
+                            ImGuiTableFlags_Borders |
+                                ImGuiTableColumnFlags_WidthStretch |
+                                ImGuiTableFlags_RowBg)) {
+        auto *actor = rigidBody.actor;
+
+        const auto &pose = actor->getGlobalPose();
+        const auto &cmass = actor->getCMassLocalPose();
+        const auto &invInertia = actor->getMassSpaceInvInertiaTensor();
+        const auto &linearVelocity = actor->getLinearVelocity();
+        const auto &angularVelocity = actor->getAngularVelocity();
+
+        liquid::imgui::renderRow("Pose position",
+                                 glm::vec3(pose.p.x, pose.p.y, pose.p.y));
+        liquid::imgui::renderRow(
+            "Pose rotation",
+            glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+        liquid::imgui::renderRow("CMass position",
+                                 glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
+        liquid::imgui::renderRow(
+            "CMass rotation",
+            glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+        liquid::imgui::renderRow(
+            "Inverse inertia tensor position",
+            glm::vec3(invInertia.x, invInertia.y, invInertia.y));
+        liquid::imgui::renderRow("Linear damping",
+                                 static_cast<float>(actor->getLinearDamping()));
+        liquid::imgui::renderRow(
+            "Angular damping", static_cast<float>(actor->getAngularDamping()));
+        liquid::imgui::renderRow(
+            "Linear velocity",
+            glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
+        liquid::imgui::renderRow(
+            "Angular velocity",
+            glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
+
+        ImGui::EndTable();
+      }
+    }
   }
-
-  auto &rigidBody =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::RigidBodyComponent>(mSelectedEntity);
-
-  ImGui::Text("Mass");
-  ImGui::InputFloat("###Mass", &rigidBody.dynamicDesc.mass);
-
-  std::array<float, 3> inertia{rigidBody.dynamicDesc.inertia.x,
-                               rigidBody.dynamicDesc.inertia.y,
-                               rigidBody.dynamicDesc.inertia.z};
-
-  if (ImGui::InputFloat3("###Inertia", inertia.data())) {
-    rigidBody.dynamicDesc.inertia.x = inertia.at(0);
-    rigidBody.dynamicDesc.inertia.y = inertia.at(1);
-    rigidBody.dynamicDesc.inertia.z = inertia.at(2);
-  }
-
-  if (!rigidBody.actor) {
-    return;
-  }
-  rigidBody.actor->getLinearVelocity();
-
-  if (ImGui::BeginTable("TableRigidBodyDetails", 2,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch |
-                            ImGuiTableFlags_RowBg)) {
-    auto *actor = rigidBody.actor;
-
-    const auto &pose = actor->getGlobalPose();
-    const auto &cmass = actor->getCMassLocalPose();
-    const auto &invInertia = actor->getMassSpaceInvInertiaTensor();
-    const auto &linearVelocity = actor->getLinearVelocity();
-    const auto &angularVelocity = actor->getAngularVelocity();
-
-    liquid::imgui::renderRow("Pose position",
-                             glm::vec3(pose.p.x, pose.p.y, pose.p.y));
-    liquid::imgui::renderRow(
-        "Pose rotation", glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
-    liquid::imgui::renderRow("CMass position",
-                             glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
-    liquid::imgui::renderRow("CMass rotation", glm::quat(cmass.q.w, cmass.q.x,
-                                                         cmass.q.y, cmass.q.z));
-    liquid::imgui::renderRow(
-        "Inverse inertia tensor position",
-        glm::vec3(invInertia.x, invInertia.y, invInertia.y));
-    liquid::imgui::renderRow("Linear damping",
-                             static_cast<float>(actor->getLinearDamping()));
-    liquid::imgui::renderRow("Angular damping",
-                             static_cast<float>(actor->getAngularDamping()));
-    liquid::imgui::renderRow(
-        "Linear velocity",
-        glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
-    liquid::imgui::renderRow(
-        "Angular velocity",
-        glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
-
-    ImGui::EndTable();
-  }
+  widgets::Section::end();
 }
 
 void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
@@ -626,43 +621,44 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Text")) {
-    return;
-  }
+  if (widgets::Section::begin("Text")) {
+    auto &text = mEntityManager.getActiveEntityDatabase()
+                     .getComponent<liquid::TextComponent>(mSelectedEntity);
 
-  auto &text = mEntityManager.getActiveEntityDatabase()
-                   .getComponent<liquid::TextComponent>(mSelectedEntity);
+    const auto &fonts = assetRegistry.getFonts().getAssets();
 
-  const auto &fonts = assetRegistry.getFonts().getAssets();
+    static constexpr float CONTENT_INPUT_HEIGHT = 100.0f;
 
-  static constexpr float CONTENT_INPUT_HEIGHT = 50.0f;
-
-  ImGui::Text("Content");
-  if (ImguiMultilineInputText(
-          "###InputContent", text.text,
-          ImVec2(ImGui::GetWindowWidth(), CONTENT_INPUT_HEIGHT), 0)) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Line height");
-  if (liquid::imgui::input("###InputLineHeight", text.lineHeight)) {
-    mEntityManager.save(mSelectedEntity);
-  }
-
-  ImGui::Text("Select font");
-  if (ImGui::BeginCombo("###SelectFont", fonts.at(text.font).name.c_str(), 0)) {
-    for (const auto &[handle, data] : fonts) {
-      bool selectable = handle == text.font;
-
-      const auto &fontName = data.name;
-
-      if (ImGui::Selectable(fontName.c_str(), &selectable)) {
-        text.font = handle;
-        mEntityManager.save(mSelectedEntity);
-      }
+    ImGui::Text("Content");
+    if (ImguiMultilineInputText(
+            "###InputContent", text.text,
+            ImVec2(ImGui::GetWindowWidth(), CONTENT_INPUT_HEIGHT), 0)) {
+      mEntityManager.save(mSelectedEntity);
     }
-    ImGui::EndCombo();
+
+    ImGui::Text("Line height");
+    if (liquid::imgui::input("###InputLineHeight", text.lineHeight)) {
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("Select font");
+    if (ImGui::BeginCombo("###SelectFont", fonts.at(text.font).name.c_str(),
+                          0)) {
+      for (const auto &[handle, data] : fonts) {
+        bool selectable = handle == text.font;
+
+        const auto &fontName = data.name;
+
+        if (ImGui::Selectable(fontName.c_str(), &selectable)) {
+          text.font = handle;
+          mEntityManager.save(mSelectedEntity);
+        }
+      }
+      ImGui::EndCombo();
+    }
   }
+
+  widgets::Section::end();
 }
 
 void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
@@ -671,17 +667,17 @@ void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Audio")) {
-    return;
+  if (widgets::Section::begin("Audio")) {
+    const auto &audio =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::AudioSourceComponent>(mSelectedEntity);
+
+    const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
+
+    ImGui::Text("Name: %s", asset.name.c_str());
   }
 
-  const auto &audio =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::AudioSourceComponent>(mSelectedEntity);
-
-  const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
-
-  ImGui::Text("Name: %s", asset.name.c_str());
+  widgets::Section::end();
 }
 
 void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
@@ -690,17 +686,18 @@ void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (!ImGui::CollapsingHeader("Scripting")) {
-    return;
+  if (widgets::Section::begin("Scripts")) {
+    const auto &scripting =
+        mEntityManager.getActiveEntityDatabase()
+            .getComponent<liquid::ScriptingComponent>(mSelectedEntity);
+
+    const auto &asset =
+        assetRegistry.getLuaScripts().getAsset(scripting.handle);
+
+    ImGui::Text("Name: %s", asset.name.c_str());
   }
 
-  const auto &scripting =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::ScriptingComponent>(mSelectedEntity);
-
-  const auto &asset = assetRegistry.getLuaScripts().getAsset(scripting.handle);
-
-  ImGui::Text("Name: %s", asset.name.c_str());
+  widgets::Section::end();
 }
 
 void EntityPanel::renderAddComponent() {

@@ -1,8 +1,9 @@
 #include "liquid/core/Base.h"
-#include "SceneHierarchyPanel.h"
-#include "ConfirmationDialog.h"
-
 #include "liquid/imgui/Imgui.h"
+
+#include "ConfirmationDialog.h"
+#include "SceneHierarchyPanel.h"
+#include "Widgets.h"
 
 namespace liquidator {
 
@@ -10,15 +11,16 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(EditorManager &editorManager) {
-  ImGui::Begin("Hierarchy");
+  if (widgets::Window::begin("Hierarchy")) {
+    mEntityManager.getActiveEntityDatabase()
+        .iterateEntities<liquid::LocalTransformComponent>(
+            [this, &editorManager](auto entity, const auto &transform) {
+              renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen,
+                           editorManager);
+            });
+  }
 
-  mEntityManager.getActiveEntityDatabase()
-      .iterateEntities<liquid::LocalTransformComponent>(
-          [this, &editorManager](auto entity, const auto &transform) {
-            renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
-          });
-
-  ImGui::End();
+  widgets::Window::end();
 }
 
 void SceneHierarchyPanel::setEntityClickHandler(
@@ -65,7 +67,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
       },
       "Delete");
 
-  if (ImGui::BeginPopupContextItem()) {
+  if (widgets::ContextMenu::begin()) {
     if (ImGui::MenuItem("Go to view")) {
       editorManager.moveCameraToEntity(entity);
     }
@@ -74,7 +76,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
       confirmDeleteSceneNode.show();
     }
 
-    ImGui::EndPopup();
+    widgets::ContextMenu::end();
   }
 
   confirmDeleteSceneNode.render(editorManager);

@@ -23,32 +23,11 @@
 #include "liquidator/editor-scene/EditorGrid.h"
 #include "liquidator/ui/UIRoot.h"
 #include "liquidator/ui/AssetLoadStatusDialog.h"
-#include "liquidator/ui/Fonts.h"
+#include "liquidator/ui/Theme.h"
+#include "liquidator/ui/Widgets.h"
+
 #include "liquidator/core/EditorRenderer.h"
-
-void randomSpawn(liquidator::EntityManager &entityManager,
-                 liquidator::EditorManager &editorManager,
-                 liquid::AssetManager &assetManager) {
-
-  constexpr float DISTRIBUTION_EDGE = 500.0f;
-  std::random_device device;
-  std::mt19937 mt(device());
-  std::uniform_real_distribution<float> dist(-DISTRIBUTION_EDGE,
-                                             DISTRIBUTION_EDGE);
-  constexpr size_t NUM_SPAWNS = 1000;
-
-  for (auto &[handle, _] :
-       assetManager.getRegistry().getPrefabs().getAssets()) {
-    for (size_t i = 0; i < NUM_SPAWNS; ++i) {
-      auto parent = entityManager.spawnEntity(
-          editorManager.getEditorCamera(), liquid::EntityNull,
-          static_cast<uint32_t>(handle), liquid::AssetType::Prefab, false);
-      entityManager.getActiveEntityDatabase()
-          .getComponent<liquid::LocalTransformComponent>(parent)
-          .localPosition = glm::vec3(dist(mt), dist(mt), dist(mt));
-    }
-  }
-}
+#include "liquidator/core/EditorSimulator.h"
 
 namespace liquidator {
 
@@ -59,8 +38,6 @@ EditorScreen::EditorScreen(liquid::Window &window,
 
 void EditorScreen::start(const Project &project) {
   liquid::FPSCounter fpsCounter;
-
-  liquid::CameraAspectRatioUpdater aspectRatioUpdater(mWindow);
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
@@ -77,9 +54,15 @@ void EditorScreen::start(const Project &project) {
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
   preloadStatusDialog.setMessages(res.getWarnings());
 
+  Theme::apply();
+
   renderer.getImguiRenderer().useConfigPath(layoutPath);
-  addFonts();
+  renderer.getImguiRenderer().setClearColor(
+      Theme::getColor(ThemeColor::BackgroundColor));
   renderer.getImguiRenderer().buildFonts();
+
+  renderer.getSceneRenderer().setClearColor(
+      Theme::getColor(ThemeColor::SceneBackgroundColor));
 
   if (res.hasWarnings()) {
     preloadStatusDialog.show();
@@ -101,15 +84,6 @@ void EditorScreen::start(const Project &project) {
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
   liquidator::AssetLoader assetLoader(assetManager, renderer.getRegistry());
-
-  liquid::AnimationSystem animationSystem(assetManager.getRegistry());
-  liquid::PhysicsSystem physicsSystem(mEventSystem);
-  liquid::SceneUpdater sceneUpdater;
-  liquid::SkeletonUpdater skeletonUpdater;
-  liquid::AudioSystem audioSystem(assetManager.getRegistry());
-  liquid::ScriptingSystem scriptingSystem(mEventSystem,
-                                          assetManager.getRegistry());
-  liquid::EntityDeleter entityDeleter;
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                                      mDevice->getDeviceStats(),
@@ -133,7 +107,7 @@ void EditorScreen::start(const Project &project) {
   imguiPassGroup.pass.read(scenePassGroup.sceneColor);
 
   {
-    constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+    static constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.52f, 0.54f, 0.89f, 1.0f};
     auto &pass = editorRenderer.attach(graph);
     pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
     pass.write(scenePassGroup.depthBuffer,
@@ -164,106 +138,80 @@ void EditorScreen::start(const Project &project) {
   ui.getAssetBrowser().setOnCreateEntry(
       [&assetManager](auto path) { assetManager.loadAsset(path); });
 
-  mainLoop.setUpdateFn([&editorCamera, &animationSystem, &physicsSystem,
-                        &entityManager, &aspectRatioUpdater, &skeletonUpdater,
-                        &scriptingSystem, &sceneUpdater, &entityDeleter,
-                        &audioSystem, this](float dt) mutable {
-    bool isPlaying = entityManager.isUsingSimulationDatabase();
+  liquidator::EditorSimulator simulator(
+      mEventSystem, mWindow, assetManager.getRegistry(), editorCamera);
 
-    auto &entityDatabase = entityManager.getActiveEntityDatabase();
+  mainLoop.setUpdateFn(
+      [&editorCamera, &entityManager, &simulator, this](float dt) mutable {
+        auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
-    mEventSystem.poll();
-    aspectRatioUpdater.update(entityDatabase);
-    editorCamera.update();
+        mEventSystem.poll();
+        simulator.update(dt, entityDatabase);
+        return true;
+      });
 
-    if (isPlaying) {
-      scriptingSystem.start(entityDatabase);
-      scriptingSystem.update(dt, entityDatabase);
-      animationSystem.update(dt, entityDatabase);
-    }
+  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
+                        &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
+                        &ui, &debugLayer, &preloadStatusDialog, &presenter,
+                        &editorRenderer, &simulator, this]() {
+    // TODO: Why is -2.0f needed here
+    static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
-    skeletonUpdater.update(entityDatabase);
-    sceneUpdater.update(entityDatabase);
-
-    if (isPlaying) {
-      physicsSystem.update(dt, entityDatabase);
-      audioSystem.output(entityDatabase);
-    }
-
-    entityDeleter.update(entityDatabase);
-    return true;
-  });
-
-  mainLoop.setRenderFn([&renderer, &editorManager, &animationSystem,
-                        &entityManager, &assetManager, &graph, &scenePassGroup,
-                        &imguiPassGroup, &physicsSystem, &ui, &debugLayer,
-                        &preloadStatusDialog, &presenter, &editorRenderer,
-                        &scriptingSystem, &audioSystem, this]() {
     auto &imgui = renderer.getImguiRenderer();
     auto &sceneRenderer = renderer.getSceneRenderer();
 
     imgui.beginRendering();
-    ui.render(editorManager, renderer, assetManager, physicsSystem,
-              entityManager);
 
-    ImVec2 pos{};
-    ImVec2 size{};
-    static constexpr float ICON_SIZE = 20.0f;
-    if (ImGui::Begin("View", nullptr)) {
-      pos = ImGui::GetWindowPos();
-      size = ImGui::GetContentRegionAvail();
+    if (widgets::MainMenuBar::begin()) {
+      liquidator::MenuBar::render(editorManager, entityManager);
+      debugLayer.renderMenu();
+      widgets::MainMenuBar::end();
+    }
 
+    debugLayer.render();
+
+    if (Toolbar::begin()) {
       auto icon =
           entityManager.isUsingSimulationDatabase()
               ? ui.getIconRegistry().getIcon(liquidator::EditorIcon::Stop)
               : ui.getIconRegistry().getIcon(liquidator::EditorIcon::Play);
 
-      if (liquid::imgui::imageButton(icon, ImVec2(ICON_SIZE, ICON_SIZE))) {
+      if (liquid::imgui::imageButton(icon, ImVec2(IconSize, IconSize))) {
         if (entityManager.isUsingSimulationDatabase()) {
-          physicsSystem.cleanup(entityManager.getActiveEntityDatabase());
-          scriptingSystem.cleanup(entityManager.getActiveEntityDatabase());
-          audioSystem.cleanup(entityManager.getActiveEntityDatabase());
+          simulator.cleanupSimulationDatabase(
+              entityManager.getActiveEntityDatabase());
+          simulator.useEditorUpdate();
           entityManager.useEditingDatabase();
         } else {
+          simulator.useSimulationUpdate();
           entityManager.useSimulationDatabase();
         }
       }
 
-      ImVec2 viewportSize(size.x, size.y - ICON_SIZE - ImGui::GetFrameHeight());
-      editorManager.getEditorCamera().setViewport(
-          pos.x, pos.y + ICON_SIZE, viewportSize.x, viewportSize.y);
+      ImGui::SameLine();
 
-      liquid::imgui::image(scenePassGroup.sceneColor, viewportSize);
-      ImGui::End();
-    }
-
-    if (!editorManager.isUsingEditorCamera()) {
-      ImGui::SetNextWindowPos(ImVec2(pos.x + size.x, pos.y + size.y), 0,
-                              ImVec2(1.0f, 1.0f));
-
-      if (ImGui::Begin("Reset editor button", nullptr,
-                       ImGuiWindowFlags_NoDecoration |
-                           ImGuiWindowFlags_NoSavedSettings |
-                           ImGuiWindowFlags_NoDocking)) {
-        if (ImGui::Button("Reset to editor camera")) {
-          editorManager.switchToEditorCamera();
-        }
-        ImGui::End();
+      if (!editorManager.isUsingEditorCamera() &&
+          ImGui::Button("Reset to editor camera")) {
+        editorManager.switchToEditorCamera();
       }
     }
+    Toolbar::end();
 
-#ifdef LIQUID_PROFILER
-    if (ImGui::Begin("Benchmark")) {
-      if (ImGui::Button("Spawn prefabs")) {
-        randomSpawn(entityManager, editorManager, assetManager);
-      }
+    ui.render(editorManager, renderer, assetManager,
+              simulator.getPhysicsSystem(), entityManager);
 
-      ImGui::End();
+    if (SceneView::begin(scenePassGroup.sceneColor)) {
+      const auto &pos = ImGui::GetWindowPos();
+      const auto &size = ImGui::GetItemRectSize();
+
+      editorManager.getEditorCamera().setViewport(pos.x, pos.y + IconSize,
+                                                  size.x, size.y);
     }
-#endif
+
+    SceneView::end();
+    StatusBar::render(editorManager);
 
     preloadStatusDialog.render();
-    debugLayer.render();
 
     imgui.endRendering();
 

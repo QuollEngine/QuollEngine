@@ -60,6 +60,8 @@ public:
                                         renderer.getRegistry(),
                                         assetManager.getRegistry());
 
+    sceneRenderer.setClearColor(glm::vec4(0.46f, 0.60f, 0.70f, 1.0f));
+
     const auto &passData = sceneRenderer.attach(graph);
     sceneRenderer.attachText(graph, passData);
 

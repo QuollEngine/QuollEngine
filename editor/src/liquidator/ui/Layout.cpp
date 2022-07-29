@@ -3,17 +3,22 @@
 
 #include "liquid/imgui/Imgui.h"
 
+#include "Toolbar.h"
+
 namespace liquidator {
 
 void Layout::setup() {
   const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
+
   const auto &viewport = ImGui::GetMainViewport();
 
   ImGui::SetNextWindowPos(
-      ImVec2(viewport->Pos.x, viewport->Pos.y + ImGui::GetFrameHeight()));
+      ImVec2(viewport->Pos.x,
+             viewport->Pos.y + ImGui::GetFrameHeight() + Toolbar::Height));
   ImGui::SetNextWindowSize(ImVec2(
       // Extract status bar from viewport size
-      viewport->Size.x, viewport->Size.y - WINDOW_AND_STATUS_BAR_HEIGHT));
+      viewport->Size.x,
+      viewport->Size.y - WINDOW_AND_STATUS_BAR_HEIGHT - Toolbar::Height));
   ImGui::SetNextWindowViewport(viewport->ID);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -56,8 +61,9 @@ void Layout::setup() {
         topRightAreaId, ImGuiDir_Right, RATIO_1_4, nullptr, &viewId);
 
     ImGui::DockBuilderDockWindow("Hierarchy", hierarchyId);
-    ImGui::DockBuilderDockWindow("Inspector", inspectorId);
-    ImGui::DockBuilderDockWindow("View", viewId);
+    ImGui::DockBuilderDockWindow("Entity", inspectorId);
+    ImGui::DockBuilderDockWindow("Environment", inspectorId);
+    ImGui::DockBuilderDockWindow("Scene", viewId);
     ImGui::DockBuilderDockWindow("Asset Browser", browserId);
 
     ImGui::DockBuilderFinish(dockspaceId);

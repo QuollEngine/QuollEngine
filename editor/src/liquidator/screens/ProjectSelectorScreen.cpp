@@ -8,7 +8,7 @@
 
 #include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/ui/IconRegistry.h"
-#include "liquidator/ui/Fonts.h"
+#include "liquidator/ui/Theme.h"
 
 #include "ProjectSelectorScreen.h"
 
@@ -43,7 +43,10 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   editorCamera.reset();
 
-  addFonts();
+  Theme::apply();
+
+  renderer.getImguiRenderer().setClearColor(
+      Theme::getColor(ThemeColor::BackgroundColor));
   renderer.getImguiRenderer().buildFonts();
 
   liquid::rhi::RenderGraph graph;

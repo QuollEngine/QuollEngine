@@ -14,7 +14,7 @@ public:
    *
    * @param editorManager Editor manager
    */
-  void render(EditorManager &editorManager);
+  static void render(EditorManager &editorManager);
 };
 
 } // namespace liquidator

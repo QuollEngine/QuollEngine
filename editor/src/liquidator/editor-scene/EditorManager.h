@@ -66,11 +66,11 @@ public:
   inline liquid::Entity getCamera() { return mCameraEntity; }
 
   /**
-   * @brief Set camera
+   * @brief Set active camera
    *
    * @param camera Camera entity
    */
-  void setCamera(liquid::Entity camera);
+  void setActiveCamera(liquid::Entity camera);
 
   /**
    * @brief Switch to editor camera
@@ -85,6 +85,17 @@ public:
    */
   inline bool isUsingEditorCamera() const {
     return mCameraEntity == mEditorCamera.getCamera();
+  }
+
+  /**
+   * @brief Check if camera is active
+   *
+   * @param camera Camera entity
+   * @retval true Using the camera
+   * @retval false Not using the camera
+   */
+  inline liquid::Entity isUsingCamera(liquid::Entity camera) const {
+    return mCameraEntity == camera;
   }
 
   /**
