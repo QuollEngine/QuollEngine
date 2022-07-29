@@ -3,6 +3,7 @@
 #include "liquid/core/Engine.h"
 
 #include "ImguiRenderer.h"
+
 #include <imgui_impl_glfw.h>
 
 static const VkDeviceSize BUFFER_MEMORY_ALIGNMENT = 256;
@@ -33,8 +34,6 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 
   static constexpr size_t FRAMES_IN_FLIGHT = 2;
   mFrameData.resize(FRAMES_IN_FLIGHT);
-
-  loadFonts();
 
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -69,6 +68,9 @@ ImguiRenderer::~ImguiRenderer() {
 }
 
 ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
+  LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
+                        "before starting rendering");
+
   constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
   constexpr uint32_t FRAMEBUFFER_SIZE_PERCENTAGE = 100;
 
@@ -187,7 +189,6 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
                          rhi::PipelineHandle pipeline) {
-
   auto *data = ImGui::GetDrawData();
 
   if (!data)
@@ -304,8 +305,9 @@ void ImguiRenderer::useConfigPath(const String &path) {
   ImGui::LoadIniSettingsFromDisk(io.IniFilename);
 }
 
-void ImguiRenderer::loadFonts() {
+void ImguiRenderer::buildFonts() {
   ImGuiIO &io = ImGui::GetIO();
+
   unsigned char *pixels = nullptr;
   int width = 0, height = 0;
   io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
@@ -328,6 +330,8 @@ void ImguiRenderer::loadFonts() {
       reinterpret_cast<void *>(static_cast<uintptr_t>(mFontTexture)));
 
   LOG_DEBUG("[ImGui] Fonts loaded");
+
+  mReady = true;
 }
 
 } // namespace liquid

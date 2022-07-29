@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "StatusBar.h"
 
-#include <imgui.h>
+#include "liquid/imgui/Imgui.h"
 
 namespace liquidator {
 

@@ -2,9 +2,7 @@
 #include "MenuBar.h"
 #include "ConfirmationDialog.h"
 
-#include <imgui.h>
-#include <glm/gtx/string_cast.hpp>
-#include <glm/gtc/matrix_access.hpp>
+#include "liquid/imgui/Imgui.h"
 
 namespace liquidator {
 

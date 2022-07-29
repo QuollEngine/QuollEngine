@@ -23,6 +23,7 @@
 #include "liquidator/editor-scene/EditorGrid.h"
 #include "liquidator/ui/UIRoot.h"
 #include "liquidator/ui/AssetLoadStatusDialog.h"
+#include "liquidator/ui/Fonts.h"
 #include "liquidator/core/EditorRenderer.h"
 
 void randomSpawn(liquidator::EntityManager &entityManager,
@@ -77,6 +78,8 @@ void EditorScreen::start(const Project &project) {
   preloadStatusDialog.setMessages(res.getWarnings());
 
   renderer.getImguiRenderer().useConfigPath(layoutPath);
+  addFonts();
+  renderer.getImguiRenderer().buildFonts();
 
   if (res.hasWarnings()) {
     preloadStatusDialog.show();

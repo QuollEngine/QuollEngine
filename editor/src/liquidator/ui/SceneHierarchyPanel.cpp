@@ -2,7 +2,7 @@
 #include "SceneHierarchyPanel.h"
 #include "ConfirmationDialog.h"
 
-#include <imgui.h>
+#include "liquid/imgui/Imgui.h"
 
 namespace liquidator {
 

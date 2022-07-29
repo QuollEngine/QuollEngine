@@ -1,8 +1,7 @@
 #include "liquid/core/Base.h"
 #include "Layout.h"
 
-#include <imgui.h>
-#include <imgui_internal.h>
+#include "liquid/imgui/Imgui.h"
 
 namespace liquidator {
 
