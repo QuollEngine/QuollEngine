@@ -8,6 +8,7 @@
 
 #include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/ui/IconRegistry.h"
+#include "liquidator/ui/Fonts.h"
 
 #include "ProjectSelectorScreen.h"
 
@@ -41,6 +42,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
   editorCamera.reset();
+
+  addFonts();
+  renderer.getImguiRenderer().buildFonts();
 
   liquid::rhi::RenderGraph graph;
   auto imguiPassData = renderer.getImguiRenderer().attach(graph);

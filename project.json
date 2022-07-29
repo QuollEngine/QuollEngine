@@ -158,8 +158,8 @@
       "buildSource": "imgui-docking",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imgui",
-        "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp {{VENDOR_PROJECTS_DIR}}/imgui",
-        "{COPY} *.h backends/imgui_impl_glfw.h {{VENDOR_INSTALL_DIR}}/include"
+        "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp misc/freetype/imgui_freetype.cpp {{VENDOR_PROJECTS_DIR}}/imgui",
+        "{COPY} *.h backends/imgui_impl_glfw.h misc/freetype/imgui_freetype.h {{VENDOR_INSTALL_DIR}}/include"
       ]
     },
     {

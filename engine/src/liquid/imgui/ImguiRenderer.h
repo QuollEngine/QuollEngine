@@ -1,13 +1,13 @@
 #pragma once
 
-#include <imgui.h>
-
 #include "liquid/window/Window.h"
 
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderGraph.h"
 #include "liquid/renderer/ShaderLibrary.h"
+
+#include "liquid/imgui/Imgui.h"
 
 namespace liquid {
 
@@ -95,6 +95,11 @@ public:
   ImguiRenderPassData attach(rhi::RenderGraph &graph);
 
   /**
+   * @brief Build font atlas
+   */
+  void buildFonts();
+
+  /**
    * @brief Begin imgui rendering
    */
   void beginRendering();
@@ -130,11 +135,6 @@ public:
 
 private:
   /**
-   * @brief Load fonts
-   */
-  void loadFonts();
-
-  /**
    * @brief Setup remder states
    *
    * @param data Imgui data
@@ -153,6 +153,8 @@ private:
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
   std::vector<FrameData> mFrameData;
   uint32_t mCurrentFrame = 0;
+
+  bool mReady = false;
 };
 
 } // namespace liquid

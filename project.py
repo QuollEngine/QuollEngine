@@ -216,7 +216,6 @@ for buildMode in buildModes:
 clean_make_dir(os.path.join(vendorRootDir, 'projects'))
 
 clean_make_dir(os.path.join(tempDir))
-create_project_hash_file(projectFile, projectHashFile)
 fetch_dependencies(project)
 
 for buildMode in buildModes:
@@ -298,3 +297,5 @@ for k, v in profiler_data.items():
     fixed_build_release = f'{v["build-Release"]:.4f}'
 
     print(f'{k:<14} {fixed_fetch:<8} {fixed_build_debug:<12} {fixed_build_release:<12}')
+
+create_project_hash_file(projectFile, projectHashFile)

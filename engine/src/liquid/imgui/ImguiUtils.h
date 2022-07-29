@@ -1,6 +1,6 @@
 #pragma once
 
-#include <imgui.h>
+#include "liquid/imgui/Imgui.h"
 #include "liquid/rhi/RenderHandle.h"
 
 namespace liquid::imgui {
