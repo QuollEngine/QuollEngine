@@ -1,41 +1,10 @@
 #include "liquid/core/Base.h"
-#include "liquid/asset/AssetManager.h"
-#include "liquid/scripting/ScriptingSystem.h"
-
 #include "liquid-tests/Testing.h"
 
-class RigidBodyLuaScriptingInterfaceTest : public ::testing::Test {
-public:
-  RigidBodyLuaScriptingInterfaceTest()
-      : assetManager(std::filesystem::current_path()),
-        scriptingSystem(eventSystem, assetManager.getRegistry()) {}
+#include "liquid-tests/test-utils/ScriptingInterfaceTestBase.h"
 
-  liquid::LuaScope &call(liquid::Entity entity,
-                         const liquid::String &functionName) {
-    auto handle =
-        assetManager
-            .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                   "scripting-system-component-tester.lua")
-            .getData();
-
-    entityDatabase.setComponent<liquid::ScriptingComponent>(entity, {handle});
-
-    scriptingSystem.start(entityDatabase);
-
-    auto &scripting =
-        entityDatabase.getComponent<liquid::ScriptingComponent>(entity);
-
-    scripting.scope.luaGetGlobal(functionName);
-    scripting.scope.call(0);
-
-    return scripting.scope;
-  }
-
-  liquid::EntityDatabase entityDatabase;
-  liquid::EventSystem eventSystem;
-  liquid::AssetManager assetManager;
-  liquid::ScriptingSystem scriptingSystem;
-};
+class RigidBodyLuaScriptingInterfaceTest
+    : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
        ApplyForceDoesNothingIfProvidedArgumentsAreInvalid) {

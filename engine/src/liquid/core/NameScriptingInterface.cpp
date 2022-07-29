@@ -1,12 +1,12 @@
 #include "liquid/core/Base.h"
-#include "NameComponent.h"
+#include "NameScriptingInterface.h"
 
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
-int NameComponent::LuaInterface::get(void *state) {
+int NameScriptingInterface::LuaInterface::get(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
@@ -32,7 +32,7 @@ int NameComponent::LuaInterface::get(void *state) {
   return 1;
 }
 
-int NameComponent::LuaInterface::set(void *state) {
+int NameScriptingInterface::LuaInterface::set(void *state) {
   LuaScope scope(state);
   if (!scope.is<LuaTable>(1) || !scope.is<String>(2)) {
     // TODO: Show logs here

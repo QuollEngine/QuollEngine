@@ -1,12 +1,12 @@
 #include "liquid/core/Base.h"
-#include "LocalTransformComponent.h"
+#include "TransformScriptingInterface.h"
 
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/entity/EntityDatabase.h"
 
 namespace liquid {
 
-int LocalTransformComponent::LuaInterface::getPosition(void *state) {
+int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
@@ -36,7 +36,7 @@ int LocalTransformComponent::LuaInterface::getPosition(void *state) {
   return 3;
 }
 
-int LocalTransformComponent::LuaInterface::setPosition(void *state) {
+int TransformScriptingInterface::LuaInterface::setPosition(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||
@@ -66,7 +66,7 @@ int LocalTransformComponent::LuaInterface::setPosition(void *state) {
   return 0;
 }
 
-int LocalTransformComponent::LuaInterface::getScale(void *state) {
+int TransformScriptingInterface::LuaInterface::getScale(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
@@ -95,7 +95,7 @@ int LocalTransformComponent::LuaInterface::getScale(void *state) {
   return 3;
 }
 
-int LocalTransformComponent::LuaInterface::setScale(void *state) {
+int TransformScriptingInterface::LuaInterface::setScale(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||

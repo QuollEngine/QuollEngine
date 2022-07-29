@@ -1,9 +1,11 @@
 #include "liquid/core/Base.h"
 #include "EntityDecorator.h"
 
+#include "liquid/core/NameScriptingInterface.h"
 #include "liquid/entity/EntityQueryScriptingInterface.h"
 #include "liquid/physics/RigidBodyScriptingInterface.h"
 #include "liquid/audio/AudioScriptingInterface.h"
+#include "liquid/scene/TransformScriptingInterface.h"
 
 #include "LuaScope.h"
 
@@ -50,8 +52,8 @@ void EntityDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   auto table = scope.createTable(2);
   table.set("id", entity);
 
-  registerEntityInterface<NameComponent>(scope, table, entity);
-  registerEntityInterface<LocalTransformComponent>(scope, table, entity);
+  registerEntityInterface<NameScriptingInterface>(scope, table, entity);
+  registerEntityInterface<TransformScriptingInterface>(scope, table, entity);
   registerEntityInterface<RigidBodyScriptingInterface>(scope, table, entity);
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
 }
