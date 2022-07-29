@@ -48,6 +48,14 @@ public:
   SceneRenderPassData attach(rhi::RenderGraph &graph);
 
   /**
+   * @brief Attach text pass to render graph
+   *
+   * @param graph Render graph
+   * @param passData Scene render pass data
+   */
+  void attachText(rhi::RenderGraph &graph, const SceneRenderPassData &passData);
+
+  /**
    * @brief Update frame data
    *
    * @param entityDatabase Entity database

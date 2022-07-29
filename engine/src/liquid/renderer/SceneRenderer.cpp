@@ -6,6 +6,8 @@
 
 namespace liquid {
 
+static constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
+
 SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
                              rhi::ResourceRegistry &resourceRegistry,
                              AssetRegistry &assetRegistry)
@@ -52,7 +54,6 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
 SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   constexpr uint32_t NUM_LIGHTS = 16;
   constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
-  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
   constexpr uint32_t SWAPCHAIN_SIZE_PERCENTAGE = 100;
 
   rhi::TextureDescription shadowMapDesc{};
@@ -169,29 +170,10 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
-    rhi::PipelineVertexInputLayout textInputLayout{};
-    const uint32_t OFFSET_LOCATION = 0;
-    const uint32_t SIZE_LOCATION = 1;
-    const uint32_t R32G32_SFLOAT = 103;
-
-    auto textPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
-        mShaderLibrary.getShader("__engine.text.default.vertex"),
-        mShaderLibrary.getShader("__engine.text.default.fragment"),
-        rhi::PipelineVertexInputLayout{},
-        rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
-        rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
-                                rhi::FrontFace::Clockwise},
-        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
-            true, rhi::BlendFactor::SrcAlpha,
-            rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add,
-            rhi::BlendFactor::One, rhi::BlendFactor::OneMinusSrcAlpha,
-            rhi::BlendOp::Add}}}});
-
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
-    pass.addPipeline(textPipeline);
 
-    pass.setExecutor([this, pipeline, skinnedPipeline, textPipeline,
+    pass.setExecutor([this, pipeline, skinnedPipeline,
                       shadowmap](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
 
@@ -234,17 +216,6 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
 
         renderSkinned(commandList, skinnedPipeline, true);
-      }
-
-      {
-        LIQUID_PROFILE_EVENT("meshPass::text");
-
-        commandList.bindPipeline(textPipeline);
-        rhi::Descriptor sceneDescriptor;
-        sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
-                             rhi::DescriptorType::UniformBuffer);
-        commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
-        renderText(commandList, textPipeline);
       }
     });
   } // mesh pass
@@ -292,6 +263,36 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   } // environment pass
 
   return SceneRenderPassData{sceneColor, depthBuffer};
+}
+
+void SceneRenderer::attachText(rhi::RenderGraph &graph,
+                               const SceneRenderPassData &passData) {
+  auto &pass = graph.addPass("textPass");
+  pass.write(passData.sceneColor, BLUEISH_CLEAR_VALUE);
+  pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
+
+  auto textPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+      mShaderLibrary.getShader("__engine.text.default.vertex"),
+      mShaderLibrary.getShader("__engine.text.default.fragment"),
+      rhi::PipelineVertexInputLayout{},
+      rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+      rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                              rhi::FrontFace::Clockwise},
+      rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+          true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::OneMinusSrcAlpha,
+          rhi::BlendOp::Add, rhi::BlendFactor::One,
+          rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
+
+  pass.addPipeline(textPipeline);
+
+  pass.setExecutor([textPipeline, this](rhi::RenderCommandList &commandList) {
+    commandList.bindPipeline(textPipeline);
+    rhi::Descriptor sceneDescriptor;
+    sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+                         rhi::DescriptorType::UniformBuffer);
+    commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
+    renderText(commandList, textPipeline);
+  });
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
