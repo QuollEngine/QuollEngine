@@ -3,6 +3,7 @@
 #include "AssetBrowser.h"
 
 #include "liquid/imgui/Imgui.h"
+#include "Widgets.h"
 
 namespace liquidator {
 
@@ -158,8 +159,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     mDirectoryChanged = false;
   }
 
-  if (ImGui::Begin("Asset Browser")) {
-    if (ImGui::BeginPopupContextWindow()) {
+  if (widgets::Window::begin("Asset Browser")) {
+    if (widgets::ContextMenu::begin()) {
       if (ImGui::MenuItem("Import asset")) {
         handleAssetImport();
       }
@@ -178,7 +179,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         mStagingEntry.isEditable = true;
         mStagingEntry.assetType = liquid::AssetType::LuaScript;
       }
-      ImGui::EndPopup();
+      widgets::ContextMenu::end();
     }
 
     const auto &size = ImGui::GetContentRegionAvail();
@@ -292,7 +293,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     ImGui::EndTable();
   }
 
-  ImGui::End();
+  widgets::Window::end();
 
   mStatusDialog.render();
 }

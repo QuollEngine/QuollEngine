@@ -71,7 +71,6 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
                         "before starting rendering");
 
-  constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.19f, 0.21f, 0.26f, 1.0f};
   constexpr uint32_t FRAMEBUFFER_SIZE_PERCENTAGE = 100;
 
   rhi::TextureDescription imguiDesc{};
@@ -80,11 +79,11 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   imguiDesc.width = FRAMEBUFFER_SIZE_PERCENTAGE;
   imguiDesc.height = FRAMEBUFFER_SIZE_PERCENTAGE;
   imguiDesc.layers = 1;
-  imguiDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+  imguiDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
   auto imgui = mRegistry.setTexture(imguiDesc);
 
   auto &pass = graph.addPass("imgui");
-  pass.write(imgui, BLUEISH_CLEAR_VALUE);
+  pass.write(imgui, mClearColor);
 
   auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
       mShaderLibrary.getShader("__engine.imgui.default.vertex"),
@@ -303,6 +302,10 @@ void ImguiRenderer::useConfigPath(const String &path) {
   ImGuiIO &io = ImGui::GetIO();
   io.IniFilename = path.c_str();
   ImGui::LoadIniSettingsFromDisk(io.IniFilename);
+}
+
+void ImguiRenderer::setClearColor(const glm::vec4 &clearColor) {
+  mClearColor = clearColor;
 }
 
 void ImguiRenderer::buildFonts() {

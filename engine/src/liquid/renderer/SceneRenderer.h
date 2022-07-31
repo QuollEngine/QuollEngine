@@ -27,6 +27,8 @@ struct SceneRenderPassData {
  * @brief Scene renderer
  */
 class SceneRenderer {
+  static constexpr glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
+
 public:
   /**
    * @brief Create scene renderer
@@ -38,6 +40,13 @@ public:
   SceneRenderer(ShaderLibrary &shaderLibrary,
                 rhi::ResourceRegistry &resourceRegistry,
                 AssetRegistry &assetRegistry);
+
+  /**
+   * @brief Set clear color
+   *
+   * @param clearColor Clear color
+   */
+  void setClearColor(const glm::vec4 &clearColor);
 
   /**
    * @brief Attach passes to render graph
@@ -95,6 +104,7 @@ private:
                   rhi::PipelineHandle pipeline);
 
 private:
+  glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;
   rhi::ResourceRegistry &mRegistry;
   RenderStorage mRenderStorage;

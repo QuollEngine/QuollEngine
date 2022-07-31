@@ -12,23 +12,19 @@ ImguiDebugLayer::ImguiDebugLayer(
     : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
       mFpsCounter(fpsCounter), mDeviceStats(deviceStats) {}
 
-void ImguiDebugLayer::render() {
-  if (ImGui::BeginMainMenuBar()) {
+void ImguiDebugLayer::renderMenu() {
+  if (ImGui::BeginMenu("Debug")) {
+    ImGui::MenuItem("Physical Device Information", nullptr,
+                    &mPhysicalDeviceInfoVisible);
+    ImGui::MenuItem("Usage Metrics", nullptr, &mUsageMetricsVisible);
 
-    if (ImGui::BeginMenu("Debug")) {
-      ImGui::MenuItem("Physical Device Information", nullptr,
-                      &mPhysicalDeviceInfoVisible);
-      ImGui::MenuItem("Usage Metrics", nullptr, &mUsageMetricsVisible);
-
-      ImGui::MenuItem("Performance Metrics", nullptr,
-                      &mPerformanceMetricsVisible);
-
-      ImGui::EndMenu();
-    }
-
-    ImGui::EndMainMenuBar();
+    ImGui::MenuItem("Performance Metrics", nullptr,
+                    &mPerformanceMetricsVisible);
+    ImGui::EndMenu();
   }
+}
 
+void ImguiDebugLayer::render() {
   renderPhysicalDeviceInfo();
   renderUsageMetrics();
   renderPerformanceMetrics();

@@ -107,7 +107,7 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
   }
 }
 
-void EditorManager::setCamera(liquid::Entity camera) {
+void EditorManager::setActiveCamera(liquid::Entity camera) {
   if (!mEntityManager.getActiveEntityDatabase()
            .hasComponent<liquid::CameraComponent>(camera)) {
     return;

@@ -16,7 +16,8 @@ public:
    * @param editorManager Editor manager
    * @param assetManager Asset manager
    */
-  void render(EditorManager &editorManager, liquid::AssetManager &assetManager);
+  static void render(EditorManager &editorManager,
+                     liquid::AssetManager &assetManager);
 };
 
 } // namespace liquidator

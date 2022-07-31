@@ -16,7 +16,8 @@ public:
    * @param editorManager Editor manager
    * @param entityManager Entity manager
    */
-  void render(EditorManager &editorManager, EntityManager &entityManager);
+  static void render(EditorManager &editorManager,
+                     EntityManager &entityManager);
 };
 
 } // namespace liquidator

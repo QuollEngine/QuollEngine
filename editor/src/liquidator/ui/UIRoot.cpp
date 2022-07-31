@@ -1,4 +1,6 @@
 #include "liquid/core/Base.h"
+#include "liquid/imgui/Imgui.h"
+
 #include "UIRoot.h"
 
 namespace liquidator {
@@ -16,16 +18,13 @@ void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
                     liquid::PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
   mLayout.setup();
-  mMenuBar.render(editorManager, entityManager);
-  mStatusBar.render(editorManager);
+
   mSceneHierarchyPanel.render(editorManager);
 
-  mInspector.render(
-      [&editorManager, &renderer, &assetManager, &physicsSystem, this]() {
-        mEntityPanel.render(editorManager, renderer, assetManager.getRegistry(),
-                            physicsSystem);
-        mEnvironmentPanel.render(editorManager, assetManager);
-      });
+  mEntityPanel.render(editorManager, renderer, assetManager.getRegistry(),
+                      physicsSystem);
+
+  EnvironmentPanel::render(editorManager, assetManager);
 
   mEditorCameraPanel.render(editorManager);
   mAssetBrowser.render(assetManager, mIconRegistry, editorManager,

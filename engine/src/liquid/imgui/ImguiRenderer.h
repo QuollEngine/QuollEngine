@@ -65,6 +65,8 @@ class ImguiRenderer {
     void *indexBufferData = nullptr;
   };
 
+  static constexpr const glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
+
 public:
   /**
    * @brief Create imgui renderer
@@ -93,6 +95,13 @@ public:
    * @return Imgui render pass data
    */
   ImguiRenderPassData attach(rhi::RenderGraph &graph);
+
+  /**
+   * @brief Set clear color
+   *
+   * @param clearColor Clear color
+   */
+  void setClearColor(const glm::vec4 &clearColor);
 
   /**
    * @brief Build font atlas
@@ -153,6 +162,8 @@ private:
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
   std::vector<FrameData> mFrameData;
   uint32_t mCurrentFrame = 0;
+
+  glm::vec4 mClearColor{DefaultClearColor};
 
   bool mReady = false;
 };

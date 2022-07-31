@@ -7,16 +7,13 @@
 namespace liquid::default_objects {
 
 AssetData<MeshAsset> createCube() {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   BaseGeometryAsset<Vertex> geometry;
 
   std::vector<Vertex> vertices;
-  std::vector<uint32_t> indices{
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-      0, 1, 2, 3, 2, 1, 4, 5, 6, 7, 6, 5,
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-      8, 9, 10, 11, 10, 9, 12, 13, 14, 15, 14, 13, 16, 17, 18, 19, 18, 17, 20,
-      // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-      21, 22, 23, 22, 21};
+  std::vector<uint32_t> indices{0,  1,  2,  3,  2,  1,  4,  5,  6,  7,  6,  5,
+                                8,  9,  10, 11, 10, 9,  12, 13, 14, 15, 14, 13,
+                                16, 17, 18, 19, 18, 17, 20, 21, 22, 23, 22, 21};
 
   vertices.push_back({-1, -1, -1, 0, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
                       0.0, 0.0}); // 0
@@ -84,6 +81,8 @@ AssetData<MeshAsset> createCube() {
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
+
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
 AssetData<MaterialAsset> createDefaultMaterial() {
