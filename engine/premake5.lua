@@ -39,8 +39,7 @@ project "LiquidEngineTest"
 
     configmap {
         ["Release"] = "Debug",
-        ["Profile-Release"] = "Debug",
-        ["Profile-Debug"] = "Debug"
+        ["Profile"] = "Debug",
     }
 
     includedirs {
