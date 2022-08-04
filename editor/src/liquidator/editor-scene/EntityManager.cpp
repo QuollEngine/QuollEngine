@@ -36,10 +36,13 @@ void EntityManager::save(liquid::Entity entity) {
   }
 
   if (mEntityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
-    node["components"]["transform"]["parent"] =
+
+    auto parentEntity =
         mEntityDatabase.getComponent<liquid::ParentComponent>(entity).parent;
-  } else {
-    node["components"]["transform"]["parent"] = 0;
+    auto id =
+        mEntityDatabase.getComponent<liquid::IdComponent>(parentEntity).id;
+
+    node["components"]["transform"]["parent"] = id;
   }
 
   if (mEntityDatabase.hasComponent<liquid::MeshComponent>(entity)) {

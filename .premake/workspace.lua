@@ -20,18 +20,18 @@ workspace "LiquidEngine"
         "../engine/platform-tools/include"
     }
     
-    configurations { "Debug", "Release", "Profile-Debug", "Profile-Release" }
+    configurations { "Debug", "Release", "Profile" }
 
     filter { "toolset:msc-*" }
         flags { "FatalCompileWarnings" }
 
-    filter {"configurations:Debug or configurations:Profile-Debug"}
+    filter {"configurations:Debug"}
         defines { "LIQUID_DEBUG" }
         symbols "On"
 
-    filter {"configurations:Release or configurations:Profile-Release"}
+    filter {"configurations:Release or configurations:Profile"}
         defines { "LIQUID_RELEASE" }
         optimize "On"
 
-    filter {"configurations:Profile-Debug or configurations:Profile-Release"}
+    filter {"configurations:Profile"}
         defines { "LIQUID_PROFILER" }

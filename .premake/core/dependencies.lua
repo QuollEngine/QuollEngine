@@ -1,15 +1,12 @@
 -- Link profiler dependencies
 function linkProfilerDependencies()
-    filter { "configurations:Profile-Debug or configurations:Profile-Release" }
+    filter { "configurations:Profile" }
+        links { "OptickCore" }
 
-        filter { "system:windows" }
-            links { "OptickCored" }
-            postbuildcommands {
-                '{COPY} %{wks.location}/../vendor/Debug/bin/OptickCored.dll %{cfg.buildtarget.directory}'
-            }
-            
-        filter {"system:linux or system:macosx"}
-            links { "OptickCore" }
+    filter { "configurations:Profile", "system:windows" }
+        postbuildcommands {
+            '{COPY} %{wks.location}/../vendor/Release/bin/OptickCore.dll %{cfg.buildtarget.directory}'
+        }
 
     filter{}
 end
@@ -31,10 +28,10 @@ function linkDependenciesWithoutVulkan()
         "PhysXFoundation_static"
     }
 
-    filter { "system:windows", "configurations:Debug or configurations:Profile-Debug" }
+    filter { "system:windows", "configurations:Debug" }
         links { "yaml-cppd", "freetyped" }
 
-    filter { "system:windows", "configurations:Release or configurations:Profile-Release" }
+    filter { "system:windows", "configurations:Release or configurations:Profile" }
         links { "yaml-cpp", "freetype" }
 
     filter {"system:linux or system:macosx"}
