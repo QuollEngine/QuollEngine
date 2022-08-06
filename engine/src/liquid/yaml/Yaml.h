@@ -1,3 +1,5 @@
+#pragma once
+
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
@@ -33,10 +35,9 @@ template <> struct convert<glm::vec3> {
       return false;
     }
 
-    value.x = node[0].as<float>();
-    value.y = node[1].as<float>();
-    value.z = node[2].as<float>();
-    return true;
+    return convert<float>::decode(node[0], value.x) &&
+           convert<float>::decode(node[1], value.y) &&
+           convert<float>::decode(node[2], value.z);
   }
 };
 
@@ -72,11 +73,10 @@ template <> struct convert<glm::vec4> {
       return false;
     }
 
-    value.x = node[0].as<float>();
-    value.y = node[1].as<float>();
-    value.z = node[2].as<float>();
-    value.w = node[3].as<float>();
-    return true;
+    return convert<float>::decode(node[0], value.x) &&
+           convert<float>::decode(node[1], value.y) &&
+           convert<float>::decode(node[2], value.z) &&
+           convert<float>::decode(node[3], value.w);
   }
 };
 
@@ -112,11 +112,10 @@ template <> struct convert<glm::quat> {
       return false;
     }
 
-    value.x = node[0].as<float>();
-    value.y = node[1].as<float>();
-    value.z = node[2].as<float>();
-    value.w = node[3].as<float>();
-    return true;
+    return convert<float>::decode(node[0], value.x) &&
+           convert<float>::decode(node[1], value.y) &&
+           convert<float>::decode(node[2], value.z) &&
+           convert<float>::decode(node[3], value.w);
   }
 };
 

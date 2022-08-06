@@ -3,6 +3,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetManager.h"
 #include "liquid/renderer/Renderer.h"
+#include "liquid/scene/SceneIO.h"
 
 #include "EditorCamera.h"
 
@@ -204,9 +205,9 @@ private:
   liquid::EntityDatabase mEntityDatabase;
   liquid::EntityDatabase mSimulationEntityDatabase;
   liquid::AssetManager &mAssetManager;
+  liquid::SceneIO mSceneIO;
   bool mInSimulation = false;
   liquid::Renderer &mRenderer;
-  uint64_t mLastId = 1;
   std::filesystem::path mScenePath;
 };
 
