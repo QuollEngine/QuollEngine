@@ -8,7 +8,7 @@ EditorRendererStorage::EditorRendererStorage(size_t reservedSpace)
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
   mGizmoTransforms.reserve(reservedSpace);
-  mSkeletonVector.reset(new glm::mat4[mReservedSpace * MAX_NUM_BONES]);
+  mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
 }
 
 void EditorRendererStorage::addSkeleton(
@@ -17,9 +17,8 @@ void EditorRendererStorage::addSkeleton(
   mSkeletonTransforms.push_back(worldTransform);
   mNumBones.push_back(static_cast<uint32_t>(boneTransforms.size()));
 
-  auto *currentSkeleton =
-      mSkeletonVector.get() + (mLastSkeleton * MAX_NUM_BONES);
-  size_t dataSize = std::min(boneTransforms.size(), MAX_NUM_BONES);
+  auto *currentSkeleton = mSkeletonVector.get() + (mLastSkeleton * MaxNumBones);
+  size_t dataSize = std::min(boneTransforms.size(), MaxNumBones);
   memcpy(currentSkeleton, boneTransforms.data(), dataSize * sizeof(glm::mat4));
 
   mLastSkeleton++;
@@ -65,7 +64,7 @@ void EditorRendererStorage::updateBuffers(
     mSkeletonBoneTransformsBuffer = registry.setBuffer(
         {
             liquid::rhi::BufferType::Storage,
-            mReservedSpace * MAX_NUM_BONES * sizeof(glm::mat4),
+            mReservedSpace * MaxNumBones * sizeof(glm::mat4),
             mSkeletonVector.get(),
         },
         mSkeletonBoneTransformsBuffer);

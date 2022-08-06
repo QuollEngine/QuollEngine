@@ -106,12 +106,12 @@ void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
 
   std::reverse(mCompiledPasses.begin(), mCompiledPasses.end());
 
-  static constexpr VkPipelineStageFlags STAGE_FRAGMENT_TEST =
+  static constexpr VkPipelineStageFlags StageFragmentTest =
       VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
       VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-  static constexpr VkPipelineStageFlags STAGE_COLOR =
+  static constexpr VkPipelineStageFlags StageColor =
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  static constexpr VkPipelineStageFlags STAGE_FRAGMENT_SHADER =
+  static constexpr VkPipelineStageFlags StageFragmentShader =
       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 
   // Determine attachments, image layouts, and barriers
@@ -131,10 +131,10 @@ void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
       VkAccessFlags otherAccess = 0;
 
       if (input.srcLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-        otherStage = STAGE_FRAGMENT_TEST;
+        otherStage = StageFragmentTest;
         otherAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
       } else if (input.srcLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
-        otherStage = STAGE_COLOR;
+        otherStage = StageColor;
         otherAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
       }
 
@@ -154,11 +154,11 @@ void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
 
       pass.mPreBarrier.enabled = true;
       pass.mPreBarrier.srcStage |= otherStage;
-      pass.mPreBarrier.dstStage |= STAGE_FRAGMENT_SHADER;
+      pass.mPreBarrier.dstStage |= StageFragmentShader;
       pass.mPreBarrier.imageBarriers.push_back(preImageBarrier);
 
       pass.mPostBarrier.enabled = true;
-      pass.mPostBarrier.srcStage |= STAGE_FRAGMENT_SHADER;
+      pass.mPostBarrier.srcStage |= StageFragmentShader;
       pass.mPostBarrier.dstStage |= otherStage;
       pass.mPostBarrier.imageBarriers.push_back(postImageBarrier);
     }
@@ -184,12 +184,12 @@ void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
           resourceRegistry.getTextureMap().getDescription(output.texture);
       if ((texture.usage & TextureUsage::Color) == TextureUsage::Color) {
         output.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        stage = STAGE_COLOR;
+        stage = StageColor;
         srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         dstAccess = srcAccess | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
       } else if ((texture.usage & TextureUsage::Depth) == TextureUsage::Depth) {
         output.dstLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        stage = STAGE_FRAGMENT_TEST;
+        stage = StageFragmentTest;
         srcAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
         dstAccess = srcAccess | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
       }

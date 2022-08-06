@@ -16,12 +16,12 @@ public:
    */
   struct FileTypeEntry {
     /**
-     * @brief Entry label
+     * Entry label
      */
     liquid::StringView label;
 
     /**
-     * @brief Entry extensions
+     * Entry extensions
      */
     std::vector<liquid::String> extensions;
   };

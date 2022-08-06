@@ -8,11 +8,23 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
+/**
+ * @brief Single object transforms
+ */
 struct ObjectItem {
+  /**
+   * Model matrix for object
+   */
   mat4 modelMatrix;
 };
 
-struct SkeletonItem {
+/**
+ * @brief Single debug skeleton transforms
+ */
+struct DebugSkeletonItem {
+  /**
+   * Bone matrices for skeleton
+   */
   mat4 bones[64];
 };
 
@@ -22,7 +34,7 @@ layout(std140, set = 0, binding = 1) readonly buffer ObjectData {
 uObjectData;
 
 layout(std140, set = 0, binding = 2) readonly buffer SkeletonData {
-  SkeletonItem items[];
+  DebugSkeletonItem items[];
 }
 uSkeletonData;
 

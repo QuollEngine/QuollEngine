@@ -10,12 +10,12 @@ namespace liquid::rhi {
  */
 struct MemoryBarrier {
   /**
-   * @brief Source access flags
+   * Source access flags
    */
   VkAccessFlags srcAccess = VK_ACCESS_NONE_KHR;
 
   /**
-   * @brief Destination access flags
+   * Destination access flags
    */
   VkAccessFlags dstAccess = VK_ACCESS_NONE_KHR;
 };
@@ -25,27 +25,27 @@ struct MemoryBarrier {
  */
 struct ImageBarrier {
   /**
-   * @brief Source access flags
+   * Source access flags
    */
   VkAccessFlags srcAccess = VK_ACCESS_NONE_KHR;
 
   /**
-   * @brief Destination access flags
+   * Destination access flags
    */
   VkAccessFlags dstAccess = VK_ACCESS_NONE_KHR;
 
   /**
-   * @brief Source image layout
+   * Source image layout
    */
   VkImageLayout srcLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
 
   /**
-   * @brief Destination image layout
+   * Destination image layout
    */
   VkImageLayout dstLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
 
   /**
-   * @brief Texture
+   * Texture
    */
   TextureHandle texture = TextureHandle::Invalid;
 };

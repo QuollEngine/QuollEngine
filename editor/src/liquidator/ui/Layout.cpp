@@ -45,20 +45,20 @@ void Layout::setup() {
                                   ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 
-    constexpr float RATIO_5_1 = 0.2f;
-    constexpr float RATIO_1_4 = 0.25;
+    static constexpr float Ratio51 = 0.2f;
+    static constexpr float Ratio14 = 0.25;
 
     ImGuiID topAreaId = -1;
-    auto browserId = ImGui::DockBuilderSplitNode(
-        dockspaceId, ImGuiDir_Down, RATIO_1_4, nullptr, &topAreaId);
+    auto browserId = ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Down,
+                                                 Ratio14, nullptr, &topAreaId);
 
     ImGuiID topRightAreaId = -1;
     auto hierarchyId = ImGui::DockBuilderSplitNode(
-        topAreaId, ImGuiDir_Left, RATIO_5_1, nullptr, &topRightAreaId);
+        topAreaId, ImGuiDir_Left, Ratio51, nullptr, &topRightAreaId);
 
     ImGuiID viewId = -1;
     auto inspectorId = ImGui::DockBuilderSplitNode(
-        topRightAreaId, ImGuiDir_Right, RATIO_1_4, nullptr, &viewId);
+        topRightAreaId, ImGuiDir_Right, Ratio14, nullptr, &viewId);
 
     ImGui::DockBuilderDockWindow("Hierarchy", hierarchyId);
     ImGui::DockBuilderDockWindow("Entity", inspectorId);

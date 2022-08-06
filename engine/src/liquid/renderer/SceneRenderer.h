@@ -13,12 +13,12 @@ namespace liquid {
  */
 struct SceneRenderPassData {
   /**
-   * @brief Scene texture
+   * Scene texture
    */
   rhi::TextureHandle sceneColor;
 
   /**
-   * @brief Scene depth buffer
+   * Scene depth buffer
    */
   rhi::TextureHandle depthBuffer;
 };

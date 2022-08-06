@@ -53,7 +53,7 @@ public:
   /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 4> fields{
+  static constexpr std::array<InterfaceField, 4> Fields{
       InterfaceField{"get_scale", getScale},
       InterfaceField{"set_scale", setScale},
       InterfaceField{"get_position", getPosition},

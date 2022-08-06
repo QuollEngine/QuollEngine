@@ -28,7 +28,7 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
       KtxError("Texture arrays are not supported", KTX_UNSUPPORTED_FEATURE)
           .what());
 
-  constexpr uint32_t CUBEMAP_SIDES = 6;
+  static constexpr uint32_t CubemapSides = 6;
 
   rhi::TextureDescription description;
   description.type = ktxTextureData->isCubemap ? rhi::TextureType::Cubemap
@@ -38,7 +38,7 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
   description.depth = ktxTextureData->baseDepth;
   description.format = ktxTexture_GetVkFormat(ktxTextureData);
   description.layers = ktxTextureData->numLayers *
-                       (ktxTextureData->isCubemap ? CUBEMAP_SIDES : 1);
+                       (ktxTextureData->isCubemap ? CubemapSides : 1);
   description.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
   description.usage = rhi::TextureUsage::Sampled | rhi::TextureUsage::Color |
                       rhi::TextureUsage::TransferDestination;
@@ -51,7 +51,7 @@ rhi::TextureHandle KtxTextureLoader::loadFromFile(const String &filename) {
 
     char *dstData = static_cast<char *>(description.data);
 
-    for (size_t i = 0; i < CUBEMAP_SIDES; ++i) {
+    for (size_t i = 0; i < CubemapSides; ++i) {
       size_t offset = 0;
       ktxTexture_GetImageOffset(ktxTextureData, 0, 0,
                                 static_cast<ktx_uint32_t>(i), &offset);

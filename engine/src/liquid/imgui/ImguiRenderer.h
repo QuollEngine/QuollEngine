@@ -16,7 +16,7 @@ namespace liquid {
  */
 struct ImguiRenderPassData {
   /**
-   * @brief Imgui pass
+   * Imgui pass
    */
   rhi::RenderGraphPass &pass;
 

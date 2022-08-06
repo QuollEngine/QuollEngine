@@ -157,12 +157,12 @@ struct PipelineVertexInputLayout {
  */
 template <>
 inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
-  const uint32_t POSITION_LOCATION = 0;
-  const uint32_t NORMAL_LOCATION = 1;
-  const uint32_t TANGENT_LOCATION = 2;
-  const uint32_t COLOR_LOCATION = 3;
-  const uint32_t TEXCOORD0_LOCATION = 4;
-  const uint32_t TEXCOORD1_LOCATION = 5;
+  static constexpr uint32_t PositionSlot = 0;
+  static constexpr uint32_t NormalSlot = 1;
+  static constexpr uint32_t TangentSlot = 2;
+  static constexpr uint32_t ColorSlot = 3;
+  static constexpr uint32_t TexCoord0Slot = 4;
+  static constexpr uint32_t TexCoord1Slot = 5;
 
   // TODO: Create abstract format type
   const uint32_t R32G32B32A32_SFLOAT = 109;
@@ -171,18 +171,20 @@ inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
 
   return PipelineVertexInputLayout{
       {PipelineVertexInputBinding{0, sizeof(Vertex), VertexInputRate::Vertex}},
-      {PipelineVertexInputAttribute{POSITION_LOCATION, 0, R32G32B32_SFLOAT,
-                                    offsetof(Vertex, x)},
-       PipelineVertexInputAttribute{NORMAL_LOCATION, 0, R32G32B32_SFLOAT,
-                                    offsetof(Vertex, nx)},
-       PipelineVertexInputAttribute{TANGENT_LOCATION, 0, R32G32B32A32_SFLOAT,
-                                    offsetof(Vertex, tx)},
-       PipelineVertexInputAttribute{COLOR_LOCATION, 0, R32G32B32_SFLOAT,
-                                    offsetof(Vertex, r)},
-       PipelineVertexInputAttribute{TEXCOORD0_LOCATION, 0, R32G32_SFLOAT,
-                                    offsetof(Vertex, u0)},
-       PipelineVertexInputAttribute{TEXCOORD1_LOCATION, 0, R32G32_SFLOAT,
-                                    offsetof(Vertex, u1)}}};
+      {
+          PipelineVertexInputAttribute{PositionSlot, 0, R32G32B32_SFLOAT,
+                                       offsetof(SkinnedVertex, x)},
+          PipelineVertexInputAttribute{NormalSlot, 0, R32G32B32_SFLOAT,
+                                       offsetof(SkinnedVertex, nx)},
+          PipelineVertexInputAttribute{TangentSlot, 0, R32G32B32A32_SFLOAT,
+                                       offsetof(SkinnedVertex, tx)},
+          PipelineVertexInputAttribute{ColorSlot, 0, R32G32B32_SFLOAT,
+                                       offsetof(SkinnedVertex, r)},
+          PipelineVertexInputAttribute{TexCoord0Slot, 0, R32G32_SFLOAT,
+                                       offsetof(SkinnedVertex, u0)},
+          PipelineVertexInputAttribute{TexCoord1Slot, 0, R32G32_SFLOAT,
+                                       offsetof(SkinnedVertex, u1)},
+      }};
 }
 
 /**
@@ -193,39 +195,39 @@ inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
 template <>
 inline PipelineVertexInputLayout
 PipelineVertexInputLayout::create<SkinnedVertex>() {
-  constexpr uint32_t POSITION_LOCATION = 0;
-  constexpr uint32_t NORMAL_LOCATION = 1;
-  constexpr uint32_t TANGENT_LOCATION = 2;
-  constexpr uint32_t COLOR_LOCATION = 3;
-  constexpr uint32_t TEXCOORD0_LOCATION = 4;
-  constexpr uint32_t TEXCOORD1_LOCATION = 5;
-  constexpr uint32_t JOINTS_LOCATION = 6;
-  constexpr uint32_t WEIGHTS_LOCATION = 7;
+  static constexpr uint32_t PositionSlot = 0;
+  static constexpr uint32_t NormalSlot = 1;
+  static constexpr uint32_t TangentSlot = 2;
+  static constexpr uint32_t ColorSlot = 3;
+  static constexpr uint32_t TexCoord0Slot = 4;
+  static constexpr uint32_t TexCoord1Slot = 5;
+  static constexpr uint32_t JointsSlot = 6;
+  static constexpr uint32_t WeightsSlot = 7;
 
   // TODO: Create abstract format type
-  constexpr uint32_t R32G32B32A32_SFLOAT = 109;
-  constexpr uint32_t R32G32B32_SFLOAT = 106;
-  constexpr uint32_t R32G32_SFLOAT = 103;
-  constexpr uint32_t R32G32B32A32_UINT = 107;
+  static constexpr uint32_t R32G32B32A32_SFLOAT = 109;
+  static constexpr uint32_t R32G32B32_SFLOAT = 106;
+  static constexpr uint32_t R32G32_SFLOAT = 103;
+  static constexpr uint32_t R32G32B32A32_UINT = 107;
 
   return PipelineVertexInputLayout{
       {PipelineVertexInputBinding{0, sizeof(SkinnedVertex),
                                   VertexInputRate::Vertex}},
-      {PipelineVertexInputAttribute{POSITION_LOCATION, 0, R32G32B32_SFLOAT,
+      {PipelineVertexInputAttribute{PositionSlot, 0, R32G32B32_SFLOAT,
                                     offsetof(SkinnedVertex, x)},
-       PipelineVertexInputAttribute{NORMAL_LOCATION, 0, R32G32B32_SFLOAT,
+       PipelineVertexInputAttribute{NormalSlot, 0, R32G32B32_SFLOAT,
                                     offsetof(SkinnedVertex, nx)},
-       PipelineVertexInputAttribute{TANGENT_LOCATION, 0, R32G32B32A32_SFLOAT,
+       PipelineVertexInputAttribute{TangentSlot, 0, R32G32B32A32_SFLOAT,
                                     offsetof(SkinnedVertex, tx)},
-       PipelineVertexInputAttribute{COLOR_LOCATION, 0, R32G32B32_SFLOAT,
+       PipelineVertexInputAttribute{ColorSlot, 0, R32G32B32_SFLOAT,
                                     offsetof(SkinnedVertex, r)},
-       PipelineVertexInputAttribute{TEXCOORD0_LOCATION, 0, R32G32_SFLOAT,
+       PipelineVertexInputAttribute{TexCoord0Slot, 0, R32G32_SFLOAT,
                                     offsetof(SkinnedVertex, u0)},
-       PipelineVertexInputAttribute{TEXCOORD1_LOCATION, 0, R32G32_SFLOAT,
+       PipelineVertexInputAttribute{TexCoord1Slot, 0, R32G32_SFLOAT,
                                     offsetof(SkinnedVertex, u1)},
-       PipelineVertexInputAttribute{JOINTS_LOCATION, 0, R32G32B32A32_UINT,
+       PipelineVertexInputAttribute{JointsSlot, 0, R32G32B32A32_UINT,
                                     offsetof(SkinnedVertex, j0)},
-       PipelineVertexInputAttribute{WEIGHTS_LOCATION, 0, R32G32B32A32_SFLOAT,
+       PipelineVertexInputAttribute{WeightsSlot, 0, R32G32B32A32_SFLOAT,
                                     offsetof(SkinnedVertex, w0)}}};
 }
 

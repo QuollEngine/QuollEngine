@@ -14,12 +14,12 @@ class EditorRendererStorage {
   /**
    * @brief Maximum number of debug bones
    */
-  static constexpr size_t MAX_NUM_BONES = 64;
+  static constexpr size_t MaxNumBones = 64;
 
   /**
    * @brief Default reserved space for buffers
    */
-  static constexpr size_t DEFAULT_RESERVED_SPACE = 2000;
+  static constexpr size_t DefaultReservedSpace = 2000;
 
 public:
   /**
@@ -27,7 +27,7 @@ public:
    *
    * @param reservedSpace Reserved space for buffer data
    */
-  EditorRendererStorage(size_t reservedSpace = DEFAULT_RESERVED_SPACE);
+  EditorRendererStorage(size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Add skeleton

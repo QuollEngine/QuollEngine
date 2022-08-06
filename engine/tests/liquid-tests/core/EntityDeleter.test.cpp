@@ -10,9 +10,9 @@ public:
 };
 
 TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
-  static constexpr size_t NUM_ENTITIES = 20;
+  static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NUM_ENTITIES, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entityDatabase.createEntity();
     entities.at(i) = entity;

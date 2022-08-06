@@ -7,8 +7,19 @@ layout(location = 6) in uvec4 inJoints;
 layout(location = 7) in vec4 inWeights;
 
 struct LightItem {
+  /**
+   * Light data
+   */
   vec4 data;
+
+  /**
+   * Light color
+   */
   vec4 color;
+
+  /**
+   * Light space matrix
+   */
   mat4 lightMatrix;
 };
 
@@ -17,11 +28,23 @@ layout(std140, set = 0, binding = 0) readonly buffer LightData {
 }
 uLightData;
 
+/**
+ * @brief Single object transforms
+ */
 struct ObjectItem {
+  /**
+   * Model matrix for object
+   */
   mat4 modelMatrix;
 };
 
+/**
+ * @brief Single skeleton transforms
+ */
 struct SkeletonItem {
+  /**
+   * Joint matrices of skeleton
+   */
   mat4 joints[16];
 };
 

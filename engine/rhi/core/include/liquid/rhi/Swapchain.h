@@ -7,12 +7,12 @@ namespace liquid::rhi {
  */
 struct Swapchain {
   /**
-   * @brief Swapchain textures
+   * Swapchain textures
    */
   std::vector<TextureHandle> textures{};
 
   /**
-   * @brief Swapchain extent
+   * Swapchain extent
    */
   glm::uvec2 extent{};
 };

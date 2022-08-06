@@ -9,17 +9,17 @@ namespace liquid {
  */
 struct TextComponent {
   /**
-   * @brief Text contents
+   * Text contents
    */
   String text;
 
   /**
-   * @brief Line height
+   * Line height
    */
   float lineHeight = 1.0f;
 
   /**
-   * @brief Font used for rendering
+   * Font used for rendering
    */
   FontAssetHandle font = FontAssetHandle::Invalid;
 };

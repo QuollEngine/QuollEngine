@@ -107,9 +107,9 @@ void EditorScreen::start(const Project &project) {
   imguiPassGroup.pass.read(scenePassGroup.sceneColor);
 
   {
-    static constexpr glm::vec4 BLUEISH_CLEAR_VALUE{0.52f, 0.54f, 0.89f, 1.0f};
+    static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
     auto &pass = editorRenderer.attach(graph);
-    pass.write(scenePassGroup.sceneColor, BLUEISH_CLEAR_VALUE);
+    pass.write(scenePassGroup.sceneColor, BlueishClearValue);
     pass.write(scenePassGroup.depthBuffer,
                liquid::rhi::DepthStencilClear{1.0f, 0});
   }

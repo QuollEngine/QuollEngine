@@ -9,12 +9,12 @@ enum class AudioAssetFormat { Unknown = 0, Wav, Mp3 };
  */
 struct AudioAsset {
   /**
-   * @brief Audio data
+   * Audio data
    */
   std::vector<char> bytes{};
 
   /**
-   * @brief Audio asset format
+   * Audio asset format
    */
   AudioAssetFormat format = AudioAssetFormat::Unknown;
 };

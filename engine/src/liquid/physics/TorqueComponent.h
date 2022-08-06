@@ -7,7 +7,7 @@ namespace liquid {
  */
 struct TorqueComponent {
   /**
-   * @brief Total amount of applied torque
+   * Total amount of applied torque
    */
   glm::vec3 torque;
 };

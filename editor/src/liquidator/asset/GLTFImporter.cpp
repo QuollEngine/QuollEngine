@@ -177,13 +177,10 @@ static BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
 TransformData loadTransformData(const tinygltf::Node &node) {
   TransformData data{};
 
-  constexpr size_t TRANSFORM_MATRIX_SIZE = 6;
-  constexpr size_t TRANSLATION_MATRIX_SIZE = 3;
-  constexpr size_t SCALE_MATRIX_SIZE = 3;
-  constexpr size_t ROTATION_MATRIX_SIZE = 4;
+  static constexpr size_t TransformMatrixSize = 6;
 
   glm::mat4 finalTransform = glm::mat4{1.0f};
-  if (node.matrix.size() == TRANSFORM_MATRIX_SIZE) {
+  if (node.matrix.size() == TransformMatrixSize) {
     finalTransform = glm::make_mat4(node.matrix.data());
     decomposeMatrix(finalTransform, data.localPosition, data.localRotation,
                     data.localScale);
@@ -192,7 +189,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
     liquid::engineLogger.log(Logger::Warning)
         << "Node matrix data must have 16 values. Skipping...";
   } else {
-    if (node.translation.size() == TRANSLATION_MATRIX_SIZE) {
+    if (node.translation.size() == glm::vec3::length()) {
       data.localPosition = glm::make_vec3(node.translation.data());
       finalTransform *= glm::translate(glm::mat4{1.0f}, data.localPosition);
     } else if (node.translation.size() > 0) {
@@ -200,7 +197,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
           << "Node translation data must have 3 values. Skipping...";
     }
 
-    if (node.rotation.size() == ROTATION_MATRIX_SIZE) {
+    if (node.rotation.size() == glm::quat::length()) {
       data.localRotation = glm::make_quat(node.rotation.data());
       finalTransform *= glm::toMat4(data.localRotation);
     } else if (node.rotation.size() > 0) {
@@ -208,7 +205,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
           << "Node rotation data must have 4 values. Skipping...";
     }
 
-    if (node.scale.size() == SCALE_MATRIX_SIZE) {
+    if (node.scale.size() == glm::vec3::length()) {
       data.localScale = glm::make_vec3(node.scale.data());
       finalTransform *= glm::scale(glm::mat4{1.0f}, data.localScale);
     } else if (node.scale.size() > 0) {

@@ -10,7 +10,7 @@ namespace liquid {
 /**
  * @brief Audio system
  *
- * @tparam Backend Audio backend
+ * @tparam AudioBackend Audio backend
  */
 template <class AudioBackend = DefaultAudioBackend> class AudioSystem {
 public:

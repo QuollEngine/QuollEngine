@@ -36,8 +36,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   liquidator::IconRegistry iconRegistry;
   std::optional<liquidator::Project> project;
 
-  static constexpr float HALF = 0.5f;
-  static constexpr float ICON_SIZE = 80.0f;
+  static constexpr float IconSize = 80.0f;
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -75,9 +74,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
     imgui.beginRendering();
 
     const auto &fbSize = glm::vec2(mWindow.getFramebufferSize());
-    auto center = fbSize * HALF;
+    const auto center = fbSize * 0.5f;
 
-    ImGui::SetNextWindowPos(ImVec2(center.x, center.y), 0, ImVec2(HALF, HALF));
+    static constexpr ImVec2 CenterWindowPivot(0.5f, 0.5f);
+
+    ImGui::SetNextWindowPos(ImVec2(center.x, center.y), 0, CenterWindowPivot);
 
     if (ImGui::Begin("Liquidator", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
@@ -89,7 +90,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         ImGui::TableNextColumn();
         if (liquid::imgui::imageButton(
                 iconRegistry.getIcon(liquidator::EditorIcon::CreateDirectory),
-                ImVec2(ICON_SIZE, ICON_SIZE))) {
+                ImVec2(IconSize, IconSize))) {
           if (projectManager.createProjectInPath()) {
             project = projectManager.getProject();
           }
@@ -99,7 +100,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         ImGui::TableNextColumn();
         if (liquid::imgui::imageButton(
                 iconRegistry.getIcon(liquidator::EditorIcon::Directory),
-                ImVec2(ICON_SIZE, ICON_SIZE))) {
+                ImVec2(IconSize, IconSize))) {
           if (projectManager.openProjectInPath()) {
             project = projectManager.getProject();
           }

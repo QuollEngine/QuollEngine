@@ -21,8 +21,8 @@ Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
   }
 
   AssetFileHeader header;
-  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
-  file.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  String magic(AssetFileMagicLength, '$');
+  file.read(magic.data(), AssetFileMagicLength);
   file.read(header.version);
   file.read(header.type);
 
@@ -120,8 +120,8 @@ Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
 
   InputBinaryStream stream(path);
   AssetFileHeader header;
-  String magic(ASSET_FILE_MAGIC_LENGTH, '$');
-  stream.read(magic.data(), ASSET_FILE_MAGIC_LENGTH);
+  String magic(AssetFileMagicLength, '$');
+  stream.read(magic.data(), AssetFileMagicLength);
 
   if (magic != header.magic) {
     return Result<bool>::Error("Not a liquid asset");

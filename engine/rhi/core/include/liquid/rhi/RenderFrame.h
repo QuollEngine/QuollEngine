@@ -7,17 +7,17 @@ namespace liquid::rhi {
  */
 struct RenderFrame {
   /**
-   * @brief Frame index
+   * Frame index
    */
   uint32_t frameIndex = std::numeric_limits<uint32_t>::max();
 
   /**
-   * @brief Swapchain image index
+   * Swapchain image index
    */
   uint32_t swapchainImageIndex = std::numeric_limits<uint32_t>::max();
 
   /**
-   * @brief Command list
+   * Command list
    */
   RenderCommandList &commandList;
 };

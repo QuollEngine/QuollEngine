@@ -115,7 +115,7 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
 }
 
 TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
-  constexpr uint64_t NumEntities = 9;
+  static constexpr uint64_t NumEntities = 9;
 
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
     createSimpleEntityFile(i);
@@ -130,7 +130,7 @@ TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
 }
 
 TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
-  constexpr uint64_t NumEntities = 9;
+  static constexpr uint64_t NumEntities = 9;
 
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
     createSimpleEntityFile(i);
@@ -149,7 +149,7 @@ TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
 }
 
 TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
-  constexpr uint64_t NumEntities = 9;
+  static constexpr uint64_t NumEntities = 9;
 
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
     // set parent to next entity
@@ -167,7 +167,7 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
 }
 
 TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
-  constexpr uint64_t NumEntities = 9;
+  static constexpr uint64_t NumEntities = 9;
 
   auto parent = entityDatabase.createEntity();
 

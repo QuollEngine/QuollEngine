@@ -96,11 +96,12 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
                           IconRegistry &iconRegistry,
                           EditorManager &editorManager,
                           EntityManager &entityManager) {
-  constexpr uint32_t ITEM_WIDTH = 90;
-  constexpr uint32_t ITEM_HEIGHT = 100;
-  constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
-  constexpr float IMAGE_PADDING = ((ITEM_WIDTH * 1.0f) - ICON_SIZE.x) / 2.0f;
-  constexpr uint32_t TEXT_WIDTH = ITEM_WIDTH - 8;
+  static constexpr uint32_t ItemWidth = 90;
+  static constexpr uint32_t ItemHeight = 100;
+  static constexpr ImVec2 IconSize(80.0f, 80.0f);
+  static constexpr float ImagePadding =
+      ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
+  static constexpr uint32_t TextWidth = ItemWidth - 8;
 
   if (mDirectoryChanged) {
     if (mCurrentDirectory.empty()) {
@@ -142,10 +143,10 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
       entry.textWidth = calculateTextWidth(entry);
 
-      if (ImGui::CalcTextSize(entry.clippedName.c_str()).x > TEXT_WIDTH) {
+      if (ImGui::CalcTextSize(entry.clippedName.c_str()).x > TextWidth) {
         bool changed = false;
 
-        while (calculateTextWidth(entry) > TEXT_WIDTH) {
+        while (calculateTextWidth(entry) > TextWidth) {
           entry.clippedName.pop_back();
         }
 
@@ -183,7 +184,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     }
 
     const auto &size = ImGui::GetContentRegionAvail();
-    auto itemsPerRow = static_cast<int32_t>(size.x / ITEM_WIDTH);
+    auto itemsPerRow = static_cast<int32_t>(size.x / ItemWidth);
 
     if (itemsPerRow == 0)
       itemsPerRow = 1;
@@ -207,12 +208,12 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
       if (mHasStagingEntry) {
         startIndex = 1;
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, ITEM_HEIGHT * 1.0f);
+        ImGui::TableNextRow(ImGuiTableRowFlags_None, ItemHeight * 1.0f);
         ImGui::TableNextColumn();
 
         liquid::imgui::image(iconRegistry.getIcon(mStagingEntry.icon),
-                             ICON_SIZE);
-        ImGui::PushItemWidth(ITEM_WIDTH);
+                             IconSize);
+        ImGui::PushItemWidth(ItemWidth);
 
         if (!mInitialFocusSet) {
           ImGui::SetKeyboardFocusHere();
@@ -230,7 +231,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         const auto &entry = mEntries.at(i);
         auto colIndex = (i % itemsPerRow);
         if (colIndex == 0) {
-          ImGui::TableNextRow(ImGuiTableRowFlags_None, ITEM_HEIGHT * 1.0f);
+          ImGui::TableNextRow(ImGuiTableRowFlags_None, ItemHeight * 1.0f);
         }
 
         const auto &filename = entry.path.filename();
@@ -242,7 +243,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
             std::to_string(static_cast<uint32_t>(entry.assetType));
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
-                              ImVec2(ITEM_WIDTH, ITEM_HEIGHT))) {
+                              ImVec2(ItemWidth, ItemHeight))) {
           // Select when item is clicked
           mSelected = i;
 
@@ -284,7 +285,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
           ImGui::EndTooltip();
         }
 
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ITEM_HEIGHT);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ItemHeight);
 
         renderEntry(entry);
       }
@@ -345,24 +346,24 @@ void AssetBrowser::handleCreateEntry() {
 }
 
 void AssetBrowser::renderEntry(const Entry &entry) {
-  constexpr uint32_t ITEM_WIDTH = 90;
-  constexpr uint32_t ITEM_HEIGHT = 100;
-  constexpr ImVec2 ICON_SIZE(80.0f, 80.0f);
-  constexpr float IMAGE_PADDING = ((ITEM_WIDTH * 1.0f) - ICON_SIZE.x) / 2.0f;
-  constexpr uint32_t TEXT_WIDTH = ITEM_WIDTH - 8;
+  static constexpr uint32_t ItemWidth = 90;
+  static constexpr uint32_t ItemHeight = 100;
+  static constexpr ImVec2 IconSize(80.0f, 80.0f);
+  static constexpr float ImagePadding =
+      ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
+  static constexpr uint32_t TextWidth = ItemWidth - 8;
 
   {
     float initialCursorPos = ImGui::GetCursorPosX();
-    ImGui::SetCursorPosX(initialCursorPos + IMAGE_PADDING);
-    liquid::imgui::image(entry.preview, ICON_SIZE);
+    ImGui::SetCursorPosX(initialCursorPos + ImagePadding);
+    liquid::imgui::image(entry.preview, IconSize);
     ImGui::SetCursorPosX(initialCursorPos);
   }
 
   {
-    static constexpr float HALF = 0.5f;
     float initialCursorPos = ImGui::GetCursorPosX();
-    float centerPos =
-        initialCursorPos + (ITEM_WIDTH * 1.0f - entry.textWidth) * HALF;
+    const float centerPos =
+        initialCursorPos + (ItemWidth * 1.0f - entry.textWidth) * 0.5f;
     ImGui::SetCursorPosX(centerPos);
     ImGui::Text("%s", entry.clippedName.c_str());
     ImGui::SetCursorPosX(initialCursorPos);

@@ -40,21 +40,21 @@ struct Project {
 class ProjectManager {
 public:
   /**
-   * Create project in path
+   * @brief Create project in path
    *
    * @return Project created successfully
    */
   bool createProjectInPath();
 
   /**
-   * Open project in path
+   * @brief Open project in path
    *
    * @return Project opened successfully
    */
   bool openProjectInPath();
 
   /**
-   * Get project
+   * @brief Get project
    *
    * @return Project
    */

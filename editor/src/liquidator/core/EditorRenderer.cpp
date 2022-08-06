@@ -109,8 +109,8 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
       commandList.bindDescriptor(editorGridPipeline, 0, sceneDescriptor);
       commandList.bindDescriptor(editorGridPipeline, 1, gridDescriptor);
 
-      constexpr uint32_t PLANE_VERTICES = 6;
-      commandList.draw(PLANE_VERTICES, 0);
+      static constexpr uint32_t GridPlaneNumVertices = 6;
+      commandList.draw(GridPlaneNumVertices, 0);
     }
 
     // Skeleton bones
@@ -200,12 +200,11 @@ void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
   entityDatabase.iterateEntities<liquid::WorldTransformComponent,
                                  liquid::PerspectiveLensComponent>(
       [this](auto entity, const auto &world, const auto &camera) {
-        static constexpr float NINETY_DEGREES_IN_RADIANS =
-            glm::pi<float>() / 2.0f;
+        static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 
         mRenderStorage.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
                                 glm::rotate(world.worldTransform,
-                                            NINETY_DEGREES_IN_RADIANS,
+                                            NinetyDegreesInRadians,
                                             glm::vec3(0, 1, 0)));
       });
 

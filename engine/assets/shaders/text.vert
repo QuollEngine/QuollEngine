@@ -19,8 +19,18 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
 }
 uObjectData;
 
+/**
+ * @brief Single glyph data
+ */
 struct GlyphItem {
+  /**
+   * Glyph atlas bounds
+   */
   vec4 bounds;
+
+  /**
+   * Glyph quad bounds
+   */
   vec4 planeBounds;
 };
 

@@ -344,9 +344,9 @@ TEST_F(SceneLoaderSkeletonTest,
        CreatesSkeletonComponentWithFileDataIfValidField) {
   liquid::AssetData<liquid::SkeletonAsset> data{};
 
-  constexpr uint32_t numJoints = 5;
+  static constexpr uint32_t NumJoints = 5;
 
-  for (uint32_t i = 0; i < numJoints; ++i) {
+  for (uint32_t i = 0; i < NumJoints; ++i) {
     float fi = static_cast<float>(i);
 
     data.data.jointLocalPositions.push_back(glm::vec3(fi));
@@ -370,8 +370,8 @@ TEST_F(SceneLoaderSkeletonTest,
       entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
   EXPECT_EQ(skeleton.assetHandle, handle);
 
-  EXPECT_EQ(skeleton.numJoints, numJoints);
-  for (uint32_t i = 0; i < numJoints; ++i) {
+  EXPECT_EQ(skeleton.numJoints, NumJoints);
+  for (uint32_t i = 0; i < NumJoints; ++i) {
     float fi = static_cast<float>(i);
 
     EXPECT_EQ(skeleton.jointLocalPositions.at(i),
@@ -434,12 +434,12 @@ TEST_F(SceneLoaderLightTest,
 
 TEST_F(SceneLoaderLightTest,
        DoesNotCreateAnyLightComponentIfLightTypeIsUndefined) {
-  constexpr uint32_t invalidStart = 1;
+  static constexpr uint32_t InvalidStart = 1;
 
   // Check for 10 items
-  constexpr uint32_t size = 10;
+  static constexpr uint32_t Size = 10;
 
-  for (uint32_t i = invalidStart; i < invalidStart + size; ++i) {
+  for (uint32_t i = InvalidStart; i < InvalidStart + Size; ++i) {
     auto [node, entity] = createNode();
     node["components"]["light"]["type"] = i;
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
@@ -1008,11 +1008,11 @@ TEST_F(SceneLoaderParentTest,
 
 TEST_F(SceneLoaderParentTest,
        DoesNotCreateParentComponentIfParentDoesNotExist) {
-  constexpr uint64_t nonExistentId = 255;
+  static constexpr uint64_t NonExistentId = 255;
   auto [parentNode, parentEntity] = createNode();
 
   auto [node, entity] = createNode();
-  node["components"]["transform"]["parent"] = nonExistentId;
+  node["components"]["transform"]["parent"] = NonExistentId;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   EXPECT_FALSE(entityDatabase.hasComponent<liquid::ParentComponent>(entity));
@@ -1022,13 +1022,13 @@ TEST_F(SceneLoaderParentTest,
 
 TEST_F(SceneLoaderParentTest,
        DoesNotCreateParentComponentIfParentIsNotCreatedWithSceneLoader) {
-  constexpr uint64_t parentId = 255;
+  static constexpr uint64_t ParentId = 255;
 
   auto parentEntity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::IdComponent>(parentEntity, {parentId});
+  entityDatabase.setComponent<liquid::IdComponent>(parentEntity, {ParentId});
 
   auto [node, entity] = createNode();
-  node["components"]["transform"]["parent"] = parentId;
+  node["components"]["transform"]["parent"] = ParentId;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   EXPECT_FALSE(entityDatabase.hasComponent<liquid::ParentComponent>(entity));

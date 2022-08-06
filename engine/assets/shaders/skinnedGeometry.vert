@@ -29,6 +29,9 @@ struct ObjectItem {
 };
 
 struct SkeletonItem {
+  /**
+   * Joints for skeleton
+   */
   mat4 joints[32];
 };
 

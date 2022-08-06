@@ -37,11 +37,11 @@ template <class TComponentType> struct EntityStorageSparseSetComponentPool {
  *
  * @tparam ComponentTypes Component types
  */
-template <class... ComponentTypes> class EntityStorageSparseSet {
-  static_assert(entity_utils::are_types_unique<ComponentTypes...>,
+template <class... TComponentTypes> class EntityStorageSparseSet {
+  static_assert(entity_utils::AreTypesUnique<TComponentTypes...>,
                 "All types must be unique");
 
-  static constexpr size_t DEAD_INDEX = std::numeric_limits<size_t>::max();
+  static constexpr size_t DeadIndex = std::numeric_limits<size_t>::max();
   template <typename T> struct IterFnType { typedef T type; };
 
 public:
@@ -135,20 +135,20 @@ public:
    * @param entity Entity
    * @param value Component value
    */
-  template <class ComponentType>
-  void setComponent(Entity entity, const ComponentType &value) {
+  template <class TComponentType>
+  void setComponent(Entity entity, const TComponentType &value) {
     LIQUID_ASSERT(hasEntity(entity),
                   "Entity " + std::to_string(entity) + " does not exist");
 
-    auto &pool = getPoolForComponent<ComponentType>();
+    auto &pool = getPoolForComponent<TComponentType>();
 
     if (entity >= pool.entityIndices.size()) {
       // TODO: Make this better
-      pool.entityIndices.resize((entity + 1) * 2, DEAD_INDEX);
+      pool.entityIndices.resize((entity + 1) * 2, DeadIndex);
     }
 
     size_t index = pool.entityIndices[entity];
-    if (index != DEAD_INDEX) {
+    if (index != DeadIndex) {
       pool.components[index] = value;
       pool.entities[index] = entity;
     } else {
@@ -165,12 +165,12 @@ public:
    * @param entity Entity
    * @return Component value
    */
-  template <class ComponentType>
-  const ComponentType &getComponent(Entity entity) const {
-    LIQUID_ASSERT(hasComponent<ComponentType>(entity),
-                  "Component named " + String(typeid(ComponentType).name()) +
+  template <class TComponentType>
+  const TComponentType &getComponent(Entity entity) const {
+    LIQUID_ASSERT(hasComponent<TComponentType>(entity),
+                  "Component named " + String(typeid(TComponentType).name()) +
                       " does not exist for entity " + std::to_string(entity));
-    const auto &pool = getPoolForComponent<ComponentType>();
+    const auto &pool = getPoolForComponent<TComponentType>();
 
     return pool.components[pool.entityIndices[entity]];
   }
@@ -182,11 +182,11 @@ public:
    * @param entity Entity
    * @return Component value
    */
-  template <class ComponentType> ComponentType &getComponent(Entity entity) {
-    LIQUID_ASSERT(hasComponent<ComponentType>(entity),
-                  "Component named " + String(typeid(ComponentType).name()) +
+  template <class TComponentType> TComponentType &getComponent(Entity entity) {
+    LIQUID_ASSERT(hasComponent<TComponentType>(entity),
+                  "Component named " + String(typeid(TComponentType).name()) +
                       " does not exist for entity " + std::to_string(entity));
-    auto &pool = getPoolForComponent<ComponentType>();
+    auto &pool = getPoolForComponent<TComponentType>();
 
     return pool.components[pool.entityIndices[entity]];
   }
@@ -199,10 +199,10 @@ public:
    * @retval true Entity exists
    * @retval false Entity does not exist
    */
-  template <class ComponentType> bool hasComponent(Entity entity) const {
-    const auto &pool = getPoolForComponent<ComponentType>();
+  template <class TComponentType> bool hasComponent(Entity entity) const {
+    const auto &pool = getPoolForComponent<TComponentType>();
     return entity < pool.entityIndices.size() &&
-           pool.entityIndices[entity] != DEAD_INDEX;
+           pool.entityIndices[entity] != DeadIndex;
   }
 
   /**
@@ -211,10 +211,10 @@ public:
    * @tparam ComponentType Component type
    * @param entity Entity
    */
-  template <class ComponentType> void deleteComponent(Entity entity) {
-    auto &pool = getPoolForComponent<ComponentType>();
+  template <class TComponentType> void deleteComponent(Entity entity) {
+    auto &pool = getPoolForComponent<TComponentType>();
     LIQUID_ASSERT(entity < pool.entityIndices.size(),
-                  "Component named " + String(typeid(ComponentType).name()) +
+                  "Component named " + String(typeid(TComponentType).name()) +
                       " does not exist for entity " + std::to_string(entity));
 
     Entity movedEntity = pool.entities.back();
@@ -235,31 +235,31 @@ public:
     // Delete last item from components array
     pool.components.pop_back();
 
-    pool.entityIndices[entity] = DEAD_INDEX;
+    pool.entityIndices[entity] = DeadIndex;
   }
 
   /**
    * @brief Count entities with component type
    *
-   * @tparam ComponentType Component type
+   * @tparam TComponentType Component type
    * @return Number of entities
    */
-  template <class ComponentType> size_t getEntityCountForComponent() const {
-    return getPoolForComponent<ComponentType>().entities.size();
+  template <class TComponentType> size_t getEntityCountForComponent() const {
+    return getPoolForComponent<TComponentType>().entities.size();
   }
 
   /**
    * @brief Get all entities with specified components
    *
-   * @tparam PickComponents Components to pick
+   * @tparam TPickComponents Components to pick
    * @param iterFn Iterator function
    */
-  template <class... PickComponents>
+  template <class... TPickComponents>
   void iterateEntities(
       const typename IterFnType<
-          std::function<void(Entity, PickComponents &...)>>::type &iterFn) {
+          std::function<void(Entity, TPickComponents &...)>>::type &iterFn) {
     iterateEntitiesInternal(iterFn,
-                            std::index_sequence_for<PickComponents...>{});
+                            std::index_sequence_for<TPickComponents...>{});
   }
 
   /**
@@ -273,12 +273,12 @@ public:
   /**
    * @brief Destroy all components of a specific type
    *
-   * @tparam Component type to destroy
+   * @tparam TComponent type to destroy
    */
-  template <class ComponentType> void destroyComponents() {
-    getPoolForComponent<ComponentType>().components.clear();
-    getPoolForComponent<ComponentType>().entities.clear();
-    getPoolForComponent<ComponentType>().entityIndices.clear();
+  template <class TComponentType> void destroyComponents() {
+    getPoolForComponent<TComponentType>().components.clear();
+    getPoolForComponent<TComponentType>().entities.clear();
+    getPoolForComponent<TComponentType>().entityIndices.clear();
   }
 
 private:
@@ -287,13 +287,13 @@ private:
    *
    * Retrieves component pool from the tuple in compile-time
    *
-   * @tparam ComponentType Component type
+   * @tparam TComponentType Component type
    * @return Component pool for component type
    */
-  template <class ComponentType>
-  const EntityStorageSparseSetComponentPool<ComponentType> &
+  template <class TComponentType>
+  const EntityStorageSparseSetComponentPool<TComponentType> &
   getPoolForComponent() const {
-    return std::get<EntityStorageSparseSetComponentPool<ComponentType>>(
+    return std::get<EntityStorageSparseSetComponentPool<TComponentType>>(
         mComponentPools);
   }
 
@@ -302,12 +302,12 @@ private:
    *
    * Retrieves component pool from the tuple in compile-time
    *
-   * @tparam ComponentType Component type
+   * @tparam TComponentType Component type
    * @return Component pool for component type
    */
-  template <class ComponentType>
-  EntityStorageSparseSetComponentPool<ComponentType> &getPoolForComponent() {
-    return std::get<EntityStorageSparseSetComponentPool<ComponentType>>(
+  template <class TComponentType>
+  EntityStorageSparseSetComponentPool<TComponentType> &getPoolForComponent() {
+    return std::get<EntityStorageSparseSetComponentPool<TComponentType>>(
         mComponentPools);
   }
 
@@ -322,13 +322,13 @@ private:
    * @param iterFn Iterator function
    * @param sequence Index sequence of picked components
    */
-  template <class... PickComponents, size_t... PickComponentIndices>
+  template <class... TPickComponents, size_t... TPickComponentIndices>
   void iterateEntitiesInternal(
-      const std::function<void(Entity, PickComponents &...)> &iterFn,
-      std::index_sequence<PickComponentIndices...> sequence) {
-    std::tuple<EntityStorageSparseSetComponentPool<PickComponents> &...>
+      const std::function<void(Entity, TPickComponents &...)> &iterFn,
+      std::index_sequence<TPickComponentIndices...> sequence) {
+    std::tuple<EntityStorageSparseSetComponentPool<TPickComponents> &...>
         pickedPools = {
-            std::get<EntityStorageSparseSetComponentPool<PickComponents>>(
+            std::get<EntityStorageSparseSetComponentPool<TPickComponents>>(
                 mComponentPools)...};
 
     const auto &smallestEntities = getSmallestEntityListFromPools(pickedPools);
@@ -338,7 +338,7 @@ private:
       bool isDead = std::apply(
           [entity](auto &&...args) {
             return ((entity >= args.entityIndices.size() ||
-                     args.entityIndices[entity] == DEAD_INDEX) ||
+                     args.entityIndices[entity] == DeadIndex) ||
                     ...);
           },
           pickedPools);
@@ -347,13 +347,14 @@ private:
         continue;
       }
 
-      const auto &indices = std::array{
-          std::get<PickComponentIndices>(pickedPools).entityIndices[entity]...};
-      std::tuple<PickComponents &...> components = {
-          std::get<PickComponentIndices>(pickedPools)
-              .components[std::get<PickComponentIndices>(indices)]...};
+      const auto &indices =
+          std::array{std::get<TPickComponentIndices>(pickedPools)
+                         .entityIndices[entity]...};
+      std::tuple<TPickComponents &...> components = {
+          std::get<TPickComponentIndices>(pickedPools)
+              .components[std::get<TPickComponentIndices>(indices)]...};
 
-      iterFn(entity, std::get<PickComponentIndices>(components)...);
+      iterFn(entity, std::get<TPickComponentIndices>(components)...);
     }
   }
 
@@ -365,10 +366,10 @@ private:
    * @tparam Index Tuple index of component pool
    * @param entity Entity
    */
-  template <size_t Index = 0> void deleteAllEntityComponents(Entity entity) {
-    auto &pool = std::get<Index>(mComponentPools);
+  template <size_t TIndex = 0> void deleteAllEntityComponents(Entity entity) {
+    auto &pool = std::get<TIndex>(mComponentPools);
     if (entity < pool.entityIndices.size() &&
-        pool.entityIndices[entity] < DEAD_INDEX) {
+        pool.entityIndices[entity] < DeadIndex) {
 
       Entity movedEntity = pool.entities.back();
       size_t entityIndexToDelete = pool.entityIndices[entity];
@@ -388,11 +389,11 @@ private:
       // Delete last item from components array
       pool.components.pop_back();
 
-      pool.entityIndices[entity] = DEAD_INDEX;
+      pool.entityIndices[entity] = DeadIndex;
     }
 
-    if constexpr (Index + 1 != sizeof...(ComponentTypes)) {
-      deleteAllEntityComponents<Index + 1>(entity);
+    if constexpr (TIndex + 1 != sizeof...(TComponentTypes)) {
+      deleteAllEntityComponents<TIndex + 1>(entity);
     }
   }
 
@@ -401,13 +402,13 @@ private:
    *
    * @tparam Index Tuple index
    */
-  template <size_t Index = 0> void deleteAllComponents() {
-    std::get<Index>(mComponentPools).components.clear();
-    std::get<Index>(mComponentPools).entityIndices.clear();
-    std::get<Index>(mComponentPools).entities.clear();
+  template <size_t TIndex = 0> void deleteAllComponents() {
+    std::get<TIndex>(mComponentPools).components.clear();
+    std::get<TIndex>(mComponentPools).entityIndices.clear();
+    std::get<TIndex>(mComponentPools).entities.clear();
 
-    if constexpr (Index + 1 != sizeof...(ComponentTypes)) {
-      deleteAllComponents<Index + 1>();
+    if constexpr (TIndex + 1 != sizeof...(TComponentTypes)) {
+      deleteAllComponents<TIndex + 1>();
     }
   }
 
@@ -424,32 +425,32 @@ private:
   /**
    * @brief Recursively find the smallest entity list
    *
-   * @tparam Index Current index
-   * @tparam IndexForSmallest Index for smallest pool
-   * @tparam PickComponents Component types to pick
+   * @tparam TIndex Current index
+   * @tparam TIndexForSmallest Index for smallest pool
+   * @tparam TPickComponents Component types to pick
    * @param pools Pools to search from
    * @return Reference to smallest entity list
    */
-  template <size_t Index = 0, size_t IndexForSmallest = 0,
-            class... PickComponents>
+  template <size_t TIndex = 0, size_t TIndexForSmallest = 0,
+            class... TPickComponents>
   static inline const std::vector<Entity> &getSmallestEntityListFromPools(
-      const std::tuple<EntityStorageSparseSetComponentPool<PickComponents> &...>
-          &pools) {
-    if constexpr (Index < sizeof...(PickComponents)) {
-      if (std::get<Index>(pools).entities.size() <
-          std::get<IndexForSmallest>(pools).entities.size()) {
-        return getSmallestEntityListFromPools<Index + 1, Index,
-                                              PickComponents...>(pools);
+      const std::tuple<
+          EntityStorageSparseSetComponentPool<TPickComponents> &...> &pools) {
+    if constexpr (TIndex < sizeof...(TPickComponents)) {
+      if (std::get<TIndex>(pools).entities.size() <
+          std::get<TIndexForSmallest>(pools).entities.size()) {
+        return getSmallestEntityListFromPools<TIndex + 1, TIndex,
+                                              TPickComponents...>(pools);
       }
-      return getSmallestEntityListFromPools<Index + 1, IndexForSmallest,
-                                            PickComponents...>(pools);
+      return getSmallestEntityListFromPools<TIndex + 1, TIndexForSmallest,
+                                            TPickComponents...>(pools);
     }
 
-    return std::get<IndexForSmallest>(pools).entities;
+    return std::get<TIndexForSmallest>(pools).entities;
   }
 
 private:
-  std::tuple<EntityStorageSparseSetComponentPool<ComponentTypes>...>
+  std::tuple<EntityStorageSparseSetComponentPool<TComponentTypes>...>
       mComponentPools;
 
   Entity mLastEntity = 1;

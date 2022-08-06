@@ -295,9 +295,9 @@ EntityManager::getTransformFromCamera(EditorCamera &camera) const {
       entityDatabase.getComponent<liquid::CameraComponent>(camera.getCamera())
           .viewMatrix;
 
-  constexpr glm::vec3 distanceFromEye = {0.0f, 0.0f, -10.0f};
+  static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);
-  const auto &orientation = invViewMatrix * glm::translate(distanceFromEye);
+  const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
 
   liquid::LocalTransformComponent transform;
   transform.localPosition = orientation[3];

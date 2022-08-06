@@ -88,7 +88,7 @@ TEST_F(AssetManagerTest, CreatesPrefabFile) {
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  liquid::String magic(liquid::AssetFileMagicLength, '$');
   file.read(magic.data(), magic.length());
   file.read(header.version);
   file.read(header.type);

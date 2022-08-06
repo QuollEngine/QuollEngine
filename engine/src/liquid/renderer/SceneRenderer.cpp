@@ -54,24 +54,24 @@ void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
 }
 
 SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
-  constexpr uint32_t NUM_LIGHTS = 16;
-  constexpr uint32_t SHADOWMAP_DIMENSIONS = 2048;
-  constexpr uint32_t SWAPCHAIN_SIZE_PERCENTAGE = 100;
+  static constexpr uint32_t NumLights = 16;
+  static constexpr uint32_t ShadowMapDimensions = 2048;
+  static constexpr uint32_t SwapchainSizePercentage = 100;
 
   rhi::TextureDescription shadowMapDesc{};
   shadowMapDesc.sizeMethod = rhi::TextureSizeMethod::Fixed;
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-  shadowMapDesc.width = SHADOWMAP_DIMENSIONS;
-  shadowMapDesc.height = SHADOWMAP_DIMENSIONS;
-  shadowMapDesc.layers = NUM_LIGHTS;
+  shadowMapDesc.width = ShadowMapDimensions;
+  shadowMapDesc.height = ShadowMapDimensions;
+  shadowMapDesc.layers = NumLights;
   shadowMapDesc.format = VK_FORMAT_D16_UNORM;
   auto shadowmap = mRegistry.setTexture(shadowMapDesc);
 
   rhi::TextureDescription sceneColorDesc{};
   sceneColorDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   sceneColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  sceneColorDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
-  sceneColorDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
+  sceneColorDesc.width = SwapchainSizePercentage;
+  sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
   sceneColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
   auto sceneColor = mRegistry.setTexture(sceneColorDesc);
@@ -79,8 +79,8 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-  depthBufferDesc.width = SWAPCHAIN_SIZE_PERCENTAGE;
-  depthBufferDesc.height = SWAPCHAIN_SIZE_PERCENTAGE;
+  depthBufferDesc.width = SwapchainSizePercentage;
+  depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
   auto depthBuffer = mRegistry.setTexture(depthBufferDesc);
@@ -181,7 +181,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
       rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
 
-      static constexpr uint32_t BRDF_BINDING = 5;
+      static constexpr uint32_t BrdfBinding = 5;
 
       sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
                            rhi::DescriptorType::UniformBuffer);
@@ -197,7 +197,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                 {mRenderStorage.getIrradianceMap(),
                  mRenderStorage.getSpecularMap()},
                 rhi::DescriptorType::CombinedImageSampler)
-          .bind(BRDF_BINDING, {mRenderStorage.getBrdfLUT()},
+          .bind(BrdfBinding, {mRenderStorage.getBrdfLUT()},
                 rhi::DescriptorType::CombinedImageSampler);
 
       {
@@ -456,7 +456,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
                                rhi::PipelineHandle pipeline) {
-  static constexpr uint32_t NUM_VERTICES = 6;
+  static constexpr uint32_t QuadNumVertices = 6;
   for (const auto &[font, texts] : mRenderStorage.getTextGroups()) {
     auto textureHandle =
         mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
@@ -484,8 +484,8 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
           pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::uvec4),
           static_cast<void *>(glm::value_ptr(glyphStart)));
 
-      commandList.draw(NUM_VERTICES * static_cast<uint32_t>(text.length), 0, 1,
-                       text.index);
+      commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
+                       1, text.index);
     }
   }
 }

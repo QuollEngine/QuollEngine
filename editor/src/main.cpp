@@ -6,14 +6,13 @@
 #include "liquidator/screens/ProjectSelectorScreen.h"
 
 int main() {
-  static constexpr uint32_t INITIAL_WIDTH = 1024;
-  static constexpr uint32_t INITIAL_HEIGHT = 768;
+  static constexpr uint32_t InitialWidth = 1024;
+  static constexpr uint32_t InitialHeight = 768;
 
   liquid::Engine::setAssetsPath(liquid::Path("./engine/assets").string());
 
   liquid::EventSystem eventSystem;
-  liquid::Window window("Liquidator", INITIAL_WIDTH, INITIAL_HEIGHT,
-                        eventSystem);
+  liquid::Window window("Liquidator", InitialWidth, InitialHeight, eventSystem);
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();

@@ -11,9 +11,9 @@ RenderStorage::RenderStorage(size_t reservedSpace)
   mMeshTransformMatrices.reserve(mReservedSpace);
 
   mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
-  mSkeletonVector.reset(new glm::mat4[mReservedSpace * MAX_NUM_JOINTS]);
+  mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumJoints]);
 
-  mLights.reserve(MAX_NUM_LIGHTS);
+  mLights.reserve(MaxNumLights);
 
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
@@ -39,7 +39,7 @@ void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
   mSkeletonsBuffer = registry.setBuffer(
       {
           rhi::BufferType::Storage,
-          mReservedSpace * MAX_NUM_JOINTS * sizeof(glm::mat4),
+          mReservedSpace * MaxNumJoints * sizeof(glm::mat4),
           mSkeletonVector.get(),
       },
       mSkeletonsBuffer);
@@ -95,8 +95,8 @@ void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle,
   mSkinnedMeshGroups.at(handle).indices.push_back(index);
 
   auto *currentSkeleton =
-      mSkeletonVector.get() + (mLastSkeleton * MAX_NUM_JOINTS);
-  size_t dataSize = std::min(skeleton.size(), MAX_NUM_JOINTS);
+      mSkeletonVector.get() + (mLastSkeleton * MaxNumJoints);
+  size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
 
   mLastSkeleton++;

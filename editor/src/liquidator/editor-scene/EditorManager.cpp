@@ -50,11 +50,11 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
     const auto &camera = node["camera"];
 
     // defaults
-    float fov = EditorCamera::DEFAULT_FOV, near = EditorCamera::DEFAULT_NEAR,
-          far = EditorCamera::DEFAULT_FAR;
-    glm::vec3 eye = EditorCamera::DEFAULT_EYE,
-              center = EditorCamera::DEFAULT_CENTER,
-              up = EditorCamera::DEFAULT_UP;
+    float fov = EditorCamera::DefaultFOV, near = EditorCamera::DefaultNear,
+          far = EditorCamera::DefaultFar;
+    glm::vec3 eye = EditorCamera::DefaultEye,
+              center = EditorCamera::DefaultCenter,
+              up = EditorCamera::DefaultUp;
 
     if (camera["fov"].IsScalar()) {
       fov = camera["fov"].as<float>();
@@ -121,11 +121,11 @@ void EditorManager::switchToEditorCamera() {
 }
 
 void EditorManager::createNewScene() {
-  static constexpr glm::vec3 LIGHT_START_POS(0.0f, 5.0f, 0.0f);
+  static constexpr glm::vec3 LightStartPos(0.0f, 5.0f, 0.0f);
 
   {
     liquid::LocalTransformComponent transform{};
-    transform.localPosition = LIGHT_START_POS;
+    transform.localPosition = LightStartPos;
     transform.localRotation =
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
@@ -159,11 +159,11 @@ void EditorManager::moveCameraToEntity(liquid::Entity entity) {
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));
 
-  constexpr glm::vec3 distanceFromCenter{0.0f, 0.0f, 10.0f};
+  static constexpr glm::vec3 DistanceFromCenter{0.0f, 0.0f, 10.0f};
 
   mEditorCamera.reset();
   mEditorCamera.setCenter(translation);
-  mEditorCamera.setEye(translation - distanceFromCenter);
+  mEditorCamera.setEye(translation - DistanceFromCenter);
 }
 
 bool EditorManager::hasEnvironment() {

@@ -126,25 +126,25 @@ VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
 }
 
 void VulkanDescriptorManager::createDescriptorPool() {
-  constexpr uint32_t NUM_UNIFORM_BUFFERS = 15000;
-  constexpr uint32_t NUM_STORAGE_BUFFERS = 10;
-  constexpr uint32_t NUM_SAMPLERS = 1000;
-  constexpr uint32_t NUM_DESCRIPTORS = 30000;
-  constexpr uint32_t MAX_TEXTURE_DESCRIPTORS = 8;
+  static constexpr uint32_t NumUniformBuffers = 15000;
+  static constexpr uint32_t NumStorageBuffers = 10;
+  static constexpr uint32_t NumSamplers = 1000;
+  static constexpr uint32_t NumDescriptors = 30000;
+  static constexpr uint32_t MaxTextureDescriptors = 8;
 
   std::array<VkDescriptorPoolSize, 3> poolSizes{
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                           NUM_UNIFORM_BUFFERS},
+                           NumUniformBuffers},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                           NUM_STORAGE_BUFFERS},
+                           NumStorageBuffers},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                           MAX_TEXTURE_DESCRIPTORS * NUM_SAMPLERS}};
+                           MaxTextureDescriptors * NumSamplers}};
 
   VkDescriptorPoolCreateInfo descriptorPoolInfo{};
   descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
   descriptorPoolInfo.pNext = nullptr;
   descriptorPoolInfo.flags = 0;
-  descriptorPoolInfo.maxSets = NUM_DESCRIPTORS;
+  descriptorPoolInfo.maxSets = NumDescriptors;
   descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   descriptorPoolInfo.pPoolSizes = poolSizes.data();
 

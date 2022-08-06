@@ -24,37 +24,37 @@ public:
   /**
    * Zoom speed when scrolling
    */
-  static constexpr float ZOOM_SPEED = 0.03f;
+  static constexpr float ZoomSpeed = 0.03f;
 
   /**
    * Default Field of view value
    */
-  static constexpr float DEFAULT_FOV = 70.0f;
+  static constexpr float DefaultFOV = 70.0f;
 
   /**
    * Default near perspective plane
    */
-  static constexpr float DEFAULT_NEAR = 0.001f;
+  static constexpr float DefaultNear = 0.001f;
 
   /**
    * Default far perspective plane
    */
-  static constexpr float DEFAULT_FAR = 1000.0f;
+  static constexpr float DefaultFar = 1000.0f;
 
   /**
    * Default camera position
    */
-  static constexpr glm::vec3 DEFAULT_EYE{0.0f, 5.0f, -10.0f};
+  static constexpr glm::vec3 DefaultEye{0.0f, 5.0f, -10.0f};
 
   /**
    * Default camera center
    */
-  static constexpr glm::vec3 DEFAULT_CENTER{0.0f, 0.0f, 0.0f};
+  static constexpr glm::vec3 DefaultCenter{0.0f, 0.0f, 0.0f};
 
   /**
    * Default camera up vector
    */
-  static constexpr glm::vec3 DEFAULT_UP{0.0f, 1.0f, 0.0f};
+  static constexpr glm::vec3 DefaultUp{0.0f, 1.0f, 0.0f};
 
 public:
   /**
@@ -216,9 +216,9 @@ private:
   void zoom();
 
 private:
-  float mFov = DEFAULT_FOV;
-  float mNear = DEFAULT_NEAR;
-  float mFar = DEFAULT_FAR;
+  float mFov = DefaultFOV;
+  float mNear = DefaultNear;
+  float mFar = DefaultFar;
 
   float mX = 0.0f;
   float mY = 0.0f;
@@ -228,9 +228,9 @@ private:
   InputState mInputState = InputState::None;
   glm::vec2 mPrevMousePos{};
 
-  glm::vec3 mEye = DEFAULT_EYE;
-  glm::vec3 mCenter = DEFAULT_CENTER;
-  glm::vec3 mUp = DEFAULT_UP;
+  glm::vec3 mEye = DefaultEye;
+  glm::vec3 mCenter = DefaultCenter;
+  glm::vec3 mUp = DefaultUp;
 
   liquid::EventObserverId mMouseButtonPressHandler = 0;
   liquid::EventObserverId mMouseButtonReleaseHandler = 0;

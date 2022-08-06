@@ -19,11 +19,11 @@ namespace liquid {
  * @return Lua table
  */
 template <class TLuaInterface> LuaTable createInterfaceTable(LuaScope &scope) {
-  constexpr auto tableSize =
-      static_cast<uint32_t>(sizeof(TLuaInterface::fields));
-  auto table = scope.createTable(tableSize + 1);
+  static constexpr auto TableSize =
+      static_cast<uint32_t>(sizeof(TLuaInterface::Fields));
+  auto table = scope.createTable(TableSize + 1);
 
-  for (auto &field : TLuaInterface::fields) {
+  for (auto &field : TLuaInterface::Fields) {
     table.set(field.key, field.fn);
   }
 

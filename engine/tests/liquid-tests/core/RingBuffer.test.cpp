@@ -56,19 +56,19 @@ TEST_F(RingBufferDeathTest, PoppingFailsIfQueueIsEmpty) {
 TEST_F(RingBufferTest, ManyOperations) {
   liquid::RingBuffer<Data> bigBuffer(150);
 
-  static constexpr int NUM_ADDITIONS = 100;
-  for (int i = 0; i < NUM_ADDITIONS; ++i) {
+  static constexpr int NumAdditions = 100;
+  for (int i = 0; i < NumAdditions; ++i) {
     bigBuffer.push({i});
   }
 
   EXPECT_FALSE(bigBuffer.empty());
-  EXPECT_EQ(bigBuffer.size(), NUM_ADDITIONS);
+  EXPECT_EQ(bigBuffer.size(), NumAdditions);
   int i = 0;
   while (!bigBuffer.empty()) {
     EXPECT_EQ(bigBuffer.front().val, i++);
     bigBuffer.pop();
   }
 
-  EXPECT_EQ(i, NUM_ADDITIONS);
+  EXPECT_EQ(i, NumAdditions);
   EXPECT_TRUE(bigBuffer.empty());
 }

@@ -144,16 +144,16 @@ public:
    */
   PhysicsSystemImpl(EventSystem &eventSystem)
       : mEventSystem(eventSystem), mSimulationEventCallback(mEventSystem) {
-    constexpr uint32_t PVD_PORT = 5425;
-    constexpr uint32_t PVD_TIMEOUT_IN_MS = 2000;
-    constexpr glm::vec3 GRAVITY(0.0f, -9.8f, 0.0f);
+    static constexpr uint32_t PvdPort = 5425;
+    static constexpr uint32_t PvdTimeoutInMs = 2000;
+    static constexpr glm::vec3 Gravity(0.0f, -9.8f, 0.0f);
 
     mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mDefaultAllocator,
                                      mDefaultErrorCallback);
 
     mPvd = PxCreatePvd(*mFoundation);
-    PxPvdTransport *transport = PxDefaultPvdSocketTransportCreate(
-        "127.0.0.1", PVD_PORT, PVD_TIMEOUT_IN_MS);
+    PxPvdTransport *transport =
+        PxDefaultPvdSocketTransportCreate("127.0.0.1", PvdPort, PvdTimeoutInMs);
     mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
     mPhysics =
@@ -164,7 +164,7 @@ public:
     mDispatcher = PxDefaultCpuDispatcherCreate(1);
     sceneDesc.cpuDispatcher = mDispatcher;
     sceneDesc.filterShader = phyxFilterAllCollisionShader;
-    sceneDesc.gravity = PxVec3(GRAVITY.x, GRAVITY.y, GRAVITY.z);
+    sceneDesc.gravity = PxVec3(Gravity.x, Gravity.y, Gravity.z);
     sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
     sceneDesc.simulationEventCallback = &mSimulationEventCallback;
 
