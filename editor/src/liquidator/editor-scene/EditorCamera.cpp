@@ -51,7 +51,7 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
           return;
         }
 
-        constexpr float MIN_OOB_THRESHOLD = 2.0f;
+        static constexpr float MinOOBThreshold = 2.0f;
         const auto &size = mWindow.getWindowSize();
 
         float minX = 0;
@@ -64,18 +64,18 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
         glm::vec2 newPos{data.xpos, data.ypos};
 
         if (data.xpos <= minX) {
-          newPos.x = maxX - MIN_OOB_THRESHOLD;
+          newPos.x = maxX - MinOOBThreshold;
           outOfBounds = true;
         } else if (data.xpos >= maxX) {
-          newPos.x = minX + MIN_OOB_THRESHOLD;
+          newPos.x = minX + MinOOBThreshold;
           outOfBounds = true;
         }
 
         if (data.ypos <= minY) {
-          newPos.y = maxY - MIN_OOB_THRESHOLD;
+          newPos.y = maxY - MinOOBThreshold;
           outOfBounds = true;
         } else if (data.ypos >= maxY) {
-          newPos.y = minY + MIN_OOB_THRESHOLD;
+          newPos.y = minY + MinOOBThreshold;
           outOfBounds = true;
         }
 
@@ -97,7 +97,7 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
           return;
         }
         glm::vec3 change =
-            glm::vec3(mEye - mCenter) * event.yoffset * ZOOM_SPEED;
+            glm::vec3(mEye - mCenter) * event.yoffset * ZoomSpeed;
         mCenter += change;
         mEye += change;
       });
@@ -144,12 +144,12 @@ void EditorCamera::update() {
 }
 
 void EditorCamera::reset() {
-  mEye = DEFAULT_EYE;
-  mCenter = DEFAULT_CENTER;
-  mUp = DEFAULT_UP;
-  mFov = DEFAULT_FOV;
-  mNear = DEFAULT_NEAR;
-  mFar = DEFAULT_FAR;
+  mEye = DefaultEye;
+  mCenter = DefaultCenter;
+  mUp = DefaultUp;
+  mFov = DefaultFOV;
+  mNear = DefaultNear;
+  mFar = DefaultFar;
 
   if (!mEntityDatabase.hasEntity(mCameraEntity)) {
     mCameraEntity = mEntityDatabase.createEntity();
@@ -158,13 +158,13 @@ void EditorCamera::reset() {
 }
 
 void EditorCamera::pan() {
-  constexpr float PAN_SPEED = 0.03f;
+  static constexpr float PanSpeed = 0.03f;
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   glm::vec3 right = glm::normalize(glm::cross(glm::vec3(mEye - mCenter), mUp));
 
   glm::vec2 mousePosDiff =
-      glm::vec4((mousePos - mPrevMousePos) * PAN_SPEED, 0.0f, 0.0f);
+      glm::vec4((mousePos - mPrevMousePos) * PanSpeed, 0.0f, 0.0f);
 
   glm::vec3 change = mUp * mousePosDiff.y + right * mousePosDiff.x;
   mEye += change;
@@ -173,13 +173,13 @@ void EditorCamera::pan() {
 }
 
 void EditorCamera::rotate() {
-  constexpr float TWO_PI = 2.0f * glm::pi<float>();
+  static constexpr float TwoPi = 2.0f * glm::pi<float>();
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   const auto &size = mWindow.getFramebufferSize();
 
   glm ::vec2 screenToSphere{// horizontal = 2pi
-                            (TWO_PI / static_cast<float>(size.x)),
+                            (TwoPi / static_cast<float>(size.x)),
                             // vertical = pi
                             (glm::pi<float>() / static_cast<float>(size.y))};
 
@@ -201,7 +201,7 @@ void EditorCamera::rotate() {
 
 void EditorCamera::zoom() {
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
-  float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZOOM_SPEED;
+  float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
   glm::vec3 change = glm::vec3(mEye - mCenter) * zoomFactor;
   mCenter += change;

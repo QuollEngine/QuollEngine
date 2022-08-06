@@ -132,8 +132,8 @@ private:
   EventSystem &mEventSystem;
   ::GLFWwindow *mWindowInstance;
 
-  template <class FunctionType>
-  using HandlerMap = std::map<uint32_t, std::function<FunctionType>>;
+  template <class TFunctionType>
+  using HandlerMap = std::map<uint32_t, std::function<TFunctionType>>;
 
   HandlerMap<void(uint32_t, uint32_t)> mResizeHandlers;
   HandlerMap<void(bool)> mFocusHandlers;

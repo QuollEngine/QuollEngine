@@ -58,9 +58,6 @@ static bool ImguiMultilineInputText(const liquid::String &label,
                                    InputTextCallback, &userData);
 }
 
-constexpr size_t VEC3_ARRAY_SIZE = 3;
-constexpr size_t VEC4_ARRAY_SIZE = 4;
-
 EntityPanel::EntityPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
@@ -205,8 +202,8 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     }
 
     ImGui::Text("Aspect Ratio");
-    static constexpr float MIN_CUSTOM_ASPECT_RATIO = 0.01f;
-    static constexpr float MAX_CUSTOM_ASPECT_RATIO = 1000.0f;
+    static constexpr float MinCustomAspectRatio = 0.01f;
+    static constexpr float MaxCustomAspectRatio = 1000.0f;
 
     bool hasViewportAspectRatio =
         mEntityManager.getActiveEntityDatabase()
@@ -235,8 +232,8 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     if (!hasViewportAspectRatio) {
       ImGui::Text("Custom aspect ratio");
       if (ImGui::DragFloat("###CustomAspectRatio", &component.aspectRatio,
-                           MIN_CUSTOM_ASPECT_RATIO, MIN_CUSTOM_ASPECT_RATIO,
-                           MAX_CUSTOM_ASPECT_RATIO, "%.2f")) {
+                           MinCustomAspectRatio, MinCustomAspectRatio,
+                           MaxCustomAspectRatio, "%.2f")) {
       }
 
       if (ImGui::IsItemDeactivatedAfterEdit()) {
@@ -277,7 +274,9 @@ void EntityPanel::renderTransform() {
 
     ImGui::Text("Rotation");
     const auto &euler = glm::eulerAngles(component.localRotation);
-    std::array<float, VEC3_ARRAY_SIZE> imguiRotation{euler.x, euler.y, euler.z};
+
+    std::array<float, glm::vec3::length()> imguiRotation{euler.x, euler.y,
+                                                         euler.z};
     if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
       component.localRotation = glm::quat(glm::vec3(
           imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
@@ -627,12 +626,12 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
 
     const auto &fonts = assetRegistry.getFonts().getAssets();
 
-    static constexpr float CONTENT_INPUT_HEIGHT = 100.0f;
+    static constexpr float ContentInputHeight = 100.0f;
 
     ImGui::Text("Content");
     if (ImguiMultilineInputText(
             "###InputContent", text.text,
-            ImVec2(ImGui::GetWindowWidth(), CONTENT_INPUT_HEIGHT), 0)) {
+            ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
       mEntityManager.save(mSelectedEntity);
     }
 
@@ -744,12 +743,12 @@ void EntityPanel::renderAddComponent() {
     if (!mEntityManager.getActiveEntityDatabase()
              .hasComponent<liquid::CollidableComponent>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      constexpr glm::vec3 DEFAULT_VALUE(0.5f);
+      static constexpr glm::vec3 DefaultValue(0.5f);
 
       mEntityManager.getActiveEntityDatabase()
           .setComponent<liquid::CollidableComponent>(
               mSelectedEntity, {liquid::PhysicsGeometryType::Box,
-                                liquid::PhysicsGeometryBox{DEFAULT_VALUE}});
+                                liquid::PhysicsGeometryBox{DefaultValue}});
       mEntityManager.save(mSelectedEntity);
     }
 

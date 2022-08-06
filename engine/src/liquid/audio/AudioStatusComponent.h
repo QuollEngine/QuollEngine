@@ -7,7 +7,7 @@ namespace liquid {
  */
 struct AudioStatusComponent {
   /**
-   * @brief Sound instance
+   * Sound instance
    */
   void *instance = nullptr;
 };

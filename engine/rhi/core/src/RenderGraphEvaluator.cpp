@@ -134,10 +134,10 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
   info.attachment.initialLayout = renderTarget.srcLayout;
   info.attachment.layout = renderTarget.dstLayout;
 
-  constexpr uint32_t HUNDRED_PERCENT = 100;
+  static constexpr uint32_t HundredPercent = 100;
   if (desc.sizeMethod == TextureSizeMethod::FramebufferRatio) {
-    info.width = desc.width * extent.x / HUNDRED_PERCENT;
-    info.height = desc.height * extent.y / HUNDRED_PERCENT;
+    info.width = desc.width * extent.x / HundredPercent;
+    info.height = desc.height * extent.y / HundredPercent;
   } else {
     info.width = desc.width;
     info.height = desc.height;

@@ -135,7 +135,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  liquid::String magic(liquid::AssetFileMagicLength, '$');
   file.read(magic.data(), magic.length());
   file.read(header.version);
   file.read(header.type);
@@ -297,7 +297,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::ASSET_FILE_MAGIC_LENGTH, '$');
+  liquid::String magic(liquid::AssetFileMagicLength, '$');
   file.read(magic.data(), magic.length());
   file.read(header.version);
   file.read(header.type);

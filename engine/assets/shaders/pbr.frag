@@ -21,9 +21,23 @@ uCameraData;
 layout(std140, set = 2, binding = 1) uniform SceneData { ivec4 data; }
 uSceneData;
 
+/**
+ * @brief Single light data
+ */
 struct LightItem {
+  /**
+   * Light data
+   */
   vec4 data;
+
+  /**
+   * Light color
+   */
   vec4 color;
+
+  /**
+   * Light space matrix
+   */
   mat4 lightMatrix;
 };
 
@@ -56,22 +70,117 @@ layout(std140, set = 3, binding = 0) uniform MaterialDataRaw {
 }
 uMaterialDataRaw;
 
+/**
+ * @brief PBR Material data
+ */
 struct MaterialData {
+  /**
+   * Index to base color texture
+   */
   int baseColorTexture;
+
+  /**
+   * Texture coordinates index
+   * for base color texture
+   *
+   * Only two texture coordinate
+   * groups are supported
+   */
   int baseColorTextureCoord;
+
+  /**
+   * Base color factor
+   *
+   * If texture is not provided,
+   * the factor is used as the
+   * base color.
+   *
+   * If texture is provided
+   * this the factor is used
+   * to scale the texture
+   * color.
+   */
   vec4 baseColorFactor;
+
+  /**
+   * Index to metallic roughness texture
+   */
   int metallicRoughnessTexture;
+
+  /**
+   * Texture coordinates index
+   * for metallic roughness texture
+   *
+   * Only two texture coordinate
+   * groups are supported
+   */
   int metallicRoughnessTextureCoord;
+
+  /**
+   * Metallic factor
+   */
   float metallicFactor;
+
+  /**
+   * Roughness factor
+   */
   float roughnessFactor;
+
+  /**
+   * Index to normal texture
+   */
   int normalTexture;
+
+  /**
+   * Texture coordinates index
+   * for normal texture
+   *
+   * Only two texture coordinate
+   * groups are supported
+   */
   int normalTextureCoord;
+
+  /**
+   * Normal scale
+   */
   float normalScale;
+
+  /**
+   * Index to occlusion texture
+   */
   int occlusionTexture;
+
+  /**
+   * Texture coordinates index
+   * for occlusion texture
+   *
+   * Only two texture coordinate
+   * groups are supported
+   */
   int occlusionTextureCoord;
+
+  /**
+   * Occlusion strength
+   */
   float occlusionStrength;
+
+  /**
+   * Index to emissive texture
+   */
   int emissiveTexture;
+
+  /**
+   * Texture coordinates index
+   * for emissive texture
+   *
+   * Only two texture coordinate
+   * groups are supported
+   */
   int emissiveTextureCoord;
+
+  /**
+   * Emissive factor
+   */
   vec3 emissiveFactor;
 };
 
@@ -94,7 +203,7 @@ const mat4 DEPTH_BIAS = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
                              1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
 
 /**
- * sRGB to Linear color
+ * @brief sRGB to Linear color
  *
  * @param srgbColor Color in SRGB color space
  * @return Color in linear color space
@@ -108,7 +217,7 @@ vec4 srgbToLinear(vec4 srgbColor) {
 }
 
 /**
- * Linear color to sRGB
+ * @brief Linear color to sRGB
  *
  * @param linearColor Color in linear color space
  * @return Color in sRGB color space
@@ -123,7 +232,7 @@ vec4 linearToSrgb(vec4 linearColor) {
 }
 
 /**
- * Lambertian diffuse
+ * @brief Lambertian diffuse
  *
  * @param diffuseColor Diffuse color
  * @return Diffuse
@@ -131,7 +240,7 @@ vec4 linearToSrgb(vec4 linearColor) {
 vec3 lambertianDiffuse(vec3 diffuseColor) { return diffuseColor / PI; }
 
 /**
- * Schlick Fresnel approximation
+ * @brief Schlick Fresnel approximation
  *
  * @param reflectance0 Reflectance at normal incidence
  * @param VdotH Dot product of V and H
@@ -142,7 +251,7 @@ vec3 schlickFresnel(vec3 reflectance0, float VdotH) {
 }
 
 /**
- * GGX/Trowbridge-Reitz normal distribution
+ * @brief GGX/Trowbridge-Reitz normal distribution
  *
  * @param roughness Roughness
  * @param NdotH Dot product of N and H
@@ -154,7 +263,7 @@ float ggxNormalDistribution(float roughness, float NdotH) {
 }
 
 /**
- * Schlick Specular Geometric Attenuation
+ * @brief Schlick Specular Geometric Attenuation
  *
  * @param roughness Roughness
  * @param NdotV Dot product of N and V
@@ -171,7 +280,7 @@ float schlickSpecularGeometricAttenuation(float roughness, float NdotV,
 }
 
 /**
- * Get normals from world position
+ * @brief Get normals from world position
  *
  * Checking for tangent existence is based on
  * w attribute of tangent vector, which determines
@@ -208,10 +317,28 @@ vec3 getNormal() {
   }
 }
 
+/**
+ * @brief Light calculation results
+ */
 struct LightCalculations {
+  /**
+   * Dot product of N and L
+   */
   float NdotL;
+
+  /**
+   * Dot product of N and H
+   */
   float NdotH;
+
+  /**
+   * Dot product of V dot H
+   */
   float VdotH;
+
+  /**
+   * Light intensity
+   */
   float intensity;
 };
 

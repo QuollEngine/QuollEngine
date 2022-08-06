@@ -7,7 +7,7 @@ namespace liquid {
  */
 struct ForceComponent {
   /**
-   * @brief Total amount of applied force
+   * Total amount of applied force
    */
   glm::vec3 force;
 };

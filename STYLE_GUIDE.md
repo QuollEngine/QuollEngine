@@ -4,7 +4,19 @@ This document covers basics for styling all the projects in this repository.
 
 ## Formatting
 
-All C++ source and shader files in this project are formatted using Clang Format using [LLVM coding standards](https://llvm.org/docs/CodingStandards.html#source-code-formatting). Please refer to [.clang-format](./.clang-format) to view clang-format properties.
+All C++ source and shader files in this project are formatted using Clang Format
+using [LLVM coding standards](https://llvm.org/docs/CodingStandards.html#source-code-formatting). Please
+refer to [.clang-format](./.clang-format) to view clang-format properties.
+
+## Docblocks
+
+All the source code, including shaders must have docblocks. The docblocks are automatically verified when
+creating Pull requests. Doxygen style commands are allowed inside docblocks but they must **always**
+start with `@` character instead of `\` (e.g `@param`).
+
+As a general rule of thumb, descriptions of functions and compound interface **must**
+start with `@brief` command while non-static public member variables of classes
+do not need to be annotated with `@brief` command.
 
 ## Shaders
 
@@ -166,7 +178,7 @@ requiring additional descriptions, single-line comments must be used.
 
 All functions must have multi-line comments that start with
 two stars (`/**`) and must use Doxygen commands that
-start with `@` sign.  Example:
+start with `@` sign. Example:
 
 ```glsl
 /**
@@ -186,4 +198,4 @@ vec3 lambertianDiffuse(vec3 diffuseColor) { return diffuseColor / PI; }
 **Code:**
 
 If a code snippet needs to be explained with comments, single line
-comments must be used. 
+comments must be used.

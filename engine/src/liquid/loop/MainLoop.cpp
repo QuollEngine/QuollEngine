@@ -20,9 +20,9 @@ void MainLoop::setRenderFn(const std::function<void()> &renderFn) {
 void MainLoop::run() {
   bool running = true;
 
-  constexpr uint32_t ONE_SECOND_IN_MS = 1000;
-  constexpr double MAX_UPDATE_TIME = 0.25;
-  constexpr double dt = 0.01;
+  static constexpr uint32_t OneSecondInMs = 1000;
+  static constexpr double MaxUpdateTime = 0.25;
+  static constexpr double TimeDelta = 0.01;
 
   uint32_t frames = 0;
   double accumulator = 0.0;
@@ -41,21 +41,21 @@ void MainLoop::run() {
 
     double frameTime = std::clamp(
         std::chrono::duration<double>(currentTime - prevGameTime).count(), 0.0,
-        MAX_UPDATE_TIME);
+        MaxUpdateTime);
 
     prevGameTime = currentTime;
     accumulator += frameTime;
 
-    while (accumulator >= dt) {
-      running = mUpdateFn(static_cast<float>(dt));
-      accumulator -= dt;
+    while (accumulator >= TimeDelta) {
+      running = mUpdateFn(static_cast<float>(TimeDelta));
+      accumulator -= TimeDelta;
     }
 
     mRenderFn();
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
-            .count() >= ONE_SECOND_IN_MS) {
+            .count() >= OneSecondInMs) {
       prevFrameTime = currentTime;
       mFpsCounter.collectFPS(frames);
       frames = 0;

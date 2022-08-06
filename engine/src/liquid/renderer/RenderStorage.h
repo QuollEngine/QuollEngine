@@ -19,17 +19,17 @@ public:
   /**
    * Default reserved space for buffers
    */
-  static constexpr size_t DEFAULT_RESERVED_SPACE = 10000;
+  static constexpr size_t DefaultReservedSpace = 10000;
 
   /**
    * Maximum number of joints
    */
-  static constexpr size_t MAX_NUM_JOINTS = 32;
+  static constexpr size_t MaxNumJoints = 32;
 
   /**
    * Maximum number of lights
    */
-  static constexpr size_t MAX_NUM_LIGHTS = 256;
+  static constexpr size_t MaxNumLights = 256;
 
   /**
    * @brief Light data
@@ -125,7 +125,7 @@ public:
    *
    * @param reservedSpace Reserved space for buffer data
    */
-  RenderStorage(size_t reservedSpace = DEFAULT_RESERVED_SPACE);
+  RenderStorage(size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Update storage buffers

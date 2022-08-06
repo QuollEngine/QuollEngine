@@ -30,7 +30,7 @@ public:
   /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 1> fields{
+  static constexpr std::array<InterfaceField, 1> Fields{
       InterfaceField{"get_first_entity_by_name", getFirstEntityByName}};
 
   /**

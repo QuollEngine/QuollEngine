@@ -11,11 +11,11 @@
 namespace liquid {
 
 Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
-  constexpr double MAX_CORNER_ANGLE = 3.0;
-  constexpr double MINIMUM_SCALE = 32.0;
-  constexpr double PIXEL_RANGE = 2.0;
-  constexpr uint32_t CHANNELS = 4;
-  constexpr double FONT_SCALE = 2.0;
+  static constexpr double MaxCornerAngle = 3.0;
+  static constexpr double MinimumScale = 32.0;
+  static constexpr double PixelRange = 2.0;
+  static constexpr uint32_t NumChannels = 4;
+  static constexpr double FontScale = 2.0;
 
   using namespace msdf_atlas;
 
@@ -34,10 +34,10 @@ Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
 
   std::vector<GlyphGeometry> msdfGlyphs;
   FontGeometry fontGeometry(&msdfGlyphs);
-  fontGeometry.loadCharset(font, FONT_SCALE, Charset::ASCII);
+  fontGeometry.loadCharset(font, FontScale, Charset::ASCII);
 
   for (auto &glyph : msdfGlyphs) {
-    glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MAX_CORNER_ANGLE, 0);
+    glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MaxCornerAngle, 0);
   }
 
   TightAtlasPacker packer;
@@ -45,8 +45,8 @@ Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
       TightAtlasPacker::DimensionsConstraint::SQUARE);
   packer.setDimensionsConstraint(
       TightAtlasPacker::DimensionsConstraint::POWER_OF_TWO_SQUARE);
-  packer.setMinimumScale(MINIMUM_SCALE);
-  packer.setPixelRange(PIXEL_RANGE);
+  packer.setMinimumScale(MinimumScale);
+  packer.setPixelRange(PixelRange);
   packer.setMiterLimit(1.0);
   packer.setPadding(0);
   packer.pack(msdfGlyphs.data(), static_cast<int>(msdfGlyphs.size()));
@@ -54,8 +54,8 @@ Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
   int width = 0, height = 0;
   packer.getDimensions(width, height);
 
-  ImmediateAtlasGenerator<float, CHANNELS, &mtsdfGenerator,
-                          BitmapAtlasStorage<byte, CHANNELS>>
+  ImmediateAtlasGenerator<float, NumChannels, &mtsdfGenerator,
+                          BitmapAtlasStorage<byte, NumChannels>>
       generator(width, height);
 
   GeneratorAttributes attributes;
@@ -102,15 +102,15 @@ Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
 
   auto storage = generator.atlasStorage();
 
-  msdfgen::BitmapConstRef<byte, CHANNELS> bitmap = storage;
+  msdfgen::BitmapConstRef<byte, NumChannels> bitmap = storage;
 
   std::vector<std::byte> pixels(static_cast<size_t>(bitmap.width) *
-                                bitmap.height * CHANNELS);
+                                bitmap.height * NumChannels);
 
   for (int y = 0; y < bitmap.height; ++y) {
-    memcpy(&pixels[CHANNELS * static_cast<size_t>(bitmap.width) * y],
+    memcpy(&pixels[NumChannels * static_cast<size_t>(bitmap.width) * y],
            bitmap(0, bitmap.height - y - 1),
-           CHANNELS * static_cast<size_t>(bitmap.width));
+           NumChannels * static_cast<size_t>(bitmap.width));
   }
 
   AssetData<FontAsset> fontAsset{};
@@ -118,11 +118,12 @@ Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
   fontAsset.path = filePath;
   fontAsset.relativePath = std::filesystem::relative(filePath, mAssetsPath);
   fontAsset.type = AssetType::Font;
-  fontAsset.size = sizeof(std::byte) * bitmap.width * bitmap.height * CHANNELS;
+  fontAsset.size =
+      sizeof(std::byte) * bitmap.width * bitmap.height * NumChannels;
   fontAsset.data.glyphs = glyphs;
   fontAsset.data.atlas = pixels;
   fontAsset.data.atlasDimensions = glm::uvec2{bitmap.width, bitmap.height};
-  fontAsset.data.fontScale = static_cast<float>(FONT_SCALE);
+  fontAsset.data.fontScale = static_cast<float>(FontScale);
 
   auto handle = mRegistry.getFonts().addAsset(fontAsset);
 

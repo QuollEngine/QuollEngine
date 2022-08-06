@@ -43,14 +43,14 @@ VulkanRenderDevice::VulkanRenderDevice(
 }
 
 RenderFrame VulkanRenderDevice::beginFrame() {
-  static constexpr auto SKIP_FRAME = std::numeric_limits<uint32_t>::max();
+  static constexpr auto SkipFrame = std::numeric_limits<uint32_t>::max();
   static RenderCommandList emptyCommandList;
 
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
 
   if (mBackend.isFramebufferResized()) {
     recreateSwapchain();
-    return {SKIP_FRAME, SKIP_FRAME, emptyCommandList};
+    return {SkipFrame, SkipFrame, emptyCommandList};
   }
 
   mStats.resetCalls();
@@ -61,7 +61,7 @@ RenderFrame VulkanRenderDevice::beginFrame() {
 
   if (imageIndex == std::numeric_limits<uint32_t>::max()) {
     recreateSwapchain();
-    return {SKIP_FRAME, SKIP_FRAME, emptyCommandList};
+    return {SkipFrame, SkipFrame, emptyCommandList};
   }
 
   auto &commandBuffer = mRenderContext.beginRendering(mFrameManager);
@@ -70,8 +70,6 @@ RenderFrame VulkanRenderDevice::beginFrame() {
 }
 
 void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
-  static constexpr auto SKIP_FRAME = std::numeric_limits<uint32_t>::max();
-
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
   mSwapchainRecreated = false;
 

@@ -4,9 +4,23 @@
 
 layout(location = 0) in vec3 inPosition;
 
+/**
+ * @brief Single light data
+ */
 struct LightItem {
+  /**
+   * Light data
+   */
   vec4 data;
+
+  /**
+   * Light color
+   */
   vec4 color;
+
+  /**
+   * Light space matrix
+   */
   mat4 lightMatrix;
 };
 
@@ -15,7 +29,13 @@ layout(std140, set = 0, binding = 0) readonly buffer LightData {
 }
 uLightData;
 
+/**
+ * @brief Single object transforms
+ */
 struct ObjectItem {
+  /**
+   * Object model matrix
+   */
   mat4 modelMatrix;
 };
 

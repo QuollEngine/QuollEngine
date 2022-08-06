@@ -32,8 +32,8 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.IniFilename = nullptr;
 
-  static constexpr size_t FRAMES_IN_FLIGHT = 2;
-  mFrameData.resize(FRAMES_IN_FLIGHT);
+  static constexpr size_t FramesInFlight = 2;
+  mFrameData.resize(FramesInFlight);
 
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -71,13 +71,13 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
                         "before starting rendering");
 
-  constexpr uint32_t FRAMEBUFFER_SIZE_PERCENTAGE = 100;
+  static constexpr uint32_t FramebufferSizePercentage = 100;
 
   rhi::TextureDescription imguiDesc{};
   imguiDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  imguiDesc.width = FRAMEBUFFER_SIZE_PERCENTAGE;
-  imguiDesc.height = FRAMEBUFFER_SIZE_PERCENTAGE;
+  imguiDesc.width = FramebufferSizePercentage;
+  imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
   auto imgui = mRegistry.setTexture(imguiDesc);

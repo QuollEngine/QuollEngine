@@ -4,7 +4,7 @@
 
 namespace liquid {
 
-constexpr size_t ASSET_FILE_MAGIC_LENGTH = 11;
+static constexpr size_t AssetFileMagicLength = 11;
 
 /**
  * @brief Asset file header

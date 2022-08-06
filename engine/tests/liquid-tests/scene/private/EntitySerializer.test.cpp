@@ -126,7 +126,7 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
-  constexpr liquid::MeshAssetHandle NonExistentMeshHandle{45};
+  static constexpr liquid::MeshAssetHandle NonExistentMeshHandle{45};
 
   auto entity = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::MeshComponent>(entity,
@@ -160,7 +160,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkinnedMeshFieldIfSkinnedMeshAssetIsNotInRegistry) {
-  constexpr liquid::SkinnedMeshAssetHandle NonExistentMeshHandle{45};
+  static constexpr liquid::SkinnedMeshAssetHandle NonExistentMeshHandle{45};
 
   auto entity = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::SkinnedMeshComponent>(
@@ -192,7 +192,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
-  constexpr liquid::SkeletonAssetHandle NonExistentSkeletonHandle{45};
+  static constexpr liquid::SkeletonAssetHandle NonExistentSkeletonHandle{45};
 
   auto entity = entityDatabase.createEntity();
   liquid::SkeletonComponent component{};
@@ -300,7 +300,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioAssetIsNotInRegistry) {
-  constexpr liquid::AudioAssetHandle NonExistentHandle{45};
+  static constexpr liquid::AudioAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::AudioSourceComponent>(
@@ -336,7 +336,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateScriptFieldIfScriptAssetIsNotInRegistry) {
-  constexpr liquid::LuaScriptAssetHandle NonExistentHandle{45};
+  static constexpr liquid::LuaScriptAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::ScriptingComponent>(entity,
@@ -385,7 +385,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
 }
 
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
-  constexpr liquid::FontAssetHandle NonExistentHandle{45};
+  static constexpr liquid::FontAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.createEntity();
 
@@ -431,7 +431,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateParentComponentIfParentEntityDoesNotExist) {
-  constexpr liquid::Entity NonExistentEntity{50};
+  static constexpr liquid::Entity NonExistentEntity{50};
 
   auto entity = entityDatabase.createEntity();
 
@@ -454,7 +454,7 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
-  constexpr uint64_t ParentId{50};
+  static constexpr uint64_t ParentId{50};
 
   auto parent = entityDatabase.createEntity();
   entityDatabase.setComponent<liquid::IdComponent>(parent, {ParentId});

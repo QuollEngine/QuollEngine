@@ -9,12 +9,12 @@ enum class FileStatus { Created, Updated, Deleted };
  */
 struct ChangedFile {
   /**
-   * @brief Path to changed file
+   * Path to changed file
    */
   Path path;
 
   /**
-   * @brief Change status
+   * Change status
    */
   FileStatus status;
 };

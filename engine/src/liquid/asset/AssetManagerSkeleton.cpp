@@ -23,7 +23,7 @@ AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   AssetFileHeader header{};
   header.type = AssetType::Skeleton;
   header.version = createVersion(0, 1);
-  file.write(header.magic, ASSET_FILE_MAGIC_LENGTH);
+  file.write(header.magic, AssetFileMagicLength);
   file.write(header.version);
   file.write(header.type);
 

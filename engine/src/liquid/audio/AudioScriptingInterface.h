@@ -37,7 +37,7 @@ public:
   /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> fields{
+  static constexpr std::array<InterfaceField, 2> Fields{
       InterfaceField{"play", play}, InterfaceField{"is_playing", isPlaying}};
 
   /**

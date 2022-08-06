@@ -11,7 +11,7 @@ namespace liquid {
  */
 struct LuaUserData {
   /**
-   * @brief User data pointer
+   * User data pointer
    */
   void *pointer = nullptr;
 };

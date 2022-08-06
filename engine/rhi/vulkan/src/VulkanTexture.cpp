@@ -46,12 +46,12 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
     imageViewType = VK_IMAGE_VIEW_TYPE_2D;
   }
 
-  static constexpr uint32_t HUNDRED_PERCENT = 100;
+  static constexpr uint32_t HundredPercent = 100;
 
   VkExtent3D extent{};
   if (isFramebufferRelative()) {
-    extent.width = description.width * swapchainExtent.x / HUNDRED_PERCENT;
-    extent.height = description.height * swapchainExtent.y / HUNDRED_PERCENT;
+    extent.width = description.width * swapchainExtent.x / HundredPercent;
+    extent.height = description.height * swapchainExtent.y / HundredPercent;
   } else {
     extent.width = description.width;
     extent.height = description.height;

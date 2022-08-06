@@ -9,12 +9,12 @@ public:
    */
   struct InterfaceField {
     /**
-     * @brief Field key
+     * Field key
      */
     const char *key;
 
     /**
-     * @brief Field function
+     * Field function
      */
     int (*fn)(void *);
   };

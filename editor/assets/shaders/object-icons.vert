@@ -9,7 +9,13 @@ layout(set = 0, binding = 0) uniform CameraData {
 }
 uCameraData;
 
+/**
+ * @brief Single object transforms
+ */
 struct ObjectItem {
+  /**
+   * Model matrix for object
+   */
   mat4 modelMatrix;
 };
 

@@ -25,7 +25,6 @@ struct EditorGridData {
  * Controls editor grid
  */
 class EditorGrid {
-
 public:
   /**
    * @brief Set grid lines display flag

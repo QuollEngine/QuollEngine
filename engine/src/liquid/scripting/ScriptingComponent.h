@@ -33,22 +33,22 @@ struct ScriptingComponent {
   /**
    * Collision start observer
    */
-  EventObserverId onCollisionStart = EVENT_OBSERVER_MAX;
+  EventObserverId onCollisionStart = EventObserverMax;
 
   /**
    * Collision end observer
    */
-  EventObserverId onCollisionEnd = EVENT_OBSERVER_MAX;
+  EventObserverId onCollisionEnd = EventObserverMax;
 
   /**
    * Key press observer
    */
-  EventObserverId onKeyPress = EVENT_OBSERVER_MAX;
+  EventObserverId onKeyPress = EventObserverMax;
 
   /**
    * Key release observer
    */
-  EventObserverId onKeyRelease = EVENT_OBSERVER_MAX;
+  EventObserverId onKeyRelease = EventObserverMax;
 };
 
 } // namespace liquid

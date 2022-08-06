@@ -125,21 +125,21 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
 void ScriptingSystem::destroyScriptingData(ScriptingComponent &component) {
   mLuaInterpreter.destroyScope(component.scope);
 
-  if (component.onCollisionStart != EVENT_OBSERVER_MAX) {
+  if (component.onCollisionStart != EventObserverMax) {
     mEventSystem.removeObserver(CollisionEvent::CollisionStarted,
                                 component.onCollisionStart);
   }
 
-  if (component.onCollisionEnd != EVENT_OBSERVER_MAX) {
+  if (component.onCollisionEnd != EventObserverMax) {
     mEventSystem.removeObserver(CollisionEvent::CollisionEnded,
                                 component.onCollisionEnd);
   }
 
-  if (component.onKeyPress != EVENT_OBSERVER_MAX) {
+  if (component.onKeyPress != EventObserverMax) {
     mEventSystem.removeObserver(KeyboardEvent::Pressed, component.onKeyPress);
   }
 
-  if (component.onKeyRelease != EVENT_OBSERVER_MAX) {
+  if (component.onKeyRelease != EventObserverMax) {
     mEventSystem.removeObserver(KeyboardEvent::Released,
                                 component.onKeyRelease);
   }

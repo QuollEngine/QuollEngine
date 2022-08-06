@@ -6,7 +6,7 @@ namespace liquid {
 
 enum class TextureAssetType { Standard, Cubemap };
 
-static constexpr uint32_t DEFAULT_TEXTURE_FORMAT = 43;
+static constexpr uint32_t DefaultTextureFormat = 43;
 
 /**
  * @brief Texture asset data
@@ -35,7 +35,7 @@ struct TextureAsset {
   /**
    * Texture format
    */
-  uint32_t format = DEFAULT_TEXTURE_FORMAT;
+  uint32_t format = DefaultTextureFormat;
 
   /**
    * Raw texture data

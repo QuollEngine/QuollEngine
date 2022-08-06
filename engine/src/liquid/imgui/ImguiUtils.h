@@ -35,7 +35,7 @@ void renderColumn(const String &value);
 
 void renderColumn(uint32_t value);
 
-template <class... Args> void renderRow(const Args &...args) {
+template <class... TArgs> void renderRow(const TArgs &...args) {
   ImGui::TableNextRow();
   (renderColumn(args), ...);
 }

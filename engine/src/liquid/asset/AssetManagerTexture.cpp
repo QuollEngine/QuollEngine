@@ -66,7 +66,7 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 
 Result<TextureAssetHandle>
 AssetManager::loadTextureFromFile(const Path &filePath) {
-  constexpr uint32_t CUBEMAP_SIDES = 6;
+  static constexpr uint32_t CubemapSides = 6;
 
   ktxTexture *ktxTextureData = nullptr;
   KTX_error_code result = ktxTexture_CreateFromNamedFile(
@@ -96,7 +96,7 @@ AssetManager::loadTextureFromFile(const Path &filePath) {
   texture.data.width = ktxTextureData->baseWidth;
   texture.data.height = ktxTextureData->baseHeight;
   texture.data.layers = ktxTextureData->numLayers *
-                        (ktxTextureData->isCubemap ? CUBEMAP_SIDES : 1);
+                        (ktxTextureData->isCubemap ? CubemapSides : 1);
   texture.data.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
                                                 : TextureAssetType::Standard;
   texture.data.format = ktxTexture_GetVkFormat(ktxTextureData);
@@ -108,7 +108,7 @@ AssetManager::loadTextureFromFile(const Path &filePath) {
 
     char *dstData = static_cast<char *>(texture.data.data);
 
-    for (size_t i = 0; i < CUBEMAP_SIDES; ++i) {
+    for (size_t i = 0; i < CubemapSides; ++i) {
       size_t offset = 0;
       ktxTexture_GetImageOffset(ktxTextureData, 0, 0,
                                 static_cast<ktx_uint32_t>(i), &offset);

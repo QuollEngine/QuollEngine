@@ -18,7 +18,7 @@ public:
 
 using ScriptingSystemDeathTest = ScriptingSystemTest;
 
-constexpr float DELTA_TIME = 0.2f;
+static constexpr float TimeDelta = 0.2f;
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto handle = assetManager
@@ -36,9 +36,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   scriptingSystem.start(entityDatabase);
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
-  scriptingSystem.update(DELTA_TIME, entityDatabase);
+  scriptingSystem.update(TimeDelta, entityDatabase);
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 0);
-  EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), DELTA_TIME);
+  EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), TimeDelta);
 }
 
 TEST_F(ScriptingSystemTest,
@@ -48,9 +48,9 @@ TEST_F(ScriptingSystemTest,
                                            "scripting-system-tester.lua")
                     .getData();
 
-  static constexpr size_t NUM_ENTITIES = 20;
+  static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NUM_ENTITIES, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entityDatabase.createEntity();
     entities.at(i) = entity;
@@ -62,7 +62,7 @@ TEST_F(ScriptingSystemTest,
   }
 
   scriptingSystem.start(entityDatabase);
-  scriptingSystem.update(DELTA_TIME, entityDatabase);
+  scriptingSystem.update(TimeDelta, entityDatabase);
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
@@ -87,7 +87,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.update(DELTA_TIME, entityDatabase);
+    scriptingSystem.update(TimeDelta, entityDatabase);
   }
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), 9);
@@ -146,10 +146,10 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
 
   scriptingSystem.start(entityDatabase);
 
-  EXPECT_LT(component.onCollisionStart, liquid::EVENT_OBSERVER_MAX);
-  EXPECT_LT(component.onCollisionEnd, liquid::EVENT_OBSERVER_MAX);
-  EXPECT_LT(component.onKeyPress, liquid::EVENT_OBSERVER_MAX);
-  EXPECT_LT(component.onKeyRelease, liquid::EVENT_OBSERVER_MAX);
+  EXPECT_LT(component.onCollisionStart, liquid::EventObserverMax);
+  EXPECT_LT(component.onCollisionEnd, liquid::EventObserverMax);
+  EXPECT_LT(component.onKeyPress, liquid::EventObserverMax);
+  EXPECT_LT(component.onKeyRelease, liquid::EventObserverMax);
 }
 
 TEST_F(ScriptingSystemTest,
