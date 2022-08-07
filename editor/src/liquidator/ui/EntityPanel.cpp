@@ -512,6 +512,7 @@ void EntityPanel::renderCollidable() {
             ImGui::Selectable(getGeometryName(type).c_str())) {
           collidable.geometryDesc.type = type;
           collidable.geometryDesc.params = getDefaultGeometryFromType(type);
+          mEntityManager.save(mSelectedEntity);
         }
       }
       ImGui::EndCombo();
@@ -520,29 +521,68 @@ void EntityPanel::renderCollidable() {
     if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
       auto &box =
           std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
-      std::array<float, 3> extents{box.halfExtents.x, box.halfExtents.y,
-                                   box.halfExtents.z};
+      auto halfExtents = box.halfExtents;
+
       ImGui::Text("Half extents");
-      if (ImGui::InputFloat3("###HalfExtents", extents.data())) {
-        box.halfExtents.x = extents.at(0);
-        box.halfExtents.y = extents.at(1);
-        box.halfExtents.z = extents.at(2);
+      if (liquid::imgui::input("###HalfExtents", halfExtents)) {
+        box.halfExtents = halfExtents;
+        mEntityManager.save(mSelectedEntity);
       }
     } else if (collidable.geometryDesc.type ==
                liquid::PhysicsGeometryType::Sphere) {
       auto &sphere = std::get<liquid::PhysicsGeometrySphere>(
           collidable.geometryDesc.params);
+      float radius = sphere.radius;
+
       ImGui::Text("Radius");
-      ImGui::InputFloat("###Radius", &sphere.radius);
+      if (liquid::imgui::input("###Radius", radius)) {
+        sphere.radius = radius;
+        mEntityManager.save(mSelectedEntity);
+      }
     } else if (collidable.geometryDesc.type ==
                liquid::PhysicsGeometryType::Capsule) {
       auto &capsule = std::get<liquid::PhysicsGeometryCapsule>(
           collidable.geometryDesc.params);
+      float radius = capsule.radius;
+      float halfHeight = capsule.halfHeight;
+
       ImGui::Text("Radius");
-      ImGui::InputFloat("###Radius", &capsule.radius);
+      if (liquid::imgui::input("###Radius", radius)) {
+        capsule.radius = radius;
+        mEntityManager.save(mSelectedEntity);
+      }
 
       ImGui::Text("Half height");
-      ImGui::InputFloat("###HalfHeight", &capsule.halfHeight);
+      if (liquid::imgui::input("###HalfHeight", halfHeight)) {
+        capsule.halfHeight = halfHeight;
+        mEntityManager.save(mSelectedEntity);
+      }
+    }
+
+    {
+      auto &material = collidable.materialDesc;
+
+      float dynamicFriction = material.dynamicFriction;
+      float restitution = material.restitution;
+      float staticFriction = material.staticFriction;
+
+      ImGui::Text("Dynamic friction");
+      if (liquid::imgui::input("###DynamicFriction", dynamicFriction)) {
+        material.dynamicFriction = dynamicFriction;
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      ImGui::Text("Restitution");
+      if (liquid::imgui::input("###Restitution", restitution)) {
+        material.restitution = restitution;
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      ImGui::Text("Static friction");
+      if (liquid::imgui::input("###StaticFriction", staticFriction)) {
+        material.staticFriction = staticFriction;
+        mEntityManager.save(mSelectedEntity);
+      }
     }
   }
   widgets::Section::end();
@@ -560,16 +600,24 @@ void EntityPanel::renderRigidBody() {
             .getComponent<liquid::RigidBodyComponent>(mSelectedEntity);
 
     ImGui::Text("Mass");
-    ImGui::InputFloat("###Mass", &rigidBody.dynamicDesc.mass);
+    float mass = rigidBody.dynamicDesc.mass;
 
-    std::array<float, 3> inertia{rigidBody.dynamicDesc.inertia.x,
-                                 rigidBody.dynamicDesc.inertia.y,
-                                 rigidBody.dynamicDesc.inertia.z};
+    if (liquid::imgui::input("###Mass", mass)) {
+      rigidBody.dynamicDesc.mass = mass;
+      mEntityManager.save(mSelectedEntity);
+    }
 
-    if (ImGui::InputFloat3("###Inertia", inertia.data())) {
-      rigidBody.dynamicDesc.inertia.x = inertia.at(0);
-      rigidBody.dynamicDesc.inertia.y = inertia.at(1);
-      rigidBody.dynamicDesc.inertia.z = inertia.at(2);
+    auto inertia = rigidBody.dynamicDesc.inertia;
+
+    if (liquid::imgui::input("###Inertia", inertia)) {
+      rigidBody.dynamicDesc.inertia = inertia;
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    ImGui::Text("Apply gravity");
+    if (ImGui::Checkbox("Apply gravity###ApplyGravity",
+                        &rigidBody.dynamicDesc.applyGravity)) {
+      mEntityManager.save(mSelectedEntity);
     }
 
     if (rigidBody.actor) {

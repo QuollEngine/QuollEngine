@@ -55,6 +55,76 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   mEntityDatabase.setComponent(entity, transform);
   mEntityDatabase.setComponent<WorldTransformComponent>(entity, {});
 
+  if (node["components"]["rigidBody"] &&
+      node["components"]["rigidBody"].IsMap()) {
+    RigidBodyComponent rigidBody{};
+    rigidBody.dynamicDesc.mass =
+        node["components"]["rigidBody"]["mass"].as<float>(
+            rigidBody.dynamicDesc.mass);
+    rigidBody.dynamicDesc.inertia =
+        node["components"]["rigidBody"]["inertia"].as<glm::vec3>(
+            rigidBody.dynamicDesc.inertia);
+    rigidBody.dynamicDesc.applyGravity =
+        node["components"]["rigidBody"]["applyGravity"].as<bool>(
+            rigidBody.dynamicDesc.applyGravity);
+
+    mEntityDatabase.setComponent(entity, rigidBody);
+  }
+
+  static const std::unordered_map<String, PhysicsGeometryType> ValidShapes{
+      {"box", PhysicsGeometryType::Box},
+      {"sphere", PhysicsGeometryType::Sphere},
+      {"capsule", PhysicsGeometryType::Capsule},
+      {"plane", PhysicsGeometryType::Plane}};
+
+  if (node["components"]["collidable"] &&
+      node["components"]["collidable"].IsMap() &&
+      ValidShapes.find(node["components"]["collidable"]["shape"].as<String>(
+          "unknown")) != ValidShapes.end()) {
+    CollidableComponent collidable{};
+    auto shape =
+        ValidShapes.at(node["components"]["collidable"]["shape"].as<String>());
+    collidable.geometryDesc.type = shape;
+
+    if (shape == PhysicsGeometryType::Box) {
+      liquid::PhysicsGeometryBox box{};
+      box.halfExtents =
+          node["components"]["collidable"]["halfExtents"].as<glm::vec3>(
+              box.halfExtents);
+
+      collidable.geometryDesc.params = box;
+    } else if (shape == PhysicsGeometryType::Sphere) {
+      liquid::PhysicsGeometrySphere sphere{};
+      sphere.radius =
+          node["components"]["collidable"]["radius"].as<float>(sphere.radius);
+
+      collidable.geometryDesc.params = sphere;
+    } else if (shape == PhysicsGeometryType::Capsule) {
+      liquid::PhysicsGeometryCapsule capsule{};
+      capsule.radius =
+          node["components"]["collidable"]["radius"].as<float>(capsule.radius);
+      capsule.halfHeight =
+          node["components"]["collidable"]["halfHeight"].as<float>(
+              capsule.halfHeight);
+
+      collidable.geometryDesc.params = capsule;
+    } else if (shape == PhysicsGeometryType::Plane) {
+      collidable.geometryDesc.params = PhysicsGeometryPlane{};
+    }
+
+    collidable.materialDesc.dynamicFriction =
+        node["components"]["collidable"]["dynamicFriction"].as<float>(
+            collidable.materialDesc.dynamicFriction);
+    collidable.materialDesc.restitution =
+        node["components"]["collidable"]["restitution"].as<float>(
+            collidable.materialDesc.restitution);
+    collidable.materialDesc.staticFriction =
+        node["components"]["collidable"]["staticFriction"].as<float>(
+            collidable.materialDesc.staticFriction);
+
+    mEntityDatabase.setComponent(entity, collidable);
+  }
+
   if (node["components"]["mesh"]) {
     auto path = Path(node["components"]["mesh"].as<String>(""));
     auto handle = mAssetRegistry.getMeshes().findHandleByRelativePath(path);

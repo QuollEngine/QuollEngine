@@ -981,6 +981,418 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
   EXPECT_EQ(text.font, handle);
 }
 
+using SceneLoaderRigidBodyTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderRigidBodyTest,
+       DoesNotCreateRigidBodyComponentIfRigidBodyFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_FALSE(entityDatabase.hasComponent<liquid::RigidBodyComponent>(entity));
+}
+
+TEST_F(SceneLoaderRigidBodyTest,
+       DoesNotCreateRigidBodyComponentIfRigidBodyFieldIsNotMap) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["rigidBody"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(
+        entityDatabase.hasComponent<liquid::AudioSourceComponent>(entity));
+  }
+}
+
+TEST_F(SceneLoaderRigidBodyTest,
+       TriesToFillRigidBodyComponentIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  liquid::RigidBodyComponent defaultComponent{};
+  auto defaults = defaultComponent.dynamicDesc;
+
+  auto validMass = 2.5f;
+  auto validInertia = glm::vec3(2.5f);
+  auto validGravity = true;
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["rigidBody"]["mass"] = invalidNode;
+    node["components"]["rigidBody"]["inertia"] = validInertia;
+    node["components"]["rigidBody"]["gravity"] = validGravity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::RigidBodyComponent>(entity));
+    const auto &rigidBody =
+        entityDatabase.getComponent<liquid::RigidBodyComponent>(entity)
+            .dynamicDesc;
+
+    EXPECT_EQ(rigidBody.mass, defaults.mass);
+    EXPECT_EQ(rigidBody.inertia, validInertia);
+    EXPECT_EQ(rigidBody.applyGravity, validGravity);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["rigidBody"]["mass"] = validMass;
+    node["components"]["rigidBody"]["inertia"] = invalidNode;
+    node["components"]["rigidBody"]["gravity"] = validGravity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::RigidBodyComponent>(entity));
+    const auto &rigidBody =
+        entityDatabase.getComponent<liquid::RigidBodyComponent>(entity)
+            .dynamicDesc;
+
+    EXPECT_EQ(rigidBody.mass, validMass);
+    EXPECT_EQ(rigidBody.inertia, defaults.inertia);
+    EXPECT_EQ(rigidBody.applyGravity, validGravity);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["rigidBody"]["mass"] = validMass;
+    node["components"]["rigidBody"]["inertia"] = validInertia;
+    node["components"]["rigidBody"]["gravity"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::RigidBodyComponent>(entity));
+    const auto &rigidBody =
+        entityDatabase.getComponent<liquid::RigidBodyComponent>(entity)
+            .dynamicDesc;
+
+    EXPECT_EQ(rigidBody.mass, validMass);
+    EXPECT_EQ(rigidBody.inertia, validInertia);
+    EXPECT_EQ(rigidBody.applyGravity, defaults.applyGravity);
+  }
+}
+
+TEST_F(SceneLoaderRigidBodyTest,
+       CreatesRigidBodyComponentWithFileDataIfValidField) {
+  auto validMass = 2.5f;
+  auto validInertia = glm::vec3(2.5f);
+  auto validGravity = true;
+
+  auto [node, entity] = createNode();
+  node["components"]["rigidBody"]["mass"] = validMass;
+  node["components"]["rigidBody"]["inertia"] = validInertia;
+  node["components"]["rigidBody"]["applyGravity"] = validGravity;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::RigidBodyComponent>(entity));
+  const auto &rigidBody =
+      entityDatabase.getComponent<liquid::RigidBodyComponent>(entity)
+          .dynamicDesc;
+
+  EXPECT_EQ(rigidBody.mass, validMass);
+  EXPECT_EQ(rigidBody.inertia, validInertia);
+  EXPECT_EQ(rigidBody.applyGravity, validGravity);
+}
+
+using SceneLoaderCollidableTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderCollidableTest,
+       DoesNotCreateCollidableComponentIfCollidableFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_FALSE(
+      entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       DoesNotCreateCollidableComponentIfCollidableFieldIsNotMap) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["collidable"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(
+        entityDatabase.hasComponent<liquid::AudioSourceComponent>(entity));
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       DoesNotCreateCollidableComponentIfCollidableShapeIsUnknown) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  node["components"]["collidable"]["shape"] = "unknown";
+
+  EXPECT_FALSE(
+      entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       TriesToFillCollidableBoxComponentIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  auto defaults = liquid::PhysicsGeometryBox{};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["collidable"]["shape"] = "box";
+    node["components"]["collidable"]["halfExtents"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &collidable = std::get<liquid::PhysicsGeometryBox>(
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .geometryDesc.params);
+
+    EXPECT_EQ(collidable.halfExtents, defaults.halfExtents);
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       CreatesBoxCollidableWithFileDataIfValidField) {
+  auto validHalfExtents = glm::vec3(2.5f);
+
+  auto [node, entity] = createNode();
+  node["components"]["collidable"]["shape"] = "box";
+  node["components"]["collidable"]["halfExtents"] = validHalfExtents;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+  const auto &collidable = std::get<liquid::PhysicsGeometryBox>(
+      entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+          .geometryDesc.params);
+
+  EXPECT_EQ(collidable.halfExtents, validHalfExtents);
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       TriesToFillCollidableSphereComponentIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  auto defaults = liquid::PhysicsGeometrySphere{};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["collidable"]["shape"] = "sphere";
+    node["components"]["collidable"]["radius"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &collidable = std::get<liquid::PhysicsGeometrySphere>(
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .geometryDesc.params);
+
+    EXPECT_EQ(collidable.radius, defaults.radius);
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       CreatesSphereCollidableWithFileDataIfValidField) {
+  auto validRadius = 2.5f;
+
+  auto [node, entity] = createNode();
+  node["components"]["collidable"]["shape"] = "sphere";
+  node["components"]["collidable"]["radius"] = validRadius;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+  const auto &collidable = std::get<liquid::PhysicsGeometrySphere>(
+      entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+          .geometryDesc.params);
+
+  EXPECT_EQ(collidable.radius, validRadius);
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       TriesToFillCollidableCapsuleComponentIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  auto defaults = liquid::PhysicsGeometryCapsule{};
+
+  auto validHalfHeight = 3.5f;
+  auto validRadius = 2.5f;
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["collidable"]["shape"] = "capsule";
+    node["components"]["collidable"]["radius"] = invalidNode;
+    node["components"]["collidable"]["halfHeight"] = validHalfHeight;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &collidable = std::get<liquid::PhysicsGeometryCapsule>(
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .geometryDesc.params);
+
+    EXPECT_EQ(collidable.radius, defaults.radius);
+    EXPECT_EQ(collidable.halfHeight, validHalfHeight);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["collidable"]["shape"] = "capsule";
+    node["components"]["collidable"]["radius"] = validRadius;
+    node["components"]["collidable"]["halfHeight"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &collidable = std::get<liquid::PhysicsGeometryCapsule>(
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .geometryDesc.params);
+
+    EXPECT_EQ(collidable.radius, validRadius);
+    EXPECT_EQ(collidable.halfHeight, defaults.halfHeight);
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       CreatesCapsuleCollidableWithFileDataIfValidField) {
+  auto validHalfHeight = 3.5f;
+  auto validRadius = 2.5f;
+
+  auto [node, entity] = createNode();
+  node["components"]["collidable"]["shape"] = "capsule";
+  node["components"]["collidable"]["radius"] = validRadius;
+  node["components"]["collidable"]["halfHeight"] = validHalfHeight;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+  const auto &collidable = std::get<liquid::PhysicsGeometryCapsule>(
+      entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+          .geometryDesc.params);
+
+  EXPECT_EQ(collidable.radius, validRadius);
+  EXPECT_EQ(collidable.halfHeight, validHalfHeight);
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       TriesToFillCollidableComponentMaterialsIfFieldPropertiesAreInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  auto defaults = liquid::PhysicsMaterialDesc{};
+
+  auto validDynamicFriction = 3.5f;
+  auto validRestitution = 2.5f;
+  auto validStaticFriction = 1.5f;
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["components"]["collidable"]["shape"] = "box";
+    node["components"]["collidable"]["dynamicFriction"] = invalidNode;
+    node["components"]["collidable"]["restitution"] = validRestitution;
+    node["components"]["collidable"]["staticFriction"] = validStaticFriction;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &material =
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .materialDesc;
+
+    EXPECT_EQ(material.dynamicFriction, defaults.dynamicFriction);
+    EXPECT_EQ(material.restitution, validRestitution);
+    EXPECT_EQ(material.staticFriction, validStaticFriction);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["components"]["collidable"]["shape"] = "sphere";
+    node["components"]["collidable"]["dynamicFriction"] = validDynamicFriction;
+    node["components"]["collidable"]["restitution"] = invalidNode;
+    node["components"]["collidable"]["staticFriction"] = validStaticFriction;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &material =
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .materialDesc;
+
+    EXPECT_EQ(material.dynamicFriction, validDynamicFriction);
+    EXPECT_EQ(material.restitution, defaults.restitution);
+    EXPECT_EQ(material.staticFriction, validStaticFriction);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["components"]["collidable"]["shape"] = "capsule";
+    node["components"]["collidable"]["dynamicFriction"] = validDynamicFriction;
+    node["components"]["collidable"]["restitution"] = validRestitution;
+    node["components"]["collidable"]["staticFriction"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(
+        entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+    const auto &material =
+        entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+            .materialDesc;
+
+    EXPECT_EQ(material.dynamicFriction, validDynamicFriction);
+    EXPECT_EQ(material.restitution, validRestitution);
+    EXPECT_EQ(material.staticFriction, defaults.staticFriction);
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest,
+       CreatesCollidableMaterialsWithFileDataIfValidField) {
+  auto validDynamicFriction = 3.5f;
+  auto validRestitution = 2.5f;
+  auto validStaticFriction = 1.5f;
+
+  auto [node, entity] = createNode();
+  // Shape does not matter here
+  node["components"]["collidable"]["shape"] = "plane";
+  node["components"]["collidable"]["dynamicFriction"] = validDynamicFriction;
+  node["components"]["collidable"]["restitution"] = validRestitution;
+  node["components"]["collidable"]["staticFriction"] = validStaticFriction;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.hasComponent<liquid::CollidableComponent>(entity));
+  const auto &material =
+      entityDatabase.getComponent<liquid::CollidableComponent>(entity)
+          .materialDesc;
+
+  EXPECT_EQ(material.dynamicFriction, validDynamicFriction);
+  EXPECT_EQ(material.restitution, validRestitution);
+  EXPECT_EQ(material.staticFriction, validStaticFriction);
+}
+
 using SceneLoaderParentTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderParentTest,

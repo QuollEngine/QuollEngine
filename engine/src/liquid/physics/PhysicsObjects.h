@@ -28,6 +28,27 @@ struct PhysicsMaterialDesc {
 enum class PhysicsGeometryType { Sphere, Plane, Capsule, Box };
 
 /**
+ * @brief Get physics geometry type string
+ *
+ * @param type Physics geometry type
+ * @return Type string
+ */
+inline String getPhysicsGeometryTypeString(PhysicsGeometryType type) {
+  switch (type) {
+  case PhysicsGeometryType::Sphere:
+    return "sphere";
+  case PhysicsGeometryType::Plane:
+    return "plane";
+  case PhysicsGeometryType::Capsule:
+    return "capsule";
+  case PhysicsGeometryType::Box:
+    return "box";
+  default:
+    return "unknown";
+  }
+}
+
+/**
  * @brief Sphere geometry data
  */
 struct PhysicsGeometrySphere {
