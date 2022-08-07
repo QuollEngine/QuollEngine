@@ -94,6 +94,45 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
+  if (mEntityDatabase.hasComponent<RigidBodyComponent>(entity)) {
+    const auto &rigidBodyDesc =
+        mEntityDatabase.getComponent<RigidBodyComponent>(entity).dynamicDesc;
+
+    components["rigidBody"]["applyGravity"] = rigidBodyDesc.applyGravity;
+    components["rigidBody"]["inertia"] = rigidBodyDesc.inertia;
+    components["rigidBody"]["mass"] = rigidBodyDesc.mass;
+  }
+
+  if (mEntityDatabase.hasComponent<CollidableComponent>(entity)) {
+    const auto &component =
+        mEntityDatabase.getComponent<CollidableComponent>(entity);
+
+    auto type = component.geometryDesc.type;
+
+    components["collidable"]["shape"] = getPhysicsGeometryTypeString(type);
+
+    if (type == PhysicsGeometryType::Box) {
+      components["collidable"]["halfExtents"] =
+          std::get<PhysicsGeometryBox>(component.geometryDesc.params)
+              .halfExtents;
+    } else if (type == PhysicsGeometryType::Sphere) {
+      components["collidable"]["radius"] =
+          std::get<PhysicsGeometrySphere>(component.geometryDesc.params).radius;
+    } else if (type == PhysicsGeometryType::Capsule) {
+      const auto &capsule =
+          std::get<PhysicsGeometryCapsule>(component.geometryDesc.params);
+      components["collidable"]["radius"] = capsule.radius;
+      components["collidable"]["halfHeight"] = capsule.halfHeight;
+    }
+
+    components["collidable"]["dynamicFriction"] =
+        component.materialDesc.dynamicFriction;
+    components["collidable"]["restitution"] =
+        component.materialDesc.restitution;
+    components["collidable"]["staticFriction"] =
+        component.materialDesc.staticFriction;
+  }
+
   if (mEntityDatabase.hasComponent<MeshComponent>(entity)) {
     auto handle = mEntityDatabase.getComponent<MeshComponent>(entity).handle;
     if (mAssetRegistry.getMeshes().hasAsset(handle)) {

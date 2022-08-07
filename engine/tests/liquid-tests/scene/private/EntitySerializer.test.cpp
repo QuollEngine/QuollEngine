@@ -423,6 +423,138 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest,
+       DoesNotCreateRigidBodyFieldIfRigidBodyComponentDoesNotExist) {
+  auto entity = entityDatabase.createEntity();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["rigidBody"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsDynamicRigidBodyDesc rigidBodyDesc{};
+  rigidBodyDesc.applyGravity = true;
+  rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
+  rigidBodyDesc.mass = 4.5f;
+
+  entityDatabase.setComponent<liquid::RigidBodyComponent>(entity,
+                                                          {rigidBodyDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["rigidBody"]);
+  EXPECT_EQ(node["rigidBody"]["applyGravity"].as<bool>(),
+            rigidBodyDesc.applyGravity);
+  EXPECT_EQ(node["rigidBody"]["inertia"].as<glm::vec3>(),
+            rigidBodyDesc.inertia);
+  EXPECT_EQ(node["rigidBody"]["mass"].as<float>(), rigidBodyDesc.mass);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateCollidableFieldIfCollidableComponentDoesNotExist) {
+  auto entity = entityDatabase.createEntity();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["collidable"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsGeometryBox boxGeometry{{2.5f, 3.5f, 4.5f}};
+
+  liquid::PhysicsGeometryDesc geometryDesc{};
+  geometryDesc.type = liquid::PhysicsGeometryType::Box;
+  geometryDesc.params = boxGeometry;
+
+  entityDatabase.setComponent<liquid::CollidableComponent>(entity,
+                                                           {geometryDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["shape"].as<liquid::String>(""), "box");
+  EXPECT_EQ(node["collidable"]["halfExtents"].as<glm::vec3>(glm::vec3(0.0f)),
+            boxGeometry.halfExtents);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsGeometrySphere sphereParams{3.5f};
+
+  liquid::PhysicsGeometryDesc geometryDesc{};
+  geometryDesc.type = liquid::PhysicsGeometryType::Sphere;
+  geometryDesc.params = sphereParams;
+
+  entityDatabase.setComponent<liquid::CollidableComponent>(entity,
+                                                           {geometryDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["shape"].as<liquid::String>(""), "sphere");
+  EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), sphereParams.radius);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsGeometryCapsule capsuleParams{2.5f, 4.5f};
+
+  liquid::PhysicsGeometryDesc geometryDesc{};
+  geometryDesc.type = liquid::PhysicsGeometryType::Capsule;
+  geometryDesc.params = capsuleParams;
+
+  entityDatabase.setComponent<liquid::CollidableComponent>(entity,
+                                                           {geometryDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["shape"].as<liquid::String>(""), "capsule");
+  EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), capsuleParams.radius);
+  EXPECT_EQ(node["collidable"]["halfHeight"].as<float>(0.0f),
+            capsuleParams.halfHeight);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsGeometryDesc geometryDesc{};
+  geometryDesc.type = liquid::PhysicsGeometryType::Plane;
+
+  entityDatabase.setComponent<liquid::CollidableComponent>(entity,
+                                                           {geometryDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["shape"].as<liquid::String>(""), "plane");
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
+  auto entity = entityDatabase.createEntity();
+
+  liquid::PhysicsMaterialDesc materialDesc{};
+  materialDesc.dynamicFriction = 2.5f;
+  materialDesc.restitution = 4.5f;
+  materialDesc.staticFriction = 3.5f;
+
+  entityDatabase.setComponent<liquid::CollidableComponent>(entity,
+                                                           {{}, materialDesc});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["dynamicFriction"].as<float>(0.0f),
+            materialDesc.dynamicFriction);
+  EXPECT_EQ(node["collidable"]["restitution"].as<float>(0.0f),
+            materialDesc.restitution);
+  EXPECT_EQ(node["collidable"]["staticFriction"].as<float>(0.0f),
+            materialDesc.staticFriction);
+}
+
+TEST_F(EntitySerializerTest,
        DoesNotCreateParentFieldIfParentComponentDoesNotExist) {
   auto entity = entityDatabase.createEntity();
   auto node = entitySerializer.createComponentsNode(entity);
