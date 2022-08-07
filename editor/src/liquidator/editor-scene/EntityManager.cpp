@@ -21,23 +21,21 @@ void EntityManager::save(liquid::Entity entity) {
 liquid::Entity EntityManager::createEmptyEntity(
     liquid::Entity parent, const liquid::LocalTransformComponent &transform,
     const liquid::String &name) {
-  auto entity = getActiveEntityDatabase().createEntity();
-  getActiveEntityDatabase().setComponent(entity, transform);
-  getActiveEntityDatabase().setComponent<liquid::WorldTransformComponent>(
-      entity, {});
 
-  if (getActiveEntityDatabase().hasEntity(parent)) {
-    getActiveEntityDatabase().setComponent<liquid::ParentComponent>(entity,
-                                                                    {parent});
+  auto &entityDatabase = getActiveEntityDatabase();
 
-    if (!getActiveEntityDatabase().hasComponent<liquid::ChildrenComponent>(
-            parent)) {
-      getActiveEntityDatabase().setComponent<liquid::ChildrenComponent>(parent,
-                                                                        {});
+  auto entity = entityDatabase.createEntity();
+  entityDatabase.setComponent(entity, transform);
+  entityDatabase.setComponent<liquid::WorldTransformComponent>(entity, {});
+
+  if (entityDatabase.hasEntity(parent)) {
+    entityDatabase.setComponent<liquid::ParentComponent>(entity, {parent});
+
+    if (!entityDatabase.hasComponent<liquid::ChildrenComponent>(parent)) {
+      entityDatabase.setComponent<liquid::ChildrenComponent>(parent, {});
     }
 
-    getActiveEntityDatabase()
-        .getComponent<liquid::ChildrenComponent>(parent)
+    entityDatabase.getComponent<liquid::ChildrenComponent>(parent)
         .children.push_back(entity);
   }
 
@@ -138,23 +136,11 @@ void EntityManager::setSkinnedMesh(liquid::Entity entity,
 }
 
 void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
-  if (!getActiveEntityDatabase().hasComponent<liquid::NameComponent>(entity)) {
-    liquid::NameComponent component{};
-    getActiveEntityDatabase().setComponent(entity, component);
-  }
-
-  auto &component =
-      getActiveEntityDatabase().getComponent<liquid::NameComponent>(entity);
-
   if (name.empty()) {
-    component.name =
-        "Untitled " +
-        std::to_string(getActiveEntityDatabase()
-                           .getComponent<liquid::IdComponent>(entity)
-                           .id);
-  } else {
-    component.name = name;
+    return;
   }
+
+  getActiveEntityDatabase().setComponent<liquid::NameComponent>(entity, {name});
 }
 
 void EntityManager::setCamera(liquid::Entity entity,
@@ -183,23 +169,11 @@ void EntityManager::setScript(liquid::Entity entity,
 }
 
 void EntityManager::deleteEntity(liquid::Entity entity) {
-  auto id = getActiveEntityDatabase().getComponent<liquid::IdComponent>(entity);
-
-  auto fileName = std::to_string(id.id) + ".lqnode";
-  getActiveEntityDatabase().setComponent<liquid::DeleteComponent>(entity, {});
-
   if (!mInSimulation) {
-    std::filesystem::remove(std::filesystem::path(mScenePath / fileName));
+    mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath);
   }
 
-  if (getActiveEntityDatabase().hasComponent<liquid::ChildrenComponent>(
-          entity)) {
-    for (auto child : getActiveEntityDatabase()
-                          .getComponent<liquid::ChildrenComponent>(entity)
-                          .children) {
-      deleteEntity(child);
-    }
-  }
+  getActiveEntityDatabase().setComponent<liquid::DeleteComponent>(entity, {});
 }
 
 liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
@@ -214,15 +188,18 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
       static_cast<liquid::PrefabAssetHandle>(handle));
   auto parent = createEmptyEntity(camera, root, asset.name, saveToFile);
 
-  std::map<uint32_t, liquid::Entity> entityMap;
+  uint32_t childIndex = 1;
+  std::unordered_map<uint32_t, liquid::Entity> entityMap;
 
   auto getOrCreateEntity =
-      [&entityMap, this, parent,
-       &camera](uint32_t localId,
-                const liquid::LocalTransformComponent &transform = {}) mutable {
+      [&entityMap, this, parent, &camera, &childIndex](
+          uint32_t localId,
+          const liquid::LocalTransformComponent &transform = {}) mutable {
         if (entityMap.find(localId) == entityMap.end()) {
-          auto entity = createEmptyEntity(parent, transform);
+          auto entity = createEmptyEntity(
+              parent, transform, "Untitled " + std::to_string(childIndex));
           entityMap.insert_or_assign(localId, entity);
+          childIndex++;
         }
 
         return entityMap.at(localId);

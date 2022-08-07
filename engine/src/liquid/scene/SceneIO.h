@@ -39,7 +39,24 @@ public:
    */
   void saveEntity(Entity entity, const Path &path);
 
+  /**
+   * @brief Delete entity
+   *
+   * @param entity Entity
+   * @param path Scene path
+   */
+  void deleteEntityFilesAndRelations(Entity entity, const Path &path);
+
 private:
+  /**
+   * @brief Get entity path
+   *
+   * @param entity Entity
+   * @param path Scene path
+   * @return Entity path
+   */
+  Path getEntityPath(Entity entity, const Path &path);
+
   /**
    * @brief Generate unique ID for entity
    *
