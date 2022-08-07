@@ -295,18 +295,14 @@ void EntityPanel::renderTransform() {
     }
 
     ImGui::Text("World Transform");
-    if (ImGui::BeginTable("table-transformWorld", 4,
-                          ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch |
-                              ImGuiTableFlags_RowBg)) {
+    if (widgets::Table::begin("TableTransformWorld", 4)) {
 
       for (glm::mat4::length_type i = 0; i < 4; ++i) {
-        liquid::imgui::renderRow(
+        widgets::Table::row(
             world.worldTransform[i].x, world.worldTransform[i].y,
             world.worldTransform[i].z, world.worldTransform[i].w);
       }
-
-      ImGui::EndTable();
+      widgets::Table::end();
     }
   }
   widgets::Section::end();
@@ -322,15 +318,11 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
-      if (ImGui::BeginTable("table-mesh", 2,
-                            ImGuiTableFlags_Borders |
-                                ImGuiTableColumnFlags_WidthStretch |
-                                ImGuiTableFlags_RowBg)) {
-
-        liquid::imgui::renderRow("Name", asset.name);
-        liquid::imgui::renderRow(
+      if (widgets::Table::begin("TableMesh", 2)) {
+        widgets::Table::row("Name", asset.name);
+        widgets::Table::row(
             "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
-        ImGui::EndTable();
+        widgets::Table::end();
       }
     }
     widgets::Section::end();
@@ -346,15 +338,10 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
 
       const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
 
-      if (ImGui::BeginTable("table-mesh", 2,
-                            ImGuiTableFlags_Borders |
-                                ImGuiTableColumnFlags_WidthStretch |
-                                ImGuiTableFlags_RowBg)) {
-
-        liquid::imgui::renderRow("Name", asset.name);
-        liquid::imgui::renderRow(
+      if (widgets::Table::begin("TableSkinnedMesh", 2)) {
+        widgets::Table::row("Name", asset.name);
+        widgets::Table::row(
             "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
-        ImGui::EndTable();
       }
     }
     widgets::Section::end();
@@ -622,10 +609,7 @@ void EntityPanel::renderRigidBody() {
 
     if (rigidBody.actor) {
       rigidBody.actor->getLinearVelocity();
-      if (ImGui::BeginTable("TableRigidBodyDetails", 2,
-                            ImGuiTableFlags_Borders |
-                                ImGuiTableColumnFlags_WidthStretch |
-                                ImGuiTableFlags_RowBg)) {
+      if (widgets::Table::begin("TableRigidBodyDetails", 2)) {
         auto *actor = rigidBody.actor;
 
         const auto &pose = actor->getGlobalPose();
@@ -634,31 +618,28 @@ void EntityPanel::renderRigidBody() {
         const auto &linearVelocity = actor->getLinearVelocity();
         const auto &angularVelocity = actor->getAngularVelocity();
 
-        liquid::imgui::renderRow("Pose position",
-                                 glm::vec3(pose.p.x, pose.p.y, pose.p.y));
-        liquid::imgui::renderRow(
-            "Pose rotation",
-            glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
-        liquid::imgui::renderRow("CMass position",
-                                 glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
-        liquid::imgui::renderRow(
-            "CMass rotation",
-            glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
-        liquid::imgui::renderRow(
+        widgets::Table::row("Pose position",
+                            glm::vec3(pose.p.x, pose.p.y, pose.p.y));
+        widgets::Table::row("Pose rotation", glm::quat(cmass.q.w, cmass.q.x,
+                                                       cmass.q.y, cmass.q.z));
+        widgets::Table::row("CMass position",
+                            glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
+        widgets::Table::row("CMass rotation", glm::quat(cmass.q.w, cmass.q.x,
+                                                        cmass.q.y, cmass.q.z));
+        widgets::Table::row(
             "Inverse inertia tensor position",
             glm::vec3(invInertia.x, invInertia.y, invInertia.y));
-        liquid::imgui::renderRow("Linear damping",
-                                 static_cast<float>(actor->getLinearDamping()));
-        liquid::imgui::renderRow(
-            "Angular damping", static_cast<float>(actor->getAngularDamping()));
-        liquid::imgui::renderRow(
+        widgets::Table::row("Linear damping",
+                            static_cast<float>(actor->getLinearDamping()));
+        widgets::Table::row("Angular damping",
+                            static_cast<float>(actor->getAngularDamping()));
+        widgets::Table::row(
             "Linear velocity",
             glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
-        liquid::imgui::renderRow(
+        widgets::Table::row(
             "Angular velocity",
             glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
-
-        ImGui::EndTable();
+        widgets::Table::end();
       }
     }
   }

@@ -25,19 +25,4 @@ bool input(const char *label, glm::vec3 &value, const char *format = "%0.3f",
 bool inputColor(const char *label, glm::vec4 &value,
                 ImGuiInputTextFlags flags = 0);
 
-void renderColumn(const glm::vec3 &value);
-
-void renderColumn(const glm::quat &value);
-
-void renderColumn(float value);
-
-void renderColumn(const String &value);
-
-void renderColumn(uint32_t value);
-
-template <class... TArgs> void renderRow(const TArgs &...args) {
-  ImGui::TableNextRow();
-  (renderColumn(args), ...);
-}
-
 } // namespace liquid::imgui

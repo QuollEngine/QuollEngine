@@ -256,6 +256,9 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
               entityManager.spawnEntity(editorManager.getEditorCamera(),
                                         liquid::EntityNull, entry.asset,
                                         entry.assetType);
+            } else if (entry.assetType == liquid::AssetType::Material) {
+              mMaterialViewer.open(
+                  static_cast<liquid::MaterialAssetHandle>(entry.asset));
             } else if (entry.assetType == liquid::AssetType::LuaScript) {
               mFileOpener.openFile(entry.path);
             }
@@ -297,6 +300,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
   widgets::Window::end();
 
   mStatusDialog.render();
+
+  mMaterialViewer.render(assetManager.getRegistry());
 }
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
