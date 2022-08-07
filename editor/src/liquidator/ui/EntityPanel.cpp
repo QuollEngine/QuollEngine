@@ -118,8 +118,11 @@ void EntityPanel::renderName() {
     mIsNameActivated = ImGui::IsItemActivated();
 
     if (ImGui::IsItemDeactivatedAfterEdit()) {
-      mEntityManager.setName(mSelectedEntity, mName);
-      mEntityManager.save(mSelectedEntity);
+      if (!mName.empty()) {
+        mEntityManager.setName(mSelectedEntity, mName);
+        mEntityManager.save(mSelectedEntity);
+      }
+
       mName = mEntityManager.getActiveEntityDatabase()
                   .getComponent<liquid::NameComponent>(mSelectedEntity)
                   .name;

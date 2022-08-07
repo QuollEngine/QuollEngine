@@ -47,18 +47,37 @@ void SceneIO::saveEntity(Entity entity, const Path &path) {
   }
 
   auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
-
   mEntityIdCache.insert({id, entity});
 
   auto node = mDeserializer.serialize(entity);
 
   if (node.hasData() && std::filesystem::is_directory(path)) {
-    auto nodePath = path / (std::to_string(id) + ".lqnode");
-
-    std::ofstream stream(nodePath, std::ios::out);
+    std::ofstream stream(getEntityPath(entity, path), std::ios::out);
     stream << node.getData();
     stream.close();
   }
+}
+
+void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
+  if (mEntityDatabase.hasComponent<ChildrenComponent>(entity)) {
+    const auto &children =
+        mEntityDatabase.getComponent<ChildrenComponent>(entity);
+    for (auto entity : children.children) {
+      deleteEntityFilesAndRelations(entity, path);
+    }
+  }
+
+  if (mEntityDatabase.hasComponent<IdComponent>(entity)) {
+    auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
+    mEntityIdCache.insert({id, entity});
+
+    std::filesystem::remove(getEntityPath(entity, path));
+  }
+}
+
+Path SceneIO::getEntityPath(Entity entity, const Path &path) {
+  auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
+  return path / (std::to_string(id) + ".lqnode");
 }
 
 uint64_t SceneIO::generateId() { return mLastId++; }

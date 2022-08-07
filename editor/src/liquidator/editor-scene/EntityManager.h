@@ -57,7 +57,7 @@ public:
    * @return New entity
    */
   liquid::Entity createEmptyEntity(EditorCamera &camera, liquid::Entity parent,
-                                   const liquid::String &name = "",
+                                   const liquid::String &name = "New entity",
                                    bool saveToFile = true);
 
   /**

@@ -12,12 +12,17 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
 
 void SceneHierarchyPanel::render(EditorManager &editorManager) {
   if (widgets::Window::begin("Hierarchy")) {
-    mEntityManager.getActiveEntityDatabase()
-        .iterateEntities<liquid::LocalTransformComponent>(
-            [this, &editorManager](auto entity, const auto &transform) {
-              renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen,
-                           editorManager);
-            });
+    auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+
+    entityDatabase.iterateEntities<liquid::LocalTransformComponent>(
+        [this, &editorManager, &entityDatabase](auto entity,
+                                                const auto &transform) {
+          if (entityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
+            return;
+          }
+
+          renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
+        });
   }
 
   widgets::Window::end();
@@ -50,15 +55,6 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
 
-  bool open = false;
-  if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
-    open = !isLeaf;
-    if (ImGui::IsItemClicked()) {
-      mEntityClickHandler(entity);
-      mSelectedEntity = entity;
-    }
-  }
-
   ConfirmationDialog confirmDeleteSceneNode(
       "Delete entity ",
       "Are you sure you want to delete node \"" + name + "\"?",
@@ -67,19 +63,32 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
       },
       "Delete");
 
-  if (widgets::ContextMenu::begin()) {
-    if (ImGui::MenuItem("Go to view")) {
-      editorManager.moveCameraToEntity(entity);
-    }
+  bool open = false;
+  if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
+    open = !isLeaf;
 
-    if (ImGui::MenuItem("Delete")) {
-      confirmDeleteSceneNode.show();
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+      mRightClickedEntity = entity;
+    } else if (ImGui::IsItemClicked()) {
+      mEntityClickHandler(entity);
+      mSelectedEntity = entity;
     }
-
-    widgets::ContextMenu::end();
   }
 
-  confirmDeleteSceneNode.render(editorManager);
+  if (mRightClickedEntity == entity) {
+    if (widgets::ContextMenu::begin()) {
+      if (ImGui::MenuItem("Go to view")) {
+        editorManager.moveCameraToEntity(entity);
+      }
+
+      if (ImGui::MenuItem("Delete")) {
+        confirmDeleteSceneNode.show();
+      }
+
+      widgets::ContextMenu::end();
+    }
+    confirmDeleteSceneNode.render(editorManager);
+  }
 
   if (open) {
     if (mEntityManager.getActiveEntityDatabase()
