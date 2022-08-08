@@ -19,7 +19,7 @@ void EditorGridPanel::render(EditorManager &editorManager) {
     return;
   }
 
-  if (widgets::Window::begin("Editor Grid")) {
+  if (widgets::FixedWindow::begin("Editor Grid", mOpen)) {
     bool showGridLines = editorManager.getEditorGrid().gridLinesShown();
     if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
       editorManager.getEditorGrid().setGridLinesFlag(showGridLines);
@@ -31,7 +31,7 @@ void EditorGridPanel::render(EditorManager &editorManager) {
     }
   }
 
-  widgets::Window::end();
+  widgets::FixedWindow::end();
 }
 
 } // namespace liquidator

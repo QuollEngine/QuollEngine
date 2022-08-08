@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/imgui/Imgui.h"
+#include "liquid/imgui/ImguiUtils.h"
 
 #include "Widgets.h"
 #include "Theme.h"
@@ -95,6 +96,16 @@ bool Window::begin(const char *title) { return ImGui::Begin(title, nullptr); }
 
 void Window::end() { ImGui::End(); }
 
+bool FixedWindow::begin(const char *title) {
+  return ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoDocking);
+}
+
+bool FixedWindow::begin(const char *title, bool &open) {
+  return ImGui::Begin(title, &open, ImGuiWindowFlags_NoDocking);
+}
+
+void FixedWindow::end() { ImGui::End(); }
+
 bool MainMenuBar::begin() {
   bool begin = ImGui::BeginMainMenuBar();
 
@@ -129,6 +140,55 @@ bool ContextMenu::begin() {
 void ContextMenu::end() {
   ImGui::PopStyleColor(2);
   ImGui::EndPopup();
+}
+
+bool Table::begin(const char *id, uint32_t numColumns) {
+  return ImGui::BeginTable(id, static_cast<int>(numColumns),
+                           ImGuiTableFlags_Borders |
+                               ImGuiTableColumnFlags_WidthStretch |
+                               ImGuiTableFlags_RowBg);
+}
+
+void Table::end() { ImGui::EndTable(); }
+
+void Table::column(const glm::vec4 &value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f %.2f %.2f %.2f", value.x, value.y, value.z, value.w);
+}
+
+void Table::column(const glm::vec3 &value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f %.2f %.2f", value.x, value.y, value.z);
+}
+
+void Table::column(const glm::quat &value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f %.2f %.2f %.2f", value.x, value.y, value.z, value.w);
+}
+
+void Table::column(float value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", value);
+}
+
+void Table::column(const liquid::String &value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", value.c_str());
+}
+
+void Table::column(int32_t value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", value);
+}
+
+void Table::column(uint32_t value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", value);
+}
+
+void Table::column(liquid::rhi::TextureHandle handle, const glm::vec2 &size) {
+  ImGui::TableNextColumn();
+  liquid::imgui::image(handle, ImVec2(size.x, size.y));
 }
 
 } // namespace liquidator::widgets

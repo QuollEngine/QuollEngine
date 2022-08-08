@@ -10,6 +10,8 @@
 #include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"
 
+#include "MaterialViewer.h"
+
 namespace liquidator {
 
 /**
@@ -93,6 +95,7 @@ private:
   std::function<void(liquid::Path)> mOnCreateEntry;
 
   AssetLoadStatusDialog mStatusDialog;
+  MaterialViewer mMaterialViewer;
 };
 
 } // namespace liquidator
