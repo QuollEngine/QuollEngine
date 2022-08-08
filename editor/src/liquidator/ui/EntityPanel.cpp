@@ -61,11 +61,13 @@ static bool ImguiMultilineInputText(const liquid::String &label,
 EntityPanel::EntityPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
-void EntityPanel::render(EditorManager &editorManager,
+void EntityPanel::render(EditorManager &editorManager, liquid::Entity entity,
                          liquid::Renderer &renderer,
                          liquid::AssetRegistry &assetRegistry,
                          liquid::PhysicsSystem &physicsSystem) {
-  if (widgets::Window::begin("Entity")) {
+  setSelectedEntity(entity);
+
+  if (auto _ = widgets::Window("Entity")) {
     if (mEntityManager.getActiveEntityDatabase().hasEntity(mSelectedEntity)) {
       renderName();
       renderTransform();
@@ -83,41 +85,20 @@ void EntityPanel::render(EditorManager &editorManager,
       handleDragAndDrop(renderer, assetRegistry);
     }
   }
-  widgets::Window::end();
 }
 
 void EntityPanel::setSelectedEntity(liquid::Entity entity) {
-  mSelectedEntity = entity;
-  mName = mEntityManager.getActiveEntityDatabase()
-              .getComponent<liquid::NameComponent>(mSelectedEntity)
-              .name;
-}
-
-void EntityPanel::renderName() {
-  if (!mIsNameActivated) {
+  if (mSelectedEntity != entity) {
+    mSelectedEntity = entity;
     mName = mEntityManager.getActiveEntityDatabase()
                 .getComponent<liquid::NameComponent>(mSelectedEntity)
                 .name;
   }
+}
 
-  if (widgets::Section::begin("Name")) {
-    ImGui::InputText(
-        "##Input", const_cast<char *>(mName.c_str()), mName.capacity() + 1,
-        ImGuiInputTextFlags_CallbackResize,
-        [](ImGuiInputTextCallbackData *data) -> int {
-          if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-            liquid::String *str = static_cast<liquid::String *>(data->UserData);
-
-            str->resize(data->BufTextLen);
-            data->Buf = const_cast<char *>(str->c_str());
-          }
-          return 0;
-        },
-        &mName);
-
-    mIsNameActivated = ImGui::IsItemActivated();
-
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+void EntityPanel::renderName() {
+  if (auto _ = widgets::Section("Name")) {
+    if (widgets::Input("", mName)) {
       if (!mName.empty()) {
         mEntityManager.setName(mSelectedEntity, mName);
         mEntityManager.save(mSelectedEntity);
@@ -128,7 +109,6 @@ void EntityPanel::renderName() {
                   .name;
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderLight() {
@@ -137,7 +117,7 @@ void EntityPanel::renderLight() {
     return;
   }
 
-  if (widgets::Section::begin("Light")) {
+  if (auto _ = widgets::Section("Light")) {
     auto &component =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::DirectionalLightComponent>(mSelectedEntity);
@@ -153,17 +133,14 @@ void EntityPanel::renderLight() {
     ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
                 component.direction.z);
 
-    ImGui::Text("Color");
-    if (liquid::imgui::inputColor("###InputColor", component.color)) {
+    if (widgets::InputColor("Color", component.color)) {
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Intensity");
-    if (liquid::imgui::input("###InputIntensity", component.intensity)) {
+    if (widgets::Input("Intensity", component.intensity)) {
       mEntityManager.save(mSelectedEntity);
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderCamera(EditorManager &editorManager) {
@@ -172,35 +149,29 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     return;
   }
 
-  if (widgets::Section::begin("Camera")) {
+  if (auto _ = widgets::Section("Camera")) {
     auto &component =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::PerspectiveLensComponent>(mSelectedEntity);
 
-    ImGui::Text("FOV");
-    ImGui::InputFloat("###InputFOV", &component.fovY);
-    if (component.fovY < 0.0f) {
-      component.fovY = 0.0f;
-    }
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+    if (widgets::Input("FOV", component.fovY)) {
+      if (component.fovY < 0.0f) {
+        component.fovY = 0.0f;
+      }
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Near");
-    ImGui::InputFloat("###InputNear", &component.near);
-    if (component.near < 0.0f) {
-      component.near = 0.0f;
-    }
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+    if (widgets::Input("Near", component.near)) {
+      if (component.near < 0.0f) {
+        component.near = 0.0f;
+      }
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Far");
-    ImGui::InputFloat("###InputFar", &component.far);
-    if (component.far < 0.0f) {
-      component.far = 0.0f;
-    }
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+    if (widgets::Input("Far", component.far)) {
+      if (component.far < 0.0f) {
+        component.far = 0.0f;
+      }
       mEntityManager.save(mSelectedEntity);
     }
 
@@ -249,88 +220,70 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
       editorManager.setActiveCamera(mSelectedEntity);
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderTransform() {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .hasComponent<liquid::LocalTransformComponent>(mSelectedEntity) ||
-      !mEntityManager.getActiveEntityDatabase()
-           .hasComponent<liquid::WorldTransformComponent>(mSelectedEntity)) {
+  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+
+  if (!entityDatabase.hasComponent<liquid::LocalTransformComponent>(
+          mSelectedEntity) ||
+      !entityDatabase.hasComponent<liquid::WorldTransformComponent>(
+          mSelectedEntity)) {
     return;
   }
 
-  if (widgets::Section::begin("Transform")) {
+  if (widgets::Section("Transform")) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase()
-            .getComponent<liquid::LocalTransformComponent>(mSelectedEntity);
-    auto &world =
-        mEntityManager.getActiveEntityDatabase()
-            .getComponent<liquid::WorldTransformComponent>(mSelectedEntity);
+        entityDatabase.getComponent<liquid::LocalTransformComponent>(
+            mSelectedEntity);
+    auto &world = entityDatabase.getComponent<liquid::WorldTransformComponent>(
+        mSelectedEntity);
 
-    ImGui::Text("Position");
-
-    if (liquid::imgui::input("###InputTransformPosition",
-                             component.localPosition)) {
+    if (widgets::Input("Position", component.localPosition)) {
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Rotation");
-    const auto &euler = glm::eulerAngles(component.localRotation);
-
-    std::array<float, glm::vec3::length()> imguiRotation{euler.x, euler.y,
-                                                         euler.z};
-    if (ImGui::InputFloat3("###InputTransformRotation", imguiRotation.data())) {
-      component.localRotation = glm::quat(glm::vec3(
-          imguiRotation.at(0), imguiRotation.at(1), imguiRotation.at(2)));
-    }
-
-    if (ImGui::IsItemDeactivatedAfterEdit()) {
+    auto euler = glm::eulerAngles(component.localRotation);
+    if (widgets::Input("Rotation", euler)) {
+      component.localRotation = glm::quat(euler);
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Scale");
-    if (liquid::imgui::input("###InputTransformScale", component.localScale)) {
+    if (widgets::Input("Scale", component.localScale)) {
       mEntityManager.save(mSelectedEntity);
     }
 
     ImGui::Text("World Transform");
-    if (widgets::Table::begin("TableTransformWorld", 4)) {
-
+    if (auto table = widgets::Table("TableTransformWorld", 4)) {
       for (glm::mat4::length_type i = 0; i < 4; ++i) {
-        widgets::Table::row(
-            world.worldTransform[i].x, world.worldTransform[i].y,
-            world.worldTransform[i].z, world.worldTransform[i].w);
+        table.row(world.worldTransform[i].x, world.worldTransform[i].y,
+                  world.worldTransform[i].z, world.worldTransform[i].w);
       }
-      widgets::Table::end();
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
   if (mEntityManager.getActiveEntityDatabase()
           .hasComponent<liquid::MeshComponent>(mSelectedEntity)) {
-    if (widgets::Section::begin("Mesh")) {
+    if (auto _ = widgets::Section("Mesh")) {
       auto handle = mEntityManager.getActiveEntityDatabase()
                         .getComponent<liquid::MeshComponent>(mSelectedEntity)
                         .handle;
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
-      if (widgets::Table::begin("TableMesh", 2)) {
-        widgets::Table::row("Name", asset.name);
-        widgets::Table::row(
-            "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
-        widgets::Table::end();
+      if (auto table = widgets::Table("TableMesh", 2)) {
+        table.row("Name", asset.name);
+        table.row("Geometries",
+                  static_cast<uint32_t>(asset.data.geometries.size()));
       }
     }
-    widgets::Section::end();
   }
 
   if (mEntityManager.getActiveEntityDatabase()
           .hasComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)) {
-    if (widgets::Section::begin("Mesh")) {
+    if (auto _ = widgets::Section("Mesh")) {
       auto handle =
           mEntityManager.getActiveEntityDatabase()
               .getComponent<liquid::SkinnedMeshComponent>(mSelectedEntity)
@@ -338,13 +291,12 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
 
       const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
 
-      if (widgets::Table::begin("TableSkinnedMesh", 2)) {
-        widgets::Table::row("Name", asset.name);
-        widgets::Table::row(
-            "Geometries", static_cast<uint32_t>(asset.data.geometries.size()));
+      if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
+        table.row("Name", asset.name);
+        table.row("Geometries",
+                  static_cast<uint32_t>(asset.data.geometries.size()));
       }
     }
-    widgets::Section::end();
   }
 }
 
@@ -354,7 +306,7 @@ void EntityPanel::renderSkeleton() {
     return;
   }
 
-  if (widgets::Section::begin("Skeleton")) {
+  if (auto _ = widgets::Section("Skeleton")) {
     bool showBones =
         mEntityManager.getActiveEntityDatabase()
             .hasComponent<liquid::SkeletonDebugComponent>(mSelectedEntity);
@@ -363,7 +315,6 @@ void EntityPanel::renderSkeleton() {
       mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
@@ -372,7 +323,7 @@ void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (widgets::Section::begin("Animation")) {
+  if (auto _ = widgets::Section("Animation")) {
     auto &component =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::AnimatorComponent>(mSelectedEntity);
@@ -426,7 +377,6 @@ void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
       }
     }
   }
-  widgets::Section::end();
 }
 
 /**
@@ -477,7 +427,7 @@ void EntityPanel::renderCollidable() {
     return;
   }
 
-  if (widgets::Section::begin("Collidable")) {
+  if (auto _ = widgets::Section("Collidable")) {
     std::array<liquid::PhysicsGeometryType, sizeof(liquid::PhysicsGeometryType)>
         types{
             liquid::PhysicsGeometryType::Box,
@@ -510,9 +460,7 @@ void EntityPanel::renderCollidable() {
           std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
       auto halfExtents = box.halfExtents;
 
-      ImGui::Text("Half extents");
-      if (liquid::imgui::input("###HalfExtents", halfExtents)) {
-        box.halfExtents = halfExtents;
+      if (widgets::Input("Half extents", box.halfExtents)) {
         mEntityManager.save(mSelectedEntity);
       }
     } else if (collidable.geometryDesc.type ==
@@ -521,11 +469,10 @@ void EntityPanel::renderCollidable() {
           collidable.geometryDesc.params);
       float radius = sphere.radius;
 
-      ImGui::Text("Radius");
-      if (liquid::imgui::input("###Radius", radius)) {
-        sphere.radius = radius;
+      if (widgets::Input("Radius", sphere.radius)) {
         mEntityManager.save(mSelectedEntity);
       }
+
     } else if (collidable.geometryDesc.type ==
                liquid::PhysicsGeometryType::Capsule) {
       auto &capsule = std::get<liquid::PhysicsGeometryCapsule>(
@@ -533,15 +480,11 @@ void EntityPanel::renderCollidable() {
       float radius = capsule.radius;
       float halfHeight = capsule.halfHeight;
 
-      ImGui::Text("Radius");
-      if (liquid::imgui::input("###Radius", radius)) {
-        capsule.radius = radius;
+      if (widgets::Input("Radius", capsule.radius)) {
         mEntityManager.save(mSelectedEntity);
       }
 
-      ImGui::Text("Half height");
-      if (liquid::imgui::input("###HalfHeight", halfHeight)) {
-        capsule.halfHeight = halfHeight;
+      if (widgets::Input("Half height", capsule.halfHeight)) {
         mEntityManager.save(mSelectedEntity);
       }
     }
@@ -549,30 +492,22 @@ void EntityPanel::renderCollidable() {
     {
       auto &material = collidable.materialDesc;
 
-      float dynamicFriction = material.dynamicFriction;
-      float restitution = material.restitution;
-      float staticFriction = material.staticFriction;
-
-      ImGui::Text("Dynamic friction");
-      if (liquid::imgui::input("###DynamicFriction", dynamicFriction)) {
-        material.dynamicFriction = dynamicFriction;
+      if (widgets::Input("Dynamic friction", material.dynamicFriction)) {
         mEntityManager.save(mSelectedEntity);
       }
 
-      ImGui::Text("Restitution");
-      if (liquid::imgui::input("###Restitution", restitution)) {
-        material.restitution = restitution;
+      if (widgets::Input("Restitution", material.restitution)) {
+        if (material.restitution > 1.0f) {
+          material.restitution = 1.0f;
+        }
         mEntityManager.save(mSelectedEntity);
       }
 
-      ImGui::Text("Static friction");
-      if (liquid::imgui::input("###StaticFriction", staticFriction)) {
-        material.staticFriction = staticFriction;
+      if (widgets::Input("Static friction", material.staticFriction)) {
         mEntityManager.save(mSelectedEntity);
       }
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderRigidBody() {
@@ -581,23 +516,16 @@ void EntityPanel::renderRigidBody() {
     return;
   }
 
-  if (widgets::Section::begin("Rigid body")) {
+  if (auto _ = widgets::Section("Rigid body")) {
     auto &rigidBody =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::RigidBodyComponent>(mSelectedEntity);
 
-    ImGui::Text("Mass");
-    float mass = rigidBody.dynamicDesc.mass;
-
-    if (liquid::imgui::input("###Mass", mass)) {
-      rigidBody.dynamicDesc.mass = mass;
+    if (widgets::Input("Mass", rigidBody.dynamicDesc.mass)) {
       mEntityManager.save(mSelectedEntity);
     }
 
-    auto inertia = rigidBody.dynamicDesc.inertia;
-
-    if (liquid::imgui::input("###Inertia", inertia)) {
-      rigidBody.dynamicDesc.inertia = inertia;
+    if (widgets::Input("Inertia", rigidBody.dynamicDesc.inertia)) {
       mEntityManager.save(mSelectedEntity);
     }
 
@@ -609,7 +537,7 @@ void EntityPanel::renderRigidBody() {
 
     if (rigidBody.actor) {
       rigidBody.actor->getLinearVelocity();
-      if (widgets::Table::begin("TableRigidBodyDetails", 2)) {
+      if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {
         auto *actor = rigidBody.actor;
 
         const auto &pose = actor->getGlobalPose();
@@ -618,32 +546,27 @@ void EntityPanel::renderRigidBody() {
         const auto &linearVelocity = actor->getLinearVelocity();
         const auto &angularVelocity = actor->getAngularVelocity();
 
-        widgets::Table::row("Pose position",
-                            glm::vec3(pose.p.x, pose.p.y, pose.p.y));
-        widgets::Table::row("Pose rotation", glm::quat(cmass.q.w, cmass.q.x,
-                                                       cmass.q.y, cmass.q.z));
-        widgets::Table::row("CMass position",
-                            glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
-        widgets::Table::row("CMass rotation", glm::quat(cmass.q.w, cmass.q.x,
-                                                        cmass.q.y, cmass.q.z));
-        widgets::Table::row(
-            "Inverse inertia tensor position",
-            glm::vec3(invInertia.x, invInertia.y, invInertia.y));
-        widgets::Table::row("Linear damping",
-                            static_cast<float>(actor->getLinearDamping()));
-        widgets::Table::row("Angular damping",
-                            static_cast<float>(actor->getAngularDamping()));
-        widgets::Table::row(
+        table.row("Pose position", glm::vec3(pose.p.x, pose.p.y, pose.p.y));
+        table.row("Pose rotation",
+                  glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+        table.row("CMass position", glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
+        table.row("CMass rotation",
+                  glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
+        table.row("Inverse inertia tensor position",
+                  glm::vec3(invInertia.x, invInertia.y, invInertia.y));
+        table.row("Linear damping",
+                  static_cast<float>(actor->getLinearDamping()));
+        table.row("Angular damping",
+                  static_cast<float>(actor->getAngularDamping()));
+        table.row(
             "Linear velocity",
             glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
-        widgets::Table::row(
+        table.row(
             "Angular velocity",
             glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
-        widgets::Table::end();
       }
     }
   }
-  widgets::Section::end();
 }
 
 void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
@@ -652,7 +575,7 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (widgets::Section::begin("Text")) {
+  if (auto _ = widgets::Section("Text")) {
     auto &text = mEntityManager.getActiveEntityDatabase()
                      .getComponent<liquid::TextComponent>(mSelectedEntity);
 
@@ -667,8 +590,7 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
       mEntityManager.save(mSelectedEntity);
     }
 
-    ImGui::Text("Line height");
-    if (liquid::imgui::input("###InputLineHeight", text.lineHeight)) {
+    if (widgets::Input("Line height", text.lineHeight)) {
       mEntityManager.save(mSelectedEntity);
     }
 
@@ -688,8 +610,6 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
       ImGui::EndCombo();
     }
   }
-
-  widgets::Section::end();
 }
 
 void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
@@ -698,7 +618,7 @@ void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (widgets::Section::begin("Audio")) {
+  if (auto _ = widgets::Section("Audio")) {
     const auto &audio =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::AudioSourceComponent>(mSelectedEntity);
@@ -707,8 +627,6 @@ void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
 
     ImGui::Text("Name: %s", asset.name.c_str());
   }
-
-  widgets::Section::end();
 }
 
 void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
@@ -717,7 +635,7 @@ void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (widgets::Section::begin("Scripts")) {
+  if (auto _ = widgets::Section("Scripts")) {
     const auto &scripting =
         mEntityManager.getActiveEntityDatabase()
             .getComponent<liquid::ScriptingComponent>(mSelectedEntity);
@@ -727,8 +645,6 @@ void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
 
     ImGui::Text("Name: %s", asset.name.c_str());
   }
-
-  widgets::Section::end();
 }
 
 void EntityPanel::renderAddComponent() {
@@ -806,10 +722,10 @@ void EntityPanel::renderAddComponent() {
 
 void EntityPanel::handleDragAndDrop(liquid::Renderer &renderer,
                                     liquid::AssetRegistry &assetRegistry) {
-  static constexpr float HALF = 0.5f;
-  auto width = ImGui::GetWindowContentRegionWidth();
+  const auto width = ImGui::GetWindowContentRegionWidth();
+  const float halfWidth = width * 0.5f;
 
-  ImGui::Button("Drag asset here", ImVec2(width, width * HALF));
+  ImGui::Button("Drag asset here", ImVec2(width, halfWidth));
 
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(

@@ -37,7 +37,7 @@ static XBounds calculateSectionBoundsX(float padding) {
               padding};
 }
 
-bool Section::begin(const char *title) {
+Section::Section(const char *title) {
   ImGui::GetWindowDrawList()->ChannelsSplit(2);
   ImGui::GetWindowDrawList()->ChannelsSetCurrent(1);
 
@@ -64,92 +64,94 @@ bool Section::begin(const char *title) {
   ImGui::PushClipRect(ImVec2(boundsX.start, window->ClipRect.Min.y),
                       ImVec2(boundsX.end, window->ClipRect.Max.y), false);
 
-  return true;
+  mExpanded = true;
 }
 
-void Section::end() {
-  auto padding = ImGui::GetStyle().WindowPadding;
+Section::~Section() {
+  if (mExpanded) {
+    auto padding = ImGui::GetStyle().WindowPadding;
 
-  ImGui::PopClipRect();
-  if (padding.x > 0) {
-    ImGui::Unindent(padding.x);
+    ImGui::PopClipRect();
+    if (padding.x > 0) {
+      ImGui::Unindent(padding.x);
+    }
+    ImGui::EndGroup();
+
+    auto boundsX = calculateSectionBoundsX(0.0f);
+
+    auto panelMin =
+        ImVec2(boundsX.start, ImGui::GetItemRectMin().y - padding.y);
+    auto panelMax = ImVec2(boundsX.end, ImGui::GetItemRectMax().y + padding.y);
+
+    ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        panelMin, panelMax,
+        ImGui::GetColorU32(ImGui::GetStyleColorVec4(ImGuiCol_ChildBg)),
+        Theme::getStyle(ThemeStyle::SectionRounding).x);
+    ImGui::GetWindowDrawList()->ChannelsMerge();
+
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding.y);
+    ImGui::Spacing();
   }
-  ImGui::EndGroup();
-
-  auto boundsX = calculateSectionBoundsX(0.0f);
-
-  auto panelMin = ImVec2(boundsX.start, ImGui::GetItemRectMin().y - padding.y);
-  auto panelMax = ImVec2(boundsX.end, ImGui::GetItemRectMax().y + padding.y);
-
-  ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
-  ImGui::GetWindowDrawList()->AddRectFilled(
-      panelMin, panelMax,
-      ImGui::GetColorU32(ImGui::GetStyleColorVec4(ImGuiCol_ChildBg)),
-      Theme::getStyle(ThemeStyle::SectionRounding).x);
-  ImGui::GetWindowDrawList()->ChannelsMerge();
-
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding.y);
-  ImGui::Spacing();
 }
 
-bool Window::begin(const char *title) { return ImGui::Begin(title, nullptr); }
+Window::Window(const char *title) { mExpanded = ImGui::Begin(title, nullptr); }
 
-void Window::end() { ImGui::End(); }
+Window::~Window() { ImGui::End(); }
 
-bool FixedWindow::begin(const char *title) {
-  return ImGui::Begin(title, nullptr, ImGuiWindowFlags_NoDocking);
+FixedWindow::FixedWindow(const char *title, bool &open) {
+  mExpanded = ImGui::Begin(title, &open, ImGuiWindowFlags_NoDocking);
 }
 
-bool FixedWindow::begin(const char *title, bool &open) {
-  return ImGui::Begin(title, &open, ImGuiWindowFlags_NoDocking);
-}
+FixedWindow::~FixedWindow() { ImGui::End(); }
 
-void FixedWindow::end() { ImGui::End(); }
+MainMenuBar::MainMenuBar() {
+  mExpanded = ImGui::BeginMainMenuBar();
 
-bool MainMenuBar::begin() {
-  bool begin = ImGui::BeginMainMenuBar();
-
-  if (begin) {
+  if (mExpanded) {
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
                           ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive,
                           ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
   }
-
-  return begin;
 }
 
-void MainMenuBar::end() {
-  ImGui::PopStyleColor(2);
-  ImGui::EndMainMenuBar();
+MainMenuBar::~MainMenuBar() {
+  if (mExpanded) {
+    ImGui::PopStyleColor(2);
+    ImGui::EndMainMenuBar();
+  }
 }
 
-bool ContextMenu::begin() {
-  bool begin = ImGui::BeginPopupContextWindow();
+ContextMenu::ContextMenu() {
+  mExpanded = ImGui::BeginPopupContextWindow();
 
-  if (begin) {
+  if (mExpanded) {
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
                           ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
     ImGui::PushStyleColor(ImGuiCol_HeaderActive,
                           ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
   }
-
-  return begin;
 }
 
-void ContextMenu::end() {
-  ImGui::PopStyleColor(2);
-  ImGui::EndPopup();
+ContextMenu::~ContextMenu() {
+  if (mExpanded) {
+    ImGui::PopStyleColor(2);
+    ImGui::EndPopup();
+  }
 }
 
-bool Table::begin(const char *id, uint32_t numColumns) {
-  return ImGui::BeginTable(id, static_cast<int>(numColumns),
-                           ImGuiTableFlags_Borders |
-                               ImGuiTableColumnFlags_WidthStretch |
-                               ImGuiTableFlags_RowBg);
+Table::Table(const char *id, uint32_t numColumns) {
+  mExpanded = ImGui::BeginTable(id, static_cast<int>(numColumns),
+                                ImGuiTableFlags_Borders |
+                                    ImGuiTableColumnFlags_WidthStretch |
+                                    ImGuiTableFlags_RowBg);
 }
 
-void Table::end() { ImGui::EndTable(); }
+Table::~Table() {
+  if (mExpanded)
+    ImGui::EndTable();
+}
 
 void Table::column(const glm::vec4 &value) {
   ImGui::TableNextColumn();
@@ -189,6 +191,78 @@ void Table::column(uint32_t value) {
 void Table::column(liquid::rhi::TextureHandle handle, const glm::vec2 &size) {
   ImGui::TableNextColumn();
   liquid::imgui::image(handle, ImVec2(size.x, size.y));
+}
+
+Input::Input(liquid::String label, glm::vec3 &value) {
+  glm::vec3 temp = value;
+
+  renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length());
+
+  if (mChanged) {
+    value = temp;
+  }
+}
+
+Input::Input(liquid::String label, float &value) {
+  float temp = value;
+
+  renderScalarInput(label, &temp, 1);
+
+  if (mChanged) {
+    value = temp;
+  }
+}
+
+Input::Input(liquid::String label, liquid::String &value) {
+  auto temp = value;
+  renderTextInput(label, temp);
+
+  if (mChanged) {
+    value = temp;
+  }
+}
+
+void Input::renderScalarInput(liquid::String label, void *data, size_t size) {
+  if (!label.empty()) {
+    ImGui::Text("%s", label.c_str());
+  }
+  const auto id = "###Input" + label;
+
+  ImGui::InputScalarN(id.c_str(), ImGuiDataType_Float, data,
+                      static_cast<int>(size), nullptr, nullptr, "%.3f");
+  mChanged = ImGui::IsItemDeactivatedAfterEdit();
+}
+
+void Input::renderTextInput(liquid::String label, liquid::String &data) {
+  if (!label.empty()) {
+    ImGui::Text("%s", label.c_str());
+  }
+  const auto id = "###Input" + label;
+
+  ImGui::InputText(
+      id.c_str(), const_cast<char *>(data.c_str()), data.capacity() + 1,
+      ImGuiInputTextFlags_CallbackResize,
+      [](ImGuiInputTextCallbackData *data) -> int {
+        if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+          liquid::String *str = static_cast<liquid::String *>(data->UserData);
+
+          str->resize(data->BufTextLen);
+          data->Buf = const_cast<char *>(str->c_str());
+        }
+        return 0;
+      },
+      &data);
+
+  mChanged = ImGui::IsItemDeactivatedAfterEdit();
+}
+
+InputColor::InputColor(liquid::String label, glm::vec4 &value) {
+  if (!label.empty()) {
+    ImGui::Text("%s", label.c_str());
+  }
+  const auto id = "###Input" + label;
+
+  mChanged = ImGui::ColorEdit4(id.c_str(), glm::value_ptr(value));
 }
 
 } // namespace liquidator::widgets

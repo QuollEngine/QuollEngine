@@ -15,16 +15,30 @@ public:
   /**
    * @brief Begin scene view
    *
-   * @param texture Texture to show
-   * @retval true Scene view is visible
-   * @retval false Scene view is not visible
+   * @param texture Scene texture
    */
-  static bool begin(liquid::rhi::TextureHandle texture);
+  SceneView(liquid::rhi::TextureHandle texture);
 
   /**
    * @brief End scene view
    */
-  static void end();
+  ~SceneView();
+
+  SceneView(const SceneView &) = delete;
+  SceneView(SceneView &&) = delete;
+  SceneView &operator=(const SceneView &) = delete;
+  SceneView &operator=(SceneView &&) = delete;
+
+  /**
+   * @brief Check if scene view is expanded
+   *
+   * @retval true Scene view is expanded
+   * @retval false Scene view is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 } // namespace liquidator

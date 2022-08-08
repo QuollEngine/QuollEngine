@@ -160,8 +160,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     mDirectoryChanged = false;
   }
 
-  if (widgets::Window::begin("Asset Browser")) {
-    if (widgets::ContextMenu::begin()) {
+  if (auto _ = widgets::Window("Asset Browser")) {
+    if (auto _ = widgets::ContextMenu()) {
       if (ImGui::MenuItem("Import asset")) {
         handleAssetImport();
       }
@@ -180,7 +180,6 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         mStagingEntry.isEditable = true;
         mStagingEntry.assetType = liquid::AssetType::LuaScript;
       }
-      widgets::ContextMenu::end();
     }
 
     const auto &size = ImGui::GetContentRegionAvail();
@@ -296,8 +295,6 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     }
     ImGui::EndTable();
   }
-
-  widgets::Window::end();
 
   mStatusDialog.render();
 

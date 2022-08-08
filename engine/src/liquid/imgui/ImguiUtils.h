@@ -16,13 +16,4 @@ bool imageButton(liquid::rhi::TextureHandle handle, const ImVec2 &size,
                  const ImVec4 &bg_col = ImVec4(0, 0, 0, 0),
                  const ImVec4 &tint_col = ImVec4(1, 1, 1, 1));
 
-bool input(const char *label, float &value, const char *format = "%0.3f",
-           ImGuiInputTextFlags flags = 0);
-
-bool input(const char *label, glm::vec3 &value, const char *format = "%0.3f",
-           ImGuiInputTextFlags flags = 0);
-
-bool inputColor(const char *label, glm::vec4 &value,
-                ImGuiInputTextFlags flags = 0);
-
 } // namespace liquid::imgui

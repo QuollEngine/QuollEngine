@@ -8,20 +8,16 @@ namespace liquidator {
  * @brief Confirmation dialog component
  */
 class ConfirmationDialog {
-  using ConfirmHandler = std::function<void(EditorManager &)>;
-
 public:
   /**
    * @brief Create confirmation dialog
    *
    * @param title Dialog title
    * @param prompt Confirmation prompt
-   * @param confirmHandler Confirm handler
    * @param confirmButtonLabel Confirm button label
    * @param cancelButtonLabel Cancel button label
    */
   ConfirmationDialog(const liquid::String &title, const liquid::String &prompt,
-                     const ConfirmHandler &confirmHandler,
                      const liquid::String &confirmButtonLabel = "Confirm",
                      const liquid::String &cancelButtonLabel = "Cancel");
 
@@ -32,15 +28,20 @@ public:
 
   /**
    * @brief Render confirmation dialog
-   *
-   * @param editorManager Editor manager
    */
-  void render(EditorManager &editorManager);
+  void render();
+
+  /**
+   * @brief Check if prompt is confirmed
+   *
+   * @retval true Prompt is confirmed
+   * @retval false Prompt is not confirmed
+   */
+  inline bool isConfirmed() const { return mConfirmed; }
 
 private:
   bool mOpen = false;
-
-  ConfirmHandler mConfirmHandler;
+  bool mConfirmed = false;
 
   liquid::String mTitle;
   liquid::String mPrompt;

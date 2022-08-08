@@ -10,7 +10,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
                               liquid::AssetManager &assetManager) {
   static constexpr float HALF = 0.5f;
 
-  if (widgets::Window::begin("Environment")) {
+  if (auto _ = widgets::Window("Environment")) {
     float width = ImGui::GetWindowWidth();
     float height = width * HALF;
 
@@ -65,7 +65,6 @@ void EnvironmentPanel::render(EditorManager &editorManager,
       }
     }
   }
-  widgets::Window::end();
 }
 
 } // namespace liquidator

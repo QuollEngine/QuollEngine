@@ -15,18 +15,32 @@ public:
    */
   static constexpr float Height = 60.0f;
 
+public:
   /**
    * @brief Begin toolbar
-   *
-   * @retval true Toolbar is visible
-   * @retval false Toolbar is not visible
    */
-  static bool begin();
+  Toolbar();
 
   /**
    * @brief End toolbar
    */
-  static void end();
+  ~Toolbar();
+
+  Toolbar(const Toolbar &) = delete;
+  Toolbar(Toolbar &&) = delete;
+  Toolbar &operator=(const Toolbar &) = delete;
+  Toolbar &operator=(Toolbar &&) = delete;
+
+  /**
+   * @brief Check if toolbar is expanded
+   *
+   * @retval true Toolbar is expanded
+   * @retval false Toolbar is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 } // namespace liquidator
