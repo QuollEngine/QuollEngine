@@ -6,7 +6,8 @@
 
 namespace liquidator {
 
-static void renderTextureIfExists(const liquid::String &label,
+static void renderTextureIfExists(widgets::Table &table,
+                                  const liquid::String &label,
                                   liquid::TextureAssetHandle handle,
                                   liquid::AssetRegistry &assetRegistry) {
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
@@ -15,8 +16,8 @@ static void renderTextureIfExists(const liquid::String &label,
     auto texture =
         assetRegistry.getTextures().getAsset(handle).data.deviceHandle;
 
-    widgets::Table::column(label);
-    widgets::Table::column(texture, TextureSize);
+    table.column(label);
+    table.column(texture, TextureSize);
   }
 }
 
@@ -35,38 +36,33 @@ void MaterialViewer::render(liquid::AssetRegistry &assetRegistry) {
 
   liquid::String title = "Material: " + material.name + "###MaterialViewer";
 
-  if (widgets::FixedWindow::begin(title.c_str(), open)) {
-    if (widgets::Table::begin("TableRigidBodyDetails", 2)) {
-      widgets::Table::row("Path", material.relativePath.string());
+  if (auto _ = widgets::FixedWindow(title.c_str(), open)) {
+    if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {
+      table.row("Path", material.relativePath.string());
 
-      renderTextureIfExists("Base texture", material.data.baseColorTexture,
-                            assetRegistry);
-      widgets::Table::row("Base color factor", material.data.baseColorFactor);
+      renderTextureIfExists(table, "Base texture",
+                            material.data.baseColorTexture, assetRegistry);
+      table.row("Base color factor", material.data.baseColorFactor);
 
-      renderTextureIfExists("Metallic roughness texture",
+      renderTextureIfExists(table, "Metallic roughness texture",
                             material.data.metallicRoughnessTexture,
                             assetRegistry);
-      widgets::Table::row("Metallic factor", material.data.metallicFactor);
-      widgets::Table::row("Roughness factor", material.data.roughnessFactor);
+      table.row("Metallic factor", material.data.metallicFactor);
+      table.row("Roughness factor", material.data.roughnessFactor);
 
-      renderTextureIfExists("Normal texture", material.data.normalTexture,
-                            assetRegistry);
-      widgets::Table::row("Normal scale", material.data.normalScale);
+      renderTextureIfExists(table, "Normal texture",
+                            material.data.normalTexture, assetRegistry);
+      table.row("Normal scale", material.data.normalScale);
 
-      renderTextureIfExists("Occlusion texture", material.data.occlusionTexture,
-                            assetRegistry);
-      widgets::Table::row("Occlusion strength",
-                          material.data.occlusionStrength);
+      renderTextureIfExists(table, "Occlusion texture",
+                            material.data.occlusionTexture, assetRegistry);
+      table.row("Occlusion strength", material.data.occlusionStrength);
 
-      renderTextureIfExists("Emissive texture", material.data.emissiveTexture,
-                            assetRegistry);
-      widgets::Table::row("Emissive factor", material.data.emissiveFactor);
-
-      widgets::Table::end();
+      renderTextureIfExists(table, "Emissive texture",
+                            material.data.emissiveTexture, assetRegistry);
+      table.row("Emissive factor", material.data.emissiveFactor);
     }
   }
-
-  widgets::FixedWindow::end();
 
   if (!open) {
     mHandle = liquid::MaterialAssetHandle::Invalid;

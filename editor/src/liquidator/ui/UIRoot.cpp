@@ -7,11 +7,7 @@ namespace liquidator {
 
 UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
     : mAssetBrowser(assetLoader), mSceneHierarchyPanel(entityManager),
-      mEntityPanel(entityManager) {
-  mSceneHierarchyPanel.setEntityClickHandler([this](liquid::Entity entity) {
-    mEntityPanel.setSelectedEntity(entity);
-  });
-}
+      mEntityPanel(entityManager) {}
 
 void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
                     liquid::AssetManager &assetManager,
@@ -21,8 +17,10 @@ void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
 
   mSceneHierarchyPanel.render(editorManager);
 
-  mEntityPanel.render(editorManager, renderer, assetManager.getRegistry(),
-                      physicsSystem);
+  if (mSceneHierarchyPanel.isEntitySelected()) {
+    mEntityPanel.render(editorManager, mSceneHierarchyPanel.getSelectedEntity(),
+                        renderer, assetManager.getRegistry(), physicsSystem);
+  }
 
   EnvironmentPanel::render(editorManager, assetManager);
 

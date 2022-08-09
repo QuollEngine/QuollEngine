@@ -17,15 +17,29 @@ public:
    * @brief Begin section
    *
    * @param title Section title
+   */
+  Section(const char *title);
+
+  /**
+   * @brief End section
+   */
+  ~Section();
+
+  Section(const Section &) = delete;
+  Section(Section &&) = delete;
+  Section &operator=(const Section &) = delete;
+  Section &operator=(Section &&) = delete;
+
+  /**
+   * @brief Check if section is expanded
+   *
    * @retval true Section is expanded
    * @retval false Section is not expanded
    */
-  static bool begin(const char *title);
+  inline operator bool() const { return mExpanded; }
 
-  /**
-   * End section
-   */
-  static void end();
+private:
+  bool mExpanded = false;
 };
 
 /**
@@ -37,15 +51,29 @@ public:
    * @brief Begin window
    *
    * @param title Window title
-   * @retval true Window is expanded
-   * @retval false Window is not expanded
    */
-  static bool begin(const char *title);
+  Window(const char *title);
 
   /**
    * @brief End window
    */
-  static void end();
+  ~Window();
+
+  Window(const Window &) = delete;
+  Window(Window &&) = delete;
+  Window &operator=(const Window &) = delete;
+  Window &operator=(Window &&) = delete;
+
+  /**
+   * @brief Check if window is expanded
+   *
+   * @retval true Window is expanded
+   * @retval false Window is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 /**
@@ -56,28 +84,33 @@ public:
 class FixedWindow {
 public:
   /**
-   * @brief Begin fixed windows
+   * @brief Begin fixed window with close button
    *
    * @param title Window title
-   * @retval true Window is expanded
-   * @retval false Window is not expanded
+   * @param open Open flag
    */
-  static bool begin(const char *title);
-
-  /**
-   * @brief Begin fixed windows with close button
-   *
-   * @param title Window title
-   * @param open Open state
-   * @retval true Window is expanded
-   * @retval false Window is not expanded
-   */
-  static bool begin(const char *title, bool &open);
+  FixedWindow(const char *title, bool &open);
 
   /**
    * @brief End fixed window
    */
-  static void end();
+  ~FixedWindow();
+
+  FixedWindow(const FixedWindow &) = delete;
+  FixedWindow(FixedWindow &&) = delete;
+  FixedWindow &operator=(const FixedWindow &) = delete;
+  FixedWindow &operator=(FixedWindow &&) = delete;
+
+  /**
+   * @brief Check if fixed window is expanded
+   *
+   * @retval true Window is expanded
+   * @retval false Window is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 /**
@@ -87,16 +120,29 @@ class MainMenuBar {
 public:
   /**
    * @brief Begin main menu bar
-   *
-   * @retval true Main menu bar is visible
-   * @retval false Main menu bar is not visible
    */
-  static bool begin();
+  MainMenuBar();
 
   /**
    * @brief End main menu bar
    */
-  static void end();
+  ~MainMenuBar();
+
+  MainMenuBar(const MainMenuBar &) = delete;
+  MainMenuBar(MainMenuBar &&) = delete;
+  MainMenuBar &operator=(const MainMenuBar &) = delete;
+  MainMenuBar &operator=(MainMenuBar &&) = delete;
+
+  /**
+   * @brief Check if main menu bar is expanded
+   *
+   * @retval true Main menu bar is expanded
+   * @retval false Main menu bar is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 /**
@@ -107,17 +153,30 @@ public:
 class ContextMenu {
 public:
   /**
-   * @brief Begin context menu
-   *
-   * @retval true Context menu is visible
-   * @retval false Context menu is not visible
+   * @brief Begin main menu bar
    */
-  static bool begin();
+  ContextMenu();
 
   /**
-   * @brief End context menu
+   * @brief End main menu bar
    */
-  static void end();
+  ~ContextMenu();
+
+  ContextMenu(const ContextMenu &) = delete;
+  ContextMenu(ContextMenu &&) = delete;
+  ContextMenu &operator=(const ContextMenu &) = delete;
+  ContextMenu &operator=(ContextMenu &&) = delete;
+
+  /**
+   * @brief Check if main menu bar is expanded
+   *
+   * @retval true Context menu is expanded
+   * @retval false Context menu is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
+
+private:
+  bool mExpanded = false;
 };
 
 /**
@@ -128,66 +187,77 @@ public:
   /**
    * @brief Begin table
    *
-   * @param id Table id
+   * @param id Table ID
    * @param numColumns Number of columns
-   * @retval true Table is visible
-   * @retval false Table is not visible
    */
-  static bool begin(const char *id, uint32_t numColumns);
+  Table(const char *id, uint32_t numColumns);
 
   /**
    * @brief End table
    */
-  static void end();
+  ~Table();
+
+  Table(const Table &) = delete;
+  Table(Table &&) = delete;
+  Table &operator=(const Table &) = delete;
+  Table &operator=(Table &&) = delete;
+
+  /**
+   * @brief Check if table is expanded
+   *
+   * @retval true Table is expanded
+   * @retval false Table is not expanded
+   */
+  inline operator bool() const { return mExpanded; }
 
   /**
    * @brief Render vector4 column
    *
    * @param value Vector4D value
    */
-  static void column(const glm::vec4 &value);
+  void column(const glm::vec4 &value);
 
   /**
    * @brief Render vector3 column
    *
    * @param value Vector3 value
    */
-  static void column(const glm::vec3 &value);
+  void column(const glm::vec3 &value);
 
   /**
    * @brief Render quaternion column
    *
    * @param value Quaternion value
    */
-  static void column(const glm::quat &value);
+  void column(const glm::quat &value);
 
   /**
    * @brief Render scalar column
    *
    * @param value Scalar value
    */
-  static void column(float value);
+  void column(float value);
 
   /**
    * @brief Render string column
    *
    * @param value String value
    */
-  static void column(const liquid::String &value);
+  void column(const liquid::String &value);
 
   /**
    * @brief Render integer column
    *
    * @param value Integer value
    */
-  static void column(int32_t value);
+  void column(int32_t value);
 
   /**
    * @brief Render unsigned integer column
    *
    * @param value Unsigned integer value
    */
-  static void column(uint32_t value);
+  void column(uint32_t value);
 
   /**
    * @brief Render image column
@@ -195,7 +265,7 @@ public:
    * @param handle Texture handle
    * @param size Image size
    */
-  static void column(liquid::rhi::TextureHandle handle, const glm::vec2 &size);
+  void column(liquid::rhi::TextureHandle handle, const glm::vec2 &size);
 
   /**
    * @brief Render row
@@ -203,12 +273,99 @@ public:
    * @tparam ...TColumns Column types
    * @param ...columns Columns
    */
-  template <class... TColumns> static void row(const TColumns &...columns) {
+  template <class... TColumns> void row(const TColumns &...columns) {
     ImGui::TableNextRow();
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
     (column(columns), ...);
   }
+
+private:
+  bool mExpanded = false;
+};
+
+/**
+ * @brief Input widget
+ */
+class Input {
+public:
+  /**
+   * @brief Render vec3 input
+   *
+   * @param label Input label
+   * @param value Input value
+   */
+  Input(liquid::String label, glm::vec3 &value);
+
+  /**
+   * @brief Render scalar input
+   *
+   * @param label Input label
+   * @param value Input value
+   */
+  Input(liquid::String label, float &value);
+
+  /**
+   * @brief Render text input
+   *
+   * @param label Input label
+   * @param value Input value
+   */
+  Input(liquid::String label, liquid::String &value);
+
+  /**
+   * @brief Check if input is changed
+   *
+   * @retval true Input is changed
+   * @retval false Input is not changed
+   */
+  inline operator bool() const { return mChanged; }
+
+private:
+  /**
+   * @brief Render scalar input
+   *
+   * @param label Input label
+   * @param data Scalar data
+   * @param size Number of data items
+   */
+  void renderScalarInput(liquid::String label, void *data, size_t size);
+
+  /**
+   * @brief Render text input
+   *
+   * @param label Input label
+   * @param data String data
+   */
+  void renderTextInput(liquid::String label, liquid::String &data);
+
+private:
+  bool mChanged = false;
+};
+
+/**
+ * @brief Color input widget
+ */
+class InputColor {
+public:
+  /**
+   * @brief Render color input
+   *
+   * @param label Input label
+   * @param value Input value
+   */
+  InputColor(liquid::String label, glm::vec4 &value);
+
+  /**
+   * @brief Check if input is changed
+   *
+   * @retval true Input is changed
+   * @retval false Input is not changed
+   */
+  inline operator bool() const { return mChanged; }
+
+private:
+  bool mChanged = false;
 };
 
 } // namespace liquidator::widgets

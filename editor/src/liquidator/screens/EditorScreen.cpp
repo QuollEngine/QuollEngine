@@ -162,15 +162,14 @@ void EditorScreen::start(const Project &project) {
 
     imgui.beginRendering();
 
-    if (widgets::MainMenuBar::begin()) {
+    if (auto _ = widgets::MainMenuBar()) {
       liquidator::MenuBar::render(editorManager, entityManager);
       debugLayer.renderMenu();
-      widgets::MainMenuBar::end();
     }
 
     debugLayer.render();
 
-    if (Toolbar::begin()) {
+    if (auto _ = Toolbar()) {
       auto icon =
           entityManager.isUsingSimulationDatabase()
               ? ui.getIconRegistry().getIcon(liquidator::EditorIcon::Stop)
@@ -195,12 +194,11 @@ void EditorScreen::start(const Project &project) {
         editorManager.switchToEditorCamera();
       }
     }
-    Toolbar::end();
 
     ui.render(editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
 
-    if (SceneView::begin(scenePassGroup.sceneColor)) {
+    if (auto _ = SceneView(scenePassGroup.sceneColor)) {
       const auto &pos = ImGui::GetWindowPos();
       const auto &size = ImGui::GetItemRectSize();
 
@@ -208,7 +206,6 @@ void EditorScreen::start(const Project &project) {
                                                   size.x, size.y);
     }
 
-    SceneView::end();
     StatusBar::render(editorManager);
 
     preloadStatusDialog.render();

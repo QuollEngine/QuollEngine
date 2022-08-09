@@ -28,6 +28,25 @@ public:
   void render(EditorManager &editorManager);
 
   /**
+   * @brief Check if entity is selected
+   *
+   * @retval true Entity is selected
+   * @retval false Entity is not selected
+   */
+  inline bool isEntitySelected() const {
+    return mSelectedEntity != liquid::EntityNull;
+  }
+
+  /**
+   * @brief Get selected entity
+   *
+   * @return Selected entity
+   */
+  inline const liquid::Entity getSelectedEntity() const {
+    return mSelectedEntity;
+  }
+
+  /**
    * @brief Set node click handler
    *
    * @param handler Node click handler

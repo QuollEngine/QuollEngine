@@ -11,7 +11,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(EditorManager &editorManager) {
-  if (widgets::Window::begin("Hierarchy")) {
+  if (auto _ = widgets::Window("Hierarchy")) {
     auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
     entityDatabase.iterateEntities<liquid::LocalTransformComponent>(
@@ -24,8 +24,6 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
           renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
         });
   }
-
-  widgets::Window::end();
 }
 
 void SceneHierarchyPanel::setEntityClickHandler(
@@ -56,11 +54,7 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   }
 
   ConfirmationDialog confirmDeleteSceneNode(
-      "Delete entity ",
-      "Are you sure you want to delete node \"" + name + "\"?",
-      [this, entity](EditorManager &editorManager) {
-        mEntityManager.deleteEntity(entity);
-      },
+      "Delete entity", "Are you sure you want to delete node \"" + name + "\"?",
       "Delete");
 
   bool open = false;
@@ -70,13 +64,12 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
     if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
       mRightClickedEntity = entity;
     } else if (ImGui::IsItemClicked()) {
-      mEntityClickHandler(entity);
       mSelectedEntity = entity;
     }
   }
 
   if (mRightClickedEntity == entity) {
-    if (widgets::ContextMenu::begin()) {
+    if (auto _ = widgets::ContextMenu()) {
       if (ImGui::MenuItem("Go to view")) {
         editorManager.moveCameraToEntity(entity);
       }
@@ -84,10 +77,11 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
       if (ImGui::MenuItem("Delete")) {
         confirmDeleteSceneNode.show();
       }
-
-      widgets::ContextMenu::end();
     }
-    confirmDeleteSceneNode.render(editorManager);
+    confirmDeleteSceneNode.render();
+    if (confirmDeleteSceneNode.isConfirmed()) {
+      mEntityManager.deleteEntity(entity);
+    }
   }
 
   if (open) {

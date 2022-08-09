@@ -20,27 +20,4 @@ bool imageButton(liquid::rhi::TextureHandle handle, const ImVec2 &size,
                             frame_padding, bg_col, tint_col);
 }
 
-bool input(const char *label, float &value, const char *format,
-           ImGuiInputTextFlags flags) {
-  ImGui::InputScalarN(label, ImGuiDataType_Float, &value, 1, NULL, NULL, format,
-                      flags);
-
-  return ImGui::IsItemDeactivatedAfterEdit();
-}
-
-bool input(const char *label, glm::vec3 &value, const char *format,
-           ImGuiInputTextFlags flags) {
-  ImGui::InputScalarN(label, ImGuiDataType_Float, glm::value_ptr(value), 3,
-                      NULL, NULL, format, flags);
-
-  return ImGui::IsItemDeactivatedAfterEdit();
-}
-
-bool inputColor(const char *label, glm::vec4 &value,
-                ImGuiInputTextFlags flags) {
-  ImGui::ColorEdit4(label, glm::value_ptr(value), flags);
-
-  return ImGui::IsItemDeactivatedAfterEdit();
-}
-
 } // namespace liquid::imgui

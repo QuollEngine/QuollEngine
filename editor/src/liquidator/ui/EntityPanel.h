@@ -24,14 +24,16 @@ public:
    * @brief Render panel
    *
    * @param editorManager Editor manager
+   * @param entity Entity to display
    * @param renderer Renderer
    * @param assetRegistry Asset registry
    * @param physicsSystem Physics system
    */
-  void render(EditorManager &editorManager, liquid::Renderer &renderer,
-              liquid::AssetRegistry &assetRegistry,
+  void render(EditorManager &editorManager, liquid::Entity entity,
+              liquid::Renderer &renderer, liquid::AssetRegistry &assetRegistry,
               liquid::PhysicsSystem &physicsSystem);
 
+private:
   /**
    * @brief Set selected entity
    *
@@ -39,7 +41,6 @@ public:
    */
   void setSelectedEntity(liquid::Entity entity);
 
-private:
   /**
    * @brief Render name component
    */
