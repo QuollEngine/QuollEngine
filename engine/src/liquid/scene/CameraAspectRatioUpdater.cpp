@@ -10,6 +10,9 @@ void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("CameraAspectRatioUpdater::update");
   const auto &size = mWindow.getWindowSize();
 
+  if (size.x <= 0.0f || size.y <= 0.0f)
+    return;
+
   entityDatabase
       .iterateEntities<PerspectiveLensComponent, AutoAspectRatioComponent>(
           [&size](auto entity, auto &lens, auto &_) {
