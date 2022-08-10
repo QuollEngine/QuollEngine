@@ -115,8 +115,10 @@ private:
 
   /**
    * @brief Render add component button
+   *
+   * @param assetRegistry Asset registry
    */
-  void renderAddComponent();
+  void renderAddComponent(liquid::AssetRegistry &assetRegistry);
 
   /**
    * @brief Handle drag and drop

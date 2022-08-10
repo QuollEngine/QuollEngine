@@ -1,6 +1,6 @@
 function copyEngineAssets(assetsPath, outputPath)
     postbuildcommands {
-        "{MKDIR} %{cfg.buildtarget.directory}/engine/assets/shaders/",
+        "{MKDIR} "..outputPath.."/shaders/",
         "glslc "..assetsPath.."/shaders/geometry.vert -o "..outputPath.."/shaders/geometry.vert.spv",
         "glslc "..assetsPath.."/shaders/skinnedGeometry.vert -o"..outputPath.."/shaders/skinnedGeometry.vert.spv",
         "glslc "..assetsPath.."/shaders/pbr.frag -o"..outputPath.."/shaders/pbr.frag.spv",
@@ -14,7 +14,9 @@ function copyEngineAssets(assetsPath, outputPath)
         "glslc "..assetsPath.."/shaders/text.vert -o"..outputPath.."/shaders/text.vert.spv",
         "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreenQuad.frag -o"..outputPath.."/shaders/fullscreenQuad.frag.spv",
-        "glslc "..assetsPath.."/shaders/fullscreenQuad.vert -o"..outputPath.."/shaders/fullscreenQuad.vert.spv"
+        "glslc "..assetsPath.."/shaders/fullscreenQuad.vert -o"..outputPath.."/shaders/fullscreenQuad.vert.spv",
+        "{MKDIR} "..outputPath.."/fonts/",
+        "{COPY} "..assetsPath.."/fonts/Roboto-Regular.ttf "..outputPath.."/fonts"
     }
 end
 
@@ -75,3 +77,4 @@ project "LiquidEngineTest"
         "{COPYFILE} ../../engine/tests/fixtures/valid-audio.wav %{cfg.buildtarget.directory}/valid-audio.wav",
         "{COPYFILE} ../../engine/tests/fixtures/valid-audio.mp3 %{cfg.buildtarget.directory}/valid-audio.mp3"
     }
+

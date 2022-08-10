@@ -17,6 +17,8 @@ void AssetRegistry::createDefaultObjects() {
   mDefaultObjects.cube = mMeshes.addAsset(mesh);
   mDefaultObjects.defaultMaterial =
       mMaterials.addAsset(default_objects::createDefaultMaterial());
+  mDefaultObjects.defaultFont =
+      mFonts.addAsset(default_objects::createDefaultFont());
 }
 
 void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {

@@ -19,8 +19,9 @@ public:
    * @brief Create asset manager
    *
    * @param assetsPath Assets path
+   * @param createDefaultObjects Create default objects
    */
-  AssetManager(const Path &assetsPath);
+  AssetManager(const Path &assetsPath, bool createDefaultObjects = false);
 
   /**
    * @brief Create texture from asset

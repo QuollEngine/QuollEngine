@@ -25,7 +25,7 @@ public:
                  backend.createDefaultDevice()),
         presenter(renderer.getShaderLibrary(), renderer.getRegistry()),
         physicsSystem(eventSystem),
-        assetManager(std::filesystem::current_path()),
+        assetManager(std::filesystem::current_path(), true),
         scriptingSystem(eventSystem, assetManager.getRegistry()) {
 
     assetManager.preloadAssets(renderer.getRegistry());

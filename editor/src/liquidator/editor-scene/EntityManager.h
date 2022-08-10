@@ -128,6 +128,14 @@ public:
   void setAudio(liquid::Entity entity, liquid::AudioAssetHandle source);
 
   /**
+   * @brief Set text for entity
+   *
+   * @param entity Entity
+   * @param text Text component
+   */
+  void setText(liquid::Entity entity, liquid::TextComponent text);
+
+  /**
    * @brief Set script for entity
    *
    * @param entity Entity

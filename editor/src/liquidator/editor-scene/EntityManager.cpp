@@ -161,6 +161,10 @@ void EntityManager::setAudio(liquid::Entity entity,
       entity, {source});
 }
 
+void EntityManager::setText(liquid::Entity entity, liquid::TextComponent text) {
+  getActiveEntityDatabase().setComponent(entity, text);
+}
+
 void EntityManager::setScript(liquid::Entity entity,
                               liquid::LuaScriptAssetHandle handle) {
   liquid::ScriptingComponent script{};
