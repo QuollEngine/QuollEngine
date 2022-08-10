@@ -42,7 +42,7 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
-  liquid::AssetManager assetManager(project.assetsPath);
+  liquid::AssetManager assetManager(project.assetsPath, true);
   liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
 
   liquid::Presenter presenter(renderer.getShaderLibrary(),

@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 #include "liquid/imgui/Imgui.h"
 
 #include "Theme.h"
@@ -89,8 +90,8 @@ static void setImguiStyles() {
  * @brief Add fonts
  */
 static void addFonts() {
-  liquid::Path fontPath = std::filesystem::current_path() / "assets" / "fonts" /
-                          "Roboto-Regular.ttf";
+  liquid::Path fontPath = liquid::Path(liquid::Engine::getAssetsPath()) /
+                          "fonts" / "Roboto-Regular.ttf";
   auto &io = ImGui::GetIO();
   io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), FontSize);
 }

@@ -8,8 +8,11 @@
 
 namespace liquid {
 
-AssetManager::AssetManager(const Path &assetsPath) : mAssetsPath(assetsPath) {
-  mRegistry.createDefaultObjects();
+AssetManager::AssetManager(const Path &assetsPath, bool createDefaultObjects)
+    : mAssetsPath(assetsPath) {
+  if (createDefaultObjects) {
+    mRegistry.createDefaultObjects();
+  }
 }
 
 Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,

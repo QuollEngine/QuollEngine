@@ -2,7 +2,11 @@
 #include "AssetData.h"
 #include "MeshAsset.h"
 #include "MaterialAsset.h"
+#include "FontAsset.h"
 #include "DefaultObjects.h"
+
+#include "liquid/text/MsdfLoader.h"
+#include "liquid/core/Engine.h"
 
 namespace liquid::default_objects {
 
@@ -77,7 +81,9 @@ AssetData<MeshAsset> createCube() {
   AssetData<MeshAsset> mesh;
   geometry.vertices = vertices;
   geometry.indices = indices;
-  mesh.name = "__liquid.engine.defaultCube";
+  mesh.name = "Cube";
+  mesh.path = "liquid::engine/meshes/cube.lqmesh";
+  mesh.relativePath = "liquid::engine/meshes/cube.lqmesh";
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
@@ -87,9 +93,24 @@ AssetData<MeshAsset> createCube() {
 
 AssetData<MaterialAsset> createDefaultMaterial() {
   AssetData<MaterialAsset> material;
-  material.name = "__liquid.engine.defaultMaterial";
+  material.name = "Default material";
+  material.path = "liquid::engine/materials/default.lqmat";
+  material.relativePath = "liquid::engine/materials/default.lqmat";
 
   return material;
+}
+
+AssetData<FontAsset> createDefaultFont() {
+  MsdfLoader loader;
+
+  auto font = loader.loadFontData(Path(Engine::getAssetsPath()) / "fonts" /
+                                  "Roboto-Regular.ttf");
+
+  font.getData().path = "liquid::engine/fonts/Roboto-Regular.ttf";
+  font.getData().relativePath = "liquid::engine/fonts/Roboto-Regular.ttf";
+  font.getData().name = "Roboto (default)";
+
+  return font.getData();
 }
 
 } // namespace liquid::default_objects

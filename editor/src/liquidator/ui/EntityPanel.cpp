@@ -81,7 +81,7 @@ void EntityPanel::render(EditorManager &editorManager, liquid::Entity entity,
       renderRigidBody();
       renderAudio(assetRegistry);
       renderScripting(assetRegistry);
-      renderAddComponent();
+      renderAddComponent(assetRegistry);
       handleDragAndDrop(renderer, assetRegistry);
     }
   }
@@ -647,7 +647,7 @@ void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
   }
 }
 
-void EntityPanel::renderAddComponent() {
+void EntityPanel::renderAddComponent(liquid::AssetRegistry &assetRegistry) {
   if (!mEntityManager.getActiveEntityDatabase().hasEntity(mSelectedEntity)) {
     return;
   }
@@ -713,6 +713,15 @@ void EntityPanel::renderAddComponent() {
              .hasComponent<liquid::PerspectiveLensComponent>(mSelectedEntity) &&
         ImGui::Selectable("Camera")) {
       mEntityManager.setCamera(mSelectedEntity, {}, true);
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (!mEntityManager.getActiveEntityDatabase()
+             .hasComponent<liquid::TextComponent>(mSelectedEntity) &&
+        ImGui::Selectable("Text")) {
+      liquid::TextComponent text{"Hello world"};
+      text.font = assetRegistry.getDefaultObjects().defaultFont;
+      mEntityManager.setText(mSelectedEntity, text);
       mEntityManager.save(mSelectedEntity);
     }
 

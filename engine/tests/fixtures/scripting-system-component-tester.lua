@@ -190,6 +190,29 @@ function rigid_body_apply_torque_invalid()
     entity.rigid_body:apply_torque(1.0, 1.0, {})
 end
 
+-- Text
+text = ''
+
+function text_get_text()
+    text = entity.text:get_text()
+end
+
+function text_get_invalid_text()
+    text = entity.name.text()
+end
+
+function text_set_text()
+    entity.text:set_text("Hello World")
+end
+
+function text_set_invalid()
+    entity.text.set("Test")
+    entity.text:set(nil)
+    entity.text:set(true)
+    entity.text:set(name_set)
+    entity.text:set({})
+end
+
 -- Audio 
 audio_is_playing_flag = false
 function audio_play()

@@ -6,6 +6,7 @@
 #include "liquid/physics/RigidBodyScriptingInterface.h"
 #include "liquid/audio/AudioScriptingInterface.h"
 #include "liquid/scene/TransformScriptingInterface.h"
+#include "liquid/text/TextScriptingInterface.h"
 
 #include "LuaScope.h"
 
@@ -56,6 +57,7 @@ void EntityDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   registerEntityInterface<TransformScriptingInterface>(scope, table, entity);
   registerEntityInterface<RigidBodyScriptingInterface>(scope, table, entity);
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
+  registerEntityInterface<TextScriptingInterface>(scope, table, entity);
 }
 
 void EntityDecorator::attachToScope(LuaScope &scope, Entity entity,
