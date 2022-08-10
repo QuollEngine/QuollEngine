@@ -12,6 +12,9 @@ void Layout::setup() {
 
   const auto &viewport = ImGui::GetMainViewport();
 
+  if (viewport->Size.x <= 0.0f || viewport->Size.y <= 0.0f)
+    return;
+
   ImGui::SetNextWindowPos(
       ImVec2(viewport->Pos.x,
              viewport->Pos.y + ImGui::GetFrameHeight() + Toolbar::Height));

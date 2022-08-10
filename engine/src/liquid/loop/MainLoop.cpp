@@ -51,7 +51,10 @@ void MainLoop::run() {
       accumulator -= TimeDelta;
     }
 
-    mRenderFn();
+    const auto &size = mWindow.getWindowSize();
+    if (size.x > 0.0f && size.y > 0.0f) {
+      mRenderFn();
+    }
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime -
                                                               prevFrameTime)
