@@ -1,11 +1,71 @@
 #include "liquid/core/Base.h"
 #include "liquid/renderer/MaterialPBR.h"
+#include "liquid/rhi/NativeBuffer.h"
 
 #include "liquid-tests/Testing.h"
 
+class MockBuffer : public liquid::rhi::NativeBuffer {
+public:
+  MockBuffer(const liquid::rhi::BufferDescription &description)
+      : size(description.size), data(description.data) {}
+
+  void *map() { return nullptr; }
+
+  void unmap() {}
+
+  void update(void *data) {}
+
+  void resize(size_t size) {}
+
+public:
+  size_t size = 0;
+  void *data = data;
+};
+
+class MockDevice : public liquid::rhi::RenderDevice {
+public:
+  liquid::rhi::RenderFrame beginFrame() {
+    return liquid::rhi::RenderFrame{0, 0, commandList};
+  }
+
+  void endFrame(const liquid::rhi::RenderFrame &renderFrame) {}
+
+  void waitForIdle() {}
+
+  void synchronize(liquid::rhi::ResourceRegistry &registry) {}
+
+  const liquid::rhi::PhysicalDeviceInformation getDeviceInformation() {
+    return liquid::rhi::PhysicalDeviceInformation{
+        "MockGPU", liquid::rhi::PhysicalDeviceType::Unknown, {}, {}};
+  }
+
+  /**
+   * @brief Get device stats
+   *
+   * @return Device stats
+   */
+  const liquid::rhi::DeviceStats &getDeviceStats() const { return stats; }
+
+  void destroyResources() {}
+
+  liquid::rhi::Swapchain getSwapchain() { return liquid::rhi::Swapchain{}; }
+
+  liquid::rhi::Buffer
+  createBuffer(const liquid::rhi::BufferDescription &description) {
+    mockBuffer = new MockBuffer(description);
+    return liquid::rhi::Buffer(liquid::rhi::BufferHandle{10}, mockBuffer);
+  }
+
+public:
+  liquid::rhi::DeviceStats stats{nullptr};
+  MockBuffer *mockBuffer = nullptr;
+
+  liquid::rhi::RenderCommandList commandList;
+};
+
 class MaterialPBRTest : public ::testing::Test {
 public:
-  liquid::rhi::ResourceRegistry registry;
+  MockDevice *device = new MockDevice;
 };
 
 TEST_F(MaterialPBRTest, GetsTextures) {
@@ -135,9 +195,8 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
       0,
       glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material(properties, registry);
+  liquid::MaterialPBR material(properties, device);
 
   EXPECT_EQ(material.getTextures().size(), 3);
-  EXPECT_EQ(registry.getBufferMap().getDescription(material.getBuffer()).size,
-            16 * sizeof(glm::vec4));
+  EXPECT_EQ(device->mockBuffer->size, 16 * sizeof(glm::vec4));
 }

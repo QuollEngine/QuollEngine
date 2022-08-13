@@ -3,6 +3,7 @@
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
 #include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/Buffer.h"
 
 #include "Asset.h"
 
@@ -44,12 +45,12 @@ struct MeshAsset {
   /**
    * List of vertex buffers
    */
-  std::vector<rhi::BufferHandle> vertexBuffers;
+  std::vector<rhi::Buffer> vertexBuffers;
 
   /**
    * List of index buffers
    */
-  std::vector<rhi::BufferHandle> indexBuffers;
+  std::vector<rhi::Buffer> indexBuffers;
 
   /**
    * List of materials
@@ -73,12 +74,12 @@ struct SkinnedMeshAsset {
   /**
    * List of vertex buffers
    */
-  std::vector<rhi::BufferHandle> vertexBuffers;
+  std::vector<rhi::Buffer> vertexBuffers;
 
   /**
    * List of index buffers
    */
-  std::vector<rhi::BufferHandle> indexBuffers;
+  std::vector<rhi::Buffer> indexBuffers;
 
   /**
    * List of materials

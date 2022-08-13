@@ -7,30 +7,48 @@ namespace liquid::rhi {
 
 VulkanBuffer::VulkanBuffer(const BufferDescription &description,
                            VulkanResourceAllocator &allocator)
-    : mAllocator(allocator), mType(description.type), mSize(description.size) {
+    : mAllocator(allocator), mType(description.type), mUsage(description.usage),
+      mSize(description.size) {
   createBuffer(description);
 }
 
-VulkanBuffer::~VulkanBuffer() { destroyBuffer(); }
+VulkanBuffer::~VulkanBuffer() {
+  vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
+}
 
-void VulkanBuffer::update(const BufferDescription &description) {
-  LIQUID_ASSERT(mType == description.type,
-                "Cannot change the type of the buffer");
+void *VulkanBuffer::map() {
+  void *data = nullptr;
+  vmaMapMemory(mAllocator, mAllocation, &data);
+  return data;
+}
 
-  if (mSize != description.size) {
-    destroyBuffer();
-    createBuffer(description);
-  } else if (description.data) {
-    void *data = nullptr;
-    vmaMapMemory(mAllocator, mAllocation, &data);
-    memcpy(data, description.data, description.size);
-    vmaUnmapMemory(mAllocator, mAllocation);
-  }
+void VulkanBuffer::unmap() { vmaUnmapMemory(mAllocator, mAllocation); }
+
+void VulkanBuffer::resize(size_t size) {
+  mSize = size;
+  createBuffer({mType, mSize, nullptr, mUsage});
+}
+
+void VulkanBuffer::update(void *data) {
+  void *mappedData = map();
+  memcpy(mappedData, data, mSize);
+  unmap();
 }
 
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
   mSize = description.size;
   mType = description.type;
+  mUsage = description.usage;
+
+  VmaAllocationCreateFlags allocationFlags = 0;
+
+  if ((mUsage & BufferUsage::HostWrite) == BufferUsage::HostWrite) {
+    allocationFlags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+  }
+
+  if ((mUsage & BufferUsage::HostRead) == BufferUsage::HostRead) {
+    allocationFlags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+  }
 
   VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_FLAG_BITS_MAX_ENUM;
@@ -42,9 +60,10 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
   } else if (description.type == rhi::BufferType::Storage) {
     bufferUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-  } else if (description.type == rhi::BufferType::Transfer) {
+  } else if (description.type == rhi::BufferType::TransferSource) {
     bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    memoryUsage = VMA_MEMORY_USAGE_CPU_ONLY;
+  } else if (description.type == rhi::BufferType::TransferDestination) {
+    bufferUsage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
   }
 
   VkBufferCreateInfo createBufferInfo{};
@@ -55,8 +74,11 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   createBufferInfo.usage = bufferUsage;
 
   VmaAllocationCreateInfo createAllocationInfo{};
-  createAllocationInfo.flags = 0;
-  createAllocationInfo.usage = memoryUsage;
+  createAllocationInfo.flags = allocationFlags;
+  createAllocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+  VmaAllocation oldAllocation = mAllocation;
+  VkBuffer oldBuffer = mBuffer;
 
   checkForVulkanError(vmaCreateBuffer(mAllocator, &createBufferInfo,
                                       &createAllocationInfo, &mBuffer,
@@ -69,10 +91,10 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     memcpy(data, description.data, description.size);
     vmaUnmapMemory(mAllocator, mAllocation);
   }
-}
 
-void VulkanBuffer::destroyBuffer() {
-  vmaDestroyBuffer(mAllocator, mBuffer, mAllocation);
+  if (oldAllocation && oldBuffer) {
+    vmaDestroyBuffer(mAllocator, oldBuffer, oldAllocation);
+  }
 }
 
 } // namespace liquid::rhi

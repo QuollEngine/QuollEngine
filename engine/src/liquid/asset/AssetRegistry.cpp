@@ -21,8 +21,9 @@ void AssetRegistry::createDefaultObjects() {
       mFonts.addAsset(default_objects::createDefaultFont());
 }
 
-void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
-  LIQUID_PROFILE_EVENT("AssetRegistry::syncWithDeviceRegistry");
+void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
+                                           rhi::RenderDevice *device) {
+  LIQUID_PROFILE_EVENT("AssetRegistry::syncWithDevice");
 
   // Synchronize textures
   for (auto &[_, texture] : mTextures.getAssets()) {
@@ -103,17 +104,15 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
           getTextureFromRegistry(material.emissiveTexture);
       properties.emissiveTextureCoord = material.emissiveTextureCoord;
 
-      material.deviceHandle.reset(new MaterialPBR(properties, registry));
+      material.deviceHandle.reset(new MaterialPBR(properties, device));
     }
   }
 
   // Synchronize meshes
   for (auto &[_, mesh] : mMeshes.getAssets()) {
     if (mesh.data.vertexBuffers.empty()) {
-      mesh.data.vertexBuffers.resize(mesh.data.geometries.size(),
-                                     rhi::BufferHandle::Invalid);
-      mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
-                                    rhi::BufferHandle::Invalid);
+      mesh.data.vertexBuffers.resize(mesh.data.geometries.size());
+      mesh.data.indexBuffers.resize(mesh.data.geometries.size());
       mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     }
 
@@ -125,7 +124,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.type = rhi::BufferType::Vertex;
         description.size = geometry.vertices.size() * sizeof(Vertex);
         description.data = geometry.vertices.data();
-        mesh.data.vertexBuffers.at(i) = registry.setBuffer(description);
+        mesh.data.vertexBuffers.at(i) = device->createBuffer(description);
       }
 
       if (!geometry.indices.empty()) {
@@ -133,7 +132,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.type = rhi::BufferType::Index;
         description.size = geometry.indices.size() * sizeof(uint32_t);
         description.data = geometry.indices.data();
-        mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
+        mesh.data.indexBuffers.at(i) = device->createBuffer(description);
       }
 
       auto material = geometry.material != MaterialAssetHandle::Invalid
@@ -147,10 +146,8 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
   // Synchronize skinned meshes
   for (auto &[_, mesh] : mSkinnedMeshes.getAssets()) {
     if (mesh.data.vertexBuffers.empty()) {
-      mesh.data.vertexBuffers.resize(mesh.data.geometries.size(),
-                                     rhi::BufferHandle::Invalid);
-      mesh.data.indexBuffers.resize(mesh.data.geometries.size(),
-                                    rhi::BufferHandle::Invalid);
+      mesh.data.vertexBuffers.resize(mesh.data.geometries.size());
+      mesh.data.indexBuffers.resize(mesh.data.geometries.size());
       mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     }
 
@@ -162,7 +159,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.type = rhi::BufferType::Vertex;
         description.size = geometry.vertices.size() * sizeof(SkinnedVertex);
         description.data = geometry.vertices.data();
-        mesh.data.vertexBuffers.at(i) = registry.setBuffer(description);
+        mesh.data.vertexBuffers.at(i) = device->createBuffer(description);
       }
 
       if (!geometry.indices.empty()) {
@@ -170,7 +167,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry) {
         description.type = rhi::BufferType::Index;
         description.size = geometry.indices.size() * sizeof(uint32_t);
         description.data = geometry.indices.data();
-        mesh.data.indexBuffers.at(i) = registry.setBuffer(description);
+        mesh.data.indexBuffers.at(i) = device->createBuffer(description);
       }
 
       auto material = geometry.material != MaterialAssetHandle::Invalid

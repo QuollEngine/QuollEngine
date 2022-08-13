@@ -57,10 +57,10 @@ public:
   /**
    * @brief Set buffer
    *
-   * @param handle Buffer handle
    * @param buffer Vulkan buffer
+   * @return New buffer handle
    */
-  void setBuffer(BufferHandle handle, std::unique_ptr<VulkanBuffer> &&buffer);
+  BufferHandle setBuffer(std::unique_ptr<VulkanBuffer> &&buffer);
 
   /**
    * @brief Delete buffer
@@ -199,11 +199,13 @@ public:
 
 private:
   ShaderMap mShaders;
-  BufferMap mBuffers;
   TextureMap mTextures;
   RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;
   PipelineMap mPipelines;
+
+  BufferMap mBuffers;
+  uint32_t mLastBuffer = 1;
 
   std::set<TextureHandle> mSwapchainRelativeTextures;
 };

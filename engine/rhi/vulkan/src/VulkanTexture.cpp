@@ -93,7 +93,8 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.usage = usageFlags;
 
   VmaAllocationCreateInfo allocationCreateInfo{};
-  allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+  allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+  allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
   checkForVulkanError(vmaCreateImage(mAllocator, &imageCreateInfo,
                                      &allocationCreateInfo, &mImage,
                                      &mAllocation, nullptr),
@@ -130,7 +131,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   if (description.data) {
     VulkanBuffer stagingBuffer(
-        {rhi::BufferType::Transfer, description.size, description.data},
+        {rhi::BufferType::TransferSource, description.size, description.data},
         mAllocator);
 
     uploadContext.submit([extent, this, &stagingBuffer,

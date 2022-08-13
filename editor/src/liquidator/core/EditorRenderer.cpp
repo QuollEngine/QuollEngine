@@ -6,9 +6,10 @@ namespace liquidator {
 
 EditorRenderer::EditorRenderer(liquid::rhi::ResourceRegistry &registry,
                                liquid::ShaderLibrary &shaderLibrary,
-                               IconRegistry &iconRegistry)
+                               IconRegistry &iconRegistry,
+                               liquid::rhi::RenderDevice *device)
     : mRegistry(registry), mIconRegistry(iconRegistry),
-      mShaderLibrary(shaderLibrary) {
+      mShaderLibrary(shaderLibrary), mRenderStorage(device) {
 
   mShaderLibrary.addShader(
       "editor-grid.vert",
@@ -208,7 +209,7 @@ void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
                                             glm::vec3(0, 1, 0)));
       });
 
-  mRenderStorage.updateBuffers(mRegistry);
+  mRenderStorage.updateBuffers();
 }
 
 } // namespace liquidator

@@ -8,9 +8,10 @@ namespace liquid {
 
 SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
                              rhi::ResourceRegistry &resourceRegistry,
-                             AssetRegistry &assetRegistry)
+                             AssetRegistry &assetRegistry,
+                             rhi::RenderDevice *device)
     : mShaderLibrary(shaderLibrary), mRegistry(resourceRegistry),
-      mAssetRegistry(assetRegistry) {
+      mAssetRegistry(assetRegistry), mDevice(device), mRenderStorage(device) {
 
   auto assetsPath = Engine::getAssetsPath();
 
@@ -256,8 +257,8 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
                              .data;
 
-      commandList.bindVertexBuffer(cube.vertexBuffers.at(0));
-      commandList.bindIndexBuffer(cube.indexBuffers.at(0),
+      commandList.bindVertexBuffer(cube.vertexBuffers.at(0).getHandle());
+      commandList.bindIndexBuffer(cube.indexBuffers.at(0).getHandle(),
                                   VK_INDEX_TYPE_UINT32);
       commandList.drawIndexed(
           static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
@@ -369,7 +370,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                               environment.brdfLUT);
       });
 
-  mRenderStorage.updateBuffers(mRegistry);
+  mRenderStorage.updateBuffers();
 }
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
@@ -383,10 +384,10 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
   for (auto &[handle, meshData] : mRenderStorage.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g));
-      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g));
+      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
+      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
       if (indexed) {
-        commandList.bindIndexBuffer(mesh.indexBuffers.at(g),
+        commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
                                     VK_INDEX_TYPE_UINT32);
       }
 
@@ -426,10 +427,10 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   for (auto &[handle, meshData] : mRenderStorage.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g));
-      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g));
+      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
+      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
       if (indexed) {
-        commandList.bindIndexBuffer(mesh.indexBuffers.at(g),
+        commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
                                     VK_INDEX_TYPE_UINT32);
       }
 

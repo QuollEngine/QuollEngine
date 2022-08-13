@@ -50,7 +50,7 @@ void EditorScreen::start(const Project &project) {
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.preloadAssets(renderer.getRegistry());
+  auto res = assetManager.preloadAssets(renderer.getRegistry(), mDevice);
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
   preloadStatusDialog.setMessages(res.getWarnings());
 
@@ -83,7 +83,8 @@ void EditorScreen::start(const Project &project) {
   editorManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::AssetLoader assetLoader(assetManager, renderer.getRegistry());
+  liquidator::AssetLoader assetLoader(assetManager, renderer.getRegistry(),
+                                      mDevice);
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                                      mDevice->getDeviceStats(),
@@ -98,7 +99,7 @@ void EditorScreen::start(const Project &project) {
 
   liquidator::EditorRenderer editorRenderer(renderer.getRegistry(),
                                             renderer.getShaderLibrary(),
-                                            ui.getIconRegistry());
+                                            ui.getIconRegistry(), mDevice);
 
   liquid::rhi::RenderGraph graph;
 

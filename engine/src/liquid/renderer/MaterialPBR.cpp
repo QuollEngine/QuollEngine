@@ -60,7 +60,7 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         rhi::ResourceRegistry &registry)
-    : Material(properties.getTextures(), properties.getProperties(), registry) {
-}
+                         rhi::RenderDevice *device)
+    : Material(properties.getTextures(), properties.getProperties(), device) {}
+
 } // namespace liquid

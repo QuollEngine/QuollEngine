@@ -7,6 +7,8 @@
 #include "RenderGraphEvaluator.h"
 #include "Swapchain.h"
 #include "RenderFrame.h"
+#include "Buffer.h"
+#include "BufferDescription.h"
 
 namespace liquid::rhi {
 
@@ -83,6 +85,14 @@ public:
    * @return Swapchain
    */
   virtual Swapchain getSwapchain() = 0;
+
+  /**
+   * @brief Create hardware buffer
+   *
+   * @param description Buffer description
+   * @return Buffer
+   */
+  virtual Buffer createBuffer(const BufferDescription &description) = 0;
 };
 
 } // namespace liquid::rhi

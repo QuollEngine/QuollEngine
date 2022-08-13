@@ -116,9 +116,9 @@ public:
    * @brief Create PBR material
    *
    * @param properties PBR properties
-   * @param registry Resource registry
+   * @param device Render device
    */
-  MaterialPBR(const Properties &properties, rhi::ResourceRegistry &registry);
+  MaterialPBR(const Properties &properties, rhi::RenderDevice *device);
 };
 
 } // namespace liquid

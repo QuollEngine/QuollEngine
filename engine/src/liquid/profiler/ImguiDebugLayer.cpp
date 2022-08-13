@@ -64,19 +64,14 @@ void ImguiDebugLayer::renderUsageMetrics() {
                             ImGuiTableColumnFlags_WidthStretch |
                             ImGuiTableFlags_RowBg)) {
 
-    // Buffers
-    size_t bufferSize = 0;
-    for (auto &[_, description] :
-         mResourceRegistry.getBufferMap().getDescriptions()) {
-      bufferSize += description.size;
-    }
-
     renderTableRow(
         "Number of buffers",
+        std::to_string(mDeviceStats.getResourceMetrics()->getBuffersCount()));
+
+    renderTableRow(
+        "Total size of allocated buffers",
         std::to_string(
-            mResourceRegistry.getBufferMap().getDescriptions().size()));
-    renderTableRow("Total size of allocated buffer",
-                   std::to_string(bufferSize));
+            mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
 
     // Textures
     size_t textureSize = 0;

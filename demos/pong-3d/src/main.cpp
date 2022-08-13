@@ -28,7 +28,8 @@ public:
         assetManager(std::filesystem::current_path(), true),
         scriptingSystem(eventSystem, assetManager.getRegistry()) {
 
-    assetManager.preloadAssets(renderer.getRegistry());
+    assetManager.preloadAssets(renderer.getRegistry(),
+                               renderer.getRenderDevice());
 
     for (auto &[handle, mesh] :
          assetManager.getRegistry().getMeshes().getAssets()) {
@@ -56,9 +57,9 @@ public:
       graph.setFramebufferExtent({width, height});
     });
 
-    liquid::SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
-                                        renderer.getRegistry(),
-                                        assetManager.getRegistry());
+    liquid::SceneRenderer sceneRenderer(
+        renderer.getShaderLibrary(), renderer.getRegistry(),
+        assetManager.getRegistry(), renderer.getRenderDevice());
 
     sceneRenderer.setClearColor(glm::vec4(0.46f, 0.60f, 0.70f, 1.0f));
 

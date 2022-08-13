@@ -3,12 +3,33 @@
 
 namespace liquidator {
 
-EditorRendererStorage::EditorRendererStorage(size_t reservedSpace)
-    : mReservedSpace(reservedSpace) {
+EditorRendererStorage::EditorRendererStorage(liquid::rhi::RenderDevice *device,
+                                             size_t reservedSpace)
+    : mReservedSpace(reservedSpace), mDevice(device) {
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
   mGizmoTransforms.reserve(reservedSpace);
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
+
+  mCameraBuffer = mDevice->createBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent)});
+
+  mEditorGridBuffer = mDevice->createBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData)});
+
+  mSkeletonTransformsBuffer = mDevice->createBuffer({
+      liquid::rhi::BufferType::Storage,
+      mReservedSpace * sizeof(glm::mat4),
+  });
+
+  mSkeletonBoneTransformsBuffer = mDevice->createBuffer({
+      liquid::rhi::BufferType::Storage,
+      mReservedSpace * MaxNumBones * sizeof(glm::mat4),
+  });
+
+  mGizmoTransformsBuffer = mDevice->createBuffer(
+      {liquid::rhi::BufferType::Storage, sizeof(glm::mat4) * mReservedSpace,
+       mGizmoTransforms.data()});
 }
 
 void EditorRendererStorage::addSkeleton(
@@ -39,41 +60,17 @@ void EditorRendererStorage::setEditorGrid(const EditorGridData &data) {
   mEditorGridData = data;
 }
 
-void EditorRendererStorage::updateBuffers(
-    liquid::rhi::ResourceRegistry &registry) {
+void EditorRendererStorage::updateBuffers() {
 
-  mCameraBuffer =
-      registry.setBuffer({liquid::rhi::BufferType::Uniform,
-                          sizeof(liquid::CameraComponent), &mCameraData},
-                         mCameraBuffer);
-
-  mEditorGridBuffer =
-      registry.setBuffer({liquid::rhi::BufferType::Uniform,
-                          sizeof(EditorGridData), &mEditorGridData},
-                         mEditorGridBuffer);
+  mCameraBuffer.update(&mCameraData);
+  mEditorGridBuffer.update(&mEditorGridData);
 
   if (!mSkeletonTransforms.empty()) {
-    mSkeletonTransformsBuffer = registry.setBuffer(
-        {
-            liquid::rhi::BufferType::Storage,
-            mReservedSpace * sizeof(glm::mat4),
-            mSkeletonTransforms.data(),
-        },
-        mSkeletonTransformsBuffer);
-
-    mSkeletonBoneTransformsBuffer = registry.setBuffer(
-        {
-            liquid::rhi::BufferType::Storage,
-            mReservedSpace * MaxNumBones * sizeof(glm::mat4),
-            mSkeletonVector.get(),
-        },
-        mSkeletonBoneTransformsBuffer);
+    mSkeletonTransformsBuffer.update(mSkeletonTransforms.data());
+    mSkeletonBoneTransformsBuffer.update(mSkeletonVector.get());
   }
 
-  mGizmoTransformsBuffer = registry.setBuffer(
-      {liquid::rhi::BufferType::Storage, sizeof(glm::mat4) * mReservedSpace,
-       mGizmoTransforms.data()},
-      mGizmoTransformsBuffer);
+  mGizmoTransformsBuffer.update(mGizmoTransforms.data());
 }
 
 void EditorRendererStorage::clear() {

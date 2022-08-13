@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "VulkanResourceAllocator.h"
+#include "liquid/rhi/NativeBuffer.h"
 #include "liquid/rhi/BufferDescription.h"
 
 namespace liquid::rhi {
@@ -10,7 +11,7 @@ namespace liquid::rhi {
 /**
  * @brief Vulkan hardware buffer
  */
-class VulkanBuffer {
+class VulkanBuffer : public NativeBuffer {
 public:
   /**
    * @brief Create buffer
@@ -32,11 +33,37 @@ public:
   VulkanBuffer &operator=(VulkanBuffer &&) = delete;
 
   /**
+   * @brief Map buffer
+   *
+   * @return Mapped data
+   */
+  void *map();
+
+  /**
+   * @brief Unmap buffer
+   */
+  void unmap();
+
+  /**
    * @brief Update buffer
    *
-   * @param description Buffer description
+   * Maps the buffer, copies data to it,
+   * and unmaps it
+   *
+   * @param data New data
    */
-  void update(const BufferDescription &description);
+  void update(void *data);
+
+  /**
+   * @brief Resize buffer
+   *
+   * Recreates the buffer with
+   * new size. Does not retain
+   * the previous data in it
+   *
+   * @param size New size
+   */
+  void resize(size_t size);
 
   /**
    * @brief Get Vulkan buffer
@@ -74,17 +101,13 @@ private:
    */
   void createBuffer(const BufferDescription &description);
 
-  /**
-   * @brief Destroy buffer
-   */
-  void destroyBuffer();
-
 private:
   VulkanResourceAllocator &mAllocator;
 
   VkBuffer mBuffer = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
   rhi::BufferType mType;
+  rhi::BufferUsage mUsage;
   size_t mSize = 0;
 };
 

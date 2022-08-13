@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NativeResourceMetrics.h"
+
 namespace liquid::rhi {
 
 /**
@@ -10,6 +12,13 @@ namespace liquid::rhi {
  */
 class DeviceStats {
 public:
+  /**
+   * @brief Create device stats
+   *
+   * @param resourceMetrics Resource metrics
+   */
+  DeviceStats(NativeResourceMetrics *resourceMetrics);
+
   /**
    * @brief Add draw call
    *
@@ -50,10 +59,21 @@ public:
    */
   inline uint32_t getCommandCallsCount() const { return mCommandCallsCount; }
 
+  /**
+   * @brief Get resource metrics
+   *
+   * @return Resource metrics
+   */
+  inline const NativeResourceMetrics *getResourceMetrics() const {
+    return mResourceMetrics;
+  }
+
 private:
   uint32_t mDrawCallsCount = 0;
   size_t mDrawnPrimitivesCount = 0;
   uint32_t mCommandCallsCount = 0;
+
+  NativeResourceMetrics *mResourceMetrics;
 };
 
 } // namespace liquid::rhi

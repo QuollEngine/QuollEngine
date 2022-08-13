@@ -3,6 +3,9 @@
 
 namespace liquid::rhi {
 
+DeviceStats::DeviceStats(NativeResourceMetrics *resourceMetrics)
+    : mResourceMetrics(resourceMetrics) {}
+
 void DeviceStats::addDrawCall(size_t primitiveCount) {
   mDrawCallsCount++;
   mDrawnPrimitivesCount += primitiveCount;

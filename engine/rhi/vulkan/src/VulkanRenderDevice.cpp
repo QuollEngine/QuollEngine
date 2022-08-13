@@ -10,6 +10,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanResourceMetrics.h"
 
 #include "VulkanError.h"
 #include "liquid/core/EngineGlobals.h"
@@ -31,7 +32,8 @@ VulkanRenderDevice::VulkanRenderDevice(
       mRenderContext(mDevice, mCommandPool, mGraphicsQueue, mPresentQueue),
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
-      mAllocator(mBackend, mPhysicalDevice, mDevice) {
+      mAllocator(mBackend, mPhysicalDevice, mDevice),
+      mStats(new VulkanResourceMetrics(mRegistry)) {
 
   VkDevice device = mDevice.getVulkanHandle();
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
@@ -100,6 +102,13 @@ Swapchain VulkanRenderDevice::getSwapchain() {
   return Swapchain{mSwapchain.getTextures(), mSwapchain.getExtent()};
 }
 
+Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
+  auto handle = mRegistry.setBuffer(
+      std::make_unique<VulkanBuffer>(description, mAllocator));
+
+  return Buffer{handle, mRegistry.getBuffers().at(handle).get()};
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -137,25 +146,6 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   }
 
   registry.getShaderMap().clearStagedResources();
-
-  // Buffers
-  for (auto [handle, state] : registry.getBufferMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-      if (mRegistry.hasBuffer(handle)) {
-        mRegistry.getBuffers().at(handle)->update(
-            registry.getBufferMap().getDescription(handle));
-      } else {
-        mRegistry.setBuffer(
-            handle,
-            std::make_unique<VulkanBuffer>(
-                registry.getBufferMap().getDescription(handle), mAllocator));
-      }
-    } else {
-      mRegistry.deleteBuffer(handle);
-    }
-  }
-
-  registry.getBufferMap().clearStagedResources();
 
   // Textures
   for (auto [handle, state] : registry.getTextureMap().getStagedResources()) {

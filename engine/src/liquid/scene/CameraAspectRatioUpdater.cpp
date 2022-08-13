@@ -10,7 +10,7 @@ void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("CameraAspectRatioUpdater::update");
   const auto &size = mWindow.getWindowSize();
 
-  if (size.x <= 0.0f || size.y <= 0.0f)
+  if (size.x <= 0 || size.y <= 0)
     return;
 
   entityDatabase

@@ -218,11 +218,11 @@
     },
     {
       "name": "vma",
-      "buildSource": "VulkanMemoryAllocator-2.3.0-vs2017",
-      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v2.3.0+vs2017.zip",
+      "buildSource": "VulkanMemoryAllocator-3.0.1",
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.0.1.zip",
       "cmd": [
         "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/vma",
-        "{COPY} src/vk_mem_alloc.h {{VENDOR_INSTALL_DIR}}/include/vma"
+        "{COPY} include/vk_mem_alloc.h {{VENDOR_INSTALL_DIR}}/include/vma"
       ]
     },
     {

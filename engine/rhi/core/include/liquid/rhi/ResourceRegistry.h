@@ -154,32 +154,6 @@ public:
   }
 
   /**
-   * @brief Set buffer
-   *
-   * @param description Buffer description
-   * @param handle Buffer handle
-   * @return Buffer handle
-   */
-  BufferHandle setBuffer(const BufferDescription &description,
-                         BufferHandle handle = BufferHandle::Invalid);
-
-  /**
-   * @brief Delete buffer
-   *
-   * @param handle Buffer handle
-   */
-  void deleteBuffer(BufferHandle handle);
-
-  /**
-   * @brief Get buffer map
-   *
-   * @return Buffer map
-   */
-  inline ResourceRegistryMap<BufferHandle, BufferDescription> &getBufferMap() {
-    return mBuffers;
-  }
-
-  /**
    * @brief Set texture
    *
    * @param description Texture description
@@ -291,7 +265,6 @@ public:
 
 private:
   ResourceRegistryMap<ShaderHandle, ShaderDescription> mShaders;
-  ResourceRegistryMap<BufferHandle, BufferDescription> mBuffers;
   ResourceRegistryMap<TextureHandle, TextureDescription> mTextures;
   ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription>
       mRenderPasses;
