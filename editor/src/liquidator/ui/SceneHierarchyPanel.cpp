@@ -26,9 +26,8 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
   }
 }
 
-void SceneHierarchyPanel::setEntityClickHandler(
-    const EntityClickHandler &handler) {
-  mEntityClickHandler = handler;
+void SceneHierarchyPanel::setSelectedEntity(liquid::Entity entity) {
+  mSelectedEntity = entity;
 }
 
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,

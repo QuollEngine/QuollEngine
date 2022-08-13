@@ -21,7 +21,6 @@ Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
 
 void Renderer::render(rhi::RenderGraph &graph,
                       rhi::RenderCommandList &commandList) {
-
   graph.compile(mRegistry);
 
   mGraphEvaluator.build(graph);

@@ -34,7 +34,7 @@ public:
    * @retval false Entity is not selected
    */
   inline bool isEntitySelected() const {
-    return mSelectedEntity != liquid::EntityNull;
+    return mEntityManager.getActiveEntityDatabase().hasEntity(mSelectedEntity);
   }
 
   /**
@@ -47,11 +47,11 @@ public:
   }
 
   /**
-   * @brief Set node click handler
+   * @brief Set selected entity
    *
-   * @param handler Node click handler
+   * @param entity Entity
    */
-  void setEntityClickHandler(const EntityClickHandler &handler);
+  void setSelectedEntity(liquid::Entity entity);
 
 private:
   /**
@@ -66,7 +66,6 @@ private:
 
 private:
   EntityManager &mEntityManager;
-  EntityClickHandler mEntityClickHandler;
   liquid::Entity mSelectedEntity = liquid::EntityNull;
   liquid::Entity mRightClickedEntity = liquid::EntityNull;
 };

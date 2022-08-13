@@ -18,6 +18,9 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device, size_t reservedSpace)
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
 
+  mMeshEntities.reserve(mReservedSpace);
+  mSkinnedMeshEntities.reserve(mReservedSpace);
+
   mMeshTransformsBuffer = mDevice->createBuffer(
       {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
 
@@ -55,9 +58,10 @@ void RenderStorage::updateBuffers() {
   mSceneBuffer.update(&mSceneData);
 }
 
-void RenderStorage::addMesh(MeshAssetHandle handle,
+void RenderStorage::addMesh(MeshAssetHandle handle, liquid::Entity entity,
                             const glm::mat4 &transform) {
   mMeshTransformMatrices.push_back(transform);
+  mMeshEntities.push_back(entity);
   uint32_t index = static_cast<uint32_t>(mMeshTransformMatrices.size() - 1);
 
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
@@ -68,10 +72,12 @@ void RenderStorage::addMesh(MeshAssetHandle handle,
   mMeshGroups.at(handle).indices.push_back(index);
 }
 
-void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle,
+void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
                                    const glm::mat4 &transform,
                                    const std::vector<glm::mat4> &skeleton) {
   mSkinnedMeshTransformMatrices.push_back(transform);
+  mSkinnedMeshEntities.push_back(entity);
+
   uint32_t index =
       static_cast<uint32_t>(mSkinnedMeshTransformMatrices.size() - 1);
 
@@ -156,6 +162,8 @@ void RenderStorage::setCameraData(const CameraComponent &data) {
 void RenderStorage::clear() {
   mMeshTransformMatrices.clear();
   mSkinnedMeshTransformMatrices.clear();
+  mMeshEntities.clear();
+  mSkinnedMeshEntities.clear();
 
   mTextTransforms.clear();
   mTextGroups.clear();

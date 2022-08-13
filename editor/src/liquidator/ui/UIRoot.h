@@ -64,6 +64,15 @@ public:
    */
   inline AssetBrowser &getAssetBrowser() { return mAssetBrowser; }
 
+  /**
+   * @brief Get scene hierarchy panel
+   *
+   * @return Scene hierarchy panel
+   */
+  inline SceneHierarchyPanel &getSceneHierarchyPanel() {
+    return mSceneHierarchyPanel;
+  }
+
 private:
   MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;

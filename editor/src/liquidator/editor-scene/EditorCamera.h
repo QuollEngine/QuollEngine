@@ -193,6 +193,26 @@ public:
   void setViewport(float x, float y, float width, float height);
 
   /**
+   * @brief Check if position is within viewport
+   *
+   * @param pos Position
+   * @retval true Position is within viewport
+   * @retval false Position is outside viewport
+   */
+  inline bool isWithinViewport(const glm::vec2 &pos) const {
+    return (pos.x >= mX && pos.x <= mX + mWidth && pos.y >= mY &&
+            pos.y <= mY + mHeight);
+  }
+
+  /**
+   * @brief Scale position to viewport
+   *
+   * @param pos Position
+   * @return Scaled position
+   */
+  glm::vec2 scaleToViewport(const glm::vec2 &pos) const;
+
+  /**
    * @brief Get input state
    *
    * @return Input state
