@@ -5,6 +5,7 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderGraph.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/ShaderLibrary.h"
 
 #include "liquid/imgui/Imgui.h"
@@ -37,7 +38,7 @@ class ImguiRenderer {
     /**
      * Vertex buffer
      */
-    rhi::BufferHandle vertexBuffer = rhi::BufferHandle::Invalid;
+    rhi::Buffer vertexBuffer;
 
     /**
      * Vertex buffer size
@@ -52,7 +53,7 @@ class ImguiRenderer {
     /**
      * Index buffer
      */
-    rhi::BufferHandle indexBuffer = rhi::BufferHandle::Invalid;
+    rhi::Buffer indexBuffer;
 
     /**
      * Index buffer size
@@ -73,10 +74,11 @@ public:
    *
    * @param window Window
    * @param registry Resource registry
+   * @param device Render device
    * @param shaderLibrary Shader library
    */
   ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                rhi::ResourceRegistry &registry);
+                rhi::ResourceRegistry &registry, rhi::RenderDevice *device);
 
   /**
    * @brief Destroy imgui renderer
@@ -166,6 +168,8 @@ private:
   glm::vec4 mClearColor{DefaultClearColor};
 
   bool mReady = false;
+
+  rhi::RenderDevice *mDevice;
 };
 
 } // namespace liquid

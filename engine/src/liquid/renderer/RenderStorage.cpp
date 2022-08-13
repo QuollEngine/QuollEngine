@@ -6,8 +6,8 @@
 
 namespace liquid {
 
-RenderStorage::RenderStorage(size_t reservedSpace)
-    : mReservedSpace(reservedSpace) {
+RenderStorage::RenderStorage(rhi::RenderDevice *device, size_t reservedSpace)
+    : mReservedSpace(reservedSpace), mDevice(device) {
   mMeshTransformMatrices.reserve(mReservedSpace);
 
   mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
@@ -17,54 +17,42 @@ RenderStorage::RenderStorage(size_t reservedSpace)
 
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
+
+  mMeshTransformsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+
+  mSkinnedMeshTransformsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+
+  mSkeletonsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage,
+       mReservedSpace * MaxNumJoints * sizeof(glm::mat4)});
+
+  mTextTransformsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+
+  mTextGlyphsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage, mReservedSpace * sizeof(GlyphData)});
+
+  mLightsBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Storage, mLights.capacity() * sizeof(LightData)});
+
+  mCameraBuffer = mDevice->createBuffer(
+      {rhi::BufferType::Uniform, sizeof(CameraComponent)});
+
+  mSceneBuffer =
+      mDevice->createBuffer({rhi::BufferType::Uniform, sizeof(SceneData)});
 }
 
-void RenderStorage::updateBuffers(rhi::ResourceRegistry &registry) {
-  mMeshTransformsBuffer = registry.setBuffer(
-      {
-          rhi::BufferType::Storage,
-          mReservedSpace * sizeof(glm::mat4),
-          mMeshTransformMatrices.data(),
-      },
-      mMeshTransformsBuffer);
-
-  mSkinnedMeshTransformsBuffer = registry.setBuffer(
-      {
-          rhi::BufferType::Storage,
-          mReservedSpace * sizeof(glm::mat4),
-          mSkinnedMeshTransformMatrices.data(),
-      },
-      mSkinnedMeshTransformsBuffer);
-
-  mSkeletonsBuffer = registry.setBuffer(
-      {
-          rhi::BufferType::Storage,
-          mReservedSpace * MaxNumJoints * sizeof(glm::mat4),
-          mSkeletonVector.get(),
-      },
-      mSkeletonsBuffer);
-
-  mTextTransformsBuffer = registry.setBuffer(
-      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4),
-       mTextTransforms.data()},
-      mTextTransformsBuffer);
-
-  mTextGlyphsBuffer = registry.setBuffer({rhi::BufferType::Storage,
-                                          mReservedSpace * sizeof(GlyphData),
-                                          mTextGlyphs.data()},
-                                         mTextGlyphsBuffer);
-
-  mLightsBuffer = registry.setBuffer({rhi::BufferType::Storage,
-                                      mLights.capacity() * sizeof(LightData),
-                                      mLights.data()},
-                                     mLightsBuffer);
-
-  mCameraBuffer = registry.setBuffer(
-      {rhi::BufferType::Uniform, sizeof(CameraComponent), &mCameraData},
-      mCameraBuffer);
-
-  mSceneBuffer = registry.setBuffer(
-      {rhi::BufferType::Uniform, sizeof(SceneData), &mSceneData}, mSceneBuffer);
+void RenderStorage::updateBuffers() {
+  mMeshTransformsBuffer.update(mMeshTransformMatrices.data());
+  mSkinnedMeshTransformsBuffer.update(mSkinnedMeshTransformMatrices.data());
+  mSkeletonsBuffer.update(mSkeletonVector.get());
+  mTextTransformsBuffer.update(mTextTransforms.data());
+  mTextGlyphsBuffer.update(mTextGlyphs.data());
+  mLightsBuffer.update(mLights.data());
+  mCameraBuffer.update(&mCameraData);
+  mSceneBuffer.update(&mSceneData);
 }
 
 void RenderStorage::addMesh(MeshAssetHandle handle,

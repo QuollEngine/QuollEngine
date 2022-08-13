@@ -17,6 +17,7 @@
 #include "liquid/scene/SkinnedVertex.h"
 
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 
 namespace liquid {
 
@@ -78,8 +79,10 @@ public:
    * @brief Synchronize assets with device registry
    *
    * @param registry Device registry
+   * @param device Render device
    */
-  void syncWithDeviceRegistry(rhi::ResourceRegistry &registry);
+  void syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
+                              rhi::RenderDevice *device);
 
   /**
    * @brief Get textures

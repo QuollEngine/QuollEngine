@@ -23,10 +23,11 @@ public:
    * @param registry Resource registry
    * @param shaderLibrary Shader library
    * @param iconRegistry Icon registry
+   * @param device Render device
    */
   EditorRenderer(liquid::rhi::ResourceRegistry &registry,
                  liquid::ShaderLibrary &shaderLibrary,
-                 IconRegistry &iconRegistry);
+                 IconRegistry &iconRegistry, liquid::rhi::RenderDevice *device);
 
   /**
    * @brief Attach to render graph

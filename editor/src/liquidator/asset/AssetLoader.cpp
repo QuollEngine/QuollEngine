@@ -37,8 +37,10 @@ static liquid::Path getUniquePath(liquid::Path path) {
 }
 
 AssetLoader::AssetLoader(liquid::AssetManager &assetManager,
-                         liquid::rhi::ResourceRegistry &resourceRegistry)
-    : mAssetManager(assetManager), mDeviceRegistry(resourceRegistry) {}
+                         liquid::rhi::ResourceRegistry &resourceRegistry,
+                         liquid::rhi::RenderDevice *device)
+    : mAssetManager(assetManager), mDeviceRegistry(resourceRegistry),
+      mDevice(device) {}
 
 liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
                                                const liquid::Path &directory) {
@@ -62,7 +64,7 @@ liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
     }
   }
 
-  mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry);
+  mAssetManager.getRegistry().syncWithDeviceRegistry(mDeviceRegistry, mDevice);
 
   return res;
 }

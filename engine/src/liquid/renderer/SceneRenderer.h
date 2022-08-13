@@ -36,10 +36,11 @@ public:
    * @param shaderLibrary Shader library
    * @param resourceRegistry Resource registry
    * @param assetRegistry Asset registry
+   * @param device Render device
    */
   SceneRenderer(ShaderLibrary &shaderLibrary,
                 rhi::ResourceRegistry &resourceRegistry,
-                AssetRegistry &assetRegistry);
+                AssetRegistry &assetRegistry, rhi::RenderDevice *device);
 
   /**
    * @brief Set clear color
@@ -109,6 +110,7 @@ private:
   rhi::ResourceRegistry &mRegistry;
   RenderStorage mRenderStorage;
   AssetRegistry &mAssetRegistry;
+  rhi::RenderDevice *mDevice;
 };
 
 } // namespace liquid

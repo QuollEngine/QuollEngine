@@ -5,6 +5,8 @@
 
 class DeviceStatsTest : public ::testing::Test {
 public:
+  DeviceStatsTest() : stats(nullptr) {}
+
   liquid::rhi::DeviceStats stats;
 };
 

@@ -2,12 +2,14 @@
 #include "liquid/core/EngineGlobals.h"
 #include "Material.h"
 
+#include "liquid/rhi/RenderDevice.h"
+
 namespace liquid {
 
 Material::Material(const std::vector<rhi::TextureHandle> &textures,
                    const std::vector<std::pair<String, Property>> &properties,
-                   rhi::ResourceRegistry &registry)
-    : mTextures(textures), mRegistry(registry) {
+                   rhi::RenderDevice *device)
+    : mTextures(textures) {
 
   for (size_t i = 0; i < properties.size(); ++i) {
     auto &prop = properties[i];
@@ -17,8 +19,9 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
 
   if (!mProperties.empty()) {
     auto size = updateBufferData();
-    mBuffer = mRegistry.setBuffer({rhi::BufferType::Uniform, size, mData});
-    mDescriptor.bind(0, mBuffer, rhi::DescriptorType::UniformBuffer);
+    mBuffer = device->createBuffer({rhi::BufferType::Uniform, size, mData});
+    mDescriptor.bind(0, mBuffer.getHandle(),
+                     rhi::DescriptorType::UniformBuffer);
   }
 
   mDescriptor.bind(1, mTextures, rhi::DescriptorType::CombinedImageSampler);
@@ -41,9 +44,8 @@ void Material::updateProperty(StringView name, const Property &value) {
   }
 
   mProperties.at(index) = value;
-  auto size = updateBufferData();
-  mBuffer =
-      mRegistry.setBuffer({rhi::BufferType::Uniform, size, mData}, mBuffer);
+  updateBufferData();
+  mBuffer.update(mData);
 }
 
 size_t Material::updateBufferData() {

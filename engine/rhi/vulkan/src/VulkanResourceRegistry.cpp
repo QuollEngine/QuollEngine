@@ -18,9 +18,13 @@ void VulkanResourceRegistry::deleteShader(ShaderHandle handle) {
   mShaders.erase(handle);
 }
 
-void VulkanResourceRegistry::setBuffer(BufferHandle handle,
-                                       std::unique_ptr<VulkanBuffer> &&buffer) {
+BufferHandle
+VulkanResourceRegistry::setBuffer(std::unique_ptr<VulkanBuffer> &&buffer) {
+  auto handle = BufferHandle{mLastBuffer};
+  mLastBuffer++;
   mBuffers.insert_or_assign(handle, std::move(buffer));
+
+  return handle;
 }
 
 void VulkanResourceRegistry::deleteBuffer(BufferHandle handle) {

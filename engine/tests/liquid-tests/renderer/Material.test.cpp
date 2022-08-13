@@ -1,11 +1,71 @@
 #include "liquid/core/Base.h"
 #include "liquid/renderer/Material.h"
+#include "liquid/rhi/NativeBuffer.h"
 
 #include "liquid-tests/Testing.h"
 
+class MockBuffer : public liquid::rhi::NativeBuffer {
+public:
+  MockBuffer(const liquid::rhi::BufferDescription &description)
+      : size(description.size), data(description.data) {}
+
+  void *map() { return data; }
+
+  void unmap() {}
+
+  void update(void *data_) { data = data_; }
+
+  void resize(size_t size) {}
+
+public:
+  size_t size = 0;
+  void *data = data;
+};
+
+class MockDevice : public liquid::rhi::RenderDevice {
+public:
+  liquid::rhi::RenderFrame beginFrame() {
+    return liquid::rhi::RenderFrame{0, 0, commandList};
+  }
+
+  void endFrame(const liquid::rhi::RenderFrame &renderFrame) {}
+
+  void waitForIdle() {}
+
+  void synchronize(liquid::rhi::ResourceRegistry &registry) {}
+
+  const liquid::rhi::PhysicalDeviceInformation getDeviceInformation() {
+    return liquid::rhi::PhysicalDeviceInformation{
+        "MockGPU", liquid::rhi::PhysicalDeviceType::Unknown, {}, {}};
+  }
+
+  /**
+   * @brief Get device stats
+   *
+   * @return Device stats
+   */
+  const liquid::rhi::DeviceStats &getDeviceStats() const { return stats; }
+
+  void destroyResources() {}
+
+  liquid::rhi::Swapchain getSwapchain() { return liquid::rhi::Swapchain{}; }
+
+  liquid::rhi::Buffer
+  createBuffer(const liquid::rhi::BufferDescription &description) {
+    mockBuffer = new MockBuffer(description);
+    return liquid::rhi::Buffer(liquid::rhi::BufferHandle{10}, mockBuffer);
+  }
+
+public:
+  liquid::rhi::DeviceStats stats{nullptr};
+  MockBuffer *mockBuffer = nullptr;
+
+  liquid::rhi::RenderCommandList commandList;
+};
+
 class MaterialTest : public ::testing::Test {
 public:
-  liquid::rhi::ResourceRegistry registry;
+  MockDevice *device = new MockDevice;
 };
 
 TEST_F(MaterialTest, SetsBuffersAndTextures) {
@@ -18,23 +78,20 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
           {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
           {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
       },
-      registry);
-
-  const auto &description =
-      registry.getBufferMap().getDescription(material.getBuffer());
+      device);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_TRUE(liquid::rhi::isHandleValid(material.getBuffer()));
   // Memory alignment
-  EXPECT_EQ(description.size, sizeof(glm::vec4) * 2);
+  EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec4) * 2);
 
   EXPECT_EQ(material.getDescriptor().getBindings().at(0).type,
             liquid::rhi::DescriptorType::UniformBuffer);
   EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
             liquid::rhi::DescriptorType::CombinedImageSampler);
 
-  char *data = static_cast<char *>(description.data);
+  char *data = static_cast<char *>(device->mockBuffer->data);
 
   auto specularVal = *reinterpret_cast<glm::vec3 *>(data);
   auto diffuseVal = *reinterpret_cast<glm::vec4 *>(data + sizeof(glm::vec4));
@@ -47,7 +104,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   std::vector<liquid::rhi::TextureHandle> textures{
       liquid::rhi::TextureHandle(1)};
 
-  liquid::Material material(textures, {}, registry);
+  liquid::Material material(textures, {}, device);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
@@ -59,7 +116,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
-  liquid::Material material({}, {}, registry);
+  liquid::Material material({}, {}, device);
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
@@ -75,7 +132,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            registry);
+                            device);
 
   const auto &properties = material.getProperties();
   {
@@ -83,10 +140,8 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==
@@ -99,11 +154,8 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
     EXPECT_EQ(properties.size(), 2);
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
-
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==
@@ -120,7 +172,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            registry);
+                            device);
 
   const auto &properties = material.getProperties();
   {
@@ -128,10 +180,8 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==
@@ -145,10 +195,8 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==
@@ -165,7 +213,7 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            registry);
+                            device);
 
   const auto &properties = material.getProperties();
   {
@@ -173,10 +221,8 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==
@@ -193,10 +239,8 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == newTestVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == newTestReal);
 
-    const auto &description =
-        registry.getBufferMap().getDescription(material.getBuffer());
-    EXPECT_EQ(description.size, sizeof(glm::vec3) * 2);
-    auto *data = static_cast<char *>(description.data);
+    EXPECT_EQ(device->mockBuffer->size, sizeof(glm::vec3) * 2);
+    auto *data = static_cast<char *>(device->mockBuffer->data);
 
     EXPECT_TRUE(*reinterpret_cast<glm::vec3 *>(data) == newTestVec3);
     EXPECT_TRUE(*reinterpret_cast<float *>(data + sizeof(glm::vec3)) ==

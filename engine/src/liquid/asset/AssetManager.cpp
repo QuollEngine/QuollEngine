@@ -44,7 +44,8 @@ Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
 }
 
 Result<bool>
-AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry) {
+AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry,
+                            rhi::RenderDevice *device) {
   LIQUID_PROFILE_EVENT("AssetManager::preloadAssets");
   std::vector<String> warnings;
 
@@ -64,7 +65,7 @@ AssetManager::preloadAssets(rhi::ResourceRegistry &resourceRegistry) {
     }
   }
 
-  mRegistry.syncWithDeviceRegistry(resourceRegistry);
+  mRegistry.syncWithDeviceRegistry(resourceRegistry, device);
 
   return Result<bool>::Ok(true, warnings);
 }

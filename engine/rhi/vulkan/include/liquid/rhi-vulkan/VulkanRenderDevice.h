@@ -88,6 +88,14 @@ public:
    */
   void synchronize(ResourceRegistry &registry) override;
 
+  /**
+   * @brief Create hardware buffer
+   *
+   * @param description Buffer description
+   * @return Buffer reference
+   */
+  Buffer createBuffer(const BufferDescription &description);
+
 private:
   /**
    * @brief Recreate swapchain
@@ -100,8 +108,6 @@ private:
   void updateFramebufferRelativeTextures();
 
 private:
-  DeviceStats mStats;
-
   VulkanRenderBackend &mBackend;
   VulkanPhysicalDevice mPhysicalDevice;
   VulkanDeviceObject mDevice;
@@ -116,6 +122,8 @@ private:
   VulkanRenderContext mRenderContext;
   VulkanUploadContext mUploadContext;
   VulkanSwapchain mSwapchain;
+
+  DeviceStats mStats;
 
   bool mSwapchainRecreated = false;
 };

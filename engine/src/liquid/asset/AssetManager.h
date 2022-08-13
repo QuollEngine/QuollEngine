@@ -202,9 +202,11 @@ public:
    * @brief Preload all assets in assets directory
    *
    * @param resourceRegistry Resource registry
+   * @param device Render device
    * @return Preload result
    */
-  Result<bool> preloadAssets(rhi::ResourceRegistry &resourceRegistry);
+  Result<bool> preloadAssets(rhi::ResourceRegistry &resourceRegistry,
+                             rhi::RenderDevice *device);
 
   /**
    * @brief Get asset name from path

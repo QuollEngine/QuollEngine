@@ -52,7 +52,7 @@ void MainLoop::run() {
     }
 
     const auto &size = mWindow.getWindowSize();
-    if (size.x > 0.0f && size.y > 0.0f) {
+    if (size.x > 0 && size.y > 0) {
       mRenderFn();
     }
 

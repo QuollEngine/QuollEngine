@@ -3,7 +3,7 @@
 #include "liquid/core/Property.h"
 
 #include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/Descriptor.h"
 
 namespace liquid {
@@ -18,11 +18,11 @@ public:
    *
    * @param textures Textures
    * @param properties Material properties
-   * @param registry Resource registry
+   * @param device Render device
    */
   Material(const std::vector<rhi::TextureHandle> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           rhi::ResourceRegistry &registry);
+           rhi::RenderDevice *device);
 
   /**
    * @brief Update property
@@ -54,7 +54,7 @@ public:
    *
    * @return Uniform buffer
    */
-  inline rhi::BufferHandle getBuffer() const { return mBuffer; }
+  inline rhi::BufferHandle getBuffer() const { return mBuffer.getHandle(); }
 
   /**
    * @brief Get properties
@@ -84,9 +84,8 @@ private:
 
 private:
   std::vector<rhi::TextureHandle> mTextures;
-  rhi::BufferHandle mBuffer = rhi::BufferHandle::Invalid;
+  rhi::Buffer mBuffer;
 
-  rhi::ResourceRegistry &mRegistry;
   char *mData = nullptr;
 
   rhi::Descriptor mDescriptor;

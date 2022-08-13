@@ -12,15 +12,6 @@ void ResourceRegistry::deleteShader(ShaderHandle handle) {
   mShaders.deleteDescription(handle);
 }
 
-BufferHandle ResourceRegistry::setBuffer(const BufferDescription &description,
-                                         BufferHandle handle) {
-  return mBuffers.setDescription(description, handle);
-}
-
-void ResourceRegistry::deleteBuffer(BufferHandle handle) {
-  mBuffers.deleteDescription(handle);
-}
-
 TextureHandle
 ResourceRegistry::setTexture(const TextureDescription &description,
                              TextureHandle handle) {

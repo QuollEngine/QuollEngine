@@ -2,6 +2,8 @@
 #pragma once
 
 #include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/RenderDevice.h"
+
 #include "liquid/scene/CameraComponent.h"
 #include "liquidator/editor-scene/EditorGrid.h"
 
@@ -25,9 +27,11 @@ public:
   /**
    * @brief Create render storage
    *
+   * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
-  EditorRendererStorage(size_t reservedSpace = DefaultReservedSpace);
+  EditorRendererStorage(liquid::rhi::RenderDevice *device,
+                        size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Add skeleton
@@ -44,7 +48,7 @@ public:
    * @return Skeleton world transforms buffer
    */
   inline liquid::rhi::BufferHandle getSkeletonTransforms() const {
-    return mSkeletonTransformsBuffer;
+    return mSkeletonTransformsBuffer.getHandle();
   };
 
   /**
@@ -53,7 +57,7 @@ public:
    * @return Skeleton bones buffer
    */
   inline liquid::rhi::BufferHandle getSkeletonBoneTransforms() const {
-    return mSkeletonBoneTransformsBuffer;
+    return mSkeletonBoneTransformsBuffer.getHandle();
   }
 
   /**
@@ -85,7 +89,7 @@ public:
    * @return Editor grid buffer
    */
   inline liquid::rhi::BufferHandle getEditorGridBuffer() const {
-    return mEditorGridBuffer;
+    return mEditorGridBuffer.getHandle();
   }
 
   /**
@@ -94,7 +98,7 @@ public:
    * @return Active camera buffer
    */
   inline liquid::rhi::BufferHandle getActiveCameraBuffer() {
-    return mCameraBuffer;
+    return mCameraBuffer.getHandle();
   }
 
   /**
@@ -112,7 +116,7 @@ public:
    * @return Gizmo transforms
    */
   inline liquid::rhi::BufferHandle getGizmoTransformsBuffer() const {
-    return mGizmoTransformsBuffer;
+    return mGizmoTransformsBuffer.getHandle();
   }
 
   /**
@@ -127,10 +131,8 @@ public:
 
   /**
    * @brief Update hardware buffer
-   *
-   * @param registry Resource registry
    */
-  void updateBuffers(liquid::rhi::ResourceRegistry &registry);
+  void updateBuffers();
 
   /**
    * @brief Clear local buffer
@@ -142,24 +144,26 @@ private:
 
   // Camera
   liquid::CameraComponent mCameraData;
-  liquid::rhi::BufferHandle mCameraBuffer{0};
+  liquid::rhi::Buffer mCameraBuffer;
 
   // Editor grid
   EditorGridData mEditorGridData{};
-  liquid::rhi::BufferHandle mEditorGridBuffer{0};
+  liquid::rhi::Buffer mEditorGridBuffer;
 
   // Skeleton bones
   size_t mLastSkeleton = 0;
   std::vector<glm::mat4> mSkeletonTransforms;
   std::unique_ptr<glm::mat4> mSkeletonVector;
   std::vector<uint32_t> mNumBones;
-  liquid::rhi::BufferHandle mSkeletonTransformsBuffer{0};
-  liquid::rhi::BufferHandle mSkeletonBoneTransformsBuffer{0};
+  liquid::rhi::Buffer mSkeletonTransformsBuffer;
+  liquid::rhi::Buffer mSkeletonBoneTransformsBuffer;
 
   // Gizmos
   std::vector<glm::mat4> mGizmoTransforms;
   std::unordered_map<liquid::rhi::TextureHandle, uint32_t> mGizmoCounts;
-  liquid::rhi::BufferHandle mGizmoTransformsBuffer{0};
+  liquid::rhi::Buffer mGizmoTransformsBuffer;
+
+  liquid::rhi::RenderDevice *mDevice;
 };
 
 } // namespace liquidator

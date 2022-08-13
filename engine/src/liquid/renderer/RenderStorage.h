@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "liquid/asset/MeshAsset.h"
 #include "liquid/entity/Entity.h"
 #include "liquid/renderer/Material.h"
@@ -123,16 +124,16 @@ public:
   /**
    * @brief Create render storage
    *
+   * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
-  RenderStorage(size_t reservedSpace = DefaultReservedSpace);
+  RenderStorage(rhi::RenderDevice *device,
+                size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Update storage buffers
-   *
-   * @param registry Resource registry
    */
-  void updateBuffers(rhi::ResourceRegistry &registry);
+  void updateBuffers();
 
   /**
    * @brief Get mesh transforms buffer
@@ -140,7 +141,7 @@ public:
    * @return Mesh transforms buffer
    */
   inline rhi::BufferHandle getMeshTransformsBuffer() const {
-    return mMeshTransformsBuffer;
+    return mMeshTransformsBuffer.getHandle();
   }
 
   /**
@@ -149,7 +150,7 @@ public:
    * @return Skinned mesh transforms buffer
    */
   inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
-    return mSkinnedMeshTransformsBuffer;
+    return mSkinnedMeshTransformsBuffer.getHandle();
   }
 
   /**
@@ -158,7 +159,7 @@ public:
    * @return Skeletons buffer
    */
   inline rhi::BufferHandle getSkeletonsBuffer() const {
-    return mSkeletonsBuffer;
+    return mSkeletonsBuffer.getHandle();
   }
 
   /**
@@ -167,7 +168,7 @@ public:
    * @return Text transforms buffer
    */
   inline rhi::BufferHandle getTextTransformsBuffer() const {
-    return mTextTransformsBuffer;
+    return mTextTransformsBuffer.getHandle();
   }
 
   /**
@@ -176,7 +177,7 @@ public:
    * @return Text glyphs buffer
    */
   inline rhi::BufferHandle getTextGlyphsBuffer() const {
-    return mTextGlyphsBuffer;
+    return mTextGlyphsBuffer.getHandle();
   }
 
   /**
@@ -184,14 +185,18 @@ public:
    *
    * @return Light buffer
    */
-  inline rhi::BufferHandle getSceneBuffer() const { return mSceneBuffer; }
+  inline rhi::BufferHandle getSceneBuffer() const {
+    return mSceneBuffer.getHandle();
+  }
 
   /**
    * @brief Get lights buffer
    *
    * @return Lights buffer
    */
-  inline rhi::BufferHandle getLightsBuffer() const { return mLightsBuffer; }
+  inline rhi::BufferHandle getLightsBuffer() const {
+    return mLightsBuffer.getHandle();
+  }
 
   /**
    * @brief Get active camera buffer
@@ -199,7 +204,7 @@ public:
    * @return Active camera buffer
    */
   inline rhi::BufferHandle getActiveCameraBuffer() const {
-    return mCameraBuffer;
+    return mCameraBuffer.getHandle();
   }
 
   /**
@@ -328,12 +333,12 @@ private:
 
   size_t mLastSkeleton = 0;
 
-  rhi::BufferHandle mMeshTransformsBuffer = rhi::BufferHandle::Invalid;
-  rhi::BufferHandle mSkinnedMeshTransformsBuffer = rhi::BufferHandle::Invalid;
-  rhi::BufferHandle mSkeletonsBuffer = rhi::BufferHandle::Invalid;
-  rhi::BufferHandle mSceneBuffer = rhi::BufferHandle::Invalid;
-  rhi::BufferHandle mLightsBuffer = rhi::BufferHandle::Invalid;
-  rhi::BufferHandle mCameraBuffer = rhi::BufferHandle::Invalid;
+  rhi::Buffer mMeshTransformsBuffer;
+  rhi::Buffer mSkinnedMeshTransformsBuffer;
+  rhi::Buffer mSkeletonsBuffer;
+  rhi::Buffer mSceneBuffer;
+  rhi::Buffer mLightsBuffer;
+  rhi::Buffer mCameraBuffer;
 
   rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mSpecularMap = rhi::TextureHandle::Invalid;
@@ -343,12 +348,14 @@ private:
   std::unordered_map<SkinnedMeshAssetHandle, MeshData> mSkinnedMeshGroups;
 
   std::vector<glm::mat4> mTextTransforms;
-  rhi::BufferHandle mTextTransformsBuffer = rhi::BufferHandle::Invalid;
+  rhi::Buffer mTextTransformsBuffer;
   std::vector<GlyphData> mTextGlyphs;
-  rhi::BufferHandle mTextGlyphsBuffer = rhi::BufferHandle::Invalid;
+  rhi::Buffer mTextGlyphsBuffer;
   std::unordered_map<FontAssetHandle, std::vector<TextData>> mTextGroups;
 
   size_t mReservedSpace = 0;
+
+  rhi::RenderDevice *mDevice = nullptr;
 };
 
 } // namespace liquid

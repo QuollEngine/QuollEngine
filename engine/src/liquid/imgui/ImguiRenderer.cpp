@@ -21,8 +21,9 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 namespace liquid {
 
 ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                             rhi::ResourceRegistry &registry)
-    : mRegistry(registry), mShaderLibrary(shaderLibrary) {
+                             rhi::ResourceRegistry &registry,
+                             rhi::RenderDevice *device)
+    : mRegistry(registry), mShaderLibrary(shaderLibrary), mDevice(device) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -45,21 +46,16 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
   mShaderLibrary.addShader("__engine.imgui.default.fragment",
                            mRegistry.setShader({Engine::getAssetsPath() +
                                                 "/shaders/imgui.frag.spv"}));
+
+  for (auto &x : mFrameData) {
+    x.vertexBuffer =
+        mDevice->createBuffer({liquid::rhi::BufferType::Vertex, 1});
+    x.indexBuffer = mDevice->createBuffer({liquid::rhi::BufferType::Index, 1});
+  }
 }
 
 ImguiRenderer::~ImguiRenderer() {
   mRegistry.deleteTexture(mFontTexture);
-
-  for (auto &x : mFrameData) {
-    mRegistry.deleteBuffer(x.vertexBuffer);
-    mRegistry.deleteBuffer(x.indexBuffer);
-
-    if (x.vertexBufferData)
-      delete[] x.vertexBufferData;
-
-    if (x.indexBufferData)
-      delete[] x.indexBufferData;
-  }
 
   mFrameData.clear();
 
@@ -152,6 +148,8 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
     }
     frameObj.vertexBufferData = new char[vertexSize];
     frameObj.vertexBufferSize = vertexSize;
+
+    frameObj.vertexBuffer.resize(vertexSize);
   }
 
   if (frameObj.indexBufferSize < indexSize) {
@@ -160,6 +158,8 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
     }
     frameObj.indexBufferData = new char[indexSize];
     frameObj.indexBufferSize = indexSize;
+
+    frameObj.indexBuffer.resize(indexSize);
   }
 
   auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBufferData);
@@ -175,15 +175,8 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
     ibDst += cmd_list->IdxBuffer.Size;
   }
 
-  frameObj.vertexBuffer =
-      mRegistry.setBuffer({rhi::BufferType::Vertex, frameObj.vertexBufferSize,
-                           frameObj.vertexBufferData},
-                          frameObj.vertexBuffer);
-
-  frameObj.indexBuffer =
-      mRegistry.setBuffer({rhi::BufferType::Index, frameObj.indexBufferSize,
-                           frameObj.indexBufferData},
-                          frameObj.indexBuffer);
+  frameObj.vertexBuffer.update(frameObj.vertexBufferData);
+  frameObj.indexBuffer.update(frameObj.indexBufferData);
 }
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
@@ -274,10 +267,11 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       int fbWidth, int fbHeight,
                                       rhi::PipelineHandle pipeline) {
   if (data->TotalVtxCount > 0) {
-    commandList.bindVertexBuffer(mFrameData.at(mCurrentFrame).vertexBuffer);
-    commandList.bindIndexBuffer(mFrameData.at(mCurrentFrame).indexBuffer,
-                                sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16
-                                                       : VK_INDEX_TYPE_UINT32);
+    commandList.bindVertexBuffer(
+        mFrameData.at(mCurrentFrame).vertexBuffer.getHandle());
+    commandList.bindIndexBuffer(
+        mFrameData.at(mCurrentFrame).indexBuffer.getHandle(),
+        sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
   }
 
   commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
