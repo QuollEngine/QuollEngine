@@ -28,6 +28,7 @@
 
 #include "liquidator/core/EditorRenderer.h"
 #include "liquidator/core/EditorSimulator.h"
+#include "liquidator/core/MousePickingGraph.h"
 
 namespace liquidator {
 
@@ -117,6 +118,12 @@ void EditorScreen::start(const Project &project) {
 
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
 
+  MousePickingGraph mousePicking(renderer.getRegistry(),
+                                 renderer.getShaderLibrary(),
+                                 renderer.getSceneRenderer().getRenderStorage(),
+                                 assetManager.getRegistry(), mDevice);
+
+  mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
   mWindow.addResizeHandler([&graph](auto width, auto height) {
@@ -151,10 +158,20 @@ void EditorScreen::start(const Project &project) {
         return true;
       });
 
+  bool mouseClicked = false;
+
+  mEventSystem.observe(liquid::MouseButtonEvent::Pressed,
+                       [&mouseClicked](auto &data) mutable {
+                         if (data.button == 0) {
+                           mouseClicked = true;
+                         }
+                       });
+
   mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, &simulator, this]() {
+                        &editorRenderer, &simulator, &mouseClicked,
+                        &mousePicking, this]() {
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -200,11 +217,10 @@ void EditorScreen::start(const Project &project) {
               simulator.getPhysicsSystem(), entityManager);
 
     if (auto _ = SceneView(scenePassGroup.sceneColor)) {
-      const auto &pos = ImGui::GetWindowPos();
+      const auto &pos = ImGui::GetItemRectMin();
       const auto &size = ImGui::GetItemRectSize();
 
-      editorManager.getEditorCamera().setViewport(pos.x, pos.y + IconSize,
-                                                  size.x, size.y);
+      editorManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y);
     }
 
     StatusBar::render(editorManager);
@@ -223,12 +239,34 @@ void EditorScreen::start(const Project &project) {
                                      editorManager.getCamera(),
                                      editorManager.getEditorGrid());
 
+      if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
+        auto entity = mousePicking.getSelectedEntity();
+        ui.getSceneHierarchyPanel().setSelectedEntity(entity);
+      }
+
+      mousePicking.compile();
+
       renderer.render(graph, renderFrame.commandList);
+
+      bool mousePicked = false;
+      if (mouseClicked) {
+        auto mousePos = mWindow.getCurrentMousePosition();
+
+        if (editorManager.getEditorCamera().isWithinViewport(mousePos)) {
+          auto scaledMousePos =
+              editorManager.getEditorCamera().scaleToViewport(mousePos);
+
+          mousePicking.execute(renderFrame.commandList, scaledMousePos,
+                               renderFrame.frameIndex);
+        }
+        mouseClicked = false;
+      }
 
       presenter.present(renderFrame.commandList, imguiPassGroup.imguiColor,
                         renderFrame.swapchainImageIndex);
 
       mDevice->endFrame(renderFrame);
+
     } else {
       presenter.updateFramebuffers(mDevice->getSwapchain());
     }

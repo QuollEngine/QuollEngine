@@ -312,7 +312,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   // Meshes
   entityDatabase.iterateEntities<WorldTransformComponent, MeshComponent>(
       [this](auto entity, const auto &world, const auto &mesh) {
-        mRenderStorage.addMesh(mesh.handle, world.worldTransform);
+        mRenderStorage.addMesh(mesh.handle, entity, world.worldTransform);
       });
 
   // Skinned Meshes
@@ -320,7 +320,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                  SkinnedMeshComponent>(
       [this](auto entity, const auto &skeleton, const auto &world,
              const auto &mesh) {
-        mRenderStorage.addSkinnedMesh(mesh.handle, world.worldTransform,
+        mRenderStorage.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
                                       skeleton.jointFinalTransforms);
       });
 
@@ -421,8 +421,6 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   descriptor.bind(1, mRenderStorage.getSkeletonsBuffer(),
                   rhi::DescriptorType::StorageBuffer);
   commandList.bindDescriptor(pipeline, 1, descriptor);
-
-  uint32_t index = 0;
 
   for (auto &[handle, meshData] : mRenderStorage.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;

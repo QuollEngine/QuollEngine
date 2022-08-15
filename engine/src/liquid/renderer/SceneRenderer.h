@@ -73,6 +73,15 @@ public:
    */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera);
 
+  /**
+   * @brief Get render storage
+   *
+   * @return Render storage
+   */
+  inline const RenderStorage &getRenderStorage() const {
+    return mRenderStorage;
+  }
+
 private:
   /**
    * @brief Render meshes

@@ -28,8 +28,7 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
 
         // Do not trigger action if cursor is outside
         // Imgui window viewport
-        if (cursorPos.x < mX || cursorPos.x > mX + mWidth || cursorPos.y < mY ||
-            cursorPos.y > mY + mHeight) {
+        if (!isWithinViewport(cursorPos)) {
           return;
         }
 
@@ -155,6 +154,16 @@ void EditorCamera::reset() {
     mCameraEntity = mEntityDatabase.createEntity();
   }
   mEntityDatabase.setComponent<liquid::CameraComponent>(mCameraEntity, {});
+}
+
+glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
+  float scaleX = static_cast<float>(mWindow.getFramebufferSize().x) / mWidth;
+  float scaleY = static_cast<float>(mWindow.getFramebufferSize().y) / mHeight;
+
+  float rX = pos.x - mX;
+  float rY = pos.y - mY;
+
+  return glm::vec2(rX * scaleX, rY * scaleY);
 }
 
 void EditorCamera::pan() {

@@ -145,12 +145,30 @@ public:
   }
 
   /**
+   * @brief Get mesh entities
+   *
+   * @return Mesh entities
+   */
+  inline const std::vector<liquid::Entity> &getMeshEntities() const {
+    return mMeshEntities;
+  }
+
+  /**
    * @brief Get skinned mesh transforms buffer
    *
    * @return Skinned mesh transforms buffer
    */
   inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
     return mSkinnedMeshTransformsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get skinned mesh entities
+   *
+   * @return Skinned mesh entities
+   */
+  inline const std::vector<liquid::Entity> &getSkinnedMeshEntities() const {
+    return mSkinnedMeshEntities;
   }
 
   /**
@@ -269,18 +287,22 @@ public:
    * @brief Add mesh data
    *
    * @param handle Mesh handle
+   * @param entity Entity
    * @param transform Mesh world transform
    */
-  void addMesh(MeshAssetHandle handle, const glm::mat4 &transform);
+  void addMesh(MeshAssetHandle handle, liquid::Entity entity,
+               const glm::mat4 &transform);
 
   /**
    * @brief Add skinned mesh data
    *
    * @param handle Skinned mesh handle
+   * @param entity Entity
    * @param transform Skinned mesh world transform
    * @param skeleton Skeleton joint transforms
    */
-  void addSkinnedMesh(SkinnedMeshAssetHandle handle, const glm::mat4 &transform,
+  void addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
+                      const glm::mat4 &transform,
                       const std::vector<glm::mat4> &skeleton);
 
   /**
@@ -323,7 +345,16 @@ public:
    */
   void clear();
 
+  /**
+   * @brief Get reserved space
+   *
+   * @return Reserved space
+   */
+  inline size_t getReservedSpace() const { return mReservedSpace; }
+
 private:
+  std::vector<Entity> mMeshEntities;
+  std::vector<Entity> mSkinnedMeshEntities;
   std::vector<glm::mat4> mMeshTransformMatrices;
   std::vector<glm::mat4> mSkinnedMeshTransformMatrices;
   std::unique_ptr<glm::mat4> mSkeletonVector;
