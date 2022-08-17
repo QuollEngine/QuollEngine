@@ -180,6 +180,45 @@ void EntityManager::deleteEntity(liquid::Entity entity) {
   getActiveEntityDatabase().setComponent<liquid::DeleteComponent>(entity, {});
 }
 
+void EntityManager::updateLocalTransformUsingWorld(
+    liquid::Entity entity, const glm::mat4 &worldTransform) {
+  auto &entityDatabase = getActiveEntityDatabase();
+
+  glm::vec3 worldPosition;
+  glm::quat worldRotation;
+  glm::vec3 worldScale;
+
+  glm::vec3 noopSkew;
+  glm::vec4 noopPerspective;
+
+  glm::decompose(worldTransform, worldScale, worldRotation, worldPosition,
+                 noopSkew, noopPerspective);
+
+  auto &transform =
+      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+
+  if (entityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
+    const auto parent =
+        entityDatabase.getComponent<liquid::ParentComponent>(entity).parent;
+    if (entityDatabase.hasEntity(parent) &&
+        entityDatabase.hasComponent<liquid::WorldTransformComponent>(parent)) {
+
+      const auto &parentWorld =
+          entityDatabase.getComponent<liquid::WorldTransformComponent>(parent)
+              .worldTransform;
+
+      const auto &invParentTransform = glm::inverse(parentWorld);
+
+      transform.localPosition =
+          glm::vec3(invParentTransform * glm::vec4(worldPosition, 1.0));
+    }
+  } else {
+    transform.localPosition = worldPosition;
+  }
+
+  save(entity);
+}
+
 liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
                                           liquid::Entity root, uint32_t handle,
                                           liquid::AssetType type,

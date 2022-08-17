@@ -54,8 +54,8 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
                                  WorldTransformComponent, CameraComponent>(
       [](auto entity, const PerspectiveLensComponent &lens,
          const WorldTransformComponent &world, CameraComponent &camera) {
-        camera.projectionMatrix =
-            glm::perspective(lens.fovY, lens.aspectRatio, lens.near, lens.far);
+        camera.projectionMatrix = glm::perspective(
+            glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
         camera.projectionMatrix[1][1] *= -1.0f;
 

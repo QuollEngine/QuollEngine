@@ -107,21 +107,28 @@ public:
    *
    * @return Field of view
    */
-  inline float getFOV() { return mFov; }
+  inline float getFOV() const { return mFov; }
 
   /**
    * @brief Get near place
    *
    * @return Near plane
    */
-  inline float getNear() { return mNear; }
+  inline float getNear() const { return mNear; }
 
   /**
    * @brief Get far plane
    *
    * @return Far plane
    */
-  inline float getFar() { return mFar; }
+  inline float getFar() const { return mFar; }
+
+  /**
+   * @brief Get aspect ratio
+   *
+   * @return Aspect ratio
+   */
+  inline float getAspectRatio() const { return mWidth / mHeight; }
 
   /**
    * @brief Get position
