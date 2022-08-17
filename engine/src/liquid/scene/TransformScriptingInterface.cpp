@@ -26,8 +26,7 @@ int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   const auto &position =
-      entityDatabase.getComponent<LocalTransformComponent>(entity)
-          .localPosition;
+      entityDatabase.get<LocalTransformComponent>(entity).localPosition;
 
   scope.set(position.x);
   scope.set(position.y);
@@ -59,8 +58,7 @@ int TransformScriptingInterface::LuaInterface::setPosition(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  auto &transform =
-      entityDatabase.getComponent<LocalTransformComponent>(entity);
+  auto &transform = entityDatabase.get<LocalTransformComponent>(entity);
   transform.localPosition = newPosition;
 
   return 0;
@@ -86,7 +84,7 @@ int TransformScriptingInterface::LuaInterface::getScale(void *state) {
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   const auto &scale =
-      entityDatabase.getComponent<LocalTransformComponent>(entity).localScale;
+      entityDatabase.get<LocalTransformComponent>(entity).localScale;
 
   scope.set(scale.x);
   scope.set(scale.y);
@@ -118,8 +116,7 @@ int TransformScriptingInterface::LuaInterface::setScale(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  auto &transform =
-      entityDatabase.getComponent<LocalTransformComponent>(entity);
+  auto &transform = entityDatabase.get<LocalTransformComponent>(entity);
   transform.localScale = newScale;
 
   return 0;

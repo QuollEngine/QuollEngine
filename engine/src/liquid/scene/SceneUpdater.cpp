@@ -17,7 +17,7 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
       .iterateEntities<LocalTransformComponent, WorldTransformComponent>(
           [this, &entityDatabase](auto entity, LocalTransformComponent &local,
                                   WorldTransformComponent &world) {
-            if (entityDatabase.hasComponent<ParentComponent>(entity))
+            if (entityDatabase.has<ParentComponent>(entity))
               return;
 
             glm::mat4 identity{1.0f};
@@ -35,7 +35,7 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
                               WorldTransformComponent &world,
                               const ParentComponent &parent) {
         auto &parentTransform =
-            entityDatabase.getComponent<WorldTransformComponent>(parent.parent);
+            entityDatabase.get<WorldTransformComponent>(parent.parent);
 
         glm::mat4 identity{1.0f};
         glm::mat4 localTransform =

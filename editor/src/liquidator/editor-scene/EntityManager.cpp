@@ -24,19 +24,19 @@ liquid::Entity EntityManager::createEmptyEntity(
 
   auto &entityDatabase = getActiveEntityDatabase();
 
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent(entity, transform);
-  entityDatabase.setComponent<liquid::WorldTransformComponent>(entity, {});
+  auto entity = entityDatabase.create();
+  entityDatabase.set(entity, transform);
+  entityDatabase.set<liquid::WorldTransformComponent>(entity, {});
 
-  if (entityDatabase.hasEntity(parent)) {
-    entityDatabase.setComponent<liquid::ParentComponent>(entity, {parent});
+  if (entityDatabase.exists(parent)) {
+    entityDatabase.set<liquid::ParentComponent>(entity, {parent});
 
-    if (!entityDatabase.hasComponent<liquid::ChildrenComponent>(parent)) {
-      entityDatabase.setComponent<liquid::ChildrenComponent>(parent, {});
+    if (!entityDatabase.has<liquid::ChildrenComponent>(parent)) {
+      entityDatabase.set<liquid::ChildrenComponent>(parent, {});
     }
 
-    entityDatabase.getComponent<liquid::ChildrenComponent>(parent)
-        .children.push_back(entity);
+    entityDatabase.get<liquid::ChildrenComponent>(parent).children.push_back(
+        entity);
   }
 
   setName(entity, name);
@@ -83,22 +83,21 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
   skeletonInstance.jointWorldTransforms.resize(skeletonInstance.numJoints,
                                                glm::mat4{1.0f});
 
-  getActiveEntityDatabase().setComponent(entity, skeletonInstance);
+  getActiveEntityDatabase().set(entity, skeletonInstance);
 }
 
 void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
   auto &entityDatabase = getActiveEntityDatabase();
-  if (!entityDatabase.hasComponent<liquid::SkeletonComponent>(entity)) {
+  if (!entityDatabase.has<liquid::SkeletonComponent>(entity)) {
     return;
   }
 
-  if (entityDatabase.hasComponent<liquid::SkeletonDebugComponent>(entity)) {
-    entityDatabase.deleteComponent<liquid::SkeletonDebugComponent>(entity);
+  if (entityDatabase.has<liquid::SkeletonDebugComponent>(entity)) {
+    entityDatabase.remove<liquid::SkeletonDebugComponent>(entity);
     return;
   }
 
-  auto &skeleton =
-      entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
+  auto &skeleton = entityDatabase.get<liquid::SkeletonComponent>(entity);
 
   liquid::SkeletonDebugComponent skeletonDebug{};
   auto numBones = skeleton.numJoints * 2;
@@ -111,28 +110,24 @@ void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
 
   skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
 
-  entityDatabase.setComponent(entity, skeletonDebug);
+  entityDatabase.set(entity, skeletonDebug);
 }
 
 void EntityManager::setMesh(liquid::Entity entity,
                             liquid::MeshAssetHandle handle) {
-  if (getActiveEntityDatabase().hasComponent<liquid::SkinnedMeshComponent>(
-          entity)) {
-    getActiveEntityDatabase().deleteComponent<liquid::SkinnedMeshComponent>(
-        entity);
+  if (getActiveEntityDatabase().has<liquid::SkinnedMeshComponent>(entity)) {
+    getActiveEntityDatabase().remove<liquid::SkinnedMeshComponent>(entity);
   }
 
-  getActiveEntityDatabase().setComponent<liquid::MeshComponent>(entity,
-                                                                {handle});
+  getActiveEntityDatabase().set<liquid::MeshComponent>(entity, {handle});
 }
 
 void EntityManager::setSkinnedMesh(liquid::Entity entity,
                                    liquid::SkinnedMeshAssetHandle handle) {
-  if (getActiveEntityDatabase().hasComponent<liquid::MeshComponent>(entity)) {
-    getActiveEntityDatabase().deleteComponent<liquid::MeshComponent>(entity);
+  if (getActiveEntityDatabase().has<liquid::MeshComponent>(entity)) {
+    getActiveEntityDatabase().remove<liquid::MeshComponent>(entity);
   }
-  getActiveEntityDatabase().setComponent<liquid::SkinnedMeshComponent>(
-      entity, {handle});
+  getActiveEntityDatabase().set<liquid::SkinnedMeshComponent>(entity, {handle});
 }
 
 void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
@@ -140,36 +135,33 @@ void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
     return;
   }
 
-  getActiveEntityDatabase().setComponent<liquid::NameComponent>(entity, {name});
+  getActiveEntityDatabase().set<liquid::NameComponent>(entity, {name});
 }
 
 void EntityManager::setCamera(liquid::Entity entity,
                               const liquid::PerspectiveLensComponent &lens,
                               bool autoRatio) {
-  getActiveEntityDatabase().setComponent<liquid::CameraComponent>(entity, {});
-  getActiveEntityDatabase().setComponent<liquid::PerspectiveLensComponent>(
-      entity, lens);
+  getActiveEntityDatabase().set<liquid::CameraComponent>(entity, {});
+  getActiveEntityDatabase().set<liquid::PerspectiveLensComponent>(entity, lens);
   if (autoRatio) {
-    getActiveEntityDatabase().setComponent<liquid::AutoAspectRatioComponent>(
-        entity, {});
+    getActiveEntityDatabase().set<liquid::AutoAspectRatioComponent>(entity, {});
   }
 }
 
 void EntityManager::setAudio(liquid::Entity entity,
                              liquid::AudioAssetHandle source) {
-  getActiveEntityDatabase().setComponent<liquid::AudioSourceComponent>(
-      entity, {source});
+  getActiveEntityDatabase().set<liquid::AudioSourceComponent>(entity, {source});
 }
 
 void EntityManager::setText(liquid::Entity entity, liquid::TextComponent text) {
-  getActiveEntityDatabase().setComponent(entity, text);
+  getActiveEntityDatabase().set(entity, text);
 }
 
 void EntityManager::setScript(liquid::Entity entity,
                               liquid::LuaScriptAssetHandle handle) {
   liquid::ScriptingComponent script{};
   script.handle = handle;
-  getActiveEntityDatabase().setComponent(entity, script);
+  getActiveEntityDatabase().set(entity, script);
 }
 
 void EntityManager::deleteEntity(liquid::Entity entity) {
@@ -177,7 +169,7 @@ void EntityManager::deleteEntity(liquid::Entity entity) {
     mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath);
   }
 
-  getActiveEntityDatabase().setComponent<liquid::DeleteComponent>(entity, {});
+  getActiveEntityDatabase().set<liquid::DeleteComponent>(entity, {});
 }
 
 void EntityManager::updateLocalTransformUsingWorld(
@@ -194,16 +186,15 @@ void EntityManager::updateLocalTransformUsingWorld(
   glm::decompose(worldTransform, worldScale, worldRotation, worldPosition,
                  noopSkew, noopPerspective);
 
-  auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+  auto &transform = entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
-  if (entityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
+  if (entityDatabase.has<liquid::ParentComponent>(entity)) {
     const auto parent =
-        entityDatabase.getComponent<liquid::ParentComponent>(entity).parent;
-    if (entityDatabase.hasEntity(parent) &&
-        entityDatabase.hasComponent<liquid::WorldTransformComponent>(parent)) {
+        entityDatabase.get<liquid::ParentComponent>(entity).parent;
+    if (entityDatabase.exists(parent) &&
+        entityDatabase.has<liquid::WorldTransformComponent>(parent)) {
       const auto &parentWorld =
-          entityDatabase.getComponent<liquid::WorldTransformComponent>(parent)
+          entityDatabase.get<liquid::WorldTransformComponent>(parent)
               .worldTransform;
 
       glm::vec3 parentPosition;
@@ -293,7 +284,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
 
   for (auto &item : asset.data.animators) {
     auto entity = getOrCreateEntity(item.entity);
-    getActiveEntityDatabase().setComponent(entity, item.value);
+    getActiveEntityDatabase().set(entity, item.value);
   }
 
   if (saveToFile) {
@@ -322,7 +313,7 @@ EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   auto &entityDatabase =
       mInSimulation ? mSimulationEntityDatabase : mEntityDatabase;
   const auto &viewMatrix =
-      entityDatabase.getComponent<liquid::CameraComponent>(camera.getCamera())
+      entityDatabase.get<liquid::CameraComponent>(camera.getCamera())
           .viewMatrix;
 
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};

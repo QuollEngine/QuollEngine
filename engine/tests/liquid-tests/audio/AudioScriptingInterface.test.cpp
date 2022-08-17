@@ -9,34 +9,32 @@ public:
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        PlayDoesNothingIfAudioSourceComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   call(entity, "audio_play");
 
-  EXPECT_FALSE(
-      entityDatabase.hasComponent<liquid::AudioStartComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::AudioStartComponent>(entity));
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest, PlayDoesNothingIfInvalidArguments) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::AudioSourceComponent>(entity, {});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioSourceComponent>(entity, {});
   call(entity, "audio_play_invalid");
 
-  EXPECT_FALSE(
-      entityDatabase.hasComponent<liquid::AudioStartComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::AudioStartComponent>(entity));
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        PlayAddsAudioStartComponentIfAudioSourceExists) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::AudioSourceComponent>(entity, {});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioSourceComponent>(entity, {});
   call(entity, "audio_play");
 
-  EXPECT_TRUE(entityDatabase.hasComponent<liquid::AudioStartComponent>(entity));
+  EXPECT_TRUE(entityDatabase.has<liquid::AudioStartComponent>(entity));
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsFalseIfAudioStatusComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   auto &scope = call(entity, "audio_is_playing");
 
   EXPECT_FALSE(scope.getGlobal<bool>("audio_is_playing_flag"));
@@ -44,8 +42,8 @@ TEST_F(AudioLuaScriptingInterfaceTest,
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsFalseIfInvalidArguments) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::AudioStatusComponent>(entity, {});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioStatusComponent>(entity, {});
 
   auto &scope = call(entity, "audio_is_playing_invalid");
   EXPECT_FALSE(scope.getGlobal<bool>("audio_is_playing_flag"));
@@ -53,8 +51,8 @@ TEST_F(AudioLuaScriptingInterfaceTest,
 
 TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsTrueIfAudioStatusComponentExists) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::AudioStatusComponent>(entity, {});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioStatusComponent>(entity, {});
   auto &scope = call(entity, "audio_is_playing");
 
   EXPECT_TRUE(scope.getGlobal<bool>("audio_is_playing_flag"));

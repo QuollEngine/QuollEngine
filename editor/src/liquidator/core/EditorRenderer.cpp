@@ -181,7 +181,7 @@ void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
   mRenderStorage.clear();
 
   mRenderStorage.setActiveCamera(
-      entityDatabase.getComponent<liquid::CameraComponent>(camera));
+      entityDatabase.get<liquid::CameraComponent>(camera));
 
   mRenderStorage.setEditorGrid(editorGrid.getData());
 

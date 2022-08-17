@@ -42,11 +42,11 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
 }
 
 void SceneIO::saveEntity(Entity entity, const Path &path) {
-  if (!mEntityDatabase.hasComponent<IdComponent>(entity)) {
-    mEntityDatabase.setComponent<IdComponent>(entity, {generateId()});
+  if (!mEntityDatabase.has<IdComponent>(entity)) {
+    mEntityDatabase.set<IdComponent>(entity, {generateId()});
   }
 
-  auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
+  auto id = mEntityDatabase.get<IdComponent>(entity).id;
   mEntityIdCache.insert({id, entity});
 
   auto node = mDeserializer.serialize(entity);
@@ -59,16 +59,15 @@ void SceneIO::saveEntity(Entity entity, const Path &path) {
 }
 
 void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
-  if (mEntityDatabase.hasComponent<ChildrenComponent>(entity)) {
-    const auto &children =
-        mEntityDatabase.getComponent<ChildrenComponent>(entity);
+  if (mEntityDatabase.has<ChildrenComponent>(entity)) {
+    const auto &children = mEntityDatabase.get<ChildrenComponent>(entity);
     for (auto entity : children.children) {
       deleteEntityFilesAndRelations(entity, path);
     }
   }
 
-  if (mEntityDatabase.hasComponent<IdComponent>(entity)) {
-    auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
+  if (mEntityDatabase.has<IdComponent>(entity)) {
+    auto id = mEntityDatabase.get<IdComponent>(entity).id;
     mEntityIdCache.insert({id, entity});
 
     std::filesystem::remove(getEntityPath(entity, path));
@@ -76,7 +75,7 @@ void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
 }
 
 Path SceneIO::getEntityPath(Entity entity, const Path &path) {
-  auto id = mEntityDatabase.getComponent<IdComponent>(entity).id;
+  auto id = mEntityDatabase.get<IdComponent>(entity).id;
   return path / (std::to_string(id) + ".lqnode");
 }
 
@@ -87,8 +86,8 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
     auto id = node["id"].as<uint64_t>(0);
 
     if (id > 0 && mEntityIdCache.find(id) == mEntityIdCache.end()) {
-      auto entity = mEntityDatabase.createEntity();
-      mEntityDatabase.setComponent<IdComponent>(entity, {id});
+      auto entity = mEntityDatabase.create();
+      mEntityDatabase.set<IdComponent>(entity, {id});
 
       if (mLastId <= id) {
         mLastId = id + 1;

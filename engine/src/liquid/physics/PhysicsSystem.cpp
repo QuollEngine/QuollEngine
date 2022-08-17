@@ -358,7 +358,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
 
       // Destroy actor and shape if there is
       // no collidable component
-      if (!entityDatabase.hasComponent<CollidableComponent>(entity)) {
+      if (!entityDatabase.has<CollidableComponent>(entity)) {
         physx::PxShape *shape = nullptr;
         actor->getShapes(&shape, 1);
 
@@ -385,7 +385,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
 
       // Destroy shape in actor if collidable component
       // is removed
-      if (!entityDatabase.hasComponent<CollidableComponent>(entity) &&
+      if (!entityDatabase.has<CollidableComponent>(entity) &&
           actor->getNbShapes() > 0) {
         PxShape *shape = nullptr;
         actor->getShapes(&shape, 1);
@@ -395,7 +395,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
       }
 
       // Destroy actor itself if rigid body component is removed
-      if (!entityDatabase.hasComponent<RigidBodyComponent>(entity)) {
+      if (!entityDatabase.has<RigidBodyComponent>(entity)) {
         mImpl->getScene()->removeActor(*actor);
         actor->release();
       }
@@ -440,9 +440,9 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
                 auto *newShape = mImpl->createShape(collidable.geometryDesc,
                                                     *collidable.material);
 
-                if (entityDatabase.hasComponent<RigidBodyComponent>(entity)) {
+                if (entityDatabase.has<RigidBodyComponent>(entity)) {
                   RigidBodyComponent &rigidBody =
-                      entityDatabase.getComponent<RigidBodyComponent>(entity);
+                      entityDatabase.get<RigidBodyComponent>(entity);
                   rigidBody.actor->detachShape(*collidable.shape);
                   rigidBody.actor->attachShape(*newShape);
                 } else {
@@ -455,7 +455,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
               }
 
               // Create rigid static if no rigid body
-              if (!entityDatabase.hasComponent<RigidBodyComponent>(entity) &&
+              if (!entityDatabase.has<RigidBodyComponent>(entity) &&
                   !collidable.rigidStatic) {
                 collidable.rigidStatic = mImpl->getPhysics()->createRigidStatic(
                     PhysxMapping::getPhysxTransform(world.worldTransform));
@@ -486,9 +486,9 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
             mImpl->getScene()->addActor(*rigidBody.actor);
 
             // Clear collidable's rigid body if exists
-            if (entityDatabase.hasComponent<CollidableComponent>(entity)) {
+            if (entityDatabase.has<CollidableComponent>(entity)) {
               CollidableComponent &collidable =
-                  entityDatabase.getComponent<CollidableComponent>(entity);
+                  entityDatabase.get<CollidableComponent>(entity);
               if (collidable.rigidStatic) {
                 mImpl->getScene()->removeActor(*collidable.rigidStatic, false);
                 collidable.rigidStatic->release();
@@ -497,11 +497,10 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
             }
           }
 
-          if (entityDatabase.hasComponent<CollidableComponent>(entity) &&
+          if (entityDatabase.has<CollidableComponent>(entity) &&
               rigidBody.actor->getNbShapes() == 0) {
             rigidBody.actor->attachShape(
-                *entityDatabase.getComponent<CollidableComponent>(entity)
-                     .shape);
+                *entityDatabase.get<CollidableComponent>(entity).shape);
           }
 
           rigidBody.actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY,
@@ -566,9 +565,8 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityDatabase.hasComponent<WorldTransformComponent>(entity)) {
-        auto &world =
-            entityDatabase.getComponent<WorldTransformComponent>(entity);
+      if (entityDatabase.has<WorldTransformComponent>(entity)) {
+        auto &world = entityDatabase.get<WorldTransformComponent>(entity);
 
         glm::quat emptyQuat;
         glm::vec3 scale;
@@ -603,14 +601,13 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
-      if (entityDatabase.hasComponent<LocalTransformComponent>(entity)) {
-        auto &transform =
-            entityDatabase.getComponent<LocalTransformComponent>(entity);
+      if (entityDatabase.has<LocalTransformComponent>(entity)) {
+        auto &transform = entityDatabase.get<LocalTransformComponent>(entity);
 
-        if (entityDatabase.hasComponent<ParentComponent>(entity)) {
+        if (entityDatabase.has<ParentComponent>(entity)) {
           const auto &parentTransform =
-              entityDatabase.getComponent<WorldTransformComponent>(
-                  entityDatabase.getComponent<ParentComponent>(entity).parent);
+              entityDatabase.get<WorldTransformComponent>(
+                  entityDatabase.get<ParentComponent>(entity).parent);
 
           const auto &invParentTransform =
               glm::inverse(parentTransform.worldTransform);

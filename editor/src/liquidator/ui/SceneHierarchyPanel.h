@@ -34,7 +34,7 @@ public:
    * @retval false Entity is not selected
    */
   inline bool isEntitySelected() const {
-    return mEntityManager.getActiveEntityDatabase().hasEntity(mSelectedEntity);
+    return mEntityManager.getActiveEntityDatabase().exists(mSelectedEntity);
   }
 
   /**

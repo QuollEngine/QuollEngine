@@ -11,10 +11,10 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
   if (node["components"]["name"] && node["components"]["name"].IsScalar()) {
     auto name = node["components"]["name"].as<liquid::String>();
-    mEntityDatabase.setComponent<NameComponent>(entity, {name});
+    mEntityDatabase.set<NameComponent>(entity, {name});
   } else {
     auto name = "Untitled " + node["id"].as<String>();
-    mEntityDatabase.setComponent<NameComponent>(entity, {name});
+    mEntityDatabase.set<NameComponent>(entity, {name});
   }
 
   LocalTransformComponent transform{};
@@ -39,21 +39,20 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       Entity parentEntity = it != entityIdCache.end() ? it->second : EntityNull;
 
       if (parentEntity != EntityNull) {
-        mEntityDatabase.setComponent<ParentComponent>(entity, {parentEntity});
+        mEntityDatabase.set<ParentComponent>(entity, {parentEntity});
 
-        if (mEntityDatabase.hasComponent<ChildrenComponent>(parentEntity)) {
-          mEntityDatabase.getComponent<ChildrenComponent>(parentEntity)
+        if (mEntityDatabase.has<ChildrenComponent>(parentEntity)) {
+          mEntityDatabase.get<ChildrenComponent>(parentEntity)
               .children.push_back(entity);
         } else {
-          mEntityDatabase.setComponent<ChildrenComponent>(parentEntity,
-                                                          {{entity}});
+          mEntityDatabase.set<ChildrenComponent>(parentEntity, {{entity}});
         }
       }
     }
   }
 
-  mEntityDatabase.setComponent(entity, transform);
-  mEntityDatabase.setComponent<WorldTransformComponent>(entity, {});
+  mEntityDatabase.set(entity, transform);
+  mEntityDatabase.set<WorldTransformComponent>(entity, {});
 
   if (node["components"]["rigidBody"] &&
       node["components"]["rigidBody"].IsMap()) {
@@ -68,7 +67,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         node["components"]["rigidBody"]["applyGravity"].as<bool>(
             rigidBody.dynamicDesc.applyGravity);
 
-    mEntityDatabase.setComponent(entity, rigidBody);
+    mEntityDatabase.set(entity, rigidBody);
   }
 
   static const std::unordered_map<String, PhysicsGeometryType> ValidShapes{
@@ -122,7 +121,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         node["components"]["collidable"]["staticFriction"].as<float>(
             collidable.materialDesc.staticFriction);
 
-    mEntityDatabase.setComponent(entity, collidable);
+    mEntityDatabase.set(entity, collidable);
   }
 
   if (node["components"]["mesh"]) {
@@ -130,7 +129,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getMeshes().findHandleByRelativePath(path);
 
     if (handle != MeshAssetHandle::Invalid) {
-      mEntityDatabase.setComponent<MeshComponent>(entity, {handle});
+      mEntityDatabase.set<MeshComponent>(entity, {handle});
     }
   }
 
@@ -140,7 +139,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         mAssetRegistry.getSkinnedMeshes().findHandleByRelativePath(path);
 
     if (handle != SkinnedMeshAssetHandle::Invalid) {
-      mEntityDatabase.setComponent<SkinnedMeshComponent>(entity, {handle});
+      mEntityDatabase.set<SkinnedMeshComponent>(entity, {handle});
     }
   }
 
@@ -168,7 +167,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       skeletonComponent.jointWorldTransforms.resize(skeletonComponent.numJoints,
                                                     glm::mat4{1.0f});
 
-      mEntityDatabase.setComponent(entity, skeletonComponent);
+      mEntityDatabase.set(entity, skeletonComponent);
     }
   }
 
@@ -183,7 +182,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       component.color =
           node["components"]["light"]["color"].as<glm::vec4>(component.color);
 
-      mEntityDatabase.setComponent(entity, component);
+      mEntityDatabase.set(entity, component);
     }
   }
 
@@ -204,14 +203,14 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
 
     if (autoRatio) {
-      mEntityDatabase.setComponent<AutoAspectRatioComponent>(entity, {});
+      mEntityDatabase.set<AutoAspectRatioComponent>(entity, {});
     } else {
       lens.aspectRatio = node["components"]["camera"]["aspectRatio"].as<float>(
           lens.aspectRatio);
     }
 
-    mEntityDatabase.setComponent<CameraComponent>(entity, {});
-    mEntityDatabase.setComponent(entity, lens);
+    mEntityDatabase.set<CameraComponent>(entity, {});
+    mEntityDatabase.set(entity, lens);
   }
 
   if (node["components"]["audio"] && node["components"]["audio"].IsMap()) {
@@ -220,7 +219,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getAudios().findHandleByRelativePath(path);
 
     if (handle != AudioAssetHandle::Invalid) {
-      mEntityDatabase.setComponent<AudioSourceComponent>(entity, {handle});
+      mEntityDatabase.set<AudioSourceComponent>(entity, {handle});
     }
   }
 
@@ -230,7 +229,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
 
     if (handle != LuaScriptAssetHandle::Invalid) {
-      mEntityDatabase.setComponent<ScriptingComponent>(entity, {handle});
+      mEntityDatabase.set<ScriptingComponent>(entity, {handle});
     }
   }
 
@@ -252,7 +251,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
           node["components"]["text"]["lineHeight"].as<float>(
               textComponent.lineHeight);
 
-      mEntityDatabase.setComponent(entity, textComponent);
+      mEntityDatabase.set(entity, textComponent);
     }
   }
 

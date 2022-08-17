@@ -16,7 +16,7 @@ public:
   void TearDown() override { std::filesystem::remove_all(SceneDirectory); }
 
   liquid::String getEntityFile(liquid::Entity entity) {
-    auto id = entityDatabase.getComponent<liquid::IdComponent>(entity).id;
+    auto id = entityDatabase.get<liquid::IdComponent>(entity).id;
     return std::to_string(id) + ".lqnode";
   }
 
@@ -125,7 +125,7 @@ TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
 
   EXPECT_EQ(entityDatabase.getEntityCount(), entities.size());
   for (auto entity : entities) {
-    EXPECT_TRUE(entityDatabase.hasComponent<liquid::IdComponent>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::IdComponent>(entity));
   }
 }
 
@@ -138,11 +138,11 @@ TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
 
   sceneIO.loadScene(SceneDirectory);
 
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   sceneIO.saveEntity(entity, SceneDirectory);
 
-  auto id = entityDatabase.getComponent<liquid::IdComponent>(entity).id;
+  auto id = entityDatabase.get<liquid::IdComponent>(entity).id;
 
   EXPECT_EQ(id, 10);
   EXPECT_TRUE(std::filesystem::is_regular_file(SceneDirectory / "10.lqnode"));
@@ -169,12 +169,12 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
 TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
   static constexpr uint64_t NumEntities = 9;
 
-  auto parent = entityDatabase.createEntity();
+  auto parent = entityDatabase.create();
 
   // Creates ID for the parent and store it in cache
   sceneIO.saveEntity(parent, SceneDirectory);
 
-  auto parentId = entityDatabase.getComponent<liquid::IdComponent>(parent).id;
+  auto parentId = entityDatabase.get<liquid::IdComponent>(parent).id;
 
   createSimpleEntityFile(10, parentId);
 
@@ -183,24 +183,21 @@ TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
   auto lastAddedEntity =
       static_cast<liquid::Entity>(entityDatabase.getEntityCount());
 
-  EXPECT_TRUE(
-      entityDatabase.hasComponent<liquid::ParentComponent>(lastAddedEntity));
-  EXPECT_EQ(
-      entityDatabase.getComponent<liquid::ParentComponent>(lastAddedEntity)
-          .parent,
-      parent);
+  EXPECT_TRUE(entityDatabase.has<liquid::ParentComponent>(lastAddedEntity));
+  EXPECT_EQ(entityDatabase.get<liquid::ParentComponent>(lastAddedEntity).parent,
+            parent);
 }
 
 TEST_F(SceneIOTest, SavingEntityCreatesIdComponentIfComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   sceneIO.saveEntity(entity, SceneDirectory);
 
-  EXPECT_TRUE(entityDatabase.hasComponent<liquid::IdComponent>(entity));
+  EXPECT_TRUE(entityDatabase.has<liquid::IdComponent>(entity));
 }
 
 TEST_F(SceneIOTest,
        SavingNewEntityCreatesEntityFileIfProvidedPathIsADirectory) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   sceneIO.saveEntity(entity, SceneDirectory);
 
@@ -210,8 +207,8 @@ TEST_F(SceneIOTest,
 
 TEST_F(SceneIOTest,
        SavingExistingEntityCreatesEntityFileIfProvidedPathIsADirectory) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::IdComponent>(entity, {155});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::IdComponent>(entity, {155});
   sceneIO.saveEntity(entity, SceneDirectory);
 
   auto path = SceneDirectory / "155.lqnode";

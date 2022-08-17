@@ -48,7 +48,7 @@ void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
       [this, &entityDatabase](auto entity, ScriptingComponent &scripting,
                               auto &) {
         destroyScriptingData(scripting);
-        entityDatabase.deleteComponent<ScriptingComponent>(entity);
+        entityDatabase.remove<ScriptingComponent>(entity);
       });
 
   entityDatabase.iterateEntities<ScriptingComponent>(

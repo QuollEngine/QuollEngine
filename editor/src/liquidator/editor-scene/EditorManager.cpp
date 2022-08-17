@@ -108,8 +108,8 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
 }
 
 void EditorManager::setActiveCamera(liquid::Entity camera) {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .hasComponent<liquid::CameraComponent>(camera)) {
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::CameraComponent>(
+          camera)) {
     return;
   }
 
@@ -132,7 +132,7 @@ void EditorManager::createNewScene() {
     auto light1 = mEntityManager.createEmptyEntity(liquid::EntityNull,
                                                    transform, "Light");
     mEntityManager.getActiveEntityDatabase()
-        .setComponent<liquid::DirectionalLightComponent>(light1, {});
+        .set<liquid::DirectionalLightComponent>(light1, {});
     mEntityManager.save(light1);
   }
 }
@@ -148,13 +148,12 @@ void EditorManager::loadOrCreateScene() {
 
 void EditorManager::moveCameraToEntity(liquid::Entity entity) {
   if (!mEntityManager.getActiveEntityDatabase()
-           .hasComponent<liquid::LocalTransformComponent>(entity)) {
+           .has<liquid::LocalTransformComponent>(entity)) {
     return;
   }
 
-  auto &transformComponent =
-      mEntityManager.getActiveEntityDatabase()
-          .getComponent<liquid::WorldTransformComponent>(entity);
+  auto &transformComponent = mEntityManager.getActiveEntityDatabase()
+                                 .get<liquid::WorldTransformComponent>(entity);
 
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));
@@ -168,19 +167,18 @@ void EditorManager::moveCameraToEntity(liquid::Entity entity) {
 
 bool EditorManager::hasEnvironment() {
   return mEntityManager.getActiveEntityDatabase()
-      .hasComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
+      .has<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
 liquid::EnvironmentComponent &EditorManager::getEnvironment() {
-  if (!mEntityManager.getActiveEntityDatabase().hasEntity(mEnvironmentEntity)) {
-    mEnvironmentEntity =
-        mEntityManager.getActiveEntityDatabase().createEntity();
-    mEntityManager.getActiveEntityDatabase()
-        .setComponent<liquid::EnvironmentComponent>(mEnvironmentEntity, {});
+  if (!mEntityManager.getActiveEntityDatabase().exists(mEnvironmentEntity)) {
+    mEnvironmentEntity = mEntityManager.getActiveEntityDatabase().create();
+    mEntityManager.getActiveEntityDatabase().set<liquid::EnvironmentComponent>(
+        mEnvironmentEntity, {});
   }
 
   return mEntityManager.getActiveEntityDatabase()
-      .getComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
+      .get<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
 void EditorManager::setTransformOperation(
