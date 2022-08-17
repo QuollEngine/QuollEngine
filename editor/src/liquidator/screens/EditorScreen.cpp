@@ -234,6 +234,8 @@ void EditorScreen::start(const Project &project) {
 
       TransformOperationControl(ui.getIconRegistry(), editorManager, IconSize);
 
+      ImGui::SameLine();
+
       if (!editorManager.isUsingEditorCamera() &&
           ImGui::Button("Reset to editor camera")) {
         editorManager.switchToEditorCamera();

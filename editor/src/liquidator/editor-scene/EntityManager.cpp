@@ -217,10 +217,13 @@ void EntityManager::updateLocalTransformUsingWorld(
       transform.localScale =
           glm::vec3(worldScale.x / parentScale.x, worldScale.y / parentScale.y,
                     worldScale.z / parentScale.z);
+      transform.localRotation =
+          glm::toQuat(glm::inverse(parentWorld) * glm::toMat4(worldRotation));
     }
   } else {
     transform.localPosition = worldPosition;
     transform.localScale = worldScale;
+    transform.localRotation = worldRotation;
   }
 
   save(entity);
