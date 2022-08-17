@@ -103,8 +103,8 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
       entityDatabase.getComponent<liquid::PerspectiveLensComponent>(entity);
   auto &camera = entityDatabase.getComponent<liquid::CameraComponent>(entity);
 
-  auto expectedPerspective =
-      glm::perspective(lens.fovY, lens.aspectRatio, lens.near, lens.far);
+  auto expectedPerspective = glm::perspective(
+      glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
   expectedPerspective[1][1] *= -1.0f;
 
   EXPECT_EQ(camera.viewMatrix, glm::inverse(transform.worldTransform));

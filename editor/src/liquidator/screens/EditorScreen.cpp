@@ -30,6 +30,8 @@
 #include "liquidator/core/EditorSimulator.h"
 #include "liquidator/core/MousePickingGraph.h"
 
+#include "ImGuizmo.h"
+
 namespace liquidator {
 
 EditorScreen::EditorScreen(liquid::Window &window,
@@ -172,6 +174,8 @@ void EditorScreen::start(const Project &project) {
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
                         &editorRenderer, &simulator, &mouseClicked,
                         &mousePicking, this]() {
+    auto &entityDatabase = entityManager.getActiveEntityDatabase();
+
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -179,6 +183,7 @@ void EditorScreen::start(const Project &project) {
     auto &sceneRenderer = renderer.getSceneRenderer();
 
     imgui.beginRendering();
+    ImGuizmo::BeginFrame();
 
     if (auto _ = widgets::MainMenuBar()) {
       liquidator::MenuBar::render(editorManager, entityManager);
@@ -221,6 +226,38 @@ void EditorScreen::start(const Project &project) {
       const auto &size = ImGui::GetItemRectSize();
 
       editorManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y);
+
+      const auto &editorCamera = editorManager.getEditorCamera();
+
+      ImGuizmo::SetDrawlist();
+      ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+    }
+
+    if (ui.getSceneHierarchyPanel().isEntitySelected()) {
+      auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
+      const auto &world =
+          entityDatabase.getComponent<liquid::WorldTransformComponent>(
+              selected);
+
+      auto worldTransform = world.worldTransform;
+
+      const auto &camera = entityDatabase.getComponent<liquid::CameraComponent>(
+          editorManager.getCamera());
+
+      auto gizmoPerspective = camera.projectionMatrix;
+      gizmoPerspective[1][1] *= -1.0f;
+
+      if (ImGuizmo::Manipulate(glm::value_ptr(camera.viewMatrix),
+                               glm::value_ptr(gizmoPerspective),
+                               ImGuizmo::TRANSLATE, ImGuizmo::LOCAL,
+                               glm::value_ptr(worldTransform), nullptr, nullptr,
+                               nullptr)) {
+        entityManager.updateLocalTransformUsingWorld(selected, worldTransform);
+      }
+
+      if (ImGuizmo::IsOver()) {
+        mouseClicked = false;
+      }
     }
 
     StatusBar::render(editorManager);

@@ -133,10 +133,9 @@ void EditorCamera::update() {
   auto &camera =
       mEntityDatabase.getComponent<liquid::CameraComponent>(mCameraEntity);
 
-  camera.projectionMatrix = glm::perspective(
-      mFov, static_cast<float>(mWidth) / static_cast<float>(mHeight), mNear,
-      mFar);
-  camera.projectionMatrix[1][1] *= -1;
+  camera.projectionMatrix =
+      glm::perspective(glm::radians(mFov), getAspectRatio(), mNear, mFar);
+  camera.projectionMatrix[1][1] *= -1.0f;
 
   camera.viewMatrix = glm::lookAt(mEye, mCenter, mUp);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;

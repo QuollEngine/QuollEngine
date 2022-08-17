@@ -151,6 +151,15 @@ public:
   void deleteEntity(liquid::Entity entity);
 
   /**
+   * @brief Update local transform using world transform
+   *
+   * @param entity Entity to update
+   * @param worldTransform World transform
+   */
+  void updateLocalTransformUsingWorld(liquid::Entity entity,
+                                      const glm::mat4 &worldTransform);
+
+  /**
    * @brief Spawn entity at view
    *
    * @param camera Editor camera

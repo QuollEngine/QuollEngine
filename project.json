@@ -163,6 +163,16 @@
       ]
     },
     {
+      "name": "imguizmo",
+      "url": "https://github.com/CedricGuillemet/ImGuizmo/archive/refs/tags/1.83.zip",
+      "buildSource": "ImGuizmo-1.83",
+      "cmd": [
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imguizmo",
+        "{COPY} LICENSE ImGuizmo.cpp {{VENDOR_PROJECTS_DIR}}/imguizmo",
+        "{COPY} ImGuizmo.h {{VENDOR_INSTALL_DIR}}/include"
+      ]
+    },
+    {
       "name": "spirv-reflect",
       "url": "https://github.com/KhronosGroup/SPIRV-Reflect/archive/refs/heads/master.zip",
       "buildSource": "SPIRV-Reflect-master",
