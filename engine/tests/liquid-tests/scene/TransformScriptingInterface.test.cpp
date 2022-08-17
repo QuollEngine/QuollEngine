@@ -11,13 +11,13 @@ using TransformLuaScriptingInterfaceDeathTest =
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
        GetPositionFailsIfComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   EXPECT_DEATH(call(entity, "local_transform_position_get"), ".*");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetPositionReturnsNilIfValuesAreInvalid) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   auto &scope = call(entity, "local_transform_position_get_invalid");
 
   EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_x"));
@@ -26,8 +26,8 @@ TEST_F(TransformLuaScriptingInterfaceTest,
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_get");
@@ -39,44 +39,44 @@ TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
        SetPositionFailsIfComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   EXPECT_DEATH(call(entity, "local_transform_position_set"), ".*");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, SetsPositionValue) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set");
 
-  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
-                .localPosition,
-            glm::vec3(2.5f, 3.5f, 0.2f));
+  EXPECT_EQ(
+      entityDatabase.get<liquid::LocalTransformComponent>(entity).localPosition,
+      glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DoesNothingIfSetPositionArgumentsAreInvalid) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set_invalid");
 
-  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
-                .localScale,
-            glm::vec3(1.5f, 0.2f, 0.5f));
+  EXPECT_EQ(
+      entityDatabase.get<liquid::LocalTransformComponent>(entity).localScale,
+      glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
        GetScaleFailsIfComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   EXPECT_DEATH(call(entity, "local_transform_scale_get"), ".*");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetScaleReturnsNilIfValuesAreInvalid) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   auto &scope = call(entity, "local_transform_scale_get_invalid");
 
   EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_x"));
@@ -85,8 +85,8 @@ TEST_F(TransformLuaScriptingInterfaceTest,
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsScaleValue) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_get");
@@ -98,31 +98,31 @@ TEST_F(TransformLuaScriptingInterfaceTest, GetsScaleValue) {
 
 TEST_F(TransformLuaScriptingInterfaceDeathTest,
        SetScaleFailsIfComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   EXPECT_DEATH(call(entity, "local_transform_scale_set"), ".*");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, SetsScaleValue) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set");
 
-  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
-                .localScale,
-            glm::vec3(2.5f, 3.5f, 0.2f));
+  EXPECT_EQ(
+      entityDatabase.get<liquid::LocalTransformComponent>(entity).localScale,
+      glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DoesNothingIfSetScaleArgumentsAreNotNumbers) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::LocalTransformComponent>(
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransformComponent>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set_invalid");
 
-  EXPECT_EQ(entityDatabase.getComponent<liquid::LocalTransformComponent>(entity)
-                .localScale,
-            glm::vec3(1.5f, 0.2f, 0.5f));
+  EXPECT_EQ(
+      entityDatabase.get<liquid::LocalTransformComponent>(entity).localScale,
+      glm::vec3(1.5f, 0.2f, 0.5f));
 }

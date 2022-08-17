@@ -23,8 +23,8 @@ int NameScriptingInterface::LuaInterface::get(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  if (entityDatabase.hasComponent<NameComponent>(entity)) {
-    scope.set(entityDatabase.getComponent<NameComponent>(entity).name);
+  if (entityDatabase.has<NameComponent>(entity)) {
+    scope.set(entityDatabase.get<NameComponent>(entity).name);
   } else {
     scope.set<String>("");
   }
@@ -50,7 +50,7 @@ int NameScriptingInterface::LuaInterface::set(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  entityDatabase.setComponent<NameComponent>(entity, {string});
+  entityDatabase.set<NameComponent>(entity, {string});
 
   return 0;
 };

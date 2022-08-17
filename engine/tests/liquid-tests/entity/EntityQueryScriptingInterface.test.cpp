@@ -18,12 +18,11 @@ public:
                                    "scripting-system-component-tester.lua")
             .getData();
 
-    entityDatabase.setComponent<liquid::ScriptingComponent>(entity, {handle});
+    entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
 
     scriptingSystem.start(entityDatabase);
 
-    auto &scripting =
-        entityDatabase.getComponent<liquid::ScriptingComponent>(entity);
+    auto &scripting = entityDatabase.get<liquid::ScriptingComponent>(entity);
 
     scripting.scope.luaGetGlobal(functionName);
     scripting.scope.call(0);
@@ -39,7 +38,7 @@ public:
 
 TEST_F(EntityQueryLuaInterfaceTest,
        GetEntityByNameReturnsNullIfParametersAreNotPassed) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
   auto &scope = call(entity, "entity_query_get_first_by_name_no_param");
 
   EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
@@ -47,7 +46,7 @@ TEST_F(EntityQueryLuaInterfaceTest,
 
 TEST_F(EntityQueryLuaInterfaceTest,
        GetEntityByNameReturnsNullIfParametersAreInvalid) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   {
     auto &scope = call(entity, "entity_query_get_first_by_name_param_nil");
@@ -71,7 +70,7 @@ TEST_F(EntityQueryLuaInterfaceTest,
 }
 
 TEST_F(EntityQueryLuaInterfaceTest, GetEntityByNameIsNullIfEntityDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "entity_query_get_first_by_name");
   EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
@@ -79,10 +78,10 @@ TEST_F(EntityQueryLuaInterfaceTest, GetEntityByNameIsNullIfEntityDoesNotExist) {
 
 TEST_F(EntityQueryLuaInterfaceTest,
        GetEntityByNameReturnsEntityTableIfEntityExists) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
-  auto e1 = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(e1, {"Test"});
+  auto e1 = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(e1, {"Test"});
 
   auto &scope = call(entity, "entity_query_get_first_by_name");
 

@@ -11,7 +11,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
   std::tuple<liquid::SkeletonComponent &, liquid::SkeletonDebugComponent &,
              liquid::Entity>
   createSkeleton(uint32_t numJoints) {
-    auto entity = entityDatabase.createEntity();
+    auto entity = entityDatabase.create();
 
     liquid::SkeletonComponent skeleton;
 
@@ -30,7 +30,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
       skeleton.jointNames.push_back("Joint " + std::to_string(i));
     }
 
-    entityDatabase.setComponent(entity, skeleton);
+    entityDatabase.set(entity, skeleton);
 
     liquid::SkeletonDebugComponent skeletonDebug{};
     auto numBones = skeleton.numJoints * 2;
@@ -43,17 +43,17 @@ struct SkeletonUpdaterTest : public ::testing::Test {
 
     skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
 
-    entityDatabase.setComponent(entity, skeletonDebug);
+    entityDatabase.set(entity, skeletonDebug);
 
     return {getSkeleton(entity), getDebugSkeleton(entity), entity};
   }
 
   liquid::SkeletonComponent &getSkeleton(liquid::Entity entity) {
-    return entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
+    return entityDatabase.get<liquid::SkeletonComponent>(entity);
   }
 
   liquid::SkeletonDebugComponent &getDebugSkeleton(liquid::Entity entity) {
-    return entityDatabase.getComponent<liquid::SkeletonDebugComponent>(entity);
+    return entityDatabase.get<liquid::SkeletonDebugComponent>(entity);
   }
 
   glm::mat4 getLocalTransform(liquid::SkeletonComponent &skeleton, uint32_t i) {
@@ -128,7 +128,7 @@ TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
   const auto &[skeleton, _, entity] = createSkeleton(2);
 
-  entityDatabase.setComponent<liquid::SkeletonDebugComponent>(entity, {});
+  entityDatabase.set<liquid::SkeletonDebugComponent>(entity, {});
 
   EXPECT_DEATH(skeletonUpdater.update(entityDatabase), ".*");
 }

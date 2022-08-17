@@ -30,16 +30,14 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
           }
         }
 
-        bool hasSkeleton =
-            entityDatabase.hasComponent<SkeletonComponent>(entity);
+        bool hasSkeleton = entityDatabase.has<SkeletonComponent>(entity);
 
         for (const auto &sequence : animation.data.keyframes) {
           const auto &value = mKeyframeInterpolator.interpolate(
               sequence, animComp.normalizedTime);
 
           if (sequence.jointTarget && hasSkeleton) {
-            auto &skeleton =
-                entityDatabase.getComponent<SkeletonComponent>(entity);
+            auto &skeleton = entityDatabase.get<SkeletonComponent>(entity);
             if (sequence.target == KeyframeSequenceAssetTarget::Position) {
               skeleton.jointLocalPositions.at(sequence.joint) =
                   glm::vec3(value);

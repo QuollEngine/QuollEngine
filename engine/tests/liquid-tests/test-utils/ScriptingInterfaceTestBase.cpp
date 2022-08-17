@@ -20,12 +20,11 @@ LuaScriptingInterfaceTestBase::call(liquid::Entity entity,
           .loadLuaScriptFromFile(std::filesystem::current_path() / mScriptName)
           .getData();
 
-  entityDatabase.setComponent<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
 
   scriptingSystem.start(entityDatabase);
 
-  auto &scripting =
-      entityDatabase.getComponent<liquid::ScriptingComponent>(entity);
+  auto &scripting = entityDatabase.get<liquid::ScriptingComponent>(entity);
 
   scripting.scope.luaGetGlobal(functionName);
   scripting.scope.call(0);

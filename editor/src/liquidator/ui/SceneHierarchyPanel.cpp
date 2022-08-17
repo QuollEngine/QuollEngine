@@ -17,7 +17,7 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
     entityDatabase.iterateEntities<liquid::LocalTransformComponent>(
         [this, &editorManager, &entityDatabase](auto entity,
                                                 const auto &transform) {
-          if (entityDatabase.hasComponent<liquid::ParentComponent>(entity)) {
+          if (entityDatabase.has<liquid::ParentComponent>(entity)) {
             return;
           }
 
@@ -32,15 +32,17 @@ void SceneHierarchyPanel::setSelectedEntity(liquid::Entity entity) {
 
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
                                        EditorManager &editorManager) {
-  liquid::String name = mEntityManager.getActiveEntityDatabase()
-                                .hasComponent<liquid::NameComponent>(entity)
-                            ? mEntityManager.getActiveEntityDatabase()
-                                  .getComponent<liquid::NameComponent>(entity)
-                                  .name
-                            : "Entity #" + std::to_string(entity);
+  liquid::String name =
+      mEntityManager.getActiveEntityDatabase().has<liquid::NameComponent>(
+          entity)
+          ? mEntityManager.getActiveEntityDatabase()
+                .get<liquid::NameComponent>(entity)
+                .name
+          : "Entity #" + std::to_string(entity);
 
-  bool isLeaf = !mEntityManager.getActiveEntityDatabase()
-                     .hasComponent<liquid::ChildrenComponent>(entity);
+  bool isLeaf =
+      !mEntityManager.getActiveEntityDatabase().has<liquid::ChildrenComponent>(
+          entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -84,12 +86,11 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   }
 
   if (open) {
-    if (mEntityManager.getActiveEntityDatabase()
-            .hasComponent<liquid::ChildrenComponent>(entity)) {
-      for (auto childEntity :
-           mEntityManager.getActiveEntityDatabase()
-               .getComponent<liquid::ChildrenComponent>(entity)
-               .children) {
+    if (mEntityManager.getActiveEntityDatabase().has<liquid::ChildrenComponent>(
+            entity)) {
+      for (auto childEntity : mEntityManager.getActiveEntityDatabase()
+                                  .get<liquid::ChildrenComponent>(entity)
+                                  .children) {
         renderEntity(childEntity, 0, editorManager);
       }
     }

@@ -39,7 +39,7 @@ public:
           });
 
       for (auto entity : toBeDeletedStarts) {
-        entityDatabase.deleteComponent<AudioStartComponent>(entity);
+        entityDatabase.remove<AudioStartComponent>(entity);
       }
     }
 
@@ -55,7 +55,7 @@ public:
           });
 
       for (auto entity : toBeDeletedStatuses) {
-        entityDatabase.deleteComponent<AudioStatusComponent>(entity);
+        entityDatabase.remove<AudioStatusComponent>(entity);
       }
     }
 
@@ -64,14 +64,14 @@ public:
       entityDatabase.iterateEntities<AudioSourceComponent, AudioStartComponent>(
           [this, &entityDatabase](auto entity, const auto &source,
                                   const auto &play) {
-            if (entityDatabase.hasComponent<AudioStatusComponent>(entity)) {
+            if (entityDatabase.has<AudioStatusComponent>(entity)) {
               return;
             }
             const auto &asset =
                 mAssetRegistry.getAudios().getAsset(source.source).data;
             void *sound = mBackend.playSound(asset);
 
-            entityDatabase.setComponent<AudioStatusComponent>(entity, {sound});
+            entityDatabase.set<AudioStatusComponent>(entity, {sound});
           });
 
       entityDatabase.destroyComponents<liquid::AudioStartComponent>();
@@ -91,7 +91,7 @@ public:
           });
 
       for (auto entity : toBeDeletedStatuses) {
-        entityDatabase.deleteComponent<AudioStatusComponent>(entity);
+        entityDatabase.remove<AudioStatusComponent>(entity);
       }
     }
   }

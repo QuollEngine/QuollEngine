@@ -75,7 +75,7 @@ public:
    *
    * @return Newly created entity
    */
-  Entity createEntity() {
+  Entity create() {
     mNumEntities++;
     if (mDeleted.size() > 0) {
       auto eid = mDeleted.front();
@@ -94,7 +94,7 @@ public:
    * @retval true Entity exists
    * @retval false Entity does not exist
    */
-  bool hasEntity(Entity entity) const {
+  bool exists(Entity entity) const {
     for (auto &deletedEntity : mDeleted) {
       if (deletedEntity == entity)
         return false;
@@ -136,8 +136,8 @@ public:
    * @param value Component value
    */
   template <class TComponentType>
-  void setComponent(Entity entity, const TComponentType &value) {
-    LIQUID_ASSERT(hasEntity(entity),
+  void set(Entity entity, const TComponentType &value) {
+    LIQUID_ASSERT(exists(entity),
                   "Entity " + std::to_string(entity) + " does not exist");
 
     auto &pool = getPoolForComponent<TComponentType>();
@@ -166,8 +166,8 @@ public:
    * @return Component value
    */
   template <class TComponentType>
-  const TComponentType &getComponent(Entity entity) const {
-    LIQUID_ASSERT(hasComponent<TComponentType>(entity),
+  const TComponentType &get(Entity entity) const {
+    LIQUID_ASSERT(has<TComponentType>(entity),
                   "Component named " + String(typeid(TComponentType).name()) +
                       " does not exist for entity " + std::to_string(entity));
     const auto &pool = getPoolForComponent<TComponentType>();
@@ -182,8 +182,8 @@ public:
    * @param entity Entity
    * @return Component value
    */
-  template <class TComponentType> TComponentType &getComponent(Entity entity) {
-    LIQUID_ASSERT(hasComponent<TComponentType>(entity),
+  template <class TComponentType> TComponentType &get(Entity entity) {
+    LIQUID_ASSERT(has<TComponentType>(entity),
                   "Component named " + String(typeid(TComponentType).name()) +
                       " does not exist for entity " + std::to_string(entity));
     auto &pool = getPoolForComponent<TComponentType>();
@@ -199,19 +199,19 @@ public:
    * @retval true Entity exists
    * @retval false Entity does not exist
    */
-  template <class TComponentType> bool hasComponent(Entity entity) const {
+  template <class TComponentType> bool has(Entity entity) const {
     const auto &pool = getPoolForComponent<TComponentType>();
     return entity < pool.entityIndices.size() &&
            pool.entityIndices[entity] != DeadIndex;
   }
 
   /**
-   * @brief Deletes component from entity
+   * @brief Remove component from entity
    *
    * @tparam ComponentType Component type
    * @param entity Entity
    */
-  template <class TComponentType> void deleteComponent(Entity entity) {
+  template <class TComponentType> void remove(Entity entity) {
     auto &pool = getPoolForComponent<TComponentType>();
     LIQUID_ASSERT(entity < pool.entityIndices.size(),
                   "Component named " + String(typeid(TComponentType).name()) +

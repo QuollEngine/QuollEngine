@@ -299,14 +299,13 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                     Entity camera) {
-  LIQUID_ASSERT(entityDatabase.hasComponent<CameraComponent>(camera),
+  LIQUID_ASSERT(entityDatabase.has<CameraComponent>(camera),
                 "Entity does not have a camera");
 
   LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
   mRenderStorage.clear();
 
-  mRenderStorage.setCameraData(
-      entityDatabase.getComponent<CameraComponent>(camera));
+  mRenderStorage.setCameraData(entityDatabase.get<CameraComponent>(camera));
 
   // Meshes
   entityDatabase.iterateEntities<WorldTransformComponent, MeshComponent>(

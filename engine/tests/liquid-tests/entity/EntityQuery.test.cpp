@@ -12,26 +12,26 @@ public:
 };
 
 TEST_F(EntityQueryTest, ReturnsNullEntityIfEntityWithNameIsNotFound) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity, {"test"});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("hello"), liquid::EntityNull);
 }
 
 TEST_F(EntityQueryTest, ReturnsEntityIfEntityWithNameIsFound) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity, {"test"});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity);
 }
 
 TEST_F(EntityQueryTest,
        ReturnsFirstFoundEntityIfMultipleEntitiesHaveTheSameName) {
-  auto entity1 = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity1, {"test"});
+  auto entity1 = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity1, {"test"});
 
-  auto entity2 = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity2, {"test"});
+  auto entity2 = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity2, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity1);
 }

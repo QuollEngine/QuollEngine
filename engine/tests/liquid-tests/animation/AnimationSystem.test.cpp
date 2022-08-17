@@ -12,13 +12,13 @@ public:
 
   AnimationSystemTest() : system(assetRegistry) {}
 
-  liquid::Entity createEntity(
+  liquid::Entity create(
       bool loop,
       liquid::AnimationAssetHandle animIndex = liquid::AnimationAssetHandle{1},
       bool playing = true) {
-    auto entity = entityDatabase.createEntity();
-    entityDatabase.setComponent<liquid::LocalTransformComponent>(entity, {});
-    entityDatabase.setComponent<liquid::AnimatorComponent>(
+    auto entity = entityDatabase.create();
+    entityDatabase.set<liquid::LocalTransformComponent>(entity, {});
+    entityDatabase.set<liquid::AnimatorComponent>(
         entity, {0, loop, 0.0f, playing, {animIndex}});
 
     return entity;
@@ -28,7 +28,7 @@ public:
       bool loop,
       liquid::AnimationAssetHandle animIndex = liquid::AnimationAssetHandle{1},
       bool playing = true) {
-    auto entity = createEntity(loop, animIndex, playing);
+    auto entity = create(loop, animIndex, playing);
 
     liquid::SkeletonComponent skeleton{};
     skeleton.jointFinalTransforms = {glm::mat4{1.0f}};
@@ -38,7 +38,7 @@ public:
     skeleton.jointLocalScales = {glm::vec3{1.0f}};
     skeleton.jointNames = {"Joint0"};
 
-    entityDatabase.setComponent(entity, skeleton);
+    entityDatabase.set(entity, skeleton);
 
     return entity;
   }
@@ -89,9 +89,8 @@ using AnimationSystemDeathTest = AnimationSystemTest;
 
 TEST_F(AnimationSystemTest,
        DoesNotAdvanceEntityAnimationIfAnimationDoesNotExist) {
-  auto entity = createEntity(false, liquid::AnimationAssetHandle::Invalid);
-  const auto &animation =
-      entityDatabase.getComponent<liquid::AnimatorComponent>(entity);
+  auto entity = create(false, liquid::AnimationAssetHandle::Invalid);
+  const auto &animation = entityDatabase.get<liquid::AnimatorComponent>(entity);
 
   EXPECT_EQ(animation.normalizedTime, 0.0f);
   system.update(0.5f, entityDatabase);
@@ -101,10 +100,9 @@ TEST_F(AnimationSystemTest,
 TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
   auto animIndex =
       createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 2.0f);
-  auto entity = createEntity(false, animIndex, false);
+  auto entity = create(false, animIndex, false);
 
-  const auto &animation =
-      entityDatabase.getComponent<liquid::AnimatorComponent>(entity);
+  const auto &animation = entityDatabase.get<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
   system.update(0.5f, entityDatabase);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
@@ -113,10 +111,9 @@ TEST_F(AnimationSystemTest, DoesNotAdvanceTimeIfComponentIsNotPlaying) {
 TEST_F(AnimationSystemTest,
        AdvancedEntityAnimationNormalizedTimeByDeltaTimeAndAnimationSpeed) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 2.0f);
-  auto entity = createEntity(false);
+  auto entity = create(false);
 
-  const auto &animation =
-      entityDatabase.getComponent<liquid::AnimatorComponent>(entity);
+  const auto &animation = entityDatabase.get<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
   system.update(0.5f, entityDatabase);
   EXPECT_EQ(animation.normalizedTime, 0.25f);
@@ -124,10 +121,9 @@ TEST_F(AnimationSystemTest,
 
 TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = createEntity(false);
+  auto entity = create(false);
 
-  const auto &animation =
-      entityDatabase.getComponent<liquid::AnimatorComponent>(entity);
+  const auto &animation = entityDatabase.get<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
   system.update(1.5f, entityDatabase);
   EXPECT_EQ(animation.normalizedTime, 1.0f);
@@ -137,9 +133,8 @@ TEST_F(AnimationSystemTest, PausesEntityAnimationWhenItReachesAnimationEnd) {
 
 TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = createEntity(true);
-  const auto &animation =
-      entityDatabase.getComponent<liquid::AnimatorComponent>(entity);
+  auto entity = create(true);
+  const auto &animation = entityDatabase.get<liquid::AnimatorComponent>(entity);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
   system.update(1.0f, entityDatabase);
   EXPECT_EQ(animation.normalizedTime, 0.0f);
@@ -147,10 +142,10 @@ TEST_F(AnimationSystemTest, RestartsAnimationTimeIfLoop) {
 
 TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Position, 1.0f);
-  auto entity = createEntity(false);
+  auto entity = create(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -164,10 +159,10 @@ TEST_F(AnimationSystemTest, UpdateEntityPositionBasedOnPositionKeyframe) {
 
 TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Rotation, 1.0f);
-  auto entity = createEntity(false);
+  auto entity = create(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -181,10 +176,10 @@ TEST_F(AnimationSystemTest, UpdateEntityRotationBasedOnRotationKeyframe) {
 
 TEST_F(AnimationSystemTest, UpdateEntityScaleBasedOnScaleKeyframe) {
   createAnimation(liquid::KeyframeSequenceAssetTarget::Scale, 1.0f);
-  auto entity = createEntity(false);
+  auto entity = create(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
   EXPECT_EQ(transform.localPosition, glm::vec3(0.0f));
   EXPECT_EQ(transform.localRotation, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -202,10 +197,9 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
-  const auto &skeleton =
-      entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
+  const auto &skeleton = entityDatabase.get<liquid::SkeletonComponent>(entity);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -227,10 +221,9 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
-  const auto &skeleton =
-      entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
+  const auto &skeleton = entityDatabase.get<liquid::SkeletonComponent>(entity);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
@@ -252,10 +245,9 @@ TEST_F(AnimationSystemTest,
   auto entity = createEntityWithSkeleton(false);
 
   const auto &transform =
-      entityDatabase.getComponent<liquid::LocalTransformComponent>(entity);
+      entityDatabase.get<liquid::LocalTransformComponent>(entity);
 
-  const auto &skeleton =
-      entityDatabase.getComponent<liquid::SkeletonComponent>(entity);
+  const auto &skeleton = entityDatabase.get<liquid::SkeletonComponent>(entity);
   EXPECT_EQ(skeleton.jointLocalPositions.at(0), glm::vec3(0.0f));
   EXPECT_EQ(skeleton.jointLocalRotations.at(0),
             glm::quat(1.0f, 0.0f, 0.0f, 0.0f));

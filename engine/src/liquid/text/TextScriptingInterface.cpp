@@ -23,8 +23,8 @@ int TextScriptingInterface::LuaInterface::getText(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  if (entityDatabase.hasComponent<TextComponent>(entity)) {
-    scope.set(entityDatabase.getComponent<TextComponent>(entity).text);
+  if (entityDatabase.has<TextComponent>(entity)) {
+    scope.set(entityDatabase.get<TextComponent>(entity).text);
   } else {
     scope.set<String>("");
   }
@@ -51,11 +51,11 @@ int TextScriptingInterface::LuaInterface::setText(void *state) {
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   // Text needs to exist in order to change it
-  if (!entityDatabase.hasComponent<TextComponent>(entity)) {
+  if (!entityDatabase.has<TextComponent>(entity)) {
     return 0;
   }
 
-  entityDatabase.getComponent<TextComponent>(entity).text = string;
+  entityDatabase.get<TextComponent>(entity).text = string;
 
   return 0;
 };

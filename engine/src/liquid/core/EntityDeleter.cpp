@@ -5,9 +5,8 @@ namespace liquid {
 
 void addToDeleteList(Entity entity, EntityDatabase &entityDatabase,
                      std::vector<Entity> &deleteList) {
-  if (entityDatabase.hasComponent<ChildrenComponent>(entity)) {
-    for (auto &child :
-         entityDatabase.getComponent<ChildrenComponent>(entity).children) {
+  if (entityDatabase.has<ChildrenComponent>(entity)) {
+    for (auto &child : entityDatabase.get<ChildrenComponent>(entity).children) {
       addToDeleteList(child, entityDatabase, deleteList);
     }
   }
@@ -23,13 +22,12 @@ void EntityDeleter::update(EntityDatabase &entityDatabase) {
 
   entityDatabase.iterateEntities<DeleteComponent>(
       [&deleteList, &entityDatabase](auto entity, auto &) {
-        if (entityDatabase.hasComponent<ParentComponent>(entity)) {
-          auto parent =
-              entityDatabase.getComponent<ParentComponent>(entity).parent;
+        if (entityDatabase.has<ParentComponent>(entity)) {
+          auto parent = entityDatabase.get<ParentComponent>(entity).parent;
 
-          if (entityDatabase.hasComponent<ChildrenComponent>(parent)) {
+          if (entityDatabase.has<ChildrenComponent>(parent)) {
             auto &children =
-                entityDatabase.getComponent<ChildrenComponent>(parent).children;
+                entityDatabase.get<ChildrenComponent>(parent).children;
 
             auto it = std::find(children.begin(), children.end(), entity);
             if (it != children.end()) {

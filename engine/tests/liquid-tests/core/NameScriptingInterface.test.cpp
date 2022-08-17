@@ -7,28 +7,28 @@ class NameLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(NameLuaScriptingInterfaceTest,
        ReturnsEmptyStringIfNameComponentDoesNotExist) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "name_get");
 
-  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::NameComponent>(entity));
   auto name = scope.getGlobal<liquid::String>("name");
   EXPECT_EQ(name, "");
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, ReturnsEmptyStringIfNoSelf) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "name_get_invalid");
 
-  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::NameComponent>(entity));
   auto name = scope.getGlobal<liquid::String>("name");
   EXPECT_EQ(name, "");
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameComponentDataIfExists) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity, {"Test name"});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity, {"Test name"});
 
   auto &scope = call(entity, "name_get");
 
@@ -37,30 +37,30 @@ TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameComponentDataIfExists) {
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, DoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
-  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::NameComponent>(entity));
   call(entity, "name_set_invalid");
-  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::NameComponent>(entity));
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, CreatesNameComponentOnSet) {
-  auto entity = entityDatabase.createEntity();
+  auto entity = entityDatabase.create();
 
-  EXPECT_FALSE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::NameComponent>(entity));
   call(entity, "name_set");
 
-  EXPECT_TRUE(entityDatabase.hasComponent<liquid::NameComponent>(entity));
-  EXPECT_EQ(entityDatabase.getComponent<liquid::NameComponent>(entity).name,
+  EXPECT_TRUE(entityDatabase.has<liquid::NameComponent>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::NameComponent>(entity).name,
             "Hello World");
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, UpdatesExistingNameComponentOnSet) {
-  auto entity = entityDatabase.createEntity();
-  entityDatabase.setComponent<liquid::NameComponent>(entity, {"Test name"});
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::NameComponent>(entity, {"Test name"});
 
   call(entity, "name_set");
 
-  EXPECT_EQ(entityDatabase.getComponent<liquid::NameComponent>(entity).name,
+  EXPECT_EQ(entityDatabase.get<liquid::NameComponent>(entity).name,
             "Hello World");
 }

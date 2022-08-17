@@ -112,7 +112,7 @@ EditorCamera::~EditorCamera() {
   mEventSystem.removeObserver(liquid::MouseScrollEvent::Scroll,
                               mMouseScrollHandler);
 
-  mEntityDatabase.deleteComponent<liquid::CameraComponent>(mCameraEntity);
+  mEntityDatabase.remove<liquid::CameraComponent>(mCameraEntity);
 }
 
 void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
@@ -130,8 +130,7 @@ void EditorCamera::update() {
     zoom();
   }
 
-  auto &camera =
-      mEntityDatabase.getComponent<liquid::CameraComponent>(mCameraEntity);
+  auto &camera = mEntityDatabase.get<liquid::CameraComponent>(mCameraEntity);
 
   camera.projectionMatrix =
       glm::perspective(glm::radians(mFov), getAspectRatio(), mNear, mFar);
@@ -149,10 +148,10 @@ void EditorCamera::reset() {
   mNear = DefaultNear;
   mFar = DefaultFar;
 
-  if (!mEntityDatabase.hasEntity(mCameraEntity)) {
-    mCameraEntity = mEntityDatabase.createEntity();
+  if (!mEntityDatabase.exists(mCameraEntity)) {
+    mCameraEntity = mEntityDatabase.create();
   }
-  mEntityDatabase.setComponent<liquid::CameraComponent>(mCameraEntity, {});
+  mEntityDatabase.set<liquid::CameraComponent>(mCameraEntity, {});
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {

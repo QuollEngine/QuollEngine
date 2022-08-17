@@ -72,7 +72,7 @@ public:
       scriptingSystem.update(dt, entityDatabase);
 
       auto &transform =
-          entityDatabase.getComponent<liquid::LocalTransformComponent>(ball);
+          entityDatabase.get<liquid::LocalTransformComponent>(ball);
 
       sceneUpdater.update(entityDatabase);
       physicsSystem.update(dt, entityDatabase);
@@ -105,13 +105,12 @@ public:
 
 private:
   void setupScene() {
-    cameraEntity = entityDatabase.createEntity();
-    entityDatabase.setComponent<liquid::CameraComponent>(cameraEntity, {});
+    cameraEntity = entityDatabase.create();
+    entityDatabase.set<liquid::CameraComponent>(cameraEntity, {});
 
     const auto &fbSize = window.getFramebufferSize();
 
-    auto &camera =
-        entityDatabase.getComponent<liquid::CameraComponent>(cameraEntity);
+    auto &camera = entityDatabase.get<liquid::CameraComponent>(cameraEntity);
 
     camera.projectionMatrix = glm::perspective(
         70.0f, static_cast<float>(fbSize.x) / static_cast<float>(fbSize.y),
@@ -130,60 +129,60 @@ private:
       camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
     });
 
-    auto e1 = entityDatabase.createEntity();
-    auto e2 = entityDatabase.createEntity();
-    auto e3 = entityDatabase.createEntity();
-    auto e4 = entityDatabase.createEntity();
+    auto e1 = entityDatabase.create();
+    auto e2 = entityDatabase.create();
+    auto e3 = entityDatabase.create();
+    auto e4 = entityDatabase.create();
 
-    ball = entityDatabase.createEntity();
-    p1 = entityDatabase.createEntity();
-    p2 = entityDatabase.createEntity();
+    ball = entityDatabase.create();
+    p1 = entityDatabase.create();
+    p2 = entityDatabase.create();
 
     // Walls
     {
-      entityDatabase.setComponent<liquid::MeshComponent>(e1, {barMesh});
-      entityDatabase.setComponent<liquid::MeshComponent>(e2, {barMesh});
-      entityDatabase.setComponent<liquid::MeshComponent>(e3, {barMesh});
-      entityDatabase.setComponent<liquid::MeshComponent>(e4, {barMesh});
+      entityDatabase.set<liquid::MeshComponent>(e1, {barMesh});
+      entityDatabase.set<liquid::MeshComponent>(e2, {barMesh});
+      entityDatabase.set<liquid::MeshComponent>(e3, {barMesh});
+      entityDatabase.set<liquid::MeshComponent>(e4, {barMesh});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           e1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(5.0f, 0.2f, 0.1f)}}});
-      entityDatabase.setComponent<liquid::NameComponent>(e1, {"Bot wall"});
+      entityDatabase.set<liquid::NameComponent>(e1, {"Bot wall"});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           e2, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(3.6f, 0.2f, 0.1f)}}});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           e3, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(3.6f, 0.2f, 0.1f)}}});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           e4, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(5.0f, 0.2f, 0.1f)}}});
-      entityDatabase.setComponent<liquid::NameComponent>(e4, {"Player wall"});
+      entityDatabase.set<liquid::NameComponent>(e4, {"Player wall"});
 
-      entityDatabase.setComponent(
-          e1, createWallTransform({0.0f, 0.0f, 3.5f}, 0.0f, 5.0f));
-      entityDatabase.setComponent(
-          e2, createWallTransform({-5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
-      entityDatabase.setComponent(
-          e3, createWallTransform({5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
-      entityDatabase.setComponent(
-          e4, createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
+      entityDatabase.set(e1,
+                         createWallTransform({0.0f, 0.0f, 3.5f}, 0.0f, 5.0f));
+      entityDatabase.set(e2,
+                         createWallTransform({-5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
+      entityDatabase.set(e3,
+                         createWallTransform({5.0f, 0.0f, 0.0f}, 90.0f, 3.6f));
+      entityDatabase.set(e4,
+                         createWallTransform({0.0f, 0.0f, -3.5f}, 0.0f, 5.0f));
 
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(e1, {});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(e2, {});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(e3, {});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(e4, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(e1, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(e2, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(e3, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(e4, {});
     }
 
-    entityDatabase.setComponent<liquid::CollidableComponent>(
+    entityDatabase.set<liquid::CollidableComponent>(
         ball, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Sphere,
                   liquid::PhysicsGeometrySphere{ballRadius}}});
@@ -191,56 +190,56 @@ private:
     {
       liquid::LocalTransformComponent ballTransform{};
       ballTransform.localScale = glm::vec3(0.3f);
-      entityDatabase.setComponent(ball, ballTransform);
-      entityDatabase.setComponent<liquid::NameComponent>(ball, {"Ball"});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(ball, {});
+      entityDatabase.set(ball, ballTransform);
+      entityDatabase.set<liquid::NameComponent>(ball, {"Ball"});
+      entityDatabase.set<liquid::WorldTransformComponent>(ball, {});
 
       auto [_, ballScriptHandle] = assetManager.getRegistry().getAssetByPath(
           assetManager.getAssetsPath() / "ball.lua");
-      entityDatabase.setComponent<liquid::RigidBodyComponent>(
+      entityDatabase.set<liquid::RigidBodyComponent>(
           ball,
           liquid::RigidBodyComponent{{1.0f, {0.05f, 100.0f, 100.0f}, false}});
-      entityDatabase.setComponent<liquid::ScriptingComponent>(
+      entityDatabase.set<liquid::ScriptingComponent>(
           ball, {static_cast<liquid::LuaScriptAssetHandle>(ballScriptHandle)});
     }
 
-    entityDatabase.setComponent<liquid::MeshComponent>(p1, {barMesh});
-    entityDatabase.setComponent<liquid::MeshComponent>(p2, {barMesh});
-    entityDatabase.setComponent<liquid::MeshComponent>(ball, {ballMesh});
+    entityDatabase.set<liquid::MeshComponent>(p1, {barMesh});
+    entityDatabase.set<liquid::MeshComponent>(p2, {barMesh});
+    entityDatabase.set<liquid::MeshComponent>(ball, {ballMesh});
 
     // Create paddles
     {
       auto [_, playerScriptHandle] = assetManager.getRegistry().getAssetByPath(
           assetManager.getAssetsPath() / "player.lua");
 
-      entityDatabase.setComponent<liquid::ScriptingComponent>(
+      entityDatabase.set<liquid::ScriptingComponent>(
           p1, {static_cast<liquid::LuaScriptAssetHandle>(playerScriptHandle)});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           p1, liquid::CollidableComponent{liquid::PhysicsGeometryDesc{
                   liquid::PhysicsGeometryType::Box,
                   liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}}});
 
-      entityDatabase.setComponent<liquid::LocalTransformComponent>(p1, {});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(p1, {});
+      entityDatabase.set<liquid::LocalTransformComponent>(p1, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(p1, {});
     }
 
     {
       auto [_, botScriptHandle] = assetManager.getRegistry().getAssetByPath(
           assetManager.getAssetsPath() / "bot.lua");
 
-      entityDatabase.setComponent<liquid::ScriptingComponent>(
+      entityDatabase.set<liquid::ScriptingComponent>(
           p2, {static_cast<liquid::LuaScriptAssetHandle>(botScriptHandle)});
 
-      entityDatabase.setComponent<liquid::CollidableComponent>(
+      entityDatabase.set<liquid::CollidableComponent>(
           p2, liquid::CollidableComponent{
                   liquid::PhysicsGeometryDesc{
                       liquid::PhysicsGeometryType::Box,
                       liquid::PhysicsGeometryBox{glm::vec3(1.0f, 0.2f, 0.1f)}},
                   liquid::PhysicsMaterialDesc{0.0f, 0.0f, 1.0f}});
 
-      entityDatabase.setComponent<liquid::LocalTransformComponent>(p2, {});
-      entityDatabase.setComponent<liquid::WorldTransformComponent>(p2, {});
+      entityDatabase.set<liquid::LocalTransformComponent>(p2, {});
+      entityDatabase.set<liquid::WorldTransformComponent>(p2, {});
     }
   }
 
