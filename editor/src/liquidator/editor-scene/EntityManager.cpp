@@ -202,18 +202,25 @@ void EntityManager::updateLocalTransformUsingWorld(
         entityDatabase.getComponent<liquid::ParentComponent>(entity).parent;
     if (entityDatabase.hasEntity(parent) &&
         entityDatabase.hasComponent<liquid::WorldTransformComponent>(parent)) {
-
       const auto &parentWorld =
           entityDatabase.getComponent<liquid::WorldTransformComponent>(parent)
               .worldTransform;
 
-      const auto &invParentTransform = glm::inverse(parentWorld);
+      glm::vec3 parentPosition;
+      glm::quat parentRotation;
+      glm::vec3 parentScale;
 
-      transform.localPosition =
-          glm::vec3(invParentTransform * glm::vec4(worldPosition, 1.0));
+      glm::decompose(parentWorld, parentScale, parentRotation, parentPosition,
+                     noopSkew, noopPerspective);
+
+      transform.localPosition = worldPosition - parentPosition;
+      transform.localScale =
+          glm::vec3(worldScale.x / parentScale.x, worldScale.y / parentScale.y,
+                    worldScale.z / parentScale.z);
     }
   } else {
     transform.localPosition = worldPosition;
+    transform.localScale = worldScale;
   }
 
   save(entity);

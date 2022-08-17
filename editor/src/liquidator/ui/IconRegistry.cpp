@@ -56,6 +56,14 @@ void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
       EditorIcon::Play, loader.loadFromFile((iconsPath / "play.png").string()));
   mIconMap.insert_or_assign(
       EditorIcon::Stop, loader.loadFromFile((iconsPath / "stop.png").string()));
+  mIconMap.insert_or_assign(
+      EditorIcon::Move, loader.loadFromFile((iconsPath / "move.png").string()));
+  mIconMap.insert_or_assign(
+      EditorIcon::Rotate,
+      loader.loadFromFile((iconsPath / "rotate.png").string()));
+  mIconMap.insert_or_assign(
+      EditorIcon::Scale,
+      loader.loadFromFile((iconsPath / "scale.png").string()));
 }
 
 } // namespace liquidator
