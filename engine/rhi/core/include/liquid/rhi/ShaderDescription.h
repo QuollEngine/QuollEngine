@@ -9,7 +9,7 @@ struct ShaderDescription {
   /**
    * Path to shader file
    */
-  String path;
+  Path path;
 };
 
 } // namespace liquid::rhi

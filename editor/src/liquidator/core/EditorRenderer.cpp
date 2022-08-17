@@ -11,26 +11,28 @@ EditorRenderer::EditorRenderer(liquid::rhi::ResourceRegistry &registry,
     : mRegistry(registry), mIconRegistry(iconRegistry),
       mShaderLibrary(shaderLibrary), mRenderStorage(device) {
 
-  mShaderLibrary.addShader(
-      "editor-grid.vert",
-      registry.setShader({"assets/shaders/editor-grid.vert.spv"}));
-  mShaderLibrary.addShader(
-      "editor-grid.frag",
-      registry.setShader({"assets/shaders/editor-grid.frag.spv"}));
+  const auto shadersPath =
+      std::filesystem::current_path() / "assets" / "shaders";
 
   mShaderLibrary.addShader(
+      "editor-grid.vert",
+      registry.setShader({shadersPath / "editor-grid.vert.spv"}));
+  mShaderLibrary.addShader(
+      "editor-grid.frag",
+      registry.setShader({shadersPath / "editor-grid.frag.spv"}));
+  mShaderLibrary.addShader(
       "skeleton-lines.vert",
-      registry.setShader({"assets/shaders/skeleton-lines.vert.spv"}));
+      registry.setShader({shadersPath / "skeleton-lines.vert.spv"}));
   mShaderLibrary.addShader(
       "skeleton-lines.frag",
-      registry.setShader({"assets/shaders/skeleton-lines.frag.spv"}));
+      registry.setShader({shadersPath / "skeleton-lines.frag.spv"}));
 
   mShaderLibrary.addShader(
       "object-icons.vert",
-      registry.setShader({"assets/shaders/object-icons.vert.spv"}));
+      registry.setShader({shadersPath / "object-icons.vert.spv"}));
   mShaderLibrary.addShader(
       "object-icons.frag",
-      registry.setShader({"assets/shaders/object-icons.frag.spv"}));
+      registry.setShader({shadersPath / "object-icons.frag.spv"}));
 }
 
 liquid::rhi::RenderGraphPass &

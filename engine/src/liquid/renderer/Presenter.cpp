@@ -9,14 +9,12 @@ namespace liquid {
 Presenter::Presenter(ShaderLibrary &shaderLibrary,
                      rhi::ResourceRegistry &registry)
     : mRegistry(registry), mShaderLibrary(shaderLibrary) {
-  mShaderLibrary.addShader(
-      "__engine.fullscreenQuad.default.vertex",
-      mRegistry.setShader(
-          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.fullscreenQuad.default.fragment",
-      mRegistry.setShader(
-          {Engine::getAssetsPath() + "/shaders/fullscreenQuad.frag.spv"}));
+  mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
+                           mRegistry.setShader({Engine::getShadersPath() /
+                                                "fullscreenQuad.vert.spv"}));
+  mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
+                           mRegistry.setShader({Engine::getShadersPath() /
+                                                "fullscreenQuad.frag.spv"}));
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {

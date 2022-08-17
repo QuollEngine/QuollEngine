@@ -291,8 +291,7 @@ private:
 };
 
 int main() {
-  liquid::Engine::setAssetsPath(
-      std::filesystem::path("./engine/assets").string());
+  liquid::Engine::setPath(std::filesystem::current_path() / "engine");
   Game game;
   return game.run();
 }

@@ -90,8 +90,7 @@ static void setImguiStyles() {
  * @brief Add fonts
  */
 static void addFonts() {
-  liquid::Path fontPath = liquid::Path(liquid::Engine::getAssetsPath()) /
-                          "fonts" / "Roboto-Regular.ttf";
+  liquid::Path fontPath = liquid::Engine::getFontsPath() / "Roboto-Regular.ttf";
   auto &io = ImGui::GetIO();
   io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), FontSize);
 }
