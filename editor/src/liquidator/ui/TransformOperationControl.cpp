@@ -15,6 +15,8 @@ TransformOperationControl::TransformOperationControl(
 
   renderIcon(iconRegistry, TransformOperation::Move, editorManager, iconSize);
   ImGui::SameLine();
+  renderIcon(iconRegistry, TransformOperation::Rotate, editorManager, iconSize);
+  ImGui::SameLine();
   renderIcon(iconRegistry, TransformOperation::Scale, editorManager, iconSize);
 }
 
