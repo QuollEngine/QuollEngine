@@ -17,18 +17,25 @@ private:
 
 public:
   /**
-   * @brief Set assets path for engine
+   * @brief Set path for engine data
    *
-   * @param path Assets path
+   * @param path Engine path
    */
-  static void setAssetsPath(const String &path);
+  static void setPath(const Path &path);
 
   /**
-   * @brief Get assets path for engine
+   * @brief Get path for engine shaders
    *
-   * @return Assets path
+   * @return Engine shaders path
    */
-  static const String &getAssetsPath();
+  static const Path getShadersPath();
+
+  /**
+   * @brief Get path for engine fonts
+   *
+   * @return Engine fonts path
+   */
+  static const Path getFontsPath();
 
 private:
   /**
@@ -40,7 +47,8 @@ private:
   Engine() = default;
 
 private:
-  String mAssetsPath;
+  Path mAssetsPath;
+  Path mEnginePath;
 };
 
 } // namespace liquid

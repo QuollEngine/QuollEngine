@@ -23,11 +23,15 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
 
   checkForVulkanError(
       vkCreateShaderModule(device, &createInfo, nullptr, &mShaderModule),
-      "Failed to create shader module from \"" + description.path + "\"");
+      "Failed to create shader module from \"" + mPath.filename().string() +
+          "\"");
 
-  LOG_DEBUG("[Vulkan] Shader module created from \"" + description.path + "\"");
+  LOG_DEBUG("[Vulkan] Shader module created from \"" +
+            std::filesystem::relative(mPath, std::filesystem::current_path())
+                .string() +
+            "\"");
 
-  createReflectionInfo(shaderBytes, description.path);
+  createReflectionInfo(shaderBytes);
 }
 
 VulkanShader::~VulkanShader() {
@@ -37,11 +41,11 @@ VulkanShader::~VulkanShader() {
   }
 }
 
-std::vector<char> VulkanShader::readShaderFile(const String &filepath) {
+std::vector<char> VulkanShader::readShaderFile(const Path &filepath) {
   std::ifstream file(filepath, std::ios::ate | std::ios::binary);
 
   LIQUID_ASSERT(file.is_open(),
-                "Failed to open shader file \"" + filepath + "\"");
+                "Failed to open shader file \"" + filepath.string() + "\"");
 
   std::streamsize fileSize = file.tellg();
   std::vector<char> buffer(fileSize);
@@ -54,14 +58,14 @@ std::vector<char> VulkanShader::readShaderFile(const String &filepath) {
   return buffer;
 }
 
-void VulkanShader::createReflectionInfo(const std::vector<char> &bytes,
-                                        const String &filepath) {
+void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
   SpvReflectShaderModule shaderReflectModule;
   SpvReflectResult result = spvReflectCreateShaderModule(
       bytes.size(), bytes.data(), &shaderReflectModule);
 
   LIQUID_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS,
-                "Failed to read reflection data from shader " + filepath);
+                "Failed to read reflection data from shader " +
+                    mPath.filename().string());
 
   mStage = static_cast<VkShaderStageFlagBits>(shaderReflectModule.shader_stage);
 

@@ -103,8 +103,8 @@ AssetData<MaterialAsset> createDefaultMaterial() {
 AssetData<FontAsset> createDefaultFont() {
   MsdfLoader loader;
 
-  auto font = loader.loadFontData(Path(Engine::getAssetsPath()) / "fonts" /
-                                  "Roboto-Regular.ttf");
+  auto font =
+      loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf");
 
   font.getData().path = "liquid::engine/fonts/Roboto-Regular.ttf";
   font.getData().relativePath = "liquid::engine/fonts/Roboto-Regular.ttf";

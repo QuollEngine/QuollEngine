@@ -6,8 +6,13 @@ namespace liquid {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 Engine Engine::engine;
 
-void Engine::setAssetsPath(const String &path) { engine.mAssetsPath = path; }
+void Engine::setPath(const Path &path) {
+  engine.mEnginePath = path;
+  engine.mAssetsPath = engine.mEnginePath / "assets";
+}
 
-const String &Engine::getAssetsPath() { return engine.mAssetsPath; }
+const Path Engine::getShadersPath() { return engine.mAssetsPath / "shaders"; }
+
+const Path Engine::getFontsPath() { return engine.mAssetsPath / "fonts"; }
 
 } // namespace liquid

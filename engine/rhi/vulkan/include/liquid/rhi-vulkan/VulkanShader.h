@@ -77,16 +77,14 @@ private:
    * @param filepath File path
    * @return Shader data in bytes
    */
-  static std::vector<char> readShaderFile(const String &filepath);
+  static std::vector<char> readShaderFile(const Path &filepath);
 
   /**
    * @brief Create reflection info
    *
    * @param bytes SpirV Bytes
-   * @param filepath File path
    */
-  void createReflectionInfo(const std::vector<char> &bytes,
-                            const String &filepath);
+  void createReflectionInfo(const std::vector<char> &bytes);
 
 private:
   VulkanDeviceObject &mDevice;
@@ -95,7 +93,7 @@ private:
   VkShaderStageFlagBits mStage = VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
 
   ReflectionData mReflectionData{};
-  String mPath;
+  Path mPath;
 };
 
 } // namespace liquid::rhi

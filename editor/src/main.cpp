@@ -9,7 +9,7 @@ int main() {
   static constexpr uint32_t InitialWidth = 1024;
   static constexpr uint32_t InitialHeight = 768;
 
-  liquid::Engine::setAssetsPath(liquid::Path("./engine/assets").string());
+  liquid::Engine::setPath(std::filesystem::current_path() / "engine");
 
   liquid::EventSystem eventSystem;
   liquid::Window window("Liquidator", InitialWidth, InitialHeight, eventSystem);
