@@ -3,6 +3,7 @@
 #include "EditorCamera.h"
 #include "EditorGrid.h"
 #include "EntityManager.h"
+#include "liquidator/core/TransformOperation.h"
 
 namespace liquidator {
 
@@ -130,12 +131,30 @@ public:
    */
   liquid::EnvironmentComponent &getEnvironment();
 
+  /**
+   * @brief Set transform operation
+   *
+   * @param transformOperation Transform operation
+   */
+  void setTransformOperation(TransformOperation transformOperation);
+
+  /**
+   * @brief Get transform operation
+   *
+   * @return Transform operation
+   */
+  TransformOperation getTransformOperation() const {
+    return mTransformOperation;
+  }
+
 private:
   EditorCamera &mEditorCamera;
   EditorGrid &mEditorGrid;
   std::filesystem::path mScenePath;
   EntityManager &mEntityManager;
   uint32_t mLastId = 1;
+
+  TransformOperation mTransformOperation = TransformOperation::Move;
 
   liquid::Entity mEnvironmentEntity = liquid::EntityNull;
   liquid::Entity mCameraEntity = liquid::EntityNull;

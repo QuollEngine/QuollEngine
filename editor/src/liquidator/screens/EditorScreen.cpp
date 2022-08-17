@@ -25,6 +25,7 @@
 #include "liquidator/ui/AssetLoadStatusDialog.h"
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/Widgets.h"
+#include "liquidator/ui/TransformOperationControl.h"
 
 #include "liquidator/core/EditorRenderer.h"
 #include "liquidator/core/EditorSimulator.h"
@@ -33,6 +34,25 @@
 #include "ImGuizmo.h"
 
 namespace liquidator {
+
+/**
+ * @brief Get imguizmo operation
+ *
+ * @param transformOperation Transform operation
+ * @return Imguizmo operation
+ */
+static ImGuizmo::OPERATION
+getImguizmoOperation(TransformOperation transformOperation) {
+  switch (transformOperation) {
+  case TransformOperation::Scale:
+    return ImGuizmo::SCALE;
+  case TransformOperation::Rotate:
+    return ImGuizmo::ROTATE;
+  case TransformOperation::Move:
+  default:
+    return ImGuizmo::TRANSLATE;
+  }
+}
 
 EditorScreen::EditorScreen(liquid::Window &window,
                            liquid::EventSystem &eventSystem,
@@ -212,6 +232,8 @@ void EditorScreen::start(const Project &project) {
 
       ImGui::SameLine();
 
+      TransformOperationControl(ui.getIconRegistry(), editorManager, IconSize);
+
       if (!editorManager.isUsingEditorCamera() &&
           ImGui::Button("Reset to editor camera")) {
         editorManager.switchToEditorCamera();
@@ -247,11 +269,12 @@ void EditorScreen::start(const Project &project) {
       auto gizmoPerspective = camera.projectionMatrix;
       gizmoPerspective[1][1] *= -1.0f;
 
-      if (ImGuizmo::Manipulate(glm::value_ptr(camera.viewMatrix),
-                               glm::value_ptr(gizmoPerspective),
-                               ImGuizmo::TRANSLATE, ImGuizmo::LOCAL,
-                               glm::value_ptr(worldTransform), nullptr, nullptr,
-                               nullptr)) {
+      if (ImGuizmo::Manipulate(
+              glm::value_ptr(camera.viewMatrix),
+              glm::value_ptr(gizmoPerspective),
+              getImguizmoOperation(editorManager.getTransformOperation()),
+              ImGuizmo::LOCAL, glm::value_ptr(worldTransform), nullptr, nullptr,
+              nullptr)) {
         entityManager.updateLocalTransformUsingWorld(selected, worldTransform);
       }
 

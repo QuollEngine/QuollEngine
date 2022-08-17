@@ -183,4 +183,9 @@ liquid::EnvironmentComponent &EditorManager::getEnvironment() {
       .getComponent<liquid::EnvironmentComponent>(mEnvironmentEntity);
 }
 
+void EditorManager::setTransformOperation(
+    TransformOperation transformOperation) {
+  mTransformOperation = transformOperation;
+}
+
 } // namespace liquidator

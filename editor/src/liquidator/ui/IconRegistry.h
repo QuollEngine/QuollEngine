@@ -1,5 +1,8 @@
 #pragma once
 
+#include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/ResourceRegistry.h"
+
 namespace liquidator {
 
 enum class EditorIcon {
@@ -20,7 +23,10 @@ enum class EditorIcon {
   Camera,
   Direction,
   Play,
-  Stop
+  Stop,
+  Move,
+  Rotate,
+  Scale
 };
 
 /**
@@ -46,7 +52,7 @@ public:
    * @param icon Icon enum
    * @return Texture handle for the icon
    */
-  inline liquid::rhi::TextureHandle getIcon(EditorIcon icon) {
+  inline liquid::rhi::TextureHandle getIcon(EditorIcon icon) const {
     return mIconMap.at(icon);
   }
 
