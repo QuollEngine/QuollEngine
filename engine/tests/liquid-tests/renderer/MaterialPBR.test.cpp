@@ -19,7 +19,7 @@ public:
 
 public:
   size_t size = 0;
-  void *data = data;
+  const void *data = nullptr;
 };
 
 class MockDevice : public liquid::rhi::RenderDevice {
@@ -39,11 +39,6 @@ public:
         "MockGPU", liquid::rhi::PhysicalDeviceType::Unknown, {}, {}};
   }
 
-  /**
-   * @brief Get device stats
-   *
-   * @return Device stats
-   */
   const liquid::rhi::DeviceStats &getDeviceStats() const { return stats; }
 
   void destroyResources() {}

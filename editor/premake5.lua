@@ -20,6 +20,8 @@ project "Liquidator"
         "glslc ../../editor/assets/shaders/mouse-picking.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking.vert.spv",
         "glslc ../../editor/assets/shaders/mouse-picking-skinned.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-skinned.vert.spv",
         "glslc ../../editor/assets/shaders/mouse-picking.frag -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking.frag.spv",
+        "glslc ../../editor/assets/shaders/collidable-shape.vert -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.vert.spv",
+        "glslc ../../editor/assets/shaders/collidable-shape.frag -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.frag.spv",
         "{MKDIR} %{cfg.buildtarget.directory}/assets/icons",
         "{COPYFILE} ../../editor/assets/icons/texture.png %{cfg.buildtarget.directory}/assets/icons/texture.png",
         "{COPYFILE} ../../editor/assets/icons/font.png %{cfg.buildtarget.directory}/assets/icons/font.png",

@@ -25,7 +25,7 @@ struct PhysicsMaterialDesc {
 /**
  * @brief Geometry types
  */
-enum class PhysicsGeometryType { Sphere, Plane, Capsule, Box };
+enum class PhysicsGeometryType { Box, Sphere, Capsule, Plane };
 
 /**
  * @brief Get physics geometry type string
@@ -35,14 +35,14 @@ enum class PhysicsGeometryType { Sphere, Plane, Capsule, Box };
  */
 inline String getPhysicsGeometryTypeString(PhysicsGeometryType type) {
   switch (type) {
-  case PhysicsGeometryType::Sphere:
-    return "sphere";
-  case PhysicsGeometryType::Plane:
-    return "plane";
-  case PhysicsGeometryType::Capsule:
-    return "capsule";
   case PhysicsGeometryType::Box:
     return "box";
+  case PhysicsGeometryType::Sphere:
+    return "sphere";
+  case PhysicsGeometryType::Capsule:
+    return "capsule";
+  case PhysicsGeometryType::Plane:
+    return "plane";
   default:
     return "unknown";
   }
@@ -107,7 +107,7 @@ struct PhysicsGeometryDesc {
   /**
    * Geometry parameters
    */
-  PhysicsGeometryParams params = PhysicsGeometryBox{{0.0f, 0.0f, 0.0f}};
+  PhysicsGeometryParams params = PhysicsGeometryBox{};
 };
 
 /**

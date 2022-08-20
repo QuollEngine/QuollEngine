@@ -30,6 +30,9 @@ EditorRendererStorage::EditorRendererStorage(liquid::rhi::RenderDevice *device,
   mGizmoTransformsBuffer = mDevice->createBuffer(
       {liquid::rhi::BufferType::Storage, sizeof(glm::mat4) * mReservedSpace,
        mGizmoTransforms.data()});
+
+  mCollidableEntityBuffer = mDevice->createBuffer(
+      {liquid::rhi::BufferType::Uniform, sizeof(CollidableEntity)});
 }
 
 void EditorRendererStorage::addSkeleton(
@@ -71,6 +74,8 @@ void EditorRendererStorage::updateBuffers() {
   }
 
   mGizmoTransformsBuffer.update(mGizmoTransforms.data());
+
+  mCollidableEntityBuffer.update(&mCollidableEntityParams);
 }
 
 void EditorRendererStorage::clear() {
@@ -79,6 +84,34 @@ void EditorRendererStorage::clear() {
   mNumBones.clear();
   mGizmoCounts.clear();
   mLastSkeleton = 0;
+
+  mCollidableEntity = liquid::EntityNull;
+}
+
+void EditorRendererStorage::setCollidable(
+    liquid::Entity entity, const liquid::CollidableComponent &collidable,
+    const liquid::WorldTransformComponent &worldTransform) {
+  mCollidableEntity = entity;
+  mCollidableEntityParams.worldTransform = worldTransform.worldTransform;
+  mCollidableEntityParams.type.x =
+      static_cast<uint32_t>(collidable.geometryDesc.type);
+
+  if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
+    const auto &params =
+        std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
+    mCollidableEntityParams.params = glm::vec4(params.halfExtents, 0.0f);
+  } else if (collidable.geometryDesc.type ==
+             liquid::PhysicsGeometryType::Sphere) {
+    const auto &params =
+        std::get<liquid::PhysicsGeometrySphere>(collidable.geometryDesc.params);
+    mCollidableEntityParams.params = glm::vec4(params.radius);
+  } else if (collidable.geometryDesc.type ==
+             liquid::PhysicsGeometryType::Capsule) {
+    const auto &params = std::get<liquid::PhysicsGeometryCapsule>(
+        collidable.geometryDesc.params);
+    mCollidableEntityParams.params =
+        glm::vec4(params.radius, params.halfHeight, 0.0f, 0.0f);
+  }
 }
 
 } // namespace liquidator

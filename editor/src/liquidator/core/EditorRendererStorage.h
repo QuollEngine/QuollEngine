@@ -7,6 +7,8 @@
 #include "liquid/scene/CameraComponent.h"
 #include "liquidator/editor-scene/EditorGrid.h"
 
+#include "liquid/entity/EntityDatabase.h"
+
 namespace liquidator {
 
 /**
@@ -22,6 +24,29 @@ class EditorRendererStorage {
    * @brief Default reserved space for buffers
    */
   static constexpr size_t DefaultReservedSpace = 2000;
+
+  /**
+   * @brief Collidable entity data for buffers
+   */
+  struct CollidableEntity {
+    /**
+     * @brief Entity world transform matrix
+     */
+    glm::mat4 worldTransform;
+
+    /**
+     * @brief Entity type
+     */
+    glm::uvec4 type;
+
+    /**
+     * @brief Collidable parameters
+     *
+     * Parameters differ between different
+     * shape types
+     */
+    glm::vec4 params;
+  };
 
 public:
   /**
@@ -139,6 +164,53 @@ public:
    */
   void clear();
 
+  /**
+   * @brief Set collidable entity
+   *
+   * @param entity Entity
+   * @param collidable Collidable component
+   * @param worldTransform World transform
+   */
+  void setCollidable(liquid::Entity entity,
+                     const liquid::CollidableComponent &collidable,
+                     const liquid::WorldTransformComponent &worldTransform);
+
+  /**
+   * @brief Get collidable parameters buffer
+   *
+   * @return Collidable parameters buffer handle
+   */
+  inline liquid::rhi::BufferHandle getCollidableParamsBuffer() const {
+    return mCollidableEntityBuffer.getHandle();
+  }
+
+  /**
+   * @brief Check if entity is set
+   *
+   * @retval true Collidable entity is set
+   * @retval false Collidable entity is not set
+   */
+  inline bool isCollidableEntitySelected() const {
+    return mCollidableEntity != liquid::EntityNull;
+  }
+
+  /**
+   * @brief Get render device
+   *
+   * @return Render device
+   */
+  inline liquid::rhi::RenderDevice *getRenderDevice() { return mDevice; }
+
+  /**
+   * @brief Get collidable shape type
+   *
+   * @return Collidable shape type
+   */
+  inline liquid::PhysicsGeometryType getCollidableShapeType() const {
+    return static_cast<liquid::PhysicsGeometryType>(
+        mCollidableEntityParams.type.x);
+  }
+
 private:
   size_t mReservedSpace = 0;
 
@@ -162,6 +234,12 @@ private:
   std::vector<glm::mat4> mGizmoTransforms;
   std::unordered_map<liquid::rhi::TextureHandle, uint32_t> mGizmoCounts;
   liquid::rhi::Buffer mGizmoTransformsBuffer;
+
+  // Collidable shape
+  liquid::Entity mCollidableEntity = liquid::EntityNull;
+  CollidableEntity mCollidableEntityParams{};
+
+  liquid::rhi::Buffer mCollidableEntityBuffer;
 
   liquid::rhi::RenderDevice *mDevice;
 };
