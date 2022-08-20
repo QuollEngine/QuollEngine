@@ -54,6 +54,11 @@ struct PipelineRasterizer {
    * Front face direction
    */
   FrontFace frontFace = FrontFace::Clockwise;
+
+  /**
+   * @brief Line width
+   */
+  float lineWidth = 1.0f;
 };
 
 enum class BlendFactor {

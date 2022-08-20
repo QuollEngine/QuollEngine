@@ -123,7 +123,7 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
       VulkanMapping::getCullMode(description.rasterizer.cullMode);
   rasterizer.frontFace =
       VulkanMapping::getFrontFace(description.rasterizer.frontFace);
-  rasterizer.lineWidth = 1.0f;
+  rasterizer.lineWidth = description.rasterizer.lineWidth;
   rasterizer.depthClampEnable = VK_FALSE;
   rasterizer.rasterizerDiscardEnable = VK_FALSE;
   rasterizer.depthBiasEnable = VK_FALSE;

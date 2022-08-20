@@ -42,7 +42,7 @@ struct BufferDescription {
   /**
    * Buffer data
    */
-  void *data = nullptr;
+  const void *data = nullptr;
 
   /**
    * @brief Buffer usage

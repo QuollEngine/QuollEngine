@@ -683,11 +683,9 @@ void EntityPanel::renderAddComponent(liquid::AssetRegistry &assetRegistry) {
     if (!mEntityManager.getActiveEntityDatabase()
              .has<liquid::CollidableComponent>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      static constexpr glm::vec3 DefaultValue(0.5f);
-
       mEntityManager.getActiveEntityDatabase().set<liquid::CollidableComponent>(
-          mSelectedEntity, {liquid::PhysicsGeometryType::Box,
-                            liquid::PhysicsGeometryBox{DefaultValue}});
+          mSelectedEntity,
+          {liquid::PhysicsGeometryType::Box, liquid::PhysicsGeometryBox{}});
       mEntityManager.save(mSelectedEntity);
     }
 

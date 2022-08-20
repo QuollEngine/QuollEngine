@@ -296,9 +296,10 @@ void EditorScreen::start(const Project &project) {
       imgui.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
                                     editorManager.getCamera());
-      editorRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
-                                     editorManager.getCamera(),
-                                     editorManager.getEditorGrid());
+      editorRenderer.updateFrameData(
+          entityManager.getActiveEntityDatabase(), editorManager.getCamera(),
+          editorManager.getEditorGrid(),
+          ui.getSceneHierarchyPanel().getSelectedEntity());
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();

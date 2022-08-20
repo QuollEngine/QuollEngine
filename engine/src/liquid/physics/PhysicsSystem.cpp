@@ -201,42 +201,45 @@ public:
    *
    * @param geometryDesc Geometry description
    * @param material Physx material
-   * @return
+   * @param worldTransform World transform
+   * @return PhysX shape
    */
   PxShape *createShape(const PhysicsGeometryDesc &geometryDesc,
-                       PxMaterial &material) {
+                       PxMaterial &material, const glm::mat4 &worldTransform) {
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(worldTransform, scale, rotation, translation, skew,
+                   perspective);
+
+    scale = glm::abs(scale);
 
     PxShape *shape = nullptr;
     if (geometryDesc.type == PhysicsGeometryType::Sphere) {
       const auto &[radius] =
           std::get<PhysicsGeometrySphere>(geometryDesc.params);
-      const auto &geometry = PxSphereGeometry(radius);
+      PxSphereGeometry geometry(std::max(scale.x, std::max(scale.y, scale.z)) *
+                                radius);
       shape = mPhysics->createShape(geometry, material, true);
-    }
-
-    if (geometryDesc.type == PhysicsGeometryType::Box) {
+    } else if (geometryDesc.type == PhysicsGeometryType::Box) {
       const auto &[halfExtents] =
           std::get<PhysicsGeometryBox>(geometryDesc.params);
-      const auto &geometry =
-          PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
+      PxBoxGeometry geometry(scale.x * halfExtents.x, scale.y * halfExtents.y,
+                             scale.z * halfExtents.z);
       shape = mPhysics->createShape(geometry, material, true);
-    }
-
-    /**
-     * @brief Send collision events
-     */
-    void sendCollisionEvents();
-
-    if (geometryDesc.type == PhysicsGeometryType::Capsule) {
+    } else if (geometryDesc.type == PhysicsGeometryType::Capsule) {
       const auto &[radius, halfHeight] =
           std::get<PhysicsGeometryCapsule>(geometryDesc.params);
-      const auto &geometry = PxCapsuleGeometry(radius, halfHeight);
+      PxCapsuleGeometry geometry(std::max(scale.x, scale.y) * radius,
+                                 scale.y * halfHeight);
       shape = mPhysics->createShape(geometry, material, true);
-    }
 
-    if (geometryDesc.type == PhysicsGeometryType::Plane) {
-      const auto &geometry = PxPlaneGeometry();
-      shape = mPhysics->createShape(geometry, material, true);
+      PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+      shape->setLocalPose(relativePose);
+    } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
+      shape = mPhysics->createShape(PxPlaneGeometry(), material, true);
     }
 
     return shape;
@@ -247,28 +250,43 @@ public:
    *
    * @param geometryDesc Geometry description
    * @param shape Physx shape
+   * @param worldTransform World transform
    */
   void updateShapeWithGeometryData(const PhysicsGeometryDesc &geometryDesc,
-                                   PxShape *shape) {
+                                   PxShape *shape,
+                                   const glm::mat4 &worldTransform) {
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+    glm::decompose(worldTransform, scale, rotation, translation, skew,
+                   perspective);
+
+    scale = glm::abs(scale);
+
     if (geometryDesc.type == PhysicsGeometryType::Sphere) {
       const auto &[radius] =
           std::get<PhysicsGeometrySphere>(geometryDesc.params);
-      const auto &geometry = PxSphereGeometry(radius);
+      PxSphereGeometry geometry(std::max(scale.x, std::max(scale.y, scale.z)) *
+                                radius);
       shape->setGeometry(geometry);
     } else if (geometryDesc.type == PhysicsGeometryType::Box) {
       const auto &[halfExtents] =
           std::get<PhysicsGeometryBox>(geometryDesc.params);
-      const auto &geometry =
-          PxBoxGeometry(halfExtents.x, halfExtents.y, halfExtents.z);
+      PxBoxGeometry geometry(scale.x * halfExtents.x, scale.y * halfExtents.y,
+                             scale.z * halfExtents.z);
       shape->setGeometry(geometry);
     } else if (geometryDesc.type == PhysicsGeometryType::Capsule) {
       const auto &[radius, halfHeight] =
           std::get<PhysicsGeometryCapsule>(geometryDesc.params);
-      const auto &geometry = PxCapsuleGeometry(radius, halfHeight);
+      PxCapsuleGeometry geometry(scale.x * radius, scale.y * halfHeight);
       shape->setGeometry(geometry);
+
+      PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+      shape->setLocalPose(relativePose);
     } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
-      const auto &geometry = PxPlaneGeometry();
-      shape->setGeometry(geometry);
+      shape->setGeometry(PxPlaneGeometry());
     }
   }
 
@@ -428,17 +446,20 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
               // Create or set shape
               if (!collidable.shape) {
                 collidable.shape = mImpl->createShape(collidable.geometryDesc,
-                                                      *collidable.material);
+                                                      *collidable.material,
+                                                      world.worldTransform);
 
                 collidable.material->release();
               } else if (PhysxMapping::getPhysxGeometryType(
                              collidable.geometryDesc.type) ==
                          collidable.shape->getGeometryType()) {
                 mImpl->updateShapeWithGeometryData(collidable.geometryDesc,
-                                                   collidable.shape);
+                                                   collidable.shape,
+                                                   world.worldTransform);
               } else {
                 auto *newShape = mImpl->createShape(collidable.geometryDesc,
-                                                    *collidable.material);
+                                                    *collidable.material,
+                                                    world.worldTransform);
 
                 if (entityDatabase.has<RigidBodyComponent>(entity)) {
                   RigidBodyComponent &rigidBody =
