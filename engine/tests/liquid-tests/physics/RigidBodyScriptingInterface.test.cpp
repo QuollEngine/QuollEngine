@@ -48,3 +48,20 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, ApplyTorqueSetsTorqueComponent) {
 
   EXPECT_EQ(torque, glm::vec3(2.5f, 3.5f, 1.2f));
 }
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       ClearDoesNothingIfProvidedArgumentsAreInvalid) {
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBodyClearComponent>(entity));
+
+  call(entity, "rigid_body_clear_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBodyClearComponent>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest, ClearSetsRigidBodyClearComponent) {
+  auto entity = entityDatabase.create();
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBodyClearComponent>(entity));
+
+  call(entity, "rigid_body_clear");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBodyClearComponent>(entity));
+}

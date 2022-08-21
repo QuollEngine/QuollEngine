@@ -25,6 +25,7 @@
 #include "liquid/physics/CollidableComponent.h"
 #include "liquid/physics/ForceComponent.h"
 #include "liquid/physics/TorqueComponent.h"
+#include "liquid/physics/RigidBodyClearComponent.h"
 #include "liquid/scripting/ScriptingComponent.h"
 #include "liquid/text/TextComponent.h"
 
@@ -58,6 +59,7 @@ using EntityDatabase = EntityStorageSparseSet<
     CollidableComponent,
     ForceComponent,
     TorqueComponent,
+    RigidBodyClearComponent,
     ScriptingComponent,
     TextComponent
 >;

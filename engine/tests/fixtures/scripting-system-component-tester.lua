@@ -190,6 +190,14 @@ function rigid_body_apply_torque_invalid()
     entity.rigid_body:apply_torque(1.0, 1.0, {})
 end
 
+function rigid_body_clear()
+    entity.rigid_body:clear()
+end
+
+function rigid_body_clear_invalid()
+    entity.rigid_body.clear()
+end
+
 -- Text
 text = ''
 

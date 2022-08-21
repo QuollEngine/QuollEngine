@@ -64,6 +64,8 @@ void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
       [this](auto entity, ScriptingComponent &scripting) {
         destroyScriptingData(scripting);
       });
+
+  entityDatabase.destroyComponents<ScriptingComponent>();
 }
 
 void ScriptingSystem::createScriptingData(ScriptingComponent &component,

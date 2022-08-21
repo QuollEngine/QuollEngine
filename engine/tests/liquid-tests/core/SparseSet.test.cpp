@@ -62,6 +62,21 @@ TEST_F(SparseSetTest, ErasesItemAtIndex) {
   }
 }
 
+TEST_F(SparseSetTest, OutOfOrderAddAndEraseDoesNotCauseInvalidState) {
+  for (uint32_t i = 0; i < NumItems; ++i) {
+    size_t index0 = sparseSet.insert(i);
+    size_t index1 = sparseSet.insert(NumItems + i);
+
+    sparseSet.erase(index0);
+    sparseSet.erase(index1);
+  }
+
+  for (uint32_t i = 0; i < NumItems; ++i) {
+    EXPECT_FALSE(sparseSet.contains(i));
+    EXPECT_FALSE(sparseSet.contains(NumItems + i));
+  }
+}
+
 TEST_F(SparseSetTest, FillsEmptyHolesOnInsertIfThereAreAny) {
   for (size_t i = 0; i < NumItems; ++i) {
     size_t index = sparseSet.insert(static_cast<uint32_t>(i) * 2);
