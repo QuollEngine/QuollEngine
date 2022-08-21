@@ -85,6 +85,13 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
 
   if (mRightClickedEntity == entity) {
     if (auto _ = widgets::ContextMenu()) {
+      StyleStack stack;
+      // TODO: Get default style instead
+      // of manually passing it
+      stack.pushStyle(ImGuiStyleVar_ItemSpacing,
+                      ImVec2(ImGui::GetStyle().ItemSpacing.x,
+                             ImGui::GetStyle().ItemSpacing.x));
+
       if (ImGui::MenuItem("Go to view")) {
         editorManager.moveCameraToEntity(entity);
       }

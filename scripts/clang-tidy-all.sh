@@ -55,19 +55,19 @@ VENDOR_INCLUDES="-isystem/usr/local/include -isystem./vendor/Debug/include -isys
 if [ $LINT_ENGINE -eq 1 ]; then
     print_info "Checking Engine files"
     $CMD -header-filter=.* --p=file --quiet $ENGINE_FILES -- --std=c++17 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/platform-tools/include
 fi
 
 if [ $LINT_RHI_CORE -eq 1 ]; then
     print_info "Checking RHICore files"
     $CMD -header-filter=.* --p=file --quiet $RHI_CORE_FILES -- --std=c++17 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi -isystem./engine/platform-tools/include
 fi
 
 if [ $LINT_RHI_VULKAN -eq 1 ]; then
     print_info "Checking RHIVulkan files"
     $CMD -header-filter=.* --p=file --quiet $RHI_VULKAN_FILES -- --std=c++17 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan -isystem./engine/platform-tools/include
 fi
 
 if [ $LINT_EDITOR -eq 1 ]; then

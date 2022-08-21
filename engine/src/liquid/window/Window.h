@@ -57,6 +57,18 @@ public:
   glm::uvec2 getWindowSize();
 
   /**
+   * @brief Set window size
+   *
+   * @param size Window size
+   */
+  void setWindowSize(const glm::uvec2 &size);
+
+  /**
+   * @brief Maximize window
+   */
+  void maximize();
+
+  /**
    * @brief Checks is window should close
    *
    * @retval true Window should close

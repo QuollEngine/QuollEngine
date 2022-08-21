@@ -118,8 +118,6 @@ void EditorScreen::start(const Project &project) {
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
 
-  mDevice->synchronize(renderer.getRegistry());
-
   liquidator::EditorRenderer editorRenderer(renderer.getRegistry(),
                                             renderer.getShaderLibrary(),
                                             ui.getIconRegistry(), mDevice);
@@ -170,6 +168,8 @@ void EditorScreen::start(const Project &project) {
 
   liquidator::EditorSimulator simulator(
       mEventSystem, mWindow, assetManager.getRegistry(), editorCamera);
+
+  mWindow.maximize();
 
   mainLoop.setUpdateFn(
       [&editorCamera, &entityManager, &simulator, this](float dt) mutable {
