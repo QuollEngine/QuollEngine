@@ -29,7 +29,7 @@ function linkDependenciesWithoutVulkan()
     }
 
     filter { "system:windows", "configurations:Debug" }
-        links { "yaml-cppd", "freetyped" }
+        links { "yaml-cppd", "freetyped", "dwmapi" }
 
     filter { "system:windows", "configurations:Release or configurations:Profile" }
         links { "yaml-cpp", "freetype" }

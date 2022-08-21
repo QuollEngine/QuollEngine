@@ -4,6 +4,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "liquid/platform-tools/NativeWindowTools.h"
+
 namespace liquid {
 
 Window::Window(StringView title, uint32_t width, uint32_t height,
@@ -25,6 +27,8 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
   mWindowInstance =
       glfwCreateWindow(static_cast<int>(width), static_cast<int>(height),
                        String(title).c_str(), nullptr, nullptr);
+
+  platform_tools::NativeWindowTools::enableDarkMode(mWindowInstance);
 
   LIQUID_ASSERT(mWindowInstance, "[GLFW] Failed to create windows");
 
@@ -174,5 +178,12 @@ bool Window::isKeyPressed(int key) const {
 }
 
 void Window::focus() { glfwFocusWindow(mWindowInstance); }
+
+void Window::setWindowSize(const glm::uvec2 &size) {
+  glfwSetWindowSize(mWindowInstance, static_cast<int>(size.x),
+                    static_cast<int>(size.y));
+}
+
+void Window::maximize() { glfwMaximizeWindow(mWindowInstance); }
 
 } // namespace liquid
