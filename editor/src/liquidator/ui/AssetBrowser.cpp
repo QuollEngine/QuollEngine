@@ -202,33 +202,11 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
     if (ImGui::BeginTable("CurrentDir", itemsPerRow,
                           ImGuiTableFlags_NoPadInnerX)) {
+      size_t i = 0;
 
-      size_t startIndex = 0;
-      if (mHasStagingEntry) {
-        startIndex = 1;
-
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, ItemHeight * 1.0f);
-        ImGui::TableNextColumn();
-
-        liquid::imgui::image(iconRegistry.getIcon(mStagingEntry.icon),
-                             IconSize);
-        ImGui::PushItemWidth(ItemWidth);
-
-        if (!mInitialFocusSet) {
-          ImGui::SetKeyboardFocusHere();
-          mInitialFocusSet = true;
-        }
-
-        ImguiInputText("###StagingEntryName", mStagingEntry.clippedName);
-
-        if (ImGui::IsItemDeactivatedAfterEdit()) {
-          handleCreateEntry();
-        }
-      }
-
-      for (size_t i = startIndex; i < mEntries.size(); ++i) {
+      for (; i < mEntries.size(); ++i) {
         const auto &entry = mEntries.at(i);
-        auto colIndex = (i % itemsPerRow);
+        auto colIndex = i % itemsPerRow;
         if (colIndex == 0) {
           ImGui::TableNextRow(ImGuiTableRowFlags_None, ItemHeight * 1.0f);
         }
@@ -291,6 +269,30 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
         renderEntry(entry);
       }
+
+      if (mHasStagingEntry) {
+        auto colIndex = i % itemsPerRow;
+        if (colIndex == 0) {
+          ImGui::TableNextRow(ImGuiTableRowFlags_None, ItemHeight * 1.0f);
+        }
+
+        ImGui::TableNextColumn();
+
+        liquid::imgui::image(iconRegistry.getIcon(mStagingEntry.icon),
+                             IconSize);
+        ImGui::PushItemWidth(ItemWidth);
+
+        if (!mInitialFocusSet) {
+          ImGui::SetKeyboardFocusHere();
+          mInitialFocusSet = true;
+        }
+
+        ImguiInputText("###StagingEntryName", mStagingEntry.clippedName);
+
+        if (ImGui::IsItemDeactivated()) {
+          handleCreateEntry();
+        }
+      }
       ImGui::TableNextRow();
     }
     ImGui::EndTable();
@@ -328,18 +330,21 @@ void AssetBrowser::handleAssetImport() {
 }
 
 void AssetBrowser::handleCreateEntry() {
-  auto path = mCurrentDirectory / mStagingEntry.clippedName;
-  path.replace_extension("lua");
-  if (mStagingEntry.isDirectory) {
-    std::filesystem::create_directory(path);
-  } else {
-    std::ofstream stream(path);
-    stream.close();
-    mOnCreateEntry(path);
+  if (!mStagingEntry.clippedName.empty()) {
+    auto path = mCurrentDirectory / mStagingEntry.clippedName;
+    if (mStagingEntry.isDirectory) {
+      std::filesystem::create_directory(path);
+    } else if (mStagingEntry.assetType == liquid::AssetType::LuaScript) {
+      path.replace_extension("lua");
+      std::ofstream stream(path);
+      stream.close();
+      mOnCreateEntry(path);
+    }
   }
 
   // Reset values and hide staging
   mStagingEntry.clippedName = "";
+  mStagingEntry.isDirectory = false;
   mHasStagingEntry = false;
   mInitialFocusSet = false;
 

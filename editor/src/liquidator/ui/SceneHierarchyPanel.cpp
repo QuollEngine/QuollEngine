@@ -4,6 +4,7 @@
 #include "ConfirmationDialog.h"
 #include "SceneHierarchyPanel.h"
 #include "Widgets.h"
+#include "StyleStack.h"
 
 namespace liquidator {
 
@@ -11,7 +12,18 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(EditorManager &editorManager) {
+  static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
+  static constexpr float TreeNodeIndentSpacing = 10.0f;
+
   if (auto _ = widgets::Window("Hierarchy")) {
+    StyleStack stack;
+    stack.pushColor(ImGuiCol_Header,
+                    ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered));
+    stack.pushStyle(ImGuiStyleVar_ItemSpacing,
+                    ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+    stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
+    stack.pushStyle(ImGuiStyleVar_IndentSpacing, TreeNodeIndentSpacing);
+
     auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
     entityDatabase.iterateEntities<liquid::LocalTransformComponent>(
@@ -53,6 +65,8 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   if (mSelectedEntity == entity) {
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
+
+  treeNodeFlags |= ImGuiTreeNodeFlags_FramePadding;
 
   ConfirmationDialog confirmDeleteSceneNode(
       "Delete entity", "Are you sure you want to delete node \"" + name + "\"?",

@@ -196,8 +196,10 @@ public:
    * @param y Viewport y position
    * @param width Viewport width
    * @param height Viewport height
+   * @param captureMouse Capture mouse for camera controls
    */
-  void setViewport(float x, float y, float width, float height);
+  void setViewport(float x, float y, float width, float height,
+                   bool captureMouse);
 
   /**
    * @brief Check if position is within viewport
@@ -251,6 +253,7 @@ private:
   float mY = 0.0f;
   float mWidth = 0.0f;
   float mHeight = 0.0f;
+  bool mCaptureMouse = false;
 
   InputState mInputState = InputState::None;
   glm::vec2 mPrevMousePos{};
