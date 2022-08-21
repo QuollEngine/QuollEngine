@@ -20,17 +20,11 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
 
   mMouseButtonPressHandler = mEventSystem.observe(
       liquid::MouseButtonEvent::Pressed, [this](const auto &data) {
-        if (data.button != GLFW_MOUSE_BUTTON_MIDDLE) {
+        if (data.button != GLFW_MOUSE_BUTTON_MIDDLE || !mCaptureMouse) {
           return;
         }
 
         const auto &cursorPos = mWindow.getCurrentMousePosition();
-
-        // Do not trigger action if cursor is outside
-        // Imgui window viewport
-        if (!isWithinViewport(cursorPos)) {
-          return;
-        }
 
         if (mWindow.isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
           mInputState = InputState::Pan;
@@ -86,6 +80,9 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
 
   mMouseScrollHandler = mEventSystem.observe(
       liquid::MouseScrollEvent::Scroll, [this](const auto &event) {
+        if (!mCaptureMouse)
+          return;
+
         const auto &pos = mWindow.getCurrentMousePosition();
         if (pos.x < mX || pos.x > mX + mWidth || pos.y < mY ||
             pos.y > mY + mHeight) {
@@ -216,11 +213,13 @@ void EditorCamera::zoom() {
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::setViewport(float x, float y, float width, float height) {
+void EditorCamera::setViewport(float x, float y, float width, float height,
+                               bool captureMouse) {
   mX = x;
   mY = y;
   mWidth = width;
   mHeight = height;
+  mCaptureMouse = captureMouse;
 }
 
 } // namespace liquidator

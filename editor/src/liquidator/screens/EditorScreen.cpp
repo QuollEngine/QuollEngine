@@ -180,20 +180,10 @@ void EditorScreen::start(const Project &project) {
         return true;
       });
 
-  bool mouseClicked = false;
-
-  mEventSystem.observe(liquid::MouseButtonEvent::Pressed,
-                       [&mouseClicked](auto &data) mutable {
-                         if (data.button == 0) {
-                           mouseClicked = true;
-                         }
-                       });
-
   mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, &simulator, &mouseClicked,
-                        &mousePicking, this]() {
+                        &editorRenderer, &simulator, &mousePicking, this]() {
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
     // TODO: Why is -2.0f needed here
@@ -242,6 +232,8 @@ void EditorScreen::start(const Project &project) {
       }
     }
 
+    bool mouseClicked = false;
+
     ui.render(editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
 
@@ -249,38 +241,42 @@ void EditorScreen::start(const Project &project) {
       const auto &pos = ImGui::GetItemRectMin();
       const auto &size = ImGui::GetItemRectSize();
 
-      editorManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y);
+      editorManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y,
+                                                  ImGui::IsItemHovered());
+
+      mouseClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
 
       const auto &editorCamera = editorManager.getEditorCamera();
 
       ImGuizmo::SetDrawlist();
       ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
-    }
 
-    if (ui.getSceneHierarchyPanel().isEntitySelected()) {
-      auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
-      const auto &world =
-          entityDatabase.get<liquid::WorldTransformComponent>(selected);
+      if (ui.getSceneHierarchyPanel().isEntitySelected()) {
+        auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
+        const auto &world =
+            entityDatabase.get<liquid::WorldTransformComponent>(selected);
 
-      auto worldTransform = world.worldTransform;
+        auto worldTransform = world.worldTransform;
 
-      const auto &camera = entityDatabase.get<liquid::CameraComponent>(
-          editorManager.getCamera());
+        const auto &camera = entityDatabase.get<liquid::CameraComponent>(
+            editorManager.getCamera());
 
-      auto gizmoPerspective = camera.projectionMatrix;
-      gizmoPerspective[1][1] *= -1.0f;
+        auto gizmoPerspective = camera.projectionMatrix;
+        gizmoPerspective[1][1] *= -1.0f;
 
-      if (ImGuizmo::Manipulate(
-              glm::value_ptr(camera.viewMatrix),
-              glm::value_ptr(gizmoPerspective),
-              getImguizmoOperation(editorManager.getTransformOperation()),
-              ImGuizmo::LOCAL, glm::value_ptr(worldTransform), nullptr, nullptr,
-              nullptr)) {
-        entityManager.updateLocalTransformUsingWorld(selected, worldTransform);
-      }
+        if (ImGuizmo::Manipulate(
+                glm::value_ptr(camera.viewMatrix),
+                glm::value_ptr(gizmoPerspective),
+                getImguizmoOperation(editorManager.getTransformOperation()),
+                ImGuizmo::LOCAL, glm::value_ptr(worldTransform), nullptr,
+                nullptr, nullptr)) {
+          entityManager.updateLocalTransformUsingWorld(selected,
+                                                       worldTransform);
+        }
 
-      if (ImGuizmo::IsOver()) {
-        mouseClicked = false;
+        if (ImGuizmo::IsOver()) {
+          mouseClicked = false;
+        }
       }
     }
 
