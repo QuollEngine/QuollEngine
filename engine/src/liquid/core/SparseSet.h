@@ -49,7 +49,8 @@ public:
       mEmptyData.pop_back();
     }
 
-    mDenseData.push_back(item);
+    mDenseData.push_back(newKey);
+    mRealData.push_back(item);
     mSparseData[newKey] = size() - 1;
 
     return newKey;
@@ -64,9 +65,20 @@ public:
     LIQUID_ASSERT(key < mSparseData.size(), "Index out of bounds");
 
     auto lastKey = size() - 1;
-    mSparseData[lastKey] = mSparseData[key];
+
+    // Copy last item to the deleted item
     mDenseData[mSparseData[key]] = mDenseData[lastKey];
+    mRealData[mSparseData[key]] = mRealData[lastKey];
+
+    // Update item's dense index
+    // in the sparse array
+    mSparseData[mDenseData[lastKey]] = mSparseData[key];
+
+    // Remove last item from dense arrays
     mDenseData.pop_back();
+    mRealData.pop_back();
+
+    // Set deleted item key to empty in sparse array
     mSparseData[key] = Empty;
 
     mEmptyData.push_back(key);
@@ -84,7 +96,7 @@ public:
 
     LIQUID_ASSERT(denseIndex != Empty, "No data at key");
 
-    return mDenseData.at(denseIndex);
+    return mRealData.at(denseIndex);
   }
 
   /**
@@ -99,7 +111,7 @@ public:
 
     LIQUID_ASSERT(denseIndex != Empty, "No data at key");
 
-    return mDenseData.at(denseIndex);
+    return mRealData.at(denseIndex);
   }
 
   /**
@@ -133,18 +145,19 @@ public:
    *
    * @return Begin iterator
    */
-  inline Iterator begin() { return mDenseData.begin(); }
+  inline Iterator begin() { return mRealData.begin(); }
 
   /**
    * @brief Get end iterator
    *
    * @return End iterator
    */
-  inline Iterator end() { return mDenseData.end(); }
+  inline Iterator end() { return mRealData.end(); }
 
 private:
-  std::vector<TData> mDenseData;
+  std::vector<size_t> mDenseData;
   std::vector<size_t> mSparseData;
+  std::vector<TData> mRealData;
   std::vector<size_t> mEmptyData;
 };
 

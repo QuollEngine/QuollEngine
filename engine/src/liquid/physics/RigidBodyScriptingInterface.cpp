@@ -62,4 +62,25 @@ int RigidBodyScriptingInterface::LuaInterface::applyTorque(void *state) {
   return 0;
 }
 
+int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    // TODO: Show logs here
+    return 0;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<uint32_t>();
+  scope.pop(1);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  entityDatabase.set<RigidBodyClearComponent>(entity, {});
+
+  return 0;
+}
+
 } // namespace liquid

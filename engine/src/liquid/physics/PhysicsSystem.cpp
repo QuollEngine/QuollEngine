@@ -536,6 +536,17 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
+    LIQUID_PROFILE_EVENT("Clear rigid body velocities");
+    entityDatabase.iterateEntities<RigidBodyClearComponent, RigidBodyComponent>(
+        [](auto entity, auto &, RigidBodyComponent &rigidBody) {
+          rigidBody.actor->setLinearVelocity(PxVec3(0.0f));
+          rigidBody.actor->setAngularVelocity(PxVec3(0.0f));
+        });
+
+    entityDatabase.destroyComponents<RigidBodyClearComponent>();
+  }
+
+  {
     LIQUID_PROFILE_EVENT("Apply forces");
 
     entityDatabase.iterateEntities<ForceComponent, RigidBodyComponent>(

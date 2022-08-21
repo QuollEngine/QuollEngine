@@ -9,7 +9,6 @@ namespace liquid {
 int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
     void *state) {
   LuaScope scope(state);
-  scope.stackDump();
 
   if (!scope.is<String>(1)) {
     scope.set(nullptr);

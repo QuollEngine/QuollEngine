@@ -35,11 +35,20 @@ public:
   static int applyTorque(void *state);
 
   /**
+   * @brief Clear force and torque
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int clear(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> Fields{
+  static constexpr std::array<InterfaceField, 3> Fields{
       InterfaceField{"apply_force", applyForce},
-      InterfaceField{"apply_torque", applyTorque}};
+      InterfaceField{"apply_torque", applyTorque},
+      InterfaceField{"clear", clear}};
 
   /**
    * @brief Get component name in scripts
