@@ -58,7 +58,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         graph.setFramebufferExtent({width, height});
       });
 
-  iconRegistry.loadIcons(renderer.getRegistry(),
+  iconRegistry.loadIcons(mDevice,
                          std::filesystem::current_path() / "assets" / "icons");
 
   mainLoop.setUpdateFn([&project, this](float dt) {

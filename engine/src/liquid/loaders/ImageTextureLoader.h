@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 
 namespace liquid {
 
@@ -14,9 +14,9 @@ public:
   /**
    * @brief Create image texture loader
    *
-   * @param registry Resource registry
+   * @param device Render device
    */
-  ImageTextureLoader(rhi::ResourceRegistry &registry);
+  ImageTextureLoader(rhi::RenderDevice *device);
 
   /**
    * @brief Load image from filename
@@ -27,7 +27,7 @@ public:
   rhi::TextureHandle loadFromFile(const String &filename);
 
 private:
-  rhi::ResourceRegistry &mRegistry;
+  rhi::RenderDevice *mDevice;
 };
 
 } // namespace liquid

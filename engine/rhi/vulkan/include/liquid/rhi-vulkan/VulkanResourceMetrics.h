@@ -31,6 +31,20 @@ public:
    */
   size_t getBuffersCount() const;
 
+  /**
+   * @brief Get size of all the textures
+   *
+   * @return Total texture size
+   */
+  size_t getTotalTextureSize() const;
+
+  /**
+   * @brief Get number of textures
+   *
+   * @return Number of textures
+   */
+  size_t getTexturesCount() const;
+
 private:
   VulkanResourceRegistry &mRegistry;
 };

@@ -154,33 +154,6 @@ public:
   }
 
   /**
-   * @brief Set texture
-   *
-   * @param description Texture description
-   * @param handle Texture handle
-   * @return Texture handle
-   */
-  TextureHandle setTexture(const TextureDescription &description,
-                           TextureHandle handle = TextureHandle::Invalid);
-
-  /**
-   * @brief Remove texture
-   *
-   * @param handle Texture handle
-   */
-  void deleteTexture(TextureHandle handle);
-
-  /**
-   * @brief Get texture map
-   *
-   * @return Texture map
-   */
-  inline ResourceRegistryMap<TextureHandle, TextureDescription> &
-  getTextureMap() {
-    return mTextures;
-  }
-
-  /**
    * @brief Set render pass
    *
    * @param description Render pass description

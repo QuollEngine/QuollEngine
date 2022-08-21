@@ -74,18 +74,14 @@ void ImguiDebugLayer::renderUsageMetrics() {
             mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
 
     // Textures
-    size_t textureSize = 0;
-    for (auto &[_, description] :
-         mResourceRegistry.getTextureMap().getDescriptions()) {
-      textureSize += description.size;
-    }
 
     renderTableRow(
         "Number of textures",
+        std::to_string(mDeviceStats.getResourceMetrics()->getTexturesCount()));
+    renderTableRow(
+        "Total size of allocated textures",
         std::to_string(
-            mResourceRegistry.getTextureMap().getDescriptions().size()));
-    renderTableRow("Total size of allocated textures",
-                   std::to_string(textureSize));
+            mDeviceStats.getResourceMetrics()->getTotalTextureSize()));
 
     // Draw calls
     renderTableRow("Number of draw calls",

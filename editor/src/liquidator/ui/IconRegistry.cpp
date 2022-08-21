@@ -1,14 +1,14 @@
 #include "liquid/core/Base.h"
-#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "liquid/loaders/ImageTextureLoader.h"
 
 #include "IconRegistry.h"
 
 namespace liquidator {
 
-void IconRegistry::loadIcons(liquid::rhi::ResourceRegistry &registry,
+void IconRegistry::loadIcons(liquid::rhi::RenderDevice *device,
                              const std::filesystem::path &iconsPath) {
-  liquid::ImageTextureLoader loader(registry);
+  liquid::ImageTextureLoader loader(device);
 
   mIconMap.insert_or_assign(
       EditorIcon::Unknown,

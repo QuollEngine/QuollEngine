@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderDevice.h"
+#include "liquid/rhi/RenderGraphEvaluator.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"

@@ -92,9 +92,26 @@ public:
    * @brief Create hardware buffer
    *
    * @param description Buffer description
-   * @return Buffer reference
+   * @return Buffer
    */
-  Buffer createBuffer(const BufferDescription &description);
+  Buffer createBuffer(const BufferDescription &description) override;
+
+  /**
+   * @brief Create texture
+   *
+   * @param description Texture description
+   * @return Texture
+   */
+  TextureHandle createTexture(const TextureDescription &description) override;
+
+  /**
+   * @brief Get texture description
+   *
+   * @param handle Texture handle
+   * @return Texture description
+   */
+  const TextureDescription
+  getTextureDescription(TextureHandle handle) const override;
 
 private:
   /**

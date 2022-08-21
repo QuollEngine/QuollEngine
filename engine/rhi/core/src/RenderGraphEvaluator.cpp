@@ -2,11 +2,13 @@
 #include "liquid/core/EngineGlobals.h"
 
 #include "RenderGraphEvaluator.h"
+#include "RenderDevice.h"
 
 namespace liquid::rhi {
 
-RenderGraphEvaluator::RenderGraphEvaluator(ResourceRegistry &registry)
-    : mRegistry(registry) {}
+RenderGraphEvaluator::RenderGraphEvaluator(ResourceRegistry &registry,
+                                           RenderDevice *device)
+    : mRegistry(registry), mDevice(device) {}
 
 void RenderGraphEvaluator::build(RenderGraph &graph) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::build");
@@ -122,8 +124,7 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
                                        const glm::uvec2 &extent) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::createAttachment");
   RenderPassAttachmentInfo info{};
-  const auto &desc =
-      mRegistry.getTextureMap().getDescription(renderTarget.texture);
+  const auto &desc = mDevice->getTextureDescription(renderTarget.texture);
 
   info.framebufferAttachments.push_back(renderTarget.texture);
 
@@ -153,7 +154,7 @@ bool RenderGraphEvaluator::hasSwapchainRelativeResources(
   for (auto rt : pass.getOutputs()) {
     auto handle = rt.texture;
     if (handle == TextureHandle(1) ||
-        mRegistry.getTextureMap().getDescription(handle).sizeMethod ==
+        mDevice->getTextureDescription(handle).sizeMethod ==
             TextureSizeMethod::FramebufferRatio) {
       return true;
     }

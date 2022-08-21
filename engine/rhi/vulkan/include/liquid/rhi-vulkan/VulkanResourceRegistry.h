@@ -18,18 +18,45 @@ class VulkanShader;
  * with a device
  */
 class VulkanResourceRegistry {
+
+  /**
+   * @brief Resource map for Vulkan resources
+   *
+   * @tparam THandle Handle
+   * @tparam TResource Resource
+   */
+  template <class THandle, class TResource> struct ResourceMap {
+    /**
+     * @brief Map type
+     */
+    using Map = std::unordered_map<THandle, std::unique_ptr<TResource>>;
+
+    /**
+     * @brief Map of handles and resources
+     */
+    Map map;
+
+    /**
+     * @brief Last handle
+     *
+     * Used for auto generation
+     */
+    uint32_t lastHandle = 1;
+  };
+
   template <class THandle, class TVulkanObject>
   using VulkanResourceMap =
       std::unordered_map<THandle, std::unique_ptr<TVulkanObject>>;
 
   using ShaderMap = VulkanResourceMap<ShaderHandle, VulkanShader>;
-  using BufferMap = VulkanResourceMap<BufferHandle, VulkanBuffer>;
-  using TextureMap = VulkanResourceMap<TextureHandle, VulkanTexture>;
   using RenderPassMap =
       VulkanResourceMap<rhi::RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap =
       VulkanResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
+
+  using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
+  using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
 
 public:
   /**
@@ -77,7 +104,7 @@ public:
    * @retval false Buffer does not exist
    */
   inline bool hasBuffer(BufferHandle handle) const {
-    return mBuffers.find(handle) != mBuffers.end();
+    return mBuffers.map.find(handle) != mBuffers.map.end();
   }
 
   /**
@@ -85,16 +112,24 @@ public:
    *
    * @return List of buffers
    */
-  inline const BufferMap &getBuffers() const { return mBuffers; }
+  inline const BufferMap::Map &getBuffers() const { return mBuffers.map; }
 
   /**
    * @brief Set texture
    *
+   * @param texture Vulkan texture
+   * @return New texture handle
+   */
+  TextureHandle setTexture(std::unique_ptr<VulkanTexture> &&texture);
+
+  /**
+   * @brief Recreate existing texture with new parameter
+   *
    * @param handle Texture handle
    * @param texture Vulkan texture
    */
-  void setTexture(TextureHandle handle,
-                  std::unique_ptr<VulkanTexture> &&texture);
+  void recreateTexture(TextureHandle handle,
+                       std::unique_ptr<VulkanTexture> &&texture);
 
   /**
    * @brief Delete texture
@@ -126,7 +161,7 @@ public:
    *
    * @return List of textures
    */
-  inline const TextureMap &getTextures() const { return mTextures; }
+  inline const TextureMap::Map &getTextures() const { return mTextures.map; }
 
   /**
    * @brief Set render pass
@@ -198,14 +233,13 @@ public:
   inline const PipelineMap &getPipelines() const { return mPipelines; }
 
 private:
-  ShaderMap mShaders;
+  BufferMap mBuffers;
   TextureMap mTextures;
+
+  ShaderMap mShaders;
   RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;
   PipelineMap mPipelines;
-
-  BufferMap mBuffers;
-  uint32_t mLastBuffer = 1;
 
   std::set<TextureHandle> mSwapchainRelativeTextures;
 };

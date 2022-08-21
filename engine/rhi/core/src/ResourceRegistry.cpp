@@ -12,16 +12,6 @@ void ResourceRegistry::deleteShader(ShaderHandle handle) {
   mShaders.deleteDescription(handle);
 }
 
-TextureHandle
-ResourceRegistry::setTexture(const TextureDescription &description,
-                             TextureHandle handle) {
-  return mTextures.setDescription(description, handle);
-}
-
-void ResourceRegistry::deleteTexture(TextureHandle handle) {
-  mTextures.deleteDescription(handle);
-}
-
 RenderPassHandle
 ResourceRegistry::setRenderPass(const RenderPassDescription &description,
                                 RenderPassHandle handle) {

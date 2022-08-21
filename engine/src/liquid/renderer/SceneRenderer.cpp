@@ -65,7 +65,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   shadowMapDesc.height = ShadowMapDimensions;
   shadowMapDesc.layers = NumLights;
   shadowMapDesc.format = VK_FORMAT_D16_UNORM;
-  auto shadowmap = mRegistry.setTexture(shadowMapDesc);
+  auto shadowmap = mDevice->createTexture(shadowMapDesc);
 
   rhi::TextureDescription sceneColorDesc{};
   sceneColorDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
@@ -74,7 +74,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
   sceneColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
-  auto sceneColor = mRegistry.setTexture(sceneColorDesc);
+  auto sceneColor = mDevice->createTexture(sceneColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
@@ -83,7 +83,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
-  auto depthBuffer = mRegistry.setTexture(depthBufferDesc);
+  auto depthBuffer = mDevice->createTexture(depthBufferDesc);
 
   {
     auto &pass = graph.addPass("shadowPass");

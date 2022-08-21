@@ -87,6 +87,7 @@ public:
   }
 
 private:
+  liquid::rhi::RenderDevice *mDevice = nullptr;
   liquid::rhi::ResourceRegistry &mResourceRegistry;
 
   liquid::rhi::RenderGraph mRenderGraph;

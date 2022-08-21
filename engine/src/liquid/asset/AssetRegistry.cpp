@@ -21,8 +21,7 @@ void AssetRegistry::createDefaultObjects() {
       mFonts.addAsset(default_objects::createDefaultFont());
 }
 
-void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
-                                           rhi::RenderDevice *device) {
+void AssetRegistry::syncWithDevice(rhi::RenderDevice *device) {
   LIQUID_PROFILE_EVENT("AssetRegistry::syncWithDevice");
 
   // Synchronize textures
@@ -43,7 +42,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
       description.size = texture.size;
       description.format = texture.data.format;
 
-      texture.data.deviceHandle = registry.setTexture(description);
+      texture.data.deviceHandle = device->createTexture(description);
     }
   }
 
@@ -60,7 +59,7 @@ void AssetRegistry::syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
                           rhi::TextureUsage::Sampled;
       description.format = VK_FORMAT_R8G8B8A8_SRGB;
 
-      font.data.deviceHandle = registry.setTexture(description);
+      font.data.deviceHandle = device->createTexture(description);
     }
   }
 

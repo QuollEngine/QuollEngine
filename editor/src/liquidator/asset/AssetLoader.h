@@ -22,11 +22,9 @@ public:
    * @brief Create asset loader
    *
    * @param assetManager Asset manager
-   * @param resourceRegistry Resource registry
    * @param device Render device
    */
   AssetLoader(liquid::AssetManager &assetManager,
-              liquid::rhi::ResourceRegistry &resourceRegistry,
               liquid::rhi::RenderDevice *device);
 
   /**
@@ -49,7 +47,6 @@ public:
 
 private:
   liquid::AssetManager &mAssetManager;
-  liquid::rhi::ResourceRegistry &mDeviceRegistry;
   liquid::platform_tools::NativeFileDialog mNativeFileDialog;
 
   liquid::rhi::RenderDevice *mDevice;

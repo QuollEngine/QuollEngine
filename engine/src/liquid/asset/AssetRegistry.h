@@ -76,13 +76,11 @@ public:
   }
 
   /**
-   * @brief Synchronize assets with device registry
+   * @brief Synchronize assets with device
    *
-   * @param registry Device registry
    * @param device Render device
    */
-  void syncWithDeviceRegistry(rhi::ResourceRegistry &registry,
-                              rhi::RenderDevice *device);
+  void syncWithDevice(rhi::RenderDevice *device);
 
   /**
    * @brief Get textures

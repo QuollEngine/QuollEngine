@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderGraphPass.h"
-#include "ResourceRegistry.h"
+#include "RenderDevice.h"
 
 namespace liquid::rhi {
 
@@ -24,9 +24,9 @@ public:
    * Topologically sorts and updates render
    * passes in place
    *
-   * @param resourceRegistry Resource registry
+   * @param device Render device
    */
-  void compile(ResourceRegistry &resourceRegistry);
+  void compile(RenderDevice *device);
 
   /**
    * @brief Get passes
