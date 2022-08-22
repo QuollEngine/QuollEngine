@@ -48,8 +48,6 @@ class VulkanResourceRegistry {
   using VulkanResourceMap =
       std::unordered_map<THandle, std::unique_ptr<TVulkanObject>>;
 
-  using RenderPassMap =
-      VulkanResourceMap<rhi::RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap =
       VulkanResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
@@ -57,6 +55,7 @@ class VulkanResourceRegistry {
   using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
+  using RenderPassMap = ResourceMap<RenderPassHandle, VulkanRenderPass>;
 
 public:
   /**
@@ -166,11 +165,11 @@ public:
   /**
    * @brief Set render pass
    *
-   * @param handle Render pass handle
    * @param renderPass Vulkan render pass
+   * @return New render pass handle
    */
-  void setRenderPass(rhi::RenderPassHandle handle,
-                     std::unique_ptr<VulkanRenderPass> &&renderPass);
+  RenderPassHandle
+  setRenderPass(std::unique_ptr<VulkanRenderPass> &&renderPass);
 
   /**
    * @brief Delete render pass
@@ -184,7 +183,9 @@ public:
    *
    * @return List of render passes
    */
-  inline const RenderPassMap &getRenderPasses() const { return mRenderPasses; }
+  inline const RenderPassMap::Map &getRenderPasses() const {
+    return mRenderPasses.map;
+  }
 
   /**
    * @brief Set framebuffer
@@ -237,8 +238,8 @@ private:
   TextureMap mTextures;
   ShaderMap mShaders;
   FramebufferMap mFramebuffers;
-
   RenderPassMap mRenderPasses;
+
   PipelineMap mPipelines;
 
   std::set<TextureHandle> mSwapchainRelativeTextures;

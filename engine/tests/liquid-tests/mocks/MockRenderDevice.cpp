@@ -54,3 +54,13 @@ const liquid::rhi::TextureDescription MockRenderDevice::getTextureDescription(
     liquid::rhi::TextureHandle handle) const {
   return mTextures.at(handle);
 }
+
+liquid::rhi::RenderPassHandle MockRenderDevice::createRenderPass(
+    const liquid::rhi::RenderPassDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::RenderPassHandle>();
+  mRenderPasses.insert_or_assign(handle, description);
+  return handle;
+}
+
+void MockRenderDevice::destroyRenderPass(
+    const liquid::rhi::RenderPassHandle handle) {}

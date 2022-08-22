@@ -128,34 +128,6 @@ private:
 class ResourceRegistry {
 public:
   /**
-   * @brief Set render pass
-   *
-   * @param description Render pass description
-   * @param handle Render pass handle
-   * @return Render pass handle
-   */
-  RenderPassHandle
-  setRenderPass(const RenderPassDescription &description,
-                RenderPassHandle handle = RenderPassHandle::Invalid);
-
-  /**
-   * @brief Remove render pass
-   *
-   * @param handle Render pass handle
-   */
-  void deleteRenderPass(RenderPassHandle handle);
-
-  /**
-   * @brief Get render pass map
-   *
-   * @return Render pass map
-   */
-  inline ResourceRegistryMap<RenderPassHandle, RenderPassDescription> &
-  getRenderPassMap() {
-    return mRenderPasses;
-  }
-
-  /**
    * @brief Set framebuffer
    *
    * @param description Render pass description
@@ -211,8 +183,6 @@ public:
   }
 
 private:
-  ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription>
-      mRenderPasses;
   ResourceRegistryMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
   ResourceRegistryMap<PipelineHandle, PipelineDescription> mPipelines;
 };

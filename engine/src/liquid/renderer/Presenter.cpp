@@ -32,7 +32,11 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   renderPassDescription.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
   renderPassDescription.attachments.push_back(attachment);
 
-  mPresentPass = mRegistry.setRenderPass(renderPassDescription, mPresentPass);
+  if (mPresentPass != rhi::RenderPassHandle::Invalid) {
+    mDevice->destroyRenderPass(mPresentPass);
+  }
+
+  mPresentPass = mDevice->createRenderPass(renderPassDescription);
 
   LOG_DEBUG("Present pass created");
 

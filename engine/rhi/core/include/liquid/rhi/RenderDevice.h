@@ -122,6 +122,22 @@ public:
    */
   virtual const TextureDescription
   getTextureDescription(TextureHandle handle) const = 0;
+
+  /**
+   * @brief Create render pass
+   *
+   * @param description Render pass description
+   * @return Render pass
+   */
+  virtual RenderPassHandle
+  createRenderPass(const RenderPassDescription &description) = 0;
+
+  /**
+   * @brief Destroy render pass
+   *
+   * @param handle Render pass handle
+   */
+  virtual void destroyRenderPass(RenderPassHandle handle) = 0;
 };
 
 } // namespace liquid::rhi

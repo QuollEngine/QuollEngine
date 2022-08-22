@@ -3,16 +3,6 @@
 
 namespace liquid::rhi {
 
-RenderPassHandle
-ResourceRegistry::setRenderPass(const RenderPassDescription &description,
-                                RenderPassHandle handle) {
-  return mRenderPasses.setDescription(description, handle);
-}
-
-void ResourceRegistry::deleteRenderPass(rhi::RenderPassHandle handle) {
-  mRenderPasses.deleteDescription(handle);
-}
-
 FramebufferHandle
 ResourceRegistry::setFramebuffer(const FramebufferDescription &description,
                                  FramebufferHandle handle) {
