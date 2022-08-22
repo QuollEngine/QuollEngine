@@ -64,3 +64,13 @@ liquid::rhi::RenderPassHandle MockRenderDevice::createRenderPass(
 
 void MockRenderDevice::destroyRenderPass(
     const liquid::rhi::RenderPassHandle handle) {}
+
+liquid::rhi::FramebufferHandle MockRenderDevice::createFramebuffer(
+    const liquid::rhi::FramebufferDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::FramebufferHandle>();
+  mFramebuffers.insert_or_assign(handle, description);
+  return handle;
+}
+
+void MockRenderDevice::destroyFramebuffer(
+    liquid::rhi::FramebufferHandle handle) {}

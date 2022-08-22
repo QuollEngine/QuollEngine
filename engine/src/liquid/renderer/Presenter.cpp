@@ -60,8 +60,8 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
   LOG_DEBUG("Present pipeline created");
 
-  for (size_t i = swapchain.textures.size(); i < mFramebuffers.size(); ++i) {
-    mRegistry.deleteFramebuffer(mFramebuffers.at(i));
+  for (auto fb : mFramebuffers) {
+    mDevice->destroyFramebuffer(fb);
   }
 
   mFramebuffers.resize(swapchain.textures.size());
@@ -74,8 +74,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     framebufferDescription.renderPass = mPresentPass;
     framebufferDescription.attachments = {swapchain.textures.at(i)};
 
-    mFramebuffers.at(i) =
-        mRegistry.setFramebuffer(framebufferDescription, mFramebuffers.at(i));
+    mFramebuffers.at(i) = mDevice->createFramebuffer(framebufferDescription);
   }
 
   LOG_DEBUG("Present framebuffers created");

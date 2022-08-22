@@ -48,14 +48,13 @@ class VulkanResourceRegistry {
   using VulkanResourceMap =
       std::unordered_map<THandle, std::unique_ptr<TVulkanObject>>;
 
-  using FramebufferMap =
-      VulkanResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
 
   using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
   using RenderPassMap = ResourceMap<RenderPassHandle, VulkanRenderPass>;
+  using FramebufferMap = ResourceMap<FramebufferHandle, VulkanFramebuffer>;
 
 public:
   /**
@@ -190,11 +189,11 @@ public:
   /**
    * @brief Set framebuffer
    *
-   * @param handle Framebuffer handle
    * @param framebuffer Vulkan framebuffer
+   * @return New framebuffer handle
    */
-  void setFramebuffer(FramebufferHandle handle,
-                      std::unique_ptr<VulkanFramebuffer> &&framebuffer);
+  FramebufferHandle
+  setFramebuffer(std::unique_ptr<VulkanFramebuffer> &&framebuffer);
 
   /**
    * @brief Delete framebuffer
@@ -208,7 +207,9 @@ public:
    *
    * @return List of framebuffers
    */
-  inline const FramebufferMap &getFramebuffers() const { return mFramebuffers; }
+  inline const FramebufferMap::Map &getFramebuffers() const {
+    return mFramebuffers.map;
+  }
 
   /**
    * @brief Set pipeline
@@ -237,8 +238,8 @@ private:
   BufferMap mBuffers;
   TextureMap mTextures;
   ShaderMap mShaders;
-  FramebufferMap mFramebuffers;
   RenderPassMap mRenderPasses;
+  FramebufferMap mFramebuffers;
 
   PipelineMap mPipelines;
 

@@ -11,8 +11,8 @@ namespace liquid::rhi {
 
 ShaderHandle
 VulkanResourceRegistry::setShader(std::unique_ptr<VulkanShader> &&shader) {
-  auto handle = ShaderHandle{mBuffers.lastHandle};
-  mBuffers.lastHandle++;
+  auto handle = ShaderHandle{mShaders.lastHandle};
+  mShaders.lastHandle++;
 
   mShaders.map.insert_or_assign(handle, std::move(shader));
   return handle;
@@ -72,7 +72,6 @@ RenderPassHandle VulkanResourceRegistry::setRenderPass(
     std::unique_ptr<VulkanRenderPass> &&renderPass) {
   auto handle = RenderPassHandle{mRenderPasses.lastHandle};
   mRenderPasses.lastHandle++;
-
   mRenderPasses.map.insert_or_assign(handle, std::move(renderPass));
 
   return handle;
@@ -82,14 +81,17 @@ void VulkanResourceRegistry::deleteRenderPass(RenderPassHandle handle) {
   mRenderPasses.map.erase(handle);
 }
 
-void VulkanResourceRegistry::setFramebuffer(
-    FramebufferHandle handle,
+FramebufferHandle VulkanResourceRegistry::setFramebuffer(
     std::unique_ptr<VulkanFramebuffer> &&framebuffer) {
-  mFramebuffers.insert_or_assign(handle, std::move(framebuffer));
+  auto handle = FramebufferHandle{mFramebuffers.lastHandle};
+  mFramebuffers.lastHandle++;
+  mFramebuffers.map.insert_or_assign(handle, std::move(framebuffer));
+
+  return handle;
 }
 
 void VulkanResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
-  mFramebuffers.erase(handle);
+  mFramebuffers.map.erase(handle);
 }
 
 void VulkanResourceRegistry::setPipeline(

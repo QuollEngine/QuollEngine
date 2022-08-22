@@ -137,6 +137,16 @@ void VulkanRenderDevice::destroyRenderPass(RenderPassHandle handle) {
   mRegistry.deleteRenderPass(handle);
 }
 
+FramebufferHandle VulkanRenderDevice::createFramebuffer(
+    const FramebufferDescription &description) {
+  return mRegistry.setFramebuffer(
+      std::make_unique<VulkanFramebuffer>(description, mDevice, mRegistry));
+}
+
+void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
+  mRegistry.deleteFramebuffer(handle);
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -162,21 +172,6 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::synchronize");
-
-  // Framebuffers
-  for (auto [handle, state] :
-       registry.getFramebufferMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-      mRegistry.setFramebuffer(
-          handle, std::make_unique<VulkanFramebuffer>(
-                      registry.getFramebufferMap().getDescription(handle),
-                      mDevice, mRegistry));
-    } else {
-      mRegistry.deleteFramebuffer(handle);
-    }
-  }
-
-  registry.getFramebufferMap().clearStagedResources();
 
   // Pipelines
   for (auto [handle, state] : registry.getPipelineMap().getStagedResources()) {

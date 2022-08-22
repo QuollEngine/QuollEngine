@@ -3,16 +3,6 @@
 
 namespace liquid::rhi {
 
-FramebufferHandle
-ResourceRegistry::setFramebuffer(const FramebufferDescription &description,
-                                 FramebufferHandle handle) {
-  return mFramebuffers.setDescription(description, handle);
-}
-
-void ResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
-  mFramebuffers.deleteDescription(handle);
-}
-
 PipelineHandle
 ResourceRegistry::setPipeline(const PipelineDescription &description,
                               PipelineHandle handle) {
