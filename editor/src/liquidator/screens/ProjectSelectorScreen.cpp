@@ -25,7 +25,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   liquid::Renderer renderer(assetRegistry, mWindow, mDevice);
   liquid::Presenter presenter(renderer.getShaderLibrary(),
-                              renderer.getRegistry());
+                              renderer.getRegistry(), mDevice);
 
   liquidator::ProjectManager projectManager;
 

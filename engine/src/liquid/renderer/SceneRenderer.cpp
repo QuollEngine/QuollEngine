@@ -17,36 +17,37 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
 
   mShaderLibrary.addShader(
       "__engine.geometry.default.vertex",
-      mRegistry.setShader({shadersPath / "geometry.vert.spv"}));
+      mDevice->createShader({shadersPath / "geometry.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.geometry.skinned.vertex",
-      mRegistry.setShader({shadersPath / "skinnedGeometry.vert.spv"}));
-  mShaderLibrary.addShader("__engine.pbr.default.fragment",
-                           mRegistry.setShader({shadersPath / "pbr.frag.spv"}));
+      mDevice->createShader({shadersPath / "skinnedGeometry.vert.spv"}));
+  mShaderLibrary.addShader(
+      "__engine.pbr.default.fragment",
+      mDevice->createShader({shadersPath / "pbr.frag.spv"}));
   mShaderLibrary.addShader(
       "__engine.skybox.default.vertex",
-      mRegistry.setShader({shadersPath / "skybox.vert.spv"}));
+      mDevice->createShader({shadersPath / "skybox.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.skybox.default.fragment",
-      mRegistry.setShader({shadersPath / "skybox.frag.spv"}));
+      mDevice->createShader({shadersPath / "skybox.frag.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.vertex",
-      mRegistry.setShader({shadersPath / "shadowmap.vert.spv"}));
+      mDevice->createShader({shadersPath / "shadowmap.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.skinned.vertex",
-      mRegistry.setShader({shadersPath / "skinnedShadowmap.vert.spv"}));
+      mDevice->createShader({shadersPath / "skinnedShadowmap.vert.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
-      mRegistry.setShader({shadersPath / "shadowmap.frag.spv"}));
+      mDevice->createShader({shadersPath / "shadowmap.frag.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.text.default.vertex",
-      mRegistry.setShader({shadersPath / "text.vert.spv"}));
+      mDevice->createShader({shadersPath / "text.vert.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.text.default.fragment",
-      mRegistry.setShader({shadersPath / "text.frag.spv"}));
+      mDevice->createShader({shadersPath / "text.frag.spv"}));
 }
 
 void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {

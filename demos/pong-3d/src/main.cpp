@@ -23,7 +23,8 @@ public:
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
         renderer(assetManager.getRegistry(), window,
                  backend.createDefaultDevice()),
-        presenter(renderer.getShaderLibrary(), renderer.getRegistry()),
+        presenter(renderer.getShaderLibrary(), renderer.getRegistry(),
+                  renderer.getRenderDevice()),
         physicsSystem(eventSystem),
         assetManager(std::filesystem::current_path(), true),
         scriptingSystem(eventSystem, assetManager.getRegistry()) {

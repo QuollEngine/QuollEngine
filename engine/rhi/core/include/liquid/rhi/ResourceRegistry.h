@@ -128,32 +128,6 @@ private:
 class ResourceRegistry {
 public:
   /**
-   * @brief Set shader
-   *
-   * @param description Shader description
-   * @param handle Shader handle
-   * @return Shader handle
-   */
-  ShaderHandle setShader(const ShaderDescription &description,
-                         ShaderHandle handle = ShaderHandle::Invalid);
-
-  /**
-   * @brief Delete shader
-   *
-   * @param handle Shader handle
-   */
-  void deleteShader(ShaderHandle handle);
-
-  /**
-   * @brief Get shader map
-   *
-   * @return Shader map
-   */
-  inline ResourceRegistryMap<ShaderHandle, ShaderDescription> &getShaderMap() {
-    return mShaders;
-  }
-
-  /**
    * @brief Set render pass
    *
    * @param description Render pass description
@@ -237,8 +211,6 @@ public:
   }
 
 private:
-  ResourceRegistryMap<ShaderHandle, ShaderDescription> mShaders;
-  ResourceRegistryMap<TextureHandle, TextureDescription> mTextures;
   ResourceRegistryMap<rhi::RenderPassHandle, RenderPassDescription>
       mRenderPasses;
   ResourceRegistryMap<FramebufferHandle, FramebufferDescription> mFramebuffers;

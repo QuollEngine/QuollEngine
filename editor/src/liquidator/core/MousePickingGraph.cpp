@@ -15,14 +15,13 @@ MousePickingGraph::MousePickingGraph(
 
   shaderLibrary.addShader(
       "mouse-picking.default.vertex",
-      resourceRegistry.setShader({"assets/shaders/mouse-picking.vert.spv"}));
+      mDevice->createShader({"assets/shaders/mouse-picking.vert.spv"}));
   shaderLibrary.addShader(
       "mouse-picking.skinned.vertex",
-      resourceRegistry.setShader(
-          {"assets/shaders/mouse-picking-skinned.vert.spv"}));
+      mDevice->createShader({"assets/shaders/mouse-picking-skinned.vert.spv"}));
   shaderLibrary.addShader(
       "mouse-picking.selector.fragment",
-      resourceRegistry.setShader({"assets/shaders/mouse-picking.frag.spv"}));
+      mDevice->createShader({"assets/shaders/mouse-picking.frag.spv"}));
 
   liquid::rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
