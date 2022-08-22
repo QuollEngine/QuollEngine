@@ -36,7 +36,12 @@ public:
   liquid::rhi::RenderPassHandle
   createRenderPass(const liquid::rhi::RenderPassDescription &description);
 
-  void destroyRenderPass(const liquid::rhi::RenderPassHandle handle);
+  void destroyRenderPass(liquid::rhi::RenderPassHandle handle);
+
+  liquid::rhi::FramebufferHandle
+  createFramebuffer(const liquid::rhi::FramebufferDescription &description);
+
+  void destroyFramebuffer(liquid::rhi::FramebufferHandle handle);
 
   inline const MockBuffer &getBuffer(liquid::rhi::BufferHandle handle) {
     return mBuffers.at(handle);
@@ -52,16 +57,16 @@ private:
 private:
   std::unordered_map<liquid::rhi::ShaderHandle, liquid::rhi::ShaderDescription>
       mShaders;
-
   std::unordered_map<liquid::rhi::BufferHandle, MockBuffer> mBuffers;
-
   std::unordered_map<liquid::rhi::TextureHandle,
                      liquid::rhi::TextureDescription>
       mTextures;
-
   std::unordered_map<liquid::rhi::RenderPassHandle,
                      liquid::rhi::RenderPassDescription>
       mRenderPasses;
+  std::unordered_map<liquid::rhi::FramebufferHandle,
+                     liquid::rhi::FramebufferDescription>
+      mFramebuffers;
 
   uint32_t mLastHandle = 1;
 

@@ -138,6 +138,22 @@ public:
    * @param handle Render pass handle
    */
   virtual void destroyRenderPass(RenderPassHandle handle) = 0;
+
+  /**
+   * @brief Create framebuffer
+   *
+   * @param description Framebuffer description
+   * @return Framebuffer
+   */
+  virtual FramebufferHandle
+  createFramebuffer(const FramebufferDescription &description) = 0;
+
+  /**
+   * @brief Destroy framebuffer
+   *
+   * @param handle Framebuffer handle
+   */
+  virtual void destroyFramebuffer(FramebufferHandle handle) = 0;
 };
 
 } // namespace liquid::rhi

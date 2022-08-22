@@ -128,34 +128,6 @@ private:
 class ResourceRegistry {
 public:
   /**
-   * @brief Set framebuffer
-   *
-   * @param description Render pass description
-   * @param handle Framebuffer handle
-   * @return Framebuffer handle
-   */
-  FramebufferHandle
-  setFramebuffer(const FramebufferDescription &description,
-                 FramebufferHandle handle = FramebufferHandle::Invalid);
-
-  /**
-   * @brief Remove framebuffer
-   *
-   * @param handle Render pass handle
-   */
-  void deleteFramebuffer(FramebufferHandle handle);
-
-  /**
-   * @brief Get framebuffer map
-   *
-   * @return Framebuffer map
-   */
-  inline ResourceRegistryMap<FramebufferHandle, FramebufferDescription> &
-  getFramebufferMap() {
-    return mFramebuffers;
-  }
-
-  /**
    * @brief Set pipeline
    *
    * @param description Render pass description
@@ -183,7 +155,6 @@ public:
   }
 
 private:
-  ResourceRegistryMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
   ResourceRegistryMap<PipelineHandle, PipelineDescription> mPipelines;
 };
 

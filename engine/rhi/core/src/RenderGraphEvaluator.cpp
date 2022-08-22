@@ -104,8 +104,11 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
     framebufferDesc.attachments = framebufferAttachments;
     framebufferDesc.renderPass = pass.mRenderPass;
 
-    pass.mFramebuffer =
-        mRegistry.setFramebuffer(framebufferDesc, pass.mFramebuffer);
+    if (pass.mFramebuffer != FramebufferHandle::Invalid) {
+      mDevice->destroyFramebuffer(pass.mFramebuffer);
+    }
+
+    pass.mFramebuffer = mDevice->createFramebuffer(framebufferDesc);
 
     pass.mDimensions.x = width;
     pass.mDimensions.y = height;

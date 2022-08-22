@@ -137,6 +137,22 @@ public:
    */
   void destroyRenderPass(RenderPassHandle handle) override;
 
+  /**
+   * @brief Create framebuffer
+   *
+   * @param description Framebuffer description
+   * @return Framebuffer
+   */
+  FramebufferHandle
+  createFramebuffer(const FramebufferDescription &description) override;
+
+  /**
+   * @brief Destroy framebuffer
+   *
+   * @param handle Framebuffer handle
+   */
+  void destroyFramebuffer(FramebufferHandle handle) override;
+
 private:
   /**
    * @brief Recreate swapchain
