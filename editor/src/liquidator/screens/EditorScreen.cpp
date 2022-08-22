@@ -73,7 +73,7 @@ void EditorScreen::start(const Project &project) {
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.preloadAssets(renderer.getRegistry(), mDevice);
+  auto res = assetManager.preloadAssets(mDevice);
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
   preloadStatusDialog.setMessages(res.getWarnings());
 
@@ -106,17 +106,15 @@ void EditorScreen::start(const Project &project) {
   editorManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::AssetLoader assetLoader(assetManager, renderer.getRegistry(),
-                                      mDevice);
+  liquidator::AssetLoader assetLoader(assetManager, mDevice);
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                                      mDevice->getDeviceStats(),
                                      renderer.getRegistry(), fpsCounter);
 
   liquidator::UIRoot ui(entityManager, assetLoader);
-  ui.getIconRegistry().loadIcons(renderer.getRegistry(),
-                                 std::filesystem::current_path() / "assets" /
-                                     "icons");
+  ui.getIconRegistry().loadIcons(mDevice, std::filesystem::current_path() /
+                                              "assets" / "icons");
 
   liquidator::EditorRenderer editorRenderer(renderer.getRegistry(),
                                             renderer.getShaderLibrary(),

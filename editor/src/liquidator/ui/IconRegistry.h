@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/ResourceRegistry.h"
+#include "liquid/rhi/RenderDevice.h"
 
 namespace liquidator {
 
@@ -40,10 +40,10 @@ public:
   /**
    * @brief Load icons from path
    *
-   * @param registry Resource registry
+   * @param device Render device
    * @param iconsPath Path to icons
    */
-  void loadIcons(liquid::rhi::ResourceRegistry &registry,
+  void loadIcons(liquid::rhi::RenderDevice *device,
                  const std::filesystem::path &iconsPath);
 
   /**

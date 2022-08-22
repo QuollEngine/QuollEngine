@@ -34,7 +34,7 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
   output.push_back(inputs.at(index));
 }
 
-void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
+void RenderGraph::compile(RenderDevice *device) {
   if (!mDirty)
     return;
 
@@ -180,8 +180,7 @@ void RenderGraph::compile(ResourceRegistry &resourceRegistry) {
       VkAccessFlags srcAccess = 0;
       VkAccessFlags dstAccess = 0;
 
-      auto &texture =
-          resourceRegistry.getTextureMap().getDescription(output.texture);
+      auto &texture = device->getTextureDescription(output.texture);
       if ((texture.usage & TextureUsage::Color) == TextureUsage::Color) {
         output.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         stage = StageColor;

@@ -1,14 +1,17 @@
 #pragma once
 
-#include "liquid/rhi/PhysicalDeviceInformation.h"
+#include "PhysicalDeviceInformation.h"
 
 #include "DeviceStats.h"
-#include "RenderGraph.h"
-#include "RenderGraphEvaluator.h"
-#include "Swapchain.h"
 #include "RenderFrame.h"
 #include "Buffer.h"
+#include "Swapchain.h"
+
 #include "BufferDescription.h"
+#include "TextureDescription.h"
+#include "ShaderDescription.h"
+
+#include "ResourceRegistry.h"
 
 namespace liquid::rhi {
 
@@ -93,6 +96,24 @@ public:
    * @return Buffer
    */
   virtual Buffer createBuffer(const BufferDescription &description) = 0;
+
+  /**
+   * @brief Create texture
+   *
+   * @param description Texture description
+   * @return Texture
+   */
+  virtual TextureHandle
+  createTexture(const TextureDescription &description) = 0;
+
+  /**
+   * @brief Get texture description
+   *
+   * @param handle Texture handle
+   * @return Texture description
+   */
+  virtual const TextureDescription
+  getTextureDescription(TextureHandle handle) const = 0;
 };
 
 } // namespace liquid::rhi

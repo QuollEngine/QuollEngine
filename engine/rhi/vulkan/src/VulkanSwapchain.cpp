@@ -103,9 +103,6 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
   }
 
   mTextures.resize(images.size());
-  for (size_t i = 0; i < mTextures.size(); ++i) {
-    mTextures.at(i) = static_cast<TextureHandle>(i + 1);
-  }
 
   for (size_t i = 0; i < mTextures.size(); ++i) {
     VkImage image = images.at(i);
@@ -132,10 +129,9 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
         vkCreateImageView(mDevice, &createInfo, nullptr, &imageView),
         "Failed to create image views for swapchain");
 
-    mRegistry.setTexture(mTextures.at(i),
-                         std::make_unique<VulkanTexture>(
-                             image, imageView, VK_NULL_HANDLE,
-                             mSurfaceFormat.format, allocator, mDevice));
+    mTextures.at(i) = mRegistry.setTexture(std::make_unique<VulkanTexture>(
+        image, imageView, VK_NULL_HANDLE, mSurfaceFormat.format, allocator,
+        mDevice));
   }
 
   LOG_DEBUG("[Vulkan] Swapchain created (" << mTextures.size() << " images)");

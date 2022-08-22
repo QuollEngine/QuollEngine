@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RenderCommandList.h"
+
 namespace liquid::rhi {
 
 /**

@@ -109,6 +109,18 @@ Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
   return Buffer{handle, mRegistry.getBuffers().at(handle).get()};
 }
 
+TextureHandle
+VulkanRenderDevice::createTexture(const TextureDescription &description) {
+  return mRegistry.setTexture(
+      std::make_unique<VulkanTexture>(description, mAllocator, mDevice,
+                                      mUploadContext, mSwapchain.getExtent()));
+}
+
+const TextureDescription
+VulkanRenderDevice::getTextureDescription(TextureHandle handle) const {
+  return mRegistry.getTextures().at(handle)->getDescription();
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -125,10 +137,10 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
 
   for (auto handle : mRegistry.getSwapchainRelativeTextures()) {
     auto &texture = mRegistry.getTextures().at(handle);
-    mRegistry.setTexture(handle,
-                         std::make_unique<VulkanTexture>(
-                             texture->getDescription(), mAllocator, mDevice,
-                             mUploadContext, mSwapchain.getExtent()));
+    mRegistry.recreateTexture(handle, std::make_unique<VulkanTexture>(
+                                          texture->getDescription(), mAllocator,
+                                          mDevice, mUploadContext,
+                                          mSwapchain.getExtent()));
   }
 }
 
@@ -146,21 +158,6 @@ void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   }
 
   registry.getShaderMap().clearStagedResources();
-
-  // Textures
-  for (auto [handle, state] : registry.getTextureMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-      mRegistry.setTexture(handle,
-                           std::make_unique<VulkanTexture>(
-                               registry.getTextureMap().getDescription(handle),
-                               mAllocator, mDevice, mUploadContext,
-                               mSwapchain.getExtent()));
-    } else {
-      mRegistry.deleteTexture(handle);
-    }
-  }
-
-  registry.getTextureMap().clearStagedResources();
 
   // Render passes
   for (auto [handle, state] :

@@ -14,14 +14,14 @@ namespace liquid {
 
 Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
                    rhi::RenderDevice *device)
-    : mGraphEvaluator(mRegistry), mDevice(device),
+    : mGraphEvaluator(mRegistry, device), mDevice(device),
       mImguiRenderer(window, mShaderLibrary, mRegistry, device),
       mAssetRegistry(assetRegistry),
       mSceneRenderer(mShaderLibrary, mRegistry, mAssetRegistry, device) {}
 
 void Renderer::render(rhi::RenderGraph &graph,
                       rhi::RenderCommandList &commandList) {
-  graph.compile(mRegistry);
+  graph.compile(mDevice);
 
   mGraphEvaluator.build(graph);
 

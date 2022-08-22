@@ -55,8 +55,6 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 }
 
 ImguiRenderer::~ImguiRenderer() {
-  mRegistry.deleteTexture(mFontTexture);
-
   mFrameData.clear();
 
   ImGui_ImplGlfw_Shutdown();
@@ -76,7 +74,7 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
-  auto imgui = mRegistry.setTexture(imguiDesc);
+  auto imgui = mDevice->createTexture(imguiDesc);
 
   auto &pass = graph.addPass("imgui");
   pass.write(imgui, mClearColor);
@@ -320,7 +318,7 @@ void ImguiRenderer::buildFonts() {
     description.format = VK_FORMAT_R8G8B8A8_SRGB;
     description.data = pixels;
 
-    mFontTexture = mRegistry.setTexture(description);
+    mFontTexture = mDevice->createTexture(description);
   }
 
   io.Fonts->SetTexID(

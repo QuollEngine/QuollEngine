@@ -8,8 +8,9 @@ MousePickingGraph::MousePickingGraph(
     liquid::ShaderLibrary &shaderLibrary,
     const liquid::RenderStorage &renderStorage,
     liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device)
-    : mResourceRegistry(resourceRegistry), mRenderStorage(renderStorage),
-      mAssetRegistry(assetRegistry), mGraphEvaluator(resourceRegistry) {
+    : mResourceRegistry(resourceRegistry), mDevice(device),
+      mRenderStorage(renderStorage), mAssetRegistry(assetRegistry),
+      mGraphEvaluator(resourceRegistry, device) {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
@@ -31,7 +32,7 @@ MousePickingGraph::MousePickingGraph(
   depthBufferDesc.height = FramebufferSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
-  auto depthBuffer = mResourceRegistry.setTexture(depthBufferDesc);
+  auto depthBuffer = mDevice->createTexture(depthBufferDesc);
 
   liquid::Entity nullEntity{0};
   mSelectedEntityBuffer = device->createBuffer(
@@ -197,7 +198,7 @@ MousePickingGraph::MousePickingGraph(
 MousePickingGraph::~MousePickingGraph() {}
 
 void MousePickingGraph::compile() {
-  mRenderGraph.compile(mResourceRegistry);
+  mRenderGraph.compile(mDevice);
   mGraphEvaluator.build(mRenderGraph);
 }
 

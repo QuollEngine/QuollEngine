@@ -28,8 +28,7 @@ public:
         assetManager(std::filesystem::current_path(), true),
         scriptingSystem(eventSystem, assetManager.getRegistry()) {
 
-    assetManager.preloadAssets(renderer.getRegistry(),
-                               renderer.getRenderDevice());
+    assetManager.preloadAssets(renderer.getRenderDevice());
 
     for (auto &[handle, mesh] :
          assetManager.getRegistry().getMeshes().getAssets()) {
