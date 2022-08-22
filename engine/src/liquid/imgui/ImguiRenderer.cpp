@@ -42,10 +42,10 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 
   mShaderLibrary.addShader(
       "__engine.imgui.default.vertex",
-      mRegistry.setShader({Engine::getShadersPath() / "imgui.vert.spv"}));
+      mDevice->createShader({Engine::getShadersPath() / "imgui.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.imgui.default.fragment",
-      mRegistry.setShader({Engine::getShadersPath() / "imgui.frag.spv"}));
+      mDevice->createShader({Engine::getShadersPath() / "imgui.frag.spv"}));
 
   for (auto &x : mFrameData) {
     x.vertexBuffer =

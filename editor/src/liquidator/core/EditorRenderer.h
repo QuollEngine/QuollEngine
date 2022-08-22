@@ -75,6 +75,7 @@ private:
 private:
   EditorRendererStorage mRenderStorage;
   liquid::rhi::ResourceRegistry &mRegistry;
+  liquid::rhi::RenderDevice *mDevice;
   liquid::ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;
   liquid::Entity mSelectedEntity = liquid::EntityNull;

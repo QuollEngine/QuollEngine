@@ -48,13 +48,13 @@ class VulkanResourceRegistry {
   using VulkanResourceMap =
       std::unordered_map<THandle, std::unique_ptr<TVulkanObject>>;
 
-  using ShaderMap = VulkanResourceMap<ShaderHandle, VulkanShader>;
   using RenderPassMap =
       VulkanResourceMap<rhi::RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap =
       VulkanResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = VulkanResourceMap<PipelineHandle, VulkanPipeline>;
 
+  using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
 
@@ -62,10 +62,10 @@ public:
   /**
    * @brief Set shader
    *
-   * @param handle Shader handle
    * @param shader Vulkan shader
+   * @return New shader handle
    */
-  void setShader(ShaderHandle handle, std::unique_ptr<VulkanShader> &&shader);
+  ShaderHandle setShader(std::unique_ptr<VulkanShader> &&shader);
 
   /**
    * @brief Delete shader
@@ -79,7 +79,7 @@ public:
    *
    * @return List of shaders
    */
-  inline const ShaderMap &getShaders() const { return mShaders; }
+  inline const ShaderMap::Map &getShaders() const { return mShaders.map; }
 
   /**
    * @brief Set buffer
@@ -235,10 +235,10 @@ public:
 private:
   BufferMap mBuffers;
   TextureMap mTextures;
-
   ShaderMap mShaders;
-  RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;
+
+  RenderPassMap mRenderPasses;
   PipelineMap mPipelines;
 
   std::set<TextureHandle> mSwapchainRelativeTextures;

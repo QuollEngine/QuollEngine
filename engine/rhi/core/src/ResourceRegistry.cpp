@@ -3,15 +3,6 @@
 
 namespace liquid::rhi {
 
-ShaderHandle ResourceRegistry::setShader(const ShaderDescription &description,
-                                         ShaderHandle handle) {
-  return mShaders.setDescription(description, handle);
-}
-
-void ResourceRegistry::deleteShader(ShaderHandle handle) {
-  mShaders.deleteDescription(handle);
-}
-
 RenderPassHandle
 ResourceRegistry::setRenderPass(const RenderPassDescription &description,
                                 RenderPassHandle handle) {

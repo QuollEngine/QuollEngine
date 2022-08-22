@@ -89,6 +89,14 @@ public:
   void synchronize(ResourceRegistry &registry) override;
 
   /**
+   * @brief Create shader
+   *
+   * @param description Shader description
+   * @return Shader
+   */
+  ShaderHandle createShader(const ShaderDescription &description) override;
+
+  /**
    * @brief Create hardware buffer
    *
    * @param description Buffer description

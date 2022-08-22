@@ -19,8 +19,10 @@ public:
    *
    * @param shaderLibrary Shader library
    * @param registry Resource registry
+   * @param device Render device
    */
-  Presenter(ShaderLibrary &shaderLibrary, rhi::ResourceRegistry &registry);
+  Presenter(ShaderLibrary &shaderLibrary, rhi::ResourceRegistry &registry,
+            rhi::RenderDevice *device);
 
   /**
    * @brief Update framebuffers
@@ -41,6 +43,7 @@ public:
 
 private:
   rhi::ResourceRegistry &mRegistry;
+  rhi::RenderDevice *mDevice;
   ShaderLibrary &mShaderLibrary;
   rhi::RenderPassHandle mPresentPass = rhi::RenderPassHandle::Invalid;
   rhi::PipelineHandle mPresentPipeline = rhi::PipelineHandle::Invalid;

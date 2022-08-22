@@ -90,6 +90,14 @@ public:
   virtual Swapchain getSwapchain() = 0;
 
   /**
+   * @brief Create shader
+   *
+   * @param description Shader description
+   * @return Shader
+   */
+  virtual ShaderHandle createShader(const ShaderDescription &description) = 0;
+
+  /**
    * @brief Create hardware buffer
    *
    * @param description Buffer description

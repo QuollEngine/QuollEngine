@@ -2,19 +2,20 @@
 #include "liquid/core/EngineGlobals.h"
 #include "liquid/core/Engine.h"
 #include "liquid/rhi/Descriptor.h"
+#include "liquid/rhi/RenderDevice.h"
 #include "Presenter.h"
 
 namespace liquid {
 
 Presenter::Presenter(ShaderLibrary &shaderLibrary,
-                     rhi::ResourceRegistry &registry)
-    : mRegistry(registry), mShaderLibrary(shaderLibrary) {
+                     rhi::ResourceRegistry &registry, rhi::RenderDevice *device)
+    : mRegistry(registry), mShaderLibrary(shaderLibrary), mDevice(device) {
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
-                           mRegistry.setShader({Engine::getShadersPath() /
-                                                "fullscreenQuad.vert.spv"}));
+                           mDevice->createShader({Engine::getShadersPath() /
+                                                  "fullscreenQuad.vert.spv"}));
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
-                           mRegistry.setShader({Engine::getShadersPath() /
-                                                "fullscreenQuad.frag.spv"}));
+                           mDevice->createShader({Engine::getShadersPath() /
+                                                  "fullscreenQuad.frag.spv"}));
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {

@@ -9,13 +9,17 @@
 
 namespace liquid::rhi {
 
-void VulkanResourceRegistry::setShader(ShaderHandle handle,
-                                       std::unique_ptr<VulkanShader> &&shader) {
-  mShaders.insert_or_assign(handle, std::move(shader));
+ShaderHandle
+VulkanResourceRegistry::setShader(std::unique_ptr<VulkanShader> &&shader) {
+  auto handle = ShaderHandle{mBuffers.lastHandle};
+  mBuffers.lastHandle++;
+
+  mShaders.map.insert_or_assign(handle, std::move(shader));
+  return handle;
 }
 
 void VulkanResourceRegistry::deleteShader(ShaderHandle handle) {
-  mShaders.erase(handle);
+  mShaders.map.erase(handle);
 }
 
 BufferHandle

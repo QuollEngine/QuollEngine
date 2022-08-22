@@ -9,7 +9,7 @@ EditorRenderer::EditorRenderer(liquid::rhi::ResourceRegistry &registry,
                                IconRegistry &iconRegistry,
                                liquid::rhi::RenderDevice *device)
     : mRegistry(registry), mIconRegistry(iconRegistry),
-      mShaderLibrary(shaderLibrary), mRenderStorage(device) {
+      mShaderLibrary(shaderLibrary), mRenderStorage(device), mDevice(device) {
 
   createCollidableShapes();
 
@@ -18,30 +18,30 @@ EditorRenderer::EditorRenderer(liquid::rhi::ResourceRegistry &registry,
 
   mShaderLibrary.addShader(
       "editor-grid.vert",
-      registry.setShader({shadersPath / "editor-grid.vert.spv"}));
+      mDevice->createShader({shadersPath / "editor-grid.vert.spv"}));
   mShaderLibrary.addShader(
       "editor-grid.frag",
-      registry.setShader({shadersPath / "editor-grid.frag.spv"}));
+      mDevice->createShader({shadersPath / "editor-grid.frag.spv"}));
   mShaderLibrary.addShader(
       "skeleton-lines.vert",
-      registry.setShader({shadersPath / "skeleton-lines.vert.spv"}));
+      mDevice->createShader({shadersPath / "skeleton-lines.vert.spv"}));
   mShaderLibrary.addShader(
       "skeleton-lines.frag",
-      registry.setShader({shadersPath / "skeleton-lines.frag.spv"}));
+      mDevice->createShader({shadersPath / "skeleton-lines.frag.spv"}));
 
   mShaderLibrary.addShader(
       "object-icons.vert",
-      registry.setShader({shadersPath / "object-icons.vert.spv"}));
+      mDevice->createShader({shadersPath / "object-icons.vert.spv"}));
   mShaderLibrary.addShader(
       "object-icons.frag",
-      registry.setShader({shadersPath / "object-icons.frag.spv"}));
+      mDevice->createShader({shadersPath / "object-icons.frag.spv"}));
 
   mShaderLibrary.addShader(
       "collidable-shape.vert",
-      registry.setShader({shadersPath / "collidable-shape.vert.spv"}));
+      mDevice->createShader({shadersPath / "collidable-shape.vert.spv"}));
   mShaderLibrary.addShader(
       "collidable-shape.frag",
-      registry.setShader({shadersPath / "collidable-shape.frag.spv"}));
+      mDevice->createShader({shadersPath / "collidable-shape.frag.spv"}));
 }
 
 liquid::rhi::RenderGraphPass &

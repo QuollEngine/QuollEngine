@@ -69,7 +69,7 @@ void EditorScreen::start(const Project &project) {
   liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
 
   liquid::Presenter presenter(renderer.getShaderLibrary(),
-                              renderer.getRegistry());
+                              renderer.getRegistry(), mDevice);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 

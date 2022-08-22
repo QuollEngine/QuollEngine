@@ -109,6 +109,12 @@ Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
   return Buffer{handle, mRegistry.getBuffers().at(handle).get()};
 }
 
+ShaderHandle
+VulkanRenderDevice::createShader(const ShaderDescription &description) {
+  return mRegistry.setShader(
+      std::make_unique<VulkanShader>(description, mDevice));
+}
+
 TextureHandle
 VulkanRenderDevice::createTexture(const TextureDescription &description) {
   return mRegistry.setTexture(
@@ -146,18 +152,6 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::synchronize");
-  // Shaders
-  for (auto [handle, state] : registry.getShaderMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-      mRegistry.setShader(
-          handle, std::make_unique<VulkanShader>(
-                      registry.getShaderMap().getDescription(handle), mDevice));
-    } else {
-      mRegistry.deleteShader(handle);
-    }
-  }
-
-  registry.getShaderMap().clearStagedResources();
 
   // Render passes
   for (auto [handle, state] :
