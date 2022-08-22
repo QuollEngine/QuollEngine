@@ -121,6 +121,22 @@ public:
   const TextureDescription
   getTextureDescription(TextureHandle handle) const override;
 
+  /**
+   * @brief Create render pass
+   *
+   * @param description Render pass description
+   * @return Render pass
+   */
+  RenderPassHandle
+  createRenderPass(const RenderPassDescription &description) override;
+
+  /**
+   * @brief Destroy render pass
+   *
+   * @param handle Render pass handle
+   */
+  void destroyRenderPass(RenderPassHandle handle) override;
+
 private:
   /**
    * @brief Recreate swapchain

@@ -88,8 +88,11 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
 
     bool renderPassExists = isHandleValid(pass.mRenderPass);
 
-    pass.mRenderPass =
-        mRegistry.setRenderPass(renderPassDesc, pass.mRenderPass);
+    if (pass.mRenderPass != RenderPassHandle::Invalid) {
+      mDevice->destroyRenderPass(pass.mRenderPass);
+    }
+
+    pass.mRenderPass = mDevice->createRenderPass(renderPassDesc);
 
     std::vector<FramebufferHandle> framebuffers(framebufferAttachments.size(),
                                                 FramebufferHandle::Invalid);

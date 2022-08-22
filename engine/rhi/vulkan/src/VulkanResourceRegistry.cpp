@@ -68,14 +68,18 @@ void VulkanResourceRegistry::deleteDanglingSwapchainRelativeTextures() {
   }
 }
 
-void VulkanResourceRegistry::setRenderPass(
-    rhi::RenderPassHandle handle,
+RenderPassHandle VulkanResourceRegistry::setRenderPass(
     std::unique_ptr<VulkanRenderPass> &&renderPass) {
-  mRenderPasses.insert_or_assign(handle, std::move(renderPass));
+  auto handle = RenderPassHandle{mRenderPasses.lastHandle};
+  mRenderPasses.lastHandle++;
+
+  mRenderPasses.map.insert_or_assign(handle, std::move(renderPass));
+
+  return handle;
 }
 
 void VulkanResourceRegistry::deleteRenderPass(RenderPassHandle handle) {
-  mRenderPasses.erase(handle);
+  mRenderPasses.map.erase(handle);
 }
 
 void VulkanResourceRegistry::setFramebuffer(

@@ -127,6 +127,16 @@ VulkanRenderDevice::getTextureDescription(TextureHandle handle) const {
   return mRegistry.getTextures().at(handle)->getDescription();
 }
 
+RenderPassHandle
+VulkanRenderDevice::createRenderPass(const RenderPassDescription &description) {
+  return mRegistry.setRenderPass(
+      std::make_unique<VulkanRenderPass>(description, mDevice, mRegistry));
+}
+
+void VulkanRenderDevice::destroyRenderPass(RenderPassHandle handle) {
+  mRegistry.deleteRenderPass(handle);
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -152,21 +162,6 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
 
 void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::synchronize");
-
-  // Render passes
-  for (auto [handle, state] :
-       registry.getRenderPassMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-      mRegistry.setRenderPass(
-          handle, std::make_unique<VulkanRenderPass>(
-                      registry.getRenderPassMap().getDescription(handle),
-                      mDevice, mRegistry));
-    } else {
-      mRegistry.deleteRenderPass(handle);
-    }
-  }
-
-  registry.getRenderPassMap().clearStagedResources();
 
   // Framebuffers
   for (auto [handle, state] :
