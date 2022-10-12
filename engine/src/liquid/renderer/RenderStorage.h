@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/asset/MeshAsset.h"
 #include "liquid/entity/Entity.h"

@@ -14,10 +14,10 @@ namespace liquid {
 
 Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
                    rhi::RenderDevice *device)
-    : mGraphEvaluator(mRegistry, device), mDevice(device),
-      mImguiRenderer(window, mShaderLibrary, mRegistry, device),
+    : mGraphEvaluator(device), mDevice(device),
+      mImguiRenderer(window, mShaderLibrary, device),
       mAssetRegistry(assetRegistry),
-      mSceneRenderer(mShaderLibrary, mRegistry, mAssetRegistry, device) {}
+      mSceneRenderer(mShaderLibrary, mAssetRegistry, device) {}
 
 void Renderer::render(rhi::RenderGraph &graph,
                       rhi::RenderCommandList &commandList) {
@@ -25,7 +25,6 @@ void Renderer::render(rhi::RenderGraph &graph,
 
   mGraphEvaluator.build(graph);
 
-  mDevice->synchronize(mRegistry);
   mGraphEvaluator.execute(commandList, graph);
 }
 

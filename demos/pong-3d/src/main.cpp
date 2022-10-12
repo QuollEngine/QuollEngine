@@ -23,8 +23,7 @@ public:
       : window("Pong 3D", 800, 600, eventSystem), backend(window),
         renderer(assetManager.getRegistry(), window,
                  backend.createDefaultDevice()),
-        presenter(renderer.getShaderLibrary(), renderer.getRegistry(),
-                  renderer.getRenderDevice()),
+        presenter(renderer.getShaderLibrary(), renderer.getRenderDevice()),
         physicsSystem(eventSystem),
         assetManager(std::filesystem::current_path(), true),
         scriptingSystem(eventSystem, assetManager.getRegistry()) {
@@ -57,9 +56,9 @@ public:
       graph.setFramebufferExtent({width, height});
     });
 
-    liquid::SceneRenderer sceneRenderer(
-        renderer.getShaderLibrary(), renderer.getRegistry(),
-        assetManager.getRegistry(), renderer.getRenderDevice());
+    liquid::SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
+                                        assetManager.getRegistry(),
+                                        renderer.getRenderDevice());
 
     sceneRenderer.setClearColor(glm::vec4(0.46f, 0.60f, 0.70f, 1.0f));
 

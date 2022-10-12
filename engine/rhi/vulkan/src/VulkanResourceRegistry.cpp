@@ -94,13 +94,16 @@ void VulkanResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
   mFramebuffers.map.erase(handle);
 }
 
-void VulkanResourceRegistry::setPipeline(
-    PipelineHandle handle, std::unique_ptr<VulkanPipeline> &&pipeline) {
-  mPipelines.insert_or_assign(handle, std::move(pipeline));
+PipelineHandle VulkanResourceRegistry::setPipeline(
+    std::unique_ptr<VulkanPipeline> &&pipeline) {
+  auto handle = PipelineHandle{mPipelines.lastHandle};
+  mPipelines.lastHandle++;
+  mPipelines.map.insert_or_assign(handle, std::move(pipeline));
+  return handle;
 }
 
 void VulkanResourceRegistry::deletePipeline(PipelineHandle handle) {
-  mPipelines.erase(handle);
+  mPipelines.map.erase(handle);
 }
 
 } // namespace liquid::rhi

@@ -70,13 +70,6 @@ public:
   inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
 
   /**
-   * @brief Get resource registry
-   *
-   * @return Resource registry
-   */
-  inline rhi::ResourceRegistry &getRegistry() { return mRegistry; }
-
-  /**
    * @brief Get render device
    *
    * @return Render device
@@ -111,7 +104,6 @@ public:
   inline void wait() { mDevice->waitForIdle(); }
 
 private:
-  rhi::ResourceRegistry mRegistry;
   rhi::RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
   ShaderLibrary mShaderLibrary;

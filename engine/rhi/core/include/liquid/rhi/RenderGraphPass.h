@@ -5,6 +5,8 @@
 #include "liquid/rhi/RenderPassDescription.h"
 #include "liquid/rhi/RenderCommandList.h"
 
+#include "RenderGraphRegistry.h"
+
 namespace liquid::rhi {
 
 class RenderGraphEvaluator;
@@ -84,7 +86,8 @@ struct RenderGraphPassBarrier {
  * @brief Render graph pass
  */
 class RenderGraphPass {
-  using ExecutorFn = std::function<void(RenderCommandList &)>;
+  using ExecutorFn =
+      std::function<void(RenderCommandList &, const RenderGraphRegistry &)>;
   friend RenderGraph;
   friend RenderGraphEvaluator;
 
@@ -163,9 +166,10 @@ public:
   /**
    * @brief Add pipeline
    *
-   * @param handle Pipeline handle
+   * @param description Pipeline description
+   * @return Virtual pipeline handle
    */
-  void addPipeline(PipelineHandle handle);
+  VirtualPipelineHandle addPipeline(const PipelineDescription &description);
 
   /**
    * @brief Get pass name
@@ -256,6 +260,8 @@ private:
   rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
   FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
   glm::uvec3 mDimensions{};
+
+  RenderGraphRegistry mRegistry;
 
   String mName;
 };

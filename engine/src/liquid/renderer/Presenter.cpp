@@ -7,9 +7,8 @@
 
 namespace liquid {
 
-Presenter::Presenter(ShaderLibrary &shaderLibrary,
-                     rhi::ResourceRegistry &registry, rhi::RenderDevice *device)
-    : mRegistry(registry), mShaderLibrary(shaderLibrary), mDevice(device) {
+Presenter::Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device)
+    : mShaderLibrary(shaderLibrary), mDevice(device) {
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
                            mDevice->createShader({Engine::getShadersPath() /
                                                   "fullscreenQuad.vert.spv"}));
@@ -55,8 +54,11 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   pipelineDescription.colorBlend.attachments = {
       liquid::rhi::PipelineColorBlendAttachment{}};
 
-  mPresentPipeline =
-      mRegistry.setPipeline(pipelineDescription, mPresentPipeline);
+  if (mPresentPipeline != rhi::PipelineHandle::Invalid) {
+    mDevice->destroyPipeline(mPresentPipeline);
+  }
+
+  mPresentPipeline = mDevice->createPipeline(pipelineDescription);
 
   LOG_DEBUG("Present pipeline created");
 

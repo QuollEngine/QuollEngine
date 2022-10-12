@@ -4,12 +4,11 @@
 
 namespace liquidator {
 
-EditorRenderer::EditorRenderer(liquid::rhi::ResourceRegistry &registry,
-                               liquid::ShaderLibrary &shaderLibrary,
+EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
                                IconRegistry &iconRegistry,
                                liquid::rhi::RenderDevice *device)
-    : mRegistry(registry), mIconRegistry(iconRegistry),
-      mShaderLibrary(shaderLibrary), mRenderStorage(device), mDevice(device) {
+    : mIconRegistry(iconRegistry), mShaderLibrary(shaderLibrary),
+      mRenderStorage(device), mDevice(device) {
 
   createCollidableShapes();
 
@@ -48,7 +47,7 @@ liquid::rhi::RenderGraphPass &
 EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
   auto &pass = graph.addPass("editor-debug");
 
-  auto editorGridPipeline = mRegistry.setPipeline(
+  auto vEditorGridPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("editor-grid.vert"),
        mShaderLibrary.getShader("editor-grid.frag"),
        {},
@@ -64,7 +63,7 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
                liquid::rhi::BlendFactor::DstAlpha,
                liquid::rhi::BlendOp::Add}}}});
 
-  auto skeletonLinesPipeline = mRegistry.setPipeline(
+  auto vSkeletonLinesPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("skeleton-lines.vert"),
        mShaderLibrary.getShader("skeleton-lines.frag"),
        {},
@@ -81,7 +80,7 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
                liquid::rhi::BlendFactor::DstAlpha,
                liquid::rhi::BlendOp::Add}}}});
 
-  auto objectIconsPipeline = mRegistry.setPipeline(
+  auto vObjectIconsPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("object-icons.vert"),
        mShaderLibrary.getShader("object-icons.frag"),
        {},
@@ -100,7 +99,7 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
 
   static const float WireframeLineHeight = 3.0f;
 
-  auto collidableShapePipeline = mRegistry.setPipeline(
+  auto vCollidableShapePipeline = pass.addPipeline(
       {mShaderLibrary.getShader("collidable-shape.vert"),
        mShaderLibrary.getShader("collidable-shape.frag"),
        liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
@@ -117,14 +116,15 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
                liquid::rhi::BlendFactor::DstAlpha,
                liquid::rhi::BlendOp::Add}}}});
 
-  pass.addPipeline(editorGridPipeline);
-  pass.addPipeline(skeletonLinesPipeline);
-  pass.addPipeline(objectIconsPipeline);
-  pass.addPipeline(collidableShapePipeline);
+  pass.setExecutor([vEditorGridPipeline, vSkeletonLinesPipeline,
+                    vObjectIconsPipeline, vCollidableShapePipeline,
+                    this](liquid::rhi::RenderCommandList &commandList,
+                          const liquid::rhi::RenderGraphRegistry &registry) {
+    auto collidableShapePipeline = registry.get(vCollidableShapePipeline);
+    auto skeletonLinesPipeline = registry.get(vSkeletonLinesPipeline);
+    auto objectIconsPipeline = registry.get(vObjectIconsPipeline);
+    auto editorGridPipeline = registry.get(vEditorGridPipeline);
 
-  pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
-                    objectIconsPipeline, collidableShapePipeline,
-                    this](liquid::rhi::RenderCommandList &commandList) {
     // Collidable shapes
     if (mRenderStorage.isCollidableEntitySelected() &&
         mRenderStorage.getCollidableShapeType() !=

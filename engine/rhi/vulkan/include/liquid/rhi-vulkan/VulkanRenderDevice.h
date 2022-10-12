@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/rhi/RenderDevice.h"
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/DeviceStats.h"
 
 #include "VulkanPhysicalDevice.h"
@@ -82,13 +81,6 @@ public:
   const DeviceStats &getDeviceStats() const override { return mStats; }
 
   /**
-   * @brief Synchronize resources
-   *
-   * @param registry Resource registry
-   */
-  void synchronize(ResourceRegistry &registry) override;
-
-  /**
    * @brief Create shader
    *
    * @param description Shader description
@@ -152,6 +144,22 @@ public:
    * @param handle Framebuffer handle
    */
   void destroyFramebuffer(FramebufferHandle handle) override;
+
+  /**
+   * @brief Create pipeline
+   *
+   * @param description Pipeline description
+   * @return Pipeline
+   */
+  PipelineHandle
+  createPipeline(const PipelineDescription &description) override;
+
+  /**
+   * @brief Destroy pipeline
+   *
+   * @param handle Pipeline handle
+   */
+  void destroyPipeline(PipelineHandle handle) override;
 
 private:
   /**

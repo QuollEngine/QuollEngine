@@ -47,12 +47,3 @@ TEST_F(RenderGraphPassTest, AddsHandleToInputOnRead) {
   EXPECT_EQ(pass.getInputs().size(), 1);
   EXPECT_EQ(pass.getInputs().at(0).texture, handle);
 }
-
-TEST_F(RenderGraphPassTest, AddsPipeline) {
-  liquid::rhi::RenderGraphPass pass("Test");
-  liquid::rhi::PipelineHandle handle{3};
-
-  pass.addPipeline(handle);
-  EXPECT_EQ(pass.getPipelines().size(), 1);
-  EXPECT_EQ(pass.getPipelines().at(0), handle);
-}

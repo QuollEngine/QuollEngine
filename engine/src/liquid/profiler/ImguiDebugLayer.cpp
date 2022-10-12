@@ -7,10 +7,9 @@ namespace liquid {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
-    const rhi::DeviceStats &deviceStats, rhi::ResourceRegistry &registry,
-    const FPSCounter &fpsCounter)
-    : mPhysicalDeviceInfo(physicalDeviceInfo), mResourceRegistry(registry),
-      mFpsCounter(fpsCounter), mDeviceStats(deviceStats) {}
+    const rhi::DeviceStats &deviceStats, const FPSCounter &fpsCounter)
+    : mPhysicalDeviceInfo(physicalDeviceInfo), mFpsCounter(fpsCounter),
+      mDeviceStats(deviceStats) {}
 
 void ImguiDebugLayer::renderMenu() {
   if (ImGui::BeginMenu("Debug")) {

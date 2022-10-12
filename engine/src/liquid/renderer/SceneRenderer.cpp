@@ -7,11 +7,10 @@
 namespace liquid {
 
 SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
-                             rhi::ResourceRegistry &resourceRegistry,
                              AssetRegistry &assetRegistry,
                              rhi::RenderDevice *device)
-    : mShaderLibrary(shaderLibrary), mRegistry(resourceRegistry),
-      mAssetRegistry(assetRegistry), mDevice(device), mRenderStorage(device) {
+    : mShaderLibrary(shaderLibrary), mAssetRegistry(assetRegistry),
+      mDevice(device), mRenderStorage(device) {
 
   auto shadersPath = Engine::getShadersPath();
 
@@ -90,7 +89,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
     auto &pass = graph.addPass("shadowPass");
     pass.write(shadowmap, rhi::DepthStencilClear{1.0f, 0});
 
-    auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+    auto vPipeline = pass.addPipeline(rhi::PipelineDescription{
         mShaderLibrary.getShader("__engine.shadowmap.default.vertex"),
         mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -98,7 +97,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                 rhi::FrontFace::Clockwise}});
 
-    auto skinnedPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+    auto vSkinnedPipeline = pass.addPipeline(rhi::PipelineDescription{
         mShaderLibrary.getShader("__engine.shadowmap.skinned.vertex"),
         mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -106,14 +105,15 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                 rhi::FrontFace::Clockwise}});
 
-    pass.addPipeline(pipeline);
-    pass.addPipeline(skinnedPipeline);
-
-    pass.setExecutor([pipeline, skinnedPipeline, shadowmap,
-                      this](rhi::RenderCommandList &commandList) {
+    pass.setExecutor([vPipeline, vSkinnedPipeline, shadowmap,
+                      this](rhi::RenderCommandList &commandList,
+                            const rhi::RenderGraphRegistry &registry) {
       rhi::Descriptor descriptor;
       descriptor.bind(0, mRenderStorage.getLightsBuffer(),
                       rhi::DescriptorType::StorageBuffer);
+
+      auto pipeline = registry.get(vPipeline);
+      auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
       {
         LIQUID_PROFILE_EVENT("shadowPass::meshes");
@@ -155,7 +155,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0, 0});
 
-    auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+    auto vPipeline = pass.addPipeline(rhi::PipelineDescription{
         mShaderLibrary.getShader("__engine.geometry.default.vertex"),
         mShaderLibrary.getShader("__engine.pbr.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -164,7 +164,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
-    auto skinnedPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+    auto vSkinnedPipeline = pass.addPipeline(rhi::PipelineDescription{
         mShaderLibrary.getShader("__engine.geometry.skinned.vertex"),
         mShaderLibrary.getShader("__engine.pbr.default.fragment"),
         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -173,11 +173,12 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
-    pass.addPipeline(pipeline);
-    pass.addPipeline(skinnedPipeline);
+    pass.setExecutor([this, vPipeline, vSkinnedPipeline,
+                      shadowmap](rhi::RenderCommandList &commandList,
+                                 const rhi::RenderGraphRegistry &registry) {
+      auto pipeline = registry.get(vPipeline);
+      auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
-    pass.setExecutor([this, pipeline, skinnedPipeline,
-                      shadowmap](rhi::RenderCommandList &commandList) {
       commandList.bindPipeline(pipeline);
 
       rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
@@ -227,7 +228,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
     auto &pass = graph.addPass("environmentPass");
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
-    auto pipeline = mRegistry.setPipeline(
+    auto vPipeline = pass.addPipeline(
         {mShaderLibrary.getShader("__engine.skybox.default.vertex"),
          mShaderLibrary.getShader("__engine.skybox.default.fragment"),
          rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -235,10 +236,13 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
-    pass.addPipeline(pipeline);
-    pass.setExecutor([pipeline, this](rhi::RenderCommandList &commandList) {
+    pass.setExecutor([vPipeline,
+                      this](rhi::RenderCommandList &commandList,
+                            const rhi::RenderGraphRegistry &registry) {
       if (!rhi::isHandleValid(mRenderStorage.getIrradianceMap()))
         return;
+
+      auto pipeline = registry.get(vPipeline);
 
       commandList.bindPipeline(pipeline);
 
@@ -274,7 +278,7 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
   pass.write(passData.sceneColor, mClearColor);
   pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
 
-  auto textPipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+  auto vTextPipeline = pass.addPipeline(rhi::PipelineDescription{
       mShaderLibrary.getShader("__engine.text.default.vertex"),
       mShaderLibrary.getShader("__engine.text.default.fragment"),
       rhi::PipelineVertexInputLayout{},
@@ -286,16 +290,18 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
           rhi::BlendOp::Add, rhi::BlendFactor::One,
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
-  pass.addPipeline(textPipeline);
+  pass.setExecutor(
+      [vTextPipeline, this](rhi::RenderCommandList &commandList,
+                            const rhi::RenderGraphRegistry &registry) {
+        auto textPipeline = registry.get(vTextPipeline);
 
-  pass.setExecutor([textPipeline, this](rhi::RenderCommandList &commandList) {
-    commandList.bindPipeline(textPipeline);
-    rhi::Descriptor sceneDescriptor;
-    sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
-                         rhi::DescriptorType::UniformBuffer);
-    commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
-    renderText(commandList, textPipeline);
-  });
+        commandList.bindPipeline(textPipeline);
+        rhi::Descriptor sceneDescriptor;
+        sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+                             rhi::DescriptorType::UniformBuffer);
+        commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
+        renderText(commandList, textPipeline);
+      });
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,

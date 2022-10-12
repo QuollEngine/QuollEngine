@@ -1,7 +1,6 @@
 #include "liquid/core/Base.h"
 
 #include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/ResourceRegistry.h"
 #include "RenderStorage.h"
 
 namespace liquid {

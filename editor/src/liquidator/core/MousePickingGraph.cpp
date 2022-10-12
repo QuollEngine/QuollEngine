@@ -3,14 +3,12 @@
 
 namespace liquidator {
 
-MousePickingGraph::MousePickingGraph(
-    liquid::rhi::ResourceRegistry &resourceRegistry,
-    liquid::ShaderLibrary &shaderLibrary,
-    const liquid::RenderStorage &renderStorage,
-    liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device)
-    : mResourceRegistry(resourceRegistry), mDevice(device),
-      mRenderStorage(renderStorage), mAssetRegistry(assetRegistry),
-      mGraphEvaluator(resourceRegistry, device) {
+MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
+                                     const liquid::RenderStorage &renderStorage,
+                                     liquid::AssetRegistry &assetRegistry,
+                                     liquid::rhi::RenderDevice *device)
+    : mDevice(device), mRenderStorage(renderStorage),
+      mAssetRegistry(assetRegistry), mGraphEvaluator(device) {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
@@ -51,38 +49,36 @@ MousePickingGraph::MousePickingGraph(
 
   // Normal meshes
 
-  auto pipeline =
-      mResourceRegistry.setPipeline(liquid::rhi::PipelineDescription{
-          shaderLibrary.getShader("mouse-picking.default.vertex"),
-          shaderLibrary.getShader("mouse-picking.selector.fragment"),
-          liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-          liquid::rhi::PipelineInputAssembly{
-              liquid::rhi::PrimitiveTopology::TriangleList},
-          liquid::rhi::PipelineRasterizer{
-              liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Back,
-              liquid::rhi::FrontFace::CounterClockwise},
-          liquid::rhi::PipelineColorBlend{{}}});
-
-  pass.addPipeline(pipeline);
+  auto vPipeline = pass.addPipeline(liquid::rhi::PipelineDescription{
+      shaderLibrary.getShader("mouse-picking.default.vertex"),
+      shaderLibrary.getShader("mouse-picking.selector.fragment"),
+      liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
+      liquid::rhi::PipelineInputAssembly{
+          liquid::rhi::PrimitiveTopology::TriangleList},
+      liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
+                                      liquid::rhi::CullMode::Back,
+                                      liquid::rhi::FrontFace::CounterClockwise},
+      liquid::rhi::PipelineColorBlend{{}}});
 
   // Skinned meshes
-  auto skinnedPipeline =
-      mResourceRegistry.setPipeline(liquid::rhi::PipelineDescription{
-          shaderLibrary.getShader("mouse-picking.skinned.vertex"),
-          shaderLibrary.getShader("mouse-picking.selector.fragment"),
-          liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-          liquid::rhi::PipelineInputAssembly{
-              liquid::rhi::PrimitiveTopology::TriangleList},
-          liquid::rhi::PipelineRasterizer{
-              liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Back,
-              liquid::rhi::FrontFace::CounterClockwise},
-          liquid::rhi::PipelineColorBlend{{}}});
+  auto vSkinnedPipeline = pass.addPipeline(liquid::rhi::PipelineDescription{
+      shaderLibrary.getShader("mouse-picking.skinned.vertex"),
+      shaderLibrary.getShader("mouse-picking.selector.fragment"),
+      liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
+      liquid::rhi::PipelineInputAssembly{
+          liquid::rhi::PrimitiveTopology::TriangleList},
+      liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
+                                      liquid::rhi::CullMode::Back,
+                                      liquid::rhi::FrontFace::CounterClockwise},
+      liquid::rhi::PipelineColorBlend{{}}});
 
-  pass.addPipeline(skinnedPipeline);
-
-  pass.setExecutor([this, pipeline, skinnedPipeline](
-                       liquid::rhi::RenderCommandList &commandList) {
+  pass.setExecutor([this, vPipeline, vSkinnedPipeline](
+                       liquid::rhi::RenderCommandList &commandList,
+                       const liquid::rhi::RenderGraphRegistry &registry) {
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
+
+    auto pipeline = registry.get(vPipeline);
+    auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
     // Mesh
     commandList.bindPipeline(pipeline);

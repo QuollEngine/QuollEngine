@@ -34,13 +34,11 @@ public:
    * @brief Create scene renderer
    *
    * @param shaderLibrary Shader library
-   * @param resourceRegistry Resource registry
    * @param assetRegistry Asset registry
    * @param device Render device
    */
-  SceneRenderer(ShaderLibrary &shaderLibrary,
-                rhi::ResourceRegistry &resourceRegistry,
-                AssetRegistry &assetRegistry, rhi::RenderDevice *device);
+  SceneRenderer(ShaderLibrary &shaderLibrary, AssetRegistry &assetRegistry,
+                rhi::RenderDevice *device);
 
   /**
    * @brief Set clear color
@@ -116,7 +114,6 @@ private:
 private:
   glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;
-  rhi::ResourceRegistry &mRegistry;
   RenderStorage mRenderStorage;
   AssetRegistry &mAssetRegistry;
   rhi::RenderDevice *mDevice;
