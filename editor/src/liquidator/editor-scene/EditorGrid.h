@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/rhi/ResourceRegistry.h"
-
 namespace liquidator {
 
 /**

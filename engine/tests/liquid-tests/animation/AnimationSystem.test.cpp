@@ -8,7 +8,6 @@ public:
   liquid::EntityDatabase entityDatabase;
   liquid::AnimationSystem system;
   liquid::AssetRegistry assetRegistry;
-  liquid::rhi::ResourceRegistry registry;
 
   AnimationSystemTest() : system(assetRegistry) {}
 

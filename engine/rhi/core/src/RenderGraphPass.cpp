@@ -19,12 +19,13 @@ void RenderGraphPass::setExecutor(const ExecutorFn &executor) {
   mExecutor = executor;
 }
 
-void RenderGraphPass::addPipeline(PipelineHandle handle) {
-  mPipelines.push_back(handle);
+VirtualPipelineHandle
+RenderGraphPass::addPipeline(const PipelineDescription &description) {
+  return mRegistry.set(description);
 }
 
 void RenderGraphPass::execute(RenderCommandList &commandList) {
-  mExecutor(commandList);
+  mExecutor(commandList, mRegistry);
 }
 
 } // namespace liquid::rhi

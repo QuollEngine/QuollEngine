@@ -68,8 +68,7 @@ void EditorScreen::start(const Project &project) {
   liquid::AssetManager assetManager(project.assetsPath, true);
   liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
 
-  liquid::Presenter presenter(renderer.getShaderLibrary(),
-                              renderer.getRegistry(), mDevice);
+  liquid::Presenter presenter(renderer.getShaderLibrary(), mDevice);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -109,15 +108,13 @@ void EditorScreen::start(const Project &project) {
   liquidator::AssetLoader assetLoader(assetManager, mDevice);
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                                     mDevice->getDeviceStats(),
-                                     renderer.getRegistry(), fpsCounter);
+                                     mDevice->getDeviceStats(), fpsCounter);
 
   liquidator::UIRoot ui(entityManager, assetLoader);
   ui.getIconRegistry().loadIcons(mDevice, std::filesystem::current_path() /
                                               "assets" / "icons");
 
-  liquidator::EditorRenderer editorRenderer(renderer.getRegistry(),
-                                            renderer.getShaderLibrary(),
+  liquidator::EditorRenderer editorRenderer(renderer.getShaderLibrary(),
                                             ui.getIconRegistry(), mDevice);
 
   liquid::rhi::RenderGraph graph;
@@ -136,8 +133,7 @@ void EditorScreen::start(const Project &project) {
 
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
 
-  MousePickingGraph mousePicking(renderer.getRegistry(),
-                                 renderer.getShaderLibrary(),
+  MousePickingGraph mousePicking(renderer.getShaderLibrary(),
                                  renderer.getSceneRenderer().getRenderStorage(),
                                  assetManager.getRegistry(), mDevice);
 

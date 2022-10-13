@@ -2,7 +2,6 @@
 
 #include "liquid/asset/Result.h"
 #include "liquid/asset/AssetManager.h"
-#include "liquid/rhi/ResourceRegistry.h"
 
 namespace liquidator {
 

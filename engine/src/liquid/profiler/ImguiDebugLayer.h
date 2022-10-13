@@ -2,7 +2,6 @@
 
 #include "liquid/profiler/FPSCounter.h"
 #include "liquid/rhi/PhysicalDeviceInformation.h"
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/DeviceStats.h"
 
 namespace liquid {
@@ -20,12 +19,10 @@ public:
    *
    * @param physicalDeviceInfo Physical device information
    * @param deviceStats Device stats
-   * @param registry Resource registry
    * @param fpsCounter FPS counter
    */
   ImguiDebugLayer(const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
                   const rhi::DeviceStats &deviceStats,
-                  rhi::ResourceRegistry &registry,
                   const FPSCounter &fpsCounter);
 
   /**
@@ -74,7 +71,6 @@ private:
   rhi::PhysicalDeviceInformation mPhysicalDeviceInfo;
   const FPSCounter &mFpsCounter;
   const rhi::DeviceStats &mDeviceStats;
-  rhi::ResourceRegistry &mResourceRegistry;
 
   bool mUsageMetricsVisible = false;
   bool mPhysicalDeviceInfoVisible = false;

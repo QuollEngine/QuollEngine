@@ -37,13 +37,11 @@ public:
   /**
    * @brief Create editor renderer
    *
-   * @param registry Resource registry
    * @param shaderLibrary Shader library
    * @param iconRegistry Icon registry
    * @param device Render device
    */
-  EditorRenderer(liquid::rhi::ResourceRegistry &registry,
-                 liquid::ShaderLibrary &shaderLibrary,
+  EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
                  IconRegistry &iconRegistry, liquid::rhi::RenderDevice *device);
 
   /**
@@ -74,7 +72,6 @@ private:
 
 private:
   EditorRendererStorage mRenderStorage;
-  liquid::rhi::ResourceRegistry &mRegistry;
   liquid::rhi::RenderDevice *mDevice;
   liquid::ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;

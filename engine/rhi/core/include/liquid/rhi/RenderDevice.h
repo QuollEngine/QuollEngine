@@ -10,8 +10,9 @@
 #include "BufferDescription.h"
 #include "TextureDescription.h"
 #include "ShaderDescription.h"
-
-#include "ResourceRegistry.h"
+#include "RenderPassDescription.h"
+#include "FramebufferDescription.h"
+#include "PipelineDescription.h"
 
 namespace liquid::rhi {
 
@@ -53,13 +54,6 @@ public:
    * @brief Wait for device to be idle
    */
   virtual void waitForIdle() = 0;
-
-  /**
-   * @brief Synchronize resources
-   *
-   * @param registry Resource registry
-   */
-  virtual void synchronize(ResourceRegistry &registry) = 0;
 
   /**
    * @brief Get physical device information
@@ -154,6 +148,22 @@ public:
    * @param handle Framebuffer handle
    */
   virtual void destroyFramebuffer(FramebufferHandle handle) = 0;
+
+  /**
+   * @brief Create pipeline
+   *
+   * @param description Pipeline description
+   * @return Pipeline
+   */
+  virtual PipelineHandle
+  createPipeline(const PipelineDescription &description) = 0;
+
+  /**
+   * @brief Destroy pipeline
+   *
+   * @param handle Pipeline handle
+   */
+  virtual void destroyPipeline(PipelineHandle handle) = 0;
 };
 
 } // namespace liquid::rhi

@@ -16,7 +16,6 @@
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
 
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderDevice.h"
 
 namespace liquid {

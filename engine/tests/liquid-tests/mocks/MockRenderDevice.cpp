@@ -11,8 +11,6 @@ void MockRenderDevice::endFrame(const liquid::rhi::RenderFrame &renderFrame) {}
 
 void MockRenderDevice::waitForIdle() {}
 
-void MockRenderDevice::synchronize(liquid::rhi::ResourceRegistry &registry) {}
-
 const liquid::rhi::PhysicalDeviceInformation
 MockRenderDevice::getDeviceInformation() {
   return liquid::rhi::PhysicalDeviceInformation(
@@ -74,3 +72,12 @@ liquid::rhi::FramebufferHandle MockRenderDevice::createFramebuffer(
 
 void MockRenderDevice::destroyFramebuffer(
     liquid::rhi::FramebufferHandle handle) {}
+
+liquid::rhi::PipelineHandle MockRenderDevice::createPipeline(
+    const liquid::rhi::PipelineDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::PipelineHandle>();
+  mPipelines.insert_or_assign(handle, description);
+  return handle;
+}
+
+void MockRenderDevice::destroyPipeline(liquid::rhi::PipelineHandle handle) {}

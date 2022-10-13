@@ -11,8 +11,6 @@ public:
 
   void waitForIdle();
 
-  void synchronize(liquid::rhi::ResourceRegistry &registry);
-
   const liquid::rhi::PhysicalDeviceInformation getDeviceInformation();
 
   const liquid::rhi::DeviceStats &getDeviceStats() const;
@@ -43,6 +41,11 @@ public:
 
   void destroyFramebuffer(liquid::rhi::FramebufferHandle handle);
 
+  liquid::rhi::PipelineHandle
+  createPipeline(const liquid::rhi::PipelineDescription &description);
+
+  void destroyPipeline(liquid::rhi::PipelineHandle handle);
+
   inline const MockBuffer &getBuffer(liquid::rhi::BufferHandle handle) {
     return mBuffers.at(handle);
   }
@@ -67,6 +70,10 @@ private:
   std::unordered_map<liquid::rhi::FramebufferHandle,
                      liquid::rhi::FramebufferDescription>
       mFramebuffers;
+
+  std::unordered_map<liquid::rhi::PipelineHandle,
+                     liquid::rhi::PipelineDescription>
+      mPipelines;
 
   uint32_t mLastHandle = 1;
 

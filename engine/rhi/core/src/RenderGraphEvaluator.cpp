@@ -1,14 +1,15 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/EngineGlobals.h"
 
+#include "liquid/rhi/FramebufferDescription.h"
+
 #include "RenderGraphEvaluator.h"
 #include "RenderDevice.h"
 
 namespace liquid::rhi {
 
-RenderGraphEvaluator::RenderGraphEvaluator(ResourceRegistry &registry,
-                                           RenderDevice *device)
-    : mRegistry(registry), mDevice(device) {}
+RenderGraphEvaluator::RenderGraphEvaluator(RenderDevice *device)
+    : mDevice(device) {}
 
 void RenderGraphEvaluator::build(RenderGraph &graph) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::build");
@@ -117,10 +118,18 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
 
   LIQUID_ASSERT(isHandleValid(pass.mRenderPass), "Render pass is not created");
 
-  for (auto resource : pass.getPipelines()) {
-    auto description = mRegistry.getPipelineMap().getDescription(resource);
+  // Pipelines
+  for (size_t i = 0; i < pass.mRegistry.mDescriptions.size(); ++i) {
+    auto &description = pass.mRegistry.mDescriptions.at(i);
     description.renderPass = pass.mRenderPass;
-    mRegistry.setPipeline(description, resource);
+
+    auto handle = pass.mRegistry.mRealResources.at(i);
+
+    if (handle != PipelineHandle::Invalid) {
+      mDevice->destroyPipeline(handle);
+    }
+
+    pass.mRegistry.mRealResources.at(i) = mDevice->createPipeline(description);
   }
 }
 

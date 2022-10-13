@@ -21,9 +21,8 @@ static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
 namespace liquid {
 
 ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                             rhi::ResourceRegistry &registry,
                              rhi::RenderDevice *device)
-    : mRegistry(registry), mShaderLibrary(shaderLibrary), mDevice(device) {
+    : mShaderLibrary(shaderLibrary), mDevice(device) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -79,7 +78,7 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   auto &pass = graph.addPass("imgui");
   pass.write(imgui, mClearColor);
 
-  auto pipeline = mRegistry.setPipeline(rhi::PipelineDescription{
+  auto pipeline = pass.addPipeline(rhi::PipelineDescription{
       mShaderLibrary.getShader("__engine.imgui.default.vertex"),
       mShaderLibrary.getShader("__engine.imgui.default.fragment"),
       rhi::PipelineVertexInputLayout{
@@ -101,10 +100,9 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
           rhi::BlendOp::Add, rhi::BlendFactor::One,
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
-  pass.addPipeline(pipeline);
-
-  pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList) {
-    draw(commandList, pipeline);
+  pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList,
+                                    const rhi::RenderGraphRegistry &registry) {
+    draw(commandList, registry.get(pipeline));
   });
 
   return {pass, imgui};

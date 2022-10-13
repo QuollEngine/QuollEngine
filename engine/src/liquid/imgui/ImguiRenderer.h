@@ -3,7 +3,6 @@
 #include "liquid/window/Window.h"
 
 #include "liquid/rhi/RenderCommandList.h"
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/ShaderLibrary.h"
@@ -73,12 +72,11 @@ public:
    * @brief Create imgui renderer
    *
    * @param window Window
-   * @param registry Resource registry
    * @param device Render device
    * @param shaderLibrary Shader library
    */
   ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                rhi::ResourceRegistry &registry, rhi::RenderDevice *device);
+                rhi::RenderDevice *device);
 
   /**
    * @brief Destroy imgui renderer
@@ -159,7 +157,6 @@ private:
                          rhi::PipelineHandle pipeline);
 
 private:
-  rhi::ResourceRegistry &mRegistry;
   ShaderLibrary &mShaderLibrary;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
   std::vector<FrameData> mFrameData;

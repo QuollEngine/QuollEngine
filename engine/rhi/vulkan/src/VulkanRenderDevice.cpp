@@ -147,6 +147,16 @@ void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
   mRegistry.deleteFramebuffer(handle);
 }
 
+PipelineHandle
+VulkanRenderDevice::createPipeline(const PipelineDescription &description) {
+  return mRegistry.setPipeline(
+      std::make_unique<VulkanPipeline>(description, mDevice, mRegistry));
+}
+
+void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
+  mRegistry.deletePipeline(handle);
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -168,25 +178,6 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
                                           mDevice, mUploadContext,
                                           mSwapchain.getExtent()));
   }
-}
-
-void VulkanRenderDevice::synchronize(ResourceRegistry &registry) {
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::synchronize");
-
-  // Pipelines
-  for (auto [handle, state] : registry.getPipelineMap().getStagedResources()) {
-    if (state == ResourceRegistryState::Set) {
-
-      mRegistry.setPipeline(
-          handle, std::make_unique<VulkanPipeline>(
-                      registry.getPipelineMap().getDescription(handle), mDevice,
-                      mRegistry));
-    } else {
-      mRegistry.deletePipeline(handle);
-    }
-  }
-
-  registry.getPipelineMap().clearStagedResources();
 }
 
 } // namespace liquid::rhi

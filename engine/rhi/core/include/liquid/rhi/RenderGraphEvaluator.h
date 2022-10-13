@@ -2,7 +2,6 @@
 
 #include "PipelineDescription.h"
 #include "RenderPassDescription.h"
-#include "ResourceRegistry.h"
 #include "RenderGraph.h"
 #include "RenderCommandList.h"
 #include "RenderDevice.h"
@@ -25,10 +24,9 @@ public:
   /**
    * @brief Create render graph evaluator
    *
-   * @param registry Resource registry
    * @param device Render device
    */
-  RenderGraphEvaluator(ResourceRegistry &registry, RenderDevice *device);
+  RenderGraphEvaluator(RenderDevice *device);
 
   /**
    * @brief Build render graph
@@ -77,8 +75,6 @@ private:
   bool hasSwapchainRelativeResources(RenderGraphPass &pass);
 
 private:
-  ResourceRegistry &mRegistry;
-
   RenderDevice *mDevice = nullptr;
 };
 

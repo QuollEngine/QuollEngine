@@ -1,6 +1,5 @@
 #pragma once
 
-#include "liquid/rhi/ResourceRegistry.h"
 #include "liquid/rhi/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/RenderGraphEvaluator.h"
@@ -24,14 +23,12 @@ public:
   /**
    * @brief Create mouse picking graph
    *
-   * @param resourceRegistry Resource registry
    * @param shaderLibrary Shader library
    * @param renderStorage Render storage
    * @param assetRegistry Asset registry
    * @param device Render device
    */
-  MousePickingGraph(liquid::rhi::ResourceRegistry &resourceRegistry,
-                    liquid::ShaderLibrary &shaderLibrary,
+  MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
                     const liquid::RenderStorage &renderStorage,
                     liquid::AssetRegistry &assetRegistry,
                     liquid::rhi::RenderDevice *device);
@@ -88,7 +85,6 @@ public:
 
 private:
   liquid::rhi::RenderDevice *mDevice = nullptr;
-  liquid::rhi::ResourceRegistry &mResourceRegistry;
 
   liquid::rhi::RenderGraph mRenderGraph;
   liquid::rhi::RenderGraphEvaluator mGraphEvaluator;

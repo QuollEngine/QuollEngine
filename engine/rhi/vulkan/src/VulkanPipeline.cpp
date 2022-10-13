@@ -252,6 +252,8 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                                 &pipelineInfo, nullptr,
                                                 &mPipeline),
                       "Failed to create pipeline");
+
+  LOG_DEBUG("[Vulkan] Pipeline created");
 }
 
 VulkanPipeline::~VulkanPipeline() {
