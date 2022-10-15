@@ -11,10 +11,10 @@ Presenter::Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device)
     : mShaderLibrary(shaderLibrary), mDevice(device) {
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
                            mDevice->createShader({Engine::getShadersPath() /
-                                                  "fullscreenQuad.vert.spv"}));
+                                                  "fullscreen-quad.vert.spv"}));
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
                            mDevice->createShader({Engine::getShadersPath() /
-                                                  "fullscreenQuad.frag.spv"}));
+                                                  "fullscreen-quad.frag.spv"}));
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {

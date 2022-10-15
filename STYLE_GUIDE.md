@@ -22,6 +22,15 @@ do not need to be annotated with `@brief` command.
 
 Spir-V GLSL shaders are used in this project. The following style guides must be followed for all shaders:
 
+### File names
+
+All shader files must be named in kebab-case format:
+
+```
+geometry-skinned.vert
+geometry-skinned.frag
+```
+
 ### Code order
 
 The following code order must be followed in all shaders:

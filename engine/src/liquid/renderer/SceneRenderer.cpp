@@ -19,7 +19,7 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
       mDevice->createShader({shadersPath / "geometry.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.geometry.skinned.vertex",
-      mDevice->createShader({shadersPath / "skinnedGeometry.vert.spv"}));
+      mDevice->createShader({shadersPath / "geometry-skinned.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.pbr.default.fragment",
       mDevice->createShader({shadersPath / "pbr.frag.spv"}));
@@ -34,7 +34,7 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
       mDevice->createShader({shadersPath / "shadowmap.vert.spv"}));
   mShaderLibrary.addShader(
       "__engine.shadowmap.skinned.vertex",
-      mDevice->createShader({shadersPath / "skinnedShadowmap.vert.spv"}));
+      mDevice->createShader({shadersPath / "shadowmap-skinned.vert.spv"}));
 
   mShaderLibrary.addShader(
       "__engine.shadowmap.default.fragment",
