@@ -2,19 +2,19 @@ function copyEngineAssets(assetsPath, outputPath)
     postbuildcommands {
         "{MKDIR} "..outputPath.."/shaders/",
         "glslc "..assetsPath.."/shaders/geometry.vert -o "..outputPath.."/shaders/geometry.vert.spv",
-        "glslc "..assetsPath.."/shaders/skinnedGeometry.vert -o"..outputPath.."/shaders/skinnedGeometry.vert.spv",
+        "glslc "..assetsPath.."/shaders/geometry-skinned.vert -o"..outputPath.."/shaders/geometry-skinned.vert.spv",
         "glslc "..assetsPath.."/shaders/pbr.frag -o"..outputPath.."/shaders/pbr.frag.spv",
         "glslc "..assetsPath.."/shaders/skybox.frag -o"..outputPath.."/shaders/skybox.frag.spv",
         "glslc "..assetsPath.."/shaders/skybox.vert -o"..outputPath.."/shaders/skybox.vert.spv",
         "glslc "..assetsPath.."/shaders/shadowmap.frag -o"..outputPath.."/shaders/shadowmap.frag.spv",
         "glslc "..assetsPath.."/shaders/shadowmap.vert -o"..outputPath.."/shaders/shadowmap.vert.spv", 
-        "glslc "..assetsPath.."/shaders/skinnedShadowmap.vert -o"..outputPath.."/shaders/skinnedShadowmap.vert.spv",
+        "glslc "..assetsPath.."/shaders/shadowmap-skinned.vert -o"..outputPath.."/shaders/shadowmap-skinned.vert.spv",
         "glslc "..assetsPath.."/shaders/imgui.frag -o"..outputPath.."/shaders/imgui.frag.spv",
         "glslc "..assetsPath.."/shaders/imgui.vert -o"..outputPath.."/shaders/imgui.vert.spv",
         "glslc "..assetsPath.."/shaders/text.vert -o"..outputPath.."/shaders/text.vert.spv",
         "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
-        "glslc "..assetsPath.."/shaders/fullscreenQuad.frag -o"..outputPath.."/shaders/fullscreenQuad.frag.spv",
-        "glslc "..assetsPath.."/shaders/fullscreenQuad.vert -o"..outputPath.."/shaders/fullscreenQuad.vert.spv",
+        "glslc "..assetsPath.."/shaders/fullscreen-quad.frag -o"..outputPath.."/shaders/fullscreen-quad.frag.spv",
+        "glslc "..assetsPath.."/shaders/fullscreen-quad.vert -o"..outputPath.."/shaders/fullscreen-quad.vert.spv",
         "{MKDIR} "..outputPath.."/fonts/",
         "{COPY} "..assetsPath.."/fonts/Roboto-Regular.ttf "..outputPath.."/fonts"
     }
