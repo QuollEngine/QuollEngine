@@ -57,8 +57,6 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
         camera.projectionMatrix = glm::perspective(
             glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
-        camera.projectionMatrix[1][1] *= -1.0f;
-
         camera.viewMatrix = glm::inverse(world.worldTransform);
         camera.projectionViewMatrix =
             camera.projectionMatrix * camera.viewMatrix;

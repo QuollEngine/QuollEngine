@@ -7,15 +7,11 @@ layout(location = 2) in vec4 inColor;
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec2 outUV;
 
-layout(push_constant) uniform TransformConstant {
-  vec2 scale;
-  vec2 translate;
-}
+layout(push_constant) uniform TransformConstant { mat4 uiTransform; }
 pcTransform;
 
 void main() {
   outColor = inColor;
   outUV = inUV;
-  gl_Position =
-      vec4(inPosition * pcTransform.scale + pcTransform.translate, 0, 1);
+  gl_Position = pcTransform.uiTransform * vec4(inPosition, 0.0, 1.0);
 }

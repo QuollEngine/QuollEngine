@@ -114,7 +114,6 @@ private:
     camera.projectionMatrix = glm::perspective(
         70.0f, static_cast<float>(fbSize.x) / static_cast<float>(fbSize.y),
         0.1f, 200.0f);
-    camera.projectionMatrix[1][1] *= -1.0f;
     camera.viewMatrix = glm::lookAt(glm::vec3{0.0f, 4.0f, -8.0f},
                                     {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
     camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
@@ -124,7 +123,6 @@ private:
       camera.projectionMatrix = glm::perspective(
           70.0f, static_cast<float>(width) / static_cast<float>(height), 0.1f,
           200.0f);
-      camera.projectionMatrix[1][1] *= -1.0f;
       camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
     });
 

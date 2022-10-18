@@ -261,20 +261,33 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
 
-  const float SCALE_FACTOR = 2.0f;
-  std::array<float, 2> scale{SCALE_FACTOR / data->DisplaySize.x,
-                             SCALE_FACTOR / data->DisplaySize.y};
-  std::array<float, 2> translate{-1.0f - data->DisplayPos.x * scale[0],
-                                 -1.0f - data->DisplayPos.y * scale[1]};
+  float L = data->DisplayPos.x;
+  float R = data->DisplayPos.x + data->DisplaySize.x;
+  float T = data->DisplayPos.y;
+  float B = data->DisplayPos.y + data->DisplaySize.y;
 
-  uint32_t scaleDataSize = static_cast<uint32_t>(sizeof(float) * scale.size());
-  uint32_t translateDataSize =
-      static_cast<uint32_t>(sizeof(float) * translate.size());
+  const float SCALE_FACTOR = 2.0f;
+  std::array<float, 16> mvp{SCALE_FACTOR / (R - L),
+                            0.0f,
+                            0.0f,
+                            0.0f,
+                            0.0f,
+                            SCALE_FACTOR / (T - B),
+                            0.0f,
+                            0.0f,
+                            0.0f,
+                            0.0f,
+                            1.0f / SCALE_FACTOR,
+                            0.0f,
+                            (R + L) / (L - R),
+                            (T + B) / (B - T),
+                            0.5f,
+                            1.0f
+
+  };
 
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                            scaleDataSize, scale.data());
-  commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, scaleDataSize,
-                            translateDataSize, translate.data());
+                            sizeof(float) * 16, mvp.data());
 }
 
 void ImguiRenderer::useConfigPath(const String &path) {

@@ -131,7 +131,6 @@ void EditorCamera::update() {
 
   camera.projectionMatrix =
       glm::perspective(glm::radians(mFov), getAspectRatio(), mNear, mFar);
-  camera.projectionMatrix[1][1] *= -1.0f;
 
   camera.viewMatrix = glm::lookAt(mEye, mCenter, mUp);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
