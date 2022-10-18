@@ -78,7 +78,7 @@ struct PhysicsGeometryCapsule {
   /**
    * Capsule half height
    */
-  float halfHeight = 1.0f;
+  float halfHeight = 0.5f;
 };
 
 /**
@@ -88,7 +88,7 @@ struct PhysicsGeometryBox {
   /**
    * Box extents halved
    */
-  glm::vec3 halfExtents{1.0f};
+  glm::vec3 halfExtents{0.5f};
 };
 
 using PhysicsGeometryParams =
