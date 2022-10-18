@@ -103,7 +103,6 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
 
   auto expectedPerspective = glm::perspective(
       glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
-  expectedPerspective[1][1] *= -1.0f;
 
   EXPECT_EQ(camera.viewMatrix, glm::inverse(transform.worldTransform));
   EXPECT_EQ(camera.projectionMatrix, expectedPerspective);

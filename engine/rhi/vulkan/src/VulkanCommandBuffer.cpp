@@ -111,8 +111,9 @@ void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
 void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
                                       const glm::vec2 &size,
                                       const glm::vec2 &depthRange) {
-  VkViewport viewport{offset.x, offset.y,     size.x,
-                      size.y,   depthRange.x, depthRange.y};
+  // Using negative height to flip the viewport
+  VkViewport viewport{offset.x, size.y - offset.y, size.x,
+                      -size.y,  depthRange.x,      depthRange.y};
 
   vkCmdSetViewport(mCommandBuffer, 0, 1, &viewport);
   mStats.addCommandCall();

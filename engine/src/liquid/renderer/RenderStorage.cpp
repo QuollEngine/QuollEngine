@@ -104,8 +104,8 @@ void RenderStorage::addLight(const DirectionalLightComponent &light) {
   glm::vec3 mPosition{-light.direction - light.direction * DIR_LIGHT_SIZE};
   mPosition.z = DIR_LIGHT_Z;
   glm::mat4 lightProjectionMatrix =
-      glm::ortho(-DIR_LIGHT_SIZE, DIR_LIGHT_SIZE, -DIR_LIGHT_SIZE,
-                 DIR_LIGHT_SIZE, DIR_LIGHT_NEAR, DIR_LIGHT_FAR);
+      glm::ortho(-DIR_LIGHT_SIZE, DIR_LIGHT_SIZE, DIR_LIGHT_SIZE,
+                 -DIR_LIGHT_SIZE, DIR_LIGHT_NEAR, DIR_LIGHT_FAR);
   glm::mat4 lightViewMatrix = glm::lookAt(
       mPosition,
       mPosition + light.direction - glm::vec3(0.0f, 0.0f, DIR_LIGHT_Z),

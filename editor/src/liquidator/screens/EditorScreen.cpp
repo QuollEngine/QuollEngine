@@ -256,7 +256,6 @@ void EditorScreen::start(const Project &project) {
             editorManager.getCamera());
 
         auto gizmoPerspective = camera.projectionMatrix;
-        gizmoPerspective[1][1] *= -1.0f;
 
         if (ImGuizmo::Manipulate(
                 glm::value_ptr(camera.viewMatrix),
