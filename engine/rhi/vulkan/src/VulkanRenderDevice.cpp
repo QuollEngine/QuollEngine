@@ -109,6 +109,10 @@ Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
   return Buffer{handle, mRegistry.getBuffers().at(handle).get()};
 }
 
+void VulkanRenderDevice::destroyBuffer(BufferHandle handle) {
+  mRegistry.deleteBuffer(handle);
+}
+
 ShaderHandle
 VulkanRenderDevice::createShader(const ShaderDescription &description) {
   return mRegistry.setShader(

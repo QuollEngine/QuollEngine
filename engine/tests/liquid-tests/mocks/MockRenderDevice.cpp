@@ -41,6 +41,8 @@ liquid::rhi::Buffer MockRenderDevice::createBuffer(
   return liquid::rhi::Buffer(handle, &mBuffers.at(handle));
 }
 
+void MockRenderDevice::destroyBuffer(liquid::rhi::BufferHandle handle) {}
+
 liquid::rhi::TextureHandle MockRenderDevice::createTexture(
     const liquid::rhi::TextureDescription &description) {
   auto handle = getNewHandle<liquid::rhi::TextureHandle>();

@@ -67,6 +67,8 @@ class ImguiRenderer {
 
   static constexpr const glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
+  static constexpr size_t FramesInFlight = 2;
+
 public:
   /**
    * @brief Create imgui renderer
@@ -159,7 +161,7 @@ private:
 private:
   ShaderLibrary &mShaderLibrary;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
-  std::vector<FrameData> mFrameData;
+  std::array<FrameData, FramesInFlight> mFrameData;
   uint32_t mCurrentFrame = 0;
 
   glm::vec4 mClearColor{DefaultClearColor};

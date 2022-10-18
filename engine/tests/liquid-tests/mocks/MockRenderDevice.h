@@ -25,6 +25,8 @@ public:
   liquid::rhi::Buffer
   createBuffer(const liquid::rhi::BufferDescription &description);
 
+  void destroyBuffer(liquid::rhi::BufferHandle handle);
+
   liquid::rhi::TextureHandle
   createTexture(const liquid::rhi::TextureDescription &description);
 
