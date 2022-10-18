@@ -97,6 +97,13 @@ public:
   Buffer createBuffer(const BufferDescription &description) override;
 
   /**
+   * @brief Destroy buffer
+   *
+   * @param handle Buffer handle
+   */
+  void destroyBuffer(BufferHandle handle) override;
+
+  /**
    * @brief Create texture
    *
    * @param description Texture description

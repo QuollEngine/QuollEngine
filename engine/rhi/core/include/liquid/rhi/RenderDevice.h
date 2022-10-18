@@ -100,6 +100,13 @@ public:
   virtual Buffer createBuffer(const BufferDescription &description) = 0;
 
   /**
+   * @brief Destroy buffer
+   *
+   * @param handle Buffer handle
+   */
+  virtual void destroyBuffer(BufferHandle handle) = 0;
+
+  /**
    * @brief Create texture
    *
    * @param description Texture description

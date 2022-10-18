@@ -32,9 +32,6 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.IniFilename = nullptr;
 
-  static constexpr size_t FramesInFlight = 2;
-  mFrameData.resize(FramesInFlight);
-
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   LOG_DEBUG("[ImGui] ImGui initialized with Vulkan backend");
@@ -54,8 +51,10 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 }
 
 ImguiRenderer::~ImguiRenderer() {
-  mFrameData.clear();
-
+  for (auto &x : mFrameData) {
+    mDevice->destroyBuffer(x.vertexBuffer.getHandle());
+    mDevice->destroyBuffer(x.indexBuffer.getHandle());
+  }
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 }
@@ -139,27 +138,17 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
       getAlignedBufferSize(data->TotalIdxCount * sizeof(ImDrawIdx));
 
   if (frameObj.vertexBufferSize < vertexSize) {
-    if (frameObj.vertexBufferData) {
-      delete[] frameObj.vertexBufferData;
-    }
-    frameObj.vertexBufferData = new char[vertexSize];
-    frameObj.vertexBufferSize = vertexSize;
-
     frameObj.vertexBuffer.resize(vertexSize);
+    frameObj.vertexBufferSize = vertexSize;
   }
 
   if (frameObj.indexBufferSize < indexSize) {
-    if (frameObj.indexBufferData) {
-      delete[] frameObj.indexBufferData;
-    }
-    frameObj.indexBufferData = new char[indexSize];
-    frameObj.indexBufferSize = indexSize;
-
     frameObj.indexBuffer.resize(indexSize);
+    frameObj.indexBufferSize = indexSize;
   }
 
-  auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBufferData);
-  auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBufferData);
+  auto *vbDst = static_cast<ImDrawVert *>(frameObj.vertexBuffer.map());
+  auto *ibDst = static_cast<ImDrawIdx *>(frameObj.indexBuffer.map());
 
   for (int n = 0; n < data->CmdListsCount; n++) {
     const ImDrawList *cmd_list = data->CmdLists[n];
@@ -171,8 +160,8 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
     ibDst += cmd_list->IdxBuffer.Size;
   }
 
-  frameObj.vertexBuffer.update(frameObj.vertexBufferData);
-  frameObj.indexBuffer.update(frameObj.indexBufferData);
+  frameObj.vertexBuffer.unmap();
+  frameObj.indexBuffer.unmap();
 }
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
