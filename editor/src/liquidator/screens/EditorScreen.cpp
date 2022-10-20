@@ -99,7 +99,7 @@ void EditorScreen::start(const Project &project) {
                                         mEventSystem, renderer, mWindow);
   liquidator::EditorGrid editorGrid;
   liquidator::EditorManager editorManager(editorCamera, editorGrid,
-                                          entityManager);
+                                          entityManager, project);
 
   editorManager.loadOrCreateScene();
   editorManager.loadEditorState(statePath);

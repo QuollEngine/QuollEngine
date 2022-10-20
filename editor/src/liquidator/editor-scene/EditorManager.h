@@ -1,9 +1,11 @@
 #pragma once
 
+#include "liquidator/project/Project.h"
+#include "liquidator/core/TransformOperation.h"
+
 #include "EditorCamera.h"
 #include "EditorGrid.h"
 #include "EntityManager.h"
-#include "liquidator/core/TransformOperation.h"
 
 namespace liquidator {
 
@@ -21,9 +23,10 @@ public:
    * @param editorCamera Editor camera
    * @param editorGrid Editor grid
    * @param entityManager Entity manager
+   * @param project Project
    */
   EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
-                EntityManager &entityManager);
+                EntityManager &entityManager, const Project &project);
 
   EditorManager(const EditorManager &) = delete;
   EditorManager(EditorManager &&) = delete;
@@ -147,12 +150,18 @@ public:
     return mTransformOperation;
   }
 
+  /**
+   * @brief Start game export flow
+   */
+  void startGameExport();
+
 private:
   EditorCamera &mEditorCamera;
   EditorGrid &mEditorGrid;
   std::filesystem::path mScenePath;
   EntityManager &mEntityManager;
   uint32_t mLastId = 1;
+  Project mProject;
 
   TransformOperation mTransformOperation = TransformOperation::Move;
 

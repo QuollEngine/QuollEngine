@@ -1,6 +1,10 @@
-function copyEngineAssets(assetsPath, outputPath)
+function copyEngineAssets()
+    assetsPath = "../../engine/assets"
+    outputPath = "%{cfg.buildtarget.directory}/engine/assets"
+
     postbuildcommands {
         "{MKDIR} "..outputPath.."/shaders/",
+        -- Shaders
         "glslc "..assetsPath.."/shaders/geometry.vert -o "..outputPath.."/shaders/geometry.vert.spv",
         "glslc "..assetsPath.."/shaders/geometry-skinned.vert -o"..outputPath.."/shaders/geometry-skinned.vert.spv",
         "glslc "..assetsPath.."/shaders/pbr.frag -o"..outputPath.."/shaders/pbr.frag.spv",
@@ -15,8 +19,9 @@ function copyEngineAssets(assetsPath, outputPath)
         "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.frag -o"..outputPath.."/shaders/fullscreen-quad.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.vert -o"..outputPath.."/shaders/fullscreen-quad.vert.spv",
+        -- Fonts
         "{MKDIR} "..outputPath.."/fonts/",
-        "{COPY} "..assetsPath.."/fonts/Roboto-Regular.ttf "..outputPath.."/fonts"
+        "{COPYFILE} "..assetsPath.."/fonts/Roboto-Regular.ttf "..outputPath.."/fonts"
     }
 end
 

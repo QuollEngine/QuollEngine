@@ -15,4 +15,6 @@ const Path Engine::getShadersPath() { return engine.mAssetsPath / "shaders"; }
 
 const Path Engine::getFontsPath() { return engine.mAssetsPath / "fonts"; }
 
+const Path Engine::getEnginePath() { return engine.mEnginePath; }
+
 } // namespace liquid
