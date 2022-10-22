@@ -8,6 +8,8 @@ project "Liquidator"
 
     loadSourceFiles{}
     linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo"}
+    
+    copyRuntime();
 
     postbuildcommands {
         "{MKDIR} %{cfg.buildtarget.directory}/assets/shaders/",
@@ -45,4 +47,4 @@ project "Liquidator"
         "{COPYFILE} ../../editor/assets/icons/scale.png %{cfg.buildtarget.directory}/assets/icons/scale.png",
     }
 
-    copyEngineAssets("../../engine/assets", "%{cfg.buildtarget.directory}/engine/assets")
+    copyEngineAssets()

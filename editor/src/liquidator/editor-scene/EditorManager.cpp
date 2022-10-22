@@ -1,16 +1,19 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
+#include "liquid/platform-tools/NativeFileDialog.h"
 
 #include "EditorManager.h"
+#include "liquidator/core/GameExporter.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
 namespace liquidator {
 
 EditorManager::EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
-                             EntityManager &entityManager)
+                             EntityManager &entityManager,
+                             const Project &project)
     : mEditorCamera(editorCamera), mEditorGrid(editorGrid),
-      mEntityManager(entityManager) {}
+      mEntityManager(entityManager), mProject(project) {}
 
 void EditorManager::saveEditorState(const std::filesystem::path &path) {
   YAML::Node node;
@@ -184,6 +187,14 @@ liquid::EnvironmentComponent &EditorManager::getEnvironment() {
 void EditorManager::setTransformOperation(
     TransformOperation transformOperation) {
   mTransformOperation = transformOperation;
+}
+
+void EditorManager::startGameExport() {
+  liquid::platform_tools::NativeFileDialog nativeFileDialog;
+  auto path = nativeFileDialog.getFilePathFromCreateDialog({});
+
+  GameExporter exporter;
+  exporter.exportGame(mProject, path);
 }
 
 } // namespace liquidator

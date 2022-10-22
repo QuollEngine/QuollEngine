@@ -1,36 +1,8 @@
 #pragma once
 
+#include "liquidator/project/Project.h"
+
 namespace liquidator {
-
-/**
- * @brief Project data
- */
-struct Project {
-  /**
-   * Project name
-   */
-  liquid::String name;
-
-  /**
-   * Project version
-   */
-  liquid::String version;
-
-  /**
-   * Path to assets directory
-   */
-  std::filesystem::path assetsPath;
-
-  /**
-   * Path to scene directory
-   */
-  std::filesystem::path scenePath;
-
-  /**
-   * Path to settings directory
-   */
-  std::filesystem::path settingsPath;
-};
 
 /**
  * @brief Project manager

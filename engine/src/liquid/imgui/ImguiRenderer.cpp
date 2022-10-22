@@ -266,28 +266,29 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
   float T = data->DisplayPos.y;
   float B = data->DisplayPos.y + data->DisplaySize.y;
 
+  static constexpr size_t MatrixSize = 16;
   const float SCALE_FACTOR = 2.0f;
-  std::array<float, 16> mvp{SCALE_FACTOR / (R - L),
-                            0.0f,
-                            0.0f,
-                            0.0f,
-                            0.0f,
-                            SCALE_FACTOR / (T - B),
-                            0.0f,
-                            0.0f,
-                            0.0f,
-                            0.0f,
-                            1.0f / SCALE_FACTOR,
-                            0.0f,
-                            (R + L) / (L - R),
-                            (T + B) / (B - T),
-                            0.5f,
-                            1.0f
+  std::array<float, MatrixSize> mvp{SCALE_FACTOR / (R - L),
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    SCALE_FACTOR / (T - B),
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    0.0f,
+                                    1.0f / SCALE_FACTOR,
+                                    0.0f,
+                                    (R + L) / (L - R),
+                                    (T + B) / (B - T),
+                                    1.0f / SCALE_FACTOR,
+                                    1.0f
 
   };
 
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                            sizeof(float) * 16, mvp.data());
+                            sizeof(float) * mvp.size(), mvp.data());
 }
 
 void ImguiRenderer::useConfigPath(const String &path) {

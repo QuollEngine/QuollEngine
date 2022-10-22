@@ -36,3 +36,9 @@ function linkPlatformLibraries()
 
     filter{}
 end
+
+-- Get target extension based
+-- on platform
+function getTargetExtension(targetName)
+    return targetName .. "%{iif(cfg.system == 'windows', '.exe', '')}"
+end

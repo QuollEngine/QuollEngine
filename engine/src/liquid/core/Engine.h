@@ -37,6 +37,13 @@ public:
    */
   static const Path getFontsPath();
 
+  /**
+   * @brief Get engine path
+   *
+   * @return Engine path
+   */
+  static const Path getEnginePath();
+
 private:
   /**
    * @brief Create engine

@@ -9,11 +9,19 @@ namespace liquidator {
 
 void MenuBar::render(EditorManager &editorManager,
                      EntityManager &entityManager) {
+  if (ImGui::BeginMenu("Project")) {
+    if (ImGui::MenuItem("Export as game", nullptr)) {
+      editorManager.startGameExport();
+    }
+    ImGui::EndMenu();
+  }
+
   if (ImGui::BeginMenu("Objects")) {
     if (ImGui::MenuItem("Create empty entity", nullptr)) {
       entityManager.createEmptyEntity(editorManager.getEditorCamera(),
                                       liquid::EntityNull);
     }
+
     ImGui::EndMenu();
   }
 }
