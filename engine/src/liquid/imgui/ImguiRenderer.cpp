@@ -288,7 +288,8 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
   };
 
   commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
-                            sizeof(float) * mvp.size(), mvp.data());
+                            static_cast<uint32_t>(sizeof(float) * mvp.size()),
+                            mvp.data());
 }
 
 void ImguiRenderer::useConfigPath(const String &path) {

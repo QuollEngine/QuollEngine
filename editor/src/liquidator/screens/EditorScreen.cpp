@@ -94,7 +94,7 @@ void EditorScreen::start(const Project &project) {
   tracker.trackForChanges();
 
   liquidator::EntityManager entityManager(assetManager, renderer,
-                                          project.scenePath);
+                                          project.scenesPath);
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                                         mEventSystem, renderer, mWindow);
   liquidator::EditorGrid editorGrid;

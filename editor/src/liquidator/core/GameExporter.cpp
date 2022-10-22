@@ -17,8 +17,8 @@ void GameExporter::exportGame(const Project &project,
   std::filesystem::copy(project.assetsPath,
                         destination / project.assetsPath.filename(),
                         co::overwrite_existing | co::recursive);
-  std::filesystem::copy(project.scenePath,
-                        destination / project.scenePath.filename(),
+  std::filesystem::copy(project.scenesPath,
+                        destination / project.scenesPath.filename(),
                         co::overwrite_existing | co::recursive);
 
   // Copy engine data
@@ -44,7 +44,7 @@ void GameExporter::exportGame(const Project &project,
   YAML::Node node;
   node["name"] = gameName.string();
   node["paths"]["assets"] = project.assetsPath.filename().string();
-  node["paths"]["scenes"] = project.scenePath.filename().string();
+  node["paths"]["scenes"] = project.scenesPath.filename().string();
 
   std::ofstream stream(destination / "launch.yml", std::ios::out);
   stream << node;
