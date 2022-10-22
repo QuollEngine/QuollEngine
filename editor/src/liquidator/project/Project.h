@@ -22,9 +22,9 @@ struct Project {
   liquid::Path assetsPath;
 
   /**
-   * Path to scene directory
+   * Path to scenes directory
    */
-  liquid::Path scenePath;
+  liquid::Path scenesPath;
 
   /**
    * Path to settings directory
