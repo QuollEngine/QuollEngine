@@ -110,19 +110,6 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
   }
 }
 
-void EditorManager::setActiveCamera(liquid::Entity camera) {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::CameraComponent>(
-          camera)) {
-    return;
-  }
-
-  mCameraEntity = camera;
-}
-
-void EditorManager::switchToEditorCamera() {
-  mCameraEntity = mEditorCamera.getCamera();
-}
-
 void EditorManager::createNewScene() {
   static constexpr glm::vec3 LightStartPos(0.0f, 5.0f, 0.0f);
 
@@ -142,7 +129,6 @@ void EditorManager::createNewScene() {
 
 void EditorManager::loadOrCreateScene() {
   mEditorCamera.reset();
-  mCameraEntity = mEditorCamera.getCamera();
 
   if (!mEntityManager.loadScene()) {
     createNewScene();

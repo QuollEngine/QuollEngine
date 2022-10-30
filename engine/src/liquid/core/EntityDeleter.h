@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scene/Scene.h"
 
 namespace liquid {
 
@@ -15,9 +15,9 @@ public:
   /**
    * @brief Delete entities
    *
-   * @param entityDatabase Entity database
+   * @param scene Scene
    */
-  void update(EntityDatabase &entityDatabase);
+  void update(Scene &scene);
 };
 
 } // namespace liquid

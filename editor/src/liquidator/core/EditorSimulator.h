@@ -43,9 +43,9 @@ public:
    * updates
    *
    * @param dt Time delta
-   * @param entityDatabase Entity database
+   * @param scene Scene
    */
-  void update(float dt, liquid::EntityDatabase &entityDatabase);
+  void update(float dt, liquid::Scene &scene);
 
   /**
    * @brief Cleanup simulation database
@@ -76,20 +76,20 @@ private:
    * @brief Editor updater
    *
    * @param dt Time delta
-   * @param entityDatabase Entity database
+   * @param scene Scene
    */
-  void updateEditor(float dt, liquid::EntityDatabase &entityDatabase);
+  void updateEditor(float dt, liquid::Scene &scene);
 
   /**
    * @brief Simulation updater
    *
    * @param dt Time delta
-   * @param entityDatabase Entity database
+   * @param scene Scene
    */
-  void updateSimulation(float dt, liquid::EntityDatabase &entityDatabase);
+  void updateSimulation(float dt, liquid::Scene &scene);
 
 private:
-  std::function<void(float, liquid::EntityDatabase &)> mUpdater;
+  std::function<void(float, liquid::Scene &)> mUpdater;
 
   EditorCamera &mEditorCamera;
   liquid::CameraAspectRatioUpdater mCameraAspectRatioUpdater;

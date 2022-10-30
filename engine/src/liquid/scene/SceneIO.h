@@ -4,9 +4,7 @@
 #include "liquid/asset/Result.h"
 #include "liquid/yaml/Yaml.h"
 #include "liquid/entity/EntityDatabase.h"
-
-#include "private/SceneLoader.h"
-#include "private/EntitySerializer.h"
+#include "liquid/scene/Scene.h"
 
 namespace liquid {
 
@@ -19,9 +17,9 @@ public:
    * @brief Create scene IO
    *
    * @param assetRegistry Asset registry
-   * @param entityDatabase Entity database
+   * @param scene Scene
    */
-  SceneIO(AssetRegistry &assetRegistry, EntityDatabase &entityDatabase);
+  SceneIO(AssetRegistry &assetRegistry, Scene &scene);
 
   /**
    * @brief Load scene from a path
@@ -40,12 +38,29 @@ public:
   void saveEntity(Entity entity, const Path &path);
 
   /**
+   * @brief Save starting camera
+   *
+   * @param entity Camera entity
+   * @param path Scene path
+   * @return Save result
+   */
+  Result<bool> saveStartingCamera(Entity entity, const Path &path);
+
+  /**
    * @brief Delete entity
    *
    * @param entity Entity
    * @param path Scene path
    */
   void deleteEntityFilesAndRelations(Entity entity, const Path &path);
+
+  /**
+   * @brief Reset everything
+   *
+   * Clear cache, destroy the entity database,
+   * and create dummy camera component
+   */
+  void reset();
 
 private:
   /**
@@ -73,9 +88,8 @@ private:
   Result<Entity> createEntityFromNode(const YAML::Node &node);
 
 private:
-  EntityDatabase &mEntityDatabase;
-  detail::SceneLoader mLoader;
-  detail::EntitySerializer mDeserializer;
+  Scene &mScene;
+  AssetRegistry &mAssetRegistry;
 
   std::unordered_map<uint64_t, Entity> mEntityIdCache;
   uint64_t mLastId = 1;

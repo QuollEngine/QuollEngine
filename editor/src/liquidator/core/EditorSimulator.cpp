@@ -14,8 +14,8 @@ EditorSimulator::EditorSimulator(liquid::EventSystem &eventSystem,
   useEditorUpdate();
 }
 
-void EditorSimulator::update(float dt, liquid::EntityDatabase &entityDatabase) {
-  mUpdater(dt, entityDatabase);
+void EditorSimulator::update(float dt, liquid::Scene &scene) {
+  mUpdater(dt, scene);
 }
 
 void EditorSimulator::cleanupSimulationDatabase(
@@ -26,30 +26,31 @@ void EditorSimulator::cleanupSimulationDatabase(
 }
 
 void EditorSimulator::useSimulationUpdate() {
-  mUpdater = [this](float dt, liquid::EntityDatabase &entityDatabase) {
-    updateSimulation(dt, entityDatabase);
+  mUpdater = [this](float dt, liquid::Scene &scene) {
+    updateSimulation(dt, scene);
   };
 }
 
 void EditorSimulator::useEditorUpdate() {
-  mUpdater = [this](float dt, liquid::EntityDatabase &entityDatabase) {
-    updateEditor(dt, entityDatabase);
+  mUpdater = [this](float dt, liquid::Scene &scene) {
+    updateEditor(dt, scene);
   };
 }
 
-void EditorSimulator::updateEditor(float dt,
-                                   liquid::EntityDatabase &entityDatabase) {
+void EditorSimulator::updateEditor(float dt, liquid::Scene &scene) {
+  auto &entityDatabase = scene.entityDatabase;
   mCameraAspectRatioUpdater.update(entityDatabase);
   mEditorCamera.update();
 
   mSkeletonUpdater.update(entityDatabase);
   mSceneUpdater.update(entityDatabase);
 
-  mEntityDeleter.update(entityDatabase);
+  mEntityDeleter.update(scene);
 }
 
-void EditorSimulator::updateSimulation(float dt,
-                                       liquid::EntityDatabase &entityDatabase) {
+void EditorSimulator::updateSimulation(float dt, liquid::Scene &scene) {
+  auto &entityDatabase = scene.entityDatabase;
+
   mCameraAspectRatioUpdater.update(entityDatabase);
 
   mScriptingSystem.start(entityDatabase);
@@ -62,7 +63,7 @@ void EditorSimulator::updateSimulation(float dt,
   mPhysicsSystem.update(dt, entityDatabase);
   mAudioSystem.output(entityDatabase);
 
-  mEntityDeleter.update(entityDatabase);
+  mEntityDeleter.update(scene);
 }
 
 } // namespace liquidator

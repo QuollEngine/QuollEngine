@@ -1,19 +1,39 @@
 #include "liquid/core/Base.h"
 #include "SceneIO.h"
 
+#include "private/SceneLoader.h"
+#include "private/EntitySerializer.h"
+
 namespace liquid {
 
-SceneIO::SceneIO(AssetRegistry &assetRegistry, EntityDatabase &entityDatabase)
-    : mEntityDatabase(entityDatabase), mLoader(assetRegistry, entityDatabase),
-      mDeserializer(assetRegistry, entityDatabase) {}
+SceneIO::SceneIO(AssetRegistry &assetRegistry, Scene &scene)
+    : mScene(scene), mAssetRegistry(assetRegistry) {
+  reset();
+}
 
 std::vector<Entity> SceneIO::loadScene(const Path &path) {
+  detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
+
+  if (!std::filesystem::is_regular_file(path)) {
+    return {};
+  }
+
+  std::ifstream stream(path, std::ios::in);
+  auto scene = YAML::Load(stream);
+
+  auto persistentZoneIndex = scene["persistentZone"].as<uint32_t>();
+  auto persistentZone = scene["zones"][persistentZoneIndex];
+
+  stream.close();
+  auto entitiesPath =
+      path.parent_path() / persistentZone["entities"].as<String>();
+
   std::vector<Entity> entities;
   std::vector<YAML::Node> yamlNodes;
 
-  if (std::filesystem::is_directory(path)) {
+  if (std::filesystem::is_directory(entitiesPath)) {
     for (const auto &entry :
-         std::filesystem::recursive_directory_iterator(path)) {
+         std::filesystem::recursive_directory_iterator(entitiesPath)) {
       std::ifstream stream(entry.path(), std::ios::in);
 
       auto node = YAML::Load(stream);
@@ -35,48 +55,111 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
       node["components"] = YAML::Node(YAML::NodeType::Map);
     }
 
-    mLoader.loadComponents(node, entities.at(i), mEntityIdCache);
+    sceneLoader.loadComponents(node, entities.at(i), mEntityIdCache);
+  }
+
+  auto res = sceneLoader.loadStartingCamera(persistentZone["startingCamera"],
+                                            mEntityIdCache, EntityNull);
+  if (res.hasData()) {
+    mScene.activeCamera = res.getData();
+  } else {
+    mScene.activeCamera = mScene.dummyCamera;
   }
 
   return entities;
 }
 
 void SceneIO::saveEntity(Entity entity, const Path &path) {
-  if (!mEntityDatabase.has<IdComponent>(entity)) {
-    mEntityDatabase.set<IdComponent>(entity, {generateId()});
+  detail::EntitySerializer serializer(mAssetRegistry, mScene.entityDatabase);
+
+  if (!mScene.entityDatabase.has<IdComponent>(entity)) {
+    mScene.entityDatabase.set<IdComponent>(entity, {generateId()});
   }
 
-  auto id = mEntityDatabase.get<IdComponent>(entity).id;
+  auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
   mEntityIdCache.insert({id, entity});
 
-  auto node = mDeserializer.serialize(entity);
+  auto node = serializer.serialize(entity);
 
-  if (node.hasData() && std::filesystem::is_directory(path)) {
+  if (node.hasData() && std::filesystem::is_regular_file(path)) {
     std::ofstream stream(getEntityPath(entity, path), std::ios::out);
     stream << node.getData();
     stream.close();
   }
 }
 
+Result<bool> SceneIO::saveStartingCamera(Entity entity, const Path &path) {
+  if (!mScene.entityDatabase.has<IdComponent>(entity)) {
+    return Result<bool>::Error("Entity does not have an id");
+  }
+
+  if (!mScene.entityDatabase.has<PerspectiveLensComponent>(entity)) {
+    return Result<bool>::Error("Entity does not have a camera");
+  }
+
+  std::ifstream stream(path);
+  auto node = YAML::Load(stream);
+  node["zones"][node["persistentZone"].as<uint32_t>()]["startingCamera"] =
+      mScene.entityDatabase.get<IdComponent>(entity).id;
+  stream.close();
+
+  std::ofstream writeStream(path);
+  writeStream << node;
+  writeStream.close();
+
+  return Result<bool>::Ok(true);
+}
+
 void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
-  if (mEntityDatabase.has<ChildrenComponent>(entity)) {
-    const auto &children = mEntityDatabase.get<ChildrenComponent>(entity);
+  if (mScene.entityDatabase.has<PerspectiveLensComponent>(entity)) {
+    detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
+    auto res =
+        sceneLoader.loadStartingCamera(YAML::Node{}, mEntityIdCache, entity);
+    if (res.hasData()) {
+      saveStartingCamera(res.getData(), path);
+      mScene.activeCamera = res.getData();
+    } else {
+      mScene.activeCamera = mScene.dummyCamera;
+    }
+  }
+
+  if (mScene.entityDatabase.has<ChildrenComponent>(entity)) {
+    const auto &children = mScene.entityDatabase.get<ChildrenComponent>(entity);
     for (auto entity : children.children) {
       deleteEntityFilesAndRelations(entity, path);
     }
   }
 
-  if (mEntityDatabase.has<IdComponent>(entity)) {
-    auto id = mEntityDatabase.get<IdComponent>(entity).id;
+  if (mScene.entityDatabase.has<IdComponent>(entity)) {
+    auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
     mEntityIdCache.insert({id, entity});
 
     std::filesystem::remove(getEntityPath(entity, path));
   }
 }
 
+void SceneIO::reset() {
+  mScene.entityDatabase.destroy();
+  mEntityIdCache.clear();
+  auto dummyCamera = mScene.entityDatabase.create();
+  mScene.entityDatabase.set<CameraComponent>(dummyCamera, {});
+  mScene.dummyCamera = dummyCamera;
+  mScene.activeCamera = dummyCamera;
+}
+
 Path SceneIO::getEntityPath(Entity entity, const Path &path) {
-  auto id = mEntityDatabase.get<IdComponent>(entity).id;
-  return path / (std::to_string(id) + ".lqnode");
+  std::ifstream stream(path, std::ios::in);
+  auto scene = YAML::Load(stream);
+
+  auto persistentZoneIndex = scene["persistentZone"].as<uint32_t>();
+  auto persistentZone = scene["zones"][persistentZoneIndex];
+
+  stream.close();
+  auto entitiesPath =
+      path.parent_path() / persistentZone["entities"].as<String>();
+
+  auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
+  return entitiesPath / (std::to_string(id) + ".lqnode");
 }
 
 uint64_t SceneIO::generateId() { return mLastId++; }
@@ -86,8 +169,8 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
     auto id = node["id"].as<uint64_t>(0);
 
     if (id > 0 && mEntityIdCache.find(id) == mEntityIdCache.end()) {
-      auto entity = mEntityDatabase.create();
-      mEntityDatabase.set<IdComponent>(entity, {id});
+      auto entity = mScene.entityDatabase.create();
+      mScene.entityDatabase.set<IdComponent>(entity, {id});
 
       if (mLastId <= id) {
         mLastId = id + 1;
