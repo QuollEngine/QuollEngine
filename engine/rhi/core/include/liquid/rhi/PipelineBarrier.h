@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include "RenderHandle.h"
+#include "AccessFlags.h"
+#include "ImageLayout.h"
 
 namespace liquid::rhi {
 
@@ -12,12 +13,12 @@ struct MemoryBarrier {
   /**
    * Source access flags
    */
-  VkAccessFlags srcAccess = VK_ACCESS_NONE_KHR;
+  Access srcAccess{Access::None};
 
   /**
    * Destination access flags
    */
-  VkAccessFlags dstAccess = VK_ACCESS_NONE_KHR;
+  Access dstAccess{Access::None};
 };
 
 /**
@@ -27,22 +28,22 @@ struct ImageBarrier {
   /**
    * Source access flags
    */
-  VkAccessFlags srcAccess = VK_ACCESS_NONE_KHR;
+  Access srcAccess{Access::None};
 
   /**
    * Destination access flags
    */
-  VkAccessFlags dstAccess = VK_ACCESS_NONE_KHR;
+  Access dstAccess{Access::None};
 
   /**
    * Source image layout
    */
-  VkImageLayout srcLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+  ImageLayout srcLayout{ImageLayout::Undefined};
 
   /**
    * Destination image layout
    */
-  VkImageLayout dstLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+  ImageLayout dstLayout{ImageLayout::Undefined};
 
   /**
    * Texture

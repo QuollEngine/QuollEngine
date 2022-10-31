@@ -21,14 +21,14 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   mExtent = swapchain.extent;
 
   rhi::RenderPassAttachmentDescription attachment{};
-  attachment.layout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  attachment.layout = rhi::ImageLayout::PresentSource;
   attachment.loadOp = rhi::AttachmentLoadOp::Clear;
   attachment.storeOp = rhi::AttachmentStoreOp::Store;
   attachment.texture = swapchain.textures.at(0);
   attachment.clearValue = rhi::AttachmentClearValue(glm::vec4{0.0f});
 
   rhi::RenderPassDescription renderPassDescription{};
-  renderPassDescription.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  renderPassDescription.bindPoint = rhi::PipelineBindPoint::Graphics;
   renderPassDescription.attachments.push_back(attachment);
 
   if (mPresentPass != rhi::RenderPassHandle::Invalid) {
@@ -87,14 +87,14 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
   {
     rhi::ImageBarrier imageBarrier;
-    imageBarrier.srcLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    imageBarrier.dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageBarrier.srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    imageBarrier.dstAccess = VK_ACCESS_SHADER_READ_BIT;
+    imageBarrier.srcLayout = rhi::ImageLayout::ColorAttachmentOptimal;
+    imageBarrier.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+    imageBarrier.srcAccess = rhi::Access::ColorAttachmentWrite;
+    imageBarrier.dstAccess = rhi::Access::ShaderRead;
     imageBarrier.texture = handle;
 
-    commandList.pipelineBarrier(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, {},
+    commandList.pipelineBarrier(rhi::PipelineStage::ColorAttachmentOutput,
+                                rhi::PipelineStage::FragmentShader, {},
                                 {imageBarrier});
   }
 
@@ -117,15 +117,15 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
   {
     rhi::ImageBarrier imageBarrier;
-    imageBarrier.srcLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageBarrier.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    imageBarrier.srcLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+    imageBarrier.dstLayout = rhi::ImageLayout::ColorAttachmentOptimal;
     imageBarrier.texture = handle;
-    imageBarrier.srcAccess = VK_ACCESS_SHADER_READ_BIT;
-    imageBarrier.dstAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    imageBarrier.srcAccess = rhi::Access::ShaderRead;
+    imageBarrier.dstAccess = rhi::Access::ColorAttachmentWrite;
 
-    commandList.pipelineBarrier(VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-                                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                                {}, {imageBarrier});
+    commandList.pipelineBarrier(rhi::PipelineStage::FragmentShader,
+                                rhi::PipelineStage::ColorAttachmentOutput, {},
+                                {imageBarrier});
   }
 }
 

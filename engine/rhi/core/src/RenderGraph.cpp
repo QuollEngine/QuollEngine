@@ -106,16 +106,15 @@ void RenderGraph::compile(RenderDevice *device) {
 
   std::reverse(mCompiledPasses.begin(), mCompiledPasses.end());
 
-  static constexpr VkPipelineStageFlags StageFragmentTest =
-      VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-      VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-  static constexpr VkPipelineStageFlags StageColor =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  static constexpr VkPipelineStageFlags StageFragmentShader =
-      VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  static constexpr PipelineStage StageFragmentTest =
+      PipelineStage::EarlyFragmentTests | PipelineStage::LateFragmentTests;
+  static constexpr PipelineStage StageColor =
+      PipelineStage::ColorAttachmentOutput;
+  static constexpr PipelineStage StageFragmentShader =
+      PipelineStage::FragmentShader;
 
   // Determine attachments, image layouts, and barriers
-  std::unordered_map<rhi::TextureHandle, VkImageLayout> visitedOutputs;
+  std::unordered_map<rhi::TextureHandle, ImageLayout> visitedOutputs;
   for (auto &pass : mCompiledPasses) {
     pass.mPreBarrier = RenderGraphPassBarrier{};
     pass.mPostBarrier = RenderGraphPassBarrier{};
@@ -125,17 +124,17 @@ void RenderGraph::compile(RenderDevice *device) {
                     "Pass is reading from an empty texture");
 
       input.srcLayout = visitedOutputs.at(input.texture);
-      input.dstLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+      input.dstLayout = ImageLayout::ShaderReadOnlyOptimal;
 
-      VkPipelineStageFlags otherStage = 0;
-      VkAccessFlags otherAccess = 0;
+      PipelineStage otherStage{PipelineStage::None};
+      Access otherAccess{Access::None};
 
-      if (input.srcLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+      if (input.srcLayout == ImageLayout::DepthStencilAttachmentOptimal) {
         otherStage = StageFragmentTest;
-        otherAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-      } else if (input.srcLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+        otherAccess = Access::DepthStencilAttachmentWrite;
+      } else if (input.srcLayout == ImageLayout::ColorAttachmentOptimal) {
         otherStage = StageColor;
-        otherAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        otherAccess = Access::ColorAttachmentWrite;
       }
 
       ImageBarrier preImageBarrier{};
@@ -143,13 +142,13 @@ void RenderGraph::compile(RenderDevice *device) {
       preImageBarrier.dstLayout = input.dstLayout;
       preImageBarrier.texture = input.texture;
       preImageBarrier.srcAccess = otherAccess;
-      preImageBarrier.dstAccess = VK_ACCESS_SHADER_READ_BIT;
+      preImageBarrier.dstAccess = Access::ShaderRead;
 
       ImageBarrier postImageBarrier{};
       postImageBarrier.srcLayout = input.dstLayout;
       postImageBarrier.dstLayout = input.srcLayout;
       postImageBarrier.texture = input.texture;
-      postImageBarrier.srcAccess = VK_ACCESS_SHADER_READ_BIT;
+      postImageBarrier.srcAccess = Access::ShaderRead;
       postImageBarrier.dstAccess = otherAccess;
 
       pass.mPreBarrier.enabled = true;
@@ -167,7 +166,7 @@ void RenderGraph::compile(RenderDevice *device) {
       auto &output = pass.mOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
       if (visitedOutputs.find(output.texture) == visitedOutputs.end()) {
-        output.srcLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        output.srcLayout = ImageLayout::Undefined;
         attachment.loadOp = AttachmentLoadOp::Clear;
       } else {
         output.srcLayout = visitedOutputs.at(output.texture);
@@ -176,21 +175,21 @@ void RenderGraph::compile(RenderDevice *device) {
 
       attachment.storeOp = AttachmentStoreOp::Store;
 
-      VkPipelineStageFlags stage = 0;
-      VkAccessFlags srcAccess = 0;
-      VkAccessFlags dstAccess = 0;
+      PipelineStage stage{PipelineStage::None};
+      Access srcAccess{Access::None};
+      Access dstAccess{Access::None};
 
       auto &texture = device->getTextureDescription(output.texture);
       if ((texture.usage & TextureUsage::Color) == TextureUsage::Color) {
-        output.dstLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        output.dstLayout = ImageLayout::ColorAttachmentOptimal;
         stage = StageColor;
-        srcAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        dstAccess = srcAccess | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+        srcAccess = Access::ColorAttachmentWrite;
+        dstAccess = srcAccess | Access::ColorAttachmentRead;
       } else if ((texture.usage & TextureUsage::Depth) == TextureUsage::Depth) {
-        output.dstLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        output.dstLayout = ImageLayout::DepthStencilAttachmentOptimal;
         stage = StageFragmentTest;
-        srcAccess = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        dstAccess = srcAccess | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        srcAccess = Access::DepthStencilAttachmentWrite;
+        dstAccess = srcAccess | Access::DepthStencilAttachmentRead;
       }
 
       MemoryBarrier memoryBarrier{};

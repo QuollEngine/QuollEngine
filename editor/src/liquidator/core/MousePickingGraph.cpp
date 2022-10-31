@@ -28,7 +28,7 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
   depthBufferDesc.width = FramebufferSizePercentage;
   depthBufferDesc.height = FramebufferSizePercentage;
   depthBufferDesc.layers = 1;
-  depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
+  depthBufferDesc.format = liquid::rhi::Format::Depth32Float;
   auto depthBuffer = mDevice->createTexture(depthBufferDesc);
 
   liquid::Entity nullEntity{0};
@@ -115,7 +115,7 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
 
         if (indexed) {
           commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      VK_INDEX_TYPE_UINT32);
+                                      liquid::rhi::IndexType::Uint32);
         }
 
         uint32_t indexCount =
@@ -170,7 +170,7 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
             liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
         if (indexed) {
           commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      VK_INDEX_TYPE_UINT32);
+                                      liquid::rhi::IndexType::Uint32);
         }
 
         uint32_t indexCount =

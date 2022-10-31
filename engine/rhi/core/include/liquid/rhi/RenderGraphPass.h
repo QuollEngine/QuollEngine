@@ -44,12 +44,12 @@ struct RenderTargetData {
   /**
    * Source image layout
    */
-  VkImageLayout srcLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+  ImageLayout srcLayout{ImageLayout::Undefined};
 
   /**
    * Destination image layout
    */
-  VkImageLayout dstLayout = VK_IMAGE_LAYOUT_MAX_ENUM;
+  ImageLayout dstLayout{ImageLayout::Undefined};
 };
 
 /**
@@ -64,12 +64,12 @@ struct RenderGraphPassBarrier {
   /**
    * Source pipeline stage
    */
-  VkPipelineStageFlags srcStage = VK_PIPELINE_STAGE_NONE_KHR;
+  PipelineStage srcStage{PipelineStage::None};
 
   /**
    * Destination pipeline stage
    */
-  VkPipelineStageFlags dstStage = VK_PIPELINE_STAGE_NONE_KHR;
+  PipelineStage dstStage{PipelineStage::None};
 
   /**
    * Memory barriers

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/rhi/Format.h"
+
 namespace liquid::rhi {
 
 enum class TextureType { Standard, Cubemap };
@@ -44,7 +46,7 @@ struct TextureDescription {
   /**
    * Texture format
    */
-  uint32_t format = 0;
+  Format format = Format::Undefined;
 
   /**
    * Texture width

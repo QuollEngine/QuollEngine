@@ -3,7 +3,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include "ImageTextureLoader.h"
-#include <vulkan/vulkan.hpp>
 
 namespace liquid {
 
@@ -18,7 +17,7 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
       stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
   LIQUID_ASSERT(description.data, "Failed to load image: " + filename);
 
-  description.format = VK_FORMAT_R8G8B8A8_SRGB;
+  description.format = rhi::Format::Rgba8Srgb;
   description.width = width;
   description.height = height;
   description.usage = rhi::TextureUsage::Color |

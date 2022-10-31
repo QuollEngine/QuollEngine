@@ -176,4 +176,96 @@ VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
   }
 }
 
+VkAccessFlags VulkanMapping::getAccessFlags(Access access) {
+  return static_cast<VkAccessFlags>(access);
+}
+
+VkImageLayout VulkanMapping::getImageLayout(ImageLayout imageLayout) {
+  switch (imageLayout) {
+  case ImageLayout::Undefined:
+    return VK_IMAGE_LAYOUT_UNDEFINED;
+  case ImageLayout::General:
+    return VK_IMAGE_LAYOUT_GENERAL;
+  case ImageLayout::ColorAttachmentOptimal:
+    return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  case ImageLayout::DepthStencilAttachmentOptimal:
+    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+  case ImageLayout::DepthStencilReadOnlyOptimal:
+    return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+  case ImageLayout::ShaderReadOnlyOptimal:
+    return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  case ImageLayout::TransferSourceOptimal:
+    return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+  case ImageLayout::TransferDestinationOptimal:
+    return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+  case ImageLayout::Preinitialized:
+    return VK_IMAGE_LAYOUT_PREINITIALIZED;
+  case ImageLayout::PresentSource:
+    return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  default:
+    return VK_IMAGE_LAYOUT_MAX_ENUM;
+  };
+}
+
+VkPipelineBindPoint
+VulkanMapping::getPipelineBindPoint(PipelineBindPoint pipelineBindPoint) {
+  switch (pipelineBindPoint) {
+  case PipelineBindPoint::Graphics:
+    return VK_PIPELINE_BIND_POINT_GRAPHICS;
+  case PipelineBindPoint::Compute:
+    return VK_PIPELINE_BIND_POINT_COMPUTE;
+  default:
+    return VK_PIPELINE_BIND_POINT_MAX_ENUM;
+  }
+}
+
+VkShaderStageFlags VulkanMapping::getShaderStageFlags(ShaderStage shaderStage) {
+  return static_cast<VkShaderStageFlags>(shaderStage);
+}
+
+VkPipelineStageFlags
+VulkanMapping::getPipelineStageFlags(PipelineStage pipelineStage) {
+  return static_cast<VkPipelineStageFlags>(pipelineStage);
+}
+
+VkIndexType VulkanMapping::getIndexType(IndexType indexType) {
+  switch (indexType) {
+  case IndexType::Uint16:
+    return VK_INDEX_TYPE_UINT16;
+  case IndexType::Uint32:
+    return VK_INDEX_TYPE_UINT32;
+  default:
+    return VK_INDEX_TYPE_MAX_ENUM;
+  }
+}
+
+VkFormat VulkanMapping::getFormat(Format format) {
+  switch (format) {
+  case rhi::Format::Rgba8Unorm:
+    return VK_FORMAT_R8G8B8A8_UNORM;
+  case rhi::Format::Rgba8Srgb:
+    return VK_FORMAT_R8G8B8A8_SRGB;
+  case rhi::Format::Bgra8Srgb:
+    return VK_FORMAT_B8G8R8A8_SRGB;
+  case rhi::Format::Rgba16Float:
+    return VK_FORMAT_R16G16B16A16_SFLOAT;
+  case rhi::Format::Rg32Float:
+    return VK_FORMAT_R32G32_SFLOAT;
+  case rhi::Format::Rgb32Float:
+    return VK_FORMAT_R32G32B32_SFLOAT;
+  case rhi::Format::Rgba32Float:
+    return VK_FORMAT_R32G32B32A32_SFLOAT;
+  case rhi::Format::Rgba32Uint:
+    return VK_FORMAT_R32G32B32A32_UINT;
+  case rhi::Format::Depth16Unorm:
+    return VK_FORMAT_D16_UNORM;
+  case rhi::Format::Depth32Float:
+    return VK_FORMAT_D32_SFLOAT;
+  case rhi::Format::Undefined:
+  default:
+    LIQUID_ASSERT(false, "Undefined format");
+    return VK_FORMAT_UNDEFINED;
+  }
+}
+
 } // namespace liquid::rhi

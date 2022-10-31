@@ -64,7 +64,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   shadowMapDesc.width = ShadowMapDimensions;
   shadowMapDesc.height = ShadowMapDimensions;
   shadowMapDesc.layers = NumLights;
-  shadowMapDesc.format = VK_FORMAT_D16_UNORM;
+  shadowMapDesc.format = rhi::Format::Depth16Unorm;
   auto shadowmap = mDevice->createTexture(shadowMapDesc);
 
   rhi::TextureDescription sceneColorDesc{};
@@ -73,7 +73,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   sceneColorDesc.width = SwapchainSizePercentage;
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
-  sceneColorDesc.format = VK_FORMAT_B8G8R8A8_SRGB;
+  sceneColorDesc.format = rhi::Format::Bgra8Srgb;
   auto sceneColor = mDevice->createTexture(sceneColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
@@ -82,7 +82,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   depthBufferDesc.width = SwapchainSizePercentage;
   depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
-  depthBufferDesc.format = VK_FORMAT_D32_SFLOAT;
+  depthBufferDesc.format = rhi::Format::Depth32Float;
   auto depthBuffer = mDevice->createTexture(depthBufferDesc);
 
   {
@@ -125,7 +125,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
              ++index) {
           glm::ivec4 pcIndex{index};
 
-          commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+          commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(glm::ivec4), &pcIndex);
           render(commandList, pipeline, false);
         }
@@ -140,7 +140,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
              ++index) {
           glm::ivec4 pcIndex{index};
 
-          commandList.pushConstants(skinnedPipeline, VK_SHADER_STAGE_VERTEX_BIT,
+          commandList.pushConstants(skinnedPipeline, rhi::ShaderStage::Vertex,
                                     0, sizeof(glm::ivec4), &pcIndex);
           renderSkinned(commandList, skinnedPipeline, false);
           index++;
@@ -263,7 +263,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
       commandList.bindVertexBuffer(cube.vertexBuffers.at(0).getHandle());
       commandList.bindIndexBuffer(cube.indexBuffers.at(0).getHandle(),
-                                  VK_INDEX_TYPE_UINT32);
+                                  rhi::IndexType::Uint32);
       commandList.drawIndexed(
           static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
     });
@@ -393,7 +393,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
       if (indexed) {
         commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                    VK_INDEX_TYPE_UINT32);
+                                    rhi::IndexType::Uint32);
       }
 
       if (bindMaterialData) {
@@ -434,7 +434,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
       bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
       if (indexed) {
         commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                    VK_INDEX_TYPE_UINT32);
+                                    rhi::IndexType::Uint32);
       }
 
       uint32_t indexCount =
@@ -485,7 +485,7 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
       glm::uvec4 glyphStart{text.glyphStart};
 
       commandList.pushConstants(
-          pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::uvec4),
+          pipeline, rhi::ShaderStage::Vertex, 0, sizeof(glm::uvec4),
           static_cast<void *>(glm::value_ptr(glyphStart)));
 
       commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,

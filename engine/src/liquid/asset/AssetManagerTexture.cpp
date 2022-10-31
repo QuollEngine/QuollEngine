@@ -7,12 +7,83 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-#include <ktx.h>
-#include <vulkan/vulkan.h>
-#include <ktxvulkan.h>
 #include "liquid/loaders/KtxError.h"
 
+#include <vulkan/vulkan.hpp>
+#include <ktx.h>
+#include <ktxvulkan.h>
+
 namespace liquid {
+
+/**
+ * @brief Get Vulkan format from RHI format
+ *
+ * @param format Vulkan format
+ * @return RHI format
+ */
+static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
+  switch (format) {
+  case rhi::Format::Rgba8Unorm:
+    return VK_FORMAT_R8G8B8A8_UNORM;
+  case rhi::Format::Rgba8Srgb:
+    return VK_FORMAT_R8G8B8A8_SRGB;
+  case rhi::Format::Bgra8Srgb:
+    return VK_FORMAT_B8G8R8A8_SRGB;
+  case rhi::Format::Rgba16Float:
+    return VK_FORMAT_R16G16B16A16_SFLOAT;
+  case rhi::Format::Rg32Float:
+    return VK_FORMAT_R32G32_SFLOAT;
+  case rhi::Format::Rgb32Float:
+    return VK_FORMAT_R32G32B32_SFLOAT;
+  case rhi::Format::Rgba32Float:
+    return VK_FORMAT_R32G32B32A32_SFLOAT;
+  case rhi::Format::Rgba32Uint:
+    return VK_FORMAT_R32G32B32A32_UINT;
+  case rhi::Format::Depth16Unorm:
+    return VK_FORMAT_D16_UNORM;
+  case rhi::Format::Depth32Float:
+    return VK_FORMAT_D32_SFLOAT;
+  case rhi::Format::Undefined:
+  default:
+    LIQUID_ASSERT(false, "Undefined format");
+    return VK_FORMAT_UNDEFINED;
+  }
+}
+
+/**
+ * @brief Get RHI format from Vulkan format
+ *
+ * @param format Vulkan format
+ * @return RHI format
+ */
+static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
+  switch (format) {
+  case VK_FORMAT_R8G8B8A8_UNORM:
+    return rhi::Format::Rgba8Unorm;
+  case VK_FORMAT_R8G8B8A8_SRGB:
+    return rhi::Format::Rgba8Srgb;
+  case VK_FORMAT_B8G8R8A8_SRGB:
+    return rhi::Format::Bgra8Srgb;
+  case VK_FORMAT_R16G16B16A16_SFLOAT:
+    return rhi::Format::Rgba16Float;
+  case VK_FORMAT_R32G32_SFLOAT:
+    return rhi::Format::Rg32Float;
+  case VK_FORMAT_R32G32B32_SFLOAT:
+    return rhi::Format::Rgb32Float;
+  case VK_FORMAT_R32G32B32A32_SFLOAT:
+    return rhi::Format::Rgba32Float;
+  case VK_FORMAT_R32G32B32A32_UINT:
+    return rhi::Format::Rgba32Uint;
+  case VK_FORMAT_D16_UNORM:
+    return rhi::Format::Depth16Unorm;
+  case VK_FORMAT_D32_SFLOAT:
+    return rhi::Format::Depth32Float;
+  case VK_FORMAT_UNDEFINED:
+  default:
+    LIQUID_ASSERT(false, "Undefined format");
+    return rhi::Format::Undefined;
+  }
+}
 
 Result<Path>
 AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
@@ -26,7 +97,7 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.numLevels = 1;
   createInfo.isArray = KTX_FALSE;
   createInfo.generateMipmaps = KTX_FALSE;
-  createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
+  createInfo.vkFormat = getVulkanFormatFromFormat(rhi::Format::Rgba8Srgb);
 
   Path assetPath = (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
 
@@ -99,7 +170,9 @@ AssetManager::loadTextureFromFile(const Path &filePath) {
                         (ktxTextureData->isCubemap ? CubemapSides : 1);
   texture.data.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
                                                 : TextureAssetType::Standard;
-  texture.data.format = ktxTexture_GetVkFormat(ktxTextureData);
+
+  texture.data.format =
+      getFormatFromVulkanFormat(ktxTexture_GetVkFormat(ktxTextureData));
 
   char *srcData = reinterpret_cast<char *>(ktxTexture_GetData(ktxTextureData));
 

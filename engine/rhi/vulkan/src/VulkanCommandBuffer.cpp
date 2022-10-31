@@ -6,6 +6,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
 #include "VulkanPipeline.h"
+#include "VulkanMapping.h"
 
 namespace liquid::rhi {
 
@@ -74,21 +75,23 @@ void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
 }
 
 void VulkanCommandBuffer::bindIndexBuffer(BufferHandle buffer,
-                                          VkIndexType indexType) {
+                                          IndexType indexType) {
   const auto &vulkanBuffer = mRegistry.getBuffers().at(buffer);
 
-  vkCmdBindIndexBuffer(mCommandBuffer, vulkanBuffer->getBuffer(), 0, indexType);
+  vkCmdBindIndexBuffer(mCommandBuffer, vulkanBuffer->getBuffer(), 0,
+                       VulkanMapping::getIndexType(indexType));
   mStats.addCommandCall();
 }
 
 void VulkanCommandBuffer::pushConstants(PipelineHandle pipeline,
-                                        VkShaderStageFlags stageFlags,
+                                        ShaderStage shaderStage,
                                         uint32_t offset, uint32_t size,
                                         void *data) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
 
   vkCmdPushConstants(mCommandBuffer, vulkanPipeline->getPipelineLayout(),
-                     stageFlags, offset, size, data);
+                     VulkanMapping::getShaderStageFlags(shaderStage), offset,
+                     size, data);
   mStats.addCommandCall();
 }
 
@@ -128,7 +131,7 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
 }
 
 void VulkanCommandBuffer::pipelineBarrier(
-    VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+    PipelineStage srcStage, PipelineStage dstStage,
     const std::vector<MemoryBarrier> &memoryBarriers,
     const std::vector<ImageBarrier> &imageBarriers) {
 
@@ -138,8 +141,8 @@ void VulkanCommandBuffer::pipelineBarrier(
     auto &vkBarrier = vkMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
     vkBarrier.pNext = nullptr;
-    vkBarrier.srcAccessMask = barrier.srcAccess;
-    vkBarrier.dstAccessMask = barrier.dstAccess;
+    vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
+    vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
   }
 
   std::vector<VkImageMemoryBarrier> vkImageMemoryBarriers(imageBarriers.size());
@@ -149,10 +152,10 @@ void VulkanCommandBuffer::pipelineBarrier(
     auto &vkBarrier = vkImageMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     vkBarrier.pNext = nullptr;
-    vkBarrier.srcAccessMask = barrier.srcAccess;
-    vkBarrier.dstAccessMask = barrier.dstAccess;
-    vkBarrier.oldLayout = barrier.srcLayout;
-    vkBarrier.newLayout = barrier.dstLayout;
+    vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
+    vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
+    vkBarrier.oldLayout = VulkanMapping::getImageLayout(barrier.srcLayout);
+    vkBarrier.newLayout = VulkanMapping::getImageLayout(barrier.dstLayout);
     vkBarrier.image = texture->getImage();
     vkBarrier.subresourceRange.baseArrayLayer = 0;
     vkBarrier.subresourceRange.baseMipLevel = 0;
@@ -162,7 +165,9 @@ void VulkanCommandBuffer::pipelineBarrier(
   }
 
   vkCmdPipelineBarrier(
-      mCommandBuffer, srcStage, dstStage, VK_DEPENDENCY_BY_REGION_BIT,
+      mCommandBuffer, VulkanMapping::getPipelineStageFlags(srcStage),
+      VulkanMapping::getPipelineStageFlags(dstStage),
+      VK_DEPENDENCY_BY_REGION_BIT,
       static_cast<uint32_t>(vkMemoryBarriers.size()), vkMemoryBarriers.data(),
       0, nullptr, static_cast<uint32_t>(vkImageMemoryBarriers.size()),
       vkImageMemoryBarriers.data());

@@ -3,6 +3,7 @@
 #include "RenderHandle.h"
 #include "liquid/scene/Vertex.h"
 #include "liquid/scene/SkinnedVertex.h"
+#include "liquid/rhi/Format.h"
 
 namespace liquid::rhi {
 
@@ -120,7 +121,7 @@ struct PipelineVertexInputAttribute {
   /**
    * Attribute format
    */
-  uint32_t format = 0;
+  Format format = Format::Undefined;
 
   /**
    * Attribute offset
@@ -169,25 +170,20 @@ inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
   static constexpr uint32_t TexCoord0Slot = 4;
   static constexpr uint32_t TexCoord1Slot = 5;
 
-  // TODO: Create abstract format type
-  const uint32_t R32G32B32A32_SFLOAT = 109;
-  const uint32_t R32G32B32_SFLOAT = 106;
-  const uint32_t R32G32_SFLOAT = 103;
-
   return PipelineVertexInputLayout{
       {PipelineVertexInputBinding{0, sizeof(Vertex), VertexInputRate::Vertex}},
       {
-          PipelineVertexInputAttribute{PositionSlot, 0, R32G32B32_SFLOAT,
+          PipelineVertexInputAttribute{PositionSlot, 0, rhi::Format::Rgb32Float,
                                        offsetof(SkinnedVertex, x)},
-          PipelineVertexInputAttribute{NormalSlot, 0, R32G32B32_SFLOAT,
+          PipelineVertexInputAttribute{NormalSlot, 0, rhi::Format::Rgb32Float,
                                        offsetof(SkinnedVertex, nx)},
-          PipelineVertexInputAttribute{TangentSlot, 0, R32G32B32A32_SFLOAT,
+          PipelineVertexInputAttribute{TangentSlot, 0, rhi::Format::Rgba32Float,
                                        offsetof(SkinnedVertex, tx)},
-          PipelineVertexInputAttribute{ColorSlot, 0, R32G32B32_SFLOAT,
+          PipelineVertexInputAttribute{ColorSlot, 0, rhi::Format::Rgb32Float,
                                        offsetof(SkinnedVertex, r)},
-          PipelineVertexInputAttribute{TexCoord0Slot, 0, R32G32_SFLOAT,
+          PipelineVertexInputAttribute{TexCoord0Slot, 0, rhi::Format::Rg32Float,
                                        offsetof(SkinnedVertex, u0)},
-          PipelineVertexInputAttribute{TexCoord1Slot, 0, R32G32_SFLOAT,
+          PipelineVertexInputAttribute{TexCoord1Slot, 0, rhi::Format::Rg32Float,
                                        offsetof(SkinnedVertex, u1)},
       }};
 }
@@ -209,30 +205,24 @@ PipelineVertexInputLayout::create<SkinnedVertex>() {
   static constexpr uint32_t JointsSlot = 6;
   static constexpr uint32_t WeightsSlot = 7;
 
-  // TODO: Create abstract format type
-  static constexpr uint32_t R32G32B32A32_SFLOAT = 109;
-  static constexpr uint32_t R32G32B32_SFLOAT = 106;
-  static constexpr uint32_t R32G32_SFLOAT = 103;
-  static constexpr uint32_t R32G32B32A32_UINT = 107;
-
   return PipelineVertexInputLayout{
       {PipelineVertexInputBinding{0, sizeof(SkinnedVertex),
                                   VertexInputRate::Vertex}},
-      {PipelineVertexInputAttribute{PositionSlot, 0, R32G32B32_SFLOAT,
+      {PipelineVertexInputAttribute{PositionSlot, 0, rhi::Format::Rgb32Float,
                                     offsetof(SkinnedVertex, x)},
-       PipelineVertexInputAttribute{NormalSlot, 0, R32G32B32_SFLOAT,
+       PipelineVertexInputAttribute{NormalSlot, 0, rhi::Format::Rgb32Float,
                                     offsetof(SkinnedVertex, nx)},
-       PipelineVertexInputAttribute{TangentSlot, 0, R32G32B32A32_SFLOAT,
+       PipelineVertexInputAttribute{TangentSlot, 0, rhi::Format::Rgba32Float,
                                     offsetof(SkinnedVertex, tx)},
-       PipelineVertexInputAttribute{ColorSlot, 0, R32G32B32_SFLOAT,
+       PipelineVertexInputAttribute{ColorSlot, 0, rhi::Format::Rgb32Float,
                                     offsetof(SkinnedVertex, r)},
-       PipelineVertexInputAttribute{TexCoord0Slot, 0, R32G32_SFLOAT,
+       PipelineVertexInputAttribute{TexCoord0Slot, 0, rhi::Format::Rg32Float,
                                     offsetof(SkinnedVertex, u0)},
-       PipelineVertexInputAttribute{TexCoord1Slot, 0, R32G32_SFLOAT,
+       PipelineVertexInputAttribute{TexCoord1Slot, 0, rhi::Format::Rg32Float,
                                     offsetof(SkinnedVertex, u1)},
-       PipelineVertexInputAttribute{JointsSlot, 0, R32G32B32A32_UINT,
+       PipelineVertexInputAttribute{JointsSlot, 0, rhi::Format::Rgba32Uint,
                                     offsetof(SkinnedVertex, j0)},
-       PipelineVertexInputAttribute{WeightsSlot, 0, R32G32B32A32_SFLOAT,
+       PipelineVertexInputAttribute{WeightsSlot, 0, rhi::Format::Rgba32Float,
                                     offsetof(SkinnedVertex, w0)}}};
 }
 

@@ -3,6 +3,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 #include "VulkanError.h"
+#include "VulkanMapping.h"
 
 namespace liquid::rhi {
 
@@ -25,7 +26,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
                              VulkanUploadContext &uploadContext,
                              const glm::uvec2 &swapchainExtent)
     : mAllocator(allocator), mDevice(device),
-      mFormat(static_cast<VkFormat>(description.format)),
+      mFormat(VulkanMapping::getFormat(description.format)),
       mDescription(description) {
   LIQUID_ASSERT(
       description.type == TextureType::Cubemap ? description.layers == 6 : true,
@@ -35,7 +36,6 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
                             ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
                             : 0;
 
-  VkFormat format = static_cast<VkFormat>(description.format);
   VkImageViewType imageViewType = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
 
   if (description.type == TextureType::Cubemap) {
@@ -84,7 +84,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.pNext = nullptr;
   imageCreateInfo.flags = imageFlags;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-  imageCreateInfo.format = format;
+  imageCreateInfo.format = mFormat;
   imageCreateInfo.extent = extent;
   imageCreateInfo.mipLevels = 1;
   imageCreateInfo.arrayLayers = description.layers;
@@ -106,7 +106,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.flags = 0;
   imageViewCreateInfo.image = mImage;
   imageViewCreateInfo.viewType = imageViewType;
-  imageViewCreateInfo.format = format;
+  imageViewCreateInfo.format = mFormat;
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
   imageViewCreateInfo.subresourceRange.layerCount = description.layers;

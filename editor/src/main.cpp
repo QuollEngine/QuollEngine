@@ -22,7 +22,6 @@ int main() {
 
   auto project = projectSelector.start();
 
-  device->waitForIdle();
   device->destroyResources();
   if (project.has_value()) {
     liquidator::EditorScreen editor(window, eventSystem, device);
