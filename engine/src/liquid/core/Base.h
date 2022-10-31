@@ -50,6 +50,7 @@
 #include "Assert.h"
 #include "Profiler.h"
 #include "Errorable.h"
+#include "BitwiseEnum.h"
 
 namespace liquid {
 

@@ -3,8 +3,8 @@
 #include "liquid/rhi/Descriptor.h"
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/PipelineBarrier.h"
-
-#include <vulkan/vulkan.hpp>
+#include "liquid/rhi/StageFlags.h"
+#include "liquid/rhi/IndexType.h"
 
 namespace liquid::rhi {
 
@@ -80,20 +80,19 @@ public:
    * @param buffer Index buffer
    * @param indexType Index buffer data type
    */
-  virtual void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType) = 0;
+  virtual void bindIndexBuffer(BufferHandle buffer, IndexType indexType) = 0;
 
   /**
    * @brief Push constants
    *
    * @param pipeline Pipeline
-   * @param stageFlags Stage flags
+   * @param shaderStage Shader stage
    * @param offset Offset
    * @param size Size
    * @param data Data
    */
-  virtual void pushConstants(PipelineHandle pipeline,
-                             VkShaderStageFlags stageFlags, uint32_t offset,
-                             uint32_t size, void *data) = 0;
+  virtual void pushConstants(PipelineHandle pipeline, ShaderStage shaderStage,
+                             uint32_t offset, uint32_t size, void *data) = 0;
 
   /**
    * @brief Draw
@@ -146,7 +145,7 @@ public:
    * @param imageBarriers Image barriers
    */
   virtual void
-  pipelineBarrier(VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+  pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
                   const std::vector<MemoryBarrier> &memoryBarriers,
                   const std::vector<ImageBarrier> &imageBarriers) = 0;
 };

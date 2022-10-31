@@ -130,6 +130,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   mainLoop.run();
 
   mWindow.removeResizeHandler(resizeHandler);
+  mDevice->waitForIdle();
   return project;
 }
 

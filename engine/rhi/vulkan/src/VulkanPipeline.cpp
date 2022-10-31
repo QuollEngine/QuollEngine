@@ -219,7 +219,8 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
     vertexInputDescriptions.at(i) = VkVertexInputAttributeDescription{
         description.inputLayout.attributes.at(i).slot,
         description.inputLayout.attributes.at(i).binding,
-        static_cast<VkFormat>(description.inputLayout.attributes.at(i).format),
+        VulkanMapping::getFormat(
+            description.inputLayout.attributes.at(i).format),
         description.inputLayout.attributes.at(i).offset,
     };
   }

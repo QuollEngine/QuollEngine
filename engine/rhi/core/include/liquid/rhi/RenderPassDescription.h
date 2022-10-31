@@ -1,7 +1,8 @@
 #pragma once
 
 #include "liquid/rhi/RenderHandle.h"
-#include <vulkan/vulkan.hpp>
+#include "liquid/rhi/ImageLayout.h"
+#include "liquid/rhi/PipelineBindPoint.h"
 
 namespace liquid::rhi {
 
@@ -48,12 +49,12 @@ struct RenderPassAttachmentDescription {
   /**
    * Attachment image initial layout
    */
-  VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  ImageLayout initialLayout{ImageLayout::Undefined};
 
   /**
    * Attachment image layout
    */
-  VkImageLayout layout = VK_IMAGE_LAYOUT_MAX_ENUM;
+  ImageLayout layout{ImageLayout::Undefined};
 
   /**
    * Attachment clear value
@@ -73,7 +74,7 @@ struct RenderPassDescription {
   /**
    * Pipeline bind point
    */
-  VkPipelineBindPoint bindPoint;
+  PipelineBindPoint bindPoint;
 };
 
 } // namespace liquid::rhi

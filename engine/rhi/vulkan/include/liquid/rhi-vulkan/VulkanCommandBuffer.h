@@ -93,18 +93,18 @@ public:
    * @param buffer Index buffer
    * @param indexType Index buffer data type
    */
-  void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType) override;
+  void bindIndexBuffer(BufferHandle buffer, IndexType indexType) override;
 
   /**
    * @brief Push constants
    *
    * @param pipeline Pipeline
-   * @param stageFlags Stage flags
+   * @param shaderStage Shader stage
    * @param offset Offset
    * @param size Size
    * @param data Data
    */
-  void pushConstants(PipelineHandle pipeline, VkShaderStageFlags stageFlags,
+  void pushConstants(PipelineHandle pipeline, ShaderStage shaderStage,
                      uint32_t offset, uint32_t size, void *data) override;
 
   /**
@@ -157,8 +157,7 @@ public:
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    */
-  void pipelineBarrier(VkPipelineStageFlags srcStage,
-                       VkPipelineStageFlags dstStage,
+  void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
                        const std::vector<MemoryBarrier> &memoryBarriers,
                        const std::vector<ImageBarrier> &imageBarriers) override;
 

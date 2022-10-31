@@ -48,10 +48,9 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       mClearValues.at(i).color.float32[3] =
           std::get<glm::vec4>(desc.clearValue).w;
 
-      attachment.initialLayout = desc.initialLayout;
-      attachment.finalLayout = desc.layout != VK_IMAGE_LAYOUT_MAX_ENUM
-                                   ? desc.layout
-                                   : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+      attachment.initialLayout =
+          VulkanMapping::getImageLayout(desc.initialLayout);
+      attachment.finalLayout = VulkanMapping::getImageLayout(desc.layout);
       ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
       colorReferences.push_back(ref);
     } else if ((texture->getDescription().usage & TextureUsage::Depth) ==
@@ -62,7 +61,8 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       mClearValues.at(i).depthStencil.stencil =
           std::get<DepthStencilClear>(desc.clearValue).clearStencil;
 
-      attachment.initialLayout = desc.initialLayout;
+      attachment.initialLayout =
+          VulkanMapping::getImageLayout(desc.initialLayout);
       attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
       ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
       depthReference.emplace(ref);
@@ -79,7 +79,8 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
   subpass.pInputAttachments = nullptr;
   subpass.preserveAttachmentCount = 0;
   subpass.pPreserveAttachments = nullptr;
-  subpass.pipelineBindPoint = description.bindPoint;
+  subpass.pipelineBindPoint =
+      VulkanMapping::getPipelineBindPoint(description.bindPoint);
   subpass.pResolveAttachments = nullptr;
 
   VkRenderPassCreateInfo createInfo{};

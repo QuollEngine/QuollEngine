@@ -120,7 +120,7 @@ public:
    * @param buffer Index buffer
    * @param indexType Index buffer data type
    */
-  inline void bindIndexBuffer(BufferHandle buffer, VkIndexType indexType) {
+  inline void bindIndexBuffer(BufferHandle buffer, IndexType indexType) {
     mNativeRenderCommandList->bindIndexBuffer(buffer, indexType);
   }
 
@@ -128,15 +128,14 @@ public:
    * @brief Push constants
    *
    * @param pipeline Pipeline
-   * @param stageFlags Stage flags
+   * @param shaderStage Shader stage
    * @param offset Offset
    * @param size Size
    * @param data Data
    */
-  inline void pushConstants(PipelineHandle pipeline,
-                            VkShaderStageFlags stageFlags, uint32_t offset,
-                            uint32_t size, void *data) {
-    mNativeRenderCommandList->pushConstants(pipeline, stageFlags, offset, size,
+  inline void pushConstants(PipelineHandle pipeline, ShaderStage shaderStage,
+                            uint32_t offset, uint32_t size, void *data) {
+    mNativeRenderCommandList->pushConstants(pipeline, shaderStage, offset, size,
                                             data);
   }
 
@@ -200,8 +199,7 @@ public:
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    */
-  void pipelineBarrier(VkPipelineStageFlags srcStage,
-                       VkPipelineStageFlags dstStage,
+  void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
                        const std::vector<MemoryBarrier> &memoryBarriers,
                        const std::vector<ImageBarrier> &imageBarriers) {
     mNativeRenderCommandList->pipelineBarrier(srcStage, dstStage,

@@ -6,7 +6,7 @@
 
 #include <imgui_impl_glfw.h>
 
-static const VkDeviceSize BUFFER_MEMORY_ALIGNMENT = 256;
+static constexpr uint64_t BufferMemoryAlignment = 256;
 
 /**
  * @brief Aligns given size based on specified alignment
@@ -14,8 +14,8 @@ static const VkDeviceSize BUFFER_MEMORY_ALIGNMENT = 256;
  * @param size Size to align
  * @return Aligned size
  */
-static inline VkDeviceSize getAlignedBufferSize(VkDeviceSize size) {
-  return ((size - 1) / BUFFER_MEMORY_ALIGNMENT + 1) * BUFFER_MEMORY_ALIGNMENT;
+static inline uint64_t getAlignedBufferSize(uint64_t size) {
+  return ((size - 1) / BufferMemoryAlignment + 1) * BufferMemoryAlignment;
 }
 
 namespace liquid {
@@ -71,7 +71,7 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
   imguiDesc.width = FramebufferSizePercentage;
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
-  imguiDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
+  imguiDesc.format = rhi::Format::Rgba8Unorm;
   auto imgui = mDevice->createTexture(imguiDesc);
 
   auto &pass = graph.addPass("imgui");
@@ -83,11 +83,11 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
       rhi::PipelineVertexInputLayout{
           {rhi::PipelineVertexInputBinding{0, sizeof(ImDrawVert),
                                            rhi::VertexInputRate::Vertex}},
-          {rhi::PipelineVertexInputAttribute{0, 0, VK_FORMAT_R32G32_SFLOAT,
+          {rhi::PipelineVertexInputAttribute{0, 0, rhi::Format::Rg32Float,
                                              IM_OFFSETOF(ImDrawVert, pos)},
-           rhi::PipelineVertexInputAttribute{1, 0, VK_FORMAT_R32G32_SFLOAT,
+           rhi::PipelineVertexInputAttribute{1, 0, rhi::Format::Rg32Float,
                                              IM_OFFSETOF(ImDrawVert, uv)},
-           rhi::PipelineVertexInputAttribute{2, 0, VK_FORMAT_R8G8B8A8_UNORM,
+           rhi::PipelineVertexInputAttribute{2, 0, rhi::Format::Rgba8Unorm,
                                              IM_OFFSETOF(ImDrawVert, col)}}
 
       },
@@ -256,7 +256,8 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
         mFrameData.at(mCurrentFrame).vertexBuffer.getHandle());
     commandList.bindIndexBuffer(
         mFrameData.at(mCurrentFrame).indexBuffer.getHandle(),
-        sizeof(ImDrawIdx) == 2 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32);
+        sizeof(ImDrawIdx) == 2 ? rhi::IndexType::Uint16
+                               : rhi::IndexType::Uint32);
   }
 
   commandList.setViewport({0, 0}, {fbWidth, fbHeight}, {0.0f, 1.0f});
@@ -287,7 +288,7 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   };
 
-  commandList.pushConstants(pipeline, VK_SHADER_STAGE_VERTEX_BIT, 0,
+  commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                             static_cast<uint32_t>(sizeof(float) * mvp.size()),
                             mvp.data());
 }
@@ -317,7 +318,7 @@ void ImguiRenderer::buildFonts() {
     description.size = width * height * 4;
     description.width = width;
     description.height = height;
-    description.format = VK_FORMAT_R8G8B8A8_SRGB;
+    description.format = rhi::Format::Rgba8Srgb;
     description.data = pixels;
 
     mFontTexture = mDevice->createTexture(description);

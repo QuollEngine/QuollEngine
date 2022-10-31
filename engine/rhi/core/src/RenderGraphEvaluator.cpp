@@ -85,7 +85,7 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
   }
 
   if (!renderPassDesc.attachments.empty()) {
-    renderPassDesc.bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    renderPassDesc.bindPoint = PipelineBindPoint::Graphics;
 
     bool renderPassExists = isHandleValid(pass.mRenderPass);
 

@@ -57,7 +57,7 @@ void AssetRegistry::syncWithDevice(rhi::RenderDevice *device) {
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
                           rhi::TextureUsage::Sampled;
-      description.format = VK_FORMAT_R8G8B8A8_SRGB;
+      description.format = rhi::Format::Rgba8Srgb;
 
       font.data.deviceHandle = device->createTexture(description);
     }

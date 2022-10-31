@@ -4,6 +4,8 @@
 #include "liquid-tests/mocks/MockRenderDevice.h"
 #include "liquid-tests/Testing.h"
 
+using namespace liquid::rhi;
+
 class RenderGraphTest : public ::testing::Test {
 public:
   MockRenderDevice device;
@@ -191,22 +193,22 @@ TEST_F(RenderGraphTest, SetsOutputImageLayouts) {
   graph.compile(&device);
 
   EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(0).srcLayout,
-            VK_IMAGE_LAYOUT_UNDEFINED);
+            ImageLayout::Undefined);
   EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(0).dstLayout,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            ImageLayout::ColorAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(1).srcLayout,
-            VK_IMAGE_LAYOUT_UNDEFINED);
+            ImageLayout::Undefined);
   EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(1).dstLayout,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            ImageLayout::DepthStencilAttachmentOptimal);
 
   EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(0).srcLayout,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            ImageLayout::DepthStencilAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(0).dstLayout,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            ImageLayout::DepthStencilAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(1).srcLayout,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            ImageLayout::ColorAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(1).dstLayout,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            ImageLayout::ColorAttachmentOptimal);
 }
 
 TEST_F(RenderGraphTest, SetsInputImageLayouts) {
@@ -235,13 +237,13 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
   graph.compile(&device);
 
   EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(0).srcLayout,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            ImageLayout::DepthStencilAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(0).dstLayout,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            ImageLayout::ShaderReadOnlyOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(1).srcLayout,
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            ImageLayout::ColorAttachmentOptimal);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(1).dstLayout,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            ImageLayout::ShaderReadOnlyOptimal);
 }
 
 TEST_F(RenderGraphTest, SetsPassBarrierForColorOutput) {
@@ -263,15 +265,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorOutput) {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
     EXPECT_FALSE(preBarrier.enabled);
     EXPECT_TRUE(postBarrier.enabled);
-    EXPECT_EQ(postBarrier.srcStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ColorAttachmentOutput);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
+              Access::ColorAttachmentWrite | Access::ColorAttachmentRead);
   }
 }
 
@@ -296,17 +295,15 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthOutput) {
     EXPECT_FALSE(preBarrier.enabled);
     EXPECT_TRUE(postBarrier.enabled);
 
-    EXPECT_EQ(postBarrier.srcStage,
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+              Access::DepthStencilAttachmentWrite |
+                  Access::DepthStencilAttachmentRead);
   }
 }
 
@@ -334,24 +331,21 @@ TEST_F(RenderGraphTest, SetsBothBarriersFromOutputs) {
     EXPECT_FALSE(preBarrier.enabled);
     EXPECT_TRUE(postBarrier.enabled);
 
-    EXPECT_EQ(postBarrier.srcStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::ColorAttachmentOutput |
+                                        PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ColorAttachmentOutput |
+                                        PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
+              Access::ColorAttachmentWrite | Access::ColorAttachmentRead);
     EXPECT_EQ(postBarrier.memoryBarriers.at(1).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(1).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+              Access::DepthStencilAttachmentWrite |
+                  Access::DepthStencilAttachmentRead);
   }
 }
 
@@ -379,36 +373,32 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromColorInput) {
     const auto &postBarrier = graph.getCompiledPasses().at(1).getPostBarrier();
     EXPECT_TRUE(preBarrier.enabled);
 
-    EXPECT_EQ(preBarrier.srcStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-    EXPECT_EQ(preBarrier.dstStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
     EXPECT_TRUE(preBarrier.memoryBarriers.empty());
     EXPECT_EQ(preBarrier.imageBarriers.size(), 1);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).texture, colorTexture);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+              ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::ColorAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess, Access::ShaderRead);
 
     EXPECT_TRUE(postBarrier.enabled);
-    EXPECT_EQ(postBarrier.srcStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ColorAttachmentOutput);
     EXPECT_TRUE(postBarrier.memoryBarriers.empty());
     EXPECT_EQ(postBarrier.imageBarriers.size(), 1);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).texture, colorTexture);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
   }
 }
 
@@ -436,38 +426,34 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromDepthInput) {
     const auto &postBarrier = graph.getCompiledPasses().at(1).getPostBarrier();
     EXPECT_TRUE(preBarrier.enabled);
 
-    EXPECT_EQ(preBarrier.srcStage,
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(preBarrier.dstStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::EarlyFragmentTests |
+                                       PipelineStage::LateFragmentTests);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
     EXPECT_TRUE(preBarrier.memoryBarriers.empty());
     EXPECT_EQ(preBarrier.imageBarriers.size(), 1);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).texture, depthTexture);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+              ImageLayout::DepthStencilAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess, Access::ShaderRead);
 
     EXPECT_TRUE(postBarrier.enabled);
-    EXPECT_EQ(postBarrier.srcStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
     EXPECT_TRUE(postBarrier.memoryBarriers.empty());
     EXPECT_EQ(postBarrier.imageBarriers.size(), 1);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).texture, depthTexture);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::DepthStencilAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
   }
 }
 
@@ -500,60 +486,54 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromBothColorAndDepthInputs) {
     const auto &postBarrier = graph.getCompiledPasses().at(1).getPostBarrier();
     EXPECT_TRUE(preBarrier.enabled);
 
-    EXPECT_EQ(preBarrier.srcStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(preBarrier.dstStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ColorAttachmentOutput |
+                                       PipelineStage::EarlyFragmentTests |
+                                       PipelineStage::LateFragmentTests);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
     EXPECT_TRUE(preBarrier.memoryBarriers.empty());
     EXPECT_EQ(preBarrier.imageBarriers.size(), 2);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).texture, colorTexture);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+              ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::ColorAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess, Access::ShaderRead);
 
     EXPECT_EQ(preBarrier.imageBarriers.at(1).texture, depthTexture);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).srcLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+              ImageLayout::DepthStencilAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(1).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(1).dstAccess, Access::ShaderRead);
 
     EXPECT_TRUE(postBarrier.enabled);
-    EXPECT_EQ(postBarrier.srcStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ColorAttachmentOutput |
+                                        PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
     EXPECT_TRUE(postBarrier.memoryBarriers.empty());
     EXPECT_EQ(postBarrier.imageBarriers.size(), 2);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).texture, colorTexture);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
 
     EXPECT_EQ(postBarrier.imageBarriers.at(1).texture, depthTexture);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).dstLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(1).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::DepthStencilAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(1).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
   }
 }
 
@@ -592,75 +572,67 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
     const auto &postBarrier = graph.getCompiledPasses().at(1).getPostBarrier();
     EXPECT_TRUE(preBarrier.enabled);
 
-    EXPECT_EQ(preBarrier.srcStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(preBarrier.dstStage, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ColorAttachmentOutput |
+                                       PipelineStage::EarlyFragmentTests |
+                                       PipelineStage::LateFragmentTests);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
     EXPECT_TRUE(preBarrier.memoryBarriers.empty());
     EXPECT_EQ(preBarrier.imageBarriers.size(), 2);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).texture, colorTexture1);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+              ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::ColorAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(0).dstAccess, Access::ShaderRead);
 
     EXPECT_EQ(preBarrier.imageBarriers.at(1).texture, depthTexture1);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).srcLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+              ImageLayout::DepthStencilAttachmentOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).dstLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(preBarrier.imageBarriers.at(1).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
-    EXPECT_EQ(preBarrier.imageBarriers.at(1).dstAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(preBarrier.imageBarriers.at(1).dstAccess, Access::ShaderRead);
 
     EXPECT_TRUE(postBarrier.enabled);
-    EXPECT_EQ(postBarrier.srcStage,
-              VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
-                  VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-    EXPECT_EQ(postBarrier.dstStage,
-              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader |
+                                        PipelineStage::ColorAttachmentOutput |
+                                        PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ColorAttachmentOutput |
+                                        PipelineStage::EarlyFragmentTests |
+                                        PipelineStage::LateFragmentTests);
     EXPECT_EQ(postBarrier.imageBarriers.size(), 2);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).texture, colorTexture1);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstLayout,
-              VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(0).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(0).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
 
     EXPECT_EQ(postBarrier.imageBarriers.at(1).texture, depthTexture1);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).srcLayout,
-              VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+              ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).dstLayout,
-              VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-    EXPECT_EQ(postBarrier.imageBarriers.at(1).srcAccess,
-              VK_ACCESS_SHADER_READ_BIT);
+              ImageLayout::DepthStencilAttachmentOptimal);
+    EXPECT_EQ(postBarrier.imageBarriers.at(1).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
 
     EXPECT_EQ(postBarrier.memoryBarriers.size(), 2);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+              Access::DepthStencilAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess,
-              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT);
+              Access::DepthStencilAttachmentWrite |
+                  Access::DepthStencilAttachmentRead);
     EXPECT_EQ(postBarrier.memoryBarriers.at(1).srcAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+              Access::ColorAttachmentWrite);
     EXPECT_EQ(postBarrier.memoryBarriers.at(1).dstAccess,
-              VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                  VK_ACCESS_COLOR_ATTACHMENT_READ_BIT);
+              Access::ColorAttachmentWrite | Access::ColorAttachmentRead);
   }
 }
 
