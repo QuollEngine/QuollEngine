@@ -63,46 +63,6 @@ public:
   inline EditorGrid &getEditorGrid() { return mEditorGrid; }
 
   /**
-   * @brief Get camera
-   *
-   * @return Camera entity
-   */
-  inline liquid::Entity getCamera() { return mCameraEntity; }
-
-  /**
-   * @brief Set active camera
-   *
-   * @param camera Camera entity
-   */
-  void setActiveCamera(liquid::Entity camera);
-
-  /**
-   * @brief Switch to editor camera
-   */
-  void switchToEditorCamera();
-
-  /**
-   * @brief Check if editor camera is active
-   *
-   * @retval true Editor camera is active
-   * @retval false Editor camera is not active
-   */
-  inline bool isUsingEditorCamera() const {
-    return mCameraEntity == mEditorCamera.getCamera();
-  }
-
-  /**
-   * @brief Check if camera is active
-   *
-   * @param camera Camera entity
-   * @retval true Using the camera
-   * @retval false Not using the camera
-   */
-  inline liquid::Entity isUsingCamera(liquid::Entity camera) const {
-    return mCameraEntity == camera;
-  }
-
-  /**
    * @brief Creates a new scene and sets it as active
    */
   void createNewScene();
@@ -166,7 +126,6 @@ private:
   TransformOperation mTransformOperation = TransformOperation::Move;
 
   liquid::Entity mEnvironmentEntity = liquid::EntityNull;
-  liquid::Entity mCameraEntity = liquid::EntityNull;
 };
 
 } // namespace liquidator

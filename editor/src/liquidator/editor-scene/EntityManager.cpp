@@ -9,13 +9,13 @@ EntityManager::EntityManager(liquid::AssetManager &assetManager,
                              liquid::Renderer &renderer,
                              const std::filesystem::path &scenePath)
     : mScenePath(scenePath), mRenderer(renderer), mAssetManager(assetManager),
-      mSceneIO(mAssetManager.getRegistry(), mEntityDatabase) {}
+      mSceneIO(mAssetManager.getRegistry(), mScene) {}
 
 void EntityManager::save(liquid::Entity entity) {
   if (mInSimulation)
     return;
 
-  mSceneIO.saveEntity(entity, mScenePath);
+  mSceneIO.saveEntity(entity, mScenePath / "main.lqscene");
 }
 
 liquid::Entity EntityManager::createEmptyEntity(
@@ -58,7 +58,7 @@ liquid::Entity EntityManager::createEmptyEntity(EditorCamera &camera,
 }
 
 bool EntityManager::loadScene() {
-  mSceneIO.loadScene(mScenePath);
+  mSceneIO.loadScene(mScenePath / "main.lqscene");
 
   return true;
 }
@@ -166,7 +166,7 @@ void EntityManager::setScript(liquid::Entity entity,
 
 void EntityManager::deleteEntity(liquid::Entity entity) {
   if (!mInSimulation) {
-    mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath);
+    mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath / "main.lqscene");
   }
 
   getActiveEntityDatabase().set<liquid::DeleteComponent>(entity, {});
@@ -296,24 +296,35 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
   return parent;
 }
 
-void EntityManager::updateSimulationEntityDatabase() {
-  mSimulationEntityDatabase.destroy();
-  mEntityDatabase.duplicate(mSimulationEntityDatabase);
-}
-
 void EntityManager::useSimulationDatabase() {
-  updateSimulationEntityDatabase();
+  mSimulationScene.entityDatabase.destroy();
+  mScene.entityDatabase.duplicate(mSimulationScene.entityDatabase);
+  mSimulationScene.activeCamera = mScene.activeCamera;
+  mSimulationScene.dummyCamera = mScene.dummyCamera;
+
   mInSimulation = true;
 }
 
 void EntityManager::useEditingDatabase() { mInSimulation = false; }
 
+liquid::Entity EntityManager::getStartingCamera() {
+  return getActiveScene().activeCamera;
+}
+
+liquid::Entity EntityManager::getActiveSimulationCamera() {
+  return mSimulationScene.activeCamera;
+}
+
+void EntityManager::setStartingCamera(liquid::Entity camera) {
+  getActiveScene().activeCamera = camera;
+  mSceneIO.saveStartingCamera(camera, mScenePath / "main.lqscene");
+}
+
 liquid::LocalTransformComponent
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
-  auto &entityDatabase =
-      mInSimulation ? mSimulationEntityDatabase : mEntityDatabase;
+  auto &scene = mInSimulation ? mSimulationScene : mScene;
   const auto &viewMatrix =
-      entityDatabase.get<liquid::CameraComponent>(camera.getCamera())
+      scene.entityDatabase.get<liquid::CameraComponent>(camera.getCamera())
           .viewMatrix;
 
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};

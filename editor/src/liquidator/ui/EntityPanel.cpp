@@ -214,9 +214,12 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
       }
     }
 
-    if (!editorManager.isUsingCamera(mSelectedEntity) &&
-        ImGui::Button("Set as active camera")) {
-      editorManager.setActiveCamera(mSelectedEntity);
+    if (mEntityManager.getStartingCamera() != mSelectedEntity) {
+      if (ImGui::Button("Set as starting camera")) {
+        mEntityManager.setStartingCamera(mSelectedEntity);
+      }
+    } else {
+      ImGui::Text("Is the starting camera");
     }
   }
 }
@@ -229,7 +232,7 @@ void EntityPanel::renderTransform() {
     return;
   }
 
-  if (widgets::Section("Transform")) {
+  if (auto _ = widgets::Section("Transform")) {
     auto &component =
         entityDatabase.get<liquid::LocalTransformComponent>(mSelectedEntity);
     auto &world =

@@ -33,7 +33,7 @@ void Runtime::start() {
   static constexpr uint32_t Width = 800;
   static constexpr uint32_t Height = 600;
 
-  liquid::EntityDatabase entityDatabase;
+  liquid::Scene scene;
   liquid::EventSystem eventSystem;
   liquid::Window window(mConfig.name, Width, Height, eventSystem);
   liquid::AssetManager assetManager(mConfig.assetsPath, true);
@@ -71,17 +71,14 @@ void Runtime::start() {
     graph.setFramebufferExtent({width, height});
   });
 
-  liquid::SceneIO sceneIO(assetManager.getRegistry(), entityDatabase);
-  sceneIO.loadScene(mConfig.scenesPath);
-
-  auto cameraEntity = liquid::EntityNull;
-  entityDatabase.iterateEntities<liquid::PerspectiveLensComponent>(
-      [&cameraEntity](auto entity, auto &) mutable { cameraEntity = entity; });
+  liquid::SceneIO sceneIO(assetManager.getRegistry(), scene);
+  sceneIO.loadScene(mConfig.scenesPath / "main.lqscene");
 
   presenter.updateFramebuffers(device->getSwapchain());
 
   mainLoop.setUpdateFn([&](float dt) mutable {
     eventSystem.poll();
+    auto &entityDatabase = scene.entityDatabase;
 
     cameraAspectRatioUpdater.update(entityDatabase);
     scriptingSystem.start(entityDatabase);
@@ -91,7 +88,7 @@ void Runtime::start() {
     sceneUpdater.update(entityDatabase);
     physicsSystem.update(dt, entityDatabase);
     audioSystem.output(entityDatabase);
-    entityDeleter.update(entityDatabase);
+    entityDeleter.update(scene);
 
     return true;
   });
@@ -100,7 +97,8 @@ void Runtime::start() {
     const auto &renderFrame = device->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      renderer.getSceneRenderer().updateFrameData(entityDatabase, cameraEntity);
+      renderer.getSceneRenderer().updateFrameData(scene.entityDatabase,
+                                                  scene.activeCamera);
 
       renderer.render(graph, renderFrame.commandList);
 

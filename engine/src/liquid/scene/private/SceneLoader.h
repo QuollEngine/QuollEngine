@@ -33,6 +33,18 @@ public:
   Result<bool> loadComponents(const YAML::Node &node, Entity entity,
                               EntityIdCache &entityIdCache);
 
+  /**
+   * @brief Load starting camera
+   *
+   * @param node YAML node
+   * @param entityIdCache Entity ID cache
+   * @param excludeEntity Entity to exclude from search
+   * @return Found starting camera
+   */
+  Result<Entity> loadStartingCamera(const YAML::Node &node,
+                                    EntityIdCache &entityIdCache,
+                                    Entity excludeEntity);
+
 private:
   AssetRegistry &mAssetRegistry;
   EntityDatabase &mEntityDatabase;

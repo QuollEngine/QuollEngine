@@ -26,22 +26,40 @@ bool ProjectManager::createProjectInPath() {
   std::filesystem::create_directory(mProject.assetsPath);
   std::filesystem::create_directory(mProject.settingsPath);
   std::filesystem::create_directory(mProject.scenesPath);
+  std::filesystem::create_directory(mProject.scenesPath / "entities");
 
-  YAML::Node projectObj;
-  projectObj["name"] = mProject.name;
-  projectObj["version"] = mProject.version;
-  projectObj["paths"]["assets"] =
-      std::filesystem::relative(mProject.assetsPath, projectPath).string();
-  projectObj["paths"]["settings"] =
-      std::filesystem::relative(mProject.settingsPath, projectPath).string();
-  projectObj["paths"]["scenes"] =
-      std::filesystem::relative(mProject.scenesPath, projectPath).string();
+  {
+    YAML::Node sceneObj;
+    sceneObj["name"] = "MainScene";
 
-  auto projectFile = projectPath / (mProject.name + ".lqproj");
+    YAML::Node mainZone;
+    mainZone["name"] = "MainZone";
+    mainZone["entities"] = "./entities";
+    sceneObj["zones"][0] = mainZone;
+    sceneObj["persistentZone"] = 0;
 
-  std::ofstream out(projectFile, std::ios::out);
-  out << projectObj;
-  out.close();
+    std::ofstream stream(mProject.scenesPath / "main.lqscene");
+    stream << sceneObj;
+    stream.close();
+  }
+
+  {
+    YAML::Node projectObj;
+    projectObj["name"] = mProject.name;
+    projectObj["version"] = mProject.version;
+    projectObj["paths"]["assets"] =
+        std::filesystem::relative(mProject.assetsPath, projectPath).string();
+    projectObj["paths"]["settings"] =
+        std::filesystem::relative(mProject.settingsPath, projectPath).string();
+    projectObj["paths"]["scenes"] =
+        std::filesystem::relative(mProject.scenesPath, projectPath).string();
+
+    auto projectFile = projectPath / (mProject.name + ".lqproj");
+
+    std::ofstream stream(projectFile, std::ios::out);
+    stream << projectObj;
+    stream.close();
+  }
 
   return true;
 }

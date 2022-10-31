@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/scene/Scene.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetManager.h"
 #include "liquid/renderer/Renderer.h"
@@ -179,7 +180,8 @@ public:
    * @return Active entity database
    */
   inline liquid::EntityDatabase &getActiveEntityDatabase() {
-    return mInSimulation ? mSimulationEntityDatabase : mEntityDatabase;
+    return mInSimulation ? mSimulationScene.entityDatabase
+                         : mScene.entityDatabase;
   }
 
   /**
@@ -200,6 +202,36 @@ public:
    */
   inline bool isUsingSimulationDatabase() const { return mInSimulation; }
 
+  /**
+   * @brief Get active camera in simulation
+   *
+   * @return Active simulation camera
+   */
+  liquid::Entity getActiveSimulationCamera();
+
+  /**
+   * @brief Get starting camera
+   *
+   * @return Starting camera entity
+   */
+  liquid::Entity getStartingCamera();
+
+  /**
+   * @brief Set starting camera
+   *
+   * @param camera Camera entity
+   */
+  void setStartingCamera(liquid::Entity camera);
+
+  /**
+   * @brief Get active scene
+   *
+   * @return Active scene
+   */
+  inline liquid::Scene &getActiveScene() {
+    return mInSimulation ? mSimulationScene : mScene;
+  }
+
 private:
   /**
    * @brief Get transform from camera
@@ -210,17 +242,10 @@ private:
   liquid::LocalTransformComponent
   getTransformFromCamera(EditorCamera &camera) const;
 
-  /**
-   * @brief Update simulation entity database
-   *
-   * Copies entity database to simulation
-   * entity database
-   */
-  void updateSimulationEntityDatabase();
-
 private:
-  liquid::EntityDatabase mEntityDatabase;
-  liquid::EntityDatabase mSimulationEntityDatabase;
+  liquid::Scene mScene;
+  liquid::Scene mSimulationScene;
+
   liquid::AssetManager &mAssetManager;
   liquid::SceneIO mSceneIO;
   bool mInSimulation = false;

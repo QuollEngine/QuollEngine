@@ -258,4 +258,37 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   return Result<bool>::Ok(entity);
 }
 
+Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
+                                               EntityIdCache &entityIdCache,
+                                               Entity excludeEntity) {
+  Entity entity = EntityNull;
+  if (node && node.IsScalar()) {
+    auto entityId = node.as<uint64_t>();
+
+    if (entityIdCache.find(entityId) != entityIdCache.end()) {
+      auto foundEntity = entityIdCache.at(entityId);
+
+      if (foundEntity != excludeEntity &&
+          mEntityDatabase.has<PerspectiveLensComponent>(foundEntity)) {
+        entity = foundEntity;
+      }
+    }
+  }
+
+  if (entity == EntityNull) {
+    mEntityDatabase.iterateEntities<PerspectiveLensComponent>(
+        [&entity, &excludeEntity](auto e, const auto &) mutable {
+          if (e != excludeEntity) {
+            entity = e;
+          }
+        });
+  }
+
+  if (entity == EntityNull) {
+    return Result<Entity>::Error("Camera entity not found");
+  }
+
+  return Result<Entity>::Ok(entity);
+}
+
 } // namespace liquid::detail

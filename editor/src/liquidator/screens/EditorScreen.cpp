@@ -10,7 +10,6 @@
 #include "liquid/scripting/ScriptingSystem.h"
 #include "liquid/renderer/Presenter.h"
 #include "liquid/asset/FileTracker.h"
-#include "liquid/core/EntityDeleter.h"
 #include "liquid/audio/AudioSystem.h"
 
 #include "liquid/physics/PhysicsSystem.h"
@@ -170,7 +169,7 @@ void EditorScreen::start(const Project &project) {
         auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
         mEventSystem.poll();
-        simulator.update(dt, entityDatabase);
+        simulator.update(dt, entityManager.getActiveScene());
         return true;
       });
 
@@ -219,11 +218,6 @@ void EditorScreen::start(const Project &project) {
       TransformOperationControl(ui.getIconRegistry(), editorManager, IconSize);
 
       ImGui::SameLine();
-
-      if (!editorManager.isUsingEditorCamera() &&
-          ImGui::Button("Reset to editor camera")) {
-        editorManager.switchToEditorCamera();
-      }
     }
 
     bool mouseClicked = false;
@@ -253,7 +247,7 @@ void EditorScreen::start(const Project &project) {
         auto worldTransform = world.worldTransform;
 
         const auto &camera = entityDatabase.get<liquid::CameraComponent>(
-            editorManager.getCamera());
+            editorManager.getEditorCamera().getCamera());
 
         auto gizmoPerspective = camera.projectionMatrix;
 
@@ -281,12 +275,16 @@ void EditorScreen::start(const Project &project) {
 
     const auto &renderFrame = mDevice->beginFrame();
 
+    auto camera = entityManager.isUsingSimulationDatabase()
+                      ? entityManager.getActiveSimulationCamera()
+                      : editorManager.getEditorCamera().getCamera();
+
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
-                                    editorManager.getCamera());
+                                    camera);
       editorRenderer.updateFrameData(
-          entityManager.getActiveEntityDatabase(), editorManager.getCamera(),
+          entityManager.getActiveEntityDatabase(), camera,
           editorManager.getEditorGrid(),
           ui.getSceneHierarchyPanel().getSelectedEntity());
 

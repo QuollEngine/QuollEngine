@@ -1415,3 +1415,111 @@ TEST_F(SceneLoaderParentTest,
                 .children.at(1),
             entity);
 }
+
+using SceneLoaderActiveCameraTest = SceneLoaderTest;
+
+TEST_F(
+    SceneLoaderActiveCameraTest,
+    ReturnsLastFoundCameraEntityInTheDatabaseIfStartingCameraInSceneNodeIsNotScalar) {
+
+  auto camera1 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera1, {});
+
+  auto camera2 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera2, {});
+
+  {
+    YAML::Node node(YAML::NodeType::Null);
+
+    auto res =
+        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+
+  {
+    YAML::Node node(YAML::NodeType::Map);
+
+    auto res =
+        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+
+  {
+    YAML::Node node(YAML::NodeType::Sequence);
+
+    auto res =
+        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+
+  {
+    YAML::Node node(YAML::NodeType::Undefined);
+
+    auto res =
+        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+}
+
+TEST_F(
+    SceneLoaderActiveCameraTest,
+    ReturnsLastFoundCameraEntityInTheDatabaseIfStartingCameraInSceneNodeDoesNotExistInDatabase) {
+
+  auto camera1 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera1, {});
+
+  auto camera2 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera2, {});
+
+  {
+    YAML::Node node(23232);
+
+    auto res =
+        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+}
+
+TEST_F(
+    SceneLoaderActiveCameraTest,
+    ReturnsLastFoundCameraEntityInTheDatabaseIfStartingCameraInSceneNodeDoesNotHaveACameraComponent) {
+  auto idNode = createNode(true).first;
+
+  auto camera1 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera1, {});
+
+  auto camera2 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera2, {});
+
+  {
+    auto res = sceneLoader.loadStartingCamera(idNode["id"], entityIdCache,
+                                              liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), camera2);
+  }
+}
+
+TEST_F(SceneLoaderActiveCameraTest,
+       ReturnsStartingCameraEntityFromSceneNodeIfEntityHasACameraComponent) {
+  auto startingCameraNode = createNode(true);
+  entityDatabase.set<liquid::PerspectiveLensComponent>(
+      startingCameraNode.second, {});
+
+  auto camera1 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera1, {});
+
+  auto camera2 = createNode(true).second;
+  entityDatabase.set<liquid::PerspectiveLensComponent>(camera2, {});
+
+  {
+    auto res = sceneLoader.loadStartingCamera(
+        startingCameraNode.first["id"], entityIdCache, liquid::EntityNull);
+    EXPECT_TRUE(res.hasData());
+    EXPECT_EQ(res.getData(), startingCameraNode.second);
+  }
+}
