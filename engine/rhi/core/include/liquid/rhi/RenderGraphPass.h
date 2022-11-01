@@ -86,8 +86,8 @@ struct RenderGraphPassBarrier {
  * @brief Render graph pass
  */
 class RenderGraphPass {
-  using ExecutorFn =
-      std::function<void(RenderCommandList &, const RenderGraphRegistry &)>;
+  using ExecutorFn = std::function<void(RenderCommandList &,
+                                        const RenderGraphRegistry &, uint32_t)>;
   friend RenderGraph;
   friend RenderGraphEvaluator;
 
@@ -138,8 +138,9 @@ public:
    * @brief Execute pass
    *
    * @param commandList Command list
+   * @param frameIndex Frame index
    */
-  void execute(RenderCommandList &commandList);
+  void execute(RenderCommandList &commandList, uint32_t frameIndex);
 
   /**
    * @brief Set output texture

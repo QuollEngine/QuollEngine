@@ -15,7 +15,7 @@ VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
       mPresentQueue(presentQueue) {
 
   mRenderCommandLists =
-      std::move(pool.createCommandLists(VulkanFrameManager::NUM_FRAMES));
+      std::move(pool.createCommandLists(RenderDevice::NumFrames));
 }
 
 VkResult VulkanRenderContext::present(VulkanFrameManager &frameManager,

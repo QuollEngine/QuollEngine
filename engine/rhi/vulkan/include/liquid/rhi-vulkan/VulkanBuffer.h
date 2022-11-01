@@ -45,16 +45,6 @@ public:
   void unmap();
 
   /**
-   * @brief Update buffer
-   *
-   * Maps the buffer, copies data to it,
-   * and unmaps it
-   *
-   * @param data New data
-   */
-  void update(void *data);
-
-  /**
    * @brief Resize buffer
    *
    * Recreates the buffer with
@@ -109,6 +99,7 @@ private:
   rhi::BufferType mType;
   rhi::BufferUsage mUsage;
   size_t mSize = 0;
+  void *mMappedData = nullptr;
 };
 
 } // namespace liquid::rhi

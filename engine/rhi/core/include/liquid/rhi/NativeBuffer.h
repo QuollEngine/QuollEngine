@@ -25,16 +25,6 @@ public:
   virtual void unmap() = 0;
 
   /**
-   * @brief Update buffer
-   *
-   * Maps the buffer, copies data to it,
-   * and unmaps it
-   *
-   * @param data New data
-   */
-  virtual void update(void *data) = 0;
-
-  /**
    * @brief Resize buffer
    *
    * Recreates the buffer with

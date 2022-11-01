@@ -97,10 +97,10 @@ void Runtime::start() {
     const auto &renderFrame = device->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      renderer.getSceneRenderer().updateFrameData(scene.entityDatabase,
-                                                  scene.activeCamera);
+      renderer.getSceneRenderer().updateFrameData(
+          scene.entityDatabase, scene.activeCamera, renderFrame.frameIndex);
 
-      renderer.render(graph, renderFrame.commandList);
+      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
 
       presenter.present(renderFrame.commandList, passData.sceneColor,
                         renderFrame.swapchainImageIndex);

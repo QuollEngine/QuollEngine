@@ -9,12 +9,12 @@
 namespace liquid {
 
 /**
- * @brief Render storage
+ * @brief Scene renderer frame data
  *
  * Stores everything necessary to
- * render the scene
+ * render a frame
  */
-class RenderStorage {
+class SceneRendererFrameData {
 public:
   /**
    * Default reserved space for buffers
@@ -121,13 +121,13 @@ public:
 
 public:
   /**
-   * @brief Create render storage
+   * @brief Create frame data
    *
    * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
-  RenderStorage(rhi::RenderDevice *device,
-                size_t reservedSpace = DefaultReservedSpace);
+  SceneRendererFrameData(rhi::RenderDevice *device,
+                         size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Update storage buffers

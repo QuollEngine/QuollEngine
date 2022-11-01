@@ -40,8 +40,10 @@ public:
    *
    * @param commandList Command list
    * @param graph Render graph
+   * @param frameIndex Frame index
    */
-  void execute(RenderCommandList &commandList, RenderGraph &graph);
+  void execute(RenderCommandList &commandList, RenderGraph &graph,
+               uint32_t frameIndex);
 
 private:
   /**

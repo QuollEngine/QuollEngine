@@ -24,7 +24,7 @@ void RenderGraphEvaluator::build(RenderGraph &graph) {
 }
 
 void RenderGraphEvaluator::execute(RenderCommandList &commandList,
-                                   RenderGraph &graph) {
+                                   RenderGraph &graph, uint32_t frameIndex) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::execute");
 
   for (auto &pass : graph.getCompiledPasses()) {
@@ -39,7 +39,7 @@ void RenderGraphEvaluator::execute(RenderCommandList &commandList,
     commandList.setViewport({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()),
                             {0.0f, 1.0f});
     commandList.setScissor({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()));
-    pass.execute(commandList);
+    pass.execute(commandList, frameIndex);
     commandList.endRenderPass();
 
     if (pass.mPostBarrier.enabled) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/rhi/RenderDevice.h"
 #include "VulkanDeviceObject.h"
 
 namespace liquid::rhi {
@@ -12,12 +13,6 @@ namespace liquid::rhi {
  * the frame
  */
 class VulkanFrameManager {
-public:
-  /**
-   * @brief Number of frames
-   */
-  static constexpr uint32_t NUM_FRAMES = 2;
-
 public:
   /**
    * @brief Create frame manager
@@ -92,9 +87,9 @@ private:
 private:
   VulkanDeviceObject &mDevice;
 
-  std::array<VkFence, NUM_FRAMES> mFrameFences{};
-  std::array<VkSemaphore, NUM_FRAMES> mImageAvailableSemaphores{};
-  std::array<VkSemaphore, NUM_FRAMES> mRenderFinishedSemaphores{};
+  std::array<VkFence, RenderDevice::NumFrames> mFrameFences{};
+  std::array<VkSemaphore, RenderDevice::NumFrames> mImageAvailableSemaphores{};
+  std::array<VkSemaphore, RenderDevice::NumFrames> mRenderFinishedSemaphores{};
 
   uint32_t mFrameIndex = 0;
 };

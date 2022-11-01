@@ -49,7 +49,6 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
       "Failed to allocate command buffers");
 
   for (size_t i = 0; i < count; ++i) {
-
     renderCommandLists.at(i) =
         std::move(RenderCommandList(new VulkanCommandBuffer(
             commandBuffers.at(i), mRegistry, mDescriptorManager, mStats)));

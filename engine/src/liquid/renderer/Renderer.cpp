@@ -20,12 +20,13 @@ Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
       mSceneRenderer(mShaderLibrary, mAssetRegistry, device) {}
 
 void Renderer::render(rhi::RenderGraph &graph,
-                      rhi::RenderCommandList &commandList) {
+                      rhi::RenderCommandList &commandList,
+                      uint32_t frameIndex) {
   graph.compile(mDevice);
 
   mGraphEvaluator.build(graph);
 
-  mGraphEvaluator.execute(commandList, graph);
+  mGraphEvaluator.execute(commandList, graph, frameIndex);
 }
 
 } // namespace liquid

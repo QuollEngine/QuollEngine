@@ -39,12 +39,13 @@ public:
   /**
    * @brief Update buffer
    *
-   * Maps the buffer, copies data to it,
+   * Maps the buffer, copies data into it,
    * and unmaps it
    *
    * @param data New data
+   * @param size Size to copy
    */
-  void update(void *data);
+  void update(const void *data, size_t size);
 
   /**
    * @brief Resize buffer
@@ -66,7 +67,7 @@ public:
 
 private:
   BufferHandle mHandle = BufferHandle::Invalid;
-  NativeBuffer *mNativeBuffer;
+  NativeBuffer *mNativeBuffer = nullptr;
 };
 
 } // namespace liquid::rhi

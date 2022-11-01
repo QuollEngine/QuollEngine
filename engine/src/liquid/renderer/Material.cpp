@@ -44,8 +44,8 @@ void Material::updateProperty(StringView name, const Property &value) {
   }
 
   mProperties.at(index) = value;
-  updateBufferData();
-  mBuffer.update(mData);
+  auto size = updateBufferData();
+  mBuffer.update(mData, size);
 }
 
 size_t Material::updateBufferData() {

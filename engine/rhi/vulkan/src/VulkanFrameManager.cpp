@@ -13,7 +13,7 @@ VulkanFrameManager::VulkanFrameManager(VulkanDeviceObject &device)
 }
 
 VulkanFrameManager::~VulkanFrameManager() {
-  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
+  for (uint32_t i = 0; i < RenderDevice::NumFrames; ++i) {
     if (mFrameFences.at(i)) {
       vkDestroyFence(mDevice, mFrameFences.at(i), nullptr);
       mFrameFences.at(i) = VK_NULL_HANDLE;
@@ -21,7 +21,7 @@ VulkanFrameManager::~VulkanFrameManager() {
   }
   LOG_DEBUG("[Vulkan] Frame fences destroyed");
 
-  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
+  for (uint32_t i = 0; i < RenderDevice::NumFrames; ++i) {
     if (mImageAvailableSemaphores.at(i)) {
       vkDestroySemaphore(mDevice, mImageAvailableSemaphores.at(i), nullptr);
       mImageAvailableSemaphores.at(i) = VK_NULL_HANDLE;
@@ -36,7 +36,7 @@ VulkanFrameManager::~VulkanFrameManager() {
 }
 
 void VulkanFrameManager::nextFrame() {
-  mFrameIndex = (mFrameIndex + 1) % NUM_FRAMES;
+  mFrameIndex = (mFrameIndex + 1) % RenderDevice::NumFrames;
 }
 
 void VulkanFrameManager::waitForFrame() {
@@ -51,7 +51,7 @@ void VulkanFrameManager::createSemaphores() {
   semaphoreInfo.pNext = nullptr;
   semaphoreInfo.flags = 0;
 
-  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
+  for (uint32_t i = 0; i < RenderDevice::NumFrames; ++i) {
     checkForVulkanError(vkCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
                                           &mImageAvailableSemaphores.at(i)),
                         "Failed to create image available semaphore");
@@ -70,7 +70,7 @@ void VulkanFrameManager::createFences() {
   fenceInfo.pNext = nullptr;
   fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-  for (uint32_t i = 0; i < NUM_FRAMES; ++i) {
+  for (uint32_t i = 0; i < RenderDevice::NumFrames; ++i) {
     checkForVulkanError(
         vkCreateFence(mDevice, &fenceInfo, nullptr, &mFrameFences.at(i)),
         "Failed to create render fence");
