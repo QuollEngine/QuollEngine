@@ -1,9 +1,6 @@
 project "LiquidEnginePlatformTools"
     basedir "../../workspace/platform-tools"
     kind "StaticLib"
-    configurations { 
-        "Debug"
-    }
 
     includedirs {
         "include/liquid/platform-tools"
