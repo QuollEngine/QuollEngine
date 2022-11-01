@@ -32,7 +32,7 @@ function linkDependenciesWithoutVulkan()
         links { "yaml-cppd", "freetyped", "dwmapi" }
 
     filter { "system:windows", "configurations:Release or configurations:Profile" }
-        links { "yaml-cpp", "freetype" }
+        links { "yaml-cpp", "freetype", "dwmapi" }
 
     filter {"system:linux or system:macosx"}
         links { "yaml-cpp", "freetype" }

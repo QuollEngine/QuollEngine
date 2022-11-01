@@ -44,9 +44,8 @@ project "LiquidEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
-    configmap {
-        ["Release"] = "Debug",
-        ["Profile"] = "Debug",
+    configurations {
+        "Debug"
     }
 
     includedirs {
