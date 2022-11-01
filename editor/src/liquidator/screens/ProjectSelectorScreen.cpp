@@ -117,7 +117,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      renderer.render(graph, renderFrame.commandList);
+      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
 
       presenter.present(renderFrame.commandList, imguiPassData.imguiColor,
                         renderFrame.swapchainImageIndex);

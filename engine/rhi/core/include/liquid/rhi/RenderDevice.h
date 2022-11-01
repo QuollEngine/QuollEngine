@@ -21,6 +21,12 @@ namespace liquid::rhi {
  */
 class RenderDevice {
 public:
+  /**
+   * @brief Number of frames
+   */
+  static constexpr size_t NumFrames = 2;
+
+public:
   RenderDevice(const RenderDevice &) = delete;
   RenderDevice &operator=(const RenderDevice &) = delete;
   RenderDevice(RenderDevice &&) = delete;

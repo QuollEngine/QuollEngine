@@ -12,9 +12,11 @@
 namespace liquidator {
 
 /**
- * @brief Storage for editor renderer
+ * @brief Frame data for editor renderer
+ *
+ * Store data for each frame
  */
-class EditorRendererStorage {
+class EditorRendererFrameData {
   /**
    * @brief Maximum number of debug bones
    */
@@ -50,13 +52,13 @@ class EditorRendererStorage {
 
 public:
   /**
-   * @brief Create render storage
+   * @brief Create frame data
    *
    * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
-  EditorRendererStorage(liquid::rhi::RenderDevice *device,
-                        size_t reservedSpace = DefaultReservedSpace);
+  EditorRendererFrameData(liquid::rhi::RenderDevice *device,
+                          size_t reservedSpace = DefaultReservedSpace);
 
   /**
    * @brief Add skeleton

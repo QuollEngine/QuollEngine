@@ -67,8 +67,6 @@ class ImguiRenderer {
 
   static constexpr const glm::vec4 DefaultClearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
-  static constexpr size_t FramesInFlight = 2;
-
 public:
   /**
    * @brief Create imgui renderer
@@ -134,8 +132,10 @@ public:
    *
    * @param commandList Command list
    * @param pipeline Pipeline
+   * @param frameIndex Frame index
    */
-  void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline);
+  void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
+            uint32_t frameIndex);
 
   /**
    * @brief Use config path for saving settings
@@ -153,16 +153,16 @@ private:
    * @param fbWidth Framebuffer width
    * @param fbHeight Framebuffer height
    * @param pipeline Pipeline
+   * @param frameIndex Frame index
    */
   void setupRenderStates(ImDrawData *data, rhi::RenderCommandList &commandList,
                          int fbWidth, int fbHeight,
-                         rhi::PipelineHandle pipeline);
+                         rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
 private:
   ShaderLibrary &mShaderLibrary;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
-  std::array<FrameData, FramesInFlight> mFrameData;
-  uint32_t mCurrentFrame = 0;
+  std::array<FrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   glm::vec4 mClearColor{DefaultClearColor};
 

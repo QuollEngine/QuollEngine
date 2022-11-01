@@ -10,7 +10,8 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
                              AssetRegistry &assetRegistry,
                              rhi::RenderDevice *device)
     : mShaderLibrary(shaderLibrary), mAssetRegistry(assetRegistry),
-      mDevice(device), mRenderStorage(device) {
+      mDevice(device), mFrameData{SceneRendererFrameData(mDevice),
+                                  SceneRendererFrameData(mDevice)} {
 
   auto shadersPath = Engine::getShadersPath();
 
@@ -107,9 +108,11 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
     pass.setExecutor([vPipeline, vSkinnedPipeline, shadowmap,
                       this](rhi::RenderCommandList &commandList,
-                            const rhi::RenderGraphRegistry &registry) {
+                            const rhi::RenderGraphRegistry &registry,
+                            uint32_t frameIndex) {
+      auto &frameData = mFrameData.at(frameIndex);
       rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getLightsBuffer(),
+      descriptor.bind(0, frameData.getLightsBuffer(),
                       rhi::DescriptorType::StorageBuffer);
 
       auto pipeline = registry.get(vPipeline);
@@ -121,13 +124,12 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
         commandList.bindDescriptor(pipeline, 0, descriptor);
 
-        for (int32_t index = 0; index < mRenderStorage.getNumLights();
-             ++index) {
+        for (int32_t index = 0; index < frameData.getNumLights(); ++index) {
           glm::ivec4 pcIndex{index};
 
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(glm::ivec4), &pcIndex);
-          render(commandList, pipeline, false);
+          render(commandList, pipeline, false, frameIndex);
         }
       }
 
@@ -136,13 +138,12 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
 
-        for (int32_t index = 0; index < mRenderStorage.getNumLights();
-             ++index) {
+        for (int32_t index = 0; index < frameData.getNumLights(); ++index) {
           glm::ivec4 pcIndex{index};
 
           commandList.pushConstants(skinnedPipeline, rhi::ShaderStage::Vertex,
                                     0, sizeof(glm::ivec4), &pcIndex);
-          renderSkinned(commandList, skinnedPipeline, false);
+          renderSkinned(commandList, skinnedPipeline, false, frameIndex);
           index++;
         }
       }
@@ -175,7 +176,9 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
     pass.setExecutor([this, vPipeline, vSkinnedPipeline,
                       shadowmap](rhi::RenderCommandList &commandList,
-                                 const rhi::RenderGraphRegistry &registry) {
+                                 const rhi::RenderGraphRegistry &registry,
+                                 uint32_t frameIndex) {
+      auto &frameData = mFrameData.at(frameIndex);
       auto pipeline = registry.get(vPipeline);
       auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
@@ -185,21 +188,19 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
       static constexpr uint32_t BrdfBinding = 5;
 
-      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            rhi::DescriptorType::UniformBuffer);
       sceneDescriptorFragment
-          .bind(0, mRenderStorage.getActiveCameraBuffer(),
+          .bind(0, frameData.getActiveCameraBuffer(),
                 rhi::DescriptorType::UniformBuffer)
-          .bind(1, mRenderStorage.getSceneBuffer(),
+          .bind(1, frameData.getSceneBuffer(),
                 rhi::DescriptorType::UniformBuffer)
-          .bind(2, mRenderStorage.getLightsBuffer(),
+          .bind(2, frameData.getLightsBuffer(),
                 rhi::DescriptorType::StorageBuffer)
           .bind(3, {shadowmap}, rhi::DescriptorType::CombinedImageSampler)
-          .bind(4,
-                {mRenderStorage.getIrradianceMap(),
-                 mRenderStorage.getSpecularMap()},
+          .bind(4, {frameData.getIrradianceMap(), frameData.getSpecularMap()},
                 rhi::DescriptorType::CombinedImageSampler)
-          .bind(BrdfBinding, {mRenderStorage.getBrdfLUT()},
+          .bind(BrdfBinding, {frameData.getBrdfLUT()},
                 rhi::DescriptorType::CombinedImageSampler);
 
       {
@@ -209,7 +210,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
         commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
 
-        render(commandList, pipeline, true);
+        render(commandList, pipeline, true, frameIndex);
       }
 
       {
@@ -219,7 +220,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
         commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
 
-        renderSkinned(commandList, skinnedPipeline, true);
+        renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
     });
   } // mesh pass
@@ -236,10 +237,11 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
-    pass.setExecutor([vPipeline,
-                      this](rhi::RenderCommandList &commandList,
-                            const rhi::RenderGraphRegistry &registry) {
-      if (!rhi::isHandleValid(mRenderStorage.getIrradianceMap()))
+    pass.setExecutor([vPipeline, this](rhi::RenderCommandList &commandList,
+                                       const rhi::RenderGraphRegistry &registry,
+                                       uint32_t frameIndex) {
+      auto &frameData = mFrameData.at(frameIndex);
+      if (!rhi::isHandleValid(frameData.getIrradianceMap()))
         return;
 
       auto pipeline = registry.get(vPipeline);
@@ -247,11 +249,11 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
       commandList.bindPipeline(pipeline);
 
       rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            rhi::DescriptorType::UniformBuffer);
 
       rhi::Descriptor skyboxDescriptor;
-      skyboxDescriptor.bind(0, {mRenderStorage.getIrradianceMap()},
+      skyboxDescriptor.bind(0, {frameData.getIrradianceMap()},
                             rhi::DescriptorType::CombinedImageSampler);
 
       commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
@@ -292,49 +294,55 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
 
   pass.setExecutor(
       [vTextPipeline, this](rhi::RenderCommandList &commandList,
-                            const rhi::RenderGraphRegistry &registry) {
+                            const rhi::RenderGraphRegistry &registry,
+                            uint32_t frameIndex) {
+        auto &frameData = mFrameData.at(frameIndex);
+
         auto textPipeline = registry.get(vTextPipeline);
 
         commandList.bindPipeline(textPipeline);
         rhi::Descriptor sceneDescriptor;
-        sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+        sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                              rhi::DescriptorType::UniformBuffer);
         commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
-        renderText(commandList, textPipeline);
+        renderText(commandList, textPipeline, frameIndex);
       });
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
-                                    Entity camera) {
+                                    Entity camera, uint32_t frameIndex) {
   LIQUID_ASSERT(entityDatabase.has<CameraComponent>(camera),
                 "Entity does not have a camera");
 
-  LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
-  mRenderStorage.clear();
+  auto &frameData = mFrameData.at(frameIndex);
 
-  mRenderStorage.setCameraData(entityDatabase.get<CameraComponent>(camera));
+  LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
+  frameData.clear();
+
+  frameData.setCameraData(entityDatabase.get<CameraComponent>(camera));
 
   // Meshes
   entityDatabase.iterateEntities<WorldTransformComponent, MeshComponent>(
-      [this](auto entity, const auto &world, const auto &mesh) {
-        mRenderStorage.addMesh(mesh.handle, entity, world.worldTransform);
+      [this, &frameData](auto entity, const auto &world, const auto &mesh) {
+        frameData.addMesh(mesh.handle, entity, world.worldTransform);
       });
 
   // Skinned Meshes
   entityDatabase.iterateEntities<SkeletonComponent, WorldTransformComponent,
                                  SkinnedMeshComponent>(
-      [this](auto entity, const auto &skeleton, const auto &world,
-             const auto &mesh) {
-        mRenderStorage.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
-                                      skeleton.jointFinalTransforms);
+      [this, &frameData](auto entity, const auto &skeleton, const auto &world,
+                         const auto &mesh) {
+        frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
+                                 skeleton.jointFinalTransforms);
       });
 
   // Texts
   entityDatabase.iterateEntities<TextComponent, WorldTransformComponent>(
-      [this](auto entity, const auto &text, const auto &world) {
+      [this, &frameData](auto entity, const auto &text, const auto &world) {
         const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
-        std::vector<RenderStorage::GlyphData> glyphs(text.text.length());
+        std::vector<SceneRendererFrameData::GlyphData> glyphs(
+            text.text.length());
         float advanceX = 0;
         float advanceY = 0;
         for (size_t i = 0; i < text.text.length(); ++i) {
@@ -358,35 +366,36 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
           advanceX += fontGlyph.advanceX;
         }
 
-        mRenderStorage.addText(text.font, glyphs, world.worldTransform);
+        frameData.addText(text.font, glyphs, world.worldTransform);
       });
 
   // Lights
   entityDatabase.iterateEntities<DirectionalLightComponent>(
-      [this](auto entity, const auto &light) {
-        mRenderStorage.addLight(light);
+      [this, &frameData](auto entity, const auto &light) {
+        frameData.addLight(light);
       });
 
   // Environments
   entityDatabase.iterateEntities<EnvironmentComponent>(
-      [this](auto entity, const auto &environment) {
-        mRenderStorage.setEnvironmentTextures(environment.irradianceMap,
-                                              environment.specularMap,
-                                              environment.brdfLUT);
+      [this, &frameData](auto entity, const auto &environment) {
+        frameData.setEnvironmentTextures(environment.irradianceMap,
+                                         environment.specularMap,
+                                         environment.brdfLUT);
       });
 
-  mRenderStorage.updateBuffers();
+  frameData.updateBuffers();
 }
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
-                           rhi::PipelineHandle pipeline,
-                           bool bindMaterialData) {
+                           rhi::PipelineHandle pipeline, bool bindMaterialData,
+                           uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
   rhi::Descriptor descriptor;
-  descriptor.bind(0, mRenderStorage.getMeshTransformsBuffer(),
+  descriptor.bind(0, frameData.getMeshTransformsBuffer(),
                   rhi::DescriptorType::StorageBuffer);
   commandList.bindDescriptor(pipeline, 1, descriptor);
 
-  for (auto &[handle, meshData] : mRenderStorage.getMeshGroups()) {
+  for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
@@ -419,15 +428,17 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                   rhi::PipelineHandle pipeline,
-                                  bool bindMaterialData) {
+                                  bool bindMaterialData, uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
+
   rhi::Descriptor descriptor;
-  descriptor.bind(0, mRenderStorage.getSkinnedMeshTransformsBuffer(),
+  descriptor.bind(0, frameData.getSkinnedMeshTransformsBuffer(),
                   rhi::DescriptorType::StorageBuffer);
-  descriptor.bind(1, mRenderStorage.getSkeletonsBuffer(),
+  descriptor.bind(1, frameData.getSkeletonsBuffer(),
                   rhi::DescriptorType::StorageBuffer);
   commandList.bindDescriptor(pipeline, 1, descriptor);
 
-  for (auto &[handle, meshData] : mRenderStorage.getSkinnedMeshGroups()) {
+  for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
@@ -459,14 +470,16 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
 }
 
 void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
-                               rhi::PipelineHandle pipeline) {
+                               rhi::PipelineHandle pipeline,
+                               uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
   static constexpr uint32_t QuadNumVertices = 6;
-  for (const auto &[font, texts] : mRenderStorage.getTextGroups()) {
+  for (const auto &[font, texts] : frameData.getTextGroups()) {
     auto textureHandle =
         mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
 
     rhi::Descriptor objectsDescriptor;
-    objectsDescriptor.bind(0, mRenderStorage.getTextTransformsBuffer(),
+    objectsDescriptor.bind(0, frameData.getTextTransformsBuffer(),
                            rhi::DescriptorType::StorageBuffer);
 
     rhi::Descriptor fontDescriptor;
@@ -474,7 +487,7 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
                         rhi::DescriptorType::CombinedImageSampler);
 
     rhi::Descriptor glyphsDescriptor;
-    glyphsDescriptor.bind(0, mRenderStorage.getTextGlyphsBuffer(),
+    glyphsDescriptor.bind(0, frameData.getTextGlyphsBuffer(),
                           rhi::DescriptorType::StorageBuffer);
 
     commandList.bindDescriptor(pipeline, 1, objectsDescriptor);

@@ -26,7 +26,6 @@ int main() {
   if (project.has_value()) {
     liquidator::EditorScreen editor(window, eventSystem, device);
     editor.start(project.value());
-    device->waitForIdle();
   }
 
   return 0;

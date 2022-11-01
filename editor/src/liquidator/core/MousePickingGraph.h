@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/RenderGraphEvaluator.h"
 #include "liquid/renderer/ShaderLibrary.h"
-#include "liquid/renderer/RenderStorage.h"
+#include "liquid/renderer/SceneRendererFrameData.h"
 #include "liquid/asset/AssetRegistry.h"
 
 #include "liquid/window/Window.h"
@@ -24,14 +24,14 @@ public:
    * @brief Create mouse picking graph
    *
    * @param shaderLibrary Shader library
-   * @param renderStorage Render storage
+   * @param frameData Scene renderer frame data
    * @param assetRegistry Asset registry
    * @param device Render device
    */
-  MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
-                    const liquid::RenderStorage &renderStorage,
-                    liquid::AssetRegistry &assetRegistry,
-                    liquid::rhi::RenderDevice *device);
+  MousePickingGraph(
+      liquid::ShaderLibrary &shaderLibrary,
+      const std::array<liquid::SceneRendererFrameData, 2> &frameData,
+      liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device);
 
   ~MousePickingGraph();
 
@@ -88,7 +88,8 @@ private:
 
   liquid::rhi::RenderGraph mRenderGraph;
   liquid::rhi::RenderGraphEvaluator mGraphEvaluator;
-  const liquid::RenderStorage &mRenderStorage;
+  const std::array<liquid::SceneRendererFrameData,
+                   liquid::rhi::RenderDevice::NumFrames> &mFrameData;
   liquid::AssetRegistry &mAssetRegistry;
 
   liquid::rhi::Buffer mEntitiesBuffer;

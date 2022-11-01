@@ -29,12 +29,6 @@ void VulkanBuffer::resize(size_t size) {
   createBuffer({mType, mSize, nullptr, mUsage});
 }
 
-void VulkanBuffer::update(void *data) {
-  void *mappedData = map();
-  memcpy(mappedData, data, mSize);
-  unmap();
-}
-
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
   mSize = description.size;
   mType = description.type;

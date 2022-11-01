@@ -100,8 +100,9 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
   pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList,
-                                    const rhi::RenderGraphRegistry &registry) {
-    draw(commandList, registry.get(pipeline));
+                                    const rhi::RenderGraphRegistry &registry,
+                                    uint32_t frameIndex) {
+    draw(commandList, registry.get(pipeline), frameIndex);
   });
 
   return {pass, imgui};
@@ -125,8 +126,7 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
-  mCurrentFrame = frameIndex;
-  auto &frameObj = mFrameData.at(mCurrentFrame);
+  auto &frameObj = mFrameData.at(frameIndex);
 
   if (data->TotalVtxCount <= 0) {
     return;
@@ -165,13 +165,13 @@ void ImguiRenderer::updateFrameData(uint32_t frameIndex) {
 }
 
 void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
-                         rhi::PipelineHandle pipeline) {
+                         rhi::PipelineHandle pipeline, uint32_t frameIndex) {
   auto *data = ImGui::GetDrawData();
 
   if (!data)
     return;
 
-  auto &frameObj = mFrameData.at(mCurrentFrame);
+  auto &frameObj = mFrameData.at(frameIndex);
   int fbWidth = (int)(data->DisplaySize.x * data->FramebufferScale.x);
   int fbHeight = (int)(data->DisplaySize.y * data->FramebufferScale.y);
 
@@ -181,7 +181,7 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
-  setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
+  setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline, frameIndex);
 
   uint32_t indexOffset = 0;
   uint32_t vertexOffset = 0;
@@ -192,7 +192,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
       if (cmd->UserCallback != NULL) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         if (cmd->UserCallback == ImDrawCallback_ResetRenderState) {
-          setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline);
+          setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline,
+                            frameIndex);
         } else {
           cmd->UserCallback(cmdList, cmd);
         }
@@ -250,12 +251,13 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
 void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       rhi::RenderCommandList &commandList,
                                       int fbWidth, int fbHeight,
-                                      rhi::PipelineHandle pipeline) {
+                                      rhi::PipelineHandle pipeline,
+                                      uint32_t frameIndex) {
   if (data->TotalVtxCount > 0) {
     commandList.bindVertexBuffer(
-        mFrameData.at(mCurrentFrame).vertexBuffer.getHandle());
+        mFrameData.at(frameIndex).vertexBuffer.getHandle());
     commandList.bindIndexBuffer(
-        mFrameData.at(mCurrentFrame).indexBuffer.getHandle(),
+        mFrameData.at(frameIndex).indexBuffer.getHandle(),
         sizeof(ImDrawIdx) == 2 ? rhi::IndexType::Uint16
                                : rhi::IndexType::Uint32);
   }

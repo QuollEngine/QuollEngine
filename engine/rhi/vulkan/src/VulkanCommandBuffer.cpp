@@ -20,7 +20,6 @@ void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
                                           FramebufferHandle framebuffer,
                                           const glm::ivec2 &renderAreaOffset,
                                           const glm::uvec2 &renderAreaSize) {
-
   const auto &vulkanRenderPass = mRegistry.getRenderPasses().at(renderPass);
 
   VkRenderPassBeginInfo beginInfo{};

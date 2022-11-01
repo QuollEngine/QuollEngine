@@ -12,7 +12,11 @@ void *Buffer::map() { return mNativeBuffer->map(); }
 
 void Buffer::unmap() { mNativeBuffer->unmap(); }
 
-void Buffer::update(void *data) { mNativeBuffer->update(data); }
+void Buffer::update(const void *data, size_t size) {
+  auto *mappedData = map();
+  memcpy(mappedData, data, size);
+  unmap();
+}
 
 void Buffer::resize(size_t size) { mNativeBuffer->resize(size); }
 

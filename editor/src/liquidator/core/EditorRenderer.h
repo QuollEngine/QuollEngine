@@ -6,7 +6,7 @@
 #include "liquidator/editor-scene/EditorGrid.h"
 #include "liquidator/ui/IconRegistry.h"
 
-#include "EditorRendererStorage.h"
+#include "EditorRendererFrameData.h"
 
 namespace liquidator {
 
@@ -59,10 +59,11 @@ public:
    * @param camera Camera
    * @param editorGrid Editor grid
    * @param selectedEntity Selected entity
+   * @param frameIndex Frame index
    */
   void updateFrameData(liquid::EntityDatabase &entityDatabase,
                        liquid::Entity camera, const EditorGrid &editorGrid,
-                       liquid::Entity selectedEntity);
+                       liquid::Entity selectedEntity, uint32_t frameIndex);
 
 private:
   /**
@@ -71,7 +72,6 @@ private:
   void createCollidableShapes();
 
 private:
-  EditorRendererStorage mRenderStorage;
   liquid::rhi::RenderDevice *mDevice;
   liquid::ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;
@@ -80,6 +80,9 @@ private:
   CollidableShapeDraw mCollidableCube;
   CollidableShapeDraw mCollidableSphere;
   CollidableShapeDraw mCollidableCapsule;
+
+  std::array<EditorRendererFrameData, liquid::rhi::RenderDevice::NumFrames>
+      mFrameData;
 };
 
 } // namespace liquidator

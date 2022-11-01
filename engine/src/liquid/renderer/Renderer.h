@@ -5,7 +5,6 @@
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"
-#include "RenderStorage.h"
 #include "liquid/imgui/ImguiRenderer.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetRegistry.h"
@@ -95,8 +94,10 @@ public:
    *
    * @param graph Render graph
    * @param commandList Render command list
+   * @param frameIndex Frame index
    */
-  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList);
+  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList,
+              uint32_t frameIndex);
 
   /**
    * @brief Wait for device

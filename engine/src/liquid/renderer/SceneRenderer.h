@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/RenderGraph.h"
 #include "liquid/asset/AssetRegistry.h"
-#include "RenderStorage.h"
+#include "SceneRendererFrameData.h"
 #include "ShaderLibrary.h"
 
 namespace liquid {
@@ -68,16 +68,18 @@ public:
    *
    * @param entityDatabase Entity database
    * @param camera Camera entity
+   * @param frameIndex Frame index
    */
-  void updateFrameData(EntityDatabase &entityDatabase, Entity camera);
+  void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
+                       uint32_t frameIndex);
 
   /**
-   * @brief Get render storage
+   * @brief Get frame data
    *
-   * @return Render storage
+   * @return Scene renderer frame data
    */
-  inline const RenderStorage &getRenderStorage() const {
-    return mRenderStorage;
+  inline const std::array<SceneRendererFrameData, 2> &getFrameData() const {
+    return mFrameData;
   }
 
 private:
@@ -87,9 +89,10 @@ private:
    * @param commandList Command list
    * @param pipeline Pipeline handle
    * @param bindMaterialData Bind material data
+   * @param frameIndex Frame index
    */
   void render(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-              bool bindMaterialData = false);
+              bool bindMaterialData, uint32_t frameIndex);
 
   /**
    * @brief Render skinned meshes
@@ -97,26 +100,28 @@ private:
    * @param commandList Command list
    * @param pipeline Pipeline handle
    * @param bindMaterialData Bind material data
+   * @param frameIndex Frame index
    */
   void renderSkinned(rhi::RenderCommandList &commandList,
-                     rhi::PipelineHandle pipeline,
-                     bool bindMaterialData = true);
+                     rhi::PipelineHandle pipeline, bool bindMaterialData,
+                     uint32_t frameIndex);
 
   /**
    * @brief Render texts
    *
    * @param commandList Command list
    * @param pipeline Pipeline handle
+   * @param frameIndex Frame index
    */
   void renderText(rhi::RenderCommandList &commandList,
-                  rhi::PipelineHandle pipeline);
+                  rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
 private:
   glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;
-  RenderStorage mRenderStorage;
   AssetRegistry &mAssetRegistry;
   rhi::RenderDevice *mDevice;
+  std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 };
 
 } // namespace liquid

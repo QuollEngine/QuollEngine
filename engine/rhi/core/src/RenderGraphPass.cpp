@@ -24,8 +24,9 @@ RenderGraphPass::addPipeline(const PipelineDescription &description) {
   return mRegistry.set(description);
 }
 
-void RenderGraphPass::execute(RenderCommandList &commandList) {
-  mExecutor(commandList, mRegistry);
+void RenderGraphPass::execute(RenderCommandList &commandList,
+                              uint32_t frameIndex) {
+  mExecutor(commandList, mRegistry, frameIndex);
 }
 
 } // namespace liquid::rhi

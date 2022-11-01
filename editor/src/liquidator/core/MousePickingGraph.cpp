@@ -3,12 +3,12 @@
 
 namespace liquidator {
 
-MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
-                                     const liquid::RenderStorage &renderStorage,
-                                     liquid::AssetRegistry &assetRegistry,
-                                     liquid::rhi::RenderDevice *device)
-    : mDevice(device), mRenderStorage(renderStorage),
-      mAssetRegistry(assetRegistry), mGraphEvaluator(device) {
+MousePickingGraph::MousePickingGraph(
+    liquid::ShaderLibrary &shaderLibrary,
+    const std::array<liquid::SceneRendererFrameData, 2> &frameData,
+    liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device)
+    : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
+      mGraphEvaluator(device) {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
@@ -38,11 +38,11 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
 
   mEntitiesBuffer = device->createBuffer(
       {liquid::rhi::BufferType::Storage,
-       sizeof(liquid::Entity) * mRenderStorage.getReservedSpace()});
+       sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace()});
 
   mSkinnedEntitiesBuffer = device->createBuffer(
       {liquid::rhi::BufferType::Storage,
-       sizeof(liquid::Entity) * mRenderStorage.getReservedSpace()});
+       sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace()});
 
   auto &pass = mRenderGraph.addPass("MousePicking");
   pass.write(depthBuffer, liquid::rhi::DepthStencilClear({1.0f, 0}));
@@ -74,7 +74,10 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
 
   pass.setExecutor([this, vPipeline, vSkinnedPipeline](
                        liquid::rhi::RenderCommandList &commandList,
-                       const liquid::rhi::RenderGraphRegistry &registry) {
+                       const liquid::rhi::RenderGraphRegistry &registry,
+                       uint32_t frameIndex) {
+    auto &frameData = mFrameData.at(frameIndex);
+
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
 
     auto pipeline = registry.get(vPipeline);
@@ -85,14 +88,14 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
 
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      descriptor.bind(0, frameData.getActiveCameraBuffer(),
                       liquid::rhi::DescriptorType::UniformBuffer);
       commandList.bindDescriptor(pipeline, 0, descriptor);
     }
 
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getMeshTransformsBuffer(),
+      descriptor.bind(0, frameData.getMeshTransformsBuffer(),
                       liquid::rhi::DescriptorType::StorageBuffer);
       descriptor.bind(1, mEntitiesBuffer.getHandle(),
                       liquid::rhi::DescriptorType::StorageBuffer);
@@ -106,7 +109,7 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
       commandList.bindDescriptor(pipeline, 2, descriptor);
     }
 
-    for (auto &[handle, meshData] : mRenderStorage.getMeshGroups()) {
+    for (auto &[handle, meshData] : frameData.getMeshGroups()) {
       const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
       for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
         commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
@@ -138,16 +141,16 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
 
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      descriptor.bind(0, frameData.getActiveCameraBuffer(),
                       liquid::rhi::DescriptorType::UniformBuffer);
       commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
     }
 
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mRenderStorage.getSkinnedMeshTransformsBuffer(),
+      descriptor.bind(0, frameData.getSkinnedMeshTransformsBuffer(),
                       liquid::rhi::DescriptorType::StorageBuffer);
-      descriptor.bind(1, mRenderStorage.getSkeletonsBuffer(),
+      descriptor.bind(1, frameData.getSkeletonsBuffer(),
                       liquid::rhi::DescriptorType::StorageBuffer);
       descriptor.bind(2, mSkinnedEntitiesBuffer.getHandle(),
                       liquid::rhi::DescriptorType::StorageBuffer);
@@ -161,7 +164,7 @@ MousePickingGraph::MousePickingGraph(liquid::ShaderLibrary &shaderLibrary,
       commandList.bindDescriptor(skinnedPipeline, 2, descriptor);
     }
 
-    for (auto &[handle, meshData] : mRenderStorage.getSkinnedMeshGroups()) {
+    for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
       const auto &mesh =
           mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
       for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
@@ -201,17 +204,20 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
                                 const glm::vec2 &mousePos,
                                 uint32_t frameIndex) {
   mFrameIndex = frameIndex;
+  auto &frameData = mFrameData.at(frameIndex);
 
-  const auto &meshEntities = mRenderStorage.getMeshEntities();
-  mEntitiesBuffer.update(const_cast<liquid::Entity *>(meshEntities.data()));
+  const auto &meshEntities = frameData.getMeshEntities();
+  mEntitiesBuffer.update(const_cast<liquid::Entity *>(meshEntities.data()),
+                         sizeof(liquid::Entity) * meshEntities.size());
 
-  const auto &skinnedMeshEntities = mRenderStorage.getSkinnedMeshEntities();
+  const auto &skinnedMeshEntities = frameData.getSkinnedMeshEntities();
   mSkinnedEntitiesBuffer.update(
-      const_cast<liquid::Entity *>(skinnedMeshEntities.data()));
+      const_cast<liquid::Entity *>(skinnedMeshEntities.data()),
+      sizeof(liquid::Entity) * skinnedMeshEntities.size());
 
   mMousePos = mousePos;
 
-  mGraphEvaluator.execute(commandList, mRenderGraph);
+  mGraphEvaluator.execute(commandList, mRenderGraph, frameIndex);
 }
 
 liquid::Entity MousePickingGraph::getSelectedEntity() {
@@ -222,7 +228,7 @@ liquid::Entity MousePickingGraph::getSelectedEntity() {
   mSelectedEntityBuffer.unmap();
 
   liquid::Entity nullEntity = liquid::EntityNull;
-  mSelectedEntityBuffer.update(&nullEntity);
+  mSelectedEntityBuffer.update(&nullEntity, sizeof(liquid::Entity));
 
   mFrameIndex = std::numeric_limits<uint32_t>::max();
 

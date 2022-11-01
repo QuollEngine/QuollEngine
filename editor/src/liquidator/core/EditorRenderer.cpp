@@ -8,7 +8,9 @@ EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
                                IconRegistry &iconRegistry,
                                liquid::rhi::RenderDevice *device)
     : mIconRegistry(iconRegistry), mShaderLibrary(shaderLibrary),
-      mRenderStorage(device), mDevice(device) {
+      mFrameData{EditorRendererFrameData(mDevice),
+                 EditorRendererFrameData(mDevice)},
+      mDevice(device) {
 
   createCollidableShapes();
 
@@ -119,28 +121,30 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
   pass.setExecutor([vEditorGridPipeline, vSkeletonLinesPipeline,
                     vObjectIconsPipeline, vCollidableShapePipeline,
                     this](liquid::rhi::RenderCommandList &commandList,
-                          const liquid::rhi::RenderGraphRegistry &registry) {
+                          const liquid::rhi::RenderGraphRegistry &registry,
+                          uint32_t frameIndex) {
+    auto &frameData = mFrameData.at(frameIndex);
     auto collidableShapePipeline = registry.get(vCollidableShapePipeline);
     auto skeletonLinesPipeline = registry.get(vSkeletonLinesPipeline);
     auto objectIconsPipeline = registry.get(vObjectIconsPipeline);
     auto editorGridPipeline = registry.get(vEditorGridPipeline);
 
     // Collidable shapes
-    if (mRenderStorage.isCollidableEntitySelected() &&
-        mRenderStorage.getCollidableShapeType() !=
+    if (frameData.isCollidableEntitySelected() &&
+        frameData.getCollidableShapeType() !=
             liquid::PhysicsGeometryType::Plane) {
       LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
 
       commandList.bindPipeline(collidableShapePipeline);
       liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            liquid::rhi::DescriptorType::UniformBuffer);
-      sceneDescriptor.bind(1, mRenderStorage.getCollidableParamsBuffer(),
+      sceneDescriptor.bind(1, frameData.getCollidableParamsBuffer(),
                            liquid::rhi::DescriptorType::UniformBuffer);
 
       commandList.bindDescriptor(collidableShapePipeline, 0, sceneDescriptor);
 
-      auto type = mRenderStorage.getCollidableShapeType();
+      auto type = frameData.getCollidableShapeType();
 
       if (type == liquid::PhysicsGeometryType::Box) {
         commandList.bindVertexBuffer(mCollidableCube.buffer.getHandle());
@@ -159,11 +163,11 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
       LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
 
       liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            liquid::rhi::DescriptorType::UniformBuffer);
 
       liquid::rhi::Descriptor gridDescriptor;
-      gridDescriptor.bind(0, mRenderStorage.getEditorGridBuffer(),
+      gridDescriptor.bind(0, frameData.getEditorGridBuffer(),
                           liquid::rhi::DescriptorType::UniformBuffer);
 
       commandList.bindPipeline(editorGridPipeline);
@@ -175,18 +179,18 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
     }
 
     // Skeleton bones
-    if (!mRenderStorage.getBoneCounts().empty()) {
+    if (!frameData.getBoneCounts().empty()) {
       LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
 
       commandList.bindPipeline(skeletonLinesPipeline);
-      auto skeletonBuffer = mRenderStorage.getSkeletonTransforms();
+      auto skeletonBuffer = frameData.getSkeletonTransforms();
 
-      auto bonesBuffer = mRenderStorage.getSkeletonBoneTransforms();
+      auto bonesBuffer = frameData.getSkeletonBoneTransforms();
 
-      const auto &numBones = mRenderStorage.getBoneCounts();
+      const auto &numBones = frameData.getBoneCounts();
 
       liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, mRenderStorage.getActiveCameraBuffer(),
+      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            liquid::rhi::DescriptorType::UniformBuffer);
       sceneDescriptor.bind(1, skeletonBuffer,
                            liquid::rhi::DescriptorType::StorageBuffer);
@@ -207,16 +211,16 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
       commandList.bindPipeline(objectIconsPipeline);
       liquid::rhi::Descriptor objectListSceneDescriptor;
       objectListSceneDescriptor.bind(
-          0, mRenderStorage.getActiveCameraBuffer(),
+          0, frameData.getActiveCameraBuffer(),
           liquid::rhi::DescriptorType::UniformBuffer);
       objectListSceneDescriptor.bind(
-          1, mRenderStorage.getGizmoTransformsBuffer(),
+          1, frameData.getGizmoTransformsBuffer(),
           liquid::rhi::DescriptorType::StorageBuffer);
       commandList.bindDescriptor(objectIconsPipeline, 0,
                                  objectListSceneDescriptor);
 
       uint32_t previousInstance = 0;
-      for (auto &[icon, count] : mRenderStorage.getGizmoCounts()) {
+      for (auto &[icon, count] : frameData.getGizmoCounts()) {
         liquid::rhi::Descriptor iconDescriptor;
         iconDescriptor.bind(0, {icon},
                             liquid::rhi::DescriptorType::CombinedImageSampler);
@@ -235,49 +239,53 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
 void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
                                      liquid::Entity camera,
                                      const EditorGrid &editorGrid,
-                                     liquid::Entity selectedEntity) {
+                                     liquid::Entity selectedEntity,
+                                     uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
+
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
-  mRenderStorage.clear();
+  frameData.clear();
 
   if (entityDatabase.has<liquid::CollidableComponent>(selectedEntity)) {
-    mRenderStorage.setCollidable(
+    frameData.setCollidable(
         selectedEntity,
         entityDatabase.get<liquid::CollidableComponent>(selectedEntity),
         entityDatabase.get<liquid::WorldTransformComponent>(selectedEntity));
   }
 
-  mRenderStorage.setActiveCamera(
+  frameData.setActiveCamera(
       entityDatabase.get<liquid::CameraComponent>(camera));
 
-  mRenderStorage.setEditorGrid(editorGrid.getData());
+  frameData.setEditorGrid(editorGrid.getData());
 
   entityDatabase.iterateEntities<liquid::WorldTransformComponent,
                                  liquid::SkeletonDebugComponent>(
-      [this](auto entity, liquid::WorldTransformComponent &worldTransform,
-             liquid::SkeletonDebugComponent &skeleton) {
-        mRenderStorage.addSkeleton(worldTransform.worldTransform,
-                                   skeleton.boneTransforms);
+      [this, &frameData](auto entity,
+                         liquid::WorldTransformComponent &worldTransform,
+                         liquid::SkeletonDebugComponent &skeleton) {
+        frameData.addSkeleton(worldTransform.worldTransform,
+                              skeleton.boneTransforms);
       });
 
   entityDatabase.iterateEntities<liquid::WorldTransformComponent,
                                  liquid::DirectionalLightComponent>(
-      [this](auto entity, const auto &world, const auto &light) {
-        mRenderStorage.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
-                                world.worldTransform);
+      [this, &frameData](auto entity, const auto &world, const auto &light) {
+        frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
+                           world.worldTransform);
       });
 
   entityDatabase.iterateEntities<liquid::WorldTransformComponent,
                                  liquid::PerspectiveLensComponent>(
-      [this](auto entity, const auto &world, const auto &camera) {
+      [this, &frameData](auto entity, const auto &world, const auto &camera) {
         static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 
-        mRenderStorage.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
-                                glm::rotate(world.worldTransform,
-                                            NinetyDegreesInRadians,
-                                            glm::vec3(0, 1, 0)));
+        frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
+                           glm::rotate(world.worldTransform,
+                                       NinetyDegreesInRadians,
+                                       glm::vec3(0, 1, 0)));
       });
 
-  mRenderStorage.updateBuffers();
+  frameData.updateBuffers();
 }
 
 void EditorRenderer::createCollidableShapes() {
@@ -311,7 +319,7 @@ void EditorRenderer::createCollidableShapes() {
         // clang-format on
     };
 
-    mCollidableCube.buffer = mRenderStorage.getRenderDevice()->createBuffer(
+    mCollidableCube.buffer = mDevice->createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableBoxVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableBoxVertices.data())});
@@ -364,7 +372,7 @@ void EditorRenderer::createCollidableShapes() {
     drawUnitCircle(CollidableSphereVertices, NumSegments, cZero, cSin, cCos);
     drawUnitCircle(CollidableSphereVertices, NumSegments, cSin, cCos, cZero);
 
-    mCollidableSphere.buffer = mRenderStorage.getRenderDevice()->createBuffer(
+    mCollidableSphere.buffer = mDevice->createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableSphereVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableSphereVertices.data())});
@@ -422,7 +430,7 @@ void EditorRenderer::createCollidableShapes() {
     drawUnitHalfCircle(CollidableCapsuleVertices, NumSegments, cZero,
                        cSinCenter(-0.5f), cCos, -Pi);
 
-    mCollidableCapsule.buffer = mRenderStorage.getRenderDevice()->createBuffer(
+    mCollidableCapsule.buffer = mDevice->createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableCapsuleVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableCapsuleVertices.data())});

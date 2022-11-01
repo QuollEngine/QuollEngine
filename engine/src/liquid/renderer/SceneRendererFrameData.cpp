@@ -1,11 +1,12 @@
 #include "liquid/core/Base.h"
 
 #include "liquid/rhi/RenderHandle.h"
-#include "RenderStorage.h"
+#include "SceneRendererFrameData.h"
 
 namespace liquid {
 
-RenderStorage::RenderStorage(rhi::RenderDevice *device, size_t reservedSpace)
+SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
+                                               size_t reservedSpace)
     : mReservedSpace(reservedSpace), mDevice(device) {
   mMeshTransformMatrices.reserve(mReservedSpace);
 
@@ -46,19 +47,27 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device, size_t reservedSpace)
       mDevice->createBuffer({rhi::BufferType::Uniform, sizeof(SceneData)});
 }
 
-void RenderStorage::updateBuffers() {
-  mMeshTransformsBuffer.update(mMeshTransformMatrices.data());
-  mSkinnedMeshTransformsBuffer.update(mSkinnedMeshTransformMatrices.data());
-  mSkeletonsBuffer.update(mSkeletonVector.get());
-  mTextTransformsBuffer.update(mTextTransforms.data());
-  mTextGlyphsBuffer.update(mTextGlyphs.data());
-  mLightsBuffer.update(mLights.data());
-  mCameraBuffer.update(&mCameraData);
-  mSceneBuffer.update(&mSceneData);
+void SceneRendererFrameData::updateBuffers() {
+  mMeshTransformsBuffer.update(mMeshTransformMatrices.data(),
+                               mMeshTransformMatrices.size() *
+                                   sizeof(glm::mat4));
+  mSkinnedMeshTransformsBuffer.update(mSkinnedMeshTransformMatrices.data(),
+                                      mSkinnedMeshTransformMatrices.size() *
+                                          sizeof(glm::mat4));
+  mSkeletonsBuffer.update(mSkeletonVector.get(),
+                          sizeof(glm::mat4) * mLastSkeleton * MaxNumJoints);
+  mTextTransformsBuffer.update(mTextTransforms.data(),
+                               mTextTransforms.size() * sizeof(glm::mat4));
+  mTextGlyphsBuffer.update(mTextGlyphs.data(),
+                           mTextGlyphs.size() * sizeof(GlyphData));
+  mLightsBuffer.update(mLights.data(), mLights.size() * sizeof(LightData));
+  mCameraBuffer.update(&mCameraData, sizeof(CameraComponent));
+  mSceneBuffer.update(&mSceneData, sizeof(SceneData));
 }
 
-void RenderStorage::addMesh(MeshAssetHandle handle, liquid::Entity entity,
-                            const glm::mat4 &transform) {
+void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
+                                     liquid::Entity entity,
+                                     const glm::mat4 &transform) {
   mMeshTransformMatrices.push_back(transform);
   mMeshEntities.push_back(entity);
   uint32_t index = static_cast<uint32_t>(mMeshTransformMatrices.size() - 1);
@@ -71,9 +80,9 @@ void RenderStorage::addMesh(MeshAssetHandle handle, liquid::Entity entity,
   mMeshGroups.at(handle).indices.push_back(index);
 }
 
-void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
-                                   const glm::mat4 &transform,
-                                   const std::vector<glm::mat4> &skeleton) {
+void SceneRendererFrameData::addSkinnedMesh(
+    SkinnedMeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
+    const std::vector<glm::mat4> &skeleton) {
   mSkinnedMeshTransformMatrices.push_back(transform);
   mSkinnedMeshEntities.push_back(entity);
 
@@ -95,7 +104,7 @@ void RenderStorage::addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
   mLastSkeleton++;
 }
 
-void RenderStorage::addLight(const DirectionalLightComponent &light) {
+void SceneRendererFrameData::addLight(const DirectionalLightComponent &light) {
   // Calculate projection matrix
   const float DIR_LIGHT_SIZE = 20.0f;
   const float DIR_LIGHT_NEAR = 0.001f;
@@ -123,9 +132,9 @@ void RenderStorage::addLight(const DirectionalLightComponent &light) {
   mSceneData.data.x = static_cast<int32_t>(mLights.size());
 }
 
-void RenderStorage::addText(FontAssetHandle font,
-                            const std::vector<GlyphData> &glyphs,
-                            const glm::mat4 &transform) {
+void SceneRendererFrameData::addText(FontAssetHandle font,
+                                     const std::vector<GlyphData> &glyphs,
+                                     const glm::mat4 &transform) {
   mTextTransforms.push_back(transform);
   uint32_t index = static_cast<uint32_t>(mTextTransforms.size() - 1);
 
@@ -145,20 +154,20 @@ void RenderStorage::addText(FontAssetHandle font,
   }
 }
 
-void RenderStorage::setEnvironmentTextures(rhi::TextureHandle irradianceMap,
-                                           rhi::TextureHandle specularMap,
-                                           rhi::TextureHandle brdfLUT) {
+void SceneRendererFrameData::setEnvironmentTextures(
+    rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap,
+    rhi::TextureHandle brdfLUT) {
   mIrradianceMap = irradianceMap;
   mSpecularMap = specularMap;
   mBrdfLUT = brdfLUT;
   mSceneData.data.y = 1;
 }
 
-void RenderStorage::setCameraData(const CameraComponent &data) {
+void SceneRendererFrameData::setCameraData(const CameraComponent &data) {
   mCameraData = data;
 }
 
-void RenderStorage::clear() {
+void SceneRendererFrameData::clear() {
   mMeshTransformMatrices.clear();
   mSkinnedMeshTransformMatrices.clear();
   mMeshEntities.clear();

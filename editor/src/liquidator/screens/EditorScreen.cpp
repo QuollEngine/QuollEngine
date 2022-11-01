@@ -133,7 +133,7 @@ void EditorScreen::start(const Project &project) {
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
 
   MousePickingGraph mousePicking(renderer.getShaderLibrary(),
-                                 renderer.getSceneRenderer().getRenderStorage(),
+                                 renderer.getSceneRenderer().getFrameData(),
                                  assetManager.getRegistry(), mDevice);
 
   mousePicking.setFramebufferSize(mWindow);
@@ -282,11 +282,12 @@ void EditorScreen::start(const Project &project) {
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
-                                    camera);
+                                    camera, renderFrame.frameIndex);
       editorRenderer.updateFrameData(
           entityManager.getActiveEntityDatabase(), camera,
           editorManager.getEditorGrid(),
-          ui.getSceneHierarchyPanel().getSelectedEntity());
+          ui.getSceneHierarchyPanel().getSelectedEntity(),
+          renderFrame.frameIndex);
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();
@@ -295,9 +296,8 @@ void EditorScreen::start(const Project &project) {
 
       mousePicking.compile();
 
-      renderer.render(graph, renderFrame.commandList);
+      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
 
-      bool mousePicked = false;
       if (mouseClicked) {
         auto mousePos = mWindow.getCurrentMousePosition();
 
@@ -323,6 +323,8 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.run();
   editorManager.saveEditorState(statePath);
+
+  mDevice->waitForIdle();
 }
 
 } // namespace liquidator
