@@ -8,7 +8,7 @@ namespace liquid::rhi {
 VulkanBuffer::VulkanBuffer(const BufferDescription &description,
                            VulkanResourceAllocator &allocator)
     : mAllocator(allocator), mType(description.type), mUsage(description.usage),
-      mSize(description.size) {
+      mSize(description.size), mMapped(description.mapped) {
   createBuffer(description);
 }
 
@@ -17,16 +17,26 @@ VulkanBuffer::~VulkanBuffer() {
 }
 
 void *VulkanBuffer::map() {
+  if (mMapped) {
+    return mMappedData;
+  }
+
   void *data = nullptr;
   vmaMapMemory(mAllocator, mAllocation, &data);
   return data;
 }
 
-void VulkanBuffer::unmap() { vmaUnmapMemory(mAllocator, mAllocation); }
+void VulkanBuffer::unmap() {
+  if (mMapped) {
+    return;
+  }
+
+  vmaUnmapMemory(mAllocator, mAllocation);
+}
 
 void VulkanBuffer::resize(size_t size) {
   mSize = size;
-  createBuffer({mType, mSize, nullptr, mUsage});
+  createBuffer({mType, mSize, nullptr, mUsage, mMapped});
 }
 
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
@@ -35,6 +45,10 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   mUsage = description.usage;
 
   VmaAllocationCreateFlags allocationFlags = 0;
+
+  if (description.mapped) {
+    allocationFlags |= VMA_ALLOCATION_CREATE_MAPPED_BIT;
+  }
 
   if ((mUsage & BufferUsage::HostWrite) == BufferUsage::HostWrite) {
     allocationFlags |= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
@@ -74,10 +88,16 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   VmaAllocation oldAllocation = mAllocation;
   VkBuffer oldBuffer = mBuffer;
 
+  VmaAllocationInfo allocationInfo{};
+
   checkForVulkanError(vmaCreateBuffer(mAllocator, &createBufferInfo,
                                       &createAllocationInfo, &mBuffer,
-                                      &mAllocation, nullptr),
+                                      &mAllocation, &allocationInfo),
                       "Cannot create buffer");
+
+  if (description.mapped) {
+    mMappedData = allocationInfo.pMappedData;
+  }
 
   if (description.data) {
     void *data = nullptr;

@@ -3,14 +3,13 @@
 
 #include <GLFW/glfw3.h>
 
-using liquid::Renderer;
 using liquid::Window;
 
 namespace liquidator {
 
 EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
                            liquid::EventSystem &eventSystem,
-                           liquid::Renderer &renderer, liquid::Window &window)
+                           liquid::Window &window)
     : mEntityDatabase(entityDatabase), mEventSystem(eventSystem),
       mWindow(window) {
 

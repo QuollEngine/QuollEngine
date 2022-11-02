@@ -11,28 +11,45 @@ EditorRendererFrameData::EditorRendererFrameData(
   mGizmoTransforms.reserve(reservedSpace);
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
 
-  mCameraBuffer = mDevice->createBuffer(
-      {liquid::rhi::BufferType::Uniform, sizeof(liquid::CameraComponent)});
+  liquid::rhi::BufferDescription defaultDesc{};
+  defaultDesc.type = liquid::rhi::BufferType::Storage;
+  defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
+  defaultDesc.mapped = true;
 
-  mEditorGridBuffer = mDevice->createBuffer(
-      {liquid::rhi::BufferType::Uniform, sizeof(EditorGridData)});
+  mSkeletonTransformsBuffer = mDevice->createBuffer(defaultDesc);
 
-  mSkeletonTransformsBuffer = mDevice->createBuffer({
-      liquid::rhi::BufferType::Storage,
-      mReservedSpace * sizeof(glm::mat4),
-  });
+  {
+    auto desc = defaultDesc;
+    desc.type = liquid::rhi::BufferType::Uniform;
+    desc.size = sizeof(liquid::CameraComponent);
+    mCameraBuffer = mDevice->createBuffer(desc);
+  }
 
-  mSkeletonBoneTransformsBuffer = mDevice->createBuffer({
-      liquid::rhi::BufferType::Storage,
-      mReservedSpace * MaxNumBones * sizeof(glm::mat4),
-  });
+  {
+    auto desc = defaultDesc;
+    desc.type = liquid::rhi::BufferType::Uniform;
+    desc.size = sizeof(EditorGridData);
+    mEditorGridBuffer = mDevice->createBuffer(desc);
+  }
 
-  mGizmoTransformsBuffer = mDevice->createBuffer(
-      {liquid::rhi::BufferType::Storage, sizeof(glm::mat4) * mReservedSpace,
-       mGizmoTransforms.data()});
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * MaxNumBones * sizeof(glm::mat4);
+    mSkeletonBoneTransformsBuffer = mDevice->createBuffer(desc);
+  }
 
-  mCollidableEntityBuffer = mDevice->createBuffer(
-      {liquid::rhi::BufferType::Uniform, sizeof(CollidableEntity)});
+  {
+    auto desc = defaultDesc;
+    desc.data = mGizmoTransforms.data();
+    mGizmoTransformsBuffer = mDevice->createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.size = sizeof(CollidableEntity);
+    desc.type = liquid::rhi::BufferType::Uniform;
+    mCollidableEntityBuffer = mDevice->createBuffer(desc);
+  }
 }
 
 void EditorRendererFrameData::addSkeleton(

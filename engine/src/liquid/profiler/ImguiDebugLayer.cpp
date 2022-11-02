@@ -58,28 +58,47 @@ void ImguiDebugLayer::renderUsageMetrics() {
   ImGui::Begin("Usage Metrics", &mUsageMetricsVisible,
                ImGuiWindowFlags_NoDocking);
 
+  static const std::array<String, 3> Units{"bytes", "Kb", "Mb"};
+  static constexpr float Kilo = 1024.0f;
+
+  auto getSizeString = [](size_t size) {
+    if (size < static_cast<size_t>(Kilo)) {
+      return std::to_string(size) + " " + Units.at(0);
+    }
+    float humanReadableSize = static_cast<float>(size);
+
+    size_t i = 1;
+    for (; i < Units.size() && humanReadableSize >= Kilo; ++i) {
+      humanReadableSize /= Kilo;
+    }
+
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << humanReadableSize << " "
+       << Units.at(i - 1) << " (" << size << " " << Units.at(0) << ")";
+    return ss.str();
+  };
+
   if (ImGui::BeginTable("Table", 2,
                         ImGuiTableFlags_Borders |
                             ImGuiTableColumnFlags_WidthStretch |
                             ImGuiTableFlags_RowBg)) {
 
+    // Buffers
     renderTableRow(
         "Number of buffers",
         std::to_string(mDeviceStats.getResourceMetrics()->getBuffersCount()));
 
     renderTableRow(
         "Total size of allocated buffers",
-        std::to_string(
-            mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
+        getSizeString(mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
 
     // Textures
-
     renderTableRow(
         "Number of textures",
         std::to_string(mDeviceStats.getResourceMetrics()->getTexturesCount()));
     renderTableRow(
         "Total size of allocated textures",
-        std::to_string(
+        getSizeString(
             mDeviceStats.getResourceMetrics()->getTotalTextureSize()));
 
     // Draw calls

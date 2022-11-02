@@ -95,7 +95,7 @@ void EditorScreen::start(const Project &project) {
   liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenesPath);
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
-                                        mEventSystem, renderer, mWindow);
+                                        mEventSystem, mWindow);
   liquidator::EditorGrid editorGrid;
   liquidator::EditorManager editorManager(editorCamera, editorGrid,
                                           entityManager, project);

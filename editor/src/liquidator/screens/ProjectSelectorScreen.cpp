@@ -4,6 +4,7 @@
 #include "liquid/asset/AssetRegistry.h"
 #include "liquid/loop/MainLoop.h"
 #include "liquid/profiler/FPSCounter.h"
+#include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/imgui/ImguiUtils.h"
 
 #include "liquidator/editor-scene/EditorCamera.h"
@@ -22,16 +23,17 @@ ProjectSelectorScreen::ProjectSelectorScreen(liquid::Window &window,
 std::optional<Project> ProjectSelectorScreen::start() {
   liquid::EntityDatabase entityDatabase;
   liquid::AssetRegistry assetRegistry;
+  liquid::ShaderLibrary shaderLibrary;
+  liquid::rhi::RenderGraphEvaluator graphEvaluator(mDevice);
 
-  liquid::Renderer renderer(assetRegistry, mWindow, mDevice);
-  liquid::Presenter presenter(renderer.getShaderLibrary(), mDevice);
+  liquid::ImguiRenderer imguiRenderer(mWindow, shaderLibrary, mDevice);
+  liquid::Presenter presenter(shaderLibrary, mDevice);
 
   liquidator::ProjectManager projectManager;
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::EditorCamera editorCamera(entityDatabase, mEventSystem, renderer,
-                                        mWindow);
+  liquidator::EditorCamera editorCamera(entityDatabase, mEventSystem, mWindow);
   liquidator::IconRegistry iconRegistry;
   std::optional<liquidator::Project> project;
 
@@ -43,12 +45,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   Theme::apply();
 
-  renderer.getImguiRenderer().setClearColor(
-      Theme::getColor(ThemeColor::BackgroundColor));
-  renderer.getImguiRenderer().buildFonts();
+  imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
+  imguiRenderer.buildFonts();
 
   liquid::rhi::RenderGraph graph;
-  auto imguiPassData = renderer.getImguiRenderer().attach(graph);
+  auto imguiPassData = imguiRenderer.attach(graph);
 
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
@@ -65,12 +66,21 @@ std::optional<Project> ProjectSelectorScreen::start() {
     return !project.has_value();
   });
 
-  mainLoop.setRenderFn([&renderer, &editorCamera, &graph, &imguiPassData,
-                        &project, &projectManager, &iconRegistry,
-                        &entityDatabase, &presenter, this]() mutable {
-    auto &imgui = renderer.getImguiRenderer();
+  liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
+                                     mDevice->getDeviceStats(), fpsCounter);
+
+  mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &editorCamera, &graph,
+                        &imguiPassData, &project, &projectManager,
+                        &iconRegistry, &entityDatabase, &presenter, &debugLayer,
+                        this]() mutable {
+    auto &imgui = imguiRenderer;
 
     imgui.beginRendering();
+
+    ImGui::BeginMainMenuBar();
+    debugLayer.renderMenu();
+    ImGui::EndMainMenuBar();
+    debugLayer.render();
 
     const auto &fbSize = glm::vec2(mWindow.getFramebufferSize());
     const auto center = fbSize * 0.5f;
@@ -117,7 +127,10 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
+      graph.compile(mDevice);
+      graphEvaluator.build(graph);
+      graphEvaluator.execute(renderFrame.commandList, graph,
+                             renderFrame.frameIndex);
 
       presenter.present(renderFrame.commandList, imguiPassData.imguiColor,
                         renderFrame.swapchainImageIndex);
