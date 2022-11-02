@@ -36,19 +36,19 @@ MousePickingGraph::MousePickingGraph(
       {liquid::rhi::BufferType::Storage, sizeof(liquid::Entity), &nullEntity,
        liquid::rhi::BufferUsage::HostRead});
 
-  mEntitiesBuffer = device->createBuffer(
-      {liquid::rhi::BufferType::Storage,
-       sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace()});
+  liquid::rhi::BufferDescription defaultDesc{};
+  defaultDesc.type = liquid::rhi::BufferType::Storage;
+  defaultDesc.size =
+      sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace();
+  defaultDesc.mapped = true;
 
-  mSkinnedEntitiesBuffer = device->createBuffer(
-      {liquid::rhi::BufferType::Storage,
-       sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace()});
+  mEntitiesBuffer = device->createBuffer(defaultDesc);
+  mSkinnedEntitiesBuffer = device->createBuffer(defaultDesc);
 
   auto &pass = mRenderGraph.addPass("MousePicking");
   pass.write(depthBuffer, liquid::rhi::DepthStencilClear({1.0f, 0}));
 
   // Normal meshes
-
   auto vPipeline = pass.addPipeline(liquid::rhi::PipelineDescription{
       shaderLibrary.getShader("mouse-picking.default.vertex"),
       shaderLibrary.getShader("mouse-picking.selector.fragment"),

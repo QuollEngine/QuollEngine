@@ -17,13 +17,7 @@ enum class BufferUsage : uint8_t {
   HostRead = 1 << 1
 };
 
-constexpr inline BufferUsage operator|(BufferUsage a, BufferUsage b) {
-  return BufferUsage(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-}
-
-constexpr inline BufferUsage operator&(BufferUsage a, BufferUsage b) {
-  return BufferUsage(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-}
+EnableBitwiseEnum(BufferUsage);
 
 /**
  * @brief Buffer description
@@ -48,6 +42,11 @@ struct BufferDescription {
    * @brief Buffer usage
    */
   BufferUsage usage = rhi::BufferUsage::HostWrite;
+
+  /**
+   * @brief Keep buffer always mapped
+   */
+  bool mapped = false;
 };
 
 } // namespace liquid::rhi

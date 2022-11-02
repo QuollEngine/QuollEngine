@@ -44,9 +44,17 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
       mDevice->createShader({Engine::getShadersPath() / "imgui.frag.spv"}));
 
   for (auto &x : mFrameData) {
-    x.vertexBuffer =
-        mDevice->createBuffer({liquid::rhi::BufferType::Vertex, 1});
-    x.indexBuffer = mDevice->createBuffer({liquid::rhi::BufferType::Index, 1});
+    liquid::rhi::BufferDescription vertexDesc{};
+    vertexDesc.type = liquid::rhi::BufferType::Vertex;
+    vertexDesc.size = 1;
+    vertexDesc.mapped = true;
+    x.vertexBuffer = mDevice->createBuffer(vertexDesc);
+
+    liquid::rhi::BufferDescription indexDesc{};
+    indexDesc.type = liquid::rhi::BufferType::Index;
+    indexDesc.size = 1;
+    indexDesc.mapped = true;
+    x.indexBuffer = mDevice->createBuffer(indexDesc);
   }
 }
 

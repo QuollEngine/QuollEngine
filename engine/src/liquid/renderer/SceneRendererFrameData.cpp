@@ -21,30 +21,46 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
   mMeshEntities.reserve(mReservedSpace);
   mSkinnedMeshEntities.reserve(mReservedSpace);
 
-  mMeshTransformsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+  rhi::BufferDescription defaultDesc{};
+  defaultDesc.type = rhi::BufferType::Storage;
+  defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
+  defaultDesc.mapped = true;
 
-  mSkinnedMeshTransformsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+  mMeshTransformsBuffer = mDevice->createBuffer(defaultDesc);
+  mSkinnedMeshTransformsBuffer = mDevice->createBuffer(defaultDesc);
+  mTextTransformsBuffer = mDevice->createBuffer(defaultDesc);
 
-  mSkeletonsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage,
-       mReservedSpace * MaxNumJoints * sizeof(glm::mat4)});
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
+    mSkeletonsBuffer = mDevice->createBuffer(desc);
+  }
 
-  mTextTransformsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage, mReservedSpace * sizeof(glm::mat4)});
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * sizeof(GlyphData);
+    mTextGlyphsBuffer = mDevice->createBuffer(desc);
+  }
 
-  mTextGlyphsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage, mReservedSpace * sizeof(GlyphData)});
+  {
+    auto desc = defaultDesc;
+    desc.size = mLights.capacity() * sizeof(LightData);
+    mLightsBuffer = mDevice->createBuffer(desc);
+  }
 
-  mLightsBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Storage, mLights.capacity() * sizeof(LightData)});
+  {
+    auto desc = defaultDesc;
+    desc.size = sizeof(CameraComponent);
+    desc.type = rhi::BufferType::Uniform;
+    mCameraBuffer = mDevice->createBuffer(desc);
+  }
 
-  mCameraBuffer = mDevice->createBuffer(
-      {rhi::BufferType::Uniform, sizeof(CameraComponent)});
-
-  mSceneBuffer =
-      mDevice->createBuffer({rhi::BufferType::Uniform, sizeof(SceneData)});
+  {
+    auto desc = defaultDesc;
+    desc.size = sizeof(SceneData);
+    desc.type = rhi::BufferType::Uniform;
+    mSceneBuffer = mDevice->createBuffer(desc);
+  }
 }
 
 void SceneRendererFrameData::updateBuffers() {

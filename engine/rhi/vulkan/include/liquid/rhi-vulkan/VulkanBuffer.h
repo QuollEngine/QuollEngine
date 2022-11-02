@@ -98,6 +98,7 @@ private:
   VmaAllocation mAllocation = VK_NULL_HANDLE;
   rhi::BufferType mType;
   rhi::BufferUsage mUsage;
+  bool mMapped = false;
   size_t mSize = 0;
   void *mMappedData = nullptr;
 };

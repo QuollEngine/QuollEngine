@@ -62,12 +62,10 @@ public:
    *
    * @param entityDatabase Entity database
    * @param eventSystem Event system
-   * @param renderer Renderer
    * @param window Window
    */
   EditorCamera(liquid::EntityDatabase &entityDatabase,
-               liquid::EventSystem &eventSystem, liquid::Renderer &renderer,
-               liquid::Window &window);
+               liquid::EventSystem &eventSystem, liquid::Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
