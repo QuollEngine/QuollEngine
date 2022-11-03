@@ -12,14 +12,22 @@ void GameExporter::exportGame(const Project &project,
 
   auto gameName = destination.filename();
 
+  auto destinationAssetsPath = destination / project.assetsPath.filename();
+
   // Copy game data to destination
   std::filesystem::create_directory(destination);
-  std::filesystem::copy(project.assetsPath,
-                        destination / project.assetsPath.filename(),
+  std::filesystem::copy(project.assetsCachePath, destinationAssetsPath,
                         co::overwrite_existing | co::recursive);
   std::filesystem::copy(project.scenesPath,
                         destination / project.scenesPath.filename(),
                         co::overwrite_existing | co::recursive);
+
+  for (auto &entry :
+       std::filesystem::recursive_directory_iterator(destinationAssetsPath)) {
+    if (entry.path().extension() == ".lqhash") {
+      std::filesystem::remove(entry.path());
+    }
+  }
 
   // Copy engine data
   auto enginePath = liquid::Engine::getEnginePath();

@@ -22,12 +22,23 @@ public:
   /**
    * @brief Load GLTF from file
    *
-   * @param filePath File path
-   * @param directory Destination path
-   * @return Load result
+   * @param originalAssetPath Original asset path
+   * @param engineAssetPath Engine asset path
+   * @return Path to newly created prefab
    */
-  liquid::Result<bool> loadFromFile(const liquid::Path &filePath,
-                                    const std::filesystem::path &directory);
+  liquid::Result<liquid::Path>
+  loadFromPath(const liquid::Path &originalAssetPath,
+               const liquid::Path &engineAssetPath);
+
+  /**
+   * @brief Save binary from ASCII gltf
+   *
+   * @param source ASCII source path
+   * @param destination Destination path
+   * @return GLB file path
+   */
+  liquid::Result<liquid::Path> saveBinary(const liquid::Path &source,
+                                          const liquid::Path &destination);
 
 private:
   liquid::AssetManager &mAssetManager;

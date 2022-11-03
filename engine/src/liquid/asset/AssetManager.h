@@ -394,4 +394,6 @@ private:
   Path mAssetsPath;
 };
 
+using AssetsCache = AssetManager;
+
 } // namespace liquid

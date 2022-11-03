@@ -46,20 +46,13 @@ public:
    * @param editorManager Editor manager
    * @param entityManager Entity manager
    */
-  void render(liquid::AssetManager &assetManager, IconRegistry &iconRegistry,
+  void render(AssetManager &assetManager, IconRegistry &iconRegistry,
               EditorManager &editorManager, EntityManager &entityManager);
 
   /**
    * @brief Reload contents in current directory
    */
   void reload();
-
-  /**
-   * @brief Set create entry handler
-   *
-   * @param handler Create entry handler
-   */
-  void setOnCreateEntry(std::function<void(liquid::Path)> handler);
 
 private:
   /**
@@ -69,8 +62,10 @@ private:
 
   /**
    * @brief Handle entry creation
+   *
+   * @param assetManager Asset manager
    */
-  void handleCreateEntry();
+  void handleCreateEntry(AssetManager &assetManager);
 
   /**
    * @brief Render entry
@@ -91,8 +86,6 @@ private:
   AssetLoader &mAssetLoader;
   liquid::platform_tools::NativeFileDialog mFileDialog;
   liquid::platform_tools::NativeFileOpener mFileOpener;
-
-  std::function<void(liquid::Path)> mOnCreateEntry;
 
   AssetLoadStatusDialog mStatusDialog;
   MaterialViewer mMaterialViewer;

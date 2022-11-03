@@ -20,6 +20,7 @@ function linkDependenciesWithoutVulkan()
         "vendor-libmsdf-atlas-gen",
         "vendor-libmsdfgen",
         "glfw3",
+        "cryptopp",
         "ktx",
         "PhysX_static",
         "PhysXPvdSDK_static",

@@ -49,7 +49,7 @@ Result<bool> AssetManager::preloadAssets(rhi::RenderDevice *device) {
 
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
-    if (!entry.is_regular_file()) {
+    if (!entry.is_regular_file() || entry.path().extension() == ".lqhash") {
       continue;
     }
 

@@ -236,7 +236,12 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
     // TODO: Support creating different samplers
     auto &image = model.images.at(model.textures.at(i).source);
     liquid::AssetData<liquid::TextureAsset> texture{};
-    texture.name = path.string() + "/" + image.uri;
+    auto textureRelPath =
+        std::filesystem::relative(path, assetManager.getAssetsPath());
+
+    auto filename = "texture" + std::to_string(i);
+    texture.name = (textureRelPath / filename).string();
+
     texture.type = liquid::AssetType::Texture;
     texture.size = image.width * image.height * 4;
     texture.data.data =
@@ -1044,12 +1049,13 @@ AnimationData loadAnimations(const tinygltf::Model &model,
   return animationData;
 }
 
-void loadPrefabs(
-    const tinygltf::Model &model, const std::filesystem::path &pathDirectory,
-    liquid::AssetManager &manager,
-    const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
-    const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
-    const SkeletonData &skeletons, const AnimationData &animations) {
+static liquid::Result<liquid::Path>
+loadPrefabs(const tinygltf::Model &model,
+            const std::filesystem::path &pathDirectory,
+            liquid::AssetManager &manager,
+            const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
+            const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
+            const SkeletonData &skeletons, const AnimationData &animations) {
 
   liquid::AssetData<liquid::PrefabAsset> prefab;
   prefab.name = pathDirectory.string() + "/" + pathDirectory.stem().string();
@@ -1132,73 +1138,105 @@ void loadPrefabs(
 
   auto path = manager.createPrefabFromAsset(prefab);
   manager.loadPrefabFromFile(path.getData());
+
+  return path;
 }
 
 GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager)
     : mAssetManager(assetManager) {}
 
-liquid::Result<bool>
-GLTFImporter::loadFromFile(const liquid::Path &filePath,
-                           const std::filesystem::path &directory) {
+liquid::Result<liquid::Path>
+GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
+                           const liquid::Path &engineAssetPath) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   liquid::String error, warning;
 
-  bool ret =
-      loader.LoadASCIIFromFile(&model, &error, &warning, filePath.string());
+  bool ret = loader.LoadBinaryFromFile(&model, &error, &warning,
+                                       originalAssetPath.string());
 
   if (!warning.empty()) {
-    return liquid::Result<bool>::Error(warning);
+    return liquid::Result<liquid::Path>::Error(warning);
     // TODO: Show warning (in a dialog)
   }
 
   if (!error.empty()) {
-    return liquid::Result<bool>::Error(error);
+    return liquid::Result<liquid::Path>::Error(error);
     // TODO: Show error (in a dialog)
   }
 
   if (!ret) {
-    return liquid::Result<bool>::Error("Cannot load GLTF file");
+    return liquid::Result<liquid::Path>::Error("Cannot load GLB file");
   }
-
-  auto baseName = filePath.filename().string();
-
-  auto prefabPath = directory / baseName;
-  uint32_t index = 1;
-  auto tmpPath = prefabPath;
-  while (std::filesystem::exists(tmpPath)) {
-    tmpPath = prefabPath;
-    liquid::String uniqueSuffix = "-" + std::to_string(index++);
-    tmpPath += uniqueSuffix;
-  }
-
-  prefabPath = tmpPath;
-  baseName = std::filesystem::path(prefabPath).filename().string();
-
-  std::filesystem::create_directory(prefabPath);
 
   GLTFToAsset<liquid::MeshAssetHandle> meshMap;
   GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
 
   std::vector<liquid::String> warnings;
 
-  auto &&textures = loadTextures(model, prefabPath, mAssetManager);
-  auto &&materials = loadMaterials(model, prefabPath, mAssetManager, textures);
-  auto &&skeletonData = loadSkeletons(model, prefabPath, mAssetManager);
+  if (std::filesystem::exists(engineAssetPath)) {
+    std::filesystem::remove_all(engineAssetPath);
+  }
+
+  std::filesystem::create_directory(engineAssetPath);
+
+  auto &&textures = loadTextures(model, engineAssetPath, mAssetManager);
+  auto &&materials =
+      loadMaterials(model, engineAssetPath, mAssetManager, textures);
+  auto &&skeletonData = loadSkeletons(model, engineAssetPath, mAssetManager);
   auto &&animationData =
-      loadAnimations(model, prefabPath, mAssetManager, skeletonData);
+      loadAnimations(model, engineAssetPath, mAssetManager, skeletonData);
 
   const auto &meshResult =
-      loadMeshes(model, prefabPath, mAssetManager, materials,
+      loadMeshes(model, engineAssetPath, mAssetManager, materials,
                  skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 
   warnings.insert(warnings.end(), meshResult.getWarnings().begin(),
                   meshResult.getWarnings().end());
 
-  loadPrefabs(model, prefabPath, mAssetManager, meshMap, skinnedMeshMap,
-              skeletonData, animationData);
+  auto prefabPath = loadPrefabs(model, engineAssetPath, mAssetManager, meshMap,
+                                skinnedMeshMap, skeletonData, animationData);
 
-  return liquid::Result<bool>::Ok(true, warnings);
+  if (!prefabPath.hasData()) {
+    return prefabPath;
+  }
+
+  return liquid::Result<liquid::Path>::Ok(prefabPath.getData(), warnings);
+}
+
+liquid::Result<liquid::Path>
+GLTFImporter::saveBinary(const liquid::Path &source,
+                         const liquid::Path &destination) {
+  tinygltf::TinyGLTF gltf;
+  tinygltf::Model model;
+  liquid::String error, warning;
+
+  bool ret = gltf.LoadASCIIFromFile(&model, &error, &warning, source.string());
+
+  if (!warning.empty()) {
+    return liquid::Result<liquid::Path>::Error(warning);
+  }
+
+  if (!error.empty()) {
+    return liquid::Result<liquid::Path>::Error(error);
+  }
+
+  if (!ret) {
+    return liquid::Result<liquid::Path>::Error("Cannot load ASCII GLTF file");
+  }
+
+  auto destinationGlb = destination;
+  destinationGlb.replace_extension("glb");
+
+  ret = gltf.WriteGltfSceneToFile(&model, destinationGlb.string(), true, true,
+                                  false, true);
+
+  if (!ret) {
+    return liquid::Result<liquid::Path>::Error(
+        "Cannot create binary GLB file from GLTF file");
+  }
+
+  return liquid::Result<liquid::Path>::Ok(destinationGlb);
 }
 
 } // namespace liquidator

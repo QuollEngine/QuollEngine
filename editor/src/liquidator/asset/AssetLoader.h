@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/asset/AssetManager.h"
+#include "AssetManager.h"
 #include "liquid/platform-tools/NativeFileDialog.h"
 
 namespace liquidator {
@@ -16,6 +16,7 @@ class AssetLoader {
   static const std::vector<liquid::String> AudioExtensions;
   static const std::vector<liquid::String> SceneExtensions;
   static const std::vector<liquid::String> FontExtensions;
+  static const std::vector<liquid::String> TextureExtensions;
 
 public:
   /**
@@ -24,8 +25,7 @@ public:
    * @param assetManager Asset manager
    * @param device Render device
    */
-  AssetLoader(liquid::AssetManager &assetManager,
-              liquid::rhi::RenderDevice *device);
+  AssetLoader(AssetManager &assetManager, liquid::rhi::RenderDevice *device);
 
   /**
    * @brief Load asset from path
@@ -46,7 +46,7 @@ public:
   liquid::Result<bool> loadFromFileDialog(const liquid::Path &directory);
 
 private:
-  liquid::AssetManager &mAssetManager;
+  AssetManager &mAssetManager;
   liquid::platform_tools::NativeFileDialog mNativeFileDialog;
 
   liquid::rhi::RenderDevice *mDevice;

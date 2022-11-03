@@ -1,6 +1,22 @@
 {
   "dependencies": [
     {
+      "name": "crypto++",
+      "url": "https://github.com/abdes/cryptopp-cmake/archive/refs/tags/CRYPTOPP_8_7_0.zip",
+      "buildSource": "cryptopp-cmake-CRYPTOPP_8_7_0",
+      "cmd": [
+        {
+          "type": "cmake",
+          "source": ".",
+          "options": {
+            "common": {
+              "CRYPTOPP_BUILD_TESTING": "OFF"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "lua",
       "url": "https://github.com/lua/lua/archive/refs/tags/v5.4.4.zip",
       "buildSource": "lua-5.4.4",
