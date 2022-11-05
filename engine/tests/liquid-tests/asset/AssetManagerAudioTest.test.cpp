@@ -1,18 +1,18 @@
 #include "liquid/core/Base.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-using AssetManagerDeathTest = AssetManagerTest;
+using AssetCacheDeathTest = AssetCacheTest;
 
-TEST_F(AssetManagerTest, LoadsWavAudioFileIntoRegistry) {
+TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
   auto filePath = std::filesystem::current_path() / "valid-audio.wav";
 
   auto result = manager.loadAudioFromFile(filePath);
@@ -32,7 +32,7 @@ TEST_F(AssetManagerTest, LoadsWavAudioFileIntoRegistry) {
   EXPECT_EQ(asset.data.format, liquid::AudioAssetFormat::Wav);
 }
 
-TEST_F(AssetManagerTest, LoadsMp3AudioFileIntoRegistry) {
+TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
   auto filePath = std::filesystem::current_path() / "valid-audio.mp3";
 
   auto result = manager.loadAudioFromFile(filePath);
@@ -52,7 +52,7 @@ TEST_F(AssetManagerTest, LoadsMp3AudioFileIntoRegistry) {
   EXPECT_EQ(asset.data.format, liquid::AudioAssetFormat::Mp3);
 }
 
-TEST_F(AssetManagerTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
+TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
   auto filePath = std::filesystem::current_path() / "white-image-100x100.png";
 
   auto result = manager.loadAudioFromFile(filePath);
@@ -61,7 +61,7 @@ TEST_F(AssetManagerTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetManagerTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
+TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
   auto filePath = std::filesystem::current_path() / "non-existent-file.wav";
 
   auto result = manager.loadAudioFromFile(filePath);

@@ -2,20 +2,20 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-TEST_F(AssetManagerTest, FailsIfKtxFileCannotBeLoaded) {
+TEST_F(AssetCacheTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
   EXPECT_TRUE(manager.loadTextureFromFile("non-existent-file.ktx").hasError());
 
@@ -24,11 +24,11 @@ TEST_F(AssetManagerTest, FailsIfKtxFileCannotBeLoaded) {
       manager.loadTextureFromFile("white-image-100x100.png").hasError());
 }
 
-TEST_F(AssetManagerTest, FailsIfTextureIsOneDimensional) {
+TEST_F(AssetCacheTest, FailsIfTextureIsOneDimensional) {
   EXPECT_TRUE(manager.loadTextureFromFile("1x1-1d.ktx").hasError());
 }
 
-TEST_F(AssetManagerTest, LoadsTexture2D) {
+TEST_F(AssetCacheTest, LoadsTexture2D) {
   auto texture = manager.loadTextureFromFile("1x1-2d.ktx");
   EXPECT_TRUE(texture.hasData());
 
@@ -40,7 +40,7 @@ TEST_F(AssetManagerTest, LoadsTexture2D) {
   EXPECT_NE(asset.data.data, nullptr);
 }
 
-TEST_F(AssetManagerTest, LoadsTextureCubemap) {
+TEST_F(AssetCacheTest, LoadsTextureCubemap) {
   auto texture = manager.loadTextureFromFile("1x1-cubemap.ktx");
   EXPECT_TRUE(texture.hasData());
 

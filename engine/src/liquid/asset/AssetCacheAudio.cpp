@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/audio/MiniAudio.h"
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 namespace liquid {
 
@@ -16,7 +16,7 @@ static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
   return AudioAssetFormat::Unknown;
 }
 
-Result<AudioAssetHandle> AssetManager::loadAudioFromFile(const Path &filePath) {
+Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
   auto ext = filePath.extension().string();
   ext.erase(0, 1);
   auto format = getAudioFormatFromExtension(ext);

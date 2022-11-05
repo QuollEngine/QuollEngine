@@ -2,17 +2,17 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
 liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
@@ -55,7 +55,7 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
   return asset;
 }
 
-TEST_F(AssetManagerTest, CreatesAnimationFile) {
+TEST_F(AssetCacheTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
   auto filePath = manager.createAnimationFromAsset(asset);
   liquid::InputBinaryStream file(filePath.getData());
@@ -112,7 +112,7 @@ TEST_F(AssetManagerTest, CreatesAnimationFile) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsAnimationAssetFromFile) {
+TEST_F(AssetCacheTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
   auto filePath = manager.createAnimationFromAsset(asset);

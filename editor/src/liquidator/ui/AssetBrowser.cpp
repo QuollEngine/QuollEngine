@@ -103,8 +103,6 @@ void AssetBrowser::render(AssetManager &assetManager,
       ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
   static constexpr uint32_t TextWidth = ItemWidth - 8;
 
-  auto &assetsCache = assetManager.getAssetsCache();
-
   if (mDirectoryChanged) {
     if (mCurrentDirectory.empty()) {
       mCurrentDirectory = assetManager.getAssetsPath();
@@ -118,7 +116,7 @@ void AssetBrowser::render(AssetManager &assetManager,
       const auto &engineAssetPath =
           assetManager.findEngineAssetPath(entry.path);
       const auto &pair =
-          assetsCache.getRegistry().getAssetByPath(engineAssetPath);
+          assetManager.getAssetRegistry().getAssetByPath(engineAssetPath);
       entry.isDirectory = dirEntry.is_directory();
       entry.assetType = pair.first;
       entry.asset = pair.second;
@@ -130,7 +128,7 @@ void AssetBrowser::render(AssetManager &assetManager,
 
       if (entry.assetType == liquid::AssetType::Texture) {
         auto handle =
-            assetsCache.getRegistry()
+            assetManager.getAssetRegistry()
                 .getTextures()
                 .getAsset(static_cast<liquid::TextureAssetHandle>(pair.second))
                 .data.deviceHandle;
@@ -306,7 +304,7 @@ void AssetBrowser::render(AssetManager &assetManager,
 
   mStatusDialog.render();
 
-  mMaterialViewer.render(assetsCache.getRegistry());
+  mMaterialViewer.render(assetManager.getAssetRegistry());
 }
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }

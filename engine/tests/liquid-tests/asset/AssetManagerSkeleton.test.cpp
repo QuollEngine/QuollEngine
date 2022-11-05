@@ -2,22 +2,22 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-using AssetManagerDeathTest = AssetManagerTest;
+using AssetCacheDeathTest = AssetCacheTest;
 
-TEST_F(AssetManagerTest, CreatesSkeletonFileFromSkeletonAsset) {
+TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
 
@@ -107,7 +107,7 @@ TEST_F(AssetManagerTest, CreatesSkeletonFileFromSkeletonAsset) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsSkeletonAssetFromFile) {
+TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
   {

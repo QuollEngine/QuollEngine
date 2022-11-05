@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path>
-AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
+AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   String extension = ".lqanim";
   Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
@@ -47,8 +47,8 @@ AssetManager::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 }
 
 Result<AnimationAssetHandle>
-AssetManager::loadAnimationDataFromInputStream(InputBinaryStream &stream,
-                                               const Path &filePath) {
+AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
+                                             const Path &filePath) {
 
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
@@ -80,7 +80,7 @@ AssetManager::loadAnimationDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<AnimationAssetHandle>
-AssetManager::loadAnimationFromFile(const Path &filePath) {
+AssetCache::loadAnimationFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
@@ -92,7 +92,7 @@ AssetManager::loadAnimationFromFile(const Path &filePath) {
 }
 
 Result<AnimationAssetHandle>
-AssetManager::getOrLoadAnimationFromPath(StringView relativePath) {
+AssetCache::getOrLoadAnimationFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Invalid);
   }

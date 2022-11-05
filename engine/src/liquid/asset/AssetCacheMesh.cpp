@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path>
-AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
+AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   String extension = ".lqmesh";
   Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
@@ -67,8 +67,8 @@ AssetManager::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 }
 
 Result<MeshAssetHandle>
-AssetManager::loadMeshDataFromInputStream(InputBinaryStream &stream,
-                                          const Path &filePath) {
+AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
+                                        const Path &filePath) {
   std::vector<String> warnings;
 
   AssetData<MeshAsset> mesh{};
@@ -144,7 +144,7 @@ AssetManager::loadMeshDataFromInputStream(InputBinaryStream &stream,
                                      warnings);
 }
 
-Result<MeshAssetHandle> AssetManager::loadMeshFromFile(const Path &filePath) {
+Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &result = checkAssetFile(stream, filePath, AssetType::Mesh);
@@ -155,7 +155,7 @@ Result<MeshAssetHandle> AssetManager::loadMeshFromFile(const Path &filePath) {
   return loadMeshDataFromInputStream(stream, filePath);
 }
 
-Result<Path> AssetManager::createSkinnedMeshFromAsset(
+Result<Path> AssetCache::createSkinnedMeshFromAsset(
     const AssetData<SkinnedMeshAsset> &asset) {
 
   String extension = ".lqmesh";
@@ -220,8 +220,8 @@ Result<Path> AssetManager::createSkinnedMeshFromAsset(
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetManager::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
-                                                 const Path &filePath) {
+AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
+                                               const Path &filePath) {
   std::vector<String> warnings;
 
   AssetData<SkinnedMeshAsset> mesh{};
@@ -311,7 +311,7 @@ AssetManager::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetManager::loadSkinnedMeshFromFile(const Path &filePath) {
+AssetCache::loadSkinnedMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::SkinnedMesh);
@@ -323,7 +323,7 @@ AssetManager::loadSkinnedMeshFromFile(const Path &filePath) {
 }
 
 Result<MeshAssetHandle>
-AssetManager::getOrLoadMeshFromPath(StringView relativePath) {
+AssetCache::getOrLoadMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Invalid);
   }
@@ -340,7 +340,7 @@ AssetManager::getOrLoadMeshFromPath(StringView relativePath) {
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetManager::getOrLoadSkinnedMeshFromPath(StringView relativePath) {
+AssetCache::getOrLoadSkinnedMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Invalid);
   }

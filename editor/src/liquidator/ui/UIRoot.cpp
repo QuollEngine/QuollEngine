@@ -19,11 +19,10 @@ void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
 
   if (mSceneHierarchyPanel.isEntitySelected()) {
     mEntityPanel.render(editorManager, mSceneHierarchyPanel.getSelectedEntity(),
-                        renderer, assetManager.getAssetsCache().getRegistry(),
-                        physicsSystem);
+                        renderer, assetManager, physicsSystem);
   }
 
-  EnvironmentPanel::render(editorManager, assetManager.getAssetsCache());
+  EnvironmentPanel::render(editorManager, assetManager);
 
   mEditorCameraPanel.render(editorManager);
   mAssetBrowser.render(assetManager, mIconRegistry, editorManager,

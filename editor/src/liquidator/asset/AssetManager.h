@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 
 namespace liquidator {
 
@@ -78,18 +78,29 @@ public:
                                    const liquid::Path &targetAssetDirectory);
 
   /**
-   * @brief Get assets cache
+   * @brief Get asset registry
    *
-   * @return Assets cache
+   * @return Asset registry
    */
-  inline liquid::AssetsCache &getAssetsCache() { return mAssetsCache; }
+  inline liquid::AssetRegistry &getAssetRegistry() {
+    return mAssetCache.getRegistry();
+  }
 
   /**
    * @brief Get path to assets
    *
    * @return Path to assets
    */
-  inline const liquid::Path &getAssetsPath() { return mAssetsPath; }
+  inline const liquid::Path &getAssetsPath() const { return mAssetsPath; }
+
+  /**
+   * @brief Get path to cache
+   *
+   * @return Path to cache
+   */
+  inline const liquid::Path &getCachePath() const {
+    return mAssetCache.getAssetsPath();
+  }
 
   /**
    * @brief Find engine asset path
@@ -266,7 +277,7 @@ private:
   loadOriginalPrefab(const liquid::Path &originalAssetPath);
 
 private:
-  liquid::AssetsCache mAssetsCache;
+  liquid::AssetCache mAssetCache;
   liquid::Path mAssetsPath;
 
   std::unordered_map<liquid::String, liquid::Path> mAssetCacheMap;

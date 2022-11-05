@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquid/asset/AssetManager.h"
-#include "../editor-scene/EditorManager.h"
+#include "liquidator/asset/AssetManager.h"
+#include "liquidator/editor-scene/EditorManager.h"
 
 namespace liquidator {
 
@@ -16,8 +16,7 @@ public:
    * @param editorManager Editor manager
    * @param assetManager Asset manager
    */
-  static void render(EditorManager &editorManager,
-                     liquid::AssetManager &assetManager);
+  static void render(EditorManager &editorManager, AssetManager &assetManager);
 };
 
 } // namespace liquidator

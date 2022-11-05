@@ -2,10 +2,10 @@
 
 #include "liquid/scene/Scene.h"
 #include "liquid/entity/EntityDatabase.h"
-#include "liquid/asset/AssetManager.h"
 #include "liquid/renderer/Renderer.h"
 #include "liquid/scene/SceneIO.h"
 
+#include "liquidator/asset/AssetManager.h"
 #include "EditorCamera.h"
 
 namespace liquidator {
@@ -25,7 +25,7 @@ public:
    * @param renderer Renderer
    * @param scenePath Scene path
    */
-  EntityManager(liquid::AssetManager &assetManager, liquid::Renderer &renderer,
+  EntityManager(AssetManager &assetManager, liquid::Renderer &renderer,
                 const std::filesystem::path &scenePath);
 
   /**
@@ -246,7 +246,7 @@ private:
   liquid::Scene mScene;
   liquid::Scene mSimulationScene;
 
-  liquid::AssetManager &mAssetManager;
+  AssetManager &mAssetManager;
   liquid::SceneIO mSceneIO;
   bool mInSimulation = false;
   liquid::Renderer &mRenderer;

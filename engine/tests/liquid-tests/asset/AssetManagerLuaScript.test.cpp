@@ -1,20 +1,20 @@
 #include "liquid/core/Base.h"
 #include <random>
 
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-using AssetManagerDeathTest = AssetManagerTest;
+using AssetCacheDeathTest = AssetCacheTest;
 
-TEST_F(AssetManagerTest, ReturnsErrorIfFileCannotBeOpened) {
+TEST_F(AssetCacheTest, ReturnsErrorIfFileCannotBeOpened) {
   auto scriptPath = std::filesystem::current_path() / "non-existent-script.lua";
 
   auto result = manager.loadLuaScriptFromFile(scriptPath);
@@ -23,7 +23,7 @@ TEST_F(AssetManagerTest, ReturnsErrorIfFileCannotBeOpened) {
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetManagerTest, LoadsLuaScriptIntoRegistry) {
+TEST_F(AssetCacheTest, LoadsLuaScriptIntoRegistry) {
   auto scriptPath = std::filesystem::current_path() / "component-script.lua";
 
   auto result = manager.loadLuaScriptFromFile(scriptPath);
@@ -54,7 +54,7 @@ TEST_F(AssetManagerTest, LoadsLuaScriptIntoRegistry) {
   EXPECT_EQ(scriptContents, contents);
 }
 
-TEST_F(AssetManagerTest, UpdatesExistingLuaScriptIfHandleExists) {
+TEST_F(AssetCacheTest, UpdatesExistingLuaScriptIfHandleExists) {
   // Load script and create handle
   auto scriptPath = std::filesystem::current_path() / "component-script.lua";
   auto result = manager.loadLuaScriptFromFile(scriptPath);
@@ -89,7 +89,7 @@ TEST_F(AssetManagerTest, UpdatesExistingLuaScriptIfHandleExists) {
   EXPECT_EQ(scriptContents, contents);
 }
 
-TEST_F(AssetManagerDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
+TEST_F(AssetCacheDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
   // Load script and create handle
   auto scriptPath = std::filesystem::current_path() / "component-script.lua";
   EXPECT_DEATH(manager.loadLuaScriptFromFile(scriptPath,

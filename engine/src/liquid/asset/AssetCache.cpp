@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
-#include "AssetManager.h"
+#include "AssetCache.h"
 #include "AssetFileHeader.h"
 
 #include "OutputBinaryStream.h"
@@ -8,16 +8,16 @@
 
 namespace liquid {
 
-AssetManager::AssetManager(const Path &assetsPath, bool createDefaultObjects)
+AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
     : mAssetsPath(assetsPath) {
   if (createDefaultObjects) {
     mRegistry.createDefaultObjects();
   }
 }
 
-Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
-                                          const Path &filePath,
-                                          AssetType assetType) {
+Result<bool> AssetCache::checkAssetFile(InputBinaryStream &file,
+                                        const Path &filePath,
+                                        AssetType assetType) {
   if (!file.good()) {
     return Result<bool>::Error("File cannot be opened for reading: " +
                                filePath.string());
@@ -43,8 +43,8 @@ Result<bool> AssetManager::checkAssetFile(InputBinaryStream &file,
   return Result<bool>::Ok(true);
 }
 
-Result<bool> AssetManager::preloadAssets(rhi::RenderDevice *device) {
-  LIQUID_PROFILE_EVENT("AssetManager::preloadAssets");
+Result<bool> AssetCache::preloadAssets(rhi::RenderDevice *device) {
+  LIQUID_PROFILE_EVENT("AssetCache::preloadAssets");
   std::vector<String> warnings;
 
   for (const auto &entry :
@@ -68,11 +68,11 @@ Result<bool> AssetManager::preloadAssets(rhi::RenderDevice *device) {
   return Result<bool>::Ok(true, warnings);
 }
 
-Result<bool> AssetManager::loadAsset(const Path &path) {
+Result<bool> AssetCache::loadAsset(const Path &path) {
   return loadAsset(path, true);
 }
 
-Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
+Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   const auto &ext = path.extension().string();
   const auto &asset = mRegistry.getAssetByPath(path);
 
@@ -189,7 +189,7 @@ Result<bool> AssetManager::loadAsset(const Path &path, bool updateExisting) {
   return Result<bool>::Error("Unknown asset file");
 }
 
-String AssetManager::getAssetNameFromPath(const Path &path) {
+String AssetCache::getAssetNameFromPath(const Path &path) {
   auto relativePath = std::filesystem::relative(path, mAssetsPath).string();
   std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
   return relativePath;

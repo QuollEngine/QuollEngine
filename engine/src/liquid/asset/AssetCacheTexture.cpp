@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -86,7 +86,7 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
 }
 
 Result<Path>
-AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
+AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   ktxTextureCreateInfo createInfo{};
   createInfo.baseWidth = asset.data.width;
   createInfo.baseHeight = asset.data.height;
@@ -136,7 +136,7 @@ AssetManager::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 }
 
 Result<TextureAssetHandle>
-AssetManager::loadTextureFromFile(const Path &filePath) {
+AssetCache::loadTextureFromFile(const Path &filePath) {
   static constexpr uint32_t CubemapSides = 6;
 
   ktxTexture *ktxTextureData = nullptr;
@@ -199,7 +199,7 @@ AssetManager::loadTextureFromFile(const Path &filePath) {
 }
 
 Result<TextureAssetHandle>
-AssetManager::getOrLoadTextureFromPath(StringView relativePath) {
+AssetCache::getOrLoadTextureFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Invalid);
   }

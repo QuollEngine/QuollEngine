@@ -1,4 +1,4 @@
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/scripting/ScriptingSystem.h"
 
 /**
@@ -27,7 +27,7 @@ public:
 protected:
   liquid::EntityDatabase entityDatabase;
   liquid::EventSystem eventSystem;
-  liquid::AssetManager assetManager;
+  liquid::AssetCache assetCache;
   liquid::ScriptingSystem scriptingSystem;
 
 private:

@@ -8,20 +8,21 @@ namespace liquid {
 class InputBinaryStream;
 
 /**
- * @brief Asset manager
+ * @brief Asset cache
  *
- * Loads and saves assets to the
- * assets path
+ * Loads and creates engine optimized
+ * assets for usage within engine
+ * functionality
  */
-class AssetManager {
+class AssetCache {
 public:
   /**
-   * @brief Create asset manager
+   * @brief Create asset cache
    *
    * @param assetsPath Assets path
    * @param createDefaultObjects Create default objects
    */
-  AssetManager(const Path &assetsPath, bool createDefaultObjects = false);
+  AssetCache(const Path &assetsPath, bool createDefaultObjects = false);
 
   /**
    * @brief Create texture from asset
@@ -393,7 +394,5 @@ private:
   AssetRegistry mRegistry;
   Path mAssetsPath;
 };
-
-using AssetsCache = AssetManager;
 
 } // namespace liquid

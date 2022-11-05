@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -11,7 +11,7 @@
 
 namespace liquid {
 
-Result<FontAssetHandle> AssetManager::loadFontFromFile(const Path &filePath) {
+Result<FontAssetHandle> AssetCache::loadFontFromFile(const Path &filePath) {
   MsdfLoader loader;
 
   auto res = loader.loadFontData(filePath);

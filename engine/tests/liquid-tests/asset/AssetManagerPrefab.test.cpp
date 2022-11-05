@@ -2,15 +2,15 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
   liquid::AssetData<liquid::PrefabAsset> createPrefabAsset() {
     liquid::AssetData<liquid::PrefabAsset> asset;
@@ -77,10 +77,10 @@ public:
     return asset;
   }
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-TEST_F(AssetManagerTest, CreatesPrefabFile) {
+TEST_F(AssetCacheTest, CreatesPrefabFile) {
   auto asset = createPrefabAsset();
 
   auto filePath = manager.createPrefabFromAsset(asset);
@@ -322,7 +322,7 @@ TEST_F(AssetManagerTest, CreatesPrefabFile) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsPrefabFile) {
+TEST_F(AssetCacheTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = manager.createPrefabFromAsset(asset);
   auto handle = manager.loadPrefabFromFile(filePath.getData());
@@ -379,7 +379,7 @@ TEST_F(AssetManagerTest, LoadsPrefabFile) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsPrefabWithMeshAnimationSkeleton) {
+TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
   auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
 

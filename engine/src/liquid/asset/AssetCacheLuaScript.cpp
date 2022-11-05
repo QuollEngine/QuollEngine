@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 namespace liquid {
 
@@ -20,8 +20,8 @@ static std::vector<char> readFileIntoBuffer(std::ifstream &stream) {
 }
 
 Result<LuaScriptAssetHandle>
-AssetManager::loadLuaScriptFromFile(const Path &filePath,
-                                    LuaScriptAssetHandle handle) {
+AssetCache::loadLuaScriptFromFile(const Path &filePath,
+                                  LuaScriptAssetHandle handle) {
   std::ifstream stream(filePath);
 
   if (!stream.good()) {

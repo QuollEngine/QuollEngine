@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path>
-AssetManager::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
+AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   String extension = ".lqprefab";
   Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
@@ -168,8 +168,8 @@ AssetManager::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 }
 
 Result<PrefabAssetHandle>
-AssetManager::loadPrefabDataFromInputStream(InputBinaryStream &stream,
-                                            const Path &filePath) {
+AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
+                                          const Path &filePath) {
 
   std::vector<String> warnings;
 
@@ -377,8 +377,7 @@ AssetManager::loadPrefabDataFromInputStream(InputBinaryStream &stream,
                                        warnings);
 }
 
-Result<PrefabAssetHandle>
-AssetManager::loadPrefabFromFile(const Path &filePath) {
+Result<PrefabAssetHandle> AssetCache::loadPrefabFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Prefab);

@@ -8,15 +8,15 @@ const liquid::String LuaScriptingInterfaceTestBase::ScriptName =
 
 LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
     const liquid::String &scriptName)
-    : assetManager(std::filesystem::current_path()),
-      scriptingSystem(eventSystem, assetManager.getRegistry()),
+    : assetCache(std::filesystem::current_path()),
+      scriptingSystem(eventSystem, assetCache.getRegistry()),
       mScriptName(scriptName) {}
 
 liquid::LuaScope &
 LuaScriptingInterfaceTestBase::call(liquid::Entity entity,
                                     const liquid::String &functionName) {
   auto handle =
-      assetManager
+      assetCache
           .loadLuaScriptFromFile(std::filesystem::current_path() / mScriptName)
           .getData();
 
