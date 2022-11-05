@@ -19,11 +19,13 @@ bool ProjectManager::createProjectInPath() {
   mProject.name = projectPath.stem().filename().string();
   mProject.version = "0.0.1";
   mProject.assetsPath = projectPath / "assets";
+  mProject.assetsCachePath = projectPath / "cache";
   mProject.settingsPath = projectPath / "settings";
   mProject.scenesPath = projectPath / "scenes";
 
   std::filesystem::create_directory(projectPath);
   std::filesystem::create_directory(mProject.assetsPath);
+  std::filesystem::create_directory(mProject.assetsCachePath);
   std::filesystem::create_directory(mProject.settingsPath);
   std::filesystem::create_directory(mProject.scenesPath);
   std::filesystem::create_directory(mProject.scenesPath / "entities");
@@ -49,6 +51,9 @@ bool ProjectManager::createProjectInPath() {
     projectObj["version"] = mProject.version;
     projectObj["paths"]["assets"] =
         std::filesystem::relative(mProject.assetsPath, projectPath).string();
+    projectObj["paths"]["assetsCache"] =
+        std::filesystem::relative(mProject.assetsCachePath, projectPath)
+            .string();
     projectObj["paths"]["settings"] =
         std::filesystem::relative(mProject.settingsPath, projectPath).string();
     projectObj["paths"]["scenes"] =
@@ -92,6 +97,9 @@ bool ProjectManager::openProjectInPath() {
   mProject.assetsPath =
       directory /
       liquid::String(projectObj["paths"]["assets"].as<liquid::String>());
+  mProject.assetsCachePath =
+      directory /
+      liquid::String(projectObj["paths"]["assetsCache"].as<liquid::String>());
   mProject.settingsPath =
       directory /
       liquid::String(projectObj["paths"]["settings"].as<liquid::String>());

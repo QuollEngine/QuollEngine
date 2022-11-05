@@ -6,6 +6,7 @@ import platform
 import shlex
 import sys
 import time
+import stat
 from glob import glob
 from urllib.request import urlretrieve
 from urllib.parse import urlparse
@@ -25,12 +26,23 @@ buildModes = ['Debug', 'Release']
 profiler_data = {}
 
 #
+# Error handler for rmtree
+#
+# Needed to delete readonly files on Windows
+#
+def on_rm_error( func, path, exc_info):
+    # path contains the path of the file that couldn't be removed
+    # let's just assume that it's read-only and unlink it.
+    os.chmod( path, stat.S_IWRITE )
+    os.unlink( path )
+
+#
 # Deletes existing directory and
 # creates a new one
 #
 def clean_make_dir(path):
     if os.path.exists(path):
-        shutil.rmtree(path)
+        shutil.rmtree(path, onerror=on_rm_error)
     os.mkdir(path=path)
 
 #
@@ -145,7 +157,7 @@ def cmd_rm(cmdLine, x):
     includedFiles = [os.path.normpath(p) for p in includedFiles]
     for file in includedFiles:
         if os.path.isdir(file):
-            shutil.rmtree(file)
+            shutil.rmtree(file, onerror=on_rm_error)
         elif os.path.isfile(file):
             os.remove(file)
         else:
@@ -288,7 +300,7 @@ for buildMode in buildModes:
 
         profiler_data[x['name']][f'build-{buildMode}'] = time.time() - start
 
-shutil.rmtree(tempDir)
+shutil.rmtree(tempDir, onerror=on_rm_error)
 
 print(f'{"Name":<14} {"Fetch":<8} {"Build (Debug)":<12} {"Build (Release)":<12}')
 for k, v in profiler_data.items():

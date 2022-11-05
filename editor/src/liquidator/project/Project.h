@@ -22,6 +22,11 @@ struct Project {
   liquid::Path assetsPath;
 
   /**
+   * @brief Path to assets cache directory
+   */
+  liquid::Path assetsCachePath;
+
+  /**
    * Path to scenes directory
    */
   liquid::Path scenesPath;

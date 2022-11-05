@@ -30,6 +30,8 @@
 #include "liquidator/core/EditorSimulator.h"
 #include "liquidator/core/MousePickingGraph.h"
 
+#include "liquidator/asset/AssetManager.h"
+
 #include "ImGuizmo.h"
 
 namespace liquidator {
@@ -64,16 +66,23 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
-  liquid::AssetManager assetManager(project.assetsPath, true);
-  liquid::Renderer renderer(assetManager.getRegistry(), mWindow, mDevice);
+  AssetManager assetManager(project.assetsPath, project.assetsCachePath);
+
+  auto &assetsCache = assetManager.getAssetsCache();
+
+  liquid::Renderer renderer(assetsCache.getRegistry(), mWindow, mDevice);
 
   liquid::Presenter presenter(renderer.getShaderLibrary(), mDevice);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.preloadAssets(mDevice);
+  auto res = assetManager.validateAndPreloadAssets(mDevice);
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
-  preloadStatusDialog.setMessages(res.getWarnings());
+
+  if (res.hasWarnings()) {
+    preloadStatusDialog.setMessages(res.getWarnings());
+    preloadStatusDialog.show();
+  }
 
   Theme::apply();
 
@@ -85,14 +94,10 @@ void EditorScreen::start(const Project &project) {
   renderer.getSceneRenderer().setClearColor(
       Theme::getColor(ThemeColor::SceneBackgroundColor));
 
-  if (res.hasWarnings()) {
-    preloadStatusDialog.show();
-  }
-
   liquid::FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  liquidator::EntityManager entityManager(assetManager, renderer,
+  liquidator::EntityManager entityManager(assetsCache, renderer,
                                           project.scenesPath);
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                                         mEventSystem, mWindow);
@@ -134,7 +139,7 @@ void EditorScreen::start(const Project &project) {
 
   MousePickingGraph mousePicking(renderer.getShaderLibrary(),
                                  renderer.getSceneRenderer().getFrameData(),
-                                 assetManager.getRegistry(), mDevice);
+                                 assetsCache.getRegistry(), mDevice);
 
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
@@ -150,17 +155,14 @@ void EditorScreen::start(const Project &project) {
 
         const auto &changes = tracker.trackForChanges();
         for (auto &change : changes) {
-          assetManager.loadAsset(change.path);
+          assetManager.loadOriginalIfChanged(change.path);
         }
 
         ui.getAssetBrowser().reload();
       });
 
-  ui.getAssetBrowser().setOnCreateEntry(
-      [&assetManager](auto path) { assetManager.loadAsset(path); });
-
   liquidator::EditorSimulator simulator(
-      mEventSystem, mWindow, assetManager.getRegistry(), editorCamera);
+      mEventSystem, mWindow, assetsCache.getRegistry(), editorCamera);
 
   mWindow.maximize();
 
@@ -173,7 +175,7 @@ void EditorScreen::start(const Project &project) {
         return true;
       });
 
-  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
+  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager, &assetsCache,
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
                         &editorRenderer, &simulator, &mousePicking, this]() {

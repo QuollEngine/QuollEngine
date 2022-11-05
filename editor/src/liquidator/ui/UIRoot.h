@@ -46,8 +46,7 @@ public:
    * @param entityManager Entity manager
    */
   void render(EditorManager &editorManager, liquid::Renderer &renderer,
-              liquid::AssetManager &assetManager,
-              liquid::PhysicsSystem &physicsSystem,
+              AssetManager &assetManager, liquid::PhysicsSystem &physicsSystem,
               EntityManager &entityManager);
 
   /**

@@ -92,7 +92,7 @@ static EditorIcon getIconFromAssetType(liquid::AssetType type) {
 AssetBrowser::AssetBrowser(AssetLoader &assetLoader)
     : mAssetLoader(assetLoader), mStatusDialog("AssetLoadStatus") {}
 
-void AssetBrowser::render(liquid::AssetManager &assetManager,
+void AssetBrowser::render(AssetManager &assetManager,
                           IconRegistry &iconRegistry,
                           EditorManager &editorManager,
                           EntityManager &entityManager) {
@@ -103,6 +103,8 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
       ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
   static constexpr uint32_t TextWidth = ItemWidth - 8;
 
+  auto &assetsCache = assetManager.getAssetsCache();
+
   if (mDirectoryChanged) {
     if (mCurrentDirectory.empty()) {
       mCurrentDirectory = assetManager.getAssetsPath();
@@ -110,9 +112,13 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
     mEntries.clear();
     for (auto &dirEntry :
          std::filesystem::directory_iterator(mCurrentDirectory)) {
+
       Entry entry;
       entry.path = dirEntry.path();
-      const auto &pair = assetManager.getRegistry().getAssetByPath(entry.path);
+      const auto &engineAssetPath =
+          assetManager.findEngineAssetPath(entry.path);
+      const auto &pair =
+          assetsCache.getRegistry().getAssetByPath(engineAssetPath);
       entry.isDirectory = dirEntry.is_directory();
       entry.assetType = pair.first;
       entry.asset = pair.second;
@@ -124,7 +130,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
       if (entry.assetType == liquid::AssetType::Texture) {
         auto handle =
-            assetManager.getRegistry()
+            assetsCache.getRegistry()
                 .getTextures()
                 .getAsset(static_cast<liquid::TextureAssetHandle>(pair.second))
                 .data.deviceHandle;
@@ -290,7 +296,7 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
         ImguiInputText("###StagingEntryName", mStagingEntry.clippedName);
 
         if (ImGui::IsItemDeactivated()) {
-          handleCreateEntry();
+          handleCreateEntry(assetManager);
         }
       }
       ImGui::TableNextRow();
@@ -300,14 +306,10 @@ void AssetBrowser::render(liquid::AssetManager &assetManager,
 
   mStatusDialog.render();
 
-  mMaterialViewer.render(assetManager.getRegistry());
+  mMaterialViewer.render(assetsCache.getRegistry());
 }
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
-
-void AssetBrowser::setOnCreateEntry(std::function<void(liquid::Path)> handler) {
-  mOnCreateEntry = handler;
-}
 
 void AssetBrowser::handleAssetImport() {
   auto res = mAssetLoader.loadFromFileDialog(mCurrentDirectory);
@@ -329,16 +331,13 @@ void AssetBrowser::handleAssetImport() {
   reload();
 }
 
-void AssetBrowser::handleCreateEntry() {
+void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
   if (!mStagingEntry.clippedName.empty()) {
     auto path = mCurrentDirectory / mStagingEntry.clippedName;
     if (mStagingEntry.isDirectory) {
-      std::filesystem::create_directory(path);
+      assetManager.createDirectory(path);
     } else if (mStagingEntry.assetType == liquid::AssetType::LuaScript) {
-      path.replace_extension("lua");
-      std::ofstream stream(path);
-      stream.close();
-      mOnCreateEntry(path);
+      assetManager.createLuaScript(path);
     }
   }
 

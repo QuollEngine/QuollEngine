@@ -10,7 +10,7 @@ UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
       mEntityPanel(entityManager) {}
 
 void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
-                    liquid::AssetManager &assetManager,
+                    AssetManager &assetManager,
                     liquid::PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
   mLayout.setup();
@@ -19,10 +19,11 @@ void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
 
   if (mSceneHierarchyPanel.isEntitySelected()) {
     mEntityPanel.render(editorManager, mSceneHierarchyPanel.getSelectedEntity(),
-                        renderer, assetManager.getRegistry(), physicsSystem);
+                        renderer, assetManager.getAssetsCache().getRegistry(),
+                        physicsSystem);
   }
 
-  EnvironmentPanel::render(editorManager, assetManager);
+  EnvironmentPanel::render(editorManager, assetManager.getAssetsCache());
 
   mEditorCameraPanel.render(editorManager);
   mAssetBrowser.render(assetManager, mIconRegistry, editorManager,
