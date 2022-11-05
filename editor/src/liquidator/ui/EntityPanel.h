@@ -26,11 +26,11 @@ public:
    * @param editorManager Editor manager
    * @param entity Entity to display
    * @param renderer Renderer
-   * @param assetRegistry Asset registry
+   * @param assetManager Asset manager
    * @param physicsSystem Physics system
    */
   void render(EditorManager &editorManager, liquid::Entity entity,
-              liquid::Renderer &renderer, liquid::AssetRegistry &assetRegistry,
+              liquid::Renderer &renderer, AssetManager &assetManager,
               liquid::PhysicsSystem &physicsSystem);
 
 private:

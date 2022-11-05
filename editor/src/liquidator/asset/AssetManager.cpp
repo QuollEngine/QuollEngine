@@ -51,7 +51,7 @@ AssetManager::AssetManager(const liquid::Path &assetsPath,
                            const liquid::Path &assetsCachePath,
                            bool createDefaultObjects)
     : mAssetsPath(assetsPath),
-      mAssetsCache(assetsCachePath, createDefaultObjects) {}
+      mAssetCache(assetsCachePath, createDefaultObjects) {}
 
 liquid::Result<bool>
 AssetManager::importAsset(const liquid::Path &source,
@@ -62,7 +62,7 @@ AssetManager::importAsset(const liquid::Path &source,
       getUniquePath(targetAssetDirectory / source.filename());
 
   if (targetAssetPath.extension() == ".gltf") {
-    GLTFImporter importer(mAssetsCache);
+    GLTFImporter importer(mAssetCache);
     auto res = importer.saveBinary(source, targetAssetPath);
     if (res.hasError()) {
       return liquid::Result<bool>::Error(res.getError());
@@ -108,7 +108,7 @@ AssetManager::findEngineAssetPath(const liquid::Path &originalAssetPath) {
   stream.close();
 
   auto engineAssetPath =
-      (mAssetsCache.getAssetsPath() / engineAssetPathStr).make_preferred();
+      (mAssetCache.getAssetsPath() / engineAssetPathStr).make_preferred();
 
   mAssetCacheMap.insert_or_assign(
       std::filesystem::canonical(originalAssetPath).string(), engineAssetPath);
@@ -165,7 +165,7 @@ AssetManager::validateAndPreloadAssets(liquid::rhi::RenderDevice *device) {
     }
   }
 
-  return mAssetsCache.preloadAssets(device);
+  return mAssetCache.preloadAssets(device);
 }
 
 liquid::Result<bool>
@@ -232,14 +232,14 @@ AssetManager::loadOriginalTexture(const liquid::Path &originalAssetPath) {
   asset.data.layers = 1;
   asset.data.format = liquid::rhi::Format::Rgba8Srgb;
 
-  auto createdFileRes = mAssetsCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   stbi_image_free(data);
 
   if (createdFileRes.hasError()) {
     return createdFileRes;
   }
 
-  auto loadRes = mAssetsCache.loadAsset(createdFileRes.getData());
+  auto loadRes = mAssetCache.loadAsset(createdFileRes.getData());
   if (loadRes.hasError()) {
     return liquid::Result<liquid::Path>::Error(loadRes.getError());
   }
@@ -253,7 +253,7 @@ AssetManager::loadOriginalAudio(const liquid::Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
-    auto res = mAssetsCache.loadAsset(engineAssetPath);
+    auto res = mAssetCache.loadAsset(engineAssetPath);
     if (res.hasData()) {
       return liquid::Result<liquid::Path>::Ok(engineAssetPath);
     }
@@ -270,7 +270,7 @@ AssetManager::loadOriginalScript(const liquid::Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
-    auto res = mAssetsCache.loadAsset(engineAssetPath);
+    auto res = mAssetCache.loadAsset(engineAssetPath);
     if (res.hasData()) {
       return liquid::Result<liquid::Path>::Ok(engineAssetPath);
     }
@@ -286,7 +286,7 @@ AssetManager::loadOriginalFont(const liquid::Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
-    auto res = mAssetsCache.loadAsset(engineAssetPath);
+    auto res = mAssetCache.loadAsset(engineAssetPath);
     if (res.hasData()) {
       return liquid::Result<liquid::Path>::Ok(engineAssetPath);
     }
@@ -300,7 +300,7 @@ liquid::Result<liquid::Path>
 AssetManager::loadOriginalPrefab(const liquid::Path &originalAssetPath) {
   auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
 
-  GLTFImporter importer(mAssetsCache);
+  GLTFImporter importer(mAssetCache);
   return importer.loadFromPath(originalAssetPath, engineAssetPath);
 }
 
@@ -330,7 +330,7 @@ AssetManager::createHashFile(const liquid::Path &originalAssetPath,
   auto hashFilePath = getHashFilePath(originalAssetPath);
 
   auto engineAssetPathStr =
-      std::filesystem::relative(engineAssetPath, mAssetsCache.getAssetsPath())
+      std::filesystem::relative(engineAssetPath, mAssetCache.getAssetsPath())
           .string();
   std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
 
@@ -348,7 +348,7 @@ AssetManager::createHashFile(const liquid::Path &originalAssetPath,
 
 liquid::Path
 AssetManager::convertToCacheRelativePath(const liquid::Path &path) const {
-  return mAssetsCache.getAssetsPath() /
+  return mAssetCache.getAssetsPath() /
          std::filesystem::relative(path, mAssetsPath);
 }
 
@@ -379,7 +379,7 @@ bool AssetManager::isAssetChanged(const liquid::Path &assetFilePath) const {
   stream.close();
 
   auto engineAssetPath =
-      (mAssetsCache.getAssetsPath() / engineAssetPathStr).make_preferred();
+      (mAssetCache.getAssetsPath() / engineAssetPathStr).make_preferred();
 
   if (!std::filesystem::exists(engineAssetPath)) {
     return true;

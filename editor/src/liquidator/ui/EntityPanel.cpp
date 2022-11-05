@@ -62,10 +62,11 @@ EntityPanel::EntityPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void EntityPanel::render(EditorManager &editorManager, liquid::Entity entity,
-                         liquid::Renderer &renderer,
-                         liquid::AssetRegistry &assetRegistry,
+                         liquid::Renderer &renderer, AssetManager &assetManager,
                          liquid::PhysicsSystem &physicsSystem) {
   setSelectedEntity(entity);
+
+  auto &assetRegistry = assetManager.getAssetRegistry();
 
   if (auto _ = widgets::Window("Entity")) {
     if (mEntityManager.getActiveEntityDatabase().exists(mSelectedEntity)) {

@@ -2,15 +2,15 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
   liquid::AssetData<liquid::MeshAsset> createRandomizedMeshAsset() {
     liquid::AssetData<liquid::MeshAsset> asset;
@@ -124,10 +124,10 @@ public:
     return asset;
   }
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
+TEST_F(AssetCacheTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = manager.createMeshFromAsset(asset);
 
@@ -215,7 +215,7 @@ TEST_F(AssetManagerTest, CreatesMeshFileFromMeshAsset) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsMeshFromFile) {
+TEST_F(AssetCacheTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = manager.createMeshFromAsset(asset).getData();
   auto handle = manager.loadMeshFromFile(filePath).getData();
@@ -252,7 +252,7 @@ TEST_F(AssetManagerTest, LoadsMeshFromFile) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsMeshWithMaterials) {
+TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
   auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";
@@ -288,7 +288,7 @@ TEST_F(AssetManagerTest, LoadsMeshWithMaterials) {
   EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
 }
 
-TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
+TEST_F(AssetCacheTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = manager.createSkinnedMeshFromAsset(asset);
@@ -395,7 +395,7 @@ TEST_F(AssetManagerTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsSkinnedMeshFromFile) {
+TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = manager.createSkinnedMeshFromAsset(asset);
@@ -434,7 +434,7 @@ TEST_F(AssetManagerTest, LoadsSkinnedMeshFromFile) {
   }
 }
 
-TEST_F(AssetManagerTest, LoadsSkinnedMeshWithMaterials) {
+TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
   auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";

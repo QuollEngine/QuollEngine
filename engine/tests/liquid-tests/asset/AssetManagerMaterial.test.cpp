@@ -2,15 +2,15 @@
 #include <random>
 
 #include "liquid/core/Version.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
 
-class AssetManagerTest : public ::testing::Test {
+class AssetCacheTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : manager(std::filesystem::current_path()) {}
 
   liquid::AssetData<liquid::MaterialAsset>
   createMaterialAsset(bool createTextures) {
@@ -72,10 +72,10 @@ public:
     return asset;
   }
 
-  liquid::AssetManager manager;
+  liquid::AssetCache manager;
 };
 
-TEST_F(AssetManagerTest, CreatesMaterialWithTexturesFromAsset) {
+TEST_F(AssetCacheTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
   auto assetFile = manager.createMaterialFromAsset(asset);
 
@@ -158,7 +158,7 @@ TEST_F(AssetManagerTest, CreatesMaterialWithTexturesFromAsset) {
   }
 }
 
-TEST_F(AssetManagerTest,
+TEST_F(AssetCacheTest,
        CreatesMaterialWithoutTexturesFromAssetIfReferencedTexturesAreInvalid) {
   auto asset = createMaterialAsset(false);
 
@@ -238,7 +238,7 @@ TEST_F(AssetManagerTest,
   }
 }
 
-TEST_F(AssetManagerTest, LoadsMaterialWithTexturesFromFile) {
+TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
   auto asset = createMaterialAsset(true);
 
   auto assetFile = manager.createMaterialFromAsset(asset);
@@ -286,7 +286,7 @@ TEST_F(AssetManagerTest, LoadsMaterialWithTexturesFromFile) {
   EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
 }
 
-TEST_F(AssetManagerTest, LoadsMaterialWithoutTexturesFromFile) {
+TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
   auto asset = createMaterialAsset(false);
 
   auto assetFile = manager.createMaterialFromAsset(asset);
@@ -336,7 +336,7 @@ TEST_F(AssetManagerTest, LoadsMaterialWithoutTexturesFromFile) {
   EXPECT_EQ(material.data.emissiveFactor, asset.data.emissiveFactor);
 }
 
-TEST_F(AssetManagerTest, LoadsTexturesWithMaterials) {
+TEST_F(AssetCacheTest, LoadsTexturesWithMaterials) {
   auto texture = manager.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> material{};
   material.name = "test-material";

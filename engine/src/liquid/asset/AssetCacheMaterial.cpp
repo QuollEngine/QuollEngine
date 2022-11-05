@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path>
-AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
+AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   String extension = ".lqmat";
 
   Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
@@ -65,8 +65,8 @@ AssetManager::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 }
 
 Result<MaterialAssetHandle>
-AssetManager::loadMaterialDataFromInputStream(InputBinaryStream &stream,
-                                              const Path &filePath) {
+AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
+                                            const Path &filePath) {
 
   AssetData<MaterialAsset> material{};
   material.path = filePath;
@@ -162,7 +162,7 @@ AssetManager::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<MaterialAssetHandle>
-AssetManager::loadMaterialFromFile(const Path &filePath) {
+AssetCache::loadMaterialFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   if (!stream.good()) {
@@ -179,7 +179,7 @@ AssetManager::loadMaterialFromFile(const Path &filePath) {
 }
 
 Result<MaterialAssetHandle>
-AssetManager::getOrLoadMaterialFromPath(StringView relativePath) {
+AssetCache::getOrLoadMaterialFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Invalid);
   }

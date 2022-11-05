@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/scripting/ScriptingSystem.h"
 
 #include "liquid-tests/Testing.h"
@@ -7,13 +7,13 @@
 class EntityQueryLuaInterfaceTest : public ::testing::Test {
 public:
   EntityQueryLuaInterfaceTest()
-      : assetManager(std::filesystem::current_path()),
-        scriptingSystem(eventSystem, assetManager.getRegistry()) {}
+      : assetCache(std::filesystem::current_path()),
+        scriptingSystem(eventSystem, assetCache.getRegistry()) {}
 
   liquid::LuaScope &call(liquid::Entity entity,
                          const liquid::String &functionName) {
     auto handle =
-        assetManager
+        assetCache
             .loadLuaScriptFromFile(std::filesystem::current_path() /
                                    "scripting-system-component-tester.lua")
             .getData();
@@ -32,7 +32,7 @@ public:
 
   liquid::EntityDatabase entityDatabase;
   liquid::EventSystem eventSystem;
-  liquid::AssetManager assetManager;
+  liquid::AssetCache assetCache;
   liquid::ScriptingSystem scriptingSystem;
 };
 

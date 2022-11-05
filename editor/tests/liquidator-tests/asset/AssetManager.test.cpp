@@ -66,8 +66,7 @@ mapExtensions(const std::vector<liquid::String> &extensions, T &&fn) {
 TEST_F(AssetManagerTest, SetsProvidedAssetsAndCachePathsOnConstruct) {
   EXPECT_EQ(manager.getAssetsPath(),
             std::filesystem::current_path() / "assets");
-  EXPECT_EQ(manager.getAssetsCache().getAssetsPath(),
-            std::filesystem::current_path() / "cache");
+  EXPECT_EQ(manager.getCachePath(), std::filesystem::current_path() / "cache");
 }
 
 TEST_F(AssetManagerTest, CreatesScriptFileAndLoadsIt) {

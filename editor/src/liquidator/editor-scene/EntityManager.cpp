@@ -5,11 +5,11 @@
 
 namespace liquidator {
 
-EntityManager::EntityManager(liquid::AssetManager &assetManager,
+EntityManager::EntityManager(AssetManager &assetManager,
                              liquid::Renderer &renderer,
                              const std::filesystem::path &scenePath)
     : mScenePath(scenePath), mRenderer(renderer), mAssetManager(assetManager),
-      mSceneIO(mAssetManager.getRegistry(), mScene) {}
+      mSceneIO(mAssetManager.getAssetRegistry(), mScene) {}
 
 void EntityManager::save(liquid::Entity entity) {
   if (mInSimulation)
@@ -66,7 +66,7 @@ bool EntityManager::loadScene() {
 void EntityManager::setSkeletonForEntity(liquid::Entity entity,
                                          liquid::SkeletonAssetHandle handle) {
   const auto &skeleton =
-      mAssetManager.getRegistry().getSkeletons().getAsset(handle).data;
+      mAssetManager.getAssetRegistry().getSkeletons().getAsset(handle).data;
 
   liquid::SkeletonComponent skeletonInstance{};
   skeletonInstance.jointLocalPositions = skeleton.jointLocalPositions;
@@ -228,7 +228,9 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
     return liquid::EntityNull;
   }
 
-  auto &asset = mAssetManager.getRegistry().getPrefabs().getAsset(
+  auto &registry = mAssetManager.getAssetRegistry();
+
+  auto &asset = registry.getPrefabs().getAsset(
       static_cast<liquid::PrefabAssetHandle>(handle));
   auto parent = createEmptyEntity(camera, root, asset.name, saveToFile);
 
@@ -259,7 +261,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
   }
 
   for (auto &item : asset.data.meshes) {
-    if (!mAssetManager.getRegistry().getMeshes().hasAsset(item.value)) {
+    if (!registry.getMeshes().hasAsset(item.value)) {
       continue;
     }
 
@@ -267,7 +269,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
   }
 
   for (auto &item : asset.data.skinnedMeshes) {
-    if (!mAssetManager.getRegistry().getSkinnedMeshes().hasAsset(item.value)) {
+    if (!registry.getSkinnedMeshes().hasAsset(item.value)) {
       continue;
     }
 
@@ -275,7 +277,7 @@ liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
   }
 
   for (auto &item : asset.data.skeletons) {
-    if (!mAssetManager.getRegistry().getSkeletons().hasAsset(item.value)) {
+    if (!registry.getSkeletons().hasAsset(item.value)) {
       continue;
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/asset/Result.h"
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 
 namespace liquidator {
 
@@ -15,9 +15,9 @@ public:
   /**
    * @brief Create GLTF importer
    *
-   * @param assetManager Asset manager
+   * @param assetCache Asset cache
    */
-  GLTFImporter(liquid::AssetManager &assetManager);
+  GLTFImporter(liquid::AssetCache &assetCache);
 
   /**
    * @brief Load GLTF from file
@@ -41,7 +41,7 @@ public:
                                           const liquid::Path &destination);
 
 private:
-  liquid::AssetManager &mAssetManager;
+  liquid::AssetCache &mAssetCache;
 };
 
 } // namespace liquidator

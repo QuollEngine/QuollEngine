@@ -229,7 +229,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
  */
 static GLTFToAsset<liquid::TextureAssetHandle>
 loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
-             liquid::AssetManager &assetManager) {
+             liquid::AssetCache &assetCache) {
   std::map<size_t, liquid::TextureAssetHandle> map;
 
   for (size_t i = 0; i < model.textures.size(); ++i) {
@@ -237,7 +237,7 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
     auto &image = model.images.at(model.textures.at(i).source);
     liquid::AssetData<liquid::TextureAsset> texture{};
     auto textureRelPath =
-        std::filesystem::relative(path, assetManager.getAssetsPath());
+        std::filesystem::relative(path, assetCache.getAssetsPath());
 
     auto filename = "texture" + std::to_string(i);
     texture.name = (textureRelPath / filename).string();
@@ -249,8 +249,8 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
     texture.data.width = image.width;
     texture.data.height = image.height;
 
-    auto &&texturePath = assetManager.createTextureFromAsset(texture);
-    auto handle = assetManager.loadTextureFromFile(texturePath.getData());
+    auto &&texturePath = assetCache.createTextureFromAsset(texture);
+    auto handle = assetCache.loadTextureFromFile(texturePath.getData());
     map.insert_or_assign(i, handle.getData());
   }
 
@@ -269,7 +269,7 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
 static GLTFToAsset<liquid::MaterialAssetHandle>
 loadMaterials(const tinygltf::Model &model,
               const std::filesystem::path &pathDirectory,
-              liquid::AssetManager &assetManager,
+              liquid::AssetCache &assetCache,
               const GLTFToAsset<liquid::TextureAssetHandle> &textures) {
   std::map<size_t, liquid::MaterialAssetHandle> map;
 
@@ -329,8 +329,8 @@ loadMaterials(const tinygltf::Model &model,
     material.data.emissiveFactor =
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
 
-    auto path = assetManager.createMaterialFromAsset(material);
-    auto handle = assetManager.loadMaterialFromFile(path.getData());
+    auto path = assetCache.createMaterialFromAsset(material);
+    auto handle = assetCache.loadMaterialFromFile(path.getData());
     map.insert_or_assign(i, handle.getData());
   }
 
@@ -546,14 +546,14 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
  *
  * @param model TinyGLTF model
  * @param pathDirectory Path to asset
- * @param manager Asset manager
+ * @param assetCache Asset cache
  * @param materials Material map
  * @param skeletons Skeleton map
  */
 static liquid::Result<bool>
 loadMeshes(const tinygltf::Model &model,
            const std::filesystem::path &pathDirectory,
-           liquid::AssetManager &manager,
+           liquid::AssetCache &assetCache,
            const GLTFToAsset<liquid::MaterialAssetHandle> &materials,
            const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons,
            GLTFToAsset<liquid::MeshAssetHandle> &outMeshes,
@@ -673,8 +673,8 @@ loadMeshes(const tinygltf::Model &model,
             skinnedMesh.data.skeleton = skeletons.map.at(it->second);
           }
 
-          auto path = manager.createSkinnedMeshFromAsset(skinnedMesh);
-          auto handle = manager.loadSkinnedMeshFromFile(path.getData());
+          auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
+          auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
           outSkinnedMeshes.map.insert_or_assign(i, handle.getData());
         }
       } else {
@@ -697,8 +697,8 @@ loadMeshes(const tinygltf::Model &model,
           mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
 
-          auto path = manager.createMeshFromAsset(mesh);
-          auto handle = manager.loadMeshFromFile(path.getData());
+          auto path = assetCache.createMeshFromAsset(mesh);
+          auto handle = assetCache.loadMeshFromFile(path.getData());
           outMeshes.map.insert_or_assign(i, handle.getData());
         }
       }
@@ -716,11 +716,11 @@ loadMeshes(const tinygltf::Model &model,
  *
  * @param model TinyGLTF model
  * @param path Path to asset
- * @param manager Asset manager
+ * @param assetCache Asset cache
  */
 SkeletonData loadSkeletons(const tinygltf::Model &model,
                            const std::filesystem::path &path,
-                           liquid::AssetManager &manager) {
+                           liquid::AssetCache &assetCache) {
   SkeletonData skeletonData{};
 
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
@@ -832,8 +832,8 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
       asset.data.jointParents.push_back(parent >= 0 ? parent : 0);
     }
 
-    auto path = manager.createSkeletonFromAsset(asset);
-    auto handle = manager.loadSkeletonFromFile(path.getData());
+    auto path = assetCache.createSkeletonFromAsset(asset);
+    auto handle = assetCache.loadSkeletonFromFile(path.getData());
 
     skeletonData.skeletonMap.map.insert_or_assign(static_cast<size_t>(si),
                                                   handle.getData());
@@ -850,12 +850,12 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
  *
  * @param model TinyGLTF model
  * @param pathDirectory Path to asset
- * @param manager Asset manager
+ * @param assetCache Asset cache
  * @param skeletonData Skeleton data
  */
 AnimationData loadAnimations(const tinygltf::Model &model,
                              const std::filesystem::path &pathDirectory,
-                             liquid::AssetManager &manager,
+                             liquid::AssetCache &assetCache,
                              const SkeletonData &skeletonData) {
   AnimationData animationData;
   for (size_t i = 0; i < model.animations.size(); ++i) {
@@ -1026,8 +1026,8 @@ AnimationData loadAnimations(const tinygltf::Model &model,
 
     LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
                   "Animation must have a target node or skin");
-    auto filePath = manager.createAnimationFromAsset(animation);
-    auto handle = manager.loadAnimationFromFile(filePath.getData());
+    auto filePath = assetCache.createAnimationFromAsset(animation);
+    auto handle = assetCache.loadAnimationFromFile(filePath.getData());
 
     if (targetSkin >= 0) {
       if (animationData.skinAnimationMap.find(targetSkin) ==
@@ -1052,7 +1052,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
 static liquid::Result<liquid::Path>
 loadPrefabs(const tinygltf::Model &model,
             const std::filesystem::path &pathDirectory,
-            liquid::AssetManager &manager,
+            liquid::AssetCache &assetCache,
             const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
             const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
             const SkeletonData &skeletons, const AnimationData &animations) {
@@ -1136,14 +1136,14 @@ loadPrefabs(const tinygltf::Model &model,
     }
   }
 
-  auto path = manager.createPrefabFromAsset(prefab);
-  manager.loadPrefabFromFile(path.getData());
+  auto path = assetCache.createPrefabFromAsset(prefab);
+  assetCache.loadPrefabFromFile(path.getData());
 
   return path;
 }
 
-GLTFImporter::GLTFImporter(liquid::AssetManager &assetManager)
-    : mAssetManager(assetManager) {}
+GLTFImporter::GLTFImporter(liquid::AssetCache &assetCache)
+    : mAssetCache(assetCache) {}
 
 liquid::Result<liquid::Path>
 GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
@@ -1180,21 +1180,21 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
 
   std::filesystem::create_directory(engineAssetPath);
 
-  auto &&textures = loadTextures(model, engineAssetPath, mAssetManager);
+  auto &&textures = loadTextures(model, engineAssetPath, mAssetCache);
   auto &&materials =
-      loadMaterials(model, engineAssetPath, mAssetManager, textures);
-  auto &&skeletonData = loadSkeletons(model, engineAssetPath, mAssetManager);
+      loadMaterials(model, engineAssetPath, mAssetCache, textures);
+  auto &&skeletonData = loadSkeletons(model, engineAssetPath, mAssetCache);
   auto &&animationData =
-      loadAnimations(model, engineAssetPath, mAssetManager, skeletonData);
+      loadAnimations(model, engineAssetPath, mAssetCache, skeletonData);
 
   const auto &meshResult =
-      loadMeshes(model, engineAssetPath, mAssetManager, materials,
+      loadMeshes(model, engineAssetPath, mAssetCache, materials,
                  skeletonData.skeletonMap, meshMap, skinnedMeshMap);
 
   warnings.insert(warnings.end(), meshResult.getWarnings().begin(),
                   meshResult.getWarnings().end());
 
-  auto prefabPath = loadPrefabs(model, engineAssetPath, mAssetManager, meshMap,
+  auto prefabPath = loadPrefabs(model, engineAssetPath, mAssetCache, meshMap,
                                 skinnedMeshMap, skeletonData, animationData);
 
   if (!prefabPath.hasData()) {

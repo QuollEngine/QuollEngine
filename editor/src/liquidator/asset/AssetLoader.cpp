@@ -13,7 +13,7 @@ liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res.hasData()) {
-    mAssetManager.getAssetsCache().getRegistry().syncWithDevice(mDevice);
+    mAssetManager.getAssetRegistry().syncWithDevice(mDevice);
   }
 
   return res;

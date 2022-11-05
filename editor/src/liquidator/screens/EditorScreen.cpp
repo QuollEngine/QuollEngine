@@ -68,9 +68,7 @@ void EditorScreen::start(const Project &project) {
 
   AssetManager assetManager(project.assetsPath, project.assetsCachePath);
 
-  auto &assetsCache = assetManager.getAssetsCache();
-
-  liquid::Renderer renderer(assetsCache.getRegistry(), mWindow, mDevice);
+  liquid::Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
 
   liquid::Presenter presenter(renderer.getShaderLibrary(), mDevice);
 
@@ -97,7 +95,7 @@ void EditorScreen::start(const Project &project) {
   liquid::FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  liquidator::EntityManager entityManager(assetsCache, renderer,
+  liquidator::EntityManager entityManager(assetManager, renderer,
                                           project.scenesPath);
   liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                                         mEventSystem, mWindow);
@@ -139,7 +137,7 @@ void EditorScreen::start(const Project &project) {
 
   MousePickingGraph mousePicking(renderer.getShaderLibrary(),
                                  renderer.getSceneRenderer().getFrameData(),
-                                 assetsCache.getRegistry(), mDevice);
+                                 assetManager.getAssetRegistry(), mDevice);
 
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
@@ -162,7 +160,7 @@ void EditorScreen::start(const Project &project) {
       });
 
   liquidator::EditorSimulator simulator(
-      mEventSystem, mWindow, assetsCache.getRegistry(), editorCamera);
+      mEventSystem, mWindow, assetManager.getAssetRegistry(), editorCamera);
 
   mWindow.maximize();
 
@@ -175,7 +173,7 @@ void EditorScreen::start(const Project &project) {
         return true;
       });
 
-  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager, &assetsCache,
+  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
                         &editorRenderer, &simulator, &mousePicking, this]() {

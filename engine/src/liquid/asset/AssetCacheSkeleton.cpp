@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Version.h"
 
-#include "AssetManager.h"
+#include "AssetCache.h"
 
 #include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path>
-AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
+AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
   String extension = ".lqskel";
   Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
@@ -41,8 +41,8 @@ AssetManager::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
 }
 
 Result<SkeletonAssetHandle>
-AssetManager::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
-                                              const Path &filePath) {
+AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
+                                            const Path &filePath) {
   auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
 
   AssetData<SkeletonAsset> skeleton{};
@@ -73,7 +73,7 @@ AssetManager::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
 }
 
 Result<SkeletonAssetHandle>
-AssetManager::loadSkeletonFromFile(const Path &filePath) {
+AssetCache::loadSkeletonFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
@@ -85,7 +85,7 @@ AssetManager::loadSkeletonFromFile(const Path &filePath) {
 }
 
 Result<SkeletonAssetHandle>
-AssetManager::getOrLoadSkeletonFromPath(StringView relativePath) {
+AssetCache::getOrLoadSkeletonFromPath(StringView relativePath) {
   if (relativePath.empty()) {
     return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Invalid);
   }

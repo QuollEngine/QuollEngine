@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 #include "liquid/platform-tools/NativeFileDialog.h"
 #include "liquid/platform-tools/NativeFileOpener.h"
 
@@ -63,7 +63,7 @@ private:
   /**
    * @brief Handle entry creation
    *
-   * @param assetManager Asset manager
+   * @param assetCache Asset cache
    */
   void handleCreateEntry(AssetManager &assetManager);
 

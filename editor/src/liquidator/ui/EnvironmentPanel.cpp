@@ -7,8 +7,10 @@
 namespace liquidator {
 
 void EnvironmentPanel::render(EditorManager &editorManager,
-                              liquid::AssetManager &assetManager) {
+                              AssetManager &assetManager) {
   static constexpr float HALF = 0.5f;
+
+  auto &textures = assetManager.getAssetRegistry().getTextures();
 
   if (auto _ = widgets::Window("Environment")) {
     float width = ImGui::GetWindowWidth();
@@ -25,7 +27,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
       if (auto *payload = ImGui::AcceptDragDropPayload(
               liquid::getAssetTypeString(liquid::AssetType::Texture).c_str())) {
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
-        auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
+        auto &asset = textures.getAsset(handle);
 
         editorManager.getEnvironment().irradianceMap = asset.data.deviceHandle;
       }
@@ -42,7 +44,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
       if (auto *payload = ImGui::AcceptDragDropPayload(
               liquid::getAssetTypeString(liquid::AssetType::Texture).c_str())) {
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
-        auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
+        auto &asset = textures.getAsset(handle);
 
         editorManager.getEnvironment().specularMap = asset.data.deviceHandle;
       }
@@ -59,7 +61,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
       if (auto *payload = ImGui::AcceptDragDropPayload(
               liquid::getAssetTypeString(liquid::AssetType::Texture).c_str())) {
         auto handle = *static_cast<liquid::TextureAssetHandle *>(payload->Data);
-        auto &asset = assetManager.getRegistry().getTextures().getAsset(handle);
+        auto &asset = textures.getAsset(handle);
 
         editorManager.getEnvironment().brdfLUT = asset.data.deviceHandle;
       }

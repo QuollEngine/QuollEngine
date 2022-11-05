@@ -23,7 +23,7 @@
 #include "liquid/rhi-vulkan/VulkanRenderDevice.h"
 
 // Asset
-#include "liquid/asset/AssetManager.h"
+#include "liquid/asset/AssetCache.h"
 
 namespace liquid::runtime {
 
@@ -36,17 +36,17 @@ void Runtime::start() {
   liquid::Scene scene;
   liquid::EventSystem eventSystem;
   liquid::Window window(mConfig.name, Width, Height, eventSystem);
-  liquid::AssetManager assetManager(mConfig.assetsPath, true);
+  liquid::AssetCache assetCache(mConfig.assetsPath, true);
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  auto res = assetManager.preloadAssets(device);
+  auto res = assetCache.preloadAssets(device);
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(window, fpsCounter);
 
   liquid::rhi::RenderGraph graph;
-  liquid::Renderer renderer(assetManager.getRegistry(), window, device);
+  liquid::Renderer renderer(assetCache.getRegistry(), window, device);
 
   static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
 
@@ -56,14 +56,14 @@ void Runtime::start() {
   renderer.getSceneRenderer().attachText(graph, passData);
 
   liquid::ScriptingSystem scriptingSystem(eventSystem,
-                                          assetManager.getRegistry());
+                                          assetCache.getRegistry());
   liquid::SceneUpdater sceneUpdater;
   liquid::PhysicsSystem physicsSystem(eventSystem);
   liquid::Presenter presenter(renderer.getShaderLibrary(), device);
   liquid::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
-  liquid::AnimationSystem animationSystem(assetManager.getRegistry());
+  liquid::AnimationSystem animationSystem(assetCache.getRegistry());
   liquid::SkeletonUpdater skeletonUpdater;
-  liquid::AudioSystem audioSystem(assetManager.getRegistry());
+  liquid::AudioSystem audioSystem(assetCache.getRegistry());
   liquid::EntityDeleter entityDeleter;
 
   graph.setFramebufferExtent(window.getFramebufferSize());
@@ -71,7 +71,7 @@ void Runtime::start() {
     graph.setFramebufferExtent({width, height});
   });
 
-  liquid::SceneIO sceneIO(assetManager.getRegistry(), scene);
+  liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
   sceneIO.loadScene(mConfig.scenesPath / "main.lqscene");
 
   presenter.updateFramebuffers(device->getSwapchain());

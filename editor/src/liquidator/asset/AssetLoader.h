@@ -12,12 +12,6 @@ namespace liquidator {
  * from the editor
  */
 class AssetLoader {
-  static const std::vector<liquid::String> ScriptExtensions;
-  static const std::vector<liquid::String> AudioExtensions;
-  static const std::vector<liquid::String> SceneExtensions;
-  static const std::vector<liquid::String> FontExtensions;
-  static const std::vector<liquid::String> TextureExtensions;
-
 public:
   /**
    * @brief Create asset loader
