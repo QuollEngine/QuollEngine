@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "EntityStorageSparseSet.h"
 
 #include "liquid/core/NameComponent.h"
 #include "liquid/core/IdComponent.h"
@@ -29,40 +30,22 @@
 #include "liquid/scripting/ScriptingComponent.h"
 #include "liquid/text/TextComponent.h"
 
-#include "EntityStorageSparseSet.h"
-
 namespace liquid {
 
-// clang-format off
-using EntityDatabase = EntityStorageSparseSet<
-    IdComponent,
-    DeleteComponent,
-    MeshComponent,
-    DirectionalLightComponent,
-    CameraComponent,
-    AutoAspectRatioComponent,
-    PerspectiveLensComponent,
-    LocalTransformComponent,
-    WorldTransformComponent,
-    ParentComponent,
-    ChildrenComponent,
-    EnvironmentComponent,
-    AnimatorComponent,
-    AudioSourceComponent,
-    AudioStartComponent,
-    AudioStatusComponent,
-    NameComponent,
-    SkinnedMeshComponent,
-    SkeletonComponent,
-    SkeletonDebugComponent,
-    RigidBodyComponent,
-    CollidableComponent,
-    ForceComponent,
-    TorqueComponent,
-    RigidBodyClearComponent,
-    ScriptingComponent,
-    TextComponent
->;
-// clang-format on
+/**
+ * @brief Entity database
+ *
+ * Default entity database used within the engine
+ *
+ * Automatically registers engine components but allows
+ * register other components for specific purposes.
+ */
+class EntityDatabase : public EntityStorageSparseSet {
+public:
+  /**
+   * @brief Create entity database
+   */
+  EntityDatabase();
+};
 
 } // namespace liquid
