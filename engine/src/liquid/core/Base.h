@@ -37,6 +37,8 @@
 #include <variant>
 #include <random>
 #include <string_view>
+#include <typeinfo>
+#include <typeindex>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
