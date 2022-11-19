@@ -242,11 +242,11 @@ void EditorScreen::start(const Project &project) {
       if (ui.getSceneHierarchyPanel().isEntitySelected()) {
         auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
         const auto &world =
-            entityDatabase.get<liquid::WorldTransformComponent>(selected);
+            entityDatabase.get<liquid::WorldTransform>(selected);
 
         auto worldTransform = world.worldTransform;
 
-        const auto &camera = entityDatabase.get<liquid::CameraComponent>(
+        const auto &camera = entityDatabase.get<liquid::Camera>(
             editorManager.getEditorCamera().getCamera());
 
         auto gizmoPerspective = camera.projectionMatrix;

@@ -18,11 +18,11 @@ public:
                                    "scripting-system-component-tester.lua")
             .getData();
 
-    entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+    entityDatabase.set<liquid::Script>(entity, {handle});
 
     scriptingSystem.start(entityDatabase);
 
-    auto &scripting = entityDatabase.get<liquid::ScriptingComponent>(entity);
+    auto &scripting = entityDatabase.get<liquid::Script>(entity);
 
     scripting.scope.luaGetGlobal(functionName);
     scripting.scope.call(0);
@@ -81,7 +81,7 @@ TEST_F(EntityQueryLuaInterfaceTest,
   auto entity = entityDatabase.create();
 
   auto e1 = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(e1, {"Test"});
+  entityDatabase.set<liquid::Name>(e1, {"Test"});
 
   auto &scope = call(entity, "entity_query_get_first_by_name");
 

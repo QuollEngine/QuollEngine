@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Force component
  */
-struct ForceComponent {
+struct Force {
   /**
    * Total amount of applied force
    */

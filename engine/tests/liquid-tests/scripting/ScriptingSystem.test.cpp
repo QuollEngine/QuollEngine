@@ -27,9 +27,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
                     .getData();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -40,8 +40,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), TimeDelta);
 }
 
-TEST_F(ScriptingSystemTest,
-       DeleteScriptingComponentForEntitiesWithDeleteComponents) {
+TEST_F(ScriptingSystemTest, DeleteScriptForEntitiesWithDeletes) {
   auto handle = assetCache
                     .loadLuaScriptFromFile(std::filesystem::current_path() /
                                            "scripting-system-tester.lua")
@@ -54,9 +53,9 @@ TEST_F(ScriptingSystemTest,
     auto entity = entityDatabase.create();
     entities.at(i) = entity;
 
-    entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+    entityDatabase.set<liquid::Script>(entity, {handle});
     if ((i % 2) == 0) {
-      entityDatabase.set<liquid::DeleteComponent>(entity, {});
+      entityDatabase.set<liquid::Delete>(entity, {});
     }
   }
 
@@ -65,8 +64,7 @@ TEST_F(ScriptingSystemTest,
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
-    EXPECT_NE(entityDatabase.has<liquid::ScriptingComponent>(entity),
-              (i % 2) == 0);
+    EXPECT_NE(entityDatabase.has<liquid::Script>(entity), (i % 2) == 0);
   }
 }
 
@@ -76,9 +74,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -97,9 +95,9 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -115,9 +113,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   // Call 10 times
@@ -135,9 +133,9 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
@@ -154,9 +152,9 @@ TEST_F(ScriptingSystemTest,
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
@@ -172,9 +170,9 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
@@ -192,9 +190,9 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
@@ -211,9 +209,9 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
@@ -231,9 +229,9 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
                                            "scripting-system-tester.lua")
                     .getData();
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::ScriptingComponent>(entity);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 

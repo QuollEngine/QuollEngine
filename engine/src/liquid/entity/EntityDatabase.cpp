@@ -4,33 +4,33 @@
 namespace liquid {
 
 EntityDatabase::EntityDatabase() {
-  reg<IdComponent>();
-  reg<NameComponent>();
-  reg<DeleteComponent>();
-  reg<MeshComponent>();
-  reg<DirectionalLightComponent>();
-  reg<CameraComponent>();
-  reg<AutoAspectRatioComponent>();
-  reg<PerspectiveLensComponent>();
-  reg<LocalTransformComponent>();
-  reg<WorldTransformComponent>();
-  reg<ParentComponent>();
-  reg<ChildrenComponent>();
-  reg<EnvironmentComponent>();
-  reg<AnimatorComponent>();
-  reg<AudioSourceComponent>();
-  reg<AudioStartComponent>();
-  reg<AudioStatusComponent>();
-  reg<SkinnedMeshComponent>();
-  reg<SkeletonComponent>();
-  reg<SkeletonDebugComponent>();
-  reg<RigidBodyComponent>();
-  reg<CollidableComponent>();
-  reg<ForceComponent>();
-  reg<TorqueComponent>();
-  reg<RigidBodyClearComponent>();
-  reg<ScriptingComponent>();
-  reg<TextComponent>();
+  reg<Id>();
+  reg<Name>();
+  reg<Delete>();
+  reg<Mesh>();
+  reg<DirectionalLight>();
+  reg<Camera>();
+  reg<AutoAspectRatio>();
+  reg<PerspectiveLens>();
+  reg<LocalTransform>();
+  reg<WorldTransform>();
+  reg<Parent>();
+  reg<Children>();
+  reg<Environment>();
+  reg<Animator>();
+  reg<AudioSource>();
+  reg<AudioStart>();
+  reg<AudioStatus>();
+  reg<SkinnedMesh>();
+  reg<Skeleton>();
+  reg<SkeletonDebug>();
+  reg<RigidBody>();
+  reg<Collidable>();
+  reg<Force>();
+  reg<Torque>();
+  reg<RigidBodyClear>();
+  reg<Script>();
+  reg<Text>();
 }
 
 } // namespace liquid

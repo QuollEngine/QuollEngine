@@ -5,6 +5,6 @@ namespace liquid {
 /**
  * @brief Audio start component
  */
-struct AudioStartComponent {};
+struct AudioStart {};
 
 } // namespace liquid

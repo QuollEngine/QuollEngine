@@ -18,7 +18,7 @@ TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<liquid::DeleteComponent>(entity, {});
+      scene.entityDatabase.set<liquid::Delete>(entity, {});
     }
   }
 
@@ -44,12 +44,12 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<liquid::DeleteComponent>(entity, {});
+      scene.entityDatabase.set<liquid::Delete>(entity, {});
     }
 
     if (i > 0 && (i % 4) == 0) {
-      scene.entityDatabase.set<liquid::ChildrenComponent>(
-          entity, {{entities.at(i - 1)}});
+      scene.entityDatabase.set<liquid::Children>(entity,
+                                                 {{entities.at(i - 1)}});
     }
   }
 
@@ -81,17 +81,16 @@ TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
     entities.at(i) = entity;
 
     if ((i % 2) == 0) {
-      scene.entityDatabase.set<liquid::DeleteComponent>(entity, {});
+      scene.entityDatabase.set<liquid::Delete>(entity, {});
     }
 
     if (i > 0) {
       // Set previous entity as parent of this entity
-      scene.entityDatabase.set<liquid::ParentComponent>(entity,
-                                                        {entities.at(i - 1)});
+      scene.entityDatabase.set<liquid::Parent>(entity, {entities.at(i - 1)});
 
       // Set this entity as a child of previous entity
-      scene.entityDatabase.set<liquid::ChildrenComponent>(entities.at(i - 1),
-                                                          {{entity}});
+      scene.entityDatabase.set<liquid::Children>(entities.at(i - 1),
+                                                 {{entity}});
     }
   }
 
@@ -102,12 +101,11 @@ TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
   entityDeleter.update(scene);
 
   for (size_t i = 0; i < entities.size(); ++i) {
-    if (!scene.entityDatabase.has<liquid::ChildrenComponent>(entities.at(i))) {
+    if (!scene.entityDatabase.has<liquid::Children>(entities.at(i))) {
       continue;
     }
     auto &children =
-        scene.entityDatabase.get<liquid::ChildrenComponent>(entities.at(i))
-            .children;
+        scene.entityDatabase.get<liquid::Children>(entities.at(i)).children;
 
     EXPECT_EQ(children.empty(), (i + 1) % 2 == 0);
   }
@@ -117,8 +115,8 @@ TEST_F(EntityDeleterTest, SetsSceneActiveCameraToDummyIfActiveCameraIsDeleted) {
   scene.activeCamera = scene.entityDatabase.create();
 
   auto entityThatComesAfter = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::DeleteComponent>(scene.activeCamera, {});
-  scene.entityDatabase.set<liquid::DeleteComponent>(entityThatComesAfter, {});
+  scene.entityDatabase.set<liquid::Delete>(scene.activeCamera, {});
+  scene.entityDatabase.set<liquid::Delete>(entityThatComesAfter, {});
 
   entityDeleter.update(scene);
 

@@ -10,7 +10,7 @@ namespace liquid {
 /**
  * @brief Rigid body component
  */
-struct RigidBodyComponent {
+struct RigidBody {
   /**
    * Dynamic rigid body description
    */

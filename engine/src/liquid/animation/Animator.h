@@ -7,7 +7,7 @@ namespace liquid {
 /**
  * @brief Animator component
  */
-struct AnimatorComponent {
+struct Animator {
   /**
    * Current animation index
    */

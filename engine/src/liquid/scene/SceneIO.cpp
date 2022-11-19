@@ -72,11 +72,11 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
 void SceneIO::saveEntity(Entity entity, const Path &path) {
   detail::EntitySerializer serializer(mAssetRegistry, mScene.entityDatabase);
 
-  if (!mScene.entityDatabase.has<IdComponent>(entity)) {
-    mScene.entityDatabase.set<IdComponent>(entity, {generateId()});
+  if (!mScene.entityDatabase.has<Id>(entity)) {
+    mScene.entityDatabase.set<Id>(entity, {generateId()});
   }
 
-  auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
+  auto id = mScene.entityDatabase.get<Id>(entity).id;
   mEntityIdCache.insert({id, entity});
 
   auto node = serializer.serialize(entity);
@@ -89,18 +89,18 @@ void SceneIO::saveEntity(Entity entity, const Path &path) {
 }
 
 Result<bool> SceneIO::saveStartingCamera(Entity entity, const Path &path) {
-  if (!mScene.entityDatabase.has<IdComponent>(entity)) {
+  if (!mScene.entityDatabase.has<Id>(entity)) {
     return Result<bool>::Error("Entity does not have an id");
   }
 
-  if (!mScene.entityDatabase.has<PerspectiveLensComponent>(entity)) {
+  if (!mScene.entityDatabase.has<PerspectiveLens>(entity)) {
     return Result<bool>::Error("Entity does not have a camera");
   }
 
   std::ifstream stream(path);
   auto node = YAML::Load(stream);
   node["zones"][node["persistentZone"].as<uint32_t>()]["startingCamera"] =
-      mScene.entityDatabase.get<IdComponent>(entity).id;
+      mScene.entityDatabase.get<Id>(entity).id;
   stream.close();
 
   std::ofstream writeStream(path);
@@ -111,7 +111,7 @@ Result<bool> SceneIO::saveStartingCamera(Entity entity, const Path &path) {
 }
 
 void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
-  if (mScene.entityDatabase.has<PerspectiveLensComponent>(entity)) {
+  if (mScene.entityDatabase.has<PerspectiveLens>(entity)) {
     detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
     auto res =
         sceneLoader.loadStartingCamera(YAML::Node{}, mEntityIdCache, entity);
@@ -123,15 +123,15 @@ void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
     }
   }
 
-  if (mScene.entityDatabase.has<ChildrenComponent>(entity)) {
-    const auto &children = mScene.entityDatabase.get<ChildrenComponent>(entity);
+  if (mScene.entityDatabase.has<Children>(entity)) {
+    const auto &children = mScene.entityDatabase.get<Children>(entity);
     for (auto entity : children.children) {
       deleteEntityFilesAndRelations(entity, path);
     }
   }
 
-  if (mScene.entityDatabase.has<IdComponent>(entity)) {
-    auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
+  if (mScene.entityDatabase.has<Id>(entity)) {
+    auto id = mScene.entityDatabase.get<Id>(entity).id;
     mEntityIdCache.insert({id, entity});
 
     std::filesystem::remove(getEntityPath(entity, path));
@@ -142,7 +142,7 @@ void SceneIO::reset() {
   mScene.entityDatabase.destroy();
   mEntityIdCache.clear();
   auto dummyCamera = mScene.entityDatabase.create();
-  mScene.entityDatabase.set<CameraComponent>(dummyCamera, {});
+  mScene.entityDatabase.set<Camera>(dummyCamera, {});
   mScene.dummyCamera = dummyCamera;
   mScene.activeCamera = dummyCamera;
 }
@@ -158,7 +158,7 @@ Path SceneIO::getEntityPath(Entity entity, const Path &path) {
   auto entitiesPath =
       path.parent_path() / persistentZone["entities"].as<String>();
 
-  auto id = mScene.entityDatabase.get<IdComponent>(entity).id;
+  auto id = mScene.entityDatabase.get<Id>(entity).id;
   return entitiesPath / (std::to_string(id) + ".lqnode");
 }
 
@@ -170,7 +170,7 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
 
     if (id > 0 && mEntityIdCache.find(id) == mEntityIdCache.end()) {
       auto entity = mScene.entityDatabase.create();
-      mScene.entityDatabase.set<IdComponent>(entity, {id});
+      mScene.entityDatabase.set<Id>(entity, {id});
 
       if (mLastId <= id) {
         mLastId = id + 1;

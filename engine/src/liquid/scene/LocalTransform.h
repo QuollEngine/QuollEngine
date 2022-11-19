@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Local transform component
  */
-struct LocalTransformComponent {
+struct LocalTransform {
   /**
    * Local position
    */

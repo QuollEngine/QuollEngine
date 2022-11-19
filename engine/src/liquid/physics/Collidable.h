@@ -11,7 +11,7 @@ namespace liquid {
 /**
  * @brief Collidable component
  */
-struct CollidableComponent {
+struct Collidable {
   /**
    * Geometry description
    */

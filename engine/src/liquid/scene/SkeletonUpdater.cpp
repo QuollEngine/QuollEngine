@@ -6,8 +6,8 @@ namespace liquid {
 void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
   {
     LIQUID_PROFILE_EVENT("SkeletonUpdater::update");
-    entityDatabase.iterateEntities<SkeletonComponent>(
-        [](auto entity, SkeletonComponent &skeleton) {
+    entityDatabase.iterateEntities<Skeleton>(
+        [](auto entity, Skeleton &skeleton) {
           for (uint32_t i = 0; i < skeleton.numJoints; ++i) {
             glm::mat4 identity{1.0f};
             auto localTransform =
@@ -30,9 +30,8 @@ void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
 
   {
     LIQUID_PROFILE_EVENT("SkeletonUpdater::updateDebug");
-    entityDatabase.iterateEntities<SkeletonComponent, SkeletonDebugComponent>(
-        [](auto entity, SkeletonComponent &skeleton,
-           SkeletonDebugComponent &debug) {
+    entityDatabase.iterateEntities<Skeleton, SkeletonDebug>(
+        [](auto entity, Skeleton &skeleton, SkeletonDebug &debug) {
           LIQUID_ASSERT(
               static_cast<uint32_t>(debug.bones.size()) ==
                   skeleton.numJoints * 2,

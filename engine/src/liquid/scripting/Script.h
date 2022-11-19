@@ -14,7 +14,7 @@ namespace liquid {
  * Provides data about the current state
  * of the script
  */
-struct ScriptingComponent {
+struct Script {
   /**
    * Lua script handle
    */

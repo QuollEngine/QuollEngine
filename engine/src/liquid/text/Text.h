@@ -7,7 +7,7 @@ namespace liquid {
 /**
  * @brief Text component
  */
-struct TextComponent {
+struct Text {
   /**
    * Text contents
    */

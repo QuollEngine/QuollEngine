@@ -417,7 +417,7 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   liquid::AssetData<liquid::PrefabAsset> prefabData{};
   prefabData.data.skinnedMeshes.push_back({0U, meshHandle.getData()});
   prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
-  liquid::PrefabComponent<liquid::AnimatorComponent> animator{};
+  liquid::PrefabComponent<liquid::Animator> animator{};
   animator.entity = 0;
   animator.value.animations.push_back(animationHandle.getData());
   prefabData.data.animators.push_back(animator);

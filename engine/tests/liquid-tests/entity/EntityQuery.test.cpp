@@ -13,14 +13,14 @@ public:
 
 TEST_F(EntityQueryTest, ReturnsNullEntityIfEntityWithNameIsNotFound) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(entity, {"test"});
+  entityDatabase.set<liquid::Name>(entity, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("hello"), liquid::EntityNull);
 }
 
 TEST_F(EntityQueryTest, ReturnsEntityIfEntityWithNameIsFound) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(entity, {"test"});
+  entityDatabase.set<liquid::Name>(entity, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity);
 }
@@ -28,10 +28,10 @@ TEST_F(EntityQueryTest, ReturnsEntityIfEntityWithNameIsFound) {
 TEST_F(EntityQueryTest,
        ReturnsFirstFoundEntityIfMultipleEntitiesHaveTheSameName) {
   auto entity1 = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(entity1, {"test"});
+  entityDatabase.set<liquid::Name>(entity1, {"test"});
 
   auto entity2 = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(entity2, {"test"});
+  entityDatabase.set<liquid::Name>(entity2, {"test"});
 
   EXPECT_EQ(entityQuery.getFirstEntityByName("test"), entity1);
 }

@@ -43,10 +43,9 @@ public:
    * @param name Entity name
    * @return New entity
    */
-  liquid::Entity
-  createEmptyEntity(liquid::Entity parent,
-                    const liquid::LocalTransformComponent &transform,
-                    const liquid::String &name = "");
+  liquid::Entity createEmptyEntity(liquid::Entity parent,
+                                   const liquid::LocalTransform &transform,
+                                   const liquid::String &name = "");
 
   /**
    * @brief Create empty entity at camera view
@@ -117,8 +116,8 @@ public:
    * @param lens Perspective lens component
    * @param autoRatio Calculate aspect ratio automatically
    */
-  void setCamera(liquid::Entity entity,
-                 const liquid::PerspectiveLensComponent &lens, bool autoRatio);
+  void setCamera(liquid::Entity entity, const liquid::PerspectiveLens &lens,
+                 bool autoRatio);
 
   /**
    * @brief Set audio for entity
@@ -134,7 +133,7 @@ public:
    * @param entity Entity
    * @param text Text component
    */
-  void setText(liquid::Entity entity, liquid::TextComponent text);
+  void setText(liquid::Entity entity, liquid::Text text);
 
   /**
    * @brief Set script for entity
@@ -239,8 +238,7 @@ private:
    * @param camera Editor camera
    * @return Transform component
    */
-  liquid::LocalTransformComponent
-  getTransformFromCamera(EditorCamera &camera) const;
+  liquid::LocalTransform getTransformFromCamera(EditorCamera &camera) const;
 
 private:
   liquid::Scene mScene;

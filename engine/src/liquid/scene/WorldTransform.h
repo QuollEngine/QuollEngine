@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief World transform component
  */
-struct WorldTransformComponent {
+struct WorldTransform {
   /**
    * World transform matrix
    */

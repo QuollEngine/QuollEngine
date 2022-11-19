@@ -59,7 +59,7 @@ private:
    *
    * @param component Scripting component
    */
-  void destroyScriptingData(ScriptingComponent &component);
+  void destroyScriptingData(Script &component);
 
   /**
    * @brief Create scripting data
@@ -67,7 +67,7 @@ private:
    * @param component Scripting component
    * @param entity Entity
    */
-  void createScriptingData(ScriptingComponent &component, Entity event);
+  void createScriptingData(Script &component, Entity event);
 
 private:
   EventSystem &mEventSystem;

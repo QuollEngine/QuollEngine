@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Audio status component
  */
-struct AudioStatusComponent {
+struct AudioStatus {
   /**
    * Sound instance
    */

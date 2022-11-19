@@ -12,7 +12,7 @@ namespace liquid {
  * transforms for the skeleton
  * joints
  */
-struct SkeletonComponent {
+struct Skeleton {
   /**
    * Number of joints
    */
@@ -70,7 +70,7 @@ struct SkeletonComponent {
  * Stores skeleton debug bone transforms
  * for rendering debug lines
  */
-struct SkeletonDebugComponent {
+struct SkeletonDebug {
   /**
    * Debug bones
    */

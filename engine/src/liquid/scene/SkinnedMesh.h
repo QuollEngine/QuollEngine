@@ -7,7 +7,7 @@ namespace liquid {
 /**
  * @brief Skinned mesh component
  */
-struct SkinnedMeshComponent {
+struct SkinnedMesh {
   /**
    * Skinned mesh asset handle
    */

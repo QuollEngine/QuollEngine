@@ -11,13 +11,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
   if (node["components"]["name"] && node["components"]["name"].IsScalar()) {
     auto name = node["components"]["name"].as<liquid::String>();
-    mEntityDatabase.set<NameComponent>(entity, {name});
+    mEntityDatabase.set<Name>(entity, {name});
   } else {
     auto name = "Untitled " + node["id"].as<String>();
-    mEntityDatabase.set<NameComponent>(entity, {name});
+    mEntityDatabase.set<Name>(entity, {name});
   }
 
-  LocalTransformComponent transform{};
+  LocalTransform transform{};
   if (node["components"]["transform"] &&
       node["components"]["transform"].IsMap()) {
     transform.localPosition =
@@ -39,24 +39,24 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       Entity parentEntity = it != entityIdCache.end() ? it->second : EntityNull;
 
       if (parentEntity != EntityNull) {
-        mEntityDatabase.set<ParentComponent>(entity, {parentEntity});
+        mEntityDatabase.set<Parent>(entity, {parentEntity});
 
-        if (mEntityDatabase.has<ChildrenComponent>(parentEntity)) {
-          mEntityDatabase.get<ChildrenComponent>(parentEntity)
+        if (mEntityDatabase.has<Children>(parentEntity)) {
+          mEntityDatabase.get<Children>(parentEntity)
               .children.push_back(entity);
         } else {
-          mEntityDatabase.set<ChildrenComponent>(parentEntity, {{entity}});
+          mEntityDatabase.set<Children>(parentEntity, {{entity}});
         }
       }
     }
   }
 
   mEntityDatabase.set(entity, transform);
-  mEntityDatabase.set<WorldTransformComponent>(entity, {});
+  mEntityDatabase.set<WorldTransform>(entity, {});
 
   if (node["components"]["rigidBody"] &&
       node["components"]["rigidBody"].IsMap()) {
-    RigidBodyComponent rigidBody{};
+    RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass =
         node["components"]["rigidBody"]["mass"].as<float>(
             rigidBody.dynamicDesc.mass);
@@ -80,7 +80,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       node["components"]["collidable"].IsMap() &&
       ValidShapes.find(node["components"]["collidable"]["shape"].as<String>(
           "unknown")) != ValidShapes.end()) {
-    CollidableComponent collidable{};
+    Collidable collidable{};
     auto shape =
         ValidShapes.at(node["components"]["collidable"]["shape"].as<String>());
     collidable.geometryDesc.type = shape;
@@ -129,7 +129,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getMeshes().findHandleByRelativePath(path);
 
     if (handle != MeshAssetHandle::Invalid) {
-      mEntityDatabase.set<MeshComponent>(entity, {handle});
+      mEntityDatabase.set<Mesh>(entity, {handle});
     }
   }
 
@@ -139,7 +139,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         mAssetRegistry.getSkinnedMeshes().findHandleByRelativePath(path);
 
     if (handle != SkinnedMeshAssetHandle::Invalid) {
-      mEntityDatabase.set<SkinnedMeshComponent>(entity, {handle});
+      mEntityDatabase.set<SkinnedMesh>(entity, {handle});
     }
   }
 
@@ -151,7 +151,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       const auto &skeleton =
           mAssetRegistry.getSkeletons().getAsset(handle).data;
 
-      liquid::SkeletonComponent skeletonComponent{};
+      liquid::Skeleton skeletonComponent{};
       skeletonComponent.jointLocalPositions = skeleton.jointLocalPositions;
       skeletonComponent.jointLocalRotations = skeleton.jointLocalRotations;
       skeletonComponent.jointLocalScales = skeleton.jointLocalScales;
@@ -176,7 +176,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
         std::numeric_limits<uint32_t>::max());
 
     if (type == 0) {
-      DirectionalLightComponent component{};
+      DirectionalLight component{};
       component.intensity = node["components"]["light"]["intensity"].as<float>(
           component.intensity);
       component.color =
@@ -187,7 +187,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["camera"] && node["components"]["camera"].IsMap()) {
-    PerspectiveLensComponent lens{};
+    PerspectiveLens lens{};
     lens.fovY = node["components"]["camera"]["fov"].as<float>(lens.fovY);
     lens.near = node["components"]["camera"]["near"].as<float>(lens.near);
     lens.far = node["components"]["camera"]["far"].as<float>(lens.far);
@@ -203,13 +203,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
 
     if (autoRatio) {
-      mEntityDatabase.set<AutoAspectRatioComponent>(entity, {});
+      mEntityDatabase.set<AutoAspectRatio>(entity, {});
     } else {
       lens.aspectRatio = node["components"]["camera"]["aspectRatio"].as<float>(
           lens.aspectRatio);
     }
 
-    mEntityDatabase.set<CameraComponent>(entity, {});
+    mEntityDatabase.set<Camera>(entity, {});
     mEntityDatabase.set(entity, lens);
   }
 
@@ -219,7 +219,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getAudios().findHandleByRelativePath(path);
 
     if (handle != AudioAssetHandle::Invalid) {
-      mEntityDatabase.set<AudioSourceComponent>(entity, {handle});
+      mEntityDatabase.set<AudioSource>(entity, {handle});
     }
   }
 
@@ -229,7 +229,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
 
     if (handle != LuaScriptAssetHandle::Invalid) {
-      mEntityDatabase.set<ScriptingComponent>(entity, {handle});
+      mEntityDatabase.set<Script>(entity, {handle});
     }
   }
 
@@ -237,7 +237,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto path = node["components"]["text"]["font"].as<String>("");
     auto handle = mAssetRegistry.getFonts().findHandleByRelativePath(path);
 
-    TextComponent textComponent{};
+    Text textComponent{};
     textComponent.font = handle;
 
     if (handle != FontAssetHandle::Invalid) {
@@ -269,14 +269,14 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
       auto foundEntity = entityIdCache.at(entityId);
 
       if (foundEntity != excludeEntity &&
-          mEntityDatabase.has<PerspectiveLensComponent>(foundEntity)) {
+          mEntityDatabase.has<PerspectiveLens>(foundEntity)) {
         entity = foundEntity;
       }
     }
   }
 
   if (entity == EntityNull) {
-    mEntityDatabase.iterateEntities<PerspectiveLensComponent>(
+    mEntityDatabase.iterateEntities<PerspectiveLens>(
         [&entity, &excludeEntity](auto e, const auto &) mutable {
           if (e != excludeEntity) {
             entity = e;

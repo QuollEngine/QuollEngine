@@ -8,7 +8,7 @@ namespace liquid {
  * Provides children relationship
  * for the entity
  */
-struct ChildrenComponent {
+struct Children {
   /**
    * Children entities
    */

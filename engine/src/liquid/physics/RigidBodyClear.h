@@ -5,6 +5,6 @@ namespace liquid {
 /**
  * @brief Used for clearing applied force and torque
  */
-struct RigidBodyClearComponent {};
+struct RigidBodyClear {};
 
 } // namespace liquid

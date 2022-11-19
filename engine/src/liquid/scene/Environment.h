@@ -9,7 +9,7 @@ namespace liquid {
  *
  * Stores IBL maps
  */
-struct EnvironmentComponent {
+struct Environment {
   /**
    * Irradiance map texture
    */

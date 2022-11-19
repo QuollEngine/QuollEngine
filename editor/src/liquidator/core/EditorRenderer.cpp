@@ -246,36 +246,33 @@ void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
-  if (entityDatabase.has<liquid::CollidableComponent>(selectedEntity)) {
+  if (entityDatabase.has<liquid::Collidable>(selectedEntity)) {
     frameData.setCollidable(
-        selectedEntity,
-        entityDatabase.get<liquid::CollidableComponent>(selectedEntity),
-        entityDatabase.get<liquid::WorldTransformComponent>(selectedEntity));
+        selectedEntity, entityDatabase.get<liquid::Collidable>(selectedEntity),
+        entityDatabase.get<liquid::WorldTransform>(selectedEntity));
   }
 
-  frameData.setActiveCamera(
-      entityDatabase.get<liquid::CameraComponent>(camera));
+  frameData.setActiveCamera(entityDatabase.get<liquid::Camera>(camera));
 
   frameData.setEditorGrid(editorGrid.getData());
 
-  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
-                                 liquid::SkeletonDebugComponent>(
-      [this, &frameData](auto entity,
-                         liquid::WorldTransformComponent &worldTransform,
-                         liquid::SkeletonDebugComponent &skeleton) {
+  entityDatabase.iterateEntities<liquid::WorldTransform, liquid::SkeletonDebug>(
+      [this, &frameData](auto entity, liquid::WorldTransform &worldTransform,
+                         liquid::SkeletonDebug &skeleton) {
         frameData.addSkeleton(worldTransform.worldTransform,
                               skeleton.boneTransforms);
       });
 
-  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
-                                 liquid::DirectionalLightComponent>(
-      [this, &frameData](auto entity, const auto &world, const auto &light) {
-        frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
-                           world.worldTransform);
-      });
+  entityDatabase
+      .iterateEntities<liquid::WorldTransform, liquid::DirectionalLight>(
+          [this, &frameData](auto entity, const auto &world,
+                             const auto &light) {
+            frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
+                               world.worldTransform);
+          });
 
-  entityDatabase.iterateEntities<liquid::WorldTransformComponent,
-                                 liquid::PerspectiveLensComponent>(
+  entityDatabase.iterateEntities<liquid::WorldTransform,
+                                 liquid::PerspectiveLens>(
       [this, &frameData](auto entity, const auto &world, const auto &camera) {
         static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 

@@ -5,6 +5,6 @@ namespace liquid {
 /**
  * @brief Delete component
  */
-struct DeleteComponent {};
+struct Delete {};
 
 } // namespace liquid

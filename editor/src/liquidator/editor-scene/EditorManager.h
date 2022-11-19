@@ -92,7 +92,7 @@ public:
    *
    * @return Environment component
    */
-  liquid::EnvironmentComponent &getEnvironment();
+  liquid::Environment &getEnvironment();
 
   /**
    * @brief Set transform operation

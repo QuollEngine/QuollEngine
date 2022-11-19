@@ -311,7 +311,7 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                     Entity camera, uint32_t frameIndex) {
-  LIQUID_ASSERT(entityDatabase.has<CameraComponent>(camera),
+  LIQUID_ASSERT(entityDatabase.has<Camera>(camera),
                 "Entity does not have a camera");
 
   auto &frameData = mFrameData.at(frameIndex);
@@ -319,17 +319,16 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
   frameData.clear();
 
-  frameData.setCameraData(entityDatabase.get<CameraComponent>(camera));
+  frameData.setCameraData(entityDatabase.get<Camera>(camera));
 
   // Meshes
-  entityDatabase.iterateEntities<WorldTransformComponent, MeshComponent>(
+  entityDatabase.iterateEntities<WorldTransform, Mesh>(
       [this, &frameData](auto entity, const auto &world, const auto &mesh) {
         frameData.addMesh(mesh.handle, entity, world.worldTransform);
       });
 
   // Skinned Meshes
-  entityDatabase.iterateEntities<SkeletonComponent, WorldTransformComponent,
-                                 SkinnedMeshComponent>(
+  entityDatabase.iterateEntities<Skeleton, WorldTransform, SkinnedMesh>(
       [this, &frameData](auto entity, const auto &skeleton, const auto &world,
                          const auto &mesh) {
         frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
@@ -337,7 +336,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       });
 
   // Texts
-  entityDatabase.iterateEntities<TextComponent, WorldTransformComponent>(
+  entityDatabase.iterateEntities<Text, WorldTransform>(
       [this, &frameData](auto entity, const auto &text, const auto &world) {
         const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
@@ -370,13 +369,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       });
 
   // Lights
-  entityDatabase.iterateEntities<DirectionalLightComponent>(
+  entityDatabase.iterateEntities<DirectionalLight>(
       [this, &frameData](auto entity, const auto &light) {
         frameData.addLight(light);
       });
 
   // Environments
-  entityDatabase.iterateEntities<EnvironmentComponent>(
+  entityDatabase.iterateEntities<Environment>(
       [this, &frameData](auto entity, const auto &environment) {
         frameData.setEnvironmentTextures(environment.irradianceMap,
                                          environment.specularMap,

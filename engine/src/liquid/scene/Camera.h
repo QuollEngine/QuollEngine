@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Camera component
  */
-struct CameraComponent {
+struct Camera {
   /**
    * Camera projection matrix
    */

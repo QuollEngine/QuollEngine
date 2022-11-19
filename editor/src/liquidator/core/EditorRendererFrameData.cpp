@@ -21,7 +21,7 @@ EditorRendererFrameData::EditorRendererFrameData(
   {
     auto desc = defaultDesc;
     desc.type = liquid::rhi::BufferType::Uniform;
-    desc.size = sizeof(liquid::CameraComponent);
+    desc.size = sizeof(liquid::Camera);
     mCameraBuffer = mDevice->createBuffer(desc);
   }
 
@@ -65,8 +65,7 @@ void EditorRendererFrameData::addSkeleton(
   mLastSkeleton++;
 }
 
-void EditorRendererFrameData::setActiveCamera(
-    const liquid::CameraComponent &camera) {
+void EditorRendererFrameData::setActiveCamera(const liquid::Camera &camera) {
   mCameraData = camera;
 }
 
@@ -82,7 +81,7 @@ void EditorRendererFrameData::setEditorGrid(const EditorGridData &data) {
 
 void EditorRendererFrameData::updateBuffers() {
 
-  mCameraBuffer.update(&mCameraData, sizeof(liquid::CameraComponent));
+  mCameraBuffer.update(&mCameraData, sizeof(liquid::Camera));
   mEditorGridBuffer.update(&mEditorGridData, sizeof(EditorGridData));
 
   if (!mSkeletonTransforms.empty()) {
@@ -111,8 +110,8 @@ void EditorRendererFrameData::clear() {
 }
 
 void EditorRendererFrameData::setCollidable(
-    liquid::Entity entity, const liquid::CollidableComponent &collidable,
-    const liquid::WorldTransformComponent &worldTransform) {
+    liquid::Entity entity, const liquid::Collidable &collidable,
+    const liquid::WorldTransform &worldTransform) {
   mCollidableEntity = entity;
   mCollidableEntityParams.worldTransform = worldTransform.worldTransform;
   mCollidableEntityParams.type.x =
