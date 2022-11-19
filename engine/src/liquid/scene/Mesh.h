@@ -7,7 +7,7 @@ namespace liquid {
 /**
  * @brief Mesh component
  */
-struct MeshComponent {
+struct Mesh {
   /**
    * Mesh asset handle
    */

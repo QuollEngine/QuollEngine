@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Directional light component
  */
-struct DirectionalLightComponent {
+struct DirectionalLight {
   /**
    * Light color
    */

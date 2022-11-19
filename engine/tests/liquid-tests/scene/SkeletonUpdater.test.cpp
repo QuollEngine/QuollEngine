@@ -8,12 +8,11 @@ struct SkeletonUpdaterTest : public ::testing::Test {
   liquid::EntityDatabase entityDatabase;
   liquid::SkeletonUpdater skeletonUpdater;
 
-  std::tuple<liquid::SkeletonComponent &, liquid::SkeletonDebugComponent &,
-             liquid::Entity>
+  std::tuple<liquid::Skeleton &, liquid::SkeletonDebug &, liquid::Entity>
   createSkeleton(uint32_t numJoints) {
     auto entity = entityDatabase.create();
 
-    liquid::SkeletonComponent skeleton;
+    liquid::Skeleton skeleton;
 
     skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
     skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
@@ -32,7 +31,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
 
     entityDatabase.set(entity, skeleton);
 
-    liquid::SkeletonDebugComponent skeletonDebug{};
+    liquid::SkeletonDebug skeletonDebug{};
     auto numBones = skeleton.numJoints * 2;
     skeletonDebug.bones.reserve(numBones);
 
@@ -48,15 +47,15 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     return {getSkeleton(entity), getDebugSkeleton(entity), entity};
   }
 
-  liquid::SkeletonComponent &getSkeleton(liquid::Entity entity) {
-    return entityDatabase.get<liquid::SkeletonComponent>(entity);
+  liquid::Skeleton &getSkeleton(liquid::Entity entity) {
+    return entityDatabase.get<liquid::Skeleton>(entity);
   }
 
-  liquid::SkeletonDebugComponent &getDebugSkeleton(liquid::Entity entity) {
-    return entityDatabase.get<liquid::SkeletonDebugComponent>(entity);
+  liquid::SkeletonDebug &getDebugSkeleton(liquid::Entity entity) {
+    return entityDatabase.get<liquid::SkeletonDebug>(entity);
   }
 
-  glm::mat4 getLocalTransform(liquid::SkeletonComponent &skeleton, uint32_t i) {
+  glm::mat4 getLocalTransform(liquid::Skeleton &skeleton, uint32_t i) {
     glm::mat4 identity{1.0f};
     return glm::translate(identity, skeleton.jointLocalPositions.at(i)) *
            glm::toMat4(skeleton.jointLocalRotations.at(i)) *
@@ -128,7 +127,7 @@ TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
   const auto &[skeleton, _, entity] = createSkeleton(2);
 
-  entityDatabase.set<liquid::SkeletonDebugComponent>(entity, {});
+  entityDatabase.set<liquid::SkeletonDebug>(entity, {});
 
   EXPECT_DEATH(skeletonUpdater.update(entityDatabase), ".*");
 }

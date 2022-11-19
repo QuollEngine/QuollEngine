@@ -14,45 +14,43 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   EntityDecorator entityDecorator;
-  entityDatabase.iterateEntities<ScriptingComponent>(
-      [this, &entityDatabase, &entityDecorator](auto entity,
-                                                ScriptingComponent &component) {
-        if (component.started) {
-          return;
-        }
+  entityDatabase.iterateEntities<Script>([this, &entityDatabase,
+                                          &entityDecorator](auto entity,
+                                                            Script &component) {
+    if (component.started) {
+      return;
+    }
 
-        component.started = true;
+    component.started = true;
 
-        if (component.scope.getLuaState()) {
-          mLuaInterpreter.destroyScope(component.scope);
-        }
-        component.scope = mLuaInterpreter.createScope();
+    if (component.scope.getLuaState()) {
+      mLuaInterpreter.destroyScope(component.scope);
+    }
+    component.scope = mLuaInterpreter.createScope();
 
-        entityDecorator.attachToScope(component.scope, entity, entityDatabase);
+    entityDecorator.attachToScope(component.scope, entity, entityDatabase);
 
-        auto &script =
-            mAssetRegistry.getLuaScripts().getAsset(component.handle);
-        mLuaInterpreter.evaluate(script.data.bytes, component.scope);
+    auto &script = mAssetRegistry.getLuaScripts().getAsset(component.handle);
+    mLuaInterpreter.evaluate(script.data.bytes, component.scope);
 
-        createScriptingData(component, entity);
+    createScriptingData(component, entity);
 
-        component.scope.luaGetGlobal("start");
-        component.scope.call(0);
-      });
+    component.scope.luaGetGlobal("start");
+    component.scope.call(0);
+  });
 }
 
 void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
 
-  entityDatabase.iterateEntities<ScriptingComponent, DeleteComponent>(
-      [this, &entityDatabase](auto entity, ScriptingComponent &scripting,
-                              auto &) {
+  entityDatabase.iterateEntities<Script, Delete>(
+      [this, &entityDatabase](auto entity, Script &scripting, auto &) {
         destroyScriptingData(scripting);
-        entityDatabase.remove<ScriptingComponent>(entity);
+        entityDatabase.remove<Script>(entity);
       });
 
-  entityDatabase.iterateEntities<ScriptingComponent>(
-      [this, &dt](auto entity, ScriptingComponent &component) {
+  entityDatabase.iterateEntities<Script>(
+      [this, &dt](auto entity, Script &component) {
         component.scope.luaGetGlobal("update");
         component.scope.set(dt);
         component.scope.call(1);
@@ -60,16 +58,15 @@ void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
 }
 
 void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
-  entityDatabase.iterateEntities<ScriptingComponent>(
-      [this](auto entity, ScriptingComponent &scripting) {
+  entityDatabase.iterateEntities<Script>(
+      [this](auto entity, Script &scripting) {
         destroyScriptingData(scripting);
       });
 
-  entityDatabase.destroyComponents<ScriptingComponent>();
+  entityDatabase.destroyComponents<Script>();
 }
 
-void ScriptingSystem::createScriptingData(ScriptingComponent &component,
-                                          Entity entity) {
+void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
   if (component.scope.hasFunction("on_collision_start")) {
     component.onCollisionStart = mEventSystem.observe(
         CollisionEvent::CollisionStarted,
@@ -124,7 +121,7 @@ void ScriptingSystem::createScriptingData(ScriptingComponent &component,
   }
 }
 
-void ScriptingSystem::destroyScriptingData(ScriptingComponent &component) {
+void ScriptingSystem::destroyScriptingData(Script &component) {
   mLuaInterpreter.destroyScope(component.scope);
 
   if (component.onCollisionStart != EventObserverMax) {

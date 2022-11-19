@@ -5,8 +5,8 @@ namespace liquid {
 
 void addToDeleteList(Entity entity, EntityDatabase &entityDatabase,
                      std::vector<Entity> &deleteList) {
-  if (entityDatabase.has<ChildrenComponent>(entity)) {
-    for (auto &child : entityDatabase.get<ChildrenComponent>(entity).children) {
+  if (entityDatabase.has<Children>(entity)) {
+    for (auto &child : entityDatabase.get<Children>(entity).children) {
       addToDeleteList(child, entityDatabase, deleteList);
     }
   }
@@ -18,24 +18,23 @@ void EntityDeleter::update(Scene &scene) {
   auto &entityDatabase = scene.entityDatabase;
   auto activeCamera = scene.activeCamera;
 
-  auto count = entityDatabase.getEntityCountForComponent<DeleteComponent>();
+  auto count = entityDatabase.getEntityCountForComponent<Delete>();
 
   std::vector<Entity> deleteList;
   deleteList.reserve(count);
 
   bool cameraDeleted = false;
 
-  entityDatabase.iterateEntities<DeleteComponent>(
+  entityDatabase.iterateEntities<Delete>(
       [&deleteList, &entityDatabase, &activeCamera,
        &cameraDeleted](auto entity, auto &) mutable {
         cameraDeleted = cameraDeleted || (activeCamera == entity);
 
-        if (entityDatabase.has<ParentComponent>(entity)) {
-          auto parent = entityDatabase.get<ParentComponent>(entity).parent;
+        if (entityDatabase.has<Parent>(entity)) {
+          auto parent = entityDatabase.get<Parent>(entity).parent;
 
-          if (entityDatabase.has<ChildrenComponent>(parent)) {
-            auto &children =
-                entityDatabase.get<ChildrenComponent>(parent).children;
+          if (entityDatabase.has<Children>(parent)) {
+            auto &children = entityDatabase.get<Children>(parent).children;
 
             auto it = std::find(children.begin(), children.end(), entity);
             if (it != children.end()) {

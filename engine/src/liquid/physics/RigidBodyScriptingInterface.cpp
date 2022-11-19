@@ -29,7 +29,7 @@ int RigidBodyScriptingInterface::LuaInterface::applyForce(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  entityDatabase.set<ForceComponent>(entity, {force});
+  entityDatabase.set<Force>(entity, {force});
 
   return 0;
 }
@@ -57,7 +57,7 @@ int RigidBodyScriptingInterface::LuaInterface::applyTorque(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  entityDatabase.set<TorqueComponent>(entity, {torque});
+  entityDatabase.set<Torque>(entity, {torque});
 
   return 0;
 }
@@ -78,7 +78,7 @@ int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  entityDatabase.set<RigidBodyClearComponent>(entity, {});
+  entityDatabase.set<RigidBodyClear>(entity, {});
 
   return 0;
 }

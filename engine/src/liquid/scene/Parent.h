@@ -8,7 +8,7 @@ namespace liquid {
  * Stores parent for
  * the entity
  */
-struct ParentComponent {
+struct Parent {
   /**
    * Parent entity
    */

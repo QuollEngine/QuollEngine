@@ -92,7 +92,7 @@ void EntityPanel::setSelectedEntity(liquid::Entity entity) {
   if (mSelectedEntity != entity) {
     mSelectedEntity = entity;
     mName = mEntityManager.getActiveEntityDatabase()
-                .get<liquid::NameComponent>(mSelectedEntity)
+                .get<liquid::Name>(mSelectedEntity)
                 .name;
   }
 }
@@ -106,22 +106,22 @@ void EntityPanel::renderName() {
       }
 
       mName = mEntityManager.getActiveEntityDatabase()
-                  .get<liquid::NameComponent>(mSelectedEntity)
+                  .get<liquid::Name>(mSelectedEntity)
                   .name;
     }
   }
 }
 
 void EntityPanel::renderLight() {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .has<liquid::DirectionalLightComponent>(mSelectedEntity)) {
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::DirectionalLight>(
+          mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Light")) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase()
-            .get<liquid::DirectionalLightComponent>(mSelectedEntity);
+        mEntityManager.getActiveEntityDatabase().get<liquid::DirectionalLight>(
+            mSelectedEntity);
 
     ImGui::Text("Type");
     if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
@@ -145,15 +145,15 @@ void EntityPanel::renderLight() {
 }
 
 void EntityPanel::renderCamera(EditorManager &editorManager) {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .has<liquid::PerspectiveLensComponent>(mSelectedEntity)) {
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::PerspectiveLens>(
+          mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Camera")) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase()
-            .get<liquid::PerspectiveLensComponent>(mSelectedEntity);
+        mEntityManager.getActiveEntityDatabase().get<liquid::PerspectiveLens>(
+            mSelectedEntity);
 
     if (widgets::Input("FOV", component.fovY)) {
       if (component.fovY < 0.0f) {
@@ -181,22 +181,22 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     static constexpr float MaxCustomAspectRatio = 1000.0f;
 
     bool hasViewportAspectRatio =
-        mEntityManager.getActiveEntityDatabase()
-            .has<liquid::AutoAspectRatioComponent>(mSelectedEntity);
+        mEntityManager.getActiveEntityDatabase().has<liquid::AutoAspectRatio>(
+            mSelectedEntity);
 
     if (ImGui::BeginCombo("###AspectRatioType",
                           hasViewportAspectRatio ? "Viewport ratio" : "Custom",
                           0)) {
 
       if (ImGui::Selectable("Viewport ratio")) {
-        mEntityManager.getActiveEntityDatabase()
-            .set<liquid::AutoAspectRatioComponent>(mSelectedEntity, {});
+        mEntityManager.getActiveEntityDatabase().set<liquid::AutoAspectRatio>(
+            mSelectedEntity, {});
         mEntityManager.save(mSelectedEntity);
       }
 
       if (ImGui::Selectable("Custom")) {
         mEntityManager.getActiveEntityDatabase()
-            .remove<liquid::AutoAspectRatioComponent>(mSelectedEntity);
+            .remove<liquid::AutoAspectRatio>(mSelectedEntity);
         mEntityManager.save(mSelectedEntity);
       }
 
@@ -228,16 +228,15 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
 void EntityPanel::renderTransform() {
   auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
-  if (!entityDatabase.has<liquid::LocalTransformComponent>(mSelectedEntity) ||
-      !entityDatabase.has<liquid::WorldTransformComponent>(mSelectedEntity)) {
+  if (!entityDatabase.has<liquid::LocalTransform>(mSelectedEntity) ||
+      !entityDatabase.has<liquid::WorldTransform>(mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Transform")) {
     auto &component =
-        entityDatabase.get<liquid::LocalTransformComponent>(mSelectedEntity);
-    auto &world =
-        entityDatabase.get<liquid::WorldTransformComponent>(mSelectedEntity);
+        entityDatabase.get<liquid::LocalTransform>(mSelectedEntity);
+    auto &world = entityDatabase.get<liquid::WorldTransform>(mSelectedEntity);
 
     if (widgets::Input("Position", component.localPosition)) {
       mEntityManager.save(mSelectedEntity);
@@ -264,11 +263,11 @@ void EntityPanel::renderTransform() {
 }
 
 void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
-  if (mEntityManager.getActiveEntityDatabase().has<liquid::MeshComponent>(
+  if (mEntityManager.getActiveEntityDatabase().has<liquid::Mesh>(
           mSelectedEntity)) {
     if (auto _ = widgets::Section("Mesh")) {
       auto handle = mEntityManager.getActiveEntityDatabase()
-                        .get<liquid::MeshComponent>(mSelectedEntity)
+                        .get<liquid::Mesh>(mSelectedEntity)
                         .handle;
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
@@ -281,11 +280,11 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
     }
   }
 
-  if (mEntityManager.getActiveEntityDatabase()
-          .has<liquid::SkinnedMeshComponent>(mSelectedEntity)) {
+  if (mEntityManager.getActiveEntityDatabase().has<liquid::SkinnedMesh>(
+          mSelectedEntity)) {
     if (auto _ = widgets::Section("Mesh")) {
       auto handle = mEntityManager.getActiveEntityDatabase()
-                        .get<liquid::SkinnedMeshComponent>(mSelectedEntity)
+                        .get<liquid::SkinnedMesh>(mSelectedEntity)
                         .handle;
 
       const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
@@ -300,14 +299,15 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
 }
 
 void EntityPanel::renderSkeleton() {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::SkeletonComponent>(
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::Skeleton>(
           mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Skeleton")) {
-    bool showBones = mEntityManager.getActiveEntityDatabase()
-                         .has<liquid::SkeletonDebugComponent>(mSelectedEntity);
+    bool showBones =
+        mEntityManager.getActiveEntityDatabase().has<liquid::SkeletonDebug>(
+            mSelectedEntity);
 
     if (ImGui::Checkbox("Show bones", &showBones)) {
       mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
@@ -316,14 +316,14 @@ void EntityPanel::renderSkeleton() {
 }
 
 void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::AnimatorComponent>(
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::Animator>(
           mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Animation")) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase().get<liquid::AnimatorComponent>(
+        mEntityManager.getActiveEntityDatabase().get<liquid::Animator>(
             mSelectedEntity);
 
     const auto &animations = assetRegistry.getAnimations().getAssets();
@@ -420,8 +420,8 @@ getDefaultGeometryFromType(const liquid::PhysicsGeometryType &type) {
 }
 
 void EntityPanel::renderCollidable() {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .has<liquid::CollidableComponent>(mSelectedEntity)) {
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::Collidable>(
+          mSelectedEntity)) {
     return;
   }
 
@@ -434,8 +434,9 @@ void EntityPanel::renderCollidable() {
             liquid::PhysicsGeometryType::Plane,
         };
 
-    auto &collidable = mEntityManager.getActiveEntityDatabase()
-                           .get<liquid::CollidableComponent>(mSelectedEntity);
+    auto &collidable =
+        mEntityManager.getActiveEntityDatabase().get<liquid::Collidable>(
+            mSelectedEntity);
 
     if (ImGui::BeginCombo(
             "###SelectGeometryType",
@@ -508,14 +509,15 @@ void EntityPanel::renderCollidable() {
 }
 
 void EntityPanel::renderRigidBody() {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::RigidBodyComponent>(
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::RigidBody>(
           mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Rigid body")) {
-    auto &rigidBody = mEntityManager.getActiveEntityDatabase()
-                          .get<liquid::RigidBodyComponent>(mSelectedEntity);
+    auto &rigidBody =
+        mEntityManager.getActiveEntityDatabase().get<liquid::RigidBody>(
+            mSelectedEntity);
 
     if (widgets::Input("Mass", rigidBody.dynamicDesc.mass)) {
       mEntityManager.save(mSelectedEntity);
@@ -566,15 +568,14 @@ void EntityPanel::renderRigidBody() {
 }
 
 void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::TextComponent>(
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::Text>(
           mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Text")) {
-    auto &text =
-        mEntityManager.getActiveEntityDatabase().get<liquid::TextComponent>(
-            mSelectedEntity);
+    auto &text = mEntityManager.getActiveEntityDatabase().get<liquid::Text>(
+        mSelectedEntity);
 
     const auto &fonts = assetRegistry.getFonts().getAssets();
 
@@ -610,14 +611,15 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
 }
 
 void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase()
-           .has<liquid::AudioSourceComponent>(mSelectedEntity)) {
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::AudioSource>(
+          mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Audio")) {
-    const auto &audio = mEntityManager.getActiveEntityDatabase()
-                            .get<liquid::AudioSourceComponent>(mSelectedEntity);
+    const auto &audio =
+        mEntityManager.getActiveEntityDatabase().get<liquid::AudioSource>(
+            mSelectedEntity);
 
     const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
 
@@ -626,15 +628,15 @@ void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
 }
 
 void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::ScriptingComponent>(
+  if (!mEntityManager.getActiveEntityDatabase().has<liquid::Script>(
           mSelectedEntity)) {
     return;
   }
 
   if (auto _ = widgets::Section("Scripts")) {
     const auto &scripting =
-        mEntityManager.getActiveEntityDatabase()
-            .get<liquid::ScriptingComponent>(mSelectedEntity);
+        mEntityManager.getActiveEntityDatabase().get<liquid::Script>(
+            mSelectedEntity);
 
     const auto &asset =
         assetRegistry.getLuaScripts().getAsset(scripting.handle);
@@ -649,16 +651,16 @@ void EntityPanel::renderAddComponent(liquid::AssetRegistry &assetRegistry) {
   }
 
   bool hasAllComponents =
-      mEntityManager.getActiveEntityDatabase()
-          .has<liquid::LocalTransformComponent>(mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<liquid::RigidBodyComponent>(
+      mEntityManager.getActiveEntityDatabase().has<liquid::LocalTransform>(
           mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<liquid::CollidableComponent>(
+      mEntityManager.getActiveEntityDatabase().has<liquid::RigidBody>(
           mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase()
-          .has<liquid::DirectionalLightComponent>(mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase()
-          .has<liquid::PerspectiveLensComponent>(mSelectedEntity);
+      mEntityManager.getActiveEntityDatabase().has<liquid::Collidable>(
+          mSelectedEntity) &&
+      mEntityManager.getActiveEntityDatabase().has<liquid::DirectionalLight>(
+          mSelectedEntity) &&
+      mEntityManager.getActiveEntityDatabase().has<liquid::PerspectiveLens>(
+          mSelectedEntity);
 
   if (hasAllComponents)
     return;
@@ -668,50 +670,50 @@ void EntityPanel::renderAddComponent(liquid::AssetRegistry &assetRegistry) {
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!mEntityManager.getActiveEntityDatabase()
-             .has<liquid::LocalTransformComponent>(mSelectedEntity) &&
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::LocalTransform>(
+            mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      mEntityManager.getActiveEntityDatabase()
-          .set<liquid::LocalTransformComponent>(mSelectedEntity, {});
-      mEntityManager.save(mSelectedEntity);
-    }
-
-    if (!mEntityManager.getActiveEntityDatabase()
-             .has<liquid::RigidBodyComponent>(mSelectedEntity) &&
-        ImGui::Selectable("Rigid body")) {
-      mEntityManager.getActiveEntityDatabase().set<liquid::RigidBodyComponent>(
+      mEntityManager.getActiveEntityDatabase().set<liquid::LocalTransform>(
           mSelectedEntity, {});
       mEntityManager.save(mSelectedEntity);
     }
 
-    if (!mEntityManager.getActiveEntityDatabase()
-             .has<liquid::CollidableComponent>(mSelectedEntity) &&
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::RigidBody>(
+            mSelectedEntity) &&
+        ImGui::Selectable("Rigid body")) {
+      mEntityManager.getActiveEntityDatabase().set<liquid::RigidBody>(
+          mSelectedEntity, {});
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::Collidable>(
+            mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      mEntityManager.getActiveEntityDatabase().set<liquid::CollidableComponent>(
+      mEntityManager.getActiveEntityDatabase().set<liquid::Collidable>(
           mSelectedEntity,
           {liquid::PhysicsGeometryType::Box, liquid::PhysicsGeometryBox{}});
       mEntityManager.save(mSelectedEntity);
     }
 
-    if (!mEntityManager.getActiveEntityDatabase()
-             .has<liquid::DirectionalLightComponent>(mSelectedEntity) &&
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::DirectionalLight>(
+            mSelectedEntity) &&
         ImGui::Selectable("Light")) {
-      mEntityManager.getActiveEntityDatabase()
-          .set<liquid::DirectionalLightComponent>(mSelectedEntity, {});
+      mEntityManager.getActiveEntityDatabase().set<liquid::DirectionalLight>(
+          mSelectedEntity, {});
       mEntityManager.save(mSelectedEntity);
     }
 
-    if (!mEntityManager.getActiveEntityDatabase()
-             .has<liquid::PerspectiveLensComponent>(mSelectedEntity) &&
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::PerspectiveLens>(
+            mSelectedEntity) &&
         ImGui::Selectable("Camera")) {
       mEntityManager.setCamera(mSelectedEntity, {}, true);
       mEntityManager.save(mSelectedEntity);
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<liquid::TextComponent>(
+    if (!mEntityManager.getActiveEntityDatabase().has<liquid::Text>(
             mSelectedEntity) &&
         ImGui::Selectable("Text")) {
-      liquid::TextComponent text{"Hello world"};
+      liquid::Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
       mEntityManager.setText(mSelectedEntity, text);
       mEntityManager.save(mSelectedEntity);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/animation/AnimatorComponent.h"
+#include "liquid/animation/Animator.h"
 
 namespace liquid {
 
@@ -77,7 +77,7 @@ struct PrefabAsset {
   /**
    * List of animators
    */
-  std::vector<PrefabComponent<AnimatorComponent>> animators;
+  std::vector<PrefabComponent<Animator>> animators;
 };
 
 } // namespace liquid

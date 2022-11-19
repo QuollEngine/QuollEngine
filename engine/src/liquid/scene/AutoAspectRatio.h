@@ -8,6 +8,6 @@ namespace liquid {
  * Used to automatically calculate the
  * aspect ratio of a camera
  */
-struct AutoAspectRatioComponent {};
+struct AutoAspectRatio {};
 
 } // namespace liquid

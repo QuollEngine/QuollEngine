@@ -8,7 +8,7 @@ namespace liquid {
  * Stores all the sources associated with
  * an entity
  */
-struct AudioSourceComponent {
+struct AudioSource {
   /**
    * @brief Audio source asset
    */

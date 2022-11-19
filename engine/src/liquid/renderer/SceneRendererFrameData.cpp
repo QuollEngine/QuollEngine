@@ -50,7 +50,7 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
 
   {
     auto desc = defaultDesc;
-    desc.size = sizeof(CameraComponent);
+    desc.size = sizeof(Camera);
     desc.type = rhi::BufferType::Uniform;
     mCameraBuffer = mDevice->createBuffer(desc);
   }
@@ -77,7 +77,7 @@ void SceneRendererFrameData::updateBuffers() {
   mTextGlyphsBuffer.update(mTextGlyphs.data(),
                            mTextGlyphs.size() * sizeof(GlyphData));
   mLightsBuffer.update(mLights.data(), mLights.size() * sizeof(LightData));
-  mCameraBuffer.update(&mCameraData, sizeof(CameraComponent));
+  mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mSceneBuffer.update(&mSceneData, sizeof(SceneData));
 }
 
@@ -120,7 +120,7 @@ void SceneRendererFrameData::addSkinnedMesh(
   mLastSkeleton++;
 }
 
-void SceneRendererFrameData::addLight(const DirectionalLightComponent &light) {
+void SceneRendererFrameData::addLight(const DirectionalLight &light) {
   // Calculate projection matrix
   const float DIR_LIGHT_SIZE = 20.0f;
   const float DIR_LIGHT_NEAR = 0.001f;
@@ -179,7 +179,7 @@ void SceneRendererFrameData::setEnvironmentTextures(
   mSceneData.data.y = 1;
 }
 
-void SceneRendererFrameData::setCameraData(const CameraComponent &data) {
+void SceneRendererFrameData::setCameraData(const Camera &data) {
   mCameraData = data;
 }
 

@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Torque component
  */
-struct TorqueComponent {
+struct Torque {
   /**
    * Total amount of applied torque
    */

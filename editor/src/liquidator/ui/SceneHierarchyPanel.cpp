@@ -26,10 +26,10 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
 
     auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
-    entityDatabase.iterateEntities<liquid::LocalTransformComponent>(
+    entityDatabase.iterateEntities<liquid::LocalTransform>(
         [this, &editorManager, &entityDatabase](auto entity,
                                                 const auto &transform) {
-          if (entityDatabase.has<liquid::ParentComponent>(entity)) {
+          if (entityDatabase.has<liquid::Parent>(entity)) {
             return;
           }
 
@@ -45,16 +45,14 @@ void SceneHierarchyPanel::setSelectedEntity(liquid::Entity entity) {
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
                                        EditorManager &editorManager) {
   liquid::String name =
-      mEntityManager.getActiveEntityDatabase().has<liquid::NameComponent>(
-          entity)
+      mEntityManager.getActiveEntityDatabase().has<liquid::Name>(entity)
           ? mEntityManager.getActiveEntityDatabase()
-                .get<liquid::NameComponent>(entity)
+                .get<liquid::Name>(entity)
                 .name
           : "Entity #" + std::to_string(entity);
 
   bool isLeaf =
-      !mEntityManager.getActiveEntityDatabase().has<liquid::ChildrenComponent>(
-          entity);
+      !mEntityManager.getActiveEntityDatabase().has<liquid::Children>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -107,10 +105,10 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   }
 
   if (open) {
-    if (mEntityManager.getActiveEntityDatabase().has<liquid::ChildrenComponent>(
+    if (mEntityManager.getActiveEntityDatabase().has<liquid::Children>(
             entity)) {
       for (auto childEntity : mEntityManager.getActiveEntityDatabase()
-                                  .get<liquid::ChildrenComponent>(entity)
+                                  .get<liquid::Children>(entity)
                                   .children) {
         renderEntity(childEntity, 0, editorManager);
       }

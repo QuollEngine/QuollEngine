@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/RenderDevice.h"
 
-#include "liquid/scene/CameraComponent.h"
+#include "liquid/scene/Camera.h"
 #include "liquidator/editor-scene/EditorGrid.h"
 
 #include "liquid/entity/EntityDatabase.h"
@@ -101,7 +101,7 @@ public:
    *
    * @param camera Active camera
    */
-  void setActiveCamera(const liquid::CameraComponent &camera);
+  void setActiveCamera(const liquid::Camera &camera);
 
   /**
    * @brief Set editor grid data
@@ -174,8 +174,8 @@ public:
    * @param worldTransform World transform
    */
   void setCollidable(liquid::Entity entity,
-                     const liquid::CollidableComponent &collidable,
-                     const liquid::WorldTransformComponent &worldTransform);
+                     const liquid::Collidable &collidable,
+                     const liquid::WorldTransform &worldTransform);
 
   /**
    * @brief Get collidable parameters buffer
@@ -217,7 +217,7 @@ private:
   size_t mReservedSpace = 0;
 
   // Camera
-  liquid::CameraComponent mCameraData;
+  liquid::Camera mCameraData;
   liquid::rhi::Buffer mCameraBuffer;
 
   // Editor grid

@@ -1110,7 +1110,7 @@ loadPrefabs(const tinygltf::Model &model,
       prefab.data.skeletons.push_back(
           {localEntityId, skeletons.skeletonMap.map.at(node.skin)});
 
-      liquid::AnimatorComponent component;
+      liquid::Animator component;
 
       auto it = animations.skinAnimationMap.find(node.skin);
       if (it != animations.skinAnimationMap.end()) {
@@ -1123,7 +1123,7 @@ loadPrefabs(const tinygltf::Model &model,
     } else {
       prefab.data.meshes.push_back({localEntityId, meshes.map.at(node.mesh)});
 
-      liquid::AnimatorComponent component;
+      liquid::Animator component;
 
       auto it = animations.nodeAnimationMap.find(nodeIndex);
       if (it != animations.nodeAnimationMap.end()) {

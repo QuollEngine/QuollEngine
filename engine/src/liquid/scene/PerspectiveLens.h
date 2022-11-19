@@ -5,7 +5,7 @@ namespace liquid {
 /**
  * @brief Perspective lens component
  */
-struct PerspectiveLensComponent {
+struct PerspectiveLens {
   /**
    * Field of view
    */

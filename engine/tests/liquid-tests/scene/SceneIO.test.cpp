@@ -34,7 +34,7 @@ public:
   void TearDown() override { std::filesystem::remove_all(SceneDirectory); }
 
   liquid::String getEntityFile(liquid::Entity entity) {
-    auto id = scene.entityDatabase.get<liquid::IdComponent>(entity).id;
+    auto id = scene.entityDatabase.get<liquid::Id>(entity).id;
     return std::to_string(id) + ".lqnode";
   }
 
@@ -149,7 +149,7 @@ TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), entities.size() + 1);
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.has<liquid::IdComponent>(entity));
+    EXPECT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
   }
 }
 
@@ -166,7 +166,7 @@ TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
 
   sceneIO.saveEntity(entity, ScenePath);
 
-  auto id = scene.entityDatabase.get<liquid::IdComponent>(entity).id;
+  auto id = scene.entityDatabase.get<liquid::Id>(entity).id;
 
   EXPECT_EQ(id, 10);
   EXPECT_TRUE(
@@ -186,8 +186,7 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
   const auto &entities = sceneIO.loadScene(ScenePath);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), entities.size() + 1);
-  EXPECT_EQ(scene.entityDatabase
-                .getEntityCountForComponent<liquid::ParentComponent>(),
+  EXPECT_EQ(scene.entityDatabase.getEntityCountForComponent<liquid::Parent>(),
             entities.size() - 1);
 }
 
@@ -199,7 +198,7 @@ TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
   // Creates ID for the parent and store it in cache
   sceneIO.saveEntity(parent, ScenePath);
 
-  auto parentId = scene.entityDatabase.get<liquid::IdComponent>(parent).id;
+  auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
 
   createSimpleEntityFile(10, parentId);
 
@@ -208,18 +207,16 @@ TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
   auto lastAddedEntity =
       static_cast<liquid::Entity>(scene.entityDatabase.getEntityCount());
 
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::ParentComponent>(lastAddedEntity));
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::ParentComponent>(lastAddedEntity).parent,
-      parent);
+  EXPECT_TRUE(scene.entityDatabase.has<liquid::Parent>(lastAddedEntity));
+  EXPECT_EQ(scene.entityDatabase.get<liquid::Parent>(lastAddedEntity).parent,
+            parent);
 }
 
 TEST_F(SceneIOTest, SavingEntityCreatesIdComponentIfComponentDoesNotExist) {
   auto entity = scene.entityDatabase.create();
   sceneIO.saveEntity(entity, ScenePath);
 
-  EXPECT_TRUE(scene.entityDatabase.has<liquid::IdComponent>(entity));
+  EXPECT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
 }
 
 TEST_F(SceneIOTest, SavingNewEntityCreatesEntityFile) {
@@ -233,7 +230,7 @@ TEST_F(SceneIOTest, SavingNewEntityCreatesEntityFile) {
 
 TEST_F(SceneIOTest, SavingExistingEntityCreatesEntityFile) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(entity, {155});
+  scene.entityDatabase.set<liquid::Id>(entity, {155});
   sceneIO.saveEntity(entity, ScenePath);
 
   auto path = SceneEntitiesDirectory / "155.lqnode";
@@ -242,15 +239,14 @@ TEST_F(SceneIOTest, SavingExistingEntityCreatesEntityFile) {
 
 TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
   EXPECT_TRUE(scene.entityDatabase.exists(scene.dummyCamera));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::CameraComponent>(scene.dummyCamera));
+  EXPECT_TRUE(scene.entityDatabase.has<liquid::Camera>(scene.dummyCamera));
 }
 
 TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
   {
     auto entity = scene.entityDatabase.create();
-    scene.entityDatabase.set<liquid::IdComponent>(entity, {15});
-    scene.entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
+    scene.entityDatabase.set<liquid::Id>(entity, {15});
+    scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
     sceneIO.saveStartingCamera(entity, ScenePath);
   }
@@ -258,8 +254,8 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
   sceneIO.loadScene(ScenePath);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeCamera));
-  EXPECT_TRUE(scene.entityDatabase.has<liquid::PerspectiveLensComponent>(
-      scene.activeCamera));
+  EXPECT_TRUE(
+      scene.entityDatabase.has<liquid::PerspectiveLens>(scene.activeCamera));
 }
 
 TEST_F(SceneIOTest,
@@ -271,12 +267,12 @@ TEST_F(SceneIOTest,
 TEST_F(SceneIOTest,
        DeletingStartingCameraSetsLastCameraAsTheNewStartingCameraIfExists) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(entity, {15});
-  scene.entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
+  scene.entityDatabase.set<liquid::Id>(entity, {15});
+  scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
   auto another = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(another, {25});
-  scene.entityDatabase.set<liquid::PerspectiveLensComponent>(another, {});
+  scene.entityDatabase.set<liquid::Id>(another, {25});
+  scene.entityDatabase.set<liquid::PerspectiveLens>(another, {});
 
   sceneIO.saveStartingCamera(entity, ScenePath);
   sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
@@ -287,8 +283,8 @@ TEST_F(SceneIOTest,
 TEST_F(SceneIOTest,
        DeletingStartingCameraSetsDummyCameraAsTheCameraIfNoOtherCameraExists) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(entity, {15});
-  scene.entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
+  scene.entityDatabase.set<liquid::Id>(entity, {15});
+  scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
   sceneIO.saveStartingCamera(entity, ScenePath);
   sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
@@ -298,8 +294,8 @@ TEST_F(SceneIOTest,
 
 TEST_F(SceneIOTest, SavesEntityAsInitialCameraIfItHasCameraComponent) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(entity, {15});
-  scene.entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
+  scene.entityDatabase.set<liquid::Id>(entity, {15});
+  scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
   sceneIO.saveEntity(entity, ScenePath);
   sceneIO.saveStartingCamera(entity, ScenePath);
@@ -309,15 +305,14 @@ TEST_F(SceneIOTest, SavesEntityAsInitialCameraIfItHasCameraComponent) {
   sceneIO.loadScene(ScenePath);
 
   EXPECT_NE(scene.activeCamera, scene.dummyCamera);
-  EXPECT_EQ(scene.entityDatabase.get<liquid::IdComponent>(entity).id, 15);
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::PerspectiveLensComponent>(entity));
+  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(entity).id, 15);
+  EXPECT_TRUE(scene.entityDatabase.has<liquid::PerspectiveLens>(entity));
 }
 
 TEST_F(SceneIOTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveCameraComponent) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::IdComponent>(entity, {15});
+  scene.entityDatabase.set<liquid::Id>(entity, {15});
 
   sceneIO.saveEntity(entity, ScenePath);
   sceneIO.saveStartingCamera(entity, ScenePath);
@@ -332,7 +327,7 @@ TEST_F(SceneIOTest,
 TEST_F(SceneIOTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveIdComponent) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
+  scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
   sceneIO.saveStartingCamera(entity, ScenePath);
 

@@ -3,13 +3,13 @@
 namespace liquid {
 
 /**
- * @brief Name component
+ * @brief ID component
  */
-struct NameComponent {
+struct Id {
   /**
-   * Entity name
+   * ID
    */
-  String name;
+  uint64_t id = 0;
 };
 
 } // namespace liquid

@@ -309,7 +309,7 @@ public:
    *
    * @param light Directional light component
    */
-  void addLight(const DirectionalLightComponent &light);
+  void addLight(const DirectionalLight &light);
 
   /**
    * @brief Add text
@@ -337,7 +337,7 @@ public:
    *
    * @param data Camera component data
    */
-  void setCameraData(const CameraComponent &data);
+  void setCameraData(const Camera &data);
 
   /**
    * @brief Clear intermediary buffers
@@ -359,7 +359,7 @@ private:
   std::unique_ptr<glm::mat4> mSkeletonVector;
   std::vector<LightData> mLights;
   SceneData mSceneData{};
-  CameraComponent mCameraData;
+  Camera mCameraData;
 
   size_t mLastSkeleton = 0;
 

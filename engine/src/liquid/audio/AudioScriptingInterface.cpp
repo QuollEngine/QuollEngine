@@ -22,11 +22,11 @@ int AudioScriptingInterface::LuaInterface::play(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  if (!entityDatabase.has<AudioSourceComponent>(entity)) {
+  if (!entityDatabase.has<AudioSource>(entity)) {
     return 0;
   }
 
-  entityDatabase.set<AudioStartComponent>(entity, {});
+  entityDatabase.set<AudioStart>(entity, {});
   return 0;
 }
 
@@ -47,7 +47,7 @@ int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
-  bool isPlaying = entityDatabase.has<AudioStatusComponent>(entity);
+  bool isPlaying = entityDatabase.has<AudioStatus>(entity);
   scope.set(isPlaying);
   return 1;
 }

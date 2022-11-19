@@ -23,18 +23,18 @@ TEST_F(EntitySerializerTest,
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<liquid::String>(""), "Untitled");
-    EXPECT_TRUE(entityDatabase.has<liquid::NameComponent>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
   }
 
   {
     auto entity = entityDatabase.create();
-    entityDatabase.set<liquid::NameComponent>(entity, {""});
+    entityDatabase.set<liquid::Name>(entity, {""});
 
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<liquid::String>(""), "Untitled");
-    EXPECT_TRUE(entityDatabase.has<liquid::NameComponent>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
   }
 }
 
@@ -42,30 +42,30 @@ TEST_F(EntitySerializerTest,
        SetsNameToDefaultNameWithIdComponentIfNameIsEmpty) {
   {
     auto entity = entityDatabase.create();
-    entityDatabase.set<liquid::IdComponent>(entity, {15});
+    entityDatabase.set<liquid::Id>(entity, {15});
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<liquid::String>(""), "Untitled 15");
-    EXPECT_TRUE(entityDatabase.has<liquid::NameComponent>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
   }
 
   {
     auto entity = entityDatabase.create();
-    entityDatabase.set<liquid::IdComponent>(entity, {15});
-    entityDatabase.set<liquid::NameComponent>(entity, {""});
+    entityDatabase.set<liquid::Id>(entity, {15});
+    entityDatabase.set<liquid::Name>(entity, {""});
 
     auto node = entitySerializer.createComponentsNode(entity);
 
     EXPECT_TRUE(node["name"]);
     EXPECT_EQ(node["name"].as<liquid::String>(""), "Untitled 15");
-    EXPECT_TRUE(entityDatabase.has<liquid::NameComponent>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
   }
 }
 
 TEST_F(EntitySerializerTest, CreatesNameFieldUsingNameComponentIfExists) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::NameComponent>(entity, {"Test entity"});
+  entityDatabase.set<liquid::Name>(entity, {"Test entity"});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -79,9 +79,8 @@ TEST_F(EntitySerializerTest,
   auto entity = entityDatabase.create();
   auto node = entitySerializer.createComponentsNode(entity);
 
-  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransformComponent>(entity));
-  const auto &defaults =
-      entityDatabase.get<liquid::LocalTransformComponent>(entity);
+  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransform>(entity));
+  const auto &defaults = entityDatabase.get<liquid::LocalTransform>(entity);
 
   EXPECT_TRUE(node["transform"]);
   EXPECT_EQ(node["transform"]["position"].as<glm::vec3>(glm::vec3(5.0f)),
@@ -97,7 +96,7 @@ TEST_F(EntitySerializerTest,
        CreatesTransformFieldFromTransformComponetnIfExists) {
   auto entity = entityDatabase.create();
 
-  liquid::LocalTransformComponent transform{};
+  liquid::LocalTransform transform{};
   transform.localPosition = glm::vec3{2.0f};
   transform.localRotation = glm::quat{0.5f, 0.5f, 0.5f, 0.5f};
   transform.localScale = glm::vec3{0.2f};
@@ -128,7 +127,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
   static constexpr liquid::MeshAssetHandle NonExistentMeshHandle{45};
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::MeshComponent>(entity, {NonExistentMeshHandle});
+  entityDatabase.set<liquid::Mesh>(entity, {NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["mesh"]);
@@ -141,7 +140,7 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::MeshComponent>(entity, {handle});
+  entityDatabase.set<liquid::Mesh>(entity, {handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
@@ -161,8 +160,7 @@ TEST_F(EntitySerializerTest,
   static constexpr liquid::SkinnedMeshAssetHandle NonExistentMeshHandle{45};
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::SkinnedMeshComponent>(entity,
-                                                   {NonExistentMeshHandle});
+  entityDatabase.set<liquid::SkinnedMesh>(entity, {NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["skinnedMesh"]);
@@ -176,7 +174,7 @@ TEST_F(EntitySerializerTest,
   auto handle = assetRegistry.getSkinnedMeshes().addAsset(mesh);
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::SkinnedMeshComponent>(entity, {handle});
+  entityDatabase.set<liquid::SkinnedMesh>(entity, {handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMesh"]);
@@ -193,7 +191,7 @@ TEST_F(EntitySerializerTest,
   static constexpr liquid::SkeletonAssetHandle NonExistentSkeletonHandle{45};
 
   auto entity = entityDatabase.create();
-  liquid::SkeletonComponent component{};
+  liquid::Skeleton component{};
   component.assetHandle = NonExistentSkeletonHandle;
   entityDatabase.set(entity, component);
 
@@ -208,7 +206,7 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsRegistry) {
   auto handle = assetRegistry.getSkeletons().addAsset(skeleton);
 
   auto entity = entityDatabase.create();
-  liquid::SkeletonComponent component{};
+  liquid::Skeleton component{};
   component.assetHandle = handle;
 
   entityDatabase.set(entity, component);
@@ -230,7 +228,7 @@ TEST_F(EntitySerializerTest,
        CreatesLightFieldIfDirectionalLightComponentExists) {
   auto entity = entityDatabase.create();
 
-  liquid::DirectionalLightComponent light{};
+  liquid::DirectionalLight light{};
   light.intensity = 5.5f;
   light.color = glm::vec4{0.5f};
   entityDatabase.set(entity, light);
@@ -257,7 +255,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
   auto entity = entityDatabase.create();
 
-  liquid::PerspectiveLensComponent lens{};
+  liquid::PerspectiveLens lens{};
   lens.aspectRatio = 2.5f;
   lens.far = 200.0f;
   lens.near = 0.2f;
@@ -278,8 +276,8 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
 TEST_F(EntitySerializerTest,
        SetsCameraAspectRatioToAutoIfAutoAspectRatioComponentExists) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::PerspectiveLensComponent>(entity, {});
-  entityDatabase.set<liquid::AutoAspectRatioComponent>(entity, {});
+  entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  entityDatabase.set<liquid::AutoAspectRatio>(entity, {});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -301,7 +299,7 @@ TEST_F(EntitySerializerTest,
   static constexpr liquid::AudioAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::AudioSourceComponent>(entity, {NonExistentHandle});
+  entityDatabase.set<liquid::AudioSource>(entity, {NonExistentHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["audio"]);
@@ -314,7 +312,7 @@ TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   auto handle = assetRegistry.getAudios().addAsset(audio);
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::AudioSourceComponent>(entity, {handle});
+  entityDatabase.set<liquid::AudioSource>(entity, {handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["audio"]);
@@ -336,7 +334,7 @@ TEST_F(EntitySerializerTest,
   static constexpr liquid::LuaScriptAssetHandle NonExistentHandle{45};
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {NonExistentHandle});
+  entityDatabase.set<liquid::Script>(entity, {NonExistentHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["script"]);
@@ -349,7 +347,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::ScriptingComponent>(entity, {handle});
+  entityDatabase.set<liquid::Script>(entity, {handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["script"]);
@@ -372,7 +370,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
   auto handle = assetRegistry.getFonts().addAsset(font);
 
   auto entity = entityDatabase.create();
-  liquid::TextComponent component{};
+  liquid::Text component{};
   component.text = "";
   component.font = handle;
 
@@ -385,7 +383,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
 
   auto entity = entityDatabase.create();
 
-  liquid::TextComponent component{};
+  liquid::Text component{};
   component.text = "Hello world";
   component.font = NonExistentHandle;
   entityDatabase.set(entity, component);
@@ -402,7 +400,7 @@ TEST_F(EntitySerializerTest,
   auto handle = assetRegistry.getFonts().addAsset(font);
 
   auto entity = entityDatabase.create();
-  liquid::TextComponent component{};
+  liquid::Text component{};
   component.text = "Hello world";
   component.lineHeight = 2.0f;
   component.font = handle;
@@ -433,7 +431,7 @@ TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
   rigidBodyDesc.inertia = glm::vec3(2.5f, 2.5f, 2.5f);
   rigidBodyDesc.mass = 4.5f;
 
-  entityDatabase.set<liquid::RigidBodyComponent>(entity, {rigidBodyDesc});
+  entityDatabase.set<liquid::RigidBody>(entity, {rigidBodyDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -461,7 +459,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
   geometryDesc.type = liquid::PhysicsGeometryType::Box;
   geometryDesc.params = boxGeometry;
 
-  entityDatabase.set<liquid::CollidableComponent>(entity, {geometryDesc});
+  entityDatabase.set<liquid::Collidable>(entity, {geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -480,7 +478,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
   geometryDesc.type = liquid::PhysicsGeometryType::Sphere;
   geometryDesc.params = sphereParams;
 
-  entityDatabase.set<liquid::CollidableComponent>(entity, {geometryDesc});
+  entityDatabase.set<liquid::Collidable>(entity, {geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -498,7 +496,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
   geometryDesc.type = liquid::PhysicsGeometryType::Capsule;
   geometryDesc.params = capsuleParams;
 
-  entityDatabase.set<liquid::CollidableComponent>(entity, {geometryDesc});
+  entityDatabase.set<liquid::Collidable>(entity, {geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -515,7 +513,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
   liquid::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = liquid::PhysicsGeometryType::Plane;
 
-  entityDatabase.set<liquid::CollidableComponent>(entity, {geometryDesc});
+  entityDatabase.set<liquid::Collidable>(entity, {geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -531,7 +529,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
   materialDesc.restitution = 4.5f;
   materialDesc.staticFriction = 3.5f;
 
-  entityDatabase.set<liquid::CollidableComponent>(entity, {{}, materialDesc});
+  entityDatabase.set<liquid::Collidable>(entity, {{}, materialDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
@@ -557,7 +555,7 @@ TEST_F(EntitySerializerTest,
 
   auto entity = entityDatabase.create();
 
-  entityDatabase.set<liquid::ParentComponent>(entity, {NonExistentEntity});
+  entityDatabase.set<liquid::Parent>(entity, {NonExistentEntity});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["transform"]["parent"]);
@@ -568,7 +566,7 @@ TEST_F(EntitySerializerTest,
   auto parent = entityDatabase.create();
   auto entity = entityDatabase.create();
 
-  entityDatabase.set<liquid::ParentComponent>(entity, {parent});
+  entityDatabase.set<liquid::Parent>(entity, {parent});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["transform"]["parent"]);
@@ -578,10 +576,10 @@ TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
   static constexpr uint64_t ParentId{50};
 
   auto parent = entityDatabase.create();
-  entityDatabase.set<liquid::IdComponent>(parent, {ParentId});
+  entityDatabase.set<liquid::Id>(parent, {ParentId});
   auto entity = entityDatabase.create();
 
-  entityDatabase.set<liquid::ParentComponent>(entity, {parent});
+  entityDatabase.set<liquid::Parent>(entity, {parent});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_EQ(node["transform"]["parent"].as<uint64_t>(0), ParentId);

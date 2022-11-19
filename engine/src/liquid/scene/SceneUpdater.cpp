@@ -13,29 +13,26 @@ void SceneUpdater::update(EntityDatabase &entityDatabase) {
 void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("SceneUpdater::updateTransforms");
 
-  entityDatabase
-      .iterateEntities<LocalTransformComponent, WorldTransformComponent>(
-          [this, &entityDatabase](auto entity, LocalTransformComponent &local,
-                                  WorldTransformComponent &world) {
-            if (entityDatabase.has<ParentComponent>(entity))
-              return;
+  entityDatabase.iterateEntities<LocalTransform, WorldTransform>(
+      [this, &entityDatabase](auto entity, LocalTransform &local,
+                              WorldTransform &world) {
+        if (entityDatabase.has<Parent>(entity))
+          return;
 
-            glm::mat4 identity{1.0f};
-            glm::mat4 localTransform =
-                glm::translate(identity, local.localPosition) *
-                glm::toMat4(local.localRotation) *
-                glm::scale(identity, local.localScale);
+        glm::mat4 identity{1.0f};
+        glm::mat4 localTransform =
+            glm::translate(identity, local.localPosition) *
+            glm::toMat4(local.localRotation) *
+            glm::scale(identity, local.localScale);
 
-            world.worldTransform = localTransform;
-          });
+        world.worldTransform = localTransform;
+      });
 
-  entityDatabase.iterateEntities<LocalTransformComponent,
-                                 WorldTransformComponent, ParentComponent>(
-      [this, &entityDatabase](auto entity, LocalTransformComponent &local,
-                              WorldTransformComponent &world,
-                              const ParentComponent &parent) {
+  entityDatabase.iterateEntities<LocalTransform, WorldTransform, Parent>(
+      [this, &entityDatabase](auto entity, LocalTransform &local,
+                              WorldTransform &world, const Parent &parent) {
         auto &parentTransform =
-            entityDatabase.get<WorldTransformComponent>(parent.parent);
+            entityDatabase.get<WorldTransform>(parent.parent);
 
         glm::mat4 identity{1.0f};
         glm::mat4 localTransform =
@@ -50,10 +47,9 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
 void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("SceneUpdater::updateCameras");
 
-  entityDatabase.iterateEntities<PerspectiveLensComponent,
-                                 WorldTransformComponent, CameraComponent>(
-      [](auto entity, const PerspectiveLensComponent &lens,
-         const WorldTransformComponent &world, CameraComponent &camera) {
+  entityDatabase.iterateEntities<PerspectiveLens, WorldTransform, Camera>(
+      [](auto entity, const PerspectiveLens &lens, const WorldTransform &world,
+         Camera &camera) {
         camera.projectionMatrix = glm::perspective(
             glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
@@ -66,23 +62,21 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
 void SceneUpdater::updateLights(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("SceneUpdater::updateLights");
 
-  entityDatabase
-      .iterateEntities<WorldTransformComponent, DirectionalLightComponent>(
-          [](auto entity, const WorldTransformComponent &world,
-             DirectionalLightComponent &light) {
-            glm::quat rotation;
-            glm::vec3 empty3;
-            glm::vec4 empty4;
-            glm::vec3 position;
+  entityDatabase.iterateEntities<WorldTransform, DirectionalLight>(
+      [](auto entity, const WorldTransform &world, DirectionalLight &light) {
+        glm::quat rotation;
+        glm::vec3 empty3;
+        glm::vec4 empty4;
+        glm::vec3 position;
 
-            glm::decompose(world.worldTransform, empty3, rotation, position,
-                           empty3, empty4);
+        glm::decompose(world.worldTransform, empty3, rotation, position, empty3,
+                       empty4);
 
-            rotation = glm::conjugate(rotation);
+        rotation = glm::conjugate(rotation);
 
-            light.direction = glm::normalize(
-                glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
-          });
+        light.direction = glm::normalize(
+            glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
+      });
 }
 
 } // namespace liquid

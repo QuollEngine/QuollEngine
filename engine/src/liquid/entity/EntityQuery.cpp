@@ -10,7 +10,7 @@ EntityQuery::EntityQuery(EntityDatabase &entityDatabase)
 
 Entity EntityQuery::getFirstEntityByName(StringView name) {
   Entity found = EntityNull;
-  mEntityDatabase.iterateEntities<NameComponent>(
+  mEntityDatabase.iterateEntities<Name>(
       [&found, &name](auto entity, const auto &component) {
         if (found != EntityNull)
           return;
