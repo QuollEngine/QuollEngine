@@ -68,6 +68,7 @@ void Layout::setup() {
     ImGui::DockBuilderDockWindow("Environment", inspectorId);
     ImGui::DockBuilderDockWindow("Scene", viewId);
     ImGui::DockBuilderDockWindow("Asset Browser", browserId);
+    ImGui::DockBuilderDockWindow("Logs", browserId);
 
     ImGui::DockBuilderFinish(dockspaceId);
     mFirstTime = false;

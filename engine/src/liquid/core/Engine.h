@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/logger/Logger.h"
+
 namespace liquid {
 
 /**
@@ -44,6 +46,13 @@ public:
    */
   static const Path getEnginePath();
 
+  /**
+   * @brief Get engine logger
+   *
+   * @return Engine logger
+   */
+  static Logger &getLogger();
+
 private:
   /**
    * @brief Create engine
@@ -51,11 +60,22 @@ private:
    * This constructor is private in order to disallow
    * creating individual engine object
    */
-  Engine() = default;
+  Engine();
 
 private:
   Path mAssetsPath;
   Path mEnginePath;
+
+  Logger mLogger;
 };
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#if defined(LIQUID_DEBUG)
+#define LOG_DEBUG(stream) Engine::getLogger().log(LogSeverity::Debug) << stream
+#else
+#define LOG_DEBUG(_)                                                           \
+  {}
+#endif
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 } // namespace liquid

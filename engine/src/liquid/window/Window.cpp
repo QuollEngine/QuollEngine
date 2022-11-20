@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 #include "Window.h"
 
 #include <GLFW/glfw3.h>
@@ -16,8 +16,8 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
     const char *errorMsg = nullptr;
     glfwGetError(&errorMsg);
     LIQUID_ASSERT(initReturnValue,
-                  "[GLFW] Failed to initialize GLFW: " + String(errorMsg));
-    engineLogger.log(Logger::Error)
+                  "Failed to initialize GLFW: " + String(errorMsg));
+    Engine::getLogger().log(LogSeverity::Error)
         << "Failed to initialize GLFW: " << errorMsg;
   }
 
@@ -30,9 +30,9 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
 
   platform_tools::NativeWindowTools::enableDarkMode(mWindowInstance);
 
-  LIQUID_ASSERT(mWindowInstance, "[GLFW] Failed to create windows");
+  LIQUID_ASSERT(mWindowInstance, "Failed to create windows");
 
-  LOG_DEBUG("[GLFW] Window Created");
+  LOG_DEBUG("Window Created");
 
   glfwSetWindowUserPointer(mWindowInstance, this);
 
@@ -111,7 +111,7 @@ Window::~Window() {
     glfwDestroyWindow(mWindowInstance);
     mWindowInstance = nullptr;
   }
-  LOG_DEBUG("[GLFW] Window destroyed");
+  LOG_DEBUG("Window destroyed");
   glfwTerminate();
 }
 

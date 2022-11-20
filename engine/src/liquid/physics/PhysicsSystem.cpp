@@ -8,7 +8,7 @@
 
 #include "PhysxMapping.h"
 
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #ifdef LIQUID_PROFILER
 static const bool RECORD_MEMORY_ALLOCATIONS = true;

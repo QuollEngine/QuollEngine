@@ -3,7 +3,7 @@
 #include "LuaTable.h"
 #include "EntityDecorator.h"
 
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 namespace liquid {
 

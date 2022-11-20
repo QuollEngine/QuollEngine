@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "VulkanValidator.h"
 #include "VulkanError.h"
@@ -77,7 +77,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
   if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-    engineLogger.log(Logger::Warning) << "[Vulkan] " << pCallbackData->pMessage;
+    Engine::getLogger().log(LogSeverity::Warning)
+        << "[Vulkan] " << pCallbackData->pMessage;
   }
 
   return VK_FALSE;

@@ -1,13 +1,11 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 #include "ShaderLibrary.h"
 
 namespace liquid {
 
 void ShaderLibrary::addShader(StringView name, rhi::ShaderHandle shader) {
   mShaders.insert(std::make_pair(name, shader));
-
-  LOG_DEBUG("Shader \"" << name << "\" loaded");
 }
 
 rhi::ShaderHandle ShaderLibrary::getShader(StringView name) const {

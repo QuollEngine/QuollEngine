@@ -1,4 +1,6 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
+
 #include "EditorScreen.h"
 
 #include "liquid/renderer/Renderer.h"
@@ -11,6 +13,7 @@
 #include "liquid/renderer/Presenter.h"
 #include "liquid/asset/FileTracker.h"
 #include "liquid/audio/AudioSystem.h"
+#include "liquid/logger/StreamTransport.h"
 
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/loop/MainLoop.h"
@@ -25,7 +28,9 @@
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/Widgets.h"
 #include "liquidator/ui/TransformOperationControl.h"
+#include "liquidator/ui/LogViewer.h"
 
+#include "liquidator/core/LogMemoryStorage.h"
 #include "liquidator/core/EditorRenderer.h"
 #include "liquidator/core/EditorSimulator.h"
 #include "liquidator/core/MousePickingGraph.h"
@@ -61,6 +66,9 @@ EditorScreen::EditorScreen(liquid::Window &window,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
+  LogMemoryStorage engineLogStorage;
+  liquid::Engine::getLogger().setTransport(engineLogStorage.createTransport());
+
   liquid::FPSCounter fpsCounter;
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
@@ -173,10 +181,12 @@ void EditorScreen::start(const Project &project) {
         return true;
       });
 
+  LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, &simulator, &mousePicking, this]() {
+                        &editorRenderer, &simulator, &mousePicking,
+                        &engineLogStorage, &logViewer, this]() {
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
     // TODO: Why is -2.0f needed here
@@ -224,6 +234,8 @@ void EditorScreen::start(const Project &project) {
 
     ui.render(editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
+
+    logViewer.render(engineLogStorage);
 
     if (auto _ = SceneView(scenePassGroup.sceneColor)) {
       const auto &pos = ImGui::GetItemRectMin();
@@ -322,6 +334,8 @@ void EditorScreen::start(const Project &project) {
   });
 
   mainLoop.run();
+  liquid::Engine::getLogger().setTransport(
+      liquid::createStreamTransport(std::cout));
   editorManager.saveEditorState(statePath);
 
   mDevice->waitForIdle();
