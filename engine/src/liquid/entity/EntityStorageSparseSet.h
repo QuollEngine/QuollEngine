@@ -2,42 +2,16 @@
 
 #include "Entity.h"
 #include "EntityUtils.h"
+#include "EntityStorageSparseSetComponentPool.h"
+#include "EntityStorageSparseSetView.h"
 
 namespace liquid {
 
 /**
- * @brief Sparse set pool for entity storage
- */
-struct EntityStorageSparseSetComponentPool {
-  /**
-   * List of entity indices
-   */
-  std::vector<size_t> entityIndices;
-
-  /**
-   * List of Entities
-   */
-  std::vector<Entity> entities;
-
-  /**
-   * List of components
-   */
-  std::vector<std::any> components;
-
-  /**
-   * Pool size
-   */
-  size_t size = 0;
-};
-
-/**
  * @brief Sparse set based entity storage
- *
- * @tparam ComponentTypes Component types
  */
 class EntityStorageSparseSet {
   static constexpr size_t DeadIndex = std::numeric_limits<size_t>::max();
-  template <typename T> struct IterFnType { typedef T type; };
 
 public:
   EntityStorageSparseSet() = default;
@@ -232,20 +206,6 @@ public:
   }
 
   /**
-   * @brief Get all entities with specified components
-   *
-   * @tparam TPickComponents Components to pick
-   * @param iterFn Iterator function
-   */
-  template <class... TPickComponents>
-  void iterateEntities(
-      const typename IterFnType<
-          std::function<void(Entity, TPickComponents &...)>>::type &iterFn) {
-    iterateEntitiesInternal(iterFn,
-                            std::index_sequence_for<TPickComponents...>{});
-  }
-
-  /**
    * @brief Destroys all entities and components
    */
   void destroy();
@@ -261,6 +221,20 @@ public:
     pool.components.clear();
     pool.entities.clear();
     pool.entityIndices.clear();
+  }
+
+  /**
+   * @brief Get view
+   *
+   * @tparam ...TPickComponents Picked components
+   * @return View
+   */
+  template <class... TPickComponents>
+  EntityStorageSparseSetView<TPickComponents...> view() {
+    std::array<EntityStorageSparseSetComponentPool *,
+               sizeof...(TPickComponents)>
+        pickedPools{&getPoolForComponent<TPickComponents>()...};
+    return EntityStorageSparseSetView<TPickComponents...>(pickedPools);
   }
 
 private:

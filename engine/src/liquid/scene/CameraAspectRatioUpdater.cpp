@@ -13,11 +13,10 @@ void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
   if (size.x <= 0 || size.y <= 0)
     return;
 
-  entityDatabase.iterateEntities<PerspectiveLens, AutoAspectRatio>(
-      [&size](auto entity, auto &lens, auto &_) {
-        lens.aspectRatio =
-            static_cast<float>(size.x) / static_cast<float>(size.y);
-      });
+  for (auto [_, lens, _1] :
+       entityDatabase.view<PerspectiveLens, AutoAspectRatio>()) {
+    lens.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
+  }
 }
 
 } // namespace liquid
