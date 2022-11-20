@@ -171,6 +171,54 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
+  if (node["components"]["animator"] &&
+      node["components"]["animator"].IsMap()) {
+    auto animations = node["components"]["animator"]["animations"];
+
+    Animator animator;
+    if (animations.IsSequence()) {
+      for (auto animation : animations) {
+        if (!animation.IsScalar()) {
+          continue;
+        }
+
+        auto path = Path(animation.as<String>(""));
+        auto handle =
+            mAssetRegistry.getAnimations().findHandleByRelativePath(path);
+
+        if (handle != AnimationAssetHandle::Invalid) {
+          animator.animations.push_back(handle);
+        }
+      }
+    }
+
+    if (node["components"]["animator"]["startingAnimation"] &&
+        node["components"]["animator"]["startingAnimation"].IsScalar()) {
+      auto startingAnimation =
+          node["components"]["animator"]["startingAnimation"];
+
+      auto idxStr = startingAnimation.as<String>();
+
+      bool isNumeric = idxStr.length() > 0;
+      for (size_t i = 0; i < idxStr.length() && isNumeric; i++) {
+        isNumeric = isdigit(idxStr[i]);
+      }
+
+      uint32_t index = 0;
+      if (isNumeric) {
+        index = std::stoi(idxStr);
+      }
+
+      if (index < animator.animations.size()) {
+        animator.currentAnimation = index;
+      }
+    }
+
+    if (animator.animations.size() > 0) {
+      mEntityDatabase.set(entity, animator);
+    }
+  }
+
   if (node["components"]["light"] && node["components"]["light"].IsMap()) {
     auto type = node["components"]["light"]["type"].as<uint32_t>(
         std::numeric_limits<uint32_t>::max());
