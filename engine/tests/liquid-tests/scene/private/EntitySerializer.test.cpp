@@ -93,7 +93,7 @@ TEST_F(EntitySerializerTest,
 }
 
 TEST_F(EntitySerializerTest,
-       CreatesTransformFieldFromTransformComponetnIfExists) {
+       CreatesTransformFieldFromTransformComponentIfExists) {
   auto entity = entityDatabase.create();
 
   liquid::LocalTransform transform{};
@@ -184,7 +184,11 @@ TEST_F(EntitySerializerTest,
 
 // Skeleton
 TEST_F(EntitySerializerTest,
-       DoesNotCreateSkeletonFieldIfSkeletonComponentDoesNotExist) {}
+       DoesNotCreateSkeletonFieldIfSkeletonComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["skeleton"]);
+}
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkeletonFieldIfSkeletonAssetIsNotInRegistry) {
@@ -199,7 +203,7 @@ TEST_F(EntitySerializerTest,
   EXPECT_FALSE(node["skeleton"]);
 }
 
-TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsRegistry) {
+TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   liquid::AssetData<liquid::SkeletonAsset> skeleton{};
   skeleton.relativePath = "/skeletons/skeleton.lqskel";
   skeleton.name = "skeleton.lqskel";
@@ -215,6 +219,55 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsRegistry) {
   EXPECT_TRUE(node["skeleton"]);
   EXPECT_EQ(node["skeleton"].as<liquid::String>(),
             skeleton.relativePath.string());
+}
+
+// Animation
+TEST_F(EntitySerializerTest,
+       DoesNotCreateAnimatorFieldIfAnimatorComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["skeleton"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
+  static constexpr uint32_t NonExistentHandleStart{45};
+  static constexpr uint32_t NonExistentHandleEnd{55};
+
+  liquid::Animator component{};
+
+  component.currentAnimation = 2;
+  for (uint32_t i = NonExistentHandleStart; i < NonExistentHandleEnd; ++i) {
+    component.animations.push_back(
+        static_cast<liquid::AnimationAssetHandle>(i));
+  }
+
+  std::vector<liquid::AnimationAssetHandle> validHandles;
+  for (uint32_t i = 0; i < 5; ++i) {
+    liquid::AssetData<liquid::AnimationAsset> animation{};
+    animation.relativePath = "/animations/animation.lqanim";
+    animation.name = "animation.lqanim";
+    auto handle = assetRegistry.getAnimations().addAsset(animation);
+    validHandles.push_back(handle);
+    component.animations.push_back(handle);
+  }
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["animator"]);
+  EXPECT_EQ(node["animator"]["startingAnimation"].as<uint32_t>(),
+            component.currentAnimation);
+  EXPECT_TRUE(node["animator"]["animations"].IsSequence());
+  EXPECT_EQ(node["animator"]["animations"].size(), validHandles.size());
+
+  for (size_t i = 0; i < node["animator"]["animations"].size(); ++i) {
+    auto animation = node["animator"]["animations"][i];
+    auto handle = validHandles.at(i);
+
+    auto relPath = assetRegistry.getAnimations().getAsset(handle).relativePath;
+    EXPECT_EQ(animation.as<liquid::String>(), relPath.string());
+  }
 }
 
 // Light

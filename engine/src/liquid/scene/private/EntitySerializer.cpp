@@ -151,6 +151,22 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
+  if (mEntityDatabase.has<Animator>(entity)) {
+    auto &animator = mEntityDatabase.get<Animator>(entity);
+
+    if (!animator.animations.empty()) {
+      components["animator"]["startingAnimation"] = animator.currentAnimation;
+
+      for (auto handle : animator.animations) {
+        if (mAssetRegistry.getAnimations().hasAsset(handle)) {
+          const auto &asset = mAssetRegistry.getAnimations().getAsset(handle);
+          components["animator"]["animations"].push_back(
+              asset.relativePath.string());
+        }
+      }
+    }
+  }
+
   if (mEntityDatabase.has<Script>(entity)) {
     auto handle = mEntityDatabase.get<Script>(entity).handle;
     if (mAssetRegistry.getLuaScripts().hasAsset(handle)) {
