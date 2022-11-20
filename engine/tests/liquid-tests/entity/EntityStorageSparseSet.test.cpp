@@ -318,53 +318,46 @@ TEST(EntityStorageSparseSetTest, IterateEntities) {
   storage.set<IntComponent>(e5, {50});
   storage.set<StringComponent>(e5, {"Entity 5"});
 
-  storage.iterateEntities<IntComponent>(
-      [&storage](liquid::Entity entity, const auto &val) {
-        EXPECT_TRUE(storage.exists(entity));
-        EXPECT_EQ(storage.get<IntComponent>(entity).value, val.value);
-      });
+  for (auto [entity, val] : storage.view<IntComponent>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    EXPECT_EQ(storage.get<IntComponent>(entity).value, val.value);
+  }
 
-  storage.iterateEntities<FloatComponent>(
-      [&storage](liquid::Entity entity, const auto &val) {
-        EXPECT_TRUE(storage.exists(entity));
-        EXPECT_EQ(storage.get<FloatComponent>(entity).value, val.value);
-      });
+  for (auto [entity, val] : storage.view<FloatComponent>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    EXPECT_EQ(storage.get<FloatComponent>(entity).value, val.value);
+  }
 
-  storage.iterateEntities<StringComponent>(
-      [&storage](liquid::Entity entity, const auto &val) {
-        EXPECT_TRUE(storage.exists(entity));
-        EXPECT_EQ(storage.get<StringComponent>(entity).value, val.value);
-      });
+  for (auto [entity, val] : storage.view<StringComponent>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    EXPECT_EQ(storage.get<StringComponent>(entity).value, val.value);
+  }
 
-  storage.iterateEntities<Component1>(
-      [&storage](liquid::Entity entity, const auto &val) {
-        EXPECT_TRUE(storage.exists(entity));
-        auto &comp = storage.get<Component1>(entity);
-        EXPECT_EQ(comp.intValue, val.intValue);
-        EXPECT_EQ(comp.realValue, val.realValue);
-      });
+  for (auto [entity, val] : storage.view<Component1>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    auto &comp = storage.get<Component1>(entity);
+    EXPECT_EQ(comp.intValue, val.intValue);
+    EXPECT_EQ(comp.realValue, val.realValue);
+  }
 
-  storage.iterateEntities<IntComponent, FloatComponent>(
-      [&storage](liquid::Entity entity, const IntComponent &val1,
-                 const FloatComponent &val2) {
-        EXPECT_TRUE(storage.exists(entity));
-        EXPECT_EQ(storage.get<IntComponent>(entity).value, val1.value);
-        EXPECT_EQ(storage.get<FloatComponent>(entity).value, val2.value);
-      });
+  for (auto [entity, val1, val2] :
+       storage.view<IntComponent, FloatComponent>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    EXPECT_EQ(storage.get<IntComponent>(entity).value, val1.value);
+    EXPECT_EQ(storage.get<FloatComponent>(entity).value, val2.value);
+  }
 
-  storage.iterateEntities<IntComponent, FloatComponent, StringComponent>(
-      [&storage](liquid::Entity entity, const auto &val1, const auto &val2,
-                 const auto &val3) {
-        EXPECT_TRUE(storage.exists(entity));
-        EXPECT_EQ(storage.get<IntComponent>(entity).value, val1.value);
-        EXPECT_EQ(storage.get<FloatComponent>(entity).value, val2.value);
-        EXPECT_EQ(storage.get<StringComponent>(entity).value, val3.value);
-      });
+  for (auto [entity, val1, val2, val3] :
+       storage.view<IntComponent, FloatComponent, StringComponent>()) {
+    EXPECT_TRUE(storage.exists(entity));
+    EXPECT_EQ(storage.get<IntComponent>(entity).value, val1.value);
+    EXPECT_EQ(storage.get<FloatComponent>(entity).value, val2.value);
+    EXPECT_EQ(storage.get<StringComponent>(entity).value, val3.value);
+  }
 
-  storage.iterateEntities<FloatComponent, Component1>(
-      [](liquid::Entity entity, const auto &, const auto &) {
-        EXPECT_TRUE(false) << "This function should not be called";
-      });
+  for (auto [entity, _1, _2] : storage.view<FloatComponent, Component1>()) {
+    EXPECT_TRUE(false) << "This function should not be called";
+  }
 }
 
 TEST(EntityStorageSparseSetTest, DestroysOneComponent) {

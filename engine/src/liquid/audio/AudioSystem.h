@@ -33,10 +33,10 @@ public:
       LIQUID_PROFILE_EVENT("Cleanup audio starts for deleted components");
 
       std::set<Entity> toBeDeletedStarts;
-      entityDatabase.iterateEntities<AudioStart, Delete>(
-          [this, &toBeDeletedStarts](auto entity, auto &status, const auto &) {
-            toBeDeletedStarts.insert(entity);
-          });
+      for (auto [entity, status, _] :
+           entityDatabase.view<AudioStart, Delete>()) {
+        toBeDeletedStarts.insert(entity);
+      }
 
       for (auto entity : toBeDeletedStarts) {
         entityDatabase.remove<AudioStart>(entity);
@@ -47,12 +47,11 @@ public:
       LIQUID_PROFILE_EVENT("Cleanup audio statuses for deleted components");
 
       std::set<Entity> toBeDeletedStatuses;
-      entityDatabase.iterateEntities<AudioStatus, Delete>(
-          [this, &toBeDeletedStatuses](auto entity, auto &status,
-                                       const auto &) {
-            mBackend.destroySound(status.instance);
-            toBeDeletedStatuses.insert(entity);
-          });
+      for (auto [entity, status, _] :
+           entityDatabase.view<AudioStatus, Delete>()) {
+        mBackend.destroySound(status.instance);
+        toBeDeletedStatuses.insert(entity);
+      }
 
       for (auto entity : toBeDeletedStatuses) {
         entityDatabase.remove<AudioStatus>(entity);
@@ -61,18 +60,17 @@ public:
 
     {
       LIQUID_PROFILE_EVENT("Start audios");
-      entityDatabase.iterateEntities<AudioSource, AudioStart>(
-          [this, &entityDatabase](auto entity, const auto &source,
-                                  const auto &play) {
-            if (entityDatabase.has<AudioStatus>(entity)) {
-              return;
-            }
-            const auto &asset =
-                mAssetRegistry.getAudios().getAsset(source.source).data;
-            void *sound = mBackend.playSound(asset);
+      for (auto [entity, source, play] :
+           entityDatabase.view<AudioSource, AudioStart>()) {
+        if (entityDatabase.has<AudioStatus>(entity)) {
+          continue;
+        }
+        const auto &asset =
+            mAssetRegistry.getAudios().getAsset(source.source).data;
+        void *sound = mBackend.playSound(asset);
 
-            entityDatabase.set<AudioStatus>(entity, {sound});
-          });
+        entityDatabase.set<AudioStatus>(entity, {sound});
+      }
 
       entityDatabase.destroyComponents<liquid::AudioStart>();
     }
@@ -82,13 +80,12 @@ public:
           "Delete audio status components for finished audios");
 
       std::set<Entity> toBeDeletedStatuses;
-      entityDatabase.iterateEntities<AudioStatus>(
-          [&toBeDeletedStatuses, this](auto entity, const auto &status) {
-            if (!mBackend.isPlaying(status.instance)) {
-              mBackend.destroySound(status.instance);
-              toBeDeletedStatuses.insert(entity);
-            }
-          });
+      for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {
+        if (!mBackend.isPlaying(status.instance)) {
+          mBackend.destroySound(status.instance);
+          toBeDeletedStatuses.insert(entity);
+        }
+      }
 
       for (auto entity : toBeDeletedStatuses) {
         entityDatabase.remove<AudioStatus>(entity);
@@ -102,10 +99,9 @@ public:
    * @param entityDatabase Entity database
    */
   void cleanup(EntityDatabase &entityDatabase) {
-    entityDatabase.iterateEntities<AudioStatus>(
-        [this](auto entity, const auto &status) {
-          mBackend.destroySound(status.instance);
-        });
+    for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {
+      mBackend.destroySound(status.instance);
+    }
 
     entityDatabase.destroyComponents<AudioStatus>();
     entityDatabase.destroyComponents<AudioStart>();

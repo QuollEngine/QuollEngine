@@ -26,15 +26,14 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
 
     auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
-    entityDatabase.iterateEntities<liquid::LocalTransform>(
-        [this, &editorManager, &entityDatabase](auto entity,
-                                                const auto &transform) {
-          if (entityDatabase.has<liquid::Parent>(entity)) {
-            return;
-          }
+    for (auto [entity, transform] :
+         entityDatabase.view<liquid::LocalTransform>()) {
+      if (entityDatabase.has<liquid::Parent>(entity)) {
+        continue;
+      }
 
-          renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
-        });
+      renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
+    }
   }
 }
 

@@ -276,12 +276,11 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
   }
 
   if (entity == EntityNull) {
-    mEntityDatabase.iterateEntities<PerspectiveLens>(
-        [&entity, &excludeEntity](auto e, const auto &) mutable {
-          if (e != excludeEntity) {
-            entity = e;
-          }
-        });
+    for (auto [e, _] : mEntityDatabase.view<PerspectiveLens>()) {
+      if (e != excludeEntity) {
+        entity = e;
+      }
+    }
   }
 
   if (entity == EntityNull) {

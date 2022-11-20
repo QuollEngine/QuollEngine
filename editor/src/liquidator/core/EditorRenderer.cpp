@@ -256,31 +256,27 @@ void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
 
   frameData.setEditorGrid(editorGrid.getData());
 
-  entityDatabase.iterateEntities<liquid::WorldTransform, liquid::SkeletonDebug>(
-      [this, &frameData](auto entity, liquid::WorldTransform &worldTransform,
-                         liquid::SkeletonDebug &skeleton) {
-        frameData.addSkeleton(worldTransform.worldTransform,
-                              skeleton.boneTransforms);
-      });
+  for (auto [entity, worldTransform, skeleton] :
+       entityDatabase.view<liquid::WorldTransform, liquid::SkeletonDebug>()) {
+    frameData.addSkeleton(worldTransform.worldTransform,
+                          skeleton.boneTransforms);
+  }
 
-  entityDatabase
-      .iterateEntities<liquid::WorldTransform, liquid::DirectionalLight>(
-          [this, &frameData](auto entity, const auto &world,
-                             const auto &light) {
-            frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
-                               world.worldTransform);
-          });
+  for (auto [entity, world, light] :
+       entityDatabase
+           .view<liquid::WorldTransform, liquid::DirectionalLight>()) {
+    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
+                       world.worldTransform);
+  }
 
-  entityDatabase.iterateEntities<liquid::WorldTransform,
-                                 liquid::PerspectiveLens>(
-      [this, &frameData](auto entity, const auto &world, const auto &camera) {
-        static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
+  for (auto [entity, world, camera] :
+       entityDatabase.view<liquid::WorldTransform, liquid::PerspectiveLens>()) {
+    static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 
-        frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
-                           glm::rotate(world.worldTransform,
-                                       NinetyDegreesInRadians,
-                                       glm::vec3(0, 1, 0)));
-      });
+    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
+                       glm::rotate(world.worldTransform, NinetyDegreesInRadians,
+                                   glm::vec3(0, 1, 0)));
+  }
 
   frameData.updateBuffers();
 }

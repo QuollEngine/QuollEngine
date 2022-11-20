@@ -9,12 +9,9 @@ AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
 void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
-  entityDatabase.iterateEntities<LocalTransform, Animator>([&entityDatabase,
-                                                            &animMap, this, dt](
-                                                               Entity entity,
-                                                               auto &transform,
-                                                               auto &animComp) {
-    auto handle = animComp.animations.at(animComp.currentAnimation);
+  for (auto [entity, transform, animator] :
+       entityDatabase.view<LocalTransform, Animator>()) {
+    auto handle = animator.animations.at(animator.currentAnimation);
 
     if (!animMap.hasAsset(handle)) {
       return;
@@ -22,13 +19,13 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
 
     const auto &animation = animMap.getAsset(handle);
 
-    if (animComp.playing) {
-      animComp.normalizedTime = std::min(
+    if (animator.playing) {
+      animator.normalizedTime = std::min(
           // Divide delta time by animation time
           // to advance time at a constant speed
-          animComp.normalizedTime + (dt / animation.data.time), 1.0f);
-      if (animComp.loop && animComp.normalizedTime >= 1.0f) {
-        animComp.normalizedTime = 0.0f;
+          animator.normalizedTime + (dt / animation.data.time), 1.0f);
+      if (animator.loop && animator.normalizedTime >= 1.0f) {
+        animator.normalizedTime = 0.0f;
       }
     }
 
@@ -36,7 +33,7 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
 
     for (const auto &sequence : animation.data.keyframes) {
       const auto &value =
-          mKeyframeInterpolator.interpolate(sequence, animComp.normalizedTime);
+          mKeyframeInterpolator.interpolate(sequence, animator.normalizedTime);
 
       if (sequence.jointTarget && hasSkeleton) {
         auto &skeleton = entityDatabase.get<Skeleton>(entity);
@@ -59,7 +56,7 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
         }
       }
     }
-  });
+  }
 }
 
 } // namespace liquid

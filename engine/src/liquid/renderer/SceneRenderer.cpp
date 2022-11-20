@@ -322,65 +322,61 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   frameData.setCameraData(entityDatabase.get<Camera>(camera));
 
   // Meshes
-  entityDatabase.iterateEntities<WorldTransform, Mesh>(
-      [this, &frameData](auto entity, const auto &world, const auto &mesh) {
-        frameData.addMesh(mesh.handle, entity, world.worldTransform);
-      });
+  for (auto [entity, world, mesh] :
+       entityDatabase.view<WorldTransform, Mesh>()) {
+    frameData.addMesh(mesh.handle, entity, world.worldTransform);
+  }
 
   // Skinned Meshes
-  entityDatabase.iterateEntities<Skeleton, WorldTransform, SkinnedMesh>(
-      [this, &frameData](auto entity, const auto &skeleton, const auto &world,
-                         const auto &mesh) {
-        frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
-                                 skeleton.jointFinalTransforms);
-      });
+  for (auto [entity, skeleton, world, mesh] :
+       entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh>()) {
+    frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
+                             skeleton.jointFinalTransforms);
+  }
 
   // Texts
-  entityDatabase.iterateEntities<Text, WorldTransform>(
-      [this, &frameData](auto entity, const auto &text, const auto &world) {
-        const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
+  for (auto [entity, text, world] :
+       entityDatabase.view<Text, WorldTransform>()) {
+    const auto &font = mAssetRegistry.getFonts().getAsset(text.font).data;
 
-        std::vector<SceneRendererFrameData::GlyphData> glyphs(
-            text.text.length());
-        float advanceX = 0;
-        float advanceY = 0;
-        for (size_t i = 0; i < text.text.length(); ++i) {
-          char c = text.text.at(i);
+    std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
+    float advanceX = 0;
+    float advanceY = 0;
+    for (size_t i = 0; i < text.text.length(); ++i) {
+      char c = text.text.at(i);
 
-          if (c == '\n') {
-            advanceX = 0.0f;
-            advanceY += text.lineHeight * font.fontScale;
-            continue;
-          }
+      if (c == '\n') {
+        advanceX = 0.0f;
+        advanceY += text.lineHeight * font.fontScale;
+        continue;
+      }
 
-          const auto &fontGlyph = font.glyphs.at(c);
-          glyphs.at(i).bounds = fontGlyph.bounds;
-          glyphs.at(i).planeBounds = fontGlyph.planeBounds;
+      const auto &fontGlyph = font.glyphs.at(c);
+      glyphs.at(i).bounds = fontGlyph.bounds;
+      glyphs.at(i).planeBounds = fontGlyph.planeBounds;
 
-          glyphs.at(i).planeBounds.x += advanceX;
-          glyphs.at(i).planeBounds.z += advanceX;
-          glyphs.at(i).planeBounds.y -= advanceY;
-          glyphs.at(i).planeBounds.w -= advanceY;
+      glyphs.at(i).planeBounds.x += advanceX;
+      glyphs.at(i).planeBounds.z += advanceX;
+      glyphs.at(i).planeBounds.y -= advanceY;
+      glyphs.at(i).planeBounds.w -= advanceY;
 
-          advanceX += fontGlyph.advanceX;
-        }
+      advanceX += fontGlyph.advanceX;
+    }
 
-        frameData.addText(text.font, glyphs, world.worldTransform);
-      });
+    frameData.addText(text.font, glyphs, world.worldTransform);
+  }
 
   // Lights
-  entityDatabase.iterateEntities<DirectionalLight>(
-      [this, &frameData](auto entity, const auto &light) {
-        frameData.addLight(light);
-      });
+  for (auto [entity, light] : entityDatabase.view<DirectionalLight>()) {
+    frameData.addLight(light);
+  };
 
   // Environments
-  entityDatabase.iterateEntities<Environment>(
-      [this, &frameData](auto entity, const auto &environment) {
-        frameData.setEnvironmentTextures(environment.irradianceMap,
-                                         environment.specularMap,
-                                         environment.brdfLUT);
-      });
+  for (auto [entity, environment] : entityDatabase.view<Environment>()) {
+    frameData.setEnvironmentTextures(environment.irradianceMap,
+                                     environment.specularMap,
+                                     environment.brdfLUT);
+  }
 
   frameData.updateBuffers();
 }

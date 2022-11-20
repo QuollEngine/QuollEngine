@@ -25,26 +25,24 @@ void EntityDeleter::update(Scene &scene) {
 
   bool cameraDeleted = false;
 
-  entityDatabase.iterateEntities<Delete>(
-      [&deleteList, &entityDatabase, &activeCamera,
-       &cameraDeleted](auto entity, auto &) mutable {
-        cameraDeleted = cameraDeleted || (activeCamera == entity);
+  for (auto [entity, _] : entityDatabase.view<Delete>()) {
+    cameraDeleted = cameraDeleted || (activeCamera == entity);
 
-        if (entityDatabase.has<Parent>(entity)) {
-          auto parent = entityDatabase.get<Parent>(entity).parent;
+    if (entityDatabase.has<Parent>(entity)) {
+      auto parent = entityDatabase.get<Parent>(entity).parent;
 
-          if (entityDatabase.has<Children>(parent)) {
-            auto &children = entityDatabase.get<Children>(parent).children;
+      if (entityDatabase.has<Children>(parent)) {
+        auto &children = entityDatabase.get<Children>(parent).children;
 
-            auto it = std::find(children.begin(), children.end(), entity);
-            if (it != children.end()) {
-              children.erase(it);
-            }
-          }
+        auto it = std::find(children.begin(), children.end(), entity);
+        if (it != children.end()) {
+          children.erase(it);
         }
+      }
+    }
 
-        addToDeleteList(entity, entityDatabase, deleteList);
-      });
+    addToDeleteList(entity, entityDatabase, deleteList);
+  }
 
   if (cameraDeleted) {
     scene.activeCamera = scene.dummyCamera;

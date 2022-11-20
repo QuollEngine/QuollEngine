@@ -9,18 +9,13 @@ EntityQuery::EntityQuery(EntityDatabase &entityDatabase)
     : mEntityDatabase(entityDatabase) {}
 
 Entity EntityQuery::getFirstEntityByName(StringView name) {
-  Entity found = EntityNull;
-  mEntityDatabase.iterateEntities<Name>(
-      [&found, &name](auto entity, const auto &component) {
-        if (found != EntityNull)
-          return;
+  for (auto [entity, component] : mEntityDatabase.view<Name>()) {
+    if (component.name == name) {
+      return entity;
+    }
+  }
 
-        if (component.name == name) {
-          found = entity;
-        }
-      });
-
-  return found;
+  return EntityNull;
 }
 
 } // namespace liquid

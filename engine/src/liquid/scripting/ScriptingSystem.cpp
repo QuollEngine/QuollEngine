@@ -14,9 +14,7 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   EntityDecorator entityDecorator;
-  entityDatabase.iterateEntities<Script>([this, &entityDatabase,
-                                          &entityDecorator](auto entity,
-                                                            Script &component) {
+  for (auto [entity, component] : entityDatabase.view<Script>()) {
     if (component.started) {
       return;
     }
@@ -37,31 +35,28 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
 
     component.scope.luaGetGlobal("start");
     component.scope.call(0);
-  });
+  }
 }
 
 void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
 
-  entityDatabase.iterateEntities<Script, Delete>(
-      [this, &entityDatabase](auto entity, Script &scripting, auto &) {
-        destroyScriptingData(scripting);
-        entityDatabase.remove<Script>(entity);
-      });
+  for (auto [entity, scripting, _] : entityDatabase.view<Script, Delete>()) {
+    destroyScriptingData(scripting);
+    entityDatabase.remove<Script>(entity);
+  }
 
-  entityDatabase.iterateEntities<Script>(
-      [this, &dt](auto entity, Script &component) {
-        component.scope.luaGetGlobal("update");
-        component.scope.set(dt);
-        component.scope.call(1);
-      });
+  for (auto [entity, component] : entityDatabase.view<Script>()) {
+    component.scope.luaGetGlobal("update");
+    component.scope.set(dt);
+    component.scope.call(1);
+  }
 }
 
 void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
-  entityDatabase.iterateEntities<Script>(
-      [this](auto entity, Script &scripting) {
-        destroyScriptingData(scripting);
-      });
+  for (auto [entity, scripting] : entityDatabase.view<Script>()) {
+    destroyScriptingData(scripting);
+  }
 
   entityDatabase.destroyComponents<Script>();
 }
