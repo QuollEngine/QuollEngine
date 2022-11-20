@@ -46,8 +46,8 @@ layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
 uSkeletonData;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
-  SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
+  SkeletonItem item = uSkeletonData.items[gl_InstanceIndex];
 
   mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
                     inWeights.y * item.joints[inJoints.y] +
