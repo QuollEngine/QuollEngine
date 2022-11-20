@@ -72,11 +72,36 @@ public:
    * @brief Mesh data
    */
   struct MeshData {
+
     /**
-     * List of indices that point to
-     * items in storage
+     * @brief Transforms of mesh entities
      */
-    std::vector<uint32_t> indices;
+    std::vector<glm::mat4> transforms;
+
+    /**
+     * @brief Ids of mesh entities
+     */
+    std::vector<Entity> entities;
+  };
+
+  /**
+   * @brief Skinned mesh data
+   */
+  struct SkinnedMeshData : public MeshData {
+    /**
+     * @brief Skeleton bone transforms
+     */
+    std::unique_ptr<glm::mat4> skeletons;
+
+    /**
+     * Last skeleton index
+     */
+    size_t lastSkeleton = 0;
+
+    /**
+     * Skeleton capacity
+     */
+    size_t skeletonCapacity = 0;
   };
 
   /**
@@ -144,30 +169,12 @@ public:
   }
 
   /**
-   * @brief Get mesh entities
-   *
-   * @return Mesh entities
-   */
-  inline const std::vector<liquid::Entity> &getMeshEntities() const {
-    return mMeshEntities;
-  }
-
-  /**
    * @brief Get skinned mesh transforms buffer
    *
    * @return Skinned mesh transforms buffer
    */
   inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
     return mSkinnedMeshTransformsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get skinned mesh entities
-   *
-   * @return Skinned mesh entities
-   */
-  inline const std::vector<liquid::Entity> &getSkinnedMeshEntities() const {
-    return mSkinnedMeshEntities;
   }
 
   /**
@@ -239,7 +246,7 @@ public:
    *
    * @return Skinned mesh groups
    */
-  inline const std::unordered_map<SkinnedMeshAssetHandle, MeshData> &
+  inline const std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData> &
   getSkinnedMeshGroups() const {
     return mSkinnedMeshGroups;
   }
@@ -352,11 +359,6 @@ public:
   inline size_t getReservedSpace() const { return mReservedSpace; }
 
 private:
-  std::vector<Entity> mMeshEntities;
-  std::vector<Entity> mSkinnedMeshEntities;
-  std::vector<glm::mat4> mMeshTransformMatrices;
-  std::vector<glm::mat4> mSkinnedMeshTransformMatrices;
-  std::unique_ptr<glm::mat4> mSkeletonVector;
   std::vector<LightData> mLights;
   SceneData mSceneData{};
   Camera mCameraData;
@@ -375,7 +377,8 @@ private:
   rhi::TextureHandle mBrdfLUT = rhi::TextureHandle::Invalid;
 
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
-  std::unordered_map<SkinnedMeshAssetHandle, MeshData> mSkinnedMeshGroups;
+  std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
+      mSkinnedMeshGroups;
 
   std::vector<glm::mat4> mTextTransforms;
   rhi::Buffer mTextTransformsBuffer;

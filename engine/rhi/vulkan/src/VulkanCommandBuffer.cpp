@@ -98,7 +98,7 @@ void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex,
                                uint32_t instanceCount, uint32_t firstInstance) {
   vkCmdDraw(mCommandBuffer, vertexCount, instanceCount, firstVertex,
             firstInstance);
-  mStats.addDrawCall(vertexCount / 3);
+  mStats.addDrawCall((vertexCount / 3) * instanceCount);
 }
 
 void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
@@ -107,7 +107,7 @@ void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
                                       uint32_t firstInstance) {
   vkCmdDrawIndexed(mCommandBuffer, indexCount, instanceCount, firstIndex,
                    vertexOffset, firstInstance);
-  mStats.addDrawCall(indexCount / 3);
+  mStats.addDrawCall((indexCount / 3) * instanceCount);
 }
 
 void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,

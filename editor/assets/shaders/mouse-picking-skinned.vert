@@ -47,9 +47,9 @@ layout(scalar, set = 1, binding = 2) readonly buffer EntityData {
 uEntityData;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
 
-  SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
+  SkeletonItem item = uSkeletonData.items[gl_InstanceIndex];
 
   mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
                     inWeights.y * item.joints[inJoints.y] +
@@ -60,5 +60,5 @@ void main() {
       uCameraData.viewProj * modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
 
   gl_Position = worldPosition;
-  outEntity = uEntityData.entities[gl_BaseInstance];
+  outEntity = uEntityData.entities[gl_InstanceIndex];
 }

@@ -109,6 +109,7 @@ MousePickingGraph::MousePickingGraph(
       commandList.bindDescriptor(pipeline, 2, descriptor);
     }
 
+    uint32_t instanceStart = 0;
     for (auto &[handle, meshData] : frameData.getMeshGroups()) {
       const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
       for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
@@ -126,18 +127,24 @@ MousePickingGraph::MousePickingGraph(
         uint32_t vertexCount =
             static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-        for (auto index : meshData.indices) {
-          if (indexed) {
-            commandList.drawIndexed(indexCount, 0, 0, 1, index);
-          } else {
-            commandList.draw(vertexCount, 0, 1, index);
-          }
+        if (indexed) {
+          commandList.drawIndexed(
+              indexCount, 0, 0,
+              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
+        } else {
+          commandList.draw(vertexCount, 0,
+                           static_cast<uint32_t>(meshData.transforms.size()),
+                           instanceStart);
         }
+
+        instanceStart += static_cast<uint32_t>(meshData.transforms.size());
       }
     }
 
     // Skinned meshes
     commandList.bindPipeline(skinnedPipeline);
+
+    instanceStart = 0;
 
     {
       liquid::rhi::Descriptor descriptor;
@@ -181,13 +188,17 @@ MousePickingGraph::MousePickingGraph(
         uint32_t vertexCount =
             static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-        for (auto index : meshData.indices) {
-          if (indexed) {
-            commandList.drawIndexed(indexCount, 0, 0, 1, index);
-          } else {
-            commandList.draw(vertexCount, 0, 1, index);
-          }
+        if (indexed) {
+          commandList.drawIndexed(
+              indexCount, 0, 0,
+              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
+        } else {
+          commandList.draw(vertexCount, 0,
+                           static_cast<uint32_t>(meshData.transforms.size()),
+                           instanceStart);
         }
+
+        instanceStart += static_cast<uint32_t>(meshData.transforms.size());
       }
     }
   });
@@ -206,14 +217,28 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
   mFrameIndex = frameIndex;
   auto &frameData = mFrameData.at(frameIndex);
 
-  const auto &meshEntities = frameData.getMeshEntities();
-  mEntitiesBuffer.update(const_cast<liquid::Entity *>(meshEntities.data()),
-                         sizeof(liquid::Entity) * meshEntities.size());
+  {
+    size_t offset = 0;
+    auto *bufferData = static_cast<liquid::Entity *>(mEntitiesBuffer.map());
+    for (auto &[_, meshData] : frameData.getMeshGroups()) {
+      memcpy(bufferData + offset, meshData.entities.data(),
+             sizeof(liquid::Entity) * meshData.entities.size());
+      offset += meshData.entities.size();
+    }
+    mEntitiesBuffer.unmap();
+  }
 
-  const auto &skinnedMeshEntities = frameData.getSkinnedMeshEntities();
-  mSkinnedEntitiesBuffer.update(
-      const_cast<liquid::Entity *>(skinnedMeshEntities.data()),
-      sizeof(liquid::Entity) * skinnedMeshEntities.size());
+  {
+    size_t offset = 0;
+    auto *bufferData =
+        static_cast<liquid::Entity *>(mSkinnedEntitiesBuffer.map());
+    for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
+      memcpy(bufferData + offset, meshData.entities.data(),
+             sizeof(liquid::Entity) * meshData.entities.size());
+      offset += meshData.entities.size();
+    }
+    mSkinnedEntitiesBuffer.unmap();
+  }
 
   mMousePos = mousePos;
 

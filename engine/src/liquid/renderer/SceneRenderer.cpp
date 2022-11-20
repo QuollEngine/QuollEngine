@@ -390,6 +390,8 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
                   rhi::DescriptorType::StorageBuffer);
   commandList.bindDescriptor(pipeline, 1, descriptor);
 
+  uint32_t instanceStart = 0;
+
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
@@ -410,13 +412,17 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       uint32_t vertexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-      for (auto index : meshData.indices) {
-        if (indexed) {
-          commandList.drawIndexed(indexCount, 0, 0, 1, index);
-        } else {
-          commandList.draw(vertexCount, 0, 1, index);
-        }
+      if (indexed) {
+        commandList.drawIndexed(
+            indexCount, 0, 0, static_cast<uint32_t>(meshData.transforms.size()),
+            instanceStart);
+      } else {
+        commandList.draw(vertexCount, 0,
+                         static_cast<uint32_t>(meshData.transforms.size()),
+                         instanceStart);
       }
+
+      instanceStart += static_cast<uint32_t>(meshData.transforms.size());
     }
   }
 }
@@ -432,6 +438,8 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   descriptor.bind(1, frameData.getSkeletonsBuffer(),
                   rhi::DescriptorType::StorageBuffer);
   commandList.bindDescriptor(pipeline, 1, descriptor);
+
+  uint32_t instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
@@ -453,13 +461,15 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
-      for (auto index : meshData.indices) {
-        if (indexed) {
-          commandList.drawIndexed(indexCount, 0, 0, 1, index);
-        } else {
-          commandList.draw(vertexCount, 0, 1, index);
-        }
+      uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+
+      if (indexed) {
+        commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
+      } else {
+        commandList.draw(vertexCount, 0, numInstances, instanceStart);
       }
+
+      instanceStart += numInstances;
     }
   }
 }

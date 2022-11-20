@@ -38,7 +38,7 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
 uObjectData;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
 
   vec4 worldPosition =
       uCameraData.viewProj * modelMatrix * vec4(inPosition, 1.0f);

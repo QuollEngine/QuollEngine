@@ -33,11 +33,11 @@ layout(scalar, set = 1, binding = 1) readonly buffer EntityData {
 uEntityData;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
 
   vec4 worldPosition =
       uCameraData.viewProj * modelMatrix * vec4(inPosition, 1.0f);
 
   gl_Position = worldPosition;
-  outEntity = uEntityData.entities[gl_BaseInstance];
+  outEntity = uEntityData.entities[gl_InstanceIndex];
 }

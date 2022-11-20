@@ -8,18 +8,11 @@ namespace liquid {
 SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
                                                size_t reservedSpace)
     : mReservedSpace(reservedSpace), mDevice(device) {
-  mMeshTransformMatrices.reserve(mReservedSpace);
-
-  mSkinnedMeshTransformMatrices.reserve(mReservedSpace);
-  mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumJoints]);
 
   mLights.reserve(MaxNumLights);
 
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
-
-  mMeshEntities.reserve(mReservedSpace);
-  mSkinnedMeshEntities.reserve(mReservedSpace);
 
   rhi::BufferDescription defaultDesc{};
   defaultDesc.type = rhi::BufferType::Storage;
@@ -64,14 +57,34 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
 }
 
 void SceneRendererFrameData::updateBuffers() {
-  mMeshTransformsBuffer.update(mMeshTransformMatrices.data(),
-                               mMeshTransformMatrices.size() *
-                                   sizeof(glm::mat4));
-  mSkinnedMeshTransformsBuffer.update(mSkinnedMeshTransformMatrices.data(),
-                                      mSkinnedMeshTransformMatrices.size() *
-                                          sizeof(glm::mat4));
-  mSkeletonsBuffer.update(mSkeletonVector.get(),
-                          sizeof(glm::mat4) * mLastSkeleton * MaxNumJoints);
+  {
+    size_t offset = 0;
+    auto *bufferData = static_cast<glm::mat4 *>(mMeshTransformsBuffer.map());
+    for (auto &[_, data] : mMeshGroups) {
+      memcpy(bufferData + offset, data.transforms.data(),
+             data.transforms.size() * sizeof(glm::mat4));
+      offset += data.transforms.size();
+    }
+  }
+
+  {
+    size_t transformsOffset = 0;
+    auto *transformsBuffer =
+        static_cast<glm::mat4 *>(mSkinnedMeshTransformsBuffer.map());
+
+    size_t skeletonsOffset = 0;
+    auto *skeletonsBuffer = static_cast<glm::mat4 *>(mSkeletonsBuffer.map());
+    for (auto &[_, data] : mSkinnedMeshGroups) {
+      memcpy(transformsBuffer + transformsOffset, data.transforms.data(),
+             data.transforms.size() * sizeof(glm::mat4));
+      transformsOffset += data.transforms.size();
+
+      memcpy(skeletonsBuffer + skeletonsOffset, data.skeletons.get(),
+             data.lastSkeleton * MaxNumJoints * sizeof(glm::mat4));
+      skeletonsOffset += data.lastSkeleton * MaxNumJoints;
+    }
+  }
+
   mTextTransformsBuffer.update(mTextTransforms.data(),
                                mTextTransforms.size() * sizeof(glm::mat4));
   mTextGlyphsBuffer.update(mTextGlyphs.data(),
@@ -84,40 +97,44 @@ void SceneRendererFrameData::updateBuffers() {
 void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
                                      liquid::Entity entity,
                                      const glm::mat4 &transform) {
-  mMeshTransformMatrices.push_back(transform);
-  mMeshEntities.push_back(entity);
-  uint32_t index = static_cast<uint32_t>(mMeshTransformMatrices.size() - 1);
-
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
     MeshData data{};
     mMeshGroups.insert_or_assign(handle, data);
   }
 
-  mMeshGroups.at(handle).indices.push_back(index);
+  mMeshGroups.at(handle).entities.push_back(entity);
+  mMeshGroups.at(handle).transforms.push_back(transform);
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
     SkinnedMeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton) {
-  mSkinnedMeshTransformMatrices.push_back(transform);
-  mSkinnedMeshEntities.push_back(entity);
-
-  uint32_t index =
-      static_cast<uint32_t>(mSkinnedMeshTransformMatrices.size() - 1);
 
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
-    MeshData data{};
-    mSkinnedMeshGroups.insert_or_assign(handle, data);
+    mSkinnedMeshGroups.insert({handle, SkinnedMeshData{}});
   }
 
-  mSkinnedMeshGroups.at(handle).indices.push_back(index);
+  auto &group = mSkinnedMeshGroups.at(handle);
 
-  auto *currentSkeleton =
-      mSkeletonVector.get() + (mLastSkeleton * MaxNumJoints);
+  group.entities.push_back(entity);
+  group.transforms.push_back(transform);
+
+  size_t currentOffset = group.lastSkeleton * MaxNumJoints;
+  size_t newSize = currentOffset + MaxNumJoints;
+
+  // Resize skeletons if new skeleton does not fit
+  if (group.skeletonCapacity < newSize) {
+    group.skeletonCapacity = newSize * 2;
+    auto *newVector = new glm::mat4[group.skeletonCapacity];
+
+    memcpy(newVector, group.skeletons.get(), currentOffset * sizeof(glm::mat4));
+    group.skeletons.reset(newVector);
+  }
+
+  auto *currentSkeleton = group.skeletons.get() + currentOffset;
   size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
-
-  mLastSkeleton++;
+  group.lastSkeleton++;
 }
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light) {
@@ -184,11 +201,6 @@ void SceneRendererFrameData::setCameraData(const Camera &data) {
 }
 
 void SceneRendererFrameData::clear() {
-  mMeshTransformMatrices.clear();
-  mSkinnedMeshTransformMatrices.clear();
-  mMeshEntities.clear();
-  mSkinnedMeshEntities.clear();
-
   mTextTransforms.clear();
   mTextGroups.clear();
   mTextGlyphs.clear();
