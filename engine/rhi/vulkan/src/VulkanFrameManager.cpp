@@ -3,6 +3,7 @@
 
 #include "VulkanFrameManager.h"
 #include "VulkanError.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -19,7 +20,7 @@ VulkanFrameManager::~VulkanFrameManager() {
       mFrameFences.at(i) = VK_NULL_HANDLE;
     }
   }
-  LOG_DEBUG("[Vulkan] Frame fences destroyed");
+  LOG_DEBUG_VK_NO_HANDLE("Frame fences destroyed: " << mFrameFences.size());
 
   for (uint32_t i = 0; i < RenderDevice::NumFrames; ++i) {
     if (mImageAvailableSemaphores.at(i)) {
@@ -32,7 +33,10 @@ VulkanFrameManager::~VulkanFrameManager() {
       mRenderFinishedSemaphores.at(i) = VK_NULL_HANDLE;
     }
   }
-  LOG_DEBUG("[Vulkan] Frame semaphores destroyed");
+  LOG_DEBUG_VK_NO_HANDLE(
+      "Frame semaphores destroyed: "
+      << mImageAvailableSemaphores.size() << " image available; "
+      << mRenderFinishedSemaphores.size() << " render finished");
 }
 
 void VulkanFrameManager::nextFrame() {
@@ -61,7 +65,10 @@ void VulkanFrameManager::createSemaphores() {
                         "Failed to create render finished semaphores");
   }
 
-  LOG_DEBUG("[Vulkan] Render semaphores created");
+  LOG_DEBUG_VK_NO_HANDLE(
+      "Frame semaphores created: "
+      << mImageAvailableSemaphores.size() << " image available; "
+      << mRenderFinishedSemaphores.size() << " render finished");
 }
 
 void VulkanFrameManager::createFences() {
@@ -76,7 +83,7 @@ void VulkanFrameManager::createFences() {
         "Failed to create render fence");
   }
 
-  LOG_DEBUG("[Vulkan] Render fence created");
+  LOG_DEBUG_VK_NO_HANDLE("Frame fences created: " << mFrameFences.size());
 }
 
 } // namespace liquid::rhi

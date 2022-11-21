@@ -5,6 +5,8 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanError.h"
 
+#include "VulkanLog.h"
+
 namespace liquid::rhi {
 
 VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
@@ -13,23 +15,25 @@ VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
                                      VulkanDescriptorManager &descriptorManager,
                                      DeviceStats &stats)
     : mDevice(device), mRegistry(registry),
-      mDescriptorManager(descriptorManager), mStats(stats) {
+      mDescriptorManager(descriptorManager), mStats(stats),
+      mQueueFamilyIndex(queueFamilyIndex) {
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-  poolInfo.queueFamilyIndex = queueFamilyIndex;
+  poolInfo.queueFamilyIndex = mQueueFamilyIndex;
 
   checkForVulkanError(
       vkCreateCommandPool(mDevice, &poolInfo, nullptr, &mCommandPool),
       "Failed to create command pool");
 
-  LOG_DEBUG("[Vulkan] Command pool created");
+  LOG_DEBUG_VK("Command pool created for queue family " << mQueueFamilyIndex,
+               mCommandPool);
 }
 
 VulkanCommandPool::~VulkanCommandPool() {
   if (mCommandPool) {
     vkDestroyCommandPool(mDevice, mCommandPool, nullptr);
-    LOG_DEBUG("[Vulkan] Command pool destroyed");
+    LOG_DEBUG_VK("Command pool destroyed", mCommandPool);
   }
 }
 
@@ -54,7 +58,9 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
             commandBuffers.at(i), mRegistry, mDescriptorManager, mStats)));
   }
 
-  LOG_DEBUG("[Vulkan] Command buffers allocated");
+  LOG_DEBUG_VK("Command buffers allocated for queue family "
+                   << mQueueFamilyIndex,
+               mCommandPool);
 
   return std::move(renderCommandLists);
 }

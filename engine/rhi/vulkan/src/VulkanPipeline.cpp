@@ -6,6 +6,7 @@
 #include "VulkanShader.h"
 #include "VulkanMapping.h"
 #include "VulkanError.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -86,6 +87,11 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
   checkForVulkanError(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo,
                                              nullptr, &mPipelineLayout),
                       "Failed to create pipeline layout");
+
+  LOG_DEBUG_VK("Pipeline layout created. Descriptor layouts: "
+                   << descriptorLayoutsRaw.size()
+                   << "; Push constants: " << pushConstantRanges.size(),
+               mPipelineLayout);
 
   // Dynamic state
   std::array<VkDynamicState, 2> dynamicStates{VK_DYNAMIC_STATE_VIEWPORT,
@@ -254,24 +260,23 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                                 &mPipeline),
                       "Failed to create pipeline");
 
-  LOG_DEBUG("[Vulkan] Pipeline created");
+  LOG_DEBUG_VK("Pipeline created", mPipeline);
 }
 
 VulkanPipeline::~VulkanPipeline() {
   if (mPipeline) {
     vkDestroyPipeline(mDevice, mPipeline, nullptr);
-    LOG_DEBUG("[Vulkan] Pipeline destroyed");
+    LOG_DEBUG_VK("Pipeline destroyed", mPipeline);
   }
 
   if (mPipelineLayout) {
     vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
-    LOG_DEBUG("[Vulkan] Pipeline layout destroyed");
+    LOG_DEBUG_VK("Pipeline layout destroyed", mPipelineLayout);
   }
 
   for (auto &[s, x] : mDescriptorLayouts) {
     vkDestroyDescriptorSetLayout(mDevice, x, nullptr);
   }
-  LOG_DEBUG("[Vulkan] Descriptor set layouts destroyed");
 }
 
 } // namespace liquid::rhi

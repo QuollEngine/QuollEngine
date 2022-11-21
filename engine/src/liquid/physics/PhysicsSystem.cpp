@@ -156,6 +156,11 @@ public:
         PxDefaultPvdSocketTransportCreate("127.0.0.1", PvdPort, PvdTimeoutInMs);
     mPvd->connect(*transport, PxPvdInstrumentationFlag::eALL);
 
+    Engine::getLogger().log(LogSeverity::Info)
+        << "PhysX initialized. Visual debugger connected connected to "
+           "127.0.0.1:"
+        << PvdPort;
+
     mPhysics =
         PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(),
                         RECORD_MEMORY_ALLOCATIONS, mPvd);

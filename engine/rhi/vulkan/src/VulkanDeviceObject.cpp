@@ -11,7 +11,8 @@ const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
 
 VulkanDeviceObject::VulkanDeviceObject(
-    const VulkanPhysicalDevice &physicalDevice) {
+    const VulkanPhysicalDevice &physicalDevice)
+    : mPhysicalDevice(physicalDevice) {
   float queuePriority = 1.0f;
   VkDeviceQueueCreateInfo createGraphicsQueueInfo{};
   createGraphicsQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -42,19 +43,23 @@ VulkanDeviceObject::VulkanDeviceObject(
 
   std::vector<const char *> extensions;
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  LOG_DEBUG("[Vulkan] Extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Vulkan extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
   extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
-  LOG_DEBUG("[Vulkan] Extension enabled: "
-            << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Vulkan extension enabled: "
+      << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
 
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
-  LOG_DEBUG("[Vulkan] Extension enabled: "
-            << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Vulkan extension enabled: "
+      << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME;
 
   extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
-  LOG_DEBUG("[Vulkan] Extension enabled: "
-            << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Vulkan extension enabled: "
+      << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
 
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
@@ -65,8 +70,9 @@ VulkanDeviceObject::VulkanDeviceObject(
   if (portabilityExt != pdExtensions.end()) {
     extensions.push_back(
         LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
-    LOG_DEBUG("[Vulkan] Extension enabled: "
-              << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+    Engine::getLogger().log(LogSeverity::Info)
+        << "Extension enabled: "
+        << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
   }
 
   VkPhysicalDeviceHostQueryResetFeatures queryResetFeatures{};
@@ -102,13 +108,16 @@ VulkanDeviceObject::VulkanDeviceObject(
       vkCreateDevice(physicalDevice, &createDeviceInfo, nullptr, &mDevice),
       "Failed to create device");
 
-  LOG_DEBUG("[Vulkan] Vulkan device created for " << physicalDevice.getName());
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Vulkan device created for " << physicalDevice.getName();
 }
 
 VulkanDeviceObject::~VulkanDeviceObject() {
   if (mDevice) {
     vkDestroyDevice(mDevice, nullptr);
-    LOG_DEBUG("[Vulkan] Vulkan device destroyed");
+
+    Engine::getLogger().log(LogSeverity::Info)
+        << "Vulkan device for " << mPhysicalDevice.getName() << " destroyed";
   }
 }
 

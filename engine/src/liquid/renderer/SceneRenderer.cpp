@@ -271,6 +271,8 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
     });
   } // environment pass
 
+  LOG_DEBUG("Scene renderer attached to graph");
+
   return SceneRenderPassData{sceneColor, depthBuffer};
 }
 

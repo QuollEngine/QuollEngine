@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -8,7 +9,7 @@
 #include "VulkanMapping.h"
 #include "VulkanError.h"
 
-#include "liquid/core/Engine.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -21,6 +22,7 @@ VulkanDescriptorManager::VulkanDescriptorManager(
 VulkanDescriptorManager::~VulkanDescriptorManager() {
   if (mDescriptorPool) {
     vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
+    LOG_DEBUG_VK("Descriptor pool destroyed", mDescriptorPool);
   }
 }
 
@@ -33,8 +35,9 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
   if (found == mDescriptorCache.end()) {
     VkDescriptorSet set = createDescriptorSet(descriptor, layout);
     mDescriptorCache.insert({hash, set});
-    LOG_DEBUG("[Vulkan] Descriptor set allocated: \""
-              << descriptor.getHashCode() << "\"");
+    LOG_DEBUG_VK("Descriptor set allocated: \"" << descriptor.getHashCode()
+                                                << "\"",
+                 set);
     return set;
   }
   return (*found).second;
@@ -133,13 +136,16 @@ void VulkanDescriptorManager::createDescriptorPool() {
   static constexpr uint32_t NumDescriptors = 30000;
   static constexpr uint32_t MaxTextureDescriptors = 8;
 
+  static constexpr uint32_t MaxImageSamplers =
+      MaxTextureDescriptors * NumSamplers;
+
   std::array<VkDescriptorPoolSize, 3> poolSizes{
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                            NumUniformBuffers},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                            NumStorageBuffers},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                           MaxTextureDescriptors * NumSamplers}};
+                           MaxImageSamplers}};
 
   VkDescriptorPoolCreateInfo descriptorPoolInfo{};
   descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -153,7 +159,10 @@ void VulkanDescriptorManager::createDescriptorPool() {
                                              nullptr, &mDescriptorPool),
                       "Failed to create descriptor pool");
 
-  LOG_DEBUG("[Vulkan] Descriptor pool created");
+  LOG_DEBUG_VK("Descriptor pool created. Samplers: "
+                   << MaxImageSamplers << "; UB: " << NumUniformBuffers
+                   << "; SB: " << NumStorageBuffers,
+               mDescriptorPool);
 }
 
 String VulkanDescriptorManager::createHash(const Descriptor &descriptor,

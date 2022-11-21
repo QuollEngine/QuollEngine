@@ -36,8 +36,6 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
   mPresentPass = mDevice->createRenderPass(renderPassDescription);
 
-  LOG_DEBUG("Present pass created");
-
   auto vertexShader =
       mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
   auto fragmentShader =
@@ -59,8 +57,6 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
   mPresentPipeline = mDevice->createPipeline(pipelineDescription);
 
-  LOG_DEBUG("Present pipeline created");
-
   for (auto fb : mFramebuffers) {
     mDevice->destroyFramebuffer(fb);
   }
@@ -77,8 +73,6 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
     mFramebuffers.at(i) = mDevice->createFramebuffer(framebufferDescription);
   }
-
-  LOG_DEBUG("Present framebuffers created");
 }
 
 void Presenter::present(rhi::RenderCommandList &commandList,

@@ -23,7 +23,6 @@ VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window) {
 
   checkForVulkanError(result, "Failed to create window surface");
 
-  LOG_DEBUG("[Vulkan] Surface created");
   return surface;
 }
 

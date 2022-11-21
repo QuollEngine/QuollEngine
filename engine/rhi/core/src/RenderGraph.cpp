@@ -6,6 +6,10 @@
 
 namespace liquid::rhi {
 
+RenderGraph::RenderGraph(StringView name) : mName(name) {
+  LOG_DEBUG("Render graph initialized: " << name);
+}
+
 RenderGraphPass &RenderGraph::addPass(StringView name) {
   mPasses.push_back(name);
   return mPasses.back();
@@ -52,9 +56,12 @@ void RenderGraph::compile(RenderDevice *device) {
       "Some of the names in the render graph are used in more than one pass");
 
   if (uniquePasses.size() != mPasses.size()) {
-    Engine::getLogger().log(LogSeverity::Warning)
+    Engine::getLogger().log(LogSeverity::Error)
         << "Some of the names in the render "
-           "graph are used in more than one pass";
+           "graph are used in more than one pass (Graph: "
+        << mName << ")";
+
+    return;
   }
 
   // Delete lonely nodes
@@ -63,7 +70,7 @@ void RenderGraph::compile(RenderDevice *device) {
     if (pass.getInputs().size() == 0 && pass.getOutputs().size() == 0) {
       LOG_DEBUG("Pass is ignored during compilation because it has no inputs, "
                 "nor outputs: "
-                << pass.getName());
+                << pass.getName() << " (Graph: " << mName << ")");
     } else {
       passIndices.push_back(i);
     }
@@ -205,6 +212,8 @@ void RenderGraph::compile(RenderDevice *device) {
       visitedOutputs.insert_or_assign(output.texture, output.dstLayout);
     }
   }
+
+  LOG_DEBUG("Render graph compiled: " << mName);
 }
 
 void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {

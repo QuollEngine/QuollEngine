@@ -5,6 +5,7 @@
 #include "VulkanTexture.h"
 #include "VulkanMapping.h"
 #include "VulkanError.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -98,13 +99,13 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
       vkCreateRenderPass(mDevice, &createInfo, nullptr, &mRenderPass),
       "Failed to create render pass");
 
-  LOG_DEBUG("[Vulkan] Render pass created");
+  LOG_DEBUG_VK("Render pass created", mRenderPass);
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
   vkDestroyRenderPass(mDevice, mRenderPass, nullptr);
 
-  LOG_DEBUG("[Vulkan] Render pass destroyed");
+  LOG_DEBUG_VK("Render pass destroyed", mRenderPass);
 }
 
 } // namespace liquid::rhi

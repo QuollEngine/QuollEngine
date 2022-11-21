@@ -8,6 +8,8 @@ using namespace liquid::rhi;
 
 class RenderGraphTest : public ::testing::Test {
 public:
+  RenderGraphTest() : graph("TestGraph") {}
+
   MockRenderDevice device;
   liquid::rhi::RenderGraph graph;
 };

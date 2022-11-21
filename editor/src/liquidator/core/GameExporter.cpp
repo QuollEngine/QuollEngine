@@ -57,6 +57,9 @@ void GameExporter::exportGame(const Project &project,
   std::ofstream stream(destination / "launch.yml", std::ios::out);
   stream << node;
   stream.close();
+
+  liquid::Engine::getLogger().log(liquid::LogSeverity::Info)
+      << "Game exported to " << destination;
 }
 
 } // namespace liquidator

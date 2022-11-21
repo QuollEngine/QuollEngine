@@ -127,7 +127,7 @@ void EditorScreen::start(const Project &project) {
   liquidator::EditorRenderer editorRenderer(renderer.getShaderLibrary(),
                                             ui.getIconRegistry(), mDevice);
 
-  liquid::rhi::RenderGraph graph;
+  liquid::rhi::RenderGraph graph("Main");
 
   auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
   auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);

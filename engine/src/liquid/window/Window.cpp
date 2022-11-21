@@ -19,6 +19,7 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
                   "Failed to initialize GLFW: " + String(errorMsg));
     Engine::getLogger().log(LogSeverity::Error)
         << "Failed to initialize GLFW: " << errorMsg;
+    return;
   }
 
   // Do not create OpenGL context
@@ -30,9 +31,18 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
 
   platform_tools::NativeWindowTools::enableDarkMode(mWindowInstance);
 
-  LIQUID_ASSERT(mWindowInstance, "Failed to create windows");
+  if (!mWindowInstance) {
+    const char *errorMsg = nullptr;
+    glfwGetError(&errorMsg);
+    LIQUID_ASSERT(initReturnValue,
+                  "Failed to create GLFW window: " + String(errorMsg));
+    Engine::getLogger().log(LogSeverity::Error)
+        << "Failed to create GLFW window: " << errorMsg;
+  }
 
-  LOG_DEBUG("Window Created");
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Window Created. Title: " << title << "; Width: " << width
+      << "; Height: " << height;
 
   glfwSetWindowUserPointer(mWindowInstance, this);
 
@@ -111,7 +121,7 @@ Window::~Window() {
     glfwDestroyWindow(mWindowInstance);
     mWindowInstance = nullptr;
   }
-  LOG_DEBUG("Window destroyed");
+  Engine::getLogger().log(LogSeverity::Info) << "Window destroyed";
   glfwTerminate();
 }
 
