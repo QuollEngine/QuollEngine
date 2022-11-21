@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "GLTFImporter.h"
 
@@ -186,14 +186,14 @@ TransformData loadTransformData(const tinygltf::Node &node) {
                     data.localScale);
 
   } else if (node.matrix.size() > 0) {
-    liquid::engineLogger.log(Logger::Warning)
+    liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
         << "Node matrix data must have 16 values. Skipping...";
   } else {
     if (node.translation.size() == glm::vec3::length()) {
       data.localPosition = glm::make_vec3(node.translation.data());
       finalTransform *= glm::translate(glm::mat4{1.0f}, data.localPosition);
     } else if (node.translation.size() > 0) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Node translation data must have 3 values. Skipping...";
     }
 
@@ -201,7 +201,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
       data.localRotation = glm::make_quat(node.rotation.data());
       finalTransform *= glm::toMat4(data.localRotation);
     } else if (node.rotation.size() > 0) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Node rotation data must have 4 values. Skipping...";
     }
 
@@ -209,7 +209,7 @@ TransformData loadTransformData(const tinygltf::Node &node) {
       data.localScale = glm::make_vec3(node.scale.data());
       finalTransform *= glm::scale(glm::mat4{1.0f}, data.localScale);
     } else if (node.scale.size() > 0) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Node scale data must have 3 values. Skipping...";
     }
   }
@@ -360,7 +360,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
   std::vector<liquid::String> warnings;
 
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
-    liquid::engineLogger.log(Logger::Warning)
+    liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
         << "Mesh #" << i << ", Primitive #" << p
         << " does not have a position attribute. Skipping...";
     return liquid::
@@ -393,7 +393,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Mesh #" << i << ", Primitive #" << p
           << " has invalid index format. Skipping...";
       return liquid::
@@ -418,7 +418,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       vertices[i].z = data[i].z;
     }
   } else {
-    liquid::engineLogger.log(Logger::Warning)
+    liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
         << "Mesh #" << i << ", Primitive #0"
         << " has invalid position format. Skipping...";
     return liquid::
@@ -443,7 +443,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     }
   } else {
     warnings.push_back("Mesh does not have normals");
-    liquid::engineLogger.log(Logger::Warning)
+    liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
         << "Calculating flat normals is not supported";
   }
 
@@ -466,7 +466,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
   } else {
     // TODO: Calculate tangents using MikkTSpace algorithms
     warnings.push_back("Mesh does not have tangents");
-    liquid::engineLogger.log(Logger::Warning)
+    liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
         << "Tangents will be calculated using derivative functions in "
            "pixel shader. For more accurate results, you need to provide "
            "the tangent attribute when generating GLTF model.";
@@ -493,7 +493,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         // TODO: Convert integer coordinates to float
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Integer based texture coordinates are not supported for "
                "TEXCOORD0";
         warnings.push_back("Integer based texture coordinates are not "
@@ -523,7 +523,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         // TODO: Convert integer coordinates to float
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Integer based texture coordinates are not supported for "
                "TEXCOORD1";
         warnings.push_back("Integer based texture coordinates are not "
@@ -615,7 +615,7 @@ loadMeshes(const tinygltf::Model &model,
               model, primitive.attributes.at("JOINTS_0"));
 
           if (jointMeta.accessor.type != TINYGLTF_TYPE_VEC4) {
-            liquid::engineLogger.log(liquid::Logger::Warning)
+            liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
                 << "Mesh #" << i
                 << " JOINTS_0 is not in VEC4 format. Skipping...";
           } else if (jointMeta.accessor.componentType ==
@@ -732,7 +732,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
 
     if (ibMeta.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Inverse bind matrices accessor must be of type FLOAT. Skipping "
              "skin #"
           << si;
@@ -741,7 +741,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     }
 
     if (ibMeta.accessor.type != TINYGLTF_TYPE_MAT4) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Inverse bind matrices accessor must be MAT4. Skipping "
              "skin #"
           << si;
@@ -749,7 +749,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     }
 
     if (ibMeta.accessor.count < skin.joints.size()) {
-      liquid::engineLogger.log(Logger::Warning)
+      liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
           << "Inverse bind matrices cannot be fewer than number of joints. "
              "Skipping "
              "skin #"
@@ -773,7 +773,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
 
       if (skeletonData.gltfToNormalizedJointMap.find(joint) !=
           skeletonData.gltfToNormalizedJointMap.end()) {
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Single joint cannot be a child of multiple skins. Skipping "
                "joint #"
             << joint
@@ -878,25 +878,25 @@ AnimationData loadAnimations(const tinygltf::Model &model,
       const auto &output = getBufferMetaForAccessor(model, sampler.output);
 
       if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Animation time accessor must be in SCALAR format. Skipping...";
         continue;
       }
 
       if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Animation time accessor component type must be FLOAT";
         continue;
       }
 
       if (input.accessor.count != output.accessor.count) {
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Sampler input and output must have the same number of items";
         continue;
       }
 
       if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        liquid::engineLogger.log(Logger::Warning)
+        liquid::Engine::getLogger().log(liquid::LogSeverity::Warning)
             << "Animation output accessor component type must be FLOAT";
         continue;
       }

@@ -13,7 +13,7 @@
 #include "VulkanResourceMetrics.h"
 
 #include "VulkanError.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 namespace liquid::rhi {
 

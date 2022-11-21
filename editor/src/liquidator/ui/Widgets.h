@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/imgui/ImguiUtils.h"
+
 namespace liquidator::widgets {
 
 /**

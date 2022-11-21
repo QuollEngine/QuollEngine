@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "RenderCommandList.h"
 #include "RenderGraph.h"
@@ -52,8 +52,9 @@ void RenderGraph::compile(RenderDevice *device) {
       "Some of the names in the render graph are used in more than one pass");
 
   if (uniquePasses.size() != mPasses.size()) {
-    engineLogger.log(Logger::Warning) << "Some of the names in the render "
-                                         "graph are used in more than one pass";
+    Engine::getLogger().log(LogSeverity::Warning)
+        << "Some of the names in the render "
+           "graph are used in more than one pass";
   }
 
   // Delete lonely nodes

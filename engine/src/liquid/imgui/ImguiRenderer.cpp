@@ -1,5 +1,4 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
 #include "liquid/core/Engine.h"
 
 #include "ImguiRenderer.h"

@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "LuaInterpreter.h"
 #include "LuaScope.h"

@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 #include "VulkanShader.h"
 #include "VulkanError.h"
@@ -26,7 +26,7 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
       "Failed to create shader module from \"" + mPath.filename().string() +
           "\"");
 
-  LOG_DEBUG("[Vulkan] Shader module created from \"" +
+  LOG_DEBUG("[Vulkan] Shader loaded: \"" +
             std::filesystem::relative(mPath, std::filesystem::current_path())
                 .string() +
             "\"");
@@ -37,7 +37,11 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
 VulkanShader::~VulkanShader() {
   if (mShaderModule) {
     vkDestroyShaderModule(mDevice, mShaderModule, nullptr);
-    LOG_DEBUG("[Vulkan] Shader module destroyed");
+
+    LOG_DEBUG("[Vulkan] Shader unloaded \"" +
+              std::filesystem::relative(mPath, std::filesystem::current_path())
+                  .string() +
+              "\"");
   }
 }
 

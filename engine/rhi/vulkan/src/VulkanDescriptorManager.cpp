@@ -8,7 +8,7 @@
 #include "VulkanMapping.h"
 #include "VulkanError.h"
 
-#include "liquid/core/EngineGlobals.h"
+#include "liquid/core/Engine.h"
 
 namespace liquid::rhi {
 
@@ -33,6 +33,8 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
   if (found == mDescriptorCache.end()) {
     VkDescriptorSet set = createDescriptorSet(descriptor, layout);
     mDescriptorCache.insert({hash, set});
+    LOG_DEBUG("[Vulkan] Descriptor set allocated: \""
+              << descriptor.getHashCode() << "\"");
     return set;
   }
   return (*found).second;
@@ -120,7 +122,6 @@ VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
   checkForVulkanError(vkAllocateDescriptorSets(
                           mDevice, &descriptorSetAllocateInfo, &descriptorSet),
                       "Failed to allocate descriptor set");
-  LOG_DEBUG("[Vulkan] Descriptor set allocated");
 
   return descriptorSet;
 }
