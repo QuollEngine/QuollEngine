@@ -22,17 +22,28 @@ void LuaInterpreter::destroyScope(LuaScope &scope) {
   lua_close(scope.getLuaState());
 }
 
-void LuaInterpreter::evaluate(const std::vector<char> &bytes, LuaScope &scope) {
+bool LuaInterpreter::evaluate(const std::vector<char> &bytes, LuaScope &scope) {
   auto *luaState = scope.getLuaState();
 
   auto ret = luaL_loadstring(
       luaState, liquid::String{bytes.begin(), bytes.end()}.c_str());
-  LIQUID_ASSERT(ret == LUA_OK, "Cannot load script");
+
+  if (!ret == LUA_OK) {
+    auto stringView = scope.get<StringView>(-1);
+    Engine::getUserLogger().error() << "Cannot load lua script: " << stringView;
+    return false;
+  }
 
   ret = lua_pcall(luaState, 0, 0, 0);
-  LIQUID_ASSERT(ret == LUA_OK, "Cannot evaluate script");
+  if (!ret == LUA_OK) {
+    auto stringView = scope.get<StringView>(-1);
+    Engine::getUserLogger().error()
+        << "Cannot evaluate lua script: " << stringView;
+    return false;
+  }
 
   lua_pop(luaState, lua_gettop(luaState));
+  return true;
 }
 
 } // namespace liquid

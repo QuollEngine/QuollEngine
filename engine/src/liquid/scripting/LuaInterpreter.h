@@ -30,8 +30,10 @@ public:
    *
    * @param bytes Script data
    * @param scope Lua scope
+   * @retval true Script evaluated sucessfully
+   * @retval false Script failed to evaluate
    */
-  void evaluate(const std::vector<char> &bytes, LuaScope &scope);
+  bool evaluate(const std::vector<char> &bytes, LuaScope &scope);
 };
 
 } // namespace liquid

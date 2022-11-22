@@ -12,12 +12,27 @@ public:
   /**
    * @brief Render log viewer
    *
-   * @param engineLogs Engine logs
+   * @param systemLogs System logs
+   * @param userLogs User logs
    */
-  void render(LogMemoryStorage &engineLogs);
+  void render(LogMemoryStorage &systemLogs, LogMemoryStorage &userLogs);
 
 private:
-  size_t mEngineLogsSize = 0;
+  /**
+   * @brief Render log container
+   *
+   * @param name Container name
+   * @param logStorage Log storage
+   * @param logSize Current log size
+   * @param width Container width
+   */
+  void renderLogContainer(const liquid::String &name,
+                          LogMemoryStorage &logStorage, size_t &logSize,
+                          float width);
+
+private:
+  size_t mSystemLogSize = 0;
+  size_t mUserLogSize = 0;
 };
 
 } // namespace liquidator

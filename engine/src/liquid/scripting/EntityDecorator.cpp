@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "EntityDecorator.h"
+#include "liquid/core/Engine.h"
 
 #include "liquid/core/NameScriptingInterface.h"
 #include "liquid/entity/EntityQueryScriptingInterface.h"
@@ -9,6 +9,8 @@
 #include "liquid/text/TextScriptingInterface.h"
 
 #include "LuaScope.h"
+#include "EntityDecorator.h"
+#include "ScriptLogger.h"
 
 namespace liquid {
 
@@ -32,7 +34,7 @@ template <class TLuaInterface> LuaTable createInterfaceTable(LuaScope &scope) {
 }
 
 /**
- * @brief Registry component with scope
+ * @brief Register component with scope
  *
  * @tparam TComponent Component to registry
  * @param scope Lua scope
@@ -70,6 +72,9 @@ void EntityDecorator::attachToScope(LuaScope &scope, Entity entity,
 
   createInterfaceTable<EntityQueryScriptingInterface::LuaInterface>(scope);
   scope.setPreviousValueAsGlobal("entity_query");
+
+  createScriptLogger(scope);
+  scope.setPreviousValueAsGlobal("logger");
 }
 
 } // namespace liquid

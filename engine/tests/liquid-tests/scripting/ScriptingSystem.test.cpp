@@ -40,7 +40,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), TimeDelta);
 }
 
-TEST_F(ScriptingSystemTest, DeleteScriptForEntitiesWithDeletes) {
+TEST_F(ScriptingSystemTest, DeletesScriptForEntitiesWithDeletes) {
   auto handle = assetCache
                     .loadLuaScriptFromFile(std::filesystem::current_path() /
                                            "scripting-system-tester.lua")
@@ -125,6 +125,49 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
+}
+
+TEST_F(ScriptingSystemTest,
+       DeletesScriptComponentsOnStartIfScriptCannotBeEvaluated) {
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(std::filesystem::current_path() /
+                                 "scripting-system-invalid-syntax.lua")
+          .getData();
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Script>(entity, {handle});
+
+  scriptingSystem.start(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
+}
+
+TEST_F(ScriptingSystemTest,
+       DeletesScriptComponentsOnStartIfScriptDoesNotHaveStartFunction) {
+  auto handle = assetCache
+                    .loadLuaScriptFromFile(std::filesystem::current_path() /
+                                           "scripting-system-no-start.lua")
+                    .getData();
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Script>(entity, {handle});
+
+  scriptingSystem.start(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
+}
+
+TEST_F(ScriptingSystemTest,
+       DeletesScriptComponentsOnStartIfScriptDoesNotHaveUpdateFunction) {
+  auto handle = assetCache
+                    .loadLuaScriptFromFile(std::filesystem::current_path() /
+                                           "scripting-system-no-update.lua")
+                    .getData();
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Script>(entity, {handle});
+
+  scriptingSystem.start(entityDatabase);
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {

@@ -96,10 +96,6 @@ private:
   LogSeverity mMinSeverity;
 
   LogTransport mTransport;
-
-private:
-  static constexpr auto NoopTransport = [](LogSeverity, LogTimestamp, String) {
-  };
 };
 
 } // namespace liquid

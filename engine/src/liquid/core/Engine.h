@@ -47,11 +47,23 @@ public:
   static const Path getEnginePath();
 
   /**
-   * @brief Get engine logger
+   * @brief Get system logger
    *
-   * @return Engine logger
+   * @return System logger
    */
   static Logger &getLogger();
+
+  /**
+   * @brief Get user logger
+   *
+   * @return User logger
+   */
+  static Logger &getUserLogger();
+
+  /**
+   * @brief Reset loggers
+   */
+  static void resetLoggers();
 
 private:
   /**
@@ -66,7 +78,9 @@ private:
   Path mAssetsPath;
   Path mEnginePath;
 
-  Logger mLogger;
+  Logger mSystemLogger;
+
+  Logger mUserLogger;
 };
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
