@@ -14,6 +14,7 @@ public:
    * @param scriptName Script name
    */
   LuaScriptingInterfaceTestBase(const liquid::String &scriptName = ScriptName);
+
   /**
    * @brief Call function
    *

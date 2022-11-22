@@ -14,6 +14,7 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
   EntityDecorator entityDecorator;
+  std::vector<Entity> deleteList;
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     if (component.started) {
       return;
@@ -29,12 +30,31 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
     entityDecorator.attachToScope(component.scope, entity, entityDatabase);
 
     auto &script = mAssetRegistry.getLuaScripts().getAsset(component.handle);
-    mLuaInterpreter.evaluate(script.data.bytes, component.scope);
+    bool success = mLuaInterpreter.evaluate(script.data.bytes, component.scope);
 
-    createScriptingData(component, entity);
+    if (success && !component.scope.hasFunction("start")) {
+      Engine::getUserLogger().error()
+          << "`start` function is missing from script";
+      success = false;
+    }
 
-    component.scope.luaGetGlobal("start");
-    component.scope.call(0);
+    if (success && !component.scope.hasFunction("update")) {
+      Engine::getUserLogger().error()
+          << "`update` function is missing from script";
+      success = false;
+    }
+
+    if (success) {
+      createScriptingData(component, entity);
+      component.scope.luaGetGlobal("start");
+      component.scope.call(0);
+    } else {
+      deleteList.push_back(entity);
+    }
+  }
+
+  for (auto entity : deleteList) {
+    entityDatabase.remove<Script>(entity);
   }
 }
 

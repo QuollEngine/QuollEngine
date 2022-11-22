@@ -116,7 +116,7 @@ void LuaScope::call(uint32_t numArgs) {
   } else {
     auto stringView = luaGetString(-1);
 
-    Engine::getLogger().error()
+    Engine::getUserLogger().error()
         << "Failed to call lua function: " << stringView;
 
     lua_pop(mScope, -1);

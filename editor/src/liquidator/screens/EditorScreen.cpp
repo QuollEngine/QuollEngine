@@ -66,8 +66,10 @@ EditorScreen::EditorScreen(liquid::Window &window,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
-  LogMemoryStorage engineLogStorage;
-  liquid::Engine::getLogger().setTransport(engineLogStorage.createTransport());
+  LogMemoryStorage systemLogStorage, userLogStorage;
+  liquid::Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  liquid::Engine::getUserLogger().setTransport(
+      userLogStorage.createTransport());
 
   liquid::FPSCounter fpsCounter;
 
@@ -186,7 +188,8 @@ void EditorScreen::start(const Project &project) {
                         &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
                         &ui, &debugLayer, &preloadStatusDialog, &presenter,
                         &editorRenderer, &simulator, &mousePicking,
-                        &engineLogStorage, &logViewer, this]() {
+                        &systemLogStorage, &userLogStorage, &logViewer,
+                        this]() {
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
     // TODO: Why is -2.0f needed here
@@ -235,7 +238,7 @@ void EditorScreen::start(const Project &project) {
     ui.render(editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
 
-    logViewer.render(engineLogStorage);
+    logViewer.render(systemLogStorage, userLogStorage);
 
     if (auto _ = SceneView(scenePassGroup.sceneColor)) {
       const auto &pos = ImGui::GetItemRectMin();
@@ -334,8 +337,7 @@ void EditorScreen::start(const Project &project) {
   });
 
   mainLoop.run();
-  liquid::Engine::getLogger().setTransport(
-      liquid::createStreamTransport(std::cout));
+  liquid::Engine::resetLoggers();
   editorManager.saveEditorState(statePath);
 
   mDevice->waitForIdle();
