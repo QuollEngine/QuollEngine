@@ -3,6 +3,7 @@
 
 #include "VulkanSwapchain.h"
 #include "VulkanError.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -25,14 +26,14 @@ void VulkanSwapchain::recreate(VulkanRenderBackend &backend,
   create(backend, physicalDevice, allocator);
 
   vkDestroySwapchainKHR(mDevice, oldSwapchain, nullptr);
-  LOG_DEBUG("[Vulkan] Old swapchain destroyed");
+  LOG_DEBUG_VK("Swapchain destroyed", mSwapchain);
 }
 
 void VulkanSwapchain::destroy() {
   if (mSwapchain) {
     vkDestroySwapchainKHR(mDevice, mSwapchain, nullptr);
     mSwapchain = VK_NULL_HANDLE;
-    LOG_DEBUG("[Vulkan] Swapchain destroyed");
+    LOG_DEBUG_VK("Swapchain destroyed", mSwapchain);
   }
 }
 
@@ -134,7 +135,10 @@ void VulkanSwapchain::create(VulkanRenderBackend &backend,
         mDevice));
   }
 
-  LOG_DEBUG("[Vulkan] Swapchain created (" << mTextures.size() << " images)");
+  LOG_DEBUG_VK("Swapchain created. Images: " << mTextures.size()
+                                             << "; Extent: [" << mExtent.x
+                                             << ", " << mExtent.y << "]",
+               mSwapchain);
 }
 
 void VulkanSwapchain::pickMostSuitableSurfaceFormat(

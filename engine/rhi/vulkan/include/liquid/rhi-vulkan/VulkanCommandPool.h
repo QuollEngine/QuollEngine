@@ -51,6 +51,7 @@ private:
   VulkanDescriptorManager &mDescriptorManager;
   DeviceStats &mStats;
   const VulkanResourceRegistry &mRegistry;
+  uint32_t mQueueFamilyIndex = 0;
 };
 
 } // namespace liquid::rhi

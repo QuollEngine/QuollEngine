@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
 #include "EditorRenderer.h"
 
@@ -232,6 +233,8 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
       }
     }
   });
+
+  LOG_DEBUG("Editor renderer attached to graph: " << graph.getName());
 
   return pass;
 }

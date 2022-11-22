@@ -26,10 +26,11 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
       "Failed to create shader module from \"" + mPath.filename().string() +
           "\"");
 
-  LOG_DEBUG("[Vulkan] Shader loaded: \"" +
-            std::filesystem::relative(mPath, std::filesystem::current_path())
-                .string() +
-            "\"");
+  Engine::getLogger().log(LogSeverity::Info)
+      << "Shader loaded: \"" +
+             std::filesystem::relative(mPath, std::filesystem::current_path())
+                 .string() +
+             "\"";
 
   createReflectionInfo(shaderBytes);
 }
@@ -38,10 +39,11 @@ VulkanShader::~VulkanShader() {
   if (mShaderModule) {
     vkDestroyShaderModule(mDevice, mShaderModule, nullptr);
 
-    LOG_DEBUG("[Vulkan] Shader unloaded \"" +
-              std::filesystem::relative(mPath, std::filesystem::current_path())
-                  .string() +
-              "\"");
+    Engine::getLogger().log(LogSeverity::Info)
+        << "Shader unloaded: \"" +
+               std::filesystem::relative(mPath, std::filesystem::current_path())
+                   .string() +
+               "\"";
   }
 }
 

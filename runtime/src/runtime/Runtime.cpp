@@ -45,7 +45,7 @@ void Runtime::start() {
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(window, fpsCounter);
 
-  liquid::rhi::RenderGraph graph;
+  liquid::rhi::RenderGraph graph("Main");
   liquid::Renderer renderer(assetCache.getRegistry(), window, device);
 
   static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};

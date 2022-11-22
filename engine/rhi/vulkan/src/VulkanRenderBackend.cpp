@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
 #include "VulkanRenderBackend.h"
 #include "VulkanWindowExtensions.h"
@@ -12,8 +13,7 @@
 #include <GLFW/glfw3.h>
 #include "VulkanRenderDevice.h"
 #include "VulkanError.h"
-
-#include "liquid/core/Engine.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -23,6 +23,7 @@ VulkanRenderBackend::VulkanRenderBackend(Window &window, bool enableValidations)
     : mWindow(window) {
   createInstance("RHI", enableValidations);
   mSurface = createSurfaceFromWindow(mInstance, window);
+  LOG_DEBUG_VK("Surface created", mSurface);
 
   mResizeListener = window.addResizeHandler(
       [this](auto width, auto height) { mFramebufferResized = true; });
@@ -35,15 +36,14 @@ VulkanRenderBackend::~VulkanRenderBackend() {
 
   if (mSurface) {
     vkDestroySurfaceKHR(mInstance, mSurface, nullptr);
-    LOG_DEBUG("[Vulkan] Surface destroyed");
+    LOG_DEBUG_VK("Surface destroyed", mSurface);
   }
 
   mValidator.detachFromInstance(mInstance);
-  LOG_DEBUG("[Vulkan] Validator detached from instance");
 
   if (mInstance) {
     vkDestroyInstance(mInstance, nullptr);
-    LOG_DEBUG("[Vulkan] Instance destroyed");
+    LOG_DEBUG_VK("Instance destroyed", mInstance);
   }
 }
 
@@ -100,10 +100,10 @@ void VulkanRenderBackend::createInstance(StringView applicationName,
 
   if (enableValidations) {
     mValidator.attachToInstance(mInstance);
-    LOG_DEBUG("[Vulkan] Validator attached to instance");
+    Engine::getLogger().log(LogSeverity::Info) << "Vulkan validations enabled";
   }
 
-  LOG_DEBUG("[Vulkan] Vulkan instance created");
+  LOG_DEBUG_VK("Vulkan instance created", mInstance);
 }
 
 VulkanPhysicalDevice VulkanRenderBackend::pickPhysicalDevice() {
@@ -122,7 +122,8 @@ VulkanPhysicalDevice VulkanRenderBackend::pickPhysicalDevice() {
   LIQUID_ASSERT(it != devices.end(), "No suitable physical device found");
 
   physicalDevice = *it;
-  LOG_DEBUG("[Vulkan] Physical device selected: " << physicalDevice.getName());
+  LOG_DEBUG_VK_NO_HANDLE(
+      "Physical device selected: " << physicalDevice.getName());
   return physicalDevice;
 }
 

@@ -8,7 +8,7 @@ MousePickingGraph::MousePickingGraph(
     const std::array<liquid::SceneRendererFrameData, 2> &frameData,
     liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device)
     : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
-      mGraphEvaluator(device) {
+      mGraphEvaluator(device), mRenderGraph("MousePicking") {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(

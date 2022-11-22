@@ -10,7 +10,6 @@ VulkanValidator::VulkanValidator() {
   mMessengerCreateInfo.sType =
       VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   mMessengerCreateInfo.messageSeverity =
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
   mMessengerCreateInfo.messageType =
@@ -71,14 +70,35 @@ void VulkanValidator::destroyDebugUtilsMessengerEXT(
   }
 }
 
+static String getValidationMessage(
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData) {
+
+  String str(pCallbackData->pMessage);
+  auto lastPipe = str.find_last_of('|');
+  if (lastPipe == String::npos) {
+    return str;
+  }
+
+  auto newStr = str.substr(lastPipe + 2);
+  std::stringstream ss;
+  ss << newStr << " (" << pCallbackData->pMessageIdName << "; 0x" << std::hex
+     << pCallbackData->messageIdNumber << ")";
+
+  return ss.str();
+}
+
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData) {
-  if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+
+  if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
     Engine::getLogger().log(LogSeverity::Warning)
-        << "[Vulkan] " << pCallbackData->pMessage;
+        << "[VK] " << getValidationMessage(pCallbackData);
+  } else {
+    Engine::getLogger().log(LogSeverity::Error)
+        << "[VK] " << getValidationMessage(pCallbackData);
   }
 
   return VK_FALSE;

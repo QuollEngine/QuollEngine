@@ -48,7 +48,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
   imguiRenderer.buildFonts();
 
-  liquid::rhi::RenderGraph graph;
+  liquid::rhi::RenderGraph graph("Main");
   auto imguiPassData = imguiRenderer.attach(graph);
 
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
@@ -144,6 +144,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   mWindow.removeResizeHandler(resizeHandler);
   mDevice->waitForIdle();
+
   return project;
 }
 

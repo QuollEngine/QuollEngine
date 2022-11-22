@@ -4,6 +4,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanUploadContext.h"
 #include "VulkanError.h"
+#include "VulkanLog.h"
 
 namespace liquid::rhi {
 
@@ -20,7 +21,7 @@ VulkanUploadContext::VulkanUploadContext(VulkanDeviceObject &mDevice,
 VulkanUploadContext::~VulkanUploadContext() {
   if (mUploadFence) {
     vkDestroyFence(mDevice, mUploadFence, nullptr);
-    LOG_DEBUG("[Vulkan] Upload fence destroyed");
+    LOG_DEBUG_VK("Upload fence destroyed", mUploadFence);
   }
 }
 
@@ -69,7 +70,7 @@ void VulkanUploadContext::createFence() {
       vkCreateFence(mDevice, &fenceInfo, nullptr, &mUploadFence),
       "Failed to create upload fence");
 
-  LOG_DEBUG("[Vulkan] Upload fence created");
+  LOG_DEBUG_VK("Upload fence created", mUploadFence);
 }
 
 } // namespace liquid::rhi

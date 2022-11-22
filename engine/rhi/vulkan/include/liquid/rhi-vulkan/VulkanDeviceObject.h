@@ -44,6 +44,7 @@ public:
 
 private:
   VkDevice mDevice = VK_NULL_HANDLE;
+  const VulkanPhysicalDevice &mPhysicalDevice;
 };
 
 } // namespace liquid::rhi

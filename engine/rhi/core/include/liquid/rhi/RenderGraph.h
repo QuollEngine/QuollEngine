@@ -11,6 +11,13 @@ namespace liquid::rhi {
 class RenderGraph {
 public:
   /**
+   * @brief Initialize render graph with name
+   *
+   * @param name Render graph name
+   */
+  RenderGraph(StringView name);
+
+  /**
    * @brief Add pass
    *
    * @param name Pass name
@@ -73,12 +80,21 @@ public:
    */
   void updateDirtyFlag();
 
+  /**
+   * @brief Get name
+   *
+   * @return Render graph name
+   */
+  inline const String &getName() const { return mName; }
+
 private:
   std::vector<RenderGraphPass> mPasses;
   std::vector<RenderGraphPass> mCompiledPasses;
 
   glm::uvec2 mFramebufferExtent{};
   bool mDirty = true;
+
+  String mName;
 };
 
 } // namespace liquid::rhi
