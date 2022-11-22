@@ -43,23 +43,21 @@ VulkanDeviceObject::VulkanDeviceObject(
 
   std::vector<const char *> extensions;
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  Engine::getLogger().log(LogSeverity::Info)
+  Engine::getLogger().info()
       << "Vulkan extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
   extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
-  Engine::getLogger().log(LogSeverity::Info)
-      << "Vulkan extension enabled: "
-      << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
+  Engine::getLogger().info() << "Vulkan extension enabled: "
+                             << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
 
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
-  Engine::getLogger().log(LogSeverity::Info)
+  Engine::getLogger().info()
       << "Vulkan extension enabled: "
       << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME;
 
   extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
-  Engine::getLogger().log(LogSeverity::Info)
-      << "Vulkan extension enabled: "
-      << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
+  Engine::getLogger().info() << "Vulkan extension enabled: "
+                             << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
 
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
@@ -70,7 +68,7 @@ VulkanDeviceObject::VulkanDeviceObject(
   if (portabilityExt != pdExtensions.end()) {
     extensions.push_back(
         LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
-    Engine::getLogger().log(LogSeverity::Info)
+    Engine::getLogger().info()
         << "Extension enabled: "
         << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
   }
@@ -108,7 +106,7 @@ VulkanDeviceObject::VulkanDeviceObject(
       vkCreateDevice(physicalDevice, &createDeviceInfo, nullptr, &mDevice),
       "Failed to create device");
 
-  Engine::getLogger().log(LogSeverity::Info)
+  Engine::getLogger().info()
       << "Vulkan device created for " << physicalDevice.getName();
 }
 
@@ -116,7 +114,7 @@ VulkanDeviceObject::~VulkanDeviceObject() {
   if (mDevice) {
     vkDestroyDevice(mDevice, nullptr);
 
-    Engine::getLogger().log(LogSeverity::Info)
+    Engine::getLogger().info()
         << "Vulkan device for " << mPhysicalDevice.getName() << " destroyed";
   }
 }

@@ -71,8 +71,7 @@ private:
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if defined(LIQUID_DEBUG)
-#define LOG_DEBUG(stream)                                                      \
-  liquid::Engine::getLogger().log(liquid::LogSeverity::Debug) << stream
+#define LOG_DEBUG(stream) liquid::Engine::getLogger().debug() << stream
 #else
 #define LOG_DEBUG(_)                                                           \
   {}

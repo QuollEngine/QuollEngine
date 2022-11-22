@@ -94,10 +94,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidator::debugCallback(
     void *pUserData) {
 
   if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-    Engine::getLogger().log(LogSeverity::Warning)
+    Engine::getLogger().warning()
         << "[VK] " << getValidationMessage(pCallbackData);
   } else {
-    Engine::getLogger().log(LogSeverity::Error)
+    Engine::getLogger().error()
         << "[VK] " << getValidationMessage(pCallbackData);
   }
 

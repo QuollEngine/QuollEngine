@@ -30,7 +30,7 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
 void Material::updateProperty(StringView name, const Property &value) {
   const auto &it = mPropertyMap.find(String(name));
   if (it == mPropertyMap.end() || (*it).second > mProperties.size()) {
-    Engine::getLogger().log(LogSeverity::Warning)
+    Engine::getLogger().warning()
         << "Property \"" << name
         << "\" does not exist in material. Skipping...";
     return;
@@ -39,7 +39,7 @@ void Material::updateProperty(StringView name, const Property &value) {
   size_t index = (*it).second;
 
   if (mProperties.at(index).getType() != value.getType()) {
-    Engine::getLogger().log(LogSeverity::Warning)
+    Engine::getLogger().warning()
         << "Type of property \"" << name
         << "\" does match the type of new property. Skipping...";
     return;

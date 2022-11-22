@@ -24,7 +24,7 @@ int main() {
 
   device->destroyResources();
   if (project.has_value()) {
-    liquid::Engine::getLogger().log(liquid::LogSeverity::Info)
+    liquid::Engine::getLogger().info()
         << "Project selected: " << project.value().name;
 
     liquidator::EditorScreen editor(window, eventSystem, device);
