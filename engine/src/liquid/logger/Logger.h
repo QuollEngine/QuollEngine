@@ -38,6 +38,49 @@ public:
   Logger(LogSeverity minSeverity = DefaultSeverity);
 
   /**
+   * @brief Set log transport
+   *
+   * @param transport Log transport
+   */
+  void setTransport(LogTransport transport);
+
+  /**
+   * @brief Create log stream for debug severity
+   *
+   * @return Log stream for debug
+   */
+  inline LogStream debug() { return log(LogSeverity::Debug); }
+
+  /**
+   * @brief Create log stream for info severity
+   *
+   * @return Log stream for info
+   */
+  inline LogStream info() { return log(LogSeverity::Info); }
+
+  /**
+   * @brief Create log stream for warning severity
+   *
+   * @return Log stream for warning
+   */
+  inline LogStream warning() { return log(LogSeverity::Warning); }
+
+  /**
+   * @brief Create log stream for error severity
+   *
+   * @return Log stream for error
+   */
+  inline LogStream error() { return log(LogSeverity::Error); }
+
+  /**
+   * @brief Create log stream for fatal severity
+   *
+   * @return Log stream for fatal
+   */
+  inline LogStream fatal() { return log(LogSeverity::Fatal); }
+
+private:
+  /**
    * @brief Create log stream
    *
    * If severity is lower than minimum severity
@@ -48,13 +91,6 @@ public:
    * @return Log stream
    */
   LogStream log(LogSeverity severity);
-
-  /**
-   * @brief Set log transport
-   *
-   * @param transport Log transport
-   */
-  void setTransport(LogTransport transport);
 
 private:
   LogSeverity mMinSeverity;

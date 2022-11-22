@@ -26,7 +26,7 @@ VulkanShader::VulkanShader(const ShaderDescription &description,
       "Failed to create shader module from \"" + mPath.filename().string() +
           "\"");
 
-  Engine::getLogger().log(LogSeverity::Info)
+  Engine::getLogger().info()
       << "Shader loaded: \"" +
              std::filesystem::relative(mPath, std::filesystem::current_path())
                  .string() +
@@ -39,7 +39,7 @@ VulkanShader::~VulkanShader() {
   if (mShaderModule) {
     vkDestroyShaderModule(mDevice, mShaderModule, nullptr);
 
-    Engine::getLogger().log(LogSeverity::Info)
+    Engine::getLogger().info()
         << "Shader unloaded: \"" +
                std::filesystem::relative(mPath, std::filesystem::current_path())
                    .string() +

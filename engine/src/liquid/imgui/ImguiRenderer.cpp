@@ -33,8 +33,7 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  Engine::getLogger().log(LogSeverity::Info)
-      << "Imgui initialized with Vulkan backend";
+  Engine::getLogger().info() << "Imgui initialized with Vulkan backend";
 
   mShaderLibrary.addShader(
       "__engine.imgui.default.vertex",
@@ -338,7 +337,7 @@ void ImguiRenderer::buildFonts() {
       reinterpret_cast<void *>(static_cast<uintptr_t>(mFontTexture)));
 
   {
-    auto &&stream = Engine::getLogger().log(LogSeverity::Info);
+    auto &&stream = Engine::getLogger().info();
     stream << "Imgui fonts loaded: ";
     for (auto *font : io.Fonts->Fonts) {
       stream << "\"" << font->ConfigData->Name << "\"; ";

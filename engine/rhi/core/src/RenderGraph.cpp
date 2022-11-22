@@ -56,7 +56,7 @@ void RenderGraph::compile(RenderDevice *device) {
       "Some of the names in the render graph are used in more than one pass");
 
   if (uniquePasses.size() != mPasses.size()) {
-    Engine::getLogger().log(LogSeverity::Error)
+    Engine::getLogger().error()
         << "Some of the names in the render "
            "graph are used in more than one pass (Graph: "
         << mName << ")";

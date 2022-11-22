@@ -58,8 +58,7 @@ void GameExporter::exportGame(const Project &project,
   stream << node;
   stream.close();
 
-  liquid::Engine::getLogger().log(liquid::LogSeverity::Info)
-      << "Game exported to " << destination;
+  liquid::Engine::getLogger().info() << "Game exported to " << destination;
 }
 
 } // namespace liquidator

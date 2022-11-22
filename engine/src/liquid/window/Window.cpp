@@ -17,8 +17,7 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
     glfwGetError(&errorMsg);
     LIQUID_ASSERT(initReturnValue,
                   "Failed to initialize GLFW: " + String(errorMsg));
-    Engine::getLogger().log(LogSeverity::Error)
-        << "Failed to initialize GLFW: " << errorMsg;
+    Engine::getLogger().error() << "Failed to initialize GLFW: " << errorMsg;
     return;
   }
 
@@ -36,13 +35,11 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
     glfwGetError(&errorMsg);
     LIQUID_ASSERT(initReturnValue,
                   "Failed to create GLFW window: " + String(errorMsg));
-    Engine::getLogger().log(LogSeverity::Error)
-        << "Failed to create GLFW window: " << errorMsg;
+    Engine::getLogger().error() << "Failed to create GLFW window: " << errorMsg;
   }
 
-  Engine::getLogger().log(LogSeverity::Info)
-      << "Window Created. Title: " << title << "; Width: " << width
-      << "; Height: " << height;
+  Engine::getLogger().info() << "Window Created. Title: " << title
+                             << "; Width: " << width << "; Height: " << height;
 
   glfwSetWindowUserPointer(mWindowInstance, this);
 
@@ -121,7 +118,7 @@ Window::~Window() {
     glfwDestroyWindow(mWindowInstance);
     mWindowInstance = nullptr;
   }
-  Engine::getLogger().log(LogSeverity::Info) << "Window destroyed";
+  Engine::getLogger().info() << "Window destroyed";
   glfwTerminate();
 }
 
