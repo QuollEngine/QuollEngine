@@ -152,6 +152,37 @@ AssetManager::validateAndPreloadAssets(liquid::rhi::RenderDevice *device) {
   LIQUID_PROFILE_EVENT("AssetManager::preloadAssets");
   std::vector<liquid::String> warnings;
 
+  for (const auto &entry : std::filesystem::recursive_directory_iterator(
+           mAssetCache.getAssetsPath())) {
+    if (!entry.is_regular_file() || entry.path().extension() != ".lqhash") {
+      continue;
+    }
+
+    auto hashFilePath = entry.path();
+
+    auto assetPath =
+        mAssetsPath /
+        std::filesystem::relative(hashFilePath, mAssetCache.getAssetsPath());
+    assetPath.replace_extension();
+
+    if (!std::filesystem::exists(assetPath)) {
+      std::ifstream stream(hashFilePath);
+      auto node = YAML::Load(stream);
+      auto engineAssetPathStr = node["engineAssetPath"].as<liquid::String>();
+      stream.close();
+
+      auto engineAssetPath =
+          (mAssetCache.getAssetsPath() / engineAssetPathStr).make_preferred();
+
+      if (engineAssetPath.extension() == ".lqprefab") {
+        std::filesystem::remove_all(engineAssetPath.parent_path());
+      } else {
+        std::filesystem::remove(engineAssetPath);
+      }
+      std::filesystem::remove(hashFilePath);
+    }
+  }
+
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
     if (!entry.is_regular_file()) {
