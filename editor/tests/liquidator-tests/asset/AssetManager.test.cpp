@@ -3,6 +3,7 @@
 #include "liquid/yaml/Yaml.h"
 
 #include "liquidator-tests/Testing.h"
+#include "liquidator-tests/mocks/MockRenderDevice.h"
 
 #include "liquidator/asset/AssetManager.h"
 
@@ -34,6 +35,11 @@ public:
     fs::remove_all(AssetsPath);
     fs::remove_all(CachePath);
     fs::remove_all(TempPath);
+  }
+
+  void createEmptyFile(liquid::Path path) {
+    std::ofstream stream(path);
+    stream.close();
   }
 
 public:
@@ -75,6 +81,76 @@ TEST_F(AssetManagerTest, CreatesScriptFileAndLoadsIt) {
   EXPECT_TRUE(handle.hasData());
   EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.lua");
   EXPECT_TRUE(fs::exists(InnerPathInAssets / ("test.lua")));
+}
+
+TEST_F(AssetManagerTest,
+       ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
+  fs::create_directories(InnerPathInCache);
+
+  auto texturePath = InnerPathInCache / "test.ktx2";
+  auto textureHashPath = InnerPathInCache / "test.ktx2.lqhash";
+
+  auto engineAssetPathStr =
+      std::filesystem::relative(texturePath, manager.getCachePath()).string();
+
+  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
+
+  YAML::Node node;
+  node["engineAssetPath"] = engineAssetPathStr;
+
+  std::ofstream stream(textureHashPath);
+  stream << node;
+  stream.close();
+
+  MockRenderDevice device;
+
+  createEmptyFile(texturePath);
+
+  EXPECT_TRUE(fs::exists(textureHashPath));
+  EXPECT_TRUE(fs::exists(texturePath));
+
+  manager.validateAndPreloadAssets(&device);
+
+  EXPECT_FALSE(fs::exists(textureHashPath));
+  EXPECT_FALSE(fs::exists(texturePath));
+}
+
+TEST_F(AssetManagerTest,
+       ValidateAndPreloadDeletesPrefabDirectoryIfAssetFileDoesNotExist) {
+  auto prefabBasePath = InnerPathInCache / "test-prefab";
+  auto prefabPath = prefabBasePath / "test.lqprefab";
+  auto prefabMeshPath = prefabBasePath / "test.lqmesh ";
+  auto prefabHashPath = InnerPathInCache / "test-prefab.lqhash";
+
+  fs::create_directories(prefabBasePath);
+
+  auto engineAssetPathStr =
+      std::filesystem::relative(prefabPath, manager.getCachePath()).string();
+
+  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
+
+  YAML::Node node;
+  node["engineAssetPath"] = engineAssetPathStr;
+
+  std::ofstream stream(prefabHashPath);
+  stream << node;
+  stream.close();
+
+  createEmptyFile(prefabPath);
+  createEmptyFile(prefabMeshPath);
+
+  MockRenderDevice device;
+
+  EXPECT_TRUE(fs::exists(prefabPath));
+  EXPECT_TRUE(fs::exists(prefabMeshPath));
+  EXPECT_TRUE(fs::exists(prefabHashPath));
+
+  manager.validateAndPreloadAssets(&device);
+
+  EXPECT_FALSE(fs::exists(prefabPath));
+  EXPECT_FALSE(fs::exists(prefabMeshPath));
+  EXPECT_FALSE(fs::exists(prefabHashPath));
+  EXPECT_FALSE(fs::exists(prefabBasePath));
 }
 
 TEST_P(AssetTest, FailedImportDoesNotCreateAssetInCache) {
