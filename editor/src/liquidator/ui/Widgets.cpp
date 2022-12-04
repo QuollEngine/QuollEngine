@@ -196,7 +196,8 @@ void Table::column(liquid::rhi::TextureHandle handle, const glm::vec2 &size) {
 Input::Input(liquid::String label, glm::vec3 &value) {
   glm::vec3 temp = value;
 
-  renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length());
+  renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length(),
+                    ImGuiDataType_Float);
 
   if (mChanged) {
     value = temp;
@@ -206,7 +207,17 @@ Input::Input(liquid::String label, glm::vec3 &value) {
 Input::Input(liquid::String label, float &value) {
   float temp = value;
 
-  renderScalarInput(label, &temp, 1);
+  renderScalarInput(label, &temp, 1, ImGuiDataType_Float);
+
+  if (mChanged) {
+    value = temp;
+  }
+}
+
+Input::Input(liquid::String label, uint32_t &value) {
+  uint32_t temp = value;
+
+  renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
 
   if (mChanged) {
     value = temp;
@@ -222,14 +233,16 @@ Input::Input(liquid::String label, liquid::String &value) {
   }
 }
 
-void Input::renderScalarInput(liquid::String label, void *data, size_t size) {
+void Input::renderScalarInput(liquid::String label, void *data, size_t size,
+                              ImGuiDataType dataType) {
   if (!label.empty()) {
     ImGui::Text("%s", label.c_str());
   }
   const auto id = "###Input" + label;
 
-  ImGui::InputScalarN(id.c_str(), ImGuiDataType_Float, data,
-                      static_cast<int>(size), nullptr, nullptr, "%.3f");
+  ImGui::InputScalarN(id.c_str(), dataType, data, static_cast<int>(size),
+                      nullptr, nullptr,
+                      dataType == ImGuiDataType_Float ? "%.3f" : 0);
   mChanged = ImGui::IsItemDeactivatedAfterEdit();
 }
 

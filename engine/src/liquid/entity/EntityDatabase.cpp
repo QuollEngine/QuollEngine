@@ -9,6 +9,7 @@ EntityDatabase::EntityDatabase() {
   reg<Delete>();
   reg<Mesh>();
   reg<DirectionalLight>();
+  reg<CascadedShadowMap>();
   reg<Camera>();
   reg<AutoAspectRatio>();
   reg<PerspectiveLens>();

@@ -300,12 +300,20 @@ public:
   Input(liquid::String label, glm::vec3 &value);
 
   /**
-   * @brief Render scalar input
+   * @brief Render decimal scalar input
    *
    * @param label Input label
    * @param value Input value
    */
   Input(liquid::String label, float &value);
+
+  /**
+   * @brief Render uint scalar input
+   *
+   * @param label Input label
+   * @param value Input value
+   */
+  Input(liquid::String label, uint32_t &value);
 
   /**
    * @brief Render text input
@@ -330,8 +338,10 @@ private:
    * @param label Input label
    * @param data Scalar data
    * @param size Number of data items
+   * @param dataType Input data type
    */
-  void renderScalarInput(liquid::String label, void *data, size_t size);
+  void renderScalarInput(liquid::String label, void *data, size_t size,
+                         ImGuiDataType dataType);
 
   /**
    * @brief Render text input

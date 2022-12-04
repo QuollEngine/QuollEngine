@@ -32,6 +32,11 @@ public:
   static constexpr size_t MaxNumLights = 256;
 
   /**
+   * Maximum number of shadow maps
+   */
+  static constexpr size_t MaxShadowMaps = 16;
+
+  /**
    * @brief Light data
    */
   struct LightData {
@@ -48,11 +53,33 @@ public:
     glm::vec4 color;
 
     /**
-     * Light view projection matrix
+     * Shadow data
      *
-     * Used for shadow mapping
+     * First parameter indicates if shadows are enabled
+     * Second parameter is the shadow index
+     * Third parameter is the number of cascades
+     *  which is used in cascaded shadow mapping
      */
-    glm::mat4 lightMatrix;
+    glm::uvec4 shadowData{0};
+  };
+
+  /**
+   * @brief Shadow map data
+   */
+  struct ShadowMapData {
+    /**
+     * Shadow matrix generated from light
+     */
+    glm::mat4 shadowMatrix;
+
+    /**
+     * Shadow data
+     *
+     * First parameter indicates shadow split depth
+     * Second parameter indicates if
+     *  percentage closer filtering is enabled
+     */
+    glm::vec4 data;
   };
 
   /**
@@ -62,8 +89,8 @@ public:
     /**
      * Scene data
      *
-     * First value is number of lights
-     * Second value represents if IBL is active
+     * First parameter is number of lights
+     * Second parameter represents if IBL is active
      */
     glm::ivec4 data{0};
   };
@@ -223,6 +250,15 @@ public:
   }
 
   /**
+   * @brief Get lights buffer
+   *
+   * @return Lights buffer
+   */
+  inline rhi::BufferHandle getShadowMapsBuffer() const {
+    return mShadowMapsBuffer.getHandle();
+  }
+
+  /**
    * @brief Get active camera buffer
    *
    * @return Active camera buffer
@@ -290,6 +326,13 @@ public:
   inline int32_t getNumLights() const { return mSceneData.data.x; }
 
   /**
+   * @brief Get number shadow maps
+   *
+   * @return Number of shadow maps
+   */
+  inline const size_t getNumShadowMaps() const { return mShadowMaps.size(); }
+
+  /**
    * @brief Add mesh data
    *
    * @param handle Mesh handle
@@ -319,6 +362,15 @@ public:
   void addLight(const DirectionalLight &light);
 
   /**
+   * @brief Add directional light with shadows
+   *
+   * @param light Directional light
+   * @param shadowMap Cascaded shadow map
+   */
+  void addLight(const DirectionalLight &light,
+                const CascadedShadowMap &shadowMap);
+
+  /**
    * @brief Add text
    *
    * @param fontHandle Font handle
@@ -342,9 +394,10 @@ public:
   /**
    * @brief Set camera data
    *
-   * @param data Camera component data
+   * @param camera Camera data
+   * @param lens Camera lens data
    */
-  void setCameraData(const Camera &data);
+  void setCameraData(const Camera &camera, const PerspectiveLens &lens);
 
   /**
    * @brief Clear intermediary buffers
@@ -359,9 +412,21 @@ public:
   inline size_t getReservedSpace() const { return mReservedSpace; }
 
 private:
+  /**
+   * @brief Add cascaded shadow maps
+   *
+   * @param light Directional light
+   * @param shadowMap Cascaded shadow map
+   */
+  void addCascadedShadowMaps(const DirectionalLight &light,
+                             const CascadedShadowMap &shadowMap);
+
+private:
   std::vector<LightData> mLights;
+  std::vector<ShadowMapData> mShadowMaps;
   SceneData mSceneData{};
   Camera mCameraData;
+  PerspectiveLens mCameraLens;
 
   size_t mLastSkeleton = 0;
 
@@ -370,6 +435,7 @@ private:
   rhi::Buffer mSkeletonsBuffer;
   rhi::Buffer mSceneBuffer;
   rhi::Buffer mLightsBuffer;
+  rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
 
   rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;

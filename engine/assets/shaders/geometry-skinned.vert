@@ -9,13 +9,11 @@ layout(location = 5) in vec2 inTextureCoord1;
 layout(location = 6) in uvec4 inJoints;
 layout(location = 7) in vec4 inWeights;
 
-layout(location = 0) out vec4 outModelPosition;
-layout(location = 1) out vec3 outWorldPosition;
-layout(location = 2) out vec2 outTextureCoord[2];
-layout(location = 4) out vec3 outNormal;
-layout(location = 5) out float outTangentHand;
-layout(location = 6) out mat3 outTBN;
-layout(location = 9) out mat4 outModelMatrix;
+layout(location = 0) out vec3 outWorldPosition;
+layout(location = 1) out vec2 outTextureCoord[2];
+layout(location = 3) out vec3 outNormal;
+layout(location = 4) out float outTangentHand;
+layout(location = 5) out mat3 outTBN;
 
 layout(set = 0, binding = 0) uniform CameraData {
   mat4 proj;
@@ -54,8 +52,7 @@ void main() {
                     inWeights.z * item.joints[inJoints.z] +
                     inWeights.w * item.joints[inJoints.w];
 
-  vec4 worldPosition =
-      uCameraData.viewProj * modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
+  vec4 worldPosition = modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
 
   mat3 m3ModelMatrix = mat3(modelMatrix);
   mat3 normalMatrix = transpose(inverse(m3ModelMatrix));
@@ -64,13 +61,11 @@ void main() {
   vec3 tangent = normalize(m3ModelMatrix * inTangent.xyz);
   vec3 bitangent = cross(normal, tangent) * inTangent.w;
 
-  outModelMatrix = modelMatrix;
-  outModelPosition = vec4(inPosition, 1.0f);
   outWorldPosition = worldPosition.xyz;
   outNormal = normal;
   outTangentHand = inTangent.w;
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;
-  gl_Position = worldPosition;
+  gl_Position = uCameraData.viewProj * worldPosition;
 }

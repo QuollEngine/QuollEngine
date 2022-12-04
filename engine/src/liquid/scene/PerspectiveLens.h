@@ -14,7 +14,7 @@ struct PerspectiveLens {
   /**
    * Near plane
    */
-  float near = 0.001f;
+  float near = 0.1f;
 
   /**
    * Far plane

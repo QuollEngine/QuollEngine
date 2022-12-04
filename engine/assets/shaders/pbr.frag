@@ -1,13 +1,11 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(location = 0) in vec4 inModelPosition;
-layout(location = 1) in vec3 inWorldPosition;
-layout(location = 2) in vec2 inTextureCoord[2];
-layout(location = 4) in vec3 inNormal;
-layout(location = 5) in float inTangentHand;
-layout(location = 6) in mat3 inTBN;
-layout(location = 9) in mat4 inModelMatrix;
+layout(location = 0) in vec3 inWorldPosition;
+layout(location = 1) in vec2 inTextureCoord[2];
+layout(location = 3) in vec3 inNormal;
+layout(location = 4) in float inTangentHand;
+layout(location = 5) in mat3 inTBN;
 
 layout(location = 0) out vec4 outColor;
 
@@ -36,9 +34,9 @@ struct LightItem {
   vec4 color;
 
   /**
-   * Light space matrix
+   * Shadow data
    */
-  mat4 lightMatrix;
+  uvec4 shadowData;
 };
 
 layout(std140, set = 2, binding = 2) readonly buffer LightData {
@@ -46,9 +44,20 @@ layout(std140, set = 2, binding = 2) readonly buffer LightData {
 }
 uLightData;
 
-layout(set = 2, binding = 3) uniform sampler2DArray uShadowmap;
-layout(set = 2, binding = 4) uniform samplerCube uIblMaps[2];
-layout(set = 2, binding = 5) uniform sampler2D uBrdfLUT;
+struct ShadowMapItem {
+  mat4 shadowMatrix;
+
+  vec4 shadowData;
+};
+
+layout(std140, set = 2, binding = 3) readonly buffer ShadowMapData {
+  ShadowMapItem items[];
+}
+uShadowMapData;
+
+layout(set = 2, binding = 4) uniform sampler2DArray uShadowmap;
+layout(set = 2, binding = 5) uniform samplerCube uIblMaps[2];
+layout(set = 2, binding = 6) uniform sampler2D uBrdfLUT;
 
 layout(std140, set = 3, binding = 0) uniform MaterialDataRaw {
   int baseColorTexture[1];
@@ -199,8 +208,8 @@ MaterialData uMaterialData = MaterialData(
 layout(set = 3, binding = 1) uniform sampler2D uTextures[8];
 
 const float PI = 3.141592653589793;
-const mat4 DEPTH_BIAS = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
-                             1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
+const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
+                                  0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
 
 /**
  * @brief sRGB to Linear color
@@ -361,20 +370,72 @@ LightCalculations getDirectionalLightSurfaceCalculations(LightItem light,
                            clamp(dot(v, h), 0.0, 1.0), light.data.w);
 }
 
-/**
- * Calculate shadow factor
- *
- * @param fragLightPosition Light position
- * @param layer Shadowmap layer
- * @return Shadow factor
- */
-float calculateShadow(vec4 fragLightPosition, uint layer) {
-  vec3 shadowCoords = fragLightPosition.xyz / fragLightPosition.w;
-
-  float closestDepth = texture(uShadowmap, vec3(shadowCoords.xy, layer)).r;
+float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
+                                   uint cascadeIndex) {
+  float closestDepth =
+      texture(uShadowmap, vec3(shadowCoords.x + offset.x,
+                               1.0 - shadowCoords.y + offset.y, cascadeIndex))
+          .r;
   float currentDepth = shadowCoords.z;
 
   return closestDepth >= currentDepth - 0.0005 ? 1.0 : 0.0;
+}
+
+/**
+ * Calculate shadow factor
+ *
+ * 1.0 => no shadow
+ * < 1.0 => has shadow
+ *
+ * @param item Light item
+ * @return Shadow factor
+ */
+float calculateShadowFactor(LightItem item) {
+  if (item.shadowData.x == 0) {
+    return 1.0;
+  }
+
+  uint cascadeIndex = item.shadowData.y;
+  float viewZ = (uCameraData.view * vec4(inWorldPosition, 1.0)).z;
+  for (uint si = item.shadowData.y;
+       si < item.shadowData.y + item.shadowData.z - 1; si++) {
+    float splitDepth = uShadowMapData.items[si].shadowData.x;
+
+    if (viewZ < splitDepth) {
+      cascadeIndex = si + 1;
+    }
+  }
+
+  mat4 shadowMatrix = uShadowMapData.items[cascadeIndex].shadowMatrix;
+  vec4 fragLightPosition =
+      DepthBiasMatrix * shadowMatrix * vec4(inWorldPosition, 1.0);
+
+  vec3 shadowCoords = fragLightPosition.xyz / fragLightPosition.w;
+
+  // Use percentage closer filtering
+  if (uShadowMapData.items[cascadeIndex].shadowData.y > 0.5) {
+    ivec2 size = textureSize(uShadowmap, 0).xy;
+    float scale = 0.75;
+
+    float dx = scale / float(size.x);
+    float dy = scale / float(size.y);
+
+    float shadowFactor = 0.0;
+    uint count = 0;
+
+    for (int x = -1; x <= 1; ++x) {
+      for (int y = -1; y <= 1; ++y) {
+        shadowFactor += calculateShadowFactorFromMap(
+            shadowCoords, vec2(x * dx, y * dy), cascadeIndex);
+        count++;
+      }
+    }
+
+    return shadowFactor / count;
+  }
+
+  return calculateShadowFactorFromMap(shadowCoords, vec2(0.0, 0.0),
+                                      cascadeIndex);
 }
 
 void main() {
@@ -426,9 +487,6 @@ void main() {
     LightItem item = uLightData.items[i];
     calc = getDirectionalLightSurfaceCalculations(item, n, v);
 
-    vec4 fragLightPosition = DEPTH_BIAS * item.lightMatrix * inModelMatrix *
-                             vec4(inModelPosition.xyz, 1.0);
-
     const vec4 lightColor = item.color;
     const float lightIntensity = calc.intensity;
 
@@ -447,8 +505,9 @@ void main() {
     vec3 diffuseBRDF = (vec3(1.0) - F) * (1 / PI) * diffuseColor;
     vec3 specularBRDF = F * D * G / (4 * NdotL * NdotV);
 
-    float shadow = calculateShadow(fragLightPosition, i);
-    color += vec3(lightColor) * shadow * NdotL * lightIntensity *
+    float shadowFactor = calculateShadowFactor(item);
+
+    color += vec3(lightColor) * shadowFactor * NdotL * lightIntensity *
              (diffuseBRDF + specularBRDF);
   }
 

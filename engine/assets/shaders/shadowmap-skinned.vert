@@ -29,6 +29,26 @@ layout(std140, set = 0, binding = 0) readonly buffer LightData {
 uLightData;
 
 /**
+ * @brief Single shadow data
+ */
+struct ShadowMapItem {
+  /**
+   * Shadow matrix generated from light
+   */
+  mat4 shadowMatrix;
+
+  /**
+   * Shadow data
+   */
+  vec4 shadowData;
+};
+
+layout(std140, set = 0, binding = 0) readonly buffer ShadowMapData {
+  ShadowMapItem items[];
+}
+uShadowMaps;
+
+/**
  * @brief Single object transforms
  */
 struct ObjectItem {
@@ -45,7 +65,7 @@ struct SkeletonItem {
   /**
    * Joint matrices of skeleton
    */
-  mat4 joints[16];
+  mat4 joints[32];
 };
 
 layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
@@ -59,18 +79,18 @@ layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
 uSkeletonData;
 
 layout(push_constant) uniform PushConstants { ivec4 index; }
-pcLightRef;
+pcShadowRef;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
-  SkeletonItem item = uSkeletonData.items[gl_BaseInstance];
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
+  SkeletonItem item = uSkeletonData.items[gl_InstanceIndex];
 
   mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
                     inWeights.y * item.joints[inJoints.y] +
                     inWeights.z * item.joints[inJoints.z] +
                     inWeights.w * item.joints[inJoints.w];
 
-  gl_Position = uLightData.items[pcLightRef.index.x].lightMatrix * modelMatrix *
-                skinMatrix * vec4(inPosition, 1.0);
-  gl_Layer = pcLightRef.index.x;
+  gl_Position = uShadowMaps.items[pcShadowRef.index.x].shadowMatrix *
+                modelMatrix * skinMatrix * vec4(inPosition, 1.0);
+  gl_Layer = pcShadowRef.index.x;
 }

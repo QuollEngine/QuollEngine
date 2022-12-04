@@ -113,6 +113,15 @@ void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
   entityDatabase.set(entity, skeletonDebug);
 }
 
+void EntityManager::toggleShadowsForLightEntity(liquid::Entity entity) {
+  auto &entityDatabase = getActiveEntityDatabase();
+  if (entityDatabase.has<liquid::CascadedShadowMap>(entity)) {
+    entityDatabase.remove<liquid::CascadedShadowMap>(entity);
+  } else {
+    entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
+  }
+}
+
 void EntityManager::setMesh(liquid::Entity entity,
                             liquid::MeshAssetHandle handle) {
   if (getActiveEntityDatabase().has<liquid::SkinnedMesh>(entity)) {

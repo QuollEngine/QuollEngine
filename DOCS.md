@@ -12,6 +12,7 @@ Framebuffer coordinate: +Y is down. Origin(0, 0) is at the top left corner
 Texture coordinate: +Y is down. Origin(0, 0) is at the top left corner.
 
 > **Note:**
+>
 > This coordinate system is based on modern APIs such as DX12, Metal, and WebGPU.
 > In Vulkan coordinate system, NDC +Y is down; so, the engine will invert this
 > automatically when Vulkan is used as a rendering backend.

@@ -5,29 +5,24 @@
 layout(location = 0) in vec3 inPosition;
 
 /**
- * @brief Single light data
+ * @brief Single shadow data
  */
-struct LightItem {
+struct ShadowMapItem {
   /**
-   * Light data
+   * Shadow matrix generated from light
    */
-  vec4 data;
+  mat4 shadowMatrix;
 
   /**
-   * Light color
+   * Shadow data
    */
-  vec4 color;
-
-  /**
-   * Light space matrix
-   */
-  mat4 lightMatrix;
+  vec4 shadowData;
 };
 
-layout(std140, set = 0, binding = 0) readonly buffer LightData {
-  LightItem items[];
+layout(std140, set = 0, binding = 0) readonly buffer ShadowMapData {
+  ShadowMapItem items[];
 }
-uLightData;
+uShadowMaps;
 
 /**
  * @brief Single object transforms
@@ -45,12 +40,12 @@ layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
 uObjectData;
 
 layout(push_constant) uniform PushConstants { ivec4 index; }
-pcLightRef;
+pcShadowRef;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
 
-  gl_Position = uLightData.items[pcLightRef.index.x].lightMatrix * modelMatrix *
-                vec4(inPosition, 1.0);
-  gl_Layer = pcLightRef.index.x;
+  gl_Position = uShadowMaps.items[pcShadowRef.index.x].shadowMatrix *
+                modelMatrix * vec4(inPosition, 1.0);
+  gl_Layer = pcShadowRef.index.x;
 }

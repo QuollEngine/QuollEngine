@@ -686,7 +686,6 @@ TEST_F(SceneLoaderLightTest,
 
 TEST_F(SceneLoaderLightTest,
        TriesToFillDirectionalComponentValuesIfLightPropertiesAreInvalid) {
-
   YAML::Node invalidArray(YAML::NodeType::Sequence);
   invalidArray.push_back("Test 1");
   invalidArray.push_back("Test 2");
@@ -742,7 +741,7 @@ TEST_F(SceneLoaderLightTest,
   }
 }
 
-TEST_F(SceneLoaderMeshTest,
+TEST_F(SceneLoaderLightTest,
        CreatesDirectionalLightWithFileDataIfValidProperties) {
   auto [node, entity] = createNode();
   node["components"]["light"]["type"] = 0;
@@ -758,6 +757,206 @@ TEST_F(SceneLoaderMeshTest,
   EXPECT_EQ(component.color, glm::vec4(2.0f));
   EXPECT_EQ(component.intensity, 3.5f);
   EXPECT_EQ(component.direction, glm::vec3(0.0f));
+}
+
+TEST_F(SceneLoaderLightTest,
+       DoesNotCreateCascadedShadowMapForDirectionalLightIfFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  node["components"]["light"]["type"] = 0;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+}
+
+TEST_F(SceneLoaderLightTest,
+       DoesNotCreateCascadedShadowMapForDirectionalLightIfShadowFieldIsNotMap) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+  }
+}
+
+TEST_F(SceneLoaderLightTest,
+       TriesToFillCascadedShadowDataIfShadowPropertiesAreInvalid) {
+  YAML::Node invalidArray(YAML::NodeType::Sequence);
+  invalidArray.push_back("Test 1");
+  invalidArray.push_back("Test 2");
+  invalidArray.push_back(15.0f);
+  invalidArray.push_back(20.0f);
+
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       invalidArray};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["softShadows"] = invalidNode;
+    node["components"]["light"]["shadow"]["splitLambda"] = 0.5f;
+    node["components"]["light"]["shadow"]["numCascades"] = 2;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, true);
+    EXPECT_EQ(component.splitLambda, 0.5f);
+    EXPECT_EQ(component.numCascades, 2);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["softShadows"] = false;
+    node["components"]["light"]["shadow"]["splitLambda"] = invalidNode;
+    node["components"]["light"]["shadow"]["numCascades"] = 2;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, false);
+    EXPECT_EQ(component.splitLambda, 0.8f);
+    EXPECT_EQ(component.numCascades, 2);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["softShadows"] = false;
+    node["components"]["light"]["shadow"]["splitLambda"] = 0.5f;
+    node["components"]["light"]["shadow"]["numCascades"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, false);
+    EXPECT_EQ(component.splitLambda, 0.5f);
+    EXPECT_EQ(component.numCascades, 4);
+  }
+
+  // Split lambda > 1.0
+  {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["splitLambda"] = 1.5f;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, true);
+    EXPECT_EQ(component.splitLambda, 1.0f);
+    EXPECT_EQ(component.numCascades, 4);
+  }
+
+  // Split lambda < 0.0
+  {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["splitLambda"] = -0.5f;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, true);
+    EXPECT_EQ(component.splitLambda, 0.0f);
+    EXPECT_EQ(component.numCascades, 4);
+  }
+
+  // Num cascades > 6
+  {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["numCascades"] = 10;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, true);
+    EXPECT_EQ(component.splitLambda, 0.8f);
+    EXPECT_EQ(component.numCascades, 6);
+  }
+
+  // Num cascades < 1
+  {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 0;
+    node["components"]["light"]["shadow"]["numCascades"] = 0;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+    EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+    EXPECT_EQ(component.softShadows, true);
+    EXPECT_EQ(component.splitLambda, 0.8f);
+    EXPECT_EQ(component.numCascades, 1);
+  }
+}
+
+TEST_F(
+    SceneLoaderLightTest,
+    CreatesCascadedShadowMapForDirectionalLightWithFileDataIfValidProperties) {
+  auto [node, entity] = createNode();
+  node["components"]["light"]["type"] = 0;
+  node["components"]["light"]["shadow"]["softShadows"] = false;
+  node["components"]["light"]["shadow"]["splitLambda"] = 0.5f;
+  node["components"]["light"]["shadow"]["numCascades"] = 2;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::DirectionalLight>(entity));
+  EXPECT_TRUE(entityDatabase.has<liquid::CascadedShadowMap>(entity));
+
+  const auto &component = entityDatabase.get<liquid::CascadedShadowMap>(entity);
+
+  EXPECT_EQ(component.softShadows, false);
+  EXPECT_EQ(component.splitLambda, 0.5f);
+  EXPECT_EQ(component.numCascades, 2);
 }
 
 using SceneLoaderCameraTest = SceneLoaderTest;

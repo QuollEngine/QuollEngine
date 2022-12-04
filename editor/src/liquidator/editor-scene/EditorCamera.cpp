@@ -12,6 +12,7 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
                            liquid::Window &window)
     : mEntityDatabase(entityDatabase), mEventSystem(eventSystem),
       mWindow(window) {
+  reset();
 
   mMouseButtonReleaseHandler = mEventSystem.observe(
       liquid::MouseButtonEvent::Released,
@@ -108,7 +109,7 @@ EditorCamera::~EditorCamera() {
   mEventSystem.removeObserver(liquid::MouseScrollEvent::Scroll,
                               mMouseScrollHandler);
 
-  mEntityDatabase.remove<liquid::Camera>(mCameraEntity);
+  mEntityDatabase.deleteEntity(mCameraEntity);
 }
 
 void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
@@ -127,9 +128,10 @@ void EditorCamera::update() {
   }
 
   auto &camera = mEntityDatabase.get<liquid::Camera>(mCameraEntity);
+  auto &lens = mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
 
-  camera.projectionMatrix =
-      glm::perspective(glm::radians(mFov), getAspectRatio(), mNear, mFar);
+  camera.projectionMatrix = glm::perspective(
+      glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
   camera.viewMatrix = glm::lookAt(mEye, mCenter, mUp);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
@@ -139,13 +141,12 @@ void EditorCamera::reset() {
   mEye = DefaultEye;
   mCenter = DefaultCenter;
   mUp = DefaultUp;
-  mFov = DefaultFOV;
-  mNear = DefaultNear;
-  mFar = DefaultFar;
 
   if (!mEntityDatabase.exists(mCameraEntity)) {
     mCameraEntity = mEntityDatabase.create();
   }
+  mEntityDatabase.set<liquid::PerspectiveLens>(
+      mCameraEntity, {DefaultFOV, DefaultFar, DefaultNear});
   mEntityDatabase.set<liquid::Camera>(mCameraEntity, {});
 }
 
@@ -217,6 +218,8 @@ void EditorCamera::setViewport(float x, float y, float width, float height,
   mY = y;
   mWidth = width;
   mHeight = height;
+
+  getPerspectiveLens().aspectRatio = mWidth / mHeight;
   mCaptureMouse = captureMouse;
 }
 

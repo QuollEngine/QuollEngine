@@ -270,8 +270,9 @@ TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   }
 }
 
-// Light
-TEST_F(EntitySerializerTest, DoesNotCreateLightFieldIfNoLightComponent) {
+// Directional light
+TEST_F(EntitySerializerTest,
+       DoesNotCreateLightFieldIfNoDirectionalLightComponent) {
   auto entity = entityDatabase.create();
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_FALSE(node["light"]);
@@ -295,6 +296,51 @@ TEST_F(EntitySerializerTest,
   EXPECT_EQ(node["light"]["color"].as<glm::vec4>(glm::vec4{-1.0f}),
             light.color);
   EXPECT_FALSE(node["light"]["direction"]);
+}
+
+// Directional light - Cascaded shadow map
+TEST_F(EntitySerializerTest,
+       DoesNotCreateShadowFieldInLightIfNoDirectionalLightComponent) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["light"]);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateShadowFieldInLightIfNoCascadedShadowComponent) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::DirectionalLight>(entity, {});
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["light"]);
+  EXPECT_FALSE(node["light"]["shadow"]);
+}
+
+TEST_F(
+    EntitySerializerTest,
+    CreatesShadowFieldInLightIfDirectionalLightComponentAndCascadedShadowMapComponentsExist) {
+  auto entity = entityDatabase.create();
+
+  liquid::DirectionalLight light{};
+  entityDatabase.set(entity, light);
+
+  liquid::CascadedShadowMap shadow{};
+  shadow.softShadows = false;
+  shadow.splitLambda = 0.2f;
+  shadow.numCascades = 4;
+  entityDatabase.set(entity, shadow);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["light"]);
+  EXPECT_TRUE(node["light"]["shadow"]);
+  EXPECT_TRUE(node["light"]["shadow"].IsMap());
+  EXPECT_EQ(node["light"]["shadow"]["softShadows"].as<bool>(true),
+            shadow.softShadows);
+  EXPECT_EQ(node["light"]["shadow"]["splitLambda"].as<float>(1.0f),
+            shadow.splitLambda);
+  EXPECT_EQ(node["light"]["shadow"]["numCascades"].as<uint32_t>(0),
+            shadow.numCascades);
 }
 
 // Camera
