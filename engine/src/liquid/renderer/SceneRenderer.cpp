@@ -55,8 +55,7 @@ void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
 }
 
 SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
-  static constexpr uint32_t NumLights = 16;
-  static constexpr uint32_t ShadowMapDimensions = 2048;
+  static constexpr uint32_t ShadowMapDimensions = 4096;
   static constexpr uint32_t SwapchainSizePercentage = 100;
 
   rhi::TextureDescription shadowMapDesc{};
@@ -64,7 +63,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   shadowMapDesc.width = ShadowMapDimensions;
   shadowMapDesc.height = ShadowMapDimensions;
-  shadowMapDesc.layers = NumLights;
+  shadowMapDesc.layers = SceneRendererFrameData::MaxShadowMaps;
   shadowMapDesc.format = rhi::Format::Depth16Unorm;
   auto shadowmap = mDevice->createTexture(shadowMapDesc);
 
@@ -112,7 +111,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                             uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
       rhi::Descriptor descriptor;
-      descriptor.bind(0, frameData.getLightsBuffer(),
+      descriptor.bind(0, frameData.getShadowMapsBuffer(),
                       rhi::DescriptorType::StorageBuffer);
 
       auto pipeline = registry.get(vPipeline);
@@ -124,7 +123,9 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
         commandList.bindDescriptor(pipeline, 0, descriptor);
 
-        for (int32_t index = 0; index < frameData.getNumLights(); ++index) {
+        for (int32_t index = 0;
+             index < static_cast<int32_t>(frameData.getNumShadowMaps());
+             ++index) {
           glm::ivec4 pcIndex{index};
 
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
@@ -138,13 +139,14 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
 
-        for (int32_t index = 0; index < frameData.getNumLights(); ++index) {
+        for (int32_t index = 0;
+             index < static_cast<int32_t>(frameData.getNumShadowMaps());
+             ++index) {
           glm::ivec4 pcIndex{index};
 
           commandList.pushConstants(skinnedPipeline, rhi::ShaderStage::Vertex,
                                     0, sizeof(glm::ivec4), &pcIndex);
           renderSkinned(commandList, skinnedPipeline, false, frameIndex);
-          index++;
         }
       }
     });
@@ -186,7 +188,8 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
       rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
 
-      static constexpr uint32_t BrdfBinding = 5;
+      static constexpr uint32_t IrradianceBinding = 5;
+      static constexpr uint32_t BrdfBinding = 6;
 
       sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
                            rhi::DescriptorType::UniformBuffer);
@@ -197,8 +200,11 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                 rhi::DescriptorType::UniformBuffer)
           .bind(2, frameData.getLightsBuffer(),
                 rhi::DescriptorType::StorageBuffer)
-          .bind(3, {shadowmap}, rhi::DescriptorType::CombinedImageSampler)
-          .bind(4, {frameData.getIrradianceMap(), frameData.getSpecularMap()},
+          .bind(3, frameData.getShadowMapsBuffer(),
+                rhi::DescriptorType::StorageBuffer)
+          .bind(4, {shadowmap}, rhi::DescriptorType::CombinedImageSampler)
+          .bind(IrradianceBinding,
+                {frameData.getIrradianceMap(), frameData.getSpecularMap()},
                 rhi::DescriptorType::CombinedImageSampler)
           .bind(BrdfBinding, {frameData.getBrdfLUT()},
                 rhi::DescriptorType::CombinedImageSampler);
@@ -321,7 +327,8 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
   frameData.clear();
 
-  frameData.setCameraData(entityDatabase.get<Camera>(camera));
+  frameData.setCameraData(entityDatabase.get<Camera>(camera),
+                          entityDatabase.get<PerspectiveLens>(camera));
 
   // Meshes
   for (auto [entity, world, mesh] :
@@ -370,7 +377,11 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   // Lights
   for (auto [entity, light] : entityDatabase.view<DirectionalLight>()) {
-    frameData.addLight(light);
+    if (entityDatabase.has<CascadedShadowMap>(entity)) {
+      frameData.addLight(light, entityDatabase.get<CascadedShadowMap>(entity));
+    } else {
+      frameData.addLight(light);
+    }
   };
 
   // Environments

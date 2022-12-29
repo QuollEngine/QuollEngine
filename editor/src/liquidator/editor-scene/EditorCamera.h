@@ -34,7 +34,7 @@ public:
   /**
    * Default near perspective plane
    */
-  static constexpr float DefaultNear = 0.001f;
+  static constexpr float DefaultNear = 0.1f;
 
   /**
    * Default far perspective plane
@@ -84,49 +84,51 @@ public:
    *
    * @param fov Field of view
    */
-  inline void setFOV(float fov) { mFov = fov; }
+  void setFOV(float fov) { getPerspectiveLens().fovY = fov; }
 
   /**
    * @brief Set near plane
    *
    * @param near Near plane
    */
-  inline void setNear(float near) { mNear = near; }
+  void setNear(float near) { getPerspectiveLens().near = near; }
 
   /**
    * @brief Set far plane
    *
    * @param far Far plane
    */
-  inline void setFar(float far) { mFar = far; }
+  void setFar(float far) { getPerspectiveLens().far = far; }
 
   /**
    * @brief Get field of view
    *
    * @return Field of view
    */
-  inline float getFOV() const { return mFov; }
+  inline float getFOV() const { return getPerspectiveLens().fovY; }
 
   /**
    * @brief Get near place
    *
    * @return Near plane
    */
-  inline float getNear() const { return mNear; }
+  inline float getNear() const { return getPerspectiveLens().near; }
 
   /**
    * @brief Get far plane
    *
    * @return Far plane
    */
-  inline float getFar() const { return mFar; }
+  inline float getFar() const { return getPerspectiveLens().far; }
 
   /**
    * @brief Get aspect ratio
    *
    * @return Aspect ratio
    */
-  inline float getAspectRatio() const { return mWidth / mHeight; }
+  inline float getAspectRatio() const {
+    return getPerspectiveLens().aspectRatio;
+  }
 
   /**
    * @brief Get position
@@ -228,6 +230,24 @@ public:
 
 private:
   /**
+   * @brief Get perspective lens
+   *
+   * @return Perspective lens
+   */
+  inline liquid::PerspectiveLens &getPerspectiveLens() {
+    return mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
+  }
+
+  /**
+   * @brief Get perspective lens
+   *
+   * @return Perspective lens
+   */
+  inline const liquid::PerspectiveLens &getPerspectiveLens() const {
+    return mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
+  }
+
+  /**
    * @brief Pan camera using mouse movement
    */
   void pan();
@@ -243,10 +263,6 @@ private:
   void zoom();
 
 private:
-  float mFov = DefaultFOV;
-  float mNear = DefaultNear;
-  float mFar = DefaultFar;
-
   float mX = 0.0f;
   float mY = 0.0f;
   float mWidth = 0.0f;

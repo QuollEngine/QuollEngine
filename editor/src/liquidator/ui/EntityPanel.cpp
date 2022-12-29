@@ -141,6 +141,34 @@ void EntityPanel::renderLight() {
     if (widgets::Input("Intensity", component.intensity)) {
       mEntityManager.save(mSelectedEntity);
     }
+
+    bool castShadows =
+        mEntityManager.getActiveEntityDatabase().has<liquid::CascadedShadowMap>(
+            mSelectedEntity);
+    if (ImGui::Checkbox("Cast shadows", &castShadows)) {
+      mEntityManager.toggleShadowsForLightEntity(mSelectedEntity);
+      mEntityManager.save(mSelectedEntity);
+    }
+
+    if (castShadows) {
+      auto &component = mEntityManager.getActiveEntityDatabase()
+                            .get<liquid::CascadedShadowMap>(mSelectedEntity);
+
+      if (ImGui::Checkbox("Soft shadows", &component.softShadows)) {
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      if (widgets::Input("Split lambda", component.splitLambda)) {
+        component.splitLambda = glm::clamp(component.splitLambda, 0.0f, 1.0f);
+        mEntityManager.save(mSelectedEntity);
+      }
+
+      if (widgets::Input("Number of cascades", component.numCascades)) {
+        component.numCascades =
+            glm::clamp(component.numCascades, 1u, component.MaxCascades);
+        mEntityManager.save(mSelectedEntity);
+      }
+    }
   }
 }
 

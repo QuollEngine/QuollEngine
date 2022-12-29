@@ -10,6 +10,7 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
     : mReservedSpace(reservedSpace), mDevice(device) {
 
   mLights.reserve(MaxNumLights);
+  mShadowMaps.reserve(MaxShadowMaps);
 
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
@@ -54,6 +55,12 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
     desc.type = rhi::BufferType::Uniform;
     mSceneBuffer = mDevice->createBuffer(desc);
   }
+
+  {
+    auto desc = defaultDesc;
+    desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
+    mShadowMapsBuffer = mDevice->createBuffer(desc);
+  }
 }
 
 void SceneRendererFrameData::updateBuffers() {
@@ -90,6 +97,8 @@ void SceneRendererFrameData::updateBuffers() {
   mTextGlyphsBuffer.update(mTextGlyphs.data(),
                            mTextGlyphs.size() * sizeof(GlyphData));
   mLightsBuffer.update(mLights.data(), mLights.size() * sizeof(LightData));
+  mShadowMapsBuffer.update(mShadowMaps.data(),
+                           mShadowMaps.size() * sizeof(ShadowMapData));
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mSceneBuffer.update(&mSceneData, sizeof(SceneData));
 }
@@ -137,29 +146,121 @@ void SceneRendererFrameData::addSkinnedMesh(
   group.lastSkeleton++;
 }
 
-void SceneRendererFrameData::addLight(const DirectionalLight &light) {
-  // Calculate projection matrix
-  const float DIR_LIGHT_SIZE = 20.0f;
-  const float DIR_LIGHT_NEAR = 0.001f;
-  const float DIR_LIGHT_FAR = 100.0f;
-  const float DIR_LIGHT_Z = 0.01f;
-  glm::vec3 mPosition{-light.direction - light.direction * DIR_LIGHT_SIZE};
-  mPosition.z = DIR_LIGHT_Z;
-  glm::mat4 lightProjectionMatrix =
-      glm::ortho(-DIR_LIGHT_SIZE, DIR_LIGHT_SIZE, DIR_LIGHT_SIZE,
-                 -DIR_LIGHT_SIZE, DIR_LIGHT_NEAR, DIR_LIGHT_FAR);
-  glm::mat4 lightViewMatrix = glm::lookAt(
-      mPosition,
-      mPosition + light.direction - glm::vec3(0.0f, 0.0f, DIR_LIGHT_Z),
-      {0.0f, 1.0f, 0.0f});
+void SceneRendererFrameData::addCascadedShadowMaps(
+    const DirectionalLight &light, const CascadedShadowMap &shadowMap) {
+  uint32_t numCascades = static_cast<uint32_t>(shadowMap.numCascades);
 
-  auto projectionViewMatrix = lightProjectionMatrix * lightViewMatrix;
+  // Calculate split distances by combining
+  // logarithmic and uniform splitting
+  //
+  // log_i = near * (far/near)^(i / size)
+  // uniform_i = near + (far - near) * (1 / size)
+  // distance_i = lambda * log_i + (1 - lambda) * uniform_i
+  std::array<float, CascadedShadowMap::MaxCascades + 1> splitDistances{};
+
+  float splitLambda = shadowMap.splitLambda;
+
+  float far = mCameraLens.far;
+  float near = mCameraLens.near;
+
+  float range = far - near;
+  float ratio = far / near;
+
+  for (size_t i = 0; i < static_cast<size_t>(numCascades + 1); ++i) {
+    float p =
+        static_cast<float>(i + 1) / static_cast<float>(splitDistances.size());
+    float log = near * std::pow(ratio, p);
+    float uniform = near + range * p;
+    float d = splitLambda * log + (1.0f - splitLambda) * uniform;
+
+    splitDistances.at(i) = mCameraLens.far * ((d - near) / range);
+  }
+
+  // Camera frustum NDC coordinates
+  static constexpr std::array<glm::vec3, 8> FrustumCornersNDC{
+      glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(1.0f, 1.0f, -1.0f),
+      glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(-1.0f, -1.0f, -1.0f),
+      glm::vec3(-1.0f, 1.0f, 1.0f),  glm::vec3(1.0f, 1.0f, 1.0f),
+      glm::vec3(1.0f, -1.0f, 1.0f),  glm::vec3(-1.0f, -1.0f, 1.0f),
+  };
+
+  float prevSplitDistance = mCameraLens.near;
+  for (size_t i = 0; i < numCascades; ++i) {
+    float splitDistance = splitDistances.at(i);
+
+    auto splitProjectionMatrix = glm::perspective(
+        glm::radians(mCameraLens.fovY), mCameraLens.aspectRatio,
+        prevSplitDistance, splitDistance);
+
+    auto invProjView =
+        glm::inverse(splitProjectionMatrix * mCameraData.viewMatrix);
+
+    std::array<glm::vec4, FrustumCornersNDC.size()> frustumCorners{};
+
+    for (size_t i = 0; i < frustumCorners.size(); ++i) {
+      auto pt = invProjView * glm::vec4(FrustumCornersNDC.at(i), 1.0f);
+      frustumCorners.at(i) = pt / pt.w;
+    }
+
+    // Calculate frustum center by adding
+    // each corner and dividing the result by
+    // number of corners
+    glm::vec3 frustumCenter{0.0f};
+    for (const auto &v : frustumCorners) {
+      frustumCenter += glm::vec3(v);
+    }
+    frustumCenter /= static_cast<float>(frustumCorners.size());
+
+    float radius = 0.0f;
+    for (const auto &corner : frustumCorners) {
+      float distance = glm::length(glm::vec3(corner) - frustumCenter);
+      radius = glm::max(radius, distance);
+    }
+
+    static constexpr float Sixteen = 16.0f;
+    radius = std::ceil(radius * Sixteen) / Sixteen;
+    glm::vec3 maxBounds = glm::vec3(radius);
+    glm::vec3 minBounds = -maxBounds;
+
+    float cascadeZ = maxBounds.z - minBounds.z;
+    auto lightViewMatrix =
+        glm::lookAt(frustumCenter - light.direction * radius, frustumCenter,
+                    glm::vec3(0.0f, 1.0f, 0.0f));
+    auto lightProjectionMatrix = glm::ortho(
+        minBounds.x, maxBounds.x, minBounds.y, maxBounds.y, 0.0f, cascadeZ);
+
+    auto projectionViewMatrix = lightProjectionMatrix * lightViewMatrix;
+
+    mShadowMaps.push_back(
+        {projectionViewMatrix,
+         glm::vec4{-splitDistance, shadowMap.softShadows ? 1.0f : 0.0f, 0.0f,
+                   0.0f}});
+
+    prevSplitDistance = splitDistance;
+  }
+}
+
+void SceneRendererFrameData::addLight(const DirectionalLight &light,
+                                      const CascadedShadowMap &shadowMap) {
+  uint32_t shadowIndex = static_cast<uint32_t>(mShadowMaps.size());
+  uint32_t numCascades = static_cast<uint32_t>(shadowMap.numCascades);
+
+  bool canCastShadows =
+      (shadowIndex + numCascades) <= static_cast<uint32_t>(MaxShadowMaps);
+
+  if (canCastShadows) {
+    addCascadedShadowMaps(light, shadowMap);
+  }
 
   LightData data{
-      glm::vec4(light.direction, light.intensity),
-      light.color,
-      projectionViewMatrix,
-  };
+      glm::vec4(light.direction, light.intensity), light.color,
+      glm::uvec4(canCastShadows ? 1 : 0, shadowIndex, numCascades, 0)};
+  mLights.push_back(data);
+  mSceneData.data.x = static_cast<int32_t>(mLights.size());
+}
+
+void SceneRendererFrameData::addLight(const DirectionalLight &light) {
+  LightData data{glm::vec4(light.direction, light.intensity), light.color};
   mLights.push_back(data);
 
   mSceneData.data.x = static_cast<int32_t>(mLights.size());
@@ -196,8 +297,10 @@ void SceneRendererFrameData::setEnvironmentTextures(
   mSceneData.data.y = 1;
 }
 
-void SceneRendererFrameData::setCameraData(const Camera &data) {
+void SceneRendererFrameData::setCameraData(const Camera &data,
+                                           const PerspectiveLens &lens) {
   mCameraData = data;
+  mCameraLens = lens;
 }
 
 void SceneRendererFrameData::clear() {
@@ -206,6 +309,7 @@ void SceneRendererFrameData::clear() {
   mTextGlyphs.clear();
 
   mLights.clear();
+  mShadowMaps.clear();
   mSceneData.data.x = 0;
   mSceneData.data.y = 0;
   mLastSkeleton = 0;

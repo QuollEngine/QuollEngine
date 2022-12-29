@@ -85,6 +85,13 @@ public:
   void toggleSkeletonDebugForEntity(liquid::Entity entity);
 
   /**
+   * @brief Toggle shadows for light entity
+   *
+   * @param entity Entity
+   */
+  void toggleShadowsForLightEntity(liquid::Entity entity);
+
+  /**
    * @brief Set mesh for entiy
    *
    * @param entity Entity

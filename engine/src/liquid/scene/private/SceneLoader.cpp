@@ -220,17 +220,35 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["light"] && node["components"]["light"].IsMap()) {
-    auto type = node["components"]["light"]["type"].as<uint32_t>(
-        std::numeric_limits<uint32_t>::max());
+    auto light = node["components"]["light"];
+    auto type =
+        light["type"].as<uint32_t>(std::numeric_limits<uint32_t>::max());
 
     if (type == 0) {
       DirectionalLight component{};
-      component.intensity = node["components"]["light"]["intensity"].as<float>(
-          component.intensity);
-      component.color =
-          node["components"]["light"]["color"].as<glm::vec4>(component.color);
+      component.intensity = light["intensity"].as<float>(component.intensity);
+      component.color = light["color"].as<glm::vec4>(component.color);
 
       mEntityDatabase.set(entity, component);
+
+      if (light["shadow"] && light["shadow"].IsMap()) {
+        CascadedShadowMap shadowComponent{};
+        shadowComponent.softShadows = light["shadow"]["softShadows"].as<bool>(
+            shadowComponent.softShadows);
+        shadowComponent.splitLambda = light["shadow"]["splitLambda"].as<float>(
+            shadowComponent.splitLambda);
+        shadowComponent.numCascades =
+            light["shadow"]["numCascades"].as<uint32_t>(
+                shadowComponent.numCascades);
+
+        shadowComponent.numCascades = glm::clamp(
+            shadowComponent.numCascades, 1u, shadowComponent.MaxCascades);
+
+        shadowComponent.splitLambda =
+            glm::clamp(shadowComponent.splitLambda, 0.0f, 1.0f);
+
+        mEntityDatabase.set(entity, shadowComponent);
+      }
     }
   }
 
