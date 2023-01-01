@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ScriptingSystem.h"
 #include "LuaTable.h"
-#include "EntityDecorator.h"
+#include "ScriptDecorator.h"
 
 #include "liquid/core/Engine.h"
 
@@ -13,7 +13,7 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
-  EntityDecorator entityDecorator;
+  ScriptDecorator entityDecorator;
   std::vector<Entity> deleteList;
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     if (component.started) {

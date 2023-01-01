@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/scripting/EntityDecorator.h"
+#include "liquid/scripting/ScriptDecorator.h"
 
 #include "EntityQuery.h"
 #include "EntityQueryScriptingInterface.h"
@@ -27,7 +27,7 @@ int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
   if (entity == EntityNull) {
     scope.set(nullptr);
   } else {
-    EntityDecorator::createEntityTable(scope, entity);
+    ScriptDecorator::createEntityTable(scope, entity);
   }
 
   return 1;
