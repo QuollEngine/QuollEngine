@@ -4,11 +4,10 @@
 #include "liquid/rhi/FramebufferDescription.h"
 
 #include "RenderGraphEvaluator.h"
-#include "RenderDevice.h"
 
-namespace liquid::rhi {
+namespace liquid {
 
-RenderGraphEvaluator::RenderGraphEvaluator(RenderDevice *device)
+RenderGraphEvaluator::RenderGraphEvaluator(rhi::RenderDevice *device)
     : mDevice(device) {}
 
 void RenderGraphEvaluator::build(RenderGraph &graph) {
@@ -23,7 +22,7 @@ void RenderGraphEvaluator::build(RenderGraph &graph) {
   graph.updateDirtyFlag();
 }
 
-void RenderGraphEvaluator::execute(RenderCommandList &commandList,
+void RenderGraphEvaluator::execute(rhi::RenderCommandList &commandList,
                                    RenderGraph &graph, uint32_t frameIndex) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::execute");
 
@@ -63,9 +62,9 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
   uint32_t height = 0;
   uint32_t layers = 0;
 
-  std::vector<TextureHandle> framebufferAttachments;
+  std::vector<rhi::TextureHandle> framebufferAttachments;
 
-  RenderPassDescription renderPassDesc{};
+  rhi::RenderPassDescription renderPassDesc{};
 
   for (size_t i = 0; i < pass.getOutputs().size(); ++i) {
     auto &output = pass.mOutputs.at(i);
@@ -85,27 +84,27 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
   }
 
   if (!renderPassDesc.attachments.empty()) {
-    renderPassDesc.bindPoint = PipelineBindPoint::Graphics;
+    renderPassDesc.bindPoint = rhi::PipelineBindPoint::Graphics;
 
     bool renderPassExists = isHandleValid(pass.mRenderPass);
 
-    if (pass.mRenderPass != RenderPassHandle::Invalid) {
+    if (pass.mRenderPass != rhi::RenderPassHandle::Invalid) {
       mDevice->destroyRenderPass(pass.mRenderPass);
     }
 
     pass.mRenderPass = mDevice->createRenderPass(renderPassDesc);
 
-    std::vector<FramebufferHandle> framebuffers(framebufferAttachments.size(),
-                                                FramebufferHandle::Invalid);
+    std::vector<rhi::FramebufferHandle> framebuffers(
+        framebufferAttachments.size(), rhi::FramebufferHandle::Invalid);
 
-    FramebufferDescription framebufferDesc;
+    rhi::FramebufferDescription framebufferDesc;
     framebufferDesc.width = width;
     framebufferDesc.height = height;
     framebufferDesc.layers = layers;
     framebufferDesc.attachments = framebufferAttachments;
     framebufferDesc.renderPass = pass.mRenderPass;
 
-    if (pass.mFramebuffer != FramebufferHandle::Invalid) {
+    if (pass.mFramebuffer != rhi::FramebufferHandle::Invalid) {
       mDevice->destroyFramebuffer(pass.mFramebuffer);
     }
 
@@ -125,7 +124,7 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
 
     auto handle = pass.mRegistry.mRealResources.at(i);
 
-    if (handle != PipelineHandle::Invalid) {
+    if (handle != rhi::PipelineHandle::Invalid) {
       mDevice->destroyPipeline(handle);
     }
 
@@ -151,7 +150,7 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
   info.attachment.layout = renderTarget.dstLayout;
 
   static constexpr uint32_t HundredPercent = 100;
-  if (desc.sizeMethod == TextureSizeMethod::FramebufferRatio) {
+  if (desc.sizeMethod == rhi::TextureSizeMethod::FramebufferRatio) {
     info.width = desc.width * extent.x / HundredPercent;
     info.height = desc.height * extent.y / HundredPercent;
   } else {
@@ -168,9 +167,9 @@ bool RenderGraphEvaluator::hasSwapchainRelativeResources(
     RenderGraphPass &pass) {
   for (auto rt : pass.getOutputs()) {
     auto handle = rt.texture;
-    if (handle == TextureHandle(1) ||
+    if (handle == rhi::TextureHandle(1) ||
         mDevice->getTextureDescription(handle).sizeMethod ==
-            TextureSizeMethod::FramebufferRatio) {
+            rhi::TextureSizeMethod::FramebufferRatio) {
       return true;
     }
   }
@@ -178,4 +177,4 @@ bool RenderGraphEvaluator::hasSwapchainRelativeResources(
   return false;
 }
 
-} // namespace liquid::rhi
+} // namespace liquid

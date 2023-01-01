@@ -1,9 +1,9 @@
 #pragma once
 
-#include "RenderHandle.h"
-#include "PipelineDescription.h"
+#include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/PipelineDescription.h"
 
-namespace liquid::rhi {
+namespace liquid {
 
 enum class VirtualPipelineHandle : size_t {};
 
@@ -23,7 +23,7 @@ public:
    * @param handle Virtual pipeline handle
    * @return Pipeline
    */
-  inline PipelineHandle get(VirtualPipelineHandle handle) const {
+  inline rhi::PipelineHandle get(VirtualPipelineHandle handle) const {
     return mRealResources.at(static_cast<size_t>(handle));
   }
 
@@ -33,11 +33,11 @@ public:
    * @param description Pipeline description
    * @return Virtual pipeline handle
    */
-  VirtualPipelineHandle set(const PipelineDescription &description);
+  VirtualPipelineHandle set(const rhi::PipelineDescription &description);
 
 private:
-  std::vector<PipelineDescription> mDescriptions;
-  std::vector<PipelineHandle> mRealResources;
+  std::vector<rhi::PipelineDescription> mDescriptions;
+  std::vector<rhi::PipelineHandle> mRealResources;
 };
 
-} // namespace liquid::rhi
+} // namespace liquid

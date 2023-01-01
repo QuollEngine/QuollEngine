@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/rhi/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
-#include "liquid/rhi/RenderGraphEvaluator.h"
+#include "liquid/renderer/RenderGraphEvaluator.h"
+#include "liquid/renderer/RenderGraph.h"
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/SceneRendererFrameData.h"
 #include "liquid/asset/AssetRegistry.h"
@@ -86,8 +86,8 @@ public:
 private:
   liquid::rhi::RenderDevice *mDevice = nullptr;
 
-  liquid::rhi::RenderGraph mRenderGraph;
-  liquid::rhi::RenderGraphEvaluator mGraphEvaluator;
+  liquid::RenderGraph mRenderGraph;
+  liquid::RenderGraphEvaluator mGraphEvaluator;
   const std::array<liquid::SceneRendererFrameData,
                    liquid::rhi::RenderDevice::NumFrames> &mFrameData;
   liquid::AssetRegistry &mAssetRegistry;

@@ -7,10 +7,10 @@
 
 #include "RenderGraphRegistry.h"
 
-namespace liquid::rhi {
+namespace liquid {
 
-class RenderGraphEvaluator;
 class RenderGraph;
+class RenderGraphEvaluator;
 
 /**
  * @brief Render graph attachment data
@@ -19,17 +19,17 @@ struct AttachmentData {
   /**
    * Clear value
    */
-  AttachmentClearValue clearValue;
+  rhi::AttachmentClearValue clearValue;
 
   /**
    * Load operation
    */
-  AttachmentLoadOp loadOp = AttachmentLoadOp::DontCare;
+  rhi::AttachmentLoadOp loadOp = rhi::AttachmentLoadOp::DontCare;
 
   /**
    * Store operation
    */
-  AttachmentStoreOp storeOp = AttachmentStoreOp::DontCare;
+  rhi::AttachmentStoreOp storeOp = rhi::AttachmentStoreOp::DontCare;
 };
 
 /**
@@ -39,17 +39,17 @@ struct RenderTargetData {
   /**
    * Texture
    */
-  TextureHandle texture = TextureHandle::Invalid;
+  rhi::TextureHandle texture = rhi::TextureHandle::Invalid;
 
   /**
    * Source image layout
    */
-  ImageLayout srcLayout{ImageLayout::Undefined};
+  rhi::ImageLayout srcLayout{rhi::ImageLayout::Undefined};
 
   /**
    * Destination image layout
    */
-  ImageLayout dstLayout{ImageLayout::Undefined};
+  rhi::ImageLayout dstLayout{rhi::ImageLayout::Undefined};
 };
 
 /**
@@ -64,29 +64,29 @@ struct RenderGraphPassBarrier {
   /**
    * Source pipeline stage
    */
-  PipelineStage srcStage{PipelineStage::None};
+  rhi::PipelineStage srcStage{rhi::PipelineStage::None};
 
   /**
    * Destination pipeline stage
    */
-  PipelineStage dstStage{PipelineStage::None};
+  rhi::PipelineStage dstStage{rhi::PipelineStage::None};
 
   /**
    * Memory barriers
    */
-  std::vector<MemoryBarrier> memoryBarriers;
+  std::vector<rhi::MemoryBarrier> memoryBarriers;
 
   /**
    * Image barriers
    */
-  std::vector<ImageBarrier> imageBarriers;
+  std::vector<rhi::ImageBarrier> imageBarriers;
 };
 
 /**
  * @brief Render graph pass
  */
 class RenderGraphPass {
-  using ExecutorFn = std::function<void(RenderCommandList &,
+  using ExecutorFn = std::function<void(rhi::RenderCommandList &,
                                         const RenderGraphRegistry &, uint32_t)>;
   friend RenderGraph;
   friend RenderGraphEvaluator;
@@ -140,7 +140,7 @@ public:
    * @param commandList Command list
    * @param frameIndex Frame index
    */
-  void execute(RenderCommandList &commandList, uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
 
   /**
    * @brief Set output texture
@@ -148,14 +148,15 @@ public:
    * @param handle Texture handle
    * @param clearValue Clear value
    */
-  void write(TextureHandle handle, const AttachmentClearValue &clearValue);
+  void write(rhi::TextureHandle handle,
+             const rhi::AttachmentClearValue &clearValue);
 
   /**
    * @brief Set input texture
    *
    * @param handle Texture handle
    */
-  void read(TextureHandle handle);
+  void read(rhi::TextureHandle handle);
 
   /**
    * @brief Set executor function
@@ -170,7 +171,8 @@ public:
    * @param description Pipeline description
    * @return Virtual pipeline handle
    */
-  VirtualPipelineHandle addPipeline(const PipelineDescription &description);
+  VirtualPipelineHandle
+  addPipeline(const rhi::PipelineDescription &description);
 
   /**
    * @brief Get pass name
@@ -211,7 +213,7 @@ public:
    *
    * @return Pipelines
    */
-  inline const std::vector<PipelineHandle> &getPipelines() const {
+  inline const std::vector<rhi::PipelineHandle> &getPipelines() const {
     return mPipelines;
   }
 
@@ -220,7 +222,7 @@ public:
    *
    * @return Framebuffer
    */
-  inline FramebufferHandle getFramebuffer() const { return mFramebuffer; }
+  inline rhi::FramebufferHandle getFramebuffer() const { return mFramebuffer; }
 
   /**
    * @brief Get dimensions
@@ -251,7 +253,7 @@ private:
   std::vector<AttachmentData> mAttachments;
   std::vector<RenderTargetData> mOutputs;
   std::vector<RenderTargetData> mInputs;
-  std::vector<PipelineHandle> mPipelines;
+  std::vector<rhi::PipelineHandle> mPipelines;
 
   RenderGraphPassBarrier mPreBarrier;
   RenderGraphPassBarrier mPostBarrier;
@@ -259,7 +261,7 @@ private:
   ExecutorFn mExecutor;
 
   rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
-  FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
+  rhi::FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
   glm::uvec3 mDimensions{};
 
   RenderGraphRegistry mRegistry;
@@ -267,4 +269,4 @@ private:
   String mName;
 };
 
-} // namespace liquid::rhi
+} // namespace liquid

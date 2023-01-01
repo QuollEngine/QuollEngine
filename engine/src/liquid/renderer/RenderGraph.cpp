@@ -1,10 +1,11 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
-#include "RenderCommandList.h"
+#include "liquid/rhi/RenderCommandList.h"
+
 #include "RenderGraph.h"
 
-namespace liquid::rhi {
+namespace liquid {
 
 RenderGraph::RenderGraph(StringView name) : mName(name) {
   LOG_DEBUG("Render graph initialized: " << name);
@@ -38,7 +39,7 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
   output.push_back(inputs.at(index));
 }
 
-void RenderGraph::compile(RenderDevice *device) {
+void RenderGraph::compile(rhi::RenderDevice *device) {
   if (!mDirty)
     return;
 
@@ -114,15 +115,15 @@ void RenderGraph::compile(RenderDevice *device) {
 
   std::reverse(mCompiledPasses.begin(), mCompiledPasses.end());
 
-  static constexpr PipelineStage StageFragmentTest =
-      PipelineStage::EarlyFragmentTests | PipelineStage::LateFragmentTests;
-  static constexpr PipelineStage StageColor =
-      PipelineStage::ColorAttachmentOutput;
-  static constexpr PipelineStage StageFragmentShader =
-      PipelineStage::FragmentShader;
+  static constexpr rhi::PipelineStage StageFragmentTest =
+      rhi::PipelineStage::EarlyFragmentTests |
+      rhi::PipelineStage::LateFragmentTests;
+  static constexpr auto StageColor = rhi::PipelineStage::ColorAttachmentOutput;
+  static constexpr auto StageFragmentShader =
+      rhi::PipelineStage::FragmentShader;
 
   // Determine attachments, image layouts, and barriers
-  std::unordered_map<rhi::TextureHandle, ImageLayout> visitedOutputs;
+  std::unordered_map<rhi::TextureHandle, rhi::ImageLayout> visitedOutputs;
   for (auto &pass : mCompiledPasses) {
     pass.mPreBarrier = RenderGraphPassBarrier{};
     pass.mPostBarrier = RenderGraphPassBarrier{};
@@ -132,31 +133,31 @@ void RenderGraph::compile(RenderDevice *device) {
                     "Pass is reading from an empty texture");
 
       input.srcLayout = visitedOutputs.at(input.texture);
-      input.dstLayout = ImageLayout::ShaderReadOnlyOptimal;
+      input.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
 
-      PipelineStage otherStage{PipelineStage::None};
-      Access otherAccess{Access::None};
+      rhi::PipelineStage otherStage{rhi::PipelineStage::None};
+      rhi::Access otherAccess{rhi::Access::None};
 
-      if (input.srcLayout == ImageLayout::DepthStencilAttachmentOptimal) {
+      if (input.srcLayout == rhi::ImageLayout::DepthStencilAttachmentOptimal) {
         otherStage = StageFragmentTest;
-        otherAccess = Access::DepthStencilAttachmentWrite;
-      } else if (input.srcLayout == ImageLayout::ColorAttachmentOptimal) {
+        otherAccess = rhi::Access::DepthStencilAttachmentWrite;
+      } else if (input.srcLayout == rhi::ImageLayout::ColorAttachmentOptimal) {
         otherStage = StageColor;
-        otherAccess = Access::ColorAttachmentWrite;
+        otherAccess = rhi::Access::ColorAttachmentWrite;
       }
 
-      ImageBarrier preImageBarrier{};
+      rhi::ImageBarrier preImageBarrier{};
       preImageBarrier.srcLayout = input.srcLayout;
       preImageBarrier.dstLayout = input.dstLayout;
       preImageBarrier.texture = input.texture;
       preImageBarrier.srcAccess = otherAccess;
-      preImageBarrier.dstAccess = Access::ShaderRead;
+      preImageBarrier.dstAccess = rhi::Access::ShaderRead;
 
-      ImageBarrier postImageBarrier{};
+      rhi::ImageBarrier postImageBarrier{};
       postImageBarrier.srcLayout = input.dstLayout;
       postImageBarrier.dstLayout = input.srcLayout;
       postImageBarrier.texture = input.texture;
-      postImageBarrier.srcAccess = Access::ShaderRead;
+      postImageBarrier.srcAccess = rhi::Access::ShaderRead;
       postImageBarrier.dstAccess = otherAccess;
 
       pass.mPreBarrier.enabled = true;
@@ -174,33 +175,35 @@ void RenderGraph::compile(RenderDevice *device) {
       auto &output = pass.mOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
       if (visitedOutputs.find(output.texture) == visitedOutputs.end()) {
-        output.srcLayout = ImageLayout::Undefined;
-        attachment.loadOp = AttachmentLoadOp::Clear;
+        output.srcLayout = rhi::ImageLayout::Undefined;
+        attachment.loadOp = rhi::AttachmentLoadOp::Clear;
       } else {
         output.srcLayout = visitedOutputs.at(output.texture);
-        attachment.loadOp = AttachmentLoadOp::Load;
+        attachment.loadOp = rhi::AttachmentLoadOp::Load;
       }
 
-      attachment.storeOp = AttachmentStoreOp::Store;
+      attachment.storeOp = rhi::AttachmentStoreOp::Store;
 
-      PipelineStage stage{PipelineStage::None};
-      Access srcAccess{Access::None};
-      Access dstAccess{Access::None};
+      rhi::PipelineStage stage{rhi::PipelineStage::None};
+      rhi::Access srcAccess{rhi::Access::None};
+      rhi::Access dstAccess{rhi::Access::None};
 
       auto &texture = device->getTextureDescription(output.texture);
-      if ((texture.usage & TextureUsage::Color) == TextureUsage::Color) {
-        output.dstLayout = ImageLayout::ColorAttachmentOptimal;
+      if ((texture.usage & rhi::TextureUsage::Color) ==
+          rhi::TextureUsage::Color) {
+        output.dstLayout = rhi::ImageLayout::ColorAttachmentOptimal;
         stage = StageColor;
-        srcAccess = Access::ColorAttachmentWrite;
-        dstAccess = srcAccess | Access::ColorAttachmentRead;
-      } else if ((texture.usage & TextureUsage::Depth) == TextureUsage::Depth) {
-        output.dstLayout = ImageLayout::DepthStencilAttachmentOptimal;
+        srcAccess = rhi::Access::ColorAttachmentWrite;
+        dstAccess = srcAccess | rhi::Access::ColorAttachmentRead;
+      } else if ((texture.usage & rhi::TextureUsage::Depth) ==
+                 rhi::TextureUsage::Depth) {
+        output.dstLayout = rhi::ImageLayout::DepthStencilAttachmentOptimal;
         stage = StageFragmentTest;
-        srcAccess = Access::DepthStencilAttachmentWrite;
-        dstAccess = srcAccess | Access::DepthStencilAttachmentRead;
+        srcAccess = rhi::Access::DepthStencilAttachmentWrite;
+        dstAccess = srcAccess | rhi::Access::DepthStencilAttachmentRead;
       }
 
-      MemoryBarrier memoryBarrier{};
+      rhi::MemoryBarrier memoryBarrier{};
       memoryBarrier.srcAccess = srcAccess;
       memoryBarrier.dstAccess = dstAccess;
 
@@ -223,4 +226,4 @@ void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {
 
 void RenderGraph::updateDirtyFlag() { mDirty = false; }
 
-} // namespace liquid::rhi
+} // namespace liquid

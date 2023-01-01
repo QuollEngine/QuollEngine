@@ -1,23 +1,24 @@
 #pragma once
 
-#include "PipelineDescription.h"
-#include "RenderPassDescription.h"
-#include "RenderGraph.h"
-#include "RenderCommandList.h"
-#include "RenderDevice.h"
+#include "liquid/rhi/PipelineDescription.h"
+#include "liquid/rhi/RenderPassDescription.h"
+#include "liquid/rhi/RenderCommandList.h"
+#include "liquid/rhi/RenderDevice.h"
 
-namespace liquid::rhi {
+#include "RenderGraph.h"
+
+namespace liquid {
 
 /**
  * @brief Render graph evaluator
  */
 class RenderGraphEvaluator {
   struct RenderPassAttachmentInfo {
-    std::vector<TextureHandle> framebufferAttachments;
+    std::vector<rhi::TextureHandle> framebufferAttachments;
     uint32_t width = 0;
     uint32_t height = 0;
     uint32_t layers = 0;
-    RenderPassAttachmentDescription attachment;
+    rhi::RenderPassAttachmentDescription attachment;
   };
 
 public:
@@ -26,7 +27,7 @@ public:
    *
    * @param device Render device
    */
-  RenderGraphEvaluator(RenderDevice *device);
+  RenderGraphEvaluator(rhi::RenderDevice *device);
 
   /**
    * @brief Build render graph
@@ -42,7 +43,7 @@ public:
    * @param graph Render graph
    * @param frameIndex Frame index
    */
-  void execute(RenderCommandList &commandList, RenderGraph &graph,
+  void execute(rhi::RenderCommandList &commandList, RenderGraph &graph,
                uint32_t frameIndex);
 
 private:
@@ -77,7 +78,7 @@ private:
   bool hasSwapchainRelativeResources(RenderGraphPass &pass);
 
 private:
-  RenderDevice *mDevice = nullptr;
+  rhi::RenderDevice *mDevice = nullptr;
 };
 
-} // namespace liquid::rhi
+} // namespace liquid

@@ -1,14 +1,14 @@
 #include "liquid/core/Base.h"
 #include "RenderGraphRegistry.h"
 
-namespace liquid::rhi {
+namespace liquid {
 
 VirtualPipelineHandle
-RenderGraphRegistry::set(const PipelineDescription &description) {
+RenderGraphRegistry::set(const rhi::PipelineDescription &description) {
   mDescriptions.push_back(description);
-  mRealResources.push_back(PipelineHandle::Invalid);
+  mRealResources.push_back(rhi::PipelineHandle::Invalid);
 
   return static_cast<VirtualPipelineHandle>(mDescriptions.size() - 1);
 }
 
-} // namespace liquid::rhi
+} // namespace liquid

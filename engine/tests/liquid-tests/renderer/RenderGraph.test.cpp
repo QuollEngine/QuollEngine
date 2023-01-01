@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/RenderGraph.h"
 
 #include "liquid-tests/mocks/MockRenderDevice.h"
 #include "liquid-tests/Testing.h"
@@ -11,7 +11,7 @@ public:
   RenderGraphTest() : graph("TestGraph") {}
 
   MockRenderDevice device;
-  liquid::rhi::RenderGraph graph;
+  liquid::RenderGraph graph;
 };
 
 class RenderGraphDeathTest : public RenderGraphTest {};

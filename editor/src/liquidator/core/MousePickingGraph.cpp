@@ -74,7 +74,7 @@ MousePickingGraph::MousePickingGraph(
 
   pass.setExecutor([this, vPipeline, vSkinnedPipeline](
                        liquid::rhi::RenderCommandList &commandList,
-                       const liquid::rhi::RenderGraphRegistry &registry,
+                       const liquid::RenderGraphRegistry &registry,
                        uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 

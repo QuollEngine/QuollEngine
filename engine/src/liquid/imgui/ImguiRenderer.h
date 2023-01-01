@@ -3,7 +3,7 @@
 #include "liquid/window/Window.h"
 
 #include "liquid/rhi/RenderCommandList.h"
-#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/ShaderLibrary.h"
 
@@ -18,7 +18,7 @@ struct ImguiRenderPassData {
   /**
    * Imgui pass
    */
-  rhi::RenderGraphPass &pass;
+  RenderGraphPass &pass;
 
   /**
    * Imgui texture
@@ -94,7 +94,7 @@ public:
    * @param graph Render graph
    * @return Imgui render pass data
    */
-  ImguiRenderPassData attach(rhi::RenderGraph &graph);
+  ImguiRenderPassData attach(RenderGraph &graph);
 
   /**
    * @brief Set clear color

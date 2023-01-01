@@ -54,7 +54,7 @@ void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
   mClearColor = clearColor;
 }
 
-SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
+SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   static constexpr uint32_t ShadowMapDimensions = 4096;
   static constexpr uint32_t SwapchainSizePercentage = 100;
 
@@ -107,7 +107,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
     pass.setExecutor([vPipeline, vSkinnedPipeline, shadowmap,
                       this](rhi::RenderCommandList &commandList,
-                            const rhi::RenderGraphRegistry &registry,
+                            const RenderGraphRegistry &registry,
                             uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
       rhi::Descriptor descriptor;
@@ -178,7 +178,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
 
     pass.setExecutor([this, vPipeline, vSkinnedPipeline,
                       shadowmap](rhi::RenderCommandList &commandList,
-                                 const rhi::RenderGraphRegistry &registry,
+                                 const RenderGraphRegistry &registry,
                                  uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
       auto pipeline = registry.get(vPipeline);
@@ -244,7 +244,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
     pass.setExecutor([vPipeline, this](rhi::RenderCommandList &commandList,
-                                       const rhi::RenderGraphRegistry &registry,
+                                       const RenderGraphRegistry &registry,
                                        uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
       if (!rhi::isHandleValid(frameData.getIrradianceMap()))
@@ -282,7 +282,7 @@ SceneRenderPassData SceneRenderer::attach(rhi::RenderGraph &graph) {
   return SceneRenderPassData{sceneColor, depthBuffer};
 }
 
-void SceneRenderer::attachText(rhi::RenderGraph &graph,
+void SceneRenderer::attachText(RenderGraph &graph,
                                const SceneRenderPassData &passData) {
   auto &pass = graph.addPass("textPass");
   pass.write(passData.sceneColor, mClearColor);
@@ -300,21 +300,20 @@ void SceneRenderer::attachText(rhi::RenderGraph &graph,
           rhi::BlendOp::Add, rhi::BlendFactor::One,
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
-  pass.setExecutor(
-      [vTextPipeline, this](rhi::RenderCommandList &commandList,
-                            const rhi::RenderGraphRegistry &registry,
-                            uint32_t frameIndex) {
-        auto &frameData = mFrameData.at(frameIndex);
+  pass.setExecutor([vTextPipeline, this](rhi::RenderCommandList &commandList,
+                                         const RenderGraphRegistry &registry,
+                                         uint32_t frameIndex) {
+    auto &frameData = mFrameData.at(frameIndex);
 
-        auto textPipeline = registry.get(vTextPipeline);
+    auto textPipeline = registry.get(vTextPipeline);
 
-        commandList.bindPipeline(textPipeline);
-        rhi::Descriptor sceneDescriptor;
-        sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
-                             rhi::DescriptorType::UniformBuffer);
-        commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
-        renderText(commandList, textPipeline, frameIndex);
-      });
+    commandList.bindPipeline(textPipeline);
+    rhi::Descriptor sceneDescriptor;
+    sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
+                         rhi::DescriptorType::UniformBuffer);
+    commandList.bindDescriptor(textPipeline, 0, sceneDescriptor);
+    renderText(commandList, textPipeline, frameIndex);
+  });
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,

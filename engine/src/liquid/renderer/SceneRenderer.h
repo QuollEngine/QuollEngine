@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderCommandList.h"
-#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/RenderGraph.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "SceneRendererFrameData.h"
 #include "ShaderLibrary.h"
@@ -53,7 +53,7 @@ public:
    * @param graph Render graph
    * @return Scene render pass data
    */
-  SceneRenderPassData attach(rhi::RenderGraph &graph);
+  SceneRenderPassData attach(RenderGraph &graph);
 
   /**
    * @brief Attach text pass to render graph
@@ -61,7 +61,7 @@ public:
    * @param graph Render graph
    * @param passData Scene render pass data
    */
-  void attachText(rhi::RenderGraph &graph, const SceneRenderPassData &passData);
+  void attachText(RenderGraph &graph, const SceneRenderPassData &passData);
 
   /**
    * @brief Update frame data

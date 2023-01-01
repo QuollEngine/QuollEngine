@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/RenderDevice.h"
-#include "liquid/rhi/RenderGraphEvaluator.h"
+#include "liquid/renderer/RenderGraphEvaluator.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
 #include "SceneRenderer.h"
@@ -96,7 +96,7 @@ public:
    * @param commandList Render command list
    * @param frameIndex Frame index
    */
-  void render(rhi::RenderGraph &graph, rhi::RenderCommandList &commandList,
+  void render(RenderGraph &graph, rhi::RenderCommandList &commandList,
               uint32_t frameIndex);
 
   /**
@@ -105,7 +105,7 @@ public:
   inline void wait() { mDevice->waitForIdle(); }
 
 private:
-  rhi::RenderGraphEvaluator mGraphEvaluator;
+  RenderGraphEvaluator mGraphEvaluator;
   rhi::RenderDevice *mDevice;
   ShaderLibrary mShaderLibrary;
   AssetRegistry &mAssetRegistry;
