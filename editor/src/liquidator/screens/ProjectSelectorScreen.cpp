@@ -24,7 +24,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   liquid::EntityDatabase entityDatabase;
   liquid::AssetRegistry assetRegistry;
   liquid::ShaderLibrary shaderLibrary;
-  liquid::rhi::RenderGraphEvaluator graphEvaluator(mDevice);
+  liquid::RenderGraphEvaluator graphEvaluator(mDevice);
 
   liquid::ImguiRenderer imguiRenderer(mWindow, shaderLibrary, mDevice);
   liquid::Presenter presenter(shaderLibrary, mDevice);
@@ -48,7 +48,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
   imguiRenderer.buildFonts();
 
-  liquid::rhi::RenderGraph graph("Main");
+  liquid::RenderGraph graph("Main");
   auto imguiPassData = imguiRenderer.attach(graph);
 
   graph.setFramebufferExtent(mWindow.getFramebufferSize());

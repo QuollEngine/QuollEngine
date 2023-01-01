@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/RenderGraph.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquidator/editor-scene/EditorGrid.h"
@@ -50,7 +50,7 @@ public:
    * @param graph Render graph
    * @return Newly created render pass
    */
-  liquid::rhi::RenderGraphPass &attach(liquid::rhi::RenderGraph &graph);
+  liquid::RenderGraphPass &attach(liquid::RenderGraph &graph);
 
   /**
    * @brief Update frame data

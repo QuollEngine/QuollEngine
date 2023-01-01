@@ -1,19 +1,20 @@
 #include "liquid/core/Base.h"
-#include "liquid/rhi/RenderGraphPass.h"
+#include "liquid/renderer/RenderGraphPass.h"
 
 #include "liquid-tests/Testing.h"
 
 class RenderGraphPassTest : public ::testing::Test {
 public:
+  RenderGraphPassTest() : pass("Test") {}
+
+  liquid::RenderGraphPass pass;
 };
 
 TEST_F(RenderGraphPassTest, SetsNameOnConstruct) {
-  liquid::rhi::RenderGraphPass pass("Test");
   EXPECT_EQ(pass.getName(), "Test");
 }
 
 TEST_F(RenderGraphPassTest, AddsHandleToOutputOnWrite) {
-  liquid::rhi::RenderGraphPass pass("Test");
   liquid::rhi::TextureHandle handle{2};
 
   pass.write(handle, glm::vec4());
@@ -22,7 +23,6 @@ TEST_F(RenderGraphPassTest, AddsHandleToOutputOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
-  liquid::rhi::RenderGraphPass pass("Test");
   liquid::rhi::TextureHandle handle{2};
 
   pass.write(handle, glm::vec4(2.0f));
@@ -38,7 +38,6 @@ TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsHandleToInputOnRead) {
-  liquid::rhi::RenderGraphPass pass("Test");
   liquid::rhi::TextureHandle handle{2};
 
   pass.read(handle);

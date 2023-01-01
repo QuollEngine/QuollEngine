@@ -7,7 +7,7 @@
 
 #include "liquid/renderer/SceneRenderer.h"
 
-#include "liquid/rhi/RenderGraph.h"
+#include "liquid/renderer/RenderGraph.h"
 
 namespace liquid {
 
@@ -18,8 +18,7 @@ Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
       mAssetRegistry(assetRegistry),
       mSceneRenderer(mShaderLibrary, mAssetRegistry, device) {}
 
-void Renderer::render(rhi::RenderGraph &graph,
-                      rhi::RenderCommandList &commandList,
+void Renderer::render(RenderGraph &graph, rhi::RenderCommandList &commandList,
                       uint32_t frameIndex) {
   graph.compile(mDevice);
 

@@ -66,7 +66,7 @@ ImguiRenderer::~ImguiRenderer() {
   ImGui::DestroyContext();
 }
 
-ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
+ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
                         "before starting rendering");
 
@@ -107,7 +107,7 @@ ImguiRenderPassData ImguiRenderer::attach(rhi::RenderGraph &graph) {
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
   pass.setExecutor([this, pipeline](rhi::RenderCommandList &commandList,
-                                    const rhi::RenderGraphRegistry &registry,
+                                    const RenderGraphRegistry &registry,
                                     uint32_t frameIndex) {
     draw(commandList, registry.get(pipeline), frameIndex);
   });

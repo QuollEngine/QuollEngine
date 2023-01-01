@@ -1,9 +1,10 @@
 #pragma once
 
-#include "RenderGraphPass.h"
-#include "RenderDevice.h"
+#include "liquid/rhi/RenderDevice.h"
 
-namespace liquid::rhi {
+#include "RenderGraphPass.h"
+
+namespace liquid {
 
 /**
  * @brief Render graph
@@ -33,7 +34,7 @@ public:
    *
    * @param device Render device
    */
-  void compile(RenderDevice *device);
+  void compile(rhi::RenderDevice *device);
 
   /**
    * @brief Get passes
@@ -97,4 +98,4 @@ private:
   String mName;
 };
 
-} // namespace liquid::rhi
+} // namespace liquid

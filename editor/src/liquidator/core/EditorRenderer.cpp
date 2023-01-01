@@ -46,8 +46,7 @@ EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
       mDevice->createShader({shadersPath / "collidable-shape.frag.spv"}));
 }
 
-liquid::rhi::RenderGraphPass &
-EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
+liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
   auto &pass = graph.addPass("editor-debug");
 
   auto vEditorGridPipeline = pass.addPipeline(
@@ -122,7 +121,7 @@ EditorRenderer::attach(liquid::rhi::RenderGraph &graph) {
   pass.setExecutor([vEditorGridPipeline, vSkeletonLinesPipeline,
                     vObjectIconsPipeline, vCollidableShapePipeline,
                     this](liquid::rhi::RenderCommandList &commandList,
-                          const liquid::rhi::RenderGraphRegistry &registry,
+                          const liquid::RenderGraphRegistry &registry,
                           uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
     auto collidableShapePipeline = registry.get(vCollidableShapePipeline);
