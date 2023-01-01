@@ -9,7 +9,7 @@
 #include "liquid/text/TextScriptingInterface.h"
 
 #include "LuaScope.h"
-#include "EntityDecorator.h"
+#include "ScriptDecorator.h"
 #include "ScriptLogger.h"
 
 namespace liquid {
@@ -51,7 +51,7 @@ void registerEntityInterface(LuaScope &scope, LuaTable &table, Entity entity) {
   table.set(TLuaInterface::getName().c_str(), componentTable);
 }
 
-void EntityDecorator::createEntityTable(LuaScope &scope, Entity entity) {
+void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   auto table = scope.createTable(2);
   table.set("id", entity);
 
@@ -62,7 +62,7 @@ void EntityDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   registerEntityInterface<TextScriptingInterface>(scope, table, entity);
 }
 
-void EntityDecorator::attachToScope(LuaScope &scope, Entity entity,
+void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,
                                     EntityDatabase &entityDatabase) {
   scope.setGlobal<LuaUserData>("__privateDatabase",
                                {static_cast<void *>(&entityDatabase)});

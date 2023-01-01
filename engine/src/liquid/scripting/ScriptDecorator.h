@@ -6,9 +6,9 @@
 namespace liquid {
 
 /**
- * @brief Decorates scope with entity system
+ * @brief Decorates scope with with globals
  */
-class EntityDecorator {
+class ScriptDecorator {
 public:
   /**
    * @brief Attach to scope
