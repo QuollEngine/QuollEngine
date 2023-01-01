@@ -12,6 +12,10 @@ void GameExporter::exportGame(const Project &project,
 
   auto gameName = destination.filename();
 
+  if (gameName.empty()) {
+    return;
+  }
+
   auto destinationAssetsPath = destination / project.assetsPath.filename();
 
   // Copy game data to destination
