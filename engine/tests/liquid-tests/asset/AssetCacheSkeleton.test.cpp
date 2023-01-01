@@ -10,9 +10,9 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 using AssetCacheDeathTest = AssetCacheTest;
@@ -65,7 +65,7 @@ TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
     }
   }
 
-  auto filePath = manager.createSkeletonFromAsset(asset);
+  auto filePath = cache.createSkeletonFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -154,13 +154,12 @@ TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {
     }
   }
 
-  auto filePath = manager.createSkeletonFromAsset(asset);
-  auto handle = manager.loadSkeletonFromFile(filePath.getData());
+  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto handle = cache.loadSkeletonFromFile(filePath.getData());
 
   EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Invalid);
 
-  auto &actual =
-      manager.getRegistry().getSkeletons().getAsset(handle.getData());
+  auto &actual = cache.getRegistry().getSkeletons().getAsset(handle.getData());
 
   for (size_t i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
     EXPECT_EQ(actual.data.jointLocalPositions.at(i),

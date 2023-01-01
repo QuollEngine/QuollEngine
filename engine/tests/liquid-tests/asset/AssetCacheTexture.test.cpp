@@ -10,29 +10,28 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 TEST_F(AssetCacheTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
-  EXPECT_TRUE(manager.loadTextureFromFile("non-existent-file.ktx").hasError());
+  EXPECT_TRUE(cache.loadTextureFromFile("non-existent-file.ktx").hasError());
 
   // invalid format
-  EXPECT_TRUE(
-      manager.loadTextureFromFile("white-image-100x100.png").hasError());
+  EXPECT_TRUE(cache.loadTextureFromFile("white-image-100x100.png").hasError());
 }
 
 TEST_F(AssetCacheTest, FailsIfTextureIsOneDimensional) {
-  EXPECT_TRUE(manager.loadTextureFromFile("1x1-1d.ktx").hasError());
+  EXPECT_TRUE(cache.loadTextureFromFile("1x1-1d.ktx").hasError());
 }
 
 TEST_F(AssetCacheTest, LoadsTexture2D) {
-  auto texture = manager.loadTextureFromFile("1x1-2d.ktx");
+  auto texture = cache.loadTextureFromFile("1x1-2d.ktx");
   EXPECT_TRUE(texture.hasData());
 
-  auto &asset = manager.getRegistry().getTextures().getAsset(texture.getData());
+  auto &asset = cache.getRegistry().getTextures().getAsset(texture.getData());
 
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);
@@ -41,11 +40,11 @@ TEST_F(AssetCacheTest, LoadsTexture2D) {
 }
 
 TEST_F(AssetCacheTest, LoadsTextureCubemap) {
-  auto texture = manager.loadTextureFromFile("1x1-cubemap.ktx");
+  auto texture = cache.loadTextureFromFile("1x1-cubemap.ktx");
   EXPECT_TRUE(texture.hasData());
 
   const auto &asset =
-      manager.getRegistry().getTextures().getAsset(texture.getData());
+      cache.getRegistry().getTextures().getAsset(texture.getData());
 
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);

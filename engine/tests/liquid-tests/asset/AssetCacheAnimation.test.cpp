@@ -10,9 +10,9 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
@@ -57,7 +57,7 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
 
 TEST_F(AssetCacheTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
-  auto filePath = manager.createAnimationFromAsset(asset);
+  auto filePath = cache.createAnimationFromAsset(asset);
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
@@ -115,13 +115,12 @@ TEST_F(AssetCacheTest, CreatesAnimationFile) {
 TEST_F(AssetCacheTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
-  auto filePath = manager.createAnimationFromAsset(asset);
-  auto handle = manager.loadAnimationFromFile(filePath.getData());
+  auto filePath = cache.createAnimationFromAsset(asset);
+  auto handle = cache.loadAnimationFromFile(filePath.getData());
   EXPECT_FALSE(handle.hasError());
   EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Invalid);
 
-  auto &actual =
-      manager.getRegistry().getAnimations().getAsset(handle.getData());
+  auto &actual = cache.getRegistry().getAnimations().getAsset(handle.getData());
   EXPECT_EQ(actual.type, liquid::AssetType::Animation);
 
   EXPECT_EQ(actual.data.time, asset.data.time);
