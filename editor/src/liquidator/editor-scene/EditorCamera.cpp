@@ -146,7 +146,7 @@ void EditorCamera::reset() {
     mCameraEntity = mEntityDatabase.create();
   }
   mEntityDatabase.set<liquid::PerspectiveLens>(
-      mCameraEntity, {DefaultFOV, DefaultFar, DefaultNear});
+      mCameraEntity, {DefaultFOV, DefaultNear, DefaultFar});
   mEntityDatabase.set<liquid::Camera>(mCameraEntity, {});
 }
 
