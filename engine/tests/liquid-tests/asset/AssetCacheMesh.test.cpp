@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
   liquid::AssetData<liquid::MeshAsset> createRandomizedMeshAsset() {
     liquid::AssetData<liquid::MeshAsset> asset;
@@ -57,7 +57,7 @@ public:
                          ("material-geom-" + std::to_string(i) + ".lqmat"));
 
         geometry.material =
-            manager.getRegistry().getMaterials().addAsset(material);
+            cache.getRegistry().getMaterials().addAsset(material);
 
         asset.data.geometries.push_back(geometry);
       }
@@ -116,20 +116,19 @@ public:
           liquid::Path(std::filesystem::current_path() / "materials" /
                        ("material-geom-" + std::to_string(i) + ".lqmat"));
 
-      geometry.material =
-          manager.getRegistry().getMaterials().addAsset(material);
+      geometry.material = cache.getRegistry().getMaterials().addAsset(material);
 
       asset.data.geometries.push_back(geometry);
     }
     return asset;
   }
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 TEST_F(AssetCacheTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = manager.createMeshFromAsset(asset);
+  auto filePath = cache.createMeshFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -217,10 +216,10 @@ TEST_F(AssetCacheTest, CreatesMeshFileFromMeshAsset) {
 
 TEST_F(AssetCacheTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = manager.createMeshFromAsset(asset).getData();
-  auto handle = manager.loadMeshFromFile(filePath).getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
+  auto handle = cache.loadMeshFromFile(filePath).getData();
   EXPECT_NE(handle, liquid::MeshAssetHandle::Invalid);
-  auto &mesh = manager.getRegistry().getMeshes().getAsset(handle);
+  auto &mesh = cache.getRegistry().getMeshes().getAsset(handle);
 
   for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
@@ -253,12 +252,12 @@ TEST_F(AssetCacheTest, LoadsMeshFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
-  auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
+  auto textureHandle = cache.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";
   materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = manager.createMaterialFromAsset(materialData);
-  auto materialHandle = manager.loadMaterialFromFile(materialPath.getData());
+  auto materialPath = cache.createMaterialFromAsset(materialData);
+  auto materialHandle = cache.loadMaterialFromFile(materialPath.getData());
 
   liquid::AssetData<liquid::MeshAsset> meshData{};
   meshData.name = "test-mesh";
@@ -267,23 +266,23 @@ TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
   geometry.material = materialHandle.getData();
   meshData.data.geometries.push_back(geometry);
 
-  auto meshPath = manager.createMeshFromAsset(meshData);
+  auto meshPath = cache.createMeshFromAsset(meshData);
 
-  manager.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  manager.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
+  cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
+  cache.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
 
-  auto meshHandle = manager.loadMeshFromFile(meshPath.getData()).getData();
-  auto &newMesh = manager.getRegistry().getMeshes().getAsset(meshHandle);
+  auto meshHandle = cache.loadMeshFromFile(meshPath.getData()).getData();
+  auto &newMesh = cache.getRegistry().getMeshes().getAsset(meshHandle);
 
   EXPECT_NE(newMesh.data.geometries.at(0).material,
             liquid::MaterialAssetHandle::Invalid);
 
-  auto &newMaterial = manager.getRegistry().getMaterials().getAsset(
+  auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
   EXPECT_NE(newMaterial.data.baseColorTexture,
             liquid::TextureAssetHandle::Invalid);
 
-  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+  auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
   EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
 }
@@ -291,7 +290,7 @@ TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
 TEST_F(AssetCacheTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = manager.createSkinnedMeshFromAsset(asset);
+  auto filePath = cache.createSkinnedMeshFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -398,11 +397,11 @@ TEST_F(AssetCacheTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
 TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = manager.createSkinnedMeshFromAsset(asset);
-  auto handle = manager.loadSkinnedMeshFromFile(filePath.getData());
+  auto filePath = cache.createSkinnedMeshFromAsset(asset);
+  auto handle = cache.loadSkinnedMeshFromFile(filePath.getData());
   EXPECT_NE(handle.getData(), liquid::SkinnedMeshAssetHandle::Invalid);
   auto &mesh =
-      manager.getRegistry().getSkinnedMeshes().getAsset(handle.getData());
+      cache.getRegistry().getSkinnedMeshes().getAsset(handle.getData());
 
   for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
     auto &expectedGeometry = asset.data.geometries.at(g);
@@ -435,12 +434,12 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
-  auto textureHandle = manager.loadTextureFromFile("1x1-2d.ktx");
+  auto textureHandle = cache.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";
   materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = manager.createMaterialFromAsset(materialData);
-  auto materialHandle = manager.loadMaterialFromFile(materialPath.getData());
+  auto materialPath = cache.createMaterialFromAsset(materialData);
+  auto materialHandle = cache.loadMaterialFromFile(materialPath.getData());
 
   liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
   meshData.name = "test-smesh";
@@ -448,24 +447,23 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
   geometry.material = materialHandle.getData();
   meshData.data.geometries.push_back(geometry);
 
-  auto meshPath = manager.createSkinnedMeshFromAsset(meshData);
+  auto meshPath = cache.createSkinnedMeshFromAsset(meshData);
 
-  manager.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  manager.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
+  cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
+  cache.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
 
-  auto meshHandle =
-      manager.loadSkinnedMeshFromFile(meshPath.getData()).getData();
-  auto &newMesh = manager.getRegistry().getSkinnedMeshes().getAsset(meshHandle);
+  auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath.getData()).getData();
+  auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(meshHandle);
 
   EXPECT_NE(newMesh.data.geometries.at(0).material,
             liquid::MaterialAssetHandle::Invalid);
 
-  auto &newMaterial = manager.getRegistry().getMaterials().getAsset(
+  auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
   EXPECT_NE(newMaterial.data.baseColorTexture,
             liquid::TextureAssetHandle::Invalid);
 
-  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+  auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
   EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
 }

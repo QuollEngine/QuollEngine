@@ -5,9 +5,9 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 using AssetCacheDeathTest = AssetCacheTest;
@@ -15,7 +15,7 @@ using AssetCacheDeathTest = AssetCacheTest;
 TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
   auto filePath = std::filesystem::current_path() / "valid-audio.wav";
 
-  auto result = manager.loadAudioFromFile(filePath);
+  auto result = cache.loadAudioFromFile(filePath);
 
   EXPECT_TRUE(result.hasData());
   EXPECT_FALSE(result.hasError());
@@ -23,7 +23,7 @@ TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, liquid::AudioAssetHandle::Invalid);
-  const auto &asset = manager.getRegistry().getAudios().getAsset(handle);
+  const auto &asset = cache.getRegistry().getAudios().getAsset(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.wav");
   EXPECT_EQ(asset.path, filePath);
@@ -35,7 +35,7 @@ TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
 TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
   auto filePath = std::filesystem::current_path() / "valid-audio.mp3";
 
-  auto result = manager.loadAudioFromFile(filePath);
+  auto result = cache.loadAudioFromFile(filePath);
 
   EXPECT_TRUE(result.hasData());
   EXPECT_FALSE(result.hasError());
@@ -43,7 +43,7 @@ TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
 
   auto handle = result.getData();
   EXPECT_NE(handle, liquid::AudioAssetHandle::Invalid);
-  const auto &asset = manager.getRegistry().getAudios().getAsset(handle);
+  const auto &asset = cache.getRegistry().getAudios().getAsset(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.mp3");
   EXPECT_EQ(asset.path, filePath);
@@ -55,7 +55,7 @@ TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
 TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
   auto filePath = std::filesystem::current_path() / "white-image-100x100.png";
 
-  auto result = manager.loadAudioFromFile(filePath);
+  auto result = cache.loadAudioFromFile(filePath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
@@ -64,7 +64,7 @@ TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
 TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
   auto filePath = std::filesystem::current_path() / "non-existent-file.wav";
 
-  auto result = manager.loadAudioFromFile(filePath);
+  auto result = cache.loadAudioFromFile(filePath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());

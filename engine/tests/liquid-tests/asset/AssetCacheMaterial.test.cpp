@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : manager(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(std::filesystem::current_path()) {}
 
   liquid::AssetData<liquid::MaterialAsset>
   createMaterialAsset(bool createTextures) {
@@ -25,7 +25,7 @@ public:
       texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
                                   "test.ktx2");
       asset.data.baseColorTexture =
-          manager.getRegistry().getTextures().addAsset(texture);
+          cache.getRegistry().getTextures().addAsset(texture);
     }
 
     asset.data.metallicFactor = 1.0f;
@@ -36,7 +36,7 @@ public:
       texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
                                   "mr.ktx2");
       asset.data.metallicRoughnessTexture =
-          manager.getRegistry().getTextures().addAsset(texture);
+          cache.getRegistry().getTextures().addAsset(texture);
     }
 
     asset.data.normalScale = 0.6f;
@@ -46,7 +46,7 @@ public:
       texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
                                   "normal.ktx2");
       asset.data.normalTexture =
-          manager.getRegistry().getTextures().addAsset(texture);
+          cache.getRegistry().getTextures().addAsset(texture);
     }
 
     asset.data.occlusionStrength = 0.4f;
@@ -56,7 +56,7 @@ public:
       texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
                                   "occlusion.ktx2");
       asset.data.occlusionTexture =
-          manager.getRegistry().getTextures().addAsset(texture);
+          cache.getRegistry().getTextures().addAsset(texture);
     }
 
     asset.data.emissiveFactor = glm::vec3(0.5f, 0.6f, 2.5f);
@@ -66,18 +66,18 @@ public:
       texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
                                   "emissive.ktx2");
       asset.data.emissiveTexture =
-          manager.getRegistry().getTextures().addAsset(texture);
+          cache.getRegistry().getTextures().addAsset(texture);
     }
 
     return asset;
   }
 
-  liquid::AssetCache manager;
+  liquid::AssetCache cache;
 };
 
 TEST_F(AssetCacheTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
-  auto assetFile = manager.createMaterialFromAsset(asset);
+  auto assetFile = cache.createMaterialFromAsset(asset);
 
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
@@ -162,7 +162,7 @@ TEST_F(AssetCacheTest,
        CreatesMaterialWithoutTexturesFromAssetIfReferencedTexturesAreInvalid) {
   auto asset = createMaterialAsset(false);
 
-  auto assetFile = manager.createMaterialFromAsset(asset);
+  auto assetFile = cache.createMaterialFromAsset(asset);
 
   {
     liquid::InputBinaryStream file(assetFile.getData());
@@ -241,11 +241,11 @@ TEST_F(AssetCacheTest,
 TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
   auto asset = createMaterialAsset(true);
 
-  auto assetFile = manager.createMaterialFromAsset(asset);
+  auto assetFile = cache.createMaterialFromAsset(asset);
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = manager.loadMaterialFromFile(assetFile.getData());
+  auto res = cache.loadMaterialFromFile(assetFile.getData());
 
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -254,7 +254,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
 
   EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
 
-  auto &material = manager.getRegistry().getMaterials().getAsset(handle);
+  auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
   EXPECT_EQ(material.path, std::filesystem::current_path() / "material1.lqmat");
   EXPECT_EQ(material.type, liquid::AssetType::Material);
@@ -289,11 +289,11 @@ TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
 TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
   auto asset = createMaterialAsset(false);
 
-  auto assetFile = manager.createMaterialFromAsset(asset);
+  auto assetFile = cache.createMaterialFromAsset(asset);
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = manager.loadMaterialFromFile(assetFile.getData());
+  auto res = cache.loadMaterialFromFile(assetFile.getData());
 
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -304,7 +304,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
 
   EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
 
-  auto &material = manager.getRegistry().getMaterials().getAsset(handle);
+  auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
   EXPECT_EQ(material.path, std::filesystem::current_path() / "material1.lqmat");
   EXPECT_EQ(material.type, liquid::AssetType::Material);
@@ -337,24 +337,24 @@ TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsTexturesWithMaterials) {
-  auto texture = manager.loadTextureFromFile("1x1-2d.ktx");
+  auto texture = cache.loadTextureFromFile("1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> material{};
   material.name = "test-material";
   material.data.baseColorTexture = texture.getData();
-  auto path = manager.createMaterialFromAsset(material);
+  auto path = cache.createMaterialFromAsset(material);
 
-  manager.getRegistry().getTextures().deleteAsset(texture.getData());
-  EXPECT_FALSE(manager.getRegistry().getTextures().hasAsset(texture.getData()));
+  cache.getRegistry().getTextures().deleteAsset(texture.getData());
+  EXPECT_FALSE(cache.getRegistry().getTextures().hasAsset(texture.getData()));
 
-  auto handle = manager.loadMaterialFromFile(path.getData());
+  auto handle = cache.loadMaterialFromFile(path.getData());
 
   auto &newMaterial =
-      manager.getRegistry().getMaterials().getAsset(handle.getData());
+      cache.getRegistry().getMaterials().getAsset(handle.getData());
 
   EXPECT_NE(newMaterial.data.baseColorTexture,
             liquid::TextureAssetHandle::Invalid);
 
-  auto &newTexture = manager.getRegistry().getTextures().getAsset(
+  auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
   EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
 }
