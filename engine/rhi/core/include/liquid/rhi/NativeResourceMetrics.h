@@ -34,6 +34,13 @@ public:
    * @return Number of textures
    */
   virtual size_t getTexturesCount() const = 0;
+
+  /**
+   * @brief Get number of descriptors
+   *
+   * @return Number of descriptors
+   */
+  virtual size_t getDescriptorsCount() const = 0;
 };
 
 } // namespace liquid::rhi

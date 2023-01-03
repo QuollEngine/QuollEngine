@@ -108,6 +108,10 @@ void ImguiDebugLayer::renderUsageMetrics() {
                    std::to_string(mDeviceStats.getDrawnPrimitivesCount()));
     renderTableRow("Number of command calls",
                    std::to_string(mDeviceStats.getCommandCallsCount()));
+    renderTableRow(
+        "Number of descriptors",
+        std::to_string(
+            mDeviceStats.getResourceMetrics()->getDescriptorsCount()));
 
     ImGui::EndTable();
   }

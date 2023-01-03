@@ -2,6 +2,7 @@
 
 #include "liquid/rhi-vulkan/VulkanDeviceObject.h"
 #include "liquid/rhi-vulkan/VulkanResourceRegistry.h"
+#include "liquid/rhi-vulkan/VulkanPipelineLayoutCache.h"
 
 #include "liquid/rhi/PipelineDescription.h"
 
@@ -20,10 +21,12 @@ public:
    * @param description Pipeline description
    * @param device Vulkan device
    * @param registry Resource registry
+   * @param pipelineLayoutCache Pipeline layout cache
    */
   VulkanPipeline(const PipelineDescription &description,
                  VulkanDeviceObject &device,
-                 const VulkanResourceRegistry &registry);
+                 const VulkanResourceRegistry &registry,
+                 VulkanPipelineLayoutCache &pipelineLayoutCache);
 
   /**
    * @brief Destructor

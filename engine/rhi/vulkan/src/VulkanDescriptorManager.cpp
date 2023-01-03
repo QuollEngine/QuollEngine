@@ -43,6 +43,12 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
   return (*found).second;
 }
 
+void VulkanDescriptorManager::clear() {
+  vkResetDescriptorPool(mDevice, mDescriptorPool, 0);
+
+  mDescriptorCache.clear();
+}
+
 VkDescriptorSet
 VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
                                              VkDescriptorSetLayout layout) {

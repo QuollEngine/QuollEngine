@@ -22,7 +22,7 @@ struct ShadowMapItem {
 layout(std140, set = 0, binding = 0) readonly buffer ShadowMapData {
   ShadowMapItem items[];
 }
-uShadowMaps;
+uShadowMapData;
 
 /**
  * @brief Single object transforms
@@ -45,7 +45,7 @@ pcShadowRef;
 void main() {
   mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
 
-  gl_Position = uShadowMaps.items[pcShadowRef.index.x].shadowMatrix *
+  gl_Position = uShadowMapData.items[pcShadowRef.index.x].shadowMatrix *
                 modelMatrix * vec4(inPosition, 1.0);
   gl_Layer = pcShadowRef.index.x;
 }

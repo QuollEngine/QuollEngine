@@ -32,7 +32,7 @@ public:
   VulkanDescriptorManager &operator=(VulkanDescriptorManager &&) = delete;
 
   /**
-   * @brief Destroy desceriptor manager
+   * @brief Destroy descriptor manager
    */
   ~VulkanDescriptorManager();
 
@@ -48,6 +48,18 @@ public:
    */
   VkDescriptorSet getOrCreateDescriptor(const Descriptor &descriptor,
                                         VkDescriptorSetLayout layout);
+
+  /**
+   * @brief Get descriptor cache size
+   *
+   * @return Descriptor cache size
+   */
+  inline size_t getCacheSize() { return mDescriptorCache.size(); }
+
+  /**
+   * @brief Clear cache
+   */
+  void clear();
 
 private:
   /**

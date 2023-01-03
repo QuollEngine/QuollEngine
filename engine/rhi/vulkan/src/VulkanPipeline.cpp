@@ -12,7 +12,8 @@ namespace liquid::rhi {
 
 VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                VulkanDeviceObject &device,
-                               const VulkanResourceRegistry &registry)
+                               const VulkanResourceRegistry &registry,
+                               VulkanPipelineLayoutCache &pipelineLayoutCache)
     : mDevice(device) {
 
   std::array<VulkanShader *, 2> shaders{
@@ -36,28 +37,8 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
   for (auto &shader : shaders) {
     const auto &reflection = shader->getReflectionData();
     for (auto &[set, bindings] : reflection.descriptorSetLayouts) {
-
-      std::vector<VkDescriptorBindingFlags> bindingFlags(
-          bindings.size(), VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
-
-      VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
-      bindingFlagsCreateInfo.sType =
-          VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-      bindingFlagsCreateInfo.pNext = nullptr;
-      bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
-      bindingFlagsCreateInfo.bindingCount =
-          static_cast<uint32_t>(bindingFlags.size());
-
-      VkDescriptorSetLayout layout = VK_NULL_HANDLE;
-      VkDescriptorSetLayoutCreateInfo createInfo{};
-      createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-      createInfo.flags = 0;
-      createInfo.pNext = &bindingFlagsCreateInfo;
-      createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-      createInfo.pBindings = bindings.data();
-      checkForVulkanError(
-          vkCreateDescriptorSetLayout(mDevice, &createInfo, nullptr, &layout),
-          "Failed to create descriptor set layout");
+      VkDescriptorSetLayout layout =
+          pipelineLayoutCache.getOrCreateDescriptorLayout(bindings);
 
       descriptorLayoutsMap.insert({set, layout});
     }
@@ -272,10 +253,6 @@ VulkanPipeline::~VulkanPipeline() {
   if (mPipelineLayout) {
     vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
     LOG_DEBUG_VK("Pipeline layout destroyed", mPipelineLayout);
-  }
-
-  for (auto &[s, x] : mDescriptorLayouts) {
-    vkDestroyDescriptorSetLayout(mDevice, x, nullptr);
   }
 }
 
