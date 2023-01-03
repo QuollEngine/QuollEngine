@@ -12,6 +12,7 @@
 #include "VulkanResourceAllocator.h"
 #include "VulkanResourceRegistry.h"
 #include "VulkanCommandPool.h"
+#include "VulkanPipelineLayoutCache.h"
 #include "VulkanDescriptorManager.h"
 #include "VulkanSwapchain.h"
 
@@ -189,6 +190,7 @@ private:
   VulkanFrameManager mFrameManager;
   VulkanResourceAllocator mAllocator;
   VulkanResourceRegistry mRegistry;
+  VulkanPipelineLayoutCache mPipelineLayoutCache;
   VulkanDescriptorManager mDescriptorManager;
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;

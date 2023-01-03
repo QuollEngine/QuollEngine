@@ -115,6 +115,7 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
 
         std::vector<VkDescriptorSetLayoutBinding> bindings(
             reflectDescriptorSet.binding_count);
+        std::vector<String> names(bindings.size());
 
         for (uint32_t i = 0; i < reflectDescriptorSet.binding_count; ++i) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
@@ -130,8 +131,18 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
             bindings.at(i).descriptorCount *= reflectBinding->array.dims[j];
           }
+
+          names.at(i) = reflectBinding->name;
         }
-        mReflectionData.descriptorSetLayouts.insert({ds->set, bindings});
+
+        std::sort(bindings.begin(), bindings.end(),
+                  [](const VkDescriptorSetLayoutBinding &a,
+                     const VkDescriptorSetLayoutBinding &b) {
+                    return a.binding < b.binding;
+                  });
+
+        mReflectionData.descriptorSetLayouts.insert(
+            {ds->set, {names, bindings}});
       }
     }
   }

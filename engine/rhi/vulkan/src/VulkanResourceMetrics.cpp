@@ -5,8 +5,10 @@
 
 namespace liquid::rhi {
 
-VulkanResourceMetrics::VulkanResourceMetrics(VulkanResourceRegistry &registry)
-    : mRegistry(registry) {}
+VulkanResourceMetrics::VulkanResourceMetrics(
+    VulkanResourceRegistry &registry,
+    VulkanDescriptorManager &descriptorManager)
+    : mRegistry(registry), mDescriptorManager(descriptorManager) {}
 
 size_t VulkanResourceMetrics::getTotalBufferSize() const {
   size_t size = 0;
@@ -34,6 +36,10 @@ size_t VulkanResourceMetrics::getTotalTextureSize() const {
 
 size_t VulkanResourceMetrics::getTexturesCount() const {
   return mRegistry.getTextures().size();
+}
+
+size_t VulkanResourceMetrics::getDescriptorsCount() const {
+  return mDescriptorManager.getCacheSize();
 }
 
 } // namespace liquid::rhi

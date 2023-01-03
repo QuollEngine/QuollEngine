@@ -24,6 +24,7 @@ VulkanRenderDevice::VulkanRenderDevice(
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
                    mRegistry, mDescriptorManager, mStats),
       mDevice(mPhysicalDevice), mDescriptorManager(mDevice, mRegistry),
+      mPipelineLayoutCache(mDevice),
       mGraphicsQueue(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
       mPresentQueue(mDevice,
@@ -33,7 +34,7 @@ VulkanRenderDevice::VulkanRenderDevice(
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
       mAllocator(mBackend, mPhysicalDevice, mDevice),
-      mStats(new VulkanResourceMetrics(mRegistry)) {
+      mStats(new VulkanResourceMetrics(mRegistry, mDescriptorManager)) {
 
   VkDevice device = mDevice.getVulkanHandle();
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
@@ -95,6 +96,7 @@ void VulkanRenderDevice::waitForIdle() { vkDeviceWaitIdle(mDevice); }
 void VulkanRenderDevice::destroyResources() {
   waitForIdle();
   mRegistry = VulkanResourceRegistry();
+  mPipelineLayoutCache.clear();
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 }
 
@@ -153,8 +155,8 @@ void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
 
 PipelineHandle
 VulkanRenderDevice::createPipeline(const PipelineDescription &description) {
-  return mRegistry.setPipeline(
-      std::make_unique<VulkanPipeline>(description, mDevice, mRegistry));
+  return mRegistry.setPipeline(std::make_unique<VulkanPipeline>(
+      description, mDevice, mRegistry, mPipelineLayoutCache));
 }
 
 void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
@@ -166,6 +168,7 @@ void VulkanRenderDevice::recreateSwapchain() {
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
 
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
+  mDescriptorManager.clear();
 
   updateFramebufferRelativeTextures();
   mBackend.finishFramebufferResize();

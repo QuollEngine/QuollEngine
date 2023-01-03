@@ -44,9 +44,18 @@ layout(std140, set = 2, binding = 2) readonly buffer LightData {
 }
 uLightData;
 
+/**
+ * @brief Single shadow data
+ */
 struct ShadowMapItem {
+  /**
+   * Shadow matrix generated from light
+   */
   mat4 shadowMatrix;
 
+  /**
+   * Shadow data
+   */
   vec4 shadowData;
 };
 

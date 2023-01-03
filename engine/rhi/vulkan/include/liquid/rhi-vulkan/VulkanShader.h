@@ -11,6 +11,22 @@ namespace liquid::rhi {
  * @brief Vulkan shader
  */
 class VulkanShader {
+public:
+  /**
+   * @brief Shader reflection descriptor set layout data
+   */
+  struct ReflectionDescriptorSetLayout {
+    /**
+     * Binding names
+     */
+    std::vector<String> names;
+
+    /**
+     * Bindings
+     */
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+  };
+
   /**
    * @brief Shader reflection data
    */
@@ -23,8 +39,7 @@ class VulkanShader {
     /**
      * Descriptor set layouts
      */
-    std::map<uint32_t, std::vector<VkDescriptorSetLayoutBinding>>
-        descriptorSetLayouts;
+    std::map<uint32_t, ReflectionDescriptorSetLayout> descriptorSetLayouts;
   };
 
 public:
