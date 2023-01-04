@@ -61,6 +61,22 @@ public:
    */
   void clear();
 
+  /**
+   * @brief Create global textures descriptor set
+   *
+   * Bindless textures
+   *
+   * @param layout Global texture descriptor set layout
+   */
+  void createGlobalTexturesDescriptorSet(VkDescriptorSetLayout layout);
+
+  /**
+   * @brief Add global texture to global textures descriptor
+   *
+   * @param handle Texture handle
+   */
+  void addGlobalTexture(rhi::TextureHandle handle);
+
 private:
   /**
    * @brief Create descriptor set
@@ -100,6 +116,8 @@ private:
   VkDevice mDevice;
 
   const rhi::VulkanResourceRegistry &mRegistry;
+
+  VkDescriptorSet mGlobalTexturesDescriptorSet = VK_NULL_HANDLE;
 };
 
 } // namespace liquid::rhi

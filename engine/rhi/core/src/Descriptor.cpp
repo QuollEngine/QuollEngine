@@ -35,4 +35,9 @@ Descriptor &Descriptor::bind(uint32_t binding, BufferHandle buffer,
   return *this;
 }
 
+Descriptor &Descriptor::bindGlobalTextures() {
+  bindings.insert({0, DescriptorBinding{DescriptorType::GlobalTextures}});
+  return *this;
+}
+
 } // namespace liquid::rhi

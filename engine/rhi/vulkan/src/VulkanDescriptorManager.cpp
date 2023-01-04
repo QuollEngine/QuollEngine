@@ -29,6 +29,12 @@ VulkanDescriptorManager::~VulkanDescriptorManager() {
 VkDescriptorSet
 VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
                                                VkDescriptorSetLayout layout) {
+  // Bindless textures
+  if (descriptor.getBindings().size() == 1 &&
+      descriptor.getBindings().at(0).type == DescriptorType::GlobalTextures) {
+    return mGlobalTexturesDescriptorSet;
+  }
+
   const String &hash = createHash(descriptor, layout);
   const auto &found = mDescriptorCache.find(hash);
 
@@ -47,6 +53,62 @@ void VulkanDescriptorManager::clear() {
   vkResetDescriptorPool(mDevice, mDescriptorPool, 0);
 
   mDescriptorCache.clear();
+}
+
+void VulkanDescriptorManager::createGlobalTexturesDescriptorSet(
+    VkDescriptorSetLayout layout) {
+  static constexpr uint32_t NumSamplers = 1000;
+
+  std::array<uint32_t, 1> dynamicDescriptorSetCounts{NumSamplers};
+
+  VkDescriptorSetVariableDescriptorCountAllocateInfo countInfo{};
+  countInfo.sType =
+      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+  countInfo.pNext = nullptr;
+  countInfo.descriptorSetCount =
+      static_cast<uint32_t>(dynamicDescriptorSetCounts.size());
+  countInfo.pDescriptorCounts = dynamicDescriptorSetCounts.data();
+
+  VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+  descriptorSetAllocateInfo.sType =
+      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  descriptorSetAllocateInfo.pNext = &countInfo;
+  descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
+  descriptorSetAllocateInfo.pSetLayouts = &layout;
+  descriptorSetAllocateInfo.descriptorSetCount = 1;
+
+  checkForVulkanError(vkAllocateDescriptorSets(mDevice,
+                                               &descriptorSetAllocateInfo,
+                                               &mGlobalTexturesDescriptorSet),
+                      "Failed to allocate global textures descriptor set");
+}
+
+void VulkanDescriptorManager::addGlobalTexture(rhi::TextureHandle handle) {
+  VkWriteDescriptorSet write{};
+  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  write.pNext = nullptr;
+  write.dstBinding = 0;
+  write.dstSet = mGlobalTexturesDescriptorSet;
+  write.dstArrayElement = static_cast<uint32_t>(handle);
+  write.descriptorCount = 1;
+  write.pBufferInfo = nullptr;
+  write.pTexelBufferView = nullptr;
+  write.descriptorType =
+      VulkanMapping::getDescriptorType(DescriptorType::CombinedImageSampler);
+
+  const auto &texture = mRegistry.getTextures().at(handle);
+
+  std::array<VkDescriptorImageInfo, 1> imageInfo{};
+  imageInfo.at(0).sampler = texture->getSampler();
+  imageInfo.at(0).imageView = texture->getImageView();
+  imageInfo.at(0).imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+  write.pImageInfo = imageInfo.data();
+
+  std::array<VkWriteDescriptorSet, 1> writes{write};
+
+  vkUpdateDescriptorSets(mDevice, static_cast<uint32_t>(writes.size()),
+                         writes.data(), 0, nullptr);
 }
 
 VkDescriptorSet
@@ -156,7 +218,7 @@ void VulkanDescriptorManager::createDescriptorPool() {
   VkDescriptorPoolCreateInfo descriptorPoolInfo{};
   descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
   descriptorPoolInfo.pNext = nullptr;
-  descriptorPoolInfo.flags = 0;
+  descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
   descriptorPoolInfo.maxSets = NumDescriptors;
   descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
   descriptorPoolInfo.pPoolSizes = poolSizes.data();

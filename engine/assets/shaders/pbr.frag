@@ -1,5 +1,6 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec2 inTextureCoord[2];
@@ -214,7 +215,7 @@ MaterialData uMaterialData = MaterialData(
     uMaterialDataRaw.occlusionStrength[0], uMaterialDataRaw.emissiveTexture[0],
     uMaterialDataRaw.emissiveTextureCoord[0], uMaterialDataRaw.emissiveFactor);
 
-layout(set = 3, binding = 1) uniform sampler2D uTextures[8];
+layout(set = 4, binding = 0) uniform sampler2D uGlobalTextures[];
 
 const float PI = 3.141592653589793;
 const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
@@ -325,7 +326,7 @@ vec3 getNormal() {
   }
 
   if (uMaterialData.normalTexture >= 0) {
-    vec3 n = texture(uTextures[uMaterialData.normalTexture],
+    vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],
                      inTextureCoord[uMaterialData.normalTextureCoord])
                  .rgb *
              uMaterialData.normalScale;
@@ -453,7 +454,7 @@ void main() {
 
   if (uMaterialData.metallicRoughnessTexture >= 0) {
     vec3 mrSample =
-        texture(uTextures[uMaterialData.metallicRoughnessTexture],
+        texture(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
                 inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
             .xyz;
     roughness *= mrSample.g;
@@ -467,7 +468,7 @@ void main() {
   if (uMaterialData.baseColorTexture >= 0) {
     baseColor =
         srgbToLinear(
-            texture(uTextures[uMaterialData.baseColorTexture],
+            texture(uGlobalTextures[uMaterialData.baseColorTexture],
                     inTextureCoord[uMaterialData.baseColorTextureCoord]))
             .xyzw *
         uMaterialData.baseColorFactor;
@@ -531,7 +532,7 @@ void main() {
   }
 
   if (uMaterialData.occlusionTexture >= 0) {
-    float ao = texture(uTextures[uMaterialData.occlusionTexture],
+    float ao = texture(uGlobalTextures[uMaterialData.occlusionTexture],
                        inTextureCoord[uMaterialData.occlusionTextureCoord])
                    .r;
     color = mix(color, color * ao, uMaterialData.occlusionStrength);
@@ -540,7 +541,7 @@ void main() {
   if (uMaterialData.emissiveTexture >= 0) {
     vec3 emissive =
         srgbToLinear(
-            texture(uTextures[uMaterialData.emissiveTexture],
+            texture(uGlobalTextures[uMaterialData.emissiveTexture],
                     inTextureCoord[uMaterialData.emissiveTextureCoord]))
             .rgb *
         uMaterialData.emissiveFactor;

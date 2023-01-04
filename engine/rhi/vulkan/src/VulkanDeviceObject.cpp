@@ -46,19 +46,6 @@ VulkanDeviceObject::VulkanDeviceObject(
   Engine::getLogger().info()
       << "Vulkan extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
-  extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
-  Engine::getLogger().info() << "Vulkan extension enabled: "
-                             << VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME;
-
-  extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
-  Engine::getLogger().info()
-      << "Vulkan extension enabled: "
-      << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME;
-
-  extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
-  Engine::getLogger().info() << "Vulkan extension enabled: "
-                             << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
-
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
         return String(static_cast<const char *>(ext.extensionName)) ==
@@ -79,11 +66,15 @@ VulkanDeviceObject::VulkanDeviceObject(
   queryResetFeatures.pNext = nullptr;
   queryResetFeatures.hostQueryReset = VK_TRUE;
 
-  VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures{};
+  VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
   descriptorIndexingFeatures.sType =
-      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
   descriptorIndexingFeatures.pNext = &queryResetFeatures;
   descriptorIndexingFeatures.descriptorBindingPartiallyBound = true;
+  descriptorIndexingFeatures.runtimeDescriptorArray = true;
+  descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = true;
+  descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind =
+      true;
 
   auto &features = physicalDevice.getFeatures();
 

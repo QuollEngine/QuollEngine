@@ -23,8 +23,6 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
     mDescriptor.bind(0, mBuffer.getHandle(),
                      rhi::DescriptorType::UniformBuffer);
   }
-
-  mDescriptor.bind(1, mTextures, rhi::DescriptorType::CombinedImageSampler);
 }
 
 void Material::updateProperty(StringView name, const Property &value) {

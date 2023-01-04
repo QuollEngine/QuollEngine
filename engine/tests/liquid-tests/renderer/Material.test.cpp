@@ -33,8 +33,6 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
 
   EXPECT_EQ(material.getDescriptor().getBindings().at(0).type,
             liquid::rhi::DescriptorType::UniformBuffer);
-  EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
-            liquid::rhi::DescriptorType::CombinedImageSampler);
 
   const char *data = static_cast<const char *>(buffer.getData());
 
@@ -57,8 +55,6 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
   EXPECT_EQ(material.getDescriptor().getBindings().find(0),
             material.getDescriptor().getBindings().end());
-  EXPECT_EQ(material.getDescriptor().getBindings().at(1).type,
-            liquid::rhi::DescriptorType::CombinedImageSampler);
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {

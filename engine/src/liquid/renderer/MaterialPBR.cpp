@@ -31,15 +31,22 @@ MaterialPBR::Properties::getTextures() const {
 
 const std::vector<std::pair<String, Property>>
 MaterialPBR::Properties::getProperties() const {
-  int index = 0;
-  int baseColorTextureIndex =
-      rhi::isHandleValid(baseColorTexture) ? index++ : -1;
+  int baseColorTextureIndex = rhi::isHandleValid(baseColorTexture)
+                                  ? static_cast<int32_t>(baseColorTexture)
+                                  : -1;
   int metallicRoughnessTextureIndex =
-      rhi::isHandleValid(metallicRoughnessTexture) ? index++ : -1;
-  int normalTextureIndex = rhi::isHandleValid(normalTexture) ? index++ : -1;
-  int occlusionTextureIndex =
-      rhi::isHandleValid(occlusionTexture) ? index++ : -1;
-  int emissiveTextureIndex = rhi::isHandleValid(emissiveTexture) ? index++ : -1;
+      rhi::isHandleValid(metallicRoughnessTexture)
+          ? static_cast<int32_t>(metallicRoughnessTexture)
+          : -1;
+  int normalTextureIndex = rhi::isHandleValid(normalTexture)
+                               ? static_cast<int32_t>(normalTexture)
+                               : -1;
+  int occlusionTextureIndex = rhi::isHandleValid(occlusionTexture)
+                                  ? static_cast<int32_t>(occlusionTexture)
+                                  : -1;
+  int emissiveTextureIndex = rhi::isHandleValid(emissiveTexture)
+                                 ? static_cast<int32_t>(emissiveTexture)
+                                 : -1;
 
   return {{"baseColorTexture", baseColorTextureIndex},
           {"baseColorTextureCoord", baseColorTextureCoord},
