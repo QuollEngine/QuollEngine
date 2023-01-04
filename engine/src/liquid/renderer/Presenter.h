@@ -45,6 +45,8 @@ private:
   rhi::PipelineHandle mPresentPipeline = rhi::PipelineHandle::Invalid;
   std::vector<rhi::FramebufferHandle> mFramebuffers{};
   glm::uvec2 mExtent{0, 0};
+  rhi::TextureHandle mPresentTexture{0};
+  rhi::n::Descriptor mPresentDescriptor;
 };
 
 } // namespace liquid

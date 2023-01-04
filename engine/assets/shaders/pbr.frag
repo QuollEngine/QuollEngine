@@ -10,80 +10,27 @@ layout(location = 5) in mat3 inTBN;
 
 layout(location = 0) out vec4 outColor;
 
-layout(std140, set = 2, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
+#include "bindless-base.glsl"
 
-layout(std140, set = 2, binding = 1) uniform SceneData { ivec4 data; }
-uSceneData;
+layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
+layout(set = 1, binding = 0) uniform sampler2DArray uTextures2DArray[];
+layout(set = 1, binding = 0) uniform samplerCube uTexturesCube[];
 
-/**
- * @brief Single light data
- */
-struct LightItem {
-  /**
-   * Light data
-   */
-  vec4 data;
-
-  /**
-   * Light color
-   */
-  vec4 color;
-
-  /**
-   * Shadow data
-   */
-  uvec4 shadowData;
-};
-
-layout(std140, set = 2, binding = 2) readonly buffer LightData {
-  LightItem items[];
-}
-uLightData;
-
-/**
- * @brief Single shadow data
- */
-struct ShadowMapItem {
-  /**
-   * Shadow matrix generated from light
-   */
-  mat4 shadowMatrix;
-
-  /**
-   * Shadow data
-   */
-  vec4 shadowData;
-};
-
-layout(std140, set = 2, binding = 3) readonly buffer ShadowMapData {
-  ShadowMapItem items[];
-}
-uShadowMapData;
-
-layout(set = 2, binding = 4) uniform sampler2DArray uShadowmap;
-layout(set = 2, binding = 5) uniform samplerCube uIblMaps[2];
-layout(set = 2, binding = 6) uniform sampler2D uBrdfLUT;
-
-layout(std140, set = 3, binding = 0) uniform MaterialDataRaw {
-  int baseColorTexture[1];
+layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
+  uint baseColorTexture[1];
   int baseColorTextureCoord[1];
   vec4 baseColorFactor;
-  int metallicRoughnessTexture[1];
+  uint metallicRoughnessTexture[1];
   int metallicRoughnessTextureCoord[1];
   float metallicFactor[1];
   float roughnessFactor[1];
-  int normalTexture[1];
+  uint normalTexture[1];
   int normalTextureCoord[1];
   float normalScale[1];
-  int occlusionTexture[1];
+  uint occlusionTexture[1];
   int occlusionTextureCoord[1];
   float occlusionStrength[1];
-  int emissiveTexture[1];
+  uint emissiveTexture[1];
   int emissiveTextureCoord[1];
   vec3 emissiveFactor;
 }
@@ -96,7 +43,7 @@ struct MaterialData {
   /**
    * Index to base color texture
    */
-  int baseColorTexture;
+  uint baseColorTexture;
 
   /**
    * Texture coordinates index
@@ -124,7 +71,7 @@ struct MaterialData {
   /**
    * Index to metallic roughness texture
    */
-  int metallicRoughnessTexture;
+  uint metallicRoughnessTexture;
 
   /**
    * Texture coordinates index
@@ -148,7 +95,7 @@ struct MaterialData {
   /**
    * Index to normal texture
    */
-  int normalTexture;
+  uint normalTexture;
 
   /**
    * Texture coordinates index
@@ -167,7 +114,7 @@ struct MaterialData {
   /**
    * Index to occlusion texture
    */
-  int occlusionTexture;
+  uint occlusionTexture;
 
   /**
    * Texture coordinates index
@@ -186,7 +133,7 @@ struct MaterialData {
   /**
    * Index to emissive texture
    */
-  int emissiveTexture;
+  uint emissiveTexture;
 
   /**
    * Texture coordinates index
@@ -214,8 +161,6 @@ MaterialData uMaterialData = MaterialData(
     uMaterialDataRaw.occlusionTextureCoord[0],
     uMaterialDataRaw.occlusionStrength[0], uMaterialDataRaw.emissiveTexture[0],
     uMaterialDataRaw.emissiveTextureCoord[0], uMaterialDataRaw.emissiveFactor);
-
-layout(set = 4, binding = 0) uniform sampler2D uGlobalTextures[];
 
 const float PI = 3.141592653589793;
 const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
@@ -325,7 +270,7 @@ vec3 getNormal() {
     tbn = mat3(T, B, N);
   }
 
-  if (uMaterialData.normalTexture >= 0) {
+  if (uMaterialData.normalTexture > 0) {
     vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],
                      inTextureCoord[uMaterialData.normalTextureCoord])
                  .rgb *
@@ -383,8 +328,9 @@ LightCalculations getDirectionalLightSurfaceCalculations(LightItem light,
 float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
                                    uint cascadeIndex) {
   float closestDepth =
-      texture(uShadowmap, vec3(shadowCoords.x + offset.x,
-                               1.0 - shadowCoords.y + offset.y, cascadeIndex))
+      texture(uTextures2DArray[getSceneData().textures.w],
+              vec3(shadowCoords.x + offset.x, 1.0 - shadowCoords.y + offset.y,
+                   cascadeIndex))
           .r;
   float currentDepth = shadowCoords.z;
 
@@ -406,25 +352,25 @@ float calculateShadowFactor(LightItem item) {
   }
 
   uint cascadeIndex = item.shadowData.y;
-  float viewZ = (uCameraData.view * vec4(inWorldPosition, 1.0)).z;
+  float viewZ = (getCamera().view * vec4(inWorldPosition, 1.0)).z;
   for (uint si = item.shadowData.y;
        si < item.shadowData.y + item.shadowData.z - 1; si++) {
-    float splitDepth = uShadowMapData.items[si].shadowData.x;
+    float splitDepth = getShadowMap(si).shadowData.x;
 
     if (viewZ < splitDepth) {
       cascadeIndex = si + 1;
     }
   }
 
-  mat4 shadowMatrix = uShadowMapData.items[cascadeIndex].shadowMatrix;
+  mat4 shadowMatrix = getShadowMap(cascadeIndex).shadowMatrix;
   vec4 fragLightPosition =
       DepthBiasMatrix * shadowMatrix * vec4(inWorldPosition, 1.0);
 
   vec3 shadowCoords = fragLightPosition.xyz / fragLightPosition.w;
 
   // Use percentage closer filtering
-  if (uShadowMapData.items[cascadeIndex].shadowData.y > 0.5) {
-    ivec2 size = textureSize(uShadowmap, 0).xy;
+  if (getShadowMap(cascadeIndex).shadowData.y > 0.5) {
+    ivec2 size = textureSize(uTextures2DArray[getSceneData().textures.w], 0).xy;
     float scale = 0.75;
 
     float dx = scale / float(size.x);
@@ -452,7 +398,7 @@ void main() {
   float metallic = uMaterialData.metallicFactor;
   float roughness = uMaterialData.roughnessFactor;
 
-  if (uMaterialData.metallicRoughnessTexture >= 0) {
+  if (uMaterialData.metallicRoughnessTexture > 0) {
     vec3 mrSample =
         texture(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
                 inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
@@ -465,7 +411,7 @@ void main() {
   metallic = clamp(metallic, 0.0, 1.0);
 
   vec4 baseColor;
-  if (uMaterialData.baseColorTexture >= 0) {
+  if (uMaterialData.baseColorTexture > 0) {
     baseColor =
         srgbToLinear(
             texture(uGlobalTextures[uMaterialData.baseColorTexture],
@@ -484,17 +430,17 @@ void main() {
 
   float alpha = roughness * roughness;
 
-  vec3 cameraPos = vec3(uCameraData.view[3]);
+  vec3 cameraPos = vec3(getCamera().view[3]);
   vec3 n = getNormal();
   vec3 v = normalize(cameraPos - inWorldPosition);
   vec3 color = vec3(0.0, 0.0, 0.0);
 
   float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
 
-  uint num = uSceneData.data.x;
+  uint num = getSceneData().data.x;
   for (uint i = 0; i < num; i++) {
     LightCalculations calc;
-    LightItem item = uLightData.items[i];
+    LightItem item = getLight(i);
     calc = getDirectionalLightSurfaceCalculations(item, n, v);
 
     const vec4 lightColor = item.color;
@@ -521,24 +467,28 @@ void main() {
              (diffuseBRDF + specularBRDF);
   }
 
-  if (uSceneData.data.y == 1) {
+  if (getSceneData().textures.x > 0) {
     vec3 reflection = -normalize(reflect(v, n));
-    vec3 diffuse = texture(uIblMaps[0], n).rgb * diffuseColor;
-    vec3 brdf = texture(uBrdfLUT, vec2(NdotV, 1.0 - roughness)).rgb;
+    vec3 diffuse =
+        texture(uTexturesCube[getSceneData().textures.x], n).rgb * diffuseColor;
+    vec3 brdf = texture(uGlobalTextures[getSceneData().textures.y],
+                        vec2(NdotV, 1.0 - roughness))
+                    .rgb;
     vec3 specular =
-        texture(uIblMaps[1], reflection).rgb * (f0 + brdf.x + brdf.y);
+        texture(uTexturesCube[getSceneData().textures.y], reflection).rgb *
+        (f0 + brdf.x + brdf.y);
 
     color += diffuse + specular;
   }
 
-  if (uMaterialData.occlusionTexture >= 0) {
+  if (uMaterialData.occlusionTexture > 0) {
     float ao = texture(uGlobalTextures[uMaterialData.occlusionTexture],
                        inTextureCoord[uMaterialData.occlusionTextureCoord])
                    .r;
     color = mix(color, color * ao, uMaterialData.occlusionStrength);
   }
 
-  if (uMaterialData.emissiveTexture >= 0) {
+  if (uMaterialData.emissiveTexture > 0) {
     vec3 emissive =
         srgbToLinear(
             texture(uGlobalTextures[uMaterialData.emissiveTexture],

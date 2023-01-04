@@ -15,37 +15,11 @@ layout(location = 3) out vec3 outNormal;
 layout(location = 4) out float outTangentHand;
 layout(location = 5) out mat3 outTBN;
 
-layout(set = 0, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
-
-struct ObjectItem {
-  mat4 modelMatrix;
-};
-
-struct SkeletonItem {
-  /**
-   * Joints for skeleton
-   */
-  mat4 joints[32];
-};
-
-layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
-  ObjectItem items[];
-}
-uObjectData;
-
-layout(std140, set = 1, binding = 1) readonly buffer SkeletonData {
-  SkeletonItem items[];
-}
-uSkeletonData;
+#include "bindless-base.glsl"
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
-  SkeletonItem item = uSkeletonData.items[gl_InstanceIndex];
+  mat4 modelMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
+  SkeletonItem item = getSkeleton(gl_InstanceIndex);
 
   mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
                     inWeights.y * item.joints[inJoints.y] +
@@ -67,5 +41,5 @@ void main() {
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;
-  gl_Position = uCameraData.viewProj * worldPosition;
+  gl_Position = getCamera().viewProj * worldPosition;
 }

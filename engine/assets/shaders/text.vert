@@ -3,39 +3,7 @@
 
 layout(location = 0) out vec2 outTexCoord;
 
-layout(set = 0, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
-
-struct ObjectItem {
-  mat4 modelMatrix;
-};
-
-layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
-  ObjectItem items[];
-}
-uObjectData;
-
-/**
- * @brief Single glyph data
- */
-struct GlyphItem {
-  /**
-   * Glyph atlas bounds
-   */
-  vec4 bounds;
-
-  /**
-   * Glyph quad bounds
-   */
-  vec4 planeBounds;
-};
-
-layout(set = 2, binding = 0) readonly buffer GlyphData { GlyphItem items[]; }
-uGlyphData;
+#include "bindless-base.glsl"
 
 layout(push_constant) uniform TextData { uint glyphStart; }
 pcTextData;
@@ -43,13 +11,13 @@ pcTextData;
 const uint QUAD_VERTICES = 6;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_BaseInstance].modelMatrix;
+  mat4 modelMatrix = getTextTransform(gl_BaseInstance).modelMatrix;
 
   uint boundIndex = gl_VertexIndex % QUAD_VERTICES;
   uint glyphIndex =
       pcTextData.glyphStart + uint(floor(gl_VertexIndex / QUAD_VERTICES));
 
-  GlyphItem glyph = uGlyphData.items[glyphIndex];
+  GlyphItem glyph = getGlyph(glyphIndex);
 
   vec2 texCoords[QUAD_VERTICES] =
       vec2[](glyph.bounds.xy, glyph.bounds.xw, glyph.bounds.zy, glyph.bounds.zy,
@@ -63,5 +31,5 @@ void main() {
 
   outTexCoord = texCoords[boundIndex];
 
-  gl_Position = uCameraData.viewProj * modelMatrix * vec4(vertex, 0.0, 1.0);
+  gl_Position = getCamera().viewProj * modelMatrix * vec4(vertex, 0.0, 1.0);
 }

@@ -3,6 +3,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "liquid/rhi/ShaderDescription.h"
+#include "liquid/rhi/DescriptorLayoutDescription.h"
+
 #include "VulkanDeviceObject.h"
 
 namespace liquid::rhi {
@@ -13,21 +15,6 @@ namespace liquid::rhi {
 class VulkanShader {
 public:
   /**
-   * @brief Shader reflection descriptor set layout data
-   */
-  struct ReflectionDescriptorSetLayout {
-    /**
-     * Binding names
-     */
-    std::vector<String> names;
-
-    /**
-     * Bindings
-     */
-    std::vector<VkDescriptorSetLayoutBinding> bindings;
-  };
-
-  /**
    * @brief Shader reflection data
    */
   struct ReflectionData {
@@ -37,9 +24,9 @@ public:
     std::vector<VkPushConstantRange> pushConstantRanges;
 
     /**
-     * Descriptor set layouts
+     * @brief Descriptor layouts
      */
-    std::map<uint32_t, ReflectionDescriptorSetLayout> descriptorSetLayouts;
+    std::map<uint32_t, DescriptorLayoutDescription> descriptorLayouts;
   };
 
 public:

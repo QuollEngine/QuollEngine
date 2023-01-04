@@ -61,6 +61,38 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
     desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
     mShadowMapsBuffer = mDevice->createBuffer(desc);
   }
+
+  static constexpr uint32_t MaxDescriptors = 20;
+  {
+    rhi::DescriptorLayoutBindingDescription bStorage{};
+    bStorage.binding = 0;
+    bStorage.name = "uGlobalBuffers";
+    bStorage.type = rhi::DescriptorLayoutBindingType::Dynamic;
+    bStorage.descriptorType = rhi::DescriptorType::StorageBuffer;
+    bStorage.descriptorCount = MaxDescriptors;
+
+    rhi::DescriptorLayoutBindingDescription bUniform{};
+    bUniform.binding = 1;
+    bUniform.name = "uGlobalUniforms";
+    bUniform.type = rhi::DescriptorLayoutBindingType::Dynamic;
+    bUniform.descriptorType = rhi::DescriptorType::UniformBuffer;
+    bUniform.descriptorCount = MaxDescriptors;
+
+    auto layout = device->createDescriptorLayout({{bStorage, bUniform}});
+    mGlobalDescriptor = device->createDescriptor(layout);
+  }
+
+  mGlobalDescriptor.write(
+      0,
+      {mMeshTransformsBuffer.getHandle(),
+       mSkinnedMeshTransformsBuffer.getHandle(), mSkeletonsBuffer.getHandle(),
+       mTextTransformsBuffer.getHandle(), mTextGlyphsBuffer.getHandle(),
+       mLightsBuffer.getHandle(), mShadowMapsBuffer.getHandle()},
+      rhi::DescriptorType::StorageBuffer, 0);
+
+  mGlobalDescriptor.write(1,
+                          {mCameraBuffer.getHandle(), mSceneBuffer.getHandle()},
+                          rhi::DescriptorType::UniformBuffer, 0);
 }
 
 void SceneRendererFrameData::updateBuffers() {
@@ -291,16 +323,21 @@ void SceneRendererFrameData::addText(FontAssetHandle font,
 void SceneRendererFrameData::setEnvironmentTextures(
     rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap,
     rhi::TextureHandle brdfLUT) {
+  mSceneData.textures.x = rhi::castHandleToUint(irradianceMap);
+  mSceneData.textures.y = rhi::castHandleToUint(specularMap);
+  mSceneData.textures.z = rhi::castHandleToUint(brdfLUT);
+
   mIrradianceMap = irradianceMap;
-  mSpecularMap = specularMap;
-  mBrdfLUT = brdfLUT;
-  mSceneData.data.y = 1;
 }
 
 void SceneRendererFrameData::setCameraData(const Camera &data,
                                            const PerspectiveLens &lens) {
   mCameraData = data;
   mCameraLens = lens;
+}
+
+void SceneRendererFrameData::setShadowMapTexture(rhi::TextureHandle shadowmap) {
+  mSceneData.textures.w = rhi::castHandleToUint(shadowmap);
 }
 
 void SceneRendererFrameData::clear() {
@@ -311,7 +348,9 @@ void SceneRendererFrameData::clear() {
   mLights.clear();
   mShadowMaps.clear();
   mSceneData.data.x = 0;
-  mSceneData.data.y = 0;
+  mSceneData.textures.x = 0;
+  mSceneData.textures.y = 0;
+  mSceneData.textures.z = 0;
   mLastSkeleton = 0;
   mIrradianceMap = rhi::TextureHandle::Invalid;
   mSpecularMap = rhi::TextureHandle::Invalid;

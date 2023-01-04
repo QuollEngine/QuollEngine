@@ -27,6 +27,21 @@ liquid::rhi::Swapchain MockRenderDevice::getSwapchain() {
   return liquid::rhi::Swapchain();
 }
 
+liquid::rhi::DescriptorLayoutHandle MockRenderDevice::createDescriptorLayout(
+    const liquid::rhi::DescriptorLayoutDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::DescriptorLayoutHandle>();
+  mDescriptorLayouts.insert_or_assign(handle, description);
+  return handle;
+}
+
+liquid::rhi::n::Descriptor
+MockRenderDevice::createDescriptor(liquid::rhi::DescriptorLayoutHandle layout) {
+  auto handle = getNewHandle<liquid::rhi::DescriptorHandle>();
+  mDescriptors.insert_or_assign(handle, MockDescriptor{layout});
+
+  return liquid::rhi::n::Descriptor(&mDescriptors.at(handle), handle);
+}
+
 liquid::rhi::ShaderHandle MockRenderDevice::createShader(
     const liquid::rhi::ShaderDescription &description) {
   auto handle = getNewHandle<liquid::rhi::ShaderHandle>();

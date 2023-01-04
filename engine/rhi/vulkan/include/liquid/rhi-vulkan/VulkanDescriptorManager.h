@@ -4,6 +4,7 @@
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanDeviceObject.h"
+#include "VulkanDescriptorPool.h"
 
 #include <vulkan/vulkan.hpp>
 
@@ -22,19 +23,16 @@ public:
    *
    * @param device Vulkan device
    * @param registry Vulkan resource registry
+   * @param descriptorPool Descriptor pool
    */
   VulkanDescriptorManager(VulkanDeviceObject &device,
-                          const VulkanResourceRegistry &registry);
+                          const VulkanResourceRegistry &registry,
+                          VulkanDescriptorPool &descriptorPool);
 
   VulkanDescriptorManager(const VulkanDescriptorManager &) = delete;
   VulkanDescriptorManager(VulkanDescriptorManager &&) = delete;
   VulkanDescriptorManager &operator=(const VulkanDescriptorManager &) = delete;
   VulkanDescriptorManager &operator=(VulkanDescriptorManager &&) = delete;
-
-  /**
-   * @brief Destroy descriptor manager
-   */
-  ~VulkanDescriptorManager();
 
   /**
    * @brief Get Vulkan descriptor set
@@ -50,13 +48,6 @@ public:
                                         VkDescriptorSetLayout layout);
 
   /**
-   * @brief Get descriptor cache size
-   *
-   * @return Descriptor cache size
-   */
-  inline size_t getCacheSize() { return mDescriptorCache.size(); }
-
-  /**
    * @brief Clear cache
    */
   void clear();
@@ -68,7 +59,7 @@ public:
    *
    * @param layout Global texture descriptor set layout
    */
-  void createGlobalTexturesDescriptorSet(VkDescriptorSetLayout layout);
+  void createGlobalTexturesDescriptorSet(DescriptorLayoutHandle layout);
 
   /**
    * @brief Add global texture to global textures descriptor
@@ -89,19 +80,6 @@ private:
                                       VkDescriptorSetLayout layout);
 
   /**
-   * @brief Allocate descriptor set
-   *
-   * @param layout Vulkan descriptor layout
-   * @return Vulkan descriptor set
-   */
-  VkDescriptorSet allocateDescriptorSet(VkDescriptorSetLayout layout);
-
-  /**
-   * @brief Create descriptor pool
-   */
-  void createDescriptorPool();
-
-  /**
    * @brief Create hash from descriptor and layout
    *
    * @param descriptor Descriptor
@@ -112,12 +90,12 @@ private:
 
 private:
   std::unordered_map<String, VkDescriptorSet> mDescriptorCache;
-  VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
+  VulkanDescriptorPool &mDescriptorPool;
   VkDevice mDevice;
 
   const rhi::VulkanResourceRegistry &mRegistry;
 
-  VkDescriptorSet mGlobalTexturesDescriptorSet = VK_NULL_HANDLE;
+  n::Descriptor mGlobalTexturesDescriptor;
 };
 
 } // namespace liquid::rhi

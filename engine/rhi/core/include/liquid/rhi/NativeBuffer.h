@@ -3,7 +3,7 @@
 namespace liquid::rhi {
 
 /**
- * @brief Native device interface
+ * @brief Native buffer interface
  */
 class NativeBuffer {
 public:

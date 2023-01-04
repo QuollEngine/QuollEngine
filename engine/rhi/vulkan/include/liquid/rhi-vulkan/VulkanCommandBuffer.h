@@ -5,6 +5,7 @@
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorManager.h"
+#include "VulkanDescriptorPool.h"
 
 namespace liquid::rhi {
 
@@ -19,10 +20,12 @@ public:
    * @param commandBuffer Command buffer
    * @param registry Resource registry
    * @param descriptorManager Vulkan descriptor manager
+   * @param descriptorPool Descriptor pool
    * @param stats Device stats
    */
   VulkanCommandBuffer(VkCommandBuffer commandBuffer,
                       const VulkanResourceRegistry &registry,
+                      const VulkanDescriptorPool &descriptorPool,
                       VulkanDescriptorManager &descriptorManager,
                       DeviceStats &stats);
 
@@ -77,8 +80,18 @@ public:
    * @param firstSet First set
    * @param descriptor Descriptor
    */
-  void bindDescriptor(PipelineHandle, uint32_t firstSet,
+  void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                       const Descriptor &descriptor) override;
+
+  /**
+   * @brief Bind descriptor
+   *
+   * @param pipeline Pipeline
+   * @param firstSet First set
+   * @param descriptor Descriptor
+   */
+  void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+                      const n::Descriptor &descriptor) override;
 
   /**
    * @brief Bind vertex buffer
@@ -165,6 +178,7 @@ private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 
   const VulkanResourceRegistry &mRegistry;
+  const VulkanDescriptorPool &mDescriptorPool;
   DeviceStats &mStats;
   VulkanDescriptorManager &mDescriptorManager;
 };

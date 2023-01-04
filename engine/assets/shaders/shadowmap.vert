@@ -4,48 +4,15 @@
 
 layout(location = 0) in vec3 inPosition;
 
-/**
- * @brief Single shadow data
- */
-struct ShadowMapItem {
-  /**
-   * Shadow matrix generated from light
-   */
-  mat4 shadowMatrix;
-
-  /**
-   * Shadow data
-   */
-  vec4 shadowData;
-};
-
-layout(std140, set = 0, binding = 0) readonly buffer ShadowMapData {
-  ShadowMapItem items[];
-}
-uShadowMapData;
-
-/**
- * @brief Single object transforms
- */
-struct ObjectItem {
-  /**
-   * Object model matrix
-   */
-  mat4 modelMatrix;
-};
-
-layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
-  ObjectItem items[];
-}
-uObjectData;
+#include "bindless-base.glsl"
 
 layout(push_constant) uniform PushConstants { ivec4 index; }
 pcShadowRef;
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
+  mat4 modelMatrix = getMeshTransform(gl_InstanceIndex).modelMatrix;
 
-  gl_Position = uShadowMapData.items[pcShadowRef.index.x].shadowMatrix *
-                modelMatrix * vec4(inPosition, 1.0);
+  gl_Position = getShadowMap(pcShadowRef.index.x).shadowMatrix * modelMatrix *
+                vec4(inPosition, 1.0);
   gl_Layer = pcShadowRef.index.x;
 }

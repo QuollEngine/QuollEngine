@@ -7,6 +7,7 @@
 #include "Buffer.h"
 #include "Swapchain.h"
 
+#include "DescriptorLayoutDescription.h"
 #include "BufferDescription.h"
 #include "TextureDescription.h"
 #include "ShaderDescription.h"
@@ -96,6 +97,23 @@ public:
    * @return Shader
    */
   virtual ShaderHandle createShader(const ShaderDescription &description) = 0;
+
+  /**
+   * @brief Create descriptor layout
+   *
+   * @param description Descriptor layout description
+   * @return Descriptor layout
+   */
+  virtual DescriptorLayoutHandle
+  createDescriptorLayout(const DescriptorLayoutDescription &description) = 0;
+
+  /**
+   * @brief Create descriptor
+   *
+   * @param layout Descriptor layout
+   * @return Descriptor
+   */
+  virtual n::Descriptor createDescriptor(DescriptorLayoutHandle layout) = 0;
 
   /**
    * @brief Create hardware buffer

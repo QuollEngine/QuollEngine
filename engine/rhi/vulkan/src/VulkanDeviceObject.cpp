@@ -75,6 +75,9 @@ VulkanDeviceObject::VulkanDeviceObject(
   descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = true;
   descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind =
       true;
+  descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind =
+      true;
+  descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind;
 
   auto &features = physicalDevice.getFeatures();
 

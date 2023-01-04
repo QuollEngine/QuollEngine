@@ -36,9 +36,11 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
 
   for (auto &shader : shaders) {
     const auto &reflection = shader->getReflectionData();
-    for (auto &[set, bindings] : reflection.descriptorSetLayouts) {
+    for (auto &[set, description] : reflection.descriptorLayouts) {
+      auto layoutHandle =
+          pipelineLayoutCache.getOrCreateDescriptorLayout(description);
       VkDescriptorSetLayout layout =
-          pipelineLayoutCache.getOrCreateDescriptorLayout(bindings);
+          pipelineLayoutCache.getVulkanDescriptorSetLayout(layoutHandle);
 
       descriptorLayoutsMap.insert({set, layout});
     }

@@ -12,9 +12,10 @@ namespace liquid::rhi {
 VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
                                      uint32_t queueFamilyIndex,
                                      const VulkanResourceRegistry &registry,
+                                     const VulkanDescriptorPool &descriptorPool,
                                      VulkanDescriptorManager &descriptorManager,
                                      DeviceStats &stats)
-    : mDevice(device), mRegistry(registry),
+    : mDevice(device), mRegistry(registry), mDescriptorPool(descriptorPool),
       mDescriptorManager(descriptorManager), mStats(stats),
       mQueueFamilyIndex(queueFamilyIndex) {
   VkCommandPoolCreateInfo poolInfo{};
@@ -53,9 +54,9 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
       "Failed to allocate command buffers");
 
   for (size_t i = 0; i < count; ++i) {
-    renderCommandLists.at(i) =
-        std::move(RenderCommandList(new VulkanCommandBuffer(
-            commandBuffers.at(i), mRegistry, mDescriptorManager, mStats)));
+    renderCommandLists.at(i) = std::move(RenderCommandList(
+        new VulkanCommandBuffer(commandBuffers.at(i), mRegistry,
+                                mDescriptorPool, mDescriptorManager, mStats)));
   }
 
   LOG_DEBUG_VK("Command buffers allocated for queue family "
