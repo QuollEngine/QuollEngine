@@ -186,7 +186,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       commandList.bindPipeline(pipeline);
 
-      rhi::Descriptor sceneDescriptor, sceneDescriptorFragment;
+      rhi::Descriptor sceneDescriptor, sceneDescriptorFragment,
+          globalTexturesDescriptor;
 
       static constexpr uint32_t IrradianceBinding = 5;
       static constexpr uint32_t BrdfBinding = 6;
@@ -209,12 +210,15 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
           .bind(BrdfBinding, {frameData.getBrdfLUT()},
                 rhi::DescriptorType::CombinedImageSampler);
 
+      globalTexturesDescriptor.bindGlobalTextures();
+
       {
         LIQUID_PROFILE_EVENT("meshPass::meshes");
 
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0, sceneDescriptor);
         commandList.bindDescriptor(pipeline, 2, sceneDescriptorFragment);
+        commandList.bindDescriptor(pipeline, 4, globalTexturesDescriptor);
 
         render(commandList, pipeline, true, frameIndex);
       }
@@ -225,6 +229,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0, sceneDescriptor);
         commandList.bindDescriptor(skinnedPipeline, 2, sceneDescriptorFragment);
+        commandList.bindDescriptor(skinnedPipeline, 4,
+                                   globalTexturesDescriptor);
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
@@ -499,9 +505,8 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
     objectsDescriptor.bind(0, frameData.getTextTransformsBuffer(),
                            rhi::DescriptorType::StorageBuffer);
 
-    rhi::Descriptor fontDescriptor;
-    fontDescriptor.bind(0, {textureHandle},
-                        rhi::DescriptorType::CombinedImageSampler);
+    rhi::Descriptor texturesDescriptor;
+    texturesDescriptor.bindGlobalTextures();
 
     rhi::Descriptor glyphsDescriptor;
     glyphsDescriptor.bind(0, frameData.getTextGlyphsBuffer(),
@@ -509,14 +514,20 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
 
     commandList.bindDescriptor(pipeline, 1, objectsDescriptor);
     commandList.bindDescriptor(pipeline, 2, glyphsDescriptor);
-    commandList.bindDescriptor(pipeline, 3, fontDescriptor);
+    commandList.bindDescriptor(pipeline, 3, texturesDescriptor);
+
+    glm::uvec4 textureData{static_cast<uint32_t>(textureHandle)};
+
+    commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment,
+                              sizeof(glm::uvec4), sizeof(glm::uvec4),
+                              glm::value_ptr(textureData));
 
     for (auto &text : texts) {
       glm::uvec4 glyphStart{text.glyphStart};
 
       commandList.pushConstants(
-          pipeline, rhi::ShaderStage::Vertex, 0, sizeof(glm::uvec4),
-          static_cast<void *>(glm::value_ptr(glyphStart)));
+          pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+          sizeof(glm::uvec4), static_cast<void *>(glm::value_ptr(glyphStart)));
 
       commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
                        1, text.index);

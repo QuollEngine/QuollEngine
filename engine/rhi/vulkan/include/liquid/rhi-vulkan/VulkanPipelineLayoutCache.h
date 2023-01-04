@@ -48,15 +48,40 @@ public:
    */
   void clear();
 
+  /**
+   * @brief Get global textures descriptor set layout
+   *
+   * Bindless textures
+   *
+   * @return Global textures descriptor set layout
+   **/
+  inline VkDescriptorSetLayout getGlobalTexturesDescriptorSetLayout() {
+    return mDescriptorSetLayouts.at(0);
+  }
+
 private:
   /**
    * @brief Create desctiptor set layout
    *
    * @param info Descriptor set layout create info
+   * @param flags Descriptor binding flags
    * @return Vulkan descriptor set layout
    */
   VkDescriptorSetLayout createDescriptorLayout(
-      const VulkanShader::ReflectionDescriptorSetLayout &info);
+      const VulkanShader::ReflectionDescriptorSetLayout &info,
+      VkDescriptorBindingFlags flags);
+
+  /**
+   * @brief Create global textures descriptor layout
+   *
+   * Bindless textures
+   */
+  void createGlobalTexturesDescriptorLayout();
+
+  /**
+   * @brief Destroy all decriptor layouts
+   */
+  void destroyAllDescriptorLayouts();
 
 private:
   VulkanDeviceObject &mDevice;

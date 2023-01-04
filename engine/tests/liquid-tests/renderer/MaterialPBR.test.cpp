@@ -91,29 +91,29 @@ TEST_F(MaterialPBRTest, GetsProperties) {
   EXPECT_PROP_EQ(15, "emissiveFactor", glm::vec3, glm::vec3(1.0, 0.2, 0.4));
 
   properties.baseColorTexture = liquid::rhi::TextureHandle(1);
-  EXPECT_PROP_EQ(0, "baseColorTexture", int, 0);
+  EXPECT_PROP_EQ(0, "baseColorTexture", int, 1);
 
   properties.normalTexture = liquid::rhi::TextureHandle(2);
-  EXPECT_PROP_EQ(0, "baseColorTexture", int, 0);
-  EXPECT_PROP_EQ(7, "normalTexture", int, 1);
+  EXPECT_PROP_EQ(0, "baseColorTexture", int, 1);
+  EXPECT_PROP_EQ(7, "normalTexture", int, 2);
 
   properties.occlusionTexture = liquid::rhi::TextureHandle(3);
-  EXPECT_PROP_EQ(0, "baseColorTexture", int, 0);
-  EXPECT_PROP_EQ(7, "normalTexture", int, 1);
-  EXPECT_PROP_EQ(10, "occlusionTexture", int, 2);
+  EXPECT_PROP_EQ(0, "baseColorTexture", int, 1);
+  EXPECT_PROP_EQ(7, "normalTexture", int, 2);
+  EXPECT_PROP_EQ(10, "occlusionTexture", int, 3);
 
   properties.metallicRoughnessTexture = liquid::rhi::TextureHandle(4);
-  EXPECT_PROP_EQ(0, "baseColorTexture", int, 0);
-  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", int, 1);
+  EXPECT_PROP_EQ(0, "baseColorTexture", int, 1);
+  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", int, 4);
   EXPECT_PROP_EQ(7, "normalTexture", int, 2);
   EXPECT_PROP_EQ(10, "occlusionTexture", int, 3);
 
   properties.emissiveTexture = liquid::rhi::TextureHandle(5);
-  EXPECT_PROP_EQ(0, "baseColorTexture", int, 0);
-  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", int, 1);
+  EXPECT_PROP_EQ(0, "baseColorTexture", int, 1);
+  EXPECT_PROP_EQ(3, "metallicRoughnessTexture", int, 4);
   EXPECT_PROP_EQ(7, "normalTexture", int, 2);
   EXPECT_PROP_EQ(10, "occlusionTexture", int, 3);
-  EXPECT_PROP_EQ(13, "emissiveTexture", int, 4);
+  EXPECT_PROP_EQ(13, "emissiveTexture", int, 5);
 
 #undef EXPECT_PROP_EQ
 }

@@ -23,8 +23,8 @@ VulkanRenderDevice::VulkanRenderDevice(
       mCommandPool(mDevice,
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
                    mRegistry, mDescriptorManager, mStats),
-      mDevice(mPhysicalDevice), mDescriptorManager(mDevice, mRegistry),
-      mPipelineLayoutCache(mDevice),
+      mDevice(mPhysicalDevice), mPipelineLayoutCache(mDevice),
+      mDescriptorManager(mDevice, mRegistry),
       mGraphicsQueue(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
       mPresentQueue(mDevice,
@@ -40,6 +40,10 @@ VulkanRenderDevice::VulkanRenderDevice(
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
   VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
   uint32_t queueIndex = mGraphicsQueue.getQueueIndex();
+
+  // Bindless textures
+  mDescriptorManager.createGlobalTexturesDescriptorSet(
+      mPipelineLayoutCache.getGlobalTexturesDescriptorSetLayout());
 
   LIQUID_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
                                  &queueIndex, 1, nullptr);
@@ -97,6 +101,11 @@ void VulkanRenderDevice::destroyResources() {
   waitForIdle();
   mRegistry = VulkanResourceRegistry();
   mPipelineLayoutCache.clear();
+  mDescriptorManager.clear();
+
+  // Bindless textures
+  mDescriptorManager.createGlobalTexturesDescriptorSet(
+      mPipelineLayoutCache.getGlobalTexturesDescriptorSetLayout());
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 }
 
@@ -123,9 +132,13 @@ VulkanRenderDevice::createShader(const ShaderDescription &description) {
 
 TextureHandle
 VulkanRenderDevice::createTexture(const TextureDescription &description) {
-  return mRegistry.setTexture(
+  auto handle = mRegistry.setTexture(
       std::make_unique<VulkanTexture>(description, mAllocator, mDevice,
                                       mUploadContext, mSwapchain.getExtent()));
+
+  mDescriptorManager.addGlobalTexture(handle);
+
+  return handle;
 }
 
 const TextureDescription
@@ -168,7 +181,6 @@ void VulkanRenderDevice::recreateSwapchain() {
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
 
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
-  mDescriptorManager.clear();
 
   updateFramebufferRelativeTextures();
   mBackend.finishFramebufferResize();
@@ -184,6 +196,8 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
                                           texture->getDescription(), mAllocator,
                                           mDevice, mUploadContext,
                                           mSwapchain.getExtent()));
+
+    mDescriptorManager.addGlobalTexture(handle);
   }
 }
 

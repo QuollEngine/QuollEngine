@@ -188,6 +188,12 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
+  {
+    rhi::Descriptor descriptor;
+    descriptor.bindGlobalTextures();
+    commandList.bindDescriptor(pipeline, 0, descriptor);
+  }
+
   setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline, frameIndex);
 
   uint32_t indexOffset = 0;
@@ -237,14 +243,13 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
         commandList.setScissor(clipRectMin, clipRectMax - clipRectMin);
         commandList.bindPipeline(pipeline);
 
-        auto handle = static_cast<rhi::TextureHandle>(
-            reinterpret_cast<uintptr_t>(cmd->TextureId));
+        glm::uvec4 textureData{
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cmd->TextureId))};
 
-        rhi::Descriptor descriptor;
-        descriptor.bind(0, std::vector<rhi::TextureHandle>{handle},
-                        rhi::DescriptorType::CombinedImageSampler);
+        commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment,
+                                  sizeof(glm::mat4), sizeof(glm::uvec4),
+                                  glm::value_ptr(textureData));
 
-        commandList.bindDescriptor(pipeline, 0, descriptor);
         commandList.drawIndexed(
             cmd->ElemCount, cmd->IdxOffset + indexOffset,
             static_cast<int32_t>(cmd->VtxOffset + vertexOffset));
@@ -297,9 +302,9 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
 
   };
 
-  commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                            static_cast<uint32_t>(sizeof(float) * mvp.size()),
-                            mvp.data());
+  commandList.pushConstants(
+      pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+      static_cast<uint32_t>(sizeof(float) * mvp.size()), mvp.data());
 }
 
 void ImguiRenderer::useConfigPath(const String &path) {
