@@ -16,19 +16,11 @@ namespace liquid::rhi {
 VulkanDescriptorManager::VulkanDescriptorManager(
     VulkanDeviceObject &device, const VulkanResourceRegistry &registry,
     VulkanDescriptorPool &descriptorPool)
-    : mDevice(device), mRegistry(registry), mDescriptorPool(descriptorPool),
-      mGlobalTexturesDescriptor(nullptr, DescriptorHandle::Invalid) {}
+    : mDevice(device), mRegistry(registry), mDescriptorPool(descriptorPool) {}
 
 VkDescriptorSet
 VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
                                                VkDescriptorSetLayout layout) {
-  // Bindless textures
-  if (descriptor.getBindings().size() == 1 &&
-      descriptor.getBindings().at(0).type == DescriptorType::GlobalTextures) {
-    return mDescriptorPool.getDescriptorSet(
-        mGlobalTexturesDescriptor.getHandle());
-  }
-
   const String &hash = createHash(descriptor, layout);
   const auto &found = mDescriptorCache.find(hash);
 
@@ -44,17 +36,6 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
 }
 
 void VulkanDescriptorManager::clear() { mDescriptorCache.clear(); }
-
-void VulkanDescriptorManager::createGlobalTexturesDescriptorSet(
-    DescriptorLayoutHandle layout) {
-  mGlobalTexturesDescriptor = mDescriptorPool.createDescriptor(layout);
-}
-
-void VulkanDescriptorManager::addGlobalTexture(rhi::TextureHandle handle) {
-  mGlobalTexturesDescriptor.write(0, {handle},
-                                  DescriptorType::CombinedImageSampler,
-                                  castHandleToUint(handle));
-}
 
 VkDescriptorSet
 VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,

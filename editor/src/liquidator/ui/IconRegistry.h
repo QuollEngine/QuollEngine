@@ -2,6 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/RenderDevice.h"
+#include "liquid/renderer/RenderStorage.h"
 
 namespace liquidator {
 
@@ -40,10 +41,10 @@ public:
   /**
    * @brief Load icons from path
    *
-   * @param device Render device
+   * @param renderStorage Render storage
    * @param iconsPath Path to icons
    */
-  void loadIcons(liquid::rhi::RenderDevice *device,
+  void loadIcons(liquid::RenderStorage &renderStorage,
                  const std::filesystem::path &iconsPath);
 
   /**

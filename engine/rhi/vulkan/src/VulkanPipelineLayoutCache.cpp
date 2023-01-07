@@ -38,9 +38,7 @@ static bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
 }
 
 VulkanPipelineLayoutCache::VulkanPipelineLayoutCache(VulkanDeviceObject &device)
-    : mDevice(device) {
-  createGlobalTexturesDescriptorLayout();
-}
+    : mDevice(device) {}
 
 VulkanPipelineLayoutCache::~VulkanPipelineLayoutCache() {
   destroyAllDescriptorLayouts();
@@ -48,13 +46,6 @@ VulkanPipelineLayoutCache::~VulkanPipelineLayoutCache() {
 
 DescriptorLayoutHandle VulkanPipelineLayoutCache::getOrCreateDescriptorLayout(
     const DescriptorLayoutDescription &description) {
-
-  // Bindless textures
-  if (description.bindings.size() == 1 &&
-      description.bindings.at(0).name == "uGlobalTextures") {
-    return static_cast<DescriptorLayoutHandle>(1);
-  }
-
   for (size_t i = 0; i < mDescriptorLayoutDescriptions.size(); ++i) {
     const auto &existing = mDescriptorLayoutDescriptions.at(i);
     if (existing.bindings.size() != description.bindings.size()) {
@@ -84,8 +75,6 @@ void VulkanPipelineLayoutCache::clear() {
 
   mDescriptorSetLayouts.clear();
   mDescriptorLayoutDescriptions.clear();
-
-  createGlobalTexturesDescriptorLayout();
 }
 
 VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
@@ -136,24 +125,6 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
       "Failed to create descriptor set layout");
 
   return layout;
-}
-
-void VulkanPipelineLayoutCache::createGlobalTexturesDescriptorLayout() {
-  static constexpr uint32_t NumSamplers = 1000;
-
-  DescriptorLayoutBindingDescription binding{};
-  binding.name = "uGlobalTextures";
-  binding.type = DescriptorLayoutBindingType::Dynamic;
-  binding.binding = 0;
-  binding.descriptorCount = NumSamplers;
-  binding.descriptorType = DescriptorType::CombinedImageSampler;
-  binding.shaderStage = ShaderStage::Fragment;
-
-  DescriptorLayoutDescription desc{{binding}};
-  mDescriptorLayoutDescriptions.push_back(desc);
-
-  VkDescriptorSetLayout layout = createDescriptorLayout(desc);
-  mDescriptorSetLayouts.push_back(layout);
 }
 
 void VulkanPipelineLayoutCache::destroyAllDescriptorLayouts() {

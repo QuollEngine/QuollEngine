@@ -6,7 +6,8 @@ namespace liquidator {
 MousePickingGraph::MousePickingGraph(
     liquid::ShaderLibrary &shaderLibrary,
     const std::array<liquid::SceneRendererFrameData, 2> &frameData,
-    liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device)
+    liquid::AssetRegistry &assetRegistry, liquid::RenderStorage &renderStorage,
+    liquid::rhi::RenderDevice *device)
     : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
       mGraphEvaluator(device), mRenderGraph("MousePicking") {
   static constexpr uint32_t FramebufferSizePercentage = 100;
@@ -29,10 +30,10 @@ MousePickingGraph::MousePickingGraph(
   depthBufferDesc.height = FramebufferSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = liquid::rhi::Format::Depth32Float;
-  auto depthBuffer = mDevice->createTexture(depthBufferDesc);
+  auto depthBuffer = renderStorage.createTexture(depthBufferDesc);
 
   liquid::Entity nullEntity{0};
-  mSelectedEntityBuffer = device->createBuffer(
+  mSelectedEntityBuffer = renderStorage.createBuffer(
       {liquid::rhi::BufferType::Storage, sizeof(liquid::Entity), &nullEntity,
        liquid::rhi::BufferUsage::HostRead});
 
@@ -42,8 +43,8 @@ MousePickingGraph::MousePickingGraph(
       sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 
-  mEntitiesBuffer = device->createBuffer(defaultDesc);
-  mSkinnedEntitiesBuffer = device->createBuffer(defaultDesc);
+  mEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
+  mSkinnedEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
 
   auto &pass = mRenderGraph.addPass("MousePicking");
   pass.write(depthBuffer, liquid::rhi::DepthStencilClear({1.0f, 0}));

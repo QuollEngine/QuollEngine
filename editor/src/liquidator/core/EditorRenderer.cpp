@@ -7,10 +7,12 @@ namespace liquidator {
 
 EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
                                IconRegistry &iconRegistry,
+                               liquid::RenderStorage &renderStorage,
                                liquid::rhi::RenderDevice *device)
     : mIconRegistry(iconRegistry), mShaderLibrary(shaderLibrary),
-      mFrameData{EditorRendererFrameData(mDevice),
-                 EditorRendererFrameData(mDevice)},
+      mRenderStorage(renderStorage),
+      mFrameData{EditorRendererFrameData(renderStorage),
+                 EditorRendererFrameData(renderStorage)},
       mDevice(device) {
 
   createCollidableShapes();
@@ -314,7 +316,7 @@ void EditorRenderer::createCollidableShapes() {
         // clang-format on
     };
 
-    mCollidableCube.buffer = mDevice->createBuffer(
+    mCollidableCube.buffer = mRenderStorage.createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableBoxVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableBoxVertices.data())});
@@ -367,7 +369,7 @@ void EditorRenderer::createCollidableShapes() {
     drawUnitCircle(CollidableSphereVertices, NumSegments, cZero, cSin, cCos);
     drawUnitCircle(CollidableSphereVertices, NumSegments, cSin, cCos, cZero);
 
-    mCollidableSphere.buffer = mDevice->createBuffer(
+    mCollidableSphere.buffer = mRenderStorage.createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableSphereVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableSphereVertices.data())});
@@ -425,7 +427,7 @@ void EditorRenderer::createCollidableShapes() {
     drawUnitHalfCircle(CollidableCapsuleVertices, NumSegments, cZero,
                        cSinCenter(-0.5f), cCos, -Pi);
 
-    mCollidableCapsule.buffer = mDevice->createBuffer(
+    mCollidableCapsule.buffer = mRenderStorage.createBuffer(
         {liquid::rhi::BufferType::Vertex,
          CollidableCapsuleVertices.size() * sizeof(liquid::Vertex),
          static_cast<const void *>(CollidableCapsuleVertices.data())});

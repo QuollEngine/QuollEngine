@@ -2,13 +2,11 @@
 #include "liquid/core/Engine.h"
 #include "Material.h"
 
-#include "liquid/rhi/RenderDevice.h"
-
 namespace liquid {
 
 Material::Material(const std::vector<rhi::TextureHandle> &textures,
                    const std::vector<std::pair<String, Property>> &properties,
-                   rhi::RenderDevice *device)
+                   RenderStorage &renderStorage)
     : mTextures(textures) {
 
   for (size_t i = 0; i < properties.size(); ++i) {
@@ -19,7 +17,8 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
 
   if (!mProperties.empty()) {
     auto size = updateBufferData();
-    mBuffer = device->createBuffer({rhi::BufferType::Uniform, size, mData});
+    mBuffer =
+        renderStorage.createBuffer({rhi::BufferType::Uniform, size, mData});
     mDescriptor.bind(0, mBuffer.getHandle(),
                      rhi::DescriptorType::UniformBuffer);
   }

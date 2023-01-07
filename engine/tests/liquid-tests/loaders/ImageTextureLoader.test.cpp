@@ -6,13 +6,16 @@
 
 class ImageTextureLoaderTest : public ::testing::Test {
 public:
+  ImageTextureLoaderTest() : renderStorage(&device) {}
   MockRenderDevice device;
+  liquid::RenderStorage renderStorage;
 };
 
 using ImageTextureLoaderDeathTest = ImageTextureLoaderTest;
 
 TEST_F(ImageTextureLoaderTest, LoadsImageUsingStb) {
-  liquid::ImageTextureLoader loader(&device);
+  liquid::ImageTextureLoader loader(renderStorage);
+
   auto texture = loader.loadFromFile("white-image-100x100.png");
 
   EXPECT_TRUE(liquid::rhi::isHandleValid(texture));
@@ -26,6 +29,7 @@ TEST_F(ImageTextureLoaderTest, LoadsImageUsingStb) {
 }
 
 TEST_F(ImageTextureLoaderDeathTest, ThrowsErrorOnFailedLoad) {
-  liquid::ImageTextureLoader loader(&device);
+  liquid::ImageTextureLoader loader(renderStorage);
+
   EXPECT_DEATH(loader.loadFromFile("non-existent-image.png"), ".*");
 }

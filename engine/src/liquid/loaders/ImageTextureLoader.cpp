@@ -6,8 +6,8 @@
 
 namespace liquid {
 
-ImageTextureLoader::ImageTextureLoader(rhi::RenderDevice *device)
-    : mDevice(device) {}
+ImageTextureLoader::ImageTextureLoader(RenderStorage &renderStorage)
+    : mRenderStorage(renderStorage) {}
 
 rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
   liquid::rhi::TextureDescription description;
@@ -26,7 +26,7 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
   description.type = rhi::TextureType::Standard;
   description.size = width * height * channels;
 
-  return mDevice->createTexture(description);
+  return mRenderStorage.createTexture(description);
 }
 
 } // namespace liquid

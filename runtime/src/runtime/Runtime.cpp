@@ -40,13 +40,14 @@ void Runtime::start() {
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  auto res = assetCache.preloadAssets(device);
+  liquid::Renderer renderer(assetCache.getRegistry(), window, device);
+
+  auto res = assetCache.preloadAssets(renderer.getRenderStorage());
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(window, fpsCounter);
 
   liquid::RenderGraph graph("Main");
-  liquid::Renderer renderer(assetCache.getRegistry(), window, device);
 
   static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
 

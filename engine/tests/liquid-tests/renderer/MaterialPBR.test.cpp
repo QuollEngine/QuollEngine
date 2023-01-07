@@ -7,7 +7,10 @@
 
 class MaterialPBRTest : public ::testing::Test {
 public:
+  MaterialPBRTest() : renderStorage(&device) {}
+
   MockRenderDevice device;
+  liquid::RenderStorage renderStorage;
 };
 
 TEST_F(MaterialPBRTest, GetsTextures) {
@@ -137,7 +140,7 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
       0,
       glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material(properties, &device);
+  liquid::MaterialPBR material(properties, renderStorage);
 
   const auto &buffer = device.getBuffer(material.getBuffer());
 

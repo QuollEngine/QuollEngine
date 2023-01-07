@@ -187,6 +187,23 @@ public:
    */
   void destroyPipeline(PipelineHandle handle) override;
 
+  /**
+   * @brief Add listener to texture update event
+   *
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  size_t addTextureUpdateListener(
+      const std::function<void(const std::set<TextureHandle> &)> &listener)
+      override;
+
+  /**
+   * @brief Remove listener for texture update events
+   *
+   * @param handle Listener handle
+   */
+  void removeTextureUpdateListener(size_t handle) override;
+
 private:
   /**
    * @brief Recreate swapchain
@@ -219,6 +236,9 @@ private:
   DeviceStats mStats;
 
   bool mSwapchainRecreated = false;
+
+  std::vector<std::function<void(const std::set<TextureHandle> &)>>
+      mTextureUpdateListeners;
 };
 
 } // namespace liquid::rhi

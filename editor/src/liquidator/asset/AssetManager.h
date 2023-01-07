@@ -129,11 +129,11 @@ public:
   /**
    * @brief Validate and preload assets
    *
-   * @param device Render device
+   * @param renderStorage Render storage
    * @return Result
    */
   liquid::Result<bool>
-  validateAndPreloadAssets(liquid::rhi::RenderDevice *device);
+  validateAndPreloadAssets(liquid::RenderStorage &renderStorage);
 
   /**
    * @brief Load original asset if hashes are changed

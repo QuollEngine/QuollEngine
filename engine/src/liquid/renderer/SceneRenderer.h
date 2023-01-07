@@ -35,10 +35,11 @@ public:
    *
    * @param shaderLibrary Shader library
    * @param assetRegistry Asset registry
+   * @param renderStorage Render storage
    * @param device Render device
    */
   SceneRenderer(ShaderLibrary &shaderLibrary, AssetRegistry &assetRegistry,
-                rhi::RenderDevice *device);
+                RenderStorage &renderStorage, rhi::RenderDevice *device);
 
   /**
    * @brief Set clear color
@@ -121,6 +122,7 @@ private:
   ShaderLibrary &mShaderLibrary;
   AssetRegistry &mAssetRegistry;
   rhi::RenderDevice *mDevice;
+  RenderStorage &mRenderStorage;
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 };
 

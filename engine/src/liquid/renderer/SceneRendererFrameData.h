@@ -184,10 +184,12 @@ public:
   /**
    * @brief Create frame data
    *
+   * @param renderStorage Render Storage
    * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
-  SceneRendererFrameData(rhi::RenderDevice *device,
+  SceneRendererFrameData(RenderStorage &renderStorage,
+                         rhi::RenderDevice *device,
                          size_t reservedSpace = DefaultReservedSpace);
 
   /**
@@ -480,8 +482,6 @@ private:
   std::unordered_map<FontAssetHandle, std::vector<TextData>> mTextGroups;
 
   size_t mReservedSpace = 0;
-
-  rhi::RenderDevice *mDevice = nullptr;
 };
 
 } // namespace liquid

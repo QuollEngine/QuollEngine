@@ -104,10 +104,19 @@ public:
    */
   inline void wait() { mDevice->waitForIdle(); }
 
+  /**
+   * @brief Get render storage
+   *
+   * @return Render storage
+   */
+  inline RenderStorage &getRenderStorage() { return mRenderStorage; }
+
 private:
-  RenderGraphEvaluator mGraphEvaluator;
-  rhi::RenderDevice *mDevice;
   ShaderLibrary mShaderLibrary;
+  rhi::RenderDevice *mDevice;
+  RenderStorage mRenderStorage;
+
+  RenderGraphEvaluator mGraphEvaluator;
   AssetRegistry &mAssetRegistry;
   ImguiRenderer mImguiRenderer;
   SceneRenderer mSceneRenderer;

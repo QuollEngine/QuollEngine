@@ -9,8 +9,6 @@ enum class DescriptorType {
   StorageBuffer,
   CombinedImageSampler,
 
-  // Bindless textures
-  GlobalTextures
 };
 
 /**
@@ -58,15 +56,6 @@ public:
    * @return Current object
    */
   Descriptor &bind(uint32_t binding, BufferHandle buffer, DescriptorType type);
-
-  /**
-   * @brief Bind global textures
-   *
-   * Bindless textures
-   *
-   * @return Current object
-   */
-  Descriptor &bindGlobalTextures();
 
   /**
    * @brief Get bindings

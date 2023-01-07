@@ -25,8 +25,10 @@ std::optional<Project> ProjectSelectorScreen::start() {
   liquid::AssetRegistry assetRegistry;
   liquid::ShaderLibrary shaderLibrary;
   liquid::RenderGraphEvaluator graphEvaluator(mDevice);
+  liquid::RenderStorage renderStorage(mDevice);
 
-  liquid::ImguiRenderer imguiRenderer(mWindow, shaderLibrary, mDevice);
+  liquid::ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage,
+                                      mDevice);
   liquid::Presenter presenter(shaderLibrary, mDevice);
 
   liquidator::ProjectManager projectManager;
@@ -58,7 +60,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
         graph.setFramebufferExtent({width, height});
       });
 
-  iconRegistry.loadIcons(mDevice,
+  iconRegistry.loadIcons(renderStorage,
                          std::filesystem::current_path() / "assets" / "icons");
 
   mainLoop.setUpdateFn([&project, this](float dt) {
