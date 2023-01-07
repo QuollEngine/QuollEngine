@@ -14,17 +14,10 @@
 namespace liquid::rhi {
 
 VulkanDescriptorManager::VulkanDescriptorManager(
-    VulkanDeviceObject &device, const VulkanResourceRegistry &registry)
-    : mDevice(device), mRegistry(registry) {
-  createDescriptorPool();
-}
-
-VulkanDescriptorManager::~VulkanDescriptorManager() {
-  if (mDescriptorPool) {
-    vkDestroyDescriptorPool(mDevice, mDescriptorPool, nullptr);
-    LOG_DEBUG_VK("Descriptor pool destroyed", mDescriptorPool);
-  }
-}
+    VulkanDeviceObject &device, const VulkanResourceRegistry &registry,
+    VulkanDescriptorPool &descriptorPool)
+    : mDevice(device), mRegistry(registry), mDescriptorPool(descriptorPool),
+      mGlobalTexturesDescriptor(nullptr, DescriptorHandle::Invalid) {}
 
 VkDescriptorSet
 VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
@@ -32,7 +25,8 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
   // Bindless textures
   if (descriptor.getBindings().size() == 1 &&
       descriptor.getBindings().at(0).type == DescriptorType::GlobalTextures) {
-    return mGlobalTexturesDescriptorSet;
+    return mDescriptorPool.getDescriptorSet(
+        mGlobalTexturesDescriptor.getHandle());
   }
 
   const String &hash = createHash(descriptor, layout);
@@ -49,72 +43,23 @@ VulkanDescriptorManager::getOrCreateDescriptor(const Descriptor &descriptor,
   return (*found).second;
 }
 
-void VulkanDescriptorManager::clear() {
-  vkResetDescriptorPool(mDevice, mDescriptorPool, 0);
-
-  mDescriptorCache.clear();
-}
+void VulkanDescriptorManager::clear() { mDescriptorCache.clear(); }
 
 void VulkanDescriptorManager::createGlobalTexturesDescriptorSet(
-    VkDescriptorSetLayout layout) {
-  static constexpr uint32_t NumSamplers = 1000;
-
-  std::array<uint32_t, 1> dynamicDescriptorSetCounts{NumSamplers};
-
-  VkDescriptorSetVariableDescriptorCountAllocateInfo countInfo{};
-  countInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-  countInfo.pNext = nullptr;
-  countInfo.descriptorSetCount =
-      static_cast<uint32_t>(dynamicDescriptorSetCounts.size());
-  countInfo.pDescriptorCounts = dynamicDescriptorSetCounts.data();
-
-  VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
-  descriptorSetAllocateInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  descriptorSetAllocateInfo.pNext = &countInfo;
-  descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
-  descriptorSetAllocateInfo.pSetLayouts = &layout;
-  descriptorSetAllocateInfo.descriptorSetCount = 1;
-
-  checkForVulkanError(vkAllocateDescriptorSets(mDevice,
-                                               &descriptorSetAllocateInfo,
-                                               &mGlobalTexturesDescriptorSet),
-                      "Failed to allocate global textures descriptor set");
+    DescriptorLayoutHandle layout) {
+  mGlobalTexturesDescriptor = mDescriptorPool.createDescriptor(layout);
 }
 
 void VulkanDescriptorManager::addGlobalTexture(rhi::TextureHandle handle) {
-  VkWriteDescriptorSet write{};
-  write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  write.pNext = nullptr;
-  write.dstBinding = 0;
-  write.dstSet = mGlobalTexturesDescriptorSet;
-  write.dstArrayElement = static_cast<uint32_t>(handle);
-  write.descriptorCount = 1;
-  write.pBufferInfo = nullptr;
-  write.pTexelBufferView = nullptr;
-  write.descriptorType =
-      VulkanMapping::getDescriptorType(DescriptorType::CombinedImageSampler);
-
-  const auto &texture = mRegistry.getTextures().at(handle);
-
-  std::array<VkDescriptorImageInfo, 1> imageInfo{};
-  imageInfo.at(0).sampler = texture->getSampler();
-  imageInfo.at(0).imageView = texture->getImageView();
-  imageInfo.at(0).imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-  write.pImageInfo = imageInfo.data();
-
-  std::array<VkWriteDescriptorSet, 1> writes{write};
-
-  vkUpdateDescriptorSets(mDevice, static_cast<uint32_t>(writes.size()),
-                         writes.data(), 0, nullptr);
+  mGlobalTexturesDescriptor.write(0, {handle},
+                                  DescriptorType::CombinedImageSampler,
+                                  castHandleToUint(handle));
 }
 
 VkDescriptorSet
 VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
                                              VkDescriptorSetLayout layout) {
-  VkDescriptorSet descriptorSet = allocateDescriptorSet(layout);
+  VkDescriptorSet descriptorSet = mDescriptorPool.createDescriptor(layout);
 
   std::vector<VkWriteDescriptorSet> writes;
   std::vector<std::vector<VkDescriptorImageInfo>> imageInfos;
@@ -176,61 +121,6 @@ VulkanDescriptorManager::createDescriptorSet(const Descriptor &descriptor,
                          writes.data(), 0, nullptr);
 
   return descriptorSet;
-}
-
-VkDescriptorSet
-VulkanDescriptorManager::allocateDescriptorSet(VkDescriptorSetLayout layout) {
-  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-
-  VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
-  descriptorSetAllocateInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  descriptorSetAllocateInfo.pNext = nullptr;
-  descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
-  descriptorSetAllocateInfo.pSetLayouts = &layout;
-  descriptorSetAllocateInfo.descriptorSetCount = 1;
-
-  checkForVulkanError(vkAllocateDescriptorSets(
-                          mDevice, &descriptorSetAllocateInfo, &descriptorSet),
-                      "Failed to allocate descriptor set");
-
-  return descriptorSet;
-}
-
-void VulkanDescriptorManager::createDescriptorPool() {
-  static constexpr uint32_t NumUniformBuffers = 15000;
-  static constexpr uint32_t NumStorageBuffers = 10;
-  static constexpr uint32_t NumSamplers = 1000;
-  static constexpr uint32_t NumDescriptors = 30000;
-  static constexpr uint32_t MaxTextureDescriptors = 8;
-
-  static constexpr uint32_t MaxImageSamplers =
-      MaxTextureDescriptors * NumSamplers;
-
-  std::array<VkDescriptorPoolSize, 3> poolSizes{
-      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                           NumUniformBuffers},
-      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                           NumStorageBuffers},
-      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                           MaxImageSamplers}};
-
-  VkDescriptorPoolCreateInfo descriptorPoolInfo{};
-  descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  descriptorPoolInfo.pNext = nullptr;
-  descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-  descriptorPoolInfo.maxSets = NumDescriptors;
-  descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-  descriptorPoolInfo.pPoolSizes = poolSizes.data();
-
-  checkForVulkanError(vkCreateDescriptorPool(mDevice, &descriptorPoolInfo,
-                                             nullptr, &mDescriptorPool),
-                      "Failed to create descriptor pool");
-
-  LOG_DEBUG_VK("Descriptor pool created. Samplers: "
-                   << MaxImageSamplers << "; UB: " << NumUniformBuffers
-                   << "; SB: " << NumStorageBuffers,
-               mDescriptorPool);
 }
 
 String VulkanDescriptorManager::createHash(const Descriptor &descriptor,

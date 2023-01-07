@@ -3,6 +3,7 @@
 
 #include "VulkanShader.h"
 #include "VulkanError.h"
+#include "VulkanMapping.h"
 
 #include "spirv_reflect.h"
 
@@ -113,36 +114,42 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
       for (auto &ds : descriptors) {
         const SpvReflectDescriptorSet &reflectDescriptorSet = *ds;
 
-        std::vector<VkDescriptorSetLayoutBinding> bindings(
-            reflectDescriptorSet.binding_count);
-        std::vector<String> names(bindings.size());
+        DescriptorLayoutDescription description{};
+
+        std::map<uint32_t, DescriptorLayoutBindingDescription> bindingsMap;
 
         for (uint32_t i = 0; i < reflectDescriptorSet.binding_count; ++i) {
           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+
           auto *reflectBinding = reflectDescriptorSet.bindings[i];
-
-          bindings.at(i).binding = reflectBinding->binding;
-          bindings.at(i).stageFlags = mStage;
-          bindings.at(i).descriptorType =
-              static_cast<VkDescriptorType>(reflectBinding->descriptor_type);
-
-          bindings.at(i).descriptorCount = 1;
-          for (uint32_t j = 0; j < reflectBinding->array.dims_count; ++j) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-            bindings.at(i).descriptorCount *= reflectBinding->array.dims[j];
+          String name(reflectBinding->name);
+          if (bindingsMap.find(reflectBinding->binding) != bindingsMap.end() &&
+              name.rfind("uGlobal") != 0) {
+            continue;
           }
 
-          names.at(i) = reflectBinding->name;
+          DescriptorLayoutBindingDescription layoutBinding{};
+
+          layoutBinding.name = name;
+          layoutBinding.binding = reflectBinding->binding;
+          layoutBinding.shaderStage = VulkanMapping::getShaderStage(mStage);
+          layoutBinding.descriptorType = VulkanMapping::getDescriptorType(
+              static_cast<VkDescriptorType>(reflectBinding->descriptor_type));
+          layoutBinding.descriptorCount = 1;
+
+          for (uint32_t j = 0; j < reflectBinding->array.dims_count; ++j) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+            layoutBinding.descriptorCount *= reflectBinding->array.dims[j];
+          }
+
+          bindingsMap.insert_or_assign(reflectBinding->binding, layoutBinding);
         }
 
-        std::sort(bindings.begin(), bindings.end(),
-                  [](const VkDescriptorSetLayoutBinding &a,
-                     const VkDescriptorSetLayoutBinding &b) {
-                    return a.binding < b.binding;
-                  });
+        for (auto &[_, binding] : bindingsMap) {
+          description.bindings.push_back(binding);
+        }
 
-        mReflectionData.descriptorSetLayouts.insert(
-            {ds->set, {names, bindings}});
+        mReflectionData.descriptorLayouts.insert({ds->set, description});
       }
     }
   }

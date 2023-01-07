@@ -86,18 +86,10 @@ MousePickingGraph::MousePickingGraph(
     // Mesh
     commandList.bindPipeline(pipeline);
 
+    commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, frameData.getActiveCameraBuffer(),
-                      liquid::rhi::DescriptorType::UniformBuffer);
-      commandList.bindDescriptor(pipeline, 0, descriptor);
-    }
-
-    {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, frameData.getMeshTransformsBuffer(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      descriptor.bind(1, mEntitiesBuffer.getHandle(),
+      descriptor.bind(0, mEntitiesBuffer.getHandle(),
                       liquid::rhi::DescriptorType::StorageBuffer);
       commandList.bindDescriptor(pipeline, 1, descriptor);
     }
@@ -146,20 +138,11 @@ MousePickingGraph::MousePickingGraph(
 
     instanceStart = 0;
 
-    {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, frameData.getActiveCameraBuffer(),
-                      liquid::rhi::DescriptorType::UniformBuffer);
-      commandList.bindDescriptor(skinnedPipeline, 0, descriptor);
-    }
+    commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
 
     {
       liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, frameData.getSkinnedMeshTransformsBuffer(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      descriptor.bind(1, frameData.getSkeletonsBuffer(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      descriptor.bind(2, mSkinnedEntitiesBuffer.getHandle(),
+      descriptor.bind(0, mSkinnedEntitiesBuffer.getHandle(),
                       liquid::rhi::DescriptorType::StorageBuffer);
       commandList.bindDescriptor(skinnedPipeline, 1, descriptor);
     }

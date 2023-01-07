@@ -4,6 +4,7 @@
 
 #include "VulkanPipelineLayoutCache.h"
 #include "VulkanError.h"
+#include "VulkanMapping.h"
 
 namespace liquid::rhi {
 
@@ -22,78 +23,113 @@ static bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
          (a.stageFlags == b.stageFlags);
 }
 
+/**
+ * @brief Check if two descriptor set bindings match
+ *
+ * @param a First binding
+ * @param b Second binding
+ * @retval true Bindings match
+ * @retval false Bindings do not match
+ */
+static bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
+                          const DescriptorLayoutBindingDescription &b) {
+  return (a.binding == b.binding) && (a.descriptorType == b.descriptorType) &&
+         (a.name == b.name);
+}
+
 VulkanPipelineLayoutCache::VulkanPipelineLayoutCache(VulkanDeviceObject &device)
     : mDevice(device) {
   createGlobalTexturesDescriptorLayout();
-}
-
-VkDescriptorSetLayout VulkanPipelineLayoutCache::getOrCreateDescriptorLayout(
-    const VulkanShader::ReflectionDescriptorSetLayout &info) {
-
-  // Bindless textures
-  if (info.names.size() == 1 && info.names.at(0) == "uGlobalTextures") {
-    return mDescriptorSetLayouts.at(0);
-  }
-
-  for (size_t i = 0; i < mDescriptorSetLayoutData.size(); ++i) {
-    const auto &existingInfo = mDescriptorSetLayoutData.at(i);
-    if (existingInfo.bindings.size() != info.bindings.size()) {
-      continue;
-    }
-
-    bool matches = true;
-    for (size_t li = 0; li < info.bindings.size() && matches; ++li) {
-      matches =
-          bindingsMatch(info.bindings.at(li), existingInfo.bindings.at(li));
-    }
-
-    if (matches) {
-      return mDescriptorSetLayouts.at(i);
-    }
-  }
-
-  VkDescriptorSetLayout layout =
-      createDescriptorLayout(info, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
-  mDescriptorSetLayoutData.push_back(info);
-  mDescriptorSetLayouts.push_back(layout);
-
-  return layout;
 }
 
 VulkanPipelineLayoutCache::~VulkanPipelineLayoutCache() {
   destroyAllDescriptorLayouts();
 }
 
+DescriptorLayoutHandle VulkanPipelineLayoutCache::getOrCreateDescriptorLayout(
+    const DescriptorLayoutDescription &description) {
+
+  // Bindless textures
+  if (description.bindings.size() == 1 &&
+      description.bindings.at(0).name == "uGlobalTextures") {
+    return static_cast<DescriptorLayoutHandle>(1);
+  }
+
+  for (size_t i = 0; i < mDescriptorLayoutDescriptions.size(); ++i) {
+    const auto &existing = mDescriptorLayoutDescriptions.at(i);
+    if (existing.bindings.size() != description.bindings.size()) {
+      continue;
+    }
+
+    bool matches = true;
+    for (size_t li = 0; li < description.bindings.size() && matches; ++li) {
+      matches =
+          bindingsMatch(description.bindings.at(li), existing.bindings.at(li));
+    }
+
+    if (matches) {
+      return static_cast<DescriptorLayoutHandle>(i + 1);
+    }
+  }
+
+  VkDescriptorSetLayout layout = createDescriptorLayout(description);
+  mDescriptorLayoutDescriptions.push_back(description);
+  mDescriptorSetLayouts.push_back(layout);
+
+  return static_cast<DescriptorLayoutHandle>(mDescriptorSetLayouts.size());
+}
+
 void VulkanPipelineLayoutCache::clear() {
   destroyAllDescriptorLayouts();
 
   mDescriptorSetLayouts.clear();
-  mDescriptorSetLayoutData.clear();
+  mDescriptorLayoutDescriptions.clear();
 
   createGlobalTexturesDescriptorLayout();
 }
 
 VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
-    const VulkanShader::ReflectionDescriptorSetLayout &info,
-    VkDescriptorBindingFlags flags) {
-  std::vector<VkDescriptorBindingFlags> bindingFlags(info.bindings.size(),
-                                                     flags);
+    const DescriptorLayoutDescription &description) {
+
+  std::vector<VkDescriptorBindingFlags> vkBindingFlags(
+      description.bindings.size(), VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+  std::vector<VkDescriptorSetLayoutBinding> vkBindings(
+      description.bindings.size(), VkDescriptorSetLayoutBinding{});
+
+  for (size_t i = 0; i < description.bindings.size(); ++i) {
+    auto &binding = description.bindings.at(i);
+
+    if (binding.type == DescriptorLayoutBindingType::Dynamic) {
+      vkBindingFlags.at(i) =
+          VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+          VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
+          VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+    }
+
+    vkBindings.at(i).binding = binding.binding;
+    vkBindings.at(i).descriptorCount = binding.descriptorCount;
+    vkBindings.at(i).descriptorType =
+        VulkanMapping::getDescriptorType(binding.descriptorType);
+    vkBindings.at(i).pImmutableSamplers = nullptr;
+    vkBindings.at(i).stageFlags =
+        VulkanMapping::getShaderStageFlags(binding.shaderStage);
+  }
 
   VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCreateInfo{};
   bindingFlagsCreateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
   bindingFlagsCreateInfo.pNext = nullptr;
-  bindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
+  bindingFlagsCreateInfo.pBindingFlags = vkBindingFlags.data();
   bindingFlagsCreateInfo.bindingCount =
-      static_cast<uint32_t>(bindingFlags.size());
+      static_cast<uint32_t>(vkBindingFlags.size());
 
   VkDescriptorSetLayout layout = VK_NULL_HANDLE;
   VkDescriptorSetLayoutCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
   createInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
   createInfo.pNext = &bindingFlagsCreateInfo;
-  createInfo.bindingCount = static_cast<uint32_t>(info.bindings.size());
-  createInfo.pBindings = info.bindings.data();
+  createInfo.bindingCount = static_cast<uint32_t>(vkBindings.size());
+  createInfo.pBindings = vkBindings.data();
 
   checkForVulkanError(
       vkCreateDescriptorSetLayout(mDevice, &createInfo, nullptr, &layout),
@@ -105,25 +141,18 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
 void VulkanPipelineLayoutCache::createGlobalTexturesDescriptorLayout() {
   static constexpr uint32_t NumSamplers = 1000;
 
-  VulkanShader::ReflectionDescriptorSetLayout info{};
-
-  info.names.push_back("uGlobalTextures");
-
-  VkDescriptorSetLayoutBinding binding{};
-  binding.pImmutableSamplers = nullptr;
+  DescriptorLayoutBindingDescription binding{};
+  binding.name = "uGlobalTextures";
+  binding.type = DescriptorLayoutBindingType::Dynamic;
   binding.binding = 0;
   binding.descriptorCount = NumSamplers;
-  binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  binding.descriptorType = DescriptorType::CombinedImageSampler;
+  binding.shaderStage = ShaderStage::Fragment;
 
-  info.bindings.push_back(binding);
+  DescriptorLayoutDescription desc{{binding}};
+  mDescriptorLayoutDescriptions.push_back(desc);
 
-  VkDescriptorSetLayout layout = createDescriptorLayout(
-      info, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-                VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
-                VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT);
-
-  mDescriptorSetLayoutData.push_back(info);
+  VkDescriptorSetLayout layout = createDescriptorLayout(desc);
   mDescriptorSetLayouts.push_back(layout);
 }
 

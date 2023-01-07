@@ -14,6 +14,7 @@
 #include "VulkanCommandPool.h"
 #include "VulkanPipelineLayoutCache.h"
 #include "VulkanDescriptorManager.h"
+#include "VulkanDescriptorPool.h"
 #include "VulkanSwapchain.h"
 
 namespace liquid::rhi {
@@ -88,6 +89,23 @@ public:
    * @return Shader
    */
   ShaderHandle createShader(const ShaderDescription &description) override;
+
+  /**
+   * @brief Create descriptor layout
+   *
+   * @param description Descriptor layout description
+   * @return Descriptor layout
+   */
+  DescriptorLayoutHandle createDescriptorLayout(
+      const DescriptorLayoutDescription &description) override;
+
+  /**
+   * @brief Create descriptor
+   *
+   * @param layout Descriptor layout
+   * @return Descriptor
+   */
+  n::Descriptor createDescriptor(DescriptorLayoutHandle layout) override;
 
   /**
    * @brief Create hardware buffer
@@ -191,6 +209,7 @@ private:
   VulkanResourceAllocator mAllocator;
   VulkanResourceRegistry mRegistry;
   VulkanPipelineLayoutCache mPipelineLayoutCache;
+  VulkanDescriptorPool mDescriptorPool;
   VulkanDescriptorManager mDescriptorManager;
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;

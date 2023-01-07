@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/NativeResourceMetrics.h"
 #include "VulkanResourceRegistry.h"
-#include "VulkanDescriptorManager.h"
+#include "VulkanDescriptorPool.h"
 
 namespace liquid::rhi {
 
@@ -15,10 +15,10 @@ public:
    * @brief Create Vulkan resource metrics
    *
    * @param registry Vulkan resource registry
-   * @param descriptorManager Descriptor manager
+   * @param descriptorPool Descriptor pool
    */
   VulkanResourceMetrics(VulkanResourceRegistry &registry,
-                        VulkanDescriptorManager &descriptorManager);
+                        VulkanDescriptorPool &descriptorPool);
 
   /**
    * @brief Get size of all the buffers
@@ -57,7 +57,7 @@ public:
 
 private:
   VulkanResourceRegistry &mRegistry;
-  VulkanDescriptorManager &mDescriptorManager;
+  VulkanDescriptorPool &mDescriptorPool;
 };
 
 } // namespace liquid::rhi

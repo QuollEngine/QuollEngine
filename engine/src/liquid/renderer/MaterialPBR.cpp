@@ -31,37 +31,21 @@ MaterialPBR::Properties::getTextures() const {
 
 const std::vector<std::pair<String, Property>>
 MaterialPBR::Properties::getProperties() const {
-  int baseColorTextureIndex = rhi::isHandleValid(baseColorTexture)
-                                  ? static_cast<int32_t>(baseColorTexture)
-                                  : -1;
-  int metallicRoughnessTextureIndex =
-      rhi::isHandleValid(metallicRoughnessTexture)
-          ? static_cast<int32_t>(metallicRoughnessTexture)
-          : -1;
-  int normalTextureIndex = rhi::isHandleValid(normalTexture)
-                               ? static_cast<int32_t>(normalTexture)
-                               : -1;
-  int occlusionTextureIndex = rhi::isHandleValid(occlusionTexture)
-                                  ? static_cast<int32_t>(occlusionTexture)
-                                  : -1;
-  int emissiveTextureIndex = rhi::isHandleValid(emissiveTexture)
-                                 ? static_cast<int32_t>(emissiveTexture)
-                                 : -1;
-
-  return {{"baseColorTexture", baseColorTextureIndex},
+  return {{"baseColorTexture", rhi::castHandleToUint(baseColorTexture)},
           {"baseColorTextureCoord", baseColorTextureCoord},
           {"baseColorFactor", baseColorFactor},
-          {"metallicRoughnessTexture", metallicRoughnessTextureIndex},
+          {"metallicRoughnessTexture",
+           rhi::castHandleToUint(metallicRoughnessTexture)},
           {"metallicRoughnessTextureCoord", metallicRoughnessTextureCoord},
           {"metallicFactor", metallicFactor},
           {"roughnessFactor", roughnessFactor},
-          {"normalTexture", normalTextureIndex},
+          {"normalTexture", rhi::castHandleToUint(normalTexture)},
           {"normalTextureCoord", normalTextureCoord},
           {"normalScale", normalScale},
-          {"occlusionTexture", occlusionTextureIndex},
+          {"occlusionTexture", rhi::castHandleToUint(occlusionTexture)},
           {"occlusionTextureCoord", occlusionTextureCoord},
           {"occlusionStrength", occlusionStrength},
-          {"emissiveTexture", emissiveTextureIndex},
+          {"emissiveTexture", rhi::castHandleToUint(emissiveTexture)},
           {"emissiveTextureCoord", emissiveTextureCoord},
           {"emissiveFactor", emissiveFactor}};
 }

@@ -5,7 +5,7 @@
 layout(location = 0) in vec2 texCoord;
 layout(location = 0) out vec4 outColor;
 
-layout(set = 3, binding = 0) uniform sampler2D uGlobalTextures[];
+layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
 
 layout(push_constant) uniform TextureData { layout(offset = 16) uint index; }
 pcTextureData;

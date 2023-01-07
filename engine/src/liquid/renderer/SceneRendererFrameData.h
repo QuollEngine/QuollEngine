@@ -87,12 +87,21 @@ public:
    */
   struct SceneData {
     /**
-     * Scene data
+     * @brief Scene data
      *
      * First parameter is number of lights
-     * Second parameter represents if IBL is active
      */
-    glm::ivec4 data{0};
+    glm::uvec4 data{0};
+
+    /**
+     * Scene textures
+     *
+     * First parameter is IBL irradiance map
+     * Second parameter is IBL specular map
+     * Third parameter is IBL BRDF LUT
+     * Fourth parameter is shadow map
+     */
+    glm::uvec4 textures{0};
   };
 
   /**
@@ -323,7 +332,7 @@ public:
    *
    * @return Number of lights
    */
-  inline int32_t getNumLights() const { return mSceneData.data.x; }
+  inline uint32_t getNumLights() const { return mSceneData.data.x; }
 
   /**
    * @brief Get number shadow maps
@@ -400,6 +409,13 @@ public:
   void setCameraData(const Camera &camera, const PerspectiveLens &lens);
 
   /**
+   * @brief Set shadow map texture
+   *
+   * @param shadowmap Shadoow map texture
+   */
+  void setShadowMapTexture(rhi::TextureHandle shadowmap);
+
+  /**
    * @brief Clear intermediary buffers
    */
   void clear();
@@ -410,6 +426,15 @@ public:
    * @return Reserved space
    */
   inline size_t getReservedSpace() const { return mReservedSpace; }
+
+  /**
+   * @brief Get buffers descriptor
+   *
+   * @return Buffers descriptor
+   */
+  inline const rhi::n::Descriptor &getGlobalDescriptor() const {
+    return mGlobalDescriptor;
+  }
 
 private:
   /**
@@ -437,6 +462,8 @@ private:
   rhi::Buffer mLightsBuffer;
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
+
+  rhi::n::Descriptor mGlobalDescriptor;
 
   rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mSpecularMap = rhi::TextureHandle::Invalid;

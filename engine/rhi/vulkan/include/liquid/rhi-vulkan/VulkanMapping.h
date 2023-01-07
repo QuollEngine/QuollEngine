@@ -158,6 +158,24 @@ public:
    * @return Vulkan format
    */
   static VkFormat getFormat(Format format);
+
+  // Vulkan to RHI mapping
+public:
+  /**
+   * @brief Get RHI descriptor type
+   *
+   * @param descriptorType Vulkan descriptor type
+   * @return RHI descriptor type
+   */
+  static DescriptorType getDescriptorType(VkDescriptorType descriptorType);
+
+  /**
+   * @brief Get RHI shader stage
+   *
+   * @param stageFlags Vulkan shader stage flags
+   * @return RHI shader stage
+   */
+  static ShaderStage getShaderStage(VkShaderStageFlags stageFlags);
 };
 
 } // namespace liquid::rhi

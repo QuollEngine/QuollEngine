@@ -13,30 +13,10 @@ layout(location = 3) out vec3 outNormal;
 layout(location = 4) out float outTangentHand;
 layout(location = 5) out mat3 outTBN;
 
-layout(set = 0, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
-
-/**
- * @brief Single object transforms
- */
-struct ObjectItem {
-  /**
-   * Object model matrix
-   */
-  mat4 modelMatrix;
-};
-
-layout(std140, set = 1, binding = 0) readonly buffer ObjectData {
-  ObjectItem items[];
-}
-uObjectData;
+#include "bindless-base.glsl"
 
 void main() {
-  mat4 modelMatrix = uObjectData.items[gl_InstanceIndex].modelMatrix;
+  mat4 modelMatrix = getMeshTransform(gl_InstanceIndex).modelMatrix;
 
   vec4 worldPosition = modelMatrix * vec4(inPosition, 1.0f);
 
@@ -53,5 +33,5 @@ void main() {
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;
-  gl_Position = uCameraData.viewProj * worldPosition;
+  gl_Position = getCamera().viewProj * worldPosition;
 }

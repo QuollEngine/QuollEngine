@@ -1,5 +1,8 @@
 #pragma once
 
+#include "liquid/rhi/DescriptorLayoutDescription.h"
+#include "liquid/rhi/RenderHandle.h"
+
 #include "VulkanDeviceObject.h"
 #include "VulkanShader.h"
 
@@ -37,11 +40,11 @@ public:
   /**
    * @brief Get or create descriptor layout
    *
-   * @param info Descriptor set layout create info
-   * @return Vulkan descriptor set layout
+   * @param description Descriptor layout description
+   * @return Descriptor layout
    */
-  VkDescriptorSetLayout getOrCreateDescriptorLayout(
-      const VulkanShader::ReflectionDescriptorSetLayout &info);
+  DescriptorLayoutHandle
+  getOrCreateDescriptorLayout(const DescriptorLayoutDescription &description);
 
   /**
    * @brief Clear pipeline layout cache
@@ -53,23 +56,43 @@ public:
    *
    * Bindless textures
    *
-   * @return Global textures descriptor set layout
+   * @return Global textures descriptor layout
    **/
-  inline VkDescriptorSetLayout getGlobalTexturesDescriptorSetLayout() {
-    return mDescriptorSetLayouts.at(0);
+  inline DescriptorLayoutHandle getGlobalTexturesDescriptorSetLayout() {
+    return DescriptorLayoutHandle{1};
+  }
+
+  /**
+   * @brief Get Vulkan descriptor set layout
+   *
+   * @param handle Descriptor layout handle
+   * @return Vulkan descriptor set layout
+   */
+  inline VkDescriptorSetLayout
+  getVulkanDescriptorSetLayout(DescriptorLayoutHandle handle) {
+    return mDescriptorSetLayouts.at(static_cast<size_t>(handle) - 1);
+  }
+
+  /**
+   * @brief Get descriptor layout description
+   *
+   * @param handle Descriptor layout handle
+   * @return Descriptor l;ayout description
+   */
+  inline const DescriptorLayoutDescription &
+  getDescriptorLayoutDescription(DescriptorLayoutHandle handle) {
+    return mDescriptorLayoutDescriptions.at(static_cast<size_t>(handle) - 1);
   }
 
 private:
   /**
-   * @brief Create desctiptor set layout
+   * @brief Create descriptor layout
    *
-   * @param info Descriptor set layout create info
-   * @param flags Descriptor binding flags
+   * @param info Descriptor layout description
    * @return Vulkan descriptor set layout
    */
-  VkDescriptorSetLayout createDescriptorLayout(
-      const VulkanShader::ReflectionDescriptorSetLayout &info,
-      VkDescriptorBindingFlags flags);
+  VkDescriptorSetLayout
+  createDescriptorLayout(const DescriptorLayoutDescription &description);
 
   /**
    * @brief Create global textures descriptor layout
@@ -79,16 +102,14 @@ private:
   void createGlobalTexturesDescriptorLayout();
 
   /**
-   * @brief Destroy all decriptor layouts
+   * @brief Destroy all descriptor layouts
    */
   void destroyAllDescriptorLayouts();
 
 private:
   VulkanDeviceObject &mDevice;
 
-  std::vector<VulkanShader::ReflectionDescriptorSetLayout>
-      mDescriptorSetLayoutData;
-
+  std::vector<DescriptorLayoutDescription> mDescriptorLayoutDescriptions;
   std::vector<VkDescriptorSetLayout> mDescriptorSetLayouts;
 };
 

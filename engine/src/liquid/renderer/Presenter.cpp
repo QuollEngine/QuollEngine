@@ -14,6 +14,19 @@ Presenter::Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device)
   mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
                            mDevice->createShader({Engine::getShadersPath() /
                                                   "fullscreen-quad.frag.spv"}));
+
+  rhi::DescriptorLayoutDescription desc{};
+  desc.bindings.resize(1);
+  desc.bindings.at(0).binding = 0;
+  desc.bindings.at(0).descriptorCount = 1;
+  desc.bindings.at(0).shaderStage = rhi::ShaderStage::Fragment;
+  desc.bindings.at(0).descriptorType =
+      rhi::DescriptorType::CombinedImageSampler;
+  desc.bindings.at(0).name = "uTexture";
+
+  auto layout = device->createDescriptorLayout(desc);
+
+  mPresentDescriptor = device->createDescriptor(layout);
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
@@ -78,6 +91,12 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 void Presenter::present(rhi::RenderCommandList &commandList,
                         rhi::TextureHandle handle, uint32_t imageIndex) {
 
+  if (handle != mPresentTexture) {
+    mPresentTexture = handle;
+    mPresentDescriptor.write(0, {handle},
+                             rhi::DescriptorType::CombinedImageSampler);
+  }
+
   {
     rhi::ImageBarrier imageBarrier;
     imageBarrier.srcLayout = rhi::ImageLayout::ColorAttachmentOptimal;
@@ -100,9 +119,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
   commandList.bindPipeline(mPresentPipeline);
 
-  rhi::Descriptor descriptor;
-  descriptor.bind(0, {handle}, rhi::DescriptorType::CombinedImageSampler);
-  commandList.bindDescriptor(mPresentPipeline, 0, descriptor);
+  commandList.bindDescriptor(mPresentPipeline, 0, mPresentDescriptor);
 
   commandList.draw(3, 0);
 

@@ -2,6 +2,7 @@
 
 #include "liquid/rhi/RenderDevice.h"
 #include "MockBuffer.h"
+#include "MockDescriptor.h"
 
 class MockRenderDevice : public liquid::rhi::RenderDevice {
 public:
@@ -18,6 +19,12 @@ public:
   void destroyResources();
 
   liquid::rhi::Swapchain getSwapchain();
+
+  liquid::rhi::DescriptorLayoutHandle createDescriptorLayout(
+      const liquid::rhi::DescriptorLayoutDescription &description);
+
+  liquid::rhi::n::Descriptor
+  createDescriptor(liquid::rhi::DescriptorLayoutHandle handle);
 
   liquid::rhi::ShaderHandle
   createShader(const liquid::rhi::ShaderDescription &description);
@@ -60,6 +67,11 @@ private:
   }
 
 private:
+  std::unordered_map<liquid::rhi::DescriptorLayoutHandle,
+                     liquid::rhi::DescriptorLayoutDescription>
+      mDescriptorLayouts;
+  std::unordered_map<liquid::rhi::DescriptorHandle, MockDescriptor>
+      mDescriptors;
   std::unordered_map<liquid::rhi::ShaderHandle, liquid::rhi::ShaderDescription>
       mShaders;
   std::unordered_map<liquid::rhi::BufferHandle, MockBuffer> mBuffers;

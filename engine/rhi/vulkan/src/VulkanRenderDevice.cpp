@@ -22,9 +22,10 @@ VulkanRenderDevice::VulkanRenderDevice(
     : mPhysicalDevice(physicalDevice), mBackend(backend),
       mCommandPool(mDevice,
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
-                   mRegistry, mDescriptorManager, mStats),
+                   mRegistry, mDescriptorPool, mDescriptorManager, mStats),
       mDevice(mPhysicalDevice), mPipelineLayoutCache(mDevice),
-      mDescriptorManager(mDevice, mRegistry),
+      mDescriptorPool(mDevice, mRegistry, mPipelineLayoutCache),
+      mDescriptorManager(mDevice, mRegistry, mDescriptorPool),
       mGraphicsQueue(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
       mPresentQueue(mDevice,
@@ -34,7 +35,7 @@ VulkanRenderDevice::VulkanRenderDevice(
       mUploadContext(mDevice, mCommandPool, mGraphicsQueue),
       mSwapchain(mBackend, mPhysicalDevice, mDevice, mRegistry, mAllocator),
       mAllocator(mBackend, mPhysicalDevice, mDevice),
-      mStats(new VulkanResourceMetrics(mRegistry, mDescriptorManager)) {
+      mStats(new VulkanResourceMetrics(mRegistry, mDescriptorPool)) {
 
   VkDevice device = mDevice.getVulkanHandle();
   VkPhysicalDevice physicalDeviceHandle = mPhysicalDevice.getVulkanHandle();
@@ -101,6 +102,7 @@ void VulkanRenderDevice::destroyResources() {
   waitForIdle();
   mRegistry = VulkanResourceRegistry();
   mPipelineLayoutCache.clear();
+  mDescriptorPool.reset();
   mDescriptorManager.clear();
 
   // Bindless textures
@@ -128,6 +130,16 @@ ShaderHandle
 VulkanRenderDevice::createShader(const ShaderDescription &description) {
   return mRegistry.setShader(
       std::make_unique<VulkanShader>(description, mDevice));
+}
+
+DescriptorLayoutHandle VulkanRenderDevice::createDescriptorLayout(
+    const DescriptorLayoutDescription &description) {
+  return mPipelineLayoutCache.getOrCreateDescriptorLayout(description);
+}
+
+n::Descriptor
+VulkanRenderDevice::createDescriptor(DescriptorLayoutHandle layout) {
+  return mDescriptorPool.createDescriptor(layout);
 }
 
 TextureHandle
