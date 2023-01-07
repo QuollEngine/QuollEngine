@@ -6,6 +6,7 @@
 
 #include "liquid/scene/Camera.h"
 #include "liquidator/editor-scene/EditorGrid.h"
+#include "liquid/renderer/RenderStorage.h"
 
 #include "liquid/entity/EntityDatabase.h"
 
@@ -54,10 +55,10 @@ public:
   /**
    * @brief Create frame data
    *
-   * @param device Render device
+   * @param renderStorage Render storage
    * @param reservedSpace Reserved space for buffer data
    */
-  EditorRendererFrameData(liquid::rhi::RenderDevice *device,
+  EditorRendererFrameData(liquid::RenderStorage &renderStorage,
                           size_t reservedSpace = DefaultReservedSpace);
 
   /**
@@ -197,13 +198,6 @@ public:
   }
 
   /**
-   * @brief Get render device
-   *
-   * @return Render device
-   */
-  inline liquid::rhi::RenderDevice *getRenderDevice() { return mDevice; }
-
-  /**
    * @brief Get collidable shape type
    *
    * @return Collidable shape type
@@ -242,8 +236,6 @@ private:
   CollidableEntity mCollidableEntityParams{};
 
   liquid::rhi::Buffer mCollidableEntityBuffer;
-
-  liquid::rhi::RenderDevice *mDevice;
 };
 
 } // namespace liquidator

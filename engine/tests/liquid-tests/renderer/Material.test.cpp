@@ -7,7 +7,10 @@
 
 class MaterialTest : public ::testing::Test {
 public:
+  MaterialTest() : renderStorage(&device) {}
+
   MockRenderDevice device;
+  liquid::RenderStorage renderStorage;
 };
 
 TEST_F(MaterialTest, SetsBuffersAndTextures) {
@@ -20,7 +23,7 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
           {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
           {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
       },
-      &device);
+      renderStorage);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
@@ -48,7 +51,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   std::vector<liquid::rhi::TextureHandle> textures{
       liquid::rhi::TextureHandle(1)};
 
-  liquid::Material material(textures, {}, &device);
+  liquid::Material material(textures, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
@@ -58,7 +61,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
-  liquid::Material material({}, {}, &device);
+  liquid::Material material({}, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
@@ -74,7 +77,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &device);
+                            renderStorage);
 
   const auto &properties = material.getProperties();
   {
@@ -118,7 +121,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &device);
+                            renderStorage);
 
   const auto &properties = material.getProperties();
   {
@@ -163,7 +166,7 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
                             },
-                            &device);
+                            renderStorage);
 
   const auto &properties = material.getProperties();
   {

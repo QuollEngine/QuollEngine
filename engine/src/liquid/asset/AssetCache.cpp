@@ -43,7 +43,7 @@ Result<bool> AssetCache::checkAssetFile(InputBinaryStream &file,
   return Result<bool>::Ok(true);
 }
 
-Result<bool> AssetCache::preloadAssets(rhi::RenderDevice *device) {
+Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
   LIQUID_PROFILE_EVENT("AssetCache::preloadAssets");
   std::vector<String> warnings;
 
@@ -63,7 +63,7 @@ Result<bool> AssetCache::preloadAssets(rhi::RenderDevice *device) {
     }
   }
 
-  mRegistry.syncWithDevice(device);
+  mRegistry.syncWithDevice(renderStorage);
 
   return Result<bool>::Ok(true, warnings);
 }

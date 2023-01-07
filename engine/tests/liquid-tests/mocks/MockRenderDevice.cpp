@@ -98,3 +98,11 @@ liquid::rhi::PipelineHandle MockRenderDevice::createPipeline(
 }
 
 void MockRenderDevice::destroyPipeline(liquid::rhi::PipelineHandle handle) {}
+
+size_t MockRenderDevice::addTextureUpdateListener(
+    const std::function<void(const std::set<liquid::rhi::TextureHandle> &)>
+        &listener) {
+  return 0;
+}
+
+void MockRenderDevice::removeTextureUpdateListener(size_t handle) {}

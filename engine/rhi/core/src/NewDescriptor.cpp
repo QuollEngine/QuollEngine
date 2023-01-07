@@ -4,8 +4,8 @@
 
 namespace liquid::rhi::n {
 
-Descriptor ::Descriptor(NativeDescriptor *nativeDescriptor,
-                        DescriptorHandle handle)
+Descriptor::Descriptor(NativeDescriptor *nativeDescriptor,
+                       DescriptorHandle handle)
     : mNativeDescriptor(nativeDescriptor), mHandle(handle) {}
 
 Descriptor &Descriptor::write(uint32_t binding,

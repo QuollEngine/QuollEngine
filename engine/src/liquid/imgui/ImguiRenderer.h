@@ -6,6 +6,7 @@
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/ShaderLibrary.h"
+#include "liquid/renderer/RenderStorage.h"
 
 #include "liquid/imgui/Imgui.h"
 
@@ -73,10 +74,11 @@ public:
    *
    * @param window Window
    * @param device Render device
+   * @param renderStorage Render storage
    * @param shaderLibrary Shader library
    */
   ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                rhi::RenderDevice *device);
+                RenderStorage &renderStorage, rhi::RenderDevice *device);
 
   /**
    * @brief Destroy imgui renderer
@@ -161,7 +163,9 @@ private:
 
 private:
   ShaderLibrary &mShaderLibrary;
+  RenderStorage &mRenderStorage;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
+
   std::array<FrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   glm::vec4 mClearColor{DefaultClearColor};

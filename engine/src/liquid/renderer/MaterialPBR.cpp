@@ -51,7 +51,8 @@ MaterialPBR::Properties::getProperties() const {
 }
 
 MaterialPBR::MaterialPBR(const Properties &properties,
-                         rhi::RenderDevice *device)
-    : Material(properties.getTextures(), properties.getProperties(), device) {}
+                         RenderStorage &renderStorage)
+    : Material(properties.getTextures(), properties.getProperties(),
+               renderStorage) {}
 
 } // namespace liquid

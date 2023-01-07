@@ -42,10 +42,6 @@ VulkanRenderDevice::VulkanRenderDevice(
   VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
   uint32_t queueIndex = mGraphicsQueue.getQueueIndex();
 
-  // Bindless textures
-  mDescriptorManager.createGlobalTexturesDescriptorSet(
-      mPipelineLayoutCache.getGlobalTexturesDescriptorSetLayout());
-
   LIQUID_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
                                  &queueIndex, 1, nullptr);
 }
@@ -105,9 +101,6 @@ void VulkanRenderDevice::destroyResources() {
   mDescriptorPool.reset();
   mDescriptorManager.clear();
 
-  // Bindless textures
-  mDescriptorManager.createGlobalTexturesDescriptorSet(
-      mPipelineLayoutCache.getGlobalTexturesDescriptorSetLayout());
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 }
 
@@ -148,8 +141,6 @@ VulkanRenderDevice::createTexture(const TextureDescription &description) {
       std::make_unique<VulkanTexture>(description, mAllocator, mDevice,
                                       mUploadContext, mSwapchain.getExtent()));
 
-  mDescriptorManager.addGlobalTexture(handle);
-
   return handle;
 }
 
@@ -188,6 +179,18 @@ void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
   mRegistry.deletePipeline(handle);
 }
 
+size_t VulkanRenderDevice::addTextureUpdateListener(
+    const std::function<void(const std::set<TextureHandle> &)> &listener) {
+  mTextureUpdateListeners.push_back(listener);
+
+  return mTextureUpdateListeners.size() - 1;
+}
+
+void VulkanRenderDevice::removeTextureUpdateListener(size_t handle) {
+  mTextureUpdateListeners.erase(mTextureUpdateListeners.begin() +
+                                static_cast<int32_t>(handle));
+}
+
 void VulkanRenderDevice::recreateSwapchain() {
   waitForIdle();
   size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
@@ -208,8 +211,10 @@ void VulkanRenderDevice::updateFramebufferRelativeTextures() {
                                           texture->getDescription(), mAllocator,
                                           mDevice, mUploadContext,
                                           mSwapchain.getExtent()));
+  }
 
-    mDescriptorManager.addGlobalTexture(handle);
+  for (const auto &listener : mTextureUpdateListeners) {
+    listener(mRegistry.getSwapchainRelativeTextures());
   }
 }
 

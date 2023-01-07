@@ -52,17 +52,6 @@ public:
   void clear();
 
   /**
-   * @brief Get global textures descriptor set layout
-   *
-   * Bindless textures
-   *
-   * @return Global textures descriptor layout
-   **/
-  inline DescriptorLayoutHandle getGlobalTexturesDescriptorSetLayout() {
-    return DescriptorLayoutHandle{1};
-  }
-
-  /**
    * @brief Get Vulkan descriptor set layout
    *
    * @param handle Descriptor layout handle
@@ -93,13 +82,6 @@ private:
    */
   VkDescriptorSetLayout
   createDescriptorLayout(const DescriptorLayoutDescription &description);
-
-  /**
-   * @brief Create global textures descriptor layout
-   *
-   * Bindless textures
-   */
-  void createGlobalTexturesDescriptorLayout();
 
   /**
    * @brief Destroy all descriptor layouts

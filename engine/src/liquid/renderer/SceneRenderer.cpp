@@ -8,10 +8,12 @@ namespace liquid {
 
 SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
                              AssetRegistry &assetRegistry,
+                             RenderStorage &renderStorage,
                              rhi::RenderDevice *device)
     : mShaderLibrary(shaderLibrary), mAssetRegistry(assetRegistry),
-      mDevice(device), mFrameData{SceneRendererFrameData(mDevice),
-                                  SceneRendererFrameData(mDevice)} {
+      mDevice(device), mRenderStorage(renderStorage),
+      mFrameData{SceneRendererFrameData(renderStorage, mDevice),
+                 SceneRendererFrameData(renderStorage, mDevice)} {
 
   auto shadersPath = Engine::getShadersPath();
 
@@ -65,7 +67,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   shadowMapDesc.height = ShadowMapDimensions;
   shadowMapDesc.layers = SceneRendererFrameData::MaxShadowMaps;
   shadowMapDesc.format = rhi::Format::Depth16Unorm;
-  auto shadowmap = mDevice->createTexture(shadowMapDesc);
+  auto shadowmap = mRenderStorage.createTexture(shadowMapDesc);
 
   for (auto &frameData : mFrameData) {
     frameData.setShadowMapTexture(shadowmap);
@@ -78,7 +80,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
   sceneColorDesc.format = rhi::Format::Bgra8Srgb;
-  auto sceneColor = mDevice->createTexture(sceneColorDesc);
+  auto sceneColor = mRenderStorage.createTexture(sceneColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
@@ -87,7 +89,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = rhi::Format::Depth32Float;
-  auto depthBuffer = mDevice->createTexture(depthBufferDesc);
+  auto depthBuffer = mRenderStorage.createTexture(depthBufferDesc);
 
   {
     auto &pass = graph.addPass("shadowPass");
@@ -188,17 +190,14 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       commandList.bindPipeline(pipeline);
 
-      rhi::Descriptor globalTexturesDescriptor;
-
-      globalTexturesDescriptor.bindGlobalTextures();
-
       {
         LIQUID_PROFILE_EVENT("meshPass::meshes");
 
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0,
                                    frameData.getGlobalDescriptor());
-        commandList.bindDescriptor(pipeline, 1, globalTexturesDescriptor);
+        commandList.bindDescriptor(
+            pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
 
         render(commandList, pipeline, true, frameIndex);
       }
@@ -209,9 +208,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0,
                                    frameData.getGlobalDescriptor());
-
-        commandList.bindDescriptor(skinnedPipeline, 1,
-                                   globalTexturesDescriptor);
+        commandList.bindDescriptor(
+            pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
@@ -243,9 +241,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
 
-      rhi::Descriptor texturesDescriptor;
-      texturesDescriptor.bindGlobalTextures();
-      commandList.bindDescriptor(pipeline, 1, texturesDescriptor);
+      commandList.bindDescriptor(pipeline, 1,
+                                 mRenderStorage.getGlobalTexturesDescriptor());
 
       const auto &cube = mAssetRegistry.getMeshes()
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
@@ -464,11 +461,9 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
     auto textureHandle =
         mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
 
-    rhi::Descriptor texturesDescriptor;
-    texturesDescriptor.bindGlobalTextures();
-
     commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
-    commandList.bindDescriptor(pipeline, 1, texturesDescriptor);
+    commandList.bindDescriptor(pipeline, 1,
+                               mRenderStorage.getGlobalTexturesDescriptor());
 
     glm::uvec4 textureData{static_cast<uint32_t>(textureHandle)};
 

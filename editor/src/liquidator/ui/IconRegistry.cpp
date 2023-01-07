@@ -6,9 +6,9 @@
 
 namespace liquidator {
 
-void IconRegistry::loadIcons(liquid::rhi::RenderDevice *device,
+void IconRegistry::loadIcons(liquid::RenderStorage &renderStorage,
                              const std::filesystem::path &iconsPath) {
-  liquid::ImageTextureLoader loader(device);
+  liquid::ImageTextureLoader loader(renderStorage);
 
   mIconMap.insert_or_assign(
       EditorIcon::Unknown,

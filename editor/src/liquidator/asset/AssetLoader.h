@@ -17,9 +17,9 @@ public:
    * @brief Create asset loader
    *
    * @param assetManager Asset manager
-   * @param device Render device
+   * @param renderStorage Render storage
    */
-  AssetLoader(AssetManager &assetManager, liquid::rhi::RenderDevice *device);
+  AssetLoader(AssetManager &assetManager, liquid::RenderStorage &renderStorage);
 
   /**
    * @brief Load asset from path
@@ -43,7 +43,7 @@ private:
   AssetManager &mAssetManager;
   liquid::platform_tools::NativeFileDialog mNativeFileDialog;
 
-  liquid::rhi::RenderDevice *mDevice;
+  liquid::RenderStorage &mRenderStorage;
 };
 
 } // namespace liquidator

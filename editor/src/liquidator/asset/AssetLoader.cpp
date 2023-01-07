@@ -5,15 +5,15 @@
 namespace liquidator {
 
 AssetLoader::AssetLoader(AssetManager &assetManager,
-                         liquid::rhi::RenderDevice *device)
-    : mAssetManager(assetManager), mDevice(device) {}
+                         liquid::RenderStorage &renderStorage)
+    : mAssetManager(assetManager), mRenderStorage(renderStorage) {}
 
 liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
                                                const liquid::Path &directory) {
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res.hasData()) {
-    mAssetManager.getAssetRegistry().syncWithDevice(mDevice);
+    mAssetManager.getAssetRegistry().syncWithDevice(mRenderStorage);
   }
 
   return res;

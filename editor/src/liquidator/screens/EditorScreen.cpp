@@ -84,7 +84,7 @@ void EditorScreen::start(const Project &project) {
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.validateAndPreloadAssets(mDevice);
+  auto res = assetManager.validateAndPreloadAssets(renderer.getRenderStorage());
   liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
@@ -117,17 +117,20 @@ void EditorScreen::start(const Project &project) {
   editorManager.loadEditorState(statePath);
 
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::AssetLoader assetLoader(assetManager, mDevice);
+  liquidator::AssetLoader assetLoader(assetManager,
+                                      renderer.getRenderStorage());
 
   liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                                      mDevice->getDeviceStats(), fpsCounter);
 
   liquidator::UIRoot ui(entityManager, assetLoader);
-  ui.getIconRegistry().loadIcons(mDevice, std::filesystem::current_path() /
-                                              "assets" / "icons");
+  ui.getIconRegistry().loadIcons(renderer.getRenderStorage(),
+                                 std::filesystem::current_path() / "assets" /
+                                     "icons");
 
-  liquidator::EditorRenderer editorRenderer(renderer.getShaderLibrary(),
-                                            ui.getIconRegistry(), mDevice);
+  liquidator::EditorRenderer editorRenderer(
+      renderer.getShaderLibrary(), ui.getIconRegistry(),
+      renderer.getRenderStorage(), mDevice);
 
   liquid::RenderGraph graph("Main");
 
@@ -145,9 +148,9 @@ void EditorScreen::start(const Project &project) {
 
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
 
-  MousePickingGraph mousePicking(renderer.getShaderLibrary(),
-                                 renderer.getSceneRenderer().getFrameData(),
-                                 assetManager.getAssetRegistry(), mDevice);
+  MousePickingGraph mousePicking(
+      renderer.getShaderLibrary(), renderer.getSceneRenderer().getFrameData(),
+      assetManager.getAssetRegistry(), renderer.getRenderStorage(), mDevice);
 
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());

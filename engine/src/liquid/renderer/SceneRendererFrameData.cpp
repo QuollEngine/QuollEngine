@@ -5,9 +5,10 @@
 
 namespace liquid {
 
-SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
+SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
+                                               rhi::RenderDevice *device,
                                                size_t reservedSpace)
-    : mReservedSpace(reservedSpace), mDevice(device) {
+    : mReservedSpace(reservedSpace) {
 
   mLights.reserve(MaxNumLights);
   mShadowMaps.reserve(MaxShadowMaps);
@@ -20,46 +21,46 @@ SceneRendererFrameData::SceneRendererFrameData(rhi::RenderDevice *device,
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
-  mMeshTransformsBuffer = mDevice->createBuffer(defaultDesc);
-  mSkinnedMeshTransformsBuffer = mDevice->createBuffer(defaultDesc);
-  mTextTransformsBuffer = mDevice->createBuffer(defaultDesc);
+  mMeshTransformsBuffer = renderStorage.createBuffer(defaultDesc);
+  mSkinnedMeshTransformsBuffer = renderStorage.createBuffer(defaultDesc);
+  mTextTransformsBuffer = renderStorage.createBuffer(defaultDesc);
 
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
-    mSkeletonsBuffer = mDevice->createBuffer(desc);
+    mSkeletonsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * sizeof(GlyphData);
-    mTextGlyphsBuffer = mDevice->createBuffer(desc);
+    mTextGlyphsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mLights.capacity() * sizeof(LightData);
-    mLightsBuffer = mDevice->createBuffer(desc);
+    mLightsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = sizeof(Camera);
     desc.type = rhi::BufferType::Uniform;
-    mCameraBuffer = mDevice->createBuffer(desc);
+    mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = sizeof(SceneData);
     desc.type = rhi::BufferType::Uniform;
-    mSceneBuffer = mDevice->createBuffer(desc);
+    mSceneBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
-    mShadowMapsBuffer = mDevice->createBuffer(desc);
+    mShadowMapsBuffer = renderStorage.createBuffer(desc);
   }
 
   static constexpr uint32_t MaxDescriptors = 20;

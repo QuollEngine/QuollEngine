@@ -20,8 +20,10 @@ static inline uint64_t getAlignedBufferSize(uint64_t size) {
 namespace liquid {
 
 ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
+                             RenderStorage &renderStorage,
                              rhi::RenderDevice *device)
-    : mShaderLibrary(shaderLibrary), mDevice(device) {
+    : mShaderLibrary(shaderLibrary), mRenderStorage(renderStorage),
+      mDevice(device) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -47,13 +49,13 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
     vertexDesc.type = liquid::rhi::BufferType::Vertex;
     vertexDesc.size = 1;
     vertexDesc.mapped = true;
-    x.vertexBuffer = mDevice->createBuffer(vertexDesc);
+    x.vertexBuffer = renderStorage.createBuffer(vertexDesc);
 
     liquid::rhi::BufferDescription indexDesc{};
     indexDesc.type = liquid::rhi::BufferType::Index;
     indexDesc.size = 1;
     indexDesc.mapped = true;
-    x.indexBuffer = mDevice->createBuffer(indexDesc);
+    x.indexBuffer = renderStorage.createBuffer(indexDesc);
   }
 }
 
@@ -79,7 +81,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = rhi::Format::Rgba8Unorm;
-  auto imgui = mDevice->createTexture(imguiDesc);
+  auto imgui = mRenderStorage.createTexture(imguiDesc);
 
   auto &pass = graph.addPass("imgui");
   pass.write(imgui, mClearColor);
@@ -188,11 +190,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
   if (fbWidth <= 0 || fbHeight <= 0)
     return;
 
-  {
-    rhi::Descriptor descriptor;
-    descriptor.bindGlobalTextures();
-    commandList.bindDescriptor(pipeline, 0, descriptor);
-  }
+  commandList.bindDescriptor(pipeline, 0,
+                             mRenderStorage.getGlobalTexturesDescriptor());
 
   setupRenderStates(data, commandList, fbWidth, fbHeight, pipeline, frameIndex);
 
@@ -335,7 +334,7 @@ void ImguiRenderer::buildFonts() {
     description.format = rhi::Format::Rgba8Srgb;
     description.data = pixels;
 
-    mFontTexture = mDevice->createTexture(description);
+    mFontTexture = mRenderStorage.createTexture(description);
   }
 
   io.Fonts->SetTexID(

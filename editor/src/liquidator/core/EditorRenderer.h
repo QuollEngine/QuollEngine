@@ -39,10 +39,13 @@ public:
    *
    * @param shaderLibrary Shader library
    * @param iconRegistry Icon registry
+   * @param renderStorage Render storage
    * @param device Render device
    */
   EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
-                 IconRegistry &iconRegistry, liquid::rhi::RenderDevice *device);
+                 IconRegistry &iconRegistry,
+                 liquid::RenderStorage &renderStorage,
+                 liquid::rhi::RenderDevice *device);
 
   /**
    * @brief Attach to render graph
@@ -81,6 +84,7 @@ private:
   CollidableShapeDraw mCollidableSphere;
   CollidableShapeDraw mCollidableCapsule;
 
+  liquid::RenderStorage &mRenderStorage;
   std::array<EditorRendererFrameData, liquid::rhi::RenderDevice::NumFrames>
       mFrameData;
 };

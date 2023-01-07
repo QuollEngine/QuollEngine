@@ -195,6 +195,22 @@ public:
    * @param handle Pipeline handle
    */
   virtual void destroyPipeline(PipelineHandle handle) = 0;
+
+  /**
+   * @brief Add listener to texture update event
+   *
+   * @param listener Listener function
+   * @return Listener handle
+   */
+  virtual size_t addTextureUpdateListener(
+      const std::function<void(const std::set<TextureHandle> &)> &listener) = 0;
+
+  /**
+   * @brief Remove listener for texture update events
+   *
+   * @param handle Listener handle
+   */
+  virtual void removeTextureUpdateListener(size_t handle) = 0;
 };
 
 } // namespace liquid::rhi

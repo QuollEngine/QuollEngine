@@ -148,8 +148,8 @@ AssetManager::createLuaScript(const liquid::Path &assetPath) {
 }
 
 liquid::Result<bool>
-AssetManager::validateAndPreloadAssets(liquid::rhi::RenderDevice *device) {
-  LIQUID_PROFILE_EVENT("AssetManager::preloadAssets");
+AssetManager::validateAndPreloadAssets(liquid::RenderStorage &renderStorage) {
+  LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
   std::vector<liquid::String> warnings;
 
   for (const auto &entry : std::filesystem::recursive_directory_iterator(
@@ -196,7 +196,7 @@ AssetManager::validateAndPreloadAssets(liquid::rhi::RenderDevice *device) {
     }
   }
 
-  return mAssetCache.preloadAssets(device);
+  return mAssetCache.preloadAssets(renderStorage);
 }
 
 liquid::Result<bool>

@@ -26,12 +26,14 @@ public:
    * @param shaderLibrary Shader library
    * @param frameData Scene renderer frame data
    * @param assetRegistry Asset registry
+   * @param renderStorage Render storage
    * @param device Render device
    */
   MousePickingGraph(
       liquid::ShaderLibrary &shaderLibrary,
       const std::array<liquid::SceneRendererFrameData, 2> &frameData,
-      liquid::AssetRegistry &assetRegistry, liquid::rhi::RenderDevice *device);
+      liquid::AssetRegistry &assetRegistry,
+      liquid::RenderStorage &renderStorage, liquid::rhi::RenderDevice *device);
 
   ~MousePickingGraph();
 

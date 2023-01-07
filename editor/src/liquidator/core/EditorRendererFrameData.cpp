@@ -4,8 +4,8 @@
 namespace liquidator {
 
 EditorRendererFrameData::EditorRendererFrameData(
-    liquid::rhi::RenderDevice *device, size_t reservedSpace)
-    : mReservedSpace(reservedSpace), mDevice(device) {
+    liquid::RenderStorage &renderStorage, size_t reservedSpace)
+    : mReservedSpace(reservedSpace) {
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
   mGizmoTransforms.reserve(reservedSpace);
@@ -16,39 +16,39 @@ EditorRendererFrameData::EditorRendererFrameData(
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
-  mSkeletonTransformsBuffer = mDevice->createBuffer(defaultDesc);
+  mSkeletonTransformsBuffer = renderStorage.createBuffer(defaultDesc);
 
   {
     auto desc = defaultDesc;
     desc.type = liquid::rhi::BufferType::Uniform;
     desc.size = sizeof(liquid::Camera);
-    mCameraBuffer = mDevice->createBuffer(desc);
+    mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.type = liquid::rhi::BufferType::Uniform;
     desc.size = sizeof(EditorGridData);
-    mEditorGridBuffer = mDevice->createBuffer(desc);
+    mEditorGridBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * MaxNumBones * sizeof(glm::mat4);
-    mSkeletonBoneTransformsBuffer = mDevice->createBuffer(desc);
+    mSkeletonBoneTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.data = mGizmoTransforms.data();
-    mGizmoTransformsBuffer = mDevice->createBuffer(desc);
+    mGizmoTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = sizeof(CollidableEntity);
     desc.type = liquid::rhi::BufferType::Uniform;
-    mCollidableEntityBuffer = mDevice->createBuffer(desc);
+    mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 }
 

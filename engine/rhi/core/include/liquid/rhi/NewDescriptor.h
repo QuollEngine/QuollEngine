@@ -58,7 +58,7 @@ public:
   inline DescriptorHandle getHandle() const { return mHandle; }
 
 private:
-  std::unique_ptr<NativeDescriptor> mNativeDescriptor;
+  NativeDescriptor *mNativeDescriptor = nullptr;
   DescriptorHandle mHandle{0};
 };
 

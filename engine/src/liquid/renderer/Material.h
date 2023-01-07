@@ -3,8 +3,8 @@
 #include "liquid/core/Property.h"
 
 #include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/RenderDevice.h"
 #include "liquid/rhi/Descriptor.h"
+#include "liquid/renderer/RenderStorage.h"
 
 namespace liquid {
 
@@ -18,11 +18,11 @@ public:
    *
    * @param textures Textures
    * @param properties Material properties
-   * @param device Render device
+   * @param renderStorage Render storage
    */
   Material(const std::vector<rhi::TextureHandle> &textures,
            const std::vector<std::pair<String, Property>> &properties,
-           rhi::RenderDevice *device);
+           RenderStorage &renderStorage);
 
   /**
    * @brief Update property

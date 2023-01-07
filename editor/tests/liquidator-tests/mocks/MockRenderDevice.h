@@ -59,6 +59,12 @@ public:
     return mBuffers.at(handle);
   }
 
+  size_t addTextureUpdateListener(
+      const std::function<void(const std::set<liquid::rhi::TextureHandle> &)>
+          &listener);
+
+  void removeTextureUpdateListener(size_t handle);
+
 private:
   template <class THandle> inline THandle getNewHandle() {
     auto handle = THandle{mLastHandle};

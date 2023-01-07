@@ -103,13 +103,14 @@ TEST_F(AssetManagerTest,
   stream.close();
 
   MockRenderDevice device;
+  liquid::RenderStorage renderStorage(&device);
 
   createEmptyFile(texturePath);
 
   EXPECT_TRUE(fs::exists(textureHashPath));
   EXPECT_TRUE(fs::exists(texturePath));
 
-  manager.validateAndPreloadAssets(&device);
+  manager.validateAndPreloadAssets(renderStorage);
 
   EXPECT_FALSE(fs::exists(textureHashPath));
   EXPECT_FALSE(fs::exists(texturePath));
@@ -140,12 +141,13 @@ TEST_F(AssetManagerTest,
   createEmptyFile(prefabMeshPath);
 
   MockRenderDevice device;
+  liquid::RenderStorage renderStorage(&device);
 
   EXPECT_TRUE(fs::exists(prefabPath));
   EXPECT_TRUE(fs::exists(prefabMeshPath));
   EXPECT_TRUE(fs::exists(prefabHashPath));
 
-  manager.validateAndPreloadAssets(&device);
+  manager.validateAndPreloadAssets(renderStorage);
 
   EXPECT_FALSE(fs::exists(prefabPath));
   EXPECT_FALSE(fs::exists(prefabMeshPath));

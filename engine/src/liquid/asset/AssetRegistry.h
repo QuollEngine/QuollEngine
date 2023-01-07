@@ -18,6 +18,8 @@
 
 #include "liquid/rhi/RenderDevice.h"
 
+#include "liquid/renderer/RenderStorage.h"
+
 namespace liquid {
 
 /**
@@ -77,9 +79,9 @@ public:
   /**
    * @brief Synchronize assets with device
    *
-   * @param device Render device
+   * @param renderStorage Render storage
    */
-  void syncWithDevice(rhi::RenderDevice *device);
+  void syncWithDevice(RenderStorage &renderStorage);
 
   /**
    * @brief Get textures
