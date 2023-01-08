@@ -3,9 +3,11 @@
 
 layout(location = 0) in flat uint outEntity;
 
-layout(scalar, set = 2, binding = 0) writeonly buffer SelectedEntityData {
-  uint selectedEntity;
-}
-uSelectedEntity;
+#include "../../../engine/assets/shaders/bindless-base.glsl"
 
-void main() { uSelectedEntity.selectedEntity = outEntity; }
+RegisterBuffer(scalar, writeonly, SelectedEntityData, { uint selectedEntity; });
+
+void main() {
+  GetBindlessResource(SelectedEntityData, pcDrawParameters.index9)
+      .selectedEntity = outEntity;
+}

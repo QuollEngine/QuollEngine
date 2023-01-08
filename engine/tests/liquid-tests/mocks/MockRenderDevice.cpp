@@ -34,12 +34,12 @@ liquid::rhi::DescriptorLayoutHandle MockRenderDevice::createDescriptorLayout(
   return handle;
 }
 
-liquid::rhi::n::Descriptor
+liquid::rhi::Descriptor
 MockRenderDevice::createDescriptor(liquid::rhi::DescriptorLayoutHandle layout) {
   auto handle = getNewHandle<liquid::rhi::DescriptorHandle>();
   mDescriptors.insert_or_assign(handle, MockDescriptor{layout});
 
-  return liquid::rhi::n::Descriptor(&mDescriptors.at(handle), handle);
+  return liquid::rhi::Descriptor(&mDescriptors.at(handle), handle);
 }
 
 liquid::rhi::ShaderHandle MockRenderDevice::createShader(

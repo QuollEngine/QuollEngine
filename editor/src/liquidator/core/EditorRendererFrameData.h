@@ -7,6 +7,7 @@
 #include "liquid/scene/Camera.h"
 #include "liquidator/editor-scene/EditorGrid.h"
 #include "liquid/renderer/RenderStorage.h"
+#include "liquid/renderer/DrawParameters.h"
 
 #include "liquid/entity/EntityDatabase.h"
 
@@ -18,6 +19,7 @@ namespace liquidator {
  * Store data for each frame
  */
 class EditorRendererFrameData {
+public:
   /**
    * @brief Maximum number of debug bones
    */
@@ -207,6 +209,13 @@ public:
         mCollidableEntityParams.type.x);
   }
 
+  /**
+   * @brief Get draw parameters
+   *
+   * @return Draw parameters
+   */
+  inline liquid::DrawParameters &getDrawParams() { return mDrawParams; }
+
 private:
   size_t mReservedSpace = 0;
 
@@ -236,6 +245,8 @@ private:
   CollidableEntity mCollidableEntityParams{};
 
   liquid::rhi::Buffer mCollidableEntityBuffer;
+
+  liquid::DrawParameters mDrawParams;
 };
 
 } // namespace liquidator

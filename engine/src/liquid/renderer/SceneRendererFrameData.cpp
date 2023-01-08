@@ -63,37 +63,16 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     mShadowMapsBuffer = renderStorage.createBuffer(desc);
   }
 
-  static constexpr uint32_t MaxDescriptors = 20;
-  {
-    rhi::DescriptorLayoutBindingDescription bStorage{};
-    bStorage.binding = 0;
-    bStorage.name = "uGlobalBuffers";
-    bStorage.type = rhi::DescriptorLayoutBindingType::Dynamic;
-    bStorage.descriptorType = rhi::DescriptorType::StorageBuffer;
-    bStorage.descriptorCount = MaxDescriptors;
-
-    rhi::DescriptorLayoutBindingDescription bUniform{};
-    bUniform.binding = 1;
-    bUniform.name = "uGlobalUniforms";
-    bUniform.type = rhi::DescriptorLayoutBindingType::Dynamic;
-    bUniform.descriptorType = rhi::DescriptorType::UniformBuffer;
-    bUniform.descriptorCount = MaxDescriptors;
-
-    auto layout = device->createDescriptorLayout({{bStorage, bUniform}});
-    mGlobalDescriptor = device->createDescriptor(layout);
-  }
-
-  mGlobalDescriptor.write(
-      0,
-      {mMeshTransformsBuffer.getHandle(),
-       mSkinnedMeshTransformsBuffer.getHandle(), mSkeletonsBuffer.getHandle(),
-       mTextTransformsBuffer.getHandle(), mTextGlyphsBuffer.getHandle(),
-       mLightsBuffer.getHandle(), mShadowMapsBuffer.getHandle()},
-      rhi::DescriptorType::StorageBuffer, 0);
-
-  mGlobalDescriptor.write(1,
-                          {mCameraBuffer.getHandle(), mSceneBuffer.getHandle()},
-                          rhi::DescriptorType::UniformBuffer, 0);
+  mDrawParams.index0 = rhi::castHandleToUint(mMeshTransformsBuffer.getHandle());
+  mDrawParams.index1 =
+      rhi::castHandleToUint(mSkinnedMeshTransformsBuffer.getHandle());
+  mDrawParams.index2 = rhi::castHandleToUint(mSkeletonsBuffer.getHandle());
+  mDrawParams.index3 = rhi::castHandleToUint(mTextTransformsBuffer.getHandle());
+  mDrawParams.index4 = rhi::castHandleToUint(mTextGlyphsBuffer.getHandle());
+  mDrawParams.index5 = rhi::castHandleToUint(mLightsBuffer.getHandle());
+  mDrawParams.index6 = rhi::castHandleToUint(mShadowMapsBuffer.getHandle());
+  mDrawParams.index7 = rhi::castHandleToUint(mCameraBuffer.getHandle());
+  mDrawParams.index8 = rhi::castHandleToUint(mSceneBuffer.getHandle());
 }
 
 void SceneRendererFrameData::updateBuffers() {

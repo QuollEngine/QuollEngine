@@ -113,7 +113,7 @@ public:
    * @param layout Descriptor layout
    * @return Descriptor
    */
-  virtual n::Descriptor createDescriptor(DescriptorLayoutHandle layout) = 0;
+  virtual Descriptor createDescriptor(DescriptorLayoutHandle layout) = 0;
 
   /**
    * @brief Create hardware buffer

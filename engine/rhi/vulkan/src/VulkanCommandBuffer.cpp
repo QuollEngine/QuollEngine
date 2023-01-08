@@ -12,11 +12,9 @@ namespace liquid::rhi {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VkCommandBuffer commandBuffer, const VulkanResourceRegistry &registry,
-    const VulkanDescriptorPool &descriptorPool,
-    VulkanDescriptorManager &descriptorManager, DeviceStats &stats)
+    const VulkanDescriptorPool &descriptorPool, DeviceStats &stats)
     : mCommandBuffer(commandBuffer), mRegistry(registry),
-      mDescriptorPool(descriptorPool), mDescriptorManager(descriptorManager),
-      mStats(stats) {}
+      mDescriptorPool(descriptorPool), mStats(stats) {}
 
 void VulkanCommandBuffer::beginRenderPass(rhi::RenderPassHandle renderPass,
                                           FramebufferHandle framebuffer,
@@ -56,19 +54,6 @@ void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
 void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
                                          uint32_t firstSet,
                                          const Descriptor &descriptor) {
-  const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
-  VkDescriptorSet descriptorSet = mDescriptorManager.getOrCreateDescriptor(
-      descriptor, vulkanPipeline->getDescriptorLayout(firstSet));
-
-  vkCmdBindDescriptorSets(mCommandBuffer, vulkanPipeline->getBindPoint(),
-                          vulkanPipeline->getPipelineLayout(), firstSet, 1,
-                          &descriptorSet, 0, {});
-  mStats.addCommandCall();
-}
-
-void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
-                                         uint32_t firstSet,
-                                         const n::Descriptor &descriptor) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());

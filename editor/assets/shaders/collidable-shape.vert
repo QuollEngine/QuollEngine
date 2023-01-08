@@ -2,38 +2,27 @@
 
 layout(location = 0) in vec3 inPosition;
 
-layout(set = 0, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
-
-layout(set = 0, binding = 1) uniform CollidableParams {
-  mat4 worldTransform;
-  uvec4 type;
-  vec4 params;
-}
-uCollidableParams;
+#include "bindless-editor.glsl"
 
 void main() {
   vec3 finalPosition = inPosition;
 
-  if (uCollidableParams.type.x == 0) {
+  if (GetCollidableParams().type.x == 0) {
     // Box
-    vec3 scale = vec3(uCollidableParams.params) * 2.0;
+    vec3 scale = vec3(GetCollidableParams().params) * 2.0;
     finalPosition *= scale;
-  } else if (uCollidableParams.type.x == 1) {
+  } else if (GetCollidableParams().type.x == 1) {
     // Sphere
-    vec3 scale = vec3(uCollidableParams.params.x);
+    vec3 scale = vec3(GetCollidableParams().params.x);
     finalPosition *= scale;
-  } else if (uCollidableParams.type.x == 2) {
+  } else if (GetCollidableParams().type.x == 2) {
     // Capsule
-    vec3 scale = vec3(uCollidableParams.params.x, uCollidableParams.params.y,
-                      uCollidableParams.params.x);
+    vec3 scale =
+        vec3(GetCollidableParams().params.x, GetCollidableParams().params.y,
+             GetCollidableParams().params.x);
     finalPosition *= scale;
   }
 
-  gl_Position = uCameraData.viewProj * uCollidableParams.worldTransform *
+  gl_Position = getCamera().viewProj * GetCollidableParams().worldTransform *
                 vec4(finalPosition, 1.0);
 }

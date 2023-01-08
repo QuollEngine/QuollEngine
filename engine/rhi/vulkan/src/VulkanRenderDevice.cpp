@@ -22,10 +22,9 @@ VulkanRenderDevice::VulkanRenderDevice(
     : mPhysicalDevice(physicalDevice), mBackend(backend),
       mCommandPool(mDevice,
                    mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily(),
-                   mRegistry, mDescriptorPool, mDescriptorManager, mStats),
+                   mRegistry, mDescriptorPool, mStats),
       mDevice(mPhysicalDevice), mPipelineLayoutCache(mDevice),
       mDescriptorPool(mDevice, mRegistry, mPipelineLayoutCache),
-      mDescriptorManager(mDevice, mRegistry, mDescriptorPool),
       mGraphicsQueue(
           mDevice, mPhysicalDevice.getQueueFamilyIndices().getGraphicsFamily()),
       mPresentQueue(mDevice,
@@ -99,7 +98,6 @@ void VulkanRenderDevice::destroyResources() {
   mRegistry = VulkanResourceRegistry();
   mPipelineLayoutCache.clear();
   mDescriptorPool.reset();
-  mDescriptorManager.clear();
 
   mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 }
@@ -130,8 +128,7 @@ DescriptorLayoutHandle VulkanRenderDevice::createDescriptorLayout(
   return mPipelineLayoutCache.getOrCreateDescriptorLayout(description);
 }
 
-n::Descriptor
-VulkanRenderDevice::createDescriptor(DescriptorLayoutHandle layout) {
+Descriptor VulkanRenderDevice::createDescriptor(DescriptorLayoutHandle layout) {
   return mDescriptorPool.createDescriptor(layout);
 }
 

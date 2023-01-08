@@ -52,14 +52,34 @@ public:
    *
    * @return Global textures descriptor
    */
-  inline const rhi::n::Descriptor &getGlobalTexturesDescriptor() const {
+  inline const rhi::Descriptor &getGlobalTexturesDescriptor() const {
     return mGlobalTexturesDescriptor;
   }
+
+  /**
+   * @brief Get global buffers descriptor
+   *
+   * @return Global buffers descriptor
+   */
+  inline const rhi::Descriptor &getGlobalBuffersDescriptor() const {
+    return mGlobalBuffersDescriptor;
+  }
+
+  /**
+   * @brief Create material descriptor
+   *
+   * @param buffer Material buffer
+   * @return Material descriptor
+   */
+  rhi::Descriptor createMaterialDescriptor(rhi::Buffer buffer);
 
 private:
   rhi::RenderDevice *mDevice = nullptr;
 
-  rhi::n::Descriptor mGlobalTexturesDescriptor;
+  rhi::DescriptorLayoutHandle mMaterialDescriptorLayout{0};
+
+  rhi::Descriptor mGlobalTexturesDescriptor;
+  rhi::Descriptor mGlobalBuffersDescriptor;
 
   size_t mResizeListener = 0;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Descriptor.h"
+#include "DescriptorType.h"
 #include "RenderHandle.h"
 
 namespace liquid::rhi {

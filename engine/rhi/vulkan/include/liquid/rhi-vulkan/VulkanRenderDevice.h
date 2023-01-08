@@ -13,7 +13,6 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanCommandPool.h"
 #include "VulkanPipelineLayoutCache.h"
-#include "VulkanDescriptorManager.h"
 #include "VulkanDescriptorPool.h"
 #include "VulkanSwapchain.h"
 
@@ -105,7 +104,7 @@ public:
    * @param layout Descriptor layout
    * @return Descriptor
    */
-  n::Descriptor createDescriptor(DescriptorLayoutHandle layout) override;
+  Descriptor createDescriptor(DescriptorLayoutHandle layout) override;
 
   /**
    * @brief Create hardware buffer
@@ -227,7 +226,6 @@ private:
   VulkanResourceRegistry mRegistry;
   VulkanPipelineLayoutCache mPipelineLayoutCache;
   VulkanDescriptorPool mDescriptorPool;
-  VulkanDescriptorManager mDescriptorManager;
   VulkanCommandPool mCommandPool;
   VulkanRenderContext mRenderContext;
   VulkanUploadContext mUploadContext;
