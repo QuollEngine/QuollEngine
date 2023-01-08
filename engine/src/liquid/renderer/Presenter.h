@@ -46,7 +46,7 @@ private:
   std::vector<rhi::FramebufferHandle> mFramebuffers{};
   glm::uvec2 mExtent{0, 0};
   rhi::TextureHandle mPresentTexture{0};
-  rhi::n::Descriptor mPresentDescriptor;
+  rhi::Descriptor mPresentDescriptor;
 };
 
 } // namespace liquid

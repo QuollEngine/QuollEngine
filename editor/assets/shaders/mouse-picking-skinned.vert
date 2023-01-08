@@ -9,10 +9,7 @@ layout(location = 0) out uint outEntity;
 
 #include "../../../engine/assets/shaders/bindless-base.glsl"
 
-layout(scalar, set = 1, binding = 0) readonly buffer EntityData {
-  uint entities[];
-}
-uEntityData;
+RegisterBuffer(scalar, readonly, EntityData, { uint entities[]; });
 
 void main() {
   mat4 modelMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
@@ -28,5 +25,6 @@ void main() {
       getCamera().viewProj * modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
 
   gl_Position = worldPosition;
-  outEntity = uEntityData.entities[gl_InstanceIndex];
+  outEntity = GetBindlessResource(EntityData, pcDrawParameters.index10)
+                  .entities[gl_InstanceIndex];
 }

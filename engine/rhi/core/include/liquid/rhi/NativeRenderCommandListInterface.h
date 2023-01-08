@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/rhi/Descriptor.h"
-#include "liquid/rhi/NewDescriptor.h"
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/PipelineBarrier.h"
 #include "liquid/rhi/StageFlags.h"
@@ -67,16 +66,6 @@ public:
    */
   virtual void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                               const Descriptor &descriptor) = 0;
-
-  /**
-   * @brief Bind descriptor
-   *
-   * @param pipeline Pipeline
-   * @param firstSet First set
-   * @param descriptor Descriptor
-   */
-  virtual void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
-                              const n::Descriptor &descriptor) = 0;
 
   /**
    * @brief Bind vertex buffer

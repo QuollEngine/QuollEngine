@@ -20,6 +20,18 @@ EditorRendererFrameData::EditorRendererFrameData(
 
   {
     auto desc = defaultDesc;
+    desc.size = mReservedSpace * MaxNumBones * sizeof(glm::mat4);
+    mSkeletonBoneTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.data = mGizmoTransforms.data();
+    mGizmoTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
     desc.type = liquid::rhi::BufferType::Uniform;
     desc.size = sizeof(liquid::Camera);
     mCameraBuffer = renderStorage.createBuffer(desc);
@@ -34,22 +46,22 @@ EditorRendererFrameData::EditorRendererFrameData(
 
   {
     auto desc = defaultDesc;
-    desc.size = mReservedSpace * MaxNumBones * sizeof(glm::mat4);
-    mSkeletonBoneTransformsBuffer = renderStorage.createBuffer(desc);
-  }
-
-  {
-    auto desc = defaultDesc;
-    desc.data = mGizmoTransforms.data();
-    mGizmoTransformsBuffer = renderStorage.createBuffer(desc);
-  }
-
-  {
-    auto desc = defaultDesc;
     desc.size = sizeof(CollidableEntity);
     desc.type = liquid::rhi::BufferType::Uniform;
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
+
+  mDrawParams.index0 =
+      liquid::rhi::castHandleToUint(mGizmoTransformsBuffer.getHandle());
+  mDrawParams.index1 =
+      liquid::rhi::castHandleToUint(mSkeletonBoneTransformsBuffer.getHandle());
+  mDrawParams.index2 =
+      liquid::rhi::castHandleToUint(mEditorGridBuffer.getHandle());
+  mDrawParams.index3 = liquid::rhi::castHandleToUint(mCameraBuffer.getHandle());
+  mDrawParams.index4 =
+      liquid::rhi::castHandleToUint(mCollidableEntityBuffer.getHandle());
+  mDrawParams.index5 =
+      liquid::rhi::castHandleToUint(mSkeletonTransformsBuffer.getHandle());
 }
 
 void EditorRendererFrameData::addSkeleton(

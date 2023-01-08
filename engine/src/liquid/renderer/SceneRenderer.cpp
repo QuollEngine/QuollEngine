@@ -124,15 +124,17 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         LIQUID_PROFILE_EVENT("shadowPass::meshes");
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0,
-                                   frameData.getGlobalDescriptor());
+                                   mRenderStorage.getGlobalBuffersDescriptor());
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
              ++index) {
-          glm::ivec4 pcIndex{index};
+          frameData.getDrawParams().index9 = index;
 
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                    sizeof(glm::ivec4), &pcIndex);
+                                    sizeof(DrawParameters),
+                                    &frameData.getDrawParams());
+
           render(commandList, pipeline, false, frameIndex);
         }
       }
@@ -141,15 +143,16 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         LIQUID_PROFILE_EVENT("shadowPass::skinnedMeshes");
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0,
-                                   frameData.getGlobalDescriptor());
+                                   mRenderStorage.getGlobalBuffersDescriptor());
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
              ++index) {
-          glm::ivec4 pcIndex{index};
+          frameData.getDrawParams().index9 = index;
 
-          commandList.pushConstants(skinnedPipeline, rhi::ShaderStage::Vertex,
-                                    0, sizeof(glm::ivec4), &pcIndex);
+          commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
+                                    sizeof(DrawParameters),
+                                    &frameData.getDrawParams());
           renderSkinned(commandList, skinnedPipeline, false, frameIndex);
         }
       }
@@ -195,9 +198,13 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0,
-                                   frameData.getGlobalDescriptor());
+                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
             pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
+
+        commandList.pushConstants(
+            pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+            sizeof(DrawParameters), &frameData.getDrawParams());
 
         render(commandList, pipeline, true, frameIndex);
       }
@@ -207,9 +214,14 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0,
-                                   frameData.getGlobalDescriptor());
+                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
+            skinnedPipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
+
+        commandList.pushConstants(
+            skinnedPipeline,
+            rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+            sizeof(DrawParameters), &frameData.getDrawParams());
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
@@ -239,10 +251,15 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       commandList.bindPipeline(pipeline);
 
-      commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
-
+      commandList.bindDescriptor(pipeline, 0,
+                                 mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
+      frameData.getDrawParams().index9 =
+          rhi::castHandleToUint(frameData.getIrradianceMap());
+      commandList.pushConstants(
+          pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+          sizeof(DrawParameters), &frameData.getDrawParams());
 
       const auto &cube = mAssetRegistry.getMeshes()
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
@@ -253,8 +270,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                   rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
-          static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0, 1,
-          rhi::castHandleToUint(frameData.getIrradianceMap()));
+          static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
     });
   } // environment pass
 
@@ -461,22 +477,18 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
     auto textureHandle =
         mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
 
-    commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
+    commandList.bindDescriptor(pipeline, 0,
+                               mRenderStorage.getGlobalBuffersDescriptor());
     commandList.bindDescriptor(pipeline, 1,
                                mRenderStorage.getGlobalTexturesDescriptor());
 
-    glm::uvec4 textureData{static_cast<uint32_t>(textureHandle)};
-
-    commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment,
-                              sizeof(glm::uvec4), sizeof(glm::uvec4),
-                              glm::value_ptr(textureData));
-
     for (auto &text : texts) {
-      glm::uvec4 glyphStart{text.glyphStart};
+      frameData.getDrawParams().index9 = rhi::castHandleToUint(textureHandle);
+      frameData.getDrawParams().index10 = text.glyphStart;
 
       commandList.pushConstants(
           pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-          sizeof(glm::uvec4), static_cast<void *>(glm::value_ptr(glyphStart)));
+          sizeof(DrawParameters), &frameData.getDrawParams());
 
       commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
                        1, text.index);

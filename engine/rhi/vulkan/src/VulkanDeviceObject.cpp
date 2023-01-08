@@ -46,6 +46,15 @@ VulkanDeviceObject::VulkanDeviceObject(
   Engine::getLogger().info()
       << "Vulkan extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
+  extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
+  Engine::getLogger().info()
+      << "Vulkan extension enabled: "
+      << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME;
+
+  extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+  Engine::getLogger().info() << "Vulkan extension enabled: "
+                             << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
+
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
         return String(static_cast<const char *>(ext.extensionName)) ==
@@ -72,12 +81,18 @@ VulkanDeviceObject::VulkanDeviceObject(
   descriptorIndexingFeatures.pNext = &queryResetFeatures;
   descriptorIndexingFeatures.descriptorBindingPartiallyBound = true;
   descriptorIndexingFeatures.runtimeDescriptorArray = true;
-  descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = true;
+
+  descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = true;
   descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind =
       true;
+
+  descriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing = true;
   descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind =
       true;
-  descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind;
+
+  descriptorIndexingFeatures.shaderStorageBufferArrayNonUniformIndexing = true;
+  descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind =
+      true;
 
   auto &features = physicalDevice.getFeatures();
 

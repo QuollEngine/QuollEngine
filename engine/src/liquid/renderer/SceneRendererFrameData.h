@@ -5,6 +5,7 @@
 #include "liquid/entity/Entity.h"
 #include "liquid/renderer/Material.h"
 #include "liquid/entity/EntityDatabase.h"
+#include "liquid/renderer/DrawParameters.h"
 
 namespace liquid {
 
@@ -198,87 +199,6 @@ public:
   void updateBuffers();
 
   /**
-   * @brief Get mesh transforms buffer
-   *
-   * @return Mesh transforms buffer
-   */
-  inline rhi::BufferHandle getMeshTransformsBuffer() const {
-    return mMeshTransformsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get skinned mesh transforms buffer
-   *
-   * @return Skinned mesh transforms buffer
-   */
-  inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
-    return mSkinnedMeshTransformsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get skeletons buffer
-   *
-   * @return Skeletons buffer
-   */
-  inline rhi::BufferHandle getSkeletonsBuffer() const {
-    return mSkeletonsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get text transforms buffer
-   *
-   * @return Text transforms buffer
-   */
-  inline rhi::BufferHandle getTextTransformsBuffer() const {
-    return mTextTransformsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get text glyphs buffer
-   *
-   * @return Text glyphs buffer
-   */
-  inline rhi::BufferHandle getTextGlyphsBuffer() const {
-    return mTextGlyphsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get light buffer
-   *
-   * @return Light buffer
-   */
-  inline rhi::BufferHandle getSceneBuffer() const {
-    return mSceneBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get lights buffer
-   *
-   * @return Lights buffer
-   */
-  inline rhi::BufferHandle getLightsBuffer() const {
-    return mLightsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get lights buffer
-   *
-   * @return Lights buffer
-   */
-  inline rhi::BufferHandle getShadowMapsBuffer() const {
-    return mShadowMapsBuffer.getHandle();
-  }
-
-  /**
-   * @brief Get active camera buffer
-   *
-   * @return Active camera buffer
-   */
-  inline rhi::BufferHandle getActiveCameraBuffer() const {
-    return mCameraBuffer.getHandle();
-  }
-
-  /**
    * @brief Get mesh groups
    *
    * @return Mesh groups
@@ -314,20 +234,6 @@ public:
    * @return Irradiance map
    */
   inline rhi::TextureHandle getIrradianceMap() const { return mIrradianceMap; }
-
-  /**
-   * @brief Get specular map
-   *
-   * @return Specular map
-   */
-  inline rhi::TextureHandle getSpecularMap() const { return mSpecularMap; }
-
-  /**
-   * @brief Get BRDF LUT
-   *
-   * @return BRDF LUT texture
-   */
-  inline rhi::TextureHandle getBrdfLUT() const { return mBrdfLUT; }
 
   /**
    * @brief Get number of lights
@@ -430,13 +336,18 @@ public:
   inline size_t getReservedSpace() const { return mReservedSpace; }
 
   /**
-   * @brief Get buffers descriptor
+   * @brief Get draw parameters
    *
-   * @return Buffers descriptor
+   * @return Draw parameters
    */
-  inline const rhi::n::Descriptor &getGlobalDescriptor() const {
-    return mGlobalDescriptor;
-  }
+  inline DrawParameters &getDrawParams() { return mDrawParams; }
+
+  /**
+   * @brief Get draw parameters
+   *
+   * @return Draw parameters
+   */
+  inline const DrawParameters &getDrawParams() const { return mDrawParams; }
 
 private:
   /**
@@ -465,8 +376,6 @@ private:
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
 
-  rhi::n::Descriptor mGlobalDescriptor;
-
   rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mSpecularMap = rhi::TextureHandle::Invalid;
   rhi::TextureHandle mBrdfLUT = rhi::TextureHandle::Invalid;
@@ -482,6 +391,8 @@ private:
   std::unordered_map<FontAssetHandle, std::vector<TextData>> mTextGroups;
 
   size_t mReservedSpace = 0;
+
+  DrawParameters mDrawParams;
 };
 
 } // namespace liquid

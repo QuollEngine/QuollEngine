@@ -5,7 +5,6 @@
 
 #include "VulkanDeviceObject.h"
 #include "VulkanDescriptorPool.h"
-#include "VulkanDescriptorManager.h"
 
 namespace liquid::rhi {
 
@@ -21,13 +20,11 @@ public:
    * @param queueFamilyIndex Queue family index
    * @param registry Vulkan registry
    * @param descriptorPool Descriptor pool
-   * @param descriptorManager Descriptor manager
    * @param stats Device stats
    */
   VulkanCommandPool(VulkanDeviceObject &device, uint32_t queueFamilyIndex,
                     const VulkanResourceRegistry &registry,
                     const VulkanDescriptorPool &descriptorPool,
-                    VulkanDescriptorManager &descriptorManager,
                     DeviceStats &stats);
 
   /**
@@ -51,7 +48,6 @@ public:
 private:
   VkCommandPool mCommandPool = VK_NULL_HANDLE;
   VulkanDeviceObject &mDevice;
-  VulkanDescriptorManager &mDescriptorManager;
   DeviceStats &mStats;
   const VulkanResourceRegistry &mRegistry;
   const VulkanDescriptorPool &mDescriptorPool;

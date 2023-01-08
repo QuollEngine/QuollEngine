@@ -23,7 +23,7 @@ public:
   liquid::rhi::DescriptorLayoutHandle createDescriptorLayout(
       const liquid::rhi::DescriptorLayoutDescription &description);
 
-  liquid::rhi::n::Descriptor
+  liquid::rhi::Descriptor
   createDescriptor(liquid::rhi::DescriptorLayoutHandle handle);
 
   liquid::rhi::ShaderHandle

@@ -7,6 +7,10 @@ layout(location = 1) in flat uint inTextureIndex;
 
 layout(location = 0) out vec4 outColor;
 
+#include "bindless-base.glsl"
+
 layout(set = 1, binding = 0) uniform samplerCube uGlobalTextures[];
 
-void main() { outColor = texture(uGlobalTextures[inTextureIndex], inTexCoord); }
+void main() {
+  outColor = texture(uGlobalTextures[pcDrawParameters.index9], inTexCoord);
+}

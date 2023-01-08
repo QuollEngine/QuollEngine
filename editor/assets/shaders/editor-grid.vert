@@ -5,12 +5,7 @@ layout(location = 0) out vec3 outNearPoint;
 layout(location = 1) out vec3 outFarPoint;
 layout(location = 2) out mat4 outViewProj;
 
-layout(set = 0, binding = 0) uniform CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-}
-uCameraData;
+#include "bindless-editor.glsl"
 
 const float GRID_SIZE = 1.0;
 const vec3 PLANE_VERTICES[4] =
@@ -27,8 +22,8 @@ const int PLANE_INDICES[6] = int[](0, 1, 2, 1, 0, 3);
  * @return Unprojected position
  */
 vec3 unprojectPoint(vec2 point, float z) {
-  mat4 invView = inverse(uCameraData.view);
-  mat4 invProj = inverse(uCameraData.proj);
+  mat4 invView = inverse(getCamera().view);
+  mat4 invProj = inverse(getCamera().proj);
   vec4 unprojectedPoint = invView * invProj * vec4(point, z, 1.0);
   return unprojectedPoint.xyz / unprojectedPoint.w;
 }
@@ -38,7 +33,7 @@ void main() {
 
   outNearPoint = unprojectPoint(vpos.xy, 0.0);
   outFarPoint = unprojectPoint(vpos.xy, 1.0);
-  outViewProj = uCameraData.viewProj;
+  outViewProj = getCamera().viewProj;
 
   gl_Position = vec4(vpos, 1.0);
 }

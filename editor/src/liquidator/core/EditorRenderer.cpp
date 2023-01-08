@@ -138,13 +138,12 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
       LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
 
       commandList.bindPipeline(collidableShapePipeline);
-      liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
-                           liquid::rhi::DescriptorType::UniformBuffer);
-      sceneDescriptor.bind(1, frameData.getCollidableParamsBuffer(),
-                           liquid::rhi::DescriptorType::UniformBuffer);
+      commandList.bindDescriptor(collidableShapePipeline, 0,
+                                 mRenderStorage.getGlobalBuffersDescriptor());
 
-      commandList.bindDescriptor(collidableShapePipeline, 0, sceneDescriptor);
+      commandList.pushConstants(
+          collidableShapePipeline, liquid::rhi::ShaderStage::Vertex, 0,
+          sizeof(liquid::DrawParameters), &frameData.getDrawParams());
 
       auto type = frameData.getCollidableShapeType();
 
@@ -164,17 +163,15 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
     {
       LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
 
-      liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
-                           liquid::rhi::DescriptorType::UniformBuffer);
-
-      liquid::rhi::Descriptor gridDescriptor;
-      gridDescriptor.bind(0, frameData.getEditorGridBuffer(),
-                          liquid::rhi::DescriptorType::UniformBuffer);
-
       commandList.bindPipeline(editorGridPipeline);
-      commandList.bindDescriptor(editorGridPipeline, 0, sceneDescriptor);
-      commandList.bindDescriptor(editorGridPipeline, 1, gridDescriptor);
+
+      commandList.bindDescriptor(editorGridPipeline, 0,
+                                 mRenderStorage.getGlobalBuffersDescriptor());
+
+      commandList.pushConstants(
+          editorGridPipeline,
+          liquid::rhi::ShaderStage::Vertex | liquid::rhi::ShaderStage::Fragment,
+          0, sizeof(liquid::DrawParameters), &frameData.getDrawParams());
 
       static constexpr uint32_t GridPlaneNumVertices = 6;
       commandList.draw(GridPlaneNumVertices, 0);
@@ -185,21 +182,14 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
       LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
 
       commandList.bindPipeline(skeletonLinesPipeline);
-      auto skeletonBuffer = frameData.getSkeletonTransforms();
+      commandList.bindDescriptor(skeletonLinesPipeline, 0,
+                                 mRenderStorage.getGlobalBuffersDescriptor());
 
-      auto bonesBuffer = frameData.getSkeletonBoneTransforms();
+      commandList.pushConstants(
+          skeletonLinesPipeline, liquid::rhi::ShaderStage::Vertex, 0,
+          sizeof(liquid::DrawParameters), &frameData.getDrawParams());
 
       const auto &numBones = frameData.getBoneCounts();
-
-      liquid::rhi::Descriptor sceneDescriptor;
-      sceneDescriptor.bind(0, frameData.getActiveCameraBuffer(),
-                           liquid::rhi::DescriptorType::UniformBuffer);
-      sceneDescriptor.bind(1, skeletonBuffer,
-                           liquid::rhi::DescriptorType::StorageBuffer);
-      sceneDescriptor.bind(2, bonesBuffer,
-                           liquid::rhi::DescriptorType::StorageBuffer);
-
-      commandList.bindDescriptor(skeletonLinesPipeline, 0, sceneDescriptor);
 
       for (size_t i = 0; i < numBones.size(); ++i) {
         commandList.draw(numBones.at(i), 0, 1, static_cast<uint32_t>(i));
@@ -211,22 +201,20 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
       LIQUID_PROFILE_EVENT("EditorPass::ObjectGizmos");
 
       commandList.bindPipeline(objectIconsPipeline);
-      liquid::rhi::Descriptor objectListSceneDescriptor;
-      objectListSceneDescriptor.bind(
-          0, frameData.getActiveCameraBuffer(),
-          liquid::rhi::DescriptorType::UniformBuffer);
-      objectListSceneDescriptor.bind(
-          1, frameData.getGizmoTransformsBuffer(),
-          liquid::rhi::DescriptorType::StorageBuffer);
       commandList.bindDescriptor(objectIconsPipeline, 0,
-                                 objectListSceneDescriptor);
+                                 mRenderStorage.getGlobalBuffersDescriptor());
+      commandList.bindDescriptor(objectIconsPipeline, 1,
+                                 mRenderStorage.getGlobalTexturesDescriptor());
 
       uint32_t previousInstance = 0;
       for (auto &[icon, count] : frameData.getGizmoCounts()) {
-        liquid::rhi::Descriptor iconDescriptor;
-        iconDescriptor.bind(0, {icon},
-                            liquid::rhi::DescriptorType::CombinedImageSampler);
-        commandList.bindDescriptor(objectIconsPipeline, 1, iconDescriptor);
+
+        frameData.getDrawParams().index8 = liquid::rhi::castHandleToUint(icon);
+        commandList.pushConstants(objectIconsPipeline,
+                                  liquid::rhi::ShaderStage::Vertex |
+                                      liquid::rhi::ShaderStage::Fragment,
+                                  0, sizeof(liquid::DrawParameters),
+                                  &frameData.getDrawParams());
 
         commandList.draw(4, 0, count, previousInstance);
 

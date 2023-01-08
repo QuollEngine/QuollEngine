@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vma/vk_mem_alloc.h>
 
-#include "VulkanDescriptorManager.h"
 #include "VulkanCommandPool.h"
 #include "VulkanSwapchain.h"
 #include "VulkanDeviceObject.h"

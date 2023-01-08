@@ -89,10 +89,8 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
     auto &binding = description.bindings.at(i);
 
     if (binding.type == DescriptorLayoutBindingType::Dynamic) {
-      vkBindingFlags.at(i) =
-          VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-          VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
-          VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
+      vkBindingFlags.at(i) = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+                             VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT;
     }
 
     vkBindings.at(i).binding = binding.binding;

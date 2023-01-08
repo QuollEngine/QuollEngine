@@ -19,8 +19,7 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
     auto size = updateBufferData();
     mBuffer =
         renderStorage.createBuffer({rhi::BufferType::Uniform, size, mData});
-    mDescriptor.bind(0, mBuffer.getHandle(),
-                     rhi::DescriptorType::UniformBuffer);
+    mDescriptor = renderStorage.createMaterialDescriptor(mBuffer);
   }
 }
 

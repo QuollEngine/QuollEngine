@@ -106,18 +106,6 @@ public:
   }
 
   /**
-   * @brief Bind descriptor
-   *
-   * @param pipeline Pipeline
-   * @param firstSet First set
-   * @param descriptor Descriptor
-   */
-  inline void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
-                             const n::Descriptor &descriptor) {
-    mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor);
-  }
-
-  /**
    * @brief Bind vertex buffer
    *
    * @param buffer Vertex buffer

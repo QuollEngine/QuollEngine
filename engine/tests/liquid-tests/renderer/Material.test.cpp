@@ -34,9 +34,6 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
   // Memory alignment
   EXPECT_EQ(buffer.getSize(), sizeof(glm::vec4) * 2);
 
-  EXPECT_EQ(material.getDescriptor().getBindings().at(0).type,
-            liquid::rhi::DescriptorType::UniformBuffer);
-
   const char *data = static_cast<const char *>(buffer.getData());
 
   auto specularVal = *reinterpret_cast<const glm::vec3 *>(data);
@@ -56,8 +53,6 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
-  EXPECT_EQ(material.getDescriptor().getBindings().find(0),
-            material.getDescriptor().getBindings().end());
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {

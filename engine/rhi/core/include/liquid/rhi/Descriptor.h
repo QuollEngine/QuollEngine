@@ -1,81 +1,64 @@
 #pragma once
 
-#include "liquid/rhi/RenderHandle.h"
+#include "NativeDescriptor.h"
 
 namespace liquid::rhi {
-
-enum class DescriptorType {
-  UniformBuffer,
-  StorageBuffer,
-  CombinedImageSampler,
-
-};
-
-/**
- * @brief Descriptor binding
- */
-struct DescriptorBinding {
-  /**
-   * Descriptor type
-   */
-  DescriptorType type;
-
-  /**
-   * Descriptor data
-   */
-  std::variant<std::vector<TextureHandle>, BufferHandle> data;
-};
 
 /**
  * @brief Descriptor
  *
- * Creates descriptor information
- * int the CPU and is used by
- * descriptor manager to get the hash
- * data
+ * Proxies all calls to native descriptor
  */
 class Descriptor {
 public:
   /**
-   * @brief Bind texture descriptor
+   * @brief Create descriptor
+   */
+  Descriptor() = default;
+
+  /**
+   * @brief Create descriptor
+   *
+   * @param nativeDescriptor Native descriptor
+   * @param handle Descriptor handle
+   */
+  Descriptor(NativeDescriptor *nativeDescriptor, DescriptorHandle handle);
+
+  /**
+   * @brief Bind texture descriptors
    *
    * @param binding Binding number
    * @param textures List of textures
    * @param type Descriptor type
+   * @param start Starting index
    * @return Current object
    */
-  Descriptor &bind(uint32_t binding, const std::vector<TextureHandle> &textures,
-                   DescriptorType type);
+  Descriptor &write(uint32_t binding,
+                    const std::vector<TextureHandle> &textures,
+                    DescriptorType type, uint32_t start = 0);
 
   /**
-   * @brief Bind buffer descriptor
+   * @brief Bind buffer descriptors
    *
    * @param binding Binding number
-   * @param buffer Hardware buffer
+   * @param buffers Buffers
    * @param type Descriptor type
+   * @param start Starting index
    * @return Current object
    */
-  Descriptor &bind(uint32_t binding, BufferHandle buffer, DescriptorType type);
+  Descriptor &write(uint32_t binding, const std::vector<BufferHandle> &buffers,
+                    DescriptorType type, uint32_t start = 0);
 
   /**
-   * @brief Get bindings
+   * @brief Get descriptor handle
    *
-   * @return Bindings
+   * @return Descriptor handle
    */
-  inline const std::map<uint32_t, DescriptorBinding> &getBindings() const {
-    return bindings;
-  }
-
-  /**
-   * @brief Get hash code
-   *
-   * @return Hash code
-   */
-  inline const String &getHashCode() const { return hashCode; }
+  inline DescriptorHandle getHandle() const { return mHandle; }
 
 private:
-  std::map<uint32_t, DescriptorBinding> bindings;
-  String hashCode;
+  NativeDescriptor *mNativeDescriptor = nullptr;
+  DescriptorHandle mHandle{0};
 };
 
 } // namespace liquid::rhi

@@ -8,9 +8,6 @@ layout(location = 7) in vec4 inWeights;
 
 #include "bindless-base.glsl"
 
-layout(push_constant) uniform PushConstants { ivec4 index; }
-pcShadowRef;
-
 void main() {
   mat4 modelMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
   SkeletonItem item = getSkeleton(gl_InstanceIndex);
@@ -20,7 +17,7 @@ void main() {
                     inWeights.z * item.joints[inJoints.z] +
                     inWeights.w * item.joints[inJoints.w];
 
-  gl_Position = getShadowMap(pcShadowRef.index.x).shadowMatrix * modelMatrix *
-                skinMatrix * vec4(inPosition, 1.0);
-  gl_Layer = pcShadowRef.index.x;
+  gl_Position = getShadowMap(pcDrawParameters.index9).shadowMatrix *
+                modelMatrix * skinMatrix * vec4(inPosition, 1.0);
+  gl_Layer = int(pcDrawParameters.index9);
 }

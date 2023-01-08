@@ -4,7 +4,6 @@
 layout(location = 0) in vec3 inPosition;
 
 layout(location = 0) out vec3 outTexCoord;
-layout(location = 1) out uint outTextureIndex;
 
 #include "bindless-base.glsl"
 
@@ -17,6 +16,4 @@ void main() {
 
   gl_Position = position.xyww;
   outTexCoord = inPosition;
-
-  outTextureIndex = gl_InstanceIndex;
 }

@@ -73,11 +73,17 @@ MousePickingGraph::MousePickingGraph(
                                       liquid::rhi::FrontFace::CounterClockwise},
       liquid::rhi::PipelineColorBlend{{}}});
 
-  pass.setExecutor([this, vPipeline, vSkinnedPipeline](
-                       liquid::rhi::RenderCommandList &commandList,
-                       const liquid::RenderGraphRegistry &registry,
-                       uint32_t frameIndex) {
+  pass.setExecutor([this, vPipeline, vSkinnedPipeline,
+                    &renderStorage](liquid::rhi::RenderCommandList &commandList,
+                                    const liquid::RenderGraphRegistry &registry,
+                                    uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
+
+    auto drawParams = frameData.getDrawParams();
+    drawParams.index9 =
+        liquid::rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
+    drawParams.index10 =
+        liquid::rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
 
@@ -85,104 +91,99 @@ MousePickingGraph::MousePickingGraph(
     auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
     // Mesh
-    commandList.bindPipeline(pipeline);
-
-    commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
     {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mEntitiesBuffer.getHandle(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      commandList.bindDescriptor(pipeline, 1, descriptor);
-    }
+      commandList.bindPipeline(pipeline);
 
-    {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mSelectedEntityBuffer.getHandle(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      commandList.bindDescriptor(pipeline, 2, descriptor);
-    }
+      commandList.bindDescriptor(pipeline, 0,
+                                 renderStorage.getGlobalBuffersDescriptor());
+      commandList.pushConstants(skinnedPipeline,
+                                liquid::rhi::ShaderStage::Vertex |
+                                    liquid::rhi::ShaderStage::Fragment,
+                                0, sizeof(liquid::DrawParameters), &drawParams);
 
-    uint32_t instanceStart = 0;
-    for (auto &[handle, meshData] : frameData.getMeshGroups()) {
-      const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-      for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-        commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-        bool indexed =
-            liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
+      uint32_t instanceStart = 0;
+      for (auto &[handle, meshData] : frameData.getMeshGroups()) {
+        const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
+        for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
+          commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
+          bool indexed =
+              liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
 
-        if (indexed) {
-          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      liquid::rhi::IndexType::Uint32);
+          if (indexed) {
+            commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                        liquid::rhi::IndexType::Uint32);
+          }
+
+          uint32_t indexCount =
+              static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
+          uint32_t vertexCount =
+              static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+
+          if (indexed) {
+            commandList.drawIndexed(
+                indexCount, 0, 0,
+                static_cast<uint32_t>(meshData.transforms.size()),
+                instanceStart);
+          } else {
+            commandList.draw(vertexCount, 0,
+                             static_cast<uint32_t>(meshData.transforms.size()),
+                             instanceStart);
+          }
+
+          instanceStart += static_cast<uint32_t>(meshData.transforms.size());
         }
-
-        uint32_t indexCount =
-            static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-        uint32_t vertexCount =
-            static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
-
-        if (indexed) {
-          commandList.drawIndexed(
-              indexCount, 0, 0,
-              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
-        } else {
-          commandList.draw(vertexCount, 0,
-                           static_cast<uint32_t>(meshData.transforms.size()),
-                           instanceStart);
-        }
-
-        instanceStart += static_cast<uint32_t>(meshData.transforms.size());
       }
     }
 
     // Skinned meshes
-    commandList.bindPipeline(skinnedPipeline);
-
-    instanceStart = 0;
-
-    commandList.bindDescriptor(pipeline, 0, frameData.getGlobalDescriptor());
-
     {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mSkinnedEntitiesBuffer.getHandle(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      commandList.bindDescriptor(skinnedPipeline, 1, descriptor);
-    }
+      auto drawParams = frameData.getDrawParams();
+      drawParams.index9 =
+          liquid::rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
+      drawParams.index10 =
+          liquid::rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
-    {
-      liquid::rhi::Descriptor descriptor;
-      descriptor.bind(0, mSelectedEntityBuffer.getHandle(),
-                      liquid::rhi::DescriptorType::StorageBuffer);
-      commandList.bindDescriptor(skinnedPipeline, 2, descriptor);
-    }
+      commandList.bindPipeline(skinnedPipeline);
 
-    for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-      const auto &mesh =
-          mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
-      for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-        commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-        bool indexed =
-            liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
-        if (indexed) {
-          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      liquid::rhi::IndexType::Uint32);
+      commandList.bindDescriptor(skinnedPipeline, 0,
+                                 renderStorage.getGlobalBuffersDescriptor());
+
+      commandList.pushConstants(skinnedPipeline,
+                                liquid::rhi::ShaderStage::Vertex |
+                                    liquid::rhi::ShaderStage::Fragment,
+                                0, sizeof(liquid::DrawParameters), &drawParams);
+
+      uint32_t instanceStart = 0;
+      for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
+        const auto &mesh =
+            mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+        for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
+          commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
+          bool indexed =
+              liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
+          if (indexed) {
+            commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                        liquid::rhi::IndexType::Uint32);
+          }
+
+          uint32_t indexCount =
+              static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
+          uint32_t vertexCount =
+              static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+
+          if (indexed) {
+            commandList.drawIndexed(
+                indexCount, 0, 0,
+                static_cast<uint32_t>(meshData.transforms.size()),
+                instanceStart);
+          } else {
+            commandList.draw(vertexCount, 0,
+                             static_cast<uint32_t>(meshData.transforms.size()),
+                             instanceStart);
+          }
+
+          instanceStart += static_cast<uint32_t>(meshData.transforms.size());
         }
-
-        uint32_t indexCount =
-            static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-        uint32_t vertexCount =
-            static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
-
-        if (indexed) {
-          commandList.drawIndexed(
-              indexCount, 0, 0,
-              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
-        } else {
-          commandList.draw(vertexCount, 0,
-                           static_cast<uint32_t>(meshData.transforms.size()),
-                           instanceStart);
-        }
-
-        instanceStart += static_cast<uint32_t>(meshData.transforms.size());
       }
     }
   });
@@ -199,7 +200,7 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
                                 const glm::vec2 &mousePos,
                                 uint32_t frameIndex) {
   mFrameIndex = frameIndex;
-  auto &frameData = mFrameData.at(frameIndex);
+  const auto &frameData = mFrameData.at(frameIndex);
 
   {
     size_t offset = 0;

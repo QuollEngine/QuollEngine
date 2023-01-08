@@ -1,30 +1,6 @@
-#define BindlessDescriptorSet 0
-#define BindlessStorageBinding 0
-#define BindlessUniformBinding 1
-
-// Ignore, used to identify bindless descriptor layout
-// in pipelines
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) readonly buffer DummyGlobalData {
-  uint ignore[];
-}
-uGlobalBuffers[];
-
-/**
- * @brief Single object transforms
- */
-struct TransformItem {
-  /**
-   * Object model matrix
-   */
-  mat4 modelMatrix;
-};
-
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) readonly buffer TransformData {
-  TransformItem items[];
-}
-uTransformsRegister[];
+#include "bindless/base.glsl"
+#include "bindless/transform.glsl"
+#include "bindless/camera.glsl"
 
 /**
  * @brief Single skeleton joints
@@ -36,11 +12,7 @@ struct SkeletonItem {
   mat4 joints[32];
 };
 
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) readonly buffer SkeletonData {
-  SkeletonItem items[];
-}
-uSkeletonsRegister[];
+RegisterBuffer(std430, readonly, SkeletonData, { SkeletonItem items[]; });
 
 /**
  * @brief Single glyph data
@@ -57,11 +29,7 @@ struct GlyphItem {
   vec4 planeBounds;
 };
 
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) readonly buffer GlyphData {
-  GlyphItem items[];
-}
-uGlyphsRegister[];
+RegisterBuffer(std430, readonly, GlyphData, { GlyphItem items[]; });
 
 /**
  * @brief Single light data
@@ -83,11 +51,7 @@ struct LightItem {
   uvec4 shadowData;
 };
 
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) readonly buffer LightData {
-  LightItem items[];
-}
-uLightsRegister[];
+RegisterBuffer(std430, readonly, LightData, { LightItem items[]; });
 
 /**
  * @brief Single shadow data
@@ -104,29 +68,7 @@ struct ShadowMapItem {
   vec4 shadowData;
 };
 
-layout(set = BindlessDescriptorSet,
-       binding = BindlessStorageBinding) buffer ShadowMapData {
-  ShadowMapItem items[];
-}
-uShadowMapsRegister[];
-
-layout(set = BindlessDescriptorSet,
-       binding = BindlessUniformBinding) uniform DummyUniformData {
-  uint ignore;
-}
-uGlobalUniforms[];
-
-struct CameraData {
-  mat4 proj;
-  mat4 view;
-  mat4 viewProj;
-};
-
-layout(set = BindlessDescriptorSet,
-       binding = BindlessUniformBinding) uniform CameraUniform {
-  CameraData camera;
-}
-uCameraRegister[];
+RegisterBuffer(std430, readonly, ShadowMapData, { ShadowMapItem items[]; });
 
 struct SceneData {
   uvec4 data;
@@ -134,48 +76,24 @@ struct SceneData {
   uvec4 textures;
 };
 
-layout(set = BindlessDescriptorSet,
-       binding = BindlessUniformBinding) uniform SceneUniform {
-  SceneData scene;
-}
-uSceneRegister[];
+RegisterUniform(SceneUniform, { SceneData scene; });
 
-struct BindlessBufferIndices {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint textTransforms;
-  uint textGlyphs;
-  uint lights;
-  uint shadowMaps;
+#define getMeshTransform(index) getTransform(0, index)
 
-  // uniforms
-  uint camera;
-  uint scene;
-};
-
-const BindlessBufferIndices bufferIndices =
-    BindlessBufferIndices(0, 1, 2, 3, 4, 5, 6, 0, 1);
-
-#define getMeshTransform(index)                                                \
-  uTransformsRegister[bufferIndices.meshTransforms].items[index]
-
-#define getSkinnedMeshTransform(index)                                         \
-  uTransformsRegister[bufferIndices.skinnedMeshTransforms].items[index]
+#define getSkinnedMeshTransform(index) getTransform(1, index)
 
 #define getSkeleton(index)                                                     \
-  uSkeletonsRegister[bufferIndices.skeletons].items[index]
+  GetBindlessResourceFromPC(SkeletonData, 2).items[index]
 
-#define getTextTransform(index)                                                \
-  uTransformsRegister[bufferIndices.textTransforms].items[index]
+#define getTextTransform(index) getTransform(3, index)
 
-#define getGlyph(index) uGlyphsRegister[bufferIndices.textGlyphs].items[index]
+#define getGlyph(index) GetBindlessResourceFromPC(GlyphData, 4).items[index]
 
-#define getLight(index) uLightsRegister[bufferIndices.lights].items[index]
+#define getLight(index) GetBindlessResourceFromPC(LightData, 5).items[index]
 
 #define getShadowMap(index)                                                    \
-  uShadowMapsRegister[bufferIndices.shadowMaps].items[index]
+  GetBindlessResourceFromPC(ShadowMapData, 6).items[index]
 
-#define getCamera() uCameraRegister[bufferIndices.camera].camera
+#define getCamera() getCameraFromReg(7)
 
-#define getSceneData() uSceneRegister[bufferIndices.scene].scene
+#define getSceneData() GetBindlessResourceFromPC(SceneUniform, 8).scene

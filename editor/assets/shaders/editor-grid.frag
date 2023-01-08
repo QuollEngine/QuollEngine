@@ -7,8 +7,7 @@ layout(location = 2) in mat4 inViewProj;
 
 layout(location = 0) out vec4 outColor;
 
-layout(std140, set = 1, binding = 0) uniform GridData { uvec4 gridLines; }
-uGridData;
+#include "bindless-editor.glsl"
 
 const vec3 LINE_COLOR = vec3(0.5, 0.5, 0.5);
 const vec3 X_AXIS_COLOR = vec3(1.0, 0.0, 0.0);
@@ -40,18 +39,18 @@ void main() {
 
     vec4 color = vec4(0.0);
     // Set non-axis line color
-    if (uGridData.gridLines.x == 1) {
+    if (getGridData().gridLines.x == 1) {
       color = vec4(LINE_COLOR, nonAxisAlpha);
     }
 
     // Set Z axis color if X position is at zero
-    if (uGridData.gridLines.y == 1 && fragPos.x > -center.x &&
+    if (getGridData().gridLines.y == 1 && fragPos.x > -center.x &&
         fragPos.x < center.x) {
       color = vec4(Z_AXIS_COLOR, lineAlpha);
     }
 
     // Set X axis color if Z position is at zero
-    if (uGridData.gridLines.y == 1 && fragPos.z > -center.y &&
+    if (getGridData().gridLines.y == 1 && fragPos.z > -center.y &&
         fragPos.z < center.y) {
       color = vec4(X_AXIS_COLOR, lineAlpha);
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/rhi/NewDescriptor.h"
+#include "liquid/rhi/Descriptor.h"
 
 #include "VulkanDeviceObject.h"
 #include "VulkanResourceRegistry.h"
@@ -35,7 +35,7 @@ public:
    * @param layout Descriptor layout
    * @return Descriptor
    */
-  n::Descriptor createDescriptor(DescriptorLayoutHandle layout);
+  Descriptor createDescriptor(DescriptorLayoutHandle layout);
 
   /**
    * @brief Reset descriptor pool

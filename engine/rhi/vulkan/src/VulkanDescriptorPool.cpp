@@ -59,32 +59,17 @@ void VulkanDescriptorPool::createDescriptorPool() {
                mDescriptorPool);
 }
 
-n::Descriptor
+Descriptor
 VulkanDescriptorPool::createDescriptor(DescriptorLayoutHandle layout) {
   const auto &description =
       mPipelineLayoutCache.getDescriptorLayoutDescription(layout);
   VkDescriptorSetLayout vulkanLayout =
       mPipelineLayoutCache.getVulkanDescriptorSetLayout(layout);
 
-  std::vector<uint32_t> variableCounts(description.bindings.size());
-  for (size_t i = 0; i < description.bindings.size(); ++i) {
-    variableCounts.at(i) =
-        description.bindings.at(i).type == DescriptorLayoutBindingType::Dynamic
-            ? description.bindings.at(i).descriptorCount
-            : 0;
-  }
-
-  VkDescriptorSetVariableDescriptorCountAllocateInfo countInfo{};
-  countInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-  countInfo.pNext = nullptr;
-  countInfo.pDescriptorCounts = variableCounts.data();
-  countInfo.descriptorSetCount = static_cast<uint32_t>(variableCounts.size());
-
   VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
   descriptorSetAllocateInfo.sType =
       VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  descriptorSetAllocateInfo.pNext = &countInfo;
+  descriptorSetAllocateInfo.pNext = nullptr;
   descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
   descriptorSetAllocateInfo.pSetLayouts = &vulkanLayout;
   descriptorSetAllocateInfo.descriptorSetCount = 1;
@@ -96,9 +81,8 @@ VulkanDescriptorPool::createDescriptor(DescriptorLayoutHandle layout) {
 
   mDescriptorSets.push_back(descriptorSet);
 
-  return n::Descriptor(
-      new VulkanDescriptorSet(mDevice, mRegistry, descriptorSet),
-      static_cast<DescriptorHandle>(mDescriptorSets.size()));
+  return Descriptor(new VulkanDescriptorSet(mDevice, mRegistry, descriptorSet),
+                    static_cast<DescriptorHandle>(mDescriptorSets.size()));
 }
 
 VkDescriptorSet
