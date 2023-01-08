@@ -15,6 +15,10 @@ StyleStack::~StyleStack() {
     ImGui::PopStyleVar(static_cast<int>(mPushedStyles));
     mPushedStyles = 0;
   }
+
+  for (uint32_t i = 0; i < mPushedFonts; ++i) {
+    ImGui::PopFont();
+  }
 }
 
 void StyleStack::pushColor(uint32_t colorIndex, const glm::vec4 &color) {
@@ -38,6 +42,11 @@ void StyleStack::pushStyle(uint32_t styleIndex, const glm::vec2 &value) {
 void StyleStack::pushStyle(uint32_t styleIndex, const ImVec2 &value) {
   ImGui::PushStyleVar(static_cast<ImGuiStyleVar>(styleIndex), value);
   mPushedStyles++;
+}
+
+void StyleStack::pushFont(ImFont *font) {
+  ImGui::PushFont(font);
+  mPushedFonts++;
 }
 
 } // namespace liquidator

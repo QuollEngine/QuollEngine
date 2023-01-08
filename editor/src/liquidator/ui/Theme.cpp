@@ -6,9 +6,14 @@
 
 namespace liquidator {
 
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 static constexpr float FontSize = 18.0f;
 
+static constexpr size_t NumFonts = 2;
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+static std::array<ImFont *, NumFonts> Fonts{};
+
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 static const std::unordered_map<ThemeColor, glm::vec4> Colors{
     {ThemeColor::BackgroundColor, glm::vec4(0.22f, 0.22f, 0.22f, 1.0f)},
     {ThemeColor::SceneBackgroundColor, glm::vec4(0.46f, 0.60f, 0.70f, 1.0f)}};
@@ -90,9 +95,31 @@ static void setImguiStyles() {
  * @brief Add fonts
  */
 static void addFonts() {
-  liquid::Path fontPath = liquid::Engine::getFontsPath() / "Roboto-Regular.ttf";
   auto &io = ImGui::GetIO();
-  io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), FontSize);
+
+  liquid::Path defaultFontPath =
+      liquid::Engine::getFontsPath() / "Roboto-Regular.ttf";
+  Fonts.at(0) =
+      io.Fonts->AddFontFromFileTTF(defaultFontPath.string().c_str(), FontSize);
+
+  liquid::Path boldFontPath =
+      std::filesystem::current_path() / "assets" / "fonts" / "Roboto-Bold.ttf";
+  Fonts.at(1) =
+      io.Fonts->AddFontFromFileTTF(boldFontPath.string().c_str(), FontSize);
+
+  for (size_t i = 0; i < Fonts.size(); ++i) {
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.GlyphMinAdvanceX = FontSize;
+    config.DstFont = Fonts.at(i);
+
+    static constexpr std::array<ImWchar, 3> IconRanges{0xe005, 0xf8ff, 0};
+
+    liquid::Path iconFontPath = std::filesystem::current_path() / "assets" /
+                                "fonts" / "FontAwesome-Solid.ttf";
+    io.Fonts->AddFontFromFileTTF(iconFontPath.string().c_str(), FontSize,
+                                 &config, IconRanges.data());
+  }
 }
 
 void Theme::apply() {
@@ -103,5 +130,7 @@ void Theme::apply() {
 glm::vec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }
 
 glm::vec2 Theme::getStyle(ThemeStyle style) { return Styles.at(style); }
+
+ImFont *Theme::getBoldFont() { return Fonts.at(1); }
 
 } // namespace liquidator

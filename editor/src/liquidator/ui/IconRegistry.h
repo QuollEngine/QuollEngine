@@ -9,7 +9,6 @@ namespace liquidator {
 enum class EditorIcon {
   Unknown,
   Directory,
-  CreateDirectory,
   Material,
   Texture,
   Font,
@@ -21,13 +20,7 @@ enum class EditorIcon {
   Prefab,
   Script,
   Sun,
-  Camera,
-  Direction,
-  Play,
-  Stop,
-  Move,
-  Rotate,
-  Scale
+  Camera
 };
 
 /**

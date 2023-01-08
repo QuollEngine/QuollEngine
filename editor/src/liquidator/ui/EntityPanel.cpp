@@ -4,6 +4,7 @@
 #include "EntityPanel.h"
 
 #include "Widgets.h"
+#include "FontAwesome.h"
 
 namespace liquidator {
 
@@ -98,7 +99,10 @@ void EntityPanel::setSelectedEntity(liquid::Entity entity) {
 }
 
 void EntityPanel::renderName() {
-  if (auto _ = widgets::Section("Name")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Circle) + "  Name";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     if (widgets::Input("", mName)) {
       if (!mName.empty()) {
         mEntityManager.setName(mSelectedEntity, mName);
@@ -118,7 +122,10 @@ void EntityPanel::renderLight() {
     return;
   }
 
-  if (auto _ = widgets::Section("Light")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Lightbulb) + "  Light";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
         mEntityManager.getActiveEntityDatabase().get<liquid::DirectionalLight>(
             mSelectedEntity);
@@ -178,7 +185,10 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     return;
   }
 
-  if (auto _ = widgets::Section("Camera")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Video) + "  Camera";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
         mEntityManager.getActiveEntityDatabase().get<liquid::PerspectiveLens>(
             mSelectedEntity);
@@ -261,7 +271,10 @@ void EntityPanel::renderTransform() {
     return;
   }
 
-  if (auto _ = widgets::Section("Transform")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Circle) + "  Transform";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
         entityDatabase.get<liquid::LocalTransform>(mSelectedEntity);
     auto &world = entityDatabase.get<liquid::WorldTransform>(mSelectedEntity);
@@ -291,9 +304,12 @@ void EntityPanel::renderTransform() {
 }
 
 void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Cubes) + "  Mesh";
+
   if (mEntityManager.getActiveEntityDatabase().has<liquid::Mesh>(
           mSelectedEntity)) {
-    if (auto _ = widgets::Section("Mesh")) {
+    if (auto _ = widgets::Section(SectionName.c_str())) {
       auto handle = mEntityManager.getActiveEntityDatabase()
                         .get<liquid::Mesh>(mSelectedEntity)
                         .handle;
@@ -310,7 +326,7 @@ void EntityPanel::renderMesh(liquid::AssetRegistry &assetRegistry) {
 
   if (mEntityManager.getActiveEntityDatabase().has<liquid::SkinnedMesh>(
           mSelectedEntity)) {
-    if (auto _ = widgets::Section("Mesh")) {
+    if (auto _ = widgets::Section(SectionName.c_str())) {
       auto handle = mEntityManager.getActiveEntityDatabase()
                         .get<liquid::SkinnedMesh>(mSelectedEntity)
                         .handle;
@@ -332,7 +348,10 @@ void EntityPanel::renderSkeleton() {
     return;
   }
 
-  if (auto _ = widgets::Section("Skeleton")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Bone) + "  Skeleton";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     bool showBones =
         mEntityManager.getActiveEntityDatabase().has<liquid::SkeletonDebug>(
             mSelectedEntity);
@@ -349,7 +368,10 @@ void EntityPanel::renderAnimation(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (auto _ = widgets::Section("Animation")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Circle) + "  Animation";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
         mEntityManager.getActiveEntityDatabase().get<liquid::Animator>(
             mSelectedEntity);
@@ -453,7 +475,10 @@ void EntityPanel::renderCollidable() {
     return;
   }
 
-  if (auto _ = widgets::Section("Collidable")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Circle) + "  Collidable";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     std::array<liquid::PhysicsGeometryType, sizeof(liquid::PhysicsGeometryType)>
         types{
             liquid::PhysicsGeometryType::Box,
@@ -542,7 +567,10 @@ void EntityPanel::renderRigidBody() {
     return;
   }
 
-  if (auto _ = widgets::Section("Rigid body")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Circle) + "  Rigid body";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &rigidBody =
         mEntityManager.getActiveEntityDatabase().get<liquid::RigidBody>(
             mSelectedEntity);
@@ -601,7 +629,9 @@ void EntityPanel::renderText(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (auto _ = widgets::Section("Text")) {
+  static const liquid::String SectionName = liquid::String(fa::Font) + "  Text";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &text = mEntityManager.getActiveEntityDatabase().get<liquid::Text>(
         mSelectedEntity);
 
@@ -644,7 +674,10 @@ void EntityPanel::renderAudio(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (auto _ = widgets::Section("Audio")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Music) + "  Audio";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     const auto &audio =
         mEntityManager.getActiveEntityDatabase().get<liquid::AudioSource>(
             mSelectedEntity);
@@ -661,7 +694,10 @@ void EntityPanel::renderScripting(liquid::AssetRegistry &assetRegistry) {
     return;
   }
 
-  if (auto _ = widgets::Section("Scripts")) {
+  static const liquid::String SectionName =
+      liquid::String(fa::Scroll) + "  Script";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     const auto &scripting =
         mEntityManager.getActiveEntityDatabase().get<liquid::Script>(
             mSelectedEntity);

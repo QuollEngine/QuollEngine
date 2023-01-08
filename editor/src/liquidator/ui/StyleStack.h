@@ -67,9 +67,17 @@ public:
    */
   void pushStyle(uint32_t styleIndex, const ImVec2 &value);
 
+  /**
+   * @brief Push style to the stack
+   *
+   * @param font Font
+   */
+  void pushFont(ImFont *font);
+
 private:
   uint32_t mPushedColors = 0;
   uint32_t mPushedStyles = 0;
+  uint32_t mPushedFonts = 0;
 };
 
 } // namespace liquidator

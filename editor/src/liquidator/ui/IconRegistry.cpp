@@ -17,9 +17,6 @@ void IconRegistry::loadIcons(liquid::RenderStorage &renderStorage,
       EditorIcon::Directory,
       loader.loadFromFile((iconsPath / "directory.png").string()));
   mIconMap.insert_or_assign(
-      EditorIcon::CreateDirectory,
-      loader.loadFromFile((iconsPath / "create-directory.png").string()));
-  mIconMap.insert_or_assign(
       EditorIcon::Material,
       loader.loadFromFile((iconsPath / "material.png").string()));
   mIconMap.insert_or_assign(
@@ -49,21 +46,6 @@ void IconRegistry::loadIcons(liquid::RenderStorage &renderStorage,
   mIconMap.insert_or_assign(
       EditorIcon::Camera,
       loader.loadFromFile((iconsPath / "camera.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Direction,
-      loader.loadFromFile((iconsPath / "direction.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Play, loader.loadFromFile((iconsPath / "play.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Stop, loader.loadFromFile((iconsPath / "stop.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Move, loader.loadFromFile((iconsPath / "move.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Rotate,
-      loader.loadFromFile((iconsPath / "rotate.png").string()));
-  mIconMap.insert_or_assign(
-      EditorIcon::Scale,
-      loader.loadFromFile((iconsPath / "scale.png").string()));
 }
 
 } // namespace liquidator

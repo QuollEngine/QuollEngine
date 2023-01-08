@@ -34,6 +34,13 @@ public:
    * @return Style value
    */
   static glm::vec2 getStyle(ThemeStyle style);
+
+  /**
+   * @brief Get bold font
+   *
+   * @return Bold font
+   */
+  static ImFont *getBoldFont();
 };
 
 } // namespace liquidator

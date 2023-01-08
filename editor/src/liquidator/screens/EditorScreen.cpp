@@ -29,6 +29,7 @@
 #include "liquidator/ui/Widgets.h"
 #include "liquidator/ui/TransformOperationControl.h"
 #include "liquidator/ui/LogViewer.h"
+#include "liquidator/ui/FontAwesome.h"
 
 #include "liquidator/core/LogMemoryStorage.h"
 #include "liquidator/core/EditorRenderer.h"
@@ -212,12 +213,10 @@ void EditorScreen::start(const Project &project) {
     debugLayer.render();
 
     if (auto _ = Toolbar()) {
-      auto icon =
-          entityManager.isUsingSimulationDatabase()
-              ? ui.getIconRegistry().getIcon(liquidator::EditorIcon::Stop)
-              : ui.getIconRegistry().getIcon(liquidator::EditorIcon::Play);
+      auto *simulationIcon =
+          entityManager.isUsingSimulationDatabase() ? fa::Stop : fa::Play;
 
-      if (liquid::imgui::imageButton(icon, ImVec2(IconSize, IconSize))) {
+      if (ImGui::Button(simulationIcon)) {
         if (entityManager.isUsingSimulationDatabase()) {
           simulator.cleanupSimulationDatabase(
               entityManager.getActiveEntityDatabase());
@@ -231,7 +230,7 @@ void EditorScreen::start(const Project &project) {
 
       ImGui::SameLine();
 
-      TransformOperationControl(ui.getIconRegistry(), editorManager, IconSize);
+      TransformOperationControl{editorManager};
 
       ImGui::SameLine();
     }

@@ -25,7 +25,9 @@ project "Liquidator"
         "glslc ../../editor/assets/shaders/collidable-shape.vert -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.vert.spv",
         "glslc ../../editor/assets/shaders/collidable-shape.frag -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.frag.spv",
         "{MKDIR} %{cfg.buildtarget.directory}/assets/icons",
-        "{COPYDIR} ../../editor/assets/icons %{cfg.buildtarget.directory}/assets/icons"
+        "{MKDIR} %{cfg.buildtarget.directory}/assets/fonts",
+        "{COPYDIR} ../../editor/assets/icons %{cfg.buildtarget.directory}/assets/icons",
+        "{COPYDIR} ../../editor/assets/fonts %{cfg.buildtarget.directory}/assets/fonts"
     }
 
     copyEngineAssets()
