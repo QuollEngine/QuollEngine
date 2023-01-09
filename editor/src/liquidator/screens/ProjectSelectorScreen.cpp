@@ -8,8 +8,10 @@
 #include "liquid/imgui/ImguiUtils.h"
 
 #include "liquidator/editor-scene/EditorCamera.h"
-#include "liquidator/ui/IconRegistry.h"
 #include "liquidator/ui/Theme.h"
+#include "liquidator/ui/FontAwesome.h"
+#include "liquidator/ui/Widgets.h"
+#include "liquidator/ui/StyleStack.h"
 
 #include "ProjectSelectorScreen.h"
 
@@ -36,10 +38,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(mWindow, fpsCounter);
   liquidator::EditorCamera editorCamera(entityDatabase, mEventSystem, mWindow);
-  liquidator::IconRegistry iconRegistry;
   std::optional<liquidator::Project> project;
-
-  static constexpr float IconSize = 80.0f;
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -60,9 +59,6 @@ std::optional<Project> ProjectSelectorScreen::start() {
         graph.setFramebufferExtent({width, height});
       });
 
-  iconRegistry.loadIcons(renderStorage,
-                         std::filesystem::current_path() / "assets" / "icons");
-
   mainLoop.setUpdateFn([&project, this](float dt) {
     mEventSystem.poll();
     return !project.has_value();
@@ -73,7 +69,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &editorCamera, &graph,
                         &imguiPassData, &project, &projectManager,
-                        &iconRegistry, &entityDatabase, &presenter, &debugLayer,
+                        &entityDatabase, &presenter, &debugLayer,
                         this]() mutable {
     auto &imgui = imguiRenderer;
 
@@ -84,42 +80,42 @@ std::optional<Project> ProjectSelectorScreen::start() {
     ImGui::EndMainMenuBar();
     debugLayer.render();
 
-    const auto &fbSize = glm::vec2(mWindow.getFramebufferSize());
-    const auto center = fbSize * 0.5f;
-
     static constexpr ImVec2 CenterWindowPivot(0.5f, 0.5f);
+    static constexpr float ActionButtonWidth = 240.0f;
+    static constexpr float ActionButtonHeight = 40.0f;
+    static constexpr float WindowPadding = 20.0f;
+    static constexpr ImVec2 ActionButtonSize{ActionButtonWidth,
+                                             ActionButtonHeight};
 
-    ImGui::SetNextWindowPos(ImVec2(center.x, center.y), 0, CenterWindowPivot);
+    const auto &fbSize = glm::vec2(mWindow.getFramebufferSize());
+    const auto actionBarPos =
+        ImVec2(fbSize.x - ActionButtonWidth - WindowPadding,
+               fbSize.y * 0.5f - WindowPadding);
+
+    ImGui::SetNextWindowPos(actionBarPos, 0, CenterWindowPivot);
 
     if (ImGui::Begin("Liquidator", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
                          ImGuiWindowFlags_NoTitleBar)) {
+      StyleStack styles;
+      styles.pushStyle(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
 
-      if (ImGui::BeginTable("project-selector", 2)) {
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        if (liquid::imgui::imageButton(
-                iconRegistry.getIcon(liquidator::EditorIcon::CreateDirectory),
-                ImVec2(IconSize, IconSize))) {
-          if (projectManager.createProjectInPath()) {
-            project = projectManager.getProject();
-          }
+      static const auto CreateProjectLabel =
+          liquid::String(fa::FolderPlus) + "  Create project";
+      if (ImGui::Button(CreateProjectLabel.c_str(), ActionButtonSize)) {
+        if (projectManager.createProjectInPath()) {
+          project = projectManager.getProject();
         }
-        ImGui::Text("Create");
-
-        ImGui::TableNextColumn();
-        if (liquid::imgui::imageButton(
-                iconRegistry.getIcon(liquidator::EditorIcon::Directory),
-                ImVec2(IconSize, IconSize))) {
-          if (projectManager.openProjectInPath()) {
-            project = projectManager.getProject();
-          }
-        }
-
-        ImGui::Text("Open");
       }
-      ImGui::EndTable();
+
+      static const auto OpenProjectLabel =
+          liquid::String(fa::FolderOpen) + "  Open project";
+      if (ImGui::Button(OpenProjectLabel.c_str(), ActionButtonSize)) {
+        if (projectManager.openProjectInPath()) {
+          project = projectManager.getProject();
+        }
+      }
     }
     ImGui::End();
 

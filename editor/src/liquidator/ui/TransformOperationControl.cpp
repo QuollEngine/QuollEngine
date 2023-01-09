@@ -6,23 +6,22 @@
 #include "TransformOperationControl.h"
 #include "StyleStack.h"
 #include "Theme.h"
+#include "FontAwesome.h"
 
 namespace liquidator {
 
 TransformOperationControl::TransformOperationControl(
-    const IconRegistry &iconRegistry, EditorManager &editorManager,
-    float iconSize) {
+    EditorManager &editorManager) {
 
-  renderIcon(iconRegistry, TransformOperation::Move, editorManager, iconSize);
+  renderIcon(TransformOperation::Move, editorManager);
   ImGui::SameLine();
-  renderIcon(iconRegistry, TransformOperation::Rotate, editorManager, iconSize);
+  renderIcon(TransformOperation::Rotate, editorManager);
   ImGui::SameLine();
-  renderIcon(iconRegistry, TransformOperation::Scale, editorManager, iconSize);
+  renderIcon(TransformOperation::Scale, editorManager);
 }
 
 void TransformOperationControl::renderIcon(
-    const IconRegistry &iconRegistry, TransformOperation transformOperation,
-    EditorManager &editorManager, float iconSize) {
+    TransformOperation transformOperation, EditorManager &editorManager) {
 
   StyleStack stack;
   if (transformOperation == editorManager.getTransformOperation()) {
@@ -34,23 +33,21 @@ void TransformOperationControl::renderIcon(
     stack.pushColor(ImGuiCol_ButtonHovered, buttonColor);
   }
 
-  if (liquid::imgui::imageButton(
-          iconRegistry.getIcon(getTransformOperationIcon(transformOperation)),
-          ImVec2(iconSize, iconSize))) {
+  if (ImGui::Button(getTransformOperationIcon(transformOperation))) {
     editorManager.setTransformOperation(transformOperation);
   }
 }
 
-EditorIcon TransformOperationControl::getTransformOperationIcon(
+const char *TransformOperationControl::getTransformOperationIcon(
     TransformOperation transformOperation) {
   switch (transformOperation) {
   case TransformOperation::Scale:
-    return EditorIcon::Scale;
+    return fa::ExpandAlt;
   case TransformOperation::Rotate:
-    return EditorIcon::Rotate;
+    return fa::Rotate;
   case TransformOperation::Move:
   default:
-    return EditorIcon::Move;
+    return fa::Arrows;
   }
 }
 

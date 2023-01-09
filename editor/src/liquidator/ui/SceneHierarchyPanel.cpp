@@ -5,6 +5,8 @@
 #include "SceneHierarchyPanel.h"
 #include "Widgets.h"
 #include "StyleStack.h"
+#include "FontAwesome.h"
+#include "Theme.h"
 
 namespace liquidator {
 
@@ -41,14 +43,50 @@ void SceneHierarchyPanel::setSelectedEntity(liquid::Entity entity) {
   mSelectedEntity = entity;
 }
 
+static liquid::String getNameAndIcon(const liquid::String &name,
+                                     const char *icon) {
+  return liquid::String(icon) + "  " + name;
+}
+
+static liquid::String getNodeName(const liquid::String &name,
+                                  liquid::Entity entity,
+                                  liquid::EntityDatabase &entityDatabase) {
+
+  if (entityDatabase.has<liquid::Camera>(entity)) {
+    return getNameAndIcon(name, fa::Video);
+  }
+
+  if (entityDatabase.has<liquid::DirectionalLight>(entity)) {
+    return getNameAndIcon(name, fa::Lightbulb);
+  }
+
+  if (entityDatabase.has<liquid::Text>(entity)) {
+    return getNameAndIcon(name, fa::Font);
+  }
+
+  if (entityDatabase.has<liquid::Skeleton>(entity)) {
+    return getNameAndIcon(name, fa::Bone);
+  }
+
+  if (entityDatabase.has<liquid::AudioSource>(entity)) {
+    return getNameAndIcon(name, fa::Music);
+  }
+
+  if (entityDatabase.has<liquid::Mesh>(entity)) {
+    return getNameAndIcon(name, fa::Cubes);
+  }
+
+  return name;
+}
+
 void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
                                        EditorManager &editorManager) {
-  liquid::String name =
-      mEntityManager.getActiveEntityDatabase().has<liquid::Name>(entity)
-          ? mEntityManager.getActiveEntityDatabase()
-                .get<liquid::Name>(entity)
-                .name
-          : "Entity #" + std::to_string(entity);
+  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+  liquid::String name = entityDatabase.has<liquid::Name>(entity)
+                            ? mEntityManager.getActiveEntityDatabase()
+                                  .get<liquid::Name>(entity)
+                                  .name
+                            : "Entity #" + std::to_string(entity);
 
   bool isLeaf =
       !mEntityManager.getActiveEntityDatabase().has<liquid::Children>(entity);
@@ -59,18 +97,25 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
         ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
   }
 
+  ConfirmationDialog confirmDeleteSceneNode(
+      "Delete entity", "Are you sure you want to delete node \"" + name + "\"?",
+      "Delete");
+
+  StyleStack fontStack;
   if (mSelectedEntity == entity) {
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
 
   treeNodeFlags |= ImGuiTreeNodeFlags_FramePadding;
 
-  ConfirmationDialog confirmDeleteSceneNode(
-      "Delete entity", "Are you sure you want to delete node \"" + name + "\"?",
-      "Delete");
-
   bool open = false;
-  if (ImGui::TreeNodeEx(name.c_str(), treeNodeFlags)) {
+
+  if (mSelectedEntity == entity && isLeaf) {
+    fontStack.pushFont(Theme::getBoldFont());
+  }
+
+  if (ImGui::TreeNodeEx(getNodeName(name, entity, entityDatabase).c_str(),
+                        treeNodeFlags)) {
     open = !isLeaf;
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
