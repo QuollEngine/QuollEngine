@@ -7,7 +7,7 @@ project "Liquidator"
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo"}
+    linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo", "meshoptimizer"}
     
     copyRuntime();
 

@@ -154,6 +154,16 @@
       ]
     },
     {
+      "name": "meshoptimizer",
+      "buildSource": "meshoptimizer-0.18",
+      "url": "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.18.zip",
+      "cmd": [
+        {
+          "type": "cmake"
+        }
+      ]
+    },
+    {
       "name": "optick",
       "buildSource": "optick-1.3.3.0",
       "url": "https://github.com/bombomby/optick/archive/refs/tags/1.3.3.0.zip",
