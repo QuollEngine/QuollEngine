@@ -395,6 +395,8 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   meshData.name = "test-prefab-mesh";
   liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
   geometry.material = materialHandle.getData();
+  geometry.vertices.push_back({1.0f});
+  geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
   auto meshPath = cache.createSkinnedMeshFromAsset(meshData);
   auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath.getData());

@@ -106,29 +106,17 @@ MousePickingGraph::MousePickingGraph(
         const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
         for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
           commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-          bool indexed =
-              liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
-
-          if (indexed) {
-            commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                        liquid::rhi::IndexType::Uint32);
-          }
+          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                      liquid::rhi::IndexType::Uint32);
 
           uint32_t indexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
           uint32_t vertexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-          if (indexed) {
-            commandList.drawIndexed(
-                indexCount, 0, 0,
-                static_cast<uint32_t>(meshData.transforms.size()),
-                instanceStart);
-          } else {
-            commandList.draw(vertexCount, 0,
-                             static_cast<uint32_t>(meshData.transforms.size()),
-                             instanceStart);
-          }
+          commandList.drawIndexed(
+              indexCount, 0, 0,
+              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
 
           instanceStart += static_cast<uint32_t>(meshData.transforms.size());
         }
@@ -159,28 +147,17 @@ MousePickingGraph::MousePickingGraph(
             mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
         for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
           commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-          bool indexed =
-              liquid::rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
-          if (indexed) {
-            commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                        liquid::rhi::IndexType::Uint32);
-          }
+          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                      liquid::rhi::IndexType::Uint32);
 
           uint32_t indexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
           uint32_t vertexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-          if (indexed) {
-            commandList.drawIndexed(
-                indexCount, 0, 0,
-                static_cast<uint32_t>(meshData.transforms.size()),
-                instanceStart);
-          } else {
-            commandList.draw(vertexCount, 0,
-                             static_cast<uint32_t>(meshData.transforms.size()),
-                             instanceStart);
-          }
+          commandList.drawIndexed(
+              indexCount, 0, 0,
+              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
 
           instanceStart += static_cast<uint32_t>(meshData.transforms.size());
         }

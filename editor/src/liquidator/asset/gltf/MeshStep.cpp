@@ -38,7 +38,29 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
             meshName + " skipped because it does not have position attribute");
   }
 
-  if (primitive.indices >= 0) {
+  auto &&positionMeta =
+      getBufferMetaForAccessor(model, primitive.attributes.at("POSITION"));
+  size_t vertexSize = positionMeta.accessor.count;
+
+  // According to spec, position attribute can only be vec3<float>
+  if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
+      positionMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+    vertices.resize(vertexSize);
+    auto *data = reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
+    for (size_t i = 0; i < vertexSize; ++i) {
+      vertices[i].x = data[i].x;
+      vertices[i].y = data[i].y;
+      vertices[i].z = data[i].z;
+    }
+  } else {
+    return liquid::
+        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
+            meshName + " skipped because it has invalid position format");
+  }
+
+  bool hasIndices = primitive.indices >= 0;
+
+  if (hasIndices) {
     auto &&indexMeta = getBufferMetaForAccessor(model, primitive.indices);
     indices.resize(indexMeta.accessor.count);
     if (indexMeta.accessor.componentType ==
@@ -63,30 +85,17 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
+      hasIndices = false;
       indices.clear();
       warnings.push_back("Mesh primitive has invalid index format");
     }
   }
 
-  auto &&positionMeta =
-      getBufferMetaForAccessor(model, primitive.attributes.at("POSITION"));
-
-  size_t vertexSize = positionMeta.accessor.count;
-  vertices.resize(vertexSize);
-
-  // According to spec, position attribute can only be vec3<float>
-  if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
-      positionMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
-    auto *data = reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
-    for (size_t i = 0; i < vertexSize; ++i) {
-      vertices[i].x = data[i].x;
-      vertices[i].y = data[i].y;
-      vertices[i].z = data[i].z;
+  if (!hasIndices) {
+    indices.resize(vertices.size());
+    for (size_t i = 0; i < vertices.size(); ++i) {
+      indices.at(i) = static_cast<uint32_t>(i);
     }
-  } else {
-    return liquid::
-        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-            meshName + " skipped because it has invalid position format");
   }
 
   if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {

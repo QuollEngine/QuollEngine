@@ -85,6 +85,12 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
   for (uint32_t i = 0; i < numGeometries; ++i) {
     uint32_t numVertices = 0;
     stream.read(numVertices);
+
+    if (numVertices == 0) {
+      return Result<MeshAssetHandle>::Error(
+          "Skinned mesh geometry has no vertices");
+    }
+
     mesh.data.geometries.at(i).vertices.resize(numVertices);
 
     std::vector<glm::vec3> positions(numVertices);
@@ -123,6 +129,10 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numIndices = 0;
     stream.read(numIndices);
+
+    if (numIndices == 0) {
+      return Result<MeshAssetHandle>::Error("Mesh does not have indices");
+    }
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
@@ -238,6 +248,10 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
   for (uint32_t i = 0; i < numGeometries; ++i) {
     uint32_t numVertices = 0;
     stream.read(numVertices);
+    if (numVertices == 0) {
+      return Result<SkinnedMeshAssetHandle>::Error(
+          "Skinned mesh geometry has no vertices");
+    }
     mesh.data.geometries.at(i).vertices.resize(numVertices);
 
     std::vector<glm::vec3> positions(numVertices);
@@ -290,6 +304,11 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numIndices = 0;
     stream.read(numIndices);
+
+    if (numIndices == 0) {
+      return Result<SkinnedMeshAssetHandle>::Error(
+          "Skinned mesh geometry has no indices");
+    }
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
