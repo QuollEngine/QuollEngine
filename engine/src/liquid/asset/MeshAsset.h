@@ -68,10 +68,6 @@ struct SkinnedMeshAsset {
   std::vector<BaseGeometryAsset<SkinnedVertex>> geometries;
 
   /**
-   * Skeleton
-   */
-  SkeletonAssetHandle skeleton = SkeletonAssetHandle::Invalid;
-  /**
    * List of vertex buffers
    */
   std::vector<rhi::Buffer> vertexBuffers;

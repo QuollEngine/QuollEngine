@@ -31,6 +31,106 @@ template <class THandle> struct GLTFToAsset {
 };
 
 /**
+ * @brief Transient skeleton data
+ *
+ * Used to store GLTF skins an joints with engine
+ * specific skeleton handles
+ */
+struct SkeletonData {
+  /**
+   * GLTF joint to engine specific joint I
+   */
+  std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
+
+  /**
+   * Joints that are associated with skins
+   */
+  std::unordered_map<uint32_t, uint32_t> jointSkinMap;
+
+  /**
+   * Skin map
+   */
+  GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
+};
+
+/**
+ * @brief Transient animation data
+ *
+ * Used to store GLTF animations with engine
+ * specific animation handles
+ */
+struct AnimationData {
+  /**
+   * Node to animation map
+   */
+  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
+      nodeAnimationMap;
+
+  /**
+   * Skin to animation map
+   */
+  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
+      skinAnimationMap;
+};
+
+/**
+ * @brief GLTF import data
+ *
+ * Stores all the information to perform the import
+ */
+struct GLTFImportData {
+  /**
+   * Asset cache
+   */
+  liquid::AssetCache &assetCache;
+
+  /**
+   * Target path
+   */
+  liquid::Path targetPath;
+
+  /**
+   * @brief GLTF model
+   */
+  const tinygltf::Model &model;
+
+  /**
+   * @brief Warnings
+   */
+  std::vector<liquid::String> warnings;
+
+  /**
+   * @brief Texture map
+   */
+  GLTFToAsset<liquid::TextureAssetHandle> textures;
+
+  /**
+   * @brief Material map
+   */
+  GLTFToAsset<liquid::MaterialAssetHandle> materials;
+
+  /**
+   * @brief Skeleton data
+   */
+  SkeletonData skeletons;
+
+  /**
+   * @brief Animation data
+   */
+  AnimationData animations;
+
+  /**
+   * @brief Mesh map
+   */
+  GLTFToAsset<liquid::MeshAssetHandle> meshes;
+
+  /**
+   * @brief Skinned mesh map
+   */
+  GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshes;
+};
+
+/**
  * @brief Transient buffer meta data
  *
  * Stores accessor, bufferview, and raw data
@@ -79,49 +179,6 @@ struct TransformData {
    * Local transform matrix
    */
   glm::mat4 localTransform{1.0f};
-};
-
-/**
- * @brief Transient skeleton data
- *
- * Used to store GLTF skins an joints with engine
- * specific skeleton handles
- */
-struct SkeletonData {
-  /**
-   * GLTF joint to engine specific joint I
-   */
-  std::unordered_map<uint32_t, uint32_t> gltfToNormalizedJointMap;
-
-  /**
-   * Joints that are associated with skins
-   */
-  std::unordered_map<uint32_t, uint32_t> jointSkinMap;
-
-  /**
-   * Skin map
-   */
-  GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
-};
-
-/**
- * @brief Transient animation data
- *
- * Used to store GLTF animations with engine
- * specific animation handles
- */
-struct AnimationData {
-  /**
-   * Node to animation map
-   */
-  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
-      nodeAnimationMap;
-
-  /**
-   * Skin to animation map
-   */
-  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
-      skinAnimationMap;
 };
 
 /**
@@ -222,14 +279,13 @@ TransformData loadTransformData(const tinygltf::Node &node) {
 /**
  * @brief Load textures into registry
  *
- * @param model GLTF model
- * @param path Path to directory
- * @param registry Asset registry
- * @return Asset map
+ * @param importData GLTF import data
  */
-static GLTFToAsset<liquid::TextureAssetHandle>
-loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
-             liquid::AssetCache &assetCache) {
+void loadTextures(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
+
   std::map<size_t, liquid::TextureAssetHandle> map;
 
   for (size_t i = 0; i < model.textures.size(); ++i) {
@@ -237,7 +293,7 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
     auto &image = model.images.at(model.textures.at(i).source);
     liquid::AssetData<liquid::TextureAsset> texture{};
     auto textureRelPath =
-        std::filesystem::relative(path, assetCache.getAssetsPath());
+        std::filesystem::relative(targetPath, assetCache.getAssetsPath());
 
     auto filename = "texture" + std::to_string(i);
     texture.name = (textureRelPath / filename).string();
@@ -251,33 +307,26 @@ loadTextures(const tinygltf::Model &model, const std::filesystem::path &path,
 
     auto &&texturePath = assetCache.createTextureFromAsset(texture);
     auto handle = assetCache.loadTextureFromFile(texturePath.getData());
-    map.insert_or_assign(i, handle.getData());
+    importData.textures.map.insert_or_assign(i, handle.getData());
   }
-
-  return {map};
 }
 
 /**
  * @brief Load materials into registry
  *
- * @param model GLTF model
- * @param pathDirectory Path to asset
- * @param registry Asset registry
- * @param textures Texture map
- * @return Asset map
+ * @param importData GLTF import data
  */
-static GLTFToAsset<liquid::MaterialAssetHandle>
-loadMaterials(const tinygltf::Model &model,
-              const std::filesystem::path &pathDirectory,
-              liquid::AssetCache &assetCache,
-              const GLTFToAsset<liquid::TextureAssetHandle> &textures) {
-  std::map<size_t, liquid::MaterialAssetHandle> map;
+void loadMaterials(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
+  const auto &textures = importData.textures;
 
   for (size_t i = 0; i < model.materials.size(); ++i) {
     auto &gltfMaterial = model.materials.at(i);
 
     liquid::AssetData<liquid::MaterialAsset> material;
-    material.name = pathDirectory.string() + "/material" + std::to_string(i);
+    material.name = targetPath.string() + "/material" + std::to_string(i);
     material.type = liquid::AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
@@ -331,10 +380,8 @@ loadMaterials(const tinygltf::Model &model,
 
     auto path = assetCache.createMaterialFromAsset(material);
     auto handle = assetCache.loadMaterialFromFile(path.getData());
-    map.insert_or_assign(i, handle.getData());
+    importData.materials.map.insert_or_assign(i, handle.getData());
   }
-
-  return {map};
 }
 
 /**
@@ -359,13 +406,13 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
   std::vector<TVertex> vertices;
   std::vector<liquid::String> warnings;
 
+  liquid::String meshName =
+      "Mesh #" + std::to_string(i) + ", Primitive #" + std::to_string(p);
+
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
-    liquid::Engine::getLogger().warning()
-        << "Mesh #" << i << ", Primitive #" << p
-        << " does not have a position attribute. Skipping...";
     return liquid::
         Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-            "Mesh primitive not have position attribute");
+            meshName + " skipped because it does not have position attribute");
   }
 
   if (primitive.indices >= 0) {
@@ -393,12 +440,8 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
-      liquid::Engine::getLogger().warning()
-          << "Mesh #" << i << ", Primitive #" << p
-          << " has invalid index format. Skipping...";
-      return liquid::
-          Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-              "Mesh primitive has invalid index format");
+      indices.clear();
+      warnings.push_back("Mesh primitive has invalid index format");
     }
   }
 
@@ -418,12 +461,9 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       vertices[i].z = data[i].z;
     }
   } else {
-    liquid::Engine::getLogger().warning()
-        << "Mesh #" << i << ", Primitive #0"
-        << " has invalid position format. Skipping...";
     return liquid::
         Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-            "Mesh primitive has invalid position format");
+            meshName + " skipped because it has invalid position format");
   }
 
   if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
@@ -440,17 +480,18 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         vertices[i].ny = data[i].y;
         vertices[i].nz = data[i].z;
       }
+    } else {
+      warnings.push_back(meshName + " normals have invalid format");
     }
   } else {
-    warnings.push_back("Mesh does not have normals");
-    liquid::Engine::getLogger().warning()
-        << "Calculating flat normals is not supported";
+    // TODO: Create flat normals
+    warnings.push_back(meshName + " does not have normals");
   }
 
   if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
     auto &&tangentMeta =
         getBufferMetaForAccessor(model, primitive.attributes.at("TANGENT"));
-    // According to spec, normal attribute can only be vec4<float> and
+    // According to spec, tangent attribute can only be vec4<float> and
     // all attributes of a primitive must have the same number of items
     if (tangentMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
         tangentMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
@@ -462,14 +503,12 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         vertices[i].tz = data[i].z;
         vertices[i].tw = data[i].w;
       }
+    } else {
+      warnings.push_back(meshName + " tangents have invalid format");
     }
   } else {
     // TODO: Calculate tangents using MikkTSpace algorithms
-    warnings.push_back("Mesh does not have tangents");
-    liquid::Engine::getLogger().warning()
-        << "Tangents will be calculated using derivative functions in "
-           "pixel shader. For more accurate results, you need to provide "
-           "the tangent attribute when generating GLTF model.";
+    warnings.push_back(meshName + " does not have tangents");
   }
 
   if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
@@ -493,9 +532,6 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         // TODO: Convert integer coordinates to float
-        liquid::Engine::getLogger().warning()
-            << "Integer based texture coordinates are not supported for "
-               "TEXCOORD0";
         warnings.push_back("Integer based texture coordinates are not "
                            "supported for TEXCOORD0");
       }
@@ -523,9 +559,6 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                  uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         // TODO: Convert integer coordinates to float
-        liquid::Engine::getLogger().warning()
-            << "Integer based texture coordinates are not supported for "
-               "TEXCOORD1";
         warnings.push_back("Integer based texture coordinates are not "
                            "supported for TEXCOORD1");
       }
@@ -544,21 +577,12 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
  * Conforms to on GLTF 2.0 spec
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
  *
- * @param model TinyGLTF model
- * @param pathDirectory Path to asset
- * @param assetCache Asset cache
- * @param materials Material map
- * @param skeletons Skeleton map
+ * @param importData GLTF import data
  */
-static liquid::Result<bool>
-loadMeshes(const tinygltf::Model &model,
-           const std::filesystem::path &pathDirectory,
-           liquid::AssetCache &assetCache,
-           const GLTFToAsset<liquid::MaterialAssetHandle> &materials,
-           const GLTFToAsset<liquid::SkeletonAssetHandle> &skeletons,
-           GLTFToAsset<liquid::MeshAssetHandle> &outMeshes,
-           GLTFToAsset<liquid::SkinnedMeshAssetHandle> &outSkinnedMeshes) {
-  std::vector<liquid::String> warnings;
+static void loadMeshes(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
 
   std::map<size_t, size_t> skeletonMeshMap;
   for (auto &node : model.nodes) {
@@ -590,7 +614,7 @@ loadMeshes(const tinygltf::Model &model,
       const auto &primitive = gltfMesh.primitives.at(p);
 
       auto material = primitive.material >= 0
-                          ? materials.map.at(primitive.material)
+                          ? importData.materials.map.at(primitive.material)
                           : liquid::MaterialAssetHandle::Invalid;
 
       if (isSkinnedMesh) {
@@ -598,12 +622,13 @@ loadMeshes(const tinygltf::Model &model,
             primitive, i, p, model);
 
         if (result.hasError()) {
-          warnings.push_back(result.getError());
+          importData.warnings.push_back(result.getError());
           continue;
         }
 
-        warnings.insert(warnings.end(), result.getWarnings().begin(),
-                        result.getWarnings().end());
+        importData.warnings.insert(importData.warnings.end(),
+                                   result.getWarnings().begin(),
+                                   result.getWarnings().end());
 
         auto &vertices = result.getData().first;
         auto &indices = result.getData().second;
@@ -663,49 +688,46 @@ loadMeshes(const tinygltf::Model &model,
 
         if (vertices.size() > 0) {
           skinnedMesh.data.geometries.push_back({vertices, indices, material});
-          skinnedMesh.name =
-              pathDirectory.string() + "/skinnedmesh" + std::to_string(i);
-          skinnedMesh.type = liquid::AssetType::SkinnedMesh;
-
-          auto it = skeletonMeshMap.find(i);
-          if (it != skeletonMeshMap.end() &&
-              skeletons.map.find(it->second) != skeletons.map.end()) {
-            skinnedMesh.data.skeleton = skeletons.map.at(it->second);
-          }
-
-          auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
-          auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
-          outSkinnedMeshes.map.insert_or_assign(i, handle.getData());
         }
       } else {
         auto &&result =
             loadStandardMeshAttributes<liquid::Vertex>(primitive, i, p, model);
 
         if (result.hasError()) {
-          warnings.push_back(result.getError());
+          importData.warnings.push_back(result.getError());
           continue;
         }
 
-        warnings.insert(warnings.end(), result.getWarnings().begin(),
-                        result.getWarnings().end());
+        importData.warnings.insert(importData.warnings.end(),
+                                   result.getWarnings().begin(),
+                                   result.getWarnings().end());
 
         auto &vertices = result.getData().first;
         auto &indices = result.getData().second;
 
         if (vertices.size() > 0) {
-          mesh.name = pathDirectory.string() + "/mesh" + std::to_string(i);
-          mesh.type = liquid::AssetType::Mesh;
           mesh.data.geometries.push_back({vertices, indices, material});
-
-          auto path = assetCache.createMeshFromAsset(mesh);
-          auto handle = assetCache.loadMeshFromFile(path.getData());
-          outMeshes.map.insert_or_assign(i, handle.getData());
         }
       }
     }
-  }
 
-  return liquid::Result<bool>::Ok(true, warnings);
+    if (isSkinnedMesh && !skinnedMesh.data.geometries.empty()) {
+      skinnedMesh.name =
+          targetPath.string() + "/skinnedmesh" + std::to_string(i);
+      skinnedMesh.type = liquid::AssetType::SkinnedMesh;
+
+      auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
+      auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
+      importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
+    } else if (!mesh.data.geometries.empty()) {
+      mesh.name = targetPath.string() + "/mesh" + std::to_string(i);
+      mesh.type = liquid::AssetType::Mesh;
+
+      auto path = assetCache.createMeshFromAsset(mesh);
+      auto handle = assetCache.loadMeshFromFile(path.getData());
+      importData.meshes.map.insert_or_assign(i, handle.getData());
+    }
+  }
 }
 
 /**
@@ -714,14 +736,12 @@ loadMeshes(const tinygltf::Model &model,
  * Conforms to on GLTF 2.0 spec
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
  *
- * @param model TinyGLTF model
- * @param path Path to asset
- * @param assetCache Asset cache
+ * @param importData GLTF import data
  */
-SkeletonData loadSkeletons(const tinygltf::Model &model,
-                           const std::filesystem::path &path,
-                           liquid::AssetCache &assetCache) {
-  SkeletonData skeletonData{};
+void loadSkeletons(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
 
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
     const auto &skin = model.skins.at(si);
@@ -748,7 +768,7 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
       continue;
     }
 
-    if (ibMeta.accessor.count < skin.joints.size()) {
+    if (ibMeta.accessor.count != skin.joints.size()) {
       liquid::Engine::getLogger().warning()
           << "Inverse bind matrices cannot be fewer than number of joints. "
              "Skipping "
@@ -768,11 +788,15 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
       }
     }
 
-    for (uint32_t i = 0; i < static_cast<uint32_t>(skin.joints.size()); ++i) {
+    bool skeletonValid = true;
+    for (uint32_t i = 0;
+         i < static_cast<uint32_t>(skin.joints.size()) && skeletonValid; ++i) {
       const auto &joint = skin.joints.at(i);
 
-      if (skeletonData.gltfToNormalizedJointMap.find(joint) !=
-          skeletonData.gltfToNormalizedJointMap.end()) {
+      skeletonValid =
+          importData.skeletons.gltfToNormalizedJointMap.find(joint) ==
+          importData.skeletons.gltfToNormalizedJointMap.end();
+      if (!skeletonValid) {
         liquid::Engine::getLogger().warning()
             << "Single joint cannot be a child of multiple skins. Skipping "
                "joint #"
@@ -782,15 +806,15 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
             << si;
         continue;
       }
-      LIQUID_ASSERT(skeletonData.gltfToNormalizedJointMap.find(joint) ==
-                        skeletonData.gltfToNormalizedJointMap.end(),
-                    "Single joint cannot be accessed by multiple skins");
       normalizedJointMap.insert({joint, i});
-      skeletonData.gltfToNormalizedJointMap.insert({joint, i});
-      skeletonData.jointSkinMap.insert({joint, si});
+      importData.skeletons.gltfToNormalizedJointMap.insert({joint, i});
+      importData.skeletons.jointSkinMap.insert({joint, si});
 
       jointParents.insert({i, -1});
     }
+
+    if (!skeletonValid)
+      continue;
 
     for (uint32_t j = 0; j < static_cast<uint32_t>(model.nodes.size()); ++j) {
       if (normalizedJointMap.find(j) == normalizedJointMap.end()) {
@@ -813,8 +837,8 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
 
     liquid::AssetData<liquid::SkeletonAsset> asset;
-    asset.name = path.string() + "/" + path.filename().string() + "-skeleton" +
-                 std::to_string(si);
+    asset.name = targetPath.string() + "/" + targetPath.filename().string() +
+                 "-skeleton" + std::to_string(si);
     asset.type = liquid::AssetType::Skeleton;
 
     for (auto &joint : skin.joints) {
@@ -835,11 +859,9 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
     auto path = assetCache.createSkeletonFromAsset(asset);
     auto handle = assetCache.loadSkeletonFromFile(path.getData());
 
-    skeletonData.skeletonMap.map.insert_or_assign(static_cast<size_t>(si),
-                                                  handle.getData());
+    importData.skeletons.skeletonMap.map.insert_or_assign(
+        static_cast<size_t>(si), handle.getData());
   }
-
-  return skeletonData;
 }
 
 /**
@@ -848,16 +870,13 @@ SkeletonData loadSkeletons(const tinygltf::Model &model,
  * Conforms to on GLTF 2.0 spec
  * https://github.com/KhronosGroup/glTF/tree/master/specification/2.0
  *
- * @param model TinyGLTF model
- * @param pathDirectory Path to asset
- * @param assetCache Asset cache
- * @param skeletonData Skeleton data
+ * @param importData GLTF import data
  */
-AnimationData loadAnimations(const tinygltf::Model &model,
-                             const std::filesystem::path &pathDirectory,
-                             liquid::AssetCache &assetCache,
-                             const SkeletonData &skeletonData) {
-  AnimationData animationData;
+void loadAnimations(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
+
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
@@ -956,7 +975,7 @@ AnimationData loadAnimations(const tinygltf::Model &model,
     }
 
     liquid::AssetData<liquid::AnimationAsset> animation;
-    animation.name = pathDirectory.string() + "/" + gltfAnimation.name;
+    animation.name = targetPath.string() + "/" + gltfAnimation.name;
     animation.data.time = maxTime;
 
     int32_t targetNode = -1;
@@ -981,18 +1000,18 @@ AnimationData loadAnimations(const tinygltf::Model &model,
 
       uint32_t targetJoint = 0;
 
-      auto it = skeletonData.jointSkinMap.find(channel.target_node);
-      bool skinFound = it != skeletonData.jointSkinMap.end();
+      auto it = importData.skeletons.jointSkinMap.find(channel.target_node);
+      bool skinFound = it != importData.skeletons.jointSkinMap.end();
       if (targetSkin == -1 && skinFound) {
         targetSkin = static_cast<int32_t>(it->second);
-        targetJoint =
-            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+        targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(
+            channel.target_node);
       } else if (skinFound) {
         LIQUID_ASSERT(
             it->second == targetSkin,
             "All channels in animation must point to the same target skin");
-        targetJoint =
-            skeletonData.gltfToNormalizedJointMap.at(channel.target_node);
+        targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(
+            channel.target_node);
       }
 
       if (targetSkin == -1 && targetNode == -1) {
@@ -1030,35 +1049,38 @@ AnimationData loadAnimations(const tinygltf::Model &model,
     auto handle = assetCache.loadAnimationFromFile(filePath.getData());
 
     if (targetSkin >= 0) {
-      if (animationData.skinAnimationMap.find(targetSkin) ==
-          animationData.skinAnimationMap.end()) {
-        animationData.skinAnimationMap.insert(
+      if (importData.animations.skinAnimationMap.find(targetSkin) ==
+          importData.animations.skinAnimationMap.end()) {
+        importData.animations.skinAnimationMap.insert(
             {static_cast<uint32_t>(targetSkin), {}});
       }
-      animationData.skinAnimationMap.at(targetSkin).push_back(handle.getData());
+      importData.animations.skinAnimationMap.at(targetSkin)
+          .push_back(handle.getData());
     } else {
-      if (animationData.nodeAnimationMap.find(targetSkin) ==
-          animationData.nodeAnimationMap.end()) {
-        animationData.nodeAnimationMap.insert(
+      if (importData.animations.nodeAnimationMap.find(targetSkin) ==
+          importData.animations.nodeAnimationMap.end()) {
+        importData.animations.nodeAnimationMap.insert(
             {static_cast<uint32_t>(targetNode), {}});
       }
 
-      animationData.nodeAnimationMap.at(targetNode).push_back(handle.getData());
+      importData.animations.nodeAnimationMap.at(targetNode)
+          .push_back(handle.getData());
     }
   }
-  return animationData;
 }
 
-static liquid::Result<liquid::Path>
-loadPrefabs(const tinygltf::Model &model,
-            const std::filesystem::path &pathDirectory,
-            liquid::AssetCache &assetCache,
-            const GLTFToAsset<liquid::MeshAssetHandle> &meshes,
-            const GLTFToAsset<liquid::SkinnedMeshAssetHandle> &skinnedMeshes,
-            const SkeletonData &skeletons, const AnimationData &animations) {
+/**
+ * @brief Load prefabs into asset registry
+ *
+ * @param importData GLTF import data
+ */
+static liquid::Result<liquid::Path> loadPrefabs(GLTFImportData &importData) {
+  auto &assetCache = importData.assetCache;
+  const auto &targetPath = importData.targetPath;
+  const auto &model = importData.model;
 
   liquid::AssetData<liquid::PrefabAsset> prefab;
-  prefab.name = pathDirectory.string() + "/" + pathDirectory.stem().string();
+  prefab.name = targetPath.string() + "/" + targetPath.stem().string();
   prefab.type = liquid::AssetType::Prefab;
 
   auto &gltfNodes = model.scenes.at(model.defaultScene);
@@ -1106,14 +1128,14 @@ loadPrefabs(const tinygltf::Model &model,
 
     if (node.skin >= 0) {
       prefab.data.skinnedMeshes.push_back(
-          {localEntityId, skinnedMeshes.map.at(node.mesh)});
+          {localEntityId, importData.skinnedMeshes.map.at(node.mesh)});
       prefab.data.skeletons.push_back(
-          {localEntityId, skeletons.skeletonMap.map.at(node.skin)});
+          {localEntityId, importData.skeletons.skeletonMap.map.at(node.skin)});
 
       liquid::Animator component;
 
-      auto it = animations.skinAnimationMap.find(node.skin);
-      if (it != animations.skinAnimationMap.end()) {
+      auto it = importData.animations.skinAnimationMap.find(node.skin);
+      if (it != importData.animations.skinAnimationMap.end()) {
         component.animations = it->second;
       }
 
@@ -1121,12 +1143,13 @@ loadPrefabs(const tinygltf::Model &model,
         prefab.data.animators.push_back({localEntityId, component});
       }
     } else {
-      prefab.data.meshes.push_back({localEntityId, meshes.map.at(node.mesh)});
+      prefab.data.meshes.push_back(
+          {localEntityId, importData.meshes.map.at(node.mesh)});
 
       liquid::Animator component;
 
-      auto it = animations.nodeAnimationMap.find(nodeIndex);
-      if (it != animations.nodeAnimationMap.end()) {
+      auto it = importData.animations.nodeAnimationMap.find(nodeIndex);
+      if (it != importData.animations.nodeAnimationMap.end()) {
         component.animations = it->second;
       }
 
@@ -1169,9 +1192,6 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
     return liquid::Result<liquid::Path>::Error("Cannot load GLB file");
   }
 
-  GLTFToAsset<liquid::MeshAssetHandle> meshMap;
-  GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshMap;
-
   std::vector<liquid::String> warnings;
 
   if (std::filesystem::exists(engineAssetPath)) {
@@ -1180,22 +1200,15 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
 
   std::filesystem::create_directory(engineAssetPath);
 
-  auto &&textures = loadTextures(model, engineAssetPath, mAssetCache);
-  auto &&materials =
-      loadMaterials(model, engineAssetPath, mAssetCache, textures);
-  auto &&skeletonData = loadSkeletons(model, engineAssetPath, mAssetCache);
-  auto &&animationData =
-      loadAnimations(model, engineAssetPath, mAssetCache, skeletonData);
+  GLTFImportData importData{mAssetCache, engineAssetPath, model};
 
-  const auto &meshResult =
-      loadMeshes(model, engineAssetPath, mAssetCache, materials,
-                 skeletonData.skeletonMap, meshMap, skinnedMeshMap);
+  loadTextures(importData);
+  loadMaterials(importData);
+  loadSkeletons(importData);
+  loadAnimations(importData);
+  loadMeshes(importData);
 
-  warnings.insert(warnings.end(), meshResult.getWarnings().begin(),
-                  meshResult.getWarnings().end());
-
-  auto prefabPath = loadPrefabs(model, engineAssetPath, mAssetCache, meshMap,
-                                skinnedMeshMap, skeletonData, animationData);
+  auto prefabPath = loadPrefabs(importData);
 
   if (!prefabPath.hasData()) {
     return prefabPath;
