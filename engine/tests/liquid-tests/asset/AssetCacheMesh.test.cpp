@@ -214,6 +214,28 @@ TEST_F(AssetCacheTest, CreatesMeshFileFromMeshAsset) {
   }
 }
 
+TEST_F(AssetCacheTest, DoesNotLoadMeshIfItHasNoVertices) {
+  auto asset = createRandomizedMeshAsset();
+  for (auto &geometry : asset.data.geometries) {
+    geometry.vertices.clear();
+  }
+
+  auto filePath = cache.createMeshFromAsset(asset).getData();
+  auto handle = cache.loadMeshFromFile(filePath);
+  EXPECT_TRUE(handle.hasError());
+}
+
+TEST_F(AssetCacheTest, DoesNotLoadMeshIfItHasNoIndices) {
+  auto asset = createRandomizedMeshAsset();
+  for (auto &geometry : asset.data.geometries) {
+    geometry.indices.clear();
+  }
+
+  auto filePath = cache.createMeshFromAsset(asset).getData();
+  auto handle = cache.loadMeshFromFile(filePath);
+  EXPECT_TRUE(handle.hasError());
+}
+
 TEST_F(AssetCacheTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset).getData();
@@ -264,6 +286,8 @@ TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
 
   liquid::BaseGeometryAsset<liquid::Vertex> geometry;
   geometry.material = materialHandle.getData();
+  geometry.vertices.push_back({1.0f});
+  geometry.indices.push_back(1);
   meshData.data.geometries.push_back(geometry);
 
   auto meshPath = cache.createMeshFromAsset(meshData);
@@ -394,6 +418,28 @@ TEST_F(AssetCacheTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   }
 }
 
+TEST_F(AssetCacheTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
+  auto asset = createRandomizedSkinnedMeshAsset();
+  for (auto &geometry : asset.data.geometries) {
+    geometry.vertices.clear();
+  }
+
+  auto filePath = cache.createSkinnedMeshFromAsset(asset).getData();
+  auto handle = cache.loadSkinnedMeshFromFile(filePath);
+  EXPECT_TRUE(handle.hasError());
+}
+
+TEST_F(AssetCacheTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
+  auto asset = createRandomizedSkinnedMeshAsset();
+  for (auto &geometry : asset.data.geometries) {
+    geometry.indices.clear();
+  }
+
+  auto filePath = cache.createSkinnedMeshFromAsset(asset).getData();
+  auto handle = cache.loadSkinnedMeshFromFile(filePath);
+  EXPECT_TRUE(handle.hasError());
+}
+
 TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
@@ -445,6 +491,8 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
   meshData.name = "test-smesh";
   liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
   geometry.material = materialHandle.getData();
+  geometry.vertices.push_back({1.0f});
+  geometry.indices.push_back(1);
   meshData.data.geometries.push_back(geometry);
 
   auto meshPath = cache.createSkinnedMeshFromAsset(meshData);

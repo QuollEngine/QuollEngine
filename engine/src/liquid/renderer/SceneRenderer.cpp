@@ -397,11 +397,8 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
-      if (indexed) {
-        commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                    rhi::IndexType::Uint32);
-      }
+      commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                  rhi::IndexType::Uint32);
 
       if (bindMaterialData) {
         commandList.bindDescriptor(pipeline, 2,
@@ -413,16 +410,9 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       uint32_t vertexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-      if (indexed) {
-        commandList.drawIndexed(
-            indexCount, 0, 0, static_cast<uint32_t>(meshData.transforms.size()),
-            instanceStart);
-      } else {
-        commandList.draw(vertexCount, 0,
-                         static_cast<uint32_t>(meshData.transforms.size()),
-                         instanceStart);
-      }
-
+      commandList.drawIndexed(indexCount, 0, 0,
+                              static_cast<uint32_t>(meshData.transforms.size()),
+                              instanceStart);
       instanceStart += static_cast<uint32_t>(meshData.transforms.size());
     }
   }
@@ -439,11 +429,8 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-      bool indexed = rhi::isHandleValid(mesh.indexBuffers.at(g).getHandle());
-      if (indexed) {
-        commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                    rhi::IndexType::Uint32);
-      }
+      commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
+                                  rhi::IndexType::Uint32);
 
       uint32_t indexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
@@ -457,11 +444,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
 
       uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
 
-      if (indexed) {
-        commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
-      } else {
-        commandList.draw(vertexCount, 0, numInstances, instanceStart);
-      }
+      commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
 
       instanceStart += numInstances;
     }

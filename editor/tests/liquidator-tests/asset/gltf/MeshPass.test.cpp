@@ -161,9 +161,9 @@ TYPED_TEST_P(MeshAttributeTest, CreatesMeshWithoutAttributeIfNotProvided) {
       EXPECT_EQ(glm::vec2(v.u1, v.v1), p.texCoords1.data.at(i));
     }
 
-    if constexpr (std::is_base_of<typename TypeParam::Type,
-                                  GLTFTestAttribute::Indices>()) {
-      EXPECT_TRUE(g.indices.empty());
+    EXPECT_EQ(g.indices.size(), p.indices.data.size());
+    for (size_t i = 0; i < g.indices.size(); ++i) {
+      EXPECT_EQ(g.indices.at(i), p.indices.data.at(i));
     }
   }
 }
@@ -241,9 +241,9 @@ TYPED_TEST_P(MeshAttributeTest,
       EXPECT_EQ(glm::vec2(v.u1, v.v1), p.texCoords1.data.at(i));
     }
 
-    if constexpr (std::is_base_of<typename TypeParam::Type,
-                                  GLTFTestAttribute::Indices>()) {
-      EXPECT_TRUE(g.indices.empty());
+    EXPECT_EQ(g.indices.size(), p.indices.data.size());
+    for (size_t i = 0; i < g.indices.size(); ++i) {
+      EXPECT_EQ(g.indices.at(i), p.indices.data.at(i));
     }
   }
 }
@@ -314,9 +314,9 @@ TYPED_TEST_P(MeshAttributeTest, CreatesMeshWithoutAttributeIfInvalidType) {
       EXPECT_EQ(glm::vec2(v.u1, v.v1), p.texCoords1.data.at(i));
     }
 
-    if constexpr (std::is_base_of<typename TypeParam::Type,
-                                  GLTFTestAttribute::Indices>()) {
-      EXPECT_TRUE(g.indices.empty());
+    EXPECT_EQ(g.indices.size(), p.indices.data.size());
+    for (size_t i = 0; i < g.indices.size(); ++i) {
+      EXPECT_EQ(g.indices.at(i), p.indices.data.at(i));
     }
   }
 }
@@ -368,9 +368,9 @@ TYPED_TEST_P(
       EXPECT_EQ(glm::vec2(v.u1, v.v1), p.texCoords1.data.at(i));
     }
 
-    if constexpr (std::is_base_of<typename TypeParam::Type,
-                                  GLTFTestAttribute::Indices>()) {
-      EXPECT_TRUE(g.indices.empty());
+    EXPECT_EQ(g.indices.size(), p.indices.data.size());
+    for (size_t i = 0; i < g.indices.size(); ++i) {
+      EXPECT_EQ(g.indices.at(i), p.indices.data.at(i));
     }
   }
 }
@@ -450,6 +450,15 @@ template <class T> struct DefaultZeroFn {
   }
 };
 
+struct DefaultIndicesFn {
+  static void call(GLTFTestBufferData<uint32_t> &data, GLTFTestPrimitive &p) {
+    data.data.resize(p.positions.data.size());
+    for (size_t i = 0; i < p.positions.data.size(); ++i) {
+      data.data.at(i) = static_cast<uint32_t>(i);
+    }
+  }
+};
+
 template <class T> struct NoopFn {
   static void call(GLTFTestBufferData<T> &data, GLTFTestPrimitive &p) {
     // do nothing
@@ -476,7 +485,7 @@ using IndexAttribute =
                        ValidValues<TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE,
                                    TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,
                                    TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT>,
-                       ValidValues<TINYGLTF_TYPE_SCALAR>, NoopFn<uint32_t>>;
+                       ValidValues<TINYGLTF_TYPE_SCALAR>, DefaultIndicesFn>;
 
 using MeshAttributeTestTypes =
     ::testing::Types<NormalAttribute, TangentAttribute, TexCoords0Attribute,
