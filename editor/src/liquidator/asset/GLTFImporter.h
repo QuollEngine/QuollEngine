@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquid/asset/Result.h"
-#include "liquid/asset/AssetCache.h"
+#include "gltf/GLTFImportData.h"
 
 namespace liquidator {
 
