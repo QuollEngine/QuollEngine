@@ -48,7 +48,10 @@ void loadPrefabs(GLTFImportData &importData) {
       }
     }
 
-    if (node.mesh < 0)
+    if (node.mesh < 0 ||
+        importData.skinnedMeshes.map.find(node.mesh) ==
+            importData.skinnedMeshes.map.end() ||
+        importData.meshes.map.find(node.mesh) != importData.meshes.map.end())
       continue;
 
     auto localEntityId = static_cast<uint32_t>(nodeIndex);
@@ -65,6 +68,7 @@ void loadPrefabs(GLTFImportData &importData) {
     if (node.skin >= 0) {
       prefab.data.skinnedMeshes.push_back(
           {localEntityId, importData.skinnedMeshes.map.at(node.mesh)});
+
       prefab.data.skeletons.push_back(
           {localEntityId, importData.skeletons.skeletonMap.map.at(node.skin)});
 

@@ -40,8 +40,6 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
     return liquid::Result<liquid::Path>::Error("Cannot load GLB file");
   }
 
-  std::vector<liquid::String> warnings;
-
   if (std::filesystem::exists(engineAssetPath)) {
     std::filesystem::remove_all(engineAssetPath);
   }
@@ -62,7 +60,7 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
   }
 
   return liquid::Result<liquid::Path>::Ok(importData.outputPath.getData(),
-                                          warnings);
+                                          importData.warnings);
 }
 
 liquid::Result<liquid::Path>

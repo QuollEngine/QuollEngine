@@ -83,8 +83,8 @@
     },
     {
       "name": "msdfgen",
-      "url": "https://github.com/Chlumsky/msdfgen/archive/refs/heads/master.zip",
-      "buildSource": "msdfgen-master",
+      "url": "https://github.com/Chlumsky/msdfgen/archive/4e8ff2321ea9696801675c908a4822c4d8e71eb8.zip",
+      "buildSource": "msdfgen-4e8ff2321ea9696801675c908a4822c4d8e71eb8",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdfgen",
         "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdfgen/core",

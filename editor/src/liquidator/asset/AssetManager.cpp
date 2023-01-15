@@ -196,7 +196,15 @@ AssetManager::validateAndPreloadAssets(liquid::RenderStorage &renderStorage) {
     }
   }
 
-  return mAssetCache.preloadAssets(renderStorage);
+  auto res = mAssetCache.preloadAssets(renderStorage);
+
+  if (res.hasError())
+    return res;
+
+  warnings.insert(warnings.end(), res.getWarnings().begin(),
+                  res.getWarnings().end());
+
+  return liquid::Result<bool>::Ok(true, warnings);
 }
 
 liquid::Result<bool>
@@ -222,7 +230,7 @@ AssetManager::loadOriginalAsset(const liquid::Path &originalAssetPath) {
 
   if (res.hasData()) {
     createHashFile(originalAssetPath, res.getData());
-    return liquid::Result<bool>::Ok(true);
+    return liquid::Result<bool>::Ok(true, res.getWarnings());
   }
 
   if (createdDirectory.has_value()) {
