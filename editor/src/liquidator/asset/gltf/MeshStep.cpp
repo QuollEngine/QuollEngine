@@ -1,8 +1,6 @@
 #include "liquid/core/Base.h"
-// TODO: Remove engine logger
-#include "liquid/core/Engine.h"
-#include "MeshStep.h"
 
+#include "MeshStep.h"
 #include "Buffer.h"
 
 namespace liquidator {
@@ -203,6 +201,85 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                                                                   warnings);
 }
 
+liquid::Result<bool>
+loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
+                          size_t p, const tinygltf::Model &model,
+                          std::vector<liquid::SkinnedVertex> &vertices) {
+  liquid::String meshName = "Skinned mesh #" + std::to_string(i) +
+                            ", Primitive #" + std::to_string(p);
+
+  std::vector<liquid::String> warnings;
+
+  bool validJoints =
+      primitive.attributes.find("JOINTS_0") != primitive.attributes.end();
+
+  if (validJoints) {
+    auto &&jointMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("JOINTS_0"));
+
+    validJoints = jointMeta.accessor.type == TINYGLTF_TYPE_VEC4;
+    if (validJoints) {
+      if (jointMeta.accessor.componentType ==
+          TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+        const auto *data =
+            reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
+
+        for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+          vertices.at(i).j0 = data[i].x;
+          vertices.at(i).j1 = data[i].y;
+          vertices.at(i).j2 = data[i].z;
+          vertices.at(i).j3 = data[i].w;
+        }
+      } else if (jointMeta.accessor.componentType ==
+                 TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+        const auto *data =
+            reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
+        for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
+          vertices.at(i).j0 = data[i].x;
+          vertices.at(i).j1 = data[i].y;
+          vertices.at(i).j2 = data[i].z;
+          vertices.at(i).j3 = data[i].w;
+        }
+      } else {
+        validJoints = false;
+      }
+    }
+  }
+
+  if (!validJoints) {
+    warnings.push_back(meshName + " joints attribute is invalid");
+  }
+
+  bool validWeights =
+      primitive.attributes.find("WEIGHTS_0") != primitive.attributes.end();
+  if (validWeights) {
+    auto &&weightsMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("WEIGHTS_0"));
+
+    validWeights =
+        weightsMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
+        weightsMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT;
+
+    if (validWeights) {
+      const auto *data =
+          reinterpret_cast<const glm::vec4 *>(weightsMeta.rawData);
+
+      for (size_t i = 0; i < weightsMeta.accessor.count; ++i) {
+        vertices.at(i).w0 = data[i].x;
+        vertices.at(i).w1 = data[i].y;
+        vertices.at(i).w2 = data[i].z;
+        vertices.at(i).w3 = data[i].w;
+      }
+    }
+  }
+
+  if (!validWeights) {
+    warnings.push_back(meshName + " weights attribute is invalid");
+  }
+
+  return liquid::Result<bool>::Ok(true, warnings);
+}
+
 /**
  * @brief Loads meshes into asset registry
  *
@@ -265,58 +342,17 @@ void loadMeshes(GLTFImportData &importData) {
         auto &vertices = result.getData().first;
         auto &indices = result.getData().second;
 
-        if (primitive.attributes.find("JOINTS_0") !=
-            primitive.attributes.end()) {
+        auto &&skinnedResult =
+            loadSkinnedMeshAttributes(primitive, i, p, model, vertices);
 
-          auto &&jointMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("JOINTS_0"));
-
-          if (jointMeta.accessor.type != TINYGLTF_TYPE_VEC4) {
-            liquid::Engine::getLogger().warning()
-                << "Mesh #" << i
-                << " JOINTS_0 is not in VEC4 format. Skipping...";
-          } else if (jointMeta.accessor.componentType ==
-                         TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE &&
-                     jointMeta.accessor.type == TINYGLTF_TYPE_VEC4) {
-            const auto *data =
-                reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
-
-            for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-              vertices.at(i).j0 = data[i].x;
-              vertices.at(i).j1 = data[i].y;
-              vertices.at(i).j2 = data[i].z;
-              vertices.at(i).j3 = data[i].w;
-            }
-          } else if (jointMeta.accessor.componentType ==
-                     TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
-            const auto *data =
-                reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
-            for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-              vertices.at(i).j0 = data[i].x;
-              vertices.at(i).j1 = data[i].y;
-              vertices.at(i).j2 = data[i].z;
-              vertices.at(i).j3 = data[i].w;
-            }
-          }
+        if (skinnedResult.hasError()) {
+          importData.warnings.push_back(result.getError());
+          continue;
         }
 
-        if (primitive.attributes.find("WEIGHTS_0") !=
-            primitive.attributes.end()) {
-          auto &&weightMeta = getBufferMetaForAccessor(
-              model, primitive.attributes.at("WEIGHTS_0"));
-          if (weightMeta.accessor.componentType ==
-              TINYGLTF_COMPONENT_TYPE_FLOAT) {
-            const auto *data =
-                reinterpret_cast<const glm::vec4 *>(weightMeta.rawData);
-
-            for (size_t i = 0; i < weightMeta.accessor.count; ++i) {
-              vertices.at(i).w0 = data[i].x;
-              vertices.at(i).w1 = data[i].y;
-              vertices.at(i).w2 = data[i].z;
-              vertices.at(i).w3 = data[i].w;
-            }
-          }
-        }
+        importData.warnings.insert(importData.warnings.end(),
+                                   skinnedResult.getWarnings().begin(),
+                                   skinnedResult.getWarnings().end());
 
         if (vertices.size() > 0) {
           skinnedMesh.data.geometries.push_back({vertices, indices, material});

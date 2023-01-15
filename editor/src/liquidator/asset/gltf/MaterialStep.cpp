@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+
 #include "MaterialStep.h"
 
 namespace liquidator {

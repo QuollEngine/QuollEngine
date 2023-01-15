@@ -1,6 +1,4 @@
 #include "liquid/core/Base.h"
-// TODO: Remove engine logger
-#include "liquid/core/Engine.h"
 
 #include "AnimationStep.h"
 #include "Buffer.h"
@@ -15,6 +13,8 @@ void loadAnimations(GLTFImportData &importData) {
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
+    liquid::String animationName = "Animation " + gltfAnimation.name;
+
     struct SamplerInfo {
       std::vector<float> times;
       std::vector<glm::vec4> values;
@@ -25,33 +25,39 @@ void loadAnimations(GLTFImportData &importData) {
     std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
 
     float maxTime = 0.0f;
+    bool animationValid = true;
 
-    for (size_t i = 0; i < gltfAnimation.samplers.size(); ++i) {
+    for (size_t i = 0; i < gltfAnimation.samplers.size() && animationValid;
+         ++i) {
       const auto &sampler = gltfAnimation.samplers.at(i);
       const auto &input = getBufferMetaForAccessor(model, sampler.input);
       const auto &output = getBufferMetaForAccessor(model, sampler.output);
 
       if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
-        liquid::Engine::getLogger().warning()
-            << "Animation time accessor must be in SCALAR format. Skipping...";
+        importData.warnings.push_back(animationName +
+                                      " skipped because it has invalid data");
+        animationValid = false;
         continue;
       }
 
       if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        liquid::Engine::getLogger().warning()
-            << "Animation time accessor component type must be FLOAT";
+        importData.warnings.push_back(animationName +
+                                      " skipped because it has invalid data");
+        animationValid = false;
         continue;
       }
 
       if (input.accessor.count != output.accessor.count) {
-        liquid::Engine::getLogger().warning()
-            << "Sampler input and output must have the same number of items";
+        importData.warnings.push_back(animationName +
+                                      " skipped because it has invalid data");
+        animationValid = true;
         continue;
       }
 
       if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        liquid::Engine::getLogger().warning()
-            << "Animation output accessor component type must be FLOAT";
+        importData.warnings.push_back(animationName +
+                                      " skipped because it has invalid data");
+        animationValid = true;
         continue;
       }
 
@@ -116,7 +122,9 @@ void loadAnimations(GLTFImportData &importData) {
     int32_t targetNode = -1;
     int32_t targetSkin = -1;
 
-    for (const auto &channel : gltfAnimation.channels) {
+    for (size_t ci = 0; ci < gltfAnimation.channels.size() && animationValid;
+         ++ci) {
+      const auto &channel = gltfAnimation.channels.at(ci);
       const auto &sampler = samplers.at(channel.sampler);
 
       if (channel.target_node == -1) {
@@ -142,25 +150,34 @@ void loadAnimations(GLTFImportData &importData) {
         targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(
             channel.target_node);
       } else if (skinFound) {
-        LIQUID_ASSERT(
-            it->second == targetSkin,
-            "All channels in animation must point to the same target skin");
+        animationValid = it->second == targetSkin;
+        if (!animationValid) {
+          importData.warnings.push_back(
+              "Animation #" + std::to_string(i) +
+              " skipped because all channels of animation must point to "
+              "the same skin");
+          continue;
+        }
+
         targetJoint = importData.skeletons.gltfToNormalizedJointMap.at(
             channel.target_node);
       }
 
       if (targetSkin == -1 && targetNode == -1) {
         targetNode = channel.target_node;
-      } else {
-        LIQUID_ASSERT(targetNode == -1, "All channels in animation must either "
-                                        "animate skin or node, not both");
-        LIQUID_ASSERT(
-            targetNode == -1 || targetNode == channel.target_node,
-            "All channels in animation must point to the same target node");
+      } else if (targetNode != -1 && targetSkin != -1) {
+        importData.warnings.push_back(
+            animationName +
+            " skipped because a channels points to both skin and node");
+        animationValid = false;
+        continue;
+      } else if (targetNode != -1 && targetNode != channel.target_node) {
+        importData.warnings.push_back(
+            animationName +
+            " skipped because a channel points to a different target node");
+        animationValid = false;
+        continue;
       }
-
-      LIQUID_ASSERT(targetSkin == -1 || targetNode == -1,
-                    "A channel must point to a node or a skin");
 
       liquid::KeyframeSequenceAsset sequence;
       sequence.interpolation = sampler.interpolation;
@@ -178,10 +195,20 @@ void loadAnimations(GLTFImportData &importData) {
       animation.data.keyframes.push_back(sequence);
     }
 
-    LIQUID_ASSERT(targetNode >= 0 || targetSkin >= 0,
-                  "Animation must have a target node or skin");
+    if (targetNode == -1 && targetSkin == -1) {
+      importData.warnings.push_back(
+          animationName +
+          " skipped because it does not have a target node or skin");
+      animationValid = false;
+      continue;
+    }
+
     auto filePath = assetCache.createAnimationFromAsset(animation);
     auto handle = assetCache.loadAnimationFromFile(filePath.getData());
+
+    if (!animationValid) {
+      continue;
+    }
 
     if (targetSkin >= 0) {
       if (importData.animations.skinAnimationMap.find(targetSkin) ==
@@ -203,4 +230,5 @@ void loadAnimations(GLTFImportData &importData) {
     }
   }
 }
+
 } // namespace liquidator

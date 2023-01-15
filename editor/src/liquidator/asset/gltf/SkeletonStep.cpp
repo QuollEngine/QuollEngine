@@ -1,6 +1,4 @@
 #include "liquid/core/Base.h"
-// TODO: Remove engine logger
-#include "liquid/core/Engine.h"
 
 #include "SkeletonStep.h"
 #include "Buffer.h"
@@ -16,34 +14,31 @@ void loadSkeletons(GLTFImportData &importData) {
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
     const auto &skin = model.skins.at(si);
 
+    auto skinName = "Skin #" + std::to_string(si);
+
     std::unordered_map<uint32_t, int> jointParents;
     std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
 
     auto &&ibMeta = getBufferMetaForAccessor(model, skin.inverseBindMatrices);
 
     if (ibMeta.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-      liquid::Engine::getLogger().warning()
-          << "Inverse bind matrices accessor must be of type FLOAT. Skipping "
-             "skin #"
-          << si;
+      importData.warnings.push_back(
+          skinName +
+          " skipped because inverse bind matrices component type is not FLOAT");
 
       continue;
     }
 
     if (ibMeta.accessor.type != TINYGLTF_TYPE_MAT4) {
-      liquid::Engine::getLogger().warning()
-          << "Inverse bind matrices accessor must be MAT4. Skipping "
-             "skin #"
-          << si;
+      importData.warnings.push_back(
+          skinName + " skipped because inverse bind matrices type is not MAT4");
       continue;
     }
 
     if (ibMeta.accessor.count != skin.joints.size()) {
-      liquid::Engine::getLogger().warning()
-          << "Inverse bind matrices cannot be fewer than number of joints. "
-             "Skipping "
-             "skin #"
-          << si;
+      importData.warnings.push_back(
+          skinName + " skipped because number of inverse bind matrices "
+                     "is different from number of joints");
       continue;
     }
 
@@ -67,13 +62,8 @@ void loadSkeletons(GLTFImportData &importData) {
           importData.skeletons.gltfToNormalizedJointMap.find(joint) ==
           importData.skeletons.gltfToNormalizedJointMap.end();
       if (!skeletonValid) {
-        liquid::Engine::getLogger().warning()
-            << "Single joint cannot be a child of multiple skins. Skipping "
-               "joint #"
-            << joint
-            << " for "
-               "skin #"
-            << si;
+        importData.warnings.push_back(
+            skinName + " skipped because a joint is a child of multiple skins");
         continue;
       }
       normalizedJointMap.insert({joint, i});
