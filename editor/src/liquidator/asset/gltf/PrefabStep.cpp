@@ -49,9 +49,9 @@ void loadPrefabs(GLTFImportData &importData) {
     }
 
     if (node.mesh < 0 ||
-        importData.skinnedMeshes.map.find(node.mesh) ==
-            importData.skinnedMeshes.map.end() ||
-        importData.meshes.map.find(node.mesh) != importData.meshes.map.end())
+        (importData.skinnedMeshes.map.find(node.mesh) ==
+             importData.skinnedMeshes.map.end() &&
+         importData.meshes.map.find(node.mesh) == importData.meshes.map.end()))
       continue;
 
     auto localEntityId = static_cast<uint32_t>(nodeIndex);

@@ -7,7 +7,7 @@ project "Liquidator"
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo", "meshoptimizer"}
+    linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     
     copyRuntime();
 
@@ -60,7 +60,7 @@ project "LiquidatorTests"
     }
 
     setupTestingOptions{}
-    links { "LiquidEngine", "LiquidEngineRHICore", "LiquidEngineRHIVulkan", "LiquidEnginePlatformTools", "vendor-libimguizmo" }
+    links { "LiquidEngine", "LiquidEngineRHICore", "LiquidEngineRHIVulkan", "LiquidEnginePlatformTools", "vendor-libimguizmo", "vendor-libmikktspace" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
 

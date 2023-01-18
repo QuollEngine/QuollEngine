@@ -14,13 +14,13 @@ namespace fs = std::filesystem;
 static const liquid::Path CachePath = fs::current_path() / "cache";
 static const liquid::Path TempPath = fs::current_path() / "temp2";
 
-struct GLTFTestAttribute {
-  struct Positions {};
-  struct Normals {};
-  struct Tangents {};
-  struct TexCoords0 {};
-  struct TexCoords1 {};
-  struct Indices {};
+enum class GLTFTestAttribute {
+  Positions,
+  Normals,
+  Tangents,
+  TexCoords0,
+  TexCoords1,
+  Indices
 };
 
 template <class T> struct GLTFTestBufferData {
@@ -41,24 +41,28 @@ struct GLTFTestPrimitive {
     return GLTFTestBufferData<T>{};
   }
 
-  template <class T> constexpr auto &get() {
-    if constexpr (std::is_base_of<T, GLTFTestAttribute::Normals>()) {
+  template <GLTFTestAttribute T> constexpr auto &get() {
+    if constexpr (T == GLTFTestAttribute::Positions) {
+      return positions;
+    }
+
+    if constexpr (T == GLTFTestAttribute::Normals) {
       return normals;
     }
 
-    if constexpr (std::is_base_of<T, GLTFTestAttribute::Tangents>()) {
+    if constexpr (T == GLTFTestAttribute::Tangents) {
       return tangents;
     }
 
-    if constexpr (std::is_base_of<T, GLTFTestAttribute::TexCoords0>()) {
+    if constexpr (T == GLTFTestAttribute::TexCoords0) {
       return texCoords0;
     }
 
-    if constexpr (std::is_base_of<T, GLTFTestAttribute::TexCoords1>()) {
+    if constexpr (T == GLTFTestAttribute::TexCoords1) {
       return texCoords1;
     }
 
-    if constexpr (std::is_base_of<T, GLTFTestAttribute::Indices>()) {
+    if constexpr (T == GLTFTestAttribute::Indices) {
       return indices;
     }
   }
@@ -259,6 +263,10 @@ static GLTFTestPrimitive createCubePrimitive() {
     primitive.tangents.data.at(i) = glm::vec4(v.tx, v.ty, v.tz, v.tw);
     primitive.texCoords0.data.at(i) = glm::vec2(v.u0, v.v0);
     primitive.texCoords1.data.at(i) = glm::vec2(v.u1, v.v1);
+  }
+
+  for (size_t i = 0; i < g.indices.size(); ++i) {
+    primitive.indices.data.at(i) = g.indices.at(i);
   }
 
   return primitive;
