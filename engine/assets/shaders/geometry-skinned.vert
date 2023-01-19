@@ -12,8 +12,7 @@ layout(location = 7) in vec4 inWeights;
 layout(location = 0) out vec3 outWorldPosition;
 layout(location = 1) out vec2 outTextureCoord[2];
 layout(location = 3) out vec3 outNormal;
-layout(location = 4) out float outTangentHand;
-layout(location = 5) out mat3 outTBN;
+layout(location = 4) out mat3 outTBN;
 
 #include "bindless-base.glsl"
 
@@ -37,7 +36,6 @@ void main() {
 
   outWorldPosition = worldPosition.xyz;
   outNormal = normal;
-  outTangentHand = inTangent.w;
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;

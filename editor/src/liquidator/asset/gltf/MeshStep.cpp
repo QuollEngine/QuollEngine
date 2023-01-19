@@ -2,8 +2,75 @@
 
 #include "MeshStep.h"
 #include "Buffer.h"
+#include "mikktspace/MikktspaceAdapter.h"
 
 namespace liquidator {
+
+template <class TVertex> inline glm::vec3 getVertexPosition(TVertex &v) {
+  return glm::vec3(v.x, v.y, v.z);
+}
+
+/**
+ * @brief Generate normals from vertex positions
+ *
+ * @tparam TVertex Vertex type
+ * @param vertices Vertices
+ * @param indices Indices
+ */
+template <class TVertex>
+void generateNormals(std::vector<TVertex> &vertices,
+                     std::vector<uint32_t> &indices) {
+  for (auto &v : vertices) {
+    v.nx = 0.0f;
+    v.ny = 0.0f;
+    v.nz = 0.0f;
+  }
+
+  for (size_t i = 0; i < indices.size(); i += 3) {
+    auto &v0 = vertices.at(indices.at(i));
+    auto &v1 = vertices.at(indices.at(i + 1));
+    auto &v2 = vertices.at(indices.at(i + 2));
+
+    auto edge1 = getVertexPosition(v0) - getVertexPosition(v1);
+    auto edge2 = getVertexPosition(v0) - getVertexPosition(v2);
+
+    auto normal = glm::cross(edge1, edge2);
+
+    v0.nx += normal.x;
+    v0.ny += normal.y;
+    v0.nz += normal.z;
+
+    v1.nx += normal.x;
+    v1.ny += normal.y;
+    v1.nz += normal.z;
+
+    v2.nx += normal.x;
+    v2.ny += normal.y;
+    v2.nz += normal.z;
+  }
+
+  for (auto &v : vertices) {
+    auto n = glm::normalize(glm::vec3(v.nx, v.ny, v.nz));
+    v.nx = n.x;
+    v.ny = n.y;
+    v.nz = n.z;
+  }
+}
+
+/**
+ * @brief Generate tangents using Mikktspace
+ *
+ * @tparam TVertex Vertex type
+ * @param vertices Vertices
+ * @param indices Indices
+ */
+template <class TVertex>
+void generateTangents(std::vector<TVertex> &vertices,
+                      const std::vector<uint32_t> &indices) {
+  MikktspaceAdapter<TVertex> adapter;
+
+  adapter.generate(vertices, indices);
+}
 
 /**
  * @brief Load standard mesh attributes
@@ -56,9 +123,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
             meshName + " skipped because it has invalid position format");
   }
 
-  bool hasIndices = primitive.indices >= 0;
-
-  if (hasIndices) {
+  if (primitive.indices >= 0) {
     auto &&indexMeta = getBufferMetaForAccessor(model, primitive.indices);
     indices.resize(indexMeta.accessor.count);
     if (indexMeta.accessor.componentType ==
@@ -83,62 +148,44 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
-      hasIndices = false;
-      indices.clear();
-      warnings.push_back("Mesh primitive has invalid index format");
+      return liquid::
+          Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
+              meshName + " skipped because it has invalid index format");
     }
-  }
-
-  if (!hasIndices) {
+  } else {
     indices.resize(vertices.size());
     for (size_t i = 0; i < vertices.size(); ++i) {
       indices.at(i) = static_cast<uint32_t>(i);
     }
   }
 
-  if (primitive.attributes.find("NORMAL") != primitive.attributes.end()) {
+  // According to spec, normal attribute can only be vec3<float> and
+  // all attributes of a primitive must have the same number of items
+  bool validNormals =
+      primitive.attributes.find("NORMAL") != primitive.attributes.end();
+
+  if (validNormals) {
     auto &&normalMeta =
         getBufferMetaForAccessor(model, primitive.attributes.at("NORMAL"));
-    // According to spec, normal attribute can only be vec3<float> and
-    // all attributes of a primitive must have the same number of items
-    if (normalMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
+
+    validNormals =
+        normalMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
         normalMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
-        normalMeta.accessor.count == vertexSize) {
+        normalMeta.accessor.count == vertexSize;
+
+    if (validNormals) {
       auto *data = reinterpret_cast<const glm::vec3 *>(normalMeta.rawData);
       for (size_t i = 0; i < vertexSize; ++i) {
         vertices[i].nx = data[i].x;
         vertices[i].ny = data[i].y;
         vertices[i].nz = data[i].z;
       }
-    } else {
-      warnings.push_back(meshName + " normals have invalid format");
     }
-  } else {
-    // TODO: Create flat normals
-    warnings.push_back(meshName + " does not have normals");
   }
 
-  if (primitive.attributes.find("TANGENT") != primitive.attributes.end()) {
-    auto &&tangentMeta =
-        getBufferMetaForAccessor(model, primitive.attributes.at("TANGENT"));
-    // According to spec, tangent attribute can only be vec4<float> and
-    // all attributes of a primitive must have the same number of items
-    if (tangentMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
-        tangentMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
-        tangentMeta.accessor.count == vertexSize) {
-      auto *data = reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
-      for (size_t i = 0; i < vertexSize; ++i) {
-        vertices[i].tx = data[i].x;
-        vertices[i].ty = data[i].y;
-        vertices[i].tz = data[i].z;
-        vertices[i].tw = data[i].w;
-      }
-    } else {
-      warnings.push_back(meshName + " tangents have invalid format");
-    }
-  } else {
-    // TODO: Calculate tangents using MikkTSpace algorithms
-    warnings.push_back(meshName + " does not have tangents");
+  if (!validNormals) {
+    warnings.push_back("Normals for " + meshName + " are generated");
+    generateNormals(vertices, indices);
   }
 
   if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
@@ -193,6 +240,36 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                            "supported for TEXCOORD1");
       }
     }
+  }
+
+  // According to spec, tangent attribute can only be vec4<float> and
+  // all attributes of a primitive must have the same number of items
+  bool validTangents =
+      primitive.attributes.find("TANGENT") != primitive.attributes.end();
+
+  if (validTangents) {
+    auto &&tangentMeta =
+        getBufferMetaForAccessor(model, primitive.attributes.at("TANGENT"));
+
+    validTangents =
+        tangentMeta.accessor.type == TINYGLTF_TYPE_VEC4 &&
+        tangentMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT &&
+        tangentMeta.accessor.count == vertexSize;
+
+    if (validTangents) {
+      auto *data = reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
+      for (size_t i = 0; i < vertexSize; ++i) {
+        vertices[i].tx = data[i].x;
+        vertices[i].ty = data[i].y;
+        vertices[i].tz = data[i].z;
+        vertices[i].tw = data[i].w;
+      }
+    }
+  }
+
+  if (!validTangents) {
+    warnings.push_back("Tangents for " + meshName + " are generated");
+    generateTangents(vertices, indices);
   }
 
   return liquid::Result<

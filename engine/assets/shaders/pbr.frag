@@ -5,8 +5,7 @@
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec2 inTextureCoord[2];
 layout(location = 3) in vec3 inNormal;
-layout(location = 4) in float inTangentHand;
-layout(location = 5) in mat3 inTBN;
+layout(location = 4) in mat3 inTBN;
 
 layout(location = 0) out vec4 outColor;
 
@@ -246,29 +245,10 @@ float schlickSpecularGeometricAttenuation(float roughness, float NdotV,
 /**
  * @brief Get normals from world position
  *
- * Checking for tangent existence is based on
- * w attribute of tangent vector, which determines
- * handedness of tangent. This value can only be +1
- * and -1. So, if this value is 0, we can identify that
- * tangent does not exist for the vertex.
- *
  * @return Normal
  */
 vec3 getNormal() {
   mat3 tbn = inTBN;
-  if (inTangentHand == 0) {
-    vec3 posDx = dFdx(inWorldPosition);
-    vec3 posDy = dFdy(inWorldPosition);
-    vec3 texDx =
-        dFdx(vec3(inTextureCoord[uMaterialData.normalTextureCoord], 0.0));
-    vec3 texDy =
-        dFdy(vec3(inTextureCoord[uMaterialData.normalTextureCoord], 0.0));
-
-    vec3 N = normalize(inNormal);
-    vec3 T = normalize(posDx * texDy.t - posDy * texDx.t);
-    vec3 B = -normalize(cross(N, T));
-    tbn = mat3(T, B, N);
-  }
 
   if (uMaterialData.normalTexture > 0) {
     vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],

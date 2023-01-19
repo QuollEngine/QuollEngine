@@ -211,6 +211,16 @@
       ]
     },
     {
+      "name": "mikktspace",
+      "url": "https://github.com/mmikk/MikkTSpace/archive/refs/heads/master.zip",
+      "buildSource": "MikkTSpace-master",
+      "cmd": [
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/mikktspace",
+        "{COPY} mikktspace.h {{VENDOR_INSTALL_DIR}}/include",
+        "{COPY} mikktspace.c {{VENDOR_PROJECTS_DIR}}/mikktspace/mikktspace.c"
+      ]
+    },
+    {
       "name": "glm",
       "buildSource": "glm",
       "url": "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip",
