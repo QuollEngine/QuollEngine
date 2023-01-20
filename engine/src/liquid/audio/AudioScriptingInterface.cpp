@@ -1,8 +1,11 @@
 #include "liquid/core/Base.h"
-#include "AudioScriptingInterface.h"
+#include "liquid/core/Engine.h"
 
 #include "liquid/scripting/LuaScope.h"
+#include "liquid/scripting/LuaMessages.h"
 #include "liquid/entity/EntityDatabase.h"
+
+#include "AudioScriptingInterface.h"
 
 namespace liquid {
 
@@ -10,7 +13,9 @@ int AudioScriptingInterface::LuaInterface::play(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "play");
+
     return 0;
   }
 
@@ -34,7 +39,8 @@ int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "is_playing");
     scope.set(false);
     return 1;
   }

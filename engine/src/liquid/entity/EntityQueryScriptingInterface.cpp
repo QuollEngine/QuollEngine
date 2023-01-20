@@ -1,5 +1,8 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
+
 #include "liquid/scripting/ScriptDecorator.h"
+#include "liquid/scripting/LuaMessages.h"
 
 #include "EntityQuery.h"
 #include "EntityQueryScriptingInterface.h"
@@ -12,7 +15,9 @@ int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
 
   if (!scope.is<String>(1)) {
     scope.set(nullptr);
-    // TODO: Show logs here
+    Engine::getUserLogger().error() << LuaMessages::invalidArguments<String>(
+        getName(), "get_first_entity_by_name");
+
     return 1;
   }
 

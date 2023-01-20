@@ -1,8 +1,11 @@
 #include "liquid/core/Base.h"
-#include "NameScriptingInterface.h"
+#include "liquid/core/Engine.h"
 
 #include "liquid/scripting/LuaScope.h"
+#include "liquid/scripting/LuaMessages.h"
 #include "liquid/entity/EntityDatabase.h"
+
+#include "NameScriptingInterface.h"
 
 namespace liquid {
 
@@ -10,7 +13,8 @@ int NameScriptingInterface::LuaInterface::get(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "get");
     scope.set<String>("");
     return 1;
   }
@@ -34,8 +38,17 @@ int NameScriptingInterface::LuaInterface::get(void *state) {
 
 int NameScriptingInterface::LuaInterface::set(void *state) {
   LuaScope scope(state);
-  if (!scope.is<LuaTable>(1) || !scope.is<String>(2)) {
-    // TODO: Show logs here
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set");
+    return 0;
+  }
+
+  if (!scope.is<String>(2)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<String>(getName(), "set");
+
     return 0;
   }
 
