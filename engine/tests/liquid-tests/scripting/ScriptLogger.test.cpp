@@ -31,10 +31,10 @@ public:
               (liquid::LogSeverity, liquid::LogTimestamp, liquid::String));
 };
 
-TEST_P(ScriptLoggerTest, DoesNothingIfProvidedArgumentIsInvalid) {
+TEST_P(ScriptLoggerTest, LogsErrorIfNoArgumentIsProvided) {
   auto [value, severity] = GetParam();
 
-  EXPECT_CALL(*this, mockTransport(severity, _, "Hello world")).Times(0);
+  EXPECT_CALL(*this, mockTransport(liquid::LogSeverity::Error, _, _)).Times(5);
 
   auto entity = entityDatabase.create();
   auto &scope = call(entity, value + "_invalid");

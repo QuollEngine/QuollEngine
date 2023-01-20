@@ -1,17 +1,29 @@
 #include "liquid/core/Base.h"
-#include "RigidBodyScriptingInterface.h"
+#include "liquid/core/Engine.h"
 
 #include "liquid/scripting/LuaScope.h"
+#include "liquid/scripting/LuaMessages.h"
 #include "liquid/entity/EntityDatabase.h"
+
+#include "RigidBodyScriptingInterface.h"
 
 namespace liquid {
 
 int RigidBodyScriptingInterface::LuaInterface::applyForce(void *state) {
   LuaScope scope(state);
 
-  if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||
-      !scope.is<float>(4)) {
-    // TODO: Show logs here
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "apply_force");
+
+    return 0;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float>(getName(),
+                                                              "apply_force");
+
     return 0;
   }
 
@@ -37,9 +49,17 @@ int RigidBodyScriptingInterface::LuaInterface::applyForce(void *state) {
 int RigidBodyScriptingInterface::LuaInterface::applyTorque(void *state) {
   LuaScope scope(state);
 
-  if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||
-      !scope.is<float>(4)) {
-    // TODO: Show logs here
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "apply_torque");
+    return 0;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float>(getName(),
+                                                              "apply_torque");
+
     return 0;
   }
 
@@ -66,7 +86,8 @@ int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Show logs here
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "clear");
     return 0;
   }
 

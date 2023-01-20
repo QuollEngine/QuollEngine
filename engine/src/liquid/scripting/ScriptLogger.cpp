@@ -2,6 +2,7 @@
 #include "liquid/core/Engine.h"
 
 #include "LuaScope.h"
+#include "LuaMessages.h"
 #include "ScriptLogger.h"
 
 namespace liquid {
@@ -11,7 +12,9 @@ void createScriptLogger(LuaScope &scope) {
   logTable.set("debug", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1)) {
-      // TODO: Show logs here
+      Engine::getUserLogger().error()
+          << LuaMessages::invalidArguments<String>("logger", "debug");
+
       return 0;
     }
 
@@ -23,7 +26,9 @@ void createScriptLogger(LuaScope &scope) {
   logTable.set("info", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1)) {
-      // TODO: Show logs here
+      Engine::getUserLogger().error()
+          << LuaMessages::invalidArguments<String>("logger", "info");
+
       return 0;
     }
 
@@ -35,7 +40,9 @@ void createScriptLogger(LuaScope &scope) {
   logTable.set("warning", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1)) {
-      // TODO: Show logs here
+      Engine::getUserLogger().error()
+          << LuaMessages::invalidArguments<String>("logger", "warning");
+
       return 0;
     }
 
@@ -47,7 +54,8 @@ void createScriptLogger(LuaScope &scope) {
   logTable.set("error", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1)) {
-      // TODO: Show logs here
+      Engine::getUserLogger().error()
+          << LuaMessages::invalidArguments<String>("logger", "error");
       return 0;
     }
 
@@ -59,7 +67,8 @@ void createScriptLogger(LuaScope &scope) {
   logTable.set("fatal", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1)) {
-      // TODO: Show logs here
+      Engine::getUserLogger().error()
+          << LuaMessages::invalidArguments<String>("logger", "fatal");
       return 0;
     }
 

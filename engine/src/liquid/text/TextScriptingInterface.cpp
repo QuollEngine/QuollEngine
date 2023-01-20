@@ -1,6 +1,9 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
+
 #include "TextScriptingInterface.h"
 
+#include "liquid/scripting/LuaMessages.h"
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/entity/EntityDatabase.h"
 
@@ -10,7 +13,9 @@ int TextScriptingInterface::LuaInterface::getText(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "get_text");
+
     scope.set<String>("");
     return 1;
   }
@@ -34,8 +39,17 @@ int TextScriptingInterface::LuaInterface::getText(void *state) {
 
 int TextScriptingInterface::LuaInterface::setText(void *state) {
   LuaScope scope(state);
-  if (!scope.is<LuaTable>(1) || !scope.is<String>(2)) {
-    // TODO: Show logs here
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set_text");
+
+    return 0;
+  }
+
+  if (!scope.is<String>(2)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<String>(getName(), "set_text");
+
     return 0;
   }
 

@@ -1,8 +1,11 @@
 #include "liquid/core/Base.h"
-#include "TransformScriptingInterface.h"
+#include "liquid/core/Engine.h"
 
 #include "liquid/scripting/LuaScope.h"
+#include "liquid/scripting/LuaMessages.h"
 #include "liquid/entity/EntityDatabase.h"
+
+#include "TransformScriptingInterface.h"
 
 namespace liquid {
 
@@ -10,7 +13,9 @@ int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "get_position");
+
     scope.set(nullptr);
     scope.set(nullptr);
     scope.set(nullptr);
@@ -38,9 +43,17 @@ int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
 int TransformScriptingInterface::LuaInterface::setPosition(void *state) {
   LuaScope scope(state);
 
-  if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||
-      !scope.is<float>(4)) {
-    // TODO: Show logs here
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set_position");
+
+    return 0;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float>(getName(),
+                                                              "set_position");
     return 0;
   }
 
@@ -68,7 +81,8 @@ int TransformScriptingInterface::LuaInterface::getScale(void *state) {
   LuaScope scope(state);
 
   if (!scope.is<LuaTable>(1)) {
-    // TODO: Print error
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "get_scale");
     scope.set(nullptr);
     scope.set(nullptr);
     scope.set(nullptr);
@@ -95,9 +109,17 @@ int TransformScriptingInterface::LuaInterface::getScale(void *state) {
 int TransformScriptingInterface::LuaInterface::setScale(void *state) {
   LuaScope scope(state);
 
-  if (!scope.is<LuaTable>(1) || !scope.is<float>(2) || !scope.is<float>(3) ||
-      !scope.is<float>(4)) {
-    // TODO: Show logs here
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set_scale");
+
+    return 0;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float>(getName(),
+                                                              "set_scale");
     return 0;
   }
 
