@@ -34,10 +34,28 @@ public:
   static int setText(void *state);
 
   /**
+   * @brief Get line height
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int getLineHeight(void *state);
+
+  /**
+   * @brief Set line height
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int setLineHeight(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"get_text", getText}, InterfaceField{"set_text", setText}};
+  static constexpr std::array<InterfaceField, 4> Fields{
+      InterfaceField{"get_text", getText}, InterfaceField{"set_text", setText},
+      InterfaceField{"get_line_height", getLineHeight},
+      InterfaceField{"set_line_height", setLineHeight}};
 
   /**
    * @brief Get component name in scripts

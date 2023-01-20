@@ -5,7 +5,8 @@
 
 class TextLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {};
 
-TEST_F(TextLuaScriptingInterfaceTest, ReturnsEmptyStringIfTextDoesNotExist) {
+TEST_F(TextLuaScriptingInterfaceTest,
+       GetTextReturnsEmptyStringIfTextDoesNotExist) {
   auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "text_get_text");
@@ -15,7 +16,7 @@ TEST_F(TextLuaScriptingInterfaceTest, ReturnsEmptyStringIfTextDoesNotExist) {
   EXPECT_EQ(name, "");
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, ReturnsEmptyStringIfNoSelf) {
+TEST_F(TextLuaScriptingInterfaceTest, GetTextReturnsEmptyStringIfNoSelf) {
   auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "text_get_text_invalid");
@@ -25,7 +26,7 @@ TEST_F(TextLuaScriptingInterfaceTest, ReturnsEmptyStringIfNoSelf) {
   EXPECT_EQ(name, "");
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, ReturnsTextTextDataIfComponentExists) {
+TEST_F(TextLuaScriptingInterfaceTest, GetTextReturnsTextDataIfComponentExists) {
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Text>(entity, {"Test name"});
 
@@ -35,7 +36,8 @@ TEST_F(TextLuaScriptingInterfaceTest, ReturnsTextTextDataIfComponentExists) {
   EXPECT_EQ(name, "Test name");
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, DoesNothingIfProvidedArgumentIsInvalid) {
+TEST_F(TextLuaScriptingInterfaceTest,
+       SetTextDoesNothingIfProvidedArgumentIsInvalid) {
   auto entity = entityDatabase.create();
 
   EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
@@ -43,7 +45,8 @@ TEST_F(TextLuaScriptingInterfaceTest, DoesNothingIfProvidedArgumentIsInvalid) {
   EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, DoesNothingIfCOmponentDOesNotExist) {
+TEST_F(TextLuaScriptingInterfaceTest,
+       SetTextDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
   EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
@@ -52,11 +55,72 @@ TEST_F(TextLuaScriptingInterfaceTest, DoesNothingIfCOmponentDOesNotExist) {
   EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, UpdatesExistingTextOnSet) {
+TEST_F(TextLuaScriptingInterfaceTest, SetTextUpdatesExistingTextIfValid) {
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Text>(entity, {"Test name"});
 
   call(entity, "text_set_text");
 
   EXPECT_EQ(entityDatabase.get<liquid::Text>(entity).text, "Hello World");
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       GetLineHeightReturnsZeroIfTextDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "text_get_line_height");
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+  auto name = scope.getGlobal<float>("text_line_height");
+  EXPECT_EQ(name, 0.0f);
+}
+
+TEST_F(TextLuaScriptingInterfaceTest, GetLineHeightReturnsZeroIfNoSelf) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "text_get_line_height_invalid");
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+  auto name = scope.getGlobal<float>("text_line_height");
+  EXPECT_EQ(name, 0.0f);
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       GetLineHeightReturnsLineHeightIfComponentExists) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Text>(entity, {"Test name", 25.0f});
+
+  auto &scope = call(entity, "text_get_line_height");
+
+  auto name = scope.getGlobal<float>("text_line_height");
+  EXPECT_EQ(name, 25.0f);
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       SetLineHeightDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+  call(entity, "text_set_line_height_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       SetLineHeightDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+  call(entity, "text_set_line_height");
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       SetLineHeightUpdatesExistingLineHeightIfValid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Text>(entity, {"Test name"});
+
+  call(entity, "text_set_line_height");
+
+  EXPECT_EQ(entityDatabase.get<liquid::Text>(entity).lineHeight, 12.0f);
 }
