@@ -43,7 +43,7 @@ void GameExporter::exportGame(const Project &project,
 
   for (auto entry :
        std::filesystem::directory_iterator(std::filesystem::current_path())) {
-    if (entry.path().stem().string() == "Runtime") {
+    if (entry.path().stem().string() == "LiquidRuntime") {
       runtimePath = entry.path();
     }
   }

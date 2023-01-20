@@ -1,13 +1,14 @@
-project "Liquidator"
+project "LiquidEditor"
     basedir "../workspace/editor"
     kind "ConsoleApp"
+    targetname "Liquidator"
 
     includedirs {
         "./src"
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidEngineRHIVulkan", "LiquidEngineRHICore", "LiquidEnginePlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"LiquidEngine", "LiquidRHIVulkan", "LiquidRHICore", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     
     copyRuntime();
 
@@ -32,7 +33,7 @@ project "Liquidator"
 
     copyEngineAssets()
 
-project "LiquidatorTests"
+project "LiquidEditorTest"
     basedir "../workspace/editor-test"
     kind "ConsoleApp"
 
@@ -60,7 +61,7 @@ project "LiquidatorTests"
     }
 
     setupTestingOptions{}
-    links { "LiquidEngine", "LiquidEngineRHICore", "LiquidEngineRHIVulkan", "LiquidEnginePlatformTools", "vendor-libimguizmo", "vendor-libmikktspace" }
+    links { "LiquidEngine", "LiquidRHICore", "LiquidRHIVulkan", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
 
