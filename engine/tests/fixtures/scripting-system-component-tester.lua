@@ -200,25 +200,46 @@ end
 
 -- Text
 text = ''
+text_line_height = -1
 
 function text_get_text()
     text = entity.text:get_text()
 end
 
 function text_get_invalid_text()
-    text = entity.name.text()
+    text = entity.name.get_text()
 end
 
 function text_set_text()
     entity.text:set_text("Hello World")
 end
 
-function text_set_invalid()
-    entity.text.set("Test")
-    entity.text:set(nil)
-    entity.text:set(true)
-    entity.text:set(name_set)
-    entity.text:set({})
+function text_set_text_invalid()
+    entity.text.set_text(12)
+    entity.text:set_text(nil)
+    entity.text:set_text(true)
+    entity.text:set_text(name_set)
+    entity.text:set_text({})
+end
+
+function text_get_line_height()
+    text_line_height = entity.text:get_line_height()
+end
+
+function text_get_line_height_invalid()
+    text_line_height = entity.text.get_line_height()
+end
+
+function text_set_line_height()
+    entity.text:set_line_height(12)
+end
+
+function text_set_line_height_invalid()
+    entity.text.set_line_height("Test")
+    entity.text:set_line_height(nil)
+    entity.text:set_line_height(true)
+    entity.text:set_line_height(name_set)
+    entity.text:set_line_height({})
 end
 
 -- Audio 
