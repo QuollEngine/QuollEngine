@@ -1,4 +1,4 @@
-project "LiquidEngineRHIVulkan"
+project "LiquidRHIVulkan"
     basedir "../../../workspace/rhi-vulkan"
     kind "StaticLib"
 

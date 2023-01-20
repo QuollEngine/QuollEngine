@@ -65,7 +65,7 @@ project "LiquidEngineTest"
     }
 
     setupTestingOptions{}
-    links { "LiquidEngine", "LiquidEngineRHICore" }
+    links { "LiquidEngine", "LiquidRHICore" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
 

@@ -1,4 +1,4 @@
-project "LiquidEngineRHICore"
+project "LiquidRHICore"
     basedir "../../../workspace/rhi-core"
     kind "StaticLib"
 

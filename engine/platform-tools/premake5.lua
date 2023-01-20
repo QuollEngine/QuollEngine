@@ -1,4 +1,4 @@
-project "LiquidEnginePlatformTools"
+project "LiquidPlatformTools"
     basedir "../../workspace/platform-tools"
     kind "StaticLib"
 
