@@ -4,7 +4,7 @@
 namespace liquid {
 
 VirtualPipelineHandle
-RenderGraphRegistry::set(const rhi::PipelineDescription &description) {
+RenderGraphRegistry::set(const rhi::GraphicsPipelineDescription &description) {
   mGraphicsPipelineDescriptions.push_back(description);
   mRealGraphicsPipelines.push_back(rhi::PipelineHandle::Invalid);
 

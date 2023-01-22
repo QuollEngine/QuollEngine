@@ -83,10 +83,10 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.format = rhi::Format::Rgba8Unorm;
   auto imgui = mRenderStorage.createTexture(imguiDesc);
 
-  auto &pass = graph.addPass("imgui");
+  auto &pass = graph.addGraphicsPass("imgui");
   pass.write(imgui, mClearColor);
 
-  auto pipeline = pass.addPipeline(rhi::PipelineDescription{
+  auto pipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
       mShaderLibrary.getShader("__engine.imgui.default.vertex"),
       mShaderLibrary.getShader("__engine.imgui.default.fragment"),
       rhi::PipelineVertexInputLayout{

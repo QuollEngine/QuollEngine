@@ -51,7 +51,7 @@ public:
   void destroyFramebuffer(liquid::rhi::FramebufferHandle handle);
 
   liquid::rhi::PipelineHandle
-  createPipeline(const liquid::rhi::PipelineDescription &description);
+  createPipeline(const liquid::rhi::GraphicsPipelineDescription &description);
 
   liquid::rhi::PipelineHandle
   createPipeline(const liquid::rhi::ComputePipelineDescription &description);
@@ -95,7 +95,7 @@ private:
       mFramebuffers;
 
   std::unordered_map<liquid::rhi::PipelineHandle,
-                     liquid::rhi::PipelineDescription>
+                     liquid::rhi::GraphicsPipelineDescription>
       mPipelines;
 
   std::unordered_map<liquid::rhi::PipelineHandle,

@@ -19,12 +19,12 @@ public:
   RenderGraph(StringView name);
 
   /**
-   * @brief Add pass
+   * @brief Add graphics pass
    *
    * @param name Pass name
    * @return Render graph pass
    */
-  RenderGraphPass &addPass(StringView name);
+  RenderGraphPass &addGraphicsPass(StringView name);
 
   /**
    * @brief Add compute pass

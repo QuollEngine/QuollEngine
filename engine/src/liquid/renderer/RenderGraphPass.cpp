@@ -8,12 +8,12 @@ RenderGraphPass::RenderGraphPass(StringView name, RenderGraphPassType type)
 
 void RenderGraphPass::write(rhi::TextureHandle handle,
                             const rhi::AttachmentClearValue &clearValue) {
-  mOutputs.push_back({handle});
+  mTextureOutputs.push_back({handle});
   mAttachments.push_back({clearValue});
 }
 
 void RenderGraphPass::read(rhi::TextureHandle handle) {
-  mInputs.push_back({handle});
+  mTextureInputs.push_back({handle});
 }
 
 void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferType type) {
@@ -41,8 +41,8 @@ void RenderGraphPass::setExecutor(const ExecutorFn &executor) {
   mExecutor = executor;
 }
 
-VirtualPipelineHandle
-RenderGraphPass::addPipeline(const rhi::PipelineDescription &description) {
+VirtualPipelineHandle RenderGraphPass::addPipeline(
+    const rhi::GraphicsPipelineDescription &description) {
   LIQUID_ASSERT(mType == RenderGraphPassType::Graphics,
                 "Cannot create graphics pipeline in a non-graphics pass");
 

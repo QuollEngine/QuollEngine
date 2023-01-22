@@ -11,7 +11,7 @@ RenderGraph::RenderGraph(StringView name) : mName(name) {
   LOG_DEBUG("Render graph initialized: " << name);
 }
 
-RenderGraphPass &RenderGraph::addPass(StringView name) {
+RenderGraphPass &RenderGraph::addGraphicsPass(StringView name) {
   mPasses.push_back({name, RenderGraphPassType::Graphics});
   return mPasses.back();
 }
@@ -73,7 +73,7 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
   // Delete lonely nodes
   for (auto i = 0; i < mPasses.size(); ++i) {
     auto &pass = mPasses.at(i);
-    if (pass.getInputs().empty() && pass.getOutputs().empty() &&
+    if (pass.getTextureInputs().empty() && pass.getTextureOutputs().empty() &&
         pass.getBufferInputs().empty() && pass.getBufferOutputs().empty()) {
       LOG_DEBUG("Pass is ignored during compilation because it has no inputs, "
                 "nor outputs: "
@@ -89,7 +89,7 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
   std::unordered_map<rhi::BufferHandle, std::vector<size_t>> passBufferReads;
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
-    for (auto &resourceId : pass.getInputs()) {
+    for (auto &resourceId : pass.getTextureInputs()) {
       passTextureReads[resourceId.texture].push_back(i);
     }
 
@@ -105,7 +105,7 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
 
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
-    for (auto resourceId : pass.getOutputs()) {
+    for (auto resourceId : pass.getTextureOutputs()) {
       if (passTextureReads.find(resourceId.texture) != passTextureReads.end()) {
         for (auto read : passTextureReads.at(resourceId.texture)) {
           adjacencyList.at(i).insert(read);
@@ -149,7 +149,7 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
     pass.mPreBarrier = RenderGraphPassBarrier{};
     pass.mPostBarrier = RenderGraphPassBarrier{};
 
-    for (auto &input : pass.mInputs) {
+    for (auto &input : pass.mTextureInputs) {
       LIQUID_ASSERT(visitedOutputs.find(input.texture) != visitedOutputs.end(),
                     "Pass is reading from an empty texture");
 
@@ -192,8 +192,8 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       pass.mPostBarrier.imageBarriers.push_back(postImageBarrier);
     }
 
-    for (size_t i = 0; i < pass.mOutputs.size(); ++i) {
-      auto &output = pass.mOutputs.at(i);
+    for (size_t i = 0; i < pass.mTextureOutputs.size(); ++i) {
+      auto &output = pass.mTextureOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
       if (visitedOutputs.find(output.texture) == visitedOutputs.end()) {
         output.srcLayout = rhi::ImageLayout::Undefined;

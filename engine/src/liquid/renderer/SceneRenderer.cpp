@@ -92,10 +92,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   auto depthBuffer = mRenderStorage.createTexture(depthBufferDesc);
 
   {
-    auto &pass = graph.addPass("shadowPass");
+    auto &pass = graph.addGraphicsPass("shadowPass");
     pass.write(shadowmap, rhi::DepthStencilClear{1.0f, 0});
 
-    auto vPipeline = pass.addPipeline(rhi::PipelineDescription{
+    auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.shadowmap.default.vertex"),
         mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -103,7 +103,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                 rhi::FrontFace::Clockwise}});
 
-    auto vSkinnedPipeline = pass.addPipeline(rhi::PipelineDescription{
+    auto vSkinnedPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.shadowmap.skinned.vertex"),
         mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -160,12 +160,12 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   } // shadow pass
 
   {
-    auto &pass = graph.addPass("meshPass");
+    auto &pass = graph.addGraphicsPass("meshPass");
     pass.read(shadowmap);
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0, 0});
 
-    auto vPipeline = pass.addPipeline(rhi::PipelineDescription{
+    auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.geometry.default.vertex"),
         mShaderLibrary.getShader("__engine.pbr.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -174,7 +174,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
-    auto vSkinnedPipeline = pass.addPipeline(rhi::PipelineDescription{
+    auto vSkinnedPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.geometry.skinned.vertex"),
         mShaderLibrary.getShader("__engine.pbr.default.fragment"),
         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -229,7 +229,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   } // mesh pass
 
   {
-    auto &pass = graph.addPass("environmentPass");
+    auto &pass = graph.addGraphicsPass("environmentPass");
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
     auto vPipeline = pass.addPipeline(
@@ -281,11 +281,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
 void SceneRenderer::attachText(RenderGraph &graph,
                                const SceneRenderPassData &passData) {
-  auto &pass = graph.addPass("textPass");
+  auto &pass = graph.addGraphicsPass("textPass");
   pass.write(passData.sceneColor, mClearColor);
   pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
 
-  auto vTextPipeline = pass.addPipeline(rhi::PipelineDescription{
+  auto vTextPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
       mShaderLibrary.getShader("__engine.text.default.vertex"),
       mShaderLibrary.getShader("__engine.text.default.fragment"),
       rhi::PipelineVertexInputLayout{},

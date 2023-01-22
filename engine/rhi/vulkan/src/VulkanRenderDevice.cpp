@@ -166,8 +166,8 @@ void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
   mRegistry.deleteFramebuffer(handle);
 }
 
-PipelineHandle
-VulkanRenderDevice::createPipeline(const PipelineDescription &description) {
+PipelineHandle VulkanRenderDevice::createPipeline(
+    const GraphicsPipelineDescription &description) {
   return mRegistry.setPipeline(std::make_unique<VulkanPipeline>(
       description, mDevice, mRegistry, mPipelineLayoutCache));
 }

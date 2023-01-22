@@ -49,7 +49,7 @@ EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
 }
 
 liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
-  auto &pass = graph.addPass("editor-debug");
+  auto &pass = graph.addGraphicsPass("editor-debug");
 
   auto vEditorGridPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("editor-grid.vert"),
