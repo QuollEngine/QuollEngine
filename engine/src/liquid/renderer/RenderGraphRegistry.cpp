@@ -5,10 +5,20 @@ namespace liquid {
 
 VirtualPipelineHandle
 RenderGraphRegistry::set(const rhi::PipelineDescription &description) {
-  mDescriptions.push_back(description);
-  mRealResources.push_back(rhi::PipelineHandle::Invalid);
+  mGraphicsPipelineDescriptions.push_back(description);
+  mRealGraphicsPipelines.push_back(rhi::PipelineHandle::Invalid);
 
-  return static_cast<VirtualPipelineHandle>(mDescriptions.size() - 1);
+  return static_cast<VirtualPipelineHandle>(
+      mGraphicsPipelineDescriptions.size() - 1);
+}
+
+VirtualComputePipelineHandle
+RenderGraphRegistry::set(const rhi::ComputePipelineDescription &description) {
+  mComputePipelineDescriptions.push_back(description);
+  mRealComputePipelines.push_back(rhi::PipelineHandle::Invalid);
+
+  return static_cast<VirtualComputePipelineHandle>(
+      mComputePipelineDescriptions.size() - 1);
 }
 
 } // namespace liquid

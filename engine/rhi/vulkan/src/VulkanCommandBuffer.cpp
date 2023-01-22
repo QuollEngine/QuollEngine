@@ -110,6 +110,12 @@ void VulkanCommandBuffer::drawIndexed(uint32_t indexCount, uint32_t firstIndex,
   mStats.addDrawCall((indexCount / 3) * instanceCount);
 }
 
+void VulkanCommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY,
+                                   uint32_t groupCountZ) {
+  vkCmdDispatch(mCommandBuffer, groupCountX, groupCountY, groupCountZ);
+  mStats.addCommandCall();
+}
+
 void VulkanCommandBuffer::setViewport(const glm::vec2 &offset,
                                       const glm::vec2 &size,
                                       const glm::vec2 &depthRange) {

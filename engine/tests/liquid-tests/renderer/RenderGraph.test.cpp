@@ -16,17 +16,32 @@ public:
 
 class RenderGraphDeathTest : public RenderGraphTest {};
 
-TEST_F(RenderGraphTest, AddsPass) {
+TEST_F(RenderGraphTest, AddsGraphicsPass) {
   auto &pass = graph.addPass("Test");
   EXPECT_EQ(pass.getName(), "Test");
+  EXPECT_EQ(pass.getType(), liquid::RenderGraphPassType::Graphics);
   EXPECT_EQ(graph.getPasses().at(0).getName(), "Test");
+  EXPECT_EQ(graph.getPasses().at(0).getType(),
+            liquid::RenderGraphPassType::Graphics);
+
+  EXPECT_TRUE(graph.getCompiledPasses().empty());
+}
+
+TEST_F(RenderGraphTest, AddsComputePass) {
+  auto &pass = graph.addComputePass("Test");
+  EXPECT_EQ(pass.getName(), "Test");
+  EXPECT_EQ(pass.getType(), liquid::RenderGraphPassType::Compute);
+  EXPECT_EQ(graph.getPasses().at(0).getName(), "Test");
+  EXPECT_EQ(graph.getPasses().at(0).getType(),
+            liquid::RenderGraphPassType::Compute);
+
   EXPECT_TRUE(graph.getCompiledPasses().empty());
 }
 
 TEST_F(RenderGraphTest, CompilationDoesNotMutateDefinedPasses) {
   auto &pass = graph.addPass("Test");
   auto &pass1 = graph.addPass("Test2");
-  auto &pass2 = graph.addPass("Test3");
+  auto &pass2 = graph.addComputePass("Test3");
 
   graph.compile(&device);
 
@@ -54,10 +69,8 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // |   +---+   +---+               |
   // +-------------------------------+
 
-  std::unordered_map<liquid::String, liquid::rhi::TextureHandle> handles{
-      {"a-b", device.createTexture({})},
+  std::unordered_map<liquid::String, liquid::rhi::TextureHandle> textures{
       {"a-d", device.createTexture({})},
-      {"d-b", device.createTexture({})},
       {"b-c", device.createTexture({})},
       {"b-g", device.createTexture({})},
       {"h-c", device.createTexture({})},
@@ -68,59 +81,63 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       {"f-g", device.createTexture({})},
       {"final-color", device.createTexture({})}};
 
+  std::unordered_map<liquid::String, liquid::rhi::BufferHandle> buffers{
+      {"a-b", device.createBuffer({}).getHandle()},
+      {"d-b", device.createBuffer({}).getHandle()}};
+
   {
     auto &pass = graph.addPass("A");
-    pass.write(handles.at("a-b"), glm::vec4());
-    pass.write(handles.at("a-d"), glm::vec4());
+    pass.write(buffers.at("a-b"), liquid::rhi::BufferType::Storage);
+    pass.write(textures.at("a-d"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("B");
-    pass.read(handles.at("a-b"));
-    pass.read(handles.at("d-b"));
-    pass.write(handles.at("b-c"), glm::vec4());
-    pass.write(handles.at("b-g"), glm::vec4());
+    pass.read(buffers.at("a-b"), liquid::rhi::BufferType::Vertex);
+    pass.read(buffers.at("d-b"), liquid::rhi::BufferType::Index);
+    pass.write(textures.at("b-c"), glm::vec4());
+    pass.write(textures.at("b-g"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("C");
-    pass.read(handles.at("b-c"));
-    pass.read(handles.at("h-c"));
-    pass.write(handles.at("c-e"), glm::vec4());
+    pass.read(textures.at("b-c"));
+    pass.read(textures.at("h-c"));
+    pass.write(textures.at("c-e"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("D");
-    pass.read(handles.at("a-d"));
-    pass.write(handles.at("d-b"), glm::vec4());
-    pass.write(handles.at("d-e"), glm::vec4());
-    pass.write(handles.at("d-g"), glm::vec4());
+    pass.read(textures.at("a-d"));
+    pass.write(buffers.at("d-b"), liquid::rhi::BufferType::Uniform);
+    pass.write(textures.at("d-e"), glm::vec4());
+    pass.write(textures.at("d-g"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("E");
-    pass.read(handles.at("d-e"));
-    pass.read(handles.at("c-e"));
-    pass.write(handles.at("e-f"), glm::vec4());
+    pass.read(textures.at("d-e"));
+    pass.read(textures.at("c-e"));
+    pass.write(textures.at("e-f"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("F");
-    pass.read(handles.at("e-f"));
-    pass.write(handles.at("f-g"), glm::vec4());
+    pass.read(textures.at("e-f"));
+    pass.write(textures.at("f-g"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("G");
-    pass.read(handles.at("f-g"));
-    pass.read(handles.at("d-g"));
-    pass.read(handles.at("b-g"));
-    pass.write(handles.at("final-color"), glm::vec4());
+    pass.read(textures.at("f-g"));
+    pass.read(textures.at("d-g"));
+    pass.read(textures.at("b-g"));
+    pass.write(textures.at("final-color"), glm::vec4());
   }
 
   {
     auto &pass = graph.addPass("H");
-    pass.write(handles.at("h-c"), glm::vec4());
+    pass.write(textures.at("h-c"), glm::vec4());
   }
 
   graph.compile(&device);
@@ -248,7 +265,7 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
             ImageLayout::ShaderReadOnlyOptimal);
 }
 
-TEST_F(RenderGraphTest, SetsPassBarrierForColorOutput) {
+TEST_F(RenderGraphTest, SetsPassBarrierForColorWrite) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
@@ -276,7 +293,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorOutput) {
   }
 }
 
-TEST_F(RenderGraphTest, SetsPassBarrierForDepthOutput) {
+TEST_F(RenderGraphTest, SetsPassBarrierForDepthWrite) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
 
@@ -309,7 +326,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthOutput) {
   }
 }
 
-TEST_F(RenderGraphTest, SetsBothBarriersFromOutputs) {
+TEST_F(RenderGraphTest, SetsPassBarriersForAllTextureWrites) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
@@ -351,7 +368,7 @@ TEST_F(RenderGraphTest, SetsBothBarriersFromOutputs) {
   }
 }
 
-TEST_F(RenderGraphTest, SetsPassBarrierFromColorInput) {
+TEST_F(RenderGraphTest, SetsPassBarrierForColorRead) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
@@ -404,7 +421,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromColorInput) {
   }
 }
 
-TEST_F(RenderGraphTest, SetsPassBarrierFromDepthInput) {
+TEST_F(RenderGraphTest, SetsPassBarrierForDepthTextureRead) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription depthDescription{};
@@ -459,7 +476,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromDepthInput) {
   }
 }
 
-TEST_F(RenderGraphTest, SetsPassBarrierFromBothColorAndDepthInputs) {
+TEST_F(RenderGraphTest, SetsPassBarrierForBothColorAndDepthTextureReads) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
@@ -536,6 +553,420 @@ TEST_F(RenderGraphTest, SetsPassBarrierFromBothColorAndDepthInputs) {
     EXPECT_EQ(postBarrier.imageBarriers.at(1).srcAccess, Access::ShaderRead);
     EXPECT_EQ(postBarrier.imageBarriers.at(1).dstAccess,
               Access::DepthStencilAttachmentWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("C");
+    pass.read(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addComputePass("C");
+    pass.read(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("B");
+    pass.read(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addComputePass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addComputePass("B");
+    pass.read(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForVertexBufferReadInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("B");
+    pass.read(buffer1, liquid::rhi::BufferType::Vertex);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::VertexInput);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess,
+              Access::VertexAttributeRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForIndexBufferReadInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("B");
+    pass.read(buffer1, liquid::rhi::BufferType::Index);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::VertexInput);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess, Access::IndexRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForIndirectBufferReadInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addComputePass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("C");
+    pass.read(buffer1, liquid::rhi::BufferType::Indirect);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::DrawIndirect);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 1);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess,
+              Access::IndirectCommandRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+  auto buffer2 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addComputePass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer2, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addPass("C");
+    pass.read(buffer1, liquid::rhi::BufferType::Indirect |
+                           liquid::rhi::BufferType::Vertex |
+                           liquid::rhi::BufferType::Index);
+    pass.read(buffer2, liquid::rhi::BufferType::Uniform |
+                           liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.dstStage, PipelineStage::DrawIndirect |
+                                       PipelineStage::VertexInput |
+                                       PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 2);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess,
+              Access::IndirectCommandRead | Access::VertexAttributeRead |
+                  Access::IndexRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(1).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(1).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+  auto buffer2 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer2, liquid::rhi::BufferType::Storage);
+  }
+
+  {
+    auto &pass = graph.addComputePass("C");
+    pass.read(buffer1, liquid::rhi::BufferType::Indirect);
+    pass.read(buffer2, liquid::rhi::BufferType::Uniform |
+                           liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
+    EXPECT_TRUE(preBarrier.enabled);
+
+    EXPECT_EQ(preBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(preBarrier.dstStage,
+              PipelineStage::DrawIndirect | PipelineStage::ComputeShader);
+    EXPECT_EQ(preBarrier.memoryBarriers.size(), 2);
+    EXPECT_FALSE(preBarrier.memoryBarriers.empty());
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).dstAccess,
+              Access::IndirectCommandRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(1).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(preBarrier.memoryBarriers.at(1).srcAccess, Access::ShaderWrite);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 1);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addComputePass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 1);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 1);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addComputePass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::ComputeShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 1);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInGraphicsPass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+  auto buffer2 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 2);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(1).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(1).dstAccess, Access::ShaderRead);
+  }
+}
+
+TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInComputePass) {
+  auto buffer1 = device.createBuffer({}).getHandle();
+  auto buffer2 = device.createBuffer({}).getHandle();
+
+  {
+    auto &pass = graph.addPass("A");
+    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+  }
+
+  graph.compile(&device);
+
+  {
+    const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
+    EXPECT_TRUE(postBarrier.enabled);
+
+    EXPECT_EQ(postBarrier.srcStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.dstStage, PipelineStage::FragmentShader);
+    EXPECT_EQ(postBarrier.memoryBarriers.size(), 2);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(0).dstAccess, Access::ShaderRead);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(1).srcAccess, Access::ShaderWrite);
+    EXPECT_EQ(postBarrier.memoryBarriers.at(1).dstAccess, Access::ShaderRead);
   }
 }
 

@@ -181,13 +181,22 @@ public:
   virtual void destroyFramebuffer(FramebufferHandle handle) = 0;
 
   /**
-   * @brief Create pipeline
+   * @brief Create graphics pipeline
    *
    * @param description Pipeline description
-   * @return Pipeline
+   * @return Graphics pipeline
    */
   virtual PipelineHandle
   createPipeline(const PipelineDescription &description) = 0;
+
+  /**
+   * @brief Create compute pipeline
+   *
+   * @param description Compute pipeline description
+   * @return Compute pipeline
+   */
+  virtual PipelineHandle
+  createPipeline(const ComputePipelineDescription &description) = 0;
 
   /**
    * @brief Destroy pipeline

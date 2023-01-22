@@ -171,13 +171,22 @@ public:
   void destroyFramebuffer(FramebufferHandle handle) override;
 
   /**
-   * @brief Create pipeline
+   * @brief Create graphics pipeline
    *
    * @param description Pipeline description
-   * @return Pipeline
+   * @return Graphics pipeline
    */
-  PipelineHandle
+  virtual PipelineHandle
   createPipeline(const PipelineDescription &description) override;
+
+  /**
+   * @brief Create compute pipeline
+   *
+   * @param description Compute pipeline description
+   * @return Compute pipeline
+   */
+  virtual PipelineHandle
+  createPipeline(const ComputePipelineDescription &description) override;
 
   /**
    * @brief Destroy pipeline

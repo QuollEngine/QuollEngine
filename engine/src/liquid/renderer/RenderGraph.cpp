@@ -12,7 +12,12 @@ RenderGraph::RenderGraph(StringView name) : mName(name) {
 }
 
 RenderGraphPass &RenderGraph::addPass(StringView name) {
-  mPasses.push_back(name);
+  mPasses.push_back({name, RenderGraphPassType::Graphics});
+  return mPasses.back();
+}
+
+RenderGraphPass &RenderGraph::addComputePass(StringView name) {
+  mPasses.push_back({name, RenderGraphPassType::Compute});
   return mPasses.back();
 }
 
@@ -26,7 +31,7 @@ RenderGraphPass &RenderGraph::addPass(StringView name) {
  */
 static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
                             size_t index, std::vector<bool> &visited,
-                            const std::vector<std::list<size_t>> &adjacencyList,
+                            const std::vector<std::set<size_t>> &adjacencyList,
                             std::vector<RenderGraphPass> &output) {
   visited.at(index) = true;
 
@@ -68,7 +73,8 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
   // Delete lonely nodes
   for (auto i = 0; i < mPasses.size(); ++i) {
     auto &pass = mPasses.at(i);
-    if (pass.getInputs().size() == 0 && pass.getOutputs().size() == 0) {
+    if (pass.getInputs().empty() && pass.getOutputs().empty() &&
+        pass.getBufferInputs().empty() && pass.getBufferOutputs().empty()) {
       LOG_DEBUG("Pass is ignored during compilation because it has no inputs, "
                 "nor outputs: "
                 << pass.getName() << " (Graph: " << mName << ")");
@@ -79,25 +85,38 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
 
   // Cache reads so we can easily access them
   // for creating the adjacency lsit
-  std::unordered_map<rhi::TextureHandle, std::vector<size_t>> passReads;
+  std::unordered_map<rhi::TextureHandle, std::vector<size_t>> passTextureReads;
+  std::unordered_map<rhi::BufferHandle, std::vector<size_t>> passBufferReads;
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto &resourceId : pass.getInputs()) {
-      passReads[resourceId.texture].push_back(i);
+      passTextureReads[resourceId.texture].push_back(i);
+    }
+
+    for (auto &resourceId : pass.getBufferInputs()) {
+      passBufferReads[resourceId.buffer].push_back(i);
     }
   }
 
   // Create adjacency list from inputs and outputs
   // to determine the edges of the graph
-  std::vector<std::list<size_t>> adjacencyList;
+  std::vector<std::set<size_t>> adjacencyList;
   adjacencyList.resize(passIndices.size());
 
   for (size_t i = 0; i < passIndices.size(); ++i) {
     auto &pass = mPasses.at(passIndices.at(i));
     for (auto resourceId : pass.getOutputs()) {
-      if (passReads.find(resourceId.texture) != passReads.end()) {
-        for (auto read : passReads.at(resourceId.texture)) {
-          adjacencyList.at(i).push_back(read);
+      if (passTextureReads.find(resourceId.texture) != passTextureReads.end()) {
+        for (auto read : passTextureReads.at(resourceId.texture)) {
+          adjacencyList.at(i).insert(read);
+        }
+      }
+    }
+
+    for (auto resourceId : pass.getBufferOutputs()) {
+      if (passBufferReads.find(resourceId.buffer) != passBufferReads.end()) {
+        for (auto read : passBufferReads.at(resourceId.buffer)) {
+          adjacencyList.at(i).insert(read);
         }
       }
     }
@@ -124,6 +143,8 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
 
   // Determine attachments, image layouts, and barriers
   std::unordered_map<rhi::TextureHandle, rhi::ImageLayout> visitedOutputs;
+  std::unordered_map<rhi::BufferHandle, rhi::PipelineStage> visitedBuffers;
+
   for (auto &pass : mCompiledPasses) {
     pass.mPreBarrier = RenderGraphPassBarrier{};
     pass.mPostBarrier = RenderGraphPassBarrier{};
@@ -213,6 +234,86 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
 
       visitedOutputs.insert_or_assign(output.texture, output.dstLayout);
+    }
+
+    for (auto &input : pass.mBufferInputs) {
+      LIQUID_ASSERT(visitedBuffers.find(input.buffer) != visitedBuffers.end(),
+                    "Pass is reading from an empty buffer");
+
+      rhi::PipelineStage stage{rhi::PipelineStage::None};
+      rhi::Access srcAccess{rhi::Access::None};
+      rhi::Access dstAccess{rhi::Access::None};
+
+      if ((input.type & rhi::BufferType::Vertex) == rhi::BufferType::Vertex) {
+        stage |= rhi::PipelineStage::VertexInput;
+        srcAccess = rhi::Access::ShaderWrite;
+        dstAccess |= rhi::Access::VertexAttributeRead;
+      }
+
+      if ((input.type & rhi::BufferType::Index) == rhi::BufferType::Index) {
+        stage |= rhi::PipelineStage::VertexInput;
+        srcAccess |= rhi::Access::ShaderWrite;
+        dstAccess |= rhi::Access::IndexRead;
+      }
+
+      if ((input.type & rhi::BufferType::Indirect) ==
+          rhi::BufferType::Indirect) {
+        stage |= rhi::PipelineStage::DrawIndirect;
+        srcAccess |= rhi::Access::ShaderWrite;
+        dstAccess |= rhi::Access::IndirectCommandRead;
+      }
+
+      if (((input.type & rhi::BufferType::Storage) ==
+           rhi::BufferType::Storage) ||
+          ((input.type & rhi::BufferType::Uniform) ==
+           rhi::BufferType::Uniform)) {
+        if (pass.getType() == RenderGraphPassType::Compute) {
+          stage |= rhi::PipelineStage::ComputeShader;
+        } else {
+          stage |= rhi::PipelineStage::FragmentShader;
+        }
+        srcAccess |= rhi::Access::ShaderWrite;
+        dstAccess |= rhi::Access::ShaderRead;
+      }
+
+      rhi::MemoryBarrier memoryBarrier{};
+      memoryBarrier.srcAccess = srcAccess;
+      memoryBarrier.dstAccess = dstAccess;
+
+      pass.mPreBarrier.enabled = true;
+      pass.mPreBarrier.srcStage |= visitedBuffers.at(input.buffer);
+      pass.mPreBarrier.dstStage |= stage;
+      pass.mPreBarrier.memoryBarriers.push_back(memoryBarrier);
+    }
+
+    for (auto &output : pass.mBufferOutputs) {
+      rhi::PipelineStage stage{rhi::PipelineStage::None};
+      rhi::Access srcAccess{rhi::Access::None};
+      rhi::Access dstAccess{rhi::Access::None};
+
+      if (((output.type & rhi::BufferType::Storage) ==
+           rhi::BufferType::Storage) ||
+          ((output.type & rhi::BufferType::Uniform) ==
+           rhi::BufferType::Uniform)) {
+        if (pass.getType() == RenderGraphPassType::Compute) {
+          stage |= rhi::PipelineStage::ComputeShader;
+        } else {
+          stage |= rhi::PipelineStage::FragmentShader;
+        }
+        srcAccess |= rhi::Access::ShaderWrite;
+        dstAccess |= rhi::Access::ShaderRead;
+      }
+
+      visitedBuffers.insert_or_assign(output.buffer, stage);
+
+      rhi::MemoryBarrier memoryBarrier{};
+      memoryBarrier.srcAccess = srcAccess;
+      memoryBarrier.dstAccess = dstAccess;
+
+      pass.mPostBarrier.enabled = true;
+      pass.mPostBarrier.srcStage |= stage;
+      pass.mPostBarrier.dstStage |= stage;
+      pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
     }
   }
 

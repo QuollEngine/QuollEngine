@@ -132,6 +132,16 @@ public:
                    uint32_t firstInstance) override;
 
   /**
+   * @brief Dispatch compute work
+   *
+   * @param groupCountX Number of groups to dispatch in X direction
+   * @param groupCountY Number of groups to dispatch in Y direction
+   * @param groupCountZ Number of groups to dispatch in Z direction
+   */
+  void dispatch(uint32_t groupCountX, uint32_t groupCountY,
+                uint32_t groupCountZ) override;
+
+  /**
    * @brief Set viewport
    *
    * @param offset Viewport offset

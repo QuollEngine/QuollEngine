@@ -72,6 +72,8 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
   } else if (description.type == rhi::BufferType::TransferDestination) {
     bufferUsage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+  } else if (description.type == rhi::BufferType::Indirect) {
+    bufferUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
   }
 
   VkBufferCreateInfo createBufferInfo{};

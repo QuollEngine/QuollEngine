@@ -4,6 +4,7 @@
 #include "liquid/rhi/PipelineDescription.h"
 #include "liquid/rhi/RenderPassDescription.h"
 #include "liquid/rhi/RenderCommandList.h"
+#include "liquid/rhi/BufferDescription.h"
 
 #include "RenderGraphRegistry.h"
 
@@ -53,11 +54,26 @@ struct RenderTargetData {
 };
 
 /**
+ * @brief Pass buffer data
+ */
+struct RenderGraphPassBufferData {
+  /**
+   * @brief Buffer
+   */
+  rhi::BufferHandle buffer = rhi::BufferHandle::Invalid;
+
+  /**
+   * @brief Buffer type
+   */
+  rhi::BufferType type = rhi::BufferType::None;
+};
+
+/**
  * @brief Render graph pass barrier
  */
 struct RenderGraphPassBarrier {
   /**
-   * Barrier active
+   * Barrier enabled
    */
   bool enabled = false;
 
@@ -83,6 +99,11 @@ struct RenderGraphPassBarrier {
 };
 
 /**
+ * @brief Render graph pass types
+ */
+enum class RenderGraphPassType { Graphics, Compute };
+
+/**
  * @brief Render graph pass
  */
 class RenderGraphPass {
@@ -96,8 +117,9 @@ public:
    * @brief Create render graph pass
    *
    * @param name Pass name
+   * @param type Pass type
    */
-  RenderGraphPass(StringView name);
+  RenderGraphPass(StringView name, RenderGraphPassType type);
 
   /**
    * @brief Copy another render pass into this
@@ -159,6 +181,22 @@ public:
   void read(rhi::TextureHandle handle);
 
   /**
+   * @brief Set output buffer
+   *
+   * @param handle Buffer handle
+   * @param type Buffer type
+   */
+  void write(rhi::BufferHandle handle, rhi::BufferType type);
+
+  /**
+   * @brief Set input buffer
+   *
+   * @param handle Buffer handle
+   * @param type Buffer type
+   */
+  void read(rhi::BufferHandle handle, rhi::BufferType type);
+
+  /**
    * @brief Set executor function
    *
    * @param executor Executor function
@@ -166,13 +204,22 @@ public:
   void setExecutor(const ExecutorFn &executor);
 
   /**
-   * @brief Add pipeline
+   * @brief Add graphics pipeline
    *
-   * @param description Pipeline description
-   * @return Virtual pipeline handle
+   * @param description Graphics pipeline description
+   * @return Virtual graphics pipeline handle
    */
   VirtualPipelineHandle
   addPipeline(const rhi::PipelineDescription &description);
+
+  /**
+   * @brief Add compute pipeline
+   *
+   * @param description Compute pipeline description
+   * @return Virtual compute pipeline handle
+   */
+  VirtualComputePipelineHandle
+  addPipeline(const rhi::ComputePipelineDescription &description);
 
   /**
    * @brief Get pass name
@@ -180,6 +227,13 @@ public:
    * @return Pass name
    */
   inline const String &getName() const { return mName; }
+
+  /**
+   * @brief Get pass type
+   *
+   * @return Pass type
+   */
+  inline const RenderGraphPassType &getType() const { return mType; }
 
   /**
    * @brief Get input textures
@@ -200,21 +254,31 @@ public:
   }
 
   /**
+   * @brief Get input buffer
+   *
+   * @return Input buffers
+   */
+  inline const std::vector<RenderGraphPassBufferData> &getBufferInputs() const {
+    return mBufferInputs;
+  }
+
+  /**
+   * @brief Get output buffers
+   *
+   * @return Output buffers
+   */
+  inline const std::vector<RenderGraphPassBufferData> &
+  getBufferOutputs() const {
+    return mBufferOutputs;
+  }
+
+  /**
    * @brief Get attachment data
    *
    * @return Attachment data
    */
   inline const std::vector<AttachmentData> &getAttachments() const {
     return mAttachments;
-  }
-
-  /**
-   * @brief Get pipelines
-   *
-   * @return Pipelines
-   */
-  inline const std::vector<rhi::PipelineHandle> &getPipelines() const {
-    return mPipelines;
   }
 
   /**
@@ -253,20 +317,26 @@ private:
   std::vector<AttachmentData> mAttachments;
   std::vector<RenderTargetData> mOutputs;
   std::vector<RenderTargetData> mInputs;
-  std::vector<rhi::PipelineHandle> mPipelines;
+
+  std::vector<RenderGraphPassBufferData> mBufferInputs;
+  std::vector<RenderGraphPassBufferData> mBufferOutputs;
 
   RenderGraphPassBarrier mPreBarrier;
   RenderGraphPassBarrier mPostBarrier;
 
   ExecutorFn mExecutor;
 
-  rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
-  rhi::FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
-  glm::uvec3 mDimensions{};
-
   RenderGraphRegistry mRegistry;
 
   String mName;
+  RenderGraphPassType mType;
+
+  bool mCreated = false;
+
+  // Graphics specific resources
+  rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
+  rhi::FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
+  glm::uvec3 mDimensions{};
 };
 
 } // namespace liquid

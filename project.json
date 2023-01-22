@@ -98,8 +98,8 @@
     },
     {
       "name": "msdf-atlas-gen",
-      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/refs/heads/master.zip",
-      "buildSource": "msdf-atlas-gen-master",
+      "url": "https://github.com/Chlumsky/msdf-atlas-gen/archive/50d1a1c275e78ee08afafbead2a2d347aa26f122.zip",
+      "buildSource": "msdf-atlas-gen-50d1a1c275e78ee08afafbead2a2d347aa26f122",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/msdf-atlas-gen",
         "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/msdf-atlas-gen",

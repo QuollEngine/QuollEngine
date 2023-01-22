@@ -14,9 +14,9 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
                                VulkanDeviceObject &device,
                                const VulkanResourceRegistry &registry,
                                VulkanPipelineLayoutCache &pipelineLayoutCache)
-    : mDevice(device) {
+    : mDevice(device), mBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS) {
 
-  std::array<VulkanShader *, 2> shaders{
+  std::vector<VulkanShader *> shaders{
       registry.getShaders().at(description.vertexShader).get(),
       registry.getShaders().at(description.fragmentShader).get(),
   };
@@ -29,52 +29,7 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
     stages.at(i).stage = shaders.at(i)->getShaderStage();
   }
 
-  // Pipeline Layout
-  std::map<uint32_t, VkDescriptorSetLayout> descriptorLayoutsMap;
-  std::vector<VkDescriptorSetLayout> descriptorLayoutsRaw;
-  std::vector<VkPushConstantRange> pushConstantRanges;
-
-  for (auto &shader : shaders) {
-    const auto &reflection = shader->getReflectionData();
-    for (auto &[set, description] : reflection.descriptorLayouts) {
-      auto layoutHandle =
-          pipelineLayoutCache.getOrCreateDescriptorLayout(description);
-      VkDescriptorSetLayout layout =
-          pipelineLayoutCache.getVulkanDescriptorSetLayout(layoutHandle);
-
-      descriptorLayoutsMap.insert({set, layout});
-    }
-
-    for (auto &x : reflection.pushConstantRanges) {
-      pushConstantRanges.push_back(x);
-    }
-  }
-
-  for (auto &[set, layout] : descriptorLayoutsMap) {
-    descriptorLayoutsRaw.push_back(layout);
-    mDescriptorLayouts.insert({set, layout});
-  }
-
-  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-  pipelineLayoutCreateInfo.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutCreateInfo.flags = 0;
-  pipelineLayoutCreateInfo.pNext = nullptr;
-  pipelineLayoutCreateInfo.setLayoutCount =
-      static_cast<uint32_t>(mDescriptorLayouts.size());
-  pipelineLayoutCreateInfo.pSetLayouts = descriptorLayoutsRaw.data();
-  pipelineLayoutCreateInfo.pushConstantRangeCount =
-      static_cast<uint32_t>(pushConstantRanges.size());
-  pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
-
-  checkForVulkanError(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo,
-                                             nullptr, &mPipelineLayout),
-                      "Failed to create pipeline layout");
-
-  LOG_DEBUG_VK("Pipeline layout created. Descriptor layouts: "
-                   << descriptorLayoutsRaw.size()
-                   << "; Push constants: " << pushConstantRanges.size(),
-               mPipelineLayout);
+  createLayout(shaders, registry, pipelineLayoutCache);
 
   // Dynamic state
   std::array<VkDynamicState, 2> dynamicStates{VK_DYNAMIC_STATE_VIEWPORT,
@@ -241,9 +196,43 @@ VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
   checkForVulkanError(vkCreateGraphicsPipelines(mDevice, VK_NULL_HANDLE, 1,
                                                 &pipelineInfo, nullptr,
                                                 &mPipeline),
-                      "Failed to create pipeline");
+                      "Failed to create graphics pipeline");
 
-  LOG_DEBUG_VK("Pipeline created", mPipeline);
+  LOG_DEBUG_VK("Graphics pipeline created", mPipeline);
+}
+
+VulkanPipeline::VulkanPipeline(const ComputePipelineDescription &description,
+                               VulkanDeviceObject &device,
+                               const VulkanResourceRegistry &registry,
+                               VulkanPipelineLayoutCache &pipelineLayoutCache)
+    : mDevice(device), mBindPoint(VK_PIPELINE_BIND_POINT_COMPUTE) {
+
+  VulkanShader *computeShader =
+      registry.getShaders().at(description.computeShader).get();
+
+  VkPipelineShaderStageCreateInfo stage{};
+  stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  stage.pName = "main";
+  stage.module = computeShader->getShaderModule();
+  stage.stage = computeShader->getShaderStage();
+
+  createLayout({computeShader}, registry, pipelineLayoutCache);
+
+  VkComputePipelineCreateInfo pipelineInfo{};
+  pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+  pipelineInfo.pNext = nullptr;
+  pipelineInfo.flags = 0;
+  pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+  pipelineInfo.basePipelineIndex = -1;
+  pipelineInfo.layout = mPipelineLayout;
+  pipelineInfo.stage = stage;
+
+  checkForVulkanError(vkCreateComputePipelines(mDevice, VK_NULL_HANDLE, 1,
+                                               &pipelineInfo, nullptr,
+                                               &mPipeline),
+                      "Failed to create compute pipeline");
+
+  LOG_DEBUG_VK("Compute pipeline created", mPipeline);
 }
 
 VulkanPipeline::~VulkanPipeline() {
@@ -256,6 +245,59 @@ VulkanPipeline::~VulkanPipeline() {
     vkDestroyPipelineLayout(mDevice, mPipelineLayout, nullptr);
     LOG_DEBUG_VK("Pipeline layout destroyed", mPipelineLayout);
   }
+}
+
+void VulkanPipeline::createLayout(
+    const std::vector<VulkanShader *> &shaders,
+    const VulkanResourceRegistry &registry,
+    VulkanPipelineLayoutCache &pipelineLayoutCache) {
+
+  // Pipeline Layout
+  std::map<uint32_t, VkDescriptorSetLayout> descriptorLayoutsMap;
+  std::vector<VkDescriptorSetLayout> descriptorLayoutsRaw;
+  std::vector<VkPushConstantRange> pushConstantRanges;
+
+  for (auto &shader : shaders) {
+    const auto &reflection = shader->getReflectionData();
+    for (auto &[set, description] : reflection.descriptorLayouts) {
+      auto layoutHandle =
+          pipelineLayoutCache.getOrCreateDescriptorLayout(description);
+      VkDescriptorSetLayout layout =
+          pipelineLayoutCache.getVulkanDescriptorSetLayout(layoutHandle);
+
+      descriptorLayoutsMap.insert({set, layout});
+    }
+
+    for (auto &x : reflection.pushConstantRanges) {
+      pushConstantRanges.push_back(x);
+    }
+  }
+
+  for (auto &[set, layout] : descriptorLayoutsMap) {
+    descriptorLayoutsRaw.push_back(layout);
+    mDescriptorLayouts.insert({set, layout});
+  }
+
+  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+  pipelineLayoutCreateInfo.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+  pipelineLayoutCreateInfo.flags = 0;
+  pipelineLayoutCreateInfo.pNext = nullptr;
+  pipelineLayoutCreateInfo.setLayoutCount =
+      static_cast<uint32_t>(mDescriptorLayouts.size());
+  pipelineLayoutCreateInfo.pSetLayouts = descriptorLayoutsRaw.data();
+  pipelineLayoutCreateInfo.pushConstantRangeCount =
+      static_cast<uint32_t>(pushConstantRanges.size());
+  pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.data();
+
+  checkForVulkanError(vkCreatePipelineLayout(mDevice, &pipelineLayoutCreateInfo,
+                                             nullptr, &mPipelineLayout),
+                      "Failed to create pipeline layout");
+
+  LOG_DEBUG_VK("Pipeline layout created. Descriptor layouts: "
+                   << descriptorLayoutsRaw.size()
+                   << "; Push constants: " << pushConstantRanges.size(),
+               mPipelineLayout);
 }
 
 } // namespace liquid::rhi

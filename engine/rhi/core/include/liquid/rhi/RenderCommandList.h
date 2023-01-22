@@ -170,6 +170,18 @@ public:
   }
 
   /**
+   * @brief Dispatch compute work
+   *
+   * @param groupCountX Number of groups to dispatch in X direction
+   * @param groupCountY Number of groups to dispatch in Y direction
+   * @param groupCountZ Number of groups to dispatch in Z direction
+   */
+  inline void dispatch(uint32_t groupCountX, uint32_t groupCountY,
+                       uint32_t groupCountZ) {
+    mNativeRenderCommandList->dispatch(groupCountX, groupCountY, groupCountZ);
+  }
+
+  /**
    * @brief Set viewport
    *
    * @param offset Viewport offset

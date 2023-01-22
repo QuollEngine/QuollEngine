@@ -15,8 +15,13 @@ void RenderGraphEvaluator::build(RenderGraph &graph) {
 
   for (size_t index = 0; index < graph.getCompiledPasses().size(); ++index) {
     auto &pass = graph.getCompiledPasses().at(index);
-    buildPass(index, graph,
-              graph.isDirty() && hasSwapchainRelativeResources(pass));
+
+    if (pass.getType() == RenderGraphPassType::Compute) {
+      buildComputePass(index, graph, graph.isDirty());
+    } else {
+      buildPass(index, graph,
+                graph.isDirty() && hasSwapchainRelativeResources(pass));
+    }
   }
 
   graph.updateDirtyFlag();
@@ -33,13 +38,17 @@ void RenderGraphEvaluator::execute(rhi::RenderCommandList &commandList,
           pass.mPreBarrier.memoryBarriers, pass.mPreBarrier.imageBarriers);
     }
 
-    commandList.beginRenderPass(pass.mRenderPass, pass.getFramebuffer(), {0, 0},
-                                glm::uvec2(pass.getDimensions()));
-    commandList.setViewport({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()),
-                            {0.0f, 1.0f});
-    commandList.setScissor({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()));
-    pass.execute(commandList, frameIndex);
-    commandList.endRenderPass();
+    if (pass.getType() == RenderGraphPassType::Compute) {
+      pass.execute(commandList, frameIndex);
+    } else {
+      commandList.beginRenderPass(pass.mRenderPass, pass.getFramebuffer(),
+                                  {0, 0}, glm::uvec2(pass.getDimensions()));
+      commandList.setViewport({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()),
+                              {0.0f, 1.0f});
+      commandList.setScissor({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()));
+      pass.execute(commandList, frameIndex);
+      commandList.endRenderPass();
+    }
 
     if (pass.mPostBarrier.enabled) {
       commandList.pipelineBarrier(
@@ -117,19 +126,47 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
 
   LIQUID_ASSERT(isHandleValid(pass.mRenderPass), "Render pass is not created");
 
-  // Pipelines
-  for (size_t i = 0; i < pass.mRegistry.mDescriptions.size(); ++i) {
-    auto &description = pass.mRegistry.mDescriptions.at(i);
+  // Graphics pipelines
+  for (size_t i = 0; i < pass.mRegistry.mGraphicsPipelineDescriptions.size();
+       ++i) {
+    auto &description = pass.mRegistry.mGraphicsPipelineDescriptions.at(i);
     description.renderPass = pass.mRenderPass;
 
-    auto handle = pass.mRegistry.mRealResources.at(i);
+    auto handle = pass.mRegistry.mRealGraphicsPipelines.at(i);
 
     if (handle != rhi::PipelineHandle::Invalid) {
       mDevice->destroyPipeline(handle);
     }
 
-    pass.mRegistry.mRealResources.at(i) = mDevice->createPipeline(description);
+    pass.mRegistry.mRealGraphicsPipelines.at(i) =
+        mDevice->createPipeline(description);
   }
+}
+
+void RenderGraphEvaluator::buildComputePass(size_t index, RenderGraph &graph,
+                                            bool force) {
+  LIQUID_PROFILE_EVENT("RenderGraphEvaluator::buildComputePass");
+  auto &pass = graph.getCompiledPasses().at(index);
+
+  if (!force && pass.mCreated) {
+    return;
+  }
+
+  for (size_t i = 0; i < pass.mRegistry.mComputePipelineDescriptions.size();
+       ++i) {
+    auto &description = pass.mRegistry.mComputePipelineDescriptions.at(i);
+
+    auto handle = pass.mRegistry.mRealComputePipelines.at(i);
+
+    if (handle != rhi::PipelineHandle::Invalid) {
+      mDevice->destroyPipeline(handle);
+    }
+
+    pass.mRegistry.mRealComputePipelines.at(i) =
+        mDevice->createPipeline(description);
+  }
+
+  pass.mCreated = true;
 }
 
 RenderGraphEvaluator::RenderPassAttachmentInfo

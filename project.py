@@ -57,9 +57,8 @@ def open_project(path):
     for x in project['dependencies']:
         parsedURL = urlparse(x['url'])
         filename = f'{x["name"]}-{os.path.basename(parsedURL.path)}'
-        filenameNoExt = os.path.splitext(filename)[0]
         x['archivePath'] = os.path.join(tempDir, filename)
-        x['archiveContentPath'] = os.path.join(tempDir, filenameNoExt)
+        x['archiveContentPath'] = os.path.join(tempDir, x['name'])
         x['sourceDir'] = os.path.normpath(os.path.join(x['archiveContentPath'], x['buildSource']))
 
     return project
