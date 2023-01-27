@@ -27,6 +27,14 @@ public:
   RenderGraphPass &addPass(StringView name);
 
   /**
+   * @brief Add compute pass
+   *
+   * @param name Pass name
+   * @return Render graph pass
+   */
+  RenderGraphPass &addComputePass(StringView name);
+
+  /**
    * @brief Compile render graph
    *
    * Topologically sorts and updates render

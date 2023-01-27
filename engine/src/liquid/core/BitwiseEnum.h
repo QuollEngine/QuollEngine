@@ -36,6 +36,9 @@ namespace liquid {
     using TUnder = typename std::underlying_type_t<TEnum>;                     \
     a = static_cast<TEnum>(static_cast<TUnder>(a) ^ static_cast<TUnder>(b));   \
     return a;                                                                  \
+  }                                                                            \
+  constexpr inline bool BitwiseEnumContains(TEnum &a, TEnum b) {               \
+    return (a & b) == b;                                                       \
   }
 
 } // namespace liquid

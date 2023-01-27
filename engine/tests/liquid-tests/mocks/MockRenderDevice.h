@@ -53,6 +53,9 @@ public:
   liquid::rhi::PipelineHandle
   createPipeline(const liquid::rhi::PipelineDescription &description);
 
+  liquid::rhi::PipelineHandle
+  createPipeline(const liquid::rhi::ComputePipelineDescription &description);
+
   void destroyPipeline(liquid::rhi::PipelineHandle handle);
 
   inline const MockBuffer &getBuffer(liquid::rhi::BufferHandle handle) {
@@ -94,6 +97,10 @@ private:
   std::unordered_map<liquid::rhi::PipelineHandle,
                      liquid::rhi::PipelineDescription>
       mPipelines;
+
+  std::unordered_map<liquid::rhi::PipelineHandle,
+                     liquid::rhi::ComputePipelineDescription>
+      mComputePipelines;
 
   uint32_t mLastHandle = 1;
 

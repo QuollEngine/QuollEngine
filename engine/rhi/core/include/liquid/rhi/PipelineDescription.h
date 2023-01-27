@@ -277,7 +277,7 @@ struct PipelineColorBlend {
 };
 
 /**
- * @brief Pipeline description
+ * @brief Graphics pipeline description
  */
 struct PipelineDescription {
   /**
@@ -314,6 +314,16 @@ struct PipelineDescription {
    * Render pass
    */
   RenderPassHandle renderPass = RenderPassHandle::Invalid;
+};
+
+/**
+ * @brief Compute pipeline description
+ */
+struct ComputePipelineDescription {
+  /**
+   * Compute shader
+   */
+  ShaderHandle computeShader = ShaderHandle::Invalid;
 };
 
 } // namespace liquid::rhi

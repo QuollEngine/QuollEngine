@@ -172,6 +172,12 @@ VulkanRenderDevice::createPipeline(const PipelineDescription &description) {
       description, mDevice, mRegistry, mPipelineLayoutCache));
 }
 
+PipelineHandle VulkanRenderDevice::createPipeline(
+    const ComputePipelineDescription &description) {
+  return mRegistry.setPipeline(std::make_unique<VulkanPipeline>(
+      description, mDevice, mRegistry, mPipelineLayoutCache));
+}
+
 void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
   mRegistry.deletePipeline(handle);
 }

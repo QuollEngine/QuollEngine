@@ -97,6 +97,13 @@ liquid::rhi::PipelineHandle MockRenderDevice::createPipeline(
   return handle;
 }
 
+liquid::rhi::PipelineHandle MockRenderDevice::createPipeline(
+    const liquid::rhi::ComputePipelineDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::PipelineHandle>();
+  mComputePipelines.insert_or_assign(handle, description);
+  return handle;
+}
+
 void MockRenderDevice::destroyPipeline(liquid::rhi::PipelineHandle handle) {}
 
 size_t MockRenderDevice::addTextureUpdateListener(

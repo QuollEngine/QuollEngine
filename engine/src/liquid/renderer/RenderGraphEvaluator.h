@@ -48,13 +48,22 @@ public:
 
 private:
   /**
-   * @brief Build render pass resources
+   * @brief Build graphics pass resources
    *
    * @param index Render pass index
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
    */
   void buildPass(size_t index, RenderGraph &graph, bool force);
+
+  /**
+   * @brief Build compute pass resources
+   *
+   * @param index Render pass index
+   * @param graph Render graph
+   * @param force Force build even if the pass resources exist
+   */
+  void buildComputePass(size_t index, RenderGraph &graph, bool force);
 
   /**
    * @brief Create attachment
