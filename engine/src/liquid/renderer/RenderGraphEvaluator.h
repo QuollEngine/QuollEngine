@@ -54,7 +54,7 @@ private:
    * @param graph Render graph
    * @param force Force build even if the pass resources exist
    */
-  void buildPass(size_t index, RenderGraph &graph, bool force);
+  void buildGraphicsPass(size_t index, RenderGraph &graph, bool force);
 
   /**
    * @brief Build compute pass resources

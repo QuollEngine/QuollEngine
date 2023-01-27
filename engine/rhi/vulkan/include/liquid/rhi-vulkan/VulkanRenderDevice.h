@@ -177,7 +177,7 @@ public:
    * @return Graphics pipeline
    */
   virtual PipelineHandle
-  createPipeline(const PipelineDescription &description) override;
+  createPipeline(const GraphicsPipelineDescription &description) override;
 
   /**
    * @brief Create compute pipeline

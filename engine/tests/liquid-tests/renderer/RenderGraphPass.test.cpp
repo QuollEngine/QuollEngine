@@ -25,8 +25,8 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
   liquid::rhi::TextureHandle handle{2};
 
   graphicsPass.write(handle, glm::vec4());
-  EXPECT_EQ(graphicsPass.getOutputs().size(), 1);
-  EXPECT_EQ(graphicsPass.getOutputs().at(0).texture, handle);
+  EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 1);
+  EXPECT_EQ(graphicsPass.getTextureOutputs().at(0).texture, handle);
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
@@ -49,9 +49,9 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToInputOnRead) {
 
   graphicsPass.read(handle);
   EXPECT_EQ(graphicsPass.getAttachments().size(), 0);
-  EXPECT_EQ(graphicsPass.getOutputs().size(), 0);
-  EXPECT_EQ(graphicsPass.getInputs().size(), 1);
-  EXPECT_EQ(graphicsPass.getInputs().at(0).texture, handle);
+  EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 0);
+  EXPECT_EQ(graphicsPass.getTextureInputs().size(), 1);
+  EXPECT_EQ(graphicsPass.getTextureInputs().at(0).texture, handle);
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithVertexOnGraphicsPass) {

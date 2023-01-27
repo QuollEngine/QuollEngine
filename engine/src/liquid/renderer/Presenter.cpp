@@ -54,7 +54,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   auto fragmentShader =
       mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
 
-  rhi::PipelineDescription pipelineDescription{};
+  rhi::GraphicsPipelineDescription pipelineDescription{};
   pipelineDescription.vertexShader = vertexShader;
   pipelineDescription.fragmentShader = fragmentShader;
   pipelineDescription.renderPass = mPresentPass;

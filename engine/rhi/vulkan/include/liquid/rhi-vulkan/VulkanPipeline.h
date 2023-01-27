@@ -23,7 +23,7 @@ public:
    * @param registry Resource registry
    * @param pipelineLayoutCache Pipeline layout cache
    */
-  VulkanPipeline(const PipelineDescription &description,
+  VulkanPipeline(const GraphicsPipelineDescription &description,
                  VulkanDeviceObject &device,
                  const VulkanResourceRegistry &registry,
                  VulkanPipelineLayoutCache &pipelineLayoutCache);

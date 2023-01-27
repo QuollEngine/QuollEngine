@@ -17,7 +17,7 @@ public:
 class RenderGraphDeathTest : public RenderGraphTest {};
 
 TEST_F(RenderGraphTest, AddsGraphicsPass) {
-  auto &pass = graph.addPass("Test");
+  auto &pass = graph.addGraphicsPass("Test");
   EXPECT_EQ(pass.getName(), "Test");
   EXPECT_EQ(pass.getType(), liquid::RenderGraphPassType::Graphics);
   EXPECT_EQ(graph.getPasses().at(0).getName(), "Test");
@@ -39,8 +39,8 @@ TEST_F(RenderGraphTest, AddsComputePass) {
 }
 
 TEST_F(RenderGraphTest, CompilationDoesNotMutateDefinedPasses) {
-  auto &pass = graph.addPass("Test");
-  auto &pass1 = graph.addPass("Test2");
+  auto &pass = graph.addGraphicsPass("Test");
+  auto &pass1 = graph.addGraphicsPass("Test2");
   auto &pass2 = graph.addComputePass("Test3");
 
   graph.compile(&device);
@@ -86,13 +86,13 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
       {"d-b", device.createBuffer({}).getHandle()}};
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffers.at("a-b"), liquid::rhi::BufferType::Storage);
     pass.write(textures.at("a-d"), glm::vec4());
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(buffers.at("a-b"), liquid::rhi::BufferType::Vertex);
     pass.read(buffers.at("d-b"), liquid::rhi::BufferType::Index);
     pass.write(textures.at("b-c"), glm::vec4());
@@ -100,14 +100,14 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   }
 
   {
-    auto &pass = graph.addPass("C");
+    auto &pass = graph.addGraphicsPass("C");
     pass.read(textures.at("b-c"));
     pass.read(textures.at("h-c"));
     pass.write(textures.at("c-e"), glm::vec4());
   }
 
   {
-    auto &pass = graph.addPass("D");
+    auto &pass = graph.addGraphicsPass("D");
     pass.read(textures.at("a-d"));
     pass.write(buffers.at("d-b"), liquid::rhi::BufferType::Uniform);
     pass.write(textures.at("d-e"), glm::vec4());
@@ -115,20 +115,20 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   }
 
   {
-    auto &pass = graph.addPass("E");
+    auto &pass = graph.addGraphicsPass("E");
     pass.read(textures.at("d-e"));
     pass.read(textures.at("c-e"));
     pass.write(textures.at("e-f"), glm::vec4());
   }
 
   {
-    auto &pass = graph.addPass("F");
+    auto &pass = graph.addGraphicsPass("F");
     pass.read(textures.at("e-f"));
     pass.write(textures.at("f-g"), glm::vec4());
   }
 
   {
-    auto &pass = graph.addPass("G");
+    auto &pass = graph.addGraphicsPass("G");
     pass.read(textures.at("f-g"));
     pass.read(textures.at("d-g"));
     pass.read(textures.at("b-g"));
@@ -136,7 +136,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   }
 
   {
-    auto &pass = graph.addPass("H");
+    auto &pass = graph.addGraphicsPass("H");
     pass.write(textures.at("h-c"), glm::vec4());
   }
 
@@ -164,9 +164,9 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 TEST_F(RenderGraphTest, SetsPassAttachmentOperations) {
   auto handle = device.createTexture({});
 
-  graph.addPass("A").write(handle, glm::vec4());
-  graph.addPass("B").write(handle, glm::vec4());
-  graph.addPass("C").write(handle, glm::vec4());
+  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("B").write(handle, glm::vec4());
+  graph.addGraphicsPass("C").write(handle, glm::vec4());
 
   graph.compile(&device);
 
@@ -198,35 +198,35 @@ TEST_F(RenderGraphTest, SetsOutputImageLayouts) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
     pass.write(depthTexture, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.write(depthTexture, {});
     pass.write(colorTexture, {});
   }
 
   graph.compile(&device);
 
-  EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(0).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(0).getTextureOutputs().at(0).srcLayout,
             ImageLayout::Undefined);
-  EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(0).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(0).getTextureOutputs().at(0).dstLayout,
             ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(1).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(0).getTextureOutputs().at(1).srcLayout,
             ImageLayout::Undefined);
-  EXPECT_EQ(graph.getCompiledPasses().at(0).getOutputs().at(1).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(0).getTextureOutputs().at(1).dstLayout,
             ImageLayout::DepthStencilAttachmentOptimal);
 
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(0).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureOutputs().at(0).srcLayout,
             ImageLayout::DepthStencilAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(0).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureOutputs().at(0).dstLayout,
             ImageLayout::DepthStencilAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(1).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureOutputs().at(1).srcLayout,
             ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getOutputs().at(1).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureOutputs().at(1).dstLayout,
             ImageLayout::ColorAttachmentOptimal);
 }
 
@@ -242,26 +242,26 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
     pass.write(depthTexture, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(depthTexture);
     pass.read(colorTexture);
   }
 
   graph.compile(&device);
 
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(0).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureInputs().at(0).srcLayout,
             ImageLayout::DepthStencilAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(0).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureInputs().at(0).dstLayout,
             ImageLayout::ShaderReadOnlyOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(1).srcLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureInputs().at(1).srcLayout,
             ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(graph.getCompiledPasses().at(1).getInputs().at(1).dstLayout,
+  EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureInputs().at(1).dstLayout,
             ImageLayout::ShaderReadOnlyOptimal);
 }
 
@@ -273,7 +273,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorWrite) {
   auto colorTexture = device.createTexture(colorDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
   }
 
@@ -302,7 +302,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthWrite) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(depthTexture, glm::vec4{});
   }
 
@@ -337,7 +337,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllTextureWrites) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
     pass.write(depthTexture, glm::vec4{});
   }
@@ -376,12 +376,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorRead) {
   auto colorTexture = device.createTexture(colorDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(colorTexture);
   }
 
@@ -429,12 +429,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthTextureRead) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(depthTexture, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(depthTexture);
   }
 
@@ -487,13 +487,13 @@ TEST_F(RenderGraphTest, SetsPassBarrierForBothColorAndDepthTextureReads) {
   auto depthTexture = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture, glm::vec4{});
     pass.write(depthTexture, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(colorTexture);
     pass.read(depthTexture);
   }
@@ -560,12 +560,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
   {
-    auto &pass = graph.addPass("C");
+    auto &pass = graph.addGraphicsPass("C");
     pass.read(buffer1, liquid::rhi::BufferType::Uniform);
   }
 
@@ -588,7 +588,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInComputePass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
@@ -616,12 +616,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(buffer1, liquid::rhi::BufferType::Storage);
   }
 
@@ -672,12 +672,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForVertexBufferReadInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(buffer1, liquid::rhi::BufferType::Vertex);
   }
 
@@ -701,12 +701,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndexBufferReadInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(buffer1, liquid::rhi::BufferType::Index);
   }
 
@@ -734,7 +734,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndirectBufferReadInGraphicsPass) {
   }
 
   {
-    auto &pass = graph.addPass("C");
+    auto &pass = graph.addGraphicsPass("C");
     pass.read(buffer1, liquid::rhi::BufferType::Indirect);
   }
 
@@ -765,7 +765,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInGraphicsPass) {
   }
 
   {
-    auto &pass = graph.addPass("C");
+    auto &pass = graph.addGraphicsPass("C");
     pass.read(buffer1, liquid::rhi::BufferType::Indirect |
                            liquid::rhi::BufferType::Vertex |
                            liquid::rhi::BufferType::Index);
@@ -799,7 +799,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInComputePass) {
   auto buffer2 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
     pass.write(buffer2, liquid::rhi::BufferType::Storage);
   }
@@ -834,7 +834,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Uniform);
   }
 
@@ -878,7 +878,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInGraphicsPass) {
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
   }
 
@@ -923,7 +923,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInGraphicsPass) {
   auto buffer2 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
     pass.write(buffer1, liquid::rhi::BufferType::Uniform);
   }
@@ -949,7 +949,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInComputePass) {
   auto buffer2 = device.createBuffer({}).getHandle();
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(buffer1, liquid::rhi::BufferType::Storage);
     pass.write(buffer1, liquid::rhi::BufferType::Uniform);
   }
@@ -984,13 +984,13 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
   auto depthTexture2 = device.createTexture(depthDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.write(colorTexture1, glm::vec4{});
     pass.write(depthTexture1, glm::vec4{});
   }
 
   {
-    auto &pass = graph.addPass("B");
+    auto &pass = graph.addGraphicsPass("B");
     pass.read(colorTexture1);
     pass.read(depthTexture1);
 
@@ -1077,7 +1077,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
   auto colorTexture = device.createTexture(colorDescription);
 
   {
-    auto &pass = graph.addPass("A");
+    auto &pass = graph.addGraphicsPass("A");
     pass.read(colorTexture);
   }
 
@@ -1087,10 +1087,10 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   liquid::rhi::TextureHandle handle = device.createTexture({});
 
-  graph.addPass("A").write(handle, glm::vec4());
-  graph.addPass("B");
-  graph.addPass("C");
-  graph.addPass("E").read(handle);
+  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("B");
+  graph.addGraphicsPass("C");
+  graph.addGraphicsPass("E").read(handle);
 
   graph.compile(&device);
 
@@ -1101,10 +1101,10 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   liquid::rhi::TextureHandle handle{2};
 
-  graph.addPass("A").write(handle, glm::vec4());
-  graph.addPass("B");
-  graph.addPass("A");
-  graph.addPass("E");
+  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("B");
+  graph.addGraphicsPass("A");
+  graph.addGraphicsPass("E");
 
   EXPECT_DEATH(graph.compile(&device), ".*");
 }

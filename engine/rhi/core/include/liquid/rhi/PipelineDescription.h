@@ -279,7 +279,7 @@ struct PipelineColorBlend {
 /**
  * @brief Graphics pipeline description
  */
-struct PipelineDescription {
+struct GraphicsPipelineDescription {
   /**
    * Vertex shader
    */

@@ -19,8 +19,8 @@ void RenderGraphEvaluator::build(RenderGraph &graph) {
     if (pass.getType() == RenderGraphPassType::Compute) {
       buildComputePass(index, graph, graph.isDirty());
     } else {
-      buildPass(index, graph,
-                graph.isDirty() && hasSwapchainRelativeResources(pass));
+      buildGraphicsPass(index, graph,
+                        graph.isDirty() && hasSwapchainRelativeResources(pass));
     }
   }
 
@@ -58,8 +58,8 @@ void RenderGraphEvaluator::execute(rhi::RenderCommandList &commandList,
   }
 }
 
-void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
-                                     bool force) {
+void RenderGraphEvaluator::buildGraphicsPass(size_t index, RenderGraph &graph,
+                                             bool force) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::buildPass");
   auto &pass = graph.getCompiledPasses().at(index);
 
@@ -75,8 +75,8 @@ void RenderGraphEvaluator::buildPass(size_t index, RenderGraph &graph,
 
   rhi::RenderPassDescription renderPassDesc{};
 
-  for (size_t i = 0; i < pass.getOutputs().size(); ++i) {
-    auto &output = pass.mOutputs.at(i);
+  for (size_t i = 0; i < pass.getTextureOutputs().size(); ++i) {
+    auto &output = pass.mTextureOutputs.at(i);
     const auto &attachment = pass.getAttachments().at(i);
 
     const auto &info =
@@ -202,7 +202,7 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
 
 bool RenderGraphEvaluator::hasSwapchainRelativeResources(
     RenderGraphPass &pass) {
-  for (auto rt : pass.getOutputs()) {
+  for (auto rt : pass.getTextureOutputs()) {
     auto handle = rt.texture;
     if (handle == rhi::TextureHandle(1) ||
         mDevice->getTextureDescription(handle).sizeMethod ==

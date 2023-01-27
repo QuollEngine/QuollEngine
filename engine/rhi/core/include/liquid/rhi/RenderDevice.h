@@ -187,7 +187,7 @@ public:
    * @return Graphics pipeline
    */
   virtual PipelineHandle
-  createPipeline(const PipelineDescription &description) = 0;
+  createPipeline(const GraphicsPipelineDescription &description) = 0;
 
   /**
    * @brief Create compute pipeline

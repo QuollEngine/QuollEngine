@@ -91,7 +91,7 @@ void MockRenderDevice::destroyFramebuffer(
     liquid::rhi::FramebufferHandle handle) {}
 
 liquid::rhi::PipelineHandle MockRenderDevice::createPipeline(
-    const liquid::rhi::PipelineDescription &description) {
+    const liquid::rhi::GraphicsPipelineDescription &description) {
   auto handle = getNewHandle<liquid::rhi::PipelineHandle>();
   mPipelines.insert_or_assign(handle, description);
   return handle;

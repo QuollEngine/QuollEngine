@@ -46,11 +46,11 @@ MousePickingGraph::MousePickingGraph(
   mEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
   mSkinnedEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
 
-  auto &pass = mRenderGraph.addPass("MousePicking");
+  auto &pass = mRenderGraph.addGraphicsPass("MousePicking");
   pass.write(depthBuffer, liquid::rhi::DepthStencilClear({1.0f, 0}));
 
   // Normal meshes
-  auto vPipeline = pass.addPipeline(liquid::rhi::PipelineDescription{
+  auto vPipeline = pass.addPipeline(liquid::rhi::GraphicsPipelineDescription{
       shaderLibrary.getShader("mouse-picking.default.vertex"),
       shaderLibrary.getShader("mouse-picking.selector.fragment"),
       liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
@@ -62,16 +62,17 @@ MousePickingGraph::MousePickingGraph(
       liquid::rhi::PipelineColorBlend{{}}});
 
   // Skinned meshes
-  auto vSkinnedPipeline = pass.addPipeline(liquid::rhi::PipelineDescription{
-      shaderLibrary.getShader("mouse-picking.skinned.vertex"),
-      shaderLibrary.getShader("mouse-picking.selector.fragment"),
-      liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-      liquid::rhi::PipelineInputAssembly{
-          liquid::rhi::PrimitiveTopology::TriangleList},
-      liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
-                                      liquid::rhi::CullMode::Back,
-                                      liquid::rhi::FrontFace::CounterClockwise},
-      liquid::rhi::PipelineColorBlend{{}}});
+  auto vSkinnedPipeline =
+      pass.addPipeline(liquid::rhi::GraphicsPipelineDescription{
+          shaderLibrary.getShader("mouse-picking.skinned.vertex"),
+          shaderLibrary.getShader("mouse-picking.selector.fragment"),
+          liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
+          liquid::rhi::PipelineInputAssembly{
+              liquid::rhi::PrimitiveTopology::TriangleList},
+          liquid::rhi::PipelineRasterizer{
+              liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Back,
+              liquid::rhi::FrontFace::CounterClockwise},
+          liquid::rhi::PipelineColorBlend{{}}});
 
   pass.setExecutor([this, vPipeline, vSkinnedPipeline,
                     &renderStorage](liquid::rhi::RenderCommandList &commandList,

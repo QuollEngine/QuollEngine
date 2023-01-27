@@ -10,7 +10,7 @@
 
 namespace liquid::rhi {
 
-VulkanPipeline::VulkanPipeline(const PipelineDescription &description,
+VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
                                VulkanDeviceObject &device,
                                const VulkanResourceRegistry &registry,
                                VulkanPipelineLayoutCache &pipelineLayoutCache)

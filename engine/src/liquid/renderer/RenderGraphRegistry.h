@@ -45,7 +45,8 @@ public:
    * @param description Graphics pipeline description
    * @return Virtual pipeline handle
    */
-  VirtualPipelineHandle set(const rhi::PipelineDescription &description);
+  VirtualPipelineHandle
+  set(const rhi::GraphicsPipelineDescription &description);
 
   /**
    * @brief Set compute pipeline
@@ -57,7 +58,7 @@ public:
   set(const rhi::ComputePipelineDescription &description);
 
 private:
-  std::vector<rhi::PipelineDescription> mGraphicsPipelineDescriptions;
+  std::vector<rhi::GraphicsPipelineDescription> mGraphicsPipelineDescriptions;
   std::vector<rhi::ComputePipelineDescription> mComputePipelineDescriptions;
 
   std::vector<rhi::PipelineHandle> mRealGraphicsPipelines;

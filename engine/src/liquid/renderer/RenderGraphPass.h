@@ -210,7 +210,7 @@ public:
    * @return Virtual graphics pipeline handle
    */
   VirtualPipelineHandle
-  addPipeline(const rhi::PipelineDescription &description);
+  addPipeline(const rhi::GraphicsPipelineDescription &description);
 
   /**
    * @brief Add compute pipeline
@@ -236,27 +236,27 @@ public:
   inline const RenderGraphPassType &getType() const { return mType; }
 
   /**
-   * @brief Get input textures
+   * @brief Get texture inputs
    *
-   * @return Input render targets
+   * @return Texture inputs
    */
-  inline const std::vector<RenderTargetData> &getInputs() const {
-    return mInputs;
+  inline const std::vector<RenderTargetData> &getTextureInputs() const {
+    return mTextureInputs;
   }
 
   /**
-   * @brief Get output textures
+   * @brief Get texture outputs
    *
-   * @return Output render targets
+   * @return Texture outputs
    */
-  inline const std::vector<RenderTargetData> &getOutputs() const {
-    return mOutputs;
+  inline const std::vector<RenderTargetData> &getTextureOutputs() const {
+    return mTextureOutputs;
   }
 
   /**
-   * @brief Get input buffer
+   * @brief Get buffer inputs
    *
-   * @return Input buffers
+   * @return Buffer inputs
    */
   inline const std::vector<RenderGraphPassBufferData> &getBufferInputs() const {
     return mBufferInputs;
@@ -315,8 +315,8 @@ public:
 
 private:
   std::vector<AttachmentData> mAttachments;
-  std::vector<RenderTargetData> mOutputs;
-  std::vector<RenderTargetData> mInputs;
+  std::vector<RenderTargetData> mTextureOutputs;
+  std::vector<RenderTargetData> mTextureInputs;
 
   std::vector<RenderGraphPassBufferData> mBufferInputs;
   std::vector<RenderGraphPassBufferData> mBufferOutputs;
