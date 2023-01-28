@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Load animations into asset registry
@@ -14,4 +14,4 @@ namespace liquidator {
  */
 void loadAnimations(GLTFImportData &importData);
 
-} // namespace liquidator
+} // namespace liquid::editor

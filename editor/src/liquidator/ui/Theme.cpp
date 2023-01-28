@@ -4,7 +4,7 @@
 
 #include "Theme.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 static constexpr float FontSize = 18.0f;
 
@@ -97,12 +97,11 @@ static void setImguiStyles() {
 static void addFonts() {
   auto &io = ImGui::GetIO();
 
-  liquid::Path defaultFontPath =
-      liquid::Engine::getFontsPath() / "Roboto-Regular.ttf";
+  Path defaultFontPath = Engine::getFontsPath() / "Roboto-Regular.ttf";
   Fonts.at(0) =
       io.Fonts->AddFontFromFileTTF(defaultFontPath.string().c_str(), FontSize);
 
-  liquid::Path boldFontPath =
+  Path boldFontPath =
       std::filesystem::current_path() / "assets" / "fonts" / "Roboto-Bold.ttf";
   Fonts.at(1) =
       io.Fonts->AddFontFromFileTTF(boldFontPath.string().c_str(), FontSize);
@@ -115,8 +114,8 @@ static void addFonts() {
 
     static constexpr std::array<ImWchar, 3> IconRanges{0xe005, 0xf8ff, 0};
 
-    liquid::Path iconFontPath = std::filesystem::current_path() / "assets" /
-                                "fonts" / "FontAwesome-Solid.ttf";
+    Path iconFontPath = std::filesystem::current_path() / "assets" / "fonts" /
+                        "FontAwesome-Solid.ttf";
     io.Fonts->AddFontFromFileTTF(iconFontPath.string().c_str(), FontSize,
                                  &config, IconRanges.data());
   }
@@ -133,4 +132,4 @@ glm::vec2 Theme::getStyle(ThemeStyle style) { return Styles.at(style); }
 
 ImFont *Theme::getBoldFont() { return Fonts.at(1); }
 
-} // namespace liquidator
+} // namespace liquid::editor

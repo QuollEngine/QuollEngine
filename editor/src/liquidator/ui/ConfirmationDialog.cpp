@@ -3,12 +3,12 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-ConfirmationDialog::ConfirmationDialog(const liquid::String &title,
-                                       const liquid::String &prompt,
-                                       const liquid::String &confirmButtonLabel,
-                                       const liquid::String &cancelButtonLabel)
+ConfirmationDialog::ConfirmationDialog(const String &title,
+                                       const String &prompt,
+                                       const String &confirmButtonLabel,
+                                       const String &cancelButtonLabel)
     : mTitle(title), mPrompt(prompt), mConfirmButtonLabel(confirmButtonLabel),
       mCancelButtonLabel(cancelButtonLabel) {}
 
@@ -38,4 +38,4 @@ void ConfirmationDialog::render() {
   mOpen = false;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

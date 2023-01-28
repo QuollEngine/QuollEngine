@@ -3,23 +3,20 @@
 
 #include <GLFW/glfw3.h>
 
-using liquid::Window;
+namespace liquid::editor {
 
-namespace liquidator {
-
-EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
-                           liquid::EventSystem &eventSystem,
-                           liquid::Window &window)
+EditorCamera::EditorCamera(EntityDatabase &entityDatabase,
+                           EventSystem &eventSystem, Window &window)
     : mEntityDatabase(entityDatabase), mEventSystem(eventSystem),
       mWindow(window) {
   reset();
 
   mMouseButtonReleaseHandler = mEventSystem.observe(
-      liquid::MouseButtonEvent::Released,
+      MouseButtonEvent::Released,
       [this](const auto &data) { mInputState = InputState::None; });
 
-  mMouseButtonPressHandler = mEventSystem.observe(
-      liquid::MouseButtonEvent::Pressed, [this](const auto &data) {
+  mMouseButtonPressHandler =
+      mEventSystem.observe(MouseButtonEvent::Pressed, [this](const auto &data) {
         if (data.button != GLFW_MOUSE_BUTTON_MIDDLE || !mCaptureMouse) {
           return;
         }
@@ -38,8 +35,8 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
         }
       });
 
-  mMouseCursorMoveHandler = mEventSystem.observe(
-      liquid::MouseCursorEvent::Moved, [this](const auto &data) {
+  mMouseCursorMoveHandler =
+      mEventSystem.observe(MouseCursorEvent::Moved, [this](const auto &data) {
         if (mInputState == InputState::None) {
           return;
         }
@@ -78,8 +75,8 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
         }
       });
 
-  mMouseScrollHandler = mEventSystem.observe(
-      liquid::MouseScrollEvent::Scroll, [this](const auto &event) {
+  mMouseScrollHandler =
+      mEventSystem.observe(MouseScrollEvent::Scroll, [this](const auto &event) {
         if (!mCaptureMouse)
           return;
 
@@ -100,14 +97,12 @@ EditorCamera::EditorCamera(liquid::EntityDatabase &entityDatabase,
 }
 
 EditorCamera::~EditorCamera() {
-  mEventSystem.removeObserver(liquid::MouseButtonEvent::Pressed,
+  mEventSystem.removeObserver(MouseButtonEvent::Pressed,
                               mMouseButtonPressHandler);
-  mEventSystem.removeObserver(liquid::MouseButtonEvent::Released,
+  mEventSystem.removeObserver(MouseButtonEvent::Released,
                               mMouseButtonReleaseHandler);
-  mEventSystem.removeObserver(liquid::MouseCursorEvent::Moved,
-                              mMouseCursorMoveHandler);
-  mEventSystem.removeObserver(liquid::MouseScrollEvent::Scroll,
-                              mMouseScrollHandler);
+  mEventSystem.removeObserver(MouseCursorEvent::Moved, mMouseCursorMoveHandler);
+  mEventSystem.removeObserver(MouseScrollEvent::Scroll, mMouseScrollHandler);
 
   mEntityDatabase.deleteEntity(mCameraEntity);
 }
@@ -127,8 +122,8 @@ void EditorCamera::update() {
     zoom();
   }
 
-  auto &camera = mEntityDatabase.get<liquid::Camera>(mCameraEntity);
-  auto &lens = mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
+  auto &camera = mEntityDatabase.get<Camera>(mCameraEntity);
+  auto &lens = mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
 
   camera.projectionMatrix = glm::perspective(
       glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
@@ -145,9 +140,9 @@ void EditorCamera::reset() {
   if (!mEntityDatabase.exists(mCameraEntity)) {
     mCameraEntity = mEntityDatabase.create();
   }
-  mEntityDatabase.set<liquid::PerspectiveLens>(
-      mCameraEntity, {DefaultFOV, DefaultNear, DefaultFar});
-  mEntityDatabase.set<liquid::Camera>(mCameraEntity, {});
+  mEntityDatabase.set<PerspectiveLens>(mCameraEntity,
+                                       {DefaultFOV, DefaultNear, DefaultFar});
+  mEntityDatabase.set<Camera>(mCameraEntity, {});
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
@@ -223,4 +218,4 @@ void EditorCamera::setViewport(float x, float y, float width, float height,
   mCaptureMouse = captureMouse;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

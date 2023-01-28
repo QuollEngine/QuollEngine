@@ -2,26 +2,26 @@
 
 #include "TextureStep.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void loadTextures(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
   const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
-  std::map<size_t, liquid::TextureAssetHandle> map;
+  std::map<size_t, TextureAssetHandle> map;
 
   for (size_t i = 0; i < model.textures.size(); ++i) {
     // TODO: Support creating different samplers
     auto &image = model.images.at(model.textures.at(i).source);
-    liquid::AssetData<liquid::TextureAsset> texture{};
+    AssetData<TextureAsset> texture{};
     auto textureRelPath =
         std::filesystem::relative(targetPath, assetCache.getAssetsPath());
 
     auto filename = "texture" + std::to_string(i);
     texture.name = (textureRelPath / filename).string();
 
-    texture.type = liquid::AssetType::Texture;
+    texture.type = AssetType::Texture;
     texture.size = image.width * image.height * 4;
     texture.data.data =
         const_cast<void *>(static_cast<const void *>(image.image.data()));
@@ -34,4 +34,4 @@ void loadTextures(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

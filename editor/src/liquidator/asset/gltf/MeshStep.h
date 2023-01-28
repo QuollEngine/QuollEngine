@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Load meshes into registry
@@ -11,4 +11,4 @@ namespace liquidator {
  */
 void loadMeshes(GLTFImportData &importData);
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -9,7 +9,7 @@
 
 #include "liquid/window/Window.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Render graph for mouse picking
@@ -29,11 +29,10 @@ public:
    * @param renderStorage Render storage
    * @param device Render device
    */
-  MousePickingGraph(
-      liquid::ShaderLibrary &shaderLibrary,
-      const std::array<liquid::SceneRendererFrameData, 2> &frameData,
-      liquid::AssetRegistry &assetRegistry,
-      liquid::RenderStorage &renderStorage, liquid::rhi::RenderDevice *device);
+  MousePickingGraph(ShaderLibrary &shaderLibrary,
+                    const std::array<SceneRendererFrameData, 2> &frameData,
+                    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+                    rhi::RenderDevice *device);
 
   ~MousePickingGraph();
 
@@ -54,8 +53,8 @@ public:
    * @param mousePos Mouse position
    * @param frameIndex Frame index
    */
-  void execute(liquid::rhi::RenderCommandList &commandList,
-               const glm::vec2 &mousePos, uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, const glm::vec2 &mousePos,
+               uint32_t frameIndex);
 
   /**
    * @brief Get selected entity
@@ -65,14 +64,14 @@ public:
    *
    * @return Selected entity
    */
-  liquid::Entity getSelectedEntity();
+  Entity getSelectedEntity();
 
   /**
    * @brief Set framebuffer size
    *
    * @param window Framebuffer size
    */
-  void setFramebufferSize(liquid::Window &window);
+  void setFramebufferSize(Window &window);
 
   /**
    * @brief Check is selection is performed in current frame
@@ -86,21 +85,21 @@ public:
   }
 
 private:
-  liquid::rhi::RenderDevice *mDevice = nullptr;
+  rhi::RenderDevice *mDevice = nullptr;
 
-  liquid::RenderGraph mRenderGraph;
-  liquid::RenderGraphEvaluator mGraphEvaluator;
-  const std::array<liquid::SceneRendererFrameData,
-                   liquid::rhi::RenderDevice::NumFrames> &mFrameData;
-  liquid::AssetRegistry &mAssetRegistry;
+  RenderGraph mRenderGraph;
+  RenderGraphEvaluator mGraphEvaluator;
+  const std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames>
+      &mFrameData;
+  AssetRegistry &mAssetRegistry;
 
-  liquid::rhi::Buffer mEntitiesBuffer;
-  liquid::rhi::Buffer mSkinnedEntitiesBuffer;
-  liquid::rhi::Buffer mSelectedEntityBuffer;
+  rhi::Buffer mEntitiesBuffer;
+  rhi::Buffer mSkinnedEntitiesBuffer;
+  rhi::Buffer mSelectedEntityBuffer;
 
   glm::vec2 mMousePos{};
 
   uint32_t mFrameIndex = std::numeric_limits<uint32_t>::max();
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

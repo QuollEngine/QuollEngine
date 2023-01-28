@@ -3,7 +3,7 @@
 #include "PrefabStep.h"
 #include "TransformUtils.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Load prefabs into asset registry
@@ -15,9 +15,9 @@ void loadPrefabs(GLTFImportData &importData) {
   const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
-  liquid::AssetData<liquid::PrefabAsset> prefab;
+  AssetData<PrefabAsset> prefab;
   prefab.name = targetPath.string() + "/" + targetPath.stem().string();
-  prefab.type = liquid::AssetType::Prefab;
+  prefab.type = AssetType::Prefab;
 
   auto &gltfNodes = model.scenes.at(model.defaultScene);
 
@@ -56,7 +56,7 @@ void loadPrefabs(GLTFImportData &importData) {
 
     auto localEntityId = static_cast<uint32_t>(nodeIndex);
 
-    liquid::PrefabTransformData transform{};
+    PrefabTransformData transform{};
     auto data = loadTransformData(node);
     transform.position = data.localPosition;
     transform.rotation = data.localRotation;
@@ -72,7 +72,7 @@ void loadPrefabs(GLTFImportData &importData) {
       prefab.data.skeletons.push_back(
           {localEntityId, importData.skeletons.skeletonMap.map.at(node.skin)});
 
-      liquid::Animator component;
+      Animator component;
 
       auto it = importData.animations.skinAnimationMap.find(node.skin);
       if (it != importData.animations.skinAnimationMap.end()) {
@@ -86,7 +86,7 @@ void loadPrefabs(GLTFImportData &importData) {
       prefab.data.meshes.push_back(
           {localEntityId, importData.meshes.map.at(node.mesh)});
 
-      liquid::Animator component;
+      Animator component;
 
       auto it = importData.animations.nodeAnimationMap.find(nodeIndex);
       if (it != importData.animations.nodeAnimationMap.end()) {
@@ -105,4 +105,4 @@ void loadPrefabs(GLTFImportData &importData) {
   importData.outputPath = path;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

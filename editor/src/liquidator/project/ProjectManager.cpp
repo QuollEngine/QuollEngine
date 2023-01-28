@@ -4,10 +4,10 @@
 
 #include "ProjectManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 bool ProjectManager::createProjectInPath() {
-  liquid::platform_tools::NativeFileDialog dialog;
+  platform_tools::NativeFileDialog dialog;
 
   auto projectPath =
       dialog.getFilePathFromCreateDialog({{"Liquid project", {"lqproj"}}});
@@ -70,7 +70,7 @@ bool ProjectManager::createProjectInPath() {
 }
 
 bool ProjectManager::openProjectInPath() {
-  liquid::platform_tools::NativeFileDialog dialog;
+  platform_tools::NativeFileDialog dialog;
 
   auto projectFilePath =
       dialog.getFilePathFromDialog({{"Liquid project", {"lqproj"}}});
@@ -92,22 +92,18 @@ bool ProjectManager::openProjectInPath() {
     return false;
   }
 
-  mProject.name = projectObj["name"].as<liquid::String>();
-  mProject.version = projectObj["version"].as<liquid::String>();
+  mProject.name = projectObj["name"].as<String>();
+  mProject.version = projectObj["version"].as<String>();
   mProject.assetsPath =
-      directory /
-      liquid::String(projectObj["paths"]["assets"].as<liquid::String>());
+      directory / String(projectObj["paths"]["assets"].as<String>());
   mProject.assetsCachePath =
-      directory /
-      liquid::String(projectObj["paths"]["assetsCache"].as<liquid::String>());
+      directory / String(projectObj["paths"]["assetsCache"].as<String>());
   mProject.settingsPath =
-      directory /
-      liquid::String(projectObj["paths"]["settings"].as<liquid::String>());
+      directory / String(projectObj["paths"]["settings"].as<String>());
   mProject.scenesPath =
-      directory /
-      liquid::String(projectObj["paths"]["scenes"].as<liquid::String>());
+      directory / String(projectObj["paths"]["scenes"].as<String>());
 
   return true;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

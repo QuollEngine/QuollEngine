@@ -8,7 +8,7 @@
 #include "Theme.h"
 #include "FontAwesome.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 TransformOperationControl::TransformOperationControl(
     EditorManager &editorManager) {
@@ -51,4 +51,4 @@ const char *TransformOperationControl::getTransformOperationIcon(
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

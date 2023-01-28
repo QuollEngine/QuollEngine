@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator::fa {
+namespace liquid::editor::fa {
 
 static constexpr const char *FillDrip = "\xef\x95\xb6";
 static constexpr const char *ArrowsToCircle = "\xee\x92\xbd";
@@ -1945,4 +1945,4 @@ static constexpr const char *PersonCircleCheck = "\xee\x94\xbe";
 static constexpr const char *TurnUp = "\xef\x8e\xbf";
 static constexpr const char *LevelUpAlt = "\xef\x8e\xbf";
 
-} // namespace liquidator::fa
+} // namespace liquid::editor::fa

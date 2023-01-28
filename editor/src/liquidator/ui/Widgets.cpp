@@ -5,7 +5,7 @@
 #include "Widgets.h"
 #include "Theme.h"
 
-namespace liquidator::widgets {
+namespace liquid::editor::widgets {
 
 /**
  * @brief Section horizontal bounds
@@ -173,7 +173,7 @@ void Table::column(float value) {
   ImGui::Text("%.2f", value);
 }
 
-void Table::column(const liquid::String &value) {
+void Table::column(const String &value) {
   ImGui::TableNextColumn();
   ImGui::Text("%s", value.c_str());
 }
@@ -188,12 +188,12 @@ void Table::column(uint32_t value) {
   ImGui::Text("%d", value);
 }
 
-void Table::column(liquid::rhi::TextureHandle handle, const glm::vec2 &size) {
+void Table::column(rhi::TextureHandle handle, const glm::vec2 &size) {
   ImGui::TableNextColumn();
-  liquid::imgui::image(handle, ImVec2(size.x, size.y));
+  imgui::image(handle, ImVec2(size.x, size.y));
 }
 
-Input::Input(liquid::String label, glm::vec3 &value) {
+Input::Input(String label, glm::vec3 &value) {
   glm::vec3 temp = value;
 
   renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length(),
@@ -204,7 +204,7 @@ Input::Input(liquid::String label, glm::vec3 &value) {
   }
 }
 
-Input::Input(liquid::String label, float &value) {
+Input::Input(String label, float &value) {
   float temp = value;
 
   renderScalarInput(label, &temp, 1, ImGuiDataType_Float);
@@ -214,7 +214,7 @@ Input::Input(liquid::String label, float &value) {
   }
 }
 
-Input::Input(liquid::String label, uint32_t &value) {
+Input::Input(String label, uint32_t &value) {
   uint32_t temp = value;
 
   renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
@@ -224,7 +224,7 @@ Input::Input(liquid::String label, uint32_t &value) {
   }
 }
 
-Input::Input(liquid::String label, liquid::String &value) {
+Input::Input(String label, String &value) {
   auto temp = value;
   renderTextInput(label, temp);
 
@@ -233,7 +233,7 @@ Input::Input(liquid::String label, liquid::String &value) {
   }
 }
 
-void Input::renderScalarInput(liquid::String label, void *data, size_t size,
+void Input::renderScalarInput(String label, void *data, size_t size,
                               ImGuiDataType dataType) {
   if (!label.empty()) {
     ImGui::Text("%s", label.c_str());
@@ -246,7 +246,7 @@ void Input::renderScalarInput(liquid::String label, void *data, size_t size,
   mChanged = ImGui::IsItemDeactivatedAfterEdit();
 }
 
-void Input::renderTextInput(liquid::String label, liquid::String &data) {
+void Input::renderTextInput(String label, String &data) {
   if (!label.empty()) {
     ImGui::Text("%s", label.c_str());
   }
@@ -257,7 +257,7 @@ void Input::renderTextInput(liquid::String label, liquid::String &data) {
       ImGuiInputTextFlags_CallbackResize,
       [](ImGuiInputTextCallbackData *data) -> int {
         if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
-          liquid::String *str = static_cast<liquid::String *>(data->UserData);
+          String *str = static_cast<String *>(data->UserData);
 
           str->resize(data->BufTextLen);
           data->Buf = const_cast<char *>(str->c_str());
@@ -269,7 +269,7 @@ void Input::renderTextInput(liquid::String label, liquid::String &data) {
   mChanged = ImGui::IsItemDeactivatedAfterEdit();
 }
 
-InputColor::InputColor(liquid::String label, glm::vec4 &value) {
+InputColor::InputColor(String label, glm::vec4 &value) {
   if (!label.empty()) {
     ImGui::Text("%s", label.c_str());
   }
@@ -278,4 +278,4 @@ InputColor::InputColor(liquid::String label, glm::vec4 &value) {
   mChanged = ImGui::ColorEdit4(id.c_str(), glm::value_ptr(value));
 }
 
-} // namespace liquidator::widgets
+} // namespace liquid::editor::widgets

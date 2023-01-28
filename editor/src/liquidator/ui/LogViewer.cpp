@@ -4,7 +4,7 @@
 #include "Widgets.h"
 #include "StyleStack.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void LogViewer::render(LogMemoryStorage &systemLogs,
                        LogMemoryStorage &userLogs) {
@@ -21,7 +21,7 @@ void LogViewer::render(LogMemoryStorage &systemLogs,
   }
 }
 
-void LogViewer::renderLogContainer(const liquid::String &name,
+void LogViewer::renderLogContainer(const String &name,
                                    LogMemoryStorage &logStorage,
                                    size_t &logSize, float width) {
   ImGui::PushID(name.c_str());
@@ -41,7 +41,7 @@ void LogViewer::renderLogContainer(const liquid::String &name,
                     flags);
 
   for (const auto &entry : logStorage.getEntries()) {
-    ImGui::Text("%s: %s", liquid::getLogSeverityString(entry.severity).c_str(),
+    ImGui::Text("%s: %s", getLogSeverityString(entry.severity).c_str(),
                 entry.message.c_str());
   }
 
@@ -54,4 +54,4 @@ void LogViewer::renderLogContainer(const liquid::String &name,
   ImGui::PopID();
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

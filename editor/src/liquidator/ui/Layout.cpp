@@ -5,7 +5,7 @@
 
 #include "Toolbar.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void Layout::setup() {
   const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
@@ -79,4 +79,4 @@ void Layout::setup() {
   ImGui::End();
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

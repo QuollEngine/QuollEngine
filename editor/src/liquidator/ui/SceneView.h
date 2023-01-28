@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Scene view widget
@@ -17,7 +17,7 @@ public:
    *
    * @param texture Scene texture
    */
-  SceneView(liquid::rhi::TextureHandle texture);
+  SceneView(rhi::TextureHandle texture);
 
   /**
    * @brief End scene view
@@ -41,4 +41,4 @@ private:
   bool mExpanded = false;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

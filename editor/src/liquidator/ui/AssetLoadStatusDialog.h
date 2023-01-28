@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Asset loading status dialog component
@@ -17,8 +17,7 @@ public:
    * @param title Dialog title
    * @param okayButton Okay button
    */
-  AssetLoadStatusDialog(const liquid::String &title,
-                        const liquid::String &okayButton = "Okay");
+  AssetLoadStatusDialog(const String &title, const String &okayButton = "Okay");
 
   /**
    * @brief Show dialog
@@ -35,21 +34,21 @@ public:
    *
    * @param title Title
    */
-  void setTitle(const liquid::String &title);
+  void setTitle(const String &title);
 
   /**
    * @brief Set messages in dialog
    *
    * @param messages Dialog messages
    */
-  void setMessages(const std::vector<liquid::String> &messages);
+  void setMessages(const std::vector<String> &messages);
 
 private:
   bool mOpen = false;
 
-  liquid::String mTitle;
-  liquid::String mOkayButton;
-  std::vector<liquid::String> mMessages;
+  String mTitle;
+  String mOkayButton;
+  std::vector<String> mMessages;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

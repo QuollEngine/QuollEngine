@@ -6,7 +6,7 @@
 
 #include "../project/ProjectManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Project selector screen
@@ -20,9 +20,8 @@ public:
    * @param eventSystem Event system
    * @param device Render device
    */
-  ProjectSelectorScreen(liquid::Window &window,
-                        liquid::EventSystem &eventSystem,
-                        liquid::rhi::RenderDevice *device);
+  ProjectSelectorScreen(Window &window, EventSystem &eventSystem,
+                        rhi::RenderDevice *device);
 
   /**
    * @brief Start project selector screen
@@ -32,9 +31,9 @@ public:
   std::optional<Project> start();
 
 private:
-  liquid::Window &mWindow;
-  liquid::EventSystem &mEventSystem;
-  liquid::rhi::RenderDevice *mDevice;
+  Window &mWindow;
+  EventSystem &mEventSystem;
+  rhi::RenderDevice *mDevice;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

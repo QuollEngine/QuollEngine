@@ -7,7 +7,7 @@
 
 #include <glm/gtc/matrix_access.hpp>
 
-namespace liquidator {
+namespace liquid::editor {
 
 EditorManager::EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
                              EntityManager &entityManager,
@@ -114,15 +114,14 @@ void EditorManager::createNewScene() {
   static constexpr glm::vec3 LightStartPos(0.0f, 5.0f, 0.0f);
 
   {
-    liquid::LocalTransform transform{};
+    LocalTransform transform{};
     transform.localPosition = LightStartPos;
     transform.localRotation =
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
-    auto light1 = mEntityManager.createEmptyEntity(liquid::EntityNull,
-                                                   transform, "Light");
-    mEntityManager.getActiveEntityDatabase().set<liquid::DirectionalLight>(
-        light1, {});
+    auto light1 =
+        mEntityManager.createEmptyEntity(EntityNull, transform, "Light");
+    mEntityManager.getActiveEntityDatabase().set<DirectionalLight>(light1, {});
     mEntityManager.save(light1);
   }
 }
@@ -135,15 +134,13 @@ void EditorManager::loadOrCreateScene() {
   }
 }
 
-void EditorManager::moveCameraToEntity(liquid::Entity entity) {
-  if (!mEntityManager.getActiveEntityDatabase().has<liquid::LocalTransform>(
-          entity)) {
+void EditorManager::moveCameraToEntity(Entity entity) {
+  if (!mEntityManager.getActiveEntityDatabase().has<LocalTransform>(entity)) {
     return;
   }
 
   auto &transformComponent =
-      mEntityManager.getActiveEntityDatabase().get<liquid::WorldTransform>(
-          entity);
+      mEntityManager.getActiveEntityDatabase().get<WorldTransform>(entity);
 
   const auto &translation =
       glm::vec3(glm::column(transformComponent.worldTransform, 3));
@@ -156,18 +153,18 @@ void EditorManager::moveCameraToEntity(liquid::Entity entity) {
 }
 
 bool EditorManager::hasEnvironment() {
-  return mEntityManager.getActiveEntityDatabase().has<liquid::Environment>(
+  return mEntityManager.getActiveEntityDatabase().has<Environment>(
       mEnvironmentEntity);
 }
 
-liquid::Environment &EditorManager::getEnvironment() {
+Environment &EditorManager::getEnvironment() {
   if (!mEntityManager.getActiveEntityDatabase().exists(mEnvironmentEntity)) {
     mEnvironmentEntity = mEntityManager.getActiveEntityDatabase().create();
-    mEntityManager.getActiveEntityDatabase().set<liquid::Environment>(
+    mEntityManager.getActiveEntityDatabase().set<Environment>(
         mEnvironmentEntity, {});
   }
 
-  return mEntityManager.getActiveEntityDatabase().get<liquid::Environment>(
+  return mEntityManager.getActiveEntityDatabase().get<Environment>(
       mEnvironmentEntity);
 }
 
@@ -177,11 +174,11 @@ void EditorManager::setTransformOperation(
 }
 
 void EditorManager::startGameExport() {
-  liquid::platform_tools::NativeFileDialog nativeFileDialog;
+  platform_tools::NativeFileDialog nativeFileDialog;
   auto path = nativeFileDialog.getFilePathFromCreateDialog({});
 
   GameExporter exporter;
   exporter.exportGame(mProject, path);
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

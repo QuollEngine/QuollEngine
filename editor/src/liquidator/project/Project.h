@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Project data
@@ -9,32 +9,32 @@ struct Project {
   /**
    * Project name
    */
-  liquid::String name;
+  String name;
 
   /**
    * Project version
    */
-  liquid::String version;
+  String version;
 
   /**
    * Path to assets directory
    */
-  liquid::Path assetsPath;
+  Path assetsPath;
 
   /**
    * @brief Path to assets cache directory
    */
-  liquid::Path assetsCachePath;
+  Path assetsCachePath;
 
   /**
    * Path to scenes directory
    */
-  liquid::Path scenesPath;
+  Path scenesPath;
 
   /**
    * Path to settings directory
    */
-  liquid::Path settingsPath;
+  Path settingsPath;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

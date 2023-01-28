@@ -3,7 +3,7 @@
 #include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/editor-scene/EntityManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Menu bar component
@@ -20,4 +20,4 @@ public:
                      EntityManager &entityManager);
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -3,7 +3,7 @@
 #include "AssetManager.h"
 #include "liquid/platform-tools/NativeFileDialog.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Asset loader
@@ -19,7 +19,7 @@ public:
    * @param assetManager Asset manager
    * @param renderStorage Render storage
    */
-  AssetLoader(AssetManager &assetManager, liquid::RenderStorage &renderStorage);
+  AssetLoader(AssetManager &assetManager, RenderStorage &renderStorage);
 
   /**
    * @brief Load asset from path
@@ -28,8 +28,7 @@ public:
    * @param directory Target directory path
    * @return Asset load result
    */
-  liquid::Result<bool> loadFromPath(const liquid::Path &path,
-                                    const liquid::Path &directory);
+  Result<bool> loadFromPath(const Path &path, const Path &directory);
 
   /**
    * @brief Load asset from native file dialog
@@ -37,13 +36,13 @@ public:
    * @param directory Target directory path
    * @return Asset load result
    */
-  liquid::Result<bool> loadFromFileDialog(const liquid::Path &directory);
+  Result<bool> loadFromFileDialog(const Path &directory);
 
 private:
   AssetManager &mAssetManager;
-  liquid::platform_tools::NativeFileDialog mNativeFileDialog;
+  platform_tools::NativeFileDialog mNativeFileDialog;
 
-  liquid::RenderStorage &mRenderStorage;
+  RenderStorage &mRenderStorage;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -3,10 +3,10 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-AssetLoadStatusDialog::AssetLoadStatusDialog(const liquid::String &title,
-                                             const liquid::String &okayButton)
+AssetLoadStatusDialog::AssetLoadStatusDialog(const String &title,
+                                             const String &okayButton)
     : mTitle(title), mOkayButton(okayButton) {}
 
 void AssetLoadStatusDialog::show() { mOpen = true; }
@@ -32,13 +32,10 @@ void AssetLoadStatusDialog::render() {
   mOpen = false;
 }
 
-void AssetLoadStatusDialog::setTitle(const liquid::String &title) {
-  mTitle = title;
-}
+void AssetLoadStatusDialog::setTitle(const String &title) { mTitle = title; }
 
-void AssetLoadStatusDialog::setMessages(
-    const std::vector<liquid::String> &messages) {
+void AssetLoadStatusDialog::setMessages(const std::vector<String> &messages) {
   mMessages = messages;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

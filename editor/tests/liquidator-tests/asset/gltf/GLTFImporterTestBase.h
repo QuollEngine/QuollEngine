@@ -321,5 +321,5 @@ public:
   }
 
   liquid::AssetCache assetCache;
-  liquidator::GLTFImporter importer;
+  liquid::editor::GLTFImporter importer;
 };

@@ -1,11 +1,10 @@
 #include "liquid/core/Base.h"
 #include "EditorSimulator.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-EditorSimulator::EditorSimulator(liquid::EventSystem &eventSystem,
-                                 liquid::Window &window,
-                                 liquid::AssetRegistry &assetRegistry,
+EditorSimulator::EditorSimulator(EventSystem &eventSystem, Window &window,
+                                 AssetRegistry &assetRegistry,
                                  EditorCamera &editorCamera)
     : mCameraAspectRatioUpdater(window),
       mScriptingSystem(eventSystem, assetRegistry),
@@ -14,30 +13,24 @@ EditorSimulator::EditorSimulator(liquid::EventSystem &eventSystem,
   useEditorUpdate();
 }
 
-void EditorSimulator::update(float dt, liquid::Scene &scene) {
-  mUpdater(dt, scene);
-}
+void EditorSimulator::update(float dt, Scene &scene) { mUpdater(dt, scene); }
 
 void EditorSimulator::cleanupSimulationDatabase(
-    liquid::EntityDatabase &simulationDatabase) {
+    EntityDatabase &simulationDatabase) {
   mPhysicsSystem.cleanup(simulationDatabase);
   mScriptingSystem.cleanup(simulationDatabase);
   mAudioSystem.cleanup(simulationDatabase);
 }
 
 void EditorSimulator::useSimulationUpdate() {
-  mUpdater = [this](float dt, liquid::Scene &scene) {
-    updateSimulation(dt, scene);
-  };
+  mUpdater = [this](float dt, Scene &scene) { updateSimulation(dt, scene); };
 }
 
 void EditorSimulator::useEditorUpdate() {
-  mUpdater = [this](float dt, liquid::Scene &scene) {
-    updateEditor(dt, scene);
-  };
+  mUpdater = [this](float dt, Scene &scene) { updateEditor(dt, scene); };
 }
 
-void EditorSimulator::updateEditor(float dt, liquid::Scene &scene) {
+void EditorSimulator::updateEditor(float dt, Scene &scene) {
   auto &entityDatabase = scene.entityDatabase;
   mCameraAspectRatioUpdater.update(entityDatabase);
   mEditorCamera.update();
@@ -48,7 +41,7 @@ void EditorSimulator::updateEditor(float dt, liquid::Scene &scene) {
   mEntityDeleter.update(scene);
 }
 
-void EditorSimulator::updateSimulation(float dt, liquid::Scene &scene) {
+void EditorSimulator::updateSimulation(float dt, Scene &scene) {
   auto &entityDatabase = scene.entityDatabase;
 
   mCameraAspectRatioUpdater.update(entityDatabase);
@@ -66,4 +59,4 @@ void EditorSimulator::updateSimulation(float dt, liquid::Scene &scene) {
   mEntityDeleter.update(scene);
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

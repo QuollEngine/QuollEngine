@@ -2,7 +2,7 @@
 
 #include "liquidator/project/Project.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Project manager
@@ -36,4 +36,4 @@ private:
   Project mProject;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

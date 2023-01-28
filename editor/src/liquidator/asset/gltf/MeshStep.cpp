@@ -4,7 +4,7 @@
 #include "Buffer.h"
 #include "mikktspace/MikktspaceAdapter.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 template <class TVertex> inline glm::vec3 getVertexPosition(TVertex &v) {
   return glm::vec3(v.x, v.y, v.z);
@@ -87,20 +87,20 @@ void generateTangents(std::vector<TVertex> &vertices,
  * @return Vertices and indices
  */
 template <class TVertex>
-liquid::Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>
+Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>
 loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
                            size_t p, const tinygltf::Model &model) {
   std::vector<uint32_t> indices;
   std::vector<TVertex> vertices;
-  std::vector<liquid::String> warnings;
+  std::vector<String> warnings;
 
-  liquid::String meshName =
+  String meshName =
       "Mesh #" + std::to_string(i) + ", Primitive #" + std::to_string(p);
 
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
-    return liquid::
-        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-            meshName + " skipped because it does not have position attribute");
+    return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
+        Error(meshName +
+              " skipped because it does not have position attribute");
   }
 
   auto &&positionMeta =
@@ -118,9 +118,8 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       vertices[i].z = data[i].z;
     }
   } else {
-    return liquid::
-        Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-            meshName + " skipped because it has invalid position format");
+    return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
+        Error(meshName + " skipped because it has invalid position format");
   }
 
   if (primitive.indices >= 0) {
@@ -148,9 +147,8 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
-      return liquid::
-          Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Error(
-              meshName + " skipped because it has invalid index format");
+      return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
+          Error(meshName + " skipped because it has invalid index format");
     }
   } else {
     indices.resize(vertices.size());
@@ -272,20 +270,18 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     generateTangents(vertices, indices);
   }
 
-  return liquid::Result<
-      std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Ok({vertices,
-                                                                   indices},
-                                                                  warnings);
+  return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Ok(
+      {vertices, indices}, warnings);
 }
 
-liquid::Result<bool>
-loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
-                          size_t p, const tinygltf::Model &model,
-                          std::vector<liquid::SkinnedVertex> &vertices) {
-  liquid::String meshName = "Skinned mesh #" + std::to_string(i) +
-                            ", Primitive #" + std::to_string(p);
+Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
+                                       size_t i, size_t p,
+                                       const tinygltf::Model &model,
+                                       std::vector<SkinnedVertex> &vertices) {
+  String meshName = "Skinned mesh #" + std::to_string(i) + ", Primitive #" +
+                    std::to_string(p);
 
-  std::vector<liquid::String> warnings;
+  std::vector<String> warnings;
 
   bool validJoints =
       primitive.attributes.find("JOINTS_0") != primitive.attributes.end();
@@ -354,7 +350,7 @@ loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     warnings.push_back(meshName + " weights attribute is invalid");
   }
 
-  return liquid::Result<bool>::Ok(true, warnings);
+  return Result<bool>::Ok(true, warnings);
 }
 
 /**
@@ -393,19 +389,19 @@ void loadMeshes(GLTFImportData &importData) {
       }
     }
 
-    liquid::AssetData<liquid::MeshAsset> mesh;
-    liquid::AssetData<liquid::SkinnedMeshAsset> skinnedMesh;
+    AssetData<MeshAsset> mesh;
+    AssetData<SkinnedMeshAsset> skinnedMesh;
 
     for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
       const auto &primitive = gltfMesh.primitives.at(p);
 
       auto material = primitive.material >= 0
                           ? importData.materials.map.at(primitive.material)
-                          : liquid::MaterialAssetHandle::Invalid;
+                          : MaterialAssetHandle::Invalid;
 
       if (isSkinnedMesh) {
-        auto &&result = loadStandardMeshAttributes<liquid::SkinnedVertex>(
-            primitive, i, p, model);
+        auto &&result =
+            loadStandardMeshAttributes<SkinnedVertex>(primitive, i, p, model);
 
         if (result.hasError()) {
           importData.warnings.push_back(result.getError());
@@ -436,7 +432,7 @@ void loadMeshes(GLTFImportData &importData) {
         }
       } else {
         auto &&result =
-            loadStandardMeshAttributes<liquid::Vertex>(primitive, i, p, model);
+            loadStandardMeshAttributes<Vertex>(primitive, i, p, model);
 
         if (result.hasError()) {
           importData.warnings.push_back(result.getError());
@@ -459,14 +455,14 @@ void loadMeshes(GLTFImportData &importData) {
     if (isSkinnedMesh && !skinnedMesh.data.geometries.empty()) {
       skinnedMesh.name =
           targetPath.string() + "/skinnedmesh" + std::to_string(i);
-      skinnedMesh.type = liquid::AssetType::SkinnedMesh;
+      skinnedMesh.type = AssetType::SkinnedMesh;
 
       auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
       auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
       importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
     } else if (!mesh.data.geometries.empty()) {
       mesh.name = targetPath.string() + "/mesh" + std::to_string(i);
-      mesh.type = liquid::AssetType::Mesh;
+      mesh.type = AssetType::Mesh;
 
       auto path = assetCache.createMeshFromAsset(mesh);
       auto handle = assetCache.loadMeshFromFile(path.getData());
@@ -475,4 +471,4 @@ void loadMeshes(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

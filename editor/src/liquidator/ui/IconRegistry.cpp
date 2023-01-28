@@ -4,11 +4,11 @@
 
 #include "IconRegistry.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-void IconRegistry::loadIcons(liquid::RenderStorage &renderStorage,
+void IconRegistry::loadIcons(RenderStorage &renderStorage,
                              const std::filesystem::path &iconsPath) {
-  liquid::ImageTextureLoader loader(renderStorage);
+  ImageTextureLoader loader(renderStorage);
 
   mIconMap.insert_or_assign(
       EditorIcon::Unknown,
@@ -48,4 +48,4 @@ void IconRegistry::loadIcons(liquid::RenderStorage &renderStorage,
       loader.loadFromFile((iconsPath / "camera.png").string()));
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

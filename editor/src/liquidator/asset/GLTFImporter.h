@@ -3,7 +3,7 @@
 #include "liquid/asset/Result.h"
 #include "gltf/GLTFImportData.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief GLTF importer
@@ -17,7 +17,7 @@ public:
    *
    * @param assetCache Asset cache
    */
-  GLTFImporter(liquid::AssetCache &assetCache);
+  GLTFImporter(AssetCache &assetCache);
 
   /**
    * @brief Load GLTF from file
@@ -26,9 +26,8 @@ public:
    * @param engineAssetPath Engine asset path
    * @return Path to newly created prefab
    */
-  liquid::Result<liquid::Path>
-  loadFromPath(const liquid::Path &originalAssetPath,
-               const liquid::Path &engineAssetPath);
+  Result<Path> loadFromPath(const Path &originalAssetPath,
+                            const Path &engineAssetPath);
 
   /**
    * @brief Save binary from ASCII gltf
@@ -37,11 +36,10 @@ public:
    * @param destination Destination path
    * @return GLB file path
    */
-  liquid::Result<liquid::Path> saveBinary(const liquid::Path &source,
-                                          const liquid::Path &destination);
+  Result<Path> saveBinary(const Path &source, const Path &destination);
 
 private:
-  liquid::AssetCache &mAssetCache;
+  AssetCache &mAssetCache;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

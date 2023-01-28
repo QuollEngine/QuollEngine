@@ -17,7 +17,7 @@
 #include "EnvironmentPanel.h"
 #include "SceneView.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Root UI entry point
@@ -45,8 +45,8 @@ public:
    * @param physicsSystem Physics system
    * @param entityManager Entity manager
    */
-  void render(EditorManager &editorManager, liquid::Renderer &renderer,
-              AssetManager &assetManager, liquid::PhysicsSystem &physicsSystem,
+  void render(EditorManager &editorManager, Renderer &renderer,
+              AssetManager &assetManager, PhysicsSystem &physicsSystem,
               EntityManager &entityManager);
 
   /**
@@ -84,4 +84,4 @@ private:
   IconRegistry mIconRegistry;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

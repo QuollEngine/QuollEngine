@@ -3,13 +3,13 @@
 
 #include "liquid/imgui/ImguiUtils.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-SceneView::SceneView(liquid::rhi::TextureHandle texture) {
+SceneView::SceneView(rhi::TextureHandle texture) {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
   mExpanded = ImGui::Begin("Scene", nullptr);
   if (mExpanded) {
-    liquid::imgui::image(texture, ImGui::GetContentRegionAvail());
+    imgui::image(texture, ImGui::GetContentRegionAvail());
   }
 }
 
@@ -18,4 +18,4 @@ SceneView::~SceneView() {
   ImGui::PopStyleVar();
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

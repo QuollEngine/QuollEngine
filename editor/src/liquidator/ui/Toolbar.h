@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Toolbar widget
@@ -43,4 +43,4 @@ private:
   bool mExpanded = false;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

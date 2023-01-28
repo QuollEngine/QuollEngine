@@ -2,7 +2,7 @@
 
 #include "liquidator/editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor grid panel component
@@ -20,4 +20,4 @@ private:
   bool mOpen = false;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

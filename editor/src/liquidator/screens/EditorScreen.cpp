@@ -40,7 +40,7 @@
 
 #include "ImGuizmo.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Get imguizmo operation
@@ -61,32 +61,30 @@ getImguizmoOperation(TransformOperation transformOperation) {
   }
 }
 
-EditorScreen::EditorScreen(liquid::Window &window,
-                           liquid::EventSystem &eventSystem,
-                           liquid::rhi::RenderDevice *device)
+EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
+                           rhi::RenderDevice *device)
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
   LogMemoryStorage systemLogStorage, userLogStorage;
-  liquid::Engine::getLogger().setTransport(systemLogStorage.createTransport());
-  liquid::Engine::getUserLogger().setTransport(
-      userLogStorage.createTransport());
+  Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
-  liquid::FPSCounter fpsCounter;
+  FPSCounter fpsCounter;
 
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
   AssetManager assetManager(project.assetsPath, project.assetsCachePath);
 
-  liquid::Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
+  Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
 
-  liquid::Presenter presenter(renderer.getShaderLibrary(), mDevice);
+  Presenter presenter(renderer.getShaderLibrary(), mDevice);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
   auto res = assetManager.validateAndPreloadAssets(renderer.getRenderStorage());
-  liquidator::AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
+  AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
     preloadStatusDialog.setMessages(res.getWarnings());
@@ -103,37 +101,34 @@ void EditorScreen::start(const Project &project) {
   renderer.getSceneRenderer().setClearColor(
       Theme::getColor(ThemeColor::SceneBackgroundColor));
 
-  liquid::FileTracker tracker(project.assetsPath);
+  FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  liquidator::EntityManager entityManager(assetManager, renderer,
-                                          project.scenesPath);
-  liquidator::EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
-                                        mEventSystem, mWindow);
-  liquidator::EditorGrid editorGrid;
-  liquidator::EditorManager editorManager(editorCamera, editorGrid,
-                                          entityManager, project);
+  EntityManager entityManager(assetManager, renderer, project.scenesPath);
+  EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
+                            mEventSystem, mWindow);
+  EditorGrid editorGrid;
+  EditorManager editorManager(editorCamera, editorGrid, entityManager, project);
 
   editorManager.loadOrCreateScene();
   editorManager.loadEditorState(statePath);
 
-  liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::AssetLoader assetLoader(assetManager,
-                                      renderer.getRenderStorage());
+  MainLoop mainLoop(mWindow, fpsCounter);
+  AssetLoader assetLoader(assetManager, renderer.getRenderStorage());
 
-  liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                                     mDevice->getDeviceStats(), fpsCounter);
+  ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
+                             mDevice->getDeviceStats(), fpsCounter);
 
-  liquidator::UIRoot ui(entityManager, assetLoader);
+  UIRoot ui(entityManager, assetLoader);
   ui.getIconRegistry().loadIcons(renderer.getRenderStorage(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
 
-  liquidator::EditorRenderer editorRenderer(
-      renderer.getShaderLibrary(), ui.getIconRegistry(),
-      renderer.getRenderStorage(), mDevice);
+  EditorRenderer editorRenderer(renderer.getShaderLibrary(),
+                                ui.getIconRegistry(),
+                                renderer.getRenderStorage(), mDevice);
 
-  liquid::RenderGraph graph("Main");
+  RenderGraph graph("Main");
 
   auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
   auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);
@@ -143,8 +138,7 @@ void EditorScreen::start(const Project &project) {
     static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
     auto &pass = editorRenderer.attach(graph);
     pass.write(scenePassGroup.sceneColor, BlueishClearValue);
-    pass.write(scenePassGroup.depthBuffer,
-               liquid::rhi::DepthStencilClear{1.0f, 0});
+    pass.write(scenePassGroup.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
   }
 
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
@@ -173,8 +167,8 @@ void EditorScreen::start(const Project &project) {
         ui.getAssetBrowser().reload();
       });
 
-  liquidator::EditorSimulator simulator(
-      mEventSystem, mWindow, assetManager.getAssetRegistry(), editorCamera);
+  EditorSimulator simulator(mEventSystem, mWindow,
+                            assetManager.getAssetRegistry(), editorCamera);
 
   mWindow.maximize();
 
@@ -206,7 +200,7 @@ void EditorScreen::start(const Project &project) {
     ImGuizmo::BeginFrame();
 
     if (auto _ = widgets::MainMenuBar()) {
-      liquidator::MenuBar::render(editorManager, entityManager);
+      MenuBar::render(editorManager, entityManager);
       debugLayer.renderMenu();
     }
 
@@ -258,12 +252,11 @@ void EditorScreen::start(const Project &project) {
 
       if (ui.getSceneHierarchyPanel().isEntitySelected()) {
         auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
-        const auto &world =
-            entityDatabase.get<liquid::WorldTransform>(selected);
+        const auto &world = entityDatabase.get<WorldTransform>(selected);
 
         auto worldTransform = world.worldTransform;
 
-        const auto &camera = entityDatabase.get<liquid::Camera>(
+        const auto &camera = entityDatabase.get<Camera>(
             editorManager.getEditorCamera().getCamera());
 
         auto gizmoPerspective = camera.projectionMatrix;
@@ -339,10 +332,10 @@ void EditorScreen::start(const Project &project) {
   });
 
   mainLoop.run();
-  liquid::Engine::resetLoggers();
+  Engine::resetLoggers();
   editorManager.saveEditorState(statePath);
 
   mDevice->waitForIdle();
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -3,7 +3,7 @@
 #include "liquidator/core/TransformOperation.h"
 #include "liquidator/editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Transform operation control widget
@@ -28,4 +28,4 @@ private:
   getTransformOperationIcon(TransformOperation transformOperation);
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

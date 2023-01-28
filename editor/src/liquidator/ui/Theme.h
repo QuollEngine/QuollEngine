@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 enum class ThemeColor { BackgroundColor, SceneBackgroundColor };
 
@@ -43,4 +43,4 @@ public:
   static ImFont *getBoldFont();
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

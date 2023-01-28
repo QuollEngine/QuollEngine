@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Docking layout component
@@ -16,4 +16,4 @@ private:
   bool mFirstTime = true;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

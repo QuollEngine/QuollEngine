@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/RenderStorage.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 enum class EditorIcon {
   Unknown,
@@ -37,7 +37,7 @@ public:
    * @param renderStorage Render storage
    * @param iconsPath Path to icons
    */
-  void loadIcons(liquid::RenderStorage &renderStorage,
+  void loadIcons(RenderStorage &renderStorage,
                  const std::filesystem::path &iconsPath);
 
   /**
@@ -46,12 +46,12 @@ public:
    * @param icon Icon enum
    * @return Texture handle for the icon
    */
-  inline liquid::rhi::TextureHandle getIcon(EditorIcon icon) const {
+  inline rhi::TextureHandle getIcon(EditorIcon icon) const {
     return mIconMap.at(icon);
   }
 
 private:
-  std::unordered_map<EditorIcon, liquid::rhi::TextureHandle> mIconMap;
+  std::unordered_map<EditorIcon, rhi::TextureHandle> mIconMap;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

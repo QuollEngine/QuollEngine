@@ -7,7 +7,7 @@
 #include "EditorGrid.h"
 #include "EntityManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor manager
@@ -77,7 +77,7 @@ public:
    *
    * @param entity Entity
    */
-  void moveCameraToEntity(liquid::Entity entity);
+  void moveCameraToEntity(Entity entity);
 
   /**
    * @brief Check if environment exists
@@ -92,7 +92,7 @@ public:
    *
    * @return Environment component
    */
-  liquid::Environment &getEnvironment();
+  Environment &getEnvironment();
 
   /**
    * @brief Set transform operation
@@ -125,7 +125,7 @@ private:
 
   TransformOperation mTransformOperation = TransformOperation::Move;
 
-  liquid::Entity mEnvironmentEntity = liquid::EntityNull;
+  Entity mEnvironmentEntity = EntityNull;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

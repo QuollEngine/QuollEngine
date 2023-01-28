@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor grid data
@@ -65,4 +65,4 @@ private:
   EditorGridData mData;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

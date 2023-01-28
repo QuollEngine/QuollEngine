@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AssetCache.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Manage all the assets in the editor
@@ -33,27 +33,27 @@ public:
   /**
    * @brief Supported texture extensions
    */
-  static const std::vector<liquid::String> TextureExtensions;
+  static const std::vector<String> TextureExtensions;
 
   /**
    * @brief Supported script extensions
    */
-  static const std::vector<liquid::String> ScriptExtensions;
+  static const std::vector<String> ScriptExtensions;
 
   /**
    * @brief Supported audio extensions
    */
-  static const std::vector<liquid::String> AudioExtensions;
+  static const std::vector<String> AudioExtensions;
 
   /**
    * @brief Supported font extensions
    */
-  static const std::vector<liquid::String> FontExtensions;
+  static const std::vector<String> FontExtensions;
 
   /**
    * @brief Supported scene extensions
    */
-  static const std::vector<liquid::String> SceneExtensions;
+  static const std::vector<String> SceneExtensions;
 
 public:
   /**
@@ -63,8 +63,7 @@ public:
    * @param assetsCachePath Path to assets cache directory
    * @param createDefaultObjects Create default objects
    */
-  AssetManager(const liquid::Path &assetsPath,
-               const liquid::Path &assetsCachePath,
+  AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                bool createDefaultObjects = true);
 
   /**
@@ -74,31 +73,29 @@ public:
    * @param targetAssetDirectory Target directory
    * @return Import result
    */
-  liquid::Result<bool> importAsset(const liquid::Path &source,
-                                   const liquid::Path &targetAssetDirectory);
+  Result<bool> importAsset(const Path &source,
+                           const Path &targetAssetDirectory);
 
   /**
    * @brief Get asset registry
    *
    * @return Asset registry
    */
-  inline liquid::AssetRegistry &getAssetRegistry() {
-    return mAssetCache.getRegistry();
-  }
+  inline AssetRegistry &getAssetRegistry() { return mAssetCache.getRegistry(); }
 
   /**
    * @brief Get path to assets
    *
    * @return Path to assets
    */
-  inline const liquid::Path &getAssetsPath() const { return mAssetsPath; }
+  inline const Path &getAssetsPath() const { return mAssetsPath; }
 
   /**
    * @brief Get path to cache
    *
    * @return Path to cache
    */
-  inline const liquid::Path &getCachePath() const {
+  inline const Path &getCachePath() const {
     return mAssetCache.getAssetsPath();
   }
 
@@ -108,7 +105,7 @@ public:
    * @param originalAssetPath Original asset path
    * @return Found engine asset path result
    */
-  liquid::Path findEngineAssetPath(const liquid::Path &originalAssetPath);
+  Path findEngineAssetPath(const Path &originalAssetPath);
 
   /**
    * @brief Create directory in assets
@@ -116,7 +113,7 @@ public:
    * @param assetsPath Path to directory in assets
    * @return Result
    */
-  liquid::Result<bool> createDirectory(const liquid::Path &assetsPath);
+  Result<bool> createDirectory(const Path &assetsPath);
 
   /**
    * @brief Create Lua script in assets
@@ -124,7 +121,7 @@ public:
    * @param assetPath Path to assets
    * @return Result
    */
-  liquid::Result<liquid::Path> createLuaScript(const liquid::Path &assetPath);
+  Result<Path> createLuaScript(const Path &assetPath);
 
   /**
    * @brief Validate and preload assets
@@ -132,8 +129,7 @@ public:
    * @param renderStorage Render storage
    * @return Result
    */
-  liquid::Result<bool>
-  validateAndPreloadAssets(liquid::RenderStorage &renderStorage);
+  Result<bool> validateAndPreloadAssets(RenderStorage &renderStorage);
 
   /**
    * @brief Load original asset if hashes are changed
@@ -141,8 +137,7 @@ public:
    * @param originalAssetPath Original asset path
    * @return Result
    */
-  liquid::Result<bool>
-  loadOriginalIfChanged(const liquid::Path &originalAssetPath);
+  Result<bool> loadOriginalIfChanged(const Path &originalAssetPath);
 
 private:
   /**
@@ -151,7 +146,7 @@ private:
    * @param path Path to file
    * @return Asset type
    */
-  static liquid::AssetType getAssetTypeFromExtension(const liquid::Path &path);
+  static AssetType getAssetTypeFromExtension(const Path &path);
 
   /**
    * @brief Get hash of a file
@@ -159,7 +154,7 @@ private:
    * @param path Path to file
    * @return File hash
    */
-  static liquid::String getFileHash(const liquid::Path &path);
+  static String getFileHash(const Path &path);
 
   /**
    * @brief Recursively create directories
@@ -167,8 +162,7 @@ private:
    * @param path Path to target directory
    * @return List of directories that were created
    */
-  static std::optional<liquid::Path>
-  createDirectoriesRecursive(const liquid::Path &path);
+  static std::optional<Path> createDirectoriesRecursive(const Path &path);
 
 private:
   /**
@@ -177,8 +171,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Cache relative asset path
    */
-  liquid::Path
-  convertToCacheRelativePath(const liquid::Path &originalAssetPath) const;
+  Path convertToCacheRelativePath(const Path &originalAssetPath) const;
 
   /**
    * @brief Get hash file path from original asset
@@ -186,7 +179,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Hash file path
    */
-  liquid::Path getHashFilePath(const liquid::Path &originalAssetPath) const;
+  Path getHashFilePath(const Path &originalAssetPath) const;
 
   /**
    * @brief Get original asset name
@@ -194,7 +187,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Original asset name
    */
-  liquid::String getOriginalAssetName(const liquid::Path &originalAssetPath);
+  String getOriginalAssetName(const Path &originalAssetPath);
 
   /**
    * @brief Check if asset is changed
@@ -209,7 +202,7 @@ private:
    * @retval true Asset is changed
    * @retval false Asset is not changed
    */
-  bool isAssetChanged(const liquid::Path &originalAssetPath) const;
+  bool isAssetChanged(const Path &originalAssetPath) const;
 
   /**
    * @brief Create hash file
@@ -218,9 +211,8 @@ private:
    * @param engineAssetPath Engine asset path
    * @return Path to newly created hash file
    */
-  liquid::Result<liquid::Path>
-  createHashFile(const liquid::Path &originalAssetPath,
-                 const liquid::Path &engineAssetPath);
+  Result<Path> createHashFile(const Path &originalAssetPath,
+                              const Path &engineAssetPath);
 
 private:
   /**
@@ -229,7 +221,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Load result
    */
-  liquid::Result<bool> loadOriginalAsset(const liquid::Path &originalAssetPath);
+  Result<bool> loadOriginalAsset(const Path &originalAssetPath);
 
   /**
    * @brief Load texture asset
@@ -237,8 +229,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Path to engine asset for texture result
    */
-  liquid::Result<liquid::Path>
-  loadOriginalTexture(const liquid::Path &originalAssetPath);
+  Result<Path> loadOriginalTexture(const Path &originalAssetPath);
 
   /**
    * @brief Load audio asset
@@ -246,8 +237,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Path to engine asset for audio result
    */
-  liquid::Result<liquid::Path>
-  loadOriginalAudio(const liquid::Path &originalAssetPath);
+  Result<Path> loadOriginalAudio(const Path &originalAssetPath);
 
   /**
    * @brief Load script asset
@@ -255,8 +245,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Path to engine asset for script result
    */
-  liquid::Result<liquid::Path>
-  loadOriginalScript(const liquid::Path &originalAssetPath);
+  Result<Path> loadOriginalScript(const Path &originalAssetPath);
 
   /**
    * @brief Load font asset
@@ -264,8 +253,7 @@ private:
    * @param originalAssetPath Original asset path
    * @return Path to engine asset for font result
    */
-  liquid::Result<liquid::Path>
-  loadOriginalFont(const liquid::Path &originalAssetPath);
+  Result<Path> loadOriginalFont(const Path &originalAssetPath);
 
   /**
    * @brief Load prefab asset
@@ -273,14 +261,13 @@ private:
    * @param originalAssetPath Original asset path
    * @return Path to engine asset for prefab result
    */
-  liquid::Result<liquid::Path>
-  loadOriginalPrefab(const liquid::Path &originalAssetPath);
+  Result<Path> loadOriginalPrefab(const Path &originalAssetPath);
 
 private:
-  liquid::AssetCache mAssetCache;
-  liquid::Path mAssetsPath;
+  AssetCache mAssetCache;
+  Path mAssetsPath;
 
-  std::unordered_map<liquid::String, liquid::Path> mAssetCacheMap;
+  std::unordered_map<String, Path> mAssetCacheMap;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

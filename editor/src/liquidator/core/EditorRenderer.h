@@ -8,7 +8,7 @@
 
 #include "EditorRendererFrameData.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor renderer
@@ -23,7 +23,7 @@ class EditorRenderer {
     /**
      * @brief Vertex buffer that holds shape data
      */
-    liquid::rhi::Buffer buffer;
+    rhi::Buffer buffer;
 
     /**
      * @brief Number of vertices
@@ -42,10 +42,8 @@ public:
    * @param renderStorage Render storage
    * @param device Render device
    */
-  EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
-                 IconRegistry &iconRegistry,
-                 liquid::RenderStorage &renderStorage,
-                 liquid::rhi::RenderDevice *device);
+  EditorRenderer(ShaderLibrary &shaderLibrary, IconRegistry &iconRegistry,
+                 RenderStorage &renderStorage, rhi::RenderDevice *device);
 
   /**
    * @brief Attach to render graph
@@ -53,7 +51,7 @@ public:
    * @param graph Render graph
    * @return Newly created render pass
    */
-  liquid::RenderGraphPass &attach(liquid::RenderGraph &graph);
+  RenderGraphPass &attach(RenderGraph &graph);
 
   /**
    * @brief Update frame data
@@ -64,9 +62,9 @@ public:
    * @param selectedEntity Selected entity
    * @param frameIndex Frame index
    */
-  void updateFrameData(liquid::EntityDatabase &entityDatabase,
-                       liquid::Entity camera, const EditorGrid &editorGrid,
-                       liquid::Entity selectedEntity, uint32_t frameIndex);
+  void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
+                       const EditorGrid &editorGrid, Entity selectedEntity,
+                       uint32_t frameIndex);
 
 private:
   /**
@@ -75,18 +73,17 @@ private:
   void createCollidableShapes();
 
 private:
-  liquid::rhi::RenderDevice *mDevice;
-  liquid::ShaderLibrary mShaderLibrary;
+  rhi::RenderDevice *mDevice;
+  ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;
-  liquid::Entity mSelectedEntity = liquid::EntityNull;
+  Entity mSelectedEntity = EntityNull;
 
   CollidableShapeDraw mCollidableCube;
   CollidableShapeDraw mCollidableSphere;
   CollidableShapeDraw mCollidableCapsule;
 
-  liquid::RenderStorage &mRenderStorage;
-  std::array<EditorRendererFrameData, liquid::rhi::RenderDevice::NumFrames>
-      mFrameData;
+  RenderStorage &mRenderStorage;
+  std::array<EditorRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

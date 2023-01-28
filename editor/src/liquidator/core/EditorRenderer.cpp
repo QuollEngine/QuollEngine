@@ -3,12 +3,12 @@
 
 #include "EditorRenderer.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
+EditorRenderer::EditorRenderer(ShaderLibrary &shaderLibrary,
                                IconRegistry &iconRegistry,
-                               liquid::RenderStorage &renderStorage,
-                               liquid::rhi::RenderDevice *device)
+                               RenderStorage &renderStorage,
+                               rhi::RenderDevice *device)
     : mIconRegistry(iconRegistry), mShaderLibrary(shaderLibrary),
       mRenderStorage(renderStorage),
       mFrameData{EditorRendererFrameData(renderStorage),
@@ -48,82 +48,63 @@ EditorRenderer::EditorRenderer(liquid::ShaderLibrary &shaderLibrary,
       mDevice->createShader({shadersPath / "collidable-shape.frag.spv"}));
 }
 
-liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
+RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
   auto &pass = graph.addGraphicsPass("editor-debug");
 
   auto vEditorGridPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("editor-grid.vert"),
        mShaderLibrary.getShader("editor-grid.frag"),
        {},
-       liquid::rhi::PipelineInputAssembly{},
-       liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
-                                       liquid::rhi::CullMode::None,
-                                       liquid::rhi::FrontFace::Clockwise},
-       liquid::rhi::PipelineColorBlend{
-           {liquid::rhi::PipelineColorBlendAttachment{
-               true, liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha, liquid::rhi::BlendOp::Add,
-               liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha,
-               liquid::rhi::BlendOp::Add}}}});
+       rhi::PipelineInputAssembly{},
+       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                               rhi::FrontFace::Clockwise},
+       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
   auto vSkeletonLinesPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("skeleton-lines.vert"),
        mShaderLibrary.getShader("skeleton-lines.frag"),
        {},
-       liquid::rhi::PipelineInputAssembly{
-           liquid::rhi::PrimitiveTopology::LineList},
-       liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Line,
-                                       liquid::rhi::CullMode::None,
-                                       liquid::rhi::FrontFace::Clockwise},
-       liquid::rhi::PipelineColorBlend{
-           {liquid::rhi::PipelineColorBlendAttachment{
-               true, liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha, liquid::rhi::BlendOp::Add,
-               liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha,
-               liquid::rhi::BlendOp::Add}}}});
+       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
+       rhi::PipelineRasterizer{rhi::PolygonMode::Line, rhi::CullMode::None,
+                               rhi::FrontFace::Clockwise},
+       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
   auto vObjectIconsPipeline = pass.addPipeline(
       {mShaderLibrary.getShader("object-icons.vert"),
        mShaderLibrary.getShader("object-icons.frag"),
        {},
-       liquid::rhi::PipelineInputAssembly{
-           liquid::rhi::PrimitiveTopology::TriangleStrip},
-       liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
-                                       liquid::rhi::CullMode::None,
-                                       liquid::rhi::FrontFace::Clockwise},
-       liquid::rhi::PipelineColorBlend{
-           {liquid::rhi::PipelineColorBlendAttachment{
-               true, liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha, liquid::rhi::BlendOp::Add,
-               liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha,
-               liquid::rhi::BlendOp::Add}}}});
+       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                               rhi::FrontFace::Clockwise},
+       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
   static const float WireframeLineHeight = 3.0f;
 
   auto vCollidableShapePipeline = pass.addPipeline(
       {mShaderLibrary.getShader("collidable-shape.vert"),
        mShaderLibrary.getShader("collidable-shape.frag"),
-       liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-       liquid::rhi::PipelineInputAssembly{
-           liquid::rhi::PrimitiveTopology::LineList},
-       liquid::rhi::PipelineRasterizer{
-           liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::None,
-           liquid::rhi::FrontFace::Clockwise, WireframeLineHeight},
-       liquid::rhi::PipelineColorBlend{
-           {liquid::rhi::PipelineColorBlendAttachment{
-               true, liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha, liquid::rhi::BlendOp::Add,
-               liquid::rhi::BlendFactor::SrcAlpha,
-               liquid::rhi::BlendFactor::DstAlpha,
-               liquid::rhi::BlendOp::Add}}}});
+       rhi::PipelineVertexInputLayout::create<Vertex>(),
+       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
+       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                               rhi::FrontFace::Clockwise, WireframeLineHeight},
+       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
   pass.setExecutor([vEditorGridPipeline, vSkeletonLinesPipeline,
                     vObjectIconsPipeline, vCollidableShapePipeline,
-                    this](liquid::rhi::RenderCommandList &commandList,
-                          const liquid::RenderGraphRegistry &registry,
+                    this](rhi::RenderCommandList &commandList,
+                          const RenderGraphRegistry &registry,
                           uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
     auto collidableShapePipeline = registry.get(vCollidableShapePipeline);
@@ -133,8 +114,7 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
 
     // Collidable shapes
     if (frameData.isCollidableEntitySelected() &&
-        frameData.getCollidableShapeType() !=
-            liquid::PhysicsGeometryType::Plane) {
+        frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
       LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
 
       commandList.bindPipeline(collidableShapePipeline);
@@ -142,18 +122,18 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
 
       commandList.pushConstants(
-          collidableShapePipeline, liquid::rhi::ShaderStage::Vertex, 0,
-          sizeof(liquid::DrawParameters), &frameData.getDrawParams());
+          collidableShapePipeline, rhi::ShaderStage::Vertex, 0,
+          sizeof(DrawParameters), &frameData.getDrawParams());
 
       auto type = frameData.getCollidableShapeType();
 
-      if (type == liquid::PhysicsGeometryType::Box) {
+      if (type == PhysicsGeometryType::Box) {
         commandList.bindVertexBuffer(mCollidableCube.buffer.getHandle());
         commandList.draw(mCollidableCube.vertexCount, 0);
-      } else if (type == liquid::PhysicsGeometryType::Sphere) {
+      } else if (type == PhysicsGeometryType::Sphere) {
         commandList.bindVertexBuffer(mCollidableSphere.buffer.getHandle());
         commandList.draw(mCollidableSphere.vertexCount, 0);
-      } else if (type == liquid::PhysicsGeometryType::Capsule) {
+      } else if (type == PhysicsGeometryType::Capsule) {
         commandList.bindVertexBuffer(mCollidableCapsule.buffer.getHandle());
         commandList.draw(mCollidableCapsule.vertexCount, 0);
       }
@@ -170,8 +150,8 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
 
       commandList.pushConstants(
           editorGridPipeline,
-          liquid::rhi::ShaderStage::Vertex | liquid::rhi::ShaderStage::Fragment,
-          0, sizeof(liquid::DrawParameters), &frameData.getDrawParams());
+          rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+          sizeof(DrawParameters), &frameData.getDrawParams());
 
       static constexpr uint32_t GridPlaneNumVertices = 6;
       commandList.draw(GridPlaneNumVertices, 0);
@@ -185,9 +165,9 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
       commandList.bindDescriptor(skeletonLinesPipeline, 0,
                                  mRenderStorage.getGlobalBuffersDescriptor());
 
-      commandList.pushConstants(
-          skeletonLinesPipeline, liquid::rhi::ShaderStage::Vertex, 0,
-          sizeof(liquid::DrawParameters), &frameData.getDrawParams());
+      commandList.pushConstants(skeletonLinesPipeline, rhi::ShaderStage::Vertex,
+                                0, sizeof(DrawParameters),
+                                &frameData.getDrawParams());
 
       const auto &numBones = frameData.getBoneCounts();
 
@@ -209,12 +189,11 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
       uint32_t previousInstance = 0;
       for (auto &[icon, count] : frameData.getGizmoCounts()) {
 
-        frameData.getDrawParams().index8 = liquid::rhi::castHandleToUint(icon);
-        commandList.pushConstants(objectIconsPipeline,
-                                  liquid::rhi::ShaderStage::Vertex |
-                                      liquid::rhi::ShaderStage::Fragment,
-                                  0, sizeof(liquid::DrawParameters),
-                                  &frameData.getDrawParams());
+        frameData.getDrawParams().index8 = rhi::castHandleToUint(icon);
+        commandList.pushConstants(
+            objectIconsPipeline,
+            rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+            sizeof(DrawParameters), &frameData.getDrawParams());
 
         commandList.draw(4, 0, count, previousInstance);
 
@@ -228,41 +207,40 @@ liquid::RenderGraphPass &EditorRenderer::attach(liquid::RenderGraph &graph) {
   return pass;
 }
 
-void EditorRenderer::updateFrameData(liquid::EntityDatabase &entityDatabase,
-                                     liquid::Entity camera,
+void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
+                                     Entity camera,
                                      const EditorGrid &editorGrid,
-                                     liquid::Entity selectedEntity,
+                                     Entity selectedEntity,
                                      uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
-  if (entityDatabase.has<liquid::Collidable>(selectedEntity)) {
-    frameData.setCollidable(
-        selectedEntity, entityDatabase.get<liquid::Collidable>(selectedEntity),
-        entityDatabase.get<liquid::WorldTransform>(selectedEntity));
+  if (entityDatabase.has<Collidable>(selectedEntity)) {
+    frameData.setCollidable(selectedEntity,
+                            entityDatabase.get<Collidable>(selectedEntity),
+                            entityDatabase.get<WorldTransform>(selectedEntity));
   }
 
-  frameData.setActiveCamera(entityDatabase.get<liquid::Camera>(camera));
+  frameData.setActiveCamera(entityDatabase.get<Camera>(camera));
 
   frameData.setEditorGrid(editorGrid.getData());
 
   for (auto [entity, worldTransform, skeleton] :
-       entityDatabase.view<liquid::WorldTransform, liquid::SkeletonDebug>()) {
+       entityDatabase.view<WorldTransform, SkeletonDebug>()) {
     frameData.addSkeleton(worldTransform.worldTransform,
                           skeleton.boneTransforms);
   }
 
   for (auto [entity, world, light] :
-       entityDatabase
-           .view<liquid::WorldTransform, liquid::DirectionalLight>()) {
+       entityDatabase.view<WorldTransform, DirectionalLight>()) {
     frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
                        world.worldTransform);
   }
 
   for (auto [entity, world, camera] :
-       entityDatabase.view<liquid::WorldTransform, liquid::PerspectiveLens>()) {
+       entityDatabase.view<WorldTransform, PerspectiveLens>()) {
     static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 
     frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
@@ -277,11 +255,11 @@ void EditorRenderer::createCollidableShapes() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   static constexpr float Pi = glm::pi<float>();
 
-  using V = liquid::Vertex;
+  using V = Vertex;
 
   // Box shape
   {
-    std::vector<liquid::Vertex> CollidableBoxVertices{
+    std::vector<Vertex> CollidableBoxVertices{
         // clang-format off
       V{-0.5f, -0.5f, -0.5f}, V{0.5f, -0.5f, -0.5f},
       V{-0.5f, -0.5f, -0.5f}, V{-0.5f, 0.5f, -0.5f},
@@ -305,8 +283,7 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     mCollidableCube.buffer = mRenderStorage.createBuffer(
-        {liquid::rhi::BufferType::Vertex,
-         CollidableBoxVertices.size() * sizeof(liquid::Vertex),
+        {rhi::BufferType::Vertex, CollidableBoxVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableBoxVertices.data())});
     mCollidableCube.vertexCount =
         static_cast<uint32_t>(CollidableBoxVertices.size());
@@ -329,7 +306,7 @@ void EditorRenderer::createCollidableShapes() {
 
   // Sphere shape
   {
-    auto drawUnitCircle = [](std::vector<liquid::Vertex> &vertices,
+    auto drawUnitCircle = [](std::vector<Vertex> &vertices,
                              uint32_t numSegments, CalculationFn cX,
                              CalculationFn cY, CalculationFn cZ) {
       const float SegmentDelta = 2.0f * Pi / static_cast<float>(numSegments);
@@ -352,14 +329,14 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     static constexpr uint32_t NumSegments = 12;
-    std::vector<liquid::Vertex> CollidableSphereVertices;
+    std::vector<Vertex> CollidableSphereVertices;
 
     drawUnitCircle(CollidableSphereVertices, NumSegments, cZero, cSin, cCos);
     drawUnitCircle(CollidableSphereVertices, NumSegments, cSin, cCos, cZero);
 
     mCollidableSphere.buffer = mRenderStorage.createBuffer(
-        {liquid::rhi::BufferType::Vertex,
-         CollidableSphereVertices.size() * sizeof(liquid::Vertex),
+        {rhi::BufferType::Vertex,
+         CollidableSphereVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableSphereVertices.data())});
     mCollidableSphere.vertexCount =
         static_cast<uint32_t>(CollidableSphereVertices.size());
@@ -367,7 +344,7 @@ void EditorRenderer::createCollidableShapes() {
 
   // Capsule shape
   {
-    auto drawUnitHalfCircle = [](std::vector<liquid::Vertex> &vertices,
+    auto drawUnitHalfCircle = [](std::vector<Vertex> &vertices,
                                  uint32_t numSegments, CalculationFn cX,
                                  CalculationFn cY, CalculationFn cZ,
                                  float circleAngle) {
@@ -391,7 +368,7 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     static constexpr uint32_t NumSegments = 12;
-    std::vector<liquid::Vertex> CollidableCapsuleVertices;
+    std::vector<Vertex> CollidableCapsuleVertices;
 
     drawUnitHalfCircle(CollidableCapsuleVertices, NumSegments, cCos,
                        cSinCenter(0.5f), cZero, Pi);
@@ -416,8 +393,8 @@ void EditorRenderer::createCollidableShapes() {
                        cSinCenter(-0.5f), cCos, -Pi);
 
     mCollidableCapsule.buffer = mRenderStorage.createBuffer(
-        {liquid::rhi::BufferType::Vertex,
-         CollidableCapsuleVertices.size() * sizeof(liquid::Vertex),
+        {rhi::BufferType::Vertex,
+         CollidableCapsuleVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableCapsuleVertices.data())});
     mCollidableCapsule.vertexCount =
         static_cast<uint32_t>(CollidableCapsuleVertices.size());
@@ -426,4 +403,4 @@ void EditorRenderer::createCollidableShapes() {
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

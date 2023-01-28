@@ -2,7 +2,7 @@
 
 #include "liquidator/core/LogMemoryStorage.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Log viewer
@@ -26,13 +26,12 @@ private:
    * @param logSize Current log size
    * @param width Container width
    */
-  void renderLogContainer(const liquid::String &name,
-                          LogMemoryStorage &logStorage, size_t &logSize,
-                          float width);
+  void renderLogContainer(const String &name, LogMemoryStorage &logStorage,
+                          size_t &logSize, float width);
 
 private:
   size_t mSystemLogSize = 0;
   size_t mUserLogSize = 0;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

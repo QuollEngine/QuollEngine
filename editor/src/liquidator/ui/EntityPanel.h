@@ -6,7 +6,7 @@
 
 #include "../editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Entity panel component
@@ -29,9 +29,8 @@ public:
    * @param assetManager Asset manager
    * @param physicsSystem Physics system
    */
-  void render(EditorManager &editorManager, liquid::Entity entity,
-              liquid::Renderer &renderer, AssetManager &assetManager,
-              liquid::PhysicsSystem &physicsSystem);
+  void render(EditorManager &editorManager, Entity entity, Renderer &renderer,
+              AssetManager &assetManager, PhysicsSystem &physicsSystem);
 
 private:
   /**
@@ -39,7 +38,7 @@ private:
    *
    * @param entity Entity to select
    */
-  void setSelectedEntity(liquid::Entity entity);
+  void setSelectedEntity(Entity entity);
 
   /**
    * @brief Render name component
@@ -68,14 +67,14 @@ private:
    *
    * @param assetRegistry Asset registry
    */
-  void renderMesh(liquid::AssetRegistry &assetRegistry);
+  void renderMesh(AssetRegistry &assetRegistry);
 
   /**
    * @brief Render animation component
    *
    * @param assetRegistry Asset registry
    */
-  void renderAnimation(liquid::AssetRegistry &assetRegistry);
+  void renderAnimation(AssetRegistry &assetRegistry);
 
   /**
    * @brief Render skeleton component
@@ -97,28 +96,28 @@ private:
    *
    * @param assetRegistry Asset registry
    */
-  void renderText(liquid::AssetRegistry &assetRegistry);
+  void renderText(AssetRegistry &assetRegistry);
 
   /**
    * @brief Render audio component
    *
    * @param assetRegistry Asset registry
    */
-  void renderAudio(liquid::AssetRegistry &assetRegistry);
+  void renderAudio(AssetRegistry &assetRegistry);
 
   /**
    * @brief Render scripting component
    *
    * @param assetRegistry Asset registry
    */
-  void renderScripting(liquid::AssetRegistry &assetRegistry);
+  void renderScripting(AssetRegistry &assetRegistry);
 
   /**
    * @brief Render add component button
    *
    * @param assetRegistry Asset registry
    */
-  void renderAddComponent(liquid::AssetRegistry &assetRegistry);
+  void renderAddComponent(AssetRegistry &assetRegistry);
 
   /**
    * @brief Handle drag and drop
@@ -126,14 +125,13 @@ private:
    * @param renderer Renderer
    * @param assetRegistry Asset registry
    */
-  void handleDragAndDrop(liquid::Renderer &renderer,
-                         liquid::AssetRegistry &assetRegistry);
+  void handleDragAndDrop(Renderer &renderer, AssetRegistry &assetRegistry);
 
 private:
-  liquid::Entity mSelectedEntity = liquid::EntityNull;
-  liquid::String mName;
+  Entity mSelectedEntity = EntityNull;
+  String mName;
   EntityManager &mEntityManager;
   bool mIsNameActivated = false;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -4,10 +4,9 @@
 
 #include "GameExporter.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-void GameExporter::exportGame(const Project &project,
-                              const liquid::Path &destination) {
+void GameExporter::exportGame(const Project &project, const Path &destination) {
   using co = std::filesystem::copy_options;
 
   auto gameName = destination.filename();
@@ -34,12 +33,12 @@ void GameExporter::exportGame(const Project &project,
   }
 
   // Copy engine data
-  auto enginePath = liquid::Engine::getEnginePath();
+  auto enginePath = Engine::getEnginePath();
   std::filesystem::copy(enginePath, destination / enginePath.filename(),
                         co::overwrite_existing | co::recursive);
 
   // Copy runtime
-  liquid::Path runtimePath;
+  Path runtimePath;
 
   for (auto entry :
        std::filesystem::directory_iterator(std::filesystem::current_path())) {
@@ -62,7 +61,7 @@ void GameExporter::exportGame(const Project &project,
   stream << node;
   stream.close();
 
-  liquid::Engine::getLogger().info() << "Game exported to " << destination;
+  Engine::getLogger().info() << "Game exported to " << destination;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

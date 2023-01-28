@@ -1,13 +1,13 @@
 #include "liquid/core/Base.h"
 #include "MousePickingGraph.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 MousePickingGraph::MousePickingGraph(
-    liquid::ShaderLibrary &shaderLibrary,
-    const std::array<liquid::SceneRendererFrameData, 2> &frameData,
-    liquid::AssetRegistry &assetRegistry, liquid::RenderStorage &renderStorage,
-    liquid::rhi::RenderDevice *device)
+    ShaderLibrary &shaderLibrary,
+    const std::array<SceneRendererFrameData, 2> &frameData,
+    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
+    rhi::RenderDevice *device)
     : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
       mGraphEvaluator(device), mRenderGraph("MousePicking") {
   static constexpr uint32_t FramebufferSizePercentage = 100;
@@ -22,69 +22,61 @@ MousePickingGraph::MousePickingGraph(
       "mouse-picking.selector.fragment",
       mDevice->createShader({"assets/shaders/mouse-picking.frag.spv"}));
 
-  liquid::rhi::TextureDescription depthBufferDesc{};
-  depthBufferDesc.sizeMethod = liquid::rhi::TextureSizeMethod::FramebufferRatio;
-  depthBufferDesc.usage =
-      liquid::rhi::TextureUsage::Depth | liquid::rhi::TextureUsage::Sampled;
+  rhi::TextureDescription depthBufferDesc{};
+  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
+  depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   depthBufferDesc.width = FramebufferSizePercentage;
   depthBufferDesc.height = FramebufferSizePercentage;
   depthBufferDesc.layers = 1;
-  depthBufferDesc.format = liquid::rhi::Format::Depth32Float;
+  depthBufferDesc.format = rhi::Format::Depth32Float;
   auto depthBuffer = renderStorage.createTexture(depthBufferDesc);
 
-  liquid::Entity nullEntity{0};
-  mSelectedEntityBuffer = renderStorage.createBuffer(
-      {liquid::rhi::BufferType::Storage, sizeof(liquid::Entity), &nullEntity,
-       liquid::rhi::BufferUsage::HostRead});
+  Entity nullEntity{0};
+  mSelectedEntityBuffer =
+      renderStorage.createBuffer({rhi::BufferType::Storage, sizeof(Entity),
+                                  &nullEntity, rhi::BufferUsage::HostRead});
 
-  liquid::rhi::BufferDescription defaultDesc{};
-  defaultDesc.type = liquid::rhi::BufferType::Storage;
-  defaultDesc.size =
-      sizeof(liquid::Entity) * mFrameData.at(0).getReservedSpace();
+  rhi::BufferDescription defaultDesc{};
+  defaultDesc.type = rhi::BufferType::Storage;
+  defaultDesc.size = sizeof(Entity) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 
   mEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
   mSkinnedEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
 
   auto &pass = mRenderGraph.addGraphicsPass("MousePicking");
-  pass.write(depthBuffer, liquid::rhi::DepthStencilClear({1.0f, 0}));
+  pass.write(depthBuffer, rhi::DepthStencilClear({1.0f, 0}));
 
   // Normal meshes
-  auto vPipeline = pass.addPipeline(liquid::rhi::GraphicsPipelineDescription{
+  auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
       shaderLibrary.getShader("mouse-picking.default.vertex"),
       shaderLibrary.getShader("mouse-picking.selector.fragment"),
-      liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-      liquid::rhi::PipelineInputAssembly{
-          liquid::rhi::PrimitiveTopology::TriangleList},
-      liquid::rhi::PipelineRasterizer{liquid::rhi::PolygonMode::Fill,
-                                      liquid::rhi::CullMode::Back,
-                                      liquid::rhi::FrontFace::CounterClockwise},
-      liquid::rhi::PipelineColorBlend{{}}});
+      rhi::PipelineVertexInputLayout::create<Vertex>(),
+      rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+      rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
+                              rhi::FrontFace::CounterClockwise},
+      rhi::PipelineColorBlend{{}}});
 
   // Skinned meshes
-  auto vSkinnedPipeline =
-      pass.addPipeline(liquid::rhi::GraphicsPipelineDescription{
-          shaderLibrary.getShader("mouse-picking.skinned.vertex"),
-          shaderLibrary.getShader("mouse-picking.selector.fragment"),
-          liquid::rhi::PipelineVertexInputLayout::create<liquid::Vertex>(),
-          liquid::rhi::PipelineInputAssembly{
-              liquid::rhi::PrimitiveTopology::TriangleList},
-          liquid::rhi::PipelineRasterizer{
-              liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Back,
-              liquid::rhi::FrontFace::CounterClockwise},
-          liquid::rhi::PipelineColorBlend{{}}});
+  auto vSkinnedPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
+      shaderLibrary.getShader("mouse-picking.skinned.vertex"),
+      shaderLibrary.getShader("mouse-picking.selector.fragment"),
+      rhi::PipelineVertexInputLayout::create<Vertex>(),
+      rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+      rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
+                              rhi::FrontFace::CounterClockwise},
+      rhi::PipelineColorBlend{{}}});
 
   pass.setExecutor([this, vPipeline, vSkinnedPipeline,
-                    &renderStorage](liquid::rhi::RenderCommandList &commandList,
-                                    const liquid::RenderGraphRegistry &registry,
+                    &renderStorage](rhi::RenderCommandList &commandList,
+                                    const RenderGraphRegistry &registry,
                                     uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     auto drawParams = frameData.getDrawParams();
     drawParams.index9 =
-        liquid::rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
-    drawParams.index10 =
-        liquid::rhi::castHandleToUint(mEntitiesBuffer.getHandle());
+        rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
+    drawParams.index10 = rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
 
@@ -98,9 +90,9 @@ MousePickingGraph::MousePickingGraph(
       commandList.bindDescriptor(pipeline, 0,
                                  renderStorage.getGlobalBuffersDescriptor());
       commandList.pushConstants(skinnedPipeline,
-                                liquid::rhi::ShaderStage::Vertex |
-                                    liquid::rhi::ShaderStage::Fragment,
-                                0, sizeof(liquid::DrawParameters), &drawParams);
+                                rhi::ShaderStage::Vertex |
+                                    rhi::ShaderStage::Fragment,
+                                0, sizeof(DrawParameters), &drawParams);
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
@@ -108,7 +100,7 @@ MousePickingGraph::MousePickingGraph(
         for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
           commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
           commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      liquid::rhi::IndexType::Uint32);
+                                      rhi::IndexType::Uint32);
 
           uint32_t indexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
@@ -128,9 +120,8 @@ MousePickingGraph::MousePickingGraph(
     {
       auto drawParams = frameData.getDrawParams();
       drawParams.index9 =
-          liquid::rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
-      drawParams.index10 =
-          liquid::rhi::castHandleToUint(mEntitiesBuffer.getHandle());
+          rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
+      drawParams.index10 = rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
       commandList.bindPipeline(skinnedPipeline);
 
@@ -138,9 +129,9 @@ MousePickingGraph::MousePickingGraph(
                                  renderStorage.getGlobalBuffersDescriptor());
 
       commandList.pushConstants(skinnedPipeline,
-                                liquid::rhi::ShaderStage::Vertex |
-                                    liquid::rhi::ShaderStage::Fragment,
-                                0, sizeof(liquid::DrawParameters), &drawParams);
+                                rhi::ShaderStage::Vertex |
+                                    rhi::ShaderStage::Fragment,
+                                0, sizeof(DrawParameters), &drawParams);
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
@@ -149,7 +140,7 @@ MousePickingGraph::MousePickingGraph(
         for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
           commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
           commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      liquid::rhi::IndexType::Uint32);
+                                      rhi::IndexType::Uint32);
 
           uint32_t indexCount =
               static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
@@ -174,7 +165,7 @@ void MousePickingGraph::compile() {
   mGraphEvaluator.build(mRenderGraph);
 }
 
-void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
+void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
                                 const glm::vec2 &mousePos,
                                 uint32_t frameIndex) {
   mFrameIndex = frameIndex;
@@ -182,10 +173,10 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
 
   {
     size_t offset = 0;
-    auto *bufferData = static_cast<liquid::Entity *>(mEntitiesBuffer.map());
+    auto *bufferData = static_cast<Entity *>(mEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(liquid::Entity) * meshData.entities.size());
+             sizeof(Entity) * meshData.entities.size());
       offset += meshData.entities.size();
     }
     mEntitiesBuffer.unmap();
@@ -193,11 +184,10 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
 
   {
     size_t offset = 0;
-    auto *bufferData =
-        static_cast<liquid::Entity *>(mSkinnedEntitiesBuffer.map());
+    auto *bufferData = static_cast<Entity *>(mSkinnedEntitiesBuffer.map());
     for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
       memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(liquid::Entity) * meshData.entities.size());
+             sizeof(Entity) * meshData.entities.size());
       offset += meshData.entities.size();
     }
     mSkinnedEntitiesBuffer.unmap();
@@ -208,26 +198,26 @@ void MousePickingGraph::execute(liquid::rhi::RenderCommandList &commandList,
   mGraphEvaluator.execute(commandList, mRenderGraph, frameIndex);
 }
 
-liquid::Entity MousePickingGraph::getSelectedEntity() {
-  auto selectedEntity = liquid::EntityNull;
+Entity MousePickingGraph::getSelectedEntity() {
+  auto selectedEntity = EntityNull;
 
   auto *data = mSelectedEntityBuffer.map();
-  memcpy(&selectedEntity, data, sizeof(liquid::Entity));
+  memcpy(&selectedEntity, data, sizeof(Entity));
   mSelectedEntityBuffer.unmap();
 
-  liquid::Entity nullEntity = liquid::EntityNull;
-  mSelectedEntityBuffer.update(&nullEntity, sizeof(liquid::Entity));
+  Entity nullEntity = EntityNull;
+  mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
 
   mFrameIndex = std::numeric_limits<uint32_t>::max();
 
   return selectedEntity;
 }
 
-void MousePickingGraph::setFramebufferSize(liquid::Window &window) {
+void MousePickingGraph::setFramebufferSize(Window &window) {
   mRenderGraph.setFramebufferExtent(window.getFramebufferSize());
   window.addResizeHandler([this](auto width, auto height) {
     mRenderGraph.setFramebufferExtent({width, height});
   });
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

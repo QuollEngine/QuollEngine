@@ -4,7 +4,7 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void EditorGridPanel::render(EditorManager &editorManager) {
   if (auto _ = widgets::MainMenuBar()) {
@@ -31,4 +31,4 @@ void EditorGridPanel::render(EditorManager &editorManager) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

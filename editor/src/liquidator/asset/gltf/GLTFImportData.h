@@ -4,7 +4,7 @@
 
 #include "liquidator/asset/gltf/TinyGLTF.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Mapping for GLTF index to
@@ -39,7 +39,7 @@ struct SkeletonData {
   /**
    * Skin map
    */
-  GLTFToAsset<liquid::SkeletonAssetHandle> skeletonMap;
+  GLTFToAsset<SkeletonAssetHandle> skeletonMap;
 };
 
 /**
@@ -52,14 +52,12 @@ struct AnimationData {
   /**
    * Node to animation map
    */
-  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
-      nodeAnimationMap;
+  std::map<uint32_t, std::vector<AnimationAssetHandle>> nodeAnimationMap;
 
   /**
    * Skin to animation map
    */
-  std::map<uint32_t, std::vector<liquid::AnimationAssetHandle>>
-      skinAnimationMap;
+  std::map<uint32_t, std::vector<AnimationAssetHandle>> skinAnimationMap;
 };
 
 /**
@@ -71,12 +69,12 @@ struct GLTFImportData {
   /**
    * Asset cache
    */
-  liquid::AssetCache &assetCache;
+  AssetCache &assetCache;
 
   /**
    * Target path
    */
-  liquid::Path targetPath;
+  Path targetPath;
 
   /**
    * @brief GLTF model
@@ -86,17 +84,17 @@ struct GLTFImportData {
   /**
    * @brief Warnings
    */
-  std::vector<liquid::String> warnings;
+  std::vector<String> warnings;
 
   /**
    * @brief Texture map
    */
-  GLTFToAsset<liquid::TextureAssetHandle> textures;
+  GLTFToAsset<TextureAssetHandle> textures;
 
   /**
    * @brief Material map
    */
-  GLTFToAsset<liquid::MaterialAssetHandle> materials;
+  GLTFToAsset<MaterialAssetHandle> materials;
 
   /**
    * @brief Skeleton data
@@ -111,18 +109,17 @@ struct GLTFImportData {
   /**
    * @brief Mesh map
    */
-  GLTFToAsset<liquid::MeshAssetHandle> meshes;
+  GLTFToAsset<MeshAssetHandle> meshes;
 
   /**
    * @brief Skinned mesh map
    */
-  GLTFToAsset<liquid::SkinnedMeshAssetHandle> skinnedMeshes;
+  GLTFToAsset<SkinnedMeshAssetHandle> skinnedMeshes;
 
   /**
    * @brief Output path
    */
-  liquid::Result<liquid::Path> outputPath =
-      liquid::Result<liquid::Path>::Error("Empty");
+  Result<Path> outputPath = Result<Path>::Error("Empty");
 };
 
-} // namespace liquidator
+} // namespace liquid::editor
