@@ -8,7 +8,7 @@
 #include "liquidator/asset/AssetManager.h"
 #include "EditorCamera.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Entity manager
@@ -25,7 +25,7 @@ public:
    * @param renderer Renderer
    * @param scenePath Scene path
    */
-  EntityManager(AssetManager &assetManager, liquid::Renderer &renderer,
+  EntityManager(AssetManager &assetManager, Renderer &renderer,
                 const std::filesystem::path &scenePath);
 
   /**
@@ -33,7 +33,7 @@ public:
    *
    * @param entity Entity
    */
-  void save(liquid::Entity entity);
+  void save(Entity entity);
 
   /**
    * @brief Create empty entity
@@ -43,9 +43,8 @@ public:
    * @param name Entity name
    * @return New entity
    */
-  liquid::Entity createEmptyEntity(liquid::Entity parent,
-                                   const liquid::LocalTransform &transform,
-                                   const liquid::String &name = "");
+  Entity createEmptyEntity(Entity parent, const LocalTransform &transform,
+                           const String &name = "");
 
   /**
    * @brief Create empty entity at camera view
@@ -56,9 +55,9 @@ public:
    * @param saveToFile Save the created entities
    * @return New entity
    */
-  liquid::Entity createEmptyEntity(EditorCamera &camera, liquid::Entity parent,
-                                   const liquid::String &name = "New entity",
-                                   bool saveToFile = true);
+  Entity createEmptyEntity(EditorCamera &camera, Entity parent,
+                           const String &name = "New entity",
+                           bool saveToFile = true);
 
   /**
    * @brief Load scene
@@ -74,22 +73,21 @@ public:
    * @param entity Entity
    * @param handle Skeleton asset handle
    */
-  void setSkeletonForEntity(liquid::Entity entity,
-                            liquid::SkeletonAssetHandle handle);
+  void setSkeletonForEntity(Entity entity, SkeletonAssetHandle handle);
 
   /**
    * @brief Toggle debug skeleton for entity
    *
    * @param entity Entity
    */
-  void toggleSkeletonDebugForEntity(liquid::Entity entity);
+  void toggleSkeletonDebugForEntity(Entity entity);
 
   /**
    * @brief Toggle shadows for light entity
    *
    * @param entity Entity
    */
-  void toggleShadowsForLightEntity(liquid::Entity entity);
+  void toggleShadowsForLightEntity(Entity entity);
 
   /**
    * @brief Set mesh for entiy
@@ -97,7 +95,7 @@ public:
    * @param entity Entity
    * @param handle Mesh asset handle
    */
-  void setMesh(liquid::Entity entity, liquid::MeshAssetHandle handle);
+  void setMesh(Entity entity, MeshAssetHandle handle);
 
   /**
    * @brief Set skinned mesh for entity
@@ -105,8 +103,7 @@ public:
    * @param entity Entity
    * @param handle Skinned mesh asset handle
    */
-  void setSkinnedMesh(liquid::Entity entity,
-                      liquid::SkinnedMeshAssetHandle handle);
+  void setSkinnedMesh(Entity entity, SkinnedMeshAssetHandle handle);
 
   /**
    * @brief Set entity name
@@ -114,7 +111,7 @@ public:
    * @param entity Entity
    * @param name Name
    */
-  void setName(liquid::Entity entity, const liquid::String &name);
+  void setName(Entity entity, const String &name);
 
   /**
    * @brief Set camera for entity
@@ -123,8 +120,7 @@ public:
    * @param lens Perspective lens component
    * @param autoRatio Calculate aspect ratio automatically
    */
-  void setCamera(liquid::Entity entity, const liquid::PerspectiveLens &lens,
-                 bool autoRatio);
+  void setCamera(Entity entity, const PerspectiveLens &lens, bool autoRatio);
 
   /**
    * @brief Set audio for entity
@@ -132,7 +128,7 @@ public:
    * @param entity Entity
    * @param source Audio source asset
    */
-  void setAudio(liquid::Entity entity, liquid::AudioAssetHandle source);
+  void setAudio(Entity entity, AudioAssetHandle source);
 
   /**
    * @brief Set text for entity
@@ -140,7 +136,7 @@ public:
    * @param entity Entity
    * @param text Text component
    */
-  void setText(liquid::Entity entity, liquid::Text text);
+  void setText(Entity entity, Text text);
 
   /**
    * @brief Set script for entity
@@ -148,14 +144,14 @@ public:
    * @param entity Entity
    * @param handle Script handle
    */
-  void setScript(liquid::Entity entity, liquid::LuaScriptAssetHandle handle);
+  void setScript(Entity entity, LuaScriptAssetHandle handle);
 
   /**
    * @brief Delete entity
    *
    * @param entity Entity
    */
-  void deleteEntity(liquid::Entity entity);
+  void deleteEntity(Entity entity);
 
   /**
    * @brief Update local transform using world transform
@@ -163,7 +159,7 @@ public:
    * @param entity Entity to update
    * @param worldTransform World transform
    */
-  void updateLocalTransformUsingWorld(liquid::Entity entity,
+  void updateLocalTransformUsingWorld(Entity entity,
                                       const glm::mat4 &worldTransform);
 
   /**
@@ -176,16 +172,15 @@ public:
    * @param saveToFile Save the spawned entities
    * @return New entity
    */
-  liquid::Entity spawnEntity(EditorCamera &camera, liquid::Entity parent,
-                             uint32_t asset, liquid::AssetType type,
-                             bool saveToFile = true);
+  Entity spawnEntity(EditorCamera &camera, Entity parent, uint32_t asset,
+                     AssetType type, bool saveToFile = true);
 
   /**
    * @brief Get active entity database
    *
    * @return Active entity database
    */
-  inline liquid::EntityDatabase &getActiveEntityDatabase() {
+  inline EntityDatabase &getActiveEntityDatabase() {
     return mInSimulation ? mSimulationScene.entityDatabase
                          : mScene.entityDatabase;
   }
@@ -213,28 +208,28 @@ public:
    *
    * @return Active simulation camera
    */
-  liquid::Entity getActiveSimulationCamera();
+  Entity getActiveSimulationCamera();
 
   /**
    * @brief Get starting camera
    *
    * @return Starting camera entity
    */
-  liquid::Entity getStartingCamera();
+  Entity getStartingCamera();
 
   /**
    * @brief Set starting camera
    *
    * @param camera Camera entity
    */
-  void setStartingCamera(liquid::Entity camera);
+  void setStartingCamera(Entity camera);
 
   /**
    * @brief Get active scene
    *
    * @return Active scene
    */
-  inline liquid::Scene &getActiveScene() {
+  inline Scene &getActiveScene() {
     return mInSimulation ? mSimulationScene : mScene;
   }
 
@@ -245,17 +240,17 @@ private:
    * @param camera Editor camera
    * @return Transform component
    */
-  liquid::LocalTransform getTransformFromCamera(EditorCamera &camera) const;
+  LocalTransform getTransformFromCamera(EditorCamera &camera) const;
 
 private:
-  liquid::Scene mScene;
-  liquid::Scene mSimulationScene;
+  Scene mScene;
+  Scene mSimulationScene;
 
   AssetManager &mAssetManager;
-  liquid::SceneIO mSceneIO;
+  SceneIO mSceneIO;
   bool mInSimulation = false;
-  liquid::Renderer &mRenderer;
+  Renderer &mRenderer;
   std::filesystem::path mScenePath;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

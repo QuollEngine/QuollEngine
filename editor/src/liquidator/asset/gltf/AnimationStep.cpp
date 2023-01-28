@@ -3,7 +3,7 @@
 #include "AnimationStep.h"
 #include "Buffer.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
@@ -13,13 +13,13 @@ void loadAnimations(GLTFImportData &importData) {
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
-    liquid::String animationName = "Animation " + gltfAnimation.name;
+    String animationName = "Animation " + gltfAnimation.name;
 
     struct SamplerInfo {
       std::vector<float> times;
       std::vector<glm::vec4> values;
-      liquid::KeyframeSequenceAssetInterpolation interpolation =
-          liquid::KeyframeSequenceAssetInterpolation::Linear;
+      KeyframeSequenceAssetInterpolation interpolation =
+          KeyframeSequenceAssetInterpolation::Linear;
     };
 
     std::vector<SamplerInfo> samplers(gltfAnimation.samplers.size());
@@ -69,10 +69,9 @@ void loadAnimations(GLTFImportData &importData) {
 
       if (sampler.interpolation == "LINEAR") {
         samplers.at(i).interpolation =
-            liquid::KeyframeSequenceAssetInterpolation::Linear;
+            KeyframeSequenceAssetInterpolation::Linear;
       } else if (sampler.interpolation == "STEP") {
-        samplers.at(i).interpolation =
-            liquid::KeyframeSequenceAssetInterpolation::Step;
+        samplers.at(i).interpolation = KeyframeSequenceAssetInterpolation::Step;
       }
 
       float max = 0.0f;
@@ -115,7 +114,7 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    liquid::AssetData<liquid::AnimationAsset> animation;
+    AssetData<AnimationAsset> animation;
     animation.name = targetPath.string() + "/" + gltfAnimation.name;
     animation.data.time = maxTime;
 
@@ -132,13 +131,13 @@ void loadAnimations(GLTFImportData &importData) {
         continue;
       }
 
-      auto target = liquid::KeyframeSequenceAssetTarget::Position;
+      auto target = KeyframeSequenceAssetTarget::Position;
       if (channel.target_path == "rotation") {
-        target = liquid::KeyframeSequenceAssetTarget::Rotation;
+        target = KeyframeSequenceAssetTarget::Rotation;
       } else if (channel.target_path == "scale") {
-        target = liquid::KeyframeSequenceAssetTarget::Scale;
+        target = KeyframeSequenceAssetTarget::Scale;
       } else if (channel.target_path == "position") {
-        target = liquid::KeyframeSequenceAssetTarget::Position;
+        target = KeyframeSequenceAssetTarget::Position;
       }
 
       uint32_t targetJoint = 0;
@@ -179,7 +178,7 @@ void loadAnimations(GLTFImportData &importData) {
         continue;
       }
 
-      liquid::KeyframeSequenceAsset sequence;
+      KeyframeSequenceAsset sequence;
       sequence.interpolation = sampler.interpolation;
       sequence.target = target;
 
@@ -231,4 +230,4 @@ void loadAnimations(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

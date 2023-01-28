@@ -2,7 +2,7 @@
 
 #include "mikktspace.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 static constexpr uint32_t TriangleVertices = 3;
 
@@ -206,4 +206,4 @@ private:
   SMikkTSpaceInterface mInterface{};
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

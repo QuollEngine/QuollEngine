@@ -15,30 +15,29 @@
 
 #include "ProjectSelectorScreen.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-ProjectSelectorScreen::ProjectSelectorScreen(liquid::Window &window,
-                                             liquid::EventSystem &eventSystem,
-                                             liquid::rhi::RenderDevice *device)
+ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
+                                             EventSystem &eventSystem,
+                                             rhi::RenderDevice *device)
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 std::optional<Project> ProjectSelectorScreen::start() {
-  liquid::EntityDatabase entityDatabase;
-  liquid::AssetRegistry assetRegistry;
-  liquid::ShaderLibrary shaderLibrary;
-  liquid::RenderGraphEvaluator graphEvaluator(mDevice);
-  liquid::RenderStorage renderStorage(mDevice);
+  EntityDatabase entityDatabase;
+  AssetRegistry assetRegistry;
+  ShaderLibrary shaderLibrary;
+  RenderGraphEvaluator graphEvaluator(mDevice);
+  RenderStorage renderStorage(mDevice);
 
-  liquid::ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage,
-                                      mDevice);
-  liquid::Presenter presenter(shaderLibrary, mDevice);
+  ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage, mDevice);
+  Presenter presenter(shaderLibrary, mDevice);
 
-  liquidator::ProjectManager projectManager;
+  ProjectManager projectManager;
 
-  liquid::FPSCounter fpsCounter;
-  liquid::MainLoop mainLoop(mWindow, fpsCounter);
-  liquidator::EditorCamera editorCamera(entityDatabase, mEventSystem, mWindow);
-  std::optional<liquidator::Project> project;
+  FPSCounter fpsCounter;
+  MainLoop mainLoop(mWindow, fpsCounter);
+  EditorCamera editorCamera(entityDatabase, mEventSystem, mWindow);
+  std::optional<Project> project;
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -49,7 +48,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
   imguiRenderer.buildFonts();
 
-  liquid::RenderGraph graph("Main");
+  RenderGraph graph("Main");
   auto imguiPassData = imguiRenderer.attach(graph);
 
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
@@ -64,8 +63,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
     return !project.has_value();
   });
 
-  liquid::ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
-                                     mDevice->getDeviceStats(), fpsCounter);
+  ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
+                             mDevice->getDeviceStats(), fpsCounter);
 
   mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &editorCamera, &graph,
                         &imguiPassData, &project, &projectManager,
@@ -102,7 +101,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
       styles.pushStyle(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.0f, 0.5f));
 
       static const auto CreateProjectLabel =
-          liquid::String(fa::FolderPlus) + "  Create project";
+          String(fa::FolderPlus) + "  Create project";
       if (ImGui::Button(CreateProjectLabel.c_str(), ActionButtonSize)) {
         if (projectManager.createProjectInPath()) {
           project = projectManager.getProject();
@@ -110,7 +109,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
       }
 
       static const auto OpenProjectLabel =
-          liquid::String(fa::FolderOpen) + "  Open project";
+          String(fa::FolderOpen) + "  Open project";
       if (ImGui::Button(OpenProjectLabel.c_str(), ActionButtonSize)) {
         if (projectManager.openProjectInPath()) {
           project = projectManager.getProject();
@@ -146,4 +145,4 @@ std::optional<Project> ProjectSelectorScreen::start() {
   return project;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

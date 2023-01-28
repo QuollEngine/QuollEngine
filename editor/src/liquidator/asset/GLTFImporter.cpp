@@ -9,35 +9,31 @@
 #include "gltf/AnimationStep.h"
 #include "gltf/PrefabStep.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-using Logger = liquid::Logger;
+GLTFImporter::GLTFImporter(AssetCache &assetCache) : mAssetCache(assetCache) {}
 
-GLTFImporter::GLTFImporter(liquid::AssetCache &assetCache)
-    : mAssetCache(assetCache) {}
-
-liquid::Result<liquid::Path>
-GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
-                           const liquid::Path &engineAssetPath) {
+Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
+                                        const Path &engineAssetPath) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
-  liquid::String error, warning;
+  String error, warning;
 
   bool ret = loader.LoadBinaryFromFile(&model, &error, &warning,
                                        originalAssetPath.string());
 
   if (!warning.empty()) {
-    return liquid::Result<liquid::Path>::Error(warning);
+    return Result<Path>::Error(warning);
     // TODO: Show warning (in a dialog)
   }
 
   if (!error.empty()) {
-    return liquid::Result<liquid::Path>::Error(error);
+    return Result<Path>::Error(error);
     // TODO: Show error (in a dialog)
   }
 
   if (!ret) {
-    return liquid::Result<liquid::Path>::Error("Cannot load GLB file");
+    return Result<Path>::Error("Cannot load GLB file");
   }
 
   if (std::filesystem::exists(engineAssetPath)) {
@@ -59,29 +55,27 @@ GLTFImporter::loadFromPath(const liquid::Path &originalAssetPath,
     return importData.outputPath;
   }
 
-  return liquid::Result<liquid::Path>::Ok(importData.outputPath.getData(),
-                                          importData.warnings);
+  return Result<Path>::Ok(importData.outputPath.getData(), importData.warnings);
 }
 
-liquid::Result<liquid::Path>
-GLTFImporter::saveBinary(const liquid::Path &source,
-                         const liquid::Path &destination) {
+Result<Path> GLTFImporter::saveBinary(const Path &source,
+                                      const Path &destination) {
   tinygltf::TinyGLTF gltf;
   tinygltf::Model model;
-  liquid::String error, warning;
+  String error, warning;
 
   bool ret = gltf.LoadASCIIFromFile(&model, &error, &warning, source.string());
 
   if (!warning.empty()) {
-    return liquid::Result<liquid::Path>::Error(warning);
+    return Result<Path>::Error(warning);
   }
 
   if (!error.empty()) {
-    return liquid::Result<liquid::Path>::Error(error);
+    return Result<Path>::Error(error);
   }
 
   if (!ret) {
-    return liquid::Result<liquid::Path>::Error("Cannot load ASCII GLTF file");
+    return Result<Path>::Error("Cannot load ASCII GLTF file");
   }
 
   auto destinationGlb = destination;
@@ -91,11 +85,10 @@ GLTFImporter::saveBinary(const liquid::Path &source,
                                   false, true);
 
   if (!ret) {
-    return liquid::Result<liquid::Path>::Error(
-        "Cannot create binary GLB file from GLTF file");
+    return Result<Path>::Error("Cannot create binary GLB file from GLTF file");
   }
 
-  return liquid::Result<liquid::Path>::Ok(destinationGlb);
+  return Result<Path>::Ok(destinationGlb);
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

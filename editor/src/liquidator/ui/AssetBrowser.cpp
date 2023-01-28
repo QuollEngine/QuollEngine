@@ -5,7 +5,7 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Imgui text callback user data
@@ -14,7 +14,7 @@ struct ImguiInputTextCallbackUserData {
   /**
    * Passed string value ref
    */
-  liquid::String &value;
+  String &value;
 };
 
 /**
@@ -42,7 +42,7 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
  * @param value String value
  * @param flags Input text flags
  */
-static bool ImguiInputText(const liquid::String &label, liquid::String &value,
+static bool ImguiInputText(const String &label, String &value,
                            ImGuiInputTextFlags flags = 0) {
   LIQUID_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0,
                 "Do not back callback resize flag");
@@ -62,26 +62,26 @@ static bool ImguiInputText(const liquid::String &label, liquid::String &value,
  * @param type Asset type
  * @return Icon type
  */
-static EditorIcon getIconFromAssetType(liquid::AssetType type) {
+static EditorIcon getIconFromAssetType(AssetType type) {
   switch (type) {
-  case liquid::AssetType::Texture:
+  case AssetType::Texture:
     return EditorIcon::Texture;
-  case liquid::AssetType::Font:
+  case AssetType::Font:
     return EditorIcon::Font;
-  case liquid::AssetType::Material:
+  case AssetType::Material:
     return EditorIcon::Material;
-  case liquid::AssetType::Mesh:
-  case liquid::AssetType::SkinnedMesh:
+  case AssetType::Mesh:
+  case AssetType::SkinnedMesh:
     return EditorIcon::Mesh;
-  case liquid::AssetType::Skeleton:
+  case AssetType::Skeleton:
     return EditorIcon::Skeleton;
-  case liquid::AssetType::Animation:
+  case AssetType::Animation:
     return EditorIcon::Animation;
-  case liquid::AssetType::Audio:
+  case AssetType::Audio:
     return EditorIcon::Audio;
-  case liquid::AssetType::Prefab:
+  case AssetType::Prefab:
     return EditorIcon::Prefab;
-  case liquid::AssetType::LuaScript:
+  case AssetType::LuaScript:
     return EditorIcon::Script;
 
   default:
@@ -126,21 +126,21 @@ void AssetBrowser::render(AssetManager &assetManager,
 
       entry.preview = iconRegistry.getIcon(entry.icon);
 
-      if (entry.assetType == liquid::AssetType::Texture) {
+      if (entry.assetType == AssetType::Texture) {
         auto handle =
             assetManager.getAssetRegistry()
                 .getTextures()
-                .getAsset(static_cast<liquid::TextureAssetHandle>(pair.second))
+                .getAsset(static_cast<TextureAssetHandle>(pair.second))
                 .data.deviceHandle;
 
-        if (handle != liquid::rhi::TextureHandle::Invalid) {
+        if (handle != rhi::TextureHandle::Invalid) {
           entry.preview = handle;
         }
       }
 
       entry.clippedName = entry.path.filename().stem().string();
 
-      liquid::String ellipsis = "..";
+      String ellipsis = "..";
       auto calculateTextWidth = [&ellipsis](Entry &entry) {
         return ImGui::CalcTextSize((entry.clippedName + ellipsis).c_str()).x;
       };
@@ -182,7 +182,7 @@ void AssetBrowser::render(AssetManager &assetManager,
         mStagingEntry.icon = EditorIcon::Script;
         mStagingEntry.isDirectory = false;
         mStagingEntry.isEditable = true;
-        mStagingEntry.assetType = liquid::AssetType::LuaScript;
+        mStagingEntry.assetType = AssetType::LuaScript;
       }
     }
 
@@ -219,9 +219,8 @@ void AssetBrowser::render(AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        liquid::String id =
-            "###" + std::to_string(entry.asset) + "-" +
-            std::to_string(static_cast<uint32_t>(entry.assetType));
+        String id = "###" + std::to_string(entry.asset) + "-" +
+                    std::to_string(static_cast<uint32_t>(entry.assetType));
         if (ImGui::Selectable(id.c_str(), mSelected == i,
                               ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(ItemWidth, ItemHeight))) {
@@ -233,31 +232,31 @@ void AssetBrowser::render(AssetManager &assetManager,
             if (entry.isDirectory) {
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
-            } else if (entry.assetType == liquid::AssetType::Prefab) {
+            } else if (entry.assetType == AssetType::Prefab) {
               entityManager.spawnEntity(editorManager.getEditorCamera(),
-                                        liquid::EntityNull, entry.asset,
+                                        EntityNull, entry.asset,
                                         entry.assetType);
-            } else if (entry.assetType == liquid::AssetType::Material) {
+            } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
-                  static_cast<liquid::MaterialAssetHandle>(entry.asset));
-            } else if (entry.assetType == liquid::AssetType::LuaScript) {
+                  static_cast<MaterialAssetHandle>(entry.asset));
+            } else if (entry.assetType == AssetType::LuaScript) {
               mFileOpener.openFile(entry.path);
             }
           }
         }
 
-        bool dndAllowed = entry.assetType == liquid::AssetType::Mesh ||
-                          entry.assetType == liquid::AssetType::SkinnedMesh ||
-                          entry.assetType == liquid::AssetType::Skeleton ||
-                          entry.assetType == liquid::AssetType::Texture ||
-                          entry.assetType == liquid::AssetType::Audio ||
-                          entry.assetType == liquid::AssetType::LuaScript;
+        bool dndAllowed = entry.assetType == AssetType::Mesh ||
+                          entry.assetType == AssetType::SkinnedMesh ||
+                          entry.assetType == AssetType::Skeleton ||
+                          entry.assetType == AssetType::Texture ||
+                          entry.assetType == AssetType::Audio ||
+                          entry.assetType == AssetType::LuaScript;
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
             ImGui::SetDragDropPayload(
-                liquid::getAssetTypeString(entry.assetType).c_str(),
-                &entry.asset, sizeof(uint32_t));
+                getAssetTypeString(entry.assetType).c_str(), &entry.asset,
+                sizeof(uint32_t));
             renderEntry(entry);
             ImGui::EndDragDropSource();
           }
@@ -282,8 +281,7 @@ void AssetBrowser::render(AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        liquid::imgui::image(iconRegistry.getIcon(mStagingEntry.icon),
-                             IconSize);
+        imgui::image(iconRegistry.getIcon(mStagingEntry.icon), IconSize);
         ImGui::PushItemWidth(ItemWidth);
 
         if (!mInitialFocusSet) {
@@ -334,7 +332,7 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
     auto path = mCurrentDirectory / mStagingEntry.clippedName;
     if (mStagingEntry.isDirectory) {
       assetManager.createDirectory(path);
-    } else if (mStagingEntry.assetType == liquid::AssetType::LuaScript) {
+    } else if (mStagingEntry.assetType == AssetType::LuaScript) {
       assetManager.createLuaScript(path);
     }
   }
@@ -360,7 +358,7 @@ void AssetBrowser::renderEntry(const Entry &entry) {
   {
     float initialCursorPos = ImGui::GetCursorPosX();
     ImGui::SetCursorPosX(initialCursorPos + ImagePadding);
-    liquid::imgui::image(entry.preview, IconSize);
+    imgui::image(entry.preview, IconSize);
     ImGui::SetCursorPosX(initialCursorPos);
   }
 
@@ -374,4 +372,4 @@ void AssetBrowser::renderEntry(const Entry &entry) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

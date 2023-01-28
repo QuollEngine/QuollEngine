@@ -2,7 +2,7 @@
 
 #include "liquidator/project/Project.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Game exporter
@@ -15,7 +15,7 @@ public:
    * @param project Project
    * @param destination Destination path
    */
-  void exportGame(const Project &project, const liquid::Path &destination);
+  void exportGame(const Project &project, const Path &destination);
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

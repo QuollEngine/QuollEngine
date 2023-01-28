@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AssetRegistry.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Material viewer
@@ -14,17 +14,17 @@ public:
    *
    * @param assetRegistry Asset registry
    */
-  void render(liquid::AssetRegistry &assetRegistry);
+  void render(AssetRegistry &assetRegistry);
 
   /**
    * @brief Open material viewer
    *
    * @param handle Material handle to display
    */
-  void open(liquid::MaterialAssetHandle handle);
+  void open(MaterialAssetHandle handle);
 
 private:
-  liquid::MaterialAssetHandle mHandle = liquid::MaterialAssetHandle::Invalid;
+  MaterialAssetHandle mHandle = MaterialAssetHandle::Invalid;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

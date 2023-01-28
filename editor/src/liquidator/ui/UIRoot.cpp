@@ -3,15 +3,14 @@
 
 #include "UIRoot.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
     : mAssetBrowser(assetLoader), mSceneHierarchyPanel(entityManager),
       mEntityPanel(entityManager) {}
 
-void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
-                    AssetManager &assetManager,
-                    liquid::PhysicsSystem &physicsSystem,
+void UIRoot::render(EditorManager &editorManager, Renderer &renderer,
+                    AssetManager &assetManager, PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
   mLayout.setup();
 
@@ -29,4 +28,4 @@ void UIRoot::render(EditorManager &editorManager, liquid::Renderer &renderer,
                        entityManager);
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

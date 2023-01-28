@@ -3,7 +3,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 Toolbar::Toolbar() {
   ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, Height));
@@ -21,4 +21,4 @@ Toolbar::~Toolbar() {
   ImGui::PopStyleVar();
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

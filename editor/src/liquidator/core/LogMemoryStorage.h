@@ -2,16 +2,16 @@
 
 #include "liquid/logger/Logger.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief In memory storage for logs
  */
 class LogMemoryStorage {
   struct LogEntry {
-    liquid::LogSeverity severity;
-    liquid::LogTimestamp timestamp;
-    liquid::String message;
+    LogSeverity severity;
+    LogTimestamp timestamp;
+    String message;
   };
 
 public:
@@ -20,7 +20,7 @@ public:
    *
    * @return Log transport
    */
-  liquid::LogTransport createTransport();
+  LogTransport createTransport();
 
   /**
    * @brief Get all log entries
@@ -38,4 +38,4 @@ private:
   std::vector<LogEntry> mEntries;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

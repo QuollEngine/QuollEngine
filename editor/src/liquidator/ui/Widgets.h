@@ -2,7 +2,7 @@
 
 #include "liquid/imgui/ImguiUtils.h"
 
-namespace liquidator::widgets {
+namespace liquid::editor::widgets {
 
 /**
  * @brief Section widget
@@ -245,7 +245,7 @@ public:
    *
    * @param value String value
    */
-  void column(const liquid::String &value);
+  void column(const String &value);
 
   /**
    * @brief Render integer column
@@ -267,7 +267,7 @@ public:
    * @param handle Texture handle
    * @param size Image size
    */
-  void column(liquid::rhi::TextureHandle handle, const glm::vec2 &size);
+  void column(rhi::TextureHandle handle, const glm::vec2 &size);
 
   /**
    * @brief Render row
@@ -297,7 +297,7 @@ public:
    * @param label Input label
    * @param value Input value
    */
-  Input(liquid::String label, glm::vec3 &value);
+  Input(String label, glm::vec3 &value);
 
   /**
    * @brief Render decimal scalar input
@@ -305,7 +305,7 @@ public:
    * @param label Input label
    * @param value Input value
    */
-  Input(liquid::String label, float &value);
+  Input(String label, float &value);
 
   /**
    * @brief Render uint scalar input
@@ -313,7 +313,7 @@ public:
    * @param label Input label
    * @param value Input value
    */
-  Input(liquid::String label, uint32_t &value);
+  Input(String label, uint32_t &value);
 
   /**
    * @brief Render text input
@@ -321,7 +321,7 @@ public:
    * @param label Input label
    * @param value Input value
    */
-  Input(liquid::String label, liquid::String &value);
+  Input(String label, String &value);
 
   /**
    * @brief Check if input is changed
@@ -340,7 +340,7 @@ private:
    * @param size Number of data items
    * @param dataType Input data type
    */
-  void renderScalarInput(liquid::String label, void *data, size_t size,
+  void renderScalarInput(String label, void *data, size_t size,
                          ImGuiDataType dataType);
 
   /**
@@ -349,7 +349,7 @@ private:
    * @param label Input label
    * @param data String data
    */
-  void renderTextInput(liquid::String label, liquid::String &data);
+  void renderTextInput(String label, String &data);
 
 private:
   bool mChanged = false;
@@ -366,7 +366,7 @@ public:
    * @param label Input label
    * @param value Input value
    */
-  InputColor(liquid::String label, glm::vec4 &value);
+  InputColor(String label, glm::vec4 &value);
 
   /**
    * @brief Check if input is changed
@@ -380,4 +380,4 @@ private:
   bool mChanged = false;
 };
 
-} // namespace liquidator::widgets
+} // namespace liquid::editor::widgets

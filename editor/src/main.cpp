@@ -17,8 +17,8 @@ int main() {
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
 
-  liquidator::ProjectSelectorScreen projectSelector(window, eventSystem,
-                                                    device);
+  liquid::editor::ProjectSelectorScreen projectSelector(window, eventSystem,
+                                                        device);
 
   auto project = projectSelector.start();
 
@@ -27,7 +27,7 @@ int main() {
     liquid::Engine::getLogger().info()
         << "Project selected: " << project.value().name;
 
-    liquidator::EditorScreen editor(window, eventSystem, device);
+    liquid::editor::EditorScreen editor(window, eventSystem, device);
     editor.start(project.value());
   }
 

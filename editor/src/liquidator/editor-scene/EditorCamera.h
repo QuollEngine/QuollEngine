@@ -5,7 +5,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor camera
@@ -64,8 +64,8 @@ public:
    * @param eventSystem Event system
    * @param window Window
    */
-  EditorCamera(liquid::EntityDatabase &entityDatabase,
-               liquid::EventSystem &eventSystem, liquid::Window &window);
+  EditorCamera(EntityDatabase &entityDatabase, EventSystem &eventSystem,
+               Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
@@ -156,7 +156,7 @@ public:
    *
    * @return Camera
    */
-  inline const liquid::Entity getCamera() const { return mCameraEntity; }
+  inline const Entity getCamera() const { return mCameraEntity; }
 
   /**
    * @brief Set camera center
@@ -234,8 +234,8 @@ private:
    *
    * @return Perspective lens
    */
-  inline liquid::PerspectiveLens &getPerspectiveLens() {
-    return mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
+  inline PerspectiveLens &getPerspectiveLens() {
+    return mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
   }
 
   /**
@@ -243,8 +243,8 @@ private:
    *
    * @return Perspective lens
    */
-  inline const liquid::PerspectiveLens &getPerspectiveLens() const {
-    return mEntityDatabase.get<liquid::PerspectiveLens>(mCameraEntity);
+  inline const PerspectiveLens &getPerspectiveLens() const {
+    return mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
   }
 
   /**
@@ -276,15 +276,15 @@ private:
   glm::vec3 mCenter = DefaultCenter;
   glm::vec3 mUp = DefaultUp;
 
-  liquid::EventObserverId mMouseButtonPressHandler = 0;
-  liquid::EventObserverId mMouseButtonReleaseHandler = 0;
-  liquid::EventObserverId mMouseCursorMoveHandler = 0;
-  liquid::EventObserverId mMouseScrollHandler = 0;
+  EventObserverId mMouseButtonPressHandler = 0;
+  EventObserverId mMouseButtonReleaseHandler = 0;
+  EventObserverId mMouseCursorMoveHandler = 0;
+  EventObserverId mMouseScrollHandler = 0;
 
-  liquid::Window &mWindow;
-  liquid::EntityDatabase &mEntityDatabase;
-  liquid::EventSystem &mEventSystem;
-  liquid::Entity mCameraEntity = liquid::EntityNull;
+  Window &mWindow;
+  EntityDatabase &mEntityDatabase;
+  EventSystem &mEventSystem;
+  Entity mCameraEntity = EntityNull;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

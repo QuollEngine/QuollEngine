@@ -3,12 +3,12 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void StatusBar::render(EditorManager &editorManager) {
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
 
-  liquid::String state = "";
+  String state = "";
   switch (editorManager.getEditorCamera().getInputState()) {
   case EditorCamera::InputState::Pan:
     state = "Panning";
@@ -43,4 +43,4 @@ void StatusBar::render(EditorManager &editorManager) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

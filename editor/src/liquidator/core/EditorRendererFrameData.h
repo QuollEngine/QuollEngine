@@ -11,7 +11,7 @@
 
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Frame data for editor renderer
@@ -60,7 +60,7 @@ public:
    * @param renderStorage Render storage
    * @param reservedSpace Reserved space for buffer data
    */
-  EditorRendererFrameData(liquid::RenderStorage &renderStorage,
+  EditorRendererFrameData(RenderStorage &renderStorage,
                           size_t reservedSpace = DefaultReservedSpace);
 
   /**
@@ -77,7 +77,7 @@ public:
    *
    * @return Skeleton world transforms buffer
    */
-  inline liquid::rhi::BufferHandle getSkeletonTransforms() const {
+  inline rhi::BufferHandle getSkeletonTransforms() const {
     return mSkeletonTransformsBuffer.getHandle();
   };
 
@@ -86,7 +86,7 @@ public:
    *
    * @return Skeleton bones buffer
    */
-  inline liquid::rhi::BufferHandle getSkeletonBoneTransforms() const {
+  inline rhi::BufferHandle getSkeletonBoneTransforms() const {
     return mSkeletonBoneTransformsBuffer.getHandle();
   }
 
@@ -104,7 +104,7 @@ public:
    *
    * @param camera Active camera
    */
-  void setActiveCamera(const liquid::Camera &camera);
+  void setActiveCamera(const Camera &camera);
 
   /**
    * @brief Set editor grid data
@@ -118,7 +118,7 @@ public:
    *
    * @return Editor grid buffer
    */
-  inline liquid::rhi::BufferHandle getEditorGridBuffer() const {
+  inline rhi::BufferHandle getEditorGridBuffer() const {
     return mEditorGridBuffer.getHandle();
   }
 
@@ -127,7 +127,7 @@ public:
    *
    * @return Active camera buffer
    */
-  inline liquid::rhi::BufferHandle getActiveCameraBuffer() {
+  inline rhi::BufferHandle getActiveCameraBuffer() {
     return mCameraBuffer.getHandle();
   }
 
@@ -137,15 +137,14 @@ public:
    * @param icon Gizmo icon
    * @param worldTransform World transform
    */
-  void addGizmo(liquid::rhi::TextureHandle icon,
-                const glm::mat4 &worldTransform);
+  void addGizmo(rhi::TextureHandle icon, const glm::mat4 &worldTransform);
 
   /**
    * @brief Get buffer for gizmo world transforms
    *
    * @return Gizmo transforms
    */
-  inline liquid::rhi::BufferHandle getGizmoTransformsBuffer() const {
+  inline rhi::BufferHandle getGizmoTransformsBuffer() const {
     return mGizmoTransformsBuffer.getHandle();
   }
 
@@ -154,7 +153,7 @@ public:
    *
    * @return Gizmo counts per icon
    */
-  inline const std::unordered_map<liquid::rhi::TextureHandle, uint32_t> &
+  inline const std::unordered_map<rhi::TextureHandle, uint32_t> &
   getGizmoCounts() const {
     return mGizmoCounts;
   }
@@ -176,16 +175,15 @@ public:
    * @param collidable Collidable component
    * @param worldTransform World transform
    */
-  void setCollidable(liquid::Entity entity,
-                     const liquid::Collidable &collidable,
-                     const liquid::WorldTransform &worldTransform);
+  void setCollidable(Entity entity, const Collidable &collidable,
+                     const WorldTransform &worldTransform);
 
   /**
    * @brief Get collidable parameters buffer
    *
    * @return Collidable parameters buffer handle
    */
-  inline liquid::rhi::BufferHandle getCollidableParamsBuffer() const {
+  inline rhi::BufferHandle getCollidableParamsBuffer() const {
     return mCollidableEntityBuffer.getHandle();
   }
 
@@ -196,7 +194,7 @@ public:
    * @retval false Collidable entity is not set
    */
   inline bool isCollidableEntitySelected() const {
-    return mCollidableEntity != liquid::EntityNull;
+    return mCollidableEntity != EntityNull;
   }
 
   /**
@@ -204,9 +202,8 @@ public:
    *
    * @return Collidable shape type
    */
-  inline liquid::PhysicsGeometryType getCollidableShapeType() const {
-    return static_cast<liquid::PhysicsGeometryType>(
-        mCollidableEntityParams.type.x);
+  inline PhysicsGeometryType getCollidableShapeType() const {
+    return static_cast<PhysicsGeometryType>(mCollidableEntityParams.type.x);
   }
 
   /**
@@ -214,39 +211,39 @@ public:
    *
    * @return Draw parameters
    */
-  inline liquid::DrawParameters &getDrawParams() { return mDrawParams; }
+  inline DrawParameters &getDrawParams() { return mDrawParams; }
 
 private:
   size_t mReservedSpace = 0;
 
   // Camera
-  liquid::Camera mCameraData;
-  liquid::rhi::Buffer mCameraBuffer;
+  Camera mCameraData;
+  rhi::Buffer mCameraBuffer;
 
   // Editor grid
   EditorGridData mEditorGridData{};
-  liquid::rhi::Buffer mEditorGridBuffer;
+  rhi::Buffer mEditorGridBuffer;
 
   // Skeleton bones
   size_t mLastSkeleton = 0;
   std::vector<glm::mat4> mSkeletonTransforms;
   std::unique_ptr<glm::mat4> mSkeletonVector;
   std::vector<uint32_t> mNumBones;
-  liquid::rhi::Buffer mSkeletonTransformsBuffer;
-  liquid::rhi::Buffer mSkeletonBoneTransformsBuffer;
+  rhi::Buffer mSkeletonTransformsBuffer;
+  rhi::Buffer mSkeletonBoneTransformsBuffer;
 
   // Gizmos
   std::vector<glm::mat4> mGizmoTransforms;
-  std::unordered_map<liquid::rhi::TextureHandle, uint32_t> mGizmoCounts;
-  liquid::rhi::Buffer mGizmoTransformsBuffer;
+  std::unordered_map<rhi::TextureHandle, uint32_t> mGizmoCounts;
+  rhi::Buffer mGizmoTransformsBuffer;
 
   // Collidable shape
-  liquid::Entity mCollidableEntity = liquid::EntityNull;
+  Entity mCollidableEntity = EntityNull;
   CollidableEntity mCollidableEntityParams{};
 
-  liquid::rhi::Buffer mCollidableEntityBuffer;
+  rhi::Buffer mCollidableEntityBuffer;
 
-  liquid::DrawParameters mDrawParams;
+  DrawParameters mDrawParams;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

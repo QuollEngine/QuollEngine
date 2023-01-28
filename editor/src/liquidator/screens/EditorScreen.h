@@ -6,7 +6,7 @@
 
 #include "../project/ProjectManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Editor screen
@@ -23,8 +23,8 @@ public:
    * @param eventSystem Event system
    * @param device Render device
    */
-  EditorScreen(liquid::Window &window, liquid::EventSystem &eventSystem,
-               liquid::rhi::RenderDevice *device);
+  EditorScreen(Window &window, EventSystem &eventSystem,
+               rhi::RenderDevice *device);
 
   /**
    * @brief Start editor screen
@@ -34,9 +34,9 @@ public:
   void start(const Project &project);
 
 private:
-  liquid::Window &mWindow;
-  liquid::EventSystem &mEventSystem;
-  liquid::rhi::RenderDevice *mDevice;
+  Window &mWindow;
+  EventSystem &mEventSystem;
+  rhi::RenderDevice *mDevice;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

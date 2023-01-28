@@ -2,7 +2,7 @@
 
 #include "liquidator/editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Confirmation dialog component
@@ -17,9 +17,9 @@ public:
    * @param confirmButtonLabel Confirm button label
    * @param cancelButtonLabel Cancel button label
    */
-  ConfirmationDialog(const liquid::String &title, const liquid::String &prompt,
-                     const liquid::String &confirmButtonLabel = "Confirm",
-                     const liquid::String &cancelButtonLabel = "Cancel");
+  ConfirmationDialog(const String &title, const String &prompt,
+                     const String &confirmButtonLabel = "Confirm",
+                     const String &cancelButtonLabel = "Cancel");
 
   /**
    * @brief Show confirmation dialog
@@ -43,10 +43,10 @@ private:
   bool mOpen = false;
   bool mConfirmed = false;
 
-  liquid::String mTitle;
-  liquid::String mPrompt;
-  liquid::String mConfirmButtonLabel;
-  liquid::String mCancelButtonLabel;
+  String mTitle;
+  String mPrompt;
+  String mConfirmButtonLabel;
+  String mCancelButtonLabel;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

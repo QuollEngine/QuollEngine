@@ -4,13 +4,13 @@
 #include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/editor-scene/EditorCamera.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Scene hierarchy panel component
  */
 class SceneHierarchyPanel {
-  using EntityClickHandler = std::function<void(liquid::Entity)>;
+  using EntityClickHandler = std::function<void(Entity)>;
 
 public:
   /**
@@ -42,16 +42,14 @@ public:
    *
    * @return Selected entity
    */
-  inline const liquid::Entity getSelectedEntity() const {
-    return mSelectedEntity;
-  }
+  inline const Entity getSelectedEntity() const { return mSelectedEntity; }
 
   /**
    * @brief Set selected entity
    *
    * @param entity Entity
    */
-  void setSelectedEntity(liquid::Entity entity);
+  void setSelectedEntity(Entity entity);
 
 private:
   /**
@@ -61,13 +59,12 @@ private:
    * @param flags Flags
    * @param editorManager Editor manager
    */
-  void renderEntity(liquid::Entity entity, int flags,
-                    EditorManager &editorManager);
+  void renderEntity(Entity entity, int flags, EditorManager &editorManager);
 
 private:
   EntityManager &mEntityManager;
-  liquid::Entity mSelectedEntity = liquid::EntityNull;
-  liquid::Entity mRightClickedEntity = liquid::EntityNull;
+  Entity mSelectedEntity = EntityNull;
+  Entity mRightClickedEntity = EntityNull;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

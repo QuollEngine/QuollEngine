@@ -1,18 +1,18 @@
 #include "liquid/core/Base.h"
 #include "EditorRendererFrameData.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-EditorRendererFrameData::EditorRendererFrameData(
-    liquid::RenderStorage &renderStorage, size_t reservedSpace)
+EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
+                                                 size_t reservedSpace)
     : mReservedSpace(reservedSpace) {
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
   mGizmoTransforms.reserve(reservedSpace);
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
 
-  liquid::rhi::BufferDescription defaultDesc{};
-  defaultDesc.type = liquid::rhi::BufferType::Storage;
+  rhi::BufferDescription defaultDesc{};
+  defaultDesc.type = rhi::BufferType::Storage;
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
@@ -32,14 +32,14 @@ EditorRendererFrameData::EditorRendererFrameData(
 
   {
     auto desc = defaultDesc;
-    desc.type = liquid::rhi::BufferType::Uniform;
-    desc.size = sizeof(liquid::Camera);
+    desc.type = rhi::BufferType::Uniform;
+    desc.size = sizeof(Camera);
     mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
-    desc.type = liquid::rhi::BufferType::Uniform;
+    desc.type = rhi::BufferType::Uniform;
     desc.size = sizeof(EditorGridData);
     mEditorGridBuffer = renderStorage.createBuffer(desc);
   }
@@ -47,21 +47,20 @@ EditorRendererFrameData::EditorRendererFrameData(
   {
     auto desc = defaultDesc;
     desc.size = sizeof(CollidableEntity);
-    desc.type = liquid::rhi::BufferType::Uniform;
+    desc.type = rhi::BufferType::Uniform;
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 
   mDrawParams.index0 =
-      liquid::rhi::castHandleToUint(mGizmoTransformsBuffer.getHandle());
+      rhi::castHandleToUint(mGizmoTransformsBuffer.getHandle());
   mDrawParams.index1 =
-      liquid::rhi::castHandleToUint(mSkeletonBoneTransformsBuffer.getHandle());
-  mDrawParams.index2 =
-      liquid::rhi::castHandleToUint(mEditorGridBuffer.getHandle());
-  mDrawParams.index3 = liquid::rhi::castHandleToUint(mCameraBuffer.getHandle());
+      rhi::castHandleToUint(mSkeletonBoneTransformsBuffer.getHandle());
+  mDrawParams.index2 = rhi::castHandleToUint(mEditorGridBuffer.getHandle());
+  mDrawParams.index3 = rhi::castHandleToUint(mCameraBuffer.getHandle());
   mDrawParams.index4 =
-      liquid::rhi::castHandleToUint(mCollidableEntityBuffer.getHandle());
+      rhi::castHandleToUint(mCollidableEntityBuffer.getHandle());
   mDrawParams.index5 =
-      liquid::rhi::castHandleToUint(mSkeletonTransformsBuffer.getHandle());
+      rhi::castHandleToUint(mSkeletonTransformsBuffer.getHandle());
 }
 
 void EditorRendererFrameData::addSkeleton(
@@ -77,11 +76,11 @@ void EditorRendererFrameData::addSkeleton(
   mLastSkeleton++;
 }
 
-void EditorRendererFrameData::setActiveCamera(const liquid::Camera &camera) {
+void EditorRendererFrameData::setActiveCamera(const Camera &camera) {
   mCameraData = camera;
 }
 
-void EditorRendererFrameData::addGizmo(liquid::rhi::TextureHandle icon,
+void EditorRendererFrameData::addGizmo(rhi::TextureHandle icon,
                                        const glm::mat4 &worldTransform) {
   mGizmoTransforms.push_back(worldTransform);
   mGizmoCounts[icon]++;
@@ -93,7 +92,7 @@ void EditorRendererFrameData::setEditorGrid(const EditorGridData &data) {
 
 void EditorRendererFrameData::updateBuffers() {
 
-  mCameraBuffer.update(&mCameraData, sizeof(liquid::Camera));
+  mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mEditorGridBuffer.update(&mEditorGridData, sizeof(EditorGridData));
 
   if (!mSkeletonTransforms.empty()) {
@@ -118,33 +117,31 @@ void EditorRendererFrameData::clear() {
   mGizmoCounts.clear();
   mLastSkeleton = 0;
 
-  mCollidableEntity = liquid::EntityNull;
+  mCollidableEntity = EntityNull;
 }
 
 void EditorRendererFrameData::setCollidable(
-    liquid::Entity entity, const liquid::Collidable &collidable,
-    const liquid::WorldTransform &worldTransform) {
+    Entity entity, const Collidable &collidable,
+    const WorldTransform &worldTransform) {
   mCollidableEntity = entity;
   mCollidableEntityParams.worldTransform = worldTransform.worldTransform;
   mCollidableEntityParams.type.x =
       static_cast<uint32_t>(collidable.geometryDesc.type);
 
-  if (collidable.geometryDesc.type == liquid::PhysicsGeometryType::Box) {
+  if (collidable.geometryDesc.type == PhysicsGeometryType::Box) {
     const auto &params =
-        std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params);
+        std::get<PhysicsGeometryBox>(collidable.geometryDesc.params);
     mCollidableEntityParams.params = glm::vec4(params.halfExtents, 0.0f);
-  } else if (collidable.geometryDesc.type ==
-             liquid::PhysicsGeometryType::Sphere) {
+  } else if (collidable.geometryDesc.type == PhysicsGeometryType::Sphere) {
     const auto &params =
-        std::get<liquid::PhysicsGeometrySphere>(collidable.geometryDesc.params);
+        std::get<PhysicsGeometrySphere>(collidable.geometryDesc.params);
     mCollidableEntityParams.params = glm::vec4(params.radius);
-  } else if (collidable.geometryDesc.type ==
-             liquid::PhysicsGeometryType::Capsule) {
-    const auto &params = std::get<liquid::PhysicsGeometryCapsule>(
-        collidable.geometryDesc.params);
+  } else if (collidable.geometryDesc.type == PhysicsGeometryType::Capsule) {
+    const auto &params =
+        std::get<PhysicsGeometryCapsule>(collidable.geometryDesc.params);
     mCollidableEntityParams.params =
         glm::vec4(params.radius, params.halfHeight, 0.0f, 0.0f);
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

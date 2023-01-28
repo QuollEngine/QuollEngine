@@ -12,7 +12,7 @@
 
 #include "MaterialViewer.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Asset browser component
@@ -20,12 +20,12 @@ namespace liquidator {
 class AssetBrowser {
   struct Entry {
     std::filesystem::path path;
-    liquid::String clippedName;
+    String clippedName;
     float textWidth = 0.0f;
     bool isDirectory = false;
     EditorIcon icon = EditorIcon::Unknown;
-    liquid::rhi::TextureHandle preview = liquid::rhi::TextureHandle::Invalid;
-    liquid::AssetType assetType = liquid::AssetType::None;
+    rhi::TextureHandle preview = rhi::TextureHandle::Invalid;
+    AssetType assetType = AssetType::None;
     uint32_t asset = 0;
     bool isEditable = false;
   };
@@ -84,11 +84,11 @@ private:
   bool mDirectoryChanged = true;
   size_t mSelected = std::numeric_limits<size_t>::max();
   AssetLoader &mAssetLoader;
-  liquid::platform_tools::NativeFileDialog mFileDialog;
-  liquid::platform_tools::NativeFileOpener mFileOpener;
+  platform_tools::NativeFileDialog mFileDialog;
+  platform_tools::NativeFileOpener mFileOpener;
 
   AssetLoadStatusDialog mStatusDialog;
   MaterialViewer mMaterialViewer;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

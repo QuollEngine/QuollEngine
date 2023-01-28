@@ -2,14 +2,14 @@
 #include "AssetLoader.h"
 #include "GLTFImporter.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 AssetLoader::AssetLoader(AssetManager &assetManager,
-                         liquid::RenderStorage &renderStorage)
+                         RenderStorage &renderStorage)
     : mAssetManager(assetManager), mRenderStorage(renderStorage) {}
 
-liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
-                                               const liquid::Path &directory) {
+Result<bool> AssetLoader::loadFromPath(const Path &path,
+                                       const Path &directory) {
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res.hasData()) {
@@ -19,9 +19,8 @@ liquid::Result<bool> AssetLoader::loadFromPath(const liquid::Path &path,
   return res;
 }
 
-liquid::Result<bool>
-AssetLoader::loadFromFileDialog(const liquid::Path &directory) {
-  using FileTypeEntry = liquid::platform_tools::NativeFileDialog::FileTypeEntry;
+Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
+  using FileTypeEntry = platform_tools::NativeFileDialog::FileTypeEntry;
 
   std::vector<FileTypeEntry> entries{
       FileTypeEntry{"Scene files", AssetManager::SceneExtensions},
@@ -32,9 +31,9 @@ AssetLoader::loadFromFileDialog(const liquid::Path &directory) {
 
   auto filePath = mNativeFileDialog.getFilePathFromDialog(entries);
   if (filePath.empty())
-    return liquid::Result<bool>::Ok(true, {});
+    return Result<bool>::Ok(true, {});
 
   return loadFromPath(filePath, directory);
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

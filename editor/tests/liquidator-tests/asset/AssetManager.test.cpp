@@ -43,7 +43,7 @@ public:
   }
 
 public:
-  liquidator::AssetManager manager;
+  liquid::editor::AssetManager manager;
 };
 
 class AssetTest : public AssetManagerTest,
@@ -377,12 +377,13 @@ TEST_P(AssetTest, ImportCreatesHashFileInCache) {
 }
 
 InitAssetTestSuite(AssetManagerTexture,
-                   liquidator::AssetManager::TextureExtensions,
+                   liquid::editor::AssetManager::TextureExtensions,
                    [](auto str) { return str + ".ktx2"; });
 
-InitAssetTestSuite(AssetManagerAudio, liquidator::AssetManager::AudioExtensions,
+InitAssetTestSuite(AssetManagerAudio,
+                   liquid::editor::AssetManager::AudioExtensions,
                    [](auto str) { return str; });
 
 InitAssetTestSuite(AssetManagerScript,
-                   liquidator::AssetManager::ScriptExtensions,
+                   liquid::editor::AssetManager::ScriptExtensions,
                    [](auto str) { return str; });

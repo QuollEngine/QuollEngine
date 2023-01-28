@@ -14,7 +14,7 @@
 
 #include "liquidator/editor-scene/EditorCamera.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Manager editor simulation
@@ -32,9 +32,8 @@ public:
    * @param assetRegistry Asset registry
    * @param editorCamera Editor camera
    */
-  EditorSimulator(liquid::EventSystem &eventSystem, liquid::Window &window,
-                  liquid::AssetRegistry &assetRegistry,
-                  EditorCamera &editorCamera);
+  EditorSimulator(EventSystem &eventSystem, Window &window,
+                  AssetRegistry &assetRegistry, EditorCamera &editorCamera);
 
   /**
    * @brief Main update function
@@ -45,14 +44,14 @@ public:
    * @param dt Time delta
    * @param scene Scene
    */
-  void update(float dt, liquid::Scene &scene);
+  void update(float dt, Scene &scene);
 
   /**
    * @brief Cleanup simulation database
    *
    * @param simulationDatabase Simulation database
    */
-  void cleanupSimulationDatabase(liquid::EntityDatabase &simulationDatabase);
+  void cleanupSimulationDatabase(EntityDatabase &simulationDatabase);
 
   /**
    * @brief Switch to simulation updater
@@ -69,7 +68,7 @@ public:
    *
    * @return Physics system
    */
-  inline liquid::PhysicsSystem &getPhysicsSystem() { return mPhysicsSystem; }
+  inline PhysicsSystem &getPhysicsSystem() { return mPhysicsSystem; }
 
 private:
   /**
@@ -78,7 +77,7 @@ private:
    * @param dt Time delta
    * @param scene Scene
    */
-  void updateEditor(float dt, liquid::Scene &scene);
+  void updateEditor(float dt, Scene &scene);
 
   /**
    * @brief Simulation updater
@@ -86,20 +85,20 @@ private:
    * @param dt Time delta
    * @param scene Scene
    */
-  void updateSimulation(float dt, liquid::Scene &scene);
+  void updateSimulation(float dt, Scene &scene);
 
 private:
-  std::function<void(float, liquid::Scene &)> mUpdater;
+  std::function<void(float, Scene &)> mUpdater;
 
   EditorCamera &mEditorCamera;
-  liquid::CameraAspectRatioUpdater mCameraAspectRatioUpdater;
-  liquid::EntityDeleter mEntityDeleter;
-  liquid::SkeletonUpdater mSkeletonUpdater;
-  liquid::SceneUpdater mSceneUpdater;
-  liquid::AnimationSystem mAnimationSystem;
-  liquid::ScriptingSystem mScriptingSystem;
-  liquid::PhysicsSystem mPhysicsSystem;
-  liquid::AudioSystem<liquid::DefaultAudioBackend> mAudioSystem;
+  CameraAspectRatioUpdater mCameraAspectRatioUpdater;
+  EntityDeleter mEntityDeleter;
+  SkeletonUpdater mSkeletonUpdater;
+  SceneUpdater mSceneUpdater;
+  AnimationSystem mAnimationSystem;
+  ScriptingSystem mScriptingSystem;
+  PhysicsSystem mPhysicsSystem;
+  AudioSystem<DefaultAudioBackend> mAudioSystem;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

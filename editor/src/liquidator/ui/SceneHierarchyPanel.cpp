@@ -8,7 +8,7 @@
 #include "FontAwesome.h"
 #include "Theme.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
@@ -28,9 +28,8 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
 
     auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
 
-    for (auto [entity, transform] :
-         entityDatabase.view<liquid::LocalTransform>()) {
-      if (entityDatabase.has<liquid::Parent>(entity)) {
+    for (auto [entity, transform] : entityDatabase.view<LocalTransform>()) {
+      if (entityDatabase.has<Parent>(entity)) {
         continue;
       }
 
@@ -39,57 +38,53 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
   }
 }
 
-void SceneHierarchyPanel::setSelectedEntity(liquid::Entity entity) {
+void SceneHierarchyPanel::setSelectedEntity(Entity entity) {
   mSelectedEntity = entity;
 }
 
-static liquid::String getNameAndIcon(const liquid::String &name,
-                                     const char *icon) {
-  return liquid::String(icon) + "  " + name;
+static String getNameAndIcon(const String &name, const char *icon) {
+  return String(icon) + "  " + name;
 }
 
-static liquid::String getNodeName(const liquid::String &name,
-                                  liquid::Entity entity,
-                                  liquid::EntityDatabase &entityDatabase) {
+static String getNodeName(const String &name, Entity entity,
+                          EntityDatabase &entityDatabase) {
 
-  if (entityDatabase.has<liquid::Camera>(entity)) {
+  if (entityDatabase.has<Camera>(entity)) {
     return getNameAndIcon(name, fa::Video);
   }
 
-  if (entityDatabase.has<liquid::DirectionalLight>(entity)) {
+  if (entityDatabase.has<DirectionalLight>(entity)) {
     return getNameAndIcon(name, fa::Lightbulb);
   }
 
-  if (entityDatabase.has<liquid::Text>(entity)) {
+  if (entityDatabase.has<Text>(entity)) {
     return getNameAndIcon(name, fa::Font);
   }
 
-  if (entityDatabase.has<liquid::Skeleton>(entity)) {
+  if (entityDatabase.has<Skeleton>(entity)) {
     return getNameAndIcon(name, fa::Bone);
   }
 
-  if (entityDatabase.has<liquid::AudioSource>(entity)) {
+  if (entityDatabase.has<AudioSource>(entity)) {
     return getNameAndIcon(name, fa::Music);
   }
 
-  if (entityDatabase.has<liquid::Mesh>(entity)) {
+  if (entityDatabase.has<Mesh>(entity)) {
     return getNameAndIcon(name, fa::Cubes);
   }
 
   return name;
 }
 
-void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
+void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                                        EditorManager &editorManager) {
   auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
-  liquid::String name = entityDatabase.has<liquid::Name>(entity)
-                            ? mEntityManager.getActiveEntityDatabase()
-                                  .get<liquid::Name>(entity)
-                                  .name
-                            : "Entity #" + std::to_string(entity);
+  String name =
+      entityDatabase.has<Name>(entity)
+          ? mEntityManager.getActiveEntityDatabase().get<Name>(entity).name
+          : "Entity #" + std::to_string(entity);
 
-  bool isLeaf =
-      !mEntityManager.getActiveEntityDatabase().has<liquid::Children>(entity);
+  bool isLeaf = !mEntityManager.getActiveEntityDatabase().has<Children>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -149,10 +144,9 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   }
 
   if (open) {
-    if (mEntityManager.getActiveEntityDatabase().has<liquid::Children>(
-            entity)) {
+    if (mEntityManager.getActiveEntityDatabase().has<Children>(entity)) {
       for (auto childEntity : mEntityManager.getActiveEntityDatabase()
-                                  .get<liquid::Children>(entity)
+                                  .get<Children>(entity)
                                   .children) {
         renderEntity(childEntity, 0, editorManager);
       }
@@ -162,4 +156,4 @@ void SceneHierarchyPanel::renderEntity(liquid::Entity entity, int flags,
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

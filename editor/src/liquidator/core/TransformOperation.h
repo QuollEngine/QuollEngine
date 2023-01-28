@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquidator {
+namespace liquid::editor {
 
 enum class TransformOperation { Move, Rotate, Scale };
 
-} // namespace liquidator
+} // namespace liquid::editor

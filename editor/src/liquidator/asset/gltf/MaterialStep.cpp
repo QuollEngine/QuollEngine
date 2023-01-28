@@ -2,7 +2,7 @@
 
 #include "MaterialStep.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Load materials into registry
@@ -18,9 +18,9 @@ void loadMaterials(GLTFImportData &importData) {
   for (size_t i = 0; i < model.materials.size(); ++i) {
     auto &gltfMaterial = model.materials.at(i);
 
-    liquid::AssetData<liquid::MaterialAsset> material;
+    AssetData<MaterialAsset> material;
     material.name = targetPath.string() + "/material" + std::to_string(i);
-    material.type = liquid::AssetType::Material;
+    material.type = AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
       material.data.baseColorTexture = textures.map.at(
@@ -77,4 +77,4 @@ void loadMaterials(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

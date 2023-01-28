@@ -2,7 +2,7 @@
 
 #include "liquidator/editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Status bar component
@@ -17,4 +17,4 @@ public:
   static void render(EditorManager &editorManager);
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

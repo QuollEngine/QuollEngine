@@ -4,12 +4,11 @@
 #include "liquid/imgui/ImguiUtils.h"
 #include "Widgets.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-static void renderTextureIfExists(widgets::Table &table,
-                                  const liquid::String &label,
-                                  liquid::TextureAssetHandle handle,
-                                  liquid::AssetRegistry &assetRegistry) {
+static void renderTextureIfExists(widgets::Table &table, const String &label,
+                                  TextureAssetHandle handle,
+                                  AssetRegistry &assetRegistry) {
   static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
   if (assetRegistry.getTextures().hasAsset(handle)) {
@@ -21,20 +20,20 @@ static void renderTextureIfExists(widgets::Table &table,
   }
 }
 
-void MaterialViewer::render(liquid::AssetRegistry &assetRegistry) {
-  bool open = mHandle != liquid::MaterialAssetHandle::Invalid;
+void MaterialViewer::render(AssetRegistry &assetRegistry) {
+  bool open = mHandle != MaterialAssetHandle::Invalid;
 
   if (!open)
     return;
 
   if (!assetRegistry.getMaterials().hasAsset(mHandle)) {
-    mHandle = liquid::MaterialAssetHandle::Invalid;
+    mHandle = MaterialAssetHandle::Invalid;
     return;
   }
 
   const auto &material = assetRegistry.getMaterials().getAsset(mHandle);
 
-  liquid::String title = "Material: " + material.name + "###MaterialViewer";
+  String title = "Material: " + material.name + "###MaterialViewer";
 
   if (auto _ = widgets::FixedWindow(title.c_str(), open)) {
     if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {
@@ -65,12 +64,10 @@ void MaterialViewer::render(liquid::AssetRegistry &assetRegistry) {
   }
 
   if (!open) {
-    mHandle = liquid::MaterialAssetHandle::Invalid;
+    mHandle = MaterialAssetHandle::Invalid;
   }
 }
 
-void MaterialViewer::open(liquid::MaterialAssetHandle handle) {
-  mHandle = handle;
-}
+void MaterialViewer::open(MaterialAssetHandle handle) { mHandle = handle; }
 
-} // namespace liquidator
+} // namespace liquid::editor

@@ -3,7 +3,7 @@
 #include "liquidator/asset/AssetManager.h"
 #include "liquidator/editor-scene/EditorManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Environment panel component
@@ -19,4 +19,4 @@ public:
   static void render(EditorManager &editorManager, AssetManager &assetManager);
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

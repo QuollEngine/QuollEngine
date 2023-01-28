@@ -5,7 +5,7 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void MenuBar::render(EditorManager &editorManager,
                      EntityManager &entityManager) {
@@ -19,11 +19,11 @@ void MenuBar::render(EditorManager &editorManager,
   if (ImGui::BeginMenu("Objects")) {
     if (ImGui::MenuItem("Create empty entity", nullptr)) {
       entityManager.createEmptyEntity(editorManager.getEditorCamera(),
-                                      liquid::EntityNull);
+                                      EntityNull);
     }
 
     ImGui::EndMenu();
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

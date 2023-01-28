@@ -2,7 +2,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 /**
  * @brief Style stack
@@ -80,4 +80,4 @@ private:
   uint32_t mPushedFonts = 0;
 };
 
-} // namespace liquidator
+} // namespace liquid::editor

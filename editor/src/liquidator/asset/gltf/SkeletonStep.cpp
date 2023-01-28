@@ -4,7 +4,7 @@
 #include "Buffer.h"
 #include "TransformUtils.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
 void loadSkeletons(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
@@ -96,10 +96,10 @@ void loadSkeletons(GLTFImportData &importData) {
 
     uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
 
-    liquid::AssetData<liquid::SkeletonAsset> asset;
+    AssetData<SkeletonAsset> asset;
     asset.name = targetPath.string() + "/" + targetPath.filename().string() +
                  "-skeleton" + std::to_string(si);
-    asset.type = liquid::AssetType::Skeleton;
+    asset.type = AssetType::Skeleton;
 
     for (auto &joint : skin.joints) {
       uint32_t nJoint = normalizedJointMap.at(joint);
@@ -124,4 +124,4 @@ void loadSkeletons(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquidator
+} // namespace liquid::editor

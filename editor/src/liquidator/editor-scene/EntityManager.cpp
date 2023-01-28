@@ -3,40 +3,38 @@
 
 #include "EntityManager.h"
 
-namespace liquidator {
+namespace liquid::editor {
 
-EntityManager::EntityManager(AssetManager &assetManager,
-                             liquid::Renderer &renderer,
+EntityManager::EntityManager(AssetManager &assetManager, Renderer &renderer,
                              const std::filesystem::path &scenePath)
     : mScenePath(scenePath), mRenderer(renderer), mAssetManager(assetManager),
       mSceneIO(mAssetManager.getAssetRegistry(), mScene) {}
 
-void EntityManager::save(liquid::Entity entity) {
+void EntityManager::save(Entity entity) {
   if (mInSimulation)
     return;
 
   mSceneIO.saveEntity(entity, mScenePath / "main.lqscene");
 }
 
-liquid::Entity
-EntityManager::createEmptyEntity(liquid::Entity parent,
-                                 const liquid::LocalTransform &transform,
-                                 const liquid::String &name) {
+Entity EntityManager::createEmptyEntity(Entity parent,
+                                        const LocalTransform &transform,
+                                        const String &name) {
 
   auto &entityDatabase = getActiveEntityDatabase();
 
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, transform);
-  entityDatabase.set<liquid::WorldTransform>(entity, {});
+  entityDatabase.set<WorldTransform>(entity, {});
 
   if (entityDatabase.exists(parent)) {
-    entityDatabase.set<liquid::Parent>(entity, {parent});
+    entityDatabase.set<Parent>(entity, {parent});
 
-    if (!entityDatabase.has<liquid::Children>(parent)) {
-      entityDatabase.set<liquid::Children>(parent, {});
+    if (!entityDatabase.has<Children>(parent)) {
+      entityDatabase.set<Children>(parent, {});
     }
 
-    entityDatabase.get<liquid::Children>(parent).children.push_back(entity);
+    entityDatabase.get<Children>(parent).children.push_back(entity);
   }
 
   setName(entity, name);
@@ -44,10 +42,8 @@ EntityManager::createEmptyEntity(liquid::Entity parent,
   return entity;
 }
 
-liquid::Entity EntityManager::createEmptyEntity(EditorCamera &camera,
-                                                liquid::Entity parent,
-                                                const liquid::String &name,
-                                                bool saveToFile) {
+Entity EntityManager::createEmptyEntity(EditorCamera &camera, Entity parent,
+                                        const String &name, bool saveToFile) {
   auto entity = createEmptyEntity(parent, getTransformFromCamera(camera), name);
 
   if (saveToFile) {
@@ -63,12 +59,12 @@ bool EntityManager::loadScene() {
   return true;
 }
 
-void EntityManager::setSkeletonForEntity(liquid::Entity entity,
-                                         liquid::SkeletonAssetHandle handle) {
+void EntityManager::setSkeletonForEntity(Entity entity,
+                                         SkeletonAssetHandle handle) {
   const auto &skeleton =
       mAssetManager.getAssetRegistry().getSkeletons().getAsset(handle).data;
 
-  liquid::Skeleton skeletonInstance{};
+  Skeleton skeletonInstance{};
   skeletonInstance.jointLocalPositions = skeleton.jointLocalPositions;
   skeletonInstance.jointLocalRotations = skeleton.jointLocalRotations;
   skeletonInstance.jointLocalScales = skeleton.jointLocalScales;
@@ -86,20 +82,20 @@ void EntityManager::setSkeletonForEntity(liquid::Entity entity,
   getActiveEntityDatabase().set(entity, skeletonInstance);
 }
 
-void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
+void EntityManager::toggleSkeletonDebugForEntity(Entity entity) {
   auto &entityDatabase = getActiveEntityDatabase();
-  if (!entityDatabase.has<liquid::Skeleton>(entity)) {
+  if (!entityDatabase.has<Skeleton>(entity)) {
     return;
   }
 
-  if (entityDatabase.has<liquid::SkeletonDebug>(entity)) {
-    entityDatabase.remove<liquid::SkeletonDebug>(entity);
+  if (entityDatabase.has<SkeletonDebug>(entity)) {
+    entityDatabase.remove<SkeletonDebug>(entity);
     return;
   }
 
-  auto &skeleton = entityDatabase.get<liquid::Skeleton>(entity);
+  auto &skeleton = entityDatabase.get<Skeleton>(entity);
 
-  liquid::SkeletonDebug skeletonDebug{};
+  SkeletonDebug skeletonDebug{};
   auto numBones = skeleton.numJoints * 2;
   skeletonDebug.bones.reserve(numBones);
 
@@ -113,76 +109,72 @@ void EntityManager::toggleSkeletonDebugForEntity(liquid::Entity entity) {
   entityDatabase.set(entity, skeletonDebug);
 }
 
-void EntityManager::toggleShadowsForLightEntity(liquid::Entity entity) {
+void EntityManager::toggleShadowsForLightEntity(Entity entity) {
   auto &entityDatabase = getActiveEntityDatabase();
-  if (entityDatabase.has<liquid::CascadedShadowMap>(entity)) {
-    entityDatabase.remove<liquid::CascadedShadowMap>(entity);
+  if (entityDatabase.has<CascadedShadowMap>(entity)) {
+    entityDatabase.remove<CascadedShadowMap>(entity);
   } else {
-    entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
+    entityDatabase.set<CascadedShadowMap>(entity, {});
   }
 }
 
-void EntityManager::setMesh(liquid::Entity entity,
-                            liquid::MeshAssetHandle handle) {
-  if (getActiveEntityDatabase().has<liquid::SkinnedMesh>(entity)) {
-    getActiveEntityDatabase().remove<liquid::SkinnedMesh>(entity);
+void EntityManager::setMesh(Entity entity, MeshAssetHandle handle) {
+  if (getActiveEntityDatabase().has<SkinnedMesh>(entity)) {
+    getActiveEntityDatabase().remove<SkinnedMesh>(entity);
   }
 
-  getActiveEntityDatabase().set<liquid::Mesh>(entity, {handle});
+  getActiveEntityDatabase().set<Mesh>(entity, {handle});
 }
 
-void EntityManager::setSkinnedMesh(liquid::Entity entity,
-                                   liquid::SkinnedMeshAssetHandle handle) {
-  if (getActiveEntityDatabase().has<liquid::Mesh>(entity)) {
-    getActiveEntityDatabase().remove<liquid::Mesh>(entity);
+void EntityManager::setSkinnedMesh(Entity entity,
+                                   SkinnedMeshAssetHandle handle) {
+  if (getActiveEntityDatabase().has<Mesh>(entity)) {
+    getActiveEntityDatabase().remove<Mesh>(entity);
   }
-  getActiveEntityDatabase().set<liquid::SkinnedMesh>(entity, {handle});
+  getActiveEntityDatabase().set<SkinnedMesh>(entity, {handle});
 }
 
-void EntityManager::setName(liquid::Entity entity, const liquid::String &name) {
+void EntityManager::setName(Entity entity, const String &name) {
   if (name.empty()) {
     return;
   }
 
-  getActiveEntityDatabase().set<liquid::Name>(entity, {name});
+  getActiveEntityDatabase().set<Name>(entity, {name});
 }
 
-void EntityManager::setCamera(liquid::Entity entity,
-                              const liquid::PerspectiveLens &lens,
+void EntityManager::setCamera(Entity entity, const PerspectiveLens &lens,
                               bool autoRatio) {
-  getActiveEntityDatabase().set<liquid::Camera>(entity, {});
-  getActiveEntityDatabase().set<liquid::PerspectiveLens>(entity, lens);
+  getActiveEntityDatabase().set<Camera>(entity, {});
+  getActiveEntityDatabase().set<PerspectiveLens>(entity, lens);
   if (autoRatio) {
-    getActiveEntityDatabase().set<liquid::AutoAspectRatio>(entity, {});
+    getActiveEntityDatabase().set<AutoAspectRatio>(entity, {});
   }
 }
 
-void EntityManager::setAudio(liquid::Entity entity,
-                             liquid::AudioAssetHandle source) {
-  getActiveEntityDatabase().set<liquid::AudioSource>(entity, {source});
+void EntityManager::setAudio(Entity entity, AudioAssetHandle source) {
+  getActiveEntityDatabase().set<AudioSource>(entity, {source});
 }
 
-void EntityManager::setText(liquid::Entity entity, liquid::Text text) {
+void EntityManager::setText(Entity entity, Text text) {
   getActiveEntityDatabase().set(entity, text);
 }
 
-void EntityManager::setScript(liquid::Entity entity,
-                              liquid::LuaScriptAssetHandle handle) {
-  liquid::Script script{};
+void EntityManager::setScript(Entity entity, LuaScriptAssetHandle handle) {
+  Script script{};
   script.handle = handle;
   getActiveEntityDatabase().set(entity, script);
 }
 
-void EntityManager::deleteEntity(liquid::Entity entity) {
+void EntityManager::deleteEntity(Entity entity) {
   if (!mInSimulation) {
     mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath / "main.lqscene");
   }
 
-  getActiveEntityDatabase().set<liquid::Delete>(entity, {});
+  getActiveEntityDatabase().set<Delete>(entity, {});
 }
 
 void EntityManager::updateLocalTransformUsingWorld(
-    liquid::Entity entity, const glm::mat4 &worldTransform) {
+    Entity entity, const glm::mat4 &worldTransform) {
   auto &entityDatabase = getActiveEntityDatabase();
 
   glm::vec3 worldPosition;
@@ -195,14 +187,14 @@ void EntityManager::updateLocalTransformUsingWorld(
   glm::decompose(worldTransform, worldScale, worldRotation, worldPosition,
                  noopSkew, noopPerspective);
 
-  auto &transform = entityDatabase.get<liquid::LocalTransform>(entity);
+  auto &transform = entityDatabase.get<LocalTransform>(entity);
 
-  if (entityDatabase.has<liquid::Parent>(entity)) {
-    const auto parent = entityDatabase.get<liquid::Parent>(entity).parent;
+  if (entityDatabase.has<Parent>(entity)) {
+    const auto parent = entityDatabase.get<Parent>(entity).parent;
     if (entityDatabase.exists(parent) &&
-        entityDatabase.has<liquid::WorldTransform>(parent)) {
+        entityDatabase.has<WorldTransform>(parent)) {
       const auto &parentWorld =
-          entityDatabase.get<liquid::WorldTransform>(parent).worldTransform;
+          entityDatabase.get<WorldTransform>(parent).worldTransform;
 
       glm::vec3 parentPosition;
       glm::quat parentRotation;
@@ -227,39 +219,37 @@ void EntityManager::updateLocalTransformUsingWorld(
   save(entity);
 }
 
-liquid::Entity EntityManager::spawnEntity(EditorCamera &camera,
-                                          liquid::Entity root, uint32_t handle,
-                                          liquid::AssetType type,
-                                          bool saveToFile) {
-  if (type != liquid::AssetType::Prefab) {
-    return liquid::EntityNull;
+Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
+                                  uint32_t handle, AssetType type,
+                                  bool saveToFile) {
+  if (type != AssetType::Prefab) {
+    return EntityNull;
   }
 
   auto &registry = mAssetManager.getAssetRegistry();
 
-  auto &asset = registry.getPrefabs().getAsset(
-      static_cast<liquid::PrefabAssetHandle>(handle));
+  auto &asset =
+      registry.getPrefabs().getAsset(static_cast<PrefabAssetHandle>(handle));
   auto parent = createEmptyEntity(camera, root, asset.name, saveToFile);
 
   uint32_t childIndex = 1;
-  std::unordered_map<uint32_t, liquid::Entity> entityMap;
+  std::unordered_map<uint32_t, Entity> entityMap;
 
-  auto getOrCreateEntity =
-      [&entityMap, this, parent, &camera,
-       &childIndex](uint32_t localId,
-                    const liquid::LocalTransform &transform = {}) mutable {
-        if (entityMap.find(localId) == entityMap.end()) {
-          auto entity = createEmptyEntity(
-              parent, transform, "Untitled " + std::to_string(childIndex));
-          entityMap.insert_or_assign(localId, entity);
-          childIndex++;
-        }
+  auto getOrCreateEntity = [&entityMap, this, parent, &camera, &childIndex](
+                               uint32_t localId,
+                               const LocalTransform &transform = {}) mutable {
+    if (entityMap.find(localId) == entityMap.end()) {
+      auto entity = createEmptyEntity(parent, transform,
+                                      "Untitled " + std::to_string(childIndex));
+      entityMap.insert_or_assign(localId, entity);
+      childIndex++;
+    }
 
-        return entityMap.at(localId);
-      };
+    return entityMap.at(localId);
+  };
 
   for (auto &item : asset.data.transforms) {
-    liquid::LocalTransform transform{};
+    LocalTransform transform{};
     transform.localPosition = item.value.position;
     transform.localRotation = item.value.rotation;
     transform.localScale = item.value.scale;
@@ -316,32 +306,32 @@ void EntityManager::useSimulationDatabase() {
 
 void EntityManager::useEditingDatabase() { mInSimulation = false; }
 
-liquid::Entity EntityManager::getStartingCamera() {
+Entity EntityManager::getStartingCamera() {
   return getActiveScene().activeCamera;
 }
 
-liquid::Entity EntityManager::getActiveSimulationCamera() {
+Entity EntityManager::getActiveSimulationCamera() {
   return mSimulationScene.activeCamera;
 }
 
-void EntityManager::setStartingCamera(liquid::Entity camera) {
+void EntityManager::setStartingCamera(Entity camera) {
   getActiveScene().activeCamera = camera;
   mSceneIO.saveStartingCamera(camera, mScenePath / "main.lqscene");
 }
 
-liquid::LocalTransform
+LocalTransform
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   auto &scene = mInSimulation ? mSimulationScene : mScene;
   const auto &viewMatrix =
-      scene.entityDatabase.get<liquid::Camera>(camera.getCamera()).viewMatrix;
+      scene.entityDatabase.get<Camera>(camera.getCamera()).viewMatrix;
 
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);
   const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
 
-  liquid::LocalTransform transform;
+  LocalTransform transform;
   transform.localPosition = orientation[3];
   return transform;
 }
 
-} // namespace liquidator
+} // namespace liquid::editor
