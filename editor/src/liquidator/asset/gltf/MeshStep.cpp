@@ -366,14 +366,6 @@ void loadMeshes(GLTFImportData &importData) {
   const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
-  std::map<size_t, size_t> skeletonMeshMap;
-  for (auto &node : model.nodes) {
-    if (node.skin >= 0 && node.mesh >= 0) {
-      skeletonMeshMap.insert_or_assign(static_cast<size_t>(node.mesh),
-                                       static_cast<size_t>(node.skin));
-    }
-  }
-
   for (auto i = 0; i < model.meshes.size(); ++i) {
     const auto &gltfMesh = model.meshes.at(i);
 

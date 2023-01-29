@@ -395,6 +395,8 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
+    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
       commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
@@ -410,11 +412,9 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       uint32_t vertexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
 
-      commandList.drawIndexed(indexCount, 0, 0,
-                              static_cast<uint32_t>(meshData.transforms.size()),
-                              instanceStart);
-      instanceStart += static_cast<uint32_t>(meshData.transforms.size());
+      commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
     }
+    instanceStart += numInstances;
   }
 }
 
@@ -427,6 +427,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
     for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
       commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
       commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
@@ -442,12 +443,9 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
-      uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
-
       commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
-
-      instanceStart += numInstances;
     }
+    instanceStart += numInstances;
   }
 }
 
