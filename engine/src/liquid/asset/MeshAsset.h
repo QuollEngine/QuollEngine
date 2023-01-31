@@ -43,19 +43,19 @@ struct MeshAsset {
   std::vector<BaseGeometryAsset<Vertex>> geometries;
 
   /**
-   * List of vertex buffers
-   */
-  std::vector<rhi::Buffer> vertexBuffers;
-
-  /**
-   * List of index buffers
-   */
-  std::vector<rhi::Buffer> indexBuffers;
-
-  /**
    * List of materials
    */
   std::vector<SharedPtr<Material>> materials;
+
+  /**
+   * @brief Vertex buffer for all geometries
+   */
+  rhi::Buffer vertexBuffer;
+
+  /**
+   * @brief Index buffer for all geometries
+   */
+  rhi::Buffer indexBuffer;
 };
 
 /**
@@ -68,14 +68,14 @@ struct SkinnedMeshAsset {
   std::vector<BaseGeometryAsset<SkinnedVertex>> geometries;
 
   /**
-   * List of vertex buffers
+   * @brief Vertex buffer for all geometries
    */
-  std::vector<rhi::Buffer> vertexBuffers;
+  rhi::Buffer vertexBuffer;
 
   /**
-   * List of index buffers
+   * @brief Index buffer for all geometries
    */
-  std::vector<rhi::Buffer> indexBuffers;
+  rhi::Buffer indexBuffer;
 
   /**
    * List of materials

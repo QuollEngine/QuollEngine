@@ -109,34 +109,61 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize meshes
   for (auto &[_, mesh] : mMeshes.getAssets()) {
-    if (mesh.data.vertexBuffers.empty()) {
-      mesh.data.vertexBuffers.resize(mesh.data.geometries.size());
-      mesh.data.indexBuffers.resize(mesh.data.geometries.size());
-      mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
+    if (rhi::isHandleValid(mesh.data.vertexBuffer.getHandle())) {
+      continue;
     }
 
+    size_t vbSize = 0;
+    size_t ibSize = 0;
+    for (auto &g : mesh.data.geometries) {
+      vbSize += g.vertices.size() * sizeof(Vertex);
+      ibSize += g.indices.size() * sizeof(uint32_t);
+    }
+
+    {
+      rhi::BufferDescription description;
+      description.type = rhi::BufferType::Vertex;
+      description.size = vbSize;
+      description.data = nullptr;
+      mesh.data.vertexBuffer = renderStorage.createBuffer(description);
+
+      auto *data = static_cast<Vertex *>(mesh.data.vertexBuffer.map());
+
+      size_t offset = 0;
+      for (auto &g : mesh.data.geometries) {
+        memcpy(data + offset, g.vertices.data(),
+               g.vertices.size() * sizeof(Vertex));
+        offset += g.vertices.size();
+      }
+
+      mesh.data.vertexBuffer.unmap();
+    }
+
+    {
+      rhi::BufferDescription description;
+      description.type = rhi::BufferType::Index;
+      description.size = ibSize;
+      description.data = nullptr;
+      mesh.data.indexBuffer = renderStorage.createBuffer(description);
+
+      auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());
+      size_t offset = 0;
+      for (auto &g : mesh.data.geometries) {
+        memcpy(data + offset, g.indices.data(),
+               g.indices.size() * sizeof(uint32_t));
+        offset += g.indices.size();
+      }
+
+      mesh.data.indexBuffer.unmap();
+    }
+
+    mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
       auto &geometry = mesh.data.geometries.at(i);
-
-      {
-        rhi::BufferDescription description;
-        description.type = rhi::BufferType::Vertex;
-        description.size = geometry.vertices.size() * sizeof(Vertex);
-        description.data = geometry.vertices.data();
-        mesh.data.vertexBuffers.at(i) = renderStorage.createBuffer(description);
-      }
-
-      if (!geometry.indices.empty()) {
-        rhi::BufferDescription description;
-        description.type = rhi::BufferType::Index;
-        description.size = geometry.indices.size() * sizeof(uint32_t);
-        description.data = geometry.indices.data();
-        mesh.data.indexBuffers.at(i) = renderStorage.createBuffer(description);
-      }
-
       auto material = geometry.material != MaterialAssetHandle::Invalid
                           ? geometry.material
                           : mDefaultObjects.defaultMaterial;
+
       mesh.data.materials.at(i) =
           mMaterials.getAsset(material).data.deviceHandle;
     }
@@ -144,34 +171,61 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize skinned meshes
   for (auto &[_, mesh] : mSkinnedMeshes.getAssets()) {
-    if (mesh.data.vertexBuffers.empty()) {
-      mesh.data.vertexBuffers.resize(mesh.data.geometries.size());
-      mesh.data.indexBuffers.resize(mesh.data.geometries.size());
-      mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
+    if (rhi::isHandleValid(mesh.data.vertexBuffer.getHandle())) {
+      continue;
     }
 
+    size_t vbSize = 0;
+    size_t ibSize = 0;
+    for (auto &g : mesh.data.geometries) {
+      vbSize += g.vertices.size() * sizeof(SkinnedVertex);
+      ibSize += g.indices.size() * sizeof(uint32_t);
+    }
+
+    {
+      rhi::BufferDescription description;
+      description.type = rhi::BufferType::Vertex;
+      description.size = vbSize;
+      description.data = nullptr;
+      mesh.data.vertexBuffer = renderStorage.createBuffer(description);
+
+      auto *data = static_cast<SkinnedVertex *>(mesh.data.vertexBuffer.map());
+
+      size_t offset = 0;
+      for (auto &g : mesh.data.geometries) {
+        memcpy(data + offset, g.vertices.data(),
+               g.vertices.size() * sizeof(SkinnedVertex));
+        offset += g.vertices.size();
+      }
+
+      mesh.data.vertexBuffer.unmap();
+    }
+
+    {
+      rhi::BufferDescription description;
+      description.type = rhi::BufferType::Index;
+      description.size = ibSize;
+      description.data = nullptr;
+      mesh.data.indexBuffer = renderStorage.createBuffer(description);
+
+      auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());
+      size_t offset = 0;
+      for (auto &g : mesh.data.geometries) {
+        memcpy(data + offset, g.indices.data(),
+               g.indices.size() * sizeof(uint32_t));
+        offset += g.indices.size();
+      }
+
+      mesh.data.indexBuffer.unmap();
+    }
+
+    mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
       auto &geometry = mesh.data.geometries.at(i);
-
-      {
-        rhi::BufferDescription description;
-        description.type = rhi::BufferType::Vertex;
-        description.size = geometry.vertices.size() * sizeof(SkinnedVertex);
-        description.data = geometry.vertices.data();
-        mesh.data.vertexBuffers.at(i) = renderStorage.createBuffer(description);
-      }
-
-      if (!geometry.indices.empty()) {
-        rhi::BufferDescription description;
-        description.type = rhi::BufferType::Index;
-        description.size = geometry.indices.size() * sizeof(uint32_t);
-        description.data = geometry.indices.data();
-        mesh.data.indexBuffers.at(i) = renderStorage.createBuffer(description);
-      }
-
       auto material = geometry.material != MaterialAssetHandle::Invalid
                           ? geometry.material
                           : mDefaultObjects.defaultMaterial;
+
       mesh.data.materials.at(i) =
           mMaterials.getAsset(material).data.deviceHandle;
     }

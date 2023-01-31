@@ -97,22 +97,25 @@ MousePickingGraph::MousePickingGraph(
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
         const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
-        for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-          commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      rhi::IndexType::Uint32);
 
-          uint32_t indexCount =
-              static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-          uint32_t vertexCount =
-              static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+        uint32_t numInstances =
+            static_cast<uint32_t>(meshData.transforms.size());
+        commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
+        commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
+                                    rhi::IndexType::Uint32);
 
-          commandList.drawIndexed(
-              indexCount, 0, 0,
-              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
+        int32_t vertexOffset = 0;
+        uint32_t indexOffset = 0;
+        for (auto &geometry : mesh.geometries) {
+          uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
+          int32_t vertexCount = static_cast<int32_t>(geometry.vertices.size());
 
-          instanceStart += static_cast<uint32_t>(meshData.transforms.size());
+          commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
+                                  numInstances, instanceStart);
+          vertexOffset += vertexCount;
+          indexOffset += indexCount;
         }
+        instanceStart += numInstances;
       }
     }
 
@@ -137,22 +140,25 @@ MousePickingGraph::MousePickingGraph(
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
         const auto &mesh =
             mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
-        for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-          commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-          commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                      rhi::IndexType::Uint32);
 
-          uint32_t indexCount =
-              static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-          uint32_t vertexCount =
-              static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+        uint32_t numInstances =
+            static_cast<uint32_t>(meshData.transforms.size());
+        commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
+        commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
+                                    rhi::IndexType::Uint32);
 
-          commandList.drawIndexed(
-              indexCount, 0, 0,
-              static_cast<uint32_t>(meshData.transforms.size()), instanceStart);
+        int32_t vertexOffset = 0;
+        uint32_t indexOffset = 0;
+        for (auto &geometry : mesh.geometries) {
+          uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
+          int32_t vertexCount = static_cast<int32_t>(geometry.vertices.size());
 
-          instanceStart += static_cast<uint32_t>(meshData.transforms.size());
+          commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
+                                  numInstances, instanceStart);
+          vertexOffset += vertexCount;
+          indexOffset += indexCount;
         }
+        instanceStart += numInstances;
       }
     }
   });
