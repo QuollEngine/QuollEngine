@@ -1,5 +1,5 @@
 function setupTestingOptions()
-    filter { "toolset:clang" }
+    filter { "configurations:Test", "toolset:clang" }
         buildoptions {
             "-fprofile-instr-generate",
             "-fcoverage-mapping"
@@ -10,7 +10,7 @@ function setupTestingOptions()
             "-fcoverage-mapping"
         }
 
-    filter { "toolset:gcc" }
+    filter { "configurations:Test", "toolset:gcc" }
         buildoptions {
             "-fprofile-arcs",
             "-ftest-coverage"

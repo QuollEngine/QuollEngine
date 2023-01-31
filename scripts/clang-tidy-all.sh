@@ -1,7 +1,5 @@
 #!/bin/sh
 
-
-
 if [ -z $1 ]; then
     CMD=clang-tidy
 else

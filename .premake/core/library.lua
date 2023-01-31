@@ -6,7 +6,7 @@ function setupLibraryDirectories()
         "KHRONOS_STATIC"
     }
 
-    filter { "configurations:Debug" }
+    filter { "configurations:Debug or configurations:Test" }
         sysincludedirs {
             "../vendor/Debug/include",
             "../vendor/Debug/include/freetype2",

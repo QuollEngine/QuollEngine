@@ -45,7 +45,7 @@ project "LiquidEngineTest"
     kind "ConsoleApp"
 
     configurations {
-        "Debug"
+        "Debug", "Test"
     }
 
     includedirs {
@@ -64,7 +64,6 @@ project "LiquidEngineTest"
         "src/liquid/rhi/vulkan/VmaImpl.cpp",
     }
 
-    setupTestingOptions{}
     links { "LiquidEngine", "LiquidRHICore" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}

@@ -29,7 +29,7 @@ function linkDependenciesWithoutVulkan()
         "PhysXFoundation_static"
     }
 
-    filter { "system:windows", "configurations:Debug" }
+    filter { "system:windows", "configurations:Debug or configurations:Test" }
         links { "yaml-cppd", "freetyped", "dwmapi" }
 
     filter { "system:windows", "configurations:Release or configurations:Profile" }
@@ -66,7 +66,7 @@ end
 
 -- Link Google Test
 function linkGoogleTest()
-    filter { "system:windows", "configurations:Debug" }
+    filter { "system:windows", "configurations:Debug or configurations:Test" }
         links { "gtestd", "gmockd" }
 
     filter {"system:windows", "configurations:Release"}
