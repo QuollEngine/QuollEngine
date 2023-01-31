@@ -265,8 +265,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
                              .data;
 
-      commandList.bindVertexBuffer(cube.vertexBuffers.at(0).getHandle());
-      commandList.bindIndexBuffer(cube.indexBuffers.at(0).getHandle(),
+      commandList.bindVertexBuffer(cube.vertexBuffer.getHandle());
+      commandList.bindIndexBuffer(cube.indexBuffer.getHandle(),
                                   rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
@@ -396,11 +396,14 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+    commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
+    commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
+                                rhi::IndexType::Uint32);
 
-    for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-      commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                  rhi::IndexType::Uint32);
+    int32_t vertexOffset = 0;
+    uint32_t indexOffset = 0;
+    for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+      auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
         commandList.bindDescriptor(pipeline, 2,
@@ -409,10 +412,13 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
       uint32_t indexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-      uint32_t vertexCount =
-          static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+      int32_t vertexCount =
+          static_cast<int32_t>(mesh.geometries.at(g).vertices.size());
 
-      commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
+      commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
+                              numInstances, instanceStart);
+      vertexOffset += vertexCount;
+      indexOffset += indexCount;
     }
     instanceStart += numInstances;
   }
@@ -428,22 +434,30 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
-    for (size_t g = 0; g < mesh.vertexBuffers.size(); ++g) {
-      commandList.bindVertexBuffer(mesh.vertexBuffers.at(g).getHandle());
-      commandList.bindIndexBuffer(mesh.indexBuffers.at(g).getHandle(),
-                                  rhi::IndexType::Uint32);
 
-      uint32_t indexCount =
-          static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-      uint32_t vertexCount =
-          static_cast<uint32_t>(mesh.geometries.at(g).vertices.size());
+    commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
+    commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
+                                rhi::IndexType::Uint32);
+
+    int32_t vertexOffset = 0;
+    uint32_t indexOffset = 0;
+    for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+      auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
         commandList.bindDescriptor(pipeline, 2,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
-      commandList.drawIndexed(indexCount, 0, 0, numInstances, instanceStart);
+      uint32_t indexCount =
+          static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
+      int32_t vertexCount =
+          static_cast<int32_t>(mesh.geometries.at(g).vertices.size());
+
+      commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
+                              numInstances, instanceStart);
+      vertexOffset += vertexCount;
+      indexOffset += indexCount;
     }
     instanceStart += numInstances;
   }
