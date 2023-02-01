@@ -308,7 +308,8 @@ static liquid::Path saveSceneGLTF(GLTFTestScene &scene) {
 
 class GLTFImporterTestBase : public ::testing::Test {
 public:
-  GLTFImporterTestBase() : assetCache(CachePath, false), importer(assetCache) {}
+  GLTFImporterTestBase()
+      : assetCache(CachePath, false), importer(assetCache, false) {}
 
   void SetUp() override {
     fs::create_directory(CachePath);

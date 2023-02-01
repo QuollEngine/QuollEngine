@@ -77,47 +77,52 @@ struct GLTFImportData {
   Path targetPath;
 
   /**
-   * @brief GLTF model
+   * GLTF model
    */
   const tinygltf::Model &model;
 
   /**
-   * @brief Warnings
+   * Optimize data
+   */
+  bool optimize = false;
+
+  /**
+   * Warnings
    */
   std::vector<String> warnings;
 
   /**
-   * @brief Texture map
+   * Texture map
    */
   GLTFToAsset<TextureAssetHandle> textures;
 
   /**
-   * @brief Material map
+   * Material map
    */
   GLTFToAsset<MaterialAssetHandle> materials;
 
   /**
-   * @brief Skeleton data
+   * Skeleton data
    */
   SkeletonData skeletons;
 
   /**
-   * @brief Animation data
+   * Animation data
    */
   AnimationData animations;
 
   /**
-   * @brief Mesh map
+   * Mesh map
    */
   GLTFToAsset<MeshAssetHandle> meshes;
 
   /**
-   * @brief Skinned mesh map
+   * Skinned mesh map
    */
   GLTFToAsset<SkinnedMeshAssetHandle> skinnedMeshes;
 
   /**
-   * @brief Output path
+   * Output path
    */
   Result<Path> outputPath = Result<Path>::Error("Empty");
 };

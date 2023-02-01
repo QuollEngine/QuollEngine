@@ -4,8 +4,17 @@
 #include "Buffer.h"
 #include "mikktspace/MikktspaceAdapter.h"
 
+#include <meshoptimizer.h>
+
 namespace liquid::editor {
 
+/**
+ * @brief Get vertex position in vec3
+ *
+ * @tparam TVertex Vertex type
+ * @param v Vertex
+ * @return GLM vec3 position
+ */
 template <class TVertex> inline glm::vec3 getVertexPosition(TVertex &v) {
   return glm::vec3(v.x, v.y, v.z);
 }
@@ -70,6 +79,28 @@ void generateTangents(std::vector<TVertex> &vertices,
   MikktspaceAdapter<TVertex> adapter;
 
   adapter.generate(vertices, indices);
+}
+
+/**
+ * @brief Optimize meshes using meshoptimizer
+ *
+ * @tparam TVertex Vertex type
+ * @param vertices Vertices
+ * @param indices Indices
+ */
+template <class TVertex>
+void optimizeMeshes(std::vector<TVertex> &vertices,
+                    std::vector<uint32_t> &indices) {
+  static constexpr float OverdrawThreshold = 1.05f;
+
+  meshopt_optimizeVertexCache(indices.data(), indices.data(), indices.size(),
+                              vertices.size());
+  meshopt_optimizeOverdraw(indices.data(), indices.data(), indices.size(),
+                           &vertices.at(0).x, vertices.size(), sizeof(TVertex),
+                           OverdrawThreshold);
+  meshopt_optimizeVertexFetch(vertices.data(), indices.data(), indices.size(),
+                              vertices.data(), vertices.size(),
+                              sizeof(TVertex));
 }
 
 /**
@@ -415,6 +446,10 @@ void loadMeshes(GLTFImportData &importData) {
           continue;
         }
 
+        if (importData.optimize) {
+          optimizeMeshes(vertices, indices);
+        }
+
         importData.warnings.insert(importData.warnings.end(),
                                    skinnedResult.getWarnings().begin(),
                                    skinnedResult.getWarnings().end());
@@ -437,6 +472,10 @@ void loadMeshes(GLTFImportData &importData) {
 
         auto &vertices = result.getData().first;
         auto &indices = result.getData().second;
+
+        if (importData.optimize) {
+          optimizeMeshes(vertices, indices);
+        }
 
         if (vertices.size() > 0) {
           mesh.data.geometries.push_back({vertices, indices, material});

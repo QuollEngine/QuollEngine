@@ -60,7 +60,7 @@ Result<bool> AssetManager::importAsset(const Path &source,
       getUniquePath(targetAssetDirectory / source.filename());
 
   if (targetAssetPath.extension() == ".gltf") {
-    GLTFImporter importer(mAssetCache);
+    GLTFImporter importer(mAssetCache, true);
     auto res = importer.saveBinary(source, targetAssetPath);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
@@ -342,7 +342,7 @@ Result<Path> AssetManager::loadOriginalFont(const Path &originalAssetPath) {
 Result<Path> AssetManager::loadOriginalPrefab(const Path &originalAssetPath) {
   auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
 
-  GLTFImporter importer(mAssetCache);
+  GLTFImporter importer(mAssetCache, true);
   return importer.loadFromPath(originalAssetPath, engineAssetPath);
 }
 
