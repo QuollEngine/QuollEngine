@@ -12,7 +12,7 @@
 namespace liquid::editor {
 
 const std::vector<String> AssetManager::TextureExtensions{"png", "jpg", "jpeg",
-                                                          "bmp", "tga"};
+                                                          "bmp", "tga", "ktx2"};
 const std::vector<String> AssetManager::ScriptExtensions{"lua"};
 const std::vector<String> AssetManager::AudioExtensions{"wav", "mp3"};
 const std::vector<String> AssetManager::FontExtensions{"ttf", "otf"};
@@ -247,6 +247,20 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
+
+  if (originalAssetPath.extension() == ".ktx2") {
+    auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
+
+    if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
+                                   co::overwrite_existing)) {
+      auto res = mAssetCache.loadAsset(engineAssetPath);
+      if (res.hasData()) {
+        return Result<Path>::Ok(engineAssetPath);
+      }
+
+      std::filesystem::remove(engineAssetPath);
+    }
+  }
 
   auto *data = stbi_load(originalAssetPath.string().c_str(), &width, &height,
                          &channels, STBI_rgb_alpha);
