@@ -139,14 +139,21 @@ Result<TextureAssetHandle>
 AssetCache::loadTextureFromFile(const Path &filePath) {
   static constexpr uint32_t CubemapSides = 6;
 
+  FILE *stream = fopen(filePath.string().c_str(), "rb");
+  if (!stream) {
+    return Result<TextureAssetHandle>::Error("Cannot open file: " +
+                                             filePath.string());
+  }
+
   ktxTexture *ktxTextureData = nullptr;
-  KTX_error_code result = ktxTexture_CreateFromNamedFile(
-      filePath.string().c_str(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
-      &ktxTextureData);
+  KTX_error_code result = ktxTexture_CreateFromStdioStream(
+      stream, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktxTextureData);
+
+  fclose(stream);
 
   if (result != KTX_SUCCESS) {
     return Result<TextureAssetHandle>::Error(
-        KtxError("Cannot create KTX texture", result).what());
+        KtxError("Cannot load KTX texture", result).what());
   }
 
   if (ktxTextureData->numDimensions != 2) {

@@ -378,7 +378,9 @@ TEST_P(AssetTest, ImportCreatesHashFileInCache) {
 
 InitAssetTestSuite(AssetManagerTexture,
                    liquid::editor::AssetManager::TextureExtensions,
-                   [](auto str) { return str + ".ktx2"; });
+                   [](auto str) {
+                     return str == "ktx2" ? str : (str + ".ktx2");
+                   });
 
 InitAssetTestSuite(AssetManagerAudio,
                    liquid::editor::AssetManager::AudioExtensions,
