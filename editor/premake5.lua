@@ -60,7 +60,7 @@ project "LiquidEditorTest"
         "src/main.cpp"
     }
 
-    links { "LiquidEngine", "LiquidRHICore", "LiquidRHIVulkan", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace" }
+    links { "LiquidEngine", "LiquidRHICore", "LiquidRHIVulkan", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
 

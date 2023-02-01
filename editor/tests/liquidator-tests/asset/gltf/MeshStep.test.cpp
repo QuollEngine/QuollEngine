@@ -388,8 +388,9 @@ TEST_F(MeshTangentAttributeTest,
 class MeshIndexAttributeTest : public MeshAttributeTestBase {
 public:
   AttributeTestFns getInvalidTest() {
-    AttributeTestFns fns{};
     static constexpr uint32_t NumVertices = 24u;
+
+    AttributeTestFns fns{};
     fns.testIndex = [](auto n1, auto n2) { EXPECT_LT(n1, NumVertices); };
     return fns;
   }

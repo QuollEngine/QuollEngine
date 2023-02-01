@@ -16,8 +16,9 @@ public:
    * @brief Create GLTF importer
    *
    * @param assetCache Asset cache
+   * @param optimize Enable optimizations
    */
-  GLTFImporter(AssetCache &assetCache);
+  GLTFImporter(AssetCache &assetCache, bool optimize);
 
   /**
    * @brief Load GLTF from file
@@ -40,6 +41,7 @@ public:
 
 private:
   AssetCache &mAssetCache;
+  bool mOptimize = false;
 };
 
 } // namespace liquid::editor
