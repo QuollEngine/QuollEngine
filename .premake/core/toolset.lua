@@ -35,7 +35,7 @@ function setupToolsetOptions()
             ["ENABLE_STRICT_OBJC_MSGSEND"] = "YES",
         }
 
-        filter { "configurations:Debug" }
+        filter { "configurations:Debug or configurations:Test" }
             xcodebuildsettings {
                 ["CLANG_ENABLE_OBJC_WEAK"] = "YES",
                 ["CODE_SIGN_IDENTITY"] = "-"

@@ -38,7 +38,7 @@ project "LiquidEditorTest"
     kind "ConsoleApp"
 
     configurations {
-        "Debug"
+        "Debug", "Test"
     }
 
     includedirs {
@@ -60,7 +60,6 @@ project "LiquidEditorTest"
         "src/main.cpp"
     }
 
-    setupTestingOptions{}
     links { "LiquidEngine", "LiquidRHICore", "LiquidRHIVulkan", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace" }
     linkGoogleTest{}
     linkDependenciesWithoutVulkan{}
@@ -68,7 +67,6 @@ project "LiquidEditorTest"
     copyEngineAssets()
 
     postbuildcommands {
-        "{MKDIR} %{cfg.buildtarget.directory}/fixtures",
         "{COPYDIR} ../../editor/tests/fixtures %{cfg.buildtarget.directory}/fixtures"
     }
 

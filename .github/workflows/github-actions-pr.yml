@@ -94,23 +94,27 @@ jobs:
 
       - name: Build
         run: |
-          make --directory workspace -j$(nproc)
+          make --directory workspace -j$(nproc) config=test
 
-      - name: Test
+      - name: Test engine
         run: |
-          cd workspace/engine-test/bin/Debug
+          cd workspace/engine-test/bin/Test
           ./LiquidEngineTest
+
+      - name: Test editor
+        run: |
+          cd workspace/editor-test/bin/Test
+          ./LiquidEditorTest
 
       - name: Coverage
         run: |
-          lcov -c --directory workspace/engine-test/obj -o coverage-report.info
-          lcov -r coverage-report.info "*vendor*" "/usr*" "*engine/tests*" -o coverage-report.info
+          ./scripts/generate-coverage-report.sh
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage-report.info
+          files: ./coverage/report.info
           flags: engine-unit
           verbose: true
           fail_ci_if_error: true

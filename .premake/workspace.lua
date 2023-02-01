@@ -6,12 +6,13 @@ workspace "LiquidEngine"
     architecture "x86_64"
 
     -- Set editor as starting project
-    startproject "Liquidator"
+    startproject "LiquidEditor"
     
     setupLibraryDirectories{}
     setupPlatformDefines{}
     linkPlatformLibraries{}
     setupToolsetOptions{}
+    setupTestingOptions{}
     
     includedirs {
         "../engine/src",
@@ -20,12 +21,12 @@ workspace "LiquidEngine"
         "../engine/platform-tools/include"
     }
     
-    configurations { "Debug", "Release", "Profile" }
+    configurations { "Debug", "Release", "Profile", "Test" }
 
     filter { "toolset:msc-*" }
         flags { "FatalCompileWarnings" }
 
-    filter {"configurations:Debug"}
+    filter {"configurations:Debug or configurations:Test"}
         defines { "LIQUID_DEBUG" }
         symbols "On"
 
@@ -35,3 +36,6 @@ workspace "LiquidEngine"
 
     filter {"configurations:Profile"}
         defines { "LIQUID_PROFILER" }
+
+    defines { "configurations:Test" }
+        defines { "LIQUID_TEST" }
