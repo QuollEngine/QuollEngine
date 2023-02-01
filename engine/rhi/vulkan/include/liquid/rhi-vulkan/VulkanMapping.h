@@ -9,7 +9,7 @@
 #include "liquid/rhi/IndexType.h"
 #include "liquid/rhi/Format.h"
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 
 namespace liquid::rhi {
 

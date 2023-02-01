@@ -6,7 +6,7 @@
 
 #include "liquid/rhi/PipelineDescription.h"
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 
 namespace liquid::rhi {
 

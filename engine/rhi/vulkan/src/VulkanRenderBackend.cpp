@@ -22,6 +22,7 @@ static const String LIQUID_ENGINE_NAME = "Liquid";
 VulkanRenderBackend::VulkanRenderBackend(Window &window, bool enableValidations)
     : mWindow(window) {
   createInstance("RHI", enableValidations);
+
   mSurface = createSurfaceFromWindow(mInstance, window);
   LOG_DEBUG_VK("Surface created", mSurface);
 
@@ -62,6 +63,9 @@ void VulkanRenderBackend::finishFramebufferResize() {
 
 void VulkanRenderBackend::createInstance(StringView applicationName,
                                          bool enableValidations) {
+  VkResult result = volkInitialize();
+  LIQUID_ASSERT(result == VK_SUCCESS, "Cannot initialize Vulkan loader");
+
   std::vector<const char *> extensions;
   extensions.resize(vulkanWindowExtensions.size());
   std::transform(vulkanWindowExtensions.begin(), vulkanWindowExtensions.end(),
@@ -97,6 +101,7 @@ void VulkanRenderBackend::createInstance(StringView applicationName,
   checkForVulkanError(
       vkCreateInstance(&createInstanceInfo, nullptr, &mInstance),
       "Failed to create instance");
+  volkLoadInstance(mInstance);
 
   if (enableValidations) {
     mValidator.attachToInstance(mInstance);

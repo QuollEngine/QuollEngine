@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 
 namespace liquid::rhi {
 

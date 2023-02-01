@@ -47,8 +47,6 @@ project "LiquidEditorTest"
         "../engine/src"
     }
 
-    filter{}
-
     files {
         "src/**.cpp",
         "tests/**.cpp",
@@ -56,7 +54,6 @@ project "LiquidEditorTest"
     }
 
     removefiles {
-        "src/liquid/rhi/vulkan/VmaImpl.cpp",
         "src/main.cpp"
     }
 

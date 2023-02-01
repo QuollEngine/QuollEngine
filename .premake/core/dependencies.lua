@@ -50,14 +50,7 @@ end
 function linkDependenciesWith(...)
     links { ... }
 
-    filter { "system:windows" }
-        links { "vulkan-1" }
-
-    filter { "system:linux or system:macosx" }
-        links { "vulkan" }
-    
-    filter{}
-
+    links { "vendor-libvolk" }
     linkDependenciesWithoutVulkan{}
     linkProfilerDependencies{}
 

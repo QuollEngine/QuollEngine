@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 #include "VulkanQueueFamily.h"
 #include "liquid/rhi/PhysicalDeviceInformation.h"
 

@@ -2,7 +2,7 @@
 #include "liquid/core/Engine.h"
 #include "liquid/window/Window.h"
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 #include <GLFW/glfw3.h>
 
 #include "VulkanError.h"
