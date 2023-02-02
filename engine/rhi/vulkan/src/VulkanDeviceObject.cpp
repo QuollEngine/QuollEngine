@@ -1,9 +1,8 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
 #include "VulkanDeviceObject.h"
 #include "VulkanError.h"
-
-#include "liquid/core/Engine.h"
 
 namespace liquid::rhi {
 
@@ -114,6 +113,7 @@ VulkanDeviceObject::VulkanDeviceObject(
   checkForVulkanError(
       vkCreateDevice(physicalDevice, &createDeviceInfo, nullptr, &mDevice),
       "Failed to create device");
+  volkLoadDevice(mDevice);
 
   Engine::getLogger().info()
       << "Vulkan device created for " << physicalDevice.getName();

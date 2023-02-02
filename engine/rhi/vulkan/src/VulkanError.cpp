@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 #include "VulkanError.h"
 
 // Reference:

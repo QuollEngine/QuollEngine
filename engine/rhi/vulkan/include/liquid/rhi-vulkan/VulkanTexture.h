@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 #include <vma/vk_mem_alloc.h>
 #include "VulkanDeviceObject.h"
 #include "VulkanUploadContext.h"

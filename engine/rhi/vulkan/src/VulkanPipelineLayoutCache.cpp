@@ -1,7 +1,5 @@
 #include "liquid/core/Base.h"
 
-#include <vulkan/vulkan.hpp>
-
 #include "VulkanPipelineLayoutCache.h"
 #include "VulkanError.h"
 #include "VulkanMapping.h"

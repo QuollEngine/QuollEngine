@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
-
 #include "liquid/rhi/ShaderDescription.h"
 #include "liquid/rhi/DescriptorLayoutDescription.h"
 

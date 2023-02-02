@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 
-#include <vulkan/vulkan.hpp>
+#include "VulkanHeaders.h"
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanTexture.h"

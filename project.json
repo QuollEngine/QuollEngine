@@ -221,6 +221,16 @@
       ]
     },
     {
+      "name": "volk",
+      "buildSource": "volk-1.3.215",
+      "url": "https://github.com/zeux/volk/archive/refs/tags/1.3.215.zip",
+      "cmd": [
+        "{MKDIR} {{VENDOR_PROJECTS_DIR}}/volk",
+        "{COPY} volk.h {{VENDOR_INSTALL_DIR}}/include",
+        "{COPY} volk.c {{VENDOR_PROJECTS_DIR}}/volk/volk.c"
+      ]
+    },
+    {
       "name": "glm",
       "buildSource": "glm",
       "url": "https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip",

@@ -53,15 +53,9 @@ project "LiquidEngineTest"
         "../engine/src"
     }
 
-    filter{}
-
     files {
         "tests/**.cpp",
         "tests/**.h"
-    }
-
-    removefiles {
-        "src/liquid/rhi/vulkan/VmaImpl.cpp",
     }
 
     links { "LiquidEngine", "LiquidRHICore" }
