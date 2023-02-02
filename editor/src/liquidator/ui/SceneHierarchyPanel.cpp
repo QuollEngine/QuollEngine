@@ -140,6 +140,10 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     confirmDeleteSceneNode.render();
     if (confirmDeleteSceneNode.isConfirmed()) {
       mEntityManager.deleteEntity(entity);
+
+      if (entity == mSelectedEntity) {
+        mSelectedEntity = EntityNull;
+      }
     }
   }
 
