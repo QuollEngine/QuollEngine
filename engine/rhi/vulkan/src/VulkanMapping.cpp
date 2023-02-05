@@ -268,6 +268,17 @@ VkFormat VulkanMapping::getFormat(Format format) {
   }
 }
 
+VkFilter VulkanMapping::getFilter(Filter filter) {
+  switch (filter) {
+  case Filter::Nearest:
+    return VK_FILTER_NEAREST;
+  case Filter::Linear:
+    return VK_FILTER_LINEAR;
+  default:
+    LIQUID_ASSERT(false, "Filter does not exist");
+  }
+}
+
 DescriptorType
 VulkanMapping::getDescriptorType(VkDescriptorType descriptorType) {
   switch (descriptorType) {

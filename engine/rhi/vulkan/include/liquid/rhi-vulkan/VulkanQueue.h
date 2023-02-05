@@ -75,6 +75,11 @@ public:
    */
   void submit(VulkanSubmitInfo submitInfo);
 
+  /**
+   * @brief Wait for idle
+   */
+  void waitForIdle();
+
 private:
   VkQueue mQueue = VK_NULL_HANDLE;
   uint32_t mQueueIndex = 0;

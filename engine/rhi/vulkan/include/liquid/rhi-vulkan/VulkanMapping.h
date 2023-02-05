@@ -8,6 +8,7 @@
 #include "liquid/rhi/StageFlags.h"
 #include "liquid/rhi/IndexType.h"
 #include "liquid/rhi/Format.h"
+#include "liquid/rhi/Filter.h"
 
 #include "VulkanHeaders.h"
 
@@ -158,6 +159,14 @@ public:
    * @return Vulkan format
    */
   static VkFormat getFormat(Format format);
+
+  /**
+   * @brief Get Vulkan filter
+   *
+   * @param filter Filter
+   * @return Vulkan filter
+   */
+  static VkFilter getFilter(Filter filter);
 
   // Vulkan to RHI mapping
 public:

@@ -163,9 +163,9 @@ void VulkanCommandBuffer::pipelineBarrier(
     vkBarrier.newLayout = VulkanMapping::getImageLayout(barrier.dstLayout);
     vkBarrier.image = texture->getImage();
     vkBarrier.subresourceRange.baseArrayLayer = 0;
-    vkBarrier.subresourceRange.baseMipLevel = 0;
+    vkBarrier.subresourceRange.baseMipLevel = barrier.baseLevel;
     vkBarrier.subresourceRange.layerCount = texture->getDescription().layers;
-    vkBarrier.subresourceRange.levelCount = 1;
+    vkBarrier.subresourceRange.levelCount = barrier.levelCount;
     vkBarrier.subresourceRange.aspectMask = texture->getImageAspectFlags();
   }
 
@@ -176,6 +176,111 @@ void VulkanCommandBuffer::pipelineBarrier(
       static_cast<uint32_t>(vkMemoryBarriers.size()), vkMemoryBarriers.data(),
       0, nullptr, static_cast<uint32_t>(vkImageMemoryBarriers.size()),
       vkImageMemoryBarriers.data());
+}
+
+void VulkanCommandBuffer::copyTextureToBuffer(
+    TextureHandle srcTexture, BufferHandle dstBuffer,
+    const std::vector<CopyRegion> &copyRegions) {
+  const auto &vulkanTexture = mRegistry.getTextures().at(srcTexture);
+  const auto &vulkanBuffer = mRegistry.getBuffers().at(dstBuffer);
+
+  std::vector<VkBufferImageCopy> copies(copyRegions.size());
+  for (size_t i = 0; i < copies.size(); ++i) {
+    auto &copy = copies.at(i);
+    auto &copyRegion = copyRegions.at(i);
+    copy.bufferOffset = copyRegion.bufferOffset;
+    copy.bufferRowLength = 0;
+    copy.bufferImageHeight = 0;
+    copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copy.imageSubresource.baseArrayLayer = copyRegion.imageBaseArrayLayer;
+    copy.imageSubresource.layerCount = copyRegion.imageLayerCount;
+    copy.imageSubresource.mipLevel = copyRegion.imageLevel;
+    copy.imageOffset =
+        VkOffset3D{copyRegion.imageOffset.x, copyRegion.imageOffset.y,
+                   copyRegion.imageOffset.z};
+    copy.imageExtent =
+        VkExtent3D{copyRegion.imageExtent.x, copyRegion.imageExtent.y,
+                   copyRegion.imageExtent.z};
+  }
+
+  vkCmdCopyImageToBuffer(mCommandBuffer, vulkanTexture->getImage(),
+                         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                         vulkanBuffer->getBuffer(),
+                         static_cast<uint32_t>(copies.size()), copies.data());
+}
+
+void VulkanCommandBuffer::copyBufferToTexture(
+    BufferHandle srcBuffer, TextureHandle dstTexture,
+    const std::vector<CopyRegion> &copyRegions) {
+  const auto &vulkanBuffer = mRegistry.getBuffers().at(srcBuffer);
+  const auto &vulkanTexture = mRegistry.getTextures().at(dstTexture);
+
+  std::vector<VkBufferImageCopy> copies(copyRegions.size());
+  for (size_t i = 0; i < copies.size(); ++i) {
+    auto &copy = copies.at(i);
+    auto &copyRegion = copyRegions.at(i);
+    copy.bufferOffset = copyRegion.bufferOffset;
+    copy.bufferRowLength = 0;
+    copy.bufferImageHeight = 0;
+    copy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    copy.imageSubresource.baseArrayLayer = copyRegion.imageBaseArrayLayer;
+    copy.imageSubresource.layerCount = copyRegion.imageLayerCount;
+    copy.imageSubresource.mipLevel = copyRegion.imageLevel;
+    copy.imageOffset =
+        VkOffset3D{copyRegion.imageOffset.x, copyRegion.imageOffset.y,
+                   copyRegion.imageOffset.z};
+    copy.imageExtent =
+        VkExtent3D{copyRegion.imageExtent.x, copyRegion.imageExtent.y,
+                   copyRegion.imageExtent.z};
+  }
+
+  vkCmdCopyBufferToImage(mCommandBuffer, vulkanBuffer->getBuffer(),
+                         vulkanTexture->getImage(),
+                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                         static_cast<uint32_t>(copies.size()), copies.data());
+}
+
+void VulkanCommandBuffer::blitTexture(TextureHandle source,
+                                      TextureHandle destination,
+                                      const std::vector<BlitRegion> &regions,
+                                      Filter filter) {
+  VkImage srcImage = mRegistry.getTextures().at(source)->getImage();
+  VkImage dstImage = mRegistry.getTextures().at(destination)->getImage();
+
+  static constexpr size_t OffsetSize = 2;
+  std::vector<VkImageBlit> vkRegions(regions.size());
+  for (size_t i = 0; i < regions.size(); ++i) {
+    auto &region = regions.at(i);
+    auto &vkRegion = vkRegions.at(i);
+
+    vkRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    vkRegion.srcSubresource.mipLevel = region.srcMipLevel;
+    vkRegion.srcSubresource.baseArrayLayer = region.srcBaseArrayLayer;
+    vkRegion.srcSubresource.layerCount = region.srcLayerCount;
+
+    for (size_t i = 0; i < OffsetSize; ++i) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+      vkRegion.srcOffsets[i] = {region.srcOffsets.at(i).x,
+                                region.srcOffsets.at(i).y,
+                                region.srcOffsets.at(i).z};
+    }
+
+    vkRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    vkRegion.dstSubresource.mipLevel = region.dstMipLevel;
+    vkRegion.dstSubresource.baseArrayLayer = region.dstBaseArrayLayer;
+    vkRegion.dstSubresource.layerCount = region.dstLayerCount;
+    for (size_t i = 0; i < OffsetSize; ++i) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+      vkRegion.dstOffsets[i] = {region.dstOffsets.at(i).x,
+                                region.dstOffsets.at(i).y,
+                                region.dstOffsets.at(i).z};
+    }
+  }
+
+  vkCmdBlitImage(mCommandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                 dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                 static_cast<uint32_t>(regions.size()), vkRegions.data(),
+                 VulkanMapping::getFilter(filter));
 }
 
 } // namespace liquid::rhi

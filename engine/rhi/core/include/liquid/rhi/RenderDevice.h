@@ -44,6 +44,20 @@ public:
   virtual ~RenderDevice() = default;
 
   /**
+   * @brief Request immediate command list
+   *
+   * @return New command list
+   */
+  virtual RenderCommandList requestImmediateCommandList() = 0;
+
+  /**
+   * @brief Submit commands immediately
+   *
+   * @param commandList Command list
+   */
+  virtual void submitImmediate(RenderCommandList &commandList) = 0;
+
+  /**
    * @brief Begin frame
    *
    * @return Frame data
@@ -147,6 +161,13 @@ public:
    */
   virtual const TextureDescription
   getTextureDescription(TextureHandle handle) const = 0;
+
+  /**
+   * @brief Destroy texture
+   *
+   * @param handle Texture handle
+   */
+  virtual void destroyTexture(TextureHandle handle) = 0;
 
   /**
    * @brief Create render pass

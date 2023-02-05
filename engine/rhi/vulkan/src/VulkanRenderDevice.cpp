@@ -45,6 +45,38 @@ VulkanRenderDevice::VulkanRenderDevice(
                                  &queueIndex, 1, nullptr);
 }
 
+RenderCommandList VulkanRenderDevice::requestImmediateCommandList() {
+  auto commandList = std::move(mCommandPool.createCommandLists(1).at(0));
+
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
+                            commandList.getNativeRenderCommandList().get())
+                            ->getVulkanCommandBuffer();
+
+  VkCommandBufferBeginInfo beginInfo{};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  beginInfo.pInheritanceInfo = nullptr;
+
+  checkForVulkanError(vkBeginCommandBuffer(commandBuffer, &beginInfo),
+                      "Failed to begin recording command buffer");
+
+  return std::move(commandList);
+}
+
+void VulkanRenderDevice::submitImmediate(RenderCommandList &commandList) {
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
+                            commandList.getNativeRenderCommandList().get())
+                            ->getVulkanCommandBuffer();
+
+  vkEndCommandBuffer(commandBuffer);
+
+  VulkanSubmitInfo submitInfo{};
+  submitInfo.commandBuffers = {commandBuffer};
+
+  mGraphicsQueue.submit(submitInfo);
+  mGraphicsQueue.waitForIdle();
+}
+
 RenderFrame VulkanRenderDevice::beginFrame() {
   static constexpr auto SkipFrame = std::numeric_limits<uint32_t>::max();
   static RenderCommandList emptyCommandList;
@@ -144,6 +176,10 @@ VulkanRenderDevice::createTexture(const TextureDescription &description) {
 const TextureDescription
 VulkanRenderDevice::getTextureDescription(TextureHandle handle) const {
   return mRegistry.getTextures().at(handle)->getDescription();
+}
+
+void VulkanRenderDevice::destroyTexture(TextureHandle handle) {
+  mRegistry.deleteTexture(handle);
 }
 
 RenderPassHandle

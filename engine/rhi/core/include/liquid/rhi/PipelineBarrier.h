@@ -49,6 +49,16 @@ struct ImageBarrier {
    * Texture
    */
   TextureHandle texture = TextureHandle::Invalid;
+
+  /**
+   * Base mip level
+   */
+  uint32_t baseLevel = 0;
+
+  /**
+   * Mip level count
+   */
+  uint32_t levelCount = 1;
 };
 
 } // namespace liquid::rhi

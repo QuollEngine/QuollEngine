@@ -6,6 +6,10 @@
 
 class MockRenderDevice : public liquid::rhi::RenderDevice {
 public:
+  liquid::rhi::RenderCommandList requestImmediateCommandList();
+
+  void submitImmediate(liquid::rhi::RenderCommandList &commandList);
+
   liquid::rhi::RenderFrame beginFrame();
 
   void endFrame(const liquid::rhi::RenderFrame &renderFrame);
@@ -36,6 +40,8 @@ public:
 
   liquid::rhi::TextureHandle
   createTexture(const liquid::rhi::TextureDescription &description);
+
+  void destroyTexture(liquid::rhi::TextureHandle handle);
 
   const liquid::rhi::TextureDescription
   getTextureDescription(liquid::rhi::TextureHandle handle) const;

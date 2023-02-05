@@ -45,6 +45,13 @@ public:
    */
   std::vector<RenderCommandList> createCommandLists(uint32_t count);
 
+  /**
+   * @brief Free command list
+   *
+   * @param commandList Command list
+   */
+  void freeCommandList(RenderCommandList &commandList);
+
 private:
   VkCommandPool mCommandPool = VK_NULL_HANDLE;
   VulkanDeviceObject &mDevice;

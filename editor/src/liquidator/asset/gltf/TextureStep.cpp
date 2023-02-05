@@ -15,22 +15,20 @@ void loadTextures(GLTFImportData &importData) {
     // TODO: Support creating different samplers
     auto &image = model.images.at(model.textures.at(i).source);
     AssetData<TextureAsset> texture{};
-    auto textureRelPath =
-        std::filesystem::relative(targetPath, assetCache.getAssetsPath());
-
     auto filename = "texture" + std::to_string(i);
-    texture.name = (textureRelPath / filename).string();
+    auto textureRelPath =
+        std::filesystem::relative(targetPath, assetCache.getAssetsPath()) /
+        filename;
 
-    texture.type = AssetType::Texture;
-    texture.size = image.width * image.height * 4;
-    texture.data.data =
-        const_cast<void *>(static_cast<const void *>(image.image.data()));
-    texture.data.width = image.width;
-    texture.data.height = image.height;
+    importData.imageLoader.loadFromMemory(
+        const_cast<void *>(static_cast<const void *>(image.image.data())),
+        image.width, image.height, textureRelPath, importData.optimize);
 
-    auto &&texturePath = assetCache.createTextureFromAsset(texture);
-    auto handle = assetCache.loadTextureFromFile(texturePath.getData());
-    importData.textures.map.insert_or_assign(i, handle.getData());
+    auto handle =
+        assetCache.getRegistry().getTextures().findHandleByRelativePath(
+            textureRelPath.replace_extension("ktx2"));
+
+    importData.textures.map.insert_or_assign(i, handle);
   }
 }
 

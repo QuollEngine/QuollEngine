@@ -48,9 +48,11 @@ static Path getUniquePath(Path path) {
 }
 
 AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
+                           liquid::rhi::RenderDevice *device, bool optimize,
                            bool createDefaultObjects)
     : mAssetsPath(assetsPath),
-      mAssetCache(assetsCachePath, createDefaultObjects) {}
+      mAssetCache(assetsCachePath, createDefaultObjects),
+      mImageLoader(mAssetCache, device), mOptimize(optimize) {}
 
 Result<bool> AssetManager::importAsset(const Path &source,
                                        const Path &targetAssetDirectory) {
@@ -60,7 +62,7 @@ Result<bool> AssetManager::importAsset(const Path &source,
       getUniquePath(targetAssetDirectory / source.filename());
 
   if (targetAssetPath.extension() == ".gltf") {
-    GLTFImporter importer(mAssetCache, true);
+    GLTFImporter importer(mAssetCache, mImageLoader, mOptimize);
     auto res = importer.saveBinary(source, targetAssetPath);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
@@ -259,8 +261,14 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
       }
 
       std::filesystem::remove(engineAssetPath);
+      return Result<Path>::Error(res.getError());
     }
+    return Result<Path>::Error("Cannot load KTX2 texture");
   }
+
+  auto engineAssetPath = getOriginalAssetName(originalAssetPath);
+  return mImageLoader.loadFromPath(originalAssetPath, engineAssetPath,
+                                   mOptimize);
 
   auto *data = stbi_load(originalAssetPath.string().c_str(), &width, &height,
                          &channels, STBI_rgb_alpha);
@@ -271,7 +279,7 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
 
   AssetData<TextureAsset> asset{};
   asset.name = getOriginalAssetName(originalAssetPath);
-  asset.size = width * height * 4;
+  asset.size = static_cast<size_t>(width) * height * 4;
   asset.data.data = data;
   asset.data.height = height;
   asset.data.width = width;
@@ -342,7 +350,7 @@ Result<Path> AssetManager::loadOriginalFont(const Path &originalAssetPath) {
 Result<Path> AssetManager::loadOriginalPrefab(const Path &originalAssetPath) {
   auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
 
-  GLTFImporter importer(mAssetCache, true);
+  GLTFImporter importer(mAssetCache, mImageLoader, mOptimize);
   return importer.loadFromPath(originalAssetPath, engineAssetPath);
 }
 

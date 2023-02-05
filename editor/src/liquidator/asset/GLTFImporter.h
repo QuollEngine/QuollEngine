@@ -2,6 +2,7 @@
 
 #include "liquid/asset/Result.h"
 #include "gltf/GLTFImportData.h"
+#include "ImageLoader.h"
 
 namespace liquid::editor {
 
@@ -16,9 +17,10 @@ public:
    * @brief Create GLTF importer
    *
    * @param assetCache Asset cache
+   * @param imageLoader Image loader
    * @param optimize Enable optimizations
    */
-  GLTFImporter(AssetCache &assetCache, bool optimize);
+  GLTFImporter(AssetCache &assetCache, ImageLoader &imageLoader, bool optimize);
 
   /**
    * @brief Load GLTF from file
@@ -41,6 +43,7 @@ public:
 
 private:
   AssetCache &mAssetCache;
+  ImageLoader &mImageLoader;
   bool mOptimize = false;
 };
 
