@@ -3,6 +3,7 @@
 
 #include "AssetManager.h"
 #include "GLTFImporter.h"
+#include "HDRIImporter.h"
 
 #include <stb/stb_image.h>
 #include <cryptopp/sha.h>
@@ -17,6 +18,7 @@ const std::vector<String> AssetManager::ScriptExtensions{"lua"};
 const std::vector<String> AssetManager::AudioExtensions{"wav", "mp3"};
 const std::vector<String> AssetManager::FontExtensions{"ttf", "otf"};
 const std::vector<String> AssetManager::SceneExtensions{"gltf", "glb"};
+const std::vector<String> AssetManager::EnvironmentExtensions{"hdr"};
 
 using co = std::filesystem::copy_options;
 
@@ -52,7 +54,8 @@ AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                            bool createDefaultObjects)
     : mAssetsPath(assetsPath),
       mAssetCache(assetsCachePath, createDefaultObjects),
-      mImageLoader(mAssetCache, device), mOptimize(optimize) {}
+      mImageLoader(mAssetCache, device), mHDRIImporter(mAssetCache, device),
+      mOptimize(optimize) {}
 
 Result<bool> AssetManager::importAsset(const Path &source,
                                        const Path &targetAssetDirectory) {
@@ -222,6 +225,8 @@ Result<bool> AssetManager::loadOriginalAsset(const Path &originalAssetPath) {
     res = loadOriginalFont(originalAssetPath);
   } else if (type == AssetType::Prefab) {
     res = loadOriginalPrefab(originalAssetPath);
+  } else if (type == AssetType::Environment) {
+    res = loadOriginalEnvironment(originalAssetPath);
   }
 
   if (res.hasData()) {
@@ -269,36 +274,6 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
   auto engineAssetPath = getOriginalAssetName(originalAssetPath);
   return mImageLoader.loadFromPath(originalAssetPath, engineAssetPath,
                                    mOptimize);
-
-  auto *data = stbi_load(originalAssetPath.string().c_str(), &width, &height,
-                         &channels, STBI_rgb_alpha);
-
-  if (!data) {
-    return Result<Path>::Error(stbi_failure_reason());
-  }
-
-  AssetData<TextureAsset> asset{};
-  asset.name = getOriginalAssetName(originalAssetPath);
-  asset.size = static_cast<size_t>(width) * height * 4;
-  asset.data.data = data;
-  asset.data.height = height;
-  asset.data.width = width;
-  asset.data.layers = 1;
-  asset.data.format = rhi::Format::Rgba8Srgb;
-
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
-  stbi_image_free(data);
-
-  if (createdFileRes.hasError()) {
-    return createdFileRes;
-  }
-
-  auto loadRes = mAssetCache.loadAsset(createdFileRes.getData());
-  if (loadRes.hasError()) {
-    return Result<Path>::Error(loadRes.getError());
-  }
-
-  return createdFileRes;
 }
 
 Result<Path> AssetManager::loadOriginalAudio(const Path &originalAssetPath) {
@@ -352,6 +327,13 @@ Result<Path> AssetManager::loadOriginalPrefab(const Path &originalAssetPath) {
 
   GLTFImporter importer(mAssetCache, mImageLoader, mOptimize);
   return importer.loadFromPath(originalAssetPath, engineAssetPath);
+}
+
+Result<Path>
+AssetManager::loadOriginalEnvironment(const Path &originalAssetPath) {
+  auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
+
+  return mHDRIImporter.loadFromPath(originalAssetPath, engineAssetPath);
 }
 
 String AssetManager::getFileHash(const Path &path) {
@@ -458,6 +440,9 @@ AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {
   }
   if (isExtension(SceneExtensions)) {
     return AssetType::Prefab;
+  }
+  if (isExtension(EnvironmentExtensions)) {
+    return AssetType::Environment;
   }
 
   return AssetType::None;

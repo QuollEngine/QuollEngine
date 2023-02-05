@@ -67,7 +67,7 @@ EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
 
 void EditorScreen::start(const Project &project) {
   LogMemoryStorage systemLogStorage, userLogStorage;
-  Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  // Engine::getLogger().setTransport(systemLogStorage.createTransport());
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
   FPSCounter fpsCounter;
@@ -75,16 +75,20 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
+  RenderStorage storage(mDevice);
+
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
                             mDevice, true, true);
 
+  auto res = assetManager.validateAndPreloadAssets(storage);
+
+  return;
   Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
 
   Presenter presenter(renderer.getShaderLibrary(), mDevice);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.validateAndPreloadAssets(renderer.getRenderStorage());
   AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {

@@ -22,6 +22,8 @@ enum class PrefabAssetHandle : uint32_t { Invalid = 0 };
 
 enum class LuaScriptAssetHandle : uint32_t { Invalid = 0 };
 
+enum class EnvironmentAssetHandle : uint32_t { Invalid = 0 };
+
 enum class AssetType : uint8_t {
   None,
   Material,
@@ -33,7 +35,8 @@ enum class AssetType : uint8_t {
   Audio,
   Prefab,
   LuaScript,
-  Font
+  Font,
+  Environment
 };
 
 inline const String getAssetTypeString(AssetType type) {
@@ -56,6 +59,8 @@ inline const String getAssetTypeString(AssetType type) {
     return "prefab";
   case AssetType::LuaScript:
     return "lua script";
+  case AssetType::Environment:
+    return "environment";
   default:
     return "none";
   }
