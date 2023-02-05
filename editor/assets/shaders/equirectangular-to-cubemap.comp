@@ -1,0 +1,25 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+#include "generate-ibl.glsl"
+
+layout(set = 0, binding = 0) uniform sampler2D uInputTexture;
+layout(set = 0, binding = 1,
+       rgba16f) writeonly uniform imageCube uOutputTexture;
+
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+const vec2 invAtan = vec2(0.1591, -0.3183);
+
+void main() {
+  ivec3 globalId = ivec3(gl_GlobalInvocationID);
+  vec3 worldPos = cubeCoordToWorld(globalId, imageSize(uOutputTexture).x);
+
+  vec2 uv = vec2(atan(worldPos.z, worldPos.x), asin(worldPos.y));
+  uv *= invAtan;
+  uv += 0.5;
+
+  vec4 color = texture(uInputTexture, uv);
+
+  imageStore(uOutputTexture, globalId, color);
+}

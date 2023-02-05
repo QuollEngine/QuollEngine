@@ -121,8 +121,14 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   for (size_t i = 0; i < asset.data.levels.size(); ++i) {
     const auto &level = asset.data.levels.at(i);
 
-    ktxTexture_SetImageFromMemory(baseTexture, static_cast<ktx_uint32_t>(i), 0,
-                                  0, baseData + level.offset, level.size);
+    size_t faceOffset = 0;
+    size_t faceSize = level.size / createInfo.numFaces;
+    for (uint32_t face = 0; face < createInfo.numFaces; ++face) {
+      ktxTexture_SetImageFromMemory(
+          baseTexture, static_cast<ktx_uint32_t>(i), 0, face,
+          baseData + level.offset + faceOffset, faceSize);
+      faceOffset += faceSize;
+    }
   }
 
   {

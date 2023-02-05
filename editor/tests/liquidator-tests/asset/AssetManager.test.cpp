@@ -119,41 +119,82 @@ TEST_F(AssetManagerTest,
 
 TEST_F(AssetManagerTest,
        ValidateAndPreloadDeletesPrefabDirectoryIfAssetFileDoesNotExist) {
-  auto prefabBasePath = InnerPathInCache / "test-prefab";
-  auto prefabPath = prefabBasePath / "test.lqprefab";
-  auto prefabMeshPath = prefabBasePath / "test.lqmesh ";
-  auto prefabHashPath = InnerPathInCache / "test-prefab.lqhash";
+  auto assetDirPath = InnerPathInCache / "test-prefab";
+  auto assetPath = assetDirPath / "test.lqprefab";
+  auto dependentAssetPath = assetDirPath / "test.lqmesh ";
+  auto hashPath = InnerPathInCache / "test-prefab.lqhash";
 
-  fs::create_directories(prefabBasePath);
+  fs::create_directories(assetDirPath);
 
   auto engineAssetPathStr =
-      std::filesystem::relative(prefabPath, manager.getCachePath()).string();
+      std::filesystem::relative(assetPath, manager.getCachePath()).string();
 
   std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
 
   YAML::Node node;
   node["engineAssetPath"] = engineAssetPathStr;
 
-  std::ofstream stream(prefabHashPath);
+  std::ofstream stream(hashPath);
   stream << node;
   stream.close();
 
-  createEmptyFile(prefabPath);
-  createEmptyFile(prefabMeshPath);
+  createEmptyFile(assetPath);
+  createEmptyFile(dependentAssetPath);
 
   MockRenderDevice device;
   liquid::RenderStorage renderStorage(&device);
 
-  EXPECT_TRUE(fs::exists(prefabPath));
-  EXPECT_TRUE(fs::exists(prefabMeshPath));
-  EXPECT_TRUE(fs::exists(prefabHashPath));
+  EXPECT_TRUE(fs::exists(assetPath));
+  EXPECT_TRUE(fs::exists(dependentAssetPath));
+  EXPECT_TRUE(fs::exists(hashPath));
+  EXPECT_TRUE(fs::exists(assetDirPath));
 
   manager.validateAndPreloadAssets(renderStorage);
 
-  EXPECT_FALSE(fs::exists(prefabPath));
-  EXPECT_FALSE(fs::exists(prefabMeshPath));
-  EXPECT_FALSE(fs::exists(prefabHashPath));
-  EXPECT_FALSE(fs::exists(prefabBasePath));
+  EXPECT_FALSE(fs::exists(assetPath));
+  EXPECT_FALSE(fs::exists(dependentAssetPath));
+  EXPECT_FALSE(fs::exists(hashPath));
+  EXPECT_FALSE(fs::exists(assetDirPath));
+}
+
+TEST_F(AssetManagerTest,
+       ValidateAndPreloadDeletesEnvironmentDirectoryIfAssetFileDoesNotExist) {
+  auto assetDirPath = InnerPathInCache / "test-env";
+  auto assetPath = assetDirPath / "test.lqenv";
+  auto dependentAssetPath = assetDirPath / "test.ktx2";
+  auto hashPath = InnerPathInCache / "test-env.lqhash";
+
+  fs::create_directories(assetDirPath);
+
+  auto engineAssetPathStr =
+      std::filesystem::relative(assetPath, manager.getCachePath()).string();
+
+  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
+
+  YAML::Node node;
+  node["engineAssetPath"] = engineAssetPathStr;
+
+  std::ofstream stream(hashPath);
+  stream << node;
+  stream.close();
+
+  createEmptyFile(assetPath);
+  createEmptyFile(dependentAssetPath);
+
+  MockRenderDevice device;
+  liquid::RenderStorage renderStorage(&device);
+
+  EXPECT_TRUE(fs::exists(assetPath));
+  EXPECT_TRUE(fs::exists(dependentAssetPath));
+  EXPECT_TRUE(fs::exists(hashPath));
+  EXPECT_TRUE(fs::exists(assetDirPath));
+
+  manager.validateAndPreloadAssets(renderStorage);
+
+  EXPECT_FALSE(fs::exists(assetPath));
+  EXPECT_FALSE(fs::exists(dependentAssetPath));
+  EXPECT_FALSE(fs::exists(hashPath));
+  EXPECT_FALSE(fs::exists(assetDirPath));
 }
 
 TEST_P(AssetTest, FailedImportDoesNotCreateAssetInCache) {

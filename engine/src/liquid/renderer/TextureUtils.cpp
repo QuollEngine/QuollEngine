@@ -149,12 +149,12 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
     rhi::BlitRegion region{};
     region.srcOffsets.at(0) = {0, 0, 0};
     region.srcOffsets.at(1) = {mipWidth, mipHeight, 1};
-    region.srcLayerCount = 1;
+    region.srcLayerCount = layers;
     region.srcMipLevel = i - 1;
     region.dstOffsets.at(0) = {0, 0, 0};
     region.dstOffsets.at(1) = {mipWidth > 1 ? mipWidth / 2 : 1,
                                mipHeight > 1 ? mipHeight / 2 : 1, 1};
-    region.dstLayerCount = 1;
+    region.dstLayerCount = layers;
     region.dstMipLevel = i;
 
     commandList.blitTexture(texture, texture, {region}, rhi::Filter::Nearest);
