@@ -60,22 +60,26 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   VkImageUsageFlags usageFlags = 0;
 
-  if ((description.usage & TextureUsage::Color) == TextureUsage::Color) {
+  if (BitwiseEnumContains(description.usage, TextureUsage::Color)) {
     usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     mAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
   }
 
-  if ((description.usage & TextureUsage::Depth) == TextureUsage::Depth) {
+  if (BitwiseEnumContains(description.usage, TextureUsage::Depth)) {
     usageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
     mAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
   }
 
-  if ((description.usage & TextureUsage::Sampled) == TextureUsage::Sampled) {
+  if (BitwiseEnumContains(description.usage, TextureUsage::Sampled)) {
     usageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT;
   }
 
-  if ((description.usage & TextureUsage::TransferDestination) ==
-      TextureUsage::TransferDestination) {
+  if (BitwiseEnumContains(description.usage, TextureUsage::TransferSource)) {
+    usageFlags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  }
+
+  if (BitwiseEnumContains(description.usage,
+                          TextureUsage::TransferDestination)) {
     usageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
   }
 
@@ -86,7 +90,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
   imageCreateInfo.format = mFormat;
   imageCreateInfo.extent = extent;
-  imageCreateInfo.mipLevels = 1;
+  imageCreateInfo.mipLevels = description.levels;
   imageCreateInfo.arrayLayers = description.layers;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -110,7 +114,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
   imageViewCreateInfo.subresourceRange.layerCount = description.layers;
-  imageViewCreateInfo.subresourceRange.levelCount = 1;
+  imageViewCreateInfo.subresourceRange.levelCount = description.levels;
   imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
   checkForVulkanError(
       vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
@@ -128,60 +132,6 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   checkForVulkanError(
       vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
       "Failed to image sampler");
-
-  if (description.data) {
-    VulkanBuffer stagingBuffer(
-        {rhi::BufferType::TransferSource, description.size, description.data},
-        mAllocator);
-
-    uploadContext.submit([extent, this, &stagingBuffer,
-                          &description](VkCommandBuffer commandBuffer) {
-      VkImageSubresourceRange range{};
-      range.aspectMask = mAspectFlags;
-      range.baseMipLevel = 0;
-      range.levelCount = 1;
-      range.baseArrayLayer = 0;
-      range.layerCount = description.layers;
-
-      VkImageMemoryBarrier imageBarrierTransfer{};
-      imageBarrierTransfer.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-      imageBarrierTransfer.pNext = nullptr;
-      imageBarrierTransfer.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-      imageBarrierTransfer.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-      imageBarrierTransfer.image = mImage;
-      imageBarrierTransfer.subresourceRange = range;
-      imageBarrierTransfer.srcAccessMask = 0;
-      imageBarrierTransfer.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-      vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                           VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
-                           nullptr, 1, &imageBarrierTransfer);
-
-      VkBufferImageCopy copyRegion{};
-      copyRegion.bufferImageHeight = 0;
-      copyRegion.bufferOffset = 0;
-      copyRegion.bufferRowLength = 0;
-      copyRegion.imageExtent = extent;
-      copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-      copyRegion.imageSubresource.baseArrayLayer = 0;
-      copyRegion.imageSubresource.layerCount = description.layers;
-      copyRegion.imageSubresource.mipLevel = 0;
-
-      vkCmdCopyBufferToImage(commandBuffer, stagingBuffer.getBuffer(), mImage,
-                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                             &copyRegion);
-
-      VkImageMemoryBarrier imageBarrierReadable = imageBarrierTransfer;
-      imageBarrierReadable.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-      imageBarrierReadable.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-      imageBarrierReadable.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-      imageBarrierReadable.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-      vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                           VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr,
-                           0, nullptr, 1, &imageBarrierReadable);
-    });
-  }
 }
 
 VulkanTexture::~VulkanTexture() {

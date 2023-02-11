@@ -35,13 +35,6 @@ public:
   size_t getBuffersCount() const override;
 
   /**
-   * @brief Get size of all the textures
-   *
-   * @return Total texture size
-   */
-  size_t getTotalTextureSize() const override;
-
-  /**
    * @brief Get number of textures
    *
    * @return Number of textures

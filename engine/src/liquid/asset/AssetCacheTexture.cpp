@@ -15,6 +15,8 @@
 
 namespace liquid {
 
+static constexpr uint32_t CubemapSides = 6;
+
 /**
  * @brief Get Vulkan format from RHI format
  *
@@ -92,12 +94,13 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.baseHeight = asset.data.height;
   createInfo.baseDepth = 1;
   createInfo.numDimensions = 2;
-  createInfo.numFaces = 1;
-  createInfo.numLayers = 1;
-  createInfo.numLevels = 1;
+  createInfo.numFaces =
+      asset.data.type == liquid::TextureAssetType::Cubemap ? CubemapSides : 1;
+  createInfo.numLayers = asset.data.layers;
+  createInfo.numLevels = static_cast<uint32_t>(asset.data.levels.size());
   createInfo.isArray = KTX_FALSE;
   createInfo.generateMipmaps = KTX_FALSE;
-  createInfo.vkFormat = getVulkanFormatFromFormat(rhi::Format::Rgba8Srgb);
+  createInfo.vkFormat = getVulkanFormatFromFormat(asset.data.format);
 
   Path assetPath = (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
 
@@ -110,15 +113,17 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
       return Result<Path>::Error(
           KtxError("Cannot create KTX texture", res).what());
     }
-
-    LIQUID_ASSERT(res == KTX_SUCCESS, "Cannot create KTX texture");
   }
 
   auto *baseTexture = reinterpret_cast<ktxTexture *>(texture);
 
-  ktxTexture_SetImageFromMemory(
-      baseTexture, 0, 0, 0, static_cast<const ktx_uint8_t *>(asset.data.data),
-      asset.size);
+  auto *baseData = static_cast<const ktx_uint8_t *>(asset.data.data);
+  for (size_t i = 0; i < asset.data.levels.size(); ++i) {
+    const auto &level = asset.data.levels.at(i);
+
+    ktxTexture_SetImageFromMemory(baseTexture, static_cast<ktx_uint32_t>(i), 0,
+                                  0, baseData + level.offset, level.size);
+  }
 
   {
     auto res =
@@ -137,8 +142,6 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 
 Result<TextureAssetHandle>
 AssetCache::loadTextureFromFile(const Path &filePath) {
-  static constexpr uint32_t CubemapSides = 6;
-
   FILE *stream = fopen(filePath.string().c_str(), "rb");
   if (!stream) {
     return Result<TextureAssetHandle>::Error("Cannot open file: " +
@@ -177,26 +180,45 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
                         (ktxTextureData->isCubemap ? CubemapSides : 1);
   texture.data.type = ktxTextureData->isCubemap ? TextureAssetType::Cubemap
                                                 : TextureAssetType::Standard;
-
   texture.data.format =
       getFormatFromVulkanFormat(ktxTexture_GetVkFormat(ktxTextureData));
+  texture.data.levels.resize(ktxTextureData->numLevels);
 
-  char *srcData = reinterpret_cast<char *>(ktxTexture_GetData(ktxTextureData));
+  auto *srcData = ktxTexture_GetData(ktxTextureData);
 
-  if (ktxTextureData->isCubemap) {
-    size_t faceSize = ktxTexture_GetImageSize(ktxTextureData, 0);
+  size_t numFaces = ktxTextureData->isCubemap ? CubemapSides : 1;
 
-    char *dstData = static_cast<char *>(texture.data.data);
+  size_t levelOffset = 0;
+  uint32_t mipWidth = texture.data.width;
+  uint32_t mipHeight = texture.data.height;
 
-    for (size_t i = 0; i < CubemapSides; ++i) {
-      size_t offset = 0;
-      ktxTexture_GetImageOffset(ktxTextureData, 0, 0,
-                                static_cast<ktx_uint32_t>(i), &offset);
+  for (size_t level = 0; level < texture.data.levels.size(); ++level) {
+    size_t size =
+        ktxTexture_GetImageSize(ktxTextureData, static_cast<int32_t>(level));
 
-      memcpy(dstData + faceSize * i, srcData + offset, faceSize);
+    texture.data.levels.at(level).offset = static_cast<uint32_t>(levelOffset);
+    texture.data.levels.at(level).size = static_cast<uint32_t>(size);
+    texture.data.levels.at(level).width = mipWidth;
+    texture.data.levels.at(level).height = mipHeight;
+
+    if (mipWidth > 1) {
+      mipWidth /= 2;
     }
-  } else {
-    memcpy(texture.data.data, srcData, texture.size);
+
+    if (mipHeight > 1) {
+      mipHeight /= 2;
+    }
+
+    for (size_t face = 0; face < numFaces; ++face) {
+      size_t offset = 0;
+      ktxTexture_GetImageOffset(ktxTextureData, static_cast<int32_t>(level), 0,
+                                static_cast<uint32_t>(face), &offset);
+
+      memcpy(static_cast<uint8_t *>(texture.data.data) + levelOffset +
+                 (size * face),
+             srcData + offset, size);
+    }
+    levelOffset += size;
   }
 
   ktxTexture_Destroy(ktxTextureData);

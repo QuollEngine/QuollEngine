@@ -33,6 +33,20 @@ public:
                      const VulkanPhysicalDevice &physicalDevice);
 
   /**
+   * @brief Request immediate command list
+   *
+   * @return New command list
+   */
+  RenderCommandList requestImmediateCommandList() override;
+
+  /**
+   * @brief Submit commands immediately
+   *
+   * @param commandList Command list
+   */
+  void submitImmediate(RenderCommandList &commandList) override;
+
+  /**
    * @brief Begin frame
    *
    * @return Frame index
@@ -137,6 +151,13 @@ public:
    */
   const TextureDescription
   getTextureDescription(TextureHandle handle) const override;
+
+  /**
+   * @brief Destroy texture
+   *
+   * @param handle Texture handle
+   */
+  void destroyTexture(TextureHandle handle) override;
 
   /**
    * @brief Create render pass

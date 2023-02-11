@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
+#include "liquid/renderer/TextureUtils.h"
 
 #include "ImguiRenderer.h"
 
@@ -328,13 +329,17 @@ void ImguiRenderer::buildFonts() {
     description.usage = rhi::TextureUsage::Color |
                         rhi::TextureUsage::TransferDestination |
                         rhi::TextureUsage::Sampled;
-    description.size = width * height * 4;
     description.width = width;
     description.height = height;
     description.format = rhi::Format::Rgba8Srgb;
-    description.data = pixels;
-
     mFontTexture = mRenderStorage.createTexture(description);
+
+    TextureUtils::copyDataToTexture(
+        mRenderStorage.getDevice(), pixels, mFontTexture,
+        rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+        {TextureAssetLevel{0, static_cast<size_t>(width) * height * 4,
+                           static_cast<uint32_t>(width),
+                           static_cast<uint32_t>(height)}});
   }
 
   io.Fonts->SetTexID(

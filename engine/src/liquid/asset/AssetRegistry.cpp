@@ -1,7 +1,8 @@
 #include "liquid/core/Base.h"
 #include "liquid/renderer/MaterialPBR.h"
-#include "AssetRegistry.h"
+#include "liquid/renderer/TextureUtils.h"
 
+#include "AssetRegistry.h"
 #include "DefaultObjects.h"
 
 namespace liquid {
@@ -27,10 +28,9 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   // Synchronize textures
   for (auto &[_, texture] : mTextures.getAssets()) {
     if (texture.data.deviceHandle == rhi::TextureHandle::Invalid) {
-      rhi::TextureDescription description;
-
-      description.data = texture.data.data;
+      rhi::TextureDescription description{};
       description.width = texture.data.width;
+      description.levels = static_cast<uint32_t>(texture.data.levels.size());
       description.layers = texture.data.layers;
       description.height = texture.data.height;
       description.usage = rhi::TextureUsage::Color |
@@ -39,10 +39,13 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.type = texture.data.type == TextureAssetType::Cubemap
                              ? rhi::TextureType::Cubemap
                              : rhi::TextureType::Standard;
-      description.size = texture.size;
       description.format = texture.data.format;
 
       texture.data.deviceHandle = renderStorage.createTexture(description);
+      TextureUtils::copyDataToTexture(
+          renderStorage.getDevice(), texture.data.data,
+          texture.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal,
+          texture.data.layers, texture.data.levels);
     }
   }
 
@@ -50,8 +53,6 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   for (auto &[_, font] : mFonts.getAssets()) {
     if (font.data.deviceHandle == rhi::TextureHandle::Invalid) {
       rhi::TextureDescription description{};
-      description.data = font.data.atlas.data();
-      description.size = font.size;
       description.width = font.data.atlasDimensions.x;
       description.height = font.data.atlasDimensions.y;
       description.usage = rhi::TextureUsage::Color |
@@ -60,6 +61,11 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.format = rhi::Format::Rgba8Srgb;
 
       font.data.deviceHandle = renderStorage.createTexture(description);
+      TextureUtils::copyDataToTexture(
+          renderStorage.getDevice(), font.data.atlas.data(),
+          font.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+          {{0, font.size, font.data.atlasDimensions.x,
+            font.data.atlasDimensions.y}});
     }
   }
 

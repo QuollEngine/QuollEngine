@@ -2,6 +2,7 @@
 
 #include "liquid/asset/AssetCache.h"
 #include "liquid/asset/DefaultObjects.h"
+#include "liquidator-tests/mocks/MockRenderDevice.h"
 
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE
 #define TINYGLTF_NO_INCLUDE_JSON
@@ -309,7 +310,8 @@ static liquid::Path saveSceneGLTF(GLTFTestScene &scene) {
 class GLTFImporterTestBase : public ::testing::Test {
 public:
   GLTFImporterTestBase()
-      : assetCache(CachePath, false), importer(assetCache, false) {}
+      : assetCache(CachePath, false), imageLoader(assetCache, &device),
+        importer(assetCache, imageLoader, false) {}
 
   void SetUp() override {
     fs::create_directory(CachePath);
@@ -321,6 +323,8 @@ public:
     fs::remove_all(TempPath);
   }
 
+  MockRenderDevice device;
   liquid::AssetCache assetCache;
+  liquid::editor::ImageLoader imageLoader;
   liquid::editor::GLTFImporter importer;
 };

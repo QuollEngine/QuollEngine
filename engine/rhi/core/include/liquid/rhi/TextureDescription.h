@@ -13,16 +13,11 @@ enum class TextureUsage : uint8_t {
   Color = 1 << 0,
   Depth = 1 << 1,
   Sampled = 1 << 2,
-  TransferDestination = 1 << 3
+  TransferSource = 1 << 4,
+  TransferDestination = 1 << 5
 };
 
-constexpr inline TextureUsage operator|(TextureUsage a, TextureUsage b) {
-  return TextureUsage(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
-}
-
-constexpr inline TextureUsage operator&(TextureUsage a, TextureUsage b) {
-  return TextureUsage(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
-}
+EnableBitwiseEnum(TextureUsage);
 
 /**
  * @brief Texture description
@@ -69,14 +64,9 @@ struct TextureDescription {
   uint32_t layers = 1;
 
   /**
-   * Texture size
+   * @brief Number of mip levels
    */
-  size_t size = 0;
-
-  /**
-   * Texture raw data
-   */
-  void *data = nullptr;
+  uint32_t levels = 1;
 };
 
 } // namespace liquid::rhi

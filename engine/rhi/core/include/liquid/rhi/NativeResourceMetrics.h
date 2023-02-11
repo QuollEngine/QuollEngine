@@ -22,13 +22,6 @@ public:
   virtual size_t getBuffersCount() const = 0;
 
   /**
-   * @brief Get size of all the textures
-   *
-   * @return Total texture size
-   */
-  virtual size_t getTotalTextureSize() const = 0;
-
-  /**
    * @brief Get number of textures
    *
    * @return Number of textures

@@ -64,4 +64,12 @@ VulkanCommandPool::createCommandLists(uint32_t count) {
   return std::move(renderCommandLists);
 }
 
+void VulkanCommandPool::freeCommandList(RenderCommandList &commandList) {
+  auto *commandBuffer = dynamic_cast<rhi::VulkanCommandBuffer *>(
+                            commandList.getNativeRenderCommandList().get())
+                            ->getVulkanCommandBuffer();
+
+  vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
+}
+
 } // namespace liquid::rhi

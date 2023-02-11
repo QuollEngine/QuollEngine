@@ -75,7 +75,8 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
-  AssetManager assetManager(project.assetsPath, project.assetsCachePath);
+  AssetManager assetManager(project.assetsPath, project.assetsCachePath,
+                            mDevice, true, true);
 
   Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
 

@@ -5,6 +5,9 @@
 #include "liquid/rhi/PipelineBarrier.h"
 #include "liquid/rhi/StageFlags.h"
 #include "liquid/rhi/IndexType.h"
+#include "liquid/rhi/Filter.h"
+#include "liquid/rhi/CopyRegion.h"
+#include "liquid/rhi/BlitRegion.h"
 
 namespace liquid::rhi {
 
@@ -158,6 +161,40 @@ public:
   pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
                   const std::vector<MemoryBarrier> &memoryBarriers,
                   const std::vector<ImageBarrier> &imageBarriers) = 0;
+
+  /**
+   * @brief Copy texture to buffer
+   *
+   * @param srcTexture Source texture
+   * @param dstBuffer Destination buffer
+   * @param copyRegions Copy regions
+   */
+  virtual void
+  copyTextureToBuffer(TextureHandle srcTexture, BufferHandle dstBuffer,
+                      const std::vector<CopyRegion> &copyRegions) = 0;
+
+  /**
+   * @brief Copy buffer to texture
+   *
+   * @param srcBuffer Source buffer
+   * @param dstTexture Destination texture
+   * @param copyRegions Copy regions
+   */
+  virtual void
+  copyBufferToTexture(BufferHandle srcBuffer, TextureHandle dstTexture,
+                      const std::vector<CopyRegion> &copyRegions) = 0;
+
+  /**
+   * @brief Blit texture
+   *
+   * @param source Source texture
+   * @param destination Destination texture
+   * @param regions Blit regions
+   * @param filter Filter
+   */
+  virtual void blitTexture(TextureHandle source, TextureHandle destination,
+                           const std::vector<BlitRegion> &regions,
+                           Filter filter) = 0;
 };
 
 } // namespace liquid::rhi

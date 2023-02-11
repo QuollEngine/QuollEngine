@@ -211,11 +211,53 @@ public:
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    */
-  void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                       const std::vector<MemoryBarrier> &memoryBarriers,
-                       const std::vector<ImageBarrier> &imageBarriers) {
+  inline void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
+                              const std::vector<MemoryBarrier> &memoryBarriers,
+                              const std::vector<ImageBarrier> &imageBarriers) {
     mNativeRenderCommandList->pipelineBarrier(srcStage, dstStage,
                                               memoryBarriers, imageBarriers);
+  }
+
+  /**
+   * @brief Copy texture to buffer
+   *
+   * @param srcTexture Source texture
+   * @param dstBuffer Destination buffer
+   * @param copyRegions Copy regions
+   */
+  inline void copyTextureToBuffer(TextureHandle srcTexture,
+                                  BufferHandle dstBuffer,
+                                  const std::vector<CopyRegion> &copyRegions) {
+    mNativeRenderCommandList->copyTextureToBuffer(srcTexture, dstBuffer,
+                                                  copyRegions);
+  }
+
+  /**
+   * @brief Copy buffer to texture
+   *
+   * @param srcBuffer Source buffer
+   * @param dstTexture Destination texture
+   * @param copyRegions Copy regions
+   */
+  inline void copyBufferToTexture(BufferHandle srcBuffer,
+                                  TextureHandle dstTexture,
+                                  const std::vector<CopyRegion> &copyRegions) {
+    mNativeRenderCommandList->copyBufferToTexture(srcBuffer, dstTexture,
+                                                  copyRegions);
+  }
+
+  /**
+   * @brief Blit texture
+   *
+   * @param source Source texture
+   * @param destination Destination texture
+   * @param regions Blit regions
+   * @param filter Filter
+   */
+  inline void blitTexture(TextureHandle source, TextureHandle destination,
+                          const std::vector<BlitRegion> &regions,
+                          Filter filter) {
+    mNativeRenderCommandList->blitTexture(source, destination, regions, filter);
   }
 
 private:

@@ -2,6 +2,7 @@
 
 #include "liquid/asset/AssetCache.h"
 
+#include "liquidator/asset/ImageLoader.h"
 #include "liquidator/asset/gltf/TinyGLTF.h"
 
 namespace liquid::editor {
@@ -70,6 +71,11 @@ struct GLTFImportData {
    * Asset cache
    */
   AssetCache &assetCache;
+
+  /**
+   * Image loader
+   */
+  ImageLoader &imageLoader;
 
   /**
    * Target path

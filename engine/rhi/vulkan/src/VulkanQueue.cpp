@@ -30,4 +30,6 @@ void VulkanQueue::submit(VulkanSubmitInfo submitInfo) {
                       "Failed to submit to queue");
 }
 
+void VulkanQueue::waitForIdle() { vkQueueWaitIdle(mQueue); }
+
 } // namespace liquid::rhi

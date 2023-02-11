@@ -171,6 +171,38 @@ public:
                        const std::vector<MemoryBarrier> &memoryBarriers,
                        const std::vector<ImageBarrier> &imageBarriers) override;
 
+  /**
+   * @brief Copy texture to buffer
+   *
+   * @param srcTexture Source texture
+   * @param dstBuffer Destination buffer
+   * @param copyRegions Copy regions
+   */
+  void copyTextureToBuffer(TextureHandle srcTexture, BufferHandle dstBuffer,
+                           const std::vector<CopyRegion> &copyRegions) override;
+
+  /**
+   * @brief Copy buffer to texture
+   *
+   * @param srcBuffer Source buffer
+   * @param dstTexture Destination texture
+   * @param copyRegions Copy regions
+   */
+  void copyBufferToTexture(BufferHandle srcBuffer, TextureHandle dstTexture,
+                           const std::vector<CopyRegion> &copyRegions) override;
+
+  /**
+   * @brief Blit texture
+   *
+   * @param source Source texture
+   * @param destination Destination texture
+   * @param regions Blit regions
+   * @param filter Filter
+   */
+  void blitTexture(TextureHandle source, TextureHandle destination,
+                   const std::vector<BlitRegion> &regions,
+                   Filter filter) override;
+
 private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;
 

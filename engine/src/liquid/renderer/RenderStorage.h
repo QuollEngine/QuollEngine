@@ -73,6 +73,13 @@ public:
    */
   rhi::Descriptor createMaterialDescriptor(rhi::Buffer buffer);
 
+  /**
+   * @brief Get render device
+   *
+   * @return Render device
+   */
+  inline rhi::RenderDevice *getDevice() { return mDevice; }
+
 private:
   rhi::RenderDevice *mDevice = nullptr;
 

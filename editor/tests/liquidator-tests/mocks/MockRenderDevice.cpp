@@ -1,5 +1,13 @@
 #include "liquid/core/Base.h"
 #include "MockRenderDevice.h"
+#include "MockRenderCommandList.h"
+
+liquid::rhi::RenderCommandList MockRenderDevice::requestImmediateCommandList() {
+  return liquid::rhi::RenderCommandList(new MockRenderCommandList);
+}
+
+void MockRenderDevice::submitImmediate(
+    liquid::rhi::RenderCommandList &commandList) {}
 
 liquid::rhi::RenderFrame MockRenderDevice::beginFrame() {
   return liquid::rhi::RenderFrame{std::numeric_limits<uint32_t>::max(),
@@ -64,6 +72,8 @@ liquid::rhi::TextureHandle MockRenderDevice::createTexture(
   mTextures.insert_or_assign(handle, description);
   return handle;
 }
+
+void MockRenderDevice::destroyTexture(liquid::rhi::TextureHandle handle) {}
 
 const liquid::rhi::TextureDescription MockRenderDevice::getTextureDescription(
     liquid::rhi::TextureHandle handle) const {

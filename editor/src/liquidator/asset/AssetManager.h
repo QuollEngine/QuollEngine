@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/asset/AssetCache.h"
+#include "ImageLoader.h"
 
 namespace liquid::editor {
 
@@ -61,10 +62,13 @@ public:
    *
    * @param assetsPath Path to assets directory
    * @param assetsCachePath Path to assets cache directory
+   * @param device Render device for computing
+   * @param optimize Optimize assets
    * @param createDefaultObjects Create default objects
    */
   AssetManager(const Path &assetsPath, const Path &assetsCachePath,
-               bool createDefaultObjects = true);
+               liquid::rhi::RenderDevice *device, bool optimize,
+               bool createDefaultObjects);
 
   /**
    * @brief Import asset
@@ -266,6 +270,9 @@ private:
 private:
   AssetCache mAssetCache;
   Path mAssetsPath;
+  bool mOptimize;
+
+  ImageLoader mImageLoader;
 
   std::unordered_map<String, Path> mAssetCacheMap;
 };

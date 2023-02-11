@@ -11,8 +11,9 @@
 
 namespace liquid::editor {
 
-GLTFImporter::GLTFImporter(AssetCache &assetCache, bool optimize)
-    : mAssetCache(assetCache), mOptimize(optimize) {}
+GLTFImporter::GLTFImporter(AssetCache &assetCache, ImageLoader &imageLoader,
+                           bool optimize)
+    : mAssetCache(assetCache), mImageLoader(imageLoader), mOptimize(optimize) {}
 
 Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
                                         const Path &engineAssetPath) {
@@ -43,7 +44,8 @@ Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
 
   std::filesystem::create_directory(engineAssetPath);
 
-  GLTFImportData importData{mAssetCache, engineAssetPath, model, mOptimize};
+  GLTFImportData importData{mAssetCache, mImageLoader, engineAssetPath, model,
+                            mOptimize};
 
   loadTextures(importData);
   loadMaterials(importData);

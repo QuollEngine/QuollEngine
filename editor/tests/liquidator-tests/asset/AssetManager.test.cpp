@@ -23,7 +23,7 @@ static const liquid::Path InnerPathInCache = CachePath / "inner-1" / "inner-2";
 
 class AssetManagerTest : public ::testing::Test {
 public:
-  AssetManagerTest() : manager(AssetsPath, CachePath, false) {}
+  AssetManagerTest() : manager(AssetsPath, CachePath, &device, false, false) {}
 
   void SetUp() override {
     fs::create_directory(AssetsPath);
@@ -43,6 +43,7 @@ public:
   }
 
 public:
+  MockRenderDevice device;
   liquid::editor::AssetManager manager;
 };
 
