@@ -5,6 +5,7 @@
 #include "VulkanWindowExtensions.h"
 #include "VulkanWindow.h"
 #include "VulkanTexture.h"
+#include "VulkanTextureView.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"

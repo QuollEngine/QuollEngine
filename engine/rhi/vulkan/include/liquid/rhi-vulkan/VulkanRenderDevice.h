@@ -160,6 +160,22 @@ public:
   void destroyTexture(TextureHandle handle) override;
 
   /**
+   * @brief Create texture view
+   *
+   * @param description Texture view description
+   * @return Texture view
+   */
+  TextureViewHandle
+  createTextureView(const TextureViewDescription &description) override;
+
+  /**
+   * @brief Destroy texture view
+   *
+   * @param handle Texture view handle
+   */
+  void destroyTextureView(TextureViewHandle handle) override;
+
+  /**
    * @brief Create render pass
    *
    * @param description Render pass description

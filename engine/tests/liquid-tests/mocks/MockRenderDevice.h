@@ -46,6 +46,11 @@ public:
   const liquid::rhi::TextureDescription
   getTextureDescription(liquid::rhi::TextureHandle handle) const;
 
+  liquid::rhi::TextureViewHandle
+  createTextureView(const liquid::rhi::TextureViewDescription &description);
+
+  void destroyTextureView(liquid::rhi::TextureViewHandle handle);
+
   liquid::rhi::RenderPassHandle
   createRenderPass(const liquid::rhi::RenderPassDescription &description);
 
@@ -93,6 +98,11 @@ private:
   std::unordered_map<liquid::rhi::TextureHandle,
                      liquid::rhi::TextureDescription>
       mTextures;
+
+  std::unordered_map<liquid::rhi::TextureViewHandle,
+                     liquid::rhi::TextureViewDescription>
+      mTextureViews;
+
   std::unordered_map<liquid::rhi::RenderPassHandle,
                      liquid::rhi::RenderPassDescription>
       mRenderPasses;

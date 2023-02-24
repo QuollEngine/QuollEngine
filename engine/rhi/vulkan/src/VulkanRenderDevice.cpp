@@ -4,6 +4,7 @@
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanTexture.h"
+#include "VulkanTextureView.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -180,6 +181,16 @@ VulkanRenderDevice::getTextureDescription(TextureHandle handle) const {
 
 void VulkanRenderDevice::destroyTexture(TextureHandle handle) {
   mRegistry.deleteTexture(handle);
+}
+
+TextureViewHandle VulkanRenderDevice::createTextureView(
+    const TextureViewDescription &description) {
+  return mRegistry.setTextureView(
+      std::make_unique<VulkanTextureView>(description, mRegistry, mDevice));
+}
+
+void VulkanRenderDevice::destroyTextureView(TextureViewHandle handle) {
+  mRegistry.deleteTextureView(handle);
 }
 
 RenderPassHandle
