@@ -80,6 +80,16 @@ const liquid::rhi::TextureDescription MockRenderDevice::getTextureDescription(
   return mTextures.at(handle);
 }
 
+liquid::rhi::TextureViewHandle MockRenderDevice::createTextureView(
+    const liquid::rhi::TextureViewDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::TextureViewHandle>();
+  mTextureViews.insert_or_assign(handle, description);
+  return handle;
+}
+
+void MockRenderDevice::destroyTextureView(
+    liquid::rhi::TextureViewHandle handle) {}
+
 liquid::rhi::RenderPassHandle MockRenderDevice::createRenderPass(
     const liquid::rhi::RenderPassDescription &description) {
   auto handle = getNewHandle<liquid::rhi::RenderPassHandle>();

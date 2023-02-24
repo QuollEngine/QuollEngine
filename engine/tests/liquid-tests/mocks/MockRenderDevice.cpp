@@ -1,8 +1,9 @@
 #include "liquid/core/Base.h"
 #include "MockRenderDevice.h"
+#include "MockRenderCommandList.h"
 
 liquid::rhi::RenderCommandList MockRenderDevice::requestImmediateCommandList() {
-  return liquid::rhi::RenderCommandList(nullptr);
+  return liquid::rhi::RenderCommandList(new MockRenderCommandList);
 }
 
 void MockRenderDevice::submitImmediate(
@@ -78,6 +79,16 @@ const liquid::rhi::TextureDescription MockRenderDevice::getTextureDescription(
     liquid::rhi::TextureHandle handle) const {
   return mTextures.at(handle);
 }
+
+liquid::rhi::TextureViewHandle MockRenderDevice::createTextureView(
+    const liquid::rhi::TextureViewDescription &description) {
+  auto handle = getNewHandle<liquid::rhi::TextureViewHandle>();
+  mTextureViews.insert_or_assign(handle, description);
+  return handle;
+}
+
+void MockRenderDevice::destroyTextureView(
+    liquid::rhi::TextureViewHandle handle) {}
 
 liquid::rhi::RenderPassHandle MockRenderDevice::createRenderPass(
     const liquid::rhi::RenderPassDescription &description) {

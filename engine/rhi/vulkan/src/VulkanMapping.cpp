@@ -171,6 +171,8 @@ VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
     return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   case DescriptorType::StorageBuffer:
     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+  case DescriptorType::StorageImage:
+    return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
   default:
     return VK_DESCRIPTOR_TYPE_MAX_ENUM;
   }
@@ -288,6 +290,8 @@ VulkanMapping::getDescriptorType(VkDescriptorType descriptorType) {
     return DescriptorType::UniformBuffer;
   case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
     return DescriptorType::StorageBuffer;
+  case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+    return DescriptorType::StorageImage;
   default:
     LIQUID_ASSERT(false, "Descriptor type does not exist");
   }

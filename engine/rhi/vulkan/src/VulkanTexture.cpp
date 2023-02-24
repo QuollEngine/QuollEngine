@@ -83,6 +83,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
     usageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
   }
 
+  if (BitwiseEnumContains(description.usage, TextureUsage::Storage)) {
+    usageFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
+  }
+
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageCreateInfo.pNext = nullptr;
