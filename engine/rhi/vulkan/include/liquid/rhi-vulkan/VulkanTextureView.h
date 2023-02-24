@@ -17,7 +17,7 @@ public:
    *
    * @param description Texture view description
    * @param registry Vulkan resource registry
-   * @param device
+   * @param device Vulkan device
    */
   VulkanTextureView(const TextureViewDescription &description,
                     VulkanResourceRegistry &registry,

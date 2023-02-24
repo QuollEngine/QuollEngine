@@ -175,6 +175,26 @@ public:
   Result<PrefabAssetHandle> loadPrefabFromFile(const Path &filePath);
 
   /**
+   * @brief Create environment from asset
+   *
+   * Create engine specific environment asset
+   * from environment data
+   *
+   * @param asset Environment asset
+   * @return Path to new environment asset
+   */
+  Result<Path>
+  createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset);
+
+  /**
+   * @brief Load environment from file
+   *
+   * @param filePath Path to asset
+   * @return Environment asset handle
+   */
+  Result<EnvironmentAssetHandle> loadEnvironmentFromFile(const Path &filePath);
+
+  /**
    * @brief Load Lua script from file
    *
    * @param filePath Path to asset
