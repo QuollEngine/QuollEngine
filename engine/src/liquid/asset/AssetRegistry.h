@@ -11,6 +11,7 @@
 #include "AnimationAsset.h"
 #include "AudioAsset.h"
 #include "PrefabAsset.h"
+#include "EnvironmentAsset.h"
 #include "LuaScriptAsset.h"
 
 #include "liquid/scene/Vertex.h"
@@ -39,6 +40,7 @@ class AssetRegistry {
   using AudioMap = AssetMap<AudioAssetHandle, AudioAsset>;
   using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
   using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
+  using EnvironmentMap = AssetMap<EnvironmentAssetHandle, EnvironmentAsset>;
 
   struct DefaultObjects {
     MeshAssetHandle cube = MeshAssetHandle::Invalid;
@@ -154,6 +156,13 @@ public:
   inline LuaScriptMap &getLuaScripts() { return mLuaScripts; }
 
   /**
+   * @brief Get environments
+   *
+   * @return Environment asset map
+   */
+  inline EnvironmentMap &getEnvironments() { return mEnvironments; }
+
+  /**
    * @brief Get asset located at path
    *
    * @param filePath Path to asset
@@ -173,6 +182,7 @@ private:
   AudioMap mAudios;
   PrefabMap mPrefabs;
   LuaScriptMap mLuaScripts;
+  EnvironmentMap mEnvironments;
 
   DefaultObjects mDefaultObjects;
 };
