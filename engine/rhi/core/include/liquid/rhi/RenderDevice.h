@@ -10,6 +10,7 @@
 #include "DescriptorLayoutDescription.h"
 #include "BufferDescription.h"
 #include "TextureDescription.h"
+#include "TextureViewDescription.h"
 #include "ShaderDescription.h"
 #include "RenderPassDescription.h"
 #include "FramebufferDescription.h"
@@ -168,6 +169,22 @@ public:
    * @param handle Texture handle
    */
   virtual void destroyTexture(TextureHandle handle) = 0;
+
+  /**
+   * @brief Create texture view
+   *
+   * @param description Texture view description
+   * @return Texture view
+   */
+  virtual TextureViewHandle
+  createTextureView(const TextureViewDescription &description) = 0;
+
+  /**
+   * @brief Destroy texture view
+   *
+   * @param handle Texture view handle
+   */
+  virtual void destroyTextureView(TextureViewHandle handle) = 0;
 
   /**
    * @brief Create render pass

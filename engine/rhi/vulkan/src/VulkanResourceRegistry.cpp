@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
+
 #include "VulkanResourceRegistry.h"
 #include "VulkanTexture.h"
+#include "VulkanTextureView.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -66,6 +68,19 @@ void VulkanResourceRegistry::deleteDanglingSwapchainRelativeTextures() {
       it = mSwapchainRelativeTextures.erase(it);
     }
   }
+}
+
+TextureViewHandle VulkanResourceRegistry::setTextureView(
+    std::unique_ptr<VulkanTextureView> &&textureView) {
+  auto handle = TextureViewHandle{mTextureViews.lastHandle};
+  mTextureViews.lastHandle++;
+  mTextureViews.map.insert_or_assign(handle, std::move(textureView));
+
+  return handle;
+}
+
+void VulkanResourceRegistry::deleteTextureView(TextureViewHandle handle) {
+  mTextureViews.map.erase(handle);
 }
 
 RenderPassHandle VulkanResourceRegistry::setRenderPass(

@@ -28,13 +28,26 @@ public:
    * @brief Bind texture descriptors
    *
    * @param binding Binding number
-   * @param textures List of textures
+   * @param textures Textures
    * @param type Descriptor type
    * @param start Starting index
    * @return Current object
    */
   Descriptor &write(uint32_t binding,
                     const std::vector<TextureHandle> &textures,
+                    DescriptorType type, uint32_t start = 0);
+
+  /**
+   * @brief Bind texture descriptors
+   *
+   * @param binding Binding number
+   * @param textureViews Texture views
+   * @param type Descriptor type
+   * @param start Starting index
+   * @return Current object
+   */
+  Descriptor &write(uint32_t binding,
+                    const std::vector<TextureViewHandle> &textureViews,
                     DescriptorType type, uint32_t start = 0);
 
   /**

@@ -11,6 +11,10 @@ public:
              liquid::rhi::DescriptorType type, uint32_t start) override;
 
   void write(uint32_t binding,
+             const std::vector<liquid::rhi::TextureViewHandle> &textureViews,
+             liquid::rhi::DescriptorType type, uint32_t start) override;
+
+  void write(uint32_t binding,
              const std::vector<liquid::rhi::BufferHandle> &buffers,
              liquid::rhi::DescriptorType type, uint32_t start) override;
 

@@ -149,6 +149,7 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
   LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
   std::vector<String> warnings;
 
+  std::vector<liquid::Path> prefabDirs;
   for (const auto &entry : std::filesystem::recursive_directory_iterator(
            mAssetCache.getAssetsPath())) {
     if (!entry.is_regular_file() || entry.path().extension() != ".lqhash") {
@@ -172,12 +173,16 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
           (mAssetCache.getAssetsPath() / engineAssetPathStr).make_preferred();
 
       if (engineAssetPath.extension() == ".lqprefab") {
-        std::filesystem::remove_all(engineAssetPath.parent_path());
-      } else {
-        std::filesystem::remove(engineAssetPath);
+        prefabDirs.push_back(engineAssetPath.parent_path());
       }
+
+      std::filesystem::remove(engineAssetPath);
       std::filesystem::remove(hashFilePath);
     }
+  }
+
+  for (const auto &path : prefabDirs) {
+    std::filesystem::remove_all(path);
   }
 
   for (const auto &entry :
