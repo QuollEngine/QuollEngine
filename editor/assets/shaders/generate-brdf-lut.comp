@@ -1,0 +1,55 @@
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_debug_printf : enable
+
+#include "generate-ibl.glsl"
+
+layout(set = 0, binding = 0) uniform samplerCube uInputTexture;
+layout(set = 0, binding = 1, rgba16f) writeonly uniform image2D uOutputTexture;
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+const uint NumSamples = 1024;
+
+float ggxSmith(float NdotL, float NdotV, float roughness) {
+  float a2 = pow(roughness, 4.0);
+  float GGXV = NdotL * sqrt(NdotV * NdotV * (1.0 - a2) + a2);
+  float GGXL = NdotV * sqrt(NdotL * NdotL * (1.0 - a2) + a2);
+  return 0.5 / (GGXV + GGXL);
+}
+
+void main() {
+  vec2 texCoord =
+      vec2(gl_GlobalInvocationID.xy) / float(imageSize(uOutputTexture).x);
+
+  float NdotV = texCoord.x;
+  float roughness = texCoord.y;
+
+  vec3 V = vec3(sqrt(1.0 - NdotV * NdotV), 0.0, NdotV);
+
+  vec3 normal = vec3(0.0, 0.0, 1.0);
+
+  vec2 f = vec2(0.0);
+  for (uint i = 0; i < NumSamples; ++i) {
+    vec2 u = sampleHammersley(i, NumSamples);
+    vec3 H = importanceSampleGGX(u, normal, roughness);
+
+    vec3 L = normalize(reflect(-V, H));
+    float NdotL = clamp(L.z, 0.0, 1.0);
+    float NdotH = clamp(H.z, 0.0, 1.0);
+    float VdotH = clamp(dot(V, H), 0.0, 1.0);
+
+    if (NdotL > 0.0) {
+      float pdf = ggxSmith(NdotV, NdotL, roughness) * VdotH * NdotL / NdotH;
+      float Fc = pow(1.0 - VdotH, 5.0);
+
+      f.x += (1.0 - Fc) * pdf;
+      f.y += Fc * pdf;
+    }
+  }
+
+  f = 4.0 * f / float(NumSamples);
+
+  imageStore(uOutputTexture, ivec2(gl_GlobalInvocationID.xy),
+             vec4(f, 0.0, 1.0));
+}

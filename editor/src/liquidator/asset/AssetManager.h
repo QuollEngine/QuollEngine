@@ -2,6 +2,7 @@
 
 #include "liquid/asset/AssetCache.h"
 #include "ImageLoader.h"
+#include "HDRIImporter.h"
 
 namespace liquid::editor {
 
@@ -55,6 +56,11 @@ public:
    * @brief Supported scene extensions
    */
   static const std::vector<String> SceneExtensions;
+
+  /**
+   * @brief Supported environment extensions
+   */
+  static const std::vector<String> EnvironmentExtensions;
 
 public:
   /**
@@ -267,12 +273,22 @@ private:
    */
   Result<Path> loadOriginalPrefab(const Path &originalAssetPath);
 
+  /**
+   * @brief Load original environment
+   *
+   * @param originalAssetPath Original asset path
+   * @return Path to engine asset for environment result
+   */
+  Result<Path> loadOriginalEnvironment(const Path &originalAssetPath);
+
 private:
   AssetCache mAssetCache;
   Path mAssetsPath;
   bool mOptimize;
 
   ImageLoader mImageLoader;
+
+  HDRIImporter mHDRIImporter;
 
   std::unordered_map<String, Path> mAssetCacheMap;
 };
