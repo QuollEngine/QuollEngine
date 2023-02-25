@@ -186,6 +186,15 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
+  if (header.type == AssetType::Environment) {
+    auto res = loadEnvironmentDataFromInputStream(stream, path);
+
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
   return Result<bool>::Error("Unknown asset file");
 }
 
