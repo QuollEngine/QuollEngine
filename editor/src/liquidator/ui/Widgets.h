@@ -40,8 +40,24 @@ public:
    */
   inline operator bool() const { return mExpanded; }
 
+  /**
+   * @brief Get clip rect
+   *
+   * @return Clip rect
+   */
+  inline const ImRect &getClipRect() const { return mClipRect; }
+
+  /**
+   * @brief Get padding
+   *
+   * @return Padding
+   */
+  inline const ImVec2 &getPadding() const { return mPadding; }
+
 private:
   bool mExpanded = false;
+  ImRect mClipRect;
+  ImVec2 mPadding;
 };
 
 /**

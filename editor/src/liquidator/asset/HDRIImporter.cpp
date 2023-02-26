@@ -138,7 +138,50 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
   environment.data.specularMap = specularCubemap.getData();
   environment.data.irradianceMap = irradianceCubemap.getData();
 
-  return mAssetCache.createEnvironmentFromAsset(environment);
+  auto createdFileRes = mAssetCache.createEnvironmentFromAsset(environment);
+
+  if (createdFileRes.hasError()) {
+    return createdFileRes;
+  }
+
+  auto loadRes = mAssetCache.loadAsset(createdFileRes.getData());
+  if (loadRes.hasError()) {
+    return Result<Path>::Error(loadRes.getError());
+  }
+
+  return createdFileRes;
+}
+
+rhi::TextureHandle
+HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
+                                   RenderStorage &renderStorage) {
+  int32_t width = 0;
+  int32_t height = 0;
+  int32_t channels = 0;
+
+  auto *data = stbi_loadf(originalAssetPath.string().c_str(), &width, &height,
+                          &channels, STBI_rgb_alpha);
+
+  if (!data) {
+    return rhi::TextureHandle::Invalid;
+  }
+
+  rhi::TextureDescription hdriTextureDesc{};
+  hdriTextureDesc.usage = rhi::TextureUsage::Color |
+                          rhi::TextureUsage::TransferDestination |
+                          rhi::TextureUsage::Sampled;
+  hdriTextureDesc.format = rhi::Format::Rgba32Float;
+  hdriTextureDesc.width = width;
+  hdriTextureDesc.height = height;
+  hdriTextureDesc.layers = 1;
+
+  auto hdriTexture = renderStorage.createTexture(hdriTextureDesc);
+  TextureUtils::copyDataToTexture(
+      mDevice, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+      {{0, static_cast<size_t>(width) * height * 4 * sizeof(float),
+        static_cast<uint32_t>(width), static_cast<uint32_t>(height)}});
+
+  return hdriTexture;
 }
 
 HDRIImporter::CubemapData

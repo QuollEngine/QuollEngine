@@ -42,6 +42,9 @@ void IconRegistry::loadIcons(RenderStorage &renderStorage,
       EditorIcon::Script,
       loader.loadFromFile((iconsPath / "script.png").string()));
   mIconMap.insert_or_assign(
+      EditorIcon::Environment,
+      loader.loadFromFile((iconsPath / "environment.png").string()));
+  mIconMap.insert_or_assign(
       EditorIcon::Sun, loader.loadFromFile((iconsPath / "sun.png").string()));
   mIconMap.insert_or_assign(
       EditorIcon::Camera,

@@ -12,5 +12,8 @@ layout(location = 0) out vec4 outColor;
 layout(set = 1, binding = 0) uniform samplerCube uGlobalTextures[];
 
 void main() {
-  outColor = texture(uGlobalTextures[pcDrawParameters.index9], inTexCoord);
+  vec3 color =
+      texture(uGlobalTextures[pcDrawParameters.index9], inTexCoord).xyz;
+
+  outColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
 }

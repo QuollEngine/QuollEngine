@@ -199,11 +199,15 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
   uint32_t mipHeight = texture.data.height;
 
   for (size_t level = 0; level < texture.data.levels.size(); ++level) {
-    size_t size =
+    // ktsTexture_GetImageSize returns size of a
+    // single face or layer within a level
+    size_t blockSize =
         ktxTexture_GetImageSize(ktxTextureData, static_cast<int32_t>(level));
 
+    size_t levelSize = blockSize * numFaces;
+
     texture.data.levels.at(level).offset = static_cast<uint32_t>(levelOffset);
-    texture.data.levels.at(level).size = static_cast<uint32_t>(size);
+    texture.data.levels.at(level).size = static_cast<uint32_t>(levelSize);
     texture.data.levels.at(level).width = mipWidth;
     texture.data.levels.at(level).height = mipHeight;
 
@@ -221,10 +225,10 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
                                 static_cast<uint32_t>(face), &offset);
 
       memcpy(static_cast<uint8_t *>(texture.data.data) + levelOffset +
-                 (size * face),
-             srcData + offset, size);
+                 (blockSize * face),
+             srcData + offset, blockSize);
     }
-    levelOffset += size;
+    levelOffset += levelSize;
   }
 
   ktxTexture_Destroy(ktxTextureData);

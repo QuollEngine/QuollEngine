@@ -244,7 +244,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                        const RenderGraphRegistry &registry,
                                        uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
-      if (!rhi::isHandleValid(frameData.getIrradianceMap()))
+      if (!rhi::isHandleValid(frameData.getSkyboxTexture()))
         return;
 
       auto pipeline = registry.get(vPipeline);
@@ -256,7 +256,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
       frameData.getDrawParams().index9 =
-          rhi::castHandleToUint(frameData.getIrradianceMap());
+          rhi::castHandleToUint(frameData.getSkyboxTexture());
       commandList.pushConstants(
           pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
           sizeof(DrawParameters), &frameData.getDrawParams());
@@ -377,10 +377,21 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   };
 
   // Environments
-  for (auto [entity, environment] : entityDatabase.view<Environment>()) {
-    frameData.setEnvironmentTextures(environment.irradianceMap,
-                                     environment.specularMap,
-                                     environment.brdfLUT);
+  const auto &textures = mAssetRegistry.getTextures();
+  for (auto [entity, environment] : entityDatabase.view<EnvironmentSkybox>()) {
+    const auto &asset = mAssetRegistry.getEnvironments()
+                            .getAsset(environment.environmentHandle)
+                            .data;
+
+    frameData.setSkyboxTexture(
+        textures.getAsset(asset.specularMap).data.deviceHandle);
+
+    if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
+      frameData.setEnvironmentTextures(
+          textures.getAsset(asset.irradianceMap).data.deviceHandle,
+          textures.getAsset(asset.specularMap).data.deviceHandle,
+          textures.getAsset(asset.brdfLut).data.deviceHandle);
+    }
   }
 
   frameData.updateBuffers();

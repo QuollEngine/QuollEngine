@@ -229,11 +229,18 @@ public:
   }
 
   /**
-   * @brief Get irradiance map
+   * @brief Get skybox texture
    *
-   * @return Irradiance map
+   * @return Skybox texture
    */
-  inline rhi::TextureHandle getIrradianceMap() const { return mIrradianceMap; }
+  inline rhi::TextureHandle getSkyboxTexture() const { return mSkyboxTexture; }
+
+  /**
+   * @brief Set skybox texture
+   *
+   * @param skyboxTexture Skybox texture
+   */
+  void setSkyboxTexture(rhi::TextureHandle skyboxTexture);
 
   /**
    * @brief Get number of lights
@@ -376,9 +383,7 @@ private:
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
 
-  rhi::TextureHandle mIrradianceMap = rhi::TextureHandle::Invalid;
-  rhi::TextureHandle mSpecularMap = rhi::TextureHandle::Invalid;
-  rhi::TextureHandle mBrdfLUT = rhi::TextureHandle::Invalid;
+  rhi::TextureHandle mSkyboxTexture = rhi::TextureHandle::Invalid;
 
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
   std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>

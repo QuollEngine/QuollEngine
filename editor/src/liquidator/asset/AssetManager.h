@@ -81,9 +81,9 @@ public:
    *
    * @param source Path to source asset
    * @param targetAssetDirectory Target directory
-   * @return Import result
+   * @return Path to imported original asset
    */
-  Result<bool> importAsset(const Path &source,
+  Result<Path> importAsset(const Path &source,
                            const Path &targetAssetDirectory);
 
   /**
@@ -108,6 +108,14 @@ public:
   inline const Path &getCachePath() const {
     return mAssetCache.getAssetsPath();
   }
+
+  /**
+   * @brief Generate preview
+   *
+   * @param path Original asset path
+   * @param renderStorage Render storage
+   */
+  void generatePreview(const Path &path, RenderStorage &renderStorage);
 
   /**
    * @brief Find engine asset path

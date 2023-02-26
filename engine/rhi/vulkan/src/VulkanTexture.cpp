@@ -133,6 +133,8 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
   samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
   samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+  samplerCreateInfo.minLod = 0.0f;
+  samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
   checkForVulkanError(
       vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
       "Failed to image sampler");

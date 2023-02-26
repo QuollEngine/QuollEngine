@@ -8,12 +8,13 @@ AssetLoader::AssetLoader(AssetManager &assetManager,
                          RenderStorage &renderStorage)
     : mAssetManager(assetManager), mRenderStorage(renderStorage) {}
 
-Result<bool> AssetLoader::loadFromPath(const Path &path,
+Result<Path> AssetLoader::loadFromPath(const Path &path,
                                        const Path &directory) {
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res.hasData()) {
     mAssetManager.getAssetRegistry().syncWithDevice(mRenderStorage);
+    mAssetManager.generatePreview(res.getData(), mRenderStorage);
   }
 
   return res;
@@ -34,7 +35,12 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
   if (filePath.empty())
     return Result<bool>::Ok(true, {});
 
-  return loadFromPath(filePath, directory);
+  auto res = loadFromPath(filePath, directory);
+
+  if (res.hasError()) {
+    return Result<bool>::Error(res.getError());
+  }
+  return Result<bool>::Ok(true, res.getWarnings());
 }
 
 } // namespace liquid::editor

@@ -57,7 +57,7 @@ AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
       mImageLoader(mAssetCache, device), mHDRIImporter(mAssetCache, device),
       mOptimize(optimize) {}
 
-Result<bool> AssetManager::importAsset(const Path &source,
+Result<Path> AssetManager::importAsset(const Path &source,
                                        const Path &targetAssetDirectory) {
   auto createdDirectory = createDirectoriesRecursive(targetAssetDirectory);
 
@@ -68,7 +68,7 @@ Result<bool> AssetManager::importAsset(const Path &source,
     GLTFImporter importer(mAssetCache, mImageLoader, mOptimize);
     auto res = importer.saveBinary(source, targetAssetPath);
     if (res.hasError()) {
-      return Result<bool>::Error(res.getError());
+      return Result<Path>::Error(res.getError());
     }
 
     targetAssetPath = res.getData();
@@ -86,10 +86,34 @@ Result<bool> AssetManager::importAsset(const Path &source,
   }
 
   if (res.hasError()) {
-    return Result<bool>::Error("Cannot import " + source.string() + ": " +
+    return Result<Path>::Error("Cannot import " + source.string() + ": " +
                                res.getError());
   }
-  return res;
+
+  return Result<Path>::Ok(targetAssetPath);
+}
+
+void AssetManager::generatePreview(const Path &originalAssetPath,
+                                   RenderStorage &renderStorage) {
+  const auto &engineAssetPath = findEngineAssetPath(originalAssetPath);
+  const auto &res = mAssetCache.getRegistry().getAssetByPath(engineAssetPath);
+  auto handle = res.second;
+
+  if (res.first == AssetType::Environment) {
+    auto &asset = mAssetCache.getRegistry().getEnvironments().getAsset(
+        static_cast<liquid::EnvironmentAssetHandle>(handle));
+    if (!rhi::isHandleValid(asset.preview)) {
+      asset.preview =
+          mHDRIImporter.loadFromPathToDevice(originalAssetPath, renderStorage);
+    }
+  } else if (res.first == AssetType::Texture) {
+    auto &asset = mAssetCache.getRegistry().getTextures().getAsset(
+        static_cast<liquid::TextureAssetHandle>(handle));
+
+    if (!rhi::isHandleValid(asset.preview)) {
+      asset.preview = asset.data.deviceHandle;
+    }
+  }
 }
 
 Path AssetManager::findEngineAssetPath(const Path &originalAssetPath) {
@@ -195,17 +219,24 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
       continue;
     }
 
-    if (isAssetChanged(entry.path())) {
-      auto res = loadOriginalAsset(entry.path());
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    }
+    auto res = loadOriginalIfChanged(entry.path());
+    warnings.insert(warnings.end(), res.getWarnings().begin(),
+                    res.getWarnings().end());
   }
 
   auto res = mAssetCache.preloadAssets(renderStorage);
 
   if (res.hasError())
     return res;
+
+  for (const auto &entry :
+       std::filesystem::recursive_directory_iterator(mAssetsPath)) {
+    if (!entry.is_regular_file()) {
+      continue;
+    }
+
+    generatePreview(entry.path(), renderStorage);
+  }
 
   warnings.insert(warnings.end(), res.getWarnings().begin(),
                   res.getWarnings().end());

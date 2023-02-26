@@ -46,6 +46,16 @@ public:
   Result<Path> loadFromPath(const Path &originalAssetPath,
                             const Path &engineAssetPath);
 
+  /**
+   * @brief Load HDRI from file to a device
+   *
+   * @param originalAssetPath Original asset path
+   * @param renderStorage Render storage
+   * @return Texture handle
+   */
+  rhi::TextureHandle loadFromPathToDevice(const Path &originalAssetPath,
+                                          RenderStorage &renderStorage);
+
 private:
   /**
    * @brief Convert equirectangular image to cubemap
