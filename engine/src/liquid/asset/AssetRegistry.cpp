@@ -93,6 +93,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
           getTextureFromRegistry(material.metallicRoughnessTexture);
       properties.metallicRoughnessTextureCoord =
           material.metallicRoughnessTextureCoord;
+      properties.roughnessFactor = material.roughnessFactor;
 
       properties.normalScale = material.normalScale;
       properties.normalTexture = getTextureFromRegistry(material.normalTexture);
@@ -298,6 +299,12 @@ AssetRegistry::getAssetByPath(const Path &filePath) {
   for (auto &[handle, asset] : mLuaScripts.getAssets()) {
     if (asset.path == filePath) {
       return {AssetType::LuaScript, static_cast<uint32_t>(handle)};
+    }
+  }
+
+  for (auto &[handle, asset] : mEnvironments.getAssets()) {
+    if (asset.path == filePath) {
+      return {AssetType::Environment, static_cast<uint32_t>(handle)};
     }
   }
 

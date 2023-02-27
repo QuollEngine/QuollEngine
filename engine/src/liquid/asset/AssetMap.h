@@ -55,6 +55,14 @@ public:
   }
 
   /**
+   * @brief Get asset
+   *
+   * @param handle Asset handle
+   * @return Asset
+   */
+  AssetData<TData> &getAsset(THandle handle) { return mAssets.at(handle); }
+
+  /**
    * @brief Get all assets
    *
    * @return List of all assets

@@ -300,14 +300,16 @@ void SceneRendererFrameData::addText(FontAssetHandle font,
   }
 }
 
+void SceneRendererFrameData::setSkyboxTexture(rhi::TextureHandle skybox) {
+  mSkyboxTexture = skybox;
+}
+
 void SceneRendererFrameData::setEnvironmentTextures(
     rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap,
     rhi::TextureHandle brdfLUT) {
   mSceneData.textures.x = rhi::castHandleToUint(irradianceMap);
   mSceneData.textures.y = rhi::castHandleToUint(specularMap);
   mSceneData.textures.z = rhi::castHandleToUint(brdfLUT);
-
-  mIrradianceMap = irradianceMap;
 }
 
 void SceneRendererFrameData::setCameraData(const Camera &data,
@@ -332,9 +334,7 @@ void SceneRendererFrameData::clear() {
   mSceneData.textures.y = 0;
   mSceneData.textures.z = 0;
   mLastSkeleton = 0;
-  mIrradianceMap = rhi::TextureHandle::Invalid;
-  mSpecularMap = rhi::TextureHandle::Invalid;
-  mBrdfLUT = rhi::TextureHandle::Invalid;
+  mSkyboxTexture = rhi::TextureHandle::Invalid;
 
   mMeshGroups.clear();
   mSkinnedMeshGroups.clear();

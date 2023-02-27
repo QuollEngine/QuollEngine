@@ -41,19 +41,19 @@ Section::Section(const char *title) {
   ImGui::GetWindowDrawList()->ChannelsSplit(2);
   ImGui::GetWindowDrawList()->ChannelsSetCurrent(1);
 
-  auto padding = ImGui::GetStyle().WindowPadding;
+  mPadding = ImGui::GetStyle().WindowPadding;
 
   auto *window = ImGui::GetCurrentWindow();
   float windowWidth = ImGui::GetWindowWidth();
 
-  auto boundsX = calculateSectionBoundsX(padding.x);
+  auto boundsX = calculateSectionBoundsX(mPadding.x);
 
   const float midPoint = boundsX.start + (boundsX.end - boundsX.start) / 2.0f;
 
-  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding.y);
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + mPadding.y);
   ImGui::BeginGroup();
-  if (padding.x > 0) {
-    ImGui::Indent(padding.x);
+  if (mPadding.x > 0) {
+    ImGui::Indent(mPadding.x);
   }
 
   ImGui::PushClipRect(ImVec2(boundsX.start, window->ClipRect.Min.y),
@@ -61,8 +61,9 @@ Section::Section(const char *title) {
   ImGui::Text("%s", title);
   ImGui::PopClipRect();
 
-  ImGui::PushClipRect(ImVec2(boundsX.start, window->ClipRect.Min.y),
-                      ImVec2(boundsX.end, window->ClipRect.Max.y), false);
+  mClipRect.Min = ImVec2(boundsX.start, window->ClipRect.Min.y);
+  mClipRect.Max = ImVec2(boundsX.end, window->ClipRect.Max.y);
+  ImGui::PushClipRect(mClipRect.Min, mClipRect.Max, false);
 
   mExpanded = true;
 }

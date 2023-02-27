@@ -83,6 +83,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
     return EditorIcon::Prefab;
   case AssetType::LuaScript:
     return EditorIcon::Script;
+  case AssetType::Environment:
+    return EditorIcon::Environment;
 
   default:
     return EditorIcon::Unknown;
@@ -127,15 +129,17 @@ void AssetBrowser::render(AssetManager &assetManager,
       entry.preview = iconRegistry.getIcon(entry.icon);
 
       if (entry.assetType == AssetType::Texture) {
-        auto handle =
+        entry.preview =
             assetManager.getAssetRegistry()
                 .getTextures()
                 .getAsset(static_cast<TextureAssetHandle>(pair.second))
-                .data.deviceHandle;
-
-        if (handle != rhi::TextureHandle::Invalid) {
-          entry.preview = handle;
-        }
+                .preview;
+      } else if (entry.assetType == AssetType::Environment) {
+        entry.preview =
+            assetManager.getAssetRegistry()
+                .getEnvironments()
+                .getAsset(static_cast<EnvironmentAssetHandle>(pair.second))
+                .preview;
       }
 
       entry.clippedName = entry.path.filename().stem().string();
@@ -250,7 +254,8 @@ void AssetBrowser::render(AssetManager &assetManager,
                           entry.assetType == AssetType::Skeleton ||
                           entry.assetType == AssetType::Texture ||
                           entry.assetType == AssetType::Audio ||
-                          entry.assetType == AssetType::LuaScript;
+                          entry.assetType == AssetType::LuaScript ||
+                          entry.assetType == AssetType::Environment;
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {

@@ -17,7 +17,8 @@ EntityDatabase::EntityDatabase() {
   reg<WorldTransform>();
   reg<Parent>();
   reg<Children>();
-  reg<Environment>();
+  reg<EnvironmentSkybox>();
+  reg<EnvironmentLightingSkyboxSource>();
   reg<Animator>();
   reg<AudioSource>();
   reg<AudioStart>();

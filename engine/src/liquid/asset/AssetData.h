@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/rhi/RenderHandle.h"
 #include "Asset.h"
 
 namespace liquid {
@@ -39,6 +40,11 @@ template <class TData> struct AssetData {
    * Asset relative path
    */
   Path relativePath;
+
+  /**
+   * Preview texture
+   */
+  rhi::TextureHandle preview = rhi::TextureHandle::Invalid;
 };
 
 } // namespace liquid

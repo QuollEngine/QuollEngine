@@ -26,9 +26,9 @@ public:
    *
    * @param path Path to asset
    * @param directory Target directory path
-   * @return Asset load result
+   * @return Imported original asset path
    */
-  Result<bool> loadFromPath(const Path &path, const Path &directory);
+  Result<Path> loadFromPath(const Path &path, const Path &directory);
 
   /**
    * @brief Load asset from native file dialog

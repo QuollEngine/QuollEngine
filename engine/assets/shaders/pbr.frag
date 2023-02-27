@@ -165,6 +165,10 @@ const float PI = 3.141592653589793;
 const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
                                   0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
 
+#define IrradianceMap uTexturesCube[getSceneData().textures.x]
+#define SpecularMap uTexturesCube[getSceneData().textures.y]
+#define BrdfLut uGlobalTextures[getSceneData().textures.z]
+
 /**
  * @brief sRGB to Linear color
  *
@@ -251,10 +255,11 @@ vec3 getNormal() {
   mat3 tbn = inTBN;
 
   if (uMaterialData.normalTexture > 0) {
-    vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],
-                     inTextureCoord[uMaterialData.normalTextureCoord])
-                 .rgb *
-             uMaterialData.normalScale;
+    vec3 n =
+        srgbToLinear(texture(uGlobalTextures[uMaterialData.normalTexture],
+                             inTextureCoord[uMaterialData.normalTextureCoord]))
+            .xyz *
+        uMaterialData.normalScale;
     return normalize(tbn * n);
   } else {
     return normalize(tbn[2]);
@@ -380,6 +385,7 @@ void main() {
 
   if (uMaterialData.metallicRoughnessTexture > 0) {
     vec3 mrSample =
+
         texture(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
                 inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
             .xyz;
@@ -406,11 +412,11 @@ void main() {
   vec3 diffuseColor =
       mix(baseColor.rgb * (1 - dielectricSpecular), vec3(0.0), metallic);
 
-  vec3 f0 = mix(vec3(dielectricSpecular), baseColor.rgb, metallic);
+  vec3 F0 = mix(vec3(dielectricSpecular), baseColor.rgb, metallic);
 
   float alpha = roughness * roughness;
 
-  vec3 cameraPos = vec3(getCamera().view[3]);
+  vec3 cameraPos = vec3(inverse(getCamera().view)[3]);
   vec3 n = getNormal();
   vec3 v = normalize(cameraPos - inWorldPosition);
   vec3 color = vec3(0.0, 0.0, 0.0);
@@ -434,7 +440,7 @@ void main() {
       continue;
     }
 
-    vec3 F = schlickFresnel(f0, VdotH);
+    vec3 F = schlickFresnel(F0, VdotH);
     float G = schlickSpecularGeometricAttenuation(alpha, NdotV, NdotL);
     float D = ggxNormalDistribution(alpha, NdotH);
 
@@ -448,15 +454,21 @@ void main() {
   }
 
   if (getSceneData().textures.x > 0) {
-    vec3 reflection = -normalize(reflect(v, n));
-    vec3 diffuse =
-        texture(uTexturesCube[getSceneData().textures.x], n).rgb * diffuseColor;
-    vec3 brdf = texture(uGlobalTextures[getSceneData().textures.y],
-                        vec2(NdotV, 1.0 - roughness))
-                    .rgb;
-    vec3 specular =
-        texture(uTexturesCube[getSceneData().textures.y], reflection).rgb *
-        (f0 + brdf.x + brdf.y);
+    vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
+
+    vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
+    vec3 kS = F0 + Fr * pow(1 - NdotV, 5.0);
+    vec3 FssEss = kS * brdfLut.r + brdfLut.g;
+    float lod = roughness * float(textureQueryLevels(SpecularMap) - 1);
+    vec3 reflection = normalize(reflect(-v, n));
+
+    float Ems = 1.0 - (brdfLut.r + brdfLut.g);
+    vec3 Favg = (F0 + (1.0 - F0) / 21.0);
+    vec3 FmsEms = Ems * FssEss * Favg / (1.0 - Favg * Ems);
+    vec3 kD = diffuseColor * (1.0 - FssEss + FmsEms);
+
+    vec3 diffuse = textureLod(IrradianceMap, n, 0).rgb * kD;
+    vec3 specular = textureLod(SpecularMap, reflection, lod).rgb * FssEss;
 
     color += diffuse + specular;
   }

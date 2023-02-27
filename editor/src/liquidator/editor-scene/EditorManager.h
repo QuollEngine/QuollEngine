@@ -9,6 +9,8 @@
 
 namespace liquid::editor {
 
+enum class EnvironmentLightingSource { None = 0, Skybox = 1 };
+
 /**
  * @brief Editor manager
  *
@@ -80,19 +82,31 @@ public:
   void moveCameraToEntity(Entity entity);
 
   /**
-   * @brief Check if environment exists
+   * @brief Check if environment skybox exists
    *
-   * @retval true Environment exists
-   * @retval false Environment does not exist
+   * @retval true Environment skybox exists
+   * @retval false Environment skybox does not exist
    */
-  bool hasEnvironment();
+  bool hasEnvironmentSkybox();
 
   /**
-   * @brief Get environment
+   * @brief Get environment skybox
    *
-   * @return Environment component
+   * @return Environment asset handle
    */
-  Environment &getEnvironment();
+  EnvironmentAssetHandle getEnvironmentSkybox();
+
+  /**
+   * @brief Set environment skybox
+   *
+   * @param environment Environment asset handle
+   */
+  void setEnvironmentSkybox(EnvironmentAssetHandle environment);
+
+  /**
+   * @brief Delete environment skybox
+   */
+  void deleteEnvironmentSkybox();
 
   /**
    * @brief Set transform operation
@@ -100,6 +114,23 @@ public:
    * @param transformOperation Transform operation
    */
   void setTransformOperation(TransformOperation transformOperation);
+
+  /**
+   * @brief Get environment lighting source
+   *
+   * @return Environment lighting source
+   */
+  EnvironmentLightingSource getEnvironmentLightingSource();
+
+  /**
+   * @brief Remove environment lighting source
+   */
+  void removeEnvironmentLightingSource();
+
+  /**
+   * @brief Set skybox as environment lighting source
+   */
+  void setEnvironmentLightingSkyboxSource();
 
   /**
    * @brief Get transform operation

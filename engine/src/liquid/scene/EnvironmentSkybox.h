@@ -1,15 +1,22 @@
 #pragma once
 
 #include "liquid/rhi/RenderHandle.h"
+#include "liquid/asset/EnvironmentAsset.h"
 
 namespace liquid {
 
 /**
- * @brief Environment component
+ * @brief Environment skybox component
  *
  * Stores IBL maps
  */
-struct Environment {
+struct EnvironmentSkybox {
+
+  /**
+   * Environment asset handle
+   */
+  EnvironmentAssetHandle environmentHandle = EnvironmentAssetHandle::Invalid;
+
   /**
    * Irradiance map texture
    */
