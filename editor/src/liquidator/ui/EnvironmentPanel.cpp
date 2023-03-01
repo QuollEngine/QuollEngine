@@ -48,7 +48,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
         dndEnvironmentAsset(section, editorManager);
 
         if (ImGui::Button(fa::Times)) {
-          editorManager.deleteEnvironmentSkybox();
+          editorManager.removeEnvironmentSkybox(true);
         }
 
       } else {
@@ -67,7 +67,7 @@ void EnvironmentPanel::render(EditorManager &editorManager,
 
       if (ImGui::BeginCombo("Source", sourceName.c_str())) {
         if (ImGui::Selectable("None")) {
-          editorManager.removeEnvironmentLightingSource();
+          editorManager.removeEnvironmentLightingSource(true);
         }
 
         if (ImGui::Selectable("Use skybox")) {

@@ -319,6 +319,10 @@ void EntityManager::setStartingCamera(Entity camera) {
   mSceneIO.saveStartingCamera(camera, mScenePath / "main.lqscene");
 }
 
+void EntityManager::saveEnvironment() {
+  mSceneIO.saveEnvironment(mScenePath / "main.lqscene");
+}
+
 LocalTransform
 EntityManager::getTransformFromCamera(EditorCamera &camera) const {
   auto &scene = mInSimulation ? mSimulationScene : mScene;

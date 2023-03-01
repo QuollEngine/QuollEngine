@@ -13,9 +13,7 @@ EditorManager::EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
                              EntityManager &entityManager,
                              const Project &project)
     : mEditorCamera(editorCamera), mEditorGrid(editorGrid),
-      mEntityManager(entityManager), mProject(project) {
-  mEnvironmentEntity = mEntityManager.getActiveEntityDatabase().create();
-}
+      mEntityManager(entityManager), mProject(project) {}
 
 void EditorManager::saveEditorState(const std::filesystem::path &path) {
   YAML::Node node;
@@ -155,24 +153,43 @@ void EditorManager::moveCameraToEntity(Entity entity) {
 }
 
 bool EditorManager::hasEnvironmentSkybox() {
+  auto environment = mEntityManager.getActiveScene().environment;
+
   return mEntityManager.getActiveEntityDatabase().has<EnvironmentSkybox>(
-      mEnvironmentEntity);
+      environment);
 }
 
 EnvironmentAssetHandle EditorManager::getEnvironmentSkybox() {
+  auto environment = mEntityManager.getActiveScene().environment;
+
   return mEntityManager.getActiveEntityDatabase()
-      .get<EnvironmentSkybox>(mEnvironmentEntity)
+      .get<EnvironmentSkybox>(environment)
       .environmentHandle;
 }
 
 void EditorManager::setEnvironmentSkybox(EnvironmentAssetHandle environment) {
+  removeEnvironmentSkybox(false);
+
+  auto environmentEntity = mEntityManager.getActiveScene().environment;
+
   mEntityManager.getActiveEntityDatabase().set<EnvironmentSkybox>(
-      mEnvironmentEntity, {environment});
+      environmentEntity, {environment});
+
+  mEntityManager.saveEnvironment();
 }
 
-void EditorManager::deleteEnvironmentSkybox() {
-  mEntityManager.getActiveEntityDatabase().remove<EnvironmentSkybox>(
-      mEnvironmentEntity);
+void EditorManager::removeEnvironmentSkybox(bool save) {
+  auto environment = mEntityManager.getActiveScene().environment;
+
+  if (mEntityManager.getActiveEntityDatabase().has<EnvironmentSkybox>(
+          environment)) {
+    mEntityManager.getActiveEntityDatabase().remove<EnvironmentSkybox>(
+        environment);
+  }
+
+  if (save) {
+    mEntityManager.saveEnvironment();
+  }
 }
 
 void EditorManager::setTransformOperation(
@@ -181,26 +198,38 @@ void EditorManager::setTransformOperation(
 }
 
 EnvironmentLightingSource EditorManager::getEnvironmentLightingSource() {
+  auto environment = mEntityManager.getActiveScene().environment;
+
   if (mEntityManager.getActiveEntityDatabase()
-          .has<EnvironmentLightingSkyboxSource>(mEnvironmentEntity)) {
+          .has<EnvironmentLightingSkyboxSource>(environment)) {
     return EnvironmentLightingSource::Skybox;
   }
 
   return EnvironmentLightingSource::None;
 }
 
-void EditorManager::removeEnvironmentLightingSource() {
+void EditorManager::removeEnvironmentLightingSource(bool save) {
+  auto environment = mEntityManager.getActiveScene().environment;
+
   if (mEntityManager.getActiveEntityDatabase()
-          .has<EnvironmentLightingSkyboxSource>(mEnvironmentEntity)) {
+          .has<EnvironmentLightingSkyboxSource>(environment)) {
     mEntityManager.getActiveEntityDatabase()
-        .remove<EnvironmentLightingSkyboxSource>(mEnvironmentEntity);
+        .remove<EnvironmentLightingSkyboxSource>(environment);
+  }
+
+  if (save) {
+    mEntityManager.saveEnvironment();
   }
 }
 
 void EditorManager::setEnvironmentLightingSkyboxSource() {
-  removeEnvironmentLightingSource();
+  auto environment = mEntityManager.getActiveScene().environment;
+
+  removeEnvironmentLightingSource(false);
   mEntityManager.getActiveEntityDatabase().set<EnvironmentLightingSkyboxSource>(
-      mEnvironmentEntity, {});
+      environment, {});
+
+  mEntityManager.saveEnvironment();
 }
 
 void EditorManager::startGameExport() {
