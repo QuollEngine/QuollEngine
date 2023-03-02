@@ -24,6 +24,8 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
   auto persistentZoneIndex = scene["persistentZone"].as<uint32_t>();
   auto persistentZone = scene["zones"][persistentZoneIndex];
 
+  loadEnvironment(persistentZone);
+
   stream.close();
   auto entitiesPath =
       path.parent_path() / persistentZone["entities"].as<String>();
@@ -160,6 +162,95 @@ Path SceneIO::getEntityPath(Entity entity, const Path &path) {
 
   auto id = mScene.entityDatabase.get<Id>(entity).id;
   return entitiesPath / (std::to_string(id) + ".lqnode");
+}
+
+Result<bool> SceneIO::saveEnvironment(const Path &path) {
+  std::ifstream stream(path);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  auto zone = node["zones"][node["persistentZone"].as<uint32_t>()];
+  zone["environment"] = YAML::Null;
+
+  if (mScene.entityDatabase.exists(mScene.environment)) {
+    YAML::Node skyboxNode(YAML::NodeType::Null);
+    YAML::Node lightingNode(YAML::NodeType::Null);
+
+    if (mScene.entityDatabase.has<EnvironmentSkybox>(mScene.environment)) {
+      auto &skybox =
+          mScene.entityDatabase.get<EnvironmentSkybox>(mScene.environment);
+
+      auto relPath = mAssetRegistry.getEnvironments()
+                         .getAsset(skybox.environmentHandle)
+                         .relativePath.string();
+      std::replace(relPath.begin(), relPath.end(), '\\', '/');
+
+      skyboxNode = YAML::Node(YAML::NodeType::Map);
+      skyboxNode["type"] = "texture";
+      skyboxNode["texture"] = relPath;
+    }
+
+    if (mScene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
+            mScene.environment)) {
+      lightingNode = YAML::Node(YAML::NodeType::Map);
+      lightingNode["source"] = "skybox";
+    }
+
+    if (skyboxNode.IsMap() || lightingNode.IsMap()) {
+      zone["environment"] = YAML::Node(YAML::NodeType::Map);
+      zone["environment"]["skybox"] = skyboxNode;
+      zone["environment"]["lighting"] = lightingNode;
+    }
+  }
+
+  stream.close();
+
+  YAML::Emitter emitter;
+  emitter.SetNullFormat(YAML::LowerNull);
+  emitter << node;
+
+  std::ofstream writeStream(path);
+  writeStream << emitter.c_str();
+  writeStream.close();
+
+  return Result<bool>::Ok(true);
+}
+
+void SceneIO::loadEnvironment(const YAML::Node &zone) {
+  if (!mScene.entityDatabase.exists(mScene.environment)) {
+    mScene.environment = mScene.entityDatabase.create();
+  }
+
+  if (!zone["environment"] || zone["environment"].IsNull() ||
+      !zone["environment"].IsMap()) {
+    return;
+  }
+
+  auto skybox = zone["environment"]["skybox"];
+  if (skybox && skybox.IsMap() && skybox["type"] && skybox["type"].IsScalar()) {
+    auto skyboxType = skybox["type"].as<String>();
+
+    if (skyboxType == "texture" && skybox["texture"].IsScalar()) {
+      auto relPath = skybox["texture"].as<String>();
+      auto handle = mAssetRegistry.getEnvironments().findHandleByRelativePath(
+          Path(relPath));
+
+      if (handle != EnvironmentAssetHandle::Invalid) {
+        mScene.entityDatabase.set<EnvironmentSkybox>(mScene.environment,
+                                                     {handle});
+      }
+    }
+  }
+
+  auto lighting = zone["environment"]["lighting"];
+  if (lighting && lighting.IsMap() && lighting["source"] &&
+      lighting["source"].IsScalar()) {
+    auto sourceType = lighting["source"].as<String>();
+    if (sourceType == "skybox") {
+      mScene.entityDatabase.set<EnvironmentLightingSkyboxSource>(
+          mScene.environment, {});
+    }
+  }
 }
 
 uint64_t SceneIO::generateId() { return mLastId++; }

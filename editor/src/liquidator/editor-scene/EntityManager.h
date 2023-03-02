@@ -233,6 +233,11 @@ public:
     return mInSimulation ? mSimulationScene : mScene;
   }
 
+  /**
+   * @brief Save environment
+   */
+  void saveEnvironment();
+
 private:
   /**
    * @brief Get transform from camera

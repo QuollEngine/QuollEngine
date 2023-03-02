@@ -47,6 +47,14 @@ public:
   Result<bool> saveStartingCamera(Entity entity, const Path &path);
 
   /**
+   * @brief Save environment
+   *
+   * @param path Scene path
+   * @return Save result
+   */
+  Result<bool> saveEnvironment(const Path &path);
+
+  /**
    * @brief Delete entity
    *
    * @param entity Entity
@@ -71,6 +79,13 @@ private:
    * @return Entity path
    */
   Path getEntityPath(Entity entity, const Path &path);
+
+  /**
+   * @brief Load environment
+   *
+   * @param zone Zone
+   */
+  void loadEnvironment(const YAML::Node &zone);
 
   /**
    * @brief Generate unique ID for entity

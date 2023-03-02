@@ -105,8 +105,10 @@ public:
 
   /**
    * @brief Delete environment skybox
+   *
+   * @param save Save changes to scene file
    */
-  void deleteEnvironmentSkybox();
+  void removeEnvironmentSkybox(bool save);
 
   /**
    * @brief Set transform operation
@@ -124,8 +126,10 @@ public:
 
   /**
    * @brief Remove environment lighting source
+   *
+   * @param save Save changes to scene file
    */
-  void removeEnvironmentLightingSource();
+  void removeEnvironmentLightingSource(bool save);
 
   /**
    * @brief Set skybox as environment lighting source
@@ -155,8 +159,6 @@ private:
   Project mProject;
 
   TransformOperation mTransformOperation = TransformOperation::Move;
-
-  Entity mEnvironmentEntity = EntityNull;
 };
 
 } // namespace liquid::editor
