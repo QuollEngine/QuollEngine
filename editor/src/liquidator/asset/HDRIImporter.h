@@ -88,16 +88,6 @@ private:
   Result<TextureAssetHandle>
   generateSpecularMap(const CubemapData &unfilteredCubemap, const Path &path);
 
-  /**
-   * @brief Generate BRDF LUT
-   *
-   * @param unfilteredCubemap Unfiltered cubemap
-   * @param path Path to BRDF Lut
-   * @return BRDF LUT texture asset
-   */
-  Result<TextureAssetHandle>
-  generateBrdfLut(const CubemapData &unfilteredCubemap, const Path &path);
-
 private:
   AssetCache &mAssetCache;
   ShaderLibrary mShaderLibrary;
@@ -106,7 +96,6 @@ private:
   rhi::PipelineHandle mPipelineGenerateCubemap;
   rhi::PipelineHandle mPipelineGenerateIrradianceMap;
   rhi::PipelineHandle mPipelineGenerateSpecularMap;
-  rhi::PipelineHandle mPipelineGenerateBrdfLut;
 };
 
 } // namespace liquid::editor

@@ -453,7 +453,14 @@ void main() {
              (diffuseBRDF + specularBRDF);
   }
 
-  if (getSceneData().textures.x > 0) {
+  if (getSceneData().data.y == 1) {
+    vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
+
+    vec3 kS = schlickFresnel(F0, NdotV);
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
+
+    color += getSceneData().color.rgb * (kD + kS * brdfLut.r + brdfLut.g);
+  } else if (getSceneData().data.y == 2 && getSceneData().textures.x > 0) {
     vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
 
     vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;

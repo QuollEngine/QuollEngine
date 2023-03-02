@@ -4,7 +4,6 @@
 
 #include "generate-ibl.glsl"
 
-layout(set = 0, binding = 0) uniform samplerCube uInputTexture;
 layout(set = 0, binding = 1, rgba16f) writeonly uniform image2D uOutputTexture;
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;

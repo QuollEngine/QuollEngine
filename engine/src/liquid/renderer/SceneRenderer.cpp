@@ -50,6 +50,12 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
   mShaderLibrary.addShader(
       "__engine.text.default.fragment",
       mDevice->createShader({shadersPath / "text.frag.spv"}));
+
+  mShaderLibrary.addShader(
+      "__engine.pbr.brdfLut.compute",
+      mDevice->createShader({shadersPath / "generate-brdf-lut.comp.spv"}));
+
+  generateBrdfLut();
 }
 
 void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
@@ -229,7 +235,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   } // mesh pass
 
   {
-    auto &pass = graph.addGraphicsPass("environmentPass");
+    auto &pass = graph.addGraphicsPass("skyboxPass");
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
     auto vPipeline = pass.addPipeline(
@@ -244,9 +250,6 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                        const RenderGraphRegistry &registry,
                                        uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
-      if (!rhi::isHandleValid(frameData.getSkyboxTexture()))
-        return;
-
       auto pipeline = registry.get(vPipeline);
 
       commandList.bindPipeline(pipeline);
@@ -255,8 +258,6 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
-      frameData.getDrawParams().index9 =
-          rhi::castHandleToUint(frameData.getSkyboxTexture());
       commandList.pushConstants(
           pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
           sizeof(DrawParameters), &frameData.getDrawParams());
@@ -272,7 +273,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       commandList.drawIndexed(
           static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
     });
-  } // environment pass
+  } // skybox pass
 
   LOG_DEBUG("Scene renderer attached to graph");
 
@@ -379,18 +380,29 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   // Environments
   const auto &textures = mAssetRegistry.getTextures();
   for (auto [entity, environment] : entityDatabase.view<EnvironmentSkybox>()) {
-    const auto &asset = mAssetRegistry.getEnvironments()
-                            .getAsset(environment.environmentHandle)
-                            .data;
+    rhi::TextureHandle irradianceMap{0};
+    rhi::TextureHandle specularMap{0};
 
-    frameData.setSkyboxTexture(
-        textures.getAsset(asset.specularMap).data.deviceHandle);
+    if (environment.type == EnvironmentSkyboxType::Color) {
+      frameData.setSkyboxColor(environment.color);
+    } else if (environment.type == EnvironmentSkyboxType::Texture &&
+               mAssetRegistry.getEnvironments().hasAsset(environment.texture)) {
+      const auto &asset =
+          mAssetRegistry.getEnvironments().getAsset(environment.texture).data;
+
+      frameData.setSkyboxTexture(
+          textures.getAsset(asset.specularMap).data.deviceHandle);
+      irradianceMap = textures.getAsset(asset.irradianceMap).data.deviceHandle;
+      specularMap = textures.getAsset(asset.specularMap).data.deviceHandle;
+    }
 
     if (entityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
-      frameData.setEnvironmentTextures(
-          textures.getAsset(asset.irradianceMap).data.deviceHandle,
-          textures.getAsset(asset.specularMap).data.deviceHandle,
-          textures.getAsset(asset.brdfLut).data.deviceHandle);
+      if (environment.type == EnvironmentSkyboxType::Color) {
+        frameData.setEnvironmentColor(environment.color);
+      } else if (environment.type == EnvironmentSkyboxType::Texture &&
+                 rhi::isHandleValid(irradianceMap)) {
+        frameData.setEnvironmentTextures(irradianceMap, specularMap);
+      }
     }
   }
 
@@ -499,6 +511,52 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
       commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
                        1, text.index);
     }
+  }
+}
+
+void SceneRenderer::generateBrdfLut() {
+  static constexpr uint32_t GroupSize = 16;
+  static constexpr uint32_t TextureSize = 512;
+
+  auto pipeline = mDevice->createPipeline(rhi::ComputePipelineDescription{
+      mShaderLibrary.getShader("__engine.pbr.brdfLut.compute")});
+
+  rhi::TextureDescription textureDesc;
+  textureDesc.type = rhi::TextureType::Standard;
+  textureDesc.format = rhi::Format::Rgba16Float;
+  textureDesc.height = TextureSize;
+  textureDesc.width = TextureSize;
+  textureDesc.layers = 1;
+  textureDesc.levels = 1;
+  textureDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
+                      rhi::TextureUsage::Sampled;
+
+  auto brdfLut = mRenderStorage.createTexture(textureDesc);
+
+  rhi::DescriptorLayoutBindingDescription binding0{};
+  binding0.type = rhi::DescriptorLayoutBindingType::Static;
+  binding0.binding = 0;
+  binding0.name = "uOutputTexture";
+  binding0.shaderStage = rhi::ShaderStage::Compute;
+  binding0.descriptorCount = 1;
+  binding0.descriptorType = rhi::DescriptorType::StorageImage;
+
+  auto layout = mDevice->createDescriptorLayout({{binding0}});
+  auto descriptor = mDevice->createDescriptor(layout);
+
+  descriptor.write(0, {brdfLut}, rhi::DescriptorType::StorageImage);
+
+  auto commandList = mDevice->requestImmediateCommandList();
+  commandList.bindPipeline(pipeline);
+  commandList.bindDescriptor(pipeline, 0, descriptor);
+  commandList.dispatch(textureDesc.width / GroupSize,
+                       textureDesc.height / GroupSize, 1);
+  mDevice->submitImmediate(commandList);
+
+  mDevice->destroyPipeline(pipeline);
+
+  for (auto &frameData : mFrameData) {
+    frameData.setBrdfLookupTable(brdfLut);
   }
 }
 

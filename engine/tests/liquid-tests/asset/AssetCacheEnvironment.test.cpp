@@ -30,14 +30,12 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
       cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
   auto specularMap =
       cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
-  auto brdfLut = cache.loadTextureFromFile(EnvDirectory / "brdf.ktx").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
   asset.path = std::filesystem::current_path() / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  asset.data.brdfLut = brdfLut;
 
   auto res = cache.createEnvironmentFromAsset(asset);
   EXPECT_TRUE(res.hasData());
@@ -61,12 +59,8 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   liquid::String specularMapPath;
   file.read(specularMapPath);
 
-  liquid::String brdfLutPath;
-  file.read(brdfLutPath);
-
   EXPECT_EQ(irradianceMapPath, "test-env/irradiance.ktx");
   EXPECT_EQ(specularMapPath, "test-env/specular.ktx");
-  EXPECT_EQ(brdfLutPath, "test-env/brdf.ktx");
 }
 
 TEST_F(AssetCacheTest,
@@ -75,19 +69,16 @@ TEST_F(AssetCacheTest,
       cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
   auto specularMap =
       cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
-  auto brdfLut = cache.loadTextureFromFile(EnvDirectory / "brdf.ktx").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
   asset.path = std::filesystem::current_path() / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  asset.data.brdfLut = brdfLut;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
-  cache.getRegistry().getTextures().deleteAsset(brdfLut);
 
   {
     std::filesystem::remove(EnvDirectory / "irradiance.ktx");
@@ -105,15 +96,6 @@ TEST_F(AssetCacheTest,
     EXPECT_TRUE(res.hasError());
     EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
   }
-
-  {
-    std::filesystem::copy("1x1-cubemap.ktx", EnvDirectory / "specular.ktx");
-    std::filesystem::remove(EnvDirectory / "brdf.ktx");
-    auto res = cache.loadEnvironmentFromFile(createRes.getData());
-
-    EXPECT_TRUE(res.hasError());
-    EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
-  }
 }
 
 TEST_F(AssetCacheTest,
@@ -122,19 +104,16 @@ TEST_F(AssetCacheTest,
       cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
   auto specularMap =
       cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
-  auto brdfLut = cache.loadTextureFromFile(EnvDirectory / "brdf.ktx").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
   asset.path = std::filesystem::current_path() / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  asset.data.brdfLut = brdfLut;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
-  cache.getRegistry().getTextures().deleteAsset(brdfLut);
 
   EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
 
@@ -144,7 +123,7 @@ TEST_F(AssetCacheTest,
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 3);
+  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
   EXPECT_FALSE(cache.getRegistry().getEnvironments().getAssets().empty());
 
   const auto &environment =
@@ -152,7 +131,6 @@ TEST_F(AssetCacheTest,
   EXPECT_NE(environment.data.irradianceMap,
             liquid::TextureAssetHandle::Invalid);
   EXPECT_NE(environment.data.specularMap, liquid::TextureAssetHandle::Invalid);
-  EXPECT_NE(environment.data.brdfLut, liquid::TextureAssetHandle::Invalid);
 }
 
 TEST_F(AssetCacheTest,
@@ -161,17 +139,15 @@ TEST_F(AssetCacheTest,
       cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
   auto specularMap =
       cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
-  auto brdfLut = cache.loadTextureFromFile(EnvDirectory / "brdf.ktx").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
   asset.path = std::filesystem::current_path() / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  asset.data.brdfLut = brdfLut;
   auto createRes = cache.createEnvironmentFromAsset(asset);
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 3);
+  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
 
   auto res = cache.loadEnvironmentFromFile(createRes.getData());
 
@@ -179,7 +155,7 @@ TEST_F(AssetCacheTest,
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
 
-  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 3);
+  EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
 
   EXPECT_FALSE(cache.getRegistry().getEnvironments().getAssets().empty());
 
@@ -188,5 +164,4 @@ TEST_F(AssetCacheTest,
 
   EXPECT_EQ(environment.data.irradianceMap, irradianceMap);
   EXPECT_EQ(environment.data.specularMap, specularMap);
-  EXPECT_EQ(environment.data.brdfLut, brdfLut);
 }

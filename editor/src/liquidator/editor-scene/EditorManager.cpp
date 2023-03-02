@@ -152,33 +152,57 @@ void EditorManager::moveCameraToEntity(Entity entity) {
   mEditorCamera.setEye(translation - DistanceFromCenter);
 }
 
-bool EditorManager::hasEnvironmentSkybox() {
+bool EditorManager::hasSkybox() {
   auto environment = mEntityManager.getActiveScene().environment;
 
   return mEntityManager.getActiveEntityDatabase().has<EnvironmentSkybox>(
       environment);
 }
 
-EnvironmentAssetHandle EditorManager::getEnvironmentSkybox() {
+EnvironmentSkyboxType EditorManager::getSkyboxType() {
+  return mEntityManager.getActiveEntityDatabase()
+      .get<EnvironmentSkybox>(mEntityManager.getActiveScene().environment)
+      .type;
+}
+
+const glm::vec4 &EditorManager::getSkyboxColor() {
+  return mEntityManager.getActiveEntityDatabase()
+      .get<EnvironmentSkybox>(mEntityManager.getActiveScene().environment)
+      .color;
+}
+
+void EditorManager::setSkyboxColor(const glm::vec4 &color) {
+  auto environmentEntity = mEntityManager.getActiveScene().environment;
+
+  EnvironmentSkybox component{EnvironmentSkyboxType::Color};
+  component.color = color;
+
+  mEntityManager.getActiveEntityDatabase().set(environmentEntity, component);
+  mEntityManager.saveEnvironment();
+}
+
+EnvironmentAssetHandle EditorManager::getSkyboxTexture() {
+  if (!hasSkybox()) {
+    return EnvironmentAssetHandle::Invalid;
+  }
   auto environment = mEntityManager.getActiveScene().environment;
 
   return mEntityManager.getActiveEntityDatabase()
       .get<EnvironmentSkybox>(environment)
-      .environmentHandle;
+      .texture;
 }
 
-void EditorManager::setEnvironmentSkybox(EnvironmentAssetHandle environment) {
-  removeEnvironmentSkybox(false);
-
+void EditorManager::setSkyboxTexture(EnvironmentAssetHandle texture) {
   auto environmentEntity = mEntityManager.getActiveScene().environment;
 
-  mEntityManager.getActiveEntityDatabase().set<EnvironmentSkybox>(
-      environmentEntity, {environment});
+  EnvironmentSkybox component{EnvironmentSkyboxType::Texture};
+  component.texture = texture;
 
+  mEntityManager.getActiveEntityDatabase().set(environmentEntity, component);
   mEntityManager.saveEnvironment();
 }
 
-void EditorManager::removeEnvironmentSkybox(bool save) {
+void EditorManager::removeSkybox() {
   auto environment = mEntityManager.getActiveScene().environment;
 
   if (mEntityManager.getActiveEntityDatabase().has<EnvironmentSkybox>(
@@ -187,9 +211,7 @@ void EditorManager::removeEnvironmentSkybox(bool save) {
         environment);
   }
 
-  if (save) {
-    mEntityManager.saveEnvironment();
-  }
+  mEntityManager.saveEnvironment();
 }
 
 void EditorManager::setTransformOperation(

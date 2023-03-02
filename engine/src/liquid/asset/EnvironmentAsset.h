@@ -15,11 +15,6 @@ struct EnvironmentAsset {
    * Specular map
    */
   TextureAssetHandle specularMap = TextureAssetHandle::Invalid;
-
-  /**
-   * BRDF Lut
-   */
-  TextureAssetHandle brdfLut = TextureAssetHandle::Invalid;
 };
 
 } // namespace liquid

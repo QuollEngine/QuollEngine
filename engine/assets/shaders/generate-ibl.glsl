@@ -1,6 +1,13 @@
 const float Pi = 3.1415926535897932384626433832795;
 const float TwoPi = Pi * 2.0;
 
+/**
+ * @brief Cube coordinate to world unnormalized
+ *
+ * @param cubeCoord Cube coordinate
+ * @param cubemapWidth Cubemap width
+ * @return World coordinate
+ */
 vec3 cubeCoordToWorldUnnormalized(ivec3 cubeCoord, float cubemapWidth) {
   vec2 texCoord = vec2(cubeCoord.xy) / cubemapWidth;
   texCoord = texCoord * 2.0 - 1.0;
@@ -22,6 +29,13 @@ vec3 cubeCoordToWorldUnnormalized(ivec3 cubeCoord, float cubemapWidth) {
   return vec3(0.0);
 }
 
+/**
+ * @brief Cube coordinate to world
+ *
+ * @param cubeCoord Cube coordinate
+ * @param cubemapWidth Cubemap width
+ * @return Normalized world coordinate
+ */
 vec3 cubeCoordToWorld(ivec3 cubeCoord, float cubemapWidth) {
   return normalize(cubeCoordToWorldUnnormalized(cubeCoord, cubemapWidth));
 }
@@ -43,11 +57,25 @@ float radicalInverseVdC(uint bits) {
   return float(bits) * 2.3283064365386963e-10; // / 0x100000000
 }
 
-// Sample i-th point from Hammersley point set of NumSamples points total.
+/**
+ * @brief Sample ith point from hammersley
+ *
+ * @param i Sample index
+ * @param numSamples Number of samples
+ * @return Sample
+ */
 vec2 sampleHammersley(uint i, uint numSamples) {
   return vec2(float(i) / float(numSamples), radicalInverseVdC(i));
 }
 
+/**
+ * @brief Importance sample GGX
+ *
+ * @param u Sample
+ * @param normal Normal
+ * @param roughness Roughness
+ * @return Importance sampled data
+ */
 vec3 importanceSampleGGX(vec2 u, vec3 normal, float roughness) {
   float alpha = roughness * roughness;
 

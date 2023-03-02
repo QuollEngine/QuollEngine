@@ -82,33 +82,52 @@ public:
   void moveCameraToEntity(Entity entity);
 
   /**
-   * @brief Check if environment skybox exists
+   * @brief Check if skybox exists
    *
    * @retval true Environment skybox exists
    * @retval false Environment skybox does not exist
    */
-  bool hasEnvironmentSkybox();
+  bool hasSkybox();
 
   /**
-   * @brief Get environment skybox
+   * @brief Get skybox type
+   *
+   * @return Skybox type
+   */
+  EnvironmentSkyboxType getSkyboxType();
+
+  /**
+   * @brief Get skybox color
+   *
+   * @return Skybox color
+   */
+  const glm::vec4 &getSkyboxColor();
+
+  /**
+   * @brief Set skybox color
+   *
+   * @param color Skybox color
+   */
+  void setSkyboxColor(const glm::vec4 &color);
+
+  /**
+   * @brief Get skybox texture
    *
    * @return Environment asset handle
    */
-  EnvironmentAssetHandle getEnvironmentSkybox();
+  EnvironmentAssetHandle getSkyboxTexture();
 
   /**
-   * @brief Set environment skybox
+   * @brief Set skybox texture
    *
    * @param environment Environment asset handle
    */
-  void setEnvironmentSkybox(EnvironmentAssetHandle environment);
+  void setSkyboxTexture(EnvironmentAssetHandle environment);
 
   /**
-   * @brief Delete environment skybox
-   *
-   * @param save Save changes to scene file
+   * @brief Delete skybox
    */
-  void removeEnvironmentSkybox(bool save);
+  void removeSkybox();
 
   /**
    * @brief Set transform operation

@@ -462,6 +462,92 @@ TEST_F(SceneIOTest,
       scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
 }
 
+TEST_F(SceneIOTest,
+       CreatesEnvironmentEntityWithSkyboxColorOnLoadIfSkyboxTypeIsColor) {
+  auto node = loadSceneFile(ScenePath);
+  auto zoneNode = node["zones"][0];
+  zoneNode["environment"]["skybox"]["type"] = "color";
+  zoneNode["environment"]["skybox"]["color"] =
+      glm::vec4{0.5f, 0.2f, 0.3f, 1.0f};
+  saveSceneFile(node, ScenePath);
+
+  sceneIO.loadScene(ScenePath);
+
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
+  EXPECT_TRUE(
+      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .type,
+      liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .texture,
+      liquid::EnvironmentAssetHandle::Invalid);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .color,
+      glm::vec4(0.5f, 0.2f, 0.3f, 1.0f));
+}
+
+TEST_F(
+    SceneIOTest,
+    CreatesEnvironmentEntityWithBlackColorOnLoadIfSkyboxTypeIsColorButColorValueIsNotSequence) {
+  auto node = loadSceneFile(ScenePath);
+  auto zoneNode = node["zones"][0];
+  zoneNode["environment"]["skybox"]["type"] = "color";
+  zoneNode["environment"]["skybox"]["color"] =
+      YAML::Node(YAML::NodeType::Scalar);
+  saveSceneFile(node, ScenePath);
+
+  sceneIO.loadScene(ScenePath);
+
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
+  EXPECT_TRUE(
+      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .type,
+      liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .texture,
+      liquid::EnvironmentAssetHandle::Invalid);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .color,
+      glm::vec4(0.0f));
+}
+
+TEST_F(
+    SceneIOTest,
+    CreatesEnvironmentEntityWithBlackColorOnLoadIfSkyboxTypeIsColorButColorValueIsNotVec4) {
+  auto node = loadSceneFile(ScenePath);
+  auto zoneNode = node["zones"][0];
+  zoneNode["environment"]["skybox"]["type"] = "color";
+  zoneNode["environment"]["skybox"]["color"][0] = 10.5f;
+
+  saveSceneFile(node, ScenePath);
+
+  sceneIO.loadScene(ScenePath);
+
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
+  EXPECT_TRUE(
+      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .type,
+      liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .texture,
+      liquid::EnvironmentAssetHandle::Invalid);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .color,
+      glm::vec4(0.0f));
+}
+
 TEST_F(
     SceneIOTest,
     CreatesEnvironmentEntityWithNoSkyboxTextureIfTypeIsTextureButEnvironmentAssetDoesNotExist) {
@@ -500,7 +586,11 @@ TEST_F(
       scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .environmentHandle,
+          .type,
+      liquid::EnvironmentSkyboxType::Texture);
+  EXPECT_EQ(
+      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
+          .texture,
       handle);
 }
 
@@ -608,7 +698,7 @@ TEST_F(SceneIOTest,
   EXPECT_TRUE(node["zones"][0]["environment"].IsNull());
 }
 
-TEST_F(SceneIOTest, SetsSkyboxToNoneOnSaveIfNoSkyboxComponent) {
+TEST_F(SceneIOTest, SetsSkyboxToNullOnSaveIfNoSkyboxComponent) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "test-env";
   asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
@@ -628,9 +718,34 @@ TEST_F(SceneIOTest, SetsSkyboxToNoneOnSaveIfNoSkyboxComponent) {
   EXPECT_TRUE(envNode["skybox"].IsNull());
 }
 
+TEST_F(SceneIOTest,
+       SetsSkyboxToNullOnSaveIfSkyboxTypeIsTextureButTextureAssetDoesNotExist) {
+  liquid::AssetData<liquid::EnvironmentAsset> asset{};
+  asset.name = "test-env";
+  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+
+  auto handle = assetRegistry.getEnvironments().addAsset(asset);
+
+  assetRegistry.getEnvironments().deleteAsset(handle);
+
+  scene.environment = scene.entityDatabase.create();
+  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
+      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
+  scene.entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
+      scene.environment, {});
+
+  sceneIO.saveEnvironment(ScenePath);
+
+  auto node = loadSceneFile(ScenePath);
+  auto envNode = node["zones"][0]["environment"];
+
+  EXPECT_TRUE(envNode.IsMap());
+  EXPECT_TRUE(envNode["skybox"].IsNull());
+}
+
 TEST_F(
     SceneIOTest,
-    SetsSkyboxTypeToTextureOnSaveIfSceneEnvironmentEntityHasSkyboxTextureComponent) {
+    SetsSkyboxTypeToTextureOnSaveIfSceneEnvironmentSkyboxTypeIsTextureAndAssetExists) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "test-env";
   asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
@@ -638,8 +753,8 @@ TEST_F(
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentSkybox>(scene.environment,
-                                                      {handle});
+  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
+      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
 
   sceneIO.saveEnvironment(ScenePath);
 
@@ -652,6 +767,29 @@ TEST_F(
   EXPECT_EQ(envNode["skybox"]["type"].as<liquid::String>(), "texture");
   EXPECT_EQ(envNode["skybox"]["texture"].as<liquid::String>(),
             "my-dir/test-env.hdr");
+  EXPECT_FALSE(envNode["skybox"]["color"]);
+}
+
+TEST_F(SceneIOTest,
+       SetsSkyboxTypeToColorOnSaveIfSceneEnvironmentSkyboxTypeIsColor) {
+  scene.environment = scene.entityDatabase.create();
+
+  liquid::EnvironmentSkybox component{};
+  component.type = liquid::EnvironmentSkyboxType::Color;
+  component.color = glm::vec4(0.5f, 0.2f, 0.5f, 1.0f);
+  scene.entityDatabase.set(scene.environment, component);
+
+  sceneIO.saveEnvironment(ScenePath);
+
+  auto node = loadSceneFile(ScenePath);
+  auto envNode = node["zones"][0]["environment"];
+
+  EXPECT_TRUE(envNode.IsMap());
+  EXPECT_TRUE(envNode["skybox"].IsMap());
+  EXPECT_TRUE(envNode["skybox"]["type"].IsScalar());
+  EXPECT_EQ(envNode["skybox"]["type"].as<liquid::String>(), "color");
+  EXPECT_FALSE(envNode["skybox"]["texture"]);
+  EXPECT_EQ(envNode["skybox"]["color"].as<glm::vec4>(), component.color);
 }
 
 TEST_F(
@@ -663,8 +801,8 @@ TEST_F(
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentSkybox>(scene.environment,
-                                                      {handle});
+  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
+      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
 
   sceneIO.saveEnvironment(ScenePath);
 

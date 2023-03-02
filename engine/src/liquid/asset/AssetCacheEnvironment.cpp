@@ -20,11 +20,6 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
                              .relativePath.string();
   std::replace(specularMapPath.begin(), specularMapPath.end(), '\\', '/');
 
-  auto brdfLutPath = mRegistry.getTextures()
-                         .getAsset(asset.data.brdfLut)
-                         .relativePath.string();
-  std::replace(brdfLutPath.begin(), brdfLutPath.end(), '\\', '/');
-
   OutputBinaryStream stream(asset.path);
   AssetFileHeader header{};
   header.type = AssetType::Environment;
@@ -35,7 +30,6 @@ Result<Path> AssetCache::createEnvironmentFromAsset(
 
   stream.write(irradianceMapPath);
   stream.write(specularMapPath);
-  stream.write(brdfLutPath);
 
   return Result<Path>::Ok(asset.path);
 }
@@ -49,9 +43,6 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   String specularMapPath;
   stream.read(specularMapPath);
 
-  String brdfLutPath;
-  stream.read(brdfLutPath);
-
   auto irradianceMapRes = getOrLoadTextureFromPath(irradianceMapPath);
   if (irradianceMapRes.hasError()) {
     return Result<EnvironmentAssetHandle>::Error(irradianceMapRes.getError());
@@ -63,14 +54,6 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
     return Result<EnvironmentAssetHandle>::Error(specularMapRes.getError());
   }
 
-  auto brdfLutRes = getOrLoadTextureFromPath(brdfLutPath);
-  if (brdfLutRes.hasError()) {
-    mRegistry.getTextures().deleteAsset(irradianceMapRes.getData());
-    mRegistry.getTextures().deleteAsset(specularMapRes.getData());
-
-    return Result<EnvironmentAssetHandle>::Error(brdfLutRes.getError());
-  }
-
   AssetData<EnvironmentAsset> environment{};
   environment.path = filePath;
   environment.relativePath = std::filesystem::relative(filePath, mAssetsPath);
@@ -78,7 +61,6 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   environment.type = AssetType::Environment;
   environment.data.irradianceMap = irradianceMapRes.getData();
   environment.data.specularMap = specularMapRes.getData();
-  environment.data.brdfLut = brdfLutRes.getData();
 
   auto environmentHandle = mRegistry.getEnvironments().addAsset(environment);
 

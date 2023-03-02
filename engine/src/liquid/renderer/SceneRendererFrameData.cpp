@@ -59,6 +59,13 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 
   {
     auto desc = defaultDesc;
+    desc.size = sizeof(SkyboxData);
+    desc.type = rhi::BufferType::Uniform;
+    mSkyboxBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
     desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
     mShadowMapsBuffer = renderStorage.createBuffer(desc);
   }
@@ -73,6 +80,7 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
   mDrawParams.index6 = rhi::castHandleToUint(mShadowMapsBuffer.getHandle());
   mDrawParams.index7 = rhi::castHandleToUint(mCameraBuffer.getHandle());
   mDrawParams.index8 = rhi::castHandleToUint(mSceneBuffer.getHandle());
+  mDrawParams.index9 = rhi::castHandleToUint(mSkyboxBuffer.getHandle());
 }
 
 void SceneRendererFrameData::updateBuffers() {
@@ -113,6 +121,7 @@ void SceneRendererFrameData::updateBuffers() {
                            mShadowMaps.size() * sizeof(ShadowMapData));
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mSceneBuffer.update(&mSceneData, sizeof(SceneData));
+  mSkyboxBuffer.update(&mSkyboxData, sizeof(SkyboxData));
 }
 
 void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
@@ -125,6 +134,10 @@ void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
 
   mMeshGroups.at(handle).entities.push_back(entity);
   mMeshGroups.at(handle).transforms.push_back(transform);
+}
+
+void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
+  mSceneData.textures.z = static_cast<uint32_t>(brdfLut);
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
@@ -300,16 +313,24 @@ void SceneRendererFrameData::addText(FontAssetHandle font,
   }
 }
 
-void SceneRendererFrameData::setSkyboxTexture(rhi::TextureHandle skybox) {
-  mSkyboxTexture = skybox;
+void SceneRendererFrameData::setSkyboxTexture(rhi::TextureHandle texture) {
+  mSkyboxData.data.x = static_cast<uint32_t>(texture);
+}
+
+void SceneRendererFrameData::setSkyboxColor(const glm::vec4 &color) {
+  mSkyboxData.color = color;
 }
 
 void SceneRendererFrameData::setEnvironmentTextures(
-    rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap,
-    rhi::TextureHandle brdfLUT) {
+    rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap) {
+  mSceneData.data.y = SceneData::EnvironmentLighting::Texture;
   mSceneData.textures.x = rhi::castHandleToUint(irradianceMap);
   mSceneData.textures.y = rhi::castHandleToUint(specularMap);
-  mSceneData.textures.z = rhi::castHandleToUint(brdfLUT);
+}
+
+void SceneRendererFrameData::setEnvironmentColor(const glm::vec4 &color) {
+  mSceneData.data.y = SceneData::EnvironmentLighting::Color;
+  mSceneData.color = color;
 }
 
 void SceneRendererFrameData::setCameraData(const Camera &data,
@@ -330,11 +351,14 @@ void SceneRendererFrameData::clear() {
   mLights.clear();
   mShadowMaps.clear();
   mSceneData.data.x = 0;
+  mSceneData.data.y = 0;
   mSceneData.textures.x = 0;
   mSceneData.textures.y = 0;
-  mSceneData.textures.z = 0;
+  // Do not unset remove BRDF Lookup table
+  mSceneData.color = {};
+  mSkyboxData.color = {};
+  mSkyboxData.data.x = 0;
   mLastSkeleton = 0;
-  mSkyboxTexture = rhi::TextureHandle::Invalid;
 
   mMeshGroups.clear();
   mSkinnedMeshGroups.clear();

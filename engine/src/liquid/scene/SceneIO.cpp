@@ -180,14 +180,21 @@ Result<bool> SceneIO::saveEnvironment(const Path &path) {
       auto &skybox =
           mScene.entityDatabase.get<EnvironmentSkybox>(mScene.environment);
 
-      auto relPath = mAssetRegistry.getEnvironments()
-                         .getAsset(skybox.environmentHandle)
-                         .relativePath.string();
-      std::replace(relPath.begin(), relPath.end(), '\\', '/');
+      if (skybox.type == EnvironmentSkyboxType::Color) {
+        skyboxNode = YAML::Node(YAML::NodeType::Map);
+        skyboxNode["type"] = "color";
+        skyboxNode["color"] = skybox.color;
+      } else if (skybox.type == EnvironmentSkyboxType::Texture &&
+                 mAssetRegistry.getEnvironments().hasAsset(skybox.texture)) {
+        auto relPath = mAssetRegistry.getEnvironments()
+                           .getAsset(skybox.texture)
+                           .relativePath.string();
+        std::replace(relPath.begin(), relPath.end(), '\\', '/');
 
-      skyboxNode = YAML::Node(YAML::NodeType::Map);
-      skyboxNode["type"] = "texture";
-      skyboxNode["texture"] = relPath;
+        skyboxNode = YAML::Node(YAML::NodeType::Map);
+        skyboxNode["type"] = "texture";
+        skyboxNode["texture"] = relPath;
+      }
     }
 
     if (mScene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
@@ -230,14 +237,20 @@ void SceneIO::loadEnvironment(const YAML::Node &zone) {
   if (skybox && skybox.IsMap() && skybox["type"] && skybox["type"].IsScalar()) {
     auto skyboxType = skybox["type"].as<String>();
 
-    if (skyboxType == "texture" && skybox["texture"].IsScalar()) {
+    if (skyboxType == "color") {
+      EnvironmentSkybox component{EnvironmentSkyboxType::Color};
+      component.color = skybox["color"].as<glm::vec4>(glm::vec4{0.0f});
+      mScene.entityDatabase.set(mScene.environment, component);
+    } else if (skyboxType == "texture" && skybox["texture"].IsScalar()) {
       auto relPath = skybox["texture"].as<String>();
       auto handle = mAssetRegistry.getEnvironments().findHandleByRelativePath(
           Path(relPath));
 
+      EnvironmentSkybox component{EnvironmentSkyboxType::Texture};
+      component.texture = handle;
+
       if (handle != EnvironmentAssetHandle::Invalid) {
-        mScene.entityDatabase.set<EnvironmentSkybox>(mScene.environment,
-                                                     {handle});
+        mScene.entityDatabase.set(mScene.environment, component);
       }
     }
   }

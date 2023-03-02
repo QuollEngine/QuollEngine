@@ -88,9 +88,16 @@ public:
    */
   struct SceneData {
     /**
-     * @brief Scene data
+     * Environment lighting type
+     */
+    enum EnvironmentLighting { None = 0, Color = 1, Texture = 2 };
+
+    /**
+     * Light data
      *
      * First parameter is number of lights
+     * Second parameter is environment lighting type
+     *   (0 = none, 1 = color, 2 = texture)
      */
     glm::uvec4 data{0};
 
@@ -103,6 +110,28 @@ public:
      * Fourth parameter is shadow map
      */
     glm::uvec4 textures{0};
+
+    /**
+     * Scene color
+     */
+    glm::vec4 color;
+  };
+
+  /**
+   * @brief Skybox data
+   */
+  struct SkyboxData {
+    /**
+     * Skybox data
+     *
+     * First value represents texture id
+     */
+    glm::uvec4 data{0};
+
+    /**
+     * Skybox color
+     */
+    glm::vec4 color;
   };
 
   /**
@@ -229,20 +258,6 @@ public:
   }
 
   /**
-   * @brief Get skybox texture
-   *
-   * @return Skybox texture
-   */
-  inline rhi::TextureHandle getSkyboxTexture() const { return mSkyboxTexture; }
-
-  /**
-   * @brief Set skybox texture
-   *
-   * @param skyboxTexture Skybox texture
-   */
-  void setSkyboxTexture(rhi::TextureHandle skyboxTexture);
-
-  /**
    * @brief Get number of lights
    *
    * @return Number of lights
@@ -265,6 +280,13 @@ public:
    */
   void addMesh(MeshAssetHandle handle, liquid::Entity entity,
                const glm::mat4 &transform);
+
+  /**
+   * @brief Set BRDF lookup table
+   *
+   * @param brdfLut BRDF Lookup table
+   */
+  void setBrdfLookupTable(rhi::TextureHandle brdfLut);
 
   /**
    * @brief Add skinned mesh data
@@ -305,15 +327,34 @@ public:
                const glm::mat4 &transform);
 
   /**
+   * @brief Set skybox texture
+   *
+   * @param skyboxTexture Skybox texture
+   */
+  void setSkyboxTexture(rhi::TextureHandle skyboxTexture);
+
+  /**
+   * @brief Set skybox color
+   *
+   * @param color Skybox color
+   */
+  void setSkyboxColor(const glm::vec4 &color);
+
+  /**
    * @brief Set environment textures
    *
    * @param irradianceMap Irradiance map
    * @param specularMap Specular map
-   * @param brdfLUT BRDF LUT
    */
   void setEnvironmentTextures(rhi::TextureHandle irradianceMap,
-                              rhi::TextureHandle specularMap,
-                              rhi::TextureHandle brdfLUT);
+                              rhi::TextureHandle specularMap);
+
+  /**
+   * @brief Set environment color
+   *
+   * @param color Environment color
+   */
+  void setEnvironmentColor(const glm::vec4 &color);
 
   /**
    * @brief Set camera data
@@ -370,6 +411,7 @@ private:
   std::vector<LightData> mLights;
   std::vector<ShadowMapData> mShadowMaps;
   SceneData mSceneData{};
+  SkyboxData mSkyboxData{};
   Camera mCameraData;
   PerspectiveLens mCameraLens;
 
@@ -382,8 +424,7 @@ private:
   rhi::Buffer mLightsBuffer;
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
-
-  rhi::TextureHandle mSkyboxTexture = rhi::TextureHandle::Invalid;
+  rhi::Buffer mSkyboxBuffer;
 
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
   std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
