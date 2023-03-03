@@ -223,7 +223,7 @@ Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
                                   uint32_t handle, AssetType type,
                                   bool saveToFile) {
   if (type != AssetType::Prefab) {
-    return EntityNull;
+    return Entity::Null;
   }
 
   auto &registry = mAssetManager.getAssetRegistry();

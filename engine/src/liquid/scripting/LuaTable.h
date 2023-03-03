@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/entity/Entity.h"
+
 namespace liquid {
 
 /**
@@ -22,6 +24,14 @@ public:
    * @param value Value column
    */
   void set(const char *key, uint32_t value);
+
+  /**
+   * @brief Set entity table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, Entity value);
 
   /**
    * @brief Set function table value

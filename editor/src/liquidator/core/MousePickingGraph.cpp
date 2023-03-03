@@ -205,13 +205,13 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 }
 
 Entity MousePickingGraph::getSelectedEntity() {
-  auto selectedEntity = EntityNull;
+  auto selectedEntity = Entity::Null;
 
   auto *data = mSelectedEntityBuffer.map();
   memcpy(&selectedEntity, data, sizeof(Entity));
   mSelectedEntityBuffer.unmap();
 
-  Entity nullEntity = EntityNull;
+  Entity nullEntity = Entity::Null;
   mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
 
   mFrameIndex = std::numeric_limits<uint32_t>::max();

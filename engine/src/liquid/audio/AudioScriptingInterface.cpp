@@ -21,7 +21,7 @@ int AudioScriptingInterface::LuaInterface::play(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -47,7 +47,7 @@ int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(

@@ -18,7 +18,7 @@ struct Scene {
   /**
    * Active camera in the scene
    */
-  Entity activeCamera = EntityNull;
+  Entity activeCamera = Entity::Null;
 
   /**
    * Dummy camera
@@ -26,12 +26,12 @@ struct Scene {
    * Used as a fallback if there
    * are no cameras in the scene
    */
-  Entity dummyCamera = EntityNull;
+  Entity dummyCamera = Entity::Null;
 
   /**
    * Environment
    */
-  Entity environment = EntityNull;
+  Entity environment = Entity::Null;
 };
 
 } // namespace liquid

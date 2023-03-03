@@ -21,7 +21,7 @@ int NameScriptingInterface::LuaInterface::get(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -54,7 +54,7 @@ int NameScriptingInterface::LuaInterface::set(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   auto string = scope.get<String>(2);

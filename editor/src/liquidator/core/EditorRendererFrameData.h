@@ -194,7 +194,7 @@ public:
    * @retval false Collidable entity is not set
    */
   inline bool isCollidableEntitySelected() const {
-    return mCollidableEntity != EntityNull;
+    return mCollidableEntity != Entity::Null;
   }
 
   /**
@@ -238,7 +238,7 @@ private:
   rhi::Buffer mGizmoTransformsBuffer;
 
   // Collidable shape
-  Entity mCollidableEntity = EntityNull;
+  Entity mCollidableEntity = Entity::Null;
   CollidableEntity mCollidableEntityParams{};
 
   rhi::Buffer mCollidableEntityBuffer;

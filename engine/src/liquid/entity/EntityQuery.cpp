@@ -15,7 +15,7 @@ Entity EntityQuery::getFirstEntityByName(StringView name) {
     }
   }
 
-  return EntityNull;
+  return Entity::Null;
 }
 
 } // namespace liquid

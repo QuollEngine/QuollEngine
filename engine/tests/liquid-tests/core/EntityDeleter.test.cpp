@@ -12,7 +12,7 @@ public:
 TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
   static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::Entity::Null);
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();
     entities.at(i) = entity;
@@ -37,7 +37,7 @@ TEST_F(EntityDeleterTest, DeleteEntitiesThatHaveDeleteComponents) {
 TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
   static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::Entity::Null);
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();
@@ -74,7 +74,7 @@ TEST_F(EntityDeleterTest, DeletesAllChildrenOfEntitiesWithDeleteComponents) {
 TEST_F(EntityDeleterTest, RemoveDeletedEntityFromChildrenOfAParent) {
   static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::Entity::Null);
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = scene.entityDatabase.create();

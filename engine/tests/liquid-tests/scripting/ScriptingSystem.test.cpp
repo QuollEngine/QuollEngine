@@ -48,7 +48,7 @@ TEST_F(ScriptingSystemTest, DeletesScriptForEntitiesWithDeletes) {
 
   static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NumEntities, liquid::EntityNull);
+  std::vector<liquid::Entity> entities(NumEntities, liquid::Entity::Null);
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entityDatabase.create();
     entities.at(i) = entity;
@@ -201,7 +201,8 @@ TEST_F(ScriptingSystemTest,
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {5, 6});
+  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted,
+                       {liquid::Entity{5}, liquid::Entity{6}});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 0);
@@ -219,7 +220,8 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted, {entity, 6});
+  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted,
+                       {entity, liquid::Entity{6}});
   eventSystem.poll();
 
   auto *luaScope = component.scope.getLuaState();
@@ -239,7 +241,8 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded, {5, entity});
+  eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded,
+                       {liquid::Entity{5}, entity});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 2);

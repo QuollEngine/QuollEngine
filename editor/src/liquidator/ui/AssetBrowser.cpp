@@ -238,7 +238,7 @@ void AssetBrowser::render(AssetManager &assetManager,
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
               entityManager.spawnEntity(editorManager.getEditorCamera(),
-                                        EntityNull, entry.asset,
+                                        Entity::Null, entry.asset,
                                         entry.assetType);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(

@@ -29,7 +29,7 @@ int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
   EntityQuery query(entityDatabase);
 
   auto entity = query.getFirstEntityByName(arg);
-  if (entity == EntityNull) {
+  if (entity == Entity::Null) {
     scope.set(nullptr);
   } else {
     ScriptDecorator::createEntityTable(scope, entity);

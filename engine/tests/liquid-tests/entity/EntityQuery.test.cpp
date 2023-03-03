@@ -15,7 +15,7 @@ TEST_F(EntityQueryTest, ReturnsNullEntityIfEntityWithNameIsNotFound) {
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Name>(entity, {"test"});
 
-  EXPECT_EQ(entityQuery.getFirstEntityByName("hello"), liquid::EntityNull);
+  EXPECT_EQ(entityQuery.getFirstEntityByName("hello"), liquid::Entity::Null);
 }
 
 TEST_F(EntityQueryTest, ReturnsEntityIfEntityWithNameIsFound) {

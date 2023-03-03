@@ -117,7 +117,7 @@ void EditorRendererFrameData::clear() {
   mGizmoCounts.clear();
   mLastSkeleton = 0;
 
-  mCollidableEntity = EntityNull;
+  mCollidableEntity = Entity::Null;
 }
 
 void EditorRendererFrameData::setCollidable(

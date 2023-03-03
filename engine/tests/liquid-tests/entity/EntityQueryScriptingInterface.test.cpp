@@ -87,5 +87,5 @@ TEST_F(EntityQueryLuaInterfaceTest,
 
   auto table = scope.getGlobal<liquid::LuaTable>("found_entity");
   table.get("id");
-  EXPECT_EQ(scope.get<uint32_t>(), e1);
+  EXPECT_EQ(scope.get<liquid::Entity>(), e1);
 }

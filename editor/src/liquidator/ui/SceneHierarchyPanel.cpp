@@ -82,7 +82,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
   String name =
       entityDatabase.has<Name>(entity)
           ? mEntityManager.getActiveEntityDatabase().get<Name>(entity).name
-          : "Entity #" + std::to_string(entity);
+          : "Entity #" + std::to_string(static_cast<uint32_t>(entity));
 
   bool isLeaf = !mEntityManager.getActiveEntityDatabase().has<Children>(entity);
 
@@ -142,7 +142,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       mEntityManager.deleteEntity(entity);
 
       if (entity == mSelectedEntity) {
-        mSelectedEntity = EntityNull;
+        mSelectedEntity = Entity::Null;
       }
     }
   }

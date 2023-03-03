@@ -25,7 +25,7 @@ public:
       return {node, entity};
     }
 
-    return {node, liquid::EntityNull};
+    return {node, liquid::Entity::Null};
   }
 
 public:
@@ -1831,7 +1831,7 @@ TEST_F(SceneLoaderParentTest, CreatesParentComponentIfParentEntityExists) {
 TEST_F(SceneLoaderParentTest,
        AddsChildToParentComponentIfChildrenComponentAlreadyExists) {
   auto [parentNode, parentEntity] = createNode();
-  entityDatabase.set<liquid::Children>(parentEntity, {{liquid::EntityNull}});
+  entityDatabase.set<liquid::Children>(parentEntity, {{liquid::Entity::Null}});
 
   auto [node, entity] = createNode();
   node["components"]["transform"]["parent"] = parentNode["id"];
@@ -1859,8 +1859,8 @@ TEST_F(
   {
     YAML::Node node(YAML::NodeType::Null);
 
-    auto res =
-        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    auto res = sceneLoader.loadStartingCamera(node, entityIdCache,
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1868,8 +1868,8 @@ TEST_F(
   {
     YAML::Node node(YAML::NodeType::Map);
 
-    auto res =
-        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    auto res = sceneLoader.loadStartingCamera(node, entityIdCache,
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1877,8 +1877,8 @@ TEST_F(
   {
     YAML::Node node(YAML::NodeType::Sequence);
 
-    auto res =
-        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    auto res = sceneLoader.loadStartingCamera(node, entityIdCache,
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1886,8 +1886,8 @@ TEST_F(
   {
     YAML::Node node(YAML::NodeType::Undefined);
 
-    auto res =
-        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    auto res = sceneLoader.loadStartingCamera(node, entityIdCache,
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1906,8 +1906,8 @@ TEST_F(
   {
     YAML::Node node(23232);
 
-    auto res =
-        sceneLoader.loadStartingCamera(node, entityIdCache, liquid::EntityNull);
+    auto res = sceneLoader.loadStartingCamera(node, entityIdCache,
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1926,7 +1926,7 @@ TEST_F(
 
   {
     auto res = sceneLoader.loadStartingCamera(idNode["id"], entityIdCache,
-                                              liquid::EntityNull);
+                                              liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), camera2);
   }
@@ -1945,7 +1945,7 @@ TEST_F(SceneLoaderActiveCameraTest,
 
   {
     auto res = sceneLoader.loadStartingCamera(
-        startingCameraNode.first["id"], entityIdCache, liquid::EntityNull);
+        startingCameraNode.first["id"], entityIdCache, liquid::Entity::Null);
     EXPECT_TRUE(res.hasData());
     EXPECT_EQ(res.getData(), startingCameraNode.second);
   }

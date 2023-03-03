@@ -63,8 +63,8 @@ private:
 
 private:
   EntityManager &mEntityManager;
-  Entity mSelectedEntity = EntityNull;
-  Entity mRightClickedEntity = EntityNull;
+  Entity mSelectedEntity = Entity::Null;
+  Entity mRightClickedEntity = Entity::Null;
 };
 
 } // namespace liquid::editor
