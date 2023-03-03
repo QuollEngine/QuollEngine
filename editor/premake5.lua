@@ -28,7 +28,6 @@ project "LiquidEditor"
         "glslc ../../editor/assets/shaders/equirectangular-to-cubemap.comp -o %{cfg.buildtarget.directory}/assets/shaders/equirectangular-to-cubemap.comp.spv",
         "glslc ../../editor/assets/shaders/generate-irradiance-map.comp -o %{cfg.buildtarget.directory}/assets/shaders/generate-irradiance-map.comp.spv",
         "glslc ../../editor/assets/shaders/generate-specular-map.comp -o %{cfg.buildtarget.directory}/assets/shaders/generate-specular-map.comp.spv",
-        "glslc ../../editor/assets/shaders/generate-brdf-lut.comp -o %{cfg.buildtarget.directory}/assets/shaders/generate-brdf-lut.comp.spv",
         "{MKDIR} %{cfg.buildtarget.directory}/assets/icons",
         "{MKDIR} %{cfg.buildtarget.directory}/assets/fonts",
         "{COPYDIR} ../../editor/assets/icons %{cfg.buildtarget.directory}/assets/icons",

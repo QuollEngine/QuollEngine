@@ -5,32 +5,26 @@
 
 namespace liquid {
 
+enum class EnvironmentSkyboxType { Color, Texture };
+
 /**
  * @brief Environment skybox component
- *
- * Stores IBL maps
  */
 struct EnvironmentSkybox {
+  /**
+   * Environment skybox type
+   */
+  EnvironmentSkyboxType type = EnvironmentSkyboxType::Color;
 
   /**
-   * Environment asset handle
+   * Skybox texture
    */
-  EnvironmentAssetHandle environmentHandle = EnvironmentAssetHandle::Invalid;
+  EnvironmentAssetHandle texture = EnvironmentAssetHandle::Invalid;
 
   /**
-   * Irradiance map texture
+   * Skybox color
    */
-  rhi::TextureHandle irradianceMap = rhi::TextureHandle::Invalid;
-
-  /**
-   * Specular map texture
-   */
-  rhi::TextureHandle specularMap = rhi::TextureHandle::Invalid;
-
-  /**
-   * BRDF LUT texture
-   */
-  rhi::TextureHandle brdfLUT = rhi::TextureHandle::Invalid;
+  glm::vec4 color{0.0f, 0.0f, 0.0f, 1.0f};
 };
 
 } // namespace liquid

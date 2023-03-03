@@ -11,9 +11,34 @@ layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform samplerCube uGlobalTextures[];
 
-void main() {
-  vec3 color =
-      texture(uGlobalTextures[pcDrawParameters.index9], inTexCoord).xyz;
+/**
+ * @brief Skybox data
+ */
+struct SkyboxData {
+  /**
+   * Data
+   *
+   * First parameter is texture handle
+   */
+  uvec4 data;
 
-  outColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+  /**
+   * Skybox color
+   */
+  vec4 color;
+};
+
+RegisterUniform(SkyboxUniform, { SkyboxData skybox; });
+
+#define getSkyboxData() GetBindlessResourceFromPC(SkyboxUniform, 9).skybox
+
+void main() {
+  if (getSkyboxData().data.x > 0) {
+    vec3 color =
+        texture(uGlobalTextures[getSkyboxData().data.x], inTexCoord).xyz;
+
+    outColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+  } else {
+    outColor = vec4(getSkyboxData().color.xyz, 1.0);
+  }
 }

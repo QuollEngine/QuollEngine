@@ -60,13 +60,6 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, rhi::RenderDevice *device)
     mPipelineGenerateSpecularMap =
         mDevice->createPipeline(rhi::ComputePipelineDescription{shader});
   }
-
-  {
-    auto shader =
-        mDevice->createShader({shadersPath / "generate-brdf-lut.comp.spv"});
-    mPipelineGenerateBrdfLut =
-        mDevice->createPipeline(rhi::ComputePipelineDescription{shader});
-  }
 }
 
 Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
@@ -115,26 +108,11 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
     return Result<Path>::Error(specularCubemap.getError());
   }
 
-  auto brdfLutName = originalAssetPath.stem().string() + "-brdf-lut";
-  auto brdfLut = generateBrdfLut(unfilteredCubemap, relPath / brdfLutName);
-
-  if (brdfLut.hasError()) {
-    mDevice->destroyTexture(unfilteredCubemap.texture);
-    mAssetCache.getRegistry().getTextures().deleteAsset(
-        irradianceCubemap.getData());
-    mAssetCache.getRegistry().getTextures().deleteAsset(
-        specularCubemap.getData());
-    std::filesystem::remove_all(engineAssetPath);
-
-    return Result<Path>::Error(brdfLut.getError());
-  }
-
   mDevice->destroyTexture(unfilteredCubemap.texture);
 
   AssetData<EnvironmentAsset> environment{};
   environment.path =
       engineAssetPath / originalAssetPath.filename().replace_extension("lqenv");
-  environment.data.brdfLut = brdfLut.getData();
   environment.data.specularMap = specularCubemap.getData();
   environment.data.irradianceMap = irradianceCubemap.getData();
 
@@ -425,67 +403,6 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
       mDevice, specularCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
       CubemapSides, asset.data.levels, asset.data.data);
   mDevice->destroyTexture(specularCubemap);
-
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
-  if (createdFileRes.hasError()) {
-    return Result<TextureAssetHandle>::Error(createdFileRes.getError());
-  }
-
-  return mAssetCache.loadTextureFromFile(createdFileRes.getData());
-}
-
-Result<TextureAssetHandle>
-HDRIImporter::generateBrdfLut(const CubemapData &unfilteredCubemap,
-                              const Path &path) {
-  static constexpr uint32_t GroupSize = 16;
-
-  rhi::TextureDescription textureDesc;
-  textureDesc.type = rhi::TextureType::Standard;
-  textureDesc.format = TargetFormat;
-  textureDesc.height = unfilteredCubemap.levels.at(0).width;
-  textureDesc.width = unfilteredCubemap.levels.at(0).width;
-  textureDesc.layers = 1;
-  textureDesc.levels = 1;
-  textureDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
-                      rhi::TextureUsage::Sampled |
-                      rhi::TextureUsage::TransferSource;
-
-  auto brdfLut = mDevice->createTexture(textureDesc);
-
-  mDescriptorGenerateCubemap.write(0, {unfilteredCubemap.texture},
-                                   rhi::DescriptorType::CombinedImageSampler);
-  mDescriptorGenerateCubemap.write(1, {brdfLut},
-                                   rhi::DescriptorType::StorageImage);
-
-  auto commandList = mDevice->requestImmediateCommandList();
-  commandList.bindPipeline(mPipelineGenerateBrdfLut);
-  commandList.bindDescriptor(mPipelineGenerateBrdfLut, 0,
-                             mDescriptorGenerateCubemap);
-  commandList.dispatch(textureDesc.width / GroupSize,
-                       textureDesc.height / GroupSize, 1);
-  mDevice->submitImmediate(commandList);
-
-  auto levels = std::vector{TextureAssetLevel{
-      0,
-      static_cast<size_t>(textureDesc.width) * textureDesc.height * FormatSize,
-      textureDesc.width, textureDesc.height}};
-
-  AssetData<TextureAsset> asset{};
-  asset.name = path.string();
-  asset.size = TextureUtils::getBufferSizeFromLevels(levels);
-  asset.data.type = TextureAssetType::Standard;
-  asset.data.width = levels.at(0).width;
-  asset.data.height = levels.at(0).height;
-  asset.data.layers = 1;
-  asset.data.format = TargetFormat;
-  asset.data.levels = levels;
-
-  asset.data.data = new char[asset.size];
-
-  TextureUtils::copyTextureToData(
-      mDevice, brdfLut, rhi::ImageLayout::ShaderReadOnlyOptimal,
-      asset.data.layers, asset.data.levels, asset.data.data);
-  mDevice->destroyTexture(brdfLut);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   if (createdFileRes.hasError()) {

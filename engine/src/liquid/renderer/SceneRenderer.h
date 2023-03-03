@@ -117,6 +117,11 @@ private:
   void renderText(rhi::RenderCommandList &commandList,
                   rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
+  /**
+   * @brief Generate BRDF lookup table
+   */
+  void generateBrdfLut();
+
 private:
   glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;

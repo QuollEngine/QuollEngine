@@ -19,6 +19,8 @@ function copyEngineAssets()
         "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.frag -o"..outputPath.."/shaders/fullscreen-quad.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.vert -o"..outputPath.."/shaders/fullscreen-quad.vert.spv",
+        "glslc "..assetsPath.."/shaders/generate-brdf-lut.comp -o "..outputPath.."/shaders/generate-brdf-lut.comp.spv",
+
         -- Fonts
         "{MKDIR} "..outputPath.."/fonts/",
         "{COPYFILE} "..assetsPath.."/fonts/Roboto-Regular.ttf "..outputPath.."/fonts"
