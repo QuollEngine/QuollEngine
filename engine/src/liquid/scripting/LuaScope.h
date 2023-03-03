@@ -3,6 +3,7 @@
 struct lua_State;
 
 #include "LuaTable.h"
+#include "liquid/entity/Entity.h"
 
 namespace liquid {
 
@@ -357,6 +358,16 @@ template <> inline int32_t LuaScope::get<int32_t>(int32_t index) {
  */
 template <> inline uint32_t LuaScope::get<uint32_t>(int32_t index) {
   return static_cast<uint32_t>(luaGetInteger(index));
+}
+
+/**
+ * @brief Get entity
+ *
+ * @param index Stack index
+ * @return Unsigned integer
+ */
+template <> inline Entity LuaScope::get<Entity>(int32_t index) {
+  return static_cast<Entity>(luaGetInteger(index));
 }
 
 /**

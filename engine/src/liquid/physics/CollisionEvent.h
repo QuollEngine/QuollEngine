@@ -13,12 +13,12 @@ struct CollisionObject {
   /**
    * Collided entity A
    */
-  Entity a = EntityNull;
+  Entity a = Entity::Null;
 
   /**
    * Collided entity B
    */
-  Entity b = EntityNull;
+  Entity b = Entity::Null;
 };
 
 } // namespace liquid

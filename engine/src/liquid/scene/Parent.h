@@ -12,7 +12,7 @@ struct Parent {
   /**
    * Parent entity
    */
-  Entity parent = EntityNull;
+  Entity parent = Entity::Null;
 };
 
 } // namespace liquid

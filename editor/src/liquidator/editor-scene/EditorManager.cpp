@@ -120,7 +120,7 @@ void EditorManager::createNewScene() {
         glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
 
     auto light1 =
-        mEntityManager.createEmptyEntity(EntityNull, transform, "Light");
+        mEntityManager.createEmptyEntity(Entity::Null, transform, "Light");
     mEntityManager.getActiveEntityDatabase().set<DirectionalLight>(light1, {});
     mEntityManager.save(light1);
   }

@@ -128,7 +128,7 @@ private:
   void handleDragAndDrop(Renderer &renderer, AssetRegistry &assetRegistry);
 
 private:
-  Entity mSelectedEntity = EntityNull;
+  Entity mSelectedEntity = Entity::Null;
   String mName;
   EntityManager &mEntityManager;
   bool mIsNameActivated = false;

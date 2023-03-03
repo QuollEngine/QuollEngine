@@ -24,7 +24,7 @@ int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -59,7 +59,7 @@ int TransformScriptingInterface::LuaInterface::setPosition(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   glm::vec3 newPosition;
@@ -91,7 +91,7 @@ int TransformScriptingInterface::LuaInterface::getScale(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -125,7 +125,7 @@ int TransformScriptingInterface::LuaInterface::setScale(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   glm::vec3 newScale;

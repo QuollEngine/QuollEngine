@@ -22,7 +22,7 @@ int TextScriptingInterface::LuaInterface::getText(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -55,7 +55,7 @@ int TextScriptingInterface::LuaInterface::setText(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   auto text = scope.get<String>(2);
@@ -86,7 +86,7 @@ int TextScriptingInterface::LuaInterface::getLineHeight(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(2);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
@@ -118,7 +118,7 @@ int TextScriptingInterface::LuaInterface::setLineHeight(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   auto lineHeight = scope.get<float>(2);

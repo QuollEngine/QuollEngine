@@ -61,7 +61,7 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
   }
 
   auto res = sceneLoader.loadStartingCamera(persistentZone["startingCamera"],
-                                            mEntityIdCache, EntityNull);
+                                            mEntityIdCache, Entity::Null);
   if (res.hasData()) {
     mScene.activeCamera = res.getData();
   } else {

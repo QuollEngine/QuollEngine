@@ -20,7 +20,8 @@ Entity EntityStorageSparseSet::create() {
     return eid;
   }
 
-  auto eid = mLastEntity++;
+  auto eid = mLastEntity;
+  mLastEntity = Entity{static_cast<uint32_t>(mLastEntity) + 1};
   return eid;
 }
 
@@ -30,11 +31,11 @@ bool EntityStorageSparseSet::exists(Entity entity) const {
       return false;
   }
 
-  return entity > EntityNull && entity < mLastEntity;
+  return entity > Entity::Null && entity < mLastEntity;
 }
 
 void EntityStorageSparseSet::deleteEntity(Entity entity) {
-  if (entity == EntityNull)
+  if (entity == Entity::Null)
     return;
 
   deleteAllEntityComponents(entity);
@@ -49,14 +50,15 @@ void EntityStorageSparseSet::destroy() {
 
 void EntityStorageSparseSet::deleteAllEntityComponents(Entity entity) {
   for (auto &[_, pool] : mComponentPools) {
-    if (entity < pool.entityIndices.size() &&
-        pool.entityIndices[entity] < DeadIndex) {
+    size_t sEntity = static_cast<size_t>(entity);
+    if (sEntity < pool.entityIndices.size() &&
+        pool.entityIndices[sEntity] < DeadIndex) {
 
-      Entity movedEntity = pool.entities.back();
-      size_t entityIndexToDelete = pool.entityIndices[entity];
+      size_t movedEntity = static_cast<size_t>(pool.entities.back());
+      size_t entityIndexToDelete = pool.entityIndices[sEntity];
 
       // Move last entity in the array to place of deleted entity
-      pool.entities[entityIndexToDelete] = movedEntity;
+      pool.entities[entityIndexToDelete] = static_cast<Entity>(movedEntity);
 
       // Change index of moved entity to the index of deleted entity
       pool.entityIndices[movedEntity] = entityIndexToDelete;
@@ -70,13 +72,13 @@ void EntityStorageSparseSet::deleteAllEntityComponents(Entity entity) {
       // Delete last item from components array
       pool.components.pop_back();
 
-      pool.entityIndices[entity] = DeadIndex;
+      pool.entityIndices[sEntity] = DeadIndex;
     }
   }
 }
 
 void EntityStorageSparseSet::deleteAllEntities() {
-  mLastEntity = 1;
+  mLastEntity = Entity{1};
   mDeleted.clear();
   mNumEntities = 0;
 }

@@ -36,9 +36,10 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       auto parentId = node["components"]["transform"]["parent"].as<uint64_t>(0);
 
       auto it = entityIdCache.find(parentId);
-      Entity parentEntity = it != entityIdCache.end() ? it->second : EntityNull;
+      Entity parentEntity =
+          it != entityIdCache.end() ? it->second : Entity::Null;
 
-      if (parentEntity != EntityNull) {
+      if (parentEntity != Entity::Null) {
         mEntityDatabase.set<Parent>(entity, {parentEntity});
 
         if (mEntityDatabase.has<Children>(parentEntity)) {
@@ -321,13 +322,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  return Result<bool>::Ok(entity);
+  return Result<bool>::Ok(true);
 }
 
 Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
                                                EntityIdCache &entityIdCache,
                                                Entity excludeEntity) {
-  Entity entity = EntityNull;
+  Entity entity = Entity::Null;
   if (node && node.IsScalar()) {
     auto entityId = node.as<uint64_t>();
 
@@ -341,7 +342,7 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
     }
   }
 
-  if (entity == EntityNull) {
+  if (entity == Entity::Null) {
     for (auto [e, _] : mEntityDatabase.view<PerspectiveLens>()) {
       if (e != excludeEntity) {
         entity = e;
@@ -349,7 +350,7 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
     }
   }
 
-  if (entity == EntityNull) {
+  if (entity == Entity::Null) {
     return Result<Entity>::Error("Camera entity not found");
   }
 

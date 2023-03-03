@@ -26,6 +26,8 @@ struct StringComponent {
   std::string value;
 };
 
+static constexpr liquid::Entity DeadEntity{12};
+
 /**
  * @brief Test entity storage
  *
@@ -67,7 +69,7 @@ public:
 
 TEST(EntityStorageSparseSetTest, ReturnsFalseIfEntityDoesNotExist) {
   TestEntityStorage<Component1> storage;
-  EXPECT_FALSE(storage.exists(12));
+  EXPECT_FALSE(storage.exists(liquid::Entity{12}));
 }
 
 TEST(EntityStorageSparseSetTest, ReturnsTrueIfEntityExists) {
@@ -80,7 +82,7 @@ TEST(EntityStorageSparseSetTest, ReturnsFalseIfComponentDoesNotExist) {
   TestEntityStorage<IntComponent, FloatComponent> storage;
   auto entity = storage.create();
   storage.set<IntComponent>(entity, {10});
-  EXPECT_FALSE(storage.has<FloatComponent>(12));
+  EXPECT_FALSE(storage.has<FloatComponent>(DeadEntity));
 }
 
 TEST(EntityStorageSparseSetTest, ReturnsTrueIfComponentExists) {
@@ -253,10 +255,10 @@ TEST(EntityStorageSparseSetTest, UseRecyclesEntity) {
 
 TEST(EntityStorageSparseSetTest, DoesNotDeleteNonExistentEntity) {
   TestEntityStorage<IntComponent, FloatComponent> storage;
-  storage.deleteEntity(liquid::EntityNull);
+  storage.deleteEntity(liquid::Entity::Null);
 
   auto e1 = storage.create();
-  EXPECT_NE(e1, liquid::EntityNull);
+  EXPECT_NE(e1, liquid::Entity::Null);
 }
 
 TEST(EntityStorageSparseSetTest, DeletesEntityAndItsComponentsIfExists) {

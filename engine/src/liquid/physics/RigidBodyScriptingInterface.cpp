@@ -29,7 +29,7 @@ int RigidBodyScriptingInterface::LuaInterface::applyForce(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   glm::vec3 force;
@@ -65,7 +65,7 @@ int RigidBodyScriptingInterface::LuaInterface::applyTorque(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   glm::vec3 torque;
@@ -93,7 +93,7 @@ int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
 
   auto entityTable = scope.get<LuaTable>(1);
   entityTable.get("id");
-  Entity entity = scope.get<uint32_t>();
+  Entity entity = scope.get<Entity>();
   scope.pop(1);
 
   EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(

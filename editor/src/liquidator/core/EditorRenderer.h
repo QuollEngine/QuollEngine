@@ -76,7 +76,7 @@ private:
   rhi::RenderDevice *mDevice;
   ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;
-  Entity mSelectedEntity = EntityNull;
+  Entity mSelectedEntity = Entity::Null;
 
   CollidableShapeDraw mCollidableCube;
   CollidableShapeDraw mCollidableSphere;

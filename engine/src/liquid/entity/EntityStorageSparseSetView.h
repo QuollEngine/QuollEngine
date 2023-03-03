@@ -88,8 +88,9 @@ public:
     get(std::index_sequence<TComponentIndices...> sequence) {
       auto entity = mSmallestPool->entities.at(mIndex);
 
-      const auto &indices = std::array{
-          std::get<TComponentIndices>(mPools)->entityIndices[entity]...};
+      const auto &indices =
+          std::array{std::get<TComponentIndices>(mPools)
+                         ->entityIndices[static_cast<size_t>(entity)]...};
 
       return {mSmallestPool->entities.at(mIndex),
               std::any_cast<TComponentTypes &>(
@@ -162,7 +163,7 @@ private:
   static bool isValidIndex(size_t index, PickedPools &pools,
                            EntityStorageSparseSetComponentPool *smallestPool) {
     bool isValid = true;
-    auto entity = smallestPool->entities.at(index);
+    auto entity = static_cast<size_t>(smallestPool->entities.at(index));
     for (size_t i = 0; i < pools.size() && isValid; ++i) {
       auto *pool = pools.at(i);
       isValid = entity < pool->entityIndices.size() &&

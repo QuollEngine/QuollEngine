@@ -284,7 +284,7 @@ private:
   Window &mWindow;
   EntityDatabase &mEntityDatabase;
   EventSystem &mEventSystem;
-  Entity mCameraEntity = EntityNull;
+  Entity mCameraEntity = Entity::Null;
 };
 
 } // namespace liquid::editor

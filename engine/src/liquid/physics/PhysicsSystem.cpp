@@ -72,9 +72,9 @@ public:
     auto *actor2 = pairHeader.actors[1];
 
     Entity e1 =
-        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor1->userData));
+        static_cast<Entity>(reinterpret_cast<uintptr_t>(actor1->userData));
     Entity e2 =
-        static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor2->userData));
+        static_cast<Entity>(reinterpret_cast<uintptr_t>(actor2->userData));
 
     for (PxU32 i = 0; i < nbPairs; ++i) {
       const PxContactPair &cp = pairs[i];
@@ -375,7 +375,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
       PxRigidStatic *actor = static_cast<PxRigidStatic *>(buffer[i]);
 
       Entity entity =
-          static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
 
       // Destroy actor and shape if there is
       // no collidable component
@@ -402,7 +402,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
       PxRigidDynamic *actor = static_cast<PxRigidDynamic *>(buffer[i]);
 
       Entity entity =
-          static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
 
       // Destroy shape in actor if collidable component
       // is removed
@@ -583,7 +583,7 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
       const auto &globalTransform = actor->getGlobalPose();
 
       Entity entity =
-          static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
 
       glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
                          globalTransform.p.z);
@@ -619,7 +619,7 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
       const auto &globalTransform = actor->getGlobalPose();
 
       Entity entity =
-          static_cast<uint32_t>(reinterpret_cast<uintptr_t>(actor->userData));
+          static_cast<Entity>(reinterpret_cast<uintptr_t>(actor->userData));
 
       glm::vec3 position(globalTransform.p.x, globalTransform.p.y,
                          globalTransform.p.z);

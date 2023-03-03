@@ -2,8 +2,6 @@
 
 namespace liquid {
 
-using Entity = uint32_t;
-
-static constexpr uint32_t EntityNull = 0;
+enum class Entity : uint32_t { Null = 0 };
 
 } // namespace liquid

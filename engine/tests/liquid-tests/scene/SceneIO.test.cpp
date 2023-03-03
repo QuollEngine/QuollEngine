@@ -682,7 +682,7 @@ TEST_F(
 }
 
 TEST_F(SceneIOTest, SetsEnvironmentToNullOnSaveIfSceneEnvironmentEntityIsNull) {
-  scene.environment = liquid::EntityNull;
+  scene.environment = liquid::Entity::Null;
   sceneIO.saveEnvironment(ScenePath);
 
   auto node = loadSceneFile(ScenePath);

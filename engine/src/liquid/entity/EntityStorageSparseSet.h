@@ -93,23 +93,25 @@ public:
   template <class TComponentType>
   void set(Entity entity, const TComponentType &value) {
     LIQUID_ASSERT(exists(entity),
-                  "Entity " + std::to_string(entity) + " does not exist");
+                  "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
+                      " does not exist");
 
     auto &pool = getPoolForComponent<TComponentType>();
 
-    if (entity >= pool.entityIndices.size()) {
+    size_t sEntity = static_cast<size_t>(entity);
+    if (sEntity >= pool.entityIndices.size()) {
       // TODO: Make this better
-      pool.entityIndices.resize((entity + 1) * 2, DeadIndex);
+      pool.entityIndices.resize((sEntity + 1) * 2, DeadIndex);
     }
 
-    size_t index = pool.entityIndices[entity];
+    size_t index = pool.entityIndices[sEntity];
     if (index != DeadIndex) {
       pool.components[index] = value;
       pool.entities[index] = entity;
     } else {
       pool.entities.push_back(entity);
       pool.components.push_back(value);
-      pool.entityIndices[entity] = pool.entities.size() - 1;
+      pool.entityIndices[sEntity] = pool.entities.size() - 1;
     }
   }
 
@@ -124,11 +126,12 @@ public:
   const TComponentType &get(Entity entity) const {
     LIQUID_ASSERT(has<TComponentType>(entity),
                   "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
+                      " does not exist for entity " +
+                      std::to_string(static_cast<uint32_t>(entity)));
     const auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<const TComponentType &>(
-        pool.components[pool.entityIndices[entity]]);
+        pool.components[pool.entityIndices[static_cast<size_t>(entity)]]);
   }
 
   /**
@@ -141,11 +144,12 @@ public:
   template <class TComponentType> TComponentType &get(Entity entity) {
     LIQUID_ASSERT(has<TComponentType>(entity),
                   "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
+                      " does not exist for entity " +
+                      std::to_string(static_cast<uint32_t>(entity)));
     auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<TComponentType &>(
-        pool.components[pool.entityIndices[entity]]);
+        pool.components[pool.entityIndices[static_cast<size_t>(entity)]]);
   }
 
   /**
@@ -157,9 +161,10 @@ public:
    * @retval false Entity does not have component
    */
   template <class TComponentType> bool has(Entity entity) const {
+    size_t sEntity = static_cast<size_t>(entity);
     const auto &pool = getPoolForComponent<TComponentType>();
-    return entity < pool.entityIndices.size() &&
-           pool.entityIndices[entity] != DeadIndex;
+    return sEntity < pool.entityIndices.size() &&
+           pool.entityIndices[sEntity] != DeadIndex;
   }
 
   /**
@@ -169,19 +174,22 @@ public:
    * @param entity Entity
    */
   template <class TComponentType> void remove(Entity entity) {
+    size_t sEntity = static_cast<size_t>(entity);
+
     auto &pool = getPoolForComponent<TComponentType>();
-    LIQUID_ASSERT(entity < pool.entityIndices.size(),
+    LIQUID_ASSERT(sEntity < pool.entityIndices.size(),
                   "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " + std::to_string(entity));
+                      " does not exist for entity " +
+                      std::to_string(static_cast<uint32_t>(entity)));
 
     Entity movedEntity = pool.entities.back();
-    size_t entityIndexToDelete = pool.entityIndices[entity];
+    size_t entityIndexToDelete = pool.entityIndices[sEntity];
 
     // Move last entity in the array to place of deleted entity
     pool.entities[entityIndexToDelete] = movedEntity;
 
     // Change index of moved entity to the index of deleted entity
-    pool.entityIndices[movedEntity] = entityIndexToDelete;
+    pool.entityIndices[static_cast<size_t>(movedEntity)] = entityIndexToDelete;
 
     // Delete last item from entities array
     pool.entities.pop_back();
@@ -192,7 +200,7 @@ public:
     // Delete last item from components array
     pool.components.pop_back();
 
-    pool.entityIndices[entity] = DeadIndex;
+    pool.entityIndices[sEntity] = DeadIndex;
   }
 
   /**
@@ -376,7 +384,7 @@ private:
   std::unordered_map<std::type_index, EntityStorageSparseSetComponentPool>
       mComponentPools;
 
-  Entity mLastEntity = 1;
+  Entity mLastEntity{1};
   std::list<Entity> mDeleted;
   size_t mNumEntities = 0;
 };
