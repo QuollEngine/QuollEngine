@@ -47,13 +47,13 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 
   for (auto &x : mFrameData) {
     liquid::rhi::BufferDescription vertexDesc{};
-    vertexDesc.type = liquid::rhi::BufferType::Vertex;
+    vertexDesc.usage = liquid::rhi::BufferUsage::Vertex;
     vertexDesc.size = 1;
     vertexDesc.mapped = true;
     x.vertexBuffer = renderStorage.createBuffer(vertexDesc);
 
     liquid::rhi::BufferDescription indexDesc{};
-    indexDesc.type = liquid::rhi::BufferType::Index;
+    indexDesc.usage = liquid::rhi::BufferUsage::Index;
     indexDesc.size = 1;
     indexDesc.mapped = true;
     x.indexBuffer = renderStorage.createBuffer(indexDesc);

@@ -129,7 +129,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
     {
       rhi::BufferDescription description;
-      description.type = rhi::BufferType::Vertex;
+      description.usage = rhi::BufferUsage::Vertex;
       description.size = vbSize;
       description.data = nullptr;
       mesh.data.vertexBuffer = renderStorage.createBuffer(description);
@@ -148,7 +148,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
     {
       rhi::BufferDescription description;
-      description.type = rhi::BufferType::Index;
+      description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
       mesh.data.indexBuffer = renderStorage.createBuffer(description);
@@ -191,7 +191,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
     {
       rhi::BufferDescription description;
-      description.type = rhi::BufferType::Vertex;
+      description.usage = rhi::BufferUsage::Vertex;
       description.size = vbSize;
       description.data = nullptr;
       mesh.data.vertexBuffer = renderStorage.createBuffer(description);
@@ -210,7 +210,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
     {
       rhi::BufferDescription description;
-      description.type = rhi::BufferType::Index;
+      description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
       mesh.data.indexBuffer = renderStorage.createBuffer(description);

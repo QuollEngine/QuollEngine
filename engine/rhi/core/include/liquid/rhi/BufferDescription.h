@@ -2,7 +2,7 @@
 
 namespace liquid::rhi {
 
-enum class BufferType {
+enum class BufferUsage {
   None = 0,
   Vertex = 1 << 0,
   Index = 1 << 1,
@@ -13,24 +13,24 @@ enum class BufferType {
   TransferDestination = 1 << 6
 };
 
-EnableBitwiseEnum(BufferType);
+EnableBitwiseEnum(BufferUsage);
 
-enum class BufferUsage : uint8_t {
+enum class BufferAllocationUsage : uint8_t {
   None = 0,
   HostWrite = 1 << 0,
   HostRead = 1 << 1
 };
 
-EnableBitwiseEnum(BufferUsage);
+EnableBitwiseEnum(BufferAllocationUsage);
 
 /**
  * @brief Buffer description
  */
 struct BufferDescription {
   /**
-   * Buffer type
+   * Buffer usage
    */
-  BufferType type = rhi::BufferType::Vertex;
+  BufferUsage usage = rhi::BufferUsage::Vertex;
 
   /**
    * Buffer size
@@ -43,9 +43,9 @@ struct BufferDescription {
   const void *data = nullptr;
 
   /**
-   * @brief Buffer usage
+   * Buffer allocation usage
    */
-  BufferUsage usage = rhi::BufferUsage::HostWrite;
+  BufferAllocationUsage allocationUsage = rhi::BufferAllocationUsage::HostWrite;
 
   /**
    * @brief Keep buffer always mapped

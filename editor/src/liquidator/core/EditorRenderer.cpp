@@ -283,7 +283,8 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     mCollidableCube.buffer = mRenderStorage.createBuffer(
-        {rhi::BufferType::Vertex, CollidableBoxVertices.size() * sizeof(Vertex),
+        {rhi::BufferUsage::Vertex,
+         CollidableBoxVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableBoxVertices.data())});
     mCollidableCube.vertexCount =
         static_cast<uint32_t>(CollidableBoxVertices.size());
@@ -335,7 +336,7 @@ void EditorRenderer::createCollidableShapes() {
     drawUnitCircle(CollidableSphereVertices, NumSegments, cSin, cCos, cZero);
 
     mCollidableSphere.buffer = mRenderStorage.createBuffer(
-        {rhi::BufferType::Vertex,
+        {rhi::BufferUsage::Vertex,
          CollidableSphereVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableSphereVertices.data())});
     mCollidableSphere.vertexCount =
@@ -393,7 +394,7 @@ void EditorRenderer::createCollidableShapes() {
                        cSinCenter(-0.5f), cCos, -Pi);
 
     mCollidableCapsule.buffer = mRenderStorage.createBuffer(
-        {rhi::BufferType::Vertex,
+        {rhi::BufferUsage::Vertex,
          CollidableCapsuleVertices.size() * sizeof(Vertex),
          static_cast<const void *>(CollidableCapsuleVertices.data())});
     mCollidableCapsule.vertexCount =

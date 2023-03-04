@@ -244,29 +244,30 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       rhi::Access srcAccess{rhi::Access::None};
       rhi::Access dstAccess{rhi::Access::None};
 
-      if ((input.type & rhi::BufferType::Vertex) == rhi::BufferType::Vertex) {
+      if ((input.usage & rhi::BufferUsage::Vertex) ==
+          rhi::BufferUsage::Vertex) {
         stage |= rhi::PipelineStage::VertexInput;
         srcAccess = rhi::Access::ShaderWrite;
         dstAccess |= rhi::Access::VertexAttributeRead;
       }
 
-      if ((input.type & rhi::BufferType::Index) == rhi::BufferType::Index) {
+      if ((input.usage & rhi::BufferUsage::Index) == rhi::BufferUsage::Index) {
         stage |= rhi::PipelineStage::VertexInput;
         srcAccess |= rhi::Access::ShaderWrite;
         dstAccess |= rhi::Access::IndexRead;
       }
 
-      if ((input.type & rhi::BufferType::Indirect) ==
-          rhi::BufferType::Indirect) {
+      if ((input.usage & rhi::BufferUsage::Indirect) ==
+          rhi::BufferUsage::Indirect) {
         stage |= rhi::PipelineStage::DrawIndirect;
         srcAccess |= rhi::Access::ShaderWrite;
         dstAccess |= rhi::Access::IndirectCommandRead;
       }
 
-      if (((input.type & rhi::BufferType::Storage) ==
-           rhi::BufferType::Storage) ||
-          ((input.type & rhi::BufferType::Uniform) ==
-           rhi::BufferType::Uniform)) {
+      if (((input.usage & rhi::BufferUsage::Storage) ==
+           rhi::BufferUsage::Storage) ||
+          ((input.usage & rhi::BufferUsage::Uniform) ==
+           rhi::BufferUsage::Uniform)) {
         if (pass.getType() == RenderGraphPassType::Compute) {
           stage |= rhi::PipelineStage::ComputeShader;
         } else {
@@ -291,10 +292,10 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       rhi::Access srcAccess{rhi::Access::None};
       rhi::Access dstAccess{rhi::Access::None};
 
-      if (((output.type & rhi::BufferType::Storage) ==
-           rhi::BufferType::Storage) ||
-          ((output.type & rhi::BufferType::Uniform) ==
-           rhi::BufferType::Uniform)) {
+      if (((output.usage & rhi::BufferUsage::Storage) ==
+           rhi::BufferUsage::Storage) ||
+          ((output.usage & rhi::BufferUsage::Uniform) ==
+           rhi::BufferUsage::Uniform)) {
         if (pass.getType() == RenderGraphPassType::Compute) {
           stage |= rhi::PipelineStage::ComputeShader;
         } else {

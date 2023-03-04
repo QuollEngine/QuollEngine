@@ -16,25 +16,25 @@ void RenderGraphPass::read(rhi::TextureHandle handle) {
   mTextureInputs.push_back({handle});
 }
 
-void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferType type) {
+void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferUsage usage) {
   LIQUID_ASSERT(
-      !BitwiseEnumContains(type, liquid::rhi::BufferType::Vertex) &&
-          !BitwiseEnumContains(type, liquid::rhi::BufferType::Index) &&
-          !BitwiseEnumContains(type, liquid::rhi::BufferType::Indirect),
+      !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Vertex) &&
+          !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Index) &&
+          !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Indirect),
       "Buffers can only be written from Uniform or Storage");
-  mBufferOutputs.push_back({handle, type});
+  mBufferOutputs.push_back({handle, usage});
 }
 
-void RenderGraphPass::read(rhi::BufferHandle handle, rhi::BufferType type) {
+void RenderGraphPass::read(rhi::BufferHandle handle, rhi::BufferUsage usage) {
   if (mType == RenderGraphPassType::Compute) {
     LIQUID_ASSERT(
-        !BitwiseEnumContains(type, liquid::rhi::BufferType::Vertex) &&
-            !BitwiseEnumContains(type, liquid::rhi::BufferType::Index),
+        !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Vertex) &&
+            !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Index),
         "Compute pass can only read "
         "buffers from uniform, storage, "
         "or indirect");
   }
-  mBufferInputs.push_back({handle, type});
+  mBufferInputs.push_back({handle, usage});
 }
 
 void RenderGraphPass::setExecutor(const ExecutorFn &executor) {
