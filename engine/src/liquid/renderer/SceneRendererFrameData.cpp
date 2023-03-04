@@ -17,7 +17,7 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
   mTextGlyphs.reserve(mReservedSpace);
 
   rhi::BufferDescription defaultDesc{};
-  defaultDesc.type = rhi::BufferType::Storage;
+  defaultDesc.usage = rhi::BufferUsage::Storage;
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
@@ -46,21 +46,21 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
   {
     auto desc = defaultDesc;
     desc.size = sizeof(Camera);
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = sizeof(SceneData);
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     mSceneBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = sizeof(SkyboxData);
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     mSkyboxBuffer = renderStorage.createBuffer(desc);
   }
 

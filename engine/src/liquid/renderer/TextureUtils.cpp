@@ -11,7 +11,7 @@ void TextureUtils::copyDataToTexture(
   rhi::BufferDescription stagingBufferDesc{};
   stagingBufferDesc.size = getBufferSizeFromLevels(destinationLevels);
   stagingBufferDesc.data = source;
-  stagingBufferDesc.type = rhi::BufferType::TransferSource;
+  stagingBufferDesc.usage = rhi::BufferUsage::TransferSource;
 
   auto stagingBuffer = device->createBuffer(stagingBufferDesc);
 
@@ -64,7 +64,7 @@ void TextureUtils::copyTextureToData(
   rhi::BufferDescription stagingBufferDesc{};
   stagingBufferDesc.size = getBufferSizeFromLevels(sourceLevels);
   stagingBufferDesc.data = nullptr;
-  stagingBufferDesc.type = rhi::BufferType::TransferDestination;
+  stagingBufferDesc.usage = rhi::BufferUsage::TransferDestination;
 
   auto stagingBuffer = device->createBuffer(stagingBufferDesc);
 

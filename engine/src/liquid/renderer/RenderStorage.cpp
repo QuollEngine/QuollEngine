@@ -88,11 +88,11 @@ rhi::Buffer
 RenderStorage::createBuffer(const liquid::rhi::BufferDescription &description) {
   auto buffer = mDevice->createBuffer(description);
 
-  if (description.type == rhi::BufferType::Storage) {
+  if (description.usage == rhi::BufferUsage::Storage) {
     mGlobalBuffersDescriptor.write(0, {buffer.getHandle()},
                                    rhi::DescriptorType::StorageBuffer,
                                    rhi::castHandleToUint(buffer.getHandle()));
-  } else if (description.type == rhi::BufferType::Uniform) {
+  } else if (description.usage == rhi::BufferUsage::Uniform) {
     mGlobalBuffersDescriptor.write(1, {buffer.getHandle()},
                                    rhi::DescriptorType::UniformBuffer,
                                    rhi::castHandleToUint(buffer.getHandle()));

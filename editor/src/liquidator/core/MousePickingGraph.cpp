@@ -32,12 +32,12 @@ MousePickingGraph::MousePickingGraph(
   auto depthBuffer = renderStorage.createTexture(depthBufferDesc);
 
   Entity nullEntity{0};
-  mSelectedEntityBuffer =
-      renderStorage.createBuffer({rhi::BufferType::Storage, sizeof(Entity),
-                                  &nullEntity, rhi::BufferUsage::HostRead});
+  mSelectedEntityBuffer = renderStorage.createBuffer(
+      {rhi::BufferUsage::Storage, sizeof(Entity), &nullEntity,
+       rhi::BufferAllocationUsage::HostRead});
 
   rhi::BufferDescription defaultDesc{};
-  defaultDesc.type = rhi::BufferType::Storage;
+  defaultDesc.usage = rhi::BufferUsage::Storage;
   defaultDesc.size = sizeof(Entity) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 

@@ -58,14 +58,14 @@ struct RenderTargetData {
  */
 struct RenderGraphPassBufferData {
   /**
-   * @brief Buffer
+   * Buffer
    */
   rhi::BufferHandle buffer = rhi::BufferHandle::Invalid;
 
   /**
-   * @brief Buffer type
+   * Buffer usage
    */
-  rhi::BufferType type = rhi::BufferType::None;
+  rhi::BufferUsage usage = rhi::BufferUsage::None;
 };
 
 /**
@@ -184,17 +184,17 @@ public:
    * @brief Set output buffer
    *
    * @param handle Buffer handle
-   * @param type Buffer type
+   * @param usage Buffer usage
    */
-  void write(rhi::BufferHandle handle, rhi::BufferType type);
+  void write(rhi::BufferHandle handle, rhi::BufferUsage usage);
 
   /**
    * @brief Set input buffer
    *
    * @param handle Buffer handle
-   * @param type Buffer type
+   * @param usage Buffer usage
    */
-  void read(rhi::BufferHandle handle, rhi::BufferType type);
+  void read(rhi::BufferHandle handle, rhi::BufferUsage usage);
 
   /**
    * @brief Set executor function

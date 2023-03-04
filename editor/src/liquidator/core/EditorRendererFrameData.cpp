@@ -12,7 +12,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
 
   rhi::BufferDescription defaultDesc{};
-  defaultDesc.type = rhi::BufferType::Storage;
+  defaultDesc.usage = rhi::BufferUsage::Storage;
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
@@ -32,14 +32,14 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
 
   {
     auto desc = defaultDesc;
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     desc.size = sizeof(Camera);
     mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     desc.size = sizeof(EditorGridData);
     mEditorGridBuffer = renderStorage.createBuffer(desc);
   }
@@ -47,7 +47,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
   {
     auto desc = defaultDesc;
     desc.size = sizeof(CollidableEntity);
-    desc.type = rhi::BufferType::Uniform;
+    desc.usage = rhi::BufferUsage::Uniform;
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 

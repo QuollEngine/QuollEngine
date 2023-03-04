@@ -70,11 +70,11 @@ public:
   inline VmaAllocation getAllocation() const { return mAllocation; }
 
   /**
-   * @brief Get buffer type
+   * @brief Get buffer usage
    *
-   * @return Buffer type
+   * @return Buffer usage
    */
-  inline rhi::BufferType getType() const { return mType; }
+  inline rhi::BufferUsage getUsage() const { return mUsage; }
 
   /**
    * @brief Get buffer size
@@ -96,8 +96,8 @@ private:
 
   VkBuffer mBuffer = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
-  rhi::BufferType mType;
   rhi::BufferUsage mUsage;
+  rhi::BufferAllocationUsage mAllocationUsage;
   bool mMapped = false;
   size_t mSize = 0;
   void *mMappedData = nullptr;

@@ -87,14 +87,14 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffers.at("a-b"), liquid::rhi::BufferType::Storage);
+    pass.write(buffers.at("a-b"), liquid::rhi::BufferUsage::Storage);
     pass.write(textures.at("a-d"), glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.read(buffers.at("a-b"), liquid::rhi::BufferType::Vertex);
-    pass.read(buffers.at("d-b"), liquid::rhi::BufferType::Index);
+    pass.read(buffers.at("a-b"), liquid::rhi::BufferUsage::Vertex);
+    pass.read(buffers.at("d-b"), liquid::rhi::BufferUsage::Index);
     pass.write(textures.at("b-c"), glm::vec4());
     pass.write(textures.at("b-g"), glm::vec4());
   }
@@ -109,7 +109,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   {
     auto &pass = graph.addGraphicsPass("D");
     pass.read(textures.at("a-d"));
-    pass.write(buffers.at("d-b"), liquid::rhi::BufferType::Uniform);
+    pass.write(buffers.at("d-b"), liquid::rhi::BufferUsage::Uniform);
     pass.write(textures.at("d-e"), glm::vec4());
     pass.write(textures.at("d-g"), glm::vec4());
   }
@@ -561,12 +561,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("C");
-    pass.read(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
@@ -589,12 +589,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInComputePass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.read(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
@@ -617,12 +617,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.read(buffer1, liquid::rhi::BufferType::Storage);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -645,12 +645,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInComputePass) {
 
   {
     auto &pass = graph.addComputePass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("B");
-    pass.read(buffer1, liquid::rhi::BufferType::Storage);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -673,12 +673,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForVertexBufferReadInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.read(buffer1, liquid::rhi::BufferType::Vertex);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Vertex);
   }
 
   graph.compile(&device);
@@ -702,12 +702,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndexBufferReadInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.read(buffer1, liquid::rhi::BufferType::Index);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Index);
   }
 
   graph.compile(&device);
@@ -730,12 +730,12 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndirectBufferReadInGraphicsPass) {
 
   {
     auto &pass = graph.addComputePass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("C");
-    pass.read(buffer1, liquid::rhi::BufferType::Indirect);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Indirect);
   }
 
   graph.compile(&device);
@@ -760,17 +760,17 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInGraphicsPass) {
 
   {
     auto &pass = graph.addComputePass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
-    pass.write(buffer2, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer2, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addGraphicsPass("C");
-    pass.read(buffer1, liquid::rhi::BufferType::Indirect |
-                           liquid::rhi::BufferType::Vertex |
-                           liquid::rhi::BufferType::Index);
-    pass.read(buffer2, liquid::rhi::BufferType::Uniform |
-                           liquid::rhi::BufferType::Storage);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Indirect |
+                           liquid::rhi::BufferUsage::Vertex |
+                           liquid::rhi::BufferUsage::Index);
+    pass.read(buffer2, liquid::rhi::BufferUsage::Uniform |
+                           liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -800,15 +800,15 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInComputePass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
-    pass.write(buffer2, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer2, liquid::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.read(buffer1, liquid::rhi::BufferType::Indirect);
-    pass.read(buffer2, liquid::rhi::BufferType::Uniform |
-                           liquid::rhi::BufferType::Storage);
+    pass.read(buffer1, liquid::rhi::BufferUsage::Indirect);
+    pass.read(buffer2, liquid::rhi::BufferUsage::Uniform |
+                           liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -835,7 +835,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
@@ -857,7 +857,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInComputePass) {
 
   {
     auto &pass = graph.addComputePass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
@@ -879,7 +879,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -901,7 +901,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInComputePass) {
 
   {
     auto &pass = graph.addComputePass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
   graph.compile(&device);
@@ -924,8 +924,8 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInGraphicsPass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
-    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
@@ -950,8 +950,8 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInComputePass) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferType::Storage);
-    pass.write(buffer1, liquid::rhi::BufferType::Uniform);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
   graph.compile(&device);
