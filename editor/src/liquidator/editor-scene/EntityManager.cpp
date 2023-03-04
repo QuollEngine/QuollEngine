@@ -230,16 +230,16 @@ Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
 
   auto &asset =
       registry.getPrefabs().getAsset(static_cast<PrefabAssetHandle>(handle));
-  auto parent = createEmptyEntity(camera, root, asset.name, saveToFile);
 
-  uint32_t childIndex = 1;
   std::unordered_map<uint32_t, Entity> entityMap;
 
-  auto getOrCreateEntity = [&entityMap, this, parent, &camera, &childIndex](
+  uint32_t childIndex = 1;
+
+  auto getOrCreateEntity = [&entityMap, this, &camera, &childIndex](
                                uint32_t localId,
                                const LocalTransform &transform = {}) mutable {
     if (entityMap.find(localId) == entityMap.end()) {
-      auto entity = createEmptyEntity(parent, transform,
+      auto entity = createEmptyEntity(Entity::Null, transform,
                                       "Untitled " + std::to_string(childIndex));
       entityMap.insert_or_assign(localId, entity);
       childIndex++;
@@ -286,8 +286,34 @@ Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
     getActiveEntityDatabase().set(entity, item.value);
   }
 
+  if (entityMap.size() == 0) {
+    return Entity::Null;
+  }
+
+  Entity parent = Entity::Null;
+
+  if (entityMap.size() > 1) {
+    std::vector<Entity> children;
+    children.reserve(entityMap.size());
+
+    parent = createEmptyEntity(camera, root, asset.name, saveToFile);
+    for (auto &[_, entity] : entityMap) {
+      getActiveEntityDatabase().set<Parent>(entity, {parent});
+      children.push_back(entity);
+    }
+
+    getActiveEntityDatabase().set<Children>(parent, {children});
+  } else {
+    for (auto &[_, entity] : entityMap) {
+      parent = entity;
+    }
+  }
+
+  getActiveEntityDatabase().set<Name>(parent, {asset.name});
+
   if (saveToFile) {
     for (auto [_, entity] : entityMap) {
+
       save(entity);
     }
   }
@@ -300,6 +326,7 @@ void EntityManager::useSimulationDatabase() {
   mScene.entityDatabase.duplicate(mSimulationScene.entityDatabase);
   mSimulationScene.activeCamera = mScene.activeCamera;
   mSimulationScene.dummyCamera = mScene.dummyCamera;
+  mSimulationScene.environment = mScene.environment;
 
   mInSimulation = true;
 }
