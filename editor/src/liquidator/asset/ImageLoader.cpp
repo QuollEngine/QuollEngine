@@ -13,7 +13,8 @@ ImageLoader::ImageLoader(AssetCache &assetCache, rhi::RenderDevice *device)
 
 Result<Path> ImageLoader::loadFromPath(const Path &originalAssetPath,
                                        const Path &engineAssetPath,
-                                       bool generateMipMaps) {
+                                       bool generateMipMaps,
+                                       rhi::Format format) {
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
@@ -27,7 +28,7 @@ Result<Path> ImageLoader::loadFromPath(const Path &originalAssetPath,
 
   auto res = loadFromMemory(data, static_cast<uint32_t>(width),
                             static_cast<uint32_t>(height), engineAssetPath,
-                            generateMipMaps);
+                            generateMipMaps, format);
 
   stbi_image_free(data);
   return res;
@@ -36,7 +37,8 @@ Result<Path> ImageLoader::loadFromPath(const Path &originalAssetPath,
 Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
                                          uint32_t height,
                                          const Path &engineAssetPath,
-                                         bool generateMipMaps) {
+                                         bool generateMipMaps,
+                                         rhi::Format format) {
   std::vector<TextureAssetLevel> levels;
   std::vector<uint8_t> assetData;
   if (generateMipMaps) {
@@ -66,7 +68,7 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
       }
     }
 
-    assetData = generateMipMapsFromTextureData(data, levels);
+    assetData = generateMipMapsFromTextureData(data, levels, format);
   } else {
     levels.resize(1);
     levels.at(0).offset = 0;
@@ -86,7 +88,7 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
   asset.data.width = width;
   asset.data.layers = 1;
   asset.data.levels = levels;
-  asset.data.format = rhi::Format::Rgba8Srgb;
+  asset.data.format = format;
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
 
@@ -103,7 +105,8 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
 }
 
 std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
-    void *data, const std::vector<TextureAssetLevel> &levels) {
+    void *data, const std::vector<TextureAssetLevel> &levels,
+    rhi::Format format) {
   rhi::TextureDescription description{};
   description.levels = static_cast<uint32_t>(levels.size());
   description.width = levels.at(0).width;
@@ -112,7 +115,7 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
   description.usage = rhi::TextureUsage::TransferSource |
                       rhi::TextureUsage::TransferDestination |
                       rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  description.format = rhi::Format::Rgba8Srgb;
+  description.format = format;
 
   auto texture = mDevice->createTexture(description);
   size_t size = static_cast<size_t>(description.width) * description.height * 4;

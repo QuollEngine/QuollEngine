@@ -11,13 +11,12 @@ layout(location = 7) in vec4 inWeights;
 
 layout(location = 0) out vec3 outWorldPosition;
 layout(location = 1) out vec2 outTextureCoord[2];
-layout(location = 3) out vec3 outNormal;
-layout(location = 4) out mat3 outTBN;
+layout(location = 3) out mat3 outTBN;
 
 #include "bindless-base.glsl"
 
 void main() {
-  mat4 modelMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
+  mat4 worldMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
   SkeletonItem item = getSkeleton(gl_InstanceIndex);
 
   mat4 skinMatrix = inWeights.x * item.joints[inJoints.x] +
@@ -25,17 +24,17 @@ void main() {
                     inWeights.z * item.joints[inJoints.z] +
                     inWeights.w * item.joints[inJoints.w];
 
-  vec4 worldPosition = modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
+  mat4 modelMatrix = worldMatrix * skinMatrix;
 
-  mat3 m3ModelMatrix = mat3(modelMatrix);
-  mat3 normalMatrix = transpose(inverse(m3ModelMatrix));
+  vec4 worldPosition = modelMatrix * vec4(inPosition, 1.0f);
 
-  vec3 normal = normalize(normalMatrix * inNormal);
-  vec3 tangent = normalize(m3ModelMatrix * inTangent.xyz);
-  vec3 bitangent = cross(normal, tangent) * inTangent.w;
+  mat4 normalMatrix = transpose(inverse(modelMatrix));
+
+  vec3 normal = normalize(vec3(normalMatrix * vec4(inNormal.xyz, 0.0)));
+  vec3 tangent = normalize(vec3(modelMatrix * vec4(inTangent.xyz, 0.0)));
+  vec3 bitangent = normalize(cross(normal, tangent));
 
   outWorldPosition = worldPosition.xyz;
-  outNormal = normal;
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;

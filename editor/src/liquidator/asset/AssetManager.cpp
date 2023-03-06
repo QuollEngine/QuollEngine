@@ -310,7 +310,7 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
 
   auto engineAssetPath = getOriginalAssetName(originalAssetPath);
   return mImageLoader.loadFromPath(originalAssetPath, engineAssetPath,
-                                   mOptimize);
+                                   mOptimize, rhi::Format::Rgba8Srgb);
 }
 
 Result<Path> AssetManager::loadOriginalAudio(const Path &originalAssetPath) {

@@ -9,8 +9,7 @@ layout(location = 5) in vec2 inTextureCoord1;
 
 layout(location = 0) out vec3 outWorldPosition;
 layout(location = 1) out vec2 outTextureCoord[2];
-layout(location = 3) out vec3 outNormal;
-layout(location = 4) out mat3 outTBN;
+layout(location = 3) out mat3 outTBN;
 
 #include "bindless-base.glsl"
 
@@ -19,15 +18,13 @@ void main() {
 
   vec4 worldPosition = modelMatrix * vec4(inPosition, 1.0f);
 
-  mat3 m3ModelMatrix = mat3(modelMatrix);
-  mat3 normalMatrix = transpose(inverse(m3ModelMatrix));
+  mat4 normalMatrix = transpose(inverse(modelMatrix));
 
-  vec3 normal = normalize(normalMatrix * inNormal);
-  vec3 tangent = normalize(m3ModelMatrix * inTangent.xyz);
-  vec3 bitangent = cross(normal, tangent) * inTangent.w;
+  vec3 normal = normalize(vec3(normalMatrix * vec4(inNormal.xyz, 0.0)));
+  vec3 tangent = normalize(vec3(modelMatrix * vec4(inTangent.xyz, 0.0)));
+  vec3 bitangent = normalize(cross(normal, tangent));
 
   outWorldPosition = worldPosition.xyz;
-  outNormal = normal;
   outTBN = mat3(tangent, bitangent, normal);
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;

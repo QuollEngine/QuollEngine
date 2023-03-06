@@ -35,7 +35,7 @@ RegisterUniform(SkyboxUniform, { SkyboxData skybox; });
 void main() {
   if (getSkyboxData().data.x > 0) {
     vec3 color =
-        texture(uGlobalTextures[getSkyboxData().data.x], inTexCoord).xyz;
+        textureLod(uGlobalTextures[getSkyboxData().data.x], inTexCoord, 0).xyz;
 
     outColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
   } else {

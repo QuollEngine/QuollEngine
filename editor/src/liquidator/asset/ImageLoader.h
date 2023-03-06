@@ -26,10 +26,12 @@ public:
    * @param originalAssetPath Original asset path
    * @param engineAssetPath Engine asset path
    * @param generateMipMaps Generate mip maps
+   * @param format Texture format
    * @return Path to newly created texture
    */
   Result<Path> loadFromPath(const Path &originalAssetPath,
-                            const Path &engineAssetPath, bool generateMipMaps);
+                            const Path &engineAssetPath, bool generateMipMaps,
+                            rhi::Format format);
 
   /**
    * @brief Load texture from memory
@@ -39,11 +41,12 @@ public:
    * @param height Texture height
    * @param engineAssetPath Engine asset path
    * @param generateMipMaps Generate mip maps
+   * @param format Texture format
    * @return Path to newly created texture
    */
   Result<Path> loadFromMemory(void *data, uint32_t width, uint32_t height,
-                              const Path &engineAssetPath,
-                              bool generateMipMaps);
+                              const Path &engineAssetPath, bool generateMipMaps,
+                              rhi::Format format);
 
 private:
   /**
@@ -51,11 +54,13 @@ private:
    *
    * @param data Texture data
    * @param levels Texture levels
+   * @param format Texture format
    * @return Texture data with mip maps
    */
   std::vector<uint8_t>
   generateMipMapsFromTextureData(void *data,
-                                 const std::vector<TextureAssetLevel> &levels);
+                                 const std::vector<TextureAssetLevel> &levels,
+                                 rhi::Format format);
 
 private:
   rhi::RenderDevice *mDevice;

@@ -518,6 +518,16 @@ void SceneRenderer::generateBrdfLut() {
   static constexpr uint32_t GroupSize = 16;
   static constexpr uint32_t TextureSize = 512;
 
+  rhi::DescriptorLayoutBindingDescription binding0{};
+  binding0.type = rhi::DescriptorLayoutBindingType::Static;
+  binding0.binding = 0;
+  binding0.name = "uOutputTexture";
+  binding0.shaderStage = rhi::ShaderStage::Compute;
+  binding0.descriptorCount = 1;
+  binding0.descriptorType = rhi::DescriptorType::StorageImage;
+
+  auto layout = mDevice->createDescriptorLayout({{binding0}});
+
   auto pipeline = mDevice->createPipeline(rhi::ComputePipelineDescription{
       mShaderLibrary.getShader("__engine.pbr.brdfLut.compute")});
 
@@ -533,15 +543,6 @@ void SceneRenderer::generateBrdfLut() {
 
   auto brdfLut = mRenderStorage.createTexture(textureDesc);
 
-  rhi::DescriptorLayoutBindingDescription binding0{};
-  binding0.type = rhi::DescriptorLayoutBindingType::Static;
-  binding0.binding = 0;
-  binding0.name = "uOutputTexture";
-  binding0.shaderStage = rhi::ShaderStage::Compute;
-  binding0.descriptorCount = 1;
-  binding0.descriptorType = rhi::DescriptorType::StorageImage;
-
-  auto layout = mDevice->createDescriptorLayout({{binding0}});
   auto descriptor = mDevice->createDescriptor(layout);
 
   descriptor.write(0, {brdfLut}, rhi::DescriptorType::StorageImage);
