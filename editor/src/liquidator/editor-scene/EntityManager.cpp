@@ -307,6 +307,10 @@ Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
     for (auto &[_, entity] : entityMap) {
       parent = entity;
     }
+
+    getActiveEntityDatabase().set<LocalTransform>(
+        parent, getTransformFromCamera(camera));
+    getActiveEntityDatabase().set<WorldTransform>(parent, {});
   }
 
   getActiveEntityDatabase().set<Name>(parent, {asset.name});
