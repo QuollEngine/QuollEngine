@@ -4,8 +4,7 @@
 
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec2 inTextureCoord[2];
-layout(location = 3) in vec3 inNormal;
-layout(location = 4) in mat3 inTBN;
+layout(location = 3) in mat3 inTBN;
 
 layout(location = 0) out vec4 outColor;
 
@@ -247,22 +246,24 @@ float schlickSpecularGeometricAttenuation(float roughness, float NdotV,
 }
 
 /**
- * @brief Get normals from world position
+ * @brief Get normal
+ *
+ * If normal texture is provided,
+ * calculates normal using
+ * geometry tangent, bitangent, and
+ * normal
  *
  * @return Normal
  */
 vec3 getNormal() {
-  mat3 tbn = inTBN;
-
   if (uMaterialData.normalTexture > 0) {
-    vec3 n =
-        srgbToLinear(texture(uGlobalTextures[uMaterialData.normalTexture],
-                             inTextureCoord[uMaterialData.normalTextureCoord]))
-            .xyz *
-        uMaterialData.normalScale;
-    return normalize(tbn * n);
+    vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],
+                     inTextureCoord[uMaterialData.normalTextureCoord])
+                 .xyz;
+    n = (n * 2.0 - 1.0) * uMaterialData.normalScale;
+    return normalize(inTBN * n);
   } else {
-    return normalize(tbn[2]);
+    return normalize(inTBN[2]);
   }
 }
 
@@ -385,7 +386,6 @@ void main() {
 
   if (uMaterialData.metallicRoughnessTexture > 0) {
     vec3 mrSample =
-
         texture(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
                 inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
             .xyz;

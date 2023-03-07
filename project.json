@@ -180,8 +180,8 @@
     },
     {
       "name": "dearimgui",
-      "url": "https://github.com/ocornut/imgui/archive/refs/heads/docking.zip",
-      "buildSource": "imgui-docking",
+      "url": "https://github.com/ocornut/imgui/archive/192196711a7d0d7c2d60454d42654cf090498a74.zip",
+      "buildSource": "imgui-192196711a7d0d7c2d60454d42654cf090498a74",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imgui",
         "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp misc/freetype/imgui_freetype.cpp {{VENDOR_PROJECTS_DIR}}/imgui",

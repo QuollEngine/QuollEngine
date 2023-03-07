@@ -2,7 +2,6 @@
 #include "liquid/core/Engine.h"
 
 #include "GLTFImporter.h"
-#include "gltf/TextureStep.h"
 #include "gltf/MaterialStep.h"
 #include "gltf/MeshStep.h"
 #include "gltf/SkeletonStep.h"
@@ -47,7 +46,6 @@ Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
   GLTFImportData importData{mAssetCache, mImageLoader, engineAssetPath, model,
                             mOptimize};
 
-  loadTextures(importData);
   loadMaterials(importData);
   loadSkeletons(importData);
   loadAnimations(importData);

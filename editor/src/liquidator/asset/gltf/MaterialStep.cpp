@@ -1,6 +1,7 @@
 #include "liquid/core/Base.h"
 
 #include "MaterialStep.h"
+#include "TextureUtils.h"
 
 namespace liquid::editor {
 
@@ -23,8 +24,9 @@ void loadMaterials(GLTFImportData &importData) {
     material.type = AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-      material.data.baseColorTexture = textures.map.at(
-          gltfMaterial.pbrMetallicRoughness.baseColorTexture.index);
+      material.data.baseColorTexture = loadTexture(
+          importData, gltfMaterial.pbrMetallicRoughness.baseColorTexture.index,
+          GLTFTextureColorSpace::Srgb, true);
     }
     material.data.baseColorTextureCoord = static_cast<int8_t>(
         gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
@@ -33,8 +35,10 @@ void loadMaterials(GLTFImportData &importData) {
                                               colorFactor[2], colorFactor[3]};
 
     if (gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
-      material.data.metallicRoughnessTexture = textures.map.at(
-          gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index);
+      material.data.metallicRoughnessTexture = loadTexture(
+          importData,
+          gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index,
+          GLTFTextureColorSpace::Linear, false);
     }
     material.data.metallicRoughnessTextureCoord = static_cast<int8_t>(
         gltfMaterial.pbrMetallicRoughness.baseColorTexture.texCoord);
@@ -45,7 +49,8 @@ void loadMaterials(GLTFImportData &importData) {
 
     if (gltfMaterial.normalTexture.index >= 0) {
       material.data.normalTexture =
-          textures.map.at(gltfMaterial.normalTexture.index);
+          loadTexture(importData, gltfMaterial.normalTexture.index,
+                      GLTFTextureColorSpace::Linear, false);
     }
     material.data.normalTextureCoord =
         static_cast<int8_t>(gltfMaterial.normalTexture.texCoord);
@@ -54,7 +59,8 @@ void loadMaterials(GLTFImportData &importData) {
 
     if (gltfMaterial.occlusionTexture.index >= 0) {
       material.data.occlusionTexture =
-          textures.map.at(gltfMaterial.occlusionTexture.index);
+          loadTexture(importData, gltfMaterial.occlusionTexture.index,
+                      GLTFTextureColorSpace::Linear, false);
     }
     material.data.occlusionTextureCoord =
         static_cast<int8_t>(gltfMaterial.occlusionTexture.texCoord);
@@ -63,7 +69,8 @@ void loadMaterials(GLTFImportData &importData) {
 
     if (gltfMaterial.emissiveTexture.index >= 0) {
       material.data.emissiveTexture =
-          textures.map.at(gltfMaterial.emissiveTexture.index);
+          loadTexture(importData, gltfMaterial.emissiveTexture.index,
+                      GLTFTextureColorSpace::Srgb, false);
     }
     material.data.emissiveTextureCoord =
         static_cast<int8_t>(gltfMaterial.emissiveTexture.texCoord);
