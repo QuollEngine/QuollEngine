@@ -70,19 +70,6 @@ public:
     return mWindow.getFramebufferSize();
   }
 
-  /**
-   * @brief Check if framebuffer is resized
-   *
-   * @retval true Framebuffer is resized
-   * @retval false Framebuffer is not resized
-   */
-  inline bool isFramebufferResized() const { return mFramebufferResized; }
-
-  /**
-   * @brief Finish framebuffer resize
-   */
-  void finishFramebufferResize();
-
 private:
   /**
    * @brief Create vulkan instance
@@ -106,8 +93,6 @@ private:
   std::unique_ptr<VulkanRenderDevice> mDevice;
 
   Window &mWindow;
-  bool mFramebufferResized = false;
-  uint32_t mResizeListener = 0;
 };
 
 } // namespace liquid::rhi

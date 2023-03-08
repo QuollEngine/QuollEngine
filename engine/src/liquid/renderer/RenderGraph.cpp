@@ -7,16 +7,22 @@
 
 namespace liquid {
 
+EnableBitwiseEnum(GraphDirty);
+
 RenderGraph::RenderGraph(StringView name) : mName(name) {
   LOG_DEBUG("Render graph initialized: " << name);
 }
 
 RenderGraphPass &RenderGraph::addGraphicsPass(StringView name) {
+  mDirty |= GraphDirty::PassChanges;
+
   mPasses.push_back({name, RenderGraphPassType::Graphics});
   return mPasses.back();
 }
 
 RenderGraphPass &RenderGraph::addComputePass(StringView name) {
+  mDirty |= GraphDirty::PassChanges;
+
   mPasses.push_back({name, RenderGraphPassType::Compute});
   return mPasses.back();
 }
@@ -45,7 +51,7 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
 }
 
 void RenderGraph::compile(rhi::RenderDevice *device) {
-  if (!mDirty)
+  if (!BitwiseEnumContains(mDirty, GraphDirty::PassChanges))
     return;
 
   LIQUID_PROFILE_EVENT("RenderGraph::compile");
@@ -123,16 +129,18 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
   }
 
   // Topological sort based on DFS
-  mCompiledPasses.reserve(passIndices.size());
+  std::vector<RenderGraphPass> compiledPasses;
+  compiledPasses.reserve(passIndices.size());
   std::vector<bool> visited(passIndices.size(), false);
 
   for (size_t i = passIndices.size(); i-- > 0;) {
     if (!visited.at(i)) {
-      topologicalSort(mPasses, i, visited, adjacencyList, mCompiledPasses);
+      topologicalSort(mPasses, i, visited, adjacencyList, compiledPasses);
     }
   }
 
-  std::reverse(mCompiledPasses.begin(), mCompiledPasses.end());
+  std::reverse(compiledPasses.begin(), compiledPasses.end());
+  mCompiledPasses = std::move(compiledPasses);
 
   static constexpr rhi::PipelineStage StageFragmentTest =
       rhi::PipelineStage::EarlyFragmentTests |
@@ -323,9 +331,9 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
 
 void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {
   mFramebufferExtent = framebufferExtent;
-  mDirty = true;
+  mDirty |= GraphDirty::SizeUpdate;
 }
 
-void RenderGraph::updateDirtyFlag() { mDirty = false; }
+void RenderGraph::updateDirtyFlag() { mDirty = GraphDirty::None; }
 
 } // namespace liquid

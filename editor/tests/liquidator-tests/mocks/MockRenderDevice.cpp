@@ -73,6 +73,10 @@ liquid::rhi::TextureHandle MockRenderDevice::createTexture(
   return handle;
 }
 
+void MockRenderDevice::updateTexture(
+    liquid::rhi::TextureHandle handle,
+    const liquid::rhi::TextureDescription &description) {}
+
 void MockRenderDevice::destroyTexture(liquid::rhi::TextureHandle handle) {}
 
 const liquid::rhi::TextureDescription MockRenderDevice::getTextureDescription(
@@ -133,3 +137,5 @@ size_t MockRenderDevice::addTextureUpdateListener(
 }
 
 void MockRenderDevice::removeTextureUpdateListener(size_t handle) {}
+
+void MockRenderDevice::recreateSwapchain() {}

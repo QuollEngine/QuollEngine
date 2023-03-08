@@ -47,7 +47,7 @@ void TextureUtils::copyDataToTexture(
 
   barrier.srcLayout = rhi::ImageLayout::TransferDestinationOptimal;
   barrier.dstLayout = destinationLayout;
-  barrier.srcAccess = rhi::Access::None;
+  barrier.srcAccess = rhi::Access::TransferWrite;
   barrier.dstAccess = rhi::Access::None;
   commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
                               rhi::PipelineStage::PipeTop, {}, {barrier});

@@ -41,6 +41,9 @@ public:
   liquid::rhi::TextureHandle
   createTexture(const liquid::rhi::TextureDescription &description);
 
+  void updateTexture(liquid::rhi::TextureHandle handle,
+                     const liquid::rhi::TextureDescription &description);
+
   void destroyTexture(liquid::rhi::TextureHandle handle);
 
   const liquid::rhi::TextureDescription
@@ -78,6 +81,8 @@ public:
           &listener);
 
   void removeTextureUpdateListener(size_t handle);
+
+  void recreateSwapchain();
 
 private:
   template <class THandle> inline THandle getNewHandle() {

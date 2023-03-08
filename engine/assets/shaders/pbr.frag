@@ -495,6 +495,8 @@ void main() {
             .rgb *
         uMaterialData.emissiveFactor;
     color += emissive;
+  } else {
+    color += uMaterialData.emissiveFactor;
   }
 
   outColor = linearToSrgb(vec4(color, baseColor.a));

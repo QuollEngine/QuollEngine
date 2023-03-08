@@ -6,6 +6,7 @@
 #include "liquid/rhi/RenderDevice.h"
 
 #include "RenderGraph.h"
+#include "RenderStorage.h"
 
 namespace liquid {
 
@@ -25,9 +26,9 @@ public:
   /**
    * @brief Create render graph evaluator
    *
-   * @param device Render device
+   * @param renderStorage Render storage
    */
-  RenderGraphEvaluator(rhi::RenderDevice *device);
+  RenderGraphEvaluator(RenderStorage &renderStorage);
 
   /**
    * @brief Build render graph
@@ -87,6 +88,7 @@ private:
   bool hasSwapchainRelativeResources(RenderGraphPass &pass);
 
 private:
+  RenderStorage &mRenderStorage;
   rhi::RenderDevice *mDevice = nullptr;
 };
 

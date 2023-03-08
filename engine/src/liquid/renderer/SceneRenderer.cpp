@@ -67,7 +67,6 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   static constexpr uint32_t SwapchainSizePercentage = 100;
 
   rhi::TextureDescription shadowMapDesc{};
-  shadowMapDesc.sizeMethod = rhi::TextureSizeMethod::Fixed;
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   shadowMapDesc.width = ShadowMapDimensions;
   shadowMapDesc.height = ShadowMapDimensions;
@@ -80,22 +79,22 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   }
 
   rhi::TextureDescription sceneColorDesc{};
-  sceneColorDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   sceneColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   sceneColorDesc.width = SwapchainSizePercentage;
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
   sceneColorDesc.format = rhi::Format::Bgra8Srgb;
-  auto sceneColor = mRenderStorage.createTexture(sceneColorDesc);
+  auto sceneColor =
+      mRenderStorage.createFramebufferRelativeTexture(sceneColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
-  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   depthBufferDesc.width = SwapchainSizePercentage;
   depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = rhi::Format::Depth32Float;
-  auto depthBuffer = mRenderStorage.createTexture(depthBufferDesc);
+  auto depthBuffer =
+      mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
 
   {
     auto &pass = graph.addGraphicsPass("shadowPass");

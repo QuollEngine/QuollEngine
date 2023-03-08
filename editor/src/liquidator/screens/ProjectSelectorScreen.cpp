@@ -26,8 +26,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
   EntityDatabase entityDatabase;
   AssetRegistry assetRegistry;
   ShaderLibrary shaderLibrary;
-  RenderGraphEvaluator graphEvaluator(mDevice);
   RenderStorage renderStorage(mDevice);
+  RenderGraphEvaluator graphEvaluator(renderStorage);
 
   ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage, mDevice);
   Presenter presenter(shaderLibrary, mDevice);
@@ -54,8 +54,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
   auto resizeHandler = mWindow.addResizeHandler(
-      [&graph, this, &presenter](auto width, auto height) {
+      [&graph, this, &renderStorage, &presenter](auto width, auto height) {
         graph.setFramebufferExtent({width, height});
+        renderStorage.setFramebufferSize(width, height);
       });
 
   mainLoop.setUpdateFn([&project, this](float dt) {
@@ -66,8 +67,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &editorCamera, &graph,
-                        &imguiPassData, &project, &projectManager,
+  mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &graph, &imguiPassData,
+                        &renderStorage, &project, &projectManager,
                         &entityDatabase, &presenter, &debugLayer,
                         this]() mutable {
     auto &imgui = imguiRenderer;
@@ -119,6 +120,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
     ImGui::End();
 
     imgui.endRendering();
+
+    if (renderStorage.recreateFramebufferRelativeTextures()) {
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+      return;
+    }
 
     const auto &renderFrame = mDevice->beginFrame();
 

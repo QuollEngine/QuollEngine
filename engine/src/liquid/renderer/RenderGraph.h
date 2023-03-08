@@ -6,6 +6,8 @@
 
 namespace liquid {
 
+enum class GraphDirty { None, PassChanges, SizeUpdate };
+
 /**
  * @brief Render graph
  */
@@ -82,7 +84,7 @@ public:
    * @retval true Passes have changed
    * @retval false Passes have not changed
    */
-  inline bool isDirty() const { return mDirty; }
+  inline bool isDirty() const { return mDirty != GraphDirty::None; }
 
   /**
    * @brief Update dirty flag
@@ -101,7 +103,7 @@ private:
   std::vector<RenderGraphPass> mCompiledPasses;
 
   glm::uvec2 mFramebufferExtent{};
-  bool mDirty = true;
+  GraphDirty mDirty = GraphDirty::None;
 
   String mName;
 };

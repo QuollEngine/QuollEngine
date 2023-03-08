@@ -151,8 +151,9 @@ void EditorScreen::start(const Project &project) {
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());
 
-  mWindow.addResizeHandler([&graph](auto width, auto height) {
+  mWindow.addResizeHandler([&graph, &renderer](auto width, auto height) {
     graph.setFramebufferExtent({width, height});
+    renderer.getRenderStorage().setFramebufferSize(width, height);
   });
 
   mWindow.addFocusHandler(
@@ -283,6 +284,11 @@ void EditorScreen::start(const Project &project) {
     preloadStatusDialog.render();
 
     imgui.endRendering();
+
+    if (renderer.getRenderStorage().recreateFramebufferRelativeTextures()) {
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+      return;
+    }
 
     const auto &renderFrame = mDevice->beginFrame();
 

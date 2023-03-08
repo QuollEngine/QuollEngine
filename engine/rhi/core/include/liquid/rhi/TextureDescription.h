@@ -6,8 +6,6 @@ namespace liquid::rhi {
 
 enum class TextureType { Standard, Cubemap };
 
-enum class TextureSizeMethod { Fixed, FramebufferRatio };
-
 enum class TextureUsage : uint8_t {
   None = 0,
   Color = 1 << 0,
@@ -28,11 +26,6 @@ struct TextureDescription {
    * Texture type
    */
   TextureType type = TextureType::Standard;
-
-  /**
-   * Texture size method
-   */
-  TextureSizeMethod sizeMethod = TextureSizeMethod::Fixed;
 
   /**
    * Texture usage

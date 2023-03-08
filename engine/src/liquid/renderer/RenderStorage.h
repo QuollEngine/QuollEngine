@@ -28,16 +28,29 @@ public:
   /**
    * @brief Destroy render storage
    */
-  ~RenderStorage();
+  ~RenderStorage() = default;
 
   /**
    * @brief Create texture
    *
    * @param description Texture description
+   * @param addToDescriptor Add texture to global descriptor
    * @return Texture handle
    */
   rhi::TextureHandle
-  createTexture(const liquid::rhi::TextureDescription &description);
+  createTexture(const liquid::rhi::TextureDescription &description,
+                bool addToDescriptor = true);
+
+  /**
+   * @brief Create framebuffer relative texture
+   *
+   * @param description Texture description
+   * @param addToDescriptor Add texture to global descriptor
+   * @return Texture handle
+   */
+  rhi::TextureHandle createFramebufferRelativeTexture(
+      const liquid::rhi::TextureDescription &description,
+      bool addToDescriptor = true);
 
   /**
    * @brief Create buffer
@@ -80,6 +93,31 @@ public:
    */
   inline rhi::RenderDevice *getDevice() { return mDevice; }
 
+  /**
+   * @brief Recreate framebuffer relative textures
+   *
+   * @retval true Framebuffer relative textures recreated
+   * @retval false Framebuffer relative textures do not require recreate
+   */
+  bool recreateFramebufferRelativeTextures();
+
+  /**
+   * @brief Check if texture is framebuffer relative
+   *
+   * @param handle Texture handle
+   * @retval true Texture is framebuffer relative
+   * @retval false Texture is not framebuffer relative
+   */
+  bool isFramebufferRelative(rhi::TextureHandle handle);
+
+  /**
+   * @brief Set framebuffer size
+   *
+   * @param width Framebuffer width
+   * @param height Framebuffer height
+   */
+  void setFramebufferSize(uint32_t width, uint32_t height);
+
 private:
   rhi::RenderDevice *mDevice = nullptr;
 
@@ -89,6 +127,14 @@ private:
   rhi::Descriptor mGlobalBuffersDescriptor;
 
   size_t mResizeListener = 0;
+
+  std::map<rhi::TextureHandle, rhi::TextureDescription>
+      mFramebufferRelativeTextures;
+
+  bool mNeedsSwapchainResize = false;
+
+  uint32_t mWidth = 0;
+  uint32_t mHeight = 0;
 };
 
 } // namespace liquid

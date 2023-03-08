@@ -84,11 +84,6 @@ RenderFrame VulkanRenderDevice::beginFrame() {
 
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
 
-  if (mBackend.isFramebufferResized()) {
-    recreateSwapchain();
-    return {SkipFrame, SkipFrame, emptyCommandList};
-  }
-
   mStats.resetCalls();
   mFrameManager.waitForFrame();
 
@@ -107,8 +102,6 @@ RenderFrame VulkanRenderDevice::beginFrame() {
 
 void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
   LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
-  mSwapchainRecreated = false;
-
   mRenderContext.endRendering(mFrameManager);
 
   VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
@@ -137,6 +130,11 @@ void VulkanRenderDevice::destroyResources() {
 
 Swapchain VulkanRenderDevice::getSwapchain() {
   return Swapchain{mSwapchain.getTextures(), mSwapchain.getExtent()};
+}
+
+void VulkanRenderDevice::recreateSwapchain() {
+  waitForIdle();
+  mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
 }
 
 Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
@@ -168,10 +166,15 @@ Descriptor VulkanRenderDevice::createDescriptor(DescriptorLayoutHandle layout) {
 TextureHandle
 VulkanRenderDevice::createTexture(const TextureDescription &description) {
   auto handle = mRegistry.setTexture(
-      std::make_unique<VulkanTexture>(description, mAllocator, mDevice,
-                                      mUploadContext, mSwapchain.getExtent()));
+      std::make_unique<VulkanTexture>(description, mAllocator, mDevice));
 
   return handle;
+}
+
+void VulkanRenderDevice::updateTexture(TextureHandle handle,
+                                       const TextureDescription &description) {
+  mRegistry.recreateTexture(handle, std::make_unique<VulkanTexture>(
+                                        description, mAllocator, mDevice));
 }
 
 const TextureDescription
@@ -227,45 +230,6 @@ PipelineHandle VulkanRenderDevice::createPipeline(
 
 void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
   mRegistry.deletePipeline(handle);
-}
-
-size_t VulkanRenderDevice::addTextureUpdateListener(
-    const std::function<void(const std::set<TextureHandle> &)> &listener) {
-  mTextureUpdateListeners.push_back(listener);
-
-  return mTextureUpdateListeners.size() - 1;
-}
-
-void VulkanRenderDevice::removeTextureUpdateListener(size_t handle) {
-  mTextureUpdateListeners.erase(mTextureUpdateListeners.begin() +
-                                static_cast<int32_t>(handle));
-}
-
-void VulkanRenderDevice::recreateSwapchain() {
-  waitForIdle();
-  size_t prevNumSwapchainImages = mSwapchain.getTextures().size();
-
-  mSwapchain.recreate(mBackend, mPhysicalDevice, mAllocator);
-
-  updateFramebufferRelativeTextures();
-  mBackend.finishFramebufferResize();
-  mSwapchainRecreated = true;
-}
-
-void VulkanRenderDevice::updateFramebufferRelativeTextures() {
-  mRegistry.deleteDanglingSwapchainRelativeTextures();
-
-  for (auto handle : mRegistry.getSwapchainRelativeTextures()) {
-    auto &texture = mRegistry.getTextures().at(handle);
-    mRegistry.recreateTexture(handle, std::make_unique<VulkanTexture>(
-                                          texture->getDescription(), mAllocator,
-                                          mDevice, mUploadContext,
-                                          mSwapchain.getExtent()));
-  }
-
-  for (const auto &listener : mTextureUpdateListeners) {
-    listener(mRegistry.getSwapchainRelativeTextures());
-  }
 }
 
 } // namespace liquid::rhi

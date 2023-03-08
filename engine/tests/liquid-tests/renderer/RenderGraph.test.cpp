@@ -1098,6 +1098,21 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   EXPECT_EQ(graph.getPasses().size(), 4);
 }
 
+TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
+  liquid::rhi::TextureHandle handle = device.createTexture({});
+
+  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("E").read(handle);
+
+  graph.compile(&device);
+  EXPECT_EQ(graph.getCompiledPasses().size(), 2);
+
+  graph.setFramebufferExtent({});
+
+  graph.compile(&device);
+  EXPECT_EQ(graph.getCompiledPasses().size(), 2);
+}
+
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   liquid::rhi::TextureHandle handle{2};
 

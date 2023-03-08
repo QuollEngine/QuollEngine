@@ -106,6 +106,11 @@ public:
   virtual Swapchain getSwapchain() = 0;
 
   /**
+   * @brief Recreate swapchain
+   */
+  virtual void recreateSwapchain() = 0;
+
+  /**
    * @brief Create shader
    *
    * @param description Shader description
@@ -153,6 +158,15 @@ public:
    */
   virtual TextureHandle
   createTexture(const TextureDescription &description) = 0;
+
+  /**
+   * @brief Update texture
+   *
+   * @param handle Texture handle
+   * @param description Texture description
+   */
+  virtual void updateTexture(TextureHandle handle,
+                             const TextureDescription &description) = 0;
 
   /**
    * @brief Get texture description
@@ -242,22 +256,6 @@ public:
    * @param handle Pipeline handle
    */
   virtual void destroyPipeline(PipelineHandle handle) = 0;
-
-  /**
-   * @brief Add listener to texture update event
-   *
-   * @param listener Listener function
-   * @return Listener handle
-   */
-  virtual size_t addTextureUpdateListener(
-      const std::function<void(const std::set<TextureHandle> &)> &listener) = 0;
-
-  /**
-   * @brief Remove listener for texture update events
-   *
-   * @param handle Listener handle
-   */
-  virtual void removeTextureUpdateListener(size_t handle) = 0;
 };
 
 } // namespace liquid::rhi
