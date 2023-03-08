@@ -315,11 +315,11 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   asset.data.format = TargetFormat;
   asset.data.levels = levels;
 
-  asset.data.data = new char[asset.size];
+  asset.data.data.resize(asset.size);
 
   TextureUtils::copyTextureToData(
       mDevice, irradianceCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
-      CubemapSides, asset.data.levels, asset.data.data);
+      CubemapSides, asset.data.levels, asset.data.data.data());
   mDevice->destroyTexture(irradianceCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
@@ -397,11 +397,11 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   asset.data.format = TargetFormat;
   asset.data.levels = unfilteredCubemap.levels;
 
-  asset.data.data = new char[asset.size];
+  asset.data.data.resize(asset.size);
 
   TextureUtils::copyTextureToData(
       mDevice, specularCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
-      CubemapSides, asset.data.levels, asset.data.data);
+      CubemapSides, asset.data.levels, asset.data.data.data());
   mDevice->destroyTexture(specularCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);

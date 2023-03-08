@@ -36,7 +36,7 @@ TEST_F(AssetCacheTest, LoadsTexture2D) {
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);
   EXPECT_EQ(asset.data.layers, 1);
-  EXPECT_NE(asset.data.data, nullptr);
+  EXPECT_GT(asset.data.data.size(), 0);
 }
 
 TEST_F(AssetCacheTest, LoadsTextureCubemap) {
@@ -49,5 +49,5 @@ TEST_F(AssetCacheTest, LoadsTextureCubemap) {
   EXPECT_EQ(asset.data.width, 1);
   EXPECT_EQ(asset.data.height, 1);
   EXPECT_EQ(asset.data.layers, 6);
-  EXPECT_NE(asset.data.data, nullptr);
+  EXPECT_GT(asset.data.data.size(), 0);
 }

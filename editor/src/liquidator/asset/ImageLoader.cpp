@@ -83,7 +83,7 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
   AssetData<TextureAsset> asset{};
   asset.name = engineAssetPath.string();
   asset.size = TextureUtils::getBufferSizeFromLevels(levels);
-  asset.data.data = assetData.data();
+  asset.data.data = std::move(assetData);
   asset.data.height = height;
   asset.data.width = width;
   asset.data.layers = 1;

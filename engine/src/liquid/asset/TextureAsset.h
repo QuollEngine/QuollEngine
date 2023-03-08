@@ -64,7 +64,7 @@ struct TextureAsset {
   /**
    * Raw texture data
    */
-  void *data = nullptr;
+  std::vector<uint8_t> data;
 
   /**
    * Mip levels

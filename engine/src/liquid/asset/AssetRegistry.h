@@ -49,12 +49,15 @@ class AssetRegistry {
   };
 
 public:
+  /**
+   * @brief Create asset registry
+   */
   AssetRegistry() = default;
 
   /**
-   * @brief Destroy registry
+   * @brief Destroy asset registry
    */
-  ~AssetRegistry();
+  ~AssetRegistry() = default;
 
   AssetRegistry(const AssetRegistry &) = delete;
   AssetRegistry &operator=(const AssetRegistry &) = delete;

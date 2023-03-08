@@ -117,7 +117,8 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
 
   auto *baseTexture = reinterpret_cast<ktxTexture *>(texture);
 
-  auto *baseData = static_cast<const ktx_uint8_t *>(asset.data.data);
+  const auto *baseData =
+      static_cast<const ktx_uint8_t *>(asset.data.data.data());
   for (size_t i = 0; i < asset.data.levels.size(); ++i) {
     const auto &level = asset.data.levels.at(i);
 
@@ -179,7 +180,7 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
   texture.path = filePath;
   texture.relativePath = std::filesystem::relative(filePath, mAssetsPath);
   texture.name = texture.relativePath.string();
-  texture.data.data = new char[texture.size];
+  texture.data.data.resize(texture.size);
   texture.data.width = ktxTextureData->baseWidth;
   texture.data.height = ktxTextureData->baseHeight;
   texture.data.layers = ktxTextureData->numLayers *
@@ -224,7 +225,7 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
       ktxTexture_GetImageOffset(ktxTextureData, static_cast<int32_t>(level), 0,
                                 static_cast<uint32_t>(face), &offset);
 
-      memcpy(static_cast<uint8_t *>(texture.data.data) + levelOffset +
+      memcpy(static_cast<uint8_t *>(texture.data.data.data()) + levelOffset +
                  (blockSize * face),
              srcData + offset, blockSize);
     }
