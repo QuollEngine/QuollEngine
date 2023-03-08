@@ -6,9 +6,10 @@
 #include "runtime/Runtime.h"
 
 int main() {
-  liquid::Engine::setPath(std::filesystem::current_path() / "engine");
-
   auto gamePath = std::filesystem::current_path();
+
+  liquid::Engine::setPath(gamePath / "engine");
+
   auto launchPath = gamePath / "launch.yml";
 
   std::ifstream stream(launchPath);

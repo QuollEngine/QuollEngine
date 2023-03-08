@@ -3,6 +3,8 @@
 
 namespace liquid {
 
+static constexpr uint32_t Hundred = 100;
+
 RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
   static constexpr uint32_t NumSamplers = 1000;
   static constexpr uint32_t MaxBuffers = 1000;
@@ -20,15 +22,6 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
     auto layout = mDevice->createDescriptorLayout(description);
 
     mGlobalTexturesDescriptor = mDevice->createDescriptor(layout);
-
-    mResizeListener =
-        device->addTextureUpdateListener([this](const auto &textures) {
-          for (auto texture : textures) {
-            mGlobalTexturesDescriptor.write(
-                0, {texture}, rhi::DescriptorType::CombinedImageSampler,
-                rhi::castHandleToUint(texture));
-          }
-        });
   }
 
   {
@@ -69,19 +62,33 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
   }
 }
 
-RenderStorage::~RenderStorage() {
-  mDevice->removeTextureUpdateListener(mResizeListener);
-}
-
-rhi::TextureHandle RenderStorage::createTexture(
-    const liquid::rhi::TextureDescription &description) {
+rhi::TextureHandle
+RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
+                             bool addToDescriptor) {
   auto texture = mDevice->createTexture(description);
 
-  mGlobalTexturesDescriptor.write(0, {texture},
-                                  rhi::DescriptorType::CombinedImageSampler,
-                                  rhi::castHandleToUint(texture));
+  if (addToDescriptor) {
+    mGlobalTexturesDescriptor.write(0, {texture},
+                                    rhi::DescriptorType::CombinedImageSampler,
+                                    rhi::castHandleToUint(texture));
+  }
 
   return texture;
+}
+
+rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
+    const liquid::rhi::TextureDescription &description, bool addToDescriptor) {
+  auto fixedSizeDesc = description;
+  fixedSizeDesc.width =
+      mDevice->getSwapchain().extent.x * description.width / Hundred;
+  fixedSizeDesc.height =
+      mDevice->getSwapchain().extent.y * description.height / Hundred;
+
+  auto handle = createTexture(fixedSizeDesc, addToDescriptor);
+
+  mFramebufferRelativeTextures.insert({handle, description});
+
+  return handle;
 }
 
 rhi::Buffer
@@ -107,6 +114,39 @@ rhi::Descriptor RenderStorage::createMaterialDescriptor(rhi::Buffer buffer) {
                    0);
 
   return descriptor;
+}
+
+bool RenderStorage::recreateFramebufferRelativeTextures() {
+  if (!mNeedsSwapchainResize) {
+    return false;
+  }
+
+  mDevice->recreateSwapchain();
+  mNeedsSwapchainResize = false;
+  for (auto &[handle, description] : mFramebufferRelativeTextures) {
+    auto fixedSizeDesc = description;
+    fixedSizeDesc.width = mWidth * description.width / Hundred;
+    fixedSizeDesc.height = mHeight * description.height / Hundred;
+
+    mDevice->updateTexture(handle, fixedSizeDesc);
+
+    mGlobalTexturesDescriptor.write(0, {handle},
+                                    rhi::DescriptorType::CombinedImageSampler,
+                                    rhi::castHandleToUint(handle));
+  }
+
+  return true;
+}
+
+bool RenderStorage::isFramebufferRelative(rhi::TextureHandle handle) {
+  return mFramebufferRelativeTextures.find(handle) !=
+         mFramebufferRelativeTextures.end();
+}
+
+void RenderStorage::setFramebufferSize(uint32_t width, uint32_t height) {
+  mWidth = width;
+  mHeight = height;
+  mNeedsSwapchainResize = true;
 }
 
 } // namespace liquid

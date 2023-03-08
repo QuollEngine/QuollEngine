@@ -7,8 +7,8 @@
 
 namespace liquid {
 
-RenderGraphEvaluator::RenderGraphEvaluator(rhi::RenderDevice *device)
-    : mDevice(device) {}
+RenderGraphEvaluator::RenderGraphEvaluator(RenderStorage &renderStorage)
+    : mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()) {}
 
 void RenderGraphEvaluator::build(RenderGraph &graph) {
   LIQUID_PROFILE_EVENT("RenderGraphEvaluator::build");
@@ -187,13 +187,8 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
   info.attachment.layout = renderTarget.dstLayout;
 
   static constexpr uint32_t HundredPercent = 100;
-  if (desc.sizeMethod == rhi::TextureSizeMethod::FramebufferRatio) {
-    info.width = desc.width * extent.x / HundredPercent;
-    info.height = desc.height * extent.y / HundredPercent;
-  } else {
-    info.width = desc.width;
-    info.height = desc.height;
-  }
+  info.width = desc.width;
+  info.height = desc.height;
 
   info.layers = desc.layers;
 
@@ -203,10 +198,7 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
 bool RenderGraphEvaluator::hasSwapchainRelativeResources(
     RenderGraphPass &pass) {
   for (auto rt : pass.getTextureOutputs()) {
-    auto handle = rt.texture;
-    if (handle == rhi::TextureHandle(1) ||
-        mDevice->getTextureDescription(handle).sizeMethod ==
-            rhi::TextureSizeMethod::FramebufferRatio) {
+    if (mRenderStorage.isFramebufferRelative(rt.texture)) {
       return true;
     }
   }

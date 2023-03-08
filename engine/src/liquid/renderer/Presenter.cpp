@@ -86,6 +86,11 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
     mFramebuffers.at(i) = mDevice->createFramebuffer(framebufferDescription);
   }
+
+  if (rhi::isHandleValid(mPresentTexture)) {
+    mPresentDescriptor.write(0, {mPresentTexture},
+                             rhi::DescriptorType::CombinedImageSampler);
+  }
 }
 
 void Presenter::present(rhi::RenderCommandList &commandList,
@@ -93,7 +98,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
   if (handle != mPresentTexture) {
     mPresentTexture = handle;
-    mPresentDescriptor.write(0, {handle},
+    mPresentDescriptor.write(0, {mPresentTexture},
                              rhi::DescriptorType::CombinedImageSampler);
   }
 

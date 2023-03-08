@@ -3,7 +3,6 @@
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec3 inTexCoord;
-layout(location = 1) in flat uint inTextureIndex;
 
 layout(location = 0) out vec4 outColor;
 

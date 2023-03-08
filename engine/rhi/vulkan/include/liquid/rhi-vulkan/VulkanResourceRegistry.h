@@ -134,24 +134,6 @@ public:
   void deleteTexture(TextureHandle handle);
 
   /**
-   * @brief Delete dangling swapchain relative textures
-   *
-   * If a texture does not exist or is not swapchain
-   * relative, remove it from the swapchain relative
-   * textures list
-   */
-  void deleteDanglingSwapchainRelativeTextures();
-
-  /**
-   * @brief Get swapchain relative textures
-   *
-   * @return Swapchain relative textures
-   */
-  inline const std::set<TextureHandle> &getSwapchainRelativeTextures() const {
-    return mSwapchainRelativeTextures;
-  }
-
-  /**
    * @brief Get textures
    *
    * @return List of textures
@@ -263,8 +245,6 @@ private:
   RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;
   PipelineMap mPipelines;
-
-  std::set<TextureHandle> mSwapchainRelativeTextures;
 };
 
 } // namespace liquid::rhi

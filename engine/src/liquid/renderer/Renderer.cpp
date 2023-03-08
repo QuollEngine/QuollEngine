@@ -13,7 +13,7 @@ namespace liquid {
 
 Renderer::Renderer(AssetRegistry &assetRegistry, Window &window,
                    rhi::RenderDevice *device)
-    : mGraphEvaluator(device), mDevice(device),
+    : mGraphEvaluator(mRenderStorage), mDevice(device),
       mImguiRenderer(window, mShaderLibrary, mRenderStorage, device),
       mRenderStorage(device), mAssetRegistry(assetRegistry),
       mSceneRenderer(mShaderLibrary, mAssetRegistry, mRenderStorage, device) {}

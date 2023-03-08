@@ -68,8 +68,9 @@ void Runtime::start() {
   liquid::EntityDeleter entityDeleter;
 
   graph.setFramebufferExtent(window.getFramebufferSize());
-  window.addResizeHandler([&graph](auto width, auto height) {
+  window.addResizeHandler([&graph, &renderer](auto width, auto height) {
     graph.setFramebufferExtent({width, height});
+    renderer.getRenderStorage().setFramebufferSize(width, height);
   });
 
   liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
@@ -96,6 +97,11 @@ void Runtime::start() {
 
   mainLoop.setRenderFn([&]() {
     const auto &renderFrame = device->beginFrame();
+
+    if (renderer.getRenderStorage().recreateFramebufferRelativeTextures()) {
+      presenter.updateFramebuffers(renderer.getRenderDevice()->getSwapchain());
+      return;
+    }
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       renderer.getSceneRenderer().updateFrameData(

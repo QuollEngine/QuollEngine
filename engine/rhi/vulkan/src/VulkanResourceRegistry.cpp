@@ -41,11 +41,6 @@ TextureHandle
 VulkanResourceRegistry::setTexture(std::unique_ptr<VulkanTexture> &&texture) {
   auto handle = TextureHandle{mTextures.lastHandle};
   mTextures.lastHandle++;
-
-  if (texture->isFramebufferRelative()) {
-    mSwapchainRelativeTextures.insert(handle);
-  }
-
   mTextures.map.insert_or_assign(handle, std::move(texture));
   return handle;
 }
@@ -57,17 +52,6 @@ void VulkanResourceRegistry::recreateTexture(
 
 void VulkanResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.map.erase(handle);
-}
-
-void VulkanResourceRegistry::deleteDanglingSwapchainRelativeTextures() {
-  for (auto it = mSwapchainRelativeTextures.begin();
-       it != mSwapchainRelativeTextures.end(); ++it) {
-    auto textureIt = mTextures.map.find(*it);
-    if (textureIt == mTextures.map.end() ||
-        !textureIt->second->isFramebufferRelative()) {
-      it = mSwapchainRelativeTextures.erase(it);
-    }
-  }
 }
 
 TextureViewHandle VulkanResourceRegistry::setTextureView(

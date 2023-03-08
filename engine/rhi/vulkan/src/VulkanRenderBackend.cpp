@@ -26,14 +26,9 @@ VulkanRenderBackend::VulkanRenderBackend(Window &window, bool enableValidations)
 
   mSurface = createSurfaceFromWindow(mInstance, window);
   LOG_DEBUG_VK("Surface created", mSurface);
-
-  mResizeListener = window.addResizeHandler(
-      [this](auto width, auto height) { mFramebufferResized = true; });
 }
 
 VulkanRenderBackend::~VulkanRenderBackend() {
-  mWindow.removeResizeHandler(mResizeListener);
-
   mDevice.reset();
 
   if (mSurface) {
@@ -56,10 +51,6 @@ RenderDevice *VulkanRenderBackend::createDefaultDevice() {
   }
 
   return mDevice.get();
-}
-
-void VulkanRenderBackend::finishFramebufferResize() {
-  mFramebufferResized = false;
 }
 
 void VulkanRenderBackend::createInstance(StringView applicationName,

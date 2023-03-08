@@ -89,6 +89,11 @@ public:
   Swapchain getSwapchain() override;
 
   /**
+   * @brief Recreate swapchain
+   */
+  void recreateSwapchain() override;
+
+  /**
    * @brief Get device stats
    *
    * @return Device stats
@@ -142,6 +147,15 @@ public:
    * @return Texture
    */
   TextureHandle createTexture(const TextureDescription &description) override;
+
+  /**
+   * @brief Update texture
+   *
+   * @param handle Texture handle
+   * @param description Texture description
+   */
+  void updateTexture(TextureHandle handle,
+                     const TextureDescription &description) override;
 
   /**
    * @brief Get texture description
@@ -232,34 +246,6 @@ public:
    */
   void destroyPipeline(PipelineHandle handle) override;
 
-  /**
-   * @brief Add listener to texture update event
-   *
-   * @param listener Listener function
-   * @return Listener handle
-   */
-  size_t addTextureUpdateListener(
-      const std::function<void(const std::set<TextureHandle> &)> &listener)
-      override;
-
-  /**
-   * @brief Remove listener for texture update events
-   *
-   * @param handle Listener handle
-   */
-  void removeTextureUpdateListener(size_t handle) override;
-
-private:
-  /**
-   * @brief Recreate swapchain
-   */
-  void recreateSwapchain();
-
-  /**
-   * @brief Update framebuffer relative textures
-   */
-  void updateFramebufferRelativeTextures();
-
 private:
   VulkanRenderBackend &mBackend;
   VulkanPhysicalDevice mPhysicalDevice;
@@ -278,11 +264,6 @@ private:
   VulkanSwapchain mSwapchain;
 
   DeviceStats mStats;
-
-  bool mSwapchainRecreated = false;
-
-  std::vector<std::function<void(const std::set<TextureHandle> &)>>
-      mTextureUpdateListeners;
 };
 
 } // namespace liquid::rhi

@@ -36,13 +36,9 @@ public:
    * @param description Texture description
    * @param allocator Vma allocator
    * @param device Vulkan device
-   * @param uploadContext Upload context
-   * @param swapchainExtent Swapchain extent
    */
   VulkanTexture(const TextureDescription &description,
-                VulkanResourceAllocator &allocator, VulkanDeviceObject &device,
-                VulkanUploadContext &uploadContext,
-                const glm::uvec2 &swapchainExtent);
+                VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
   /**
    * @brief Destroy texture
@@ -95,16 +91,6 @@ public:
    * @return Image aspect flags
    */
   inline VkImageAspectFlags getImageAspectFlags() const { return mAspectFlags; }
-
-  /**
-   * @brief Check if texture resizes with framebuffer
-   *
-   * @retval true Texture resizes with framebuffer
-   * @retval false Texture does not resize with framebuffer
-   */
-  inline bool isFramebufferRelative() const {
-    return mDescription.sizeMethod == TextureSizeMethod::FramebufferRatio;
-  }
 
   /**
    * @brief Get description

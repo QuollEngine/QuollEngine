@@ -22,9 +22,7 @@ VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
 
 VulkanTexture::VulkanTexture(const TextureDescription &description,
                              VulkanResourceAllocator &allocator,
-                             VulkanDeviceObject &device,
-                             VulkanUploadContext &uploadContext,
-                             const glm::uvec2 &swapchainExtent)
+                             VulkanDeviceObject &device)
     : mAllocator(allocator), mDevice(device),
       mFormat(VulkanMapping::getFormat(description.format)),
       mDescription(description) {
@@ -49,13 +47,8 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   static constexpr uint32_t HundredPercent = 100;
 
   VkExtent3D extent{};
-  if (isFramebufferRelative()) {
-    extent.width = description.width * swapchainExtent.x / HundredPercent;
-    extent.height = description.height * swapchainExtent.y / HundredPercent;
-  } else {
-    extent.width = description.width;
-    extent.height = description.height;
-  }
+  extent.width = description.width;
+  extent.height = description.height;
   extent.depth = description.depth;
 
   VkImageUsageFlags usageFlags = 0;

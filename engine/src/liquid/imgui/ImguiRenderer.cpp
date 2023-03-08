@@ -76,13 +76,13 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   rhi::TextureDescription imguiDesc{};
-  imguiDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   imguiDesc.width = FramebufferSizePercentage;
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = rhi::Format::Rgba8Unorm;
-  auto imgui = mRenderStorage.createTexture(imguiDesc);
+  auto imgui =
+      mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
 
   auto &pass = graph.addGraphicsPass("imgui");
   pass.write(imgui, mClearColor);

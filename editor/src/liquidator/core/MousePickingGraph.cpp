@@ -9,7 +9,7 @@ MousePickingGraph::MousePickingGraph(
     AssetRegistry &assetRegistry, RenderStorage &renderStorage,
     rhi::RenderDevice *device)
     : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
-      mGraphEvaluator(device), mRenderGraph("MousePicking") {
+      mGraphEvaluator(renderStorage), mRenderGraph("MousePicking") {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
@@ -23,13 +23,13 @@ MousePickingGraph::MousePickingGraph(
       mDevice->createShader({"assets/shaders/mouse-picking.frag.spv"}));
 
   rhi::TextureDescription depthBufferDesc{};
-  depthBufferDesc.sizeMethod = rhi::TextureSizeMethod::FramebufferRatio;
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   depthBufferDesc.width = FramebufferSizePercentage;
   depthBufferDesc.height = FramebufferSizePercentage;
   depthBufferDesc.layers = 1;
   depthBufferDesc.format = rhi::Format::Depth32Float;
-  auto depthBuffer = renderStorage.createTexture(depthBufferDesc);
+  auto depthBuffer =
+      renderStorage.createFramebufferRelativeTexture(depthBufferDesc);
 
   Entity nullEntity{0};
   mSelectedEntityBuffer = renderStorage.createBuffer(
