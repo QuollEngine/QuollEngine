@@ -7,12 +7,6 @@
 
 namespace liquid {
 
-AssetRegistry::~AssetRegistry() {
-  for (auto &[_, texture] : mTextures.getAssets()) {
-    delete[](texture.data.data);
-  }
-}
-
 void AssetRegistry::createDefaultObjects() {
   auto mesh = default_objects::createCube();
   mDefaultObjects.cube = mMeshes.addAsset(mesh);
@@ -43,7 +37,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
       texture.data.deviceHandle = renderStorage.createTexture(description);
       TextureUtils::copyDataToTexture(
-          renderStorage.getDevice(), texture.data.data,
+          renderStorage.getDevice(), texture.data.data.data(),
           texture.data.deviceHandle, rhi::ImageLayout::ShaderReadOnlyOptimal,
           texture.data.layers, texture.data.levels);
     }
