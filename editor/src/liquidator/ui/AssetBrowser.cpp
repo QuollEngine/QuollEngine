@@ -95,7 +95,7 @@ AssetBrowser::AssetBrowser(AssetLoader &assetLoader)
     : mAssetLoader(assetLoader), mStatusDialog("AssetLoadStatus") {}
 
 void AssetBrowser::render(AssetManager &assetManager,
-                          IconRegistry &iconRegistry,
+                          IconRegistry &iconRegistry, WorkspaceState &state,
                           EditorManager &editorManager,
                           EntityManager &entityManager) {
   static constexpr uint32_t ItemWidth = 90;
@@ -237,8 +237,7 @@ void AssetBrowser::render(AssetManager &assetManager,
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
-              entityManager.spawnEntity(editorManager.getEditorCamera(),
-                                        Entity::Null, entry.asset,
+              entityManager.spawnEntity(state.camera, Entity::Null, entry.asset,
                                         entry.assetType);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(

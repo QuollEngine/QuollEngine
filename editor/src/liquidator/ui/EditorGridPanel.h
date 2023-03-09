@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/state/WorkspaceState.h"
 
 namespace liquid::editor {
 
@@ -12,9 +12,9 @@ public:
   /**
    * @brief Render editor grid panel
    *
-   * @param editorManager Editor manager
+   * @param state Workspace state
    */
-  void render(EditorManager &editorManager);
+  void render(WorkspaceState &state);
 
 private:
   bool mOpen = false;

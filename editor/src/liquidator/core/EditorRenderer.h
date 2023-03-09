@@ -3,8 +3,8 @@
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/ShaderLibrary.h"
-#include "liquidator/editor-scene/EditorGrid.h"
 #include "liquidator/ui/IconRegistry.h"
+#include "liquidator/state/WorkspaceState.h"
 
 #include "EditorRendererFrameData.h"
 
@@ -58,13 +58,11 @@ public:
    *
    * @param entityDatabase Entity database
    * @param camera Camera
-   * @param editorGrid Editor grid
-   * @param selectedEntity Selected entity
+   * @param state Workspace state
    * @param frameIndex Frame index
    */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
-                       const EditorGrid &editorGrid, Entity selectedEntity,
-                       uint32_t frameIndex);
+                       WorkspaceState &state, uint32_t frameIndex);
 
 private:
   /**

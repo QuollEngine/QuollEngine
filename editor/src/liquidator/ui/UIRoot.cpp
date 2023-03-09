@@ -9,22 +9,23 @@ UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
     : mAssetBrowser(assetLoader), mSceneHierarchyPanel(entityManager),
       mEntityPanel(entityManager) {}
 
-void UIRoot::render(EditorManager &editorManager, Renderer &renderer,
-                    AssetManager &assetManager, PhysicsSystem &physicsSystem,
+void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
+                    Renderer &renderer, AssetManager &assetManager,
+                    PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
   mLayout.setup();
 
-  mSceneHierarchyPanel.render(editorManager);
+  mSceneHierarchyPanel.render(state, editorManager);
 
-  if (mSceneHierarchyPanel.isEntitySelected()) {
-    mEntityPanel.render(editorManager, mSceneHierarchyPanel.getSelectedEntity(),
-                        renderer, assetManager, physicsSystem);
+  if (state.selectedEntity != Entity::Null) {
+    mEntityPanel.render(editorManager, state.selectedEntity, renderer,
+                        assetManager, physicsSystem);
   }
 
   EnvironmentPanel::render(editorManager, assetManager);
 
-  mEditorCameraPanel.render(editorManager);
-  mAssetBrowser.render(assetManager, mIconRegistry, editorManager,
+  mEditorCameraPanel.render(state);
+  mAssetBrowser.render(assetManager, mIconRegistry, state, editorManager,
                        entityManager);
 }
 

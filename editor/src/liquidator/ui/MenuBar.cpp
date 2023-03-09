@@ -7,7 +7,7 @@
 
 namespace liquid::editor {
 
-void MenuBar::render(EditorManager &editorManager,
+void MenuBar::render(WorkspaceState &state, EditorManager &editorManager,
                      EntityManager &entityManager) {
   if (ImGui::BeginMenu("Project")) {
     if (ImGui::MenuItem("Export as game", nullptr)) {
@@ -18,8 +18,7 @@ void MenuBar::render(EditorManager &editorManager,
 
   if (ImGui::BeginMenu("Objects")) {
     if (ImGui::MenuItem("Create empty entity", nullptr)) {
-      entityManager.createEmptyEntity(editorManager.getEditorCamera(),
-                                      Entity::Null);
+      entityManager.createEmptyEntity(state.camera, Entity::Null);
     }
 
     ImGui::EndMenu();

@@ -22,10 +22,9 @@ public:
    * @brief Create entity manager
    *
    * @param assetManager Asset manager
-   * @param renderer Renderer
    * @param scenePath Scene path
    */
-  EntityManager(AssetManager &assetManager, Renderer &renderer,
+  EntityManager(AssetManager &assetManager,
                 const std::filesystem::path &scenePath);
 
   /**
@@ -49,13 +48,13 @@ public:
   /**
    * @brief Create empty entity at camera view
    *
-   * @param camera Editor camera
+   * @param camera Camera
    * @param parent Parent entity
    * @param name Entity name
    * @param saveToFile Save the created entities
    * @return New entity
    */
-  Entity createEmptyEntity(EditorCamera &camera, Entity parent,
+  Entity createEmptyEntity(Entity camera, Entity parent,
                            const String &name = "New entity",
                            bool saveToFile = true);
 
@@ -163,16 +162,16 @@ public:
                                       const glm::mat4 &worldTransform);
 
   /**
-   * @brief Spawn entity at view
+   * @brief Spawn entity at camera view
    *
-   * @param camera Editor camera
+   * @param camera Camera
    * @param parent Parent entity
    * @param asset Asset handle
    * @param type Asset type
    * @param saveToFile Save the spawned entities
    * @return New entity
    */
-  Entity spawnEntity(EditorCamera &camera, Entity parent, uint32_t asset,
+  Entity spawnEntity(Entity camera, Entity parent, uint32_t asset,
                      AssetType type, bool saveToFile = true);
 
   /**
@@ -242,10 +241,10 @@ private:
   /**
    * @brief Get transform from camera
    *
-   * @param camera Editor camera
+   * @param camera Camera
    * @return Transform component
    */
-  LocalTransform getTransformFromCamera(EditorCamera &camera) const;
+  LocalTransform getTransformFromCamera(Entity camera) const;
 
 private:
   Scene mScene;
@@ -254,7 +253,6 @@ private:
   AssetManager &mAssetManager;
   SceneIO mSceneIO;
   bool mInSimulation = false;
-  Renderer &mRenderer;
   std::filesystem::path mScenePath;
 };
 

@@ -22,7 +22,6 @@
 
 #include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/editor-scene/EditorManager.h"
-#include "liquidator/editor-scene/EditorGrid.h"
 #include "liquidator/ui/UIRoot.h"
 #include "liquidator/ui/AssetLoadStatusDialog.h"
 #include "liquidator/ui/Theme.h"
@@ -37,6 +36,7 @@
 #include "liquidator/core/MousePickingGraph.h"
 
 #include "liquidator/asset/AssetManager.h"
+#include "liquidator/state/WorkspaceState.h"
 
 #include "ImGuizmo.h"
 
@@ -105,14 +105,13 @@ void EditorScreen::start(const Project &project) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  EntityManager entityManager(assetManager, renderer, project.scenesPath);
+  EntityManager entityManager(assetManager, project.scenesPath);
   EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                             mEventSystem, mWindow);
-  EditorGrid editorGrid;
-  EditorManager editorManager(editorCamera, editorGrid, entityManager, project);
 
+  EditorManager editorManager(editorCamera, entityManager, project);
   editorManager.loadOrCreateScene();
-  editorManager.loadEditorState(statePath);
+  WorkspaceState state = editorManager.loadWorkspaceState(statePath);
 
   MainLoop mainLoop(mWindow, fpsCounter);
   AssetLoader assetLoader(assetManager, renderer.getRenderStorage());
@@ -174,21 +173,20 @@ void EditorScreen::start(const Project &project) {
 
   mWindow.maximize();
 
-  mainLoop.setUpdateFn(
-      [&editorCamera, &entityManager, &simulator, this](float dt) mutable {
-        auto &entityDatabase = entityManager.getActiveEntityDatabase();
+  mainLoop.setUpdateFn([&entityManager, &simulator, this](float dt) mutable {
+    auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
-        mEventSystem.poll();
-        simulator.update(dt, entityManager.getActiveScene());
-        return true;
-      });
+    mEventSystem.poll();
+    simulator.update(dt, entityManager.getActiveScene());
+    return true;
+  });
 
   LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
-                        &assetManager, &graph, &scenePassGroup, &imguiPassGroup,
-                        &ui, &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, &simulator, &mousePicking,
-                        &systemLogStorage, &userLogStorage, &logViewer,
+                        &editorCamera, &assetManager, &graph, &scenePassGroup,
+                        &imguiPassGroup, &ui, &debugLayer, &preloadStatusDialog,
+                        &presenter, &editorRenderer, &simulator, &mousePicking,
+                        &systemLogStorage, &userLogStorage, &logViewer, &state,
                         this]() {
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
@@ -202,7 +200,7 @@ void EditorScreen::start(const Project &project) {
     ImGuizmo::BeginFrame();
 
     if (auto _ = widgets::MainMenuBar()) {
-      MenuBar::render(editorManager, entityManager);
+      MenuBar::render(state, editorManager, entityManager);
       debugLayer.renderMenu();
     }
 
@@ -226,14 +224,14 @@ void EditorScreen::start(const Project &project) {
 
       ImGui::SameLine();
 
-      TransformOperationControl{editorManager};
+      TransformOperationControl{state};
 
       ImGui::SameLine();
     }
 
     bool mouseClicked = false;
 
-    ui.render(editorManager, renderer, assetManager,
+    ui.render(state, editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
 
     logViewer.render(systemLogStorage, userLogStorage);
@@ -242,33 +240,29 @@ void EditorScreen::start(const Project &project) {
       const auto &pos = ImGui::GetItemRectMin();
       const auto &size = ImGui::GetItemRectSize();
 
-      editorManager.getEditorCamera().setViewport(pos.x, pos.y, size.x, size.y,
-                                                  ImGui::IsItemHovered());
+      editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
+                               ImGui::IsItemHovered());
 
       mouseClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
-
-      const auto &editorCamera = editorManager.getEditorCamera();
 
       ImGuizmo::SetDrawlist();
       ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-      if (ui.getSceneHierarchyPanel().isEntitySelected()) {
-        auto selected = ui.getSceneHierarchyPanel().getSelectedEntity();
+      if (state.selectedEntity != Entity::Null) {
+        auto selected = state.selectedEntity;
         const auto &world = entityDatabase.get<WorldTransform>(selected);
 
         auto worldTransform = world.worldTransform;
 
-        const auto &camera = entityDatabase.get<Camera>(
-            editorManager.getEditorCamera().getCamera());
+        const auto &camera = entityDatabase.get<Camera>(state.camera);
 
         auto gizmoPerspective = camera.projectionMatrix;
 
         if (ImGuizmo::Manipulate(
                 glm::value_ptr(camera.viewMatrix),
                 glm::value_ptr(gizmoPerspective),
-                getImguizmoOperation(editorManager.getTransformOperation()),
-                ImGuizmo::LOCAL, glm::value_ptr(worldTransform), nullptr,
-                nullptr, nullptr)) {
+                getImguizmoOperation(state.activeTransform), ImGuizmo::LOCAL,
+                glm::value_ptr(worldTransform), nullptr, nullptr, nullptr)) {
           entityManager.updateLocalTransformUsingWorld(selected,
                                                        worldTransform);
         }
@@ -294,21 +288,18 @@ void EditorScreen::start(const Project &project) {
 
     auto camera = entityManager.isUsingSimulationDatabase()
                       ? entityManager.getActiveSimulationCamera()
-                      : editorManager.getEditorCamera().getCamera();
+                      : state.camera;
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
                                     camera, renderFrame.frameIndex);
-      editorRenderer.updateFrameData(
-          entityManager.getActiveEntityDatabase(), camera,
-          editorManager.getEditorGrid(),
-          ui.getSceneHierarchyPanel().getSelectedEntity(),
-          renderFrame.frameIndex);
+      editorRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
+                                     camera, state, renderFrame.frameIndex);
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();
-        ui.getSceneHierarchyPanel().setSelectedEntity(entity);
+        state.selectedEntity = entity;
       }
 
       mousePicking.compile();
@@ -340,7 +331,7 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.run();
   Engine::resetLoggers();
-  editorManager.saveEditorState(statePath);
+  editorManager.saveWorkspaceState(state, statePath);
 
   mDevice->waitForIdle();
 }

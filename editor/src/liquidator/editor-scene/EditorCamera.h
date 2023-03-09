@@ -4,6 +4,7 @@
 #include "liquid/window/Window.h"
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
+#include "liquidator/core/CameraLookAt.h"
 
 namespace liquid::editor {
 
@@ -80,48 +81,6 @@ public:
   ~EditorCamera();
 
   /**
-   * @brief Set field of view
-   *
-   * @param fov Field of view
-   */
-  void setFOV(float fov) { getPerspectiveLens().fovY = fov; }
-
-  /**
-   * @brief Set near plane
-   *
-   * @param near Near plane
-   */
-  void setNear(float near) { getPerspectiveLens().near = near; }
-
-  /**
-   * @brief Set far plane
-   *
-   * @param far Far plane
-   */
-  void setFar(float far) { getPerspectiveLens().far = far; }
-
-  /**
-   * @brief Get field of view
-   *
-   * @return Field of view
-   */
-  inline float getFOV() const { return getPerspectiveLens().fovY; }
-
-  /**
-   * @brief Get near place
-   *
-   * @return Near plane
-   */
-  inline float getNear() const { return getPerspectiveLens().near; }
-
-  /**
-   * @brief Get far plane
-   *
-   * @return Far plane
-   */
-  inline float getFar() const { return getPerspectiveLens().far; }
-
-  /**
    * @brief Get aspect ratio
    *
    * @return Aspect ratio
@@ -131,63 +90,9 @@ public:
   }
 
   /**
-   * @brief Get position
-   *
-   * @return Camera position
-   */
-  inline const glm::vec3 &getEye() const { return mEye; }
-
-  /**
-   * @brief Get camera center
-   *
-   * @return Camera center
-   */
-  inline const glm::vec3 &getCenter() const { return mCenter; }
-
-  /**
-   * @brief Get camera up vector
-   *
-   * @return Camera up vector
-   */
-  inline const glm::vec3 &getUp() const { return mUp; }
-
-  /**
-   * @brief Get camera
-   *
-   * @return Camera
-   */
-  inline const Entity getCamera() const { return mCameraEntity; }
-
-  /**
-   * @brief Set camera center
-   *
-   * @param center Camera center
-   */
-  void setCenter(const glm::vec3 &center);
-
-  /**
-   * @brief Set camera eye position
-   *
-   * @param eye Eye vector
-   */
-  void setEye(const glm::vec3 &eye);
-
-  /**
-   * @brief Set camera up vector
-   *
-   * @param up Up vector
-   */
-  void setUp(const glm::vec3 &up);
-
-  /**
    * @brief Update camera
    */
   void update();
-
-  /**
-   * @brief Reset camera to defaults
-   */
-  void reset();
 
   /**
    * @brief Set viewport
@@ -228,7 +133,19 @@ public:
    */
   inline const InputState &getInputState() const { return mInputState; }
 
+  /**
+   * @brief Get camera entity
+   *
+   * @return Camera entity
+   */
+  inline Entity getEntity() { return mCameraEntity; }
+
 private:
+  /**
+   * @brief Reset camera to defaults
+   */
+  void reset();
+
   /**
    * @brief Get perspective lens
    *
@@ -271,10 +188,6 @@ private:
 
   InputState mInputState = InputState::None;
   glm::vec2 mPrevMousePos{};
-
-  glm::vec3 mEye = DefaultEye;
-  glm::vec3 mCenter = DefaultCenter;
-  glm::vec3 mUp = DefaultUp;
 
   EventObserverId mMouseButtonPressHandler = 0;
   EventObserverId mMouseButtonReleaseHandler = 0;

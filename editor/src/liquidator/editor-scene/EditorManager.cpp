@@ -9,34 +9,44 @@
 
 namespace liquid::editor {
 
-EditorManager::EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
+EditorManager::EditorManager(EditorCamera &editorCamera,
                              EntityManager &entityManager,
                              const Project &project)
-    : mEditorCamera(editorCamera), mEditorGrid(editorGrid),
-      mEntityManager(entityManager), mProject(project) {}
+    : mEditorCamera(editorCamera), mEntityManager(entityManager),
+      mProject(project) {}
 
-void EditorManager::saveEditorState(const std::filesystem::path &path) {
+void EditorManager::saveWorkspaceState(WorkspaceState &state,
+                                       const std::filesystem::path &path) {
+
+  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+  const auto &lens = entityDatabase.get<PerspectiveLens>(state.camera);
+  const auto &lookAt = entityDatabase.get<CameraLookAt>(state.camera);
+
   YAML::Node node;
-  node["camera"]["fov"] = mEditorCamera.getFOV();
-  node["camera"]["near"] = mEditorCamera.getNear();
-  node["camera"]["far"] = mEditorCamera.getFar();
-  node["camera"]["eye"] = mEditorCamera.getEye();
-  node["camera"]["center"] = mEditorCamera.getCenter();
-  node["camera"]["up"] = mEditorCamera.getUp();
+  node["camera"]["fov"] = lens.fovY;
+  node["camera"]["near"] = lens.near;
+  node["camera"]["far"] = lens.far;
+  node["camera"]["eye"] = lookAt.eye;
+  node["camera"]["center"] = lookAt.center;
+  node["camera"]["up"] = lookAt.up;
 
-  node["grid"]["axisLines"] = mEditorGrid.axisLinesShown();
-  node["grid"]["gridLines"] = mEditorGrid.gridLinesShown();
+  node["grid"]["gridLines"] = state.grid.x == 1;
+  node["grid"]["axisLines"] = state.grid.y == 1;
 
   std::ofstream stream(path, std::ios::out);
   stream << node;
   stream.close();
 }
 
-void EditorManager::loadEditorState(const std::filesystem::path &path) {
+WorkspaceState
+EditorManager::loadWorkspaceState(const std::filesystem::path &path) {
+  WorkspaceState state{};
+  state.camera = mEditorCamera.getEntity();
+
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {
-    return;
+    return state;
   }
 
   YAML::Node node;
@@ -45,10 +55,9 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
     stream.close();
   } catch (std::exception &) {
     stream.close();
-    return;
+    return state;
   }
 
-  stream.close();
   if (node["camera"].IsMap()) {
     const auto &camera = node["camera"];
 
@@ -60,35 +69,32 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
               up = EditorCamera::DefaultUp;
 
     if (camera["fov"].IsScalar()) {
-      fov = camera["fov"].as<float>();
+      fov = camera["fov"].as<float>(fov);
     }
 
     if (camera["near"].IsScalar()) {
-      near = camera["near"].as<float>();
+      near = camera["near"].as<float>(near);
     }
 
     if (camera["far"].IsScalar()) {
-      far = camera["far"].as<float>();
+      far = camera["far"].as<float>(far);
     }
 
     if (camera["eye"].IsSequence()) {
-      eye = camera["eye"].as<glm::vec3>();
+      eye = camera["eye"].as<glm::vec3>(eye);
     }
 
     if (camera["center"].IsSequence()) {
-      center = camera["center"].as<glm::vec3>();
+      center = camera["center"].as<glm::vec3>(center);
     }
 
     if (camera["up"].IsSequence()) {
-      up = camera["up"].as<glm::vec3>();
+      up = camera["up"].as<glm::vec3>(up);
     }
 
-    mEditorCamera.setFOV(fov);
-    mEditorCamera.setNear(near);
-    mEditorCamera.setFar(far);
-    mEditorCamera.setEye(eye);
-    mEditorCamera.setCenter(center);
-    mEditorCamera.setUp(up);
+    auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+    entityDatabase.set<PerspectiveLens>(state.camera, {fov, near, far});
+    entityDatabase.set<CameraLookAt>(state.camera, {eye, center, up});
   }
 
   if (node["grid"].IsMap()) {
@@ -105,9 +111,11 @@ void EditorManager::loadEditorState(const std::filesystem::path &path) {
       gridLinesShown = grid["gridLines"].as<bool>();
     }
 
-    mEditorGrid.setAxisLinesFlag(axisLinesShown);
-    mEditorGrid.setGridLinesFlag(gridLinesShown);
+    state.grid.x = static_cast<uint32_t>(gridLinesShown);
+    state.grid.y = static_cast<uint32_t>(axisLinesShown);
   }
+
+  return state;
 }
 
 void EditorManager::createNewScene() {
@@ -127,15 +135,13 @@ void EditorManager::createNewScene() {
 }
 
 void EditorManager::loadOrCreateScene() {
-  mEditorCamera.reset();
-
   if (!mEntityManager.loadScene()) {
     createNewScene();
   }
 }
 
-void EditorManager::moveCameraToEntity(Entity entity) {
-  if (!mEntityManager.getActiveEntityDatabase().has<LocalTransform>(entity)) {
+void EditorManager::moveCameraToEntity(WorkspaceState &state, Entity entity) {
+  if (!mEntityManager.getActiveEntityDatabase().has<WorldTransform>(entity)) {
     return;
   }
 
@@ -147,9 +153,12 @@ void EditorManager::moveCameraToEntity(Entity entity) {
 
   static constexpr glm::vec3 DistanceFromCenter{0.0f, 0.0f, 10.0f};
 
-  mEditorCamera.reset();
-  mEditorCamera.setCenter(translation);
-  mEditorCamera.setEye(translation - DistanceFromCenter);
+  auto &lookAt =
+      mEntityManager.getActiveEntityDatabase().get<CameraLookAt>(state.camera);
+
+  lookAt.up = EditorCamera::DefaultUp;
+  lookAt.center = translation;
+  lookAt.eye = translation - DistanceFromCenter;
 }
 
 bool EditorManager::hasSkybox() {
@@ -212,11 +221,6 @@ void EditorManager::removeSkybox() {
   }
 
   mEntityManager.saveEnvironment();
-}
-
-void EditorManager::setTransformOperation(
-    TransformOperation transformOperation) {
-  mTransformOperation = transformOperation;
 }
 
 EnvironmentLightingSource EditorManager::getEnvironmentLightingSource() {

@@ -5,7 +5,6 @@
 #include "liquid/rhi/RenderDevice.h"
 
 #include "liquid/scene/Camera.h"
-#include "liquidator/editor-scene/EditorGrid.h"
 #include "liquid/renderer/RenderStorage.h"
 #include "liquid/renderer/DrawParameters.h"
 
@@ -111,7 +110,7 @@ public:
    *
    * @param data Editor grid data
    */
-  void setEditorGrid(const EditorGridData &data);
+  void setEditorGrid(const glm::uvec4 &data);
 
   /**
    * @brief Get editor grid buffer
@@ -221,7 +220,7 @@ private:
   rhi::Buffer mCameraBuffer;
 
   // Editor grid
-  EditorGridData mEditorGridData{};
+  glm::uvec4 mEditorGridData{};
   rhi::Buffer mEditorGridBuffer;
 
   // Skeleton bones

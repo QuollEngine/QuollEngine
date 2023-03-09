@@ -4,6 +4,8 @@
 #include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/editor-scene/EditorCamera.h"
 
+#include "liquidator/state/WorkspaceState.h"
+
 namespace liquid::editor {
 
 /**
@@ -23,33 +25,10 @@ public:
   /**
    * @brief Render the UI
    *
+   * @param state Workspace state
    * @param editorManager Editor manager
    */
-  void render(EditorManager &editorManager);
-
-  /**
-   * @brief Check if entity is selected
-   *
-   * @retval true Entity is selected
-   * @retval false Entity is not selected
-   */
-  inline bool isEntitySelected() const {
-    return mEntityManager.getActiveEntityDatabase().exists(mSelectedEntity);
-  }
-
-  /**
-   * @brief Get selected entity
-   *
-   * @return Selected entity
-   */
-  inline const Entity getSelectedEntity() const { return mSelectedEntity; }
-
-  /**
-   * @brief Set selected entity
-   *
-   * @param entity Entity
-   */
-  void setSelectedEntity(Entity entity);
+  void render(WorkspaceState &state, EditorManager &editorManager);
 
 private:
   /**
@@ -57,13 +36,14 @@ private:
    *
    * @param entity Entity
    * @param flags Flags
+   * @param state Workspace state
    * @param editorManager Editor manager
    */
-  void renderEntity(Entity entity, int flags, EditorManager &editorManager);
+  void renderEntity(Entity entity, int flags, WorkspaceState &state,
+                    EditorManager &editorManager);
 
 private:
   EntityManager &mEntityManager;
-  Entity mSelectedEntity = Entity::Null;
   Entity mRightClickedEntity = Entity::Null;
 };
 
