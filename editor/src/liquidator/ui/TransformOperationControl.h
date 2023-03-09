@@ -1,7 +1,7 @@
 #pragma once
 
 #include "liquidator/core/TransformOperation.h"
-#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/state/WorkspaceState.h"
 
 namespace liquid::editor {
 
@@ -16,13 +16,12 @@ public:
   /**
    * @brief Begin toolbar
    *
-   * @param editorManager Editor manager
+   * @param state Workspace state
    */
-  TransformOperationControl(EditorManager &editorManager);
+  TransformOperationControl(WorkspaceState &state);
 
 private:
-  void renderIcon(TransformOperation transformOperation,
-                  EditorManager &editorManager);
+  void renderIcon(TransformOperation transformOperation, WorkspaceState &state);
 
   static const char *
   getTransformOperationIcon(TransformOperation transformOperation);

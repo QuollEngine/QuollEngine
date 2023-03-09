@@ -1,10 +1,9 @@
 #pragma once
 
 #include "liquidator/project/Project.h"
-#include "liquidator/core/TransformOperation.h"
+#include "liquidator/state/WorkspaceState.h"
 
 #include "EditorCamera.h"
-#include "EditorGrid.h"
 #include "EntityManager.h"
 
 namespace liquid::editor {
@@ -23,12 +22,11 @@ public:
    * @brief Create editor manager
    *
    * @param editorCamera Editor camera
-   * @param editorGrid Editor grid
    * @param entityManager Entity manager
    * @param project Project
    */
-  EditorManager(EditorCamera &editorCamera, EditorGrid &editorGrid,
-                EntityManager &entityManager, const Project &project);
+  EditorManager(EditorCamera &editorCamera, EntityManager &entityManager,
+                const Project &project);
 
   EditorManager(const EditorManager &) = delete;
   EditorManager(EditorManager &&) = delete;
@@ -37,18 +35,21 @@ public:
   ~EditorManager() = default;
 
   /**
-   * @brief Save editor state to a file
+   * @brief Save workspace state to a file
    *
-   * @param path Path to editor state file
+   * @param state Workspace state
+   * @param path Path to workspace state file
    */
-  void saveEditorState(const std::filesystem::path &path);
+  void saveWorkspaceState(WorkspaceState &state,
+                          const std::filesystem::path &path);
 
   /**
-   * @brief Load editor state from file
+   * @brief Load workspace state from file
    *
-   * @param path Path to editor state file
+   * @param path Path to workspace state file
+   * @return Workspace state
    */
-  void loadEditorState(const std::filesystem::path &path);
+  WorkspaceState loadWorkspaceState(const std::filesystem::path &path);
 
   /**
    * @brief Get editor camera
@@ -56,13 +57,6 @@ public:
    * @return Editor camera
    */
   inline EditorCamera &getEditorCamera() { return mEditorCamera; }
-
-  /**
-   * @brief Get editor grid
-   *
-   * @return Editor grid
-   */
-  inline EditorGrid &getEditorGrid() { return mEditorGrid; }
 
   /**
    * @brief Creates a new scene and sets it as active
@@ -77,9 +71,10 @@ public:
   /**
    * @brief Move camera to entity location
    *
+   * @param state Workspace state
    * @param entity Entity
    */
-  void moveCameraToEntity(Entity entity);
+  void moveCameraToEntity(WorkspaceState &state, Entity entity);
 
   /**
    * @brief Check if skybox exists
@@ -130,13 +125,6 @@ public:
   void removeSkybox();
 
   /**
-   * @brief Set transform operation
-   *
-   * @param transformOperation Transform operation
-   */
-  void setTransformOperation(TransformOperation transformOperation);
-
-  /**
    * @brief Get environment lighting source
    *
    * @return Environment lighting source
@@ -156,28 +144,15 @@ public:
   void setEnvironmentLightingSkyboxSource();
 
   /**
-   * @brief Get transform operation
-   *
-   * @return Transform operation
-   */
-  TransformOperation getTransformOperation() const {
-    return mTransformOperation;
-  }
-
-  /**
    * @brief Start game export flow
    */
   void startGameExport();
 
 private:
   EditorCamera &mEditorCamera;
-  EditorGrid &mEditorGrid;
   std::filesystem::path mScenePath;
   EntityManager &mEntityManager;
-  uint32_t mLastId = 1;
   Project mProject;
-
-  TransformOperation mTransformOperation = TransformOperation::Move;
 };
 
 } // namespace liquid::editor

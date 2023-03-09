@@ -208,24 +208,23 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
 }
 
 void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
-                                     Entity camera,
-                                     const EditorGrid &editorGrid,
-                                     Entity selectedEntity,
+                                     Entity camera, WorkspaceState &state,
                                      uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
-  if (entityDatabase.has<Collidable>(selectedEntity)) {
-    frameData.setCollidable(selectedEntity,
-                            entityDatabase.get<Collidable>(selectedEntity),
-                            entityDatabase.get<WorldTransform>(selectedEntity));
+  if (entityDatabase.has<Collidable>(state.selectedEntity)) {
+    frameData.setCollidable(
+        state.selectedEntity,
+        entityDatabase.get<Collidable>(state.selectedEntity),
+        entityDatabase.get<WorldTransform>(state.selectedEntity));
   }
 
   frameData.setActiveCamera(entityDatabase.get<Camera>(camera));
 
-  frameData.setEditorGrid(editorGrid.getData());
+  frameData.setEditorGrid(state.grid);
 
   for (auto [entity, worldTransform, skeleton] :
        entityDatabase.view<WorldTransform, SkeletonDebug>()) {

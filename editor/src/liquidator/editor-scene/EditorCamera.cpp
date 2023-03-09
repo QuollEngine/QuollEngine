@@ -1,4 +1,6 @@
 #include "liquid/core/Base.h"
+#include "liquidator/core/CameraLookAt.h"
+
 #include "EditorCamera.h"
 
 #include <GLFW/glfw3.h>
@@ -89,10 +91,13 @@ EditorCamera::EditorCamera(EntityDatabase &entityDatabase,
         if (mInputState != InputState::None) {
           return;
         }
+
+        auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
+
         glm::vec3 change =
-            glm::vec3(mEye - mCenter) * event.yoffset * ZoomSpeed;
-        mCenter += change;
-        mEye += change;
+            glm::vec3(lookAt.eye - lookAt.center) * event.yoffset * ZoomSpeed;
+        lookAt.center += change;
+        lookAt.eye += change;
       });
 }
 
@@ -107,12 +112,6 @@ EditorCamera::~EditorCamera() {
   mEntityDatabase.deleteEntity(mCameraEntity);
 }
 
-void EditorCamera::setCenter(const glm::vec3 &center) { mCenter = center; }
-
-void EditorCamera::setEye(const glm::vec3 &eye) { mEye = eye; }
-
-void EditorCamera::setUp(const glm::vec3 &up) { mUp = up; }
-
 void EditorCamera::update() {
   if (mInputState == InputState::Pan) {
     pan();
@@ -124,25 +123,25 @@ void EditorCamera::update() {
 
   auto &camera = mEntityDatabase.get<Camera>(mCameraEntity);
   auto &lens = mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
+  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
 
   camera.projectionMatrix = glm::perspective(
       glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
-  camera.viewMatrix = glm::lookAt(mEye, mCenter, mUp);
+  camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
 }
 
 void EditorCamera::reset() {
-  mEye = DefaultEye;
-  mCenter = DefaultCenter;
-  mUp = DefaultUp;
-
   if (!mEntityDatabase.exists(mCameraEntity)) {
     mCameraEntity = mEntityDatabase.create();
   }
+
   mEntityDatabase.set<PerspectiveLens>(mCameraEntity,
                                        {DefaultFOV, DefaultNear, DefaultFar});
   mEntityDatabase.set<Camera>(mCameraEntity, {});
+  mEntityDatabase.set<CameraLookAt>(mCameraEntity,
+                                    {DefaultEye, DefaultCenter, DefaultUp});
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
@@ -158,20 +157,25 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
 void EditorCamera::pan() {
   static constexpr float PanSpeed = 0.03f;
 
+  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
+
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
-  glm::vec3 right = glm::normalize(glm::cross(glm::vec3(mEye - mCenter), mUp));
+  glm::vec3 right = glm::normalize(
+      glm::cross(glm::vec3(lookAt.eye - lookAt.center), lookAt.up));
 
   glm::vec2 mousePosDiff =
       glm::vec4((mousePos - mPrevMousePos) * PanSpeed, 0.0f, 0.0f);
 
-  glm::vec3 change = mUp * mousePosDiff.y + right * mousePosDiff.x;
-  mEye += change;
-  mCenter += change;
+  glm::vec3 change = lookAt.up * mousePosDiff.y + right * mousePosDiff.x;
+  lookAt.eye += change;
+  lookAt.center += change;
   mPrevMousePos = mousePos;
 }
 
 void EditorCamera::rotate() {
   static constexpr float TwoPi = 2.0f * glm::pi<float>();
+
+  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   const auto &size = mWindow.getFramebufferSize();
@@ -184,26 +188,28 @@ void EditorCamera::rotate() {
   // Convert mouse position difference to angle
   // difference for arcball
   glm::vec2 angleDiff = (mousePos - mPrevMousePos) * screenToSphere;
-  glm::vec3 direction = glm::vec3(mEye - mCenter);
-  glm::vec3 right = glm::normalize(glm::cross(direction, mUp));
-  mUp = glm::normalize(glm::cross(right, direction));
+  glm::vec3 direction = glm::vec3(lookAt.eye - lookAt.center);
+  glm::vec3 right = glm::normalize(glm::cross(direction, lookAt.up));
+  lookAt.up = glm::normalize(glm::cross(right, direction));
 
-  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, mUp);
+  glm::mat4 rotationX = glm::rotate(glm::mat4{1.0f}, -angleDiff.x, lookAt.up);
   glm::mat4 rotationY = glm::rotate(glm::mat4{1.0f}, angleDiff.y, right);
 
-  mEye =
-      glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) + mCenter;
+  lookAt.eye = glm::vec3(rotationY * (rotationX * glm::vec4(direction, 0.0f))) +
+               lookAt.center;
 
   mPrevMousePos = mousePos;
 }
 
 void EditorCamera::zoom() {
+  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
+
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
-  glm::vec3 change = glm::vec3(mEye - mCenter) * zoomFactor;
-  mCenter += change;
-  mEye += change;
+  glm::vec3 change = glm::vec3(lookAt.eye - lookAt.center) * zoomFactor;
+  lookAt.center += change;
+  lookAt.eye += change;
   mPrevMousePos = mousePos;
 }
 

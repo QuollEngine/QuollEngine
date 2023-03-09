@@ -7,7 +7,6 @@
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/imgui/ImguiUtils.h"
 
-#include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/FontAwesome.h"
 #include "liquidator/ui/Widgets.h"
@@ -36,12 +35,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   FPSCounter fpsCounter;
   MainLoop mainLoop(mWindow, fpsCounter);
-  EditorCamera editorCamera(entityDatabase, mEventSystem, mWindow);
   std::optional<Project> project;
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
-
-  editorCamera.reset();
 
   Theme::apply();
 

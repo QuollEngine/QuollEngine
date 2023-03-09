@@ -40,7 +40,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
   {
     auto desc = defaultDesc;
     desc.usage = rhi::BufferUsage::Uniform;
-    desc.size = sizeof(EditorGridData);
+    desc.size = sizeof(glm::uvec4);
     mEditorGridBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -86,14 +86,14 @@ void EditorRendererFrameData::addGizmo(rhi::TextureHandle icon,
   mGizmoCounts[icon]++;
 }
 
-void EditorRendererFrameData::setEditorGrid(const EditorGridData &data) {
+void EditorRendererFrameData::setEditorGrid(const glm::uvec4 &data) {
   mEditorGridData = data;
 }
 
 void EditorRendererFrameData::updateBuffers() {
 
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
-  mEditorGridBuffer.update(&mEditorGridData, sizeof(EditorGridData));
+  mEditorGridBuffer.update(&mEditorGridData, sizeof(glm::uvec4));
 
   if (!mSkeletonTransforms.empty()) {
     mSkeletonTransformsBuffer.update(mSkeletonTransforms.data(),

@@ -1,14 +1,17 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
 
+#include "liquidator/core/CameraLookAt.h"
 #include "EntityManager.h"
 
 namespace liquid::editor {
 
-EntityManager::EntityManager(AssetManager &assetManager, Renderer &renderer,
+EntityManager::EntityManager(AssetManager &assetManager,
                              const std::filesystem::path &scenePath)
-    : mScenePath(scenePath), mRenderer(renderer), mAssetManager(assetManager),
-      mSceneIO(mAssetManager.getAssetRegistry(), mScene) {}
+    : mScenePath(scenePath), mAssetManager(assetManager),
+      mSceneIO(mAssetManager.getAssetRegistry(), mScene) {
+  mScene.entityDatabase.reg<CameraLookAt>();
+}
 
 void EntityManager::save(Entity entity) {
   if (mInSimulation)
@@ -42,7 +45,7 @@ Entity EntityManager::createEmptyEntity(Entity parent,
   return entity;
 }
 
-Entity EntityManager::createEmptyEntity(EditorCamera &camera, Entity parent,
+Entity EntityManager::createEmptyEntity(Entity camera, Entity parent,
                                         const String &name, bool saveToFile) {
   auto entity = createEmptyEntity(parent, getTransformFromCamera(camera), name);
 
@@ -219,9 +222,8 @@ void EntityManager::updateLocalTransformUsingWorld(
   save(entity);
 }
 
-Entity EntityManager::spawnEntity(EditorCamera &camera, Entity root,
-                                  uint32_t handle, AssetType type,
-                                  bool saveToFile) {
+Entity EntityManager::spawnEntity(Entity camera, Entity root, uint32_t handle,
+                                  AssetType type, bool saveToFile) {
   if (type != AssetType::Prefab) {
     return Entity::Null;
   }
@@ -354,11 +356,9 @@ void EntityManager::saveEnvironment() {
   mSceneIO.saveEnvironment(mScenePath / "main.lqscene");
 }
 
-LocalTransform
-EntityManager::getTransformFromCamera(EditorCamera &camera) const {
+LocalTransform EntityManager::getTransformFromCamera(Entity camera) const {
   auto &scene = mInSimulation ? mSimulationScene : mScene;
-  const auto &viewMatrix =
-      scene.entityDatabase.get<Camera>(camera.getCamera()).viewMatrix;
+  const auto &viewMatrix = scene.entityDatabase.get<Camera>(camera).viewMatrix;
 
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
   const auto &invViewMatrix = glm::inverse(viewMatrix);

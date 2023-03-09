@@ -43,11 +43,13 @@ public:
    *
    * @param assetManager Asset manager
    * @param iconRegistry Icon registry
+   * @param state Workspace state
    * @param editorManager Editor manager
    * @param entityManager Entity manager
    */
   void render(AssetManager &assetManager, IconRegistry &iconRegistry,
-              EditorManager &editorManager, EntityManager &entityManager);
+              WorkspaceState &state, EditorManager &editorManager,
+              EntityManager &entityManager);
 
   /**
    * @brief Reload contents in current directory

@@ -10,21 +10,20 @@
 
 namespace liquid::editor {
 
-TransformOperationControl::TransformOperationControl(
-    EditorManager &editorManager) {
+TransformOperationControl::TransformOperationControl(WorkspaceState &state) {
 
-  renderIcon(TransformOperation::Move, editorManager);
+  renderIcon(TransformOperation::Move, state);
   ImGui::SameLine();
-  renderIcon(TransformOperation::Rotate, editorManager);
+  renderIcon(TransformOperation::Rotate, state);
   ImGui::SameLine();
-  renderIcon(TransformOperation::Scale, editorManager);
+  renderIcon(TransformOperation::Scale, state);
 }
 
 void TransformOperationControl::renderIcon(
-    TransformOperation transformOperation, EditorManager &editorManager) {
+    TransformOperation transformOperation, WorkspaceState &state) {
 
   StyleStack stack;
-  if (transformOperation == editorManager.getTransformOperation()) {
+  if (transformOperation == state.activeTransform) {
     const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
     glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 
@@ -34,7 +33,7 @@ void TransformOperationControl::renderIcon(
   }
 
   if (ImGui::Button(getTransformOperationIcon(transformOperation))) {
-    editorManager.setTransformOperation(transformOperation);
+    state.activeTransform = transformOperation;
   }
 }
 

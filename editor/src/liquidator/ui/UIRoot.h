@@ -39,15 +39,16 @@ public:
    *
    * Renders all components inside the root
    *
+   * @param state Workspace state
    * @param editorManager Editor manager
    * @param renderer Renderer
    * @param assetManager Asset manager
    * @param physicsSystem Physics system
    * @param entityManager Entity manager
    */
-  void render(EditorManager &editorManager, Renderer &renderer,
-              AssetManager &assetManager, PhysicsSystem &physicsSystem,
-              EntityManager &entityManager);
+  void render(WorkspaceState &state, EditorManager &editorManager,
+              Renderer &renderer, AssetManager &assetManager,
+              PhysicsSystem &physicsSystem, EntityManager &entityManager);
 
   /**
    * @brief Get icon registry

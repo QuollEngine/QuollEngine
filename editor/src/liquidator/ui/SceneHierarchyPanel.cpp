@@ -13,7 +13,8 @@ namespace liquid::editor {
 SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
-void SceneHierarchyPanel::render(EditorManager &editorManager) {
+void SceneHierarchyPanel::render(WorkspaceState &state,
+                                 EditorManager &editorManager) {
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
   static constexpr float TreeNodeIndentSpacing = 10.0f;
 
@@ -33,13 +34,10 @@ void SceneHierarchyPanel::render(EditorManager &editorManager) {
         continue;
       }
 
-      renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, editorManager);
+      renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, state,
+                   editorManager);
     }
   }
-}
-
-void SceneHierarchyPanel::setSelectedEntity(Entity entity) {
-  mSelectedEntity = entity;
 }
 
 static String getNameAndIcon(const String &name, const char *icon) {
@@ -77,6 +75,7 @@ static String getNodeName(const String &name, Entity entity,
 }
 
 void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
+                                       WorkspaceState &state,
                                        EditorManager &editorManager) {
   auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
   String name =
@@ -97,7 +96,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       "Delete");
 
   StyleStack fontStack;
-  if (mSelectedEntity == entity) {
+  if (state.selectedEntity == entity) {
     treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
   }
 
@@ -105,7 +104,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
 
   bool open = false;
 
-  if (mSelectedEntity == entity && isLeaf) {
+  if (state.selectedEntity == entity && isLeaf) {
     fontStack.pushFont(Theme::getBoldFont());
   }
 
@@ -116,7 +115,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
       mRightClickedEntity = entity;
     } else if (ImGui::IsItemClicked()) {
-      mSelectedEntity = entity;
+      state.selectedEntity = entity;
     }
   }
 
@@ -130,7 +129,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                              ImGui::GetStyle().ItemSpacing.x));
 
       if (ImGui::MenuItem("Go to view")) {
-        editorManager.moveCameraToEntity(entity);
+        editorManager.moveCameraToEntity(state, entity);
       }
 
       if (ImGui::MenuItem("Delete")) {
@@ -139,11 +138,11 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     }
     confirmDeleteSceneNode.render();
     if (confirmDeleteSceneNode.isConfirmed()) {
-      mEntityManager.deleteEntity(entity);
-
-      if (entity == mSelectedEntity) {
-        mSelectedEntity = Entity::Null;
+      if (entity == state.selectedEntity) {
+        state.selectedEntity = Entity::Null;
       }
+
+      mEntityManager.deleteEntity(entity);
     }
   }
 
@@ -152,7 +151,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       for (auto childEntity : mEntityManager.getActiveEntityDatabase()
                                   .get<Children>(entity)
                                   .children) {
-        renderEntity(childEntity, 0, editorManager);
+        renderEntity(childEntity, 0, state, editorManager);
       }
     }
 
