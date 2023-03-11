@@ -6,15 +6,15 @@
 
 namespace liquid::editor {
 
-EntityManager::EntityManager(AssetManager &assetManager,
+EntityManager::EntityManager(AssetManager &assetManager, WorkspaceState &state,
                              const std::filesystem::path &scenePath)
-    : mScenePath(scenePath), mAssetManager(assetManager),
-      mSceneIO(mAssetManager.getAssetRegistry(), mScene) {
-  mScene.entityDatabase.reg<CameraLookAt>();
+    : mScenePath(scenePath), mAssetManager(assetManager), mState(state),
+      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene) {
+  mState.scene.entityDatabase.reg<CameraLookAt>();
 }
 
 void EntityManager::save(Entity entity) {
-  if (mInSimulation)
+  if (mState.mode == WorkspaceMode::Simulation)
     return;
 
   mSceneIO.saveEntity(entity, mScenePath / "main.lqscene");
@@ -169,7 +169,7 @@ void EntityManager::setScript(Entity entity, LuaScriptAssetHandle handle) {
 }
 
 void EntityManager::deleteEntity(Entity entity) {
-  if (!mInSimulation) {
+  if (mState.mode == WorkspaceMode::Edit) {
     mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath / "main.lqscene");
   }
 
@@ -327,24 +327,12 @@ Entity EntityManager::spawnEntity(Entity camera, Entity root, uint32_t handle,
   return parent;
 }
 
-void EntityManager::useSimulationDatabase() {
-  mSimulationScene.entityDatabase.destroy();
-  mScene.entityDatabase.duplicate(mSimulationScene.entityDatabase);
-  mSimulationScene.activeCamera = mScene.activeCamera;
-  mSimulationScene.dummyCamera = mScene.dummyCamera;
-  mSimulationScene.environment = mScene.environment;
-
-  mInSimulation = true;
-}
-
-void EntityManager::useEditingDatabase() { mInSimulation = false; }
-
 Entity EntityManager::getStartingCamera() {
   return getActiveScene().activeCamera;
 }
 
 Entity EntityManager::getActiveSimulationCamera() {
-  return mSimulationScene.activeCamera;
+  return mState.simulationScene.activeCamera;
 }
 
 void EntityManager::setStartingCamera(Entity camera) {
@@ -357,7 +345,9 @@ void EntityManager::saveEnvironment() {
 }
 
 LocalTransform EntityManager::getTransformFromCamera(Entity camera) const {
-  auto &scene = mInSimulation ? mSimulationScene : mScene;
+  auto &scene = mState.mode == WorkspaceMode::Simulation
+                    ? mState.simulationScene
+                    : mState.scene;
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(camera).viewMatrix;
 
   static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};

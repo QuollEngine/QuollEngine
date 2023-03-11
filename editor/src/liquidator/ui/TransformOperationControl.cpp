@@ -8,45 +8,30 @@
 #include "Theme.h"
 #include "FontAwesome.h"
 
+#include "liquidator/actions/SetActiveTransformActions.h"
+
 namespace liquid::editor {
 
-TransformOperationControl::TransformOperationControl(WorkspaceState &state) {
+TransformOperationControl::TransformOperationControl(
+    WorkspaceState &state, ActionExecutor &actionExecutor)
+    : mActions{SetActiveTransformToMoveAction, SetActiveTransformToRotateAction,
+               SetActiveTransformToScaleAction} {
 
-  renderIcon(TransformOperation::Move, state);
-  ImGui::SameLine();
-  renderIcon(TransformOperation::Rotate, state);
-  ImGui::SameLine();
-  renderIcon(TransformOperation::Scale, state);
-}
+  for (const auto &action : mActions) {
+    StyleStack stack;
+    if (action.predicate(state)) {
+      const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+      glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 
-void TransformOperationControl::renderIcon(
-    TransformOperation transformOperation, WorkspaceState &state) {
+      stack.pushColor(ImGuiCol_Button, buttonColor);
+      stack.pushColor(ImGuiCol_ButtonActive, buttonColor);
+      stack.pushColor(ImGuiCol_ButtonHovered, buttonColor);
+    }
 
-  StyleStack stack;
-  if (transformOperation == state.activeTransform) {
-    const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
-    glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
-
-    stack.pushColor(ImGuiCol_Button, buttonColor);
-    stack.pushColor(ImGuiCol_ButtonActive, buttonColor);
-    stack.pushColor(ImGuiCol_ButtonHovered, buttonColor);
-  }
-
-  if (ImGui::Button(getTransformOperationIcon(transformOperation))) {
-    state.activeTransform = transformOperation;
-  }
-}
-
-const char *TransformOperationControl::getTransformOperationIcon(
-    TransformOperation transformOperation) {
-  switch (transformOperation) {
-  case TransformOperation::Scale:
-    return fa::ExpandAlt;
-  case TransformOperation::Rotate:
-    return fa::Rotate;
-  case TransformOperation::Move:
-  default:
-    return fa::Arrows;
+    if (ImGui::Button(String(action.icon).c_str())) {
+      actionExecutor.execute(action);
+    }
+    ImGui::SameLine();
   }
 }
 

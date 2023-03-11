@@ -47,9 +47,10 @@ public:
    * @brief Load workspace state from file
    *
    * @param path Path to workspace state file
-   * @return Workspace state
+   * @param state Workspace state
    */
-  WorkspaceState loadWorkspaceState(const std::filesystem::path &path);
+  void loadWorkspaceState(const std::filesystem::path &path,
+                          WorkspaceState &state);
 
   /**
    * @brief Get editor camera
@@ -67,14 +68,6 @@ public:
    * @brief Load or create scene
    */
   void loadOrCreateScene();
-
-  /**
-   * @brief Move camera to entity location
-   *
-   * @param state Workspace state
-   * @param entity Entity
-   */
-  void moveCameraToEntity(WorkspaceState &state, Entity entity);
 
   /**
    * @brief Check if skybox exists

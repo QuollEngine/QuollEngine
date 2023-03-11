@@ -8,12 +8,15 @@
 #include "FontAwesome.h"
 #include "Theme.h"
 
+#include "liquidator/actions/MoveCameraToEntityAction.h"
+
 namespace liquid::editor {
 
 SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(WorkspaceState &state,
+                                 ActionExecutor &actionExecutor,
                                  EditorManager &editorManager) {
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
   static constexpr float TreeNodeIndentSpacing = 10.0f;
@@ -35,7 +38,7 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
       }
 
       renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, state,
-                   editorManager);
+                   actionExecutor, editorManager);
     }
   }
 }
@@ -76,6 +79,7 @@ static String getNodeName(const String &name, Entity entity,
 
 void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                                        WorkspaceState &state,
+                                       ActionExecutor &actionExecutor,
                                        EditorManager &editorManager) {
   auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
   String name =
@@ -129,7 +133,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                              ImGui::GetStyle().ItemSpacing.x));
 
       if (ImGui::MenuItem("Go to view")) {
-        editorManager.moveCameraToEntity(state, entity);
+        actionExecutor.execute(MoveCameraToEntityAction, entity);
       }
 
       if (ImGui::MenuItem("Delete")) {
@@ -151,7 +155,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       for (auto childEntity : mEntityManager.getActiveEntityDatabase()
                                   .get<Children>(entity)
                                   .children) {
-        renderEntity(childEntity, 0, state, editorManager);
+        renderEntity(childEntity, 0, state, actionExecutor, editorManager);
       }
     }
 

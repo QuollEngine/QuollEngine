@@ -13,6 +13,7 @@
 #include "liquid/window/Window.h"
 
 #include "liquidator/editor-scene/EditorCamera.h"
+#include "liquidator/state/WorkspaceState.h"
 
 namespace liquid::editor {
 
@@ -42,26 +43,9 @@ public:
    * updates
    *
    * @param dt Time delta
-   * @param scene Scene
+   * @param state Workspace state
    */
-  void update(float dt, Scene &scene);
-
-  /**
-   * @brief Cleanup simulation database
-   *
-   * @param simulationDatabase Simulation database
-   */
-  void cleanupSimulationDatabase(EntityDatabase &simulationDatabase);
-
-  /**
-   * @brief Switch to simulation updater
-   */
-  void useSimulationUpdate();
-
-  /**
-   * @brief Switch to editing updater
-   */
-  void useEditorUpdate();
+  void update(float dt, WorkspaceState &state);
 
   /**
    * @brief Get physics system
@@ -72,23 +56,30 @@ public:
 
 private:
   /**
+   * @brief Cleanup simulation database
+   *
+   * @param simulationDatabase Simulation database
+   */
+  void cleanupSimulationDatabase(EntityDatabase &simulationDatabase);
+
+  /**
    * @brief Editor updater
    *
    * @param dt Time delta
-   * @param scene Scene
+   * @param state Workspace state
    */
-  void updateEditor(float dt, Scene &scene);
+  void updateEditor(float dt, WorkspaceState &scene);
 
   /**
    * @brief Simulation updater
    *
    * @param dt Time delta
-   * @param scene Scene
+   * @param state Workspace state
    */
-  void updateSimulation(float dt, Scene &scene);
+  void updateSimulation(float dt, WorkspaceState &scene);
 
 private:
-  std::function<void(float, Scene &)> mUpdater;
+  std::function<void(float, WorkspaceState &)> mUpdater;
 
   EditorCamera &mEditorCamera;
   CameraAspectRatioUpdater mCameraAspectRatioUpdater;
@@ -99,6 +90,8 @@ private:
   ScriptingSystem mScriptingSystem;
   PhysicsSystem mPhysicsSystem;
   AudioSystem<DefaultAudioBackend> mAudioSystem;
+
+  WorkspaceMode mMode = WorkspaceMode::Edit;
 };
 
 } // namespace liquid::editor

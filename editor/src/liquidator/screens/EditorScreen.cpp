@@ -38,6 +38,10 @@
 #include "liquidator/asset/AssetManager.h"
 #include "liquidator/state/WorkspaceState.h"
 
+#include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/actions/SetActiveTransformActions.h"
+#include "liquidator/actions/SimulationModeActions.h"
+
 #include "ImGuizmo.h"
 
 namespace liquid::editor {
@@ -105,13 +109,17 @@ void EditorScreen::start(const Project &project) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  EntityManager entityManager(assetManager, project.scenesPath);
+  WorkspaceState state;
+
+  ActionExecutor actionExecutor(state);
+
+  EntityManager entityManager(assetManager, state, project.scenesPath);
   EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                             mEventSystem, mWindow);
 
   EditorManager editorManager(editorCamera, entityManager, project);
   editorManager.loadOrCreateScene();
-  WorkspaceState state = editorManager.loadWorkspaceState(statePath);
+  editorManager.loadWorkspaceState(statePath, state);
 
   MainLoop mainLoop(mWindow, fpsCounter);
   AssetLoader assetLoader(assetManager, renderer.getRenderStorage());
@@ -119,7 +127,7 @@ void EditorScreen::start(const Project &project) {
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  UIRoot ui(entityManager, assetLoader);
+  UIRoot ui(actionExecutor, entityManager, assetLoader);
   ui.getIconRegistry().loadIcons(renderer.getRenderStorage(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
@@ -173,13 +181,12 @@ void EditorScreen::start(const Project &project) {
 
   mWindow.maximize();
 
-  mainLoop.setUpdateFn([&entityManager, &simulator, this](float dt) mutable {
-    auto &entityDatabase = entityManager.getActiveEntityDatabase();
-
-    mEventSystem.poll();
-    simulator.update(dt, entityManager.getActiveScene());
-    return true;
-  });
+  mainLoop.setUpdateFn(
+      [&entityManager, &state, &simulator, this](float dt) mutable {
+        mEventSystem.poll();
+        simulator.update(dt, state);
+        return true;
+      });
 
   LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
@@ -187,7 +194,7 @@ void EditorScreen::start(const Project &project) {
                         &imguiPassGroup, &ui, &debugLayer, &preloadStatusDialog,
                         &presenter, &editorRenderer, &simulator, &mousePicking,
                         &systemLogStorage, &userLogStorage, &logViewer, &state,
-                        this]() {
+                        &actionExecutor, this]() {
     auto &entityDatabase = entityManager.getActiveEntityDatabase();
 
     // TODO: Why is -2.0f needed here
@@ -200,7 +207,7 @@ void EditorScreen::start(const Project &project) {
     ImGuizmo::BeginFrame();
 
     if (auto _ = widgets::MainMenuBar()) {
-      MenuBar::render(state, editorManager, entityManager);
+      MenuBar::render(state, actionExecutor, editorManager, entityManager);
       debugLayer.renderMenu();
     }
 
@@ -208,23 +215,19 @@ void EditorScreen::start(const Project &project) {
 
     if (auto _ = Toolbar()) {
       auto *simulationIcon =
-          entityManager.isUsingSimulationDatabase() ? fa::Stop : fa::Play;
+          state.mode == WorkspaceMode::Simulation ? fa::Stop : fa::Play;
 
       if (ImGui::Button(simulationIcon)) {
-        if (entityManager.isUsingSimulationDatabase()) {
-          simulator.cleanupSimulationDatabase(
-              entityManager.getActiveEntityDatabase());
-          simulator.useEditorUpdate();
-          entityManager.useEditingDatabase();
+        if (state.mode == WorkspaceMode::Simulation) {
+          actionExecutor.execute(StopSimulationModeAction);
         } else {
-          simulator.useSimulationUpdate();
-          entityManager.useSimulationDatabase();
+          actionExecutor.execute(StartSimulationModeAction);
         }
       }
 
       ImGui::SameLine();
 
-      TransformOperationControl{state};
+      TransformOperationControl{state, actionExecutor};
 
       ImGui::SameLine();
     }

@@ -7,7 +7,8 @@
 
 namespace liquid::editor {
 
-void MenuBar::render(WorkspaceState &state, EditorManager &editorManager,
+void MenuBar::render(WorkspaceState &state, ActionExecutor &actionExecutor,
+                     EditorManager &editorManager,
                      EntityManager &entityManager) {
   if (ImGui::BeginMenu("Project")) {
     if (ImGui::MenuItem("Export as game", nullptr)) {
