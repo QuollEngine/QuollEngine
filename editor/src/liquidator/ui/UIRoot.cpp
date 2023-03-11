@@ -5,9 +5,10 @@
 
 namespace liquid::editor {
 
-UIRoot::UIRoot(EntityManager &entityManager, AssetLoader &assetLoader)
-    : mAssetBrowser(assetLoader), mSceneHierarchyPanel(entityManager),
-      mEntityPanel(entityManager) {}
+UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
+               AssetLoader &assetLoader)
+    : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader),
+      mSceneHierarchyPanel(entityManager), mEntityPanel(entityManager) {}
 
 void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
                     Renderer &renderer, AssetManager &assetManager,
@@ -15,7 +16,7 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
                     EntityManager &entityManager) {
   mLayout.setup();
 
-  mSceneHierarchyPanel.render(state, editorManager);
+  mSceneHierarchyPanel.render(state, mActionExecutor, editorManager);
 
   if (state.selectedEntity != Entity::Null) {
     mEntityPanel.render(editorManager, state.selectedEntity, renderer,
@@ -24,7 +25,7 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
 
   EnvironmentPanel::render(editorManager, assetManager);
 
-  mEditorCameraPanel.render(state);
+  mEditorCameraPanel.render(state, mActionExecutor);
   mAssetBrowser.render(assetManager, mIconRegistry, state, editorManager,
                        entityManager);
 }

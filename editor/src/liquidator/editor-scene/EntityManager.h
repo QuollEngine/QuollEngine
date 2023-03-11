@@ -5,6 +5,7 @@
 #include "liquid/renderer/Renderer.h"
 #include "liquid/scene/SceneIO.h"
 
+#include "liquidator/state/WorkspaceState.h"
 #include "liquidator/asset/AssetManager.h"
 #include "EditorCamera.h"
 
@@ -22,9 +23,10 @@ public:
    * @brief Create entity manager
    *
    * @param assetManager Asset manager
+   * @param state Workspace state
    * @param scenePath Scene path
    */
-  EntityManager(AssetManager &assetManager,
+  EntityManager(AssetManager &assetManager, WorkspaceState &state,
                 const std::filesystem::path &scenePath);
 
   /**
@@ -180,19 +182,10 @@ public:
    * @return Active entity database
    */
   inline EntityDatabase &getActiveEntityDatabase() {
-    return mInSimulation ? mSimulationScene.entityDatabase
-                         : mScene.entityDatabase;
+    return mState.mode == WorkspaceMode::Simulation
+               ? mState.simulationScene.entityDatabase
+               : mState.scene.entityDatabase;
   }
-
-  /**
-   * @brief Use simulation database
-   */
-  void useSimulationDatabase();
-
-  /**
-   * @brief Use editing database
-   */
-  void useEditingDatabase();
 
   /**
    * @brief Check if using simulation database
@@ -200,7 +193,9 @@ public:
    * @retval true Using simulation databse
    * @retval false Using editing database
    */
-  inline bool isUsingSimulationDatabase() const { return mInSimulation; }
+  inline bool isUsingSimulationDatabase() const {
+    return mState.mode == WorkspaceMode::Simulation;
+  }
 
   /**
    * @brief Get active camera in simulation
@@ -229,7 +224,8 @@ public:
    * @return Active scene
    */
   inline Scene &getActiveScene() {
-    return mInSimulation ? mSimulationScene : mScene;
+    return mState.mode == WorkspaceMode::Simulation ? mState.simulationScene
+                                                    : mState.scene;
   }
 
   /**
@@ -247,12 +243,10 @@ private:
   LocalTransform getTransformFromCamera(Entity camera) const;
 
 private:
-  Scene mScene;
-  Scene mSimulationScene;
+  WorkspaceState &mState;
 
   AssetManager &mAssetManager;
   SceneIO mSceneIO;
-  bool mInSimulation = false;
   std::filesystem::path mScenePath;
 };
 

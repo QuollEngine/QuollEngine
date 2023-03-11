@@ -16,6 +16,7 @@
 #include "IconRegistry.h"
 #include "EnvironmentPanel.h"
 #include "SceneView.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
 
@@ -29,10 +30,12 @@ public:
   /**
    * @brief Create UI Root
    *
+   * @param actionExecutor Action executor
    * @param entityManager Entity manager
    * @param assetLoader Asset loader
    */
-  UIRoot(EntityManager &entityManager, AssetLoader &assetLoader);
+  UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
+         AssetLoader &assetLoader);
 
   /**
    * @brief Render UI Root
@@ -74,6 +77,7 @@ public:
   }
 
 private:
+  ActionExecutor mActionExecutor;
   MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;

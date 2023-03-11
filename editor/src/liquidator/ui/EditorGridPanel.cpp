@@ -4,9 +4,15 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
+#include "liquidator/actions/SetGridDataActions.h"
+
 namespace liquid::editor {
 
-void EditorGridPanel::render(WorkspaceState &state) {
+static const std::vector<Action> GridActions{SetGridLinesAction,
+                                             SetGridAxisLinesAction};
+
+void EditorGridPanel::render(WorkspaceState &state,
+                             ActionExecutor &actionExecutor) {
   if (auto _ = widgets::MainMenuBar()) {
     if (ImGui::BeginMenu("Editor")) {
       ImGui::MenuItem("Grid", nullptr, &mOpen);
@@ -19,14 +25,11 @@ void EditorGridPanel::render(WorkspaceState &state) {
   }
 
   if (auto _ = widgets::FixedWindow("Editor Grid", mOpen)) {
-    bool showGridLines = state.grid.x == 1;
-    if (ImGui::Checkbox("Show grid lines", &showGridLines)) {
-      state.grid.x = static_cast<uint32_t>(showGridLines);
-    }
-
-    bool showAxisLines = state.grid.y == 1;
-    if (ImGui::Checkbox("Show axis lines", &showAxisLines)) {
-      state.grid.y = static_cast<uint32_t>(showAxisLines);
+    for (const auto &action : GridActions) {
+      bool enabled = action.predicate(state);
+      if (ImGui::Checkbox(String(action.name).c_str(), &enabled)) {
+        actionExecutor.execute(action, enabled);
+      }
     }
   }
 }

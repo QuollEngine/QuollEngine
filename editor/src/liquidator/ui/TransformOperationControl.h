@@ -2,6 +2,7 @@
 
 #include "liquidator/core/TransformOperation.h"
 #include "liquidator/state/WorkspaceState.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
 
@@ -17,14 +18,14 @@ public:
    * @brief Begin toolbar
    *
    * @param state Workspace state
+   * @param actionExecutor Action executor
    */
-  TransformOperationControl(WorkspaceState &state);
+  TransformOperationControl(WorkspaceState &state,
+                            ActionExecutor &actionExecutor);
 
 private:
-  void renderIcon(TransformOperation transformOperation, WorkspaceState &state);
-
-  static const char *
-  getTransformOperationIcon(TransformOperation transformOperation);
+  static constexpr size_t NumOperations = 3;
+  std::array<Action, NumOperations> mActions;
 };
 
 } // namespace liquid::editor

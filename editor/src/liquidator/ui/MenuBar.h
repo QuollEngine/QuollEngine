@@ -2,6 +2,7 @@
 
 #include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/editor-scene/EntityManager.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
 
@@ -14,10 +15,12 @@ public:
    * @brief Render menu bar
    *
    * @param state Workspace state
+   * @param actionExecutor Action executor
    * @param editorManager Editor manager
    * @param entityManager Entity manager
    */
-  static void render(WorkspaceState &state, EditorManager &editorManager,
+  static void render(WorkspaceState &state, ActionExecutor &actionExecutor,
+                     EditorManager &editorManager,
                      EntityManager &entityManager);
 };
 

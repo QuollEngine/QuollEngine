@@ -38,15 +38,14 @@ void EditorManager::saveWorkspaceState(WorkspaceState &state,
   stream.close();
 }
 
-WorkspaceState
-EditorManager::loadWorkspaceState(const std::filesystem::path &path) {
-  WorkspaceState state{};
+void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
+                                       WorkspaceState &state) {
   state.camera = mEditorCamera.getEntity();
 
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {
-    return state;
+    return;
   }
 
   YAML::Node node;
@@ -55,7 +54,7 @@ EditorManager::loadWorkspaceState(const std::filesystem::path &path) {
     stream.close();
   } catch (std::exception &) {
     stream.close();
-    return state;
+    return;
   }
 
   if (node["camera"].IsMap()) {
@@ -114,8 +113,6 @@ EditorManager::loadWorkspaceState(const std::filesystem::path &path) {
     state.grid.x = static_cast<uint32_t>(gridLinesShown);
     state.grid.y = static_cast<uint32_t>(axisLinesShown);
   }
-
-  return state;
 }
 
 void EditorManager::createNewScene() {
@@ -138,27 +135,6 @@ void EditorManager::loadOrCreateScene() {
   if (!mEntityManager.loadScene()) {
     createNewScene();
   }
-}
-
-void EditorManager::moveCameraToEntity(WorkspaceState &state, Entity entity) {
-  if (!mEntityManager.getActiveEntityDatabase().has<WorldTransform>(entity)) {
-    return;
-  }
-
-  auto &transformComponent =
-      mEntityManager.getActiveEntityDatabase().get<WorldTransform>(entity);
-
-  const auto &translation =
-      glm::vec3(glm::column(transformComponent.worldTransform, 3));
-
-  static constexpr glm::vec3 DistanceFromCenter{0.0f, 0.0f, 10.0f};
-
-  auto &lookAt =
-      mEntityManager.getActiveEntityDatabase().get<CameraLookAt>(state.camera);
-
-  lookAt.up = EditorCamera::DefaultUp;
-  lookAt.center = translation;
-  lookAt.eye = translation - DistanceFromCenter;
 }
 
 bool EditorManager::hasSkybox() {

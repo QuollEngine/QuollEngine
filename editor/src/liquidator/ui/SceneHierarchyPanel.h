@@ -5,6 +5,7 @@
 #include "liquidator/editor-scene/EditorCamera.h"
 
 #include "liquidator/state/WorkspaceState.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
 
@@ -26,9 +27,11 @@ public:
    * @brief Render the UI
    *
    * @param state Workspace state
+   * @param actionExecutor Action executor
    * @param editorManager Editor manager
    */
-  void render(WorkspaceState &state, EditorManager &editorManager);
+  void render(WorkspaceState &state, ActionExecutor &actionExecutor,
+              EditorManager &editorManager);
 
 private:
   /**
@@ -37,9 +40,11 @@ private:
    * @param entity Entity
    * @param flags Flags
    * @param state Workspace state
+   * @param actionExecutor Action executor
    * @param editorManager Editor manager
    */
   void renderEntity(Entity entity, int flags, WorkspaceState &state,
+                    ActionExecutor &actionExecutor,
                     EditorManager &editorManager);
 
 private:
