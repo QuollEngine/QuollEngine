@@ -8,7 +8,7 @@
 namespace liquid::editor {
 
 static Action MoveCameraToEntityAction{
-    "MoveCameraToEntity", "", [](WorkspaceState &state, std::any data) {
+    "MoveCameraToEntity", [](WorkspaceState &state, std::any data) {
       auto entity = std::any_cast<Entity>(data);
 
       auto &scene = state.scene;

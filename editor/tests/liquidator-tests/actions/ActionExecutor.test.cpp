@@ -21,7 +21,7 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithStateAndData) {
 
   bool called = false;
   liquid::editor::Action TestAction{
-      "TestAction", "",
+      "TestAction",
       [&called](liquid::editor::WorkspaceState &state, std::any data) mutable {
         called = true;
         EXPECT_EQ(std::any_cast<liquid::String>(data), "Hello world");

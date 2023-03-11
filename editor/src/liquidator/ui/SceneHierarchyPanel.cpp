@@ -16,8 +16,7 @@ SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
     : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(WorkspaceState &state,
-                                 ActionExecutor &actionExecutor,
-                                 EditorManager &editorManager) {
+                                 ActionExecutor &actionExecutor) {
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
   static constexpr float TreeNodeIndentSpacing = 10.0f;
 
@@ -38,7 +37,7 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
       }
 
       renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, state,
-                   actionExecutor, editorManager);
+                   actionExecutor);
     }
   }
 }
@@ -79,8 +78,7 @@ static String getNodeName(const String &name, Entity entity,
 
 void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                                        WorkspaceState &state,
-                                       ActionExecutor &actionExecutor,
-                                       EditorManager &editorManager) {
+                                       ActionExecutor &actionExecutor) {
   auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
   String name =
       entityDatabase.has<Name>(entity)
@@ -155,7 +153,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       for (auto childEntity : mEntityManager.getActiveEntityDatabase()
                                   .get<Children>(entity)
                                   .children) {
-        renderEntity(childEntity, 0, state, actionExecutor, editorManager);
+        renderEntity(childEntity, 0, state, actionExecutor);
       }
     }
 

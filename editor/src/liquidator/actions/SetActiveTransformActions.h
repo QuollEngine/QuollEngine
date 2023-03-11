@@ -5,7 +5,7 @@
 namespace liquid::editor {
 
 static const Action SetActiveTransformToMoveAction{
-    "SetActiveTransformToMove", fa::Arrows,
+    "SetActiveTransformToMove",
     [](WorkspaceState &state, std::any data) {
       state.activeTransform = TransformOperation::Move;
       return ActionExecutorResult{};
@@ -15,7 +15,7 @@ static const Action SetActiveTransformToMoveAction{
     }};
 
 static const Action SetActiveTransformToRotateAction{
-    "SetActiveTransformToRotate", fa::Rotate,
+    "SetActiveTransformToRotate",
     [](WorkspaceState &state, std::any data) {
       state.activeTransform = TransformOperation::Rotate;
       return ActionExecutorResult{};
@@ -25,7 +25,7 @@ static const Action SetActiveTransformToRotateAction{
     }};
 
 static const Action SetActiveTransformToScaleAction{
-    "SetActiveTransformToScale", fa::ExpandAlt,
+    "SetActiveTransformToScale",
     [](WorkspaceState &state, std::any data) {
       state.activeTransform = TransformOperation::Scale;
       return ActionExecutorResult{};

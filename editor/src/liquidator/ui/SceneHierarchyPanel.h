@@ -28,10 +28,8 @@ public:
    *
    * @param state Workspace state
    * @param actionExecutor Action executor
-   * @param editorManager Editor manager
    */
-  void render(WorkspaceState &state, ActionExecutor &actionExecutor,
-              EditorManager &editorManager);
+  void render(WorkspaceState &state, ActionExecutor &actionExecutor);
 
 private:
   /**
@@ -41,11 +39,9 @@ private:
    * @param flags Flags
    * @param state Workspace state
    * @param actionExecutor Action executor
-   * @param editorManager Editor manager
    */
   void renderEntity(Entity entity, int flags, WorkspaceState &state,
-                    ActionExecutor &actionExecutor,
-                    EditorManager &editorManager);
+                    ActionExecutor &actionExecutor);
 
 private:
   EntityManager &mEntityManager;

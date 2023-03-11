@@ -87,6 +87,7 @@ private:
   StatusBar mStatusBar;
   Layout mLayout;
   IconRegistry mIconRegistry;
+  Toolbar mToolbar;
 };
 
 } // namespace liquid::editor
