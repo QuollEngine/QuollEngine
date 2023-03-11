@@ -26,7 +26,6 @@
 #include "liquidator/ui/AssetLoadStatusDialog.h"
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/Widgets.h"
-#include "liquidator/ui/TransformOperationControl.h"
 #include "liquidator/ui/LogViewer.h"
 #include "liquidator/ui/FontAwesome.h"
 
@@ -39,8 +38,6 @@
 #include "liquidator/state/WorkspaceState.h"
 
 #include "liquidator/actions/ActionExecutor.h"
-#include "liquidator/actions/SetActiveTransformActions.h"
-#include "liquidator/actions/SimulationModeActions.h"
 
 #include "ImGuizmo.h"
 
@@ -212,25 +209,6 @@ void EditorScreen::start(const Project &project) {
     }
 
     debugLayer.render();
-
-    if (auto _ = Toolbar()) {
-      auto *simulationIcon =
-          state.mode == WorkspaceMode::Simulation ? fa::Stop : fa::Play;
-
-      if (ImGui::Button(simulationIcon)) {
-        if (state.mode == WorkspaceMode::Simulation) {
-          actionExecutor.execute(StopSimulationModeAction);
-        } else {
-          actionExecutor.execute(StartSimulationModeAction);
-        }
-      }
-
-      ImGui::SameLine();
-
-      TransformOperationControl{state, actionExecutor};
-
-      ImGui::SameLine();
-    }
 
     bool mouseClicked = false;
 

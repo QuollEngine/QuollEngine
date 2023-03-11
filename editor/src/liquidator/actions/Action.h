@@ -21,11 +21,6 @@ public:
   StringView name;
 
   /**
-   * Action icon
-   */
-  StringView icon;
-
-  /**
    * Action executor
    */
   std::function<ActionExecutorResult(WorkspaceState &, std::any data)>

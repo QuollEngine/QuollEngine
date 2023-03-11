@@ -1,6 +1,11 @@
 #pragma once
 
+#include "liquidator/state/WorkspaceState.h"
+#include "liquidator/actions/ActionExecutor.h"
+
 namespace liquid::editor {
+
+enum class ToolbarItemType { Toggleable, HideWhenInactive };
 
 /**
  * @brief Toolbar widget
@@ -9,6 +14,14 @@ namespace liquid::editor {
  * is stored in this widget
  */
 class Toolbar {
+private:
+  struct ToolbarItem {
+    Action action;
+    String label;
+    String icon;
+    ToolbarItemType type;
+  };
+
 public:
   /**
    * @brief Toolbar height
@@ -17,30 +30,26 @@ public:
 
 public:
   /**
-   * @brief Begin toolbar
-   */
-  Toolbar();
-
-  /**
-   * @brief End toolbar
-   */
-  ~Toolbar();
-
-  Toolbar(const Toolbar &) = delete;
-  Toolbar(Toolbar &&) = delete;
-  Toolbar &operator=(const Toolbar &) = delete;
-  Toolbar &operator=(Toolbar &&) = delete;
-
-  /**
-   * @brief Check if toolbar is expanded
+   * @brief Render toolbar
    *
-   * @retval true Toolbar is expanded
-   * @retval false Toolbar is not expanded
+   * @param state Workspace state
+   * @param actionExecutor Action executor
    */
-  inline operator bool() const { return mExpanded; }
+  void render(WorkspaceState &state, ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Add action
+   *
+   * @param action Action
+   * @param label Button label
+   * @param icon Button icon
+   * @param type Item type
+   */
+  void add(const Action &action, String label, String icon,
+           ToolbarItemType type);
 
 private:
-  bool mExpanded = false;
+  std::vector<ToolbarItem> mItems;
 };
 
 } // namespace liquid::editor

@@ -5,7 +5,7 @@
 namespace liquid::editor {
 
 static Action StartSimulationModeAction{
-    "Start simulation", fa::Play,
+    "Start simulation",
     [](WorkspaceState &state, std::any data) {
       state.mode = WorkspaceMode::Simulation;
       state.simulationScene.entityDatabase.destroy();
@@ -19,7 +19,7 @@ static Action StartSimulationModeAction{
     [](WorkspaceState &state) { return state.mode == WorkspaceMode::Edit; }};
 
 static Action StopSimulationModeAction{
-    "Stop simulation", fa::Stop,
+    "Stop simulation",
     [](WorkspaceState &state, std::any data) {
       state.mode = WorkspaceMode::Edit;
       return ActionExecutorResult{};
