@@ -9,11 +9,9 @@
 #include "Theme.h"
 
 #include "liquidator/actions/MoveCameraToEntityAction.h"
+#include "liquidator/actions/DeleteEntityAction.h"
 
 namespace liquid::editor {
-
-SceneHierarchyPanel::SceneHierarchyPanel(EntityManager &entityManager)
-    : mEntityManager(entityManager) {}
 
 void SceneHierarchyPanel::render(WorkspaceState &state,
                                  ActionExecutor &actionExecutor) {
@@ -21,6 +19,10 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
   static constexpr float TreeNodeIndentSpacing = 10.0f;
 
   if (auto _ = widgets::Window("Hierarchy")) {
+    auto &scene = state.mode == WorkspaceMode::Simulation
+                      ? state.simulationScene
+                      : state.scene;
+
     StyleStack stack;
     stack.pushColor(ImGuiCol_Header,
                     ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered));
@@ -29,10 +31,9 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
     stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
     stack.pushStyle(ImGuiStyleVar_IndentSpacing, TreeNodeIndentSpacing);
 
-    auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
-
-    for (auto [entity, transform] : entityDatabase.view<LocalTransform>()) {
-      if (entityDatabase.has<Parent>(entity)) {
+    for (auto [entity, transform] :
+         scene.entityDatabase.view<LocalTransform>()) {
+      if (scene.entityDatabase.has<Parent>(entity)) {
         continue;
       }
 
@@ -79,13 +80,15 @@ static String getNodeName(const String &name, Entity entity,
 void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                                        WorkspaceState &state,
                                        ActionExecutor &actionExecutor) {
-  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
   String name =
-      entityDatabase.has<Name>(entity)
-          ? mEntityManager.getActiveEntityDatabase().get<Name>(entity).name
+      scene.entityDatabase.has<Name>(entity)
+          ? scene.entityDatabase.get<Name>(entity).name
           : "Entity #" + std::to_string(static_cast<uint32_t>(entity));
 
-  bool isLeaf = !mEntityManager.getActiveEntityDatabase().has<Children>(entity);
+  bool isLeaf = !scene.entityDatabase.has<Children>(entity);
 
   int treeNodeFlags = flags;
   if (isLeaf) {
@@ -110,7 +113,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     fontStack.pushFont(Theme::getBoldFont());
   }
 
-  if (ImGui::TreeNodeEx(getNodeName(name, entity, entityDatabase).c_str(),
+  if (ImGui::TreeNodeEx(getNodeName(name, entity, scene.entityDatabase).c_str(),
                         treeNodeFlags)) {
     open = !isLeaf;
 
@@ -140,19 +143,14 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     }
     confirmDeleteSceneNode.render();
     if (confirmDeleteSceneNode.isConfirmed()) {
-      if (entity == state.selectedEntity) {
-        state.selectedEntity = Entity::Null;
-      }
-
-      mEntityManager.deleteEntity(entity);
+      actionExecutor.execute(DeleteEntityAction, entity);
     }
   }
 
   if (open) {
-    if (mEntityManager.getActiveEntityDatabase().has<Children>(entity)) {
-      for (auto childEntity : mEntityManager.getActiveEntityDatabase()
-                                  .get<Children>(entity)
-                                  .children) {
+    if (scene.entityDatabase.has<Children>(entity)) {
+      for (auto childEntity :
+           scene.entityDatabase.get<Children>(entity).children) {
         renderEntity(childEntity, 0, state, actionExecutor);
       }
     }

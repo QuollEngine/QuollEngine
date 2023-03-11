@@ -8,7 +8,12 @@ namespace liquid::editor {
 /**
  * @brief Action executor result
  */
-struct ActionExecutorResult {};
+struct ActionExecutorResult {
+  /**
+   * Entities to delete
+   */
+  std::vector<Entity> entitiesToDelete;
+};
 
 /**
  * @brief Editor action

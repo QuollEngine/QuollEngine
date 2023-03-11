@@ -11,7 +11,7 @@ namespace liquid::editor {
 UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
                AssetLoader &assetLoader)
     : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader),
-      mSceneHierarchyPanel(entityManager), mEntityPanel(entityManager) {
+      mEntityPanel(entityManager) {
 
   mToolbar.add(StartSimulationModeAction, "Play", fa::Play,
                ToolbarItemType::HideWhenInactive);

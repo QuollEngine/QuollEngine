@@ -17,13 +17,6 @@ class SceneHierarchyPanel {
 
 public:
   /**
-   * @brief Create scene hierarchy panel
-   *
-   * @param entityManager Entity manager
-   */
-  SceneHierarchyPanel(EntityManager &entityManager);
-
-  /**
    * @brief Render the UI
    *
    * @param state Workspace state
@@ -44,7 +37,6 @@ private:
                     ActionExecutor &actionExecutor);
 
 private:
-  EntityManager &mEntityManager;
   Entity mRightClickedEntity = Entity::Null;
 };
 
