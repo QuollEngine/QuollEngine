@@ -2,16 +2,11 @@
 #include "liquidator/actions/SimulationModeActions.h"
 
 #include "liquidator-tests/Testing.h"
+#include "ActionTestBase.h"
 
 using WM = liquid::editor::WorkspaceMode;
 
-class SimulationModeActionsTestBase : public ::testing::Test {
-public:
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
-};
-
-using StartSimulationModeActionTest = SimulationModeActionsTestBase;
+using StartSimulationModeActionTest = ActionTestBase;
 
 TEST_F(StartSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Edit;
@@ -59,7 +54,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_FALSE(action.predicate(state));
 }
 
-using StopSimulationModeActionTest = SimulationModeActionsTestBase;
+using StopSimulationModeActionTest = ActionTestBase;
 
 TEST_F(StopSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Simulation;

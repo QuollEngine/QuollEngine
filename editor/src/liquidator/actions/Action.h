@@ -18,6 +18,11 @@ struct ActionExecutorResult {
    * Entities to delete
    */
   std::vector<Entity> entitiesToDelete;
+
+  /**
+   * Save scene
+   */
+  bool saveScene = false;
 };
 
 /**
@@ -29,6 +34,12 @@ public:
    * @brief Action destructor
    */
   virtual ~Action() = default;
+
+  Action() = default;
+  Action(const Action &) = delete;
+  Action(Action &&) = delete;
+  Action &operator=(const Action &) = delete;
+  Action &operator=(Action &&) = delete;
 
   /**
    * @brief Action executor

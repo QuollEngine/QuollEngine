@@ -5,16 +5,17 @@
 namespace liquid::editor {
 
 /**
- * @brief Set active transform action
+ * @brief Set name for entity action
  */
-class SetActiveTransformAction : public Action {
+class EntitySetName : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param transformOperation Transform operation
+   * @param entity Entity
+   * @param name Name
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  EntitySetName(Entity entity, Name name);
 
   /**
    * @brief Action executor
@@ -34,7 +35,8 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TransformOperation mTransformOperation;
+  Entity mEntity;
+  Name mName;
 };
 
 } // namespace liquid::editor

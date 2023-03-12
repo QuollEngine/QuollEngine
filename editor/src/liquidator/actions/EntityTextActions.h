@@ -1,20 +1,21 @@
 #pragma once
 
-#include "liquidator/actions/Action.h"
+#include "Action.h"
 
 namespace liquid::editor {
 
 /**
- * @brief Set active transform action
+ * @brief Entity set local transform action
  */
-class SetActiveTransformAction : public Action {
+class EntitySetText : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param transformOperation Transform operation
+   * @param entity Entity
+   * @param text Text
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  EntitySetText(Entity entity, Text text);
 
   /**
    * @brief Action executor
@@ -34,7 +35,8 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TransformOperation mTransformOperation;
+  Entity mEntity;
+  Text mText;
 };
 
 } // namespace liquid::editor

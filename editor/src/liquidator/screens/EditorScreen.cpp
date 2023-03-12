@@ -125,7 +125,7 @@ void EditorScreen::start(const Project &project) {
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  UIRoot ui(actionExecutor, entityManager, assetLoader);
+  UIRoot ui(actionExecutor, assetLoader);
   ui.getIconRegistry().loadIcons(renderer.getRenderStorage(),
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
@@ -206,8 +206,7 @@ void EditorScreen::start(const Project &project) {
 
     bool mouseClicked = false;
 
-    ui.render(state, editorManager, renderer, assetManager,
-              simulator.getPhysicsSystem(), entityManager);
+    ui.render(state, editorManager, assetManager, entityManager);
 
     if (auto _ = widgets::MainMenuBar()) {
       debugLayer.renderMenu();

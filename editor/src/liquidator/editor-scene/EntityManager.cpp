@@ -86,42 +86,6 @@ void EntityManager::setSkeletonForEntity(Entity entity,
   getActiveEntityDatabase().set(entity, skeletonInstance);
 }
 
-void EntityManager::toggleSkeletonDebugForEntity(Entity entity) {
-  auto &entityDatabase = getActiveEntityDatabase();
-  if (!entityDatabase.has<Skeleton>(entity)) {
-    return;
-  }
-
-  if (entityDatabase.has<SkeletonDebug>(entity)) {
-    entityDatabase.remove<SkeletonDebug>(entity);
-    return;
-  }
-
-  auto &skeleton = entityDatabase.get<Skeleton>(entity);
-
-  SkeletonDebug skeletonDebug{};
-  auto numBones = skeleton.numJoints * 2;
-  skeletonDebug.bones.reserve(numBones);
-
-  for (uint32_t joint = 0; joint < skeleton.numJoints; ++joint) {
-    skeletonDebug.bones.push_back(skeleton.jointParents.at(joint));
-    skeletonDebug.bones.push_back(joint);
-  }
-
-  skeletonDebug.boneTransforms.resize(numBones, glm::mat4{1.0f});
-
-  entityDatabase.set(entity, skeletonDebug);
-}
-
-void EntityManager::toggleShadowsForLightEntity(Entity entity) {
-  auto &entityDatabase = getActiveEntityDatabase();
-  if (entityDatabase.has<CascadedShadowMap>(entity)) {
-    entityDatabase.remove<CascadedShadowMap>(entity);
-  } else {
-    entityDatabase.set<CascadedShadowMap>(entity, {});
-  }
-}
-
 void EntityManager::setMesh(Entity entity, MeshAssetHandle handle) {
   if (getActiveEntityDatabase().has<SkinnedMesh>(entity)) {
     getActiveEntityDatabase().remove<SkinnedMesh>(entity);
@@ -144,29 +108,6 @@ void EntityManager::setName(Entity entity, const String &name) {
   }
 
   getActiveEntityDatabase().set<Name>(entity, {name});
-}
-
-void EntityManager::setCamera(Entity entity, const PerspectiveLens &lens,
-                              bool autoRatio) {
-  getActiveEntityDatabase().set<Camera>(entity, {});
-  getActiveEntityDatabase().set<PerspectiveLens>(entity, lens);
-  if (autoRatio) {
-    getActiveEntityDatabase().set<AutoAspectRatio>(entity, {});
-  }
-}
-
-void EntityManager::setAudio(Entity entity, AudioAssetHandle source) {
-  getActiveEntityDatabase().set<AudioSource>(entity, {source});
-}
-
-void EntityManager::setText(Entity entity, Text text) {
-  getActiveEntityDatabase().set(entity, text);
-}
-
-void EntityManager::setScript(Entity entity, LuaScriptAssetHandle handle) {
-  Script script{};
-  script.handle = handle;
-  getActiveEntityDatabase().set(entity, script);
 }
 
 void EntityManager::updateLocalTransformUsingWorld(
@@ -320,17 +261,8 @@ Entity EntityManager::spawnEntity(Entity camera, Entity root, uint32_t handle,
   return parent;
 }
 
-Entity EntityManager::getStartingCamera() {
-  return getActiveScene().activeCamera;
-}
-
 Entity EntityManager::getActiveSimulationCamera() {
   return mState.simulationScene.activeCamera;
-}
-
-void EntityManager::setStartingCamera(Entity camera) {
-  getActiveScene().activeCamera = camera;
-  mSceneIO.saveStartingCamera(camera, mScenePath / "main.lqscene");
 }
 
 void EntityManager::saveEnvironment() {

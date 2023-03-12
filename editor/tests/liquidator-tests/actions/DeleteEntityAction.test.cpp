@@ -2,12 +2,9 @@
 #include "liquidator/actions/DeleteEntityAction.h"
 
 #include "liquidator-tests/Testing.h"
+#include "ActionTestBase.h"
 
-class DeleteEntityActionTest : public ::testing::Test {
-public:
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
-};
+using DeleteEntityActionTest = ActionTestBase;
 
 TEST_F(DeleteEntityActionTest,
        ExecuteAddsDeleteComponentToEntityInSceneIfWorkspaceModeIsEdit) {

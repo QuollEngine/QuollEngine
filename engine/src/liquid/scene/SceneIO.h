@@ -40,11 +40,10 @@ public:
   /**
    * @brief Save starting camera
    *
-   * @param entity Camera entity
    * @param path Scene path
    * @return Save result
    */
-  Result<bool> saveStartingCamera(Entity entity, const Path &path);
+  Result<bool> saveStartingCamera(const Path &path);
 
   /**
    * @brief Save environment

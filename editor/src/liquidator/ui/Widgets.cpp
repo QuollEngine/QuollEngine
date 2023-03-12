@@ -194,42 +194,53 @@ void Table::column(rhi::TextureHandle handle, const glm::vec2 &size) {
   imgui::image(handle, ImVec2(size.x, size.y));
 }
 
-Input::Input(String label, glm::vec3 &value) {
-  glm::vec3 temp = value;
+Input::Input(String label, glm::vec3 &value, bool autoChange) {
+  if (autoChange) {
+    auto temp = value;
 
-  renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length(),
-                    ImGuiDataType_Float);
+    renderScalarInput(label, glm::value_ptr(temp), glm::vec3::length(),
+                      ImGuiDataType_Float);
 
-  if (mChanged) {
-    value = temp;
+    if (mChanged) {
+      value = temp;
+    }
+
+  } else {
+    renderScalarInput(label, glm::value_ptr(value), glm::vec3::length(),
+                      ImGuiDataType_Float);
   }
 }
 
-Input::Input(String label, float &value) {
-  float temp = value;
+Input::Input(String label, float &value, bool autoChange) {
+  if (autoChange) {
+    auto temp = value;
 
-  renderScalarInput(label, &temp, 1, ImGuiDataType_Float);
+    renderScalarInput(label, &temp, 1, ImGuiDataType_Float);
 
-  if (mChanged) {
-    value = temp;
+    if (mChanged) {
+      value = temp;
+    }
+
+  } else {
+    renderScalarInput(label, &value, 1, ImGuiDataType_Float);
   }
 }
 
-Input::Input(String label, uint32_t &value) {
+Input::Input(String label, uint32_t &value, bool autoChange) {
   uint32_t temp = value;
 
   renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
 
-  if (mChanged) {
+  if (mChanged && autoChange) {
     value = temp;
   }
 }
 
-Input::Input(String label, String &value) {
+Input::Input(String label, String &value, bool autoChange) {
   auto temp = value;
   renderTextInput(label, temp);
 
-  if (mChanged) {
+  if (mChanged && autoChange) {
     value = temp;
   }
 }

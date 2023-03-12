@@ -78,20 +78,6 @@ public:
   void setSkeletonForEntity(Entity entity, SkeletonAssetHandle handle);
 
   /**
-   * @brief Toggle debug skeleton for entity
-   *
-   * @param entity Entity
-   */
-  void toggleSkeletonDebugForEntity(Entity entity);
-
-  /**
-   * @brief Toggle shadows for light entity
-   *
-   * @param entity Entity
-   */
-  void toggleShadowsForLightEntity(Entity entity);
-
-  /**
    * @brief Set mesh for entiy
    *
    * @param entity Entity
@@ -114,39 +100,6 @@ public:
    * @param name Name
    */
   void setName(Entity entity, const String &name);
-
-  /**
-   * @brief Set camera for entity
-   *
-   * @param entity Entity
-   * @param lens Perspective lens component
-   * @param autoRatio Calculate aspect ratio automatically
-   */
-  void setCamera(Entity entity, const PerspectiveLens &lens, bool autoRatio);
-
-  /**
-   * @brief Set audio for entity
-   *
-   * @param entity Entity
-   * @param source Audio source asset
-   */
-  void setAudio(Entity entity, AudioAssetHandle source);
-
-  /**
-   * @brief Set text for entity
-   *
-   * @param entity Entity
-   * @param text Text component
-   */
-  void setText(Entity entity, Text text);
-
-  /**
-   * @brief Set script for entity
-   *
-   * @param entity Entity
-   * @param handle Script handle
-   */
-  void setScript(Entity entity, LuaScriptAssetHandle handle);
 
   /**
    * @brief Update local transform using world transform
@@ -197,20 +150,6 @@ public:
    * @return Active simulation camera
    */
   Entity getActiveSimulationCamera();
-
-  /**
-   * @brief Get starting camera
-   *
-   * @return Starting camera entity
-   */
-  Entity getStartingCamera();
-
-  /**
-   * @brief Set starting camera
-   *
-   * @param camera Camera entity
-   */
-  void setStartingCamera(Entity camera);
 
   /**
    * @brief Get active scene

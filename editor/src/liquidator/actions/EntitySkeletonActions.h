@@ -5,16 +5,16 @@
 namespace liquid::editor {
 
 /**
- * @brief Set active transform action
+ * @brief Export as game action
  */
-class SetActiveTransformAction : public Action {
+class EntityToggleSkeletonDebugBones : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param transformOperation Transform operation
+   * @param entity Entity
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  EntityToggleSkeletonDebugBones(Entity entity);
 
   /**
    * @brief Action executor
@@ -34,7 +34,7 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TransformOperation mTransformOperation;
+  Entity mEntity;
 };
 
 } // namespace liquid::editor

@@ -90,19 +90,19 @@ void SceneIO::saveEntity(Entity entity, const Path &path) {
   }
 }
 
-Result<bool> SceneIO::saveStartingCamera(Entity entity, const Path &path) {
-  if (!mScene.entityDatabase.has<Id>(entity)) {
+Result<bool> SceneIO::saveStartingCamera(const Path &path) {
+  if (!mScene.entityDatabase.has<Id>(mScene.activeCamera)) {
     return Result<bool>::Error("Entity does not have an id");
   }
 
-  if (!mScene.entityDatabase.has<PerspectiveLens>(entity)) {
+  if (!mScene.entityDatabase.has<PerspectiveLens>(mScene.activeCamera)) {
     return Result<bool>::Error("Entity does not have a camera");
   }
 
   std::ifstream stream(path);
   auto node = YAML::Load(stream);
   node["zones"][node["persistentZone"].as<uint32_t>()]["startingCamera"] =
-      mScene.entityDatabase.get<Id>(entity).id;
+      mScene.entityDatabase.get<Id>(mScene.activeCamera).id;
   stream.close();
 
   std::ofstream writeStream(path);
@@ -118,8 +118,8 @@ void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
     auto res =
         sceneLoader.loadStartingCamera(YAML::Node{}, mEntityIdCache, entity);
     if (res.hasData()) {
-      saveStartingCamera(res.getData(), path);
       mScene.activeCamera = res.getData();
+      saveStartingCamera(path);
     } else {
       mScene.activeCamera = mScene.dummyCamera;
     }

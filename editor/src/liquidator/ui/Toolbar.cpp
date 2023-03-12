@@ -24,7 +24,7 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
 
       StyleStack stack;
       if (item.type == ToolbarItemType::Toggleable &&
-          item.action->predicate(state)) {
+          !item.action->predicate(state)) {
         const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
         glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 
