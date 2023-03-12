@@ -23,11 +23,12 @@ public:
    * @brief Create entity manager
    *
    * @param assetManager Asset manager
+   * @param sceneIO Scene IO
    * @param state Workspace state
    * @param scenePath Scene path
    */
-  EntityManager(AssetManager &assetManager, WorkspaceState &state,
-                const std::filesystem::path &scenePath);
+  EntityManager(AssetManager &assetManager, SceneIO &sceneIO,
+                WorkspaceState &state, const std::filesystem::path &scenePath);
 
   /**
    * @brief Save entity
@@ -148,13 +149,6 @@ public:
   void setScript(Entity entity, LuaScriptAssetHandle handle);
 
   /**
-   * @brief Delete entity
-   *
-   * @param entity Entity
-   */
-  void deleteEntity(Entity entity);
-
-  /**
    * @brief Update local transform using world transform
    *
    * @param entity Entity to update
@@ -246,7 +240,7 @@ private:
   WorkspaceState &mState;
 
   AssetManager &mAssetManager;
-  SceneIO mSceneIO;
+  SceneIO &mSceneIO;
   std::filesystem::path mScenePath;
 };
 

@@ -3,10 +3,29 @@
 
 #include "liquidator-tests/Testing.h"
 
+static const liquid::Path ScenePath{std::filesystem::current_path() / "scene"};
+
 class ActionExecutorTest : public ::testing::Test {
 public:
-  liquid::editor::WorkspaceState state;
-  liquid::editor::ActionExecutor executor{state};
+  void SetUp() override {
+    std::filesystem::create_directories(ScenePath / "entities");
+
+    YAML::Node scene;
+    scene["persistentZone"] = 0;
+    scene["zones"][0]["entities"] = (ScenePath / "entities").string();
+    std::ofstream stream(ScenePath / "main.lqscene");
+    stream << scene;
+    stream.close();
+
+    executor.getSceneIO().loadScene(ScenePath / "main.lqscene");
+  }
+
+  void TearDown() override { std::filesystem::remove_all(ScenePath); }
+
+public:
+  liquid::AssetRegistry registry;
+  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::ActionExecutor executor{state, ScenePath / "main.lqscene"};
 };
 
 TEST_F(ActionExecutorTest, ExecuteFailsIfActionHasNoExecutor) {
@@ -32,4 +51,53 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithStateAndData) {
   executor.execute(TestAction, liquid::String("Hello world"));
 
   EXPECT_TRUE(called);
+}
+
+TEST_F(ActionExecutorTest,
+       ExecuteDeletesEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsEdit) {
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+
+  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
+
+  auto entityPath = ScenePath / "entities" / "15.lqnode";
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  liquid::editor::Action TestAction{
+      "TestAction",
+      [entity](liquid::editor::WorkspaceState &state, std::any data) {
+        liquid::editor::ActionExecutorResult result{};
+        result.entitiesToDelete.push_back(entity);
+        return result;
+      }};
+
+  executor.execute(TestAction);
+  EXPECT_FALSE(std::filesystem::exists(entityPath));
+}
+
+TEST_F(
+    ActionExecutorTest,
+    ExecuteDoesNotDeleteEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsSimulation) {
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+
+  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
+
+  auto entityPath = ScenePath / "entities" / "15.lqnode";
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  liquid::editor::Action TestAction{
+      "TestAction",
+      [entity](liquid::editor::WorkspaceState &state, std::any data) {
+        liquid::editor::ActionExecutorResult result{};
+        result.entitiesToDelete.push_back(entity);
+        return result;
+      }};
+
+  executor.execute(TestAction);
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
 }

@@ -9,7 +9,8 @@ public:
     state.scene.entityDatabase.reg<liquid::editor::CameraLookAt>();
   }
 
-  liquid::editor::WorkspaceState state;
+  liquid::AssetRegistry registry;
+  liquid::editor::WorkspaceState state{registry};
 };
 
 TEST_F(MoveCameraToEntityActionTest,

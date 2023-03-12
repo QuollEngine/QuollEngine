@@ -6,10 +6,11 @@
 
 namespace liquid::editor {
 
-EntityManager::EntityManager(AssetManager &assetManager, WorkspaceState &state,
+EntityManager::EntityManager(AssetManager &assetManager, SceneIO &sceneIO,
+                             WorkspaceState &state,
                              const std::filesystem::path &scenePath)
     : mScenePath(scenePath), mAssetManager(assetManager), mState(state),
-      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene) {
+      mSceneIO(sceneIO) {
   mState.scene.entityDatabase.reg<CameraLookAt>();
 }
 
@@ -166,14 +167,6 @@ void EntityManager::setScript(Entity entity, LuaScriptAssetHandle handle) {
   Script script{};
   script.handle = handle;
   getActiveEntityDatabase().set(entity, script);
-}
-
-void EntityManager::deleteEntity(Entity entity) {
-  if (mState.mode == WorkspaceMode::Edit) {
-    mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath / "main.lqscene");
-  }
-
-  getActiveEntityDatabase().set<Delete>(entity, {});
 }
 
 void EntityManager::updateLocalTransformUsingWorld(

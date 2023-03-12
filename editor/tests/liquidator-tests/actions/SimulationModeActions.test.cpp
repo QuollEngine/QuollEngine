@@ -7,7 +7,8 @@ using WM = liquid::editor::WorkspaceMode;
 
 class SimulationModeActionsTestBase : public ::testing::Test {
 public:
-  liquid::editor::WorkspaceState state{};
+  liquid::AssetRegistry registry;
+  liquid::editor::WorkspaceState state{registry};
 };
 
 using StartSimulationModeActionTest = SimulationModeActionsTestBase;

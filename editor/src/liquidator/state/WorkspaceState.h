@@ -2,6 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 #include "liquid/scene/Scene.h"
+#include "liquid/asset/AssetRegistry.h"
 #include "liquidator/core/TransformOperation.h"
 
 namespace liquid::editor {
@@ -12,6 +13,11 @@ enum class WorkspaceMode { Edit, Simulation };
  * @brief State for editor workspace
  */
 struct WorkspaceState {
+  /**
+   * Asset registry
+   */
+  AssetRegistry &assetRegistry;
+
   /**
    * Workspace mode
    */

@@ -106,11 +106,12 @@ void EditorScreen::start(const Project &project) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  WorkspaceState state;
+  WorkspaceState state{assetManager.getAssetRegistry()};
 
-  ActionExecutor actionExecutor(state);
+  ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
 
-  EntityManager entityManager(assetManager, state, project.scenesPath);
+  EntityManager entityManager(assetManager, actionExecutor.getSceneIO(), state,
+                              project.scenesPath);
   EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
                             mEventSystem, mWindow);
 
