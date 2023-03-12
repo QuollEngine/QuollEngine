@@ -21,6 +21,12 @@ void ActionExecutor::execute(const Action &action, std::any data) {
       mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath);
     }
   }
+
+  if (!res.entitiesToSave.empty()) {
+    for (auto entity : res.entitiesToSave) {
+      mSceneIO.saveEntity(entity, mScenePath);
+    }
+  }
 }
 
 } // namespace liquid::editor

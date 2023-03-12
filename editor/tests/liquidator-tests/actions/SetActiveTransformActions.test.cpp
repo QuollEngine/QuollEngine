@@ -8,7 +8,7 @@ using TO = liquid::editor::TransformOperation;
 class SetActiveTransformActionsTestBase : public ::testing::Test {
 public:
   liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::WorkspaceState state{{}, registry};
 };
 
 using SetActiveTransformToMoveActionTest = SetActiveTransformActionsTestBase;

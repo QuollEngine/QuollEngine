@@ -6,7 +6,7 @@
 class DeleteEntityActionTest : public ::testing::Test {
 public:
   liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::WorkspaceState state{{}, registry};
 };
 
 TEST_F(DeleteEntityActionTest, ExecuteFailsIfProvidedArgumentIsNotEntity) {

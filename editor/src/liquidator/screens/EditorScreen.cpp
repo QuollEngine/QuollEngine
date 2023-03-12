@@ -106,7 +106,7 @@ void EditorScreen::start(const Project &project) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
-  WorkspaceState state{assetManager.getAssetRegistry()};
+  WorkspaceState state{project, assetManager.getAssetRegistry()};
 
   ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
 
@@ -204,17 +204,15 @@ void EditorScreen::start(const Project &project) {
     imgui.beginRendering();
     ImGuizmo::BeginFrame();
 
-    if (auto _ = widgets::MainMenuBar()) {
-      MenuBar::render(state, actionExecutor, editorManager, entityManager);
-      debugLayer.renderMenu();
-    }
-
-    debugLayer.render();
-
     bool mouseClicked = false;
 
     ui.render(state, editorManager, renderer, assetManager,
               simulator.getPhysicsSystem(), entityManager);
+
+    if (auto _ = widgets::MainMenuBar()) {
+      debugLayer.renderMenu();
+    }
+    debugLayer.render();
 
     logViewer.render(systemLogStorage, userLogStorage);
 

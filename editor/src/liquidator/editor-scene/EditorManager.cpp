@@ -3,7 +3,6 @@
 #include "liquid/platform-tools/NativeFileDialog.h"
 
 #include "EditorManager.h"
-#include "liquidator/core/GameExporter.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
@@ -232,14 +231,6 @@ void EditorManager::setEnvironmentLightingSkyboxSource() {
       environment, {});
 
   mEntityManager.saveEnvironment();
-}
-
-void EditorManager::startGameExport() {
-  platform_tools::NativeFileDialog nativeFileDialog;
-  auto path = nativeFileDialog.getFilePathFromCreateDialog({});
-
-  GameExporter exporter;
-  exporter.exportGame(mProject, path);
 }
 
 } // namespace liquid::editor

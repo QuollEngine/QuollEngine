@@ -136,11 +136,6 @@ public:
    */
   void setEnvironmentLightingSkyboxSource();
 
-  /**
-   * @brief Start game export flow
-   */
-  void startGameExport();
-
 private:
   EditorCamera &mEditorCamera;
   std::filesystem::path mScenePath;

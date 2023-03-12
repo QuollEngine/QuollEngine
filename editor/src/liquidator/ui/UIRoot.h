@@ -5,7 +5,6 @@
 #include "liquid/renderer/Renderer.h"
 
 #include "liquidator/editor-scene/EditorManager.h"
-#include "MenuBar.h"
 #include "Toolbar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
@@ -16,6 +15,8 @@
 #include "IconRegistry.h"
 #include "EnvironmentPanel.h"
 #include "SceneView.h"
+#include "MainMenu.h"
+
 #include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
@@ -78,7 +79,6 @@ public:
 
 private:
   ActionExecutor mActionExecutor;
-  MenuBar mMenuBar;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
   EnvironmentPanel mEnvironmentPanel;
@@ -88,6 +88,7 @@ private:
   Layout mLayout;
   IconRegistry mIconRegistry;
   Toolbar mToolbar;
+  MainMenu mMainMenu;
 };
 
 } // namespace liquid::editor
