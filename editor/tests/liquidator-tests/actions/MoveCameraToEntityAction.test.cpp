@@ -10,7 +10,7 @@ public:
   }
 
   liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::WorkspaceState state{{}, registry};
 };
 
 TEST_F(MoveCameraToEntityActionTest,

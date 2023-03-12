@@ -10,6 +10,11 @@ namespace liquid::editor {
  */
 struct ActionExecutorResult {
   /**
+   * Entities to save
+   */
+  std::vector<Entity> entitiesToSave;
+
+  /**
    * Entities to delete
    */
   std::vector<Entity> entitiesToDelete;

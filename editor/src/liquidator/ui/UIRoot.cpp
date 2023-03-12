@@ -3,6 +3,8 @@
 
 #include "liquidator/actions/SetActiveTransformActions.h"
 #include "liquidator/actions/SimulationModeActions.h"
+#include "liquidator/actions/CreateEmptyEntityAtViewAction.h"
+#include "liquidator/actions/ExportAsGameAction.h"
 
 #include "UIRoot.h"
 
@@ -12,6 +14,13 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
                AssetLoader &assetLoader)
     : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader),
       mEntityPanel(entityManager) {
+
+  mMainMenu.begin("Project")
+      .add("Export as game", ExportAsGameAction)
+      .end()
+      .begin("Objects")
+      .add("Create empty object", CreateEmptyEntityAtViewAction)
+      .end();
 
   mToolbar.add(StartSimulationModeAction, "Play", fa::Play,
                ToolbarItemType::HideWhenInactive);
@@ -29,6 +38,7 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
                     Renderer &renderer, AssetManager &assetManager,
                     PhysicsSystem &physicsSystem,
                     EntityManager &entityManager) {
+  mMainMenu.render(mActionExecutor);
   mToolbar.render(state, mActionExecutor);
   mLayout.setup();
 

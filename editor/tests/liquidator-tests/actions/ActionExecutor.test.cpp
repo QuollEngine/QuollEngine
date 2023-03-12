@@ -24,7 +24,7 @@ public:
 
 public:
   liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::WorkspaceState state{{}, registry};
   liquid::editor::ActionExecutor executor{state, ScenePath / "main.lqscene"};
 };
 
@@ -51,6 +51,49 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithStateAndData) {
   executor.execute(TestAction, liquid::String("Hello world"));
 
   EXPECT_TRUE(called);
+}
+
+TEST_F(ActionExecutorTest,
+       ExecuteCreatesEntityFilesIfActionReturnsEntitiesToSaveAndModeIsEdit) {
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+
+  auto entityPath = ScenePath / "entities" / "1.lqnode";
+  EXPECT_FALSE(std::filesystem::exists(entityPath));
+
+  liquid::editor::Action TestAction{
+      "TestAction",
+      [entity](liquid::editor::WorkspaceState &state, std::any data) {
+        liquid::editor::ActionExecutorResult result{};
+        result.entitiesToSave.push_back(entity);
+        return result;
+      }};
+
+  executor.execute(TestAction);
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
+}
+
+TEST_F(
+    ActionExecutorTest,
+    ExecuteDoesNotCreateEntityFilesIfActionReturnsEntitiesToSaveAndModeIsSimulation) {
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+
+  auto entityPath = ScenePath / "entities" / "1.lqnode";
+  EXPECT_FALSE(std::filesystem::exists(entityPath));
+
+  liquid::editor::Action TestAction{
+      "TestAction",
+      [entity](liquid::editor::WorkspaceState &state, std::any data) {
+        liquid::editor::ActionExecutorResult result{};
+        result.entitiesToSave.push_back(entity);
+        return result;
+      }};
+
+  executor.execute(TestAction);
+  EXPECT_FALSE(std::filesystem::exists(entityPath));
 }
 
 TEST_F(ActionExecutorTest,

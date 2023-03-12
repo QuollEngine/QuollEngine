@@ -6,7 +6,7 @@
 class SetGridDataActionsTestBase : public ::testing::Test {
 public:
   liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{registry};
+  liquid::editor::WorkspaceState state{{}, registry};
 };
 
 using SetGridAxisLines = SetGridDataActionsTestBase;
