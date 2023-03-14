@@ -7,10 +7,8 @@ ActionExecutor::ActionExecutor(WorkspaceState &state, Path scenePath)
     : mState(state), mScenePath(scenePath),
       mSceneIO(state.assetRegistry, state.scene) {}
 
-void ActionExecutor::execute(const Action &action, std::any data) {
-  LIQUID_ASSERT((bool)action.onExecute,
-                "Action \"" + String(action.name) + "\" has no executor");
-  auto res = action.onExecute(mState, data);
+void ActionExecutor::execute(const std::unique_ptr<Action> &action) {
+  auto res = action->onExecute(mState);
 
   if (mState.mode == WorkspaceMode::Simulation) {
     return;

@@ -8,9 +8,6 @@
 
 namespace liquid::editor {
 
-static const std::vector<Action> GridActions{SetGridLinesAction,
-                                             SetGridAxisLinesAction};
-
 void EditorGridPanel::render(WorkspaceState &state,
                              ActionExecutor &actionExecutor) {
   if (auto _ = widgets::MainMenuBar()) {
@@ -25,10 +22,18 @@ void EditorGridPanel::render(WorkspaceState &state,
   }
 
   if (auto _ = widgets::FixedWindow("Editor Grid", mOpen)) {
-    for (const auto &action : GridActions) {
-      bool enabled = action.predicate(state);
-      if (ImGui::Checkbox(String(action.name).c_str(), &enabled)) {
-        actionExecutor.execute(action, enabled);
+    {
+      bool enabled = SetGridLinesAction::isShown(state);
+      if (ImGui::Checkbox("Show grid lines", &enabled)) {
+        actionExecutor.execute(std::make_unique<SetGridLinesAction>(enabled));
+      }
+    }
+
+    {
+      bool enabled = SetGridAxisLinesAction::isShown(state);
+      if (ImGui::Checkbox("Show axis lines", &enabled)) {
+        actionExecutor.execute(
+            std::make_unique<SetGridAxisLinesAction>(enabled));
       }
     }
   }

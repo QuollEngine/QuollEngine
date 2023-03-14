@@ -14,17 +14,12 @@ public:
 };
 
 TEST_F(MoveCameraToEntityActionTest,
-       ExecuteFailsIfProvidedArgumentIsNotEntity) {
-  EXPECT_THROW(
-      liquid::editor::MoveCameraToEntityAction.onExecute(state, "test"),
-      std::bad_any_cast);
-}
-
-TEST_F(MoveCameraToEntityActionTest,
        ExecuteFailsIfProvidedEntityDoesNotHaveWorldTransform) {
   auto entity = state.scene.entityDatabase.create();
-  EXPECT_DEATH(
-      liquid::editor::MoveCameraToEntityAction.onExecute(state, entity), ".*");
+
+  liquid::editor::MoveCameraToEntityAction action(entity);
+
+  EXPECT_DEATH(action.onExecute(state), ".*");
 }
 
 TEST_F(MoveCameraToEntityActionTest,
@@ -39,7 +34,8 @@ TEST_F(MoveCameraToEntityActionTest,
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<liquid::WorldTransform>(entity, {world});
 
-  liquid::editor::MoveCameraToEntityAction.onExecute(state, entity);
+  liquid::editor::MoveCameraToEntityAction action(entity);
+  action.onExecute(state);
 
   const auto &lookAt =
       state.scene.entityDatabase.get<liquid::editor::CameraLookAt>(

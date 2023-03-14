@@ -134,7 +134,8 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                              ImGui::GetStyle().ItemSpacing.x));
 
       if (ImGui::MenuItem("Go to view")) {
-        actionExecutor.execute(MoveCameraToEntityAction, entity);
+        actionExecutor.execute(
+            std::make_unique<MoveCameraToEntityAction>(entity));
       }
 
       if (ImGui::MenuItem("Delete")) {
@@ -143,7 +144,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     }
     confirmDeleteSceneNode.render();
     if (confirmDeleteSceneNode.isConfirmed()) {
-      actionExecutor.execute(DeleteEntityAction, entity);
+      actionExecutor.execute(std::make_unique<DeleteEntityAction>(entity));
     }
   }
 

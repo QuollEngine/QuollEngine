@@ -28,29 +28,42 @@ public:
   liquid::editor::ActionExecutor executor{state, ScenePath / "main.lqscene"};
 };
 
-TEST_F(ActionExecutorTest, ExecuteFailsIfActionHasNoExecutor) {
-  liquid::editor::Action TestAction{"TestAction"};
+class TestAction : public liquid::editor::Action {
+public:
+  TestAction(std::vector<liquid::Entity> entitiesToSave,
+             std::vector<liquid::Entity> entitiesToDelete)
+      : mEntitiesToSave(entitiesToSave), mEntitiesToDelete(entitiesToDelete) {}
 
-  EXPECT_DEATH(executor.execute(TestAction, liquid::String("Hello world")),
-               ".*");
-}
+  liquid::editor::ActionExecutorResult
+  onExecute(liquid::editor::WorkspaceState &state) {
+    mCalled = true;
 
-TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithStateAndData) {
+    liquid::editor::ActionExecutorResult res{};
+
+    res.entitiesToSave = mEntitiesToSave;
+    res.entitiesToDelete = mEntitiesToDelete;
+
+    return res;
+  }
+
+  bool predicate(liquid::editor::WorkspaceState &state) { return true; }
+
+  bool isCalled() { return mCalled; }
+
+private:
+  bool mCalled = false;
+  std::vector<liquid::Entity> mEntitiesToSave;
+  std::vector<liquid::Entity> mEntitiesToDelete;
+};
+
+TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
   state.mode = liquid::editor::WorkspaceMode::Simulation;
 
-  bool called = false;
-  liquid::editor::Action TestAction{
-      "TestAction",
-      [&called](liquid::editor::WorkspaceState &state, std::any data) mutable {
-        called = true;
-        EXPECT_EQ(std::any_cast<liquid::String>(data), "Hello world");
-        EXPECT_EQ(state.mode, liquid::editor::WorkspaceMode::Simulation);
-        return liquid::editor::ActionExecutorResult{};
-      }};
+  auto *actionPtr = new TestAction({}, {});
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(TestAction, liquid::String("Hello world"));
-
-  EXPECT_TRUE(called);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
 }
 
 TEST_F(ActionExecutorTest,
@@ -61,15 +74,11 @@ TEST_F(ActionExecutorTest,
   auto entityPath = ScenePath / "entities" / "1.lqnode";
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 
-  liquid::editor::Action TestAction{
-      "TestAction",
-      [entity](liquid::editor::WorkspaceState &state, std::any data) {
-        liquid::editor::ActionExecutorResult result{};
-        result.entitiesToSave.push_back(entity);
-        return result;
-      }};
+  auto *actionPtr = new TestAction({entity}, {});
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(TestAction);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 }
 
@@ -84,15 +93,11 @@ TEST_F(
   auto entityPath = ScenePath / "entities" / "1.lqnode";
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 
-  liquid::editor::Action TestAction{
-      "TestAction",
-      [entity](liquid::editor::WorkspaceState &state, std::any data) {
-        liquid::editor::ActionExecutorResult result{};
-        result.entitiesToSave.push_back(entity);
-        return result;
-      }};
+  auto *actionPtr = new TestAction({entity}, {});
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(TestAction);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 }
 
@@ -107,15 +112,11 @@ TEST_F(ActionExecutorTest,
   auto entityPath = ScenePath / "entities" / "15.lqnode";
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 
-  liquid::editor::Action TestAction{
-      "TestAction",
-      [entity](liquid::editor::WorkspaceState &state, std::any data) {
-        liquid::editor::ActionExecutorResult result{};
-        result.entitiesToDelete.push_back(entity);
-        return result;
-      }};
+  auto *actionPtr = new TestAction({}, {entity});
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(TestAction);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 }
 
@@ -133,14 +134,10 @@ TEST_F(
   auto entityPath = ScenePath / "entities" / "15.lqnode";
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 
-  liquid::editor::Action TestAction{
-      "TestAction",
-      [entity](liquid::editor::WorkspaceState &state, std::any data) {
-        liquid::editor::ActionExecutorResult result{};
-        result.entitiesToDelete.push_back(entity);
-        return result;
-      }};
+  auto *actionPtr = new TestAction({}, {entity});
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(TestAction);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 }

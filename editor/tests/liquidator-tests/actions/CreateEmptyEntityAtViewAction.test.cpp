@@ -28,7 +28,8 @@ public:
 
 TEST_F(CreateEmptyEntityAtViewActionTest,
        ExecuteCreatesEmptyEntityInSceneWhenModeIsEdit) {
-  auto res = liquid::editor::CreateEmptyEntityAtViewAction.onExecute(state, {});
+  liquid::editor::CreateEmptyEntityAtViewAction action;
+  auto res = action.onExecute(state);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
@@ -50,7 +51,8 @@ TEST_F(CreateEmptyEntityAtViewActionTest,
        ExecuteCreatesEmptyEntityInSimulatorSceneWhenModeIsSimulation) {
   state.mode = liquid::editor::WorkspaceMode::Simulation;
 
-  auto res = liquid::editor::CreateEmptyEntityAtViewAction.onExecute(state, {});
+  liquid::editor::CreateEmptyEntityAtViewAction action;
+  auto res = action.onExecute(state);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);

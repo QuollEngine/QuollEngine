@@ -7,26 +7,37 @@
 
 namespace liquid::editor {
 
-static Action MoveCameraToEntityAction{
-    "MoveCameraToEntity", [](WorkspaceState &state, std::any data) {
-      auto entity = std::any_cast<Entity>(data);
+/**
+ * @brief Move camera to entity action
+ */
+class MoveCameraToEntityAction : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity to move the camera to
+   */
+  MoveCameraToEntityAction(Entity entity);
 
-      auto &scene = state.scene;
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-      auto &transformComponent =
-          scene.entityDatabase.get<WorldTransform>(entity);
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
 
-      const auto &translation =
-          glm::vec3(glm::column(transformComponent.worldTransform, 3));
-
-      static constexpr glm::vec3 DistanceFromCenter{0.0f, 0.0f, 10.0f};
-
-      auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
-
-      lookAt.up = EditorCamera::DefaultUp;
-      lookAt.center = translation;
-      lookAt.eye = translation - DistanceFromCenter;
-      return ActionExecutorResult{};
-    }};
+private:
+  Entity mEntity;
+};
 
 } // namespace liquid::editor

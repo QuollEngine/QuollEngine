@@ -5,7 +5,7 @@
 
 namespace liquid::editor {
 
-MainMenuItem::MainMenuItem(MainMenuItem *parent, String label, Action action)
+MainMenuItem::MainMenuItem(MainMenuItem *parent, String label, Action *action)
     : mParent(parent), mLabel(label), mAction(action) {}
 
 MainMenuItem &MainMenuItem::begin(String label) {
@@ -16,7 +16,7 @@ MainMenuItem &MainMenuItem::begin(String label) {
 
 MainMenuItem &MainMenuItem::end() { return mParent ? *mParent : *this; }
 
-MainMenuItem &MainMenuItem::add(String label, Action action) {
+MainMenuItem &MainMenuItem::add(String label, Action *action) {
   mChildren.push_back({this, label, action});
 
   return *this;

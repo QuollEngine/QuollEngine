@@ -4,34 +4,73 @@
 
 namespace liquid::editor {
 
-static const Action SetActiveTransformToMoveAction{
-    "SetActiveTransformToMove",
-    [](WorkspaceState &state, std::any data) {
-      state.activeTransform = TransformOperation::Move;
-      return ActionExecutorResult{};
-    },
-    [](WorkspaceState &state) {
-      return state.activeTransform == TransformOperation::Move;
-    }};
+/**
+ * @brief Set active transform to move action
+ */
+class SetActiveTransformToMoveAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-static const Action SetActiveTransformToRotateAction{
-    "SetActiveTransformToRotate",
-    [](WorkspaceState &state, std::any data) {
-      state.activeTransform = TransformOperation::Rotate;
-      return ActionExecutorResult{};
-    },
-    [](WorkspaceState &state) {
-      return state.activeTransform == TransformOperation::Rotate;
-    }};
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
 
-static const Action SetActiveTransformToScaleAction{
-    "SetActiveTransformToScale",
-    [](WorkspaceState &state, std::any data) {
-      state.activeTransform = TransformOperation::Scale;
-      return ActionExecutorResult{};
-    },
-    [](WorkspaceState &state) {
-      return state.activeTransform == TransformOperation::Scale;
-    }};
+/**
+ * @brief Set active transform to rotate action
+ */
+class SetActiveTransformToRotateAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
+
+/**
+ * @brief Set active transform to scale action
+ */
+class SetActiveTransformToScaleAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
 
 } // namespace liquid::editor

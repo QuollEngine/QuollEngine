@@ -4,23 +4,37 @@
 
 namespace liquid::editor {
 
-static Action DeleteEntityAction{
-    "DeleteEntity", [](WorkspaceState &state, std::any data) {
-      auto entity = std::any_cast<Entity>(data);
+/**
+ * @brief Delete entity action
+ */
+class DeleteEntityAction : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity to delete
+   */
+  DeleteEntityAction(Entity entity);
 
-      auto &scene = state.mode == WorkspaceMode::Simulation
-                        ? state.simulationScene
-                        : state.scene;
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-      scene.entityDatabase.set<Delete>(entity, {});
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
 
-      if (state.selectedEntity == entity) {
-        state.selectedEntity = Entity::Null;
-      }
-
-      ActionExecutorResult res{};
-      res.entitiesToDelete.push_back(entity);
-      return res;
-    }};
+private:
+  Entity mEntity;
+};
 
 } // namespace liquid::editor

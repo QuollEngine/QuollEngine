@@ -16,7 +16,7 @@ enum class ToolbarItemType { Toggleable, HideWhenInactive };
 class Toolbar {
 private:
   struct ToolbarItem {
-    Action action;
+    std::unique_ptr<Action> action;
     String label;
     String icon;
     ToolbarItemType type;
@@ -45,8 +45,7 @@ public:
    * @param icon Button icon
    * @param type Item type
    */
-  void add(const Action &action, String label, String icon,
-           ToolbarItemType type);
+  void add(Action *action, String label, String icon, ToolbarItemType type);
 
 private:
   std::vector<ToolbarItem> mItems;

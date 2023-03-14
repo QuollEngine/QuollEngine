@@ -4,28 +4,50 @@
 
 namespace liquid::editor {
 
-static Action StartSimulationModeAction{
-    "Start simulation",
-    [](WorkspaceState &state, std::any data) {
-      state.mode = WorkspaceMode::Simulation;
-      state.simulationScene.entityDatabase.destroy();
-      state.scene.entityDatabase.duplicate(
-          state.simulationScene.entityDatabase);
-      state.simulationScene.activeCamera = state.scene.activeCamera;
-      state.simulationScene.dummyCamera = state.scene.dummyCamera;
-      state.simulationScene.environment = state.scene.environment;
-      return ActionExecutorResult{};
-    },
-    [](WorkspaceState &state) { return state.mode == WorkspaceMode::Edit; }};
+/**
+ * @brief Start simulation mode
+ */
+class StartSimulationModeAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-static Action StopSimulationModeAction{
-    "Stop simulation",
-    [](WorkspaceState &state, std::any data) {
-      state.mode = WorkspaceMode::Edit;
-      return ActionExecutorResult{};
-    },
-    [](WorkspaceState &state) {
-      return state.mode == WorkspaceMode::Simulation;
-    }};
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
+
+/**
+ * @brief Stop simulation mode
+ */
+class StopSimulationModeAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
 
 } // namespace liquid::editor
