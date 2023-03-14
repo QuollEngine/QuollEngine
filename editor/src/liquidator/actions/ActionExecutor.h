@@ -22,9 +22,8 @@ public:
    * @brief Execute action
    *
    * @param action Action
-   * @param data Action data
    */
-  void execute(const Action &action, std::any data = {});
+  void execute(const std::unique_ptr<Action> &action);
 
   /**
    * @brief Get scene IO

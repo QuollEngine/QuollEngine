@@ -21,27 +21,31 @@ struct ActionExecutorResult {
 };
 
 /**
- * @brief Editor action
+ * @brief Editor action interface
  */
 class Action {
 public:
   /**
-   * Action name
+   * @brief Action destructor
    */
-  StringView name;
+  virtual ~Action() = default;
 
   /**
-   * Action executor
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
    */
-  std::function<ActionExecutorResult(WorkspaceState &, std::any data)>
-      onExecute;
+  virtual ActionExecutorResult onExecute(WorkspaceState &state) = 0;
 
   /**
-   * Action predicate
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
    */
-  std::function<bool(WorkspaceState &)> predicate = [](WorkspaceState &) {
-    return true;
-  };
+  virtual bool predicate(WorkspaceState &state) = 0;
 };
 
 } // namespace liquid::editor

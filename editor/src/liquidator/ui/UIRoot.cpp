@@ -16,21 +16,21 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
       mEntityPanel(entityManager) {
 
   mMainMenu.begin("Project")
-      .add("Export as game", ExportAsGameAction)
+      .add("Export as game", new ExportAsGameAction)
       .end()
       .begin("Objects")
-      .add("Create empty object", CreateEmptyEntityAtViewAction)
+      .add("Create empty object", new CreateEmptyEntityAtViewAction)
       .end();
 
-  mToolbar.add(StartSimulationModeAction, "Play", fa::Play,
+  mToolbar.add(new StartSimulationModeAction, "Play", fa::Play,
                ToolbarItemType::HideWhenInactive);
-  mToolbar.add(StopSimulationModeAction, "Stop", fa::Stop,
+  mToolbar.add(new StopSimulationModeAction, "Stop", fa::Stop,
                ToolbarItemType::HideWhenInactive);
-  mToolbar.add(SetActiveTransformToMoveAction, "Move", fa::Arrows,
+  mToolbar.add(new SetActiveTransformToMoveAction, "Move", fa::Arrows,
                ToolbarItemType::Toggleable);
-  mToolbar.add(SetActiveTransformToRotateAction, "Rotate", fa::Rotate,
+  mToolbar.add(new SetActiveTransformToRotateAction, "Rotate", fa::Rotate,
                ToolbarItemType::Toggleable);
-  mToolbar.add(SetActiveTransformToScaleAction, "Scale", fa::ExpandAlt,
+  mToolbar.add(new SetActiveTransformToScaleAction, "Scale", fa::ExpandAlt,
                ToolbarItemType::Toggleable);
 }
 

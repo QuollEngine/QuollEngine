@@ -18,13 +18,13 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
 
     for (const auto &item : mItems) {
       if (item.type == ToolbarItemType::HideWhenInactive &&
-          !item.action.predicate(state)) {
+          !item.action->predicate(state)) {
         continue;
       }
 
       StyleStack stack;
       if (item.type == ToolbarItemType::Toggleable &&
-          item.action.predicate(state)) {
+          item.action->predicate(state)) {
         const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
         glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 
@@ -45,9 +45,10 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
   ImGui::PopStyleVar();
 }
 
-void Toolbar::add(const Action &action, String label, String icon,
+void Toolbar::add(Action *action, String label, String icon,
                   ToolbarItemType type) {
-  mItems.push_back({action, label, icon, type});
+  mItems.push_back(
+      {std::move(std::unique_ptr<Action>(action)), label, icon, type});
 }
 
 } // namespace liquid::editor

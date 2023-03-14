@@ -1,20 +1,30 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
-#include "liquid/platform-tools/NativeFileDialog.h"
-#include "liquidator/core/GameExporter.h"
 
 namespace liquid::editor {
 
-static Action ExportAsGameAction{
-    "ExportAsGame", [](WorkspaceState &state, std::any data) {
-      platform_tools::NativeFileDialog nativeFileDialog;
-      auto path = nativeFileDialog.getFilePathFromCreateDialog({});
+/**
+ * @brief Export as game action
+ */
+class ExportAsGameAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-      GameExporter exporter;
-      exporter.exportGame(state.project, path);
-
-      return ActionExecutorResult{};
-    }};
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
 
 } // namespace liquid::editor

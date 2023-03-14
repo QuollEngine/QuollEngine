@@ -19,7 +19,7 @@ public:
    * @param label Menu item label
    * @param action Menu item action
    */
-  MainMenuItem(MainMenuItem *parent, String label, Action action);
+  MainMenuItem(MainMenuItem *parent, String label, Action *action);
 
   /**
    * @brief Begin submenu
@@ -43,7 +43,7 @@ public:
    * @param action Menu item action
    * @return This menu item
    */
-  MainMenuItem &add(String label, Action action);
+  MainMenuItem &add(String label, Action *action);
 
   /**
    * @brief Get children
@@ -62,7 +62,7 @@ public:
   void render(ActionExecutor &actionExecutor) const;
 
 private:
-  Action mAction;
+  std::unique_ptr<Action> mAction;
   String mLabel;
   std::vector<MainMenuItem> mChildren;
 

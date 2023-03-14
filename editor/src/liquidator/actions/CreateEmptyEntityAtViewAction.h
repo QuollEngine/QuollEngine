@@ -4,30 +4,27 @@
 
 namespace liquid::editor {
 
-static Action CreateEmptyEntityAtViewAction{
-    "CreateEmptyEntityAtView", [](WorkspaceState &state, std::any data) {
-      auto &scene = state.mode == WorkspaceMode::Simulation
-                        ? state.simulationScene
-                        : state.scene;
+/**
+ * @brief Create empty entity at view action
+ */
+class CreateEmptyEntityAtViewAction : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
 
-      const auto &viewMatrix =
-          scene.entityDatabase.get<Camera>(state.camera).viewMatrix;
-
-      static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
-      const auto &invViewMatrix = glm::inverse(viewMatrix);
-      const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
-
-      LocalTransform transform{};
-      transform.localPosition = orientation[3];
-
-      auto entity = scene.entityDatabase.create();
-      scene.entityDatabase.set(entity, transform);
-      scene.entityDatabase.set<WorldTransform>(entity, {});
-      scene.entityDatabase.set<Name>(entity, {"New entity"});
-
-      ActionExecutorResult res{};
-      res.entitiesToSave.push_back(entity);
-      return res;
-    }};
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
 
 } // namespace liquid::editor

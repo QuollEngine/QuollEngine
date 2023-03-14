@@ -9,16 +9,12 @@ public:
   liquid::editor::WorkspaceState state{{}, registry};
 };
 
-TEST_F(DeleteEntityActionTest, ExecuteFailsIfProvidedArgumentIsNotEntity) {
-  EXPECT_THROW(liquid::editor::DeleteEntityAction.onExecute(state, "test"),
-               std::bad_any_cast);
-}
-
 TEST_F(DeleteEntityActionTest,
        ExecuteAddsDeleteComponentToEntityInSceneIfWorkspaceModeIsEdit) {
   auto entity = state.scene.entityDatabase.create();
 
-  auto res = liquid::editor::DeleteEntityAction.onExecute(state, entity);
+  liquid::editor::DeleteEntityAction action(entity);
+  auto res = action.onExecute(state);
 
   EXPECT_TRUE(state.scene.entityDatabase.has<liquid::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
@@ -31,7 +27,8 @@ TEST_F(
   state.mode = liquid::editor::WorkspaceMode::Simulation;
   auto entity = state.simulationScene.entityDatabase.create();
 
-  auto res = liquid::editor::DeleteEntityAction.onExecute(state, entity);
+  liquid::editor::DeleteEntityAction action(entity);
+  auto res = action.onExecute(state);
 
   EXPECT_TRUE(state.simulationScene.entityDatabase.has<liquid::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
@@ -44,7 +41,8 @@ TEST_F(DeleteEntityActionTest,
   auto entity = state.simulationScene.entityDatabase.create();
   state.selectedEntity = entity;
 
-  auto res = liquid::editor::DeleteEntityAction.onExecute(state, entity);
+  liquid::editor::DeleteEntityAction action(entity);
+  auto res = action.onExecute(state);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -56,7 +54,8 @@ TEST_F(
   auto entity = state.simulationScene.entityDatabase.create();
   state.selectedEntity = state.simulationScene.entityDatabase.create();
 
-  auto res = liquid::editor::DeleteEntityAction.onExecute(state, entity);
+  liquid::editor::DeleteEntityAction action(entity);
+  auto res = action.onExecute(state);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }

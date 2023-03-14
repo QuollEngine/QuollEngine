@@ -12,49 +12,94 @@ public:
 using SetGridAxisLines = SetGridDataActionsTestBase;
 
 TEST_F(SetGridAxisLines, ExecutorEnablesGridAxisLinesIfArgumentIsTrue) {
-  EXPECT_EQ(state.grid.y, 0);
-  liquid::editor::SetGridAxisLinesAction.onExecute(state, true);
+  state.grid.y = 0;
+
+  liquid::editor::SetGridAxisLinesAction action(true);
+  action.onExecute(state);
   EXPECT_EQ(state.grid.y, 1);
 }
 
 TEST_F(SetGridAxisLines, ExecutorDisablesGridAxisLinesIfArgumentIsFalse) {
   state.grid.y = 1;
-  EXPECT_EQ(state.grid.y, 1);
-  liquid::editor::SetGridAxisLinesAction.onExecute(state, false);
+
+  liquid::editor::SetGridAxisLinesAction action(false);
+  action.onExecute(state);
   EXPECT_EQ(state.grid.y, 0);
 }
 
-TEST_F(SetGridAxisLines, PredicateReturnsFalseIfAxisLinesAreDisabled) {
-  liquid::editor::SetGridAxisLinesAction.onExecute(state, false);
-  EXPECT_FALSE(liquid::editor::SetGridAxisLinesAction.predicate(state));
+TEST_F(SetGridAxisLines,
+       PredicateReturnsFalseIfAxisLinesMatchProvidedArgument) {
+  {
+    state.grid.y = 0;
+    liquid::editor::SetGridAxisLinesAction action(false);
+    EXPECT_FALSE(action.predicate(state));
+  }
+
+  {
+    state.grid.y = 1;
+    liquid::editor::SetGridAxisLinesAction action(true);
+    EXPECT_FALSE(action.predicate(state));
+  }
 }
 
-TEST_F(SetGridAxisLines, PredicateReturnsFalseIfAxisLinesAreEnabled) {
-  liquid::editor::SetGridAxisLinesAction.onExecute(state, true);
-  EXPECT_TRUE(liquid::editor::SetGridAxisLinesAction.predicate(state));
+TEST_F(SetGridAxisLines,
+       PredicateReturnsTrueIfAxisLinesDoNotMatchProvidedArguments) {
+  {
+    state.grid.y = 0;
+    liquid::editor::SetGridAxisLinesAction action(true);
+    EXPECT_TRUE(action.predicate(state));
+  }
+
+  {
+    state.grid.y = 1;
+    liquid::editor::SetGridAxisLinesAction action(false);
+    EXPECT_TRUE(action.predicate(state));
+  }
 }
 
-using SetGridines = SetGridDataActionsTestBase;
+using SetGridLines = SetGridDataActionsTestBase;
 
-TEST_F(SetGridAxisLines, ExecutorEnablesGridLinesIfArgumentIsTrue) {
-  EXPECT_EQ(state.grid.x, 0);
-  liquid::editor::SetGridLinesAction.onExecute(state, true);
+TEST_F(SetGridLines, ExecutorEnablesGridLinesIfArgumentIsTrue) {
+  state.grid.x = 0;
+
+  liquid::editor::SetGridLinesAction action(true);
+  action.onExecute(state);
   EXPECT_EQ(state.grid.x, 1);
 }
 
-TEST_F(SetGridAxisLines, ExecutorDisablesGridLinesIfArgumentIsFalse) {
+TEST_F(SetGridLines, ExecutorDisablesGridLinesIfArgumentIsFalse) {
   state.grid.x = 1;
-  EXPECT_EQ(state.grid.x, 1);
-  liquid::editor::SetGridLinesAction.onExecute(state, false);
+
+  liquid::editor::SetGridLinesAction action(false);
+  action.onExecute(state);
   EXPECT_EQ(state.grid.x, 0);
 }
 
-TEST_F(SetGridAxisLines, PredicateReturnsFalseIfGridLinesAreDisabled) {
-  liquid::editor::SetGridLinesAction.onExecute(state, false);
-  EXPECT_FALSE(liquid::editor::SetGridLinesAction.predicate(state));
+TEST_F(SetGridLines, PredicateReturnsTrueIfGridLinesMatchProvidedArguments) {
+  {
+    state.grid.x = 0;
+    liquid::editor::SetGridLinesAction action(false);
+    EXPECT_FALSE(action.predicate(state));
+  }
+
+  {
+    state.grid.x = 1;
+    liquid::editor::SetGridLinesAction action(true);
+    EXPECT_FALSE(action.predicate(state));
+  }
 }
 
-TEST_F(SetGridAxisLines, PredicateReturnsFalseIfGridLinesAreEnabled) {
-  liquid::editor::SetGridLinesAction.onExecute(state, true);
-  EXPECT_TRUE(liquid::editor::SetGridLinesAction.predicate(state));
+TEST_F(SetGridLines,
+       PredicateReturnsTrueIfGridLinesDoNotMatchProvidedArguments) {
+  {
+    state.grid.x = 0;
+    liquid::editor::SetGridLinesAction action(false);
+    EXPECT_FALSE(action.predicate(state));
+  }
+
+  {
+    state.grid.x = 1;
+    liquid::editor::SetGridLinesAction action(true);
+    EXPECT_FALSE(action.predicate(state));
+  }
 }
