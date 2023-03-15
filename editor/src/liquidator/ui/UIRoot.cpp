@@ -10,10 +10,8 @@
 
 namespace liquid::editor {
 
-UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
-               AssetLoader &assetLoader)
-    : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader),
-      mEntityPanel(entityManager) {
+UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
+    : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader) {
 
   mMainMenu.begin("Project")
       .add("Export as game", new ExportAsGameAction)
@@ -26,18 +24,16 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
                ToolbarItemType::HideWhenInactive);
   mToolbar.add(new StopSimulationModeAction, "Stop", fa::Stop,
                ToolbarItemType::HideWhenInactive);
-  mToolbar.add(new SetActiveTransformToMoveAction, "Move", fa::Arrows,
-               ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransformToRotateAction, "Rotate", fa::Rotate,
-               ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransformToScaleAction, "Scale", fa::ExpandAlt,
-               ToolbarItemType::Toggleable);
+  mToolbar.add(new SetActiveTransformAction(TransformOperation::Move), "Move",
+               fa::Arrows, ToolbarItemType::Toggleable);
+  mToolbar.add(new SetActiveTransformAction(TransformOperation::Rotate),
+               "Rotate", fa::Rotate, ToolbarItemType::Toggleable);
+  mToolbar.add(new SetActiveTransformAction(TransformOperation::Scale), "Scale",
+               fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 
 void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
-                    Renderer &renderer, AssetManager &assetManager,
-                    PhysicsSystem &physicsSystem,
-                    EntityManager &entityManager) {
+                    AssetManager &assetManager, EntityManager &entityManager) {
   mMainMenu.render(mActionExecutor);
   mToolbar.render(state, mActionExecutor);
   mLayout.setup();
@@ -45,8 +41,7 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
   mSceneHierarchyPanel.render(state, mActionExecutor);
 
   if (state.selectedEntity != Entity::Null) {
-    mEntityPanel.render(editorManager, state.selectedEntity, renderer,
-                        assetManager, physicsSystem);
+    mEntityPanel.render(state, mActionExecutor, state.selectedEntity);
   }
 
   EnvironmentPanel::render(editorManager, assetManager);

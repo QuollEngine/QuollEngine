@@ -5,16 +5,17 @@
 namespace liquid::editor {
 
 /**
- * @brief Set active transform action
+ * @brief Set audio for entity action
  */
-class SetActiveTransformAction : public Action {
+class EntitySetAudio : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param transformOperation Transform operation
+   * @param entity Entity
+   * @param audio Audio asset handle
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  EntitySetAudio(Entity entity, AudioAssetHandle audio);
 
   /**
    * @brief Action executor
@@ -34,7 +35,8 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TransformOperation mTransformOperation;
+  Entity mEntity;
+  AudioAssetHandle mAudio;
 };
 
 } // namespace liquid::editor

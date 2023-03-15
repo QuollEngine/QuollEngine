@@ -262,7 +262,8 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
     scene.entityDatabase.set<liquid::Id>(entity, {15});
     scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
-    sceneIO.saveStartingCamera(entity, ScenePath);
+    scene.activeCamera = entity;
+    sceneIO.saveStartingCamera(ScenePath);
   }
 
   sceneIO.loadScene(ScenePath);
@@ -288,7 +289,8 @@ TEST_F(SceneIOTest,
   scene.entityDatabase.set<liquid::Id>(another, {25});
   scene.entityDatabase.set<liquid::PerspectiveLens>(another, {});
 
-  sceneIO.saveStartingCamera(entity, ScenePath);
+  scene.activeCamera = entity;
+  sceneIO.saveStartingCamera(ScenePath);
   sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
 
   EXPECT_EQ(scene.activeCamera, another);
@@ -300,7 +302,8 @@ TEST_F(SceneIOTest,
   scene.entityDatabase.set<liquid::Id>(entity, {15});
   scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
-  sceneIO.saveStartingCamera(entity, ScenePath);
+  scene.activeCamera = entity;
+  sceneIO.saveStartingCamera(ScenePath);
   sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
 
   EXPECT_EQ(scene.activeCamera, scene.dummyCamera);
@@ -310,9 +313,10 @@ TEST_F(SceneIOTest, SavesEntityAsInitialCameraIfItHasCameraComponent) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<liquid::Id>(entity, {15});
   scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
-
   sceneIO.saveEntity(entity, ScenePath);
-  sceneIO.saveStartingCamera(entity, ScenePath);
+
+  scene.activeCamera = entity;
+  sceneIO.saveStartingCamera(ScenePath);
 
   sceneIO.reset();
 
@@ -329,12 +333,12 @@ TEST_F(SceneIOTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveCameraComponent) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<liquid::Id>(entity, {15});
-
   sceneIO.saveEntity(entity, ScenePath);
-  sceneIO.saveStartingCamera(entity, ScenePath);
+
+  scene.activeCamera = entity;
+  sceneIO.saveStartingCamera(ScenePath);
 
   sceneIO.reset();
-
   sceneIO.loadScene(ScenePath);
 
   EXPECT_EQ(scene.activeCamera, scene.dummyCamera);
@@ -344,7 +348,9 @@ TEST_F(SceneIOTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveIdComponent) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
-  sceneIO.saveStartingCamera(entity, ScenePath);
+
+  scene.activeCamera = entity;
+  sceneIO.saveStartingCamera(ScenePath);
   sceneIO.reset();
 
   sceneIO.loadScene(ScenePath);

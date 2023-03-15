@@ -30,10 +30,6 @@ public:
 
 class TestAction : public liquid::editor::Action {
 public:
-  TestAction(std::vector<liquid::Entity> entitiesToSave,
-             std::vector<liquid::Entity> entitiesToDelete)
-      : mEntitiesToSave(entitiesToSave), mEntitiesToDelete(entitiesToDelete) {}
-
   liquid::editor::ActionExecutorResult
   onExecute(liquid::editor::WorkspaceState &state) {
     mCalled = true;
@@ -42,11 +38,24 @@ public:
 
     res.entitiesToSave = mEntitiesToSave;
     res.entitiesToDelete = mEntitiesToDelete;
+    res.saveScene = mSaveScene;
 
     return res;
   }
 
-  bool predicate(liquid::editor::WorkspaceState &state) { return true; }
+  void saveEntityOnExecute(liquid::Entity entity) {
+    mEntitiesToSave.push_back(entity);
+  }
+
+  void deleteEntityOnExecute(liquid::Entity entity) {
+    mEntitiesToDelete.push_back(entity);
+  }
+
+  void saveSceneOnExecute() { mSaveScene = true; }
+
+  void setPredicate(bool predicate) { mPredicate = predicate; }
+
+  bool predicate(liquid::editor::WorkspaceState &state) { return mPredicate; }
 
   bool isCalled() { return mCalled; }
 
@@ -54,12 +63,24 @@ private:
   bool mCalled = false;
   std::vector<liquid::Entity> mEntitiesToSave;
   std::vector<liquid::Entity> mEntitiesToDelete;
+  bool mSaveScene = false;
+  bool mPredicate = true;
 };
+
+TEST_F(ActionExecutorTest,
+       ExecuteDoesNotCallActionExecutorIfActionPredicateReturnsFalse) {
+  auto *actionPtr = new TestAction;
+  actionPtr->setPredicate(false);
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+
+  executor.execute(action);
+  EXPECT_FALSE(actionPtr->isCalled());
+}
 
 TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
   state.mode = liquid::editor::WorkspaceMode::Simulation;
 
-  auto *actionPtr = new TestAction({}, {});
+  auto *actionPtr = new TestAction;
   std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
   executor.execute(action);
@@ -74,9 +95,10 @@ TEST_F(ActionExecutorTest,
   auto entityPath = ScenePath / "entities" / "1.lqnode";
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 
-  auto *actionPtr = new TestAction({entity}, {});
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  auto *actionPtr = new TestAction;
+  actionPtr->saveEntityOnExecute(entity);
 
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
   executor.execute(action);
   EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_TRUE(std::filesystem::exists(entityPath));
@@ -93,9 +115,10 @@ TEST_F(
   auto entityPath = ScenePath / "entities" / "1.lqnode";
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 
-  auto *actionPtr = new TestAction({entity}, {});
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  auto *actionPtr = new TestAction;
+  actionPtr->saveEntityOnExecute(entity);
 
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
   executor.execute(action);
   EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_FALSE(std::filesystem::exists(entityPath));
@@ -112,9 +135,10 @@ TEST_F(ActionExecutorTest,
   auto entityPath = ScenePath / "entities" / "15.lqnode";
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 
-  auto *actionPtr = new TestAction({}, {entity});
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  auto *actionPtr = new TestAction;
+  actionPtr->deleteEntityOnExecute(entity);
 
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
   executor.execute(action);
   EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_FALSE(std::filesystem::exists(entityPath));
@@ -134,10 +158,71 @@ TEST_F(
   auto entityPath = ScenePath / "entities" / "15.lqnode";
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 
-  auto *actionPtr = new TestAction({}, {entity});
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  auto *actionPtr = new TestAction;
+  actionPtr->deleteEntityOnExecute(entity);
 
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
   executor.execute(action);
   EXPECT_TRUE(actionPtr->isCalled());
   EXPECT_TRUE(std::filesystem::exists(entityPath));
+}
+
+TEST_F(ActionExecutorTest,
+       ExecuteSavesSceneFileIfActionReturnsSaveSceneAndModeIsEdit) {
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.activeCamera = entity;
+
+  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
+
+  auto entityPath = ScenePath / "entities" / "15.lqnode";
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  auto *actionPtr = new TestAction;
+  actionPtr->saveSceneOnExecute();
+
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
+
+  std::ifstream stream(ScenePath / "main.lqscene");
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  auto startingCamera =
+      node["zones"][node["persistentZone"].as<size_t>()]["startingCamera"];
+  EXPECT_TRUE(startingCamera);
+  EXPECT_TRUE(startingCamera.IsScalar());
+  EXPECT_EQ(startingCamera.as<uint32_t>(), 15);
+}
+
+TEST_F(ActionExecutorTest,
+       ExecuteDoesNotSaveSceneFileIfActionReturnsSaveSceneAndModeIsSimulation) {
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+
+  auto entity = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.activeCamera = entity;
+
+  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
+
+  auto entityPath = ScenePath / "entities" / "15.lqnode";
+  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  auto *actionPtr = new TestAction;
+  actionPtr->saveSceneOnExecute();
+
+  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  executor.execute(action);
+  EXPECT_TRUE(actionPtr->isCalled());
+
+  std::ifstream stream(ScenePath / "main.lqscene");
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  auto startingCamera =
+      node["zones"][node["persistentZone"].as<size_t>()]["startingCamera"];
+  EXPECT_FALSE(startingCamera);
 }

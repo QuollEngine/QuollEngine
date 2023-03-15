@@ -6,6 +6,18 @@
 #include "Widgets.h"
 #include "FontAwesome.h"
 
+#include "liquidator/actions/EntityNameActions.h"
+#include "liquidator/actions/EntityTransformActions.h"
+#include "liquidator/actions/EntityTextActions.h"
+#include "liquidator/actions/EntityRigidBodyActions.h"
+#include "liquidator/actions/EntityLightActions.h"
+#include "liquidator/actions/EntityCameraActions.h"
+#include "liquidator/actions/EntityCollidableActions.h"
+#include "liquidator/actions/EntitySkeletonActions.h"
+#include "liquidator/actions/EntityAudioActions.h"
+#include "liquidator/actions/EntityScriptingActions.h"
+#include "liquidator/actions/SceneActions.h"
+
 namespace liquid::editor {
 
 /**
@@ -59,65 +71,58 @@ static bool ImguiMultilineInputText(const String &label, String &value,
                                    InputTextCallback, &userData);
 }
 
-EntityPanel::EntityPanel(EntityManager &entityManager)
-    : mEntityManager(entityManager) {}
-
-void EntityPanel::render(EditorManager &editorManager, Entity entity,
-                         Renderer &renderer, AssetManager &assetManager,
-                         PhysicsSystem &physicsSystem) {
-  setSelectedEntity(entity);
-
-  auto &assetRegistry = assetManager.getAssetRegistry();
+void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
+                         Entity entity) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+  setSelectedEntity(scene, entity);
 
   if (auto _ = widgets::Window("Entity")) {
-    if (mEntityManager.getActiveEntityDatabase().exists(mSelectedEntity)) {
-      renderName();
-      renderTransform();
-      renderText(assetRegistry);
-      renderMesh(assetRegistry);
-      renderLight();
-      renderCamera(editorManager);
-      renderAnimation(assetRegistry);
-      renderSkeleton();
-      renderCollidable();
-      renderRigidBody();
-      renderAudio(assetRegistry);
-      renderScripting(assetRegistry);
-      renderAddComponent(assetRegistry);
-      handleDragAndDrop(renderer, assetRegistry);
+    if (scene.entityDatabase.exists(mSelectedEntity)) {
+      renderName(scene, actionExecutor);
+      renderTransform(scene, actionExecutor);
+      renderText(scene, state.assetRegistry, actionExecutor);
+      renderMesh(scene, state.assetRegistry);
+      renderLight(scene, actionExecutor);
+      renderCamera(state, scene, actionExecutor);
+      renderAnimation(state, scene, state.assetRegistry);
+      renderSkeleton(scene, actionExecutor);
+      renderCollidable(scene, actionExecutor);
+      renderRigidBody(scene, actionExecutor);
+      renderAudio(scene, state.assetRegistry);
+      renderScripting(scene, state.assetRegistry);
+      renderAddComponent(scene, state.assetRegistry, actionExecutor);
+      handleDragAndDrop(state.assetRegistry, actionExecutor);
     }
   }
 }
 
-void EntityPanel::setSelectedEntity(Entity entity) {
+void EntityPanel::setSelectedEntity(Scene &scene, Entity entity) {
   if (mSelectedEntity != entity) {
     mSelectedEntity = entity;
-    mName = mEntityManager.getActiveEntityDatabase()
-                .get<Name>(mSelectedEntity)
-                .name;
+    mName = scene.entityDatabase.get<Name>(mSelectedEntity);
   }
 }
 
-void EntityPanel::renderName() {
+void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Circle) + "  Name";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    if (widgets::Input("", mName)) {
-      if (!mName.empty()) {
-        mEntityManager.setName(mSelectedEntity, mName);
-        mEntityManager.save(mSelectedEntity);
+    String name = scene.entityDatabase.get<Name>(mSelectedEntity).name;
+
+    if (widgets::Input("", mName.name)) {
+      if (!mName.name.empty()) {
+        actionExecutor.execute(
+            std::make_unique<EntitySetName>(mSelectedEntity, mName));
       }
 
-      mName = mEntityManager.getActiveEntityDatabase()
-                  .get<Name>(mSelectedEntity)
-                  .name;
+      mName = scene.entityDatabase.get<Name>(mSelectedEntity);
     }
   }
 }
 
-void EntityPanel::renderLight() {
-  if (!mEntityManager.getActiveEntityDatabase().has<DirectionalLight>(
-          mSelectedEntity)) {
+void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity)) {
     return;
   }
 
@@ -125,8 +130,7 @@ void EntityPanel::renderLight() {
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase().get<DirectionalLight>(
-            mSelectedEntity);
+        scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
 
     ImGui::Text("Type");
     if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
@@ -139,48 +143,100 @@ void EntityPanel::renderLight() {
     ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
                 component.direction.z);
 
-    if (widgets::InputColor("Color", component.color)) {
-      mEntityManager.save(mSelectedEntity);
+    bool sendAction = false;
+
+    glm::vec4 color = component.color;
+    if (widgets::InputColor("Color", color)) {
+      if (!mDirectionalLight.has_value()) {
+        mDirectionalLight = component;
+      }
+
+      component.color = color;
     }
 
-    if (widgets::Input("Intensity", component.intensity)) {
-      mEntityManager.save(mSelectedEntity);
+    sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+
+    float intensity = component.intensity;
+    if (widgets::Input("Intensity", intensity, false)) {
+      if (!mDirectionalLight.has_value()) {
+        mDirectionalLight = component;
+      }
+      component.intensity = intensity;
+
+      sendAction = true;
+    }
+
+    if (mDirectionalLight.has_value() && sendAction) {
+      actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+          mSelectedEntity, component));
+
+      mDirectionalLight.reset();
     }
 
     bool castShadows =
-        mEntityManager.getActiveEntityDatabase().has<CascadedShadowMap>(
-            mSelectedEntity);
+        scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
     if (ImGui::Checkbox("Cast shadows", &castShadows)) {
-      mEntityManager.toggleShadowsForLightEntity(mSelectedEntity);
-      mEntityManager.save(mSelectedEntity);
+      if (castShadows) {
+        actionExecutor.execute(
+            std::make_unique<EntityEnableCascadedShadowMap>(mSelectedEntity));
+      } else {
+        actionExecutor.execute(
+            std::make_unique<EntityDisableCascadedShadowMap>(mSelectedEntity));
+      }
     }
 
     if (castShadows) {
+      bool sendAction = false;
       auto &component =
-          mEntityManager.getActiveEntityDatabase().get<CascadedShadowMap>(
-              mSelectedEntity);
+          scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
 
-      if (ImGui::Checkbox("Soft shadows", &component.softShadows)) {
-        mEntityManager.save(mSelectedEntity);
+      bool softShadows = component.softShadows;
+      if (ImGui::Checkbox("Soft shadows", &softShadows)) {
+        if (!mCascadedShadowMap.has_value()) {
+          mCascadedShadowMap = component;
+        }
+
+        component.softShadows = softShadows;
+        sendAction = true;
       }
 
-      if (widgets::Input("Split lambda", component.splitLambda)) {
-        component.splitLambda = glm::clamp(component.splitLambda, 0.0f, 1.0f);
-        mEntityManager.save(mSelectedEntity);
+      float splitLambda = component.splitLambda;
+      if (widgets::Input("Split lambda", splitLambda, false)) {
+        splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
+
+        if (!mCascadedShadowMap.has_value()) {
+          mCascadedShadowMap = component;
+        }
+
+        component.splitLambda = splitLambda;
+        sendAction = true;
       }
 
-      if (widgets::Input("Number of cascades", component.numCascades)) {
-        component.numCascades =
-            glm::clamp(component.numCascades, 1u, component.MaxCascades);
-        mEntityManager.save(mSelectedEntity);
+      uint32_t numCascades = component.numCascades;
+      if (widgets::Input("Number of cascades", numCascades, false)) {
+        numCascades = glm::clamp(numCascades, 1u, component.MaxCascades);
+
+        if (!mCascadedShadowMap.has_value()) {
+          mCascadedShadowMap = component;
+        }
+        component.numCascades = numCascades;
+        sendAction = true;
+      }
+
+      if (mCascadedShadowMap.has_value() && sendAction) {
+        actionExecutor.execute(
+            std::make_unique<EntitySetCascadedShadowMapAction>(mSelectedEntity,
+                                                               component));
+
+        mCascadedShadowMap.reset();
       }
     }
   }
 }
 
-void EntityPanel::renderCamera(EditorManager &editorManager) {
-  if (!mEntityManager.getActiveEntityDatabase().has<PerspectiveLens>(
-          mSelectedEntity)) {
+void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
+                               ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity)) {
     return;
   }
 
@@ -188,28 +244,59 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
-        mEntityManager.getActiveEntityDatabase().get<PerspectiveLens>(
-            mSelectedEntity);
+        scene.entityDatabase.get<PerspectiveLens>(mSelectedEntity);
 
-    if (widgets::Input("FOV", component.fovY)) {
-      if (component.fovY < 0.0f) {
-        component.fovY = 0.0f;
+    bool sendAction = false;
+
+    float fovY = component.fovY;
+    if (widgets::Input("FOV", fovY, false)) {
+      if (fovY < 0.0f) {
+        fovY = 0.0f;
       }
-      mEntityManager.save(mSelectedEntity);
+
+      if (!mPerspectiveLens.has_value()) {
+        mPerspectiveLens = component;
+      }
+      component.fovY = fovY;
+
+      sendAction = true;
     }
 
-    if (widgets::Input("Near", component.near)) {
-      if (component.near < 0.0f) {
-        component.near = 0.0f;
+    float near = component.near;
+    if (widgets::Input("Near", near, false)) {
+      if (near < 0.0f) {
+        near = 0.0f;
       }
-      mEntityManager.save(mSelectedEntity);
+
+      if (!mPerspectiveLens.has_value()) {
+        mPerspectiveLens = component;
+      }
+
+      component.near = near;
+
+      sendAction = true;
     }
 
-    if (widgets::Input("Far", component.far)) {
-      if (component.far < 0.0f) {
-        component.far = 0.0f;
+    float far = component.far;
+    if (widgets::Input("Far", far, false)) {
+      if (far < 0.0f) {
+        far = 0.0f;
       }
-      mEntityManager.save(mSelectedEntity);
+
+      if (!mPerspectiveLens.has_value()) {
+        mPerspectiveLens = component;
+      }
+
+      component.far = far;
+
+      sendAction = true;
+    }
+
+    if (sendAction && mPerspectiveLens.has_value()) {
+      actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
+          mSelectedEntity, component));
+
+      mPerspectiveLens.reset();
     }
 
     ImGui::Text("Aspect Ratio");
@@ -217,23 +304,21 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
     static constexpr float MaxCustomAspectRatio = 1000.0f;
 
     bool hasViewportAspectRatio =
-        mEntityManager.getActiveEntityDatabase().has<AutoAspectRatio>(
-            mSelectedEntity);
+        scene.entityDatabase.has<AutoAspectRatio>(mSelectedEntity);
 
     if (ImGui::BeginCombo("###AspectRatioType",
                           hasViewportAspectRatio ? "Viewport ratio" : "Custom",
                           0)) {
 
       if (ImGui::Selectable("Viewport ratio")) {
-        mEntityManager.getActiveEntityDatabase().set<AutoAspectRatio>(
-            mSelectedEntity, {});
-        mEntityManager.save(mSelectedEntity);
+        actionExecutor.execute(
+            std::make_unique<EntitySetCameraAutoAspectRatio>(mSelectedEntity));
       }
 
       if (ImGui::Selectable("Custom")) {
-        mEntityManager.getActiveEntityDatabase().remove<AutoAspectRatio>(
-            mSelectedEntity);
-        mEntityManager.save(mSelectedEntity);
+        actionExecutor.execute(
+            std::make_unique<EntitySetCameraCustomAspectRatio>(
+                mSelectedEntity));
       }
 
       ImGui::EndCombo();
@@ -241,19 +326,28 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
 
     if (!hasViewportAspectRatio) {
       ImGui::Text("Custom aspect ratio");
-      if (ImGui::DragFloat("###CustomAspectRatio", &component.aspectRatio,
+      float aspectRatio = component.aspectRatio;
+      if (ImGui::DragFloat("###CustomAspectRatio", &aspectRatio,
                            MinCustomAspectRatio, MinCustomAspectRatio,
                            MaxCustomAspectRatio, "%.2f")) {
+
+        if (!mPerspectiveLens.has_value()) {
+          mPerspectiveLens = component;
+        }
+
+        component.aspectRatio = aspectRatio;
       }
 
       if (ImGui::IsItemDeactivatedAfterEdit()) {
-        mEntityManager.save(mSelectedEntity);
+        actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component));
       }
     }
 
-    if (mEntityManager.getStartingCamera() != mSelectedEntity) {
+    if (scene.activeCamera != mSelectedEntity) {
       if (ImGui::Button("Set as starting camera")) {
-        mEntityManager.setStartingCamera(mSelectedEntity);
+        actionExecutor.execute(
+            std::make_unique<SceneSetStartingCamera>(mSelectedEntity));
       }
     } else {
       ImGui::Text("Is the starting camera");
@@ -261,32 +355,57 @@ void EntityPanel::renderCamera(EditorManager &editorManager) {
   }
 }
 
-void EntityPanel::renderTransform() {
-  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
+void EntityPanel::renderTransform(Scene &scene,
+                                  ActionExecutor &actionExecutor) {
 
-  if (!entityDatabase.has<LocalTransform>(mSelectedEntity) ||
-      !entityDatabase.has<WorldTransform>(mSelectedEntity)) {
+  if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) ||
+      !scene.entityDatabase.has<WorldTransform>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + "  Transform";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component = entityDatabase.get<LocalTransform>(mSelectedEntity);
-    auto &world = entityDatabase.get<WorldTransform>(mSelectedEntity);
+    auto &component = scene.entityDatabase.get<LocalTransform>(mSelectedEntity);
+    auto &world = scene.entityDatabase.get<WorldTransform>(mSelectedEntity);
 
-    if (widgets::Input("Position", component.localPosition)) {
-      mEntityManager.save(mSelectedEntity);
+    bool sendAction = false;
+
+    auto localPosition = component.localPosition;
+    if (widgets::Input("Position", component.localPosition, false)) {
+      if (!mLocalTransform.has_value()) {
+        mLocalTransform = component;
+      }
+
+      component.localPosition = localPosition;
+      sendAction = true;
     }
 
     auto euler = glm::eulerAngles(component.localRotation);
-    if (widgets::Input("Rotation", euler)) {
+    if (widgets::Input("Rotation", euler, false)) {
+      if (!mLocalTransform.has_value()) {
+        mLocalTransform = component;
+      }
+
       component.localRotation = glm::quat(euler);
-      mEntityManager.save(mSelectedEntity);
+      sendAction = true;
     }
 
-    if (widgets::Input("Scale", component.localScale)) {
-      mEntityManager.save(mSelectedEntity);
+    auto localScale = component.localScale;
+    if (widgets::Input("Scale", localScale, false)) {
+      if (!mLocalTransform.has_value()) {
+        mLocalTransform = component;
+      }
+
+      component.localScale = localScale;
+      sendAction = true;
+    }
+
+    if (sendAction && mLocalTransform.has_value()) {
+      actionExecutor.execute(std::make_unique<EntitySetLocalTransform>(
+          mSelectedEntity, component));
+
+      mLocalTransform.reset();
     }
 
     ImGui::Text("World Transform");
@@ -299,14 +418,12 @@ void EntityPanel::renderTransform() {
   }
 }
 
-void EntityPanel::renderMesh(AssetRegistry &assetRegistry) {
+void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry) {
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
-  if (mEntityManager.getActiveEntityDatabase().has<Mesh>(mSelectedEntity)) {
+  if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = mEntityManager.getActiveEntityDatabase()
-                        .get<Mesh>(mSelectedEntity)
-                        .handle;
+      auto handle = scene.entityDatabase.get<Mesh>(mSelectedEntity).handle;
 
       const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
@@ -318,12 +435,10 @@ void EntityPanel::renderMesh(AssetRegistry &assetRegistry) {
     }
   }
 
-  if (mEntityManager.getActiveEntityDatabase().has<SkinnedMesh>(
-          mSelectedEntity)) {
+  if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
     if (auto _ = widgets::Section(SectionName.c_str())) {
-      auto handle = mEntityManager.getActiveEntityDatabase()
-                        .get<SkinnedMesh>(mSelectedEntity)
-                        .handle;
+      auto handle =
+          scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity).handle;
 
       const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
 
@@ -336,37 +451,33 @@ void EntityPanel::renderMesh(AssetRegistry &assetRegistry) {
   }
 }
 
-void EntityPanel::renderSkeleton() {
-  if (!mEntityManager.getActiveEntityDatabase().has<Skeleton>(
-          mSelectedEntity)) {
+void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<Skeleton>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Bone) + "  Skeleton";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    bool showBones =
-        mEntityManager.getActiveEntityDatabase().has<SkeletonDebug>(
-            mSelectedEntity);
+    bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
 
     if (ImGui::Checkbox("Show bones", &showBones)) {
-      mEntityManager.toggleSkeletonDebugForEntity(mSelectedEntity);
+      actionExecutor.execute(
+          std::make_unique<EntityToggleSkeletonDebugBones>(mSelectedEntity));
     }
   }
 }
 
-void EntityPanel::renderAnimation(AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<Animator>(
-          mSelectedEntity)) {
+void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
+                                  AssetRegistry &assetRegistry) {
+  if (!scene.entityDatabase.has<Animator>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + "  Animation";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component =
-        mEntityManager.getActiveEntityDatabase().get<Animator>(mSelectedEntity);
-
+    auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
     const auto &animations = assetRegistry.getAnimations().getAssets();
 
     const auto &currentAnimation =
@@ -387,7 +498,7 @@ void EntityPanel::renderAnimation(AssetRegistry &assetRegistry) {
       ImGui::EndCombo();
     }
 
-    if (mEntityManager.isUsingSimulationDatabase()) {
+    if (state.mode == WorkspaceMode::Simulation) {
       ImGui::Text("Time");
 
       float animationTime =
@@ -439,30 +550,9 @@ static String getGeometryName(const PhysicsGeometryType &type) {
   }
 }
 
-/**
- * @brief Get defaulty geometry from type
- *
- * @param type Geometry type
- * @return Default geometry parameters
- */
-static PhysicsGeometryParams
-getDefaultGeometryFromType(const PhysicsGeometryType &type) {
-  switch (type) {
-  case PhysicsGeometryType::Box:
-  default:
-    return PhysicsGeometryBox();
-  case PhysicsGeometryType::Sphere:
-    return PhysicsGeometrySphere();
-  case PhysicsGeometryType::Capsule:
-    return PhysicsGeometryCapsule();
-  case PhysicsGeometryType::Plane:
-    return PhysicsGeometryPlane();
-  }
-}
-
-void EntityPanel::renderCollidable() {
-  if (!mEntityManager.getActiveEntityDatabase().has<Collidable>(
-          mSelectedEntity)) {
+void EntityPanel::renderCollidable(Scene &scene,
+                                   ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<Collidable>(mSelectedEntity)) {
     return;
   }
 
@@ -476,8 +566,7 @@ void EntityPanel::renderCollidable() {
         PhysicsGeometryType::Plane,
     };
 
-    auto &collidable = mEntityManager.getActiveEntityDatabase().get<Collidable>(
-        mSelectedEntity);
+    auto &collidable = scene.entityDatabase.get<Collidable>(mSelectedEntity);
 
     if (ImGui::BeginCombo(
             "###SelectGeometryType",
@@ -486,90 +575,160 @@ void EntityPanel::renderCollidable() {
       for (auto type : types) {
         if (type != collidable.geometryDesc.type &&
             ImGui::Selectable(getGeometryName(type).c_str())) {
-          collidable.geometryDesc.type = type;
-          collidable.geometryDesc.params = getDefaultGeometryFromType(type);
-          mEntityManager.save(mSelectedEntity);
+          actionExecutor.execute(
+              std::make_unique<EntitySetCollidableType>(mSelectedEntity, type));
         }
       }
       ImGui::EndCombo();
     }
 
+    bool sendAction = false;
+
     if (collidable.geometryDesc.type == PhysicsGeometryType::Box) {
       auto &box = std::get<PhysicsGeometryBox>(collidable.geometryDesc.params);
       auto halfExtents = box.halfExtents;
 
-      if (widgets::Input("Half extents", box.halfExtents)) {
-        mEntityManager.save(mSelectedEntity);
+      if (widgets::Input("Half extents", halfExtents, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
+
+        box.halfExtents = halfExtents;
+        sendAction = true;
       }
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Sphere) {
       auto &sphere =
           std::get<PhysicsGeometrySphere>(collidable.geometryDesc.params);
       float radius = sphere.radius;
 
-      if (widgets::Input("Radius", sphere.radius)) {
-        mEntityManager.save(mSelectedEntity);
-      }
+      if (widgets::Input("Radius", radius, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
 
+        sphere.radius = radius;
+        sendAction = true;
+      }
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Capsule) {
       auto &capsule =
           std::get<PhysicsGeometryCapsule>(collidable.geometryDesc.params);
       float radius = capsule.radius;
       float halfHeight = capsule.halfHeight;
 
-      if (widgets::Input("Radius", capsule.radius)) {
-        mEntityManager.save(mSelectedEntity);
+      if (widgets::Input("Radius", radius, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
+
+        capsule.radius = radius;
+        sendAction = true;
       }
 
-      if (widgets::Input("Half height", capsule.halfHeight)) {
-        mEntityManager.save(mSelectedEntity);
+      if (widgets::Input("Half height", halfHeight, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
+
+        capsule.halfHeight = halfHeight;
+        sendAction = true;
       }
     }
 
     {
       auto &material = collidable.materialDesc;
 
-      if (widgets::Input("Dynamic friction", material.dynamicFriction)) {
-        mEntityManager.save(mSelectedEntity);
-      }
+      float dynamicFriction = material.dynamicFriction;
 
-      if (widgets::Input("Restitution", material.restitution)) {
-        if (material.restitution > 1.0f) {
-          material.restitution = 1.0f;
+      if (widgets::Input("Dynamic friction", dynamicFriction, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
         }
-        mEntityManager.save(mSelectedEntity);
+
+        material.dynamicFriction = dynamicFriction;
+        sendAction = true;
       }
 
-      if (widgets::Input("Static friction", material.staticFriction)) {
-        mEntityManager.save(mSelectedEntity);
+      float restitution = material.restitution;
+      if (widgets::Input("Restitution", restitution, false)) {
+        if (restitution > 1.0f) {
+          restitution = 1.0f;
+        }
+
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
+
+        material.restitution = restitution;
+        sendAction = true;
       }
+
+      float staticFriction = material.staticFriction;
+      if (widgets::Input("Static friction", staticFriction, false)) {
+        if (!mCollidable.has_value()) {
+          mCollidable = collidable;
+        }
+
+        material.staticFriction = staticFriction;
+        sendAction = true;
+      }
+    }
+
+    if (sendAction && mCollidable.has_value()) {
+      actionExecutor.execute(
+          std::make_unique<EntitySetCollidable>(mSelectedEntity, collidable));
+      mCollidable.reset();
     }
   }
 }
 
-void EntityPanel::renderRigidBody() {
-  if (!mEntityManager.getActiveEntityDatabase().has<RigidBody>(
-          mSelectedEntity)) {
+void EntityPanel::renderRigidBody(Scene &scene,
+                                  ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Circle) + "  Rigid body";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &rigidBody = mEntityManager.getActiveEntityDatabase().get<RigidBody>(
-        mSelectedEntity);
+    auto &rigidBody = scene.entityDatabase.get<RigidBody>(mSelectedEntity);
 
-    if (widgets::Input("Mass", rigidBody.dynamicDesc.mass)) {
-      mEntityManager.save(mSelectedEntity);
+    bool sendAction = false;
+    float mass = rigidBody.dynamicDesc.mass;
+    if (widgets::Input("Mass", mass, false)) {
+      if (!mRigidBody.has_value()) {
+        mRigidBody = rigidBody;
+      }
+
+      rigidBody.dynamicDesc.mass = mass;
+      sendAction = true;
     }
 
-    if (widgets::Input("Inertia", rigidBody.dynamicDesc.inertia)) {
-      mEntityManager.save(mSelectedEntity);
+    glm::vec3 inertia = rigidBody.dynamicDesc.inertia;
+    if (widgets::Input("Inertia", inertia, false)) {
+      if (!mRigidBody.has_value()) {
+        mRigidBody = rigidBody;
+      }
+
+      rigidBody.dynamicDesc.inertia = inertia;
+      sendAction = true;
     }
 
     ImGui::Text("Apply gravity");
-    if (ImGui::Checkbox("Apply gravity###ApplyGravity",
-                        &rigidBody.dynamicDesc.applyGravity)) {
-      mEntityManager.save(mSelectedEntity);
+    bool applyGravity = rigidBody.dynamicDesc.applyGravity;
+    if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
+      if (!mRigidBody.has_value()) {
+        mRigidBody = rigidBody;
+      }
+
+      rigidBody.dynamicDesc.applyGravity = applyGravity;
+      sendAction = true;
+    }
+
+    if (sendAction && mRigidBody.has_value()) {
+      actionExecutor.execute(
+          std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody));
+
+      mRigidBody.reset();
     }
 
     if (rigidBody.actor) {
@@ -606,30 +765,47 @@ void EntityPanel::renderRigidBody() {
   }
 }
 
-void EntityPanel::renderText(AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<Text>(mSelectedEntity)) {
+void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
+                             ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<Text>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Font) + "  Text";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &text =
-        mEntityManager.getActiveEntityDatabase().get<Text>(mSelectedEntity);
+    auto &text = scene.entityDatabase.get<Text>(mSelectedEntity);
 
     const auto &fonts = assetRegistry.getFonts().getAssets();
 
     static constexpr float ContentInputHeight = 100.0f;
+    bool sendAction = false;
 
     ImGui::Text("Content");
+    String tmpText = text.text;
     if (ImguiMultilineInputText(
-            "###InputContent", text.text,
+            "###InputContent", tmpText,
             ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
-      mEntityManager.save(mSelectedEntity);
+      if (!mText.has_value()) {
+        mText = text;
+      }
+
+      text.text = tmpText;
     }
 
-    if (widgets::Input("Line height", text.lineHeight)) {
-      mEntityManager.save(mSelectedEntity);
+    if (ImGui::IsItemDeactivatedAfterEdit()) {
+      sendAction = true;
+    }
+
+    float lineHeight = text.lineHeight;
+    if (widgets::Input("Line height", lineHeight, false)) {
+      if (!mText.has_value()) {
+        mText = text;
+      }
+
+      text.lineHeight = lineHeight;
+
+      sendAction = true;
     }
 
     ImGui::Text("Select font");
@@ -641,45 +817,50 @@ void EntityPanel::renderText(AssetRegistry &assetRegistry) {
         const auto &fontName = data.name;
 
         if (ImGui::Selectable(fontName.c_str(), &selectable)) {
+          if (!mText.has_value()) {
+            mText = text;
+          }
+
           text.font = handle;
-          mEntityManager.save(mSelectedEntity);
+          sendAction = true;
         }
       }
       ImGui::EndCombo();
     }
+
+    if (sendAction && mText.has_value()) {
+      actionExecutor.execute(
+          std::make_unique<EntitySetText>(mSelectedEntity, text));
+
+      mText.reset();
+    }
   }
 }
 
-void EntityPanel::renderAudio(AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<AudioSource>(
-          mSelectedEntity)) {
+void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry) {
+  if (!scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Music) + "  Audio";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &audio =
-        mEntityManager.getActiveEntityDatabase().get<AudioSource>(
-            mSelectedEntity);
-
+    const auto &audio = scene.entityDatabase.get<AudioSource>(mSelectedEntity);
     const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
 
     ImGui::Text("Name: %s", asset.name.c_str());
   }
 }
 
-void EntityPanel::renderScripting(AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().has<Script>(mSelectedEntity)) {
+void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry) {
+  if (!scene.entityDatabase.has<Script>(mSelectedEntity)) {
     return;
   }
 
   static const String SectionName = String(fa::Scroll) + "  Script";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &scripting =
-        mEntityManager.getActiveEntityDatabase().get<Script>(mSelectedEntity);
-
+    const auto &scripting = scene.entityDatabase.get<Script>(mSelectedEntity);
     const auto &asset =
         assetRegistry.getLuaScripts().getAsset(scripting.handle);
 
@@ -687,22 +868,18 @@ void EntityPanel::renderScripting(AssetRegistry &assetRegistry) {
   }
 }
 
-void EntityPanel::renderAddComponent(AssetRegistry &assetRegistry) {
-  if (!mEntityManager.getActiveEntityDatabase().exists(mSelectedEntity)) {
+void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
+                                     ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.exists(mSelectedEntity)) {
     return;
   }
 
   bool hasAllComponents =
-      mEntityManager.getActiveEntityDatabase().has<LocalTransform>(
-          mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<RigidBody>(
-          mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<Collidable>(
-          mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<DirectionalLight>(
-          mSelectedEntity) &&
-      mEntityManager.getActiveEntityDatabase().has<PerspectiveLens>(
-          mSelectedEntity);
+      scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
+      scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
+      scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
+      scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
+      scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity);
 
   if (hasAllComponents)
     return;
@@ -712,59 +889,52 @@ void EntityPanel::renderAddComponent(AssetRegistry &assetRegistry) {
   }
 
   if (ImGui::BeginPopup("AddComponentPopup")) {
-    if (!mEntityManager.getActiveEntityDatabase().has<LocalTransform>(
-            mSelectedEntity) &&
+    if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      mEntityManager.getActiveEntityDatabase().set<LocalTransform>(
-          mSelectedEntity, {});
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(std::make_unique<EntitySetLocalTransform>(
+          mSelectedEntity, LocalTransform{}));
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<RigidBody>(
-            mSelectedEntity) &&
+    if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      mEntityManager.getActiveEntityDatabase().set<RigidBody>(mSelectedEntity,
-                                                              {});
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(
+          std::make_unique<EntitySetRigidBody>(mSelectedEntity, RigidBody{}));
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<Collidable>(
-            mSelectedEntity) &&
+    if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      mEntityManager.getActiveEntityDatabase().set<Collidable>(
-          mSelectedEntity, {PhysicsGeometryType::Box, PhysicsGeometryBox{}});
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(std::make_unique<EntitySetCollidableType>(
+          mSelectedEntity, PhysicsGeometryType::Box));
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<DirectionalLight>(
-            mSelectedEntity) &&
+    if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
         ImGui::Selectable("Light")) {
-      mEntityManager.getActiveEntityDatabase().set<DirectionalLight>(
-          mSelectedEntity, {});
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+          mSelectedEntity, liquid::DirectionalLight{}));
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<PerspectiveLens>(
-            mSelectedEntity) &&
+    if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity) &&
         ImGui::Selectable("Camera")) {
-      mEntityManager.setCamera(mSelectedEntity, {}, true);
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
+          mSelectedEntity, liquid::PerspectiveLens{}));
+      actionExecutor.execute(
+          std::make_unique<EntitySetCameraAutoAspectRatio>(mSelectedEntity));
     }
 
-    if (!mEntityManager.getActiveEntityDatabase().has<Text>(mSelectedEntity) &&
+    if (!scene.entityDatabase.has<Text>(mSelectedEntity) &&
         ImGui::Selectable("Text")) {
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
-      mEntityManager.setText(mSelectedEntity, text);
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(
+          std::make_unique<EntitySetText>(mSelectedEntity, text));
     }
 
     ImGui::EndPopup();
   }
 }
 
-void EntityPanel::handleDragAndDrop(Renderer &renderer,
-                                    AssetRegistry &assetRegistry) {
+void EntityPanel::handleDragAndDrop(AssetRegistry &assetRegistry,
+                                    ActionExecutor &actionExecutor) {
   const auto width = ImGui::GetWindowContentRegionWidth();
   const float halfWidth = width * 0.5f;
 
@@ -772,42 +942,19 @@ void EntityPanel::handleDragAndDrop(Renderer &renderer,
 
   if (ImGui::BeginDragDropTarget()) {
     if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Mesh).c_str())) {
-      auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
-
-      mEntityManager.setMesh(mSelectedEntity, asset);
-      mEntityManager.save(mSelectedEntity);
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
-      auto asset = *static_cast<SkinnedMeshAssetHandle *>(payload->Data);
-      mEntityManager.setSkinnedMesh(mSelectedEntity, asset);
-      mEntityManager.save(mSelectedEntity);
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
-            getAssetTypeString(AssetType::Skeleton).c_str())) {
-      auto asset = *static_cast<SkeletonAssetHandle *>(payload->Data);
-
-      mEntityManager.setSkeletonForEntity(mSelectedEntity, asset);
-      mEntityManager.save(mSelectedEntity);
-    }
-
-    if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Audio).c_str())) {
       auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
 
-      mEntityManager.setAudio(mSelectedEntity, asset);
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(
+          std::make_unique<EntitySetAudio>(mSelectedEntity, asset));
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
 
-      mEntityManager.setScript(mSelectedEntity, asset);
-      mEntityManager.save(mSelectedEntity);
+      actionExecutor.execute(
+          std::make_unique<EntitySetScript>(mSelectedEntity, asset));
     }
 
     ImGui::EndDragDropTarget();

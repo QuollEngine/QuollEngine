@@ -32,11 +32,9 @@ public:
    * @brief Create UI Root
    *
    * @param actionExecutor Action executor
-   * @param entityManager Entity manager
    * @param assetLoader Asset loader
    */
-  UIRoot(ActionExecutor &actionExecutor, EntityManager &entityManager,
-         AssetLoader &assetLoader);
+  UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader);
 
   /**
    * @brief Render UI Root
@@ -45,14 +43,11 @@ public:
    *
    * @param state Workspace state
    * @param editorManager Editor manager
-   * @param renderer Renderer
    * @param assetManager Asset manager
-   * @param physicsSystem Physics system
    * @param entityManager Entity manager
    */
   void render(WorkspaceState &state, EditorManager &editorManager,
-              Renderer &renderer, AssetManager &assetManager,
-              PhysicsSystem &physicsSystem, EntityManager &entityManager);
+              AssetManager &assetManager, EntityManager &entityManager);
 
   /**
    * @brief Get icon registry

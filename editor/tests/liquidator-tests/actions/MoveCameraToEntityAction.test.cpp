@@ -2,15 +2,13 @@
 #include "liquidator/actions/MoveCameraToEntityAction.h"
 
 #include "liquidator-tests/Testing.h"
+#include "ActionTestBase.h"
 
-class MoveCameraToEntityActionTest : public ::testing::Test {
+class MoveCameraToEntityActionTest : public ActionTestBase {
 public:
   MoveCameraToEntityActionTest() {
     state.scene.entityDatabase.reg<liquid::editor::CameraLookAt>();
   }
-
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
 };
 
 TEST_F(MoveCameraToEntityActionTest,

@@ -312,32 +312,36 @@ public:
    *
    * @param label Input label
    * @param value Input value
+   * @param autoChange Auto change
    */
-  Input(String label, glm::vec3 &value);
+  Input(String label, glm::vec3 &value, bool autoChange = true);
 
   /**
    * @brief Render decimal scalar input
    *
    * @param label Input label
    * @param value Input value
+   * @param autoChange Auto change
    */
-  Input(String label, float &value);
+  Input(String label, float &value, bool autoChange = true);
 
   /**
    * @brief Render uint scalar input
    *
    * @param label Input label
    * @param value Input value
+   * @param autoChange Auto change
    */
-  Input(String label, uint32_t &value);
+  Input(String label, uint32_t &value, bool autoChange = true);
 
   /**
    * @brief Render text input
    *
    * @param label Input label
    * @param value Input value
+   * @param autoChange Auto change
    */
-  Input(String label, String &value);
+  Input(String label, String &value, bool autoChange = true);
 
   /**
    * @brief Check if input is changed

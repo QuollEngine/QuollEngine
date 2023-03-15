@@ -6,6 +6,9 @@
 
 #include "../editor-scene/EditorManager.h"
 
+#include "liquidator/state/WorkspaceState.h"
+#include "liquidator/actions/ActionExecutor.h"
+
 namespace liquid::editor {
 
 /**
@@ -14,124 +17,159 @@ namespace liquid::editor {
 class EntityPanel {
 public:
   /**
-   * @brief Create entity panel
-   *
-   * @param entityManager Entity manager
-   */
-  EntityPanel(EntityManager &entityManager);
-
-  /**
    * @brief Render panel
    *
-   * @param editorManager Editor manager
+   * @param state Workspace state
+   * @param actionExecutor Action executor
    * @param entity Entity to display
-   * @param renderer Renderer
-   * @param assetManager Asset manager
-   * @param physicsSystem Physics system
    */
-  void render(EditorManager &editorManager, Entity entity, Renderer &renderer,
-              AssetManager &assetManager, PhysicsSystem &physicsSystem);
+  void render(WorkspaceState &state, ActionExecutor &actionExecutor,
+              Entity entity);
 
 private:
   /**
    * @brief Set selected entity
    *
+   * @param scene Scene
    * @param entity Entity to select
    */
-  void setSelectedEntity(Entity entity);
+  void setSelectedEntity(Scene &scene, Entity entity);
 
   /**
    * @brief Render name component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderName();
+  void renderName(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render light component
+   *
+   * @param scene Active scene
+   * @param actionExecutor Action executor
    */
-  void renderLight();
+  void renderLight(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render camera component
    *
-   * @param editorManager Editor manager
+   * @param state Workspace state
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderCamera(EditorManager &editorManager);
+  void renderCamera(WorkspaceState &state, Scene &scene,
+                    ActionExecutor &actionExecutor);
 
   /**
    * @brief Render transform component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderTransform();
+  void renderTransform(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render mesh
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
    */
-  void renderMesh(AssetRegistry &assetRegistry);
+  void renderMesh(Scene &scene, AssetRegistry &assetRegistry);
 
   /**
    * @brief Render animation component
    *
+   * @param state Workspace state
+   * @param scene Scene
    * @param assetRegistry Asset registry
    */
-  void renderAnimation(AssetRegistry &assetRegistry);
+  void renderAnimation(WorkspaceState &state, Scene &scene,
+                       AssetRegistry &assetRegistry);
 
   /**
    * @brief Render skeleton component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderSkeleton();
+  void renderSkeleton(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render collidable component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderCollidable();
+  void renderCollidable(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render rigid body component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
    */
-  void renderRigidBody();
+  void renderRigidBody(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render text component
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void renderText(AssetRegistry &assetRegistry);
+  void renderText(Scene &scene, AssetRegistry &assetRegistry,
+                  ActionExecutor &actionExecutor);
 
   /**
    * @brief Render audio component
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
    */
-  void renderAudio(AssetRegistry &assetRegistry);
+  void renderAudio(Scene &scene, AssetRegistry &assetRegistry);
 
   /**
    * @brief Render scripting component
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
    */
-  void renderScripting(AssetRegistry &assetRegistry);
+  void renderScripting(Scene &scene, AssetRegistry &assetRegistry);
 
   /**
    * @brief Render add component button
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void renderAddComponent(AssetRegistry &assetRegistry);
+  void renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
+                          ActionExecutor &actionExecutor);
 
   /**
    * @brief Handle drag and drop
    *
-   * @param renderer Renderer
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void handleDragAndDrop(Renderer &renderer, AssetRegistry &assetRegistry);
+  void handleDragAndDrop(AssetRegistry &assetRegistry,
+                         ActionExecutor &actionExecutor);
 
 private:
   Entity mSelectedEntity = Entity::Null;
-  String mName;
-  EntityManager &mEntityManager;
   bool mIsNameActivated = false;
+
+  Name mName;
+
+private:
+  std::optional<RigidBody> mRigidBody;
+  std::optional<LocalTransform> mLocalTransform;
+  std::optional<Text> mText;
+  std::optional<Collidable> mCollidable;
+  std::optional<DirectionalLight> mDirectionalLight;
+  std::optional<PerspectiveLens> mPerspectiveLens;
+  std::optional<CascadedShadowMap> mCascadedShadowMap;
 };
 
 } // namespace liquid::editor

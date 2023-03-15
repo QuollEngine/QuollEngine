@@ -20,6 +20,6 @@ ActionExecutorResult DeleteEntityAction::onExecute(WorkspaceState &state) {
   return res;
 }
 
-bool DeleteEntityAction::predicate(WorkspaceState &state) { return false; }
+bool DeleteEntityAction::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

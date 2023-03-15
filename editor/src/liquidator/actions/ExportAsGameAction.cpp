@@ -16,6 +16,6 @@ ActionExecutorResult ExportAsGameAction::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool ExportAsGameAction::predicate(WorkspaceState &state) { return false; }
+bool ExportAsGameAction::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

@@ -2,16 +2,12 @@
 #include "liquidator/actions/SetGridDataActions.h"
 
 #include "liquidator-tests/Testing.h"
+#include "ActionTestBase.h"
 
-class SetGridDataActionsTestBase : public ::testing::Test {
-public:
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
-};
+using GridSetAxisLinesActionTest = ActionTestBase;
 
-using SetGridAxisLines = SetGridDataActionsTestBase;
-
-TEST_F(SetGridAxisLines, ExecutorEnablesGridAxisLinesIfArgumentIsTrue) {
+TEST_F(GridSetAxisLinesActionTest,
+       ExecutorEnablesGridAxisLinesIfArgumentIsTrue) {
   state.grid.y = 0;
 
   liquid::editor::SetGridAxisLinesAction action(true);
@@ -19,7 +15,8 @@ TEST_F(SetGridAxisLines, ExecutorEnablesGridAxisLinesIfArgumentIsTrue) {
   EXPECT_EQ(state.grid.y, 1);
 }
 
-TEST_F(SetGridAxisLines, ExecutorDisablesGridAxisLinesIfArgumentIsFalse) {
+TEST_F(GridSetAxisLinesActionTest,
+       ExecutorDisablesGridAxisLinesIfArgumentIsFalse) {
   state.grid.y = 1;
 
   liquid::editor::SetGridAxisLinesAction action(false);
@@ -27,7 +24,7 @@ TEST_F(SetGridAxisLines, ExecutorDisablesGridAxisLinesIfArgumentIsFalse) {
   EXPECT_EQ(state.grid.y, 0);
 }
 
-TEST_F(SetGridAxisLines,
+TEST_F(GridSetAxisLinesActionTest,
        PredicateReturnsFalseIfAxisLinesMatchProvidedArgument) {
   {
     state.grid.y = 0;
@@ -42,7 +39,7 @@ TEST_F(SetGridAxisLines,
   }
 }
 
-TEST_F(SetGridAxisLines,
+TEST_F(GridSetAxisLinesActionTest,
        PredicateReturnsTrueIfAxisLinesDoNotMatchProvidedArguments) {
   {
     state.grid.y = 0;
@@ -57,9 +54,9 @@ TEST_F(SetGridAxisLines,
   }
 }
 
-using SetGridLines = SetGridDataActionsTestBase;
+using GridSetLinesActionTest = ActionTestBase;
 
-TEST_F(SetGridLines, ExecutorEnablesGridLinesIfArgumentIsTrue) {
+TEST_F(GridSetLinesActionTest, ExecutorEnablesGridLinesIfArgumentIsTrue) {
   state.grid.x = 0;
 
   liquid::editor::SetGridLinesAction action(true);
@@ -67,7 +64,7 @@ TEST_F(SetGridLines, ExecutorEnablesGridLinesIfArgumentIsTrue) {
   EXPECT_EQ(state.grid.x, 1);
 }
 
-TEST_F(SetGridLines, ExecutorDisablesGridLinesIfArgumentIsFalse) {
+TEST_F(GridSetLinesActionTest, ExecutorDisablesGridLinesIfArgumentIsFalse) {
   state.grid.x = 1;
 
   liquid::editor::SetGridLinesAction action(false);
@@ -75,7 +72,8 @@ TEST_F(SetGridLines, ExecutorDisablesGridLinesIfArgumentIsFalse) {
   EXPECT_EQ(state.grid.x, 0);
 }
 
-TEST_F(SetGridLines, PredicateReturnsTrueIfGridLinesMatchProvidedArguments) {
+TEST_F(GridSetLinesActionTest,
+       PredicateReturnsTrueIfGridLinesMatchProvidedArguments) {
   {
     state.grid.x = 0;
     liquid::editor::SetGridLinesAction action(false);
@@ -89,7 +87,7 @@ TEST_F(SetGridLines, PredicateReturnsTrueIfGridLinesMatchProvidedArguments) {
   }
 }
 
-TEST_F(SetGridLines,
+TEST_F(GridSetLinesActionTest,
        PredicateReturnsTrueIfGridLinesDoNotMatchProvidedArguments) {
   {
     state.grid.x = 0;

@@ -5,16 +5,17 @@
 namespace liquid::editor {
 
 /**
- * @brief Set active transform action
+ * @brief Set script for entity action
  */
-class SetActiveTransformAction : public Action {
+class EntitySetScript : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param transformOperation Transform operation
+   * @param entity Entity
+   * @param script Script handle
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  EntitySetScript(Entity entity, LuaScriptAssetHandle script);
 
   /**
    * @brief Action executor
@@ -34,7 +35,8 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TransformOperation mTransformOperation;
+  Entity mEntity;
+  LuaScriptAssetHandle mScript;
 };
 
 } // namespace liquid::editor
