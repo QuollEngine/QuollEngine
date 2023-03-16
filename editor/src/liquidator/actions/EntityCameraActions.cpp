@@ -13,6 +13,9 @@ EntitySetPerspectiveLens::onExecute(WorkspaceState &state) {
                                                         : state.scene;
 
   scene.entityDatabase.set(mEntity, mLens);
+  if (!scene.entityDatabase.has<Camera>(mEntity)) {
+    scene.entityDatabase.set(mEntity, Camera{});
+  }
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);

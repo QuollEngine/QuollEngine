@@ -227,21 +227,29 @@ Input::Input(String label, float &value, bool autoChange) {
 }
 
 Input::Input(String label, uint32_t &value, bool autoChange) {
-  uint32_t temp = value;
+  if (autoChange) {
+    uint32_t temp = value;
 
-  renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
+    renderScalarInput(label, &temp, 1, ImGuiDataType_U32);
 
-  if (mChanged && autoChange) {
-    value = temp;
+    if (mChanged) {
+      value = temp;
+    }
+  } else {
+    renderScalarInput(label, &value, 1, ImGuiDataType_U32);
   }
 }
 
 Input::Input(String label, String &value, bool autoChange) {
-  auto temp = value;
-  renderTextInput(label, temp);
+  if (autoChange) {
+    auto temp = value;
+    renderTextInput(label, temp);
 
-  if (mChanged && autoChange) {
-    value = temp;
+    if (mChanged) {
+      value = temp;
+    }
+  } else {
+    renderTextInput(label, value);
   }
 }
 

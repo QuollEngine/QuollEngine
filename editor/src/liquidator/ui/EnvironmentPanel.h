@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquidator/asset/AssetManager.h"
-#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/state/WorkspaceState.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 namespace liquid::editor {
 
@@ -13,10 +13,31 @@ public:
   /**
    * @brief Render environment panel
    *
-   * @param editorManager Editor manager
-   * @param assetManager Asset manager
+   * @param state Workspace state
+   * @param actionExecutor Action executor
    */
-  static void render(EditorManager &editorManager, AssetManager &assetManager);
+  static void render(WorkspaceState &state, ActionExecutor &actionExecutor);
+
+private:
+  /**
+   * @brief Render environment skybox section
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  static void renderSkyboxSection(Scene &scene, AssetRegistry &assetRegistry,
+                                  ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Render environment lighting section
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  static void renderLightingSection(Scene &scene, AssetRegistry &assetRegistry,
+                                    ActionExecutor &actionExecutor);
 };
 
 } // namespace liquid::editor

@@ -265,10 +265,6 @@ Entity EntityManager::getActiveSimulationCamera() {
   return mState.simulationScene.activeCamera;
 }
 
-void EntityManager::saveEnvironment() {
-  mSceneIO.saveEnvironment(mScenePath / "main.lqscene");
-}
-
 LocalTransform EntityManager::getTransformFromCamera(Entity camera) const {
   auto &scene = mState.mode == WorkspaceMode::Simulation
                     ? mState.simulationScene

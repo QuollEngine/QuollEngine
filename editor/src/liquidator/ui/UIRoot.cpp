@@ -44,7 +44,7 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
     mEntityPanel.render(state, mActionExecutor, state.selectedEntity);
   }
 
-  EnvironmentPanel::render(editorManager, assetManager);
+  EnvironmentPanel::render(state, mActionExecutor);
 
   mEditorCameraPanel.render(state, mActionExecutor);
   mAssetBrowser.render(assetManager, mIconRegistry, state, editorManager,
