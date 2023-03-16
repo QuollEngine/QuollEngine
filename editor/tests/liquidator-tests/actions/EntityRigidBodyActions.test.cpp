@@ -6,8 +6,8 @@
 
 using EntitySetRigidBodyActionTest = ActionTestBase;
 
-TEST_F(EntitySetRigidBodyActionTest, ExecutorSetsTextForEntityInScene) {
-  auto entity = state.scene.entityDatabase.create();
+TEST_P(EntitySetRigidBodyActionTest, ExecutorSetsRigidBodyForEntity) {
+  auto entity = activeScene().entityDatabase.create();
 
   liquid::RigidBody rigidBody{};
   rigidBody.dynamicDesc.mass = 5.0f;
@@ -15,25 +15,11 @@ TEST_F(EntitySetRigidBodyActionTest, ExecutorSetsTextForEntityInScene) {
   liquid::editor::EntitySetRigidBody action(entity, rigidBody);
   auto res = action.onExecute(state);
 
-  EXPECT_EQ(state.scene.entityDatabase.get<liquid::RigidBody>(entity)
+  EXPECT_EQ(activeScene()
+                .entityDatabase.get<liquid::RigidBody>(entity)
                 .dynamicDesc.mass,
             5.0f);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
-TEST_F(EntitySetRigidBodyActionTest,
-       ExecutorSetsTextForEntityInSimulationScene) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
-  auto entity = state.simulationScene.entityDatabase.create();
-
-  liquid::RigidBody rigidBody{};
-  rigidBody.dynamicDesc.mass = 5.0f;
-
-  liquid::editor::EntitySetRigidBody action(entity, rigidBody);
-  auto res = action.onExecute(state);
-
-  EXPECT_EQ(state.simulationScene.entityDatabase.get<liquid::RigidBody>(entity)
-                .dynamicDesc.mass,
-            5.0f);
-  EXPECT_EQ(res.entitiesToSave.at(0), entity);
-}
+InitActionsTestSuite(EntityActionsTest, EntitySetRigidBodyActionTest);

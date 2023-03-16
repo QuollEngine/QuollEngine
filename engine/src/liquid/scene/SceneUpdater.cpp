@@ -66,8 +66,6 @@ void SceneUpdater::updateLights(EntityDatabase &entityDatabase) {
     glm::decompose(world.worldTransform, empty3, rotation, position, empty3,
                    empty4);
 
-    rotation = glm::conjugate(rotation);
-
     light.direction =
         glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
   }

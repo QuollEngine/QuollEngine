@@ -212,16 +212,18 @@ void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
         sendAction = true;
       }
 
-      uint32_t numCascades = component.numCascades;
-      if (widgets::Input("Number of cascades", numCascades, false)) {
-        numCascades = glm::clamp(numCascades, 1u, component.MaxCascades);
-
+      int32_t numCascades = static_cast<int32_t>(component.numCascades);
+      ImGui::Text("Number of cascades");
+      if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
+                         static_cast<int32_t>(component.MaxCascades))) {
         if (!mCascadedShadowMap.has_value()) {
           mCascadedShadowMap = component;
         }
-        component.numCascades = numCascades;
+        component.numCascades = static_cast<uint32_t>(numCascades);
         sendAction = true;
       }
+
+      sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
       if (mCascadedShadowMap.has_value() && sendAction) {
         actionExecutor.execute(

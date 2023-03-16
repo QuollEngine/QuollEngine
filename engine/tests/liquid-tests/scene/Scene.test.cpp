@@ -131,7 +131,6 @@ TEST_F(SceneUpdaterTest, UpdateDirectionalLightsBasedOnTransforms) {
   glm::decompose(transform.worldTransform, empty3, rotation, position, empty3,
                  empty4);
 
-  rotation = glm::conjugate(rotation);
   auto expected =
       glm::normalize(glm::vec3(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)));
 
