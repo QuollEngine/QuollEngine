@@ -55,6 +55,10 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
       "__engine.pbr.brdfLut.compute",
       mDevice->createShader({shadersPath / "generate-brdf-lut.comp.spv"}));
 
+  mShaderLibrary.addShader(
+      "__engine.hdr.default.fragment",
+      mDevice->createShader({Engine::getShadersPath() / "hdr.frag.spv"}));
+
   generateBrdfLut();
 }
 
@@ -83,9 +87,17 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   sceneColorDesc.width = SwapchainSizePercentage;
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
-  sceneColorDesc.format = rhi::Format::Bgra8Srgb;
+  sceneColorDesc.format = rhi::Format::Rgba16Float;
   auto sceneColor =
       mRenderStorage.createFramebufferRelativeTexture(sceneColorDesc);
+
+  rhi::TextureDescription hdrColorDesc{};
+  hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+  hdrColorDesc.width = SwapchainSizePercentage;
+  hdrColorDesc.height = SwapchainSizePercentage;
+  hdrColorDesc.layers = 1;
+  hdrColorDesc.format = rhi::Format::Bgra8Srgb;
+  auto hdrColor = mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
@@ -274,9 +286,44 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
     });
   } // skybox pass
 
+  {
+    auto &pass = graph.addGraphicsPass("hdrPass");
+    pass.read(sceneColor);
+    pass.write(hdrColor, mClearColor);
+
+    rhi::GraphicsPipelineDescription pipelineDescription{};
+    pipelineDescription.vertexShader =
+        mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+    pipelineDescription.fragmentShader =
+        mShaderLibrary.getShader("__engine.hdr.default.fragment");
+    pipelineDescription.rasterizer = rhi::PipelineRasterizer{
+        liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
+        liquid::rhi::FrontFace::CounterClockwise};
+    pipelineDescription.colorBlend.attachments = {
+        liquid::rhi::PipelineColorBlendAttachment{}};
+
+    auto vPipeline = pass.addPipeline(pipelineDescription);
+
+    pass.setExecutor([vPipeline, sceneColor,
+                      this](rhi::RenderCommandList &commandList,
+                            const RenderGraphRegistry &registry,
+                            uint32_t frameIndex) {
+      auto pipeline = registry.get(vPipeline);
+      commandList.bindPipeline(pipeline);
+      commandList.bindDescriptor(pipeline, 0,
+                                 mRenderStorage.getGlobalTexturesDescriptor());
+
+      uint32_t color = static_cast<uint32_t>(sceneColor);
+
+      commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
+                                sizeof(uint32_t), &color);
+      commandList.draw(3, 0);
+    });
+  }
+
   LOG_DEBUG("Scene renderer attached to graph");
 
-  return SceneRenderPassData{sceneColor, depthBuffer};
+  return SceneRenderPassData{hdrColor, depthBuffer};
 }
 
 void SceneRenderer::attachText(RenderGraph &graph,

@@ -100,9 +100,6 @@ void EditorScreen::start(const Project &project) {
       Theme::getColor(ThemeColor::BackgroundColor));
   renderer.getImguiRenderer().buildFonts();
 
-  renderer.getSceneRenderer().setClearColor(
-      Theme::getColor(ThemeColor::SceneBackgroundColor));
-
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 

@@ -169,35 +169,6 @@ const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
 #define BrdfLut uGlobalTextures[getSceneData().textures.z]
 
 /**
- * @brief sRGB to Linear color
- *
- * @param srgbColor Color in SRGB color space
- * @return Color in linear color space
- */
-vec4 srgbToLinear(vec4 srgbColor) {
-  vec3 bLess = step(vec3(0.04045), srgbColor.xyz);
-  vec3 linearOut =
-      mix(srgbColor.xyz / vec3(12.92),
-          pow((srgbColor.xyz + vec3(0.055)) / vec3(1.055), vec3(2.4)), bLess);
-  return vec4(linearOut, srgbColor.w);
-}
-
-/**
- * @brief Linear color to sRGB
- *
- * @param linearColor Color in linear color space
- * @return Color in sRGB color space
- */
-vec4 linearToSrgb(vec4 linearColor) {
-  bvec3 cutoff = lessThan(linearColor.rgb, vec3(0.0031308));
-  vec3 higher =
-      vec3(1.055) * pow(linearColor.rgb, vec3(1.0 / 2.4)) - vec3(0.055);
-  vec3 lower = linearColor.rgb * vec3(12.92);
-
-  return vec4(mix(higher, lower, cutoff), linearColor.a);
-}
-
-/**
  * @brief Lambertian diffuse
  *
  * @param diffuseColor Diffuse color
@@ -398,12 +369,10 @@ void main() {
 
   vec4 baseColor;
   if (uMaterialData.baseColorTexture > 0) {
-    baseColor =
-        srgbToLinear(
-            texture(uGlobalTextures[uMaterialData.baseColorTexture],
-                    inTextureCoord[uMaterialData.baseColorTextureCoord]))
-            .xyzw *
-        uMaterialData.baseColorFactor;
+    baseColor = texture(uGlobalTextures[uMaterialData.baseColorTexture],
+                        inTextureCoord[uMaterialData.baseColorTextureCoord])
+                    .xyzw *
+                uMaterialData.baseColorFactor;
   } else {
     baseColor = uMaterialData.baseColorFactor;
   }
@@ -488,16 +457,14 @@ void main() {
   }
 
   if (uMaterialData.emissiveTexture > 0) {
-    vec3 emissive =
-        srgbToLinear(
-            texture(uGlobalTextures[uMaterialData.emissiveTexture],
-                    inTextureCoord[uMaterialData.emissiveTextureCoord]))
-            .rgb *
-        uMaterialData.emissiveFactor;
+    vec3 emissive = texture(uGlobalTextures[uMaterialData.emissiveTexture],
+                            inTextureCoord[uMaterialData.emissiveTextureCoord])
+                        .rgb *
+                    uMaterialData.emissiveFactor;
     color += emissive;
   } else {
     color += uMaterialData.emissiveFactor;
   }
 
-  outColor = linearToSrgb(vec4(color, baseColor.a));
+  outColor = vec4(color, baseColor.a);
 }
