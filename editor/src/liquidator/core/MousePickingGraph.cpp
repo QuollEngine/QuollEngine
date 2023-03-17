@@ -9,7 +9,16 @@ MousePickingGraph::MousePickingGraph(
     AssetRegistry &assetRegistry, RenderStorage &renderStorage,
     rhi::RenderDevice *device)
     : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
-      mGraphEvaluator(renderStorage), mRenderGraph("MousePicking") {
+      mGraphEvaluator(renderStorage), mRenderGraph("MousePicking"),
+      mBindlessParams{
+          BindlessDrawParameters(renderStorage.getDevice()
+                                     ->getDeviceInformation()
+                                     .getLimits()
+                                     .minUniformBufferOffsetAlignment),
+          BindlessDrawParameters(renderStorage.getDevice()
+                                     ->getDeviceInformation()
+                                     .getLimits()
+                                     .minUniformBufferOffsetAlignment)} {
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
@@ -67,16 +76,32 @@ MousePickingGraph::MousePickingGraph(
                               rhi::FrontFace::CounterClockwise},
       rhi::PipelineColorBlend{{}}});
 
-  pass.setExecutor([this, vPipeline, vSkinnedPipeline,
+  struct MousePickingDrawParams {
+    rhi::BufferHandle meshTransforms;
+    rhi::BufferHandle skinnedMeshTransforms;
+    rhi::BufferHandle skeletons;
+    rhi::BufferHandle camera;
+    rhi::BufferHandle entities;
+    rhi::BufferHandle selectedEntity;
+    uint32_t pad0;
+    uint32_t pad1;
+  };
+
+  size_t offset = 0;
+  for (size_t i = 0; i < mBindlessParams.size(); ++i) {
+    auto &frameData = mFrameData.at(i);
+    offset = mBindlessParams.at(i).addRange(MousePickingDrawParams{
+        frameData.getMeshTransformsBuffer(),
+        frameData.getSkinnedMeshTransformsBuffer(),
+        frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
+        mEntitiesBuffer.getHandle(), mSelectedEntityBuffer.getHandle()});
+  }
+
+  pass.setExecutor([this, vPipeline, vSkinnedPipeline, offset,
                     &renderStorage](rhi::RenderCommandList &commandList,
                                     const RenderGraphRegistry &registry,
                                     uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
-
-    auto drawParams = frameData.getDrawParams();
-    drawParams.index9 =
-        rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
-    drawParams.index10 = rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
 
@@ -89,10 +114,9 @@ MousePickingGraph::MousePickingGraph(
 
       commandList.bindDescriptor(pipeline, 0,
                                  renderStorage.getGlobalBuffersDescriptor());
-      commandList.pushConstants(skinnedPipeline,
-                                rhi::ShaderStage::Vertex |
-                                    rhi::ShaderStage::Fragment,
-                                0, sizeof(DrawParameters), &drawParams);
+      commandList.bindDescriptor(pipeline, 1,
+                                 mBindlessParams.at(frameIndex).getDescriptor(),
+                                 {static_cast<uint32_t>(offset)});
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
@@ -121,20 +145,14 @@ MousePickingGraph::MousePickingGraph(
 
     // Skinned meshes
     {
-      auto drawParams = frameData.getDrawParams();
-      drawParams.index9 =
-          rhi::castHandleToUint(mSelectedEntityBuffer.getHandle());
-      drawParams.index10 = rhi::castHandleToUint(mEntitiesBuffer.getHandle());
 
       commandList.bindPipeline(skinnedPipeline);
 
       commandList.bindDescriptor(skinnedPipeline, 0,
                                  renderStorage.getGlobalBuffersDescriptor());
-
-      commandList.pushConstants(skinnedPipeline,
-                                rhi::ShaderStage::Vertex |
-                                    rhi::ShaderStage::Fragment,
-                                0, sizeof(DrawParameters), &drawParams);
+      commandList.bindDescriptor(skinnedPipeline, 1,
+                                 mBindlessParams.at(frameIndex).getDescriptor(),
+                                 {static_cast<uint32_t>(offset)});
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
@@ -162,6 +180,10 @@ MousePickingGraph::MousePickingGraph(
       }
     }
   });
+
+  for (auto &bp : mBindlessParams) {
+    bp.build(mDevice);
+  }
 }
 
 MousePickingGraph::~MousePickingGraph() {}

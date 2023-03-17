@@ -4,6 +4,19 @@ layout(location = 0) out vec2 outTexCoord;
 
 #include "bindless-editor.glsl"
 
+#define getGizmoTransform(index)                                               \
+  GetBindlessResource(TransformData, uDrawParams.gizmoTransforms).items[index]
+
+layout(set = 2, binding = 0) uniform DrawParameters {
+  uint gizmoTransforms;
+  uint skeletonTransforms;
+  uint debugSkeletons;
+  uint collidbaleParams;
+  uint camera;
+  uint gridData;
+}
+uDrawParams;
+
 const vec2 positions[4] =
     vec2[](vec2(-1, -1), vec2(+1, -1), vec2(-1, +1), vec2(+1, +1));
 const vec2 texCoords[4] =

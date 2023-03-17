@@ -134,7 +134,7 @@ void ImguiDebugLayer::renderPhysicalDeviceInfo() {
   renderPropertyMapAsTable(mPhysicalDeviceInfo.getProperties());
 
   ImGui::Text("Limits");
-  renderPropertyMapAsTable(mPhysicalDeviceInfo.getLimits());
+  renderPropertyMapAsTable(mPhysicalDeviceInfo.getRawLimits());
   ImGui::End();
 }
 

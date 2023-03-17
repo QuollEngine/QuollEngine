@@ -32,9 +32,17 @@ ActionExecutorResult EntitySetCollidableType::onExecute(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
-  collidable.geometryDesc.type = mType;
-  collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
+  if (scene.entityDatabase.has<Collidable>(mEntity)) {
+    auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
+    collidable.geometryDesc.type = mType;
+    collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
+  } else {
+    Collidable collidable{};
+    collidable.geometryDesc.type = mType;
+    collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
+
+    scene.entityDatabase.set<Collidable>(mEntity, collidable);
+  }
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -45,7 +53,7 @@ bool EntitySetCollidableType::predicate(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  return scene.entityDatabase.has<Collidable>(mEntity) &&
+  return !scene.entityDatabase.has<Collidable>(mEntity) ||
          scene.entityDatabase.get<Collidable>(mEntity).geometryDesc.type !=
              mType;
 }

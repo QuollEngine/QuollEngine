@@ -22,6 +22,16 @@ public:
    */
   using UnorderedPropertyMap = std::vector<std::pair<String, Property>>;
 
+  /**
+   * @brief Device limits
+   */
+  struct Limits {
+    /**
+     * Minimum uniform buffer alignment offset
+     */
+    uint32_t minUniformBufferOffsetAlignment = 0;
+  };
+
 public:
   /**
    * @brief Create physical device information
@@ -29,11 +39,13 @@ public:
    * @param name Device name
    * @param type Device type
    * @param properties Device properties
+   * @param rawLimits Device limits (raw)
    * @param limits Device limits
    */
   PhysicalDeviceInformation(StringView name, PhysicalDeviceType type,
                             const UnorderedPropertyMap &properties,
-                            const UnorderedPropertyMap &limits);
+                            const UnorderedPropertyMap &rawLimits,
+                            const Limits &limits);
 
   /**
    * @brief Get device type
@@ -63,7 +75,14 @@ public:
    *
    * @return Device limits
    */
-  inline const UnorderedPropertyMap &getLimits() const { return mLimits; }
+  inline const UnorderedPropertyMap &getRawLimits() const { return mRawLimits; }
+
+  /**
+   * @brief Get device limits
+   *
+   * @return Device limits
+   */
+  inline const Limits &getLimits() const { return mLimits; }
 
   /**
    * @brief Get type string proeprties
@@ -77,7 +96,8 @@ private:
   PhysicalDeviceType mType;
 
   UnorderedPropertyMap mProperties;
-  UnorderedPropertyMap mLimits;
+  UnorderedPropertyMap mRawLimits;
+  Limits mLimits;
 };
 
 } // namespace liquid::rhi

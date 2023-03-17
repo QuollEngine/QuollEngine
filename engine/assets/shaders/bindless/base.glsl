@@ -55,33 +55,3 @@ layout(set = BindlessDescriptorSet,
   uint ignore;
 }
 uGlobalUniforms[];
-
-/**
- * @brief Push constants to access bindless resources
- */
-layout(push_constant) uniform DrawParameters {
-  uint index0;
-  uint index1;
-  uint index2;
-  uint index3;
-
-  uint index4;
-  uint index5;
-  uint index6;
-  uint index7;
-
-  uint index8;
-  uint index9;
-  uint index10;
-  uint pad2;
-}
-pcDrawParameters;
-
-/**
- * @brief Get bindless resource from push constant index
- *
- * @param Name Layout name
- * @param i Push constant index
- */
-#define GetBindlessResourceFromPC(Name, i)                                     \
-  GetBindlessResource(Name, pcDrawParameters.index##i)

@@ -57,6 +57,18 @@ public:
   void write(uint32_t binding, const std::vector<BufferHandle> &buffers,
              DescriptorType type, uint32_t start) override;
 
+  /**
+   * @brief Bind buffer descriptors
+   *
+   * @param binding Binding number
+   * @param bufferInfos Buffer infos
+   * @param type Descriptor type
+   * @param start Starting index
+   */
+  void write(uint32_t binding,
+             const std::vector<DescriptorBufferInfo> &bufferInfos,
+             DescriptorType type, uint32_t start) override;
+
 private:
   /**
    * @brief Write descriptor set

@@ -5,7 +5,16 @@ layout(location = 0) in vec3 inPosition;
 
 layout(location = 0) out vec3 outTexCoord;
 
-#include "bindless-base.glsl"
+#include "bindless/base.glsl"
+#include "bindless/camera.glsl"
+
+layout(set = 2, binding = 0) uniform DrawParams {
+  uint camera;
+  uint skybox;
+  uint pad0;
+  uint pad1;
+}
+uDrawParams;
 
 void main() {
   mat4 viewWithoutTranslation =

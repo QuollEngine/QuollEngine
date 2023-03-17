@@ -59,7 +59,6 @@ ActionExecutorResult SpawnPrefabAtTransform::onExecute(WorkspaceState &state) {
     if (pTransform.value.parent >= 0) {
       auto parent = getOrCreateEntity(pTransform.value.parent);
       auto entity = getOrCreateEntity(pTransform.entity);
-
       scene.entityDatabase.set(entity, Parent{parent});
 
       if (!scene.entityDatabase.has<Children>(entity)) {

@@ -6,7 +6,15 @@ layout(location = 0) in vec3 inTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
-#include "bindless-base.glsl"
+layout(set = 2, binding = 0) uniform DrawParams {
+  uint camera;
+  uint skybox;
+  uint pad0;
+  uint pad1;
+}
+uDrawParams;
+
+#include "bindless/base.glsl"
 
 layout(set = 1, binding = 0) uniform samplerCube uGlobalTextures[];
 
@@ -29,7 +37,8 @@ struct SkyboxData {
 
 RegisterUniform(SkyboxUniform, { SkyboxData skybox; });
 
-#define getSkyboxData() GetBindlessResourceFromPC(SkyboxUniform, 9).skybox
+#define getSkyboxData()                                                        \
+  GetBindlessResource(SkyboxUniform, uDrawParams.skybox).skybox
 
 void main() {
   if (getSkyboxData().data.x > 0) {

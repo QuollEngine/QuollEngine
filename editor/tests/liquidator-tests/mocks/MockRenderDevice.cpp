@@ -21,8 +21,10 @@ void MockRenderDevice::waitForIdle() {}
 
 const liquid::rhi::PhysicalDeviceInformation
 MockRenderDevice::getDeviceInformation() {
+  liquid::rhi::PhysicalDeviceInformation::Limits limits{};
+
   return liquid::rhi::PhysicalDeviceInformation(
-      "Mock Device", liquid::rhi::PhysicalDeviceType::CPU, {}, {});
+      "Mock Device", liquid::rhi::PhysicalDeviceType::CPU, {}, {}, limits);
 }
 
 const liquid::rhi::DeviceStats &MockRenderDevice::getDeviceStats() const {

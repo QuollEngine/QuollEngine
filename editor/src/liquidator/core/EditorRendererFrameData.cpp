@@ -5,7 +5,11 @@ namespace liquid::editor {
 
 EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
                                                  size_t reservedSpace)
-    : mReservedSpace(reservedSpace) {
+    : mReservedSpace(reservedSpace),
+      mBindlessParams(renderStorage.getDevice()
+                          ->getDeviceInformation()
+                          .getLimits()
+                          .minUniformBufferOffsetAlignment) {
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
   mGizmoTransforms.reserve(reservedSpace);
@@ -51,16 +55,22 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 
-  mDrawParams.index0 =
-      rhi::castHandleToUint(mGizmoTransformsBuffer.getHandle());
-  mDrawParams.index1 =
-      rhi::castHandleToUint(mSkeletonBoneTransformsBuffer.getHandle());
-  mDrawParams.index2 = rhi::castHandleToUint(mEditorGridBuffer.getHandle());
-  mDrawParams.index3 = rhi::castHandleToUint(mCameraBuffer.getHandle());
-  mDrawParams.index4 =
-      rhi::castHandleToUint(mCollidableEntityBuffer.getHandle());
-  mDrawParams.index5 =
-      rhi::castHandleToUint(mSkeletonTransformsBuffer.getHandle());
+  struct EditorDrawParams {
+    rhi::BufferHandle gizmoTransforms;
+    rhi::BufferHandle skeletonTransforms;
+    rhi::BufferHandle debugSkeletons;
+    rhi::BufferHandle collidbaleParams;
+    rhi::BufferHandle camera;
+    rhi::BufferHandle gridData;
+  };
+
+  mBindlessParams.addRange(EditorDrawParams{
+      mGizmoTransformsBuffer.getHandle(), mSkeletonTransformsBuffer.getHandle(),
+      mSkeletonBoneTransformsBuffer.getHandle(),
+      mCollidableEntityBuffer.getHandle(), mCameraBuffer.getHandle(),
+      mEditorGridBuffer.getHandle()});
+
+  mBindlessParams.build(renderStorage.getDevice());
 }
 
 void EditorRendererFrameData::addSkeleton(

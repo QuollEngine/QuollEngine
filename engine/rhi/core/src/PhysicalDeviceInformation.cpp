@@ -5,8 +5,10 @@ namespace liquid::rhi {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
     StringView name, PhysicalDeviceType type,
-    const UnorderedPropertyMap &properties, const UnorderedPropertyMap &limits)
-    : mName(name), mType(type), mProperties(properties), mLimits(limits) {}
+    const UnorderedPropertyMap &properties,
+    const UnorderedPropertyMap &rawLimits, const Limits &limits)
+    : mName(name), mType(type), mProperties(properties), mRawLimits(rawLimits),
+      mLimits(limits) {}
 
 const String PhysicalDeviceInformation::getTypeString() const {
   switch (mType) {

@@ -169,6 +169,8 @@ VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
     return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   case DescriptorType::UniformBuffer:
     return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  case DescriptorType::UniformBufferDynamic:
+    return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
   case DescriptorType::StorageBuffer:
     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
   case DescriptorType::StorageImage:

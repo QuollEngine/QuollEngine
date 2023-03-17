@@ -91,6 +91,9 @@ private:
   RenderGraphEvaluator mGraphEvaluator;
   const std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames>
       &mFrameData;
+  std::array<BindlessDrawParameters, rhi::RenderDevice::NumFrames>
+      mBindlessParams;
+
   AssetRegistry &mAssetRegistry;
 
   rhi::Buffer mEntitiesBuffer;

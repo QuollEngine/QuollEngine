@@ -6,6 +6,26 @@
 namespace liquid::rhi {
 
 /**
+ * @brief Descriptor buffer info
+ */
+struct DescriptorBufferInfo {
+  /**
+   * Buffer offset
+   */
+  uint32_t offset = 0;
+
+  /**
+   * Buffer range
+   */
+  uint32_t range = 0;
+
+  /**
+   * Buffer
+   */
+  BufferHandle buffer = rhi::BufferHandle::Invalid;
+};
+
+/**
  * @brief Native descriptor interface
  */
 class NativeDescriptor {
@@ -43,6 +63,18 @@ public:
    * @param start Starting index
    */
   virtual void write(uint32_t binding, const std::vector<BufferHandle> &buffers,
+                     DescriptorType type, uint32_t start) = 0;
+
+  /**
+   * @brief Bind buffer descriptors
+   *
+   * @param binding Binding number
+   * @param bufferInfos Buffer infos
+   * @param type Descriptor type
+   * @param start Starting index
+   */
+  virtual void write(uint32_t binding,
+                     const std::vector<DescriptorBufferInfo> &bufferInfos,
                      DescriptorType type, uint32_t start) = 0;
 };
 

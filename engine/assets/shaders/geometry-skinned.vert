@@ -13,7 +13,21 @@ layout(location = 0) out vec3 outWorldPosition;
 layout(location = 1) out vec2 outTextureCoord[2];
 layout(location = 3) out mat3 outTBN;
 
-#include "bindless-base.glsl"
+#include "bindless/base.glsl"
+#include "bindless/mesh.glsl"
+#include "bindless/camera.glsl"
+
+layout(set = 3, binding = 0) uniform DrawParams {
+  uint meshTransforms;
+  uint skinnedMeshTransforms;
+  uint skeletons;
+  uint camera;
+  uint scene;
+  uint lights;
+  uint shadows;
+  uint pad0;
+}
+uDrawParams;
 
 void main() {
   mat4 worldMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;

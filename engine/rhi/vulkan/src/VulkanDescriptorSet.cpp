@@ -68,6 +68,23 @@ void VulkanDescriptorSet::write(uint32_t binding,
   write(binding, start, bufferInfos.size(), type, nullptr, bufferInfos.data());
 }
 
+void VulkanDescriptorSet::write(
+    uint32_t binding, const std::vector<DescriptorBufferInfo> &bufferInfos,
+    DescriptorType type, uint32_t start) {
+  std::vector<VkDescriptorBufferInfo> vkBufferInfos(bufferInfos.size(),
+                                                    VkDescriptorBufferInfo{});
+
+  for (size_t i = 0; i < bufferInfos.size(); ++i) {
+    const auto &vkBuffer = mRegistry.getBuffers().at(bufferInfos.at(i).buffer);
+    vkBufferInfos.at(i).buffer = vkBuffer->getBuffer();
+    vkBufferInfos.at(i).offset = bufferInfos.at(i).offset;
+    vkBufferInfos.at(i).range = bufferInfos.at(i).range;
+  }
+
+  write(binding, start, bufferInfos.size(), type, nullptr,
+        vkBufferInfos.data());
+}
+
 void VulkanDescriptorSet::write(uint32_t binding, uint32_t start,
                                 size_t descriptorCount, DescriptorType type,
                                 const VkDescriptorImageInfo *imageInfos,

@@ -25,6 +25,7 @@ VulkanDescriptorPool::~VulkanDescriptorPool() {
 
 void VulkanDescriptorPool::createDescriptorPool() {
   static constexpr uint32_t NumUniformBuffers = 15000;
+  static constexpr uint32_t NumUniformBuffersDynamic = 20;
   static constexpr uint32_t NumStorageBuffers = 10;
   static constexpr uint32_t NumSamplers = 1000;
   static constexpr uint32_t NumDescriptors = 30000;
@@ -33,9 +34,11 @@ void VulkanDescriptorPool::createDescriptorPool() {
   static constexpr uint32_t MaxImageSamplers =
       MaxTextureDescriptors * NumSamplers;
 
-  std::array<VkDescriptorPoolSize, 3> poolSizes{
+  std::array<VkDescriptorPoolSize, 4> poolSizes{
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                            NumUniformBuffers},
+      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                           NumUniformBuffersDynamic},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                            NumStorageBuffers},
       VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -55,6 +58,7 @@ void VulkanDescriptorPool::createDescriptorPool() {
 
   LOG_DEBUG_VK("Descriptor pool created. Samplers: "
                    << MaxImageSamplers << "; UB: " << NumUniformBuffers
+                   << "; UBD: " << NumUniformBuffersDynamic
                    << "; SB: " << NumStorageBuffers,
                mDescriptorPool);
 }

@@ -13,7 +13,8 @@ void MockRenderCommandList::bindPipeline(liquid::rhi::PipelineHandle pipeline) {
 
 void MockRenderCommandList::bindDescriptor(
     liquid::rhi::PipelineHandle pipeline, uint32_t firstSet,
-    const liquid::rhi::Descriptor &descriptor) {}
+    const liquid::rhi::Descriptor &descriptor,
+    const std::vector<uint32_t> &dynamicOffsets) {}
 
 void MockRenderCommandList::bindVertexBuffer(liquid::rhi::BufferHandle buffer) {
 }

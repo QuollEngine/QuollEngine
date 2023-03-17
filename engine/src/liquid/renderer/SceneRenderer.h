@@ -79,7 +79,7 @@ public:
    *
    * @return Scene renderer frame data
    */
-  inline const std::array<SceneRendererFrameData, 2> &getFrameData() const {
+  inline const std::array<SceneRendererFrameData, 2> &getFrameData() {
     return mFrameData;
   }
 

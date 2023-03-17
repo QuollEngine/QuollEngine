@@ -3,7 +3,20 @@
 
 layout(location = 0) out vec2 outTexCoord;
 
-#include "bindless-base.glsl"
+#include "bindless/base.glsl"
+#include "bindless/camera.glsl"
+#include "bindless/text.glsl"
+
+layout(set = 2, binding = 0) uniform DrawParams {
+  uint textTransforms;
+  uint camera;
+  uint glyphs;
+  uint pad0;
+}
+uDrawParams;
+
+layout(push_constant) uniform PushConstants { uvec4 text; }
+pcTextParams;
 
 const uint QUAD_VERTICES = 6;
 
@@ -12,7 +25,7 @@ void main() {
 
   uint boundIndex = gl_VertexIndex % QUAD_VERTICES;
   uint glyphIndex =
-      pcDrawParameters.index10 + uint(floor(gl_VertexIndex / QUAD_VERTICES));
+      pcTextParams.text.y + uint(floor(gl_VertexIndex / QUAD_VERTICES));
 
   GlyphItem glyph = getGlyph(glyphIndex);
 

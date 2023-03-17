@@ -7,10 +7,12 @@
 using EntitySetCollidableTypeActionTest = ActionTestBase;
 
 TEST_P(EntitySetCollidableTypeActionTest,
-       ExecutorSetsCollidableTypeAndResetsTheParams) {
+       ExecutorSetsCollidableTypeAndResetsTheParamsOfExistingCollidable) {
   auto entity = activeScene().entityDatabase.create();
 
-  activeScene().entityDatabase.set<liquid::Collidable>(entity, {});
+  liquid::Collidable collidable{};
+  collidable.materialDesc.staticFriction = 5.0f;
+  activeScene().entityDatabase.set(entity, collidable);
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
@@ -26,16 +28,41 @@ TEST_P(EntitySetCollidableTypeActionTest,
                 .geometryDesc.type,
             liquid::PhysicsGeometryType::Sphere);
   EXPECT_EQ(sphere.radius, liquid::PhysicsGeometrySphere{}.radius);
+  EXPECT_EQ(activeScene()
+                .entityDatabase.get<liquid::Collidable>(entity)
+                .materialDesc.staticFriction,
+            5.0f);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,
-       PredicatesReturnsFalseIfNoCollidableComponentForEntity) {
+       ExecutorCreatesNewCollidableIfEntityDoesNotHaveCollidable) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntitySetCollidableType action(
+      entity, liquid::PhysicsGeometryType::Capsule);
+  auto res = action.onExecute(state);
+
+  auto capsule = std::get<liquid::PhysicsGeometryCapsule>(
+      activeScene()
+          .entityDatabase.get<liquid::Collidable>(entity)
+          .geometryDesc.params);
+
+  EXPECT_EQ(activeScene()
+                .entityDatabase.get<liquid::Collidable>(entity)
+                .geometryDesc.type,
+            liquid::PhysicsGeometryType::Capsule);
+  EXPECT_EQ(capsule.radius, liquid::PhysicsGeometryCapsule{}.radius);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntitySetCollidableTypeActionTest,
+       PredicatesReturnsTrueIfEntityHasNoCollidableComponent) {
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state));
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,

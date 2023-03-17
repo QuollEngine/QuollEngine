@@ -274,7 +274,12 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
        limits.optimalBufferCopyRowPitchAlignment},
       {"nonCoherentAtomSize", limits.nonCoherentAtomSize}};
 
-  return PhysicalDeviceInformation(mName, type, propertiesMap, limitsMap);
+  PhysicalDeviceInformation::Limits deviceLimits{};
+  deviceLimits.minUniformBufferOffsetAlignment =
+      static_cast<uint32_t>(limits.minUniformBufferOffsetAlignment);
+
+  return PhysicalDeviceInformation(mName, type, propertiesMap, limitsMap,
+                                   deviceLimits);
 }
 
 } // namespace liquid::rhi

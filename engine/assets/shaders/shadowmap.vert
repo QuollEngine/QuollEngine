@@ -4,12 +4,25 @@
 
 layout(location = 0) in vec3 inPosition;
 
-#include "bindless-base.glsl"
+#include "bindless/base.glsl"
+#include "bindless/mesh.glsl"
+#include "bindless/shadows.glsl"
+
+layout(set = 1, binding = 0) uniform DrawParams {
+  uint meshTransforms;
+  uint skinnedMeshTransforms;
+  uint skeletons;
+  uint shadows;
+}
+uDrawParams;
+
+layout(push_constant) uniform PushConstants { uvec4 shadow; }
+pcShadowParams;
 
 void main() {
   mat4 modelMatrix = getMeshTransform(gl_InstanceIndex).modelMatrix;
 
-  gl_Position = getShadowMap(pcDrawParameters.index9).shadowMatrix *
+  gl_Position = getShadowMap(pcShadowParams.shadow.x).shadowMatrix *
                 modelMatrix * vec4(inPosition, 1.0);
-  gl_Layer = int(pcDrawParameters.index9);
+  gl_Layer = int(pcShadowParams.shadow.x);
 }

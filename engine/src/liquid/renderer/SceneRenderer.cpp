@@ -3,6 +3,7 @@
 
 #include "SceneRenderer.h"
 #include "StandardPushConstants.h"
+#include "BindlessDrawParameters.h"
 
 namespace liquid {
 
@@ -109,6 +110,22 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
 
   {
+    struct ShadowDrawParams {
+      rhi::BufferHandle meshTransforms;
+      rhi::BufferHandle skinnedMeshTransforms;
+      rhi::BufferHandle skeletonTransforms;
+      rhi::BufferHandle shadows;
+    };
+
+    size_t shadowDrawOffset = 0;
+    for (auto &frameData : mFrameData) {
+      shadowDrawOffset =
+          frameData.getBindlessParams().addRange(ShadowDrawParams{
+              frameData.getMeshTransformsBuffer(),
+              frameData.getSkinnedMeshTransformsBuffer(),
+              frameData.getSkeletonsBuffer(), frameData.getShadowMapsBuffer()});
+    }
+
     auto &pass = graph.addGraphicsPass("shadowPass");
     pass.write(shadowmap, rhi::DepthStencilClear{1.0f, 0});
 
@@ -128,7 +145,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                 rhi::FrontFace::Clockwise}});
 
-    pass.setExecutor([vPipeline, vSkinnedPipeline, shadowmap,
+    pass.setExecutor([vPipeline, vSkinnedPipeline, shadowmap, shadowDrawOffset,
                       this](rhi::RenderCommandList &commandList,
                             const RenderGraphRegistry &registry,
                             uint32_t frameIndex) {
@@ -142,15 +159,15 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0,
                                    mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            pipeline, 1, frameData.getBindlessParams().getDescriptor(),
+            {static_cast<uint32_t>(shadowDrawOffset)});
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
              ++index) {
-          frameData.getDrawParams().index9 = index;
-
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                    sizeof(DrawParameters),
-                                    &frameData.getDrawParams());
+                                    sizeof(uint32_t), &index);
 
           render(commandList, pipeline, false, frameIndex);
         }
@@ -161,15 +178,17 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(skinnedPipeline, 0,
                                    mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            pipeline, 1, frameData.getBindlessParams().getDescriptor(),
+            {static_cast<uint32_t>(shadowDrawOffset)});
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
              ++index) {
-          frameData.getDrawParams().index9 = index;
 
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                    sizeof(DrawParameters),
-                                    &frameData.getDrawParams());
+                                    sizeof(uint32_t), &index);
+
           renderSkinned(commandList, skinnedPipeline, false, frameIndex);
         }
       }
@@ -177,6 +196,27 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   } // shadow pass
 
   {
+    struct MeshDrawParams {
+      rhi::BufferHandle meshTransforms;
+      rhi::BufferHandle skinnedMeshTransforms;
+      rhi::BufferHandle skeletonTransforms;
+      rhi::BufferHandle camera;
+      rhi::BufferHandle scene;
+      rhi::BufferHandle lights;
+      rhi::BufferHandle shadows;
+      uint32_t pad0;
+    };
+
+    size_t offset = 0;
+    for (auto &frameData : mFrameData) {
+      offset = frameData.getBindlessParams().addRange(MeshDrawParams{
+          frameData.getMeshTransformsBuffer(),
+          frameData.getSkinnedMeshTransformsBuffer(),
+          frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
+          frameData.getSceneBuffer(), frameData.getLightsBuffer(),
+          frameData.getShadowMapsBuffer()});
+    }
+
     auto &pass = graph.addGraphicsPass("meshPass");
     pass.read(shadowmap);
     pass.write(sceneColor, mClearColor);
@@ -200,7 +240,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                 rhi::FrontFace::Clockwise},
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
 
-    pass.setExecutor([this, vPipeline, vSkinnedPipeline,
+    pass.setExecutor([this, vPipeline, vSkinnedPipeline, offset,
                       shadowmap](rhi::RenderCommandList &commandList,
                                  const RenderGraphRegistry &registry,
                                  uint32_t frameIndex) {
@@ -218,10 +258,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                    mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
             pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
-
-        commandList.pushConstants(
-            pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-            sizeof(DrawParameters), &frameData.getDrawParams());
+        commandList.bindDescriptor(
+            pipeline, 3, frameData.getBindlessParams().getDescriptor(),
+            {static_cast<uint32_t>(offset)});
 
         render(commandList, pipeline, true, frameIndex);
       }
@@ -234,11 +273,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                    mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
             skinnedPipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
-
-        commandList.pushConstants(
-            skinnedPipeline,
-            rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-            sizeof(DrawParameters), &frameData.getDrawParams());
+        commandList.bindDescriptor(
+            pipeline, 3, frameData.getBindlessParams().getDescriptor(),
+            {static_cast<uint32_t>(offset)});
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
@@ -246,6 +283,19 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   } // mesh pass
 
   {
+    struct SkyboxDrawParams {
+      rhi::BufferHandle camera;
+      rhi::BufferHandle skybox;
+      uint32_t pad0;
+      uint32_t pad1;
+    };
+
+    size_t skyboxOffset = 0;
+    for (auto &frameData : mFrameData) {
+      skyboxOffset = frameData.getBindlessParams().addRange(SkyboxDrawParams{
+          frameData.getCameraBuffer(), frameData.getSkyboxBuffer()});
+    }
+
     auto &pass = graph.addGraphicsPass("skyboxPass");
     pass.write(sceneColor, mClearColor);
     pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
@@ -257,9 +307,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
-    pass.setExecutor([vPipeline, this](rhi::RenderCommandList &commandList,
-                                       const RenderGraphRegistry &registry,
-                                       uint32_t frameIndex) {
+    pass.setExecutor([vPipeline, skyboxOffset,
+                      this](rhi::RenderCommandList &commandList,
+                            const RenderGraphRegistry &registry,
+                            uint32_t frameIndex) {
       auto &frameData = mFrameData.at(frameIndex);
       auto pipeline = registry.get(vPipeline);
 
@@ -269,9 +320,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
-      commandList.pushConstants(
-          pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-          sizeof(DrawParameters), &frameData.getDrawParams());
+      commandList.bindDescriptor(pipeline, 2,
+                                 frameData.getBindlessParams().getDescriptor(),
+                                 {static_cast<uint32_t>(skyboxOffset)});
 
       const auto &cube = mAssetRegistry.getMeshes()
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
@@ -328,6 +379,20 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
 void SceneRenderer::attachText(RenderGraph &graph,
                                const SceneRenderPassData &passData) {
+  struct TextDrawParams {
+    rhi::BufferHandle textTransforms;
+    rhi::BufferHandle camera;
+    rhi::BufferHandle glyphs;
+    uint32_t pad0;
+  };
+
+  size_t offset = 0;
+  for (auto &frameData : mFrameData) {
+    offset = frameData.getBindlessParams().addRange(TextDrawParams{
+        frameData.getTextTransformsBuffer(), frameData.getCameraBuffer(),
+        frameData.getGlyphsBuffer()});
+  }
+
   auto &pass = graph.addGraphicsPass("textPass");
   pass.write(passData.sceneColor, mClearColor);
   pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
@@ -344,16 +409,24 @@ void SceneRenderer::attachText(RenderGraph &graph,
           rhi::BlendOp::Add, rhi::BlendFactor::One,
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
-  pass.setExecutor([vTextPipeline, this](rhi::RenderCommandList &commandList,
-                                         const RenderGraphRegistry &registry,
-                                         uint32_t frameIndex) {
+  pass.setExecutor([vTextPipeline, offset,
+                    this](rhi::RenderCommandList &commandList,
+                          const RenderGraphRegistry &registry,
+                          uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     auto textPipeline = registry.get(vTextPipeline);
 
     commandList.bindPipeline(textPipeline);
+    commandList.bindDescriptor(textPipeline, 2,
+                               frameData.getBindlessParams().getDescriptor(),
+                               {static_cast<uint32_t>(offset)});
     renderText(commandList, textPipeline, frameIndex);
   });
+
+  for (auto &frameData : mFrameData) {
+    frameData.getBindlessParams().build(mRenderStorage.getDevice());
+  }
 }
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
@@ -547,12 +620,12 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
                                mRenderStorage.getGlobalTexturesDescriptor());
 
     for (auto &text : texts) {
-      frameData.getDrawParams().index9 = rhi::castHandleToUint(textureHandle);
-      frameData.getDrawParams().index10 = text.glyphStart;
+      glm::uvec4 textConstants{rhi::castHandleToUint(textureHandle),
+                               text.glyphStart, 0, 0};
 
       commandList.pushConstants(
           pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-          sizeof(DrawParameters), &frameData.getDrawParams());
+          sizeof(glm::uvec4), glm::value_ptr(textConstants));
 
       commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
                        1, text.index);

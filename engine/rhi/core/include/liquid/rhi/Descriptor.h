@@ -63,6 +63,19 @@ public:
                     DescriptorType type, uint32_t start = 0);
 
   /**
+   * @brief Bind buffer descriptors
+   *
+   * @param binding Binding number
+   * @param bufferInfos Buffer infos
+   * @param type Descriptor type
+   * @param start Starting index
+   * @return Current object
+   */
+  Descriptor &write(uint32_t binding,
+                    const std::vector<DescriptorBufferInfo> &bufferInfos,
+                    DescriptorType type, uint32_t start = 0);
+
+  /**
    * @brief Get descriptor handle
    *
    * @return Descriptor handle

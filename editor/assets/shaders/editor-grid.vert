@@ -7,6 +7,16 @@ layout(location = 2) out mat4 outViewProj;
 
 #include "bindless-editor.glsl"
 
+layout(set = 1, binding = 0) uniform DrawParameters {
+  uint gizmoTransforms;
+  uint skeletonTransforms;
+  uint debugSkeletons;
+  uint collidbaleParams;
+  uint camera;
+  uint gridData;
+}
+uDrawParams;
+
 const float GRID_SIZE = 1.0;
 const vec3 PLANE_VERTICES[4] =
     vec3[](vec3(1.0, 1.0, 0.0), vec3(-1.0, -1.0, 0.0), vec3(-1.0, 1.0, 0.0),

@@ -33,4 +33,13 @@ Descriptor &Descriptor::write(uint32_t binding,
   return *this;
 }
 
+Descriptor &
+Descriptor::write(uint32_t binding,
+                  const std::vector<DescriptorBufferInfo> &bufferInfos,
+                  DescriptorType type, uint32_t start) {
+  mNativeDescriptor->write(binding, bufferInfos, type, start);
+
+  return *this;
+}
+
 } // namespace liquid::rhi

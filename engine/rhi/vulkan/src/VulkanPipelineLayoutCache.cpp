@@ -31,8 +31,7 @@ static bool bindingsMatch(const VkDescriptorSetLayoutBinding &a,
  */
 static bool bindingsMatch(const DescriptorLayoutBindingDescription &a,
                           const DescriptorLayoutBindingDescription &b) {
-  return (a.binding == b.binding) && (a.descriptorType == b.descriptorType) &&
-         (a.name == b.name);
+  return (a.binding == b.binding) && (a.name == b.name);
 }
 
 VulkanPipelineLayoutCache::VulkanPipelineLayoutCache(VulkanDeviceObject &device)
