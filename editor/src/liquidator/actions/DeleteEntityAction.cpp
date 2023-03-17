@@ -11,7 +11,16 @@ ActionExecutorResult DeleteEntityAction::onExecute(WorkspaceState &state) {
 
   scene.entityDatabase.set<Delete>(mEntity, {});
 
-  if (state.selectedEntity == mEntity) {
+  auto current = state.selectedEntity;
+
+  bool preserveSelectedEntity = current != mEntity;
+  while (preserveSelectedEntity && scene.entityDatabase.has<Parent>(current)) {
+    auto parent = scene.entityDatabase.get<Parent>(current).parent;
+    preserveSelectedEntity = parent != mEntity;
+    current = parent;
+  }
+
+  if (!preserveSelectedEntity) {
     state.selectedEntity = Entity::Null;
   }
 

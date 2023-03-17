@@ -73,6 +73,10 @@ static bool ImguiMultilineInputText(const String &label, String &value,
 
 void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
                          Entity entity) {
+  if (entity == Entity::Null) {
+    return;
+  }
+
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   setSelectedEntity(scene, entity);

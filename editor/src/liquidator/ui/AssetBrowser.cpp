@@ -5,6 +5,8 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
+#include "liquidator/actions/SpawnEntityActions.h"
+
 namespace liquid::editor {
 
 /**
@@ -96,8 +98,7 @@ AssetBrowser::AssetBrowser(AssetLoader &assetLoader)
 
 void AssetBrowser::render(AssetManager &assetManager,
                           IconRegistry &iconRegistry, WorkspaceState &state,
-                          EditorManager &editorManager,
-                          EntityManager &entityManager) {
+                          ActionExecutor &actionExecutor) {
   static constexpr uint32_t ItemWidth = 90;
   static constexpr uint32_t ItemHeight = 100;
   static constexpr ImVec2 IconSize(80.0f, 80.0f);
@@ -237,8 +238,8 @@ void AssetBrowser::render(AssetManager &assetManager,
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
-              entityManager.spawnEntity(state.camera, Entity::Null, entry.asset,
-                                        entry.assetType);
+              actionExecutor.execute(std::make_unique<SpawnPrefabAtView>(
+                  static_cast<PrefabAssetHandle>(entry.asset), state.camera));
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
