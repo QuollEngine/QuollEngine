@@ -9,6 +9,19 @@ layout(location = 0) out vec4 outColor;
 
 #include "bindless-editor.glsl"
 
+RegisterUniform(GridData, { uvec4 gridLines; });
+#define getGridData() GetBindlessResource(GridData, uDrawParams.gridData)
+
+layout(set = 1, binding = 0) uniform DrawParameters {
+  uint gizmoTransforms;
+  uint skeletonTransforms;
+  uint debugSkeletons;
+  uint collidbaleParams;
+  uint camera;
+  uint gridData;
+}
+uDrawParams;
+
 const vec3 LINE_COLOR = vec3(0.5, 0.5, 0.5);
 const vec3 X_AXIS_COLOR = vec3(1.0, 0.0, 0.0);
 const vec3 Z_AXIS_COLOR = vec3(0.0, 0.0, 1.0);

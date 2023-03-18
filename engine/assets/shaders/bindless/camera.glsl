@@ -6,7 +6,5 @@ struct CameraData {
 
 RegisterUniform(CameraUniform, { CameraData camera; });
 
-#ifdef Bindless
-#define getCameraFromReg(register)                                             \
-  GetBindlessResourceFromPC(CameraUniform, register).camera
-#endif
+#define getCamera()                                                            \
+  GetBindlessResource(CameraUniform, uDrawParams.camera).camera

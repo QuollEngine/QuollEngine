@@ -6,7 +6,7 @@
 
 #include "liquid/scene/Camera.h"
 #include "liquid/renderer/RenderStorage.h"
-#include "liquid/renderer/DrawParameters.h"
+#include "liquid/renderer/BindlessDrawParameters.h"
 
 #include "liquid/entity/EntityDatabase.h"
 
@@ -206,11 +206,11 @@ public:
   }
 
   /**
-   * @brief Get draw parameters
+   * @brief Get bindless parameters
    *
-   * @return Draw parameters
+   * @return Bindless parameters
    */
-  inline DrawParameters &getDrawParams() { return mDrawParams; }
+  inline BindlessDrawParameters &getBindlessParams() { return mBindlessParams; }
 
 private:
   size_t mReservedSpace = 0;
@@ -242,7 +242,7 @@ private:
 
   rhi::Buffer mCollidableEntityBuffer;
 
-  DrawParameters mDrawParams;
+  BindlessDrawParameters mBindlessParams;
 };
 
 } // namespace liquid::editor

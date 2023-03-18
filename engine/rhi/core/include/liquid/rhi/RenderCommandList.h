@@ -99,10 +99,13 @@ public:
    * @param pipeline Pipeline
    * @param firstSet First set
    * @param descriptor Descriptor
+   * @param dynamicOffsets Dynamic offsets
    */
   inline void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
-                             const Descriptor &descriptor) {
-    mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor);
+                             const Descriptor &descriptor,
+                             const std::vector<uint32_t> &dynamicOffsets = {}) {
+    mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor,
+                                             dynamicOffsets);
   }
 
   /**

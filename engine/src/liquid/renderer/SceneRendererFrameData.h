@@ -5,7 +5,7 @@
 #include "liquid/entity/Entity.h"
 #include "liquid/renderer/Material.h"
 #include "liquid/entity/EntityDatabase.h"
-#include "liquid/renderer/DrawParameters.h"
+#include "liquid/renderer/BindlessDrawParameters.h"
 
 namespace liquid {
 
@@ -384,18 +384,110 @@ public:
   inline size_t getReservedSpace() const { return mReservedSpace; }
 
   /**
-   * @brief Get draw parameters
+   * @brief Get bindless parameters
    *
-   * @return Draw parameters
+   * @return Bindless parameters
    */
-  inline DrawParameters &getDrawParams() { return mDrawParams; }
+  inline BindlessDrawParameters &getBindlessParams() { return mBindlessParams; }
 
   /**
-   * @brief Get draw parameters
+   * @brief Get bindless parameters
    *
-   * @return Draw parameters
+   * @return Bindless parameters
    */
-  inline const DrawParameters &getDrawParams() const { return mDrawParams; }
+  inline const BindlessDrawParameters &getBindlessParams() const {
+    return mBindlessParams;
+  }
+
+  /**
+   * @brief Get mesh transforms buffer
+   *
+   * @return Mesh transforms buffer
+   */
+  inline rhi::BufferHandle getMeshTransformsBuffer() const {
+    return mMeshTransformsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get skinned mesh transforms buffer
+   *
+   * @return Skinned mesh transforms buffer
+   */
+  inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
+    return mSkinnedMeshTransformsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get text transforms buffer
+   *
+   * @return Text transforms buffer
+   */
+  inline rhi::BufferHandle getTextTransformsBuffer() const {
+    return mTextTransformsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get skeletons buffer
+   *
+   * @return Skeletons buffer
+   */
+  inline rhi::BufferHandle getSkeletonsBuffer() const {
+    return mSkeletonsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get camera buffer
+   *
+   * @return Camera buffer
+   */
+  inline rhi::BufferHandle getCameraBuffer() const {
+    return mCameraBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get scene buffer
+   *
+   * @return Scene buffer
+   */
+  inline rhi::BufferHandle getSceneBuffer() const {
+    return mSceneBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get lights buffer
+   *
+   * @return Lights buffer
+   */
+  inline rhi::BufferHandle getLightsBuffer() const {
+    return mLightsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get shadow maps buffer
+   *
+   * @return Shadow maps buffer
+   */
+  inline rhi::BufferHandle getShadowMapsBuffer() const {
+    return mShadowMapsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get skybox buffer
+   *
+   * @return Skybox buffer
+   */
+  inline rhi::BufferHandle getSkyboxBuffer() const {
+    return mSkyboxBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get glyphs buffer
+   *
+   * @return Glyphs buffer
+   */
+  inline rhi::BufferHandle getGlyphsBuffer() const {
+    return mTextGlyphsBuffer.getHandle();
+  }
 
 private:
   /**
@@ -438,7 +530,7 @@ private:
 
   size_t mReservedSpace = 0;
 
-  DrawParameters mDrawParams;
+  BindlessDrawParameters mBindlessParams;
 };
 
 } // namespace liquid

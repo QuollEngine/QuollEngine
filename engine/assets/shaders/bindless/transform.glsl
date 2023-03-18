@@ -1,3 +1,6 @@
+#ifndef TRANSFORM_GLSL
+#define TRANSFORM_GLSL
+
 /**
  * @brief Single object transforms
  */
@@ -10,7 +13,4 @@ struct TransformItem {
 
 RegisterBuffer(std430, readonly, TransformData, { TransformItem items[]; });
 
-#ifdef Bindless
-#define getTransform(register, index)                                          \
-  GetBindlessResourceFromPC(TransformData, register).items[index]
 #endif

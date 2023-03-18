@@ -8,7 +8,23 @@ layout(location = 3) in mat3 inTBN;
 
 layout(location = 0) out vec4 outColor;
 
-#include "bindless-base.glsl"
+#include "bindless/base.glsl"
+#include "bindless/camera.glsl"
+#include "bindless/scene.glsl"
+#include "bindless/shadows.glsl"
+#include "bindless/lights.glsl"
+
+layout(set = 3, binding = 0) uniform DrawParams {
+  uint meshTransforms;
+  uint skinnedMeshTransforms;
+  uint skeletons;
+  uint camera;
+  uint scene;
+  uint lights;
+  uint shadows;
+  uint pad0;
+}
+uDrawParams;
 
 layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 1, binding = 0) uniform sampler2DArray uTextures2DArray[];
@@ -164,9 +180,9 @@ const float PI = 3.141592653589793;
 const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
                                   0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 1.0);
 
-#define IrradianceMap uTexturesCube[getSceneData().textures.x]
-#define SpecularMap uTexturesCube[getSceneData().textures.y]
-#define BrdfLut uGlobalTextures[getSceneData().textures.z]
+#define IrradianceMap uTexturesCube[getScene().textures.x]
+#define SpecularMap uTexturesCube[getScene().textures.y]
+#define BrdfLut uGlobalTextures[getScene().textures.z]
 
 /**
  * @brief Lambertian diffuse
@@ -285,7 +301,7 @@ LightCalculations getDirectionalLightSurfaceCalculations(LightItem light,
 float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
                                    uint cascadeIndex) {
   float closestDepth =
-      texture(uTextures2DArray[getSceneData().textures.w],
+      texture(uTextures2DArray[getScene().textures.w],
               vec3(shadowCoords.x + offset.x, 1.0 - shadowCoords.y + offset.y,
                    cascadeIndex))
           .r;
@@ -327,7 +343,7 @@ float calculateShadowFactor(LightItem item) {
 
   // Use percentage closer filtering
   if (getShadowMap(cascadeIndex).shadowData.y > 0.5) {
-    ivec2 size = textureSize(uTextures2DArray[getSceneData().textures.w], 0).xy;
+    ivec2 size = textureSize(uTextures2DArray[getScene().textures.w], 0).xy;
     float scale = 0.75;
 
     float dx = scale / float(size.x);
@@ -392,7 +408,7 @@ void main() {
 
   float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
 
-  uint num = getSceneData().data.x;
+  uint num = getScene().data.x;
   for (uint i = 0; i < num; i++) {
     LightCalculations calc;
     LightItem item = getLight(i);
@@ -422,14 +438,14 @@ void main() {
              (diffuseBRDF + specularBRDF);
   }
 
-  if (getSceneData().data.y == 1) {
+  if (getScene().data.y == 1) {
     vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
 
     vec3 kS = schlickFresnel(F0, NdotV);
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
-    color += getSceneData().color.rgb * (kD + kS * brdfLut.r + brdfLut.g);
-  } else if (getSceneData().data.y == 2 && getSceneData().textures.x > 0) {
+    color += getScene().color.rgb * (kD + kS * brdfLut.r + brdfLut.g);
+  } else if (getScene().data.y == 2 && getScene().textures.x > 0) {
     vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
 
     vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;

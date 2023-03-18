@@ -18,6 +18,10 @@ public:
              const std::vector<liquid::rhi::BufferHandle> &buffers,
              liquid::rhi::DescriptorType type, uint32_t start) override;
 
+  void write(uint32_t binding,
+             const std::vector<liquid::rhi::DescriptorBufferInfo> &bufferInfos,
+             liquid::rhi::DescriptorType type, uint32_t start) override;
+
 public:
   liquid::rhi::DescriptorLayoutHandle mLayout{0};
 };

@@ -51,16 +51,17 @@ void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
-                                         uint32_t firstSet,
-                                         const Descriptor &descriptor) {
+void VulkanCommandBuffer::bindDescriptor(
+    PipelineHandle pipeline, uint32_t firstSet, const Descriptor &descriptor,
+    const std::vector<uint32_t> &dynamicOffsets) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());
 
-  vkCmdBindDescriptorSets(mCommandBuffer, vulkanPipeline->getBindPoint(),
-                          vulkanPipeline->getPipelineLayout(), firstSet, 1,
-                          &descriptorSet, 0, {});
+  vkCmdBindDescriptorSets(
+      mCommandBuffer, vulkanPipeline->getBindPoint(),
+      vulkanPipeline->getPipelineLayout(), firstSet, 1, &descriptorSet,
+      static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
   mStats.addCommandCall();
 }
 

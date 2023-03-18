@@ -120,10 +120,9 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
       commandList.bindPipeline(collidableShapePipeline);
       commandList.bindDescriptor(collidableShapePipeline, 0,
                                  mRenderStorage.getGlobalBuffersDescriptor());
-
-      commandList.pushConstants(
-          collidableShapePipeline, rhi::ShaderStage::Vertex, 0,
-          sizeof(DrawParameters), &frameData.getDrawParams());
+      commandList.bindDescriptor(collidableShapePipeline, 1,
+                                 frameData.getBindlessParams().getDescriptor(),
+                                 {0});
 
       auto type = frameData.getCollidableShapeType();
 
@@ -144,14 +143,11 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
       LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
 
       commandList.bindPipeline(editorGridPipeline);
-
       commandList.bindDescriptor(editorGridPipeline, 0,
                                  mRenderStorage.getGlobalBuffersDescriptor());
-
-      commandList.pushConstants(
-          editorGridPipeline,
-          rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-          sizeof(DrawParameters), &frameData.getDrawParams());
+      commandList.bindDescriptor(editorGridPipeline, 1,
+                                 frameData.getBindlessParams().getDescriptor(),
+                                 {0});
 
       static constexpr uint32_t GridPlaneNumVertices = 6;
       commandList.draw(GridPlaneNumVertices, 0);
@@ -164,10 +160,9 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
       commandList.bindPipeline(skeletonLinesPipeline);
       commandList.bindDescriptor(skeletonLinesPipeline, 0,
                                  mRenderStorage.getGlobalBuffersDescriptor());
-
-      commandList.pushConstants(skeletonLinesPipeline, rhi::ShaderStage::Vertex,
-                                0, sizeof(DrawParameters),
-                                &frameData.getDrawParams());
+      commandList.bindDescriptor(skeletonLinesPipeline, 1,
+                                 frameData.getBindlessParams().getDescriptor(),
+                                 {0});
 
       const auto &numBones = frameData.getBoneCounts();
 
@@ -185,15 +180,16 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(objectIconsPipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
+      commandList.bindDescriptor(objectIconsPipeline, 2,
+                                 frameData.getBindlessParams().getDescriptor(),
+                                 {0});
 
       uint32_t previousInstance = 0;
       for (auto &[icon, count] : frameData.getGizmoCounts()) {
-
-        frameData.getDrawParams().index8 = rhi::castHandleToUint(icon);
-        commandList.pushConstants(
-            objectIconsPipeline,
-            rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-            sizeof(DrawParameters), &frameData.getDrawParams());
+        auto uIcon = rhi::castHandleToUint(icon);
+        commandList.pushConstants(objectIconsPipeline,
+                                  rhi::ShaderStage::Fragment, 0,
+                                  sizeof(uint32_t), &uIcon);
 
         commandList.draw(4, 0, count, previousInstance);
 

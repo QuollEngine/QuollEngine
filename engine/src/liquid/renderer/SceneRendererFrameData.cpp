@@ -8,8 +8,11 @@ namespace liquid {
 SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
                                                rhi::RenderDevice *device,
                                                size_t reservedSpace)
-    : mReservedSpace(reservedSpace) {
-
+    : mReservedSpace(reservedSpace),
+      mBindlessParams(renderStorage.getDevice()
+                          ->getDeviceInformation()
+                          .getLimits()
+                          .minUniformBufferOffsetAlignment) {
   mLights.reserve(MaxNumLights);
   mShadowMaps.reserve(MaxShadowMaps);
 
@@ -69,18 +72,6 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
     mShadowMapsBuffer = renderStorage.createBuffer(desc);
   }
-
-  mDrawParams.index0 = rhi::castHandleToUint(mMeshTransformsBuffer.getHandle());
-  mDrawParams.index1 =
-      rhi::castHandleToUint(mSkinnedMeshTransformsBuffer.getHandle());
-  mDrawParams.index2 = rhi::castHandleToUint(mSkeletonsBuffer.getHandle());
-  mDrawParams.index3 = rhi::castHandleToUint(mTextTransformsBuffer.getHandle());
-  mDrawParams.index4 = rhi::castHandleToUint(mTextGlyphsBuffer.getHandle());
-  mDrawParams.index5 = rhi::castHandleToUint(mLightsBuffer.getHandle());
-  mDrawParams.index6 = rhi::castHandleToUint(mShadowMapsBuffer.getHandle());
-  mDrawParams.index7 = rhi::castHandleToUint(mCameraBuffer.getHandle());
-  mDrawParams.index8 = rhi::castHandleToUint(mSceneBuffer.getHandle());
-  mDrawParams.index9 = rhi::castHandleToUint(mSkyboxBuffer.getHandle());
 }
 
 void SceneRendererFrameData::updateBuffers() {
@@ -143,7 +134,6 @@ void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
 void SceneRendererFrameData::addSkinnedMesh(
     SkinnedMeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton) {
-
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
     mSkinnedMeshGroups.insert({handle, SkinnedMeshData{}});
   }

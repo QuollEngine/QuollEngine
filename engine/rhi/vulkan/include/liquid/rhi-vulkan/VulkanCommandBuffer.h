@@ -76,9 +76,11 @@ public:
    * @param pipeline Pipeline
    * @param firstSet First set
    * @param descriptor Descriptor
+   * @param dynamicOffsets Dynamic offsets
    */
   void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
-                      const Descriptor &descriptor) override;
+                      const Descriptor &descriptor,
+                      const std::vector<uint32_t> &dynamicOffsets) override;
 
   /**
    * @brief Bind vertex buffer
