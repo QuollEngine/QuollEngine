@@ -43,25 +43,6 @@
 
 namespace liquid::editor {
 
-/**
- * @brief Get imguizmo operation
- *
- * @param transformOperation Transform operation
- * @return Imguizmo operation
- */
-static ImGuizmo::OPERATION
-getImguizmoOperation(TransformOperation transformOperation) {
-  switch (transformOperation) {
-  case TransformOperation::Scale:
-    return ImGuizmo::SCALE;
-  case TransformOperation::Rotate:
-    return ImGuizmo::ROTATE;
-  case TransformOperation::Move:
-  default:
-    return ImGuizmo::TRANSLATE;
-  }
-}
-
 EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
                            rhi::RenderDevice *device)
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
@@ -104,16 +85,14 @@ void EditorScreen::start(const Project &project) {
   tracker.trackForChanges();
 
   WorkspaceState state{project, assetManager.getAssetRegistry()};
+  state.scene.entityDatabase.reg<CameraLookAt>();
 
   ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
+  actionExecutor.getSceneIO().loadScene(project.scenesPath / "main.lqscene");
 
-  EntityManager entityManager(assetManager, actionExecutor.getSceneIO(), state,
-                              project.scenesPath);
-  EditorCamera editorCamera(entityManager.getActiveEntityDatabase(),
-                            mEventSystem, mWindow);
+  EditorCamera editorCamera(state.scene.entityDatabase, mEventSystem, mWindow);
 
-  EditorManager editorManager(editorCamera, entityManager, project);
-  editorManager.loadOrCreateScene();
+  EditorManager editorManager(editorCamera, project);
   editorManager.loadWorkspaceState(statePath, state);
 
   MainLoop mainLoop(mWindow, fpsCounter);
@@ -176,22 +155,19 @@ void EditorScreen::start(const Project &project) {
 
   mWindow.maximize();
 
-  mainLoop.setUpdateFn(
-      [&entityManager, &state, &simulator, this](float dt) mutable {
-        mEventSystem.poll();
-        simulator.update(dt, state);
-        return true;
-      });
+  mainLoop.setUpdateFn([&state, &simulator, this](float dt) mutable {
+    mEventSystem.poll();
+    simulator.update(dt, state);
+    return true;
+  });
 
   LogViewer logViewer;
-  mainLoop.setRenderFn([&renderer, &editorManager, &entityManager,
-                        &editorCamera, &assetManager, &graph, &scenePassGroup,
-                        &imguiPassGroup, &ui, &debugLayer, &preloadStatusDialog,
-                        &presenter, &editorRenderer, &simulator, &mousePicking,
+  mainLoop.setRenderFn([&renderer, &editorManager, &editorCamera, &assetManager,
+                        &graph, &scenePassGroup, &imguiPassGroup, &ui,
+                        &debugLayer, &preloadStatusDialog, &presenter,
+                        &editorRenderer, &simulator, &mousePicking,
                         &systemLogStorage, &userLogStorage, &logViewer, &state,
                         &actionExecutor, this]() {
-    auto &entityDatabase = entityManager.getActiveEntityDatabase();
-
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -200,8 +176,6 @@ void EditorScreen::start(const Project &project) {
 
     imgui.beginRendering();
     ImGuizmo::BeginFrame();
-
-    bool mouseClicked = false;
 
     ui.render(state, editorManager, assetManager);
 
@@ -212,42 +186,8 @@ void EditorScreen::start(const Project &project) {
 
     logViewer.render(systemLogStorage, userLogStorage);
 
-    if (auto _ = SceneView(scenePassGroup.sceneColor)) {
-      const auto &pos = ImGui::GetItemRectMin();
-      const auto &size = ImGui::GetItemRectSize();
-
-      editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
-                               ImGui::IsItemHovered());
-
-      mouseClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
-
-      ImGuizmo::SetDrawlist();
-      ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
-
-      if (state.selectedEntity != Entity::Null) {
-        auto selected = state.selectedEntity;
-        const auto &world = entityDatabase.get<WorldTransform>(selected);
-
-        auto worldTransform = world.worldTransform;
-
-        const auto &camera = entityDatabase.get<Camera>(state.camera);
-
-        auto gizmoPerspective = camera.projectionMatrix;
-
-        if (ImGuizmo::Manipulate(
-                glm::value_ptr(camera.viewMatrix),
-                glm::value_ptr(gizmoPerspective),
-                getImguizmoOperation(state.activeTransform), ImGuizmo::LOCAL,
-                glm::value_ptr(worldTransform), nullptr, nullptr, nullptr)) {
-          entityManager.updateLocalTransformUsingWorld(selected,
-                                                       worldTransform);
-        }
-
-        if (ImGuizmo::IsOver()) {
-          mouseClicked = false;
-        }
-      }
-    }
+    bool mouseClicked =
+        ui.renderSceneView(state, scenePassGroup.sceneColor, editorCamera);
 
     StatusBar::render(editorManager);
 
@@ -266,12 +206,16 @@ void EditorScreen::start(const Project &project) {
                       ? state.simulationScene.activeCamera
                       : state.camera;
 
+    auto &scene = state.mode == WorkspaceMode::Simulation
+                      ? state.simulationScene
+                      : state.scene;
+
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      sceneRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
-                                    camera, renderFrame.frameIndex);
-      editorRenderer.updateFrameData(entityManager.getActiveEntityDatabase(),
-                                     camera, state, renderFrame.frameIndex);
+      sceneRenderer.updateFrameData(scene.entityDatabase, camera,
+                                    renderFrame.frameIndex);
+      editorRenderer.updateFrameData(scene.entityDatabase, camera, state,
+                                     renderFrame.frameIndex);
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();

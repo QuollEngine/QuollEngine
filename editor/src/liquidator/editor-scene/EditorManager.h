@@ -4,7 +4,6 @@
 #include "liquidator/state/WorkspaceState.h"
 
 #include "EditorCamera.h"
-#include "EntityManager.h"
 
 namespace liquid::editor {
 
@@ -22,11 +21,9 @@ public:
    * @brief Create editor manager
    *
    * @param editorCamera Editor camera
-   * @param entityManager Entity manager
    * @param project Project
    */
-  EditorManager(EditorCamera &editorCamera, EntityManager &entityManager,
-                const Project &project);
+  EditorManager(EditorCamera &editorCamera, const Project &project);
 
   EditorManager(const EditorManager &) = delete;
   EditorManager(EditorManager &&) = delete;
@@ -59,20 +56,9 @@ public:
    */
   inline EditorCamera &getEditorCamera() { return mEditorCamera; }
 
-  /**
-   * @brief Creates a new scene and sets it as active
-   */
-  void createNewScene();
-
-  /**
-   * @brief Load or create scene
-   */
-  void loadOrCreateScene();
-
 private:
   EditorCamera &mEditorCamera;
   std::filesystem::path mScenePath;
-  EntityManager &mEntityManager;
   Project mProject;
 };
 

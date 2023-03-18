@@ -15,6 +15,7 @@
 #include "IconRegistry.h"
 #include "EnvironmentPanel.h"
 #include "SceneView.h"
+#include "SceneGizmos.h"
 #include "MainMenu.h"
 
 #include "liquidator/actions/ActionExecutor.h"
@@ -47,6 +48,18 @@ public:
    */
   void render(WorkspaceState &state, EditorManager &editorManager,
               AssetManager &assetManager);
+
+  /**
+   * @brief Render scene view
+   *
+   * @param state Workspace state
+   * @param sceneTexture Scene texture
+   * @param editorCamera Editor camera
+   * @retval true Entity is clicked
+   * @retval false Entity is not clicked
+   */
+  bool renderSceneView(WorkspaceState &state, rhi::TextureHandle sceneTexture,
+                       EditorCamera &editorCamera);
 
   /**
    * @brief Get icon registry
@@ -83,6 +96,7 @@ private:
   IconRegistry mIconRegistry;
   Toolbar mToolbar;
   MainMenu mMainMenu;
+  SceneGizmos mSceneGizmos;
 };
 
 } // namespace liquid::editor
