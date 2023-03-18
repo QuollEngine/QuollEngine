@@ -8,18 +8,16 @@
 
 namespace liquid::editor {
 
-EditorManager::EditorManager(EditorCamera &editorCamera,
-                             EntityManager &entityManager,
-                             const Project &project)
-    : mEditorCamera(editorCamera), mEntityManager(entityManager),
-      mProject(project) {}
+EditorManager::EditorManager(EditorCamera &editorCamera, const Project &project)
+    : mEditorCamera(editorCamera), mProject(project) {}
 
 void EditorManager::saveWorkspaceState(WorkspaceState &state,
                                        const std::filesystem::path &path) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
 
-  auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
-  const auto &lens = entityDatabase.get<PerspectiveLens>(state.camera);
-  const auto &lookAt = entityDatabase.get<CameraLookAt>(state.camera);
+  const auto &lens = scene.entityDatabase.get<PerspectiveLens>(state.camera);
+  const auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
 
   YAML::Node node;
   node["camera"]["fov"] = lens.fovY;
@@ -90,9 +88,12 @@ void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
       up = camera["up"].as<glm::vec3>(up);
     }
 
-    auto &entityDatabase = mEntityManager.getActiveEntityDatabase();
-    entityDatabase.set<PerspectiveLens>(state.camera, {fov, near, far});
-    entityDatabase.set<CameraLookAt>(state.camera, {eye, center, up});
+    auto &scene = state.mode == WorkspaceMode::Simulation
+                      ? state.simulationScene
+                      : state.scene;
+
+    scene.entityDatabase.set<PerspectiveLens>(state.camera, {fov, near, far});
+    scene.entityDatabase.set<CameraLookAt>(state.camera, {eye, center, up});
   }
 
   if (node["grid"].IsMap()) {
@@ -111,28 +112,6 @@ void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
 
     state.grid.x = static_cast<uint32_t>(gridLinesShown);
     state.grid.y = static_cast<uint32_t>(axisLinesShown);
-  }
-}
-
-void EditorManager::createNewScene() {
-  static constexpr glm::vec3 LightStartPos(0.0f, 5.0f, 0.0f);
-
-  {
-    LocalTransform transform{};
-    transform.localPosition = LightStartPos;
-    transform.localRotation =
-        glm::quat(glm::vec3(0.0f, 0.0f, glm::pi<float>()));
-
-    auto light1 =
-        mEntityManager.createEmptyEntity(Entity::Null, transform, "Light");
-    mEntityManager.getActiveEntityDatabase().set<DirectionalLight>(light1, {});
-    mEntityManager.save(light1);
-  }
-}
-
-void EditorManager::loadOrCreateScene() {
-  if (!mEntityManager.loadScene()) {
-    createNewScene();
   }
 }
 

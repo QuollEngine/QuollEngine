@@ -1,12 +1,13 @@
 #include "liquid/core/Base.h"
 #include "liquid/imgui/Imgui.h"
 
-#include "liquidator/actions/SetActiveTransformActions.h"
+#include "liquidator/actions/TransformOperationActions.h"
 #include "liquidator/actions/SimulationModeActions.h"
 #include "liquidator/actions/CreateEmptyEntityAtViewAction.h"
 #include "liquidator/actions/ExportAsGameAction.h"
 
 #include "UIRoot.h"
+#include "ImGuizmo.h"
 
 namespace liquid::editor {
 
@@ -45,6 +46,31 @@ void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
 
   mEditorCameraPanel.render(state, mActionExecutor);
   mAssetBrowser.render(assetManager, mIconRegistry, state, mActionExecutor);
+}
+
+bool UIRoot::renderSceneView(WorkspaceState &state,
+                             rhi::TextureHandle sceneTexture,
+                             EditorCamera &editorCamera) {
+
+  if (auto _ = SceneView(sceneTexture)) {
+    const auto &pos = ImGui::GetItemRectMin();
+    const auto &size = ImGui::GetItemRectSize();
+
+    editorCamera.setViewport(pos.x, pos.y, size.x, size.y,
+                             ImGui::IsItemHovered());
+
+    bool isItemClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+
+    ImGuizmo::SetDrawlist();
+    ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+
+    if (state.selectedEntity != Entity::Null) {
+      isItemClicked &= !mSceneGizmos.render(state, mActionExecutor);
+    }
+    return isItemClicked;
+  }
+
+  return false;
 }
 
 } // namespace liquid::editor

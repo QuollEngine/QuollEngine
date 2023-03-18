@@ -23,4 +23,23 @@ ActionExecutorResult EntitySetLocalTransform::onExecute(WorkspaceState &state) {
 
 bool EntitySetLocalTransform::predicate(WorkspaceState &state) { return true; }
 
+EntitySetLocalTransformContinuous::EntitySetLocalTransformContinuous(
+    Entity entity, LocalTransform localTransformStart)
+    : mEntity(entity), mLocalTransformStart(localTransformStart) {}
+
+void EntitySetLocalTransformContinuous::setLocalTransformFinal(
+    LocalTransform localTransformFinal) {
+  mLocalTransformFinal = localTransformFinal;
+}
+
+ActionExecutorResult
+EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state) {
+  return EntitySetLocalTransform(mEntity, mLocalTransformFinal.value())
+      .onExecute(state);
+}
+
+bool EntitySetLocalTransformContinuous::predicate(WorkspaceState &state) {
+  return mLocalTransformFinal.has_value();
+}
+
 } // namespace liquid::editor
