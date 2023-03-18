@@ -12,6 +12,9 @@ ActionExecutorResult EntitySetLocalTransform::onExecute(WorkspaceState &state) {
                                                         : state.scene;
 
   scene.entityDatabase.set(mEntity, mLocalTransform);
+  if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
+    scene.entityDatabase.set<WorldTransform>(mEntity, {});
+  }
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);

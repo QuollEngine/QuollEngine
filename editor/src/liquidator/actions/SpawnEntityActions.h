@@ -5,16 +5,17 @@
 namespace liquid::editor {
 
 /**
- * @brief Toggle debug bones for skeleton entity actions
+ * @brief Spawn prefab at given transform action
  */
-class EntityToggleSkeletonDebugBones : public Action {
+class SpawnPrefabAtTransform : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param entity Entity
+   * @param handle Prefab asset handle
+   * @param transform Transform
    */
-  EntityToggleSkeletonDebugBones(Entity entity);
+  SpawnPrefabAtTransform(PrefabAssetHandle handle, LocalTransform transform);
 
   /**
    * @brief Action executor
@@ -34,21 +35,22 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  Entity mEntity;
+  PrefabAssetHandle mHandle;
+  LocalTransform mTransform;
 };
 
 /**
- * @brief Set skeleton for entity action
+ * @brief Spawn prefab at camera view action
  */
-class EntitySetSkeleton : public Action {
+class SpawnPrefabAtView : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param entity Entity
-   * @param handle Skeleton asset handle
+   * @param handle Prefab asset handle
+   * @param camera Camera entity
    */
-  EntitySetSkeleton(Entity entity, SkeletonAssetHandle handle);
+  SpawnPrefabAtView(PrefabAssetHandle handle, Entity camera);
 
   /**
    * @brief Action executor
@@ -68,8 +70,8 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  Entity mEntity;
-  SkeletonAssetHandle mHandle;
+  PrefabAssetHandle mHandle;
+  Entity mCamera;
 };
 
 } // namespace liquid::editor

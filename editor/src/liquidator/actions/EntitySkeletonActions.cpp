@@ -41,4 +41,48 @@ bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state) {
   return scene.entityDatabase.has<Skeleton>(mEntity);
 }
 
+EntitySetSkeleton::EntitySetSkeleton(Entity entity, SkeletonAssetHandle handle)
+    : mEntity(entity), mHandle(handle) {}
+
+ActionExecutorResult EntitySetSkeleton::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  const auto &asset = state.assetRegistry.getSkeletons().getAsset(mHandle).data;
+
+  size_t numJoints = asset.jointLocalPositions.size();
+
+  Skeleton skeleton{};
+  skeleton.assetHandle = mHandle;
+  skeleton.numJoints = static_cast<uint32_t>(numJoints);
+  skeleton.jointNames.resize(numJoints);
+  skeleton.jointParents.resize(numJoints);
+  skeleton.jointLocalPositions.resize(numJoints);
+  skeleton.jointLocalRotations.resize(numJoints);
+  skeleton.jointLocalScales.resize(numJoints);
+  skeleton.jointInverseBindMatrices.resize(numJoints);
+  skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
+  skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
+
+  for (size_t i = 0; i < numJoints; ++i) {
+    skeleton.jointNames.at(i) = asset.jointNames.at(i);
+    skeleton.jointParents.at(i) = asset.jointParents.at(i);
+    skeleton.jointLocalPositions.at(i) = asset.jointLocalPositions.at(i);
+    skeleton.jointLocalRotations.at(i) = asset.jointLocalRotations.at(i);
+    skeleton.jointLocalScales.at(i) = asset.jointLocalScales.at(i);
+    skeleton.jointInverseBindMatrices.at(i) =
+        asset.jointInverseBindMatrices.at(i);
+  }
+
+  scene.entityDatabase.set(mEntity, skeleton);
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  return res;
+}
+
+bool EntitySetSkeleton::predicate(WorkspaceState &state) {
+  return state.assetRegistry.getSkeletons().hasAsset(mHandle);
+}
+
 } // namespace liquid::editor

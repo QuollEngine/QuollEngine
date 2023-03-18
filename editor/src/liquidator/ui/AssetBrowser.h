@@ -6,6 +6,7 @@
 
 #include "liquidator/asset/AssetLoader.h"
 #include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/actions/ActionExecutor.h"
 
 #include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"
@@ -44,12 +45,10 @@ public:
    * @param assetManager Asset manager
    * @param iconRegistry Icon registry
    * @param state Workspace state
-   * @param editorManager Editor manager
-   * @param entityManager Entity manager
+   * @param actionExecutor Action executor
    */
   void render(AssetManager &assetManager, IconRegistry &iconRegistry,
-              WorkspaceState &state, EditorManager &editorManager,
-              EntityManager &entityManager);
+              WorkspaceState &state, ActionExecutor &actionExecutor);
 
   /**
    * @brief Reload contents in current directory

@@ -5,16 +5,17 @@
 namespace liquid::editor {
 
 /**
- * @brief Toggle debug bones for skeleton entity actions
+ * @brief Set mesh for entity
  */
-class EntityToggleSkeletonDebugBones : public Action {
+class EntitySetMesh : public Action {
 public:
   /**
    * @brief Create action
    *
    * @param entity Entity
+   * @param handle Mesh asset handle
    */
-  EntityToggleSkeletonDebugBones(Entity entity);
+  EntitySetMesh(Entity entity, MeshAssetHandle handle);
 
   /**
    * @brief Action executor
@@ -35,20 +36,21 @@ public:
 
 private:
   Entity mEntity;
+  MeshAssetHandle mHandle;
 };
 
 /**
- * @brief Set skeleton for entity action
+ * @brief Set skinned mesh for entity
  */
-class EntitySetSkeleton : public Action {
+class EntitySetSkinnedMesh : public Action {
 public:
   /**
    * @brief Create action
    *
    * @param entity Entity
-   * @param handle Skeleton asset handle
+   * @param handle Skinned mesh asset handle
    */
-  EntitySetSkeleton(Entity entity, SkeletonAssetHandle handle);
+  EntitySetSkinnedMesh(Entity entity, SkinnedMeshAssetHandle handle);
 
   /**
    * @brief Action executor
@@ -69,7 +71,7 @@ public:
 
 private:
   Entity mEntity;
-  SkeletonAssetHandle mHandle;
+  SkinnedMeshAssetHandle mHandle;
 };
 
 } // namespace liquid::editor

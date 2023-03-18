@@ -33,22 +33,18 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
 }
 
 void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
-                    AssetManager &assetManager, EntityManager &entityManager) {
+                    AssetManager &assetManager) {
   mMainMenu.render(mActionExecutor);
   mToolbar.render(state, mActionExecutor);
   mLayout.setup();
 
   mSceneHierarchyPanel.render(state, mActionExecutor);
-
-  if (state.selectedEntity != Entity::Null) {
-    mEntityPanel.render(state, mActionExecutor, state.selectedEntity);
-  }
+  mEntityPanel.render(state, mActionExecutor, state.selectedEntity);
 
   EnvironmentPanel::render(state, mActionExecutor);
 
   mEditorCameraPanel.render(state, mActionExecutor);
-  mAssetBrowser.render(assetManager, mIconRegistry, state, editorManager,
-                       entityManager);
+  mAssetBrowser.render(assetManager, mIconRegistry, state, mActionExecutor);
 }
 
 } // namespace liquid::editor

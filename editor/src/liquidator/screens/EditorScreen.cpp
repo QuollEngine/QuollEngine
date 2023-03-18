@@ -203,7 +203,7 @@ void EditorScreen::start(const Project &project) {
 
     bool mouseClicked = false;
 
-    ui.render(state, editorManager, assetManager, entityManager);
+    ui.render(state, editorManager, assetManager);
 
     if (auto _ = widgets::MainMenuBar()) {
       debugLayer.renderMenu();
@@ -262,8 +262,8 @@ void EditorScreen::start(const Project &project) {
 
     const auto &renderFrame = mDevice->beginFrame();
 
-    auto camera = entityManager.isUsingSimulationDatabase()
-                      ? entityManager.getActiveSimulationCamera()
+    auto camera = state.mode == WorkspaceMode::Simulation
+                      ? state.simulationScene.activeCamera
                       : state.camera;
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {

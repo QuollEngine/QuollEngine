@@ -44,10 +44,9 @@ public:
    * @param state Workspace state
    * @param editorManager Editor manager
    * @param assetManager Asset manager
-   * @param entityManager Entity manager
    */
   void render(WorkspaceState &state, EditorManager &editorManager,
-              AssetManager &assetManager, EntityManager &entityManager);
+              AssetManager &assetManager);
 
   /**
    * @brief Get icon registry
