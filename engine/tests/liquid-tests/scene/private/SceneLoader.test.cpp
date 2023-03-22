@@ -959,6 +959,101 @@ TEST_F(
   EXPECT_EQ(component.numCascades, 2);
 }
 
+TEST_F(
+    SceneLoaderLightTest,
+    TriesToFillPointLightComponentValuesIfLightPropertiesAreInvalidForPointLightType) {
+  YAML::Node invalidArray(YAML::NodeType::Sequence);
+  invalidArray.push_back("Test 1");
+  invalidArray.push_back("Test 2");
+  invalidArray.push_back(15.0f);
+  invalidArray.push_back(20.0f);
+
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       invalidArray};
+
+  liquid::PointLight defaults{};
+
+  glm::vec4 validColor{0.5f};
+  float validIntensity = 3.5f;
+  float validRange = 25.0f;
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 1;
+    node["components"]["light"]["color"] = invalidNode;
+    node["components"]["light"]["intensity"] = validIntensity;
+    node["components"]["light"]["range"] = validRange;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<liquid::PointLight>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PointLight>(entity);
+
+    EXPECT_EQ(component.color, defaults.color);
+    EXPECT_EQ(component.intensity, validIntensity);
+    EXPECT_EQ(component.range, validRange);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 1;
+    node["components"]["light"]["color"] = validColor;
+    node["components"]["light"]["intensity"] = invalidNode;
+    node["components"]["light"]["range"] = validRange;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<liquid::PointLight>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PointLight>(entity);
+
+    EXPECT_EQ(component.color, validColor);
+    EXPECT_EQ(component.intensity, defaults.intensity);
+    EXPECT_EQ(component.range, validRange);
+  }
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["light"]["type"] = 1;
+    node["components"]["light"]["color"] = validColor;
+    node["components"]["light"]["intensity"] = validIntensity;
+    node["components"]["light"]["range"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<liquid::PointLight>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PointLight>(entity);
+
+    EXPECT_EQ(component.color, validColor);
+    EXPECT_EQ(component.intensity, validIntensity);
+    EXPECT_EQ(component.range, defaults.range);
+  }
+}
+
+TEST_F(SceneLoaderLightTest, CreatesPointLightWithFileDataIfValidProperties) {
+  auto [node, entity] = createNode();
+  node["components"]["light"]["type"] = 1;
+  node["components"]["light"]["color"] = glm::vec4(2.0f);
+  node["components"]["light"]["intensity"] = 3.5f;
+  node["components"]["light"]["range"] = 25.0f;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  ASSERT_TRUE(entityDatabase.has<liquid::PointLight>(entity));
+
+  const auto &component = entityDatabase.get<liquid::PointLight>(entity);
+
+  EXPECT_EQ(component.color, glm::vec4(2.0f));
+  EXPECT_EQ(component.intensity, 3.5f);
+  EXPECT_EQ(component.range, 25.0f);
+}
+
 using SceneLoaderCameraTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderCameraTest,

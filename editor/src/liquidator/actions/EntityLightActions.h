@@ -140,4 +140,39 @@ private:
   CascadedShadowMap mShadowMap;
 };
 
+/**
+ * @brief Set poin light for entity action
+ */
+class EntitySetPointLight : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   * @param light Point light
+   */
+  EntitySetPointLight(Entity entity, PointLight light);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+  PointLight mLight;
+};
+
 } // namespace liquid::editor

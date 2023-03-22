@@ -55,6 +55,10 @@ static String getNodeName(const String &name, Entity entity,
   }
 
   if (entityDatabase.has<DirectionalLight>(entity)) {
+    return getNameAndIcon(name, fa::Sun);
+  }
+
+  if (entityDatabase.has<PointLight>(entity)) {
     return getNameAndIcon(name, fa::Lightbulb);
   }
 

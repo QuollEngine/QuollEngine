@@ -38,13 +38,14 @@ public:
   static constexpr size_t MaxShadowMaps = 16;
 
   /**
-   * @brief Light data
+   * @brief Directional light data
    */
-  struct LightData {
+  struct DirectionalLightData {
     /**
      * Light data
      *
-     * Changes based on type of light
+     * First three values are direction
+     * Last value is intensity
      */
     glm::vec4 data;
 
@@ -62,6 +63,31 @@ public:
      *  which is used in cascaded shadow mapping
      */
     glm::uvec4 shadowData{0};
+  };
+
+  /**
+   * @brief Point light data
+   */
+  struct PointLightData {
+    /**
+     * Light data
+     *
+     * First three values are position
+     * Last value is direction
+     */
+    glm::vec4 data;
+
+    /**
+     * Light range
+     *
+     * vec4 is used for padding purposes
+     */
+    glm::vec4 range;
+
+    /**
+     * Light color
+     */
+    glm::vec4 color;
   };
 
   /**
@@ -95,8 +121,10 @@ public:
     /**
      * Light data
      *
-     * First parameter is number of lights
-     * Second parameter is environment lighting type
+     * First parameter is number of directional lights
+     * Second parameter is number of point lights
+     *
+     * Fourth parameter is environment lighting type
      *   (0 = none, 1 = color, 2 = texture)
      */
     glm::uvec4 data{0};
@@ -317,6 +345,14 @@ public:
                 const CascadedShadowMap &shadowMap);
 
   /**
+   * @brief Add point light
+   *
+   * @param light Point light component
+   * @param transform World transform
+   */
+  void addLight(const PointLight &light, const WorldTransform &transform);
+
+  /**
    * @brief Add text
    *
    * @param fontHandle Font handle
@@ -454,12 +490,21 @@ public:
   }
 
   /**
-   * @brief Get lights buffer
+   * @brief Get directional lights buffer
    *
-   * @return Lights buffer
+   * @return Directional lights buffer
    */
-  inline rhi::BufferHandle getLightsBuffer() const {
-    return mLightsBuffer.getHandle();
+  inline rhi::BufferHandle getDirectionalLightsBuffer() const {
+    return mDirectionalLightsBuffer.getHandle();
+  }
+
+  /**
+   * @brief Get point lights buffer
+   *
+   * @return Point lights buffer
+   */
+  inline rhi::BufferHandle getPointLightsBuffer() const {
+    return mPointLightsBuffer.getHandle();
   }
 
   /**
@@ -500,7 +545,8 @@ private:
                              const CascadedShadowMap &shadowMap);
 
 private:
-  std::vector<LightData> mLights;
+  std::vector<DirectionalLightData> mDirectionalLights;
+  std::vector<PointLightData> mPointLights;
   std::vector<ShadowMapData> mShadowMaps;
   SceneData mSceneData{};
   SkyboxData mSkyboxData{};
@@ -513,7 +559,8 @@ private:
   rhi::Buffer mSkinnedMeshTransformsBuffer;
   rhi::Buffer mSkeletonsBuffer;
   rhi::Buffer mSceneBuffer;
-  rhi::Buffer mLightsBuffer;
+  rhi::Buffer mDirectionalLightsBuffer;
+  rhi::Buffer mPointLightsBuffer;
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
   rhi::Buffer mSkyboxBuffer;

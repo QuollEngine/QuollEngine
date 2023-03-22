@@ -1,7 +1,7 @@
 /**
- * @brief Single light data
+ * @brief Directional light item
  */
-struct LightItem {
+struct DirectionalLightItem {
   /**
    * Light data
    */
@@ -18,7 +18,39 @@ struct LightItem {
   uvec4 shadowData;
 };
 
-RegisterBuffer(std430, readonly, LightData, { LightItem items[]; });
+RegisterBuffer(std430, readonly, DirectionalLightData,
+               { DirectionalLightItem items[]; });
 
-#define getLight(index)                                                        \
-  GetBindlessResource(LightData, uDrawParams.lights).items[index]
+#define getDirectionalLight(index)                                             \
+  GetBindlessResource(DirectionalLightData, uDrawParams.directionalLights)     \
+      .items[index]
+
+/**
+ * @brief Point light item
+ */
+struct PointLightItem {
+  /**
+   * Light data
+   */
+  vec4 data;
+
+  /**
+   * Light range
+   */
+  vec4 range;
+
+  /**
+   * Light color
+   */
+  vec4 color;
+
+  /**
+   * Shadow data
+   */
+  uvec4 shadowData;
+};
+
+RegisterBuffer(std430, readonly, PointLightData, { PointLightItem items[]; });
+
+#define getPointLight(index)                                                   \
+  GetBindlessResource(PointLightData, uDrawParams.pointLights).items[index]

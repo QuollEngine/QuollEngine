@@ -250,6 +250,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
         mEntityDatabase.set(entity, shadowComponent);
       }
+    } else if (type == 1) {
+      PointLight component{};
+      component.intensity = light["intensity"].as<float>(component.intensity);
+      component.color = light["color"].as<glm::vec4>(component.color);
+      component.range = light["range"].as<glm::float32>(component.range);
+
+      mEntityDatabase.set(entity, component);
     }
   }
 

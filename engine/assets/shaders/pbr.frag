@@ -20,9 +20,9 @@ layout(set = 3, binding = 0) uniform DrawParams {
   uint skeletons;
   uint camera;
   uint scene;
-  uint lights;
+  uint directionalLights;
+  uint pointLights;
   uint shadows;
-  uint pad0;
 }
 uDrawParams;
 
@@ -280,6 +280,32 @@ struct LightCalculations {
 };
 
 /**
+ * Get light surface calculations for point light
+ *
+ * @param light Light data
+ * @param n Normal
+ * @param v View
+ * @return Light calculations
+ */
+LightCalculations getPointLightSurfaceCalculations(PointLightItem light, vec3 n,
+                                                   vec3 v) {
+  vec3 direction = light.data.xyz - inWorldPosition.xyz;
+  float distance = length(direction);
+  float attenuation = 1.0 / (distance * distance);
+
+  if (light.range.x > 0.0 && distance > light.range.x) {
+    return LightCalculations(0.0, 0.0, 0.0, 0.0);
+  }
+
+  vec3 l = normalize(direction);
+  vec3 h = normalize(v + l);
+
+  return LightCalculations(
+      clamp(dot(n, l), 0.0, 1.0), clamp(dot(n, h), 0.0, 1.0),
+      clamp(dot(v, h), 0.0, 1.0), light.data.w * attenuation);
+}
+
+/**
  * Get light surface calculations for directional light
  *
  * @param light Light data
@@ -287,8 +313,9 @@ struct LightCalculations {
  * @param v View
  * @return Light calculations
  */
-LightCalculations getDirectionalLightSurfaceCalculations(LightItem light,
-                                                         vec3 n, vec3 v) {
+LightCalculations
+getDirectionalLightSurfaceCalculations(DirectionalLightItem light, vec3 n,
+                                       vec3 v) {
   vec3 direction = -light.data.xyz;
   vec3 l = normalize(direction);
   vec3 h = normalize(v + l);
@@ -311,7 +338,7 @@ float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
 }
 
 /**
- * Calculate shadow factor
+ * Calculate shadow factor for directional light
  *
  * 1.0 => no shadow
  * < 1.0 => has shadow
@@ -319,7 +346,7 @@ float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
  * @param item Light item
  * @return Shadow factor
  */
-float calculateShadowFactor(LightItem item) {
+float calculateShadowFactor(DirectionalLightItem item) {
   if (item.shadowData.x == 0) {
     return 1.0;
   }
@@ -367,6 +394,22 @@ float calculateShadowFactor(LightItem item) {
                                       cascadeIndex);
 }
 
+vec3 getLightContributionFactor(LightCalculations calc, vec3 F0, float NdotV,
+                                float alpha, vec3 diffuseColor) {
+  float NdotL = calc.NdotL;
+  float NdotH = calc.NdotH;
+  float VdotH = calc.VdotH;
+
+  vec3 F = schlickFresnel(F0, VdotH);
+  float G = schlickSpecularGeometricAttenuation(alpha, NdotV, NdotL);
+  float D = ggxNormalDistribution(alpha, NdotH);
+
+  vec3 diffuseBRDF = (vec3(1.0) - F) * (1 / PI) * diffuseColor;
+  vec3 specularBRDF = F * D * G / (4 * NdotL * NdotV);
+
+  return NdotL * calc.intensity * (diffuseBRDF + specularBRDF);
+}
+
 void main() {
   float metallic = uMaterialData.metallicFactor;
   float roughness = uMaterialData.roughnessFactor;
@@ -408,44 +451,43 @@ void main() {
 
   float NdotV = clamp(abs(dot(n, v)), 0.001, 1.0);
 
-  uint num = getScene().data.x;
-  for (uint i = 0; i < num; i++) {
-    LightCalculations calc;
-    LightItem item = getLight(i);
-    calc = getDirectionalLightSurfaceCalculations(item, n, v);
+  uint numDirectionalLights = getScene().data.x;
+  for (uint i = 0; i < numDirectionalLights; i++) {
+    DirectionalLightItem item = getDirectionalLight(i);
+    LightCalculations calc = getDirectionalLightSurfaceCalculations(item, n, v);
 
-    const vec4 lightColor = item.color;
-    const float lightIntensity = calc.intensity;
-
-    float NdotL = calc.NdotL;
-    float NdotH = calc.NdotH;
-    float VdotH = calc.VdotH;
-
-    if (NdotL < 0.001) {
+    if (calc.NdotL < 0.001 || calc.intensity < 0.001) {
       continue;
     }
 
-    vec3 F = schlickFresnel(F0, VdotH);
-    float G = schlickSpecularGeometricAttenuation(alpha, NdotV, NdotL);
-    float D = ggxNormalDistribution(alpha, NdotH);
-
-    vec3 diffuseBRDF = (vec3(1.0) - F) * (1 / PI) * diffuseColor;
-    vec3 specularBRDF = F * D * G / (4 * NdotL * NdotV);
-
     float shadowFactor = calculateShadowFactor(item);
 
-    color += vec3(lightColor) * shadowFactor * NdotL * lightIntensity *
-             (diffuseBRDF + specularBRDF);
+    color += item.color.rgb *
+             getLightContributionFactor(calc, F0, NdotV, alpha, diffuseColor) *
+             shadowFactor;
   }
 
-  if (getScene().data.y == 1) {
+  uint numPointLights = getScene().data.y;
+  for (uint i = 0; i < numPointLights; i++) {
+    PointLightItem item = getPointLight(i);
+    LightCalculations calc = getPointLightSurfaceCalculations(item, n, v);
+
+    if (calc.NdotL < 0.001 || calc.intensity < 0.001) {
+      continue;
+    }
+
+    color += item.color.rgb *
+             getLightContributionFactor(calc, F0, NdotV, alpha, diffuseColor);
+  }
+
+  if (getScene().data.w == 1) {
     vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
 
     vec3 kS = schlickFresnel(F0, NdotV);
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
     color += getScene().color.rgb * (kD + kS * brdfLut.r + brdfLut.g);
-  } else if (getScene().data.y == 2 && getScene().textures.x > 0) {
+  } else if (getScene().data.w == 2 && getScene().textures.x > 0) {
     vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
 
     vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;

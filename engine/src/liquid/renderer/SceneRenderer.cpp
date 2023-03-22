@@ -202,9 +202,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       rhi::BufferHandle skeletonTransforms;
       rhi::BufferHandle camera;
       rhi::BufferHandle scene;
-      rhi::BufferHandle lights;
+      rhi::BufferHandle directionalLights;
+      rhi::BufferHandle pointLights;
       rhi::BufferHandle shadows;
-      uint32_t pad0;
     };
 
     size_t offset = 0;
@@ -213,8 +213,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
           frameData.getMeshTransformsBuffer(),
           frameData.getSkinnedMeshTransformsBuffer(),
           frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
-          frameData.getSceneBuffer(), frameData.getLightsBuffer(),
-          frameData.getShadowMapsBuffer()});
+          frameData.getSceneBuffer(), frameData.getDirectionalLightsBuffer(),
+          frameData.getPointLightsBuffer(), frameData.getShadowMapsBuffer()});
     }
 
     auto &pass = graph.addGraphicsPass("meshPass");
@@ -487,13 +487,19 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
     frameData.addText(text.font, glyphs, world.worldTransform);
   }
 
-  // Lights
+  // Directional lights
   for (auto [entity, light] : entityDatabase.view<DirectionalLight>()) {
     if (entityDatabase.has<CascadedShadowMap>(entity)) {
       frameData.addLight(light, entityDatabase.get<CascadedShadowMap>(entity));
     } else {
       frameData.addLight(light);
     }
+  };
+
+  // Point lights
+  for (auto [entity, light, world] :
+       entityDatabase.view<PointLight, WorldTransform>()) {
+    frameData.addLight(light, world);
   };
 
   // Environments

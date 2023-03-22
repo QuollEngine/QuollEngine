@@ -126,117 +126,189 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
 }
 
 void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
-  if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity)) {
+  bool hasDirectionalLight =
+      scene.entityDatabase.has<DirectionalLight>(mSelectedEntity);
+  bool hasPointLight = scene.entityDatabase.has<PointLight>(mSelectedEntity);
+
+  if (!hasDirectionalLight && !hasPointLight) {
     return;
   }
 
   static const String SectionName = String(fa::Lightbulb) + "  Light";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    auto &component =
-        scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
-
     ImGui::Text("Type");
-    if (ImGui::BeginCombo("###LightType", "Directional", 0)) {
-      if (ImGui::Selectable("Directional")) {
+
+    String selected = hasDirectionalLight
+                          ? "Directional"
+                          : (hasPointLight ? "Point" : "Unknown");
+
+    if (ImGui::BeginCombo("###LightType", selected.c_str(), 0)) {
+      if (ImGui::Selectable("Directional", &hasDirectionalLight)) {
+        actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+            mSelectedEntity, DirectionalLight{}));
+      }
+      if (ImGui::Selectable("Point light", &hasPointLight)) {
+        actionExecutor.execute(std::make_unique<EntitySetPointLight>(
+            mSelectedEntity, PointLight{}));
       }
       ImGui::EndCombo();
     }
 
-    ImGui::Text("Direction");
-    ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
-                component.direction.z);
+    renderDirectionalLight(scene, actionExecutor);
+    renderPointLight(scene, actionExecutor);
+  }
+}
 
+void EntityPanel::renderDirectionalLight(Scene &scene,
+                                         ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity)) {
+    return;
+  }
+
+  auto &component = scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
+
+  ImGui::Text("Direction");
+  ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
+              component.direction.z);
+
+  bool sendAction = false;
+
+  glm::vec4 color = component.color;
+  if (widgets::InputColor("Color", color)) {
+    if (!mDirectionalLight.has_value()) {
+      mDirectionalLight = component;
+    }
+
+    component.color = color;
+  }
+
+  sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+
+  float intensity = component.intensity;
+  if (widgets::Input("Intensity", intensity, false)) {
+    if (!mDirectionalLight.has_value()) {
+      mDirectionalLight = component;
+    }
+    component.intensity = intensity;
+
+    sendAction = true;
+  }
+
+  if (mDirectionalLight.has_value() && sendAction) {
+    actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+        mSelectedEntity, component));
+
+    mDirectionalLight.reset();
+  }
+
+  bool castShadows =
+      scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
+  if (ImGui::Checkbox("Cast shadows", &castShadows)) {
+    if (castShadows) {
+      actionExecutor.execute(
+          std::make_unique<EntityEnableCascadedShadowMap>(mSelectedEntity));
+    } else {
+      actionExecutor.execute(
+          std::make_unique<EntityDisableCascadedShadowMap>(mSelectedEntity));
+    }
+  }
+
+  if (castShadows) {
     bool sendAction = false;
+    auto &component =
+        scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
 
-    glm::vec4 color = component.color;
-    if (widgets::InputColor("Color", color)) {
-      if (!mDirectionalLight.has_value()) {
-        mDirectionalLight = component;
+    bool softShadows = component.softShadows;
+    if (ImGui::Checkbox("Soft shadows", &softShadows)) {
+      if (!mCascadedShadowMap.has_value()) {
+        mCascadedShadowMap = component;
       }
 
-      component.color = color;
+      component.softShadows = softShadows;
+      sendAction = true;
+    }
+
+    float splitLambda = component.splitLambda;
+    if (widgets::Input("Split lambda", splitLambda, false)) {
+      splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
+
+      if (!mCascadedShadowMap.has_value()) {
+        mCascadedShadowMap = component;
+      }
+
+      component.splitLambda = splitLambda;
+      sendAction = true;
+    }
+
+    int32_t numCascades = static_cast<int32_t>(component.numCascades);
+    ImGui::Text("Number of cascades");
+    if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
+                       static_cast<int32_t>(component.MaxCascades))) {
+      if (!mCascadedShadowMap.has_value()) {
+        mCascadedShadowMap = component;
+      }
+      component.numCascades = static_cast<uint32_t>(numCascades);
+      sendAction = true;
     }
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    float intensity = component.intensity;
-    if (widgets::Input("Intensity", intensity, false)) {
-      if (!mDirectionalLight.has_value()) {
-        mDirectionalLight = component;
-      }
-      component.intensity = intensity;
-
-      sendAction = true;
-    }
-
-    if (mDirectionalLight.has_value() && sendAction) {
-      actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+    if (mCascadedShadowMap.has_value() && sendAction) {
+      actionExecutor.execute(std::make_unique<EntitySetCascadedShadowMapAction>(
           mSelectedEntity, component));
 
-      mDirectionalLight.reset();
+      mCascadedShadowMap.reset();
+    }
+  }
+}
+
+void EntityPanel::renderPointLight(Scene &scene,
+                                   ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
+    return;
+  }
+
+  auto &component = scene.entityDatabase.get<PointLight>(mSelectedEntity);
+
+  bool sendAction = false;
+
+  glm::vec4 color = component.color;
+  if (widgets::InputColor("Color", color)) {
+    if (!mPointLight.has_value()) {
+      mPointLight = component;
     }
 
-    bool castShadows =
-        scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
-    if (ImGui::Checkbox("Cast shadows", &castShadows)) {
-      if (castShadows) {
-        actionExecutor.execute(
-            std::make_unique<EntityEnableCascadedShadowMap>(mSelectedEntity));
-      } else {
-        actionExecutor.execute(
-            std::make_unique<EntityDisableCascadedShadowMap>(mSelectedEntity));
-      }
+    component.color = color;
+  }
+
+  sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+
+  float intensity = component.intensity;
+  if (widgets::Input("Intensity (in candelas)", intensity, false)) {
+    if (!mDirectionalLight.has_value()) {
+      mPointLight = component;
     }
+    component.intensity = intensity;
 
-    if (castShadows) {
-      bool sendAction = false;
-      auto &component =
-          scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
+    sendAction = true;
+  }
 
-      bool softShadows = component.softShadows;
-      if (ImGui::Checkbox("Soft shadows", &softShadows)) {
-        if (!mCascadedShadowMap.has_value()) {
-          mCascadedShadowMap = component;
-        }
-
-        component.softShadows = softShadows;
-        sendAction = true;
-      }
-
-      float splitLambda = component.splitLambda;
-      if (widgets::Input("Split lambda", splitLambda, false)) {
-        splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
-
-        if (!mCascadedShadowMap.has_value()) {
-          mCascadedShadowMap = component;
-        }
-
-        component.splitLambda = splitLambda;
-        sendAction = true;
-      }
-
-      int32_t numCascades = static_cast<int32_t>(component.numCascades);
-      ImGui::Text("Number of cascades");
-      if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
-                         static_cast<int32_t>(component.MaxCascades))) {
-        if (!mCascadedShadowMap.has_value()) {
-          mCascadedShadowMap = component;
-        }
-        component.numCascades = static_cast<uint32_t>(numCascades);
-        sendAction = true;
-      }
-
-      sendAction |= ImGui::IsItemDeactivatedAfterEdit();
-
-      if (mCascadedShadowMap.has_value() && sendAction) {
-        actionExecutor.execute(
-            std::make_unique<EntitySetCascadedShadowMapAction>(mSelectedEntity,
-                                                               component));
-
-        mCascadedShadowMap.reset();
-      }
+  float range = component.range;
+  if (widgets::Input("Range", range, false)) {
+    if (!mDirectionalLight.has_value()) {
+      mPointLight = component;
     }
+    component.range = range;
+
+    sendAction = true;
+  }
+
+  if (mPointLight.has_value() && sendAction) {
+    actionExecutor.execute(
+        std::make_unique<EntitySetPointLight>(mSelectedEntity, component));
+
+    mPointLight.reset();
   }
 }
 
@@ -914,9 +986,16 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
-        ImGui::Selectable("Light")) {
-      actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
-          mSelectedEntity, liquid::DirectionalLight{}));
+        !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
+      if (ImGui::Selectable("Directional light")) {
+        actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
+            mSelectedEntity, liquid::DirectionalLight{}));
+      }
+
+      if (ImGui::Selectable("Point light")) {
+        actionExecutor.execute(std::make_unique<EntitySetPointLight>(
+            mSelectedEntity, liquid::PointLight{}));
+      }
     }
 
     if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity) &&

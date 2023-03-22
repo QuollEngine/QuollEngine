@@ -9,6 +9,7 @@
 #include "liquid/scene/Mesh.h"
 #include "liquid/scene/SkinnedMesh.h"
 #include "liquid/scene/DirectionalLight.h"
+#include "liquid/scene/PointLight.h"
 #include "liquid/scene/CascadedShadowMap.h"
 #include "liquid/scene/PerspectiveLens.h"
 #include "liquid/scene/AutoAspectRatio.h"

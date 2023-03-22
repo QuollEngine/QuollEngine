@@ -57,6 +57,22 @@ TEST_P(SpawnPrefabAtTransform, ExecutorCreatesEntitiesFromPrefab) {
     asset.data.animators.push_back(animator);
   }
 
+  // Create two directional lights
+  for (uint32_t i = 1; i < 3; ++i) {
+    liquid::PrefabComponent<liquid::DirectionalLight> light{};
+    light.entity = i;
+    light.value.intensity = 25.0f;
+    asset.data.directionalLights.push_back(light);
+  }
+
+  // Create two point lights
+  for (uint32_t i = 3; i < 5; ++i) {
+    liquid::PrefabComponent<liquid::PointLight> light{};
+    light.entity = i;
+    light.value.range = 25.0f;
+    asset.data.pointLights.push_back(light);
+  }
+
   auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
@@ -132,6 +148,18 @@ TEST_P(SpawnPrefabAtTransform, ExecutorCreatesEntitiesFromPrefab) {
     auto entity = res.entitiesToSave.at(i);
     const auto &animator = db.get<liquid::Animator>(entity);
     EXPECT_EQ(animator.currentAnimation, i);
+  }
+
+  for (uint32_t i = 1; i < 3; ++i) {
+    auto entity = res.entitiesToSave.at(i);
+    const auto &light = db.get<liquid::DirectionalLight>(entity);
+    EXPECT_EQ(light.intensity, 25.0f);
+  }
+
+  for (uint32_t i = 3; i < 5; ++i) {
+    auto entity = res.entitiesToSave.at(i);
+    const auto &light = db.get<liquid::PointLight>(entity);
+    EXPECT_EQ(light.range, 25.0f);
   }
 }
 

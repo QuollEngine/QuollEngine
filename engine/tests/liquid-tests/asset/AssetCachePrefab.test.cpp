@@ -20,12 +20,16 @@ public:
     std::mt19937 mt(device());
     std::uniform_real_distribution<float> dist(-5.0f, 10.0f);
     std::uniform_int_distribution<int32_t> idist(-1, 2);
+    std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
+    std::uniform_real_distribution<float> distPositive(0.0f, 10.0f);
 
     uint32_t numTransforms = 5;
     uint32_t numMeshes = 5;
     uint32_t numAnimators = 4;
     uint32_t numAnimationsPerAnimator = 3;
     uint32_t numSkeletons = 3;
+    uint32_t numDirectionalLights = 2;
+    uint32_t numPointLights = 4;
 
     for (uint32_t i = 0; i < numTransforms; ++i) {
       liquid::PrefabTransformData transform{};
@@ -35,6 +39,25 @@ public:
       transform.parent = idist(mt);
 
       asset.data.transforms.push_back({i, transform});
+    }
+
+    for (uint32_t i = 0; i < numDirectionalLights; ++i) {
+      liquid::DirectionalLight light{};
+      light.color = {distColor(mt), distColor(mt), distColor(mt),
+                     distColor(mt)};
+      light.intensity = distPositive(mt);
+
+      asset.data.directionalLights.push_back({i, light});
+    }
+
+    for (uint32_t i = 0; i < numPointLights; ++i) {
+      liquid::PointLight light{};
+      light.color = {distColor(mt), distColor(mt), distColor(mt),
+                     distColor(mt)};
+      light.intensity = distPositive(mt);
+      light.range = distPositive(mt);
+
+      asset.data.pointLights.push_back({i, light});
     }
 
     for (uint32_t i = 0; i < numMeshes; ++i) {
@@ -320,6 +343,49 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
       }
     }
   }
+
+  {
+    uint32_t numComponents = 0;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 2);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 999;
+      file.read(entity);
+      EXPECT_EQ(entity, i);
+
+      glm::vec4 color{999.0f};
+      float intensity = 0.0f;
+      file.read(color);
+      file.read(intensity);
+
+      EXPECT_EQ(asset.data.directionalLights.at(i).value.color, color);
+      EXPECT_EQ(asset.data.directionalLights.at(i).value.intensity, intensity);
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 4);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 999;
+      file.read(entity);
+      EXPECT_EQ(entity, i);
+
+      glm::vec4 color{999.0f};
+      float intensity = 0.0f;
+      float range = 99.0f;
+      file.read(color);
+      file.read(intensity);
+      file.read(range);
+
+      EXPECT_EQ(asset.data.pointLights.at(i).value.color, color);
+      EXPECT_EQ(asset.data.pointLights.at(i).value.intensity, intensity);
+      EXPECT_EQ(asset.data.pointLights.at(i).value.range, range);
+    }
+  }
 }
 
 TEST_F(AssetCacheTest, LoadsPrefabFile) {
@@ -376,6 +442,30 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
     for (size_t j = 0; j < expected.value.animations.size(); ++j) {
       EXPECT_EQ(expected.value.animations.at(j), actual.value.animations.at(j));
     }
+  }
+
+  EXPECT_EQ(asset.data.directionalLights.size(),
+            prefab.data.directionalLights.size());
+  for (size_t i = 0; i < prefab.data.directionalLights.size(); ++i) {
+    auto &expected = asset.data.directionalLights.at(i);
+    auto &actual = prefab.data.directionalLights.at(i);
+
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value.color, actual.value.color);
+    EXPECT_EQ(expected.value.intensity, actual.value.intensity);
+    EXPECT_EQ(expected.value.direction, glm::vec3(0.0f));
+    EXPECT_EQ(actual.value.direction, glm::vec3(0.0f));
+  }
+
+  EXPECT_EQ(asset.data.pointLights.size(), prefab.data.pointLights.size());
+  for (size_t i = 0; i < prefab.data.pointLights.size(); ++i) {
+    auto &expected = asset.data.pointLights.at(i);
+    auto &actual = prefab.data.pointLights.at(i);
+
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value.color, actual.value.color);
+    EXPECT_EQ(expected.value.intensity, actual.value.intensity);
+    EXPECT_EQ(expected.value.range, actual.value.range);
   }
 }
 

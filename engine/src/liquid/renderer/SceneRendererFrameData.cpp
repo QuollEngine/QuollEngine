@@ -13,7 +13,8 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
                           ->getDeviceInformation()
                           .getLimits()
                           .minUniformBufferOffsetAlignment) {
-  mLights.reserve(MaxNumLights);
+  mDirectionalLights.reserve(MaxNumLights);
+  mPointLights.reserve(MaxNumLights);
   mShadowMaps.reserve(MaxShadowMaps);
 
   mTextTransforms.reserve(mReservedSpace);
@@ -42,8 +43,14 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 
   {
     auto desc = defaultDesc;
-    desc.size = mLights.capacity() * sizeof(LightData);
-    mLightsBuffer = renderStorage.createBuffer(desc);
+    desc.size = mDirectionalLights.capacity() * sizeof(DirectionalLightData);
+    mDirectionalLightsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.size = mPointLights.capacity() * sizeof(PointLightData);
+    mPointLightsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
@@ -107,7 +114,11 @@ void SceneRendererFrameData::updateBuffers() {
                                mTextTransforms.size() * sizeof(glm::mat4));
   mTextGlyphsBuffer.update(mTextGlyphs.data(),
                            mTextGlyphs.size() * sizeof(GlyphData));
-  mLightsBuffer.update(mLights.data(), mLights.size() * sizeof(LightData));
+  mDirectionalLightsBuffer.update(mDirectionalLights.data(),
+                                  mDirectionalLights.size() *
+                                      sizeof(DirectionalLightData));
+  mPointLightsBuffer.update(mPointLights.data(),
+                            mPointLights.size() * sizeof(PointLightData));
   mShadowMapsBuffer.update(mShadowMaps.data(),
                            mShadowMaps.size() * sizeof(ShadowMapData));
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
@@ -267,18 +278,35 @@ void SceneRendererFrameData::addLight(const DirectionalLight &light,
     addCascadedShadowMaps(light, shadowMap);
   }
 
-  LightData data{
+  DirectionalLightData data{
       glm::vec4(light.direction, light.intensity), light.color,
       glm::uvec4(canCastShadows ? 1 : 0, shadowIndex, numCascades, 0)};
-  mLights.push_back(data);
-  mSceneData.data.x = static_cast<int32_t>(mLights.size());
+  mDirectionalLights.push_back(data);
+  mSceneData.data.x = static_cast<int32_t>(mDirectionalLights.size());
 }
 
 void SceneRendererFrameData::addLight(const DirectionalLight &light) {
-  LightData data{glm::vec4(light.direction, light.intensity), light.color};
-  mLights.push_back(data);
+  DirectionalLightData data{glm::vec4(light.direction, light.intensity),
+                            light.color};
+  mDirectionalLights.push_back(data);
 
-  mSceneData.data.x = static_cast<int32_t>(mLights.size());
+  mSceneData.data.x = static_cast<int32_t>(mDirectionalLights.size());
+}
+
+void SceneRendererFrameData::addLight(const PointLight &light,
+                                      const WorldTransform &transform) {
+  glm::vec3 scale;
+  glm::quat orientation;
+  glm::vec3 position;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(transform.worldTransform, scale, orientation, position, skew,
+                 perspective);
+
+  PointLightData data{glm::vec4(position, light.intensity),
+                      glm::vec4(light.range), glm::vec4(light.color)};
+  mPointLights.push_back(data);
+  mSceneData.data.y = static_cast<int32_t>(mPointLights.size());
 }
 
 void SceneRendererFrameData::addText(FontAssetHandle font,
@@ -313,13 +341,13 @@ void SceneRendererFrameData::setSkyboxColor(const glm::vec4 &color) {
 
 void SceneRendererFrameData::setEnvironmentTextures(
     rhi::TextureHandle irradianceMap, rhi::TextureHandle specularMap) {
-  mSceneData.data.y = SceneData::EnvironmentLighting::Texture;
+  mSceneData.data.w = SceneData::EnvironmentLighting::Texture;
   mSceneData.textures.x = rhi::castHandleToUint(irradianceMap);
   mSceneData.textures.y = rhi::castHandleToUint(specularMap);
 }
 
 void SceneRendererFrameData::setEnvironmentColor(const glm::vec4 &color) {
-  mSceneData.data.y = SceneData::EnvironmentLighting::Color;
+  mSceneData.data.w = SceneData::EnvironmentLighting::Color;
   mSceneData.color = color;
 }
 
@@ -338,7 +366,8 @@ void SceneRendererFrameData::clear() {
   mTextGroups.clear();
   mTextGlyphs.clear();
 
-  mLights.clear();
+  mDirectionalLights.clear();
+  mPointLights.clear();
   mShadowMaps.clear();
   mSceneData.data.x = 0;
   mSceneData.data.y = 0;
