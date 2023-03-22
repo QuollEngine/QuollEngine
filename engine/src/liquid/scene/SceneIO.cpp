@@ -74,6 +74,13 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
 void SceneIO::saveEntity(Entity entity, const Path &path) {
   detail::EntitySerializer serializer(mAssetRegistry, mScene.entityDatabase);
 
+  if (mScene.entityDatabase.has<Parent>(entity)) {
+    auto parent = mScene.entityDatabase.get<Parent>(entity).parent;
+    if (!mScene.entityDatabase.has<Id>(parent)) {
+      saveEntity(parent, path);
+    }
+  }
+
   if (!mScene.entityDatabase.has<Id>(entity)) {
     mScene.entityDatabase.set<Id>(entity, {generateId()});
   }

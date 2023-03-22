@@ -150,6 +150,8 @@ void EditorScreen::start(const Project &project) {
         ui.getAssetBrowser().reload();
       });
 
+  ui.processShortcuts(mEventSystem);
+
   EditorSimulator simulator(mEventSystem, mWindow,
                             assetManager.getAssetRegistry(), editorCamera);
 
