@@ -343,6 +343,33 @@ TEST_F(
             shadow.numCascades);
 }
 
+// Point light
+TEST_F(EntitySerializerTest, DoesNotCreateLightFieldIfNoPointLight) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["light"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesLightFieldIfPointLightComponentExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::PointLight light{};
+  light.intensity = 5.5f;
+  light.color = glm::vec4{0.5f};
+  light.range = 25.0f;
+  entityDatabase.set(entity, light);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["light"]);
+  EXPECT_TRUE(node["light"].IsMap());
+  EXPECT_EQ(node["light"]["type"].as<uint32_t>(1000), 1);
+  EXPECT_EQ(node["light"]["intensity"].as<float>(-1.0f), light.intensity);
+  EXPECT_EQ(node["light"]["color"].as<glm::vec4>(glm::vec4{-1.0f}),
+            light.color);
+  EXPECT_EQ(node["light"]["range"].as<float>(-1.0f), light.range);
+}
+
 // Camera
 TEST_F(EntitySerializerTest,
        DoesNotCreateCameraFieldIfLensComponentDoesNotExist) {

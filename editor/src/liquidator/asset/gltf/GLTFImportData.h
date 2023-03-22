@@ -128,6 +128,16 @@ struct GLTFImportData {
   GLTFToAsset<SkinnedMeshAssetHandle> skinnedMeshes;
 
   /**
+   * Directional light map
+   */
+  GLTFToAsset<DirectionalLight> directionalLights;
+
+  /**
+   * Point light map
+   */
+  GLTFToAsset<PointLight> pointLights;
+
+  /**
    * Output path
    */
   Result<Path> outputPath = Result<Path>::Error("Empty");

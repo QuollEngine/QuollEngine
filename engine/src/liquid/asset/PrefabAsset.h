@@ -1,6 +1,8 @@
 #pragma once
 
 #include "liquid/animation/Animator.h"
+#include "liquid/scene/PointLight.h"
+#include "liquid/scene/DirectionalLight.h"
 
 namespace liquid {
 
@@ -78,6 +80,16 @@ struct PrefabAsset {
    * List of animators
    */
   std::vector<PrefabComponent<Animator>> animators;
+
+  /**
+   * List of point lights
+   */
+  std::vector<PrefabComponent<PointLight>> pointLights;
+
+  /**
+   * List of directional lights
+   */
+  std::vector<PrefabComponent<DirectionalLight>> directionalLights;
 };
 
 } // namespace liquid

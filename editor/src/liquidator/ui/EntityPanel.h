@@ -52,6 +52,22 @@ private:
   void renderLight(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render directional light component
+   *
+   * @param scene Active scene
+   * @param actionExecutor Action executor
+   */
+  void renderDirectionalLight(Scene &scene, ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Render point light component
+   *
+   * @param scene Active scene
+   * @param actionExecutor Action executor
+   */
+  void renderPointLight(Scene &scene, ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render camera component
    *
    * @param state Workspace state
@@ -168,6 +184,7 @@ private:
   std::optional<Text> mText;
   std::optional<Collidable> mCollidable;
   std::optional<DirectionalLight> mDirectionalLight;
+  std::optional<PointLight> mPointLight;
   std::optional<PerspectiveLens> mPerspectiveLens;
   std::optional<CascadedShadowMap> mCascadedShadowMap;
 };

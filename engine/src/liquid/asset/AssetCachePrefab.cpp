@@ -164,6 +164,30 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     }
   }
 
+  {
+    auto numComponents =
+        static_cast<uint32_t>(asset.data.directionalLights.size());
+    file.write(numComponents);
+
+    for (auto &light : asset.data.directionalLights) {
+      file.write(light.entity);
+      file.write(light.value.color);
+      file.write(light.value.intensity);
+    }
+  }
+
+  {
+    auto numComponents = static_cast<uint32_t>(asset.data.pointLights.size());
+    file.write(numComponents);
+
+    for (auto &light : asset.data.pointLights) {
+      file.write(light.entity);
+      file.write(light.value.color);
+      file.write(light.value.intensity);
+      file.write(light.value.range);
+    }
+  }
+
   return Result<Path>::Ok(assetPath);
 }
 
@@ -370,6 +394,44 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
         prefab.data.animators.at(i).value.animations.at(j) =
             localAnimationMap.at(animations.at(j));
       }
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+    prefab.data.directionalLights.resize(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      glm::vec4 color;
+      float intensity = 0.0f;
+      stream.read(color);
+      stream.read(intensity);
+
+      prefab.data.directionalLights.at(i).entity = entity;
+      prefab.data.directionalLights.at(i).value = {color, intensity};
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+    prefab.data.pointLights.resize(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      glm::vec4 color;
+      float intensity = 0.0f;
+      float range = 0.0f;
+      stream.read(color);
+      stream.read(intensity);
+      stream.read(range);
+
+      prefab.data.pointLights.at(i).entity = entity;
+      prefab.data.pointLights.at(i).value = {color, intensity, range};
     }
   }
 

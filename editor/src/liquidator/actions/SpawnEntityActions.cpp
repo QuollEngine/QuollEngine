@@ -3,6 +3,7 @@
 #include "EntityMeshActions.h"
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
+#include "EntityLightActions.h"
 
 #include "SpawnEntityActions.h"
 
@@ -43,10 +44,11 @@ ActionExecutorResult SpawnPrefabAtTransform::onExecute(WorkspaceState &state) {
   std::unordered_map<uint32_t, size_t> entityMap;
   std::vector<Entity> entities;
 
-  auto getOrCreateEntity = [&entityMap, &entities,
-                            &scene](uint32_t localId) mutable {
+  auto getOrCreateEntity = [&entityMap, &entities, &scene,
+                            &state](uint32_t localId) mutable {
     if (entityMap.find(localId) == entityMap.end()) {
       auto entity = scene.entityDatabase.create();
+      EntitySetLocalTransform(entity, {}).onExecute(state);
       entities.push_back(entity);
       entityMap.insert_or_assign(localId, entities.size() - 1);
       return entity;
@@ -97,6 +99,16 @@ ActionExecutorResult SpawnPrefabAtTransform::onExecute(WorkspaceState &state) {
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
     scene.entityDatabase.set(entity, item.value);
+  }
+
+  for (auto &item : asset.directionalLights) {
+    auto entity = getOrCreateEntity(item.entity);
+    EntitySetDirectionalLight(entity, item.value).onExecute(state);
+  }
+
+  for (auto &item : asset.pointLights) {
+    auto entity = getOrCreateEntity(item.entity);
+    EntitySetPointLight(entity, item.value).onExecute(state);
   }
 
   std::vector<Entity> rootEntities;

@@ -105,3 +105,32 @@ TEST_P(EntitySetCascadedShadowMapActionTest, ExecutorSetsCascadedShadowMap) {
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetCascadedShadowMapActionTest);
+
+using EntitySetPointLightActionTest = ActionTestBase;
+
+TEST_P(EntitySetPointLightActionTest, ExecutorSetsPointLightForEntity) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntitySetPointLight action(entity, {glm::vec4{0.3f}});
+  auto res = action.onExecute(state);
+
+  EXPECT_EQ(activeScene().entityDatabase.get<liquid::PointLight>(entity).color,
+            glm::vec4(0.3f));
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntitySetPointLightActionTest, ExecutorRemovesOtherLightsOnEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
+
+  liquid::editor::EntitySetPointLight action(entity, {glm::vec4{0.3f}});
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::DirectionalLight>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<liquid::PointLight>(entity).color,
+            glm::vec4(0.3f));
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+InitActionsTestSuite(EntityActionsTest, EntitySetPointLightActionTest);

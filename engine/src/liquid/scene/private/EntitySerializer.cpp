@@ -67,6 +67,13 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
       components["light"]["shadow"]["splitLambda"] = shadow.splitLambda;
       components["light"]["shadow"]["numCascades"] = shadow.numCascades;
     }
+  } else if (mEntityDatabase.has<PointLight>(entity)) {
+    const auto &light = mEntityDatabase.get<PointLight>(entity);
+
+    components["light"]["type"] = 1;
+    components["light"]["color"] = light.color;
+    components["light"]["intensity"] = light.intensity;
+    components["light"]["range"] = light.range;
   }
 
   if (mEntityDatabase.has<PerspectiveLens>(entity)) {

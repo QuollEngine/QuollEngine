@@ -6,6 +6,7 @@
 #include "gltf/MeshStep.h"
 #include "gltf/SkeletonStep.h"
 #include "gltf/AnimationStep.h"
+#include "gltf/LightStep.h"
 #include "gltf/PrefabStep.h"
 
 namespace liquid::editor {
@@ -50,6 +51,7 @@ Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
   loadSkeletons(importData);
   loadAnimations(importData);
   loadMeshes(importData);
+  loadLights(importData);
   loadPrefabs(importData);
 
   if (!importData.outputPath.hasData()) {

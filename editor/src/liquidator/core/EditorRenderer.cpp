@@ -234,6 +234,12 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                        world.worldTransform);
   }
 
+  for (auto [entity, world, light] :
+       entityDatabase.view<WorldTransform, PointLight>()) {
+    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Light),
+                       world.worldTransform);
+  }
+
   for (auto [entity, world, camera] :
        entityDatabase.view<WorldTransform, PerspectiveLens>()) {
     static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;

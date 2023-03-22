@@ -13,6 +13,10 @@ EntitySetDirectionalLight::onExecute(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
+  if (scene.entityDatabase.has<PointLight>(mEntity)) {
+    scene.entityDatabase.remove<PointLight>(mEntity);
+  }
+
   scene.entityDatabase.set(mEntity, mLight);
 
   ActionExecutorResult res{};
@@ -87,5 +91,25 @@ EntitySetCascadedShadowMapAction::onExecute(WorkspaceState &state) {
 bool EntitySetCascadedShadowMapAction::predicate(WorkspaceState &state) {
   return true;
 }
+
+EntitySetPointLight::EntitySetPointLight(Entity entity, PointLight light)
+    : mEntity(entity), mLight(light) {}
+
+ActionExecutorResult EntitySetPointLight::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  if (scene.entityDatabase.has<DirectionalLight>(mEntity)) {
+    scene.entityDatabase.remove<DirectionalLight>(mEntity);
+  }
+
+  scene.entityDatabase.set(mEntity, mLight);
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  return res;
+}
+
+bool EntitySetPointLight::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

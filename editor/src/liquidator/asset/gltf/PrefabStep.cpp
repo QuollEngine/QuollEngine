@@ -48,11 +48,27 @@ void loadPrefabs(GLTFImportData &importData) {
       }
     }
 
-    if (node.mesh < 0 ||
-        (importData.skinnedMeshes.map.find(node.mesh) ==
-             importData.skinnedMeshes.map.end() &&
-         importData.meshes.map.find(node.mesh) == importData.meshes.map.end()))
-      continue;
+    bool hasValidMesh =
+        node.mesh >= 0 &&
+        (importData.skinnedMeshes.map.find(node.mesh) !=
+             importData.skinnedMeshes.map.end() ||
+         importData.meshes.map.find(node.mesh) != importData.meshes.map.end());
+    bool hasValidLight = false;
+
+    auto itExtLight = node.extensions.find("KHR_lights_punctual");
+
+    if (itExtLight != node.extensions.end()) {
+      const auto &data = (*itExtLight).second;
+      if (data.Has("light")) {
+        auto index = data.Get("light").GetNumberAsInt();
+        hasValidLight =
+            index >= 0 &&
+            (importData.directionalLights.map.find(static_cast<size_t>(
+                 index)) != importData.directionalLights.map.end() ||
+             importData.pointLights.map.find(static_cast<size_t>(index)) !=
+                 importData.pointLights.map.end());
+      }
+    }
 
     auto localEntityId = static_cast<uint32_t>(nodeIndex);
 
@@ -65,36 +81,55 @@ void loadPrefabs(GLTFImportData &importData) {
 
     prefab.data.transforms.push_back({localEntityId, transform});
 
-    if (node.skin >= 0) {
-      prefab.data.skinnedMeshes.push_back(
-          {localEntityId, importData.skinnedMeshes.map.at(node.mesh)});
+    if (hasValidMesh) {
+      if (node.skin >= 0) {
+        prefab.data.skinnedMeshes.push_back(
+            {localEntityId, importData.skinnedMeshes.map.at(node.mesh)});
 
-      prefab.data.skeletons.push_back(
-          {localEntityId, importData.skeletons.skeletonMap.map.at(node.skin)});
+        prefab.data.skeletons.push_back(
+            {localEntityId,
+             importData.skeletons.skeletonMap.map.at(node.skin)});
 
-      Animator component;
+        Animator component;
 
-      auto it = importData.animations.skinAnimationMap.find(node.skin);
-      if (it != importData.animations.skinAnimationMap.end()) {
-        component.animations = it->second;
+        auto it = importData.animations.skinAnimationMap.find(node.skin);
+        if (it != importData.animations.skinAnimationMap.end()) {
+          component.animations = it->second;
+        }
+
+        if (component.animations.size() > 0) {
+          prefab.data.animators.push_back({localEntityId, component});
+        }
+      } else {
+        prefab.data.meshes.push_back(
+            {localEntityId, importData.meshes.map.at(node.mesh)});
+
+        Animator component;
+
+        auto it = importData.animations.nodeAnimationMap.find(nodeIndex);
+        if (it != importData.animations.nodeAnimationMap.end()) {
+          component.animations = it->second;
+        }
+
+        if (component.animations.size() > 0) {
+          prefab.data.animators.push_back({localEntityId, component});
+        }
       }
+    }
 
-      if (component.animations.size() > 0) {
-        prefab.data.animators.push_back({localEntityId, component});
-      }
-    } else {
-      prefab.data.meshes.push_back(
-          {localEntityId, importData.meshes.map.at(node.mesh)});
+    if (hasValidLight) {
+      const auto &light = itExtLight->second;
+      size_t lightIndex =
+          static_cast<size_t>(light.Get("light").GetNumberAsInt());
 
-      Animator component;
-
-      auto it = importData.animations.nodeAnimationMap.find(nodeIndex);
-      if (it != importData.animations.nodeAnimationMap.end()) {
-        component.animations = it->second;
-      }
-
-      if (component.animations.size() > 0) {
-        prefab.data.animators.push_back({localEntityId, component});
+      if (importData.directionalLights.map.find(lightIndex) !=
+          importData.directionalLights.map.end()) {
+        prefab.data.directionalLights.push_back(
+            {localEntityId, importData.directionalLights.map.at(lightIndex)});
+      } else if (importData.pointLights.map.find(lightIndex) !=
+                 importData.pointLights.map.end()) {
+        prefab.data.pointLights.push_back(
+            {localEntityId, importData.pointLights.map.at(lightIndex)});
       }
     }
   }
