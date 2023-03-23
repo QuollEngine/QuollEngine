@@ -32,10 +32,11 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   }
 
   AssetData<TextureAsset> texture{};
-  auto filename = "texture" + std::to_string(index);
+  auto assetName =
+      image.name.empty() ? "texture" + std::to_string(index) : image.name;
   auto textureRelPath =
       std::filesystem::relative(targetPath, assetCache.getAssetsPath()) /
-      filename;
+      assetName;
 
   importData.imageLoader.loadFromMemory(
       const_cast<void *>(static_cast<const void *>(image.image.data())),

@@ -484,15 +484,20 @@ void loadMeshes(GLTFImportData &importData) {
     }
 
     if (isSkinnedMesh && !skinnedMesh.data.geometries.empty()) {
-      skinnedMesh.name =
-          targetPath.string() + "/skinnedmesh" + std::to_string(i);
+      auto assetName = gltfMesh.name.empty() ? "skinnedmesh" + std::to_string(i)
+                                             : gltfMesh.name;
+
+      skinnedMesh.name = targetPath.string() + "/" + assetName;
       skinnedMesh.type = AssetType::SkinnedMesh;
 
       auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
       auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
       importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
     } else if (!mesh.data.geometries.empty()) {
-      mesh.name = targetPath.string() + "/mesh" + std::to_string(i);
+      auto assetName =
+          gltfMesh.name.empty() ? "mesh " + std::to_string(i) : gltfMesh.name;
+
+      mesh.name = targetPath.string() + "/" + assetName;
       mesh.type = AssetType::Mesh;
 
       auto path = assetCache.createMeshFromAsset(mesh);

@@ -114,8 +114,12 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
+    auto assetName = gltfAnimation.name.empty()
+                         ? "animation" + std::to_string(i)
+                         : gltfAnimation.name;
+
     AssetData<AnimationAsset> animation;
-    animation.name = targetPath.string() + "/" + gltfAnimation.name;
+    animation.name = targetPath.string() + "/" + assetName;
     animation.data.time = maxTime;
 
     int32_t targetNode = -1;
