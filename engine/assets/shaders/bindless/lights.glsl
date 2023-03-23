@@ -43,11 +43,6 @@ struct PointLightItem {
    * Light color
    */
   vec4 color;
-
-  /**
-   * Shadow data
-   */
-  uvec4 shadowData;
 };
 
 RegisterBuffer(std430, readonly, PointLightData, { PointLightItem items[]; });

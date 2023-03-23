@@ -51,6 +51,8 @@ void Runtime::start() {
 
   static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
 
+  liquid::Presenter presenter(renderer.getShaderLibrary(), device);
+
   renderer.getSceneRenderer().setClearColor(BlueishClearValue);
 
   auto passData = renderer.getSceneRenderer().attach(graph);
@@ -60,7 +62,6 @@ void Runtime::start() {
                                           assetCache.getRegistry());
   liquid::SceneUpdater sceneUpdater;
   liquid::PhysicsSystem physicsSystem(eventSystem);
-  liquid::Presenter presenter(renderer.getShaderLibrary(), device);
   liquid::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
   liquid::AnimationSystem animationSystem(assetCache.getRegistry());
   liquid::SkeletonUpdater skeletonUpdater;

@@ -10,11 +10,8 @@ void ShortcutsManager::add(Shortcut shortcut, Action *action) {
 
 void ShortcutsManager::process(int key, int mods,
                                ActionExecutor &actionExecutor) {
-  std::cout << "Input: " << (char)key << " - " << mods << "\n ";
-
   for (size_t i = 0; i < mShortcuts.size(); ++i) {
     const auto &shortcut = mShortcuts.at(i);
-    std::cout << (char)shortcut.getKey() << " - " << shortcut.getMods() << "\n";
 
     if (shortcut == Shortcut(key, mods)) {
       actionExecutor.execute(mActions.at(i));

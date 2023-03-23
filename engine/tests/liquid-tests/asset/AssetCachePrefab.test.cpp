@@ -68,6 +68,14 @@ public:
       asset.data.meshes.push_back({i, handle});
     }
 
+    // Add two more entities that point to the same
+    // meshes to test that existing meshes are always
+    // referenced instead of added again
+    for (uint32_t i = 0; i < 2; ++i) {
+      auto handle = asset.data.meshes.at(static_cast<size_t>(i)).value;
+      asset.data.meshes.push_back({numMeshes + i, handle});
+    }
+
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkinnedMeshAsset> mesh;
       mesh.path = std::filesystem::current_path() /
@@ -76,12 +84,28 @@ public:
       asset.data.skinnedMeshes.push_back({i, handle});
     }
 
+    // Add two more entities that point to the same
+    // meshes to test that existing meshes are always
+    // referenced instead of added again
+    for (uint32_t i = 0; i < 2; ++i) {
+      auto handle = asset.data.skinnedMeshes.at(static_cast<size_t>(i)).value;
+      asset.data.skinnedMeshes.push_back({numSkeletons + i, handle});
+    }
+
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkeletonAsset> skeleton;
       skeleton.path = std::filesystem::current_path() /
                       ("skeletons/skel-" + std::to_string(i) + ".lqskel");
       auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
       asset.data.skeletons.push_back({i, handle});
+    }
+
+    // Add two more entities that point to the same
+    // skeletons to test that existing skeletons are always
+    // referenced instead of added again
+    for (uint32_t i = 0; i < 2; ++i) {
+      auto handle = asset.data.skeletons.at(static_cast<size_t>(i)).value;
+      asset.data.skeletons.push_back({numSkeletons + i, handle});
     }
 
     asset.data.animators.resize(numAnimators);
@@ -95,6 +119,14 @@ public:
 
       asset.data.animators.at(entityId).entity = entityId;
       asset.data.animators.at(entityId).value.animations.push_back(handle);
+    }
+
+    // Add two more entities that point to same animations
+    // to test that existing animations are always
+    // referenced instead of added again
+    for (uint32_t i = 0; i < 2; ++i) {
+      liquid::Animator animator = asset.data.animators.at(i).value;
+      asset.data.animators.push_back({numAnimators + i, animator});
     }
 
     return asset;
@@ -125,7 +157,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     auto &map = cache.getRegistry().getMeshes();
     uint32_t numAssets = 0;
     file.read(numAssets);
-    EXPECT_EQ(numAssets, static_cast<uint32_t>(expected.size()));
+    EXPECT_EQ(numAssets, static_cast<uint32_t>(expected.size() - 2));
     actualMeshes.resize(numAssets);
     file.read(actualMeshes);
 
@@ -146,7 +178,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     auto &map = cache.getRegistry().getSkinnedMeshes();
     uint32_t numAssets = 0;
     file.read(numAssets);
-    EXPECT_EQ(numAssets, static_cast<uint32_t>(expected.size()));
+    EXPECT_EQ(numAssets, 3);
     actualSkinnedMeshes.resize(numAssets);
     file.read(actualSkinnedMeshes);
 
@@ -167,7 +199,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     auto &map = cache.getRegistry().getSkeletons();
     uint32_t numAssets = 0;
     file.read(numAssets);
-    EXPECT_EQ(numAssets, static_cast<uint32_t>(expected.size()));
+    EXPECT_EQ(numAssets, 3);
     actualSkeletons.resize(numAssets);
     file.read(actualSkeletons);
 
@@ -236,7 +268,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
-    EXPECT_EQ(numComponents, 5);
+    EXPECT_EQ(numComponents, 7);
     auto &map = cache.getRegistry().getMeshes();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 999;
@@ -245,7 +277,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       uint32_t meshIndex = 999;
       file.read(meshIndex);
-      EXPECT_EQ(meshIndex, i);
+      EXPECT_EQ(meshIndex, i % 5);
 
       auto &expected = map.getAsset(asset.data.meshes.at(i).value);
 
@@ -254,14 +286,14 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
                                 .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
-      EXPECT_EQ(expectedString, actualMeshes.at(i));
+      EXPECT_EQ(expectedString, actualMeshes.at(meshIndex));
     }
   }
 
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
-    EXPECT_EQ(numComponents, 3);
+    EXPECT_EQ(numComponents, 5);
     auto &map = cache.getRegistry().getSkinnedMeshes();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 999;
@@ -270,7 +302,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       uint32_t meshIndex = 999;
       file.read(meshIndex);
-      EXPECT_EQ(meshIndex, i);
+      EXPECT_EQ(meshIndex, i % 3);
 
       auto &expected = map.getAsset(asset.data.skinnedMeshes.at(i).value);
 
@@ -279,23 +311,23 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
                                 .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
-      EXPECT_EQ(expectedString, actualSkinnedMeshes.at(i));
+      EXPECT_EQ(expectedString, actualSkinnedMeshes.at(meshIndex));
     }
   }
 
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
-    EXPECT_EQ(numComponents, 3);
+    EXPECT_EQ(numComponents, 5);
     auto &map = cache.getRegistry().getSkeletons();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t meshIndex = 999;
-      file.read(meshIndex);
-      EXPECT_EQ(meshIndex, i);
+      uint32_t skeletonIndex = 999;
+      file.read(skeletonIndex);
+      EXPECT_EQ(skeletonIndex, i % 3);
 
       auto &expected = map.getAsset(asset.data.skeletons.at(i).value);
 
@@ -304,14 +336,14 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
                                 .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
-      EXPECT_EQ(expectedString, actualSkeletons.at(i));
+      EXPECT_EQ(expectedString, actualSkeletons.at(skeletonIndex));
     }
   }
 
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
-    EXPECT_EQ(numComponents, 4);
+    EXPECT_EQ(numComponents, 6);
     auto &map = cache.getRegistry().getAnimations();
 
     for (uint32_t i = 0; i < numComponents; ++i) {

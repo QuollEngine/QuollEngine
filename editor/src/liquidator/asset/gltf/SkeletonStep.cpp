@@ -15,6 +15,9 @@ void loadSkeletons(GLTFImportData &importData) {
     const auto &skin = model.skins.at(si);
 
     auto skinName = "Skin #" + std::to_string(si);
+    if (!skin.name.empty()) {
+      skinName += "(" + skin.name + ")";
+    }
 
     std::unordered_map<uint32_t, int> jointParents;
     std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
@@ -96,9 +99,11 @@ void loadSkeletons(GLTFImportData &importData) {
 
     uint32_t numJoints = static_cast<uint32_t>(skin.joints.size());
 
+    auto assetName =
+        skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
+
     AssetData<SkeletonAsset> asset;
-    asset.name = targetPath.string() + "/" + targetPath.filename().string() +
-                 "-skeleton" + std::to_string(si);
+    asset.name = targetPath.string() + "/" + assetName;
     asset.type = AssetType::Skeleton;
 
     for (auto &joint : skin.joints) {

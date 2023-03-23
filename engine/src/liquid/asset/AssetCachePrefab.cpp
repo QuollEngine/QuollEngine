@@ -27,82 +27,97 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   file.write(header.version);
   file.write(header.type);
 
-  // Load assets
-  uint32_t numMeshes = static_cast<uint32_t>(asset.data.meshes.size());
-  file.write(numMeshes);
-
   std::map<MeshAssetHandle, uint32_t> localMeshMap;
-  uint32_t lastMeshId = 0;
+  {
+    std::vector<String> assetPaths;
+    assetPaths.reserve(asset.data.meshes.size());
 
-  for (auto &component : asset.data.meshes) {
-    auto &mesh = mRegistry.getMeshes().getAsset(component.value);
-    auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
-    std::replace(path.begin(), path.end(), '\\', '/');
-    file.write(path);
-
-    if (localMeshMap.find(component.value) == localMeshMap.end()) {
-      localMeshMap.insert_or_assign(component.value, lastMeshId++);
-    }
-  }
-
-  uint32_t numSkinnedMeshes =
-      static_cast<uint32_t>(asset.data.skinnedMeshes.size());
-  file.write(numSkinnedMeshes);
-
-  std::map<SkinnedMeshAssetHandle, uint32_t> localSkinnedMeshMap;
-  uint32_t lastSkinnedMeshId = 0;
-
-  for (auto &component : asset.data.skinnedMeshes) {
-    auto &mesh = mRegistry.getSkinnedMeshes().getAsset(component.value);
-    auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
-    std::replace(path.begin(), path.end(), '\\', '/');
-    file.write(path);
-
-    if (localSkinnedMeshMap.find(component.value) ==
-        localSkinnedMeshMap.end()) {
-      localSkinnedMeshMap.insert_or_assign(component.value,
-                                           lastSkinnedMeshId++);
-    }
-  }
-
-  uint32_t numSkeletons = static_cast<uint32_t>(asset.data.skeletons.size());
-  file.write(numSkeletons);
-
-  std::map<SkeletonAssetHandle, uint32_t> localSkeletonMap;
-  uint32_t lastSkeletonId = 0;
-
-  for (auto &component : asset.data.skeletons) {
-    auto &skeleton = mRegistry.getSkeletons().getAsset(component.value);
-    auto path = std::filesystem::relative(skeleton.path, mAssetsPath).string();
-    std::replace(path.begin(), path.end(), '\\', '/');
-    file.write(path);
-
-    if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
-      localSkeletonMap.insert_or_assign(component.value, lastSkeletonId++);
-    }
-  }
-
-  uint32_t numAnimations = 0;
-  for (auto &animator : asset.data.animators) {
-    numAnimations += static_cast<uint32_t>(animator.value.animations.size());
-  }
-  file.write(numAnimations);
-
-  std::map<AnimationAssetHandle, uint32_t> localAnimationMap;
-  uint32_t lastAnimationId = 0;
-
-  for (auto &component : asset.data.animators) {
-    for (auto &handle : component.value.animations) {
-      auto &animation = mRegistry.getAnimations().getAsset(handle);
-      auto path =
-          std::filesystem::relative(animation.path, mAssetsPath).string();
+    for (auto &component : asset.data.meshes) {
+      auto &mesh = mRegistry.getMeshes().getAsset(component.value);
+      auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
       std::replace(path.begin(), path.end(), '\\', '/');
-      file.write(path);
 
-      if (localAnimationMap.find(handle) == localAnimationMap.end()) {
-        localAnimationMap.insert_or_assign(handle, lastAnimationId++);
+      if (localMeshMap.find(component.value) == localMeshMap.end()) {
+        localMeshMap.insert_or_assign(component.value,
+                                      static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(path);
       }
     }
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
+  }
+
+  std::map<SkinnedMeshAssetHandle, uint32_t> localSkinnedMeshMap;
+  {
+    std::vector<String> assetPaths;
+    assetPaths.reserve(asset.data.skinnedMeshes.size());
+
+    for (auto &component : asset.data.skinnedMeshes) {
+      auto &mesh = mRegistry.getSkinnedMeshes().getAsset(component.value);
+      auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+
+      if (localSkinnedMeshMap.find(component.value) ==
+          localSkinnedMeshMap.end()) {
+        localSkinnedMeshMap.insert_or_assign(
+            component.value, static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(path);
+      }
+    }
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
+  }
+
+  std::map<SkeletonAssetHandle, uint32_t> localSkeletonMap;
+  {
+    std::vector<String> assetPaths;
+    assetPaths.reserve(asset.data.skeletons.size());
+
+    for (auto &component : asset.data.skeletons) {
+      auto &skeleton = mRegistry.getSkeletons().getAsset(component.value);
+      auto path =
+          std::filesystem::relative(skeleton.path, mAssetsPath).string();
+      std::replace(path.begin(), path.end(), '\\', '/');
+
+      if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
+        localSkeletonMap.insert_or_assign(
+            component.value, static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(path);
+      }
+    }
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
+  }
+
+  std::map<AnimationAssetHandle, uint32_t> localAnimationMap;
+  {
+    std::vector<String> assetPaths;
+    uint32_t numAnimations = 0;
+    for (auto &animator : asset.data.animators) {
+      numAnimations += static_cast<uint32_t>(animator.value.animations.size());
+    }
+    assetPaths.reserve(numAnimations);
+
+    for (auto &component : asset.data.animators) {
+      for (auto &handle : component.value.animations) {
+        auto &animation = mRegistry.getAnimations().getAsset(handle);
+        auto path =
+            std::filesystem::relative(animation.path, mAssetsPath).string();
+        std::replace(path.begin(), path.end(), '\\', '/');
+
+        if (localAnimationMap.find(handle) == localAnimationMap.end()) {
+          localAnimationMap.insert_or_assign(
+              handle, static_cast<uint32_t>(assetPaths.size()));
+          assetPaths.push_back(path);
+        }
+      }
+    }
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
   }
 
   // Load component data

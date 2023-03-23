@@ -19,8 +19,12 @@ void loadMaterials(GLTFImportData &importData) {
   for (size_t i = 0; i < model.materials.size(); ++i) {
     auto &gltfMaterial = model.materials.at(i);
 
+    auto assetName = gltfMaterial.name.empty() ? "material" + std::to_string(i)
+                                               : gltfMaterial.name;
+
     AssetData<MaterialAsset> material;
-    material.name = targetPath.string() + "/material" + std::to_string(i);
+
+    material.name = targetPath.string() + "/" + assetName;
     material.type = AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
