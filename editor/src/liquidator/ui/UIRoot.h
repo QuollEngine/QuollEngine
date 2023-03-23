@@ -17,6 +17,7 @@
 #include "SceneView.h"
 #include "SceneGizmos.h"
 #include "MainMenu.h"
+#include "ShortcutsManager.h"
 
 #include "liquidator/actions/ActionExecutor.h"
 
@@ -84,6 +85,13 @@ public:
     return mSceneHierarchyPanel;
   }
 
+  /**
+   * @brief Process shortcuts
+   *
+   * @param eventSystem Event system
+   */
+  void processShortcuts(EventSystem &eventSystem);
+
 private:
   ActionExecutor mActionExecutor;
   SceneHierarchyPanel mSceneHierarchyPanel;
@@ -97,6 +105,7 @@ private:
   Toolbar mToolbar;
   MainMenu mMainMenu;
   SceneGizmos mSceneGizmos;
+  ShortcutsManager mShortcutsManager;
 };
 
 } // namespace liquid::editor

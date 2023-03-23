@@ -5,6 +5,7 @@
 #include "liquidator/actions/SimulationModeActions.h"
 #include "liquidator/actions/CreateEmptyEntityAtViewAction.h"
 #include "liquidator/actions/ExportAsGameAction.h"
+#include "liquidator/actions/DeleteEntityAction.h"
 
 #include "UIRoot.h"
 #include "ImGuizmo.h"
@@ -14,11 +15,15 @@ namespace liquid::editor {
 UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
     : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader) {
 
+  mShortcutsManager.add(Shortcut().control().key('N'),
+                        new CreateEmptyEntityAtViewAction);
+
   mMainMenu.begin("Project")
       .add("Export as game", new ExportAsGameAction)
       .end()
       .begin("Objects")
-      .add("Create empty object", new CreateEmptyEntityAtViewAction)
+      .add("Create empty object", new CreateEmptyEntityAtViewAction,
+           Shortcut().control().key('N'))
       .end();
 
   mToolbar.add(new StartSimulationModeAction, "Play", fa::Play,
@@ -71,6 +76,12 @@ bool UIRoot::renderSceneView(WorkspaceState &state,
   }
 
   return false;
+}
+
+void UIRoot::processShortcuts(EventSystem &eventSystem) {
+  eventSystem.observe(KeyboardEvent::Pressed, [this](const auto &data) {
+    mShortcutsManager.process(data.key, data.mods, mActionExecutor);
+  });
 }
 
 } // namespace liquid::editor

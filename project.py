@@ -95,8 +95,8 @@ def project_hash_matches(projectFilePath, hashFilePath):
 #
 # Fetches and extracts dependencies of a project
 #
-def fetch_dependencies(project):
-    for x in project['dependencies']:
+def fetch_dependencies(dependencies):
+    for x in dependencies:
         profiler_data[x['name']] = { 'fetch': 0, 'build': 0 }
 
         print(f'Fetching {x["name"]}...')
@@ -210,27 +210,41 @@ def run_process(cmdLine, cwd):
 def is_dict(obj, key):
     return key in obj and type(obj[key]) is dict
 
-if project_hash_matches(projectFile, projectHashFile):
+project = open_project(projectFile)
+dependencies = project['dependencies']
+cleanAll = True
+
+if len(sys.argv) == 2:
+    projectName = sys.argv[1]
+
+    dependencies = [x for x in dependencies if x['name'] == projectName]
+
+    if len(dependencies) == 0:
+        print(f'`{projectName}` dependency is not found')
+        sys.exit(1)
+
+    cleanAll = False
+elif project_hash_matches(projectFile, projectHashFile):
     print('Dependencies are up to date!')
     sys.exit(0)
 
-project = open_project(projectFile)
-clean_make_dir(vendorRootDir)
+if cleanAll:
+    clean_make_dir(vendorRootDir)
 
-for buildMode in buildModes:
-    vendorModeDir = os.path.join(vendorRootDir, buildMode)
-    clean_make_dir(vendorModeDir)
-    clean_make_dir(os.path.join(vendorModeDir, 'include'))
-    clean_make_dir(os.path.join(vendorModeDir, 'lib'))
-    clean_make_dir(os.path.join(vendorModeDir, 'bin'))
+    for buildMode in buildModes:
+        vendorModeDir = os.path.join(vendorRootDir, buildMode)
+        clean_make_dir(vendorModeDir)
+        clean_make_dir(os.path.join(vendorModeDir, 'include'))
+        clean_make_dir(os.path.join(vendorModeDir, 'lib'))
+        clean_make_dir(os.path.join(vendorModeDir, 'bin'))
 
-clean_make_dir(os.path.join(vendorRootDir, 'projects'))
+    clean_make_dir(os.path.join(vendorRootDir, 'projects'))
 
 clean_make_dir(os.path.join(tempDir))
-fetch_dependencies(project)
+fetch_dependencies(dependencies)
 
 for buildMode in buildModes:
-    for x in project['dependencies']:
+    for x in dependencies: 
         print(f'Building {x["name"]}...')
         start = time.time()
         params = {

@@ -167,7 +167,7 @@ TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
   }
 }
 
-TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
+TEST_F(SceneIOTest, SavingEntityAfterLoadingCreatesEntityWithNonConflictingId) {
   static constexpr uint64_t NumEntities = 9;
 
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
@@ -185,6 +185,32 @@ TEST_F(SceneIOTest, SavingSceneAfterLoadingCreatesEntityWithNonConflictingId) {
   EXPECT_EQ(id, 10);
   EXPECT_TRUE(
       std::filesystem::is_regular_file(SceneEntitiesDirectory / "10.lqnode"));
+}
+
+TEST_F(SceneIOTest, SavingEntitySavesParentBeforeEntityIfParentHasNoId) {
+  auto entity = scene.entityDatabase.create();
+  auto parent = scene.entityDatabase.create();
+  auto parent2 = scene.entityDatabase.create();
+
+  scene.entityDatabase.set<liquid::Parent>(entity, {parent});
+  scene.entityDatabase.set<liquid::Parent>(parent, {parent2});
+
+  sceneIO.saveEntity(entity, ScenePath);
+
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent2));
+
+  auto entityId = scene.entityDatabase.get<liquid::Id>(entity).id;
+  auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
+  auto parent2Id = scene.entityDatabase.get<liquid::Id>(parent2).id;
+
+  EXPECT_TRUE(std::filesystem::is_regular_file(
+      SceneEntitiesDirectory / (std::to_string(entityId) + ".lqnode")));
+  EXPECT_TRUE(std::filesystem::is_regular_file(
+      SceneEntitiesDirectory / (std::to_string(parentId) + ".lqnode")));
+  EXPECT_TRUE(std::filesystem::is_regular_file(
+      SceneEntitiesDirectory / (std::to_string(parent2Id) + ".lqnode")));
 }
 
 TEST_F(SceneIOTest, LoadingSetsParentsProperly) {

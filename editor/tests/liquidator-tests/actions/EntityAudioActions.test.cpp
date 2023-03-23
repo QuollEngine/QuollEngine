@@ -6,7 +6,7 @@
 
 using EntitySetAudioActionTest = ActionTestBase;
 
-TEST_F(EntitySetAudioActionTest, ExecutorSetsAudioSourceForEntity) {
+TEST_P(EntitySetAudioActionTest, ExecutorSetsAudioSourceForEntity) {
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});

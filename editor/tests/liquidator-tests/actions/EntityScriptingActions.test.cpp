@@ -6,7 +6,7 @@
 
 using EntitySetScriptActionTest = ActionTestBase;
 
-TEST_F(EntitySetScriptActionTest, ExecutorSetsScriptForEntity) {
+TEST_P(EntitySetScriptActionTest, ExecutorSetsScriptForEntity) {
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::EntitySetScript action(entity,

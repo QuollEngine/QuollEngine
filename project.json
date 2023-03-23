@@ -254,7 +254,11 @@
           "type": "cmake",
           "options": {
             "common": {
-              "YAML_BUILD_SHARED_LIBS": "OFF"
+              "YAML_BUILD_SHARED_LIBS": "OFF",
+              "YAML_CPP_BUILD_TOOLS": "OFF",
+              "YAML_CPP_BUILD_TESTS": "OFF",
+              "YAML_CPP_FORMAT_SOURCE": "OFF",
+              "YAML_CPP_BUILD_CONTRIB": "OFF"
             },
             "linux": {
               "CMAKE_CXX_FLAGS": "\"-Wno-maybe-uninitialized\""
