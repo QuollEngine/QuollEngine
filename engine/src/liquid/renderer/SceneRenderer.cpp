@@ -97,7 +97,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   hdrColorDesc.width = SwapchainSizePercentage;
   hdrColorDesc.height = SwapchainSizePercentage;
   hdrColorDesc.layers = 1;
-  hdrColorDesc.format = rhi::Format::Bgra8Srgb;
+  hdrColorDesc.format = rhi::Format::Rgba8Srgb;
   auto hdrColor = mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};

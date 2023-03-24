@@ -80,7 +80,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.width = FramebufferSizePercentage;
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
-  imguiDesc.format = rhi::Format::Bgra8Srgb;
+  imguiDesc.format = rhi::Format::Rgba8Srgb;
   auto imgui =
       mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
 
