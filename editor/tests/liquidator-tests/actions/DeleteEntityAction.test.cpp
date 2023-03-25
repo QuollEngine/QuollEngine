@@ -10,7 +10,7 @@ TEST_P(DeleteEntityActionTest,
        ExecuteAddsDeleteComponentToEntityInSceneIfWorkspaceModeIsEdit) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntityAction action(entity);
+  liquid::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
@@ -24,7 +24,7 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
   state.selectedEntity = entity;
 
-  liquid::editor::DeleteEntityAction action(entity);
+  liquid::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
@@ -44,7 +44,7 @@ TEST_P(
     state.selectedEntity = e2;
   }
 
-  liquid::editor::DeleteEntityAction action(entity);
+  liquid::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
@@ -56,7 +56,7 @@ TEST_P(
   auto entity = activeScene().entityDatabase.create();
   state.selectedEntity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntityAction action(entity);
+  liquid::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);

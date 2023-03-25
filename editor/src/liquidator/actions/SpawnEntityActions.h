@@ -5,6 +5,29 @@
 namespace liquid::editor {
 
 /**
+ * @brief Spawn empty entity at view action
+ */
+class SpawnEmptyEntityAtView : public Action {
+public:
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+};
+
+/**
  * @brief Spawn prefab at given transform action
  */
 class SpawnPrefabAtTransform : public Action {

@@ -8,7 +8,7 @@
 #include "FontAwesome.h"
 #include "Theme.h"
 
-#include "liquidator/actions/MoveCameraToEntityAction.h"
+#include "liquidator/actions/EditorCameraActions.h"
 #include "liquidator/actions/DeleteEntityAction.h"
 
 namespace liquid::editor {
@@ -138,8 +138,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
                              ImGui::GetStyle().ItemSpacing.x));
 
       if (ImGui::MenuItem("Go to view")) {
-        actionExecutor.execute(
-            std::make_unique<MoveCameraToEntityAction>(entity));
+        actionExecutor.execute(std::make_unique<MoveCameraToEntity>(entity));
       }
 
       if (ImGui::MenuItem("Delete")) {
@@ -148,7 +147,7 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     }
     confirmDeleteSceneNode.render();
     if (confirmDeleteSceneNode.isConfirmed()) {
-      actionExecutor.execute(std::make_unique<DeleteEntityAction>(entity));
+      actionExecutor.execute(std::make_unique<DeleteEntity>(entity));
     }
   }
 

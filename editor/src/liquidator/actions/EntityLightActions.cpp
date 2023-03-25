@@ -72,12 +72,12 @@ bool EntityDisableCascadedShadowMap::predicate(WorkspaceState &state) {
   return scene.entityDatabase.has<CascadedShadowMap>(mEntity);
 }
 
-EntitySetCascadedShadowMapAction::EntitySetCascadedShadowMapAction(
+EntitySetCascadedShadowMap::EntitySetCascadedShadowMap(
     Entity entity, CascadedShadowMap shadowMap)
     : mEntity(entity), mShadowMap(shadowMap) {}
 
 ActionExecutorResult
-EntitySetCascadedShadowMapAction::onExecute(WorkspaceState &state) {
+EntitySetCascadedShadowMap::onExecute(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -88,7 +88,7 @@ EntitySetCascadedShadowMapAction::onExecute(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetCascadedShadowMapAction::predicate(WorkspaceState &state) {
+bool EntitySetCascadedShadowMap::predicate(WorkspaceState &state) {
   return true;
 }
 

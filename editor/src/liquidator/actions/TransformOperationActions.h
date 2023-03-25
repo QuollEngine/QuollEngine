@@ -7,14 +7,14 @@ namespace liquid::editor {
 /**
  * @brief Set active transform action
  */
-class SetActiveTransformAction : public Action {
+class SetActiveTransform : public Action {
 public:
   /**
    * @brief Create action
    *
    * @param transformOperation Transform operation
    */
-  SetActiveTransformAction(TransformOperation transformOperation);
+  SetActiveTransform(TransformOperation transformOperation);
 
   /**
    * @brief Action executor

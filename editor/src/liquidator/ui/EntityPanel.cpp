@@ -255,7 +255,7 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
     if (mCascadedShadowMap.has_value() && sendAction) {
-      actionExecutor.execute(std::make_unique<EntitySetCascadedShadowMapAction>(
+      actionExecutor.execute(std::make_unique<EntitySetCascadedShadowMap>(
           mSelectedEntity, component));
 
       mCascadedShadowMap.reset();

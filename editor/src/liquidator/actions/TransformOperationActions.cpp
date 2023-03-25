@@ -3,17 +3,15 @@
 
 namespace liquid::editor {
 
-SetActiveTransformAction::SetActiveTransformAction(
-    TransformOperation transformOperation)
+SetActiveTransform::SetActiveTransform(TransformOperation transformOperation)
     : mTransformOperation(transformOperation) {}
 
-ActionExecutorResult
-SetActiveTransformAction::onExecute(WorkspaceState &state) {
+ActionExecutorResult SetActiveTransform::onExecute(WorkspaceState &state) {
   state.activeTransform = mTransformOperation;
   return ActionExecutorResult{};
 }
 
-bool SetActiveTransformAction::predicate(WorkspaceState &state) {
+bool SetActiveTransform::predicate(WorkspaceState &state) {
   return state.activeTransform != mTransformOperation;
 }
 

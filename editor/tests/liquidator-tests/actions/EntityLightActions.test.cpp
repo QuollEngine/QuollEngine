@@ -94,7 +94,7 @@ using EntitySetCascadedShadowMapActionTest = ActionTestBase;
 TEST_P(EntitySetCascadedShadowMapActionTest, ExecutorSetsCascadedShadowMap) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::EntitySetCascadedShadowMapAction action(entity, {0.4f});
+  liquid::editor::EntitySetCascadedShadowMap action(entity, {0.4f});
   auto res = action.onExecute(state);
 
   EXPECT_EQ(activeScene()

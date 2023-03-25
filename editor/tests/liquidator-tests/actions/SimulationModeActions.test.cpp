@@ -11,7 +11,7 @@ using StartSimulationModeActionTest = ActionTestBase;
 TEST_F(StartSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Edit;
 
-  liquid::editor::StartSimulationModeAction action;
+  liquid::editor::StartSimulationMode action;
   action.onExecute(state);
   EXPECT_EQ(state.mode, WM::Simulation);
 }
@@ -32,7 +32,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_EQ(state.simulationScene.dummyCamera, liquid::Entity::Null);
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
 
-  liquid::editor::StartSimulationModeAction action;
+  liquid::editor::StartSimulationMode action;
   action.onExecute(state);
 
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
@@ -57,7 +57,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_EQ(state.simulationScene.dummyCamera, liquid::Entity::Null);
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
 
-  liquid::editor::StartSimulationModeAction action;
+  liquid::editor::StartSimulationMode action;
   action.onExecute(state);
 
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
@@ -70,7 +70,7 @@ TEST_F(StartSimulationModeActionTest,
        PredicateReturnsTrueIfWorkspaceModeIsEdit) {
   state.mode = WM::Edit;
 
-  liquid::editor::StartSimulationModeAction action;
+  liquid::editor::StartSimulationMode action;
   EXPECT_TRUE(action.predicate(state));
 }
 
@@ -78,7 +78,7 @@ TEST_F(StartSimulationModeActionTest,
        PredicateReturnsFalseIfWorkspaceModeIsSimulation) {
   state.mode = WM::Simulation;
 
-  liquid::editor::StartSimulationModeAction action;
+  liquid::editor::StartSimulationMode action;
   EXPECT_FALSE(action.predicate(state));
 }
 
@@ -87,7 +87,7 @@ using StopSimulationModeActionTest = ActionTestBase;
 TEST_F(StopSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Simulation;
 
-  liquid::editor::StopSimulationModeAction action;
+  liquid::editor::StopSimulationMode action;
   action.onExecute(state);
   EXPECT_EQ(state.mode, WM::Edit);
 }
@@ -96,7 +96,7 @@ TEST_F(StopSimulationModeActionTest,
        PredicateReturnsTrueIfWorkspaceModeIsSimulation) {
   state.mode = WM::Simulation;
 
-  liquid::editor::StopSimulationModeAction action;
+  liquid::editor::StopSimulationMode action;
   EXPECT_TRUE(action.predicate(state));
 }
 
@@ -104,6 +104,6 @@ TEST_F(StopSimulationModeActionTest,
        PredicateReturnsFalseIfWorkspaceModeIsSimulation) {
   state.mode = WM::Edit;
 
-  liquid::editor::StopSimulationModeAction action;
+  liquid::editor::StopSimulationMode action;
   EXPECT_FALSE(action.predicate(state));
 }
