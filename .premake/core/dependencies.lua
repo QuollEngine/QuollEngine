@@ -60,7 +60,7 @@ end
 -- Link Google Test
 function linkGoogleTest()
     filter { "system:windows", "configurations:Debug or configurations:Test" }
-        links { "gtestd", "gmockd" }
+        links { "gtest", "gmock" }
 
     filter {"system:windows", "configurations:Release"}
         links { "gtest", "gmock" }

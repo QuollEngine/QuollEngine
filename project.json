@@ -35,7 +35,8 @@
           "type": "cmake",
           "options": {
             "common": {
-              "BUILD_SHARED_LIBS": "OFF"
+              "BUILD_SHARED_LIBS": "OFF",
+              "GLFW_BUILD_TESTS": "OFF"
             }
           }
         }
@@ -140,8 +141,8 @@
     },
     {
       "name": "googletest",
-      "buildSource": "googletest-release-1.11.0",
-      "url": "https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip",
+      "buildSource": "googletest-1.13.0",
+      "url": "https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip",
       "cmd": [
         {
           "type": "cmake",
