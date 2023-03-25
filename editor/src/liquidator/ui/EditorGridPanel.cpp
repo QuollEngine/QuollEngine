@@ -4,7 +4,7 @@
 #include "liquid/imgui/Imgui.h"
 #include "Widgets.h"
 
-#include "liquidator/actions/SetGridDataActions.h"
+#include "liquidator/actions/EditorGridActions.h"
 
 namespace liquid::editor {
 
@@ -23,17 +23,16 @@ void EditorGridPanel::render(WorkspaceState &state,
 
   if (auto _ = widgets::FixedWindow("Editor Grid", mOpen)) {
     {
-      bool enabled = SetGridLinesAction::isShown(state);
+      bool enabled = SetGridLines::isShown(state);
       if (ImGui::Checkbox("Show grid lines", &enabled)) {
-        actionExecutor.execute(std::make_unique<SetGridLinesAction>(enabled));
+        actionExecutor.execute(std::make_unique<SetGridLines>(enabled));
       }
     }
 
     {
-      bool enabled = SetGridAxisLinesAction::isShown(state);
+      bool enabled = SetGridAxisLines::isShown(state);
       if (ImGui::Checkbox("Show axis lines", &enabled)) {
-        actionExecutor.execute(
-            std::make_unique<SetGridAxisLinesAction>(enabled));
+        actionExecutor.execute(std::make_unique<SetGridAxisLines>(enabled));
       }
     }
   }

@@ -108,7 +108,7 @@ private:
 /**
  * @brief Set cascaded shadow map for entity action
  */
-class EntitySetCascadedShadowMapAction : public Action {
+class EntitySetCascadedShadowMap : public Action {
 public:
   /**
    * @brief Create action
@@ -116,7 +116,7 @@ public:
    * @param entity Entity
    * @param shadowMap Cascaded shadow map
    */
-  EntitySetCascadedShadowMapAction(Entity entity, CascadedShadowMap shadowMap);
+  EntitySetCascadedShadowMap(Entity entity, CascadedShadowMap shadowMap);
 
   /**
    * @brief Action executor

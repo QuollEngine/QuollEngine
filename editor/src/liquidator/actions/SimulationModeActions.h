@@ -5,9 +5,9 @@
 namespace liquid::editor {
 
 /**
- * @brief Start simulation mode
+ * @brief Start simulation mode action
  */
-class StartSimulationModeAction : public Action {
+class StartSimulationMode : public Action {
 public:
   /**
    * @brief Action executor
@@ -28,9 +28,9 @@ public:
 };
 
 /**
- * @brief Stop simulation mode
+ * @brief Stop simulation mode action
  */
-class StopSimulationModeAction : public Action {
+class StopSimulationMode : public Action {
 public:
   /**
    * @brief Action executor

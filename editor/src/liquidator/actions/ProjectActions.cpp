@@ -2,11 +2,11 @@
 #include "liquid/platform-tools/NativeFileDialog.h"
 #include "liquidator/core/GameExporter.h"
 
-#include "ExportAsGameAction.h"
+#include "ProjectActions.h"
 
 namespace liquid::editor {
 
-ActionExecutorResult ExportAsGameAction::onExecute(WorkspaceState &state) {
+ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state) {
   platform_tools::NativeFileDialog nativeFileDialog;
   auto path = nativeFileDialog.getFilePathFromCreateDialog({});
 
@@ -16,6 +16,6 @@ ActionExecutorResult ExportAsGameAction::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool ExportAsGameAction::predicate(WorkspaceState &state) { return true; }
+bool ExportAsGame::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

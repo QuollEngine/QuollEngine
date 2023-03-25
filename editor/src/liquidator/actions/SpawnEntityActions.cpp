@@ -4,10 +4,28 @@
 #include "EntitySkeletonActions.h"
 #include "EntityTransformActions.h"
 #include "EntityLightActions.h"
+#include "EntityNameActions.h"
 
 #include "SpawnEntityActions.h"
 
 namespace liquid::editor {
+
+/**
+ * @brief Get transform from camera view matrix
+ *
+ * @param viewMatrix Camera view matrix
+ * @return Local transform
+ */
+static LocalTransform getTransformFromView(glm::mat4 viewMatrix) {
+  static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
+  const auto &invViewMatrix = glm::inverse(viewMatrix);
+  const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
+
+  LocalTransform transform{};
+  transform.localPosition = orientation[3];
+
+  return transform;
+}
 
 /**
  * @brief Check if prefab is valid
@@ -29,6 +47,30 @@ static bool isPrefabValid(AssetRegistry &assetRegistry,
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
          !prefab.skeletons.empty() || !prefab.skinnedMeshes.empty() ||
          !prefab.transforms.empty();
+}
+
+ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+  const auto &viewMatrix =
+      scene.entityDatabase.get<Camera>(state.camera).viewMatrix;
+
+  auto entity = scene.entityDatabase.create();
+
+  auto transform = getTransformFromView(viewMatrix);
+  EntitySetLocalTransform(entity, transform).onExecute(state);
+  EntitySetName(entity, {"New entity"}).onExecute(state);
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(entity);
+  return res;
+}
+
+bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<Camera>(state.camera);
 }
 
 SpawnPrefabAtTransform::SpawnPrefabAtTransform(PrefabAssetHandle handle,
@@ -155,14 +197,8 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state) {
 
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
-  static constexpr glm::vec3 DistanceFromEye{0.0f, 0.0f, -10.0f};
-  const auto &invViewMatrix = glm::inverse(viewMatrix);
-  const auto &orientation = invViewMatrix * glm::translate(DistanceFromEye);
-
-  LocalTransform transform{};
-  transform.localPosition = orientation[3];
-
-  return SpawnPrefabAtTransform(mHandle, transform).onExecute(state);
+  return SpawnPrefabAtTransform(mHandle, getTransformFromView(viewMatrix))
+      .onExecute(state);
 }
 
 bool SpawnPrefabAtView::predicate(WorkspaceState &state) {

@@ -3,8 +3,7 @@
 
 namespace liquid::editor {
 
-ActionExecutorResult
-StartSimulationModeAction::onExecute(WorkspaceState &state) {
+ActionExecutorResult StartSimulationMode::onExecute(WorkspaceState &state) {
   state.mode = WorkspaceMode::Simulation;
   state.simulationScene.entityDatabase.destroy();
   state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
@@ -19,17 +18,16 @@ StartSimulationModeAction::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool StartSimulationModeAction::predicate(WorkspaceState &state) {
+bool StartSimulationMode::predicate(WorkspaceState &state) {
   return state.mode == WorkspaceMode::Edit;
 }
 
-ActionExecutorResult
-StopSimulationModeAction::onExecute(WorkspaceState &state) {
+ActionExecutorResult StopSimulationMode::onExecute(WorkspaceState &state) {
   state.mode = WorkspaceMode::Edit;
   return ActionExecutorResult{};
 }
 
-bool StopSimulationModeAction::predicate(WorkspaceState &state) {
+bool StopSimulationMode::predicate(WorkspaceState &state) {
   return state.mode == WorkspaceMode::Simulation;
 }
 

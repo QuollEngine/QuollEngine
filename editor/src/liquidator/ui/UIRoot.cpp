@@ -3,8 +3,8 @@
 
 #include "liquidator/actions/TransformOperationActions.h"
 #include "liquidator/actions/SimulationModeActions.h"
-#include "liquidator/actions/CreateEmptyEntityAtViewAction.h"
-#include "liquidator/actions/ExportAsGameAction.h"
+#include "liquidator/actions/SpawnEntityActions.h"
+#include "liquidator/actions/ProjectActions.h"
 #include "liquidator/actions/DeleteEntityAction.h"
 
 #include "UIRoot.h"
@@ -16,25 +16,23 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
     : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader) {
 
   mShortcutsManager.add(Shortcut().control().key('N'),
-                        new CreateEmptyEntityAtViewAction);
+                        new SpawnEmptyEntityAtView);
 
   mMainMenu.begin("Project")
-      .add("Export as game", new ExportAsGameAction)
+      .add("Export as game", new ExportAsGame)
       .end()
       .begin("Objects")
-      .add("Create empty object", new CreateEmptyEntityAtViewAction,
+      .add("Create empty object", new SpawnEmptyEntityAtView,
            Shortcut().control().key('N'))
       .end();
 
-  mToolbar.add(new StartSimulationModeAction, "Play", fa::Play,
+  mToolbar.add(new StartSimulationMode, "Play", fa::Play,
                ToolbarItemType::HideWhenInactive);
-  mToolbar.add(new StopSimulationModeAction, "Stop", fa::Stop,
-               ToolbarItemType::HideWhenInactive);
-  mToolbar.add(new SetActiveTransformAction(TransformOperation::Move), "Move",
+  mToolbar.add(new SetActiveTransform(TransformOperation::Move), "Move",
                fa::Arrows, ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransformAction(TransformOperation::Rotate),
-               "Rotate", fa::Rotate, ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransformAction(TransformOperation::Scale), "Scale",
+  mToolbar.add(new SetActiveTransform(TransformOperation::Rotate), "Rotate",
+               fa::Rotate, ToolbarItemType::Toggleable);
+  mToolbar.add(new SetActiveTransform(TransformOperation::Scale), "Scale",
                fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 

@@ -7,7 +7,7 @@ namespace liquid::editor {
 /**
  * @brief Set grid lines action
  */
-class SetGridLinesAction : public Action {
+class SetGridLines : public Action {
 public:
   /**
    * @brief Check if grid lines are shown
@@ -24,7 +24,7 @@ public:
    *
    * @param show Show grid lines
    */
-  SetGridLinesAction(bool show);
+  SetGridLines(bool show);
 
   /**
    * @brief Action executor
@@ -50,7 +50,7 @@ private:
 /**
  * @brief Set grid axis lines action
  */
-class SetGridAxisLinesAction : public Action {
+class SetGridAxisLines : public Action {
 public:
   /**
    * @brief Check if grid axis lines are shown
@@ -67,7 +67,7 @@ public:
    *
    * @param show Show grid axis lines
    */
-  SetGridAxisLinesAction(bool show);
+  SetGridAxisLines(bool show);
 
   /**
    * @brief Action executor

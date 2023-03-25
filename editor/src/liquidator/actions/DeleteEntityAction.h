@@ -7,14 +7,14 @@ namespace liquid::editor {
 /**
  * @brief Delete entity action
  */
-class DeleteEntityAction : public Action {
+class DeleteEntity : public Action {
 public:
   /**
    * @brief Create action
    *
    * @param entity Entity to delete
    */
-  DeleteEntityAction(Entity entity);
+  DeleteEntity(Entity entity);
 
   /**
    * @brief Action executor

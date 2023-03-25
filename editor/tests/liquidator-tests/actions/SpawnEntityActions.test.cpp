@@ -4,6 +4,57 @@
 #include "liquidator-tests/Testing.h"
 #include "ActionTestBase.h"
 
+using SpawnEmptyEntityAtViewActionTest = ActionTestBase;
+
+TEST_P(SpawnEmptyEntityAtViewActionTest, ExecutorSpawnsEmptyEntityAtView) {
+  auto camera = activeScene().entityDatabase.create();
+  glm::mat4 viewMatrix =
+      glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
+                  glm::vec3{0.0f, 1.0f, 0.0f});
+
+  liquid::Camera component{};
+  component.viewMatrix = viewMatrix;
+  activeScene().entityDatabase.set(camera, component);
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  auto res = action.onExecute(state);
+
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
+
+  auto entity = res.entitiesToSave.at(0);
+
+  EXPECT_EQ(activeScene()
+                .entityDatabase.get<liquid::LocalTransform>(entity)
+                .localPosition,
+            glm::vec3(0.0f, 0.0f, -10.0f));
+  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Name>(entity).name,
+            "New entity");
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::WorldTransform>(entity));
+}
+
+TEST_P(SpawnEmptyEntityAtViewActionTest,
+       PredicateReturnsTrueIfCameraEntityHasCamera) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(SpawnEmptyEntityAtViewActionTest,
+       PredicateReturnsFalseIfCameraEntityHasNoCamera) {
+  auto camera = activeScene().entityDatabase.create();
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, SpawnEmptyEntityAtViewActionTest);
+
 using SpawnPrefabAtTransform = ActionTestBase;
 
 TEST_P(SpawnPrefabAtTransform, ExecutorCreatesEntitiesFromPrefab) {

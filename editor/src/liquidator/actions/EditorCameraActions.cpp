@@ -1,13 +1,11 @@
 #include "liquid/core/Base.h"
-#include "MoveCameraToEntityAction.h"
+#include "EditorCameraActions.h"
 
 namespace liquid::editor {
 
-MoveCameraToEntityAction::MoveCameraToEntityAction(Entity entity)
-    : mEntity(entity) {}
+MoveCameraToEntity::MoveCameraToEntity(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult
-MoveCameraToEntityAction::onExecute(WorkspaceState &state) {
+ActionExecutorResult MoveCameraToEntity::onExecute(WorkspaceState &state) {
 
   auto &scene = state.scene;
 
@@ -26,6 +24,6 @@ MoveCameraToEntityAction::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool MoveCameraToEntityAction::predicate(WorkspaceState &state) { return true; }
+bool MoveCameraToEntity::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

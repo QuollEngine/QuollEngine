@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquidator/actions/MoveCameraToEntityAction.h"
+#include "liquidator/actions/EditorCameraActions.h"
 
 #include "liquidator-tests/Testing.h"
 #include "ActionTestBase.h"
@@ -15,7 +15,7 @@ TEST_F(MoveCameraToEntityActionTest,
        ExecuteFailsIfProvidedEntityDoesNotHaveWorldTransform) {
   auto entity = state.scene.entityDatabase.create();
 
-  liquid::editor::MoveCameraToEntityAction action(entity);
+  liquid::editor::MoveCameraToEntity action(entity);
 
   EXPECT_DEATH(action.onExecute(state), ".*");
 }
@@ -32,7 +32,7 @@ TEST_F(MoveCameraToEntityActionTest,
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<liquid::WorldTransform>(entity, {world});
 
-  liquid::editor::MoveCameraToEntityAction action(entity);
+  liquid::editor::MoveCameraToEntity action(entity);
   action.onExecute(state);
 
   const auto &lookAt =
