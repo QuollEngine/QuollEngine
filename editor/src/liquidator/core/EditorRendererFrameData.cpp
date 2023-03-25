@@ -62,6 +62,8 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     rhi::BufferHandle collidbaleParams;
     rhi::BufferHandle camera;
     rhi::BufferHandle gridData;
+    uint32_t pad0;
+    uint32_t pad1;
   };
 
   mBindlessParams.addRange(EditorDrawParams{

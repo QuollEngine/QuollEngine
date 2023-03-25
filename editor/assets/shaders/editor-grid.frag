@@ -16,9 +16,11 @@ layout(set = 1, binding = 0) uniform DrawParameters {
   uint gizmoTransforms;
   uint skeletonTransforms;
   uint debugSkeletons;
-  uint collidbaleParams;
+  uint collidableParams;
   uint camera;
   uint gridData;
+  uint pad0;
+  uint pad1;
 }
 uDrawParams;
 

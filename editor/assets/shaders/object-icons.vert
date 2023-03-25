@@ -14,6 +14,8 @@ layout(set = 2, binding = 0) uniform DrawParameters {
   uint collidbaleParams;
   uint camera;
   uint gridData;
+  uint pad0;
+  uint pad1;
 }
 uDrawParams;
 
