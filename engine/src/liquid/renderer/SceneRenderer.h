@@ -18,6 +18,16 @@ struct SceneRenderPassData {
   rhi::TextureHandle sceneColor;
 
   /**
+   * Scene color resolved
+   */
+  rhi::TextureHandle sceneColorResolved;
+
+  /**
+   * Final color texture
+   */
+  rhi::TextureHandle finalColor;
+
+  /**
    * Scene depth buffer
    */
   rhi::TextureHandle depthBuffer;
@@ -122,6 +132,13 @@ private:
    */
   void generateBrdfLut();
 
+  /**
+   * @brief Get framebuffer samples
+   *
+   * @return Framebuffer samples
+   */
+  inline uint32_t getFramebufferSamples() const { return mMaxSampleCounts; }
+
 private:
   glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;
@@ -129,6 +146,8 @@ private:
   rhi::RenderDevice *mDevice;
   RenderStorage &mRenderStorage;
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
+
+  uint32_t mMaxSampleCounts = 1;
 };
 
 } // namespace liquid

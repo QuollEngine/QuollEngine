@@ -217,15 +217,13 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       rhi::Access srcAccess{rhi::Access::None};
       rhi::Access dstAccess{rhi::Access::None};
 
-      auto &texture = device->getTextureDescription(output.texture);
-      if ((texture.usage & rhi::TextureUsage::Color) ==
-          rhi::TextureUsage::Color) {
+      if (attachment.type == AttachmentType::Color ||
+          attachment.type == AttachmentType::Resolve) {
         output.dstLayout = rhi::ImageLayout::ColorAttachmentOptimal;
         stage = StageColor;
         srcAccess = rhi::Access::ColorAttachmentWrite;
         dstAccess = srcAccess | rhi::Access::ColorAttachmentRead;
-      } else if ((texture.usage & rhi::TextureUsage::Depth) ==
-                 rhi::TextureUsage::Depth) {
+      } else if (attachment.type == AttachmentType::Depth) {
         output.dstLayout = rhi::ImageLayout::DepthStencilAttachmentOptimal;
         stage = StageFragmentTest;
         srcAccess = rhi::Access::DepthStencilAttachmentWrite;

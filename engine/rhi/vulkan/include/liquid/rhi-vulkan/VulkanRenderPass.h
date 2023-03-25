@@ -49,6 +49,18 @@ public:
   }
 
 private:
+  /**
+   * @brief Get Vulkan attachment description
+   *
+   * @param description Render pass attachment description
+   * @param registry Vulkan resource registry
+   * @return Vulkan attachment description
+   */
+  VkAttachmentDescription getVulkanAttachmentDescription(
+      const RenderPassAttachmentDescription &description,
+      const VulkanResourceRegistry &registry);
+
+private:
   VulkanDeviceObject &mDevice;
   VkRenderPass mRenderPass = VK_NULL_HANDLE;
   std::vector<VkClearValue> mClearValues;

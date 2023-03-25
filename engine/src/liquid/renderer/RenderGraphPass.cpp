@@ -6,10 +6,10 @@ namespace liquid {
 RenderGraphPass::RenderGraphPass(StringView name, RenderGraphPassType type)
     : mName(name), mType(type) {}
 
-void RenderGraphPass::write(rhi::TextureHandle handle,
+void RenderGraphPass::write(rhi::TextureHandle handle, AttachmentType type,
                             const rhi::AttachmentClearValue &clearValue) {
   mTextureOutputs.push_back({handle});
-  mAttachments.push_back({clearValue});
+  mAttachments.push_back({type, clearValue});
 }
 
 void RenderGraphPass::read(rhi::TextureHandle handle) {

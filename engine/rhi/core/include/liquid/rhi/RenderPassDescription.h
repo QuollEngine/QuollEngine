@@ -67,9 +67,19 @@ struct RenderPassAttachmentDescription {
  */
 struct RenderPassDescription {
   /**
-   * Number of render pass attachments
+   * Color attachments
    */
-  std::vector<RenderPassAttachmentDescription> attachments;
+  std::vector<RenderPassAttachmentDescription> colorAttachments;
+
+  /**
+   * Depth attachment
+   */
+  std::optional<RenderPassAttachmentDescription> depthAttachment;
+
+  /**
+   * Resolve attachment
+   */
+  std::optional<RenderPassAttachmentDescription> resolveAttachment;
 
   /**
    * Pipeline bind point

@@ -24,7 +24,7 @@ TEST_F(RenderGraphPassTest, SetsNameAndTypeOnConstruct) {
 TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
   liquid::rhi::TextureHandle handle{2};
 
-  graphicsPass.write(handle, glm::vec4());
+  graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4());
   EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 1);
   EXPECT_EQ(graphicsPass.getTextureOutputs().at(0).texture, handle);
 }
@@ -32,7 +32,7 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
   liquid::rhi::TextureHandle handle{2};
 
-  graphicsPass.write(handle, glm::vec4(2.0f));
+  graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4(2.0f));
   EXPECT_EQ(graphicsPass.getAttachments().size(), 1);
   EXPECT_EQ(std::get<glm::vec4>(graphicsPass.getAttachments().at(0).clearValue),
             glm::vec4(2.0f));

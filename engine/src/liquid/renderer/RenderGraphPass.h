@@ -13,10 +13,17 @@ namespace liquid {
 class RenderGraph;
 class RenderGraphEvaluator;
 
+enum class AttachmentType { Color, Depth, Resolve };
+
 /**
  * @brief Render graph attachment data
  */
 struct AttachmentData {
+  /**
+   * Attachment type
+   */
+  AttachmentType type = AttachmentType::Color;
+
   /**
    * Clear value
    */
@@ -168,9 +175,10 @@ public:
    * @brief Set output texture
    *
    * @param handle Texture handle
+   * @param type Attachment type
    * @param clearValue Clear value
    */
-  void write(rhi::TextureHandle handle,
+  void write(rhi::TextureHandle handle, AttachmentType type,
              const rhi::AttachmentClearValue &clearValue);
 
   /**

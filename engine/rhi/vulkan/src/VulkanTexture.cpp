@@ -89,9 +89,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.extent = extent;
   imageCreateInfo.mipLevels = description.levels;
   imageCreateInfo.arrayLayers = description.layers;
-  imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
   imageCreateInfo.usage = usageFlags;
+  imageCreateInfo.samples =
+      static_cast<VkSampleCountFlagBits>(description.samples);
 
   VmaAllocationCreateInfo allocationCreateInfo{};
   allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;

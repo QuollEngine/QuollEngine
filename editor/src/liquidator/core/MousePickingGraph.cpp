@@ -54,7 +54,8 @@ MousePickingGraph::MousePickingGraph(
   mSkinnedEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
 
   auto &pass = mRenderGraph.addGraphicsPass("MousePicking");
-  pass.write(depthBuffer, rhi::DepthStencilClear({1.0f, 0}));
+  pass.write(depthBuffer, AttachmentType::Depth,
+             rhi::DepthStencilClear({1.0f, 0}));
 
   // Normal meshes
   auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{

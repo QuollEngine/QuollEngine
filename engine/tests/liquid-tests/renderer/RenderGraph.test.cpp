@@ -88,43 +88,44 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   {
     auto &pass = graph.addGraphicsPass("A");
     pass.write(buffers.at("a-b"), liquid::rhi::BufferUsage::Storage);
-    pass.write(textures.at("a-d"), glm::vec4());
+    pass.write(textures.at("a-d"), liquid::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
     pass.read(buffers.at("a-b"), liquid::rhi::BufferUsage::Vertex);
     pass.read(buffers.at("d-b"), liquid::rhi::BufferUsage::Index);
-    pass.write(textures.at("b-c"), glm::vec4());
-    pass.write(textures.at("b-g"), glm::vec4());
+    pass.write(textures.at("b-c"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("b-g"), liquid::AttachmentType::Depth, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("C");
     pass.read(textures.at("b-c"));
     pass.read(textures.at("h-c"));
-    pass.write(textures.at("c-e"), glm::vec4());
+    pass.write(textures.at("c-e"), liquid::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("D");
     pass.read(textures.at("a-d"));
     pass.write(buffers.at("d-b"), liquid::rhi::BufferUsage::Uniform);
-    pass.write(textures.at("d-e"), glm::vec4());
-    pass.write(textures.at("d-g"), glm::vec4());
+    pass.write(textures.at("d-e"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("d-g"), liquid::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("E");
     pass.read(textures.at("d-e"));
     pass.read(textures.at("c-e"));
-    pass.write(textures.at("e-f"), glm::vec4());
+    pass.write(textures.at("e-f"), liquid::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("F");
     pass.read(textures.at("e-f"));
-    pass.write(textures.at("f-g"), glm::vec4());
+    pass.write(textures.at("f-g"), liquid::AttachmentType::Resolve,
+               glm::vec4());
   }
 
   {
@@ -132,12 +133,13 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
     pass.read(textures.at("f-g"));
     pass.read(textures.at("d-g"));
     pass.read(textures.at("b-g"));
-    pass.write(textures.at("final-color"), glm::vec4());
+    pass.write(textures.at("final-color"), liquid::AttachmentType::Color,
+               glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("H");
-    pass.write(textures.at("h-c"), glm::vec4());
+    pass.write(textures.at("h-c"), liquid::AttachmentType::Depth, glm::vec4());
   }
 
   graph.compile(&device);
@@ -164,9 +166,12 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 TEST_F(RenderGraphTest, SetsPassAttachmentOperations) {
   auto handle = device.createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, glm::vec4());
-  graph.addGraphicsPass("B").write(handle, glm::vec4());
-  graph.addGraphicsPass("C").write(handle, glm::vec4());
+  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
+  graph.addGraphicsPass("B").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
+  graph.addGraphicsPass("C").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
 
   graph.compile(&device);
 
@@ -199,14 +204,14 @@ TEST_F(RenderGraphTest, SetsOutputImageLayouts) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.write(depthTexture, {});
-    pass.write(colorTexture, {});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, {});
+    pass.write(colorTexture, liquid::AttachmentType::Color, {});
   }
 
   graph.compile(&device);
@@ -243,8 +248,8 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   {
@@ -274,7 +279,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorWrite) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
   }
 
   graph.compile(&device);
@@ -303,7 +308,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthWrite) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   graph.compile(&device);
@@ -338,8 +343,8 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllTextureWrites) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   graph.compile(&device);
@@ -377,7 +382,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorRead) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
   }
 
   {
@@ -430,7 +435,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthTextureRead) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   {
@@ -488,8 +493,8 @@ TEST_F(RenderGraphTest, SetsPassBarrierForBothColorAndDepthTextureReads) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, glm::vec4{});
-    pass.write(depthTexture, glm::vec4{});
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   {
@@ -985,8 +990,8 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture1, glm::vec4{});
-    pass.write(depthTexture1, glm::vec4{});
+    pass.write(colorTexture1, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture1, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
   {
@@ -994,8 +999,8 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
     pass.read(colorTexture1);
     pass.read(depthTexture1);
 
-    pass.write(depthTexture2, {});
-    pass.write(colorTexture2, {});
+    pass.write(depthTexture2, liquid::AttachmentType::Depth, {});
+    pass.write(colorTexture2, liquid::AttachmentType::Color, {});
   }
 
   graph.compile(&device);
@@ -1087,7 +1092,8 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   liquid::rhi::TextureHandle handle = device.createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
   graph.addGraphicsPass("B");
   graph.addGraphicsPass("C");
   graph.addGraphicsPass("E").read(handle);
@@ -1101,7 +1107,8 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
   liquid::rhi::TextureHandle handle = device.createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
   graph.addGraphicsPass("E").read(handle);
 
   graph.compile(&device);
@@ -1116,7 +1123,8 @@ TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   liquid::rhi::TextureHandle handle{2};
 
-  graph.addGraphicsPass("A").write(handle, glm::vec4());
+  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+                                   glm::vec4());
   graph.addGraphicsPass("B");
   graph.addGraphicsPass("A");
   graph.addGraphicsPass("E");
