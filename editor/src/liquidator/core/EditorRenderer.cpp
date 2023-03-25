@@ -193,7 +193,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
 
         commandList.draw(4, 0, count, previousInstance);
 
-        previousInstance = count;
+        previousInstance += count;
       }
     }
   });

@@ -18,9 +18,12 @@ TEST_F(StartSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
 
 TEST_F(StartSimulationModeActionTest,
        ExecutorDuplicatesSceneToSimulationScene) {
+  auto activeCamera = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Camera>(activeCamera, {});
+
   state.mode = WM::Edit;
   state.scene.environment = liquid::Entity{12};
-  state.scene.activeCamera = liquid::Entity{14};
+  state.scene.activeCamera = activeCamera;
   state.scene.dummyCamera = liquid::Entity{15};
   auto entity = state.scene.entityDatabase.create();
 
@@ -34,6 +37,31 @@ TEST_F(StartSimulationModeActionTest,
 
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.activeCamera);
+  EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
+  EXPECT_TRUE(state.simulationScene.entityDatabase.exists(entity));
+}
+
+TEST_F(StartSimulationModeActionTest,
+       ExecutorSetsDummyCameraAsSceneCameraIfSceneHasNoActiveCamera) {
+  auto dummyCamera = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.set<liquid::Camera>(dummyCamera, {});
+
+  state.mode = WM::Edit;
+  state.scene.environment = liquid::Entity{12};
+  state.scene.activeCamera = liquid::Entity{14};
+  state.scene.dummyCamera = dummyCamera;
+  auto entity = state.scene.entityDatabase.create();
+
+  EXPECT_EQ(state.simulationScene.environment, liquid::Entity::Null);
+  EXPECT_EQ(state.simulationScene.activeCamera, liquid::Entity::Null);
+  EXPECT_EQ(state.simulationScene.dummyCamera, liquid::Entity::Null);
+  EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
+
+  liquid::editor::StartSimulationModeAction action;
+  action.onExecute(state);
+
+  EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
+  EXPECT_EQ(state.simulationScene.activeCamera, state.scene.dummyCamera);
   EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
   EXPECT_TRUE(state.simulationScene.entityDatabase.exists(entity));
 }
