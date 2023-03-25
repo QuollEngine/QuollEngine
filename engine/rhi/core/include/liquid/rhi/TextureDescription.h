@@ -58,9 +58,14 @@ struct TextureDescription {
   uint32_t layers = 1;
 
   /**
-   * @brief Number of mip levels
+   * Number of mip levels
    */
   uint32_t levels = 1;
+
+  /**
+   * Number of samples
+   */
+  uint32_t samples = 1;
 };
 
 } // namespace liquid::rhi

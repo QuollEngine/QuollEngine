@@ -14,60 +14,100 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    const VulkanResourceRegistry &registry)
     : mDevice(device) {
 
-  std::vector<VkAttachmentDescription> attachments(
-      description.attachments.size());
-  mClearValues.resize(attachments.size());
+  size_t numDepthAttachments = description.depthAttachment.has_value() ? 1 : 0;
+  size_t numResolveAttachments =
+      description.resolveAttachment.has_value() ? 1 : 0;
+
+  size_t numAttachments = description.colorAttachments.size() +
+                          numDepthAttachments + numResolveAttachments;
+
+  std::vector<VkAttachmentDescription> attachments;
+  attachments.reserve(numAttachments);
+  mClearValues.reserve(numAttachments);
 
   std::vector<VkAttachmentReference> colorReferences;
   std::optional<VkAttachmentReference> depthReference;
+  std::optional<VkAttachmentReference> resolveReference;
 
-  for (size_t i = 0; i < description.attachments.size(); ++i) {
-    auto &attachment = attachments.at(i);
-    auto &desc = description.attachments.at(i);
+  for (size_t i = 0; i < description.colorAttachments.size(); ++i) {
+    auto &desc = description.colorAttachments.at(i);
     const auto &texture = registry.getTextures().at(desc.texture);
 
-    attachment.flags = 0;
-    attachment.loadOp = VulkanMapping::getAttachmentLoadOp(desc.loadOp);
-    attachment.storeOp = VulkanMapping::getAttachmentStoreOp(desc.storeOp);
-    attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    attachment.format = texture->getFormat();
+    LIQUID_ASSERT(BitwiseEnumContains(texture->getDescription().usage,
+                                      TextureUsage::Color),
+                  "Texture cannot be a color attachment");
+
+    VkAttachmentDescription attachment =
+        getVulkanAttachmentDescription(desc, registry);
+    attachment.initialLayout =
+        VulkanMapping::getImageLayout(desc.initialLayout);
+    attachment.finalLayout = VulkanMapping::getImageLayout(desc.layout);
+    attachments.push_back(attachment);
 
     VkAttachmentReference ref;
-    ref.attachment = static_cast<uint32_t>(i);
+    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorReferences.push_back(ref);
 
-    if ((texture->getDescription().usage & TextureUsage::Color) ==
-        TextureUsage::Color) {
+    VkClearValue clearValue;
+    clearValue.color.float32[0] = std::get<glm::vec4>(desc.clearValue).x;
+    clearValue.color.float32[1] = std::get<glm::vec4>(desc.clearValue).y;
+    clearValue.color.float32[2] = std::get<glm::vec4>(desc.clearValue).z;
+    clearValue.color.float32[3] = std::get<glm::vec4>(desc.clearValue).w;
+    mClearValues.push_back(clearValue);
+  }
 
-      mClearValues.at(i).color.float32[0] =
-          std::get<glm::vec4>(desc.clearValue).x;
-      mClearValues.at(i).color.float32[1] =
-          std::get<glm::vec4>(desc.clearValue).y;
-      mClearValues.at(i).color.float32[2] =
-          std::get<glm::vec4>(desc.clearValue).z;
-      mClearValues.at(i).color.float32[3] =
-          std::get<glm::vec4>(desc.clearValue).w;
+  if (description.depthAttachment.has_value()) {
+    const auto &desc = description.depthAttachment.value();
+    const auto &texture = registry.getTextures().at(desc.texture);
 
-      attachment.initialLayout =
-          VulkanMapping::getImageLayout(desc.initialLayout);
-      attachment.finalLayout = VulkanMapping::getImageLayout(desc.layout);
-      ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-      colorReferences.push_back(ref);
-    } else if ((texture->getDescription().usage & TextureUsage::Depth) ==
-               TextureUsage::Depth) {
+    LIQUID_ASSERT(BitwiseEnumContains(texture->getDescription().usage,
+                                      TextureUsage::Depth),
+                  "Texture cannot be a depth attachment");
 
-      mClearValues.at(i).depthStencil.depth =
-          std::get<DepthStencilClear>(desc.clearValue).clearDepth;
-      mClearValues.at(i).depthStencil.stencil =
-          std::get<DepthStencilClear>(desc.clearValue).clearStencil;
+    VkAttachmentDescription attachment =
+        getVulkanAttachmentDescription(desc, registry);
+    attachment.initialLayout =
+        VulkanMapping::getImageLayout(desc.initialLayout);
+    attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    attachments.push_back(attachment);
 
-      attachment.initialLayout =
-          VulkanMapping::getImageLayout(desc.initialLayout);
-      attachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-      ref.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-      depthReference.emplace(ref);
-    }
+    VkAttachmentReference ref;
+    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.layout = attachment.finalLayout;
+    depthReference.emplace(ref);
+
+    VkClearValue clearValue;
+    clearValue.depthStencil.depth =
+        std::get<DepthStencilClear>(desc.clearValue).clearDepth;
+    clearValue.depthStencil.stencil =
+        std::get<DepthStencilClear>(desc.clearValue).clearStencil;
+    mClearValues.push_back(clearValue);
+  }
+
+  if (description.resolveAttachment.has_value()) {
+    const auto &desc = description.resolveAttachment.value();
+
+    VkAttachmentDescription attachment =
+        getVulkanAttachmentDescription(desc, registry);
+
+    attachment.initialLayout =
+        VulkanMapping::getImageLayout(desc.initialLayout);
+    attachment.finalLayout = VulkanMapping::getImageLayout(desc.layout);
+
+    attachments.push_back(attachment);
+
+    VkAttachmentReference ref;
+    ref.attachment = static_cast<uint32_t>(attachments.size() - 1);
+    ref.layout = attachment.finalLayout;
+    resolveReference.emplace(ref);
+
+    VkClearValue clearValue;
+    clearValue.color.float32[0] = std::get<glm::vec4>(desc.clearValue).x;
+    clearValue.color.float32[1] = std::get<glm::vec4>(desc.clearValue).y;
+    clearValue.color.float32[2] = std::get<glm::vec4>(desc.clearValue).z;
+    clearValue.color.float32[3] = std::get<glm::vec4>(desc.clearValue).w;
+    mClearValues.push_back(clearValue);
   }
 
   VkSubpassDescription subpass{};
@@ -82,7 +122,8 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
   subpass.pPreserveAttachments = nullptr;
   subpass.pipelineBindPoint =
       VulkanMapping::getPipelineBindPoint(description.bindPoint);
-  subpass.pResolveAttachments = nullptr;
+  subpass.pResolveAttachments =
+      resolveReference.has_value() ? &resolveReference.value() : nullptr;
 
   VkRenderPassCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -106,6 +147,24 @@ VulkanRenderPass::~VulkanRenderPass() {
   vkDestroyRenderPass(mDevice, mRenderPass, nullptr);
 
   LOG_DEBUG_VK("Render pass destroyed", mRenderPass);
+}
+
+VkAttachmentDescription VulkanRenderPass::getVulkanAttachmentDescription(
+    const RenderPassAttachmentDescription &description,
+    const VulkanResourceRegistry &registry) {
+  const auto &texture = registry.getTextures().at(description.texture);
+
+  VkAttachmentDescription attachment{};
+  attachment.flags = 0;
+  attachment.loadOp = VulkanMapping::getAttachmentLoadOp(description.loadOp);
+  attachment.storeOp = VulkanMapping::getAttachmentStoreOp(description.storeOp);
+  attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+  attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  attachment.samples =
+      static_cast<VkSampleCountFlagBits>(texture->getDescription().samples);
+  attachment.format = texture->getFormat();
+
+  return attachment;
 }
 
 } // namespace liquid::rhi

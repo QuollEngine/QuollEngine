@@ -85,7 +85,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
       mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
 
   auto &pass = graph.addGraphicsPass("imgui");
-  pass.write(imgui, mClearColor);
+  pass.write(imgui, AttachmentType::Color, mClearColor);
 
   auto pipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
       mShaderLibrary.getShader("__engine.imgui.default.vertex"),

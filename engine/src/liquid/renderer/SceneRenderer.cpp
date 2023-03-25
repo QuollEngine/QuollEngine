@@ -18,6 +18,20 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
 
   auto shadersPath = Engine::getShadersPath();
 
+  mMaxSampleCounts =
+      mDevice->getDeviceInformation().getLimits().framebufferColorSampleCounts &
+      mDevice->getDeviceInformation().getLimits().framebufferDepthSampleCounts;
+
+  mMaxSampleCounts = std::max(1u, mMaxSampleCounts);
+
+  static constexpr uint32_t MaxSamples = 8;
+  for (uint32_t i = MaxSamples; i > 1; i = i / 2) {
+    if ((mMaxSampleCounts & i) == i) {
+      mMaxSampleCounts = i;
+      break;
+    }
+  }
+
   mShaderLibrary.addShader(
       "__engine.geometry.default.vertex",
       mDevice->createShader({shadersPath / "geometry.vert.spv"}));
@@ -89,8 +103,16 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   sceneColorDesc.height = SwapchainSizePercentage;
   sceneColorDesc.layers = 1;
   sceneColorDesc.format = rhi::Format::Rgba16Float;
+  sceneColorDesc.samples = mMaxSampleCounts;
+
   auto sceneColor =
       mRenderStorage.createFramebufferRelativeTexture(sceneColorDesc);
+
+  rhi::TextureDescription sceneColorResolvedDesc = sceneColorDesc;
+  sceneColorResolvedDesc.samples = 1;
+
+  auto sceneColorResolved =
+      mRenderStorage.createFramebufferRelativeTexture(sceneColorResolvedDesc);
 
   rhi::TextureDescription hdrColorDesc{};
   hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
@@ -98,6 +120,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   hdrColorDesc.height = SwapchainSizePercentage;
   hdrColorDesc.layers = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
+
   auto hdrColor = mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
 
   rhi::TextureDescription depthBufferDesc{};
@@ -105,7 +128,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   depthBufferDesc.width = SwapchainSizePercentage;
   depthBufferDesc.height = SwapchainSizePercentage;
   depthBufferDesc.layers = 1;
+  depthBufferDesc.samples = mMaxSampleCounts;
   depthBufferDesc.format = rhi::Format::Depth32Float;
+
   auto depthBuffer =
       mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
 
@@ -127,7 +152,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
     }
 
     auto &pass = graph.addGraphicsPass("shadowPass");
-    pass.write(shadowmap, rhi::DepthStencilClear{1.0f, 0});
+    pass.write(shadowmap, AttachmentType::Depth,
+               rhi::DepthStencilClear{1.0f, 0});
 
     auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.shadowmap.default.vertex"),
@@ -219,8 +245,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
     auto &pass = graph.addGraphicsPass("meshPass");
     pass.read(shadowmap);
-    pass.write(sceneColor, mClearColor);
-    pass.write(depthBuffer, rhi::DepthStencilClear{1.0, 0});
+    pass.write(sceneColor, AttachmentType::Color, mClearColor);
+    pass.write(depthBuffer, AttachmentType::Depth,
+               rhi::DepthStencilClear{1.0, 0});
+    pass.write(sceneColorResolved, AttachmentType::Resolve, mClearColor);
 
     auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
         mShaderLibrary.getShader("__engine.geometry.default.vertex"),
@@ -238,7 +266,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                 rhi::FrontFace::Clockwise},
-        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
+        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+        rhi::PipelineMultisample{0}});
 
     pass.setExecutor([this, vPipeline, vSkinnedPipeline, offset,
                       shadowmap](rhi::RenderCommandList &commandList,
@@ -297,8 +326,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
     }
 
     auto &pass = graph.addGraphicsPass("skyboxPass");
-    pass.write(sceneColor, mClearColor);
-    pass.write(depthBuffer, rhi::DepthStencilClear{1.0f, 0});
+    pass.write(sceneColor, AttachmentType::Color, mClearColor);
+    pass.write(depthBuffer, AttachmentType::Depth,
+               rhi::DepthStencilClear{1.0f, 0});
+    pass.write(sceneColorResolved, AttachmentType::Resolve, mClearColor);
+
     auto vPipeline = pass.addPipeline(
         {mShaderLibrary.getShader("__engine.skybox.default.vertex"),
          mShaderLibrary.getShader("__engine.skybox.default.fragment"),
@@ -339,8 +371,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   {
     auto &pass = graph.addGraphicsPass("hdrPass");
-    pass.read(sceneColor);
-    pass.write(hdrColor, mClearColor);
+    pass.read(sceneColorResolved);
+    pass.write(hdrColor, AttachmentType::Color, mClearColor);
 
     rhi::GraphicsPipelineDescription pipelineDescription{};
     pipelineDescription.vertexShader =
@@ -355,7 +387,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
     auto vPipeline = pass.addPipeline(pipelineDescription);
 
-    pass.setExecutor([vPipeline, sceneColor,
+    pass.setExecutor([vPipeline, sceneColorResolved,
                       this](rhi::RenderCommandList &commandList,
                             const RenderGraphRegistry &registry,
                             uint32_t frameIndex) {
@@ -364,7 +396,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       commandList.bindDescriptor(pipeline, 0,
                                  mRenderStorage.getGlobalTexturesDescriptor());
 
-      uint32_t color = static_cast<uint32_t>(sceneColor);
+      uint32_t color = static_cast<uint32_t>(sceneColorResolved);
 
       commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
                                 sizeof(uint32_t), &color);
@@ -374,7 +406,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   LOG_DEBUG("Scene renderer attached to graph");
 
-  return SceneRenderPassData{hdrColor, depthBuffer};
+  return SceneRenderPassData{sceneColor, sceneColorResolved, hdrColor,
+                             depthBuffer};
 }
 
 void SceneRenderer::attachText(RenderGraph &graph,
@@ -394,8 +427,10 @@ void SceneRenderer::attachText(RenderGraph &graph,
   }
 
   auto &pass = graph.addGraphicsPass("textPass");
-  pass.write(passData.sceneColor, mClearColor);
-  pass.write(passData.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
+  pass.write(passData.sceneColor, AttachmentType::Color, mClearColor);
+  pass.write(passData.depthBuffer, AttachmentType::Depth,
+             rhi::DepthStencilClear{1.0f, 0});
+  pass.write(passData.sceneColorResolved, AttachmentType::Resolve, mClearColor);
 
   auto vTextPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
       mShaderLibrary.getShader("__engine.text.default.vertex"),

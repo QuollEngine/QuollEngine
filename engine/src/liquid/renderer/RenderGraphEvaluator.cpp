@@ -75,13 +75,25 @@ void RenderGraphEvaluator::buildGraphicsPass(size_t index, RenderGraph &graph,
 
   rhi::RenderPassDescription renderPassDesc{};
 
+  uint32_t sampleCount = 0;
+
   for (size_t i = 0; i < pass.getTextureOutputs().size(); ++i) {
     auto &output = pass.mTextureOutputs.at(i);
+    sampleCount = std::max(
+        mDevice->getTextureDescription(output.texture).samples, sampleCount);
+
     const auto &attachment = pass.getAttachments().at(i);
 
     const auto &info =
         createAttachment(attachment, output, graph.getFramebufferExtent());
-    renderPassDesc.attachments.push_back(info.attachment);
+
+    if (attachment.type == AttachmentType::Resolve) {
+      renderPassDesc.resolveAttachment.emplace(info.attachment);
+    } else if (attachment.type == AttachmentType::Depth) {
+      renderPassDesc.depthAttachment.emplace(info.attachment);
+    } else {
+      renderPassDesc.colorAttachments.push_back(info.attachment);
+    }
 
     for (auto handle : info.framebufferAttachments) {
       framebufferAttachments.push_back(handle);
@@ -92,7 +104,8 @@ void RenderGraphEvaluator::buildGraphicsPass(size_t index, RenderGraph &graph,
     layers = info.layers;
   }
 
-  if (!renderPassDesc.attachments.empty()) {
+  if (!renderPassDesc.colorAttachments.empty() ||
+      renderPassDesc.depthAttachment.has_value()) {
     renderPassDesc.bindPoint = rhi::PipelineBindPoint::Graphics;
 
     bool renderPassExists = isHandleValid(pass.mRenderPass);
@@ -131,6 +144,7 @@ void RenderGraphEvaluator::buildGraphicsPass(size_t index, RenderGraph &graph,
        ++i) {
     auto &description = pass.mRegistry.mGraphicsPipelineDescriptions.at(i);
     description.renderPass = pass.mRenderPass;
+    description.multisample.sampleCount = sampleCount;
 
     auto handle = pass.mRegistry.mRealGraphicsPipelines.at(i);
 
@@ -189,7 +203,6 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
   static constexpr uint32_t HundredPercent = 100;
   info.width = desc.width;
   info.height = desc.height;
-
   info.layers = desc.layers;
 
   return info;

@@ -49,11 +49,7 @@ void Runtime::start() {
 
   liquid::RenderGraph graph("Main");
 
-  static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
-
   liquid::Presenter presenter(renderer.getShaderLibrary(), device);
-
-  renderer.getSceneRenderer().setClearColor(BlueishClearValue);
 
   auto passData = renderer.getSceneRenderer().attach(graph);
   renderer.getSceneRenderer().attachText(graph, passData);
@@ -110,7 +106,7 @@ void Runtime::start() {
 
       renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
 
-      presenter.present(renderFrame.commandList, passData.sceneColor,
+      presenter.present(renderFrame.commandList, passData.finalColor,
                         renderFrame.swapchainImageIndex);
 
       renderer.getRenderDevice()->endFrame(renderFrame);

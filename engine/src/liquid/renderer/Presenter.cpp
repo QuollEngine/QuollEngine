@@ -41,7 +41,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
 
   rhi::RenderPassDescription renderPassDescription{};
   renderPassDescription.bindPoint = rhi::PipelineBindPoint::Graphics;
-  renderPassDescription.attachments.push_back(attachment);
+  renderPassDescription.colorAttachments.push_back(attachment);
 
   if (mPresentPass != rhi::RenderPassHandle::Invalid) {
     mDevice->destroyRenderPass(mPresentPass);

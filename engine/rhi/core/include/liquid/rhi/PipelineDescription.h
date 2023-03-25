@@ -277,6 +277,16 @@ struct PipelineColorBlend {
 };
 
 /**
+ * @brief Pipeline multisampling description
+ */
+struct PipelineMultisample {
+  /**
+   * Sample count
+   */
+  uint32_t sampleCount = 1;
+};
+
+/**
  * @brief Graphics pipeline description
  */
 struct GraphicsPipelineDescription {
@@ -309,6 +319,11 @@ struct GraphicsPipelineDescription {
    * Color blending
    */
   PipelineColorBlend colorBlend;
+
+  /**
+   * Multisampling
+   */
+  PipelineMultisample multisample;
 
   /**
    * Render pass

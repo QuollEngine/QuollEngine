@@ -30,6 +30,16 @@ public:
      * Minimum uniform buffer alignment offset
      */
     uint32_t minUniformBufferOffsetAlignment = 0;
+
+    /**
+     * Framebuffer color sample counts
+     */
+    uint32_t framebufferColorSampleCounts = 0;
+
+    /**
+     * Framebuffer depth sample counts
+     */
+    uint32_t framebufferDepthSampleCounts = 0;
   };
 
 public:

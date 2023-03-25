@@ -277,6 +277,10 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
   PhysicalDeviceInformation::Limits deviceLimits{};
   deviceLimits.minUniformBufferOffsetAlignment =
       static_cast<uint32_t>(limits.minUniformBufferOffsetAlignment);
+  deviceLimits.framebufferColorSampleCounts =
+      static_cast<uint32_t>(limits.framebufferColorSampleCounts);
+  deviceLimits.framebufferDepthSampleCounts =
+      static_cast<uint32_t>(limits.framebufferDepthSampleCounts);
 
   return PhysicalDeviceInformation(mName, type, propertiesMap, limitsMap,
                                    deviceLimits);

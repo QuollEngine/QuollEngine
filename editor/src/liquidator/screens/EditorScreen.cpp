@@ -114,13 +114,16 @@ void EditorScreen::start(const Project &project) {
 
   auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
   auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);
-  imguiPassGroup.pass.read(scenePassGroup.sceneColor);
+  imguiPassGroup.pass.read(scenePassGroup.finalColor);
 
   {
-    static constexpr glm::vec4 BlueishClearValue{0.52f, 0.54f, 0.89f, 1.0f};
+    static constexpr glm::vec4 ClearColor{0.52f, 0.54f, 0.89f, 1.0f};
     auto &pass = editorRenderer.attach(graph);
-    pass.write(scenePassGroup.sceneColor, BlueishClearValue);
-    pass.write(scenePassGroup.depthBuffer, rhi::DepthStencilClear{1.0f, 0});
+    pass.write(scenePassGroup.sceneColor, AttachmentType::Color, ClearColor);
+    pass.write(scenePassGroup.depthBuffer, AttachmentType::Depth,
+               rhi::DepthStencilClear{1.0f, 0});
+    pass.write(scenePassGroup.sceneColorResolved, AttachmentType::Resolve,
+               ClearColor);
   }
 
   renderer.getSceneRenderer().attachText(graph, scenePassGroup);
@@ -189,7 +192,7 @@ void EditorScreen::start(const Project &project) {
     logViewer.render(systemLogStorage, userLogStorage);
 
     bool mouseClicked =
-        ui.renderSceneView(state, scenePassGroup.sceneColor, editorCamera);
+        ui.renderSceneView(state, scenePassGroup.finalColor, editorCamera);
 
     StatusBar::render(editorManager);
 
