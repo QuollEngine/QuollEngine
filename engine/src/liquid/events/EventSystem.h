@@ -56,7 +56,7 @@ public:
   }
 
   /**
-   * @brief Remove collision event observer
+   * @brief Remove event observer
    *
    * @tparam TEvent Event type enum
    * @param type Event type
@@ -66,6 +66,21 @@ public:
   inline void removeObserver(TEvent type, EventObserverId id) {
     using CurrentPool = GetEventPool<TEvent>;
     std::get<CurrentPool>(mPools).removeObserver(type, id);
+  }
+
+  /**
+   * @brief Check if observer exists
+   *
+   * @tparam TEvent Event type enum
+   * @param type Event type
+   * @param id Observer Id
+   * @retval true Observer exists
+   * @retval false Observer does not exist
+   */
+  template <class TEvent>
+  inline bool hasObserver(TEvent type, EventObserverId id) {
+    using CurrentPool = GetEventPool<TEvent>;
+    return std::get<CurrentPool>(mPools).hasObserver(type, id);
   }
 
   /**

@@ -4,6 +4,7 @@
 #include "EntityUtils.h"
 #include "EntityStorageSparseSetComponentPool.h"
 #include "EntityStorageSparseSetView.h"
+#include "EntityStorageSparseSetObserver.h"
 
 namespace liquid {
 
@@ -12,6 +13,8 @@ namespace liquid {
  */
 class EntityStorageSparseSet {
   static constexpr size_t DeadIndex = std::numeric_limits<size_t>::max();
+
+  static constexpr size_t MaxObserverPoolSizePerComponent = 100;
 
 public:
   EntityStorageSparseSet() = default;
@@ -47,6 +50,10 @@ public:
                       " already exists");
 
     mComponentPools.insert({id, {}});
+
+    std::vector<EntityStorageSparseSetComponentPool> removeObserverPool;
+    removeObserverPool.reserve(MaxObserverPoolSizePerComponent);
+    mRemoveObserverPools.insert({id, std::move(removeObserverPool)});
   }
 
   /**
@@ -182,8 +189,15 @@ public:
                       " does not exist for entity " +
                       std::to_string(static_cast<uint32_t>(entity)));
 
-    Entity movedEntity = pool.entities.back();
     size_t entityIndexToDelete = pool.entityIndices[sEntity];
+
+    auto &observers = getRemoveObserverPoolForComponent<TComponentType>();
+    for (auto &observer : observers) {
+      observer.entities.push_back(entity);
+      observer.components.push_back(pool.components[entityIndexToDelete]);
+    }
+
+    Entity movedEntity = pool.entities.back();
 
     // Move last entity in the array to place of deleted entity
     pool.entities[entityIndexToDelete] = movedEntity;
@@ -245,6 +259,25 @@ public:
     return EntityStorageSparseSetView<TPickComponents...>(pickedPools);
   }
 
+  /**
+   * @brief Observe component remove
+   *
+   * @tparam TComponentType Component type to observer
+   * @return Observer
+   */
+  template <class TComponentType>
+  EntityStorageSparseSetObserver<TComponentType> observeRemove() {
+    auto &observers = getRemoveObserverPoolForComponent<TComponentType>();
+
+    LIQUID_ASSERT(observers.size() < MaxObserverPoolSizePerComponent - 1,
+                  "Maximum number of observers is reached");
+
+    observers.push_back({});
+
+    return EntityStorageSparseSetObserver<TComponentType>(
+        &observers.at(observers.size() - 1));
+  }
+
 private:
   /**
    * @brief Get component id from type
@@ -290,6 +323,25 @@ private:
                       " does not exists");
 
     return mComponentPools.at(id);
+  }
+
+  /**
+   * @brief Get pool for component
+   *
+   * Retrieves component pool from the tuple in compile-time
+   *
+   * @tparam TComponentType Component type
+   * @return Component pool for component type
+   */
+  template <class TComponentType>
+  std::vector<EntityStorageSparseSetComponentPool> &
+  getRemoveObserverPoolForComponent() {
+    auto id = getComponentId<TComponentType>();
+    LIQUID_ASSERT(mRemoveObserverPools.find(id) != mRemoveObserverPools.end(),
+                  "Component pool " + String(typeid(TComponentType).name()) +
+                      " does not exist");
+
+    return mRemoveObserverPools.at(id);
   }
 
   /**
@@ -380,9 +432,18 @@ private:
    */
   void deleteAllEntities();
 
+  /**
+   * @brief Delete all observers
+   */
+  void deleteAllObservers();
+
 private:
   std::unordered_map<std::type_index, EntityStorageSparseSetComponentPool>
       mComponentPools;
+
+  std::unordered_map<std::type_index,
+                     std::vector<EntityStorageSparseSetComponentPool>>
+      mRemoveObserverPools;
 
   Entity mLastEntity{1};
   std::list<Entity> mDeleted;

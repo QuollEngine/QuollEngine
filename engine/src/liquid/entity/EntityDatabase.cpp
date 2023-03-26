@@ -29,6 +29,7 @@ EntityDatabase::EntityDatabase() {
   reg<SkeletonDebug>();
   reg<RigidBody>();
   reg<Collidable>();
+  reg<PhysxInstance>();
   reg<Force>();
   reg<Torque>();
   reg<RigidBodyClear>();

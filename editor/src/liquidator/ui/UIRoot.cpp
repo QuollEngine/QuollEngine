@@ -28,6 +28,8 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
 
   mToolbar.add(new StartSimulationMode, "Play", fa::Play,
                ToolbarItemType::HideWhenInactive);
+  mToolbar.add(new StopSimulationMode, "Stop", fa::Stop,
+               ToolbarItemType::HideWhenInactive);
   mToolbar.add(new SetActiveTransform(TransformOperation::Move), "Move",
                fa::Arrows, ToolbarItemType::Toggleable);
   mToolbar.add(new SetActiveTransform(TransformOperation::Rotate), "Rotate",

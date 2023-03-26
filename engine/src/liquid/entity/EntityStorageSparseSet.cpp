@@ -44,18 +44,26 @@ void EntityStorageSparseSet::deleteEntity(Entity entity) {
 }
 
 void EntityStorageSparseSet::destroy() {
+  deleteAllObservers();
   deleteAllComponents();
   deleteAllEntities();
 }
 
 void EntityStorageSparseSet::deleteAllEntityComponents(Entity entity) {
-  for (auto &[_, pool] : mComponentPools) {
+  for (auto &[index, pool] : mComponentPools) {
     size_t sEntity = static_cast<size_t>(entity);
+
     if (sEntity < pool.entityIndices.size() &&
         pool.entityIndices[sEntity] < DeadIndex) {
 
       size_t movedEntity = static_cast<size_t>(pool.entities.back());
       size_t entityIndexToDelete = pool.entityIndices[sEntity];
+
+      auto &observers = mRemoveObserverPools.at(index);
+      for (auto &observer : observers) {
+        observer.entities.push_back(entity);
+        observer.components.push_back(pool.components[entityIndexToDelete]);
+      }
 
       // Move last entity in the array to place of deleted entity
       pool.entities[entityIndexToDelete] = static_cast<Entity>(movedEntity);
@@ -88,6 +96,12 @@ void EntityStorageSparseSet::deleteAllComponents() {
     pool.components.clear();
     pool.entities.clear();
     pool.entityIndices.clear();
+  }
+}
+
+void EntityStorageSparseSet::deleteAllObservers() {
+  for (auto &[_, pool] : mRemoveObserverPools) {
+    pool.clear();
   }
 }
 

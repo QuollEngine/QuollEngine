@@ -8,7 +8,9 @@ class ScriptingSystemTest : public ::testing::Test {
 public:
   ScriptingSystemTest()
       : assetCache(std::filesystem::current_path()),
-        scriptingSystem(eventSystem, assetCache.getRegistry()) {}
+        scriptingSystem(eventSystem, assetCache.getRegistry()) {
+    scriptingSystem.observeChanges(entityDatabase);
+  }
 
   liquid::EntityDatabase entityDatabase;
   liquid::EventSystem eventSystem;
@@ -40,7 +42,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   EXPECT_EQ(component.scope.getGlobal<float>("global_dt"), TimeDelta);
 }
 
-TEST_F(ScriptingSystemTest, DeletesScriptForEntitiesWithDeletes) {
+TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   auto handle = assetCache
                     .loadLuaScriptFromFile(std::filesystem::current_path() /
                                            "scripting-system-tester.lua")
@@ -54,17 +56,33 @@ TEST_F(ScriptingSystemTest, DeletesScriptForEntitiesWithDeletes) {
     entities.at(i) = entity;
 
     entityDatabase.set<liquid::Script>(entity, {handle});
-    if ((i % 2) == 0) {
-      entityDatabase.set<liquid::Delete>(entity, {});
-    }
   }
 
   scriptingSystem.start(entityDatabase);
-  scriptingSystem.update(TimeDelta, entityDatabase);
 
+  std::vector<liquid::Script> scripts(entities.size());
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
-    EXPECT_NE(entityDatabase.has<liquid::Script>(entity), (i % 2) == 0);
+    scripts.at(i) = entityDatabase.get<liquid::Script>(entity);
+    ASSERT_TRUE(eventSystem.hasObserver(liquid::CollisionEvent::CollisionEnded,
+                                        scripts.at(i).onCollisionEnd));
+
+    if ((i % 2) == 0) {
+      entityDatabase.remove<liquid::Script>(entity);
+    }
+  }
+
+  scriptingSystem.update(TimeDelta, entityDatabase);
+  for (size_t i = 0; i < entities.size(); ++i) {
+    auto entity = entities.at(i);
+    bool deleted = (i % 2) == 0;
+    EXPECT_NE(entityDatabase.has<liquid::Script>(entity), deleted);
+
+    if (deleted) {
+      EXPECT_FALSE(
+          eventSystem.hasObserver(liquid::CollisionEvent::CollisionEnded,
+                                  scripts.at(i).onCollisionEnd));
+    }
   }
 }
 

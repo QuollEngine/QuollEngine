@@ -67,6 +67,18 @@ public:
   }
 
   /**
+   * @brief Check if observer exists
+   *
+   * @param type Event type
+   * @param observerId Observer Id
+   * @retval true Observer exists
+   * @retval Observer does not exist
+   */
+  bool hasObserver(TEvent type, EventObserverId observerId) {
+    return mObservers.at(type).contains(observerId);
+  }
+
+  /**
    * @brief Dispatch event
    *
    * @param type Event type
