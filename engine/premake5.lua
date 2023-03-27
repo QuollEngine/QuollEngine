@@ -53,7 +53,8 @@ project "LiquidEngineTest"
 
     includedirs {
         "../engine/tests",
-        "../engine/src"
+        "../engine/src",
+        "../engine/rhi/mock/include"
     }
 
     files {
@@ -61,9 +62,8 @@ project "LiquidEngineTest"
         "tests/**.h"
     }
 
-    links { "LiquidEngine", "LiquidRHICore" }
+    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore"}
     linkGoogleTest{}
-    linkDependenciesWithoutVulkan{}
 
     postbuildcommands {
         "{COPYFILE} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",

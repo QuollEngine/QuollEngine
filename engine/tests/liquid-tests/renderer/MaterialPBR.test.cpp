@@ -1,15 +1,14 @@
 #include "liquid/core/Base.h"
 #include "liquid/renderer/MaterialPBR.h"
-#include "liquid/rhi/NativeBuffer.h"
+#include "liquid/rhi-mock/MockRenderDevice.h"
 
-#include "liquid-tests/mocks/MockRenderDevice.h"
 #include "liquid-tests/Testing.h"
 
 class MaterialPBRTest : public ::testing::Test {
 public:
   MaterialPBRTest() : renderStorage(&device) {}
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage;
 };
 
@@ -142,8 +141,8 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
 
   liquid::MaterialPBR material(properties, renderStorage);
 
-  const auto &buffer = device.getBuffer(material.getBuffer());
+  auto *buffer = device.getBuffer(material.getBuffer());
 
   EXPECT_EQ(material.getTextures().size(), 3);
-  EXPECT_EQ(buffer.getSize(), 16 * sizeof(glm::vec4));
+  EXPECT_EQ(buffer->getDescription().size, 16 * sizeof(glm::vec4));
 }

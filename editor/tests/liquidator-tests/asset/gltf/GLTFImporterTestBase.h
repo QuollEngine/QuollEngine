@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AssetCache.h"
 #include "liquid/asset/DefaultObjects.h"
-#include "liquidator-tests/mocks/MockRenderDevice.h"
+#include "liquid/rhi-mock/MockRenderDevice.h"
 
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE
 #define TINYGLTF_NO_INCLUDE_JSON
@@ -323,7 +323,7 @@ public:
     fs::remove_all(TempPath);
   }
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::AssetCache assetCache;
   liquid::editor::ImageLoader imageLoader;
   liquid::editor::GLTFImporter importer;

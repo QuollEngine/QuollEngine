@@ -4,11 +4,13 @@ project "LiquidEditor"
     targetname "Liquidator"
 
     includedirs {
-        "./src"
+        "./src",
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidRHIVulkan", "LiquidRHICore", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkOptick{}
+    linkDependenciesWith{"LiquidEngine", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkVulkanRHI{}
     
     copyRuntime();
 
@@ -47,7 +49,8 @@ project "LiquidEditorTest"
     includedirs {
         "../editor/tests",
         "../editor/src",
-        "../engine/src"
+        "../engine/src",
+        "../engine/rhi/mock/include"
     }
 
     files {
@@ -60,9 +63,8 @@ project "LiquidEditorTest"
         "src/main.cpp"
     }
 
-    links { "LiquidEngine", "LiquidRHICore", "LiquidRHIVulkan", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer" }
+    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     linkGoogleTest{}
-    linkDependenciesWithoutVulkan{}
 
     copyEngineAssets()
 
