@@ -64,6 +64,10 @@ void Runtime::start() {
   liquid::AudioSystem audioSystem(assetCache.getRegistry());
   liquid::EntityDeleter entityDeleter;
 
+  audioSystem.observeChanges(scene.entityDatabase);
+  scriptingSystem.observeChanges(scene.entityDatabase);
+  physicsSystem.observeChanges(scene.entityDatabase);
+
   graph.setFramebufferExtent(window.getFramebufferSize());
   window.addResizeHandler([&graph, &renderer](auto width, auto height) {
     graph.setFramebufferExtent({width, height});
@@ -79,6 +83,7 @@ void Runtime::start() {
     eventSystem.poll();
     auto &entityDatabase = scene.entityDatabase;
 
+    entityDeleter.update(scene);
     cameraAspectRatioUpdater.update(entityDatabase);
     scriptingSystem.start(entityDatabase);
     scriptingSystem.update(dt, entityDatabase);
@@ -87,7 +92,6 @@ void Runtime::start() {
     sceneUpdater.update(entityDatabase);
     physicsSystem.update(dt, entityDatabase);
     audioSystem.output(entityDatabase);
-    entityDeleter.update(scene);
 
     return true;
   });

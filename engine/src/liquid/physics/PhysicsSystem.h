@@ -48,6 +48,13 @@ public:
    */
   void cleanup(EntityDatabase &entityDatabase);
 
+  /**
+   * @brief Observer changes in entities
+   *
+   * @param entityDatabase Entity database
+   */
+  void observeChanges(EntityDatabase &entityDatabase);
+
 private:
   /**
    * @brief Synchronize physics components
@@ -66,6 +73,8 @@ private:
 private:
   PhysicsSystemImpl *mImpl = nullptr;
   EventSystem &mEventSystem;
+
+  EntityDatabaseObserver<PhysxInstance> mPhysxInstanceRemoveObserver;
 };
 
 } // namespace liquid

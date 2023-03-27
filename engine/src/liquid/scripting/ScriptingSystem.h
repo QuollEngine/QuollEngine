@@ -53,6 +53,13 @@ public:
    */
   void cleanup(EntityDatabase &entityDatabase);
 
+  /**
+   * @brief Observer changes in entities
+   *
+   * @param entityDatabase Entity database
+   */
+  void observeChanges(EntityDatabase &entityDatabase);
+
 private:
   /**
    * @brief Destroy scripting data
@@ -73,6 +80,8 @@ private:
   EventSystem &mEventSystem;
   AssetRegistry &mAssetRegistry;
   LuaInterpreter mLuaInterpreter;
+
+  EntityDatabaseObserver<Script> mScriptRemoveObserver;
 };
 
 } // namespace liquid

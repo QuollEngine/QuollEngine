@@ -193,6 +193,14 @@ public:
    */
   void stackDump();
 
+  /**
+   * @brief Check if scope exists
+   *
+   * @retval true Scope exists
+   * @retval false Scope does not exist
+   */
+  operator bool() { return mScope != nullptr; }
+
 private:
   /**
    * @brief Get table field

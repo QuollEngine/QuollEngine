@@ -19,6 +19,9 @@ void EntityDeleter::update(Scene &scene) {
   auto activeCamera = scene.activeCamera;
 
   auto count = entityDatabase.getEntityCountForComponent<Delete>();
+  if (count == 0) {
+    return;
+  }
 
   std::vector<Entity> deleteList;
   deleteList.reserve(count);

@@ -808,38 +808,6 @@ void EntityPanel::renderRigidBody(Scene &scene,
 
       mRigidBody.reset();
     }
-
-    if (rigidBody.actor) {
-      rigidBody.actor->getLinearVelocity();
-      if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {
-        auto *actor = rigidBody.actor;
-
-        const auto &pose = actor->getGlobalPose();
-        const auto &cmass = actor->getCMassLocalPose();
-        const auto &invInertia = actor->getMassSpaceInvInertiaTensor();
-        const auto &linearVelocity = actor->getLinearVelocity();
-        const auto &angularVelocity = actor->getAngularVelocity();
-
-        table.row("Pose position", glm::vec3(pose.p.x, pose.p.y, pose.p.y));
-        table.row("Pose rotation",
-                  glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
-        table.row("CMass position", glm::vec3(cmass.p.x, cmass.p.y, cmass.p.y));
-        table.row("CMass rotation",
-                  glm::quat(cmass.q.w, cmass.q.x, cmass.q.y, cmass.q.z));
-        table.row("Inverse inertia tensor position",
-                  glm::vec3(invInertia.x, invInertia.y, invInertia.y));
-        table.row("Linear damping",
-                  static_cast<float>(actor->getLinearDamping()));
-        table.row("Angular damping",
-                  static_cast<float>(actor->getAngularDamping()));
-        table.row(
-            "Linear velocity",
-            glm::vec3(linearVelocity.x, linearVelocity.y, linearVelocity.z));
-        table.row(
-            "Angular velocity",
-            glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z));
-      }
-    }
   }
 }
 

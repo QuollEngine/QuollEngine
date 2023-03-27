@@ -30,32 +30,24 @@ public:
     LIQUID_PROFILE_EVENT("AudioSystem::output");
 
     {
-      LIQUID_PROFILE_EVENT("Cleanup audio starts for deleted components");
+      LIQUID_PROFILE_EVENT("Cleanup audio data for delete components");
 
-      std::set<Entity> toBeDeletedStarts;
-      for (auto [entity, status, _] :
-           entityDatabase.view<AudioStart, Delete>()) {
-        toBeDeletedStarts.insert(entity);
+      for (auto [entity, source] : mAudioSourceRemoveObserver) {
+        if (entityDatabase.has<AudioStart>(entity)) {
+          entityDatabase.remove<AudioStart>(entity);
+        }
+
+        if (entityDatabase.has<AudioStatus>(entity)) {
+          entityDatabase.remove<AudioStatus>(entity);
+        }
       }
 
-      for (auto entity : toBeDeletedStarts) {
-        entityDatabase.remove<AudioStart>(entity);
-      }
-    }
-
-    {
-      LIQUID_PROFILE_EVENT("Cleanup audio statuses for deleted components");
-
-      std::set<Entity> toBeDeletedStatuses;
-      for (auto [entity, status, _] :
-           entityDatabase.view<AudioStatus, Delete>()) {
+      for (auto [entity, status] : mAudioStatusRemoveObserver) {
         mBackend.destroySound(status.instance);
-        toBeDeletedStatuses.insert(entity);
       }
 
-      for (auto entity : toBeDeletedStatuses) {
-        entityDatabase.remove<AudioStatus>(entity);
-      }
+      mAudioSourceRemoveObserver.clear();
+      mAudioStatusRemoveObserver.clear();
     }
 
     {
@@ -82,7 +74,6 @@ public:
       std::set<Entity> toBeDeletedStatuses;
       for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {
         if (!mBackend.isPlaying(status.instance)) {
-          mBackend.destroySound(status.instance);
           toBeDeletedStatuses.insert(entity);
         }
       }
@@ -108,6 +99,16 @@ public:
   }
 
   /**
+   * @brief Observer changes in entities
+   *
+   * @param entityDatabase Entity database
+   */
+  void observeChanges(EntityDatabase &entityDatabase) {
+    mAudioSourceRemoveObserver = entityDatabase.observeRemove<AudioSource>();
+    mAudioStatusRemoveObserver = entityDatabase.observeRemove<AudioStatus>();
+  }
+
+  /**
    * @brief Get audio backend
    *
    * @return Audio backend
@@ -117,6 +118,9 @@ public:
 private:
   AudioBackend mBackend;
   AssetRegistry &mAssetRegistry;
+
+  EntityDatabaseObserver<AudioSource> mAudioSourceRemoveObserver;
+  EntityDatabaseObserver<AudioStatus> mAudioStatusRemoveObserver;
 };
 
 } // namespace liquid

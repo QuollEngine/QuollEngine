@@ -48,7 +48,9 @@ private:
 
 class AudioSystemTest : public ::testing::Test {
 public:
-  AudioSystemTest() : audioSystem(assetRegistry) {}
+  AudioSystemTest() : audioSystem(assetRegistry) {
+    audioSystem.observeChanges(entityDatabase);
+  }
 
   liquid::AudioAssetHandle createFakeAudio() {
     std::vector<char> bytes;
@@ -157,7 +159,9 @@ TEST_F(AudioSystemTest, DeletesAudioStatusComponentFromFinishedAudios) {
 
   backend.setStatus(sound, false);
   audioSystem.output(entityDatabase);
+  EXPECT_TRUE(backend.hasSound(sound));
 
+  audioSystem.output(entityDatabase);
   EXPECT_FALSE(backend.hasSound(sound));
 }
 
@@ -185,7 +189,7 @@ TEST_F(AudioSystemTest, CleanupDeletesAllAudioStatuses) {
   EXPECT_FALSE(backend.hasSound(sound));
 }
 
-TEST_F(AudioSystemTest, DeletesAudioStartComponentsWithDeleteComponents) {
+TEST_F(AudioSystemTest, DeletesAudioComponentsWhenAudioSourceIsDeleted) {
   auto &backend = audioSystem.getBackend();
 
   auto handle = createFakeAudio();
@@ -193,7 +197,12 @@ TEST_F(AudioSystemTest, DeletesAudioStartComponentsWithDeleteComponents) {
   auto e1 = entityDatabase.create();
   entityDatabase.set<liquid::AudioStart>(e1, {});
   entityDatabase.set<liquid::AudioSource>(e1, {handle});
-  entityDatabase.set<liquid::Delete>(e1, {});
+  entityDatabase.remove<liquid::AudioSource>(e1);
+
+  auto e2 = entityDatabase.create();
+  entityDatabase.set<liquid::AudioStart>(e2, {});
+  entityDatabase.set<liquid::AudioSource>(e2, {handle});
+  entityDatabase.deleteEntity(e2);
 
   audioSystem.output(entityDatabase);
 
@@ -201,7 +210,7 @@ TEST_F(AudioSystemTest, DeletesAudioStartComponentsWithDeleteComponents) {
   EXPECT_FALSE(entityDatabase.has<liquid::AudioStatus>(e1));
 }
 
-TEST_F(AudioSystemTest, DeletesAudioStatusComponentsWithDeleteComponents) {
+TEST_F(AudioSystemTest, DeletesAudioDataWhenAudioSourceComponentsAreDeleted) {
   auto &backend = audioSystem.getBackend();
 
   auto handle = createFakeAudio();
@@ -210,15 +219,21 @@ TEST_F(AudioSystemTest, DeletesAudioStatusComponentsWithDeleteComponents) {
   entityDatabase.set<liquid::AudioStart>(e1, {});
   entityDatabase.set<liquid::AudioSource>(e1, {handle});
 
+  auto e2 = entityDatabase.create();
+  entityDatabase.set<liquid::AudioStart>(e2, {});
+  entityDatabase.set<liquid::AudioSource>(e2, {handle});
+
   audioSystem.output(entityDatabase);
+  auto *sound1 = entityDatabase.get<liquid::AudioStatus>(e1).instance;
+  auto *sound2 = entityDatabase.get<liquid::AudioStatus>(e2).instance;
 
-  auto *sound = entityDatabase.get<liquid::AudioStatus>(e1).instance;
-
-  entityDatabase.set<liquid::Delete>(e1, {});
+  entityDatabase.remove<liquid::AudioSource>(e1);
+  entityDatabase.deleteEntity(e2);
 
   audioSystem.output(entityDatabase);
 
   EXPECT_FALSE(entityDatabase.has<liquid::AudioStart>(e1));
   EXPECT_FALSE(entityDatabase.has<liquid::AudioStatus>(e1));
-  EXPECT_FALSE(backend.hasSound(sound));
+  EXPECT_FALSE(backend.hasSound(sound1));
+  EXPECT_FALSE(backend.hasSound(sound2));
 }

@@ -63,6 +63,13 @@ private:
   void cleanupSimulationDatabase(EntityDatabase &simulationDatabase);
 
   /**
+   * @brief Observe changes for simulation database
+   *
+   * @param simulationDatabase Simulation database
+   */
+  void observeChanges(EntityDatabase &simulationDatabase);
+
+  /**
    * @brief Editor updater
    *
    * @param dt Time delta

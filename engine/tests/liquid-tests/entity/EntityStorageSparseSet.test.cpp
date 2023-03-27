@@ -469,3 +469,215 @@ TEST(EntityStorageSparseSetTest, DeletesMultipleComponents) {
   storage.remove<IntComponent>(e5);
   storage.remove<IntComponent>(e6);
 }
+
+TEST(EntityStorageSparseSetTest,
+     RemoveObserverIteratesOverAllRemovedComponents) {
+  struct Pair {
+    liquid::Entity entity;
+    int value;
+    liquid::String strValue;
+  };
+
+  TestEntityStorage<IntComponent, StringComponent> storage;
+  auto e1 = storage.create();
+  auto e2 = storage.create();
+  auto e3 = storage.create();
+  auto e4 = storage.create();
+  auto e5 = storage.create();
+  auto e6 = storage.create();
+  storage.set<IntComponent>(e1, {10});
+  storage.set<StringComponent>(e1, {"e1"});
+  storage.set<IntComponent>(e2, {20});
+  storage.set<StringComponent>(e2, {"e2"});
+  storage.set<IntComponent>(e3, {30});
+  storage.set<StringComponent>(e3, {"e3"});
+  storage.set<IntComponent>(e4, {40});
+  storage.set<StringComponent>(e4, {"e4"});
+  storage.set<IntComponent>(e5, {50});
+  storage.set<StringComponent>(e5, {"e5"});
+  storage.set<IntComponent>(e6, {60});
+  storage.set<StringComponent>(e6, {"e6"});
+
+  auto observer1 = storage.observeRemove<IntComponent>();
+  auto observer2 = storage.observeRemove<StringComponent>();
+  storage.remove<IntComponent>(e1);
+  storage.remove<IntComponent>(e3);
+  storage.remove<StringComponent>(e1);
+
+  auto observer3 = storage.observeRemove<IntComponent>();
+  storage.remove<IntComponent>(e2);
+  storage.remove<IntComponent>(e4);
+
+  std::array<Pair, 4> orderedExpectation{
+      Pair{e1, 10, "e1"}, {e3, 30, "e3"}, {e2, 20, "e2"}, {e4, 40, "e4"}};
+
+  {
+    size_t index = 0;
+    EXPECT_EQ(observer1.size(), 4);
+    for (auto [entity, component] : observer1) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+      EXPECT_FALSE(storage.has<IntComponent>(entity));
+      index++;
+    }
+  }
+
+  {
+    size_t index = 0;
+    EXPECT_EQ(observer2.size(), 1);
+    for (auto [entity, component] : observer2) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).strValue);
+      EXPECT_FALSE(storage.has<StringComponent>(entity));
+
+      index++;
+    }
+  }
+
+  {
+    size_t index = 2;
+    EXPECT_EQ(observer3.size(), 2);
+    for (auto [entity, component] : observer3) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+      EXPECT_FALSE(storage.has<IntComponent>(entity));
+
+      index++;
+    }
+  }
+}
+
+TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
+  struct Pair {
+    liquid::Entity entity;
+    int value;
+    liquid::String strValue;
+  };
+
+  TestEntityStorage<IntComponent, StringComponent> storage;
+  auto e1 = storage.create();
+  auto e2 = storage.create();
+  auto e3 = storage.create();
+  auto e4 = storage.create();
+  auto e5 = storage.create();
+  auto e6 = storage.create();
+  storage.set<IntComponent>(e1, {10});
+  storage.set<StringComponent>(e1, {"e1"});
+  storage.set<IntComponent>(e2, {20});
+  storage.set<StringComponent>(e2, {"e2"});
+  storage.set<IntComponent>(e3, {30});
+  storage.set<StringComponent>(e3, {"e3"});
+  storage.set<IntComponent>(e4, {40});
+  storage.set<StringComponent>(e4, {"e4"});
+  storage.set<IntComponent>(e5, {50});
+  storage.set<StringComponent>(e5, {"e5"});
+  storage.set<IntComponent>(e6, {60});
+  storage.set<StringComponent>(e6, {"e6"});
+
+  auto observer1 = storage.observeRemove<IntComponent>();
+  auto observer2 = storage.observeRemove<StringComponent>();
+  storage.deleteEntity(e1);
+  storage.deleteEntity(e3);
+
+  auto observer3 = storage.observeRemove<IntComponent>();
+  storage.deleteEntity(e2);
+  storage.deleteEntity(e4);
+
+  std::array<Pair, 4> orderedExpectation{
+      Pair{e1, 10, "e1"}, {e3, 30, "e3"}, {e2, 20, "e2"}, {e4, 40, "e4"}};
+
+  storage.deleteEntity(e1);
+  storage.deleteEntity(e3);
+
+  {
+    size_t index = 0;
+    EXPECT_EQ(observer1.size(), 4);
+    for (auto [entity, component] : observer1) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+      EXPECT_FALSE(storage.exists(entity));
+
+      index++;
+    }
+  }
+
+  {
+    size_t index = 0;
+    EXPECT_EQ(observer2.size(), 4);
+    for (auto [entity, component] : observer2) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).strValue);
+      EXPECT_FALSE(storage.exists(entity));
+
+      index++;
+    }
+  }
+
+  {
+    size_t index = 2;
+    EXPECT_EQ(observer3.size(), 2);
+    for (auto [entity, component] : observer3) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+      EXPECT_FALSE(storage.exists(entity));
+
+      index++;
+    }
+  }
+}
+
+TEST(EntityStorageSparseSetTest, ClearingObserverClearsAllExistingData) {
+  struct Pair {
+    liquid::Entity entity;
+    int value;
+  };
+
+  TestEntityStorage<IntComponent, StringComponent> storage;
+  auto e1 = storage.create();
+  auto e2 = storage.create();
+  auto e3 = storage.create();
+  auto e4 = storage.create();
+  auto e5 = storage.create();
+  auto e6 = storage.create();
+  storage.set<IntComponent>(e1, {10});
+  storage.set<IntComponent>(e2, {20});
+  storage.set<IntComponent>(e3, {30});
+  storage.set<IntComponent>(e4, {40});
+  storage.set<IntComponent>(e5, {50});
+  storage.set<IntComponent>(e6, {60});
+
+  auto observer1 = storage.observeRemove<IntComponent>();
+  storage.remove<IntComponent>(e1);
+  storage.remove<IntComponent>(e3);
+
+  std::array<Pair, 4> orderedExpectation{
+      Pair{e1, 10}, {e3, 30}, {e2, 20}, {e4, 40}};
+
+  {
+    EXPECT_EQ(observer1.size(), 2);
+    size_t index = 0;
+    for (auto [entity, component] : observer1) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+
+      index++;
+    }
+  }
+
+  observer1.clear();
+  EXPECT_EQ(observer1.size(), 0);
+
+  storage.remove<IntComponent>(e2);
+  storage.remove<IntComponent>(e4);
+
+  {
+    EXPECT_EQ(observer1.size(), 2);
+    size_t index = 2;
+    for (auto [entity, component] : observer1) {
+      EXPECT_EQ(entity, orderedExpectation.at(index).entity);
+      EXPECT_EQ(component.value, orderedExpectation.at(index).value);
+
+      index++;
+    }
+  }
+}

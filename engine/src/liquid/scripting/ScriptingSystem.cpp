@@ -61,10 +61,10 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
 void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::update");
 
-  for (auto [entity, scripting, _] : entityDatabase.view<Script, Delete>()) {
-    destroyScriptingData(scripting);
-    entityDatabase.remove<Script>(entity);
+  for (auto [entity, script] : mScriptRemoveObserver) {
+    destroyScriptingData(script);
   }
+  mScriptRemoveObserver.clear();
 
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     component.scope.luaGetGlobal("update");
@@ -74,11 +74,15 @@ void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
 }
 
 void ScriptingSystem::cleanup(EntityDatabase &entityDatabase) {
-  for (auto [entity, scripting] : entityDatabase.view<Script>()) {
-    destroyScriptingData(scripting);
+  for (auto [entity, script] : entityDatabase.view<Script>()) {
+    destroyScriptingData(script);
   }
 
   entityDatabase.destroyComponents<Script>();
+}
+
+void ScriptingSystem::observeChanges(EntityDatabase &entityDatabase) {
+  mScriptRemoveObserver = entityDatabase.observeRemove<Script>();
 }
 
 void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
@@ -137,7 +141,9 @@ void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
 }
 
 void ScriptingSystem::destroyScriptingData(Script &component) {
-  mLuaInterpreter.destroyScope(component.scope);
+  if (component.scope) {
+    mLuaInterpreter.destroyScope(component.scope);
+  }
 
   if (component.onCollisionStart != EventObserverMax) {
     mEventSystem.removeObserver(CollisionEvent::CollisionStarted,

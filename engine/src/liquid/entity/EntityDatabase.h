@@ -30,6 +30,7 @@
 #include "liquid/physics/Force.h"
 #include "liquid/physics/Torque.h"
 #include "liquid/physics/RigidBodyClear.h"
+#include "liquid/physics/PhysxInstance.h"
 #include "liquid/scripting/Script.h"
 #include "liquid/text/Text.h"
 
@@ -50,5 +51,8 @@ public:
    */
   EntityDatabase();
 };
+
+template <class TComponent>
+using EntityDatabaseObserver = EntityStorageSparseSetObserver<TComponent>;
 
 } // namespace liquid
