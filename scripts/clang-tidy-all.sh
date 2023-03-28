@@ -17,6 +17,7 @@ shift;
 LINT_ENGINE=1
 LINT_RHI_CORE=1
 LINT_RHI_VULKAN=1
+LINT_RHI_MOCK=1
 LINT_EDITOR=1
 LINT_RUNTIME=1
 
@@ -24,6 +25,7 @@ if [ $# -gt 0 ]; then
     LINT_ENGINE="0"
     LINT_RHI_CORE="0"
     LINT_RHI_VULKAN="0"
+    LINT_RHI_MOCK="0"
     LINT_EDITOR="0"
     LINT_RUNTIME="0"
 
@@ -35,6 +37,8 @@ if [ $# -gt 0 ]; then
         LINT_RHI_CORE=1
     elif [ $1 = 'rhi-vulkan' ]; then
         LINT_RHI_VULKAN=1
+    elif [ $1 = 'rhi-mock' ]; then
+        LINT_RHI_MOCK=1
     elif [ $1 = 'editor' ]; then
         LINT_EDITOR=1
     elif [ $1 = 'runtime' ]; then
@@ -53,6 +57,7 @@ EDITOR_FILES=$(find editor/src -type f -name "*.cpp")
 RUNTIME_FILES=$(find runtime/src -type f -name "*.cpp")
 RHI_CORE_FILES=$(find engine/rhi/core -type f -name "*.cpp")
 RHI_VULKAN_FILES=$(find engine/rhi/vulkan -type f -name "*.cpp")
+RHI_MOCK_FILES=$(find engine/rhi/mock -type f -name "*.cpp")
 VENDOR_INCLUDES="-isystem/usr/local/include -isystem./vendor/Debug/include -isystem./vendor/Debug/include/msdfgen -isystem./vendor/Debug/include/freetype2"
 
 LINTERROR=0
@@ -79,6 +84,15 @@ if [ $LINT_RHI_VULKAN -eq 1 ]; then
     print_info "Checking RHIVulkan files"
     $CMD -header-filter=.* --p=file --quiet $RHI_VULKAN_FILES -- --std=c++17 \
         $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan -isystem./engine/platform-tools/include
+
+    LINTRET=$?
+    LINTERROR=$((LINTERROR | LINTRET))
+fi
+
+if [ $LINT_RHI_MOCK -eq 1 ]; then
+    print_info "Checking RHIMock files"
+    $CMD -header-filter=.* --p=file --quiet $RHI_MOCK_FILES -- --std=c++17 \
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/mock/include -isystem./engine/rhi/mock/include/liquid/rhi-mock -isystem./engine/platform-tools/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))

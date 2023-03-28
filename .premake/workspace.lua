@@ -17,7 +17,6 @@ workspace "LiquidEngine"
     includedirs {
         "../engine/src",
         "../engine/rhi/core/include",
-        "../engine/rhi/vulkan/include",
         "../engine/platform-tools/include"
     }
     

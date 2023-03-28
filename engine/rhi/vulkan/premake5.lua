@@ -12,3 +12,8 @@ project "LiquidRHIVulkan"
         "src/*.cpp", 
         "include/**.h"
     }
+
+function linkVulkanRHI()
+    links { "LiquidRHIVulkan", "LiquidRHICore", "vendor-libvolk", "vendor-libspirv-reflect" }
+    includedirs { "../engine/rhi/vulkan/include" }
+end

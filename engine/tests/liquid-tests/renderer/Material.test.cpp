@@ -1,15 +1,14 @@
 #include "liquid/core/Base.h"
 #include "liquid/renderer/Material.h"
-#include "liquid/rhi/NativeBuffer.h"
+#include "liquid/rhi-mock/MockRenderDevice.h"
 
-#include "liquid-tests/mocks/MockRenderDevice.h"
 #include "liquid-tests/Testing.h"
 
 class MaterialTest : public ::testing::Test {
 public:
   MaterialTest() : renderStorage(&device) {}
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage;
 };
 
@@ -29,17 +28,14 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
   EXPECT_EQ(material.hasTextures(), true);
   EXPECT_TRUE(liquid::rhi::isHandleValid(material.getBuffer()));
 
-  const auto &buffer = device.getBuffer(material.getBuffer());
-
-  // Memory alignment
-  EXPECT_EQ(buffer.getSize(), sizeof(glm::vec4) * 2);
-
-  const char *data = static_cast<const char *>(buffer.getData());
+  auto *buffer = device.getBuffer(material.getBuffer());
+  const char *data = static_cast<const char *>(buffer->map());
 
   auto specularVal = *reinterpret_cast<const glm::vec3 *>(data);
   auto diffuseVal =
       *reinterpret_cast<const glm::vec4 *>(data + sizeof(glm::vec4));
 
+  EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec4) * 2);
   EXPECT_TRUE(specularVal == glm::vec3(0.5, 0.2, 0.3));
   EXPECT_TRUE(diffuseVal == glm::vec4(1.0, 1.0, 1.0, 1.0));
 }
@@ -80,11 +76,10 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &buffer = device.getBuffer(material.getBuffer());
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
 
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
-
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 testReal);
@@ -93,14 +88,14 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
   material.updateProperty("non-existent-property", liquid::Property(1.0f));
 
   {
-    const auto &buffer = device.getBuffer(material.getBuffer());
-
     EXPECT_EQ(properties.size(), 2);
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
 
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
+
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 testReal);
@@ -124,11 +119,10 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &buffer = device.getBuffer(material.getBuffer());
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
 
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
-
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 testReal);
@@ -141,11 +135,10 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &buffer = device.getBuffer(material.getBuffer());
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
 
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
-
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 testReal);
@@ -169,11 +162,10 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == testVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == testReal);
 
-    const auto &buffer = device.getBuffer(material.getBuffer());
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
 
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
-
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == testVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 testReal);
@@ -189,11 +181,10 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
     EXPECT_TRUE(properties.at(0).getValue<glm::vec3>() == newTestVec3);
     EXPECT_TRUE(properties.at(1).getValue<float>() == newTestReal);
 
-    const auto &buffer = device.getBuffer(material.getBuffer());
+    auto *buffer = device.getBuffer(material.getBuffer());
+    const char *data = static_cast<const char *>(buffer->map());
 
-    EXPECT_EQ(buffer.getSize(), sizeof(glm::vec3) * 2);
-    const auto *data = static_cast<const char *>(buffer.getData());
-
+    EXPECT_EQ(buffer->getDescription().size, sizeof(glm::vec3) * 2);
     EXPECT_TRUE(*reinterpret_cast<const glm::vec3 *>(data) == newTestVec3);
     EXPECT_TRUE(*reinterpret_cast<const float *>(data + sizeof(glm::vec3)) ==
                 newTestReal);

@@ -1,10 +1,9 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 #include "liquid/yaml/Yaml.h"
+#include "liquid/rhi-mock/MockRenderDevice.h"
 
 #include "liquidator-tests/Testing.h"
-#include "liquidator-tests/mocks/MockRenderDevice.h"
-
 #include "liquidator/asset/AssetManager.h"
 
 #include <cryptopp/sha.h>
@@ -43,7 +42,7 @@ public:
   }
 
 public:
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::editor::AssetManager manager;
 };
 
@@ -103,7 +102,7 @@ TEST_F(AssetManagerTest,
   stream << node;
   stream.close();
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage(&device);
 
   createEmptyFile(texturePath);
@@ -141,7 +140,7 @@ TEST_F(AssetManagerTest,
   createEmptyFile(assetPath);
   createEmptyFile(dependentAssetPath);
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage(&device);
 
   EXPECT_TRUE(fs::exists(assetPath));
@@ -181,7 +180,7 @@ TEST_F(AssetManagerTest,
   createEmptyFile(assetPath);
   createEmptyFile(dependentAssetPath);
 
-  MockRenderDevice device;
+  liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage(&device);
 
   EXPECT_TRUE(fs::exists(assetPath));

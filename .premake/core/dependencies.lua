@@ -1,18 +1,7 @@
--- Link profiler dependencies
-function linkProfilerDependencies()
-    filter { "configurations:Profile" }
-        links { "OptickCore" }
-
-    filter { "configurations:Profile", "system:windows" }
-        postbuildcommands {
-            '{COPY} %{wks.location}/../vendor/Release/bin/OptickCore.dll %{cfg.buildtarget.directory}'
-        }
-
-    filter{}
-end
-
 -- Link dependencies without Vulkan
-function linkDependenciesWithoutVulkan()
+function linkDependenciesWith(...)
+    links { ... }
+
     links {
         "vendor-libimgui",
         "vendor-libspirv-reflect",
@@ -46,27 +35,20 @@ function linkDependenciesWithoutVulkan()
     filter{}
 end
 
--- Link dependencies shared by all projects
-function linkDependenciesWith(...)
-    links { ... }
-
-    links { "vendor-libvolk" }
-    linkDependenciesWithoutVulkan{}
-    linkProfilerDependencies{}
-
-    filter{}
-end
-
 -- Link Google Test
 function linkGoogleTest()
-    filter { "system:windows", "configurations:Debug or configurations:Test" }
-        links { "gtest", "gmock" }
+    links { "gtest", "gmock" }
+end
 
-    filter {"system:windows", "configurations:Release"}
-        links { "gtest", "gmock" }
+-- Link profiler dependencies
+function linkOptick()
+    filter { "configurations:Profile" }
+        links { "OptickCore" }
 
-    filter { "system:macosx or system:linux" }
-        links { "gtest", "gmock" }
+    filter { "configurations:Profile", "system:windows" }
+        postbuildcommands {
+            '{COPY} %{wks.location}/../vendor/Release/bin/OptickCore.dll %{cfg.buildtarget.directory}'
+        }
 
     filter{}
 end

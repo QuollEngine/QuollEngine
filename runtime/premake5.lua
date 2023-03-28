@@ -20,7 +20,9 @@ project "LiquidRuntime"
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine", "LiquidRHIVulkan", "LiquidRHICore", "LiquidPlatformTools" }
+    linkDependenciesWith{"LiquidEngine", "LiquidPlatformTools"}
+    linkVulkanRHI{}
+    linkOptick{}
 
     -- This is for development only since runtime
     -- will always be copied from the editor
