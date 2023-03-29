@@ -38,6 +38,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.activeCamera);
   EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
+  EXPECT_EQ(state.activeCamera, state.scene.activeCamera);
   EXPECT_TRUE(state.simulationScene.entityDatabase.exists(entity));
 }
 
@@ -63,6 +64,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.dummyCamera);
   EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
+  EXPECT_EQ(state.activeCamera, state.scene.dummyCamera);
   EXPECT_TRUE(state.simulationScene.entityDatabase.exists(entity));
 }
 
@@ -86,10 +88,12 @@ using StopSimulationModeActionTest = ActionTestBase;
 
 TEST_F(StopSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Simulation;
+  state.camera = state.scene.entityDatabase.create();
 
   liquid::editor::StopSimulationMode action;
   action.onExecute(state);
   EXPECT_EQ(state.mode, WM::Edit);
+  EXPECT_EQ(state.activeCamera, state.camera);
 }
 
 TEST_F(StopSimulationModeActionTest,

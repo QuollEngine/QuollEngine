@@ -3,13 +3,11 @@
 #include "liquid/platform-tools/NativeFileDialog.h"
 
 #include "EditorManager.h"
+#include "EditorCamera.h"
 
 #include <glm/gtc/matrix_access.hpp>
 
 namespace liquid::editor {
-
-EditorManager::EditorManager(EditorCamera &editorCamera, const Project &project)
-    : mEditorCamera(editorCamera), mProject(project) {}
 
 void EditorManager::saveWorkspaceState(WorkspaceState &state,
                                        const std::filesystem::path &path) {
@@ -37,8 +35,6 @@ void EditorManager::saveWorkspaceState(WorkspaceState &state,
 
 void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
                                        WorkspaceState &state) {
-  state.camera = mEditorCamera.getEntity();
-
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {

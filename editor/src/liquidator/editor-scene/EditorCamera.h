@@ -5,6 +5,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/events/EventSystem.h"
 #include "liquidator/core/CameraLookAt.h"
+#include "liquidator/state/WorkspaceState.h"
 
 namespace liquid::editor {
 
@@ -20,7 +21,13 @@ public:
   /**
    * Current camera input state
    */
-  enum class InputState { None = 0, Pan = 1, Rotate = 2, Zoom = 3 };
+  enum class InputState {
+    None = 0,
+    Pan = 1,
+    Rotate = 2,
+    Zoom = 3,
+    ZoomWheel = 4
+  };
 
   /**
    * Zoom speed when scrolling
@@ -61,12 +68,10 @@ public:
   /**
    * @brief Create editor camera
    *
-   * @param entityDatabase Entity database
    * @param eventSystem Event system
    * @param window Window
    */
-  EditorCamera(EntityDatabase &entityDatabase, EventSystem &eventSystem,
-               Window &window);
+  EditorCamera(EventSystem &eventSystem, Window &window);
 
   EditorCamera(const EditorCamera &) = delete;
   EditorCamera &operator=(const EditorCamera &) = delete;
@@ -81,18 +86,11 @@ public:
   ~EditorCamera();
 
   /**
-   * @brief Get aspect ratio
-   *
-   * @return Aspect ratio
-   */
-  inline float getAspectRatio() const {
-    return getPerspectiveLens().aspectRatio;
-  }
-
-  /**
    * @brief Update camera
+   *
+   * @param state Workspace state
    */
-  void update();
+  void update(WorkspaceState &state);
 
   /**
    * @brief Set viewport
@@ -134,56 +132,48 @@ public:
   inline const InputState &getInputState() const { return mInputState; }
 
   /**
-   * @brief Get camera entity
+   * @brief Create default camera
    *
+   * @param entityDatabase Entity database
    * @return Camera entity
    */
-  inline Entity getEntity() { return mCameraEntity; }
+  Entity createDefaultCamera(EntityDatabase &entityDatabase);
 
 private:
   /**
-   * @brief Reset camera to defaults
-   */
-  void reset();
-
-  /**
-   * @brief Get perspective lens
-   *
-   * @return Perspective lens
-   */
-  inline PerspectiveLens &getPerspectiveLens() {
-    return mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
-  }
-
-  /**
-   * @brief Get perspective lens
-   *
-   * @return Perspective lens
-   */
-  inline const PerspectiveLens &getPerspectiveLens() const {
-    return mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
-  }
-
-  /**
    * @brief Pan camera using mouse movement
+   *
+   * @param lookAt Camera look at
    */
-  void pan();
+  void pan(CameraLookAt &lookAt);
 
   /**
    * @brief Rotate camera using mouse movement
+   *
+   * @param lookAt Camera look at
    */
-  void rotate();
+  void rotate(CameraLookAt &lookAt);
 
   /**
    * @brief Zoom camera using mouse movement
+   *
+   * @param lookAt Camera look at
    */
-  void zoom();
+  void zoom(CameraLookAt &lookAt);
+
+  /**
+   * @brief Zoom camera using mouse wheel
+   *
+   * @param lookAt Camera look at
+   */
+  void zoomWheel(CameraLookAt &lookAt);
 
 private:
   float mX = 0.0f;
   float mY = 0.0f;
   float mWidth = 0.0f;
   float mHeight = 0.0f;
+  float mWheelOffset = 0.0f;
   bool mCaptureMouse = false;
 
   InputState mInputState = InputState::None;
@@ -195,9 +185,7 @@ private:
   EventObserverId mMouseScrollHandler = 0;
 
   Window &mWindow;
-  EntityDatabase &mEntityDatabase;
   EventSystem &mEventSystem;
-  Entity mCameraEntity = Entity::Null;
 };
 
 } // namespace liquid::editor

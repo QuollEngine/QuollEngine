@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquidator/editor-scene/EditorManager.h"
+#include "liquidator/editor-scene/EditorCamera.h"
 
 namespace liquid::editor {
 
@@ -12,9 +12,9 @@ public:
   /**
    * @brief Render status bar
    *
-   * @param editorManager Editor manager
+   * @param editorCamera Editor camera
    */
-  static void render(EditorManager &editorManager);
+  static void render(EditorCamera &editorCamera);
 };
 
 } // namespace liquid::editor

@@ -52,7 +52,7 @@ void EditorSimulator::updateEditor(float dt, WorkspaceState &state) {
   mEntityDeleter.update(state.scene);
 
   mCameraAspectRatioUpdater.update(entityDatabase);
-  mEditorCamera.update();
+  mEditorCamera.update(state);
 
   mSkeletonUpdater.update(entityDatabase);
   mSceneUpdater.update(entityDatabase);

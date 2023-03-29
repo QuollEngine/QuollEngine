@@ -84,16 +84,17 @@ void EditorScreen::start(const Project &project) {
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
 
+  EditorCamera editorCamera(mEventSystem, mWindow);
+
   WorkspaceState state{project, assetManager.getAssetRegistry()};
   state.scene.entityDatabase.reg<CameraLookAt>();
+  state.camera = editorCamera.createDefaultCamera(state.scene.entityDatabase);
+  state.activeCamera = state.camera;
 
   ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
   actionExecutor.getSceneIO().loadScene(project.scenesPath / "main.lqscene");
 
-  EditorCamera editorCamera(state.scene.entityDatabase, mEventSystem, mWindow);
-
-  EditorManager editorManager(editorCamera, project);
-  editorManager.loadWorkspaceState(statePath, state);
+  EditorManager::loadWorkspaceState(statePath, state);
 
   MainLoop mainLoop(mWindow, fpsCounter);
   AssetLoader assetLoader(assetManager, renderer.getRenderStorage());
@@ -167,12 +168,12 @@ void EditorScreen::start(const Project &project) {
   });
 
   LogViewer logViewer;
-  mainLoop.setRenderFn([&renderer, &editorManager, &editorCamera, &assetManager,
-                        &graph, &scenePassGroup, &imguiPassGroup, &ui,
-                        &debugLayer, &preloadStatusDialog, &presenter,
-                        &editorRenderer, &simulator, &mousePicking,
-                        &systemLogStorage, &userLogStorage, &logViewer, &state,
-                        &actionExecutor, this]() {
+  mainLoop.setRenderFn([&renderer, &editorCamera, &assetManager, &graph,
+                        &scenePassGroup, &imguiPassGroup, &ui, &debugLayer,
+                        &preloadStatusDialog, &presenter, &editorRenderer,
+                        &simulator, &mousePicking, &systemLogStorage,
+                        &userLogStorage, &logViewer, &state, &actionExecutor,
+                        this]() {
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -182,7 +183,7 @@ void EditorScreen::start(const Project &project) {
     imgui.beginRendering();
     ImGuizmo::BeginFrame();
 
-    ui.render(state, editorManager, assetManager);
+    ui.render(state, assetManager);
 
     if (auto _ = widgets::MainMenuBar()) {
       debugLayer.renderMenu();
@@ -194,7 +195,7 @@ void EditorScreen::start(const Project &project) {
     bool mouseClicked =
         ui.renderSceneView(state, scenePassGroup.finalColor, editorCamera);
 
-    StatusBar::render(editorManager);
+    StatusBar::render(editorCamera);
 
     preloadStatusDialog.render();
 
@@ -207,20 +208,16 @@ void EditorScreen::start(const Project &project) {
 
     const auto &renderFrame = mDevice->beginFrame();
 
-    auto camera = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene.activeCamera
-                      : state.camera;
-
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      sceneRenderer.updateFrameData(scene.entityDatabase, camera,
+      sceneRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
                                     renderFrame.frameIndex);
-      editorRenderer.updateFrameData(scene.entityDatabase, camera, state,
-                                     renderFrame.frameIndex);
+      editorRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
+                                     state, renderFrame.frameIndex);
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();
@@ -234,9 +231,8 @@ void EditorScreen::start(const Project &project) {
       if (mouseClicked) {
         auto mousePos = mWindow.getCurrentMousePosition();
 
-        if (editorManager.getEditorCamera().isWithinViewport(mousePos)) {
-          auto scaledMousePos =
-              editorManager.getEditorCamera().scaleToViewport(mousePos);
+        if (editorCamera.isWithinViewport(mousePos)) {
+          auto scaledMousePos = editorCamera.scaleToViewport(mousePos);
 
           mousePicking.execute(renderFrame.commandList, scaledMousePos,
                                renderFrame.frameIndex);
@@ -256,7 +252,7 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.run();
   Engine::resetLoggers();
-  editorManager.saveWorkspaceState(state, statePath);
+  EditorManager::saveWorkspaceState(state, statePath);
 
   mDevice->waitForIdle();
 }
