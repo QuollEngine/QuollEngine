@@ -109,15 +109,15 @@ MousePickingGraph::MousePickingGraph(
     auto pipeline = registry.get(vPipeline);
     auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
+    std::array<uint32_t, 1> offsets{static_cast<uint32_t>(offset)};
     // Mesh
     {
       commandList.bindPipeline(pipeline);
 
       commandList.bindDescriptor(pipeline, 0,
                                  renderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(pipeline, 1,
-                                 mBindlessParams.at(frameIndex).getDescriptor(),
-                                 {static_cast<uint32_t>(offset)});
+      commandList.bindDescriptor(
+          pipeline, 1, mBindlessParams.at(frameIndex).getDescriptor(), offsets);
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
@@ -153,7 +153,7 @@ MousePickingGraph::MousePickingGraph(
                                  renderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(skinnedPipeline, 1,
                                  mBindlessParams.at(frameIndex).getDescriptor(),
-                                 {static_cast<uint32_t>(offset)});
+                                 offsets);
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {

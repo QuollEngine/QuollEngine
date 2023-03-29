@@ -68,7 +68,8 @@ RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
   auto texture = mDevice->createTexture(description);
 
   if (addToDescriptor) {
-    mGlobalTexturesDescriptor.write(0, {texture},
+    std::array<rhi::TextureHandle, 1> textures{texture};
+    mGlobalTexturesDescriptor.write(0, textures,
                                     rhi::DescriptorType::CombinedImageSampler,
                                     rhi::castHandleToUint(texture));
   }
@@ -95,12 +96,13 @@ rhi::Buffer
 RenderStorage::createBuffer(const liquid::rhi::BufferDescription &description) {
   auto buffer = mDevice->createBuffer(description);
 
+  std::array<rhi::BufferHandle, 1> buffers{buffer.getHandle()};
   if (description.usage == rhi::BufferUsage::Storage) {
-    mGlobalBuffersDescriptor.write(0, {buffer.getHandle()},
+    mGlobalBuffersDescriptor.write(0, buffers,
                                    rhi::DescriptorType::StorageBuffer,
                                    rhi::castHandleToUint(buffer.getHandle()));
   } else if (description.usage == rhi::BufferUsage::Uniform) {
-    mGlobalBuffersDescriptor.write(1, {buffer.getHandle()},
+    mGlobalBuffersDescriptor.write(1, buffers,
                                    rhi::DescriptorType::UniformBuffer,
                                    rhi::castHandleToUint(buffer.getHandle()));
   }
@@ -110,8 +112,8 @@ RenderStorage::createBuffer(const liquid::rhi::BufferDescription &description) {
 
 rhi::Descriptor RenderStorage::createMaterialDescriptor(rhi::Buffer buffer) {
   auto descriptor = mDevice->createDescriptor(mMaterialDescriptorLayout);
-  descriptor.write(0, {buffer.getHandle()}, rhi::DescriptorType::UniformBuffer,
-                   0);
+  std::array<rhi::BufferHandle, 1> buffers{buffer.getHandle()};
+  descriptor.write(0, buffers, rhi::DescriptorType::UniformBuffer, 0);
 
   return descriptor;
 }
@@ -130,7 +132,8 @@ bool RenderStorage::recreateFramebufferRelativeTextures() {
 
     mDevice->updateTexture(handle, fixedSizeDesc);
 
-    mGlobalTexturesDescriptor.write(0, {handle},
+    std::array<rhi::TextureHandle, 1> textures{handle};
+    mGlobalTexturesDescriptor.write(0, textures,
                                     rhi::DescriptorType::CombinedImageSampler,
                                     rhi::castHandleToUint(handle));
   }

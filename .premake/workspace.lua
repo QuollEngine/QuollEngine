@@ -2,7 +2,7 @@
 workspace "LiquidEngine"
     basedir "../workspace/"
     language "C++"
-    cppdialect "C++17"
+    cppdialect "C++20"
     architecture "x86_64"
 
     -- Set editor as starting project

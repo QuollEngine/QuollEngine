@@ -101,7 +101,8 @@ private:
 
 private:
   VkDebugUtilsMessengerEXT mMessenger = VK_NULL_HANDLE;
-  std::vector<const char *> mValidationLayers{"VK_LAYER_KHRONOS_validation"};
+  static constexpr std::array<const char *, 1> mValidationLayers{
+      "VK_LAYER_KHRONOS_validation"};
   VkDebugUtilsMessengerCreateInfoEXT mMessengerCreateInfo{};
 };
 

@@ -233,18 +233,26 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
 
   // Convert equirectangular texture to cubemap
   {
-    mDescriptorGenerateCubemap.write(0, {hdriTexture},
+    std::array<rhi::TextureHandle, 1> hdriTextureData{hdriTexture};
+    mDescriptorGenerateCubemap.write(0, hdriTextureData,
                                      rhi::DescriptorType::CombinedImageSampler);
-    mDescriptorGenerateCubemap.write(1, {unfilteredCubemap},
+
+    std::array<rhi::TextureHandle, 1> unfilteredCubemapData{unfilteredCubemap};
+    mDescriptorGenerateCubemap.write(1, unfilteredCubemapData,
                                      rhi::DescriptorType::StorageImage);
 
     auto commandList = mDevice->requestImmediateCommandList();
-    commandList.pipelineBarrier(
-        rhi::PipelineStage::PipeTop, rhi::PipelineStage::ComputeShader,
-        {rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}},
+
+    std::array<rhi::MemoryBarrier, 1> memoryBarriers{
+        {rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}}};
+    std::array<rhi::ImageBarrier, 1> imageBarriers{
         {rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderWrite,
                            rhi::ImageLayout::Undefined,
-                           rhi::ImageLayout::General, unfilteredCubemap}});
+                           rhi::ImageLayout::General, unfilteredCubemap}}};
+
+    commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
+                                rhi::PipelineStage::ComputeShader,
+                                memoryBarriers, imageBarriers);
 
     commandList.bindPipeline(mPipelineGenerateCubemap);
     commandList.bindDescriptor(mPipelineGenerateCubemap, 0,
@@ -278,23 +286,32 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
                       rhi::TextureUsage::TransferSource;
   auto irradianceCubemap = mDevice->createTexture(cubemapDesc);
 
-  mDescriptorGenerateCubemap.write(0, {unfilteredCubemap.texture},
+  std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
+      unfilteredCubemap.texture};
+  mDescriptorGenerateCubemap.write(0, unfilteredCubemapData,
                                    rhi::DescriptorType::CombinedImageSampler);
-  mDescriptorGenerateCubemap.write(1, {irradianceCubemap},
+
+  std::array<rhi::TextureHandle, 1> irradianceCubemapData{irradianceCubemap};
+  mDescriptorGenerateCubemap.write(1, irradianceCubemapData,
                                    rhi::DescriptorType::StorageImage);
 
   auto commandList = mDevice->requestImmediateCommandList();
-  commandList.pipelineBarrier(
-      rhi::PipelineStage::PipeTop, rhi::PipelineStage::ComputeShader,
-      {rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderRead},
-       rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}},
-      {rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderRead,
-                         rhi::ImageLayout::General,
-                         rhi::ImageLayout::ShaderReadOnlyOptimal,
-                         unfilteredCubemap.texture},
-       rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderWrite,
-                         rhi::ImageLayout::Undefined, rhi::ImageLayout::General,
-                         irradianceCubemap}});
+
+  std::array<rhi::MemoryBarrier, 2> memoryBarriers{
+      rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderRead},
+      rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}};
+
+  std::array<rhi::ImageBarrier, 2> imageBarriers{
+      rhi::ImageBarrier{
+          rhi::Access::None, rhi::Access::ShaderRead, rhi::ImageLayout::General,
+          rhi::ImageLayout::ShaderReadOnlyOptimal, unfilteredCubemap.texture},
+      rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderWrite,
+                        rhi::ImageLayout::Undefined, rhi::ImageLayout::General,
+                        irradianceCubemap}};
+
+  commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
+                              rhi::PipelineStage::ComputeShader, memoryBarriers,
+                              imageBarriers);
 
   commandList.bindPipeline(mPipelineGenerateIrradianceMap);
   commandList.bindDescriptor(mPipelineGenerateIrradianceMap, 0,
@@ -357,12 +374,16 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     textureViews.at(level) = mDevice->createTextureView(description);
   }
 
-  mDescriptorGenerateCubemap.write(0, {unfilteredCubemap.texture},
+  std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
+      unfilteredCubemap.texture};
+  mDescriptorGenerateCubemap.write(0, unfilteredCubemapData,
                                    rhi::DescriptorType::CombinedImageSampler);
 
   for (size_t mipLevel = 0; mipLevel < unfilteredCubemap.levels.size();
        ++mipLevel) {
-    mDescriptorGenerateCubemap.write(1, {textureViews.at(mipLevel)},
+    std::array<rhi::TextureViewHandle, 1> textureViewData{
+        textureViews.at(mipLevel)};
+    mDescriptorGenerateCubemap.write(1, textureViewData,
                                      rhi::DescriptorType::StorageImage);
 
     auto commandList = mDevice->requestImmediateCommandList();

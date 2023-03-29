@@ -53,7 +53,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   int width = 0, height = 0;
   packer.getDimensions(width, height);
 
-  ImmediateAtlasGenerator<float, NumChannels, &mtsdfGenerator,
+  ImmediateAtlasGenerator<float, NumChannels, mtsdfGenerator,
                           BitmapAtlasStorage<byte, NumChannels>>
       generator(width, height);
 

@@ -4,10 +4,15 @@
 namespace liquid {
 
 void BindlessDrawParameters::build(rhi::RenderDevice *device) {
+  size_t maxSize = 0;
+  for (auto &range : mRanges) {
+    maxSize = std::max(range.size, maxSize);
+  }
+
   // Create buffer
   {
     rhi::BufferDescription description{};
-    description.size = mLastOffset;
+    description.size = mLastOffset + maxSize;
     description.usage = rhi::BufferUsage::Uniform;
     description.data = nullptr;
 
@@ -34,21 +39,18 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
 
   // Create descriptor
   {
+    std::array<rhi::BufferHandle, 1> buffers{mBuffer.getHandle()};
     mDescriptor = device->createDescriptor(mDescriptorLayout);
-    mDescriptor.write(0, {mBuffer.getHandle()},
-                      rhi::DescriptorType::UniformBufferDynamic, 0);
-
-    size_t maxSize = 0;
-    for (auto &range : mRanges) {
-      maxSize = std::max(range.size, maxSize);
-    }
+    mDescriptor.write(0, buffers, rhi::DescriptorType::UniformBufferDynamic, 0);
 
     rhi::DescriptorBufferInfo info{};
     info.offset = 0;
     info.range = static_cast<uint32_t>(maxSize);
     info.buffer = mBuffer.getHandle();
 
-    mDescriptor.write(0, {info}, rhi::DescriptorType::UniformBufferDynamic, 0);
+    std::array<rhi::DescriptorBufferInfo, 1> bufferInfos{info};
+    mDescriptor.write(0, bufferInfos, rhi::DescriptorType::UniformBufferDynamic,
+                      0);
   }
 }
 
