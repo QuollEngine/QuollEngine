@@ -50,6 +50,15 @@ struct WorkspaceState {
   Entity camera{Entity::Null};
 
   /**
+   * Active camera
+   *
+   * This camera is passed to the renderer
+   * and can point to either workspace camera,
+   * scene's active camera, or any other camera.
+   */
+  Entity activeCamera{Entity::Null};
+
+  /**
    * Selected entity
    */
   Entity selectedEntity{Entity::Null};

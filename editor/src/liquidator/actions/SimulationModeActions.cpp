@@ -12,9 +12,12 @@ ActionExecutorResult StartSimulationMode::onExecute(WorkspaceState &state) {
 
   if (state.scene.entityDatabase.has<Camera>(state.scene.activeCamera)) {
     state.simulationScene.activeCamera = state.scene.activeCamera;
+    state.activeCamera = state.scene.activeCamera;
   } else {
     state.simulationScene.activeCamera = state.scene.dummyCamera;
+    state.activeCamera = state.scene.dummyCamera;
   }
+
   return ActionExecutorResult{};
 }
 
@@ -24,6 +27,7 @@ bool StartSimulationMode::predicate(WorkspaceState &state) {
 
 ActionExecutorResult StopSimulationMode::onExecute(WorkspaceState &state) {
   state.mode = WorkspaceMode::Edit;
+  state.activeCamera = state.camera;
   return ActionExecutorResult{};
 }
 

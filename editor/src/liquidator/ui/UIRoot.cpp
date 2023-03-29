@@ -38,8 +38,7 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
                fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 
-void UIRoot::render(WorkspaceState &state, EditorManager &editorManager,
-                    AssetManager &assetManager) {
+void UIRoot::render(WorkspaceState &state, AssetManager &assetManager) {
   mMainMenu.render(mActionExecutor);
   mToolbar.render(state, mActionExecutor);
   mLayout.setup();

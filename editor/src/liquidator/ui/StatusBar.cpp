@@ -5,11 +5,11 @@
 
 namespace liquid::editor {
 
-void StatusBar::render(EditorManager &editorManager) {
+void StatusBar::render(EditorCamera &editorCamera) {
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
 
   String state = "";
-  switch (editorManager.getEditorCamera().getInputState()) {
+  switch (editorCamera.getInputState()) {
   case EditorCamera::InputState::Pan:
     state = "Panning";
     break;
@@ -17,6 +17,7 @@ void StatusBar::render(EditorManager &editorManager) {
     state = "Rotating";
     break;
   case EditorCamera::InputState::Zoom:
+  case EditorCamera::InputState::ZoomWheel:
     state = "Zooming";
     break;
   default:

@@ -44,11 +44,9 @@ public:
    * Renders all components inside the root
    *
    * @param state Workspace state
-   * @param editorManager Editor manager
    * @param assetManager Asset manager
    */
-  void render(WorkspaceState &state, EditorManager &editorManager,
-              AssetManager &assetManager);
+  void render(WorkspaceState &state, AssetManager &assetManager);
 
   /**
    * @brief Render scene view

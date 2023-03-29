@@ -7,12 +7,8 @@
 
 namespace liquid::editor {
 
-EditorCamera::EditorCamera(EntityDatabase &entityDatabase,
-                           EventSystem &eventSystem, Window &window)
-    : mEntityDatabase(entityDatabase), mEventSystem(eventSystem),
-      mWindow(window) {
-  reset();
-
+EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
+    : mEventSystem(eventSystem), mWindow(window) {
   mMouseButtonReleaseHandler = mEventSystem.observe(
       MouseButtonEvent::Released,
       [this](const auto &data) { mInputState = InputState::None; });
@@ -39,7 +35,8 @@ EditorCamera::EditorCamera(EntityDatabase &entityDatabase,
 
   mMouseCursorMoveHandler =
       mEventSystem.observe(MouseCursorEvent::Moved, [this](const auto &data) {
-        if (mInputState == InputState::None) {
+        if (mInputState == InputState::None ||
+            mInputState == InputState::ZoomWheel) {
           return;
         }
 
@@ -88,16 +85,13 @@ EditorCamera::EditorCamera(EntityDatabase &entityDatabase,
           return;
         }
 
-        if (mInputState != InputState::None) {
+        if (mInputState != InputState::None &&
+            mInputState != InputState::ZoomWheel) {
           return;
         }
 
-        auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
-
-        glm::vec3 change =
-            glm::vec3(lookAt.eye - lookAt.center) * event.yoffset * ZoomSpeed;
-        lookAt.center += change;
-        lookAt.eye += change;
+        mInputState = InputState::ZoomWheel;
+        mWheelOffset = event.yoffset;
       });
 }
 
@@ -108,40 +102,34 @@ EditorCamera::~EditorCamera() {
                               mMouseButtonReleaseHandler);
   mEventSystem.removeObserver(MouseCursorEvent::Moved, mMouseCursorMoveHandler);
   mEventSystem.removeObserver(MouseScrollEvent::Scroll, mMouseScrollHandler);
-
-  mEntityDatabase.deleteEntity(mCameraEntity);
 }
 
-void EditorCamera::update() {
+void EditorCamera::update(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
+
   if (mInputState == InputState::Pan) {
-    pan();
+    pan(lookAt);
   } else if (mInputState == InputState::Rotate) {
-    rotate();
+    rotate(lookAt);
   } else if (mInputState == InputState::Zoom) {
-    zoom();
+    zoom(lookAt);
+  } else if (mInputState == InputState::ZoomWheel) {
+    zoomWheel(lookAt);
   }
 
-  auto &camera = mEntityDatabase.get<Camera>(mCameraEntity);
-  auto &lens = mEntityDatabase.get<PerspectiveLens>(mCameraEntity);
-  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
+  auto &camera = scene.entityDatabase.get<Camera>(state.camera);
+  auto &lens = scene.entityDatabase.get<PerspectiveLens>(state.camera);
+
+  lens.aspectRatio = mWidth / mHeight;
 
   camera.projectionMatrix = glm::perspective(
       glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
 
   camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
-}
-
-void EditorCamera::reset() {
-  if (!mEntityDatabase.exists(mCameraEntity)) {
-    mCameraEntity = mEntityDatabase.create();
-  }
-
-  mEntityDatabase.set<PerspectiveLens>(mCameraEntity,
-                                       {DefaultFOV, DefaultNear, DefaultFar});
-  mEntityDatabase.set<Camera>(mCameraEntity, {});
-  mEntityDatabase.set<CameraLookAt>(mCameraEntity,
-                                    {DefaultEye, DefaultCenter, DefaultUp});
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
@@ -154,10 +142,20 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
   return glm::vec2(rX * scaleX, rY * scaleY);
 }
 
-void EditorCamera::pan() {
-  static constexpr float PanSpeed = 0.03f;
+Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
+  auto camera = entityDatabase.create();
 
-  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
+  entityDatabase.set<PerspectiveLens>(camera,
+                                      {DefaultFOV, DefaultNear, DefaultFar});
+  entityDatabase.set<Camera>(camera, {});
+  entityDatabase.set<CameraLookAt>(camera,
+                                   {DefaultEye, DefaultCenter, DefaultUp});
+
+  return camera;
+}
+
+void EditorCamera::pan(CameraLookAt &lookAt) {
+  static constexpr float PanSpeed = 0.03f;
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   glm::vec3 right = glm::normalize(
@@ -172,10 +170,8 @@ void EditorCamera::pan() {
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::rotate() {
+void EditorCamera::rotate(CameraLookAt &lookAt) {
   static constexpr float TwoPi = 2.0f * glm::pi<float>();
-
-  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
 
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   const auto &size = mWindow.getFramebufferSize();
@@ -201,9 +197,7 @@ void EditorCamera::rotate() {
   mPrevMousePos = mousePos;
 }
 
-void EditorCamera::zoom() {
-  auto &lookAt = mEntityDatabase.get<CameraLookAt>(mCameraEntity);
-
+void EditorCamera::zoom(CameraLookAt &lookAt) {
   glm::vec2 mousePos = mWindow.getCurrentMousePosition();
   float zoomFactor = (mousePos.y - mPrevMousePos.y) * ZoomSpeed;
 
@@ -213,14 +207,22 @@ void EditorCamera::zoom() {
   mPrevMousePos = mousePos;
 }
 
+void EditorCamera::zoomWheel(CameraLookAt &lookAt) {
+  glm::vec3 change =
+      glm::vec3(lookAt.eye - lookAt.center) * mWheelOffset * ZoomSpeed;
+  lookAt.center += change;
+  lookAt.eye += change;
+
+  mWheelOffset = 0.0f;
+  mInputState = InputState::None;
+}
+
 void EditorCamera::setViewport(float x, float y, float width, float height,
                                bool captureMouse) {
   mX = x;
   mY = y;
   mWidth = width;
   mHeight = height;
-
-  getPerspectiveLens().aspectRatio = mWidth / mHeight;
   mCaptureMouse = captureMouse;
 }
 
