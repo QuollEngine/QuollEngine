@@ -31,7 +31,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding, const std::vector<TextureHandle> &textures,
+  void write(uint32_t binding, std::span<TextureHandle> textures,
              DescriptorType type, uint32_t start) override;
 
   /**
@@ -42,8 +42,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding,
-             const std::vector<TextureViewHandle> &textureViews,
+  void write(uint32_t binding, std::span<TextureViewHandle> textureViews,
              DescriptorType type, uint32_t start) override;
 
   /**
@@ -54,7 +53,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding, const std::vector<BufferHandle> &buffers,
+  void write(uint32_t binding, std::span<BufferHandle> buffers,
              DescriptorType type, uint32_t start) override;
 
   /**
@@ -65,8 +64,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  void write(uint32_t binding,
-             const std::vector<DescriptorBufferInfo> &bufferInfos,
+  void write(uint32_t binding, std::span<DescriptorBufferInfo> bufferInfos,
              DescriptorType type, uint32_t start) override;
 
 private:

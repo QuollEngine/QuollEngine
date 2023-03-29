@@ -88,7 +88,8 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   }
 
   if (rhi::isHandleValid(mPresentTexture)) {
-    mPresentDescriptor.write(0, {mPresentTexture},
+    std::array<rhi::TextureHandle, 1> textures{mPresentTexture};
+    mPresentDescriptor.write(0, textures,
                              rhi::DescriptorType::CombinedImageSampler);
   }
 }
@@ -98,7 +99,8 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
   if (handle != mPresentTexture) {
     mPresentTexture = handle;
-    mPresentDescriptor.write(0, {mPresentTexture},
+    std::array<rhi::TextureHandle, 1> textures{mPresentTexture};
+    mPresentDescriptor.write(0, textures,
                              rhi::DescriptorType::CombinedImageSampler);
   }
 
@@ -110,9 +112,10 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     imageBarrier.dstAccess = rhi::Access::ShaderRead;
     imageBarrier.texture = handle;
 
+    std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
     commandList.pipelineBarrier(rhi::PipelineStage::ColorAttachmentOutput,
                                 rhi::PipelineStage::FragmentShader, {},
-                                {imageBarrier});
+                                barriers);
   }
 
   commandList.beginRenderPass(
@@ -138,9 +141,10 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     imageBarrier.srcAccess = rhi::Access::ShaderRead;
     imageBarrier.dstAccess = rhi::Access::ColorAttachmentWrite;
 
+    std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
     commandList.pipelineBarrier(rhi::PipelineStage::FragmentShader,
                                 rhi::PipelineStage::ColorAttachmentOutput, {},
-                                {imageBarrier});
+                                barriers);
   }
 }
 

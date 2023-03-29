@@ -179,15 +179,16 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       auto pipeline = registry.get(vPipeline);
       auto skinnedPipeline = registry.get(vSkinnedPipeline);
-
+      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(shadowDrawOffset)};
       {
         LIQUID_PROFILE_EVENT("shadowPass::meshes");
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(pipeline, 0,
                                    mRenderStorage.getGlobalBuffersDescriptor());
+
         commandList.bindDescriptor(
             pipeline, 1, frameData.getBindlessParams().getDescriptor(),
-            {static_cast<uint32_t>(shadowDrawOffset)});
+            offsets);
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
@@ -206,7 +207,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                    mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
             pipeline, 1, frameData.getBindlessParams().getDescriptor(),
-            {static_cast<uint32_t>(shadowDrawOffset)});
+            offsets);
 
         for (int32_t index = 0;
              index < static_cast<int32_t>(frameData.getNumShadowMaps());
@@ -233,9 +234,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       rhi::BufferHandle shadows;
     };
 
-    size_t offset = 0;
+    size_t pbrOffset = 0;
     for (auto &frameData : mFrameData) {
-      offset = frameData.getBindlessParams().addRange(MeshDrawParams{
+      pbrOffset = frameData.getBindlessParams().addRange(MeshDrawParams{
           frameData.getMeshTransformsBuffer(),
           frameData.getSkinnedMeshTransformsBuffer(),
           frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
@@ -269,7 +270,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
         rhi::PipelineMultisample{0}});
 
-    pass.setExecutor([this, vPipeline, vSkinnedPipeline, offset,
+    pass.setExecutor([this, vPipeline, vSkinnedPipeline, pbrOffset,
                       shadowmap](rhi::RenderCommandList &commandList,
                                  const RenderGraphRegistry &registry,
                                  uint32_t frameIndex) {
@@ -279,6 +280,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
       commandList.bindPipeline(pipeline);
 
+      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(pbrOffset)};
       {
         LIQUID_PROFILE_EVENT("meshPass::meshes");
 
@@ -289,7 +291,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
             pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
             pipeline, 3, frameData.getBindlessParams().getDescriptor(),
-            {static_cast<uint32_t>(offset)});
+            offsets);
 
         render(commandList, pipeline, true, frameIndex);
       }
@@ -304,7 +306,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
             skinnedPipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
             pipeline, 3, frameData.getBindlessParams().getDescriptor(),
-            {static_cast<uint32_t>(offset)});
+            offsets);
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
@@ -343,6 +345,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                       this](rhi::RenderCommandList &commandList,
                             const RenderGraphRegistry &registry,
                             uint32_t frameIndex) {
+      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(skyboxOffset)};
+
       auto &frameData = mFrameData.at(frameIndex);
       auto pipeline = registry.get(vPipeline);
 
@@ -352,9 +356,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
-      commandList.bindDescriptor(pipeline, 2,
-                                 frameData.getBindlessParams().getDescriptor(),
-                                 {static_cast<uint32_t>(skyboxOffset)});
+      commandList.bindDescriptor(
+          pipeline, 2, frameData.getBindlessParams().getDescriptor(), offsets);
 
       const auto &cube = mAssetRegistry.getMeshes()
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
@@ -419,9 +422,9 @@ void SceneRenderer::attachText(RenderGraph &graph,
     uint32_t pad0;
   };
 
-  size_t offset = 0;
+  size_t textOffset = 0;
   for (auto &frameData : mFrameData) {
-    offset = frameData.getBindlessParams().addRange(TextDrawParams{
+    textOffset = frameData.getBindlessParams().addRange(TextDrawParams{
         frameData.getTextTransformsBuffer(), frameData.getCameraBuffer(),
         frameData.getGlyphsBuffer()});
   }
@@ -444,7 +447,7 @@ void SceneRenderer::attachText(RenderGraph &graph,
           rhi::BlendOp::Add, rhi::BlendFactor::One,
           rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
 
-  pass.setExecutor([vTextPipeline, offset,
+  pass.setExecutor([vTextPipeline, textOffset,
                     this](rhi::RenderCommandList &commandList,
                           const RenderGraphRegistry &registry,
                           uint32_t frameIndex) {
@@ -452,10 +455,11 @@ void SceneRenderer::attachText(RenderGraph &graph,
 
     auto textPipeline = registry.get(vTextPipeline);
 
+    std::array<uint32_t, 1> offsets{static_cast<uint32_t>(textOffset)};
     commandList.bindPipeline(textPipeline);
     commandList.bindDescriptor(textPipeline, 2,
                                frameData.getBindlessParams().getDescriptor(),
-                               {static_cast<uint32_t>(offset)});
+                               offsets);
     renderText(commandList, textPipeline, frameIndex);
   });
 
@@ -705,7 +709,8 @@ void SceneRenderer::generateBrdfLut() {
 
   auto descriptor = mDevice->createDescriptor(layout);
 
-  descriptor.write(0, {brdfLut}, rhi::DescriptorType::StorageImage);
+  std::array<rhi::TextureHandle, 1> textures{brdfLut};
+  descriptor.write(0, textures, rhi::DescriptorType::StorageImage);
 
   auto commandList = mDevice->requestImmediateCommandList();
   commandList.bindPipeline(pipeline);

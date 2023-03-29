@@ -70,7 +70,7 @@ public:
    */
   virtual void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                               const Descriptor &descriptor,
-                              const std::vector<uint32_t> &dynamicOffsets) = 0;
+                              std::span<uint32_t> dynamicOffsets) = 0;
 
   /**
    * @brief Bind vertex buffer
@@ -159,10 +159,9 @@ public:
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    */
-  virtual void
-  pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                  const std::vector<MemoryBarrier> &memoryBarriers,
-                  const std::vector<ImageBarrier> &imageBarriers) = 0;
+  virtual void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
+                               std::span<MemoryBarrier> memoryBarriers,
+                               std::span<ImageBarrier> imageBarriers) = 0;
 
   /**
    * @brief Copy texture to buffer
@@ -171,9 +170,9 @@ public:
    * @param dstBuffer Destination buffer
    * @param copyRegions Copy regions
    */
-  virtual void
-  copyTextureToBuffer(TextureHandle srcTexture, BufferHandle dstBuffer,
-                      const std::vector<CopyRegion> &copyRegions) = 0;
+  virtual void copyTextureToBuffer(TextureHandle srcTexture,
+                                   BufferHandle dstBuffer,
+                                   std::span<CopyRegion> copyRegions) = 0;
 
   /**
    * @brief Copy buffer to texture
@@ -182,9 +181,9 @@ public:
    * @param dstTexture Destination texture
    * @param copyRegions Copy regions
    */
-  virtual void
-  copyBufferToTexture(BufferHandle srcBuffer, TextureHandle dstTexture,
-                      const std::vector<CopyRegion> &copyRegions) = 0;
+  virtual void copyBufferToTexture(BufferHandle srcBuffer,
+                                   TextureHandle dstTexture,
+                                   std::span<CopyRegion> copyRegions) = 0;
 
   /**
    * @brief Blit texture
@@ -195,8 +194,7 @@ public:
    * @param filter Filter
    */
   virtual void blitTexture(TextureHandle source, TextureHandle destination,
-                           const std::vector<BlitRegion> &regions,
-                           Filter filter) = 0;
+                           std::span<BlitRegion> regions, Filter filter) = 0;
 };
 
 } // namespace liquid::rhi

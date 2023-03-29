@@ -80,7 +80,7 @@ public:
    */
   void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                       const Descriptor &descriptor,
-                      const std::vector<uint32_t> &dynamicOffsets) override;
+                      std::span<uint32_t> dynamicOffsets) override;
 
   /**
    * @brief Bind vertex buffer
@@ -170,8 +170,8 @@ public:
    * @param imageBarriers Image barriers
    */
   void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                       const std::vector<MemoryBarrier> &memoryBarriers,
-                       const std::vector<ImageBarrier> &imageBarriers) override;
+                       std::span<MemoryBarrier> memoryBarriers,
+                       std::span<ImageBarrier> imageBarriers) override;
 
   /**
    * @brief Copy texture to buffer
@@ -181,7 +181,7 @@ public:
    * @param copyRegions Copy regions
    */
   void copyTextureToBuffer(TextureHandle srcTexture, BufferHandle dstBuffer,
-                           const std::vector<CopyRegion> &copyRegions) override;
+                           std::span<CopyRegion> copyRegions) override;
 
   /**
    * @brief Copy buffer to texture
@@ -191,7 +191,7 @@ public:
    * @param copyRegions Copy regions
    */
   void copyBufferToTexture(BufferHandle srcBuffer, TextureHandle dstTexture,
-                           const std::vector<CopyRegion> &copyRegions) override;
+                           std::span<CopyRegion> copyRegions) override;
 
   /**
    * @brief Blit texture
@@ -202,8 +202,7 @@ public:
    * @param filter Filter
    */
   void blitTexture(TextureHandle source, TextureHandle destination,
-                   const std::vector<BlitRegion> &regions,
-                   Filter filter) override;
+                   std::span<BlitRegion> regions, Filter filter) override;
 
 private:
   VkCommandBuffer mCommandBuffer = VK_NULL_HANDLE;

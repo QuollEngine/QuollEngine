@@ -3,6 +3,11 @@
 
 namespace liquid::rhi {
 
+template <class T>
+static constexpr std::vector<T> vectorFrom(std::span<T> data) {
+  return std::vector<T>(data.begin(), data.end());
+}
+
 MockCommandList::MockCommandList(MockCommandList &&rhs) {
   mCommands = std::move(rhs.mCommands);
   mDrawCalls = std::move(rhs.mDrawCalls);
@@ -38,14 +43,15 @@ void MockCommandList::bindPipeline(PipelineHandle pipeline) {
   mBindings.pipeline = pipeline;
 }
 
-void MockCommandList::bindDescriptor(
-    PipelineHandle pipeline, uint32_t firstSet, const Descriptor &descriptor,
-    const std::vector<uint32_t> &dynamicOffsets) {
+void MockCommandList::bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
+                                     const Descriptor &descriptor,
+                                     std::span<uint32_t> dynamicOffsets) {
   auto *command = new MockCommandBindDescriptor;
   command->pipeline = pipeline;
   command->firstSet = firstSet;
   command->descriptor = descriptor;
-  command->dynamicOffsets = dynamicOffsets;
+  command->dynamicOffsets =
+      std::vector(dynamicOffsets.begin(), dynamicOffsets.end());
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 
   mBindings.descriptors.insert_or_assign(firstSet, descriptor);
@@ -145,45 +151,45 @@ void MockCommandList::setScissor(const glm::ivec2 &offset,
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
-void MockCommandList::pipelineBarrier(
-    PipelineStage srcStage, PipelineStage dstStage,
-    const std::vector<MemoryBarrier> &memoryBarriers,
-    const std::vector<ImageBarrier> &imageBarriers) {
+void MockCommandList::pipelineBarrier(PipelineStage srcStage,
+                                      PipelineStage dstStage,
+                                      std::span<MemoryBarrier> memoryBarriers,
+                                      std::span<ImageBarrier> imageBarriers) {
   auto *command = new MockCommandPipelineBarrier;
   command->srcStage = dstStage;
-  command->memoryBarriers = memoryBarriers;
-  command->imageBarriers = imageBarriers;
+  command->memoryBarriers = vectorFrom(memoryBarriers);
+  command->imageBarriers = vectorFrom(imageBarriers);
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
-void MockCommandList::copyTextureToBuffer(
-    TextureHandle srcTexture, BufferHandle dstBuffer,
-    const std::vector<CopyRegion> &copyRegions) {
+void MockCommandList::copyTextureToBuffer(TextureHandle srcTexture,
+                                          BufferHandle dstBuffer,
+                                          std::span<CopyRegion> copyRegions) {
   auto *command = new MockCommandCopyTextureToBuffer;
   command->srcTexture = srcTexture;
   command->dstBuffer = dstBuffer;
-  command->copyRegions = copyRegions;
+  command->copyRegions = vectorFrom(copyRegions);
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
-void MockCommandList::copyBufferToTexture(
-    BufferHandle srcBuffer, TextureHandle dstTexture,
-    const std::vector<CopyRegion> &copyRegions) {
+void MockCommandList::copyBufferToTexture(BufferHandle srcBuffer,
+                                          TextureHandle dstTexture,
+                                          std::span<CopyRegion> copyRegions) {
   auto *command = new MockCommandCopyBufferToTexture;
   command->srcBuffer = srcBuffer;
   command->dstTexture = dstTexture;
-  command->copyRegions = copyRegions;
+  command->copyRegions = vectorFrom(copyRegions);
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
 void MockCommandList::blitTexture(TextureHandle source,
                                   TextureHandle destination,
-                                  const std::vector<BlitRegion> &regions,
+                                  std::span<BlitRegion> regions,
                                   Filter filter) {
   auto *command = new MockCommandBlitTexture;
   command->source = source;
   command->destination = destination;
-  command->regions = regions;
+  command->regions = vectorFrom(regions);
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 

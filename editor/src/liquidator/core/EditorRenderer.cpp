@@ -112,6 +112,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
     auto objectIconsPipeline = registry.get(vObjectIconsPipeline);
     auto editorGridPipeline = registry.get(vEditorGridPipeline);
 
+    std::array<uint32_t, 1> offsets{0};
     // Collidable shapes
     if (frameData.isCollidableEntitySelected() &&
         frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
@@ -122,7 +123,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(collidableShapePipeline, 1,
                                  frameData.getBindlessParams().getDescriptor(),
-                                 {0});
+                                 offsets);
 
       auto type = frameData.getCollidableShapeType();
 
@@ -147,7 +148,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(editorGridPipeline, 1,
                                  frameData.getBindlessParams().getDescriptor(),
-                                 {0});
+                                 offsets);
 
       static constexpr uint32_t GridPlaneNumVertices = 6;
       commandList.draw(GridPlaneNumVertices, 0);
@@ -162,7 +163,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(skeletonLinesPipeline, 1,
                                  frameData.getBindlessParams().getDescriptor(),
-                                 {0});
+                                 offsets);
 
       const auto &numBones = frameData.getBoneCounts();
 
@@ -182,7 +183,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
                                  mRenderStorage.getGlobalTexturesDescriptor());
       commandList.bindDescriptor(objectIconsPipeline, 2,
                                  frameData.getBindlessParams().getDescriptor(),
-                                 {0});
+                                 offsets);
 
       uint32_t previousInstance = 0;
       for (auto &[icon, count] : frameData.getGizmoCounts()) {

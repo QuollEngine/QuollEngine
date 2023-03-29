@@ -51,9 +51,10 @@ void VulkanCommandBuffer::bindPipeline(PipelineHandle pipeline) {
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::bindDescriptor(
-    PipelineHandle pipeline, uint32_t firstSet, const Descriptor &descriptor,
-    const std::vector<uint32_t> &dynamicOffsets) {
+void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
+                                         uint32_t firstSet,
+                                         const Descriptor &descriptor,
+                                         std::span<uint32_t> dynamicOffsets) {
   const auto &vulkanPipeline = mRegistry.getPipelines().at(pipeline);
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());
@@ -138,12 +139,12 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
 
 void VulkanCommandBuffer::pipelineBarrier(
     PipelineStage srcStage, PipelineStage dstStage,
-    const std::vector<MemoryBarrier> &memoryBarriers,
-    const std::vector<ImageBarrier> &imageBarriers) {
+    std::span<MemoryBarrier> memoryBarriers,
+    std::span<ImageBarrier> imageBarriers) {
 
   std::vector<VkMemoryBarrier> vkMemoryBarriers(memoryBarriers.size());
   for (size_t i = 0; i < memoryBarriers.size(); ++i) {
-    auto &barrier = memoryBarriers.at(i);
+    auto &barrier = memoryBarriers[i];
     auto &vkBarrier = vkMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
     vkBarrier.pNext = nullptr;
@@ -153,7 +154,7 @@ void VulkanCommandBuffer::pipelineBarrier(
 
   std::vector<VkImageMemoryBarrier> vkImageMemoryBarriers(imageBarriers.size());
   for (size_t i = 0; i < imageBarriers.size(); ++i) {
-    auto &barrier = imageBarriers.at(i);
+    auto &barrier = imageBarriers[i];
     const auto &texture = mRegistry.getTextures().at(barrier.texture);
     auto &vkBarrier = vkImageMemoryBarriers.at(i);
     vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -181,14 +182,14 @@ void VulkanCommandBuffer::pipelineBarrier(
 
 void VulkanCommandBuffer::copyTextureToBuffer(
     TextureHandle srcTexture, BufferHandle dstBuffer,
-    const std::vector<CopyRegion> &copyRegions) {
+    std::span<CopyRegion> copyRegions) {
   const auto &vulkanTexture = mRegistry.getTextures().at(srcTexture);
   const auto &vulkanBuffer = mRegistry.getBuffers().at(dstBuffer);
 
   std::vector<VkBufferImageCopy> copies(copyRegions.size());
   for (size_t i = 0; i < copies.size(); ++i) {
     auto &copy = copies.at(i);
-    auto &copyRegion = copyRegions.at(i);
+    auto &copyRegion = copyRegions[i];
     copy.bufferOffset = copyRegion.bufferOffset;
     copy.bufferRowLength = 0;
     copy.bufferImageHeight = 0;
@@ -212,14 +213,14 @@ void VulkanCommandBuffer::copyTextureToBuffer(
 
 void VulkanCommandBuffer::copyBufferToTexture(
     BufferHandle srcBuffer, TextureHandle dstTexture,
-    const std::vector<CopyRegion> &copyRegions) {
+    std::span<CopyRegion> copyRegions) {
   const auto &vulkanBuffer = mRegistry.getBuffers().at(srcBuffer);
   const auto &vulkanTexture = mRegistry.getTextures().at(dstTexture);
 
   std::vector<VkBufferImageCopy> copies(copyRegions.size());
   for (size_t i = 0; i < copies.size(); ++i) {
     auto &copy = copies.at(i);
-    auto &copyRegion = copyRegions.at(i);
+    auto &copyRegion = copyRegions[i];
     copy.bufferOffset = copyRegion.bufferOffset;
     copy.bufferRowLength = 0;
     copy.bufferImageHeight = 0;
@@ -243,7 +244,7 @@ void VulkanCommandBuffer::copyBufferToTexture(
 
 void VulkanCommandBuffer::blitTexture(TextureHandle source,
                                       TextureHandle destination,
-                                      const std::vector<BlitRegion> &regions,
+                                      std::span<BlitRegion> regions,
                                       Filter filter) {
   VkImage srcImage = mRegistry.getTextures().at(source)->getImage();
   VkImage dstImage = mRegistry.getTextures().at(destination)->getImage();
@@ -251,7 +252,7 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
   static constexpr size_t OffsetSize = 2;
   std::vector<VkImageBlit> vkRegions(regions.size());
   for (size_t i = 0; i < regions.size(); ++i) {
-    auto &region = regions.at(i);
+    auto &region = regions[i];
     auto &vkRegion = vkRegions.at(i);
 
     vkRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

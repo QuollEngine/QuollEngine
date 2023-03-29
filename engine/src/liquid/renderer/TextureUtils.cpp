@@ -26,8 +26,9 @@ void TextureUtils::copyDataToTexture(
   barrier.dstLayout = rhi::ImageLayout::TransferDestinationOptimal;
   barrier.texture = destination;
 
+  std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                              rhi::PipelineStage::Transfer, {}, {barrier});
+                              rhi::PipelineStage::Transfer, {}, preBarriers);
 
   std::vector<rhi::CopyRegion> copies(destinationLevels.size());
   for (size_t i = 0; i < copies.size(); ++i) {
@@ -49,8 +50,9 @@ void TextureUtils::copyDataToTexture(
   barrier.dstLayout = destinationLayout;
   barrier.srcAccess = rhi::Access::TransferWrite;
   barrier.dstAccess = rhi::Access::None;
+  std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, {barrier});
+                              rhi::PipelineStage::PipeTop, {}, postBarriers);
 
   device->submitImmediate(commandList);
 
@@ -79,8 +81,9 @@ void TextureUtils::copyTextureToData(
   barrier.dstLayout = rhi::ImageLayout::TransferSourceOptimal;
   barrier.texture = source;
 
+  std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                              rhi::PipelineStage::Transfer, {}, {barrier});
+                              rhi::PipelineStage::Transfer, {}, preBarriers);
 
   std::vector<rhi::CopyRegion> copies(sourceLevels.size());
   for (size_t i = 0; i < copies.size(); ++i) {
@@ -101,8 +104,9 @@ void TextureUtils::copyTextureToData(
   barrier.dstLayout = sourceLayout;
   barrier.srcAccess = rhi::Access::None;
   barrier.dstAccess = rhi::Access::None;
+  std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, {barrier});
+                              rhi::PipelineStage::PipeTop, {}, postBarriers);
 
   device->submitImmediate(commandList);
 
@@ -129,8 +133,9 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
   barrier.srcLayout = rhi::ImageLayout::Undefined;
   barrier.dstLayout = rhi::ImageLayout::TransferDestinationOptimal;
 
+  std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::Transfer, {}, {barrier});
+                              rhi::PipelineStage::Transfer, {}, preBarriers);
 
   barrier.srcAccess = rhi::Access::TransferWrite;
   barrier.dstAccess = rhi::Access::TransferRead;
@@ -143,8 +148,9 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
 
   for (uint32_t i = 1; i < levels; ++i) {
     barrier.baseLevel = i - 1;
+    std::array<rhi::ImageBarrier, 1> barriers{barrier};
     commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                                rhi::PipelineStage::Transfer, {}, {barrier});
+                                rhi::PipelineStage::Transfer, {}, barriers);
 
     rhi::BlitRegion region{};
     region.srcOffsets.at(0) = {0, 0, 0};
@@ -157,7 +163,8 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
     region.dstLayerCount = layers;
     region.dstMipLevel = i;
 
-    commandList.blitTexture(texture, texture, {region}, rhi::Filter::Nearest);
+    std::array<rhi::BlitRegion, 1> regions{region};
+    commandList.blitTexture(texture, texture, regions, rhi::Filter::Nearest);
 
     if (mipWidth > 1) {
       mipWidth /= 2;
@@ -173,8 +180,10 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
   barrier.dstLayout = layout;
   barrier.srcAccess = rhi::Access::None;
   barrier.dstAccess = rhi::Access::None;
+
+  std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
   commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, {barrier});
+                              rhi::PipelineStage::PipeTop, {}, postBarriers);
 
   device->submitImmediate(commandList);
 }

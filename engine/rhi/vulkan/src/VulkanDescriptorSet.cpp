@@ -14,13 +14,13 @@ VulkanDescriptorSet::VulkanDescriptorSet(VulkanDeviceObject &device,
     : mDevice(device), mRegistry(registry), mDescriptorSet(descriptorSet) {}
 
 void VulkanDescriptorSet::write(uint32_t binding,
-                                const std::vector<TextureHandle> &textures,
+                                std::span<TextureHandle> textures,
                                 DescriptorType type, uint32_t start) {
   std::vector<VkDescriptorImageInfo> imageInfos(textures.size(),
                                                 VkDescriptorImageInfo{});
 
   for (size_t i = 0; i < textures.size(); ++i) {
-    const auto &vkTexture = mRegistry.getTextures().at(textures.at(i));
+    const auto &vkTexture = mRegistry.getTextures().at(textures[i]);
     imageInfos.at(i).imageLayout =
         type == DescriptorType::StorageImage
             ? VK_IMAGE_LAYOUT_GENERAL
@@ -32,15 +32,14 @@ void VulkanDescriptorSet::write(uint32_t binding,
   write(binding, start, imageInfos.size(), type, imageInfos.data(), nullptr);
 }
 
-void VulkanDescriptorSet::write(
-    uint32_t binding, const std::vector<TextureViewHandle> &textureViews,
-    DescriptorType type, uint32_t start) {
+void VulkanDescriptorSet::write(uint32_t binding,
+                                std::span<TextureViewHandle> textureViews,
+                                DescriptorType type, uint32_t start) {
   std::vector<VkDescriptorImageInfo> imageInfos(textureViews.size(),
                                                 VkDescriptorImageInfo{});
 
   for (size_t i = 0; i < textureViews.size(); ++i) {
-    const auto &vkTextureView =
-        mRegistry.getTextureViews().at(textureViews.at(i));
+    const auto &vkTextureView = mRegistry.getTextureViews().at(textureViews[i]);
     imageInfos.at(i).imageLayout =
         type == DescriptorType::StorageImage
             ? VK_IMAGE_LAYOUT_GENERAL
@@ -53,13 +52,13 @@ void VulkanDescriptorSet::write(
 }
 
 void VulkanDescriptorSet::write(uint32_t binding,
-                                const std::vector<BufferHandle> &buffers,
+                                std::span<BufferHandle> buffers,
                                 DescriptorType type, uint32_t start) {
   std::vector<VkDescriptorBufferInfo> bufferInfos(buffers.size(),
                                                   VkDescriptorBufferInfo{});
 
   for (size_t i = 0; i < buffers.size(); ++i) {
-    const auto &vkBuffer = mRegistry.getBuffers().at(buffers.at(i));
+    const auto &vkBuffer = mRegistry.getBuffers().at(buffers[i]);
     bufferInfos.at(i).buffer = vkBuffer->getBuffer();
     bufferInfos.at(i).offset = 0;
     bufferInfos.at(i).range = vkBuffer->getSize();
@@ -68,17 +67,17 @@ void VulkanDescriptorSet::write(uint32_t binding,
   write(binding, start, bufferInfos.size(), type, nullptr, bufferInfos.data());
 }
 
-void VulkanDescriptorSet::write(
-    uint32_t binding, const std::vector<DescriptorBufferInfo> &bufferInfos,
-    DescriptorType type, uint32_t start) {
+void VulkanDescriptorSet::write(uint32_t binding,
+                                std::span<DescriptorBufferInfo> bufferInfos,
+                                DescriptorType type, uint32_t start) {
   std::vector<VkDescriptorBufferInfo> vkBufferInfos(bufferInfos.size(),
                                                     VkDescriptorBufferInfo{});
 
   for (size_t i = 0; i < bufferInfos.size(); ++i) {
-    const auto &vkBuffer = mRegistry.getBuffers().at(bufferInfos.at(i).buffer);
+    const auto &vkBuffer = mRegistry.getBuffers().at(bufferInfos[i].buffer);
     vkBufferInfos.at(i).buffer = vkBuffer->getBuffer();
-    vkBufferInfos.at(i).offset = bufferInfos.at(i).offset;
-    vkBufferInfos.at(i).range = bufferInfos.at(i).range;
+    vkBufferInfos.at(i).offset = bufferInfos[i].offset;
+    vkBufferInfos.at(i).range = bufferInfos[i].range;
   }
 
   write(binding, start, bufferInfos.size(), type, nullptr,

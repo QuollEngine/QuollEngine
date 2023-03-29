@@ -286,10 +286,12 @@ static tinygltf::Mesh createMesh(tinygltf::Model &model, GLTFTestMesh &inMesh) {
 }
 
 static liquid::Path saveSceneGLTF(GLTFTestScene &scene) {
+  tinygltf::Scene gltfScene;
+  gltfScene.name = "Scene";
   tinygltf::Model model;
   model.asset.version = "2.0";
   model.asset.generator = "tinygltf";
-  model.scenes.push_back({"Scene"});
+  model.scenes.push_back(gltfScene);
   model.defaultScene = 0;
 
   for (auto &mesh : scene.meshes) {

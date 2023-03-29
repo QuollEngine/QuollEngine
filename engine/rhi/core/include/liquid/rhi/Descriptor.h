@@ -33,8 +33,7 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding,
-                    const std::vector<TextureHandle> &textures,
+  Descriptor &write(uint32_t binding, std::span<TextureHandle> textures,
                     DescriptorType type, uint32_t start = 0);
 
   /**
@@ -46,8 +45,7 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding,
-                    const std::vector<TextureViewHandle> &textureViews,
+  Descriptor &write(uint32_t binding, std::span<TextureViewHandle> textureViews,
                     DescriptorType type, uint32_t start = 0);
 
   /**
@@ -59,7 +57,7 @@ public:
    * @param start Starting index
    * @return Current object
    */
-  Descriptor &write(uint32_t binding, const std::vector<BufferHandle> &buffers,
+  Descriptor &write(uint32_t binding, std::span<BufferHandle> buffers,
                     DescriptorType type, uint32_t start = 0);
 
   /**
@@ -72,7 +70,7 @@ public:
    * @return Current object
    */
   Descriptor &write(uint32_t binding,
-                    const std::vector<DescriptorBufferInfo> &bufferInfos,
+                    std::span<DescriptorBufferInfo> bufferInfos,
                     DescriptorType type, uint32_t start = 0);
 
   /**

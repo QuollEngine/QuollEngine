@@ -39,6 +39,7 @@
 #include <string_view>
 #include <typeinfo>
 #include <typeindex>
+#include <span>
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>

@@ -38,8 +38,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  virtual void write(uint32_t binding,
-                     const std::vector<TextureHandle> &textures,
+  virtual void write(uint32_t binding, std::span<TextureHandle> textures,
                      DescriptorType type, uint32_t start) = 0;
 
   /**
@@ -51,7 +50,7 @@ public:
    * @param start Starting index
    */
   virtual void write(uint32_t binding,
-                     const std::vector<TextureViewHandle> &textureViews,
+                     std::span<TextureViewHandle> textureViews,
                      DescriptorType type, uint32_t start) = 0;
 
   /**
@@ -62,7 +61,7 @@ public:
    * @param type Descriptor type
    * @param start Starting index
    */
-  virtual void write(uint32_t binding, const std::vector<BufferHandle> &buffers,
+  virtual void write(uint32_t binding, std::span<BufferHandle> buffers,
                      DescriptorType type, uint32_t start) = 0;
 
   /**
@@ -74,7 +73,7 @@ public:
    * @param start Starting index
    */
   virtual void write(uint32_t binding,
-                     const std::vector<DescriptorBufferInfo> &bufferInfos,
+                     std::span<DescriptorBufferInfo> bufferInfos,
                      DescriptorType type, uint32_t start) = 0;
 };
 

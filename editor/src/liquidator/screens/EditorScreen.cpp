@@ -49,7 +49,7 @@ EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
 
 void EditorScreen::start(const Project &project) {
   LogMemoryStorage systemLogStorage, userLogStorage;
-  Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  // Engine::getLogger().setTransport(systemLogStorage.createTransport());
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
   FPSCounter fpsCounter;

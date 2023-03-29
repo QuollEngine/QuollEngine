@@ -103,7 +103,7 @@ public:
    */
   inline void bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
                              const Descriptor &descriptor,
-                             const std::vector<uint32_t> &dynamicOffsets = {}) {
+                             std::span<uint32_t> dynamicOffsets = {}) {
     mNativeRenderCommandList->bindDescriptor(pipeline, firstSet, descriptor,
                                              dynamicOffsets);
   }
@@ -215,8 +215,8 @@ public:
    * @param imageBarriers Image barriers
    */
   inline void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                              const std::vector<MemoryBarrier> &memoryBarriers,
-                              const std::vector<ImageBarrier> &imageBarriers) {
+                              std::span<MemoryBarrier> memoryBarriers,
+                              std::span<ImageBarrier> imageBarriers) {
     mNativeRenderCommandList->pipelineBarrier(srcStage, dstStage,
                                               memoryBarriers, imageBarriers);
   }
@@ -230,7 +230,7 @@ public:
    */
   inline void copyTextureToBuffer(TextureHandle srcTexture,
                                   BufferHandle dstBuffer,
-                                  const std::vector<CopyRegion> &copyRegions) {
+                                  std::span<CopyRegion> copyRegions) {
     mNativeRenderCommandList->copyTextureToBuffer(srcTexture, dstBuffer,
                                                   copyRegions);
   }
@@ -244,7 +244,7 @@ public:
    */
   inline void copyBufferToTexture(BufferHandle srcBuffer,
                                   TextureHandle dstTexture,
-                                  const std::vector<CopyRegion> &copyRegions) {
+                                  std::span<CopyRegion> copyRegions) {
     mNativeRenderCommandList->copyBufferToTexture(srcBuffer, dstTexture,
                                                   copyRegions);
   }
@@ -258,8 +258,7 @@ public:
    * @param filter Filter
    */
   inline void blitTexture(TextureHandle source, TextureHandle destination,
-                          const std::vector<BlitRegion> &regions,
-                          Filter filter) {
+                          std::span<BlitRegion> regions, Filter filter) {
     mNativeRenderCommandList->blitTexture(source, destination, regions, filter);
   }
 

@@ -19,6 +19,8 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.TemplateParameterPrefix
     value: T
+  - key: readability-identifier-naming.TypeTemplateParameterIgnoredRegexp
+    value: expr-type
   - key: modernize-replace-auto-ptr.IncludeStyle
     value: llvm
   - key: cppcoreguidelines-no-malloc.Reallocations

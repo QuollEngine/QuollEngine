@@ -92,7 +92,7 @@ private:
    * @param registry Resource registry
    * @param pipelineLayoutCache Pipeline layout cache
    */
-  void createLayout(const std::vector<VulkanShader *> &shaders,
+  void createLayout(const std::span<VulkanShader *> &shaders,
                     const VulkanResourceRegistry &registry,
                     VulkanPipelineLayoutCache &pipelineLayoutCache);
 

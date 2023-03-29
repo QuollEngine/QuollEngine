@@ -217,7 +217,8 @@ VulkanPipeline::VulkanPipeline(const ComputePipelineDescription &description,
   stage.module = computeShader->getShaderModule();
   stage.stage = computeShader->getShaderStage();
 
-  createLayout({computeShader}, registry, pipelineLayoutCache);
+  std::array<VulkanShader *, 1> shaders{computeShader};
+  createLayout(shaders, registry, pipelineLayoutCache);
 
   VkComputePipelineCreateInfo pipelineInfo{};
   pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -249,7 +250,7 @@ VulkanPipeline::~VulkanPipeline() {
 }
 
 void VulkanPipeline::createLayout(
-    const std::vector<VulkanShader *> &shaders,
+    const std::span<VulkanShader *> &shaders,
     const VulkanResourceRegistry &registry,
     VulkanPipelineLayoutCache &pipelineLayoutCache) {
 
