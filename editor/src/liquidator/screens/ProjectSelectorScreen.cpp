@@ -6,6 +6,7 @@
 #include "liquid/profiler/FPSCounter.h"
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/imgui/ImguiUtils.h"
+#include "liquid/imgui/ImguiRenderer.h"
 
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/FontAwesome.h"
@@ -28,8 +29,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
   RenderStorage renderStorage(mDevice);
   RenderGraphEvaluator graphEvaluator(renderStorage);
 
-  ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage, mDevice);
-  Presenter presenter(shaderLibrary, mDevice);
+  ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage);
+  Presenter presenter(shaderLibrary, renderStorage);
 
   ProjectManager projectManager;
 

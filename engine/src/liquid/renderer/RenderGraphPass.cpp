@@ -41,24 +41,13 @@ void RenderGraphPass::setExecutor(const ExecutorFn &executor) {
   mExecutor = executor;
 }
 
-VirtualPipelineHandle RenderGraphPass::addPipeline(
-    const rhi::GraphicsPipelineDescription &description) {
-  LIQUID_ASSERT(mType == RenderGraphPassType::Graphics,
-                "Cannot create graphics pipeline in a non-graphics pass");
-
-  return mRegistry.set(description);
-}
-
-VirtualComputePipelineHandle RenderGraphPass::addPipeline(
-    const rhi::ComputePipelineDescription &description) {
-  LIQUID_ASSERT(mType == RenderGraphPassType::Compute,
-                "Cannot create compute pipeline in a non-compute pass");
-  return mRegistry.set(description);
+void RenderGraphPass::addPipeline(rhi::PipelineHandle handle) {
+  mPipelines.push_back(handle);
 }
 
 void RenderGraphPass::execute(rhi::RenderCommandList &commandList,
                               uint32_t frameIndex) {
-  mExecutor(commandList, mRegistry, frameIndex);
+  mExecutor(commandList, frameIndex);
 }
 
 } // namespace liquid

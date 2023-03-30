@@ -51,7 +51,7 @@ EditorRenderer::EditorRenderer(ShaderLibrary &shaderLibrary,
 RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
   auto &pass = graph.addGraphicsPass("editor-debug");
 
-  auto vEditorGridPipeline = pass.addPipeline(
+  auto editorGridPipeline = mRenderStorage.addPipeline(
       {mShaderLibrary.getShader("editor-grid.vert"),
        mShaderLibrary.getShader("editor-grid.frag"),
        {},
@@ -63,7 +63,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
            rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
            rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  auto vSkeletonLinesPipeline = pass.addPipeline(
+  auto skeletonLinesPipeline = mRenderStorage.addPipeline(
       {mShaderLibrary.getShader("skeleton-lines.vert"),
        mShaderLibrary.getShader("skeleton-lines.frag"),
        {},
@@ -75,7 +75,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
            rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
            rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  auto vObjectIconsPipeline = pass.addPipeline(
+  auto objectIconsPipeline = mRenderStorage.addPipeline(
       {mShaderLibrary.getShader("object-icons.vert"),
        mShaderLibrary.getShader("object-icons.frag"),
        {},
@@ -89,7 +89,7 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
 
   static const float WireframeLineHeight = 3.0f;
 
-  auto vCollidableShapePipeline = pass.addPipeline(
+  auto collidableShapePipeline = mRenderStorage.addPipeline(
       {mShaderLibrary.getShader("collidable-shape.vert"),
        mShaderLibrary.getShader("collidable-shape.frag"),
        rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -101,16 +101,16 @@ RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
            rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
            rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  pass.setExecutor([vEditorGridPipeline, vSkeletonLinesPipeline,
-                    vObjectIconsPipeline, vCollidableShapePipeline,
+  pass.addPipeline(editorGridPipeline);
+  pass.addPipeline(skeletonLinesPipeline);
+  pass.addPipeline(objectIconsPipeline);
+  pass.addPipeline(collidableShapePipeline);
+
+  pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
+                    objectIconsPipeline, collidableShapePipeline,
                     this](rhi::RenderCommandList &commandList,
-                          const RenderGraphRegistry &registry,
                           uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
-    auto collidableShapePipeline = registry.get(vCollidableShapePipeline);
-    auto skeletonLinesPipeline = registry.get(vSkeletonLinesPipeline);
-    auto objectIconsPipeline = registry.get(vObjectIconsPipeline);
-    auto editorGridPipeline = registry.get(vEditorGridPipeline);
 
     std::array<uint32_t, 1> offsets{0};
     // Collidable shapes

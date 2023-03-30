@@ -11,6 +11,8 @@
 #include "liquid/scene/SkeletonUpdater.h"
 #include "liquid/scripting/ScriptingSystem.h"
 #include "liquid/renderer/Presenter.h"
+#include "liquid/renderer/SceneRenderer.h"
+#include "liquid/imgui/ImguiRenderer.h"
 #include "liquid/asset/FileTracker.h"
 #include "liquid/audio/AudioSystem.h"
 #include "liquid/logger/StreamTransport.h"
@@ -57,12 +59,18 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
+  Renderer renderer(mWindow, mDevice);
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
-                            mDevice, true, true);
+                            renderer.getRenderStorage(), true, true);
 
-  Renderer renderer(assetManager.getAssetRegistry(), mWindow, mDevice);
+  SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
+                              assetManager.getAssetRegistry(),
+                              renderer.getRenderStorage());
 
-  Presenter presenter(renderer.getShaderLibrary(), mDevice);
+  ImguiRenderer imguiRenderer(mWindow, renderer.getShaderLibrary(),
+                              renderer.getRenderStorage());
+
+  Presenter presenter(renderer.getShaderLibrary(), renderer.getRenderStorage());
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -76,10 +84,9 @@ void EditorScreen::start(const Project &project) {
 
   Theme::apply();
 
-  renderer.getImguiRenderer().useConfigPath(layoutPath);
-  renderer.getImguiRenderer().setClearColor(
-      Theme::getColor(ThemeColor::BackgroundColor));
-  renderer.getImguiRenderer().buildFonts();
+  imguiRenderer.useConfigPath(layoutPath);
+  imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
+  imguiRenderer.buildFonts();
 
   FileTracker tracker(project.assetsPath);
   tracker.trackForChanges();
@@ -113,8 +120,8 @@ void EditorScreen::start(const Project &project) {
 
   RenderGraph graph("Main");
 
-  auto scenePassGroup = renderer.getSceneRenderer().attach(graph);
-  auto imguiPassGroup = renderer.getImguiRenderer().attach(graph);
+  auto scenePassGroup = sceneRenderer.attach(graph);
+  auto imguiPassGroup = imguiRenderer.attach(graph);
   imguiPassGroup.pass.read(scenePassGroup.finalColor);
 
   {
@@ -127,10 +134,10 @@ void EditorScreen::start(const Project &project) {
                ClearColor);
   }
 
-  renderer.getSceneRenderer().attachText(graph, scenePassGroup);
+  sceneRenderer.attachText(graph, scenePassGroup);
 
   MousePickingGraph mousePicking(
-      renderer.getShaderLibrary(), renderer.getSceneRenderer().getFrameData(),
+      renderer.getShaderLibrary(), sceneRenderer.getFrameData(),
       assetManager.getAssetRegistry(), renderer.getRenderStorage(), mDevice);
 
   mousePicking.setFramebufferSize(mWindow);
@@ -169,18 +176,15 @@ void EditorScreen::start(const Project &project) {
 
   LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorCamera, &assetManager, &graph,
-                        &scenePassGroup, &imguiPassGroup, &ui, &debugLayer,
-                        &preloadStatusDialog, &presenter, &editorRenderer,
-                        &simulator, &mousePicking, &systemLogStorage,
-                        &userLogStorage, &logViewer, &state, &actionExecutor,
-                        this]() {
+                        &sceneRenderer, &imguiRenderer, &scenePassGroup,
+                        &imguiPassGroup, &ui, &debugLayer, &preloadStatusDialog,
+                        &presenter, &editorRenderer, &simulator, &mousePicking,
+                        &systemLogStorage, &userLogStorage, &logViewer, &state,
+                        &actionExecutor, this]() {
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
-    auto &imgui = renderer.getImguiRenderer();
-    auto &sceneRenderer = renderer.getSceneRenderer();
-
-    imgui.beginRendering();
+    imguiRenderer.beginRendering();
     ImGuizmo::BeginFrame();
 
     ui.render(state, assetManager);
@@ -199,7 +203,7 @@ void EditorScreen::start(const Project &project) {
 
     preloadStatusDialog.render();
 
-    imgui.endRendering();
+    imguiRenderer.endRendering();
 
     if (renderer.getRenderStorage().recreateFramebufferRelativeTextures()) {
       presenter.updateFramebuffers(mDevice->getSwapchain());
@@ -213,7 +217,7 @@ void EditorScreen::start(const Project &project) {
                       : state.scene;
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      imgui.updateFrameData(renderFrame.frameIndex);
+      imguiRenderer.updateFrameData(renderFrame.frameIndex);
       sceneRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
                                     renderFrame.frameIndex);
       editorRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,

@@ -224,20 +224,20 @@ public:
   /**
    * @brief Create graphics pipeline
    *
-   * @param description Pipeline description
-   * @return Graphics pipeline
+   * @param description Graphics pipeline description
+   * @param handle Pipeline handle
    */
-  virtual PipelineHandle
-  createPipeline(const GraphicsPipelineDescription &description) override;
+  void createPipeline(const GraphicsPipelineDescription &description,
+                      PipelineHandle handle) override;
 
   /**
    * @brief Create compute pipeline
    *
    * @param description Compute pipeline description
-   * @return Compute pipeline
+   * @param handle Pipeline handle
    */
-  virtual PipelineHandle
-  createPipeline(const ComputePipelineDescription &description) override;
+  void createPipeline(const ComputePipelineDescription &description,
+                      PipelineHandle handle) override;
 
   /**
    * @brief Destroy pipeline
@@ -245,6 +245,15 @@ public:
    * @param handle Pipeline handle
    */
   void destroyPipeline(PipelineHandle handle) override;
+
+  /**
+   * @brief Check if device has pipeline
+   *
+   * @param handle Pipeline handle
+   * @retval true Device has pipeline
+   * @retval false Device does not have pipeline
+   */
+  bool hasPipeline(PipelineHandle handle) override;
 
 private:
   VulkanRenderBackend &mBackend;

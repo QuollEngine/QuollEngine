@@ -32,9 +32,9 @@ public:
    * @brief Create HDRI importer
    *
    * @param assetCache Asset cache
-   * @param device Render device
+   * @param renderStorage Render storage
    */
-  HDRIImporter(AssetCache &assetCache, rhi::RenderDevice *device);
+  HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage);
 
   /**
    * @brief Load HDRI from file
@@ -91,7 +91,7 @@ private:
 private:
   AssetCache &mAssetCache;
   ShaderLibrary mShaderLibrary;
-  rhi::RenderDevice *mDevice;
+  RenderStorage &mRenderStorage;
   rhi::Descriptor mDescriptorGenerateCubemap;
   rhi::PipelineHandle mPipelineGenerateCubemap;
   rhi::PipelineHandle mPipelineGenerateIrradianceMap;

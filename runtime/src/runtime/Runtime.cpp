@@ -17,6 +17,7 @@
 #include "liquid/audio/AudioSystem.h"
 #include "liquid/core/EntityDeleter.h"
 #include "liquid/scene/SceneIO.h"
+#include "liquid/renderer/SceneRenderer.h"
 
 // Render hardware interfaces
 #include "liquid/rhi/RenderDevice.h"
@@ -40,7 +41,11 @@ void Runtime::start() {
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  liquid::Renderer renderer(assetCache.getRegistry(), window, device);
+  liquid::Renderer renderer(window, device);
+
+  SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
+                              assetCache.getRegistry(),
+                              renderer.getRenderStorage());
 
   auto res = assetCache.preloadAssets(renderer.getRenderStorage());
 
@@ -49,10 +54,11 @@ void Runtime::start() {
 
   liquid::RenderGraph graph("Main");
 
-  liquid::Presenter presenter(renderer.getShaderLibrary(), device);
+  liquid::Presenter presenter(renderer.getShaderLibrary(),
+                              renderer.getRenderStorage());
 
-  auto passData = renderer.getSceneRenderer().attach(graph);
-  renderer.getSceneRenderer().attachText(graph, passData);
+  auto passData = sceneRenderer.attach(graph);
+  sceneRenderer.attachText(graph, passData);
 
   liquid::ScriptingSystem scriptingSystem(eventSystem,
                                           assetCache.getRegistry());
@@ -105,8 +111,8 @@ void Runtime::start() {
     }
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
-      renderer.getSceneRenderer().updateFrameData(
-          scene.entityDatabase, scene.activeCamera, renderFrame.frameIndex);
+      sceneRenderer.updateFrameData(scene.entityDatabase, scene.activeCamera,
+                                    renderFrame.frameIndex);
 
       renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
 

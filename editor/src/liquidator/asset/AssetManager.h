@@ -68,12 +68,12 @@ public:
    *
    * @param assetsPath Path to assets directory
    * @param assetsCachePath Path to assets cache directory
-   * @param device Render device for computing
+   * @param renderStorage Render storage
    * @param optimize Optimize assets
    * @param createDefaultObjects Create default objects
    */
   AssetManager(const Path &assetsPath, const Path &assetsCachePath,
-               liquid::rhi::RenderDevice *device, bool optimize,
+               RenderStorage &renderStorage, bool optimize,
                bool createDefaultObjects);
 
   /**

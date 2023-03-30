@@ -93,12 +93,9 @@ void VulkanResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {
   mFramebuffers.map.erase(handle);
 }
 
-PipelineHandle VulkanResourceRegistry::setPipeline(
-    std::unique_ptr<VulkanPipeline> &&pipeline) {
-  auto handle = PipelineHandle{mPipelines.lastHandle};
-  mPipelines.lastHandle++;
+void VulkanResourceRegistry::setPipeline(
+    std::unique_ptr<VulkanPipeline> &&pipeline, PipelineHandle handle) {
   mPipelines.map.insert_or_assign(handle, std::move(pipeline));
-  return handle;
 }
 
 void VulkanResourceRegistry::deletePipeline(PipelineHandle handle) {

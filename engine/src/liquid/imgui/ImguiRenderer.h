@@ -73,12 +73,11 @@ public:
    * @brief Create imgui renderer
    *
    * @param window Window
-   * @param device Render device
-   * @param renderStorage Render storage
    * @param shaderLibrary Shader library
+   * @param renderStorage Render storage
    */
   ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                RenderStorage &renderStorage, rhi::RenderDevice *device);
+                RenderStorage &renderStorage);
 
   /**
    * @brief Destroy imgui renderer
