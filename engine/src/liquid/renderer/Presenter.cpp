@@ -6,14 +6,16 @@
 
 namespace liquid {
 
-Presenter::Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device)
-    : mShaderLibrary(shaderLibrary), mDevice(device) {
-  mShaderLibrary.addShader("__engine.fullscreenQuad.default.vertex",
-                           mDevice->createShader({Engine::getShadersPath() /
-                                                  "fullscreen-quad.vert.spv"}));
-  mShaderLibrary.addShader("__engine.fullscreenQuad.default.fragment",
-                           mDevice->createShader({Engine::getShadersPath() /
-                                                  "fullscreen-quad.frag.spv"}));
+Presenter::Presenter(ShaderLibrary &shaderLibrary, RenderStorage &renderStorage)
+    : mShaderLibrary(shaderLibrary), mRenderStorage(renderStorage) {
+  mShaderLibrary.addShader(
+      "__engine.fullscreenQuad.default.vertex",
+      renderStorage.getDevice()->createShader(
+          {Engine::getShadersPath() / "fullscreen-quad.vert.spv"}));
+  mShaderLibrary.addShader(
+      "__engine.fullscreenQuad.default.fragment",
+      renderStorage.getDevice()->createShader(
+          {Engine::getShadersPath() / "fullscreen-quad.frag.spv"}));
 
   rhi::DescriptorLayoutDescription desc{};
   desc.bindings.resize(1);
@@ -24,9 +26,25 @@ Presenter::Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device)
       rhi::DescriptorType::CombinedImageSampler;
   desc.bindings.at(0).name = "uTexture";
 
-  auto layout = device->createDescriptorLayout(desc);
+  auto layout = renderStorage.getDevice()->createDescriptorLayout(desc);
 
-  mPresentDescriptor = device->createDescriptor(layout);
+  mPresentDescriptor = renderStorage.getDevice()->createDescriptor(layout);
+
+  auto vertexShader =
+      mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+  auto fragmentShader =
+      mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
+
+  rhi::GraphicsPipelineDescription pipelineDescription{};
+  pipelineDescription.vertexShader = vertexShader;
+  pipelineDescription.fragmentShader = fragmentShader;
+  pipelineDescription.rasterizer = rhi::PipelineRasterizer{
+      liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
+      liquid::rhi::FrontFace::CounterClockwise};
+  pipelineDescription.colorBlend.attachments = {
+      liquid::rhi::PipelineColorBlendAttachment{}};
+
+  mPresentPipeline = mRenderStorage.addPipeline(pipelineDescription);
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
@@ -44,34 +62,32 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   renderPassDescription.colorAttachments.push_back(attachment);
 
   if (mPresentPass != rhi::RenderPassHandle::Invalid) {
-    mDevice->destroyRenderPass(mPresentPass);
+    mRenderStorage.getDevice()->destroyRenderPass(mPresentPass);
   }
 
-  mPresentPass = mDevice->createRenderPass(renderPassDescription);
+  mPresentPass =
+      mRenderStorage.getDevice()->createRenderPass(renderPassDescription);
 
   auto vertexShader =
       mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
   auto fragmentShader =
       mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
 
-  rhi::GraphicsPipelineDescription pipelineDescription{};
-  pipelineDescription.vertexShader = vertexShader;
-  pipelineDescription.fragmentShader = fragmentShader;
-  pipelineDescription.renderPass = mPresentPass;
-  pipelineDescription.rasterizer = rhi::PipelineRasterizer{
-      liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
-      liquid::rhi::FrontFace::CounterClockwise};
-  pipelineDescription.colorBlend.attachments = {
-      liquid::rhi::PipelineColorBlendAttachment{}};
+  mRenderStorage.getGraphicsPipelineDescription(mPresentPipeline).renderPass =
+      mPresentPass;
 
-  if (mPresentPipeline != rhi::PipelineHandle::Invalid) {
-    mDevice->destroyPipeline(mPresentPipeline);
+  auto *device = mRenderStorage.getDevice();
+
+  if (device->hasPipeline(mPresentPipeline)) {
+    device->destroyPipeline(mPresentPipeline);
   }
 
-  mPresentPipeline = mDevice->createPipeline(pipelineDescription);
+  device->createPipeline(
+      mRenderStorage.getGraphicsPipelineDescription(mPresentPipeline),
+      mPresentPipeline);
 
   for (auto fb : mFramebuffers) {
-    mDevice->destroyFramebuffer(fb);
+    device->destroyFramebuffer(fb);
   }
 
   mFramebuffers.resize(swapchain.textures.size());
@@ -84,7 +100,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     framebufferDescription.renderPass = mPresentPass;
     framebufferDescription.attachments = {swapchain.textures.at(i)};
 
-    mFramebuffers.at(i) = mDevice->createFramebuffer(framebufferDescription);
+    mFramebuffers.at(i) = device->createFramebuffer(framebufferDescription);
   }
 
   if (rhi::isHandleValid(mPresentTexture)) {

@@ -50,12 +50,12 @@ static Path getUniquePath(Path path) {
 }
 
 AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
-                           liquid::rhi::RenderDevice *device, bool optimize,
+                           RenderStorage &renderStorage, bool optimize,
                            bool createDefaultObjects)
     : mAssetsPath(assetsPath),
       mAssetCache(assetsCachePath, createDefaultObjects),
-      mImageLoader(mAssetCache, device), mHDRIImporter(mAssetCache, device),
-      mOptimize(optimize) {}
+      mImageLoader(mAssetCache, renderStorage.getDevice()),
+      mHDRIImporter(mAssetCache, renderStorage), mOptimize(optimize) {}
 
 Result<Path> AssetManager::importAsset(const Path &source,
                                        const Path &targetAssetDirectory) {

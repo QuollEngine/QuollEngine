@@ -140,20 +140,16 @@ void RenderGraphEvaluator::buildGraphicsPass(size_t index, RenderGraph &graph,
   LIQUID_ASSERT(isHandleValid(pass.mRenderPass), "Render pass is not created");
 
   // Graphics pipelines
-  for (size_t i = 0; i < pass.mRegistry.mGraphicsPipelineDescriptions.size();
-       ++i) {
-    auto &description = pass.mRegistry.mGraphicsPipelineDescriptions.at(i);
+  for (auto handle : pass.mPipelines) {
+    auto &description = mRenderStorage.getGraphicsPipelineDescription(handle);
     description.renderPass = pass.mRenderPass;
     description.multisample.sampleCount = sampleCount;
 
-    auto handle = pass.mRegistry.mRealGraphicsPipelines.at(i);
-
-    if (handle != rhi::PipelineHandle::Invalid) {
+    if (mDevice->hasPipeline(handle)) {
       mDevice->destroyPipeline(handle);
     }
 
-    pass.mRegistry.mRealGraphicsPipelines.at(i) =
-        mDevice->createPipeline(description);
+    mDevice->createPipeline(description, handle);
   }
 }
 
@@ -166,18 +162,14 @@ void RenderGraphEvaluator::buildComputePass(size_t index, RenderGraph &graph,
     return;
   }
 
-  for (size_t i = 0; i < pass.mRegistry.mComputePipelineDescriptions.size();
-       ++i) {
-    auto &description = pass.mRegistry.mComputePipelineDescriptions.at(i);
+  for (auto handle : pass.mPipelines) {
+    auto &description = mRenderStorage.getComputePipelineDescription(handle);
 
-    auto handle = pass.mRegistry.mRealComputePipelines.at(i);
-
-    if (handle != rhi::PipelineHandle::Invalid) {
+    if (mDevice->hasPipeline(handle)) {
       mDevice->destroyPipeline(handle);
     }
 
-    pass.mRegistry.mRealComputePipelines.at(i) =
-        mDevice->createPipeline(description);
+    mDevice->createPipeline(description, handle);
   }
 
   pass.mCreated = true;

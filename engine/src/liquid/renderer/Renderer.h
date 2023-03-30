@@ -4,10 +4,7 @@
 #include "liquid/renderer/RenderGraphEvaluator.h"
 #include "ShaderLibrary.h"
 #include "MaterialPBR.h"
-#include "SceneRenderer.h"
-#include "liquid/imgui/ImguiRenderer.h"
 #include "liquid/entity/EntityDatabase.h"
-#include "liquid/asset/AssetRegistry.h"
 
 namespace liquid {
 
@@ -48,12 +45,10 @@ public:
   /**
    * @brief Create renderer
    *
-   * @param assetRegistry Asset registry
    * @param window Window
    * @param device Render device
    */
-  Renderer(AssetRegistry &assetRegistry, Window &window,
-           rhi::RenderDevice *device);
+  Renderer(Window &window, rhi::RenderDevice *device);
 
   ~Renderer() = default;
   Renderer(const Renderer &rhs) = delete;
@@ -74,20 +69,6 @@ public:
    * @return Render device
    */
   inline rhi::RenderDevice *getRenderDevice() { return mDevice; }
-
-  /**
-   * @brief Get imgui renderer
-   *
-   * @return Imgui renderer
-   */
-  inline ImguiRenderer &getImguiRenderer() { return mImguiRenderer; }
-
-  /**
-   * @brief Get scene renderer
-   *
-   * @return Scene renderer
-   */
-  inline SceneRenderer &getSceneRenderer() { return mSceneRenderer; }
 
   /**
    * @brief Render
@@ -117,9 +98,6 @@ private:
   RenderStorage mRenderStorage;
 
   RenderGraphEvaluator mGraphEvaluator;
-  AssetRegistry &mAssetRegistry;
-  ImguiRenderer mImguiRenderer;
-  SceneRenderer mSceneRenderer;
 };
 
 } // namespace liquid

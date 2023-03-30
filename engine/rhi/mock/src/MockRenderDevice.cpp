@@ -141,14 +141,14 @@ void MockRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
   mFramebuffers.erase(handle);
 }
 
-PipelineHandle MockRenderDevice::createPipeline(
-    const GraphicsPipelineDescription &description) {
-  return mPipelines.insert({description});
+void MockRenderDevice::createPipeline(
+    const GraphicsPipelineDescription &description, PipelineHandle handle) {
+  mPipelines.insert({description}, handle);
 }
 
-PipelineHandle MockRenderDevice::createPipeline(
-    const ComputePipelineDescription &description) {
-  return mPipelines.insert({description});
+void MockRenderDevice::createPipeline(
+    const ComputePipelineDescription &description, PipelineHandle handle) {
+  mPipelines.insert({description}, handle);
 }
 
 void MockRenderDevice::destroyPipeline(PipelineHandle handle) {

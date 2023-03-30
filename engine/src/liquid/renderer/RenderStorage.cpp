@@ -152,4 +152,20 @@ void RenderStorage::setFramebufferSize(uint32_t width, uint32_t height) {
   mNeedsSwapchainResize = true;
 }
 
+rhi::PipelineHandle RenderStorage::addPipeline(
+    const rhi::GraphicsPipelineDescription &description) {
+  mPipelineDescriptions.push_back(description);
+  mGraphicsPipelineIndices.push_back(mPipelineDescriptions.size() - 1);
+
+  return static_cast<rhi::PipelineHandle>(mPipelineDescriptions.size());
+}
+
+rhi::PipelineHandle
+RenderStorage::addPipeline(const rhi::ComputePipelineDescription &description) {
+  mPipelineDescriptions.push_back(description);
+  mComputePipelineIndices.push_back(mPipelineDescriptions.size() - 1);
+
+  return static_cast<rhi::PipelineHandle>(mPipelineDescriptions.size());
+}
+
 } // namespace liquid

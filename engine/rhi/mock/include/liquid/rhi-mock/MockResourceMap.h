@@ -18,7 +18,7 @@ public:
    */
   THandle insert(const TResource &resource) {
     auto handle = static_cast<THandle>(mIncrement);
-    mResources.insert_or_assign(handle, resource);
+    mResources.insert_or_assign(handle, std::move(resource));
 
     mIncrement++;
     return handle;
@@ -41,11 +41,32 @@ public:
   /**
    * @brief Insert resource
    *
+   * @param resource Resource
+   * @param handle Resource handle
+   */
+  void insert(const TResource &resource, THandle handle) {
+    mResources.insert_or_assign(handle, std::move(resource));
+    return handle;
+  }
+
+  /**
+   * @brief Insert resource
+   *
+   * @param resource Resource
+   * @param handle Resource handle
+   */
+  void insert(TResource &&resource, THandle handle) {
+    mResources.insert_or_assign(handle, std::move(resource));
+  }
+
+  /**
+   * @brief Insert resource
+   *
    * @param handle Resource handle
    * @param resource Resource
    */
-  void replace(THandle handle, TResource resource) {
-    mResources.emplace(handle, resource);
+  void replace(THandle handle, TResource &&resource) {
+    mResources.emplace(handle, std::move(resource));
   }
 
   /**
@@ -70,6 +91,17 @@ public:
    * @param handle Resource handle
    */
   void erase(THandle handle) { mResources.erase(handle); }
+
+  /**
+   * @brief Check if registry exists
+   *
+   * @param handle Resource handle
+   * @retval true Resource exists
+   * @retval false Resources does not exist
+   */
+  bool exists(THandle handle) const {
+    return mResources.find(handle) != mResources.end();
+  }
 
 private:
   uint32_t mIncrement = 1;

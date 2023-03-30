@@ -3,6 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/Swapchain.h"
+#include "RenderStorage.h"
 #include "ShaderLibrary.h"
 
 namespace liquid {
@@ -17,9 +18,9 @@ public:
    * @brief Create presenter
    *
    * @param shaderLibrary Shader library
-   * @param device Render device
+   * @param renderStorage Render storage
    */
-  Presenter(ShaderLibrary &shaderLibrary, rhi::RenderDevice *device);
+  Presenter(ShaderLibrary &shaderLibrary, RenderStorage &renderStorage);
 
   /**
    * @brief Update framebuffers
@@ -39,7 +40,7 @@ public:
                uint32_t imageIndex);
 
 private:
-  rhi::RenderDevice *mDevice;
+  RenderStorage &mRenderStorage;
   ShaderLibrary &mShaderLibrary;
   rhi::RenderPassHandle mPresentPass = rhi::RenderPassHandle::Invalid;
   rhi::PipelineHandle mPresentPipeline = rhi::PipelineHandle::Invalid;

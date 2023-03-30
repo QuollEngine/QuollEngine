@@ -235,20 +235,20 @@ public:
   /**
    * @brief Create graphics pipeline
    *
-   * @param description Pipeline description
-   * @return Graphics pipeline
+   * @param description Graphics pipeline description
+   * @param handle Pipeline handle
    */
-  virtual PipelineHandle
-  createPipeline(const GraphicsPipelineDescription &description) = 0;
+  virtual void createPipeline(const GraphicsPipelineDescription &description,
+                              PipelineHandle handle) = 0;
 
   /**
    * @brief Create compute pipeline
    *
    * @param description Compute pipeline description
-   * @return Compute pipeline
+   * @param handle Pipeline handle
    */
-  virtual PipelineHandle
-  createPipeline(const ComputePipelineDescription &description) = 0;
+  virtual void createPipeline(const ComputePipelineDescription &description,
+                              PipelineHandle handle) = 0;
 
   /**
    * @brief Destroy pipeline
@@ -256,6 +256,15 @@ public:
    * @param handle Pipeline handle
    */
   virtual void destroyPipeline(PipelineHandle handle) = 0;
+
+  /**
+   * @brief Check if device has pipeline
+   *
+   * @param handle Pipeline handle
+   * @retval true Device has pipeline
+   * @retval false Device does not have pipeline
+   */
+  virtual bool hasPipeline(PipelineHandle handle) = 0;
 };
 
 } // namespace liquid::rhi

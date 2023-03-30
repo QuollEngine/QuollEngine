@@ -13,8 +13,10 @@ static constexpr uint32_t CubemapSides = 6;
 static constexpr rhi::Format TargetFormat = rhi::Format::Rgba16Float;
 static constexpr uint32_t FormatSize = 4 * 2;
 
-HDRIImporter::HDRIImporter(AssetCache &assetCache, rhi::RenderDevice *device)
-    : mAssetCache(assetCache), mDevice(device) {
+HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
+    : mAssetCache(assetCache), mRenderStorage(renderStorage) {
+
+  auto *device = mRenderStorage.getDevice();
 
   const auto shadersPath =
       std::filesystem::current_path() / "assets" / "shaders";
@@ -36,34 +38,53 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, rhi::RenderDevice *device)
     binding1.descriptorCount = 1;
     binding1.descriptorType = rhi::DescriptorType::StorageImage;
 
-    auto layout = mDevice->createDescriptorLayout({{binding0, binding1}});
-    mDescriptorGenerateCubemap = mDevice->createDescriptor(layout);
+    auto layout = device->createDescriptorLayout({{binding0, binding1}});
+    mDescriptorGenerateCubemap = device->createDescriptor(layout);
   }
 
   {
-    auto shader = mDevice->createShader(
+    auto shader = device->createShader(
         {shadersPath / "equirectangular-to-cubemap.comp.spv"});
+
     mPipelineGenerateCubemap =
-        mDevice->createPipeline(rhi::ComputePipelineDescription{shader});
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+
+    mRenderStorage.getDevice()->createPipeline(
+        mRenderStorage.getComputePipelineDescription(mPipelineGenerateCubemap),
+        mPipelineGenerateCubemap);
   }
 
   {
-    auto shader = mDevice->createShader(
+    auto shader = device->createShader(
         {shadersPath / "generate-irradiance-map.comp.spv"});
+
     mPipelineGenerateIrradianceMap =
-        mDevice->createPipeline(rhi::ComputePipelineDescription{shader});
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+
+    mRenderStorage.getDevice()->createPipeline(
+        mRenderStorage.getComputePipelineDescription(
+            mPipelineGenerateIrradianceMap),
+        mPipelineGenerateIrradianceMap);
   }
 
   {
     auto shader =
-        mDevice->createShader({shadersPath / "generate-specular-map.comp.spv"});
+        device->createShader({shadersPath / "generate-specular-map.comp.spv"});
+
     mPipelineGenerateSpecularMap =
-        mDevice->createPipeline(rhi::ComputePipelineDescription{shader});
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+
+    mRenderStorage.getDevice()->createPipeline(
+        mRenderStorage.getComputePipelineDescription(
+            mPipelineGenerateSpecularMap),
+        mPipelineGenerateSpecularMap);
   }
 }
 
 Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
                                         const Path &engineAssetPath) {
+  auto *device = mRenderStorage.getDevice();
+
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
@@ -89,7 +110,7 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
       generateIrradianceMap(unfilteredCubemap, relPath / irradianceMapName);
 
   if (irradianceCubemap.hasError()) {
-    mDevice->destroyTexture(unfilteredCubemap.texture);
+    device->destroyTexture(unfilteredCubemap.texture);
     std::filesystem::remove_all(engineAssetPath);
 
     return Result<Path>::Error(irradianceCubemap.getError());
@@ -100,7 +121,7 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
       generateSpecularMap(unfilteredCubemap, relPath / specularMapName);
 
   if (specularCubemap.hasError()) {
-    mDevice->destroyTexture(unfilteredCubemap.texture);
+    device->destroyTexture(unfilteredCubemap.texture);
     mAssetCache.getRegistry().getTextures().deleteAsset(
         irradianceCubemap.getData());
     std::filesystem::remove_all(engineAssetPath);
@@ -108,7 +129,7 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
     return Result<Path>::Error(specularCubemap.getError());
   }
 
-  mDevice->destroyTexture(unfilteredCubemap.texture);
+  device->destroyTexture(unfilteredCubemap.texture);
 
   AssetData<EnvironmentAsset> environment{};
   environment.path =
@@ -133,6 +154,8 @@ Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
 rhi::TextureHandle
 HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
                                    RenderStorage &renderStorage) {
+  auto *device = mRenderStorage.getDevice();
+
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
@@ -155,7 +178,7 @@ HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
 
   auto hdriTexture = renderStorage.createTexture(hdriTextureDesc);
   TextureUtils::copyDataToTexture(
-      mDevice, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+      device, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
       {{0, static_cast<size_t>(width) * height * 4 * sizeof(float),
         static_cast<uint32_t>(width), static_cast<uint32_t>(height)}});
 
@@ -165,6 +188,8 @@ HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
 HDRIImporter::CubemapData
 HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
                                               uint32_t height) {
+  auto *device = mRenderStorage.getDevice();
+
   rhi::TextureDescription hdriTextureDesc{};
   hdriTextureDesc.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
@@ -174,10 +199,10 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
   hdriTextureDesc.height = height;
   hdriTextureDesc.layers = 1;
 
-  auto hdriTexture = mDevice->createTexture(hdriTextureDesc);
+  auto hdriTexture = device->createTexture(hdriTextureDesc);
 
   TextureUtils::copyDataToTexture(
-      mDevice, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
+      device, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
       {{0, static_cast<size_t>(width) * height * 4 * sizeof(float),
         static_cast<uint32_t>(width), static_cast<uint32_t>(height)}});
 
@@ -229,7 +254,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
                       rhi::TextureUsage::TransferSource |
                       rhi::TextureUsage::TransferDestination;
 
-  auto unfilteredCubemap = mDevice->createTexture(cubemapDesc);
+  auto unfilteredCubemap = device->createTexture(cubemapDesc);
 
   // Convert equirectangular texture to cubemap
   {
@@ -241,7 +266,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
     mDescriptorGenerateCubemap.write(1, unfilteredCubemapData,
                                      rhi::DescriptorType::StorageImage);
 
-    auto commandList = mDevice->requestImmediateCommandList();
+    auto commandList = device->requestImmediateCommandList();
 
     std::array<rhi::MemoryBarrier, 1> memoryBarriers{
         {rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}}};
@@ -259,11 +284,11 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
                                mDescriptorGenerateCubemap);
     commandList.dispatch(GroupCount, GroupCount, CubemapSides);
 
-    mDevice->submitImmediate(commandList);
+    device->submitImmediate(commandList);
   }
 
   TextureUtils::generateMipMapsForTexture(
-      mDevice, unfilteredCubemap, rhi::ImageLayout::General, CubemapSides,
+      device, unfilteredCubemap, rhi::ImageLayout::General, CubemapSides,
       numLevels, CubemapResolution, CubemapResolution);
 
   return CubemapData{unfilteredCubemap, levels};
@@ -272,6 +297,8 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
 Result<TextureAssetHandle>
 HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
                                     const Path &path) {
+  auto *device = mRenderStorage.getDevice();
+
   const uint32_t GroupCount = unfilteredCubemap.levels.at(0).width / 32;
 
   rhi::TextureDescription cubemapDesc;
@@ -284,7 +311,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   cubemapDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
-  auto irradianceCubemap = mDevice->createTexture(cubemapDesc);
+  auto irradianceCubemap = device->createTexture(cubemapDesc);
 
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
       unfilteredCubemap.texture};
@@ -295,7 +322,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   mDescriptorGenerateCubemap.write(1, irradianceCubemapData,
                                    rhi::DescriptorType::StorageImage);
 
-  auto commandList = mDevice->requestImmediateCommandList();
+  auto commandList = device->requestImmediateCommandList();
 
   std::array<rhi::MemoryBarrier, 2> memoryBarriers{
       rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderRead},
@@ -318,7 +345,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
                              mDescriptorGenerateCubemap);
   commandList.dispatch(GroupCount, GroupCount, CubemapSides);
 
-  mDevice->submitImmediate(commandList);
+  device->submitImmediate(commandList);
 
   auto levels = {unfilteredCubemap.levels.at(0)};
 
@@ -335,9 +362,9 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   asset.data.data.resize(asset.size);
 
   TextureUtils::copyTextureToData(
-      mDevice, irradianceCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
+      device, irradianceCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
       CubemapSides, asset.data.levels, asset.data.data.data());
-  mDevice->destroyTexture(irradianceCubemap);
+  device->destroyTexture(irradianceCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   if (createdFileRes.hasError()) {
@@ -350,6 +377,8 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
 Result<TextureAssetHandle>
 HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                                   const Path &path) {
+  auto *device = mRenderStorage.getDevice();
+
   rhi::TextureDescription cubemapDesc;
   cubemapDesc.type = rhi::TextureType::Cubemap;
   cubemapDesc.format = TargetFormat;
@@ -361,7 +390,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
 
-  auto specularCubemap = mDevice->createTexture(cubemapDesc);
+  auto specularCubemap = device->createTexture(cubemapDesc);
 
   std::vector<rhi::TextureViewHandle> textureViews(
       unfilteredCubemap.levels.size());
@@ -371,7 +400,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     description.level = static_cast<uint32_t>(level);
     description.layerCount = CubemapSides;
 
-    textureViews.at(level) = mDevice->createTextureView(description);
+    textureViews.at(level) = device->createTextureView(description);
   }
 
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
@@ -386,7 +415,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     mDescriptorGenerateCubemap.write(1, textureViewData,
                                      rhi::DescriptorType::StorageImage);
 
-    auto commandList = mDevice->requestImmediateCommandList();
+    auto commandList = device->requestImmediateCommandList();
     commandList.bindPipeline(mPipelineGenerateSpecularMap);
     commandList.bindDescriptor(mPipelineGenerateSpecularMap, 0,
                                mDescriptorGenerateCubemap);
@@ -401,11 +430,11 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                               rhi::ShaderStage::Compute, 0, sizeof(glm::vec4),
                               glm::value_ptr(data));
     commandList.dispatch(groupSize, groupSize, CubemapSides);
-    mDevice->submitImmediate(commandList);
+    device->submitImmediate(commandList);
   }
 
   for (auto view : textureViews) {
-    mDevice->destroyTextureView(view);
+    device->destroyTextureView(view);
   }
 
   AssetData<TextureAsset> asset{};
@@ -421,9 +450,9 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   asset.data.data.resize(asset.size);
 
   TextureUtils::copyTextureToData(
-      mDevice, specularCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
+      device, specularCubemap, rhi::ImageLayout::ShaderReadOnlyOptimal,
       CubemapSides, asset.data.levels, asset.data.data.data());
-  mDevice->destroyTexture(specularCubemap);
+  device->destroyTexture(specularCubemap);
 
   auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
   if (createdFileRes.hasError()) {

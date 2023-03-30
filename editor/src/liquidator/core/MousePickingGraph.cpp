@@ -58,7 +58,7 @@ MousePickingGraph::MousePickingGraph(
              rhi::DepthStencilClear({1.0f, 0}));
 
   // Normal meshes
-  auto vPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
+  auto pipeline = renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
       shaderLibrary.getShader("mouse-picking.default.vertex"),
       shaderLibrary.getShader("mouse-picking.selector.fragment"),
       rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -68,14 +68,18 @@ MousePickingGraph::MousePickingGraph(
       rhi::PipelineColorBlend{{}}});
 
   // Skinned meshes
-  auto vSkinnedPipeline = pass.addPipeline(rhi::GraphicsPipelineDescription{
-      shaderLibrary.getShader("mouse-picking.skinned.vertex"),
-      shaderLibrary.getShader("mouse-picking.selector.fragment"),
-      rhi::PipelineVertexInputLayout::create<Vertex>(),
-      rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
-      rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
-                              rhi::FrontFace::CounterClockwise},
-      rhi::PipelineColorBlend{{}}});
+  auto skinnedPipeline =
+      renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
+          shaderLibrary.getShader("mouse-picking.skinned.vertex"),
+          shaderLibrary.getShader("mouse-picking.selector.fragment"),
+          rhi::PipelineVertexInputLayout::create<Vertex>(),
+          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
+                                  rhi::FrontFace::CounterClockwise},
+          rhi::PipelineColorBlend{{}}});
+
+  pass.addPipeline(pipeline);
+  pass.addPipeline(skinnedPipeline);
 
   struct MousePickingDrawParams {
     rhi::BufferHandle meshTransforms;
@@ -98,16 +102,12 @@ MousePickingGraph::MousePickingGraph(
         mEntitiesBuffer.getHandle(), mSelectedEntityBuffer.getHandle()});
   }
 
-  pass.setExecutor([this, vPipeline, vSkinnedPipeline, offset,
+  pass.setExecutor([this, pipeline, skinnedPipeline, offset,
                     &renderStorage](rhi::RenderCommandList &commandList,
-                                    const RenderGraphRegistry &registry,
                                     uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
-
-    auto pipeline = registry.get(vPipeline);
-    auto skinnedPipeline = registry.get(vSkinnedPipeline);
 
     std::array<uint32_t, 1> offsets{static_cast<uint32_t>(offset)};
     // Mesh
@@ -146,7 +146,6 @@ MousePickingGraph::MousePickingGraph(
 
     // Skinned meshes
     {
-
       commandList.bindPipeline(skinnedPipeline);
 
       commandList.bindDescriptor(skinnedPipeline, 0,

@@ -6,8 +6,6 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/BufferDescription.h"
 
-#include "RenderGraphRegistry.h"
-
 namespace liquid {
 
 class RenderGraph;
@@ -114,8 +112,7 @@ enum class RenderGraphPassType { Graphics, Compute };
  * @brief Render graph pass
  */
 class RenderGraphPass {
-  using ExecutorFn = std::function<void(rhi::RenderCommandList &,
-                                        const RenderGraphRegistry &, uint32_t)>;
+  using ExecutorFn = std::function<void(rhi::RenderCommandList &, uint32_t)>;
   friend RenderGraph;
   friend RenderGraphEvaluator;
 
@@ -212,22 +209,11 @@ public:
   void setExecutor(const ExecutorFn &executor);
 
   /**
-   * @brief Add graphics pipeline
+   * @brief Add pipeline to pass
    *
-   * @param description Graphics pipeline description
-   * @return Virtual graphics pipeline handle
+   * @param handle Pipeline handle
    */
-  VirtualPipelineHandle
-  addPipeline(const rhi::GraphicsPipelineDescription &description);
-
-  /**
-   * @brief Add compute pipeline
-   *
-   * @param description Compute pipeline description
-   * @return Virtual compute pipeline handle
-   */
-  VirtualComputePipelineHandle
-  addPipeline(const rhi::ComputePipelineDescription &description);
+  void addPipeline(rhi::PipelineHandle handle);
 
   /**
    * @brief Get pass name
@@ -334,7 +320,7 @@ private:
 
   ExecutorFn mExecutor;
 
-  RenderGraphRegistry mRegistry;
+  std::vector<rhi::PipelineHandle> mPipelines;
 
   String mName;
   RenderGraphPassType mType;

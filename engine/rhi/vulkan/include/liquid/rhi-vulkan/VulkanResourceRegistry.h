@@ -219,16 +219,28 @@ public:
    * @brief Set pipeline
    *
    * @param pipeline Vulkan pipeline
-   * @return New pipeline handle
+   * @param handle Pipeline handle
    */
-  PipelineHandle setPipeline(std::unique_ptr<VulkanPipeline> &&pipeline);
+  void setPipeline(std::unique_ptr<VulkanPipeline> &&pipeline,
+                   PipelineHandle handle);
 
   /**
    * @brief Delete pipeline
    *
    * @param handle Pipeline handle
    */
-  void deletePipeline(rhi::PipelineHandle handle);
+  void deletePipeline(PipelineHandle handle);
+
+  /**
+   * @brief Check if pipeline exists in registry
+   *
+   * @param handle Pipeline handle
+   * @retval true Pipeline exists
+   * @retval false Pipeline does not exist
+   */
+  inline bool hasPipeline(PipelineHandle handle) const {
+    return mPipelines.map.find(handle) != mPipelines.map.end();
+  }
 
   /**
    * @brief Get pipelines

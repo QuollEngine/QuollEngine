@@ -46,10 +46,9 @@ public:
    * @param shaderLibrary Shader library
    * @param assetRegistry Asset registry
    * @param renderStorage Render storage
-   * @param device Render device
    */
   SceneRenderer(ShaderLibrary &shaderLibrary, AssetRegistry &assetRegistry,
-                RenderStorage &renderStorage, rhi::RenderDevice *device);
+                RenderStorage &renderStorage);
 
   /**
    * @brief Set clear color
@@ -143,8 +142,8 @@ private:
   glm::vec4 mClearColor{DefaultClearColor};
   ShaderLibrary &mShaderLibrary;
   AssetRegistry &mAssetRegistry;
-  rhi::RenderDevice *mDevice;
   RenderStorage &mRenderStorage;
+  rhi::RenderDevice *mDevice;
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   uint32_t mMaxSampleCounts = 1;

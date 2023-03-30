@@ -118,6 +118,49 @@ public:
    */
   void setFramebufferSize(uint32_t width, uint32_t height);
 
+public:
+  /**
+   * @brief Add graphics pipeline
+   *
+   * @param description Graphics pipeline description
+   * @return Virtual pipeline handle
+   */
+  rhi::PipelineHandle
+  addPipeline(const rhi::GraphicsPipelineDescription &description);
+
+  /**
+   * @brief Add compute pipeline
+   *
+   * @param description Compute pipeline description
+   * @return Virtual pipeline handle
+   */
+  rhi::PipelineHandle
+  addPipeline(const rhi::ComputePipelineDescription &description);
+
+  /**
+   * @brief Get graphics pipeline description
+   *
+   * @param handle Pipeline handle
+   * @return Graphics pipeline description
+   */
+  inline rhi::GraphicsPipelineDescription &
+  getGraphicsPipelineDescription(rhi::PipelineHandle handle) {
+    return std::get<rhi::GraphicsPipelineDescription>(
+        mPipelineDescriptions.at(static_cast<size_t>(handle) - 1));
+  }
+
+  /**
+   * @brief Get compute pipeline description
+   *
+   * @param handle Pipeline handle
+   * @return Compute pipeline description
+   */
+  inline rhi::ComputePipelineDescription &
+  getComputePipelineDescription(rhi::PipelineHandle handle) {
+    return std::get<rhi::ComputePipelineDescription>(
+        mPipelineDescriptions.at(static_cast<size_t>(handle) - 1));
+  }
+
 private:
   rhi::RenderDevice *mDevice = nullptr;
 
@@ -135,6 +178,12 @@ private:
 
   uint32_t mWidth = 0;
   uint32_t mHeight = 0;
+
+  std::vector<std::variant<rhi::GraphicsPipelineDescription,
+                           rhi::ComputePipelineDescription>>
+      mPipelineDescriptions;
+  std::vector<size_t> mGraphicsPipelineIndices;
+  std::vector<size_t> mComputePipelineIndices;
 };
 
 } // namespace liquid

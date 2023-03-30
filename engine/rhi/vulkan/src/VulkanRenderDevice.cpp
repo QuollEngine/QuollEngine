@@ -216,20 +216,28 @@ void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
   mRegistry.deleteFramebuffer(handle);
 }
 
-PipelineHandle VulkanRenderDevice::createPipeline(
-    const GraphicsPipelineDescription &description) {
-  return mRegistry.setPipeline(std::make_unique<VulkanPipeline>(
-      description, mDevice, mRegistry, mPipelineLayoutCache));
+void VulkanRenderDevice::createPipeline(
+    const GraphicsPipelineDescription &description, PipelineHandle handle) {
+  return mRegistry.setPipeline(
+      std::make_unique<VulkanPipeline>(description, mDevice, mRegistry,
+                                       mPipelineLayoutCache),
+      handle);
 }
 
-PipelineHandle VulkanRenderDevice::createPipeline(
-    const ComputePipelineDescription &description) {
-  return mRegistry.setPipeline(std::make_unique<VulkanPipeline>(
-      description, mDevice, mRegistry, mPipelineLayoutCache));
+void VulkanRenderDevice::createPipeline(
+    const ComputePipelineDescription &description, PipelineHandle handle) {
+  return mRegistry.setPipeline(
+      std::make_unique<VulkanPipeline>(description, mDevice, mRegistry,
+                                       mPipelineLayoutCache),
+      handle);
 }
 
 void VulkanRenderDevice::destroyPipeline(PipelineHandle handle) {
   mRegistry.deletePipeline(handle);
+}
+
+bool VulkanRenderDevice::hasPipeline(PipelineHandle handle) {
+  return mRegistry.hasPipeline(handle);
 }
 
 } // namespace liquid::rhi
