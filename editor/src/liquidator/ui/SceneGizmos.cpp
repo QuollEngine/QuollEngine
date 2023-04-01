@@ -88,7 +88,7 @@ bool SceneGizmos::render(WorkspaceState &state,
   ImGuizmo::SetDrawlist();
   ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-  const auto &camera = scene.entityDatabase.get<Camera>(state.camera);
+  const auto &camera = scene.entityDatabase.get<Camera>(state.activeCamera);
   auto gizmoPerspective = camera.projectionMatrix;
 
   auto selected = state.selectedEntity;
@@ -96,7 +96,7 @@ bool SceneGizmos::render(WorkspaceState &state,
   auto worldTransform = world.worldTransform;
   if (ImGuizmo::Manipulate(
           glm::value_ptr(camera.viewMatrix), glm::value_ptr(gizmoPerspective),
-          getImguizmoOperation(state.activeTransform), ImGuizmo::LOCAL,
+          getImguizmoOperation(state.activeTransform), ImGuizmo::WORLD,
           glm::value_ptr(worldTransform), nullptr, nullptr, nullptr)) {
     if (!mAction) {
       const auto &localTransform =

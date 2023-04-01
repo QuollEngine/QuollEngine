@@ -165,14 +165,14 @@ public:
         PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(),
                         RECORD_MEMORY_ALLOCATIONS, mPvd);
 
-    PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
     mDispatcher = PxDefaultCpuDispatcherCreate(1);
+
+    PxSceneDesc sceneDesc(mPhysics->getTolerancesScale());
     sceneDesc.cpuDispatcher = mDispatcher;
     sceneDesc.filterShader = phyxFilterAllCollisionShader;
     sceneDesc.gravity = PxVec3(Gravity.x, Gravity.y, Gravity.z);
     sceneDesc.flags = PxSceneFlag::eENABLE_ACTIVE_ACTORS;
     sceneDesc.simulationEventCallback = &mSimulationEventCallback;
-
     mScene = mPhysics->createScene(sceneDesc);
 
     auto *pvdClient = mScene->getScenePvdClient();
@@ -344,19 +344,24 @@ void PhysicsSystem::update(float dt, EntityDatabase &entityDatabase) {
 void PhysicsSystem::cleanup(EntityDatabase &entityDatabase) {
   for (auto [entity, physx] : entityDatabase.view<PhysxInstance>()) {
     if (physx.rigidStatic) {
+      if (physx.shape) {
+        physx.rigidStatic->detachShape(*physx.shape);
+      }
       mImpl->getScene()->removeActor(*physx.rigidStatic);
+      physx.rigidStatic->release();
     }
 
     if (physx.rigidDynamic) {
+      if (physx.shape) {
+        physx.rigidDynamic->detachShape(*physx.shape);
+      }
       mImpl->getScene()->removeActor(*physx.rigidDynamic);
-    }
-
-    if (physx.material) {
-      physx.material->release();
+      physx.rigidDynamic->release();
     }
   }
 
   entityDatabase.destroyComponents<PhysxInstance>();
+  mPhysxInstanceRemoveObserver.clear();
 }
 
 void PhysicsSystem::observeChanges(EntityDatabase &entityDatabase) {
@@ -472,14 +477,12 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
 
         mImpl->getScene()->addActor(*physx.rigidDynamic);
 
-        // Clear collidable's rigid body if exists
-        if (entityDatabase.has<Collidable>(entity)) {
-          Collidable &collidable = entityDatabase.get<Collidable>(entity);
-          if (physx.rigidStatic) {
-            mImpl->getScene()->removeActor(*physx.rigidStatic, false);
-            physx.rigidStatic->release();
-            physx.rigidStatic = nullptr;
-          }
+        // Remove rigid static if exists
+        if (physx.rigidStatic) {
+          physx.rigidStatic->detachShape(*physx.shape);
+          mImpl->getScene()->removeActor(*physx.rigidStatic, false);
+          physx.rigidStatic->release();
+          physx.rigidStatic = nullptr;
         }
       }
 
