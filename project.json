@@ -181,8 +181,8 @@
     },
     {
       "name": "dearimgui",
-      "url": "https://github.com/ocornut/imgui/archive/192196711a7d0d7c2d60454d42654cf090498a74.zip",
-      "buildSource": "imgui-192196711a7d0d7c2d60454d42654cf090498a74",
+      "url": "https://github.com/ocornut/imgui/archive/4fdafef54f3946d628e24fe8c84d603a15fa4a6f.zip",
+      "buildSource": "imgui-4fdafef54f3946d628e24fe8c84d603a15fa4a6f",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imgui",
         "{COPY} LICENSE.txt *.cpp backends/imgui_impl_glfw.cpp misc/freetype/imgui_freetype.cpp {{VENDOR_PROJECTS_DIR}}/imgui",
@@ -191,8 +191,8 @@
     },
     {
       "name": "imguizmo",
-      "url": "https://github.com/CedricGuillemet/ImGuizmo/archive/refs/tags/1.83.zip",
-      "buildSource": "ImGuizmo-1.83",
+      "url": "https://github.com/CedricGuillemet/ImGuizmo/archive/fbc3614abcc642de7f3868cc0d68a35503ca9a4e.zip",
+      "buildSource": "ImGuizmo-fbc3614abcc642de7f3868cc0d68a35503ca9a4e",
       "cmd": [
         "{MKDIR} {{VENDOR_PROJECTS_DIR}}/imguizmo",
         "{COPY} LICENSE ImGuizmo.cpp {{VENDOR_PROJECTS_DIR}}/imguizmo",
