@@ -122,3 +122,80 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localScale,
             glm::vec3(1.5f, 0.2f, 0.5f));
 }
+
+// XYZ -> Roll-Pitch-Yaw
+constexpr glm::quat TestQuat{0.835326f, 0.3502249f, 0.0783618f, 0.4164508f};
+constexpr glm::vec3 TestEulerDegrees{45.0f, 25.0f, 35.0f};
+
+TEST_F(TransformLuaScriptingInterfaceDeathTest,
+       GetRotationFailsIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  EXPECT_DEATH(call(entity, "local_transform_rotation_get"), ".*");
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       GetRotationReturnsNilIfValuesAreInvalid) {
+  auto entity = entityDatabase.create();
+  auto &scope = call(entity, "local_transform_rotation_get_invalid");
+
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_x"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_y"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_z"));
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       GetRotationReturnsRotationInDegrees) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransform>(entity, {{}, TestQuat, {}});
+
+  std::cout << glm::to_string(glm::quat(glm::radians(
+                   glm::vec3{TestEulerDegrees.y, TestEulerDegrees.x,
+                             TestEulerDegrees.z})))
+            << "\n";
+
+  auto &scope = call(entity, "local_transform_rotation_get");
+
+  auto actual = glm::vec3{scope.getGlobal<float>("local_rotation_x"),
+                          scope.getGlobal<float>("local_rotation_y"),
+                          scope.getGlobal<float>("local_rotation_z")};
+  auto expected = TestEulerDegrees;
+
+  EXPECT_NEAR(actual.x, expected.x, 0.0001f);
+  EXPECT_NEAR(actual.y, expected.y, 0.0001f);
+  EXPECT_NEAR(actual.z, expected.z, 0.0001f);
+}
+
+TEST_F(TransformLuaScriptingInterfaceDeathTest,
+       SetRotationFailsIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  EXPECT_DEATH(call(entity, "local_transform_rotation_set"), ".*");
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       SetRotationConvertsProvidedEulerDegreeRotationsToQuat) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransform>(entity, {{}, {}, {}});
+
+  auto &scope = call(entity, "local_transform_rotation_set");
+
+  auto actual =
+      entityDatabase.get<liquid::LocalTransform>(entity).localRotation;
+  auto expected = TestQuat;
+
+  EXPECT_NEAR(actual.x, expected.x, 0.0001f);
+  EXPECT_NEAR(actual.y, expected.y, 0.0001f);
+  EXPECT_NEAR(actual.z, expected.z, 0.0001f);
+  EXPECT_NEAR(actual.w, expected.w, 0.0001f);
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       DoesNothingIfSetRotationArgumentsAreNotNumbers) {
+  constexpr glm::quat RandomQuat{0.2f, 0.4f, 0.1f, 0.5f};
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransform>(entity, {{}, RandomQuat, {}});
+
+  auto &scope = call(entity, "local_transform_rotation_set_invalid");
+
+  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localRotation,
+            RandomQuat);
+}

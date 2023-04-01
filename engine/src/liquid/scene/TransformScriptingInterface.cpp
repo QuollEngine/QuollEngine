@@ -77,6 +77,87 @@ int TransformScriptingInterface::LuaInterface::setPosition(void *state) {
   return 0;
 }
 
+int TransformScriptingInterface::LuaInterface::getRotation(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "get_rotation");
+    scope.set(nullptr);
+    scope.set(nullptr);
+    scope.set(nullptr);
+    return 3;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<Entity>();
+  scope.pop(2);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  const auto &rotationQuat =
+      entityDatabase.get<LocalTransform>(entity).localRotation;
+
+  glm::vec3 rotationEuler{};
+
+  glm::extractEulerAngleXYZ(glm::toMat4(rotationQuat), rotationEuler.x,
+                            rotationEuler.y, rotationEuler.z);
+  rotationEuler = glm::degrees(rotationEuler);
+
+  scope.set(rotationEuler.z);
+  scope.set(rotationEuler.y);
+  scope.set(rotationEuler.x);
+
+  return 3;
+}
+
+int TransformScriptingInterface::LuaInterface::setRotation(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set_rotation");
+
+    return 0;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float>(getName(),
+                                                              "set_rotation");
+    return 0;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<Entity>();
+  scope.pop(1);
+
+  glm::vec3 newRotation;
+  newRotation.x = scope.get<float>(2);
+  newRotation.y = scope.get<float>(3);
+  newRotation.z = scope.get<float>(4);
+
+  std::cout << "Set rotation: " << glm::to_string(newRotation) << "\n";
+
+  newRotation = glm::radians(newRotation);
+  scope.pop(4);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  auto &transform = entityDatabase.get<LocalTransform>(entity);
+
+  // glm::quat accepts euler angles
+  // in pitch-yaw-roll representation,
+  // while we pass XYZ
+  transform.localRotation = glm::toQuat(
+      glm::eulerAngleXYZ(newRotation.x, newRotation.y, newRotation.z));
+  return 0;
+}
+
 int TransformScriptingInterface::LuaInterface::getScale(void *state) {
   LuaScope scope(state);
 

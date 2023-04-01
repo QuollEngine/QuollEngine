@@ -459,13 +459,20 @@ void EntityPanel::renderTransform(Scene &scene,
       sendAction = true;
     }
 
-    auto euler = glm::eulerAngles(component.localRotation);
+    glm::vec3 euler{};
+    glm::extractEulerAngleXYZ(glm::toMat4(component.localRotation), euler.x,
+                              euler.y, euler.z);
+    euler = glm::degrees(euler);
+
     if (widgets::Input("Rotation", euler, false)) {
       if (!mLocalTransform.has_value()) {
         mLocalTransform = component;
       }
 
-      component.localRotation = glm::quat(euler);
+      auto eulerRadians = glm::radians(euler);
+      component.localRotation = glm::toQuat(
+          glm::eulerAngleXYZ(eulerRadians.x, eulerRadians.y, eulerRadians.z));
+
       sendAction = true;
     }
 
