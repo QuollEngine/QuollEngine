@@ -4,14 +4,12 @@
 namespace liquid::rhi {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
-    StringView name, PhysicalDeviceType type,
-    const UnorderedPropertyMap &properties,
-    const UnorderedPropertyMap &rawLimits, const Limits &limits)
-    : mName(name), mType(type), mProperties(properties), mRawLimits(rawLimits),
-      mLimits(limits) {}
+    StringView name, const PhysicalDeviceProperties &properties,
+    const PhysicalDeviceLimits &limits)
+    : mName(name), mProperties(properties), mLimits(limits) {}
 
 const String PhysicalDeviceInformation::getTypeString() const {
-  switch (mType) {
+  switch (mProperties.type) {
   case PhysicalDeviceType::DiscreteGPU:
     return "Discrete GPU";
   case PhysicalDeviceType::IntegratedGPU:

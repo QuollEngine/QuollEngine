@@ -99,11 +99,11 @@ VulkanPhysicalDevice::getPresentModes(const VkSurfaceKHR &surface) const {
 }
 
 const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
-  VkPhysicalDeviceProperties mProperties;
-  vkGetPhysicalDeviceProperties(mDevice, &mProperties);
+  VkPhysicalDeviceProperties vkProperties;
+  vkGetPhysicalDeviceProperties(mDevice, &vkProperties);
 
   PhysicalDeviceType type = PhysicalDeviceType::Unknown;
-  switch (mProperties.deviceType) {
+  switch (vkProperties.deviceType) {
   case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
     type = PhysicalDeviceType::DiscreteGPU;
     break;
@@ -123,167 +123,138 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
     break;
   }
 
-  const auto &limits = mProperties.limits;
+  const auto &vkLimits = vkProperties.limits;
 
-  PhysicalDeviceInformation::UnorderedPropertyMap propertiesMap{
-      {"apiVersion", mProperties.apiVersion},
-      {"driverVersion", mProperties.driverVersion},
-      {"vendorID", mProperties.vendorID},
-      {"deviceID", mProperties.deviceID}};
+  PhysicalDeviceProperties properties;
+  properties.type = type;
+  properties.apiName = "Vulkan";
+  properties.apiVersion = vkProperties.apiVersion;
+  properties.driverVersion = vkProperties.driverVersion;
+  properties.deviceId = vkProperties.vendorID;
+  properties.deviceId = vkProperties.deviceID;
 
-  PhysicalDeviceInformation::UnorderedPropertyMap limitsMap{
-      {"maxImageDimension1D", limits.maxImageDimension1D},
-      {"maxImageDimension2D", limits.maxImageDimension2D},
-      {"maxImageDimension3D", limits.maxImageDimension3D},
-      {"maxImageDimensionCube", limits.maxImageDimensionCube},
-      {"maxImageArrayLayers", limits.maxImageArrayLayers},
-      {"maxTexelBufferElements", limits.maxTexelBufferElements},
-      {"maxUniformBufferRange", limits.maxUniformBufferRange},
-      {"maxStorageBufferRange", limits.maxStorageBufferRange},
-      {"maxPushConstantsSize", limits.maxPushConstantsSize},
-      {"maxMemoryAllocationCount", limits.maxMemoryAllocationCount},
-      {"maxSamplerAllocationCount", limits.maxSamplerAllocationCount},
-      {"bufferImageGranularity", limits.bufferImageGranularity},
-      {"sparseAddressSpaceSize", limits.sparseAddressSpaceSize},
-      {"maxBoundDescriptorSets", limits.maxBoundDescriptorSets},
-      {"maxPerStageDescriptorSamplers", limits.maxPerStageDescriptorSamplers},
-      {"maxPerStageDescriptorUniformBuffers",
-       limits.maxPerStageDescriptorUniformBuffers},
-      {"maxPerStageDescriptorStorageBuffers",
-       limits.maxPerStageDescriptorStorageBuffers},
-      {"maxPerStageDescriptorSampledImages",
-       limits.maxPerStageDescriptorSampledImages},
-      {"maxPerStageDescriptorStorageImages",
-       limits.maxPerStageDescriptorStorageImages},
-      {"maxPerStageDescriptorInputAttachments",
-       limits.maxPerStageDescriptorInputAttachments},
-      {"maxPerStageResources", limits.maxPerStageResources},
-      {"maxDescriptorSetSamplers", limits.maxDescriptorSetSamplers},
-      {"maxDescriptorSetUniformBuffers", limits.maxDescriptorSetUniformBuffers},
-      {"maxDescriptorSetUniformBuffersDynamic",
-       limits.maxDescriptorSetUniformBuffersDynamic},
-      {"maxDescriptorSetStorageBuffers", limits.maxDescriptorSetStorageBuffers},
-      {"maxDescriptorSetStorageBuffersDynamic",
-       limits.maxDescriptorSetStorageBuffersDynamic},
-      {"maxDescriptorSetSampledImages", limits.maxDescriptorSetSampledImages},
-      {"maxDescriptorSetStorageImages", limits.maxDescriptorSetStorageImages},
-      {"maxDescriptorSetInputAttachments",
-       limits.maxDescriptorSetInputAttachments},
-      {"maxVertexInputAttributes", limits.maxVertexInputAttributes},
-      {"maxVertexInputBindings", limits.maxVertexInputBindings},
-      {"maxVertexInputAttributeOffset", limits.maxVertexInputAttributeOffset},
-      {"maxVertexInputBindingStride", limits.maxVertexInputBindingStride},
-      {"maxVertexOutputComponents", limits.maxVertexOutputComponents},
-      {"maxTessellationGenerationLevel", limits.maxTessellationGenerationLevel},
-      {"maxTessellationPatchSize", limits.maxTessellationPatchSize},
-      {"maxTessellationControlPerVertexInputComponents",
-       limits.maxTessellationControlPerVertexInputComponents},
-      {"maxTessellationControlPerVertexOutputComponents",
-       limits.maxTessellationControlPerVertexOutputComponents},
-      {"maxTessellationControlPerPatchOutputComponents",
-       limits.maxTessellationControlPerPatchOutputComponents},
-      {"maxTessellationControlTotalOutputComponents",
-       limits.maxTessellationControlTotalOutputComponents},
-      {"maxTessellationEvaluationInputComponents",
-       limits.maxTessellationEvaluationInputComponents},
-      {"maxTessellationEvaluationOutputComponents",
-       limits.maxTessellationEvaluationOutputComponents},
-      {"maxGeometryShaderInvocations", limits.maxGeometryShaderInvocations},
-      {"maxGeometryInputComponents", limits.maxGeometryInputComponents},
-      {"maxGeometryOutputComponents", limits.maxGeometryOutputComponents},
-      {"maxGeometryOutputVertices", limits.maxGeometryOutputVertices},
-      {"maxGeometryTotalOutputComponents",
-       limits.maxGeometryTotalOutputComponents},
-      {"maxFragmentInputComponents", limits.maxFragmentInputComponents},
-      {"maxFragmentOutputAttachments", limits.maxFragmentOutputAttachments},
-      {"maxFragmentDualSrcAttachments", limits.maxFragmentDualSrcAttachments},
-      {"maxFragmentCombinedOutputResources",
-       limits.maxFragmentCombinedOutputResources},
-      {"maxComputeSharedMemorySize", limits.maxComputeSharedMemorySize},
-      {"maxComputeWorkGroupCount",
-       glm::vec3(limits.maxComputeWorkGroupCount[0],
-                 limits.maxComputeWorkGroupCount[1],
-                 limits.maxComputeWorkGroupCount[2])},
-      {"maxComputeWorkGroupInvocations", limits.maxComputeWorkGroupInvocations},
-      {"maxComputeWorkGroupSize", glm::vec3(limits.maxComputeWorkGroupSize[0],
-                                            limits.maxComputeWorkGroupSize[1],
-                                            limits.maxComputeWorkGroupSize[2])},
-      {"subPixelPrecisionBits", limits.subPixelPrecisionBits},
-      {"subTexelPrecisionBits", limits.subTexelPrecisionBits},
-      {"mipmapPrecisionBits", limits.mipmapPrecisionBits},
-      {"maxDrawIndexedIndexValue", limits.maxDrawIndexedIndexValue},
-      {"maxDrawIndirectCount", limits.maxDrawIndirectCount},
-      {"maxSamplerLodBias", limits.maxSamplerLodBias},
-      {"maxSamplerAnisotropy", limits.maxSamplerAnisotropy},
-      {"maxViewports", limits.maxViewports},
-      {"maxViewportDimensions", glm::vec2(limits.maxViewportDimensions[0],
-                                          limits.maxViewportDimensions[1])},
-      {"viewportBoundsRange",
-       glm::vec2(limits.viewportBoundsRange[0], limits.viewportBoundsRange[1])},
-      {"viewportSubPixelBits", limits.viewportSubPixelBits},
-      {"minMemoryMapAlignment",
-       static_cast<uint64_t>(limits.minMemoryMapAlignment)},
-      {"minTexelBufferOffsetAlignment", limits.minTexelBufferOffsetAlignment},
-      {"minUniformBufferOffsetAlignment",
-       limits.minUniformBufferOffsetAlignment},
-      {"minStorageBufferOffsetAlignment",
-       limits.minStorageBufferOffsetAlignment},
-      {"minTexelOffset", limits.minTexelOffset},
-      {"maxTexelOffset", limits.maxTexelOffset},
-      {"minTexelGatherOffset", limits.minTexelGatherOffset},
-      {"maxTexelGatherOffset", limits.maxTexelGatherOffset},
-      {"minInterpolationOffset", limits.minInterpolationOffset},
-      {"maxInterpolationOffset", limits.maxInterpolationOffset},
-      {"subPixelInterpolationOffsetBits",
-       limits.subPixelInterpolationOffsetBits},
-      {"maxFramebufferWidth", limits.maxFramebufferWidth},
-      {"maxFramebufferHeight", limits.maxFramebufferHeight},
-      {"maxFramebufferLayers", limits.maxFramebufferLayers},
-      {"framebufferColorSampleCounts", limits.framebufferColorSampleCounts},
-      {"framebufferDepthSampleCounts", limits.framebufferDepthSampleCounts},
-      {"framebufferStencilSampleCounts", limits.framebufferStencilSampleCounts},
-      {"framebufferNoAttachmentsSampleCounts",
-       limits.framebufferNoAttachmentsSampleCounts},
-      {"maxColorAttachments", limits.maxColorAttachments},
-      {"sampledImageColorSampleCounts", limits.sampledImageColorSampleCounts},
-      {"sampledImageIntegerSampleCounts",
-       limits.sampledImageIntegerSampleCounts},
-      {"sampledImageDepthSampleCounts", limits.sampledImageDepthSampleCounts},
-      {"sampledImageStencilSampleCounts",
-       limits.sampledImageStencilSampleCounts},
-      {"storageImageSampleCounts", limits.storageImageSampleCounts},
-      {"maxSampleMaskWords", limits.maxSampleMaskWords},
-      {"timestampComputeAndGraphics", limits.timestampComputeAndGraphics},
-      {"timestampPeriod", limits.timestampPeriod},
-      {"maxClipDistances", limits.maxClipDistances},
-      {"maxCullDistances", limits.maxCullDistances},
-      {"maxCombinedClipAndCullDistances",
-       limits.maxCombinedClipAndCullDistances},
-      {"discreteQueuePriorities", limits.discreteQueuePriorities},
-      {"pointSizeRange",
-       glm::vec2(limits.pointSizeRange[0], limits.pointSizeRange[1])},
-      {"lineWidthRange",
-       glm::vec2(limits.lineWidthRange[0], limits.lineWidthRange[1])},
-      {"pointSizeGranularity", limits.pointSizeGranularity},
-      {"lineWidthGranularity", limits.lineWidthGranularity},
-      {"strictLines", limits.strictLines},
-      {"standardSampleLocations", limits.standardSampleLocations},
-      {"optimalBufferCopyOffsetAlignment",
-       limits.optimalBufferCopyOffsetAlignment},
-      {"optimalBufferCopyRowPitchAlignment",
-       limits.optimalBufferCopyRowPitchAlignment},
-      {"nonCoherentAtomSize", limits.nonCoherentAtomSize}};
+  PhysicalDeviceLimits limits;
+  limits.maxImageDimension1D = vkLimits.maxImageDimension1D;
+  limits.maxImageDimension2D = vkLimits.maxImageDimension2D;
+  limits.maxImageDimension3D = vkLimits.maxImageDimension3D;
+  limits.maxImageDimensionCube = vkLimits.maxImageDimensionCube;
+  limits.maxImageArrayLayers = vkLimits.maxImageArrayLayers;
+  limits.maxTexelBufferElements = vkLimits.maxTexelBufferElements;
+  limits.maxUniformBufferRange = vkLimits.maxUniformBufferRange;
+  limits.maxStorageBufferRange = vkLimits.maxStorageBufferRange;
+  limits.maxPushConstantsSize = vkLimits.maxPushConstantsSize;
+  limits.maxMemoryAllocationCount = vkLimits.maxMemoryAllocationCount;
+  limits.maxSamplerAllocationCount = vkLimits.maxSamplerAllocationCount;
+  limits.bufferImageGranularity = vkLimits.bufferImageGranularity;
+  limits.sparseAddressSpaceSize = vkLimits.sparseAddressSpaceSize;
+  limits.maxBoundDescriptorSets = vkLimits.maxBoundDescriptorSets;
+  limits.maxPerStageDescriptorSamplers = vkLimits.maxPerStageDescriptorSamplers;
+  limits.maxPerStageDescriptorUniformBuffers =
+      vkLimits.maxPerStageDescriptorUniformBuffers;
+  limits.maxPerStageDescriptorStorageBuffers =
+      vkLimits.maxPerStageDescriptorStorageBuffers;
+  limits.maxPerStageDescriptorSampledImages =
+      vkLimits.maxPerStageDescriptorSampledImages;
+  limits.maxPerStageDescriptorStorageImages =
+      vkLimits.maxPerStageDescriptorStorageImages;
+  limits.maxPerStageDescriptorInputAttachments =
+      vkLimits.maxPerStageDescriptorInputAttachments;
+  limits.maxPerStageResources = vkLimits.maxPerStageResources;
+  limits.maxDescriptorSetSamplers = vkLimits.maxDescriptorSetSamplers;
+  limits.maxDescriptorSetUniformBuffers =
+      vkLimits.maxDescriptorSetUniformBuffers;
+  limits.maxDescriptorSetUniformBuffersDynamic =
+      vkLimits.maxDescriptorSetUniformBuffersDynamic;
+  limits.maxDescriptorSetStorageBuffers =
+      vkLimits.maxDescriptorSetStorageBuffers;
+  limits.maxDescriptorSetStorageBuffersDynamic =
+      vkLimits.maxDescriptorSetStorageBuffersDynamic;
+  limits.maxDescriptorSetSampledImages = vkLimits.maxDescriptorSetSampledImages;
+  limits.maxDescriptorSetStorageImages = vkLimits.maxDescriptorSetStorageImages;
+  limits.maxDescriptorSetInputAttachments =
+      vkLimits.maxDescriptorSetInputAttachments;
+  limits.maxVertexInputAttributes = vkLimits.maxVertexInputAttributes;
+  limits.maxVertexInputBindings = vkLimits.maxVertexInputBindings;
+  limits.maxVertexInputAttributeOffset = vkLimits.maxVertexInputAttributeOffset;
+  limits.maxVertexInputBindingStride = vkLimits.maxVertexInputBindingStride;
+  limits.maxVertexOutputComponents = vkLimits.maxVertexOutputComponents;
+  limits.maxFragmentInputComponents = vkLimits.maxFragmentInputComponents;
+  limits.maxFragmentOutputAttachments = vkLimits.maxFragmentOutputAttachments;
+  limits.maxFragmentDualSrcAttachments = vkLimits.maxFragmentDualSrcAttachments;
+  limits.maxFragmentCombinedOutputResources =
+      vkLimits.maxFragmentCombinedOutputResources;
+  limits.maxComputeSharedMemorySize = vkLimits.maxComputeSharedMemorySize;
+  limits.maxComputeWorkGroupCount = {vkLimits.maxComputeWorkGroupCount[0],
+                                     vkLimits.maxComputeWorkGroupCount[1],
+                                     vkLimits.maxComputeWorkGroupCount[2]};
+  limits.maxComputeWorkGroupInvocations =
+      vkLimits.maxComputeWorkGroupInvocations;
+  limits.maxComputeWorkGroupSize = {vkLimits.maxComputeWorkGroupSize[0],
+                                    vkLimits.maxComputeWorkGroupSize[1],
+                                    vkLimits.maxComputeWorkGroupSize[2]};
+  limits.subPixelPrecisionBits = vkLimits.subPixelPrecisionBits;
+  limits.subTexelPrecisionBits = vkLimits.subTexelPrecisionBits;
+  limits.mipmapPrecisionBits = vkLimits.mipmapPrecisionBits;
+  limits.maxDrawIndexedIndexValue = vkLimits.maxDrawIndexedIndexValue;
+  limits.maxDrawIndirectCount = vkLimits.maxDrawIndirectCount;
+  limits.maxSamplerLodBias = vkLimits.maxSamplerLodBias;
+  limits.maxSamplerAnisotropy = vkLimits.maxSamplerAnisotropy;
+  limits.maxViewports = vkLimits.maxViewports;
+  limits.maxViewportDimensions = {vkLimits.maxViewportDimensions[0],
+                                  vkLimits.maxViewportDimensions[1]};
+  limits.viewportBoundsRange = {vkLimits.viewportBoundsRange[0],
+                                vkLimits.viewportBoundsRange[1]};
+  limits.viewportSubPixelBits = vkLimits.viewportSubPixelBits;
+  limits.minMemoryMapAlignment = vkLimits.minMemoryMapAlignment;
+  limits.minTexelBufferOffsetAlignment = vkLimits.minTexelBufferOffsetAlignment;
+  limits.minUniformBufferOffsetAlignment =
+      vkLimits.minUniformBufferOffsetAlignment;
+  limits.minStorageBufferOffsetAlignment =
+      vkLimits.minStorageBufferOffsetAlignment;
+  limits.minTexelOffset = vkLimits.minTexelOffset;
+  limits.maxTexelOffset = vkLimits.maxTexelOffset;
+  limits.minTexelGatherOffset = vkLimits.minTexelGatherOffset;
+  limits.maxTexelGatherOffset = vkLimits.maxTexelGatherOffset;
+  limits.minInterpolationOffset = vkLimits.minInterpolationOffset;
+  limits.maxInterpolationOffset = vkLimits.maxInterpolationOffset;
+  limits.subPixelInterpolationOffsetBits =
+      vkLimits.subPixelInterpolationOffsetBits;
+  limits.maxFramebufferWidth = vkLimits.maxFramebufferWidth;
+  limits.maxFramebufferHeight = vkLimits.maxFramebufferHeight;
+  limits.maxFramebufferLayers = vkLimits.maxFramebufferLayers;
+  limits.framebufferColorSampleCounts = vkLimits.framebufferColorSampleCounts;
+  limits.framebufferDepthSampleCounts = vkLimits.framebufferDepthSampleCounts;
+  limits.framebufferStencilSampleCounts =
+      vkLimits.framebufferStencilSampleCounts;
+  limits.maxColorAttachments = vkLimits.maxColorAttachments;
+  limits.sampledImageColorSampleCounts = vkLimits.sampledImageColorSampleCounts;
+  limits.sampledImageIntegerSampleCounts =
+      vkLimits.sampledImageIntegerSampleCounts;
+  limits.sampledImageDepthSampleCounts = vkLimits.sampledImageDepthSampleCounts;
+  limits.sampledImageStencilSampleCounts =
+      vkLimits.sampledImageStencilSampleCounts;
+  limits.storageImageSampleCounts = vkLimits.storageImageSampleCounts;
+  limits.maxSampleMaskWords = vkLimits.maxSampleMaskWords;
+  limits.timestampComputeAndGraphics = vkLimits.timestampComputeAndGraphics;
+  limits.timestampPeriod = vkLimits.timestampPeriod;
+  limits.maxClipDistances = vkLimits.maxClipDistances;
+  limits.maxCullDistances = limits.maxCullDistances;
+  limits.maxCombinedClipAndCullDistances =
+      limits.maxCombinedClipAndCullDistances;
+  limits.discreteQueuePriorities = limits.discreteQueuePriorities;
+  limits.pointSizeRange = {limits.pointSizeRange[0], limits.pointSizeRange[1]};
+  limits.lineWidthRange = {limits.lineWidthRange[0], limits.lineWidthRange[1]};
+  limits.pointSizeGranularity = limits.pointSizeGranularity;
+  limits.lineWidthGranularity = limits.lineWidthGranularity;
+  limits.strictLines = limits.strictLines;
+  limits.standardSampleLocations = limits.standardSampleLocations;
+  limits.optimalBufferCopyOffsetAlignment =
+      limits.optimalBufferCopyOffsetAlignment;
+  limits.optimalBufferCopyRowPitchAlignment =
+      limits.optimalBufferCopyRowPitchAlignment;
+  limits.nonCoherentAtomSize = limits.nonCoherentAtomSize;
 
-  PhysicalDeviceInformation::Limits deviceLimits{};
-  deviceLimits.minUniformBufferOffsetAlignment =
-      static_cast<uint32_t>(limits.minUniformBufferOffsetAlignment);
-  deviceLimits.framebufferColorSampleCounts =
-      static_cast<uint32_t>(limits.framebufferColorSampleCounts);
-  deviceLimits.framebufferDepthSampleCounts =
-      static_cast<uint32_t>(limits.framebufferDepthSampleCounts);
-
-  return PhysicalDeviceInformation(mName, type, propertiesMap, limitsMap,
-                                   deviceLimits);
+  return PhysicalDeviceInformation(mName, properties, limits);
 }
 
 } // namespace liquid::rhi

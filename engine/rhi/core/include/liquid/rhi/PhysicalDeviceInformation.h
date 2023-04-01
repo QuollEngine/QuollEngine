@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/core/Property.h"
+#include "PhysicalDeviceLimits.h"
 
 namespace liquid::rhi {
 
@@ -13,56 +14,62 @@ enum class PhysicalDeviceType {
 };
 
 /**
+ * @brief Physical device properties
+ */
+struct PhysicalDeviceProperties {
+  /**
+   * Device type
+   */
+  PhysicalDeviceType type;
+
+  /**
+   * API name
+   */
+  String apiName;
+
+  /**
+   * API version
+   */
+  uint32_t apiVersion;
+
+  /**
+   * Driver version
+   */
+  uint32_t driverVersion;
+
+  /**
+   * Vendor ID
+   */
+  uint32_t vendorId;
+
+  /**
+   * Device ID
+   */
+  uint32_t deviceId;
+};
+
+/**
  * @brief Physical device information
  */
 class PhysicalDeviceInformation {
 public:
   /**
-   * Unordered property map
-   */
-  using UnorderedPropertyMap = std::vector<std::pair<String, Property>>;
-
-  /**
-   * @brief Device limits
-   */
-  struct Limits {
-    /**
-     * Minimum uniform buffer alignment offset
-     */
-    uint32_t minUniformBufferOffsetAlignment = 0;
-
-    /**
-     * Framebuffer color sample counts
-     */
-    uint32_t framebufferColorSampleCounts = 0;
-
-    /**
-     * Framebuffer depth sample counts
-     */
-    uint32_t framebufferDepthSampleCounts = 0;
-  };
-
-public:
-  /**
    * @brief Create physical device information
    *
    * @param name Device name
-   * @param type Device type
    * @param properties Device properties
-   * @param rawLimits Device limits (raw)
    * @param limits Device limits
    */
-  PhysicalDeviceInformation(StringView name, PhysicalDeviceType type,
-                            const UnorderedPropertyMap &properties,
-                            const UnorderedPropertyMap &rawLimits,
-                            const Limits &limits);
+  PhysicalDeviceInformation(StringView name,
+                            const PhysicalDeviceProperties &properties,
+                            const PhysicalDeviceLimits &limits);
 
   /**
    * @brief Get device type
    *
    * @return Physical device type
    */
-  inline const PhysicalDeviceType getType() const { return mType; }
+  inline const PhysicalDeviceType getType() const { return mProperties.type; }
 
   /**
    * @brief Get device name
@@ -76,7 +83,7 @@ public:
    *
    * @return Device properties
    */
-  inline const UnorderedPropertyMap &getProperties() const {
+  inline const PhysicalDeviceProperties &getProperties() const {
     return mProperties;
   }
 
@@ -85,14 +92,7 @@ public:
    *
    * @return Device limits
    */
-  inline const UnorderedPropertyMap &getRawLimits() const { return mRawLimits; }
-
-  /**
-   * @brief Get device limits
-   *
-   * @return Device limits
-   */
-  inline const Limits &getLimits() const { return mLimits; }
+  inline const PhysicalDeviceLimits &getLimits() const { return mLimits; }
 
   /**
    * @brief Get type string proeprties
@@ -103,11 +103,8 @@ public:
 
 private:
   String mName;
-  PhysicalDeviceType mType;
-
-  UnorderedPropertyMap mProperties;
-  UnorderedPropertyMap mRawLimits;
-  Limits mLimits;
+  PhysicalDeviceProperties mProperties;
+  PhysicalDeviceLimits mLimits;
 };
 
 } // namespace liquid::rhi
