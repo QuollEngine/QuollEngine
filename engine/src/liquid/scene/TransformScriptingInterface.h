@@ -51,13 +51,31 @@ public:
   static int setPosition(void *state);
 
   /**
+   * @brief Get rotation
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int getRotation(void *state);
+
+  /**
+   * @brief Set rotation
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int setRotation(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 4> Fields{
+  static constexpr std::array<InterfaceField, 6> Fields{
       InterfaceField{"get_scale", getScale},
       InterfaceField{"set_scale", setScale},
       InterfaceField{"get_position", getPosition},
-      InterfaceField{"set_position", setPosition}};
+      InterfaceField{"set_position", setPosition},
+      InterfaceField{"get_rotation", getRotation},
+      InterfaceField{"set_rotation", setRotation}};
 
   /**
    * @brief Get component name in scripts

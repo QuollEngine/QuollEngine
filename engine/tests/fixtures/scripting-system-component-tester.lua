@@ -133,6 +133,46 @@ function local_transform_scale_set_invalid()
     entity.local_transform:set_scale(1.0, 1.0, {})
 end
 
+
+local_rotation_x = 0
+local_rotation_y = 0
+local_rotation_z = 0
+function local_transform_rotation_get()
+    local_rotation_x, local_rotation_y, local_rotation_z = entity.local_transform:get_rotation()
+end
+
+function local_transform_rotation_get_invalid()
+    local_rotation_x, local_rotation_y, local_rotation_z = entity.local_transform.get_rotation()
+end
+
+function local_transform_rotation_set()
+    entity.local_transform:set_rotation(35.0, 25.0, 45.0)
+end
+
+function local_transform_rotation_set_invalid()
+    entity.local_transform.set_rotation(1.0, 1.0, 1.0)
+
+    entity.local_transform:set_rotation(nil, 1.0, 1.0)
+    entity.local_transform:set_rotation(1.0, nil, 1.0)
+    entity.local_transform:set_rotation(1.0, 1.0, nil)
+
+    entity.local_transform:set_rotation("string", 1.0, 1.0)
+    entity.local_transform:set_rotation(1.0, "string", 1.0)
+    entity.local_transform:set_rotation(1.0, 1.0, "string")
+
+    entity.local_transform:set_rotation(true, 1.0, 1.0)
+    entity.local_transform:set_rotation(1.0, true, 1.0)
+    entity.local_transform:set_rotation(1.0, 1.0, true)
+
+    entity.local_transform:set_rotation(local_transform_rotation_set, 1.0, 1.0)
+    entity.local_transform:set_rotation(1.0, local_transform_rotation_set, 1.0)
+    entity.local_transform:set_rotation(1.0, 1.0, local_transform_rotation_set)
+
+    entity.local_transform:set_rotation({}, 1.0, 1.0)
+    entity.local_transform:set_rotation(1.0, {}, 1.0)
+    entity.local_transform:set_rotation(1.0, 1.0, {})
+end
+
 -- Rigid body
 function rigid_body_apply_force()
     entity.rigid_body:apply_force(10.0, 0.2, 5.0);
