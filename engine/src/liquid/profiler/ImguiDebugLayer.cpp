@@ -129,27 +129,6 @@ void ImguiDebugLayer::renderPhysicalDeviceInfo() {
 
     ImGui::EndTable();
   }
-
-  ImGui::Text("Properties");
-  renderPropertyMapAsTable(mPhysicalDeviceInfo.getProperties());
-
-  ImGui::Text("Limits");
-  renderPropertyMapAsTable(mPhysicalDeviceInfo.getRawLimits());
-  ImGui::End();
-}
-
-void ImguiDebugLayer::renderPropertyMapAsTable(
-    const std::vector<std::pair<String, Property>> &properties) {
-  if (ImGui::BeginTable("Table", 2,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch |
-                            ImGuiTableFlags_RowBg)) {
-
-    for (const auto &[name, value] : properties) {
-      renderTableRow(name, value.toString());
-    }
-    ImGui::EndTable();
-  }
 }
 
 void ImguiDebugLayer::renderTableRow(StringView header, StringView value) {

@@ -40,8 +40,7 @@ void MockRenderDevice::waitForIdle() {
 }
 
 const PhysicalDeviceInformation MockRenderDevice::getDeviceInformation() {
-  return PhysicalDeviceInformation("MockDevice", PhysicalDeviceType::CPU, {},
-                                   {}, {});
+  return PhysicalDeviceInformation("MockDevice", {}, {});
 }
 
 const DeviceStats &MockRenderDevice::getDeviceStats() const {

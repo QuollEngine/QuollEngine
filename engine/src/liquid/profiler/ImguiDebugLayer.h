@@ -59,14 +59,6 @@ private:
    */
   void renderTableRow(StringView header, StringView value);
 
-  /**
-   * @brief Render property map as a table
-   *
-   * @param properties Properties
-   */
-  void renderPropertyMapAsTable(
-      const std::vector<std::pair<String, Property>> &properties);
-
 private:
   rhi::PhysicalDeviceInformation mPhysicalDeviceInfo;
   const FPSCounter &mFpsCounter;
