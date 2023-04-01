@@ -2,6 +2,23 @@
 
 namespace liquid {
 
+enum class LuaScriptVariableType { String, AssetPrefab, Invalid };
+
+/**
+ * @brief Lua script variable
+ */
+struct LuaScriptVariable {
+  /**
+   * Variable type
+   */
+  LuaScriptVariableType type{LuaScriptVariableType::Invalid};
+
+  /**
+   * Variable name
+   */
+  String name;
+};
+
 /**
  * @brief Lua script asset data
  */
@@ -9,7 +26,12 @@ struct LuaScriptAsset {
   /**
    * Bytes that represent the script
    */
-  std::vector<char> bytes;
+  std::vector<uint8_t> bytes;
+
+  /**
+   * Variables
+   */
+  std::unordered_map<String, LuaScriptVariable> variables;
 };
 
 } // namespace liquid

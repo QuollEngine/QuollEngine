@@ -14,7 +14,7 @@ public:
                          const liquid::String &functionName) {
     auto handle =
         assetCache
-            .loadLuaScriptFromFile(std::filesystem::current_path() /
+            .loadLuaScriptFromFile(FixturesPath /
                                    "scripting-system-component-tester.lua")
             .getData();
 

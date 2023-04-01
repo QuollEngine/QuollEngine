@@ -12,6 +12,15 @@
 
 namespace liquid::editor {
 
+static const String LuaScriptTemplate = R"""(function start()
+  -- Initialize your data here
+end
+
+function update(dt)
+  -- Update data here
+end
+)""";
+
 const std::vector<String> AssetManager::TextureExtensions{"png", "jpg", "jpeg",
                                                           "bmp", "tga", "ktx2"};
 const std::vector<String> AssetManager::ScriptExtensions{"lua"};
@@ -160,6 +169,7 @@ Result<Path> AssetManager::createLuaScript(const Path &assetPath) {
   auto originalAssetPath = assetPath;
   originalAssetPath.replace_extension("lua");
   std::ofstream stream(originalAssetPath);
+  stream << LuaScriptTemplate;
   stream.close();
 
   auto res = loadOriginalAsset(originalAssetPath);
@@ -220,8 +230,12 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
     }
 
     auto res = loadOriginalIfChanged(entry.path());
-    warnings.insert(warnings.end(), res.getWarnings().begin(),
-                    res.getWarnings().end());
+    if (res.hasError()) {
+      warnings.push_back(res.getError());
+    } else {
+      warnings.insert(warnings.end(), res.getWarnings().begin(),
+                      res.getWarnings().end());
+    }
   }
 
   auto res = mAssetCache.preloadAssets(renderStorage);
@@ -338,10 +352,14 @@ Result<Path> AssetManager::loadOriginalScript(const Path &originalAssetPath) {
     if (res.hasData()) {
       return Result<Path>::Ok(engineAssetPath);
     }
+
     std::filesystem::remove(engineAssetPath);
+    return Result<Path>::Error("Failed to evaluate script " +
+                               originalAssetPath.string() + ": " +
+                               res.getError());
   }
 
-  return Result<Path>::Error("Cannot load script file");
+  return Result<Path>::Error("Cannot import script due to I/O error");
 }
 
 Result<Path> AssetManager::loadOriginalFont(const Path &originalAssetPath) {

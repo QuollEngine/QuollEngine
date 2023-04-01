@@ -1337,7 +1337,8 @@ TEST_F(SceneLoaderScriptTest,
   EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
 }
 
-TEST_F(SceneLoaderScriptTest, CreatesScriptComponentWithFileDataIfValidField) {
+TEST_F(SceneLoaderScriptTest,
+       CreatesScriptComponentWithFileDataIfStringFieldWithValidPath) {
   liquid::AssetData<liquid::LuaScriptAsset> data{};
   data.relativePath = liquid::Path("test") / "hello.lua";
   auto handle = assetRegistry.getLuaScripts().addAsset(data);
@@ -1348,6 +1349,45 @@ TEST_F(SceneLoaderScriptTest, CreatesScriptComponentWithFileDataIfValidField) {
 
   EXPECT_TRUE(entityDatabase.has<liquid::Script>(entity));
   EXPECT_EQ(entityDatabase.get<liquid::Script>(entity).handle, handle);
+}
+
+TEST_F(SceneLoaderScriptTest,
+       CreatesScriptComponentWithFileAndVariablesIfMapWithValidPath) {
+  liquid::AssetData<liquid::LuaScriptAsset> data{};
+  data.relativePath = liquid::Path("test") / "hello.lua";
+  auto handle = assetRegistry.getLuaScripts().addAsset(data);
+
+  liquid::AssetData<liquid::PrefabAsset> prefabData{};
+  prefabData.relativePath = liquid::Path("test") / "my-prefab.lqprefab";
+  auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefabData);
+
+  auto [node, entity] = createNode();
+  node["components"]["script"]["asset"] = data.relativePath.string();
+  node["components"]["script"]["variables"]["test_str"]["type"] = "string";
+  node["components"]["script"]["variables"]["test_str"]["value"] =
+      "Test string";
+  node["components"]["script"]["variables"]["test_valid_prefab"]["type"] =
+      "prefab";
+  node["components"]["script"]["variables"]["test_valid_prefab"]["value"] =
+      prefabData.relativePath.string();
+  node["components"]["script"]["variables"]["test_invalid_prefab"]["type"] =
+      "prefab";
+  node["components"]["script"]["variables"]["test_invalid_prefab"]["value"] =
+      "unknown-prefab-file.lqprefab";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::Script>(entity));
+  const auto &script = entityDatabase.get<liquid::Script>(entity);
+
+  EXPECT_EQ(script.handle, handle);
+
+  // Invalid prefab is ignored
+  EXPECT_FALSE(script.variables.contains("test_invalid_prefab"));
+  EXPECT_EQ(script.variables.at("test_str").get<liquid::String>(),
+            "Test string");
+  EXPECT_EQ(
+      script.variables.at("test_valid_prefab").get<liquid::PrefabAssetHandle>(),
+      prefabHandle);
 }
 
 using SceneLoaderTextTest = SceneLoaderTest;

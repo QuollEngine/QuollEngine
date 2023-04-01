@@ -14,6 +14,10 @@ LuaScope::LuaScope(void *scope) : mScope(static_cast<lua_State *>(scope)) {}
 
 void LuaScope::pop(int count) { lua_pop(mScope, count); }
 
+void LuaScope::error(const String &error) {
+  luaL_error(mScope, "%s", error.c_str());
+}
+
 void LuaScope::stackDump() {
   int top = lua_gettop(mScope);
   for (int i = 1; i <= top; i++) {

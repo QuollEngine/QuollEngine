@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   liquid::AssetCache cache;
 };

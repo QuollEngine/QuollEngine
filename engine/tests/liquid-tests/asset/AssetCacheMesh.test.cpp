@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   liquid::AssetData<liquid::MeshAsset> createRandomizedMeshAsset() {
     liquid::AssetData<liquid::MeshAsset> asset;
@@ -53,7 +53,7 @@ public:
 
         liquid::AssetData<liquid::MaterialAsset> material;
         material.path =
-            liquid::Path(std::filesystem::current_path() / "materials" /
+            liquid::Path(FixturesPath / "materials" /
                          ("material-geom-" + std::to_string(i) + ".lqmat"));
 
         geometry.material =
@@ -113,7 +113,7 @@ public:
 
       liquid::AssetData<liquid::MaterialAsset> material;
       material.path =
-          liquid::Path(std::filesystem::current_path() / "materials" /
+          liquid::Path(FixturesPath / "materials" /
                        ("material-geom-" + std::to_string(i) + ".lqmat"));
 
       geometry.material = cache.getRegistry().getMaterials().addAsset(material);
@@ -274,7 +274,7 @@ TEST_F(AssetCacheTest, LoadsMeshFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
-  auto textureHandle = cache.loadTextureFromFile("1x1-2d.ktx");
+  auto textureHandle = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";
   materialData.data.baseColorTexture = textureHandle.getData();
@@ -480,7 +480,7 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
-  auto textureHandle = cache.loadTextureFromFile("1x1-2d.ktx");
+  auto textureHandle = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> materialData{};
   materialData.name = "test-mesh-material";
   materialData.data.baseColorTexture = textureHandle.getData();

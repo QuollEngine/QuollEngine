@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   liquid::AssetData<liquid::PrefabAsset> createPrefabAsset() {
     liquid::AssetData<liquid::PrefabAsset> asset;
@@ -62,8 +62,8 @@ public:
 
     for (uint32_t i = 0; i < numMeshes; ++i) {
       liquid::AssetData<liquid::MeshAsset> mesh;
-      mesh.path = std::filesystem::current_path() /
-                  ("meshes/mesh-" + std::to_string(i) + ".lqmesh");
+      mesh.path =
+          FixturesPath / ("meshes/mesh-" + std::to_string(i) + ".lqmesh");
       auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
       asset.data.meshes.push_back({i, handle});
     }
@@ -78,8 +78,8 @@ public:
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkinnedMeshAsset> mesh;
-      mesh.path = std::filesystem::current_path() /
-                  ("meshes/smesh-" + std::to_string(i) + ".lqmesh");
+      mesh.path =
+          FixturesPath / ("meshes/smesh-" + std::to_string(i) + ".lqmesh");
       auto handle = cache.getRegistry().getSkinnedMeshes().addAsset(mesh);
       asset.data.skinnedMeshes.push_back({i, handle});
     }
@@ -94,8 +94,8 @@ public:
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkeletonAsset> skeleton;
-      skeleton.path = std::filesystem::current_path() /
-                      ("skeletons/skel-" + std::to_string(i) + ".lqskel");
+      skeleton.path =
+          FixturesPath / ("skeletons/skel-" + std::to_string(i) + ".lqskel");
       auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
       asset.data.skeletons.push_back({i, handle});
     }
@@ -111,8 +111,8 @@ public:
     asset.data.animators.resize(numAnimators);
     for (uint32_t i = 0; i < numAnimators * numAnimationsPerAnimator; ++i) {
       liquid::AssetData<liquid::AnimationAsset> animation;
-      animation.path = std::filesystem::current_path() /
-                       ("skeletons/anim-" + std::to_string(i) + ".lqanim");
+      animation.path =
+          FixturesPath / ("skeletons/anim-" + std::to_string(i) + ".lqanim");
       auto handle = cache.getRegistry().getAnimations().addAsset(animation);
 
       uint32_t entityId = (i / numAnimationsPerAnimator);
@@ -164,7 +164,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto expectedString =
           std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    std::filesystem::current_path())
+                                    FixturesPath)
               .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
@@ -185,7 +185,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto expectedString =
           std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    std::filesystem::current_path())
+                                    FixturesPath)
               .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
@@ -206,7 +206,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto expectedString =
           std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    std::filesystem::current_path())
+                                    FixturesPath)
               .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
@@ -230,8 +230,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
       auto animation = expected.at(entityId).value.animations.at(i % 3);
 
       auto expectedString =
-          std::filesystem::relative(map.getAsset(animation).path,
-                                    std::filesystem::current_path())
+          std::filesystem::relative(map.getAsset(animation).path, FixturesPath)
               .string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
@@ -281,9 +280,8 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.meshes.at(i).value);
 
-      auto expectedString = std::filesystem::relative(
-                                expected.path, std::filesystem::current_path())
-                                .string();
+      auto expectedString =
+          std::filesystem::relative(expected.path, FixturesPath).string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
       EXPECT_EQ(expectedString, actualMeshes.at(meshIndex));
@@ -306,9 +304,8 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.skinnedMeshes.at(i).value);
 
-      auto expectedString = std::filesystem::relative(
-                                expected.path, std::filesystem::current_path())
-                                .string();
+      auto expectedString =
+          std::filesystem::relative(expected.path, FixturesPath).string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
       EXPECT_EQ(expectedString, actualSkinnedMeshes.at(meshIndex));
@@ -331,9 +328,8 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.skeletons.at(i).value);
 
-      auto expectedString = std::filesystem::relative(
-                                expected.path, std::filesystem::current_path())
-                                .string();
+      auto expectedString =
+          std::filesystem::relative(expected.path, FixturesPath).string();
       std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
       EXPECT_EQ(expectedString, actualSkeletons.at(skeletonIndex));
@@ -366,9 +362,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
             map.getAsset(asset.data.animators.at(i).value.animations.at(j));
 
         auto expectedString =
-            std::filesystem::relative(expected.path,
-                                      std::filesystem::current_path())
-                .string();
+            std::filesystem::relative(expected.path, FixturesPath).string();
         std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
 
         EXPECT_EQ(expectedString, actualAnimations.at(animations.at(j)));
@@ -503,7 +497,7 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
 
 TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
-  auto textureHandle = cache.loadTextureFromFile("1x1-2d.ktx");
+  auto textureHandle = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
 
   // Create material
   liquid::AssetData<liquid::MaterialAsset> materialData{};

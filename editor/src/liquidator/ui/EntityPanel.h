@@ -8,6 +8,7 @@
 
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/actions/EntityScriptingActions.h"
 
 namespace liquid::editor {
 
@@ -150,8 +151,10 @@ private:
    *
    * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void renderScripting(Scene &scene, AssetRegistry &assetRegistry);
+  void renderScripting(Scene &scene, AssetRegistry &assetRegistry,
+                       ActionExecutor &actionExecutor);
 
   /**
    * @brief Render add component button
@@ -187,6 +190,7 @@ private:
   std::optional<PointLight> mPointLight;
   std::optional<PerspectiveLens> mPerspectiveLens;
   std::optional<CascadedShadowMap> mCascadedShadowMap;
+  std::unique_ptr<EntitySetScriptVariable> mSetScriptVariable;
 };
 
 } // namespace liquid::editor

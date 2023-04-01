@@ -6,17 +6,20 @@
 
 #include "liquid-tests/Testing.h"
 
-static liquid::Path EnvDirectory = std::filesystem::current_path() / "test-env";
+static liquid::Path EnvDirectory = FixturesPath / "test-env";
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   void SetUp() override {
     std::filesystem::create_directory(EnvDirectory);
-    std::filesystem::copy("1x1-cubemap.ktx", EnvDirectory / "irradiance.ktx");
-    std::filesystem::copy("1x1-cubemap.ktx", EnvDirectory / "specular.ktx");
-    std::filesystem::copy("1x1-2d.ktx", EnvDirectory / "brdf.ktx");
+    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
+                          EnvDirectory / "irradiance.ktx");
+    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
+                          EnvDirectory / "specular.ktx");
+    std::filesystem::copy(FixturesPath / "1x1-2d.ktx",
+                          EnvDirectory / "brdf.ktx");
   }
 
   void TearDown() override { std::filesystem::remove_all(EnvDirectory); }
@@ -33,7 +36,7 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
-  asset.path = std::filesystem::current_path() / "environment.lqenv";
+  asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
@@ -72,7 +75,7 @@ TEST_F(AssetCacheTest,
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
-  asset.path = std::filesystem::current_path() / "environment.lqenv";
+  asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
@@ -89,7 +92,8 @@ TEST_F(AssetCacheTest,
   }
 
   {
-    std::filesystem::copy("1x1-cubemap.ktx", EnvDirectory / "irradiance.ktx");
+    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
+                          EnvDirectory / "irradiance.ktx");
     std::filesystem::remove(EnvDirectory / "specular.ktx");
     auto res = cache.loadEnvironmentFromFile(createRes.getData());
 
@@ -107,7 +111,7 @@ TEST_F(AssetCacheTest,
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
-  asset.path = std::filesystem::current_path() / "environment.lqenv";
+  asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
@@ -142,7 +146,7 @@ TEST_F(AssetCacheTest,
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "environment.lqenv";
-  asset.path = std::filesystem::current_path() / "environment.lqenv";
+  asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);

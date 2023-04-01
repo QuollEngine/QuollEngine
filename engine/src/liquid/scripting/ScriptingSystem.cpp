@@ -13,11 +13,27 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
 
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("ScriptingSystem::start");
-  ScriptDecorator entityDecorator;
+  ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
   for (auto [entity, component] : entityDatabase.view<Script>()) {
     if (component.started) {
       return;
+    }
+
+    bool valid = true;
+    auto &script = mAssetRegistry.getLuaScripts().getAsset(component.handle);
+    for (auto &[key, value] : script.data.variables) {
+      auto it = component.variables.find(key);
+      if (it == component.variables.end() || !it->second.isType(value.type)) {
+        // TODO: Throw error here
+        valid = false;
+        break;
+      }
+    }
+
+    if (!valid) {
+      deleteList.push_back(entity);
+      continue;
     }
 
     component.started = true;
@@ -26,31 +42,18 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
       mLuaInterpreter.destroyScope(component.scope);
     }
     component.scope = mLuaInterpreter.createScope();
+    scriptDecorator.attachToScope(component.scope, entity, entityDatabase);
+    scriptDecorator.attachVariableInjectors(component.scope,
+                                            component.variables);
 
-    entityDecorator.attachToScope(component.scope, entity, entityDatabase);
-
-    auto &script = mAssetRegistry.getLuaScripts().getAsset(component.handle);
     bool success = mLuaInterpreter.evaluate(script.data.bytes, component.scope);
+    LIQUID_ASSERT(success, "Cannot evaluate script");
 
-    if (success && !component.scope.hasFunction("start")) {
-      Engine::getUserLogger().error()
-          << "`start` function is missing from script";
-      success = false;
-    }
+    scriptDecorator.removeVariableInjectors(component.scope);
 
-    if (success && !component.scope.hasFunction("update")) {
-      Engine::getUserLogger().error()
-          << "`update` function is missing from script";
-      success = false;
-    }
-
-    if (success) {
-      createScriptingData(component, entity);
-      component.scope.luaGetGlobal("start");
-      component.scope.call(0);
-    } else {
-      deleteList.push_back(entity);
-    }
+    createScriptingData(component, entity);
+    component.scope.luaGetGlobal("start");
+    component.scope.call(0);
   }
 
   for (auto entity : deleteList) {

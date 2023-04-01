@@ -298,12 +298,41 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["script"]) {
-    auto path = node["components"]["script"].as<String>("");
+    Script script{};
+    String path;
+    if (node["components"]["script"].IsScalar()) {
+      path = node["components"]["script"].as<String>("");
+    } else if (node["components"]["script"].IsMap()) {
+      path = node["components"]["script"]["asset"].as<String>("");
 
-    auto handle = mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
+      if (node["components"]["script"]["variables"] &&
+          node["components"]["script"]["variables"].IsMap()) {
+        for (const auto &var : node["components"]["script"]["variables"]) {
+          if (!var.second.IsMap()) {
+            continue;
+          }
+          auto name = var.first.as<String>("");
+          auto type = var.second["type"].as<String>("");
+          auto value = var.second["value"].as<String>("");
 
-    if (handle != LuaScriptAssetHandle::Invalid) {
-      mEntityDatabase.set<Script>(entity, {handle});
+          if (type == "string") {
+            script.variables.insert_or_assign(name, value);
+          } else if (type == "prefab") {
+            auto handle =
+                mAssetRegistry.getPrefabs().findHandleByRelativePath(value);
+            if (handle != PrefabAssetHandle::Invalid) {
+              script.variables.insert_or_assign(name, handle);
+            }
+          }
+        }
+      }
+    }
+
+    script.handle =
+        mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
+
+    if (script.handle != LuaScriptAssetHandle::Invalid) {
+      mEntityDatabase.set(entity, script);
     }
   }
 

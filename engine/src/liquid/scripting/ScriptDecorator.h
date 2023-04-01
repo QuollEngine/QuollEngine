@@ -21,6 +21,23 @@ public:
                      EntityDatabase &entityDatabase);
 
   /**
+   * @brief Attach variable injectors
+   *
+   * @param scope Lua scope
+   * @param variables Input variables
+   */
+  void attachVariableInjectors(
+      LuaScope &scope,
+      std::unordered_map<String, LuaScriptInputVariable> &variables);
+
+  /**
+   * @brief Remove variable injectors
+   *
+   * @param scope Lua scope
+   */
+  void removeVariableInjectors(LuaScope &scope);
+
+  /**
    * @brief Create entity table for the given entity
    *
    * @param scope Lua scope

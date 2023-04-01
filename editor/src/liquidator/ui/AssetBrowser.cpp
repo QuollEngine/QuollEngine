@@ -243,13 +243,14 @@ void AssetBrowser::render(AssetManager &assetManager,
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
-            } else if (entry.assetType == AssetType::LuaScript) {
+            } else {
               mFileOpener.openFile(entry.path);
             }
           }
         }
 
-        bool dndAllowed = entry.assetType == AssetType::Mesh ||
+        bool dndAllowed = entry.assetType == AssetType::Prefab ||
+                          entry.assetType == AssetType::Mesh ||
                           entry.assetType == AssetType::SkinnedMesh ||
                           entry.assetType == AssetType::Skeleton ||
                           entry.assetType == AssetType::Texture ||
