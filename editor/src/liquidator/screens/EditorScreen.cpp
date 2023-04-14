@@ -51,7 +51,7 @@ EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
 
 void EditorScreen::start(const Project &project) {
   LogMemoryStorage systemLogStorage, userLogStorage;
-  // Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  Engine::getLogger().setTransport(systemLogStorage.createTransport());
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
   FPSCounter fpsCounter;
@@ -148,18 +148,30 @@ void EditorScreen::start(const Project &project) {
     renderer.getRenderStorage().setFramebufferSize(width, height);
   });
 
-  mWindow.addFocusHandler(
-      [&tracker, &assetManager, &renderer, &ui](bool focused) {
-        if (!focused)
-          return;
+  mWindow.addFocusHandler([&tracker, &preloadStatusDialog, &assetManager,
+                           &renderer, &ui](bool focused) {
+    if (!focused)
+      return;
 
-        const auto &changes = tracker.trackForChanges();
-        for (auto &change : changes) {
-          assetManager.loadOriginalIfChanged(change.path);
-        }
+    const auto &changes = tracker.trackForChanges();
+    std::vector<String> messages;
+    for (auto &change : changes) {
+      auto res = assetManager.loadOriginalIfChanged(change.path);
+      if (res.hasError()) {
+        messages.push_back(res.getError());
+      } else {
+        messages.insert(messages.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+      }
+    }
 
-        ui.getAssetBrowser().reload();
-      });
+    ui.getAssetBrowser().reload();
+
+    if (!messages.empty()) {
+      preloadStatusDialog.setMessages(messages);
+      preloadStatusDialog.show();
+    }
+  });
 
   ui.processShortcuts(mEventSystem);
 

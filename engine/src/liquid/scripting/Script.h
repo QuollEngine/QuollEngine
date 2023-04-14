@@ -3,6 +3,7 @@
 #include "ScriptHandle.h"
 #include "liquid/asset/Asset.h"
 #include "liquid/events/EventObserver.h"
+#include "liquid/scripting/LuaScriptInputVariable.h"
 
 #include "LuaScope.h"
 
@@ -29,6 +30,11 @@ struct Script {
    * Lua scope
    */
   LuaScope scope;
+
+  /**
+   * Input variables
+   */
+  std::unordered_map<String, LuaScriptInputVariable> variables;
 
   /**
    * Collision start observer

@@ -140,8 +140,6 @@ int TransformScriptingInterface::LuaInterface::setRotation(void *state) {
   newRotation.y = scope.get<float>(3);
   newRotation.z = scope.get<float>(4);
 
-  std::cout << "Set rotation: " << glm::to_string(newRotation) << "\n";
-
   newRotation = glm::radians(newRotation);
   scope.pop(4);
 

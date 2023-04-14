@@ -66,19 +66,6 @@ project "LiquidEngineTest"
     linkGoogleTest{}
 
     postbuildcommands {
-        "{COPYFILE} ../../engine/tests/fixtures/white-image-100x100.png %{cfg.buildtarget.directory}/white-image-100x100.png",
-        "{COPYFILE} ../../engine/tests/fixtures/1x1-cubemap.ktx %{cfg.buildtarget.directory}/1x1-cubemap.ktx",
-        "{COPYFILE} ../../engine/tests/fixtures/1x1-2d.ktx %{cfg.buildtarget.directory}/1x1-2d.ktx",
-        "{COPYFILE} ../../engine/tests/fixtures/1x1-1d.ktx %{cfg.buildtarget.directory}/1x1-1d.ktx",
-        "{COPYFILE} ../../engine/tests/fixtures/component-script.lua %{cfg.buildtarget.directory}/component-script.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/component-script-2.lua %{cfg.buildtarget.directory}/component-script-2.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-tester.lua %{cfg.buildtarget.directory}/scripting-system-tester.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-component-tester.lua %{cfg.buildtarget.directory}/scripting-system-component-tester.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-logging-tester.lua %{cfg.buildtarget.directory}/scripting-system-logging-tester.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-no-start.lua %{cfg.buildtarget.directory}/scripting-system-no-start.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-no-update.lua %{cfg.buildtarget.directory}/scripting-system-no-update.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/scripting-system-invalid-syntax.lua %{cfg.buildtarget.directory}/scripting-system-invalid-syntax.lua",
-        "{COPYFILE} ../../engine/tests/fixtures/valid-audio.wav %{cfg.buildtarget.directory}/valid-audio.wav",
-        "{COPYFILE} ../../engine/tests/fixtures/valid-audio.mp3 %{cfg.buildtarget.directory}/valid-audio.mp3"
+        "{COPYDIR} ../../engine/tests/fixtures %{cfg.buildtarget.directory}/fixtures"
     }
 

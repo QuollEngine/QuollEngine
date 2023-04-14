@@ -16,9 +16,7 @@ liquid::LuaScope &
 LuaScriptingInterfaceTestBase::call(liquid::Entity entity,
                                     const liquid::String &functionName) {
   auto handle =
-      assetCache
-          .loadLuaScriptFromFile(std::filesystem::current_path() / mScriptName)
-          .getData();
+      assetCache.loadLuaScriptFromFile(FixturesPath / mScriptName).getData();
 
   entityDatabase.set<liquid::Script>(entity, {handle});
 

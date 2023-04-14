@@ -148,11 +148,6 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::LocalTransform>(entity, {{}, TestQuat, {}});
 
-  std::cout << glm::to_string(glm::quat(glm::radians(
-                   glm::vec3{TestEulerDegrees.y, TestEulerDegrees.x,
-                             TestEulerDegrees.z})))
-            << "\n";
-
   auto &scope = call(entity, "local_transform_rotation_get");
 
   auto actual = glm::vec3{scope.getGlobal<float>("local_rotation_x"),

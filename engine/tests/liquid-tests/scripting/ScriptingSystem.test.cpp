@@ -7,7 +7,7 @@
 class ScriptingSystemTest : public ::testing::Test {
 public:
   ScriptingSystemTest()
-      : assetCache(std::filesystem::current_path()),
+      : assetCache(FixturesPath),
         scriptingSystem(eventSystem, assetCache.getRegistry()) {
     scriptingSystem.observeChanges(entityDatabase);
   }
@@ -23,10 +23,10 @@ using ScriptingSystemDeathTest = ScriptingSystemTest;
 static constexpr float TimeDelta = 0.2f;
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
 
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
@@ -43,10 +43,10 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
 }
 
 TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
 
   static constexpr size_t NumEntities = 20;
 
@@ -87,10 +87,10 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -108,10 +108,10 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -126,10 +126,10 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -145,54 +145,102 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
   EXPECT_EQ(component.scope.getGlobal<int32_t>("value"), -1);
 }
 
-TEST_F(ScriptingSystemTest,
-       DeletesScriptComponentsOnStartIfScriptCannotBeEvaluated) {
+TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
   auto handle =
       assetCache
-          .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                 "scripting-system-invalid-syntax.lua")
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-vars.lua")
           .getData();
+
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
-  scriptingSystem.start(entityDatabase);
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
+  scriptingSystem.start(entityDatabase);
   EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
 }
 
-TEST_F(ScriptingSystemTest,
-       DeletesScriptComponentsOnStartIfScriptDoesNotHaveStartFunction) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-no-start.lua")
-                    .getData();
+TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarTypesAreInvalid) {
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-vars.lua")
+          .getData();
+
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  liquid::Script script{handle};
+  script.variables.insert_or_assign("string_value",
+                                    liquid::PrefabAssetHandle{15});
+  script.variables.insert_or_assign("prefab_value",
+                                    liquid::PrefabAssetHandle{15});
+  entityDatabase.set(entity, script);
+
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
-
   EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
 }
 
-TEST_F(ScriptingSystemTest,
-       DeletesScriptComponentsOnStartIfScriptDoesNotHaveUpdateFunction) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-no-update.lua")
-                    .getData();
+TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-vars.lua")
+          .getData();
+
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  liquid::Script script{handle};
+  script.variables.insert_or_assign("string_value",
+                                    liquid::String("Hello world"));
+  script.variables.insert_or_assign("prefab_value",
+                                    liquid::PrefabAssetHandle{15});
+  entityDatabase.set(entity, script);
+
+  auto &component = entityDatabase.get<liquid::Script>(entity);
+
+  scriptingSystem.start(entityDatabase);
+  ASSERT_TRUE(entityDatabase.has<liquid::Script>(entity));
+
+  EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
+            "Hello world");
+  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
+}
+
+TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-vars.lua")
+          .getData();
+
+  auto entity = entityDatabase.create();
+  liquid::Script script{handle};
+  script.variables.insert_or_assign("string_value",
+                                    liquid::String("Hello world"));
+  script.variables.insert_or_assign("prefab_value",
+                                    liquid::PrefabAssetHandle{15});
+  entityDatabase.set(entity, script);
+
+  auto &component = entityDatabase.get<liquid::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
+  EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
+            "Hello world");
+  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
+
+  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("global_vars"));
+  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("entity"));
+
+  component.scope.luaGetGlobal("update");
+  component.scope.call(0);
+
+  EXPECT_TRUE(component.scope.isGlobal<std::nullptr_t>("global_vars"));
+  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("entity"));
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -208,10 +256,10 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
 
 TEST_F(ScriptingSystemTest,
        DoesNotCallScriptCollisionEventIfEntityDidNotCollide) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -227,10 +275,10 @@ TEST_F(ScriptingSystemTest,
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -248,10 +296,10 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -268,10 +316,10 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 
@@ -288,10 +336,10 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
-  auto handle = assetCache
-                    .loadLuaScriptFromFile(std::filesystem::current_path() /
-                                           "scripting-system-tester.lua")
-                    .getData();
+  auto handle =
+      assetCache
+          .loadLuaScriptFromFile(FixturesPath / "scripting-system-tester.lua")
+          .getData();
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::Script>(entity, {handle});
 

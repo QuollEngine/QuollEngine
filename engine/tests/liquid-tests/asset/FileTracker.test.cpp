@@ -5,8 +5,7 @@
 
 namespace fs = std::filesystem;
 
-static const fs::path fileTrackerPath =
-    std::filesystem::current_path() / "file-tracker-test";
+static const fs::path fileTrackerPath = FixturesPath / "file-tracker-test";
 
 bool compareChangedFiles(liquid::ChangedFile a, liquid::ChangedFile b) {
   return a.path.string() < b.path.string();

@@ -8,7 +8,7 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-inline std::vector<char> readFileIntoBuffer(const liquid::String &fileName) {
+inline std::vector<uint8_t> readFileIntoBuffer(const liquid::Path &fileName) {
   std::ifstream file(fileName);
 
   LIQUID_ASSERT(file.good(), "File cannot be opened");
@@ -16,7 +16,7 @@ inline std::vector<char> readFileIntoBuffer(const liquid::String &fileName) {
   std::ostringstream ss;
   ss << file.rdbuf();
   const std::string &s = ss.str();
-  std::vector<char> bytes(s.begin(), s.end());
+  std::vector<uint8_t> bytes(s.begin(), s.end());
   file.close();
 
   return bytes;
@@ -30,7 +30,7 @@ public:
 TEST_F(LuaInterpreterTest, EvaluateScript) {
   auto scope = interpreter.createScope();
 
-  auto buffer = readFileIntoBuffer("component-script.lua");
+  auto buffer = readFileIntoBuffer(FixturesPath / "component-script.lua");
 
   interpreter.evaluate(buffer, scope);
 

@@ -8,6 +8,7 @@
 #include "liquid/scene/TransformScriptingInterface.h"
 #include "liquid/text/TextScriptingInterface.h"
 
+#include "LuaMessages.h"
 #include "LuaScope.h"
 #include "ScriptDecorator.h"
 #include "ScriptLogger.h"
@@ -75,6 +76,59 @@ void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,
 
   createScriptLogger(scope);
   scope.setPreviousValueAsGlobal("logger");
+}
+
+void ScriptDecorator::attachVariableInjectors(
+    LuaScope &scope,
+    std::unordered_map<String, LuaScriptInputVariable> &variables) {
+  scope.setGlobal<LuaUserData>("__privateVariables",
+                               {static_cast<void *>(&variables)});
+  auto table = scope.createTable(1);
+
+  table.set("register", [](void *state) {
+    LuaScope scope(state);
+    if (!scope.is<String>(1) || !scope.is<uint32_t>(2)) {
+      scope.error(LuaMessages::invalidArguments<String, float>("input_vars",
+                                                               "register"));
+      return 0;
+    }
+
+    auto name = scope.get<String>(1);
+    auto type = scope.get<uint32_t>(2);
+
+    if (type >= static_cast<uint32_t>(LuaScriptVariableType::Invalid)) {
+      scope.error("Variable \"" + name + "\" has invalid type");
+      return 0;
+    }
+
+    auto &data =
+        *static_cast<std::unordered_map<String, LuaScriptInputVariable> *>(
+            scope.getGlobal<LuaUserData>("__privateVariables").pointer);
+
+    auto value = data.at(name);
+    if (value.isType(LuaScriptVariableType::String)) {
+      scope.set(value.get<String>());
+    } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
+      scope.set(static_cast<uint32_t>(value.get<PrefabAssetHandle>()));
+    }
+
+    return 1;
+  });
+
+  auto typesTable = scope.createTable(3);
+  typesTable.set("Invalid",
+                 static_cast<uint32_t>(LuaScriptVariableType::Invalid));
+  typesTable.set("String",
+                 static_cast<uint32_t>(LuaScriptVariableType::String));
+  typesTable.set("AssetPrefab",
+                 static_cast<uint32_t>(LuaScriptVariableType::AssetPrefab));
+  table.set("types", typesTable);
+  scope.setPreviousValueAsGlobal("input_vars");
+}
+
+void ScriptDecorator::removeVariableInjectors(LuaScope &scope) {
+  scope.setGlobal("input_vars", nullptr);
+  scope.setGlobal("__privateVariables", nullptr);
 }
 
 } // namespace liquid

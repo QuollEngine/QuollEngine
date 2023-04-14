@@ -412,7 +412,7 @@ TEST_F(EntitySerializerTest,
   EXPECT_EQ(node["camera"]["aspectRatio"].as<liquid::String>(""), "auto");
 }
 
-// Script
+// Audio
 TEST_F(EntitySerializerTest,
        DoesNotCreateAudioFieldIfAudioComponentDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -470,15 +470,50 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   liquid::AssetData<liquid::LuaScriptAsset> script{};
   script.relativePath = "/scripts/script.lua";
   script.name = "script.lua";
+  script.data.variables.insert_or_assign(
+      "test_str",
+      liquid::LuaScriptVariable{liquid::LuaScriptVariableType::String});
+  script.data.variables.insert_or_assign(
+      "test_prefab",
+      liquid::LuaScriptVariable{liquid::LuaScriptVariableType::AssetPrefab});
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
+  liquid::AssetData<liquid::PrefabAsset> prefab{};
+  prefab.relativePath = "/prefabs/test.lqprefab";
+  prefab.name = "test.lqprefab";
+  auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
+
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+
+  liquid::Script component{handle};
+  component.variables.insert_or_assign("test_str",
+                                       liquid::String("hello world"));
+  component.variables.insert_or_assign("test_str_invalid",
+                                       liquid::String("hello world"));
+  component.variables.insert_or_assign("test_prefab", prefabHandle);
+  entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["script"]);
-  EXPECT_EQ(node["script"].as<liquid::String>(""),
+  EXPECT_EQ(node["script"]["asset"].as<liquid::String>(""),
             script.relativePath.string());
+  EXPECT_TRUE(node["script"]["variables"]);
+
+  EXPECT_FALSE(node["script"]["variables"]["test_str_invalid"]);
+  EXPECT_EQ(
+      node["script"]["variables"]["test_str"]["type"].as<liquid::String>(""),
+      "string");
+  EXPECT_EQ(
+      node["script"]["variables"]["test_str"]["value"].as<liquid::String>(""),
+      "hello world");
+  EXPECT_EQ(
+      node["script"]["variables"]["test_prefab"]["type"].as<liquid::String>(""),
+      "prefab");
+
+  EXPECT_EQ(
+      node["script"]["variables"]["test_prefab"]["value"].as<liquid::String>(
+          ""),
+      prefab.relativePath.string());
 }
 
 // Text

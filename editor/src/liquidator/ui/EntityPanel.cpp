@@ -94,7 +94,7 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
       renderCollidable(scene, actionExecutor);
       renderRigidBody(scene, actionExecutor);
       renderAudio(scene, state.assetRegistry);
-      renderScripting(scene, state.assetRegistry);
+      renderScripting(scene, state.assetRegistry, actionExecutor);
       renderAddComponent(scene, state.assetRegistry, actionExecutor);
       handleDragAndDrop(state.assetRegistry, actionExecutor);
     }
@@ -905,7 +905,8 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry) {
   }
 }
 
-void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry) {
+void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
+                                  ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<Script>(mSelectedEntity)) {
     return;
   }
@@ -913,11 +914,103 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry) {
   static const String SectionName = String(fa::Scroll) + "  Script";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    const auto &scripting = scene.entityDatabase.get<Script>(mSelectedEntity);
-    const auto &asset =
-        assetRegistry.getLuaScripts().getAsset(scripting.handle);
+    auto &script = scene.entityDatabase.get<Script>(mSelectedEntity);
+    const auto &asset = assetRegistry.getLuaScripts().getAsset(script.handle);
 
     ImGui::Text("Name: %s", asset.name.c_str());
+
+    if (!asset.data.variables.empty()) {
+      ImGui::Text("Variables");
+
+      if (script.started) {
+        widgets::Table table("scriptVariables", 3);
+        table.row("Name", "Type", "Value");
+        for (const auto &[name, variable] : asset.data.variables) {
+
+          String type = "Unknown";
+          if (variable.type == LuaScriptVariableType::String) {
+            type = "String";
+          } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
+            type = "Prefab";
+          }
+
+          String value;
+          if (!script.variables.contains(name) ||
+              !script.variables.at(name).isType(variable.type)) {
+            // Do nothing
+          } else if (script.variables.at(name).isType(
+                         LuaScriptVariableType::String)) {
+            value = script.variables.at(name).get<String>();
+          } else if (script.variables.at(name).isType(
+                         LuaScriptVariableType::AssetPrefab)) {
+            auto handle = script.variables.at(name).get<PrefabAssetHandle>();
+            value = assetRegistry.getPrefabs().getAsset(handle).name;
+          }
+
+          table.row(name, type, value);
+        }
+      } else {
+        for (const auto &[name, variable] : asset.data.variables) {
+          LuaScriptInputVariable existingVariable;
+          if (mSetScriptVariable &&
+              mSetScriptVariable->getValue().isType(variable.type) &&
+              mSetScriptVariable->getName() == name) {
+            existingVariable = mSetScriptVariable->getValue();
+          } else if (script.variables.contains(name) &&
+                     script.variables.at(name).isType(variable.type)) {
+            existingVariable = script.variables.at(name);
+          }
+
+          if (variable.type == LuaScriptVariableType::String) {
+            auto it = script.variables.find(name);
+
+            auto value = existingVariable.isType(LuaScriptVariableType::String)
+                             ? existingVariable.get<String>()
+                             : "";
+
+            if (widgets::Input(name, value, false)) {
+              if (!mSetScriptVariable) {
+                mSetScriptVariable.reset(
+                    new EntitySetScriptVariable(mSelectedEntity, name, value));
+              }
+
+              mSetScriptVariable->setValue(value);
+            }
+
+          } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
+            ImGui::Text("%s", name.c_str());
+            auto value =
+                existingVariable.isType(LuaScriptVariableType::AssetPrefab)
+                    ? existingVariable.get<PrefabAssetHandle>()
+                    : PrefabAssetHandle::Invalid;
+
+            const auto width = ImGui::GetWindowContentRegionWidth();
+            const float halfWidth = width * 0.5f;
+            if (value == PrefabAssetHandle::Invalid) {
+              ImGui::Button("Drag prefab here", ImVec2(width, halfWidth));
+            } else {
+              String buttonLabel =
+                  "Replace current prefab: " +
+                  assetRegistry.getPrefabs().getAsset(value).name;
+              ImGui::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+            }
+
+            if (ImGui::BeginDragDropTarget()) {
+              if (auto *payload = ImGui::AcceptDragDropPayload(
+                      getAssetTypeString(AssetType::Prefab).c_str())) {
+                auto handle = *static_cast<PrefabAssetHandle *>(payload->Data);
+                mSetScriptVariable.reset(
+                    new EntitySetScriptVariable(mSelectedEntity, name, handle));
+              }
+            }
+          }
+
+          if (mSetScriptVariable) {
+            actionExecutor.execute(std::move(mSetScriptVariable));
+          }
+        }
+      }
+    }
   }
 }
 

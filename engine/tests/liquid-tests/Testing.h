@@ -2,6 +2,9 @@
 
 #include "liquid/entity/Entity.h"
 
+static const liquid::Path FixturesPath =
+    std::filesystem::current_path() / "fixtures";
+
 namespace glm {
 
 template <length_t L, typename T, qualifier Q>

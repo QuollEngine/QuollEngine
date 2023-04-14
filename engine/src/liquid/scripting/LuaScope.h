@@ -187,6 +187,13 @@ public:
   void pop(int count);
 
   /**
+   * @brief Throw error
+   *
+   * @param error Error message
+   */
+  void error(const String &error);
+
+  /**
    * @brief Dump Lua stack
    *
    * Used for debugging purposes

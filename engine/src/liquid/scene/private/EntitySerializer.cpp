@@ -182,10 +182,35 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   }
 
   if (mEntityDatabase.has<Script>(entity)) {
-    auto handle = mEntityDatabase.get<Script>(entity).handle;
-    if (mAssetRegistry.getLuaScripts().hasAsset(handle)) {
-      components["script"] =
-          mAssetRegistry.getLuaScripts().getAsset(handle).relativePath.string();
+    const auto &script = mEntityDatabase.get<Script>(entity);
+    if (mAssetRegistry.getLuaScripts().hasAsset(script.handle)) {
+      const auto &asset =
+          mAssetRegistry.getLuaScripts().getAsset(script.handle);
+
+      components["script"]["asset"] = asset.relativePath.string();
+
+      for (auto &[name, value] : script.variables) {
+        auto it = asset.data.variables.find(name);
+        if (it == asset.data.variables.end() ||
+            !value.isType(it->second.type)) {
+          continue;
+        }
+
+        if (value.isType(LuaScriptVariableType::String)) {
+          components["script"]["variables"][name]["type"] = "string";
+          components["script"]["variables"][name]["value"] =
+              value.get<String>();
+        } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
+          auto handle = value.get<PrefabAssetHandle>();
+          if (mAssetRegistry.getPrefabs().hasAsset(handle)) {
+            auto path = mAssetRegistry.getPrefabs()
+                            .getAsset(handle)
+                            .relativePath.string();
+            components["script"]["variables"][name]["type"] = "prefab";
+            components["script"]["variables"][name]["value"] = path;
+          }
+        }
+      }
     }
   }
 

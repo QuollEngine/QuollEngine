@@ -10,7 +10,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   liquid::AssetData<liquid::MaterialAsset>
   createMaterialAsset(bool createTextures) {
@@ -22,8 +22,7 @@ public:
 
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
-                                  "test.ktx2");
+      texture.path = liquid::Path(FixturesPath / "textures" / "test.ktx2");
       asset.data.baseColorTexture =
           cache.getRegistry().getTextures().addAsset(texture);
     }
@@ -33,8 +32,7 @@ public:
     asset.data.metallicRoughnessTextureCoord = 3;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
-                                  "mr.ktx2");
+      texture.path = liquid::Path(FixturesPath / "textures" / "mr.ktx2");
       asset.data.metallicRoughnessTexture =
           cache.getRegistry().getTextures().addAsset(texture);
     }
@@ -43,8 +41,7 @@ public:
     asset.data.normalTextureCoord = 4;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
-                                  "normal.ktx2");
+      texture.path = liquid::Path(FixturesPath / "textures" / "normal.ktx2");
       asset.data.normalTexture =
           cache.getRegistry().getTextures().addAsset(texture);
     }
@@ -53,8 +50,7 @@ public:
     asset.data.occlusionTextureCoord = 5;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
-                                  "occlusion.ktx2");
+      texture.path = liquid::Path(FixturesPath / "textures" / "occlusion.ktx2");
       asset.data.occlusionTexture =
           cache.getRegistry().getTextures().addAsset(texture);
     }
@@ -63,8 +59,7 @@ public:
     asset.data.emissiveTextureCoord = 6;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.path = liquid::Path(std::filesystem::current_path() / "textures" /
-                                  "emissive.ktx2");
+      texture.path = liquid::Path(FixturesPath / "textures" / "emissive.ktx2");
       asset.data.emissiveTexture =
           cache.getRegistry().getTextures().addAsset(texture);
     }
@@ -256,7 +251,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
-  EXPECT_EQ(material.path, std::filesystem::current_path() / "material1.lqmat");
+  EXPECT_EQ(material.path, FixturesPath / "material1.lqmat");
   EXPECT_EQ(material.type, liquid::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
@@ -306,7 +301,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
-  EXPECT_EQ(material.path, std::filesystem::current_path() / "material1.lqmat");
+  EXPECT_EQ(material.path, FixturesPath / "material1.lqmat");
   EXPECT_EQ(material.type, liquid::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
@@ -337,7 +332,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
 }
 
 TEST_F(AssetCacheTest, LoadsTexturesWithMaterials) {
-  auto texture = cache.loadTextureFromFile("1x1-2d.ktx");
+  auto texture = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
   liquid::AssetData<liquid::MaterialAsset> material{};
   material.name = "test-material";
   material.data.baseColorTexture = texture.getData();

@@ -5,7 +5,7 @@
 
 class AssetCacheTest : public ::testing::Test {
 public:
-  AssetCacheTest() : cache(std::filesystem::current_path()) {}
+  AssetCacheTest() : cache(FixturesPath) {}
 
   liquid::AssetCache cache;
 };
@@ -13,7 +13,7 @@ public:
 using AssetCacheDeathTest = AssetCacheTest;
 
 TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
-  auto filePath = std::filesystem::current_path() / "valid-audio.wav";
+  auto filePath = FixturesPath / "valid-audio.wav";
 
   auto result = cache.loadAudioFromFile(filePath);
 
@@ -33,7 +33,7 @@ TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
 }
 
 TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
-  auto filePath = std::filesystem::current_path() / "valid-audio.mp3";
+  auto filePath = FixturesPath / "valid-audio.mp3";
 
   auto result = cache.loadAudioFromFile(filePath);
 
@@ -53,7 +53,7 @@ TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
 }
 
 TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
-  auto filePath = std::filesystem::current_path() / "white-image-100x100.png";
+  auto filePath = FixturesPath / "white-image-100x100.png";
 
   auto result = cache.loadAudioFromFile(filePath);
   EXPECT_TRUE(result.hasError());
@@ -62,7 +62,7 @@ TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileHasInvalidExtension) {
 }
 
 TEST_F(AssetCacheTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
-  auto filePath = std::filesystem::current_path() / "non-existent-file.wav";
+  auto filePath = FixturesPath / "non-existent-file.wav";
 
   auto result = cache.loadAudioFromFile(filePath);
   EXPECT_TRUE(result.hasError());
