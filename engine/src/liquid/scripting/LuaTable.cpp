@@ -1,11 +1,6 @@
 #include "liquid/core/Base.h"
+#include "LuaHeaders.h"
 #include "LuaTable.h"
-
-extern "C" {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-}
 
 namespace liquid {
 
