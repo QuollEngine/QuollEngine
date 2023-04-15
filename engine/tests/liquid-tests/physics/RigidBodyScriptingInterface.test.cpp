@@ -64,3 +64,29 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest, ClearSetsRigidBodyClearComponent) {
   call(entity, "rigid_body_clear");
   EXPECT_TRUE(entityDatabase.has<liquid::RigidBodyClear>(entity));
 }
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::RigidBody>(entity, {});
+
+  call(entity, "rigid_body_delete_invalid");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "rigid_body_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       DeleteRemovesRigidBodyComponentFromEntity) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::RigidBody>(entity, {});
+
+  call(entity, "rigid_body_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}

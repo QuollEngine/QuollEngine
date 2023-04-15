@@ -35,10 +35,19 @@ public:
   static int isPlaying(void *state);
 
   /**
+   * @brief Delete component
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int deleteThis(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"play", play}, InterfaceField{"is_playing", isPlaying}};
+  static constexpr std::array<InterfaceField, 3> Fields{
+      InterfaceField{"play", play}, InterfaceField{"is_playing", isPlaying},
+      InterfaceField{"delete", deleteThis}};
 
   /**
    * @brief Get component name in scripts

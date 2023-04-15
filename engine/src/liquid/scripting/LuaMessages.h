@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/entity/Entity.h"
+
 namespace liquid {
 
 /**
@@ -16,6 +18,50 @@ public:
    */
   static String noEntityTable(const String &interfaceName,
                               const String &functionName);
+
+  /**
+   * @brief Message for entity does not exist
+   *
+   * @param interfaceName Interface name
+   * @param functionName Function name
+   * @param entity Entity
+   * @return Error message
+   */
+  static String entityDoesNotExist(const String &interfaceName,
+                                   const String &functionName, Entity entity);
+
+  /**
+   * @brief Message for component does not exist
+   *
+   * @param componentName Component name
+   * @param entity Entity
+   * @return Error message
+   */
+  static String componentDoesNotExist(const String &componentName,
+                                      Entity entity);
+
+  /**
+   * @brief Messages for nothing is spawned because prefab is empty
+   *
+   * @param interfaceName Interface name
+   * @param functionName Function name
+   * @param prefabName Prefab name
+   * @return Error message
+   */
+  static String nothingSpawnedBecauseEmptyPrefab(const String &interfaceName,
+                                                 const String &functionName,
+                                                 const String &prefabName);
+
+  /**
+   * @brief Message for asset not found
+   *
+   * @param interfaceName Interface name
+   * @param functionName Function name
+   * @param type Asset type
+   * @return Error message
+   */
+  static String assetNotFound(const String &interfaceName,
+                              const String &functionName, const String &type);
 
   /**
    * @brief Message for invalid arguments
@@ -51,6 +97,10 @@ template <> inline String LuaMessages::getTypename<float>() { return "number"; }
 
 template <> inline String LuaMessages::getTypename<String>() {
   return "string";
+}
+
+template <> inline String LuaMessages::getTypename<Entity>() {
+  return "entity table";
 }
 
 } // namespace liquid

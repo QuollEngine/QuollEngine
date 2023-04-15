@@ -43,12 +43,20 @@ public:
   static int clear(void *state);
 
   /**
+   * @brief Delete component
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int deleteThis(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 3> Fields{
+  static constexpr std::array<InterfaceField, 4> Fields{
       InterfaceField{"apply_force", applyForce},
       InterfaceField{"apply_torque", applyTorque},
-      InterfaceField{"clear", clear}};
+      InterfaceField{"clear", clear}, InterfaceField{"delete", deleteThis}};
 
   /**
    * @brief Get component name in scripts

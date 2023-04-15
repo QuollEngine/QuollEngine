@@ -62,3 +62,28 @@ TEST_F(NameLuaScriptingInterfaceTest, UpdatesExistingNameComponentOnSet) {
 
   EXPECT_EQ(entityDatabase.get<liquid::Name>(entity).name, "Hello World");
 }
+
+TEST_F(NameLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Name>(entity, {});
+
+  call(entity, "name_delete_invalid");
+  EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
+}
+
+TEST_F(NameLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "name_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::Name>(entity));
+}
+
+TEST_F(NameLuaScriptingInterfaceTest, DeleteRemovesNameComponentFromEntity) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Name>(entity, {});
+
+  call(entity, "name_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::Name>(entity));
+}

@@ -67,15 +67,24 @@ public:
   static int setRotation(void *state);
 
   /**
+   * @brief Delete component
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int deleteThis(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 6> Fields{
+  static constexpr std::array<InterfaceField, 7> Fields{
       InterfaceField{"get_scale", getScale},
       InterfaceField{"set_scale", setScale},
       InterfaceField{"get_position", getPosition},
       InterfaceField{"set_position", setPosition},
       InterfaceField{"get_rotation", getRotation},
-      InterfaceField{"set_rotation", setRotation}};
+      InterfaceField{"set_rotation", setRotation},
+      InterfaceField{"delete", deleteThis}};
 
   /**
    * @brief Get component name in scripts

@@ -50,12 +50,21 @@ public:
   static int setLineHeight(void *state);
 
   /**
+   * @brief Delete component
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int deleteThis(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 4> Fields{
+  static constexpr std::array<InterfaceField, 5> Fields{
       InterfaceField{"get_text", getText}, InterfaceField{"set_text", setText},
       InterfaceField{"get_line_height", getLineHeight},
-      InterfaceField{"set_line_height", setLineHeight}};
+      InterfaceField{"set_line_height", setLineHeight},
+      InterfaceField{"delete", deleteThis}};
 
   /**
    * @brief Get component name in scripts

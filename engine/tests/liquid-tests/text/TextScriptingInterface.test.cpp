@@ -124,3 +124,28 @@ TEST_F(TextLuaScriptingInterfaceTest,
 
   EXPECT_EQ(entityDatabase.get<liquid::Text>(entity).lineHeight, 12.0f);
 }
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Text>(entity, {});
+
+  call(entity, "text_delete_invalid");
+  EXPECT_TRUE(entityDatabase.has<liquid::Text>(entity));
+}
+
+TEST_F(TextLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "text_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+}
+
+TEST_F(TextLuaScriptingInterfaceTest, DeleteRemovesTextComponentFromEntity) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Text>(entity, {});
+
+  call(entity, "text_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::Text>(entity));
+}

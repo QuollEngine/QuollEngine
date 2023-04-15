@@ -38,4 +38,36 @@ int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
   return 1;
 }
 
+int EntityQueryScriptingInterface::LuaInterface::deleteEntity(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<Entity>(getName(), "delete_entity");
+    return 0;
+  }
+
+  auto arg = scope.get<LuaTable>(1);
+  arg.get("id");
+  if (!scope.is<uint32_t>()) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<Entity>(getName(), "delete_entity");
+    return 0;
+  }
+
+  auto entity = scope.get<Entity>();
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  if (!entityDatabase.exists(entity)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::entityDoesNotExist(getName(), "delete_entity", entity);
+    return 0;
+  }
+
+  entityDatabase.set<Delete>(entity, {});
+
+  return 0;
+}
+
 } // namespace liquid

@@ -1,40 +1,9 @@
 #include "liquid/core/Base.h"
-#include "liquid/asset/AssetCache.h"
-#include "liquid/scripting/ScriptingSystem.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/ScriptingInterfaceTestBase.h"
 
-class EntityQueryLuaInterfaceTest : public ::testing::Test {
-public:
-  EntityQueryLuaInterfaceTest()
-      : assetCache(std::filesystem::current_path()),
-        scriptingSystem(eventSystem, assetCache.getRegistry()) {}
-
-  liquid::LuaScope &call(liquid::Entity entity,
-                         const liquid::String &functionName) {
-    auto handle =
-        assetCache
-            .loadLuaScriptFromFile(FixturesPath /
-                                   "scripting-system-component-tester.lua")
-            .getData();
-
-    entityDatabase.set<liquid::Script>(entity, {handle});
-
-    scriptingSystem.start(entityDatabase);
-
-    auto &scripting = entityDatabase.get<liquid::Script>(entity);
-
-    scripting.scope.luaGetGlobal(functionName);
-    scripting.scope.call(0);
-
-    return scripting.scope;
-  }
-
-  liquid::EntityDatabase entityDatabase;
-  liquid::EventSystem eventSystem;
-  liquid::AssetCache assetCache;
-  liquid::ScriptingSystem scriptingSystem;
-};
+using EntityQueryLuaInterfaceTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(EntityQueryLuaInterfaceTest,
        GetEntityByNameReturnsNullIfParametersAreNotPassed) {
@@ -88,4 +57,53 @@ TEST_F(EntityQueryLuaInterfaceTest,
   auto table = scope.getGlobal<liquid::LuaTable>("found_entity");
   table.get("id");
   EXPECT_EQ(scope.get<liquid::Entity>(), e1);
+}
+
+TEST_F(EntityQueryLuaInterfaceTest, DeleteEntityDoesNothingIfInvalidArgument) {
+  auto entity = entityDatabase.create();
+
+  {
+    call(entity, "entity_query_delete_entity_no_param");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+
+  {
+    call(entity, "entity_query_delete_entity_param_nil");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+
+  {
+    call(entity, "entity_query_delete_entity_param_boolean");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+
+  {
+    call(entity, "entity_query_delete_entity_param_table");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+
+  {
+    call(entity, "entity_query_delete_entity_param_string");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+}
+
+TEST_F(EntityQueryLuaInterfaceTest,
+       DeleteEntityDoesNothingIfEntityDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  {
+    call(entity, "entity_query_delete_entity_param_invalid_entity");
+    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+  }
+}
+
+TEST_F(EntityQueryLuaInterfaceTest,
+       DeleteEntityAddsDeleteComponentToExistingEntity) {
+  auto entity = entityDatabase.create();
+
+  {
+    call(entity, "entity_query_delete_entity_param_entity_table");
+    EXPECT_TRUE(entityDatabase.has<liquid::Delete>(entity));
+  }
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "liquid/asset/AssetCache.h"
 #include "liquid/scripting/ScriptingSystem.h"
 

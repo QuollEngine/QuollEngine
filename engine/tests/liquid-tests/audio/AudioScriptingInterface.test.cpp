@@ -57,3 +57,29 @@ TEST_F(AudioLuaScriptingInterfaceTest,
 
   EXPECT_TRUE(scope.getGlobal<bool>("audio_is_playing_flag"));
 }
+
+TEST_F(AudioLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioSource>(entity, {});
+
+  call(entity, "audio_delete_invalid");
+  EXPECT_TRUE(entityDatabase.has<liquid::AudioSource>(entity));
+}
+
+TEST_F(AudioLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "audio_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::AudioSource>(entity));
+}
+
+TEST_F(AudioLuaScriptingInterfaceTest,
+       DeleteRemovesAudioSourceComponentFromEntity) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::AudioSource>(entity, {});
+
+  call(entity, "audio_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::AudioSource>(entity));
+}

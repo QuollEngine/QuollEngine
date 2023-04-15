@@ -1,9 +1,10 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/scripting/LuaMessages.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "NameScriptingInterface.h"
 
@@ -66,6 +67,10 @@ int NameScriptingInterface::LuaInterface::set(void *state) {
   entityDatabase.set<Name>(entity, {string});
 
   return 0;
-};
+}
+
+int NameScriptingInterface::LuaInterface::deleteThis(void *state) {
+  return ComponentLuaInterfaceCommon::deleteComponent<Name>(getName(), state);
+}
 
 } // namespace liquid

@@ -2,6 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 #include "liquid/entity/EntityDatabase.h"
+#include "liquid/asset/AssetRegistry.h"
 
 namespace liquid {
 
@@ -16,9 +17,11 @@ public:
    * @param scope Lua scope
    * @param entity Entity
    * @param entityDatabase Entity database
+   * @param assetRegistry Asset registry
    */
   void attachToScope(LuaScope &scope, Entity entity,
-                     EntityDatabase &entityDatabase);
+                     EntityDatabase &entityDatabase,
+                     AssetRegistry &assetRegistry);
 
   /**
    * @brief Attach variable injectors

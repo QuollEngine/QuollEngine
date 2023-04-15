@@ -1,9 +1,10 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/scripting/LuaMessages.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "RigidBodyScriptingInterface.h"
 
@@ -102,6 +103,11 @@ int RigidBodyScriptingInterface::LuaInterface::clear(void *state) {
   entityDatabase.set<RigidBodyClear>(entity, {});
 
   return 0;
+}
+
+int RigidBodyScriptingInterface::LuaInterface::deleteThis(void *state) {
+  return ComponentLuaInterfaceCommon::deleteComponent<RigidBody>(getName(),
+                                                                 state);
 }
 
 } // namespace liquid
