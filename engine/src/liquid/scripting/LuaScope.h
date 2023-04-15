@@ -458,6 +458,17 @@ template <> inline bool LuaScope::is<uint32_t>(int32_t index) {
 }
 
 /**
+ * @brief Check if variable is entity
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<Entity>(int32_t index) {
+  return luaIsNumber(index);
+}
+
+/**
  * @brief Check if variable is a floating point
  *
  * @param index Stack index

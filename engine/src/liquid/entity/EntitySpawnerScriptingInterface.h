@@ -5,19 +5,19 @@
 namespace liquid {
 
 /**
- * @brief Scripting interfaces for entity query
+ * @brief Scripting interfaces for entity spawner
  */
-struct EntityQueryScriptingInterface {
+struct EntitySpawnerScriptingInterface {
 public:
   class LuaInterface;
 };
 
 /**
- * @brief Lua scripting interface for entity query
+ * @brief Lua scripting interface for entity spawner
  */
-class EntityQueryScriptingInterface::LuaInterface
+class EntitySpawnerScriptingInterface::LuaInterface
     : public ComponentLuaInterface<
-          EntityQueryScriptingInterface::LuaInterface> {
+          EntitySpawnerScriptingInterface::LuaInterface> {
 public:
   /**
    * @brief Get first entity by name
@@ -25,7 +25,7 @@ public:
    * @param state Lua state
    * @return Number of arguments
    */
-  static int getFirstEntityByName(void *state);
+  static int spawnEmpty(void *state);
 
   /**
    * @brief Delete entity
@@ -33,21 +33,21 @@ public:
    * @param state Lua state
    * @return Number of arguments
    */
-  static int deleteEntity(void *state);
+  static int spawnPrefab(void *state);
 
   /**
    * @brief Interface fields
    */
   static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"get_first_entity_by_name", getFirstEntityByName},
-      InterfaceField{"delete_entity", deleteEntity}};
+      InterfaceField{"spawn_empty", spawnEmpty},
+      InterfaceField{"spawn_prefab", spawnPrefab}};
 
   /**
    * @brief Get component name in scripts
    *
    * @return Component name
    */
-  static const String getName() { return "entity_query"; }
+  static const String getName() { return "entity_spawner"; }
 };
 
 } // namespace liquid

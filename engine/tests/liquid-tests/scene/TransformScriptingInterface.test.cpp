@@ -194,3 +194,29 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localRotation,
             RandomQuat);
 }
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransform>(entity, {});
+
+  call(entity, "local_transform_delete_invalid");
+  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransform>(entity));
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       DeleteDoesNothingIfComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "local_transform_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::LocalTransform>(entity));
+}
+
+TEST_F(TransformLuaScriptingInterfaceTest,
+       DeleteRemovesLocalTransformComponentFromEntity) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::LocalTransform>(entity, {});
+
+  call(entity, "local_transform_delete");
+  EXPECT_FALSE(entityDatabase.has<liquid::LocalTransform>(entity));
+}

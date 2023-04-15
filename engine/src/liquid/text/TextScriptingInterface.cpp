@@ -1,11 +1,12 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
-#include "TextScriptingInterface.h"
-
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/scripting/LuaMessages.h"
 #include "liquid/scripting/LuaScope.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scripting/ComponentLuaInterfaceCommon.h"
+
+#include "TextScriptingInterface.h"
 
 namespace liquid {
 
@@ -136,5 +137,9 @@ int TextScriptingInterface::LuaInterface::setLineHeight(void *state) {
 
   return 0;
 };
+
+int TextScriptingInterface::LuaInterface::deleteThis(void *state) {
+  return ComponentLuaInterfaceCommon::deleteComponent<Text>(getName(), state);
+}
 
 } // namespace liquid

@@ -6,6 +6,7 @@ end
 
 found_entity = -1
 
+-- Entity query: get first by name
 function entity_query_get_first_by_name_no_param()
    found_entity = entity_query.get_first_entity_by_name()
 end
@@ -30,6 +31,71 @@ function entity_query_get_first_by_name()
     found_entity = entity_query.get_first_entity_by_name("Test")
 end
 
+-- Entity query: delete entity
+function entity_query_delete_entity_no_param()
+    entity_query.delete_entity()
+end
+
+function entity_query_delete_entity_param_nil()
+    entity_query.delete_entity(nil)
+end
+
+function entity_query_delete_entity_param_boolean()
+    entity_query.delete_entity(true)
+end
+
+function entity_query_delete_entity_param_table()
+    entity_query.delete_entity({})
+end
+
+function entity_query_delete_entity_param_string()
+    entity_query.delete_entity("Test")
+end
+
+function entity_query_delete_entity_param_invalid_entity()
+    custom_entity = {id=123123}
+    entity_query.delete_entity(custom_entity)
+end
+
+function entity_query_delete_entity_param_entity_table()
+    entity_query.delete_entity(entity)
+end
+
+created_entity = -1
+
+-- Entity spawner
+function entity_spawner_spawn_empty()
+    created_entity = entity_spawner.spawn_empty()
+end
+
+function entity_spawner_spawn_prefab_no_param()
+    created_entity = entity_spawner.spawn_prefab()
+end
+
+function entity_spawner_spawn_prefab_param_nil()
+    created_entity = entity_spawner.spawn_prefab(nil)
+end
+
+function entity_spawner_spawn_prefab_param_boolean()
+    created_entity = entity_spawner.spawn_prefab(true)
+end
+
+function entity_spawner_spawn_prefab_param_table()
+    created_entity = entity_spawner.spawn_prefab({})
+end
+
+function entity_spawner_spawn_prefab_param_string()
+    created_entity = entity_spawner.spawn_prefab("Test")
+end
+
+function entity_spawner_spawn_prefab_unknown_handle()
+    created_entity = entity_spawner.spawn_prefab(99999)
+end
+
+function entity_spawner_spawn_prefab()
+    created_entity = entity_spawner.spawn_prefab(1)
+end
+
 -- Name 
 name = ''
 
@@ -51,6 +117,14 @@ function name_set_invalid()
     entity.name:set(true)
     entity.name:set(name_set)
     entity.name:set({})
+end
+
+function name_delete_invalid()
+    entity.name.delete()
+end
+
+function name_delete()
+    entity.name:delete()
 end
 
 -- Local transform 
@@ -173,6 +247,14 @@ function local_transform_rotation_set_invalid()
     entity.local_transform:set_rotation(1.0, 1.0, {})
 end
 
+function local_transform_delete_invalid()
+    entity.local_transform.delete()
+end
+
+function local_transform_delete()
+    entity.local_transform:delete()
+end
+
 -- Rigid body
 function rigid_body_apply_force()
     entity.rigid_body:apply_force(10.0, 0.2, 5.0);
@@ -238,6 +320,14 @@ function rigid_body_clear_invalid()
     entity.rigid_body.clear()
 end
 
+function rigid_body_delete_invalid()
+    entity.rigid_body.delete()
+end
+
+function rigid_body_delete()
+    entity.rigid_body:delete()
+end
+
 -- Text
 text = ''
 text_line_height = -1
@@ -282,6 +372,14 @@ function text_set_line_height_invalid()
     entity.text:set_line_height({})
 end
 
+function text_delete_invalid()
+    entity.text.delete()
+end
+
+function text_delete()
+    entity.text:delete()
+end
+
 -- Audio 
 audio_is_playing_flag = false
 function audio_play()
@@ -298,4 +396,12 @@ end
 
 function audio_is_playing_invalid()
     audio_is_playing_flag = entity.audio.is_playing()
+end
+
+function audio_delete_invalid()
+    entity.audio.delete()
+end
+
+function audio_delete()
+    entity.audio:delete()
 end

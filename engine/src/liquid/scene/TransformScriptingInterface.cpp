@@ -1,9 +1,11 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
+#include "liquid/entity/EntityDatabase.h"
+
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/scripting/LuaMessages.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "TransformScriptingInterface.h"
 
@@ -220,6 +222,11 @@ int TransformScriptingInterface::LuaInterface::setScale(void *state) {
   transform.localScale = newScale;
 
   return 0;
+}
+
+int TransformScriptingInterface::LuaInterface::deleteThis(void *state) {
+  return ComponentLuaInterfaceCommon::deleteComponent<LocalTransform>(getName(),
+                                                                      state);
 }
 
 } // namespace liquid

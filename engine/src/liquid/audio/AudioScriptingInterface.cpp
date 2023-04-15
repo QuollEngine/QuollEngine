@@ -1,9 +1,10 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
+#include "liquid/entity/EntityDatabase.h"
 #include "liquid/scripting/LuaScope.h"
 #include "liquid/scripting/LuaMessages.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "liquid/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "AudioScriptingInterface.h"
 
@@ -56,6 +57,11 @@ int AudioScriptingInterface::LuaInterface::isPlaying(void *state) {
   bool isPlaying = entityDatabase.has<AudioStatus>(entity);
   scope.set(isPlaying);
   return 1;
+}
+
+int AudioScriptingInterface::LuaInterface::deleteThis(void *state) {
+  return ComponentLuaInterfaceCommon::deleteComponent<AudioSource>(getName(),
+                                                                   state);
 }
 
 } // namespace liquid

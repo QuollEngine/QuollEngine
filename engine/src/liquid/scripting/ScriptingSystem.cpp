@@ -42,7 +42,8 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
       mLuaInterpreter.destroyScope(component.scope);
     }
     component.scope = mLuaInterpreter.createScope();
-    scriptDecorator.attachToScope(component.scope, entity, entityDatabase);
+    scriptDecorator.attachToScope(component.scope, entity, entityDatabase,
+                                  mAssetRegistry);
     scriptDecorator.attachVariableInjectors(component.scope,
                                             component.variables);
 

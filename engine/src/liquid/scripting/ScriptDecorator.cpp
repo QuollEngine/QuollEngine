@@ -1,8 +1,9 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
-#include "liquid/core/NameScriptingInterface.h"
 #include "liquid/entity/EntityQueryScriptingInterface.h"
+#include "liquid/entity/EntitySpawnerScriptingInterface.h"
+#include "liquid/core/NameScriptingInterface.h"
 #include "liquid/physics/RigidBodyScriptingInterface.h"
 #include "liquid/audio/AudioScriptingInterface.h"
 #include "liquid/scene/TransformScriptingInterface.h"
@@ -53,7 +54,7 @@ void registerEntityInterface(LuaScope &scope, LuaTable &table, Entity entity) {
 }
 
 void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
-  auto table = scope.createTable(2);
+  auto table = scope.createTable(3);
   table.set("id", entity);
 
   registerEntityInterface<NameScriptingInterface>(scope, table, entity);
@@ -64,15 +65,21 @@ void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
 }
 
 void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,
-                                    EntityDatabase &entityDatabase) {
+                                    EntityDatabase &entityDatabase,
+                                    AssetRegistry &assetRegistry) {
   scope.setGlobal<LuaUserData>("__privateDatabase",
                                {static_cast<void *>(&entityDatabase)});
+  scope.setGlobal<LuaUserData>("__privateAssetRegistry",
+                               {static_cast<void *>(&assetRegistry)});
 
   createEntityTable(scope, entity);
   scope.setPreviousValueAsGlobal("entity");
 
   createInterfaceTable<EntityQueryScriptingInterface::LuaInterface>(scope);
   scope.setPreviousValueAsGlobal("entity_query");
+
+  createInterfaceTable<EntitySpawnerScriptingInterface::LuaInterface>(scope);
+  scope.setPreviousValueAsGlobal("entity_spawner");
 
   createScriptLogger(scope);
   scope.setPreviousValueAsGlobal("logger");

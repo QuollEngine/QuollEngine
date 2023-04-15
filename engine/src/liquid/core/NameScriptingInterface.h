@@ -34,10 +34,19 @@ public:
   static int set(void *state);
 
   /**
+   * @brief Delete component
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int deleteThis(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"get", get}, InterfaceField{"set", set}};
+  static constexpr std::array<InterfaceField, 3> Fields{
+      InterfaceField{"get", get}, InterfaceField{"set", set},
+      InterfaceField{"delete", deleteThis}};
 
   /**
    * @brief Get component name in scripts
