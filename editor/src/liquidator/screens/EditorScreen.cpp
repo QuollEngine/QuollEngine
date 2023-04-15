@@ -50,8 +50,7 @@ EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
 void EditorScreen::start(const Project &project) {
-  LogMemoryStorage systemLogStorage, userLogStorage;
-  Engine::getLogger().setTransport(systemLogStorage.createTransport());
+  LogMemoryStorage userLogStorage;
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
   FPSCounter fpsCounter;
@@ -75,11 +74,15 @@ void EditorScreen::start(const Project &project) {
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
   auto res = assetManager.validateAndPreloadAssets(renderer.getRenderStorage());
-  AssetLoadStatusDialog preloadStatusDialog("Loaded with warnings");
+  AssetLoadStatusDialog loadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
-    preloadStatusDialog.setMessages(res.getWarnings());
-    preloadStatusDialog.show();
+    for (const auto &warning : res.getWarnings()) {
+      Engine::getUserLogger().warning() << warning;
+    }
+
+    loadStatusDialog.setMessages(res.getWarnings());
+    loadStatusDialog.show();
   }
 
   Theme::apply();
@@ -148,7 +151,7 @@ void EditorScreen::start(const Project &project) {
     renderer.getRenderStorage().setFramebufferSize(width, height);
   });
 
-  mWindow.addFocusHandler([&tracker, &preloadStatusDialog, &assetManager,
+  mWindow.addFocusHandler([&tracker, &loadStatusDialog, &assetManager,
                            &renderer, &ui](bool focused) {
     if (!focused)
       return;
@@ -159,17 +162,23 @@ void EditorScreen::start(const Project &project) {
       auto res = assetManager.loadOriginalIfChanged(change.path);
       if (res.hasError()) {
         messages.push_back(res.getError());
+
+        Engine::getUserLogger().error() << res.getError();
       } else {
         messages.insert(messages.end(), res.getWarnings().begin(),
                         res.getWarnings().end());
+
+        for (const auto &warning : res.getWarnings()) {
+          Engine::getUserLogger().warning() << warning;
+        }
       }
     }
 
     ui.getAssetBrowser().reload();
 
     if (!messages.empty()) {
-      preloadStatusDialog.setMessages(messages);
-      preloadStatusDialog.show();
+      loadStatusDialog.setMessages(messages);
+      loadStatusDialog.show();
     }
   });
 
@@ -189,10 +198,10 @@ void EditorScreen::start(const Project &project) {
   LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorCamera, &assetManager, &graph,
                         &sceneRenderer, &imguiRenderer, &scenePassGroup,
-                        &imguiPassGroup, &ui, &debugLayer, &preloadStatusDialog,
+                        &imguiPassGroup, &ui, &debugLayer, &loadStatusDialog,
                         &presenter, &editorRenderer, &simulator, &mousePicking,
-                        &systemLogStorage, &userLogStorage, &logViewer, &state,
-                        &actionExecutor, this]() {
+                        &userLogStorage, &logViewer, &state, &actionExecutor,
+                        this]() {
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -206,14 +215,14 @@ void EditorScreen::start(const Project &project) {
     }
     debugLayer.render();
 
-    logViewer.render(systemLogStorage, userLogStorage);
+    logViewer.render(userLogStorage);
 
     bool mouseClicked =
         ui.renderSceneView(state, scenePassGroup.finalColor, editorCamera);
 
     StatusBar::render(editorCamera);
 
-    preloadStatusDialog.render();
+    loadStatusDialog.render();
 
     imguiRenderer.endRendering();
 

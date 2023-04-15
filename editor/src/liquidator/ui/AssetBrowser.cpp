@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 #include "liquid/imgui/ImguiUtils.h"
 #include "AssetBrowser.h"
 
@@ -321,6 +322,8 @@ void AssetBrowser::handleAssetImport() {
     mStatusDialog.setMessages({res.getError()});
     mStatusDialog.show();
 
+    Engine::getUserLogger().error() << res.getError();
+
     return;
   }
 
@@ -328,6 +331,10 @@ void AssetBrowser::handleAssetImport() {
     mStatusDialog.setTitle("Import successful with warnings");
     mStatusDialog.setMessages(res.getWarnings());
     mStatusDialog.show();
+
+    for (const auto &warning : res.getWarnings()) {
+      Engine::getUserLogger().warning() << warning;
+    }
   }
 
   reload();

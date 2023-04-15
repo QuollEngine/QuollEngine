@@ -6,16 +6,11 @@
 
 namespace liquid::editor {
 
-void LogViewer::render(LogMemoryStorage &systemLogs,
-                       LogMemoryStorage &userLogs) {
+void LogViewer::render(LogMemoryStorage &userLogs) {
   auto flags = ImGuiWindowFlags_HorizontalScrollbar |
                ImGuiWindowFlags_AlwaysUseWindowPadding;
 
   if (auto _ = widgets::Window("Logs")) {
-    const float FirstHalf = ImGui::GetContentRegionAvail().x / 2.0f;
-
-    renderLogContainer("System Logs", systemLogs, mSystemLogSize, FirstHalf);
-    ImGui::SameLine();
     renderLogContainer("User logs", userLogs, mUserLogSize,
                        ImGui::GetContentRegionAvail().x);
   }

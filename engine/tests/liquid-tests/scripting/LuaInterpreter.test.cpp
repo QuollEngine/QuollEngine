@@ -1,12 +1,8 @@
 #include "liquid/core/Base.h"
+#include "liquid/scripting/LuaHeaders.h"
 #include "liquid/scripting/LuaInterpreter.h"
 
 #include "liquid-tests/Testing.h"
-
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-}
 
 inline std::vector<uint8_t> readFileIntoBuffer(const liquid::Path &fileName) {
   std::ifstream file(fileName);
