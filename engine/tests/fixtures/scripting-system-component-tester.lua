@@ -207,7 +207,6 @@ function local_transform_scale_set_invalid()
     entity.local_transform:set_scale(1.0, 1.0, {})
 end
 
-
 local_rotation_x = 0
 local_rotation_y = 0
 local_rotation_z = 0
@@ -256,6 +255,97 @@ function local_transform_delete()
 end
 
 -- Rigid body
+function rigid_body_set_default_params()
+    entity.rigid_body:set_default_params();
+end
+
+function rigid_body_set_default_params_invalid()
+    entity.rigid_body.set_default_params()
+end
+
+mass = 0
+function rigid_body_get_mass()
+    mass = entity.rigid_body:get_mass()
+end
+
+function rigid_body_get_mass_invalid()
+    mass = entity.rigid_body.get_mass()
+end
+
+function rigid_body_set_mass()
+    entity.rigid_body:set_mass(2.5);
+end
+
+function rigid_body_set_mass_invalid()
+    entity.rigid_body.set_mass(0.0)
+    entity.rigid_body:set_mass(nil)
+    entity.rigid_body:set_mass("string")
+    entity.rigid_body:set_mass(true)
+    entity.rigid_body:set_mass(local_transform_scale_set)
+    entity.rigid_body:set_mass({})
+end
+
+inertia_x = 0
+inertia_y = 0
+inertia_z = 0
+function rigid_body_get_inertia()
+    inertia_x, inertia_y, inertia_z = entity.rigid_body:get_inertia()
+end
+
+function rigid_body_get_inertia_invalid()
+    inertia_x, inertia_y, inertia_z = entity.rigid_body.get_inertia()
+end
+
+function rigid_body_set_inertia()
+    entity.rigid_body:set_inertia(2.5, 2.5, 2.5)
+end
+
+function rigid_body_set_inertia_invalid()
+    entity.rigid_body.set_inertia(0.0, 1.0, 1.0)
+
+    entity.rigid_body:set_inertia(nil, 0.0, 1.0)
+    entity.rigid_body:set_inertia(0.0, nil, 1.0)
+    entity.rigid_body:set_inertia(0.0, 1.0, nil)
+
+    entity.rigid_body:set_inertia("string", 0.0, 1.0)
+    entity.rigid_body:set_inertia(0.0, "string", 1.0)
+    entity.rigid_body:set_inertia(0.0, 1.0, "string")
+
+    entity.rigid_body:set_inertia(true, 0.0, 1.0)
+    entity.rigid_body:set_inertia(0.0, true, 1.0)
+    entity.rigid_body:set_inertia(0.0, 1.0, true)
+
+    entity.rigid_body:set_inertia(local_transform_scale_set, 0.0, 1.0)
+    entity.rigid_body:set_inertia(0.0, local_transform_scale_set, 1.0)
+    entity.rigid_body:set_inertia(0.0, 1.0, local_transform_scale_set)
+
+    entity.rigid_body:set_inertia({}, 0.0, 1.0)
+    entity.rigid_body:set_inertia(0.0, {}, 1.0)
+    entity.rigid_body:set_inertia(0.0, 1.0, {})
+end
+
+is_gravity_applied = true
+function rigid_body_is_gravity_applied()
+    is_gravity_applied = entity.rigid_body:is_gravity_applied()
+end
+
+function rigid_body_is_gravity_applied_invalid()
+    is_gravity_applied = entity.rigid_body.is_gravity_applied()
+end
+
+function rigid_body_apply_gravity()
+    entity.rigid_body:apply_gravity(false)
+end
+
+function rigid_body_apply_gravity_invalid()
+    entity.rigid_body.apply_gravity(0.0)
+    entity.rigid_body:apply_gravity(nil)
+    entity.rigid_body:apply_gravity("string")
+    entity.rigid_body:apply_gravity(2.5)
+    entity.rigid_body:apply_gravity(local_transform_scale_set)
+    entity.rigid_body:apply_gravity({})
+end
+
 function rigid_body_apply_force()
     entity.rigid_body:apply_force(10.0, 0.2, 5.0);
 end
@@ -320,12 +410,167 @@ function rigid_body_clear_invalid()
     entity.rigid_body.clear()
 end
 
+function rigid_body_delete()
+    entity.rigid_body:delete()
+end
+
 function rigid_body_delete_invalid()
     entity.rigid_body.delete()
 end
 
-function rigid_body_delete()
-    entity.rigid_body:delete()
+-- Collidable
+function collidable_set_default_material()
+    entity.collidable:set_default_material();
+end
+
+function collidable_set_default_material_invalid()
+    entity.collidable.set_default_material()
+end
+
+static_friction = 0
+function collidable_get_static_friction()
+    static_friction = entity.collidable:get_static_friction()
+end
+
+function collidable_get_static_friction_invalid()
+    static_friction = entity.collidable.get_static_friction()
+end
+
+function collidable_set_static_friction()
+    entity.collidable:set_static_friction(2.5);
+end
+
+function collidable_set_static_friction_invalid()
+    entity.collidable.set_static_friction(0.0)
+    entity.collidable:set_static_friction(nil)
+    entity.collidable:set_static_friction("string")
+    entity.collidable:set_static_friction(true)
+    entity.collidable:set_static_friction(local_transform_scale_set)
+    entity.collidable:set_static_friction({})
+end
+
+dynamic_friction = 0
+function collidable_get_dynamic_friction()
+    dynamic_friction = entity.collidable:get_dynamic_friction()
+end
+
+function collidable_get_dynamic_friction_invalid()
+    dynamic_friction = entity.collidable.get_dynamic_friction()
+end
+
+function collidable_set_dynamic_friction()
+    entity.collidable:set_dynamic_friction(2.5);
+end
+
+function collidable_set_dynamic_friction_invalid()
+    entity.collidable.set_dynamic_friction(0.0)
+    entity.collidable:set_dynamic_friction(nil)
+    entity.collidable:set_dynamic_friction("string")
+    entity.collidable:set_dynamic_friction(true)
+    entity.collidable:set_dynamic_friction(local_transform_scale_set)
+    entity.collidable:set_dynamic_friction({})
+end
+
+restitution = 0
+function collidable_get_restitution()
+    restitution = entity.collidable:get_restitution()
+end
+
+function collidable_get_restitution_invalid()
+    restitution = entity.collidable.get_restitution()
+end
+
+function collidable_set_restitution()
+    entity.collidable:set_restitution(2.5);
+end
+
+function collidable_set_restitution_invalid()
+    entity.collidable.set_restitution(0.0)
+    entity.collidable:set_restitution(nil)
+    entity.collidable:set_restitution("string")
+    entity.collidable:set_restitution(true)
+    entity.collidable:set_restitution(local_transform_scale_set)
+    entity.collidable:set_restitution({})
+end
+
+function collidable_set_box_geometry()
+    entity.collidable:set_box_geometry(2.5, 2.5, 2.5)
+end
+
+function collidable_set_box_geometry_invalid()
+    entity.collidable.set_box_geometry(1.0, 1.0, 1.0)
+
+    entity.collidable:set_box_geometry(nil, 1.0, 1.0)
+    entity.collidable:set_box_geometry(1.0, nil, 1.0)
+    entity.collidable:set_box_geometry(1.0, 1.0, nil)
+
+    entity.collidable:set_box_geometry("string", 1.0, 1.0)
+    entity.collidable:set_box_geometry(1.0, "string", 1.0)
+    entity.collidable:set_box_geometry(1.0, 1.0, "string")
+
+    entity.collidable:set_box_geometry(true, 1.0, 1.0)
+    entity.collidable:set_box_geometry(1.0, true, 1.0)
+    entity.collidable:set_box_geometry(1.0, 1.0, true)
+
+    entity.collidable:set_box_geometry(local_transform_scale_set, 1.0, 1.0)
+    entity.collidable:set_box_geometry(1.0, local_transform_scale_set, 1.0)
+    entity.collidable:set_box_geometry(1.0, 1.0, local_transform_scale_set)
+
+    entity.collidable:set_box_geometry({}, 1.0, 1.0)
+    entity.collidable:set_box_geometry(1.0, {}, 1.0)
+    entity.collidable:set_box_geometry(1.0, 1.0, {})
+end
+
+function collidable_set_sphere_geometry()
+    entity.collidable:set_sphere_geometry(2.5)
+end
+
+function collidable_set_sphere_geometry_invalid()
+    entity.collidable.set_box_geometry(0.0)
+    entity.collidable:set_box_geometry(nil)
+    entity.collidable:set_box_geometry("string")
+    entity.collidable:set_box_geometry(true)
+    entity.collidable:set_box_geometry(local_transform_scale_set)
+    entity.collidable:set_box_geometry({})
+end
+
+function collidable_set_capsule_geometry()
+    entity.collidable:set_capsule_geometry(2.5, 3.5)
+end
+
+function collidable_set_capsule_geometry_invalid()
+    entity.collidable.set_box_geometry(1.0, 1.0)
+
+    entity.collidable:set_box_geometry(nil, 1.0)
+    entity.collidable:set_box_geometry(1.0, nil)
+
+    entity.collidable:set_box_geometry("string", 1.0)
+    entity.collidable:set_box_geometry(1.0, "string")
+
+    entity.collidable:set_box_geometry(true, 1.0)
+    entity.collidable:set_box_geometry(1.0, true)
+
+    entity.collidable:set_box_geometry(local_transform_scale_set, 1.0)
+    entity.collidable:set_box_geometry(1.0, local_transform_scale_set)
+
+    entity.collidable:set_box_geometry({}, 1.0)
+    entity.collidable:set_box_geometry(1.0, {})
+end
+
+function collidable_set_plane_geometry()
+    entity.collidable:set_plane_geometry()
+end
+
+function collidable_set_plane_geometry_invalid()
+    entity.collidable.set_plane_geometry()
+end
+
+function collidable_delete()
+    entity.collidable:delete()
+end
+
+function collidable_delete_invalid()
+    entity.collidable.delete()
 end
 
 -- Text
