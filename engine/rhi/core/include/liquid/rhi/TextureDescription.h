@@ -10,10 +10,11 @@ enum class TextureUsage : uint8_t {
   None = 0,
   Color = 1 << 0,
   Depth = 1 << 1,
-  Sampled = 1 << 2,
-  Storage = 1 << 3,
-  TransferSource = 1 << 4,
-  TransferDestination = 1 << 5
+  Stencil = 1 << 2,
+  Sampled = 1 << 3,
+  Storage = 1 << 4,
+  TransferSource = 1 << 5,
+  TransferDestination = 1 << 6
 };
 
 EnableBitwiseEnum(TextureUsage);

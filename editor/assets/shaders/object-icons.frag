@@ -28,5 +28,4 @@ pcIconParams;
 
 void main() {
   outColor = texture(uGlobalTextures[pcIconParams.icon.x], inTexCoord);
-  gl_FragDepth = 0.0;
 }

@@ -158,8 +158,10 @@ VkAttachmentDescription VulkanRenderPass::getVulkanAttachmentDescription(
   attachment.flags = 0;
   attachment.loadOp = VulkanMapping::getAttachmentLoadOp(description.loadOp);
   attachment.storeOp = VulkanMapping::getAttachmentStoreOp(description.storeOp);
-  attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-  attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  attachment.stencilLoadOp =
+      VulkanMapping::getAttachmentLoadOp(description.stencilLoadOp);
+  attachment.stencilStoreOp =
+      VulkanMapping::getAttachmentStoreOp(description.stencilStoreOp);
   attachment.samples =
       static_cast<VkSampleCountFlagBits>(texture->getDescription().samples);
   attachment.format = texture->getFormat();

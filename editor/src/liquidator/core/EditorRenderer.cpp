@@ -46,162 +46,331 @@ EditorRenderer::EditorRenderer(ShaderLibrary &shaderLibrary,
   mShaderLibrary.addShader(
       "collidable-shape.frag",
       mDevice->createShader({shadersPath / "collidable-shape.frag.spv"}));
+
+  mShaderLibrary.addShader(
+      "outline-geometry.vert",
+      mDevice->createShader({shadersPath / "outline-geometry.vert.spv"}));
+  mShaderLibrary.addShader(
+      "outline-skinned-geometry.vert",
+      mDevice->createShader(
+          {shadersPath / "outline-skinned-geometry.vert.spv"}));
+  mShaderLibrary.addShader(
+      "outline-color.frag",
+      mDevice->createShader({shadersPath / "outline-color.frag.spv"}));
 }
 
-RenderGraphPass &EditorRenderer::attach(RenderGraph &graph) {
-  auto &pass = graph.addGraphicsPass("editor-debug");
+void EditorRenderer::attach(RenderGraph &graph,
+                            const SceneRenderPassData &scenePassData) {
+  // editor debug
+  {
+    auto &editorDebugPass = graph.addGraphicsPass("editorDebug");
+    editorDebugPass.write(scenePassData.sceneColor, AttachmentType::Color,
+                          glm::vec4(0.0));
+    editorDebugPass.write(scenePassData.depthBuffer, AttachmentType::Depth,
+                          rhi::DepthStencilClear{1.0f, 0});
+    editorDebugPass.write(scenePassData.sceneColorResolved,
+                          AttachmentType::Resolve, glm::vec4(0.0));
 
-  auto editorGridPipeline = mRenderStorage.addPipeline(
-      {mShaderLibrary.getShader("editor-grid.vert"),
-       mShaderLibrary.getShader("editor-grid.frag"),
-       {},
-       rhi::PipelineInputAssembly{},
-       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
-                               rhi::FrontFace::Clockwise},
-       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
-           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
-           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+    auto editorGridPipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("editor-grid.vert"),
+         mShaderLibrary.getShader("editor-grid.frag"),
+         {},
+         rhi::PipelineInputAssembly{},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+             rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  auto skeletonLinesPipeline = mRenderStorage.addPipeline(
-      {mShaderLibrary.getShader("skeleton-lines.vert"),
-       mShaderLibrary.getShader("skeleton-lines.frag"),
-       {},
-       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
-       rhi::PipelineRasterizer{rhi::PolygonMode::Line, rhi::CullMode::None,
-                               rhi::FrontFace::Clockwise},
-       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
-           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
-           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+    auto skeletonLinesPipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("skeleton-lines.vert"),
+         mShaderLibrary.getShader("skeleton-lines.frag"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Line, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+             rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  auto objectIconsPipeline = mRenderStorage.addPipeline(
-      {mShaderLibrary.getShader("object-icons.vert"),
-       mShaderLibrary.getShader("object-icons.frag"),
-       {},
-       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
-       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
-                               rhi::FrontFace::Clockwise},
-       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
-           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
-           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+    auto objectIconsPipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("object-icons.vert"),
+         mShaderLibrary.getShader("object-icons.frag"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+             rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  static const float WireframeLineHeight = 3.0f;
+    static const float WireframeLineHeight = 3.0f;
 
-  auto collidableShapePipeline = mRenderStorage.addPipeline(
-      {mShaderLibrary.getShader("collidable-shape.vert"),
-       mShaderLibrary.getShader("collidable-shape.frag"),
-       rhi::PipelineVertexInputLayout::create<Vertex>(),
-       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
-       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
-                               rhi::FrontFace::Clockwise, WireframeLineHeight},
-       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
-           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
-           rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-           rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+    auto collidableShapePipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("collidable-shape.vert"),
+         mShaderLibrary.getShader("collidable-shape.frag"),
+         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise,
+                                 WireframeLineHeight},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
+             rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
-  pass.addPipeline(editorGridPipeline);
-  pass.addPipeline(skeletonLinesPipeline);
-  pass.addPipeline(objectIconsPipeline);
-  pass.addPipeline(collidableShapePipeline);
+    editorDebugPass.addPipeline(editorGridPipeline);
+    editorDebugPass.addPipeline(skeletonLinesPipeline);
+    editorDebugPass.addPipeline(objectIconsPipeline);
+    editorDebugPass.addPipeline(collidableShapePipeline);
 
-  pass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
-                    objectIconsPipeline, collidableShapePipeline,
-                    this](rhi::RenderCommandList &commandList,
-                          uint32_t frameIndex) {
-    auto &frameData = mFrameData.at(frameIndex);
+    editorDebugPass.setExecutor([editorGridPipeline, skeletonLinesPipeline,
+                                 objectIconsPipeline, collidableShapePipeline,
+                                 this](rhi::RenderCommandList &commandList,
+                                       uint32_t frameIndex) {
+      auto &frameData = mFrameData.at(frameIndex);
 
-    std::array<uint32_t, 1> offsets{0};
-    // Collidable shapes
-    if (frameData.isCollidableEntitySelected() &&
-        frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
-      LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
+      std::array<uint32_t, 1> offsets{0};
+      // Collidable shapes
+      if (frameData.isCollidableEntitySelected() &&
+          frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
+        LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
 
-      commandList.bindPipeline(collidableShapePipeline);
-      commandList.bindDescriptor(collidableShapePipeline, 0,
-                                 mRenderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(collidableShapePipeline, 1,
-                                 frameData.getBindlessParams().getDescriptor(),
-                                 offsets);
+        commandList.bindPipeline(collidableShapePipeline);
+        commandList.bindDescriptor(collidableShapePipeline, 0,
+                                   mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            collidableShapePipeline, 1,
+            frameData.getBindlessParams().getDescriptor(), offsets);
 
-      auto type = frameData.getCollidableShapeType();
+        auto type = frameData.getCollidableShapeType();
 
-      if (type == PhysicsGeometryType::Box) {
-        commandList.bindVertexBuffer(mCollidableCube.buffer.getHandle());
-        commandList.draw(mCollidableCube.vertexCount, 0);
-      } else if (type == PhysicsGeometryType::Sphere) {
-        commandList.bindVertexBuffer(mCollidableSphere.buffer.getHandle());
-        commandList.draw(mCollidableSphere.vertexCount, 0);
-      } else if (type == PhysicsGeometryType::Capsule) {
-        commandList.bindVertexBuffer(mCollidableCapsule.buffer.getHandle());
-        commandList.draw(mCollidableCapsule.vertexCount, 0);
+        if (type == PhysicsGeometryType::Box) {
+          commandList.bindVertexBuffer(mCollidableCube.buffer.getHandle());
+          commandList.draw(mCollidableCube.vertexCount, 0);
+        } else if (type == PhysicsGeometryType::Sphere) {
+          commandList.bindVertexBuffer(mCollidableSphere.buffer.getHandle());
+          commandList.draw(mCollidableSphere.vertexCount, 0);
+        } else if (type == PhysicsGeometryType::Capsule) {
+          commandList.bindVertexBuffer(mCollidableCapsule.buffer.getHandle());
+          commandList.draw(mCollidableCapsule.vertexCount, 0);
+        }
       }
-    }
 
-    // Editor grid
-    {
-      LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
+      // Editor grid
+      {
+        LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
 
-      commandList.bindPipeline(editorGridPipeline);
-      commandList.bindDescriptor(editorGridPipeline, 0,
-                                 mRenderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(editorGridPipeline, 1,
-                                 frameData.getBindlessParams().getDescriptor(),
-                                 offsets);
+        commandList.bindPipeline(editorGridPipeline);
+        commandList.bindDescriptor(editorGridPipeline, 0,
+                                   mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            editorGridPipeline, 1,
+            frameData.getBindlessParams().getDescriptor(), offsets);
 
-      static constexpr uint32_t GridPlaneNumVertices = 6;
-      commandList.draw(GridPlaneNumVertices, 0);
-    }
-
-    // Skeleton bones
-    if (!frameData.getBoneCounts().empty()) {
-      LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
-
-      commandList.bindPipeline(skeletonLinesPipeline);
-      commandList.bindDescriptor(skeletonLinesPipeline, 0,
-                                 mRenderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(skeletonLinesPipeline, 1,
-                                 frameData.getBindlessParams().getDescriptor(),
-                                 offsets);
-
-      const auto &numBones = frameData.getBoneCounts();
-
-      for (size_t i = 0; i < numBones.size(); ++i) {
-        commandList.draw(numBones.at(i), 0, 1, static_cast<uint32_t>(i));
+        static constexpr uint32_t GridPlaneNumVertices = 6;
+        commandList.draw(GridPlaneNumVertices, 0);
       }
-    }
 
-    // Object gizmos
-    {
-      LIQUID_PROFILE_EVENT("EditorPass::ObjectGizmos");
+      // Skeleton bones
+      if (!frameData.getBoneCounts().empty()) {
+        LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
 
-      commandList.bindPipeline(objectIconsPipeline);
-      commandList.bindDescriptor(objectIconsPipeline, 0,
-                                 mRenderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(objectIconsPipeline, 1,
-                                 mRenderStorage.getGlobalTexturesDescriptor());
-      commandList.bindDescriptor(objectIconsPipeline, 2,
-                                 frameData.getBindlessParams().getDescriptor(),
-                                 offsets);
+        commandList.bindPipeline(skeletonLinesPipeline);
+        commandList.bindDescriptor(skeletonLinesPipeline, 0,
+                                   mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            skeletonLinesPipeline, 1,
+            frameData.getBindlessParams().getDescriptor(), offsets);
 
-      uint32_t previousInstance = 0;
-      for (auto &[icon, count] : frameData.getGizmoCounts()) {
-        auto uIcon = rhi::castHandleToUint(icon);
-        commandList.pushConstants(objectIconsPipeline,
-                                  rhi::ShaderStage::Fragment, 0,
-                                  sizeof(uint32_t), &uIcon);
+        const auto &numBones = frameData.getBoneCounts();
 
-        commandList.draw(4, 0, count, previousInstance);
-
-        previousInstance += count;
+        for (size_t i = 0; i < numBones.size(); ++i) {
+          commandList.draw(numBones.at(i), 0, 1, static_cast<uint32_t>(i));
+        }
       }
-    }
-  });
+
+      // Object gizmos
+      {
+        LIQUID_PROFILE_EVENT("EditorPass::ObjectGizmos");
+
+        commandList.bindPipeline(objectIconsPipeline);
+        commandList.bindDescriptor(objectIconsPipeline, 0,
+                                   mRenderStorage.getGlobalBuffersDescriptor());
+        commandList.bindDescriptor(
+            objectIconsPipeline, 1,
+            mRenderStorage.getGlobalTexturesDescriptor());
+        commandList.bindDescriptor(
+            objectIconsPipeline, 2,
+            frameData.getBindlessParams().getDescriptor(), offsets);
+
+        uint32_t previousInstance = 0;
+        for (auto &[icon, count] : frameData.getGizmoCounts()) {
+          auto uIcon = rhi::castHandleToUint(icon);
+          commandList.pushConstants(objectIconsPipeline,
+                                    rhi::ShaderStage::Fragment, 0,
+                                    sizeof(uint32_t), &uIcon);
+
+          commandList.draw(4, 0, count, previousInstance);
+
+          previousInstance += count;
+        }
+      }
+    });
+  }
+
+  // outlines
+  {
+    static constexpr uint32_t SwapchainSizePercentage = 100;
+    rhi::TextureDescription depthBufferDesc{};
+    depthBufferDesc.usage = rhi::TextureUsage::Depth |
+                            rhi::TextureUsage::Stencil |
+                            rhi::TextureUsage::Sampled;
+    depthBufferDesc.width = SwapchainSizePercentage;
+    depthBufferDesc.height = SwapchainSizePercentage;
+    depthBufferDesc.layers = 1;
+    depthBufferDesc.samples = scenePassData.sampleCount;
+    depthBufferDesc.format = rhi::Format::Depth32FloatStencil8Uint;
+
+    auto depthBuffer =
+        mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
+
+    auto &outlinePass = graph.addGraphicsPass("outlinePass");
+    outlinePass.write(scenePassData.sceneColor, AttachmentType::Color,
+                      glm::vec4(0.0));
+    outlinePass.write(depthBuffer, AttachmentType::Depth,
+                      rhi::DepthStencilClear{1.0f, 0});
+    outlinePass.write(scenePassData.sceneColorResolved, AttachmentType::Resolve,
+                      glm::vec4(0.0));
+
+    static constexpr uint32_t MaskAll = 0xFF;
+    rhi::PipelineDepthStencil outlineWritePipelineStencil{
+        .depthTest = true,
+        .depthWrite = true,
+        .stencilTest = true,
+        .front = {.failOp = rhi::StencilOp::Keep,
+                  .passOp = rhi::StencilOp::Replace,
+                  .depthFailOp = rhi::StencilOp::Keep,
+                  .compareOp = rhi::CompareOp::Always,
+                  .compareMask = 0x00,
+                  .writeMask = MaskAll,
+                  .reference = 1},
+        .back = {.failOp = rhi::StencilOp::Keep,
+                 .passOp = rhi::StencilOp::Replace,
+                 .depthFailOp = rhi::StencilOp::Keep,
+                 .compareOp = rhi::CompareOp::Always,
+                 .compareMask = 0x00,
+                 .writeMask = MaskAll,
+                 .reference = 1}};
+
+    rhi::PipelineDepthStencil outlinePipelineStencil{
+        .depthTest = false,
+        .depthWrite = true,
+        .stencilTest = true,
+        .front = {.failOp = rhi::StencilOp::Keep,
+                  .passOp = rhi::StencilOp::Replace,
+                  .depthFailOp = rhi::StencilOp::Keep,
+                  .compareOp = rhi::CompareOp::NotEqual,
+                  .compareMask = MaskAll,
+                  .writeMask = 0x00,
+                  .reference = 1},
+        .back = {.failOp = rhi::StencilOp::Keep,
+                 .passOp = rhi::StencilOp::Replace,
+                 .depthFailOp = rhi::StencilOp::Keep,
+                 .compareOp = rhi::CompareOp::NotEqual,
+                 .compareMask = MaskAll,
+                 .writeMask = 0x00,
+                 .reference = 1}};
+
+    auto outlineGeometryStencilWritePipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("outline-geometry.vert"),
+         mShaderLibrary.getShader("outline-color.frag"),
+         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add}}},
+         outlineWritePipelineStencil});
+
+    auto outlineGeometryPipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("outline-geometry.vert"),
+         mShaderLibrary.getShader("outline-color.frag"),
+         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add}}},
+         outlinePipelineStencil});
+
+    auto outlineSkinnedGeometryStencilWritePipeline =
+        mRenderStorage.addPipeline(
+            {mShaderLibrary.getShader("outline-skinned-geometry.vert"),
+             mShaderLibrary.getShader("outline-color.frag"),
+             rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+             rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
+                                     rhi::CullMode::None,
+                                     rhi::FrontFace::Clockwise},
+             rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+                 true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+                 rhi::BlendOp::Add, rhi::BlendFactor::Zero,
+                 rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
+             outlineWritePipelineStencil});
+
+    auto outlineSkinnedGeometryPipeline = mRenderStorage.addPipeline(
+        {mShaderLibrary.getShader("outline-skinned-geometry.vert"),
+         mShaderLibrary.getShader("outline-color.frag"),
+         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+         outlinePipelineStencil});
+
+    outlinePass.addPipeline(outlineGeometryStencilWritePipeline);
+    outlinePass.addPipeline(outlineGeometryPipeline);
+    outlinePass.addPipeline(outlineSkinnedGeometryStencilWritePipeline);
+    outlinePass.addPipeline(outlineSkinnedGeometryPipeline);
+
+    outlinePass.setExecutor(
+        [outlineGeometryStencilWritePipeline, outlineGeometryPipeline,
+         outlineSkinnedGeometryStencilWritePipeline,
+         outlineSkinnedGeometryPipeline,
+         this](rhi::RenderCommandList &commandList, uint32_t frameIndex) {
+          static constexpr glm::vec4 OutlineColor{1.0f, 0.26f, 0.0f, 1.0f};
+          static constexpr float OutlineScale = 1.02f;
+
+          auto &frameData = mFrameData.at(frameIndex);
+
+          auto meshEnd = static_cast<uint32_t>(frameData.getOutlineMeshEnd());
+          auto skinnedMeshEnd =
+              static_cast<uint32_t>(frameData.getOutlineSkinnedMeshEnd());
+
+          renderOutlines(commandList, frameData,
+                         outlineGeometryStencilWritePipeline, 0, meshEnd,
+                         glm::vec4{0.0f}, 1.0f);
+          renderOutlines(commandList, frameData, outlineGeometryPipeline, 0,
+                         meshEnd, OutlineColor, OutlineScale);
+
+          renderOutlines(commandList, frameData,
+                         outlineSkinnedGeometryStencilWritePipeline, meshEnd,
+                         skinnedMeshEnd, glm::vec4{0.0f}, 1.0f);
+
+          renderOutlines(commandList, frameData, outlineSkinnedGeometryPipeline,
+                         meshEnd, skinnedMeshEnd, OutlineColor, OutlineScale);
+        });
+  }
 
   LOG_DEBUG("Editor renderer attached to graph: " << graph.getName());
-
-  return pass;
 }
 
 void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
@@ -211,6 +380,32 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   LIQUID_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
+
+  if (entityDatabase.exists(state.selectedEntity)) {
+    if (entityDatabase.has<Mesh>(state.selectedEntity)) {
+      auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
+
+      const auto &world =
+          entityDatabase.get<WorldTransform>(state.selectedEntity);
+
+      const auto &data = state.assetRegistry.getMeshes().getAsset(handle).data;
+      frameData.addMeshOutline(data, world.worldTransform);
+    } else if (entityDatabase.has<SkinnedMesh>(state.selectedEntity) &&
+               entityDatabase.has<Skeleton>(state.selectedEntity)) {
+      auto handle =
+          entityDatabase.get<SkinnedMesh>(state.selectedEntity).handle;
+
+      const auto &world =
+          entityDatabase.get<WorldTransform>(state.selectedEntity);
+      const auto &data =
+          state.assetRegistry.getSkinnedMeshes().getAsset(handle).data;
+
+      const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
+                                 .jointFinalTransforms;
+
+      frameData.addSkinnedMeshOutline(data, skeleton, world.worldTransform);
+    }
+  }
 
   if (entityDatabase.has<Collidable>(state.selectedEntity)) {
     frameData.setCollidable(
@@ -251,6 +446,49 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
   }
 
   frameData.updateBuffers();
+}
+
+void EditorRenderer::renderOutlines(rhi::RenderCommandList &commandList,
+                                    EditorRendererFrameData &frameData,
+                                    rhi::PipelineHandle pipeline,
+                                    uint32_t instanceStart,
+                                    uint32_t instanceEnd, glm::vec4 color,
+                                    float scale) {
+  std::array<uint32_t, 1> offsets{0};
+
+  commandList.bindPipeline(pipeline);
+  commandList.bindDescriptor(pipeline, 0,
+                             mRenderStorage.getGlobalBuffersDescriptor());
+  commandList.bindDescriptor(
+      pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
+
+  struct PushConstants {
+    glm::vec4 color;
+    glm::vec4 scale;
+    glm::uvec4 index;
+  };
+
+  PushConstants pc{};
+  pc.color = color;
+  pc.scale = glm::vec4(scale);
+  pc.index.x = instanceStart;
+
+  commandList.pushConstants(
+      pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+      sizeof(PushConstants), &pc);
+
+  for (uint32_t instanceIndex = instanceStart; instanceIndex < instanceEnd;
+       ++instanceIndex) {
+    const auto &outline = frameData.getMeshOutlines().at(instanceIndex);
+    commandList.bindVertexBuffer(outline.vertexBuffer);
+    commandList.bindIndexBuffer(outline.indexBuffer, rhi::IndexType::Uint32);
+
+    for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+      commandList.drawIndexed(
+          outline.indexCounts.at(i), outline.indexOffsets.at(i),
+          static_cast<int32_t>(outline.vertexOffsets.at(i)), 1, instanceIndex);
+    }
+  }
 }
 
 void EditorRenderer::createCollidableShapes() {

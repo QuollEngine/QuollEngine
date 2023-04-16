@@ -93,13 +93,41 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
       VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
   depthStencilState.pNext = nullptr;
   depthStencilState.flags = 0;
-  depthStencilState.depthTestEnable = VK_TRUE;
-  depthStencilState.depthWriteEnable = VK_TRUE;
+  depthStencilState.depthTestEnable = description.depthStencil.depthTest;
+  depthStencilState.depthWriteEnable = description.depthStencil.depthWrite;
   depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
   depthStencilState.depthBoundsTestEnable = VK_FALSE;
   depthStencilState.minDepthBounds = 0.0f;
   depthStencilState.maxDepthBounds = 1.0f;
-  depthStencilState.stencilTestEnable = VK_FALSE;
+  depthStencilState.stencilTestEnable = description.depthStencil.stencilTest;
+
+  {
+    // Front stencil
+    const auto &stencil = description.depthStencil.front;
+    auto &vkStencil = depthStencilState.front;
+
+    vkStencil.compareMask = stencil.compareMask;
+    vkStencil.compareOp = VulkanMapping::getCompareOp(stencil.compareOp);
+    vkStencil.failOp = VulkanMapping::getStencilOp(stencil.failOp);
+    vkStencil.passOp = VulkanMapping::getStencilOp(stencil.passOp);
+    vkStencil.depthFailOp = VulkanMapping::getStencilOp(stencil.depthFailOp);
+    vkStencil.reference = stencil.reference;
+    vkStencil.writeMask = stencil.writeMask;
+  }
+
+  {
+    // Back stencil
+    const auto &stencil = description.depthStencil.back;
+    auto &vkStencil = depthStencilState.back;
+
+    vkStencil.compareMask = stencil.compareMask;
+    vkStencil.compareOp = VulkanMapping::getCompareOp(stencil.compareOp);
+    vkStencil.failOp = VulkanMapping::getStencilOp(stencil.failOp);
+    vkStencil.passOp = VulkanMapping::getStencilOp(stencil.passOp);
+    vkStencil.depthFailOp = VulkanMapping::getStencilOp(stencil.depthFailOp);
+    vkStencil.reference = stencil.reference;
+    vkStencil.writeMask = stencil.writeMask;
+  }
 
   std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments(
       description.colorBlend.attachments.size(),

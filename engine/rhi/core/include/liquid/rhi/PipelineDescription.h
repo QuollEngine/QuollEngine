@@ -84,6 +84,28 @@ enum class BlendOp { Add, Subtract, ReverseSubtract, Min, Max };
 
 enum class VertexInputRate { Vertex, Instance };
 
+enum class StencilOp {
+  Keep,
+  Zero,
+  Replace,
+  IncrementAndClamp,
+  DecrementAndClamp,
+  Invert,
+  IncrementAndWrap,
+  DecrementAndWrap
+};
+
+enum CompareOp {
+  Never,
+  Less,
+  Equal,
+  LessOrEqual,
+  Greater,
+  NotEqual,
+  GreaterOrEqual,
+  Always
+};
+
 /**
  * @brief Pipeline vertex input binding
  */
@@ -277,6 +299,76 @@ struct PipelineColorBlend {
 };
 
 /**
+ * @brief Pipeline stencil description
+ */
+struct PipelineStencil {
+  /**
+   * Stencil fail operation
+   */
+  StencilOp failOp = StencilOp::Keep;
+
+  /**
+   * Stencil and depth pass operation
+   */
+  StencilOp passOp = StencilOp::Keep;
+
+  /**
+   * Stencil pass but depth fail operation
+   */
+  StencilOp depthFailOp = StencilOp::Keep;
+
+  /**
+   * Compare operation
+   */
+  CompareOp compareOp = CompareOp::Always;
+
+  /**
+   * Compare mask
+   */
+  uint32_t compareMask = 0;
+
+  /**
+   * Write mask
+   */
+  uint32_t writeMask = 0;
+
+  /**
+   * Reference value
+   */
+  uint32_t reference = 0;
+};
+
+/**
+ * @brief Pipeline depth stencil state
+ */
+struct PipelineDepthStencil {
+  /**
+   * Depth test
+   */
+  bool depthTest = true;
+
+  /**
+   * Depth write
+   */
+  bool depthWrite = true;
+
+  /**
+   * Stencil test
+   */
+  bool stencilTest = false;
+
+  /**
+   * Front stencil
+   */
+  PipelineStencil front{};
+
+  /**
+   * Back stencil
+   */
+  PipelineStencil back{};
+};
+
+/**
  * @brief Pipeline multisampling description
  */
 struct PipelineMultisample {
@@ -319,6 +411,11 @@ struct GraphicsPipelineDescription {
    * Color blending
    */
   PipelineColorBlend colorBlend;
+
+  /**
+   * Depth stencil
+   */
+  PipelineDepthStencil depthStencil;
 
   /**
    * Multisampling

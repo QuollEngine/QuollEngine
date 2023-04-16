@@ -42,6 +42,16 @@ struct RenderPassAttachmentDescription {
   AttachmentStoreOp storeOp;
 
   /**
+   * Attachment stencil load operation
+   */
+  AttachmentLoadOp stencilLoadOp;
+
+  /**
+   * Attachment stencil store operation
+   */
+  AttachmentStoreOp stencilStoreOp;
+
+  /**
    * Attachment texture
    */
   TextureHandle texture = TextureHandle::Invalid;

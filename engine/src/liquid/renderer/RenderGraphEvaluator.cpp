@@ -187,6 +187,12 @@ RenderGraphEvaluator::createAttachment(const AttachmentData &attachment,
 
   info.attachment.loadOp = attachment.loadOp;
   info.attachment.storeOp = attachment.storeOp;
+
+  if (BitwiseEnumContains(desc.usage, rhi::TextureUsage::Stencil)) {
+    info.attachment.stencilLoadOp = attachment.loadOp;
+    info.attachment.stencilStoreOp = attachment.storeOp;
+  }
+
   info.attachment.texture = renderTarget.texture;
   info.attachment.clearValue = attachment.clearValue;
   info.attachment.initialLayout = renderTarget.srcLayout;

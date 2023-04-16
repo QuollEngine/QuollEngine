@@ -173,6 +173,8 @@ private:
 
   std::map<rhi::TextureHandle, rhi::TextureDescription>
       mFramebufferRelativeTextures;
+  std::vector<rhi::TextureHandle>
+      mFramebufferRelativeTexturesInGlobalDescriptor;
 
   bool mNeedsSwapchainResize = false;
 

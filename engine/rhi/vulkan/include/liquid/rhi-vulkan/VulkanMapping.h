@@ -87,6 +87,22 @@ public:
   static VkBlendOp getBlendOp(BlendOp blendOp);
 
   /**
+   * @brief Get Vulkan compare operation
+   *
+   * @param compareOp Compare operation
+   * @return Vulkan compare operation
+   */
+  static VkCompareOp getCompareOp(CompareOp compareOp);
+
+  /**
+   * @brief Get Vulkan stencil operation
+   *
+   * @param stencilOp Stencil operation
+   * @return Vulkan stencil operation
+   */
+  static VkStencilOp getStencilOp(StencilOp stencilOp);
+
+  /**
    * @brief Get Vulkan vertex input rate
    *
    * @param vertexInputRate Vertex input rate
