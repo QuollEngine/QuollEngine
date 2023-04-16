@@ -66,6 +66,8 @@ void *LuaScope::luaGetUserData(int index) {
 
 bool LuaScope::luaIsNil(int index) { return lua_isnil(mScope, index); }
 
+bool LuaScope::luaIsBoolean(int index) { return lua_isboolean(mScope, index); }
+
 bool LuaScope::luaIsInteger(int index) { return lua_isinteger(mScope, index); }
 
 bool LuaScope::luaIsNumber(int index) { return lua_isnumber(mScope, index); }

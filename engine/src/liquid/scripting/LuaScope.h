@@ -266,6 +266,15 @@ private:
   bool luaIsNil(int index);
 
   /**
+   * @brief Check if stack value is boolean
+   *
+   * @param index Stack index
+   * @retval true Value is boolean
+   * @retval false Value is boolean
+   */
+  bool luaIsBoolean(int index);
+
+  /**
    * @brief Check if stack value is an integer
    *
    * @param index Stack index
@@ -433,6 +442,17 @@ template <> inline LuaTable LuaScope::get<LuaTable>(int32_t index) {
  */
 template <> inline LuaUserData LuaScope::get<LuaUserData>(int32_t index) {
   return {luaGetUserData(index)};
+}
+
+/**
+ * @brief Check if variable is a boolean
+ *
+ * @param index Stack index
+ * @retval true Type matches
+ * @retval false Type does not match
+ */
+template <> inline bool LuaScope::is<bool>(int32_t index) {
+  return luaIsBoolean(index);
 }
 
 /**

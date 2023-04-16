@@ -7,6 +7,226 @@ class RigidBodyLuaScriptingInterfaceTest
     : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetDefaultParamsDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+  call(entity, "rigid_body_set_default_params_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest, SetDefaultParamsSetsNewRigidBody) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "rigid_body_set_default_params");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            liquid::RigidBody{}.dynamicDesc.mass);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       GetMassReturnsNullIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::RigidBody>(entity, {});
+
+  auto &scope = call(entity, "rigid_body_get_mass_invalid");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("mass"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       GetMassReturnsNullIfRigidBodyDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "rigid_body_get_mass");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("mass"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest, GetMassReturnsRigidBodyMass) {
+  auto entity = entityDatabase.create();
+  liquid::RigidBody rigidBody;
+  rigidBody.dynamicDesc.mass = 2.5f;
+  entityDatabase.set(entity, rigidBody);
+
+  auto &scope = call(entity, "rigid_body_get_mass");
+  EXPECT_EQ(scope.getGlobal<float>("mass"), 2.5f);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetMassDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+  call(entity, "rigid_body_set_mass_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetMassCreatesRigidBodyIfItDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "rigid_body_set_mass");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            2.5);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetMassUpdatesMassPropertyOfRigidBodyIfExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::RigidBody rigidBody{};
+  rigidBody.dynamicDesc.inertia = glm::vec3(7.5f);
+  entityDatabase.set(entity, rigidBody);
+
+  call(entity, "rigid_body_set_mass");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            2.5);
+  EXPECT_NE(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            rigidBody.dynamicDesc.mass);
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.inertia,
+            rigidBody.dynamicDesc.inertia);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       GetInertiaReturnsNullIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::RigidBody>(entity, {});
+
+  auto &scope = call(entity, "rigid_body_get_inertia_invalid");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_x"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_y"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_z"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       GetInertiaReturnsNullIfRigidBodyDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "rigid_body_get_inertia");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_x"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_y"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_z"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest, GetInertiaReturnsRigidBodyInertia) {
+  auto entity = entityDatabase.create();
+  liquid::RigidBody rigidBody;
+  rigidBody.dynamicDesc.inertia = glm::vec3(2.5f);
+  entityDatabase.set(entity, rigidBody);
+
+  auto &scope = call(entity, "rigid_body_get_inertia");
+  EXPECT_EQ(scope.getGlobal<float>("inertia_x"), 2.5f);
+  EXPECT_EQ(scope.getGlobal<float>("inertia_y"), 2.5f);
+  EXPECT_EQ(scope.getGlobal<float>("inertia_z"), 2.5f);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetInertiaDoesNothingIfProvidedArgumentsAreInvalid) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+  call(entity, "rigid_body_set_inertia_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetInertiaCreatesRigidBodyIfItDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "rigid_body_set_inertia");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.inertia,
+            glm::vec3(2.5));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       SetInertiaUpdatesInertiaPropertyOfRigidBodyIfExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::RigidBody rigidBody{};
+  rigidBody.dynamicDesc.mass = 7.5f;
+  entityDatabase.set(entity, rigidBody);
+
+  call(entity, "rigid_body_set_inertia");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            rigidBody.dynamicDesc.mass);
+  EXPECT_NE(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.inertia,
+            rigidBody.dynamicDesc.inertia);
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.inertia,
+            glm::vec3{2.5f});
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       IsGravityAppliedReturnsNullIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::RigidBody>(entity, {});
+
+  auto &scope = call(entity, "rigid_body_is_gravity_applied_invalid");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("is_gravity_applied"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       IsGravityAppliedReturnsNullIfRigidBodyDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "rigid_body_is_gravity_applied");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("is_gravity_applied"));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       IsGravityAppliedReturnsRigidBodyGravityApplied) {
+  auto entity = entityDatabase.create();
+  liquid::RigidBody rigidBody;
+  rigidBody.dynamicDesc.applyGravity = false;
+  entityDatabase.set(entity, rigidBody);
+
+  auto &scope = call(entity, "rigid_body_is_gravity_applied");
+  EXPECT_EQ(scope.getGlobal<bool>("is_gravity_applied"), false);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       ApplyGravityDoesNothingIfProvidedArgumentIsInvalid) {
+  auto entity = entityDatabase.create();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+  call(entity, "rigid_body_apply_gravity_invalid");
+  EXPECT_FALSE(entityDatabase.has<liquid::RigidBody>(entity));
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       ApplyGravityCreatesRigidBodyIfItDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "rigid_body_apply_gravity");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(
+      entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.applyGravity,
+      false);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
+       ApplyGravityUpdatesInertiaPropertyOfRigidBodyIfExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::RigidBody rigidBody{};
+  rigidBody.dynamicDesc.mass = 7.5f;
+  entityDatabase.set(entity, rigidBody);
+
+  call(entity, "rigid_body_apply_gravity");
+  EXPECT_TRUE(entityDatabase.has<liquid::RigidBody>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.mass,
+            rigidBody.dynamicDesc.mass);
+  EXPECT_NE(
+      entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.applyGravity,
+      rigidBody.dynamicDesc.applyGravity);
+  EXPECT_EQ(
+      entityDatabase.get<liquid::RigidBody>(entity).dynamicDesc.applyGravity,
+      false);
+}
+
+TEST_F(RigidBodyLuaScriptingInterfaceTest,
        ApplyForceDoesNothingIfProvidedArgumentsAreInvalid) {
   auto entity = entityDatabase.create();
 
