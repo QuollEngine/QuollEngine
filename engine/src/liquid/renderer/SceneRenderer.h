@@ -15,22 +15,27 @@ struct SceneRenderPassData {
   /**
    * Scene texture
    */
-  rhi::TextureHandle sceneColor;
+  rhi::TextureHandle sceneColor = rhi::TextureHandle::Invalid;
 
   /**
    * Scene color resolved
    */
-  rhi::TextureHandle sceneColorResolved;
+  rhi::TextureHandle sceneColorResolved = rhi::TextureHandle::Invalid;
 
   /**
    * Final color texture
    */
-  rhi::TextureHandle finalColor;
+  rhi::TextureHandle finalColor = rhi::TextureHandle::Invalid;
 
   /**
    * Scene depth buffer
    */
-  rhi::TextureHandle depthBuffer;
+  rhi::TextureHandle depthBuffer = rhi::TextureHandle::Invalid;
+
+  /**
+   * Sample count
+   */
+  uint32_t sampleCount = 0;
 };
 
 /**

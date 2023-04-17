@@ -97,12 +97,13 @@ void EditorScreen::start(const Project &project) {
   EditorCamera editorCamera(mEventSystem, mWindow);
 
   WorkspaceState state{project, assetManager.getAssetRegistry()};
-  state.scene.entityDatabase.reg<CameraLookAt>();
-  state.camera = editorCamera.createDefaultCamera(state.scene.entityDatabase);
-  state.activeCamera = state.camera;
 
   ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
   actionExecutor.getSceneIO().loadScene(project.scenesPath / "main.lqscene");
+
+  state.scene.entityDatabase.reg<CameraLookAt>();
+  state.camera = editorCamera.createDefaultCamera(state.scene.entityDatabase);
+  state.activeCamera = state.camera;
 
   EditorManager::loadWorkspaceState(statePath, state);
 
@@ -117,25 +118,16 @@ void EditorScreen::start(const Project &project) {
                                  std::filesystem::current_path() / "assets" /
                                      "icons");
 
-  EditorRenderer editorRenderer(renderer.getShaderLibrary(),
-                                ui.getIconRegistry(),
-                                renderer.getRenderStorage(), mDevice);
-
   RenderGraph graph("Main");
 
   auto scenePassGroup = sceneRenderer.attach(graph);
   auto imguiPassGroup = imguiRenderer.attach(graph);
   imguiPassGroup.pass.read(scenePassGroup.finalColor);
 
-  {
-    static constexpr glm::vec4 ClearColor{0.52f, 0.54f, 0.89f, 1.0f};
-    auto &pass = editorRenderer.attach(graph);
-    pass.write(scenePassGroup.sceneColor, AttachmentType::Color, ClearColor);
-    pass.write(scenePassGroup.depthBuffer, AttachmentType::Depth,
-               rhi::DepthStencilClear{1.0f, 0});
-    pass.write(scenePassGroup.sceneColorResolved, AttachmentType::Resolve,
-               ClearColor);
-  }
+  EditorRenderer editorRenderer(renderer.getShaderLibrary(),
+                                ui.getIconRegistry(),
+                                renderer.getRenderStorage(), mDevice);
+  editorRenderer.attach(graph, scenePassGroup);
 
   sceneRenderer.attachText(graph, scenePassGroup);
 

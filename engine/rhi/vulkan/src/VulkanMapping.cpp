@@ -151,6 +151,52 @@ VkBlendOp VulkanMapping::getBlendOp(BlendOp blendOp) {
   }
 }
 
+VkCompareOp VulkanMapping::getCompareOp(CompareOp compareOp) {
+  switch (compareOp) {
+  case CompareOp::Never:
+    return VK_COMPARE_OP_NEVER;
+  case CompareOp::Less:
+    return VK_COMPARE_OP_LESS;
+  case CompareOp::Equal:
+    return VK_COMPARE_OP_EQUAL;
+  case CompareOp::LessOrEqual:
+    return VK_COMPARE_OP_LESS_OR_EQUAL;
+  case CompareOp::Greater:
+    return VK_COMPARE_OP_GREATER;
+  case CompareOp::NotEqual:
+    return VK_COMPARE_OP_NOT_EQUAL;
+  case CompareOp::GreaterOrEqual:
+    return VK_COMPARE_OP_GREATER_OR_EQUAL;
+  case CompareOp::Always:
+    return VK_COMPARE_OP_ALWAYS;
+  default:
+    return VK_COMPARE_OP_MAX_ENUM;
+  }
+}
+
+VkStencilOp VulkanMapping::getStencilOp(StencilOp stencilOp) {
+  switch (stencilOp) {
+  case StencilOp::Keep:
+    return VK_STENCIL_OP_KEEP;
+  case StencilOp::Zero:
+    return VK_STENCIL_OP_ZERO;
+  case StencilOp::Replace:
+    return VK_STENCIL_OP_REPLACE;
+  case StencilOp::IncrementAndClamp:
+    return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+  case StencilOp::DecrementAndClamp:
+    return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+  case StencilOp::Invert:
+    return VK_STENCIL_OP_INVERT;
+  case StencilOp::IncrementAndWrap:
+    return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+  case StencilOp::DecrementAndWrap:
+    return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+  default:
+    return VK_STENCIL_OP_MAX_ENUM;
+  };
+}
+
 VkVertexInputRate VulkanMapping::getVertexInputRate(VertexInputRate inputRate) {
   switch (inputRate) {
   case VertexInputRate::Vertex:
@@ -265,6 +311,8 @@ VkFormat VulkanMapping::getFormat(Format format) {
     return VK_FORMAT_D16_UNORM;
   case rhi::Format::Depth32Float:
     return VK_FORMAT_D32_SFLOAT;
+  case rhi::Format::Depth32FloatStencil8Uint:
+    return VK_FORMAT_D32_SFLOAT_S8_UINT;
   case rhi::Format::Undefined:
   default:
     LIQUID_ASSERT(false, "Undefined format");

@@ -3,6 +3,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/RenderDevice.h"
+#include "liquid/asset/MeshAsset.h"
 
 #include "liquid/scene/Camera.h"
 #include "liquid/renderer/RenderStorage.h"
@@ -34,22 +35,49 @@ public:
    */
   struct CollidableEntity {
     /**
-     * @brief Entity world transform matrix
+     * Entity world transform matrix
      */
     glm::mat4 worldTransform;
 
     /**
-     * @brief Entity type
+     * Entity type
      */
     glm::uvec4 type;
 
     /**
-     * @brief Collidable parameters
+     * Collidable parameters
      *
      * Parameters differ between different
      * shape types
      */
     glm::vec4 params;
+  };
+
+  /**
+   * @brief Mesh outline
+   */
+  struct MeshOutline {
+    /**
+     * Vertex buffer
+     */
+    rhi::BufferHandle vertexBuffer;
+
+    /**
+     * Index buffer
+     */
+    rhi::BufferHandle indexBuffer;
+    /**
+     * Index buffer
+     */
+    std::vector<uint32_t> indexCounts;
+    /**
+     * Index offsets
+     */
+    std::vector<uint32_t> indexOffsets;
+    /**
+     * Vertex offsets
+     */
+    std::vector<uint32_t> vertexOffsets;
   };
 
 public:
@@ -139,6 +167,50 @@ public:
   void addGizmo(rhi::TextureHandle icon, const glm::mat4 &worldTransform);
 
   /**
+   * @brief Add mesh outline
+   *
+   * @param mesh Mesh asset
+   * @param worldTransform World transform
+   */
+  void addMeshOutline(const MeshAsset &mesh, const glm::mat4 &worldTransform);
+
+  /**
+   * @brief Add skinned mesh outline
+   *
+   * @param mesh Skinned mesh asset
+   * @param skeleton Skeleton joints
+   * @param worldTransform World transform
+   */
+  void addSkinnedMeshOutline(const SkinnedMeshAsset &mesh,
+                             const std::vector<glm::mat4> &skeleton,
+                             const glm::mat4 &worldTransform);
+
+  /**
+   * @brief Get mesh outlines
+   *
+   * @return Mesh outlines
+   */
+  inline const std::vector<MeshOutline> &getMeshOutlines() const {
+    return mMeshOutlines;
+  }
+
+  /**
+   * @brief Get last mesh index in outline data
+   *
+   * @return Last mesh index
+   */
+  inline size_t getOutlineMeshEnd() const { return mOutlineMeshEnd; }
+
+  /**
+   * @brief Get last skinned mesh index in outline data
+   *
+   * @return Last skinned mesh index
+   */
+  inline size_t getOutlineSkinnedMeshEnd() const {
+    return mOutlineSkinnedMeshEnd;
+  }
+
+  /**
    * @brief Get buffer for gizmo world transforms
    *
    * @return Gizmo transforms
@@ -214,6 +286,19 @@ public:
 
 private:
   size_t mReservedSpace = 0;
+
+  // Outlines
+  std::vector<MeshOutline> mMeshOutlines;
+  size_t mOutlineMeshEnd = 0;
+  size_t mOutlineSkinnedMeshEnd = 0;
+
+  std::vector<glm::mat4> mOutlineTransforms;
+
+  std::unique_ptr<glm::mat4> mOutlineSkeletons;
+  size_t mLastOutlineSkeleton = 0;
+  size_t mOutlineSkeletonCapacity = 0;
+  rhi::Buffer mOutlineTransformsBuffer;
+  rhi::Buffer mOutlineSkeletonsBuffer;
 
   // Camera
   Camera mCameraData;

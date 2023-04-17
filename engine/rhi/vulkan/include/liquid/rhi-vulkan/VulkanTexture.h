@@ -107,7 +107,7 @@ private:
   VkImageView mImageView = VK_NULL_HANDLE;
   VkSampler mSampler = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
-  VkImageAspectFlags mAspectFlags = VK_IMAGE_ASPECT_FLAG_BITS_MAX_ENUM;
+  VkImageAspectFlags mAspectFlags = VK_IMAGE_ASPECT_NONE;
   VulkanResourceAllocator &mAllocator;
   VulkanDeviceObject &mDevice;
   TextureDescription mDescription;

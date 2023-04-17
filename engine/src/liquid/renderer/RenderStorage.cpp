@@ -88,6 +88,9 @@ rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
   auto handle = createTexture(fixedSizeDesc, addToDescriptor);
 
   mFramebufferRelativeTextures.insert({handle, description});
+  if (addToDescriptor) {
+    mFramebufferRelativeTexturesInGlobalDescriptor.push_back(handle);
+  }
 
   return handle;
 }
@@ -131,7 +134,9 @@ bool RenderStorage::recreateFramebufferRelativeTextures() {
     fixedSizeDesc.height = mHeight * description.height / Hundred;
 
     mDevice->updateTexture(handle, fixedSizeDesc);
+  }
 
+  for (auto handle : mFramebufferRelativeTexturesInGlobalDescriptor) {
     std::array<rhi::TextureHandle, 1> textures{handle};
     mGlobalTexturesDescriptor.write(0, textures,
                                     rhi::DescriptorType::CombinedImageSampler,

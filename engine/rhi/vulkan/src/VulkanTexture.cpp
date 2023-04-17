@@ -55,12 +55,17 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   if (BitwiseEnumContains(description.usage, TextureUsage::Color)) {
     usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    mAspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    mAspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
   }
 
   if (BitwiseEnumContains(description.usage, TextureUsage::Depth)) {
     usageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    mAspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+    mAspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+  }
+
+  if (BitwiseEnumContains(description.usage, TextureUsage::Stencil)) {
+    usageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    mAspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
   }
 
   if (BitwiseEnumContains(description.usage, TextureUsage::Sampled)) {

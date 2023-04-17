@@ -5,6 +5,7 @@
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquidator/ui/IconRegistry.h"
 #include "liquidator/state/WorkspaceState.h"
+#include "liquid/renderer/SceneRenderer.h"
 
 #include "EditorRendererFrameData.h"
 
@@ -49,9 +50,9 @@ public:
    * @brief Attach to render graph
    *
    * @param graph Render graph
-   * @return Newly created render pass
+   * @param scenePassData Scene pass data
    */
-  RenderGraphPass &attach(RenderGraph &graph);
+  void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData);
 
   /**
    * @brief Update frame data
@@ -65,6 +66,22 @@ public:
                        WorkspaceState &state, uint32_t frameIndex);
 
 private:
+  /**
+   * @brief Render outlines
+   *
+   * @param commandList Command list
+   * @param outlines Outlines
+   * @param pipeline Pipeline
+   * @param instanceStart Instance start index
+   * @param instanceEnd Instance end index
+   * @param color Color used in fragment shader
+   * @param scale Object scale
+   */
+  void renderOutlines(rhi::RenderCommandList &commandList,
+                      EditorRendererFrameData &frameData,
+                      rhi::PipelineHandle pipeline, uint32_t instanceStart,
+                      uint32_t instanceEnd, glm::vec4 color, float scale);
+
   /**
    * @brief Create buffers for collidable shapes
    */

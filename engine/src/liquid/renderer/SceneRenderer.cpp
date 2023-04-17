@@ -270,6 +270,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                     rhi::FrontFace::Clockwise},
             rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+            {},
             rhi::PipelineMultisample{0}});
 
     pass.addPipeline(pipeline);
@@ -412,7 +413,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   LOG_DEBUG("Scene renderer attached to graph");
 
   return SceneRenderPassData{sceneColor, sceneColorResolved, hdrColor,
-                             depthBuffer};
+                             depthBuffer, mMaxSampleCounts};
 }
 
 void SceneRenderer::attachText(RenderGraph &graph,

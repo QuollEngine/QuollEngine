@@ -3,6 +3,8 @@
 
 namespace liquid::editor {
 
+static constexpr size_t MaxNumJoints = 32;
+
 EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
                                                  size_t reservedSpace)
     : mReservedSpace(reservedSpace),
@@ -12,7 +14,8 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
                           .minUniformBufferOffsetAlignment) {
   mSkeletonTransforms.reserve(mReservedSpace);
   mNumBones.reserve(mReservedSpace);
-  mGizmoTransforms.reserve(reservedSpace);
+  mGizmoTransforms.reserve(mReservedSpace);
+  mOutlineTransforms.reserve(mReservedSpace);
   mSkeletonVector.reset(new glm::mat4[mReservedSpace * MaxNumBones]);
 
   rhi::BufferDescription defaultDesc{};
@@ -55,22 +58,31 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
+    mOutlineSkeletonsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  mOutlineTransformsBuffer = renderStorage.createBuffer(defaultDesc);
+
   struct EditorDrawParams {
     rhi::BufferHandle gizmoTransforms;
     rhi::BufferHandle skeletonTransforms;
     rhi::BufferHandle debugSkeletons;
-    rhi::BufferHandle collidbaleParams;
+    rhi::BufferHandle collidableParams;
     rhi::BufferHandle camera;
     rhi::BufferHandle gridData;
-    uint32_t pad0;
-    uint32_t pad1;
+    rhi::BufferHandle outlineTransforms;
+    rhi::BufferHandle outlineSkeletons;
   };
 
   mBindlessParams.addRange(EditorDrawParams{
       mGizmoTransformsBuffer.getHandle(), mSkeletonTransformsBuffer.getHandle(),
       mSkeletonBoneTransformsBuffer.getHandle(),
       mCollidableEntityBuffer.getHandle(), mCameraBuffer.getHandle(),
-      mEditorGridBuffer.getHandle()});
+      mEditorGridBuffer.getHandle(), mOutlineTransformsBuffer.getHandle(),
+      mOutlineSkeletonsBuffer.getHandle()});
 
   mBindlessParams.build(renderStorage.getDevice());
 }
@@ -98,12 +110,85 @@ void EditorRendererFrameData::addGizmo(rhi::TextureHandle icon,
   mGizmoCounts[icon]++;
 }
 
+void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
+                                             const glm::mat4 &worldTransform) {
+  MeshOutline outline{};
+  outline.indexBuffer = mesh.indexBuffer.getHandle();
+  outline.vertexBuffer = mesh.vertexBuffer.getHandle();
+  outline.indexCounts.resize(mesh.geometries.size());
+  outline.indexOffsets.resize(mesh.geometries.size());
+  outline.vertexOffsets.resize(mesh.geometries.size());
+
+  mOutlineTransforms.push_back(worldTransform);
+
+  uint32_t lastIndexOffset = 0;
+  uint32_t lastVertexOffset = 0;
+  for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+    outline.indexCounts.at(i) =
+        static_cast<uint32_t>(mesh.geometries.at(i).indices.size());
+    outline.indexOffsets.at(i) = static_cast<uint32_t>(lastIndexOffset);
+    outline.vertexOffsets.at(i) = lastVertexOffset;
+    lastIndexOffset += outline.indexCounts.at(i);
+    lastVertexOffset +=
+        static_cast<uint32_t>(mesh.geometries.at(i).vertices.size());
+  }
+
+  mMeshOutlines.push_back(outline);
+  mOutlineMeshEnd++;
+}
+
+void EditorRendererFrameData::addSkinnedMeshOutline(
+    const SkinnedMeshAsset &mesh, const std::vector<glm::mat4> &skeleton,
+    const glm::mat4 &worldTransform) {
+  MeshOutline outline{};
+  outline.indexBuffer = mesh.indexBuffer.getHandle();
+  outline.vertexBuffer = mesh.vertexBuffer.getHandle();
+  outline.indexCounts.resize(mesh.geometries.size());
+  outline.indexOffsets.resize(mesh.geometries.size());
+  outline.vertexOffsets.resize(mesh.geometries.size());
+
+  mOutlineTransforms.push_back(worldTransform);
+
+  uint32_t lastIndexOffset = 0;
+  uint32_t lastVertexOffset = 0;
+  for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
+    outline.indexCounts.at(i) =
+        static_cast<uint32_t>(mesh.geometries.at(i).indices.size());
+    outline.indexOffsets.at(i) = static_cast<uint32_t>(lastIndexOffset);
+    outline.vertexOffsets.at(i) = lastVertexOffset;
+    lastIndexOffset += outline.indexCounts.at(i);
+    lastVertexOffset +=
+        static_cast<uint32_t>(mesh.geometries.at(i).vertices.size());
+  }
+
+  mMeshOutlines.push_back(outline);
+
+  size_t currentOffset = mLastOutlineSkeleton * MaxNumJoints;
+  size_t newSize = currentOffset + MaxNumJoints;
+
+  // Resize skeletons if new skeleton does not fit
+  if (mOutlineSkeletonCapacity < newSize) {
+    mOutlineSkeletonCapacity = newSize * 2;
+    auto *newVector = new glm::mat4[mOutlineSkeletonCapacity];
+
+    memcpy(newVector, mOutlineSkeletons.get(),
+           currentOffset * sizeof(glm::mat4));
+    mOutlineSkeletons.reset(newVector);
+  }
+
+  auto *currentSkeleton = mOutlineSkeletons.get() + currentOffset;
+  size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
+  memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
+  mLastOutlineSkeleton++;
+
+  mOutlineSkinnedMeshEnd++;
+}
+
 void EditorRendererFrameData::setEditorGrid(const glm::uvec4 &data) {
   mEditorGridData = data;
 }
 
 void EditorRendererFrameData::updateBuffers() {
-
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mEditorGridBuffer.update(&mEditorGridData, sizeof(glm::uvec4));
 
@@ -118,6 +203,18 @@ void EditorRendererFrameData::updateBuffers() {
   mGizmoTransformsBuffer.update(mGizmoTransforms.data(),
                                 mGizmoTransforms.size() * sizeof(glm::mat4));
 
+  mOutlineTransformsBuffer.update(
+      mOutlineTransforms.data(), mOutlineTransforms.size() * sizeof(glm::mat4));
+
+  if (mLastOutlineSkeleton > 0) {
+    auto *skeletonsBuffer =
+        static_cast<glm::mat4 *>(mOutlineSkeletonsBuffer.map());
+    memcpy(skeletonsBuffer, mOutlineSkeletons.get(),
+           mLastOutlineSkeleton * MaxNumJoints * sizeof(glm::mat4));
+
+    mOutlineSkeletonsBuffer.unmap();
+  }
+
   mCollidableEntityBuffer.update(&mCollidableEntityParams,
                                  sizeof(CollidableEntity));
 }
@@ -128,6 +225,12 @@ void EditorRendererFrameData::clear() {
   mNumBones.clear();
   mGizmoCounts.clear();
   mLastSkeleton = 0;
+
+  mMeshOutlines.clear();
+  mOutlineMeshEnd = 0;
+  mOutlineSkinnedMeshEnd = 0;
+  mOutlineTransforms.clear();
+  mLastOutlineSkeleton = 0;
 
   mCollidableEntity = Entity::Null;
 }

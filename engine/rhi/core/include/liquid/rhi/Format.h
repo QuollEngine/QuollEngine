@@ -13,7 +13,8 @@ enum Format {
   Rgba32Float,
   Rgba32Uint,
   Depth16Unorm,
-  Depth32Float
+  Depth32Float,
+  Depth32FloatStencil8Uint
 };
 
 } // namespace liquid::rhi
