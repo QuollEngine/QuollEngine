@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/actions/EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
@@ -38,5 +39,7 @@ private:
   Entity mEntity;
   AudioAssetHandle mAudio;
 };
+
+using EntityDeleteAudio = EntityDefaultDeleteAction<AudioSource>;
 
 } // namespace liquid::editor

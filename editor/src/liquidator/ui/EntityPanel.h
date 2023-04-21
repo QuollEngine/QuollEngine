@@ -91,8 +91,10 @@ private:
    *
    * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void renderMesh(Scene &scene, AssetRegistry &assetRegistry);
+  void renderMesh(Scene &scene, AssetRegistry &assetRegistry,
+                  ActionExecutor &actionExecutor);
 
   /**
    * @brief Render animation component
@@ -100,9 +102,11 @@ private:
    * @param state Workspace state
    * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
   void renderAnimation(WorkspaceState &state, Scene &scene,
-                       AssetRegistry &assetRegistry);
+                       AssetRegistry &assetRegistry,
+                       ActionExecutor &actionExecutor);
 
   /**
    * @brief Render skeleton component
@@ -143,8 +147,10 @@ private:
    *
    * @param scene Scene
    * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
    */
-  void renderAudio(Scene &scene, AssetRegistry &assetRegistry);
+  void renderAudio(Scene &scene, AssetRegistry &assetRegistry,
+                   ActionExecutor &actionExecutor);
 
   /**
    * @brief Render scripting component
@@ -174,6 +180,15 @@ private:
    */
   void handleDragAndDrop(AssetRegistry &assetRegistry,
                          ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Check if item should be deleted
+   *
+   * @param component Component name
+   * @retval true Item should be deleted
+   * @retval false Item should not be deleted
+   */
+  bool shouldDelete(const char *component);
 
 private:
   Entity mSelectedEntity = Entity::Null;

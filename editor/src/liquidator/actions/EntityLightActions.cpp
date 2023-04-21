@@ -112,4 +112,51 @@ ActionExecutorResult EntitySetPointLight::onExecute(WorkspaceState &state) {
 
 bool EntitySetPointLight::predicate(WorkspaceState &state) { return true; }
 
+EntityDeleteDirectionalLight::EntityDeleteDirectionalLight(Entity entity)
+    : mEntity(entity) {}
+
+ActionExecutorResult
+EntityDeleteDirectionalLight::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.remove<DirectionalLight>(mEntity);
+
+  if (scene.entityDatabase.has<CascadedShadowMap>(mEntity)) {
+    scene.entityDatabase.remove<CascadedShadowMap>(mEntity);
+  }
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  return res;
+}
+
+bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<DirectionalLight>(mEntity);
+}
+
+EntityDeletePointLight::EntityDeletePointLight(Entity entity)
+    : mEntity(entity) {}
+
+ActionExecutorResult EntityDeletePointLight::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.remove<PointLight>(mEntity);
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  return res;
+}
+
+bool EntityDeletePointLight::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<PointLight>(mEntity);
+}
+
 } // namespace liquid::editor

@@ -152,6 +152,8 @@ void SceneIO::reset() {
   mEntityIdCache.clear();
   auto dummyCamera = mScene.entityDatabase.create();
   mScene.entityDatabase.set<Camera>(dummyCamera, {});
+  mScene.entityDatabase.set<PerspectiveLens>(dummyCamera, {});
+
   mScene.dummyCamera = dummyCamera;
   mScene.activeCamera = dummyCamera;
 }

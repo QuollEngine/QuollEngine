@@ -105,4 +105,37 @@ private:
   Entity mEntity;
 };
 
+/**
+ * @brief Delete camera action
+ */
+class EntityDeleteCamera : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   */
+  EntityDeleteCamera(Entity entity);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+};
+
 } // namespace liquid::editor

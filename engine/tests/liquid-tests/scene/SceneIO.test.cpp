@@ -280,6 +280,8 @@ TEST_F(SceneIOTest, SavingExistingEntityCreatesEntityFile) {
 TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
   EXPECT_TRUE(scene.entityDatabase.exists(scene.dummyCamera));
   EXPECT_TRUE(scene.entityDatabase.has<liquid::Camera>(scene.dummyCamera));
+  EXPECT_TRUE(
+      scene.entityDatabase.has<liquid::PerspectiveLens>(scene.dummyCamera));
 }
 
 TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {

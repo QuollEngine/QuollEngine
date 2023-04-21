@@ -87,9 +87,9 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
 InitActionsTestSuite(EntityActionsTest, EntitySetCollidableTypeActionTest);
 
-using SetEntityCollidableAction = ActionTestBase;
+using SetEntityCollidableActionTest = ActionTestBase;
 
-TEST_P(SetEntityCollidableAction, ExecutorSetsCollidableForEntity) {
+TEST_P(SetEntityCollidableActionTest, ExecutorSetsCollidableForEntity) {
   auto entity = activeScene().entityDatabase.create();
 
   liquid::Collidable collidable{};
@@ -105,4 +105,38 @@ TEST_P(SetEntityCollidableAction, ExecutorSetsCollidableForEntity) {
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
-InitActionsTestSuite(EntityActionsTest, SetEntityCollidableAction);
+InitActionsTestSuite(EntityActionsTest, SetEntityCollidableActionTest);
+
+using EntityDeleteCollidableActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteCollidableActionTest,
+       ExecutorDeletesCollidableComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Collidable>(entity, {});
+
+  liquid::editor::EntityDeleteCollidable action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Collidable>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteCollidableActionTest,
+       PredicateReturnsTrueIfEntityHasCollidableComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Collidable>(entity, {});
+
+  liquid::editor::EntityDeleteCollidable action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteCollidableActionTest,
+       PredicateReturnsTrueIfEntityHasNoCollidableComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteCollidable action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteCollidableActionTest);

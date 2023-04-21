@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/actions/EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
@@ -39,6 +40,8 @@ private:
   MeshAssetHandle mHandle;
 };
 
+using EntityDeleteMesh = EntityDefaultDeleteAction<Mesh>;
+
 /**
  * @brief Set skinned mesh for entity
  */
@@ -73,5 +76,7 @@ private:
   Entity mEntity;
   SkinnedMeshAssetHandle mHandle;
 };
+
+using EntityDeleteSkinnedMesh = EntityDefaultDeleteAction<SkinnedMesh>;
 
 } // namespace liquid::editor

@@ -35,6 +35,39 @@ TEST_P(EntitySetMeshActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
 
 InitActionsTestSuite(EntityActionsTest, EntitySetMeshActionTest);
 
+using EntityDeleteMeshActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteMeshActionTest, ExecutorDeletesMeshComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Mesh>(entity, {});
+
+  liquid::editor::EntityDeleteMesh action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteMeshActionTest,
+       PredicateReturnsTrueIfEntityHasMeshComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Mesh>(entity, {});
+
+  liquid::editor::EntityDeleteMesh action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteMeshActionTest,
+       PredicateReturnsTrueIfEntityHasNoMeshComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteMesh action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteMeshActionTest);
+
 using EntitySetSkinnedMeshActionTest = ActionTestBase;
 
 TEST_P(EntitySetSkinnedMeshActionTest, ExecutorSetsSkinnedMeshForEntity) {
@@ -68,3 +101,37 @@ TEST_P(EntitySetSkinnedMeshActionTest,
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetSkinnedMeshActionTest);
+
+using EntityDeleteSkinnedMeshActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteSkinnedMeshActionTest,
+       ExecutorDeletesSkinnedMeshComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {});
+
+  liquid::editor::EntityDeleteSkinnedMesh action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteSkinnedMeshActionTest,
+       PredicateReturnsTrueIfEntityHasSkinnedMeshComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {});
+
+  liquid::editor::EntityDeleteSkinnedMesh action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteSkinnedMeshActionTest,
+       PredicateReturnsTrueIfEntityHasNoSkinnedMeshComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteSkinnedMesh action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteSkinnedMeshActionTest);

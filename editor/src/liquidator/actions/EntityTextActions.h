@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Action.h"
+#include "liquidator/actions/EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
@@ -38,5 +39,7 @@ private:
   Entity mEntity;
   Text mText;
 };
+
+using EntityDeleteText = EntityDefaultDeleteAction<Text>;
 
 } // namespace liquid::editor

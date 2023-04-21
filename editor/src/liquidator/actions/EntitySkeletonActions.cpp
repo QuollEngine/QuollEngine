@@ -85,4 +85,28 @@ bool EntitySetSkeleton::predicate(WorkspaceState &state) {
   return state.assetRegistry.getSkeletons().hasAsset(mHandle);
 }
 
+EntityDeleteSkeleton::EntityDeleteSkeleton(Entity entity) : mEntity(entity) {}
+
+ActionExecutorResult EntityDeleteSkeleton::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.remove<Skeleton>(mEntity);
+
+  if (scene.entityDatabase.has<SkeletonDebug>(mEntity)) {
+    scene.entityDatabase.remove<SkeletonDebug>(mEntity);
+  }
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  return res;
+}
+
+bool EntityDeleteSkeleton::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<Skeleton>(mEntity);
+}
+
 } // namespace liquid::editor

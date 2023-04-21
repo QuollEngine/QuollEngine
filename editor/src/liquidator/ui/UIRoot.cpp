@@ -55,7 +55,6 @@ void UIRoot::render(WorkspaceState &state, AssetManager &assetManager) {
 bool UIRoot::renderSceneView(WorkspaceState &state,
                              rhi::TextureHandle sceneTexture,
                              EditorCamera &editorCamera) {
-
   if (auto _ = SceneView(sceneTexture)) {
     const auto &pos = ImGui::GetItemRectMin();
     const auto &size = ImGui::GetItemRectSize();

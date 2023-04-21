@@ -106,6 +106,58 @@ TEST_P(EntitySetCascadedShadowMapActionTest, ExecutorSetsCascadedShadowMap) {
 
 InitActionsTestSuite(EntityActionsTest, EntitySetCascadedShadowMapActionTest);
 
+using EntityDeleteDirectionalLightActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteDirectionalLightActionTest,
+       ExecutorDeletesDirectionalLightComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
+
+  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::DirectionalLight>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteDirectionalLightActionTest,
+       ExecutorDeletesCascadedShadowMapFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
+  activeScene().entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
+
+  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::DirectionalLight>(entity));
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::CascadedShadowMap>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteDirectionalLightActionTest,
+       PredicateReturnsTrueIfEntityHasDirectionalLightComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
+
+  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteDirectionalLightActionTest,
+       PredicateReturnsTrueIfEntityHasNoDirectionalLightComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteDirectionalLightActionTest);
+
 using EntitySetPointLightActionTest = ActionTestBase;
 
 TEST_P(EntitySetPointLightActionTest, ExecutorSetsPointLightForEntity) {
@@ -134,3 +186,37 @@ TEST_P(EntitySetPointLightActionTest, ExecutorRemovesOtherLightsOnEntity) {
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetPointLightActionTest);
+
+using EntityDeletePointLightActionTest = ActionTestBase;
+
+TEST_P(EntityDeletePointLightActionTest,
+       ExecutorDeletesPointLightComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::PointLight>(entity, {});
+
+  liquid::editor::EntityDeletePointLight action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::PointLight>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeletePointLightActionTest,
+       PredicateReturnsTrueIfEntityHasPointLightComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::PointLight>(entity, {});
+
+  liquid::editor::EntityDeletePointLight action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeletePointLightActionTest,
+       PredicateReturnsTrueIfEntityHasNoPointLightComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeletePointLight action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeletePointLightActionTest);

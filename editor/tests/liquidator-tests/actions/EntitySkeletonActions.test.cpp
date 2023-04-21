@@ -119,3 +119,52 @@ TEST_P(EntitySetSkeletonActionTest,
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetSkeletonActionTest);
+
+using EntityDeleteSkeletonActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteSkeletonActionTest,
+       ExecutorDeletesSkeletonComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+
+  liquid::editor::EntityDeleteSkeleton action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Skeleton>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteSkeletonActionTest,
+       ExecutorDeletesSkeletonDebugComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
+
+  liquid::editor::EntityDeleteSkeleton action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Skeleton>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteSkeletonActionTest,
+       PredicateReturnsTrueIfEntityHasSkeletonComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+
+  liquid::editor::EntityDeleteSkeleton action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteSkeletonActionTest,
+       PredicateReturnsFalseIfEntityHasNoSkeletonComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteSkeleton action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteSkeletonActionTest);
