@@ -6,6 +6,49 @@
 namespace liquid::editor {
 
 /**
+ * @brief Create script entity action
+ */
+class EntityCreateScript : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   * @param handle Script asset handle
+   */
+  EntityCreateScript(Entity entity, LuaScriptAssetHandle handle);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+  LuaScriptAssetHandle mHandle;
+};
+
+/**
  * @brief Set script for entity action
  */
 class EntitySetScript : public Action {
@@ -27,6 +70,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -38,6 +89,7 @@ public:
 private:
   Entity mEntity;
   LuaScriptAssetHandle mScript;
+  LuaScriptAssetHandle mOldScript{};
 };
 
 /**
@@ -62,6 +114,14 @@ public:
    * @return Executor result
    */
   ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action action
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
 
   /**
    * @brief Action predicate
@@ -97,6 +157,7 @@ private:
   Entity mEntity;
   String mName;
   LuaScriptInputVariable mValue;
+  Script mOldScript{};
 };
 
 using EntityDeleteScript = EntityDefaultDeleteAction<Script>;

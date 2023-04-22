@@ -23,6 +23,11 @@ struct ActionExecutorResult {
    * Save scene
    */
   bool saveScene = false;
+
+  /**
+   * Add to undo/redo history
+   */
+  bool addToHistory = false;
 };
 
 /**
@@ -48,6 +53,14 @@ public:
    * @return Executor result
    */
   virtual ActionExecutorResult onExecute(WorkspaceState &state) = 0;
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  virtual ActionExecutorResult onUndo(WorkspaceState &state);
 
   /**
    * @brief Action predicate

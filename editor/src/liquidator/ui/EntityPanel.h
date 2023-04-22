@@ -9,6 +9,12 @@
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/actions/EntityScriptingActions.h"
+#include "liquidator/actions/EntityNameActions.h"
+#include "liquidator/actions/EntityCollidableActions.h"
+#include "liquidator/actions/EntityRigidBodyActions.h"
+#include "liquidator/actions/EntityTextActions.h"
+#include "liquidator/actions/EntityLightActions.h"
+#include "liquidator/actions/EntityCameraActions.h"
 
 namespace liquid::editor {
 
@@ -43,14 +49,6 @@ private:
    * @param actionExecutor Action executor
    */
   void renderName(Scene &scene, ActionExecutor &actionExecutor);
-
-  /**
-   * @brief Render light component
-   *
-   * @param scene Active scene
-   * @param actionExecutor Action executor
-   */
-  void renderLight(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render directional light component
@@ -175,10 +173,11 @@ private:
   /**
    * @brief Handle drag and drop
    *
+   * @param scene Scene
    * @param assetRegistry Asset registry
    * @param actionExecutor Action executor
    */
-  void handleDragAndDrop(AssetRegistry &assetRegistry,
+  void handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
                          ActionExecutor &actionExecutor);
 
   /**
@@ -195,16 +194,16 @@ private:
   bool mIsNameActivated = false;
 
 private:
-  std::optional<Name> mName;
-  std::optional<RigidBody> mRigidBody;
-  std::optional<LocalTransform> mLocalTransform;
-  std::optional<Text> mText;
-  std::optional<Collidable> mCollidable;
-  std::optional<DirectionalLight> mDirectionalLight;
-  std::optional<PointLight> mPointLight;
-  std::optional<PerspectiveLens> mPerspectiveLens;
-  std::optional<CascadedShadowMap> mCascadedShadowMap;
+  std::unique_ptr<EntitySetName> mNameAction;
+  std::unique_ptr<EntitySetLocalTransformContinuous> mLocalTransformAction;
+  std::unique_ptr<EntitySetCollidable> mCollidableAction;
+  std::unique_ptr<EntitySetRigidBody> mRigidBodyAction;
+  std::unique_ptr<EntitySetText> mTextAction;
+  std::unique_ptr<EntitySetDirectionalLight> mDirectionalLightAction;
+  std::unique_ptr<EntitySetCascadedShadowMap> mCascadedShadowMapAction;
   std::unique_ptr<EntitySetScriptVariable> mSetScriptVariable;
+  std::unique_ptr<EntitySetPointLight> mPointLightAction;
+  std::unique_ptr<EntitySetPerspectiveLens> mPerspectiveLensAction;
 };
 
 } // namespace liquid::editor

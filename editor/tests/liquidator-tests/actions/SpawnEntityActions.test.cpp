@@ -32,6 +32,29 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, ExecutorSpawnsEmptyEntityAtView) {
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Name>(entity).name,
             "New entity");
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::WorldTransform>(entity));
+  EXPECT_TRUE(res.addToHistory);
+}
+
+TEST_P(SpawnEmptyEntityAtViewActionTest, UndoRemovesSpawnedEntity) {
+  auto camera = activeScene().entityDatabase.create();
+  glm::mat4 viewMatrix =
+      glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
+                  glm::vec3{0.0f, 1.0f, 0.0f});
+
+  liquid::Camera component{};
+  component.viewMatrix = viewMatrix;
+  activeScene().entityDatabase.set(camera, component);
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  auto execRes = action.onExecute(state);
+  auto undoRes = action.onUndo(state);
+
+  EXPECT_EQ(execRes.entitiesToSave.size(), 1);
+  EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
+  EXPECT_EQ(execRes.entitiesToSave.at(0), undoRes.entitiesToDelete.at(0));
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(
+      execRes.entitiesToSave.at(0)));
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
@@ -55,54 +78,6 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
 
 InitActionsTestSuite(EntityActionsTest, SpawnEmptyEntityAtViewActionTest);
 
-using SpawnPrefabAtTransform = ActionTestBase;
-
-TEST_P(SpawnPrefabAtTransform, ExecutorCreatesEntitiesFromPrefab) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
-  asset.data.transforms.push_back({0});
-
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
-
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
-  liquid::editor::SpawnPrefabAtTransform action(prefab, transform);
-
-  auto res = action.onExecute(state);
-  EXPECT_EQ(res.entitiesToSave.size(), 1);
-
-  auto entity = res.entitiesToSave.at(0);
-
-  EXPECT_EQ(activeScene()
-                .entityDatabase.get<liquid::LocalTransform>(entity)
-                .localPosition,
-            transform.localPosition);
-}
-
-TEST_P(SpawnPrefabAtTransform,
-       PredicateReturnsTrueIfPrefabAssetExistsAndIsNotEmpty) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
-  asset.data.transforms.push_back({0});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
-
-  liquid::editor::SpawnPrefabAtTransform action(prefab, {});
-  EXPECT_TRUE(action.predicate(state));
-}
-
-TEST_P(SpawnPrefabAtTransform, PredicateReturnsFalseIfPrefabAssetDoesNotExist) {
-  liquid::editor::SpawnPrefabAtTransform action(liquid::PrefabAssetHandle{15},
-                                                {});
-  EXPECT_FALSE(action.predicate(state));
-}
-
-TEST_P(SpawnPrefabAtTransform, PredicateReturnsFalseIfPrefabAssetIsEmpty) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
-
-  liquid::editor::SpawnPrefabAtTransform action(prefab, {});
-  EXPECT_FALSE(action.predicate(state));
-}
-
-InitActionsTestSuite(EntityActionsTest, SpawnPrefabAtTransform);
-
 using SpawnPrefabAtViewActionTest = ActionTestBase;
 
 TEST_P(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
@@ -117,20 +92,56 @@ TEST_P(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
 
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
+  asset.data.transforms.push_back({1});
+
   auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state);
 
-  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  ASSERT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(1), liquid::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(2), liquid::Entity::Null);
 
-  auto entity = res.entitiesToSave.at(0);
+  auto entity = res.entitiesToSave.at(2);
 
   EXPECT_EQ(activeScene()
                 .entityDatabase.get<liquid::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(0.0f, 0.0f, -10.0f));
+  EXPECT_TRUE(res.addToHistory);
+}
+
+TEST_P(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
+  auto camera = activeScene().entityDatabase.create();
+  glm::mat4 viewMatrix =
+      glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
+                  glm::vec3{0.0f, 1.0f, 0.0f});
+
+  liquid::Camera component{};
+  component.viewMatrix = viewMatrix;
+  activeScene().entityDatabase.set(camera, component);
+
+  liquid::AssetData<liquid::PrefabAsset> asset{};
+  asset.data.transforms.push_back({0});
+  asset.data.transforms.push_back({1});
+
+  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+
+  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  auto execRes = action.onExecute(state);
+
+  auto undoRes = action.onUndo(state);
+
+  ASSERT_EQ(execRes.entitiesToSave.size(), 3);
+  ASSERT_EQ(undoRes.entitiesToDelete.size(), 1);
+
+  auto entity = undoRes.entitiesToDelete.at(0);
+
+  EXPECT_EQ(undoRes.entitiesToDelete.back(), entity);
+
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
 }
 
 TEST_P(

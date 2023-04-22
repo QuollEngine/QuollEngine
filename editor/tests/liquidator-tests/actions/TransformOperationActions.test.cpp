@@ -13,8 +13,21 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Rotate;
 
   liquid::editor::SetActiveTransform action(TO::Move);
-  action.onExecute(state);
+  auto res = action.onExecute(state);
+
   EXPECT_EQ(state.activeTransform, TO::Move);
+  EXPECT_TRUE(res.addToHistory);
+}
+
+TEST_F(SetActiveTransformActionTest,
+       UndoChangesActiveTransformToPreviousTransform) {
+  state.activeTransform = TO::Rotate;
+
+  liquid::editor::SetActiveTransform action(TO::Move);
+  action.onExecute(state);
+  action.onUndo(state);
+
+  EXPECT_EQ(state.activeTransform, TO::Rotate);
 }
 
 TEST_F(SetActiveTransformActionTest,

@@ -30,10 +30,12 @@ public:
 
 struct TestActionData {
   bool called = false;
+  bool undoCalled = false;
   std::vector<liquid::Entity> entitiesToSave;
   std::vector<liquid::Entity> entitiesToDelete;
   bool saveScene = false;
   bool mPredicate = true;
+  bool addToHistory = false;
 };
 
 class TestAction : public liquid::editor::Action {
@@ -49,6 +51,20 @@ public:
     res.entitiesToSave = mData->entitiesToSave;
     res.entitiesToDelete = mData->entitiesToDelete;
     res.saveScene = mData->saveScene;
+    res.addToHistory = mData->addToHistory;
+
+    return res;
+  }
+
+  liquid::editor::ActionExecutorResult
+  onUndo(liquid::editor::WorkspaceState &state) {
+    mData->undoCalled = true;
+
+    liquid::editor::ActionExecutorResult res{};
+
+    res.entitiesToSave = mData->entitiesToDelete;
+    res.entitiesToDelete = mData->entitiesToSave;
+    res.saveScene = mData->saveScene;
 
     return res;
   }
@@ -62,6 +78,8 @@ public:
   }
 
   void saveSceneOnExecute() { mData->saveScene = true; }
+
+  void addToHistory() { mData->addToHistory = true; }
 
   void setPredicate(bool predicate) { mData->mPredicate = predicate; }
 
@@ -103,6 +121,8 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
   executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
 }
 
 TEST_F(ActionExecutorTest,
@@ -249,4 +269,192 @@ TEST_F(ActionExecutorTest,
   auto startingCamera =
       node["zones"][node["persistentZone"].as<size_t>()]["startingCamera"];
   EXPECT_FALSE(startingCamera);
+}
+
+TEST_F(ActionExecutorTest,
+       ExecuteAddsActionToUndoStackIfActionReturnsAddToHistoryAndModeIsEdit) {
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+}
+
+TEST_F(
+    ActionExecutorTest,
+    ExecuteDoesNotAddActionToUndoStackIfActionReturnsAddToHistoryAndModeIsSimulation) {
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+}
+
+TEST_F(ActionExecutorTest, UndoDoesNothingIfUndoStackIsEmpty) {
+  executor.undo();
+}
+
+TEST_F(ActionExecutorTest, UndoDoesNothingIfModeIsSimulation) {
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  executor.undo();
+
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+}
+
+TEST_F(ActionExecutorTest,
+       UndoCallsLastActionUndoAndUpdatesRedoStackIfModeIsEdit) {
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+
+  executor.undo();
+
+  EXPECT_TRUE(actionData->undoCalled);
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_FALSE(executor.getRedoStack().empty());
+}
+
+TEST_F(ActionExecutorTest, RedoDoesNothingIfRedoStackIsEmpty) {
+  executor.redo();
+}
+
+TEST_F(ActionExecutorTest, RedoDoesNothingIfModeIsSimulation) {
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+
+  executor.undo();
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_FALSE(executor.getRedoStack().empty());
+
+  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  executor.redo();
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_FALSE(executor.getRedoStack().empty());
+}
+
+TEST_F(ActionExecutorTest,
+       RedoCallsLastActionExecuteAndUpdatesUndoStackifModeIsEdit) {
+  auto *actionPtr = new TestAction;
+  actionPtr->addToHistory();
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+
+  actionData->called = false;
+
+  executor.undo();
+  EXPECT_TRUE(executor.getUndoStack().empty());
+  EXPECT_FALSE(executor.getRedoStack().empty());
+
+  executor.redo();
+  EXPECT_TRUE(actionData->called);
+  EXPECT_FALSE(executor.getUndoStack().empty());
+  EXPECT_TRUE(executor.getRedoStack().empty());
+}
+
+TEST_F(
+    ActionExecutorTest,
+    ExecuteAfterUndoDoesNotClearRedoStackIfActionDoesNotReturnAddToHistoryAndModeIsEdit) {
+  {
+    auto *actionPtr = new TestAction;
+    actionPtr->addToHistory();
+    auto actionData = actionPtr->getData();
+
+    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.process();
+    EXPECT_TRUE(actionData->called);
+    EXPECT_FALSE(executor.getUndoStack().empty());
+    EXPECT_TRUE(executor.getRedoStack().empty());
+
+    actionData->called = false;
+
+    executor.undo();
+    EXPECT_TRUE(executor.getUndoStack().empty());
+    EXPECT_EQ(executor.getRedoStack().size(), 1);
+  }
+
+  {
+    auto *actionPtr = new TestAction;
+    auto actionData = actionPtr->getData();
+
+    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.process();
+
+    EXPECT_TRUE(actionData->called);
+    EXPECT_EQ(executor.getUndoStack().size(), 0);
+    EXPECT_EQ(executor.getRedoStack().size(), 1);
+  }
+}
+
+TEST_F(
+    ActionExecutorTest,
+    ExecuteAfterUndoClearsRedoStackIfActionReturnsAddToHistoryAndModeIsEdit) {
+  {
+    auto *actionPtr = new TestAction;
+    actionPtr->addToHistory();
+    auto actionData = actionPtr->getData();
+
+    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.process();
+    EXPECT_TRUE(actionData->called);
+    EXPECT_FALSE(executor.getUndoStack().empty());
+    EXPECT_TRUE(executor.getRedoStack().empty());
+
+    executor.undo();
+    EXPECT_TRUE(executor.getUndoStack().empty());
+    EXPECT_FALSE(executor.getRedoStack().empty());
+  }
+
+  {
+    auto *actionPtr = new TestAction;
+    actionPtr->addToHistory();
+    auto actionData = actionPtr->getData();
+
+    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.process();
+
+    EXPECT_TRUE(actionData->called);
+    EXPECT_EQ(executor.getUndoStack().size(), 1);
+    EXPECT_TRUE(executor.getRedoStack().empty());
+  }
 }

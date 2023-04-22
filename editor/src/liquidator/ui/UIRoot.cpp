@@ -7,6 +7,7 @@
 #include "liquidator/actions/ProjectActions.h"
 #include "liquidator/actions/DeleteEntityAction.h"
 #include "liquidator/actions/TypedActionCreator.h"
+#include "liquidator/actions/HistoryActions.h"
 
 #include "UIRoot.h"
 #include "ImGuizmo.h"
@@ -18,6 +19,10 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
 
   mShortcutsManager.add(Shortcut().control().key('N'),
                         TypedActionCreator::create<SpawnEmptyEntityAtView>());
+  mShortcutsManager.add(Shortcut().control().shift().key('Z'),
+                        TypedActionCreator::create<Redo>(actionExecutor));
+  mShortcutsManager.add(Shortcut().control().key('Z'),
+                        TypedActionCreator::create<Undo>(actionExecutor));
 
   mMainMenu.begin("Project")
       .add("Export as game", TypedActionCreator::create<ExportAsGame>())

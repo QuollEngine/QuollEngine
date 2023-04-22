@@ -32,17 +32,25 @@ ActionExecutorResult EntitySetCollidableType::onExecute(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  if (scene.entityDatabase.has<Collidable>(mEntity)) {
-    auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
-    collidable.geometryDesc.type = mType;
-    collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
-  } else {
-    Collidable collidable{};
-    collidable.geometryDesc.type = mType;
-    collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
+  auto &collidable = scene.entityDatabase.get<Collidable>(mEntity);
+  mOldCollidable = collidable;
 
-    scene.entityDatabase.set<Collidable>(mEntity, collidable);
-  }
+  collidable.geometryDesc.type = mType;
+  collidable.geometryDesc.params = getDefaultGeometryFromType(mType);
+
+  scene.entityDatabase.set(mEntity, collidable);
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  res.addToHistory = true;
+  return res;
+}
+
+ActionExecutorResult EntitySetCollidableType::onUndo(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.set(mEntity, mOldCollidable);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mEntity);
@@ -53,24 +61,9 @@ bool EntitySetCollidableType::predicate(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  return !scene.entityDatabase.has<Collidable>(mEntity) ||
+  return scene.entityDatabase.has<Collidable>(mEntity) &&
          scene.entityDatabase.get<Collidable>(mEntity).geometryDesc.type !=
              mType;
 }
-
-EntitySetCollidable::EntitySetCollidable(Entity entity, Collidable collidable)
-    : mEntity(entity), mCollidable(collidable) {}
-
-ActionExecutorResult EntitySetCollidable::onExecute(WorkspaceState &state) {
-  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
-                                                        : state.scene;
-
-  scene.entityDatabase.set<Collidable>(mEntity, mCollidable);
-  ActionExecutorResult res{};
-  res.entitiesToSave.push_back(mEntity);
-  return res;
-}
-
-bool EntitySetCollidable::predicate(WorkspaceState &state) { return true; }
 
 } // namespace liquid::editor

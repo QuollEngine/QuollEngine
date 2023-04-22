@@ -1,43 +1,9 @@
 #pragma once
 
 #include "Action.h"
+#include "EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
-
-/**
- * @brief Entity set local transform action
- */
-class EntitySetLocalTransform : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param localTransform Local transform
-   */
-  EntitySetLocalTransform(Entity entity, LocalTransform localTransform);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-  LocalTransform mLocalTransform;
-};
 
 /**
  * @brief Entity set local transform continous action
@@ -53,17 +19,19 @@ public:
    * @brief Create action
    *
    * @param entity Entity
-   * @param localTransformStart Local transform start
+   * @param oldLocalTransform Old local transform
+   * @param newLocalTransform New local transform
    */
-  EntitySetLocalTransformContinuous(Entity entity,
-                                    LocalTransform localTransformStart);
+  EntitySetLocalTransformContinuous(
+      Entity entity, std::optional<LocalTransform> oldLocalTransform,
+      std::optional<LocalTransform> newLocalTransform = std::nullopt);
 
   /**
-   * @brief Set final local transform
+   * @brief Set new local transform
    *
-   * @param localTransformFinal Final local transform
+   * @param newLocalTransform New local transform
    */
-  void setLocalTransformFinal(LocalTransform localTransformFinal);
+  void setNewComponent(LocalTransform newLocalTransform);
 
   /**
    * @brief Action executor
@@ -72,6 +40,14 @@ public:
    * @return Executor result
    */
   ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undoer
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
 
   /**
    * @brief Action predicate
@@ -85,8 +61,8 @@ public:
 private:
   Entity mEntity;
 
-  LocalTransform mLocalTransformStart;
-  std::optional<LocalTransform> mLocalTransformFinal;
+  std::optional<LocalTransform> mOldLocalTransform;
+  std::optional<LocalTransform> mNewLocalTransform;
 };
 
 } // namespace liquid::editor

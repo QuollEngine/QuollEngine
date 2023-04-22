@@ -72,11 +72,11 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
       if (ImGui::Selectable("None")) {
         actionExecutor.execute<SceneRemoveSkybox>();
       } else if (ImGui::Selectable("Color")) {
-        actionExecutor.execute<SceneSetSkyboxColor>(
-            glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
+        actionExecutor.execute<SceneChangeSkyboxType>(
+            EnvironmentSkyboxType::Color);
       } else if (ImGui::Selectable("Texture")) {
-        actionExecutor.execute<SceneSetSkyboxTexture>(
-            EnvironmentAssetHandle::Invalid);
+        actionExecutor.execute<SceneChangeSkyboxType>(
+            EnvironmentSkyboxType::Texture);
       }
 
       ImGui::EndCombo();
@@ -90,10 +90,13 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
         scene.entityDatabase.get<EnvironmentSkybox>(scene.environment);
 
     if (skybox.type == EnvironmentSkyboxType::Color) {
-      auto &color =
-          scene.entityDatabase.get<EnvironmentSkybox>(scene.environment).color;
+      auto &skybox =
+          scene.entityDatabase.get<EnvironmentSkybox>(scene.environment);
 
-      widgets::InputColor("Color", color);
+      auto color = skybox.color;
+      if (widgets::InputColor("Color", color)) {
+        skybox.color = color;
+      }
 
       if (ImGui::IsItemDeactivatedAfterEdit()) {
         actionExecutor.execute<SceneSetSkyboxColor>(color);

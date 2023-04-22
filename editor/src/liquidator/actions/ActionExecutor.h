@@ -9,6 +9,8 @@ namespace liquid::editor {
  * @brief Action executor
  */
 class ActionExecutor {
+  using ActionStack = std::list<std::unique_ptr<Action>>;
+
 public:
   /**
    * @brief Create action executor
@@ -42,11 +44,43 @@ public:
   }
 
   /**
+   * @brief Undo last action
+   */
+  void undo();
+
+  /**
+   * @brief Redo last action
+   */
+  void redo();
+
+  /**
    * @brief Get scene IO
    *
    * @return Scene IO
    */
   inline SceneIO &getSceneIO() { return mSceneIO; }
+
+  /**
+   * @brief Get undo stack
+   *
+   * @return Undo stack
+   */
+  inline const ActionStack &getUndoStack() const { return mUndoStack; }
+
+  /**
+   * @brief Get redo stack
+   *
+   * @return Redo stack
+   */
+  inline const ActionStack &getRedoStack() const { return mRedoStack; }
+
+private:
+  /**
+   * @brief Save action result
+   *
+   * @param result Action executor result
+   */
+  void saveActionResult(const ActionExecutorResult &result);
 
 private:
   WorkspaceState &mState;
@@ -54,6 +88,8 @@ private:
   Path mScenePath;
 
   std::unique_ptr<Action> mActionToProcess;
+  ActionStack mUndoStack;
+  ActionStack mRedoStack;
 };
 
 } // namespace liquid::editor
