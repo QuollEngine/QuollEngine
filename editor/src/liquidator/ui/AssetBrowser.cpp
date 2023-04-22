@@ -239,8 +239,8 @@ void AssetBrowser::render(AssetManager &assetManager,
               mCurrentDirectory = entry.path;
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
-              actionExecutor.execute(std::make_unique<SpawnPrefabAtView>(
-                  static_cast<PrefabAssetHandle>(entry.asset), state.camera));
+              actionExecutor.execute<SpawnPrefabAtView>(
+                  static_cast<PrefabAssetHandle>(entry.asset), state.camera);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));

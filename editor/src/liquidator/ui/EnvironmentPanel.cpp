@@ -42,7 +42,7 @@ static void dndEnvironmentAsset(widgets::Section &section,
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Environment).c_str())) {
       auto asset = *static_cast<EnvironmentAssetHandle *>(payload->Data);
-      actionExecutor.execute(std::make_unique<SceneSetSkyboxTexture>(asset));
+      actionExecutor.execute<SceneSetSkyboxTexture>(asset);
     }
   }
 }
@@ -70,13 +70,13 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
     ImGui::Text("Type");
     if (ImGui::BeginCombo("###SkyboxType", getSkyboxTypeLabel(scene).c_str())) {
       if (ImGui::Selectable("None")) {
-        actionExecutor.execute(std::make_unique<SceneRemoveSkybox>());
+        actionExecutor.execute<SceneRemoveSkybox>();
       } else if (ImGui::Selectable("Color")) {
-        actionExecutor.execute(std::make_unique<SceneSetSkyboxColor>(
-            glm::vec4{0.0f, 0.0f, 0.0f, 1.0f}));
+        actionExecutor.execute<SceneSetSkyboxColor>(
+            glm::vec4{0.0f, 0.0f, 0.0f, 1.0f});
       } else if (ImGui::Selectable("Texture")) {
-        actionExecutor.execute(std::make_unique<SceneSetSkyboxTexture>(
-            EnvironmentAssetHandle::Invalid));
+        actionExecutor.execute<SceneSetSkyboxTexture>(
+            EnvironmentAssetHandle::Invalid);
       }
 
       ImGui::EndCombo();
@@ -96,7 +96,7 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
       widgets::InputColor("Color", color);
 
       if (ImGui::IsItemDeactivatedAfterEdit()) {
-        actionExecutor.execute(std::make_unique<SceneSetSkyboxColor>(color));
+        actionExecutor.execute<SceneSetSkyboxColor>(color);
       }
     } else if (skybox.type == EnvironmentSkyboxType::Texture) {
       if (environments.hasAsset(skybox.texture)) {
@@ -108,8 +108,8 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
         dndEnvironmentAsset(section, actionExecutor);
 
         if (ImGui::Button(fa::Times)) {
-          actionExecutor.execute(std::make_unique<SceneSetSkyboxTexture>(
-              EnvironmentAssetHandle::Invalid));
+          actionExecutor.execute<SceneSetSkyboxTexture>(
+              EnvironmentAssetHandle::Invalid);
         }
 
       } else {
@@ -136,12 +136,11 @@ void EnvironmentPanel::renderLightingSection(Scene &scene,
     ImGui::Text("Source");
     if (ImGui::BeginCombo("###LightingSource", sourceName.c_str())) {
       if (ImGui::Selectable("None")) {
-        actionExecutor.execute(std::make_unique<SceneRemoveLighting>());
+        actionExecutor.execute<SceneRemoveLighting>();
       }
 
       if (ImGui::Selectable("Use skybox")) {
-        actionExecutor.execute(
-            std::make_unique<SceneSetSkyboxLightingSource>());
+        actionExecutor.execute<SceneSetSkyboxLightingSource>();
       }
 
       ImGui::EndCombo();

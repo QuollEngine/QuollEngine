@@ -6,6 +6,7 @@
 #include "liquidator/actions/SpawnEntityActions.h"
 #include "liquidator/actions/ProjectActions.h"
 #include "liquidator/actions/DeleteEntityAction.h"
+#include "liquidator/actions/TypedActionCreator.h"
 
 #include "UIRoot.h"
 #include "ImGuizmo.h"
@@ -16,26 +17,30 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
     : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader) {
 
   mShortcutsManager.add(Shortcut().control().key('N'),
-                        new SpawnEmptyEntityAtView);
+                        TypedActionCreator::create<SpawnEmptyEntityAtView>());
 
   mMainMenu.begin("Project")
-      .add("Export as game", new ExportAsGame)
+      .add("Export as game", TypedActionCreator::create<ExportAsGame>())
       .end()
       .begin("Objects")
-      .add("Create empty object", new SpawnEmptyEntityAtView,
+      .add("Create empty object",
+           TypedActionCreator::create<SpawnEmptyEntityAtView>(),
            Shortcut().control().key('N'))
       .end();
 
-  mToolbar.add(new StartSimulationMode, "Play", fa::Play,
-               ToolbarItemType::HideWhenInactive);
-  mToolbar.add(new StopSimulationMode, "Stop", fa::Stop,
-               ToolbarItemType::HideWhenInactive);
-  mToolbar.add(new SetActiveTransform(TransformOperation::Move), "Move",
-               fa::Arrows, ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransform(TransformOperation::Rotate), "Rotate",
-               fa::Rotate, ToolbarItemType::Toggleable);
-  mToolbar.add(new SetActiveTransform(TransformOperation::Scale), "Scale",
-               fa::ExpandAlt, ToolbarItemType::Toggleable);
+  mToolbar.add(TypedActionCreator::create<StartSimulationMode>(), "Play",
+               fa::Play, ToolbarItemType::HideWhenInactive);
+  mToolbar.add(TypedActionCreator::create<StopSimulationMode>(), "Stop",
+               fa::Stop, ToolbarItemType::HideWhenInactive);
+  mToolbar.add(
+      TypedActionCreator::create<SetActiveTransform>(TransformOperation::Move),
+      "Move", fa::Arrows, ToolbarItemType::Toggleable);
+  mToolbar.add(TypedActionCreator ::create<SetActiveTransform>(
+                   TransformOperation::Rotate),
+               "Rotate", fa::Rotate, ToolbarItemType::Toggleable);
+  mToolbar.add(
+      TypedActionCreator::create<SetActiveTransform>(TransformOperation::Scale),
+      "Scale", fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 
 void UIRoot::render(WorkspaceState &state, AssetManager &assetManager) {

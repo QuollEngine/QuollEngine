@@ -2,6 +2,7 @@
 
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/actions/ActionCreator.h"
 
 namespace liquid::editor {
 
@@ -16,6 +17,7 @@ enum class ToolbarItemType { Toggleable, HideWhenInactive };
 class Toolbar {
 private:
   struct ToolbarItem {
+    std::unique_ptr<ActionCreator> actionCreator;
     std::unique_ptr<Action> action;
     String label;
     String icon;
@@ -38,14 +40,15 @@ public:
   void render(WorkspaceState &state, ActionExecutor &actionExecutor);
 
   /**
-   * @brief Add action
+   * @brief Add toolbar item
    *
-   * @param action Action
+   * @param actionCreator Action creator
    * @param label Button label
    * @param icon Button icon
    * @param type Item type
    */
-  void add(Action *action, String label, String icon, ToolbarItemType type);
+  void add(ActionCreator *actionCreator, String label, String icon,
+           ToolbarItemType type);
 
 private:
   std::vector<ToolbarItem> mItems;

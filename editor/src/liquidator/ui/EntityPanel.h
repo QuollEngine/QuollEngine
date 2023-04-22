@@ -194,9 +194,8 @@ private:
   Entity mSelectedEntity = Entity::Null;
   bool mIsNameActivated = false;
 
-  Name mName;
-
 private:
+  std::optional<Name> mName;
   std::optional<RigidBody> mRigidBody;
   std::optional<LocalTransform> mLocalTransform;
   std::optional<Text> mText;

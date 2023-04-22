@@ -7,7 +7,13 @@ ActionExecutor::ActionExecutor(WorkspaceState &state, Path scenePath)
     : mState(state), mScenePath(scenePath),
       mSceneIO(state.assetRegistry, state.scene) {}
 
-void ActionExecutor::execute(const std::unique_ptr<Action> &action) {
+void ActionExecutor::process() {
+  if (!mActionToProcess) {
+    return;
+  }
+
+  auto action = std::move(mActionToProcess);
+
   if (!action->predicate(mState)) {
     return;
   }
@@ -34,6 +40,10 @@ void ActionExecutor::execute(const std::unique_ptr<Action> &action) {
     mSceneIO.saveStartingCamera(mScenePath);
     mSceneIO.saveEnvironment(mScenePath);
   }
+}
+
+void ActionExecutor::execute(std::unique_ptr<Action> action) {
+  mActionToProcess = std::move(action);
 }
 
 } // namespace liquid::editor

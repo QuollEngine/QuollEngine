@@ -91,7 +91,7 @@ public:
   void processShortcuts(EventSystem &eventSystem);
 
 private:
-  ActionExecutor mActionExecutor;
+  ActionExecutor &mActionExecutor;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
   EnvironmentPanel mEnvironmentPanel;

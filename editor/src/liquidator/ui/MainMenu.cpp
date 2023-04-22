@@ -5,9 +5,10 @@
 
 namespace liquid::editor {
 
-MainMenuItem::MainMenuItem(MainMenuItem *parent, String label, Action *action,
-                           Shortcut shortcut)
-    : mParent(parent), mLabel(label), mAction(action), mShortcut(shortcut) {}
+MainMenuItem::MainMenuItem(MainMenuItem *parent, String label,
+                           ActionCreator *actionCreator, Shortcut shortcut)
+    : mParent(parent), mLabel(label), mActionCreator(actionCreator),
+      mShortcut(shortcut) {}
 
 MainMenuItem &MainMenuItem::begin(String label) {
   mChildren.push_back({this, label, {}, Shortcut{}});
@@ -17,19 +18,18 @@ MainMenuItem &MainMenuItem::begin(String label) {
 
 MainMenuItem &MainMenuItem::end() { return mParent ? *mParent : *this; }
 
-MainMenuItem &MainMenuItem::add(String label, Action *action,
+MainMenuItem &MainMenuItem::add(String label, ActionCreator *actionCreator,
                                 Shortcut shortcut) {
-  mChildren.push_back({this, label, action, shortcut});
+  mChildren.push_back({this, label, actionCreator, shortcut});
 
   return *this;
 }
 
 void MainMenuItem::render(ActionExecutor &actionExecutor) const {
   if (mChildren.empty()) {
-
     if (ImGui::MenuItem(mLabel.c_str(),
                         mShortcut ? mShortcut.toString().c_str() : nullptr)) {
-      actionExecutor.execute(mAction);
+      actionExecutor.execute(mActionCreator->create());
     }
     return;
   }
