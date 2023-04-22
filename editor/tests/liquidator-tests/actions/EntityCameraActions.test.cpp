@@ -108,3 +108,104 @@ TEST_P(SetEntityPerspectiveLensCustomAspectRatioTest,
 
 InitActionsTestSuite(EntityActionsTest,
                      SetEntityPerspectiveLensCustomAspectRatioTest);
+
+using EntityDeleteCameraActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteCameraActionTest,
+       ExecutorDeletesPerspectiveLensComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::PerspectiveLens>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+  EXPECT_FALSE(res.saveScene);
+}
+
+TEST_P(EntityDeleteCameraActionTest,
+       ExecutorDeletesCameraAndAutoAspectRatioComponentsIfExists) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  activeScene().entityDatabase.set<liquid::Camera>(entity, {});
+  activeScene().entityDatabase.set<liquid::AutoAspectRatio>(entity, {});
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Camera>(entity));
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+  EXPECT_FALSE(res.saveScene);
+}
+
+TEST_P(EntityDeleteCameraActionTest,
+       ExecutorSetsStartingCameraToDummyCameraIfEntityIsStartingCamera) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().dummyCamera = activeScene().entityDatabase.create();
+  activeScene().activeCamera = entity;
+
+  activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  activeScene().entityDatabase.set<liquid::Camera>(entity, {});
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::PerspectiveLens>(entity));
+
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+  EXPECT_TRUE(res.saveScene);
+
+  EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
+}
+
+TEST_P(EntityDeleteCameraActionTest,
+       ExecutorSetsWorkspaceActiveCameraToDummyCameraIfEntityIsActiveCamera) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().dummyCamera = activeScene().entityDatabase.create();
+  state.activeCamera = entity;
+
+  activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+  activeScene().entityDatabase.set<liquid::Camera>(entity, {});
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(
+      activeScene().entityDatabase.has<liquid::PerspectiveLens>(entity));
+
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+  EXPECT_FALSE(res.saveScene);
+
+  EXPECT_EQ(state.activeCamera, activeScene().dummyCamera);
+}
+
+TEST_P(EntityDeleteCameraActionTest,
+       PredicateReturnsTrueIfEntityHasPerspectiveLensComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteCameraActionTest,
+       PredicateReturnsTrueIfEntityHasNoPerspectiveLensComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteCamera action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteCameraActionTest);

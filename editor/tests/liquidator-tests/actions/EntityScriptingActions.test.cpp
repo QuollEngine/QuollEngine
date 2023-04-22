@@ -145,3 +145,36 @@ TEST_P(EntitySetScriptVariableActionTest,
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetScriptVariableActionTest);
+
+using EntityDeleteScriptActionTest = ActionTestBase;
+
+TEST_P(EntityDeleteScriptActionTest, ExecutorDeletesScriptComponentFromEntity) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Script>(entity, {});
+
+  liquid::editor::EntityDeleteScript action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Script>(entity));
+  ASSERT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+}
+
+TEST_P(EntityDeleteScriptActionTest,
+       PredicateReturnsTrueIfEntityHasScriptComponent) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Script>(entity, {});
+
+  liquid::editor::EntityDeleteScript action(entity);
+  EXPECT_TRUE(action.predicate(state));
+}
+
+TEST_P(EntityDeleteScriptActionTest,
+       PredicateReturnsFalseIfEntityHasNoScriptComponent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::EntityDeleteScript action(entity);
+  EXPECT_FALSE(action.predicate(state));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityDeleteScriptActionTest);

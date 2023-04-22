@@ -69,4 +69,42 @@ bool EntitySetCameraCustomAspectRatio::predicate(WorkspaceState &state) {
   return scene.entityDatabase.has<AutoAspectRatio>(mEntity);
 }
 
+EntityDeleteCamera::EntityDeleteCamera(Entity entity) : mEntity(entity) {}
+
+ActionExecutorResult EntityDeleteCamera::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.remove<PerspectiveLens>(mEntity);
+
+  if (scene.entityDatabase.has<AutoAspectRatio>(mEntity)) {
+    scene.entityDatabase.remove<AutoAspectRatio>(mEntity);
+  }
+
+  if (scene.entityDatabase.has<Camera>(mEntity)) {
+    scene.entityDatabase.remove<Camera>(mEntity);
+  }
+
+  if (state.activeCamera == mEntity) {
+    state.activeCamera = scene.dummyCamera;
+  }
+
+  bool isStartingCamera = scene.activeCamera == mEntity;
+  if (isStartingCamera) {
+    scene.activeCamera = scene.dummyCamera;
+  }
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  res.saveScene = isStartingCamera;
+  return res;
+}
+
+bool EntityDeleteCamera::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<PerspectiveLens>(mEntity);
+}
+
 } // namespace liquid::editor

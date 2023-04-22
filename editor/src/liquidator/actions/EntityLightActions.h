@@ -141,6 +141,39 @@ private:
 };
 
 /**
+ * @brief Delete directional light from entity action
+ */
+class EntityDeleteDirectionalLight : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   */
+  EntityDeleteDirectionalLight(Entity entity);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+};
+
+/**
  * @brief Set poin light for entity action
  */
 class EntitySetPointLight : public Action {
@@ -173,6 +206,39 @@ public:
 private:
   Entity mEntity;
   PointLight mLight;
+};
+
+/**
+ * @brief Delete point light from entity action
+ */
+class EntityDeletePointLight : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   */
+  EntityDeletePointLight(Entity entity);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
 };
 
 } // namespace liquid::editor

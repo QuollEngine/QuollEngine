@@ -6,7 +6,6 @@ namespace liquid::editor {
 MoveCameraToEntity::MoveCameraToEntity(Entity entity) : mEntity(entity) {}
 
 ActionExecutorResult MoveCameraToEntity::onExecute(WorkspaceState &state) {
-
   auto &scene = state.scene;
 
   auto &transformComponent = scene.entityDatabase.get<WorldTransform>(mEntity);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/actions/EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
@@ -97,5 +98,7 @@ private:
   String mName;
   LuaScriptInputVariable mValue;
 };
+
+using EntityDeleteScript = EntityDefaultDeleteAction<Script>;
 
 } // namespace liquid::editor

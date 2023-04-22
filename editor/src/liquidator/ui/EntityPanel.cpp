@@ -16,6 +16,8 @@
 #include "liquidator/actions/EntitySkeletonActions.h"
 #include "liquidator/actions/EntityAudioActions.h"
 #include "liquidator/actions/EntityScriptingActions.h"
+#include "liquidator/actions/EntityMeshActions.h"
+#include "liquidator/actions/EntityAnimatorActions.h"
 #include "liquidator/actions/SceneActions.h"
 
 namespace liquid::editor {
@@ -86,14 +88,14 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
       renderName(scene, actionExecutor);
       renderTransform(scene, actionExecutor);
       renderText(scene, state.assetRegistry, actionExecutor);
-      renderMesh(scene, state.assetRegistry);
+      renderMesh(scene, state.assetRegistry, actionExecutor);
       renderLight(scene, actionExecutor);
       renderCamera(state, scene, actionExecutor);
-      renderAnimation(state, scene, state.assetRegistry);
+      renderAnimation(state, scene, state.assetRegistry, actionExecutor);
       renderSkeleton(scene, actionExecutor);
       renderCollidable(scene, actionExecutor);
       renderRigidBody(scene, actionExecutor);
-      renderAudio(scene, state.assetRegistry);
+      renderAudio(scene, state.assetRegistry, actionExecutor);
       renderScripting(scene, state.assetRegistry, actionExecutor);
       renderAddComponent(scene, state.assetRegistry, actionExecutor);
       handleDragAndDrop(state.assetRegistry, actionExecutor);
@@ -157,6 +159,18 @@ void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
 
     renderDirectionalLight(scene, actionExecutor);
     renderPointLight(scene, actionExecutor);
+  }
+
+  if (shouldDelete("Light")) {
+    if (hasDirectionalLight) {
+      actionExecutor.execute(
+          std::make_unique<EntityDeleteDirectionalLight>(mSelectedEntity));
+    }
+
+    if (hasPointLight) {
+      actionExecutor.execute(
+          std::make_unique<EntityDeletePointLight>(mSelectedEntity));
+    }
   }
 }
 
@@ -318,7 +332,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     return;
   }
 
-  static const String SectionName = String(fa::Video) + "  Camera";
+  static const String SectionName = String(fa::Video) + " Camera";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
@@ -431,11 +445,15 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       ImGui::Text("Is the starting camera");
     }
   }
+
+  if (shouldDelete("Camera")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteCamera>(mSelectedEntity));
+  }
 }
 
 void EntityPanel::renderTransform(Scene &scene,
                                   ActionExecutor &actionExecutor) {
-
   if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) ||
       !scene.entityDatabase.has<WorldTransform>(mSelectedEntity)) {
     return;
@@ -503,7 +521,8 @@ void EntityPanel::renderTransform(Scene &scene,
   }
 }
 
-void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry) {
+void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
+                             ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Cubes) + "  Mesh";
 
   if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
@@ -517,6 +536,11 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry) {
         table.row("Geometries",
                   static_cast<uint32_t>(asset.data.geometries.size()));
       }
+    }
+
+    if (shouldDelete("Mesh")) {
+      actionExecutor.execute(
+          std::make_unique<EntityDeleteMesh>(mSelectedEntity));
     }
   }
 
@@ -532,6 +556,11 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry) {
         table.row("Geometries",
                   static_cast<uint32_t>(asset.data.geometries.size()));
       }
+    }
+
+    if (shouldDelete("SkinnedMesh")) {
+      actionExecutor.execute(
+          std::make_unique<EntityDeleteSkinnedMesh>(mSelectedEntity));
     }
   }
 }
@@ -551,10 +580,16 @@ void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
           std::make_unique<EntityToggleSkeletonDebugBones>(mSelectedEntity));
     }
   }
+
+  if (shouldDelete("Skeleton")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteSkeleton>(mSelectedEntity));
+  }
 }
 
 void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
-                                  AssetRegistry &assetRegistry) {
+                                  AssetRegistry &assetRegistry,
+                                  ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<Animator>(mSelectedEntity)) {
     return;
   }
@@ -611,6 +646,11 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
         component.normalizedTime = 0.0f;
       }
     }
+  }
+
+  if (shouldDelete("Animator")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteAnimator>(mSelectedEntity));
   }
 }
 
@@ -764,6 +804,11 @@ void EntityPanel::renderCollidable(Scene &scene,
       mCollidable.reset();
     }
   }
+
+  if (shouldDelete("Collidable")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteCollidable>(mSelectedEntity));
+  }
 }
 
 void EntityPanel::renderRigidBody(Scene &scene,
@@ -815,6 +860,11 @@ void EntityPanel::renderRigidBody(Scene &scene,
 
       mRigidBody.reset();
     }
+  }
+
+  if (shouldDelete("RigidBody")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteRigidBody>(mSelectedEntity));
   }
 }
 
@@ -888,9 +938,14 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
       mText.reset();
     }
   }
+
+  if (shouldDelete("Text")) {
+    actionExecutor.execute(std::make_unique<EntityDeleteText>(mSelectedEntity));
+  }
 }
 
-void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry) {
+void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
+                              ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
     return;
   }
@@ -902,6 +957,11 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry) {
     const auto &asset = assetRegistry.getAudios().getAsset(audio.source);
 
     ImGui::Text("Name: %s", asset.name.c_str());
+  }
+
+  if (shouldDelete("Audio")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteAudio>(mSelectedEntity));
   }
 }
 
@@ -1012,6 +1072,11 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
       }
     }
   }
+
+  if (shouldDelete("Scripting")) {
+    actionExecutor.execute(
+        std::make_unique<EntityDeleteScript>(mSelectedEntity));
+  }
 }
 
 void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
@@ -1112,6 +1177,20 @@ void EntityPanel::handleDragAndDrop(AssetRegistry &assetRegistry,
 
     ImGui::EndDragDropTarget();
   }
+}
+
+bool EntityPanel::shouldDelete(const char *component) {
+  bool clicked = false;
+  if (ImGui::BeginPopupContextItem(component,
+                                   ImGuiPopupFlags_MouseButtonRight)) {
+    if (ImGui::MenuItem("Delete")) {
+      clicked = true;
+    }
+
+    ImGui::EndPopup();
+  }
+
+  return clicked;
 }
 
 } // namespace liquid::editor

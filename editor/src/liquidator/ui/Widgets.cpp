@@ -76,9 +76,14 @@ Section::~Section() {
     if (padding.x > 0) {
       ImGui::Unindent(padding.x);
     }
-    ImGui::EndGroup();
 
     auto boundsX = calculateSectionBoundsX(0.0f);
+    auto *window = ImGui::GetCurrentWindow();
+    // Hack: Needed to ensure that the group
+    // takes up full width of the parent area
+    window->DC.CursorMaxPos.x = boundsX.end;
+
+    ImGui::EndGroup();
 
     auto panelMin =
         ImVec2(boundsX.start, ImGui::GetItemRectMin().y - padding.y);
