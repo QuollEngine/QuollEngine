@@ -28,63 +28,81 @@ public:
   liquid::editor::ActionExecutor executor{state, ScenePath / "main.lqscene"};
 };
 
+struct TestActionData {
+  bool called = false;
+  std::vector<liquid::Entity> entitiesToSave;
+  std::vector<liquid::Entity> entitiesToDelete;
+  bool saveScene = false;
+  bool mPredicate = true;
+};
+
 class TestAction : public liquid::editor::Action {
 public:
+  TestAction() : mData(new TestActionData) {}
+
   liquid::editor::ActionExecutorResult
   onExecute(liquid::editor::WorkspaceState &state) {
-    mCalled = true;
+    mData->called = true;
 
     liquid::editor::ActionExecutorResult res{};
 
-    res.entitiesToSave = mEntitiesToSave;
-    res.entitiesToDelete = mEntitiesToDelete;
-    res.saveScene = mSaveScene;
+    res.entitiesToSave = mData->entitiesToSave;
+    res.entitiesToDelete = mData->entitiesToDelete;
+    res.saveScene = mData->saveScene;
 
     return res;
   }
 
   void saveEntityOnExecute(liquid::Entity entity) {
-    mEntitiesToSave.push_back(entity);
+    mData->entitiesToSave.push_back(entity);
   }
 
   void deleteEntityOnExecute(liquid::Entity entity) {
-    mEntitiesToDelete.push_back(entity);
+    mData->entitiesToDelete.push_back(entity);
   }
 
-  void saveSceneOnExecute() { mSaveScene = true; }
+  void saveSceneOnExecute() { mData->saveScene = true; }
 
-  void setPredicate(bool predicate) { mPredicate = predicate; }
+  void setPredicate(bool predicate) { mData->mPredicate = predicate; }
 
-  bool predicate(liquid::editor::WorkspaceState &state) { return mPredicate; }
+  bool predicate(liquid::editor::WorkspaceState &state) {
+    return mData->mPredicate;
+  }
 
-  bool isCalled() { return mCalled; }
+  inline liquid::SharedPtr<TestActionData> getData() { return mData; }
 
 private:
-  bool mCalled = false;
-  std::vector<liquid::Entity> mEntitiesToSave;
-  std::vector<liquid::Entity> mEntitiesToDelete;
-  bool mSaveScene = false;
-  bool mPredicate = true;
+  liquid::SharedPtr<TestActionData> mData;
 };
+
+TEST_F(ActionExecutorTest, ExecuteDoesNothingIfNoActionToProcess) {
+  // Ensure that function does not
+  // fail if there are no actions to
+  // process
+  executor.process();
+}
 
 TEST_F(ActionExecutorTest,
        ExecuteDoesNotCallActionExecutorIfActionPredicateReturnsFalse) {
   auto *actionPtr = new TestAction;
   actionPtr->setPredicate(false);
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
 
-  executor.execute(action);
-  EXPECT_FALSE(actionPtr->isCalled());
+  auto actionData = actionPtr->getData();
+
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_FALSE(actionData->called);
 }
 
 TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
   state.mode = liquid::editor::WorkspaceMode::Simulation;
 
   auto *actionPtr = new TestAction;
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
+  auto actionData = actionPtr->getData();
 
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
 }
 
 TEST_F(ActionExecutorTest,
@@ -97,10 +115,11 @@ TEST_F(ActionExecutorTest,
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 }
 
@@ -117,10 +136,11 @@ TEST_F(
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 }
 
@@ -137,10 +157,11 @@ TEST_F(ActionExecutorTest,
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(std::filesystem::exists(entityPath));
 }
 
@@ -160,10 +181,11 @@ TEST_F(
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
   EXPECT_TRUE(std::filesystem::exists(entityPath));
 }
 
@@ -181,10 +203,11 @@ TEST_F(ActionExecutorTest,
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
 
   std::ifstream stream(ScenePath / "main.lqscene");
   auto node = YAML::Load(stream);
@@ -213,10 +236,11 @@ TEST_F(ActionExecutorTest,
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
+  auto actionData = actionPtr->getData();
 
-  std::unique_ptr<liquid::editor::Action> action(actionPtr);
-  executor.execute(action);
-  EXPECT_TRUE(actionPtr->isCalled());
+  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.process();
+  EXPECT_TRUE(actionData->called);
 
   std::ifstream stream(ScenePath / "main.lqscene");
   auto node = YAML::Load(stream);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/actions/ActionCreator.h"
 #include "Shortcut.h"
 
 namespace liquid::editor {
@@ -18,10 +19,10 @@ public:
    *
    * @param parent Parent menu item
    * @param label Menu item label
-   * @param action Menu item action
+   * @param actionCreator Menu item action creator
    * @param shortcut Shortcut
    */
-  MainMenuItem(MainMenuItem *parent, String label, Action *action,
+  MainMenuItem(MainMenuItem *parent, String label, ActionCreator *actionCreator,
                Shortcut shortcut);
 
   /**
@@ -43,11 +44,12 @@ public:
    * @brief Add actionable menu item
    *
    * @param label Menu item label
-   * @param action Menu item action
+   * @param actionCreator Menu item action creator
    * @param shortcut Shortcut
    * @return This menu item
    */
-  MainMenuItem &add(String label, Action *action, Shortcut shortcut = {});
+  MainMenuItem &add(String label, ActionCreator *actionCreator,
+                    Shortcut shortcut = {});
 
   /**
    * @brief Get children
@@ -66,7 +68,7 @@ public:
   void render(ActionExecutor &actionExecutor) const;
 
 private:
-  std::unique_ptr<Action> mAction;
+  std::unique_ptr<ActionCreator> mActionCreator;
   String mLabel;
   Shortcut mShortcut;
   std::vector<MainMenuItem> mChildren;

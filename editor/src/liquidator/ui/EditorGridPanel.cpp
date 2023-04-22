@@ -25,14 +25,14 @@ void EditorGridPanel::render(WorkspaceState &state,
     {
       bool enabled = SetGridLines::isShown(state);
       if (ImGui::Checkbox("Show grid lines", &enabled)) {
-        actionExecutor.execute(std::make_unique<SetGridLines>(enabled));
+        actionExecutor.execute<SetGridLines>(enabled);
       }
     }
 
     {
       bool enabled = SetGridAxisLines::isShown(state);
       if (ImGui::Checkbox("Show axis lines", &enabled)) {
-        actionExecutor.execute(std::make_unique<SetGridAxisLines>(enabled));
+        actionExecutor.execute<SetGridAxisLines>(enabled);
       }
     }
   }

@@ -3,9 +3,9 @@
 
 namespace liquid::editor {
 
-void ShortcutsManager::add(Shortcut shortcut, Action *action) {
+void ShortcutsManager::add(Shortcut shortcut, ActionCreator *actionCreator) {
   mShortcuts.push_back(shortcut);
-  mActions.push_back(std::unique_ptr<Action>(action));
+  mActionCreators.push_back(std::unique_ptr<ActionCreator>(actionCreator));
 }
 
 void ShortcutsManager::process(int key, int mods,
@@ -14,7 +14,7 @@ void ShortcutsManager::process(int key, int mods,
     const auto &shortcut = mShortcuts.at(i);
 
     if (shortcut == Shortcut(key, mods)) {
-      actionExecutor.execute(mActions.at(i));
+      actionExecutor.execute(mActionCreators.at(i)->create());
       return;
     }
   }

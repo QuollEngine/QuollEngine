@@ -16,7 +16,7 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
                        ImGuiWindowFlags_NoSavedSettings |
                        ImGuiWindowFlags_NoDocking)) {
 
-    for (const auto &item : mItems) {
+    for (auto &item : mItems) {
       if (item.type == ToolbarItemType::HideWhenInactive &&
           !item.action->predicate(state)) {
         continue;
@@ -34,7 +34,9 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
       }
 
       if (ImGui::Button(item.icon.c_str())) {
-        actionExecutor.execute(item.action);
+        actionExecutor.execute(std::move(item.action));
+
+        item.action = item.actionCreator->create();
       }
 
       ImGui::SameLine();
@@ -45,10 +47,11 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
   ImGui::PopStyleVar();
 }
 
-void Toolbar::add(Action *action, String label, String icon,
+void Toolbar::add(ActionCreator *actionCreator, String label, String icon,
                   ToolbarItemType type) {
-  mItems.push_back(
-      {std::move(std::unique_ptr<Action>(action)), label, icon, type});
+  auto ptr = actionCreator->create();
+  mItems.push_back({std::unique_ptr<ActionCreator>(actionCreator),
+                    std::move(ptr), label, icon, type});
 }
 
 } // namespace liquid::editor

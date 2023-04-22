@@ -181,11 +181,13 @@ void EditorScreen::start(const Project &project) {
 
   mWindow.maximize();
 
-  mainLoop.setUpdateFn([&state, &simulator, this](float dt) mutable {
-    mEventSystem.poll();
-    simulator.update(dt, state);
-    return true;
-  });
+  mainLoop.setUpdateFn(
+      [&state, &actionExecutor, &simulator, this](float dt) mutable {
+        actionExecutor.process();
+        mEventSystem.poll();
+        simulator.update(dt, state);
+        return true;
+      });
 
   LogViewer logViewer;
   mainLoop.setRenderFn([&renderer, &editorCamera, &assetManager, &graph,

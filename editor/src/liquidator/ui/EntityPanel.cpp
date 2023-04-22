@@ -106,7 +106,6 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
 void EntityPanel::setSelectedEntity(Scene &scene, Entity entity) {
   if (mSelectedEntity != entity) {
     mSelectedEntity = entity;
-    mName = scene.entityDatabase.get<Name>(mSelectedEntity);
   }
 }
 
@@ -114,15 +113,23 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
   static const String SectionName = String(fa::Circle) + "  Name";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
-    String name = scene.entityDatabase.get<Name>(mSelectedEntity).name;
+    auto &name = scene.entityDatabase.get<Name>(mSelectedEntity);
 
-    if (widgets::Input("", mName.name)) {
-      if (!mName.name.empty()) {
-        actionExecutor.execute(
-            std::make_unique<EntitySetName>(mSelectedEntity, mName));
+    auto tmpName = name.name;
+    if (widgets::Input("", tmpName)) {
+      if (!mName.has_value()) {
+        mName = name;
       }
 
-      mName = scene.entityDatabase.get<Name>(mSelectedEntity);
+      name.name = tmpName;
+    }
+
+    if (mName.has_value()) {
+      if (name.name.empty()) {
+        name.name = "Untitled";
+      }
+      actionExecutor.execute<EntitySetName>(mSelectedEntity, name);
+      mName.reset();
     }
   }
 }
@@ -147,12 +154,12 @@ void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
 
     if (ImGui::BeginCombo("###LightType", selected.c_str(), 0)) {
       if (ImGui::Selectable("Directional", &hasDirectionalLight)) {
-        actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
-            mSelectedEntity, DirectionalLight{}));
+        actionExecutor.execute<EntitySetDirectionalLight>(mSelectedEntity,
+                                                          DirectionalLight{});
       }
       if (ImGui::Selectable("Point light", &hasPointLight)) {
-        actionExecutor.execute(std::make_unique<EntitySetPointLight>(
-            mSelectedEntity, PointLight{}));
+        actionExecutor.execute<EntitySetPointLight>(mSelectedEntity,
+                                                    PointLight{});
       }
       ImGui::EndCombo();
     }
@@ -163,13 +170,11 @@ void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
 
   if (shouldDelete("Light")) {
     if (hasDirectionalLight) {
-      actionExecutor.execute(
-          std::make_unique<EntityDeleteDirectionalLight>(mSelectedEntity));
+      actionExecutor.execute<EntityDeleteDirectionalLight>(mSelectedEntity);
     }
 
     if (hasPointLight) {
-      actionExecutor.execute(
-          std::make_unique<EntityDeletePointLight>(mSelectedEntity));
+      actionExecutor.execute<EntityDeletePointLight>(mSelectedEntity);
     }
   }
 }
@@ -210,8 +215,8 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
   }
 
   if (mDirectionalLight.has_value() && sendAction) {
-    actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
-        mSelectedEntity, component));
+    actionExecutor.execute<EntitySetDirectionalLight>(mSelectedEntity,
+                                                      component);
 
     mDirectionalLight.reset();
   }
@@ -220,11 +225,9 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
       scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
   if (ImGui::Checkbox("Cast shadows", &castShadows)) {
     if (castShadows) {
-      actionExecutor.execute(
-          std::make_unique<EntityEnableCascadedShadowMap>(mSelectedEntity));
+      actionExecutor.execute<EntityEnableCascadedShadowMap>(mSelectedEntity);
     } else {
-      actionExecutor.execute(
-          std::make_unique<EntityDisableCascadedShadowMap>(mSelectedEntity));
+      actionExecutor.execute<EntityDisableCascadedShadowMap>(mSelectedEntity);
     }
   }
 
@@ -269,8 +272,8 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
     if (mCascadedShadowMap.has_value() && sendAction) {
-      actionExecutor.execute(std::make_unique<EntitySetCascadedShadowMap>(
-          mSelectedEntity, component));
+      actionExecutor.execute<EntitySetCascadedShadowMap>(mSelectedEntity,
+                                                         component);
 
       mCascadedShadowMap.reset();
     }
@@ -319,8 +322,7 @@ void EntityPanel::renderPointLight(Scene &scene,
   }
 
   if (mPointLight.has_value() && sendAction) {
-    actionExecutor.execute(
-        std::make_unique<EntitySetPointLight>(mSelectedEntity, component));
+    actionExecutor.execute<EntitySetPointLight>(mSelectedEntity, component);
 
     mPointLight.reset();
   }
@@ -385,8 +387,8 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     }
 
     if (sendAction && mPerspectiveLens.has_value()) {
-      actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
-          mSelectedEntity, component));
+      actionExecutor.execute<EntitySetPerspectiveLens>(mSelectedEntity,
+                                                       component);
 
       mPerspectiveLens.reset();
     }
@@ -403,14 +405,12 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                           0)) {
 
       if (ImGui::Selectable("Viewport ratio")) {
-        actionExecutor.execute(
-            std::make_unique<EntitySetCameraAutoAspectRatio>(mSelectedEntity));
+        actionExecutor.execute<EntitySetCameraAutoAspectRatio>(mSelectedEntity);
       }
 
       if (ImGui::Selectable("Custom")) {
-        actionExecutor.execute(
-            std::make_unique<EntitySetCameraCustomAspectRatio>(
-                mSelectedEntity));
+        actionExecutor.execute<EntitySetCameraCustomAspectRatio>(
+            mSelectedEntity);
       }
 
       ImGui::EndCombo();
@@ -431,15 +431,14 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
       }
 
       if (ImGui::IsItemDeactivatedAfterEdit()) {
-        actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component));
+        actionExecutor.execute<EntitySetPerspectiveLens>(mSelectedEntity,
+                                                         component);
       }
     }
 
     if (scene.activeCamera != mSelectedEntity) {
       if (ImGui::Button("Set as starting camera")) {
-        actionExecutor.execute(
-            std::make_unique<SceneSetStartingCamera>(mSelectedEntity));
+        actionExecutor.execute<SceneSetStartingCamera>(mSelectedEntity);
       }
     } else {
       ImGui::Text("Is the starting camera");
@@ -447,8 +446,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
   }
 
   if (shouldDelete("Camera")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteCamera>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteCamera>(mSelectedEntity);
   }
 }
 
@@ -505,8 +503,8 @@ void EntityPanel::renderTransform(Scene &scene,
     }
 
     if (sendAction && mLocalTransform.has_value()) {
-      actionExecutor.execute(std::make_unique<EntitySetLocalTransform>(
-          mSelectedEntity, component));
+      actionExecutor.execute<EntitySetLocalTransform>(mSelectedEntity,
+                                                      component);
 
       mLocalTransform.reset();
     }
@@ -539,8 +537,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (shouldDelete("Mesh")) {
-      actionExecutor.execute(
-          std::make_unique<EntityDeleteMesh>(mSelectedEntity));
+      actionExecutor.execute<EntityDeleteMesh>(mSelectedEntity);
     }
   }
 
@@ -559,8 +556,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (shouldDelete("SkinnedMesh")) {
-      actionExecutor.execute(
-          std::make_unique<EntityDeleteSkinnedMesh>(mSelectedEntity));
+      actionExecutor.execute<EntityDeleteSkinnedMesh>(mSelectedEntity);
     }
   }
 }
@@ -576,14 +572,12 @@ void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
     bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
 
     if (ImGui::Checkbox("Show bones", &showBones)) {
-      actionExecutor.execute(
-          std::make_unique<EntityToggleSkeletonDebugBones>(mSelectedEntity));
+      actionExecutor.execute<EntityToggleSkeletonDebugBones>(mSelectedEntity);
     }
   }
 
   if (shouldDelete("Skeleton")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteSkeleton>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteSkeleton>(mSelectedEntity);
   }
 }
 
@@ -649,8 +643,7 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
   }
 
   if (shouldDelete("Animator")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteAnimator>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteAnimator>(mSelectedEntity);
   }
 }
 
@@ -700,8 +693,8 @@ void EntityPanel::renderCollidable(Scene &scene,
       for (auto type : types) {
         if (type != collidable.geometryDesc.type &&
             ImGui::Selectable(getGeometryName(type).c_str())) {
-          actionExecutor.execute(
-              std::make_unique<EntitySetCollidableType>(mSelectedEntity, type));
+          actionExecutor.execute<EntitySetCollidableType>(mSelectedEntity,
+                                                          type);
         }
       }
       ImGui::EndCombo();
@@ -799,15 +792,13 @@ void EntityPanel::renderCollidable(Scene &scene,
     }
 
     if (sendAction && mCollidable.has_value()) {
-      actionExecutor.execute(
-          std::make_unique<EntitySetCollidable>(mSelectedEntity, collidable));
+      actionExecutor.execute<EntitySetCollidable>(mSelectedEntity, collidable);
       mCollidable.reset();
     }
   }
 
   if (shouldDelete("Collidable")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteCollidable>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteCollidable>(mSelectedEntity);
   }
 }
 
@@ -855,16 +846,14 @@ void EntityPanel::renderRigidBody(Scene &scene,
     }
 
     if (sendAction && mRigidBody.has_value()) {
-      actionExecutor.execute(
-          std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody));
+      actionExecutor.execute<EntitySetRigidBody>(mSelectedEntity, rigidBody);
 
       mRigidBody.reset();
     }
   }
 
   if (shouldDelete("RigidBody")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteRigidBody>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteRigidBody>(mSelectedEntity);
   }
 }
 
@@ -932,15 +921,14 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (sendAction && mText.has_value()) {
-      actionExecutor.execute(
-          std::make_unique<EntitySetText>(mSelectedEntity, text));
+      actionExecutor.execute<EntitySetText>(mSelectedEntity, text);
 
       mText.reset();
     }
   }
 
   if (shouldDelete("Text")) {
-    actionExecutor.execute(std::make_unique<EntityDeleteText>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteText>(mSelectedEntity);
   }
 }
 
@@ -960,8 +948,7 @@ void EntityPanel::renderAudio(Scene &scene, AssetRegistry &assetRegistry,
   }
 
   if (shouldDelete("Audio")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteAudio>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteAudio>(mSelectedEntity);
   }
 }
 
@@ -1074,8 +1061,7 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
   }
 
   if (shouldDelete("Scripting")) {
-    actionExecutor.execute(
-        std::make_unique<EntityDeleteScript>(mSelectedEntity));
+    actionExecutor.execute<EntityDeleteScript>(mSelectedEntity);
   }
 }
 
@@ -1102,49 +1088,45 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
   if (ImGui::BeginPopup("AddComponentPopup")) {
     if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      actionExecutor.execute(std::make_unique<EntitySetLocalTransform>(
-          mSelectedEntity, LocalTransform{}));
+      actionExecutor.execute<EntitySetLocalTransform>(mSelectedEntity,
+                                                      LocalTransform{});
     }
 
     if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      actionExecutor.execute(
-          std::make_unique<EntitySetRigidBody>(mSelectedEntity, RigidBody{}));
+      actionExecutor.execute<EntitySetRigidBody>(mSelectedEntity, RigidBody{});
     }
 
     if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      actionExecutor.execute(std::make_unique<EntitySetCollidableType>(
-          mSelectedEntity, PhysicsGeometryType::Box));
+      actionExecutor.execute<EntitySetCollidableType>(mSelectedEntity,
+                                                      PhysicsGeometryType::Box);
     }
 
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
         !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
       if (ImGui::Selectable("Directional light")) {
-        actionExecutor.execute(std::make_unique<EntitySetDirectionalLight>(
-            mSelectedEntity, liquid::DirectionalLight{}));
+        actionExecutor.execute<EntitySetDirectionalLight>(
+            mSelectedEntity, liquid::DirectionalLight{});
       }
 
       if (ImGui::Selectable("Point light")) {
-        actionExecutor.execute(std::make_unique<EntitySetPointLight>(
-            mSelectedEntity, liquid::PointLight{}));
+        actionExecutor.execute<EntitySetPointLight>(mSelectedEntity,
+                                                    liquid::PointLight{});
       }
     }
 
     if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity) &&
         ImGui::Selectable("Camera")) {
-      actionExecutor.execute(std::make_unique<EntitySetPerspectiveLens>(
-          mSelectedEntity, liquid::PerspectiveLens{}));
-      actionExecutor.execute(
-          std::make_unique<EntitySetCameraAutoAspectRatio>(mSelectedEntity));
+      actionExecutor.execute<EntitySetPerspectiveLens>(
+          mSelectedEntity, liquid::PerspectiveLens{});
     }
 
     if (!scene.entityDatabase.has<Text>(mSelectedEntity) &&
         ImGui::Selectable("Text")) {
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
-      actionExecutor.execute(
-          std::make_unique<EntitySetText>(mSelectedEntity, text));
+      actionExecutor.execute<EntitySetText>(mSelectedEntity, text);
     }
 
     ImGui::EndPopup();
@@ -1163,16 +1145,14 @@ void EntityPanel::handleDragAndDrop(AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::Audio).c_str())) {
       auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
 
-      actionExecutor.execute(
-          std::make_unique<EntitySetAudio>(mSelectedEntity, asset));
+      actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
 
-      actionExecutor.execute(
-          std::make_unique<EntitySetScript>(mSelectedEntity, asset));
+      actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
     }
 
     ImGui::EndDragDropTarget();

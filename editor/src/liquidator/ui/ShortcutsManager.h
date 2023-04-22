@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquidator/actions/Action.h"
+#include "liquidator/actions/ActionCreator.h"
 #include "liquidator/actions/ActionExecutor.h"
 #include "Shortcut.h"
 
@@ -15,9 +15,9 @@ public:
    * @brief Add shortcut
    *
    * @param shortcut Shortcut
-   * @param action Action
+   * @param actionCreator Action creator
    */
-  void add(Shortcut shortcut, Action *action);
+  void add(Shortcut shortcut, ActionCreator *actionCreator);
 
   /**
    * @brief Process input
@@ -30,7 +30,7 @@ public:
 
 private:
   std::vector<Shortcut> mShortcuts;
-  std::vector<std::unique_ptr<Action>> mActions;
+  std::vector<std::unique_ptr<ActionCreator>> mActionCreators;
 };
 
 } // namespace liquid::editor
