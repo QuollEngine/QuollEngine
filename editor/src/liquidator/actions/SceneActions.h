@@ -25,6 +25,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -35,6 +43,7 @@ public:
 
 private:
   Entity mEntity;
+  Entity mPreviousCamera = Entity::Null;
 };
 
 /**
@@ -51,6 +60,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -58,6 +75,51 @@ public:
    * @retval false Predicate is false
    */
   bool predicate(WorkspaceState &state) override;
+
+private:
+  EnvironmentSkybox mOldSkybox{};
+};
+
+/**
+ * @brief Change skybox type scene action
+ */
+class SceneChangeSkyboxType : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param type Skybox type
+   */
+  SceneChangeSkyboxType(EnvironmentSkyboxType type);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  EnvironmentSkyboxType mType;
+  std::optional<EnvironmentSkybox> mOldSkybox;
 };
 
 /**
@@ -68,7 +130,7 @@ public:
   /**
    * @brief Create action
    *
-   * @param color Skybox color
+   * @param color Color
    */
   SceneSetSkyboxColor(glm::vec4 color);
 
@@ -81,6 +143,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -90,6 +160,7 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
+  EnvironmentSkybox mOldSkybox;
   glm::vec4 mColor;
 };
 
@@ -114,6 +185,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -124,6 +203,7 @@ public:
 
 private:
   liquid::EnvironmentAssetHandle mTexture;
+  EnvironmentSkybox mOldSkybox;
 };
 
 /**
@@ -140,6 +220,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -147,6 +235,9 @@ public:
    * @retval false Predicate is false
    */
   bool predicate(WorkspaceState &state) override;
+
+private:
+  EnvironmentLightingSkyboxSource mOldLightingSource;
 };
 
 /**
@@ -161,6 +252,14 @@ public:
    * @return Executor result
    */
   ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
 
   /**
    * @brief Action predicate

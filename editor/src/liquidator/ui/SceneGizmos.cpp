@@ -107,7 +107,7 @@ bool SceneGizmos::render(WorkspaceState &state,
 
     auto localTransform =
         calculateLocalTransformFromWorld(state, selected, worldTransform);
-    mAction->setLocalTransformFinal(localTransform);
+    mAction->setNewComponent(localTransform);
 
     scene.entityDatabase.set(selected, localTransform);
   }

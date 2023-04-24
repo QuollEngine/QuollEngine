@@ -18,35 +18,12 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-};
-
-/**
- * @brief Spawn prefab at given transform action
- */
-class SpawnPrefabAtTransform : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param handle Prefab asset handle
-   * @param transform Transform
-   */
-  SpawnPrefabAtTransform(PrefabAssetHandle handle, LocalTransform transform);
-
-  /**
-   * @brief Action executor
+   * @brief Action undo
    *
    * @param state Workspace state
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
 
   /**
    * @brief Action predicate
@@ -58,8 +35,7 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  PrefabAssetHandle mHandle;
-  LocalTransform mTransform;
+  Entity mSpawnedEntity = Entity::Null;
 };
 
 /**
@@ -84,6 +60,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -95,6 +79,7 @@ public:
 private:
   PrefabAssetHandle mHandle;
   Entity mCamera;
+  Entity mSpawnedRootEntity = Entity::Null;
 };
 
 } // namespace liquid::editor

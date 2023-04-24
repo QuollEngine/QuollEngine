@@ -48,7 +48,7 @@ Section::Section(const char *title) {
 
   auto boundsX = calculateSectionBoundsX(mPadding.x);
 
-  const float midPoint = boundsX.start + (boundsX.end - boundsX.start) / 2.0f;
+  const float midPoint = boundsX.start + (boundsX.end - boundsX.start) / 1.2f;
 
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + mPadding.y);
   ImGui::BeginGroup();

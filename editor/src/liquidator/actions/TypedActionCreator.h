@@ -29,9 +29,8 @@ public:
     auto args = mArgs;
 
     // Pass tuple as action constructor arguments
-    TAction *action = std::apply(
-        [](auto... args) { return new TAction(std::forward<TArgs>(args)...); },
-        args);
+    TAction *action =
+        std::apply([](auto &...args) { return new TAction(args...); }, args);
 
     return std::unique_ptr<Action>(action);
   }

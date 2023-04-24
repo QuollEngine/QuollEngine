@@ -1,144 +1,24 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
-/**
- * @brief Set directional light for entity action
- */
-class EntitySetDirectionalLight : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param light Directional light
-   */
-  EntitySetDirectionalLight(Entity entity, DirectionalLight light);
+using EntityCreateDirectionalLight =
+    EntityDefaultCreateComponent<DirectionalLight>;
 
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+using EntitySetDirectionalLight =
+    EntityDefaultUpdateComponent<DirectionalLight>;
 
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
+using EntityEnableCascadedShadowMap =
+    EntityDefaultCreateComponent<CascadedShadowMap>;
 
-private:
-  Entity mEntity;
-  DirectionalLight mLight;
-};
+using EntityDisableCascadedShadowMap =
+    EntityDefaultDeleteAction<CascadedShadowMap>;
 
-/**
- * @brief Enable cascaded shadow map for entity action
- */
-class EntityEnableCascadedShadowMap : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   */
-  EntityEnableCascadedShadowMap(Entity entity);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-};
-
-/**
- * @brief Disable cascaded shadow map for entity action
- */
-class EntityDisableCascadedShadowMap : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   */
-  EntityDisableCascadedShadowMap(Entity entity);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-};
-
-/**
- * @brief Set cascaded shadow map for entity action
- */
-class EntitySetCascadedShadowMap : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param shadowMap Cascaded shadow map
-   */
-  EntitySetCascadedShadowMap(Entity entity, CascadedShadowMap shadowMap);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-  CascadedShadowMap mShadowMap;
-};
+using EntitySetCascadedShadowMap =
+    EntityDefaultUpdateComponent<CascadedShadowMap>;
 
 /**
  * @brief Delete directional light from entity action
@@ -161,38 +41,12 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-};
-
-/**
- * @brief Set poin light for entity action
- */
-class EntitySetPointLight : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param light Point light
-   */
-  EntitySetPointLight(Entity entity, PointLight light);
-
-  /**
-   * @brief Action executor
+   * @brief Action undo
    *
    * @param state Workspace state
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
 
   /**
    * @brief Action predicate
@@ -205,40 +59,14 @@ public:
 
 private:
   Entity mEntity;
-  PointLight mLight;
+  DirectionalLight mOldDirectionalLight;
+  std::optional<CascadedShadowMap> mOldCascadedShadowMap;
 };
 
-/**
- * @brief Delete point light from entity action
- */
-class EntityDeletePointLight : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   */
-  EntityDeletePointLight(Entity entity);
+using EntityCreatePointLight = EntityDefaultCreateComponent<PointLight>;
 
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+using EntitySetPointLight = EntityDefaultUpdateComponent<PointLight>;
 
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-};
+using EntityDeletePointLight = EntityDefaultDeleteAction<PointLight>;
 
 } // namespace liquid::editor

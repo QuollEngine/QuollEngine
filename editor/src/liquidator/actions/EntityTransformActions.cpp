@@ -3,17 +3,47 @@
 
 namespace liquid::editor {
 
-EntitySetLocalTransform::EntitySetLocalTransform(Entity entity,
-                                                 LocalTransform localTransform)
-    : mEntity(entity), mLocalTransform(localTransform) {}
+EntitySetLocalTransformContinuous::EntitySetLocalTransformContinuous(
+    Entity entity, std::optional<LocalTransform> oldLocalTransform,
+    std::optional<LocalTransform> newLocalTransform)
+    : mEntity(entity), mOldLocalTransform(oldLocalTransform),
+      mNewLocalTransform(newLocalTransform) {}
 
-ActionExecutorResult EntitySetLocalTransform::onExecute(WorkspaceState &state) {
+void EntitySetLocalTransformContinuous::setNewComponent(
+    LocalTransform localTransformFinal) {
+  mNewLocalTransform = localTransformFinal;
+}
+
+ActionExecutorResult
+EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+  scene.entityDatabase.set(mEntity, mNewLocalTransform.value());
+  if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
+    scene.entityDatabase.set<WorldTransform>(mEntity, {});
+  }
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+  res.addToHistory = true;
+  return res;
+}
+
+ActionExecutorResult
+EntitySetLocalTransformContinuous::onUndo(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  scene.entityDatabase.set(mEntity, mLocalTransform);
-  if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
-    scene.entityDatabase.set<WorldTransform>(mEntity, {});
+  if (mOldLocalTransform.has_value()) {
+    scene.entityDatabase.set(mEntity, mOldLocalTransform.value());
+    if (!scene.entityDatabase.has<WorldTransform>(mEntity)) {
+      scene.entityDatabase.set<WorldTransform>(mEntity, {});
+    }
+  } else {
+    scene.entityDatabase.remove<LocalTransform>(mEntity);
+    if (scene.entityDatabase.has<WorldTransform>(mEntity)) {
+      scene.entityDatabase.remove<WorldTransform>(mEntity);
+    }
   }
 
   ActionExecutorResult res{};
@@ -21,25 +51,8 @@ ActionExecutorResult EntitySetLocalTransform::onExecute(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetLocalTransform::predicate(WorkspaceState &state) { return true; }
-
-EntitySetLocalTransformContinuous::EntitySetLocalTransformContinuous(
-    Entity entity, LocalTransform localTransformStart)
-    : mEntity(entity), mLocalTransformStart(localTransformStart) {}
-
-void EntitySetLocalTransformContinuous::setLocalTransformFinal(
-    LocalTransform localTransformFinal) {
-  mLocalTransformFinal = localTransformFinal;
-}
-
-ActionExecutorResult
-EntitySetLocalTransformContinuous::onExecute(WorkspaceState &state) {
-  return EntitySetLocalTransform(mEntity, mLocalTransformFinal.value())
-      .onExecute(state);
-}
-
 bool EntitySetLocalTransformContinuous::predicate(WorkspaceState &state) {
-  return mLocalTransformFinal.has_value();
+  return mNewLocalTransform.has_value();
 }
 
 } // namespace liquid::editor

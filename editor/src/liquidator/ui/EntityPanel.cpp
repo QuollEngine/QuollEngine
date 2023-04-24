@@ -89,7 +89,8 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
       renderTransform(scene, actionExecutor);
       renderText(scene, state.assetRegistry, actionExecutor);
       renderMesh(scene, state.assetRegistry, actionExecutor);
-      renderLight(scene, actionExecutor);
+      renderDirectionalLight(scene, actionExecutor);
+      renderPointLight(scene, actionExecutor);
       renderCamera(state, scene, actionExecutor);
       renderAnimation(state, scene, state.assetRegistry, actionExecutor);
       renderSkeleton(scene, actionExecutor);
@@ -98,7 +99,7 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
       renderAudio(scene, state.assetRegistry, actionExecutor);
       renderScripting(scene, state.assetRegistry, actionExecutor);
       renderAddComponent(scene, state.assetRegistry, actionExecutor);
-      handleDragAndDrop(state.assetRegistry, actionExecutor);
+      handleDragAndDrop(scene, state.assetRegistry, actionExecutor);
     }
   }
 }
@@ -117,64 +118,18 @@ void EntityPanel::renderName(Scene &scene, ActionExecutor &actionExecutor) {
 
     auto tmpName = name.name;
     if (widgets::Input("", tmpName)) {
-      if (!mName.has_value()) {
-        mName = name;
-      }
+      if (!tmpName.empty()) {
+        if (!mNameAction) {
+          mNameAction = std::make_unique<EntitySetName>(mSelectedEntity, name);
+        }
 
-      name.name = tmpName;
+        name.name = tmpName;
+      }
     }
 
-    if (mName.has_value()) {
-      if (name.name.empty()) {
-        name.name = "Untitled";
-      }
-      actionExecutor.execute<EntitySetName>(mSelectedEntity, name);
-      mName.reset();
-    }
-  }
-}
-
-void EntityPanel::renderLight(Scene &scene, ActionExecutor &actionExecutor) {
-  bool hasDirectionalLight =
-      scene.entityDatabase.has<DirectionalLight>(mSelectedEntity);
-  bool hasPointLight = scene.entityDatabase.has<PointLight>(mSelectedEntity);
-
-  if (!hasDirectionalLight && !hasPointLight) {
-    return;
-  }
-
-  static const String SectionName = String(fa::Lightbulb) + "  Light";
-
-  if (auto _ = widgets::Section(SectionName.c_str())) {
-    ImGui::Text("Type");
-
-    String selected = hasDirectionalLight
-                          ? "Directional"
-                          : (hasPointLight ? "Point" : "Unknown");
-
-    if (ImGui::BeginCombo("###LightType", selected.c_str(), 0)) {
-      if (ImGui::Selectable("Directional", &hasDirectionalLight)) {
-        actionExecutor.execute<EntitySetDirectionalLight>(mSelectedEntity,
-                                                          DirectionalLight{});
-      }
-      if (ImGui::Selectable("Point light", &hasPointLight)) {
-        actionExecutor.execute<EntitySetPointLight>(mSelectedEntity,
-                                                    PointLight{});
-      }
-      ImGui::EndCombo();
-    }
-
-    renderDirectionalLight(scene, actionExecutor);
-    renderPointLight(scene, actionExecutor);
-  }
-
-  if (shouldDelete("Light")) {
-    if (hasDirectionalLight) {
-      actionExecutor.execute<EntityDeleteDirectionalLight>(mSelectedEntity);
-    }
-
-    if (hasPointLight) {
-      actionExecutor.execute<EntityDeletePointLight>(mSelectedEntity);
+    if (mNameAction) {
+      mNameAction->setNewComponent(name);
+      actionExecutor.execute(std::move(mNameAction));
     }
   }
 }
@@ -185,98 +140,106 @@ void EntityPanel::renderDirectionalLight(Scene &scene,
     return;
   }
 
-  auto &component = scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
-
-  ImGui::Text("Direction");
-  ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
-              component.direction.z);
-
-  bool sendAction = false;
-
-  glm::vec4 color = component.color;
-  if (widgets::InputColor("Color", color)) {
-    if (!mDirectionalLight.has_value()) {
-      mDirectionalLight = component;
-    }
-
-    component.color = color;
-  }
-
-  sendAction |= ImGui::IsItemDeactivatedAfterEdit();
-
-  float intensity = component.intensity;
-  if (widgets::Input("Intensity", intensity, false)) {
-    if (!mDirectionalLight.has_value()) {
-      mDirectionalLight = component;
-    }
-    component.intensity = intensity;
-
-    sendAction = true;
-  }
-
-  if (mDirectionalLight.has_value() && sendAction) {
-    actionExecutor.execute<EntitySetDirectionalLight>(mSelectedEntity,
-                                                      component);
-
-    mDirectionalLight.reset();
-  }
-
-  bool castShadows =
-      scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
-  if (ImGui::Checkbox("Cast shadows", &castShadows)) {
-    if (castShadows) {
-      actionExecutor.execute<EntityEnableCascadedShadowMap>(mSelectedEntity);
-    } else {
-      actionExecutor.execute<EntityDisableCascadedShadowMap>(mSelectedEntity);
-    }
-  }
-
-  if (castShadows) {
-    bool sendAction = false;
+  static const String SectionName = String(fa::Sun) + "  Directional light";
+  if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
-        scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
+        scene.entityDatabase.get<DirectionalLight>(mSelectedEntity);
 
-    bool softShadows = component.softShadows;
-    if (ImGui::Checkbox("Soft shadows", &softShadows)) {
-      if (!mCascadedShadowMap.has_value()) {
-        mCascadedShadowMap = component;
+    ImGui::Text("Direction");
+    ImGui::Text("%.3f %.3f %.3f", component.direction.x, component.direction.y,
+                component.direction.z);
+
+    bool sendAction = false;
+
+    glm::vec4 color = component.color;
+    if (widgets::InputColor("Color", color)) {
+      if (!mDirectionalLightAction) {
+        mDirectionalLightAction = std::make_unique<EntitySetDirectionalLight>(
+            mSelectedEntity, component);
       }
 
-      component.softShadows = softShadows;
-      sendAction = true;
-    }
-
-    float splitLambda = component.splitLambda;
-    if (widgets::Input("Split lambda", splitLambda, false)) {
-      splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
-
-      if (!mCascadedShadowMap.has_value()) {
-        mCascadedShadowMap = component;
-      }
-
-      component.splitLambda = splitLambda;
-      sendAction = true;
-    }
-
-    int32_t numCascades = static_cast<int32_t>(component.numCascades);
-    ImGui::Text("Number of cascades");
-    if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
-                       static_cast<int32_t>(component.MaxCascades))) {
-      if (!mCascadedShadowMap.has_value()) {
-        mCascadedShadowMap = component;
-      }
-      component.numCascades = static_cast<uint32_t>(numCascades);
-      sendAction = true;
+      component.color = color;
     }
 
     sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-    if (mCascadedShadowMap.has_value() && sendAction) {
-      actionExecutor.execute<EntitySetCascadedShadowMap>(mSelectedEntity,
-                                                         component);
+    float intensity = component.intensity;
+    if (widgets::Input("Intensity", intensity, false)) {
+      if (!mDirectionalLightAction) {
+        mDirectionalLightAction = std::make_unique<EntitySetDirectionalLight>(
+            mSelectedEntity, component);
+      }
 
-      mCascadedShadowMap.reset();
+      component.intensity = intensity;
+      sendAction = true;
     }
+
+    if (sendAction && mDirectionalLightAction) {
+      mDirectionalLightAction->setNewComponent(component);
+      actionExecutor.execute(std::move(mDirectionalLightAction));
+    }
+
+    bool castShadows =
+        scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
+    if (ImGui::Checkbox("Cast shadows", &castShadows)) {
+      if (castShadows) {
+        actionExecutor.execute<EntityEnableCascadedShadowMap>(mSelectedEntity);
+      } else {
+        actionExecutor.execute<EntityDisableCascadedShadowMap>(mSelectedEntity);
+      }
+    }
+
+    castShadows = scene.entityDatabase.has<CascadedShadowMap>(mSelectedEntity);
+
+    if (castShadows) {
+      bool sendAction = false;
+      auto &component =
+          scene.entityDatabase.get<CascadedShadowMap>(mSelectedEntity);
+
+      bool softShadows = component.softShadows;
+      if (ImGui::Checkbox("Soft shadows", &softShadows)) {
+        if (!mCascadedShadowMapAction) {
+          mCascadedShadowMapAction =
+              std::make_unique<EntitySetCascadedShadowMap>(mSelectedEntity,
+                                                           component);
+        }
+
+        component.softShadows = softShadows;
+        sendAction = true;
+      }
+
+      float splitLambda = component.splitLambda;
+      if (widgets::Input("Split lambda", splitLambda, false)) {
+        splitLambda = glm::clamp(splitLambda, 0.0f, 1.0f);
+
+        mCascadedShadowMapAction = std::make_unique<EntitySetCascadedShadowMap>(
+            mSelectedEntity, component);
+
+        component.splitLambda = splitLambda;
+        sendAction = true;
+      }
+
+      int32_t numCascades = static_cast<int32_t>(component.numCascades);
+      ImGui::Text("Number of cascades");
+      if (ImGui::DragInt("###NumberOfCascades", &numCascades, 0.5f, 1,
+                         static_cast<int32_t>(component.MaxCascades))) {
+        mCascadedShadowMapAction = std::make_unique<EntitySetCascadedShadowMap>(
+            mSelectedEntity, component);
+
+        component.numCascades = static_cast<uint32_t>(numCascades);
+      }
+
+      sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+
+      if (mCascadedShadowMapAction && sendAction) {
+        mCascadedShadowMapAction->setNewComponent(component);
+        actionExecutor.execute(std::move(mCascadedShadowMapAction));
+      }
+    }
+  }
+
+  if (shouldDelete("Directional light")) {
+    actionExecutor.execute<EntityDeleteDirectionalLight>(mSelectedEntity);
   }
 }
 
@@ -286,45 +249,55 @@ void EntityPanel::renderPointLight(Scene &scene,
     return;
   }
 
-  auto &component = scene.entityDatabase.get<PointLight>(mSelectedEntity);
+  static const String SectionName = String(fa::Lightbulb) + "  Point light";
 
-  bool sendAction = false;
+  if (auto _ = widgets::Section(SectionName.c_str())) {
 
-  glm::vec4 color = component.color;
-  if (widgets::InputColor("Color", color)) {
-    if (!mPointLight.has_value()) {
-      mPointLight = component;
+    auto &component = scene.entityDatabase.get<PointLight>(mSelectedEntity);
+
+    bool sendAction = false;
+
+    glm::vec4 color = component.color;
+    if (widgets::InputColor("Color", color)) {
+      if (!mPointLightAction) {
+        mPointLightAction =
+            std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
+      }
+
+      component.color = color;
     }
 
-    component.color = color;
-  }
+    sendAction |= ImGui::IsItemDeactivatedAfterEdit();
 
-  sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+    float intensity = component.intensity;
+    if (widgets::Input("Intensity (in candelas)", intensity, false)) {
+      mPointLightAction =
+          std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
 
-  float intensity = component.intensity;
-  if (widgets::Input("Intensity (in candelas)", intensity, false)) {
-    if (!mDirectionalLight.has_value()) {
-      mPointLight = component;
+      component.intensity = intensity;
+
+      sendAction = true;
     }
-    component.intensity = intensity;
 
-    sendAction = true;
-  }
+    float range = component.range;
+    if (widgets::Input("Range", range, false)) {
+      if (!mPointLightAction) {
+        mPointLightAction =
+            std::make_unique<EntitySetPointLight>(mSelectedEntity, component);
+      }
+      component.range = range;
 
-  float range = component.range;
-  if (widgets::Input("Range", range, false)) {
-    if (!mDirectionalLight.has_value()) {
-      mPointLight = component;
+      sendAction = true;
     }
-    component.range = range;
 
-    sendAction = true;
+    if (mPointLightAction && sendAction) {
+      mPointLightAction->setNewComponent(component);
+      actionExecutor.execute(std::move(mPointLightAction));
+    }
   }
 
-  if (mPointLight.has_value() && sendAction) {
-    actionExecutor.execute<EntitySetPointLight>(mSelectedEntity, component);
-
-    mPointLight.reset();
+  if (shouldDelete("Point light")) {
+    actionExecutor.execute<EntityDeletePointLight>(mSelectedEntity);
   }
 }
 
@@ -334,7 +307,7 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     return;
   }
 
-  static const String SectionName = String(fa::Video) + " Camera";
+  static const String SectionName = String(fa::Video) + " Perpective camera";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component =
@@ -348,8 +321,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
         fovY = 0.0f;
       }
 
-      if (!mPerspectiveLens.has_value()) {
-        mPerspectiveLens = component;
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
       }
       component.fovY = fovY;
 
@@ -362,8 +336,9 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
         near = 0.0f;
       }
 
-      if (!mPerspectiveLens.has_value()) {
-        mPerspectiveLens = component;
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
       }
 
       component.near = near;
@@ -377,20 +352,18 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
         far = 0.0f;
       }
 
-      if (!mPerspectiveLens.has_value()) {
-        mPerspectiveLens = component;
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
       }
-
       component.far = far;
 
       sendAction = true;
     }
 
-    if (sendAction && mPerspectiveLens.has_value()) {
-      actionExecutor.execute<EntitySetPerspectiveLens>(mSelectedEntity,
-                                                       component);
-
-      mPerspectiveLens.reset();
+    if (sendAction && mPerspectiveLensAction) {
+      mPerspectiveLensAction->setNewComponent(component);
+      actionExecutor.execute(std::move(mPerspectiveLensAction));
     }
 
     ImGui::Text("Aspect Ratio");
@@ -423,16 +396,17 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
                            MinCustomAspectRatio, MinCustomAspectRatio,
                            MaxCustomAspectRatio, "%.2f")) {
 
-        if (!mPerspectiveLens.has_value()) {
-          mPerspectiveLens = component;
+        if (!mPerspectiveLensAction) {
+          mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+              mSelectedEntity, component);
         }
 
         component.aspectRatio = aspectRatio;
       }
 
-      if (ImGui::IsItemDeactivatedAfterEdit()) {
-        actionExecutor.execute<EntitySetPerspectiveLens>(mSelectedEntity,
-                                                         component);
+      if (ImGui::IsItemDeactivatedAfterEdit() && mPerspectiveLensAction) {
+        mPerspectiveLensAction->setNewComponent(component);
+        actionExecutor.execute(std::move(mPerspectiveLensAction));
       }
     }
 
@@ -445,8 +419,8 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
     }
   }
 
-  if (shouldDelete("Camera")) {
-    actionExecutor.execute<EntityDeleteCamera>(mSelectedEntity);
+  if (shouldDelete("Perspective camera")) {
+    actionExecutor.execute<EntityDeletePerspectiveLens>(mSelectedEntity);
   }
 }
 
@@ -463,16 +437,15 @@ void EntityPanel::renderTransform(Scene &scene,
     auto &component = scene.entityDatabase.get<LocalTransform>(mSelectedEntity);
     auto &world = scene.entityDatabase.get<WorldTransform>(mSelectedEntity);
 
-    bool sendAction = false;
-
     auto localPosition = component.localPosition;
-    if (widgets::Input("Position", component.localPosition, false)) {
-      if (!mLocalTransform.has_value()) {
-        mLocalTransform = component;
+    if (widgets::Input("Position", localPosition, false)) {
+      if (!mLocalTransformAction) {
+        mLocalTransformAction =
+            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
+                                                                component);
       }
 
       component.localPosition = localPosition;
-      sendAction = true;
     }
 
     glm::vec3 euler{};
@@ -481,32 +454,31 @@ void EntityPanel::renderTransform(Scene &scene,
     euler = glm::degrees(euler);
 
     if (widgets::Input("Rotation", euler, false)) {
-      if (!mLocalTransform.has_value()) {
-        mLocalTransform = component;
+      if (!mLocalTransformAction) {
+        mLocalTransformAction =
+            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
+                                                                component);
       }
 
       auto eulerRadians = glm::radians(euler);
       component.localRotation = glm::toQuat(
           glm::eulerAngleXYZ(eulerRadians.x, eulerRadians.y, eulerRadians.z));
-
-      sendAction = true;
     }
 
     auto localScale = component.localScale;
     if (widgets::Input("Scale", localScale, false)) {
-      if (!mLocalTransform.has_value()) {
-        mLocalTransform = component;
+      if (!mLocalTransformAction) {
+        mLocalTransformAction =
+            std::make_unique<EntitySetLocalTransformContinuous>(mSelectedEntity,
+                                                                component);
       }
 
       component.localScale = localScale;
-      sendAction = true;
     }
 
-    if (sendAction && mLocalTransform.has_value()) {
-      actionExecutor.execute<EntitySetLocalTransform>(mSelectedEntity,
-                                                      component);
-
-      mLocalTransform.reset();
+    if (mLocalTransformAction) {
+      mLocalTransformAction->setNewComponent(component);
+      actionExecutor.execute(std::move(mLocalTransformAction));
     }
 
     ImGui::Text("World Transform");
@@ -707,12 +679,12 @@ void EntityPanel::renderCollidable(Scene &scene,
       auto halfExtents = box.halfExtents;
 
       if (widgets::Input("Half extents", halfExtents, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         box.halfExtents = halfExtents;
-        sendAction = true;
       }
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Sphere) {
       auto &sphere =
@@ -720,12 +692,12 @@ void EntityPanel::renderCollidable(Scene &scene,
       float radius = sphere.radius;
 
       if (widgets::Input("Radius", radius, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         sphere.radius = radius;
-        sendAction = true;
       }
     } else if (collidable.geometryDesc.type == PhysicsGeometryType::Capsule) {
       auto &capsule =
@@ -734,21 +706,21 @@ void EntityPanel::renderCollidable(Scene &scene,
       float halfHeight = capsule.halfHeight;
 
       if (widgets::Input("Radius", radius, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         capsule.radius = radius;
-        sendAction = true;
       }
 
       if (widgets::Input("Half height", halfHeight, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         capsule.halfHeight = halfHeight;
-        sendAction = true;
       }
     }
 
@@ -758,12 +730,12 @@ void EntityPanel::renderCollidable(Scene &scene,
       float dynamicFriction = material.dynamicFriction;
 
       if (widgets::Input("Dynamic friction", dynamicFriction, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         material.dynamicFriction = dynamicFriction;
-        sendAction = true;
       }
 
       float restitution = material.restitution;
@@ -772,28 +744,29 @@ void EntityPanel::renderCollidable(Scene &scene,
           restitution = 1.0f;
         }
 
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         material.restitution = restitution;
-        sendAction = true;
       }
 
       float staticFriction = material.staticFriction;
       if (widgets::Input("Static friction", staticFriction, false)) {
-        if (!mCollidable.has_value()) {
-          mCollidable = collidable;
+        if (!mCollidableAction) {
+          mCollidableAction = std::make_unique<EntitySetCollidable>(
+              mSelectedEntity, collidable);
         }
 
         material.staticFriction = staticFriction;
-        sendAction = true;
       }
     }
 
-    if (sendAction && mCollidable.has_value()) {
-      actionExecutor.execute<EntitySetCollidable>(mSelectedEntity, collidable);
-      mCollidable.reset();
+    if (mCollidableAction) {
+      mCollidableAction->setNewComponent(collidable);
+
+      actionExecutor.execute(std::move(mCollidableAction));
     }
   }
 
@@ -816,39 +789,38 @@ void EntityPanel::renderRigidBody(Scene &scene,
     bool sendAction = false;
     float mass = rigidBody.dynamicDesc.mass;
     if (widgets::Input("Mass", mass, false)) {
-      if (!mRigidBody.has_value()) {
-        mRigidBody = rigidBody;
+      if (!mRigidBodyAction) {
+        mRigidBodyAction =
+            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.mass = mass;
-      sendAction = true;
     }
 
     glm::vec3 inertia = rigidBody.dynamicDesc.inertia;
     if (widgets::Input("Inertia", inertia, false)) {
-      if (!mRigidBody.has_value()) {
-        mRigidBody = rigidBody;
+      if (!mRigidBodyAction) {
+        mRigidBodyAction =
+            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.inertia = inertia;
-      sendAction = true;
     }
 
     ImGui::Text("Apply gravity");
     bool applyGravity = rigidBody.dynamicDesc.applyGravity;
     if (ImGui::Checkbox("Apply gravity###ApplyGravity", &applyGravity)) {
-      if (!mRigidBody.has_value()) {
-        mRigidBody = rigidBody;
+      if (!mRigidBodyAction) {
+        mRigidBodyAction =
+            std::make_unique<EntitySetRigidBody>(mSelectedEntity, rigidBody);
       }
 
       rigidBody.dynamicDesc.applyGravity = applyGravity;
-      sendAction = true;
     }
 
-    if (sendAction && mRigidBody.has_value()) {
-      actionExecutor.execute<EntitySetRigidBody>(mSelectedEntity, rigidBody);
-
-      mRigidBody.reset();
+    if (mRigidBodyAction) {
+      mRigidBodyAction->setNewComponent(rigidBody);
+      actionExecutor.execute(std::move(mRigidBodyAction));
     }
   }
 
@@ -878,8 +850,8 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
     if (ImguiMultilineInputText(
             "###InputContent", tmpText,
             ImVec2(ImGui::GetWindowWidth(), ContentInputHeight), 0)) {
-      if (!mText.has_value()) {
-        mText = text;
+      if (!mTextAction) {
+        mTextAction = std::make_unique<EntitySetText>(mSelectedEntity, text);
       }
 
       text.text = tmpText;
@@ -891,13 +863,11 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
 
     float lineHeight = text.lineHeight;
     if (widgets::Input("Line height", lineHeight, false)) {
-      if (!mText.has_value()) {
-        mText = text;
+      if (!mTextAction) {
+        mTextAction = std::make_unique<EntitySetText>(mSelectedEntity, text);
       }
 
       text.lineHeight = lineHeight;
-
-      sendAction = true;
     }
 
     ImGui::Text("Select font");
@@ -909,21 +879,21 @@ void EntityPanel::renderText(Scene &scene, AssetRegistry &assetRegistry,
         const auto &fontName = data.name;
 
         if (ImGui::Selectable(fontName.c_str(), &selectable)) {
-          if (!mText.has_value()) {
-            mText = text;
+          if (!mTextAction) {
+            mTextAction =
+                std::make_unique<EntitySetText>(mSelectedEntity, text);
           }
 
           text.font = handle;
-          sendAction = true;
         }
       }
       ImGui::EndCombo();
     }
 
-    if (sendAction && mText.has_value()) {
-      actionExecutor.execute<EntitySetText>(mSelectedEntity, text);
+    if (mTextAction) {
+      mTextAction->setNewComponent(text);
 
-      mText.reset();
+      actionExecutor.execute(std::move(mTextAction));
     }
   }
 
@@ -1088,52 +1058,48 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
   if (ImGui::BeginPopup("AddComponentPopup")) {
     if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
-      actionExecutor.execute<EntitySetLocalTransform>(mSelectedEntity,
-                                                      LocalTransform{});
+      actionExecutor.execute<EntitySetLocalTransformContinuous>(
+          mSelectedEntity, liquid::LocalTransform{}, liquid::LocalTransform{});
     }
 
     if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
         ImGui::Selectable("Rigid body")) {
-      actionExecutor.execute<EntitySetRigidBody>(mSelectedEntity, RigidBody{});
+      actionExecutor.execute<EntityCreateRigidBody>(mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<Collidable>(mSelectedEntity) &&
         ImGui::Selectable("Collidable")) {
-      actionExecutor.execute<EntitySetCollidableType>(mSelectedEntity,
-                                                      PhysicsGeometryType::Box);
+      actionExecutor.execute<EntityCreateCollidable>(mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
         !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
       if (ImGui::Selectable("Directional light")) {
-        actionExecutor.execute<EntitySetDirectionalLight>(
-            mSelectedEntity, liquid::DirectionalLight{});
+        actionExecutor.execute<EntityCreateDirectionalLight>(mSelectedEntity);
       }
 
       if (ImGui::Selectable("Point light")) {
-        actionExecutor.execute<EntitySetPointLight>(mSelectedEntity,
-                                                    liquid::PointLight{});
+        actionExecutor.execute<EntityCreatePointLight>(mSelectedEntity);
       }
     }
 
     if (!scene.entityDatabase.has<PerspectiveLens>(mSelectedEntity) &&
-        ImGui::Selectable("Camera")) {
-      actionExecutor.execute<EntitySetPerspectiveLens>(
-          mSelectedEntity, liquid::PerspectiveLens{});
+        ImGui::Selectable("Perspective camera")) {
+      actionExecutor.execute<EntityCreatePerspectiveLens>(mSelectedEntity);
     }
 
     if (!scene.entityDatabase.has<Text>(mSelectedEntity) &&
         ImGui::Selectable("Text")) {
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
-      actionExecutor.execute<EntitySetText>(mSelectedEntity, text);
+      actionExecutor.execute<EntityCreateText>(mSelectedEntity, text);
     }
 
     ImGui::EndPopup();
   }
 }
 
-void EntityPanel::handleDragAndDrop(AssetRegistry &assetRegistry,
+void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
                                     ActionExecutor &actionExecutor) {
   const auto width = ImGui::GetWindowContentRegionWidth();
   const float halfWidth = width * 0.5f;
@@ -1145,14 +1111,22 @@ void EntityPanel::handleDragAndDrop(AssetRegistry &assetRegistry,
             getAssetTypeString(AssetType::Audio).c_str())) {
       auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
 
-      actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
+      if (scene.entityDatabase.has<AudioSource>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetAudio>(mSelectedEntity, asset);
+      } else {
+        actionExecutor.execute<EntityCreateAudio>(mSelectedEntity, asset);
+      }
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::LuaScript).c_str())) {
       auto asset = *static_cast<LuaScriptAssetHandle *>(payload->Data);
 
-      actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
+      if (scene.entityDatabase.has<Script>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
+      } else {
+        actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);
+      }
     }
 
     ImGui::EndDragDropTarget();

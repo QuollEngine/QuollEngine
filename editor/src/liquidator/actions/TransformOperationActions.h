@@ -25,6 +25,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -35,6 +43,7 @@ public:
 
 private:
   TransformOperation mTransformOperation;
+  TransformOperation mOldTransformOperation{};
 };
 
 } // namespace liquid::editor

@@ -39,41 +39,6 @@ private:
 };
 
 /**
- * @brief Set skeleton for entity action
- */
-class EntitySetSkeleton : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param entity Entity
-   * @param handle Skeleton asset handle
-   */
-  EntitySetSkeleton(Entity entity, SkeletonAssetHandle handle);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mEntity;
-  SkeletonAssetHandle mHandle;
-};
-
-/**
  * @brief Delete skeleton from entity action
  */
 class EntityDeleteSkeleton : public Action {
@@ -94,6 +59,14 @@ public:
   ActionExecutorResult onExecute(WorkspaceState &state) override;
 
   /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
    * @brief Action predicate
    *
    * @param state Workspace state
@@ -104,6 +77,8 @@ public:
 
 private:
   Entity mEntity;
+  Skeleton mOldComponent;
+  std::optional<SkeletonDebug> mOldSkeletonDebug;
 };
 
 } // namespace liquid::editor
