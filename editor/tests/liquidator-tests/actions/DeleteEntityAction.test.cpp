@@ -20,7 +20,6 @@ TEST_P(DeleteEntityActionTest,
 
 TEST_P(DeleteEntityActionTest,
        ExecuteSetsSelectedEntityToNullIfSelectedEntityIsDeletedEntity) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
   auto entity = activeScene().entityDatabase.create();
   state.selectedEntity = entity;
 
@@ -60,6 +59,107 @@ TEST_P(
   auto res = action.onExecute(state);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(DeleteEntityActionTest,
+       ExecuteSetsStartingCameraToDummyCameraIfStartingCameraIsDeletedEntity) {
+  activeScene().dummyCamera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().activeCamera = entity;
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_TRUE(res.saveScene);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteSetsStartingCameraToDummyCameraIfStartingCameraIsADescendantOfDeletedEntity) {
+  activeScene().dummyCamera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  {
+    auto e1 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+
+    auto e2 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().activeCamera = e2;
+  }
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_TRUE(res.saveScene);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteDoesNotSetStartingCameraToDummyCameraIfStartingCameraIsNotAffectedByDelete) {
+  activeScene().dummyCamera = activeScene().entityDatabase.create();
+  activeScene().activeCamera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_NE(activeScene().activeCamera, activeScene().dummyCamera);
+  EXPECT_FALSE(res.saveScene);
+}
+
+TEST_P(DeleteEntityActionTest,
+       ExecuteSetsActiveCameraToWorkspaceCameraIfActiveCameraIsDeletedEntity) {
+  state.camera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+  state.activeCamera = entity;
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_EQ(state.activeCamera, state.camera);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteSetsActiveCameraToWorkspaceCameraIfActiveCameraIsADescendantOfDeletedEntity) {
+  state.camera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  {
+    auto e1 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+
+    auto e2 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    state.activeCamera = e2;
+  }
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_EQ(state.activeCamera, state.camera);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteDoesNotSetActiveCameraToWorkspaceCameraIfActiveCameraIsNotAffectedByDelete) {
+  state.camera = activeScene().entityDatabase.create();
+  state.activeCamera = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state);
+
+  EXPECT_NE(state.activeCamera, state.camera);
 }
 
 InitActionsTestSuite(EntityActionsTest, DeleteEntityActionTest);
