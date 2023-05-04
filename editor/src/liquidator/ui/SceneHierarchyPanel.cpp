@@ -10,6 +10,7 @@
 
 #include "liquidator/actions/EditorCameraActions.h"
 #include "liquidator/actions/DeleteEntityAction.h"
+#include "liquidator/actions/EntityRelationActions.h"
 
 namespace liquid::editor {
 
@@ -117,15 +118,32 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     fontStack.pushFont(Theme::getBoldFont());
   }
 
-  if (ImGui::TreeNodeEx(getNodeName(name, entity, scene.entityDatabase).c_str(),
-                        treeNodeFlags)) {
-    open = !isLeaf;
+  auto nodeName = getNodeName(name, entity, scene.entityDatabase);
 
-    if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-      mRightClickedEntity = entity;
-    } else if (ImGui::IsItemClicked()) {
-      state.selectedEntity = entity;
+  ImGui::PushID(static_cast<int32_t>(entity));
+  if (ImGui::TreeNodeEx(nodeName.c_str(), treeNodeFlags)) {
+    open = !isLeaf;
+  }
+  ImGui::PopID();
+
+  if (ImGui::BeginDragDropSource()) {
+    ImGui::SetDragDropPayload("Entity", &entity, sizeof(Entity));
+    ImGui::Text("%s", nodeName.c_str());
+    ImGui::EndDragDropSource();
+  }
+
+  if (ImGui::BeginDragDropTarget()) {
+    if (auto *payload = ImGui::AcceptDragDropPayload("Entity")) {
+      auto child = *static_cast<Entity *>(payload->Data);
+      actionExecutor.execute<EntitySetParent>(child, entity);
     }
+    ImGui::EndDragDropTarget();
+  }
+
+  if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+    mRightClickedEntity = entity;
+  } else if (ImGui::IsItemClicked()) {
+    state.selectedEntity = entity;
   }
 
   if (mRightClickedEntity == entity) {
@@ -158,7 +176,6 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
         renderEntity(childEntity, 0, state, actionExecutor);
       }
     }
-
     ImGui::TreePop();
   }
 }

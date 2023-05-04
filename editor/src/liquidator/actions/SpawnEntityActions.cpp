@@ -74,6 +74,23 @@ ActionExecutorResult SpawnEmptyEntityAtView::onUndo(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
+  bool preserveSelectedEntity = true;
+  {
+    auto current = state.selectedEntity;
+
+    preserveSelectedEntity = current != mSpawnedEntity;
+    while (preserveSelectedEntity &&
+           scene.entityDatabase.has<Parent>(current)) {
+      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+      preserveSelectedEntity = parent != mSpawnedEntity;
+      current = parent;
+    }
+  }
+
+  if (!preserveSelectedEntity) {
+    state.selectedEntity = Entity::Null;
+  }
+
   scene.entityDatabase.set<Delete>(mSpawnedEntity, {});
   ActionExecutorResult res{};
   res.entitiesToDelete.push_back(mSpawnedEntity);
@@ -110,6 +127,23 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state) {
 ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
+
+  bool preserveSelectedEntity = true;
+  {
+    auto current = state.selectedEntity;
+
+    preserveSelectedEntity = current != mSpawnedRootEntity;
+    while (preserveSelectedEntity &&
+           scene.entityDatabase.has<Parent>(current)) {
+      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+      preserveSelectedEntity = parent != mSpawnedRootEntity;
+      current = parent;
+    }
+  }
+
+  if (!preserveSelectedEntity) {
+    state.selectedEntity = Entity::Null;
+  }
 
   scene.entityDatabase.set<Delete>(mSpawnedRootEntity, {});
   ActionExecutorResult res{};

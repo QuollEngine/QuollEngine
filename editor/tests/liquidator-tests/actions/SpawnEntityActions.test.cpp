@@ -58,6 +58,63 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, UndoRemovesSpawnedEntity) {
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
+       UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  auto res = action.onExecute(state);
+  state.selectedEntity = res.entitiesToSave.at(0);
+
+  action.onUndo(state);
+
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(
+    SpawnEmptyEntityAtViewActionTest,
+    UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  state.camera = camera;
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  auto res = action.onExecute(state);
+
+  auto entity = res.entitiesToSave.at(0);
+
+  {
+    auto e1 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+
+    auto e2 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    state.selectedEntity = e2;
+  }
+
+  action.onUndo(state);
+
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(SpawnEmptyEntityAtViewActionTest,
+       UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  state.camera = camera;
+
+  auto entity = activeScene().entityDatabase.create();
+  state.selectedEntity = activeScene().entityDatabase.create();
+
+  liquid::editor::SpawnEmptyEntityAtView action;
+  action.onExecute(state);
+  action.onUndo(state);
+
+  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(SpawnEmptyEntityAtViewActionTest,
        PredicateReturnsTrueIfCameraEntityHasCamera) {
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
@@ -142,6 +199,64 @@ TEST_P(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
   EXPECT_EQ(undoRes.entitiesToDelete.back(), entity);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
+}
+
+TEST_P(SpawnPrefabAtViewActionTest,
+       UndoSetsSelectedEntityToNullIfSpawnedRootIsSelected) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+
+  liquid::AssetData<liquid::PrefabAsset> asset{};
+  asset.data.transforms.push_back({0});
+  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+
+  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  auto res = action.onExecute(state);
+
+  auto entity = res.entitiesToSave.at(0);
+  state.selectedEntity = entity;
+
+  action.onUndo(state);
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(SpawnPrefabAtViewActionTest,
+       UndoSetsSelectedEntityToNullIfSelectedEntityIsDescendantOfSpawnedRoot) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+
+  liquid::AssetData<liquid::PrefabAsset> asset{};
+  asset.data.transforms.push_back({0});
+  asset.data.transforms.push_back({1});
+  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+
+  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  auto res = action.onExecute(state);
+
+  state.selectedEntity = res.entitiesToSave.back();
+
+  action.onUndo(state);
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_P(
+    SpawnEmptyEntityAtViewActionTest,
+    UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotInSpawnedPrefabTree) {
+  auto camera = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+
+  liquid::AssetData<liquid::PrefabAsset> asset{};
+  asset.data.transforms.push_back({0});
+  asset.data.transforms.push_back({1});
+  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+
+  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  auto res = action.onExecute(state);
+
+  state.selectedEntity = liquid::Entity{25};
+
+  action.onUndo(state);
+  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }
 
 TEST_P(
