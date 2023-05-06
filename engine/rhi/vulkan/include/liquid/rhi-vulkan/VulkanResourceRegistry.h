@@ -113,18 +113,10 @@ public:
    * @brief Set texture
    *
    * @param texture Vulkan texture
-   * @return New texture handle
-   */
-  TextureHandle setTexture(std::unique_ptr<VulkanTexture> &&texture);
-
-  /**
-   * @brief Recreate existing texture with new parameter
-   *
    * @param handle Texture handle
-   * @param texture Vulkan texture
    */
-  void recreateTexture(TextureHandle handle,
-                       std::unique_ptr<VulkanTexture> &&texture);
+  void setTexture(std::unique_ptr<VulkanTexture> &&texture,
+                  TextureHandle handle);
 
   /**
    * @brief Delete texture

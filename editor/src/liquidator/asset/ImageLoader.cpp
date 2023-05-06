@@ -8,8 +8,8 @@
 
 namespace liquid::editor {
 
-ImageLoader::ImageLoader(AssetCache &assetCache, rhi::RenderDevice *device)
-    : mAssetCache(assetCache), mDevice(device) {}
+ImageLoader::ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage)
+    : mAssetCache(assetCache), mRenderStorage(renderStorage) {}
 
 Result<Path> ImageLoader::loadFromPath(const Path &originalAssetPath,
                                        const Path &engineAssetPath,
@@ -117,25 +117,28 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
                       rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   description.format = format;
 
-  auto texture = mDevice->createTexture(description);
+  auto texture = mRenderStorage.createTexture(description);
   size_t size = static_cast<size_t>(description.width) * description.height * 4;
 
   TextureUtils::copyDataToTexture(
-      mDevice, data, texture, rhi::ImageLayout::TransferDestinationOptimal, 1,
+      mRenderStorage.getDevice(), data, texture,
+      rhi::ImageLayout::TransferDestinationOptimal, 1,
       {TextureAssetLevel{0, size, description.width, description.height}});
 
   TextureUtils::generateMipMapsForTexture(
-      mDevice, texture, rhi::ImageLayout::TransferSourceOptimal,
-      description.layers, static_cast<uint32_t>(levels.size()),
-      description.width, description.height);
+      mRenderStorage.getDevice(), texture,
+      rhi::ImageLayout::TransferSourceOptimal, description.layers,
+      static_cast<uint32_t>(levels.size()), description.width,
+      description.height);
 
   std::vector<uint8_t> textureData(
       TextureUtils::getBufferSizeFromLevels(levels));
 
-  TextureUtils::copyTextureToData(
-      mDevice, texture, rhi::ImageLayout::TransferDestinationOptimal,
-      description.layers, levels, textureData.data());
-  mDevice->destroyTexture(texture);
+  TextureUtils::copyTextureToData(mRenderStorage.getDevice(), texture,
+                                  rhi::ImageLayout::TransferDestinationOptimal,
+                                  description.layers, levels,
+                                  textureData.data());
+  mRenderStorage.getDevice()->destroyTexture(texture);
 
   return std::move(textureData);
 }

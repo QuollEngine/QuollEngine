@@ -65,20 +65,23 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
 rhi::TextureHandle
 RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
                              bool addToDescriptor) {
-  auto texture = mDevice->createTexture(description);
+  auto handle = getNewTextureHandle();
+
+  mDevice->createTexture(description, handle);
 
   if (addToDescriptor) {
-    std::array<rhi::TextureHandle, 1> textures{texture};
+    std::array<rhi::TextureHandle, 1> textures{handle};
     mGlobalTexturesDescriptor.write(0, textures,
                                     rhi::DescriptorType::CombinedImageSampler,
-                                    rhi::castHandleToUint(texture));
+                                    rhi::castHandleToUint(handle));
   }
 
-  return texture;
+  return handle;
 }
 
 rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
     const liquid::rhi::TextureDescription &description, bool addToDescriptor) {
+
   auto fixedSizeDesc = description;
   fixedSizeDesc.width =
       mDevice->getSwapchain().extent.x * description.width / Hundred;
@@ -93,6 +96,11 @@ rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
   }
 
   return handle;
+}
+
+rhi::TextureHandle RenderStorage::getNewTextureHandle() {
+  uint32_t handle = mLastTexture++;
+  return rhi::TextureHandle{handle};
 }
 
 rhi::Buffer
@@ -133,7 +141,7 @@ bool RenderStorage::recreateFramebufferRelativeTextures() {
     fixedSizeDesc.width = mWidth * description.width / Hundred;
     fixedSizeDesc.height = mHeight * description.height / Hundred;
 
-    mDevice->updateTexture(handle, fixedSizeDesc);
+    mDevice->createTexture(fixedSizeDesc, handle);
   }
 
   for (auto handle : mFramebufferRelativeTexturesInGlobalDescriptor) {

@@ -11,8 +11,17 @@ class RenderGraphTest : public ::testing::Test {
 public:
   RenderGraphTest() : graph("TestGraph") {}
 
+  liquid::rhi::TextureHandle
+  createTexture(liquid::rhi::TextureDescription desc) {
+    liquid::rhi::TextureHandle handle{lastTextureHandle++};
+
+    device.createTexture(desc, handle);
+    return handle;
+  }
+
   MockRenderDevice device;
   liquid::RenderGraph graph;
+  uint32_t lastTextureHandle = 0;
 };
 
 class RenderGraphDeathTest : public RenderGraphTest {};
@@ -70,17 +79,14 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // |   +---+   +---+               |
   // +-------------------------------+
 
+  using Texture = liquid::rhi::TextureHandle;
+
   std::unordered_map<liquid::String, liquid::rhi::TextureHandle> textures{
-      {"a-d", device.createTexture({})},
-      {"b-c", device.createTexture({})},
-      {"b-g", device.createTexture({})},
-      {"h-c", device.createTexture({})},
-      {"c-e", device.createTexture({})},
-      {"d-e", device.createTexture({})},
-      {"d-g", device.createTexture({})},
-      {"e-f", device.createTexture({})},
-      {"f-g", device.createTexture({})},
-      {"final-color", device.createTexture({})}};
+      {"a-d", createTexture({})}, {"b-c", createTexture({})},
+      {"b-g", createTexture({})}, {"h-c", createTexture({})},
+      {"c-e", createTexture({})}, {"d-e", createTexture({})},
+      {"d-g", createTexture({})}, {"e-f", createTexture({})},
+      {"f-g", createTexture({})}, {"final-color", createTexture({})}};
 
   std::unordered_map<liquid::String, liquid::rhi::BufferHandle> buffers{
       {"a-b", device.createBuffer({}).getHandle()},
@@ -165,7 +171,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 }
 
 TEST_F(RenderGraphTest, SetsPassAttachmentOperations) {
-  auto handle = device.createTexture({});
+  auto handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());
@@ -197,11 +203,11 @@ TEST_F(RenderGraphTest, SetsOutputImageLayouts) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
 
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -241,11 +247,11 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
 
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -276,7 +282,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorWrite) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -305,7 +311,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthWrite) {
 
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -337,10 +343,10 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllTextureWrites) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -379,7 +385,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorRead) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -432,7 +438,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthTextureRead) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -487,10 +493,10 @@ TEST_F(RenderGraphTest, SetsPassBarrierForBothColorAndDepthTextureReads) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture = device.createTexture(depthDescription);
+  auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -981,13 +987,13 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture1 = device.createTexture(colorDescription);
-  auto colorTexture2 = device.createTexture(colorDescription);
+  auto colorTexture1 = createTexture(colorDescription);
+  auto colorTexture2 = createTexture(colorDescription);
 
   TextureDescription depthDescription{};
   depthDescription.usage = TextureUsage::Depth;
-  auto depthTexture1 = device.createTexture(depthDescription);
-  auto depthTexture2 = device.createTexture(depthDescription);
+  auto depthTexture1 = createTexture(depthDescription);
+  auto depthTexture2 = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -1080,7 +1086,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
   using TextureUsage = liquid::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
-  auto colorTexture = device.createTexture(colorDescription);
+  auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
@@ -1091,7 +1097,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
 }
 
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
-  liquid::rhi::TextureHandle handle = device.createTexture({});
+  liquid::rhi::TextureHandle handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());
@@ -1106,7 +1112,7 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 }
 
 TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
-  liquid::rhi::TextureHandle handle = device.createTexture({});
+  liquid::rhi::TextureHandle handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());

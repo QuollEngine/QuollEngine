@@ -53,6 +53,13 @@ public:
       bool addToDescriptor = true);
 
   /**
+   * @brief Get new texture handle
+   *
+   * @return Texture handle
+   */
+  rhi::TextureHandle getNewTextureHandle();
+
+  /**
    * @brief Create buffer
    *
    * @param description Buffer description
@@ -186,6 +193,9 @@ private:
       mPipelineDescriptions;
   std::vector<size_t> mGraphicsPipelineIndices;
   std::vector<size_t> mComputePipelineIndices;
+
+  static constexpr uint32_t TextureStart = 0;
+  uint32_t mLastTexture = TextureStart;
 };
 
 } // namespace liquid

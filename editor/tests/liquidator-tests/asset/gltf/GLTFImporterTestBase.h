@@ -312,7 +312,8 @@ static liquid::Path saveSceneGLTF(GLTFTestScene &scene) {
 class GLTFImporterTestBase : public ::testing::Test {
 public:
   GLTFImporterTestBase()
-      : assetCache(CachePath, false), imageLoader(assetCache, &device),
+      : renderStorage(&device), assetCache(CachePath, false),
+        imageLoader(assetCache, renderStorage),
         importer(assetCache, imageLoader, false) {}
 
   void SetUp() override {
@@ -326,6 +327,7 @@ public:
   }
 
   liquid::rhi::MockRenderDevice device;
+  liquid::RenderStorage renderStorage;
   liquid::AssetCache assetCache;
   liquid::editor::ImageLoader imageLoader;
   liquid::editor::GLTFImporter importer;
