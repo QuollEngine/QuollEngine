@@ -37,16 +37,8 @@ void VulkanResourceRegistry::deleteBuffer(BufferHandle handle) {
   mBuffers.map.erase(handle);
 }
 
-TextureHandle
-VulkanResourceRegistry::setTexture(std::unique_ptr<VulkanTexture> &&texture) {
-  auto handle = TextureHandle{mTextures.lastHandle};
-  mTextures.lastHandle++;
-  mTextures.map.insert_or_assign(handle, std::move(texture));
-  return handle;
-}
-
-void VulkanResourceRegistry::recreateTexture(
-    TextureHandle handle, std::unique_ptr<VulkanTexture> &&texture) {
+void VulkanResourceRegistry::setTexture(
+    std::unique_ptr<VulkanTexture> &&texture, TextureHandle handle) {
   mTextures.map.insert_or_assign(handle, std::move(texture));
 }
 

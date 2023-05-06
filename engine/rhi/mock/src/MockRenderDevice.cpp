@@ -94,14 +94,9 @@ void MockRenderDevice::destroyBuffer(BufferHandle handle) {
   mBuffers.erase(handle);
 }
 
-TextureHandle
-MockRenderDevice::createTexture(const TextureDescription &description) {
-  return mTextures.insert({description});
-}
-
-void MockRenderDevice::updateTexture(TextureHandle handle,
-                                     const TextureDescription &description) {
-  mTextures.replace(handle, {description});
+void MockRenderDevice::createTexture(const TextureDescription &description,
+                                     TextureHandle handle) {
+  return mTextures.insert({description}, handle);
 }
 
 const TextureDescription

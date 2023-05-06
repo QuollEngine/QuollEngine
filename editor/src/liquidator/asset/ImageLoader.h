@@ -16,9 +16,9 @@ public:
    * @brief Create image loader
    *
    * @param assetCache Asset cache
-   * @param device Render device for processing
+   * @param renderStorage Render storage
    */
-  ImageLoader(AssetCache &assetCache, rhi::RenderDevice *device);
+  ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage);
 
   /**
    * @brief Load texture from path
@@ -63,7 +63,7 @@ private:
                                  rhi::Format format);
 
 private:
-  rhi::RenderDevice *mDevice;
+  RenderStorage &mRenderStorage;
   AssetCache &mAssetCache;
 };
 

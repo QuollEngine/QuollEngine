@@ -63,7 +63,7 @@ AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                            bool createDefaultObjects)
     : mAssetsPath(assetsPath),
       mAssetCache(assetsCachePath, createDefaultObjects),
-      mImageLoader(mAssetCache, renderStorage.getDevice()),
+      mImageLoader(mAssetCache, renderStorage),
       mHDRIImporter(mAssetCache, renderStorage), mOptimize(optimize) {}
 
 Result<Path> AssetManager::importAsset(const Path &source,

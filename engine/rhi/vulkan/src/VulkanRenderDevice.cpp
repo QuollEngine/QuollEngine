@@ -163,18 +163,11 @@ Descriptor VulkanRenderDevice::createDescriptor(DescriptorLayoutHandle layout) {
   return mDescriptorPool.createDescriptor(layout);
 }
 
-TextureHandle
-VulkanRenderDevice::createTexture(const TextureDescription &description) {
-  auto handle = mRegistry.setTexture(
-      std::make_unique<VulkanTexture>(description, mAllocator, mDevice));
-
-  return handle;
-}
-
-void VulkanRenderDevice::updateTexture(TextureHandle handle,
-                                       const TextureDescription &description) {
-  mRegistry.recreateTexture(handle, std::make_unique<VulkanTexture>(
-                                        description, mAllocator, mDevice));
+void VulkanRenderDevice::createTexture(const TextureDescription &description,
+                                       TextureHandle handle) {
+  mRegistry.setTexture(
+      std::make_unique<VulkanTexture>(description, mAllocator, mDevice),
+      handle);
 }
 
 const TextureDescription

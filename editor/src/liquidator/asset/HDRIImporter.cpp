@@ -199,7 +199,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
   hdriTextureDesc.height = height;
   hdriTextureDesc.layers = 1;
 
-  auto hdriTexture = device->createTexture(hdriTextureDesc);
+  auto hdriTexture = mRenderStorage.createTexture(hdriTextureDesc, false);
 
   TextureUtils::copyDataToTexture(
       device, data, hdriTexture, rhi::ImageLayout::ShaderReadOnlyOptimal, 1,
@@ -254,7 +254,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
                       rhi::TextureUsage::TransferSource |
                       rhi::TextureUsage::TransferDestination;
 
-  auto unfilteredCubemap = device->createTexture(cubemapDesc);
+  auto unfilteredCubemap = mRenderStorage.createTexture(cubemapDesc);
 
   // Convert equirectangular texture to cubemap
   {
@@ -311,7 +311,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   cubemapDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
-  auto irradianceCubemap = device->createTexture(cubemapDesc);
+  auto irradianceCubemap = mRenderStorage.createTexture(cubemapDesc);
 
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
       unfilteredCubemap.texture};
@@ -390,7 +390,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
 
-  auto specularCubemap = device->createTexture(cubemapDesc);
+  auto specularCubemap = mRenderStorage.createTexture(cubemapDesc);
 
   std::vector<rhi::TextureViewHandle> textureViews(
       unfilteredCubemap.levels.size());

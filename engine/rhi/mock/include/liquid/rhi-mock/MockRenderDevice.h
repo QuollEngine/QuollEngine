@@ -139,18 +139,10 @@ public:
    * @brief Create texture
    *
    * @param description Texture description
-   * @return Texture
-   */
-  TextureHandle createTexture(const TextureDescription &description) override;
-
-  /**
-   * @brief Update texture
-   *
    * @param handle Texture handle
-   * @param description Texture description
    */
-  void updateTexture(TextureHandle handle,
-                     const TextureDescription &description) override;
+  void createTexture(const TextureDescription &description,
+                     rhi::TextureHandle handle) override;
 
   /**
    * @brief Get texture description

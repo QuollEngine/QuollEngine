@@ -154,19 +154,10 @@ public:
    * @brief Create texture
    *
    * @param description Texture description
-   * @return Texture
-   */
-  virtual TextureHandle
-  createTexture(const TextureDescription &description) = 0;
-
-  /**
-   * @brief Update texture
-   *
    * @param handle Texture handle
-   * @param description Texture description
    */
-  virtual void updateTexture(TextureHandle handle,
-                             const TextureDescription &description) = 0;
+  virtual void createTexture(const TextureDescription &description,
+                             TextureHandle handle) = 0;
 
   /**
    * @brief Get texture description
