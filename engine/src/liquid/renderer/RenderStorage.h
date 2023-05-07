@@ -194,7 +194,7 @@ private:
   std::vector<size_t> mGraphicsPipelineIndices;
   std::vector<size_t> mComputePipelineIndices;
 
-  static constexpr uint32_t TextureStart = 0;
+  static constexpr uint32_t TextureStart = 10;
   uint32_t mLastTexture = TextureStart;
 };
 
