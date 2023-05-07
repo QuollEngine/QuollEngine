@@ -23,7 +23,7 @@ public:
   MockPipeline(const GraphicsPipelineDescription &description);
 
   /**
-   * @brief Create comppute pipeline
+   * @brief Create compute pipeline
    *
    * @param description Compute pipeline description
    */
@@ -35,6 +35,24 @@ public:
    * @return Pipeline type
    */
   inline Type getType() const { return mType; }
+
+  /**
+   * @brief Get graphics pipeline description
+   *
+   * @return Graphics pipeline description
+   */
+  inline GraphicsPipelineDescription getGraphicsDescription() const {
+    return mGraphicsDescription;
+  }
+
+  /**
+   * @brief Get compute pipeline description
+   *
+   * @return Compute pipeline description
+   */
+  inline ComputePipelineDescription getComputeDecription() const {
+    return mComputeDescription;
+  }
 
 private:
   GraphicsPipelineDescription mGraphicsDescription;

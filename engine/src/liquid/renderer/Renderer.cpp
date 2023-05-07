@@ -12,16 +12,12 @@
 namespace liquid {
 
 Renderer::Renderer(Window &window, rhi::RenderDevice *device)
-    : mGraphEvaluator(mRenderStorage), mDevice(device), mRenderStorage(device) {
-}
+    : mDevice(device), mRenderStorage(mDevice) {}
 
 void Renderer::render(RenderGraph &graph, rhi::RenderCommandList &commandList,
                       uint32_t frameIndex) {
-  graph.compile(mDevice);
-
-  mGraphEvaluator.build(graph);
-
-  mGraphEvaluator.execute(commandList, graph, frameIndex);
+  graph.build(mRenderStorage);
+  graph.execute(commandList, frameIndex);
 }
 
 } // namespace liquid

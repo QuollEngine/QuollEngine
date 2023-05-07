@@ -257,6 +257,20 @@ public:
   }
 
   /**
+   * @brief Get render pass
+   *
+   * @return Render pass
+   */
+  inline rhi::RenderPassHandle getRenderPass() const { return mRenderPass; }
+
+  /**
+   * @brief Get framebuffer
+   *
+   * @return Framebuffer
+   */
+  inline rhi::FramebufferHandle getFramebuffer() const { return mFramebuffer; }
+
+  /**
    * @brief Get output buffers
    *
    * @return Output buffers
@@ -274,13 +288,6 @@ public:
   inline const std::vector<AttachmentData> &getAttachments() const {
     return mAttachments;
   }
-
-  /**
-   * @brief Get framebuffer
-   *
-   * @return Framebuffer
-   */
-  inline rhi::FramebufferHandle getFramebuffer() const { return mFramebuffer; }
 
   /**
    * @brief Get dimensions

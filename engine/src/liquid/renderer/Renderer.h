@@ -1,10 +1,10 @@
 #pragma once
 
 #include "liquid/rhi/RenderDevice.h"
-#include "liquid/renderer/RenderGraphEvaluator.h"
-#include "ShaderLibrary.h"
-#include "MaterialPBR.h"
 #include "liquid/entity/EntityDatabase.h"
+
+#include "ShaderLibrary.h"
+#include "RenderGraph.h"
 
 namespace liquid {
 
@@ -96,8 +96,6 @@ private:
   ShaderLibrary mShaderLibrary;
   rhi::RenderDevice *mDevice;
   RenderStorage mRenderStorage;
-
-  RenderGraphEvaluator mGraphEvaluator;
 };
 
 } // namespace liquid

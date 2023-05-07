@@ -126,6 +126,11 @@ void MockRenderDevice::destroyRenderPass(RenderPassHandle handle) {
   mRenderPasses.erase(handle);
 }
 
+const RenderPassDescription
+MockRenderDevice::getRenderPassDescription(RenderPassHandle handle) const {
+  return mRenderPasses.at(handle);
+}
+
 FramebufferHandle
 MockRenderDevice::createFramebuffer(const FramebufferDescription &description) {
   return mFramebuffers.insert(description);
@@ -133,6 +138,11 @@ MockRenderDevice::createFramebuffer(const FramebufferDescription &description) {
 
 void MockRenderDevice::destroyFramebuffer(FramebufferHandle handle) {
   mFramebuffers.erase(handle);
+}
+
+const FramebufferDescription
+MockRenderDevice::getFramebufferDescription(FramebufferHandle handle) const {
+  return mFramebuffers.at(handle);
 }
 
 void MockRenderDevice::createPipeline(
@@ -147,6 +157,10 @@ void MockRenderDevice::createPipeline(
 
 void MockRenderDevice::destroyPipeline(PipelineHandle handle) {
   mPipelines.erase(handle);
+}
+
+const MockPipeline &MockRenderDevice::getPipeline(PipelineHandle handle) const {
+  return mPipelines.at(handle);
 }
 
 } // namespace liquid::rhi

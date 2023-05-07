@@ -133,7 +133,7 @@ void EditorScreen::start(const Project &project) {
 
   MousePickingGraph mousePicking(
       renderer.getShaderLibrary(), sceneRenderer.getFrameData(),
-      assetManager.getAssetRegistry(), renderer.getRenderStorage(), mDevice);
+      assetManager.getAssetRegistry(), renderer.getRenderStorage());
 
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/renderer/RenderGraphEvaluator.h"
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/SceneRendererFrameData.h"
@@ -27,12 +25,10 @@ public:
    * @param frameData Scene renderer frame data
    * @param assetRegistry Asset registry
    * @param renderStorage Render storage
-   * @param device Render device
    */
   MousePickingGraph(ShaderLibrary &shaderLibrary,
                     const std::array<SceneRendererFrameData, 2> &frameData,
-                    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
-                    rhi::RenderDevice *device);
+                    AssetRegistry &assetRegistry, RenderStorage &renderStorage);
 
   ~MousePickingGraph();
 
@@ -85,10 +81,8 @@ public:
   }
 
 private:
-  rhi::RenderDevice *mDevice = nullptr;
-
+  RenderStorage &mRenderStorage;
   RenderGraph mRenderGraph;
-  RenderGraphEvaluator mGraphEvaluator;
   const std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames>
       &mFrameData;
   std::array<BindlessDrawParameters, rhi::RenderDevice::NumFrames>

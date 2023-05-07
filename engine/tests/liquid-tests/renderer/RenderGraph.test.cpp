@@ -9,7 +9,7 @@ using namespace liquid::rhi;
 
 class RenderGraphTest : public ::testing::Test {
 public:
-  RenderGraphTest() : graph("TestGraph") {}
+  RenderGraphTest() : graph("TestGraph"), storage(&device) {}
 
   liquid::rhi::TextureHandle
   createTexture(liquid::rhi::TextureDescription desc) {
@@ -20,6 +20,7 @@ public:
   }
 
   MockRenderDevice device;
+  liquid::RenderStorage storage;
   liquid::RenderGraph graph;
   uint32_t lastTextureHandle = 0;
 };
@@ -53,7 +54,7 @@ TEST_F(RenderGraphTest, CompilationDoesNotMutateDefinedPasses) {
   auto &pass1 = graph.addGraphicsPass("Test2");
   auto &pass2 = graph.addComputePass("Test3");
 
-  graph.compile(&device);
+  graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().size(), 0);
   EXPECT_EQ(graph.getPasses().size(), 3);
@@ -149,7 +150,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
     pass.write(textures.at("h-c"), liquid::AttachmentType::Depth, glm::vec4());
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   // Join sorted pass names to a string
   // for easier assertion
@@ -180,7 +181,7 @@ TEST_F(RenderGraphTest, SetsPassAttachmentOperations) {
   graph.addGraphicsPass("C").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());
 
-  graph.compile(&device);
+  graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().at(0).getAttachments().at(0).loadOp,
             liquid::rhi::AttachmentLoadOp::Clear);
@@ -221,7 +222,7 @@ TEST_F(RenderGraphTest, SetsOutputImageLayouts) {
     pass.write(colorTexture, liquid::AttachmentType::Color, {});
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().at(0).getTextureOutputs().at(0).srcLayout,
             ImageLayout::Undefined);
@@ -265,7 +266,7 @@ TEST_F(RenderGraphTest, SetsInputImageLayouts) {
     pass.read(colorTexture);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().at(1).getTextureInputs().at(0).srcLayout,
             ImageLayout::DepthStencilAttachmentOptimal);
@@ -289,7 +290,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorWrite) {
     pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(0).getPreBarrier();
@@ -318,7 +319,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthWrite) {
     pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(0).getPreBarrier();
@@ -354,7 +355,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllTextureWrites) {
     pass.write(depthTexture, liquid::AttachmentType::Depth, glm::vec4{});
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(0).getPreBarrier();
@@ -397,7 +398,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForColorRead) {
     pass.read(colorTexture);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -450,7 +451,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForDepthTextureRead) {
     pass.read(depthTexture);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -510,7 +511,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForBothColorAndDepthTextureReads) {
     pass.read(depthTexture);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -581,7 +582,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInGraphicsPass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -609,7 +610,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferReadInComputePass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -637,7 +638,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInGraphicsPass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -665,7 +666,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferReadInComputePass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -693,7 +694,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForVertexBufferReadInGraphicsPass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Vertex);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -722,7 +723,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndexBufferReadInGraphicsPass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Index);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -750,7 +751,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForIndirectBufferReadInGraphicsPass) {
     pass.read(buffer1, liquid::rhi::BufferUsage::Indirect);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -785,7 +786,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInGraphicsPass) {
                            liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -823,7 +824,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForAllBufferReadsInComputePass) {
                            liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -850,7 +851,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInGraphicsPass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -872,7 +873,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForUniformBufferWriteInComputePass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -894,7 +895,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInGraphicsPass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -916,7 +917,7 @@ TEST_F(RenderGraphTest, SetsPassBarrierForStorageBufferWriteInComputePass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -940,7 +941,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInGraphicsPass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -966,7 +967,7 @@ TEST_F(RenderGraphTest, SetsPassBarriersForAllBufferWritesInComputePass) {
     pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &postBarrier = graph.getCompiledPasses().at(0).getPostBarrier();
@@ -1010,7 +1011,7 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
     pass.write(colorTexture2, liquid::AttachmentType::Color, {});
   }
 
-  graph.compile(&device);
+  graph.build(storage);
 
   {
     const auto &preBarrier = graph.getCompiledPasses().at(1).getPreBarrier();
@@ -1081,6 +1082,233 @@ TEST_F(RenderGraphTest, MergesInputAndOutputBarriers) {
   }
 }
 
+TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyColorAttachments) {
+  TextureDescription colorDescription{};
+  colorDescription.usage = TextureUsage::Color;
+  colorDescription.width = 1024;
+  colorDescription.height = 768;
+  colorDescription.layers = 10;
+  auto texture = createTexture(colorDescription);
+
+  auto &pass = graph.addGraphicsPass("A");
+  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{2.5f});
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+
+  auto renderPassDesc =
+      device.getRenderPassDescription(compiled.getRenderPass());
+  EXPECT_EQ(renderPassDesc.bindPoint, PipelineBindPoint::Graphics);
+  EXPECT_EQ(renderPassDesc.colorAttachments.size(), 1);
+  EXPECT_FALSE(renderPassDesc.depthAttachment.has_value());
+  EXPECT_FALSE(renderPassDesc.resolveAttachment.has_value());
+  EXPECT_EQ(renderPassDesc.colorAttachments.at(0).texture, texture);
+  EXPECT_EQ(
+      std::get<glm::vec4>(renderPassDesc.colorAttachments.at(0).clearValue),
+      glm::vec4{2.5f});
+
+  auto framebufferDesc =
+      device.getFramebufferDescription(compiled.getFramebuffer());
+  EXPECT_EQ(framebufferDesc.renderPass, compiled.getRenderPass());
+  EXPECT_EQ(framebufferDesc.layers, 10);
+  EXPECT_EQ(framebufferDesc.width, 1024);
+  EXPECT_EQ(framebufferDesc.height, 768);
+  EXPECT_EQ(framebufferDesc.attachments.size(), 1);
+  EXPECT_EQ(framebufferDesc.attachments.at(0), texture);
+}
+
+TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyDepthAttachment) {
+  TextureDescription colorDescription{};
+  colorDescription.usage = TextureUsage::Depth;
+  colorDescription.width = 1024;
+  colorDescription.height = 768;
+  colorDescription.layers = 10;
+  auto texture = createTexture(colorDescription);
+
+  auto &pass = graph.addGraphicsPass("A");
+  pass.write(texture, liquid::AttachmentType::Depth,
+             DepthStencilClear{2.5f, 35});
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+
+  auto renderPassDesc =
+      device.getRenderPassDescription(compiled.getRenderPass());
+  EXPECT_EQ(renderPassDesc.bindPoint, PipelineBindPoint::Graphics);
+  EXPECT_EQ(renderPassDesc.colorAttachments.size(), 0);
+  EXPECT_FALSE(renderPassDesc.resolveAttachment.has_value());
+  EXPECT_TRUE(renderPassDesc.depthAttachment.has_value());
+  EXPECT_EQ(renderPassDesc.depthAttachment.value().texture, texture);
+  auto clear = std::get<DepthStencilClear>(
+      renderPassDesc.depthAttachment.value().clearValue);
+  EXPECT_EQ(clear.clearDepth, 2.5f);
+  EXPECT_EQ(clear.clearStencil, 35);
+
+  auto framebufferDesc =
+      device.getFramebufferDescription(compiled.getFramebuffer());
+  EXPECT_EQ(framebufferDesc.renderPass, compiled.getRenderPass());
+  EXPECT_EQ(framebufferDesc.layers, 10);
+  EXPECT_EQ(framebufferDesc.width, 1024);
+  EXPECT_EQ(framebufferDesc.height, 768);
+  EXPECT_EQ(framebufferDesc.attachments.size(), 1);
+  EXPECT_EQ(framebufferDesc.attachments.at(0), texture);
+}
+
+TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyResolveAttachment) {
+  TextureDescription colorDescription{};
+  colorDescription.usage = TextureUsage::Color;
+  colorDescription.width = 1024;
+  colorDescription.height = 768;
+  colorDescription.layers = 10;
+  auto texture = createTexture(colorDescription);
+
+  auto &pass = graph.addGraphicsPass("A");
+  pass.write(texture, liquid::AttachmentType::Resolve, glm::vec4{2.5f});
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+
+  auto renderPassDesc =
+      device.getRenderPassDescription(compiled.getRenderPass());
+  EXPECT_EQ(renderPassDesc.bindPoint, PipelineBindPoint::Graphics);
+  EXPECT_EQ(renderPassDesc.colorAttachments.size(), 0);
+  EXPECT_TRUE(renderPassDesc.resolveAttachment.has_value());
+  EXPECT_FALSE(renderPassDesc.depthAttachment.has_value());
+  EXPECT_EQ(renderPassDesc.resolveAttachment.value().texture, texture);
+  EXPECT_EQ(
+      std::get<glm::vec4>(renderPassDesc.resolveAttachment.value().clearValue),
+      glm::vec4{2.5f});
+
+  auto framebufferDesc =
+      device.getFramebufferDescription(compiled.getFramebuffer());
+  EXPECT_EQ(framebufferDesc.renderPass, compiled.getRenderPass());
+  EXPECT_EQ(framebufferDesc.layers, 10);
+  EXPECT_EQ(framebufferDesc.width, 1024);
+  EXPECT_EQ(framebufferDesc.height, 768);
+  EXPECT_EQ(framebufferDesc.attachments.size(), 1);
+  EXPECT_EQ(framebufferDesc.attachments.at(0), texture);
+}
+
+TEST_F(RenderGraphTest, BuildsRenderPassWithAllAttachments) {
+  TextureDescription description{};
+  description.usage = TextureUsage::Depth | TextureUsage::Color;
+  description.width = 1024;
+  description.height = 768;
+  description.layers = 10;
+  auto color1 = createTexture(description);
+  auto color2 = createTexture(description);
+  auto depth = createTexture(description);
+  auto resolve = createTexture(description);
+
+  auto &pass = graph.addGraphicsPass("A");
+  pass.write(color1, liquid::AttachmentType::Color, glm::vec4{2.5f});
+  pass.write(color2, liquid::AttachmentType::Color, glm::vec4{4.5f});
+  pass.write(depth, liquid::AttachmentType::Depth, DepthStencilClear{2.5f, 35});
+  pass.write(resolve, liquid::AttachmentType::Resolve, glm::vec4{5.5f});
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  auto renderPassDesc =
+      device.getRenderPassDescription(compiled.getRenderPass());
+  EXPECT_EQ(renderPassDesc.bindPoint, PipelineBindPoint::Graphics);
+  EXPECT_EQ(renderPassDesc.colorAttachments.size(), 2);
+  EXPECT_TRUE(renderPassDesc.resolveAttachment.has_value());
+  EXPECT_TRUE(renderPassDesc.depthAttachment.has_value());
+
+  EXPECT_EQ(renderPassDesc.colorAttachments.at(0).texture, color1);
+  EXPECT_EQ(
+      std::get<glm::vec4>(renderPassDesc.colorAttachments.at(0).clearValue),
+      glm::vec4{2.5f});
+  EXPECT_EQ(renderPassDesc.colorAttachments.at(1).texture, color2);
+  EXPECT_EQ(
+      std::get<glm::vec4>(renderPassDesc.colorAttachments.at(1).clearValue),
+      glm::vec4{4.5f});
+
+  auto clear = std::get<DepthStencilClear>(
+      renderPassDesc.depthAttachment.value().clearValue);
+  EXPECT_EQ(clear.clearDepth, 2.5f);
+  EXPECT_EQ(clear.clearStencil, 35);
+
+  EXPECT_EQ(renderPassDesc.resolveAttachment.value().texture, resolve);
+  EXPECT_EQ(
+      std::get<glm::vec4>(renderPassDesc.resolveAttachment.value().clearValue),
+      glm::vec4{5.5f});
+
+  auto framebufferDesc =
+      device.getFramebufferDescription(compiled.getFramebuffer());
+  EXPECT_EQ(framebufferDesc.renderPass, compiled.getRenderPass());
+  EXPECT_EQ(framebufferDesc.layers, 10);
+  EXPECT_EQ(framebufferDesc.width, 1024);
+  EXPECT_EQ(framebufferDesc.height, 768);
+  EXPECT_EQ(framebufferDesc.attachments.size(), 4);
+  EXPECT_EQ(framebufferDesc.attachments.at(0), color1);
+  EXPECT_EQ(framebufferDesc.attachments.at(1), color2);
+  EXPECT_EQ(framebufferDesc.attachments.at(2), depth);
+  EXPECT_EQ(framebufferDesc.attachments.at(3), resolve);
+}
+
+TEST_F(RenderGraphTest, BuildsGraphicsPipelinesForGraphicsPasses) {
+  GraphicsPipelineDescription description{};
+  description.vertexShader = ShaderHandle{25};
+
+  auto pipeline = storage.addPipeline(description);
+
+  auto texture = createTexture({});
+  auto &pass = graph.addGraphicsPass("A");
+  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{0.0f});
+  pass.addPipeline(pipeline);
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+
+  auto mock = device.getPipeline(pipeline);
+  EXPECT_EQ(mock.getType(), MockPipeline::Type::Graphics);
+  auto mockDescription = mock.getGraphicsDescription();
+
+  EXPECT_EQ(mockDescription.vertexShader, ShaderHandle{25});
+  EXPECT_EQ(mockDescription.renderPass, compiled.getRenderPass());
+}
+
+TEST_F(RenderGraphTest, BuildsComputePipelinesForComputePasses) {
+  ComputePipelineDescription description{};
+  description.computeShader = ShaderHandle{25};
+
+  auto pipeline = storage.addPipeline(description);
+
+  auto texture = createTexture({});
+  auto &pass = graph.addComputePass("A");
+  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{0.0f});
+  pass.addPipeline(pipeline);
+
+  graph.build(storage);
+
+  auto &compiled = graph.getCompiledPasses().at(0);
+
+  auto mock = device.getPipeline(pipeline);
+  EXPECT_EQ(mock.getType(), MockPipeline::Type::Compute);
+  auto mockDescription = mock.getComputeDecription();
+
+  EXPECT_EQ(mockDescription.computeShader, ShaderHandle{25});
+}
+
 TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
   using TextureDescription = liquid::rhi::TextureDescription;
   using TextureUsage = liquid::rhi::TextureUsage;
@@ -1093,7 +1321,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
     pass.read(colorTexture);
   }
 
-  EXPECT_DEATH(graph.compile(&device), ".*");
+  EXPECT_DEATH(graph.build(storage), ".*");
 }
 
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
@@ -1105,7 +1333,7 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   graph.addGraphicsPass("C");
   graph.addGraphicsPass("E").read(handle);
 
-  graph.compile(&device);
+  graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().size(), 2);
   EXPECT_EQ(graph.getPasses().size(), 4);
@@ -1118,12 +1346,12 @@ TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
                                    glm::vec4());
   graph.addGraphicsPass("E").read(handle);
 
-  graph.compile(&device);
+  graph.build(storage);
   EXPECT_EQ(graph.getCompiledPasses().size(), 2);
 
   graph.setFramebufferExtent({});
 
-  graph.compile(&device);
+  graph.build(storage);
   EXPECT_EQ(graph.getCompiledPasses().size(), 2);
 }
 
@@ -1136,5 +1364,5 @@ TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   graph.addGraphicsPass("A");
   graph.addGraphicsPass("E");
 
-  EXPECT_DEATH(graph.compile(&device), ".*");
+  EXPECT_DEATH(graph.build(storage), ".*");
 }

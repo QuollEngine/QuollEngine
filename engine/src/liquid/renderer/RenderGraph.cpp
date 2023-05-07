@@ -50,10 +50,7 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
   output.push_back(inputs.at(index));
 }
 
-void RenderGraph::compile(rhi::RenderDevice *device) {
-  if (!BitwiseEnumContains(mDirty, GraphDirty::PassChanges))
-    return;
-
+void RenderGraph::compile() {
   LIQUID_PROFILE_EVENT("RenderGraph::compile");
   std::vector<size_t> passIndices;
   passIndices.reserve(mPasses.size());
@@ -141,6 +138,10 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
 
   std::reverse(compiledPasses.begin(), compiledPasses.end());
   mCompiledPasses = std::move(compiledPasses);
+}
+
+void RenderGraph::buildBarriers() {
+  LIQUID_PROFILE_EVENT("RenderGraph::buildBarriers");
 
   static constexpr rhi::PipelineStage StageFragmentTest =
       rhi::PipelineStage::EarlyFragmentTests |
@@ -323,15 +324,182 @@ void RenderGraph::compile(rhi::RenderDevice *device) {
       pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
     }
   }
+}
 
-  LOG_DEBUG("Render graph compiled: " << mName);
+void RenderGraph::buildPasses(RenderStorage &storage) {
+  LIQUID_PROFILE_EVENT("RenderGraph::buildPasses");
+
+  for (auto &pass : mCompiledPasses) {
+
+    if (pass.getType() == RenderGraphPassType::Compute) {
+      buildComputePass(pass, storage);
+    } else {
+      buildGraphicsPass(pass, storage);
+    }
+  }
+}
+
+void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
+                                    RenderStorage &storage) {
+  LIQUID_PROFILE_EVENT("RenderGraph::buildGraphicsPass");
+  auto *device = storage.getDevice();
+
+  uint32_t width = 0;
+  uint32_t height = 0;
+  uint32_t layers = 0;
+  uint32_t sampleCount = 0;
+
+  std::vector<rhi::TextureHandle> framebufferAttachments;
+
+  rhi::RenderPassDescription renderPassDesc{};
+  renderPassDesc.bindPoint = rhi::PipelineBindPoint::Graphics;
+
+  for (size_t i = 0; i < pass.getTextureOutputs().size(); ++i) {
+    auto &output = pass.mTextureOutputs.at(i);
+    sampleCount = std::max(
+        device->getTextureDescription(output.texture).samples, sampleCount);
+
+    const auto &attachment = pass.getAttachments().at(i);
+
+    const auto &desc = device->getTextureDescription(output.texture);
+
+    framebufferAttachments.push_back(output.texture);
+
+    rhi::RenderPassAttachmentDescription rpAttachmentDesc{};
+    rpAttachmentDesc.texture = output.texture;
+    rpAttachmentDesc.clearValue = attachment.clearValue;
+    rpAttachmentDesc.initialLayout = output.srcLayout;
+    rpAttachmentDesc.layout = output.dstLayout;
+
+    rpAttachmentDesc.loadOp = attachment.loadOp;
+    rpAttachmentDesc.storeOp = attachment.storeOp;
+    if (BitwiseEnumContains(desc.usage, rhi::TextureUsage::Stencil)) {
+      rpAttachmentDesc.stencilLoadOp = attachment.loadOp;
+      rpAttachmentDesc.stencilStoreOp = attachment.storeOp;
+    }
+
+    if (attachment.type == AttachmentType::Resolve) {
+      renderPassDesc.resolveAttachment.emplace(rpAttachmentDesc);
+    } else if (attachment.type == AttachmentType::Depth) {
+      renderPassDesc.depthAttachment.emplace(rpAttachmentDesc);
+    } else {
+      renderPassDesc.colorAttachments.push_back(rpAttachmentDesc);
+    }
+
+    width = desc.width;
+    height = desc.height;
+    layers = desc.layers;
+  }
+
+  bool renderPassExists = isHandleValid(pass.mRenderPass);
+
+  if (rhi::isHandleValid(pass.mRenderPass)) {
+    device->destroyRenderPass(pass.mRenderPass);
+  }
+
+  pass.mRenderPass = device->createRenderPass(renderPassDesc);
+
+  std::vector<rhi::FramebufferHandle> framebuffers(
+      framebufferAttachments.size(), rhi::FramebufferHandle::Invalid);
+
+  rhi::FramebufferDescription framebufferDesc;
+  framebufferDesc.width = width;
+  framebufferDesc.height = height;
+  framebufferDesc.layers = layers;
+  framebufferDesc.attachments = framebufferAttachments;
+  framebufferDesc.renderPass = pass.mRenderPass;
+
+  if (rhi::isHandleValid(pass.mFramebuffer)) {
+    device->destroyFramebuffer(pass.mFramebuffer);
+  }
+  pass.mFramebuffer = device->createFramebuffer(framebufferDesc);
+
+  pass.mDimensions.x = width;
+  pass.mDimensions.y = height;
+  pass.mDimensions.z = layers;
+
+  for (auto handle : pass.mPipelines) {
+    auto &description = storage.getGraphicsPipelineDescription(handle);
+    description.renderPass = pass.mRenderPass;
+    description.multisample.sampleCount = sampleCount;
+
+    if (device->hasPipeline(handle)) {
+      device->destroyPipeline(handle);
+    }
+
+    device->createPipeline(description, handle);
+  }
+}
+
+void RenderGraph::buildComputePass(RenderGraphPass &pass,
+                                   RenderStorage &storage) {
+  LIQUID_PROFILE_EVENT("buildComputePass");
+  auto *device = storage.getDevice();
+
+  for (auto handle : pass.mPipelines) {
+    auto &description = storage.getComputePipelineDescription(handle);
+
+    if (device->hasPipeline(handle)) {
+      device->destroyPipeline(handle);
+    }
+
+    device->createPipeline(description, handle);
+  }
+}
+
+void RenderGraph::execute(rhi::RenderCommandList &commandList,
+                          uint32_t frameIndex) {
+  LIQUID_PROFILE_EVENT("RenderGraph::execute");
+
+  for (auto &pass : mCompiledPasses) {
+    if (pass.mPreBarrier.enabled) {
+      commandList.pipelineBarrier(
+          pass.mPreBarrier.srcStage, pass.mPreBarrier.dstStage,
+          pass.mPreBarrier.memoryBarriers, pass.mPreBarrier.imageBarriers);
+    }
+
+    if (pass.getType() == RenderGraphPassType::Compute) {
+      pass.execute(commandList, frameIndex);
+    } else {
+      commandList.beginRenderPass(pass.mRenderPass, pass.getFramebuffer(),
+                                  {0, 0}, glm::uvec2(pass.getDimensions()));
+      commandList.setViewport({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()),
+                              {0.0f, 1.0f});
+      commandList.setScissor({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()));
+      pass.execute(commandList, frameIndex);
+      commandList.endRenderPass();
+    }
+
+    if (pass.mPostBarrier.enabled) {
+      commandList.pipelineBarrier(
+          pass.mPostBarrier.srcStage, pass.mPostBarrier.dstStage,
+          pass.mPostBarrier.memoryBarriers, pass.mPostBarrier.imageBarriers);
+    }
+  }
+}
+
+void RenderGraph::build(RenderStorage &storage) {
+  if (!isDirty()) {
+    return;
+  }
+
+  if (BitwiseEnumContains(mDirty, GraphDirty::PassChanges)) {
+    compile();
+    buildBarriers();
+  }
+
+  if (isDirty()) {
+    buildPasses(storage);
+  }
+
+  mDirty = GraphDirty::None;
+
+  LOG_DEBUG("Render graph built: " << mName);
 }
 
 void RenderGraph::setFramebufferExtent(glm::uvec2 framebufferExtent) {
   mFramebufferExtent = framebufferExtent;
   mDirty |= GraphDirty::SizeUpdate;
 }
-
-void RenderGraph::updateDirtyFlag() { mDirty = GraphDirty::None; }
 
 } // namespace liquid
