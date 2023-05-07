@@ -193,6 +193,15 @@ public:
   void destroyRenderPass(RenderPassHandle handle) override;
 
   /**
+   * @brief Get render pass description
+   *
+   * @param handle Render pass handle
+   * @return Render pass description
+   */
+  const RenderPassDescription
+  getRenderPassDescription(RenderPassHandle handle) const;
+
+  /**
    * @brief Create framebuffer
    *
    * @param description Framebuffer description
@@ -207,6 +216,15 @@ public:
    * @param handle Framebuffer handle
    */
   void destroyFramebuffer(FramebufferHandle handle) override;
+
+  /**
+   * @brief Get framebuffer description
+   *
+   * @param handle Framebuffer handle
+   * @return Framebuffer description
+   */
+  const FramebufferDescription
+  getFramebufferDescription(FramebufferHandle handle) const;
 
   /**
    * @brief Create graphics pipeline
@@ -232,6 +250,14 @@ public:
    * @param handle Pipeline handle
    */
   void destroyPipeline(PipelineHandle handle) override;
+
+  /**
+   * @brief Get pipeline
+   *
+   * @param handle Pipeline handle
+   * @return Mock pipeline
+   */
+  const MockPipeline &getPipeline(PipelineHandle handle) const;
 
   /**
    * @brief Check if device has pipeline

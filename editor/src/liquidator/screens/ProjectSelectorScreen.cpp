@@ -27,7 +27,6 @@ std::optional<Project> ProjectSelectorScreen::start() {
   AssetRegistry assetRegistry;
   ShaderLibrary shaderLibrary;
   RenderStorage renderStorage(mDevice);
-  RenderGraphEvaluator graphEvaluator(renderStorage);
 
   ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage);
   Presenter presenter(shaderLibrary, renderStorage);
@@ -64,10 +63,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  mainLoop.setRenderFn([&imguiRenderer, &graphEvaluator, &graph, &imguiPassData,
-                        &renderStorage, &project, &projectManager,
-                        &entityDatabase, &presenter, &debugLayer,
-                        this]() mutable {
+  mainLoop.setRenderFn([&imguiRenderer, &graph, &imguiPassData, &renderStorage,
+                        &project, &projectManager, &entityDatabase, &presenter,
+                        &debugLayer, this]() mutable {
     auto &imgui = imguiRenderer;
 
     imgui.beginRendering();
@@ -127,10 +125,8 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      graph.compile(mDevice);
-      graphEvaluator.build(graph);
-      graphEvaluator.execute(renderFrame.commandList, graph,
-                             renderFrame.frameIndex);
+      graph.build(renderStorage);
+      graph.execute(renderFrame.commandList, renderFrame.frameIndex);
 
       presenter.present(renderFrame.commandList, imguiPassData.imguiColor,
                         renderFrame.swapchainImageIndex);

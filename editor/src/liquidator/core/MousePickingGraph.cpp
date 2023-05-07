@@ -6,10 +6,9 @@ namespace liquid::editor {
 MousePickingGraph::MousePickingGraph(
     ShaderLibrary &shaderLibrary,
     const std::array<SceneRendererFrameData, 2> &frameData,
-    AssetRegistry &assetRegistry, RenderStorage &renderStorage,
-    rhi::RenderDevice *device)
-    : mDevice(device), mFrameData(frameData), mAssetRegistry(assetRegistry),
-      mGraphEvaluator(renderStorage), mRenderGraph("MousePicking"),
+    AssetRegistry &assetRegistry, RenderStorage &renderStorage)
+    : mRenderStorage(renderStorage), mFrameData(frameData),
+      mAssetRegistry(assetRegistry), mRenderGraph("MousePicking"),
       mBindlessParams{
           BindlessDrawParameters(renderStorage.getDevice()
                                      ->getDeviceInformation()
@@ -19,17 +18,19 @@ MousePickingGraph::MousePickingGraph(
                                      ->getDeviceInformation()
                                      .getLimits()
                                      .minUniformBufferOffsetAlignment)} {
+  auto *device = mRenderStorage.getDevice();
+
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
   shaderLibrary.addShader(
       "mouse-picking.default.vertex",
-      mDevice->createShader({"assets/shaders/mouse-picking.vert.spv"}));
+      device->createShader({"assets/shaders/mouse-picking.vert.spv"}));
   shaderLibrary.addShader(
       "mouse-picking.skinned.vertex",
-      mDevice->createShader({"assets/shaders/mouse-picking-skinned.vert.spv"}));
+      device->createShader({"assets/shaders/mouse-picking-skinned.vert.spv"}));
   shaderLibrary.addShader(
       "mouse-picking.selector.fragment",
-      mDevice->createShader({"assets/shaders/mouse-picking.frag.spv"}));
+      device->createShader({"assets/shaders/mouse-picking.frag.spv"}));
 
   rhi::TextureDescription depthBufferDesc{};
   depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
@@ -182,16 +183,13 @@ MousePickingGraph::MousePickingGraph(
   });
 
   for (auto &bp : mBindlessParams) {
-    bp.build(mDevice);
+    bp.build(device);
   }
 }
 
 MousePickingGraph::~MousePickingGraph() {}
 
-void MousePickingGraph::compile() {
-  mRenderGraph.compile(mDevice);
-  mGraphEvaluator.build(mRenderGraph);
-}
+void MousePickingGraph::compile() { mRenderGraph.build(mRenderStorage); }
 
 void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
                                 const glm::vec2 &mousePos,
@@ -223,7 +221,7 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   mMousePos = mousePos;
 
-  mGraphEvaluator.execute(commandList, mRenderGraph, frameIndex);
+  mRenderGraph.execute(commandList, frameIndex);
 }
 
 Entity MousePickingGraph::getSelectedEntity() {

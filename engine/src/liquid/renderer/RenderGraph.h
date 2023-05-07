@@ -3,6 +3,7 @@
 #include "liquid/rhi/RenderDevice.h"
 
 #include "RenderGraphPass.h"
+#include "RenderStorage.h"
 
 namespace liquid {
 
@@ -37,14 +38,19 @@ public:
   RenderGraphPass &addComputePass(StringView name);
 
   /**
-   * @brief Compile render graph
+   * @brief Execute render graph
    *
-   * Topologically sorts and updates render
-   * passes in place
-   *
-   * @param device Render device
+   * @param commandList Command list
+   * @param frameIndex Frame index
    */
-  void compile(rhi::RenderDevice *device);
+  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
+
+  /**
+   * @brief Build render graph
+   *
+   * @param storage Render storage
+   */
+  void build(RenderStorage &storage);
 
   /**
    * @brief Get passes
@@ -87,16 +93,54 @@ public:
   inline bool isDirty() const { return mDirty != GraphDirty::None; }
 
   /**
-   * @brief Update dirty flag
-   */
-  void updateDirtyFlag();
-
-  /**
    * @brief Get name
    *
    * @return Render graph name
    */
   inline const String &getName() const { return mName; }
+
+private:
+  /**
+   * @brief Compile render graph
+   *
+   * Topologically sorts and updates render
+   * passes in place
+   */
+  void compile();
+
+  /**
+   * @brief Build barriers
+   */
+  void buildBarriers();
+
+  /**
+   * @brief Build passes resources
+   *
+   *
+   * @param storage Render storage
+   */
+  void buildPasses(RenderStorage &storage);
+
+  /**
+   * @brief Build graphics pass resources
+   *
+   * Creates framebuffers, render passes,
+   * and pipelines
+   *
+   * @param pass Render graph pass
+   * @param storage Render storage
+   */
+  void buildGraphicsPass(RenderGraphPass &pass, RenderStorage &storage);
+
+  /**
+   * @brief Build compute pass resources
+   *
+   * Creates compute pipelines
+   *
+   * @param pass Render graph pass
+   * @param storage Render storage
+   */
+  void buildComputePass(RenderGraphPass &pass, RenderStorage &storage);
 
 private:
   std::vector<RenderGraphPass> mPasses;
