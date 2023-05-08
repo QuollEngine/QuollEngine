@@ -99,8 +99,15 @@ rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
 }
 
 rhi::TextureHandle RenderStorage::getNewTextureHandle() {
-  uint32_t handle = mLastTexture++;
-  return rhi::TextureHandle{handle};
+  return mTextureCounter.create();
+}
+
+rhi::RenderPassHandle RenderStorage::getNewRenderPassHandle() {
+  return mRenderPassCounter.create();
+}
+
+rhi::FramebufferHandle RenderStorage::getNewFramebufferHandle() {
+  return mFramebufferCounter.create();
 }
 
 rhi::Buffer

@@ -195,10 +195,10 @@ public:
    * @brief Create render pass
    *
    * @param description Render pass description
-   * @return Render pass
+   * @param handle Render pass handle
    */
-  virtual RenderPassHandle
-  createRenderPass(const RenderPassDescription &description) = 0;
+  virtual void createRenderPass(const RenderPassDescription &description,
+                                RenderPassHandle handle) = 0;
 
   /**
    * @brief Destroy render pass
@@ -211,10 +211,10 @@ public:
    * @brief Create framebuffer
    *
    * @param description Framebuffer description
-   * @return Framebuffer
+   * @param handle Framebuffer handle
    */
-  virtual FramebufferHandle
-  createFramebuffer(const FramebufferDescription &description) = 0;
+  virtual void createFramebuffer(const FramebufferDescription &description,
+                                 FramebufferHandle handle) = 0;
 
   /**
    * @brief Destroy framebuffer

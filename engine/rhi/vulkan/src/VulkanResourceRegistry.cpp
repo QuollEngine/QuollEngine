@@ -59,26 +59,19 @@ void VulkanResourceRegistry::deleteTextureView(TextureViewHandle handle) {
   mTextureViews.map.erase(handle);
 }
 
-RenderPassHandle VulkanResourceRegistry::setRenderPass(
-    std::unique_ptr<VulkanRenderPass> &&renderPass) {
-  auto handle = RenderPassHandle{mRenderPasses.lastHandle};
-  mRenderPasses.lastHandle++;
+void VulkanResourceRegistry::setRenderPass(
+    std::unique_ptr<VulkanRenderPass> &&renderPass, RenderPassHandle handle) {
   mRenderPasses.map.insert_or_assign(handle, std::move(renderPass));
-
-  return handle;
 }
 
 void VulkanResourceRegistry::deleteRenderPass(RenderPassHandle handle) {
   mRenderPasses.map.erase(handle);
 }
 
-FramebufferHandle VulkanResourceRegistry::setFramebuffer(
-    std::unique_ptr<VulkanFramebuffer> &&framebuffer) {
-  auto handle = FramebufferHandle{mFramebuffers.lastHandle};
-  mFramebuffers.lastHandle++;
+void VulkanResourceRegistry::setFramebuffer(
+    std::unique_ptr<VulkanFramebuffer> &&framebuffer,
+    FramebufferHandle handle) {
   mFramebuffers.map.insert_or_assign(handle, std::move(framebuffer));
-
-  return handle;
 }
 
 void VulkanResourceRegistry::deleteFramebuffer(FramebufferHandle handle) {

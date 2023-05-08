@@ -330,7 +330,6 @@ void RenderGraph::buildPasses(RenderStorage &storage) {
   LIQUID_PROFILE_EVENT("RenderGraph::buildPasses");
 
   for (auto &pass : mCompiledPasses) {
-
     if (pass.getType() == RenderGraphPassType::Compute) {
       buildComputePass(pass, storage);
     } else {
@@ -393,14 +392,11 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
   bool renderPassExists = isHandleValid(pass.mRenderPass);
 
-  if (rhi::isHandleValid(pass.mRenderPass)) {
-    device->destroyRenderPass(pass.mRenderPass);
+  if (!rhi::isHandleValid(pass.mRenderPass)) {
+    pass.mRenderPass = storage.getNewRenderPassHandle();
   }
 
-  pass.mRenderPass = device->createRenderPass(renderPassDesc);
-
-  std::vector<rhi::FramebufferHandle> framebuffers(
-      framebufferAttachments.size(), rhi::FramebufferHandle::Invalid);
+  device->createRenderPass(renderPassDesc, pass.mRenderPass);
 
   rhi::FramebufferDescription framebufferDesc;
   framebufferDesc.width = width;
@@ -409,10 +405,10 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
   framebufferDesc.attachments = framebufferAttachments;
   framebufferDesc.renderPass = pass.mRenderPass;
 
-  if (rhi::isHandleValid(pass.mFramebuffer)) {
-    device->destroyFramebuffer(pass.mFramebuffer);
+  if (!rhi::isHandleValid(pass.mFramebuffer)) {
+    pass.mFramebuffer = storage.getNewFramebufferHandle();
   }
-  pass.mFramebuffer = device->createFramebuffer(framebufferDesc);
+  device->createFramebuffer(framebufferDesc, pass.mFramebuffer);
 
   pass.mDimensions.x = width;
   pass.mDimensions.y = height;
