@@ -189,20 +189,22 @@ void VulkanRenderDevice::destroyTextureView(TextureViewHandle handle) {
   mRegistry.deleteTextureView(handle);
 }
 
-RenderPassHandle
-VulkanRenderDevice::createRenderPass(const RenderPassDescription &description) {
-  return mRegistry.setRenderPass(
-      std::make_unique<VulkanRenderPass>(description, mDevice, mRegistry));
+void VulkanRenderDevice::createRenderPass(
+    const RenderPassDescription &description, RenderPassHandle handle) {
+  mRegistry.setRenderPass(
+      std::make_unique<VulkanRenderPass>(description, mDevice, mRegistry),
+      handle);
 }
 
 void VulkanRenderDevice::destroyRenderPass(RenderPassHandle handle) {
   mRegistry.deleteRenderPass(handle);
 }
 
-FramebufferHandle VulkanRenderDevice::createFramebuffer(
-    const FramebufferDescription &description) {
-  return mRegistry.setFramebuffer(
-      std::make_unique<VulkanFramebuffer>(description, mDevice, mRegistry));
+void VulkanRenderDevice::createFramebuffer(
+    const FramebufferDescription &description, FramebufferHandle handle) {
+  mRegistry.setFramebuffer(
+      std::make_unique<VulkanFramebuffer>(description, mDevice, mRegistry),
+      handle);
 }
 
 void VulkanRenderDevice::destroyFramebuffer(FramebufferHandle handle) {

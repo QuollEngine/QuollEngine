@@ -2,6 +2,7 @@
 
 #include "liquid/rhi/TextureDescription.h"
 #include "liquid/rhi/RenderDevice.h"
+#include "HandleCounter.h"
 
 namespace liquid {
 
@@ -58,6 +59,20 @@ public:
    * @return Texture handle
    */
   rhi::TextureHandle getNewTextureHandle();
+
+  /**
+   * @brief Get new render pass handle
+   *
+   * @return Render pass handle
+   */
+  rhi::RenderPassHandle getNewRenderPassHandle();
+
+  /**
+   * @brief Get new framebuffer handle
+   *
+   * @return Framebuffer handle
+   */
+  rhi::FramebufferHandle getNewFramebufferHandle();
 
   /**
    * @brief Create buffer
@@ -195,7 +210,9 @@ private:
   std::vector<size_t> mComputePipelineIndices;
 
   static constexpr uint32_t TextureStart = 10;
-  uint32_t mLastTexture = TextureStart;
+  HandleCounter<rhi::TextureHandle, TextureStart> mTextureCounter;
+  HandleCounter<rhi::RenderPassHandle> mRenderPassCounter;
+  HandleCounter<rhi::FramebufferHandle> mFramebufferCounter;
 };
 
 } // namespace liquid

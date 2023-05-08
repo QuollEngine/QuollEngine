@@ -46,7 +46,6 @@ public:
    */
   void insert(const TResource &resource, THandle handle) {
     mResources.insert_or_assign(handle, std::move(resource));
-    return handle;
   }
 
   /**

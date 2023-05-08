@@ -117,9 +117,9 @@ void MockRenderDevice::destroyTextureView(TextureViewHandle handle) {
   mTextureViews.erase(handle);
 }
 
-RenderPassHandle
-MockRenderDevice::createRenderPass(const RenderPassDescription &description) {
-  return mRenderPasses.insert(description);
+void MockRenderDevice::createRenderPass(
+    const RenderPassDescription &description, RenderPassHandle handle) {
+  return mRenderPasses.insert(description, handle);
 }
 
 void MockRenderDevice::destroyRenderPass(RenderPassHandle handle) {
@@ -131,9 +131,9 @@ MockRenderDevice::getRenderPassDescription(RenderPassHandle handle) const {
   return mRenderPasses.at(handle);
 }
 
-FramebufferHandle
-MockRenderDevice::createFramebuffer(const FramebufferDescription &description) {
-  return mFramebuffers.insert(description);
+void MockRenderDevice::createFramebuffer(
+    const FramebufferDescription &description, FramebufferHandle handle) {
+  mFramebuffers.insert(description, handle);
 }
 
 void MockRenderDevice::destroyFramebuffer(FramebufferHandle handle) {

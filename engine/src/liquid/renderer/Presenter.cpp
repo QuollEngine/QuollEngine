@@ -45,6 +45,8 @@ Presenter::Presenter(ShaderLibrary &shaderLibrary, RenderStorage &renderStorage)
       liquid::rhi::PipelineColorBlendAttachment{}};
 
   mPresentPipeline = mRenderStorage.addPipeline(pipelineDescription);
+
+  mPresentPass = mRenderStorage.getNewRenderPassHandle();
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
@@ -65,8 +67,8 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     mRenderStorage.getDevice()->destroyRenderPass(mPresentPass);
   }
 
-  mPresentPass =
-      mRenderStorage.getDevice()->createRenderPass(renderPassDescription);
+  mRenderStorage.getDevice()->createRenderPass(renderPassDescription,
+                                               mPresentPass);
 
   auto vertexShader =
       mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
@@ -91,6 +93,11 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   }
 
   mFramebuffers.resize(swapchain.textures.size());
+  for (size_t i = 0; i < mFramebuffers.size(); ++i) {
+    if (!rhi::isHandleValid(mFramebuffers.at(i))) {
+      mFramebuffers.at(i) = mRenderStorage.getNewFramebufferHandle();
+    }
+  }
 
   for (size_t i = 0; i < mFramebuffers.size(); ++i) {
     rhi::FramebufferDescription framebufferDescription{};
@@ -100,7 +107,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     framebufferDescription.renderPass = mPresentPass;
     framebufferDescription.attachments = {swapchain.textures.at(i)};
 
-    mFramebuffers.at(i) = device->createFramebuffer(framebufferDescription);
+    device->createFramebuffer(framebufferDescription, mFramebuffers.at(i));
   }
 
   if (rhi::isHandleValid(mPresentTexture)) {

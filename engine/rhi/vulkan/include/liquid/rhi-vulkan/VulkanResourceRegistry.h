@@ -161,10 +161,10 @@ public:
    * @brief Set render pass
    *
    * @param renderPass Vulkan render pass
-   * @return New render pass handle
+   * @param handle Render pass handle
    */
-  RenderPassHandle
-  setRenderPass(std::unique_ptr<VulkanRenderPass> &&renderPass);
+  void setRenderPass(std::unique_ptr<VulkanRenderPass> &&renderPass,
+                     RenderPassHandle handle);
 
   /**
    * @brief Delete render pass
@@ -186,10 +186,10 @@ public:
    * @brief Set framebuffer
    *
    * @param framebuffer Vulkan framebuffer
-   * @return New framebuffer handle
+   * @param handle Framebuffer handle
    */
-  FramebufferHandle
-  setFramebuffer(std::unique_ptr<VulkanFramebuffer> &&framebuffer);
+  void setFramebuffer(std::unique_ptr<VulkanFramebuffer> &&framebuffer,
+                      FramebufferHandle handle);
 
   /**
    * @brief Delete framebuffer

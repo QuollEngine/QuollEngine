@@ -185,10 +185,10 @@ public:
    * @brief Create render pass
    *
    * @param description Render pass description
-   * @return Render pass
+   * @param handle Render pass handle
    */
-  RenderPassHandle
-  createRenderPass(const RenderPassDescription &description) override;
+  void createRenderPass(const RenderPassDescription &description,
+                        RenderPassHandle handle) override;
 
   /**
    * @brief Destroy render pass
@@ -201,10 +201,10 @@ public:
    * @brief Create framebuffer
    *
    * @param description Framebuffer description
-   * @return Framebuffer
+   * @param handle Framebuffer handle
    */
-  FramebufferHandle
-  createFramebuffer(const FramebufferDescription &description) override;
+  void createFramebuffer(const FramebufferDescription &description,
+                         FramebufferHandle handle);
 
   /**
    * @brief Destroy framebuffer
