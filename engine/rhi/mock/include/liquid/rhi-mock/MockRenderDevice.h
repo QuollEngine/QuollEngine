@@ -161,6 +161,14 @@ public:
   void destroyTexture(TextureHandle handle) override;
 
   /**
+   * @brief Get texture updates
+   *
+   * @param handle Texture handle
+   * @return Texture updates
+   */
+  uint32_t getTextureUpdates(TextureHandle handle);
+
+  /**
    * @brief Create texture view
    *
    * @param description Texture view description

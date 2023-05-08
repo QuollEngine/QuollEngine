@@ -108,6 +108,10 @@ void MockRenderDevice::destroyTexture(TextureHandle handle) {
   mTextures.erase(handle);
 }
 
+uint32_t MockRenderDevice::getTextureUpdates(TextureHandle handle) {
+  return mTextures.getEmplaced(handle);
+}
+
 TextureViewHandle
 MockRenderDevice::createTextureView(const TextureViewDescription &description) {
   return mTextureViews.insert(description);

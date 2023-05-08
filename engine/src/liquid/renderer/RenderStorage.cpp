@@ -79,6 +79,13 @@ RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
   return handle;
 }
 
+void RenderStorage::addToDescriptor(rhi::TextureHandle handle) {
+  std::array<rhi::TextureHandle, 1> textures{handle};
+  mGlobalTexturesDescriptor.write(0, textures,
+                                  rhi::DescriptorType::CombinedImageSampler,
+                                  rhi::castHandleToUint(handle));
+}
+
 rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
     const liquid::rhi::TextureDescription &description, bool addToDescriptor) {
 

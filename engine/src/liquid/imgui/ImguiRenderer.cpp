@@ -80,8 +80,9 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = rhi::Format::Rgba8Srgb;
-  auto imgui =
+  auto imguiReal =
       mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
+  auto imgui = graph.import(imguiReal);
 
   auto &pass = graph.addGraphicsPass("imgui");
   pass.write(imgui, AttachmentType::Color, mClearColor);

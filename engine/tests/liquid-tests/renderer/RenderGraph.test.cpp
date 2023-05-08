@@ -11,21 +11,138 @@ class RenderGraphTest : public ::testing::Test {
 public:
   RenderGraphTest() : graph("TestGraph"), storage(&device) {}
 
-  liquid::rhi::TextureHandle
+  liquid::RenderGraphResource<TextureHandle>
   createTexture(liquid::rhi::TextureDescription desc) {
-    liquid::rhi::TextureHandle handle{lastTextureHandle++};
-
-    device.createTexture(desc, handle);
-    return handle;
+    return graph.create(desc, [](auto, auto &) {});
   }
 
   MockRenderDevice device;
   liquid::RenderStorage storage;
   liquid::RenderGraph graph;
-  uint32_t lastTextureHandle = 0;
+
+  using OnBuildMockFunction =
+      ::testing::MockFunction<void(TextureHandle, liquid::RenderStorage &)>;
 };
 
-class RenderGraphDeathTest : public RenderGraphTest {};
+using RenderGraphDeathTest = RenderGraphTest;
+
+TEST_F(RenderGraphTest, CreatesAllTexturesOnBuild) {
+  OnBuildMockFunction onCreateR1;
+  OnBuildMockFunction onCreateR2;
+
+  EXPECT_CALL(onCreateR1, Call(::testing::_, ::testing::_)).Times(1);
+  EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(1);
+
+  TextureDescription fixedDescription{};
+  fixedDescription.width = 512;
+  fixedDescription.height = 512;
+
+  graph.setFramebufferExtent({1920, 1080});
+
+  auto r1 = graph.create(fixedDescription, onCreateR1.AsStdFunction());
+  auto r2 = graph.create(
+      [](auto width, auto height) {
+        TextureDescription desc{};
+        desc.width = width;
+        desc.height = height;
+
+        return desc;
+      },
+      onCreateR2.AsStdFunction());
+
+  EXPECT_FALSE(isHandleValid(r1.getHandle()));
+  EXPECT_FALSE(isHandleValid(r2.getHandle()));
+
+  graph.build(storage);
+
+  EXPECT_TRUE(isHandleValid(r1.getHandle()));
+  EXPECT_TRUE(isHandleValid(r2.getHandle()));
+
+  auto desc1 = device.getTextureDescription(r1.getHandle());
+  EXPECT_EQ(desc1.width, 512);
+  EXPECT_EQ(desc1.height, 512);
+
+  auto desc2 = device.getTextureDescription(r2.getHandle());
+  EXPECT_EQ(desc2.width, 1920);
+  EXPECT_EQ(desc2.height, 1080);
+}
+
+TEST_F(RenderGraphTest, RecreatesDynamicTexturesOnResize) {
+  OnBuildMockFunction onCreateR1;
+  OnBuildMockFunction onCreateR2;
+
+  EXPECT_CALL(onCreateR1, Call(::testing::_, ::testing::_)).Times(1);
+  EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(2);
+
+  TextureDescription fixedDescription{};
+  fixedDescription.width = 512;
+  fixedDescription.height = 512;
+
+  graph.setFramebufferExtent({1920, 1080});
+
+  auto r1 = graph.create(fixedDescription, onCreateR1.AsStdFunction());
+  auto r2 = graph.create(
+      [](auto width, auto height) {
+        TextureDescription desc{};
+        desc.width = width;
+        desc.height = height;
+
+        return desc;
+      },
+      onCreateR2.AsStdFunction());
+
+  graph.build(storage);
+
+  auto desc1 = device.getTextureDescription(r1.getHandle());
+  EXPECT_EQ(desc1.width, 512);
+  EXPECT_EQ(desc1.height, 512);
+  EXPECT_EQ(device.getTextureUpdates(r1.getHandle()), 1);
+
+  auto desc2 = device.getTextureDescription(r2.getHandle());
+  EXPECT_EQ(desc2.width, 1920);
+  EXPECT_EQ(desc2.height, 1080);
+  EXPECT_EQ(device.getTextureUpdates(r2.getHandle()), 1);
+
+  graph.setFramebufferExtent({2560, 1440});
+  graph.build(storage);
+
+  EXPECT_EQ(device.getTextureUpdates(r1.getHandle()), 1);
+
+  auto desc3 = device.getTextureDescription(r2.getHandle());
+  EXPECT_EQ(desc3.width, 2560);
+  EXPECT_EQ(desc3.height, 1440);
+  EXPECT_EQ(device.getTextureUpdates(r2.getHandle()), 2);
+}
+
+TEST_F(RenderGraphTest, ImportsExternalResourcesToRenderGraph) {
+  auto handle = storage.createTexture({});
+
+  auto resource = graph.import(handle);
+  EXPECT_EQ(device.getTextureUpdates(handle), 1);
+  EXPECT_TRUE(isHandleValid(handle));
+  EXPECT_EQ(resource.getHandle(), handle);
+
+  graph.build(storage);
+  EXPECT_EQ(device.getTextureUpdates(handle), 1);
+  EXPECT_EQ(resource.getHandle(), handle);
+}
+
+TEST_F(RenderGraphTest, IgnoresExternalResourcesOnResize) {
+  auto handle = storage.createTexture({});
+
+  auto resource = graph.import(handle);
+  EXPECT_EQ(device.getTextureUpdates(handle), 1);
+  EXPECT_EQ(resource.getHandle(), handle);
+  EXPECT_TRUE(isHandleValid(handle));
+
+  graph.build(storage);
+  EXPECT_EQ(device.getTextureUpdates(handle), 1);
+  EXPECT_EQ(resource.getHandle(), handle);
+
+  graph.setFramebufferExtent({2560, 1440});
+  EXPECT_EQ(device.getTextureUpdates(handle), 1);
+  EXPECT_EQ(resource.getHandle(), handle);
+}
 
 TEST_F(RenderGraphTest, AddsGraphicsPass) {
   auto &pass = graph.addGraphicsPass("Test");
@@ -80,14 +197,21 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   // |   +---+   +---+               |
   // +-------------------------------+
 
-  using Texture = liquid::rhi::TextureHandle;
+  using Texture = TextureHandle;
 
-  std::unordered_map<liquid::String, liquid::rhi::TextureHandle> textures{
-      {"a-d", createTexture({})}, {"b-c", createTexture({})},
-      {"b-g", createTexture({})}, {"h-c", createTexture({})},
-      {"c-e", createTexture({})}, {"d-e", createTexture({})},
-      {"d-g", createTexture({})}, {"e-f", createTexture({})},
-      {"f-g", createTexture({})}, {"final-color", createTexture({})}};
+  auto finalColor = storage.createTexture({});
+
+  std::unordered_map<liquid::String, liquid::RenderGraphResource<TextureHandle>>
+      textures{{"a-d", createTexture({})},
+               {"b-c", createTexture({})},
+               {"b-g", createTexture({})},
+               {"h-c", createTexture({})},
+               {"c-e", createTexture({})},
+               {"d-e", createTexture({})},
+               {"d-g", createTexture({})},
+               {"e-f", createTexture({})},
+               {"f-g", createTexture({})},
+               {"final-color", graph.import(finalColor)}};
 
   std::unordered_map<liquid::String, liquid::rhi::BufferHandle> buffers{
       {"a-b", device.createBuffer({}).getHandle()},
@@ -1325,7 +1449,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
 }
 
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
-  liquid::rhi::TextureHandle handle = createTexture({});
+  auto handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());
@@ -1340,7 +1464,7 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 }
 
 TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
-  liquid::rhi::TextureHandle handle = createTexture({});
+  auto handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());
@@ -1356,7 +1480,7 @@ TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
 }
 
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
-  liquid::rhi::TextureHandle handle{2};
+  auto handle = createTexture({});
 
   graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
                                    glm::vec4());

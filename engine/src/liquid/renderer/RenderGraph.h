@@ -2,8 +2,10 @@
 
 #include "liquid/rhi/RenderDevice.h"
 
-#include "RenderGraphPass.h"
 #include "RenderStorage.h"
+#include "RenderGraphRegistry.h"
+#include "RenderGraphResource.h"
+#include "RenderGraphPass.h"
 
 namespace liquid {
 
@@ -13,6 +15,16 @@ enum class GraphDirty { None, PassChanges, SizeUpdate };
  * @brief Render graph
  */
 class RenderGraph {
+  using RGTexture = RenderGraphResource<rhi::TextureHandle>;
+  using RGTextureCreator =
+      std::function<rhi::TextureDescription(uint32_t, uint32_t)>;
+  template <class THandle>
+  using RGBuildCallback = std::function<void(THandle, RenderStorage &)>;
+
+  using RGTextureBuildCallback = RGBuildCallback<rhi::TextureHandle>;
+
+  enum class RGResourceType { Texture, Buffer };
+
 public:
   /**
    * @brief Initialize render graph with name
@@ -36,6 +48,33 @@ public:
    * @return Render graph pass
    */
   RenderGraphPass &addComputePass(StringView name);
+
+  /**
+   * @brief Create fixed texture
+   *
+   * @param description Texture description
+   * @param onBuild On build callback
+   * @return Render graph texture
+   */
+  RGTexture create(const rhi::TextureDescription &description,
+                   RGTextureBuildCallback onBuild);
+
+  /**
+   * @brief Create dynamic texture
+   *
+   * @param creator Texture creator
+   * @param onBuild On build callback
+   * @return Render graph texture
+   */
+  RGTexture create(RGTextureCreator creator, RGTextureBuildCallback onBuild);
+
+  /**
+   * @brief Import existing texture to render graph
+   *
+   * @param handle Texture handle
+   * @return Render graph texture
+   */
+  RGTexture import(rhi::TextureHandle handle);
 
   /**
    * @brief Execute render graph
@@ -101,6 +140,13 @@ public:
 
 private:
   /**
+   * @brief Build render graph resources
+   *
+   * @param storage Render storage
+   */
+  void buildResources(RenderStorage &storage);
+
+  /**
    * @brief Compile render graph
    *
    * Topologically sorts and updates render
@@ -115,7 +161,6 @@ private:
 
   /**
    * @brief Build passes resources
-   *
    *
    * @param storage Render storage
    */
@@ -143,9 +188,21 @@ private:
   void buildComputePass(RenderGraphPass &pass, RenderStorage &storage);
 
 private:
+  // Passes
   std::vector<RenderGraphPass> mPasses;
   std::vector<RenderGraphPass> mCompiledPasses;
 
+private:
+  // Resources
+  RenderGraphRegistry mRegistry;
+
+  std::vector<RGResourceType> mRealResourceTypes;
+  std::vector<
+      std::variant<std::monostate, rhi::TextureDescription, RGTextureCreator>>
+      mTextureDescriptions;
+  std::vector<RGTextureBuildCallback> mTextureBuilds;
+
+private:
   glm::uvec2 mFramebufferExtent{};
   GraphDirty mDirty = GraphDirty::None;
 

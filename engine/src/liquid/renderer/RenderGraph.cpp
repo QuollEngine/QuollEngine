@@ -27,6 +27,45 @@ RenderGraphPass &RenderGraph::addComputePass(StringView name) {
   return mPasses.back();
 }
 
+RenderGraph::RGTexture
+RenderGraph::create(const rhi::TextureDescription &description,
+                    RGTextureBuildCallback onBuild) {
+  mDirty |= GraphDirty::PassChanges;
+
+  auto index = mRegistry.getRealResources().size();
+  mRegistry.getRealResources().push_back(0);
+  mRealResourceTypes.push_back(RGResourceType::Texture);
+  mTextureDescriptions.push_back(description);
+  mTextureBuilds.push_back(onBuild);
+
+  return RGTexture(mRegistry, index);
+}
+
+RenderGraph::RGTexture RenderGraph::create(RGTextureCreator creator,
+                                           RGTextureBuildCallback onBuild) {
+  mDirty |= GraphDirty::PassChanges;
+
+  auto index = mRegistry.getRealResources().size();
+  mRegistry.getRealResources().push_back(0);
+  mRealResourceTypes.push_back(RGResourceType::Texture);
+  mTextureDescriptions.push_back(creator);
+  mTextureBuilds.push_back(onBuild);
+
+  return RGTexture(mRegistry, index);
+}
+
+RenderGraph::RGTexture RenderGraph::import(rhi::TextureHandle handle) {
+  mDirty |= GraphDirty::PassChanges;
+
+  auto index = mRegistry.getRealResources().size();
+  mRegistry.getRealResources().push_back(static_cast<uint32_t>(handle));
+  mRealResourceTypes.push_back(RGResourceType::Texture);
+  mTextureDescriptions.push_back({});
+  mTextureBuilds.push_back([](auto, auto &) {});
+
+  return RGTexture(mRegistry, index);
+}
+
 /**
  * @brief Topologically sort a graph
  *
@@ -48,6 +87,66 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
   }
 
   output.push_back(inputs.at(index));
+}
+
+void RenderGraph::buildResources(RenderStorage &storage) {
+  // Create all real handles for render graph if they do not exist
+  for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
+    if (mRegistry.getRealResources().at(i) != 0) {
+      continue;
+    }
+
+    uint32_t handle = 0;
+    if (mRealResourceTypes.at(i) == RGResourceType::Texture) {
+      handle = static_cast<uint32_t>(storage.getNewTextureHandle());
+    } else if (mRealResourceTypes.at(i) == RGResourceType::Buffer) {
+      LIQUID_ASSERT(false, "Not implemented");
+    }
+    mRegistry.getRealResources().at(i) = handle;
+  }
+
+  auto *device = storage.getDevice();
+
+  if (BitwiseEnumContains(mDirty, GraphDirty::PassChanges)) {
+    for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
+      if (mRealResourceTypes.at(i) == RGResourceType::Texture) {
+        auto handle =
+            static_cast<rhi::TextureHandle>(mRegistry.getRealResources().at(i));
+
+        const auto &desc = mTextureDescriptions.at(i);
+        if (const auto *fixedDesc =
+                std::get_if<rhi::TextureDescription>(&desc)) {
+          device->createTexture(*fixedDesc, handle);
+        } else if (const auto *creator = std::get_if<RGTextureCreator>(&desc)) {
+          auto dynamicDesc =
+              (*creator)(mFramebufferExtent.x, mFramebufferExtent.y);
+
+          device->createTexture(dynamicDesc, handle);
+        }
+
+        mTextureBuilds.at(i)(handle, storage);
+      } else if (mRealResourceTypes.at(i) == RGResourceType::Buffer) {
+        LIQUID_ASSERT(false, "Not implemented");
+      }
+    }
+  } else if (BitwiseEnumContains(mDirty, GraphDirty::SizeUpdate)) {
+    for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
+      if (mRealResourceTypes.at(i) != RGResourceType::Texture) {
+        continue;
+      }
+
+      auto handle =
+          static_cast<rhi::TextureHandle>(mRegistry.getRealResources().at(i));
+      const auto &desc = mTextureDescriptions.at(i);
+      if (const auto *creator = std::get_if<RGTextureCreator>(&desc)) {
+        auto dynamicDesc =
+            (*creator)(mFramebufferExtent.x, mFramebufferExtent.y);
+
+        device->createTexture(dynamicDesc, handle);
+        mTextureBuilds.at(i)(handle, storage);
+      }
+    }
+  }
 }
 
 void RenderGraph::compile() {
@@ -478,6 +577,8 @@ void RenderGraph::build(RenderStorage &storage) {
   if (!isDirty()) {
     return;
   }
+
+  buildResources(storage);
 
   if (BitwiseEnumContains(mDirty, GraphDirty::PassChanges)) {
     compile();
