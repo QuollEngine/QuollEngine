@@ -224,19 +224,20 @@ void EditorRenderer::attach(RenderGraph &graph,
 
   // outlines
   {
-    static constexpr uint32_t SwapchainSizePercentage = 100;
-    rhi::TextureDescription depthBufferDesc{};
-    depthBufferDesc.usage = rhi::TextureUsage::Depth |
-                            rhi::TextureUsage::Stencil |
-                            rhi::TextureUsage::Sampled;
-    depthBufferDesc.width = SwapchainSizePercentage;
-    depthBufferDesc.height = SwapchainSizePercentage;
-    depthBufferDesc.layers = 1;
-    depthBufferDesc.samples = scenePassData.sampleCount;
-    depthBufferDesc.format = rhi::Format::Depth32FloatStencil8Uint;
-
-    auto depthBuffer =
-        mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
+    auto depthBuffer = graph.create(
+        [scenePassData](auto width, auto height) {
+          rhi::TextureDescription description{};
+          description.usage = rhi::TextureUsage::Depth |
+                              rhi::TextureUsage::Stencil |
+                              rhi::TextureUsage::Sampled;
+          description.width = width;
+          description.height = height;
+          description.layers = 1;
+          description.samples = scenePassData.sampleCount;
+          description.format = rhi::Format::Depth32FloatStencil8Uint;
+          return description;
+        },
+        [](auto handle, RenderStorage &storage) {});
 
     auto &outlinePass = graph.addGraphicsPass("outlinePass");
     outlinePass.write(scenePassData.sceneColor, AttachmentType::Color,

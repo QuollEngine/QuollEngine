@@ -43,6 +43,13 @@ public:
                 bool addToDescriptor = true);
 
   /**
+   * @brief Add texture to global descriptor
+   *
+   * @param handle Texture handle
+   */
+  void addToDescriptor(rhi::TextureHandle handle);
+
+  /**
    * @brief Create framebuffer relative texture
    *
    * @param description Texture description

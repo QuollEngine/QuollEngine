@@ -33,6 +33,7 @@ public:
   THandle insert(TResource &&resource) {
     auto handle = static_cast<THandle>(mIncrement);
     mResources.insert_or_assign(handle, std::move(resource));
+    incrementEmplacement(handle);
 
     mIncrement++;
     return handle;
@@ -46,6 +47,7 @@ public:
    */
   void insert(const TResource &resource, THandle handle) {
     mResources.insert_or_assign(handle, std::move(resource));
+    incrementEmplacement(handle);
   }
 
   /**
@@ -56,6 +58,7 @@ public:
    */
   void insert(TResource &&resource, THandle handle) {
     mResources.insert_or_assign(handle, std::move(resource));
+    incrementEmplacement(handle);
   }
 
   /**
@@ -66,6 +69,7 @@ public:
    */
   void replace(THandle handle, TResource &&resource) {
     mResources.emplace(handle, std::move(resource));
+    incrementEmplacement(handle);
   }
 
   /**
@@ -81,6 +85,7 @@ public:
    */
   void clear() {
     mResources.clear();
+    mEmplacements.clear();
     mIncrement = 1;
   }
 
@@ -102,9 +107,30 @@ public:
     return mResources.find(handle) != mResources.end();
   }
 
+  /**
+   * @brief Get number of times the handle is emplaced
+   *
+   * @param handle Resource handle
+   * @return Number of times the handle is emplaced
+   */
+  uint32_t getEmplaced(THandle handle) const {
+    return mEmplacements.at(handle);
+  }
+
+private:
+  void incrementEmplacement(THandle handle) {
+    auto it = mEmplacements.find(handle);
+    if (it != mEmplacements.end()) {
+      mEmplacements.at(handle)++;
+    } else {
+      mEmplacements.insert({handle, 1});
+    }
+  }
+
 private:
   uint32_t mIncrement = 1;
   std::unordered_map<THandle, TResource> mResources;
+  std::unordered_map<THandle, uint32_t> mEmplacements;
 };
 
 } // namespace liquid::rhi

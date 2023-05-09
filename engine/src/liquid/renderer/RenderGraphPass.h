@@ -5,11 +5,11 @@
 #include "liquid/rhi/RenderPassDescription.h"
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/rhi/BufferDescription.h"
+#include "RenderGraphResource.h"
 
 namespace liquid {
 
 class RenderGraph;
-class RenderGraphEvaluator;
 
 enum class AttachmentType { Color, Depth, Resolve };
 
@@ -45,7 +45,7 @@ struct RenderTargetData {
   /**
    * Texture
    */
-  rhi::TextureHandle texture = rhi::TextureHandle::Invalid;
+  RenderGraphResource<rhi::TextureHandle> texture;
 
   /**
    * Source image layout
@@ -114,7 +114,6 @@ enum class RenderGraphPassType { Graphics, Compute };
 class RenderGraphPass {
   using ExecutorFn = std::function<void(rhi::RenderCommandList &, uint32_t)>;
   friend RenderGraph;
-  friend RenderGraphEvaluator;
 
 public:
   /**
@@ -175,15 +174,15 @@ public:
    * @param type Attachment type
    * @param clearValue Clear value
    */
-  void write(rhi::TextureHandle handle, AttachmentType type,
-             const rhi::AttachmentClearValue &clearValue);
+  void write(RenderGraphResource<rhi::TextureHandle> handle,
+             AttachmentType type, const rhi::AttachmentClearValue &clearValue);
 
   /**
    * @brief Set input texture
    *
    * @param handle Texture handle
    */
-  void read(rhi::TextureHandle handle);
+  void read(RenderGraphResource<rhi::TextureHandle> handle);
 
   /**
    * @brief Set output buffer

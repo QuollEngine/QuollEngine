@@ -1,5 +1,5 @@
 #include "liquid/core/Base.h"
-#include "liquid/renderer/RenderGraphPass.h"
+#include "liquid/renderer/RenderGraph.h"
 
 #include "liquid-tests/Testing.h"
 
@@ -7,8 +7,10 @@ class RenderGraphPassTest : public ::testing::Test {
 public:
   RenderGraphPassTest()
       : graphicsPass("Graphics", liquid::RenderGraphPassType::Graphics),
-        computePass("Compute", liquid::RenderGraphPassType::Compute) {}
+        computePass("Compute", liquid::RenderGraphPassType::Compute),
+        graph("Test graph") {}
 
+  liquid::RenderGraph graph;
   liquid::RenderGraphPass graphicsPass;
   liquid::RenderGraphPass computePass;
 };
@@ -22,7 +24,8 @@ TEST_F(RenderGraphPassTest, SetsNameAndTypeOnConstruct) {
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
-  liquid::rhi::TextureHandle handle{2};
+  auto handle =
+      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
 
   graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4());
   EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 1);
@@ -30,7 +33,8 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
-  liquid::rhi::TextureHandle handle{2};
+  auto handle =
+      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
 
   graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4(2.0f));
   EXPECT_EQ(graphicsPass.getAttachments().size(), 1);
@@ -45,7 +49,8 @@ TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToInputOnRead) {
-  liquid::rhi::TextureHandle handle{2};
+  auto handle =
+      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
 
   graphicsPass.read(handle);
   EXPECT_EQ(graphicsPass.getAttachments().size(), 0);

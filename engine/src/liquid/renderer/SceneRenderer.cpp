@@ -90,28 +90,45 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   shadowMapDesc.height = ShadowMapDimensions;
   shadowMapDesc.layers = SceneRendererFrameData::MaxShadowMaps;
   shadowMapDesc.format = rhi::Format::Depth16Unorm;
-  auto shadowmap = mRenderStorage.createTexture(shadowMapDesc);
+  auto shadowmap =
+      graph.create(shadowMapDesc, [this](auto handle, RenderStorage &storage) {
+        for (auto &frameData : mFrameData) {
+          frameData.setShadowMapTexture(handle);
+        }
+        storage.addToDescriptor(handle);
+      });
 
-  for (auto &frameData : mFrameData) {
-    frameData.setShadowMapTexture(shadowmap);
-  }
+  auto sceneColor = graph.create(
+      [this](auto width, auto height) {
+        rhi::TextureDescription description{};
+        description.usage =
+            rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+        description.width = width;
+        description.height = height;
+        description.layers = 1;
+        description.format = rhi::Format::Rgba16Float;
+        description.samples = mMaxSampleCounts;
 
-  rhi::TextureDescription sceneColorDesc{};
-  sceneColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  sceneColorDesc.width = SwapchainSizePercentage;
-  sceneColorDesc.height = SwapchainSizePercentage;
-  sceneColorDesc.layers = 1;
-  sceneColorDesc.format = rhi::Format::Rgba16Float;
-  sceneColorDesc.samples = mMaxSampleCounts;
+        return description;
+      },
+      [](auto handle, RenderStorage &storage) {});
 
-  auto sceneColor =
-      mRenderStorage.createFramebufferRelativeTexture(sceneColorDesc);
+  auto sceneColorResolved = graph.create(
+      [this](auto width, auto height) {
+        rhi::TextureDescription description{};
+        description.usage =
+            rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+        description.width = width;
+        description.height = height;
+        description.layers = 1;
+        description.format = rhi::Format::Rgba16Float;
+        description.samples = 1;
 
-  rhi::TextureDescription sceneColorResolvedDesc = sceneColorDesc;
-  sceneColorResolvedDesc.samples = 1;
-
-  auto sceneColorResolved =
-      mRenderStorage.createFramebufferRelativeTexture(sceneColorResolvedDesc);
+        return description;
+      },
+      [](auto handle, RenderStorage &storage) {
+        storage.addToDescriptor(handle);
+      });
 
   rhi::TextureDescription hdrColorDesc{};
   hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
@@ -120,18 +137,23 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   hdrColorDesc.layers = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
 
-  auto hdrColor = mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
+  auto hdrColorReal =
+      mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
+  auto hdrColor = graph.import(hdrColorReal);
 
-  rhi::TextureDescription depthBufferDesc{};
-  depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-  depthBufferDesc.width = SwapchainSizePercentage;
-  depthBufferDesc.height = SwapchainSizePercentage;
-  depthBufferDesc.layers = 1;
-  depthBufferDesc.samples = mMaxSampleCounts;
-  depthBufferDesc.format = rhi::Format::Depth32Float;
-
-  auto depthBuffer =
-      mRenderStorage.createFramebufferRelativeTexture(depthBufferDesc, false);
+  auto depthBuffer = graph.create(
+      [this](auto width, auto height) {
+        rhi::TextureDescription description{};
+        description.usage =
+            rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+        description.width = width;
+        description.height = height;
+        description.layers = 1;
+        description.samples = mMaxSampleCounts;
+        description.format = rhi::Format::Depth32Float;
+        return description;
+      },
+      [](auto handle, RenderStorage &storage) {});
 
   {
     struct ShadowDrawParams {
@@ -402,7 +424,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       commandList.bindDescriptor(pipeline, 0,
                                  mRenderStorage.getGlobalTexturesDescriptor());
 
-      uint32_t color = static_cast<uint32_t>(sceneColorResolved);
+      uint32_t color = static_cast<uint32_t>(sceneColorResolved.getHandle());
 
       commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
                                 sizeof(uint32_t), &color);

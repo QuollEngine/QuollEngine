@@ -1,18 +1,20 @@
 #include "liquid/core/Base.h"
 #include "RenderGraphPass.h"
+#include "RenderGraph.h"
 
 namespace liquid {
 
 RenderGraphPass::RenderGraphPass(StringView name, RenderGraphPassType type)
     : mName(name), mType(type) {}
 
-void RenderGraphPass::write(rhi::TextureHandle handle, AttachmentType type,
+void RenderGraphPass::write(RenderGraphResource<rhi::TextureHandle> handle,
+                            AttachmentType type,
                             const rhi::AttachmentClearValue &clearValue) {
   mTextureOutputs.push_back({handle});
   mAttachments.push_back({type, clearValue});
 }
 
-void RenderGraphPass::read(rhi::TextureHandle handle) {
+void RenderGraphPass::read(RenderGraphResource<rhi::TextureHandle> handle) {
   mTextureInputs.push_back({handle});
 }
 
