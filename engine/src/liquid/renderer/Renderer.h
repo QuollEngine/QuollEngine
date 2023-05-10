@@ -3,7 +3,6 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/entity/EntityDatabase.h"
 
-#include "ShaderLibrary.h"
 #include "RenderGraph.h"
 
 namespace liquid {
@@ -57,13 +56,6 @@ public:
   Renderer &operator=(Renderer &&rhs) = delete;
 
   /**
-   * @brief Get shader library
-   *
-   * @return Shader library
-   */
-  inline ShaderLibrary &getShaderLibrary() { return mShaderLibrary; }
-
-  /**
    * @brief Get render device
    *
    * @return Render device
@@ -93,7 +85,6 @@ public:
   inline RenderStorage &getRenderStorage() { return mRenderStorage; }
 
 private:
-  ShaderLibrary mShaderLibrary;
   rhi::RenderDevice *mDevice;
   RenderStorage mRenderStorage;
 };

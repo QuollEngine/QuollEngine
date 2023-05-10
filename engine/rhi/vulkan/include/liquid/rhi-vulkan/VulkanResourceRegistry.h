@@ -58,9 +58,9 @@ public:
    * @brief Set shader
    *
    * @param shader Vulkan shader
-   * @return New shader handle
+   * @param handle Shader handle
    */
-  ShaderHandle setShader(std::unique_ptr<VulkanShader> &&shader);
+  void setShader(std::unique_ptr<VulkanShader> &&shader, ShaderHandle handle);
 
   /**
    * @brief Delete shader
@@ -136,10 +136,10 @@ public:
    * @brief Set texture view
    *
    * @param textureView Vulkan texture view
-   * @return New texture view handle
+   * @param handle Texture view handle
    */
-  TextureViewHandle
-  setTextureView(std::unique_ptr<VulkanTextureView> &&textureView);
+  void setTextureView(std::unique_ptr<VulkanTextureView> &&textureView,
+                      TextureViewHandle handle);
 
   /**
    * @brief Delete texture view

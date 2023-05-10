@@ -43,7 +43,8 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
   }
 
   {
-    auto shader = device->createShader(
+    auto shader = mRenderStorage.createShader(
+        "hrdi.equirectangular-to-cubemap.compute",
         {shadersPath / "equirectangular-to-cubemap.comp.spv"});
 
     mPipelineGenerateCubemap =
@@ -55,7 +56,8 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
   }
 
   {
-    auto shader = device->createShader(
+    auto shader = mRenderStorage.createShader(
+        "hrdi.generate-irradiance-map.compute",
         {shadersPath / "generate-irradiance-map.comp.spv"});
 
     mPipelineGenerateIrradianceMap =
@@ -68,8 +70,9 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
   }
 
   {
-    auto shader =
-        device->createShader({shadersPath / "generate-specular-map.comp.spv"});
+    auto shader = mRenderStorage.createShader(
+        "hrdi.generate-specular-map.compute",
+        {shadersPath / "generate-specular-map.comp.spv"});
 
     mPipelineGenerateSpecularMap =
         mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
@@ -400,7 +403,8 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     description.level = static_cast<uint32_t>(level);
     description.layerCount = CubemapSides;
 
-    textureViews.at(level) = device->createTextureView(description);
+    textureViews.at(level) =
+        mRenderStorage.createTextureView(description, false);
   }
 
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{

@@ -4,7 +4,6 @@
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/asset/AssetRegistry.h"
 #include "SceneRendererFrameData.h"
-#include "ShaderLibrary.h"
 
 namespace liquid {
 
@@ -48,12 +47,10 @@ public:
   /**
    * @brief Create scene renderer
    *
-   * @param shaderLibrary Shader library
    * @param assetRegistry Asset registry
    * @param renderStorage Render storage
    */
-  SceneRenderer(ShaderLibrary &shaderLibrary, AssetRegistry &assetRegistry,
-                RenderStorage &renderStorage);
+  SceneRenderer(AssetRegistry &assetRegistry, RenderStorage &renderStorage);
 
   /**
    * @brief Set clear color
@@ -145,10 +142,8 @@ private:
 
 private:
   glm::vec4 mClearColor{DefaultClearColor};
-  ShaderLibrary &mShaderLibrary;
   AssetRegistry &mAssetRegistry;
   RenderStorage &mRenderStorage;
-  rhi::RenderDevice *mDevice;
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
   uint32_t mMaxSampleCounts = 1;

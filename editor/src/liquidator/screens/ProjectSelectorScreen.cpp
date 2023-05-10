@@ -25,11 +25,10 @@ ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
 std::optional<Project> ProjectSelectorScreen::start() {
   EntityDatabase entityDatabase;
   AssetRegistry assetRegistry;
-  ShaderLibrary shaderLibrary;
   RenderStorage renderStorage(mDevice);
 
-  ImguiRenderer imguiRenderer(mWindow, shaderLibrary, renderStorage);
-  Presenter presenter(shaderLibrary, renderStorage);
+  ImguiRenderer imguiRenderer(mWindow, renderStorage);
+  Presenter presenter(renderStorage);
 
   ProjectManager projectManager;
 

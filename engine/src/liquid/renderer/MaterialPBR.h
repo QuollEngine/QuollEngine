@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Material.h"
-#include "ShaderLibrary.h"
 
 namespace liquid {
 

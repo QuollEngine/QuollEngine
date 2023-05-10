@@ -243,11 +243,9 @@ public:
    * @brief Create frame data
    *
    * @param renderStorage Render Storage
-   * @param device Render device
    * @param reservedSpace Reserved space for buffer data
    */
   SceneRendererFrameData(RenderStorage &renderStorage,
-                         rhi::RenderDevice *device,
                          size_t reservedSpace = DefaultReservedSpace);
 
   /**

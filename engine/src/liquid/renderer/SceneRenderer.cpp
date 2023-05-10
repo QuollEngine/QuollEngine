@@ -7,19 +7,18 @@
 
 namespace liquid {
 
-SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
-                             AssetRegistry &assetRegistry,
+SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
                              RenderStorage &renderStorage)
-    : mShaderLibrary(shaderLibrary), mAssetRegistry(assetRegistry),
-      mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()),
-      mFrameData{SceneRendererFrameData(renderStorage, mDevice),
-                 SceneRendererFrameData(renderStorage, mDevice)} {
+    : mAssetRegistry(assetRegistry), mRenderStorage(renderStorage),
+      mFrameData{SceneRendererFrameData(renderStorage),
+                 SceneRendererFrameData(renderStorage)} {
 
   auto shadersPath = Engine::getShadersPath();
 
+  auto *device = mRenderStorage.getDevice();
   mMaxSampleCounts =
-      mDevice->getDeviceInformation().getLimits().framebufferColorSampleCounts &
-      mDevice->getDeviceInformation().getLimits().framebufferDepthSampleCounts;
+      device->getDeviceInformation().getLimits().framebufferColorSampleCounts &
+      device->getDeviceInformation().getLimits().framebufferDepthSampleCounts;
 
   mMaxSampleCounts = std::max(1u, mMaxSampleCounts);
 
@@ -31,47 +30,35 @@ SceneRenderer::SceneRenderer(ShaderLibrary &shaderLibrary,
     }
   }
 
-  mShaderLibrary.addShader(
-      "__engine.geometry.default.vertex",
-      mDevice->createShader({shadersPath / "geometry.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.geometry.skinned.vertex",
-      mDevice->createShader({shadersPath / "geometry-skinned.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.pbr.default.fragment",
-      mDevice->createShader({shadersPath / "pbr.frag.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.skybox.default.vertex",
-      mDevice->createShader({shadersPath / "skybox.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.skybox.default.fragment",
-      mDevice->createShader({shadersPath / "skybox.frag.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.shadowmap.default.vertex",
-      mDevice->createShader({shadersPath / "shadowmap.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.shadowmap.skinned.vertex",
-      mDevice->createShader({shadersPath / "shadowmap-skinned.vert.spv"}));
+  mRenderStorage.createShader("__engine.geometry.default.vertex",
+                              {shadersPath / "geometry.vert.spv"});
+  mRenderStorage.createShader("__engine.geometry.skinned.vertex",
+                              {shadersPath / "geometry-skinned.vert.spv"});
+  mRenderStorage.createShader("__engine.pbr.default.fragment",
+                              {shadersPath / "pbr.frag.spv"});
+  mRenderStorage.createShader("__engine.skybox.default.vertex",
+                              {shadersPath / "skybox.vert.spv"});
+  mRenderStorage.createShader("__engine.skybox.default.fragment",
+                              {shadersPath / "skybox.frag.spv"});
+  mRenderStorage.createShader("__engine.shadowmap.default.vertex",
+                              {shadersPath / "shadowmap.vert.spv"});
+  mRenderStorage.createShader("__engine.shadowmap.skinned.vertex",
+                              {shadersPath / "shadowmap-skinned.vert.spv"});
 
-  mShaderLibrary.addShader(
-      "__engine.shadowmap.default.fragment",
-      mDevice->createShader({shadersPath / "shadowmap.frag.spv"}));
+  mRenderStorage.createShader("__engine.shadowmap.default.fragment",
+                              {shadersPath / "shadowmap.frag.spv"});
 
-  mShaderLibrary.addShader(
-      "__engine.text.default.vertex",
-      mDevice->createShader({shadersPath / "text.vert.spv"}));
+  mRenderStorage.createShader("__engine.text.default.vertex",
+                              {shadersPath / "text.vert.spv"});
 
-  mShaderLibrary.addShader(
-      "__engine.text.default.fragment",
-      mDevice->createShader({shadersPath / "text.frag.spv"}));
+  mRenderStorage.createShader("__engine.text.default.fragment",
+                              {shadersPath / "text.frag.spv"});
 
-  mShaderLibrary.addShader(
-      "__engine.pbr.brdfLut.compute",
-      mDevice->createShader({shadersPath / "generate-brdf-lut.comp.spv"}));
+  mRenderStorage.createShader("__engine.pbr.brdfLut.compute",
+                              {shadersPath / "generate-brdf-lut.comp.spv"});
 
-  mShaderLibrary.addShader(
-      "__engine.hdr.default.fragment",
-      mDevice->createShader({Engine::getShadersPath() / "hdr.frag.spv"}));
+  mRenderStorage.createShader("__engine.hdr.default.fragment",
+                              {Engine::getShadersPath() / "hdr.frag.spv"});
 
   generateBrdfLut();
 }
@@ -177,8 +164,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                rhi::DepthStencilClear{1.0f, 0});
 
     auto pipeline = mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-        mShaderLibrary.getShader("__engine.shadowmap.default.vertex"),
-        mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
+        mRenderStorage.getShader("__engine.shadowmap.default.vertex"),
+        mRenderStorage.getShader("__engine.shadowmap.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
@@ -186,8 +173,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
     auto skinnedPipeline =
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-            mShaderLibrary.getShader("__engine.shadowmap.skinned.vertex"),
-            mShaderLibrary.getShader("__engine.shadowmap.default.fragment"),
+            mRenderStorage.getShader("__engine.shadowmap.skinned.vertex"),
+            mRenderStorage.getShader("__engine.shadowmap.default.fragment"),
             rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
@@ -275,8 +262,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
     pass.write(sceneColorResolved, AttachmentType::Resolve, mClearColor);
 
     auto pipeline = mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-        mShaderLibrary.getShader("__engine.geometry.default.vertex"),
-        mShaderLibrary.getShader("__engine.pbr.default.fragment"),
+        mRenderStorage.getShader("__engine.geometry.default.vertex"),
+        mRenderStorage.getShader("__engine.pbr.default.fragment"),
         rhi::PipelineVertexInputLayout::create<Vertex>(),
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -285,8 +272,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
     auto skinnedPipeline =
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-            mShaderLibrary.getShader("__engine.geometry.skinned.vertex"),
-            mShaderLibrary.getShader("__engine.pbr.default.fragment"),
+            mRenderStorage.getShader("__engine.geometry.skinned.vertex"),
+            mRenderStorage.getShader("__engine.pbr.default.fragment"),
             rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -359,8 +346,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
     pass.write(sceneColorResolved, AttachmentType::Resolve, mClearColor);
 
     auto pipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("__engine.skybox.default.vertex"),
-         mShaderLibrary.getShader("__engine.skybox.default.fragment"),
+        {mRenderStorage.getShader("__engine.skybox.default.vertex"),
+         mRenderStorage.getShader("__engine.skybox.default.fragment"),
          rhi::PipelineVertexInputLayout::create<Vertex>(),
          rhi::PipelineInputAssembly{},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
@@ -405,9 +392,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
     rhi::GraphicsPipelineDescription pipelineDescription{};
     pipelineDescription.vertexShader =
-        mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+        mRenderStorage.getShader("__engine.fullscreenQuad.default.vertex");
     pipelineDescription.fragmentShader =
-        mShaderLibrary.getShader("__engine.hdr.default.fragment");
+        mRenderStorage.getShader("__engine.hdr.default.fragment");
     pipelineDescription.rasterizer = rhi::PipelineRasterizer{
         liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
         liquid::rhi::FrontFace::CounterClockwise};
@@ -462,8 +449,8 @@ void SceneRenderer::attachText(RenderGraph &graph,
 
   auto textPipeline =
       mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-          mShaderLibrary.getShader("__engine.text.default.vertex"),
-          mShaderLibrary.getShader("__engine.text.default.fragment"),
+          mRenderStorage.getShader("__engine.text.default.vertex"),
+          mRenderStorage.getShader("__engine.text.default.fragment"),
           rhi::PipelineVertexInputLayout{},
           rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
           rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -705,6 +692,8 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
 }
 
 void SceneRenderer::generateBrdfLut() {
+  auto *device = mRenderStorage.getDevice();
+
   static constexpr uint32_t GroupSize = 16;
   static constexpr uint32_t TextureSize = 512;
 
@@ -716,13 +705,13 @@ void SceneRenderer::generateBrdfLut() {
   binding0.descriptorCount = 1;
   binding0.descriptorType = rhi::DescriptorType::StorageImage;
 
-  auto layout = mDevice->createDescriptorLayout({{binding0}});
+  auto layout = device->createDescriptorLayout({{binding0}});
 
   auto pipeline = mRenderStorage.addPipeline(rhi::ComputePipelineDescription(
-      {mShaderLibrary.getShader("__engine.pbr.brdfLut.compute")}));
+      {mRenderStorage.getShader("__engine.pbr.brdfLut.compute")}));
 
-  mDevice->createPipeline(
-      mRenderStorage.getComputePipelineDescription(pipeline), pipeline);
+  device->createPipeline(mRenderStorage.getComputePipelineDescription(pipeline),
+                         pipeline);
 
   rhi::TextureDescription textureDesc;
   textureDesc.type = rhi::TextureType::Standard;
@@ -736,19 +725,19 @@ void SceneRenderer::generateBrdfLut() {
 
   auto brdfLut = mRenderStorage.createTexture(textureDesc);
 
-  auto descriptor = mDevice->createDescriptor(layout);
+  auto descriptor = device->createDescriptor(layout);
 
   std::array<rhi::TextureHandle, 1> textures{brdfLut};
   descriptor.write(0, textures, rhi::DescriptorType::StorageImage);
 
-  auto commandList = mDevice->requestImmediateCommandList();
+  auto commandList = device->requestImmediateCommandList();
   commandList.bindPipeline(pipeline);
   commandList.bindDescriptor(pipeline, 0, descriptor);
   commandList.dispatch(textureDesc.width / GroupSize,
                        textureDesc.height / GroupSize, 1);
-  mDevice->submitImmediate(commandList);
+  device->submitImmediate(commandList);
 
-  mDevice->destroyPipeline(pipeline);
+  device->destroyPipeline(pipeline);
 
   for (auto &frameData : mFrameData) {
     frameData.setBrdfLookupTable(brdfLut);

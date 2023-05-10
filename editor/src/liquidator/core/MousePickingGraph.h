@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/renderer/RenderGraph.h"
-#include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/SceneRendererFrameData.h"
 #include "liquid/asset/AssetRegistry.h"
 
@@ -21,21 +20,12 @@ public:
   /**
    * @brief Create mouse picking graph
    *
-   * @param shaderLibrary Shader library
    * @param frameData Scene renderer frame data
    * @param assetRegistry Asset registry
    * @param renderStorage Render storage
    */
-  MousePickingGraph(ShaderLibrary &shaderLibrary,
-                    const std::array<SceneRendererFrameData, 2> &frameData,
+  MousePickingGraph(const std::array<SceneRendererFrameData, 2> &frameData,
                     AssetRegistry &assetRegistry, RenderStorage &renderStorage);
-
-  ~MousePickingGraph();
-
-  MousePickingGraph(const MousePickingGraph &) = delete;
-  MousePickingGraph &operator=(const MousePickingGraph &) = delete;
-  MousePickingGraph(MousePickingGraph &&) = delete;
-  MousePickingGraph &operator=(MousePickingGraph &&) = delete;
 
   /**
    * @brief Compile the graph

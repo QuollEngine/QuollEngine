@@ -114,9 +114,10 @@ public:
    * @brief Create shader
    *
    * @param description Shader description
-   * @return Shader
+   * @param handle Shader handle
    */
-  virtual ShaderHandle createShader(const ShaderDescription &description) = 0;
+  virtual void createShader(const ShaderDescription &description,
+                            ShaderHandle handle) = 0;
 
   /**
    * @brief Create descriptor layout
@@ -179,10 +180,10 @@ public:
    * @brief Create texture view
    *
    * @param description Texture view description
-   * @return Texture view
+   * @param handle Texture view handle
    */
-  virtual TextureViewHandle
-  createTextureView(const TextureViewDescription &description) = 0;
+  virtual void createTextureView(const TextureViewDescription &description,
+                                 TextureViewHandle handle) = 0;
 
   /**
    * @brief Destroy texture view

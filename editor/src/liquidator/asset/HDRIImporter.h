@@ -1,7 +1,6 @@
 #pragma once
 
 #include "liquid/asset/AssetCache.h"
-#include "liquid/renderer/ShaderLibrary.h"
 
 namespace liquid::editor {
 
@@ -90,7 +89,6 @@ private:
 
 private:
   AssetCache &mAssetCache;
-  ShaderLibrary mShaderLibrary;
   RenderStorage &mRenderStorage;
   rhi::Descriptor mDescriptorGenerateCubemap;
   rhi::PipelineHandle mPipelineGenerateCubemap;

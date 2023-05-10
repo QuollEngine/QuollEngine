@@ -64,9 +64,9 @@ void MockRenderDevice::recreateSwapchain() {
   // Do nothing
 }
 
-ShaderHandle
-MockRenderDevice::createShader(const ShaderDescription &description) {
-  return mShaders.insert(description);
+void MockRenderDevice::createShader(const ShaderDescription &description,
+                                    ShaderHandle handle) {
+  mShaders.insert(description, handle);
 }
 
 DescriptorLayoutHandle MockRenderDevice::createDescriptorLayout(
@@ -112,9 +112,9 @@ uint32_t MockRenderDevice::getTextureUpdates(TextureHandle handle) {
   return mTextures.getEmplaced(handle);
 }
 
-TextureViewHandle
-MockRenderDevice::createTextureView(const TextureViewDescription &description) {
-  return mTextureViews.insert(description);
+void MockRenderDevice::createTextureView(
+    const TextureViewDescription &description, TextureViewHandle handle) {
+  return mTextureViews.insert(description, handle);
 }
 
 void MockRenderDevice::destroyTextureView(TextureViewHandle handle) {

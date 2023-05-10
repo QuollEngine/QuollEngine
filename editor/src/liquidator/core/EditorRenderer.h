@@ -2,7 +2,6 @@
 
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/entity/EntityDatabase.h"
-#include "liquid/renderer/ShaderLibrary.h"
 #include "liquidator/ui/IconRegistry.h"
 #include "liquidator/state/WorkspaceState.h"
 #include "liquid/renderer/SceneRenderer.h"
@@ -38,13 +37,12 @@ public:
   /**
    * @brief Create editor renderer
    *
-   * @param shaderLibrary Shader library
    * @param iconRegistry Icon registry
    * @param renderStorage Render storage
    * @param device Render device
    */
-  EditorRenderer(ShaderLibrary &shaderLibrary, IconRegistry &iconRegistry,
-                 RenderStorage &renderStorage, rhi::RenderDevice *device);
+  EditorRenderer(IconRegistry &iconRegistry, RenderStorage &renderStorage,
+                 rhi::RenderDevice *device);
 
   /**
    * @brief Attach to render graph
@@ -89,7 +87,6 @@ private:
 
 private:
   rhi::RenderDevice *mDevice;
-  ShaderLibrary mShaderLibrary;
   IconRegistry &mIconRegistry;
   Entity mSelectedEntity = Entity::Null;
 

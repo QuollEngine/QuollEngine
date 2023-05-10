@@ -148,10 +148,10 @@ void VulkanRenderDevice::destroyBuffer(BufferHandle handle) {
   mRegistry.deleteBuffer(handle);
 }
 
-ShaderHandle
-VulkanRenderDevice::createShader(const ShaderDescription &description) {
-  return mRegistry.setShader(
-      std::make_unique<VulkanShader>(description, mDevice));
+void VulkanRenderDevice::createShader(const ShaderDescription &description,
+                                      ShaderHandle handle) {
+  mRegistry.setShader(std::make_unique<VulkanShader>(description, mDevice),
+                      handle);
 }
 
 DescriptorLayoutHandle VulkanRenderDevice::createDescriptorLayout(
@@ -179,10 +179,11 @@ void VulkanRenderDevice::destroyTexture(TextureHandle handle) {
   mRegistry.deleteTexture(handle);
 }
 
-TextureViewHandle VulkanRenderDevice::createTextureView(
-    const TextureViewDescription &description) {
-  return mRegistry.setTextureView(
-      std::make_unique<VulkanTextureView>(description, mRegistry, mDevice));
+void VulkanRenderDevice::createTextureView(
+    const TextureViewDescription &description, TextureViewHandle handle) {
+  mRegistry.setTextureView(
+      std::make_unique<VulkanTextureView>(description, mRegistry, mDevice),
+      handle);
 }
 
 void VulkanRenderDevice::destroyTextureView(TextureViewHandle handle) {
