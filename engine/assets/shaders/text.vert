@@ -7,11 +7,11 @@ layout(location = 0) out vec2 outTexCoord;
 #include "bindless/camera.glsl"
 #include "bindless/text.glsl"
 
-layout(set = 2, binding = 0) uniform DrawParams {
-  uint textTransforms;
-  uint camera;
-  uint glyphs;
-  uint pad0;
+layout(set = 1, binding = 0) uniform DrawParameters {
+  TransformsArray textTransforms;
+  Camera camera;
+  GlyphsArray glyphs;
+  Empty pad0;
 }
 uDrawParams;
 

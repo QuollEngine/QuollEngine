@@ -15,10 +15,8 @@ struct GlyphItem {
   vec4 planeBounds;
 };
 
-RegisterBuffer(std430, readonly, GlyphData, { GlyphItem items[]; });
+Buffer(16) GlyphsArray { GlyphItem items[]; };
 
-#define getTextTransform(index)                                                \
-  GetBindlessResource(TransformData, uDrawParams.textTransforms).items[index]
+#define getTextTransform(index) uDrawParams.textTransforms.items[index]
 
-#define getGlyph(index)                                                        \
-  GetBindlessResource(GlyphData, uDrawParams.glyphs).items[index]
+#define getGlyph(index) uDrawParams.glyphs.items[index]

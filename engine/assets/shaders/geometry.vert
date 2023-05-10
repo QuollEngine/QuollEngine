@@ -15,15 +15,15 @@ layout(location = 3) out mat3 outTBN;
 #include "bindless/mesh.glsl"
 #include "bindless/camera.glsl"
 
-layout(set = 3, binding = 0) uniform DrawParams {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint camera;
-  uint scene;
-  uint lights;
-  uint shadows;
-  uint pad0;
+layout(set = 2, binding = 0) uniform DrawParameters {
+  TransformsArray meshTransforms;
+  TransformsArray skinnedMeshTransforms;
+  SkeletonsArray skeletons;
+  Camera camera;
+  Empty scene;
+  Empty directionalLights;
+  Empty pointLights;
+  Empty shadows;
 }
 uDrawParams;
 

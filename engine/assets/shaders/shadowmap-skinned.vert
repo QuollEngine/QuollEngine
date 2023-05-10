@@ -10,11 +10,11 @@ layout(location = 7) in vec4 inWeights;
 #include "bindless/mesh.glsl"
 #include "bindless/shadows.glsl"
 
-layout(set = 1, binding = 0) uniform DrawParams {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint shadows;
+layout(set = 0, binding = 0) uniform DrawParameters {
+  TransformsArray meshTransforms;
+  TransformsArray skinnedMeshTransforms;
+  SkeletonsArray skeletons;
+  ShadowMapsArray shadows;
 }
 uDrawParams;
 

@@ -48,6 +48,7 @@ VulkanResourceAllocator::VulkanResourceAllocator(
   createInfo.physicalDevice = physicalDevice;
   createInfo.device = device;
   createInfo.pVulkanFunctions = &vulkanFns;
+  createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
   checkForVulkanError(vmaCreateAllocator(&createInfo, &mAllocator),
                       "Failed to create VMA allocator");

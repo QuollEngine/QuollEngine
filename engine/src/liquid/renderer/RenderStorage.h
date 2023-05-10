@@ -129,15 +129,6 @@ public:
   }
 
   /**
-   * @brief Get global buffers descriptor
-   *
-   * @return Global buffers descriptor
-   */
-  inline const rhi::Descriptor &getGlobalBuffersDescriptor() const {
-    return mGlobalBuffersDescriptor;
-  }
-
-  /**
    * @brief Create material descriptor
    *
    * @param buffer Material buffer
@@ -226,7 +217,6 @@ private:
   rhi::DescriptorLayoutHandle mMaterialDescriptorLayout{0};
 
   rhi::Descriptor mGlobalTexturesDescriptor;
-  rhi::Descriptor mGlobalBuffersDescriptor;
 
   size_t mResizeListener = 0;
 

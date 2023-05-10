@@ -8,11 +8,9 @@ layout(location = 0) out vec3 outTexCoord;
 #include "bindless/base.glsl"
 #include "bindless/camera.glsl"
 
-layout(set = 2, binding = 0) uniform DrawParams {
-  uint camera;
-  uint skybox;
-  uint pad0;
-  uint pad1;
+layout(set = 1, binding = 0) uniform DrawParameters {
+  Camera camera;
+  Empty skybox;
 }
 uDrawParams;
 

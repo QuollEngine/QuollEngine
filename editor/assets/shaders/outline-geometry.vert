@@ -6,20 +6,19 @@ layout(location = 7) in vec4 inWeights;
 
 #include "bindless-editor.glsl"
 
-#define getOutlineTransform(index)                                             \
-  GetBindlessResource(TransformData, uDrawParams.outlineTransforms).items[index]
-
-layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidableParams;
-  uint camera;
-  uint gridData;
-  uint outlineTransforms;
-  uint outlineSkeletons;
+layout(set = 0, binding = 0) uniform DrawParameters {
+  Empty gizmoTransforms;
+  Empty skeletonTransforms;
+  Empty debugSkeletons;
+  Empty collidableParams;
+  Camera camera;
+  Empty gridData;
+  TransformsArray outlineTransforms;
+  Empty outlineSkeletons;
 }
 uDrawParams;
+
+#define getOutlineTransform(index) uDrawParams.outlineTransforms.items[index]
 
 /**
  * @brief Push constant for color

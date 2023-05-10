@@ -7,13 +7,13 @@ layout(location = 2) out mat4 outViewProj;
 
 #include "bindless-editor.glsl"
 
-layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidbaleParams;
-  uint camera;
-  uint gridData;
+layout(set = 0, binding = 0) uniform DrawParameters {
+  Empty gizmoTransforms;
+  Empty skeletonTransforms;
+  Empty debugSkeletons;
+  Empty collidableParams;
+  Camera camera;
+  Empty gridData;
 }
 uDrawParams;
 

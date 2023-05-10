@@ -3,23 +3,20 @@
 
 layout(location = 0) in flat uint outEntity;
 
-layout(set = 1, binding = 0) uniform DrawParams {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint camera;
-  uint entities;
-  uint selectedEntity;
-  uint pad0;
-  uint pad1;
+#include "bindless-editor.glsl"
+
+Buffer(16) SelectedEntity { uint selectedEntity; };
+
+layout(set = 0, binding = 0) uniform DrawParams {
+  Empty meshTransforms;
+  Empty skinnedMeshTransforms;
+  Empty skeletons;
+  Empty camera;
+  Empty entities;
+  SelectedEntity selectedEntity;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
 
-#include "../../../engine/assets/shaders/bindless/base.glsl"
-
-RegisterBuffer(scalar, writeonly, SelectedEntityData, { uint selectedEntity; });
-
-void main() {
-  GetBindlessResource(SelectedEntityData, uDrawParams.selectedEntity)
-      .selectedEntity = outEntity;
-}
+void main() { uDrawParams.selectedEntity.selectedEntity = outEntity; }

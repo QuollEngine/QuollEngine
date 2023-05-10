@@ -13,7 +13,6 @@ struct ShadowMapItem {
   vec4 shadowData;
 };
 
-RegisterBuffer(std430, readonly, ShadowMapData, { ShadowMapItem items[]; });
+Buffer(64) ShadowMapsArray { ShadowMapItem items[]; };
 
-#define getShadowMap(index)                                                    \
-  GetBindlessResource(ShadowMapData, uDrawParams.shadows).items[index]
+#define getShadowMap(index) uDrawParams.shadows.items[index]

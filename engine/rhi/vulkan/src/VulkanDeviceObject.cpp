@@ -9,6 +9,22 @@ namespace liquid::rhi {
 const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
 
+/**
+ * @brief Assert feature in debug mode or log fatal error in release
+ *
+ * @param featureFlag Feature flag
+ * @param name Feature name
+ */
+static void assertFeature(VkBool32 featureFlag, String name) {
+  LIQUID_ASSERT(featureFlag == VK_TRUE,
+                "Feature is not supported in physical device: " + name);
+  if (featureFlag != VK_TRUE) {
+    Engine::getLogger().fatal()
+        << "Vulkan renderer requires the following feature to be enabled: "
+        << name;
+  }
+}
+
 VulkanDeviceObject::VulkanDeviceObject(
     const VulkanPhysicalDevice &physicalDevice)
     : mPhysicalDevice(physicalDevice) {
@@ -72,38 +88,59 @@ VulkanDeviceObject::VulkanDeviceObject(
   queryResetFeatures.sType =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES;
   queryResetFeatures.pNext = nullptr;
-  queryResetFeatures.hostQueryReset = VK_TRUE;
 
   VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
   descriptorIndexingFeatures.sType =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
   descriptorIndexingFeatures.pNext = &queryResetFeatures;
-  descriptorIndexingFeatures.descriptorBindingPartiallyBound = true;
-  descriptorIndexingFeatures.runtimeDescriptorArray = true;
 
-  descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = true;
-  descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind =
-      true;
+  VkPhysicalDeviceBufferDeviceAddressFeatures bufferDeviceAddressFeatures{};
+  bufferDeviceAddressFeatures.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+  bufferDeviceAddressFeatures.pNext = &descriptorIndexingFeatures;
 
-  descriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing = true;
-  descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind =
-      true;
+  VkPhysicalDeviceFeatures2 deviceFeatures{};
+  deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+  deviceFeatures.pNext = &bufferDeviceAddressFeatures;
+  vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures);
 
-  descriptorIndexingFeatures.shaderStorageBufferArrayNonUniformIndexing = true;
-  descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind =
-      true;
-
-  auto &features = physicalDevice.getFeatures();
+  assertFeature(bufferDeviceAddressFeatures.bufferDeviceAddress,
+                "Buffer device address > Buffer device address");
+  assertFeature(descriptorIndexingFeatures.descriptorBindingPartiallyBound,
+                "Descriptor indexing > Partially bound descriptor binding");
+  assertFeature(
+      descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing,
+      "Descriptor indexing > Sampled image array non-uniform indexing");
+  assertFeature(
+      descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind,
+      "Descriptor indexing > Sampled image update after bind descriptor "
+      "binding");
+  assertFeature(
+      descriptorIndexingFeatures.shaderUniformBufferArrayNonUniformIndexing,
+      "Descriptor indexing > Uniform buffer array non-uniform indexing");
+  assertFeature(
+      descriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind,
+      "Descriptor indexing > Uniform buffer update after bind descriptor "
+      "binding");
+  assertFeature(
+      descriptorIndexingFeatures.shaderStorageBufferArrayNonUniformIndexing,
+      "Descriptor indexing > Storage buffer array non-uniform indexing");
+  assertFeature(
+      descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind,
+      "Descriptor indexing > Storage buffer update after bind descriptor "
+      "binding");
+  assertFeature(
+      descriptorIndexingFeatures.descriptorBindingStorageBufferUpdateAfterBind,
+      "Query reset > Host query reset");
 
   VkDeviceCreateInfo createDeviceInfo{};
   createDeviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createDeviceInfo.pNext = &descriptorIndexingFeatures;
+  createDeviceInfo.pNext = &deviceFeatures;
   createDeviceInfo.flags = 0;
-
   createDeviceInfo.pQueueCreateInfos = queueInfos.data();
   createDeviceInfo.queueCreateInfoCount =
       static_cast<uint32_t>(queueInfos.size());
-  createDeviceInfo.pEnabledFeatures = &features;
+  createDeviceInfo.pEnabledFeatures = nullptr;
   createDeviceInfo.enabledLayerCount = 0;
   createDeviceInfo.ppEnabledLayerNames = nullptr;
   createDeviceInfo.enabledExtensionCount =

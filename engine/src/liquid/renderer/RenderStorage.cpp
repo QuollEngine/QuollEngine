@@ -24,29 +24,6 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
     mGlobalTexturesDescriptor = mDevice->createDescriptor(layout);
   }
 
-  {
-    rhi::DescriptorLayoutBindingDescription binding0{};
-    binding0.binding = 0;
-    binding0.type = rhi::DescriptorLayoutBindingType::Dynamic;
-    binding0.name = "uGlobalBuffers";
-    binding0.descriptorCount = MaxBuffers;
-    binding0.descriptorType = rhi::DescriptorType::StorageBuffer;
-    binding0.shaderStage = rhi::ShaderStage::All;
-
-    rhi::DescriptorLayoutBindingDescription binding1{};
-    binding1.binding = 1;
-    binding1.type = rhi::DescriptorLayoutBindingType::Dynamic;
-    binding1.name = "uGlobalUniforms";
-    binding1.descriptorCount = MaxBuffers;
-    binding1.descriptorType = rhi::DescriptorType::UniformBuffer;
-    binding1.shaderStage = rhi::ShaderStage::All;
-
-    rhi::DescriptorLayoutDescription description{{binding0, binding1}};
-    auto layout = mDevice->createDescriptorLayout(description);
-
-    mGlobalBuffersDescriptor = mDevice->createDescriptor(layout);
-  }
-
   // Material descriptor layout
   {
     rhi::DescriptorLayoutBindingDescription binding{};
@@ -150,20 +127,7 @@ rhi::FramebufferHandle RenderStorage::getNewFramebufferHandle() {
 
 rhi::Buffer
 RenderStorage::createBuffer(const liquid::rhi::BufferDescription &description) {
-  auto buffer = mDevice->createBuffer(description);
-
-  std::array<rhi::BufferHandle, 1> buffers{buffer.getHandle()};
-  if (description.usage == rhi::BufferUsage::Storage) {
-    mGlobalBuffersDescriptor.write(0, buffers,
-                                   rhi::DescriptorType::StorageBuffer,
-                                   rhi::castHandleToUint(buffer.getHandle()));
-  } else if (description.usage == rhi::BufferUsage::Uniform) {
-    mGlobalBuffersDescriptor.write(1, buffers,
-                                   rhi::DescriptorType::UniformBuffer,
-                                   rhi::castHandleToUint(buffer.getHandle()));
-  }
-
-  return buffer;
+  return mDevice->createBuffer(description);
 }
 
 rhi::Descriptor RenderStorage::createMaterialDescriptor(rhi::Buffer buffer) {

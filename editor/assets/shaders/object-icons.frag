@@ -6,17 +6,17 @@ layout(location = 0) out vec4 outColor;
 
 #include "bindless-editor.glsl"
 
-layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
+layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidableParams;
-  uint camera;
-  uint gridData;
-  uint pad0;
-  uint pad1;
+  Empty gizmoTransforms;
+  Empty skeletonTransforms;
+  Empty debugSkeletons;
+  Empty collidableParams;
+  Empty camera;
+  Empty gridData;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
 
