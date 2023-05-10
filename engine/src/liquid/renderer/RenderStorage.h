@@ -43,6 +43,36 @@ public:
                 bool addToDescriptor = true);
 
   /**
+   * @brief Create texture view
+   *
+   * @param description Texture view description
+   * @param addToDescriptor Add texture to global descriptor
+   * @return Texture view handle
+   */
+  rhi::TextureViewHandle
+  createTextureView(const liquid::rhi::TextureViewDescription &description,
+                    bool addToDescriptor = true);
+
+  /**
+   * @brief Create shader
+   *
+   * @param name Shader name
+   * @param description Shader description
+   * @return Shader handle
+   */
+  rhi::ShaderHandle
+  createShader(const String &name,
+               const liquid::rhi::ShaderDescription &description);
+
+  /**
+   * @brief Get shader by name
+   *
+   * @param name Shader name
+   * @return Shader handle
+   */
+  rhi::ShaderHandle getShader(const String &name);
+
+  /**
    * @brief Add texture to global descriptor
    *
    * @param handle Texture handle
@@ -217,9 +247,13 @@ private:
   std::vector<size_t> mComputePipelineIndices;
 
   static constexpr uint32_t TextureStart = 10;
+  HandleCounter<rhi::ShaderHandle> mShaderCounter;
   HandleCounter<rhi::TextureHandle, TextureStart> mTextureCounter;
+  HandleCounter<rhi::TextureViewHandle, TextureStart> mTextureViewCounter;
   HandleCounter<rhi::RenderPassHandle> mRenderPassCounter;
   HandleCounter<rhi::FramebufferHandle> mFramebufferCounter;
+
+  std::unordered_map<String, rhi::ShaderHandle> mShaderMap;
 };
 
 } // namespace liquid

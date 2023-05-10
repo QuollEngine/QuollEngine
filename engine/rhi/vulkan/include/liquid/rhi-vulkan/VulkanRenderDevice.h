@@ -104,9 +104,10 @@ public:
    * @brief Create shader
    *
    * @param description Shader description
-   * @return Shader
+   * @param handle Shader handle
    */
-  ShaderHandle createShader(const ShaderDescription &description) override;
+  void createShader(const ShaderDescription &description,
+                    ShaderHandle handle) override;
 
   /**
    * @brief Create descriptor layout
@@ -169,10 +170,10 @@ public:
    * @brief Create texture view
    *
    * @param description Texture view description
-   * @return Texture view
+   * @param handle Texture view handle
    */
-  TextureViewHandle
-  createTextureView(const TextureViewDescription &description) override;
+  void createTextureView(const TextureViewDescription &description,
+                         TextureViewHandle handle) override;
 
   /**
    * @brief Destroy texture view

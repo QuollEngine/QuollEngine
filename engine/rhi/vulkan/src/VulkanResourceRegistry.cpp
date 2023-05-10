@@ -11,13 +11,9 @@
 
 namespace liquid::rhi {
 
-ShaderHandle
-VulkanResourceRegistry::setShader(std::unique_ptr<VulkanShader> &&shader) {
-  auto handle = ShaderHandle{mShaders.lastHandle};
-  mShaders.lastHandle++;
-
+void VulkanResourceRegistry::setShader(std::unique_ptr<VulkanShader> &&shader,
+                                       ShaderHandle handle) {
   mShaders.map.insert_or_assign(handle, std::move(shader));
-  return handle;
 }
 
 void VulkanResourceRegistry::deleteShader(ShaderHandle handle) {
@@ -46,13 +42,10 @@ void VulkanResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.map.erase(handle);
 }
 
-TextureViewHandle VulkanResourceRegistry::setTextureView(
-    std::unique_ptr<VulkanTextureView> &&textureView) {
-  auto handle = TextureViewHandle{mTextureViews.lastHandle};
-  mTextureViews.lastHandle++;
+void VulkanResourceRegistry::setTextureView(
+    std::unique_ptr<VulkanTextureView> &&textureView,
+    TextureViewHandle handle) {
   mTextureViews.map.insert_or_assign(handle, std::move(textureView));
-
-  return handle;
 }
 
 void VulkanResourceRegistry::deleteTextureView(TextureViewHandle handle) {

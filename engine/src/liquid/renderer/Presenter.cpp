@@ -6,16 +6,14 @@
 
 namespace liquid {
 
-Presenter::Presenter(ShaderLibrary &shaderLibrary, RenderStorage &renderStorage)
-    : mShaderLibrary(shaderLibrary), mRenderStorage(renderStorage) {
-  mShaderLibrary.addShader(
+Presenter::Presenter(RenderStorage &renderStorage)
+    : mRenderStorage(renderStorage) {
+  mRenderStorage.createShader(
       "__engine.fullscreenQuad.default.vertex",
-      renderStorage.getDevice()->createShader(
-          {Engine::getShadersPath() / "fullscreen-quad.vert.spv"}));
-  mShaderLibrary.addShader(
+      {Engine::getShadersPath() / "fullscreen-quad.vert.spv"});
+  mRenderStorage.createShader(
       "__engine.fullscreenQuad.default.fragment",
-      renderStorage.getDevice()->createShader(
-          {Engine::getShadersPath() / "fullscreen-quad.frag.spv"}));
+      {Engine::getShadersPath() / "fullscreen-quad.frag.spv"});
 
   rhi::DescriptorLayoutDescription desc{};
   desc.bindings.resize(1);
@@ -31,9 +29,9 @@ Presenter::Presenter(ShaderLibrary &shaderLibrary, RenderStorage &renderStorage)
   mPresentDescriptor = renderStorage.getDevice()->createDescriptor(layout);
 
   auto vertexShader =
-      mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+      mRenderStorage.getShader("__engine.fullscreenQuad.default.vertex");
   auto fragmentShader =
-      mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
+      mRenderStorage.getShader("__engine.fullscreenQuad.default.fragment");
 
   rhi::GraphicsPipelineDescription pipelineDescription{};
   pipelineDescription.vertexShader = vertexShader;
@@ -71,9 +69,9 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
                                                mPresentPass);
 
   auto vertexShader =
-      mShaderLibrary.getShader("__engine.fullscreenQuad.default.vertex");
+      mRenderStorage.getShader("__engine.fullscreenQuad.default.vertex");
   auto fragmentShader =
-      mShaderLibrary.getShader("__engine.fullscreenQuad.default.fragment");
+      mRenderStorage.getShader("__engine.fullscreenQuad.default.fragment");
 
   mRenderStorage.getGraphicsPipelineDescription(mPresentPipeline).renderPass =
       mPresentPass;

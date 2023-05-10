@@ -20,10 +20,8 @@ static inline uint64_t getAlignedBufferSize(uint64_t size) {
 
 namespace liquid {
 
-ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                             RenderStorage &renderStorage)
-    : mShaderLibrary(shaderLibrary), mRenderStorage(renderStorage),
-      mDevice(renderStorage.getDevice()) {
+ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
+    : mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()) {
   ImGui::CreateContext();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
@@ -37,12 +35,10 @@ ImguiRenderer::ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
 
   Engine::getLogger().info() << "Imgui initialized with Vulkan backend";
 
-  mShaderLibrary.addShader(
-      "__engine.imgui.default.vertex",
-      mDevice->createShader({Engine::getShadersPath() / "imgui.vert.spv"}));
-  mShaderLibrary.addShader(
-      "__engine.imgui.default.fragment",
-      mDevice->createShader({Engine::getShadersPath() / "imgui.frag.spv"}));
+  mRenderStorage.createShader("__engine.imgui.default.vertex",
+                              {Engine::getShadersPath() / "imgui.vert.spv"});
+  mRenderStorage.createShader("__engine.imgui.default.fragment",
+                              {Engine::getShadersPath() / "imgui.frag.spv"});
 
   for (auto &x : mFrameData) {
     liquid::rhi::BufferDescription vertexDesc{};
@@ -88,8 +84,8 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   pass.write(imgui, AttachmentType::Color, mClearColor);
 
   auto pipeline = mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-      mShaderLibrary.getShader("__engine.imgui.default.vertex"),
-      mShaderLibrary.getShader("__engine.imgui.default.fragment"),
+      mRenderStorage.getShader("__engine.imgui.default.vertex"),
+      mRenderStorage.getShader("__engine.imgui.default.fragment"),
       rhi::PipelineVertexInputLayout{
           {rhi::PipelineVertexInputBinding{0, sizeof(ImDrawVert),
                                            rhi::VertexInputRate::Vertex}},

@@ -6,7 +6,6 @@
 namespace liquid {
 
 SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
-                                               rhi::RenderDevice *device,
                                                size_t reservedSpace)
     : mReservedSpace(reservedSpace),
       mBindlessParams(renderStorage.getDevice()

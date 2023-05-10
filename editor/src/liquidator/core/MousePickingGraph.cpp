@@ -4,7 +4,6 @@
 namespace liquid::editor {
 
 MousePickingGraph::MousePickingGraph(
-    ShaderLibrary &shaderLibrary,
     const std::array<SceneRendererFrameData, 2> &frameData,
     AssetRegistry &assetRegistry, RenderStorage &renderStorage)
     : mRenderStorage(renderStorage), mFrameData(frameData),
@@ -22,15 +21,13 @@ MousePickingGraph::MousePickingGraph(
 
   static constexpr uint32_t FramebufferSizePercentage = 100;
 
-  shaderLibrary.addShader(
-      "mouse-picking.default.vertex",
-      device->createShader({"assets/shaders/mouse-picking.vert.spv"}));
-  shaderLibrary.addShader(
+  mRenderStorage.createShader("mouse-picking.default.vertex",
+                              {"assets/shaders/mouse-picking.vert.spv"});
+  mRenderStorage.createShader(
       "mouse-picking.skinned.vertex",
-      device->createShader({"assets/shaders/mouse-picking-skinned.vert.spv"}));
-  shaderLibrary.addShader(
-      "mouse-picking.selector.fragment",
-      device->createShader({"assets/shaders/mouse-picking.frag.spv"}));
+      {"assets/shaders/mouse-picking-skinned.vert.spv"});
+  mRenderStorage.createShader("mouse-picking.selector.fragment",
+                              {"assets/shaders/mouse-picking.frag.spv"});
 
   auto depthBuffer = mRenderGraph.create(
       [this](auto width, auto height) {
@@ -65,8 +62,8 @@ MousePickingGraph::MousePickingGraph(
 
   // Normal meshes
   auto pipeline = renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-      shaderLibrary.getShader("mouse-picking.default.vertex"),
-      shaderLibrary.getShader("mouse-picking.selector.fragment"),
+      mRenderStorage.getShader("mouse-picking.default.vertex"),
+      mRenderStorage.getShader("mouse-picking.selector.fragment"),
       rhi::PipelineVertexInputLayout::create<Vertex>(),
       rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
       rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
@@ -76,8 +73,8 @@ MousePickingGraph::MousePickingGraph(
   // Skinned meshes
   auto skinnedPipeline =
       renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
-          shaderLibrary.getShader("mouse-picking.skinned.vertex"),
-          shaderLibrary.getShader("mouse-picking.selector.fragment"),
+          mRenderStorage.getShader("mouse-picking.skinned.vertex"),
+          mRenderStorage.getShader("mouse-picking.selector.fragment"),
           rhi::PipelineVertexInputLayout::create<Vertex>(),
           rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
           rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
@@ -191,8 +188,6 @@ MousePickingGraph::MousePickingGraph(
     bp.build(device);
   }
 }
-
-MousePickingGraph::~MousePickingGraph() {}
 
 void MousePickingGraph::compile() { mRenderGraph.build(mRenderStorage); }
 

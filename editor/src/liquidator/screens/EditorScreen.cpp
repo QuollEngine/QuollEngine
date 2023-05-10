@@ -62,14 +62,12 @@ void EditorScreen::start(const Project &project) {
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
                             renderer.getRenderStorage(), true, true);
 
-  SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
-                              assetManager.getAssetRegistry(),
+  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(),
                               renderer.getRenderStorage());
 
-  ImguiRenderer imguiRenderer(mWindow, renderer.getShaderLibrary(),
-                              renderer.getRenderStorage());
+  ImguiRenderer imguiRenderer(mWindow, renderer.getRenderStorage());
 
-  Presenter presenter(renderer.getShaderLibrary(), renderer.getRenderStorage());
+  Presenter presenter(renderer.getRenderStorage());
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
@@ -124,16 +122,15 @@ void EditorScreen::start(const Project &project) {
   auto imguiPassGroup = imguiRenderer.attach(graph);
   imguiPassGroup.pass.read(scenePassGroup.finalColor);
 
-  EditorRenderer editorRenderer(renderer.getShaderLibrary(),
-                                ui.getIconRegistry(),
+  EditorRenderer editorRenderer(ui.getIconRegistry(),
                                 renderer.getRenderStorage(), mDevice);
   editorRenderer.attach(graph, scenePassGroup);
 
   sceneRenderer.attachText(graph, scenePassGroup);
 
-  MousePickingGraph mousePicking(
-      renderer.getShaderLibrary(), sceneRenderer.getFrameData(),
-      assetManager.getAssetRegistry(), renderer.getRenderStorage());
+  MousePickingGraph mousePicking(sceneRenderer.getFrameData(),
+                                 assetManager.getAssetRegistry(),
+                                 renderer.getRenderStorage());
 
   mousePicking.setFramebufferSize(mWindow);
   graph.setFramebufferExtent(mWindow.getFramebufferSize());

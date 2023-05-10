@@ -5,12 +5,10 @@
 
 namespace liquid::editor {
 
-EditorRenderer::EditorRenderer(ShaderLibrary &shaderLibrary,
-                               IconRegistry &iconRegistry,
+EditorRenderer::EditorRenderer(IconRegistry &iconRegistry,
                                RenderStorage &renderStorage,
                                rhi::RenderDevice *device)
-    : mIconRegistry(iconRegistry), mShaderLibrary(shaderLibrary),
-      mRenderStorage(renderStorage),
+    : mIconRegistry(iconRegistry), mRenderStorage(renderStorage),
       mFrameData{EditorRendererFrameData(renderStorage),
                  EditorRendererFrameData(renderStorage)},
       mDevice(device) {
@@ -20,43 +18,32 @@ EditorRenderer::EditorRenderer(ShaderLibrary &shaderLibrary,
   const auto shadersPath =
       std::filesystem::current_path() / "assets" / "shaders";
 
-  mShaderLibrary.addShader(
-      "editor-grid.vert",
-      mDevice->createShader({shadersPath / "editor-grid.vert.spv"}));
-  mShaderLibrary.addShader(
-      "editor-grid.frag",
-      mDevice->createShader({shadersPath / "editor-grid.frag.spv"}));
-  mShaderLibrary.addShader(
-      "skeleton-lines.vert",
-      mDevice->createShader({shadersPath / "skeleton-lines.vert.spv"}));
-  mShaderLibrary.addShader(
-      "skeleton-lines.frag",
-      mDevice->createShader({shadersPath / "skeleton-lines.frag.spv"}));
+  mRenderStorage.createShader("editor-grid.vert",
+                              {shadersPath / "editor-grid.vert.spv"});
+  mRenderStorage.createShader("editor-grid.frag",
+                              {shadersPath / "editor-grid.frag.spv"});
+  mRenderStorage.createShader("skeleton-lines.vert",
+                              {shadersPath / "skeleton-lines.vert.spv"});
+  mRenderStorage.createShader("skeleton-lines.frag",
+                              {shadersPath / "skeleton-lines.frag.spv"});
 
-  mShaderLibrary.addShader(
-      "object-icons.vert",
-      mDevice->createShader({shadersPath / "object-icons.vert.spv"}));
-  mShaderLibrary.addShader(
-      "object-icons.frag",
-      mDevice->createShader({shadersPath / "object-icons.frag.spv"}));
+  mRenderStorage.createShader("object-icons.vert",
+                              {shadersPath / "object-icons.vert.spv"});
+  mRenderStorage.createShader("object-icons.frag",
+                              {shadersPath / "object-icons.frag.spv"});
 
-  mShaderLibrary.addShader(
-      "collidable-shape.vert",
-      mDevice->createShader({shadersPath / "collidable-shape.vert.spv"}));
-  mShaderLibrary.addShader(
-      "collidable-shape.frag",
-      mDevice->createShader({shadersPath / "collidable-shape.frag.spv"}));
+  mRenderStorage.createShader("collidable-shape.vert",
+                              {shadersPath / "collidable-shape.vert.spv"});
+  mRenderStorage.createShader("collidable-shape.frag",
+                              {shadersPath / "collidable-shape.frag.spv"});
 
-  mShaderLibrary.addShader(
-      "outline-geometry.vert",
-      mDevice->createShader({shadersPath / "outline-geometry.vert.spv"}));
-  mShaderLibrary.addShader(
+  mRenderStorage.createShader("outline-geometry.vert",
+                              {shadersPath / "outline-geometry.vert.spv"});
+  mRenderStorage.createShader(
       "outline-skinned-geometry.vert",
-      mDevice->createShader(
-          {shadersPath / "outline-skinned-geometry.vert.spv"}));
-  mShaderLibrary.addShader(
-      "outline-color.frag",
-      mDevice->createShader({shadersPath / "outline-color.frag.spv"}));
+      {shadersPath / "outline-skinned-geometry.vert.spv"});
+  mRenderStorage.createShader("outline-color.frag",
+                              {shadersPath / "outline-color.frag.spv"});
 }
 
 void EditorRenderer::attach(RenderGraph &graph,
@@ -72,8 +59,8 @@ void EditorRenderer::attach(RenderGraph &graph,
                           AttachmentType::Resolve, glm::vec4(0.0));
 
     auto editorGridPipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("editor-grid.vert"),
-         mShaderLibrary.getShader("editor-grid.frag"),
+        {mRenderStorage.getShader("editor-grid.vert"),
+         mRenderStorage.getShader("editor-grid.frag"),
          {},
          rhi::PipelineInputAssembly{},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -84,8 +71,8 @@ void EditorRenderer::attach(RenderGraph &graph,
              rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
     auto skeletonLinesPipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("skeleton-lines.vert"),
-         mShaderLibrary.getShader("skeleton-lines.frag"),
+        {mRenderStorage.getShader("skeleton-lines.vert"),
+         mRenderStorage.getShader("skeleton-lines.frag"),
          {},
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Line, rhi::CullMode::None,
@@ -96,8 +83,8 @@ void EditorRenderer::attach(RenderGraph &graph,
              rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
 
     auto objectIconsPipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("object-icons.vert"),
-         mShaderLibrary.getShader("object-icons.frag"),
+        {mRenderStorage.getShader("object-icons.vert"),
+         mRenderStorage.getShader("object-icons.frag"),
          {},
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -110,8 +97,8 @@ void EditorRenderer::attach(RenderGraph &graph,
     static const float WireframeLineHeight = 3.0f;
 
     auto collidableShapePipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("collidable-shape.vert"),
-         mShaderLibrary.getShader("collidable-shape.frag"),
+        {mRenderStorage.getShader("collidable-shape.vert"),
+         mRenderStorage.getShader("collidable-shape.frag"),
          rhi::PipelineVertexInputLayout::create<Vertex>(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -287,8 +274,8 @@ void EditorRenderer::attach(RenderGraph &graph,
                  .reference = 1}};
 
     auto outlineGeometryStencilWritePipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("outline-geometry.vert"),
-         mShaderLibrary.getShader("outline-color.frag"),
+        {mRenderStorage.getShader("outline-geometry.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
          rhi::PipelineVertexInputLayout::create<Vertex>(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -300,8 +287,8 @@ void EditorRenderer::attach(RenderGraph &graph,
          outlineWritePipelineStencil});
 
     auto outlineGeometryPipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("outline-geometry.vert"),
-         mShaderLibrary.getShader("outline-color.frag"),
+        {mRenderStorage.getShader("outline-geometry.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
          rhi::PipelineVertexInputLayout::create<Vertex>(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -314,8 +301,8 @@ void EditorRenderer::attach(RenderGraph &graph,
 
     auto outlineSkinnedGeometryStencilWritePipeline =
         mRenderStorage.addPipeline(
-            {mShaderLibrary.getShader("outline-skinned-geometry.vert"),
-             mShaderLibrary.getShader("outline-color.frag"),
+            {mRenderStorage.getShader("outline-skinned-geometry.vert"),
+             mRenderStorage.getShader("outline-color.frag"),
              rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
              rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
              rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
@@ -328,8 +315,8 @@ void EditorRenderer::attach(RenderGraph &graph,
              outlineWritePipelineStencil});
 
     auto outlineSkinnedGeometryPipeline = mRenderStorage.addPipeline(
-        {mShaderLibrary.getShader("outline-skinned-geometry.vert"),
-         mShaderLibrary.getShader("outline-color.frag"),
+        {mRenderStorage.getShader("outline-skinned-geometry.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
          rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,

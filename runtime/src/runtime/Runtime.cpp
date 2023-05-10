@@ -43,8 +43,7 @@ void Runtime::start() {
   auto *device = backend.createDefaultDevice();
   liquid::Renderer renderer(window, device);
 
-  SceneRenderer sceneRenderer(renderer.getShaderLibrary(),
-                              assetCache.getRegistry(),
+  SceneRenderer sceneRenderer(assetCache.getRegistry(),
                               renderer.getRenderStorage());
 
   auto res = assetCache.preloadAssets(renderer.getRenderStorage());
@@ -54,8 +53,7 @@ void Runtime::start() {
 
   liquid::RenderGraph graph("Main");
 
-  liquid::Presenter presenter(renderer.getShaderLibrary(),
-                              renderer.getRenderStorage());
+  liquid::Presenter presenter(renderer.getRenderStorage());
 
   auto passData = sceneRenderer.attach(graph);
   sceneRenderer.attachText(graph, passData);

@@ -5,7 +5,6 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
-#include "liquid/renderer/ShaderLibrary.h"
 #include "liquid/renderer/RenderStorage.h"
 
 #include "liquid/imgui/Imgui.h"
@@ -73,11 +72,9 @@ public:
    * @brief Create imgui renderer
    *
    * @param window Window
-   * @param shaderLibrary Shader library
    * @param renderStorage Render storage
    */
-  ImguiRenderer(Window &window, ShaderLibrary &shaderLibrary,
-                RenderStorage &renderStorage);
+  ImguiRenderer(Window &window, RenderStorage &renderStorage);
 
   /**
    * @brief Destroy imgui renderer
@@ -161,7 +158,6 @@ private:
                          rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
 private:
-  ShaderLibrary &mShaderLibrary;
   RenderStorage &mRenderStorage;
   rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
 
