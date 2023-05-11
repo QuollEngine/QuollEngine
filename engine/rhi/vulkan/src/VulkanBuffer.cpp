@@ -10,7 +10,7 @@ VulkanBuffer::VulkanBuffer(const BufferDescription &description,
                            VulkanDeviceObject &device)
     : mDevice(device), mAllocator(allocator), mUsage(description.usage),
       mAllocationUsage(description.allocationUsage), mSize(description.size),
-      mMapped(description.mapped) {
+      mMapped(description.mapped), mDebugName(description.debugName) {
   createBuffer(description);
 }
 
@@ -38,7 +38,7 @@ void VulkanBuffer::unmap() {
 
 void VulkanBuffer::resize(size_t size) {
   mSize = size;
-  createBuffer({mUsage, mSize, nullptr, mAllocationUsage, mMapped});
+  createBuffer({mUsage, mSize, nullptr, mAllocationUsage, mMapped, mDebugName});
 }
 
 DeviceAddress VulkanBuffer::getAddress() {
@@ -116,7 +116,9 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   checkForVulkanError(vmaCreateBuffer(mAllocator, &createBufferInfo,
                                       &createAllocationInfo, &mBuffer,
                                       &mAllocation, &allocationInfo),
-                      "Cannot create buffer");
+                      "Cannot create buffer", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_BUFFER, mBuffer);
 
   if (description.mapped) {
     mMappedData = allocationInfo.pMappedData;

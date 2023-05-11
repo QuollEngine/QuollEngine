@@ -95,6 +95,11 @@ struct RenderPassDescription {
    * Pipeline bind point
    */
   PipelineBindPoint bindPoint;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

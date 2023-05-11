@@ -138,7 +138,10 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
 
   checkForVulkanError(
       vkCreateRenderPass(mDevice, &createInfo, nullptr, &mRenderPass),
-      "Failed to create render pass");
+      "Failed to create render pass", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_RENDER_PASS,
+                        mRenderPass);
 
   LOG_DEBUG_VK("Render pass created", mRenderPass);
 }

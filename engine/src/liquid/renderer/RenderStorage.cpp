@@ -18,7 +18,7 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
     binding.descriptorType = rhi::DescriptorType::CombinedImageSampler;
     binding.shaderStage = rhi::ShaderStage::Fragment;
 
-    rhi::DescriptorLayoutDescription description{{binding}};
+    rhi::DescriptorLayoutDescription description{{binding}, "Global textures"};
     auto layout = mDevice->createDescriptorLayout(description);
 
     mGlobalTexturesDescriptor = mDevice->createDescriptor(layout);
@@ -34,7 +34,7 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
     binding.descriptorType = rhi::DescriptorType::UniformBuffer;
     binding.shaderStage = rhi::ShaderStage::Fragment;
 
-    rhi::DescriptorLayoutDescription description{{binding}};
+    rhi::DescriptorLayoutDescription description{{binding}, "Material"};
     mMaterialDescriptorLayout = mDevice->createDescriptorLayout(description);
   }
 }
@@ -56,9 +56,9 @@ RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
   return handle;
 }
 
-rhi::TextureViewHandle RenderStorage::createTextureView(
-    const liquid::rhi::TextureViewDescription &description,
-    bool addToDescriptor) {
+rhi::TextureViewHandle
+RenderStorage::createTextureView(const rhi::TextureViewDescription &description,
+                                 bool addToDescriptor) {
   auto handle = mTextureViewCounter.create();
 
   mDevice->createTextureView(description, handle);
@@ -75,7 +75,7 @@ rhi::TextureViewHandle RenderStorage::createTextureView(
 
 rhi::ShaderHandle
 RenderStorage::createShader(const String &name,
-                            const liquid::rhi::ShaderDescription &description) {
+                            const rhi::ShaderDescription &description) {
   auto handle = mShaderCounter.create();
   mDevice->createShader(description, handle);
 
@@ -95,7 +95,7 @@ void RenderStorage::addToDescriptor(rhi::TextureHandle handle) {
 }
 
 rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
-    const liquid::rhi::TextureDescription &description, bool addToDescriptor) {
+    const rhi::TextureDescription &description, bool addToDescriptor) {
 
   auto fixedSizeDesc = description;
   fixedSizeDesc.width =
@@ -126,7 +126,7 @@ rhi::FramebufferHandle RenderStorage::getNewFramebufferHandle() {
 }
 
 rhi::Buffer
-RenderStorage::createBuffer(const liquid::rhi::BufferDescription &description) {
+RenderStorage::createBuffer(const rhi::BufferDescription &description) {
   return mDevice->createBuffer(description);
 }
 

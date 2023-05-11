@@ -222,10 +222,13 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
   pipelineInfo.pColorBlendState = &colorBlending;
   pipelineInfo.pDynamicState = &dynamicState;
 
-  checkForVulkanError(vkCreateGraphicsPipelines(mDevice, VK_NULL_HANDLE, 1,
-                                                &pipelineInfo, nullptr,
-                                                &mPipeline),
-                      "Failed to create graphics pipeline");
+  checkForVulkanError(
+      vkCreateGraphicsPipelines(mDevice, VK_NULL_HANDLE, 1, &pipelineInfo,
+                                nullptr, &mPipeline),
+      "Failed to create graphics pipeline", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_PIPELINE,
+                        mPipeline);
 
   LOG_DEBUG_VK("Graphics pipeline created", mPipeline);
 }
@@ -257,10 +260,13 @@ VulkanPipeline::VulkanPipeline(const ComputePipelineDescription &description,
   pipelineInfo.layout = mPipelineLayout;
   pipelineInfo.stage = stage;
 
-  checkForVulkanError(vkCreateComputePipelines(mDevice, VK_NULL_HANDLE, 1,
-                                               &pipelineInfo, nullptr,
-                                               &mPipeline),
-                      "Failed to create compute pipeline");
+  checkForVulkanError(
+      vkCreateComputePipelines(mDevice, VK_NULL_HANDLE, 1, &pipelineInfo,
+                               nullptr, &mPipeline),
+      "Failed to create compute pipeline", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_PIPELINE,
+                        mPipeline);
 
   LOG_DEBUG_VK("Compute pipeline created", mPipeline);
 }

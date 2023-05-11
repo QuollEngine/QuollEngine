@@ -32,6 +32,11 @@ struct FramebufferDescription {
    * Texture attachments
    */
   std::vector<TextureHandle> attachments;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

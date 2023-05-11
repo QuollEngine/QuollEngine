@@ -27,13 +27,13 @@ ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
 
   ImGuiIO &io = ImGui::GetIO();
-  io.BackendRendererName = "ImguiCustomBackend";
+  io.BackendRendererName = "LiquidRHI";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.IniFilename = nullptr;
 
   ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  Engine::getLogger().info() << "Imgui initialized with Vulkan backend";
+  Engine::getLogger().info() << "Imgui initialized";
 
   mRenderStorage.createShader("__engine.imgui.default.vertex",
                               {Engine::getShadersPath() / "imgui.vert.spv"});
@@ -45,12 +45,16 @@ ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
     vertexDesc.usage = liquid::rhi::BufferUsage::Vertex;
     vertexDesc.size = 1;
     vertexDesc.mapped = true;
+    vertexDesc.debugName = "imgui vertex";
+
     x.vertexBuffer = renderStorage.createBuffer(vertexDesc);
 
     liquid::rhi::BufferDescription indexDesc{};
     indexDesc.usage = liquid::rhi::BufferUsage::Index;
     indexDesc.size = 1;
     indexDesc.mapped = true;
+    indexDesc.debugName = "imgui index";
+
     x.indexBuffer = renderStorage.createBuffer(indexDesc);
   }
 }
@@ -76,6 +80,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.height = FramebufferSizePercentage;
   imguiDesc.layers = 1;
   imguiDesc.format = rhi::Format::Rgba8Srgb;
+  imguiDesc.debugName = "Imgui color";
   auto imguiReal =
       mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
   auto imgui = graph.import(imguiReal);
@@ -329,6 +334,7 @@ void ImguiRenderer::buildFonts() {
     description.width = width;
     description.height = height;
     description.format = rhi::Format::Rgba8Srgb;
+    description.debugName = "Imgui font";
     mFontTexture = mRenderStorage.createTexture(description);
 
     TextureUtils::copyDataToTexture(

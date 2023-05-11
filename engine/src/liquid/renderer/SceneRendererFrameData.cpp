@@ -31,24 +31,32 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
+    desc.debugName = "Skeletons";
+
     mSkeletonsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * sizeof(GlyphData);
+    desc.debugName = "Text glyphs";
+
     mTextGlyphsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mDirectionalLights.capacity() * sizeof(DirectionalLightData);
+    desc.debugName = "Directional lights";
+
     mDirectionalLightsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mPointLights.capacity() * sizeof(PointLightData);
+    desc.debugName = "Point lights";
+
     mPointLightsBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -56,6 +64,8 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.size = sizeof(Camera);
     desc.usage = rhi::BufferUsage::Uniform;
+    desc.debugName = "Camera";
+
     mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -63,6 +73,8 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.size = sizeof(SceneData);
     desc.usage = rhi::BufferUsage::Uniform;
+    desc.debugName = "Scene";
+
     mSceneBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -70,12 +82,16 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.size = sizeof(SkyboxData);
     desc.usage = rhi::BufferUsage::Uniform;
+    desc.debugName = "Skybox";
+
     mSkyboxBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mShadowMaps.capacity() * sizeof(ShadowMapData);
+    desc.debugName = "Shadow maps";
+
     mShadowMapsBuffer = renderStorage.createBuffer(desc);
   }
 }

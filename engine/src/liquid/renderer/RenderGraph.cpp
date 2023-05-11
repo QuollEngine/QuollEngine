@@ -451,6 +451,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
   rhi::RenderPassDescription renderPassDesc{};
   renderPassDesc.bindPoint = rhi::PipelineBindPoint::Graphics;
+  renderPassDesc.debugName = pass.getName();
 
   for (size_t i = 0; i < pass.getTextureOutputs().size(); ++i) {
     auto &output = pass.mTextureOutputs.at(i);
@@ -503,6 +504,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
   framebufferDesc.layers = layers;
   framebufferDesc.attachments = framebufferAttachments;
   framebufferDesc.renderPass = pass.mRenderPass;
+  framebufferDesc.debugName = pass.getName();
 
   if (!rhi::isHandleValid(pass.mFramebuffer)) {
     pass.mFramebuffer = storage.getNewFramebufferHandle();

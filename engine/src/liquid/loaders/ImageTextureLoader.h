@@ -24,7 +24,7 @@ public:
    * @param filename Filename
    * @return 2D Texture
    */
-  rhi::TextureHandle loadFromFile(const String &filename);
+  rhi::TextureHandle loadFromFile(const Path &filename);
 
 private:
   RenderStorage &mRenderStorage;

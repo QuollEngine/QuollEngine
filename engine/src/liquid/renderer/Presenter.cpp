@@ -23,6 +23,7 @@ Presenter::Presenter(RenderStorage &renderStorage)
   desc.bindings.at(0).descriptorType =
       rhi::DescriptorType::CombinedImageSampler;
   desc.bindings.at(0).name = "uTexture";
+  desc.debugName = "Presenter";
 
   auto layout = renderStorage.getDevice()->createDescriptorLayout(desc);
 
@@ -60,6 +61,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   rhi::RenderPassDescription renderPassDescription{};
   renderPassDescription.bindPoint = rhi::PipelineBindPoint::Graphics;
   renderPassDescription.colorAttachments.push_back(attachment);
+  renderPassDescription.debugName = "Presenter";
 
   if (mPresentPass != rhi::RenderPassHandle::Invalid) {
     mRenderStorage.getDevice()->destroyRenderPass(mPresentPass);
@@ -104,6 +106,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     framebufferDescription.layers = 1;
     framebufferDescription.renderPass = mPresentPass;
     framebufferDescription.attachments = {swapchain.textures.at(i)};
+    framebufferDescription.debugName = "Presenter";
 
     device->createFramebuffer(framebufferDescription, mFramebuffers.at(i));
   }

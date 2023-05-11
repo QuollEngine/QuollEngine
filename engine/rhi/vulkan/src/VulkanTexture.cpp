@@ -105,7 +105,9 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   checkForVulkanError(vmaCreateImage(mAllocator, &imageCreateInfo,
                                      &allocationCreateInfo, &mImage,
                                      &mAllocation, nullptr),
-                      "Failed to create texture");
+                      "Failed to create texture", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE, mImage);
 
   VkImageViewCreateInfo imageViewCreateInfo{};
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -120,8 +122,13 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.subresourceRange.levelCount = description.levels;
   imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
   checkForVulkanError(
-      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
-      "Failed to create image view");
+      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView)
+          ? VK_ERROR_FRAGMENTATION
+          : VK_ERROR_FRAGMENTATION,
+      "Failed to create image view", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE_VIEW,
+                        mImageView);
 
   VkSamplerCreateInfo samplerCreateInfo{};
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -136,7 +143,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
   checkForVulkanError(
       vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
-      "Failed to image sampler");
+      "Failed to image sampler", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_SAMPLER,
+                        mSampler);
 }
 
 VulkanTexture::~VulkanTexture() {

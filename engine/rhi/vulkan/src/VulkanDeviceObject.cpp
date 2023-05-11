@@ -58,17 +58,8 @@ VulkanDeviceObject::VulkanDeviceObject(
 
   std::vector<const char *> extensions;
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-  Engine::getLogger().info()
-      << "Vulkan extension enabled: " << VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
-  Engine::getLogger().info()
-      << "Vulkan extension enabled: "
-      << VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME;
-
   extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
-  Engine::getLogger().info() << "Vulkan extension enabled: "
-                             << VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME;
 
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
@@ -79,9 +70,6 @@ VulkanDeviceObject::VulkanDeviceObject(
   if (portabilityExt != pdExtensions.end()) {
     extensions.push_back(
         LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
-    Engine::getLogger().info()
-        << "Extension enabled: "
-        << LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
   }
 
   VkPhysicalDeviceHostQueryResetFeatures queryResetFeatures{};
@@ -152,8 +140,12 @@ VulkanDeviceObject::VulkanDeviceObject(
       "Failed to create device");
   volkLoadDevice(mDevice);
 
+  for (const auto &ext : extensions) {
+    Engine::getLogger().info() << "[VK] Device extension enabled: " << ext;
+  }
+
   Engine::getLogger().info()
-      << "Vulkan device created for " << physicalDevice.getName();
+      << "[VK] Device created for " << physicalDevice.getName();
 }
 
 VulkanDeviceObject::~VulkanDeviceObject() {
@@ -161,8 +153,53 @@ VulkanDeviceObject::~VulkanDeviceObject() {
     vkDestroyDevice(mDevice, nullptr);
 
     Engine::getLogger().info()
-        << "Vulkan device for " << mPhysicalDevice.getName() << " destroyed";
+        << "[VK] Device for " << mPhysicalDevice.getName() << " destroyed";
   }
+}
+
+static String getObjectTypeLabel(VkObjectType type) {
+  switch (type) {
+  case VK_OBJECT_TYPE_BUFFER:
+    return "buffer";
+  case VK_OBJECT_TYPE_IMAGE:
+    return "texture";
+  case VK_OBJECT_TYPE_IMAGE_VIEW:
+    return "texture view";
+  case VK_OBJECT_TYPE_SAMPLER:
+    return "sampler";
+  case VK_OBJECT_TYPE_RENDER_PASS:
+    return "render pass";
+  case VK_OBJECT_TYPE_FRAMEBUFFER:
+    return "framebuffer";
+  case VK_OBJECT_TYPE_PIPELINE:
+    return "pipeline";
+  case VK_OBJECT_TYPE_DESCRIPTOR_SET:
+    return "descriptor";
+  case VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT:
+    return "descriptor layout";
+  case VK_OBJECT_TYPE_SHADER_MODULE:
+    return "shader";
+  default:
+    return "";
+  };
+}
+
+void VulkanDeviceObject::setObjectName(const String &name, VkObjectType type,
+                                       void *handle) {
+  if (!vkSetDebugUtilsObjectNameEXT || name.empty()) {
+    return;
+  }
+
+  auto objectName = name + " " + getObjectTypeLabel(type);
+
+  VkDebugUtilsObjectNameInfoEXT nameInfo{};
+  nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+  nameInfo.pNext = nullptr;
+  nameInfo.pObjectName = objectName.c_str();
+  nameInfo.objectType = type;
+  nameInfo.objectHandle = reinterpret_cast<uint64_t &>(handle);
+
+  vkSetDebugUtilsObjectNameEXT(mDevice, &nameInfo);
 }
 
 } // namespace liquid::rhi

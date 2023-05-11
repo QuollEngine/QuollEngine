@@ -110,6 +110,8 @@ private:
   bool mMapped = false;
   size_t mSize = 0;
   void *mMappedData = nullptr;
+
+  String mDebugName;
 };
 
 } // namespace liquid::rhi

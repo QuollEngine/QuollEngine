@@ -30,6 +30,11 @@ struct TextureViewDescription {
    * Layer count
    */
   uint32_t layerCount = 1;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi
