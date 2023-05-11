@@ -34,6 +34,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
                              ? rhi::TextureType::Cubemap
                              : rhi::TextureType::Standard;
       description.format = texture.data.format;
+      description.debugName = texture.name;
 
       texture.data.deviceHandle = renderStorage.createTexture(description);
       TextureUtils::copyDataToTexture(
@@ -53,6 +54,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
                           rhi::TextureUsage::TransferDestination |
                           rhi::TextureUsage::Sampled;
       description.format = rhi::Format::Rgba8Srgb;
+      description.debugName = font.name;
 
       font.data.deviceHandle = renderStorage.createTexture(description);
       TextureUtils::copyDataToTexture(
@@ -126,6 +128,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.usage = rhi::BufferUsage::Vertex;
       description.size = vbSize;
       description.data = nullptr;
+      description.debugName = mesh.name + " vertex";
       mesh.data.vertexBuffer = renderStorage.createBuffer(description);
 
       auto *data = static_cast<Vertex *>(mesh.data.vertexBuffer.map());
@@ -145,6 +148,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
+      description.debugName = mesh.name + " index";
+
       mesh.data.indexBuffer = renderStorage.createBuffer(description);
 
       auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());
@@ -188,6 +193,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.usage = rhi::BufferUsage::Vertex;
       description.size = vbSize;
       description.data = nullptr;
+      description.debugName = mesh.name + " vertex";
+
       mesh.data.vertexBuffer = renderStorage.createBuffer(description);
 
       auto *data = static_cast<SkinnedVertex *>(mesh.data.vertexBuffer.map());
@@ -207,6 +214,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
+      description.debugName = mesh.name + " index";
+
       mesh.data.indexBuffer = renderStorage.createBuffer(description);
 
       auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());

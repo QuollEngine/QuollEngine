@@ -214,6 +214,7 @@ void EditorRenderer::attach(RenderGraph &graph,
           description.layers = 1;
           description.samples = scenePassData.sampleCount;
           description.format = rhi::Format::Depth32FloatStencil8Uint;
+          description.debugName = "Editor depth stencil for outline";
           return description;
         },
         [](auto handle, RenderStorage &storage) {});

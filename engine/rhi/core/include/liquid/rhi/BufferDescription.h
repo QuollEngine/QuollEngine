@@ -51,6 +51,11 @@ struct BufferDescription {
    * @brief Keep buffer always mapped
    */
   bool mapped = false;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

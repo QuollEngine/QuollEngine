@@ -28,12 +28,14 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * MaxNumBones * sizeof(glm::mat4);
+    desc.debugName = "Skeleton bone transforms";
     mSkeletonBoneTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.data = mGizmoTransforms.data();
+    desc.debugName = "Gizmo transforms";
     mGizmoTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -41,6 +43,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.usage = rhi::BufferUsage::Uniform;
     desc.size = sizeof(Camera);
+    desc.debugName = "Camera";
     mCameraBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -48,6 +51,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.usage = rhi::BufferUsage::Uniform;
     desc.size = sizeof(glm::uvec4);
+    desc.debugName = "Editor grid";
     mEditorGridBuffer = renderStorage.createBuffer(desc);
   }
 
@@ -55,16 +59,22 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     auto desc = defaultDesc;
     desc.size = sizeof(CollidableEntity);
     desc.usage = rhi::BufferUsage::Uniform;
+    desc.debugName = "Collidable entity";
     mCollidableEntityBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
     desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
+    desc.debugName = "Outline skeletons";
     mOutlineSkeletonsBuffer = renderStorage.createBuffer(desc);
   }
 
-  mOutlineTransformsBuffer = renderStorage.createBuffer(defaultDesc);
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Outline transforms";
+    mOutlineTransformsBuffer = renderStorage.createBuffer(desc);
+  }
 
   struct EditorDrawParams {
     rhi::DeviceAddress gizmoTransforms;

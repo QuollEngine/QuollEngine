@@ -77,6 +77,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   shadowMapDesc.height = ShadowMapDimensions;
   shadowMapDesc.layers = SceneRendererFrameData::MaxShadowMaps;
   shadowMapDesc.format = rhi::Format::Depth16Unorm;
+  shadowMapDesc.debugName = "Shadow maps";
   auto shadowmap =
       graph.create(shadowMapDesc, [this](auto handle, RenderStorage &storage) {
         for (auto &frameData : mFrameData) {
@@ -95,6 +96,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         description.layers = 1;
         description.format = rhi::Format::Rgba16Float;
         description.samples = mMaxSampleCounts;
+        description.debugName = "Sampled scene";
 
         return description;
       },
@@ -110,6 +112,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         description.layers = 1;
         description.format = rhi::Format::Rgba16Float;
         description.samples = 1;
+        description.debugName = "Resolved scene";
 
         return description;
       },
@@ -123,6 +126,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   hdrColorDesc.height = SwapchainSizePercentage;
   hdrColorDesc.layers = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
+  hdrColorDesc.debugName = "HDR";
 
   auto hdrColorReal =
       mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
@@ -138,6 +142,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         description.layers = 1;
         description.samples = mMaxSampleCounts;
         description.format = rhi::Format::Depth32Float;
+        description.debugName = "Depth buffer";
+
         return description;
       },
       [](auto handle, RenderStorage &storage) {});
@@ -712,6 +718,7 @@ void SceneRenderer::generateBrdfLut() {
   textureDesc.levels = 1;
   textureDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled;
+  textureDesc.debugName = "BRDF LUT";
 
   auto brdfLut = mRenderStorage.createTexture(textureDesc);
 

@@ -50,6 +50,11 @@ struct DescriptorLayoutDescription {
    * Descriptor layout bindings
    */
   std::vector<DescriptorLayoutBindingDescription> bindings;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

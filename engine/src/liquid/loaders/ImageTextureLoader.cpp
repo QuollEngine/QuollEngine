@@ -10,13 +10,13 @@ namespace liquid {
 ImageTextureLoader::ImageTextureLoader(RenderStorage &renderStorage)
     : mRenderStorage(renderStorage) {}
 
-rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
+rhi::TextureHandle ImageTextureLoader::loadFromFile(const Path &path) {
   liquid::rhi::TextureDescription description;
   int width = 0, height = 0, channels = 0;
 
-  void *data =
-      stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-  LIQUID_ASSERT(data, "Failed to load image: " + filename);
+  void *data = stbi_load(path.string().c_str(), &width, &height, &channels,
+                         STBI_rgb_alpha);
+  LIQUID_ASSERT(data, "Failed to load image: " + path.string());
 
   description.format = rhi::Format::Rgba8Srgb;
   description.width = width;
@@ -25,6 +25,7 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const String &filename) {
                       rhi::TextureUsage::TransferDestination |
                       rhi::TextureUsage::Sampled;
   description.type = rhi::TextureType::Standard;
+  description.debugName = path.filename().string();
 
   auto texture = mRenderStorage.createTexture(description);
 

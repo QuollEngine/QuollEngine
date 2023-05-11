@@ -48,9 +48,15 @@ VulkanTextureView::VulkanTextureView(const TextureViewDescription &description,
   createInfo.subresourceRange.baseArrayLayer = description.layer;
   createInfo.subresourceRange.layerCount = description.layerCount;
 
+  auto debugName = description.debugName.empty()
+                       ? texture->getDescription().debugName
+                       : description.debugName;
+
   checkForVulkanError(
       vkCreateImageView(mDevice, &createInfo, nullptr, &mImageView),
-      "Failed to create image view");
+      "Failed to create image view", description.debugName);
+
+  mDevice.setObjectName(debugName, VK_OBJECT_TYPE_IMAGE_VIEW, mImageView);
 
   mSampler = texture->getSampler();
 }

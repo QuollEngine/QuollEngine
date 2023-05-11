@@ -423,6 +423,11 @@ struct GraphicsPipelineDescription {
   PipelineMultisample multisample;
 
   /**
+   * Debug name
+   */
+  String debugName;
+
+  /**
    * Render pass
    */
   RenderPassHandle renderPass = RenderPassHandle::Invalid;
@@ -436,6 +441,11 @@ struct ComputePipelineDescription {
    * Compute shader
    */
   ShaderHandle computeShader = ShaderHandle::Invalid;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

@@ -66,7 +66,8 @@ static const std::map<VkResult, liquid::String> resultMap{
 
 namespace liquid::rhi {
 
-String createVulkanErrorMessage(VkResult resultCode, const String &what) {
+String createVulkanErrorMessage(VkResult resultCode, const String &what,
+                                const String &debugName) {
   String errorMessage = "[VulkanError] " + what;
   if (resultCode == VK_SUCCESS) {
     return errorMessage;
@@ -77,7 +78,13 @@ String createVulkanErrorMessage(VkResult resultCode, const String &what) {
   const auto &humanReadableResultString =
       it != resultMap.end() ? (*it).second : "Unknown Error";
 
-  return errorMessage + ": " + humanReadableResultString + " " + codeString;
+  auto debugNameString = !debugName.empty() ? "Resource: " + debugName : "";
+
+  std::stringstream ss;
+  ss << errorMessage << ": " << humanReadableResultString << " " << codeString
+     << ". " << debugNameString;
+
+  return ss.str();
 }
 
 } // namespace liquid::rhi

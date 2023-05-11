@@ -34,7 +34,10 @@ VulkanFramebuffer::VulkanFramebuffer(const FramebufferDescription &description,
 
   checkForVulkanError(
       vkCreateFramebuffer(mDevice, &createInfo, nullptr, &mFramebuffer),
-      "Failed to create framebuffer");
+      "Failed to create framebuffer", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_FRAMEBUFFER,
+                        mFramebuffer);
 }
 
 VulkanFramebuffer::~VulkanFramebuffer() {

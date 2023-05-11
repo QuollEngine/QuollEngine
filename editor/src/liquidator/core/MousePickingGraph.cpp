@@ -39,6 +39,8 @@ MousePickingGraph::MousePickingGraph(
         description.layers = 1;
         description.samples = 1;
         description.format = rhi::Format::Depth32Float;
+        description.debugName = "Mouse picking depth stencil";
+
         return description;
       },
       [](auto handle, RenderStorage &storage) {});
@@ -53,8 +55,17 @@ MousePickingGraph::MousePickingGraph(
   defaultDesc.size = sizeof(Entity) * mFrameData.at(0).getReservedSpace();
   defaultDesc.mapped = true;
 
-  mEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
-  mSkinnedEntitiesBuffer = renderStorage.createBuffer(defaultDesc);
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Entities";
+    mEntitiesBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Skinned entities";
+    mSkinnedEntitiesBuffer = renderStorage.createBuffer(desc);
+  }
 
   auto &pass = mRenderGraph.addGraphicsPass("MousePicking");
   pass.write(depthBuffer, AttachmentType::Depth,

@@ -97,7 +97,11 @@ void VulkanRenderBackend::createInstance(StringView applicationName,
 
   if (enableValidations) {
     mValidator.attachToInstance(mInstance);
-    Engine::getLogger().info() << "Vulkan validations enabled";
+    Engine::getLogger().info() << "[VK] Validations enabled";
+  }
+
+  for (const auto &ext : extensions) {
+    Engine::getLogger().info() << "[VK] Instance extension enabled: " << ext;
   }
 
   LOG_DEBUG_VK("Vulkan instance created", mInstance);

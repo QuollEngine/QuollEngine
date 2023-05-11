@@ -117,7 +117,10 @@ VkDescriptorSetLayout VulkanPipelineLayoutCache::createDescriptorLayout(
 
   checkForVulkanError(
       vkCreateDescriptorSetLayout(mDevice, &createInfo, nullptr, &layout),
-      "Failed to create descriptor set layout");
+      "Failed to create descriptor set layout", description.debugName);
+
+  mDevice.setObjectName(description.debugName,
+                        VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, layout);
 
   return layout;
 }

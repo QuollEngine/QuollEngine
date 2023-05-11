@@ -41,6 +41,15 @@ public:
    */
   inline VkDevice getVulkanHandle() const { return mDevice; }
 
+  /**
+   * @brief Set object name
+   *
+   * @param name Object name
+   * @param type Obejct type
+   * @param handle Object handle
+   */
+  void setObjectName(const String &name, VkObjectType type, void *handle);
+
 private:
   VkDevice mDevice = VK_NULL_HANDLE;
   const VulkanPhysicalDevice &mPhysicalDevice;

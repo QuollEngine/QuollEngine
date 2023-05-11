@@ -81,7 +81,11 @@ VulkanDescriptorPool::createDescriptor(DescriptorLayoutHandle layout) {
   VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
   checkForVulkanError(vkAllocateDescriptorSets(
                           mDevice, &descriptorSetAllocateInfo, &descriptorSet),
-                      "Failed to allocate descriptor set");
+                      "Failed to allocate descriptor set",
+                      description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_DESCRIPTOR_SET,
+                        descriptorSet);
 
   mDescriptorSets.push_back(descriptorSet);
 

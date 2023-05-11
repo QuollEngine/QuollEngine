@@ -67,6 +67,11 @@ struct TextureDescription {
    * Number of samples
    */
   uint32_t samples = 1;
+
+  /**
+   * Debug name
+   */
+  String debugName;
 };
 
 } // namespace liquid::rhi

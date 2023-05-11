@@ -17,6 +17,7 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
     description.size = mLastOffset + maxSize;
     description.usage = rhi::BufferUsage::Uniform;
     description.data = nullptr;
+    description.debugName = "Bindless draw parameters";
 
     mBuffer = device->createBuffer(description);
 
