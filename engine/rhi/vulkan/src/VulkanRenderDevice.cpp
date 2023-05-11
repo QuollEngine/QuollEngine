@@ -139,7 +139,7 @@ void VulkanRenderDevice::recreateSwapchain() {
 
 Buffer VulkanRenderDevice::createBuffer(const BufferDescription &description) {
   auto handle = mRegistry.setBuffer(
-      std::make_unique<VulkanBuffer>(description, mAllocator));
+      std::make_unique<VulkanBuffer>(description, mAllocator, mDevice));
 
   return Buffer{handle, mRegistry.getBuffers().at(handle).get()};
 }

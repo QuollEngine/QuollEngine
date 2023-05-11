@@ -7,21 +7,19 @@ layout(location = 7) in vec4 inWeights;
 
 layout(location = 0) out uint outEntity;
 
-#include "../../../engine/assets/shaders/bindless/base.glsl"
-#include "../../../engine/assets/shaders/bindless/mesh.glsl"
-#include "../../../engine/assets/shaders/bindless/camera.glsl"
+#include "bindless-editor.glsl"
 
-RegisterBuffer(scalar, readonly, EntityData, { uint entities[]; });
+Buffer(16) EntityData { uint entities[]; };
 
-layout(set = 1, binding = 0) uniform DrawParams {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint camera;
-  uint entities;
-  uint selectedEntity;
-  uint pad0;
-  uint pad1;
+layout(set = 0, binding = 0) uniform DrawParams {
+  TransformsArray meshTransforms;
+  TransformsArray skinnedMeshTransforms;
+  SkeletonsArray skeletons;
+  Camera camera;
+  EntityData entities;
+  Empty selectedEntity;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
 
@@ -39,6 +37,5 @@ void main() {
       getCamera().viewProj * modelMatrix * skinMatrix * vec4(inPosition, 1.0f);
 
   gl_Position = worldPosition;
-  outEntity = GetBindlessResource(EntityData, uDrawParams.entities)
-                  .entities[gl_InstanceIndex];
+  outEntity = uDrawParams.entities.entities[gl_InstanceIndex];
 }

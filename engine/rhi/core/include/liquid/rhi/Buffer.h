@@ -1,10 +1,9 @@
 #pragma once
 
 #include "liquid/rhi/RenderHandle.h"
+#include "liquid/rhi/NativeBuffer.h"
 
 namespace liquid::rhi {
-
-class NativeBuffer;
 
 /**
  * @brief Hardware buffer
@@ -57,6 +56,15 @@ public:
    * @param size New size
    */
   void resize(size_t size);
+
+  /**
+   * @brief Get device address
+   *
+   * @return Device address
+   */
+  inline DeviceAddress getAddress() const {
+    return mNativeBuffer->getAddress();
+  }
 
   /**
    * @brief Get buffer handle

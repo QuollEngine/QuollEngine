@@ -32,12 +32,10 @@ public:
    *
    * @param device Vulkan Physical Device handle
    * @param properties Physical Device properties
-   * @param features Physical Device features
    * @param queueFamilyIndices Queue Family Indices
    */
   VulkanPhysicalDevice(const VkPhysicalDevice &device,
                        const VkPhysicalDeviceProperties &properties,
-                       const VkPhysicalDeviceFeatures &features,
                        const VulkanQueueFamily &queueFamilyIndices);
 
   /**
@@ -54,15 +52,6 @@ public:
    * @return Physical device name
    */
   inline const String &getName() const { return mName; }
-
-  /**
-   * @brief Get device features
-   *
-   * @return Device features
-   */
-  inline const VkPhysicalDeviceFeatures &getFeatures() const {
-    return mFeatures;
-  }
 
   /**
    * @brief Get queue family indices
@@ -131,7 +120,6 @@ public:
 private:
   VulkanQueueFamily mQueueFamilyIndices;
   VkPhysicalDeviceProperties mProperties{};
-  VkPhysicalDeviceFeatures mFeatures{};
 
   String mName;
 

@@ -14,23 +14,11 @@ layout(location = 0) out vec4 outColor;
 #include "bindless/shadows.glsl"
 #include "bindless/lights.glsl"
 
-layout(set = 3, binding = 0) uniform DrawParams {
-  uint meshTransforms;
-  uint skinnedMeshTransforms;
-  uint skeletons;
-  uint camera;
-  uint scene;
-  uint directionalLights;
-  uint pointLights;
-  uint shadows;
-}
-uDrawParams;
+layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
+layout(set = 0, binding = 0) uniform sampler2DArray uTextures2DArray[];
+layout(set = 0, binding = 0) uniform samplerCube uTexturesCube[];
 
-layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 1, binding = 0) uniform sampler2DArray uTextures2DArray[];
-layout(set = 1, binding = 0) uniform samplerCube uTexturesCube[];
-
-layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
+layout(std140, set = 1, binding = 0) uniform MaterialDataRaw {
   uint baseColorTexture[1];
   int baseColorTextureCoord[1];
   vec4 baseColorFactor;
@@ -49,6 +37,18 @@ layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
   vec3 emissiveFactor;
 }
 uMaterialDataRaw;
+
+layout(set = 2, binding = 0) uniform DrawParameters {
+  Empty meshTransforms;
+  Empty skinnedMeshTransforms;
+  Empty skeletons;
+  Camera camera;
+  Scene scene;
+  DirectionalLightsArray directionalLights;
+  PointLightsArray pointLights;
+  ShadowMapsArray shadows;
+}
+uDrawParams;
 
 /**
  * @brief PBR Material data
@@ -327,8 +327,9 @@ getDirectionalLightSurfaceCalculations(DirectionalLightItem light, vec3 n,
 
 float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
                                    uint cascadeIndex) {
+  uint index = getScene().textures.w;
   float closestDepth =
-      texture(uTextures2DArray[getScene().textures.w],
+      texture(uTextures2DArray[index],
               vec3(shadowCoords.x + offset.x, 1.0 - shadowCoords.y + offset.y,
                    cascadeIndex))
           .r;

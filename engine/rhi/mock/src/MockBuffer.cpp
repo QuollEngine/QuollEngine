@@ -18,4 +18,8 @@ void MockBuffer::unmap() {
 
 void MockBuffer::resize(size_t size) { mData.resize(size); }
 
+rhi::DeviceAddress MockBuffer::getAddress() {
+  return rhi::DeviceAddress{reinterpret_cast<uint64_t>(this)};
+}
+
 } // namespace liquid::rhi

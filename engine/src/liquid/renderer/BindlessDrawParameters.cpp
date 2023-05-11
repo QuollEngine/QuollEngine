@@ -9,6 +9,8 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
     maxSize = std::max(range.size, maxSize);
   }
 
+  maxSize = padSizeToMinimumUniformAlignment(maxSize);
+
   // Create buffer
   {
     rhi::BufferDescription description{};

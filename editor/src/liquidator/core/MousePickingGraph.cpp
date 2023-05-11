@@ -85,14 +85,14 @@ MousePickingGraph::MousePickingGraph(
   pass.addPipeline(skinnedPipeline);
 
   struct MousePickingDrawParams {
-    rhi::BufferHandle meshTransforms;
-    rhi::BufferHandle skinnedMeshTransforms;
-    rhi::BufferHandle skeletons;
-    rhi::BufferHandle camera;
-    rhi::BufferHandle entities;
-    rhi::BufferHandle selectedEntity;
-    uint32_t pad0;
-    uint32_t pad1;
+    rhi::DeviceAddress meshTransforms;
+    rhi::DeviceAddress skinnedMeshTransforms;
+    rhi::DeviceAddress skeletons;
+    rhi::DeviceAddress camera;
+    rhi::DeviceAddress entities;
+    rhi::DeviceAddress selectedEntity;
+    rhi::DeviceAddress pad0;
+    rhi::DeviceAddress pad1;
   };
 
   size_t offset = 0;
@@ -102,7 +102,7 @@ MousePickingGraph::MousePickingGraph(
         frameData.getMeshTransformsBuffer(),
         frameData.getSkinnedMeshTransformsBuffer(),
         frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
-        mEntitiesBuffer.getHandle(), mSelectedEntityBuffer.getHandle()});
+        mEntitiesBuffer.getAddress(), mSelectedEntityBuffer.getAddress()});
   }
 
   pass.setExecutor([this, pipeline, skinnedPipeline, offset,
@@ -117,10 +117,8 @@ MousePickingGraph::MousePickingGraph(
     {
       commandList.bindPipeline(pipeline);
 
-      commandList.bindDescriptor(pipeline, 0,
-                                 renderStorage.getGlobalBuffersDescriptor());
       commandList.bindDescriptor(
-          pipeline, 1, mBindlessParams.at(frameIndex).getDescriptor(), offsets);
+          pipeline, 0, mBindlessParams.at(frameIndex).getDescriptor(), offsets);
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getMeshGroups()) {
@@ -152,8 +150,6 @@ MousePickingGraph::MousePickingGraph(
       commandList.bindPipeline(skinnedPipeline);
 
       commandList.bindDescriptor(skinnedPipeline, 0,
-                                 renderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(skinnedPipeline, 1,
                                  mBindlessParams.at(frameIndex).getDescriptor(),
                                  offsets);
 

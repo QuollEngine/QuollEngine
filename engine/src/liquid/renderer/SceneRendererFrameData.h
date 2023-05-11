@@ -438,8 +438,8 @@ public:
    *
    * @return Mesh transforms buffer
    */
-  inline rhi::BufferHandle getMeshTransformsBuffer() const {
-    return mMeshTransformsBuffer.getHandle();
+  inline rhi::DeviceAddress getMeshTransformsBuffer() const {
+    return mMeshTransformsBuffer.getAddress();
   }
 
   /**
@@ -447,8 +447,8 @@ public:
    *
    * @return Skinned mesh transforms buffer
    */
-  inline rhi::BufferHandle getSkinnedMeshTransformsBuffer() const {
-    return mSkinnedMeshTransformsBuffer.getHandle();
+  inline rhi::DeviceAddress getSkinnedMeshTransformsBuffer() const {
+    return mSkinnedMeshTransformsBuffer.getAddress();
   }
 
   /**
@@ -456,8 +456,8 @@ public:
    *
    * @return Text transforms buffer
    */
-  inline rhi::BufferHandle getTextTransformsBuffer() const {
-    return mTextTransformsBuffer.getHandle();
+  inline rhi::DeviceAddress getTextTransformsBuffer() const {
+    return mTextTransformsBuffer.getAddress();
   }
 
   /**
@@ -465,8 +465,8 @@ public:
    *
    * @return Skeletons buffer
    */
-  inline rhi::BufferHandle getSkeletonsBuffer() const {
-    return mSkeletonsBuffer.getHandle();
+  inline rhi::DeviceAddress getSkeletonsBuffer() const {
+    return mSkeletonsBuffer.getAddress();
   }
 
   /**
@@ -474,8 +474,8 @@ public:
    *
    * @return Camera buffer
    */
-  inline rhi::BufferHandle getCameraBuffer() const {
-    return mCameraBuffer.getHandle();
+  inline rhi::DeviceAddress getCameraBuffer() const {
+    return mCameraBuffer.getAddress();
   }
 
   /**
@@ -483,8 +483,8 @@ public:
    *
    * @return Scene buffer
    */
-  inline rhi::BufferHandle getSceneBuffer() const {
-    return mSceneBuffer.getHandle();
+  inline rhi::DeviceAddress getSceneBuffer() const {
+    return mSceneBuffer.getAddress();
   }
 
   /**
@@ -492,8 +492,8 @@ public:
    *
    * @return Directional lights buffer
    */
-  inline rhi::BufferHandle getDirectionalLightsBuffer() const {
-    return mDirectionalLightsBuffer.getHandle();
+  inline rhi::DeviceAddress getDirectionalLightsBuffer() const {
+    return mDirectionalLightsBuffer.getAddress();
   }
 
   /**
@@ -501,8 +501,8 @@ public:
    *
    * @return Point lights buffer
    */
-  inline rhi::BufferHandle getPointLightsBuffer() const {
-    return mPointLightsBuffer.getHandle();
+  inline rhi::DeviceAddress getPointLightsBuffer() const {
+    return mPointLightsBuffer.getAddress();
   }
 
   /**
@@ -510,8 +510,8 @@ public:
    *
    * @return Shadow maps buffer
    */
-  inline rhi::BufferHandle getShadowMapsBuffer() const {
-    return mShadowMapsBuffer.getHandle();
+  inline rhi::DeviceAddress getShadowMapsBuffer() const {
+    return mShadowMapsBuffer.getAddress();
   }
 
   /**
@@ -519,8 +519,8 @@ public:
    *
    * @return Skybox buffer
    */
-  inline rhi::BufferHandle getSkyboxBuffer() const {
-    return mSkyboxBuffer.getHandle();
+  inline rhi::DeviceAddress getSkyboxBuffer() const {
+    return mSkyboxBuffer.getAddress();
   }
 
   /**
@@ -528,8 +528,8 @@ public:
    *
    * @return Glyphs buffer
    */
-  inline rhi::BufferHandle getGlyphsBuffer() const {
-    return mTextGlyphsBuffer.getHandle();
+  inline rhi::DeviceAddress getGlyphsBuffer() const {
+    return mTextGlyphsBuffer.getAddress();
   }
 
 private:

@@ -18,9 +18,10 @@ public:
    *
    * @param description Buffer description
    * @param allocator Vulkan allocator
+   * @param device Vulkan device object
    */
   VulkanBuffer(const BufferDescription &description,
-               VulkanResourceAllocator &allocator);
+               VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
   /**
    * @brief Destroy buffer
@@ -37,12 +38,12 @@ public:
    *
    * @return Mapped data
    */
-  void *map();
+  void *map() override;
 
   /**
    * @brief Unmap buffer
    */
-  void unmap();
+  void unmap() override;
 
   /**
    * @brief Resize buffer
@@ -53,7 +54,14 @@ public:
    *
    * @param size New size
    */
-  void resize(size_t size);
+  void resize(size_t size) override;
+
+  /**
+   * @brief Get device address
+   *
+   * @return Buffer device address
+   */
+  DeviceAddress getAddress() override;
 
   /**
    * @brief Get Vulkan buffer
@@ -93,6 +101,7 @@ private:
 
 private:
   VulkanResourceAllocator &mAllocator;
+  VulkanDeviceObject &mDevice;
 
   VkBuffer mBuffer = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;

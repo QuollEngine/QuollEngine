@@ -67,22 +67,23 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
   mOutlineTransformsBuffer = renderStorage.createBuffer(defaultDesc);
 
   struct EditorDrawParams {
-    rhi::BufferHandle gizmoTransforms;
-    rhi::BufferHandle skeletonTransforms;
-    rhi::BufferHandle debugSkeletons;
-    rhi::BufferHandle collidableParams;
-    rhi::BufferHandle camera;
-    rhi::BufferHandle gridData;
-    rhi::BufferHandle outlineTransforms;
-    rhi::BufferHandle outlineSkeletons;
+    rhi::DeviceAddress gizmoTransforms;
+    rhi::DeviceAddress skeletonTransforms;
+    rhi::DeviceAddress debugSkeletons;
+    rhi::DeviceAddress collidableParams;
+    rhi::DeviceAddress camera;
+    rhi::DeviceAddress gridData;
+    rhi::DeviceAddress outlineTransforms;
+    rhi::DeviceAddress outlineSkeletons;
   };
 
   mBindlessParams.addRange(EditorDrawParams{
-      mGizmoTransformsBuffer.getHandle(), mSkeletonTransformsBuffer.getHandle(),
-      mSkeletonBoneTransformsBuffer.getHandle(),
-      mCollidableEntityBuffer.getHandle(), mCameraBuffer.getHandle(),
-      mEditorGridBuffer.getHandle(), mOutlineTransformsBuffer.getHandle(),
-      mOutlineSkeletonsBuffer.getHandle()});
+      mGizmoTransformsBuffer.getAddress(),
+      mSkeletonTransformsBuffer.getAddress(),
+      mSkeletonBoneTransformsBuffer.getAddress(),
+      mCollidableEntityBuffer.getAddress(), mCameraBuffer.getAddress(),
+      mEditorGridBuffer.getAddress(), mOutlineTransformsBuffer.getAddress(),
+      mOutlineSkeletonsBuffer.getAddress()});
 
   mBindlessParams.build(renderStorage.getDevice());
 }

@@ -11,6 +11,6 @@ struct TransformItem {
   mat4 modelMatrix;
 };
 
-RegisterBuffer(std430, readonly, TransformData, { TransformItem items[]; });
+Buffer(64) TransformsArray { TransformItem items[]; };
 
 #endif

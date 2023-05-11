@@ -4,25 +4,25 @@ layout(location = 0) in vec3 inPosition;
 
 #include "bindless-editor.glsl"
 
-RegisterUniform(CollidableParamsUniform, {
+Buffer(64) CollidableParams {
   mat4 worldTransform;
   uvec4 type;
   vec4 params;
-});
-#define GetCollidableParams()                                                  \
-  GetBindlessResource(CollidableParamsUniform, uDrawParams.collidableParams)
+};
 
-layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidableParams;
-  uint camera;
-  uint gridData;
-  uint pad0;
-  uint pad1;
+layout(set = 0, binding = 0) uniform DrawParameters {
+  Empty gizmoTransforms;
+  Empty skeletonTransforms;
+  Empty debugSkeletons;
+  CollidableParams collidableParams;
+  Camera camera;
+  Empty gridData;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
+
+#define GetCollidableParams() uDrawParams.collidableParams
 
 void main() {
   vec3 finalPosition = inPosition;

@@ -37,6 +37,13 @@ public:
   void resize(size_t size) override;
 
   /**
+   * @brief Get buffer device address
+   *
+   * @return Device address
+   */
+  rhi::DeviceAddress getAddress() override;
+
+  /**
    * @brief Get buffer description
    *
    * @return Buffer description

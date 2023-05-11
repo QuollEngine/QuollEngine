@@ -16,13 +16,10 @@ VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-
     VulkanQueueFamily queueFamilyIndices(physicalDevice, surface);
 
     devices.push_back(VulkanPhysicalDevice(physicalDevice, deviceProperties,
-                                           deviceFeatures, queueFamilyIndices));
+                                           queueFamilyIndices));
   }
 
   return devices;
@@ -31,9 +28,8 @@ VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
 VulkanPhysicalDevice::VulkanPhysicalDevice(
     const VkPhysicalDevice &device,
     const VkPhysicalDeviceProperties &properties,
-    const VkPhysicalDeviceFeatures &features,
     const VulkanQueueFamily &queueFamilyIndices)
-    : mDevice(device), mProperties(properties), mFeatures(features),
+    : mDevice(device), mProperties(properties),
       mQueueFamilyIndices(queueFamilyIndices) {
   mName = String((const char *)mProperties.deviceName);
 }

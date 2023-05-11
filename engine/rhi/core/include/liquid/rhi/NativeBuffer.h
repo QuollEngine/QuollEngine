@@ -1,5 +1,7 @@
 #pragma once
 
+#include "liquid/rhi/DeviceAddress.h"
+
 namespace liquid::rhi {
 
 /**
@@ -34,6 +36,13 @@ public:
    * @param size New size
    */
   virtual void resize(size_t size) = 0;
+
+  /**
+   * @brief Get buffer device address
+   *
+   * @return Device address
+   */
+  virtual DeviceAddress getAddress() = 0;
 };
 
 } // namespace liquid::rhi

@@ -6,8 +6,9 @@
 namespace liquid::rhi {
 
 VulkanBuffer::VulkanBuffer(const BufferDescription &description,
-                           VulkanResourceAllocator &allocator)
-    : mAllocator(allocator), mUsage(description.usage),
+                           VulkanResourceAllocator &allocator,
+                           VulkanDeviceObject &device)
+    : mDevice(device), mAllocator(allocator), mUsage(description.usage),
       mAllocationUsage(description.allocationUsage), mSize(description.size),
       mMapped(description.mapped) {
   createBuffer(description);
@@ -40,6 +41,16 @@ void VulkanBuffer::resize(size_t size) {
   createBuffer({mUsage, mSize, nullptr, mAllocationUsage, mMapped});
 }
 
+DeviceAddress VulkanBuffer::getAddress() {
+  VkBufferDeviceAddressInfo addressInfo{};
+  addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+  addressInfo.pNext = nullptr;
+  addressInfo.buffer = mBuffer;
+
+  return static_cast<DeviceAddress>(
+      vkGetBufferDeviceAddress(mDevice, &addressInfo));
+}
+
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
   mSize = description.size;
   mUsage = description.usage;
@@ -62,7 +73,7 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   }
 
   VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-  VkBufferUsageFlags bufferUsage = 0;
+  VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
   if (BitwiseEnumContains(description.usage, rhi::BufferUsage::Vertex)) {
     bufferUsage |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
   } else if (BitwiseEnumContains(description.usage, rhi::BufferUsage::Index)) {

@@ -1,4 +1,4 @@
-struct SceneData {
+Buffer(16) Scene {
   uvec4 data;
 
   uvec4 textures;
@@ -6,6 +6,4 @@ struct SceneData {
   vec4 color;
 };
 
-RegisterUniform(SceneUniform, { SceneData scene; });
-
-#define getScene() GetBindlessResource(SceneUniform, uDrawParams.scene).scene
+#define getScene() uDrawParams.scene

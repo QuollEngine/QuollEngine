@@ -13,28 +13,23 @@ struct DebugSkeletonItem {
   mat4 bones[64];
 };
 
-RegisterBuffer(std430, readonly, DebugSkeletonData,
-               { DebugSkeletonItem items[]; });
+Buffer(64) DebugSkeletonsArray { DebugSkeletonItem items[]; };
 
-#define GetDebugSkeleton(index)                                                \
-  GetBindlessResource(DebugSkeletonData, uDrawParams.debugSkeletons)           \
-      .items[index]
-
-#define getSkeletonTransform(index)                                            \
-  GetBindlessResource(TransformData, uDrawParams.skeletonTransforms)           \
-      .items[index]
-
-layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidableParams;
-  uint camera;
-  uint gridData;
-  uint pad0;
-  uint pad1;
+layout(set = 0, binding = 0) uniform DrawParameters {
+  Empty gizmoTransforms;
+  TransformsArray skeletonTransforms;
+  DebugSkeletonsArray debugSkeletons;
+  Empty collidableParams;
+  Camera camera;
+  Empty gridData;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
+
+#define GetDebugSkeleton(index) uDrawParams.debugSkeletons.items[index]
+
+#define getSkeletonTransform(index) uDrawParams.skeletonTransforms.items[index]
 
 void main() {
   gl_Position = getCamera().viewProj *

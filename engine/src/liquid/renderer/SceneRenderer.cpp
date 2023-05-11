@@ -144,10 +144,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   {
     struct ShadowDrawParams {
-      rhi::BufferHandle meshTransforms;
-      rhi::BufferHandle skinnedMeshTransforms;
-      rhi::BufferHandle skeletonTransforms;
-      rhi::BufferHandle shadows;
+      rhi::DeviceAddress meshTransforms;
+      rhi::DeviceAddress skinnedMeshTransforms;
+      rhi::DeviceAddress skeletonTransforms;
+      rhi::DeviceAddress shadows;
     };
 
     size_t shadowDrawOffset = 0;
@@ -193,11 +193,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       {
         LIQUID_PROFILE_EVENT("shadowPass::meshes");
         commandList.bindPipeline(pipeline);
-        commandList.bindDescriptor(pipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
 
         commandList.bindDescriptor(
-            pipeline, 1, frameData.getBindlessParams().getDescriptor(),
+            pipeline, 0, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         for (int32_t index = 0;
@@ -213,10 +211,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       {
         LIQUID_PROFILE_EVENT("shadowPass::skinnedMeshes");
         commandList.bindPipeline(skinnedPipeline);
-        commandList.bindDescriptor(skinnedPipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            pipeline, 1, frameData.getBindlessParams().getDescriptor(),
+            pipeline, 0, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         for (int32_t index = 0;
@@ -234,14 +230,14 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   {
     struct MeshDrawParams {
-      rhi::BufferHandle meshTransforms;
-      rhi::BufferHandle skinnedMeshTransforms;
-      rhi::BufferHandle skeletonTransforms;
-      rhi::BufferHandle camera;
-      rhi::BufferHandle scene;
-      rhi::BufferHandle directionalLights;
-      rhi::BufferHandle pointLights;
-      rhi::BufferHandle shadows;
+      rhi::DeviceAddress meshTransforms;
+      rhi::DeviceAddress skinnedMeshTransforms;
+      rhi::DeviceAddress skeletonTransforms;
+      rhi::DeviceAddress camera;
+      rhi::DeviceAddress scene;
+      rhi::DeviceAddress directionalLights;
+      rhi::DeviceAddress pointLights;
+      rhi::DeviceAddress shadows;
     };
 
     size_t pbrOffset = 0;
@@ -297,12 +293,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         LIQUID_PROFILE_EVENT("meshPass::meshes");
 
         commandList.bindPipeline(pipeline);
-        commandList.bindDescriptor(pipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            pipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
+            pipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
-            pipeline, 3, frameData.getBindlessParams().getDescriptor(),
+            pipeline, 2, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         render(commandList, pipeline, true, frameIndex);
@@ -312,12 +306,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         LIQUID_PROFILE_EVENT("meshPass::skinnedMeshes");
 
         commandList.bindPipeline(skinnedPipeline);
-        commandList.bindDescriptor(skinnedPipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            skinnedPipeline, 1, mRenderStorage.getGlobalTexturesDescriptor());
+            skinnedPipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
-            pipeline, 3, frameData.getBindlessParams().getDescriptor(),
+            skinnedPipeline, 2, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
@@ -327,10 +319,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   {
     struct SkyboxDrawParams {
-      rhi::BufferHandle camera;
-      rhi::BufferHandle skybox;
-      uint32_t pad0;
-      uint32_t pad1;
+      rhi::DeviceAddress camera;
+      rhi::DeviceAddress skybox;
     };
 
     size_t skyboxOffset = 0;
@@ -366,11 +356,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       commandList.bindPipeline(pipeline);
 
       commandList.bindDescriptor(pipeline, 0,
-                                 mRenderStorage.getGlobalBuffersDescriptor());
-      commandList.bindDescriptor(pipeline, 1,
                                  mRenderStorage.getGlobalTexturesDescriptor());
       commandList.bindDescriptor(
-          pipeline, 2, frameData.getBindlessParams().getDescriptor(), offsets);
+          pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
 
       const auto &cube = mAssetRegistry.getMeshes()
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
@@ -421,6 +409,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 
   LOG_DEBUG("Scene renderer attached to graph");
 
+  for (auto &frameData : mFrameData) {
+    frameData.getBindlessParams().build(mRenderStorage.getDevice());
+  }
+
   return SceneRenderPassData{sceneColor, sceneColorResolved, hdrColor,
                              depthBuffer, mMaxSampleCounts};
 }
@@ -428,10 +420,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
 void SceneRenderer::attachText(RenderGraph &graph,
                                const SceneRenderPassData &passData) {
   struct TextDrawParams {
-    rhi::BufferHandle textTransforms;
-    rhi::BufferHandle camera;
-    rhi::BufferHandle glyphs;
-    uint32_t pad0;
+    rhi::DeviceAddress textTransforms;
+    rhi::DeviceAddress camera;
+    rhi::DeviceAddress glyphs;
+    rhi::DeviceAddress pad0;
   };
 
   size_t textOffset = 0;
@@ -470,7 +462,7 @@ void SceneRenderer::attachText(RenderGraph &graph,
 
     std::array<uint32_t, 1> offsets{static_cast<uint32_t>(textOffset)};
     commandList.bindPipeline(textPipeline);
-    commandList.bindDescriptor(textPipeline, 2,
+    commandList.bindDescriptor(textPipeline, 1,
                                frameData.getBindlessParams().getDescriptor(),
                                offsets);
     renderText(commandList, textPipeline, frameIndex);
@@ -606,7 +598,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 2,
+        commandList.bindDescriptor(pipeline, 1,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
@@ -645,7 +637,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
       auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 2,
+        commandList.bindDescriptor(pipeline, 1,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
@@ -673,8 +665,6 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
         mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
 
     commandList.bindDescriptor(pipeline, 0,
-                               mRenderStorage.getGlobalBuffersDescriptor());
-    commandList.bindDescriptor(pipeline, 1,
                                mRenderStorage.getGlobalTexturesDescriptor());
 
     for (auto &text : texts) {

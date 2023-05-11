@@ -9,18 +9,19 @@ layout(location = 0) out vec4 outColor;
 
 #include "bindless-editor.glsl"
 
-RegisterUniform(GridData, { uvec4 gridLines; });
-#define getGridData() GetBindlessResource(GridData, uDrawParams.gridData)
+Buffer(16) GridData { uvec4 gridLines; };
 
-layout(set = 1, binding = 0) uniform DrawParameters {
-  uint gizmoTransforms;
-  uint skeletonTransforms;
-  uint debugSkeletons;
-  uint collidableParams;
-  uint camera;
-  uint gridData;
-  uint pad0;
-  uint pad1;
+#define getGridData() uDrawParams.gridData
+
+layout(set = 0, binding = 0) uniform DrawParameters {
+  Empty gizmoTransforms;
+  Empty skeletonTransforms;
+  Empty debugSkeletons;
+  Empty collidableParams;
+  Empty camera;
+  GridData gridData;
+  Empty pad0;
+  Empty pad1;
 }
 uDrawParams;
 

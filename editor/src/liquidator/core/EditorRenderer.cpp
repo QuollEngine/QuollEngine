@@ -127,10 +127,8 @@ void EditorRenderer::attach(RenderGraph &graph,
         LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
 
         commandList.bindPipeline(collidableShapePipeline);
-        commandList.bindDescriptor(collidableShapePipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            collidableShapePipeline, 1,
+            collidableShapePipeline, 0,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
         auto type = frameData.getCollidableShapeType();
@@ -152,10 +150,8 @@ void EditorRenderer::attach(RenderGraph &graph,
         LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
 
         commandList.bindPipeline(editorGridPipeline);
-        commandList.bindDescriptor(editorGridPipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            editorGridPipeline, 1,
+            editorGridPipeline, 0,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
         static constexpr uint32_t GridPlaneNumVertices = 6;
@@ -167,10 +163,8 @@ void EditorRenderer::attach(RenderGraph &graph,
         LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
 
         commandList.bindPipeline(skeletonLinesPipeline);
-        commandList.bindDescriptor(skeletonLinesPipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            skeletonLinesPipeline, 1,
+            skeletonLinesPipeline, 0,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
         const auto &numBones = frameData.getBoneCounts();
@@ -185,13 +179,11 @@ void EditorRenderer::attach(RenderGraph &graph,
         LIQUID_PROFILE_EVENT("EditorPass::ObjectGizmos");
 
         commandList.bindPipeline(objectIconsPipeline);
-        commandList.bindDescriptor(objectIconsPipeline, 0,
-                                   mRenderStorage.getGlobalBuffersDescriptor());
         commandList.bindDescriptor(
-            objectIconsPipeline, 1,
+            objectIconsPipeline, 0,
             mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
-            objectIconsPipeline, 2,
+            objectIconsPipeline, 1,
             frameData.getBindlessParams().getDescriptor(), offsets);
 
         uint32_t previousInstance = 0;
@@ -445,10 +437,8 @@ void EditorRenderer::renderOutlines(rhi::RenderCommandList &commandList,
   std::array<uint32_t, 1> offsets{0};
 
   commandList.bindPipeline(pipeline);
-  commandList.bindDescriptor(pipeline, 0,
-                             mRenderStorage.getGlobalBuffersDescriptor());
   commandList.bindDescriptor(
-      pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
+      pipeline, 0, frameData.getBindlessParams().getDescriptor(), offsets);
 
   struct PushConstants {
     glm::vec4 color;
