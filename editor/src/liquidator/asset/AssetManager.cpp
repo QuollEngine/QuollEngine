@@ -99,7 +99,7 @@ Result<Path> AssetManager::importAsset(const Path &source,
                                res.getError());
   }
 
-  return Result<Path>::Ok(targetAssetPath);
+  return Result<Path>::Ok(targetAssetPath, res.getWarnings());
 }
 
 void AssetManager::generatePreview(const Path &originalAssetPath,
