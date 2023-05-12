@@ -122,9 +122,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.subresourceRange.levelCount = description.levels;
   imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
   checkForVulkanError(
-      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView)
-          ? VK_ERROR_FRAGMENTATION
-          : VK_ERROR_FRAGMENTATION,
+      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
       "Failed to create image view", description.debugName);
 
   mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE_VIEW,
