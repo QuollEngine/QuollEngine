@@ -108,22 +108,34 @@ void AssetBrowser::render(AssetManager &assetManager,
   static constexpr uint32_t TextWidth = ItemWidth - 8;
 
   if (mDirectoryChanged) {
-    if (mCurrentDirectory.empty()) {
-      mCurrentDirectory = assetManager.getAssetsPath();
+    if (mContentsDirectory.empty()) {
+      mContentsDirectory = assetManager.getAssetsPath();
+      mAssetDirectory = assetManager.getAssetsPath();
     }
     mEntries.clear();
     for (auto &dirEntry :
-         std::filesystem::directory_iterator(mCurrentDirectory)) {
+         std::filesystem::directory_iterator(mContentsDirectory)) {
+
+      bool isEngineDirectory = mContentsDirectory != mAssetDirectory;
+
+      if (isEngineDirectory & dirEntry.is_directory()) {
+        continue;
+      }
 
       Entry entry;
       entry.path = dirEntry.path();
       const auto &engineAssetPath =
-          assetManager.findEngineAssetPath(entry.path);
+          isEngineDirectory ? entry.path
+                            : assetManager.findEngineAssetPath(entry.path);
       const auto &pair =
           assetManager.getAssetRegistry().getAssetByPath(engineAssetPath);
       entry.isDirectory = dirEntry.is_directory();
       entry.assetType = pair.first;
       entry.asset = pair.second;
+
+      if (isEngineDirectory && entry.assetType == AssetType::Prefab) {
+        continue;
+      }
 
       entry.icon = entry.isDirectory ? EditorIcon::Directory
                                      : getIconFromAssetType(entry.assetType);
@@ -135,7 +147,7 @@ void AssetBrowser::render(AssetManager &assetManager,
             assetManager.getAssetRegistry()
                 .getTextures()
                 .getAsset(static_cast<TextureAssetHandle>(pair.second))
-                .preview;
+                .data.deviceHandle;
       } else if (entry.assetType == AssetType::Environment) {
         entry.preview =
             assetManager.getAssetRegistry()
@@ -171,44 +183,29 @@ void AssetBrowser::render(AssetManager &assetManager,
   }
 
   if (auto _ = widgets::Window("Asset Browser")) {
-    if (auto _ = widgets::ContextMenu()) {
-      if (ImGui::MenuItem("Import asset")) {
-        handleAssetImport();
-      }
-
-      if (ImGui::MenuItem("Create directory")) {
-        mHasStagingEntry = true;
-        mStagingEntry.icon = EditorIcon::Directory;
-        mStagingEntry.isDirectory = true;
-        mStagingEntry.isEditable = true;
-      }
-
-      if (ImGui::MenuItem("Create Lua script")) {
-        mHasStagingEntry = true;
-        mStagingEntry.icon = EditorIcon::Script;
-        mStagingEntry.isDirectory = false;
-        mStagingEntry.isEditable = true;
-        mStagingEntry.assetType = AssetType::LuaScript;
-      }
-    }
-
     const auto &size = ImGui::GetContentRegionAvail();
     auto itemsPerRow = static_cast<int32_t>(size.x / ItemWidth);
 
     if (itemsPerRow == 0)
       itemsPerRow = 1;
 
-    auto relativePath = std::filesystem::relative(mCurrentDirectory,
+    auto relativePath = std::filesystem::relative(mAssetDirectory,
                                                   assetManager.getAssetsPath());
 
-    if (mCurrentDirectory != assetManager.getAssetsPath()) {
+    if (mAssetDirectory != assetManager.getAssetsPath()) {
       if (ImGui::Button("Back")) {
-        mCurrentDirectory = mCurrentDirectory.parent_path();
+        mAssetDirectory = mAssetDirectory.parent_path();
+        mContentsDirectory = mAssetDirectory;
         mDirectoryChanged = true;
       }
       ImGui::SameLine();
     }
+
     ImGui::Text("%s", relativePath.string().c_str());
+
+    bool itemContextMenu = false;
+
+    std::optional<Entry> rightClickedEntry;
 
     if (ImGui::BeginTable("CurrentDir", itemsPerRow,
                           ImGuiTableFlags_NoPadInnerX)) {
@@ -236,7 +233,8 @@ void AssetBrowser::render(AssetManager &assetManager,
           // Double click opens the file/directory
           if (ImGui::IsMouseDoubleClicked(0)) {
             if (entry.isDirectory) {
-              mCurrentDirectory = entry.path;
+              mAssetDirectory = entry.path;
+              mContentsDirectory = entry.path;
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
               actionExecutor.execute<SpawnPrefabAtView>(
@@ -275,6 +273,24 @@ void AssetBrowser::render(AssetManager &assetManager,
           ImGui::EndTooltip();
         }
 
+        if (entry.assetType == AssetType::Prefab) {
+          if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+            ImGui::OpenPopup(id.c_str(), ImGuiPopupFlags_MouseButtonRight);
+          }
+
+          if (ImGui::BeginPopup(id.c_str())) {
+            if (ImGui::MenuItem("View contents")) {
+              auto relativePath = std::filesystem::relative(
+                  entry.path, assetManager.getAssetsPath());
+
+              mContentsDirectory = assetManager.getCachePath() / relativePath;
+              mAssetDirectory = entry.path;
+              mDirectoryChanged = true;
+            }
+            ImGui::EndPopup();
+          }
+        }
+
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ItemHeight);
 
         renderEntry(entry);
@@ -304,7 +320,33 @@ void AssetBrowser::render(AssetManager &assetManager,
       }
       ImGui::TableNextRow();
     }
+
     ImGui::EndTable();
+
+    if (ImGui::BeginPopupContextWindow(
+            "AssetBrowserPopup", ImGuiPopupFlags_NoOpenOverItems |
+                                     ImGuiPopupFlags_MouseButtonRight |
+                                     ImGuiPopupFlags_NoOpenOverExistingPopup)) {
+      if (ImGui::MenuItem("Import asset")) {
+        handleAssetImport();
+      }
+
+      if (ImGui::MenuItem("Create directory")) {
+        mHasStagingEntry = true;
+        mStagingEntry.icon = EditorIcon::Directory;
+        mStagingEntry.isDirectory = true;
+        mStagingEntry.isEditable = true;
+      }
+
+      if (ImGui::MenuItem("Create Lua script")) {
+        mHasStagingEntry = true;
+        mStagingEntry.icon = EditorIcon::Script;
+        mStagingEntry.isDirectory = false;
+        mStagingEntry.isEditable = true;
+        mStagingEntry.assetType = AssetType::LuaScript;
+      }
+      ImGui::EndPopup();
+    }
   }
 
   mStatusDialog.render();
@@ -315,7 +357,7 @@ void AssetBrowser::render(AssetManager &assetManager,
 void AssetBrowser::reload() { mDirectoryChanged = true; }
 
 void AssetBrowser::handleAssetImport() {
-  auto res = mAssetLoader.loadFromFileDialog(mCurrentDirectory);
+  auto res = mAssetLoader.loadFromFileDialog(mAssetDirectory);
 
   if (res.hasError()) {
     mStatusDialog.setTitle("Import failed");
@@ -342,7 +384,7 @@ void AssetBrowser::handleAssetImport() {
 
 void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
   if (!mStagingEntry.clippedName.empty()) {
-    auto path = mCurrentDirectory / mStagingEntry.clippedName;
+    auto path = mAssetDirectory / mStagingEntry.clippedName;
     if (mStagingEntry.isDirectory) {
       assetManager.createDirectory(path);
     } else if (mStagingEntry.assetType == AssetType::LuaScript) {
