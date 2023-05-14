@@ -81,7 +81,8 @@ private:
   bool mInitialFocusSet = false;
 
   std::vector<Entry> mEntries;
-  std::filesystem::path mCurrentDirectory;
+  Path mAssetDirectory;
+  Path mContentsDirectory;
   bool mDirectoryChanged = true;
   size_t mSelected = std::numeric_limits<size_t>::max();
   AssetLoader &mAssetLoader;
