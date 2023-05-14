@@ -15,7 +15,8 @@ layout(location = 3) out mat3 outTBN;
 #include "bindless/mesh.glsl"
 #include "bindless/camera.glsl"
 
-layout(set = 2, binding = 0) uniform DrawParameters {
+layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
+layout(set = 1, binding = 0) uniform DrawParameters {
   TransformsArray meshTransforms;
   TransformsArray skinnedMeshTransforms;
   SkeletonsArray skeletons;

@@ -22,7 +22,7 @@ public:
    * @brief Spawn empty entity
    *
    * @param transform Local transform
-   * @return Entity
+   * @return Spawned entity
    */
   Entity spawnEmpty(LocalTransform transform);
 
@@ -35,6 +35,15 @@ public:
    */
   std::vector<Entity> spawnPrefab(PrefabAssetHandle handle,
                                   LocalTransform transform);
+
+  /**
+   * Spawn sprite
+   *
+   * @param handle Texture asset handle
+   * @param transform Local transform
+   * @return Spawned entity
+   */
+  Entity spawnSprite(TextureAssetHandle handle, LocalTransform transform);
 
 private:
   EntityDatabase &mEntityDatabase;

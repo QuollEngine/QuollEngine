@@ -37,6 +37,8 @@ EditorRenderer::EditorRenderer(IconRegistry &iconRegistry,
   mRenderStorage.createShader("collidable-shape.frag",
                               {shadersPath / "collidable-shape.frag.spv"});
 
+  mRenderStorage.createShader("outline-sprite.vert",
+                              {shadersPath / "outline-sprite.vert.spv"});
   mRenderStorage.createShader("outline-geometry.vert",
                               {shadersPath / "outline-geometry.vert.spv"});
   mRenderStorage.createShader(
@@ -68,7 +70,10 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
              true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
              rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
+         {},
+         {},
+         "editor grid"});
 
     auto skeletonLinesPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("skeleton-lines.vert"),
@@ -80,7 +85,10 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
              true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
              rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
+         {},
+         {},
+         "skeleton lines"});
 
     auto objectIconsPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("object-icons.vert"),
@@ -92,7 +100,10 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
              true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
              rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
+         {},
+         {},
+         "object icons"});
 
     static const float WireframeLineHeight = 3.0f;
 
@@ -107,7 +118,10 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
              true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::DstAlpha,
              rhi::BlendOp::Add, rhi::BlendFactor::SrcAlpha,
-             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}}});
+             rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
+         {},
+         {},
+         "collidable shape"});
 
     editorDebugPass.addPipeline(editorGridPipeline);
     editorDebugPass.addPipeline(skeletonLinesPipeline);
@@ -266,6 +280,32 @@ void EditorRenderer::attach(RenderGraph &graph,
                  .writeMask = 0x00,
                  .reference = 1}};
 
+    auto outlineSpriteStencilWritePipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("outline-sprite.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add}}},
+         outlineWritePipelineStencil});
+
+    auto outlineSpritePipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("outline-sprite.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add}}},
+         outlinePipelineStencil});
+
     auto outlineGeometryStencilWritePipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-geometry.vert"),
          mRenderStorage.getShader("outline-color.frag"),
@@ -317,13 +357,16 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
          outlinePipelineStencil});
 
+    outlinePass.addPipeline(outlineSpriteStencilWritePipeline);
+    outlinePass.addPipeline(outlineSpritePipeline);
     outlinePass.addPipeline(outlineGeometryStencilWritePipeline);
     outlinePass.addPipeline(outlineGeometryPipeline);
     outlinePass.addPipeline(outlineSkinnedGeometryStencilWritePipeline);
     outlinePass.addPipeline(outlineSkinnedGeometryPipeline);
 
     outlinePass.setExecutor(
-        [outlineGeometryStencilWritePipeline, outlineGeometryPipeline,
+        [outlineSpriteStencilWritePipeline, outlineSpritePipeline,
+         outlineGeometryStencilWritePipeline, outlineGeometryPipeline,
          outlineSkinnedGeometryStencilWritePipeline,
          outlineSkinnedGeometryPipeline,
          this](rhi::RenderCommandList &commandList, uint32_t frameIndex) {
@@ -332,22 +375,30 @@ void EditorRenderer::attach(RenderGraph &graph,
 
           auto &frameData = mFrameData.at(frameIndex);
 
+          auto spriteEnd =
+              static_cast<uint32_t>(frameData.getOutlineSpriteEnd());
           auto meshEnd = static_cast<uint32_t>(frameData.getOutlineMeshEnd());
           auto skinnedMeshEnd =
               static_cast<uint32_t>(frameData.getOutlineSkinnedMeshEnd());
 
-          renderOutlines(commandList, frameData,
-                         outlineGeometryStencilWritePipeline, 0, meshEnd,
-                         glm::vec4{0.0f}, 1.0f);
-          renderOutlines(commandList, frameData, outlineGeometryPipeline, 0,
-                         meshEnd, OutlineColor, OutlineScale);
+          renderSpriteOutlines(commandList, frameData,
+                               outlineSpriteStencilWritePipeline, 0, spriteEnd,
+                               glm::vec4{0.0f}, 1.0f);
+          renderSpriteOutlines(commandList, frameData, outlineSpritePipeline, 0,
+                               spriteEnd, OutlineColor, OutlineScale);
 
-          renderOutlines(commandList, frameData,
-                         outlineSkinnedGeometryStencilWritePipeline, meshEnd,
-                         skinnedMeshEnd, glm::vec4{0.0f}, 1.0f);
+          renderMeshOutlines(commandList, frameData,
+                             outlineGeometryStencilWritePipeline, spriteEnd,
+                             meshEnd, glm::vec4{0.0f}, 1.0f);
+          renderMeshOutlines(commandList, frameData, outlineGeometryPipeline,
+                             spriteEnd, meshEnd, OutlineColor, OutlineScale);
 
-          renderOutlines(commandList, frameData, outlineSkinnedGeometryPipeline,
-                         meshEnd, skinnedMeshEnd, OutlineColor, OutlineScale);
+          renderMeshOutlines(commandList, frameData,
+                             outlineSkinnedGeometryStencilWritePipeline,
+                             meshEnd, skinnedMeshEnd, glm::vec4{0.0f}, 1.0f);
+          renderMeshOutlines(commandList, frameData,
+                             outlineSkinnedGeometryPipeline, meshEnd,
+                             skinnedMeshEnd, OutlineColor, OutlineScale);
         });
   }
 
@@ -363,7 +414,11 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
   frameData.clear();
 
   if (entityDatabase.exists(state.selectedEntity)) {
-    if (entityDatabase.has<Mesh>(state.selectedEntity)) {
+    if (entityDatabase.has<Sprite>(state.selectedEntity)) {
+      const auto &world =
+          entityDatabase.get<WorldTransform>(state.selectedEntity);
+      frameData.addSpriteOutline(world.worldTransform);
+    } else if (entityDatabase.has<Mesh>(state.selectedEntity)) {
       auto handle = entityDatabase.get<Mesh>(state.selectedEntity).handle;
 
       const auto &world =
@@ -429,12 +484,42 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
   frameData.updateBuffers();
 }
 
-void EditorRenderer::renderOutlines(rhi::RenderCommandList &commandList,
-                                    EditorRendererFrameData &frameData,
-                                    rhi::PipelineHandle pipeline,
-                                    uint32_t instanceStart,
-                                    uint32_t instanceEnd, glm::vec4 color,
-                                    float scale) {
+void EditorRenderer::renderSpriteOutlines(rhi::RenderCommandList &commandList,
+                                          EditorRendererFrameData &frameData,
+                                          rhi::PipelineHandle pipeline,
+                                          uint32_t instanceStart,
+                                          uint32_t instanceEnd, glm::vec4 color,
+                                          float scale) {
+  std::array<uint32_t, 1> offsets{0};
+
+  commandList.bindPipeline(pipeline);
+  commandList.bindDescriptor(
+      pipeline, 0, frameData.getBindlessParams().getDescriptor(), offsets);
+
+  struct PushConstants {
+    glm::vec4 color;
+    glm::vec4 scale;
+    glm::uvec4 index;
+  };
+
+  PushConstants pc{};
+  pc.color = color;
+  pc.scale = glm::vec4(scale);
+  pc.index.x = instanceStart;
+
+  commandList.pushConstants(
+      pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+      sizeof(PushConstants), &pc);
+
+  commandList.draw(4, 0, instanceEnd - instanceStart, instanceStart);
+}
+
+void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,
+                                        EditorRendererFrameData &frameData,
+                                        rhi::PipelineHandle pipeline,
+                                        uint32_t instanceStart,
+                                        uint32_t instanceEnd, glm::vec4 color,
+                                        float scale) {
   std::array<uint32_t, 1> offsets{0};
 
   commandList.bindPipeline(pipeline);

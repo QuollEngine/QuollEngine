@@ -20,7 +20,7 @@ class EntitySpawnerScriptingInterface::LuaInterface
           EntitySpawnerScriptingInterface::LuaInterface> {
 public:
   /**
-   * @brief Get first entity by name
+   * @brief Spawn empty entity
    *
    * @param state Lua state
    * @return Number of arguments
@@ -28,7 +28,7 @@ public:
   static int spawnEmpty(void *state);
 
   /**
-   * @brief Delete entity
+   * @brief Spawn prefab
    *
    * @param state Lua state
    * @return Number of arguments
@@ -36,11 +36,20 @@ public:
   static int spawnPrefab(void *state);
 
   /**
+   * @brief Spawn sprite
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int spawnSprite(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 2> Fields{
+  static constexpr std::array<InterfaceField, 3> Fields{
       InterfaceField{"spawn_empty", spawnEmpty},
-      InterfaceField{"spawn_prefab", spawnPrefab}};
+      InterfaceField{"spawn_prefab", spawnPrefab},
+      InterfaceField{"spawn_sprite", spawnSprite}};
 
   /**
    * @brief Get component name in scripts

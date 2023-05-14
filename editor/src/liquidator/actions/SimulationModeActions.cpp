@@ -28,6 +28,24 @@ bool StartSimulationMode::predicate(WorkspaceState &state) {
 ActionExecutorResult StopSimulationMode::onExecute(WorkspaceState &state) {
   state.mode = WorkspaceMode::Edit;
   state.activeCamera = state.camera;
+
+  bool preserveSelectedEntity = true;
+  {
+    auto current = state.selectedEntity;
+
+    preserveSelectedEntity = state.scene.entityDatabase.exists(current);
+    while (preserveSelectedEntity &&
+           state.scene.entityDatabase.has<Parent>(current)) {
+      auto parent = state.scene.entityDatabase.get<Parent>(current).parent;
+      preserveSelectedEntity = state.scene.entityDatabase.exists(parent);
+      current = parent;
+    }
+  }
+
+  if (!preserveSelectedEntity) {
+    state.selectedEntity = Entity::Null;
+  }
+
   return ActionExecutorResult{};
 }
 

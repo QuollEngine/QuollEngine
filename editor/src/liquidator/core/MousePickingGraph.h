@@ -80,8 +80,9 @@ private:
 
   AssetRegistry &mAssetRegistry;
 
-  rhi::Buffer mEntitiesBuffer;
-  rhi::Buffer mSkinnedEntitiesBuffer;
+  rhi::Buffer mSpriteEntitiesBuffer;
+  rhi::Buffer mMeshEntitiesBuffer;
+  rhi::Buffer mSkinnedMeshEntitiesBuffer;
   rhi::Buffer mSelectedEntityBuffer;
 
   glm::vec2 mMousePos{};

@@ -183,6 +183,53 @@ TEST_F(SceneLoaderTransformTest,
   EXPECT_EQ(transform.localScale, validScale);
 }
 
+using SceneLoaderSpriteTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderSpriteTest,
+       DoesNotCreateSpriteComponentIfSpriteFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Sprite>(entity));
+}
+
+TEST_F(SceneLoaderSpriteTest,
+       DoesNotCreateSpriteComponentIfSpriteFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["sprite"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::Sprite>(entity));
+  }
+}
+
+TEST_F(SceneLoaderSpriteTest,
+       DoesNotCreateSpriteComponentIfNoTextureAssetInRegistry) {
+  auto [node, entity] = createNode();
+  node["components"]["sprite"] = "hello.ktx2";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::Sprite>(entity));
+}
+
+TEST_F(SceneLoaderSpriteTest, CreatesSpriteComponentWithFileDataIfValidField) {
+  liquid::AssetData<liquid::TextureAsset> data{};
+  data.relativePath = liquid::Path("test") / "hello.ktx";
+  auto handle = assetRegistry.getTextures().addAsset(data);
+
+  auto [node, entity] = createNode();
+  node["components"]["sprite"] = data.relativePath.string();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::Sprite>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::Sprite>(entity).handle, handle);
+}
+
 using SceneLoaderMeshTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderMeshTest, DoesNotCreateMeshComponentIfMeshFieldIsNotDefined) {

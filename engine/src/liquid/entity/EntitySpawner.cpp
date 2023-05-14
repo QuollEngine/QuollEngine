@@ -153,4 +153,16 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
   return entities;
 }
 
+Entity EntitySpawner::spawnSprite(TextureAssetHandle handle,
+                                  LocalTransform transform) {
+  auto entity = mEntityDatabase.create();
+
+  mEntityDatabase.set(entity, transform);
+  mEntityDatabase.set<WorldTransform>(entity, {});
+  mEntityDatabase.set(entity, Name{"New sprite"});
+  mEntityDatabase.set<Sprite>(entity, {handle});
+
+  return entity;
+}
+
 } // namespace liquid

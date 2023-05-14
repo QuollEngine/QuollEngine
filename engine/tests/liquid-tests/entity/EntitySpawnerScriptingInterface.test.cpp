@@ -109,3 +109,68 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
       glm::vec3{0.0f});
   EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(createdEntity));
 }
+
+TEST_F(EntitySpawnerLuaInterfaceTest,
+       SpawnSpriteReturnsNullIfInvalidArguments) {
+  auto entity = entityDatabase.create();
+
+  {
+    auto &scope = call(entity, "entity_spawner_spawn_sprite_no_param");
+    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  }
+
+  {
+    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_nil");
+    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  }
+
+  {
+    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_boolean");
+    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  }
+
+  {
+    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_table");
+    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  }
+
+  {
+    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_string");
+    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  }
+}
+
+TEST_F(EntitySpawnerLuaInterfaceTest,
+       SpawnSpriteReturnsNullIfTextureDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "entity_spawner_spawn_sprite_unknown_handle");
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+}
+
+TEST_F(EntitySpawnerLuaInterfaceTest,
+       SpawnSpriteCreatesSpriteEntityAndReturnsEntityTable) {
+  auto texture = assetCache.getRegistry().getTextures().addAsset({});
+  ASSERT_EQ(texture, liquid::TextureAssetHandle{1});
+
+  auto entity = entityDatabase.create();
+
+  auto &scope = call(entity, "entity_spawner_spawn_sprite");
+
+  EXPECT_TRUE(scope.isGlobal<liquid::LuaTable>("created_entity"));
+  auto createdEntityTable = scope.getGlobal<liquid::LuaTable>("created_entity");
+  createdEntityTable.get("id");
+  auto createdEntity = scope.get<liquid::Entity>();
+
+  EXPECT_NE(entity, createdEntity);
+  EXPECT_TRUE(entityDatabase.exists(createdEntity));
+
+  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransform>(createdEntity));
+
+  EXPECT_EQ(
+      entityDatabase.get<liquid::LocalTransform>(createdEntity).localPosition,
+      glm::vec3{0.0f});
+  EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(createdEntity));
+  EXPECT_TRUE(entityDatabase.has<liquid::Sprite>(createdEntity));
+  EXPECT_EQ(entityDatabase.get<liquid::Sprite>(createdEntity).handle, texture);
+}

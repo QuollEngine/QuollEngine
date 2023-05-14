@@ -79,6 +79,10 @@ static String getNodeName(const String &name, Entity entity,
     return getNameAndIcon(name, fa::Cubes);
   }
 
+  if (entityDatabase.has<Sprite>(entity)) {
+    return getNameAndIcon(name, fa::Image);
+  }
+
   return name;
 }
 

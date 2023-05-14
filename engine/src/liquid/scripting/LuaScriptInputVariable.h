@@ -30,6 +30,13 @@ public:
   LuaScriptInputVariable(PrefabAssetHandle value);
 
   /**
+   * @brief Create texture asset handle variable value
+   *
+   * @param value Texture value
+   */
+  LuaScriptInputVariable(TextureAssetHandle value);
+
+  /**
    * @brief Get value
    *
    * @tparam TValue Value type
@@ -50,7 +57,7 @@ public:
 
 private:
   LuaScriptVariableType mType = LuaScriptVariableType::Invalid;
-  std::variant<String, PrefabAssetHandle> mValue;
+  std::variant<String, PrefabAssetHandle, TextureAssetHandle> mValue;
 };
 
 } // namespace liquid

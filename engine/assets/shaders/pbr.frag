@@ -18,7 +18,19 @@ layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 0) uniform sampler2DArray uTextures2DArray[];
 layout(set = 0, binding = 0) uniform samplerCube uTexturesCube[];
 
-layout(std140, set = 1, binding = 0) uniform MaterialDataRaw {
+layout(set = 1, binding = 0) uniform DrawParameters {
+  Empty meshTransforms;
+  Empty skinnedMeshTransforms;
+  Empty skeletons;
+  Camera camera;
+  Scene scene;
+  DirectionalLightsArray directionalLights;
+  PointLightsArray pointLights;
+  ShadowMapsArray shadows;
+}
+uDrawParams;
+
+layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
   uint baseColorTexture[1];
   int baseColorTextureCoord[1];
   vec4 baseColorFactor;
@@ -37,18 +49,6 @@ layout(std140, set = 1, binding = 0) uniform MaterialDataRaw {
   vec3 emissiveFactor;
 }
 uMaterialDataRaw;
-
-layout(set = 2, binding = 0) uniform DrawParameters {
-  Empty meshTransforms;
-  Empty skinnedMeshTransforms;
-  Empty skeletons;
-  Camera camera;
-  Scene scene;
-  DirectionalLightsArray directionalLights;
-  PointLightsArray pointLights;
-  ShadowMapsArray shadows;
-}
-uDrawParams;
 
 /**
  * @brief PBR Material data

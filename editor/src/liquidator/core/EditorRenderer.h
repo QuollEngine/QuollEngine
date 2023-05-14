@@ -65,7 +65,7 @@ public:
 
 private:
   /**
-   * @brief Render outlines
+   * @brief Render sprite outlines
    *
    * @param commandList Command list
    * @param outlines Outlines
@@ -75,10 +75,27 @@ private:
    * @param color Color used in fragment shader
    * @param scale Object scale
    */
-  void renderOutlines(rhi::RenderCommandList &commandList,
-                      EditorRendererFrameData &frameData,
-                      rhi::PipelineHandle pipeline, uint32_t instanceStart,
-                      uint32_t instanceEnd, glm::vec4 color, float scale);
+  void renderSpriteOutlines(rhi::RenderCommandList &commandList,
+                            EditorRendererFrameData &frameData,
+                            rhi::PipelineHandle pipeline,
+                            uint32_t instanceStart, uint32_t instanceEnd,
+                            glm::vec4 color, float scale);
+
+  /**
+   * @brief Render mesh outlines
+   *
+   * @param commandList Command list
+   * @param outlines Outlines
+   * @param pipeline Pipeline
+   * @param instanceStart Instance start index
+   * @param instanceEnd Instance end index
+   * @param color Color used in fragment shader
+   * @param scale Object scale
+   */
+  void renderMeshOutlines(rhi::RenderCommandList &commandList,
+                          EditorRendererFrameData &frameData,
+                          rhi::PipelineHandle pipeline, uint32_t instanceStart,
+                          uint32_t instanceEnd, glm::vec4 color, float scale);
 
   /**
    * @brief Create buffers for collidable shapes

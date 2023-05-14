@@ -172,6 +172,8 @@ TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarTypesAreInvalid) {
                                     liquid::PrefabAssetHandle{15});
   script.variables.insert_or_assign("prefab_value",
                                     liquid::PrefabAssetHandle{15});
+  script.variables.insert_or_assign("texture_value",
+                                    liquid::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<liquid::Script>(entity);
@@ -192,6 +194,8 @@ TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
                                     liquid::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
                                     liquid::PrefabAssetHandle{15});
+  script.variables.insert_or_assign("texture_value",
+                                    liquid::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<liquid::Script>(entity);
@@ -202,6 +206,7 @@ TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
             "Hello world");
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
+  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
 }
 
 TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
@@ -216,6 +221,8 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
                                     liquid::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
                                     liquid::PrefabAssetHandle{15});
+  script.variables.insert_or_assign("texture_value",
+                                    liquid::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
   auto &component = entityDatabase.get<liquid::Script>(entity);
@@ -225,6 +232,7 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
             "Hello world");
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
+  EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
 
   EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("global_vars"));
   EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("entity"));

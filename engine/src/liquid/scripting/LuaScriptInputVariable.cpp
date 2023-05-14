@@ -9,4 +9,7 @@ LuaScriptInputVariable::LuaScriptInputVariable(String value)
 LuaScriptInputVariable::LuaScriptInputVariable(PrefabAssetHandle value)
     : mValue(value), mType(LuaScriptVariableType::AssetPrefab) {}
 
+LuaScriptInputVariable::LuaScriptInputVariable(TextureAssetHandle value)
+    : mValue(value), mType(LuaScriptVariableType::AssetTexture) {}
+
 } // namespace liquid

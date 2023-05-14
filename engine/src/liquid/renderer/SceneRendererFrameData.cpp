@@ -18,15 +18,44 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 
   mTextTransforms.reserve(mReservedSpace);
   mTextGlyphs.reserve(mReservedSpace);
+  mSpriteTransforms.reserve(mReservedSpace);
+  mSpriteTextures.reserve(mReservedSpace);
 
   rhi::BufferDescription defaultDesc{};
   defaultDesc.usage = rhi::BufferUsage::Storage;
   defaultDesc.size = mReservedSpace * sizeof(glm::mat4);
   defaultDesc.mapped = true;
 
-  mMeshTransformsBuffer = renderStorage.createBuffer(defaultDesc);
-  mSkinnedMeshTransformsBuffer = renderStorage.createBuffer(defaultDesc);
-  mTextTransformsBuffer = renderStorage.createBuffer(defaultDesc);
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Mesh transforms";
+    mMeshTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Skinned mesh transforms";
+    mSkinnedMeshTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Text transforms";
+    mTextTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Sprite transforms";
+    mSpriteTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * sizeof(glm::uvec4);
+    desc.debugName = "Sprite textures";
+    mSpriteTexturesBuffer = renderStorage.createBuffer(desc);
+  }
 
   {
     auto desc = defaultDesc;
@@ -139,6 +168,11 @@ void SceneRendererFrameData::updateBuffers() {
   mCameraBuffer.update(&mCameraData, sizeof(Camera));
   mSceneBuffer.update(&mSceneData, sizeof(SceneData));
   mSkyboxBuffer.update(&mSkyboxData, sizeof(SkyboxData));
+
+  mSpriteTexturesBuffer.update(mSpriteTextures.data(),
+                               mSpriteTextures.size() * sizeof(uint32_t));
+  mSpriteTransformsBuffer.update(mSpriteTransforms.data(),
+                                 mSpriteTransforms.size() * sizeof(glm::mat4));
 }
 
 void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
@@ -324,6 +358,14 @@ void SceneRendererFrameData::addLight(const PointLight &light,
   mSceneData.data.y = static_cast<int32_t>(mPointLights.size());
 }
 
+void SceneRendererFrameData::addSprite(Entity entity,
+                                       rhi::TextureHandle texture,
+                                       const glm::mat4 &worldTransform) {
+  mSpriteEntities.push_back(entity);
+  mSpriteTransforms.push_back(worldTransform);
+  mSpriteTextures.push_back(texture);
+}
+
 void SceneRendererFrameData::addText(FontAssetHandle font,
                                      const std::vector<GlyphData> &glyphs,
                                      const glm::mat4 &transform) {
@@ -377,6 +419,10 @@ void SceneRendererFrameData::setShadowMapTexture(rhi::TextureHandle shadowmap) {
 }
 
 void SceneRendererFrameData::clear() {
+  mSpriteEntities.clear();
+  mSpriteTransforms.clear();
+  mSpriteTextures.clear();
+
   mTextTransforms.clear();
   mTextGroups.clear();
   mTextGlyphs.clear();

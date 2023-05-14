@@ -121,6 +121,12 @@ void EditorRendererFrameData::addGizmo(rhi::TextureHandle icon,
   mGizmoCounts[icon]++;
 }
 
+void EditorRendererFrameData::addSpriteOutline(
+    const glm::mat4 &worldTransform) {
+  mOutlineTransforms.push_back(worldTransform);
+  mOutlineSpriteEnd++;
+}
+
 void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
                                              const glm::mat4 &worldTransform) {
   MeshOutline outline{};
@@ -238,6 +244,7 @@ void EditorRendererFrameData::clear() {
   mLastSkeleton = 0;
 
   mMeshOutlines.clear();
+  mOutlineSpriteEnd = 0;
   mOutlineMeshEnd = 0;
   mOutlineSkinnedMeshEnd = 0;
   mOutlineTransforms.clear();

@@ -97,8 +97,8 @@ void ScriptDecorator::attachVariableInjectors(
   table.set("register", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1) || !scope.is<uint32_t>(2)) {
-      scope.error(LuaMessages::invalidArguments<String, float>("input_vars",
-                                                               "register"));
+      scope.error(LuaMessages::invalidArguments<String, uint32_t>("input_vars",
+                                                                  "register"));
       return 0;
     }
 
@@ -119,6 +119,8 @@ void ScriptDecorator::attachVariableInjectors(
       scope.set(value.get<String>());
     } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
       scope.set(static_cast<uint32_t>(value.get<PrefabAssetHandle>()));
+    } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
+      scope.set(static_cast<uint32_t>(value.get<TextureAssetHandle>()));
     }
 
     return 1;
@@ -131,6 +133,8 @@ void ScriptDecorator::attachVariableInjectors(
                  static_cast<uint32_t>(LuaScriptVariableType::String));
   typesTable.set("AssetPrefab",
                  static_cast<uint32_t>(LuaScriptVariableType::AssetPrefab));
+  typesTable.set("AssetTexture",
+                 static_cast<uint32_t>(LuaScriptVariableType::AssetTexture));
   table.set("types", typesTable);
   scope.setPreviousValueAsGlobal("input_vars");
 }

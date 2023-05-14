@@ -239,6 +239,9 @@ void AssetBrowser::render(AssetManager &assetManager,
             } else if (entry.assetType == AssetType::Prefab) {
               actionExecutor.execute<SpawnPrefabAtView>(
                   static_cast<PrefabAssetHandle>(entry.asset), state.camera);
+            } else if (entry.assetType == AssetType::Texture) {
+              actionExecutor.execute<SpawnSpriteAtView>(
+                  static_cast<TextureAssetHandle>(entry.asset), state.camera);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
@@ -323,29 +326,33 @@ void AssetBrowser::render(AssetManager &assetManager,
 
     ImGui::EndTable();
 
-    if (ImGui::BeginPopupContextWindow(
-            "AssetBrowserPopup", ImGuiPopupFlags_NoOpenOverItems |
-                                     ImGuiPopupFlags_MouseButtonRight |
-                                     ImGuiPopupFlags_NoOpenOverExistingPopup)) {
-      if (ImGui::MenuItem("Import asset")) {
-        handleAssetImport();
-      }
+    // Show context menu if not inside prefab
+    if (mContentsDirectory == mAssetDirectory) {
+      if (ImGui::BeginPopupContextWindow(
+              "AssetBrowserPopup",
+              ImGuiPopupFlags_NoOpenOverItems |
+                  ImGuiPopupFlags_MouseButtonRight |
+                  ImGuiPopupFlags_NoOpenOverExistingPopup)) {
+        if (ImGui::MenuItem("Import asset")) {
+          handleAssetImport();
+        }
 
-      if (ImGui::MenuItem("Create directory")) {
-        mHasStagingEntry = true;
-        mStagingEntry.icon = EditorIcon::Directory;
-        mStagingEntry.isDirectory = true;
-        mStagingEntry.isEditable = true;
-      }
+        if (ImGui::MenuItem("Create directory")) {
+          mHasStagingEntry = true;
+          mStagingEntry.icon = EditorIcon::Directory;
+          mStagingEntry.isDirectory = true;
+          mStagingEntry.isEditable = true;
+        }
 
-      if (ImGui::MenuItem("Create Lua script")) {
-        mHasStagingEntry = true;
-        mStagingEntry.icon = EditorIcon::Script;
-        mStagingEntry.isDirectory = false;
-        mStagingEntry.isEditable = true;
-        mStagingEntry.assetType = AssetType::LuaScript;
+        if (ImGui::MenuItem("Create Lua script")) {
+          mHasStagingEntry = true;
+          mStagingEntry.icon = EditorIcon::Script;
+          mStagingEntry.isDirectory = false;
+          mStagingEntry.isEditable = true;
+          mStagingEntry.assetType = AssetType::LuaScript;
+        }
+        ImGui::EndPopup();
       }
-      ImGui::EndPopup();
     }
   }
 

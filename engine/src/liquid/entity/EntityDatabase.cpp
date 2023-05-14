@@ -8,6 +8,7 @@ EntityDatabase::EntityDatabase() {
   reg<Name>();
   reg<Delete>();
   reg<Mesh>();
+  reg<Sprite>();
   reg<DirectionalLight>();
   reg<PointLight>();
   reg<CascadedShadowMap>();
