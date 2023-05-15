@@ -414,6 +414,17 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
   }
 }
 
+TEST_F(AssetCacheTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
+  liquid::AssetData<liquid::PrefabAsset> asset;
+  asset.name = "test-prefab0";
+  auto filePath = cache.createPrefabFromAsset(asset);
+
+  auto res = cache.loadPrefabFromFile(filePath.getData());
+  EXPECT_TRUE(res.hasError());
+  EXPECT_FALSE(res.hasData());
+  EXPECT_FALSE(res.hasWarnings());
+}
+
 TEST_F(AssetCacheTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createPrefabFromAsset(asset);
