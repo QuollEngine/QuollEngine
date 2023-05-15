@@ -450,6 +450,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
+  if (prefab.data.transforms.empty() && prefab.data.directionalLights.empty() &&
+      prefab.data.pointLights.empty() && prefab.data.meshes.empty() &&
+      prefab.data.skinnedMeshes.empty() && prefab.data.skeletons.empty() &&
+      prefab.data.animators.empty()) {
+    return Result<PrefabAssetHandle>::Error("Prefab is empty");
+  }
+
   return Result<PrefabAssetHandle>::Ok(mRegistry.getPrefabs().addAsset(prefab),
                                        warnings);
 }
