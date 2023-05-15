@@ -96,6 +96,34 @@ function entity_spawner_spawn_prefab()
     created_entity = entity_spawner.spawn_prefab(1)
 end
 
+function entity_spawner_spawn_sprite_no_param()
+    created_entity = entity_spawner.spawn_sprite()
+end
+
+function entity_spawner_spawn_sprite_param_nil()
+    created_entity = entity_spawner.spawn_sprite(nil)
+end
+
+function entity_spawner_spawn_sprite_param_boolean()
+    created_entity = entity_spawner.spawn_sprite(true)
+end
+
+function entity_spawner_spawn_sprite_param_table()
+    created_entity = entity_spawner.spawn_sprite({})
+end
+
+function entity_spawner_spawn_sprite_param_string()
+    created_entity = entity_spawner.spawn_sprite("Test")
+end
+
+function entity_spawner_spawn_sprite_unknown_handle()
+    created_entity = entity_spawner.spawn_sprite(9999)
+end
+
+function entity_spawner_spawn_sprite()
+    created_entity = entity_spawner.spawn_sprite(1)
+end
+
 -- Name 
 name = ''
 

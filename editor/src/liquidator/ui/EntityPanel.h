@@ -85,6 +85,16 @@ private:
   void renderTransform(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render sprite
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderSprite(Scene &scene, AssetRegistry &assetRegistry,
+                    ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render mesh
    *
    * @param scene Scene

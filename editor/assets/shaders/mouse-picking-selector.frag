@@ -8,14 +8,16 @@ layout(location = 0) in flat uint outEntity;
 Buffer(16) SelectedEntity { uint selectedEntity; };
 
 layout(set = 0, binding = 0) uniform DrawParams {
-  Empty meshTransforms;
-  Empty skinnedMeshTransforms;
-  Empty skeletons;
-  Empty camera;
-  Empty entities;
   SelectedEntity selectedEntity;
-  Empty pad0;
-  Empty pad1;
+
+  Empty camera;
+  Empty spriteTransforms;
+  Empty spriteEntities;
+  Empty meshTransforms;
+  Empty meshEntities;
+  Empty skinnedMeshTransforms;
+  Empty skinnedMeshEntities;
+  Empty skeletons;
 }
 uDrawParams;
 

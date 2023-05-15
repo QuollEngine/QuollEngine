@@ -140,6 +140,14 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
         component.materialDesc.staticFriction;
   }
 
+  if (mEntityDatabase.has<Sprite>(entity)) {
+    auto handle = mEntityDatabase.get<Sprite>(entity).handle;
+    if (mAssetRegistry.getTextures().hasAsset(handle)) {
+      components["sprite"] =
+          mAssetRegistry.getTextures().getAsset(handle).relativePath.string();
+    }
+  }
+
   if (mEntityDatabase.has<Mesh>(entity)) {
     auto handle = mEntityDatabase.get<Mesh>(entity).handle;
     if (mAssetRegistry.getMeshes().hasAsset(handle)) {

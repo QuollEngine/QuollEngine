@@ -2,7 +2,7 @@
 
 namespace liquid {
 
-enum class LuaScriptVariableType { String, AssetPrefab, Invalid };
+enum class LuaScriptVariableType { String, AssetPrefab, AssetTexture, Invalid };
 
 /**
  * @brief Lua script variable

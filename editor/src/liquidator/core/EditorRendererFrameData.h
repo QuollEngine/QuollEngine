@@ -167,6 +167,13 @@ public:
   void addGizmo(rhi::TextureHandle icon, const glm::mat4 &worldTransform);
 
   /**
+   * @brief Add sprite outline
+   *
+   * @param worldTransform World transform
+   */
+  void addSpriteOutline(const glm::mat4 &worldTransform);
+
+  /**
    * @brief Add mesh outline
    *
    * @param mesh Mesh asset
@@ -193,6 +200,13 @@ public:
   inline const std::vector<MeshOutline> &getMeshOutlines() const {
     return mMeshOutlines;
   }
+
+  /**
+   * @brief Get last sprite index in outline data
+   *
+   * @return Last sprite index
+   */
+  inline size_t getOutlineSpriteEnd() const { return mOutlineSpriteEnd; }
 
   /**
    * @brief Get last mesh index in outline data
@@ -289,6 +303,7 @@ private:
 
   // Outlines
   std::vector<MeshOutline> mMeshOutlines;
+  size_t mOutlineSpriteEnd = 0;
   size_t mOutlineMeshEnd = 0;
   size_t mOutlineSkinnedMeshEnd = 0;
 

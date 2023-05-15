@@ -10,14 +10,19 @@ layout(location = 0) out uint outEntity;
 Buffer(16) EntitiesArray { uint entities[]; };
 
 layout(set = 0, binding = 0) uniform DrawParams {
-  TransformsArray meshTransforms;
-  TransformsArray skinnedMeshTransforms;
-  SkeletonsArray skeletons;
-  Camera camera;
-  EntitiesArray entities;
   Empty selectedEntity;
-  Empty pad0;
-  Empty pad1;
+
+  Camera camera;
+
+  TransformsArray spriteTransforms;
+  EntitiesArray spriteEntities;
+
+  TransformsArray meshTransforms;
+  EntitiesArray meshEntities;
+
+  TransformsArray skinnedMeshTransforms;
+  EntitiesArray skinnedMeshEntities;
+  SkeletonsArray skeletons;
 }
 uDrawParams;
 
@@ -28,5 +33,5 @@ void main() {
       getCamera().viewProj * modelMatrix * vec4(inPosition, 1.0f);
 
   gl_Position = worldPosition;
-  outEntity = uDrawParams.entities.entities[gl_InstanceIndex];
+  outEntity = uDrawParams.meshEntities.entities[gl_InstanceIndex];
 }

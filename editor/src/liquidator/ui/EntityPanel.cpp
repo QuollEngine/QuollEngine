@@ -18,6 +18,7 @@
 #include "liquidator/actions/EntityScriptingActions.h"
 #include "liquidator/actions/EntityMeshActions.h"
 #include "liquidator/actions/EntityAnimatorActions.h"
+#include "liquidator/actions/EntitySpriteActions.h"
 #include "liquidator/actions/SceneActions.h"
 
 namespace liquid::editor {
@@ -88,6 +89,7 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
       renderName(scene, actionExecutor);
       renderTransform(scene, actionExecutor);
       renderText(scene, state.assetRegistry, actionExecutor);
+      renderSprite(scene, state.assetRegistry, actionExecutor);
       renderMesh(scene, state.assetRegistry, actionExecutor);
       renderDirectionalLight(scene, actionExecutor);
       renderPointLight(scene, actionExecutor);
@@ -487,6 +489,32 @@ void EntityPanel::renderTransform(Scene &scene,
         table.row(world.worldTransform[i].x, world.worldTransform[i].y,
                   world.worldTransform[i].z, world.worldTransform[i].w);
       }
+    }
+  }
+}
+
+void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
+                               ActionExecutor &actionExecutor) {
+  static const String SectionName = String(fa::Image) + "  Sprite";
+
+  if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+
+    if (auto _ = widgets::Section(SectionName.c_str())) {
+      auto handle = scene.entityDatabase.get<Sprite>(mSelectedEntity).handle;
+
+      const auto &asset = assetRegistry.getTextures().getAsset(handle);
+      static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
+
+      if (auto table = widgets::Table("TableSprite", 2)) {
+
+        table.row("Texture", asset.name);
+        table.column("Preview");
+        table.column(asset.data.deviceHandle, TextureSize);
+      }
+    }
+
+    if (shouldDelete("Texture")) {
+      actionExecutor.execute<EntityDeleteSprite>(mSelectedEntity);
     }
   }
 }
@@ -949,6 +977,8 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             type = "String";
           } else if (variable.type == LuaScriptVariableType::AssetPrefab) {
             type = "Prefab";
+          } else if (variable.type == LuaScriptVariableType::AssetTexture) {
+            type = "Texture";
           }
 
           String value;
@@ -962,6 +992,10 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
                          LuaScriptVariableType::AssetPrefab)) {
             auto handle = script.variables.at(name).get<PrefabAssetHandle>();
             value = assetRegistry.getPrefabs().getAsset(handle).name;
+          } else if (script.variables.at(name).isType(
+                         LuaScriptVariableType::AssetTexture)) {
+            auto handle = script.variables.at(name).get<TextureAssetHandle>();
+            value = assetRegistry.getTextures().getAsset(handle).name;
           }
 
           table.row(name, type, value);
@@ -1016,6 +1050,32 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
               if (auto *payload = ImGui::AcceptDragDropPayload(
                       getAssetTypeString(AssetType::Prefab).c_str())) {
                 auto handle = *static_cast<PrefabAssetHandle *>(payload->Data);
+                mSetScriptVariable.reset(
+                    new EntitySetScriptVariable(mSelectedEntity, name, handle));
+              }
+            }
+          } else if (variable.type == LuaScriptVariableType::AssetTexture) {
+            ImGui::Text("%s", name.c_str());
+            auto value =
+                existingVariable.isType(LuaScriptVariableType::AssetTexture)
+                    ? existingVariable.get<TextureAssetHandle>()
+                    : TextureAssetHandle::Invalid;
+
+            const auto width = ImGui::GetWindowContentRegionWidth();
+            const float halfWidth = width * 0.5f;
+            if (value == TextureAssetHandle::Invalid) {
+              ImGui::Button("Drag texture here", ImVec2(width, halfWidth));
+            } else {
+              String buttonLabel =
+                  "Replace current texture: " +
+                  assetRegistry.getTextures().getAsset(value).name;
+              ImGui::Button(buttonLabel.c_str(), ImVec2(width, halfWidth));
+            }
+
+            if (ImGui::BeginDragDropTarget()) {
+              if (auto *payload = ImGui::AcceptDragDropPayload(
+                      getAssetTypeString(AssetType::Texture).c_str())) {
+                auto handle = *static_cast<TextureAssetHandle *>(payload->Data);
                 mSetScriptVariable.reset(
                     new EntitySetScriptVariable(mSelectedEntity, name, handle));
               }
@@ -1126,6 +1186,17 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
         actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);
+      }
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            getAssetTypeString(AssetType::Texture).c_str())) {
+      auto asset = *static_cast<TextureAssetHandle *>(payload->Data);
+
+      if (scene.entityDatabase.has<Sprite>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetSprite>(mSelectedEntity, asset);
+      } else {
+        actionExecutor.execute<EntityCreateSprite>(mSelectedEntity, asset);
       }
     }
 

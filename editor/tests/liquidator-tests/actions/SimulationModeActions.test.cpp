@@ -97,6 +97,61 @@ TEST_F(StopSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
 }
 
 TEST_F(StopSimulationModeActionTest,
+       ExecutorSetsSelectedEntityToNullIfEntityDoesNotExistInScene) {
+  state.mode = WM::Simulation;
+  state.camera = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
+
+  state.selectedEntity = state.simulationScene.entityDatabase.create();
+
+  liquid::editor::StopSimulationMode action;
+  action.onExecute(state);
+  EXPECT_EQ(state.mode, WM::Edit);
+  EXPECT_EQ(state.activeCamera, state.camera);
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_F(
+    StopSimulationModeActionTest,
+    ExecutorSetsSelectedEntityToNullIfIfEntityIsADescendantOfEntityThatDoesNotExistInScene) {
+  state.mode = WM::Simulation;
+  state.camera = state.scene.entityDatabase.create();
+  state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
+
+  auto entity = state.simulationScene.entityDatabase.create();
+
+  {
+    auto e1 = state.simulationScene.entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+
+    auto e2 = state.simulationScene.entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    state.selectedEntity = e2;
+  }
+
+  liquid::editor::StopSimulationMode action;
+  action.onExecute(state);
+  EXPECT_EQ(state.mode, WM::Edit);
+  EXPECT_EQ(state.activeCamera, state.camera);
+  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_F(StopSimulationModeActionTest,
+       ExecutorDoesNotSetSelectedEntityToNullIfSelectedEntityExistsInScene) {
+  state.mode = WM::Simulation;
+  state.camera = state.scene.entityDatabase.create();
+  state.selectedEntity = state.scene.entityDatabase.create();
+
+  state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
+
+  liquid::editor::StopSimulationMode action;
+  action.onExecute(state);
+  EXPECT_EQ(state.mode, WM::Edit);
+  EXPECT_EQ(state.activeCamera, state.camera);
+  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+}
+
+TEST_F(StopSimulationModeActionTest,
        PredicateReturnsTrueIfWorkspaceModeIsSimulation) {
   state.mode = WM::Simulation;
 

@@ -159,4 +159,58 @@ bool SpawnPrefabAtView::predicate(WorkspaceState &state) {
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
+SpawnSpriteAtView::SpawnSpriteAtView(TextureAssetHandle handle, Entity camera)
+    : mHandle(handle), mCamera(camera) {}
+
+ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
+
+  ActionExecutorResult res{};
+  mSpawnedEntity = EntitySpawner(scene.entityDatabase, state.assetRegistry)
+                       .spawnSprite(mHandle, getTransformFromView(viewMatrix));
+
+  res.entitiesToSave.push_back(mSpawnedEntity);
+  res.addToHistory = true;
+
+  return res;
+}
+
+ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  bool preserveSelectedEntity = true;
+  {
+    auto current = state.selectedEntity;
+
+    preserveSelectedEntity = current != mSpawnedEntity;
+    while (preserveSelectedEntity &&
+           scene.entityDatabase.has<Parent>(current)) {
+      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+      preserveSelectedEntity = parent != mSpawnedEntity;
+      current = parent;
+    }
+  }
+
+  if (!preserveSelectedEntity) {
+    state.selectedEntity = Entity::Null;
+  }
+
+  scene.entityDatabase.set<Delete>(mSpawnedEntity, {});
+  ActionExecutorResult res{};
+  res.entitiesToDelete.push_back(mSpawnedEntity);
+  return res;
+}
+
+bool SpawnSpriteAtView::predicate(WorkspaceState &state) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return state.assetRegistry.getTextures().hasAsset(mHandle) &&
+         scene.entityDatabase.has<Camera>(mCamera);
+}
+
 } // namespace liquid::editor

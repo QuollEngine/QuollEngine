@@ -1,99 +1,22 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/actions/EntityDefaultDeleteAction.h"
 
 namespace liquid::editor {
 
 /**
- * @brief Spawn empty entity at view action
+ * @brief Set sprite for entity action
  */
-class SpawnEmptyEntityAtView : public Action {
-public:
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  Entity mSpawnedEntity = Entity::Null;
-};
-
-/**
- * @brief Spawn prefab at camera view action
- */
-class SpawnPrefabAtView : public Action {
+class EntitySetSprite : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param handle Prefab asset handle
-   * @param camera Camera entity
-   */
-  SpawnPrefabAtView(PrefabAssetHandle handle, Entity camera);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state) override;
-
-private:
-  PrefabAssetHandle mHandle;
-  Entity mCamera;
-  Entity mSpawnedRootEntity = Entity::Null;
-};
-
-/**
- * @brief Spawn sprite at camera view action
- */
-class SpawnSpriteAtView : public Action {
-public:
-  /**
-   * @brief Create action
-   *
+   * @param entity Entity
    * @param handle Texture asset handle
-   * @param camera Camera entity
    */
-  SpawnSpriteAtView(TextureAssetHandle handle, Entity camera);
+  EntitySetSprite(Entity entity, TextureAssetHandle handle);
 
   /**
    * @brief Action executor
@@ -121,9 +44,54 @@ public:
   bool predicate(WorkspaceState &state) override;
 
 private:
-  TextureAssetHandle mHandle;
-  Entity mCamera;
-  Entity mSpawnedEntity = Entity::Null;
+  Entity mEntity;
+  TextureAssetHandle mSprite;
+  TextureAssetHandle mOldSprite = TextureAssetHandle::Invalid;
 };
+
+/**
+ * @brief Create sprite entity action
+ */
+class EntityCreateSprite : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   * @param handle Texture asset handle
+   */
+  EntityCreateSprite(Entity entity, TextureAssetHandle handle);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+  TextureAssetHandle mHandle;
+};
+
+using EntityDeleteSprite = EntityDefaultDeleteAction<Sprite>;
 
 } // namespace liquid::editor

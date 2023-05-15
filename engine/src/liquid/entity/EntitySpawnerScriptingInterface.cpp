@@ -79,4 +79,37 @@ int EntitySpawnerScriptingInterface::LuaInterface::spawnPrefab(void *state) {
   return 1;
 }
 
+int EntitySpawnerScriptingInterface::LuaInterface::spawnSprite(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<uint32_t>(1)) {
+    scope.set(nullptr);
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<uint32_t>(getName(), "spawn_sprite");
+
+    return 1;
+  }
+
+  auto textureHandle = static_cast<TextureAssetHandle>(scope.get<uint32_t>(1));
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+  AssetRegistry &assetRegistry = *static_cast<AssetRegistry *>(
+      scope.getGlobal<LuaUserData>("__privateAssetRegistry").pointer);
+
+  if (!assetRegistry.getTextures().hasAsset(textureHandle)) {
+    scope.set(nullptr);
+    Engine::getUserLogger().error() << LuaMessages::assetNotFound(
+        getName(), "spawn_sprite", getAssetTypeString(AssetType::Texture));
+
+    return 1;
+  }
+
+  auto entity = EntitySpawner(entityDatabase, assetRegistry)
+                    .spawnSprite(textureHandle, {});
+
+  ScriptDecorator::createEntityTable(scope, entity);
+  return 1;
+}
+
 } // namespace liquid

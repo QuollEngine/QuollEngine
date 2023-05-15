@@ -30,6 +30,11 @@ SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
     }
   }
 
+  mRenderStorage.createShader("__engine.sprite.default.vertex",
+                              {shadersPath / "sprite.vert.spv"});
+  mRenderStorage.createShader("__engine.sprite.default.fragment",
+                              {shadersPath / "sprite.frag.spv"});
+
   mRenderStorage.createShader("__engine.geometry.default.vertex",
                               {shadersPath / "geometry.vert.spv"});
   mRenderStorage.createShader("__engine.geometry.skinned.vertex",
@@ -175,7 +180,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineVertexInputLayout::create<Vertex>(),
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
-                                rhi::FrontFace::Clockwise}});
+                                rhi::FrontFace::Clockwise},
+        {},
+        {},
+        {},
+        "shadowmap mesh"});
 
     auto skinnedPipeline =
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
@@ -185,7 +194,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
                                     rhi::CullMode::Front,
-                                    rhi::FrontFace::Clockwise}});
+                                    rhi::FrontFace::Clockwise},
+            {},
+            {},
+            {},
+            "shadowmap skinned mesh"});
 
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
@@ -270,7 +283,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                 rhi::FrontFace::Clockwise},
-        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
+        rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+        {},
+        rhi::PipelineMultisample{0},
+        "mesh"});
 
     auto skinnedPipeline =
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
@@ -282,7 +298,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                                     rhi::FrontFace::Clockwise},
             rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
             {},
-            rhi::PipelineMultisample{0}});
+            rhi::PipelineMultisample{0},
+            "skinned mesh"});
 
     pass.addPipeline(pipeline);
     pass.addPipeline(skinnedPipeline);
@@ -302,7 +319,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindDescriptor(
             pipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
-            pipeline, 2, frameData.getBindlessParams().getDescriptor(),
+            pipeline, 1, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         render(commandList, pipeline, true, frameIndex);
@@ -315,13 +332,66 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         commandList.bindDescriptor(
             skinnedPipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
         commandList.bindDescriptor(
-            skinnedPipeline, 2, frameData.getBindlessParams().getDescriptor(),
+            skinnedPipeline, 1, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
         renderSkinned(commandList, skinnedPipeline, true, frameIndex);
       }
     });
   } // mesh pass
+
+  {
+    struct SpriteDrawParams {
+      rhi::DeviceAddress camera;
+      rhi::DeviceAddress transforms;
+      rhi::DeviceAddress textures;
+      rhi::DeviceAddress pad0;
+    };
+
+    auto &pass = graph.addGraphicsPass("spritePass");
+    pass.write(sceneColor, AttachmentType::Color, mClearColor);
+    pass.write(depthBuffer, AttachmentType::Depth,
+               rhi::DepthStencilClear{1.0f, 0});
+    pass.write(sceneColorResolved, AttachmentType::Resolve, mClearColor);
+
+    auto pipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("__engine.sprite.default.vertex"),
+         mRenderStorage.getShader("__engine.sprite.default.fragment"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+         {},
+         {},
+         "sprite"});
+
+    pass.addPipeline(pipeline);
+
+    size_t spriteOffset = 0;
+    for (auto &frameData : mFrameData) {
+      spriteOffset = frameData.getBindlessParams().addRange(SpriteDrawParams{
+          frameData.getCameraBuffer(), frameData.getSpriteTransformsBuffer(),
+          frameData.getSpriteTexturesBuffer(), frameData.getCameraBuffer()});
+    }
+
+    pass.setExecutor([pipeline, spriteOffset,
+                      this](rhi::RenderCommandList &commandList,
+                            uint32_t frameIndex) {
+      auto &frameData = mFrameData.at(frameIndex);
+
+      std::array<uint32_t, 1> offsets{static_cast<uint32_t>(spriteOffset)};
+
+      commandList.bindPipeline(pipeline);
+      commandList.bindDescriptor(pipeline, 0,
+                                 mRenderStorage.getGlobalTexturesDescriptor());
+      commandList.bindDescriptor(
+          pipeline, 1, frameData.getBindlessParams().getDescriptor(), offsets);
+
+      commandList.draw(
+          4, 0, static_cast<uint32_t>(frameData.getSpriteEntities().size()), 0);
+    });
+  } // sprite pass
 
   {
     struct SkyboxDrawParams {
@@ -348,7 +418,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
          rhi::PipelineInputAssembly{},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                  rhi::FrontFace::Clockwise},
-         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}}});
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
+         {},
+         {},
+         "skybox"});
 
     pass.addPipeline(pipeline);
 
@@ -394,6 +467,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
         liquid::rhi::FrontFace::CounterClockwise};
     pipelineDescription.colorBlend.attachments = {
         liquid::rhi::PipelineColorBlendAttachment{}};
+    pipelineDescription.debugName = "hdr";
 
     auto pipeline = mRenderStorage.addPipeline(pipelineDescription);
     pass.addPipeline(pipeline);
@@ -457,7 +531,10 @@ void SceneRenderer::attachText(RenderGraph &graph,
               true, rhi::BlendFactor::SrcAlpha,
               rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add,
               rhi::BlendFactor::One, rhi::BlendFactor::OneMinusSrcAlpha,
-              rhi::BlendOp::Add}}}});
+              rhi::BlendOp::Add}}},
+          {},
+          {},
+          "text"});
 
   pass.addPipeline(textPipeline);
 
@@ -491,6 +568,13 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   frameData.setCameraData(entityDatabase.get<Camera>(camera),
                           entityDatabase.get<PerspectiveLens>(camera));
+
+  for (auto [entity, sprite, world] :
+       entityDatabase.view<Sprite, WorldTransform>()) {
+    auto handle =
+        mAssetRegistry.getTextures().getAsset(sprite.handle).data.deviceHandle;
+    frameData.addSprite(entity, handle, world.worldTransform);
+  }
 
   // Meshes
   for (auto [entity, world, mesh] :
@@ -604,7 +688,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
       auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 1,
+        commandList.bindDescriptor(pipeline, 2,
                                    mesh.materials.at(g)->getDescriptor());
       }
 
@@ -643,7 +727,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
       auto &geometry = mesh.geometries.at(g);
 
       if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 1,
+        commandList.bindDescriptor(pipeline, 2,
                                    mesh.materials.at(g)->getDescriptor());
       }
 

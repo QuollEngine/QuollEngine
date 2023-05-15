@@ -115,6 +115,40 @@ TEST_F(EntitySerializerTest,
             transform.localScale);
 }
 
+// Sprite
+TEST_F(EntitySerializerTest,
+       DoesNotCreateSpriteFieldIfMeshComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["sprite"]);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateSpriteFieldIfTextureAssetIsNotInRegistry) {
+  static constexpr liquid::TextureAssetHandle NonExistentMeshHandle{45};
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Sprite>(entity, {NonExistentMeshHandle});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["mesh"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
+  liquid::AssetData<liquid::TextureAsset> texture{};
+  texture.relativePath = "/textures/sprite.ktx2";
+  texture.name = "sprite.ktx2";
+  auto handle = assetRegistry.getTextures().addAsset(texture);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::Sprite>(entity, {handle});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["sprite"]);
+  EXPECT_EQ(node["sprite"].as<liquid::String>(""),
+            texture.relativePath.string());
+}
+
 // Mesh
 TEST_F(EntitySerializerTest,
        DoesNotCreateMeshFieldIfMeshComponentDoesNotExist) {

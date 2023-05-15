@@ -35,8 +35,8 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
   table.set("register", [](void *state) {
     LuaScope scope(state);
     if (!scope.is<String>(1) || !scope.is<uint32_t>(2)) {
-      scope.error(LuaMessages::invalidArguments<String, float>("input_vars",
-                                                               "register"));
+      scope.error(LuaMessages::invalidArguments<String, uint32_t>("input_vars",
+                                                                  "register"));
       return 0;
     }
 
@@ -71,6 +71,8 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
                  static_cast<uint32_t>(LuaScriptVariableType::String));
   typesTable.set("AssetPrefab",
                  static_cast<uint32_t>(LuaScriptVariableType::AssetPrefab));
+  typesTable.set("AssetTexture",
+                 static_cast<uint32_t>(LuaScriptVariableType::AssetTexture));
   table.set("types", typesTable);
   scope.setPreviousValueAsGlobal("input_vars");
 }

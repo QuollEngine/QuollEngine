@@ -288,3 +288,20 @@ TEST_F(EntitySpawnerTest,
   EXPECT_TRUE(db.has<liquid::WorldTransform>(root));
   EXPECT_TRUE(entityDatabase.has<liquid::Name>(root));
 }
+
+TEST_F(EntitySpawnerTest,
+       SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
+  liquid::AssetData<liquid::TextureAsset> asset{};
+  asset.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  auto assetHandle = assetRegistry.getTextures().addAsset(asset);
+
+  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+
+  auto entity = entitySpawner.spawnSprite(assetHandle, transform);
+  EXPECT_TRUE(entityDatabase.exists(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localPosition,
+            transform.localPosition);
+  EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(entity));
+  EXPECT_TRUE(entityDatabase.has<liquid::Sprite>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::Sprite>(entity).handle, assetHandle);
+}

@@ -21,6 +21,7 @@
 #include "liquid/scene/WorldTransform.h"
 #include "liquid/scene/EnvironmentSkybox.h"
 #include "liquid/scene/EnvironmentLighting.h"
+#include "liquid/scene/Sprite.h"
 #include "liquid/animation/Animator.h"
 #include "liquid/audio/AudioSource.h"
 #include "liquid/audio/AudioStart.h"

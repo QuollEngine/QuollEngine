@@ -254,6 +254,15 @@ public:
   void updateBuffers();
 
   /**
+   * @brief Get sprite entities
+   *
+   * @return Sprite entities
+   */
+  inline const std::vector<Entity> &getSpriteEntities() const {
+    return mSpriteEntities;
+  }
+
+  /**
    * @brief Get mesh groups
    *
    * @return Mesh groups
@@ -351,6 +360,16 @@ public:
   void addLight(const PointLight &light, const WorldTransform &transform);
 
   /**
+   * @brief Add sprite
+   *
+   * @param entity Entity
+   * @param texture Texture handle
+   * @param worldTransform World transform
+   */
+  void addSprite(Entity entity, rhi::TextureHandle texture,
+                 const glm::mat4 &worldTransform);
+
+  /**
    * @brief Add text
    *
    * @param fontHandle Font handle
@@ -431,6 +450,24 @@ public:
    */
   inline const BindlessDrawParameters &getBindlessParams() const {
     return mBindlessParams;
+  }
+
+  /**
+   * @brief Get sprite transforms buffer
+   *
+   * @return Sprite transforms buffer
+   */
+  inline rhi::DeviceAddress getSpriteTransformsBuffer() const {
+    return mSpriteTransformsBuffer.getAddress();
+  }
+
+  /**
+   * @brief Get sprite textures buffer
+   *
+   * @return Sprite textures buffer
+   */
+  inline rhi::DeviceAddress getSpriteTexturesBuffer() const {
+    return mSpriteTexturesBuffer.getAddress();
   }
 
   /**
@@ -566,6 +603,12 @@ private:
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
   std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
       mSkinnedMeshGroups;
+
+  std::vector<glm::mat4> mSpriteTransforms;
+  std::vector<rhi::TextureHandle> mSpriteTextures;
+  std::vector<Entity> mSpriteEntities;
+  rhi::Buffer mSpriteTransformsBuffer;
+  rhi::Buffer mSpriteTexturesBuffer;
 
   std::vector<glm::mat4> mTextTransforms;
   rhi::Buffer mTextTransformsBuffer;

@@ -55,6 +55,16 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});
 
+  if (node["components"]["sprite"]) {
+    auto path = Path(node["components"]["sprite"].as<String>(""));
+
+    auto handle = mAssetRegistry.getTextures().findHandleByRelativePath(path);
+
+    if (handle != TextureAssetHandle::Invalid) {
+      mEntityDatabase.set<Sprite>(entity, {handle});
+    }
+  }
+
   if (node["components"]["rigidBody"] &&
       node["components"]["rigidBody"].IsMap()) {
     RigidBody rigidBody{};

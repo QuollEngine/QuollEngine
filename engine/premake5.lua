@@ -17,6 +17,8 @@ function copyEngineAssets()
         "glslc "..assetsPath.."/shaders/imgui.vert -o"..outputPath.."/shaders/imgui.vert.spv",
         "glslc "..assetsPath.."/shaders/text.vert -o"..outputPath.."/shaders/text.vert.spv",
         "glslc "..assetsPath.."/shaders/text.frag -o"..outputPath.."/shaders/text.frag.spv",
+        "glslc "..assetsPath.."/shaders/sprite.vert -o"..outputPath.."/shaders/sprite.vert.spv",
+        "glslc "..assetsPath.."/shaders/sprite.frag -o"..outputPath.."/shaders/sprite.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.frag -o"..outputPath.."/shaders/fullscreen-quad.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.vert -o"..outputPath.."/shaders/fullscreen-quad.vert.spv",
         "glslc "..assetsPath.."/shaders/generate-brdf-lut.comp -o "..outputPath.."/shaders/generate-brdf-lut.comp.spv",
