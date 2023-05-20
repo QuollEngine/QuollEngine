@@ -86,6 +86,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
     return EditorIcon::Prefab;
   case AssetType::LuaScript:
     return EditorIcon::Script;
+  case AssetType::Animator:
+    return EditorIcon::Animator;
   case AssetType::Environment:
     return EditorIcon::Environment;
 
@@ -258,7 +260,8 @@ void AssetBrowser::render(AssetManager &assetManager,
                           entry.assetType == AssetType::Texture ||
                           entry.assetType == AssetType::Audio ||
                           entry.assetType == AssetType::LuaScript ||
-                          entry.assetType == AssetType::Environment;
+                          entry.assetType == AssetType::Environment ||
+                          entry.assetType == AssetType::Animator;
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {
@@ -351,6 +354,14 @@ void AssetBrowser::render(AssetManager &assetManager,
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::LuaScript;
         }
+
+        if (ImGui::MenuItem("Create animator")) {
+          mHasStagingEntry = true;
+          mStagingEntry.icon = EditorIcon::Animator;
+          mStagingEntry.isDirectory = false;
+          mStagingEntry.isEditable = true;
+          mStagingEntry.assetType = AssetType::Animator;
+        }
         ImGui::EndPopup();
       }
     }
@@ -396,6 +407,8 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
       assetManager.createDirectory(path);
     } else if (mStagingEntry.assetType == AssetType::LuaScript) {
       assetManager.createLuaScript(path);
+    } else if (mStagingEntry.assetType == AssetType::Animator) {
+      assetManager.createAnimator(path);
     }
   }
 

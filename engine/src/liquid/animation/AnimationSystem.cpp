@@ -9,9 +9,37 @@ AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
 void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
+
+  for (auto [entity, animator, animatorEvent] :
+       entityDatabase.view<Animator, AnimatorEvent>()) {
+    const auto &state = mAssetRegistry.getAnimators()
+                            .getAsset(animator.asset)
+                            .data.states.at(animator.currentState);
+
+    for (auto &transition : state.transitions) {
+      if (transition.eventName == animatorEvent.eventName) {
+        animator.currentState = transition.target;
+        animator.normalizedTime = 0.0f;
+        break;
+      }
+    }
+  }
+
+  entityDatabase.destroyComponents<AnimatorEvent>();
+
   for (auto [entity, transform, animator] :
        entityDatabase.view<LocalTransform, Animator>()) {
-    auto handle = animator.animations.at(animator.currentAnimation);
+
+    const auto &animatorAsset =
+        mAssetRegistry.getAnimators().getAsset(animator.asset);
+
+    if (animator.currentState >= animatorAsset.data.states.size()) {
+      animator.currentState = animatorAsset.data.initialState;
+    }
+
+    const auto &state = animatorAsset.data.states.at(animator.currentState);
+
+    auto handle = state.animation;
 
     if (!animMap.hasAsset(handle)) {
       return;
@@ -24,7 +52,7 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
           // Divide delta time by animation time
           // to advance time at a constant speed
           animator.normalizedTime + (dt / animation.data.time), 1.0f);
-      if (animator.loop && animator.normalizedTime >= 1.0f) {
+      if (animator.normalizedTime >= 1.0f) {
         animator.normalizedTime = 0.0f;
       }
     }

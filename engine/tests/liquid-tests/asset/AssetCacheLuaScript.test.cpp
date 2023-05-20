@@ -15,7 +15,6 @@ public:
 using AssetCacheDeathTest = AssetCacheTest;
 
 TEST_F(AssetCacheTest, ReturnsErrorIfFileCannotBeOpened) {
-  std::cout << "Asset path: " << cache.getAssetsPath() << "\n";
   auto scriptPath = FixturesPath / "non-existent-script.lua";
 
   auto result = cache.loadLuaScriptFromFile(scriptPath);

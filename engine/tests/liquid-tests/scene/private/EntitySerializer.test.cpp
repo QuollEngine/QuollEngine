@@ -136,7 +136,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
   liquid::AssetData<liquid::TextureAsset> texture{};
-  texture.relativePath = "/textures/sprite.ktx2";
+  texture.relativePath = liquid::Path("textures") / "texture.ktx2";
   texture.name = "sprite.ktx2";
   auto handle = assetRegistry.getTextures().addAsset(texture);
 
@@ -145,8 +145,7 @@ TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["sprite"]);
-  EXPECT_EQ(node["sprite"].as<liquid::String>(""),
-            texture.relativePath.string());
+  EXPECT_EQ(node["sprite"].as<liquid::String>(""), "textures/texture.ktx2");
 }
 
 // Mesh
@@ -169,7 +168,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
 
 TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   liquid::AssetData<liquid::MeshAsset> mesh{};
-  mesh.relativePath = "/meshes/mesh.lqmesh";
+  mesh.relativePath = liquid::Path("meshes") / "mesh.lqmesh";
   mesh.name = "mesh.lqmesh";
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
@@ -178,7 +177,7 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
-  EXPECT_EQ(node["mesh"].as<liquid::String>(""), mesh.relativePath.string());
+  EXPECT_EQ(node["mesh"].as<liquid::String>(""), "meshes/mesh.lqmesh");
 }
 
 // Skinned mesh
@@ -203,7 +202,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
   liquid::AssetData<liquid::SkinnedMeshAsset> mesh{};
-  mesh.relativePath = "/meshes/skinnedMesh.lqmesh";
+  mesh.relativePath = liquid::Path("meshes") / "skinnedMesh.lqmesh";
   mesh.name = "skinnedMesh.lqmesh";
   auto handle = assetRegistry.getSkinnedMeshes().addAsset(mesh);
 
@@ -213,7 +212,7 @@ TEST_F(EntitySerializerTest,
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMesh"]);
   EXPECT_EQ(node["skinnedMesh"].as<liquid::String>(""),
-            mesh.relativePath.string());
+            "meshes/skinnedMesh.lqmesh");
 }
 
 // Skeleton
@@ -239,7 +238,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   liquid::AssetData<liquid::SkeletonAsset> skeleton{};
-  skeleton.relativePath = "/skeletons/skeleton.lqskel";
+  skeleton.relativePath = liquid::Path("skeletons") / "skeleton.lqskel";
   skeleton.name = "skeleton.lqskel";
   auto handle = assetRegistry.getSkeletons().addAsset(skeleton);
 
@@ -251,57 +250,47 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skeleton"]);
-  EXPECT_EQ(node["skeleton"].as<liquid::String>(),
-            skeleton.relativePath.string());
+  EXPECT_EQ(node["skeleton"].as<liquid::String>(), "skeletons/skeleton.lqskel");
 }
 
-// Animation
+// Animator
 TEST_F(EntitySerializerTest,
        DoesNotCreateAnimatorFieldIfAnimatorComponentDoesNotExist) {
   auto entity = entityDatabase.create();
   auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_FALSE(node["skeleton"]);
+  EXPECT_FALSE(node["animator"]);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
+  static constexpr liquid::AnimatorAssetHandle NonExistentAnimatorHandle{45};
+
+  auto entity = entityDatabase.create();
+  liquid::Animator component{};
+  component.asset = NonExistentAnimatorHandle;
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["animator"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
-  static constexpr uint32_t NonExistentHandleStart{45};
-  static constexpr uint32_t NonExistentHandleEnd{55};
+  liquid::AssetData<liquid::AnimatorAsset> animator{};
+  animator.relativePath = liquid::Path("animators") / "test.animator";
+  animator.name = "test.animator";
+  auto handle = assetRegistry.getAnimators().addAsset(animator);
 
   liquid::Animator component{};
-
-  component.currentAnimation = 2;
-  for (uint32_t i = NonExistentHandleStart; i < NonExistentHandleEnd; ++i) {
-    component.animations.push_back(
-        static_cast<liquid::AnimationAssetHandle>(i));
-  }
-
-  std::vector<liquid::AnimationAssetHandle> validHandles;
-  for (uint32_t i = 0; i < 5; ++i) {
-    liquid::AssetData<liquid::AnimationAsset> animation{};
-    animation.relativePath = "/animations/animation.lqanim";
-    animation.name = "animation.lqanim";
-    auto handle = assetRegistry.getAnimations().addAsset(animation);
-    validHandles.push_back(handle);
-    component.animations.push_back(handle);
-  }
+  component.asset = handle;
+  component.currentState = 0;
 
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, component);
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["animator"]);
-  EXPECT_EQ(node["animator"]["startingAnimation"].as<uint32_t>(),
-            component.currentAnimation);
-  EXPECT_TRUE(node["animator"]["animations"].IsSequence());
-  EXPECT_EQ(node["animator"]["animations"].size(), validHandles.size());
-
-  for (size_t i = 0; i < node["animator"]["animations"].size(); ++i) {
-    auto animation = node["animator"]["animations"][i];
-    auto handle = validHandles.at(i);
-
-    auto relPath = assetRegistry.getAnimations().getAsset(handle).relativePath;
-    EXPECT_EQ(animation.as<liquid::String>(), relPath.string());
-  }
+  EXPECT_EQ(node["animator"]["asset"].as<liquid::String>(),
+            "animators/test.animator");
 }
 
 // Directional light
@@ -467,7 +456,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   liquid::AssetData<liquid::AudioAsset> audio{};
-  audio.relativePath = "/audios/bark.wav";
+  audio.relativePath = liquid::Path("audios") / "bark.wav";
   audio.name = "bark.wav";
   auto handle = assetRegistry.getAudios().addAsset(audio);
 
@@ -477,8 +466,7 @@ TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["audio"]);
   EXPECT_TRUE(node["audio"].IsMap());
-  EXPECT_EQ(node["audio"]["source"].as<liquid::String>(""),
-            audio.relativePath.string());
+  EXPECT_EQ(node["audio"]["source"].as<liquid::String>(""), "audios/bark.wav");
 }
 
 // Script
@@ -502,7 +490,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   liquid::AssetData<liquid::LuaScriptAsset> script{};
-  script.relativePath = "/scripts/script.lua";
+  script.relativePath = liquid::Path("scripts") / "script.lua";
   script.name = "script.lua";
   script.data.variables.insert_or_assign(
       "test_str",
@@ -513,7 +501,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
   liquid::AssetData<liquid::PrefabAsset> prefab{};
-  prefab.relativePath = "/prefabs/test.lqprefab";
+  prefab.relativePath = liquid::Path("prefabs") / "test.lqprefab";
   prefab.name = "test.lqprefab";
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
 
@@ -530,7 +518,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["script"]);
   EXPECT_EQ(node["script"]["asset"].as<liquid::String>(""),
-            script.relativePath.string());
+            "scripts/script.lua");
   EXPECT_TRUE(node["script"]["variables"]);
 
   EXPECT_FALSE(node["script"]["variables"]["test_str_invalid"]);
@@ -547,7 +535,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   EXPECT_EQ(
       node["script"]["variables"]["test_prefab"]["value"].as<liquid::String>(
           ""),
-      prefab.relativePath.string());
+      "prefabs/test.lqprefab");
 }
 
 // Text
@@ -590,7 +578,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
 TEST_F(EntitySerializerTest,
        CreatesTextFieldIfTextContentsAreNotEmptyAndFontAssetIsInRegistry) {
   liquid::AssetData<liquid::FontAsset> font{};
-  font.relativePath = "/fonts/Roboto.ttf";
+  font.relativePath = liquid::Path("fonts") / "Roboto.ttf";
   font.name = "Roboto.ttf";
   auto handle = assetRegistry.getFonts().addAsset(font);
 
@@ -607,8 +595,7 @@ TEST_F(EntitySerializerTest,
   EXPECT_TRUE(node["text"].IsMap());
   EXPECT_EQ(node["text"]["content"].as<liquid::String>(""), "Hello world");
   EXPECT_EQ(node["text"]["lineHeight"].as<float>(-1.0f), component.lineHeight);
-  EXPECT_EQ(node["text"]["font"].as<liquid::String>(""),
-            font.relativePath.string());
+  EXPECT_EQ(node["text"]["font"].as<liquid::String>(""), "fonts/Roboto.ttf");
 }
 
 TEST_F(EntitySerializerTest,

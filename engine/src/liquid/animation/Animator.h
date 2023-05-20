@@ -9,14 +9,14 @@ namespace liquid {
  */
 struct Animator {
   /**
-   * Current animation index
+   * Animator asset handle
    */
-  uint32_t currentAnimation = 0;
+  AnimatorAssetHandle asset = AnimatorAssetHandle::Invalid;
 
   /**
-   * Loop animation
+   * Current animator state
    */
-  bool loop = false;
+  size_t currentState = std::numeric_limits<size_t>::max();
 
   /**
    * Normalized time
@@ -28,12 +28,7 @@ struct Animator {
   /**
    * Animation is playing
    */
-  bool playing = false;
-
-  /**
-   * List of animation handles
-   */
-  std::vector<AnimationAssetHandle> animations;
+  bool playing = true;
 };
 
 } // namespace liquid

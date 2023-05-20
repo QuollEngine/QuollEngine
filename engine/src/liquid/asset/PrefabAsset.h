@@ -77,9 +77,14 @@ struct PrefabAsset {
   std::vector<PrefabComponent<SkeletonAssetHandle>> skeletons;
 
   /**
+   * List of animations
+   */
+  std::vector<AnimationAssetHandle> animations;
+
+  /**
    * List of animators
    */
-  std::vector<PrefabComponent<Animator>> animators;
+  std::vector<PrefabComponent<AnimatorAssetHandle>> animators;
 
   /**
    * List of point lights

@@ -86,6 +86,14 @@ TEST_F(AssetManagerTest, CreatesScriptFileAndLoadsIt) {
   EXPECT_TRUE(fs::exists(InnerPathInAssets / ("test.lua")));
 }
 
+TEST_F(AssetManagerTest, CreatesAnimatorFileAndLoadsIt) {
+  auto handle = manager.createAnimator(InnerPathInAssets / "test");
+
+  EXPECT_TRUE(handle.hasData());
+  EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.animator");
+  EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.animator"));
+}
+
 TEST_F(AssetManagerTest,
        ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
   fs::create_directories(InnerPathInCache);
@@ -432,4 +440,8 @@ InitAssetTestSuite(AssetManagerAudio,
 
 InitAssetTestSuite(AssetManagerScript,
                    liquid::editor::AssetManager::ScriptExtensions,
+                   [](auto str) { return str; });
+
+InitAssetTestSuite(AssetManagerAnimator,
+                   liquid::editor::AssetManager::AnimatorExtensions,
                    [](auto str) { return str; });

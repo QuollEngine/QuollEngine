@@ -21,6 +21,15 @@ function update(dt)
 end
 )""";
 
+static const String AnimatorTemplate = R"""(version: 0.1
+type: animator
+initial: EMPTY
+states:
+  EMPTY:
+    output: {}
+    on: []
+)""";
+
 const std::vector<String> AssetManager::TextureExtensions{"png", "jpg", "jpeg",
                                                           "bmp", "tga", "ktx2"};
 const std::vector<String> AssetManager::ScriptExtensions{"lua"};
@@ -28,6 +37,7 @@ const std::vector<String> AssetManager::AudioExtensions{"wav", "mp3"};
 const std::vector<String> AssetManager::FontExtensions{"ttf", "otf"};
 const std::vector<String> AssetManager::SceneExtensions{"gltf", "glb"};
 const std::vector<String> AssetManager::EnvironmentExtensions{"hdr"};
+const std::vector<String> AssetManager::AnimatorExtensions{"animator"};
 
 using co = std::filesystem::copy_options;
 
@@ -181,6 +191,25 @@ Result<Path> AssetManager::createLuaScript(const Path &assetPath) {
   return Result<Path>::Ok(originalAssetPath, res.getWarnings());
 }
 
+Result<Path> AssetManager::createAnimator(const Path &assetPath) {
+  createDirectoriesRecursive(assetPath.parent_path());
+  auto createdDirectory = createDirectoriesRecursive(
+      convertToCacheRelativePath(assetPath.parent_path()));
+
+  auto originalAssetPath = assetPath;
+  originalAssetPath.replace_extension("animator");
+  std::ofstream stream(originalAssetPath);
+  stream << AnimatorTemplate;
+  stream.close();
+
+  auto res = loadOriginalAsset(originalAssetPath);
+  if (res.hasError()) {
+    return Result<Path>::Error(res.getError());
+  }
+
+  return Result<Path>::Ok(originalAssetPath, res.getWarnings());
+}
+
 Result<bool>
 AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
   LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
@@ -278,6 +307,8 @@ Result<bool> AssetManager::loadOriginalAsset(const Path &originalAssetPath) {
     res = loadOriginalPrefab(originalAssetPath);
   } else if (type == AssetType::Environment) {
     res = loadOriginalEnvironment(originalAssetPath);
+  } else if (type == AssetType::Animator) {
+    res = loadOriginalAnimator(originalAssetPath);
   }
 
   if (res.hasData()) {
@@ -375,6 +406,21 @@ Result<Path> AssetManager::loadOriginalFont(const Path &originalAssetPath) {
   }
 
   return Result<Path>::Error("Cannot load font file");
+}
+
+Result<Path> AssetManager::loadOriginalAnimator(const Path &originalAssetPath) {
+  auto engineAssetPath = convertToCacheRelativePath(originalAssetPath);
+
+  if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
+                                 co::overwrite_existing)) {
+    auto res = mAssetCache.loadAsset(engineAssetPath);
+    if (res.hasData()) {
+      return Result<Path>::Ok(engineAssetPath, res.getWarnings());
+    }
+    std::filesystem::remove(engineAssetPath);
+  }
+
+  return Result<Path>::Error("Cannot load animator file");
 }
 
 Result<Path> AssetManager::loadOriginalPrefab(const Path &originalAssetPath) {
@@ -498,6 +544,9 @@ AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {
   }
   if (isExtension(EnvironmentExtensions)) {
     return AssetType::Environment;
+  }
+  if (isExtension(AnimatorExtensions)) {
+    return AssetType::Animator;
   }
 
   return AssetType::None;

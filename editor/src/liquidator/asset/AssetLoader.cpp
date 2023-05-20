@@ -29,6 +29,7 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
       FileTypeEntry{"Script files", AssetManager::ScriptExtensions},
       FileTypeEntry{"Font files", AssetManager::FontExtensions},
       FileTypeEntry{"Texture files", AssetManager::TextureExtensions},
+      FileTypeEntry{"Animator files", AssetManager::AnimatorExtensions},
       FileTypeEntry{"Environment files", AssetManager::EnvironmentExtensions}};
 
   auto filePath = mNativeFileDialog.getFilePathFromDialog(entries);

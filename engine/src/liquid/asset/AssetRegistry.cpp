@@ -287,6 +287,12 @@ AssetRegistry::getAssetByPath(const Path &filePath) {
     }
   }
 
+  for (auto &[handle, asset] : mAnimators.getAssets()) {
+    if (asset.path == filePath) {
+      return {AssetType::Animator, static_cast<uint32_t>(handle)};
+    }
+  }
+
   for (auto &[handle, asset] : mAudios.getAssets()) {
     if (asset.path == filePath) {
       return {AssetType::Audio, static_cast<uint32_t>(handle)};

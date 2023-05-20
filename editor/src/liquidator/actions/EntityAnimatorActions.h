@@ -5,6 +5,93 @@
 
 namespace liquid::editor {
 
+/**
+ * @brief Create animator entity action
+ */
+class EntityCreateAnimator : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   * @param handle Animator asset handle
+   */
+  EntityCreateAnimator(Entity entity, AnimatorAssetHandle handle);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+  AnimatorAssetHandle mHandle;
+};
+
+/**
+ * @brief Set animator for entity action
+ */
+class EntitySetAnimator : public Action {
+public:
+  /**
+   * @brief Create action
+   *
+   * @param entity Entity
+   * @param script Animator handle
+   */
+  EntitySetAnimator(Entity entity, AnimatorAssetHandle script);
+
+  /**
+   * @brief Action executor
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onExecute(WorkspaceState &state) override;
+
+  /**
+   * @brief Action undo
+   *
+   * @param state Workspace state
+   * @return Executor result
+   */
+  ActionExecutorResult onUndo(WorkspaceState &state) override;
+
+  /**
+   * @brief Action predicate
+   *
+   * @param state Workspace state
+   * @retval true Predicate is true
+   * @retval false Predicate is false
+   */
+  bool predicate(WorkspaceState &state) override;
+
+private:
+  Entity mEntity;
+  AnimatorAssetHandle mAnimator;
+  AnimatorAssetHandle mOldAnimator{};
+};
+
 using EntityDeleteAnimator = EntityDefaultDeleteAction<Animator>;
 
 } // namespace liquid::editor

@@ -653,6 +653,27 @@ function text_delete()
     entity.text:delete()
 end
 
+-- Animator
+function animator_trigger_invalid()
+    entity.animator.trigger(12)
+    entity.animator:trigger(nil)
+    entity.animator:trigger(true)
+    entity.animator:trigger(name_set)
+    entity.animator:trigger({})
+end
+
+function animator_trigger()
+   entity.animator:trigger("Move")
+end
+
+function animator_delete_invalid()
+    entity.animator.delete()
+end
+
+function animator_delete()
+    entity.animator:delete()
+end
+
 -- Audio 
 audio_is_playing_flag = false
 function audio_play()

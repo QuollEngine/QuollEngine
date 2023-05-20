@@ -506,7 +506,6 @@ void EntityPanel::renderSprite(Scene &scene, AssetRegistry &assetRegistry,
       static constexpr glm::vec2 TextureSize(80.0f, 80.0f);
 
       if (auto table = widgets::Table("TableSprite", 2)) {
-
         table.row("Texture", asset.name);
         table.column("Preview");
         table.column(asset.data.deviceHandle, TextureSize);
@@ -588,56 +587,68 @@ void EntityPanel::renderAnimation(WorkspaceState &state, Scene &scene,
     return;
   }
 
-  static const String SectionName = String(fa::Circle) + "  Animation";
+  static const String SectionName = String(fa::Circle) + " Animator";
 
   if (auto _ = widgets::Section(SectionName.c_str())) {
     auto &component = scene.entityDatabase.get<Animator>(mSelectedEntity);
-    const auto &animations = assetRegistry.getAnimations().getAssets();
+    const auto &animatorAsset =
+        assetRegistry.getAnimators().getAsset(component.asset).data;
 
-    const auto &currentAnimation =
-        animations.at(component.animations.at(component.currentAnimation));
+    auto currentStateIndex =
+        component.currentState < animatorAsset.states.size()
+            ? component.currentState
+            : animatorAsset.initialState;
 
-    if (ImGui::BeginCombo("###SelectAnimation", currentAnimation.name.c_str(),
-                          0)) {
-      for (size_t i = 0; i < component.animations.size(); ++i) {
-        bool selectable = component.currentAnimation == i;
+    const auto &currentState = animatorAsset.states.at(currentStateIndex);
 
-        const auto &animationName =
-            animations.at(component.animations.at(i)).name;
+    bool isSimulation = state.mode == WorkspaceMode::Simulation;
 
-        if (ImGui::Selectable(animationName.c_str(), &selectable)) {
-          component.currentAnimation = static_cast<uint32_t>(i);
+    ImGui::Text("Current state: %s", currentState.name.c_str());
+    if (auto table = widgets::Table("Transitions", isSimulation ? 3 : 2)) {
+      table.row("Event", "Target");
+      for (auto &transition : currentState.transitions) {
+        table.row(transition.eventName,
+                  animatorAsset.states.at(transition.target).name);
+
+        if (isSimulation) {
+          ImGui::TableNextColumn();
+          ImGui::PushID(transition.eventName.c_str());
+          if (ImGui::Button("Toggle")) {
+            scene.entityDatabase.set<AnimatorEvent>(mSelectedEntity,
+                                                    {transition.eventName});
+          }
+          ImGui::PopID();
         }
       }
-      ImGui::EndCombo();
     }
 
     if (state.mode == WorkspaceMode::Simulation) {
-      ImGui::Text("Time");
+      if (assetRegistry.getAnimations().hasAsset(currentState.animation)) {
+        const auto &animationAsset =
+            assetRegistry.getAnimations().getAsset(currentState.animation).data;
 
-      float animationTime =
-          component.normalizedTime * currentAnimation.data.time;
-      if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
-                             currentAnimation.data.time)) {
-        component.normalizedTime = animationTime / currentAnimation.data.time;
-      }
-
-      ImGui::Checkbox("Loop", &component.loop);
-
-      if (!component.playing) {
-        if (ImGui::Button("Play")) {
-          component.playing = true;
+        ImGui::Text("Time");
+        float animationTime = component.normalizedTime * animationAsset.time;
+        if (ImGui::SliderFloat("###AnimationTime", &animationTime, 0.0f,
+                               animationAsset.time)) {
+          component.normalizedTime = animationTime / animationAsset.time;
         }
-      } else {
-        if (ImGui::Button("Pause")) {
-          component.playing = false;
+
+        if (!component.playing) {
+          if (ImGui::Button("Play")) {
+            component.playing = true;
+          }
+        } else {
+          if (ImGui::Button("Pause")) {
+            component.playing = false;
+          }
         }
-      }
 
-      ImGui::SameLine();
+        ImGui::SameLine();
 
-      if (ImGui::Button("Reset")) {
-        component.normalizedTime = 0.0f;
+        if (ImGui::Button("Reset")) {
+          component.normalizedTime = 0.0f;
+        }
       }
     }
   }
@@ -1186,6 +1197,17 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
         actionExecutor.execute<EntitySetScript>(mSelectedEntity, asset);
       } else {
         actionExecutor.execute<EntityCreateScript>(mSelectedEntity, asset);
+      }
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            getAssetTypeString(AssetType::Animator).c_str())) {
+      auto asset = *static_cast<AnimatorAssetHandle *>(payload->Data);
+
+      if (scene.entityDatabase.has<Animator>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetAnimator>(mSelectedEntity, asset);
+      } else {
+        actionExecutor.execute<EntityCreateAnimator>(mSelectedEntity, asset);
       }
     }
 

@@ -28,6 +28,8 @@ void IconRegistry::loadIcons(RenderStorage &renderStorage,
                             loader.loadFromFile(iconsPath / "audio.png"));
   mIconMap.insert_or_assign(EditorIcon::Animation,
                             loader.loadFromFile(iconsPath / "animation.png"));
+  mIconMap.insert_or_assign(EditorIcon::Animator,
+                            loader.loadFromFile(iconsPath / "animator.png"));
   mIconMap.insert_or_assign(EditorIcon::Prefab,
                             loader.loadFromFile(iconsPath / "prefab.png"));
   mIconMap.insert_or_assign(EditorIcon::Script,

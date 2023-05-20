@@ -23,6 +23,7 @@
 #include "liquid/scene/EnvironmentLighting.h"
 #include "liquid/scene/Sprite.h"
 #include "liquid/animation/Animator.h"
+#include "liquid/animation/AnimatorEvent.h"
 #include "liquid/audio/AudioSource.h"
 #include "liquid/audio/AudioStart.h"
 #include "liquid/audio/AudioStatus.h"

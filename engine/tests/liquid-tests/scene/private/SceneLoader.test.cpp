@@ -441,239 +441,37 @@ TEST_F(SceneLoaderAnimatorTest,
 }
 
 TEST_F(SceneLoaderAnimatorTest,
-       DoesNotCreateAnimatorComponentIfAnimationsFieldIsNotSequence) {
+       DoesNotCreateAnimatorComponentIfAssetFieldIsInvalid) {
   std::vector<YAML::Node> invalidNodes{
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
-      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Scalar)};
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node("invalid-node")};
 
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
-    node["components"]["animator"]["animations"] = invalidNode;
+    node["components"]["animator"]["asset"] = invalidNode;
     sceneLoader.loadComponents(node, entity, entityIdCache);
     EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
   }
 }
 
-TEST_F(SceneLoaderAnimatorTest,
-       DoesNotCreateAnimatorComponentIfAnimationsFieldIsEmpty) {
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-  sceneLoader.loadComponents(node, entity, entityIdCache);
-  EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
-}
-
-TEST_F(
-    SceneLoaderAnimatorTest,
-    DoesNotCreateAnimatorComponentIfNoAnimationsAfterRemovingInvalidSequenceItems) {
-  std::vector<YAML::Node> invalidNodes{
-      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
-      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence)};
-
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  size_t index = 0;
-  for (const auto &invalidNode : invalidNodes) {
-    node["components"]["animator"]["animations"].push_back(invalidNode);
-  }
-
-  sceneLoader.loadComponents(node, entity, entityIdCache);
-
-  EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
-}
-
-TEST_F(
-    SceneLoaderAnimatorTest,
-    DoesNotCreateAnimatorComponentIfNoAnimationsAfterRemovingNonExistentAssets) {
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  node["components"]["animator"]["animations"].push_back(
-      "non-existent-sequence.lqanim");
-
-  sceneLoader.loadComponents(node, entity, entityIdCache);
-
-  EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
-}
-
 TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
-  liquid::AssetData<liquid::AnimationAsset> data{};
-  data.relativePath = liquid::Path("test") / "hello.lqanim";
-  auto handle = assetRegistry.getAnimations().addAsset(data);
+  liquid::AssetData<liquid::AnimatorAsset> data{};
+  data.relativePath = liquid::Path("animators") / "test.animator";
+  data.data.initialState = 5;
+  auto handle = assetRegistry.getAnimators().addAsset(data);
 
   auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  node["components"]["animator"]["animations"].push_back(
-      data.relativePath.string());
+  node["components"]["animator"]["asset"] = "animators/test.animator";
 
   sceneLoader.loadComponents(node, entity, entityIdCache);
 
   EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
 
   const auto &animator = entityDatabase.get<liquid::Animator>(entity);
-  EXPECT_EQ(animator.animations.size(), 1);
-  EXPECT_EQ(animator.animations.at(0), handle);
-  EXPECT_EQ(animator.currentAnimation, 0);
-  EXPECT_EQ(animator.loop, false);
-  EXPECT_EQ(animator.playing, false);
-  EXPECT_EQ(animator.normalizedTime, 0);
-}
-
-TEST_F(SceneLoaderAnimatorTest,
-       CreatesAnimatorComponentWithInvalidAnimationsRemoved) {
-  std::vector<YAML::Node> invalidNodes{
-      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
-      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence)};
-
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  static constexpr size_t AnimationsCount = 5;
-
-  std::vector<liquid::AnimationAssetHandle> validAnimationHandles;
-
-  size_t index = 0;
-
-  for (size_t i = 0; i < AnimationsCount; ++i) {
-    liquid::AssetData<liquid::AnimationAsset> data{};
-    data.relativePath =
-        liquid::Path("test") / ("hello" + std::to_string(i) + ".lqanim");
-    validAnimationHandles.push_back(
-        assetRegistry.getAnimations().addAsset(data));
-    node["components"]["animator"]["animations"].push_back(
-        data.relativePath.string());
-  }
-
-  for (auto invalidNode : invalidNodes) {
-    node["components"]["animator"]["animations"].push_back(invalidNode);
-  }
-
-  for (size_t i = 0; i < AnimationsCount; ++i) {
-    node["components"]["animator"]["animations"].push_back(
-        "invalid-animation-" + std::to_string(i) + ".lqanim");
-  }
-
-  sceneLoader.loadComponents(node, entity, entityIdCache);
-
-  EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
-
-  const auto &animator = entityDatabase.get<liquid::Animator>(entity);
-  EXPECT_EQ(animator.animations.size(), validAnimationHandles.size());
-  for (size_t i = 0; i < animator.animations.size(); ++i) {
-    EXPECT_EQ(animator.animations.at(i), validAnimationHandles.at(i));
-  }
-  EXPECT_EQ(animator.currentAnimation, 0);
-  EXPECT_EQ(animator.loop, false);
-  EXPECT_EQ(animator.playing, false);
-  EXPECT_EQ(animator.normalizedTime, 0);
-}
-
-TEST_F(SceneLoaderAnimatorTest,
-       SetsAnimatorComponentStartingAnimationToZeroIfInvalidField) {
-  liquid::AssetData<liquid::AnimationAsset> data{};
-  data.relativePath = liquid::Path("test") / "hello.lqanim";
-  auto handle = assetRegistry.getAnimations().addAsset(data);
-
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-  node["components"]["animator"]["animations"].push_back(
-      data.relativePath.string());
-
-  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
-                                       YAML::Node(YAML::NodeType::Null),
-                                       YAML::Node(YAML::NodeType::Map),
-                                       YAML::Node(YAML::NodeType::Sequence),
-                                       YAML::Node(YAML::NodeType::Scalar),
-                                       YAML::Node("incorrect-value")};
-
-  for (auto invalidNode : invalidNodes) {
-    node["components"]["animator"]["startingAnimation"] = invalidNode;
-    sceneLoader.loadComponents(node, entity, entityIdCache);
-
-    EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
-    const auto &animator = entityDatabase.get<liquid::Animator>(entity);
-
-    EXPECT_EQ(animator.currentAnimation, 0);
-    entityDatabase.remove<liquid::Animator>(entity);
-  }
-}
-
-TEST_F(
-    SceneLoaderAnimatorTest,
-    SetsAnimatorComponentStartingAnimationToZeroIfAnimationIndexIsOutOfBounds) {
-  liquid::AssetData<liquid::AnimationAsset> data{};
-  data.relativePath = liquid::Path("test") / "hello.lqanim";
-  auto handle = assetRegistry.getAnimations().addAsset(data);
-
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  static constexpr size_t AnimationsCount = 5;
-
-  size_t index = 0;
-
-  for (size_t i = 0; i < AnimationsCount; ++i) {
-    liquid::AssetData<liquid::AnimationAsset> data{};
-    data.relativePath =
-        liquid::Path("test") / ("hello" + std::to_string(i) + ".lqanim");
-    assetRegistry.getAnimations().addAsset(data);
-    node["components"]["animator"]["animations"].push_back(
-        data.relativePath.string());
-  }
-
-  std::vector<YAML::Node> invalidNodes{YAML::Node(5), YAML::Node(6)};
-
-  for (size_t i = 5; i < 10; ++i) {
-    node["components"]["animator"]["startingAnimation"] = i;
-
-    sceneLoader.loadComponents(node, entity, entityIdCache);
-
-    EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
-    const auto &animator = entityDatabase.get<liquid::Animator>(entity);
-
-    EXPECT_EQ(animator.currentAnimation, 0);
-    entityDatabase.remove<liquid::Animator>(entity);
-  }
-}
-
-TEST_F(SceneLoaderAnimatorTest,
-       SetsAnimatorComponentStartingAnimationToFieldIndexIfValidIndex) {
-  auto [node, entity] = createNode();
-  node["components"]["animator"]["animations"] =
-      YAML::Node(YAML::NodeType::Sequence);
-
-  static constexpr size_t AnimationsCount = 5;
-
-  size_t index = 0;
-
-  for (size_t i = 0; i < AnimationsCount; ++i) {
-    liquid::AssetData<liquid::AnimationAsset> data{};
-    data.relativePath =
-        liquid::Path("test") / ("hello" + std::to_string(i) + ".lqanim");
-    assetRegistry.getAnimations().addAsset(data);
-    node["components"]["animator"]["animations"].push_back(
-        data.relativePath.string());
-  }
-
-  for (size_t i = 0; i < AnimationsCount; ++i) {
-    node["components"]["animator"]["startingAnimation"] = i;
-
-    sceneLoader.loadComponents(node, entity, entityIdCache);
-
-    EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
-    const auto &animator = entityDatabase.get<liquid::Animator>(entity);
-
-    EXPECT_EQ(animator.currentAnimation, static_cast<uint32_t>(i));
-    entityDatabase.remove<liquid::Animator>(entity);
-  }
+  EXPECT_EQ(animator.asset, handle);
+  EXPECT_EQ(animator.currentState, std::numeric_limits<size_t>::max());
+  EXPECT_EQ(animator.normalizedTime, 0.0f);
 }
 
 using SceneLoaderLightTest = SceneLoaderTest;

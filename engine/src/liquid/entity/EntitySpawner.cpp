@@ -109,7 +109,12 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
 
   for (auto &item : asset.animators) {
     auto entity = getOrCreateEntity(item.entity);
-    mEntityDatabase.set<Animator>(entity, item.value);
+    const auto &asset = mAssetRegistry.getAnimators().getAsset(item.value);
+
+    Animator animator{};
+    animator.asset = item.value;
+    animator.currentState = asset.data.initialState;
+    mEntityDatabase.set(entity, animator);
   }
 
   for (auto &item : asset.directionalLights) {
