@@ -9,6 +9,7 @@
 #include "MeshAsset.h"
 #include "SkeletonAsset.h"
 #include "AnimationAsset.h"
+#include "AnimatorAsset.h"
 #include "AudioAsset.h"
 #include "PrefabAsset.h"
 #include "EnvironmentAsset.h"
@@ -37,6 +38,7 @@ class AssetRegistry {
   using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, SkinnedMeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
+  using AnimatorMap = AssetMap<AnimatorAssetHandle, AnimatorAsset>;
   using AudioMap = AssetMap<AudioAssetHandle, AudioAsset>;
   using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
   using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
@@ -138,6 +140,13 @@ public:
   inline AnimationMap &getAnimations() { return mAnimations; }
 
   /**
+   * @brief Get animators
+   *
+   * @return Animator asset map
+   */
+  inline AnimatorMap &getAnimators() { return mAnimators; }
+
+  /**
    * @brief Get audios
    *
    * @return Audio asset map
@@ -182,6 +191,7 @@ private:
   SkinnedMeshMap mSkinnedMeshes;
   SkeletonMap mSkeletons;
   AnimationMap mAnimations;
+  AnimatorMap mAnimators;
   AudioMap mAudios;
   PrefabMap mPrefabs;
   LuaScriptMap mLuaScripts;

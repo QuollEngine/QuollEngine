@@ -79,12 +79,21 @@ TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
     asset.data.skeletons.push_back(skeleton);
   }
 
+  for (uint32_t i = 2; i < 5; ++i) {
+    liquid::AnimationAssetHandle animation{i};
+    asset.data.animations.push_back(animation);
+  }
+
   // create animators for skinned meshes
   // also create one additional animator
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::PrefabComponent<liquid::Animator> animator{};
+    liquid::AssetData<liquid::AnimatorAsset> animatorAsset{};
+    animatorAsset.data.initialState = i;
+    auto handle = assetRegistry.getAnimators().addAsset(animatorAsset);
+
+    liquid::PrefabComponent<liquid::AnimatorAssetHandle> animator{};
     animator.entity = i;
-    animator.value.currentAnimation = i;
+    animator.value = handle;
     asset.data.animators.push_back(animator);
   }
 
@@ -175,7 +184,12 @@ TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &animator = db.get<liquid::Animator>(entity);
-    EXPECT_EQ(animator.currentAnimation, i);
+    EXPECT_NE(animator.asset, liquid::AnimatorAssetHandle::Invalid);
+    EXPECT_EQ(animator.currentState, i);
+    EXPECT_EQ(
+        assetRegistry.getAnimators().getAsset(animator.asset).data.initialState,
+        animator.currentState);
+    EXPECT_EQ(animator.normalizedTime, 0.0f);
   }
 
   for (uint32_t i = 1; i < 3; ++i) {

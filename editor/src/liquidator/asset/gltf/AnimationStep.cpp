@@ -10,6 +10,9 @@ void loadAnimations(GLTFImportData &importData) {
   const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
+  std::map<uint32_t, std::vector<AnimationAssetHandle>> nodeAnimationMap;
+  std::map<uint32_t, std::vector<AnimationAssetHandle>> skinAnimationMap;
+
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
@@ -214,23 +217,96 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     if (targetSkin >= 0) {
-      if (importData.animations.skinAnimationMap.find(targetSkin) ==
-          importData.animations.skinAnimationMap.end()) {
-        importData.animations.skinAnimationMap.insert(
-            {static_cast<uint32_t>(targetSkin), {}});
+      if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
+        skinAnimationMap.insert({static_cast<uint32_t>(targetSkin), {}});
       }
-      importData.animations.skinAnimationMap.at(targetSkin)
-          .push_back(handle.getData());
+      skinAnimationMap.at(targetSkin).push_back(handle.getData());
     } else {
-      if (importData.animations.nodeAnimationMap.find(targetSkin) ==
-          importData.animations.nodeAnimationMap.end()) {
-        importData.animations.nodeAnimationMap.insert(
-            {static_cast<uint32_t>(targetNode), {}});
+      if (nodeAnimationMap.find(targetSkin) == nodeAnimationMap.end()) {
+        nodeAnimationMap.insert({static_cast<uint32_t>(targetNode), {}});
       }
-
-      importData.animations.nodeAnimationMap.at(targetNode)
-          .push_back(handle.getData());
+      nodeAnimationMap.at(targetNode).push_back(handle.getData());
     }
+  }
+
+  for (auto &[skin, animations] : skinAnimationMap) {
+    AssetData<AnimatorAsset> asset{};
+    asset.relativePath =
+        (targetPath / ("animator-skin-" + std::to_string(skin)))
+            .replace_extension("animator");
+
+    for (auto handle : animations) {
+      AnimationState state{};
+      state.name = assetCache.getRegistry()
+                       .getAnimations()
+                       .getAsset(handle)
+                       .relativePath.stem()
+                       .string();
+
+      state.animation = handle;
+      asset.data.states.push_back(state);
+    }
+
+    for (size_t i = 0; i < asset.data.states.size(); ++i) {
+      auto &state = asset.data.states.at(i);
+
+      for (size_t j = 0; j < asset.data.states.size(); ++j) {
+        if (i == j) {
+          // Ignore transition to itself
+          continue;
+        }
+
+        AnimationStateTransition transition{};
+        transition.eventName = asset.data.states.at(j).name;
+        transition.target = j;
+        state.transitions.push_back(transition);
+      }
+    }
+
+    auto path = assetCache.createAnimatorFromAsset(asset);
+    auto handle = assetCache.loadAnimatorFromFile(path.getData());
+    importData.animations.skinAnimatorMap.insert_or_assign(skin,
+                                                           handle.getData());
+  }
+
+  for (auto &[node, animations] : nodeAnimationMap) {
+    AssetData<AnimatorAsset> asset{};
+    asset.relativePath =
+        (targetPath / ("animator-node-" + std::to_string(node)))
+            .replace_extension("animator");
+
+    for (auto handle : animations) {
+      AnimationState state{};
+      state.name = assetCache.getRegistry()
+                       .getAnimations()
+                       .getAsset(handle)
+                       .relativePath.stem()
+                       .string();
+
+      state.animation = handle;
+      asset.data.states.push_back(state);
+    }
+
+    for (size_t i = 0; i < asset.data.states.size(); ++i) {
+      auto &state = asset.data.states.at(i);
+
+      for (size_t j = 0; j < asset.data.states.size(); ++j) {
+        if (i == j) {
+          // Ignore transition to itself
+          continue;
+        }
+
+        AnimationStateTransition transition{};
+        transition.eventName = asset.data.states.at(j).name;
+        transition.target = j;
+        state.transitions.push_back(transition);
+      }
+    }
+
+    auto path = assetCache.createAnimatorFromAsset(asset);
+    auto handle = assetCache.loadAnimatorFromFile(path.getData());
+    importData.animations.skinAnimatorMap.insert_or_assign(node,
+                                                           handle.getData());
   }
 }
 

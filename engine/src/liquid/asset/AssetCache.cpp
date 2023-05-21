@@ -79,8 +79,10 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   uint32_t handle = updateExisting ? asset.second : 0;
 
   if (updateExisting && asset.first != AssetType::None &&
-      asset.first != AssetType::LuaScript) {
-    return Result<bool>::Error("Can only reload Lua scripts on watch");
+      asset.first != AssetType::LuaScript &&
+      asset.first != AssetType::Animator) {
+    return Result<bool>::Error(
+        "Can only reload Lua scripts and animators on watch");
   }
 
   if (ext == ".ktx2") {
@@ -95,6 +97,16 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   if (ext == ".lua") {
     auto res =
         loadLuaScriptFromFile(path, static_cast<LuaScriptAssetHandle>(handle));
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
+  if (ext == ".animator") {
+    auto res =
+        loadAnimatorFromFile(path, static_cast<AnimatorAssetHandle>(handle));
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }

@@ -90,29 +90,18 @@ void loadPrefabs(GLTFImportData &importData) {
             {localEntityId,
              importData.skeletons.skeletonMap.map.at(node.skin)});
 
-        Animator component;
-
-        auto it = importData.animations.skinAnimationMap.find(node.skin);
-        if (it != importData.animations.skinAnimationMap.end()) {
-          component.animations = it->second;
+        auto it = importData.animations.skinAnimatorMap.find(node.skin);
+        if (it != importData.animations.skinAnimatorMap.end()) {
+          prefab.data.animators.push_back({localEntityId, it->second});
         }
 
-        if (component.animations.size() > 0) {
-          prefab.data.animators.push_back({localEntityId, component});
-        }
       } else {
         prefab.data.meshes.push_back(
             {localEntityId, importData.meshes.map.at(node.mesh)});
 
-        Animator component;
-
-        auto it = importData.animations.nodeAnimationMap.find(nodeIndex);
-        if (it != importData.animations.nodeAnimationMap.end()) {
-          component.animations = it->second;
-        }
-
-        if (component.animations.size() > 0) {
-          prefab.data.animators.push_back({localEntityId, component});
+        auto it = importData.animations.nodeAnimatorMap.find(nodeIndex);
+        if (it != importData.animations.nodeAnimatorMap.end()) {
+          prefab.data.animators.push_back({localEntityId, it->second});
         }
       }
     }

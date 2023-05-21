@@ -26,7 +26,7 @@ public:
     uint32_t numTransforms = 5;
     uint32_t numMeshes = 5;
     uint32_t numAnimators = 4;
-    uint32_t numAnimationsPerAnimator = 3;
+    uint32_t numAnimations = 3;
     uint32_t numSkeletons = 3;
     uint32_t numDirectionalLights = 2;
     uint32_t numPointLights = 4;
@@ -108,25 +108,28 @@ public:
       asset.data.skeletons.push_back({numSkeletons + i, handle});
     }
 
-    asset.data.animators.resize(numAnimators);
-    for (uint32_t i = 0; i < numAnimators * numAnimationsPerAnimator; ++i) {
+    for (uint32_t i = 0; i < numAnimations; ++i) {
       liquid::AssetData<liquid::AnimationAsset> animation;
       animation.path =
           FixturesPath / ("skeletons/anim-" + std::to_string(i) + ".lqanim");
       auto handle = cache.getRegistry().getAnimations().addAsset(animation);
+      asset.data.animations.push_back(handle);
+    }
 
-      uint32_t entityId = (i / numAnimationsPerAnimator);
-
-      asset.data.animators.at(entityId).entity = entityId;
-      asset.data.animators.at(entityId).value.animations.push_back(handle);
+    for (uint32_t i = 0; i < numAnimators; ++i) {
+      liquid::AssetData<liquid::AnimatorAsset> animator;
+      animator.path = FixturesPath /
+                      ("skeletons/animator-" + std::to_string(i) + ".animator");
+      auto handle = cache.getRegistry().getAnimators().addAsset(animator);
+      asset.data.animators.push_back({i, handle});
     }
 
     // Add two more entities that point to same animations
     // to test that existing animations are always
     // referenced instead of added again
     for (uint32_t i = 0; i < 2; ++i) {
-      liquid::Animator animator = asset.data.animators.at(i).value;
-      asset.data.animators.push_back({numAnimators + i, animator});
+      auto handle = asset.data.animators.at(i).value;
+      asset.data.animators.push_back({numAnimators + i, handle});
     }
 
     return asset;
@@ -216,23 +219,44 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
   std::vector<liquid::String> actualAnimations;
   {
-    auto &expected = asset.data.animators;
+    auto &expected = asset.data.animations;
     auto &map = cache.getRegistry().getAnimations();
     auto &actual = actualAnimations;
     uint32_t numAssets = 0;
     file.read(numAssets);
-    EXPECT_EQ(numAssets, 12);
+    EXPECT_EQ(numAssets, 3);
     actualAnimations.resize(numAssets);
     file.read(actual);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      uint32_t entityId = (i / 3);
-      auto animation = expected.at(entityId).value.animations.at(i % 3);
+      auto animation = expected.at(i);
 
       auto expectedString =
           std::filesystem::relative(map.getAsset(animation).path, FixturesPath)
               .string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
+
+      EXPECT_EQ(expectedString, actual.at(i));
+    }
+  }
+
+  std::vector<liquid::String> actualAnimators;
+  {
+    auto &expected = asset.data.animators;
+    auto &map = cache.getRegistry().getAnimators();
+    auto &actual = actualAnimators;
+    uint32_t numAssets = 0;
+    file.read(numAssets);
+    EXPECT_EQ(numAssets, 4);
+    actualAnimators.resize(numAssets);
+    file.read(actual);
+
+    for (uint32_t i = 0; i < numAssets; ++i) {
+      uint32_t entityId = (i / 3);
+      auto animation = expected.at(i).value;
+
+      auto expectedString =
+          std::filesystem::relative(map.getAsset(animation).path, FixturesPath)
+              .string();
 
       EXPECT_EQ(expectedString, actual.at(i));
     }
@@ -339,34 +363,42 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
-    EXPECT_EQ(numComponents, 6);
+    EXPECT_EQ(numComponents, 3);
     auto &map = cache.getRegistry().getAnimations();
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t animatorIndex = 999;
+      file.read(animatorIndex);
+
+      auto &expected = map.getAsset(asset.data.animations.at(i));
+
+      auto expectedString =
+          std::filesystem::relative(expected.path, FixturesPath).string();
+
+      EXPECT_EQ(expectedString, actualAnimations.at(animatorIndex));
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 6);
+    auto &map = cache.getRegistry().getAnimators();
 
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 999;
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      uint32_t numAnimations = 0;
-      file.read(numAnimations);
-      EXPECT_EQ(numAnimations, 3);
+      uint32_t animatorIndex = 999;
+      file.read(animatorIndex);
 
-      std::vector<uint32_t> animations(numAnimations);
-      file.read(animations);
+      auto &expected = map.getAsset(asset.data.animators.at(i).value);
 
-      EXPECT_EQ(asset.data.animators.at(i).value.animations.size(),
-                animations.size());
+      auto expectedString =
+          std::filesystem::relative(expected.path, FixturesPath).string();
 
-      for (size_t j = 0; j < animations.size(); ++j) {
-        auto &expected =
-            map.getAsset(asset.data.animators.at(i).value.animations.at(j));
-
-        auto expectedString =
-            std::filesystem::relative(expected.path, FixturesPath).string();
-        std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
-        EXPECT_EQ(expectedString, actualAnimations.at(animations.at(j)));
-      }
+      EXPECT_EQ(expectedString, actualAnimators.at(animatorIndex));
     }
   }
 
@@ -468,17 +500,21 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
     EXPECT_EQ(expected.value, actual.value);
   }
 
+  EXPECT_EQ(asset.data.animations.size(), prefab.data.animations.size());
+  for (size_t i = 0; i < prefab.data.animations.size(); ++i) {
+    auto &expected = asset.data.animations.at(i);
+    auto &actual = prefab.data.animations.at(i);
+
+    EXPECT_EQ(expected, actual);
+  }
+
   EXPECT_EQ(asset.data.animators.size(), prefab.data.animators.size());
   for (size_t i = 0; i < prefab.data.animators.size(); ++i) {
     auto &expected = asset.data.animators.at(i);
     auto &actual = prefab.data.animators.at(i);
 
     EXPECT_EQ(expected.entity, actual.entity);
-    EXPECT_EQ(expected.value.animations.size(), actual.value.animations.size());
-
-    for (size_t j = 0; j < expected.value.animations.size(); ++j) {
-      EXPECT_EQ(expected.value.animations.at(j), actual.value.animations.at(j));
-    }
+    EXPECT_EQ(expected.value, actual.value);
   }
 
   EXPECT_EQ(asset.data.directionalLights.size(),
@@ -541,14 +577,19 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto animationPath = cache.createAnimationFromAsset(animationData).getData();
   auto animationHandle = cache.loadAnimationFromFile(animationPath);
 
+  // Create animator
+  liquid::AssetData<liquid::AnimatorAsset> animatorData{};
+  animatorData.relativePath = "test-prefab-animator.animator";
+  animatorData.data.states.push_back({"INITIAL"});
+  auto animatorPath = cache.createAnimatorFromAsset(animatorData).getData();
+  auto animatorHandle = cache.loadAnimatorFromFile(animatorPath);
+
   // Create prefab
   liquid::AssetData<liquid::PrefabAsset> prefabData{};
   prefabData.data.skinnedMeshes.push_back({0U, meshHandle.getData()});
   prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
-  liquid::PrefabComponent<liquid::Animator> animator{};
-  animator.entity = 0;
-  animator.value.animations.push_back(animationHandle.getData());
-  prefabData.data.animators.push_back(animator);
+  prefabData.data.animations.push_back(animationHandle.getData());
+  prefabData.data.animators.push_back({0U, animatorHandle.getData()});
 
   auto prefabPath = cache.createPrefabFromAsset(prefabData);
 
@@ -558,6 +599,7 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().getSkinnedMeshes().deleteAsset(meshHandle.getData());
   cache.getRegistry().getSkeletons().deleteAsset(skeletonHandle.getData());
   cache.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
+  cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
 
   auto prefabHandle = cache.loadPrefabFromFile(prefabPath.getData());
   EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Invalid);
@@ -592,10 +634,16 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   EXPECT_EQ(newSkeleton.name, "test-prefab-skeleton.lqskel");
 
   // Validate animation
-  auto newAnimationHandle =
-      newPrefab.data.animators.at(0).value.animations.at(0);
+  auto newAnimationHandle = newPrefab.data.animations.at(0);
   EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Invalid);
   auto &newAnimation =
       cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
   EXPECT_EQ(newAnimation.name, "test-prefab-animation.lqanim");
+
+  // Validate animator
+  auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
+  EXPECT_NE(newAnimatorHandle, liquid::AnimatorAssetHandle::Invalid);
+  auto &newAnimator =
+      cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
+  EXPECT_EQ(newAnimator.relativePath, "test-prefab-animator.animator");
 }

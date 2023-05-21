@@ -51,14 +51,14 @@ struct SkeletonData {
  */
 struct AnimationData {
   /**
-   * Node to animation map
+   * Node to animator map
    */
-  std::map<uint32_t, std::vector<AnimationAssetHandle>> nodeAnimationMap;
+  std::map<uint32_t, AnimatorAssetHandle> nodeAnimatorMap;
 
   /**
-   * Skin to animation map
+   * Skin to animator map
    */
-  std::map<uint32_t, std::vector<AnimationAssetHandle>> skinAnimationMap;
+  std::map<uint32_t, AnimatorAssetHandle> skinAnimatorMap;
 };
 
 /**

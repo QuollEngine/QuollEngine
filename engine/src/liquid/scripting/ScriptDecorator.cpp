@@ -9,6 +9,7 @@
 #include "liquid/audio/AudioScriptingInterface.h"
 #include "liquid/scene/TransformScriptingInterface.h"
 #include "liquid/text/TextScriptingInterface.h"
+#include "liquid/animation/AnimatorScriptingInterface.h"
 
 #include "LuaMessages.h"
 #include "LuaScope.h"
@@ -64,6 +65,7 @@ void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   registerEntityInterface<CollidableScriptingInterface>(scope, table, entity);
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
   registerEntityInterface<TextScriptingInterface>(scope, table, entity);
+  registerEntityInterface<AnimatorScriptingInterface>(scope, table, entity);
 }
 
 void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,

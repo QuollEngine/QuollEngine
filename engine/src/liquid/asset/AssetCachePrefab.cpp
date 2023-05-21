@@ -95,25 +95,44 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   std::map<AnimationAssetHandle, uint32_t> localAnimationMap;
   {
     std::vector<String> assetPaths;
-    uint32_t numAnimations = 0;
-    for (auto &animator : asset.data.animators) {
-      numAnimations += static_cast<uint32_t>(animator.value.animations.size());
+    assetPaths.reserve(asset.data.animations.size());
+
+    for (auto handle : asset.data.animations) {
+      auto &animation = mRegistry.getAnimations().getAsset(handle);
+
+      auto path =
+          std::filesystem::relative(animation.path, mAssetsPath).string();
+
+      if (localAnimationMap.find(handle) == localAnimationMap.end()) {
+        localAnimationMap.insert_or_assign(
+            handle, static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(path);
+      }
+      std::replace(path.begin(), path.end(), '\\', '/');
     }
-    assetPaths.reserve(numAnimations);
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
+  }
+
+  std::map<AnimatorAssetHandle, uint32_t> localAnimatorMap;
+  {
+    std::vector<String> assetPaths;
+    assetPaths.reserve(asset.data.animators.size());
 
     for (auto &component : asset.data.animators) {
-      for (auto &handle : component.value.animations) {
-        auto &animation = mRegistry.getAnimations().getAsset(handle);
-        auto path =
-            std::filesystem::relative(animation.path, mAssetsPath).string();
-        std::replace(path.begin(), path.end(), '\\', '/');
+      auto handle = component.value;
+      auto &animation = mRegistry.getAnimators().getAsset(handle);
 
-        if (localAnimationMap.find(handle) == localAnimationMap.end()) {
-          localAnimationMap.insert_or_assign(
-              handle, static_cast<uint32_t>(assetPaths.size()));
-          assetPaths.push_back(path);
-        }
+      auto path =
+          std::filesystem::relative(animation.path, mAssetsPath).string();
+
+      if (localAnimatorMap.find(handle) == localAnimatorMap.end()) {
+        localAnimatorMap.insert_or_assign(
+            handle, static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(path);
       }
+      std::replace(path.begin(), path.end(), '\\', '/');
     }
 
     file.write(static_cast<uint32_t>(assetPaths.size()));
@@ -164,18 +183,21 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
+    auto numComponents = static_cast<uint32_t>(asset.data.animations.size());
+    file.write(numComponents);
+
+    for (auto &component : asset.data.animations) {
+      file.write(localAnimationMap.at(component));
+    }
+  }
+
+  {
     auto numComponents = static_cast<uint32_t>(asset.data.animators.size());
     file.write(numComponents);
 
-    for (auto &animator : asset.data.animators) {
-      file.write(animator.entity);
-
-      auto numAnimations =
-          static_cast<uint32_t>(animator.value.animations.size());
-      file.write(numAnimations);
-      for (auto &handle : animator.value.animations) {
-        file.write(localAnimationMap.at(handle));
-      }
+    for (auto &component : asset.data.animators) {
+      file.write(component.entity);
+      file.write(localAnimatorMap.at(component.value));
     }
   }
 
@@ -306,6 +328,30 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
+  std::vector<AnimatorAssetHandle> localAnimatorMap;
+  {
+    auto &map = mRegistry.getAnimators();
+
+    uint32_t numAssets = 0;
+    stream.read(numAssets);
+    std::vector<liquid::String> actual(numAssets);
+    stream.read(actual);
+    localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Invalid);
+
+    for (uint32_t i = 0; i < numAssets; ++i) {
+      auto assetPathStr = actual.at(i);
+      const auto &res = getOrLoadAnimatorFromPath(assetPathStr);
+      if (res.hasData()) {
+        localAnimatorMap.at(i) = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+
+      } else {
+        warnings.push_back(res.getError());
+      }
+    }
+  }
+
   {
     uint32_t numComponents = 0;
     stream.read(numComponents);
@@ -390,25 +436,32 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numComponents);
     auto &map = mRegistry.getAnimations();
 
+    prefab.data.animations.resize(numComponents);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t animationIndex = 0;
+      stream.read(animationIndex);
+
+      prefab.data.animations.at(i) = localAnimationMap.at(animationIndex);
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+    auto &map = mRegistry.getAnimators();
+
     prefab.data.animators.resize(numComponents);
 
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 0;
       stream.read(entity);
 
-      uint32_t numAnimations = 0;
-      stream.read(numAnimations);
-
-      std::vector<uint32_t> animations(numAnimations);
-      stream.read(animations);
+      uint32_t animatorIndex = 0;
+      stream.read(animatorIndex);
 
       prefab.data.animators.at(i).entity = entity;
-      prefab.data.animators.at(i).value.animations.resize(numAnimations);
-
-      for (size_t j = 0; j < animations.size(); ++j) {
-        prefab.data.animators.at(i).value.animations.at(j) =
-            localAnimationMap.at(animations.at(j));
-      }
+      prefab.data.animators.at(i).value = localAnimatorMap.at(animatorIndex);
     }
   }
 

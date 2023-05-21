@@ -53,6 +53,11 @@ public:
   static const std::vector<String> FontExtensions;
 
   /**
+   * @brief Supported font extensions
+   */
+  static const std::vector<String> AnimatorExtensions;
+
+  /**
    * @brief Supported scene extensions
    */
   static const std::vector<String> SceneExtensions;
@@ -140,6 +145,14 @@ public:
    * @return Result
    */
   Result<Path> createLuaScript(const Path &assetPath);
+
+  /**
+   * @brief Create animator in assets
+   *
+   * @param assetPath Path to assets
+   * @return Result
+   */
+  Result<Path> createAnimator(const Path &assetPath);
 
   /**
    * @brief Validate and preload assets
@@ -272,6 +285,14 @@ private:
    * @return Path to engine asset for font result
    */
   Result<Path> loadOriginalFont(const Path &originalAssetPath);
+
+  /**
+   * @brief Load animator asset
+   *
+   * @param originalAssetPath Original asset path
+   * @return Path to engine asset for font result
+   */
+  Result<Path> loadOriginalAnimator(const Path &originalAssetPath);
 
   /**
    * @brief Load prefab asset

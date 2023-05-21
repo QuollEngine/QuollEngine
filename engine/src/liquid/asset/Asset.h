@@ -16,6 +16,8 @@ enum class SkeletonAssetHandle : uint32_t { Invalid = 0 };
 
 enum class AnimationAssetHandle : uint32_t { Invalid = 0 };
 
+enum class AnimatorAssetHandle : uint32_t { Invalid = 0 };
+
 enum class AudioAssetHandle : uint32_t { Invalid = 0 };
 
 enum class PrefabAssetHandle : uint32_t { Invalid = 0 };
@@ -36,7 +38,8 @@ enum class AssetType : uint8_t {
   Prefab,
   LuaScript,
   Font,
-  Environment
+  Environment,
+  Animator
 };
 
 inline const String getAssetTypeString(AssetType type) {
@@ -53,6 +56,8 @@ inline const String getAssetTypeString(AssetType type) {
     return "skinned mesh";
   case AssetType::Animation:
     return "animation";
+  case AssetType::Animator:
+    return "animator";
   case AssetType::Environment:
     return "environment";
   case AssetType::Audio:

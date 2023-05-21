@@ -148,6 +148,28 @@ public:
   Result<AnimationAssetHandle> loadAnimationFromFile(const Path &filePath);
 
   /**
+   * @brief Create animator from asset
+   *
+   * Create engine specific animator asset
+   * from animator data
+   *
+   * @param asset Animator asset
+   * @return Path to new animator asset
+   */
+  Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset);
+
+  /**
+   * @brief Load animator from file
+   *
+   * @param filePath Path to asset
+   * @param handle Existing asset handle
+   * @return Animator asset handle
+   */
+  Result<AnimatorAssetHandle> loadAnimatorFromFile(
+      const Path &filePath,
+      AnimatorAssetHandle handle = AnimatorAssetHandle::Invalid);
+
+  /**
    * @brief Load audio from file
    *
    * @param filePath Path to asset
@@ -259,8 +281,8 @@ private:
   String getAssetRelativePath(TAssetMap &map,
                               typename TAssetMap::Handle handle) {
     if (handle != TAssetMap::Handle::Invalid) {
-      auto &texture = map.getAsset(handle);
-      auto path = std::filesystem::relative(texture.path, mAssetsPath).string();
+      auto &asset = map.getAsset(handle);
+      auto path = std::filesystem::relative(asset.path, mAssetsPath).string();
       std::replace(path.begin(), path.end(), '\\', '/');
       return path;
     }
@@ -420,6 +442,15 @@ private:
    */
   Result<AnimationAssetHandle>
   getOrLoadAnimationFromPath(StringView relativePath);
+
+  /**
+   * @brief Get or load animator from path
+   *
+   * @param relativePath Path to animator
+   * @return Existing or newly loaded animator
+   */
+  Result<AnimatorAssetHandle>
+  getOrLoadAnimatorFromPath(StringView relativePath);
 
 private:
   AssetRegistry mRegistry;
