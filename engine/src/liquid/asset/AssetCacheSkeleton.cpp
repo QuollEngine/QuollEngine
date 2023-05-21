@@ -87,7 +87,7 @@ AssetCache::loadSkeletonFromFile(const Path &filePath) {
 Result<SkeletonAssetHandle>
 AssetCache::getOrLoadSkeletonFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Invalid);
+    return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();

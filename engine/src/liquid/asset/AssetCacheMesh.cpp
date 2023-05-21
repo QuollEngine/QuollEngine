@@ -344,7 +344,7 @@ AssetCache::loadSkinnedMeshFromFile(const Path &filePath) {
 Result<MeshAssetHandle>
 AssetCache::getOrLoadMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Invalid);
+    return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();
@@ -361,7 +361,7 @@ AssetCache::getOrLoadMeshFromPath(StringView relativePath) {
 Result<SkinnedMeshAssetHandle>
 AssetCache::getOrLoadSkinnedMeshFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Invalid);
+    return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();

@@ -1221,8 +1221,8 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyColorAttachments) {
 
   auto &compiled = graph.getCompiledPasses().at(0);
 
-  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
-  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Null);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Null);
 
   auto renderPassDesc =
       device.getRenderPassDescription(compiled.getRenderPass());
@@ -1261,8 +1261,8 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyDepthAttachment) {
 
   auto &compiled = graph.getCompiledPasses().at(0);
 
-  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
-  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Null);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Null);
 
   auto renderPassDesc =
       device.getRenderPassDescription(compiled.getRenderPass());
@@ -1301,8 +1301,8 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyResolveAttachment) {
 
   auto &compiled = graph.getCompiledPasses().at(0);
 
-  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
-  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Null);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Null);
 
   auto renderPassDesc =
       device.getRenderPassDescription(compiled.getRenderPass());
@@ -1400,8 +1400,8 @@ TEST_F(RenderGraphTest, BuildsGraphicsPipelinesForGraphicsPasses) {
 
   auto &compiled = graph.getCompiledPasses().at(0);
 
-  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Invalid);
-  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Invalid);
+  EXPECT_NE(compiled.getRenderPass(), RenderPassHandle::Null);
+  EXPECT_NE(compiled.getFramebuffer(), FramebufferHandle::Null);
 
   auto mock = device.getPipeline(pipeline);
   EXPECT_EQ(mock.getType(), MockPipeline::Type::Graphics);

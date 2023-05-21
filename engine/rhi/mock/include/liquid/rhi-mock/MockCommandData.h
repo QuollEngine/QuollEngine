@@ -9,7 +9,7 @@ struct MockBindings {
   /**
    * Pipeline
    */
-  PipelineHandle pipeline = PipelineHandle::Invalid;
+  PipelineHandle pipeline = PipelineHandle::Null;
 
   /**
    * Descriptors
@@ -21,21 +21,21 @@ struct MockBindings {
    *
    * Graphics specific
    */
-  RenderPassHandle renderPass = RenderPassHandle::Invalid;
+  RenderPassHandle renderPass = RenderPassHandle::Null;
 
   /**
    * Vertex buffer
    *
    * Graphics specific
    */
-  BufferHandle vertexBuffer = BufferHandle::Invalid;
+  BufferHandle vertexBuffer = BufferHandle::Null;
 
   /**
    * Index buffer
    *
    * Graphics specific
    */
-  BufferHandle indexBuffer = BufferHandle::Invalid;
+  BufferHandle indexBuffer = BufferHandle::Null;
 
   /**
    * Index buffer type

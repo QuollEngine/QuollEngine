@@ -461,7 +461,7 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createPrefabFromAsset(asset);
   auto handle = cache.loadPrefabFromFile(filePath.getData());
-  EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Invalid);
+  EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Null);
 
   auto &prefab = cache.getRegistry().getPrefabs().getAsset(handle.getData());
 
@@ -602,24 +602,24 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
 
   auto prefabHandle = cache.loadPrefabFromFile(prefabPath.getData());
-  EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Invalid);
+  EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Null);
 
   auto &newPrefab =
       cache.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
 
   // Validate mesh
   EXPECT_NE(newPrefab.data.skinnedMeshes.at(0).value,
-            liquid::SkinnedMeshAssetHandle::Invalid);
+            liquid::SkinnedMeshAssetHandle::Null);
   auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(
       newPrefab.data.skinnedMeshes.at(0).value);
   EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Invalid);
+            liquid::MaterialAssetHandle::Null);
 
   // Validate material
   auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
   EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Invalid);
+            liquid::TextureAssetHandle::Null);
 
   // Validate texture
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
@@ -628,21 +628,21 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
-            liquid::SkeletonAssetHandle::Invalid);
+            liquid::SkeletonAssetHandle::Null);
   auto &newSkeleton = cache.getRegistry().getSkeletons().getAsset(
       newPrefab.data.skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.name, "test-prefab-skeleton.lqskel");
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
-  EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Invalid);
+  EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Null);
   auto &newAnimation =
       cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
   EXPECT_EQ(newAnimation.name, "test-prefab-animation.lqanim");
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
-  EXPECT_NE(newAnimatorHandle, liquid::AnimatorAssetHandle::Invalid);
+  EXPECT_NE(newAnimatorHandle, liquid::AnimatorAssetHandle::Null);
   auto &newAnimator =
       cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
   EXPECT_EQ(newAnimator.relativePath, "test-prefab-animator.animator");

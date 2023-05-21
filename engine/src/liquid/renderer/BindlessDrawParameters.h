@@ -72,7 +72,7 @@ private:
 
   rhi::Buffer mBuffer;
   rhi::DescriptorLayoutHandle mDescriptorLayout =
-      rhi::DescriptorLayoutHandle::Invalid;
+      rhi::DescriptorLayoutHandle::Null;
   rhi::Descriptor mDescriptor;
 };
 

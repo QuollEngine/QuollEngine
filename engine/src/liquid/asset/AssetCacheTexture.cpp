@@ -241,7 +241,7 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
 Result<TextureAssetHandle>
 AssetCache::getOrLoadTextureFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Invalid);
+    return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();

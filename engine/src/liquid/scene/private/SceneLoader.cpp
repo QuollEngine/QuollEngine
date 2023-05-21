@@ -60,7 +60,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
     auto handle = mAssetRegistry.getTextures().findHandleByRelativePath(path);
 
-    if (handle != TextureAssetHandle::Invalid) {
+    if (handle != TextureAssetHandle::Null) {
       mEntityDatabase.set<Sprite>(entity, {handle});
     }
   }
@@ -139,7 +139,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto path = Path(node["components"]["mesh"].as<String>(""));
     auto handle = mAssetRegistry.getMeshes().findHandleByRelativePath(path);
 
-    if (handle != MeshAssetHandle::Invalid) {
+    if (handle != MeshAssetHandle::Null) {
       mEntityDatabase.set<Mesh>(entity, {handle});
     }
   }
@@ -149,7 +149,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle =
         mAssetRegistry.getSkinnedMeshes().findHandleByRelativePath(path);
 
-    if (handle != SkinnedMeshAssetHandle::Invalid) {
+    if (handle != SkinnedMeshAssetHandle::Null) {
       mEntityDatabase.set<SkinnedMesh>(entity, {handle});
     }
   }
@@ -158,7 +158,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto path = Path(node["components"]["skeleton"].as<String>(""));
     auto handle = mAssetRegistry.getSkeletons().findHandleByRelativePath(path);
 
-    if (handle != SkeletonAssetHandle::Invalid) {
+    if (handle != SkeletonAssetHandle::Null) {
       const auto &skeleton =
           mAssetRegistry.getSkeletons().getAsset(handle).data;
 
@@ -189,7 +189,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle =
         mAssetRegistry.getAnimators().findHandleByRelativePath(assetPath);
 
-    if (handle != AnimatorAssetHandle::Invalid) {
+    if (handle != AnimatorAssetHandle::Null) {
       const auto &asset = mAssetRegistry.getAnimators().getAsset(handle);
       Animator animator;
       animator.asset = handle;
@@ -269,7 +269,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
     auto handle = mAssetRegistry.getAudios().findHandleByRelativePath(path);
 
-    if (handle != AudioAssetHandle::Invalid) {
+    if (handle != AudioAssetHandle::Null) {
       mEntityDatabase.set<AudioSource>(entity, {handle});
     }
   }
@@ -297,7 +297,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
           } else if (type == "prefab") {
             auto handle =
                 mAssetRegistry.getPrefabs().findHandleByRelativePath(value);
-            if (handle != PrefabAssetHandle::Invalid) {
+            if (handle != PrefabAssetHandle::Null) {
               script.variables.insert_or_assign(name, handle);
             }
           }
@@ -308,7 +308,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     script.handle =
         mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
 
-    if (script.handle != LuaScriptAssetHandle::Invalid) {
+    if (script.handle != LuaScriptAssetHandle::Null) {
       mEntityDatabase.set(entity, script);
     }
   }
@@ -320,7 +320,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     Text textComponent{};
     textComponent.font = handle;
 
-    if (handle != FontAssetHandle::Invalid) {
+    if (handle != FontAssetHandle::Null) {
       if (node["components"]["text"]["content"] &&
           node["components"]["text"]["content"].IsScalar()) {
         textComponent.text = node["components"]["text"]["content"].as<String>(

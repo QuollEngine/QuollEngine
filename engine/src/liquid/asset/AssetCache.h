@@ -165,9 +165,9 @@ public:
    * @param handle Existing asset handle
    * @return Animator asset handle
    */
-  Result<AnimatorAssetHandle> loadAnimatorFromFile(
-      const Path &filePath,
-      AnimatorAssetHandle handle = AnimatorAssetHandle::Invalid);
+  Result<AnimatorAssetHandle>
+  loadAnimatorFromFile(const Path &filePath,
+                       AnimatorAssetHandle handle = AnimatorAssetHandle::Null);
 
   /**
    * @brief Load audio from file
@@ -225,7 +225,7 @@ public:
    */
   Result<LuaScriptAssetHandle> loadLuaScriptFromFile(
       const Path &filePath,
-      LuaScriptAssetHandle handle = LuaScriptAssetHandle::Invalid);
+      LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null);
 
   /**
    * @brief Get asset registry
@@ -280,7 +280,7 @@ private:
   template <class TAssetMap>
   String getAssetRelativePath(TAssetMap &map,
                               typename TAssetMap::Handle handle) {
-    if (handle != TAssetMap::Handle::Invalid) {
+    if (handle != TAssetMap::Handle::Null) {
       auto &asset = map.getAsset(handle);
       auto path = std::filesystem::relative(asset.path, mAssetsPath).string();
       std::replace(path.begin(), path.end(), '\\', '/');

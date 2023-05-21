@@ -11,7 +11,7 @@ struct Animator {
   /**
    * Animator asset handle
    */
-  AnimatorAssetHandle asset = AnimatorAssetHandle::Invalid;
+  AnimatorAssetHandle asset = AnimatorAssetHandle::Null;
 
   /**
    * Current animator state

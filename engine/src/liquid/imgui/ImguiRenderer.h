@@ -159,7 +159,7 @@ private:
 
 private:
   RenderStorage &mRenderStorage;
-  rhi::TextureHandle mFontTexture = rhi::TextureHandle::Invalid;
+  rhi::TextureHandle mFontTexture = rhi::TextureHandle::Null;
 
   std::array<FrameData, rhi::RenderDevice::NumFrames> mFrameData;
 

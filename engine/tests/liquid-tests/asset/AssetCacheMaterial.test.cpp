@@ -247,7 +247,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
+  EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
@@ -297,7 +297,7 @@ TEST_F(AssetCacheTest, LoadsMaterialWithoutTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, liquid::MaterialAssetHandle::Invalid);
+  EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, "material1.lqmat");
@@ -347,7 +347,7 @@ TEST_F(AssetCacheTest, LoadsTexturesWithMaterials) {
       cache.getRegistry().getMaterials().getAsset(handle.getData());
 
   EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Invalid);
+            liquid::TextureAssetHandle::Null);
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);

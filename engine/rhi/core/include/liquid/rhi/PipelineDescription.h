@@ -385,12 +385,12 @@ struct GraphicsPipelineDescription {
   /**
    * Vertex shader
    */
-  ShaderHandle vertexShader = ShaderHandle::Invalid;
+  ShaderHandle vertexShader = ShaderHandle::Null;
 
   /**
    * Fragment shader
    */
-  ShaderHandle fragmentShader = ShaderHandle::Invalid;
+  ShaderHandle fragmentShader = ShaderHandle::Null;
 
   /**
    * Vertex input layout
@@ -430,7 +430,7 @@ struct GraphicsPipelineDescription {
   /**
    * Render pass
    */
-  RenderPassHandle renderPass = RenderPassHandle::Invalid;
+  RenderPassHandle renderPass = RenderPassHandle::Null;
 };
 
 /**
@@ -440,7 +440,7 @@ struct ComputePipelineDescription {
   /**
    * Compute shader
    */
-  ShaderHandle computeShader = ShaderHandle::Invalid;
+  ShaderHandle computeShader = ShaderHandle::Null;
 
   /**
    * Debug name

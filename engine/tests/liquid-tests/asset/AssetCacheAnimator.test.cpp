@@ -249,7 +249,7 @@ TEST_F(AssetCacheTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "valid");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Invalid);
+            liquid::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -293,7 +293,7 @@ TEST_F(AssetCacheTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "INITIAL");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Invalid);
+            liquid::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -438,7 +438,7 @@ TEST_F(AssetCacheTest, LoadAnimatorIgnoresInvalidTransitions) {
   EXPECT_EQ(animator.data.states.size(), 2);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Invalid);
+            liquid::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).transitions.at(0).eventName,
             "NEW_EVENT");

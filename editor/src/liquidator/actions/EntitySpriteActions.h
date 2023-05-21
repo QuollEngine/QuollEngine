@@ -46,7 +46,7 @@ public:
 private:
   Entity mEntity;
   TextureAssetHandle mSprite;
-  TextureAssetHandle mOldSprite = TextureAssetHandle::Invalid;
+  TextureAssetHandle mOldSprite = TextureAssetHandle::Null;
 };
 
 /**

@@ -157,7 +157,7 @@ TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {
   auto filePath = cache.createSkeletonFromAsset(asset);
   auto handle = cache.loadSkeletonFromFile(filePath.getData());
 
-  EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Invalid);
+  EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getSkeletons().getAsset(handle.getData());
 

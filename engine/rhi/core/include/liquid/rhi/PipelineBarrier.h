@@ -48,7 +48,7 @@ struct ImageBarrier {
   /**
    * Texture
    */
-  TextureHandle texture = TextureHandle::Invalid;
+  TextureHandle texture = TextureHandle::Null;
 
   /**
    * Base mip level

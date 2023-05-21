@@ -1044,11 +1044,11 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetPrefab)
                     ? existingVariable.get<PrefabAssetHandle>()
-                    : PrefabAssetHandle::Invalid;
+                    : PrefabAssetHandle::Null;
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const float halfWidth = width * 0.5f;
-            if (value == PrefabAssetHandle::Invalid) {
+            if (value == PrefabAssetHandle::Null) {
               ImGui::Button("Drag prefab here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =
@@ -1070,11 +1070,11 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
             auto value =
                 existingVariable.isType(LuaScriptVariableType::AssetTexture)
                     ? existingVariable.get<TextureAssetHandle>()
-                    : TextureAssetHandle::Invalid;
+                    : TextureAssetHandle::Null;
 
             const auto width = ImGui::GetWindowContentRegionWidth();
             const float halfWidth = width * 0.5f;
-            if (value == TextureAssetHandle::Invalid) {
+            if (value == TextureAssetHandle::Null) {
               ImGui::Button("Drag texture here", ImVec2(width, halfWidth));
             } else {
               String buttonLabel =

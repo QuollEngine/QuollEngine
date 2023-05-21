@@ -45,9 +45,9 @@ class AssetRegistry {
   using EnvironmentMap = AssetMap<EnvironmentAssetHandle, EnvironmentAsset>;
 
   struct DefaultObjects {
-    MeshAssetHandle cube = MeshAssetHandle::Invalid;
-    MaterialAssetHandle defaultMaterial = MaterialAssetHandle::Invalid;
-    FontAssetHandle defaultFont = FontAssetHandle::Invalid;
+    MeshAssetHandle cube = MeshAssetHandle::Null;
+    MaterialAssetHandle defaultMaterial = MaterialAssetHandle::Null;
+    FontAssetHandle defaultFont = FontAssetHandle::Null;
   };
 
 public:

@@ -11,7 +11,7 @@ struct SkinnedMesh {
   /**
    * Skinned mesh asset handle
    */
-  SkinnedMeshAssetHandle handle = SkinnedMeshAssetHandle::Invalid;
+  SkinnedMeshAssetHandle handle = SkinnedMeshAssetHandle::Null;
 };
 
 } // namespace liquid

@@ -258,7 +258,7 @@ void SceneIO::loadEnvironment(const YAML::Node &zone) {
       EnvironmentSkybox component{EnvironmentSkyboxType::Texture};
       component.texture = handle;
 
-      if (handle != EnvironmentAssetHandle::Invalid) {
+      if (handle != EnvironmentAssetHandle::Null) {
         mScene.entityDatabase.set(mScene.environment, component);
       }
     }

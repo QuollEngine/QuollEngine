@@ -50,7 +50,7 @@ struct FontAsset {
   /**
    * Device handle
    */
-  rhi::TextureHandle deviceHandle = rhi::TextureHandle::Invalid;
+  rhi::TextureHandle deviceHandle = rhi::TextureHandle::Null;
 };
 
 } // namespace liquid

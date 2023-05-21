@@ -21,7 +21,7 @@ struct Text {
   /**
    * Font used for rendering
    */
-  FontAssetHandle font = FontAssetHandle::Invalid;
+  FontAssetHandle font = FontAssetHandle::Null;
 };
 
 } // namespace liquid

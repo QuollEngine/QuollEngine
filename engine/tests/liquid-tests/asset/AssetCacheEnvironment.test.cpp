@@ -132,9 +132,8 @@ TEST_F(AssetCacheTest,
 
   const auto &environment =
       cache.getRegistry().getEnvironments().getAsset(res.getData());
-  EXPECT_NE(environment.data.irradianceMap,
-            liquid::TextureAssetHandle::Invalid);
-  EXPECT_NE(environment.data.specularMap, liquid::TextureAssetHandle::Invalid);
+  EXPECT_NE(environment.data.irradianceMap, liquid::TextureAssetHandle::Null);
+  EXPECT_NE(environment.data.specularMap, liquid::TextureAssetHandle::Null);
 }
 
 TEST_F(AssetCacheTest,

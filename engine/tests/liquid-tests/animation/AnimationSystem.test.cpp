@@ -354,6 +354,6 @@ TEST_F(AnimationSystemTest,
 }
 
 TEST_F(AnimationSystemTest, DoesNothingIfAnimationDoesNotExist) {
-  auto entity = create(liquid::AnimationAssetHandle::Invalid);
+  auto entity = create(liquid::AnimationAssetHandle::Null);
   system.update(0.5f, entityDatabase);
 }

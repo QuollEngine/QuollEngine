@@ -48,23 +48,22 @@ TEST_F(MaterialPBRTest, GetsTextures) {
 }
 
 TEST_F(MaterialPBRTest, GetsProperties) {
-  liquid::MaterialPBR::Properties properties{
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      {1.0f, 0.2f, 0.3f, 0.4f},
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      0.2f,
-      0.6f,
-      liquid::rhi::TextureHandle::Invalid,
-      1,
-      0.7f,
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      0.3f,
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      glm::vec3(1.0f, 0.2f, 0.4f)};
+  liquid::MaterialPBR::Properties properties{liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             {1.0f, 0.2f, 0.3f, 0.4f},
+                                             liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             0.2f,
+                                             0.6f,
+                                             liquid::rhi::TextureHandle::Null,
+                                             1,
+                                             0.7f,
+                                             liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             0.3f,
+                                             liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             glm::vec3(1.0f, 0.2f, 0.4f)};
 
 #define EXPECT_PROP_EQ(idx, key, type, value)                                  \
   EXPECT_EQ(properties.getProperties()[idx].first, key);                       \
@@ -121,23 +120,22 @@ TEST_F(MaterialPBRTest, GetsProperties) {
 }
 
 TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
-  liquid::MaterialPBR::Properties properties{
-      liquid::rhi::TextureHandle(1),
-      0,
-      {1.0f, 0.2f, 0.3f, 0.4f},
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      0.2f,
-      0.6f,
-      liquid::rhi::TextureHandle(2),
-      1,
-      0.7f,
-      liquid::rhi::TextureHandle::Invalid,
-      0,
-      0.3f,
-      liquid::rhi::TextureHandle(3),
-      0,
-      glm::vec3(1.0f, 0.2f, 0.4f)};
+  liquid::MaterialPBR::Properties properties{liquid::rhi::TextureHandle(1),
+                                             0,
+                                             {1.0f, 0.2f, 0.3f, 0.4f},
+                                             liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             0.2f,
+                                             0.6f,
+                                             liquid::rhi::TextureHandle(2),
+                                             1,
+                                             0.7f,
+                                             liquid::rhi::TextureHandle::Null,
+                                             0,
+                                             0.3f,
+                                             liquid::rhi::TextureHandle(3),
+                                             0,
+                                             glm::vec3(1.0f, 0.2f, 0.4f)};
 
   liquid::MaterialPBR material(properties, renderStorage);
 

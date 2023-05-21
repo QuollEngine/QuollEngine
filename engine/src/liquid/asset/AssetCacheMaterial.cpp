@@ -181,7 +181,7 @@ AssetCache::loadMaterialFromFile(const Path &filePath) {
 Result<MaterialAssetHandle>
 AssetCache::getOrLoadMaterialFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Invalid);
+    return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();

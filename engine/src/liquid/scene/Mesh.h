@@ -11,7 +11,7 @@ struct Mesh {
   /**
    * Mesh asset handle
    */
-  MeshAssetHandle handle = MeshAssetHandle::Invalid;
+  MeshAssetHandle handle = MeshAssetHandle::Null;
 };
 
 } // namespace liquid

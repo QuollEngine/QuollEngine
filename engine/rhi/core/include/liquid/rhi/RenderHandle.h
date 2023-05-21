@@ -2,23 +2,23 @@
 
 namespace liquid::rhi {
 
-enum class ShaderHandle : uint32_t { Invalid = 0 };
+enum class ShaderHandle : uint32_t { Null = 0 };
 
-enum class BufferHandle : uint32_t { Invalid = 0 };
+enum class BufferHandle : uint32_t { Null = 0 };
 
-enum class TextureHandle : uint32_t { Invalid = 0 };
+enum class TextureHandle : uint32_t { Null = 0 };
 
-enum class TextureViewHandle : uint32_t { Invalid = 0 };
+enum class TextureViewHandle : uint32_t { Null = 0 };
 
-enum class RenderPassHandle : uint32_t { Invalid = 0 };
+enum class RenderPassHandle : uint32_t { Null = 0 };
 
-enum class FramebufferHandle : uint32_t { Invalid = 0 };
+enum class FramebufferHandle : uint32_t { Null = 0 };
 
-enum class PipelineHandle : uint32_t { Invalid = 0 };
+enum class PipelineHandle : uint32_t { Null = 0 };
 
-enum class DescriptorLayoutHandle : uint32_t { Invalid = 0 };
+enum class DescriptorLayoutHandle : uint32_t { Null = 0 };
 
-enum class DescriptorHandle : uint32_t { Invalid = 0 };
+enum class DescriptorHandle : uint32_t { Null = 0 };
 
 /**
  * @brief Check if type equals any of the other types
@@ -43,7 +43,7 @@ template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
                 TextureViewHandle, RenderPassHandle, FramebufferHandle,
                 PipelineHandle, DescriptorLayoutHandle, DescriptorHandle>,
       "Type must be a render handle");
-  return handle != THandle::Invalid;
+  return handle != THandle::Null;
 }
 
 /**

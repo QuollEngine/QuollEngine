@@ -63,7 +63,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
   renderPassDescription.colorAttachments.push_back(attachment);
   renderPassDescription.debugName = "Presenter";
 
-  if (mPresentPass != rhi::RenderPassHandle::Invalid) {
+  if (mPresentPass != rhi::RenderPassHandle::Null) {
     mRenderStorage.getDevice()->destroyRenderPass(mPresentPass);
   }
 

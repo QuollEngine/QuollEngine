@@ -54,7 +54,7 @@ struct RenderPassAttachmentDescription {
   /**
    * Attachment texture
    */
-  TextureHandle texture = TextureHandle::Invalid;
+  TextureHandle texture = TextureHandle::Null;
 
   /**
    * Attachment image initial layout

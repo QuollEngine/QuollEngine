@@ -28,7 +28,7 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   if (format == rhi::Format::Undefined) {
     importData.warnings.push_back("Texture #" + std::to_string(index) +
                                   " has 16-bit channels and cannot be loaded");
-    return TextureAssetHandle::Invalid;
+    return TextureAssetHandle::Null;
   }
 
   AssetData<TextureAsset> texture{};

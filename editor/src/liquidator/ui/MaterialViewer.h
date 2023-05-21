@@ -24,7 +24,7 @@ public:
   void open(MaterialAssetHandle handle);
 
 private:
-  MaterialAssetHandle mHandle = MaterialAssetHandle::Invalid;
+  MaterialAssetHandle mHandle = MaterialAssetHandle::Null;
 };
 
 } // namespace liquid::editor

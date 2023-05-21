@@ -21,13 +21,13 @@ static void renderTextureIfExists(widgets::Table &table, const String &label,
 }
 
 void MaterialViewer::render(AssetRegistry &assetRegistry) {
-  bool open = mHandle != MaterialAssetHandle::Invalid;
+  bool open = mHandle != MaterialAssetHandle::Null;
 
   if (!open)
     return;
 
   if (!assetRegistry.getMaterials().hasAsset(mHandle)) {
-    mHandle = MaterialAssetHandle::Invalid;
+    mHandle = MaterialAssetHandle::Null;
     return;
   }
 
@@ -64,7 +64,7 @@ void MaterialViewer::render(AssetRegistry &assetRegistry) {
   }
 
   if (!open) {
-    mHandle = MaterialAssetHandle::Invalid;
+    mHandle = MaterialAssetHandle::Null;
   }
 }
 

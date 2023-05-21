@@ -247,7 +247,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localMeshMap.resize(numAssets, MeshAssetHandle::Invalid);
+    localMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -268,7 +268,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localSkinnedMeshMap.resize(numAssets, SkinnedMeshAssetHandle::Invalid);
+    localSkinnedMeshMap.resize(numAssets, SkinnedMeshAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -289,7 +289,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Invalid);
+    localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -312,7 +312,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localAnimationMap.resize(numAssets, AnimationAssetHandle::Invalid);
+    localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);
@@ -336,7 +336,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Invalid);
+    localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetPathStr = actual.at(i);

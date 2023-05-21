@@ -25,7 +25,7 @@ class AssetBrowser {
     float textWidth = 0.0f;
     bool isDirectory = false;
     EditorIcon icon = EditorIcon::Unknown;
-    rhi::TextureHandle preview = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle preview = rhi::TextureHandle::Null;
     AssetType assetType = AssetType::None;
     uint32_t asset = 0;
     bool isEditable = false;

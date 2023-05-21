@@ -420,7 +420,7 @@ void loadMeshes(GLTFImportData &importData) {
 
       auto material = primitive.material >= 0
                           ? importData.materials.map.at(primitive.material)
-                          : MaterialAssetHandle::Invalid;
+                          : MaterialAssetHandle::Null;
 
       if (isSkinnedMesh) {
         auto &&result =

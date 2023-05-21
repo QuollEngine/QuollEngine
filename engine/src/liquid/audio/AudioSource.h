@@ -12,7 +12,7 @@ struct AudioSource {
   /**
    * @brief Audio source asset
    */
-  AudioAssetHandle source = AudioAssetHandle::Invalid;
+  AudioAssetHandle source = AudioAssetHandle::Null;
 };
 
 } // namespace liquid

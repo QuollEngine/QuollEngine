@@ -11,7 +11,7 @@ struct FramebufferDescription {
   /**
    * Render pass
    */
-  RenderPassHandle renderPass = RenderPassHandle::Invalid;
+  RenderPassHandle renderPass = RenderPassHandle::Null;
 
   /**
    * Width

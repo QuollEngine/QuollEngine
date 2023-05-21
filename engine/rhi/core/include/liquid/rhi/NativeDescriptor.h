@@ -22,7 +22,7 @@ struct DescriptorBufferInfo {
   /**
    * Buffer
    */
-  BufferHandle buffer = rhi::BufferHandle::Invalid;
+  BufferHandle buffer = rhi::BufferHandle::Null;
 };
 
 /**
