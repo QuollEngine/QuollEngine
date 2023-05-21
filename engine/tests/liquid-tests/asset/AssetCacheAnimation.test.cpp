@@ -118,7 +118,7 @@ TEST_F(AssetCacheTest, LoadsAnimationAssetFromFile) {
   auto filePath = cache.createAnimationFromAsset(asset);
   auto handle = cache.loadAnimationFromFile(filePath.getData());
   EXPECT_FALSE(handle.hasError());
-  EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Invalid);
+  EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getAnimations().getAsset(handle.getData());
   EXPECT_EQ(actual.type, liquid::AssetType::Animation);

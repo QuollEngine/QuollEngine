@@ -11,7 +11,7 @@ struct MaterialAsset {
   /**
    * Base color texture
    */
-  TextureAssetHandle baseColorTexture = TextureAssetHandle::Invalid;
+  TextureAssetHandle baseColorTexture = TextureAssetHandle::Null;
 
   /**
    * Base color texture coordinate index
@@ -26,7 +26,7 @@ struct MaterialAsset {
   /**
    * Metallic roughness textures
    */
-  TextureAssetHandle metallicRoughnessTexture = TextureAssetHandle::Invalid;
+  TextureAssetHandle metallicRoughnessTexture = TextureAssetHandle::Null;
 
   /**
    * Metallic roughness texture coordinate index
@@ -46,7 +46,7 @@ struct MaterialAsset {
   /**
    * Normal texture
    */
-  TextureAssetHandle normalTexture = TextureAssetHandle::Invalid;
+  TextureAssetHandle normalTexture = TextureAssetHandle::Null;
 
   /**
    * Normal texture coordinate index
@@ -61,7 +61,7 @@ struct MaterialAsset {
   /**
    * Occlusion texture
    */
-  TextureAssetHandle occlusionTexture = TextureAssetHandle::Invalid;
+  TextureAssetHandle occlusionTexture = TextureAssetHandle::Null;
 
   /**
    * Occlusion texture coordinate index
@@ -76,7 +76,7 @@ struct MaterialAsset {
   /**
    * Emissive texture
    */
-  TextureAssetHandle emissiveTexture = TextureAssetHandle::Invalid;
+  TextureAssetHandle emissiveTexture = TextureAssetHandle::Null;
 
   /**
    * Emissive texture coordinate index

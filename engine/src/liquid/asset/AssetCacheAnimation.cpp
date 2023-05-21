@@ -94,7 +94,7 @@ AssetCache::loadAnimationFromFile(const Path &filePath) {
 Result<AnimationAssetHandle>
 AssetCache::getOrLoadAnimationFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Invalid);
+    return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();

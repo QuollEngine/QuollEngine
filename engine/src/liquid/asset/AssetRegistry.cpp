@@ -21,7 +21,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize textures
   for (auto &[_, texture] : mTextures.getAssets()) {
-    if (texture.data.deviceHandle == rhi::TextureHandle::Invalid) {
+    if (texture.data.deviceHandle == rhi::TextureHandle::Null) {
       rhi::TextureDescription description{};
       description.width = texture.data.width;
       description.levels = static_cast<uint32_t>(texture.data.levels.size());
@@ -46,7 +46,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize fonts
   for (auto &[_, font] : mFonts.getAssets()) {
-    if (font.data.deviceHandle == rhi::TextureHandle::Invalid) {
+    if (font.data.deviceHandle == rhi::TextureHandle::Null) {
       rhi::TextureDescription description{};
       description.width = font.data.atlasDimensions.x;
       description.height = font.data.atlasDimensions.y;
@@ -67,11 +67,11 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize materials
   auto getTextureFromRegistry = [this](TextureAssetHandle handle) {
-    if (handle != TextureAssetHandle::Invalid) {
+    if (handle != TextureAssetHandle::Null) {
       return mTextures.getAsset(handle).data.deviceHandle;
     }
 
-    return rhi::TextureHandle::Invalid;
+    return rhi::TextureHandle::Null;
   };
 
   for (auto &[_, asset] : mMaterials.getAssets()) {
@@ -166,7 +166,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
       auto &geometry = mesh.data.geometries.at(i);
-      auto material = geometry.material != MaterialAssetHandle::Invalid
+      auto material = geometry.material != MaterialAssetHandle::Null
                           ? geometry.material
                           : mDefaultObjects.defaultMaterial;
 
@@ -232,7 +232,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
     for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
       auto &geometry = mesh.data.geometries.at(i);
-      auto material = geometry.material != MaterialAssetHandle::Invalid
+      auto material = geometry.material != MaterialAssetHandle::Null
                           ? geometry.material
                           : mDefaultObjects.defaultMaterial;
 

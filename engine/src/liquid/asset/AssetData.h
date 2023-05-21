@@ -44,7 +44,7 @@ template <class TData> struct AssetData {
   /**
    * Preview texture
    */
-  rhi::TextureHandle preview = rhi::TextureHandle::Invalid;
+  rhi::TextureHandle preview = rhi::TextureHandle::Null;
 };
 
 } // namespace liquid

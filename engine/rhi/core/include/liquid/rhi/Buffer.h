@@ -74,7 +74,7 @@ public:
   inline BufferHandle getHandle() const { return mHandle; }
 
 private:
-  BufferHandle mHandle = BufferHandle::Invalid;
+  BufferHandle mHandle = BufferHandle::Null;
   NativeBuffer *mNativeBuffer = nullptr;
 };
 

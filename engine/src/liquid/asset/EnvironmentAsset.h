@@ -9,12 +9,12 @@ struct EnvironmentAsset {
   /**
    * Irradiance map
    */
-  TextureAssetHandle irradianceMap = TextureAssetHandle::Invalid;
+  TextureAssetHandle irradianceMap = TextureAssetHandle::Null;
 
   /**
    * Specular map
    */
-  TextureAssetHandle specularMap = TextureAssetHandle::Invalid;
+  TextureAssetHandle specularMap = TextureAssetHandle::Null;
 };
 
 } // namespace liquid

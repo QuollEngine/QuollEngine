@@ -32,7 +32,7 @@ void MockCommandList::endRenderPass() {
   mCommands.push_back(
       std::unique_ptr<MockCommand>(new MockCommandBeginRenderPass));
 
-  mBindings.renderPass = RenderPassHandle::Invalid;
+  mBindings.renderPass = RenderPassHandle::Null;
 }
 
 void MockCommandList::bindPipeline(PipelineHandle pipeline) {

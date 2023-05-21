@@ -13,7 +13,7 @@ namespace liquid {
 Result<AnimatorAssetHandle>
 AssetCache::getOrLoadAnimatorFromPath(StringView relativePath) {
   if (relativePath.empty()) {
-    return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Invalid);
+    return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
   }
 
   Path fullPath = (mAssetsPath / relativePath).make_preferred();
@@ -217,7 +217,7 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     }
   }
 
-  if (handle == AnimatorAssetHandle::Invalid) {
+  if (handle == AnimatorAssetHandle::Null) {
     auto newHandle = mRegistry.getAnimators().addAsset(asset);
     return Result<AnimatorAssetHandle>::Ok(newHandle, warnings);
   }

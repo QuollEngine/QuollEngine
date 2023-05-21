@@ -184,7 +184,7 @@ TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
     const auto &animator = db.get<liquid::Animator>(entity);
-    EXPECT_NE(animator.asset, liquid::AnimatorAssetHandle::Invalid);
+    EXPECT_NE(animator.asset, liquid::AnimatorAssetHandle::Null);
     EXPECT_EQ(animator.currentState, i);
     EXPECT_EQ(
         assetRegistry.getAnimators().getAsset(animator.asset).data.initialState,

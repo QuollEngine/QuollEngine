@@ -32,7 +32,7 @@ public:
     /**
      * Base color texture
      */
-    rhi::TextureHandle baseColorTexture = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle baseColorTexture = rhi::TextureHandle::Null;
 
     /**
      * Base color texture coordinate index
@@ -47,7 +47,7 @@ public:
     /**
      * Metallic roughness textures
      */
-    rhi::TextureHandle metallicRoughnessTexture = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle metallicRoughnessTexture = rhi::TextureHandle::Null;
 
     /**
      * Metallic roughness texture coordinate index
@@ -67,7 +67,7 @@ public:
     /**
      * Normal texture
      */
-    rhi::TextureHandle normalTexture = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle normalTexture = rhi::TextureHandle::Null;
 
     /**
      * Normal texture coordinate index
@@ -82,7 +82,7 @@ public:
     /**
      * Occlusion texture
      */
-    rhi::TextureHandle occlusionTexture = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle occlusionTexture = rhi::TextureHandle::Null;
 
     /**
      * Occlusion texture coordinate index
@@ -97,7 +97,7 @@ public:
     /**
      * Emissive texture
      */
-    rhi::TextureHandle emissiveTexture = rhi::TextureHandle::Invalid;
+    rhi::TextureHandle emissiveTexture = rhi::TextureHandle::Null;
 
     /**
      * Emissive texture coordinate index

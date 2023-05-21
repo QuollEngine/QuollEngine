@@ -31,7 +31,7 @@ struct AnimationState {
   /**
    * Animation corresponding to the state
    */
-  AnimationAssetHandle animation = AnimationAssetHandle::Invalid;
+  AnimationAssetHandle animation = AnimationAssetHandle::Null;
 
   /**
    * Transitions to other states

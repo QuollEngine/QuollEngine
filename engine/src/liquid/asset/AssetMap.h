@@ -85,7 +85,7 @@ public:
       }
     }
 
-    return THandle::Invalid;
+    return THandle::Null;
   }
 
   /**

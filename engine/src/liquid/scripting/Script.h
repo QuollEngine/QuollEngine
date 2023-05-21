@@ -19,7 +19,7 @@ struct Script {
   /**
    * Lua script handle
    */
-  LuaScriptAssetHandle handle = LuaScriptAssetHandle::Invalid;
+  LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null;
 
   /**
    * Script started

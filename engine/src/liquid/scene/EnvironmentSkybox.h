@@ -19,7 +19,7 @@ struct EnvironmentSkybox {
   /**
    * Skybox texture
    */
-  EnvironmentAssetHandle texture = EnvironmentAssetHandle::Invalid;
+  EnvironmentAssetHandle texture = EnvironmentAssetHandle::Null;
 
   /**
    * Skybox color

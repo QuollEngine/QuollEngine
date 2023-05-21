@@ -65,8 +65,7 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
   });
 
   auto typesTable = scope.createTable(3);
-  typesTable.set("Invalid",
-                 static_cast<uint32_t>(LuaScriptVariableType::Invalid));
+  typesTable.set("Null", static_cast<uint32_t>(LuaScriptVariableType::Invalid));
   typesTable.set("String",
                  static_cast<uint32_t>(LuaScriptVariableType::String));
   typesTable.set("AssetPrefab",
@@ -122,7 +121,7 @@ AssetCache::loadLuaScriptFromFile(const Path &filePath,
 
   interpreter.destroyScope(scope);
 
-  if (handle == LuaScriptAssetHandle::Invalid) {
+  if (handle == LuaScriptAssetHandle::Null) {
     auto newHandle = mRegistry.getLuaScripts().addAsset(asset);
     return Result<LuaScriptAssetHandle>::Ok(newHandle);
   }

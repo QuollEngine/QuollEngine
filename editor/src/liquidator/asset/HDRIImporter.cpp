@@ -167,7 +167,7 @@ HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
                           &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return rhi::TextureHandle::Invalid;
+    return rhi::TextureHandle::Null;
   }
 
   rhi::TextureDescription hdriTextureDesc{};

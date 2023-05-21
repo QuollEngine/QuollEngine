@@ -517,7 +517,7 @@ TEST_F(SceneIOTest,
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .texture,
-      liquid::EnvironmentAssetHandle::Invalid);
+      liquid::EnvironmentAssetHandle::Null);
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .color,
@@ -546,7 +546,7 @@ TEST_F(
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .texture,
-      liquid::EnvironmentAssetHandle::Invalid);
+      liquid::EnvironmentAssetHandle::Null);
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .color,
@@ -575,7 +575,7 @@ TEST_F(
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .texture,
-      liquid::EnvironmentAssetHandle::Invalid);
+      liquid::EnvironmentAssetHandle::Null);
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
           .color,

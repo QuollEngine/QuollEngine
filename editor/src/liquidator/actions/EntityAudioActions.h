@@ -46,7 +46,7 @@ public:
 private:
   Entity mEntity;
   AudioAssetHandle mAudio;
-  AudioAssetHandle mOldAudio = AudioAssetHandle::Invalid;
+  AudioAssetHandle mOldAudio = AudioAssetHandle::Null;
 };
 
 /**

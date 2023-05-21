@@ -240,7 +240,7 @@ TEST_F(AssetCacheTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handle = cache.loadMeshFromFile(filePath).getData();
-  EXPECT_NE(handle, liquid::MeshAssetHandle::Invalid);
+  EXPECT_NE(handle, liquid::MeshAssetHandle::Null);
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle);
 
   for (size_t g = 0; g < asset.data.geometries.size(); ++g) {
@@ -299,12 +299,12 @@ TEST_F(AssetCacheTest, LoadsMeshWithMaterials) {
   auto &newMesh = cache.getRegistry().getMeshes().getAsset(meshHandle);
 
   EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Invalid);
+            liquid::MaterialAssetHandle::Null);
 
   auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
   EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Invalid);
+            liquid::TextureAssetHandle::Null);
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
@@ -445,7 +445,7 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshFromFile) {
 
   auto filePath = cache.createSkinnedMeshFromAsset(asset);
   auto handle = cache.loadSkinnedMeshFromFile(filePath.getData());
-  EXPECT_NE(handle.getData(), liquid::SkinnedMeshAssetHandle::Invalid);
+  EXPECT_NE(handle.getData(), liquid::SkinnedMeshAssetHandle::Null);
   auto &mesh =
       cache.getRegistry().getSkinnedMeshes().getAsset(handle.getData());
 
@@ -504,12 +504,12 @@ TEST_F(AssetCacheTest, LoadsSkinnedMeshWithMaterials) {
   auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(meshHandle);
 
   EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Invalid);
+            liquid::MaterialAssetHandle::Null);
 
   auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
   EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Invalid);
+            liquid::TextureAssetHandle::Null);
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);

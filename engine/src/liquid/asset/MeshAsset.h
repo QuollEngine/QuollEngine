@@ -30,7 +30,7 @@ template <class TVertex> struct BaseGeometryAsset {
   /**
    * Material handle
    */
-  MaterialAssetHandle material = MaterialAssetHandle::Invalid;
+  MaterialAssetHandle material = MaterialAssetHandle::Null;
 };
 
 /**

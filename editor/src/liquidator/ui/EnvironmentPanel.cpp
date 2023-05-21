@@ -112,7 +112,7 @@ void EnvironmentPanel::renderSkyboxSection(Scene &scene,
 
         if (ImGui::Button(fa::Times)) {
           actionExecutor.execute<SceneSetSkyboxTexture>(
-              EnvironmentAssetHandle::Invalid);
+              EnvironmentAssetHandle::Null);
         }
 
       } else {

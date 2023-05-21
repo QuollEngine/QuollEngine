@@ -39,8 +39,8 @@ public:
 
 private:
   RenderStorage &mRenderStorage;
-  rhi::RenderPassHandle mPresentPass = rhi::RenderPassHandle::Invalid;
-  rhi::PipelineHandle mPresentPipeline = rhi::PipelineHandle::Invalid;
+  rhi::RenderPassHandle mPresentPass = rhi::RenderPassHandle::Null;
+  rhi::PipelineHandle mPresentPipeline = rhi::PipelineHandle::Null;
   std::vector<rhi::FramebufferHandle> mFramebuffers{};
   glm::uvec2 mExtent{0, 0};
   rhi::TextureHandle mPresentTexture{0};

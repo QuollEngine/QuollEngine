@@ -65,7 +65,7 @@ struct RenderGraphPassBufferData {
   /**
    * Buffer
    */
-  rhi::BufferHandle buffer = rhi::BufferHandle::Invalid;
+  rhi::BufferHandle buffer = rhi::BufferHandle::Null;
 
   /**
    * Buffer usage
@@ -334,8 +334,8 @@ private:
   bool mCreated = false;
 
   // Graphics specific resources
-  rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Invalid;
-  rhi::FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Invalid;
+  rhi::RenderPassHandle mRenderPass = rhi::RenderPassHandle::Null;
+  rhi::FramebufferHandle mFramebuffer = rhi::FramebufferHandle::Null;
   glm::uvec3 mDimensions{};
 };
 

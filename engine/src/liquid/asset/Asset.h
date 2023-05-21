@@ -2,29 +2,29 @@
 
 namespace liquid {
 
-enum class MaterialAssetHandle : uint32_t { Invalid = 0 };
+enum class MaterialAssetHandle : uint32_t { Null = 0 };
 
-enum class TextureAssetHandle : uint32_t { Invalid = 0 };
+enum class TextureAssetHandle : uint32_t { Null = 0 };
 
-enum class FontAssetHandle : uint32_t { Invalid = 0 };
+enum class FontAssetHandle : uint32_t { Null = 0 };
 
-enum class MeshAssetHandle : uint32_t { Invalid = 0 };
+enum class MeshAssetHandle : uint32_t { Null = 0 };
 
-enum class SkinnedMeshAssetHandle : uint32_t { Invalid = 0 };
+enum class SkinnedMeshAssetHandle : uint32_t { Null = 0 };
 
-enum class SkeletonAssetHandle : uint32_t { Invalid = 0 };
+enum class SkeletonAssetHandle : uint32_t { Null = 0 };
 
-enum class AnimationAssetHandle : uint32_t { Invalid = 0 };
+enum class AnimationAssetHandle : uint32_t { Null = 0 };
 
-enum class AnimatorAssetHandle : uint32_t { Invalid = 0 };
+enum class AnimatorAssetHandle : uint32_t { Null = 0 };
 
-enum class AudioAssetHandle : uint32_t { Invalid = 0 };
+enum class AudioAssetHandle : uint32_t { Null = 0 };
 
-enum class PrefabAssetHandle : uint32_t { Invalid = 0 };
+enum class PrefabAssetHandle : uint32_t { Null = 0 };
 
-enum class LuaScriptAssetHandle : uint32_t { Invalid = 0 };
+enum class LuaScriptAssetHandle : uint32_t { Null = 0 };
 
-enum class EnvironmentAssetHandle : uint32_t { Invalid = 0 };
+enum class EnvironmentAssetHandle : uint32_t { Null = 0 };
 
 enum class AssetType : uint8_t {
   None,

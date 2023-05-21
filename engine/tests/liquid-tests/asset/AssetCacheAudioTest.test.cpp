@@ -22,7 +22,7 @@ TEST_F(AssetCacheTest, LoadsWavAudioFileIntoRegistry) {
   EXPECT_FALSE(result.hasWarnings());
 
   auto handle = result.getData();
-  EXPECT_NE(handle, liquid::AudioAssetHandle::Invalid);
+  EXPECT_NE(handle, liquid::AudioAssetHandle::Null);
   const auto &asset = cache.getRegistry().getAudios().getAsset(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.wav");
@@ -42,7 +42,7 @@ TEST_F(AssetCacheTest, LoadsMp3AudioFileIntoRegistry) {
   EXPECT_FALSE(result.hasWarnings());
 
   auto handle = result.getData();
-  EXPECT_NE(handle, liquid::AudioAssetHandle::Invalid);
+  EXPECT_NE(handle, liquid::AudioAssetHandle::Null);
   const auto &asset = cache.getRegistry().getAudios().getAsset(handle);
 
   EXPECT_EQ(asset.name, "valid-audio.mp3");
