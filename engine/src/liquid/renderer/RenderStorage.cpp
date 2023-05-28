@@ -10,15 +10,24 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
   static constexpr uint32_t MaxBuffers = 1000;
 
   {
-    rhi::DescriptorLayoutBindingDescription binding{};
-    binding.binding = 0;
-    binding.type = rhi::DescriptorLayoutBindingType::Dynamic;
-    binding.name = "uGlobalTextures";
-    binding.descriptorCount = NumSamplers;
-    binding.descriptorType = rhi::DescriptorType::CombinedImageSampler;
-    binding.shaderStage = rhi::ShaderStage::Fragment;
+    rhi::DescriptorLayoutBindingDescription binding0{};
+    binding0.binding = 0;
+    binding0.type = rhi::DescriptorLayoutBindingType::Dynamic;
+    binding0.name = "uGlobalTextures";
+    binding0.descriptorCount = NumSamplers;
+    binding0.descriptorType = rhi::DescriptorType::CombinedImageSampler;
+    binding0.shaderStage = rhi::ShaderStage::All;
 
-    rhi::DescriptorLayoutDescription description{{binding}, "Global textures"};
+    rhi::DescriptorLayoutBindingDescription binding1{};
+    binding1.binding = 1;
+    binding1.type = rhi::DescriptorLayoutBindingType::Dynamic;
+    binding1.name = "uGlobalImages";
+    binding1.descriptorCount = NumSamplers;
+    binding1.descriptorType = rhi::DescriptorType::StorageImage;
+    binding1.shaderStage = rhi::ShaderStage::All;
+
+    rhi::DescriptorLayoutDescription description{{binding0, binding1},
+                                                 "Global textures"};
     auto layout = mDevice->createDescriptorLayout(description);
 
     mGlobalTexturesDescriptor = mDevice->createDescriptor(layout);
@@ -87,9 +96,20 @@ rhi::ShaderHandle RenderStorage::getShader(const String &name) {
 
 void RenderStorage::addToDescriptor(rhi::TextureHandle handle) {
   std::array<rhi::TextureHandle, 1> textures{handle};
-  mGlobalTexturesDescriptor.write(0, textures,
-                                  rhi::DescriptorType::CombinedImageSampler,
-                                  rhi::castHandleToUint(handle));
+
+  auto usage = mDevice->getTextureDescription(handle).usage;
+
+  if (BitwiseEnumContains(usage, rhi::TextureUsage::Sampled)) {
+    mGlobalTexturesDescriptor.write(0, textures,
+                                    rhi::DescriptorType::CombinedImageSampler,
+                                    rhi::castHandleToUint(handle));
+  }
+
+  if (BitwiseEnumContains(usage, rhi::TextureUsage::Storage)) {
+    mGlobalTexturesDescriptor.write(1, textures,
+                                    rhi::DescriptorType::StorageImage,
+                                    rhi::castHandleToUint(handle));
+  }
 }
 
 rhi::TextureHandle RenderStorage::getNewTextureHandle() {

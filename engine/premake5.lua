@@ -22,6 +22,9 @@ function copyEngineAssets()
         "glslc "..assetsPath.."/shaders/fullscreen-quad.frag -o"..outputPath.."/shaders/fullscreen-quad.frag.spv",
         "glslc "..assetsPath.."/shaders/fullscreen-quad.vert -o"..outputPath.."/shaders/fullscreen-quad.vert.spv",
         "glslc "..assetsPath.."/shaders/generate-brdf-lut.comp -o "..outputPath.."/shaders/generate-brdf-lut.comp.spv",
+        "glslc "..assetsPath.."/shaders/extract-bright-colors.comp -o "..outputPath.."/shaders/extract-bright-colors.comp.spv",
+        "glslc "..assetsPath.."/shaders/bloom-downsample.comp -o "..outputPath.."/shaders/bloom-downsample.comp.spv",
+        "glslc "..assetsPath.."/shaders/bloom-upsample.comp -o "..outputPath.."/shaders/bloom-upsample.comp.spv",
         "glslc "..assetsPath.."/shaders/hdr.frag -o "..outputPath.."/shaders/hdr.frag.spv",
 
         -- Fonts

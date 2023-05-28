@@ -140,11 +140,11 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   samplerCreateInfo.pNext = nullptr;
   samplerCreateInfo.flags = 0;
-  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
-  samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+  samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
   samplerCreateInfo.minLod = 0.0f;
   samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
   checkForVulkanError(
@@ -201,11 +201,11 @@ VulkanTexture::VulkanTexture(const TextureViewDescription &description,
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   samplerCreateInfo.pNext = nullptr;
   samplerCreateInfo.flags = 0;
-  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
-  samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+  samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
   samplerCreateInfo.minLod = 0.0f;
   samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
   checkForVulkanError(

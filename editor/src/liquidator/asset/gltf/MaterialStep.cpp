@@ -82,6 +82,18 @@ void loadMaterials(GLTFImportData &importData) {
     material.data.emissiveFactor =
         glm::vec3{emissiveFactor[0], emissiveFactor[1], emissiveFactor[2]};
 
+    auto emissiveStrengthExt =
+        gltfMaterial.extensions.find("KHR_materials_emissive_strength");
+
+    if (emissiveStrengthExt != gltfMaterial.extensions.end() &&
+        emissiveStrengthExt->second.IsObject()) {
+      auto strength = emissiveStrengthExt->second.Get("emissiveStrength");
+      if (strength.IsReal()) {
+        material.data.emissiveFactor *=
+            static_cast<float>(strength.GetNumberAsDouble());
+      }
+    }
+
     auto path = assetCache.createMaterialFromAsset(material);
     auto handle = assetCache.loadMaterialFromFile(path.getData());
     importData.materials.map.insert_or_assign(i, handle.getData());

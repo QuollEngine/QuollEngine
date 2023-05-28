@@ -224,11 +224,27 @@ void RenderGraph::buildBarriers() {
       auto newDependency = RenderGraphSyncDependency::getTextureWrite(
           pass.getType(), pass.getAttachments().at(index).type);
 
+      const auto &description = mRegistry.getDescription<rhi::TextureHandle>(
+          output.texture.getIndex());
+
+      uint32_t baseMipLevel = 0;
+      uint32_t mipLevelCount = 1;
+
+      if (const auto *textureDescription =
+              std::get_if<rhi::TextureDescription>(&description)) {
+        mipLevelCount = textureDescription->mipLevelCount;
+      } else if (const auto *viewDescription =
+                     std::get_if<RGTextureViewDescription>(&description)) {
+        mipLevelCount = viewDescription->mipLevelCount;
+        baseMipLevel = viewDescription->baseMipLevel;
+      }
+
       rhi::ImageBarrier imageBarrier{};
       imageBarrier.texture = handle;
       imageBarrier.dstAccess = newDependency.access;
       imageBarrier.dstLayout = newDependency.layout;
-
+      imageBarrier.baseLevel = baseMipLevel;
+      imageBarrier.levelCount = mipLevelCount;
       dstStage |= newDependency.stage;
 
       auto it = textureDependencies.find(handle);
