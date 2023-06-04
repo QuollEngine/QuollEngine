@@ -13,7 +13,7 @@ public:
 
   liquid::RenderGraphResource<TextureHandle>
   createTexture(liquid::rhi::TextureDescription desc) {
-    return graph.create(desc, [](auto, auto &) {});
+    return graph.create(desc);
   }
 
   MockRenderDevice device;
@@ -39,24 +39,27 @@ TEST_F(RenderGraphTest, CreatesAllTexturesOnBuild) {
 
   graph.setFramebufferExtent({1920, 1080});
 
-  auto r1 = graph.create(fixedDescription, onCreateR1.AsStdFunction());
-  auto r2 = graph.create(
-      [](auto width, auto height) {
-        TextureDescription desc{};
-        desc.width = width;
-        desc.height = height;
+  auto r1 = graph.create(fixedDescription).onReady(onCreateR1.AsStdFunction());
+  auto r2 = graph
+                .create([](auto width, auto height) {
+                  TextureDescription desc{};
+                  desc.width = width;
+                  desc.height = height;
 
-        return desc;
-      },
-      onCreateR2.AsStdFunction());
+                  return desc;
+                })
+                .onReady(onCreateR2.AsStdFunction());
+  auto v1 = graph.createView(r1, 1, 2, 3, 4);
 
   EXPECT_FALSE(isHandleValid(r1.getHandle()));
   EXPECT_FALSE(isHandleValid(r2.getHandle()));
+  EXPECT_FALSE(isHandleValid(v1.getHandle()));
 
   graph.build(storage);
 
   EXPECT_TRUE(isHandleValid(r1.getHandle()));
   EXPECT_TRUE(isHandleValid(r2.getHandle()));
+  EXPECT_TRUE(isHandleValid(v1.getHandle()));
 
   auto desc1 = device.getTextureDescription(r1.getHandle());
   EXPECT_EQ(desc1.width, 512);
@@ -65,6 +68,13 @@ TEST_F(RenderGraphTest, CreatesAllTexturesOnBuild) {
   auto desc2 = device.getTextureDescription(r2.getHandle());
   EXPECT_EQ(desc2.width, 1920);
   EXPECT_EQ(desc2.height, 1080);
+
+  auto desc3 = device.getTextureViewDescription(v1.getHandle());
+  EXPECT_EQ(desc3.texture, r1.getHandle());
+  EXPECT_EQ(desc3.baseMipLevel, 1);
+  EXPECT_EQ(desc3.mipLevelCount, 2);
+  EXPECT_EQ(desc3.baseLayer, 3);
+  EXPECT_EQ(desc3.layerCount, 4);
 }
 
 TEST_F(RenderGraphTest, RecreatesDynamicTexturesOnResize) {
@@ -80,16 +90,16 @@ TEST_F(RenderGraphTest, RecreatesDynamicTexturesOnResize) {
 
   graph.setFramebufferExtent({1920, 1080});
 
-  auto r1 = graph.create(fixedDescription, onCreateR1.AsStdFunction());
-  auto r2 = graph.create(
-      [](auto width, auto height) {
-        TextureDescription desc{};
-        desc.width = width;
-        desc.height = height;
+  auto r1 = graph.create(fixedDescription).onReady(onCreateR1.AsStdFunction());
+  auto r2 = graph
+                .create([](auto width, auto height) {
+                  TextureDescription desc{};
+                  desc.width = width;
+                  desc.height = height;
 
-        return desc;
-      },
-      onCreateR2.AsStdFunction());
+                  return desc;
+                })
+                .onReady(onCreateR2.AsStdFunction());
 
   graph.build(storage);
 
@@ -112,6 +122,46 @@ TEST_F(RenderGraphTest, RecreatesDynamicTexturesOnResize) {
   EXPECT_EQ(desc3.width, 2560);
   EXPECT_EQ(desc3.height, 1440);
   EXPECT_EQ(device.getTextureUpdates(r2.getHandle()), 2);
+}
+
+TEST_F(RenderGraphTest, RecreatesTextureViewOfDynamicTextureOnResize) {
+  OnBuildMockFunction onCreateR1;
+  OnBuildMockFunction onCreateR2;
+
+  EXPECT_CALL(onCreateR1, Call(::testing::_, ::testing::_)).Times(1);
+  EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(2);
+
+  TextureDescription fixedDescription{};
+  fixedDescription.width = 512;
+  fixedDescription.height = 512;
+
+  graph.setFramebufferExtent({1920, 1080});
+
+  auto r1 = graph.create(fixedDescription);
+  auto r2 = graph.create([](auto width, auto height) {
+    TextureDescription desc{};
+    desc.width = width;
+    desc.height = height;
+
+    return desc;
+  });
+
+  auto v1 =
+      graph.createView(r1, 1, 2, 3, 4).onReady(onCreateR1.AsStdFunction());
+
+  auto v2 =
+      graph.createView(r2, 5, 6, 7, 8).onReady(onCreateR2.AsStdFunction());
+
+  graph.build(storage);
+
+  EXPECT_EQ(device.getTextureUpdates(v1.getHandle()), 1);
+  EXPECT_EQ(device.getTextureUpdates(v2.getHandle()), 1);
+
+  graph.setFramebufferExtent({2560, 1440});
+  graph.build(storage);
+
+  EXPECT_EQ(device.getTextureUpdates(v1.getHandle()), 1);
+  EXPECT_EQ(device.getTextureUpdates(v2.getHandle()), 2);
 }
 
 TEST_F(RenderGraphTest, ImportsExternalResourcesToRenderGraph) {
@@ -281,7 +331,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
   std::vector<liquid::String> names(graph.getPasses().size());
   std::transform(graph.getCompiledPasses().begin(),
                  graph.getCompiledPasses().end(), names.begin(),
-                 [this](auto &pass) { return pass.getName(); });
+                 [](auto &pass) { return pass.getName(); });
 
   // Convert it to string for easier checking
   liquid::String output = "";
@@ -1211,7 +1261,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyColorAttachments) {
   colorDescription.usage = TextureUsage::Color;
   colorDescription.width = 1024;
   colorDescription.height = 768;
-  colorDescription.layers = 10;
+  colorDescription.layerCount = 10;
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
@@ -1250,7 +1300,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyDepthAttachment) {
   colorDescription.usage = TextureUsage::Depth;
   colorDescription.width = 1024;
   colorDescription.height = 768;
-  colorDescription.layers = 10;
+  colorDescription.layerCount = 10;
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
@@ -1291,7 +1341,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyResolveAttachment) {
   colorDescription.usage = TextureUsage::Color;
   colorDescription.width = 1024;
   colorDescription.height = 768;
-  colorDescription.layers = 10;
+  colorDescription.layerCount = 10;
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
@@ -1330,7 +1380,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithAllAttachments) {
   description.usage = TextureUsage::Depth | TextureUsage::Color;
   description.width = 1024;
   description.height = 768;
-  description.layers = 10;
+  description.layerCount = 10;
   auto color1 = createTexture(description);
   auto color2 = createTexture(description);
   auto depth = createTexture(description);

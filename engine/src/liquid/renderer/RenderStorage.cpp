@@ -47,27 +47,21 @@ RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
   mDevice->createTexture(description, handle);
 
   if (addToDescriptor) {
-    std::array<rhi::TextureHandle, 1> textures{handle};
-    mGlobalTexturesDescriptor.write(0, textures,
-                                    rhi::DescriptorType::CombinedImageSampler,
-                                    rhi::castHandleToUint(handle));
+    this->addToDescriptor(handle);
   }
 
   return handle;
 }
 
-rhi::TextureViewHandle
+rhi::TextureHandle
 RenderStorage::createTextureView(const rhi::TextureViewDescription &description,
                                  bool addToDescriptor) {
-  auto handle = mTextureViewCounter.create();
+  auto handle = getNewTextureHandle();
 
   mDevice->createTextureView(description, handle);
 
   if (addToDescriptor) {
-    std::array<rhi::TextureViewHandle, 1> textures{handle};
-    mGlobalTexturesDescriptor.write(0, textures,
-                                    rhi::DescriptorType::CombinedImageSampler,
-                                    rhi::castHandleToUint(handle));
+    this->addToDescriptor(handle);
   }
 
   return handle;

@@ -16,12 +16,6 @@ void MockDescriptor::write(uint32_t binding, std::span<TextureHandle> textures,
   mBindings.push_back({binding, type, start, vectorFrom(textures)});
 }
 
-void MockDescriptor::write(uint32_t binding,
-                           std::span<TextureViewHandle> textureViews,
-                           DescriptorType type, uint32_t start) {
-  mBindings.push_back({binding, type, start, vectorFrom(textureViews)});
-}
-
 void MockDescriptor::write(uint32_t binding, std::span<BufferHandle> buffers,
                            DescriptorType type, uint32_t start) {
   mBindings.push_back({binding, type, start, vectorFrom(buffers)});

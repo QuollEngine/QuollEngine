@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RenderHandle.h"
+
 namespace liquid::rhi {
 
 /**
@@ -14,17 +16,17 @@ struct TextureViewDescription {
   /**
    * Base mip level
    */
-  uint32_t level = 0;
+  uint32_t baseMipLevel = 0;
 
   /**
    * Number of levels
    */
-  uint32_t levelCount = 1;
+  uint32_t mipLevelCount = 1;
 
   /**
    * Base layer
    */
-  uint32_t layer = 0;
+  uint32_t baseLayer = 0;
 
   /**
    * Layer count

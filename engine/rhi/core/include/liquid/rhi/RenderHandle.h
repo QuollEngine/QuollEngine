@@ -8,8 +8,6 @@ enum class BufferHandle : uint32_t { Null = 0 };
 
 enum class TextureHandle : uint32_t { Null = 0 };
 
-enum class TextureViewHandle : uint32_t { Null = 0 };
-
 enum class RenderPassHandle : uint32_t { Null = 0 };
 
 enum class FramebufferHandle : uint32_t { Null = 0 };
@@ -38,11 +36,10 @@ inline constexpr bool IsAnySame = (std::is_same_v<T, Rest> || ...);
  * @retval false Handle is not valid
  */
 template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
-  static_assert(
-      IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
-                TextureViewHandle, RenderPassHandle, FramebufferHandle,
-                PipelineHandle, DescriptorLayoutHandle, DescriptorHandle>,
-      "Type must be a render handle");
+  static_assert(IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
+                          RenderPassHandle, FramebufferHandle, PipelineHandle,
+                          DescriptorLayoutHandle, DescriptorHandle>,
+                "Type must be a render handle");
   return handle != THandle::Null;
 }
 
@@ -55,11 +52,10 @@ template <class THandle> constexpr inline bool isHandleValid(THandle handle) {
  */
 template <class THandle>
 constexpr inline uint32_t castHandleToUint(THandle handle) {
-  static_assert(
-      IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
-                TextureViewHandle, RenderPassHandle, FramebufferHandle,
-                PipelineHandle, DescriptorLayoutHandle, DescriptorHandle>,
-      "Type must be a render handle");
+  static_assert(IsAnySame<THandle, ShaderHandle, BufferHandle, TextureHandle,
+                          RenderPassHandle, FramebufferHandle, PipelineHandle,
+                          DescriptorLayoutHandle, DescriptorHandle>,
+                "Type must be a render handle");
 
   return static_cast<uint32_t>(handle);
 }

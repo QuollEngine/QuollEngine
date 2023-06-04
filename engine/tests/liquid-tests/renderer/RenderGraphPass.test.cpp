@@ -24,8 +24,7 @@ TEST_F(RenderGraphPassTest, SetsNameAndTypeOnConstruct) {
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
-  auto handle =
-      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
+  auto handle = graph.create(liquid::rhi::TextureDescription{});
 
   graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4());
   EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 1);
@@ -33,8 +32,7 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
-  auto handle =
-      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
+  auto handle = graph.create(liquid::rhi::TextureDescription{});
 
   graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4(2.0f));
   EXPECT_EQ(graphicsPass.getAttachments().size(), 1);
@@ -49,8 +47,7 @@ TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToInputOnRead) {
-  auto handle =
-      graph.create(liquid::rhi::TextureDescription{}, [](auto, auto &) {});
+  auto handle = graph.create(liquid::rhi::TextureDescription{});
 
   graphicsPass.read(handle);
   EXPECT_EQ(graphicsPass.getAttachments().size(), 0);

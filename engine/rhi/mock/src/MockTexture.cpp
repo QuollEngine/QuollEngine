@@ -8,4 +8,7 @@ MockTexture::MockTexture(const TextureDescription &description)
   // TODO: Calculate size
 }
 
+MockTexture::MockTexture(const TextureViewDescription &description)
+    : mViewDescription(description) {}
+
 } // namespace liquid::rhi

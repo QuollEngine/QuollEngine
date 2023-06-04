@@ -177,7 +177,7 @@ HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
   hdriTextureDesc.format = rhi::Format::Rgba32Float;
   hdriTextureDesc.width = width;
   hdriTextureDesc.height = height;
-  hdriTextureDesc.layers = 1;
+  hdriTextureDesc.layerCount = 1;
 
   auto hdriTexture = renderStorage.createTexture(hdriTextureDesc);
   TextureUtils::copyDataToTexture(
@@ -200,7 +200,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
   hdriTextureDesc.format = rhi::Format::Rgba32Float;
   hdriTextureDesc.width = width;
   hdriTextureDesc.height = height;
-  hdriTextureDesc.layers = 1;
+  hdriTextureDesc.layerCount = 1;
 
   auto hdriTexture = mRenderStorage.createTexture(hdriTextureDesc, false);
 
@@ -250,8 +250,8 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
   cubemapDesc.format = TargetFormat;
   cubemapDesc.height = CubemapResolution;
   cubemapDesc.width = CubemapResolution;
-  cubemapDesc.layers = CubemapSides;
-  cubemapDesc.levels = numLevels;
+  cubemapDesc.layerCount = CubemapSides;
+  cubemapDesc.mipLevelCount = numLevels;
   cubemapDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource |
@@ -309,8 +309,8 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   cubemapDesc.format = TargetFormat;
   cubemapDesc.height = unfilteredCubemap.levels.at(0).width;
   cubemapDesc.width = unfilteredCubemap.levels.at(0).width;
-  cubemapDesc.layers = CubemapSides;
-  cubemapDesc.levels = 1;
+  cubemapDesc.layerCount = CubemapSides;
+  cubemapDesc.mipLevelCount = 1;
   cubemapDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
@@ -387,20 +387,20 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   cubemapDesc.format = TargetFormat;
   cubemapDesc.height = unfilteredCubemap.levels.at(0).width;
   cubemapDesc.width = unfilteredCubemap.levels.at(0).width;
-  cubemapDesc.layers = CubemapSides;
-  cubemapDesc.levels = static_cast<uint32_t>(unfilteredCubemap.levels.size());
+  cubemapDesc.layerCount = CubemapSides;
+  cubemapDesc.mipLevelCount =
+      static_cast<uint32_t>(unfilteredCubemap.levels.size());
   cubemapDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled |
                       rhi::TextureUsage::TransferSource;
 
   auto specularCubemap = mRenderStorage.createTexture(cubemapDesc);
 
-  std::vector<rhi::TextureViewHandle> textureViews(
-      unfilteredCubemap.levels.size());
+  std::vector<rhi::TextureHandle> textureViews(unfilteredCubemap.levels.size());
   for (size_t level = 0; level < unfilteredCubemap.levels.size(); ++level) {
     rhi::TextureViewDescription description{};
     description.texture = specularCubemap;
-    description.level = static_cast<uint32_t>(level);
+    description.baseMipLevel = static_cast<uint32_t>(level);
     description.layerCount = CubemapSides;
 
     textureViews.at(level) =
@@ -414,7 +414,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
 
   for (size_t mipLevel = 0; mipLevel < unfilteredCubemap.levels.size();
        ++mipLevel) {
-    std::array<rhi::TextureViewHandle, 1> textureViewData{
+    std::array<rhi::TextureHandle, 1> textureViewData{
         textureViews.at(mipLevel)};
     mDescriptorGenerateCubemap.write(1, textureViewData,
                                      rhi::DescriptorType::StorageImage);
@@ -438,7 +438,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   }
 
   for (auto view : textureViews) {
-    device->destroyTextureView(view);
+    device->destroyTexture(view);
   }
 
   AssetData<TextureAsset> asset{};

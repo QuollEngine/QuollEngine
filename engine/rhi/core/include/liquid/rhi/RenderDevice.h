@@ -183,14 +183,7 @@ public:
    * @param handle Texture view handle
    */
   virtual void createTextureView(const TextureViewDescription &description,
-                                 TextureViewHandle handle) = 0;
-
-  /**
-   * @brief Destroy texture view
-   *
-   * @param handle Texture view handle
-   */
-  virtual void destroyTextureView(TextureViewHandle handle) = 0;
+                                 TextureHandle handle) = 0;
 
   /**
    * @brief Create render pass

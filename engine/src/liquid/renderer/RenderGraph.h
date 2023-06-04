@@ -53,20 +53,31 @@ public:
    * @brief Create fixed texture
    *
    * @param description Texture description
-   * @param onBuild On build callback
    * @return Render graph texture
    */
-  RGTexture create(const rhi::TextureDescription &description,
-                   RGTextureBuildCallback onBuild);
+  RGTexture create(const rhi::TextureDescription &description);
 
   /**
    * @brief Create dynamic texture
    *
    * @param creator Texture creator
-   * @param onBuild On build callback
    * @return Render graph texture
    */
-  RGTexture create(RGTextureCreator creator, RGTextureBuildCallback onBuild);
+  RGTexture create(RGTextureCreator creator);
+
+  /**
+   * @brief Create texture view
+   *
+   * @param texture Render graph texture
+   * @param baseMipLevel Base mip level
+   * @param mipLevelCount Mip level count
+   * @param baseLayer Base layer
+   * @param layerCount Layer count
+   * @return Render graph texture
+   */
+  RGTexture createView(RGTexture texture, uint32_t baseMipLevel = 0,
+                       uint32_t mipLevelCount = 1, uint32_t baseLayer = 0,
+                       uint32_t layerCount = 1);
 
   /**
    * @brief Import existing texture to render graph
@@ -195,12 +206,6 @@ private:
 private:
   // Resources
   RenderGraphRegistry mRegistry;
-
-  std::vector<RGResourceType> mRealResourceTypes;
-  std::vector<
-      std::variant<std::monostate, rhi::TextureDescription, RGTextureCreator>>
-      mTextureDescriptions;
-  std::vector<RGTextureBuildCallback> mTextureBuilds;
 
 private:
   glm::uvec2 mFramebufferExtent{};

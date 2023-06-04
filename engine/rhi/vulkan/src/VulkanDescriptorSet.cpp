@@ -4,7 +4,6 @@
 #include "VulkanMapping.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
-#include "VulkanTextureView.h"
 
 namespace liquid::rhi {
 
@@ -27,25 +26,6 @@ void VulkanDescriptorSet::write(uint32_t binding,
             : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfos.at(i).imageView = vkTexture->getImageView();
     imageInfos.at(i).sampler = vkTexture->getSampler();
-  }
-
-  write(binding, start, imageInfos.size(), type, imageInfos.data(), nullptr);
-}
-
-void VulkanDescriptorSet::write(uint32_t binding,
-                                std::span<TextureViewHandle> textureViews,
-                                DescriptorType type, uint32_t start) {
-  std::vector<VkDescriptorImageInfo> imageInfos(textureViews.size(),
-                                                VkDescriptorImageInfo{});
-
-  for (size_t i = 0; i < textureViews.size(); ++i) {
-    const auto &vkTextureView = mRegistry.getTextureViews().at(textureViews[i]);
-    imageInfos.at(i).imageLayout =
-        type == DescriptorType::StorageImage
-            ? VK_IMAGE_LAYOUT_GENERAL
-            : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfos.at(i).imageView = vkTextureView->getImageView();
-    imageInfos.at(i).sampler = vkTextureView->getSampler();
   }
 
   write(binding, start, imageInfos.size(), type, imageInfos.data(), nullptr);

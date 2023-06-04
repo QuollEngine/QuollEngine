@@ -80,56 +80,54 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
   shadowMapDesc.width = ShadowMapDimensions;
   shadowMapDesc.height = ShadowMapDimensions;
-  shadowMapDesc.layers = SceneRendererFrameData::MaxShadowMaps;
+  shadowMapDesc.layerCount = SceneRendererFrameData::MaxShadowMaps;
   shadowMapDesc.format = rhi::Format::Depth16Unorm;
   shadowMapDesc.debugName = "Shadow maps";
-  auto shadowmap =
-      graph.create(shadowMapDesc, [this](auto handle, RenderStorage &storage) {
-        for (auto &frameData : mFrameData) {
-          frameData.setShadowMapTexture(handle);
-        }
-        storage.addToDescriptor(handle);
-      });
+  auto shadowmap = graph.create(shadowMapDesc)
+                       .onReady([this](auto handle, RenderStorage &storage) {
+                         for (auto &frameData : mFrameData) {
+                           frameData.setShadowMapTexture(handle);
+                         }
+                         storage.addToDescriptor(handle);
+                       });
 
-  auto sceneColor = graph.create(
-      [this](auto width, auto height) {
-        rhi::TextureDescription description{};
-        description.usage =
-            rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-        description.width = width;
-        description.height = height;
-        description.layers = 1;
-        description.format = rhi::Format::Rgba16Float;
-        description.samples = mMaxSampleCounts;
-        description.debugName = "Sampled scene";
+  auto sceneColor = graph.create([this](auto width, auto height) {
+    rhi::TextureDescription description{};
+    description.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+    description.width = width;
+    description.height = height;
+    description.layerCount = 1;
+    description.format = rhi::Format::Rgba16Float;
+    description.samples = mMaxSampleCounts;
+    description.debugName = "Sampled scene";
 
-        return description;
-      },
-      [](auto handle, RenderStorage &storage) {});
+    return description;
+  });
 
-  auto sceneColorResolved = graph.create(
-      [this](auto width, auto height) {
-        rhi::TextureDescription description{};
-        description.usage =
-            rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-        description.width = width;
-        description.height = height;
-        description.layers = 1;
-        description.format = rhi::Format::Rgba16Float;
-        description.samples = 1;
-        description.debugName = "Resolved scene";
+  auto sceneColorResolved =
+      graph
+          .create([this](auto width, auto height) {
+            rhi::TextureDescription description{};
+            description.usage =
+                rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+            description.width = width;
+            description.height = height;
+            description.layerCount = 1;
+            description.format = rhi::Format::Rgba16Float;
+            description.samples = 1;
+            description.debugName = "Resolved scene";
 
-        return description;
-      },
-      [](auto handle, RenderStorage &storage) {
-        storage.addToDescriptor(handle);
-      });
+            return description;
+          })
+          .onReady([](rhi::TextureHandle handle, RenderStorage &storage) {
+            storage.addToDescriptor(handle);
+          });
 
   rhi::TextureDescription hdrColorDesc{};
   hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   hdrColorDesc.width = SwapchainSizePercentage;
   hdrColorDesc.height = SwapchainSizePercentage;
-  hdrColorDesc.layers = 1;
+  hdrColorDesc.layerCount = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
   hdrColorDesc.debugName = "HDR";
 
@@ -137,21 +135,18 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
       mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
   auto hdrColor = graph.import(hdrColorReal);
 
-  auto depthBuffer = graph.create(
-      [this](auto width, auto height) {
-        rhi::TextureDescription description{};
-        description.usage =
-            rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-        description.width = width;
-        description.height = height;
-        description.layers = 1;
-        description.samples = mMaxSampleCounts;
-        description.format = rhi::Format::Depth32Float;
-        description.debugName = "Depth buffer";
+  auto depthBuffer = graph.create([this](auto width, auto height) {
+    rhi::TextureDescription description{};
+    description.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+    description.width = width;
+    description.height = height;
+    description.layerCount = 1;
+    description.samples = mMaxSampleCounts;
+    description.format = rhi::Format::Depth32Float;
+    description.debugName = "Depth buffer";
 
-        return description;
-      },
-      [](auto handle, RenderStorage &storage) {});
+    return description;
+  });
 
   {
     struct ShadowDrawParams {
@@ -798,8 +793,8 @@ void SceneRenderer::generateBrdfLut() {
   textureDesc.format = rhi::Format::Rgba16Float;
   textureDesc.height = TextureSize;
   textureDesc.width = TextureSize;
-  textureDesc.layers = 1;
-  textureDesc.levels = 1;
+  textureDesc.layerCount = 1;
+  textureDesc.mipLevelCount = 1;
   textureDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Storage |
                       rhi::TextureUsage::Sampled;
   textureDesc.debugName = "BRDF LUT";

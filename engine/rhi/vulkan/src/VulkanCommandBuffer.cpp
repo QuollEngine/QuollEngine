@@ -166,7 +166,8 @@ void VulkanCommandBuffer::pipelineBarrier(
     vkBarrier.image = texture->getImage();
     vkBarrier.subresourceRange.baseArrayLayer = 0;
     vkBarrier.subresourceRange.baseMipLevel = barrier.baseLevel;
-    vkBarrier.subresourceRange.layerCount = texture->getDescription().layers;
+    vkBarrier.subresourceRange.layerCount =
+        texture->getDescription().layerCount;
     vkBarrier.subresourceRange.levelCount = barrier.levelCount;
     vkBarrier.subresourceRange.aspectMask = texture->getImageAspectFlags();
   }

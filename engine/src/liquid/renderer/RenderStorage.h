@@ -49,7 +49,7 @@ public:
    * @param addToDescriptor Add texture to global descriptor
    * @return Texture view handle
    */
-  rhi::TextureViewHandle
+  rhi::TextureHandle
   createTextureView(const liquid::rhi::TextureViewDescription &description,
                     bool addToDescriptor = true);
 
@@ -239,7 +239,6 @@ private:
   static constexpr uint32_t TextureStart = 10;
   HandleCounter<rhi::ShaderHandle> mShaderCounter;
   HandleCounter<rhi::TextureHandle, TextureStart> mTextureCounter;
-  HandleCounter<rhi::TextureViewHandle, TextureStart> mTextureViewCounter;
   HandleCounter<rhi::RenderPassHandle> mRenderPassCounter;
   HandleCounter<rhi::FramebufferHandle> mFramebufferCounter;
 

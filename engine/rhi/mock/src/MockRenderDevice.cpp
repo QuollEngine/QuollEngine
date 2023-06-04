@@ -50,7 +50,6 @@ const DeviceStats &MockRenderDevice::getDeviceStats() const {
 void MockRenderDevice::destroyResources() {
   mBuffers.clear();
   mTextures.clear();
-  mTextureViews.clear();
   mFramebuffers.clear();
   mRenderPasses.clear();
   mShaders.clear();
@@ -104,6 +103,11 @@ MockRenderDevice::getTextureDescription(TextureHandle handle) const {
   return mTextures.at(handle).getDescription();
 }
 
+const TextureViewDescription
+MockRenderDevice::getTextureViewDescription(TextureHandle handle) const {
+  return mTextures.at(handle).getViewDescription();
+}
+
 void MockRenderDevice::destroyTexture(TextureHandle handle) {
   mTextures.erase(handle);
 }
@@ -113,12 +117,8 @@ uint32_t MockRenderDevice::getTextureUpdates(TextureHandle handle) {
 }
 
 void MockRenderDevice::createTextureView(
-    const TextureViewDescription &description, TextureViewHandle handle) {
-  return mTextureViews.insert(description, handle);
-}
-
-void MockRenderDevice::destroyTextureView(TextureViewHandle handle) {
-  mTextureViews.erase(handle);
+    const TextureViewDescription &description, TextureHandle handle) {
+  return mTextures.insert({description}, handle);
 }
 
 void MockRenderDevice::createRenderPass(

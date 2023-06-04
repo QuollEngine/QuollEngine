@@ -16,14 +16,6 @@ Descriptor &Descriptor::write(uint32_t binding,
   return *this;
 }
 
-Descriptor &Descriptor::write(uint32_t binding,
-                              std::span<TextureViewHandle> textureViews,
-                              DescriptorType type, uint32_t start) {
-  mNativeDescriptor->write(binding, textureViews, type, start);
-
-  return *this;
-}
-
 Descriptor &Descriptor::write(uint32_t binding, std::span<BufferHandle> buffers,
                               DescriptorType type, uint32_t start) {
   mNativeDescriptor->write(binding, buffers, type, start);

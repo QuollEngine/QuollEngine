@@ -78,7 +78,7 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
   imguiDesc.width = FramebufferSizePercentage;
   imguiDesc.height = FramebufferSizePercentage;
-  imguiDesc.layers = 1;
+  imguiDesc.layerCount = 1;
   imguiDesc.format = rhi::Format::Rgba8Srgb;
   imguiDesc.debugName = "Imgui color";
   auto imguiReal =

@@ -26,9 +26,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
     : mAllocator(allocator), mDevice(device),
       mFormat(VulkanMapping::getFormat(description.format)),
       mDescription(description) {
-  LIQUID_ASSERT(
-      description.type == TextureType::Cubemap ? description.layers == 6 : true,
-      "Cubemap must have 6 layers");
+  LIQUID_ASSERT(description.type == TextureType::Cubemap
+                    ? description.layerCount == 6
+                    : true,
+                "Cubemap must have 6 layers");
 
   uint32_t imageFlags = description.type == TextureType::Cubemap
                             ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
@@ -38,7 +39,7 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   if (description.type == TextureType::Cubemap) {
     imageViewType = VK_IMAGE_VIEW_TYPE_CUBE;
-  } else if (description.layers > 1) {
+  } else if (description.layerCount > 1) {
     imageViewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
   } else {
     imageViewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -92,8 +93,8 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
   imageCreateInfo.format = mFormat;
   imageCreateInfo.extent = extent;
-  imageCreateInfo.mipLevels = description.levels;
-  imageCreateInfo.arrayLayers = description.layers;
+  imageCreateInfo.mipLevels = description.mipLevelCount;
+  imageCreateInfo.arrayLayers = description.layerCount;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
   imageCreateInfo.usage = usageFlags;
   imageCreateInfo.samples =
@@ -109,6 +110,9 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE, mImage);
 
+  mViewDescription.layerCount = description.layerCount;
+  mViewDescription.mipLevelCount = description.mipLevelCount;
+
   VkImageViewCreateInfo imageViewCreateInfo{};
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   imageViewCreateInfo.pNext = nullptr;
@@ -118,9 +122,70 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
   imageViewCreateInfo.format = mFormat;
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-  imageViewCreateInfo.subresourceRange.layerCount = description.layers;
-  imageViewCreateInfo.subresourceRange.levelCount = description.levels;
+  imageViewCreateInfo.subresourceRange.layerCount = description.layerCount;
+  imageViewCreateInfo.subresourceRange.levelCount = description.mipLevelCount;
   imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
+  checkForVulkanError(
+      vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
+      "Failed to create image view", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE_VIEW,
+                        mImageView);
+
+  VkSamplerCreateInfo samplerCreateInfo{};
+  samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  samplerCreateInfo.pNext = nullptr;
+  samplerCreateInfo.flags = 0;
+  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+  samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+  samplerCreateInfo.minLod = 0.0f;
+  samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
+  checkForVulkanError(
+      vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
+      "Failed to image sampler", description.debugName);
+
+  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_SAMPLER,
+                        mSampler);
+}
+
+VulkanTexture::VulkanTexture(const TextureViewDescription &description,
+                             VulkanResourceRegistry &registry,
+                             VulkanResourceAllocator &allocator,
+                             VulkanDeviceObject &device)
+    : mDevice(device), mAllocator(allocator) {
+  const auto &original = registry.getTextures().at(description.texture);
+
+  mImage = original->mImage;
+  mFormat = original->mFormat;
+  mAspectFlags = original->mAspectFlags;
+  mDescription = original->mDescription;
+  mViewDescription = description;
+
+  VkImageViewType imageViewType = VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+  if (original->mDescription.type == TextureType::Cubemap) {
+    imageViewType = VK_IMAGE_VIEW_TYPE_CUBE;
+  } else if (description.layerCount > 1) {
+    imageViewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+  } else {
+    imageViewType = VK_IMAGE_VIEW_TYPE_2D;
+  }
+
+  VkImageViewCreateInfo imageViewCreateInfo{};
+  imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  imageViewCreateInfo.pNext = nullptr;
+  imageViewCreateInfo.flags = 0;
+  imageViewCreateInfo.image = mImage;
+  imageViewCreateInfo.viewType = imageViewType;
+  imageViewCreateInfo.format = original->mFormat;
+  imageViewCreateInfo.subresourceRange.baseMipLevel = description.baseMipLevel;
+  imageViewCreateInfo.subresourceRange.levelCount = description.mipLevelCount;
+  imageViewCreateInfo.subresourceRange.baseArrayLayer = description.baseLayer;
+  imageViewCreateInfo.subresourceRange.layerCount = description.layerCount;
+  imageViewCreateInfo.subresourceRange.aspectMask = mAspectFlags;
+
   checkForVulkanError(
       vkCreateImageView(mDevice, &imageViewCreateInfo, nullptr, &mImageView),
       "Failed to create image view", description.debugName);

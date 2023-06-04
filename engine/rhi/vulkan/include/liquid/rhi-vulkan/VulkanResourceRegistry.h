@@ -48,7 +48,6 @@ class VulkanResourceRegistry {
   using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
-  using TextureViewMap = ResourceMap<TextureViewHandle, VulkanTextureView>;
   using RenderPassMap = ResourceMap<RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap = ResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = ResourceMap<PipelineHandle, VulkanPipeline>;
@@ -131,31 +130,6 @@ public:
    * @return List of textures
    */
   inline const TextureMap::Map &getTextures() const { return mTextures.map; }
-
-  /**
-   * @brief Set texture view
-   *
-   * @param textureView Vulkan texture view
-   * @param handle Texture view handle
-   */
-  void setTextureView(std::unique_ptr<VulkanTextureView> &&textureView,
-                      TextureViewHandle handle);
-
-  /**
-   * @brief Delete texture view
-   *
-   * @param handle Texture view handle
-   */
-  void deleteTextureView(TextureViewHandle handle);
-
-  /**
-   * @brief Get texture views
-   *
-   * @return List of texture views
-   */
-  inline const TextureViewMap::Map &getTextureViews() const {
-    return mTextureViews.map;
-  }
 
   /**
    * @brief Set render pass
@@ -244,7 +218,6 @@ public:
 private:
   BufferMap mBuffers;
   TextureMap mTextures;
-  TextureViewMap mTextureViews;
   ShaderMap mShaders;
   RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;
