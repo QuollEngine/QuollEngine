@@ -108,7 +108,7 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
     void *data, const std::vector<TextureAssetLevel> &levels,
     rhi::Format format) {
   rhi::TextureDescription description{};
-  description.levels = static_cast<uint32_t>(levels.size());
+  description.mipLevelCount = static_cast<uint32_t>(levels.size());
   description.width = levels.at(0).width;
   description.height = levels.at(0).height;
   description.depth = 1;
@@ -127,7 +127,7 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
 
   TextureUtils::generateMipMapsForTexture(
       mRenderStorage.getDevice(), texture,
-      rhi::ImageLayout::TransferSourceOptimal, description.layers,
+      rhi::ImageLayout::TransferSourceOptimal, description.layerCount,
       static_cast<uint32_t>(levels.size()), description.width,
       description.height);
 
@@ -136,7 +136,7 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
 
   TextureUtils::copyTextureToData(mRenderStorage.getDevice(), texture,
                                   rhi::ImageLayout::TransferDestinationOptimal,
-                                  description.layers, levels,
+                                  description.layerCount, levels,
                                   textureData.data());
   mRenderStorage.getDevice()->destroyTexture(texture);
 

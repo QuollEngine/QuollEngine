@@ -155,6 +155,15 @@ public:
   getTextureDescription(TextureHandle handle) const override;
 
   /**
+   * @brief Get texture view description
+   *
+   * @param handle Texture handle
+   * @return Texture view description
+   */
+  const TextureViewDescription
+  getTextureViewDescription(TextureHandle handle) const;
+
+  /**
    * @brief Destroy texture
    *
    * @param handle Texture handle
@@ -173,17 +182,10 @@ public:
    * @brief Create texture view
    *
    * @param description Texture view description
-   * @param handle Texture view handle
+   * @param handle Texture handle
    */
   void createTextureView(const TextureViewDescription &description,
-                         TextureViewHandle handle) override;
-
-  /**
-   * @brief Destroy texture view
-   *
-   * @param handle Texture view handle
-   */
-  void destroyTextureView(TextureViewHandle handle) override;
+                         TextureHandle handle) override;
 
   /**
    * @brief Create render pass
@@ -282,7 +284,6 @@ public:
 private:
   MockResourceMap<BufferHandle, std::unique_ptr<MockBuffer>> mBuffers;
   MockResourceMap<TextureHandle, MockTexture> mTextures;
-  MockResourceMap<TextureViewHandle, TextureViewDescription> mTextureViews;
   MockResourceMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
   MockResourceMap<RenderPassHandle, RenderPassDescription> mRenderPasses;
 

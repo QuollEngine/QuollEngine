@@ -1,10 +1,10 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Engine.h"
 
 #include "VulkanHeaders.h"
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanTexture.h"
-#include "VulkanTextureView.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -14,7 +14,6 @@
 #include "VulkanResourceMetrics.h"
 
 #include "VulkanError.h"
-#include "liquid/core/Engine.h"
 
 namespace liquid::rhi {
 
@@ -180,14 +179,10 @@ void VulkanRenderDevice::destroyTexture(TextureHandle handle) {
 }
 
 void VulkanRenderDevice::createTextureView(
-    const TextureViewDescription &description, TextureViewHandle handle) {
-  mRegistry.setTextureView(
-      std::make_unique<VulkanTextureView>(description, mRegistry, mDevice),
-      handle);
-}
-
-void VulkanRenderDevice::destroyTextureView(TextureViewHandle handle) {
-  mRegistry.deleteTextureView(handle);
+    const TextureViewDescription &description, TextureHandle handle) {
+  mRegistry.setTexture(std::make_unique<VulkanTexture>(description, mRegistry,
+                                                       mAllocator, mDevice),
+                       handle);
 }
 
 void VulkanRenderDevice::createRenderPass(

@@ -35,17 +35,6 @@ public:
              DescriptorType type, uint32_t start) override;
 
   /**
-   * @brief Bind texture descriptors
-   *
-   * @param binding Binding number
-   * @param textureViews Texture views
-   * @param type Descriptor type
-   * @param start Starting index
-   */
-  void write(uint32_t binding, std::span<TextureViewHandle> textureViews,
-             DescriptorType type, uint32_t start) override;
-
-  /**
    * @brief Write buffers
    *
    * @param binding Binding number

@@ -42,18 +42,6 @@ public:
                      DescriptorType type, uint32_t start) = 0;
 
   /**
-   * @brief Bind texture descriptors
-   *
-   * @param binding Binding number
-   * @param textureViews Texture views
-   * @param type Descriptor type
-   * @param start Starting index
-   */
-  virtual void write(uint32_t binding,
-                     std::span<TextureViewHandle> textureViews,
-                     DescriptorType type, uint32_t start) = 0;
-
-  /**
    * @brief Bind buffer descriptors
    *
    * @param binding Binding number

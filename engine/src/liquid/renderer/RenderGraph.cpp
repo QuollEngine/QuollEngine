@@ -28,42 +28,44 @@ RenderGraphPass &RenderGraph::addComputePass(StringView name) {
 }
 
 RenderGraph::RGTexture
-RenderGraph::create(const rhi::TextureDescription &description,
-                    RGTextureBuildCallback onBuild) {
+RenderGraph::create(const rhi::TextureDescription &description) {
   mDirty |= GraphDirty::PassChanges;
 
-  auto index = mRegistry.getRealResources().size();
-  mRegistry.getRealResources().push_back(0);
-  mRealResourceTypes.push_back(RGResourceType::Texture);
-  mTextureDescriptions.push_back(description);
-  mTextureBuilds.push_back(onBuild);
-
-  return RGTexture(mRegistry, index);
+  auto textureIndex = mRegistry.allocate<rhi::TextureHandle>(description);
+  return RGTexture(mRegistry, textureIndex);
 }
 
-RenderGraph::RGTexture RenderGraph::create(RGTextureCreator creator,
-                                           RGTextureBuildCallback onBuild) {
+RenderGraph::RGTexture RenderGraph::create(RGTextureCreator creator) {
   mDirty |= GraphDirty::PassChanges;
 
-  auto index = mRegistry.getRealResources().size();
-  mRegistry.getRealResources().push_back(0);
-  mRealResourceTypes.push_back(RGResourceType::Texture);
-  mTextureDescriptions.push_back(creator);
-  mTextureBuilds.push_back(onBuild);
+  auto textureIndex = mRegistry.allocate<rhi::TextureHandle>(creator);
 
-  return RGTexture(mRegistry, index);
+  return RGTexture(mRegistry, textureIndex);
+}
+
+RenderGraph::RGTexture RenderGraph::createView(RGTexture texture,
+                                               uint32_t baseMipLevel,
+                                               uint32_t mipLevelCount,
+                                               uint32_t baseLayer,
+                                               uint32_t layerCount) {
+  RGTextureViewDescription description{};
+  description.baseMipLevel = baseMipLevel;
+  description.mipLevelCount = mipLevelCount;
+  description.baseLayer = baseLayer;
+  description.layerCount = layerCount;
+  description.textureIndex = texture.getIndex();
+
+  auto textureIndex = mRegistry.allocate<rhi::TextureHandle>(description);
+
+  return RGTexture(mRegistry, textureIndex);
 }
 
 RenderGraph::RGTexture RenderGraph::import(rhi::TextureHandle handle) {
   mDirty |= GraphDirty::PassChanges;
 
-  auto index = mRegistry.getRealResources().size();
-  mRegistry.getRealResources().push_back(static_cast<uint32_t>(handle));
-  mRealResourceTypes.push_back(RGResourceType::Texture);
-  mTextureDescriptions.push_back({});
-  mTextureBuilds.push_back([](auto, auto &) {});
+  auto textureIndex = mRegistry.allocate(handle);
 
-  return RGTexture(mRegistry, index);
+  return RGTexture(mRegistry, textureIndex);
 }
 
 /**
@@ -91,59 +93,79 @@ static void topologicalSort(const std::vector<RenderGraphPass> &inputs,
 
 void RenderGraph::buildResources(RenderStorage &storage) {
   // Create all real handles for render graph if they do not exist
-  for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
-    if (mRegistry.getRealResources().at(i) != 0) {
+  const auto &textures = mRegistry.getRealResources<rhi::TextureHandle>();
+  for (size_t i = 0; i < textures.size(); ++i) {
+    if (textures.at(i) != rhi::TextureHandle::Null) {
       continue;
     }
 
-    uint32_t handle = 0;
-    if (mRealResourceTypes.at(i) == RGResourceType::Texture) {
-      handle = static_cast<uint32_t>(storage.getNewTextureHandle());
-    } else if (mRealResourceTypes.at(i) == RGResourceType::Buffer) {
-      LIQUID_ASSERT(false, "Not implemented");
-    }
-    mRegistry.getRealResources().at(i) = handle;
+    mRegistry.set(i, storage.getNewTextureHandle());
   }
 
   auto *device = storage.getDevice();
 
   if (BitwiseEnumContains(mDirty, GraphDirty::PassChanges)) {
-    for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
-      if (mRealResourceTypes.at(i) == RGResourceType::Texture) {
-        auto handle =
-            static_cast<rhi::TextureHandle>(mRegistry.getRealResources().at(i));
+    for (size_t i = 0; i < textures.size(); ++i) {
+      auto handle = mRegistry.get<rhi::TextureHandle>(i);
+      const auto &desc = mRegistry.getDescription<rhi::TextureHandle>(i);
 
-        const auto &desc = mTextureDescriptions.at(i);
-        if (const auto *fixedDesc =
-                std::get_if<rhi::TextureDescription>(&desc)) {
-          device->createTexture(*fixedDesc, handle);
-        } else if (const auto *creator = std::get_if<RGTextureCreator>(&desc)) {
-          auto dynamicDesc =
-              (*creator)(mFramebufferExtent.x, mFramebufferExtent.y);
+      if (const auto *fixedDesc = std::get_if<rhi::TextureDescription>(&desc)) {
+        device->createTexture(*fixedDesc, handle);
+      } else if (const auto *creator = std::get_if<RGTextureCreator>(&desc)) {
+        auto dynamicDesc =
+            (*creator)(mFramebufferExtent.x, mFramebufferExtent.y);
 
-          device->createTexture(dynamicDesc, handle);
-        }
-
-        mTextureBuilds.at(i)(handle, storage);
-      } else if (mRealResourceTypes.at(i) == RGResourceType::Buffer) {
-        LIQUID_ASSERT(false, "Not implemented");
+        device->createTexture(dynamicDesc, handle);
+      } else if (const auto *view =
+                     std::get_if<RGTextureViewDescription>(&desc)) {
+        rhi::TextureViewDescription description{};
+        description.baseMipLevel = view->baseMipLevel;
+        description.mipLevelCount = view->mipLevelCount;
+        description.baseLayer = view->baseLayer;
+        description.layerCount = view->layerCount;
+        description.texture =
+            mRegistry.get<rhi::TextureHandle>(view->textureIndex);
+        device->createTextureView(description, handle);
       }
+
+      mRegistry.callResourceReady<rhi::TextureHandle>(i, storage);
     }
-  } else if (BitwiseEnumContains(mDirty, GraphDirty::SizeUpdate)) {
-    for (size_t i = 0; i < mRegistry.getRealResources().size(); ++i) {
-      if (mRealResourceTypes.at(i) != RGResourceType::Texture) {
-        continue;
-      }
 
-      auto handle =
-          static_cast<rhi::TextureHandle>(mRegistry.getRealResources().at(i));
-      const auto &desc = mTextureDescriptions.at(i);
+  } else if (BitwiseEnumContains(mDirty, GraphDirty::SizeUpdate)) {
+    std::vector<size_t> resized;
+    for (size_t i = 0; i < textures.size(); ++i) {
+      auto handle = mRegistry.get<rhi::TextureHandle>(i);
+      const auto &desc = mRegistry.getDescription<rhi::TextureHandle>(i);
+
       if (const auto *creator = std::get_if<RGTextureCreator>(&desc)) {
         auto dynamicDesc =
             (*creator)(mFramebufferExtent.x, mFramebufferExtent.y);
 
         device->createTexture(dynamicDesc, handle);
-        mTextureBuilds.at(i)(handle, storage);
+        mRegistry.callResourceReady<rhi::TextureHandle>(i, storage);
+        resized.push_back(i);
+      }
+    }
+
+    for (size_t i = 0; i < textures.size(); ++i) {
+      auto handle = mRegistry.get<rhi::TextureHandle>(i);
+      const auto &desc = mRegistry.getDescription<rhi::TextureHandle>(i);
+
+      if (const auto *view = std::get_if<RGTextureViewDescription>(&desc)) {
+        if (std::find(resized.begin(), resized.end(), view->textureIndex) ==
+            resized.end()) {
+          continue;
+        }
+        rhi::TextureViewDescription description{};
+        description.baseMipLevel = view->baseMipLevel;
+        description.mipLevelCount = view->mipLevelCount;
+        description.baseLayer = view->baseLayer;
+        description.layerCount = view->layerCount;
+        description.texture =
+            mRegistry.get<rhi::TextureHandle>(view->textureIndex);
+        device->createTextureView(description, handle);
+
+        mRegistry.callResourceReady<rhi::TextureHandle>(i, storage);
       }
     }
   }
@@ -444,7 +466,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
   uint32_t width = 0;
   uint32_t height = 0;
-  uint32_t layers = 0;
+  uint32_t layerCount = 0;
   uint32_t sampleCount = 0;
 
   std::vector<rhi::TextureHandle> framebufferAttachments;
@@ -487,7 +509,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
     width = desc.width;
     height = desc.height;
-    layers = desc.layers;
+    layerCount = desc.layerCount;
   }
 
   bool renderPassExists = isHandleValid(pass.mRenderPass);
@@ -501,7 +523,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
   rhi::FramebufferDescription framebufferDesc;
   framebufferDesc.width = width;
   framebufferDesc.height = height;
-  framebufferDesc.layers = layers;
+  framebufferDesc.layers = layerCount;
   framebufferDesc.attachments = framebufferAttachments;
   framebufferDesc.renderPass = pass.mRenderPass;
   framebufferDesc.debugName = pass.getName();
@@ -513,7 +535,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
   pass.mDimensions.x = width;
   pass.mDimensions.y = height;
-  pass.mDimensions.z = layers;
+  pass.mDimensions.z = layerCount;
 
   for (auto handle : pass.mPipelines) {
     auto &description = storage.getGraphicsPipelineDescription(handle);

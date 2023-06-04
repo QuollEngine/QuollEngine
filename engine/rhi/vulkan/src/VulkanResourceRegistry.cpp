@@ -2,7 +2,6 @@
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanTexture.h"
-#include "VulkanTextureView.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -40,16 +39,6 @@ void VulkanResourceRegistry::setTexture(
 
 void VulkanResourceRegistry::deleteTexture(TextureHandle handle) {
   mTextures.map.erase(handle);
-}
-
-void VulkanResourceRegistry::setTextureView(
-    std::unique_ptr<VulkanTextureView> &&textureView,
-    TextureViewHandle handle) {
-  mTextureViews.map.insert_or_assign(handle, std::move(textureView));
-}
-
-void VulkanResourceRegistry::deleteTextureView(TextureViewHandle handle) {
-  mTextureViews.map.erase(handle);
 }
 
 void VulkanResourceRegistry::setRenderPass(

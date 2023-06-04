@@ -5,8 +5,10 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanUploadContext.h"
 #include "VulkanResourceAllocator.h"
+#include "VulkanResourceRegistry.h"
 
 #include "liquid/rhi/TextureDescription.h"
+#include "liquid/rhi/TextureViewDescription.h"
 
 namespace liquid::rhi {
 
@@ -38,6 +40,18 @@ public:
    * @param device Vulkan device
    */
   VulkanTexture(const TextureDescription &description,
+                VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
+
+  /**
+   * @brief Create Vulkan texture view
+   *
+   * @param description Texture description
+   * @param registry Vulkan resource registry
+   * @param allocator Vulkan resource allocator
+   * @param device Vulkan device
+   */
+  VulkanTexture(const TextureViewDescription &description,
+                VulkanResourceRegistry &registry,
                 VulkanResourceAllocator &allocator, VulkanDeviceObject &device);
 
   /**
@@ -111,6 +125,7 @@ private:
   VulkanResourceAllocator &mAllocator;
   VulkanDeviceObject &mDevice;
   TextureDescription mDescription;
+  TextureViewDescription mViewDescription;
 };
 
 } // namespace liquid::rhi

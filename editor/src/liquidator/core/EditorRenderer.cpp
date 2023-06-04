@@ -217,21 +217,19 @@ void EditorRenderer::attach(RenderGraph &graph,
 
   // outlines
   {
-    auto depthBuffer = graph.create(
-        [scenePassData](auto width, auto height) {
-          rhi::TextureDescription description{};
-          description.usage = rhi::TextureUsage::Depth |
-                              rhi::TextureUsage::Stencil |
-                              rhi::TextureUsage::Sampled;
-          description.width = width;
-          description.height = height;
-          description.layers = 1;
-          description.samples = scenePassData.sampleCount;
-          description.format = rhi::Format::Depth32FloatStencil8Uint;
-          description.debugName = "Editor depth stencil for outline";
-          return description;
-        },
-        [](auto handle, RenderStorage &storage) {});
+    auto depthBuffer = graph.create([scenePassData](auto width, auto height) {
+      rhi::TextureDescription description{};
+      description.usage = rhi::TextureUsage::Depth |
+                          rhi::TextureUsage::Stencil |
+                          rhi::TextureUsage::Sampled;
+      description.width = width;
+      description.height = height;
+      description.layerCount = 1;
+      description.samples = scenePassData.sampleCount;
+      description.format = rhi::Format::Depth32FloatStencil8Uint;
+      description.debugName = "Editor depth stencil for outline";
+      return description;
+    });
 
     auto &outlinePass = graph.addGraphicsPass("outlinePass");
     outlinePass.write(scenePassData.sceneColor, AttachmentType::Color,

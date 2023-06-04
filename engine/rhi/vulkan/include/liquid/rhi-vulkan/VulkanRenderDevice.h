@@ -170,17 +170,10 @@ public:
    * @brief Create texture view
    *
    * @param description Texture view description
-   * @param handle Texture view handle
+   * @param handle Texture handle
    */
   void createTextureView(const TextureViewDescription &description,
-                         TextureViewHandle handle) override;
-
-  /**
-   * @brief Destroy texture view
-   *
-   * @param handle Texture view handle
-   */
-  void destroyTextureView(TextureViewHandle handle) override;
+                         TextureHandle handle) override;
 
   /**
    * @brief Create render pass

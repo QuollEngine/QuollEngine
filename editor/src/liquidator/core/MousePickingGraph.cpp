@@ -30,21 +30,18 @@ MousePickingGraph::MousePickingGraph(
       "mouse-picking.selector.fragment",
       {"assets/shaders/mouse-picking-selector.frag.spv"});
 
-  auto depthBuffer = mRenderGraph.create(
-      [this](auto width, auto height) {
-        rhi::TextureDescription description{};
-        description.usage =
-            rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-        description.width = width;
-        description.height = height;
-        description.layers = 1;
-        description.samples = 1;
-        description.format = rhi::Format::Depth32Float;
-        description.debugName = "Mouse picking depth stencil";
+  auto depthBuffer = mRenderGraph.create([this](auto width, auto height) {
+    rhi::TextureDescription description{};
+    description.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+    description.width = width;
+    description.height = height;
+    description.layerCount = 1;
+    description.samples = 1;
+    description.format = rhi::Format::Depth32Float;
+    description.debugName = "Mouse picking depth stencil";
 
-        return description;
-      },
-      [](auto handle, RenderStorage &storage) {});
+    return description;
+  });
 
   Entity nullEntity{0};
   mSelectedEntityBuffer = renderStorage.createBuffer(

@@ -56,12 +56,12 @@ struct TextureDescription {
   /**
    * Number of layers in texture
    */
-  uint32_t layers = 1;
+  uint32_t layerCount = 1;
 
   /**
    * Number of mip levels
    */
-  uint32_t levels = 1;
+  uint32_t mipLevelCount = 1;
 
   /**
    * Number of samples

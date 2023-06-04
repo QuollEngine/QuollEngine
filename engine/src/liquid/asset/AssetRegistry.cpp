@@ -24,8 +24,9 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     if (texture.data.deviceHandle == rhi::TextureHandle::Null) {
       rhi::TextureDescription description{};
       description.width = texture.data.width;
-      description.levels = static_cast<uint32_t>(texture.data.levels.size());
-      description.layers = texture.data.layers;
+      description.mipLevelCount =
+          static_cast<uint32_t>(texture.data.levels.size());
+      description.layerCount = texture.data.layers;
       description.height = texture.data.height;
       description.usage = rhi::TextureUsage::Color |
                           rhi::TextureUsage::TransferDestination |
