@@ -270,6 +270,15 @@ public:
   inline rhi::FramebufferHandle getFramebuffer() const { return mFramebuffer; }
 
   /**
+   * @brief Get pipelines
+   *
+   * @return Pipelines
+   */
+  inline const std::vector<rhi::PipelineHandle> &getPipelines() const {
+    return mPipelines;
+  }
+
+  /**
    * @brief Get output buffers
    *
    * @return Output buffers

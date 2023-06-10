@@ -164,6 +164,17 @@ public:
   getTextureViewDescription(TextureHandle handle) const;
 
   /**
+   * @brief Check if texture exists in device
+   *
+   * @param handle Texture handle
+   * @retval true Texture exists
+   * @retval false Texture does not exist
+   */
+  inline bool hasTexture(TextureHandle handle) const {
+    return mTextures.exists(handle);
+  }
+
+  /**
    * @brief Destroy texture
    *
    * @param handle Texture handle
@@ -213,6 +224,17 @@ public:
   getRenderPassDescription(RenderPassHandle handle) const;
 
   /**
+   * @brief Check if render pass exists in device
+   *
+   * @param handle Render pass handle
+   * @retval true Render pass exists
+   * @retval false Render pass does not exist
+   */
+  inline bool hasRenderPass(RenderPassHandle handle) const {
+    return mRenderPasses.exists(handle);
+  }
+
+  /**
    * @brief Create framebuffer
    *
    * @param description Framebuffer description
@@ -236,6 +258,17 @@ public:
    */
   const FramebufferDescription
   getFramebufferDescription(FramebufferHandle handle) const;
+
+  /**
+   * @brief Check if framebuffer exists in device
+   *
+   * @param handle Framebuffer handle
+   * @retval true Framebuffer exists
+   * @retval false Framebuffer does not exist
+   */
+  inline bool hasFramebuffer(FramebufferHandle handle) const {
+    return mFramebuffers.exists(handle);
+  }
 
   /**
    * @brief Create graphics pipeline

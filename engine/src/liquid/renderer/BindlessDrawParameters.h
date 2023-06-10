@@ -56,6 +56,13 @@ public:
    */
   void build(rhi::RenderDevice *device);
 
+  /**
+   * @brief Destroy buffers and descriptor
+   *
+   * @param device Render device
+   */
+  void destroy(rhi::RenderDevice *device);
+
 private:
   /**
    * @brief Pad size to minimum uniform alignment

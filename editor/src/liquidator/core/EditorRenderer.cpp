@@ -49,7 +49,12 @@ EditorRenderer::EditorRenderer(IconRegistry &iconRegistry,
 }
 
 void EditorRenderer::attach(RenderGraph &graph,
-                            const SceneRenderPassData &scenePassData) {
+                            const SceneRenderPassData &scenePassData,
+                            const RendererOptions &options) {
+  for (auto &frameData : mFrameData) {
+    frameData.getBindlessParams().destroy(mRenderStorage.getDevice());
+  }
+
   // editor debug
   {
     auto &editorDebugPass = graph.addGraphicsPass("editorDebug");
@@ -217,19 +222,17 @@ void EditorRenderer::attach(RenderGraph &graph,
 
   // outlines
   {
-    auto depthBuffer = graph.create([scenePassData](auto width, auto height) {
-      rhi::TextureDescription description{};
-      description.usage = rhi::TextureUsage::Depth |
-                          rhi::TextureUsage::Stencil |
-                          rhi::TextureUsage::Sampled;
-      description.width = width;
-      description.height = height;
-      description.layerCount = 1;
-      description.samples = scenePassData.sampleCount;
-      description.format = rhi::Format::Depth32FloatStencil8Uint;
-      description.debugName = "Editor depth stencil for outline";
-      return description;
-    });
+    rhi::TextureDescription depthBufferDesc{};
+    depthBufferDesc.usage = rhi::TextureUsage::Depth |
+                            rhi::TextureUsage::Stencil |
+                            rhi::TextureUsage::Sampled;
+    depthBufferDesc.width = options.size.x;
+    depthBufferDesc.height = options.size.y;
+    depthBufferDesc.layerCount = 1;
+    depthBufferDesc.samples = scenePassData.sampleCount;
+    depthBufferDesc.format = rhi::Format::Depth32FloatStencil8Uint;
+    depthBufferDesc.debugName = "Editor depth stencil for outline";
+    auto depthBuffer = graph.create(depthBufferDesc);
 
     auto &outlinePass = graph.addGraphicsPass("outlinePass");
     outlinePass.write(scenePassData.sceneColor, AttachmentType::Color,

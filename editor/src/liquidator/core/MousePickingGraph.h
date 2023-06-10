@@ -28,11 +28,6 @@ public:
                     AssetRegistry &assetRegistry, RenderStorage &renderStorage);
 
   /**
-   * @brief Compile the graph
-   */
-  void compile();
-
-  /**
    * @brief Execute the graph
    *
    * @param commandList Command list
@@ -55,9 +50,9 @@ public:
   /**
    * @brief Set framebuffer size
    *
-   * @param window Framebuffer size
+   * @param size Framebuffer size
    */
-  void setFramebufferSize(Window &window);
+  void setFramebufferSize(glm::uvec2 size);
 
   /**
    * @brief Check is selection is performed in current frame
@@ -69,6 +64,12 @@ public:
   inline bool isSelectionPerformedInFrame(uint32_t frameIndex) const {
     return frameIndex == mFrameIndex;
   }
+
+private:
+  /**
+   * @brief Create render graph
+   */
+  void createRenderGraph();
 
 private:
   RenderStorage &mRenderStorage;
@@ -86,6 +87,9 @@ private:
   rhi::Buffer mSelectedEntityBuffer;
 
   glm::vec2 mMousePos{};
+
+  glm::uvec2 mFramebufferSize{};
+  bool mResized = true;
 
   uint32_t mFrameIndex = std::numeric_limits<uint32_t>::max();
 };

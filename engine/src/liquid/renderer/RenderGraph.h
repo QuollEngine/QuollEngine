@@ -58,14 +58,6 @@ public:
   RGTexture create(const rhi::TextureDescription &description);
 
   /**
-   * @brief Create dynamic texture
-   *
-   * @param creator Texture creator
-   * @return Render graph texture
-   */
-  RGTexture create(RGTextureCreator creator);
-
-  /**
    * @brief Create texture view
    *
    * @param texture Render graph texture
@@ -103,6 +95,13 @@ public:
   void build(RenderStorage &storage);
 
   /**
+   * @brief Clear render graph
+   *
+   * @param storage Render storage
+   */
+  void destroy(RenderStorage &storage);
+
+  /**
    * @brief Get passes
    *
    * @return Render graph passes
@@ -117,30 +116,6 @@ public:
   inline std::vector<RenderGraphPass> &getCompiledPasses() {
     return mCompiledPasses;
   }
-
-  /**
-   * @brief Set framebuffer extent
-   *
-   * @param framebufferExtent Framebuffer extent
-   */
-  void setFramebufferExtent(glm::uvec2 framebufferExtent);
-
-  /**
-   * @brief Get framebuffer extent
-   *
-   * @return Framebuffer extent
-   */
-  inline const glm::uvec2 &getFramebufferExtent() const {
-    return mFramebufferExtent;
-  }
-
-  /**
-   * @brief Check if recreate is necessary
-   *
-   * @retval true Passes have changed
-   * @retval false Passes have not changed
-   */
-  inline bool isDirty() const { return mDirty != GraphDirty::None; }
 
   /**
    * @brief Get name
@@ -199,19 +174,11 @@ private:
   void buildComputePass(RenderGraphPass &pass, RenderStorage &storage);
 
 private:
-  // Passes
+  RenderGraphRegistry mRegistry;
+  String mName;
+
   std::vector<RenderGraphPass> mPasses;
   std::vector<RenderGraphPass> mCompiledPasses;
-
-private:
-  // Resources
-  RenderGraphRegistry mRegistry;
-
-private:
-  glm::uvec2 mFramebufferExtent{};
-  GraphDirty mDirty = GraphDirty::None;
-
-  String mName;
 };
 
 } // namespace liquid

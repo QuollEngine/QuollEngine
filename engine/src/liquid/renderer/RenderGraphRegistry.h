@@ -35,6 +35,8 @@ struct RGTextureViewDescription {
   uint32_t layerCount = 1;
 };
 
+enum class RGResourceState { Transient, Real };
+
 /**
  * @brief Render graph resource cache
  *
@@ -56,6 +58,7 @@ public:
     mRealResources.push_back(THandle{0});
     mDescriptions.push_back(description);
     mResourceReadyFns.push_back([](auto, auto &) {});
+    mResourceStates.push_back(RGResourceState::Transient);
 
     return index;
   }
@@ -71,13 +74,25 @@ public:
     mRealResources.push_back(handle);
     mDescriptions.push_back({});
     mResourceReadyFns.push_back([](auto, auto &) {});
+    mResourceStates.push_back(RGResourceState::Real);
+
     return index;
+  }
+
+  /**
+   * @brief Get state of render graph resource
+   *
+   * @param index Resource index
+   * @return Render graph resource state
+   */
+  RGResourceState getResourceState(size_t index) const {
+    return mResourceStates.at(index);
   }
 
   /**
    * @brief Get real resource
    *
-   * @param index Resource index
+   * @param index Resource indexResourceType
    * @return Resource handleindex
    */
   THandle get(size_t index) { return mRealResources.at(index); }
@@ -135,6 +150,7 @@ private:
   std::vector<THandle> mRealResources;
   std::vector<ResourceReadyFn> mResourceReadyFns;
   std::vector<TDescription> mDescriptions;
+  std::vector<RGResourceState> mResourceStates;
 };
 
 /**
@@ -149,12 +165,6 @@ public:
    */
   template <class THandle>
   using ResourceReadyFn = std::function<void(THandle, RenderStorage &)>;
-
-  /**
-   * Render graph texture creator function
-   */
-  using RGTextureCreator =
-      std::function<rhi::TextureDescription(uint32_t, uint32_t)>;
 
 public:
   /**
@@ -214,6 +224,18 @@ public:
   }
 
   /**
+   * @brief Get render graph resource type
+   *
+   * @tparam THandle Handle type
+   * @param index Resource index
+   * @return Render graph resource type
+   */
+  template <class THandle>
+  inline RGResourceState getResourceState(size_t index) const {
+    return getCache<THandle>().getResourceState(index);
+  }
+
+  /**
    * @brief Set handle
    *
    * @tparam THandle Handle type
@@ -261,7 +283,7 @@ private:
 
 private:
   using TextureDesc = std::variant<std::monostate, rhi::TextureDescription,
-                                   RGTextureViewDescription, RGTextureCreator>;
+                                   RGTextureViewDescription>;
 
   RenderGraphResourceCache<rhi::TextureHandle, TextureDesc> mTextureCache;
 };

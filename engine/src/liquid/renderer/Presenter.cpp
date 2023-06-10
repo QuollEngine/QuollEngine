@@ -49,6 +49,7 @@ Presenter::Presenter(RenderStorage &renderStorage)
 }
 
 void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
+  mUpdateRequired = false;
   mExtent = swapchain.extent;
 
   rhi::RenderPassAttachmentDescription attachment{};
@@ -111,11 +112,7 @@ void Presenter::updateFramebuffers(const rhi::Swapchain &swapchain) {
     device->createFramebuffer(framebufferDescription, mFramebuffers.at(i));
   }
 
-  if (rhi::isHandleValid(mPresentTexture)) {
-    std::array<rhi::TextureHandle, 1> textures{mPresentTexture};
-    mPresentDescriptor.write(0, textures,
-                             rhi::DescriptorType::CombinedImageSampler);
-  }
+  mPresentTexture = rhi::TextureHandle::Null;
 }
 
 void Presenter::present(rhi::RenderCommandList &commandList,
@@ -171,5 +168,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
                                 barriers);
   }
 }
+
+void Presenter::enqueueFramebufferUpdate() { mUpdateRequired = true; }
 
 } // namespace liquid

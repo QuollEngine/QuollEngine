@@ -335,12 +335,13 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15});
+  eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15, -1, 3});
   eventSystem.poll();
 
   auto *luaScope = component.scope.getLuaState();
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 3);
   EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 15);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_mods"), 3);
 }
 
 TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
@@ -355,9 +356,10 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::KeyboardEvent::Released, {35});
+  eventSystem.dispatch(liquid::KeyboardEvent::Released, {35, -1, 3});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 4);
   EXPECT_EQ(component.scope.getGlobal<int32_t>("key_value"), 35);
+  EXPECT_EQ(component.scope.getGlobal<int32_t>("key_mods"), 3);
 }

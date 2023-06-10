@@ -11,13 +11,36 @@
 
 namespace liquid {
 
-Renderer::Renderer(Window &window, rhi::RenderDevice *device)
-    : mDevice(device), mRenderStorage(mDevice) {}
+Renderer::Renderer(RenderStorage &storage, const RendererOptions &options)
+    : mRenderStorage(storage), mGraph("Main"), mOptions(options) {}
 
-void Renderer::render(RenderGraph &graph, rhi::RenderCommandList &commandList,
-                      uint32_t frameIndex) {
-  graph.build(mRenderStorage);
-  graph.execute(commandList, frameIndex);
+void Renderer::setGraphBuilder(GraphBuilderFn &&builderFn) {
+  mBuilderFn = builderFn;
+}
+
+void Renderer::setFramebufferSize(glm::uvec2 size) {
+  mOptions.size = size;
+  mOptionsChanged = true;
+}
+
+void Renderer::rebuildIfSettingsChanged() {
+  if (!mOptionsChanged) {
+    return;
+  }
+
+  mGraph.destroy(mRenderStorage);
+  mGraph = RenderGraph("Main");
+  auto res = mBuilderFn(mGraph, mOptions);
+  mGraph.build(mRenderStorage);
+  mSceneTexture = res.sceneTexture;
+  mFinalTexture = res.finalTexture;
+  mOptionsChanged = false;
+}
+
+void Renderer::execute(rhi::RenderCommandList &commandList,
+                       uint32_t frameIndex) {
+
+  mGraph.execute(commandList, frameIndex);
 }
 
 } // namespace liquid

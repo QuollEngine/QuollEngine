@@ -125,8 +125,9 @@ void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
         KeyboardEvent::Pressed, [this, &component](const auto &data) {
           component.scope.luaGetGlobal("on_key_press");
 
-          auto table = component.scope.createTable(1);
+          auto table = component.scope.createTable(2);
           table.set("key", data.key);
+          table.set("mods", data.mods);
 
           component.scope.call(1);
         });
@@ -136,8 +137,9 @@ void ScriptingSystem::createScriptingData(Script &component, Entity entity) {
     component.onKeyRelease = mEventSystem.observe(
         KeyboardEvent::Released, [this, &component](const auto &data) {
           component.scope.luaGetGlobal("on_key_release");
-          auto table = component.scope.createTable(1);
+          auto table = component.scope.createTable(2);
           table.set("key", data.key);
+          table.set("mods", data.mods);
 
           component.scope.call(1);
         });

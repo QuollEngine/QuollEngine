@@ -34,134 +34,31 @@ TEST_F(RenderGraphTest, CreatesAllTexturesOnBuild) {
   EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(1);
 
   TextureDescription fixedDescription{};
-  fixedDescription.width = 512;
-  fixedDescription.height = 512;
+  fixedDescription.width = 1920;
+  fixedDescription.height = 1080;
 
-  graph.setFramebufferExtent({1920, 1080});
+  auto t1 = graph.create(fixedDescription).onReady(onCreateR1.AsStdFunction());
+  auto t2 =
+      graph.createView(t1, 1, 2, 3, 4).onReady(onCreateR2.AsStdFunction());
 
-  auto r1 = graph.create(fixedDescription).onReady(onCreateR1.AsStdFunction());
-  auto r2 = graph
-                .create([](auto width, auto height) {
-                  TextureDescription desc{};
-                  desc.width = width;
-                  desc.height = height;
-
-                  return desc;
-                })
-                .onReady(onCreateR2.AsStdFunction());
-  auto v1 = graph.createView(r1, 1, 2, 3, 4);
-
-  EXPECT_FALSE(isHandleValid(r1.getHandle()));
-  EXPECT_FALSE(isHandleValid(r2.getHandle()));
-  EXPECT_FALSE(isHandleValid(v1.getHandle()));
+  EXPECT_FALSE(isHandleValid(t1.getHandle()));
+  EXPECT_FALSE(isHandleValid(t2.getHandle()));
 
   graph.build(storage);
 
-  EXPECT_TRUE(isHandleValid(r1.getHandle()));
-  EXPECT_TRUE(isHandleValid(r2.getHandle()));
-  EXPECT_TRUE(isHandleValid(v1.getHandle()));
+  EXPECT_TRUE(isHandleValid(t1.getHandle()));
+  EXPECT_TRUE(isHandleValid(t2.getHandle()));
 
-  auto desc1 = device.getTextureDescription(r1.getHandle());
-  EXPECT_EQ(desc1.width, 512);
-  EXPECT_EQ(desc1.height, 512);
+  auto desc1 = device.getTextureDescription(t1.getHandle());
+  EXPECT_EQ(desc1.width, 1920);
+  EXPECT_EQ(desc1.height, 1080);
 
-  auto desc2 = device.getTextureDescription(r2.getHandle());
-  EXPECT_EQ(desc2.width, 1920);
-  EXPECT_EQ(desc2.height, 1080);
-
-  auto desc3 = device.getTextureViewDescription(v1.getHandle());
-  EXPECT_EQ(desc3.texture, r1.getHandle());
-  EXPECT_EQ(desc3.baseMipLevel, 1);
-  EXPECT_EQ(desc3.mipLevelCount, 2);
-  EXPECT_EQ(desc3.baseLayer, 3);
-  EXPECT_EQ(desc3.layerCount, 4);
-}
-
-TEST_F(RenderGraphTest, RecreatesDynamicTexturesOnResize) {
-  OnBuildMockFunction onCreateR1;
-  OnBuildMockFunction onCreateR2;
-
-  EXPECT_CALL(onCreateR1, Call(::testing::_, ::testing::_)).Times(1);
-  EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(2);
-
-  TextureDescription fixedDescription{};
-  fixedDescription.width = 512;
-  fixedDescription.height = 512;
-
-  graph.setFramebufferExtent({1920, 1080});
-
-  auto r1 = graph.create(fixedDescription).onReady(onCreateR1.AsStdFunction());
-  auto r2 = graph
-                .create([](auto width, auto height) {
-                  TextureDescription desc{};
-                  desc.width = width;
-                  desc.height = height;
-
-                  return desc;
-                })
-                .onReady(onCreateR2.AsStdFunction());
-
-  graph.build(storage);
-
-  auto desc1 = device.getTextureDescription(r1.getHandle());
-  EXPECT_EQ(desc1.width, 512);
-  EXPECT_EQ(desc1.height, 512);
-  EXPECT_EQ(device.getTextureUpdates(r1.getHandle()), 1);
-
-  auto desc2 = device.getTextureDescription(r2.getHandle());
-  EXPECT_EQ(desc2.width, 1920);
-  EXPECT_EQ(desc2.height, 1080);
-  EXPECT_EQ(device.getTextureUpdates(r2.getHandle()), 1);
-
-  graph.setFramebufferExtent({2560, 1440});
-  graph.build(storage);
-
-  EXPECT_EQ(device.getTextureUpdates(r1.getHandle()), 1);
-
-  auto desc3 = device.getTextureDescription(r2.getHandle());
-  EXPECT_EQ(desc3.width, 2560);
-  EXPECT_EQ(desc3.height, 1440);
-  EXPECT_EQ(device.getTextureUpdates(r2.getHandle()), 2);
-}
-
-TEST_F(RenderGraphTest, RecreatesTextureViewOfDynamicTextureOnResize) {
-  OnBuildMockFunction onCreateR1;
-  OnBuildMockFunction onCreateR2;
-
-  EXPECT_CALL(onCreateR1, Call(::testing::_, ::testing::_)).Times(1);
-  EXPECT_CALL(onCreateR2, Call(::testing::_, ::testing::_)).Times(2);
-
-  TextureDescription fixedDescription{};
-  fixedDescription.width = 512;
-  fixedDescription.height = 512;
-
-  graph.setFramebufferExtent({1920, 1080});
-
-  auto r1 = graph.create(fixedDescription);
-  auto r2 = graph.create([](auto width, auto height) {
-    TextureDescription desc{};
-    desc.width = width;
-    desc.height = height;
-
-    return desc;
-  });
-
-  auto v1 =
-      graph.createView(r1, 1, 2, 3, 4).onReady(onCreateR1.AsStdFunction());
-
-  auto v2 =
-      graph.createView(r2, 5, 6, 7, 8).onReady(onCreateR2.AsStdFunction());
-
-  graph.build(storage);
-
-  EXPECT_EQ(device.getTextureUpdates(v1.getHandle()), 1);
-  EXPECT_EQ(device.getTextureUpdates(v2.getHandle()), 1);
-
-  graph.setFramebufferExtent({2560, 1440});
-  graph.build(storage);
-
-  EXPECT_EQ(device.getTextureUpdates(v1.getHandle()), 1);
-  EXPECT_EQ(device.getTextureUpdates(v2.getHandle()), 2);
+  auto desc2 = device.getTextureViewDescription(t2.getHandle());
+  EXPECT_EQ(desc2.texture, t1.getHandle());
+  EXPECT_EQ(desc2.baseMipLevel, 1);
+  EXPECT_EQ(desc2.mipLevelCount, 2);
+  EXPECT_EQ(desc2.baseLayer, 3);
+  EXPECT_EQ(desc2.layerCount, 4);
 }
 
 TEST_F(RenderGraphTest, ImportsExternalResourcesToRenderGraph) {
@@ -173,23 +70,6 @@ TEST_F(RenderGraphTest, ImportsExternalResourcesToRenderGraph) {
   EXPECT_EQ(resource.getHandle(), handle);
 
   graph.build(storage);
-  EXPECT_EQ(device.getTextureUpdates(handle), 1);
-  EXPECT_EQ(resource.getHandle(), handle);
-}
-
-TEST_F(RenderGraphTest, IgnoresExternalResourcesOnResize) {
-  auto handle = storage.createTexture({});
-
-  auto resource = graph.import(handle);
-  EXPECT_EQ(device.getTextureUpdates(handle), 1);
-  EXPECT_EQ(resource.getHandle(), handle);
-  EXPECT_TRUE(isHandleValid(handle));
-
-  graph.build(storage);
-  EXPECT_EQ(device.getTextureUpdates(handle), 1);
-  EXPECT_EQ(resource.getHandle(), handle);
-
-  graph.setFramebufferExtent({2560, 1440});
   EXPECT_EQ(device.getTextureUpdates(handle), 1);
   EXPECT_EQ(resource.getHandle(), handle);
 }
@@ -1523,8 +1403,6 @@ TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
   graph.build(storage);
   EXPECT_EQ(graph.getCompiledPasses().size(), 2);
 
-  graph.setFramebufferExtent({});
-
   graph.build(storage);
   EXPECT_EQ(graph.getCompiledPasses().size(), 2);
 }
@@ -1539,4 +1417,52 @@ TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   graph.addGraphicsPass("E");
 
   EXPECT_DEATH(graph.build(storage), ".*");
+}
+
+TEST_F(RenderGraphTest, DestroysAllTransientResourcesOnDestroy) {
+  TextureDescription fixedDescription{};
+  fixedDescription.width = 1920;
+  fixedDescription.height = 1080;
+
+  auto t1 = graph.create(fixedDescription);
+  auto t2 = graph.createView(t1, 1, 2, 3, 4);
+
+  auto pipeline =
+      storage.addPipeline(liquid::rhi::GraphicsPipelineDescription{});
+
+  auto &pass = graph.addGraphicsPass("test");
+  pass.write(t1, liquid::AttachmentType::Color, {});
+  pass.addPipeline(pipeline);
+
+  graph.build(storage);
+
+  auto &cpass = graph.getCompiledPasses().at(0);
+
+  EXPECT_TRUE(device.hasTexture(t1.getHandle()));
+  EXPECT_TRUE(device.hasTexture(t2.getHandle()));
+  EXPECT_TRUE(device.hasFramebuffer(cpass.getFramebuffer()));
+  EXPECT_TRUE(device.hasRenderPass(cpass.getRenderPass()));
+  EXPECT_TRUE(device.hasPipeline(pipeline));
+
+  graph.destroy(storage);
+
+  EXPECT_FALSE(device.hasTexture(t1.getHandle()));
+  EXPECT_FALSE(device.hasTexture(t2.getHandle()));
+  EXPECT_FALSE(device.hasFramebuffer(cpass.getFramebuffer()));
+  EXPECT_FALSE(device.hasRenderPass(cpass.getRenderPass()));
+  EXPECT_FALSE(device.hasPipeline(pipeline));
+}
+
+TEST_F(RenderGraphTest, DoesNotDestroyImportedResourcesOnDestroy) {
+  auto texture = storage.createTexture({});
+
+  graph.import(texture);
+
+  graph.build(storage);
+
+  EXPECT_TRUE(device.hasTexture(texture));
+
+  graph.destroy(storage);
+
+  EXPECT_TRUE(device.hasTexture(texture));
 }

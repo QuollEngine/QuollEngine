@@ -58,20 +58,24 @@ void EditorScreen::start(const Project &project) {
   auto layoutPath = (project.settingsPath / "layout.ini").string();
   auto statePath = project.settingsPath / "state.lqstate";
 
-  Renderer renderer(mWindow, mDevice);
+  RenderStorage renderStorage(mDevice);
+
+  liquid::RendererOptions initialOptions{};
+  initialOptions.size = mWindow.getFramebufferSize();
+  Renderer renderer(renderStorage, initialOptions);
+
   AssetManager assetManager(project.assetsPath, project.assetsCachePath,
-                            renderer.getRenderStorage(), true, true);
+                            renderStorage, true, true);
 
-  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(),
-                              renderer.getRenderStorage());
+  SceneRenderer sceneRenderer(assetManager.getAssetRegistry(), renderStorage);
 
-  ImguiRenderer imguiRenderer(mWindow, renderer.getRenderStorage());
+  ImguiRenderer imguiRenderer(mWindow, renderStorage);
 
-  Presenter presenter(renderer.getRenderStorage());
+  Presenter presenter(renderStorage);
 
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
-  auto res = assetManager.validateAndPreloadAssets(renderer.getRenderStorage());
+  auto res = assetManager.validateAndPreloadAssets(renderStorage);
   AssetLoadStatusDialog loadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
@@ -106,38 +110,38 @@ void EditorScreen::start(const Project &project) {
   EditorManager::loadWorkspaceState(statePath, state);
 
   MainLoop mainLoop(mWindow, fpsCounter);
-  AssetLoader assetLoader(assetManager, renderer.getRenderStorage());
+  AssetLoader assetLoader(assetManager, renderStorage);
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
   UIRoot ui(actionExecutor, assetLoader);
-  ui.getIconRegistry().loadIcons(renderer.getRenderStorage(),
-                                 std::filesystem::current_path() / "assets" /
-                                     "icons");
+  ui.getIconRegistry().loadIcons(
+      renderStorage, std::filesystem::current_path() / "assets" / "icons");
 
-  RenderGraph graph("Main");
+  EditorRenderer editorRenderer(ui.getIconRegistry(), renderStorage, mDevice);
 
-  auto scenePassGroup = sceneRenderer.attach(graph);
-  auto imguiPassGroup = imguiRenderer.attach(graph);
-  imguiPassGroup.pass.read(scenePassGroup.finalColor);
+  renderer.setGraphBuilder([&](auto &graph, const auto &options) {
+    auto scenePassGroup = sceneRenderer.attach(graph, options);
+    auto imguiPassGroup = imguiRenderer.attach(graph, options);
+    imguiPassGroup.pass.read(scenePassGroup.finalColor);
+    editorRenderer.attach(graph, scenePassGroup, options);
+    sceneRenderer.attachText(graph, scenePassGroup);
 
-  EditorRenderer editorRenderer(ui.getIconRegistry(),
-                                renderer.getRenderStorage(), mDevice);
-  editorRenderer.attach(graph, scenePassGroup);
-
-  sceneRenderer.attachText(graph, scenePassGroup);
+    return RendererTextures{imguiPassGroup.imguiColor,
+                            scenePassGroup.finalColor};
+  });
 
   MousePickingGraph mousePicking(sceneRenderer.getFrameData(),
                                  assetManager.getAssetRegistry(),
-                                 renderer.getRenderStorage());
+                                 renderStorage);
 
-  mousePicking.setFramebufferSize(mWindow);
-  graph.setFramebufferExtent(mWindow.getFramebufferSize());
+  mousePicking.setFramebufferSize(mWindow.getFramebufferSize());
 
-  mWindow.addResizeHandler([&graph, &renderer](auto width, auto height) {
-    graph.setFramebufferExtent({width, height});
-    renderer.getRenderStorage().setFramebufferSize(width, height);
+  mWindow.addResizeHandler([&](auto width, auto height) {
+    renderer.setFramebufferSize({width, height});
+    mousePicking.setFramebufferSize({width, height});
+    presenter.enqueueFramebufferUpdate();
   });
 
   mWindow.addFocusHandler([&tracker, &loadStatusDialog, &assetManager,
@@ -187,12 +191,15 @@ void EditorScreen::start(const Project &project) {
       });
 
   LogViewer logViewer;
-  mainLoop.setRenderFn([&renderer, &editorCamera, &assetManager, &graph,
-                        &sceneRenderer, &imguiRenderer, &scenePassGroup,
-                        &imguiPassGroup, &ui, &debugLayer, &loadStatusDialog,
-                        &presenter, &editorRenderer, &simulator, &mousePicking,
-                        &userLogStorage, &logViewer, &state, &actionExecutor,
-                        this]() {
+  mainLoop.setRenderFn([&]() {
+    if (presenter.requiresFramebufferUpdate()) {
+      mDevice->recreateSwapchain();
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+      return;
+    }
+
+    renderer.rebuildIfSettingsChanged();
+
     // TODO: Why is -2.0f needed here
     static const float IconSize = ImGui::GetFrameHeight() - 2.0f;
 
@@ -209,18 +216,13 @@ void EditorScreen::start(const Project &project) {
     logViewer.render(userLogStorage);
 
     bool mouseClicked =
-        ui.renderSceneView(state, scenePassGroup.finalColor, editorCamera);
+        ui.renderSceneView(state, renderer.getSceneTexture(), editorCamera);
 
     StatusBar::render(editorCamera);
 
     loadStatusDialog.render();
 
     imguiRenderer.endRendering();
-
-    if (renderer.getRenderStorage().recreateFramebufferRelativeTextures()) {
-      presenter.updateFramebuffers(mDevice->getSwapchain());
-      return;
-    }
 
     const auto &renderFrame = mDevice->beginFrame();
 
@@ -240,27 +242,23 @@ void EditorScreen::start(const Project &project) {
         state.selectedEntity = entity;
       }
 
-      mousePicking.compile();
-
-      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
+      renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
 
       if (mouseClicked) {
         auto mousePos = mWindow.getCurrentMousePosition();
 
         if (editorCamera.isWithinViewport(mousePos)) {
           auto scaledMousePos = editorCamera.scaleToViewport(mousePos);
-
           mousePicking.execute(renderFrame.commandList, scaledMousePos,
                                renderFrame.frameIndex);
         }
         mouseClicked = false;
       }
 
-      presenter.present(renderFrame.commandList, imguiPassGroup.imguiColor,
+      presenter.present(renderFrame.commandList, renderer.getFinalTexture(),
                         renderFrame.swapchainImageIndex);
 
       mDevice->endFrame(renderFrame);
-
     } else {
       presenter.updateFramebuffers(mDevice->getSwapchain());
     }

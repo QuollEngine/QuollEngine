@@ -67,6 +67,10 @@ RenderStorage::createTextureView(const rhi::TextureViewDescription &description,
   return handle;
 }
 
+void RenderStorage::destroyTexture(rhi::TextureHandle handle) {
+  mDevice->destroyTexture(handle);
+}
+
 rhi::ShaderHandle
 RenderStorage::createShader(const String &name,
                             const rhi::ShaderDescription &description) {
@@ -86,25 +90,6 @@ void RenderStorage::addToDescriptor(rhi::TextureHandle handle) {
   mGlobalTexturesDescriptor.write(0, textures,
                                   rhi::DescriptorType::CombinedImageSampler,
                                   rhi::castHandleToUint(handle));
-}
-
-rhi::TextureHandle RenderStorage::createFramebufferRelativeTexture(
-    const rhi::TextureDescription &description, bool addToDescriptor) {
-
-  auto fixedSizeDesc = description;
-  fixedSizeDesc.width =
-      mDevice->getSwapchain().extent.x * description.width / Hundred;
-  fixedSizeDesc.height =
-      mDevice->getSwapchain().extent.y * description.height / Hundred;
-
-  auto handle = createTexture(fixedSizeDesc, addToDescriptor);
-
-  mFramebufferRelativeTextures.insert({handle, description});
-  if (addToDescriptor) {
-    mFramebufferRelativeTexturesInGlobalDescriptor.push_back(handle);
-  }
-
-  return handle;
 }
 
 rhi::TextureHandle RenderStorage::getNewTextureHandle() {
@@ -130,42 +115,6 @@ rhi::Descriptor RenderStorage::createMaterialDescriptor(rhi::Buffer buffer) {
   descriptor.write(0, buffers, rhi::DescriptorType::UniformBuffer, 0);
 
   return descriptor;
-}
-
-bool RenderStorage::recreateFramebufferRelativeTextures() {
-  if (!mNeedsSwapchainResize) {
-    return false;
-  }
-
-  mDevice->recreateSwapchain();
-  mNeedsSwapchainResize = false;
-  for (auto &[handle, description] : mFramebufferRelativeTextures) {
-    auto fixedSizeDesc = description;
-    fixedSizeDesc.width = mWidth * description.width / Hundred;
-    fixedSizeDesc.height = mHeight * description.height / Hundred;
-
-    mDevice->createTexture(fixedSizeDesc, handle);
-  }
-
-  for (auto handle : mFramebufferRelativeTexturesInGlobalDescriptor) {
-    std::array<rhi::TextureHandle, 1> textures{handle};
-    mGlobalTexturesDescriptor.write(0, textures,
-                                    rhi::DescriptorType::CombinedImageSampler,
-                                    rhi::castHandleToUint(handle));
-  }
-
-  return true;
-}
-
-bool RenderStorage::isFramebufferRelative(rhi::TextureHandle handle) {
-  return mFramebufferRelativeTextures.find(handle) !=
-         mFramebufferRelativeTextures.end();
-}
-
-void RenderStorage::setFramebufferSize(uint32_t width, uint32_t height) {
-  mWidth = width;
-  mHeight = height;
-  mNeedsSwapchainResize = true;
 }
 
 rhi::PipelineHandle RenderStorage::addPipeline(

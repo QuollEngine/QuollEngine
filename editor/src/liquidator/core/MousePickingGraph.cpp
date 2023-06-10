@@ -30,19 +30,6 @@ MousePickingGraph::MousePickingGraph(
       "mouse-picking.selector.fragment",
       {"assets/shaders/mouse-picking-selector.frag.spv"});
 
-  auto depthBuffer = mRenderGraph.create([this](auto width, auto height) {
-    rhi::TextureDescription description{};
-    description.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-    description.width = width;
-    description.height = height;
-    description.layerCount = 1;
-    description.samples = 1;
-    description.format = rhi::Format::Depth32Float;
-    description.debugName = "Mouse picking depth stencil";
-
-    return description;
-  });
-
   Entity nullEntity{0};
   mSelectedEntityBuffer = renderStorage.createBuffer(
       {rhi::BufferUsage::Storage, sizeof(Entity), &nullEntity,
@@ -70,6 +57,91 @@ MousePickingGraph::MousePickingGraph(
     desc.debugName = "skinned mesh entities";
     mSkinnedMeshEntitiesBuffer = renderStorage.createBuffer(desc);
   }
+}
+
+void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
+                                const glm::vec2 &mousePos,
+                                uint32_t frameIndex) {
+  mFrameIndex = frameIndex;
+  const auto &frameData = mFrameData.at(frameIndex);
+
+  mSpriteEntitiesBuffer.update(frameData.getSpriteEntities().data(),
+                               frameData.getSpriteEntities().size() *
+                                   sizeof(Entity));
+
+  {
+    size_t offset = 0;
+    auto *bufferData = static_cast<Entity *>(mMeshEntitiesBuffer.map());
+    for (auto &[_, meshData] : frameData.getMeshGroups()) {
+      memcpy(bufferData + offset, meshData.entities.data(),
+             sizeof(Entity) * meshData.entities.size());
+      offset += meshData.entities.size();
+    }
+    mMeshEntitiesBuffer.unmap();
+  }
+
+  {
+    size_t offset = 0;
+    auto *bufferData = static_cast<Entity *>(mSkinnedMeshEntitiesBuffer.map());
+    for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
+      memcpy(bufferData + offset, meshData.entities.data(),
+             sizeof(Entity) * meshData.entities.size());
+      offset += meshData.entities.size();
+    }
+    mSkinnedMeshEntitiesBuffer.unmap();
+  }
+
+  mMousePos = mousePos;
+
+  if (mResized) {
+    mRenderGraph.destroy(mRenderStorage);
+    mRenderGraph = RenderGraph("Mouse picking");
+
+    createRenderGraph();
+
+    mRenderGraph.build(mRenderStorage);
+
+    mResized = false;
+  }
+
+  mRenderGraph.execute(commandList, frameIndex);
+}
+
+Entity MousePickingGraph::getSelectedEntity() {
+  auto selectedEntity = Entity::Null;
+
+  auto *data = mSelectedEntityBuffer.map();
+  memcpy(&selectedEntity, data, sizeof(Entity));
+  mSelectedEntityBuffer.unmap();
+
+  Entity nullEntity = Entity::Null;
+  mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
+
+  mFrameIndex = std::numeric_limits<uint32_t>::max();
+
+  return selectedEntity;
+}
+
+void MousePickingGraph::setFramebufferSize(glm::uvec2 size) {
+  mFramebufferSize = size;
+  mResized = true;
+}
+
+void MousePickingGraph::createRenderGraph() {
+  for (auto &params : mBindlessParams) {
+    params.destroy(mRenderStorage.getDevice());
+  }
+
+  rhi::TextureDescription depthBufferDesc{};
+  depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+  depthBufferDesc.width = mFramebufferSize.x;
+  depthBufferDesc.height = mFramebufferSize.y;
+  depthBufferDesc.layerCount = 1;
+  depthBufferDesc.samples = 1;
+  depthBufferDesc.format = rhi::Format::Depth32Float;
+  depthBufferDesc.debugName = "Mouse picking depth stencil";
+
+  auto depthBuffer = mRenderGraph.create(depthBufferDesc);
 
   auto &pass = mRenderGraph.addGraphicsPass("MousePicking");
   pass.write(depthBuffer, AttachmentType::Depth,
@@ -77,7 +149,7 @@ MousePickingGraph::MousePickingGraph(
 
   // Sprites
   auto spritePipeline =
-      renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
+      mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.sprite.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
           {},
@@ -91,7 +163,7 @@ MousePickingGraph::MousePickingGraph(
 
   // Normal meshes
   auto meshPipeline =
-      renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
+      mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.mesh.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
           rhi::PipelineVertexInputLayout::create<Vertex>(),
@@ -105,7 +177,7 @@ MousePickingGraph::MousePickingGraph(
 
   // Skinned meshes
   auto skinnedMeshPipeline =
-      renderStorage.addPipeline(rhi::GraphicsPipelineDescription{
+      mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.skinned-mesh.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
           rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
@@ -156,8 +228,8 @@ MousePickingGraph::MousePickingGraph(
   }
 
   pass.setExecutor([this, spritePipeline, meshPipeline, skinnedMeshPipeline,
-                    offset, &renderStorage](rhi::RenderCommandList &commandList,
-                                            uint32_t frameIndex) {
+                    offset](rhi::RenderCommandList &commandList,
+                            uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
@@ -244,69 +316,8 @@ MousePickingGraph::MousePickingGraph(
   });
 
   for (auto &bp : mBindlessParams) {
-    bp.build(device);
+    bp.build(mRenderStorage.getDevice());
   }
-}
-
-void MousePickingGraph::compile() { mRenderGraph.build(mRenderStorage); }
-
-void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
-                                const glm::vec2 &mousePos,
-                                uint32_t frameIndex) {
-  mFrameIndex = frameIndex;
-  const auto &frameData = mFrameData.at(frameIndex);
-
-  mSpriteEntitiesBuffer.update(frameData.getSpriteEntities().data(),
-                               frameData.getSpriteEntities().size() *
-                                   sizeof(Entity));
-
-  {
-    size_t offset = 0;
-    auto *bufferData = static_cast<Entity *>(mMeshEntitiesBuffer.map());
-    for (auto &[_, meshData] : frameData.getMeshGroups()) {
-      memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(Entity) * meshData.entities.size());
-      offset += meshData.entities.size();
-    }
-    mMeshEntitiesBuffer.unmap();
-  }
-
-  {
-    size_t offset = 0;
-    auto *bufferData = static_cast<Entity *>(mSkinnedMeshEntitiesBuffer.map());
-    for (auto &[_, meshData] : frameData.getSkinnedMeshGroups()) {
-      memcpy(bufferData + offset, meshData.entities.data(),
-             sizeof(Entity) * meshData.entities.size());
-      offset += meshData.entities.size();
-    }
-    mSkinnedMeshEntitiesBuffer.unmap();
-  }
-
-  mMousePos = mousePos;
-
-  mRenderGraph.execute(commandList, frameIndex);
-}
-
-Entity MousePickingGraph::getSelectedEntity() {
-  auto selectedEntity = Entity::Null;
-
-  auto *data = mSelectedEntityBuffer.map();
-  memcpy(&selectedEntity, data, sizeof(Entity));
-  mSelectedEntityBuffer.unmap();
-
-  Entity nullEntity = Entity::Null;
-  mSelectedEntityBuffer.update(&nullEntity, sizeof(Entity));
-
-  mFrameIndex = std::numeric_limits<uint32_t>::max();
-
-  return selectedEntity;
-}
-
-void MousePickingGraph::setFramebufferSize(Window &window) {
-  mRenderGraph.setFramebufferExtent(window.getFramebufferSize());
-  window.addResizeHandler([this](auto width, auto height) {
-    mRenderGraph.setFramebufferExtent({width, height});
-  });
 }
 
 } // namespace liquid::editor

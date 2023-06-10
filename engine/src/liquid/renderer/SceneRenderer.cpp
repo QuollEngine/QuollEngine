@@ -72,9 +72,13 @@ void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
   mClearColor = clearColor;
 }
 
-SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
+SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
+                                          const RendererOptions &options) {
+  for (auto &frameData : mFrameData) {
+    frameData.getBindlessParams().destroy(mRenderStorage.getDevice());
+  }
+
   static constexpr uint32_t ShadowMapDimensions = 4096;
-  static constexpr uint32_t SwapchainSizePercentage = 100;
 
   rhi::TextureDescription shadowMapDesc{};
   shadowMapDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
@@ -91,62 +95,50 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph) {
                          storage.addToDescriptor(handle);
                        });
 
-  auto sceneColor = graph.create([this](auto width, auto height) {
-    rhi::TextureDescription description{};
-    description.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-    description.width = width;
-    description.height = height;
-    description.layerCount = 1;
-    description.format = rhi::Format::Rgba16Float;
-    description.samples = mMaxSampleCounts;
-    description.debugName = "Sampled scene";
+  rhi::TextureDescription sceneColorDesc{};
+  sceneColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
+  sceneColorDesc.width = options.size.x;
+  sceneColorDesc.height = options.size.y;
+  sceneColorDesc.layerCount = 1;
+  sceneColorDesc.format = rhi::Format::Rgba16Float;
+  sceneColorDesc.samples = mMaxSampleCounts;
+  sceneColorDesc.debugName = "Sampled scene";
 
-    return description;
-  });
+  auto sceneColor = graph.create(sceneColorDesc);
 
+  auto sceneColorResolvedDesc = sceneColorDesc;
+  sceneColorResolvedDesc.samples = 1;
+  sceneColorResolvedDesc.debugName = "Resolved scene";
   auto sceneColorResolved =
-      graph
-          .create([this](auto width, auto height) {
-            rhi::TextureDescription description{};
-            description.usage =
-                rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-            description.width = width;
-            description.height = height;
-            description.layerCount = 1;
-            description.format = rhi::Format::Rgba16Float;
-            description.samples = 1;
-            description.debugName = "Resolved scene";
-
-            return description;
-          })
+      graph.create(sceneColorResolvedDesc)
           .onReady([](rhi::TextureHandle handle, RenderStorage &storage) {
             storage.addToDescriptor(handle);
           });
 
   rhi::TextureDescription hdrColorDesc{};
   hdrColorDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  hdrColorDesc.width = SwapchainSizePercentage;
-  hdrColorDesc.height = SwapchainSizePercentage;
+  hdrColorDesc.width = options.size.x;
+  hdrColorDesc.height = options.size.y;
   hdrColorDesc.layerCount = 1;
   hdrColorDesc.format = rhi::Format::Rgba8Srgb;
   hdrColorDesc.debugName = "HDR";
 
-  auto hdrColorReal =
-      mRenderStorage.createFramebufferRelativeTexture(hdrColorDesc);
-  auto hdrColor = graph.import(hdrColorReal);
+  auto hdrColor =
+      graph.create(hdrColorDesc)
+          .onReady([](rhi::TextureHandle handle, RenderStorage &storage) {
+            storage.addToDescriptor(handle);
+          });
 
-  auto depthBuffer = graph.create([this](auto width, auto height) {
-    rhi::TextureDescription description{};
-    description.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
-    description.width = width;
-    description.height = height;
-    description.layerCount = 1;
-    description.samples = mMaxSampleCounts;
-    description.format = rhi::Format::Depth32Float;
-    description.debugName = "Depth buffer";
+  rhi::TextureDescription depthBufferDesc{};
+  depthBufferDesc.usage = rhi::TextureUsage::Depth | rhi::TextureUsage::Sampled;
+  depthBufferDesc.width = options.size.x;
+  depthBufferDesc.height = options.size.y;
+  depthBufferDesc.layerCount = 1;
+  depthBufferDesc.samples = mMaxSampleCounts;
+  depthBufferDesc.format = rhi::Format::Depth32Float;
+  depthBufferDesc.debugName = "Depth buffer";
 
-    return description;
-  });
+  auto depthBuffer = graph.create(depthBufferDesc);
 
   {
     struct ShadowDrawParams {

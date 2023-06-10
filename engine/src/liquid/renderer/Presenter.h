@@ -37,6 +37,19 @@ public:
   void present(rhi::RenderCommandList &commandList, rhi::TextureHandle handle,
                uint32_t imageIndex);
 
+  /**
+   * @brief Set flag to update framebuffers
+   */
+  void enqueueFramebufferUpdate();
+
+  /**
+   * @brief Check if framebuffer update is required
+   *
+   * @retval true Framebuffer update is required
+   * @retval false Framebuffer update is not required
+   */
+  inline bool requiresFramebufferUpdate() const { return mUpdateRequired; }
+
 private:
   RenderStorage &mRenderStorage;
   rhi::RenderPassHandle mPresentPass = rhi::RenderPassHandle::Null;
@@ -45,6 +58,8 @@ private:
   glm::uvec2 mExtent{0, 0};
   rhi::TextureHandle mPresentTexture{0};
   rhi::Descriptor mPresentDescriptor;
+
+  bool mUpdateRequired = false;
 };
 
 } // namespace liquid

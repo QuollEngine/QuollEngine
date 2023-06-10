@@ -26,6 +26,10 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
     : mAllocator(allocator), mDevice(device),
       mFormat(VulkanMapping::getFormat(description.format)),
       mDescription(description) {
+
+  LIQUID_ASSERT(description.width > 0 && description.height > 0,
+                "Texture dimensions cannot be zero");
+
   LIQUID_ASSERT(description.type == TextureType::Cubemap
                     ? description.layerCount == 6
                     : true,
