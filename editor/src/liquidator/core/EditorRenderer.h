@@ -49,8 +49,10 @@ public:
    *
    * @param graph Render graph
    * @param scenePassData Scene pass data
+   * @param options Renderer options
    */
-  void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData);
+  void attach(RenderGraph &graph, const SceneRenderPassData &scenePassData,
+              const RendererOptions &options);
 
   /**
    * @brief Update frame data

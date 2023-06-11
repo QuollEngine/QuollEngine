@@ -68,22 +68,19 @@ ImguiRenderer::~ImguiRenderer() {
   ImGui::DestroyContext();
 }
 
-ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph) {
+ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
+                                          const RendererOptions &options) {
   LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
                         "before starting rendering");
 
-  static constexpr uint32_t FramebufferSizePercentage = 100;
-
   rhi::TextureDescription imguiDesc{};
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;
-  imguiDesc.width = FramebufferSizePercentage;
-  imguiDesc.height = FramebufferSizePercentage;
+  imguiDesc.width = options.size.x;
+  imguiDesc.height = options.size.y;
   imguiDesc.layerCount = 1;
   imguiDesc.format = rhi::Format::Rgba8Srgb;
   imguiDesc.debugName = "Imgui color";
-  auto imguiReal =
-      mRenderStorage.createFramebufferRelativeTexture(imguiDesc, false);
-  auto imgui = graph.import(imguiReal);
+  auto imgui = graph.create(imguiDesc);
 
   auto &pass = graph.addGraphicsPass("imgui");
   pass.write(imgui, AttachmentType::Color, mClearColor);

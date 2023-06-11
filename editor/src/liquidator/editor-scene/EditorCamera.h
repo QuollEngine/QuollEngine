@@ -171,8 +171,8 @@ private:
 private:
   float mX = 0.0f;
   float mY = 0.0f;
-  float mWidth = 0.0f;
-  float mHeight = 0.0f;
+  float mWidth = 1.0f;
+  float mHeight = 1.0f;
   float mWheelOffset = 0.0f;
   bool mCaptureMouse = false;
 

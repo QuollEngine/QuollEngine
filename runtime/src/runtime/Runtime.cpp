@@ -41,22 +41,27 @@ void Runtime::start() {
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  liquid::Renderer renderer(window, device);
+  liquid::RenderStorage renderStorage(device);
 
-  SceneRenderer sceneRenderer(assetCache.getRegistry(),
-                              renderer.getRenderStorage());
+  liquid::RendererOptions initialOptions{};
+  initialOptions.size = {Width, Height};
+  liquid::Renderer renderer(renderStorage, initialOptions);
 
-  auto res = assetCache.preloadAssets(renderer.getRenderStorage());
+  SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage);
+
+  auto res = assetCache.preloadAssets(renderStorage);
 
   liquid::FPSCounter fpsCounter;
   liquid::MainLoop mainLoop(window, fpsCounter);
 
-  liquid::RenderGraph graph("Main");
+  liquid::Presenter presenter(renderStorage);
 
-  liquid::Presenter presenter(renderer.getRenderStorage());
+  renderer.setGraphBuilder([&](auto &graph, const auto &options) {
+    auto passData = sceneRenderer.attach(graph, options);
+    sceneRenderer.attachText(graph, passData);
 
-  auto passData = sceneRenderer.attach(graph);
-  sceneRenderer.attachText(graph, passData);
+    return RendererTextures{passData.finalColor, passData.finalColor};
+  });
 
   liquid::ScriptingSystem scriptingSystem(eventSystem,
                                           assetCache.getRegistry());
@@ -72,10 +77,9 @@ void Runtime::start() {
   scriptingSystem.observeChanges(scene.entityDatabase);
   physicsSystem.observeChanges(scene.entityDatabase);
 
-  graph.setFramebufferExtent(window.getFramebufferSize());
-  window.addResizeHandler([&graph, &renderer](auto width, auto height) {
-    graph.setFramebufferExtent({width, height});
-    renderer.getRenderStorage().setFramebufferSize(width, height);
+  window.addResizeHandler([&](auto width, auto height) {
+    renderer.setFramebufferSize({width, height});
+    presenter.enqueueFramebufferUpdate();
   });
 
   liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
@@ -101,25 +105,28 @@ void Runtime::start() {
   });
 
   mainLoop.setRenderFn([&]() {
-    const auto &renderFrame = device->beginFrame();
-
-    if (renderer.getRenderStorage().recreateFramebufferRelativeTextures()) {
-      presenter.updateFramebuffers(renderer.getRenderDevice()->getSwapchain());
+    if (presenter.requiresFramebufferUpdate()) {
+      device->recreateSwapchain();
+      presenter.updateFramebuffers(device->getSwapchain());
       return;
     }
+
+    renderer.rebuildIfSettingsChanged();
+
+    const auto &renderFrame = device->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       sceneRenderer.updateFrameData(scene.entityDatabase, scene.activeCamera,
                                     renderFrame.frameIndex);
 
-      renderer.render(graph, renderFrame.commandList, renderFrame.frameIndex);
+      renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
 
-      presenter.present(renderFrame.commandList, passData.finalColor,
+      presenter.present(renderFrame.commandList, renderer.getFinalTexture(),
                         renderFrame.swapchainImageIndex);
 
-      renderer.getRenderDevice()->endFrame(renderFrame);
+      device->endFrame(renderFrame);
     } else {
-      presenter.updateFramebuffers(renderer.getRenderDevice()->getSwapchain());
+      presenter.updateFramebuffers(device->getSwapchain());
     }
   });
 

@@ -3,6 +3,7 @@
 #include "liquid/rhi/RenderCommandList.h"
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/asset/AssetRegistry.h"
+#include "liquid/renderer/RendererOptions.h"
 #include "SceneRendererFrameData.h"
 
 namespace liquid {
@@ -63,9 +64,11 @@ public:
    * @brief Attach passes to render graph
    *
    * @param graph Render graph
+   * @param options Renderer options
    * @return Scene render pass data
    */
-  SceneRenderPassData attach(RenderGraph &graph);
+  SceneRenderPassData attach(RenderGraph &graph,
+                             const RendererOptions &options);
 
   /**
    * @brief Attach text pass to render graph

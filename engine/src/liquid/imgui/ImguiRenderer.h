@@ -6,6 +6,7 @@
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/RenderStorage.h"
+#include "liquid/renderer/RendererOptions.h"
 
 #include "liquid/imgui/Imgui.h"
 
@@ -23,7 +24,7 @@ struct ImguiRenderPassData {
   /**
    * Imgui texture
    */
-  rhi::TextureHandle imguiColor;
+  RenderGraphResource<rhi::TextureHandle> imguiColor;
 };
 
 /**
@@ -90,9 +91,11 @@ public:
    * @brief Attach render passes to render graph
    *
    * @param graph Render graph
+   * @param options Renderer options
    * @return Imgui render pass data
    */
-  ImguiRenderPassData attach(RenderGraph &graph);
+  ImguiRenderPassData attach(RenderGraph &graph,
+                             const RendererOptions &options);
 
   /**
    * @brief Set clear color

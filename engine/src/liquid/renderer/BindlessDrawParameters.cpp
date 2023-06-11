@@ -57,6 +57,15 @@ void BindlessDrawParameters::build(rhi::RenderDevice *device) {
   }
 }
 
+void BindlessDrawParameters::destroy(rhi::RenderDevice *device) {
+  mRanges.clear();
+  mLastOffset = 0;
+  if (rhi::isHandleValid(mBuffer.getHandle())) {
+    device->destroyBuffer(mBuffer.getHandle());
+    mBuffer = rhi::Buffer();
+  }
+}
+
 size_t
 BindlessDrawParameters::padSizeToMinimumUniformAlignment(size_t originalSize) {
   if (mMinBufferAlignment > 0) {

@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/entity/EntityDatabase.h"
-
+#include "RendererOptions.h"
 #include "RenderGraph.h"
 
 namespace liquid {
@@ -35,6 +35,21 @@ struct DefaultGraphResources {
 };
 
 /**
+ * @brief Renderer textures
+ */
+struct RendererTextures {
+  /**
+   * Final texture
+   */
+  RenderGraphResource<rhi::TextureHandle> finalTexture;
+
+  /**
+   * Scene texture
+   */
+  RenderGraphResource<rhi::TextureHandle> sceneTexture;
+};
+
+/**
  * @brief Renderer
  *
  * Executes the graph in the render device
@@ -42,12 +57,19 @@ struct DefaultGraphResources {
 class Renderer {
 public:
   /**
+   * @brief Renderer graph builder function type
+   */
+  using GraphBuilderFn =
+      std::function<RendererTextures(RenderGraph &, const RendererOptions &)>;
+
+public:
+  /**
    * @brief Create renderer
    *
-   * @param window Window
-   * @param device Render device
+   * @param storage Render storage
+   * @param options Renderer options
    */
-  Renderer(Window &window, rhi::RenderDevice *device);
+  Renderer(RenderStorage &storage, const RendererOptions &options);
 
   ~Renderer() = default;
   Renderer(const Renderer &rhs) = delete;
@@ -56,37 +78,57 @@ public:
   Renderer &operator=(Renderer &&rhs) = delete;
 
   /**
-   * @brief Get render device
+   * @brief Set graph builder
    *
-   * @return Render device
+   * @param builderFn Builder function
    */
-  inline rhi::RenderDevice *getRenderDevice() { return mDevice; }
+  void setGraphBuilder(GraphBuilderFn &&builderFn);
 
   /**
-   * @brief Render
+   * @brief Set framebuffer size
    *
-   * @param graph Render graph
+   * @param size Framebuffer size
+   */
+  void setFramebufferSize(glm::uvec2 size);
+
+  /**
+   * @brief Rebuild render graph if settings have changed
+   */
+  void rebuildIfSettingsChanged();
+
+  /**
+   * @brief Execute main graph
+   *
    * @param commandList Render command list
    * @param frameIndex Frame index
    */
-  void render(RenderGraph &graph, rhi::RenderCommandList &commandList,
-              uint32_t frameIndex);
+  void execute(rhi::RenderCommandList &commandList, uint32_t frameIndex);
 
   /**
-   * @brief Wait for device
-   */
-  inline void wait() { mDevice->waitForIdle(); }
-
-  /**
-   * @brief Get render storage
+   * @brief Get final texture
    *
-   * @return Render storage
+   * @return Final texture
    */
-  inline RenderStorage &getRenderStorage() { return mRenderStorage; }
+  inline rhi::TextureHandle getFinalTexture() const { return mFinalTexture; }
+
+  /**
+   * @brief Get scene texture
+   *
+   * @return Scene texture
+   */
+  inline rhi::TextureHandle getSceneTexture() const { return mSceneTexture; }
 
 private:
-  rhi::RenderDevice *mDevice;
-  RenderStorage mRenderStorage;
+  RenderStorage &mRenderStorage;
+
+  bool mOptionsChanged = true;
+  RendererOptions mOptions{};
+
+  RenderGraph mGraph;
+  GraphBuilderFn mBuilderFn{};
+
+  rhi::TextureHandle mFinalTexture{0};
+  rhi::TextureHandle mSceneTexture{0};
 };
 
 } // namespace liquid

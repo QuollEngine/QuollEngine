@@ -7,6 +7,7 @@
 #include "liquid/profiler/ImguiDebugLayer.h"
 #include "liquid/imgui/ImguiUtils.h"
 #include "liquid/imgui/ImguiRenderer.h"
+#include "liquid/renderer/Renderer.h"
 
 #include "liquidator/ui/Theme.h"
 #include "liquidator/ui/FontAwesome.h"
@@ -27,6 +28,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
   AssetRegistry assetRegistry;
   RenderStorage renderStorage(mDevice);
 
+  liquid::RendererOptions initialOptions{};
+  initialOptions.size = mWindow.getFramebufferSize();
+
+  Renderer renderer(renderStorage, initialOptions);
+
   ImguiRenderer imguiRenderer(mWindow, renderStorage);
   Presenter presenter(renderStorage);
 
@@ -43,16 +49,16 @@ std::optional<Project> ProjectSelectorScreen::start() {
   imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
   imguiRenderer.buildFonts();
 
-  RenderGraph graph("Main");
-  auto imguiPassData = imguiRenderer.attach(graph);
+  renderer.setGraphBuilder([&](RenderGraph &graph,
+                               const RendererOptions &options) {
+    auto imguiPassData = imguiRenderer.attach(graph, options);
+    return RendererTextures{imguiPassData.imguiColor, imguiPassData.imguiColor};
+  });
 
-  graph.setFramebufferExtent(mWindow.getFramebufferSize());
-
-  auto resizeHandler = mWindow.addResizeHandler(
-      [&graph, this, &renderStorage, &presenter](auto width, auto height) {
-        graph.setFramebufferExtent({width, height});
-        renderStorage.setFramebufferSize(width, height);
-      });
+  auto resizeHandler = mWindow.addResizeHandler([&](auto width, auto height) {
+    renderer.setFramebufferSize({width, height});
+    presenter.enqueueFramebufferUpdate();
+  });
 
   mainLoop.setUpdateFn([&project, this](float dt) {
     mEventSystem.poll();
@@ -62,9 +68,15 @@ std::optional<Project> ProjectSelectorScreen::start() {
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  mainLoop.setRenderFn([&imguiRenderer, &graph, &imguiPassData, &renderStorage,
-                        &project, &projectManager, &entityDatabase, &presenter,
-                        &debugLayer, this]() mutable {
+  mainLoop.setRenderFn([&]() mutable {
+    if (presenter.requiresFramebufferUpdate()) {
+      mDevice->recreateSwapchain();
+      presenter.updateFramebuffers(mDevice->getSwapchain());
+      return;
+    }
+
+    renderer.rebuildIfSettingsChanged();
+
     auto &imgui = imguiRenderer;
 
     imgui.beginRendering();
@@ -115,19 +127,13 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     imgui.endRendering();
 
-    if (renderStorage.recreateFramebufferRelativeTextures()) {
-      presenter.updateFramebuffers(mDevice->getSwapchain());
-      return;
-    }
-
     const auto &renderFrame = mDevice->beginFrame();
 
     if (renderFrame.frameIndex < std::numeric_limits<uint32_t>::max()) {
       imgui.updateFrameData(renderFrame.frameIndex);
-      graph.build(renderStorage);
-      graph.execute(renderFrame.commandList, renderFrame.frameIndex);
+      renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
 
-      presenter.present(renderFrame.commandList, imguiPassData.imguiColor,
+      presenter.present(renderFrame.commandList, renderer.getFinalTexture(),
                         renderFrame.swapchainImageIndex);
       mDevice->endFrame(renderFrame);
     } else {
