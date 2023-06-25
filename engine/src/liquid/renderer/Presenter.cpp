@@ -136,7 +136,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
     commandList.pipelineBarrier(rhi::PipelineStage::ColorAttachmentOutput,
                                 rhi::PipelineStage::FragmentShader, {},
-                                barriers);
+                                barriers, {});
   }
 
   commandList.beginRenderPass(
@@ -165,7 +165,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
     commandList.pipelineBarrier(rhi::PipelineStage::FragmentShader,
                                 rhi::PipelineStage::ColorAttachmentOutput, {},
-                                barriers);
+                                barriers, {});
   }
 }
 

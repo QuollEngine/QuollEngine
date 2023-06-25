@@ -305,6 +305,11 @@ struct MockCommandPipelineBarrier
    * Image barriers
    */
   std::vector<ImageBarrier> imageBarriers;
+
+  /**
+   * Buffer barriers
+   */
+  std::vector<BufferBarrier> bufferBarriers;
 };
 
 /**

@@ -280,7 +280,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
 
     commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
                                 rhi::PipelineStage::ComputeShader,
-                                memoryBarriers, imageBarriers);
+                                memoryBarriers, imageBarriers, {});
 
     commandList.bindPipeline(mPipelineGenerateCubemap);
     commandList.bindDescriptor(mPipelineGenerateCubemap, 0,
@@ -341,7 +341,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
 
   commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
                               rhi::PipelineStage::ComputeShader, memoryBarriers,
-                              imageBarriers);
+                              imageBarriers, {});
 
   commandList.bindPipeline(mPipelineGenerateIrradianceMap);
   commandList.bindDescriptor(mPipelineGenerateIrradianceMap, 0,

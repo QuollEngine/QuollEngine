@@ -101,6 +101,11 @@ struct RenderGraphPassBarrier {
    * Image barriers
    */
   std::vector<rhi::ImageBarrier> imageBarriers;
+
+  /**
+   * Buffer barriers
+   */
+  std::vector<rhi::BufferBarrier> bufferBarriers;
 };
 
 /**
@@ -305,21 +310,12 @@ public:
   inline const glm::uvec3 &getDimensions() const { return mDimensions; }
 
   /**
-   * @brief Get pass pre barrier
+   * @brief Get pass synchronization dependencies
    *
-   * @return Pass pre barrier
+   * @return Pass syncronization dependencies
    */
-  inline const RenderGraphPassBarrier &getPreBarrier() const {
-    return mPreBarrier;
-  }
-
-  /**
-   * @brief Get pass pre barrier
-   *
-   * @return Pass pre barrier
-   */
-  inline const RenderGraphPassBarrier &getPostBarrier() const {
-    return mPostBarrier;
+  inline const RenderGraphPassBarrier &getSyncDependencies() const {
+    return mDependencies;
   }
 
 private:
@@ -330,8 +326,7 @@ private:
   std::vector<RenderGraphPassBufferData> mBufferInputs;
   std::vector<RenderGraphPassBufferData> mBufferOutputs;
 
-  RenderGraphPassBarrier mPreBarrier;
-  RenderGraphPassBarrier mPostBarrier;
+  RenderGraphPassBarrier mDependencies;
 
   ExecutorFn mExecutor;
 

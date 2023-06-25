@@ -61,4 +61,34 @@ struct ImageBarrier {
   uint32_t levelCount = 1;
 };
 
+/**
+ * @brief Buffer barrier
+ */
+struct BufferBarrier {
+  /**
+   * Source access flags
+   */
+  Access srcAccess{Access::None};
+
+  /**
+   * Destination access flags
+   */
+  Access dstAccess{Access::None};
+
+  /**
+   * Buffer handle
+   */
+  BufferHandle buffer = BufferHandle::Null;
+
+  /**
+   * Buffer offset
+   */
+  uint32_t offset = 0;
+
+  /**
+   * Buffer size
+   */
+  uint32_t size = 0;
+};
+
 } // namespace liquid::rhi
