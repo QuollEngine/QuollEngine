@@ -3,6 +3,7 @@
 
 #include "liquid/rhi/RenderCommandList.h"
 
+#include "RenderGraphSyncDependency.h"
 #include "RenderGraph.h"
 
 namespace liquid {
@@ -203,185 +204,158 @@ void RenderGraph::compile() {
 void RenderGraph::buildBarriers() {
   LIQUID_PROFILE_EVENT("RenderGraph::buildBarriers");
 
-  static constexpr rhi::PipelineStage StageFragmentTest =
-      rhi::PipelineStage::EarlyFragmentTests |
-      rhi::PipelineStage::LateFragmentTests;
-  static constexpr auto StageColor = rhi::PipelineStage::ColorAttachmentOutput;
-  static constexpr auto StageFragmentShader =
-      rhi::PipelineStage::FragmentShader;
-
-  // Determine attachments, image layouts, and barriers
-  std::unordered_map<rhi::TextureHandle, rhi::ImageLayout> visitedOutputs;
-  std::unordered_map<rhi::BufferHandle, rhi::PipelineStage> visitedBuffers;
+  std::unordered_map<rhi::TextureHandle, rhi::ImageLayout>
+      textureAttachmentLayouts;
+  std::unordered_map<rhi::TextureHandle, RenderGraphTextureSyncDependency>
+      textureDependencies;
+  std::unordered_map<rhi::BufferHandle, RenderGraphBufferSyncDependency>
+      bufferDependencies;
 
   for (auto &pass : mCompiledPasses) {
-    pass.mPreBarrier = RenderGraphPassBarrier{};
-    pass.mPostBarrier = RenderGraphPassBarrier{};
+    rhi::PipelineStage srcStage = rhi::PipelineStage::None;
+    rhi::PipelineStage dstStage = rhi::PipelineStage::None;
+    std::vector<rhi::ImageBarrier> imageBarriers{};
+    std::vector<rhi::BufferBarrier> bufferBarriers{};
 
-    for (auto &input : pass.mTextureInputs) {
-      LIQUID_ASSERT(visitedOutputs.find(input.texture) != visitedOutputs.end(),
-                    "Pass is reading from an empty texture");
+    for (size_t index = 0; index < pass.getTextureOutputs().size(); ++index) {
+      auto &output = pass.getTextureOutputs().at(index);
+      auto handle = output.texture.getHandle();
 
-      input.srcLayout = visitedOutputs.at(input.texture);
-      input.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+      auto newDependency = RenderGraphSyncDependency::getTextureWrite(
+          pass.getType(), pass.getAttachments().at(index).type);
 
-      rhi::PipelineStage otherStage{rhi::PipelineStage::None};
-      rhi::Access otherAccess{rhi::Access::None};
+      rhi::ImageBarrier imageBarrier{};
+      imageBarrier.texture = handle;
+      imageBarrier.dstAccess = newDependency.access;
+      imageBarrier.dstLayout = newDependency.layout;
 
-      if (input.srcLayout == rhi::ImageLayout::DepthStencilAttachmentOptimal) {
-        otherStage = StageFragmentTest;
-        otherAccess = rhi::Access::DepthStencilAttachmentWrite;
-      } else if (input.srcLayout == rhi::ImageLayout::ColorAttachmentOptimal) {
-        otherStage = StageColor;
-        otherAccess = rhi::Access::ColorAttachmentWrite;
+      dstStage |= newDependency.stage;
+
+      auto it = textureDependencies.find(handle);
+      if (it == textureDependencies.end()) {
+        srcStage |= rhi::PipelineStage::PipeTop;
+
+        imageBarrier.srcAccess = rhi::Access::None;
+        imageBarrier.srcLayout = rhi::ImageLayout::Undefined;
+      } else {
+        auto oldDependency = it->second;
+
+        srcStage |= oldDependency.stage;
+
+        imageBarrier.srcAccess = oldDependency.access;
+        imageBarrier.srcLayout = oldDependency.layout;
       }
 
-      rhi::ImageBarrier preImageBarrier{};
-      preImageBarrier.srcLayout = input.srcLayout;
-      preImageBarrier.dstLayout = input.dstLayout;
-      preImageBarrier.texture = input.texture;
-      preImageBarrier.srcAccess = otherAccess;
-      preImageBarrier.dstAccess = rhi::Access::ShaderRead;
-
-      rhi::ImageBarrier postImageBarrier{};
-      postImageBarrier.srcLayout = input.dstLayout;
-      postImageBarrier.dstLayout = input.srcLayout;
-      postImageBarrier.texture = input.texture;
-      postImageBarrier.srcAccess = rhi::Access::ShaderRead;
-      postImageBarrier.dstAccess = otherAccess;
-
-      pass.mPreBarrier.enabled = true;
-      pass.mPreBarrier.srcStage |= otherStage;
-      pass.mPreBarrier.dstStage |= StageFragmentShader;
-      pass.mPreBarrier.imageBarriers.push_back(preImageBarrier);
-
-      pass.mPostBarrier.enabled = true;
-      pass.mPostBarrier.srcStage |= StageFragmentShader;
-      pass.mPostBarrier.dstStage |= otherStage;
-      pass.mPostBarrier.imageBarriers.push_back(postImageBarrier);
+      imageBarriers.push_back(imageBarrier);
+      textureDependencies.insert_or_assign(handle, newDependency);
     }
 
+    for (size_t index = 0; index < pass.getTextureInputs().size(); ++index) {
+      auto &input = pass.getTextureInputs().at(index);
+      auto handle = input.texture.getHandle();
+
+      auto newDependency =
+          RenderGraphSyncDependency::getTextureRead(pass.getType());
+
+      LIQUID_ASSERT(textureDependencies.find(handle) !=
+                        textureDependencies.end(),
+                    "Cannot read from unwritten texture");
+
+      auto oldDependency = textureDependencies.at(handle);
+
+      srcStage |= oldDependency.stage;
+      dstStage |= newDependency.stage;
+
+      rhi::ImageBarrier imageBarrier{};
+      imageBarrier.texture = handle;
+      imageBarrier.srcAccess = oldDependency.access;
+      imageBarrier.dstAccess = newDependency.access;
+      imageBarrier.srcLayout = oldDependency.layout;
+      imageBarrier.dstLayout = newDependency.layout;
+      imageBarriers.push_back(imageBarrier);
+
+      textureDependencies.insert_or_assign(handle, newDependency);
+    }
+
+    for (auto &output : pass.getBufferOutputs()) {
+      auto handle = output.buffer;
+
+      auto newDependency =
+          RenderGraphSyncDependency::getBufferWrite(pass.getType());
+
+      rhi::BufferBarrier bufferBarrier{};
+      bufferBarrier.buffer = handle;
+      bufferBarrier.dstAccess = newDependency.access;
+
+      dstStage |= newDependency.stage;
+
+      auto it = bufferDependencies.find(handle);
+      if (it == bufferDependencies.end()) {
+        srcStage |= rhi::PipelineStage::PipeTop;
+
+        bufferBarrier.srcAccess = rhi::Access::None;
+      } else {
+        auto oldDependency = it->second;
+
+        srcStage |= oldDependency.stage;
+
+        bufferBarrier.srcAccess = oldDependency.access;
+      }
+
+      bufferBarriers.push_back(bufferBarrier);
+      bufferDependencies.insert_or_assign(handle, newDependency);
+    }
+
+    for (auto &input : pass.getBufferInputs()) {
+      auto handle = input.buffer;
+
+      auto newDependency =
+          RenderGraphSyncDependency::getBufferRead(pass.getType(), input.usage);
+
+      auto oldDependency = bufferDependencies.at(handle);
+
+      srcStage |= oldDependency.stage;
+      dstStage |= newDependency.stage;
+
+      rhi::BufferBarrier bufferBarrier{};
+      bufferBarrier.buffer = handle;
+      bufferBarrier.srcAccess = oldDependency.access;
+      bufferBarrier.dstAccess = newDependency.access;
+      bufferBarriers.push_back(bufferBarrier);
+
+      bufferDependencies.insert_or_assign(handle, newDependency);
+    }
+
+    pass.mDependencies.enabled = true;
+    pass.mDependencies.srcStage = srcStage;
+    pass.mDependencies.dstStage = dstStage;
+    pass.mDependencies.imageBarriers = imageBarriers;
+    pass.mDependencies.bufferBarriers = bufferBarriers;
+
+    // Attachments
     for (size_t i = 0; i < pass.mTextureOutputs.size(); ++i) {
       auto &output = pass.mTextureOutputs.at(i);
       auto &attachment = pass.mAttachments.at(i);
-      if (visitedOutputs.find(output.texture) == visitedOutputs.end()) {
+      if (textureAttachmentLayouts.find(output.texture) ==
+          textureAttachmentLayouts.end()) {
         output.srcLayout = rhi::ImageLayout::Undefined;
         attachment.loadOp = rhi::AttachmentLoadOp::Clear;
       } else {
-        output.srcLayout = visitedOutputs.at(output.texture);
+        output.srcLayout = textureAttachmentLayouts.at(output.texture);
         attachment.loadOp = rhi::AttachmentLoadOp::Load;
       }
 
       attachment.storeOp = rhi::AttachmentStoreOp::Store;
 
-      rhi::PipelineStage stage{rhi::PipelineStage::None};
-      rhi::Access srcAccess{rhi::Access::None};
-      rhi::Access dstAccess{rhi::Access::None};
-
       if (attachment.type == AttachmentType::Color ||
           attachment.type == AttachmentType::Resolve) {
         output.dstLayout = rhi::ImageLayout::ColorAttachmentOptimal;
-        stage = StageColor;
-        srcAccess = rhi::Access::ColorAttachmentWrite;
-        dstAccess = srcAccess | rhi::Access::ColorAttachmentRead;
       } else if (attachment.type == AttachmentType::Depth) {
         output.dstLayout = rhi::ImageLayout::DepthStencilAttachmentOptimal;
-        stage = StageFragmentTest;
-        srcAccess = rhi::Access::DepthStencilAttachmentWrite;
-        dstAccess = srcAccess | rhi::Access::DepthStencilAttachmentRead;
       }
 
-      rhi::MemoryBarrier memoryBarrier{};
-      memoryBarrier.srcAccess = srcAccess;
-      memoryBarrier.dstAccess = dstAccess;
-
-      pass.mPostBarrier.enabled = true;
-      pass.mPostBarrier.srcStage |= stage;
-      pass.mPostBarrier.dstStage |= stage;
-      pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
-
-      visitedOutputs.insert_or_assign(output.texture, output.dstLayout);
-    }
-
-    for (auto &input : pass.mBufferInputs) {
-      LIQUID_ASSERT(visitedBuffers.find(input.buffer) != visitedBuffers.end(),
-                    "Pass is reading from an empty buffer");
-
-      rhi::PipelineStage stage{rhi::PipelineStage::None};
-      rhi::Access srcAccess{rhi::Access::None};
-      rhi::Access dstAccess{rhi::Access::None};
-
-      if ((input.usage & rhi::BufferUsage::Vertex) ==
-          rhi::BufferUsage::Vertex) {
-        stage |= rhi::PipelineStage::VertexInput;
-        srcAccess = rhi::Access::ShaderWrite;
-        dstAccess |= rhi::Access::VertexAttributeRead;
-      }
-
-      if ((input.usage & rhi::BufferUsage::Index) == rhi::BufferUsage::Index) {
-        stage |= rhi::PipelineStage::VertexInput;
-        srcAccess |= rhi::Access::ShaderWrite;
-        dstAccess |= rhi::Access::IndexRead;
-      }
-
-      if ((input.usage & rhi::BufferUsage::Indirect) ==
-          rhi::BufferUsage::Indirect) {
-        stage |= rhi::PipelineStage::DrawIndirect;
-        srcAccess |= rhi::Access::ShaderWrite;
-        dstAccess |= rhi::Access::IndirectCommandRead;
-      }
-
-      if (((input.usage & rhi::BufferUsage::Storage) ==
-           rhi::BufferUsage::Storage) ||
-          ((input.usage & rhi::BufferUsage::Uniform) ==
-           rhi::BufferUsage::Uniform)) {
-        if (pass.getType() == RenderGraphPassType::Compute) {
-          stage |= rhi::PipelineStage::ComputeShader;
-        } else {
-          stage |= rhi::PipelineStage::FragmentShader;
-        }
-        srcAccess |= rhi::Access::ShaderWrite;
-        dstAccess |= rhi::Access::ShaderRead;
-      }
-
-      rhi::MemoryBarrier memoryBarrier{};
-      memoryBarrier.srcAccess = srcAccess;
-      memoryBarrier.dstAccess = dstAccess;
-
-      pass.mPreBarrier.enabled = true;
-      pass.mPreBarrier.srcStage |= visitedBuffers.at(input.buffer);
-      pass.mPreBarrier.dstStage |= stage;
-      pass.mPreBarrier.memoryBarriers.push_back(memoryBarrier);
-    }
-
-    for (auto &output : pass.mBufferOutputs) {
-      rhi::PipelineStage stage{rhi::PipelineStage::None};
-      rhi::Access srcAccess{rhi::Access::None};
-      rhi::Access dstAccess{rhi::Access::None};
-
-      if (((output.usage & rhi::BufferUsage::Storage) ==
-           rhi::BufferUsage::Storage) ||
-          ((output.usage & rhi::BufferUsage::Uniform) ==
-           rhi::BufferUsage::Uniform)) {
-        if (pass.getType() == RenderGraphPassType::Compute) {
-          stage |= rhi::PipelineStage::ComputeShader;
-        } else {
-          stage |= rhi::PipelineStage::FragmentShader;
-        }
-        srcAccess |= rhi::Access::ShaderWrite;
-        dstAccess |= rhi::Access::ShaderRead;
-      }
-
-      visitedBuffers.insert_or_assign(output.buffer, stage);
-
-      rhi::MemoryBarrier memoryBarrier{};
-      memoryBarrier.srcAccess = srcAccess;
-      memoryBarrier.dstAccess = dstAccess;
-
-      pass.mPostBarrier.enabled = true;
-      pass.mPostBarrier.srcStage |= stage;
-      pass.mPostBarrier.dstStage |= stage;
-      pass.mPostBarrier.memoryBarriers.push_back(memoryBarrier);
+      textureAttachmentLayouts.insert_or_assign(output.texture,
+                                                output.dstLayout);
     }
   }
 }
@@ -510,10 +484,11 @@ void RenderGraph::execute(rhi::RenderCommandList &commandList,
   LIQUID_PROFILE_EVENT("RenderGraph::execute");
 
   for (auto &pass : mCompiledPasses) {
-    if (pass.mPreBarrier.enabled) {
-      commandList.pipelineBarrier(
-          pass.mPreBarrier.srcStage, pass.mPreBarrier.dstStage,
-          pass.mPreBarrier.memoryBarriers, pass.mPreBarrier.imageBarriers);
+    if (pass.mDependencies.enabled) {
+      commandList.pipelineBarrier(pass.mDependencies.srcStage,
+                                  pass.mDependencies.dstStage,
+                                  pass.mDependencies.memoryBarriers,
+                                  pass.mDependencies.imageBarriers, {});
     }
 
     if (pass.getType() == RenderGraphPassType::Compute) {
@@ -526,12 +501,6 @@ void RenderGraph::execute(rhi::RenderCommandList &commandList,
       commandList.setScissor({0.0f, 0.0f}, glm::uvec2(pass.getDimensions()));
       pass.execute(commandList, frameIndex);
       commandList.endRenderPass();
-    }
-
-    if (pass.mPostBarrier.enabled) {
-      commandList.pipelineBarrier(
-          pass.mPostBarrier.srcStage, pass.mPostBarrier.dstStage,
-          pass.mPostBarrier.memoryBarriers, pass.mPostBarrier.imageBarriers);
     }
   }
 }

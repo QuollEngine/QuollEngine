@@ -140,7 +140,8 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
 void VulkanCommandBuffer::pipelineBarrier(
     PipelineStage srcStage, PipelineStage dstStage,
     std::span<MemoryBarrier> memoryBarriers,
-    std::span<ImageBarrier> imageBarriers) {
+    std::span<ImageBarrier> imageBarriers,
+    std::span<BufferBarrier> bufferBarriers) {
 
   std::vector<VkMemoryBarrier> vkMemoryBarriers(memoryBarriers.size());
   for (size_t i = 0; i < memoryBarriers.size(); ++i) {
@@ -172,12 +173,28 @@ void VulkanCommandBuffer::pipelineBarrier(
     vkBarrier.subresourceRange.aspectMask = texture->getImageAspectFlags();
   }
 
+  std::vector<VkBufferMemoryBarrier> vkBufferMemoryBarriers(
+      bufferBarriers.size());
+  for (size_t i = 0; i < bufferBarriers.size(); ++i) {
+    auto &barrier = bufferBarriers[i];
+    auto &vkBarrier = vkBufferMemoryBarriers.at(i);
+    vkBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    vkBarrier.pNext = nullptr;
+    vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
+    vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
+    vkBarrier.buffer = mRegistry.getBuffers().at(barrier.buffer)->getBuffer();
+    vkBarrier.offset = barrier.offset;
+    vkBarrier.size = barrier.size > 0 ? barrier.size : VK_WHOLE_SIZE;
+  }
+
   vkCmdPipelineBarrier(
       mCommandBuffer, VulkanMapping::getPipelineStageFlags(srcStage),
       VulkanMapping::getPipelineStageFlags(dstStage),
       VK_DEPENDENCY_BY_REGION_BIT,
       static_cast<uint32_t>(vkMemoryBarriers.size()), vkMemoryBarriers.data(),
-      0, nullptr, static_cast<uint32_t>(vkImageMemoryBarriers.size()),
+      static_cast<uint32_t>(vkBufferMemoryBarriers.size()),
+      vkBufferMemoryBarriers.data(),
+      static_cast<uint32_t>(vkImageMemoryBarriers.size()),
       vkImageMemoryBarriers.data());
 }
 
