@@ -17,6 +17,7 @@ layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 0) uniform sampler2DArray uTextures2DArray[];
 layout(set = 0, binding = 0) uniform samplerCube uTexturesCube[];
+layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
   Empty meshTransforms;

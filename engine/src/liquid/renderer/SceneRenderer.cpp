@@ -64,6 +64,15 @@ SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
 
   mRenderStorage.createShader("__engine.hdr.default.fragment",
                               {Engine::getShadersPath() / "hdr.frag.spv"});
+  mRenderStorage.createShader(
+      "__engine.bloom.extract-bright-colors.compute",
+      {Engine::getShadersPath() / "extract-bright-colors.comp.spv"});
+  mRenderStorage.createShader(
+      "__engine.bloom.downsample.compute",
+      {Engine::getShadersPath() / "bloom-downsample.comp.spv"});
+  mRenderStorage.createShader(
+      "__engine.bloom.upsample.compute",
+      {Engine::getShadersPath() / "bloom-upsample.comp.spv"});
 
   generateBrdfLut();
 }
@@ -439,9 +448,175 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     });
   } // skybox pass
 
+  static constexpr uint32_t BloomMipChainSize = 7;
+
+  rhi::TextureDescription description{};
+  description.debugName = "Bloom";
+  description.mipLevelCount = BloomMipChainSize;
+  description.format = rhi::Format::Rgba16Float;
+  description.usage = rhi::TextureUsage::Sampled | rhi::TextureUsage::Storage |
+                      rhi::TextureUsage::Color;
+  description.width = options.size.x;
+  description.height = options.size.y;
+
+  auto bloomTexture =
+      graph.create(description).onReady([](auto handle, auto &storage) {
+        storage.addToDescriptor(handle);
+      });
+
+  {
+    auto &pass = graph.addComputePass("bloom");
+    pass.read(sceneColorResolved);
+    pass.write(bloomTexture, AttachmentType::Color, mClearColor);
+
+    struct BloomMip {
+      RenderGraphResource<rhi::TextureHandle> texture;
+      glm::uvec2 size;
+    };
+
+    std::vector<BloomMip> bloomChain;
+    bloomChain.push_back({bloomTexture, options.size});
+    bloomChain.reserve(BloomMipChainSize);
+    for (uint32_t i = 1; i < BloomMipChainSize; ++i) {
+      auto view = graph.createView(bloomTexture, i)
+                      .onReady([](auto handle, auto &storage) {
+                        storage.addToDescriptor(handle);
+                      });
+      bloomChain.push_back({view, options.size / 2u});
+    }
+
+    auto extractBrightColorsPipeline = mRenderStorage.addPipeline(
+        rhi::ComputePipelineDescription{mRenderStorage.getShader(
+            "__engine.bloom.extract-bright-colors.compute")});
+    pass.addPipeline(extractBrightColorsPipeline);
+
+    auto downsamplePipeline =
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
+            mRenderStorage.getShader("__engine.bloom.downsample.compute")});
+    pass.addPipeline(downsamplePipeline);
+
+    auto upsamplePipeline =
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
+            mRenderStorage.getShader("__engine.bloom.upsample.compute")});
+    pass.addPipeline(upsamplePipeline);
+
+    static constexpr uint32_t WorkGroupSize = 32;
+
+    pass.setExecutor([extractBrightColorsPipeline, downsamplePipeline,
+                      upsamplePipeline, bloomTexture, sceneColorResolved,
+                      &options, bloomChain,
+                      this](rhi::RenderCommandList &commandList,
+                            uint32_t frameIndex) {
+      // Extract bright colors
+      {
+        commandList.bindDescriptor(
+            extractBrightColorsPipeline, 0,
+            mRenderStorage.getGlobalTexturesDescriptor());
+
+        glm::uvec4 texture{
+            static_cast<uint32_t>(sceneColorResolved.getHandle()),
+            static_cast<uint32_t>(bloomTexture.getHandle()), 0, 0};
+        commandList.pushConstants(extractBrightColorsPipeline,
+                                  rhi::ShaderStage::Compute, 0,
+                                  sizeof(glm::uvec4), glm::value_ptr(texture));
+
+        commandList.bindPipeline(extractBrightColorsPipeline);
+        commandList.dispatch(options.size.x / WorkGroupSize,
+                             options.size.y / WorkGroupSize, 1);
+      }
+
+      // Downsample
+      {
+        commandList.bindDescriptor(
+            downsamplePipeline, 0,
+            mRenderStorage.getGlobalTexturesDescriptor());
+        commandList.bindPipeline(downsamplePipeline);
+
+        for (uint32_t level = 1;
+             level < static_cast<uint32_t>(bloomChain.size()); ++level) {
+
+          const auto &source = bloomChain.at(level - 1);
+          const auto &target = bloomChain.at(level);
+
+          rhi::ImageBarrier imageBarrier{};
+          imageBarrier.baseLevel = level - 1;
+          imageBarrier.levelCount = 1;
+          imageBarrier.srcAccess = rhi::Access::ShaderWrite;
+          imageBarrier.srcLayout = rhi::ImageLayout::General;
+          imageBarrier.dstAccess = rhi::Access::ShaderRead;
+          imageBarrier.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+          imageBarrier.texture = bloomTexture;
+
+          std::array<rhi::ImageBarrier, 1> imageBarriers{imageBarrier};
+
+          commandList.pipelineBarrier(rhi::PipelineStage::ComputeShader,
+                                      rhi::PipelineStage::ComputeShader, {},
+                                      imageBarriers, {});
+
+          glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
+                             static_cast<uint32_t>(target.texture.getHandle()),
+                             level - 1, level};
+          commandList.pushConstants(
+              downsamplePipeline, rhi::ShaderStage::Compute, 0,
+              sizeof(glm::uvec4), glm::value_ptr(texture));
+          commandList.dispatch(target.size.x / WorkGroupSize,
+                               target.size.y / WorkGroupSize, 1);
+        }
+      }
+
+      // Upsample
+      {
+        commandList.bindDescriptor(
+            upsamplePipeline, 0, mRenderStorage.getGlobalTexturesDescriptor());
+        commandList.bindPipeline(upsamplePipeline);
+        for (uint32_t level = static_cast<uint32_t>(bloomChain.size() - 1);
+             level > 0; --level) {
+
+          rhi::ImageBarrier imageBarrierSrc{};
+          imageBarrierSrc.baseLevel = level;
+          imageBarrierSrc.levelCount = 1;
+          imageBarrierSrc.srcAccess = rhi::Access::ShaderWrite;
+          imageBarrierSrc.srcLayout = rhi::ImageLayout::General;
+          imageBarrierSrc.dstAccess = rhi::Access::ShaderRead;
+          imageBarrierSrc.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+          imageBarrierSrc.texture = bloomTexture;
+
+          rhi::ImageBarrier imageBarrierDst{};
+          imageBarrierDst.baseLevel = level - 1;
+          imageBarrierDst.levelCount = 1;
+          imageBarrierDst.srcAccess = rhi::Access::ShaderRead;
+          imageBarrierDst.srcLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+          imageBarrierDst.dstAccess = rhi::Access::ShaderWrite;
+          imageBarrierDst.dstLayout = rhi::ImageLayout::General;
+          imageBarrierDst.texture = bloomTexture;
+
+          std::array<rhi::ImageBarrier, 2> imageBarriers{imageBarrierSrc,
+                                                         imageBarrierDst};
+
+          commandList.pipelineBarrier(rhi::PipelineStage::ComputeShader,
+                                      rhi::PipelineStage::ComputeShader, {},
+                                      imageBarriers, {});
+
+          const auto &source = bloomChain.at(level);
+          const auto &target = bloomChain.at(level - 1);
+
+          glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
+                             static_cast<uint32_t>(target.texture.getHandle()),
+                             0, 0};
+          commandList.pushConstants(upsamplePipeline, rhi::ShaderStage::Compute,
+                                    0, sizeof(glm::uvec4),
+                                    glm::value_ptr(texture));
+          commandList.dispatch(target.size.x / WorkGroupSize,
+                               target.size.y / WorkGroupSize, 1);
+        }
+      }
+    });
+  }
+
   {
     auto &pass = graph.addGraphicsPass("hdrPass");
     pass.read(sceneColorResolved);
+    pass.read(bloomTexture);
     pass.write(hdrColor, AttachmentType::Color, mClearColor);
 
     rhi::GraphicsPipelineDescription pipelineDescription{};
@@ -459,17 +634,19 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     auto pipeline = mRenderStorage.addPipeline(pipelineDescription);
     pass.addPipeline(pipeline);
 
-    pass.setExecutor([pipeline, sceneColorResolved,
+    pass.setExecutor([pipeline, sceneColorResolved, bloomTexture,
                       this](rhi::RenderCommandList &commandList,
                             uint32_t frameIndex) {
       commandList.bindPipeline(pipeline);
       commandList.bindDescriptor(pipeline, 0,
                                  mRenderStorage.getGlobalTexturesDescriptor());
 
-      uint32_t color = static_cast<uint32_t>(sceneColorResolved.getHandle());
+      glm::uvec4 color{static_cast<uint32_t>(sceneColorResolved.getHandle()),
+                       static_cast<uint32_t>(bloomTexture.getHandle()), 0, 0};
 
       commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
-                                sizeof(uint32_t), &color);
+                                sizeof(glm::uvec4), glm::value_ptr(color));
+
       commandList.draw(3, 0);
     });
   }

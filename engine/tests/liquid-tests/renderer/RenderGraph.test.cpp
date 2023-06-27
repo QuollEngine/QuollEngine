@@ -322,6 +322,51 @@ TEST_F(RenderGraphTest,
             liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
 }
 
+TEST_F(RenderGraphTest, SetsImageBarrierForAllMipLevelsIfTextureIsNotAView) {
+  liquid::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  colorDescription.mipLevelCount = 20;
+  auto colorTexture = createTexture(colorDescription);
+
+  {
+    auto &pass = graph.addGraphicsPass("A");
+    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+  }
+
+  graph.build(storage);
+
+  auto barrier = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_TRUE(barrier.enabled);
+  EXPECT_EQ(barrier.imageBarriers.size(), 1);
+  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
+  EXPECT_EQ(barrier.imageBarriers.at(0).baseLevel, 0);
+  EXPECT_EQ(barrier.imageBarriers.at(0).levelCount, 20);
+}
+
+TEST_F(RenderGraphTest,
+       SetsImageBarrierForSpecifiedMipLevelsWhenTextureIsView) {
+  liquid::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  colorDescription.mipLevelCount = 20;
+  auto colorTexture = createTexture(colorDescription);
+
+  auto view = graph.createView(colorTexture, 5, 10);
+
+  {
+    auto &pass = graph.addGraphicsPass("A");
+    pass.write(view, liquid::AttachmentType::Color, glm::vec4{});
+  }
+
+  graph.build(storage);
+
+  auto barrier = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_TRUE(barrier.enabled);
+  EXPECT_EQ(barrier.imageBarriers.size(), 1);
+  EXPECT_EQ(barrier.imageBarriers.at(0).texture, view.getHandle());
+  EXPECT_EQ(barrier.imageBarriers.at(0).baseLevel, 5);
+  EXPECT_EQ(barrier.imageBarriers.at(0).levelCount, 10);
+}
+
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWrites) {
   liquid::rhi::TextureDescription description{};
   description.usage = liquid::rhi::TextureUsage::Color;
