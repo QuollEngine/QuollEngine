@@ -1,15 +1,11 @@
 #pragma once
 
-namespace liquid::platform_tools {
+namespace liquid::platform {
 
 /**
- * @brief Native file dialog
- *
- * Abstracts away platform specific
- * file dialog implementation over
- * a common API
+ * @brief Platform file dialog
  */
-class NativeFileDialog {
+class FileDialog {
 public:
   /**
    * @brief File type entry
@@ -33,7 +29,7 @@ public:
    * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
-  liquid::Path
+  static liquid::Path
   getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes);
 
   /**
@@ -42,8 +38,8 @@ public:
    * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
-  liquid::Path
+  static liquid::Path
   getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes);
 };
 
-} // namespace liquid::platform_tools
+} // namespace liquid::platform

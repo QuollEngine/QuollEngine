@@ -8,6 +8,8 @@
 
 #include "liquidator/actions/SpawnEntityActions.h"
 
+#include "liquid/platform/tools/FileOpener.h"
+
 namespace liquid::editor {
 
 /**
@@ -248,7 +250,7 @@ void AssetBrowser::render(AssetManager &assetManager,
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
             } else {
-              mFileOpener.openFile(entry.path);
+              platform::FileOpener::openFile(entry.path);
             }
           }
         }

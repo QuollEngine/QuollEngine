@@ -1,18 +1,18 @@
 #include "liquid/core/Base.h"
-#include "NativeFileDialog.h"
+#include "liquid/platform/tools/FileDialog.h"
 
-namespace liquid::platform_tools {
+namespace liquid::platform {
 
-liquid::Path NativeFileDialog::getFilePathFromDialog(
+Path FileDialog::getFilePathFromDialog(
     const std::vector<FileTypeEntry> &fileTypes) {
   LIQUID_ASSERT(false, "Not implemented");
   return "";
 }
 
-liquid::Path NativeFileDialog::getFilePathFromCreateDialog(
+Path FileDialog::getFilePathFromCreateDialog(
     const std::vector<FileTypeEntry> &fileTypes) {
   LIQUID_ASSERT(false, "Not implemented");
   return "";
 }
 
-} // namespace liquid::platform_tools
+} // namespace liquid::platform

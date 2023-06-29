@@ -1,16 +1,14 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
-#include "liquid/platform-tools/NativeFileDialog.h"
+#include "liquid/platform/tools/FileDialog.h"
 
 #include "ProjectManager.h"
 
 namespace liquid::editor {
 
 bool ProjectManager::createProjectInPath() {
-  platform_tools::NativeFileDialog dialog;
-
-  auto projectPath =
-      dialog.getFilePathFromCreateDialog({{"Liquid project", {"lqproj"}}});
+  auto projectPath = platform::FileDialog::getFilePathFromCreateDialog(
+      {{"Liquid project", {"lqproj"}}});
 
   if (projectPath.empty()) {
     return false;
@@ -70,10 +68,8 @@ bool ProjectManager::createProjectInPath() {
 }
 
 bool ProjectManager::openProjectInPath() {
-  platform_tools::NativeFileDialog dialog;
-
-  auto projectFilePath =
-      dialog.getFilePathFromDialog({{"Liquid project", {"lqproj"}}});
+  auto projectFilePath = platform::FileDialog::getFilePathFromDialog(
+      {{"Liquid project", {"lqproj"}}});
   if (projectFilePath.empty()) {
     return false;
   }

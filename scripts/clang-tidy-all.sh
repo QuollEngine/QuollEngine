@@ -65,7 +65,7 @@ LINTERROR=0
 if [ $LINT_ENGINE -eq 1 ]; then
     print_info "Checking Engine files"
     $CMD -header-filter=.* --p=file --quiet $ENGINE_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))
@@ -74,7 +74,7 @@ fi
 if [ $LINT_RHI_CORE -eq 1 ]; then
     print_info "Checking RHICore files"
     $CMD -header-filter=.* --p=file --quiet $RHI_CORE_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/core/include/liquid/rhi -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))
@@ -83,7 +83,7 @@ fi
 if [ $LINT_RHI_VULKAN -eq 1 ]; then
     print_info "Checking RHIVulkan files"
     $CMD -header-filter=.* --p=file --quiet $RHI_VULKAN_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/rhi/vulkan/include/liquid/rhi-vulkan -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))
@@ -92,7 +92,7 @@ fi
 if [ $LINT_RHI_MOCK -eq 1 ]; then
     print_info "Checking RHIMock files"
     $CMD -header-filter=.* --p=file --quiet $RHI_MOCK_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/mock/include -isystem./engine/rhi/mock/include/liquid/rhi-mock -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/mock/include -isystem./engine/rhi/mock/include/liquid/rhi-mock -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))
@@ -101,7 +101,7 @@ fi
 if [ $LINT_EDITOR -eq 1 ]; then
     print_info "Checking Editor files"
     $CMD -header-filter=.* --p=file --quiet $EDITOR_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./editor/src -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./editor/src -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))
@@ -110,7 +110,7 @@ fi
 if [ $LINT_RUNTIME -eq 1 ]; then
     print_info "Checking Runtime files"
     $CMD --header-filter=.* --p=file --quiet $RUNTIME_FILES -- --std=c++20 \
-        $VENDOR_INCLUDES -isystem./runtime/src -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./engine/platform-tools/include
+        $VENDOR_INCLUDES -isystem./runtime/src -isystem./engine/src -isystem./engine/rhi/core/include -isystem./engine/rhi/vulkan/include -isystem./platform/base/include
 
     LINTRET=$?
     LINTERROR=$((LINTERROR | LINTRET))

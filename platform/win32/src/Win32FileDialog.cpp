@@ -1,9 +1,9 @@
 #include "liquid/core/Base.h"
-#include "NativeFileDialog.h"
+#include "liquid/platform/tools/FileDialog.h"
 #include <windows.h>
 #include <shobjidl.h>
 
-namespace liquid::platform_tools {
+namespace liquid::platform {
 
 /**
  * @brief Win32 file type entry
@@ -24,8 +24,8 @@ static void checkWin32Error(HRESULT res, const liquid::String &message) {
   LIQUID_ASSERT(SUCCEEDED(res), "Failed to open file dialog " + message);
 }
 
-liquid::Path NativeFileDialog::getFilePathFromDialog(
-    const std::vector<FileTypeEntry> &fileTypes) {
+liquid::Path
+FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileOpenDialog, nullptr,
                                    CLSCTX_INPROC_SERVER,
@@ -98,7 +98,7 @@ liquid::Path NativeFileDialog::getFilePathFromDialog(
   return filePath;
 }
 
-liquid::Path NativeFileDialog::getFilePathFromCreateDialog(
+liquid::Path FileDialog::getFilePathFromCreateDialog(
     const std::vector<FileTypeEntry> &fileTypes) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
@@ -172,4 +172,4 @@ liquid::Path NativeFileDialog::getFilePathFromCreateDialog(
   return filePath;
 }
 
-} // namespace liquid::platform_tools
+} // namespace liquid::platform

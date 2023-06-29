@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/platform/tools/FileDialog.h"
 #include "AssetLoader.h"
 #include "GLTFImporter.h"
 
@@ -21,7 +22,7 @@ Result<Path> AssetLoader::loadFromPath(const Path &path,
 }
 
 Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
-  using FileTypeEntry = platform_tools::NativeFileDialog::FileTypeEntry;
+  using FileTypeEntry = platform::FileDialog::FileTypeEntry;
 
   std::vector<FileTypeEntry> entries{
       FileTypeEntry{"Scene files", AssetManager::SceneExtensions},
@@ -32,7 +33,7 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
       FileTypeEntry{"Animator files", AssetManager::AnimatorExtensions},
       FileTypeEntry{"Environment files", AssetManager::EnvironmentExtensions}};
 
-  auto filePath = mNativeFileDialog.getFilePathFromDialog(entries);
+  auto filePath = platform::FileDialog::getFilePathFromDialog(entries);
   if (filePath.empty())
     return Result<bool>::Ok(true, {});
 

@@ -1,6 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
-#include "liquid/platform-tools/NativeFileDialog.h"
+#include "liquid/platform/tools/FileDialog.h"
 
 #include "EditorManager.h"
 #include "EditorCamera.h"
