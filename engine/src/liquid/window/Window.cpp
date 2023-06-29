@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "liquid/platform-tools/NativeWindowTools.h"
+#include "liquid/platform/tools/WindowUtils.h"
 
 namespace liquid {
 
@@ -28,7 +28,7 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
       glfwCreateWindow(static_cast<int>(width), static_cast<int>(height),
                        String(title).c_str(), nullptr, nullptr);
 
-  platform_tools::NativeWindowTools::enableDarkMode(mWindowInstance);
+  platform::WindowUtils::enableDarkMode(mWindowInstance);
 
   if (!mWindowInstance) {
     const char *errorMsg = nullptr;

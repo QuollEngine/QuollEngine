@@ -1,9 +1,9 @@
 #include <AppKit/AppKit.h>
-#include "NativeFileDialog.h"
+#include "liquid/platform/tools/FileDialog.h"
 
-namespace liquid::platform_tools {
+namespace liquid::platform {
 
-liquid::Path NativeFileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
+Path FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
     // TODO: Fix this in macOS
     std::vector<NSString *> nssExtensions;
 
@@ -31,10 +31,10 @@ liquid::Path NativeFileDialog::getFilePathFromDialog(const std::vector<FileTypeE
     return filename;
 }
 
-liquid::Path 
-NativeFileDialog::getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes) {
+Path 
+FileDialog::getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes) {
     LIQUID_ASSERT(false, "Not implemented");
     return "";
 }
 
-} // namespace liquid::platform_tools
+} // namespace liquid::platform

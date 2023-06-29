@@ -17,7 +17,7 @@ workspace "LiquidEngine"
     includedirs {
         "../engine/src",
         "../engine/rhi/core/include",
-        "../engine/platform-tools/include"
+        "../platform/base/include"
     }
     
     configurations { "Debug", "Release", "Profile", "Test" }

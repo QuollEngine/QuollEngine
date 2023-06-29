@@ -8,7 +8,7 @@ include ".premake/vendor-projects/libmsdfgen.lua"
 include ".premake/vendor-projects/libmsdf-atlas-gen.lua"
 include ".premake/vendor-projects/libmikktspace.lua"
 include ".premake/vendor-projects/libvolk.lua"
-include "engine/platform-tools/"
+include 'platform/'
 include "engine/rhi/core/"
 include "engine/rhi/vulkan/"
 include "engine/rhi/mock/"

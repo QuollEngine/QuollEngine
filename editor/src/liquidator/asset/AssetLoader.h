@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AssetManager.h"
-#include "liquid/platform-tools/NativeFileDialog.h"
 
 namespace liquid::editor {
 
@@ -40,8 +39,6 @@ public:
 
 private:
   AssetManager &mAssetManager;
-  platform_tools::NativeFileDialog mNativeFileDialog;
-
   RenderStorage &mRenderStorage;
 };
 

@@ -9,8 +9,9 @@ project "LiquidEditor"
 
     loadSourceFiles{}
     linkOptick{}
-    linkDependenciesWith{"LiquidEngine", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"LiquidEngine", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     linkVulkanRHI{}
+    linkPlatform()
     
     copyRuntime();
 
@@ -68,8 +69,9 @@ project "LiquidEditorTest"
         "src/main.cpp"
     }
 
-    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore", "LiquidPlatformTools", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     linkGoogleTest{}
+    linkPlatform()
 
     copyEngineAssets()
 

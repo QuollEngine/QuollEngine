@@ -1,8 +1,6 @@
 #pragma once
 
 #include "liquid/asset/AssetCache.h"
-#include "liquid/platform-tools/NativeFileDialog.h"
-#include "liquid/platform-tools/NativeFileOpener.h"
 
 #include "liquidator/asset/AssetLoader.h"
 #include "liquidator/editor-scene/EditorManager.h"
@@ -86,8 +84,6 @@ private:
   bool mDirectoryChanged = true;
   size_t mSelected = std::numeric_limits<size_t>::max();
   AssetLoader &mAssetLoader;
-  platform_tools::NativeFileDialog mFileDialog;
-  platform_tools::NativeFileOpener mFileOpener;
 
   AssetLoadStatusDialog mStatusDialog;
   MaterialViewer mMaterialViewer;
