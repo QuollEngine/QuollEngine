@@ -155,12 +155,12 @@ layout(set = 1, binding = 1) uniform sampler2D uTextures;
 
 **Push constants:**
 
-All push constants must start with `pc` and must be defined in camelCase. Example:
+Push constants are also treated as uniforms, must start with `u`, and must be defined in camelCase. Example:
 
 ```glsl
 layout(push_constant) uniform ModelTransform {
     mat4 modelMatrix
-} pcTransform;
+} uTransform;
 ```
 
 > **Note:**

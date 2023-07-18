@@ -317,6 +317,15 @@ public:
   Input(String label, glm::vec3 &value, bool autoChange = true);
 
   /**
+   * @brief Render vec2 input
+   *
+   * @param label Input label
+   * @param value Input value
+   * @param autoChange Auto change
+   */
+  Input(String label, glm::vec2 &value, bool autoChange = true);
+
+  /**
    * @brief Render decimal scalar input
    *
    * @param label Input label

@@ -239,9 +239,44 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["components"]["camera"] && node["components"]["camera"].IsMap()) {
     PerspectiveLens lens{};
-    lens.fovY = node["components"]["camera"]["fov"].as<float>(lens.fovY);
-    lens.near = node["components"]["camera"]["near"].as<float>(lens.near);
-    lens.far = node["components"]["camera"]["far"].as<float>(lens.far);
+    float near = node["components"]["camera"]["near"].as<float>(lens.near);
+    if (near >= 0.0f) {
+      lens.near = near;
+    }
+
+    float far = node["components"]["camera"]["far"].as<float>(lens.far);
+    if (far >= 0.0f) {
+      lens.far = far;
+    }
+
+    glm::vec2 sensorSize =
+        node["components"]["camera"]["sensorSize"].as<glm::vec2>(
+            lens.sensorSize);
+
+    if (sensorSize.x >= 0.0f && sensorSize.y >= 0.0f) {
+      lens.sensorSize = sensorSize;
+    }
+
+    float focalLength =
+        node["components"]["camera"]["focalLength"].as<float>(lens.focalLength);
+    if (focalLength >= 0.0f) {
+      lens.focalLength = focalLength;
+    }
+
+    float aperture =
+        node["components"]["camera"]["aperture"].as<float>(lens.aperture);
+    if (aperture >= 0.0f) {
+      lens.aperture = aperture;
+    }
+
+    float shutterSpeed = node["components"]["camera"]["shutterSpeed"].as<float>(
+        lens.shutterSpeed);
+    if (shutterSpeed >= 0.0f) {
+      lens.shutterSpeed = shutterSpeed;
+    }
+
+    lens.sensitivity = node["components"]["camera"]["sensitivity"].as<uint32_t>(
+        lens.sensitivity);
 
     bool autoRatio = true;
     if (node["components"]["camera"]["aspectRatio"] &&
@@ -256,8 +291,11 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     if (autoRatio) {
       mEntityDatabase.set<AutoAspectRatio>(entity, {});
     } else {
-      lens.aspectRatio = node["components"]["camera"]["aspectRatio"].as<float>(
+      float aspectRatio = node["components"]["camera"]["aspectRatio"].as<float>(
           lens.aspectRatio);
+      if (aspectRatio >= 0.0f) {
+        lens.aspectRatio = aspectRatio;
+      }
     }
 
     mEntityDatabase.set<Camera>(entity, {});

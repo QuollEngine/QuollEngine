@@ -10,6 +10,6 @@ layout(push_constant) uniform PushConstants {
   vec4 scale;
   vec4 index;
 }
-pcOutline;
+uOutline;
 
-void main() { outColor = pcOutline.color; }
+void main() { outColor = uOutline.color; }

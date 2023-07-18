@@ -97,13 +97,16 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   auto &lens = entityDatabase.get<liquid::PerspectiveLens>(entity);
   auto &camera = entityDatabase.get<liquid::Camera>(entity);
 
-  auto expectedPerspective = glm::perspective(
-      glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
+  float fovY = 2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+
+  auto expectedPerspective =
+      glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);
 
   EXPECT_EQ(camera.viewMatrix, glm::inverse(transform.worldTransform));
   EXPECT_EQ(camera.projectionMatrix, expectedPerspective);
   EXPECT_EQ(camera.projectionViewMatrix,
             camera.projectionMatrix * camera.viewMatrix);
+  EXPECT_NEAR(camera.exposure.x, 10.97f, 9.02f);
 }
 
 TEST_F(SceneUpdaterTest, UpdateDirectionalLightsBasedOnTransforms) {

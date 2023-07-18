@@ -641,11 +641,19 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       commandList.bindDescriptor(pipeline, 0,
                                  mRenderStorage.getGlobalTexturesDescriptor());
 
-      glm::uvec4 color{static_cast<uint32_t>(sceneColorResolved.getHandle()),
-                       static_cast<uint32_t>(bloomTexture.getHandle()), 0, 0};
+      struct Data {
+        rhi::TextureHandle sceneColor;
+
+        rhi::TextureHandle bloomTexture;
+
+        rhi::DeviceAddress bufferAddress;
+      };
+
+      Data data{sceneColorResolved.getHandle(), bloomTexture.getHandle(),
+                mFrameData.at(frameIndex).getCameraBuffer()};
 
       commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
-                                sizeof(glm::uvec4), glm::value_ptr(color));
+                                sizeof(Data), &data);
 
       commandList.draw(3, 0);
     });

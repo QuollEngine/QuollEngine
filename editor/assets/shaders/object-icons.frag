@@ -25,8 +25,8 @@ uDrawParams;
  * @brief Push for icons
  */
 layout(push_constant) uniform IconParams { uvec4 icon; }
-pcIconParams;
+uIconParams;
 
 void main() {
-  outColor = texture(uGlobalTextures[pcIconParams.icon.x], inTexCoord);
+  outColor = texture(uGlobalTextures[uIconParams.icon.x], inTexCoord);
 }

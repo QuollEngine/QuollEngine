@@ -16,7 +16,7 @@ layout(set = 1, binding = 0) uniform DrawParameters {
 uDrawParams;
 
 layout(push_constant) uniform PushConstants { uvec4 text; }
-pcTextParams;
+uTextParams;
 
 const uint QUAD_VERTICES = 6;
 
@@ -25,7 +25,7 @@ void main() {
 
   uint boundIndex = gl_VertexIndex % QUAD_VERTICES;
   uint glyphIndex =
-      pcTextParams.text.y + uint(floor(gl_VertexIndex / QUAD_VERTICES));
+      uTextParams.text.y + uint(floor(gl_VertexIndex / QUAD_VERTICES));
 
   GlyphItem glyph = getGlyph(glyphIndex);
 

@@ -45,11 +45,20 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
 
   for (auto [entity, lens, world, camera] :
        entityDatabase.view<PerspectiveLens, WorldTransform, Camera>()) {
-    camera.projectionMatrix = glm::perspective(
-        glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
+
+    const float fovY =
+        2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+
+    camera.projectionMatrix =
+        glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);
 
     camera.viewMatrix = glm::inverse(world.worldTransform);
     camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
+
+    const float ev100 =
+        std::log2f(powf(lens.aperture, 2.0f) * lens.shutterSpeed * 100.0f /
+                   static_cast<float>(lens.sensitivity));
+    camera.exposure.x = ev100;
   }
 }
 

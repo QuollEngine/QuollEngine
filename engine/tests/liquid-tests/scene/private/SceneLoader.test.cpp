@@ -102,7 +102,6 @@ TEST_F(SceneLoaderTransformTest,
 
 TEST_F(SceneLoaderTransformTest,
        TriesToFillAllPossibleValuesIfInvalidStructure) {
-
   liquid::LocalTransform defaults{};
   glm::vec3 validPosition(2.0f);
   glm::quat validRotation(0.0f, 1.0f, 0.0f, 0.0f);
@@ -939,39 +938,26 @@ TEST_F(SceneLoaderCameraTest,
 
   liquid::PerspectiveLens defaults{};
 
-  float validFov = 65.0f;
   float validNear = 0.5f;
   float validFar = 1000.0f;
   float validAspectRatio = 2.0f;
-
-  // FOV
-  for (const auto &invalidNode : invalidNodes) {
-    auto [node, entity] = createNode();
-    node["components"]["camera"]["fov"] = invalidNode;
-    node["components"]["camera"]["near"] = validNear;
-    node["components"]["camera"]["far"] = validFar;
-    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
-
-    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
-
-    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
-    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
-
-    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
-
-    EXPECT_EQ(component.fovY, defaults.fovY);
-    EXPECT_EQ(component.near, validNear);
-    EXPECT_EQ(component.far, validFar);
-    EXPECT_EQ(component.aspectRatio, validAspectRatio);
-  }
+  glm::vec2 validSensorSize{50.0f, 45.0f};
+  float validFocalLength = 100.0f;
+  float validAperture = 2.5f;
+  float validShutterSpeed = 0.125f;
+  uint32_t validSensitivity = 2500;
 
   // Near
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
-    node["components"]["camera"]["fov"] = validFov;
     node["components"]["camera"]["near"] = invalidNode;
     node["components"]["camera"]["far"] = validFar;
     node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
@@ -980,19 +966,27 @@ TEST_F(SceneLoaderCameraTest,
 
     const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
 
-    EXPECT_EQ(component.fovY, validFov);
     EXPECT_EQ(component.near, defaults.near);
     EXPECT_EQ(component.far, validFar);
     EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
   }
 
   // Far
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
-    node["components"]["camera"]["fov"] = validFov;
     node["components"]["camera"]["near"] = validNear;
     node["components"]["camera"]["far"] = invalidNode;
     node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
@@ -1001,19 +995,27 @@ TEST_F(SceneLoaderCameraTest,
 
     const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
 
-    EXPECT_EQ(component.fovY, validFov);
     EXPECT_EQ(component.near, validNear);
     EXPECT_EQ(component.far, defaults.far);
     EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
   }
 
   // Aspect ratio
   for (const auto &invalidNode : invalidNodes) {
     auto [node, entity] = createNode();
-    node["components"]["camera"]["fov"] = validFov;
     node["components"]["camera"]["near"] = validNear;
     node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
     node["components"]["camera"]["aspectRatio"] = invalidNode;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
 
     sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
@@ -1022,17 +1024,194 @@ TEST_F(SceneLoaderCameraTest,
 
     const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
 
-    EXPECT_EQ(component.fovY, validFov);
     EXPECT_EQ(component.near, validNear);
     EXPECT_EQ(component.far, validFar);
     EXPECT_EQ(component.aspectRatio, defaults.aspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
   }
+
+  // Sensor size
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["camera"]["near"] = validNear;
+    node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = invalidNode;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+    EXPECT_EQ(component.near, validNear);
+    EXPECT_EQ(component.far, validFar);
+    EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, defaults.sensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
+  }
+
+  // Focal length
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["camera"]["near"] = validNear;
+    node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = invalidNode;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+    EXPECT_EQ(component.near, validNear);
+    EXPECT_EQ(component.far, validFar);
+    EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, defaults.focalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
+  }
+
+  // Aperture
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["camera"]["near"] = validNear;
+    node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = invalidNode;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+    EXPECT_EQ(component.near, validNear);
+    EXPECT_EQ(component.far, validFar);
+    EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, defaults.aperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
+  }
+
+  // Shutter speed
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["camera"]["near"] = validNear;
+    node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = invalidNode;
+    node["components"]["camera"]["sensitivity"] = validSensitivity;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+    EXPECT_EQ(component.near, validNear);
+    EXPECT_EQ(component.far, validFar);
+    EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, defaults.shutterSpeed);
+    EXPECT_EQ(component.sensitivity, validSensitivity);
+  }
+
+  // Sensitivity
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["camera"]["near"] = validNear;
+    node["components"]["camera"]["far"] = validFar;
+    node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+    node["components"]["camera"]["sensorSize"] = validSensorSize;
+    node["components"]["camera"]["focalLength"] = validFocalLength;
+    node["components"]["camera"]["aperture"] = validAperture;
+    node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+    node["components"]["camera"]["sensitivity"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+    EXPECT_FALSE(entityDatabase.has<liquid::AutoAspectRatio>(entity));
+
+    const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+    EXPECT_EQ(component.near, validNear);
+    EXPECT_EQ(component.far, validFar);
+    EXPECT_EQ(component.aspectRatio, validAspectRatio);
+    EXPECT_EQ(component.sensorSize, validSensorSize);
+    EXPECT_EQ(component.focalLength, validFocalLength);
+    EXPECT_EQ(component.aperture, validAperture);
+    EXPECT_EQ(component.shutterSpeed, validShutterSpeed);
+    EXPECT_EQ(component.sensitivity, defaults.sensitivity);
+  }
+}
+
+TEST_F(SceneLoaderCameraTest,
+       CreatesCameraComponentWithDefaultValuesIfValuesAreNegative) {
+  liquid::PerspectiveLens defaults{};
+
+  auto [node, entity] = createNode();
+  node["components"]["camera"]["near"] = -1.0f;
+  node["components"]["camera"]["far"] = -2.0f;
+  node["components"]["camera"]["aspectRatio"] = -3.0f;
+  node["components"]["camera"]["sensorSize"] = glm::vec2(-1.0f, 2.5f);
+  node["components"]["camera"]["focalLength"] = -2.5f;
+  node["components"]["camera"]["aperture"] = -2.5f;
+  node["components"]["camera"]["shutterSpeed"] = -2.5f;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+
+  const auto &component = entityDatabase.get<liquid::PerspectiveLens>(entity);
+
+  EXPECT_EQ(component.near, defaults.near);
+  EXPECT_EQ(component.far, defaults.far);
+  EXPECT_EQ(component.aspectRatio, defaults.aspectRatio);
+  EXPECT_EQ(component.sensorSize, defaults.sensorSize);
+  EXPECT_EQ(component.focalLength, defaults.focalLength);
+  EXPECT_EQ(component.aperture, defaults.aperture);
+  EXPECT_EQ(component.shutterSpeed, defaults.shutterSpeed);
 }
 
 TEST_F(SceneLoaderCameraTest, CreatesCameraComponentWithDefaultValues) {
   liquid::Camera defaults{};
   auto [node, entity] = createNode();
-  node["components"]["camera"]["fov"] = 20.0f;
+  node["components"]["camera"]["focalLength"] = 20.0f;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   EXPECT_TRUE(entityDatabase.has<liquid::Camera>(entity));
@@ -1060,25 +1239,37 @@ TEST_F(SceneLoaderCameraTest,
 }
 
 TEST_F(SceneLoaderCameraTest, CreatesCameraComponentWithFileDataIfValidField) {
-  float validFov = 65.0f;
   float validNear = 0.5f;
   float validFar = 1000.0f;
   float validAspectRatio = 2.0f;
+  glm::vec2 validSensorSize{50.0f, 45.0f};
+  float validFocalLength = 100.0f;
+  float validAperture = 2.5f;
+  float validShutterSpeed = 0.125f;
+  uint32_t validSensitivity = 2500;
 
   auto [node, entity] = createNode();
-  node["components"]["camera"]["fov"] = validFov;
   node["components"]["camera"]["near"] = validNear;
   node["components"]["camera"]["far"] = validFar;
   node["components"]["camera"]["aspectRatio"] = validAspectRatio;
+  node["components"]["camera"]["sensorSize"] = validSensorSize;
+  node["components"]["camera"]["focalLength"] = validFocalLength;
+  node["components"]["camera"]["aperture"] = validAperture;
+  node["components"]["camera"]["shutterSpeed"] = validShutterSpeed;
+  node["components"]["camera"]["sensitivity"] = validSensitivity;
 
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   const auto &lens = entityDatabase.get<liquid::PerspectiveLens>(entity);
 
-  EXPECT_EQ(lens.fovY, validFov);
   EXPECT_EQ(lens.near, validNear);
   EXPECT_EQ(lens.far, validFar);
   EXPECT_EQ(lens.aspectRatio, validAspectRatio);
+  EXPECT_EQ(lens.sensorSize, validSensorSize);
+  EXPECT_EQ(lens.focalLength, validFocalLength);
+  EXPECT_EQ(lens.aperture, validAperture);
+  EXPECT_EQ(lens.shutterSpeed, validShutterSpeed);
+  EXPECT_EQ(lens.sensitivity, validSensitivity);
 }
 
 using SceneLoaderAudioTest = SceneLoaderTest;

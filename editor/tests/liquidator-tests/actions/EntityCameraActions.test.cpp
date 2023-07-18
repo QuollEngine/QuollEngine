@@ -57,8 +57,8 @@ InitActionsTestSuite(EntityActionsTest, EntityCreatePerspectiveLensActionTest);
 using EntitySetPerspectiveLensActionTest = ActionTestBase;
 
 InitDefaultUpdateComponentTests(EntitySetPerspectiveLensActionTest,
-                                EntitySetPerspectiveLens, PerspectiveLens, fovY,
-                                45.0f);
+                                EntitySetPerspectiveLens, PerspectiveLens,
+                                focalLength, 45.0f);
 
 InitActionsTestSuite(EntityActionsTest, EntitySetPerspectiveLensActionTest);
 

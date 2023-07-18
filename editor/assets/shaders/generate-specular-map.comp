@@ -9,7 +9,7 @@ layout(set = 0, binding = 1,
        rgba16f) writeonly uniform imageCube uOutputTexture;
 
 layout(push_constant) uniform PushConstants { vec4 data; }
-pcMipParams;
+uMipParams;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -18,9 +18,9 @@ const uint NumSamples = 4096;
 void main() {
   ivec3 globalId = ivec3(gl_GlobalInvocationID.xyz);
 
-  float roughness = pcMipParams.data.x;
-  float mipLevel = pcMipParams.data.y;
-  float mipWidth = pcMipParams.data.z;
+  float roughness = uMipParams.data.x;
+  float mipLevel = uMipParams.data.y;
+  float mipWidth = uMipParams.data.z;
 
   vec3 normal = cubeCoordToWorld(globalId, mipWidth);
 

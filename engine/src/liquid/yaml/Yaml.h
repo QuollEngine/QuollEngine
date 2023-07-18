@@ -5,6 +5,41 @@
 namespace YAML {
 
 /**
+ * @brief GLM 2D vector Yaml serializer
+ */
+template <> struct convert<glm::vec2> {
+  /**
+   * @brief Encode GLM 2D vector to Yaml
+   *
+   * @param value GLM 2D vector
+   * @return Yaml node
+   */
+  static Node encode(const glm::vec2 &value) {
+    Node node;
+    node.push_back(value.x);
+    node.push_back(value.y);
+    return node;
+  }
+
+  /**
+   * @brief Decode Yaml to GLM 2D vector
+   *
+   * @param node Yaml node
+   * @param value GLM 2D vector
+   * @retval true Decoding successful
+   * @retval false Decoding failed
+   */
+  static bool decode(const Node &node, glm::vec2 &value) {
+    if (!node.IsSequence() || node.size() != 2) {
+      return false;
+    }
+
+    return convert<float>::decode(node[0], value.x) &&
+           convert<float>::decode(node[1], value.y);
+  }
+};
+
+/**
  * @brief GLM 3D vector Yaml serializer
  */
 template <> struct convert<glm::vec3> {

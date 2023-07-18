@@ -408,7 +408,11 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
   lens.aspectRatio = 2.5f;
   lens.far = 200.0f;
   lens.near = 0.2f;
-  lens.fovY = 80.0f;
+  lens.sensorSize = glm::vec2(50.0f, 45.0f);
+  lens.focalLength = 100.0f;
+  lens.aperture = 1.5f;
+  lens.shutterSpeed = 2.5f;
+  lens.sensitivity = 2500;
   entityDatabase.set(entity, lens);
 
   auto node = entitySerializer.createComponentsNode(entity);
@@ -416,10 +420,15 @@ TEST_F(EntitySerializerTest, CreatesCameraFieldIfLensComponentExists) {
   EXPECT_TRUE(node["camera"]);
   EXPECT_TRUE(node["camera"].IsMap());
   EXPECT_EQ(node["camera"]["type"].as<uint32_t>(1000), 0);
-  EXPECT_EQ(node["camera"]["fov"].as<float>(-1.0f), lens.fovY);
   EXPECT_EQ(node["camera"]["near"].as<float>(-1.0f), lens.near);
   EXPECT_EQ(node["camera"]["far"].as<float>(-1.0f), lens.far);
   EXPECT_EQ(node["camera"]["aspectRatio"].as<float>(-1.0f), lens.aspectRatio);
+  EXPECT_EQ(node["camera"]["sensorSize"].as<glm::vec2>(glm::vec2{-1.0f, -1.0f}),
+            lens.sensorSize);
+  EXPECT_EQ(node["camera"]["focalLength"].as<float>(-1.0f), lens.focalLength);
+  EXPECT_EQ(node["camera"]["aperture"].as<float>(-1.0f), lens.aperture);
+  EXPECT_EQ(node["camera"]["shutterSpeed"].as<float>(-1.0f), lens.shutterSpeed);
+  EXPECT_EQ(node["camera"]["sensitivity"].as<float>(-1.0f), lens.sensitivity);
 }
 
 TEST_F(EntitySerializerTest,
