@@ -1,6 +1,9 @@
 #version 450 core
 #extension GL_EXT_nonuniform_qualifier : enable
 
+#include "bindless/base.glsl"
+#include "bindless/camera.glsl"
+
 layout(location = 0) in vec2 inTexCoord;
 
 layout(location = 0) out vec4 outColor;
@@ -8,7 +11,12 @@ layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
 
-layout(push_constant) uniform DrawParameters { uvec4 index; };
+layout(push_constant) uniform DrawParameters {
+  uint sceneTexture;
+  uint bloomTexture;
+  Camera camera;
+}
+uDrawParams;
 
 const vec3 Gamma = vec3(1.0 / 2.2);
 
@@ -42,9 +50,16 @@ vec3 aces(vec3 v) {
 const float BloomContribution = 0.2;
 
 void main() {
-  vec4 hdrColor = texture(uGlobalTextures[index.x], inTexCoord);
-  vec3 bloomColor = texture(uGlobalTextures[index.y], inTexCoord).rgb;
+  vec4 hdrColor =
+      texture(uGlobalTextures[uDrawParams.sceneTexture], inTexCoord);
+  vec3 bloomColor =
+      texture(uGlobalTextures[uDrawParams.bloomTexture], inTexCoord).rgb;
+
+  float ev100 = getCamera().exposure.x;
+
+  float exposure = 1.0 / (1.2 * pow(2.0, ev100));
 
   outColor =
-      vec4(aces(mix(hdrColor.rgb, bloomColor, BloomContribution)), hdrColor.a);
+      vec4(aces(mix(hdrColor.rgb, bloomColor, BloomContribution) * exposure),
+           hdrColor.a);
 }

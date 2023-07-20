@@ -17,12 +17,12 @@ layout(set = 0, binding = 0) uniform DrawParameters {
 uDrawParams;
 
 layout(push_constant) uniform PushConstants { uvec4 shadow; }
-pcShadowParams;
+uShadowParams;
 
 void main() {
   mat4 modelMatrix = getMeshTransform(gl_InstanceIndex).modelMatrix;
 
-  gl_Position = getShadowMap(pcShadowParams.shadow.x).shadowMatrix *
+  gl_Position = getShadowMap(uShadowParams.shadow.x).shadowMatrix *
                 modelMatrix * vec4(inPosition, 1.0);
-  gl_Layer = int(pcShadowParams.shadow.x);
+  gl_Layer = int(uShadowParams.shadow.x);
 }

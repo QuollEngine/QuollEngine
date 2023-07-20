@@ -241,6 +241,9 @@ void SceneRendererFrameData::addCascadedShadowMaps(
   float range = far - near;
   float ratio = far / near;
 
+  const float fovY =
+      2.0f * atanf(mCameraLens.sensorSize.y / (2.0f * mCameraLens.focalLength));
+
   for (size_t i = 0; i < static_cast<size_t>(numCascades + 1); ++i) {
     float p =
         static_cast<float>(i + 1) / static_cast<float>(splitDistances.size());
@@ -264,8 +267,7 @@ void SceneRendererFrameData::addCascadedShadowMaps(
     float splitDistance = splitDistances.at(i);
 
     auto splitProjectionMatrix = glm::perspective(
-        glm::radians(mCameraLens.fovY), mCameraLens.aspectRatio,
-        prevSplitDistance, splitDistance);
+        fovY, mCameraLens.aspectRatio, prevSplitDistance, splitDistance);
 
     auto invProjView =
         glm::inverse(splitProjectionMatrix * mCameraData.viewMatrix);

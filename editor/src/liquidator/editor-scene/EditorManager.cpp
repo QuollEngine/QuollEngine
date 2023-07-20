@@ -18,9 +18,10 @@ void EditorManager::saveWorkspaceState(WorkspaceState &state,
   const auto &lookAt = scene.entityDatabase.get<CameraLookAt>(state.camera);
 
   YAML::Node node;
-  node["camera"]["fov"] = lens.fovY;
   node["camera"]["near"] = lens.near;
   node["camera"]["far"] = lens.far;
+  node["camera"]["sensorSize"] = lens.sensorSize;
+  node["camera"]["focalLength"] = lens.focalLength;
   node["camera"]["eye"] = lookAt.eye;
   node["camera"]["center"] = lookAt.center;
   node["camera"]["up"] = lookAt.up;
@@ -54,33 +55,39 @@ void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
     const auto &camera = node["camera"];
 
     // defaults
-    float fov = EditorCamera::DefaultFOV, near = EditorCamera::DefaultNear,
-          far = EditorCamera::DefaultFar;
-    glm::vec3 eye = EditorCamera::DefaultEye,
-              center = EditorCamera::DefaultCenter,
-              up = EditorCamera::DefaultUp;
+    auto near = EditorCamera::DefaultNear;
+    auto far = EditorCamera::DefaultFar;
+    auto sensorSize = EditorCamera::DefaultSensorSize;
+    auto focalLength = EditorCamera::DefaultFocalLength;
+    auto eye = EditorCamera::DefaultEye;
+    auto center = EditorCamera::DefaultCenter;
+    auto up = EditorCamera::DefaultUp;
 
-    if (camera["fov"].IsScalar()) {
-      fov = camera["fov"].as<float>(fov);
-    }
-
-    if (camera["near"].IsScalar()) {
+    if (camera["near"] && camera["near"].IsScalar()) {
       near = camera["near"].as<float>(near);
     }
 
-    if (camera["far"].IsScalar()) {
+    if (camera["far"] && camera["far"].IsScalar()) {
       far = camera["far"].as<float>(far);
     }
 
-    if (camera["eye"].IsSequence()) {
+    if (camera["sensorSize"] && camera["sensorSize"].IsSequence()) {
+      sensorSize = camera["sensorSize"].as<glm::vec2>(sensorSize);
+    }
+
+    if (camera["focalLength"] && camera["focalLength"].IsScalar()) {
+      focalLength = camera["sensorSize"].as<float>(focalLength);
+    }
+
+    if (camera["eye"] && camera["eye"].IsSequence()) {
       eye = camera["eye"].as<glm::vec3>(eye);
     }
 
-    if (camera["center"].IsSequence()) {
+    if (camera["center"] && camera["center"].IsSequence()) {
       center = camera["center"].as<glm::vec3>(center);
     }
 
-    if (camera["up"].IsSequence()) {
+    if (camera["up"] && camera["up"].IsSequence()) {
       up = camera["up"].as<glm::vec3>(up);
     }
 
@@ -88,7 +95,13 @@ void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
                       ? state.simulationScene
                       : state.scene;
 
-    scene.entityDatabase.set<PerspectiveLens>(state.camera, {fov, near, far});
+    PerspectiveLens lens{};
+    lens.near = near;
+    lens.far = far;
+    lens.sensorSize = sensorSize;
+    lens.focalLength = focalLength;
+
+    scene.entityDatabase.set<PerspectiveLens>(state.camera, lens);
     scene.entityDatabase.set<CameraLookAt>(state.camera, {eye, center, up});
   }
 

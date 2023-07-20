@@ -317,21 +317,6 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
 
     bool sendAction = false;
 
-    float fovY = component.fovY;
-    if (widgets::Input("FOV", fovY, false)) {
-      if (fovY < 0.0f) {
-        fovY = 0.0f;
-      }
-
-      if (!mPerspectiveLensAction) {
-        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
-            mSelectedEntity, component);
-      }
-      component.fovY = fovY;
-
-      sendAction = true;
-    }
-
     float near = component.near;
     if (widgets::Input("Near", near, false)) {
       if (near < 0.0f) {
@@ -359,6 +344,73 @@ void EntityPanel::renderCamera(WorkspaceState &state, Scene &scene,
             mSelectedEntity, component);
       }
       component.far = far;
+
+      sendAction = true;
+    }
+
+    glm::vec2 sensorSize = component.sensorSize;
+    if (widgets::Input("Sensor size (mm)", sensorSize, false)) {
+      sensorSize = glm::max(sensorSize, glm::vec2(0.0f));
+
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
+      }
+      component.sensorSize = sensorSize;
+
+      sendAction = true;
+    }
+
+    float focalLength = component.focalLength;
+    if (widgets::Input("Focal length (mm)", focalLength, false)) {
+      focalLength = std::max(focalLength, 0.0f);
+
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
+      }
+      component.focalLength = focalLength;
+
+      sendAction = true;
+    }
+
+    float aperture = component.aperture;
+    if (widgets::Input("Aperture", aperture, false)) {
+      if (aperture < 0.0f) {
+        aperture = 0.0f;
+      }
+
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
+      }
+      component.aperture = aperture;
+
+      sendAction = true;
+    }
+
+    float shutterSpeed = 1.0f / component.shutterSpeed;
+    if (widgets::Input("Shutter speed (1/s)", shutterSpeed, false)) {
+      if (shutterSpeed < 0.0f) {
+        shutterSpeed = 0.0f;
+      }
+
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
+      }
+      component.shutterSpeed = 1.0f / shutterSpeed;
+
+      sendAction = true;
+    }
+
+    uint32_t sensitivity = component.sensitivity;
+    if (widgets::Input("Sensitivity (ISO)", sensitivity, false)) {
+      if (!mPerspectiveLensAction) {
+        mPerspectiveLensAction = std::make_unique<EntitySetPerspectiveLens>(
+            mSelectedEntity, component);
+      }
+      component.sensitivity = sensitivity;
 
       sendAction = true;
     }

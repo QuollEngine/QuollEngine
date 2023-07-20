@@ -35,9 +35,14 @@ public:
   static constexpr float ZoomSpeed = 0.03f;
 
   /**
-   * Default Field of view value
+   * Default sensor size
    */
-  static constexpr float DefaultFOV = 70.0f;
+  static constexpr glm::vec2 DefaultSensorSize{16.0f, 16.0f};
+
+  /**
+   * Default focal length
+   */
+  static constexpr float DefaultFocalLength = 16.0f;
 
   /**
    * Default near perspective plane

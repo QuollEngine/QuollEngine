@@ -12,9 +12,8 @@ layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
 
 layout(push_constant) uniform TextureData { layout(offset = 64) uint index; }
-pcTextureData;
+uTextureData;
 
 void main() {
-  outColor =
-      inColor * texture(uGlobalTextures[pcTextureData.index], inTexCoord);
+  outColor = inColor * texture(uGlobalTextures[uTextureData.index], inTexCoord);
 }

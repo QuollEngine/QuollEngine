@@ -28,7 +28,7 @@ layout(push_constant) uniform PushConstants {
   vec4 scale;
   uvec4 index;
 }
-pcOutline;
+uOutline;
 
 const vec2 positions[4] =
     vec2[](vec2(-1, -1), vec2(+1, -1), vec2(-1, +1), vec2(+1, +1));
@@ -36,5 +36,5 @@ const vec2 positions[4] =
 void main() {
   gl_Position = getCamera().viewProj *
                 getOutlineTransform(gl_InstanceIndex).modelMatrix *
-                vec4(positions[gl_VertexIndex] * pcOutline.scale.x, 0.0, 1.0);
+                vec4(positions[gl_VertexIndex] * uOutline.scale.x, 0.0, 1.0);
 }

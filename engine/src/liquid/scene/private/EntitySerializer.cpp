@@ -80,9 +80,13 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     const auto &camera = mEntityDatabase.get<PerspectiveLens>(entity);
 
     components["camera"]["type"] = 0;
-    components["camera"]["fov"] = camera.fovY;
     components["camera"]["near"] = camera.near;
     components["camera"]["far"] = camera.far;
+    components["camera"]["aperture"] = camera.aperture;
+    components["camera"]["sensorSize"] = camera.sensorSize;
+    components["camera"]["focalLength"] = camera.focalLength;
+    components["camera"]["shutterSpeed"] = camera.shutterSpeed;
+    components["camera"]["sensitivity"] = camera.sensitivity;
 
     if (mEntityDatabase.has<AutoAspectRatio>(entity)) {
       components["camera"]["aspectRatio"] = "auto";

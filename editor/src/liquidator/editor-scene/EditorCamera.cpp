@@ -125,11 +125,15 @@ void EditorCamera::update(WorkspaceState &state) {
 
   lens.aspectRatio = mWidth / mHeight;
 
-  camera.projectionMatrix = glm::perspective(
-      glm::radians(lens.fovY), lens.aspectRatio, lens.near, lens.far);
+  const float fovY =
+      2.0f * atanf(lens.sensorSize.y / (2.0f * lens.focalLength));
+
+  camera.projectionMatrix =
+      glm::perspective(fovY, lens.aspectRatio, lens.near, lens.far);
 
   camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
+  camera.exposure.x = 1.0f;
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
@@ -145,8 +149,13 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
 Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
   auto camera = entityDatabase.create();
 
-  entityDatabase.set<PerspectiveLens>(camera,
-                                      {DefaultFOV, DefaultNear, DefaultFar});
+  PerspectiveLens lens{};
+  lens.near = DefaultNear;
+  lens.far = DefaultFar;
+  lens.sensorSize = DefaultSensorSize;
+  lens.focalLength = DefaultFocalLength;
+
+  entityDatabase.set(camera, lens);
   entityDatabase.set<Camera>(camera, {});
   entityDatabase.set<CameraLookAt>(camera,
                                    {DefaultEye, DefaultCenter, DefaultUp});

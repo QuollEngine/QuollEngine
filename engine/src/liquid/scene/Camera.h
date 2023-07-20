@@ -20,6 +20,13 @@ struct Camera {
    * Camera projection view matrix
    */
   glm::mat4 projectionViewMatrix{1.0};
+
+  /**
+   * Exposure values for camera
+   *
+   * First value represents the EV100 value.
+   */
+  glm::vec4 exposure{1.0f, 0.0f, 0.0f, 0.0f};
 };
 
 } // namespace liquid

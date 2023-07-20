@@ -30,7 +30,7 @@ layout(push_constant) uniform PushConstants {
   vec4 scale;
   uvec4 index;
 }
-pcOutline;
+uOutline;
 
 void main() {
   SkeletonItem item = getOutlineSkeleton(0);
@@ -42,5 +42,5 @@ void main() {
 
   gl_Position = getCamera().viewProj *
                 getOutlineTransform(gl_InstanceIndex).modelMatrix * skinMatrix *
-                vec4(inPosition * pcOutline.scale.x, 1.0);
+                vec4(inPosition * uOutline.scale.x, 1.0);
 }

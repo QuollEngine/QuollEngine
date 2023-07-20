@@ -216,6 +216,23 @@ Input::Input(String label, glm::vec3 &value, bool autoChange) {
   }
 }
 
+Input::Input(String label, glm::vec2 &value, bool autoChange) {
+  if (autoChange) {
+    auto temp = value;
+
+    renderScalarInput(label, glm::value_ptr(temp), glm::vec2::length(),
+                      ImGuiDataType_Float);
+
+    if (mChanged) {
+      value = temp;
+    }
+
+  } else {
+    renderScalarInput(label, glm::value_ptr(value), glm::vec2::length(),
+                      ImGuiDataType_Float);
+  }
+}
+
 Input::Input(String label, float &value, bool autoChange) {
   if (autoChange) {
     auto temp = value;
