@@ -12,7 +12,7 @@ TEST_P(EntityCreateAnimatorActionTest, ExecutorCreatesAnimatorSourceComponent) {
 
   liquid::editor::EntityCreateAnimator action(entity,
                                               liquid::AnimatorAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Animator>(entity).asset,
             liquid::AnimatorAssetHandle{15});
@@ -27,7 +27,7 @@ TEST_P(EntityCreateAnimatorActionTest, UndoDeletesAnimatorSourceComponet) {
 
   liquid::editor::EntityCreateAnimator action(entity,
                                               liquid::AnimatorAssetHandle{15});
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Animator>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -38,7 +38,7 @@ TEST_P(EntityCreateAnimatorActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateAnimator action(entity,
                                               liquid::AnimatorAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateAnimatorActionTest,
@@ -46,16 +46,16 @@ TEST_P(EntityCreateAnimatorActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateAnimator action(entity,
                                               liquid::AnimatorAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateAnimatorActionTest,
        PredicateReturnsTrueIfAnimatorDoesNotExistAndAssetIsValid) {
   auto entity = activeScene().entityDatabase.create();
-  auto handle = state.assetRegistry.getAnimators().addAsset({});
+  auto handle = assetRegistry.getAnimators().addAsset({});
 
   liquid::editor::EntityCreateAnimator action(entity, handle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntityCreateAnimatorActionTest);
@@ -68,7 +68,7 @@ TEST_P(EntitySetAnimatorActionTest, ExecutorSetsAnimatorForEntity) {
 
   liquid::editor::EntitySetAnimator action(entity,
                                            liquid::AnimatorAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Animator>(entity).asset,
             liquid::AnimatorAssetHandle{15});
@@ -83,8 +83,8 @@ TEST_P(EntitySetAnimatorActionTest, UndoSetsPreviousAnimatorForEntity) {
 
   liquid::editor::EntitySetAnimator action(entity,
                                            liquid::AnimatorAssetHandle{15});
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Animator>(entity).asset,
             liquid::AnimatorAssetHandle{25});
@@ -95,15 +95,15 @@ TEST_P(EntitySetAnimatorActionTest, PredicateReturnsFalseIfAnimatorIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntitySetAnimator action(entity,
                                            liquid::AnimatorAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetAnimatorActionTest, PredicateReturnsTrueIfAnimatorExists) {
   auto entity = activeScene().entityDatabase.create();
-  auto scriptHandle = state.assetRegistry.getAnimators().addAsset({});
+  auto scriptHandle = assetRegistry.getAnimators().addAsset({});
 
   liquid::editor::EntitySetAnimator action(entity, scriptHandle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetAnimatorActionTest);

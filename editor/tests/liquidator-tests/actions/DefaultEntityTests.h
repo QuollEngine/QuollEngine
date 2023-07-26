@@ -5,7 +5,7 @@
   TEST_P(SuiteName, ExecutorCreatesComponentForEntity) {                       \
     auto entity = activeScene().entityDatabase.create();                       \
     liquid::editor::ActionName action(entity);                                 \
-    auto res = action.onExecute(state);                                        \
+    auto res = action.onExecute(state, assetRegistry);                         \
     EXPECT_TRUE(                                                               \
         activeScene().entityDatabase.has<liquid::ComponentName>(entity));      \
     EXPECT_EQ(res.entitiesToSave.at(0), entity);                               \
@@ -16,7 +16,7 @@
     auto entity = activeScene().entityDatabase.create();                       \
     activeScene().entityDatabase.set<liquid::ComponentName>(entity, {});       \
     liquid::editor::ActionName action(entity);                                 \
-    auto res = action.onUndo(state);                                           \
+    auto res = action.onUndo(state, assetRegistry);                            \
     EXPECT_FALSE(                                                              \
         activeScene().entityDatabase.has<liquid::ComponentName>(entity));      \
     EXPECT_EQ(res.entitiesToSave.at(0), entity);                               \
@@ -25,12 +25,14 @@
   TEST_P(SuiteName, PredicateReturnsFalseIfComponentAlreadyExists) {           \
     auto entity = activeScene().entityDatabase.create();                       \
     activeScene().entityDatabase.set<liquid::ComponentName>(entity, {});       \
-    EXPECT_FALSE(liquid::editor::ActionName(entity).predicate(state));         \
+    EXPECT_FALSE(                                                              \
+        liquid::editor::ActionName(entity).predicate(state, assetRegistry));   \
   }                                                                            \
                                                                                \
   TEST_P(SuiteName, PredicateReturnsTrueIfComponentDoesNotExist) {             \
     auto entity = activeScene().entityDatabase.create();                       \
-    EXPECT_TRUE(liquid::editor::ActionName(entity).predicate(state));          \
+    EXPECT_TRUE(                                                               \
+        liquid::editor::ActionName(entity).predicate(state, assetRegistry));   \
   }
 
 // Default delete component tests
@@ -39,7 +41,7 @@
     auto entity = activeScene().entityDatabase.create();                       \
     activeScene().entityDatabase.set<liquid::ComponentName>(entity, {});       \
     liquid::editor::ActionName action(entity);                                 \
-    auto res = action.onExecute(state);                                        \
+    auto res = action.onExecute(state, assetRegistry);                         \
     EXPECT_FALSE(                                                              \
         activeScene().entityDatabase.has<liquid::ComponentName>(entity));      \
     ASSERT_EQ(res.entitiesToSave.size(), 1);                                   \
@@ -51,23 +53,23 @@
     auto entity = activeScene().entityDatabase.create();                       \
     activeScene().entityDatabase.set<liquid::ComponentName>(entity, {});       \
     liquid::editor::ActionName action(entity);                                 \
-    EXPECT_TRUE(action.predicate(state));                                      \
+    EXPECT_TRUE(action.predicate(state, assetRegistry));                       \
   }                                                                            \
                                                                                \
   TEST_P(SuiteName, PredicateReturnsFalseIfEntityDoesNotHaveComponent) {       \
     auto entity = activeScene().entityDatabase.create();                       \
     liquid::editor::ActionName action(entity);                                 \
-    EXPECT_FALSE(action.predicate(state));                                     \
+    EXPECT_FALSE(action.predicate(state, assetRegistry));                      \
   }                                                                            \
                                                                                \
   TEST_P(SuiteName, UndoCreatesOldComponentForEntity) {                        \
     auto entity = activeScene().entityDatabase.create();                       \
     activeScene().entityDatabase.set<liquid::ComponentName>(entity, {});       \
     liquid::editor::ActionName action(entity);                                 \
-    action.onExecute(state);                                                   \
+    action.onExecute(state, assetRegistry);                                    \
     EXPECT_FALSE(                                                              \
         activeScene().entityDatabase.has<liquid::ComponentName>(entity));      \
-    auto res = action.onUndo(state);                                           \
+    auto res = action.onUndo(state, assetRegistry);                            \
     EXPECT_TRUE(                                                               \
         activeScene().entityDatabase.has<liquid::ComponentName>(entity));      \
     ASSERT_EQ(res.entitiesToSave.size(), 1);                                   \
@@ -84,7 +86,7 @@
                                                                                \
     liquid::editor::ActionName action(entity, {});                             \
     action.setNewComponent(component);                                         \
-    auto res = action.onExecute(state);                                        \
+    auto res = action.onExecute(state, assetRegistry);                         \
                                                                                \
     EXPECT_EQ(activeScene()                                                    \
                   .entityDatabase.get<liquid::ComponentName>(entity)           \
@@ -100,7 +102,7 @@
     component.TestPropertyName = TestPropertyValue;                            \
                                                                                \
     liquid::editor::ActionName action(entity, component);                      \
-    auto res = action.onUndo(state);                                           \
+    auto res = action.onUndo(state, assetRegistry);                            \
                                                                                \
     EXPECT_EQ(activeScene()                                                    \
                   .entityDatabase.get<liquid::ComponentName>(entity)           \
@@ -114,12 +116,12 @@
                                                                                \
     liquid::editor::ActionName action(entity, {});                             \
     action.setNewComponent({});                                                \
-    EXPECT_TRUE(action.predicate(state));                                      \
+    EXPECT_TRUE(action.predicate(state, assetRegistry));                       \
   }                                                                            \
                                                                                \
   TEST_P(SuiteName, PredicateReturnsFalseIfNewComponentIsEmpty) {              \
     auto entity = activeScene().entityDatabase.create();                       \
                                                                                \
     liquid::editor::ActionName action(entity, {});                             \
-    EXPECT_FALSE(action.predicate(state));                                     \
+    EXPECT_FALSE(action.predicate(state, assetRegistry));                      \
   }

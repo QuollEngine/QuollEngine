@@ -18,29 +18,34 @@ public:
   EntitySetParent(Entity entity, Entity parent);
 
   /**
-   * @brief Executor
+   * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
-   * @brief Undo
+   * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
-   * @brief Predicate
+   * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Parent is valid
    * @retval false Parent is not valid
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   Entity mEntity;

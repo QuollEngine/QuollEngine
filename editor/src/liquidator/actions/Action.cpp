@@ -3,6 +3,9 @@
 
 namespace liquid::editor {
 
-ActionExecutorResult Action::onUndo(WorkspaceState &state) { return {}; }
+ActionExecutorResult Action::onUndo(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
+  return {};
+}
 
 } // namespace liquid::editor

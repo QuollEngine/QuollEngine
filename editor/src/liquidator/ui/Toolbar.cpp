@@ -6,7 +6,8 @@
 
 namespace liquid::editor {
 
-void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
+void Toolbar::render(WorkspaceState &state, AssetRegistry &assetRegistry,
+                     ActionExecutor &actionExecutor) {
   ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, Height));
   ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetFrameHeight()));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -18,13 +19,13 @@ void Toolbar::render(WorkspaceState &state, ActionExecutor &actionExecutor) {
 
     for (auto &item : mItems) {
       if (item.type == ToolbarItemType::HideWhenInactive &&
-          !item.action->predicate(state)) {
+          !item.action->predicate(state, assetRegistry)) {
         continue;
       }
 
       StyleStack stack;
       if (item.type == ToolbarItemType::Toggleable &&
-          !item.action->predicate(state)) {
+          !item.action->predicate(state, assetRegistry)) {
         const auto &imguiCol = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
         glm::vec4 buttonColor{imguiCol.x, imguiCol.y, imguiCol.z, imguiCol.w};
 

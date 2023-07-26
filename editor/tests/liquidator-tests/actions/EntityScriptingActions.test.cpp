@@ -12,7 +12,7 @@ TEST_P(EntityCreateScriptActionTest, ExecutorCreatesScriptSourceComponent) {
 
   liquid::editor::EntityCreateScript action(entity,
                                             liquid::LuaScriptAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Script>(entity).handle,
             liquid::LuaScriptAssetHandle{15});
@@ -27,7 +27,7 @@ TEST_P(EntityCreateScriptActionTest, UndoDeletesScriptSourceComponet) {
 
   liquid::editor::EntityCreateScript action(entity,
                                             liquid::LuaScriptAssetHandle{15});
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Script>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -38,7 +38,7 @@ TEST_P(EntityCreateScriptActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateScript action(entity,
                                             liquid::LuaScriptAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateScriptActionTest,
@@ -46,16 +46,16 @@ TEST_P(EntityCreateScriptActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateScript action(entity,
                                             liquid::LuaScriptAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateScriptActionTest,
        PredicateReturnsTrueIfScriptDoesNotExistAndAssetIsValid) {
   auto entity = activeScene().entityDatabase.create();
-  auto handle = state.assetRegistry.getLuaScripts().addAsset({});
+  auto handle = assetRegistry.getLuaScripts().addAsset({});
 
   liquid::editor::EntityCreateScript action(entity, handle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntityCreateScriptActionTest);
@@ -68,7 +68,7 @@ TEST_P(EntitySetScriptActionTest, ExecutorSetsScriptForEntity) {
 
   liquid::editor::EntitySetScript action(entity,
                                          liquid::LuaScriptAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Script>(entity).handle,
             liquid::LuaScriptAssetHandle{15});
@@ -83,8 +83,8 @@ TEST_P(EntitySetScriptActionTest, UndoSetsPreviousScriptForEntity) {
 
   liquid::editor::EntitySetScript action(entity,
                                          liquid::LuaScriptAssetHandle{15});
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Script>(entity).handle,
             liquid::LuaScriptAssetHandle{25});
@@ -95,15 +95,15 @@ TEST_P(EntitySetScriptActionTest, PredicateReturnsFalseIfScriptIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntitySetScript action(entity,
                                          liquid::LuaScriptAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptActionTest, PredicateReturnsTrueIfScriptExists) {
   auto entity = activeScene().entityDatabase.create();
-  auto scriptHandle = state.assetRegistry.getLuaScripts().addAsset({});
+  auto scriptHandle = assetRegistry.getLuaScripts().addAsset({});
 
   liquid::editor::EntitySetScript action(entity, scriptHandle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetScriptActionTest);
@@ -118,7 +118,7 @@ TEST_P(EntitySetScriptVariableActionTest, ExecutorSetsScriptVariableForEntity) {
   liquid::editor::EntitySetScriptVariable action(entity, "var1",
                                                  liquid::PrefabAssetHandle{15});
 
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   const auto &variables =
       activeScene().entityDatabase.get<liquid::Script>(entity).variables;
@@ -144,8 +144,8 @@ TEST_P(EntitySetScriptVariableActionTest,
   liquid::editor::EntitySetScriptVariable action(entity, "var1",
                                                  liquid::PrefabAssetHandle{15});
 
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   const auto &variables =
       activeScene().entityDatabase.get<liquid::Script>(entity).variables;
@@ -165,7 +165,7 @@ TEST_P(EntitySetScriptVariableActionTest,
   liquid::editor::EntitySetScriptVariable action(entity, "test",
                                                  liquid::String("Hello world"));
 
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptVariableActionTest,
@@ -176,7 +176,7 @@ TEST_P(EntitySetScriptVariableActionTest,
 
   liquid::editor::EntitySetScriptVariable action(entity, "test",
                                                  liquid::String("Hello world"));
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptVariableActionTest,
@@ -185,14 +185,14 @@ TEST_P(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1",
       liquid::LuaScriptVariable{liquid::LuaScriptVariableType::String, "var1"});
-  auto handle = state.assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Script>(entity, {handle});
 
   liquid::editor::EntitySetScriptVariable action(entity, "var2",
                                                  liquid::String("Hello world"));
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptVariableActionTest,
@@ -201,14 +201,14 @@ TEST_P(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1", liquid::LuaScriptVariable{
                   liquid::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = state.assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Script>(entity, {handle});
 
   liquid::editor::EntitySetScriptVariable action(entity, "var1",
                                                  liquid::String("Test value"));
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptVariableActionTest,
@@ -217,14 +217,14 @@ TEST_P(EntitySetScriptVariableActionTest,
   asset.data.variables.insert_or_assign(
       "var1", liquid::LuaScriptVariable{
                   liquid::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = state.assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
   auto entity = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Script>(entity, {handle});
 
   liquid::editor::EntitySetScriptVariable action(entity, "var1",
                                                  liquid::PrefabAssetHandle{25});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetScriptVariableActionTest, PredicateReturnsTrueIfValidVariable) {
@@ -232,15 +232,15 @@ TEST_P(EntitySetScriptVariableActionTest, PredicateReturnsTrueIfValidVariable) {
   asset.data.variables.insert_or_assign(
       "var1", liquid::LuaScriptVariable{
                   liquid::LuaScriptVariableType::AssetPrefab, "var1"});
-  auto handle = state.assetRegistry.getLuaScripts().addAsset(asset);
+  auto handle = assetRegistry.getLuaScripts().addAsset(asset);
 
-  auto prefabHandle = state.assetRegistry.getPrefabs().addAsset({});
+  auto prefabHandle = assetRegistry.getPrefabs().addAsset({});
 
   auto entity = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Script>(entity, {handle});
 
   liquid::editor::EntitySetScriptVariable action(entity, "var1", prefabHandle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetScriptVariableActionTest);

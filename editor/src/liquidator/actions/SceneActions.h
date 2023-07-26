@@ -20,26 +20,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   Entity mEntity;
@@ -55,26 +60,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   EnvironmentSkybox mOldSkybox{};
@@ -96,26 +106,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   EnvironmentSkyboxType mType;
@@ -138,26 +153,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   EnvironmentSkybox mOldSkybox;
@@ -180,26 +200,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   liquid::EnvironmentAssetHandle mTexture;
@@ -215,26 +240,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   EnvironmentLightingSkyboxSource mOldLightingSource;
@@ -249,26 +279,31 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action undo
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override;
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 };
 
 } // namespace liquid::editor

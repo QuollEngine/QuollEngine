@@ -16,9 +16,11 @@ public:
    * @brief Create action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @param scenePath Scene path
    */
-  ActionExecutor(WorkspaceState &state, Path scenePath);
+  ActionExecutor(WorkspaceState &state, AssetRegistry &assetRegistry,
+                 Path scenePath);
 
   /**
    * @brief Process actions
@@ -84,6 +86,7 @@ private:
 
 private:
   WorkspaceState &mState;
+  AssetRegistry &mAssetRegistry;
   SceneIO mSceneIO;
   Path mScenePath;
 

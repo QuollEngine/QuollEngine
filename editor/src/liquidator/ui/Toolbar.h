@@ -35,9 +35,11 @@ public:
    * @brief Render toolbar
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @param actionExecutor Action executor
    */
-  void render(WorkspaceState &state, ActionExecutor &actionExecutor);
+  void render(WorkspaceState &state, AssetRegistry &assetRegistry,
+              ActionExecutor &actionExecutor);
 
   /**
    * @brief Add toolbar item

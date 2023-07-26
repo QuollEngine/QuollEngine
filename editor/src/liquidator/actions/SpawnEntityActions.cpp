@@ -50,7 +50,9 @@ static bool isPrefabValid(AssetRegistry &assetRegistry,
          !prefab.transforms.empty();
 }
 
-ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SpawnEmptyEntityAtView::onExecute(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   const auto &viewMatrix =
@@ -58,10 +60,11 @@ ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state) {
 
   auto transform = getTransformFromView(viewMatrix);
 
-  mSpawnedEntity = EntitySpawner(scene.entityDatabase, state.assetRegistry)
-                       .spawnEmpty(transform);
+  mSpawnedEntity =
+      EntitySpawner(scene.entityDatabase, assetRegistry).spawnEmpty(transform);
 
-  EntitySetName(mSpawnedEntity, {}, Name{"New entity"}).onExecute(state);
+  EntitySetName(mSpawnedEntity, {}, Name{"New entity"})
+      .onExecute(state, assetRegistry);
 
   ActionExecutorResult res{};
   res.entitiesToSave.push_back(mSpawnedEntity);
@@ -70,7 +73,9 @@ ActionExecutorResult SpawnEmptyEntityAtView::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SpawnEmptyEntityAtView::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+SpawnEmptyEntityAtView::onUndo(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -97,7 +102,8 @@ ActionExecutorResult SpawnEmptyEntityAtView::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state) {
+bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state,
+                                       AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -107,7 +113,9 @@ bool SpawnEmptyEntityAtView::predicate(WorkspaceState &state) {
 SpawnPrefabAtView::SpawnPrefabAtView(PrefabAssetHandle handle, Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
-ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SpawnPrefabAtView::onExecute(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -115,7 +123,7 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state) {
 
   ActionExecutorResult res{};
   res.entitiesToSave =
-      EntitySpawner(scene.entityDatabase, state.assetRegistry)
+      EntitySpawner(scene.entityDatabase, assetRegistry)
           .spawnPrefab(mHandle, getTransformFromView(viewMatrix));
   res.addToHistory = true;
 
@@ -124,7 +132,8 @@ ActionExecutorResult SpawnPrefabAtView::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state) {
+ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -151,25 +160,28 @@ ActionExecutorResult SpawnPrefabAtView::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SpawnPrefabAtView::predicate(WorkspaceState &state) {
+bool SpawnPrefabAtView::predicate(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  return isPrefabValid(state.assetRegistry, mHandle) &&
+  return isPrefabValid(assetRegistry, mHandle) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
 SpawnSpriteAtView::SpawnSpriteAtView(TextureAssetHandle handle, Entity camera)
     : mHandle(handle), mCamera(camera) {}
 
-ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SpawnSpriteAtView::onExecute(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
   const auto &viewMatrix = scene.entityDatabase.get<Camera>(mCamera).viewMatrix;
 
   ActionExecutorResult res{};
-  mSpawnedEntity = EntitySpawner(scene.entityDatabase, state.assetRegistry)
+  mSpawnedEntity = EntitySpawner(scene.entityDatabase, assetRegistry)
                        .spawnSprite(mHandle, getTransformFromView(viewMatrix));
 
   res.entitiesToSave.push_back(mSpawnedEntity);
@@ -178,7 +190,8 @@ ActionExecutorResult SpawnSpriteAtView::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state) {
+ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -205,11 +218,12 @@ ActionExecutorResult SpawnSpriteAtView::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SpawnSpriteAtView::predicate(WorkspaceState &state) {
+bool SpawnSpriteAtView::predicate(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  return state.assetRegistry.getTextures().hasAsset(mHandle) &&
+  return assetRegistry.getTextures().hasAsset(mHandle) &&
          scene.entityDatabase.has<Camera>(mCamera);
 }
 

@@ -20,18 +20,21 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Action undo stack is not empty
    * @retval false Action undo stack is empty
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   ActionExecutor &mActionExecutor;
@@ -53,18 +56,21 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override;
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override;
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Action redo stack is not empty
    * @retval false Action redo stack is empty
    */
-  bool predicate(WorkspaceState &state) override;
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
   ActionExecutor &mActionExecutor;

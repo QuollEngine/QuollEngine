@@ -50,26 +50,32 @@ public:
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  virtual ActionExecutorResult onExecute(WorkspaceState &state) = 0;
+  virtual ActionExecutorResult onExecute(WorkspaceState &state,
+                                         AssetRegistry &assetRegistry) = 0;
 
   /**
    * @brief Action executor
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Executor result
    */
-  virtual ActionExecutorResult onUndo(WorkspaceState &state);
+  virtual ActionExecutorResult onUndo(WorkspaceState &state,
+                                      AssetRegistry &assetRegistry);
 
   /**
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Predicate is true
    * @retval false Predicate is false
    */
-  virtual bool predicate(WorkspaceState &state) = 0;
+  virtual bool predicate(WorkspaceState &state,
+                         AssetRegistry &assetRegistry) = 0;
 };
 
 } // namespace liquid::editor

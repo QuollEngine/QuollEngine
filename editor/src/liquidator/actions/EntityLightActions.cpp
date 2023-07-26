@@ -8,7 +8,8 @@ EntityDeleteDirectionalLight::EntityDeleteDirectionalLight(Entity entity)
     : mEntity(entity) {}
 
 ActionExecutorResult
-EntityDeleteDirectionalLight::onExecute(WorkspaceState &state) {
+EntityDeleteDirectionalLight::onExecute(WorkspaceState &state,
+                                        AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -28,7 +29,8 @@ EntityDeleteDirectionalLight::onExecute(WorkspaceState &state) {
 }
 
 ActionExecutorResult
-EntityDeleteDirectionalLight::onUndo(WorkspaceState &state) {
+EntityDeleteDirectionalLight::onUndo(WorkspaceState &state,
+                                     AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -43,7 +45,8 @@ EntityDeleteDirectionalLight::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state) {
+bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 

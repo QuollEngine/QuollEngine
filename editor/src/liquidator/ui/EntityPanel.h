@@ -28,10 +28,11 @@ public:
    *
    * @param state Workspace state
    * @param actionExecutor Action executor
+   * @param assetRegistry Asset registry
    * @param entity Entity to display
    */
-  void render(WorkspaceState &state, ActionExecutor &actionExecutor,
-              Entity entity);
+  void render(WorkspaceState &state, AssetRegistry &assetRegistry,
+              ActionExecutor &actionExecutor, Entity entity);
 
 private:
   /**

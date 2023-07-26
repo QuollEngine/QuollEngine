@@ -6,7 +6,8 @@ namespace liquid::editor {
 EntitySetParent::EntitySetParent(Entity entity, Entity parent)
     : mEntity(entity), mParent(parent) {}
 
-ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state) {
+ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   auto &db = scene.entityDatabase;
@@ -50,7 +51,8 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   auto &db = scene.entityDatabase;
@@ -90,7 +92,8 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetParent::predicate(WorkspaceState &state) {
+bool EntitySetParent::predicate(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   auto &db = scene.entityDatabase;

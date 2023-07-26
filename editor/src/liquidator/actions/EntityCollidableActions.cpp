@@ -28,7 +28,9 @@ EntitySetCollidableType::EntitySetCollidableType(Entity entity,
                                                  PhysicsGeometryType type)
     : mEntity(entity), mType(type) {}
 
-ActionExecutorResult EntitySetCollidableType::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntitySetCollidableType::onExecute(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -46,7 +48,9 @@ ActionExecutorResult EntitySetCollidableType::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetCollidableType::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+EntitySetCollidableType::onUndo(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -57,7 +61,8 @@ ActionExecutorResult EntitySetCollidableType::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetCollidableType::predicate(WorkspaceState &state) {
+bool EntitySetCollidableType::predicate(WorkspaceState &state,
+                                        AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 

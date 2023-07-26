@@ -11,7 +11,7 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
@@ -24,7 +24,7 @@ TEST_P(DeleteEntityActionTest,
   state.selectedEntity = entity;
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -44,7 +44,7 @@ TEST_P(
   }
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -56,7 +56,7 @@ TEST_P(
   state.selectedEntity = activeScene().entityDatabase.create();
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }
@@ -69,7 +69,7 @@ TEST_P(DeleteEntityActionTest,
   activeScene().activeCamera = entity;
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
   EXPECT_TRUE(res.saveScene);
@@ -92,7 +92,7 @@ TEST_P(
   }
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
   EXPECT_TRUE(res.saveScene);
@@ -107,7 +107,7 @@ TEST_P(
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(activeScene().activeCamera, activeScene().dummyCamera);
   EXPECT_FALSE(res.saveScene);
@@ -121,7 +121,7 @@ TEST_P(DeleteEntityActionTest,
   state.activeCamera = entity;
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.activeCamera, state.camera);
 }
@@ -143,7 +143,7 @@ TEST_P(
   }
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.activeCamera, state.camera);
 }
@@ -157,7 +157,7 @@ TEST_P(
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::DeleteEntity action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(state.activeCamera, state.camera);
 }

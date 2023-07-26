@@ -8,26 +8,32 @@ EntityCreateScript::EntityCreateScript(Entity entity,
                                        LuaScriptAssetHandle handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult EntityCreateScript::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntityCreateScript::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<Script>(mEntity, {mHandle})
-      .onExecute(state);
+      .onExecute(state, assetRegistry);
 }
 
-ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state) {
-  return EntityDefaultCreateComponent<Script>(mEntity, {mHandle}).onUndo(state);
+ActionExecutorResult EntityCreateScript::onUndo(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
+  return EntityDefaultCreateComponent<Script>(mEntity, {mHandle})
+      .onUndo(state, assetRegistry);
 }
 
-bool EntityCreateScript::predicate(WorkspaceState &state) {
+bool EntityCreateScript::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   return !scene.entityDatabase.has<Script>(mEntity) &&
-         state.assetRegistry.getLuaScripts().hasAsset(mHandle);
+         assetRegistry.getLuaScripts().hasAsset(mHandle);
 }
 
 EntitySetScript::EntitySetScript(Entity entity, LuaScriptAssetHandle script)
     : mEntity(entity), mScript(script) {}
 
-ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state) {
+ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -41,7 +47,8 @@ ActionExecutorResult EntitySetScript::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -52,15 +59,18 @@ ActionExecutorResult EntitySetScript::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetScript::predicate(WorkspaceState &state) {
-  return state.assetRegistry.getLuaScripts().hasAsset(mScript);
+bool EntitySetScript::predicate(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
+  return assetRegistry.getLuaScripts().hasAsset(mScript);
 }
 
 EntitySetScriptVariable::EntitySetScriptVariable(
     Entity entity, const String &name, const LuaScriptInputVariable &value)
     : mEntity(entity), mName(name), mValue(value) {}
 
-ActionExecutorResult EntitySetScriptVariable::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntitySetScriptVariable::onExecute(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -75,7 +85,9 @@ ActionExecutorResult EntitySetScriptVariable::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetScriptVariable::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+EntitySetScriptVariable::onUndo(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -86,7 +98,8 @@ ActionExecutorResult EntitySetScriptVariable::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetScriptVariable::predicate(WorkspaceState &state) {
+bool EntitySetScriptVariable::predicate(WorkspaceState &state,
+                                        AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -95,12 +108,12 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state) {
   }
 
   auto scriptHandle = scene.entityDatabase.get<Script>(mEntity).handle;
-  if (!state.assetRegistry.getLuaScripts().hasAsset(scriptHandle)) {
+  if (!assetRegistry.getLuaScripts().hasAsset(scriptHandle)) {
     return false;
   }
 
   const auto &variables =
-      state.assetRegistry.getLuaScripts().getAsset(scriptHandle).data.variables;
+      assetRegistry.getLuaScripts().getAsset(scriptHandle).data.variables;
 
   auto it = variables.find(mName);
   if (it == variables.end()) {
@@ -113,7 +126,7 @@ bool EntitySetScriptVariable::predicate(WorkspaceState &state) {
 
   if (mValue.isType(LuaScriptVariableType::AssetPrefab)) {
     auto handle = mValue.get<PrefabAssetHandle>();
-    if (!state.assetRegistry.getPrefabs().hasAsset(handle)) {
+    if (!assetRegistry.getPrefabs().hasAsset(handle)) {
       return false;
     }
   }

@@ -13,7 +13,7 @@ TEST_P(EntityToggleSkeletonDebugBonesActionTest,
   activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
 
   liquid::editor::EntityToggleSkeletonDebugBones action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
   EXPECT_TRUE(res.entitiesToSave.empty());
@@ -26,7 +26,7 @@ TEST_P(EntityToggleSkeletonDebugBonesActionTest,
   activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
 
   liquid::editor::EntityToggleSkeletonDebugBones action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
   EXPECT_TRUE(res.entitiesToSave.empty());
@@ -37,7 +37,7 @@ TEST_P(EntityToggleSkeletonDebugBonesActionTest,
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::EntityToggleSkeletonDebugBones action(entity);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityToggleSkeletonDebugBonesActionTest,
@@ -46,7 +46,7 @@ TEST_P(EntityToggleSkeletonDebugBonesActionTest,
   activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
 
   liquid::editor::EntityToggleSkeletonDebugBones action(entity);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest,
@@ -64,7 +64,7 @@ TEST_P(EntityDeleteSkeletonActionTest,
   activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
 
   liquid::editor::EntityDeleteSkeleton action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Skeleton>(entity));
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
@@ -79,8 +79,8 @@ TEST_P(
   activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
 
   liquid::editor::EntityDeleteSkeleton action(entity);
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
@@ -94,9 +94,9 @@ TEST_P(EntityDeleteSkeletonActionTest,
   activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
 
   liquid::editor::EntityDeleteSkeleton action(entity);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);

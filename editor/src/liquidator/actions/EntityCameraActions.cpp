@@ -7,7 +7,8 @@ EntityCreatePerspectiveLens::EntityCreatePerspectiveLens(Entity entity)
     : mEntity(entity) {}
 
 ActionExecutorResult
-EntityCreatePerspectiveLens::onExecute(WorkspaceState &state) {
+EntityCreatePerspectiveLens::onExecute(WorkspaceState &state,
+                                       AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -22,7 +23,8 @@ EntityCreatePerspectiveLens::onExecute(WorkspaceState &state) {
 }
 
 ActionExecutorResult
-EntityCreatePerspectiveLens::onUndo(WorkspaceState &state) {
+EntityCreatePerspectiveLens::onUndo(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -35,7 +37,8 @@ EntityCreatePerspectiveLens::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntityCreatePerspectiveLens::predicate(WorkspaceState &state) {
+bool EntityCreatePerspectiveLens::predicate(WorkspaceState &state,
+                                            AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -46,7 +49,8 @@ EntityDeletePerspectiveLens::EntityDeletePerspectiveLens(Entity entity)
     : mEntity(entity) {}
 
 ActionExecutorResult
-EntityDeletePerspectiveLens::onExecute(WorkspaceState &state) {
+EntityDeletePerspectiveLens::onExecute(WorkspaceState &state,
+                                       AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -80,7 +84,8 @@ EntityDeletePerspectiveLens::onExecute(WorkspaceState &state) {
 }
 
 ActionExecutorResult
-EntityDeletePerspectiveLens::onUndo(WorkspaceState &state) {
+EntityDeletePerspectiveLens::onUndo(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -109,7 +114,8 @@ EntityDeletePerspectiveLens::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntityDeletePerspectiveLens::predicate(WorkspaceState &state) {
+bool EntityDeletePerspectiveLens::predicate(WorkspaceState &state,
+                                            AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 

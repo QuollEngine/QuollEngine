@@ -3,7 +3,9 @@
 
 namespace liquid::editor {
 
-ActionExecutorResult StartSimulationMode::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+StartSimulationMode::onExecute(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
   state.mode = WorkspaceMode::Simulation;
   state.simulationScene.entityDatabase.destroy();
   state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
@@ -21,11 +23,14 @@ ActionExecutorResult StartSimulationMode::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool StartSimulationMode::predicate(WorkspaceState &state) {
+bool StartSimulationMode::predicate(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
   return state.mode == WorkspaceMode::Edit;
 }
 
-ActionExecutorResult StopSimulationMode::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+StopSimulationMode::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   state.mode = WorkspaceMode::Edit;
   state.activeCamera = state.camera;
 
@@ -49,7 +54,8 @@ ActionExecutorResult StopSimulationMode::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool StopSimulationMode::predicate(WorkspaceState &state) {
+bool StopSimulationMode::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   return state.mode == WorkspaceMode::Simulation;
 }
 

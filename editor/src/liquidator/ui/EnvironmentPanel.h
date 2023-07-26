@@ -14,9 +14,11 @@ public:
    * @brief Render environment panel
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @param actionExecutor Action executor
    */
-  static void render(WorkspaceState &state, ActionExecutor &actionExecutor);
+  static void render(WorkspaceState &state, AssetRegistry &assetRegistry,
+                     ActionExecutor &actionExecutor);
 
 private:
   /**

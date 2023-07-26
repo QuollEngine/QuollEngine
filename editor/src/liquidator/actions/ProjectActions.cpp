@@ -6,7 +6,8 @@
 
 namespace liquid::editor {
 
-ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state) {
+ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto path = platform::FileDialog::getFilePathFromCreateDialog({});
 
   GameExporter exporter;
@@ -15,6 +16,9 @@ ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool ExportAsGame::predicate(WorkspaceState &state) { return true; }
+bool ExportAsGame::predicate(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
+  return true;
+}
 
 } // namespace liquid::editor

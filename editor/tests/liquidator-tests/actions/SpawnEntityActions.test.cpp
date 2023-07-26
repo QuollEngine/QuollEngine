@@ -18,7 +18,7 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, ExecutorSpawnsEmptyEntityAtView) {
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
@@ -47,8 +47,8 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, UndoRemovesSpawnedEntity) {
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  auto execRes = action.onExecute(state);
-  auto undoRes = action.onUndo(state);
+  auto execRes = action.onExecute(state, assetRegistry);
+  auto undoRes = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -64,10 +64,10 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -80,7 +80,7 @@ TEST_P(
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   auto entity = res.entitiesToSave.at(0);
 
@@ -93,7 +93,7 @@ TEST_P(
     state.selectedEntity = e2;
   }
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -106,8 +106,8 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
   state.selectedEntity = activeScene().entityDatabase.create();
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  action.onExecute(state);
-  action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }
@@ -119,7 +119,7 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
@@ -128,7 +128,7 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
   state.camera = camera;
 
   liquid::editor::SpawnEmptyEntityAtView action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, SpawnEmptyEntityAtViewActionTest);
@@ -149,10 +149,10 @@ TEST_P(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
@@ -182,12 +182,12 @@ TEST_P(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  auto execRes = action.onExecute(state);
+  auto execRes = action.onExecute(state, assetRegistry);
 
-  auto undoRes = action.onUndo(state);
+  auto undoRes = action.onUndo(state, assetRegistry);
 
   ASSERT_EQ(execRes.entitiesToSave.size(), 3);
   ASSERT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -206,15 +206,15 @@ TEST_P(SpawnPrefabAtViewActionTest,
 
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   auto entity = res.entitiesToSave.at(0);
   state.selectedEntity = entity;
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
 
@@ -226,14 +226,14 @@ TEST_P(SpawnPrefabAtViewActionTest,
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   state.selectedEntity = res.entitiesToSave.back();
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
 
@@ -246,14 +246,14 @@ TEST_P(
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   state.selectedEntity = liquid::Entity{25};
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }
 
@@ -265,10 +265,10 @@ TEST_P(
 
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest,
@@ -277,17 +277,17 @@ TEST_P(SpawnPrefabAtViewActionTest,
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
   liquid::editor::SpawnPrefabAtView action(liquid::PrefabAssetHandle{15},
                                            camera);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest, PredicateReturnsFalseIfPrefabAssetIsEmpty) {
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
   liquid::AssetData<liquid::PrefabAsset> asset{};
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest,
@@ -296,10 +296,10 @@ TEST_P(SpawnPrefabAtViewActionTest,
 
   liquid::AssetData<liquid::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
-  auto prefab = state.assetRegistry.getPrefabs().addAsset(asset);
+  auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
   liquid::editor::SpawnPrefabAtView action(prefab, camera);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, SpawnPrefabAtViewActionTest);
@@ -309,7 +309,7 @@ using SpawnSpriteAtViewActionTest = ActionTestBase;
 TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   liquid::AssetData<liquid::TextureAsset> data{};
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
-  auto textureAsset = state.assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
   glm::mat4 viewMatrix =
@@ -322,7 +322,7 @@ TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   state.camera = camera;
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
@@ -344,15 +344,15 @@ TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
 TEST_P(SpawnSpriteAtViewActionTest, UndoRemovesSpawnedEntity) {
   liquid::AssetData<liquid::TextureAsset> data{};
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
-  auto textureAsset = state.assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
   state.camera = camera;
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto execRes = action.onExecute(state);
-  auto undoRes = action.onUndo(state);
+  auto execRes = action.onExecute(state, assetRegistry);
+  auto undoRes = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
@@ -365,7 +365,7 @@ TEST_P(SpawnSpriteAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
   liquid::AssetData<liquid::TextureAsset> data{};
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
-  auto textureAsset = state.assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
@@ -373,10 +373,10 @@ TEST_P(SpawnSpriteAtViewActionTest,
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -386,14 +386,14 @@ TEST_P(
     UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
   liquid::AssetData<liquid::TextureAsset> data{};
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
-  auto textureAsset = state.assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
   state.camera = camera;
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
   auto entity = res.entitiesToSave.at(0);
@@ -407,7 +407,7 @@ TEST_P(
     state.selectedEntity = e2;
   }
 
-  action.onUndo(state);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
 }
@@ -416,7 +416,7 @@ TEST_P(SpawnSpriteAtViewActionTest,
        UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
   liquid::AssetData<liquid::TextureAsset> data{};
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
-  auto textureAsset = state.assetRegistry.getTextures().addAsset(data);
+  auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
@@ -425,15 +425,15 @@ TEST_P(SpawnSpriteAtViewActionTest,
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  action.onExecute(state);
-  action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
 }
 
 TEST_P(SpawnSpriteAtViewActionTest,
        PredicateReturnsTrueIfCameraEntityHasCameraAndAssetExists) {
-  auto textureAsset = state.assetRegistry.getTextures().addAsset({});
+  auto textureAsset = assetRegistry.getTextures().addAsset({});
 
   auto camera = activeScene().entityDatabase.create();
   activeScene().entityDatabase.set<liquid::Camera>(camera, {});
@@ -441,19 +441,19 @@ TEST_P(SpawnSpriteAtViewActionTest,
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnSpriteAtViewActionTest,
        PredicateReturnsFalseIfCameraEntityHasNoCamera) {
-  auto textureAsset = state.assetRegistry.getTextures().addAsset({});
+  auto textureAsset = assetRegistry.getTextures().addAsset({});
 
   auto camera = activeScene().entityDatabase.create();
   state.camera = camera;
 
   liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
 
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
@@ -464,7 +464,7 @@ TEST_P(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
   liquid::editor::SpawnSpriteAtView action(liquid::TextureAssetHandle{45},
                                            camera);
 
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, SpawnSpriteAtViewActionTest);

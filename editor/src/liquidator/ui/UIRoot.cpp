@@ -50,13 +50,15 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
 
 void UIRoot::render(WorkspaceState &state, AssetManager &assetManager) {
   mMainMenu.render(mActionExecutor);
-  mToolbar.render(state, mActionExecutor);
+  mToolbar.render(state, assetManager.getAssetRegistry(), mActionExecutor);
   mLayout.setup();
 
   mSceneHierarchyPanel.render(state, mActionExecutor);
-  mEntityPanel.render(state, mActionExecutor, state.selectedEntity);
+  mEntityPanel.render(state, assetManager.getAssetRegistry(), mActionExecutor,
+                      state.selectedEntity);
 
-  EnvironmentPanel::render(state, mActionExecutor);
+  EnvironmentPanel::render(state, assetManager.getAssetRegistry(),
+                           mActionExecutor);
 
   mEditorCameraPanel.render(state, mActionExecutor);
   mAssetBrowser.render(assetManager, mIconRegistry, state, mActionExecutor);
