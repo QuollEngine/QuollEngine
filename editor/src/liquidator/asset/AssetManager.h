@@ -170,6 +170,13 @@ public:
    */
   Result<bool> loadOriginalIfChanged(const Path &originalAssetPath);
 
+  /**
+   * @brief Get render storage
+   *
+   * @return Render storage
+   */
+  inline RenderStorage &getRenderStorage() { return mRenderStorage; }
+
 private:
   /**
    * @brief Get asset type from path extension
@@ -311,6 +318,7 @@ private:
   Result<Path> loadOriginalEnvironment(const Path &originalAssetPath);
 
 private:
+  RenderStorage &mRenderStorage;
   AssetCache mAssetCache;
   Path mAssetsPath;
   bool mOptimize;

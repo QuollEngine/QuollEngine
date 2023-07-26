@@ -14,16 +14,7 @@
 
 namespace liquid::editor {
 
-UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
-    : mActionExecutor(actionExecutor), mAssetBrowser(assetLoader) {
-
-  mShortcutsManager.add(Shortcut().control().key('N'),
-                        TypedActionCreator::create<SpawnEmptyEntityAtView>());
-  mShortcutsManager.add(Shortcut().control().shift().key('Z'),
-                        TypedActionCreator::create<Redo>(actionExecutor));
-  mShortcutsManager.add(Shortcut().control().key('Z'),
-                        TypedActionCreator::create<Undo>(actionExecutor));
-
+UIRoot::UIRoot() {
   mMainMenu.begin("Project")
       .add("Export as game", TypedActionCreator::create<ExportAsGame>())
       .end()
@@ -48,23 +39,24 @@ UIRoot::UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader)
       "Scale", fa::ExpandAlt, ToolbarItemType::Toggleable);
 }
 
-void UIRoot::render(WorkspaceState &state, AssetManager &assetManager) {
-  mMainMenu.render(mActionExecutor);
-  mToolbar.render(state, assetManager.getAssetRegistry(), mActionExecutor);
-  mLayout.setup();
+void UIRoot::render(WorkspaceContext &context) {
+  mMainMenu.render(context.actionExecutor);
+  mToolbar.render(context.state, context.assetManager.getAssetRegistry(),
+                  context.actionExecutor);
 
-  mSceneHierarchyPanel.render(state, mActionExecutor);
-  mEntityPanel.render(state, assetManager.getAssetRegistry(), mActionExecutor,
-                      state.selectedEntity);
+  mSceneHierarchyPanel.render(context.state, context.actionExecutor);
+  mEntityPanel.render(context.state, context.assetManager.getAssetRegistry(),
+                      context.actionExecutor);
 
-  EnvironmentPanel::render(state, assetManager.getAssetRegistry(),
-                           mActionExecutor);
+  EnvironmentPanel::render(context.state,
+                           context.assetManager.getAssetRegistry(),
+                           context.actionExecutor);
 
-  mEditorCameraPanel.render(state, mActionExecutor);
-  mAssetBrowser.render(assetManager, mIconRegistry, state, mActionExecutor);
+  mEditorCameraPanel.render(context.state, context.actionExecutor);
+  mAssetBrowser.render(context);
 }
 
-bool UIRoot::renderSceneView(WorkspaceState &state,
+bool UIRoot::renderSceneView(WorkspaceContext &context,
                              rhi::TextureHandle sceneTexture,
                              EditorCamera &editorCamera) {
   if (auto _ = SceneView(sceneTexture)) {
@@ -79,8 +71,9 @@ bool UIRoot::renderSceneView(WorkspaceState &state,
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
 
-    if (state.selectedEntity != Entity::Null) {
-      isItemClicked &= !mSceneGizmos.render(state, mActionExecutor);
+    if (context.state.selectedEntity != Entity::Null) {
+      isItemClicked &=
+          !mSceneGizmos.render(context.state, context.actionExecutor);
     }
     return isItemClicked;
   }
@@ -88,10 +81,21 @@ bool UIRoot::renderSceneView(WorkspaceState &state,
   return false;
 }
 
-void UIRoot::processShortcuts(EventSystem &eventSystem) {
-  eventSystem.observe(KeyboardEvent::Pressed, [this](const auto &data) {
-    mShortcutsManager.process(data.key, data.mods, mActionExecutor);
-  });
+void UIRoot::processShortcuts(WorkspaceContext &context,
+                              EventSystem &eventSystem) {
+  mShortcutsManager.add(Shortcut().control().key('N'),
+                        TypedActionCreator::create<SpawnEmptyEntityAtView>());
+  mShortcutsManager.add(
+      Shortcut().control().shift().key('Z'),
+      TypedActionCreator::create<Redo>(context.actionExecutor));
+  mShortcutsManager.add(
+      Shortcut().control().key('Z'),
+      TypedActionCreator::create<Undo>(context.actionExecutor));
+
+  eventSystem.observe(
+      KeyboardEvent::Pressed, [this, &context](const auto &data) {
+        mShortcutsManager.process(data.key, data.mods, context.actionExecutor);
+      });
 }
 
 } // namespace liquid::editor

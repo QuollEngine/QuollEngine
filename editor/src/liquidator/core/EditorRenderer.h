@@ -2,7 +2,6 @@
 
 #include "liquid/renderer/RenderGraph.h"
 #include "liquid/entity/EntityDatabase.h"
-#include "liquidator/ui/IconRegistry.h"
 #include "liquidator/state/WorkspaceState.h"
 #include "liquid/renderer/SceneRenderer.h"
 
@@ -37,12 +36,10 @@ public:
   /**
    * @brief Create editor renderer
    *
-   * @param iconRegistry Icon registry
    * @param renderStorage Render storage
    * @param device Render device
    */
-  EditorRenderer(IconRegistry &iconRegistry, RenderStorage &renderStorage,
-                 rhi::RenderDevice *device);
+  EditorRenderer(RenderStorage &renderStorage, rhi::RenderDevice *device);
 
   /**
    * @brief Attach to render graph
@@ -108,7 +105,6 @@ private:
 
 private:
   rhi::RenderDevice *mDevice;
-  IconRegistry &mIconRegistry;
   Entity mSelectedEntity = Entity::Null;
 
   CollidableShapeDraw mCollidableCube;

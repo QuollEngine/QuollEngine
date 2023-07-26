@@ -2,15 +2,16 @@
 #include "liquid/yaml/Yaml.h"
 #include "liquid/platform/tools/FileDialog.h"
 
-#include "EditorManager.h"
-#include "EditorCamera.h"
+#include "liquidator/core/CameraLookAt.h"
+#include "liquidator/editor-scene/EditorCamera.h"
 
+#include "WorkspaceIO.h"
 #include <glm/gtc/matrix_access.hpp>
 
 namespace liquid::editor {
 
-void EditorManager::saveWorkspaceState(WorkspaceState &state,
-                                       const std::filesystem::path &path) {
+void WorkspaceIO::saveWorkspaceState(WorkspaceState &state,
+                                     const std::filesystem::path &path) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -34,8 +35,8 @@ void EditorManager::saveWorkspaceState(WorkspaceState &state,
   stream.close();
 }
 
-void EditorManager::loadWorkspaceState(const std::filesystem::path &path,
-                                       WorkspaceState &state) {
+void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
+                                     const std::filesystem::path &path) {
   std::ifstream stream(path, std::ios::in);
 
   if (!stream.good()) {

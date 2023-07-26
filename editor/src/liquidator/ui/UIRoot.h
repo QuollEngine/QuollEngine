@@ -4,14 +4,12 @@
 #include "liquid/physics/PhysicsSystem.h"
 #include "liquid/renderer/Renderer.h"
 
-#include "liquidator/editor-scene/EditorManager.h"
 #include "Toolbar.h"
 #include "SceneHierarchyPanel.h"
 #include "EntityPanel.h"
 #include "EditorGridPanel.h"
 #include "StatusBar.h"
 #include "AssetBrowser.h"
-#include "Layout.h"
 #include "IconRegistry.h"
 #include "EnvironmentPanel.h"
 #include "SceneView.h"
@@ -19,7 +17,7 @@
 #include "MainMenu.h"
 #include "ShortcutsManager.h"
 
-#include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/workspace/WorkspaceContext.h"
 
 namespace liquid::editor {
 
@@ -31,41 +29,31 @@ namespace liquid::editor {
 class UIRoot {
 public:
   /**
-   * @brief Create UI Root
-   *
-   * @param actionExecutor Action executor
-   * @param assetLoader Asset loader
+   * @brief Create UI root
    */
-  UIRoot(ActionExecutor &actionExecutor, AssetLoader &assetLoader);
+  UIRoot();
 
   /**
    * @brief Render UI Root
    *
    * Renders all components inside the root
    *
-   * @param state Workspace state
-   * @param assetManager Asset manager
+   * @param context Workspace context
    */
-  void render(WorkspaceState &state, AssetManager &assetManager);
+  void render(WorkspaceContext &context);
 
   /**
    * @brief Render scene view
    *
-   * @param state Workspace state
+   * @param context Workspace context
    * @param sceneTexture Scene texture
    * @param editorCamera Editor camera
    * @retval true Entity is clicked
    * @retval false Entity is not clicked
    */
-  bool renderSceneView(WorkspaceState &state, rhi::TextureHandle sceneTexture,
+  bool renderSceneView(WorkspaceContext &context,
+                       rhi::TextureHandle sceneTexture,
                        EditorCamera &editorCamera);
-
-  /**
-   * @brief Get icon registry
-   *
-   * @return Icon registry
-   */
-  inline IconRegistry &getIconRegistry() { return mIconRegistry; }
 
   /**
    * @brief Get asset browser panel
@@ -86,20 +74,20 @@ public:
   /**
    * @brief Process shortcuts
    *
+   * @param context Workspace context
    * @param eventSystem Event system
    */
-  void processShortcuts(EventSystem &eventSystem);
+  void processShortcuts(WorkspaceContext &context, EventSystem &eventSystem);
 
 private:
-  ActionExecutor &mActionExecutor;
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
   EnvironmentPanel mEnvironmentPanel;
   EditorGridPanel mEditorCameraPanel;
   AssetBrowser mAssetBrowser;
+
+  // Unclosable UI
   StatusBar mStatusBar;
-  Layout mLayout;
-  IconRegistry mIconRegistry;
   Toolbar mToolbar;
   MainMenu mMainMenu;
   SceneGizmos mSceneGizmos;

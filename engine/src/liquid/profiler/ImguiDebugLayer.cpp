@@ -36,98 +36,105 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
 
   uint32_t fps = mFpsCounter.getFPS();
 
-  ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
-               ImGuiWindowFlags_NoDocking);
-  if (ImGui::BeginTable("Table", 2,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch |
-                            ImGuiTableFlags_RowBg)) {
+  if (ImGui::Begin("Performance Metrics", &mPerformanceMetricsVisible,
+                   ImGuiWindowFlags_NoDocking)) {
+    if (ImGui::BeginTable("Table", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
 
-    renderTableRow("FPS", std::to_string(fps));
-    renderTableRow("Frame time",
-                   std::to_string(fps > 0 ? ONE_SECOND_IN_MS / fps : 0) + "ms");
-    ImGui::EndTable();
+      renderTableRow("FPS", std::to_string(fps));
+      renderTableRow("Frame time",
+                     std::to_string(fps > 0 ? ONE_SECOND_IN_MS / fps : 0) +
+                         "ms");
+      ImGui::EndTable();
+    }
+    ImGui::End();
   }
-  ImGui::End();
 }
 
 void ImguiDebugLayer::renderUsageMetrics() {
   if (!mUsageMetricsVisible)
     return;
 
-  ImGui::Begin("Usage Metrics", &mUsageMetricsVisible,
-               ImGuiWindowFlags_NoDocking);
+  if (ImGui::Begin("Usage Metrics", &mUsageMetricsVisible,
+                   ImGuiWindowFlags_NoDocking)) {
 
-  static const std::array<String, 3> Units{"bytes", "Kb", "Mb"};
-  static constexpr float Kilo = 1024.0f;
+    static const std::array<String, 3> Units{"bytes", "Kb", "Mb"};
+    static constexpr float Kilo = 1024.0f;
 
-  auto getSizeString = [](size_t size) {
-    if (size < static_cast<size_t>(Kilo)) {
-      return std::to_string(size) + " " + Units.at(0);
+    auto getSizeString = [](size_t size) {
+      if (size < static_cast<size_t>(Kilo)) {
+        return std::to_string(size) + " " + Units.at(0);
+      }
+      float humanReadableSize = static_cast<float>(size);
+
+      size_t i = 1;
+      for (; i < Units.size() && humanReadableSize >= Kilo; ++i) {
+        humanReadableSize /= Kilo;
+      }
+
+      std::stringstream ss;
+      ss << std::fixed << std::setprecision(2) << humanReadableSize << " "
+         << Units.at(i - 1) << " (" << size << " " << Units.at(0) << ")";
+      return ss.str();
+    };
+
+    if (ImGui::BeginTable("Table", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_RowBg)) {
+      // Buffers
+      renderTableRow(
+          "Number of buffers",
+          std::to_string(mDeviceStats.getResourceMetrics()->getBuffersCount()));
+
+      renderTableRow(
+          "Total size of allocated buffers",
+          getSizeString(
+              mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
+
+      // Textures
+      renderTableRow(
+          "Number of textures",
+          std::to_string(
+              mDeviceStats.getResourceMetrics()->getTexturesCount()));
+
+      // Draw calls
+      renderTableRow("Number of draw calls",
+                     std::to_string(mDeviceStats.getDrawCallsCount()));
+      renderTableRow("Number of drawn primitives",
+                     std::to_string(mDeviceStats.getDrawnPrimitivesCount()));
+      renderTableRow("Number of command calls",
+                     std::to_string(mDeviceStats.getCommandCallsCount()));
+      renderTableRow(
+          "Number of descriptors",
+          std::to_string(
+              mDeviceStats.getResourceMetrics()->getDescriptorsCount()));
+
+      ImGui::EndTable();
     }
-    float humanReadableSize = static_cast<float>(size);
 
-    size_t i = 1;
-    for (; i < Units.size() && humanReadableSize >= Kilo; ++i) {
-      humanReadableSize /= Kilo;
-    }
-
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(2) << humanReadableSize << " "
-       << Units.at(i - 1) << " (" << size << " " << Units.at(0) << ")";
-    return ss.str();
-  };
-
-  if (ImGui::BeginTable("Table", 2,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch |
-                            ImGuiTableFlags_RowBg)) {
-
-    // Buffers
-    renderTableRow(
-        "Number of buffers",
-        std::to_string(mDeviceStats.getResourceMetrics()->getBuffersCount()));
-
-    renderTableRow(
-        "Total size of allocated buffers",
-        getSizeString(mDeviceStats.getResourceMetrics()->getTotalBufferSize()));
-
-    // Textures
-    renderTableRow(
-        "Number of textures",
-        std::to_string(mDeviceStats.getResourceMetrics()->getTexturesCount()));
-
-    // Draw calls
-    renderTableRow("Number of draw calls",
-                   std::to_string(mDeviceStats.getDrawCallsCount()));
-    renderTableRow("Number of drawn primitives",
-                   std::to_string(mDeviceStats.getDrawnPrimitivesCount()));
-    renderTableRow("Number of command calls",
-                   std::to_string(mDeviceStats.getCommandCallsCount()));
-    renderTableRow(
-        "Number of descriptors",
-        std::to_string(
-            mDeviceStats.getResourceMetrics()->getDescriptorsCount()));
-
-    ImGui::EndTable();
+    ImGui::End();
   }
-
-  ImGui::End();
 }
 
 void ImguiDebugLayer::renderPhysicalDeviceInfo() {
   if (!mPhysicalDeviceInfoVisible)
     return;
 
-  ImGui::Begin(("Device Info: " + mPhysicalDeviceInfo.getName()).c_str(),
-               &mPhysicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking);
-  if (ImGui::BeginTable("Table", 2,
-                        ImGuiTableFlags_Borders |
-                            ImGuiTableColumnFlags_WidthStretch)) {
-    renderTableRow("Name", mPhysicalDeviceInfo.getName());
-    renderTableRow("Type", mPhysicalDeviceInfo.getTypeString());
+  if (ImGui::Begin(("Device Info: " + mPhysicalDeviceInfo.getName()).c_str(),
+                   &mPhysicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking)) {
+    if (ImGui::BeginTable("Table", 2,
+                          ImGuiTableFlags_Borders |
+                              ImGuiTableColumnFlags_WidthStretch)) {
+      renderTableRow("Name", mPhysicalDeviceInfo.getName());
+      renderTableRow("Type", mPhysicalDeviceInfo.getTypeString());
 
-    ImGui::EndTable();
+      ImGui::EndTable();
+    }
+
+    ImGui::End();
   }
 }
 

@@ -1,11 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/imgui/ImguiUtils.h"
 
-#include "EntityPanel.h"
-
-#include "Widgets.h"
-#include "FontAwesome.h"
-
 #include "liquidator/actions/EntityNameActions.h"
 #include "liquidator/actions/EntityTransformActions.h"
 #include "liquidator/actions/EntityTextActions.h"
@@ -20,6 +15,11 @@
 #include "liquidator/actions/EntityAnimatorActions.h"
 #include "liquidator/actions/EntitySpriteActions.h"
 #include "liquidator/actions/SceneActions.h"
+
+#include "EntityPanel.h"
+
+#include "Widgets.h"
+#include "FontAwesome.h"
 
 namespace liquid::editor {
 
@@ -75,14 +75,14 @@ static bool ImguiMultilineInputText(const String &label, String &value,
 }
 
 void EntityPanel::render(WorkspaceState &state, AssetRegistry &assetRegistry,
-                         ActionExecutor &actionExecutor, Entity entity) {
-  if (entity == Entity::Null) {
+                         ActionExecutor &actionExecutor) {
+  if (state.selectedEntity == Entity::Null) {
     return;
   }
 
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
-  setSelectedEntity(scene, entity);
+  setSelectedEntity(scene, state.selectedEntity);
 
   if (auto _ = widgets::Window("Entity")) {
     if (scene.entityDatabase.exists(mSelectedEntity)) {

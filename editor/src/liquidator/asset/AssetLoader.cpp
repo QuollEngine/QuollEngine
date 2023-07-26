@@ -5,17 +5,18 @@
 
 namespace liquid::editor {
 
-AssetLoader::AssetLoader(AssetManager &assetManager,
-                         RenderStorage &renderStorage)
-    : mAssetManager(assetManager), mRenderStorage(renderStorage) {}
+AssetLoader::AssetLoader(AssetManager &assetManager)
+    : mAssetManager(assetManager) {}
 
 Result<Path> AssetLoader::loadFromPath(const Path &path,
                                        const Path &directory) {
   auto res = mAssetManager.importAsset(path, directory);
 
   if (res.hasData()) {
-    mAssetManager.getAssetRegistry().syncWithDevice(mRenderStorage);
-    mAssetManager.generatePreview(res.getData(), mRenderStorage);
+    mAssetManager.getAssetRegistry().syncWithDevice(
+        mAssetManager.getRenderStorage());
+    mAssetManager.generatePreview(res.getData(),
+                                  mAssetManager.getRenderStorage());
   }
 
   return res;

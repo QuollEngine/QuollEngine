@@ -306,12 +306,6 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
       static_cast<uint32_t>(sizeof(float) * mvp.size()), mvp.data());
 }
 
-void ImguiRenderer::useConfigPath(const String &path) {
-  ImGuiIO &io = ImGui::GetIO();
-  io.IniFilename = path.c_str();
-  ImGui::LoadIniSettingsFromDisk(io.IniFilename);
-}
-
 void ImguiRenderer::setClearColor(const glm::vec4 &clearColor) {
   mClearColor = clearColor;
 }

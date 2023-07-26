@@ -23,7 +23,6 @@
 #include "liquid/scene/CameraAspectRatioUpdater.h"
 
 #include "liquidator/editor-scene/EditorCamera.h"
-#include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/ui/UIRoot.h"
 #include "liquidator/ui/AssetLoadStatusDialog.h"
 #include "liquidator/ui/Theme.h"
@@ -37,9 +36,8 @@
 #include "liquidator/core/MousePickingGraph.h"
 
 #include "liquidator/asset/AssetManager.h"
-#include "liquidator/state/WorkspaceState.h"
 
-#include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/workspace/Workspace.h"
 
 #include "ImGuizmo.h"
 
@@ -54,9 +52,6 @@ void EditorScreen::start(const Project &project) {
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
   FPSCounter fpsCounter;
-
-  auto layoutPath = (project.settingsPath / "layout.ini").string();
-  auto statePath = project.settingsPath / "state.lqstate";
 
   RenderStorage renderStorage(mDevice);
 
@@ -88,8 +83,6 @@ void EditorScreen::start(const Project &project) {
   }
 
   Theme::apply();
-
-  imguiRenderer.useConfigPath(layoutPath);
   imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
   imguiRenderer.buildFonts();
 
@@ -98,29 +91,24 @@ void EditorScreen::start(const Project &project) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  WorkspaceState state{project};
+  Workspace workspace(project, assetManager,
+                      project.scenesPath / "main.lqscene");
 
-  ActionExecutor actionExecutor(state, assetManager.getAssetRegistry(),
-                                project.scenesPath / "main.lqscene");
-  actionExecutor.getSceneIO().loadScene(project.scenesPath / "main.lqscene");
+  auto context = workspace.getContext();
 
-  state.scene.entityDatabase.reg<CameraLookAt>();
-  state.camera = editorCamera.createDefaultCamera(state.scene.entityDatabase);
-  state.activeCamera = state.camera;
+  auto &state = context.state;
 
-  EditorManager::loadWorkspaceState(statePath, state);
+  UIRoot ui;
 
   MainLoop mainLoop(mWindow, fpsCounter);
-  AssetLoader assetLoader(assetManager, renderStorage);
 
   ImguiDebugLayer debugLayer(mDevice->getDeviceInformation(),
                              mDevice->getDeviceStats(), fpsCounter);
 
-  UIRoot ui(actionExecutor, assetLoader);
-  ui.getIconRegistry().loadIcons(
-      renderStorage, std::filesystem::current_path() / "assets" / "icons");
+  IconRegistry::loadIcons(renderStorage,
+                          std::filesystem::current_path() / "assets" / "icons");
 
-  EditorRenderer editorRenderer(ui.getIconRegistry(), renderStorage, mDevice);
+  EditorRenderer editorRenderer(renderStorage, mDevice);
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto scenePassGroup = sceneRenderer.attach(graph, options);
@@ -176,7 +164,7 @@ void EditorScreen::start(const Project &project) {
     }
   });
 
-  ui.processShortcuts(mEventSystem);
+  ui.processShortcuts(context, mEventSystem);
 
   EditorSimulator simulator(mEventSystem, mWindow,
                             assetManager.getAssetRegistry(), editorCamera);
@@ -184,8 +172,8 @@ void EditorScreen::start(const Project &project) {
   mWindow.maximize();
 
   mainLoop.setUpdateFn(
-      [&state, &actionExecutor, &simulator, this](float dt) mutable {
-        actionExecutor.process();
+      [&state, &workspace, &simulator, this](float dt) mutable {
+        workspace.update();
         mEventSystem.poll();
         simulator.update(dt, state);
         return true;
@@ -207,7 +195,9 @@ void EditorScreen::start(const Project &project) {
     imguiRenderer.beginRendering();
     ImGuizmo::BeginFrame();
 
-    ui.render(state, assetManager);
+    workspace.renderLayout();
+
+    ui.render(context);
 
     if (auto _ = widgets::MainMenuBar()) {
       debugLayer.renderMenu();
@@ -217,7 +207,7 @@ void EditorScreen::start(const Project &project) {
     logViewer.render(userLogStorage);
 
     bool mouseClicked =
-        ui.renderSceneView(state, renderer.getSceneTexture(), editorCamera);
+        ui.renderSceneView(context, renderer.getSceneTexture(), editorCamera);
 
     StatusBar::render(editorCamera);
 
@@ -241,7 +231,7 @@ void EditorScreen::start(const Project &project) {
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();
-        state.selectedEntity = entity;
+        context.state.selectedEntity = entity;
       }
 
       renderer.execute(renderFrame.commandList, renderFrame.frameIndex);
@@ -268,7 +258,6 @@ void EditorScreen::start(const Project &project) {
 
   mainLoop.run();
   Engine::resetLoggers();
-  EditorManager::saveWorkspaceState(state, statePath);
 
   mDevice->waitForIdle();
 }

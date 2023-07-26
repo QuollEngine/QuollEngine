@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquidator/editor-scene/EditorManager.h"
-
 namespace liquid::editor {
 
 /**

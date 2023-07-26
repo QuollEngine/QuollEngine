@@ -40,8 +40,8 @@ public:
    * @param renderStorage Render storage
    * @param iconsPath Path to icons
    */
-  void loadIcons(RenderStorage &renderStorage,
-                 const std::filesystem::path &iconsPath);
+  static void loadIcons(RenderStorage &renderStorage,
+                        const std::filesystem::path &iconsPath);
 
   /**
    * @brief Get icon
@@ -49,12 +49,13 @@ public:
    * @param icon Icon enum
    * @return Texture handle for the icon
    */
-  inline rhi::TextureHandle getIcon(EditorIcon icon) const {
+  static inline rhi::TextureHandle getIcon(EditorIcon icon) {
     return mIconMap.at(icon);
   }
 
 private:
-  std::unordered_map<EditorIcon, rhi::TextureHandle> mIconMap;
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,-warnings-as-errors)
+  static std::unordered_map<EditorIcon, rhi::TextureHandle> mIconMap;
 };
 
 } // namespace liquid::editor
