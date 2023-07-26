@@ -12,7 +12,7 @@ TEST_P(EntityCreateAudioActionTest, ExecutorCreatesAudioSourceComponent) {
 
   liquid::editor::EntityCreateAudio action(entity,
                                            liquid::AudioAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(
       activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
@@ -28,7 +28,7 @@ TEST_P(EntityCreateAudioActionTest, UndoDeletesAudioSourceComponet) {
 
   liquid::editor::EntityCreateAudio action(entity,
                                            liquid::AudioAssetHandle{15});
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::AudioSource>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -39,7 +39,7 @@ TEST_P(EntityCreateAudioActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateAudio action(entity,
                                            liquid::AudioAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateAudioActionTest,
@@ -47,16 +47,16 @@ TEST_P(EntityCreateAudioActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntityCreateAudio action(entity,
                                            liquid::AudioAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateAudioActionTest,
        PredicateReturnsTrueIfAudioDoesNotExistAndAssetIsValid) {
   auto entity = activeScene().entityDatabase.create();
-  auto handle = state.assetRegistry.getAudios().addAsset({});
+  auto handle = assetRegistry.getAudios().addAsset({});
 
   liquid::editor::EntityCreateAudio action(entity, handle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntityCreateAudioActionTest);
@@ -68,7 +68,7 @@ TEST_P(EntitySetAudioActionTest, ExecutorSetsAudioForEntity) {
   activeScene().entityDatabase.set<liquid::AudioSource>(entity, {});
 
   liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(
       activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
@@ -82,8 +82,8 @@ TEST_P(EntitySetAudioActionTest, UndoSetsPreviousAudioForEntity) {
       entity, {liquid::AudioAssetHandle{25}});
 
   liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(
       activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
@@ -94,15 +94,15 @@ TEST_P(EntitySetAudioActionTest, UndoSetsPreviousAudioForEntity) {
 TEST_P(EntitySetAudioActionTest, PredicateReturnsFalseIfAudioIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetAudioActionTest, PredicateReturnsTrueIfAudioExists) {
   auto entity = activeScene().entityDatabase.create();
-  auto scriptHandle = state.assetRegistry.getAudios().addAsset({});
+  auto scriptHandle = assetRegistry.getAudios().addAsset({});
 
   liquid::editor::EntitySetAudio action(entity, scriptHandle);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetAudioActionTest);

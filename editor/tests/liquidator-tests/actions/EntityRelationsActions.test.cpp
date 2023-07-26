@@ -11,7 +11,7 @@ TEST_F(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
   auto parent = activeScene().entityDatabase.create();
 
   liquid::editor::EntitySetParent action(entity, parent);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 2);
@@ -43,7 +43,7 @@ TEST_F(
   activeScene().entityDatabase.set<liquid::Children>(p1, {{entity}});
 
   liquid::editor::EntitySetParent action(entity, p2);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 3);
@@ -82,7 +82,7 @@ TEST_F(
   activeScene().entityDatabase.set<liquid::Children>(p2, {{}});
 
   liquid::editor::EntitySetParent action(entity, p2);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(res.addToHistory);
   EXPECT_EQ(res.entitiesToSave.size(), 3);
@@ -118,8 +118,8 @@ TEST_F(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
   auto parent = activeScene().entityDatabase.create();
 
   liquid::editor::EntitySetParent action(entity, parent);
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(res.entitiesToSave.size(), 2);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -140,8 +140,8 @@ TEST_F(
   activeScene().entityDatabase.set<liquid::Children>(p1, {{entity}});
 
   liquid::editor::EntitySetParent action(entity, p2);
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -179,8 +179,8 @@ TEST_F(
   activeScene().entityDatabase.set<liquid::Children>(p2, {{child0}});
 
   liquid::editor::EntitySetParent action(entity, p2);
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(res.entitiesToSave.size(), 3);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -214,7 +214,7 @@ TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
   auto entity = activeScene().entityDatabase.create();
 
   EXPECT_FALSE(liquid::editor::EntitySetParent(entity, liquid::Entity{25})
-                   .predicate(state));
+                   .predicate(state, assetRegistry));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
@@ -223,8 +223,8 @@ TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
 
   activeScene().entityDatabase.set<liquid::Parent>(child0, {entity});
 
-  EXPECT_FALSE(
-      liquid::editor::EntitySetParent(entity, child0).predicate(state));
+  EXPECT_FALSE(liquid::editor::EntitySetParent(entity, child0)
+                   .predicate(state, assetRegistry));
 }
 
 TEST_F(EntitySetParentTest,
@@ -236,8 +236,8 @@ TEST_F(EntitySetParentTest,
   activeScene().entityDatabase.set<liquid::Parent>(child1, {child0});
   activeScene().entityDatabase.set<liquid::Parent>(child0, {entity});
 
-  EXPECT_FALSE(
-      liquid::editor::EntitySetParent(entity, child1).predicate(state));
+  EXPECT_FALSE(liquid::editor::EntitySetParent(entity, child1)
+                   .predicate(state, assetRegistry));
 }
 
 TEST_F(EntitySetParentTest,
@@ -246,20 +246,21 @@ TEST_F(EntitySetParentTest,
   auto parent = activeScene().entityDatabase.create();
 
   activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
-  EXPECT_FALSE(
-      liquid::editor::EntitySetParent(entity, parent).predicate(state));
+  EXPECT_FALSE(liquid::editor::EntitySetParent(entity, parent)
+                   .predicate(state, assetRegistry));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
   auto entity = activeScene().entityDatabase.create();
 
-  EXPECT_FALSE(
-      liquid::editor::EntitySetParent(entity, entity).predicate(state));
+  EXPECT_FALSE(liquid::editor::EntitySetParent(entity, entity)
+                   .predicate(state, assetRegistry));
 }
 
 TEST_F(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
   auto entity = activeScene().entityDatabase.create();
   auto parent = activeScene().entityDatabase.create();
 
-  EXPECT_TRUE(liquid::editor::EntitySetParent(entity, parent).predicate(state));
+  EXPECT_TRUE(liquid::editor::EntitySetParent(entity, parent)
+                  .predicate(state, assetRegistry));
 }

@@ -24,8 +24,8 @@ public:
                : state.scene;
   }
 
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
+  liquid::AssetRegistry assetRegistry;
+  liquid::editor::WorkspaceState state{};
 };
 
 #define InitActionsTestSuite(InstantiationName, TestSuiteName)                 \

@@ -52,8 +52,8 @@ TEST_P(
   activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
 
   liquid::editor::EntityDeleteDirectionalLight action(entity);
-  action.onExecute(state);
-  auto res = action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(
       activeScene().entityDatabase.has<liquid::CascadedShadowMap>(entity));
@@ -68,9 +68,9 @@ TEST_P(EntityDeleteDirectionalLightActionTest,
   activeScene().entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
 
   liquid::editor::EntityDeleteDirectionalLight action(entity);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(
       activeScene().entityDatabase.has<liquid::CascadedShadowMap>(entity));

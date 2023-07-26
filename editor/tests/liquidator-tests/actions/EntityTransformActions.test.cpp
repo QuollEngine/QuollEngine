@@ -17,7 +17,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
                                                            startTransform);
   action.setNewComponent(finalTransform);
 
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
   EXPECT_EQ(activeScene()
                 .entityDatabase.get<liquid::LocalTransform>(entity)
                 .localPosition,
@@ -36,7 +36,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
   liquid::editor::EntitySetLocalTransformContinuous action(entity,
                                                            startTransform);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
   EXPECT_EQ(activeScene()
                 .entityDatabase.get<liquid::LocalTransform>(entity)
                 .localPosition,
@@ -52,7 +52,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
   liquid::editor::EntitySetLocalTransformContinuous action(entity,
                                                            std::nullopt);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
   EXPECT_FALSE(
       activeScene().entityDatabase.has<liquid::LocalTransform>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
@@ -67,7 +67,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
   liquid::editor::EntitySetLocalTransformContinuous action(entity,
                                                            std::nullopt);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
   EXPECT_FALSE(
       activeScene().entityDatabase.has<liquid::LocalTransform>(entity));
   EXPECT_FALSE(
@@ -81,7 +81,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
   liquid::editor::EntitySetLocalTransformContinuous action(
       entity, {}, liquid::LocalTransform{glm::vec3{5.5f}});
 
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetLocalTransformContinousActionTest,
@@ -89,7 +89,7 @@ TEST_P(EntitySetLocalTransformContinousActionTest,
   auto entity = activeScene().entityDatabase.create();
   liquid::editor::EntitySetLocalTransformContinuous action(entity, {});
 
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest,

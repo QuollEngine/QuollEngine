@@ -12,7 +12,7 @@ TEST_F(StartSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.mode = WM::Edit;
 
   liquid::editor::StartSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
   EXPECT_EQ(state.mode, WM::Simulation);
 }
 
@@ -33,7 +33,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
 
   liquid::editor::StartSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.activeCamera);
@@ -59,7 +59,7 @@ TEST_F(StartSimulationModeActionTest,
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
 
   liquid::editor::StartSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.dummyCamera);
@@ -73,7 +73,7 @@ TEST_F(StartSimulationModeActionTest,
   state.mode = WM::Edit;
 
   liquid::editor::StartSimulationMode action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_F(StartSimulationModeActionTest,
@@ -81,7 +81,7 @@ TEST_F(StartSimulationModeActionTest,
   state.mode = WM::Simulation;
 
   liquid::editor::StartSimulationMode action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 using StopSimulationModeActionTest = ActionTestBase;
@@ -91,7 +91,7 @@ TEST_F(StopSimulationModeActionTest, ExecutorSetsWorkspaceModeToSimulation) {
   state.camera = state.scene.entityDatabase.create();
 
   liquid::editor::StopSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
   EXPECT_EQ(state.mode, WM::Edit);
   EXPECT_EQ(state.activeCamera, state.camera);
 }
@@ -105,7 +105,7 @@ TEST_F(StopSimulationModeActionTest,
   state.selectedEntity = state.simulationScene.entityDatabase.create();
 
   liquid::editor::StopSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
   EXPECT_EQ(state.mode, WM::Edit);
   EXPECT_EQ(state.activeCamera, state.camera);
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
@@ -130,7 +130,7 @@ TEST_F(
   }
 
   liquid::editor::StopSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
   EXPECT_EQ(state.mode, WM::Edit);
   EXPECT_EQ(state.activeCamera, state.camera);
   EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
@@ -145,7 +145,7 @@ TEST_F(StopSimulationModeActionTest,
   state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
 
   liquid::editor::StopSimulationMode action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
   EXPECT_EQ(state.mode, WM::Edit);
   EXPECT_EQ(state.activeCamera, state.camera);
   EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
@@ -156,7 +156,7 @@ TEST_F(StopSimulationModeActionTest,
   state.mode = WM::Simulation;
 
   liquid::editor::StopSimulationMode action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_F(StopSimulationModeActionTest,
@@ -164,5 +164,5 @@ TEST_F(StopSimulationModeActionTest,
   state.mode = WM::Edit;
 
   liquid::editor::StopSimulationMode action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }

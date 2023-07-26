@@ -17,7 +17,7 @@ TEST_F(MoveCameraToEntityActionTest,
 
   liquid::editor::MoveCameraToEntity action(entity);
 
-  EXPECT_DEATH(action.onExecute(state), ".*");
+  EXPECT_DEATH(action.onExecute(state, assetRegistry), ".*");
 }
 
 TEST_F(MoveCameraToEntityActionTest,
@@ -33,7 +33,7 @@ TEST_F(MoveCameraToEntityActionTest,
   state.scene.entityDatabase.set<liquid::WorldTransform>(entity, {world});
 
   liquid::editor::MoveCameraToEntity action(entity);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
   const auto &lookAt =
       state.scene.entityDatabase.get<liquid::editor::CameraLookAt>(

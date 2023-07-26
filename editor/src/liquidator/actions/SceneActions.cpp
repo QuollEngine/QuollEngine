@@ -6,7 +6,9 @@ namespace liquid::editor {
 SceneSetStartingCamera::SceneSetStartingCamera(Entity entity)
     : mEntity(entity) {}
 
-ActionExecutorResult SceneSetStartingCamera::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneSetStartingCamera::onExecute(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -19,7 +21,9 @@ ActionExecutorResult SceneSetStartingCamera::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneSetStartingCamera::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+SceneSetStartingCamera::onUndo(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -30,7 +34,8 @@ ActionExecutorResult SceneSetStartingCamera::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneSetStartingCamera::predicate(WorkspaceState &state) {
+bool SceneSetStartingCamera::predicate(WorkspaceState &state,
+                                       AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -38,7 +43,9 @@ bool SceneSetStartingCamera::predicate(WorkspaceState &state) {
          scene.entityDatabase.has<PerspectiveLens>(mEntity);
 }
 
-ActionExecutorResult SceneRemoveSkybox::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneRemoveSkybox::onExecute(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -52,7 +59,8 @@ ActionExecutorResult SceneRemoveSkybox::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneRemoveSkybox::onUndo(WorkspaceState &state) {
+ActionExecutorResult SceneRemoveSkybox::onUndo(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -64,7 +72,8 @@ ActionExecutorResult SceneRemoveSkybox::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneRemoveSkybox::predicate(WorkspaceState &state) {
+bool SceneRemoveSkybox::predicate(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -74,7 +83,9 @@ bool SceneRemoveSkybox::predicate(WorkspaceState &state) {
 SceneChangeSkyboxType::SceneChangeSkyboxType(EnvironmentSkyboxType type)
     : mType(type) {}
 
-ActionExecutorResult SceneChangeSkyboxType::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneChangeSkyboxType::onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -91,7 +102,9 @@ ActionExecutorResult SceneChangeSkyboxType::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneChangeSkyboxType::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+SceneChangeSkyboxType::onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -106,7 +119,8 @@ ActionExecutorResult SceneChangeSkyboxType::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneChangeSkyboxType::predicate(WorkspaceState &state) {
+bool SceneChangeSkyboxType::predicate(WorkspaceState &state,
+                                      AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -124,7 +138,9 @@ bool SceneChangeSkyboxType::predicate(WorkspaceState &state) {
 
 SceneSetSkyboxColor::SceneSetSkyboxColor(glm::vec4 color) : mColor(color) {}
 
-ActionExecutorResult SceneSetSkyboxColor::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneSetSkyboxColor::onExecute(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -139,7 +155,8 @@ ActionExecutorResult SceneSetSkyboxColor::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneSetSkyboxColor::onUndo(WorkspaceState &state) {
+ActionExecutorResult SceneSetSkyboxColor::onUndo(WorkspaceState &state,
+                                                 AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -151,7 +168,8 @@ ActionExecutorResult SceneSetSkyboxColor::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneSetSkyboxColor::predicate(WorkspaceState &state) {
+bool SceneSetSkyboxColor::predicate(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -167,7 +185,9 @@ SceneSetSkyboxTexture::SceneSetSkyboxTexture(
     liquid::EnvironmentAssetHandle texture)
     : mTexture(texture) {}
 
-ActionExecutorResult SceneSetSkyboxTexture::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneSetSkyboxTexture::onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -182,7 +202,9 @@ ActionExecutorResult SceneSetSkyboxTexture::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneSetSkyboxTexture::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+SceneSetSkyboxTexture::onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -194,7 +216,8 @@ ActionExecutorResult SceneSetSkyboxTexture::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneSetSkyboxTexture::predicate(WorkspaceState &state) {
+bool SceneSetSkyboxTexture::predicate(WorkspaceState &state,
+                                      AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -206,7 +229,9 @@ bool SceneSetSkyboxTexture::predicate(WorkspaceState &state) {
          EnvironmentSkyboxType::Texture;
 }
 
-ActionExecutorResult SceneRemoveLighting::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SceneRemoveLighting::onExecute(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -223,7 +248,8 @@ ActionExecutorResult SceneRemoveLighting::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SceneRemoveLighting::onUndo(WorkspaceState &state) {
+ActionExecutorResult SceneRemoveLighting::onUndo(WorkspaceState &state,
+                                                 AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -235,7 +261,8 @@ ActionExecutorResult SceneRemoveLighting::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneRemoveLighting::predicate(WorkspaceState &state) {
+bool SceneRemoveLighting::predicate(WorkspaceState &state,
+                                    AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -244,7 +271,8 @@ bool SceneRemoveLighting::predicate(WorkspaceState &state) {
 }
 
 ActionExecutorResult
-SceneSetSkyboxLightingSource::onExecute(WorkspaceState &state) {
+SceneSetSkyboxLightingSource::onExecute(WorkspaceState &state,
+                                        AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -258,7 +286,8 @@ SceneSetSkyboxLightingSource::onExecute(WorkspaceState &state) {
 }
 
 ActionExecutorResult
-SceneSetSkyboxLightingSource::onUndo(WorkspaceState &state) {
+SceneSetSkyboxLightingSource::onUndo(WorkspaceState &state,
+                                     AssetRegistry &assetRegistry) {
 
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
@@ -271,7 +300,8 @@ SceneSetSkyboxLightingSource::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool SceneSetSkyboxLightingSource::predicate(WorkspaceState &state) {
+bool SceneSetSkyboxLightingSource::predicate(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 

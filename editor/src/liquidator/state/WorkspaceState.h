@@ -20,11 +20,6 @@ struct WorkspaceState {
   Project project;
 
   /**
-   * Asset registry
-   */
-  AssetRegistry &assetRegistry;
-
-  /**
    * Workspace mode
    */
   WorkspaceMode mode = WorkspaceMode::Edit;

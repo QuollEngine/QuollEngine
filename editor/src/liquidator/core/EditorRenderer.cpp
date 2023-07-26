@@ -408,6 +408,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 
 void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                      Entity camera, WorkspaceState &state,
+                                     AssetRegistry &assetRegistry,
                                      uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
@@ -425,7 +426,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
 
-      const auto &data = state.assetRegistry.getMeshes().getAsset(handle).data;
+      const auto &data = assetRegistry.getMeshes().getAsset(handle).data;
       frameData.addMeshOutline(data, world.worldTransform);
     } else if (entityDatabase.has<SkinnedMesh>(state.selectedEntity) &&
                entityDatabase.has<Skeleton>(state.selectedEntity)) {
@@ -434,8 +435,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
-      const auto &data =
-          state.assetRegistry.getSkinnedMeshes().getAsset(handle).data;
+      const auto &data = assetRegistry.getSkinnedMeshes().getAsset(handle).data;
 
       const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
                                  .jointFinalTransforms;

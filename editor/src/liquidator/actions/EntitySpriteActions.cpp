@@ -6,7 +6,8 @@ namespace liquid::editor {
 EntitySetSprite::EntitySetSprite(Entity entity, TextureAssetHandle handle)
     : mEntity(entity), mSprite(handle) {}
 
-ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state) {
+ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -18,7 +19,8 @@ ActionExecutorResult EntitySetSprite::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -29,26 +31,33 @@ ActionExecutorResult EntitySetSprite::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetSprite::predicate(WorkspaceState &state) {
-  return state.assetRegistry.getTextures().hasAsset(mSprite);
+bool EntitySetSprite::predicate(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
+  return assetRegistry.getTextures().hasAsset(mSprite);
 }
 
 EntityCreateSprite::EntityCreateSprite(Entity entity, TextureAssetHandle handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult EntityCreateSprite::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntityCreateSprite::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<Sprite>(mEntity, {mHandle})
-      .onExecute(state);
+      .onExecute(state, assetRegistry);
 }
 
-ActionExecutorResult EntityCreateSprite::onUndo(WorkspaceState &state) {
-  return EntityDefaultCreateComponent<Sprite>(mEntity, {mHandle}).onUndo(state);
+ActionExecutorResult EntityCreateSprite::onUndo(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
+  return EntityDefaultCreateComponent<Sprite>(mEntity, {mHandle})
+      .onUndo(state, assetRegistry);
 }
 
-bool EntityCreateSprite::predicate(WorkspaceState &state) {
+bool EntityCreateSprite::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   return !scene.entityDatabase.has<Sprite>(mEntity) &&
-         state.assetRegistry.getTextures().hasAsset(mHandle);
+         assetRegistry.getTextures().hasAsset(mHandle);
 }
+
 } // namespace liquid::editor

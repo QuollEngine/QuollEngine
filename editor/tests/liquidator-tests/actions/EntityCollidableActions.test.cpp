@@ -35,7 +35,7 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   const auto &collidableNew =
       activeScene().entityDatabase.get<liquid::Collidable>(entity);
@@ -63,9 +63,9 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   const auto &collidableNew =
       activeScene().entityDatabase.get<liquid::Collidable>(entity);
@@ -85,7 +85,7 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,
@@ -95,7 +95,7 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Box);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,
@@ -105,7 +105,7 @@ TEST_P(EntitySetCollidableTypeActionTest,
 
   liquid::editor::EntitySetCollidableType action(
       entity, liquid::PhysicsGeometryType::Sphere);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetCollidableTypeActionTest);

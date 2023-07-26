@@ -6,7 +6,9 @@ namespace liquid::editor {
 SetActiveTransform::SetActiveTransform(TransformOperation transformOperation)
     : mTransformOperation(transformOperation) {}
 
-ActionExecutorResult SetActiveTransform::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+SetActiveTransform::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   mOldTransformOperation = state.activeTransform;
   state.activeTransform = mTransformOperation;
 
@@ -15,12 +17,14 @@ ActionExecutorResult SetActiveTransform::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult SetActiveTransform::onUndo(WorkspaceState &state) {
+ActionExecutorResult SetActiveTransform::onUndo(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
   state.activeTransform = mOldTransformOperation;
   return ActionExecutorResult{};
 }
 
-bool SetActiveTransform::predicate(WorkspaceState &state) {
+bool SetActiveTransform::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
   return state.activeTransform != mTransformOperation;
 }
 

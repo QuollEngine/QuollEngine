@@ -13,7 +13,7 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Rotate;
 
   liquid::editor::SetActiveTransform action(TO::Move);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.activeTransform, TO::Move);
   EXPECT_TRUE(res.addToHistory);
@@ -24,8 +24,8 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Rotate;
 
   liquid::editor::SetActiveTransform action(TO::Move);
-  action.onExecute(state);
-  action.onUndo(state);
+  action.onExecute(state, assetRegistry);
+  action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(state.activeTransform, TO::Rotate);
 }
@@ -35,7 +35,7 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Move;
 
   liquid::editor::SetActiveTransform action(TO::Move);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_F(SetActiveTransformActionTest,
@@ -43,5 +43,5 @@ TEST_F(SetActiveTransformActionTest,
   state.activeTransform = TO::Move;
 
   liquid::editor::SetActiveTransform action(TO::Scale);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }

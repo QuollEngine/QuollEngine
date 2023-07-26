@@ -10,7 +10,7 @@ TEST_P(SceneSetStartingCameraActionTest, ExecutorSetsActiveCamera) {
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::SceneSetStartingCamera action(entity);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, entity);
   EXPECT_TRUE(res.saveScene);
@@ -24,9 +24,9 @@ TEST_P(SceneSetStartingCameraActionTest, UndoSetsPreviousActiveCamera) {
   activeScene().activeCamera = cameraEntity;
 
   liquid::editor::SceneSetStartingCamera action(entity);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, cameraEntity);
   EXPECT_TRUE(res.saveScene);
@@ -39,7 +39,7 @@ TEST_P(SceneSetStartingCameraActionTest,
   activeScene().activeCamera = entity;
 
   liquid::editor::SceneSetStartingCamera action(entity);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneSetStartingCameraActionTest,
@@ -47,7 +47,7 @@ TEST_P(SceneSetStartingCameraActionTest,
   auto entity = activeScene().entityDatabase.create();
 
   liquid::editor::SceneSetStartingCamera action(entity);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneSetStartingCameraActionTest,
@@ -56,7 +56,7 @@ TEST_P(SceneSetStartingCameraActionTest,
   activeScene().entityDatabase.set<liquid::PerspectiveLens>(entity, {});
 
   liquid::editor::SceneSetStartingCamera action(entity);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneSetStartingCameraActionTest);
@@ -70,7 +70,7 @@ TEST_P(SceneRemoveSkyboxActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveSkybox action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -85,9 +85,9 @@ TEST_P(SceneRemoveSkyboxActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveSkybox action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -99,7 +99,7 @@ TEST_P(SceneRemoveSkyboxActionTest,
   activeScene().environment = activeScene().entityDatabase.create();
 
   liquid::editor::SceneRemoveSkybox action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneRemoveSkyboxActionTest, PredicateReturnsTrueIfEntityHasSkybox) {
@@ -108,7 +108,7 @@ TEST_P(SceneRemoveSkyboxActionTest, PredicateReturnsTrueIfEntityHasSkybox) {
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveSkybox action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneRemoveSkyboxActionTest);
@@ -122,7 +122,7 @@ TEST_P(SceneChangeSkyboxTypeActionTest, ExecutorSetsDefaultSkybox) {
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Texture);
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -143,9 +143,9 @@ TEST_P(SceneChangeSkyboxTypeActionTest,
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Texture);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -163,9 +163,9 @@ TEST_P(SceneChangeSkyboxTypeActionTest,
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Texture);
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -181,7 +181,7 @@ TEST_P(SceneChangeSkyboxTypeActionTest,
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Texture);
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneChangeSkyboxTypeActionTest,
@@ -190,7 +190,7 @@ TEST_P(SceneChangeSkyboxTypeActionTest,
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Color);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneChangeSkyboxTypeActionTest,
@@ -202,7 +202,7 @@ TEST_P(SceneChangeSkyboxTypeActionTest,
 
   liquid::editor::SceneChangeSkyboxType action(
       liquid::EnvironmentSkyboxType::Color);
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneChangeSkyboxTypeActionTest);
@@ -215,7 +215,7 @@ TEST_P(SceneSetSkyboxColorActionTest, ExecutorSetsSkyboxColorForEnvironment) {
                                    liquid::EnvironmentSkybox{});
 
   liquid::editor::SceneSetSkyboxColor action(glm::vec4{0.2f});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -242,9 +242,9 @@ TEST_P(SceneSetSkyboxColorActionTest,
   activeScene().entityDatabase.set(activeScene().environment, skybox);
 
   liquid::editor::SceneSetSkyboxColor action(glm::vec4{0.2f});
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -264,7 +264,8 @@ TEST_P(SceneSetSkyboxColorActionTest,
 TEST_P(SceneSetSkyboxColorActionTest,
        PredicateReturnsFalseIfEnvironmentDoesNotHaveSkybox) {
   activeScene().environment = activeScene().entityDatabase.create();
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxColor({}).predicate(state));
+  EXPECT_FALSE(
+      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
 }
 
 TEST_P(SceneSetSkyboxColorActionTest,
@@ -273,7 +274,8 @@ TEST_P(SceneSetSkyboxColorActionTest,
   liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Texture};
   activeScene().entityDatabase.set(activeScene().environment, skybox);
 
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxColor({}).predicate(state));
+  EXPECT_FALSE(
+      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
 }
 
 TEST_P(SceneSetSkyboxColorActionTest,
@@ -282,7 +284,8 @@ TEST_P(SceneSetSkyboxColorActionTest,
   liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Color};
   activeScene().entityDatabase.set(activeScene().environment, skybox);
 
-  EXPECT_TRUE(liquid::editor::SceneSetSkyboxColor({}).predicate(state));
+  EXPECT_TRUE(
+      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxColorActionTest);
@@ -297,7 +300,7 @@ TEST_P(SceneSetSkyboxTextureActionTest,
 
   liquid::editor::SceneSetSkyboxTexture action(
       liquid::EnvironmentAssetHandle{20});
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -325,9 +328,9 @@ TEST_P(SceneSetSkyboxTextureActionTest,
 
   liquid::editor::SceneSetSkyboxTexture action(
       liquid::EnvironmentAssetHandle{20});
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
       activeScene().environment));
@@ -347,7 +350,8 @@ TEST_P(SceneSetSkyboxTextureActionTest,
 TEST_P(SceneSetSkyboxTextureActionTest,
        PredicateReturnsFalseIfEnvironmentDoesNotHaveSkybox) {
   activeScene().environment = activeScene().entityDatabase.create();
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(state));
+  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
+      state, assetRegistry));
 }
 
 TEST_P(SceneSetSkyboxTextureActionTest,
@@ -356,7 +360,8 @@ TEST_P(SceneSetSkyboxTextureActionTest,
   liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Color};
   activeScene().entityDatabase.set(activeScene().environment, skybox);
 
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(state));
+  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
+      state, assetRegistry));
 }
 
 TEST_P(SceneSetSkyboxTextureActionTest,
@@ -365,7 +370,8 @@ TEST_P(SceneSetSkyboxTextureActionTest,
   liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Texture};
   activeScene().entityDatabase.set(activeScene().environment, skybox);
 
-  EXPECT_TRUE(liquid::editor::SceneSetSkyboxTexture({}).predicate(state));
+  EXPECT_TRUE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
+      state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxTextureActionTest);
@@ -379,7 +385,7 @@ TEST_P(SceneRemoveLightingActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveLighting action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_FALSE(
       activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
@@ -395,9 +401,9 @@ TEST_P(SceneRemoveLightingActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveLighting action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(
       activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
@@ -412,7 +418,7 @@ TEST_P(SceneRemoveLightingActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneRemoveLighting action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneRemoveLightingActionTest,
@@ -420,7 +426,7 @@ TEST_P(SceneRemoveLightingActionTest,
   activeScene().environment = activeScene().entityDatabase.create();
 
   liquid::editor::SceneRemoveLighting action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneRemoveLightingActionTest);
@@ -432,7 +438,7 @@ TEST_P(SceneSetSkyboxLightingSourceActionTest,
   activeScene().environment = activeScene().entityDatabase.create();
 
   liquid::editor::SceneSetSkyboxLightingSource action;
-  auto res = action.onExecute(state);
+  auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_TRUE(
       activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
@@ -446,9 +452,9 @@ TEST_P(SceneSetSkyboxLightingSourceActionTest,
   activeScene().environment = activeScene().entityDatabase.create();
 
   liquid::editor::SceneSetSkyboxLightingSource action;
-  action.onExecute(state);
+  action.onExecute(state, assetRegistry);
 
-  auto res = action.onUndo(state);
+  auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(
       activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
@@ -461,7 +467,7 @@ TEST_P(SceneSetSkyboxLightingSourceActionTest,
   activeScene().environment = activeScene().entityDatabase.create();
 
   liquid::editor::SceneSetSkyboxLightingSource action;
-  EXPECT_TRUE(action.predicate(state));
+  EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SceneSetSkyboxLightingSourceActionTest,
@@ -471,7 +477,7 @@ TEST_P(SceneSetSkyboxLightingSourceActionTest,
       activeScene().environment, {});
 
   liquid::editor::SceneSetSkyboxLightingSource action;
-  EXPECT_FALSE(action.predicate(state));
+  EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxLightingSourceActionTest);

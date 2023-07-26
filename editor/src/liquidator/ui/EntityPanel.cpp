@@ -74,8 +74,8 @@ static bool ImguiMultilineInputText(const String &label, String &value,
                                    InputTextCallback, &userData);
 }
 
-void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
-                         Entity entity) {
+void EntityPanel::render(WorkspaceState &state, AssetRegistry &assetRegistry,
+                         ActionExecutor &actionExecutor, Entity entity) {
   if (entity == Entity::Null) {
     return;
   }
@@ -88,20 +88,20 @@ void EntityPanel::render(WorkspaceState &state, ActionExecutor &actionExecutor,
     if (scene.entityDatabase.exists(mSelectedEntity)) {
       renderName(scene, actionExecutor);
       renderTransform(scene, actionExecutor);
-      renderText(scene, state.assetRegistry, actionExecutor);
-      renderSprite(scene, state.assetRegistry, actionExecutor);
-      renderMesh(scene, state.assetRegistry, actionExecutor);
+      renderText(scene, assetRegistry, actionExecutor);
+      renderSprite(scene, assetRegistry, actionExecutor);
+      renderMesh(scene, assetRegistry, actionExecutor);
       renderDirectionalLight(scene, actionExecutor);
       renderPointLight(scene, actionExecutor);
       renderCamera(state, scene, actionExecutor);
-      renderAnimation(state, scene, state.assetRegistry, actionExecutor);
+      renderAnimation(state, scene, assetRegistry, actionExecutor);
       renderSkeleton(scene, actionExecutor);
       renderCollidable(scene, actionExecutor);
       renderRigidBody(scene, actionExecutor);
-      renderAudio(scene, state.assetRegistry, actionExecutor);
-      renderScripting(scene, state.assetRegistry, actionExecutor);
-      renderAddComponent(scene, state.assetRegistry, actionExecutor);
-      handleDragAndDrop(scene, state.assetRegistry, actionExecutor);
+      renderAudio(scene, assetRegistry, actionExecutor);
+      renderScripting(scene, assetRegistry, actionExecutor);
+      renderAddComponent(scene, assetRegistry, actionExecutor);
+      handleDragAndDrop(scene, assetRegistry, actionExecutor);
     }
   }
 }

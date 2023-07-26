@@ -6,7 +6,8 @@ namespace liquid::editor {
 EntitySetAudio::EntitySetAudio(Entity entity, AudioAssetHandle audio)
     : mEntity(entity), mAudio(audio) {}
 
-ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state) {
+ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -18,7 +19,8 @@ ActionExecutorResult EntitySetAudio::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state,
+                                            AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -29,28 +31,33 @@ ActionExecutorResult EntitySetAudio::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetAudio::predicate(WorkspaceState &state) {
-  return state.assetRegistry.getAudios().hasAsset(mAudio);
+bool EntitySetAudio::predicate(WorkspaceState &state,
+                               AssetRegistry &assetRegistry) {
+  return assetRegistry.getAudios().hasAsset(mAudio);
 }
 
 EntityCreateAudio::EntityCreateAudio(Entity entity, AudioAssetHandle handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult EntityCreateAudio::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntityCreateAudio::onExecute(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<AudioSource>(mEntity, {mHandle})
-      .onExecute(state);
+      .onExecute(state, assetRegistry);
 }
 
-ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntityCreateAudio::onUndo(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<AudioSource>(mEntity, {mHandle})
-      .onUndo(state);
+      .onUndo(state, assetRegistry);
 }
 
-bool EntityCreateAudio::predicate(WorkspaceState &state) {
+bool EntityCreateAudio::predicate(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   return !scene.entityDatabase.has<AudioSource>(mEntity) &&
-         state.assetRegistry.getAudios().hasAsset(mHandle);
+         assetRegistry.getAudios().hasAsset(mHandle);
 }
 
 } // namespace liquid::editor

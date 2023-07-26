@@ -48,12 +48,13 @@ static void dndEnvironmentAsset(widgets::Section &section,
 }
 
 void EnvironmentPanel::render(WorkspaceState &state,
+                              AssetRegistry &assetRegistry,
                               ActionExecutor &actionExecutor) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   if (auto _ = widgets::Window("Environment")) {
-    renderSkyboxSection(scene, state.assetRegistry, actionExecutor);
-    renderLightingSection(scene, state.assetRegistry, actionExecutor);
+    renderSkyboxSection(scene, assetRegistry, actionExecutor);
+    renderLightingSection(scene, assetRegistry, actionExecutor);
   }
 }
 

@@ -7,27 +7,34 @@ EntityCreateAnimator::EntityCreateAnimator(Entity entity,
                                            AnimatorAssetHandle handle)
     : mEntity(entity), mHandle(handle) {}
 
-ActionExecutorResult EntityCreateAnimator::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntityCreateAnimator::onExecute(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<Animator>(mEntity, {mHandle})
-      .onExecute(state);
+      .onExecute(state, assetRegistry);
 }
 
-ActionExecutorResult EntityCreateAnimator::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+EntityCreateAnimator::onUndo(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   return EntityDefaultCreateComponent<Animator>(mEntity, {mHandle})
-      .onUndo(state);
+      .onUndo(state, assetRegistry);
 }
 
-bool EntityCreateAnimator::predicate(WorkspaceState &state) {
+bool EntityCreateAnimator::predicate(WorkspaceState &state,
+                                     AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   return !scene.entityDatabase.has<Animator>(mEntity) &&
-         state.assetRegistry.getAnimators().hasAsset(mHandle);
+         assetRegistry.getAnimators().hasAsset(mHandle);
 }
 
 EntitySetAnimator::EntitySetAnimator(Entity entity, AnimatorAssetHandle script)
     : mEntity(entity), mAnimator(script) {}
 
-ActionExecutorResult EntitySetAnimator::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntitySetAnimator::onExecute(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -41,7 +48,8 @@ ActionExecutorResult EntitySetAnimator::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state) {
+ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -52,8 +60,9 @@ ActionExecutorResult EntitySetAnimator::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntitySetAnimator::predicate(WorkspaceState &state) {
-  return state.assetRegistry.getAnimators().hasAsset(mAnimator);
+bool EntitySetAnimator::predicate(WorkspaceState &state,
+                                  AssetRegistry &assetRegistry) {
+  return assetRegistry.getAnimators().hasAsset(mAnimator);
 }
 
 } // namespace liquid::editor

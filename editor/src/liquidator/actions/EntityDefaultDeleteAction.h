@@ -20,9 +20,11 @@ public:
    * @brief Execute action
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override {
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -42,9 +44,11 @@ public:
    * @brief Recreate component
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override {
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -61,10 +65,11 @@ public:
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Entity has component
    * @retval false Entity does not have component
    */
-  bool predicate(WorkspaceState &state) override {
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -97,9 +102,11 @@ public:
    * @brief Create component
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override {
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -116,9 +123,11 @@ public:
    * @brief Delete component
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override {
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -135,10 +144,11 @@ public:
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Entity has component
    * @retval false Entity does not have component
    */
-  bool predicate(WorkspaceState &state) override {
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -184,9 +194,11 @@ public:
    * @brief Update to new component
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onExecute(WorkspaceState &state) override {
+  ActionExecutorResult onExecute(WorkspaceState &state,
+                                 AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -204,9 +216,11 @@ public:
    * @brief Update to previous component
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @return Execution result
    */
-  ActionExecutorResult onUndo(WorkspaceState &state) override {
+  ActionExecutorResult onUndo(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
@@ -222,10 +236,11 @@ public:
    * @brief Action predicate
    *
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @retval true Entity has component
    * @retval false Entity does not have component
    */
-  bool predicate(WorkspaceState &state) override {
+  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;

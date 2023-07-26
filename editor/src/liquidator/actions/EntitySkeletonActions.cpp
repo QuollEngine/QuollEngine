@@ -7,7 +7,8 @@ EntityToggleSkeletonDebugBones::EntityToggleSkeletonDebugBones(Entity entity)
     : mEntity(entity) {}
 
 ActionExecutorResult
-EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state) {
+EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state,
+                                          AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -34,7 +35,8 @@ EntityToggleSkeletonDebugBones::onExecute(WorkspaceState &state) {
   return ActionExecutorResult();
 }
 
-bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state) {
+bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state,
+                                               AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -43,7 +45,9 @@ bool EntityToggleSkeletonDebugBones::predicate(WorkspaceState &state) {
 
 EntityDeleteSkeleton::EntityDeleteSkeleton(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult EntityDeleteSkeleton::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+EntityDeleteSkeleton::onExecute(WorkspaceState &state,
+                                AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -62,7 +66,9 @@ ActionExecutorResult EntityDeleteSkeleton::onExecute(WorkspaceState &state) {
   return res;
 }
 
-ActionExecutorResult EntityDeleteSkeleton::onUndo(WorkspaceState &state) {
+ActionExecutorResult
+EntityDeleteSkeleton::onUndo(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -76,7 +82,8 @@ ActionExecutorResult EntityDeleteSkeleton::onUndo(WorkspaceState &state) {
   return res;
 }
 
-bool EntityDeleteSkeleton::predicate(WorkspaceState &state) {
+bool EntityDeleteSkeleton::predicate(WorkspaceState &state,
+                                     AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 

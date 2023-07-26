@@ -5,7 +5,8 @@ namespace liquid::editor {
 
 DeleteEntity::DeleteEntity(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state) {
+ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
+                                             AssetRegistry &assetRegistry) {
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -67,6 +68,9 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state) {
   return res;
 }
 
-bool DeleteEntity::predicate(WorkspaceState &state) { return true; }
+bool DeleteEntity::predicate(WorkspaceState &state,
+                             AssetRegistry &assetRegistry) {
+  return true;
+}
 
 } // namespace liquid::editor

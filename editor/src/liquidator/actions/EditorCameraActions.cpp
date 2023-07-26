@@ -5,7 +5,9 @@ namespace liquid::editor {
 
 MoveCameraToEntity::MoveCameraToEntity(Entity entity) : mEntity(entity) {}
 
-ActionExecutorResult MoveCameraToEntity::onExecute(WorkspaceState &state) {
+ActionExecutorResult
+MoveCameraToEntity::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
   auto &scene = state.scene;
 
   auto &transformComponent = scene.entityDatabase.get<WorldTransform>(mEntity);
@@ -23,6 +25,9 @@ ActionExecutorResult MoveCameraToEntity::onExecute(WorkspaceState &state) {
   return ActionExecutorResult{};
 }
 
-bool MoveCameraToEntity::predicate(WorkspaceState &state) { return true; }
+bool MoveCameraToEntity::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
+  return true;
+}
 
 } // namespace liquid::editor

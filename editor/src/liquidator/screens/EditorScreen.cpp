@@ -98,9 +98,10 @@ void EditorScreen::start(const Project &project) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  WorkspaceState state{project, assetManager.getAssetRegistry()};
+  WorkspaceState state{project};
 
-  ActionExecutor actionExecutor(state, project.scenesPath / "main.lqscene");
+  ActionExecutor actionExecutor(state, assetManager.getAssetRegistry(),
+                                project.scenesPath / "main.lqscene");
   actionExecutor.getSceneIO().loadScene(project.scenesPath / "main.lqscene");
 
   state.scene.entityDatabase.reg<CameraLookAt>();
@@ -235,7 +236,8 @@ void EditorScreen::start(const Project &project) {
       sceneRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
                                     renderFrame.frameIndex);
       editorRenderer.updateFrameData(scene.entityDatabase, state.activeCamera,
-                                     state, renderFrame.frameIndex);
+                                     state, assetManager.getAssetRegistry(),
+                                     renderFrame.frameIndex);
 
       if (mousePicking.isSelectionPerformedInFrame(renderFrame.frameIndex)) {
         auto entity = mousePicking.getSelectedEntity();

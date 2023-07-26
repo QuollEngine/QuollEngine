@@ -60,10 +60,12 @@ public:
    * @param entityDatabase Entity database
    * @param camera Camera
    * @param state Workspace state
+   * @param assetRegistry Asset registry
    * @param frameIndex Frame index
    */
   void updateFrameData(EntityDatabase &entityDatabase, Entity camera,
-                       WorkspaceState &state, uint32_t frameIndex);
+                       WorkspaceState &state, AssetRegistry &assetRegistry,
+                       uint32_t frameIndex);
 
 private:
   /**

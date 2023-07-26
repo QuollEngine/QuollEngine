@@ -23,9 +23,10 @@ public:
   void TearDown() override { std::filesystem::remove_all(ScenePath); }
 
 public:
-  liquid::AssetRegistry registry;
-  liquid::editor::WorkspaceState state{{}, registry};
-  liquid::editor::ActionExecutor executor{state, ScenePath / "main.lqscene"};
+  liquid::AssetRegistry assetRegistry;
+  liquid::editor::WorkspaceState state{};
+  liquid::editor::ActionExecutor executor{state, assetRegistry,
+                                          ScenePath / "main.lqscene"};
 };
 
 struct TestActionData {
@@ -43,7 +44,8 @@ public:
   TestAction() : mData(new TestActionData) {}
 
   liquid::editor::ActionExecutorResult
-  onExecute(liquid::editor::WorkspaceState &state) {
+  onExecute(liquid::editor::WorkspaceState &state,
+            liquid::AssetRegistry &assetRegistry) {
     mData->called = true;
 
     liquid::editor::ActionExecutorResult res{};
@@ -57,7 +59,8 @@ public:
   }
 
   liquid::editor::ActionExecutorResult
-  onUndo(liquid::editor::WorkspaceState &state) {
+  onUndo(liquid::editor::WorkspaceState &state,
+         liquid::AssetRegistry &assetRegistry) override {
     mData->undoCalled = true;
 
     liquid::editor::ActionExecutorResult res{};
@@ -69,6 +72,14 @@ public:
     return res;
   }
 
+  bool predicate(liquid::editor::WorkspaceState &state,
+                 liquid::AssetRegistry &assetRegistry) override {
+    return mData->mPredicate;
+  }
+
+  inline liquid::SharedPtr<TestActionData> getData() { return mData; }
+
+public:
   void saveEntityOnExecute(liquid::Entity entity) {
     mData->entitiesToSave.push_back(entity);
   }
@@ -82,12 +93,6 @@ public:
   void addToHistory() { mData->addToHistory = true; }
 
   void setPredicate(bool predicate) { mData->mPredicate = predicate; }
-
-  bool predicate(liquid::editor::WorkspaceState &state) {
-    return mData->mPredicate;
-  }
-
-  inline liquid::SharedPtr<TestActionData> getData() { return mData; }
 
 private:
   liquid::SharedPtr<TestActionData> mData;
