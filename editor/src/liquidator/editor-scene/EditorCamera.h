@@ -71,6 +71,15 @@ public:
 
 public:
   /**
+   * @brief Create default camera
+   *
+   * @param entityDatabase Entity database
+   * @return Camera entity
+   */
+  static Entity createDefaultCamera(EntityDatabase &entityDatabase);
+
+public:
+  /**
    * @brief Create editor camera
    *
    * @param eventSystem Event system
@@ -135,14 +144,6 @@ public:
    * @return Input state
    */
   inline const InputState &getInputState() const { return mInputState; }
-
-  /**
-   * @brief Create default camera
-   *
-   * @param entityDatabase Entity database
-   * @return Camera entity
-   */
-  Entity createDefaultCamera(EntityDatabase &entityDatabase);
 
 private:
   /**

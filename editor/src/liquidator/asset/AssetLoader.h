@@ -16,9 +16,8 @@ public:
    * @brief Create asset loader
    *
    * @param assetManager Asset manager
-   * @param renderStorage Render storage
    */
-  AssetLoader(AssetManager &assetManager, RenderStorage &renderStorage);
+  AssetLoader(AssetManager &assetManager);
 
   /**
    * @brief Load asset from path
@@ -39,7 +38,6 @@ public:
 
 private:
   AssetManager &mAssetManager;
-  RenderStorage &mRenderStorage;
 };
 
 } // namespace liquid::editor

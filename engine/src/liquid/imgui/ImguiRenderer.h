@@ -138,13 +138,6 @@ public:
   void draw(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
             uint32_t frameIndex);
 
-  /**
-   * @brief Use config path for saving settings
-   *
-   * @param path Config path
-   */
-  void useConfigPath(const String &path);
-
 private:
   /**
    * @brief Setup remder states

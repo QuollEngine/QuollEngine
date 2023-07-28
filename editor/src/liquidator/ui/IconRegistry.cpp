@@ -6,8 +6,13 @@
 
 namespace liquid::editor {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,-warnings-as-errors)
+std::unordered_map<EditorIcon, rhi::TextureHandle> IconRegistry::mIconMap{};
+
 void IconRegistry::loadIcons(RenderStorage &renderStorage,
                              const std::filesystem::path &iconsPath) {
+  LIQUID_ASSERT(mIconMap.empty(), "Icons are already loaded");
+
   ImageTextureLoader loader(renderStorage);
 
   mIconMap.insert_or_assign(EditorIcon::Unknown,

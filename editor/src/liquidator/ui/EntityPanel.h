@@ -4,8 +4,6 @@
 #include "liquid/animation/AnimationSystem.h"
 #include "liquid/physics/PhysicsSystem.h"
 
-#include "../editor-scene/EditorManager.h"
-
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/actions/EntityScriptingActions.h"
@@ -29,10 +27,9 @@ public:
    * @param state Workspace state
    * @param actionExecutor Action executor
    * @param assetRegistry Asset registry
-   * @param entity Entity to display
    */
   void render(WorkspaceState &state, AssetRegistry &assetRegistry,
-              ActionExecutor &actionExecutor, Entity entity);
+              ActionExecutor &actionExecutor);
 
 private:
   /**

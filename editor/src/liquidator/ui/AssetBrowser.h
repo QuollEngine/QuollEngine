@@ -3,12 +3,12 @@
 #include "liquid/asset/AssetCache.h"
 
 #include "liquidator/asset/AssetLoader.h"
-#include "liquidator/editor-scene/EditorManager.h"
 #include "liquidator/actions/ActionExecutor.h"
+#include "liquidator/workspace/WorkspaceContext.h"
 
-#include "IconRegistry.h"
 #include "AssetLoadStatusDialog.h"
 
+#include "IconRegistry.h"
 #include "MaterialViewer.h"
 
 namespace liquid::editor {
@@ -31,22 +31,11 @@ class AssetBrowser {
 
 public:
   /**
-   * @brief Create asset browser
-   *
-   * @param assetLoader Asset loader
-   */
-  AssetBrowser(AssetLoader &assetLoader);
-
-  /**
    * @brief Render status bar
    *
-   * @param assetManager Asset manager
-   * @param iconRegistry Icon registry
-   * @param state Workspace state
-   * @param actionExecutor Action executor
+   * @param context Workspace context
    */
-  void render(AssetManager &assetManager, IconRegistry &iconRegistry,
-              WorkspaceState &state, ActionExecutor &actionExecutor);
+  void render(WorkspaceContext &context);
 
   /**
    * @brief Reload contents in current directory
@@ -56,8 +45,10 @@ public:
 private:
   /**
    * @brief Handle importing assets
+   *
+   * @param assetManager Asset manager
    */
-  void handleAssetImport();
+  void handleAssetImport(AssetManager &assetManager);
 
   /**
    * @brief Handle entry creation
@@ -83,9 +74,8 @@ private:
   Path mContentsDirectory;
   bool mDirectoryChanged = true;
   size_t mSelected = std::numeric_limits<size_t>::max();
-  AssetLoader &mAssetLoader;
 
-  AssetLoadStatusDialog mStatusDialog;
+  AssetLoadStatusDialog mStatusDialog{"AssetLoadStatus"};
   MaterialViewer mMaterialViewer;
 };
 

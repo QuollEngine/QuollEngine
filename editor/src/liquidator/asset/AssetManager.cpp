@@ -71,7 +71,7 @@ static Path getUniquePath(Path path) {
 AssetManager::AssetManager(const Path &assetsPath, const Path &assetsCachePath,
                            RenderStorage &renderStorage, bool optimize,
                            bool createDefaultObjects)
-    : mAssetsPath(assetsPath),
+    : mRenderStorage(renderStorage), mAssetsPath(assetsPath),
       mAssetCache(assetsCachePath, createDefaultObjects),
       mImageLoader(mAssetCache, renderStorage),
       mHDRIImporter(mAssetCache, renderStorage), mOptimize(optimize) {}

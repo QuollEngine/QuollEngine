@@ -1,14 +1,14 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
-#include "liquid/imgui/ImguiUtils.h"
-#include "AssetBrowser.h"
-
 #include "liquid/imgui/Imgui.h"
-#include "Widgets.h"
+#include "liquid/imgui/ImguiUtils.h"
+
+#include "liquid/platform/tools/FileOpener.h"
 
 #include "liquidator/actions/SpawnEntityActions.h"
 
-#include "liquid/platform/tools/FileOpener.h"
+#include "Widgets.h"
+#include "AssetBrowser.h"
 
 namespace liquid::editor {
 
@@ -98,12 +98,9 @@ static EditorIcon getIconFromAssetType(AssetType type) {
   }
 }
 
-AssetBrowser::AssetBrowser(AssetLoader &assetLoader)
-    : mAssetLoader(assetLoader), mStatusDialog("AssetLoadStatus") {}
+void AssetBrowser::render(WorkspaceContext &context) {
+  auto &assetManager = context.assetManager;
 
-void AssetBrowser::render(AssetManager &assetManager,
-                          IconRegistry &iconRegistry, WorkspaceState &state,
-                          ActionExecutor &actionExecutor) {
   static constexpr uint32_t ItemWidth = 90;
   static constexpr uint32_t ItemHeight = 100;
   static constexpr ImVec2 IconSize(80.0f, 80.0f);
@@ -144,7 +141,7 @@ void AssetBrowser::render(AssetManager &assetManager,
       entry.icon = entry.isDirectory ? EditorIcon::Directory
                                      : getIconFromAssetType(entry.assetType);
 
-      entry.preview = iconRegistry.getIcon(entry.icon);
+      entry.preview = IconRegistry::getIcon(entry.icon);
 
       if (entry.assetType == AssetType::Texture) {
         entry.preview =
@@ -241,11 +238,13 @@ void AssetBrowser::render(AssetManager &assetManager,
               mContentsDirectory = entry.path;
               mDirectoryChanged = true;
             } else if (entry.assetType == AssetType::Prefab) {
-              actionExecutor.execute<SpawnPrefabAtView>(
-                  static_cast<PrefabAssetHandle>(entry.asset), state.camera);
+              context.actionExecutor.execute<SpawnPrefabAtView>(
+                  static_cast<PrefabAssetHandle>(entry.asset),
+                  context.state.camera);
             } else if (entry.assetType == AssetType::Texture) {
-              actionExecutor.execute<SpawnSpriteAtView>(
-                  static_cast<TextureAssetHandle>(entry.asset), state.camera);
+              context.actionExecutor.execute<SpawnSpriteAtView>(
+                  static_cast<TextureAssetHandle>(entry.asset),
+                  context.state.camera);
             } else if (entry.assetType == AssetType::Material) {
               mMaterialViewer.open(
                   static_cast<MaterialAssetHandle>(entry.asset));
@@ -312,7 +311,7 @@ void AssetBrowser::render(AssetManager &assetManager,
 
         ImGui::TableNextColumn();
 
-        imgui::image(iconRegistry.getIcon(mStagingEntry.icon), IconSize);
+        imgui::image(IconRegistry::getIcon(mStagingEntry.icon), IconSize);
         ImGui::PushItemWidth(ItemWidth);
 
         if (!mInitialFocusSet) {
@@ -339,7 +338,7 @@ void AssetBrowser::render(AssetManager &assetManager,
                   ImGuiPopupFlags_MouseButtonRight |
                   ImGuiPopupFlags_NoOpenOverExistingPopup)) {
         if (ImGui::MenuItem("Import asset")) {
-          handleAssetImport();
+          handleAssetImport(context.assetManager);
         }
 
         if (ImGui::MenuItem("Create directory")) {
@@ -376,8 +375,8 @@ void AssetBrowser::render(AssetManager &assetManager,
 
 void AssetBrowser::reload() { mDirectoryChanged = true; }
 
-void AssetBrowser::handleAssetImport() {
-  auto res = mAssetLoader.loadFromFileDialog(mAssetDirectory);
+void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
+  auto res = AssetLoader(assetManager).loadFromFileDialog(mAssetDirectory);
 
   if (res.hasError()) {
     mStatusDialog.setTitle("Import failed");

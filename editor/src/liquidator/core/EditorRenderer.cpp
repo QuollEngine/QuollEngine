@@ -1,14 +1,15 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
 
+#include "liquidator/ui/IconRegistry.h"
+
 #include "EditorRenderer.h"
 
 namespace liquid::editor {
 
-EditorRenderer::EditorRenderer(IconRegistry &iconRegistry,
-                               RenderStorage &renderStorage,
+EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
                                rhi::RenderDevice *device)
-    : mIconRegistry(iconRegistry), mRenderStorage(renderStorage),
+    : mRenderStorage(renderStorage),
       mFrameData{EditorRendererFrameData(renderStorage),
                  EditorRendererFrameData(renderStorage)},
       mDevice(device) {
@@ -463,13 +464,13 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
   for (auto [entity, world, light] :
        entityDatabase.view<WorldTransform, DirectionalLight>()) {
-    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Sun),
+    frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Sun),
                        world.worldTransform);
   }
 
   for (auto [entity, world, light] :
        entityDatabase.view<WorldTransform, PointLight>()) {
-    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Light),
+    frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Light),
                        world.worldTransform);
   }
 
@@ -477,7 +478,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
        entityDatabase.view<WorldTransform, PerspectiveLens>()) {
     static constexpr float NinetyDegreesInRadians = glm::pi<float>() / 2.0f;
 
-    frameData.addGizmo(mIconRegistry.getIcon(EditorIcon::Camera),
+    frameData.addGizmo(IconRegistry::getIcon(EditorIcon::Camera),
                        glm::rotate(world.worldTransform, NinetyDegreesInRadians,
                                    glm::vec3(0, 1, 0)));
   }

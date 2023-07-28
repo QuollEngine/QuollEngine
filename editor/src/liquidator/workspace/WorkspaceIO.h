@@ -6,11 +6,11 @@
 namespace liquid::editor {
 
 /**
- * @brief Editor manager
+ * @brief Workspace input/output
  *
  * Saves an loads workspace state
  */
-class EditorManager {
+class WorkspaceIO {
 public:
   /**
    * @brief Save workspace state to a file
@@ -24,11 +24,11 @@ public:
   /**
    * @brief Load workspace state from file
    *
-   * @param path Path to workspace state file
    * @param state Workspace state
+   * @param path Path to workspace state file
    */
-  static void loadWorkspaceState(const std::filesystem::path &path,
-                                 WorkspaceState &state);
+  static void loadWorkspaceState(WorkspaceState &state,
+                                 const std::filesystem::path &path);
 };
 
 } // namespace liquid::editor

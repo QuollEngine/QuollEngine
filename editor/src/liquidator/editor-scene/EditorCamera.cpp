@@ -7,6 +7,23 @@
 
 namespace liquid::editor {
 
+Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
+  auto camera = entityDatabase.create();
+
+  PerspectiveLens lens{};
+  lens.near = DefaultNear;
+  lens.far = DefaultFar;
+  lens.sensorSize = DefaultSensorSize;
+  lens.focalLength = DefaultFocalLength;
+
+  entityDatabase.set(camera, lens);
+  entityDatabase.set<Camera>(camera, {});
+  entityDatabase.set<CameraLookAt>(camera,
+                                   {DefaultEye, DefaultCenter, DefaultUp});
+
+  return camera;
+}
+
 EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
     : mEventSystem(eventSystem), mWindow(window) {
   mMouseButtonReleaseHandler = mEventSystem.observe(
@@ -144,23 +161,6 @@ glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {
   float rY = pos.y - mY;
 
   return glm::vec2(rX * scaleX, rY * scaleY);
-}
-
-Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
-  auto camera = entityDatabase.create();
-
-  PerspectiveLens lens{};
-  lens.near = DefaultNear;
-  lens.far = DefaultFar;
-  lens.sensorSize = DefaultSensorSize;
-  lens.focalLength = DefaultFocalLength;
-
-  entityDatabase.set(camera, lens);
-  entityDatabase.set<Camera>(camera, {});
-  entityDatabase.set<CameraLookAt>(camera,
-                                   {DefaultEye, DefaultCenter, DefaultUp});
-
-  return camera;
 }
 
 void EditorCamera::pan(CameraLookAt &lookAt) {
