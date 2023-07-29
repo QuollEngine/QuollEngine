@@ -111,7 +111,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
   sceneColorDesc.layerCount = 1;
   sceneColorDesc.format = rhi::Format::Rgba16Float;
   sceneColorDesc.samples = mMaxSampleCounts;
-  sceneColorDesc.debugName = "Sampled scene";
+  sceneColorDesc.debugName = "Scene";
 
   auto sceneColor = graph.create(sceneColorDesc);
 

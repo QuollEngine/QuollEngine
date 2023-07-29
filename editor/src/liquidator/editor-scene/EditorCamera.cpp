@@ -150,7 +150,9 @@ void EditorCamera::update(WorkspaceState &state) {
 
   camera.viewMatrix = glm::lookAt(lookAt.eye, lookAt.center, lookAt.up);
   camera.projectionViewMatrix = camera.projectionMatrix * camera.viewMatrix;
-  camera.exposure.x = 1.0f;
+
+  static constexpr float Ev100ForOneExposure = -0.263034f;
+  camera.exposure.x = Ev100ForOneExposure;
 }
 
 glm::vec2 EditorCamera::scaleToViewport(const glm::vec2 &pos) const {

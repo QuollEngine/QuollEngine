@@ -150,9 +150,13 @@ void VulkanSwapchain::pickMostSuitableSurfaceFormat(
   auto it = std::find_if(
       surfaceFormats.begin(), surfaceFormats.end(),
       [](auto surfaceFormat) -> bool {
-        return surfaceFormat.format == VK_FORMAT_R8G8B8A8_SRGB &&
+        return (surfaceFormat.format == VK_FORMAT_R8G8B8A8_SRGB ||
+                surfaceFormat.format == VK_FORMAT_B8G8R8A8_SRGB) &&
                surfaceFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
       });
+
+  LIQUID_ASSERT(it != surfaceFormats.end(),
+                "Most suitable surface format not found");
 
   mSurfaceFormat = it != surfaceFormats.end() ? *it : surfaceFormats[0];
 }

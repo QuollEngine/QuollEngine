@@ -6,6 +6,49 @@
 
 namespace liquid::editor {
 
+static constexpr float Gamma = 2.2f;
+
+/**
+ * @brief Srgb color to linear
+ *
+ * This function automatically converts
+ * gamma corrected nonlinear colors to linear
+ * ones; so, it is easier to apply colors
+ * from graphics design applications to here
+ * without manually performing calculations.
+ *
+ * @param r Red
+ * @param g Greed
+ * @param b Blue
+ * @param a Alpha
+ * @return Linear color
+ */
+static ImVec4 SrgbToLinear(int r, int g, int b, int a) {
+  ImVec4 color(ImColor(r, g, b, a));
+
+  return {std::pow(color.x, Gamma), std::pow(color.y, Gamma),
+          std::pow(color.z, Gamma), color.w};
+}
+
+/**
+ * @brief Srgb color to linear
+ *
+ * This function automatically converts
+ * gamma corrected nonlinear colors to linear
+ * ones; so, it is easier to apply colors
+ * from graphics design applications to here
+ * without manually performing calculations.
+ *
+ * @param r Red
+ * @param g Greed
+ * @param b Blue
+ * @param a Alpha
+ * @return Linear color
+ */
+static glm::vec4 SrgbToLinear(float r, float g, float b, float a) {
+  return {std::pow(r, Gamma), std::pow(g, Gamma), std::pow(b, Gamma), a};
+}
+
 static constexpr float FontSize = 18.0f;
 
 static constexpr size_t NumFonts = 2;
@@ -15,8 +58,9 @@ static std::array<ImFont *, NumFonts> Fonts{};
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 static const std::unordered_map<ThemeColor, glm::vec4> Colors{
-    {ThemeColor::BackgroundColor, glm::vec4(0.22f, 0.22f, 0.22f, 1.0f)},
-    {ThemeColor::SceneBackgroundColor, glm::vec4(0.46f, 0.60f, 0.70f, 1.0f)}};
+    {ThemeColor::BackgroundColor, SrgbToLinear(0.22f, 0.22f, 0.22f, 1.0f)},
+    {ThemeColor::SceneBackgroundColor,
+     SrgbToLinear(0.46f, 0.60f, 0.70f, 1.0f)}};
 
 static const std::unordered_map<ThemeStyle, glm::vec2> Styles{
     {ThemeStyle::SectionRounding, glm::vec2(8.0f, 8.0f)},
@@ -31,11 +75,11 @@ static void setImguiStyles() {
   auto &style = ImGui::GetStyle();
 
   // All items
-  style.Colors[ImGuiCol_FrameBg] = ImVec4(ImColor(58, 58, 58, 255));
-  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(ImColor(33, 33, 33, 255));
-  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(ImColor(33, 33, 33, 255));
-  style.Colors[ImGuiCol_PopupBg] = ImVec4(ImColor(37, 37, 37, 255));
-  style.Colors[ImGuiCol_ChildBg] = ImVec4(ImColor(37, 37, 37, 255));
+  style.Colors[ImGuiCol_FrameBg] = SrgbToLinear(58, 58, 58, 255);
+  style.Colors[ImGuiCol_FrameBgHovered] = SrgbToLinear(33, 33, 33, 255);
+  style.Colors[ImGuiCol_FrameBgActive] = SrgbToLinear(33, 33, 33, 255);
+  style.Colors[ImGuiCol_PopupBg] = SrgbToLinear(37, 37, 37, 255);
+  style.Colors[ImGuiCol_ChildBg] = SrgbToLinear(37, 37, 37, 255);
   style.ItemSpacing = ImVec2(8.0f, 8.0f);
   style.ItemInnerSpacing = ImVec2(8.0f, 8.0f);
   style.FrameRounding = 4.0f;
@@ -48,46 +92,45 @@ static void setImguiStyles() {
   // Tables
   style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
   style.Colors[ImGuiCol_TableBorderStrong] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_TableHeaderBg] = ImVec4(ImColor(68, 68, 68, 255));
-  style.Colors[ImGuiCol_TableRowBg] = ImVec4(ImColor(68, 68, 68, 255));
-  style.Colors[ImGuiCol_TableRowBgAlt] = ImVec4(ImColor(58, 58, 58, 255));
+  style.Colors[ImGuiCol_TableHeaderBg] = SrgbToLinear(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TableRowBg] = SrgbToLinear(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TableRowBgAlt] = SrgbToLinear(58, 58, 58, 255);
   style.CellPadding = ImVec2(8.0f, 8.0f);
 
   // Window
-  style.Colors[ImGuiCol_WindowBg] = ImVec4(ImColor(44, 44, 44, 255));
-  style.Colors[ImGuiCol_MenuBarBg] = ImVec4(ImColor(55, 55, 55, 255));
-  style.Colors[ImGuiCol_TitleBg] = ImVec4(ImColor(68, 68, 68, 255));
-  style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(ImColor(68, 68, 68, 255));
-  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(ImColor(24, 24, 24, 255));
-  style.Colors[ImGuiCol_ResizeGrip] = ImVec4(ImColor(255, 255, 255, 125));
-  style.Colors[ImGuiCol_ResizeGripHovered] =
-      ImVec4(ImColor(255, 255, 255, 255));
-  style.Colors[ImGuiCol_ResizeGripActive] = ImVec4(ImColor(255, 255, 255, 255));
+  style.Colors[ImGuiCol_WindowBg] = SrgbToLinear(44, 44, 44, 255);
+  style.Colors[ImGuiCol_MenuBarBg] = SrgbToLinear(55, 55, 55, 255);
+  style.Colors[ImGuiCol_TitleBg] = SrgbToLinear(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TitleBgCollapsed] = SrgbToLinear(68, 68, 68, 255);
+  style.Colors[ImGuiCol_TitleBgActive] = SrgbToLinear(24, 24, 24, 255);
+  style.Colors[ImGuiCol_ResizeGrip] = SrgbToLinear(255, 255, 255, 125);
+  style.Colors[ImGuiCol_ResizeGripHovered] = SrgbToLinear(255, 255, 255, 255);
+  style.Colors[ImGuiCol_ResizeGripActive] = SrgbToLinear(255, 255, 255, 255);
   style.WindowRounding = 8.0f;
   style.WindowPadding = ImVec2(10.0f, 10.0f);
   style.WindowBorderSize = 0.0f;
 
   // Tabs
-  style.Colors[ImGuiCol_Tab] = ImVec4(ImColor(55, 55, 55, 255));
-  style.Colors[ImGuiCol_TabUnfocused] = ImVec4(ImColor(55, 55, 55, 255));
-  style.Colors[ImGuiCol_TabHovered] = ImVec4(ImColor(44, 44, 44, 255));
-  style.Colors[ImGuiCol_TabActive] = ImVec4(ImColor(44, 44, 44, 255));
-  style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(ImColor(44, 44, 44, 255));
+  style.Colors[ImGuiCol_Tab] = SrgbToLinear(55, 55, 55, 255);
+  style.Colors[ImGuiCol_TabUnfocused] = SrgbToLinear(55, 55, 55, 255);
+  style.Colors[ImGuiCol_TabHovered] = SrgbToLinear(44, 44, 44, 255);
+  style.Colors[ImGuiCol_TabActive] = SrgbToLinear(44, 44, 44, 255);
+  style.Colors[ImGuiCol_TabUnfocusedActive] = SrgbToLinear(44, 44, 44, 255);
 
   // Headers
   // Used by collapsing header
   style.Colors[ImGuiCol_Header] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_HeaderActive] = ImVec4(ImColor(37, 37, 37, 255));
-  style.Colors[ImGuiCol_HeaderHovered] = ImVec4(ImColor(37, 37, 37, 255));
+  style.Colors[ImGuiCol_HeaderActive] = SrgbToLinear(37, 37, 37, 255);
+  style.Colors[ImGuiCol_HeaderHovered] = SrgbToLinear(37, 37, 37, 255);
 
   // Inputs
-  style.Colors[ImGuiCol_Button] = ImVec4(ImColor(58, 58, 58, 255));
-  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(ImColor(33, 33, 33, 255));
-  style.Colors[ImGuiCol_ButtonActive] = ImVec4(ImColor(33, 33, 33, 255));
+  style.Colors[ImGuiCol_Button] = SrgbToLinear(58, 58, 58, 255);
+  style.Colors[ImGuiCol_ButtonHovered] = SrgbToLinear(33, 33, 33, 255);
+  style.Colors[ImGuiCol_ButtonActive] = SrgbToLinear(33, 33, 33, 255);
 
-  style.Colors[ImGuiCol_CheckMark] = ImVec4(ImColor(255, 255, 255, 255));
-  style.Colors[ImGuiCol_SliderGrab] = ImVec4(ImColor(58, 58, 58, 255));
-  style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(ImColor(68, 68, 68, 255));
+  style.Colors[ImGuiCol_CheckMark] = SrgbToLinear(255, 255, 255, 255);
+  style.Colors[ImGuiCol_SliderGrab] = SrgbToLinear(58, 58, 58, 255);
+  style.Colors[ImGuiCol_SliderGrabActive] = SrgbToLinear(68, 68, 68, 255);
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 

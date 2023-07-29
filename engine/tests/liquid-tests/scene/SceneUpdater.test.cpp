@@ -106,7 +106,7 @@ TEST_F(SceneUpdaterTest, UpdatesCameraBasedOnTransformAndPerspectiveLens) {
   EXPECT_EQ(camera.projectionMatrix, expectedPerspective);
   EXPECT_EQ(camera.projectionViewMatrix,
             camera.projectionMatrix * camera.viewMatrix);
-  EXPECT_NEAR(camera.exposure.x, 10.97f, 9.02f);
+  EXPECT_NEAR(camera.exposure.x, -0.965f, 0.001f);
 }
 
 TEST_F(SceneUpdaterTest, UpdateDirectionalLightsBasedOnTransforms) {
