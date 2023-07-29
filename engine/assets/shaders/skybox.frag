@@ -40,7 +40,7 @@ void main() {
     vec3 color =
         textureLod(uGlobalTextures[getSkybox().data.x], inTexCoord, 0).xyz;
 
-    outColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+    outColor = vec4(color, 1.0);
   } else {
     outColor = vec4(getSkybox().color.xyz, 1.0);
   }

@@ -21,17 +21,17 @@ struct PerspectiveLens {
   /**
    * Default aperture
    */
-  static constexpr float DefaultAperture = 22.0f;
+  static constexpr float DefaultAperture = 16.0f;
 
   /**
    * Default shutter speed
    */
-  static constexpr float DefaultShutterSpeed = 1.0f / 125.0f;
+  static constexpr float DefaultShutterSpeed = 1.0f / 250.0f;
 
   /**
    * Default sensitivity
    */
-  static constexpr uint32_t DefaultSensitivity = 100;
+  static constexpr uint32_t DefaultSensitivity = 200;
 
   /**
    * Near plane
