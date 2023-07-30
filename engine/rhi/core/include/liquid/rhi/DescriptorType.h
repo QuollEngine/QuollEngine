@@ -7,7 +7,8 @@ enum class DescriptorType {
   UniformBufferDynamic,
   StorageBuffer,
   CombinedImageSampler,
-  StorageImage
+  StorageImage,
+  None
 };
 
 } // namespace liquid::rhi

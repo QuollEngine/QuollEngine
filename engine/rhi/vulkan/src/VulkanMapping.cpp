@@ -332,6 +332,7 @@ VkFilter VulkanMapping::getFilter(Filter filter) {
     return VK_FILTER_LINEAR;
   default:
     LIQUID_ASSERT(false, "Filter does not exist");
+    return VK_FILTER_MAX_ENUM;
   }
 }
 
@@ -348,6 +349,7 @@ VulkanMapping::getDescriptorType(VkDescriptorType descriptorType) {
     return DescriptorType::StorageImage;
   default:
     LIQUID_ASSERT(false, "Descriptor type does not exist");
+    return DescriptorType::None;
   }
 }
 

@@ -43,16 +43,6 @@ public:
   void reset();
 
   /**
-   * @brief Create native Vulkan descriptor set
-   *
-   * @param layout Vulkan descriptor set layout
-   * @return Vulkan descriptor set
-   *
-   * @todo Remove after migration
-   */
-  VkDescriptorSet createDescriptor(VkDescriptorSetLayout layout);
-
-  /**
    * @brief Get Vulkan descriptor set
    *
    * @param handle Descriptor handle
@@ -69,6 +59,17 @@ public:
    */
   inline size_t getDescriptorsCount() const { return mDescriptorSets.size(); }
 
+  /**
+   * @brief Get layout from descriptor
+   *
+   * @param descriptor Vulkan descriptor
+   * @return Vulkan descriptor set layout
+   */
+  inline VkDescriptorSetLayout
+  getLayoutFromDescriptor(VkDescriptorSet descriptor) const {
+    return mDescriptorLayoutMap.at(descriptor);
+  }
+
 private:
   /**
    * @brief Create Vulkan descriptor pool
@@ -82,6 +83,9 @@ private:
 
   VkDescriptorPool mDescriptorPool = VK_NULL_HANDLE;
   std::vector<VkDescriptorSet> mDescriptorSets;
+
+  std::unordered_map<VkDescriptorSet, VkDescriptorSetLayout>
+      mDescriptorLayoutMap;
 };
 
 } // namespace liquid::rhi

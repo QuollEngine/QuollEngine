@@ -84,6 +84,13 @@ public:
    */
   inline VkPipelineBindPoint getBindPoint() const { return mBindPoint; }
 
+  /**
+   * @brief Get debug name
+   *
+   * @return Debug name
+   */
+  const String &getDebugName() const { return mDebugName; }
+
 private:
   /**
    * @brief Create pipeline layout
@@ -103,6 +110,8 @@ private:
   VkPipelineBindPoint mBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 
   std::unordered_map<uint32_t, VkDescriptorSetLayout> mDescriptorLayouts;
+
+  String mDebugName;
 };
 
 } // namespace liquid::rhi
