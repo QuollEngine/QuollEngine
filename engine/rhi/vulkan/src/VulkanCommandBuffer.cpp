@@ -59,6 +59,13 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());
 
+  LIQUID_ASSERT(
+      vulkanPipeline->getDescriptorLayout(firstSet) ==
+          mDescriptorPool.getLayoutFromDescriptor(descriptorSet),
+      "Layout of provided descriptor does not match the layout for set #" +
+          std::to_string(firstSet) + " that is defined in pipeline \"" +
+          vulkanPipeline->getDebugName() + "\"");
+
   vkCmdBindDescriptorSets(
       mCommandBuffer, vulkanPipeline->getBindPoint(),
       vulkanPipeline->getPipelineLayout(), firstSet, 1, &descriptorSet,

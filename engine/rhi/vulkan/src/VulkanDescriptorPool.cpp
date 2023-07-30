@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Debug.h"
 #include "liquid/core/Engine.h"
 
 #include "VulkanDescriptorPool.h"
@@ -89,29 +90,13 @@ VulkanDescriptorPool::createDescriptor(DescriptorLayoutHandle layout) {
 
   mDescriptorSets.push_back(descriptorSet);
 
+  LiquidDebugOnly(
+      { mDescriptorLayoutMap.insert_or_assign(descriptorSet, vulkanLayout); });
+
+  auto handle = static_cast<DescriptorHandle>(mDescriptorSets.size());
+
   return Descriptor(new VulkanDescriptorSet(mDevice, mRegistry, descriptorSet),
-                    static_cast<DescriptorHandle>(mDescriptorSets.size()));
-}
-
-VkDescriptorSet
-VulkanDescriptorPool::createDescriptor(VkDescriptorSetLayout layout) {
-  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-
-  VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
-  descriptorSetAllocateInfo.sType =
-      VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  descriptorSetAllocateInfo.pNext = nullptr;
-  descriptorSetAllocateInfo.descriptorPool = mDescriptorPool;
-  descriptorSetAllocateInfo.pSetLayouts = &layout;
-  descriptorSetAllocateInfo.descriptorSetCount = 1;
-
-  checkForVulkanError(vkAllocateDescriptorSets(
-                          mDevice, &descriptorSetAllocateInfo, &descriptorSet),
-                      "Failed to allocate descriptor set");
-
-  mDescriptorSets.push_back(descriptorSet);
-
-  return descriptorSet;
+                    handle);
 }
 
 void VulkanDescriptorPool::reset() {

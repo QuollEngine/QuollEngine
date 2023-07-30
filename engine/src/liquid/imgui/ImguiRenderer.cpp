@@ -105,7 +105,10 @@ ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
       rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
           true, rhi::BlendFactor::SrcAlpha, rhi::BlendFactor::OneMinusSrcAlpha,
           rhi::BlendOp::Add, rhi::BlendFactor::One,
-          rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}}});
+          rhi::BlendFactor::OneMinusSrcAlpha, rhi::BlendOp::Add}}},
+      {},
+      {},
+      "imgui"});
 
   pass.addPipeline(pipeline);
 

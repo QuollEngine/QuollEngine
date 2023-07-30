@@ -14,7 +14,8 @@ VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
                                VulkanDeviceObject &device,
                                const VulkanResourceRegistry &registry,
                                VulkanPipelineLayoutCache &pipelineLayoutCache)
-    : mDevice(device), mBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS) {
+    : mDevice(device), mDebugName(description.debugName),
+      mBindPoint(VK_PIPELINE_BIND_POINT_GRAPHICS) {
 
   std::vector<VulkanShader *> shaders{
       registry.getShaders().at(description.vertexShader).get(),
@@ -237,7 +238,8 @@ VulkanPipeline::VulkanPipeline(const ComputePipelineDescription &description,
                                VulkanDeviceObject &device,
                                const VulkanResourceRegistry &registry,
                                VulkanPipelineLayoutCache &pipelineLayoutCache)
-    : mDevice(device), mBindPoint(VK_PIPELINE_BIND_POINT_COMPUTE) {
+    : mDevice(device), mDebugName(description.debugName),
+      mBindPoint(VK_PIPELINE_BIND_POINT_COMPUTE) {
 
   VulkanShader *computeShader =
       registry.getShaders().at(description.computeShader).get();
