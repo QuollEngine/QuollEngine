@@ -124,7 +124,7 @@ public:
    * @param access Access
    * @return Vulkan access flags
    */
-  static VkAccessFlags getAccessFlags(Access access);
+  static VkAccessFlags2 getAccessFlags(Access access);
 
   /**
    * @brief Get Vulkan image layout
@@ -157,7 +157,7 @@ public:
    * @param pipelineStage Pipeline stage
    * @return Vulkan pipeline stage flags
    */
-  static VkPipelineStageFlags
+  static VkPipelineStageFlags2
   getPipelineStageFlags(PipelineStage pipelineStage);
 
   /**

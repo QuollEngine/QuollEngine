@@ -70,10 +70,16 @@ void VulkanRenderDevice::submitImmediate(RenderCommandList &commandList) {
 
   vkEndCommandBuffer(commandBuffer);
 
-  VulkanSubmitInfo submitInfo{};
-  submitInfo.commandBuffers = {commandBuffer};
+  VkCommandBufferSubmitInfo commandBufferInfo{};
+  commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+  commandBufferInfo.pNext = nullptr;
+  commandBufferInfo.commandBuffer = commandBuffer;
+  commandBufferInfo.deviceMask = 0;
 
-  mGraphicsQueue.submit(submitInfo);
+  std::array<VkCommandBufferSubmitInfo, 1> commandBufferInfos{
+      commandBufferInfo};
+
+  mGraphicsQueue.submit(VK_NULL_HANDLE, commandBufferInfos, {}, {});
   mGraphicsQueue.waitForIdle();
 }
 

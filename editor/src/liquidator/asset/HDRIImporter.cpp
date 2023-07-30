@@ -271,16 +271,12 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
 
     auto commandList = device->requestImmediateCommandList();
 
-    std::array<rhi::MemoryBarrier, 1> memoryBarriers{
-        {rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}}};
-    std::array<rhi::ImageBarrier, 1> imageBarriers{
-        {rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderWrite,
-                           rhi::ImageLayout::Undefined,
-                           rhi::ImageLayout::General, unfilteredCubemap}}};
+    std::array<rhi::ImageBarrier, 1> imageBarriers{{rhi::ImageBarrier{
+        rhi::Access::None, rhi::Access::ShaderWrite, rhi::PipelineStage::None,
+        rhi::PipelineStage::ComputeShader, rhi::ImageLayout::Undefined,
+        rhi::ImageLayout::General, unfilteredCubemap}}};
 
-    commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                                rhi::PipelineStage::ComputeShader,
-                                memoryBarriers, imageBarriers, {});
+    commandList.pipelineBarrier({}, imageBarriers, {});
 
     commandList.bindPipeline(mPipelineGenerateCubemap);
     commandList.bindDescriptor(mPipelineGenerateCubemap, 0,
@@ -327,21 +323,17 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
 
   auto commandList = device->requestImmediateCommandList();
 
-  std::array<rhi::MemoryBarrier, 2> memoryBarriers{
-      rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderRead},
-      rhi::MemoryBarrier{rhi::Access::None, rhi::Access::ShaderWrite}};
-
   std::array<rhi::ImageBarrier, 2> imageBarriers{
       rhi::ImageBarrier{
-          rhi::Access::None, rhi::Access::ShaderRead, rhi::ImageLayout::General,
+          rhi::Access::None, rhi::Access::ShaderRead, rhi::PipelineStage::None,
+          rhi::PipelineStage::ComputeShader, rhi::ImageLayout::General,
           rhi::ImageLayout::ShaderReadOnlyOptimal, unfilteredCubemap.texture},
-      rhi::ImageBarrier{rhi::Access::None, rhi::Access::ShaderWrite,
-                        rhi::ImageLayout::Undefined, rhi::ImageLayout::General,
-                        irradianceCubemap}};
+      rhi::ImageBarrier{
+          rhi::Access::None, rhi::Access::ShaderWrite, rhi::PipelineStage::None,
+          rhi::PipelineStage::ComputeShader, rhi::ImageLayout::Undefined,
+          rhi::ImageLayout::General, irradianceCubemap}};
 
-  commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                              rhi::PipelineStage::ComputeShader, memoryBarriers,
-                              imageBarriers, {});
+  commandList.pipelineBarrier({}, imageBarriers, {});
 
   commandList.bindPipeline(mPipelineGenerateIrradianceMap);
   commandList.bindDescriptor(mPipelineGenerateIrradianceMap, 0,

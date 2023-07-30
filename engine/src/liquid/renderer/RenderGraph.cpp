@@ -212,8 +212,6 @@ void RenderGraph::buildBarriers() {
       bufferDependencies;
 
   for (auto &pass : mCompiledPasses) {
-    rhi::PipelineStage srcStage = rhi::PipelineStage::None;
-    rhi::PipelineStage dstStage = rhi::PipelineStage::None;
     std::vector<rhi::ImageBarrier> imageBarriers{};
     std::vector<rhi::BufferBarrier> bufferBarriers{};
 
@@ -245,19 +243,17 @@ void RenderGraph::buildBarriers() {
       imageBarrier.dstLayout = newDependency.layout;
       imageBarrier.baseLevel = baseMipLevel;
       imageBarrier.levelCount = mipLevelCount;
-      dstStage |= newDependency.stage;
+      imageBarrier.dstStage = newDependency.stage;
 
       auto it = textureDependencies.find(handle);
       if (it == textureDependencies.end()) {
-        srcStage |= rhi::PipelineStage::PipeTop;
-
+        imageBarrier.srcStage = rhi::PipelineStage::None;
         imageBarrier.srcAccess = rhi::Access::None;
         imageBarrier.srcLayout = rhi::ImageLayout::Undefined;
       } else {
         auto oldDependency = it->second;
 
-        srcStage |= oldDependency.stage;
-
+        imageBarrier.srcStage = oldDependency.stage;
         imageBarrier.srcAccess = oldDependency.access;
         imageBarrier.srcLayout = oldDependency.layout;
       }
@@ -279,15 +275,14 @@ void RenderGraph::buildBarriers() {
 
       auto oldDependency = textureDependencies.at(handle);
 
-      srcStage |= oldDependency.stage;
-      dstStage |= newDependency.stage;
-
       rhi::ImageBarrier imageBarrier{};
       imageBarrier.texture = handle;
       imageBarrier.srcAccess = oldDependency.access;
       imageBarrier.dstAccess = newDependency.access;
       imageBarrier.srcLayout = oldDependency.layout;
       imageBarrier.dstLayout = newDependency.layout;
+      imageBarrier.srcStage = oldDependency.stage;
+      imageBarrier.dstStage = newDependency.stage;
       imageBarriers.push_back(imageBarrier);
 
       textureDependencies.insert_or_assign(handle, newDependency);
@@ -302,19 +297,16 @@ void RenderGraph::buildBarriers() {
       rhi::BufferBarrier bufferBarrier{};
       bufferBarrier.buffer = handle;
       bufferBarrier.dstAccess = newDependency.access;
-
-      dstStage |= newDependency.stage;
+      bufferBarrier.dstStage = newDependency.stage;
 
       auto it = bufferDependencies.find(handle);
       if (it == bufferDependencies.end()) {
-        srcStage |= rhi::PipelineStage::PipeTop;
-
+        bufferBarrier.srcStage = rhi::PipelineStage::None;
         bufferBarrier.srcAccess = rhi::Access::None;
       } else {
         auto oldDependency = it->second;
 
-        srcStage |= oldDependency.stage;
-
+        bufferBarrier.srcStage = oldDependency.stage;
         bufferBarrier.srcAccess = oldDependency.access;
       }
 
@@ -330,21 +322,17 @@ void RenderGraph::buildBarriers() {
 
       auto oldDependency = bufferDependencies.at(handle);
 
-      srcStage |= oldDependency.stage;
-      dstStage |= newDependency.stage;
-
       rhi::BufferBarrier bufferBarrier{};
       bufferBarrier.buffer = handle;
       bufferBarrier.srcAccess = oldDependency.access;
       bufferBarrier.dstAccess = newDependency.access;
+      bufferBarrier.srcStage = oldDependency.stage;
+      bufferBarrier.dstStage = newDependency.stage;
       bufferBarriers.push_back(bufferBarrier);
 
       bufferDependencies.insert_or_assign(handle, newDependency);
     }
 
-    pass.mDependencies.enabled = true;
-    pass.mDependencies.srcStage = srcStage;
-    pass.mDependencies.dstStage = dstStage;
     pass.mDependencies.imageBarriers = imageBarriers;
     pass.mDependencies.bufferBarriers = bufferBarriers;
 
@@ -500,12 +488,9 @@ void RenderGraph::execute(rhi::RenderCommandList &commandList,
   LIQUID_PROFILE_EVENT("RenderGraph::execute");
 
   for (auto &pass : mCompiledPasses) {
-    if (pass.mDependencies.enabled) {
-      commandList.pipelineBarrier(pass.mDependencies.srcStage,
-                                  pass.mDependencies.dstStage,
-                                  pass.mDependencies.memoryBarriers,
-                                  pass.mDependencies.imageBarriers, {});
-    }
+    commandList.pipelineBarrier(pass.mDependencies.memoryBarriers,
+                                pass.mDependencies.imageBarriers,
+                                pass.mDependencies.bufferBarriers);
 
     if (pass.getType() == RenderGraphPassType::Compute) {
       pass.execute(commandList, frameIndex);

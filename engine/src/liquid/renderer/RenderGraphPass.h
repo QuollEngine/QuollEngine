@@ -78,21 +78,6 @@ struct RenderGraphPassBufferData {
  */
 struct RenderGraphPassBarrier {
   /**
-   * Barrier enabled
-   */
-  bool enabled = false;
-
-  /**
-   * Source pipeline stage
-   */
-  rhi::PipelineStage srcStage{rhi::PipelineStage::None};
-
-  /**
-   * Destination pipeline stage
-   */
-  rhi::PipelineStage dstStage{rhi::PipelineStage::None};
-
-  /**
    * Memory barriers
    */
   std::vector<rhi::MemoryBarrier> memoryBarriers;

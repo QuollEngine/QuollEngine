@@ -111,7 +111,7 @@ TEST_F(RenderGraphSyncDependencyBufferReadTest,
   auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
       liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Vertex);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::VertexInput);
+  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::VertexAttributeInput);
   EXPECT_EQ(dependency.access, liquid::rhi::Access::VertexAttributeRead);
 }
 
@@ -120,7 +120,7 @@ TEST_F(RenderGraphSyncDependencyBufferReadTest,
   auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
       liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Index);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::VertexInput);
+  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::IndexInput);
   EXPECT_EQ(dependency.access, liquid::rhi::Access::IndexRead);
 }
 
@@ -158,8 +158,9 @@ TEST_F(RenderGraphSyncDependencyBufferReadTest,
       liquid::RenderGraphPassType::Graphics,
       liquid::rhi::BufferUsage::Storage | liquid::rhi::BufferUsage::Vertex);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::FragmentShader |
-                                  liquid::rhi::PipelineStage::VertexInput);
+  EXPECT_EQ(dependency.stage,
+            liquid::rhi::PipelineStage::FragmentShader |
+                liquid::rhi::PipelineStage::VertexAttributeInput);
   EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead |
                                    liquid::rhi::Access::VertexAttributeRead);
 }

@@ -60,6 +60,7 @@ VulkanDeviceObject::VulkanDeviceObject(
   extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
   extensions.push_back(VK_EXT_SHADER_VIEWPORT_INDEX_LAYER_EXTENSION_NAME);
   extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+  extensions.push_back(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
@@ -87,11 +88,17 @@ VulkanDeviceObject::VulkanDeviceObject(
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
   bufferDeviceAddressFeatures.pNext = &descriptorIndexingFeatures;
 
+  VkPhysicalDeviceSynchronization2Features sync2Features{};
+  sync2Features.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+  sync2Features.pNext = &bufferDeviceAddressFeatures;
+
   VkPhysicalDeviceFeatures2 deviceFeatures{};
   deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-  deviceFeatures.pNext = &bufferDeviceAddressFeatures;
+  deviceFeatures.pNext = &sync2Features;
   vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures);
 
+  assertFeature(sync2Features.synchronization2, "Synchronization 2");
   assertFeature(bufferDeviceAddressFeatures.bufferDeviceAddress,
                 "Buffer device address > Buffer device address");
   assertFeature(descriptorIndexingFeatures.descriptorBindingPartiallyBound,

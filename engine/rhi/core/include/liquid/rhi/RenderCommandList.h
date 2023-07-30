@@ -209,18 +209,15 @@ public:
   /**
    * @brief Pipeline barrier
    *
-   * @param srcStage Source pipeline stage
-   * @param dstStage Destination pipeline stage
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    * @param bufferBarriers Buffer barriers
    */
-  inline void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                              std::span<MemoryBarrier> memoryBarriers,
+  inline void pipelineBarrier(std::span<MemoryBarrier> memoryBarriers,
                               std::span<ImageBarrier> imageBarriers,
                               std::span<BufferBarrier> bufferBarriers) {
-    mNativeRenderCommandList->pipelineBarrier(
-        srcStage, dstStage, memoryBarriers, imageBarriers, bufferBarriers);
+    mNativeRenderCommandList->pipelineBarrier(memoryBarriers, imageBarriers,
+                                              bufferBarriers);
   }
 
   /**

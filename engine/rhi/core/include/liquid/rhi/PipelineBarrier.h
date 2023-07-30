@@ -3,6 +3,7 @@
 #include "RenderHandle.h"
 #include "AccessFlags.h"
 #include "ImageLayout.h"
+#include "StageFlags.h"
 
 namespace liquid::rhi {
 
@@ -19,6 +20,16 @@ struct MemoryBarrier {
    * Destination access flags
    */
   Access dstAccess{Access::None};
+
+  /**
+   * Source pipeline stage
+   */
+  PipelineStage srcStage{PipelineStage::None};
+
+  /**
+   * Destination pipeline stage
+   */
+  PipelineStage dstStage{PipelineStage::None};
 };
 
 /**
@@ -34,6 +45,16 @@ struct ImageBarrier {
    * Destination access flags
    */
   Access dstAccess{Access::None};
+
+  /**
+   * Source pipeline stage
+   */
+  PipelineStage srcStage{PipelineStage::None};
+
+  /**
+   * Destination pipeline stage
+   */
+  PipelineStage dstStage{PipelineStage::None};
 
   /**
    * Source image layout
@@ -74,6 +95,16 @@ struct BufferBarrier {
    * Destination access flags
    */
   Access dstAccess{Access::None};
+
+  /**
+   * Source pipeline stage
+   */
+  PipelineStage srcStage{PipelineStage::None};
+
+  /**
+   * Destination pipeline stage
+   */
+  PipelineStage dstStage{PipelineStage::None};
 
   /**
    * Buffer handle

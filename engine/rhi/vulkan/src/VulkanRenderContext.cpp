@@ -68,14 +68,36 @@ void VulkanRenderContext::endRendering(VulkanFrameManager &frameManager) {
 
   vkEndCommandBuffer(commandBuffer);
 
-  VulkanSubmitInfo submitInfo{};
-  submitInfo.commandBuffers = {commandBuffer};
-  submitInfo.fence = frameManager.getFrameFence();
-  submitInfo.signalSemaphores = {frameManager.getRenderFinishedSemaphore()};
-  submitInfo.waitSemaphores = {frameManager.getImageAvailableSemaphore()};
-  submitInfo.waitStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  VkCommandBufferSubmitInfo commandBufferInfo{};
+  commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+  commandBufferInfo.pNext = nullptr;
+  commandBufferInfo.commandBuffer = commandBuffer;
+  commandBufferInfo.deviceMask = 0;
 
-  mGraphicsQueue.submit(submitInfo);
+  VkSemaphoreSubmitInfo waitSemaphoreInfo{};
+  waitSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+  waitSemaphoreInfo.pNext = nullptr;
+  waitSemaphoreInfo.stageMask = 0;
+  waitSemaphoreInfo.semaphore = frameManager.getImageAvailableSemaphore();
+  waitSemaphoreInfo.deviceIndex = 0;
+  waitSemaphoreInfo.value = 0;
+
+  VkSemaphoreSubmitInfo signalSemaphoreInfo{};
+  signalSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+  signalSemaphoreInfo.pNext = nullptr;
+  signalSemaphoreInfo.stageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  signalSemaphoreInfo.semaphore = frameManager.getRenderFinishedSemaphore();
+  signalSemaphoreInfo.deviceIndex = 0;
+  signalSemaphoreInfo.value = 0;
+
+  std::array<VkCommandBufferSubmitInfo, 1> commandBufferInfos{
+      commandBufferInfo};
+  std::array<VkSemaphoreSubmitInfo, 1> waitSemaphoreInfos{waitSemaphoreInfo};
+  std::array<VkSemaphoreSubmitInfo, 1> signalSemaphoreInfos{
+      signalSemaphoreInfo};
+
+  mGraphicsQueue.submit(frameManager.getFrameFence(), commandBufferInfos,
+                        waitSemaphoreInfos, signalSemaphoreInfos);
 }
 
 } // namespace liquid::rhi

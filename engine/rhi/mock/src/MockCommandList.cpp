@@ -151,14 +151,10 @@ void MockCommandList::setScissor(const glm::ivec2 &offset,
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 }
 
-void MockCommandList::pipelineBarrier(PipelineStage srcStage,
-                                      PipelineStage dstStage,
-                                      std::span<MemoryBarrier> memoryBarriers,
+void MockCommandList::pipelineBarrier(std::span<MemoryBarrier> memoryBarriers,
                                       std::span<ImageBarrier> imageBarriers,
                                       std::span<BufferBarrier> bufferBarriers) {
   auto *command = new MockCommandPipelineBarrier;
-  command->srcStage = srcStage;
-  command->dstStage = dstStage;
   command->memoryBarriers = vectorFrom(memoryBarriers);
   command->imageBarriers = vectorFrom(imageBarriers);
   command->bufferBarriers = vectorFrom(bufferBarriers);

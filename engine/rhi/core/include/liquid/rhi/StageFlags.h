@@ -12,22 +12,25 @@ enum class ShaderStage {
 
 EnableBitwiseEnum(ShaderStage);
 
-enum class PipelineStage {
-  PipeTop = 0x00000001,
-  DrawIndirect = 0x00000002,
-  VertexInput = 0x00000004,
-  VertexShader = 0x00000008,
-  FragmentShader = 0x00000080,
-  EarlyFragmentTests = 0x00000100,
-  LateFragmentTests = 0x00000200,
-  ColorAttachmentOutput = 0x00000400,
-  ComputeShader = 0x00000800,
-  Transfer = 0x00001000,
-  PipeBottom = 0x00002000,
-  Host = 0x00004000,
-  AllGraphics = 0x00008000,
-  AllCommands = 0x00010000,
-  None = 0
+enum class PipelineStage : uint64_t {
+  None = 0ULL,
+  DrawIndirect = 0x00000002ULL,
+  VertexShader = 0x00000008ULL,
+  FragmentShader = 0x00000080ULL,
+  EarlyFragmentTests = 0x00000100ULL,
+  LateFragmentTests = 0x00000200ULL,
+  ColorAttachmentOutput = 0x00000400ULL,
+  ComputeShader = 0x00000800ULL,
+  Transfer = 0x00001000ULL,
+  Host = 0x00004000ULL,
+  AllGraphics = 0x00008000ULL,
+  AllCommands = 0x00010000ULL,
+  Copy = 0x100000000ULL,
+  Resolve = 0x200000000ULL,
+  Blit = 0x400000000ULL,
+  Clear = 0x800000000ULL,
+  IndexInput = 0x1000000000ULL,
+  VertexAttributeInput = 0x2000000000ULL
 };
 
 EnableBitwiseEnum(PipelineStage);
