@@ -24,12 +24,12 @@ void TextureUtils::copyDataToTexture(
   barrier.dstAccess = rhi::Access::TransferWrite;
   barrier.srcLayout = rhi::ImageLayout::Undefined;
   barrier.dstLayout = rhi::ImageLayout::TransferDestinationOptimal;
+  barrier.srcStage = rhi::PipelineStage::None;
+  barrier.dstStage = rhi::PipelineStage::Transfer;
   barrier.texture = destination;
 
   std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                              rhi::PipelineStage::Transfer, {}, preBarriers,
-                              {});
+  commandList.pipelineBarrier({}, preBarriers, {});
 
   std::vector<rhi::CopyRegion> copies(destinationLevels.size());
   for (size_t i = 0; i < copies.size(); ++i) {
@@ -51,10 +51,10 @@ void TextureUtils::copyDataToTexture(
   barrier.dstLayout = destinationLayout;
   barrier.srcAccess = rhi::Access::TransferWrite;
   barrier.dstAccess = rhi::Access::None;
+  barrier.srcStage = rhi::PipelineStage::Transfer;
+  barrier.dstStage = rhi::PipelineStage::AllCommands;
   std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, postBarriers,
-                              {});
+  commandList.pipelineBarrier({}, postBarriers, {});
 
   device->submitImmediate(commandList);
 
@@ -82,11 +82,11 @@ void TextureUtils::copyTextureToData(
   barrier.srcLayout = rhi::ImageLayout::Undefined;
   barrier.dstLayout = rhi::ImageLayout::TransferSourceOptimal;
   barrier.texture = source;
+  barrier.srcStage = rhi::PipelineStage::None;
+  barrier.dstStage = rhi::PipelineStage::Transfer;
 
   std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::PipeTop,
-                              rhi::PipelineStage::Transfer, {}, preBarriers,
-                              {});
+  commandList.pipelineBarrier({}, preBarriers, {});
 
   std::vector<rhi::CopyRegion> copies(sourceLevels.size());
   for (size_t i = 0; i < copies.size(); ++i) {
@@ -107,10 +107,10 @@ void TextureUtils::copyTextureToData(
   barrier.dstLayout = sourceLayout;
   barrier.srcAccess = rhi::Access::None;
   barrier.dstAccess = rhi::Access::None;
+  barrier.srcStage = rhi::PipelineStage::Transfer;
+  barrier.dstStage = rhi::PipelineStage::AllCommands;
   std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, postBarriers,
-                              {});
+  commandList.pipelineBarrier({}, postBarriers, {});
 
   device->submitImmediate(commandList);
 
@@ -136,11 +136,11 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
   barrier.dstAccess = rhi::Access::TransferWrite;
   barrier.srcLayout = rhi::ImageLayout::Undefined;
   barrier.dstLayout = rhi::ImageLayout::TransferDestinationOptimal;
+  barrier.srcStage = rhi::PipelineStage::Transfer;
+  barrier.dstStage = rhi::PipelineStage::Transfer;
 
   std::array<rhi::ImageBarrier, 1> preBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::Transfer, {}, preBarriers,
-                              {});
+  commandList.pipelineBarrier({}, preBarriers, {});
 
   barrier.srcAccess = rhi::Access::TransferWrite;
   barrier.dstAccess = rhi::Access::TransferRead;
@@ -153,9 +153,10 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
 
   for (uint32_t i = 1; i < levels; ++i) {
     barrier.baseLevel = i - 1;
+    barrier.srcStage = rhi::PipelineStage::Transfer;
+    barrier.dstStage = rhi::PipelineStage::Transfer;
     std::array<rhi::ImageBarrier, 1> barriers{barrier};
-    commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                                rhi::PipelineStage::Transfer, {}, barriers, {});
+    commandList.pipelineBarrier({}, barriers, {});
 
     rhi::BlitRegion region{};
     region.srcOffsets.at(0) = {0, 0, 0};
@@ -185,11 +186,11 @@ void TextureUtils::generateMipMapsForTexture(rhi::RenderDevice *device,
   barrier.dstLayout = layout;
   barrier.srcAccess = rhi::Access::None;
   barrier.dstAccess = rhi::Access::None;
+  barrier.srcStage = rhi::PipelineStage::Transfer;
+  barrier.dstStage = rhi::PipelineStage::AllCommands;
 
   std::array<rhi::ImageBarrier, 1> postBarriers{barrier};
-  commandList.pipelineBarrier(rhi::PipelineStage::Transfer,
-                              rhi::PipelineStage::PipeTop, {}, postBarriers,
-                              {});
+  commandList.pipelineBarrier({}, postBarriers, {});
 
   device->submitImmediate(commandList);
 }

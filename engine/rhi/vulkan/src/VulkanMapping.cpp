@@ -226,8 +226,8 @@ VulkanMapping::getDescriptorType(DescriptorType descriptorType) {
   }
 }
 
-VkAccessFlags VulkanMapping::getAccessFlags(Access access) {
-  return static_cast<VkAccessFlags>(access);
+VkAccessFlags2 VulkanMapping::getAccessFlags(Access access) {
+  return static_cast<VkAccessFlags2>(access);
 }
 
 VkImageLayout VulkanMapping::getImageLayout(ImageLayout imageLayout) {
@@ -250,6 +250,10 @@ VkImageLayout VulkanMapping::getImageLayout(ImageLayout imageLayout) {
     return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
   case ImageLayout::Preinitialized:
     return VK_IMAGE_LAYOUT_PREINITIALIZED;
+  case ImageLayout::ReadOnlyOptimal:
+    return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+  case ImageLayout::AttachmentOptional:
+    return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
   case ImageLayout::PresentSource:
     return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
   default:
@@ -273,9 +277,9 @@ VkShaderStageFlags VulkanMapping::getShaderStageFlags(ShaderStage shaderStage) {
   return static_cast<VkShaderStageFlags>(shaderStage);
 }
 
-VkPipelineStageFlags
+VkPipelineStageFlags2
 VulkanMapping::getPipelineStageFlags(PipelineStage pipelineStage) {
-  return static_cast<VkPipelineStageFlags>(pipelineStage);
+  return static_cast<VkPipelineStageFlags2>(pipelineStage);
 }
 
 VkIndexType VulkanMapping::getIndexType(IndexType indexType) {

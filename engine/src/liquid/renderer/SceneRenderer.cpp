@@ -546,12 +546,12 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           imageBarrier.dstAccess = rhi::Access::ShaderRead;
           imageBarrier.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
           imageBarrier.texture = bloomTexture;
+          imageBarrier.srcStage = rhi::PipelineStage::ComputeShader;
+          imageBarrier.dstStage = rhi::PipelineStage::ComputeShader;
 
           std::array<rhi::ImageBarrier, 1> imageBarriers{imageBarrier};
 
-          commandList.pipelineBarrier(rhi::PipelineStage::ComputeShader,
-                                      rhi::PipelineStage::ComputeShader, {},
-                                      imageBarriers, {});
+          commandList.pipelineBarrier({}, imageBarriers, {});
 
           glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
                              static_cast<uint32_t>(target.texture.getHandle()),
@@ -579,6 +579,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           imageBarrierSrc.srcLayout = rhi::ImageLayout::General;
           imageBarrierSrc.dstAccess = rhi::Access::ShaderRead;
           imageBarrierSrc.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
+          imageBarrierSrc.srcStage = rhi::PipelineStage::ComputeShader;
+          imageBarrierSrc.dstStage = rhi::PipelineStage::ComputeShader;
           imageBarrierSrc.texture = bloomTexture;
 
           rhi::ImageBarrier imageBarrierDst{};
@@ -589,13 +591,13 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           imageBarrierDst.dstAccess = rhi::Access::ShaderWrite;
           imageBarrierDst.dstLayout = rhi::ImageLayout::General;
           imageBarrierDst.texture = bloomTexture;
+          imageBarrierDst.srcStage = rhi::PipelineStage::ComputeShader;
+          imageBarrierDst.dstStage = rhi::PipelineStage::ComputeShader;
 
           std::array<rhi::ImageBarrier, 2> imageBarriers{imageBarrierSrc,
                                                          imageBarrierDst};
 
-          commandList.pipelineBarrier(rhi::PipelineStage::ComputeShader,
-                                      rhi::PipelineStage::ComputeShader, {},
-                                      imageBarriers, {});
+          commandList.pipelineBarrier({}, imageBarriers, {});
 
           const auto &source = bloomChain.at(level);
           const auto &target = bloomChain.at(level - 1);

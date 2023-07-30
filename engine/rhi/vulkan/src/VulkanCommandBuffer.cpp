@@ -138,27 +138,31 @@ void VulkanCommandBuffer::setScissor(const glm::ivec2 &offset,
 }
 
 void VulkanCommandBuffer::pipelineBarrier(
-    PipelineStage srcStage, PipelineStage dstStage,
     std::span<MemoryBarrier> memoryBarriers,
     std::span<ImageBarrier> imageBarriers,
     std::span<BufferBarrier> bufferBarriers) {
 
-  std::vector<VkMemoryBarrier> vkMemoryBarriers(memoryBarriers.size());
+  std::vector<VkMemoryBarrier2> vkMemoryBarriers(memoryBarriers.size());
   for (size_t i = 0; i < memoryBarriers.size(); ++i) {
     auto &barrier = memoryBarriers[i];
     auto &vkBarrier = vkMemoryBarriers.at(i);
-    vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
     vkBarrier.pNext = nullptr;
     vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
     vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
+    vkBarrier.srcStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.srcStage);
+    vkBarrier.dstStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.dstStage);
   }
 
-  std::vector<VkImageMemoryBarrier> vkImageMemoryBarriers(imageBarriers.size());
+  std::vector<VkImageMemoryBarrier2> vkImageMemoryBarriers(
+      imageBarriers.size());
   for (size_t i = 0; i < imageBarriers.size(); ++i) {
     auto &barrier = imageBarriers[i];
     const auto &texture = mRegistry.getTextures().at(barrier.texture);
     auto &vkBarrier = vkImageMemoryBarriers.at(i);
-    vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
     vkBarrier.pNext = nullptr;
     vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
     vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
@@ -171,31 +175,44 @@ void VulkanCommandBuffer::pipelineBarrier(
         texture->getDescription().layerCount;
     vkBarrier.subresourceRange.levelCount = barrier.levelCount;
     vkBarrier.subresourceRange.aspectMask = texture->getImageAspectFlags();
+    vkBarrier.srcStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.srcStage);
+    vkBarrier.dstStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.dstStage);
   }
 
-  std::vector<VkBufferMemoryBarrier> vkBufferMemoryBarriers(
+  std::vector<VkBufferMemoryBarrier2> vkBufferMemoryBarriers(
       bufferBarriers.size());
   for (size_t i = 0; i < bufferBarriers.size(); ++i) {
     auto &barrier = bufferBarriers[i];
     auto &vkBarrier = vkBufferMemoryBarriers.at(i);
-    vkBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    vkBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
     vkBarrier.pNext = nullptr;
     vkBarrier.srcAccessMask = VulkanMapping::getAccessFlags(barrier.srcAccess);
     vkBarrier.dstAccessMask = VulkanMapping::getAccessFlags(barrier.dstAccess);
     vkBarrier.buffer = mRegistry.getBuffers().at(barrier.buffer)->getBuffer();
     vkBarrier.offset = barrier.offset;
     vkBarrier.size = barrier.size > 0 ? barrier.size : VK_WHOLE_SIZE;
+    vkBarrier.srcStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.srcStage);
+    vkBarrier.dstStageMask =
+        VulkanMapping::getPipelineStageFlags(barrier.dstStage);
   }
 
-  vkCmdPipelineBarrier(
-      mCommandBuffer, VulkanMapping::getPipelineStageFlags(srcStage),
-      VulkanMapping::getPipelineStageFlags(dstStage),
-      VK_DEPENDENCY_BY_REGION_BIT,
-      static_cast<uint32_t>(vkMemoryBarriers.size()), vkMemoryBarriers.data(),
-      static_cast<uint32_t>(vkBufferMemoryBarriers.size()),
-      vkBufferMemoryBarriers.data(),
-      static_cast<uint32_t>(vkImageMemoryBarriers.size()),
-      vkImageMemoryBarriers.data());
+  VkDependencyInfo info{};
+  info.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+  info.pNext = nullptr;
+  info.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+  info.bufferMemoryBarrierCount =
+      static_cast<uint32_t>(vkBufferMemoryBarriers.size());
+  info.pBufferMemoryBarriers = vkBufferMemoryBarriers.data();
+  info.imageMemoryBarrierCount =
+      static_cast<uint32_t>(vkImageMemoryBarriers.size());
+  info.pImageMemoryBarriers = vkImageMemoryBarriers.data();
+  info.memoryBarrierCount = static_cast<uint32_t>(vkMemoryBarriers.size());
+  info.pMemoryBarriers = vkMemoryBarriers.data();
+
+  vkCmdPipelineBarrier2KHR(mCommandBuffer, &info);
 }
 
 void VulkanCommandBuffer::copyTextureToBuffer(

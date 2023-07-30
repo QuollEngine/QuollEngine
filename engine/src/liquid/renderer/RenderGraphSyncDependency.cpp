@@ -60,12 +60,12 @@ RenderGraphSyncDependency::getBufferRead(RenderGraphPassType type,
   rhi::PipelineStage stage = rhi::PipelineStage::None;
 
   if (BitwiseEnumContains(usage, rhi::BufferUsage::Vertex)) {
-    stage |= rhi::PipelineStage::VertexInput;
+    stage |= rhi::PipelineStage::VertexAttributeInput;
     access |= rhi::Access::VertexAttributeRead;
   }
 
   if (BitwiseEnumContains(usage, rhi::BufferUsage::Index)) {
-    stage |= rhi::PipelineStage::VertexInput;
+    stage |= rhi::PipelineStage::IndexInput;
     access |= rhi::Access::IndexRead;
   }
 

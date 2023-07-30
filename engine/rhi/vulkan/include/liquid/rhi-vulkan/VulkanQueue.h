@@ -5,36 +5,6 @@
 namespace liquid::rhi {
 
 /**
- * @brief Vulkan submit info
- */
-struct VulkanSubmitInfo {
-  /**
-   * Pipeline stage flags to wait for
-   */
-  VkPipelineStageFlags waitStages;
-
-  /**
-   * Semaphores to wait for
-   */
-  std::vector<VkSemaphore> waitSemaphores;
-
-  /**
-   * Semaphores to signal
-   */
-  std::vector<VkSemaphore> signalSemaphores;
-
-  /**
-   * Fence to signal
-   */
-  VkFence fence = VK_NULL_HANDLE;
-
-  /**
-   * Command buffers
-   */
-  std::vector<VkCommandBuffer> commandBuffers;
-};
-
-/**
  * @brief Vulkan queue
  */
 class VulkanQueue {
@@ -71,9 +41,15 @@ public:
   /**
    * @brief Submit queue
    *
-   * @param submitInfo Submit info
+   * @param fence Submission fence
+   * @param commandBufferInfos Command buffer infos
+   * @param waitSemaphoreInfos Command buffer infos
+   * @param signalSemaphoreInfos Command buffer infos
    */
-  void submit(VulkanSubmitInfo submitInfo);
+  void submit(VkFence fence,
+              std::span<VkCommandBufferSubmitInfo> commandBufferInfos,
+              std::span<VkSemaphoreSubmitInfo> waitSemaphoreInfos,
+              std::span<VkSemaphoreSubmitInfo> signalSemaphoreInfos);
 
   /**
    * @brief Wait for idle

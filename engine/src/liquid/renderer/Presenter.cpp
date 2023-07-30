@@ -131,12 +131,12 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     imageBarrier.dstLayout = rhi::ImageLayout::ShaderReadOnlyOptimal;
     imageBarrier.srcAccess = rhi::Access::ColorAttachmentWrite;
     imageBarrier.dstAccess = rhi::Access::ShaderRead;
+    imageBarrier.srcStage = rhi::PipelineStage::ColorAttachmentOutput;
+    imageBarrier.dstStage = rhi::PipelineStage::FragmentShader;
     imageBarrier.texture = handle;
 
     std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
-    commandList.pipelineBarrier(rhi::PipelineStage::ColorAttachmentOutput,
-                                rhi::PipelineStage::FragmentShader, {},
-                                barriers, {});
+    commandList.pipelineBarrier({}, barriers, {});
   }
 
   commandList.beginRenderPass(
@@ -161,11 +161,11 @@ void Presenter::present(rhi::RenderCommandList &commandList,
     imageBarrier.texture = handle;
     imageBarrier.srcAccess = rhi::Access::ShaderRead;
     imageBarrier.dstAccess = rhi::Access::ColorAttachmentWrite;
+    imageBarrier.srcStage = rhi::PipelineStage::FragmentShader;
+    imageBarrier.dstStage = rhi::PipelineStage::ColorAttachmentOutput;
 
     std::array<rhi::ImageBarrier, 1> barriers{imageBarrier};
-    commandList.pipelineBarrier(rhi::PipelineStage::FragmentShader,
-                                rhi::PipelineStage::ColorAttachmentOutput, {},
-                                barriers, {});
+    commandList.pipelineBarrier({}, barriers, {});
   }
 }
 

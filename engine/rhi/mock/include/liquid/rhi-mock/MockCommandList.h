@@ -144,14 +144,11 @@ public:
   /**
    * @brief Pipeline barrier
    *
-   * @param srcStage Source pipeline stage
-   * @param dstStage Destination pipeline stage
    * @param memoryBarriers Memory barriers
    * @param imageBarriers Image barriers
    * @param bufferBarriers Buffer barriers
    */
-  void pipelineBarrier(PipelineStage srcStage, PipelineStage dstStage,
-                       std::span<MemoryBarrier> memoryBarriers,
+  void pipelineBarrier(std::span<MemoryBarrier> memoryBarriers,
                        std::span<ImageBarrier> imageBarriers,
                        std::span<BufferBarrier> bufferBarriers) override;
 

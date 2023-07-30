@@ -276,50 +276,59 @@ TEST_F(RenderGraphTest,
 
   graph.build(storage);
 
-  auto barrier0 = graph.getCompiledPasses().at(0).getSyncDependencies();
-  EXPECT_TRUE(barrier0.enabled);
-  EXPECT_EQ(barrier0.srcStage, liquid::rhi::PipelineStage::PipeTop);
-  EXPECT_EQ(barrier0.dstStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier0.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier0.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier0.imageBarriers.at(0).srcAccess, liquid::rhi::Access::None);
-  EXPECT_EQ(barrier0.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier0.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::Undefined);
-  EXPECT_EQ(barrier0.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  auto dependencies0 = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_EQ(dependencies0.imageBarriers.size(), 1);
 
-  const auto &barrier1 = graph.getCompiledPasses().at(1).getSyncDependencies();
+  {
+    const auto &imageBarrier = dependencies0.imageBarriers.at(0);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage, liquid::rhi::PipelineStage::None);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::None);
+    EXPECT_EQ(imageBarrier.dstAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.srcLayout, liquid::rhi::ImageLayout::Undefined);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  }
 
-  EXPECT_TRUE(barrier1.enabled);
-  EXPECT_EQ(barrier1.srcStage,
-            liquid::rhi::PipelineStage::PipeTop |
-                liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier1.dstStage,
-            liquid::rhi::PipelineStage::FragmentShader |
-                liquid::rhi::PipelineStage::EarlyFragmentTests |
-                liquid::rhi::PipelineStage::LateFragmentTests);
-  EXPECT_EQ(barrier1.imageBarriers.size(), 2);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).texture, depthTexture.getHandle());
-  EXPECT_EQ(barrier1.imageBarriers.at(0).srcAccess, liquid::rhi::Access::None);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::DepthStencilAttachmentWrite);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::Undefined);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+  const auto &dependencies1 =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies1.imageBarriers.size(), 2);
 
-  EXPECT_EQ(barrier1.imageBarriers.at(1).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier1.imageBarriers.at(1).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier1.imageBarriers.at(1).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier1.imageBarriers.at(1).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier1.imageBarriers.at(1).dstLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  {
+    const auto &imageBarrier = dependencies1.imageBarriers.at(0);
+
+    EXPECT_EQ(imageBarrier.texture, depthTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage, liquid::rhi::PipelineStage::None);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::EarlyFragmentTests |
+                  liquid::rhi::PipelineStage::LateFragmentTests);
+    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::None);
+    EXPECT_EQ(imageBarrier.dstAccess,
+              liquid::rhi::Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(imageBarrier.srcLayout, liquid::rhi::ImageLayout::Undefined);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+  }
+
+  {
+    const auto &imageBarrier = dependencies1.imageBarriers.at(1);
+
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierForAllMipLevelsIfTextureIsNotAView) {
@@ -335,12 +344,13 @@ TEST_F(RenderGraphTest, SetsImageBarrierForAllMipLevelsIfTextureIsNotAView) {
 
   graph.build(storage);
 
-  auto barrier = graph.getCompiledPasses().at(0).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).baseLevel, 0);
-  EXPECT_EQ(barrier.imageBarriers.at(0).levelCount, 20);
+  auto dependencies = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 1);
+
+  const auto &imageBarrier = dependencies.imageBarriers.at(0);
+  EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+  EXPECT_EQ(imageBarrier.baseLevel, 0);
+  EXPECT_EQ(imageBarrier.levelCount, 20);
 }
 
 TEST_F(RenderGraphTest,
@@ -359,12 +369,13 @@ TEST_F(RenderGraphTest,
 
   graph.build(storage);
 
-  auto barrier = graph.getCompiledPasses().at(0).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, view.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).baseLevel, 5);
-  EXPECT_EQ(barrier.imageBarriers.at(0).levelCount, 10);
+  auto dependencies = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 1);
+
+  const auto &imageBarrier = dependencies.imageBarriers.at(0);
+  EXPECT_EQ(imageBarrier.texture, view.getHandle());
+  EXPECT_EQ(imageBarrier.baseLevel, 5);
+  EXPECT_EQ(imageBarrier.levelCount, 10);
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWrites) {
@@ -385,24 +396,20 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWrites) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  const auto &dependencies =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 1);
 
-  const auto &barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage,
+  const auto &imageBarrier = dependencies.imageBarriers.at(0);
+  EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+  EXPECT_EQ(imageBarrier.srcStage,
             liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(barrier.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcLayout,
+  EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(imageBarrier.srcLayout,
             liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::General);
+  EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
 }
 
 TEST_F(RenderGraphTest,
@@ -429,38 +436,39 @@ TEST_F(RenderGraphTest,
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  const auto &dependencies =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 2);
 
-  const auto &barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
+  {
+    const auto &imageBarrier = dependencies.imageBarriers.at(0);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+  }
 
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput |
-                liquid::rhi::PipelineStage::EarlyFragmentTests |
-                liquid::rhi::PipelineStage::LateFragmentTests);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+  {
+    const auto &imageBarrier = dependencies.imageBarriers.at(1);
 
-  EXPECT_EQ(barrier.imageBarriers.size(), 2);
-
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::General);
-
-  EXPECT_EQ(barrier.imageBarriers.at(1).texture, depthTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(1).srcAccess,
-            liquid::rhi::Access::DepthStencilAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(1).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(1).srcLayout,
-            liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(1).dstLayout,
-            liquid::rhi::ImageLayout::General);
+    EXPECT_EQ(imageBarrier.texture, depthTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::EarlyFragmentTests |
+                  liquid::rhi::PipelineStage::LateFragmentTests);
+    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+  }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWriteAndPassRead) {
@@ -480,23 +488,20 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWriteAndPassRead) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  const auto &dependencies =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 1);
 
-  const auto &barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage,
+  const auto &imageBarrier = dependencies.imageBarriers.at(0);
+  EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+  EXPECT_EQ(imageBarrier.srcStage,
             liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcLayout,
+  EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(imageBarrier.srcLayout,
             liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstLayout,
+  EXPECT_EQ(imageBarrier.dstLayout,
             liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
 }
 
@@ -522,39 +527,43 @@ TEST_F(RenderGraphTest, SetsImageBarriersBetweenPassReads) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  const auto &dependencies1 =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies1.imageBarriers.size(), 1);
 
-  const auto &barrier1 = graph.getCompiledPasses().at(1).getSyncDependencies();
+  {
+    const auto &imageBarrier = dependencies1.imageBarriers.at(0);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  }
 
-  EXPECT_TRUE(barrier1.enabled);
-  EXPECT_EQ(barrier1.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier1.dstStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier1.imageBarriers.size(), 1);
+  auto dependencies2 = graph.getCompiledPasses().at(2).getSyncDependencies();
+  EXPECT_EQ(dependencies2.imageBarriers.size(), 1);
 
-  EXPECT_EQ(barrier1.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier1.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier1.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  {
+    const auto &imageBarrier = dependencies2.imageBarriers.at(0);
 
-  auto barrier2 = graph.getCompiledPasses().at(2).getSyncDependencies();
-  EXPECT_TRUE(barrier2.enabled);
-  EXPECT_EQ(barrier2.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier2.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(barrier2.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier2.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier2.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier2.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
-  EXPECT_EQ(barrier2.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassReadAndPassWrite) {
@@ -575,37 +584,44 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassReadAndPassWrite) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  const auto &dependencies =
+      graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 2);
 
-  const auto &barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
+  {
+    const auto &imageBarrier = dependencies.imageBarriers.at(0);
 
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier.dstStage,
-            liquid::rhi::PipelineStage::FragmentShader |
-                liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(barrier.imageBarriers.size(), 2);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  }
 
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  {
+    const auto &imageBarrier = dependencies.imageBarriers.at(1);
 
-  EXPECT_EQ(barrier.imageBarriers.at(1).texture, colorTexture.getHandle());
-  EXPECT_EQ(barrier.imageBarriers.at(1).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(1).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier.imageBarriers.at(1).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(1).dstLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+    EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout,
+              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  }
 }
 
 TEST_F(RenderGraphTest,
@@ -619,15 +635,15 @@ TEST_F(RenderGraphTest,
 
   graph.build(storage);
 
-  auto barrier0 = graph.getCompiledPasses().at(0).getSyncDependencies();
-  EXPECT_TRUE(barrier0.enabled);
-  EXPECT_EQ(barrier0.srcStage, liquid::rhi::PipelineStage::PipeTop);
-  EXPECT_EQ(barrier0.dstStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier0.bufferBarriers.size(), 1);
-  EXPECT_EQ(barrier0.bufferBarriers.at(0).buffer, buffer1);
-  EXPECT_EQ(barrier0.bufferBarriers.at(0).srcAccess, liquid::rhi::Access::None);
-  EXPECT_EQ(barrier0.bufferBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
+  auto dependencies = graph.getCompiledPasses().at(0).getSyncDependencies();
+  EXPECT_EQ(dependencies.bufferBarriers.size(), 1);
+
+  const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
+  EXPECT_EQ(bufferBarrier.buffer, buffer1);
+  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::None);
+  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::None);
+  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
 }
 
 TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWrites) {
@@ -645,20 +661,17 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWrites) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  auto dependencies = graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.bufferBarriers.size(), 1);
 
-  auto barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(barrier.bufferBarriers.size(), 1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).buffer, buffer1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).size, 0);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).offset, 0);
+  const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
+  EXPECT_EQ(bufferBarrier.buffer, buffer1);
+  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.size, 0);
+  EXPECT_EQ(bufferBarrier.offset, 0);
 }
 
 TEST_F(RenderGraphTest, SetsBufferBarrierBetweenMultipleBufferWrites) {
@@ -679,29 +692,34 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenMultipleBufferWrites) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  auto dependencies = graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.bufferBarriers.size(), 2);
 
-  auto barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(barrier.bufferBarriers.size(), 2);
+  {
+    const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
+    EXPECT_EQ(bufferBarrier.buffer, buffer1);
+    EXPECT_EQ(bufferBarrier.srcStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage,
+              liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.size, 0);
+    EXPECT_EQ(bufferBarrier.offset, 0);
+  }
 
-  EXPECT_EQ(barrier.bufferBarriers.at(0).buffer, buffer1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).size, 0);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).offset, 0);
-
-  EXPECT_EQ(barrier.bufferBarriers.at(1).buffer, buffer2);
-  EXPECT_EQ(barrier.bufferBarriers.at(1).srcAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(1).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(1).size, 0);
-  EXPECT_EQ(barrier.bufferBarriers.at(1).offset, 0);
+  {
+    const auto &bufferBarrier = dependencies.bufferBarriers.at(1);
+    EXPECT_EQ(bufferBarrier.buffer, buffer2);
+    EXPECT_EQ(bufferBarrier.srcStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage,
+              liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.size, 0);
+    EXPECT_EQ(bufferBarrier.offset, 0);
+  }
 }
 
 TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWriteAndRead) {
@@ -720,21 +738,17 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWriteAndRead) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  auto dependencies = graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.bufferBarriers.size(), 1);
 
-  auto barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(barrier.bufferBarriers.size(), 1);
-
-  EXPECT_EQ(barrier.bufferBarriers.at(0).buffer, buffer1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).size, 0);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).offset, 0);
+  const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
+  EXPECT_EQ(bufferBarrier.buffer, buffer1);
+  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(bufferBarrier.size, 0);
+  EXPECT_EQ(bufferBarrier.offset, 0);
 }
 
 TEST_F(RenderGraphTest, SetsBufferAndTextureBarriersBetweenPasses) {
@@ -758,34 +772,36 @@ TEST_F(RenderGraphTest, SetsBufferAndTextureBarriersBetweenPasses) {
 
   graph.build(storage);
 
-  EXPECT_TRUE(graph.getCompiledPasses().at(0).getSyncDependencies().enabled);
+  auto dependencies = graph.getCompiledPasses().at(1).getSyncDependencies();
+  EXPECT_EQ(dependencies.imageBarriers.size(), 1);
+  EXPECT_EQ(dependencies.bufferBarriers.size(), 1);
 
-  auto barrier = graph.getCompiledPasses().at(1).getSyncDependencies();
-  EXPECT_TRUE(barrier.enabled);
-  EXPECT_EQ(barrier.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput |
-                liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(barrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+  {
+    const auto &imageBarrier = dependencies.imageBarriers.at(0);
+    EXPECT_EQ(imageBarrier.texture, colorTexture);
+    EXPECT_EQ(imageBarrier.srcStage,
+              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess,
+              liquid::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(imageBarrier.srcLayout,
+              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+  }
 
-  EXPECT_EQ(barrier.imageBarriers.size(), 1);
-  EXPECT_EQ(barrier.imageBarriers.at(0).texture, colorTexture);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.imageBarriers.at(0).srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(barrier.imageBarriers.at(0).dstLayout,
-            liquid::rhi::ImageLayout::General);
-
-  EXPECT_EQ(barrier.bufferBarriers.size(), 1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).buffer, buffer1);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).srcAccess,
-            liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).dstAccess,
-            liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).size, 0);
-  EXPECT_EQ(barrier.bufferBarriers.at(0).offset, 0);
+  {
+    const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
+    EXPECT_EQ(bufferBarrier.buffer, buffer1);
+    EXPECT_EQ(bufferBarrier.srcStage,
+              liquid::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage,
+              liquid::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(bufferBarrier.size, 0);
+    EXPECT_EQ(bufferBarrier.offset, 0);
+  }
 }
 
 TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyColorAttachments) {
