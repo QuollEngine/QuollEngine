@@ -28,12 +28,14 @@ private:
    * @brief Render entity as tree item
    *
    * @param entity Entity
+   * @param index Index
    * @param flags Flags
    * @param state Workspace state
    * @param actionExecutor Action executor
+   * @return Calculated index
    */
-  void renderEntity(Entity entity, int flags, WorkspaceState &state,
-                    ActionExecutor &actionExecutor);
+  uint32_t renderEntity(Entity entity, uint32_t index, int flags,
+                        WorkspaceState &state, ActionExecutor &actionExecutor);
 
 private:
   Entity mRightClickedEntity = Entity::Null;

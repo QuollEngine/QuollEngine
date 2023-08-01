@@ -1,6 +1,7 @@
 #include "liquid/core/Base.h"
 #include "Toolbar.h"
 #include "StyleStack.h"
+#include "Theme.h"
 
 #include "liquid/imgui/Imgui.h"
 
@@ -11,6 +12,8 @@ void Toolbar::render(WorkspaceState &state, AssetRegistry &assetRegistry,
   ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x, Height));
   ImGui::SetNextWindowPos(ImVec2(0.0f, ImGui::GetFrameHeight()));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  ImGui::PushStyleColor(ImGuiCol_WindowBg,
+                        Theme::getColor(ThemeColor::Neutral200));
   if (ImGui::Begin("Toolbar", 0,
                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                        ImGuiWindowFlags_NoResize |
@@ -46,6 +49,7 @@ void Toolbar::render(WorkspaceState &state, AssetRegistry &assetRegistry,
 
   ImGui::End();
   ImGui::PopStyleVar();
+  ImGui::PopStyleColor();
 }
 
 void Toolbar::add(ActionCreator *actionCreator, String label, String icon,

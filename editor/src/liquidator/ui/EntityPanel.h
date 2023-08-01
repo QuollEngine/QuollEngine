@@ -22,14 +22,14 @@ namespace liquid::editor {
 class EntityPanel {
 public:
   /**
-   * @brief Render panel
+   * @brief Render entity panel
    *
    * @param state Workspace state
    * @param actionExecutor Action executor
    * @param assetRegistry Asset registry
    */
-  void render(WorkspaceState &state, AssetRegistry &assetRegistry,
-              ActionExecutor &actionExecutor);
+  void renderContent(WorkspaceState &state, AssetRegistry &assetRegistry,
+                     ActionExecutor &actionExecutor);
 
 private:
   /**

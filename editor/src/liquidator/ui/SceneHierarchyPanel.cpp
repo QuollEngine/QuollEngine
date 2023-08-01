@@ -19,14 +19,18 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
   static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
   static constexpr float TreeNodeIndentSpacing = 10.0f;
 
-  if (auto _ = widgets::Window("Hierarchy")) {
+  float paddingY = ImGui::GetStyle().WindowPadding.y;
+  StyleStack stack;
+  stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+  uint32_t index = 0;
+
+  if (auto _ = widgets::Window("Scene")) {
     auto &scene = state.mode == WorkspaceMode::Simulation
                       ? state.simulationScene
                       : state.scene;
 
     StyleStack stack;
-    stack.pushColor(ImGuiCol_Header,
-                    ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered));
     stack.pushStyle(ImGuiStyleVar_ItemSpacing,
                     ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
     stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
@@ -38,8 +42,8 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
         continue;
       }
 
-      renderEntity(entity, ImGuiTreeNodeFlags_DefaultOpen, state,
-                   actionExecutor);
+      index = renderEntity(entity, index + 1, ImGuiTreeNodeFlags_DefaultOpen,
+                           state, actionExecutor);
     }
   }
 }
@@ -86,9 +90,10 @@ static String getNodeName(const String &name, Entity entity,
   return name;
 }
 
-void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
-                                       WorkspaceState &state,
-                                       ActionExecutor &actionExecutor) {
+uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
+                                           int flags, WorkspaceState &state,
+                                           ActionExecutor &actionExecutor) {
+  uint32_t innerIndex = index;
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
@@ -109,26 +114,30 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
       "Delete entity", "Are you sure you want to delete node \"" + name + "\"?",
       "Delete");
 
-  StyleStack fontStack;
-  if (state.selectedEntity == entity) {
-    treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
-  }
-
-  treeNodeFlags |= ImGuiTreeNodeFlags_FramePadding;
+  treeNodeFlags |= ImGuiTreeNodeFlags_FramePadding |
+                   ImGuiTreeNodeFlags_SpanFullWidth |
+                   ImGuiTreeNodeFlags_Selected;
 
   bool open = false;
-
-  if (state.selectedEntity == entity && isLeaf) {
-    fontStack.pushFont(Theme::getBoldFont());
-  }
-
   auto nodeName = getNodeName(name, entity, scene.entityDatabase);
 
-  ImGui::PushID(static_cast<int32_t>(entity));
-  if (ImGui::TreeNodeEx(nodeName.c_str(), treeNodeFlags)) {
-    open = !isLeaf;
+  {
+    StyleStack styleStack;
+    if (state.selectedEntity == entity) {
+      styleStack.pushFont(Theme::getBoldFont());
+      styleStack.pushColor(ImGuiCol_Header,
+                           Theme::getColor(ThemeColor::Primary100));
+    } else if ((innerIndex % 2) == 0) {
+      styleStack.pushColor(ImGuiCol_Header,
+                           Theme::getColor(ThemeColor::Neutral200));
+    }
+
+    ImGui::PushID(static_cast<int32_t>(entity));
+    if (ImGui::TreeNodeEx(nodeName.c_str(), treeNodeFlags)) {
+      open = !isLeaf;
+    }
+    ImGui::PopID();
   }
-  ImGui::PopID();
 
   if (ImGui::BeginDragDropSource()) {
     ImGui::SetDragDropPayload("Entity", &entity, sizeof(Entity));
@@ -177,11 +186,14 @@ void SceneHierarchyPanel::renderEntity(Entity entity, int flags,
     if (scene.entityDatabase.has<Children>(entity)) {
       for (auto childEntity :
            scene.entityDatabase.get<Children>(entity).children) {
-        renderEntity(childEntity, 0, state, actionExecutor);
+        innerIndex =
+            renderEntity(childEntity, innerIndex + 1, 0, state, actionExecutor);
       }
     }
     ImGui::TreePop();
   }
+
+  return innerIndex;
 }
 
 } // namespace liquid::editor

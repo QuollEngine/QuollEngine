@@ -45,12 +45,8 @@ void UIRoot::render(WorkspaceContext &context) {
                   context.actionExecutor);
 
   mSceneHierarchyPanel.render(context.state, context.actionExecutor);
-  mEntityPanel.render(context.state, context.assetManager.getAssetRegistry(),
-                      context.actionExecutor);
-
-  EnvironmentPanel::render(context.state,
-                           context.assetManager.getAssetRegistry(),
-                           context.actionExecutor);
+  mInspector.render(context.state, context.assetManager.getAssetRegistry(),
+                    context.actionExecutor);
 
   mEditorCameraPanel.render(context.state, context.actionExecutor);
   mAssetBrowser.render(context);
