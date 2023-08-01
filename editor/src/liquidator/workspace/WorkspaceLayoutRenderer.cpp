@@ -56,27 +56,31 @@ void WorkspaceLayoutRenderer::reset() {
                                 ImGuiDockNodeFlags_PassthruCentralNode);
   ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 
-  static constexpr float RatioSide = 1.0f / 8.0f;
-  static constexpr float RatioBottom = 1.0f / 4.0f;
+  // Default template
+  // Sidebar - Hierarchy (top) and Inspector (bottom)
+  // Main - View (top) and Asset browser (bottom)
 
-  ImGuiID topAreaId = -1;
-  auto browserId = ImGui::DockBuilderSplitNode(
-      dockspaceId, ImGuiDir_Down, RatioBottom, nullptr, &topAreaId);
+  static constexpr float RatioSidebar = 1.0f / 6.0f;
+  static constexpr float RatioMainBottom = 1.0f / 4.0f;
+  static constexpr float RatioSideBottom = 2.0f / 3.0f;
 
-  ImGuiID topRightAreaId = -1;
-  auto hierarchyId = ImGui::DockBuilderSplitNode(
-      topAreaId, ImGuiDir_Left, RatioSide, nullptr, &topRightAreaId);
+  ImGuiID mainId = -1;
+  auto sidebarId = ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Right,
+                                               RatioSidebar, nullptr, &mainId);
 
-  ImGuiID viewId = -1;
-  auto inspectorId = ImGui::DockBuilderSplitNode(topRightAreaId, ImGuiDir_Right,
-                                                 RatioSide, nullptr, &viewId);
+  ImGuiID sidebarTopId = -1;
+  auto sidebarBottomId = ImGui::DockBuilderSplitNode(
+      sidebarId, ImGuiDir_Down, RatioSideBottom, nullptr, &sidebarTopId);
 
-  ImGui::DockBuilderDockWindow("Hierarchy", hierarchyId);
-  ImGui::DockBuilderDockWindow("Entity", inspectorId);
-  ImGui::DockBuilderDockWindow("Environment", inspectorId);
-  ImGui::DockBuilderDockWindow("Scene", viewId);
-  ImGui::DockBuilderDockWindow("Asset Browser", browserId);
-  ImGui::DockBuilderDockWindow("Logs", browserId);
+  ImGuiID mainTopId = -1;
+  auto mainBottomId = ImGui::DockBuilderSplitNode(
+      mainId, ImGuiDir_Down, RatioMainBottom, nullptr, &mainTopId);
+
+  ImGui::DockBuilderDockWindow("Scene", sidebarTopId);
+  ImGui::DockBuilderDockWindow("Inspector", sidebarBottomId);
+  ImGui::DockBuilderDockWindow("View", mainTopId);
+  ImGui::DockBuilderDockWindow("Asset Browser", mainBottomId);
+  ImGui::DockBuilderDockWindow("Logs", mainBottomId);
 
   ImGui::DockBuilderFinish(dockspaceId);
 }

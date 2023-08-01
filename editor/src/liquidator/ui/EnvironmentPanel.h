@@ -17,8 +17,8 @@ public:
    * @param assetRegistry Asset registry
    * @param actionExecutor Action executor
    */
-  static void render(WorkspaceState &state, AssetRegistry &assetRegistry,
-                     ActionExecutor &actionExecutor);
+  static void renderContent(WorkspaceState &state, AssetRegistry &assetRegistry,
+                            ActionExecutor &actionExecutor);
 
 private:
   /**

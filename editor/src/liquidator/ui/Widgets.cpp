@@ -92,7 +92,7 @@ Section::~Section() {
     ImGui::GetWindowDrawList()->ChannelsSetCurrent(0);
     ImGui::GetWindowDrawList()->AddRectFilled(
         panelMin, panelMax,
-        ImGui::GetColorU32(ImGui::GetStyleColorVec4(ImGuiCol_ChildBg)),
+        ImGui::GetColorU32(Theme::getColor(ThemeColor::Neutral400)),
         Theme::getStyle(ThemeStyle::SectionRounding).x);
     ImGui::GetWindowDrawList()->ChannelsMerge();
 
@@ -112,37 +112,23 @@ FixedWindow::FixedWindow(const char *title, bool &open) {
 FixedWindow::~FixedWindow() { ImGui::End(); }
 
 MainMenuBar::MainMenuBar() {
+  ImGui::PushStyleColor(ImGuiCol_MenuBarBg,
+                        Theme::getColor(ThemeColor::Neutral200));
   mExpanded = ImGui::BeginMainMenuBar();
-
-  if (mExpanded) {
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
-                          ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive,
-                          ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
-  }
 }
 
 MainMenuBar::~MainMenuBar() {
   if (mExpanded) {
-    ImGui::PopStyleColor(2);
     ImGui::EndMainMenuBar();
   }
+
+  ImGui::PopStyleColor();
 }
 
-ContextMenu::ContextMenu() {
-  mExpanded = ImGui::BeginPopupContextWindow();
-
-  if (mExpanded) {
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
-                          ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive,
-                          ImGui::GetStyleColorVec4(ImGuiCol_TitleBgCollapsed));
-  }
-}
+ContextMenu::ContextMenu() { mExpanded = ImGui::BeginPopupContextWindow(); }
 
 ContextMenu::~ContextMenu() {
   if (mExpanded) {
-    ImGui::PopStyleColor(2);
     ImGui::EndPopup();
   }
 }

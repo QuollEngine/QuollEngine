@@ -5,48 +5,42 @@
 #include "Theme.h"
 
 namespace liquid::editor {
-
-static constexpr float Gamma = 2.2f;
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 /**
- * @brief Srgb color to linear
+ * @brief Convert Srgb color to linear
  *
  * This function automatically converts
- * gamma corrected nonlinear colors to linear
+ * gamma corrected nonlinear values to linear
  * ones; so, it is easier to apply colors
  * from graphics design applications to here
  * without manually performing calculations.
  *
- * @param r Red
- * @param g Greed
- * @param b Blue
- * @param a Alpha
- * @return Linear color
+ * @param value Srgb value
+ * @return Linear value
  */
-static ImVec4 SrgbToLinear(int r, int g, int b, int a) {
-  ImVec4 color(ImColor(r, g, b, a));
+static constexpr float SrgbToLinear(float value) {
+  if (value <= 0.0031308f) {
+    return value / 12.92f;
+  }
 
-  return {std::pow(color.x, Gamma), std::pow(color.y, Gamma),
-          std::pow(color.z, Gamma), color.w};
+  return pow((value + 0.055f) / 1.055f, 2.4f);
 }
 
 /**
  * @brief Srgb color to linear
  *
- * This function automatically converts
- * gamma corrected nonlinear colors to linear
- * ones; so, it is easier to apply colors
- * from graphics design applications to here
- * without manually performing calculations.
- *
  * @param r Red
  * @param g Greed
  * @param b Blue
  * @param a Alpha
  * @return Linear color
  */
-static glm::vec4 SrgbToLinear(float r, float g, float b, float a) {
-  return {std::pow(r, Gamma), std::pow(g, Gamma), std::pow(b, Gamma), a};
+static ImVec4 SrgbToLinear(int r, int g, int b, int a = 255) {
+  ImVec4 color(ImColor(r, g, b, a));
+
+  return {SrgbToLinear(color.x), SrgbToLinear(color.y), SrgbToLinear(color.z),
+          color.w};
 }
 
 static constexpr float FontSize = 18.0f;
@@ -56,30 +50,61 @@ static constexpr size_t NumFonts = 2;
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static std::array<ImFont *, NumFonts> Fonts{};
 
-// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-static const std::unordered_map<ThemeColor, glm::vec4> Colors{
-    {ThemeColor::BackgroundColor, SrgbToLinear(0.22f, 0.22f, 0.22f, 1.0f)},
-    {ThemeColor::SceneBackgroundColor,
-     SrgbToLinear(0.46f, 0.60f, 0.70f, 1.0f)}};
+static const std::unordered_map<ThemeColor, ImVec4> Colors{
+    {ThemeColor::White, SrgbToLinear(255, 255, 255)},
+    {ThemeColor::Black, SrgbToLinear(0, 0, 0)},
+    {ThemeColor::Transparent, SrgbToLinear(0, 0, 0, 0)},
+
+    // Neutral colors
+    {ThemeColor::Neutral100, SrgbToLinear(29, 29, 29)},
+    {ThemeColor::Neutral200, SrgbToLinear(32, 32, 32)},
+    {ThemeColor::Neutral300, SrgbToLinear(38, 38, 38)},
+    {ThemeColor::Neutral400, SrgbToLinear(49, 49, 49)},
+    {ThemeColor::Neutral500, SrgbToLinear(50, 50, 50)},
+    {ThemeColor::Neutral600, SrgbToLinear(58, 58, 58)},
+    {ThemeColor::Neutral700, SrgbToLinear(76, 76, 76)},
+    {ThemeColor::Neutral800, SrgbToLinear(83, 83, 83)},
+    {ThemeColor::Neutral900, SrgbToLinear(116, 116, 116)},
+
+    // Primary colors
+    {ThemeColor::Primary100, SrgbToLinear(52, 55, 110)},
+    {ThemeColor::Primary200, SrgbToLinear(65, 67, 129)},
+
+    // Misc
+    {ThemeColor::ModalBackdrop, SrgbToLinear(0, 0, 0, 220)},
+
+    // End
+};
 
 static const std::unordered_map<ThemeStyle, glm::vec2> Styles{
     {ThemeStyle::SectionRounding, glm::vec2(8.0f, 8.0f)},
+    // End
 };
-// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 /**
  * @brief Set imgui styles
  */
 static void setImguiStyles() {
-  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   auto &style = ImGui::GetStyle();
 
+  // Separator
+  style.Colors[ImGuiCol_Separator] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_SeparatorHovered] =
+      Theme::getColor(ThemeColor::Primary100);
+  style.Colors[ImGuiCol_SeparatorActive] = SrgbToLinear(65, 67, 129);
+  style.Colors[ImGuiCol_DockingPreview] =
+      Theme::getColor(ThemeColor::Primary100);
+
   // All items
-  style.Colors[ImGuiCol_FrameBg] = SrgbToLinear(58, 58, 58, 255);
-  style.Colors[ImGuiCol_FrameBgHovered] = SrgbToLinear(33, 33, 33, 255);
-  style.Colors[ImGuiCol_FrameBgActive] = SrgbToLinear(33, 33, 33, 255);
-  style.Colors[ImGuiCol_PopupBg] = SrgbToLinear(37, 37, 37, 255);
-  style.Colors[ImGuiCol_ChildBg] = SrgbToLinear(37, 37, 37, 255);
+  style.Colors[ImGuiCol_FrameBg] = Theme::getColor(ThemeColor::Neutral800);
+  style.Colors[ImGuiCol_FrameBgHovered] =
+      Theme::getColor(ThemeColor::Neutral700);
+  style.Colors[ImGuiCol_FrameBgActive] =
+      Theme::getColor(ThemeColor::Neutral700);
+  style.Colors[ImGuiCol_PopupBg] = Theme::getColor(ThemeColor::Neutral100);
+  style.Colors[ImGuiCol_ChildBg] = Theme::getColor(ThemeColor::Neutral100);
+  style.Colors[ImGuiCol_ModalWindowDimBg] =
+      Theme::getColor(ThemeColor::ModalBackdrop);
   style.ItemSpacing = ImVec2(8.0f, 8.0f);
   style.ItemInnerSpacing = ImVec2(8.0f, 8.0f);
   style.FrameRounding = 4.0f;
@@ -98,11 +123,13 @@ static void setImguiStyles() {
   style.CellPadding = ImVec2(8.0f, 8.0f);
 
   // Window
-  style.Colors[ImGuiCol_WindowBg] = SrgbToLinear(44, 44, 44, 255);
-  style.Colors[ImGuiCol_MenuBarBg] = SrgbToLinear(55, 55, 55, 255);
-  style.Colors[ImGuiCol_TitleBg] = SrgbToLinear(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TitleBgCollapsed] = SrgbToLinear(68, 68, 68, 255);
-  style.Colors[ImGuiCol_TitleBgActive] = SrgbToLinear(24, 24, 24, 255);
+  style.Colors[ImGuiCol_WindowBg] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_MenuBarBg] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_TitleBg] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_TitleBgCollapsed] =
+      Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_TitleBgActive] =
+      Theme::getColor(ThemeColor::Neutral300);
   style.Colors[ImGuiCol_ResizeGrip] = SrgbToLinear(255, 255, 255, 125);
   style.Colors[ImGuiCol_ResizeGripHovered] = SrgbToLinear(255, 255, 255, 255);
   style.Colors[ImGuiCol_ResizeGripActive] = SrgbToLinear(255, 255, 255, 255);
@@ -111,27 +138,30 @@ static void setImguiStyles() {
   style.WindowBorderSize = 0.0f;
 
   // Tabs
-  style.Colors[ImGuiCol_Tab] = SrgbToLinear(55, 55, 55, 255);
-  style.Colors[ImGuiCol_TabUnfocused] = SrgbToLinear(55, 55, 55, 255);
-  style.Colors[ImGuiCol_TabHovered] = SrgbToLinear(44, 44, 44, 255);
-  style.Colors[ImGuiCol_TabActive] = SrgbToLinear(44, 44, 44, 255);
-  style.Colors[ImGuiCol_TabUnfocusedActive] = SrgbToLinear(44, 44, 44, 255);
+  style.Colors[ImGuiCol_Tab] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_TabUnfocused] = Theme::getColor(ThemeColor::Neutral300);
+  style.Colors[ImGuiCol_TabHovered] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_TabActive] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_TabUnfocusedActive] =
+      Theme::getColor(ThemeColor::Neutral500);
 
   // Headers
   // Used by collapsing header
-  style.Colors[ImGuiCol_Header] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-  style.Colors[ImGuiCol_HeaderActive] = SrgbToLinear(37, 37, 37, 255);
-  style.Colors[ImGuiCol_HeaderHovered] = SrgbToLinear(37, 37, 37, 255);
+  style.Colors[ImGuiCol_Header] = Theme::getColor(ThemeColor::Transparent);
+  style.Colors[ImGuiCol_HeaderActive] = Theme::getColor(ThemeColor::Primary100);
+  style.Colors[ImGuiCol_HeaderHovered] =
+      Theme::getColor(ThemeColor::Primary100);
 
-  // Inputs
-  style.Colors[ImGuiCol_Button] = SrgbToLinear(58, 58, 58, 255);
-  style.Colors[ImGuiCol_ButtonHovered] = SrgbToLinear(33, 33, 33, 255);
-  style.Colors[ImGuiCol_ButtonActive] = SrgbToLinear(33, 33, 33, 255);
+  // Buttons
+  style.Colors[ImGuiCol_Button] = Theme::getColor(ThemeColor::Neutral500);
+  style.Colors[ImGuiCol_ButtonHovered] =
+      Theme::getColor(ThemeColor::Primary100);
+  style.Colors[ImGuiCol_ButtonActive] = Theme::getColor(ThemeColor::Primary100);
 
-  style.Colors[ImGuiCol_CheckMark] = SrgbToLinear(255, 255, 255, 255);
-  style.Colors[ImGuiCol_SliderGrab] = SrgbToLinear(58, 58, 58, 255);
-  style.Colors[ImGuiCol_SliderGrabActive] = SrgbToLinear(68, 68, 68, 255);
-  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
+  style.Colors[ImGuiCol_CheckMark] = Theme::getColor(ThemeColor::White);
+  style.Colors[ImGuiCol_SliderGrab] = Theme::getColor(ThemeColor::Neutral600);
+  style.Colors[ImGuiCol_SliderGrabActive] =
+      Theme::getColor(ThemeColor::Neutral900);
 }
 
 /**
@@ -169,10 +199,21 @@ void Theme::apply() {
   setImguiStyles();
 }
 
-glm::vec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }
+glm::vec4 Theme::getEngineColor(ThemeColor color) {
+  auto c = Colors.at(color);
+  return glm::vec4(c.x, c.y, c.z, c.w);
+}
+
+glm::vec4 Theme::getClearColor() {
+  return getEngineColor(ThemeColor::Neutral500);
+}
+
+ImVec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }
 
 glm::vec2 Theme::getStyle(ThemeStyle style) { return Styles.at(style); }
 
 ImFont *Theme::getBoldFont() { return Fonts.at(1); }
+
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 } // namespace liquid::editor

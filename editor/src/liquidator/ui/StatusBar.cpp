@@ -1,7 +1,9 @@
 #include "liquid/core/Base.h"
-#include "StatusBar.h"
-
 #include "liquid/imgui/Imgui.h"
+
+#include "StatusBar.h"
+#include "Theme.h"
+#include "StyleStack.h"
 
 namespace liquid::editor {
 
@@ -35,6 +37,11 @@ void StatusBar::render(EditorCamera &editorCamera) {
       ImGuiWindowFlags_NoSavedSettings |
       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground |
       ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+  StyleStack stack;
+  stack.pushColor(ImGuiCol_MenuBarBg, Theme::getColor(ThemeColor::Neutral100));
+  stack.pushStyle(ImGuiStyleVar_WindowRounding, 0.0f);
+
   if (ImGui::Begin("StatusBar", nullptr, flags)) {
     if (ImGui::BeginMenuBar()) {
       ImGui::Text("%s", state.c_str());

@@ -83,7 +83,7 @@ void EditorScreen::start(const Project &project) {
   }
 
   Theme::apply();
-  imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
+  imguiRenderer.setClearColor(Theme::getClearColor());
   imguiRenderer.buildFonts();
 
   FileTracker tracker(project.assetsPath);

@@ -16,6 +16,7 @@
 #include "SceneGizmos.h"
 #include "MainMenu.h"
 #include "ShortcutsManager.h"
+#include "Inspector.h"
 
 #include "liquidator/workspace/WorkspaceContext.h"
 
@@ -85,6 +86,7 @@ private:
   EnvironmentPanel mEnvironmentPanel;
   EditorGridPanel mEditorCameraPanel;
   AssetBrowser mAssetBrowser;
+  Inspector mInspector;
 
   // Unclosable UI
   StatusBar mStatusBar;

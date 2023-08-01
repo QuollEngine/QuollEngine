@@ -74,35 +74,34 @@ static bool ImguiMultilineInputText(const String &label, String &value,
                                    InputTextCallback, &userData);
 }
 
-void EntityPanel::render(WorkspaceState &state, AssetRegistry &assetRegistry,
-                         ActionExecutor &actionExecutor) {
+void EntityPanel::renderContent(WorkspaceState &state,
+                                AssetRegistry &assetRegistry,
+                                ActionExecutor &actionExecutor) {
   if (state.selectedEntity == Entity::Null) {
+    ImGui::Text("Select an entity in the scene to see properties");
     return;
   }
 
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
   setSelectedEntity(scene, state.selectedEntity);
-
-  if (auto _ = widgets::Window("Entity")) {
-    if (scene.entityDatabase.exists(mSelectedEntity)) {
-      renderName(scene, actionExecutor);
-      renderTransform(scene, actionExecutor);
-      renderText(scene, assetRegistry, actionExecutor);
-      renderSprite(scene, assetRegistry, actionExecutor);
-      renderMesh(scene, assetRegistry, actionExecutor);
-      renderDirectionalLight(scene, actionExecutor);
-      renderPointLight(scene, actionExecutor);
-      renderCamera(state, scene, actionExecutor);
-      renderAnimation(state, scene, assetRegistry, actionExecutor);
-      renderSkeleton(scene, actionExecutor);
-      renderCollidable(scene, actionExecutor);
-      renderRigidBody(scene, actionExecutor);
-      renderAudio(scene, assetRegistry, actionExecutor);
-      renderScripting(scene, assetRegistry, actionExecutor);
-      renderAddComponent(scene, assetRegistry, actionExecutor);
-      handleDragAndDrop(scene, assetRegistry, actionExecutor);
-    }
+  if (scene.entityDatabase.exists(mSelectedEntity)) {
+    renderName(scene, actionExecutor);
+    renderTransform(scene, actionExecutor);
+    renderText(scene, assetRegistry, actionExecutor);
+    renderSprite(scene, assetRegistry, actionExecutor);
+    renderMesh(scene, assetRegistry, actionExecutor);
+    renderDirectionalLight(scene, actionExecutor);
+    renderPointLight(scene, actionExecutor);
+    renderCamera(state, scene, actionExecutor);
+    renderAnimation(state, scene, assetRegistry, actionExecutor);
+    renderSkeleton(scene, actionExecutor);
+    renderCollidable(scene, actionExecutor);
+    renderRigidBody(scene, actionExecutor);
+    renderAudio(scene, assetRegistry, actionExecutor);
+    renderScripting(scene, assetRegistry, actionExecutor);
+    renderAddComponent(scene, assetRegistry, actionExecutor);
+    handleDragAndDrop(scene, assetRegistry, actionExecutor);
   }
 }
 

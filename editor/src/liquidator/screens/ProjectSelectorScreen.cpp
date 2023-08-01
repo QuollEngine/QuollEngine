@@ -46,7 +46,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
   Theme::apply();
 
-  imguiRenderer.setClearColor(Theme::getColor(ThemeColor::BackgroundColor));
+  imguiRenderer.setClearColor(Theme::getClearColor());
   imguiRenderer.buildFonts();
 
   renderer.setGraphBuilder([&](RenderGraph &graph,
@@ -81,9 +81,9 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     imgui.beginRendering();
 
-    ImGui::BeginMainMenuBar();
-    debugLayer.renderMenu();
-    ImGui::EndMainMenuBar();
+    if (auto _ = widgets::MainMenuBar()) {
+      debugLayer.renderMenu();
+    }
     debugLayer.render();
 
     static constexpr ImVec2 CenterWindowPivot(0.5f, 0.5f);
