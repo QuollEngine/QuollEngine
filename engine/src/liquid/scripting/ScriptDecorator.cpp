@@ -8,6 +8,7 @@
 #include "liquid/physics/CollidableScriptingInterface.h"
 #include "liquid/audio/AudioScriptingInterface.h"
 #include "liquid/scene/TransformScriptingInterface.h"
+#include "liquid/scene/PerspectiveLensScriptingInterface.h"
 #include "liquid/text/TextScriptingInterface.h"
 #include "liquid/animation/AnimatorScriptingInterface.h"
 
@@ -61,6 +62,8 @@ void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
 
   registerEntityInterface<NameScriptingInterface>(scope, table, entity);
   registerEntityInterface<TransformScriptingInterface>(scope, table, entity);
+  registerEntityInterface<PerspectiveLensScriptingInterface>(scope, table,
+                                                             entity);
   registerEntityInterface<RigidBodyScriptingInterface>(scope, table, entity);
   registerEntityInterface<CollidableScriptingInterface>(scope, table, entity);
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);

@@ -5,7 +5,7 @@
 namespace liquid {
 
 /**
- * @brief Scripting interfaces for rigid body
+ * @brief Scripting interfaces for local transform
  */
 struct TransformScriptingInterface {
 public:
@@ -13,7 +13,7 @@ public:
 };
 
 /**
- * @brief Lua interface for local transform component
+ * @brief Lua interface for local transform
  */
 class TransformScriptingInterface::LuaInterface
     : public ComponentLuaInterface<TransformScriptingInterface::LuaInterface> {
