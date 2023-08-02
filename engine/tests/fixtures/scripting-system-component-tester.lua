@@ -699,3 +699,80 @@ end
 function audio_delete()
     entity.audio:delete()
 end
+
+-- Perspective lens
+pr_near = 0
+pr_far = 0
+pr_sensor_width = 0
+pr_sensor_height = 0
+pr_focal_length = 0
+pr_aperture = 0
+pr_shutter_speed = 0
+pr_sensitivity = 0
+
+function perspective_lens_get()
+  pr_near = entity.perspective_lens:get_near()
+  pr_far = entity.perspective_lens:get_far()
+  pr_sensor_width, pr_sensor_height = entity.perspective_lens:get_sensor_size()
+  pr_focal_length = entity.perspective_lens:get_focal_length()
+  pr_aperture = entity.perspective_lens:get_aperture()
+  pr_shutter_speed = entity.perspective_lens:get_shutter_speed()
+  pr_sensitivity = entity.perspective_lens:get_sensitivity()
+end
+
+function perspective_lens_get_invalid()
+    pr_near = entity.perspective_lens.get_near()
+    pr_far = entity.perspective_lens.get_far()
+    pr_sensor_width, pr_sensor_height = entity.perspective_lens.get_sensor_size()
+    pr_focal_length = entity.perspective_lens.get_focal_length()
+    pr_aperture = entity.perspective_lens.get_aperture()
+    pr_shutter_speed = entity.perspective_lens.get_shutter_speed()
+    pr_sensitivity = entity.perspective_lens.get_sensitivity()
+end
+
+function perspective_lens_set()
+    entity.perspective_lens:set_near(0.004)
+    entity.perspective_lens:set_far(4000.0)
+    entity.perspective_lens:set_sensor_size(200.0, 200.0)
+    entity.perspective_lens:set_focal_length(50.0)
+    entity.perspective_lens:set_aperture(65.0)
+    entity.perspective_lens:set_shutter_speed(2200.0)
+    entity.perspective_lens:set_sensitivity(4000)
+end
+
+function perspective_lens_set_invalid_param(value)
+    entity.perspective_lens:set_near(value)
+    entity.perspective_lens:set_far(value)
+    entity.perspective_lens:set_sensor_size(value, 200.0)
+    entity.perspective_lens:set_sensor_size(200.0, value)
+    entity.perspective_lens:set_focal_length(value)
+    entity.perspective_lens:set_aperture(value)
+    entity.perspective_lens:set_shutter_speed(value)
+    entity.perspective_lens:set_sensitivity(value)
+end
+
+function perspective_lens_set_invalid()
+    entity.perspective_lens.set_near(0.004)
+    entity.perspective_lens.set_far(4000.0)
+    entity.perspective_lens.set_sensor_size(200.0, 200.0)
+    entity.perspective_lens.set_focal_length(50.0)
+    entity.perspective_lens.set_aperture(65.0)
+    entity.perspective_lens.set_shutter_speed(2200.0)
+    entity.perspective_lens.set_sensitivity(4000)
+
+    entity.perspective_lens:set_sensor_size(200.0)
+
+    perspective_lens_set_invalid_param(nil)
+    perspective_lens_set_invalid_param("string")
+    perspective_lens_set_invalid_param(true)
+    perspective_lens_set_invalid_param(perspective_lens_set)
+    perspective_lens_set_invalid_param({})
+end
+
+function perspective_lens_delete()
+    entity.perspective_lens:delete()
+end
+
+function perspective_lens_delete_invalid()
+    entity.perspective_lens.delete()
+end
