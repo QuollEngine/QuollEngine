@@ -792,7 +792,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       advanceX += fontGlyph.advanceX;
     }
 
-    frameData.addText(text.font, glyphs, world.worldTransform);
+    frameData.addText(entity, text.font, glyphs, world.worldTransform);
   }
 
   // Directional lights

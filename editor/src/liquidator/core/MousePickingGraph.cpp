@@ -26,6 +26,8 @@ MousePickingGraph::MousePickingGraph(
   mRenderStorage.createShader(
       "mouse-picking.skinned-mesh.vertex",
       {"assets/shaders/mouse-picking-skinned-mesh.vert.spv"});
+  mRenderStorage.createShader("mouse-picking.text.vertex",
+                              {"assets/shaders/mouse-picking-text.vert.spv"});
   mRenderStorage.createShader(
       "mouse-picking.selector.fragment",
       {"assets/shaders/mouse-picking-selector.frag.spv"});
@@ -57,6 +59,12 @@ MousePickingGraph::MousePickingGraph(
     desc.debugName = "skinned mesh entities";
     mSkinnedMeshEntitiesBuffer = renderStorage.createBuffer(desc);
   }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "text entities";
+    mTextEntitiesBuffer = renderStorage.createBuffer(desc);
+  }
 }
 
 void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
@@ -65,9 +73,36 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
   mFrameIndex = frameIndex;
   const auto &frameData = mFrameData.at(frameIndex);
 
+  auto &textBounds = mMousePickingFrameData.at(frameIndex).textBounds;
+  textBounds.clear();
+  textBounds.resize(frameData.getTextEntities().size());
+
+  for (const auto &[_, texts] : frameData.getTextGroups()) {
+    for (const auto &text : texts) {
+      glm::vec4 bounds(
+          std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+          std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+
+      for (auto i = text.glyphStart; i < text.glyphStart + text.length; ++i) {
+        const auto &glyph =
+            frameData.getTextGlyphs().at(static_cast<size_t>(i));
+
+        bounds.x = std::min(glyph.planeBounds.x, bounds.x);
+        bounds.y = std::min(glyph.planeBounds.y, bounds.y);
+        bounds.z = std::max(glyph.planeBounds.z, bounds.z);
+        bounds.w = std::max(glyph.planeBounds.w, bounds.w);
+      }
+
+      textBounds.at(text.index) = bounds;
+    }
+  }
+
   mSpriteEntitiesBuffer.update(frameData.getSpriteEntities().data(),
                                frameData.getSpriteEntities().size() *
                                    sizeof(Entity));
+  mTextEntitiesBuffer.update(frameData.getTextEntities().data(),
+                             frameData.getTextEntities().size() *
+                                 sizeof(Entity));
 
   {
     size_t offset = 0;
@@ -189,9 +224,24 @@ void MousePickingGraph::createRenderGraph() {
           {},
           "mouse picking skinned mesh"});
 
+  // Texts
+  auto textPipeline =
+      mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
+          mRenderStorage.getShader("mouse-picking.text.vertex"),
+          mRenderStorage.getShader("mouse-picking.selector.fragment"),
+          {},
+          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                  rhi::FrontFace::CounterClockwise},
+          rhi::PipelineColorBlend{{}},
+          {},
+          {},
+          "mouse picking text"});
+
   pass.addPipeline(spritePipeline);
   pass.addPipeline(meshPipeline);
   pass.addPipeline(skinnedMeshPipeline);
+  pass.addPipeline(textPipeline);
 
   struct MousePickingDrawParams {
     rhi::DeviceAddress selectedEntity;
@@ -206,30 +256,33 @@ void MousePickingGraph::createRenderGraph() {
     rhi::DeviceAddress skinnedMeshTransforms;
     rhi::DeviceAddress skinnedMeshEntities;
     rhi::DeviceAddress skeletons;
+
+    rhi::DeviceAddress textTransforms;
+    rhi::DeviceAddress textEntities;
+    rhi::DeviceAddress glyphs;
   };
 
   size_t offset = 0;
   for (size_t i = 0; i < mBindlessParams.size(); ++i) {
     auto &frameData = mFrameData.at(i);
     offset = mBindlessParams.at(i).addRange(MousePickingDrawParams{
-        mSelectedEntityBuffer.getAddress(),
-        frameData.getCameraBuffer(),
+        mSelectedEntityBuffer.getAddress(), frameData.getCameraBuffer(),
 
         frameData.getSpriteTransformsBuffer(),
         mSpriteEntitiesBuffer.getAddress(),
 
-        frameData.getMeshTransformsBuffer(),
-        mMeshEntitiesBuffer.getAddress(),
+        frameData.getMeshTransformsBuffer(), mMeshEntitiesBuffer.getAddress(),
 
         frameData.getSkinnedMeshTransformsBuffer(),
-        mSkinnedMeshEntitiesBuffer.getAddress(),
-        frameData.getSkeletonsBuffer(),
-    });
+        mSkinnedMeshEntitiesBuffer.getAddress(), frameData.getSkeletonsBuffer(),
+
+        frameData.getTextTransformsBuffer(), mTextEntitiesBuffer.getAddress(),
+        frameData.getGlyphsBuffer()});
   }
 
   pass.setExecutor([this, spritePipeline, meshPipeline, skinnedMeshPipeline,
-                    offset](rhi::RenderCommandList &commandList,
-                            uint32_t frameIndex) {
+                    textPipeline, offset](rhi::RenderCommandList &commandList,
+                                          uint32_t frameIndex) {
     auto &frameData = mFrameData.at(frameIndex);
 
     commandList.setScissor(glm::ivec2(mMousePos), glm::uvec2(1, 1));
@@ -311,6 +364,24 @@ void MousePickingGraph::createRenderGraph() {
           indexOffset += indexCount;
         }
         instanceStart += numInstances;
+      }
+    }
+
+    // Text
+    {
+      commandList.bindPipeline(textPipeline);
+      commandList.bindDescriptor(textPipeline, 0,
+                                 mBindlessParams.at(frameIndex).getDescriptor(),
+                                 offsets);
+
+      static constexpr uint32_t NumVertices = 4;
+      for (size_t i = 0; i < frameData.getTextEntities().size(); ++i) {
+        commandList.pushConstants(
+            textPipeline, rhi::ShaderStage::Vertex, 0, sizeof(glm::uvec4),
+            glm::value_ptr(
+                mMousePickingFrameData.at(frameIndex).textBounds.at(i)));
+
+        commandList.draw(NumVertices, 0, 1, static_cast<uint32_t>(i));
       }
     }
   });

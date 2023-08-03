@@ -26,6 +26,7 @@ project "LiquidEditor"
         "glslc ../../editor/assets/shaders/mouse-picking-sprite.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-sprite.vert.spv",
         "glslc ../../editor/assets/shaders/mouse-picking-mesh.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-mesh.vert.spv",
         "glslc ../../editor/assets/shaders/mouse-picking-skinned-mesh.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-skinned-mesh.vert.spv",
+        "glslc ../../editor/assets/shaders/mouse-picking-text.vert -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-text.vert.spv",
         "glslc ../../editor/assets/shaders/mouse-picking-selector.frag -o %{cfg.buildtarget.directory}/assets/shaders/mouse-picking-selector.frag.spv",
         "glslc ../../editor/assets/shaders/collidable-shape.vert -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.vert.spv",
         "glslc ../../editor/assets/shaders/collidable-shape.frag -o %{cfg.buildtarget.directory}/assets/shaders/collidable-shape.frag.spv",

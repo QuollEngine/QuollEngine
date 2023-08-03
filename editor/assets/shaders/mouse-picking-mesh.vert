@@ -5,26 +5,7 @@ layout(location = 0) in vec3 inPosition;
 
 layout(location = 0) out uint outEntity;
 
-#include "bindless-editor.glsl"
-
-Buffer(16) EntitiesArray { uint entities[]; };
-
-layout(set = 0, binding = 0) uniform DrawParams {
-  Empty selectedEntity;
-
-  Camera camera;
-
-  TransformsArray spriteTransforms;
-  EntitiesArray spriteEntities;
-
-  TransformsArray meshTransforms;
-  EntitiesArray meshEntities;
-
-  TransformsArray skinnedMeshTransforms;
-  EntitiesArray skinnedMeshEntities;
-  SkeletonsArray skeletons;
-}
-uDrawParams;
+#include "mouse-picking-base.glsl"
 
 void main() {
   mat4 modelMatrix = getMeshTransform(gl_InstanceIndex).modelMatrix;
