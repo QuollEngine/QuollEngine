@@ -3,26 +3,7 @@
 
 layout(location = 0) out uint outEntity;
 
-#include "bindless-editor.glsl"
-
-Buffer(16) EntitiesArray { uint entities[]; };
-
-layout(set = 0, binding = 0) uniform DrawParams {
-  Empty selectedEntity;
-
-  Camera camera;
-
-  TransformsArray spriteTransforms;
-  EntitiesArray spriteEntities;
-
-  TransformsArray meshTransforms;
-  EntitiesArray meshEntities;
-
-  TransformsArray skinnedMeshTransforms;
-  EntitiesArray skinnedMeshEntities;
-  SkeletonsArray skeletons;
-}
-uDrawParams;
+#include "mouse-picking-base.glsl"
 
 const vec2 positions[4] =
     vec2[](vec2(-1, -1), vec2(+1, -1), vec2(-1, +1), vec2(+1, +1));

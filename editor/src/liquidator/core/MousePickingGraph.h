@@ -16,6 +16,10 @@ namespace liquid::editor {
  * storage buffer
  */
 class MousePickingGraph {
+  struct MousePickingFrameData {
+    std::vector<glm::vec4> textBounds;
+  };
+
 public:
   /**
    * @brief Create mouse picking graph
@@ -79,11 +83,15 @@ private:
   std::array<BindlessDrawParameters, rhi::RenderDevice::NumFrames>
       mBindlessParams;
 
+  std::array<MousePickingFrameData, rhi::RenderDevice::NumFrames>
+      mMousePickingFrameData;
+
   AssetRegistry &mAssetRegistry;
 
   rhi::Buffer mSpriteEntitiesBuffer;
   rhi::Buffer mMeshEntitiesBuffer;
   rhi::Buffer mSkinnedMeshEntitiesBuffer;
+  rhi::Buffer mTextEntitiesBuffer;
   rhi::Buffer mSelectedEntityBuffer;
 
   glm::vec2 mMousePos{};

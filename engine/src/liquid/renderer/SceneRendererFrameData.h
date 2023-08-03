@@ -288,8 +288,26 @@ public:
    * @return Text groups
    */
   inline const std::unordered_map<FontAssetHandle, std::vector<TextData>> &
-  getTextGroups() {
+  getTextGroups() const {
     return mTextGroups;
+  }
+
+  /**
+   * @brief Get text glyphs
+   *
+   * @return Text glyphs
+   */
+  inline const std::vector<GlyphData> &getTextGlyphs() const {
+    return mTextGlyphs;
+  }
+
+  /**
+   * @brief Get text entities
+   *
+   * @return Text entities
+   */
+  inline const std::vector<Entity> &getTextEntities() const {
+    return mTextEntities;
   }
 
   /**
@@ -372,11 +390,13 @@ public:
   /**
    * @brief Add text
    *
+   * @param entity Entity
    * @param fontHandle Font handle
    * @param glyphs Text glyphs
    * @param transform Text world transform
    */
-  void addText(FontAssetHandle fontHandle, const std::vector<GlyphData> &glyphs,
+  void addText(Entity entity, FontAssetHandle fontHandle,
+               const std::vector<GlyphData> &glyphs,
                const glm::mat4 &transform);
 
   /**
@@ -611,6 +631,7 @@ private:
   rhi::Buffer mSpriteTexturesBuffer;
 
   std::vector<glm::mat4> mTextTransforms;
+  std::vector<Entity> mTextEntities;
   rhi::Buffer mTextTransformsBuffer;
   std::vector<GlyphData> mTextGlyphs;
   rhi::Buffer mTextGlyphsBuffer;

@@ -368,10 +368,11 @@ void SceneRendererFrameData::addSprite(Entity entity,
   mSpriteTextures.push_back(texture);
 }
 
-void SceneRendererFrameData::addText(FontAssetHandle font,
+void SceneRendererFrameData::addText(Entity entity, FontAssetHandle font,
                                      const std::vector<GlyphData> &glyphs,
                                      const glm::mat4 &transform) {
   mTextTransforms.push_back(transform);
+  mTextEntities.push_back(entity);
   uint32_t index = static_cast<uint32_t>(mTextTransforms.size() - 1);
 
   TextData textData{};
@@ -425,6 +426,7 @@ void SceneRendererFrameData::clear() {
   mSpriteTransforms.clear();
   mSpriteTextures.clear();
 
+  mTextEntities.clear();
   mTextTransforms.clear();
   mTextGroups.clear();
   mTextGlyphs.clear();
