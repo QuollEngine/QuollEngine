@@ -75,26 +75,23 @@ void MousePickingGraph::execute(rhi::RenderCommandList &commandList,
 
   auto &textBounds = mMousePickingFrameData.at(frameIndex).textBounds;
   textBounds.clear();
-  textBounds.resize(frameData.getTextEntities().size());
+  textBounds.reserve(frameData.getTexts().size());
 
-  for (const auto &[_, texts] : frameData.getTextGroups()) {
-    for (const auto &text : texts) {
-      glm::vec4 bounds(
-          std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
-          std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+  for (const auto &text : frameData.getTexts()) {
+    glm::vec4 bounds(
+        std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
 
-      for (auto i = text.glyphStart; i < text.glyphStart + text.length; ++i) {
-        const auto &glyph =
-            frameData.getTextGlyphs().at(static_cast<size_t>(i));
+    for (auto i = text.glyphStart; i < text.glyphStart + text.length; ++i) {
+      const auto &glyph = frameData.getTextGlyphs().at(static_cast<size_t>(i));
 
-        bounds.x = std::min(glyph.planeBounds.x, bounds.x);
-        bounds.y = std::min(glyph.planeBounds.y, bounds.y);
-        bounds.z = std::max(glyph.planeBounds.z, bounds.z);
-        bounds.w = std::max(glyph.planeBounds.w, bounds.w);
-      }
-
-      textBounds.at(text.index) = bounds;
+      bounds.x = std::min(glyph.planeBounds.x, bounds.x);
+      bounds.y = std::min(glyph.planeBounds.y, bounds.y);
+      bounds.z = std::max(glyph.planeBounds.z, bounds.z);
+      bounds.w = std::max(glyph.planeBounds.w, bounds.w);
     }
+
+    textBounds.push_back(bounds);
   }
 
   mSpriteEntitiesBuffer.update(frameData.getSpriteEntities().data(),

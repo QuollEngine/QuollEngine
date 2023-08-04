@@ -792,7 +792,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
       advanceX += fontGlyph.advanceX;
     }
 
-    frameData.addText(entity, text.font, glyphs, world.worldTransform);
+    frameData.addText(entity, font.deviceHandle, glyphs, world.worldTransform);
   }
 
   // Directional lights
@@ -924,24 +924,21 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
                                uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
   static constexpr uint32_t QuadNumVertices = 6;
-  for (const auto &[font, texts] : frameData.getTextGroups()) {
-    auto textureHandle =
-        mAssetRegistry.getFonts().getAsset(font).data.deviceHandle;
+  for (size_t i = 0; i < frameData.getTexts().size(); ++i) {
+    const auto &text = frameData.getTexts().at(i);
 
     commandList.bindDescriptor(pipeline, 0,
                                mRenderStorage.getGlobalTexturesDescriptor());
 
-    for (auto &text : texts) {
-      glm::uvec4 textConstants{rhi::castHandleToUint(textureHandle),
-                               text.glyphStart, 0, 0};
+    glm::uvec4 textConstants{rhi::castHandleToUint(text.fontTexture),
+                             text.glyphStart, 0, 0};
 
-      commandList.pushConstants(
-          pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
-          sizeof(glm::uvec4), glm::value_ptr(textConstants));
+    commandList.pushConstants(
+        pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+        sizeof(glm::uvec4), glm::value_ptr(textConstants));
 
-      commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0,
-                       1, text.index);
-    }
+    commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0, 1,
+                     static_cast<uint32_t>(i));
   }
 }
 

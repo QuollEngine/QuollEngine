@@ -217,15 +217,13 @@ public:
   };
 
   /**
-   * @brief Text data
+   * @brief Text item
    */
-  struct TextData {
+  struct TextItem {
     /**
-     * Text index
-     *
-     * Used for finding transforms
+     * Font handle
      */
-    uint32_t index = 0;
+    rhi::TextureHandle fontTexture = rhi::TextureHandle::Null;
 
     /**
      * Glyph start position in glyphs buffer
@@ -283,14 +281,11 @@ public:
   }
 
   /**
-   * @brief Get text groups
+   * @brief Get texts
    *
-   * @return Text groups
+   * @return Texts
    */
-  inline const std::unordered_map<FontAssetHandle, std::vector<TextData>> &
-  getTextGroups() const {
-    return mTextGroups;
-  }
+  inline const std::vector<TextItem> &getTexts() const { return mTexts; }
 
   /**
    * @brief Get text glyphs
@@ -391,11 +386,11 @@ public:
    * @brief Add text
    *
    * @param entity Entity
-   * @param fontHandle Font handle
+   * @param fontTexture Font texture handle
    * @param glyphs Text glyphs
    * @param transform Text world transform
    */
-  void addText(Entity entity, FontAssetHandle fontHandle,
+  void addText(Entity entity, rhi::TextureHandle fontTexture,
                const std::vector<GlyphData> &glyphs,
                const glm::mat4 &transform);
 
@@ -630,12 +625,13 @@ private:
   rhi::Buffer mSpriteTransformsBuffer;
   rhi::Buffer mSpriteTexturesBuffer;
 
+  std::vector<TextItem> mTexts;
   std::vector<glm::mat4> mTextTransforms;
   std::vector<Entity> mTextEntities;
-  rhi::Buffer mTextTransformsBuffer;
   std::vector<GlyphData> mTextGlyphs;
+
+  rhi::Buffer mTextTransformsBuffer;
   rhi::Buffer mTextGlyphsBuffer;
-  std::unordered_map<FontAssetHandle, std::vector<TextData>> mTextGroups;
 
   size_t mReservedSpace = 0;
 
