@@ -368,15 +368,16 @@ void SceneRendererFrameData::addSprite(Entity entity,
   mSpriteTextures.push_back(texture);
 }
 
-void SceneRendererFrameData::addText(Entity entity, FontAssetHandle font,
+void SceneRendererFrameData::addText(Entity entity,
+                                     rhi::TextureHandle fontTexture,
                                      const std::vector<GlyphData> &glyphs,
                                      const glm::mat4 &transform) {
   mTextTransforms.push_back(transform);
   mTextEntities.push_back(entity);
   uint32_t index = static_cast<uint32_t>(mTextTransforms.size() - 1);
 
-  TextData textData{};
-  textData.index = index;
+  TextItem textData{};
+  textData.fontTexture = fontTexture;
   textData.glyphStart = static_cast<uint32_t>(mTextGlyphs.size());
   textData.length = static_cast<uint32_t>(glyphs.size());
 
@@ -384,11 +385,7 @@ void SceneRendererFrameData::addText(Entity entity, FontAssetHandle font,
     mTextGlyphs.push_back(glyph);
   }
 
-  if (mTextGroups.find(font) == mTextGroups.end()) {
-    mTextGroups.insert_or_assign(font, std::vector<TextData>{textData});
-  } else {
-    mTextGroups.at(font).push_back(textData);
-  }
+  mTexts.push_back(textData);
 }
 
 void SceneRendererFrameData::setSkyboxTexture(rhi::TextureHandle texture) {
@@ -428,7 +425,7 @@ void SceneRendererFrameData::clear() {
 
   mTextEntities.clear();
   mTextTransforms.clear();
-  mTextGroups.clear();
+  mTexts.clear();
   mTextGlyphs.clear();
 
   mDirectionalLights.clear();
