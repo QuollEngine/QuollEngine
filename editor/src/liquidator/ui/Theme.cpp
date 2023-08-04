@@ -76,10 +76,10 @@ static const std::unordered_map<ThemeColor, ImVec4> Colors{
     // End
 };
 
-static const std::unordered_map<ThemeStyle, glm::vec2> Styles{
-    {ThemeStyle::SectionRounding, glm::vec2(8.0f, 8.0f)},
-    // End
-};
+static constexpr ThemeStyles Styles{.itemSpacing = ImVec2(8.0f, 8.0f),
+                                    .sectionRounding = ImVec2(8.0f, 8.0f),
+                                    .windowPadding = ImVec2(10.0f, 10.0f),
+                                    .childRounding = 4.0f};
 
 /**
  * @brief Set imgui styles
@@ -105,14 +105,14 @@ static void setImguiStyles() {
   style.Colors[ImGuiCol_ChildBg] = Theme::getColor(ThemeColor::Neutral100);
   style.Colors[ImGuiCol_ModalWindowDimBg] =
       Theme::getColor(ThemeColor::ModalBackdrop);
-  style.ItemSpacing = ImVec2(8.0f, 8.0f);
+  style.ItemSpacing = Styles.itemSpacing;
   style.ItemInnerSpacing = ImVec2(8.0f, 8.0f);
   style.FrameRounding = 4.0f;
   style.FramePadding = ImVec2(10.0f, 10.0f);
   style.FrameBorderSize = 0.0f;
   style.PopupBorderSize = 0.0f;
   style.PopupRounding = 4.0f;
-  style.ChildRounding = 4.0f;
+  style.ChildRounding = Styles.childRounding;
 
   // Tables
   style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -134,7 +134,7 @@ static void setImguiStyles() {
   style.Colors[ImGuiCol_ResizeGripHovered] = SrgbToLinear(255, 255, 255, 255);
   style.Colors[ImGuiCol_ResizeGripActive] = SrgbToLinear(255, 255, 255, 255);
   style.WindowRounding = 8.0f;
-  style.WindowPadding = ImVec2(10.0f, 10.0f);
+  style.WindowPadding = Styles.windowPadding;
   style.WindowBorderSize = 0.0f;
 
   // Tabs
@@ -210,7 +210,7 @@ glm::vec4 Theme::getClearColor() {
 
 ImVec4 Theme::getColor(ThemeColor color) { return Colors.at(color); }
 
-glm::vec2 Theme::getStyle(ThemeStyle style) { return Styles.at(style); }
+const ThemeStyles &Theme::getStyles() { return Styles; }
 
 ImFont *Theme::getBoldFont() { return Fonts.at(1); }
 

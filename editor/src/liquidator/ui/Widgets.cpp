@@ -93,7 +93,7 @@ Section::~Section() {
     ImGui::GetWindowDrawList()->AddRectFilled(
         panelMin, panelMax,
         ImGui::GetColorU32(Theme::getColor(ThemeColor::Neutral400)),
-        Theme::getStyle(ThemeStyle::SectionRounding).x);
+        Theme::getStyles().sectionRounding.x);
     ImGui::GetWindowDrawList()->ChannelsMerge();
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding.y);
