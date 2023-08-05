@@ -32,7 +32,7 @@ void SceneHierarchyPanel::render(WorkspaceState &state,
 
     StyleStack stack;
     stack.pushStyle(ImGuiStyleVar_ItemSpacing,
-                    ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+                    ImVec2(Theme::getStyles().itemSpacing.x, 0.0f));
     stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
     stack.pushStyle(ImGuiStyleVar_IndentSpacing, TreeNodeIndentSpacing);
 
@@ -160,14 +160,12 @@ uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
   }
 
   if (mRightClickedEntity == entity) {
-    if (auto _ = widgets::ContextMenu()) {
-      StyleStack stack;
-      // TODO: Get default style instead
-      // of manually passing it
-      stack.pushStyle(ImGuiStyleVar_ItemSpacing,
-                      ImVec2(ImGui::GetStyle().ItemSpacing.x,
-                             ImGui::GetStyle().ItemSpacing.x));
+    StyleStack stack;
+    stack.pushStyle(ImGuiStyleVar_WindowPadding,
+                    Theme::getStyles().windowPadding);
+    stack.pushStyle(ImGuiStyleVar_ItemSpacing, Theme::getStyles().itemSpacing);
 
+    if (auto _ = widgets::ContextMenu()) {
       if (ImGui::MenuItem("Go to view")) {
         actionExecutor.execute<MoveCameraToEntity>(entity);
       }

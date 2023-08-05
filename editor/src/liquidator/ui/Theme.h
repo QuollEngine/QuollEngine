@@ -26,7 +26,30 @@ enum class ThemeColor {
   ModalBackdrop
 };
 
-enum class ThemeStyle { SectionRounding };
+/**
+ * @brief Theme styles
+ */
+struct ThemeStyles {
+  /**
+   * Item spacing
+   */
+  ImVec2 itemSpacing;
+
+  /**
+   * Section rounding
+   */
+  ImVec2 sectionRounding;
+
+  /**
+   * Window padding
+   */
+  ImVec2 windowPadding;
+
+  /**
+   * Child rounding
+   */
+  float childRounding = 0.0f;
+};
 
 /**
  * @brief UI theme
@@ -65,19 +88,18 @@ public:
   static ImVec4 getColor(ThemeColor color);
 
   /**
-   * @brief Get theme style
-   *
-   * @param style Theme style
-   * @return Style value
-   */
-  static glm::vec2 getStyle(ThemeStyle style);
-
-  /**
    * @brief Get bold font
    *
    * @return Bold font
    */
   static ImFont *getBoldFont();
+
+  /**
+   * @brief Get default theme styles
+   *
+   * @return Theme styles
+   */
+  static const ThemeStyles &getStyles();
 };
 
 } // namespace liquid::editor

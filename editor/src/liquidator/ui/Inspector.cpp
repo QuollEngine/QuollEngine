@@ -28,11 +28,6 @@ Inspector::Inspector() {
 
 void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
                        ActionExecutor &actionExecutor) {
-
-  auto actualWindowPadding = ImGui::GetStyle().WindowPadding;
-  auto actualItemSpacing = ImGui::GetStyle().ItemSpacing;
-  auto actualChildRounding = ImGui::GetStyle().ChildRounding;
-
   StyleStack stack;
   stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
@@ -78,7 +73,8 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
 
     {
       StyleStack stack;
-      stack.pushStyle(ImGuiStyleVar_WindowPadding, actualWindowPadding);
+      stack.pushStyle(ImGuiStyleVar_WindowPadding,
+                      Theme::getStyles().windowPadding);
       stack.pushColor(ImGuiCol_ChildBg,
                       Theme::getColor(ThemeColor::Neutral300));
 
@@ -86,8 +82,10 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
                             ImGuiWindowFlags_AlwaysUseWindowPadding)) {
 
         StyleStack stack;
-        stack.pushStyle(ImGuiStyleVar_ItemSpacing, actualItemSpacing);
-        stack.pushStyle(ImGuiStyleVar_ChildRounding, actualChildRounding);
+        stack.pushStyle(ImGuiStyleVar_ItemSpacing,
+                        Theme::getStyles().itemSpacing);
+        stack.pushStyle(ImGuiStyleVar_ChildRounding,
+                        Theme::getStyles().childRounding);
 
         mTabs.at(mSelectedIndex).renderFn(state, assetRegistry, actionExecutor);
       }
