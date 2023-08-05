@@ -47,6 +47,10 @@ EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
       {shadersPath / "outline-skinned-geometry.vert.spv"});
   mRenderStorage.createShader("outline-color.frag",
                               {shadersPath / "outline-color.frag.spv"});
+  mRenderStorage.createShader("outline-text.vert",
+                              {shadersPath / "outline-text.vert.spv"});
+  mRenderStorage.createShader("outline-text.frag",
+                              {shadersPath / "outline-text.frag.spv"});
 }
 
 void EditorRenderer::attach(RenderGraph &graph,
@@ -286,6 +290,36 @@ void EditorRenderer::attach(RenderGraph &graph,
         {mRenderStorage.getShader("outline-sprite.vert"),
          mRenderStorage.getShader("outline-color.frag"),
          {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
+             rhi::BlendOp::Add}}},
+         outlineWritePipelineStencil,
+         {},
+         "sprite outline stencil write"});
+
+    auto outlineSpritePipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("outline-sprite.vert"),
+         mRenderStorage.getShader("outline-color.frag"),
+         {},
+         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleStrip},
+         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
+                                 rhi::FrontFace::Clockwise},
+         rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{
+             true, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
+             rhi::BlendOp::Add}}},
+         outlinePipelineStencil,
+         {},
+         "sprite outline"});
+
+    auto outlineTextStencilWritePipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("outline-text.vert"),
+         mRenderStorage.getShader("outline-text.frag"),
+         {},
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise},
@@ -293,11 +327,13 @@ void EditorRenderer::attach(RenderGraph &graph,
              true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
              rhi::BlendOp::Add, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
              rhi::BlendOp::Add}}},
-         outlineWritePipelineStencil});
+         outlineWritePipelineStencil,
+         {},
+         "text outline stencil write"});
 
-    auto outlineSpritePipeline = mRenderStorage.addPipeline(
-        {mRenderStorage.getShader("outline-sprite.vert"),
-         mRenderStorage.getShader("outline-color.frag"),
+    auto outlineTextPipeline = mRenderStorage.addPipeline(
+        {mRenderStorage.getShader("outline-text.vert"),
+         mRenderStorage.getShader("outline-text.frag"),
          {},
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
@@ -306,7 +342,9 @@ void EditorRenderer::attach(RenderGraph &graph,
              true, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
              rhi::BlendOp::Add, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
              rhi::BlendOp::Add}}},
-         outlinePipelineStencil});
+         outlinePipelineStencil,
+         {},
+         "text outline"});
 
     auto outlineGeometryStencilWritePipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-geometry.vert"),
@@ -319,7 +357,9 @@ void EditorRenderer::attach(RenderGraph &graph,
              true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
              rhi::BlendOp::Add, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
              rhi::BlendOp::Add}}},
-         outlineWritePipelineStencil});
+         outlineWritePipelineStencil,
+         {},
+         "geometry outline stencil write"});
 
     auto outlineGeometryPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-geometry.vert"),
@@ -332,7 +372,9 @@ void EditorRenderer::attach(RenderGraph &graph,
              true, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
              rhi::BlendOp::Add, rhi::BlendFactor::One, rhi::BlendFactor::Zero,
              rhi::BlendOp::Add}}},
-         outlinePipelineStencil});
+         outlinePipelineStencil,
+         {},
+         "geometry outline"});
 
     auto outlineSkinnedGeometryStencilWritePipeline =
         mRenderStorage.addPipeline(
@@ -347,7 +389,9 @@ void EditorRenderer::attach(RenderGraph &graph,
                  true, rhi::BlendFactor::Zero, rhi::BlendFactor::One,
                  rhi::BlendOp::Add, rhi::BlendFactor::Zero,
                  rhi::BlendFactor::DstAlpha, rhi::BlendOp::Add}}},
-             outlineWritePipelineStencil});
+             outlineWritePipelineStencil,
+             {},
+             "skinned geometry outline stencil write"});
 
     auto outlineSkinnedGeometryPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-skinned-geometry.vert"),
@@ -357,10 +401,14 @@ void EditorRenderer::attach(RenderGraph &graph,
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
-         outlinePipelineStencil});
+         outlinePipelineStencil,
+         {},
+         "sprite outline"});
 
     outlinePass.addPipeline(outlineSpriteStencilWritePipeline);
     outlinePass.addPipeline(outlineSpritePipeline);
+    outlinePass.addPipeline(outlineTextStencilWritePipeline);
+    outlinePass.addPipeline(outlineTextPipeline);
     outlinePass.addPipeline(outlineGeometryStencilWritePipeline);
     outlinePass.addPipeline(outlineGeometryPipeline);
     outlinePass.addPipeline(outlineSkinnedGeometryStencilWritePipeline);
@@ -368,17 +416,20 @@ void EditorRenderer::attach(RenderGraph &graph,
 
     outlinePass.setExecutor(
         [outlineSpriteStencilWritePipeline, outlineSpritePipeline,
+         outlineTextStencilWritePipeline, outlineTextPipeline,
          outlineGeometryStencilWritePipeline, outlineGeometryPipeline,
          outlineSkinnedGeometryStencilWritePipeline,
          outlineSkinnedGeometryPipeline,
          this](rhi::RenderCommandList &commandList, uint32_t frameIndex) {
           static constexpr glm::vec4 OutlineColor{1.0f, 0.26f, 0.0f, 1.0f};
           static constexpr float OutlineScale = 1.02f;
+          static constexpr float OutlineScale2D = 1.06f;
 
           auto &frameData = mFrameData.at(frameIndex);
 
           auto spriteEnd =
               static_cast<uint32_t>(frameData.getOutlineSpriteEnd());
+          auto textEnd = static_cast<uint32_t>(frameData.getOutlineTextEnd());
           auto meshEnd = static_cast<uint32_t>(frameData.getOutlineMeshEnd());
           auto skinnedMeshEnd =
               static_cast<uint32_t>(frameData.getOutlineSkinnedMeshEnd());
@@ -387,13 +438,19 @@ void EditorRenderer::attach(RenderGraph &graph,
                                outlineSpriteStencilWritePipeline, 0, spriteEnd,
                                glm::vec4{0.0f}, 1.0f);
           renderSpriteOutlines(commandList, frameData, outlineSpritePipeline, 0,
-                               spriteEnd, OutlineColor, OutlineScale);
+                               spriteEnd, OutlineColor, OutlineScale2D);
+
+          renderTextOutlines(commandList, frameData,
+                             outlineTextStencilWritePipeline, spriteEnd,
+                             textEnd, glm::vec4{0.0f}, 1.0f);
+          renderTextOutlines(commandList, frameData, outlineTextPipeline,
+                             spriteEnd, textEnd, OutlineColor, OutlineScale2D);
 
           renderMeshOutlines(commandList, frameData,
-                             outlineGeometryStencilWritePipeline, spriteEnd,
+                             outlineGeometryStencilWritePipeline, textEnd,
                              meshEnd, glm::vec4{0.0f}, 1.0f);
           renderMeshOutlines(commandList, frameData, outlineGeometryPipeline,
-                             spriteEnd, meshEnd, OutlineColor, OutlineScale);
+                             textEnd, meshEnd, OutlineColor, OutlineScale);
 
           renderMeshOutlines(commandList, frameData,
                              outlineSkinnedGeometryStencilWritePipeline,
@@ -442,6 +499,37 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                  .jointFinalTransforms;
 
       frameData.addSkinnedMeshOutline(data, skeleton, world.worldTransform);
+    } else if (entityDatabase.has<Text>(state.selectedEntity)) {
+      const auto &text = entityDatabase.get<Text>(state.selectedEntity);
+      const auto &font = assetRegistry.getFonts().getAsset(text.font).data;
+      const auto &world =
+          entityDatabase.get<WorldTransform>(state.selectedEntity);
+
+      std::vector<SceneRendererFrameData::GlyphData> glyphs(text.text.length());
+      float advanceX = 0;
+      float advanceY = 0;
+      for (size_t i = 0; i < text.text.length(); ++i) {
+        char c = text.text.at(i);
+
+        if (c == '\n') {
+          advanceX = 0.0f;
+          advanceY += text.lineHeight * font.fontScale;
+          continue;
+        }
+
+        const auto &fontGlyph = font.glyphs.at(c);
+        glyphs.at(i).bounds = fontGlyph.bounds;
+        glyphs.at(i).planeBounds = fontGlyph.planeBounds;
+
+        glyphs.at(i).planeBounds.x += advanceX;
+        glyphs.at(i).planeBounds.z += advanceX;
+        glyphs.at(i).planeBounds.y -= advanceY;
+        glyphs.at(i).planeBounds.w -= advanceY;
+
+        advanceX += fontGlyph.advanceX;
+      }
+
+      frameData.addTextOutline(font.deviceHandle, glyphs, world.worldTransform);
     }
   }
 
@@ -514,6 +602,46 @@ void EditorRenderer::renderSpriteOutlines(rhi::RenderCommandList &commandList,
       sizeof(PushConstants), &pc);
 
   commandList.draw(4, 0, instanceEnd - instanceStart, instanceStart);
+}
+
+void EditorRenderer::renderTextOutlines(rhi::RenderCommandList &commandList,
+                                        EditorRendererFrameData &frameData,
+                                        rhi::PipelineHandle pipeline,
+                                        uint32_t instanceStart,
+                                        uint32_t instanceEnd, glm::vec4 color,
+                                        float scale) {
+  std::array<uint32_t, 1> offsets{0};
+
+  commandList.bindPipeline(pipeline);
+  commandList.bindDescriptor(
+      pipeline, 0, frameData.getBindlessParams().getDescriptor(), offsets);
+  commandList.bindDescriptor(pipeline, 1,
+                             mRenderStorage.getGlobalTexturesDescriptor());
+
+  struct PushConstants {
+    glm::vec4 color;
+    glm::vec4 scale;
+    glm::uvec4 index;
+  };
+
+  static constexpr uint32_t QuadNumVertices = 6;
+  for (size_t i = 0; i < frameData.getTextOutlines().size(); ++i) {
+    const auto &text = frameData.getTextOutlines().at(i);
+
+    PushConstants pc{};
+    pc.color = color;
+    pc.scale = glm::vec4(scale);
+    pc.index.x = instanceStart;
+    pc.index.y = text.glyphStart;
+    pc.index.z = rhi::castHandleToUint(text.fontTexture);
+
+    commandList.pushConstants(
+        pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
+        sizeof(PushConstants), &pc);
+
+    commandList.draw(QuadNumVertices * static_cast<uint32_t>(text.length), 0, 1,
+                     static_cast<uint32_t>(i));
+  }
 }
 
 void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,

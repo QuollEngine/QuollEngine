@@ -15,6 +15,7 @@ layout(set = 0, binding = 0) uniform DrawParameters {
   Empty gridData;
   TransformsArray outlineTransforms;
   Empty outlineSkeletons;
+  Empty glyphs;
 }
 uDrawParams;
 

@@ -374,7 +374,6 @@ void SceneRendererFrameData::addText(Entity entity,
                                      const glm::mat4 &transform) {
   mTextTransforms.push_back(transform);
   mTextEntities.push_back(entity);
-  uint32_t index = static_cast<uint32_t>(mTextTransforms.size() - 1);
 
   TextItem textData{};
   textData.fontTexture = fontTexture;
