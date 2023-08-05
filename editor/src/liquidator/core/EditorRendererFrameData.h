@@ -8,7 +8,7 @@
 #include "liquid/scene/Camera.h"
 #include "liquid/renderer/RenderStorage.h"
 #include "liquid/renderer/BindlessDrawParameters.h"
-
+#include "liquid/renderer/SceneRendererFrameData.h"
 #include "liquid/entity/EntityDatabase.h"
 
 namespace liquid::editor {
@@ -174,6 +174,18 @@ public:
   void addSpriteOutline(const glm::mat4 &worldTransform);
 
   /**
+   * @brief Add text outline
+   *
+   * @param fontTexture Font texture
+   * @param glyphs Text glyphs
+   * @param worldTransform World transform
+   */
+  void
+  addTextOutline(rhi::TextureHandle fontTexture,
+                 const std::vector<SceneRendererFrameData::GlyphData> &glyphs,
+                 const glm::mat4 &worldTransform);
+
+  /**
    * @brief Add mesh outline
    *
    * @param mesh Mesh asset
@@ -202,11 +214,28 @@ public:
   }
 
   /**
+   * @brief Get mesh outlines
+   *
+   * @return Mesh outlines
+   */
+  inline const std::vector<SceneRendererFrameData::TextItem> &
+  getTextOutlines() const {
+    return mTextOutlines;
+  }
+
+  /**
    * @brief Get last sprite index in outline data
    *
    * @return Last sprite index
    */
   inline size_t getOutlineSpriteEnd() const { return mOutlineSpriteEnd; }
+
+  /**
+   * @brief Get last text index in outline data
+   *
+   * @return Last text index
+   */
+  inline size_t getOutlineTextEnd() const { return mOutlineTextEnd; }
 
   /**
    * @brief Get last mesh index in outline data
@@ -302,17 +331,23 @@ private:
   size_t mReservedSpace = 0;
 
   // Outlines
-  std::vector<MeshOutline> mMeshOutlines;
-  size_t mOutlineSpriteEnd = 0;
-  size_t mOutlineMeshEnd = 0;
-  size_t mOutlineSkinnedMeshEnd = 0;
-
   std::vector<glm::mat4> mOutlineTransforms;
+  rhi::Buffer mOutlineTransformsBuffer;
 
+  size_t mOutlineSpriteEnd = 0;
+
+  size_t mOutlineTextEnd = 0;
+  std::vector<SceneRendererFrameData::TextItem> mTextOutlines;
+  std::vector<SceneRendererFrameData::GlyphData> mTextGlyphOutlines;
+  rhi::Buffer mOutlineTextGlyphsBuffer;
+
+  size_t mOutlineMeshEnd = 0;
+  std::vector<MeshOutline> mMeshOutlines;
+
+  size_t mOutlineSkinnedMeshEnd = 0;
   std::unique_ptr<glm::mat4> mOutlineSkeletons;
   size_t mLastOutlineSkeleton = 0;
   size_t mOutlineSkeletonCapacity = 0;
-  rhi::Buffer mOutlineTransformsBuffer;
   rhi::Buffer mOutlineSkeletonsBuffer;
 
   // Camera

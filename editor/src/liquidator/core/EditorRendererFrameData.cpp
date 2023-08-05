@@ -76,6 +76,12 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     mOutlineTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Outline text glyphs";
+    mOutlineTextGlyphsBuffer = renderStorage.createBuffer(desc);
+  }
+
   struct EditorDrawParams {
     rhi::DeviceAddress gizmoTransforms;
     rhi::DeviceAddress skeletonTransforms;
@@ -85,6 +91,7 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     rhi::DeviceAddress gridData;
     rhi::DeviceAddress outlineTransforms;
     rhi::DeviceAddress outlineSkeletons;
+    rhi::DeviceAddress outlineTextGlyphs;
   };
 
   mBindlessParams.addRange(EditorDrawParams{
@@ -93,7 +100,8 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
       mSkeletonBoneTransformsBuffer.getAddress(),
       mCollidableEntityBuffer.getAddress(), mCameraBuffer.getAddress(),
       mEditorGridBuffer.getAddress(), mOutlineTransformsBuffer.getAddress(),
-      mOutlineSkeletonsBuffer.getAddress()});
+      mOutlineSkeletonsBuffer.getAddress(),
+      mOutlineTextGlyphsBuffer.getAddress()});
 
   mBindlessParams.build(renderStorage.getDevice());
 }
@@ -125,6 +133,26 @@ void EditorRendererFrameData::addSpriteOutline(
     const glm::mat4 &worldTransform) {
   mOutlineTransforms.push_back(worldTransform);
   mOutlineSpriteEnd++;
+}
+
+void EditorRendererFrameData::addTextOutline(
+    rhi::TextureHandle fontTexture,
+    const std::vector<SceneRendererFrameData::GlyphData> &glyphs,
+    const glm::mat4 &worldTransform) {
+
+  mOutlineTransforms.push_back(worldTransform);
+
+  SceneRendererFrameData::TextItem textData{};
+  textData.fontTexture = fontTexture;
+  textData.glyphStart = static_cast<uint32_t>(mTextGlyphOutlines.size());
+  textData.length = static_cast<uint32_t>(glyphs.size());
+
+  for (auto &glyph : glyphs) {
+    mTextGlyphOutlines.push_back(glyph);
+  }
+
+  mTextOutlines.push_back(textData);
+  mOutlineTextEnd++;
 }
 
 void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
@@ -223,6 +251,10 @@ void EditorRendererFrameData::updateBuffers() {
   mOutlineTransformsBuffer.update(
       mOutlineTransforms.data(), mOutlineTransforms.size() * sizeof(glm::mat4));
 
+  mOutlineTextGlyphsBuffer.update(
+      mTextGlyphOutlines.data(),
+      mTextGlyphOutlines.size() * sizeof(SceneRendererFrameData::GlyphData));
+
   if (mLastOutlineSkeleton > 0) {
     auto *skeletonsBuffer =
         static_cast<glm::mat4 *>(mOutlineSkeletonsBuffer.map());
@@ -244,7 +276,10 @@ void EditorRendererFrameData::clear() {
   mLastSkeleton = 0;
 
   mMeshOutlines.clear();
+  mTextOutlines.clear();
+  mTextGlyphOutlines.clear();
   mOutlineSpriteEnd = 0;
+  mOutlineTextEnd = 0;
   mOutlineMeshEnd = 0;
   mOutlineSkinnedMeshEnd = 0;
   mOutlineTransforms.clear();

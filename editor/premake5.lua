@@ -34,6 +34,8 @@ project "LiquidEditor"
         "glslc ../../editor/assets/shaders/outline-geometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/outline-geometry.vert.spv",
         "glslc ../../editor/assets/shaders/outline-skinned-geometry.vert -o %{cfg.buildtarget.directory}/assets/shaders/outline-skinned-geometry.vert.spv",
         "glslc ../../editor/assets/shaders/outline-color.frag -o %{cfg.buildtarget.directory}/assets/shaders/outline-color.frag.spv",
+        "glslc ../../editor/assets/shaders/outline-text.vert -o %{cfg.buildtarget.directory}/assets/shaders/outline-text.vert.spv",
+        "glslc ../../editor/assets/shaders/outline-text.frag -o %{cfg.buildtarget.directory}/assets/shaders/outline-text.frag.spv",
         "glslc ../../editor/assets/shaders/equirectangular-to-cubemap.comp -o %{cfg.buildtarget.directory}/assets/shaders/equirectangular-to-cubemap.comp.spv",
         "glslc ../../editor/assets/shaders/generate-irradiance-map.comp -o %{cfg.buildtarget.directory}/assets/shaders/generate-irradiance-map.comp.spv",
         "glslc ../../editor/assets/shaders/generate-specular-map.comp -o %{cfg.buildtarget.directory}/assets/shaders/generate-specular-map.comp.spv",
