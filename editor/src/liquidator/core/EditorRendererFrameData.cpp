@@ -81,29 +81,6 @@ EditorRendererFrameData::EditorRendererFrameData(RenderStorage &renderStorage,
     desc.debugName = "Outline text glyphs";
     mOutlineTextGlyphsBuffer = renderStorage.createBuffer(desc);
   }
-
-  struct EditorDrawParams {
-    rhi::DeviceAddress gizmoTransforms;
-    rhi::DeviceAddress skeletonTransforms;
-    rhi::DeviceAddress debugSkeletons;
-    rhi::DeviceAddress collidableParams;
-    rhi::DeviceAddress camera;
-    rhi::DeviceAddress gridData;
-    rhi::DeviceAddress outlineTransforms;
-    rhi::DeviceAddress outlineSkeletons;
-    rhi::DeviceAddress outlineTextGlyphs;
-  };
-
-  mBindlessParams.addRange(EditorDrawParams{
-      mGizmoTransformsBuffer.getAddress(),
-      mSkeletonTransformsBuffer.getAddress(),
-      mSkeletonBoneTransformsBuffer.getAddress(),
-      mCollidableEntityBuffer.getAddress(), mCameraBuffer.getAddress(),
-      mEditorGridBuffer.getAddress(), mOutlineTransformsBuffer.getAddress(),
-      mOutlineSkeletonsBuffer.getAddress(),
-      mOutlineTextGlyphsBuffer.getAddress()});
-
-  mBindlessParams.build(renderStorage.getDevice());
 }
 
 void EditorRendererFrameData::addSkeleton(
@@ -310,6 +287,29 @@ void EditorRendererFrameData::setCollidable(
     mCollidableEntityParams.params =
         glm::vec4(params.radius, params.halfHeight, 0.0f, 0.0f);
   }
+}
+
+void EditorRendererFrameData::createBindlessParamsRange() {
+  struct EditorDrawParams {
+    rhi::DeviceAddress gizmoTransforms;
+    rhi::DeviceAddress skeletonTransforms;
+    rhi::DeviceAddress debugSkeletons;
+    rhi::DeviceAddress collidableParams;
+    rhi::DeviceAddress camera;
+    rhi::DeviceAddress gridData;
+    rhi::DeviceAddress outlineTransforms;
+    rhi::DeviceAddress outlineSkeletons;
+    rhi::DeviceAddress outlineTextGlyphs;
+  };
+
+  mBindlessParams.addRange(EditorDrawParams{
+      mGizmoTransformsBuffer.getAddress(),
+      mSkeletonTransformsBuffer.getAddress(),
+      mSkeletonBoneTransformsBuffer.getAddress(),
+      mCollidableEntityBuffer.getAddress(), mCameraBuffer.getAddress(),
+      mEditorGridBuffer.getAddress(), mOutlineTransformsBuffer.getAddress(),
+      mOutlineSkeletonsBuffer.getAddress(),
+      mOutlineTextGlyphsBuffer.getAddress()});
 }
 
 } // namespace liquid::editor

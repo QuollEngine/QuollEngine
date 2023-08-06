@@ -58,6 +58,8 @@ void EditorRenderer::attach(RenderGraph &graph,
                             const RendererOptions &options) {
   for (auto &frameData : mFrameData) {
     frameData.getBindlessParams().destroy(mRenderStorage.getDevice());
+    frameData.createBindlessParamsRange();
+    frameData.getBindlessParams().build(mRenderStorage.getDevice());
   }
 
   // editor debug

@@ -31,8 +31,8 @@ layout(push_constant) uniform PushConstants {
 }
 uOutline;
 
-const vec2 positions[4] =
-    vec2[](vec2(-1, -1), vec2(+1, -1), vec2(-1, +1), vec2(+1, +1));
+const vec2 positions[4] = vec2[](vec2(-0.5, -0.5), vec2(+0.5, -0.5),
+                                 vec2(-0.5, +0.5), vec2(+0.5, +0.5));
 
 void main() {
   gl_Position = getCamera().viewProj *
