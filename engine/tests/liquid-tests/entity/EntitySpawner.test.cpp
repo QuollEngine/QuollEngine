@@ -37,7 +37,7 @@ TEST_F(EntitySpawnerDeathTest, SpawnPrefabReturnsEmptyListIfPrefabIsEmpty) {
   EXPECT_DEATH(entitySpawner.spawnPrefab(prefab, {}), ".*");
 }
 
-TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
+TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   liquid::AssetData<liquid::PrefabAsset> asset{};
 
   // Create 5 transforms
@@ -61,6 +61,14 @@ TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
     mesh.entity = i;
     mesh.value = liquid::MeshAssetHandle{i};
     asset.data.meshes.push_back(mesh);
+  }
+
+  // Create names
+  for (uint32_t i = 3; i < 5; ++i) {
+    liquid::PrefabComponent<liquid::String> name{};
+    name.entity = i;
+    name.value = "Test name " + std::to_string(i);
+    asset.data.names.push_back(name);
   }
 
   // Create three skinned meshes
@@ -154,6 +162,23 @@ TEST_F(EntitySpawnerTest, SpawnEntityCreatesEntitiesFromPrefab) {
     EXPECT_TRUE(db.has<liquid::WorldTransform>(entity));
   }
 
+  // Test names
+
+  // First three items have names with Untitled
+  for (uint32_t i = 0; i < 3; ++i) {
+    auto entity = res.at(i);
+    const auto &name = db.get<liquid::Name>(entity);
+
+    EXPECT_EQ(name.name, "New entity");
+  }
+
+  for (uint32_t i = 3; i < 5; ++i) {
+    auto entity = res.at(i);
+    const auto &name = db.get<liquid::Name>(entity);
+
+    EXPECT_EQ(name.name, "Test name " + std::to_string(i));
+  }
+
   // Test meshes
   for (uint32_t i = 0; i < 2; ++i) {
     auto entity = res.at(i);
@@ -236,6 +261,7 @@ TEST_F(
     EntitySpawnerTest,
     SpawnPrefabWrapsAllSpawnedEntitiesInAParentIfPrefabHasMoreThanOneRootEntity) {
   liquid::AssetData<liquid::PrefabAsset> asset{};
+  asset.relativePath = liquid::Path("my-path") / "my-prefab.lqprefab";
 
   {
     liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
@@ -259,6 +285,7 @@ TEST_F(
   EXPECT_EQ(db.get<liquid::LocalTransform>(root).localPosition,
             transform.localPosition);
   EXPECT_TRUE(db.has<liquid::WorldTransform>(root));
+  EXPECT_EQ(db.get<liquid::Name>(root).name, "my-prefab");
 
   EXPECT_FALSE(entityDatabase.has<liquid::Parent>(root));
 
@@ -300,12 +327,13 @@ TEST_F(EntitySpawnerTest,
   EXPECT_EQ(db.get<liquid::LocalTransform>(root).localPosition,
             transform.localPosition);
   EXPECT_TRUE(db.has<liquid::WorldTransform>(root));
-  EXPECT_TRUE(entityDatabase.has<liquid::Name>(root));
+  EXPECT_EQ(entityDatabase.get<liquid::Name>(root).name, "New entity");
 }
 
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
   liquid::AssetData<liquid::TextureAsset> asset{};
+  asset.relativePath = liquid::Path("my-path") / "my-sprite.png";
   asset.data.deviceHandle = liquid::rhi::TextureHandle{25};
   auto assetHandle = assetRegistry.getTextures().addAsset(asset);
 
@@ -318,4 +346,5 @@ TEST_F(EntitySpawnerTest,
   EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(entity));
   EXPECT_TRUE(entityDatabase.has<liquid::Sprite>(entity));
   EXPECT_EQ(entityDatabase.get<liquid::Sprite>(entity).handle, assetHandle);
+  EXPECT_EQ(entityDatabase.get<liquid::Name>(entity).name, "my-sprite");
 }

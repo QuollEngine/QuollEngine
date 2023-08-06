@@ -308,6 +308,7 @@ using SpawnSpriteAtViewActionTest = ActionTestBase;
 
 TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   liquid::AssetData<liquid::TextureAsset> data{};
+  data.relativePath = liquid::Path("test-path") / "my-texture.ktx2";
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
@@ -334,7 +335,7 @@ TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
                 .localPosition,
             glm::vec3(0.0f, 0.0f, -10.0f));
   EXPECT_EQ(activeScene().entityDatabase.get<liquid::Name>(entity).name,
-            "New sprite");
+            "my-texture");
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::WorldTransform>(entity));
   EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Sprite>(entity));
 

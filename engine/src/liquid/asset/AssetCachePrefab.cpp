@@ -156,6 +156,16 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
   }
 
   {
+    auto numComponents = static_cast<uint32_t>(asset.data.names.size());
+    file.write(numComponents);
+
+    for (auto &name : asset.data.names) {
+      file.write(name.entity);
+      file.write(name.value);
+    }
+  }
+
+  {
     auto numComponents = static_cast<uint32_t>(asset.data.meshes.size());
     file.write(numComponents);
     for (auto &component : asset.data.meshes) {
@@ -377,6 +387,22 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numComponents = 0;
     stream.read(numComponents);
+    prefab.data.names.resize(numComponents);
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      String name;
+      stream.read(name);
+
+      prefab.data.names.at(i).entity = entity;
+      prefab.data.names.at(i).value = name;
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
 
     prefab.data.meshes.resize(numComponents);
 
@@ -506,7 +532,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   if (prefab.data.transforms.empty() && prefab.data.directionalLights.empty() &&
       prefab.data.pointLights.empty() && prefab.data.meshes.empty() &&
       prefab.data.skinnedMeshes.empty() && prefab.data.skeletons.empty() &&
-      prefab.data.animators.empty()) {
+      prefab.data.animators.empty() && prefab.data.names.empty()) {
     return Result<PrefabAssetHandle>::Error("Prefab is empty");
   }
 

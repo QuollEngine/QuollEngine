@@ -95,6 +95,11 @@ struct PrefabAsset {
    * List of directional lights
    */
   std::vector<PrefabComponent<DirectionalLight>> directionalLights;
+
+  /**
+   * @brief List of entity names
+   */
+  std::vector<PrefabComponent<String>> names;
 };
 
 } // namespace liquid

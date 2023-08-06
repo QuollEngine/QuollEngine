@@ -81,6 +81,9 @@ void loadPrefabs(GLTFImportData &importData) {
 
     prefab.data.transforms.push_back({localEntityId, transform});
 
+    prefab.data.names.push_back(
+        {localEntityId, node.name.empty() ? "Untitled" : node.name});
+
     if (hasValidMesh) {
       if (node.skin >= 0) {
         prefab.data.skinnedMeshes.push_back(
