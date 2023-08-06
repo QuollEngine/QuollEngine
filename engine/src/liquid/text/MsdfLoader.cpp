@@ -14,7 +14,7 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   static constexpr double MinimumScale = 32.0;
   static constexpr double PixelRange = 2.0;
   static constexpr uint32_t NumChannels = 4;
-  static constexpr double FontScale = 2.0;
+  static constexpr double FontScale = 4.0;
 
   using namespace msdf_atlas;
 
@@ -89,9 +89,10 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
       double top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
       msdfGlyph.getQuadPlaneBounds(left, top, right, bottom);
 
-      glyph.planeBounds =
-          glm::vec4(static_cast<float>(left), static_cast<float>(top),
-                    static_cast<float>(right), static_cast<float>(bottom));
+      glyph.planeBounds = glm::vec4(static_cast<float>(left) / FontScale,
+                                    static_cast<float>(top) / FontScale,
+                                    static_cast<float>(right) / FontScale,
+                                    static_cast<float>(bottom) / FontScale);
     }
 
     glyph.advanceX = static_cast<float>(msdfGlyph.getAdvance());

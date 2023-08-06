@@ -327,6 +327,11 @@ public:
    */
   inline BindlessDrawParameters &getBindlessParams() { return mBindlessParams; }
 
+  /**
+   * @brief Create bindless params range
+   */
+  void createBindlessParamsRange();
+
 private:
   size_t mReservedSpace = 0;
 

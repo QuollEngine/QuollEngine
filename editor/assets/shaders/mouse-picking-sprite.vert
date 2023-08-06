@@ -5,8 +5,8 @@ layout(location = 0) out uint outEntity;
 
 #include "mouse-picking-base.glsl"
 
-const vec2 positions[4] =
-    vec2[](vec2(-1, -1), vec2(+1, -1), vec2(-1, +1), vec2(+1, +1));
+const vec2 positions[4] = vec2[](vec2(-0.5, -0.5), vec2(+0.5, -0.5),
+                                 vec2(-0.5, +0.5), vec2(+0.5, +0.5));
 
 void main() {
   mat4 modelMatrix =
