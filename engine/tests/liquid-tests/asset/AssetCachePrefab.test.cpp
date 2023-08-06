@@ -30,6 +30,7 @@ public:
     uint32_t numSkeletons = 3;
     uint32_t numDirectionalLights = 2;
     uint32_t numPointLights = 4;
+    uint32_t numNames = 3;
 
     for (uint32_t i = 0; i < numTransforms; ++i) {
       liquid::PrefabTransformData transform{};
@@ -39,6 +40,12 @@ public:
       transform.parent = idist(mt);
 
       asset.data.transforms.push_back({i, transform});
+    }
+
+    for (uint32_t i = 0; i < numNames; ++i) {
+      liquid::String name = "Test name " + std::to_string(i);
+
+      asset.data.names.push_back({i, name});
     }
 
     for (uint32_t i = 0; i < numDirectionalLights; ++i) {
@@ -291,6 +298,23 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
   {
     uint32_t numComponents = 0;
     file.read(numComponents);
+    EXPECT_EQ(numComponents, 3);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 999;
+      file.read(entity);
+      EXPECT_EQ(entity, i);
+
+      liquid::String name;
+      file.read(name);
+
+      EXPECT_EQ(asset.data.names.at(i).value, name);
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    file.read(numComponents);
     EXPECT_EQ(numComponents, 7);
     auto &map = cache.getRegistry().getMeshes();
     for (uint32_t i = 0; i < numComponents; ++i) {
@@ -474,6 +498,14 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
     EXPECT_EQ(expected.value.rotation, actual.value.rotation);
     EXPECT_EQ(expected.value.scale, actual.value.scale);
     EXPECT_EQ(expected.value.parent, actual.value.parent);
+  }
+
+  EXPECT_EQ(asset.data.names.size(), prefab.data.names.size());
+  for (size_t i = 0; i < prefab.data.names.size(); ++i) {
+    auto &expected = asset.data.names.at(i);
+    auto &actual = prefab.data.names.at(i);
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value, actual.value);
   }
 
   EXPECT_EQ(asset.data.meshes.size(), prefab.data.meshes.size());

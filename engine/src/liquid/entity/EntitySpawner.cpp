@@ -20,6 +20,8 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
   LIQUID_ASSERT(mAssetRegistry.getPrefabs().hasAsset(handle),
                 "Prefab not found");
 
+  const auto &assetName =
+      mAssetRegistry.getPrefabs().getAsset(handle).relativePath.stem().string();
   const auto &asset = mAssetRegistry.getPrefabs().getAsset(handle).data;
 
   std::unordered_map<uint32_t, size_t> entityMap;
@@ -31,6 +33,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
       auto entity = mEntityDatabase.create();
       mEntityDatabase.set<LocalTransform>(entity, {});
       mEntityDatabase.set<WorldTransform>(entity, {});
+      mEntityDatabase.set<Name>(entity, {"New entity"});
 
       entities.push_back(entity);
       entityMap.insert_or_assign(localId, entities.size() - 1);
@@ -62,6 +65,13 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
     transform.localScale = pTransform.value.scale;
 
     mEntityDatabase.set<LocalTransform>(entity, transform);
+  }
+
+  for (const auto &pName : asset.names) {
+    auto entity = getOrCreateEntity(pName.entity);
+    Name name{};
+    name.name = pName.value;
+    mEntityDatabase.set<Name>(entity, name);
   }
 
   for (const auto &pMesh : asset.meshes) {
@@ -147,13 +157,13 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
       mEntityDatabase.set<Parent>(entity, {rootNode});
     }
     entities.push_back(rootNode);
+    mEntityDatabase.set<Name>(rootNode, {assetName});
   } else {
     rootNode = rootEntities.at(0);
   }
 
   mEntityDatabase.set(rootNode, transform);
   mEntityDatabase.set<WorldTransform>(rootNode, {});
-  mEntityDatabase.set(rootNode, Name{"New entity"});
 
   return entities;
 }
@@ -162,9 +172,14 @@ Entity EntitySpawner::spawnSprite(TextureAssetHandle handle,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 
+  auto name = mAssetRegistry.getTextures()
+                  .getAsset(handle)
+                  .relativePath.stem()
+                  .string();
+
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});
-  mEntityDatabase.set(entity, Name{"New sprite"});
+  mEntityDatabase.set(entity, Name{name});
   mEntityDatabase.set<Sprite>(entity, {handle});
 
   return entity;
