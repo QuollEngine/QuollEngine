@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/asset/AssetCache.h"
+#include "liquid/asset/AssetRevision.h"
 #include "ImageLoader.h"
 #include "HDRIImporter.h"
 
@@ -235,6 +236,7 @@ private:
    * - Original asset file is changed
    * - Engine file does not exist for the asset
    * - Hash file does not exist for the asset
+   * - Asset type has a new revision
    *
    * @param path Original asset path
    * @retval true Asset is changed
@@ -247,10 +249,12 @@ private:
    *
    * @param originalAssetPath Original asset path
    * @param engineAssetPath Engine asset path
+   * @param revision Asset revision
    * @return Path to newly created hash file
    */
   Result<Path> createHashFile(const Path &originalAssetPath,
-                              const Path &engineAssetPath);
+                              const Path &engineAssetPath,
+                              AssetRevision revision);
 
 private:
   /**
