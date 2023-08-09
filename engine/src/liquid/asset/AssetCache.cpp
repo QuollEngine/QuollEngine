@@ -138,7 +138,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   stream.read(magic.data(), AssetFileMagicLength);
 
   if (magic != header.magic) {
-    return Result<bool>::Error("Not a liquid asset");
+    return Result<bool>::Error("Not a liquid asset: " + path.stem().string());
   }
 
   stream.read(header.version);
@@ -207,7 +207,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  return Result<bool>::Error("Unknown asset file");
+  return Result<bool>::Error("Unknown asset file: " + path.stem().string());
 }
 
 String AssetCache::getAssetNameFromPath(const Path &path) {

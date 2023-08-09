@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/yaml/Yaml.h"
+#include "liquid/asset/AssetRevision.h"
 
 #include "AssetManager.h"
 #include "GLTFImporter.h"
@@ -312,7 +313,8 @@ Result<bool> AssetManager::loadOriginalAsset(const Path &originalAssetPath) {
   }
 
   if (res.hasData()) {
-    createHashFile(originalAssetPath, res.getData());
+    createHashFile(originalAssetPath, res.getData(),
+                   getRevisionForAssetType(type));
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
@@ -457,7 +459,8 @@ String AssetManager::getFileHash(const Path &path) {
 }
 
 Result<Path> AssetManager::createHashFile(const Path &originalAssetPath,
-                                          const Path &engineAssetPath) {
+                                          const Path &engineAssetPath,
+                                          AssetRevision revision) {
   auto filename = originalAssetPath.filename();
   auto hashFilePath = getHashFilePath(originalAssetPath);
 
@@ -470,6 +473,7 @@ Result<Path> AssetManager::createHashFile(const Path &originalAssetPath,
   node["originalAssetHash"] = getFileHash(originalAssetPath);
   node["engineAssetHash"] = getFileHash(engineAssetPath);
   node["engineAssetPath"] = engineAssetPathStr;
+  node["revision"] = static_cast<uint32_t>(revision);
 
   std::ofstream stream(hashFilePath);
   stream << node;
@@ -504,8 +508,9 @@ bool AssetManager::isAssetChanged(const Path &assetFilePath) const {
 
   std::ifstream stream(hashFilePath);
   auto node = YAML::Load(stream);
-  auto originalAssetHash = node["originalAssetHash"].as<String>();
-  auto engineAssetPathStr = node["engineAssetPath"].as<String>();
+  auto originalAssetHash = node["originalAssetHash"].as<String>("");
+  auto engineAssetPathStr = node["engineAssetPath"].as<String>("");
+  auto revision = AssetRevision{node["revision"].as<uint32_t>(0)};
   stream.close();
 
   auto engineAssetPath =
@@ -515,7 +520,10 @@ bool AssetManager::isAssetChanged(const Path &assetFilePath) const {
     return true;
   }
 
-  return getFileHash(assetFilePath) != originalAssetHash;
+  auto type = getAssetTypeFromExtension(assetFilePath);
+
+  return getFileHash(assetFilePath) != originalAssetHash ||
+         getRevisionForAssetType(type) != revision;
 }
 
 AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {

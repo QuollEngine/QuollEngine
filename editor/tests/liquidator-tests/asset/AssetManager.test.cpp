@@ -389,10 +389,13 @@ TEST_P(AssetTest, ImportCreatesHashFileInCache) {
   auto originalAssetHash = node["originalAssetHash"].as<liquid::String>();
   auto engineAssetHash = node["engineAssetHash"].as<liquid::String>();
   auto engineAssetPathStr = node["engineAssetPath"].as<liquid::String>();
+  auto revision = node["revision"].as<uint32_t>();
   stream.close();
 
   auto engineAssetPath = (CachePath / engineAssetPathStr).make_preferred();
   EXPECT_EQ(engineAssetPath, InnerPathInCache / cacheFilename);
+
+  EXPECT_NE(revision, 0);
 
   {
     std::ifstream stream(engineAssetPath, std::ios::binary);
