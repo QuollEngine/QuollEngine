@@ -20,8 +20,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
   LIQUID_ASSERT(mAssetRegistry.getPrefabs().hasAsset(handle),
                 "Prefab not found");
 
-  const auto &assetName =
-      mAssetRegistry.getPrefabs().getAsset(handle).relativePath.stem().string();
+  const auto &assetName = mAssetRegistry.getPrefabs().getAsset(handle).name;
   const auto &asset = mAssetRegistry.getPrefabs().getAsset(handle).data;
 
   std::unordered_map<uint32_t, size_t> entityMap;
@@ -172,10 +171,7 @@ Entity EntitySpawner::spawnSprite(TextureAssetHandle handle,
                                   LocalTransform transform) {
   auto entity = mEntityDatabase.create();
 
-  auto name = mAssetRegistry.getTextures()
-                  .getAsset(handle)
-                  .relativePath.stem()
-                  .string();
+  auto name = mAssetRegistry.getTextures().getAsset(handle).name;
 
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});

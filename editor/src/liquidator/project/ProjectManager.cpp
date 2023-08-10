@@ -8,7 +8,7 @@ namespace liquid::editor {
 
 bool ProjectManager::createProjectInPath() {
   auto projectPath = platform::FileDialog::getFilePathFromCreateDialog(
-      {{"Liquid project", {"lqproj"}}});
+      {{"Liquid project", {"liquid"}}});
 
   if (projectPath.empty()) {
     return false;
@@ -57,7 +57,7 @@ bool ProjectManager::createProjectInPath() {
     projectObj["paths"]["scenes"] =
         std::filesystem::relative(mProject.scenesPath, projectPath).string();
 
-    auto projectFile = projectPath / (mProject.name + ".lqproj");
+    auto projectFile = projectPath / (mProject.name + ".liquid");
 
     std::ofstream stream(projectFile, std::ios::out);
     stream << projectObj;
@@ -69,7 +69,7 @@ bool ProjectManager::createProjectInPath() {
 
 bool ProjectManager::openProjectInPath() {
   auto projectFilePath = platform::FileDialog::getFilePathFromDialog(
-      {{"Liquid project", {"lqproj"}}});
+      {{"Liquid project", {"liquid"}}});
   if (projectFilePath.empty()) {
     return false;
   }

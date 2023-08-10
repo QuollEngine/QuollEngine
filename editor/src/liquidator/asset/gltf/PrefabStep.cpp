@@ -12,11 +12,10 @@ namespace liquid::editor {
  */
 void loadPrefabs(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
   AssetData<PrefabAsset> prefab;
-  prefab.name = targetPath.string() + "/" + targetPath.stem().string();
+  prefab.name = importData.sourcePath.filename().string();
   prefab.type = AssetType::Prefab;
 
   auto &gltfNodes = model.scenes.at(model.defaultScene);
@@ -126,10 +125,22 @@ void loadPrefabs(GLTFImportData &importData) {
     }
   }
 
-  auto path = assetCache.createPrefabFromAsset(prefab);
-  assetCache.loadPrefabFromFile(path.getData());
+  auto it = importData.uuids.find("root");
 
-  importData.outputPath = path;
+  auto path = assetCache.createPrefabFromAsset(
+      prefab, it != importData.uuids.end() ? it->second : "");
+
+  if (path.hasData()) {
+    auto handle = assetCache.loadPrefabFromFile(path.getData());
+
+    if (handle.hasData()) {
+      importData.outputUuids.insert_or_assign("root",
+                                              assetCache.getRegistry()
+                                                  .getPrefabs()
+                                                  .getAsset(handle.getData())
+                                                  .uuid);
+    }
+  }
 }
 
 } // namespace liquid::editor

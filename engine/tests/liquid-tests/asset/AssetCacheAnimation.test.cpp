@@ -7,12 +7,10 @@
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-class AssetCacheTest : public ::testing::Test {
+class AssetCacheAnimationTest : public AssetCacheTestBase {
 public:
-  AssetCacheTest() : cache(FixturesPath) {}
-
-  liquid::AssetCache cache;
 };
 
 liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
@@ -55,20 +53,17 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
   return asset;
 }
 
-TEST_F(AssetCacheTest, CreatesAnimationFile) {
+TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
-  auto filePath = cache.createAnimationFromAsset(asset);
+  auto filePath = cache.createAnimationFromAsset(asset, "");
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::AssetFileMagicLength, '$');
-  file.read(magic.data(), magic.length());
-  file.read(header.version);
-  file.read(header.type);
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  file.read(header);
+  EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, liquid::AssetType::Animation);
+  EXPECT_EQ(header.name, asset.name);
 
   float time = 0.0f;
   uint32_t numKeyframes = 0;
@@ -115,10 +110,10 @@ TEST_F(AssetCacheTest, CreatesAnimationFile) {
       filePath.getData().replace_extension("assetmeta")));
 }
 
-TEST_F(AssetCacheTest, LoadsAnimationAssetFromFile) {
+TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
-  auto filePath = cache.createAnimationFromAsset(asset);
+  auto filePath = cache.createAnimationFromAsset(asset, "");
   auto handle = cache.loadAnimationFromFile(filePath.getData());
   EXPECT_FALSE(handle.hasError());
   EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);

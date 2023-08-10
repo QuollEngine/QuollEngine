@@ -114,9 +114,9 @@ public:
     return scene;
   }
 
-  liquid::Result<liquid::Path> loadScene(GLTFTestScene &scene) {
+  liquid::Result<liquid::editor::UUIDMap> loadScene(GLTFTestScene &scene) {
     auto path = saveSceneGLTF(scene);
-    return importer.loadFromPath(path, CachePath);
+    return importer.loadFromPath(path, {});
   }
 
   void validateAttributes(GLTFTestScene &scene,

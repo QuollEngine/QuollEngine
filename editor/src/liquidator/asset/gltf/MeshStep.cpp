@@ -297,7 +297,6 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
   }
 
   if (!validTangents) {
-    warnings.push_back("Tangents for " + meshName + " are generated");
     generateTangents(vertices, indices);
   }
 
@@ -394,7 +393,6 @@ Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
  */
 void loadMeshes(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
   for (auto i = 0; i < model.meshes.size(); ++i) {
@@ -487,22 +485,34 @@ void loadMeshes(GLTFImportData &importData) {
       auto assetName = gltfMesh.name.empty() ? "skinnedmesh" + std::to_string(i)
                                              : gltfMesh.name;
 
-      skinnedMesh.name = targetPath.string() + "/" + assetName;
       skinnedMesh.type = AssetType::SkinnedMesh;
+      skinnedMesh.name = getGLTFAssetName(importData, assetName);
 
-      auto path = assetCache.createSkinnedMeshFromAsset(skinnedMesh);
+      auto path = assetCache.createSkinnedMeshFromAsset(
+          skinnedMesh, getUUID(importData, assetName));
       auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
       importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
+
+      importData.outputUuids.insert_or_assign(assetName,
+                                              assetCache.getRegistry()
+                                                  .getSkinnedMeshes()
+                                                  .getAsset(handle.getData())
+                                                  .uuid);
     } else if (!mesh.data.geometries.empty()) {
       auto assetName =
           gltfMesh.name.empty() ? "mesh " + std::to_string(i) : gltfMesh.name;
+      auto uuid = getUUID(importData, assetName);
 
-      mesh.name = targetPath.string() + "/" + assetName;
       mesh.type = AssetType::Mesh;
+      mesh.name = getGLTFAssetName(importData, assetName);
 
-      auto path = assetCache.createMeshFromAsset(mesh);
+      auto path = assetCache.createMeshFromAsset(mesh, uuid);
       auto handle = assetCache.loadMeshFromFile(path.getData());
       importData.meshes.map.insert_or_assign(i, handle.getData());
+
+      importData.outputUuids.insert_or_assign(
+          assetName,
+          assetCache.getRegistry().getMeshes().getAsset(handle.getData()).uuid);
     }
   }
 }

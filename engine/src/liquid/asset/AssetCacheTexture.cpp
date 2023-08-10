@@ -3,7 +3,6 @@
 
 #include "AssetCache.h"
 
-#include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
@@ -87,8 +86,33 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
   }
 }
 
+Result<Path> liquid::AssetCache::createTextureFromSource(const Path &sourcePath,
+                                                         const String &uuid) {
+  using co = std::filesystem::copy_options;
+
+  auto assetPath = createAssetPath(uuid);
+
+  if (!std::filesystem::copy_file(sourcePath, assetPath,
+                                  co::overwrite_existing)) {
+    return Result<Path>::Error("Cannot create texture from source: " +
+                               sourcePath.stem().string());
+  }
+
+  auto metaRes = createMetaFile(AssetType::Texture,
+                                sourcePath.filename().string(), assetPath);
+
+  if (!metaRes.hasData()) {
+    std::filesystem::remove(assetPath);
+    return Result<Path>::Error("Cannot create texture from source: " +
+                               sourcePath.stem().string());
+  }
+
+  return Result<Path>::Ok(assetPath);
+}
+
 Result<Path>
-AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
+AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset,
+                                   const String &uuid) {
   ktxTextureCreateInfo createInfo{};
   createInfo.baseWidth = asset.data.width;
   createInfo.baseHeight = asset.data.height;
@@ -102,7 +126,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.generateMipmaps = KTX_FALSE;
   createInfo.vkFormat = getVulkanFormatFromFormat(asset.data.format);
 
-  Path assetPath = (mAssetsPath / (asset.name + ".ktx2")).make_preferred();
+  auto assetPath = createAssetPath(uuid);
 
   ktxTexture2 *texture = nullptr;
   {
@@ -142,7 +166,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
     }
   }
 
-  auto metaRes = createMetaFile(AssetType::Texture, assetPath);
+  auto metaRes = createMetaFile(AssetType::Texture, asset.name, assetPath);
   if (metaRes.hasError()) {
     std::filesystem::remove(assetPath);
     return metaRes;
@@ -181,11 +205,15 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
         "Texture arrays are not supported");
   }
 
+  auto meta = getMetaFromUuid(filePath.stem().string());
+
   AssetData<TextureAsset> texture{};
+  // TODO: Remove size
   texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
+  texture.name = meta.name;
   texture.path = filePath;
-  texture.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  texture.name = texture.relativePath.string();
+  texture.uuid = filePath.stem().string();
+  texture.type = AssetType::Texture;
   texture.data.data.resize(texture.size);
   texture.data.width = ktxTextureData->baseWidth;
   texture.data.height = ktxTextureData->baseHeight;
@@ -245,20 +273,17 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
 }
 
 Result<TextureAssetHandle>
-AssetCache::getOrLoadTextureFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+AssetCache::getOrLoadTextureFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getTextures().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<TextureAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getTextures().findHandleByUuid(uuid);
+  if (handle != TextureAssetHandle::Null) {
+    return Result<TextureAssetHandle>::Ok(handle);
   }
 
-  return loadTextureFromFile(fullPath);
+  return loadTextureFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

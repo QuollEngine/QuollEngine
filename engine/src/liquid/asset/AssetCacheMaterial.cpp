@@ -10,10 +10,11 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
+AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset,
+                                    const String &uuid) {
   String extension = ".lqmat";
 
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
+  auto assetPath = createAssetPath(uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -24,40 +25,38 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 
   AssetFileHeader header{};
   header.type = AssetType::Material;
-  header.version = createVersion(0, 1);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  file.write(header);
 
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
-
-  auto baseColorTexturePath = getAssetRelativePath(mRegistry.getTextures(),
-                                                   asset.data.baseColorTexture);
-  file.write(baseColorTexturePath);
+  auto baseColorTexture =
+      getAssetUuid(mRegistry.getTextures(), asset.data.baseColorTexture);
+  file.write(baseColorTexture);
   file.write(asset.data.baseColorTextureCoord);
   file.write(asset.data.baseColorFactor);
 
-  auto metallicRoughnessTexturePath = getAssetRelativePath(
+  auto metallicRoughnessTexture = getAssetUuid(
       mRegistry.getTextures(), asset.data.metallicRoughnessTexture);
-  file.write(metallicRoughnessTexturePath);
+  file.write(metallicRoughnessTexture);
   file.write(asset.data.metallicRoughnessTextureCoord);
   file.write(asset.data.metallicFactor);
   file.write(asset.data.roughnessFactor);
 
-  auto normalTexturePath =
-      getAssetRelativePath(mRegistry.getTextures(), asset.data.normalTexture);
-  file.write(normalTexturePath);
+  auto normalTexture =
+      getAssetUuid(mRegistry.getTextures(), asset.data.normalTexture);
+  file.write(normalTexture);
   file.write(asset.data.normalTextureCoord);
   file.write(asset.data.normalScale);
 
-  auto occlusionTexturePath = getAssetRelativePath(mRegistry.getTextures(),
-                                                   asset.data.occlusionTexture);
-  file.write(occlusionTexturePath);
+  auto occlusionTexture =
+      getAssetUuid(mRegistry.getTextures(), asset.data.occlusionTexture);
+  file.write(occlusionTexture);
   file.write(asset.data.occlusionTextureCoord);
   file.write(asset.data.occlusionStrength);
 
-  auto emissiveTexturePath =
-      getAssetRelativePath(mRegistry.getTextures(), asset.data.emissiveTexture);
-  file.write(emissiveTexturePath);
+  auto emissiveTexture =
+      getAssetUuid(mRegistry.getTextures(), asset.data.emissiveTexture);
+  file.write(emissiveTexture);
   file.write(asset.data.emissiveTextureCoord);
   file.write(asset.data.emissiveFactor);
 
@@ -66,20 +65,21 @@ AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
 
 Result<MaterialAssetHandle>
 AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
-                                            const Path &filePath) {
+                                            const Path &filePath,
+                                            const AssetFileHeader &header) {
 
   AssetData<MaterialAsset> material{};
+  material.name = header.name;
   material.path = filePath;
-  material.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  material.name = material.relativePath.string();
+  material.uuid = filePath.stem().string();
   material.type = AssetType::Material;
   std::vector<String> warnings{};
 
   // Base color
   {
-    String texturePathStr;
-    stream.read(texturePathStr);
-    const auto &res = getOrLoadTextureFromPath(texturePathStr);
+    String textureUuid;
+    stream.read(textureUuid);
+    const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
       material.data.baseColorTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -93,9 +93,9 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Metallic roughness
   {
-    String texturePathStr;
-    stream.read(texturePathStr);
-    const auto &res = getOrLoadTextureFromPath(texturePathStr);
+    String textureUuid;
+    stream.read(textureUuid);
+    const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
       material.data.metallicRoughnessTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -111,9 +111,9 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Normal
   {
-    String texturePathStr;
-    stream.read(texturePathStr);
-    const auto &res = getOrLoadTextureFromPath(texturePathStr);
+    String textureUuid;
+    stream.read(textureUuid);
+    const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
       material.data.normalTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -127,9 +127,9 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Occlusion
   {
-    String texturePathStr;
-    stream.read(texturePathStr);
-    const auto &res = getOrLoadTextureFromPath(texturePathStr);
+    String textureUuid;
+    stream.read(textureUuid);
+    const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
       material.data.occlusionTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -143,9 +143,9 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Emissive
   {
-    String texturePathStr;
-    stream.read(texturePathStr);
-    const auto &res = getOrLoadTextureFromPath(texturePathStr);
+    String textureUuid;
+    stream.read(textureUuid);
+    const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
       material.data.emissiveTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -175,24 +175,21 @@ AssetCache::loadMaterialFromFile(const Path &filePath) {
     return Result<MaterialAssetHandle>::Error(header.getError());
   }
 
-  return loadMaterialDataFromInputStream(stream, filePath);
+  return loadMaterialDataFromInputStream(stream, filePath, header.getData());
 }
 
 Result<MaterialAssetHandle>
-AssetCache::getOrLoadMaterialFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+AssetCache::getOrLoadMaterialFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getMaterials().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<MaterialAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getMaterials().findHandleByUuid(uuid);
+  if (handle != MaterialAssetHandle::Null) {
+    return Result<MaterialAssetHandle>::Ok(handle);
   }
 
-  return loadMaterialFromFile(fullPath);
+  return loadMaterialFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

@@ -4,25 +4,26 @@
 #include "liquid/asset/AssetRevision.h"
 #include "ImageLoader.h"
 #include "HDRIImporter.h"
+#include "UUIDMap.h"
 
 namespace liquid::editor {
 
 /**
  * @brief Manage all the assets in the editor
  *
- * - Import original assets by creating engine assets
+ * - Import source assets by creating engine assets
  * - Validate assets for changes
  * - Preload assets
  * - Creates assets (e.g script files)
  *
  * Nomeclature:
  *
- * assets directory - Directory of original assets
- * cache directory - Directory of engine specific assets and hash files
- * original asset - Original assets (stored in assets directory)
+ * assets directory - Directory of source assets and meta files
+ * cache directory - Directory of engine specific assets
+ * source asset - Source assets (stored in assets directory)
  * engine asset - Transformed assets that
  *   can be used within the engine (stored in cache directory)
- * hash file - Stores hashes of both original and
+ * meta file - Stores hashes of both source and
  *   engine assets (stored in cache directory)
  *
  * @warning DO NOT PROVIDE RELATIVE PATH TO ANY FUNCTION
@@ -87,7 +88,7 @@ public:
    *
    * @param source Path to source asset
    * @param targetAssetDirectory Target directory
-   * @return Path to imported original asset
+   * @return Path to imported source asset
    */
   Result<Path> importAsset(const Path &source,
                            const Path &targetAssetDirectory);
@@ -125,18 +126,18 @@ public:
   /**
    * @brief Generate preview
    *
-   * @param path Original asset path
+   * @param path Source asset path
    * @param renderStorage Render storage
    */
   void generatePreview(const Path &path, RenderStorage &renderStorage);
 
   /**
-   * @brief Find engine asset path
+   * @brief Find root asset uuid
    *
-   * @param originalAssetPath Original asset path
-   * @return Found engine asset path result
+   * @param sourceAssetPath Source asset path
+   * @return Found engine asset root uuid
    */
-  Path findEngineAssetPath(const Path &originalAssetPath);
+  String findRootAssetUuid(const Path &sourceAssetPath);
 
   /**
    * @brief Create directory in assets
@@ -171,12 +172,12 @@ public:
   Result<bool> validateAndPreloadAssets(RenderStorage &renderStorage);
 
   /**
-   * @brief Load original asset if hashes are changed
+   * @brief Load source asset if files have changed
    *
-   * @param originalAssetPath Original asset path
-   * @return Result
+   * @param sourceAssetPath Source asset path
+   * @return Uuids of the asset
    */
-  Result<bool> loadOriginalIfChanged(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceIfChanged(const Path &sourceAssetPath);
 
   /**
    * @brief Get render storage
@@ -212,121 +213,128 @@ private:
 
 private:
   /**
-   * @brief Convert to cache relative asset path
+   * @brief Get meta file path from source asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Cache relative asset path
+   * @param sourceAssetPath Source asset path
+   * @return Meta file path
    */
-  Path convertToCacheRelativePath(const Path &originalAssetPath) const;
+  Path getMetaFilePath(const Path &sourceAssetPath) const;
 
   /**
-   * @brief Get hash file path from original asset
+   * @brief Get uuids from meta
    *
-   * @param originalAssetPath Original asset path
-   * @return Hash file path
+   * @param sourceAssetPath Source asset path
+   * @return Uuid map
    */
-  Path getHashFilePath(const Path &originalAssetPath) const;
-
-  /**
-   * @brief Get original asset name
-   *
-   * @param originalAssetPath Original asset path
-   * @return Original asset name
-   */
-  String getOriginalAssetName(const Path &originalAssetPath);
+  UUIDMap getUuidsFromMeta(const Path &sourceAssetPath) const;
 
   /**
    * @brief Check if asset is changed
    *
    * A changed asset means the following:
    *
-   * - Original asset file is changed
    * - Engine file does not exist for the asset
-   * - Hash file does not exist for the asset
+   * - Meta file does not exist for the asset
    * - Asset type has a new revision
+   * - Hashes mismatch
    *
-   * @param path Original asset path
+   * @param path Source asset path
    * @retval true Asset is changed
    * @retval false Asset is not changed
    */
-  bool isAssetChanged(const Path &originalAssetPath) const;
+  bool isAssetChanged(const Path &sourceAssetPath) const;
 
   /**
-   * @brief Create hash file
+   * @brief Create meta file
    *
-   * @param originalAssetPath Original asset path
-   * @param engineAssetPath Engine asset path
+   * @param sourceAssetPath Source asset path
+   * @param uuid Uuid map
    * @param revision Asset revision
-   * @return Path to newly created hash file
+   * @return Path to newly created meta file
    */
-  Result<Path> createHashFile(const Path &originalAssetPath,
-                              const Path &engineAssetPath,
+  Result<Path> createMetaFile(const Path &sourceAssetPath, const UUIDMap &uuids,
                               AssetRevision revision);
 
 private:
   /**
-   * @brief Load original asset
+   * @brief Load source asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Load result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuids of all loaded assets
    */
-  Result<bool> loadOriginalAsset(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceAsset(const Path &sourceAssetPath,
+                                  const UUIDMap &uuids);
 
   /**
    * @brief Load texture asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for texture result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalTexture(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceTexture(const Path &sourceAssetPath,
+                                    const UUIDMap &uuids);
 
   /**
    * @brief Load audio asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for audio result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalAudio(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceAudio(const Path &sourceAssetPath,
+                                  const UUIDMap &uuids);
 
   /**
    * @brief Load script asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for script result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalScript(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceScript(const Path &sourceAssetPath,
+                                   const UUIDMap &uuids);
 
   /**
    * @brief Load font asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for font result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalFont(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceFont(const Path &sourceAssetPath,
+                                 const UUIDMap &uuid);
 
   /**
    * @brief Load animator asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for font result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalAnimator(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceAnimator(const Path &sourceAssetPath,
+                                     const UUIDMap &uuid);
 
   /**
    * @brief Load prefab asset
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for prefab result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalPrefab(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourcePrefab(const Path &sourceAssetPath,
+                                   const UUIDMap &uuids);
 
   /**
-   * @brief Load original environment
+   * @brief Load source environment
    *
-   * @param originalAssetPath Original asset path
-   * @return Path to engine asset for environment result
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
    */
-  Result<Path> loadOriginalEnvironment(const Path &originalAssetPath);
+  Result<UUIDMap> loadSourceEnvironment(const Path &sourceAssetPath,
+                                        const UUIDMap &uuids);
 
 private:
   RenderStorage &mRenderStorage;
@@ -338,7 +346,7 @@ private:
 
   HDRIImporter mHDRIImporter;
 
-  std::unordered_map<String, Path> mAssetCacheMap;
+  std::unordered_map<String, String> mAssetCacheMap;
 };
 
 } // namespace liquid::editor

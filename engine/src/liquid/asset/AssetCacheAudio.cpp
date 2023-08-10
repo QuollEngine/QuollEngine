@@ -9,22 +9,36 @@ static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
     return AudioAssetFormat::Wav;
   }
 
-  if (extension == "mp3") {
-    return AudioAssetFormat::Mp3;
+  return AudioAssetFormat::Unknown;
+}
+
+Result<Path> liquid::AssetCache::createAudioFromSource(const Path &sourcePath,
+                                                       const String &uuid) {
+  using co = std::filesystem::copy_options;
+
+  auto assetPath = createAssetPath(uuid);
+
+  if (!std::filesystem::copy_file(sourcePath, assetPath,
+                                  co::overwrite_existing)) {
+    return Result<Path>::Error("Cannot create audio from source: " +
+                               sourcePath.stem().string());
   }
 
-  return AudioAssetFormat::Unknown;
+  auto metaRes = createMetaFile(AssetType::Audio,
+                                sourcePath.filename().string(), assetPath);
+
+  if (!metaRes.hasData()) {
+    std::filesystem::remove(assetPath);
+    return Result<Path>::Error("Cannot create audio from source: " +
+                               sourcePath.stem().string());
+  }
+
+  return Result<Path>::Ok(assetPath);
 }
 
 Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
   auto ext = filePath.extension().string();
   ext.erase(0, 1);
-  auto format = getAudioFormatFromExtension(ext);
-
-  if (format == AudioAssetFormat::Unknown) {
-    return Result<AudioAssetHandle>::Error("Cannot load audio file: " +
-                                           filePath.string());
-  }
 
   auto *decoder = new ma_decoder;
 
@@ -46,13 +60,14 @@ Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
   stream.seekg(0, std::ios::beg);
   stream.read(&bytes[0], pos);
 
+  auto meta = getMetaFromUuid(filePath.stem().string());
+
   AssetData<AudioAsset> asset;
+  asset.name = meta.name;
   asset.path = filePath;
-  asset.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  asset.name = asset.relativePath.string();
+  asset.uuid = filePath.stem().string();
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;
-  asset.data.format = format;
 
   return Result<AudioAssetHandle>::Ok(mRegistry.getAudios().addAsset(asset));
 }

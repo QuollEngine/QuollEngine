@@ -10,9 +10,10 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
-  String extension = ".lqanim";
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
+AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset,
+                                     const String &uuid) {
+  auto assetPath = createAssetPath(uuid);
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -22,10 +23,9 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 
   AssetFileHeader header{};
   header.type = AssetType::Animation;
-  header.version = createVersion(0, 1);
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  file.write(header);
 
   file.write(asset.data.time);
   uint32_t numKeyframes = static_cast<uint32_t>(asset.data.keyframes.size());
@@ -48,13 +48,13 @@ AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
 
 Result<AnimationAssetHandle>
 AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
-                                             const Path &filePath) {
+                                             const Path &filePath,
+                                             const AssetFileHeader &header) {
 
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
-  animation.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  animation.name = animation.relativePath.string();
   animation.type = AssetType::Animation;
+  animation.uuid = filePath.stem().string();
 
   stream.read(animation.data.time);
   uint32_t numKeyframes = 0;
@@ -88,24 +88,21 @@ AssetCache::loadAnimationFromFile(const Path &filePath) {
     return Result<AnimationAssetHandle>::Error(header.getError());
   }
 
-  return loadAnimationDataFromInputStream(stream, filePath);
+  return loadAnimationDataFromInputStream(stream, filePath, header.getData());
 }
 
 Result<AnimationAssetHandle>
-AssetCache::getOrLoadAnimationFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+AssetCache::getOrLoadAnimationFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getAnimations().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<AnimationAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getAnimations().findHandleByUuid(uuid);
+  if (handle != AnimationAssetHandle::Null) {
+    return Result<AnimationAssetHandle>::Ok(handle);
   }
 
-  return loadAnimationFromFile(fullPath);
+  return loadAnimationFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

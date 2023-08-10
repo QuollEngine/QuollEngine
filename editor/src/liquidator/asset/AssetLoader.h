@@ -24,7 +24,7 @@ public:
    *
    * @param path Path to asset
    * @param directory Target directory path
-   * @return Imported original asset path
+   * @return Imported source asset path
    */
   Result<Path> loadFromPath(const Path &path, const Path &directory);
 

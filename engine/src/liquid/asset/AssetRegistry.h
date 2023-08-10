@@ -175,13 +175,13 @@ public:
   inline EnvironmentMap &getEnvironments() { return mEnvironments; }
 
   /**
-   * @brief Get asset located at path
+   * @brief Get asset by uuid
    *
-   * @param filePath Path to asset
+   * @param uuid Asset uuid
    * @retval {AssetType::None, 0} Asset does not exist
    * @return Asset type and ID
    */
-  std::pair<AssetType, uint32_t> getAssetByPath(const Path &filePath);
+  std::pair<AssetType, uint32_t> getAssetByUuid(const String &uuid);
 
 private:
   TextureMap mTextures;

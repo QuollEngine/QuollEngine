@@ -52,7 +52,6 @@ public:
   liquid::AnimationAssetHandle
   createAnimation(liquid::KeyframeSequenceAssetTarget target, float time) {
     liquid::AssetData<liquid::AnimationAsset> animation;
-    animation.name = "testAnim";
     animation.data.time = time;
 
     liquid::KeyframeSequenceAsset sequence;
@@ -72,7 +71,6 @@ public:
   createSkeletonAnimation(liquid::KeyframeSequenceAssetTarget target,
                           float time) {
     liquid::AssetData<liquid::AnimationAsset> animation;
-    animation.name = "testAnim";
     animation.data.time = time;
 
     liquid::KeyframeSequenceAsset sequence;

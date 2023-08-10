@@ -76,6 +76,31 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
   scope.setPreviousValueAsGlobal("input_vars");
 }
 
+Result<Path>
+liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
+                                              const String &uuid) {
+  using co = std::filesystem::copy_options;
+
+  auto assetPath = createAssetPath(uuid);
+
+  if (!std::filesystem::copy_file(sourcePath, assetPath,
+                                  co::overwrite_existing)) {
+    return Result<Path>::Error("Cannot create Lua script from source: " +
+                               sourcePath.stem().string());
+  }
+
+  auto metaRes = createMetaFile(AssetType::LuaScript,
+                                sourcePath.filename().string(), assetPath);
+
+  if (!metaRes.hasData()) {
+    std::filesystem::remove(assetPath);
+    return Result<Path>::Error("Cannot create Lua script from source: " +
+                               sourcePath.stem().string());
+  }
+
+  return Result<Path>::Ok(assetPath);
+}
+
 Result<LuaScriptAssetHandle>
 AssetCache::loadLuaScriptFromFile(const Path &filePath,
                                   LuaScriptAssetHandle handle) {
@@ -86,11 +111,13 @@ AssetCache::loadLuaScriptFromFile(const Path &filePath,
         "File cannot be opened for reading: " + filePath.string());
   }
 
+  auto meta = getMetaFromUuid(filePath.stem().string());
+
   AssetData<LuaScriptAsset> asset;
   asset.path = filePath;
-  asset.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  asset.name = asset.relativePath.string();
+  asset.name = meta.name;
   asset.type = AssetType::LuaScript;
+  asset.uuid = filePath.stem().string();
   asset.data.bytes = readFileIntoBuffer(stream);
 
   stream.close();

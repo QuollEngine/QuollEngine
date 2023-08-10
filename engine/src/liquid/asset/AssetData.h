@@ -17,11 +17,6 @@ template <class TData> struct AssetData {
   AssetType type = AssetType::None;
 
   /**
-   * Asset name
-   */
-  String name;
-
-  /**
    * Asset size
    */
   size_t size = 0;
@@ -37,9 +32,14 @@ template <class TData> struct AssetData {
   Path path;
 
   /**
-   * Asset relative path
+   * Asset uuid
    */
-  Path relativePath;
+  String uuid;
+
+  /**
+   * Asset name
+   */
+  String name;
 
   /**
    * Preview texture

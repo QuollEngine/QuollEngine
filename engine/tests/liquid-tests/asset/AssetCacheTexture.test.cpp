@@ -3,33 +3,90 @@
 
 #include "liquid/core/Version.h"
 #include "liquid/asset/AssetCache.h"
-#include "liquid/asset/AssetFileHeader.h"
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-class AssetCacheTest : public ::testing::Test {
+class AssetCacheTextureTest : public AssetCacheTestBase {
 public:
-  AssetCacheTest() : cache(FixturesPath) {}
-
-  liquid::AssetCache cache;
 };
 
-TEST_F(AssetCacheTest, FailsIfKtxFileCannotBeLoaded) {
+TEST_F(AssetCacheTextureTest, CreatesTextureFromSource) {
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", "");
+  EXPECT_TRUE(filePath.hasData());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
+
+  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+
+  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+
+  EXPECT_EQ(meta.type, liquid::AssetType::Texture);
+  EXPECT_EQ(meta.name, "1x1-2d.ktx");
+}
+
+TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
+  auto createdRes =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", "");
+  auto texture = cache.loadTextureFromFile(createdRes.getData());
+  auto handle = texture.getData();
+
+  auto asset = cache.getRegistry().getTextures().getAsset(handle);
+
+  cache.getRegistry().getTextures().deleteAsset(handle);
+
+  auto filePath = cache.createTextureFromAsset(asset, "");
+  EXPECT_TRUE(filePath.hasData());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
+
+  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+
+  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  EXPECT_EQ(meta.type, liquid::AssetType::Texture);
+  EXPECT_EQ(meta.name, "1x1-2d.ktx");
+}
+
+TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", "");
+
+  auto texture = cache.loadTextureFromFile(filePath.getData());
+  auto handle = texture.getData();
+
+  auto asset = cache.getRegistry().getTextures().getAsset(handle);
+
+  EXPECT_EQ(asset.path, filePath.getData());
+  EXPECT_EQ(asset.name, "1x1-2d.ktx");
+  EXPECT_EQ(asset.type, liquid::AssetType::Texture);
+}
+
+TEST_F(AssetCacheTextureTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
-  EXPECT_TRUE(cache.loadTextureFromFile("non-existent-file.ktx").hasError());
+  EXPECT_TRUE(cache.loadTextureFromFile(CachePath / "non-existent-file.asset")
+                  .hasError());
 
   // invalid format
-  EXPECT_TRUE(cache.loadTextureFromFile("white-image-100x100.png").hasError());
+  auto filePath = cache.createTextureFromSource(
+      FixturesPath / "white-image-100x100.png", "");
+
+  EXPECT_TRUE(cache.loadTextureFromFile(filePath.getData()).hasError());
 }
 
-TEST_F(AssetCacheTest, FailsIfTextureIsOneDimensional) {
-  EXPECT_TRUE(
-      cache.loadTextureFromFile(FixturesPath / "1x1-1d.ktx").hasError());
+TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-1d.ktx", "");
+
+  EXPECT_TRUE(cache.loadTextureFromFile(filePath.getData()).hasError());
 }
 
-TEST_F(AssetCacheTest, LoadsTexture2D) {
-  auto texture = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
+TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", "");
+
+  auto texture = cache.loadTextureFromFile(filePath.getData());
   EXPECT_TRUE(texture.hasData());
 
   auto &asset = cache.getRegistry().getTextures().getAsset(texture.getData());
@@ -40,8 +97,11 @@ TEST_F(AssetCacheTest, LoadsTexture2D) {
   EXPECT_GT(asset.data.data.size(), 0);
 }
 
-TEST_F(AssetCacheTest, LoadsTextureCubemap) {
-  auto texture = cache.loadTextureFromFile(FixturesPath / "1x1-cubemap.ktx");
+TEST_F(AssetCacheTextureTest, LoadsTextureCubemap) {
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx", "");
+  auto texture = cache.loadTextureFromFile(filePath.getData());
+
   EXPECT_TRUE(texture.hasData());
 
   const auto &asset =

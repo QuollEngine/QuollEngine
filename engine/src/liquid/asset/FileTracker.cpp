@@ -12,7 +12,7 @@ std::vector<ChangedFile> FileTracker::trackForChanges() {
 
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mPath)) {
-    if (entry.is_directory()) {
+    if (!entry.is_regular_file() || entry.path().extension() == ".meta") {
       continue;
     }
     auto lastWriteTime = std::filesystem::last_write_time(entry);

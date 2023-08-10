@@ -7,17 +7,13 @@
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-class AssetCacheTest : public ::testing::Test {
+class AssetCacheSkeletonTest : public AssetCacheTestBase {
 public:
-  AssetCacheTest() : cache(FixturesPath) {}
-
-  liquid::AssetCache cache;
 };
 
-using AssetCacheDeathTest = AssetCacheTest;
-
-TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
+TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
 
@@ -65,18 +61,14 @@ TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto filePath = cache.createSkeletonFromAsset(asset, "");
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::AssetFileMagicLength, '$');
-  file.read(magic.data(), magic.length());
-  file.read(header.version);
-  file.read(header.type);
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  file.read(header);
+  EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, liquid::AssetType::Skeleton);
 
   uint32_t numJoints = 0;
@@ -110,9 +102,10 @@ TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
       filePath.getData().replace_extension("assetmeta")));
 }
 
-TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {
+TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
+
   {
     std::random_device device;
     std::mt19937 mt(device());
@@ -157,12 +150,14 @@ TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset);
+  auto filePath = cache.createSkeletonFromAsset(asset, "");
   auto handle = cache.loadSkeletonFromFile(filePath.getData());
 
   EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getSkeletons().getAsset(handle.getData());
+
+  EXPECT_EQ(actual.name, asset.name);
 
   for (size_t i = 0; i < actual.data.jointLocalPositions.size(); ++i) {
     EXPECT_EQ(actual.data.jointLocalPositions.at(i),

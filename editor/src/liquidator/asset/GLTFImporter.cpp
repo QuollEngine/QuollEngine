@@ -15,37 +15,31 @@ GLTFImporter::GLTFImporter(AssetCache &assetCache, ImageLoader &imageLoader,
                            bool optimize)
     : mAssetCache(assetCache), mImageLoader(imageLoader), mOptimize(optimize) {}
 
-Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
-                                        const Path &engineAssetPath) {
+Result<UUIDMap> GLTFImporter::loadFromPath(const Path &sourceAssetPath,
+                                           const UUIDMap &uuids) {
   tinygltf::TinyGLTF loader;
   tinygltf::Model model;
   String error, warning;
 
   bool ret = loader.LoadBinaryFromFile(&model, &error, &warning,
-                                       originalAssetPath.string());
+                                       sourceAssetPath.string());
 
   if (!warning.empty()) {
-    return Result<Path>::Error(warning);
+    return Result<UUIDMap>::Error(warning);
     // TODO: Show warning (in a dialog)
   }
 
   if (!error.empty()) {
-    return Result<Path>::Error(error);
+    return Result<UUIDMap>::Error(error);
     // TODO: Show error (in a dialog)
   }
 
   if (!ret) {
-    return Result<Path>::Error("Cannot load GLB file");
+    return Result<UUIDMap>::Error("Cannot load GLB file");
   }
 
-  if (std::filesystem::exists(engineAssetPath)) {
-    std::filesystem::remove_all(engineAssetPath);
-  }
-
-  std::filesystem::create_directory(engineAssetPath);
-
-  GLTFImportData importData{mAssetCache, mImageLoader, engineAssetPath, model,
-                            mOptimize};
+  GLTFImportData importData{mAssetCache, mImageLoader, sourceAssetPath,
+                            uuids,       model,        mOptimize};
 
   loadMaterials(importData);
   loadSkeletons(importData);
@@ -54,11 +48,7 @@ Result<Path> GLTFImporter::loadFromPath(const Path &originalAssetPath,
   loadLights(importData);
   loadPrefabs(importData);
 
-  if (!importData.outputPath.hasData()) {
-    return importData.outputPath;
-  }
-
-  return Result<Path>::Ok(importData.outputPath.getData(), importData.warnings);
+  return Result<UUIDMap>::Ok(importData.outputUuids, importData.warnings);
 }
 
 Result<Path> GLTFImporter::saveBinary(const Path &source,

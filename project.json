@@ -1,6 +1,24 @@
 {
   "dependencies": [
     {
+      "name": "stduuid",
+      "url": "https://github.com/mariusbancila/stduuid/archive/refs/tags/v1.2.3.zip",
+      "buildSource": "stduuid-1.2.3",
+      "cmd": [
+        {
+          "type": "cmake",
+          "source": ".",
+          "options": {
+            "common": {
+              "UUID_BUILD_TESTS": "OFF",
+              "UUID_USING_CXX20_SPAN": "ON",
+              "UUID_ENABLE_INSTALL": "ON"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "crypto++",
       "url": "https://github.com/abdes/cryptopp-cmake/archive/refs/tags/CRYPTOPP_8_7_0.zip",
       "buildSource": "cryptopp-cmake-CRYPTOPP_8_7_0",

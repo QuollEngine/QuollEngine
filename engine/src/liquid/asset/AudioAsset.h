@@ -2,7 +2,7 @@
 
 namespace liquid {
 
-enum class AudioAssetFormat { Unknown = 0, Wav, Mp3 };
+enum class AudioAssetFormat { Unknown = 0, Wav };
 
 /**
  * @brief Audio asset data
@@ -16,7 +16,7 @@ struct AudioAsset {
   /**
    * Audio asset format
    */
-  AudioAssetFormat format = AudioAssetFormat::Unknown;
+  AudioAssetFormat format = AudioAssetFormat::Wav;
 };
 
 } // namespace liquid

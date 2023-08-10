@@ -195,14 +195,12 @@ Result<bool> SceneIO::saveEnvironment(const Path &path) {
         skyboxNode["color"] = skybox.color;
       } else if (skybox.type == EnvironmentSkyboxType::Texture &&
                  mAssetRegistry.getEnvironments().hasAsset(skybox.texture)) {
-        auto relPath = mAssetRegistry.getEnvironments()
-                           .getAsset(skybox.texture)
-                           .relativePath.string();
-        std::replace(relPath.begin(), relPath.end(), '\\', '/');
+        auto uuid =
+            mAssetRegistry.getEnvironments().getAsset(skybox.texture).uuid;
 
         skyboxNode = YAML::Node(YAML::NodeType::Map);
         skyboxNode["type"] = "texture";
-        skyboxNode["texture"] = relPath;
+        skyboxNode["texture"] = uuid;
       }
     }
 
@@ -251,9 +249,8 @@ void SceneIO::loadEnvironment(const YAML::Node &zone) {
       component.color = skybox["color"].as<glm::vec4>(glm::vec4{0.0f});
       mScene.entityDatabase.set(mScene.environment, component);
     } else if (skyboxType == "texture" && skybox["texture"].IsScalar()) {
-      auto relPath = skybox["texture"].as<String>();
-      auto handle = mAssetRegistry.getEnvironments().findHandleByRelativePath(
-          Path(relPath));
+      auto uuid = skybox["texture"].as<String>();
+      auto handle = mAssetRegistry.getEnvironments().findHandleByUuid(uuid);
 
       EnvironmentSkybox component{EnvironmentSkyboxType::Texture};
       component.texture = handle;

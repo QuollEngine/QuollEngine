@@ -37,8 +37,6 @@ void MaterialViewer::render(AssetRegistry &assetRegistry) {
 
   if (auto _ = widgets::FixedWindow(title.c_str(), open)) {
     if (auto table = widgets::Table("TableRigidBodyDetails", 2)) {
-      table.row("Path", material.relativePath.string());
-
       renderTextureIfExists(table, "Base texture",
                             material.data.baseColorTexture, assetRegistry);
       table.row("Base color factor", material.data.baseColorFactor);

@@ -5,42 +5,35 @@
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-static liquid::Path EnvDirectory = FixturesPath / "test-env";
-
-class AssetCacheTest : public ::testing::Test {
+class AssetCacheEnvironmentTest : public AssetCacheTestBase {
 public:
-  AssetCacheTest() : cache(FixturesPath) {}
-
   void SetUp() override {
-    std::filesystem::create_directory(EnvDirectory);
+    AssetCacheTestBase::SetUp();
+
     std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          EnvDirectory / "irradiance.ktx");
+                          CachePath / "irradiance.asset");
     std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          EnvDirectory / "specular.ktx");
+                          CachePath / "specular.asset");
     std::filesystem::copy(FixturesPath / "1x1-2d.ktx",
-                          EnvDirectory / "brdf.ktx");
+                          CachePath / "brdf.asset");
   }
-
-  void TearDown() override { std::filesystem::remove_all(EnvDirectory); }
-
-public:
-  liquid::AssetCache cache;
 };
 
-TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
+TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   auto irradianceMap =
-      cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
   auto specularMap =
-      cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "environment.lqenv";
-  asset.path = FixturesPath / "environment.lqenv";
+  asset.name = "env-0";
+  asset.path = FixturesPath / "environment";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
-  auto filePath = cache.createEnvironmentFromAsset(asset);
+  auto filePath = cache.createEnvironmentFromAsset(asset, "");
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
@@ -48,13 +41,10 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
   liquid::AssetFileHeader header;
-  liquid::String magic(liquid::AssetFileMagicLength, '$');
-  file.read(magic.data(), magic.length());
-  file.read(header.version);
-  file.read(header.type);
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  file.read(header);
+  EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, liquid::AssetType::Environment);
+  EXPECT_EQ(header.name, asset.name);
 
   liquid::String irradianceMapPath;
   file.read(irradianceMapPath);
@@ -62,32 +52,32 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   liquid::String specularMapPath;
   file.read(specularMapPath);
 
-  EXPECT_EQ(irradianceMapPath, "test-env/irradiance.ktx");
-  EXPECT_EQ(specularMapPath, "test-env/specular.ktx");
+  EXPECT_EQ(irradianceMapPath, "irradiance");
+  EXPECT_EQ(specularMapPath, "specular");
 
   EXPECT_FALSE(std::filesystem::exists(
       filePath.getData().replace_extension("assetmeta")));
 }
 
-TEST_F(AssetCacheTest,
+TEST_F(AssetCacheEnvironmentTest,
        DoesNotLoadEnvironmentAssetIfEnvironmentTexturesCouldNotBeLoaded) {
   auto irradianceMap =
-      cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
   auto specularMap =
-      cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "environment.lqenv";
+
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createEnvironmentFromAsset(asset, "");
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
 
   {
-    std::filesystem::remove(EnvDirectory / "irradiance.ktx");
+    std::filesystem::remove(CachePath / "irradiance.asset");
     auto res = cache.loadEnvironmentFromFile(createRes.getData());
 
     EXPECT_TRUE(res.hasError());
@@ -96,8 +86,8 @@ TEST_F(AssetCacheTest,
 
   {
     std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          EnvDirectory / "irradiance.ktx");
-    std::filesystem::remove(EnvDirectory / "specular.ktx");
+                          CachePath / "irradiance.asset");
+    std::filesystem::remove(CachePath / "specular.asset");
     auto res = cache.loadEnvironmentFromFile(createRes.getData());
 
     EXPECT_TRUE(res.hasError());
@@ -105,19 +95,19 @@ TEST_F(AssetCacheTest,
   }
 }
 
-TEST_F(AssetCacheTest,
+TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithTexturesIfTexturesAreNotLoaded) {
   auto irradianceMap =
-      cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
   auto specularMap =
-      cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "environment.lqenv";
+
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createEnvironmentFromAsset(asset, "");
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
@@ -139,19 +129,19 @@ TEST_F(AssetCacheTest,
   EXPECT_NE(environment.data.specularMap, liquid::TextureAssetHandle::Null);
 }
 
-TEST_F(AssetCacheTest,
+TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithExistingTexturesIfTexturesAreLoaded) {
   auto irradianceMap =
-      cache.loadTextureFromFile(EnvDirectory / "irradiance.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
   auto specularMap =
-      cache.loadTextureFromFile(EnvDirectory / "specular.ktx").getData();
+      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "environment.lqenv";
+
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset);
+  auto createRes = cache.createEnvironmentFromAsset(asset, "");
 
   EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
 

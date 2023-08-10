@@ -244,76 +244,76 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 }
 
 std::pair<AssetType, uint32_t>
-AssetRegistry::getAssetByPath(const Path &filePath) {
-  LIQUID_PROFILE_EVENT("AssetRegistry::getAssetType");
+AssetRegistry::getAssetByUuid(const String &uuid) {
+  LIQUID_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
   for (auto &[handle, asset] : mTextures.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Texture, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mFonts.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Font, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mMaterials.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Material, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mMeshes.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Mesh, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mSkinnedMeshes.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::SkinnedMesh, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mSkeletons.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Skeleton, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAnimations.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Animation, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAnimators.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Animator, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mAudios.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Audio, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mPrefabs.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Prefab, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mLuaScripts.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::LuaScript, static_cast<uint32_t>(handle)};
     }
   }
 
   for (auto &[handle, asset] : mEnvironments.getAssets()) {
-    if (asset.path == filePath) {
+    if (asset.uuid == uuid) {
       return {AssetType::Environment, static_cast<uint32_t>(handle)};
     }
   }
