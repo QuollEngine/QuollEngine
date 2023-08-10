@@ -110,6 +110,9 @@ TEST_F(AssetCacheTest, CreatesAnimationFile) {
       EXPECT_EQ(values.at(i), keyframe.keyframeValues.at(i));
     }
   }
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest, LoadsAnimationAssetFromFile) {

@@ -52,11 +52,19 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
     }
   }
 
-  std::ofstream stream(mAssetsPath / asset.relativePath);
+  auto fullPath = mAssetsPath / asset.relativePath;
+
+  std::ofstream stream(fullPath);
   stream << root;
   stream.close();
 
-  return Result<Path>::Ok(mAssetsPath / asset.relativePath);
+  auto metaRes = createMetaFile(AssetType::Animator, fullPath);
+  if (metaRes.hasError()) {
+    std::filesystem::remove(fullPath);
+    return metaRes;
+  }
+
+  return Result<Path>::Ok(fullPath);
 }
 
 Result<AnimatorAssetHandle>

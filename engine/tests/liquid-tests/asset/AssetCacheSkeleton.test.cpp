@@ -105,6 +105,9 @@ TEST_F(AssetCacheTest, CreatesSkeletonFileFromSkeletonAsset) {
               asset.data.jointInverseBindMatrices.at(i));
     EXPECT_EQ(actualNames.at(i), asset.data.jointNames.at(i));
   }
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest, LoadsSkeletonAssetFromFile) {

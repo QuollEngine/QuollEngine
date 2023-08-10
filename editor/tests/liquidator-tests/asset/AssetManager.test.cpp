@@ -247,10 +247,12 @@ TEST_P(AssetTest, FailedImportDoesNotDeleteExistingSubdirectories) {
   std::ofstream stream(TempPath / emptyFilename, std::ios::binary);
   stream.close();
 
-  ASSERT_TRUE(
-      manager
-          .importAsset(FixturesPath / validOriginalFilename, InnerPathInAssets)
-          .hasData());
+  {
+    auto res = manager.importAsset(FixturesPath / validOriginalFilename,
+                                   InnerPathInAssets);
+
+    ASSERT_TRUE(res.hasData());
+  }
 
   {
     auto subdirectory = InnerPathInAssets;
@@ -355,6 +357,9 @@ TEST_P(AssetTest, ImportCreatesAssetInCache) {
   EXPECT_TRUE(fs::exists(CachePath / cacheFilename));
   EXPECT_EQ(manager.findEngineAssetPath(AssetsPath / originalFilename),
             CachePath / cacheFilename);
+  EXPECT_EQ(
+      manager.getCache().getTypeFromAssetPath(CachePath / cacheFilename),
+      liquid::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
 }
 
 TEST_P(AssetTest, ImportMirrorsCacheSubdirectoriesWithAssets) {

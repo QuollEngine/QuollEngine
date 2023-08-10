@@ -72,13 +72,13 @@ public:
 
 TEST_F(AssetCacheTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
-  auto assetFile = cache.createMaterialFromAsset(asset);
+  auto filePath = cache.createMaterialFromAsset(asset);
 
-  EXPECT_FALSE(assetFile.hasError());
-  EXPECT_FALSE(assetFile.hasWarnings());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
 
   {
-    liquid::InputBinaryStream file(assetFile.getData());
+    liquid::InputBinaryStream file(filePath.getData());
     EXPECT_TRUE(file.good());
 
     liquid::AssetFileHeader header;
@@ -151,16 +151,19 @@ TEST_F(AssetCacheTest, CreatesMaterialWithTexturesFromAsset) {
     EXPECT_EQ(emissiveTextureCoord, 6);
     EXPECT_EQ(emissiveFactor, glm::vec3(0.5f, 0.6f, 2.5f));
   }
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest,
        CreatesMaterialWithoutTexturesFromAssetIfReferencedTexturesAreInvalid) {
   auto asset = createMaterialAsset(false);
 
-  auto assetFile = cache.createMaterialFromAsset(asset);
+  auto filePath = cache.createMaterialFromAsset(asset);
 
   {
-    liquid::InputBinaryStream file(assetFile.getData());
+    liquid::InputBinaryStream file(filePath.getData());
     EXPECT_TRUE(file.good());
 
     liquid::AssetFileHeader header;

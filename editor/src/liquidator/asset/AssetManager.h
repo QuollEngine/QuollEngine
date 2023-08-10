@@ -116,6 +116,13 @@ public:
   }
 
   /**
+   * @brief Get asset cache
+   *
+   * @return Asset cache
+   */
+  inline const AssetCache &getCache() const { return mAssetCache; }
+
+  /**
    * @brief Generate preview
    *
    * @param path Original asset path
@@ -178,7 +185,6 @@ public:
    */
   inline RenderStorage &getRenderStorage() { return mRenderStorage; }
 
-private:
   /**
    * @brief Get asset type from path extension
    *
@@ -187,6 +193,7 @@ private:
    */
   static AssetType getAssetTypeFromExtension(const Path &path);
 
+private:
   /**
    * @brief Get hash of a file
    *

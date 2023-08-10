@@ -212,6 +212,9 @@ TEST_F(AssetCacheTest, CreatesMeshFileFromMeshAsset) {
     EXPECT_EQ(materialPath,
               "materials/material-geom-" + std::to_string(i) + ".lqmat");
   }
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest, DoesNotLoadMeshIfItHasNoVertices) {

@@ -40,12 +40,12 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
-  auto res = cache.createEnvironmentFromAsset(asset);
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
-  EXPECT_FALSE(res.hasWarnings());
+  auto filePath = cache.createEnvironmentFromAsset(asset);
+  EXPECT_TRUE(filePath.hasData());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
 
-  liquid::InputBinaryStream file(res.getData());
+  liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
   liquid::AssetFileHeader header;
   liquid::String magic(liquid::AssetFileMagicLength, '$');
@@ -64,6 +64,9 @@ TEST_F(AssetCacheTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
   EXPECT_EQ(irradianceMapPath, "test-env/irradiance.ktx");
   EXPECT_EQ(specularMapPath, "test-env/specular.ktx");
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest,

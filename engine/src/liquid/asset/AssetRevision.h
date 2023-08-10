@@ -5,18 +5,18 @@
 namespace liquid {
 
 enum class AssetRevision : uint32_t {
-  Material = 230811,
-  Texture = 230811,
-  Mesh = 230811,
-  SkinnedMesh = 230811,
-  Skeleton = 230811,
-  Animation = 230811,
-  Audio = 230811,
-  Prefab = 230811,
-  LuaScript = 230811,
-  Font = 230811,
-  Environment = 230811,
-  Animator = 230811
+  Material = 230911,
+  Texture = 230911,
+  Mesh = 230911,
+  SkinnedMesh = 230911,
+  Skeleton = 230911,
+  Animation = 230911,
+  Audio = 230911,
+  Prefab = 230911,
+  LuaScript = 230911,
+  Font = 230911,
+  Environment = 230911,
+  Animator = 230911
 };
 
 /**

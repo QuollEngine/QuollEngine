@@ -56,13 +56,13 @@ TEST_F(AssetCacheTest, CreatesAnimatorFileFromAsset) {
   asset.data.states.push_back(stateWalk);
   asset.data.states.push_back(stateRun);
 
-  auto res = cache.createAnimatorFromAsset(asset);
+  auto filePath = cache.createAnimatorFromAsset(asset);
 
-  EXPECT_TRUE(res.hasData());
-  EXPECT_FALSE(res.hasError());
-  EXPECT_FALSE(res.hasWarnings());
+  EXPECT_TRUE(filePath.hasData());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
 
-  auto path = res.getData();
+  auto path = filePath.getData();
 
   std::ifstream stream(path);
   auto node = YAML::Load(stream);
@@ -156,6 +156,12 @@ TEST_F(AssetCacheTest, CreatesAnimatorFileFromAsset) {
     EXPECT_EQ(t2["event"].as<liquid::String>(""), "WALK");
     EXPECT_EQ(t2["target"].as<liquid::String>(""), "walk");
   }
+
+  EXPECT_TRUE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
+  EXPECT_EQ(cache.getTypeFromAssetPath(
+                filePath.getData().replace_extension("assetmeta")),
+            liquid::AssetType::Animator);
 }
 
 TEST_F(AssetCacheTest, LoadAnimatorFailsIfRequiredPropertiesAreInvalid) {
