@@ -49,7 +49,8 @@ Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
 
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
-    if (!entry.is_regular_file() || entry.path().extension() == ".lqhash") {
+    if (!entry.is_regular_file() || entry.path().extension() == ".lqhash" ||
+        entry.path().extension() == ".assetmeta") {
       continue;
     }
 
@@ -72,6 +73,22 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
   return loadAsset(path, true);
 }
 
+AssetType AssetCache::getTypeFromAssetPath(const Path &path) const {
+  AssetType type = AssetType::None;
+  auto typePath = path;
+  typePath.replace_extension("assetmeta");
+  if (!std::filesystem::exists(typePath)) {
+    return type;
+  }
+
+  std::ifstream stream(typePath, std::ios::binary);
+  if (stream.good()) {
+    stream.read(reinterpret_cast<char *>(&type), sizeof(AssetType));
+    stream.close();
+  }
+  return type;
+}
+
 Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   const auto &ext = path.extension().string();
   const auto &asset = mRegistry.getAssetByPath(path);
@@ -85,7 +102,10 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
         "Can only reload Lua scripts and animators on watch");
   }
 
-  if (ext == ".ktx2") {
+  // Handle files that are not in liquid format
+  auto nonLiquidAssetType = getTypeFromAssetPath(path);
+
+  if (nonLiquidAssetType == AssetType::Texture) {
     auto res = loadTextureFromFile(path);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
@@ -94,7 +114,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (ext == ".lua") {
+  if (nonLiquidAssetType == AssetType::LuaScript) {
     auto res =
         loadLuaScriptFromFile(path, static_cast<LuaScriptAssetHandle>(handle));
     if (res.hasError()) {
@@ -104,7 +124,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (ext == ".animator") {
+  if (nonLiquidAssetType == AssetType::Animator) {
     auto res =
         loadAnimatorFromFile(path, static_cast<AnimatorAssetHandle>(handle));
     if (res.hasError()) {
@@ -114,7 +134,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (ext == ".wav" || ext == ".mp3" || ext == ".flac") {
+  if (nonLiquidAssetType == AssetType::Audio) {
     auto res = loadAudioFromFile(path);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
@@ -123,7 +143,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
-  if (ext == ".ttf" || ext == ".otf") {
+  if (nonLiquidAssetType == AssetType::Font) {
     auto res = loadFontFromFile(path);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
@@ -214,6 +234,21 @@ String AssetCache::getAssetNameFromPath(const Path &path) {
   auto relativePath = std::filesystem::relative(path, mAssetsPath).string();
   std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
   return relativePath;
+}
+
+Result<Path> AssetCache::createMetaFile(AssetType type, Path path) {
+  auto metaPath = path.replace_extension("assetmeta");
+  std::ofstream out(metaPath, std::ios::binary);
+
+  if (!out.good()) {
+    return Result<Path>::Error("Cannot create meta file for asset: " +
+                               path.stem().string());
+  }
+
+  out.write(reinterpret_cast<const char *>(&type), sizeof(type));
+  out.close();
+
+  return Result<Path>::Ok(metaPath);
 }
 
 } // namespace liquid

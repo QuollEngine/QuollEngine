@@ -344,8 +344,11 @@ Result<Path> AssetManager::loadOriginalTexture(const Path &originalAssetPath) {
 
     if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                    co::overwrite_existing)) {
+      auto metaRes =
+          mAssetCache.createMetaFile(AssetType::Texture, engineAssetPath);
       auto res = mAssetCache.loadAsset(engineAssetPath);
-      if (res.hasData()) {
+
+      if (res.hasData() && metaRes.hasData()) {
         return Result<Path>::Ok(engineAssetPath);
       }
 
@@ -365,8 +368,11 @@ Result<Path> AssetManager::loadOriginalAudio(const Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
+    auto metaRes =
+        mAssetCache.createMetaFile(AssetType::Audio, engineAssetPath);
     auto res = mAssetCache.loadAsset(engineAssetPath);
-    if (res.hasData()) {
+
+    if (res.hasData() && metaRes.hasData()) {
       return Result<Path>::Ok(engineAssetPath);
     }
 
@@ -381,8 +387,11 @@ Result<Path> AssetManager::loadOriginalScript(const Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
+    auto metaRes =
+        mAssetCache.createMetaFile(AssetType::LuaScript, engineAssetPath);
     auto res = mAssetCache.loadAsset(engineAssetPath);
-    if (res.hasData()) {
+
+    if (res.hasData() && metaRes.hasData()) {
       return Result<Path>::Ok(engineAssetPath);
     }
 
@@ -400,8 +409,10 @@ Result<Path> AssetManager::loadOriginalFont(const Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
+    auto metaRes = mAssetCache.createMetaFile(AssetType::Font, engineAssetPath);
     auto res = mAssetCache.loadAsset(engineAssetPath);
-    if (res.hasData()) {
+
+    if (res.hasData() && metaRes.hasData()) {
       return Result<Path>::Ok(engineAssetPath);
     }
     std::filesystem::remove(engineAssetPath);
@@ -415,10 +426,14 @@ Result<Path> AssetManager::loadOriginalAnimator(const Path &originalAssetPath) {
 
   if (std::filesystem::copy_file(originalAssetPath, engineAssetPath,
                                  co::overwrite_existing)) {
+    auto metaRes =
+        mAssetCache.createMetaFile(AssetType::Animator, engineAssetPath);
     auto res = mAssetCache.loadAsset(engineAssetPath);
-    if (res.hasData()) {
+
+    if (res.hasData() && metaRes.hasData()) {
       return Result<Path>::Ok(engineAssetPath, res.getWarnings());
     }
+
     std::filesystem::remove(engineAssetPath);
   }
 

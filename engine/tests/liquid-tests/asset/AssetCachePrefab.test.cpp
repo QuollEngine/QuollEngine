@@ -468,6 +468,9 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
       EXPECT_EQ(asset.data.pointLights.at(i).value.range, range);
     }
   }
+
+  EXPECT_FALSE(std::filesystem::exists(
+      filePath.getData().replace_extension("assetmeta")));
 }
 
 TEST_F(AssetCacheTest, FailsLoadingPrefabIfPrefabHasNoComponents) {

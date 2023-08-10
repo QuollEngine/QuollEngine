@@ -268,6 +268,26 @@ public:
    */
   Result<bool> loadAsset(const Path &path);
 
+  /**
+   * @brief Get type from asset
+   *
+   * @param path Asset path
+   * @return Asset type
+   */
+  AssetType getTypeFromAssetPath(const Path &path) const;
+
+  /**
+   * @brief Create asset metafile
+   *
+   * Creates file in the same path as
+   * the path of the asset
+   *
+   * @param type Asset type
+   * @param path Full path to asset
+   * @return Path to meta file
+   */
+  Result<Path> createMetaFile(AssetType type, Path path);
+
 private:
   /**
    * @brief Get relative path of the asset

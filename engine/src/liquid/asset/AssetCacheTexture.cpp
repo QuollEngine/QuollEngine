@@ -142,6 +142,12 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
     }
   }
 
+  auto metaRes = createMetaFile(AssetType::Texture, assetPath);
+  if (metaRes.hasError()) {
+    std::filesystem::remove(assetPath);
+    return metaRes;
+  }
+
   ktxTexture_Destroy(baseTexture);
 
   return Result<Path>::Ok(assetPath);
