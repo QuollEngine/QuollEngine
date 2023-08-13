@@ -219,7 +219,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(uint32_t), &index);
 
-          render(commandList, pipeline, false, frameIndex);
+          render(commandList, pipeline, frameIndex);
         }
       }
 
@@ -237,7 +237,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(uint32_t), &index);
 
-          renderSkinned(commandList, skinnedPipeline, false, frameIndex);
+          renderSkinned(commandList, skinnedPipeline, frameIndex);
         }
       }
     });
@@ -245,8 +245,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
   {
     struct MeshDrawParams {
+      rhi::DeviceAddress materials;
       rhi::DeviceAddress meshTransforms;
+      rhi::DeviceAddress meshMaterials;
       rhi::DeviceAddress skinnedMeshTransforms;
+      rhi::DeviceAddress skinnedMeshMaterials;
       rhi::DeviceAddress skeletonTransforms;
       rhi::DeviceAddress camera;
       rhi::DeviceAddress scene;
@@ -258,8 +261,11 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     size_t pbrOffset = 0;
     for (auto &frameData : mFrameData) {
       pbrOffset = frameData.getBindlessParams().addRange(MeshDrawParams{
+          frameData.getFlattenedMaterialsBuffer(),
           frameData.getMeshTransformsBuffer(),
+          frameData.getMeshMaterialsBuffer(),
           frameData.getSkinnedMeshTransformsBuffer(),
+          frameData.getSkinnedMeshMaterialsBuffer(),
           frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
           frameData.getSceneBuffer(), frameData.getDirectionalLightsBuffer(),
           frameData.getPointLightsBuffer(), frameData.getShadowMapsBuffer()});
@@ -318,7 +324,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             pipeline, 1, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
-        render(commandList, pipeline, true, frameIndex);
+        render(commandList, pipeline, frameIndex);
       }
 
       {
@@ -331,7 +337,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
             skinnedPipeline, 1, frameData.getBindlessParams().getDescriptor(),
             offsets);
 
-        renderSkinned(commandList, skinnedPipeline, true, frameIndex);
+        renderSkinned(commandList, skinnedPipeline, frameIndex);
       }
     });
   } // mesh pass
@@ -743,6 +749,11 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   frameData.setCameraData(entityDatabase.get<Camera>(camera),
                           entityDatabase.get<PerspectiveLens>(camera));
 
+  frameData.setDefaultMaterial(
+      mAssetRegistry.getMaterials()
+          .getAsset(mAssetRegistry.getDefaultObjects().defaultMaterial)
+          .data.deviceHandle->getAddress());
+
   for (auto [entity, sprite, world] :
        entityDatabase.view<Sprite, WorldTransform>()) {
     auto handle =
@@ -751,16 +762,35 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   }
 
   // Meshes
-  for (auto [entity, world, mesh] :
-       entityDatabase.view<WorldTransform, Mesh>()) {
-    frameData.addMesh(mesh.handle, entity, world.worldTransform);
+  for (auto [entity, world, mesh, renderer] :
+       entityDatabase.view<WorldTransform, Mesh, MeshRenderer>()) {
+    const auto &asset = mAssetRegistry.getMeshes().getAsset(mesh.handle);
+
+    std::vector<rhi::DeviceAddress> materials;
+    for (auto material : renderer.materials) {
+      materials.push_back(mAssetRegistry.getMaterials()
+                              .getAsset(material)
+                              .data.deviceHandle->getAddress());
+    }
+
+    frameData.addMesh(mesh.handle, entity, world.worldTransform, materials);
   }
 
   // Skinned Meshes
-  for (auto [entity, skeleton, world, mesh] :
-       entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh>()) {
+  for (auto [entity, skeleton, world, mesh, renderer] :
+       entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh,
+                           SkinnedMeshRenderer>()) {
+    const auto &asset = mAssetRegistry.getSkinnedMeshes().getAsset(mesh.handle);
+
+    std::vector<rhi::DeviceAddress> materials;
+    for (auto material : renderer.materials) {
+      materials.push_back(mAssetRegistry.getMaterials()
+                              .getAsset(material)
+                              .data.deviceHandle->getAddress());
+    }
+
     frameData.addSkinnedMesh(mesh.handle, entity, world.worldTransform,
-                             skeleton.jointFinalTransforms);
+                             skeleton.jointFinalTransforms, materials);
   }
 
   // Texts
@@ -843,8 +873,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
 }
 
 void SceneRenderer::render(rhi::RenderCommandList &commandList,
-                           rhi::PipelineHandle pipeline, bool bindMaterialData,
-                           uint32_t frameIndex) {
+                           rhi::PipelineHandle pipeline, uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
   uint32_t instanceStart = 0;
@@ -861,10 +890,10 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
     for (size_t g = 0; g < mesh.geometries.size(); ++g) {
       auto &geometry = mesh.geometries.at(g);
 
-      if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 2,
-                                   mesh.materials.at(g)->getDescriptor());
-      }
+      auto index = static_cast<uint32_t>(g);
+
+      commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
+                                sizeof(uint32_t), &index);
 
       uint32_t indexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
@@ -882,7 +911,7 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
 
 void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
                                   rhi::PipelineHandle pipeline,
-                                  bool bindMaterialData, uint32_t frameIndex) {
+                                  uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
   uint32_t instanceStart = 0;
@@ -899,11 +928,6 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
     uint32_t indexOffset = 0;
     for (size_t g = 0; g < mesh.geometries.size(); ++g) {
       auto &geometry = mesh.geometries.at(g);
-
-      if (bindMaterialData) {
-        commandList.bindDescriptor(pipeline, 2,
-                                   mesh.materials.at(g)->getDescriptor());
-      }
 
       uint32_t indexCount =
           static_cast<uint32_t>(mesh.geometries.at(g).indices.size());

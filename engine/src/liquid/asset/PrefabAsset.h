@@ -3,6 +3,8 @@
 #include "liquid/animation/Animator.h"
 #include "liquid/scene/PointLight.h"
 #include "liquid/scene/DirectionalLight.h"
+#include "liquid/renderer/MeshRenderer.h"
+#include "liquid/renderer/SkinnedMeshRenderer.h"
 
 namespace liquid {
 
@@ -100,6 +102,16 @@ struct PrefabAsset {
    * @brief List of entity names
    */
   std::vector<PrefabComponent<String>> names;
+
+  /**
+   * List of mesh renderers
+   */
+  std::vector<PrefabComponent<MeshRenderer>> meshRenderers;
+
+  /**
+   * List of skinned mesh renderers
+   */
+  std::vector<PrefabComponent<SkinnedMeshRenderer>> skinnedMeshRenderers;
 };
 
 } // namespace liquid

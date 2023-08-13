@@ -12,17 +12,22 @@ layout(location = 7) in vec4 inWeights;
 layout(location = 0) out vec3 outWorldPosition;
 layout(location = 1) out vec2 outTextureCoord[2];
 layout(location = 3) out mat3 outTBN;
+layout(location = 6) out uint outMaterialIndex;
 
 #include "bindless/base.glsl"
 #include "bindless/mesh.glsl"
 #include "bindless/camera.glsl"
+#include "bindless/material.glsl"
 
 layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
+  MaterialsArray materials;
   TransformsArray meshTransforms;
+  MaterialRangeArray meshMaterialRanges;
   TransformsArray skinnedMeshTransforms;
+  MaterialRangeArray skinnedMeshMaterialRanges;
   SkeletonsArray skeletons;
   Camera camera;
   Empty scene;
@@ -31,6 +36,9 @@ layout(set = 1, binding = 0) uniform DrawParameters {
   Empty shadows;
 }
 uDrawParams;
+
+layout(std430, push_constant) uniform PushConstants { uint submeshIndex; }
+uMeshParams;
 
 void main() {
   mat4 worldMatrix = getSkinnedMeshTransform(gl_InstanceIndex).modelMatrix;
@@ -56,4 +64,9 @@ void main() {
   outTextureCoord[0] = inTextureCoord0;
   outTextureCoord[1] = inTextureCoord1;
   gl_Position = getCamera().viewProj * worldPosition;
+
+  outMaterialIndex =
+      min(uDrawParams.skinnedMeshMaterialRanges.items[gl_InstanceIndex].start +
+              uMeshParams.submeshIndex,
+          uDrawParams.skinnedMeshMaterialRanges.items[gl_InstanceIndex].end);
 }

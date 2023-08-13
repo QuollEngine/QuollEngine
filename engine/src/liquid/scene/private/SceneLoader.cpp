@@ -144,6 +144,26 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
+  if (node["components"]["meshRenderer"] &&
+      node["components"]["meshRenderer"].IsMap()) {
+    MeshRenderer renderer{};
+    auto materials = node["components"]["meshRenderer"]["materials"];
+
+    if (materials.IsSequence()) {
+      for (auto material : materials) {
+        auto uuid = material.as<String>("");
+        auto handle = mAssetRegistry.getMaterials().findHandleByUuid(uuid);
+        if (handle == MaterialAssetHandle::Null) {
+          continue;
+        }
+
+        renderer.materials.push_back(handle);
+      }
+    }
+
+    mEntityDatabase.set(entity, renderer);
+  }
+
   if (node["components"]["skinnedMesh"]) {
     auto uuid = node["components"]["skinnedMesh"].as<String>("");
     auto handle = mAssetRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
@@ -151,6 +171,26 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     if (handle != SkinnedMeshAssetHandle::Null) {
       mEntityDatabase.set<SkinnedMesh>(entity, {handle});
     }
+  }
+
+  if (node["components"]["skinnedMeshRenderer"] &&
+      node["components"]["skinnedMeshRenderer"].IsMap()) {
+    SkinnedMeshRenderer renderer{};
+    auto materials = node["components"]["skinnedMeshRenderer"]["materials"];
+
+    if (materials.IsSequence()) {
+      for (auto material : materials) {
+        auto uuid = material.as<String>("");
+        auto handle = mAssetRegistry.getMaterials().findHandleByUuid(uuid);
+        if (handle == MaterialAssetHandle::Null) {
+          continue;
+        }
+
+        renderer.materials.push_back(handle);
+      }
+    }
+
+    mEntityDatabase.set(entity, renderer);
   }
 
   if (node["components"]["skeleton"]) {

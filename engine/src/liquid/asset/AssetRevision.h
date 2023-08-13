@@ -12,7 +12,7 @@ enum class AssetRevision : uint32_t {
   Skeleton = 230911,
   Animation = 230911,
   Audio = 230911,
-  Prefab = 230911,
+  Prefab = 230913,
   LuaScript = 230911,
   Font = 230911,
   Environment = 230911,

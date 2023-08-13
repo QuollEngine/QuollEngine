@@ -107,7 +107,8 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
           getTextureFromRegistry(material.emissiveTexture);
       properties.emissiveTextureCoord = material.emissiveTextureCoord;
 
-      material.deviceHandle.reset(new MaterialPBR(properties, renderStorage));
+      material.deviceHandle.reset(
+          new MaterialPBR(asset.name, properties, renderStorage));
     }
   }
 

@@ -63,6 +63,25 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     asset.data.meshes.push_back(mesh);
   }
 
+  // Create two mesh renderers with 3 materials each
+  for (uint32_t i = 0; i < 2; ++i) {
+    liquid::PrefabComponent<liquid::MeshRenderer> renderer{};
+    renderer.entity = i;
+    renderer.value.materials.push_back(liquid::MaterialAssetHandle{1});
+    renderer.value.materials.push_back(liquid::MaterialAssetHandle{2});
+    renderer.value.materials.push_back(liquid::MaterialAssetHandle{3});
+    asset.data.meshRenderers.push_back(renderer);
+  }
+
+  // Create three skinned mesh renderers with 2 materials each
+  for (uint32_t i = 0; i < 3; ++i) {
+    liquid::PrefabComponent<liquid::SkinnedMeshRenderer> renderer{};
+    renderer.entity = i;
+    renderer.value.materials.push_back(liquid::MaterialAssetHandle{1});
+    renderer.value.materials.push_back(liquid::MaterialAssetHandle{2});
+    asset.data.skinnedMeshRenderers.push_back(renderer);
+  }
+
   // Create names
   for (uint32_t i = 3; i < 5; ++i) {
     liquid::PrefabComponent<liquid::String> name{};
@@ -187,12 +206,34 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     EXPECT_EQ(mesh.handle, static_cast<liquid::MeshAssetHandle>(i));
   }
 
+  // Test mesh renderers
+  for (uint32_t i = 0; i < 2; ++i) {
+    auto entity = res.at(i);
+    const auto &renderer = db.get<liquid::MeshRenderer>(entity);
+
+    for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
+      EXPECT_EQ(renderer.materials.at(mi),
+                static_cast<liquid::MaterialAssetHandle>(mi + 1));
+    }
+  }
+
   // Test skinned meshes
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<liquid::SkinnedMesh>(entity);
     EXPECT_EQ(mesh.handle, static_cast<liquid::SkinnedMeshAssetHandle>(i));
+  }
+
+  // Test skinned mesh renderer
+  for (uint32_t i = 0; i < 3; ++i) {
+    auto entity = res.at(i);
+    const auto &renderer = db.get<liquid::SkinnedMeshRenderer>(entity);
+
+    for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
+      EXPECT_EQ(renderer.materials.at(mi),
+                static_cast<liquid::MaterialAssetHandle>(mi + 1));
+    }
   }
 
   // Test skeletons

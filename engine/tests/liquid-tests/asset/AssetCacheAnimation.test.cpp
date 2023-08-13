@@ -119,6 +119,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getAnimations().getAsset(handle.getData());
+  EXPECT_EQ(actual.name, asset.name);
   EXPECT_EQ(actual.type, liquid::AssetType::Animation);
 
   EXPECT_EQ(actual.data.time, asset.data.time);

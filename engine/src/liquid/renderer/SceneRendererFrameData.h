@@ -163,6 +163,21 @@ public:
   };
 
   /**
+   * @brief Material range
+   */
+  struct MaterialRange {
+    /**
+     * Range start
+     */
+    uint32_t start = 0;
+
+    /**
+     * Range end
+     */
+    uint32_t end = 0;
+  };
+
+  /**
    * @brief Mesh data
    */
   struct MeshData {
@@ -171,6 +186,11 @@ public:
      * @brief Transforms of mesh entities
      */
     std::vector<glm::mat4> transforms;
+
+    /**
+     * @brief Mateiral ranges
+     */
+    std::vector<MaterialRange> materialRanges;
 
     /**
      * @brief Ids of mesh entities
@@ -320,21 +340,23 @@ public:
   inline const size_t getNumShadowMaps() const { return mShadowMaps.size(); }
 
   /**
+   * @brief Set default material
+   *
+   * @param material Default material
+   */
+  void setDefaultMaterial(rhi::DeviceAddress material);
+
+  /**
    * @brief Add mesh data
    *
    * @param handle Mesh handle
    * @param entity Entity
    * @param transform Mesh world transform
+   * @param materials Materials
    */
   void addMesh(MeshAssetHandle handle, liquid::Entity entity,
-               const glm::mat4 &transform);
-
-  /**
-   * @brief Set BRDF lookup table
-   *
-   * @param brdfLut BRDF Lookup table
-   */
-  void setBrdfLookupTable(rhi::TextureHandle brdfLut);
+               const glm::mat4 &transform,
+               const std::vector<rhi::DeviceAddress> &materials);
 
   /**
    * @brief Add skinned mesh data
@@ -343,10 +365,19 @@ public:
    * @param entity Entity
    * @param transform Skinned mesh world transform
    * @param skeleton Skeleton joint transforms
+   * @param materials Materials
    */
   void addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
                       const glm::mat4 &transform,
-                      const std::vector<glm::mat4> &skeleton);
+                      const std::vector<glm::mat4> &skeleton,
+                      const std::vector<rhi::DeviceAddress> &materials);
+
+  /**
+   * @brief Set BRDF lookup table
+   *
+   * @param brdfLut BRDF Lookup table
+   */
+  void setBrdfLookupTable(rhi::TextureHandle brdfLut);
 
   /**
    * @brief Add directional light
@@ -486,6 +517,15 @@ public:
   }
 
   /**
+   * @brief Get flattened materials
+   *
+   * @return Flattened materials buffers
+   */
+  inline rhi::DeviceAddress getFlattenedMaterialsBuffer() const {
+    return mFlatMaterialsBuffer.getAddress();
+  }
+
+  /**
    * @brief Get mesh transforms buffer
    *
    * @return Mesh transforms buffer
@@ -495,12 +535,30 @@ public:
   }
 
   /**
+   * @brief Get mesh materials buffer
+   *
+   * @return Mesh materials buffer
+   */
+  inline rhi::DeviceAddress getMeshMaterialsBuffer() const {
+    return mMeshMaterialsBuffer.getAddress();
+  }
+
+  /**
    * @brief Get skinned mesh transforms buffer
    *
    * @return Skinned mesh transforms buffer
    */
   inline rhi::DeviceAddress getSkinnedMeshTransformsBuffer() const {
     return mSkinnedMeshTransformsBuffer.getAddress();
+  }
+
+  /**
+   * @brief Get skinned mesh materials buffer
+   *
+   * @return Skinned mesh materials buffer
+   */
+  inline rhi::DeviceAddress getSkinnedMeshMaterialsBuffer() const {
+    return mSkinnedMeshMaterialsBuffer.getAddress();
   }
 
   /**
@@ -605,19 +663,24 @@ private:
 
   size_t mLastSkeleton = 0;
 
+  std::vector<rhi::DeviceAddress> mFlatMaterials;
+  rhi::Buffer mFlatMaterialsBuffer;
+
   rhi::Buffer mMeshTransformsBuffer;
   rhi::Buffer mSkinnedMeshTransformsBuffer;
   rhi::Buffer mSkeletonsBuffer;
+  rhi::Buffer mMeshMaterialsBuffer;
+  rhi::Buffer mSkinnedMeshMaterialsBuffer;
+  std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
+  std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
+      mSkinnedMeshGroups;
+
   rhi::Buffer mSceneBuffer;
   rhi::Buffer mDirectionalLightsBuffer;
   rhi::Buffer mPointLightsBuffer;
   rhi::Buffer mShadowMapsBuffer;
   rhi::Buffer mCameraBuffer;
   rhi::Buffer mSkyboxBuffer;
-
-  std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
-  std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
-      mSkinnedMeshGroups;
 
   std::vector<glm::mat4> mSpriteTransforms;
   std::vector<rhi::TextureHandle> mSpriteTextures;

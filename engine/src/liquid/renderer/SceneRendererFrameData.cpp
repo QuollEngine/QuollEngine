@@ -28,14 +28,43 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 
   {
     auto desc = defaultDesc;
+    desc.debugName = "Flat materials";
+    desc.size = mReservedSpace * sizeof(rhi::DeviceAddress);
+    mFlatMaterialsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
     desc.debugName = "Mesh transforms";
     mMeshTransformsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
     auto desc = defaultDesc;
+    desc.debugName = "Mesh material ranges";
+    desc.size = mReservedSpace * sizeof(MaterialRange);
+    mMeshMaterialsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
     desc.debugName = "Skinned mesh transforms";
     mSkinnedMeshTransformsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.debugName = "Skinned mesh material ranges";
+    desc.size = mReservedSpace * sizeof(MaterialRange);
+    mSkinnedMeshMaterialsBuffer = renderStorage.createBuffer(desc);
+  }
+
+  {
+    auto desc = defaultDesc;
+    desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
+    desc.debugName = "Skeletons";
+
+    mSkeletonsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
@@ -55,14 +84,6 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
     desc.size = mReservedSpace * sizeof(glm::uvec4);
     desc.debugName = "Sprite textures";
     mSpriteTexturesBuffer = renderStorage.createBuffer(desc);
-  }
-
-  {
-    auto desc = defaultDesc;
-    desc.size = mReservedSpace * MaxNumJoints * sizeof(glm::mat4);
-    desc.debugName = "Skeletons";
-
-    mSkeletonsBuffer = renderStorage.createBuffer(desc);
   }
 
   {
@@ -126,6 +147,10 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 }
 
 void SceneRendererFrameData::updateBuffers() {
+  LIQUID_PROFILE_EVENT("SceneRendererFrameData::updateBuffer");
+  mFlatMaterialsBuffer.update(mFlatMaterials.data(),
+                              mFlatMaterials.size() *
+                                  sizeof(rhi::DeviceAddress));
   {
     size_t offset = 0;
     auto *bufferData = static_cast<glm::mat4 *>(mMeshTransformsBuffer.map());
@@ -133,6 +158,16 @@ void SceneRendererFrameData::updateBuffers() {
       memcpy(bufferData + offset, data.transforms.data(),
              data.transforms.size() * sizeof(glm::mat4));
       offset += data.transforms.size();
+    }
+  }
+
+  {
+    size_t offset = 0;
+    auto *bufferData = static_cast<MaterialRange *>(mMeshMaterialsBuffer.map());
+    for (auto &[_, data] : mMeshGroups) {
+      memcpy(bufferData + offset, data.materialRanges.data(),
+             data.materialRanges.size() * sizeof(MaterialRange));
+      offset += data.materialRanges.size();
     }
   }
 
@@ -151,6 +186,17 @@ void SceneRendererFrameData::updateBuffers() {
       memcpy(skeletonsBuffer + skeletonsOffset, data.skeletons.get(),
              data.lastSkeleton * MaxNumJoints * sizeof(glm::mat4));
       skeletonsOffset += data.lastSkeleton * MaxNumJoints;
+    }
+  }
+
+  {
+    size_t offset = 0;
+    auto *bufferData =
+        static_cast<MaterialRange *>(mSkinnedMeshMaterialsBuffer.map());
+    for (auto &[_, data] : mSkinnedMeshGroups) {
+      memcpy(bufferData + offset, data.materialRanges.data(),
+             data.materialRanges.size() * sizeof(MaterialRange));
+      offset += data.materialRanges.size();
     }
   }
 
@@ -175,9 +221,20 @@ void SceneRendererFrameData::updateBuffers() {
                                  mSpriteTransforms.size() * sizeof(glm::mat4));
 }
 
-void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
-                                     liquid::Entity entity,
-                                     const glm::mat4 &transform) {
+void SceneRendererFrameData::setDefaultMaterial(rhi::DeviceAddress material) {
+  mFlatMaterials.at(0) = material;
+}
+
+void SceneRendererFrameData::addMesh(
+    MeshAssetHandle handle, liquid::Entity entity, const glm::mat4 &transform,
+    const std::vector<rhi::DeviceAddress> &materials) {
+  uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());
+  for (const auto &material : materials) {
+    mFlatMaterials.push_back(material);
+  }
+  auto newMaterialSize = static_cast<uint32_t>(mFlatMaterials.size());
+  uint32_t end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+
   if (mMeshGroups.find(handle) == mMeshGroups.end()) {
     MeshData data{};
     mMeshGroups.insert_or_assign(handle, data);
@@ -185,15 +242,20 @@ void SceneRendererFrameData::addMesh(MeshAssetHandle handle,
 
   mMeshGroups.at(handle).entities.push_back(entity);
   mMeshGroups.at(handle).transforms.push_back(transform);
-}
-
-void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
-  mSceneData.textures.z = static_cast<uint32_t>(brdfLut);
+  mMeshGroups.at(handle).materialRanges.push_back({start, end});
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
     SkinnedMeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
-    const std::vector<glm::mat4> &skeleton) {
+    const std::vector<glm::mat4> &skeleton,
+    const std::vector<rhi::DeviceAddress> &materials) {
+  uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());
+  for (const auto &material : materials) {
+    mFlatMaterials.push_back(material);
+  }
+  auto newMaterialSize = static_cast<uint32_t>(mFlatMaterials.size());
+  uint32_t end = newMaterialSize == start ? 0 : newMaterialSize - 1;
+
   if (mSkinnedMeshGroups.find(handle) == mSkinnedMeshGroups.end()) {
     mSkinnedMeshGroups.insert({handle, SkinnedMeshData{}});
   }
@@ -202,6 +264,7 @@ void SceneRendererFrameData::addSkinnedMesh(
 
   group.entities.push_back(entity);
   group.transforms.push_back(transform);
+  group.materialRanges.push_back({start, end});
 
   size_t currentOffset = group.lastSkeleton * MaxNumJoints;
   size_t newSize = currentOffset + MaxNumJoints;
@@ -219,6 +282,10 @@ void SceneRendererFrameData::addSkinnedMesh(
   size_t dataSize = std::min(skeleton.size(), MaxNumJoints);
   memcpy(currentSkeleton, skeleton.data(), dataSize * sizeof(glm::mat4));
   group.lastSkeleton++;
+}
+
+void SceneRendererFrameData::setBrdfLookupTable(rhi::TextureHandle brdfLut) {
+  mSceneData.textures.z = static_cast<uint32_t>(brdfLut);
 }
 
 void SceneRendererFrameData::addCascadedShadowMaps(
@@ -418,6 +485,7 @@ void SceneRendererFrameData::setShadowMapTexture(rhi::TextureHandle shadowmap) {
 }
 
 void SceneRendererFrameData::clear() {
+
   mSpriteEntities.clear();
   mSpriteTransforms.clear();
   mSpriteTextures.clear();
@@ -438,8 +506,10 @@ void SceneRendererFrameData::clear() {
   mSceneData.color = {};
   mSkyboxData.color = {};
   mSkyboxData.data.x = 0;
-  mLastSkeleton = 0;
 
+  mLastSkeleton = 0;
+  mFlatMaterials.clear();
+  mFlatMaterials.resize(1);
   mMeshGroups.clear();
   mSkinnedMeshGroups.clear();
 }

@@ -35,6 +35,8 @@
 #include "liquid/physics/PhysxInstance.h"
 #include "liquid/scripting/Script.h"
 #include "liquid/text/Text.h"
+#include "liquid/renderer/MeshRenderer.h"
+#include "liquid/renderer/SkinnedMeshRenderer.h"
 
 namespace liquid {
 

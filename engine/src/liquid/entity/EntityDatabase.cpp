@@ -37,6 +37,8 @@ EntityDatabase::EntityDatabase() {
   reg<RigidBodyClear>();
   reg<Script>();
   reg<Text>();
+  reg<MeshRenderer>();
+  reg<SkinnedMeshRenderer>();
 }
 
 } // namespace liquid

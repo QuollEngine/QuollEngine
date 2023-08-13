@@ -103,23 +103,20 @@ private:
    *
    * @param commandList Command list
    * @param pipeline Pipeline handle
-   * @param bindMaterialData Bind material data
    * @param frameIndex Frame index
    */
   void render(rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
-              bool bindMaterialData, uint32_t frameIndex);
+              uint32_t frameIndex);
 
   /**
    * @brief Render skinned meshes
    *
    * @param commandList Command list
    * @param pipeline Pipeline handle
-   * @param bindMaterialData Bind material data
    * @param frameIndex Frame index
    */
   void renderSkinned(rhi::RenderCommandList &commandList,
-                     rhi::PipelineHandle pipeline, bool bindMaterialData,
-                     uint32_t frameIndex);
+                     rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
   /**
    * @brief Render texts

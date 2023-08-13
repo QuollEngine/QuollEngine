@@ -17,7 +17,7 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
       liquid::rhi::TextureHandle(1)};
 
   liquid::Material material(
-      textures,
+      "test", textures,
       {
           {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
           {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
@@ -44,7 +44,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
   std::vector<liquid::rhi::TextureHandle> textures{
       liquid::rhi::TextureHandle(1)};
 
-  liquid::Material material(textures, {}, renderStorage);
+  liquid::Material material("test", textures, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
@@ -52,7 +52,7 @@ TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
-  liquid::Material material({}, {}, renderStorage);
+  liquid::Material material("test", {}, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
@@ -63,7 +63,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material({},
+  liquid::Material material("test", {},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
@@ -106,7 +106,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material({},
+  liquid::Material material("test", {},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},
@@ -149,7 +149,7 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material({},
+  liquid::Material material("test", {},
                             {
                                 {"specular", liquid::Property(testVec3)},
                                 {"diffuse", liquid::Property(testReal)},

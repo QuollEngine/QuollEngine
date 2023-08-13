@@ -22,11 +22,14 @@ public:
     std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
     std::uniform_real_distribution<float> distPositive(0.0f, 10.0f);
 
+    uint32_t numMaterials = 5;
     uint32_t numTransforms = 5;
     uint32_t numMeshes = 5;
+    uint32_t numMeshRenderers = 4;
+    uint32_t numSkeletons = 3;
+    uint32_t numSkinnedMeshRenderers = 2;
     uint32_t numAnimators = 4;
     uint32_t numAnimations = 3;
-    uint32_t numSkeletons = 3;
     uint32_t numDirectionalLights = 2;
     uint32_t numPointLights = 4;
     uint32_t numNames = 3;
@@ -66,11 +69,26 @@ public:
       asset.data.pointLights.push_back({i, light});
     }
 
+    std::vector<liquid::MaterialAssetHandle> materials(numMaterials);
+    for (uint32_t i = 0; i < numMaterials; ++i) {
+      liquid::AssetData<liquid::MaterialAsset> material;
+      material.uuid = "material-" + std::to_string(i);
+      materials.at(i) = cache.getRegistry().getMaterials().addAsset(material);
+    }
+
     for (uint32_t i = 0; i < numMeshes; ++i) {
       liquid::AssetData<liquid::MeshAsset> mesh;
       mesh.uuid = "mesh-" + std::to_string(i);
       auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
       asset.data.meshes.push_back({i, handle});
+    }
+
+    for (uint32_t i = 0; i < numMeshRenderers; ++i) {
+      liquid::MeshRenderer renderer{};
+      renderer.materials.push_back(materials.at(i % 3));
+      renderer.materials.push_back(materials.at(1 + (i % 3)));
+
+      asset.data.meshRenderers.push_back({i, renderer});
     }
 
     // Add two more entities that point to the same
@@ -94,6 +112,15 @@ public:
     for (uint32_t i = 0; i < 2; ++i) {
       auto handle = asset.data.skinnedMeshes.at(static_cast<size_t>(i)).value;
       asset.data.skinnedMeshes.push_back({numSkeletons + i, handle});
+    }
+
+    for (uint32_t i = 0; i < numSkinnedMeshRenderers; ++i) {
+      liquid::SkinnedMeshRenderer renderer{};
+      renderer.materials.push_back(materials.at((i % 2)));
+      renderer.materials.push_back(materials.at(1 + (i % 2)));
+      renderer.materials.push_back(materials.at(2 + (i % 2)));
+
+      asset.data.skinnedMeshRenderers.push_back({i, renderer});
     }
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
@@ -155,6 +182,22 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   liquid::String magic(liquid::AssetFileMagicLength, '$');
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, liquid::AssetType::Prefab);
+
+  std::vector<liquid::String> actualMaterials;
+  {
+    auto &map = cache.getRegistry().getMaterials();
+    auto &actual = actualMaterials;
+    uint32_t numAssets = 0;
+    file.read(numAssets);
+    EXPECT_EQ(numAssets, 4);
+    actualMaterials.resize(numAssets);
+    file.read(actual);
+
+    for (uint32_t i = 0; i < numAssets; ++i) {
+      auto handle = map.findHandleByUuid(actual.at(i));
+      EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
+    }
+  }
 
   std::vector<liquid::String> actualMeshes;
   {
@@ -302,6 +345,36 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   }
 
   {
+    uint32_t numComponents = 999;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 4);
+    auto &map = cache.getRegistry().getMaterials();
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 999;
+      file.read(entity);
+      EXPECT_EQ(entity, i);
+
+      uint32_t numMaterials = 999;
+      file.read(numMaterials);
+      EXPECT_EQ(numMaterials, 2);
+
+      std::vector<uint32_t> materialIndices(numMaterials);
+      file.read(materialIndices);
+
+      auto &expected = asset.data.meshRenderers.at(i).value;
+      EXPECT_EQ(materialIndices.size(), expected.materials.size());
+
+      for (size_t mi = 0; mi < materialIndices.size(); ++mi) {
+        auto materialIndex = materialIndices.at(mi);
+        auto handle = expected.materials.at(mi);
+
+        auto uuid = actualMaterials.at(materialIndex);
+        EXPECT_EQ(uuid, map.getAsset(handle).uuid);
+      }
+    }
+  }
+
+  {
     uint32_t numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 5);
@@ -318,6 +391,36 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       auto &expected = map.getAsset(asset.data.skinnedMeshes.at(i).value);
 
       EXPECT_EQ(expected.uuid, actualSkinnedMeshes.at(meshIndex));
+    }
+  }
+
+  {
+    uint32_t numComponents = 999;
+    file.read(numComponents);
+    EXPECT_EQ(numComponents, 2);
+    auto &map = cache.getRegistry().getMaterials();
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 999;
+      file.read(entity);
+      EXPECT_EQ(entity, i);
+
+      uint32_t numMaterials = 999;
+      file.read(numMaterials);
+      EXPECT_EQ(numMaterials, 3);
+
+      std::vector<uint32_t> materialIndices(numMaterials);
+      file.read(materialIndices);
+
+      auto &expected = asset.data.skinnedMeshRenderers.at(i).value;
+      EXPECT_EQ(materialIndices.size(), expected.materials.size());
+
+      for (size_t mi = 0; mi < materialIndices.size(); ++mi) {
+        auto materialIndex = materialIndices.at(mi);
+        auto handle = expected.materials.at(mi);
+
+        auto uuid = actualMaterials.at(materialIndex);
+        EXPECT_EQ(uuid, map.getAsset(handle).uuid);
+      }
     }
   }
 
@@ -472,12 +575,35 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     EXPECT_EQ(expected.value, actual.value);
   }
 
+  EXPECT_EQ(asset.data.meshRenderers.size(), prefab.data.meshRenderers.size());
+  for (size_t i = 0; i < prefab.data.meshRenderers.size(); ++i) {
+    auto &expected = asset.data.meshRenderers.at(i);
+    auto &actual = prefab.data.meshRenderers.at(i);
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
+    for (size_t mi = 0; mi < expected.value.materials.size(); ++mi) {
+      EXPECT_EQ(expected.value.materials.at(mi), actual.value.materials.at(mi));
+    }
+  }
+
   EXPECT_EQ(asset.data.skinnedMeshes.size(), prefab.data.skinnedMeshes.size());
   for (size_t i = 0; i < prefab.data.skinnedMeshes.size(); ++i) {
     auto &expected = asset.data.skinnedMeshes.at(i);
     auto &actual = prefab.data.skinnedMeshes.at(i);
     EXPECT_EQ(expected.entity, actual.entity);
     EXPECT_EQ(expected.value, actual.value);
+  }
+
+  EXPECT_EQ(asset.data.skinnedMeshRenderers.size(),
+            prefab.data.skinnedMeshRenderers.size());
+  for (size_t i = 0; i < prefab.data.skinnedMeshRenderers.size(); ++i) {
+    auto &expected = asset.data.skinnedMeshRenderers.at(i);
+    auto &actual = prefab.data.skinnedMeshRenderers.at(i);
+    EXPECT_EQ(expected.entity, actual.entity);
+    EXPECT_EQ(expected.value.materials.size(), actual.value.materials.size());
+    for (size_t mi = 0; mi < expected.value.materials.size(); ++mi) {
+      EXPECT_EQ(expected.value.materials.at(mi), actual.value.materials.at(mi));
+    }
   }
 
   EXPECT_EQ(asset.data.skeletons.size(), prefab.data.skeletons.size());

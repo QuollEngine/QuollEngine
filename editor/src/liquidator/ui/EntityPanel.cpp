@@ -12,6 +12,8 @@
 #include "liquidator/actions/EntityAudioActions.h"
 #include "liquidator/actions/EntityScriptingActions.h"
 #include "liquidator/actions/EntityMeshActions.h"
+#include "liquidator/actions/EntityMeshRendererActions.h"
+#include "liquidator/actions/EntitySkinnedMeshRendererActions.h"
 #include "liquidator/actions/EntityAnimatorActions.h"
 #include "liquidator/actions/EntitySpriteActions.h"
 #include "liquidator/actions/SceneActions.h"
@@ -91,6 +93,8 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderText(scene, assetRegistry, actionExecutor);
     renderSprite(scene, assetRegistry, actionExecutor);
     renderMesh(scene, assetRegistry, actionExecutor);
+    renderMeshRenderer(scene, assetRegistry, actionExecutor);
+    renderSkinnedMeshRenderer(scene, assetRegistry, actionExecutor);
     renderDirectionalLight(scene, actionExecutor);
     renderPointLight(scene, actionExecutor);
     renderCamera(state, scene, actionExecutor);
@@ -608,6 +612,128 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     if (shouldDelete("SkinnedMesh")) {
       actionExecutor.execute<EntityDeleteSkinnedMesh>(mSelectedEntity);
     }
+  }
+}
+
+void EntityPanel::renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+                                     ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName = String(fa::Desktop) + "  Mesh renderer";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
+    const auto &renderer =
+        scene.entityDatabase.get<MeshRenderer>(mSelectedEntity);
+
+    if (auto table = widgets::Table("TableMaterials", 2)) {
+      for (size_t i = 0; i < renderer.materials.size(); ++i) {
+        const auto &asset =
+            assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Slot %d", static_cast<uint32_t>(i));
+        ImGui::TableNextColumn();
+        ImGui::Button(asset.name.c_str());
+        if (ImGui::BeginDragDropTarget()) {
+          if (auto *payload = ImGui::AcceptDragDropPayload(
+                  getAssetTypeString(AssetType::Material).c_str())) {
+            auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+            actionExecutor.execute<EntitySetMeshRendererMaterial>(
+                mSelectedEntity, i, asset);
+          }
+          ImGui::EndDragDropTarget();
+        }
+      }
+
+      ImGui::TableNextColumn();
+      ImGui::Button("Drop a new material slot");
+      if (ImGui::BeginDragDropTarget()) {
+        if (auto *payload = ImGui::AcceptDragDropPayload(
+                getAssetTypeString(AssetType::Material).c_str())) {
+          auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+          actionExecutor.execute<EntityAddMeshRendererMaterialSlot>(
+              mSelectedEntity, asset);
+        }
+        ImGui::EndDragDropTarget();
+      }
+
+      if (renderer.materials.size() > 0) {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        if (ImGui::Button("Delete last row")) {
+          actionExecutor.execute<EntityRemoveLastMeshRendererMaterialSlot>(
+              mSelectedEntity);
+        }
+      }
+    }
+  }
+
+  if (shouldDelete("Mesh renderer")) {
+    actionExecutor.execute<EntityDeleteMeshRenderer>(mSelectedEntity);
+  }
+}
+
+void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
+                                            AssetRegistry &assetRegistry,
+                                            ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName =
+      String(fa::Desktop) + " Skinned mesh renderer";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
+    const auto &renderer =
+        scene.entityDatabase.get<SkinnedMeshRenderer>(mSelectedEntity);
+
+    if (auto table = widgets::Table("TableMaterials", 2)) {
+      for (size_t i = 0; i < renderer.materials.size(); ++i) {
+        const auto &asset =
+            assetRegistry.getMaterials().getAsset(renderer.materials.at(i));
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Slot %d", static_cast<uint32_t>(i));
+        ImGui::TableNextColumn();
+        ImGui::Button(asset.name.c_str());
+        if (ImGui::BeginDragDropTarget()) {
+          if (auto *payload = ImGui::AcceptDragDropPayload(
+                  getAssetTypeString(AssetType::Material).c_str())) {
+            auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+            actionExecutor.execute<EntitySetSkinnedMeshRendererMaterial>(
+                mSelectedEntity, i, asset);
+          }
+          ImGui::EndDragDropTarget();
+        }
+      }
+
+      ImGui::TableNextColumn();
+      ImGui::Button("Drop a new material slot");
+      if (ImGui::BeginDragDropTarget()) {
+        if (auto *payload = ImGui::AcceptDragDropPayload(
+                getAssetTypeString(AssetType::Material).c_str())) {
+          auto asset = *static_cast<MaterialAssetHandle *>(payload->Data);
+          actionExecutor.execute<EntityAddSkinnedMeshRendererMaterialSlot>(
+              mSelectedEntity, asset);
+        }
+        ImGui::EndDragDropTarget();
+      }
+
+      if (renderer.materials.size() > 0) {
+        ImGui::TableNextColumn();
+        if (ImGui::Button("Delete last row")) {
+          actionExecutor
+              .execute<EntityRemoveLastSkinnedMeshRendererMaterialSlot>(
+                  mSelectedEntity);
+        }
+      }
+    }
+  }
+
+  if (shouldDelete("Skinned mesh renderer")) {
+    actionExecutor.execute<EntityDeleteSkinnedMeshRenderer>(mSelectedEntity);
   }
 }
 
@@ -1194,6 +1320,16 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
       actionExecutor.execute<EntityCreateCollidable>(mSelectedEntity);
     }
 
+    if (!scene.entityDatabase.has<MeshRenderer>(mSelectedEntity) &&
+        ImGui::Selectable("Mesh renderer")) {
+      actionExecutor.execute<EntityCreateMeshRenderer>(mSelectedEntity);
+    }
+
+    if (!scene.entityDatabase.has<SkinnedMeshRenderer>(mSelectedEntity) &&
+        ImGui::Selectable("Skinned mesh renderer")) {
+      actionExecutor.execute<EntityCreateSkinnedMeshRenderer>(mSelectedEntity);
+    }
+
     if (!scene.entityDatabase.has<DirectionalLight>(mSelectedEntity) &&
         !scene.entityDatabase.has<PointLight>(mSelectedEntity)) {
       if (ImGui::Selectable("Directional light")) {
@@ -1229,6 +1365,34 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
   ImGui::Button("Drag asset here", ImVec2(width, halfWidth));
 
   if (ImGui::BeginDragDropTarget()) {
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            getAssetTypeString(AssetType::Mesh).c_str())) {
+      auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
+
+      if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetMesh>(
+            mSelectedEntity, scene.entityDatabase.get<Mesh>(mSelectedEntity),
+            Mesh{asset});
+      } else {
+        actionExecutor.execute<EntityCreateMesh>(mSelectedEntity, Mesh{asset});
+      }
+    }
+
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
+      auto asset = *static_cast<SkinnedMeshAssetHandle *>(payload->Data);
+
+      if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
+        actionExecutor.execute<EntitySetSkinnedMesh>(
+            mSelectedEntity,
+            scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity),
+            SkinnedMesh{asset});
+      } else {
+        actionExecutor.execute<EntityCreateSkinnedMesh>(mSelectedEntity,
+                                                        SkinnedMesh{asset});
+      }
+    }
+
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Audio).c_str())) {
       auto asset = *static_cast<AudioAssetHandle *>(payload->Data);
