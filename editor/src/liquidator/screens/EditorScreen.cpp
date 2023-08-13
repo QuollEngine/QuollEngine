@@ -141,7 +141,7 @@ void EditorScreen::start(const Project &project) {
     const auto &changes = tracker.trackForChanges();
     std::vector<String> messages;
     for (auto &change : changes) {
-      auto res = assetManager.loadOriginalIfChanged(change.path);
+      auto res = assetManager.loadSourceIfChanged(change.path);
       if (res.hasError()) {
         messages.push_back(res.getError());
 

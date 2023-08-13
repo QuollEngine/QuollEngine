@@ -84,78 +84,79 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
   }
 }
 
-Result<Path> HDRIImporter::loadFromPath(const Path &originalAssetPath,
-                                        const Path &engineAssetPath) {
+Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
+                                           const UUIDMap &uuids) {
   auto *device = mRenderStorage.getDevice();
 
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
 
-  auto *data = stbi_loadf(originalAssetPath.string().c_str(), &width, &height,
+  auto *data = stbi_loadf(sourceAssetPath.string().c_str(), &width, &height,
                           &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return Result<Path>::Error(stbi_failure_reason());
+    return Result<UUIDMap>::Error(stbi_failure_reason());
   }
-
-  std::filesystem::create_directory(engineAssetPath);
-
-  auto relPath =
-      std::filesystem::relative(engineAssetPath, mAssetCache.getAssetsPath());
 
   auto unfilteredCubemap = convertEquirectangularToCubemap(
       data, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
   stbi_image_free(data);
 
-  auto irradianceMapName = originalAssetPath.stem().string() + "-irradiance";
-  auto irradianceCubemap =
-      generateIrradianceMap(unfilteredCubemap, relPath / irradianceMapName);
+  auto irradianceMapName = sourceAssetPath.filename().string() + "/irradiance";
+  auto irradianceCubemap = generateIrradianceMap(
+      unfilteredCubemap, getUUIDFromMap(uuids, "irradiance"),
+      irradianceMapName);
 
   if (irradianceCubemap.hasError()) {
     device->destroyTexture(unfilteredCubemap.texture);
-    std::filesystem::remove_all(engineAssetPath);
-
-    return Result<Path>::Error(irradianceCubemap.getError());
+    return Result<UUIDMap>::Error(irradianceCubemap.getError());
   }
 
-  auto specularMapName = originalAssetPath.stem().string() + "-specular";
-  auto specularCubemap =
-      generateSpecularMap(unfilteredCubemap, relPath / specularMapName);
+  auto specularMapName = sourceAssetPath.filename().string() + "/specular";
+  auto specularCubemap = generateSpecularMap(
+      unfilteredCubemap, getUUIDFromMap(uuids, "specular"), specularMapName);
 
   if (specularCubemap.hasError()) {
     device->destroyTexture(unfilteredCubemap.texture);
     mAssetCache.getRegistry().getTextures().deleteAsset(
         irradianceCubemap.getData());
-    std::filesystem::remove_all(engineAssetPath);
 
-    return Result<Path>::Error(specularCubemap.getError());
+    return Result<UUIDMap>::Error(specularCubemap.getError());
   }
 
   device->destroyTexture(unfilteredCubemap.texture);
 
   AssetData<EnvironmentAsset> environment{};
-  environment.path =
-      engineAssetPath / originalAssetPath.filename().replace_extension("lqenv");
   environment.data.specularMap = specularCubemap.getData();
   environment.data.irradianceMap = irradianceCubemap.getData();
 
-  auto createdFileRes = mAssetCache.createEnvironmentFromAsset(environment);
+  auto createdFileRes = mAssetCache.createEnvironmentFromAsset(
+      environment, getUUIDFromMap(uuids, "root"));
 
   if (createdFileRes.hasError()) {
-    return createdFileRes;
+    return Result<UUIDMap>::Error(createdFileRes.getError());
   }
 
-  auto loadRes = mAssetCache.loadAsset(createdFileRes.getData());
+  auto loadRes = mAssetCache.loadEnvironmentFromFile(createdFileRes.getData());
   if (loadRes.hasError()) {
-    return Result<Path>::Error(loadRes.getError());
+    return Result<UUIDMap>::Error(loadRes.getError());
   }
 
-  return createdFileRes;
+  auto &registry = mAssetCache.getRegistry();
+
+  UUIDMap output{
+      {"root", registry.getEnvironments().getAsset(loadRes.getData()).uuid},
+      {"irradiance",
+       registry.getTextures().getAsset(environment.data.irradianceMap).uuid},
+      {"specular",
+       registry.getTextures().getAsset(environment.data.specularMap).uuid}};
+
+  return Result<UUIDMap>::Ok(output);
 }
 
 rhi::TextureHandle
-HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
+HDRIImporter::loadFromPathToDevice(const Path &sourceAssetPath,
                                    RenderStorage &renderStorage) {
   auto *device = mRenderStorage.getDevice();
 
@@ -163,7 +164,7 @@ HDRIImporter::loadFromPathToDevice(const Path &originalAssetPath,
   int32_t height = 0;
   int32_t channels = 0;
 
-  auto *data = stbi_loadf(originalAssetPath.string().c_str(), &width, &height,
+  auto *data = stbi_loadf(sourceAssetPath.string().c_str(), &width, &height,
                           &channels, STBI_rgb_alpha);
 
   if (!data) {
@@ -295,7 +296,7 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
 
 Result<TextureAssetHandle>
 HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
-                                    const Path &path) {
+                                    const String &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
 
   const uint32_t GroupCount = unfilteredCubemap.levels.at(0).width / 32;
@@ -345,7 +346,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   auto levels = {unfilteredCubemap.levels.at(0)};
 
   AssetData<TextureAsset> asset{};
-  asset.name = path.string();
+  asset.name = name;
   asset.size = TextureUtils::getBufferSizeFromLevels(levels);
   asset.data.type = TextureAssetType::Cubemap;
   asset.data.width = unfilteredCubemap.levels.at(0).width;
@@ -361,7 +362,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
       CubemapSides, asset.data.levels, asset.data.data.data());
   device->destroyTexture(irradianceCubemap);
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createTextureFromAsset(asset, uuid);
   if (createdFileRes.hasError()) {
     return Result<TextureAssetHandle>::Error(createdFileRes.getError());
   }
@@ -371,7 +372,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
 
 Result<TextureAssetHandle>
 HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
-                                  const Path &path) {
+                                  const String &uuid, const String &name) {
   auto *device = mRenderStorage.getDevice();
 
   rhi::TextureDescription cubemapDesc;
@@ -434,7 +435,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   }
 
   AssetData<TextureAsset> asset{};
-  asset.name = path.string();
+  asset.name = name;
   asset.size = TextureUtils::getBufferSizeFromLevels(unfilteredCubemap.levels);
   asset.data.type = TextureAssetType::Cubemap;
   asset.data.width = unfilteredCubemap.levels.at(0).width;
@@ -450,7 +451,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
       CubemapSides, asset.data.levels, asset.data.data.data());
   device->destroyTexture(specularCubemap);
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createTextureFromAsset(asset, uuid);
   if (createdFileRes.hasError()) {
     return Result<TextureAssetHandle>::Error(createdFileRes.getError());
   }

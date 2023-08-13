@@ -5,17 +5,38 @@
 
 #include "liquid-tests/Testing.h"
 
-class AssetCacheTest : public ::testing::Test {
-public:
-  AssetCacheTest() : cache(FixturesPath) {}
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-  liquid::AssetCache cache;
+class AssetCacheLuaScriptTest : public AssetCacheTestBase {
+public:
+  liquid::Result<liquid::LuaScriptAssetHandle>
+  loadFromSource(liquid::Path sourcePath) {
+    auto cachePath = cache.createLuaScriptFromSource(sourcePath, "");
+
+    return cache.loadLuaScriptFromFile(cachePath.getData());
+  }
 };
 
-using AssetCacheDeathTest = AssetCacheTest;
+using AssetCacheLuaScriptDeathTest = AssetCacheLuaScriptTest;
 
-TEST_F(AssetCacheTest, ReturnsErrorIfFileCannotBeOpened) {
-  auto scriptPath = FixturesPath / "non-existent-script.lua";
+TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
+  auto scriptPath = FixturesPath / "script-asset-valid.lua";
+
+  auto filePath = cache.createLuaScriptFromSource(scriptPath, "");
+  EXPECT_TRUE(filePath.hasData());
+  EXPECT_FALSE(filePath.hasError());
+  EXPECT_FALSE(filePath.hasWarnings());
+
+  EXPECT_EQ(filePath.getData().filename().string().size(), 38);
+
+  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+
+  EXPECT_EQ(meta.type, liquid::AssetType::LuaScript);
+  EXPECT_EQ(meta.name, "script-asset-valid.lua");
+}
+
+TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfFileCannotBeOpened) {
+  auto scriptPath = CachePath / "non-existent-script.asset";
 
   auto result = cache.loadLuaScriptFromFile(scriptPath);
   EXPECT_TRUE(result.hasError());
@@ -23,56 +44,57 @@ TEST_F(AssetCacheTest, ReturnsErrorIfFileCannotBeOpened) {
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest, ReturnsErrorIfScriptHasNoStartFunction) {
+TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasNoStartFunction) {
   auto scriptPath = FixturesPath / "script-asset-no-start.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest, ReturnsErrorIfScriptHasNoUpdateFunction) {
+TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasNoUpdateFunction) {
   auto scriptPath = FixturesPath / "script-asset-no-update.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest, ReturnsErrorIfScriptHasSyntaxError) {
+TEST_F(AssetCacheLuaScriptTest, ReturnsErrorIfScriptHasSyntaxError) {
   auto scriptPath = FixturesPath / "script-asset-invalid-syntax.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest,
+TEST_F(AssetCacheLuaScriptTest,
        ReturnsErrorIfScriptRegistersMultipleVariablesWithTheSameName) {
   auto scriptPath = FixturesPath / "script-asset-duplicate-var-names.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest, ReturnsErrorIfScriptRegistersVariablesWithInvalidTypes) {
+TEST_F(AssetCacheLuaScriptTest,
+       ReturnsErrorIfScriptRegistersVariablesWithInvalidTypes) {
   auto scriptPath = FixturesPath / "script-asset-invalid-var-type.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
 }
 
-TEST_F(AssetCacheTest, LoadsLuaScriptIntoRegistry) {
+TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   auto scriptPath = FixturesPath / "script-asset-valid.lua";
 
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+  auto result = loadFromSource(scriptPath);
   EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_TRUE(result.hasData());
@@ -80,8 +102,8 @@ TEST_F(AssetCacheTest, LoadsLuaScriptIntoRegistry) {
   auto handle = result.getData();
 
   auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+  script.name = "script-asset-valid.lua";
   EXPECT_EQ(script.name, "script-asset-valid.lua");
-  EXPECT_EQ(script.path, cache.getAssetsPath() / script.name);
   EXPECT_EQ(script.type, liquid::AssetType::LuaScript);
   EXPECT_EQ(script.data.variables.size(), 2);
 
@@ -106,26 +128,25 @@ TEST_F(AssetCacheTest, LoadsLuaScriptIntoRegistry) {
   EXPECT_EQ(scriptContents, contents);
 }
 
-TEST_F(AssetCacheTest, UpdatesExistingLuaScriptIfHandleExists) {
-  // Load script and create handle
-  auto scriptPath = FixturesPath / "component-script.lua";
-  auto result = cache.loadLuaScriptFromFile(scriptPath);
+TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
+  auto filePath = cache.createLuaScriptFromSource(
+      FixturesPath / "component-script.lua", "");
+
+  auto result = cache.loadLuaScriptFromFile(filePath.getData());
   EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_TRUE(result.hasData());
 
   auto handle = result.getData();
 
-  // Load script to update the handle
-  auto scriptPath2 = FixturesPath / "component-script-2.lua";
-  cache.loadLuaScriptFromFile(scriptPath2, handle);
+  auto filePath2 = cache.createLuaScriptFromSource(
+      FixturesPath / "component-script-2.lua", "");
+  cache.loadLuaScriptFromFile(filePath2.getData(), handle);
 
-  auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
-  EXPECT_EQ(script.name, "component-script-2.lua");
-  EXPECT_EQ(script.path, cache.getAssetsPath() / script.name);
+  const auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
   EXPECT_EQ(script.type, liquid::AssetType::LuaScript);
 
-  std::ifstream file(scriptPath2);
+  std::ifstream file(script.path);
 
   EXPECT_TRUE(file.good());
 
@@ -141,10 +162,11 @@ TEST_F(AssetCacheTest, UpdatesExistingLuaScriptIfHandleExists) {
   EXPECT_EQ(scriptContents, contents);
 }
 
-TEST_F(AssetCacheDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
-  // Load script and create handle
-  auto scriptPath = FixturesPath / "script-asset-valid.lua";
-  EXPECT_DEATH(
-      cache.loadLuaScriptFromFile(scriptPath, liquid::LuaScriptAssetHandle{25}),
-      ".*");
+TEST_F(AssetCacheLuaScriptDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
+  auto filePath = cache.createLuaScriptFromSource(
+      FixturesPath / "script-asset-valid.lua", "");
+
+  EXPECT_DEATH(cache.loadLuaScriptFromFile(filePath.getData(),
+                                           liquid::LuaScriptAssetHandle{25}),
+               ".*");
 }

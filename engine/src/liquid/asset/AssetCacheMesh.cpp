@@ -9,10 +9,10 @@
 
 namespace liquid {
 
-Result<Path>
-AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
-  String extension = ".lqmesh";
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
+Result<Path> AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset,
+                                             const String &uuid) {
+  auto assetPath = createAssetPath(uuid);
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -22,10 +22,9 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 
   AssetFileHeader header{};
   header.type = AssetType::Mesh;
-  header.version = createVersion(0, 1);
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  file.write(header);
 
   auto numGeometries = static_cast<uint32_t>(asset.data.geometries.size());
   file.write(numGeometries);
@@ -59,7 +58,7 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
     file.write(geometry.indices);
 
     auto materialPath =
-        getAssetRelativePath(mRegistry.getMaterials(), geometry.material);
+        getAssetUuid(mRegistry.getMaterials(), geometry.material);
     file.write(materialPath);
   }
 
@@ -68,14 +67,15 @@ AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
 
 Result<MeshAssetHandle>
 AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
-                                        const Path &filePath) {
+                                        const Path &filePath,
+                                        const AssetFileHeader &header) {
   std::vector<String> warnings;
 
   AssetData<MeshAsset> mesh{};
+  mesh.name = header.name;
   mesh.path = filePath;
-  mesh.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  mesh.name = mesh.relativePath.string();
   mesh.type = AssetType::Mesh;
+  mesh.uuid = filePath.stem().string();
 
   uint32_t numGeometries = 0;
   stream.read(numGeometries);
@@ -137,10 +137,10 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
 
-    String materialPathStr;
-    stream.read(materialPathStr);
+    String materialPath;
+    stream.read(materialPath);
 
-    const auto &res = getOrLoadMaterialFromPath(materialPathStr);
+    const auto &res = getOrLoadMaterialFromUuid(materialPath);
     if (res.hasData()) {
       mesh.data.geometries.at(i).material = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -157,19 +157,19 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
 Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
-  const auto &result = checkAssetFile(stream, filePath, AssetType::Mesh);
-  if (result.hasError()) {
-    return Result<MeshAssetHandle>::Error(result.getError());
+  const auto &header = checkAssetFile(stream, filePath, AssetType::Mesh);
+  if (header.hasError()) {
+    return Result<MeshAssetHandle>::Error(header.getError());
   }
 
-  return loadMeshDataFromInputStream(stream, filePath);
+  return loadMeshDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<Path> AssetCache::createSkinnedMeshFromAsset(
-    const AssetData<SkinnedMeshAsset> &asset) {
+Result<Path>
+AssetCache::createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset,
+                                       const String &uuid) {
+  auto assetPath = createAssetPath(uuid);
 
-  String extension = ".lqmesh";
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -178,11 +178,10 @@ Result<Path> AssetCache::createSkinnedMeshFromAsset(
   }
 
   AssetFileHeader header{};
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
   header.type = AssetType::SkinnedMesh;
-  header.version = createVersion(0, 1);
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
+  file.write(header);
 
   auto numGeometries = static_cast<uint32_t>(asset.data.geometries.size());
   file.write(numGeometries);
@@ -221,9 +220,9 @@ Result<Path> AssetCache::createSkinnedMeshFromAsset(
     file.write(numIndices);
     file.write(geometry.indices);
 
-    auto materialPath =
-        getAssetRelativePath(mRegistry.getMaterials(), geometry.material);
-    file.write(materialPath);
+    auto materialUuid =
+        getAssetUuid(mRegistry.getMaterials(), geometry.material);
+    file.write(materialUuid);
   }
 
   return Result<Path>::Ok(assetPath);
@@ -231,14 +230,15 @@ Result<Path> AssetCache::createSkinnedMeshFromAsset(
 
 Result<SkinnedMeshAssetHandle>
 AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
-                                               const Path &filePath) {
+                                               const Path &filePath,
+                                               const AssetFileHeader &header) {
   std::vector<String> warnings;
 
   AssetData<SkinnedMeshAsset> mesh{};
+  mesh.name = header.name;
   mesh.path = filePath;
-  mesh.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  mesh.name = mesh.relativePath.string();
-  mesh.type = AssetType::Material;
+  mesh.type = AssetType::SkinnedMesh;
+  mesh.uuid = filePath.stem().string();
 
   uint32_t numGeometries = 0;
   stream.read(numGeometries);
@@ -313,9 +313,9 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
 
-    String materialPathStr;
-    stream.read(materialPathStr);
-    const auto &res = getOrLoadMaterialFromPath(materialPathStr);
+    String materialUuid;
+    stream.read(materialUuid);
+    const auto &res = getOrLoadMaterialFromUuid(materialUuid);
     if (res.hasData()) {
       mesh.data.geometries.at(i).material = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -338,41 +338,34 @@ AssetCache::loadSkinnedMeshFromFile(const Path &filePath) {
     return Result<SkinnedMeshAssetHandle>::Error(header.getError());
   }
 
-  return loadSkinnedMeshDataFromInputStream(stream, filePath);
+  return loadSkinnedMeshDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MeshAssetHandle>
-AssetCache::getOrLoadMeshFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getMeshes().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<MeshAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getMeshes().findHandleByUuid(uuid);
+  if (handle != MeshAssetHandle::Null) {
+    return Result<MeshAssetHandle>::Ok(handle);
   }
 
-  return loadMeshFromFile(fullPath);
+  return loadMeshFromFile(getPathFromUuid(uuid));
 }
 
 Result<SkinnedMeshAssetHandle>
-AssetCache::getOrLoadSkinnedMeshFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+AssetCache::getOrLoadSkinnedMeshFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getSkinnedMeshes().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<SkinnedMeshAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
+  if (handle != SkinnedMeshAssetHandle::Null) {
+    return Result<SkinnedMeshAssetHandle>::Ok(handle);
   }
 
-  return loadSkinnedMeshFromFile(fullPath);
+  return loadSkinnedMeshFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

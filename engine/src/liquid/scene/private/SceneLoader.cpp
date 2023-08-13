@@ -56,9 +56,9 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   mEntityDatabase.set<WorldTransform>(entity, {});
 
   if (node["components"]["sprite"]) {
-    auto path = Path(node["components"]["sprite"].as<String>(""));
+    auto uuid = node["components"]["sprite"].as<String>("");
 
-    auto handle = mAssetRegistry.getTextures().findHandleByRelativePath(path);
+    auto handle = mAssetRegistry.getTextures().findHandleByUuid(uuid);
 
     if (handle != TextureAssetHandle::Null) {
       mEntityDatabase.set<Sprite>(entity, {handle});
@@ -136,8 +136,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["mesh"]) {
-    auto path = Path(node["components"]["mesh"].as<String>(""));
-    auto handle = mAssetRegistry.getMeshes().findHandleByRelativePath(path);
+    auto uuid = node["components"]["mesh"].as<String>("");
+    auto handle = mAssetRegistry.getMeshes().findHandleByUuid(uuid);
 
     if (handle != MeshAssetHandle::Null) {
       mEntityDatabase.set<Mesh>(entity, {handle});
@@ -145,9 +145,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["skinnedMesh"]) {
-    auto path = Path(node["components"]["skinnedMesh"].as<String>(""));
-    auto handle =
-        mAssetRegistry.getSkinnedMeshes().findHandleByRelativePath(path);
+    auto uuid = node["components"]["skinnedMesh"].as<String>("");
+    auto handle = mAssetRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
 
     if (handle != SkinnedMeshAssetHandle::Null) {
       mEntityDatabase.set<SkinnedMesh>(entity, {handle});
@@ -155,8 +154,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["skeleton"]) {
-    auto path = Path(node["components"]["skeleton"].as<String>(""));
-    auto handle = mAssetRegistry.getSkeletons().findHandleByRelativePath(path);
+    auto uuid = node["components"]["skeleton"].as<String>("");
+    auto handle = mAssetRegistry.getSkeletons().findHandleByUuid(uuid);
 
     if (handle != SkeletonAssetHandle::Null) {
       const auto &skeleton =
@@ -186,8 +185,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       node["components"]["animator"].IsMap() &&
       node["components"]["animator"]["asset"]) {
     auto assetPath = node["components"]["animator"]["asset"].as<String>("");
-    auto handle =
-        mAssetRegistry.getAnimators().findHandleByRelativePath(assetPath);
+    auto handle = mAssetRegistry.getAnimators().findHandleByUuid(assetPath);
 
     if (handle != AnimatorAssetHandle::Null) {
       const auto &asset = mAssetRegistry.getAnimators().getAsset(handle);
@@ -303,9 +301,9 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["audio"] && node["components"]["audio"].IsMap()) {
-    auto path = node["components"]["audio"]["source"].as<String>("");
+    auto uuid = node["components"]["audio"]["source"].as<String>("");
 
-    auto handle = mAssetRegistry.getAudios().findHandleByRelativePath(path);
+    auto handle = mAssetRegistry.getAudios().findHandleByUuid(uuid);
 
     if (handle != AudioAssetHandle::Null) {
       mEntityDatabase.set<AudioSource>(entity, {handle});
@@ -314,11 +312,11 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 
   if (node["components"]["script"]) {
     Script script{};
-    String path;
+    String uuid;
     if (node["components"]["script"].IsScalar()) {
-      path = node["components"]["script"].as<String>("");
+      uuid = node["components"]["script"].as<String>("");
     } else if (node["components"]["script"].IsMap()) {
-      path = node["components"]["script"]["asset"].as<String>("");
+      uuid = node["components"]["script"]["asset"].as<String>("");
 
       if (node["components"]["script"]["variables"] &&
           node["components"]["script"]["variables"].IsMap()) {
@@ -333,8 +331,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
           if (type == "string") {
             script.variables.insert_or_assign(name, value);
           } else if (type == "prefab") {
-            auto handle =
-                mAssetRegistry.getPrefabs().findHandleByRelativePath(value);
+            auto handle = mAssetRegistry.getPrefabs().findHandleByUuid(value);
             if (handle != PrefabAssetHandle::Null) {
               script.variables.insert_or_assign(name, handle);
             }
@@ -343,8 +340,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       }
     }
 
-    script.handle =
-        mAssetRegistry.getLuaScripts().findHandleByRelativePath(path);
+    script.handle = mAssetRegistry.getLuaScripts().findHandleByUuid(uuid);
 
     if (script.handle != LuaScriptAssetHandle::Null) {
       mEntityDatabase.set(entity, script);
@@ -352,8 +348,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   if (node["components"]["text"] && node["components"]["text"].IsMap()) {
-    auto path = node["components"]["text"]["font"].as<String>("");
-    auto handle = mAssetRegistry.getFonts().findHandleByRelativePath(path);
+    auto uuid = node["components"]["text"]["font"].as<String>("");
+    auto handle = mAssetRegistry.getFonts().findHandleByUuid(uuid);
 
     Text textComponent{};
     textComponent.font = handle;

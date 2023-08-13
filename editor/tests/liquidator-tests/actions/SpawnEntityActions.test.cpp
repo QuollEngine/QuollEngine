@@ -308,7 +308,7 @@ using SpawnSpriteAtViewActionTest = ActionTestBase;
 
 TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
   liquid::AssetData<liquid::TextureAsset> data{};
-  data.relativePath = liquid::Path("test-path") / "my-texture.ktx2";
+  data.name = "my-texture";
   data.data.deviceHandle = liquid::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 

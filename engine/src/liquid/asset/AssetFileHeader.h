@@ -13,14 +13,19 @@ static constexpr size_t AssetFileMagicLength = 11;
  */
 struct AssetFileHeader {
   /**
-   * Magic to identify the file
+   * Magic constant
    */
-  const char *magic = "LQASSETFILE";
+  static constexpr const char *MagicConstant = "LQASSETFILE";
 
   /**
-   * Asset version
+   * Magic value
    */
-  uint64_t version = 0;
+  String magic;
+
+  /**
+   * Asset name
+   */
+  String name;
 
   /**
    * Asset type

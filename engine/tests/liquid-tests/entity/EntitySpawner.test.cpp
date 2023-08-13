@@ -261,7 +261,8 @@ TEST_F(
     EntitySpawnerTest,
     SpawnPrefabWrapsAllSpawnedEntitiesInAParentIfPrefabHasMoreThanOneRootEntity) {
   liquid::AssetData<liquid::PrefabAsset> asset{};
-  asset.relativePath = liquid::Path("my-path") / "my-prefab.lqprefab";
+  asset.uuid = "231231231";
+  asset.name = "my-prefab";
 
   {
     liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
@@ -333,7 +334,8 @@ TEST_F(EntitySpawnerTest,
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
   liquid::AssetData<liquid::TextureAsset> asset{};
-  asset.relativePath = liquid::Path("my-path") / "my-sprite.png";
+  asset.uuid = "121311231";
+  asset.name = "my-sprite";
   asset.data.deviceHandle = liquid::rhi::TextureHandle{25};
   auto assetHandle = assetRegistry.getTextures().addAsset(asset);
 

@@ -73,14 +73,14 @@ public:
   }
 
   /**
-   * @brief Find handle by relative path
+   * @brief Find asset handle by uuid
    *
-   * @param path Relative path
+   * @param uuid Asset uuid
    * @return Handle
    */
-  inline THandle findHandleByRelativePath(const Path &path) const {
+  inline THandle findHandleByUuid(const String &uuid) const {
     for (auto &[handle, data] : mAssets) {
-      if (data.relativePath == path) {
+      if (data.uuid == uuid) {
         return handle;
       }
     }

@@ -7,16 +7,19 @@ namespace liquid::editor {
 
 void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
-  std::map<uint32_t, std::vector<AnimationAssetHandle>> nodeAnimationMap;
-  std::map<uint32_t, std::vector<AnimationAssetHandle>> skinAnimationMap;
+  std::map<uint32_t, std::vector<std::pair<AnimationAssetHandle, String>>>
+      nodeAnimationMap;
+  std::map<uint32_t, std::vector<std::pair<AnimationAssetHandle, String>>>
+      skinAnimationMap;
 
   for (size_t i = 0; i < model.animations.size(); ++i) {
     const auto &gltfAnimation = model.animations.at(i);
 
-    String animationName = "Animation " + gltfAnimation.name;
+    auto assetName = gltfAnimation.name.empty()
+                         ? "animation" + std::to_string(i)
+                         : gltfAnimation.name;
 
     struct SamplerInfo {
       std::vector<float> times;
@@ -37,28 +40,28 @@ void loadAnimations(GLTFImportData &importData) {
       const auto &output = getBufferMetaForAccessor(model, sampler.output);
 
       if (input.accessor.type != TINYGLTF_TYPE_SCALAR) {
-        importData.warnings.push_back(animationName +
+        importData.warnings.push_back(assetName +
                                       " skipped because it has invalid data");
         animationValid = false;
         continue;
       }
 
       if (input.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        importData.warnings.push_back(animationName +
+        importData.warnings.push_back(assetName +
                                       " skipped because it has invalid data");
         animationValid = false;
         continue;
       }
 
       if (input.accessor.count != output.accessor.count) {
-        importData.warnings.push_back(animationName +
+        importData.warnings.push_back(assetName +
                                       " skipped because it has invalid data");
         animationValid = true;
         continue;
       }
 
       if (output.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
-        importData.warnings.push_back(animationName +
+        importData.warnings.push_back(assetName +
                                       " skipped because it has invalid data");
         animationValid = true;
         continue;
@@ -117,12 +120,8 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    auto assetName = gltfAnimation.name.empty()
-                         ? "animation" + std::to_string(i)
-                         : gltfAnimation.name;
-
     AssetData<AnimationAsset> animation;
-    animation.name = targetPath.string() + "/" + assetName;
+    animation.name = getGLTFAssetName(importData, assetName);
     animation.data.time = maxTime;
 
     int32_t targetNode = -1;
@@ -173,13 +172,13 @@ void loadAnimations(GLTFImportData &importData) {
         targetNode = channel.target_node;
       } else if (targetNode != -1 && targetSkin != -1) {
         importData.warnings.push_back(
-            animationName +
+            assetName +
             " skipped because a channels points to both skin and node");
         animationValid = false;
         continue;
       } else if (targetNode != -1 && targetNode != channel.target_node) {
         importData.warnings.push_back(
-            animationName +
+            assetName +
             " skipped because a channel points to a different target node");
         animationValid = false;
         continue;
@@ -203,14 +202,20 @@ void loadAnimations(GLTFImportData &importData) {
 
     if (targetNode == -1 && targetSkin == -1) {
       importData.warnings.push_back(
-          animationName +
+          assetName +
           " skipped because it does not have a target node or skin");
       animationValid = false;
       continue;
     }
 
-    auto filePath = assetCache.createAnimationFromAsset(animation);
+    auto filePath = assetCache.createAnimationFromAsset(
+        animation, getUUID(importData, assetName));
     auto handle = assetCache.loadAnimationFromFile(filePath.getData());
+    importData.outputUuids.insert_or_assign(assetName,
+                                            assetCache.getRegistry()
+                                                .getAnimations()
+                                                .getAsset(handle.getData())
+                                                .uuid);
 
     if (!animationValid) {
       continue;
@@ -220,28 +225,23 @@ void loadAnimations(GLTFImportData &importData) {
       if (skinAnimationMap.find(targetSkin) == skinAnimationMap.end()) {
         skinAnimationMap.insert({static_cast<uint32_t>(targetSkin), {}});
       }
-      skinAnimationMap.at(targetSkin).push_back(handle.getData());
+      skinAnimationMap.at(targetSkin).push_back({handle.getData(), assetName});
     } else {
       if (nodeAnimationMap.find(targetSkin) == nodeAnimationMap.end()) {
         nodeAnimationMap.insert({static_cast<uint32_t>(targetNode), {}});
       }
-      nodeAnimationMap.at(targetNode).push_back(handle.getData());
+      nodeAnimationMap.at(targetNode).push_back({handle.getData(), assetName});
     }
   }
 
   for (auto &[skin, animations] : skinAnimationMap) {
-    AssetData<AnimatorAsset> asset{};
-    asset.relativePath =
-        (targetPath / ("animator-skin-" + std::to_string(skin)))
-            .replace_extension("animator");
+    auto animatorName = "animator-skin-" + std::to_string(skin);
 
-    for (auto handle : animations) {
+    AssetData<AnimatorAsset> asset{};
+    asset.name = asset.name = getGLTFAssetName(importData, animatorName);
+    for (auto [handle, assetName] : animations) {
       AnimationState state{};
-      state.name = assetCache.getRegistry()
-                       .getAnimations()
-                       .getAsset(handle)
-                       .relativePath.stem()
-                       .string();
+      state.name = assetName;
 
       state.animation = handle;
       asset.data.states.push_back(state);
@@ -263,26 +263,28 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    auto path = assetCache.createAnimatorFromAsset(asset);
+    auto path = assetCache.createAnimatorFromAsset(
+        asset, getUUID(importData, animatorName));
     auto handle = assetCache.loadAnimatorFromFile(path.getData());
     importData.animations.skinAnimatorMap.insert_or_assign(skin,
                                                            handle.getData());
+
+    importData.outputUuids.insert_or_assign(animatorName,
+                                            assetCache.getRegistry()
+                                                .getAnimators()
+                                                .getAsset(handle.getData())
+                                                .uuid);
   }
 
   for (auto &[node, animations] : nodeAnimationMap) {
+    auto animatorName = "animator-node-" + std::to_string(node);
+
     AssetData<AnimatorAsset> asset{};
-    asset.relativePath =
-        (targetPath / ("animator-node-" + std::to_string(node)))
-            .replace_extension("animator");
+    asset.name = asset.name = getGLTFAssetName(importData, animatorName);
 
-    for (auto handle : animations) {
+    for (auto [handle, assetName] : animations) {
       AnimationState state{};
-      state.name = assetCache.getRegistry()
-                       .getAnimations()
-                       .getAsset(handle)
-                       .relativePath.stem()
-                       .string();
-
+      state.name = assetName;
       state.animation = handle;
       asset.data.states.push_back(state);
     }
@@ -303,10 +305,16 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    auto path = assetCache.createAnimatorFromAsset(asset);
+    auto path = assetCache.createAnimatorFromAsset(
+        asset, getUUID(importData, animatorName));
     auto handle = assetCache.loadAnimatorFromFile(path.getData());
-    importData.animations.skinAnimatorMap.insert_or_assign(node,
+    importData.animations.nodeAnimatorMap.insert_or_assign(node,
                                                            handle.getData());
+    importData.outputUuids.insert_or_assign(animatorName,
+                                            assetCache.getRegistry()
+                                                .getAnimators()
+                                                .getAsset(handle.getData())
+                                                .uuid);
   }
 }
 

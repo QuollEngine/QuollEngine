@@ -7,11 +7,10 @@
 #include "liquid/asset/InputBinaryStream.h"
 
 #include "liquid-tests/Testing.h"
+#include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-class AssetCacheTest : public ::testing::Test {
+class AssetCachePrefabTest : public AssetCacheTestBase {
 public:
-  AssetCacheTest() : cache(FixturesPath) {}
-
   liquid::AssetData<liquid::PrefabAsset> createPrefabAsset() {
     liquid::AssetData<liquid::PrefabAsset> asset;
     asset.name = "test-prefab0";
@@ -69,8 +68,7 @@ public:
 
     for (uint32_t i = 0; i < numMeshes; ++i) {
       liquid::AssetData<liquid::MeshAsset> mesh;
-      mesh.path =
-          FixturesPath / ("meshes/mesh-" + std::to_string(i) + ".lqmesh");
+      mesh.uuid = "mesh-" + std::to_string(i);
       auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
       asset.data.meshes.push_back({i, handle});
     }
@@ -85,8 +83,7 @@ public:
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkinnedMeshAsset> mesh;
-      mesh.path =
-          FixturesPath / ("meshes/smesh-" + std::to_string(i) + ".lqmesh");
+      mesh.uuid = "smesh-" + std::to_string(i);
       auto handle = cache.getRegistry().getSkinnedMeshes().addAsset(mesh);
       asset.data.skinnedMeshes.push_back({i, handle});
     }
@@ -101,8 +98,7 @@ public:
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
       liquid::AssetData<liquid::SkeletonAsset> skeleton;
-      skeleton.path =
-          FixturesPath / ("skeletons/skel-" + std::to_string(i) + ".lqskel");
+      skeleton.uuid = "skel-" + std::to_string(i);
       auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
       asset.data.skeletons.push_back({i, handle});
     }
@@ -117,16 +113,15 @@ public:
 
     for (uint32_t i = 0; i < numAnimations; ++i) {
       liquid::AssetData<liquid::AnimationAsset> animation;
-      animation.path =
-          FixturesPath / ("skeletons/anim-" + std::to_string(i) + ".lqanim");
+      animation.uuid = "animation-" + std::to_string(i);
+
       auto handle = cache.getRegistry().getAnimations().addAsset(animation);
       asset.data.animations.push_back(handle);
     }
 
     for (uint32_t i = 0; i < numAnimators; ++i) {
       liquid::AssetData<liquid::AnimatorAsset> animator;
-      animator.path = FixturesPath /
-                      ("skeletons/animator-" + std::to_string(i) + ".animator");
+      animator.uuid = "animator-" + std::to_string(i);
       auto handle = cache.getRegistry().getAnimators().addAsset(animator);
       asset.data.animators.push_back({i, handle});
     }
@@ -142,23 +137,23 @@ public:
     return asset;
   }
 
-  liquid::AssetCache cache;
+  void SetUp() override {
+    AssetCacheTestBase::SetUp();
+    std::filesystem::copy(FixturesPath / "1x1-2d.ktx", CachePath / "tex.asset");
+  }
 };
 
-TEST_F(AssetCacheTest, CreatesPrefabFile) {
+TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   auto asset = createPrefabAsset();
 
-  auto filePath = cache.createPrefabFromAsset(asset);
+  auto filePath = cache.createPrefabFromAsset(asset, "");
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
   liquid::AssetFileHeader header;
+  file.read(header);
   liquid::String magic(liquid::AssetFileMagicLength, '$');
-  file.read(magic.data(), magic.length());
-  file.read(header.version);
-  file.read(header.type);
-  EXPECT_EQ(magic, header.magic);
-  EXPECT_EQ(header.version, liquid::createVersion(0, 1));
+  EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.type, liquid::AssetType::Prefab);
 
   std::vector<liquid::String> actualMeshes;
@@ -172,12 +167,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     file.read(actualMeshes);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto expectedString =
-          std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    FixturesPath)
-              .string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
+      auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualMeshes.at(i));
     }
   }
@@ -193,12 +183,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     file.read(actualSkinnedMeshes);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto expectedString =
-          std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    FixturesPath)
-              .string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
+      auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualSkinnedMeshes.at(i));
     }
   }
@@ -214,12 +199,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     file.read(actualSkeletons);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto expectedString =
-          std::filesystem::relative(map.getAsset(expected.at(i).value).path,
-                                    FixturesPath)
-              .string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
+      auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualSkeletons.at(i));
     }
   }
@@ -236,12 +216,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto animation = expected.at(i);
-
-      auto expectedString =
-          std::filesystem::relative(map.getAsset(animation).path, FixturesPath)
-              .string();
-
+      auto expectedString = map.getAsset(expected.at(i)).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -258,13 +233,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
     file.read(actual);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      uint32_t entityId = (i / 3);
-      auto animation = expected.at(i).value;
-
-      auto expectedString =
-          std::filesystem::relative(map.getAsset(animation).path, FixturesPath)
-              .string();
-
+      auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actual.at(i));
     }
   }
@@ -328,11 +297,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.meshes.at(i).value);
 
-      auto expectedString =
-          std::filesystem::relative(expected.path, FixturesPath).string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
-      EXPECT_EQ(expectedString, actualMeshes.at(meshIndex));
+      EXPECT_EQ(expected.uuid, actualMeshes.at(meshIndex));
     }
   }
 
@@ -352,11 +317,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.skinnedMeshes.at(i).value);
 
-      auto expectedString =
-          std::filesystem::relative(expected.path, FixturesPath).string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
-      EXPECT_EQ(expectedString, actualSkinnedMeshes.at(meshIndex));
+      EXPECT_EQ(expected.uuid, actualSkinnedMeshes.at(meshIndex));
     }
   }
 
@@ -376,11 +337,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.skeletons.at(i).value);
 
-      auto expectedString =
-          std::filesystem::relative(expected.path, FixturesPath).string();
-      std::replace(expectedString.begin(), expectedString.end(), '\\', '/');
-
-      EXPECT_EQ(expectedString, actualSkeletons.at(skeletonIndex));
+      EXPECT_EQ(expected.uuid, actualSkeletons.at(skeletonIndex));
     }
   }
 
@@ -396,10 +353,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.animations.at(i));
 
-      auto expectedString =
-          std::filesystem::relative(expected.path, FixturesPath).string();
-
-      EXPECT_EQ(expectedString, actualAnimations.at(animatorIndex));
+      EXPECT_EQ(expected.uuid, actualAnimations.at(animatorIndex));
     }
   }
 
@@ -419,10 +373,7 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
 
       auto &expected = map.getAsset(asset.data.animators.at(i).value);
 
-      auto expectedString =
-          std::filesystem::relative(expected.path, FixturesPath).string();
-
-      EXPECT_EQ(expectedString, actualAnimators.at(animatorIndex));
+      EXPECT_EQ(expected.uuid, actualAnimators.at(animatorIndex));
     }
   }
 
@@ -473,10 +424,10 @@ TEST_F(AssetCacheTest, CreatesPrefabFile) {
       filePath.getData().replace_extension("assetmeta")));
 }
 
-TEST_F(AssetCacheTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
+TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
   liquid::AssetData<liquid::PrefabAsset> asset;
-  asset.name = "test-prefab0";
-  auto filePath = cache.createPrefabFromAsset(asset);
+
+  auto filePath = cache.createPrefabFromAsset(asset, "");
 
   auto res = cache.loadPrefabFromFile(filePath.getData());
   EXPECT_TRUE(res.hasError());
@@ -484,13 +435,15 @@ TEST_F(AssetCacheTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
   EXPECT_FALSE(res.hasWarnings());
 }
 
-TEST_F(AssetCacheTest, LoadsPrefabFile) {
+TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
-  auto filePath = cache.createPrefabFromAsset(asset);
+  auto filePath = cache.createPrefabFromAsset(asset, "");
   auto handle = cache.loadPrefabFromFile(filePath.getData());
   EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Null);
+  EXPECT_FALSE(handle.hasWarnings());
 
   auto &prefab = cache.getRegistry().getPrefabs().getAsset(handle.getData());
+  EXPECT_EQ(prefab.name, asset.name);
 
   EXPECT_EQ(asset.data.transforms.size(), prefab.data.transforms.size());
   for (size_t i = 0; i < prefab.data.transforms.size(); ++i) {
@@ -577,46 +530,50 @@ TEST_F(AssetCacheTest, LoadsPrefabFile) {
   }
 }
 
-TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
+TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
-  auto textureHandle = cache.loadTextureFromFile(FixturesPath / "1x1-2d.ktx");
+  auto tempTextureHandle =
+      cache.loadTextureFromFile(CachePath / "tex.asset").getData();
+  auto tempTextureAsset =
+      cache.getRegistry().getTextures().getAsset(tempTextureHandle);
+  cache.getRegistry().getTextures().deleteAsset(tempTextureHandle);
+
+  auto texturePath =
+      cache.createTextureFromAsset(tempTextureAsset, "").getData();
+  auto textureHandle = cache.loadTextureFromFile(texturePath);
 
   // Create material
   liquid::AssetData<liquid::MaterialAsset> materialData{};
-  materialData.name = "test-prefab-mesh-material";
   materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = cache.createMaterialFromAsset(materialData);
-  auto materialHandle = cache.loadMaterialFromFile(materialPath.getData());
+  auto materialPath = cache.createMaterialFromAsset(materialData, "").getData();
+  auto materialHandle = cache.loadMaterialFromFile(materialPath);
 
   // Create mesh
   liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
-  meshData.name = "test-prefab-mesh";
   liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
   geometry.material = materialHandle.getData();
   geometry.vertices.push_back({1.0f});
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
-  auto meshPath = cache.createSkinnedMeshFromAsset(meshData);
-  auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath.getData());
+  auto meshPath = cache.createSkinnedMeshFromAsset(meshData, "").getData();
+  auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath);
 
   // Create skeleton
   liquid::AssetData<liquid::SkeletonAsset> skeletonData{};
-  skeletonData.name = "test-prefab-skeleton";
-  auto skeletonPath = cache.createSkeletonFromAsset(skeletonData);
-  auto skeletonHandle = cache.loadSkeletonFromFile(skeletonPath.getData());
+  auto skeletonPath = cache.createSkeletonFromAsset(skeletonData, "").getData();
+  auto skeletonHandle = cache.loadSkeletonFromFile(skeletonPath);
 
   // Create animation
   liquid::AssetData<liquid::AnimationAsset> animationData{};
-  animationData.name = "test-prefab-animation";
   animationData.data.time = 2.5;
-  auto animationPath = cache.createAnimationFromAsset(animationData).getData();
+  auto animationPath =
+      cache.createAnimationFromAsset(animationData, "").getData();
   auto animationHandle = cache.loadAnimationFromFile(animationPath);
 
   // Create animator
   liquid::AssetData<liquid::AnimatorAsset> animatorData{};
-  animatorData.relativePath = "test-prefab-animator.animator";
   animatorData.data.states.push_back({"INITIAL"});
-  auto animatorPath = cache.createAnimatorFromAsset(animatorData).getData();
+  auto animatorPath = cache.createAnimatorFromAsset(animatorData, "").getData();
   auto animatorHandle = cache.loadAnimatorFromFile(animatorPath);
 
   // Create prefab
@@ -626,7 +583,7 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
   prefabData.data.animations.push_back(animationHandle.getData());
   prefabData.data.animators.push_back({0U, animatorHandle.getData()});
 
-  auto prefabPath = cache.createPrefabFromAsset(prefabData);
+  auto prefabPath = cache.createPrefabFromAsset(prefabData, "");
 
   // Delete all existing assets
   cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
@@ -647,38 +604,40 @@ TEST_F(AssetCacheTest, LoadsPrefabWithMeshAnimationSkeleton) {
             liquid::SkinnedMeshAssetHandle::Null);
   auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(
       newPrefab.data.skinnedMeshes.at(0).value);
+  EXPECT_EQ(newMesh.path, meshPath);
   EXPECT_NE(newMesh.data.geometries.at(0).material,
             liquid::MaterialAssetHandle::Null);
 
   // Validate material
   auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
       newMesh.data.geometries.at(0).material);
+  EXPECT_EQ(newMaterial.path, materialPath);
   EXPECT_NE(newMaterial.data.baseColorTexture,
             liquid::TextureAssetHandle::Null);
 
   // Validate texture
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.name, "1x1-2d.ktx");
+  EXPECT_EQ(newTexture.path, texturePath);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
             liquid::SkeletonAssetHandle::Null);
   auto &newSkeleton = cache.getRegistry().getSkeletons().getAsset(
       newPrefab.data.skeletons.at(0).value);
-  EXPECT_EQ(newSkeleton.name, "test-prefab-skeleton.lqskel");
+  EXPECT_EQ(newSkeleton.path, skeletonPath);
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
   EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Null);
   auto &newAnimation =
       cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
-  EXPECT_EQ(newAnimation.name, "test-prefab-animation.lqanim");
+  EXPECT_EQ(newAnimation.path, animationPath);
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
   EXPECT_NE(newAnimatorHandle, liquid::AnimatorAssetHandle::Null);
   auto &newAnimator =
       cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
-  EXPECT_EQ(newAnimator.relativePath, "test-prefab-animator.animator");
+  EXPECT_EQ(newAnimator.path, animatorPath);
 }

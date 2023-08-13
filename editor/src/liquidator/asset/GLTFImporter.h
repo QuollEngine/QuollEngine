@@ -25,12 +25,12 @@ public:
   /**
    * @brief Load GLTF from file
    *
-   * @param originalAssetPath Original asset path
-   * @param engineAssetPath Engine asset path
-   * @return Path to newly created prefab
+   * @param sourceAssetPath Source asset path
+   * @param uuids Existing asset uuids
+   * @return Uuids of newly created assets
    */
-  Result<Path> loadFromPath(const Path &originalAssetPath,
-                            const Path &engineAssetPath);
+  Result<UUIDMap> loadFromPath(const Path &sourceAssetPath,
+                               const UUIDMap &uuids);
 
   /**
    * @brief Save binary from ASCII gltf

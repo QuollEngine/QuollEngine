@@ -12,6 +12,12 @@
 
 namespace liquid::editor {
 
+static constexpr uint32_t ItemWidth = 90;
+static constexpr uint32_t ItemHeight = 100;
+static constexpr ImVec2 IconSize(80.0f, 80.0f);
+static constexpr float ImagePadding = ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
+static constexpr uint32_t TextWidth = ItemWidth - 8;
+
 /**
  * @brief Imgui text callback user data
  */
@@ -101,86 +107,20 @@ static EditorIcon getIconFromAssetType(AssetType type) {
 void AssetBrowser::render(WorkspaceContext &context) {
   auto &assetManager = context.assetManager;
 
-  static constexpr uint32_t ItemWidth = 90;
-  static constexpr uint32_t ItemHeight = 100;
-  static constexpr ImVec2 IconSize(80.0f, 80.0f);
-  static constexpr float ImagePadding =
-      ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
-  static constexpr uint32_t TextWidth = ItemWidth - 8;
+  if (mCurrentDirectory.empty()) {
+    setCurrentFetch(assetManager.getAssetsPath());
+  }
 
-  if (mDirectoryChanged) {
-    if (mContentsDirectory.empty()) {
-      mContentsDirectory = assetManager.getAssetsPath();
-      mAssetDirectory = assetManager.getAssetsPath();
-    }
+  if (mNeedsRefresh) {
     mEntries.clear();
-    for (auto &dirEntry :
-         std::filesystem::directory_iterator(mContentsDirectory)) {
-
-      bool isEngineDirectory = mContentsDirectory != mAssetDirectory;
-
-      if (isEngineDirectory & dirEntry.is_directory()) {
-        continue;
-      }
-
-      Entry entry;
-      entry.path = dirEntry.path();
-      const auto &engineAssetPath =
-          isEngineDirectory ? entry.path
-                            : assetManager.findEngineAssetPath(entry.path);
-      const auto &pair =
-          assetManager.getAssetRegistry().getAssetByPath(engineAssetPath);
-      entry.isDirectory = dirEntry.is_directory();
-      entry.assetType = pair.first;
-      entry.asset = pair.second;
-
-      if (isEngineDirectory && entry.assetType == AssetType::Prefab) {
-        continue;
-      }
-
-      entry.icon = entry.isDirectory ? EditorIcon::Directory
-                                     : getIconFromAssetType(entry.assetType);
-
-      entry.preview = IconRegistry::getIcon(entry.icon);
-
-      if (entry.assetType == AssetType::Texture) {
-        entry.preview =
-            assetManager.getAssetRegistry()
-                .getTextures()
-                .getAsset(static_cast<TextureAssetHandle>(pair.second))
-                .data.deviceHandle;
-      } else if (entry.assetType == AssetType::Environment) {
-        entry.preview =
-            assetManager.getAssetRegistry()
-                .getEnvironments()
-                .getAsset(static_cast<EnvironmentAssetHandle>(pair.second))
-                .preview;
-      }
-
-      entry.clippedName = entry.path.filename().stem().string();
-
-      String ellipsis = "..";
-      auto calculateTextWidth = [&ellipsis](Entry &entry) {
-        return ImGui::CalcTextSize((entry.clippedName + ellipsis).c_str()).x;
-      };
-
-      entry.textWidth = calculateTextWidth(entry);
-
-      if (ImGui::CalcTextSize(entry.clippedName.c_str()).x > TextWidth) {
-        bool changed = false;
-
-        while (calculateTextWidth(entry) > TextWidth) {
-          entry.clippedName.pop_back();
-        }
-
-        entry.textWidth = calculateTextWidth(entry);
-        entry.clippedName += ellipsis;
-      }
-
-      mEntries.push_back(entry);
+    if (const auto *path = std::get_if<Path>(&mCurrentFetch)) {
+      fetchAssetDirectory(*path, assetManager);
+    } else if (const auto *handle =
+                   std::get_if<PrefabAssetHandle>(&mCurrentFetch)) {
+      fetchPrefab(*handle, assetManager);
     }
 
-    mDirectoryChanged = false;
+    mNeedsRefresh = false;
   }
 
   if (auto _ = widgets::Window("Asset Browser")) {
@@ -190,14 +130,14 @@ void AssetBrowser::render(WorkspaceContext &context) {
     if (itemsPerRow == 0)
       itemsPerRow = 1;
 
-    auto relativePath = std::filesystem::relative(mAssetDirectory,
+    const auto &currentFetchPath = getCurrentFetchPath();
+
+    auto relativePath = std::filesystem::relative(currentFetchPath,
                                                   assetManager.getAssetsPath());
 
-    if (mAssetDirectory != assetManager.getAssetsPath()) {
+    if (currentFetchPath != assetManager.getAssetsPath()) {
       if (ImGui::Button("Back")) {
-        mAssetDirectory = mAssetDirectory.parent_path();
-        mContentsDirectory = mAssetDirectory;
-        mDirectoryChanged = true;
+        setCurrentFetch(currentFetchPath.parent_path());
       }
       ImGui::SameLine();
     }
@@ -234,9 +174,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
           // Double click opens the file/directory
           if (ImGui::IsMouseDoubleClicked(0)) {
             if (entry.isDirectory) {
-              mAssetDirectory = entry.path;
-              mContentsDirectory = entry.path;
-              mDirectoryChanged = true;
+              setCurrentFetch(entry.path);
             } else if (entry.assetType == AssetType::Prefab) {
               context.actionExecutor.execute<SpawnPrefabAtView>(
                   static_cast<PrefabAssetHandle>(entry.asset),
@@ -276,7 +214,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
         if (ImGui::IsItemHovered()) {
           ImGui::BeginTooltip();
-          ImGui::Text("%s", entry.path.filename().string().c_str());
+          ImGui::Text("%s", entry.name.c_str());
           ImGui::EndTooltip();
         }
 
@@ -287,12 +225,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
           if (ImGui::BeginPopup(id.c_str())) {
             if (ImGui::MenuItem("View contents")) {
-              auto relativePath = std::filesystem::relative(
-                  entry.path, assetManager.getAssetsPath());
-
-              mContentsDirectory = assetManager.getCachePath() / relativePath;
-              mAssetDirectory = entry.path;
-              mDirectoryChanged = true;
+              setCurrentFetch(static_cast<PrefabAssetHandle>(entry.asset));
             }
             ImGui::EndPopup();
           }
@@ -319,7 +252,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
           mInitialFocusSet = true;
         }
 
-        ImguiInputText("###StagingEntryName", mStagingEntry.clippedName);
+        ImguiInputText("###StagingEntryName", mStagingEntry.name);
 
         if (ImGui::IsItemDeactivated()) {
           handleCreateEntry(assetManager);
@@ -330,8 +263,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
 
     ImGui::EndTable();
 
-    // Show context menu if not inside prefab
-    if (mContentsDirectory == mAssetDirectory) {
+    if (std::get_if<Path>(&mCurrentFetch) != nullptr) {
       if (ImGui::BeginPopupContextWindow(
               "AssetBrowserPopup",
               ImGuiPopupFlags_NoOpenOverItems |
@@ -373,10 +305,10 @@ void AssetBrowser::render(WorkspaceContext &context) {
   mMaterialViewer.render(assetManager.getAssetRegistry());
 }
 
-void AssetBrowser::reload() { mDirectoryChanged = true; }
+void AssetBrowser::reload() { mNeedsRefresh = true; }
 
 void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
-  auto res = AssetLoader(assetManager).loadFromFileDialog(mAssetDirectory);
+  auto res = AssetLoader(assetManager).loadFromFileDialog(mCurrentDirectory);
 
   if (res.hasError()) {
     mStatusDialog.setTitle("Import failed");
@@ -402,8 +334,8 @@ void AssetBrowser::handleAssetImport(AssetManager &assetManager) {
 }
 
 void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
-  if (!mStagingEntry.clippedName.empty()) {
-    auto path = mAssetDirectory / mStagingEntry.clippedName;
+  if (!mStagingEntry.name.empty()) {
+    auto path = mCurrentDirectory / mStagingEntry.name;
     if (mStagingEntry.isDirectory) {
       assetManager.createDirectory(path);
     } else if (mStagingEntry.assetType == AssetType::LuaScript) {
@@ -414,22 +346,15 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
   }
 
   // Reset values and hide staging
-  mStagingEntry.clippedName = "";
+  mStagingEntry.name = "";
   mStagingEntry.isDirectory = false;
   mHasStagingEntry = false;
   mInitialFocusSet = false;
 
-  // Trigger directory refresh
-  mDirectoryChanged = true;
+  reload();
 }
 
 void AssetBrowser::renderEntry(const Entry &entry) {
-  static constexpr uint32_t ItemWidth = 90;
-  static constexpr uint32_t ItemHeight = 100;
-  static constexpr ImVec2 IconSize(80.0f, 80.0f);
-  static constexpr float ImagePadding =
-      ((ItemWidth * 1.0f) - IconSize.x) / 2.0f;
-  static constexpr uint32_t TextWidth = ItemWidth - 8;
 
   {
     float initialCursorPos = ImGui::GetCursorPosX();
@@ -443,9 +368,205 @@ void AssetBrowser::renderEntry(const Entry &entry) {
     const float centerPos =
         initialCursorPos + (ItemWidth * 1.0f - entry.textWidth) * 0.5f;
     ImGui::SetCursorPosX(centerPos);
-    ImGui::Text("%s", entry.clippedName.c_str());
+    ImGui::Text("%s", entry.truncatedName.c_str());
     ImGui::SetCursorPosX(initialCursorPos);
   }
+}
+
+void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
+  mCurrentDirectory = path;
+
+  for (auto &directoryEntry : std::filesystem::directory_iterator(path)) {
+    auto filePath = directoryEntry.path();
+    if (filePath.extension() == ".meta") {
+      continue;
+    }
+
+    const auto &engineAssetUuid = assetManager.findRootAssetUuid(filePath);
+    const auto &pair =
+        assetManager.getAssetRegistry().getAssetByUuid(engineAssetUuid);
+
+    Entry entry;
+    entry.isDirectory = directoryEntry.is_directory();
+    entry.path = filePath;
+    entry.name = filePath.filename().string();
+    entry.assetType = pair.first;
+    entry.asset = pair.second;
+
+    setDefaultProps(entry, assetManager.getAssetRegistry());
+    mEntries.push_back(entry);
+  }
+}
+
+void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
+                               AssetManager &assetManager) {
+  auto &assetRegistry = assetManager.getAssetRegistry();
+  const auto &prefab = assetRegistry.getPrefabs().getAsset(handle);
+  mPrefabDirectory = mCurrentDirectory / prefab.name;
+
+  auto prefabName = prefab.name + "/";
+
+  auto removePrefabName = [&prefabName](String name) {
+    auto index = name.find(prefabName);
+    if (index == 0) {
+      auto length = prefabName.length();
+      return name.substr(length);
+    }
+    return name;
+  };
+
+  auto createPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
+                               AssetMap<AssetHandle, AssetData> &map,
+                               AssetHandle handle) {
+    const auto &asset = map.getAsset(handle);
+    Entry entry;
+    entry.isDirectory = false;
+    entry.path = asset.path;
+    entry.name = removePrefabName(asset.name);
+    entry.assetType = asset.type;
+    entry.asset = static_cast<uint32_t>(handle);
+    setDefaultProps(entry, assetManager.getAssetRegistry());
+
+    return entry;
+  };
+
+  auto addTextureEntryIfExists = [&](TextureAssetHandle handle) {
+    if (handle != TextureAssetHandle::Null) {
+      mEntries.push_back(createPrefabEntry(
+          assetManager.getAssetRegistry().getTextures(), handle));
+    }
+  };
+
+  auto addMaterialEntryIfExists = [&](MaterialAssetHandle handle) {
+    if (handle != MaterialAssetHandle::Null) {
+      mEntries.push_back(
+          createPrefabEntry(assetRegistry.getMaterials(), handle));
+
+      const auto &material = assetRegistry.getMaterials().getAsset(handle);
+
+      addTextureEntryIfExists(material.data.baseColorTexture);
+      addTextureEntryIfExists(material.data.metallicRoughnessTexture);
+      addTextureEntryIfExists(material.data.normalTexture);
+      addTextureEntryIfExists(material.data.occlusionTexture);
+      addTextureEntryIfExists(material.data.emissiveTexture);
+    }
+  };
+
+  for (const auto &ref : prefab.data.meshes) {
+    const auto &asset = assetRegistry.getMeshes().getAsset(ref.value);
+
+    mEntries.push_back(createPrefabEntry(assetRegistry.getMeshes(), ref.value));
+
+    for (const auto &geometry : asset.data.geometries) {
+      addMaterialEntryIfExists(geometry.material);
+    }
+  }
+
+  for (const auto &ref : prefab.data.skinnedMeshes) {
+    const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(ref.value);
+
+    mEntries.push_back(
+        createPrefabEntry(assetRegistry.getSkinnedMeshes(), ref.value));
+
+    for (const auto &geometry : asset.data.geometries) {
+      addMaterialEntryIfExists(geometry.material);
+    }
+  }
+
+  for (const auto &ref : prefab.data.skeletons) {
+    const auto &asset = assetRegistry.getSkeletons().getAsset(ref.value);
+
+    Entry entry;
+    entry.isDirectory = false;
+    entry.path = asset.path;
+    entry.name = removePrefabName(asset.name);
+    entry.assetType = asset.type;
+    entry.asset = static_cast<uint32_t>(ref.value);
+
+    setDefaultProps(entry, assetManager.getAssetRegistry());
+    mEntries.push_back(entry);
+  }
+
+  for (const auto ref : prefab.data.animations) {
+    const auto &asset = assetRegistry.getAnimations().getAsset(ref);
+
+    Entry entry;
+    entry.isDirectory = false;
+    entry.path = asset.path;
+    entry.name = removePrefabName(asset.name);
+    entry.assetType = asset.type;
+    entry.asset = static_cast<uint32_t>(ref);
+
+    setDefaultProps(entry, assetManager.getAssetRegistry());
+    mEntries.push_back(entry);
+  }
+
+  for (const auto &ref : prefab.data.animators) {
+    const auto &asset = assetRegistry.getAnimators().getAsset(ref.value);
+
+    Entry entry;
+    entry.isDirectory = false;
+    entry.path = asset.path;
+    entry.name = removePrefabName(asset.name);
+    entry.assetType = asset.type;
+    entry.asset = static_cast<uint32_t>(ref.value);
+
+    setDefaultProps(entry, assetManager.getAssetRegistry());
+    mEntries.push_back(entry);
+  }
+}
+
+void AssetBrowser::setDefaultProps(Entry &entry, AssetRegistry &assetRegistry) {
+  // Name
+  String ellipsis = "..";
+  auto calculateTextWidth = [&ellipsis](const String &name) {
+    return ImGui::CalcTextSize((name + ellipsis).c_str()).x;
+  };
+
+  entry.textWidth = calculateTextWidth(entry.name);
+  entry.truncatedName = entry.name;
+
+  if (ImGui::CalcTextSize(entry.truncatedName.c_str()).x > TextWidth) {
+    bool changed = false;
+
+    while (calculateTextWidth(entry.truncatedName) > TextWidth) {
+      entry.truncatedName.pop_back();
+    }
+
+    entry.textWidth = calculateTextWidth(entry.truncatedName);
+    entry.truncatedName += ellipsis;
+  }
+
+  // Icon and preview
+  entry.icon = entry.isDirectory ? EditorIcon::Directory
+                                 : getIconFromAssetType(entry.assetType);
+
+  if (entry.assetType == AssetType::Texture) {
+    entry.preview = assetRegistry.getTextures()
+                        .getAsset(static_cast<TextureAssetHandle>(entry.asset))
+                        .data.deviceHandle;
+  } else if (entry.assetType == AssetType::Environment) {
+    entry.preview =
+        assetRegistry.getEnvironments()
+            .getAsset(static_cast<EnvironmentAssetHandle>(entry.asset))
+            .preview;
+  } else {
+    entry.preview = IconRegistry::getIcon(entry.icon);
+  }
+}
+
+void AssetBrowser::setCurrentFetch(
+    std::variant<Path, PrefabAssetHandle> fetch) {
+  mCurrentFetch = fetch;
+  reload();
+}
+
+const Path &AssetBrowser::getCurrentFetchPath() const {
+  if (std::get_if<PrefabAssetHandle>(&mCurrentFetch)) {
+    return mPrefabDirectory;
+  }
+
+  return mCurrentDirectory;
 }
 
 } // namespace liquid::editor

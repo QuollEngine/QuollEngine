@@ -8,47 +8,46 @@
 
 namespace liquid {
 
-Result<Path> AssetCache::createEnvironmentFromAsset(
-    const AssetData<EnvironmentAsset> &asset) {
-  auto irradianceMapPath = mRegistry.getTextures()
-                               .getAsset(asset.data.irradianceMap)
-                               .relativePath.string();
-  std::replace(irradianceMapPath.begin(), irradianceMapPath.end(), '\\', '/');
+Result<Path>
+AssetCache::createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset,
+                                       const String &uuid) {
+  auto irradianceMapUuid =
+      mRegistry.getTextures().getAsset(asset.data.irradianceMap).uuid;
 
-  auto specularMapPath = mRegistry.getTextures()
-                             .getAsset(asset.data.specularMap)
-                             .relativePath.string();
-  std::replace(specularMapPath.begin(), specularMapPath.end(), '\\', '/');
+  auto specularMapUuid =
+      mRegistry.getTextures().getAsset(asset.data.specularMap).uuid;
 
-  OutputBinaryStream stream(asset.path);
+  auto assetPath = createAssetPath(uuid);
+
+  OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};
   header.type = AssetType::Environment;
-  header.version = createVersion(0, 1);
-  stream.write(header.magic, AssetFileMagicLength);
-  stream.write(header.version);
-  stream.write(header.type);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  stream.write(header);
 
-  stream.write(irradianceMapPath);
-  stream.write(specularMapPath);
+  stream.write(irradianceMapUuid);
+  stream.write(specularMapUuid);
 
-  return Result<Path>::Ok(asset.path);
+  return Result<Path>::Ok(assetPath);
 }
 
 Result<EnvironmentAssetHandle>
 AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
-                                               const Path &filePath) {
-  String irradianceMapPath;
-  stream.read(irradianceMapPath);
+                                               const Path &filePath,
+                                               const AssetFileHeader &header) {
+  String irradianceMapUuid;
+  stream.read(irradianceMapUuid);
 
-  String specularMapPath;
-  stream.read(specularMapPath);
+  String specularMapUuid;
+  stream.read(specularMapUuid);
 
-  auto irradianceMapRes = getOrLoadTextureFromPath(irradianceMapPath);
+  auto irradianceMapRes = getOrLoadTextureFromUuid(irradianceMapUuid);
   if (irradianceMapRes.hasError()) {
     return Result<EnvironmentAssetHandle>::Error(irradianceMapRes.getError());
   }
 
-  auto specularMapRes = getOrLoadTextureFromPath(specularMapPath);
+  auto specularMapRes = getOrLoadTextureFromUuid(specularMapUuid);
   if (specularMapRes.hasError()) {
     mRegistry.getTextures().deleteAsset(irradianceMapRes.getData());
     return Result<EnvironmentAssetHandle>::Error(specularMapRes.getError());
@@ -56,8 +55,7 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
   AssetData<EnvironmentAsset> environment{};
   environment.path = filePath;
-  environment.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  environment.name = environment.relativePath.string();
+  environment.uuid = filePath.stem().string();
   environment.type = AssetType::Environment;
   environment.data.irradianceMap = irradianceMapRes.getData();
   environment.data.specularMap = specularMapRes.getData();
@@ -76,7 +74,7 @@ AssetCache::loadEnvironmentFromFile(const Path &filePath) {
     return Result<EnvironmentAssetHandle>::Error(header.getError());
   }
 
-  return loadEnvironmentDataFromInputStream(stream, filePath);
+  return loadEnvironmentDataFromInputStream(stream, filePath, header.getData());
 }
 
 } // namespace liquid

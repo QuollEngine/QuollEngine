@@ -18,7 +18,6 @@ static const liquid::Path FixturesPath = fs::current_path() / "fixtures";
 static const liquid::Path TempPath = fs::current_path() / "temp";
 static const liquid::Path InnerPathInAssets =
     AssetsPath / "inner-1" / "inner-2";
-static const liquid::Path InnerPathInCache = CachePath / "inner-1" / "inner-2";
 
 class AssetManagerTest : public ::testing::Test {
 public:
@@ -94,343 +93,173 @@ TEST_F(AssetManagerTest, CreatesAnimatorFileAndLoadsIt) {
   EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.animator"));
 }
 
+TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
+  fs::create_directories(InnerPathInAssets);
+
+  auto animatorPath = InnerPathInAssets / "test.animator";
+  auto metaPath = animatorPath;
+  metaPath.replace_extension("animator.meta");
+
+  auto sourcePath = manager.createAnimator(animatorPath).getData();
+  auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
+  EXPECT_EQ(engineUuidBefore.size(), 32);
+
+  std::filesystem::remove(
+      (manager.getCachePath() / engineUuidBefore).replace_extension("asset"));
+
+  manager.loadSourceIfChanged(sourcePath);
+
+  auto engineUuidAfter = manager.findRootAssetUuid(sourcePath);
+  EXPECT_EQ(engineUuidAfter.size(), 32);
+  EXPECT_EQ(engineUuidBefore, engineUuidAfter);
+}
+
+TEST_F(
+    AssetManagerTest,
+    ValidateAndPreloadDoesNotCreateFileWithNewUUIDIfFileContentsHaveChanged) {
+  liquid::rhi::MockRenderDevice device;
+  liquid::RenderStorage renderStorage(&device);
+
+  fs::create_directories(InnerPathInAssets);
+
+  auto animatorPath = InnerPathInAssets / "test.animator";
+  auto metaPath = animatorPath;
+  metaPath.replace_extension("animator.meta");
+
+  auto sourcePath = manager.createAnimator(animatorPath).getData();
+  auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
+  EXPECT_EQ(engineUuidBefore.size(), 32);
+
+  std::filesystem::remove(
+      (manager.getCachePath() / engineUuidBefore).replace_extension("asset"));
+
+  manager.validateAndPreloadAssets(renderStorage);
+
+  auto engineUuidAfter = manager.findRootAssetUuid(sourcePath);
+  EXPECT_EQ(engineUuidAfter.size(), 32);
+  EXPECT_EQ(engineUuidBefore, engineUuidAfter);
+}
+
 TEST_F(AssetManagerTest,
        ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
-  fs::create_directories(InnerPathInCache);
-
-  auto texturePath = InnerPathInCache / "test.ktx2";
-  auto textureHashPath = InnerPathInCache / "test.ktx2.lqhash";
-
-  auto engineAssetPathStr =
-      std::filesystem::relative(texturePath, manager.getCachePath()).string();
-
-  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
-
-  YAML::Node node;
-  node["engineAssetPath"] = engineAssetPathStr;
-
-  std::ofstream stream(textureHashPath);
-  stream << node;
-  stream.close();
+  auto texturePath = CachePath / "test.asset";
 
   liquid::rhi::MockRenderDevice device;
   liquid::RenderStorage renderStorage(&device);
 
   createEmptyFile(texturePath);
 
-  EXPECT_TRUE(fs::exists(textureHashPath));
   EXPECT_TRUE(fs::exists(texturePath));
 
   manager.validateAndPreloadAssets(renderStorage);
 
-  EXPECT_FALSE(fs::exists(textureHashPath));
   EXPECT_FALSE(fs::exists(texturePath));
 }
 
-TEST_F(AssetManagerTest,
-       ValidateAndPreloadDeletesPrefabDirectoryIfAssetFileDoesNotExist) {
-  auto assetDirPath = InnerPathInCache / "test-prefab";
-  auto assetPath = assetDirPath / "test.lqprefab";
-  auto dependentAssetPath = assetDirPath / "test.lqmesh ";
-  auto hashPath = InnerPathInCache / "test-prefab.lqhash";
-
-  fs::create_directories(assetDirPath);
-
-  auto engineAssetPathStr =
-      std::filesystem::relative(assetPath, manager.getCachePath()).string();
-
-  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
-
-  YAML::Node node;
-  node["engineAssetPath"] = engineAssetPathStr;
-
-  std::ofstream stream(hashPath);
-  stream << node;
-  stream.close();
-
-  createEmptyFile(assetPath);
-  createEmptyFile(dependentAssetPath);
-
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage(&device);
-
-  EXPECT_TRUE(fs::exists(assetPath));
-  EXPECT_TRUE(fs::exists(dependentAssetPath));
-  EXPECT_TRUE(fs::exists(hashPath));
-  EXPECT_TRUE(fs::exists(assetDirPath));
-
-  manager.validateAndPreloadAssets(renderStorage);
-
-  EXPECT_FALSE(fs::exists(assetPath));
-  EXPECT_FALSE(fs::exists(dependentAssetPath));
-  EXPECT_FALSE(fs::exists(hashPath));
-  EXPECT_FALSE(fs::exists(assetDirPath));
-}
-
-TEST_F(AssetManagerTest,
-       ValidateAndPreloadDeletesEnvironmentDirectoryIfAssetFileDoesNotExist) {
-  auto assetDirPath = InnerPathInCache / "test-env";
-  auto assetPath = assetDirPath / "test.lqenv";
-  auto dependentAssetPath = assetDirPath / "test.ktx2";
-  auto hashPath = InnerPathInCache / "test-env.lqhash";
-
-  fs::create_directories(assetDirPath);
-
-  auto engineAssetPathStr =
-      std::filesystem::relative(assetPath, manager.getCachePath()).string();
-
-  std::replace(engineAssetPathStr.begin(), engineAssetPathStr.end(), '\\', '/');
-
-  YAML::Node node;
-  node["engineAssetPath"] = engineAssetPathStr;
-
-  std::ofstream stream(hashPath);
-  stream << node;
-  stream.close();
-
-  createEmptyFile(assetPath);
-  createEmptyFile(dependentAssetPath);
-
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage(&device);
-
-  EXPECT_TRUE(fs::exists(assetPath));
-  EXPECT_TRUE(fs::exists(dependentAssetPath));
-  EXPECT_TRUE(fs::exists(hashPath));
-  EXPECT_TRUE(fs::exists(assetDirPath));
-
-  manager.validateAndPreloadAssets(renderStorage);
-
-  EXPECT_FALSE(fs::exists(assetPath));
-  EXPECT_FALSE(fs::exists(dependentAssetPath));
-  EXPECT_FALSE(fs::exists(hashPath));
-  EXPECT_FALSE(fs::exists(assetDirPath));
-}
-
 TEST_P(AssetTest, FailedImportDoesNotCreateAssetInCache) {
-  auto originalExtension = std::get<0>(GetParam());
+  auto extension = std::get<0>(GetParam());
   // Lua scripts are not compiled at load stage
   // They are only compiled on start by the scripting
   // manager
-  if (originalExtension == "lua") {
+  if (extension == "lua") {
     return;
   }
 
-  auto cacheExtension = std::get<1>(GetParam());
-  auto originalFilename = "empty-asset." + originalExtension;
-  auto cacheFilename = "empty-asset." + cacheExtension;
+  auto filename = "empty-asset." + extension;
 
-  std::ofstream stream(TempPath / originalFilename, std::ios::binary);
+  std::ofstream stream(TempPath / filename, std::ios::binary);
   stream.close();
 
-  auto res = manager.importAsset(TempPath / originalFilename, AssetsPath);
+  auto res = manager.importAsset(TempPath / filename, AssetsPath);
 
   EXPECT_TRUE(res.hasError());
-  EXPECT_FALSE(fs::exists(AssetsPath / originalFilename));
-  EXPECT_FALSE(fs::exists(CachePath / cacheFilename));
-}
-
-TEST_P(AssetTest, FailedImportDoesNotDeleteExistingSubdirectories) {
-  auto originalExtension = std::get<0>(GetParam());
-  // Lua scripts are not compiled at load stage
-  // They are only compiled on start by the scripting
-  // manager
-  if (originalExtension == "lua") {
-    return;
-  }
-
-  auto cacheExtension = std::get<1>(GetParam());
-  auto emptyFilename = "empty-asset." + originalExtension;
-  auto validOriginalFilename = "valid-asset." + originalExtension;
-  auto validEngineFilename = "valid-asset." + cacheExtension;
-
-  std::ofstream stream(TempPath / emptyFilename, std::ios::binary);
-  stream.close();
-
-  {
-    auto res = manager.importAsset(FixturesPath / validOriginalFilename,
-                                   InnerPathInAssets);
-
-    ASSERT_TRUE(res.hasData());
-  }
-
-  {
-    auto subdirectory = InnerPathInAssets;
-    auto cacheSubdirectory = InnerPathInCache;
-
-    auto res = manager.importAsset(TempPath / emptyFilename, subdirectory);
-
-    EXPECT_TRUE(res.hasError());
-    EXPECT_TRUE(fs::exists(subdirectory));
-    EXPECT_TRUE(fs::exists(cacheSubdirectory));
-    EXPECT_TRUE(fs::exists(InnerPathInAssets / validOriginalFilename));
-    EXPECT_TRUE(fs::exists(InnerPathInCache / validEngineFilename));
-  }
-
-  {
-    auto subdirectory = InnerPathInAssets.parent_path();
-    auto cacheSubdirectory = InnerPathInCache.parent_path();
-
-    auto res = manager.importAsset(TempPath / emptyFilename, subdirectory);
-
-    EXPECT_TRUE(res.hasError());
-    EXPECT_TRUE(fs::exists(subdirectory));
-    EXPECT_TRUE(fs::exists(cacheSubdirectory));
-    EXPECT_TRUE(fs::exists(InnerPathInAssets / validOriginalFilename));
-    EXPECT_TRUE(fs::exists(InnerPathInCache / validEngineFilename));
-  }
-}
-
-TEST_P(AssetTest, FailedImportDoesNotCreateNewSubdirectories) {
-  auto originalExtension = std::get<0>(GetParam());
-  // Lua scripts are not compiled at load stage
-  // They are only compiled on start by the scripting
-  // manager
-  if (originalExtension == "lua") {
-    return;
-  }
-
-  auto cacheExtension = std::get<1>(GetParam());
-  auto emptyFilename = "empty-asset." + originalExtension;
-  auto validOriginalFilename = "valid-asset." + originalExtension;
-  auto validEngineFilename = "valid-asset." + cacheExtension;
-
-  std::ofstream stream(TempPath / emptyFilename, std::ios::binary);
-  stream.close();
-
-  ASSERT_TRUE(
-      manager
-          .importAsset(FixturesPath / validOriginalFilename, InnerPathInAssets)
-          .hasData());
-
-  {
-    auto subdirectory = InnerPathInAssets / "test-inner";
-    auto cacheSubdirectory = InnerPathInCache / "test-inner";
-
-    auto res = manager.importAsset(TempPath / emptyFilename, subdirectory);
-
-    EXPECT_TRUE(res.hasError());
-    EXPECT_FALSE(fs::exists(subdirectory));
-    EXPECT_FALSE(fs::exists(cacheSubdirectory));
-  }
+  EXPECT_FALSE(fs::exists(AssetsPath / filename));
 }
 
 TEST_P(AssetTest, ImportCopiesSourceToAssets) {
-  auto originalExtension = std::get<0>(GetParam());
-  auto originalFilename = "valid-asset." + originalExtension;
+  auto extension = std::get<0>(GetParam());
+  auto filename = "valid-asset." + extension;
 
-  auto res = manager.importAsset(FixturesPath / originalFilename, AssetsPath);
+  auto res = manager.importAsset(FixturesPath / filename, AssetsPath);
 
   EXPECT_TRUE(res.hasData());
-  EXPECT_TRUE(fs::exists(AssetsPath / originalFilename));
+  EXPECT_TRUE(fs::exists(AssetsPath / filename));
 }
 
 TEST_P(AssetTest, ImportModifiesTheNameAndCopiesSourceToAssetsIfDuplicate) {
-  auto originalExtension = std::get<0>(GetParam());
-  auto originalFilename = "valid-asset." + originalExtension;
+  auto fixtureExtension = std::get<0>(GetParam());
+  auto fixturePath =
+      (FixturesPath / "valid-asset").replace_extension(fixtureExtension);
 
   {
-    auto res = manager.importAsset(FixturesPath / originalFilename, AssetsPath);
+    auto res = manager.importAsset(fixturePath, AssetsPath);
     EXPECT_TRUE(res.hasData());
-    EXPECT_TRUE(fs::exists(AssetsPath / originalFilename));
+    EXPECT_TRUE(fs::exists(res.getData()));
+    EXPECT_EQ(res.getData(),
+              (AssetsPath / "valid-asset").replace_extension(fixtureExtension));
   }
 
-  for (uint32_t i = 0; i < 10; ++i) {
-    auto originalDuplicateName =
-        "valid-asset-" + std::to_string(i + 1) + "." + originalExtension;
-    auto res = manager.importAsset(FixturesPath / originalFilename, AssetsPath);
+  for (uint32_t i = 1; i < 10; ++i) {
+    auto duplicateName = (AssetsPath / ("valid-asset-" + std::to_string(i)))
+                             .replace_extension(fixtureExtension);
+
+    auto res = manager.importAsset(fixturePath, AssetsPath);
     EXPECT_TRUE(res.hasData());
-    EXPECT_TRUE(fs::exists(AssetsPath / originalDuplicateName))
-        << originalDuplicateName << " does not exist";
+    EXPECT_EQ(res.getData(), duplicateName);
+    EXPECT_TRUE(fs::exists(duplicateName))
+        << duplicateName << " does not exist";
   }
 }
 
 TEST_P(AssetTest, ImportCreatesAssetInCache) {
-  auto originalExtension = std::get<0>(GetParam());
-  auto cacheExtension = std::get<1>(GetParam());
-  auto originalFilename = "valid-asset." + originalExtension;
-  auto cacheFilename = "valid-asset." + cacheExtension;
+  auto extension = std::get<0>(GetParam());
+  auto filename = "valid-asset." + extension;
 
-  auto res = manager.importAsset(FixturesPath / originalFilename, AssetsPath);
+  auto res = manager.importAsset(FixturesPath / filename, AssetsPath);
+
+  auto uuid = manager.findRootAssetUuid(res.getData());
 
   EXPECT_TRUE(res.hasData());
-  EXPECT_TRUE(fs::exists(CachePath / cacheFilename));
-  EXPECT_EQ(manager.findEngineAssetPath(AssetsPath / originalFilename),
-            CachePath / cacheFilename);
+  EXPECT_EQ(uuid.size(), 32);
   EXPECT_EQ(
-      manager.getCache().getTypeFromAssetPath(CachePath / cacheFilename),
+      manager.getCache().getMetaFromUuid(uuid).type,
       liquid::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
 }
 
-TEST_P(AssetTest, ImportMirrorsCacheSubdirectoriesWithAssets) {
-  auto originalExtension = std::get<0>(GetParam());
-  auto cacheExtension = std::get<1>(GetParam());
-  auto originalFilename = "valid-asset." + originalExtension;
-  auto cacheFilename = "valid-asset." + cacheExtension;
+TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
+  auto fixtureExt = std::get<0>(GetParam());
+  auto fixturePath = FixturesPath / ("valid-asset." + fixtureExt);
 
-  auto res =
-      manager.importAsset(FixturesPath / originalFilename, InnerPathInAssets);
-
+  auto res = manager.importAsset(fixturePath, InnerPathInAssets);
   EXPECT_TRUE(res.hasData());
-  EXPECT_TRUE(fs::exists(InnerPathInCache / cacheFilename));
-}
 
-TEST_P(AssetTest, ImportCreatesHashFileInCache) {
-  auto originalExtension = std::get<0>(GetParam());
-  auto cacheExtension = std::get<1>(GetParam());
-  auto originalFilename = "valid-asset." + originalExtension;
-  auto cacheFilename = "valid-asset." + cacheExtension;
-  auto hashFilename = originalFilename + ".lqhash";
+  auto sourcePath = res.getData();
+  auto metaPath = sourcePath;
+  metaPath.replace_extension(sourcePath.extension().string() + ".meta");
+  EXPECT_TRUE(fs::exists(metaPath));
 
-  auto res =
-      manager.importAsset(FixturesPath / originalFilename, InnerPathInAssets);
-
-  EXPECT_TRUE(res.hasData());
-  EXPECT_TRUE(fs::exists(InnerPathInAssets / originalFilename));
-  EXPECT_TRUE(fs::exists(InnerPathInCache / hashFilename));
-
-  std::ifstream stream(InnerPathInCache / hashFilename);
+  std::ifstream stream(metaPath);
   auto node = YAML::Load(stream);
-  auto originalAssetHash = node["originalAssetHash"].as<liquid::String>();
-  auto engineAssetHash = node["engineAssetHash"].as<liquid::String>();
-  auto engineAssetPathStr = node["engineAssetPath"].as<liquid::String>();
+  auto sourceAssetHash = node["sourceHash"].as<liquid::String>();
+  auto uuid = node["uuid"]["root"].as<liquid::String>();
   auto revision = node["revision"].as<uint32_t>();
   stream.close();
 
-  auto engineAssetPath = (CachePath / engineAssetPathStr).make_preferred();
-  EXPECT_EQ(engineAssetPath, InnerPathInCache / cacheFilename);
-
+  EXPECT_EQ(uuid.size(), 32);
   EXPECT_NE(revision, 0);
 
   {
-    std::ifstream stream(engineAssetPath, std::ios::binary);
+    std::ifstream stream(sourcePath, std::ios::binary);
 
-    liquid::String string;
+    liquid::String calculatedHash;
     CryptoPP::SHA256 sha256;
     CryptoPP::FileSource source(
         stream, true,
         new CryptoPP::HashFilter(
-            sha256,
-            new CryptoPP::HexEncoder(new CryptoPP::StringSink(string))));
+            sha256, new CryptoPP::HexEncoder(
+                        new CryptoPP::StringSink(calculatedHash))));
 
-    EXPECT_EQ(engineAssetHash, string);
-
-    stream.close();
-  }
-
-  {
-    std::ifstream stream(InnerPathInAssets / originalFilename,
-                         std::ios::binary);
-
-    liquid::String string;
-    CryptoPP::SHA256 sha256;
-    CryptoPP::FileSource source(
-        stream, true,
-        new CryptoPP::HashFilter(
-            sha256,
-            new CryptoPP::HexEncoder(new CryptoPP::StringSink(string))));
-
-    EXPECT_EQ(originalAssetHash, string);
+    EXPECT_EQ(sourceAssetHash, calculatedHash);
 
     stream.close();
   }
@@ -452,4 +281,8 @@ InitAssetTestSuite(AssetManagerScript,
 
 InitAssetTestSuite(AssetManagerAnimator,
                    liquid::editor::AssetManager::AnimatorExtensions,
+                   [](auto str) { return str; });
+
+InitAssetTestSuite(AssetManagerFont,
+                   liquid::editor::AssetManager::FontExtensions,
                    [](auto str) { return str; });

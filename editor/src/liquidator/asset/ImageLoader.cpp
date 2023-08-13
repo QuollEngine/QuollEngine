@@ -11,34 +11,34 @@ namespace liquid::editor {
 ImageLoader::ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage)
     : mAssetCache(assetCache), mRenderStorage(renderStorage) {}
 
-Result<Path> ImageLoader::loadFromPath(const Path &originalAssetPath,
-                                       const Path &engineAssetPath,
-                                       bool generateMipMaps,
-                                       rhi::Format format) {
+Result<String> ImageLoader::loadFromPath(const Path &sourceAssetPath,
+                                         const String &uuid,
+                                         bool generateMipMaps,
+                                         rhi::Format format) {
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
 
-  auto *data = stbi_load(originalAssetPath.string().c_str(), &width, &height,
+  auto *data = stbi_load(sourceAssetPath.string().c_str(), &width, &height,
                          &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return Result<Path>::Error(stbi_failure_reason());
+    return Result<String>::Error(stbi_failure_reason());
   }
 
-  auto res = loadFromMemory(data, static_cast<uint32_t>(width),
-                            static_cast<uint32_t>(height), engineAssetPath,
-                            generateMipMaps, format);
+  auto res = loadFromMemory(
+      data, static_cast<uint32_t>(width), static_cast<uint32_t>(height), uuid,
+      sourceAssetPath.filename().string(), generateMipMaps, format);
 
   stbi_image_free(data);
   return res;
 }
 
-Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
-                                         uint32_t height,
-                                         const Path &engineAssetPath,
-                                         bool generateMipMaps,
-                                         rhi::Format format) {
+Result<String> ImageLoader::loadFromMemory(void *data, uint32_t width,
+                                           uint32_t height, const String &uuid,
+                                           const String &name,
+                                           bool generateMipMaps,
+                                           rhi::Format format) {
   std::vector<TextureAssetLevel> levels;
   std::vector<uint8_t> assetData;
   if (generateMipMaps) {
@@ -81,7 +81,7 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
   }
 
   AssetData<TextureAsset> asset{};
-  asset.name = engineAssetPath.string();
+  asset.name = name;
   asset.size = TextureUtils::getBufferSizeFromLevels(levels);
   asset.data.data = std::move(assetData);
   asset.data.height = height;
@@ -90,18 +90,19 @@ Result<Path> ImageLoader::loadFromMemory(void *data, uint32_t width,
   asset.data.levels = levels;
   asset.data.format = format;
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
+  auto createdFileRes = mAssetCache.createTextureFromAsset(asset, uuid);
 
   if (createdFileRes.hasError()) {
-    return createdFileRes;
+    return Result<String>::Error(createdFileRes.getError());
   }
 
-  auto loadRes = mAssetCache.loadAsset(createdFileRes.getData());
+  auto loadRes = mAssetCache.loadTextureFromFile(createdFileRes.getData());
   if (loadRes.hasError()) {
-    return Result<Path>::Error(loadRes.getError());
+    return Result<String>::Error(loadRes.getError());
   }
 
-  return createdFileRes;
+  return Result<String>::Ok(
+      mAssetCache.getRegistry().getTextures().getAsset(loadRes.getData()).uuid);
 }
 
 std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(

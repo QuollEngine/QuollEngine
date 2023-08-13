@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AssetFileHeader.h"
+
 namespace liquid {
 
 /**
@@ -115,6 +117,18 @@ template <> inline void OutputBinaryStream::write(const glm::vec4 &value) {
  */
 template <> inline void OutputBinaryStream::write(const glm::quat &value) {
   write(glm::value_ptr(value), sizeof(glm::quat));
+}
+
+/**
+ * @brief Write asset file header to file
+ *
+ * @param value Asset file header
+ */
+template <>
+inline void OutputBinaryStream::write(const AssetFileHeader &value) {
+  write(value.magic);
+  write(value.name);
+  write(value.type);
 }
 
 /**

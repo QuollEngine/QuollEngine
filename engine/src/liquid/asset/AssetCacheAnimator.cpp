@@ -4,31 +4,39 @@
 
 #include "AssetCache.h"
 
-#include "AssetFileHeader.h"
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
 namespace liquid {
 
-Result<AnimatorAssetHandle>
-AssetCache::getOrLoadAnimatorFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
-    return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
+Result<Path>
+liquid::AssetCache::createAnimatorFromSource(const Path &sourcePath,
+                                             const String &uuid) {
+  using co = std::filesystem::copy_options;
+
+  auto assetPath = createAssetPath(uuid);
+
+  if (!std::filesystem::copy_file(sourcePath, assetPath,
+                                  co::overwrite_existing)) {
+    return Result<Path>::Error("Cannot create animator from source: " +
+                               sourcePath.stem().string());
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
+  auto metaRes = createMetaFile(AssetType::Animator,
+                                sourcePath.filename().string(), assetPath);
 
-  for (auto &[handle, asset] : mRegistry.getAnimators().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<AnimatorAssetHandle>::Ok(handle);
-    }
+  if (!metaRes.hasData()) {
+    std::filesystem::remove(assetPath);
+    return Result<Path>::Error("Cannot create animator from source: " +
+                               sourcePath.stem().string());
   }
 
-  return loadAnimatorFromFile(fullPath);
+  return Result<Path>::Ok(assetPath);
 }
 
 Result<Path>
-AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
+AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset,
+                                    const String &uuid) {
   YAML::Node root;
   root["version"] = "0.1";
   root["type"] = "animator";
@@ -40,7 +48,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
     auto stateNode = statesNode[state.name];
     stateNode["output"]["type"] = "animation";
     stateNode["output"]["animation"] =
-        getAssetRelativePath(mRegistry.getAnimations(), state.animation);
+        getAssetUuid(mRegistry.getAnimations(), state.animation);
 
     for (const auto &transition : state.transitions) {
       YAML::Node transitionNode(YAML::NodeType::Map);
@@ -52,19 +60,19 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
     }
   }
 
-  auto fullPath = mAssetsPath / asset.relativePath;
+  auto assetPath = createAssetPath(uuid);
 
-  std::ofstream stream(fullPath);
+  std::ofstream stream(assetPath);
   stream << root;
   stream.close();
 
-  auto metaRes = createMetaFile(AssetType::Animator, fullPath);
+  auto metaRes = createMetaFile(AssetType::Animator, asset.name, assetPath);
   if (metaRes.hasError()) {
-    std::filesystem::remove(fullPath);
+    std::filesystem::remove(assetPath);
     return metaRes;
   }
 
-  return Result<Path>::Ok(fullPath);
+  return Result<Path>::Ok(assetPath);
 }
 
 Result<AnimatorAssetHandle>
@@ -86,10 +94,13 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     return Result<AnimatorAssetHandle>::Error("`states` field must be a map");
   }
 
+  auto meta = getMetaFromUuid(filePath.stem().string());
+
   AssetData<AnimatorAsset> asset{};
-  asset.relativePath = std::filesystem::relative(filePath, mAssetsPath);
   asset.type = AssetType::Animator;
+  asset.name = meta.name;
   asset.path = filePath;
+  asset.uuid = filePath.stem().string();
 
   std::vector<String> warnings;
 
@@ -112,7 +123,7 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     if (output["type"] && output["type"].as<String>("") == "animation") {
       auto animation = output["animation"].as<String>("");
       if (!animation.empty()) {
-        auto res = getOrLoadAnimationFromPath(animation);
+        auto res = getOrLoadAnimationFromUuid(animation);
         if (res.hasData()) {
           state.animation = res.getData();
         }
@@ -233,6 +244,20 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
   mRegistry.getAnimators().updateAsset(handle, asset);
 
   return Result<AnimatorAssetHandle>::Ok(handle, warnings);
+}
+
+Result<AnimatorAssetHandle>
+AssetCache::getOrLoadAnimatorFromUuid(const String &uuid) {
+  if (uuid.empty()) {
+    return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
+  }
+
+  auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
+  if (handle != AnimatorAssetHandle::Null) {
+    return Result<AnimatorAssetHandle>::Ok(handle);
+  }
+
+  return loadAnimatorFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

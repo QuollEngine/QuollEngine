@@ -603,20 +603,19 @@ TEST_F(
     SceneIOTest,
     CreatesEnvironmentEntityWithSkyboxTextureIfTypeIsTextureAndEnvironmentAssetExists) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   auto node = loadSceneFile(ScenePath);
   auto zoneNode = node["zones"][0];
   zoneNode["environment"]["skybox"]["type"] = "texture";
-  zoneNode["environment"]["skybox"]["texture"] = "my-dir/test-env.hdr";
+  zoneNode["environment"]["skybox"]["texture"] = "test-env";
   saveSceneFile(node, ScenePath);
 
   sceneIO.loadScene(ScenePath);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
   EXPECT_EQ(
       scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
@@ -699,8 +698,7 @@ TEST_F(
     SceneIOTest,
     CreatesEnvironmentEntityWithEnvironmentLightingSourceSkyboxIfLightingSourceIsSkybox) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   auto node = loadSceneFile(ScenePath);
@@ -734,8 +732,7 @@ TEST_F(SceneIOTest,
 
 TEST_F(SceneIOTest, SetsSkyboxToNullOnSaveIfNoSkyboxComponent) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
 
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
@@ -755,8 +752,7 @@ TEST_F(SceneIOTest, SetsSkyboxToNullOnSaveIfNoSkyboxComponent) {
 TEST_F(SceneIOTest,
        SetsSkyboxToNullOnSaveIfSkyboxTypeIsTextureButTextureAssetDoesNotExist) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
 
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
@@ -781,8 +777,7 @@ TEST_F(
     SceneIOTest,
     SetsSkyboxTypeToTextureOnSaveIfSceneEnvironmentSkyboxTypeIsTextureAndAssetExists) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
 
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
@@ -799,8 +794,7 @@ TEST_F(
   EXPECT_TRUE(envNode["skybox"].IsMap());
   EXPECT_TRUE(envNode["skybox"]["type"].IsScalar());
   EXPECT_EQ(envNode["skybox"]["type"].as<liquid::String>(), "texture");
-  EXPECT_EQ(envNode["skybox"]["texture"].as<liquid::String>(),
-            "my-dir/test-env.hdr");
+  EXPECT_EQ(envNode["skybox"]["texture"].as<liquid::String>(), "test-env");
   EXPECT_FALSE(envNode["skybox"]["color"]);
 }
 
@@ -830,8 +824,7 @@ TEST_F(
     SceneIOTest,
     SetsEnvironmentLightingToNullOnSaveIfNoEnvironmentLightingSourceComponent) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
+  asset.uuid = "test-env";
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   scene.environment = scene.entityDatabase.create();
@@ -851,9 +844,7 @@ TEST_F(
     SceneIOTest,
     SetsEnvironmentLightingSkyboxSourceComponentOnSaveIfLightingSourceIsSkybox) {
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.name = "test-env";
-  asset.relativePath = liquid::Path("my-dir") / "test-env.hdr";
-
+  asset.uuid = "test-env";
   auto handle = assetRegistry.getEnvironments().addAsset(asset);
 
   scene.environment = scene.entityDatabase.create();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/asset/AssetCache.h"
+#include "UUIDMap.h"
 
 namespace liquid::editor {
 
@@ -38,21 +39,21 @@ public:
   /**
    * @brief Load HDRI from file
    *
-   * @param originalAssetPath Original asset path
-   * @param engineAssetPath Engine asset path
-   * @return Path to newly created environment asset
+   * @param sourceAssetPath Source asset path
+   * @param uuids Existing asset uuids
+   * @return Created uuids
    */
-  Result<Path> loadFromPath(const Path &originalAssetPath,
-                            const Path &engineAssetPath);
+  Result<UUIDMap> loadFromPath(const Path &sourceAssetPath,
+                               const UUIDMap &uuids);
 
   /**
    * @brief Load HDRI from file to a device
    *
-   * @param originalAssetPath Original asset path
+   * @param sourceAssetPath Source asset path
    * @param renderStorage Render storage
    * @return Texture handle
    */
-  rhi::TextureHandle loadFromPathToDevice(const Path &originalAssetPath,
+  rhi::TextureHandle loadFromPathToDevice(const Path &sourceAssetPath,
                                           RenderStorage &renderStorage);
 
 private:
@@ -72,20 +73,24 @@ private:
    *
    * @param unfilteredCubemap Unfiltered cubemap
    * @param path Path to irradiance map
+   * @param name Asset name
    * @return Irradiance map texture asset
    */
   Result<TextureAssetHandle>
-  generateIrradianceMap(const CubemapData &unfilteredCubemap, const Path &path);
+  generateIrradianceMap(const CubemapData &unfilteredCubemap,
+                        const String &uuid, const String &name);
 
   /**
    * @brief Generate specular map
    *
    * @param unfilteredCubemap Unfiltered cubemap
    * @param path Path to specular map
+   * @param name Asset name
    * @return Specular map texture asset
    */
   Result<TextureAssetHandle>
-  generateSpecularMap(const CubemapData &unfilteredCubemap, const Path &path);
+  generateSpecularMap(const CubemapData &unfilteredCubemap, const String &uuid,
+                      const String &name);
 
 private:
   AssetCache &mAssetCache;

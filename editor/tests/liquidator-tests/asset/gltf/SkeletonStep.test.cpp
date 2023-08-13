@@ -50,7 +50,7 @@ TEST_F(GLTFImporterSkeletonTest, DoesNotCreateSkeletonIfNoSkins) {
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -76,7 +76,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -99,7 +99,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -125,7 +125,7 @@ TEST_F(
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -135,7 +135,6 @@ TEST_F(
 
 TEST_F(GLTFImporterSkeletonTest,
        DoesNotCreateSkeletonIfJointBelongsToTwoSkins) {
-
   GLTFTestScene scene;
 
   int jointIndex = -1;
@@ -153,7 +152,7 @@ TEST_F(GLTFImporterSkeletonTest,
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -169,7 +168,7 @@ TEST_F(GLTFImporterSkeletonTest, CreatesSkeletonWithJoints) {
 
   auto path = saveSceneGLTF(scene);
 
-  auto res = importer.loadFromPath(path, CachePath);
+  auto res = importer.loadFromPath(path, {});
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());

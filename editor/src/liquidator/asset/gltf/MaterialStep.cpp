@@ -12,7 +12,6 @@ namespace liquid::editor {
  */
 void loadMaterials(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
   const auto &textures = importData.textures;
 
@@ -24,7 +23,8 @@ void loadMaterials(GLTFImportData &importData) {
 
     AssetData<MaterialAsset> material;
 
-    material.name = targetPath.string() + "/" + assetName;
+    material.name = getGLTFAssetName(importData, assetName);
+
     material.type = AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
@@ -94,9 +94,16 @@ void loadMaterials(GLTFImportData &importData) {
       }
     }
 
-    auto path = assetCache.createMaterialFromAsset(material);
+    auto path = assetCache.createMaterialFromAsset(
+        material, getUUID(importData, assetName));
     auto handle = assetCache.loadMaterialFromFile(path.getData());
     importData.materials.map.insert_or_assign(i, handle.getData());
+
+    importData.outputUuids.insert_or_assign(assetName,
+                                            assetCache.getRegistry()
+                                                .getMaterials()
+                                                .getAsset(handle.getData())
+                                                .uuid);
   }
 }
 

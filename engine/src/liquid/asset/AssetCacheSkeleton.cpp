@@ -10,9 +10,10 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
-  String extension = ".lqskel";
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
+AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset,
+                                    const String &uuid) {
+  auto assetPath = createAssetPath(uuid);
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -22,10 +23,9 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
 
   AssetFileHeader header{};
   header.type = AssetType::Skeleton;
-  header.version = createVersion(0, 1);
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  file.write(header);
 
   auto numJoints = static_cast<uint32_t>(asset.data.jointLocalPositions.size());
   file.write(numJoints);
@@ -42,14 +42,13 @@ AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
 
 Result<SkeletonAssetHandle>
 AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
-                                            const Path &filePath) {
-  auto assetName = std::filesystem::relative(filePath, mAssetsPath).string();
-
+                                            const Path &filePath,
+                                            const AssetFileHeader &header) {
   AssetData<SkeletonAsset> skeleton{};
   skeleton.path = filePath;
-  skeleton.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  skeleton.name = skeleton.relativePath.string();
   skeleton.type = AssetType::Skeleton;
+  skeleton.uuid = filePath.stem().string();
+  skeleton.name = header.name;
 
   uint32_t numJoints = 0;
   stream.read(numJoints);
@@ -81,24 +80,21 @@ AssetCache::loadSkeletonFromFile(const Path &filePath) {
     return Result<SkeletonAssetHandle>::Error(header.getError());
   }
 
-  return loadSkeletonDataFromInputStream(stream, filePath);
+  return loadSkeletonDataFromInputStream(stream, filePath, header.getData());
 }
 
 Result<SkeletonAssetHandle>
-AssetCache::getOrLoadSkeletonFromPath(StringView relativePath) {
-  if (relativePath.empty()) {
+AssetCache::getOrLoadSkeletonFromUuid(const String &uuid) {
+  if (uuid.empty()) {
     return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Null);
   }
 
-  Path fullPath = (mAssetsPath / relativePath).make_preferred();
-
-  for (auto &[handle, asset] : mRegistry.getSkeletons().getAssets()) {
-    if (asset.path == fullPath) {
-      return Result<SkeletonAssetHandle>::Ok(handle);
-    }
+  auto handle = mRegistry.getSkeletons().findHandleByUuid(uuid);
+  if (handle != SkeletonAssetHandle::Null) {
+    return Result<SkeletonAssetHandle>::Ok(handle);
   }
 
-  return loadSkeletonFromFile(fullPath);
+  return loadSkeletonFromFile(getPathFromUuid(uuid));
 }
 
 } // namespace liquid

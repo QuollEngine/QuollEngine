@@ -12,10 +12,11 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   }
 
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
   auto &image = model.images.at(model.textures.at(index).source);
+  auto assetName =
+      image.name.empty() ? "texture" + std::to_string(index) : image.name;
 
   rhi::Format format = rhi::Format::Undefined;
 
@@ -26,25 +27,27 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   }
 
   if (format == rhi::Format::Undefined) {
-    importData.warnings.push_back("Texture #" + std::to_string(index) +
+    importData.warnings.push_back(assetName +
                                   " has 16-bit channels and cannot be loaded");
     return TextureAssetHandle::Null;
   }
 
-  AssetData<TextureAsset> texture{};
-  auto assetName =
-      image.name.empty() ? "texture" + std::to_string(index) : image.name;
-  auto textureRelPath =
-      std::filesystem::relative(targetPath, assetCache.getAssetsPath()) /
-      assetName;
-
-  importData.imageLoader.loadFromMemory(
+  auto uuid = importData.imageLoader.loadFromMemory(
       const_cast<void *>(static_cast<const void *>(image.image.data())),
-      image.width, image.height, textureRelPath,
+      image.width, image.height, getUUIDFromMap(importData.uuids, assetName),
+      getGLTFAssetName(importData, assetName),
       generateMipMaps && importData.optimize, format);
 
-  auto handle = assetCache.getRegistry().getTextures().findHandleByRelativePath(
-      textureRelPath.replace_extension("ktx2"));
+  if (uuid.hasError()) {
+    importData.warnings.push_back(assetName + " could not be loaded");
+    return TextureAssetHandle::Null;
+  }
+
+  auto handle =
+      assetCache.getRegistry().getTextures().findHandleByUuid(uuid.getData());
+
+  importData.outputUuids.insert_or_assign(
+      assetName, assetCache.getRegistry().getTextures().getAsset(handle).uuid);
 
   importData.textures.map.insert_or_assign(index, handle);
   return handle;

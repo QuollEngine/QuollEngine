@@ -1,5 +1,8 @@
 #pragma once
 
+#include "AssetFileHeader.h"
+#include "AssetMeta.h"
+
 namespace liquid {
 
 /**
@@ -129,6 +132,27 @@ template <> inline void InputBinaryStream::read(std::vector<String> &value) {
     value.at(i).resize(length);
     read(value.at(i).data(), length);
   }
+}
+
+/**
+ * @brief Read binary data into asset file header
+ *
+ * @param header Asset file header
+ */
+template <> inline void InputBinaryStream::read(AssetFileHeader &header) {
+  read(header.magic);
+  read(header.name);
+  read(header.type);
+}
+
+/**
+ * @brief Read binary data into asset meta
+ *
+ * @param meta Asset meta
+ */
+template <> inline void InputBinaryStream::read(AssetMeta &meta) {
+  read(meta.type);
+  read(meta.name);
 }
 
 } // namespace liquid

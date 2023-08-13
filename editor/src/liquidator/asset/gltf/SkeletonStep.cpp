@@ -8,16 +8,13 @@ namespace liquid::editor {
 
 void loadSkeletons(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
-  const auto &targetPath = importData.targetPath;
   const auto &model = importData.model;
 
   for (uint32_t si = 0; si < static_cast<uint32_t>(model.skins.size()); ++si) {
     const auto &skin = model.skins.at(si);
 
-    auto skinName = "Skin #" + std::to_string(si);
-    if (!skin.name.empty()) {
-      skinName += "(" + skin.name + ")";
-    }
+    auto skeletonName =
+        skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
 
     std::unordered_map<uint32_t, int> jointParents;
     std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
@@ -26,7 +23,7 @@ void loadSkeletons(GLTFImportData &importData) {
 
     if (ibMeta.accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT) {
       importData.warnings.push_back(
-          skinName +
+          skeletonName +
           " skipped because inverse bind matrices component type is not FLOAT");
 
       continue;
@@ -34,14 +31,15 @@ void loadSkeletons(GLTFImportData &importData) {
 
     if (ibMeta.accessor.type != TINYGLTF_TYPE_MAT4) {
       importData.warnings.push_back(
-          skinName + " skipped because inverse bind matrices type is not MAT4");
+          skeletonName +
+          " skipped because inverse bind matrices type is not MAT4");
       continue;
     }
 
     if (ibMeta.accessor.count != skin.joints.size()) {
       importData.warnings.push_back(
-          skinName + " skipped because number of inverse bind matrices "
-                     "is different from number of joints");
+          skeletonName + " skipped because number of inverse bind matrices "
+                         "is different from number of joints");
       continue;
     }
 
@@ -66,7 +64,8 @@ void loadSkeletons(GLTFImportData &importData) {
           importData.skeletons.gltfToNormalizedJointMap.end();
       if (!skeletonValid) {
         importData.warnings.push_back(
-            skinName + " skipped because a joint is a child of multiple skins");
+            skeletonName +
+            " skipped because a joint is a child of multiple skins");
         continue;
       }
       normalizedJointMap.insert({joint, i});
@@ -103,7 +102,7 @@ void loadSkeletons(GLTFImportData &importData) {
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
 
     AssetData<SkeletonAsset> asset;
-    asset.name = targetPath.string() + "/" + assetName;
+    asset.name = getGLTFAssetName(importData, assetName);
     asset.type = AssetType::Skeleton;
 
     for (auto &joint : skin.joints) {
@@ -121,11 +120,18 @@ void loadSkeletons(GLTFImportData &importData) {
       asset.data.jointParents.push_back(parent >= 0 ? parent : 0);
     }
 
-    auto path = assetCache.createSkeletonFromAsset(asset);
+    auto path = assetCache.createSkeletonFromAsset(
+        asset, getUUID(importData, skeletonName));
     auto handle = assetCache.loadSkeletonFromFile(path.getData());
 
     importData.skeletons.skeletonMap.map.insert_or_assign(
         static_cast<size_t>(si), handle.getData());
+
+    importData.outputUuids.insert_or_assign(assetName,
+                                            assetCache.getRegistry()
+                                                .getSkeletons()
+                                                .getAsset(handle.getData())
+                                                .uuid);
   }
 }
 

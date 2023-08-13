@@ -82,8 +82,8 @@ AssetData<MeshAsset> createCube() {
   geometry.vertices = vertices;
   geometry.indices = indices;
   mesh.name = "Cube";
-  mesh.path = "liquid::engine/meshes/cube.lqmesh";
-  mesh.relativePath = "liquid::engine/meshes/cube.lqmesh";
+  mesh.path = "liquid::engine/meshes/cube";
+  mesh.uuid = "liquid::engine/meshes/cube";
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
@@ -94,8 +94,8 @@ AssetData<MeshAsset> createCube() {
 AssetData<MaterialAsset> createDefaultMaterial() {
   AssetData<MaterialAsset> material;
   material.name = "Default material";
-  material.path = "liquid::engine/materials/default.lqmat";
-  material.relativePath = "liquid::engine/materials/default.lqmat";
+  material.path = "liquid::engine/materials/default";
+  material.uuid = "liquid::engine/materials/default";
 
   return material;
 }
@@ -106,9 +106,9 @@ AssetData<FontAsset> createDefaultFont() {
   auto font =
       loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf");
 
-  font.getData().path = "liquid::engine/fonts/Roboto-Regular.ttf";
-  font.getData().relativePath = "liquid::engine/fonts/Roboto-Regular.ttf";
   font.getData().name = "Roboto (default)";
+  font.getData().path = "liquid::engine/fonts/Roboto-Regular";
+  font.getData().uuid = "liquid::engine/fonts/Roboto-Regular";
 
   return font.getData();
 }

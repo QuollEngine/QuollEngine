@@ -18,8 +18,9 @@ namespace liquid::editor {
  */
 class AssetBrowser {
   struct Entry {
-    std::filesystem::path path;
-    String clippedName;
+    Path path;
+    String name;
+    String truncatedName;
     float textWidth = 0.0f;
     bool isDirectory = false;
     EditorIcon icon = EditorIcon::Unknown;
@@ -43,36 +44,33 @@ public:
   void reload();
 
 private:
-  /**
-   * @brief Handle importing assets
-   *
-   * @param assetManager Asset manager
-   */
   void handleAssetImport(AssetManager &assetManager);
 
-  /**
-   * @brief Handle entry creation
-   *
-   * @param assetCache Asset cache
-   */
   void handleCreateEntry(AssetManager &assetManager);
 
-  /**
-   * @brief Render entry
-   *
-   * @param entry Entry
-   */
   void renderEntry(const Entry &entry);
+
+  void fetchAssetDirectory(Path path, AssetManager &assetManager);
+
+  void fetchPrefab(PrefabAssetHandle handle, AssetManager &assetManager);
+
+  void setDefaultProps(Entry &entry, AssetRegistry &assetRegistry);
+
+  void setCurrentFetch(std::variant<Path, PrefabAssetHandle> fetch);
+
+  const Path &getCurrentFetchPath() const;
 
 private:
   Entry mStagingEntry;
   bool mHasStagingEntry = false;
   bool mInitialFocusSet = false;
 
+  bool mNeedsRefresh = true;
+  std::variant<Path, PrefabAssetHandle> mCurrentFetch;
+
   std::vector<Entry> mEntries;
-  Path mAssetDirectory;
-  Path mContentsDirectory;
-  bool mDirectoryChanged = true;
+  Path mCurrentDirectory;
+  Path mPrefabDirectory;
   size_t mSelected = std::numeric_limits<size_t>::max();
 
   AssetLoadStatusDialog mStatusDialog{"AssetLoadStatus"};

@@ -23,15 +23,14 @@ public:
   /**
    * @brief Load texture from path
    *
-   * @param originalAssetPath Original asset path
-   * @param engineAssetPath Engine asset path
+   * @param sourceAssetPath Source asset path
+   * @param uuid Asset uuid
    * @param generateMipMaps Generate mip maps
    * @param format Texture format
-   * @return Path to newly created texture
+   * @return Uuid of newly created texture
    */
-  Result<Path> loadFromPath(const Path &originalAssetPath,
-                            const Path &engineAssetPath, bool generateMipMaps,
-                            rhi::Format format);
+  Result<String> loadFromPath(const Path &sourceAssetPath, const String &uuid,
+                              bool generateMipMaps, rhi::Format format);
 
   /**
    * @brief Load texture from memory
@@ -39,14 +38,15 @@ public:
    * @param data Texture data
    * @param width Texture width
    * @param height Texture height
-   * @param engineAssetPath Engine asset path
+   * @param uuid Asset uuid
+   * @param name Asset name
    * @param generateMipMaps Generate mip maps
    * @param format Texture format
-   * @return Path to newly created texture
+   * @return Uuid of newly created texture
    */
-  Result<Path> loadFromMemory(void *data, uint32_t width, uint32_t height,
-                              const Path &engineAssetPath, bool generateMipMaps,
-                              rhi::Format format);
+  Result<String> loadFromMemory(void *data, uint32_t width, uint32_t height,
+                                const String &uuid, const String &name,
+                                bool generateMipMaps, rhi::Format format);
 
 private:
   /**

@@ -10,9 +10,10 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
-  String extension = ".lqprefab";
-  Path assetPath = (mAssetsPath / (asset.name + extension)).make_preferred();
+AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
+                                  const String &uuid) {
+  auto assetPath = createAssetPath(uuid);
+
   OutputBinaryStream file(assetPath);
 
   if (!file.good()) {
@@ -22,10 +23,9 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
   AssetFileHeader header{};
   header.type = AssetType::Prefab;
-  header.version = createVersion(0, 1);
-  file.write(header.magic, AssetFileMagicLength);
-  file.write(header.version);
-  file.write(header.type);
+  header.magic = AssetFileHeader::MagicConstant;
+  header.name = asset.name;
+  file.write(header);
 
   std::map<MeshAssetHandle, uint32_t> localMeshMap;
   {
@@ -33,14 +33,12 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.meshes.size());
 
     for (auto &component : asset.data.meshes) {
-      auto &mesh = mRegistry.getMeshes().getAsset(component.value);
-      auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mRegistry.getMeshes().getAsset(component.value).uuid;
 
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
         localMeshMap.insert_or_assign(component.value,
                                       static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(path);
+        assetPaths.push_back(uuid);
       }
     }
 
@@ -54,15 +52,13 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.skinnedMeshes.size());
 
     for (auto &component : asset.data.skinnedMeshes) {
-      auto &mesh = mRegistry.getSkinnedMeshes().getAsset(component.value);
-      auto path = std::filesystem::relative(mesh.path, mAssetsPath).string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mRegistry.getSkinnedMeshes().getAsset(component.value).uuid;
 
       if (localSkinnedMeshMap.find(component.value) ==
           localSkinnedMeshMap.end()) {
         localSkinnedMeshMap.insert_or_assign(
             component.value, static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(path);
+        assetPaths.push_back(uuid);
       }
     }
 
@@ -76,15 +72,12 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.skeletons.size());
 
     for (auto &component : asset.data.skeletons) {
-      auto &skeleton = mRegistry.getSkeletons().getAsset(component.value);
-      auto path =
-          std::filesystem::relative(skeleton.path, mAssetsPath).string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mRegistry.getSkeletons().getAsset(component.value).uuid;
 
       if (localSkeletonMap.find(component.value) == localSkeletonMap.end()) {
         localSkeletonMap.insert_or_assign(
             component.value, static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(path);
+        assetPaths.push_back(uuid);
       }
     }
 
@@ -98,17 +91,13 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.animations.size());
 
     for (auto handle : asset.data.animations) {
-      auto &animation = mRegistry.getAnimations().getAsset(handle);
-
-      auto path =
-          std::filesystem::relative(animation.path, mAssetsPath).string();
+      auto uuid = mRegistry.getAnimations().getAsset(handle).uuid;
 
       if (localAnimationMap.find(handle) == localAnimationMap.end()) {
         localAnimationMap.insert_or_assign(
             handle, static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(path);
+        assetPaths.push_back(uuid);
       }
-      std::replace(path.begin(), path.end(), '\\', '/');
     }
 
     file.write(static_cast<uint32_t>(assetPaths.size()));
@@ -121,18 +110,13 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
     assetPaths.reserve(asset.data.animators.size());
 
     for (auto &component : asset.data.animators) {
-      auto handle = component.value;
-      auto &animation = mRegistry.getAnimators().getAsset(handle);
+      auto uuid = mRegistry.getAnimators().getAsset(component.value).uuid;
 
-      auto path =
-          std::filesystem::relative(animation.path, mAssetsPath).string();
-
-      if (localAnimatorMap.find(handle) == localAnimatorMap.end()) {
+      if (localAnimatorMap.find(component.value) == localAnimatorMap.end()) {
         localAnimatorMap.insert_or_assign(
-            handle, static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(path);
+            component.value, static_cast<uint32_t>(assetPaths.size()));
+        assetPaths.push_back(uuid);
       }
-      std::replace(path.begin(), path.end(), '\\', '/');
     }
 
     file.write(static_cast<uint32_t>(assetPaths.size()));
@@ -240,15 +224,16 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
 
 Result<PrefabAssetHandle>
 AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
-                                          const Path &filePath) {
+                                          const Path &filePath,
+                                          const AssetFileHeader &header) {
 
   std::vector<String> warnings;
 
   AssetData<PrefabAsset> prefab{};
+  prefab.name = header.name;
   prefab.path = filePath;
-  prefab.relativePath = std::filesystem::relative(filePath, mAssetsPath);
-  prefab.name = prefab.relativePath.string();
   prefab.type = AssetType::Prefab;
+  prefab.uuid = filePath.stem().string();
 
   std::vector<MeshAssetHandle> localMeshMap;
 
@@ -260,8 +245,8 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     localMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetPathStr = actual.at(i);
-      const auto &res = getOrLoadMeshFromPath(assetPathStr);
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadMeshFromUuid(assetUuid);
       if (res.hasData()) {
         localMeshMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -281,8 +266,8 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     localSkinnedMeshMap.resize(numAssets, SkinnedMeshAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetPathStr = actual.at(i);
-      const auto &res = getOrLoadSkinnedMeshFromPath(assetPathStr);
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadSkinnedMeshFromUuid(assetUuid);
       if (res.hasData()) {
         localSkinnedMeshMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -302,8 +287,8 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetPathStr = actual.at(i);
-      const auto &res = getOrLoadSkeletonFromPath(assetPathStr);
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadSkeletonFromUuid(assetUuid);
       if (res.hasData()) {
         localSkeletonMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -325,8 +310,8 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetPathStr = actual.at(i);
-      const auto &res = getOrLoadAnimationFromPath(assetPathStr);
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadAnimationFromUuid(assetUuid);
       if (res.hasData()) {
         localAnimationMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -349,8 +334,8 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetPathStr = actual.at(i);
-      const auto &res = getOrLoadAnimatorFromPath(assetPathStr);
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadAnimatorFromUuid(assetUuid);
       if (res.hasData()) {
         localAnimatorMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -548,7 +533,7 @@ Result<PrefabAssetHandle> AssetCache::loadPrefabFromFile(const Path &filePath) {
     return Result<PrefabAssetHandle>::Error(header.getError());
   }
 
-  return loadPrefabDataFromInputStream(stream, filePath);
+  return loadPrefabDataFromInputStream(stream, filePath, header.getData());
 }
 
 } // namespace liquid

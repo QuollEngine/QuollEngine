@@ -4,6 +4,7 @@
 
 #include "liquidator/asset/ImageLoader.h"
 #include "liquidator/asset/gltf/TinyGLTF.h"
+#include "liquidator/asset/UUIDMap.h"
 
 namespace liquid::editor {
 
@@ -78,9 +79,14 @@ struct GLTFImportData {
   ImageLoader &imageLoader;
 
   /**
-   * Target path
+   * Source asset path
    */
-  Path targetPath;
+  Path sourcePath;
+
+  /**
+   * Uuid map
+   */
+  UUIDMap uuids;
 
   /**
    * GLTF model
@@ -141,6 +147,34 @@ struct GLTFImportData {
    * Output path
    */
   Result<Path> outputPath = Result<Path>::Error("Empty");
+
+  /**
+   * Output uuids
+   */
+  UUIDMap outputUuids;
 };
+
+/**
+ * @brief Get uuid for object
+ *
+ * @param importData Import data
+ * @param name Asset name
+ * @return Uuid or empty string
+ */
+static String getUUID(const GLTFImportData &importData, const String &name) {
+  return getUUIDFromMap(importData.uuids, name);
+}
+
+/**
+ * @brief Get GLTF asset name
+ *
+ * @param importData Import data
+ * @param name Item name
+ * @return Asset name
+ */
+static String getGLTFAssetName(const GLTFImportData &importData,
+                               const String &name) {
+  return importData.sourcePath.filename().string() + "/" + name;
+}
 
 } // namespace liquid::editor

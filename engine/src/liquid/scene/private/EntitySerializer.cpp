@@ -99,13 +99,11 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     const auto &text = mEntityDatabase.get<Text>(entity);
 
     if (!text.text.empty() && mAssetRegistry.getFonts().hasAsset(text.font)) {
-      auto path =
-          mAssetRegistry.getFonts().getAsset(text.font).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto font = mAssetRegistry.getFonts().getAsset(text.font).uuid;
 
       components["text"]["content"] = text.text;
       components["text"]["lineHeight"] = text.lineHeight;
-      components["text"]["font"] = path;
+      components["text"]["font"] = font;
     }
   }
 
@@ -150,45 +148,36 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   if (mEntityDatabase.has<Sprite>(entity)) {
     auto handle = mEntityDatabase.get<Sprite>(entity).handle;
     if (mAssetRegistry.getTextures().hasAsset(handle)) {
-      auto path =
-          mAssetRegistry.getTextures().getAsset(handle).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getTextures().getAsset(handle).uuid;
 
-      components["sprite"] = path;
+      components["sprite"] = uuid;
     }
   }
 
   if (mEntityDatabase.has<Mesh>(entity)) {
     auto handle = mEntityDatabase.get<Mesh>(entity).handle;
     if (mAssetRegistry.getMeshes().hasAsset(handle)) {
-      auto path =
-          mAssetRegistry.getMeshes().getAsset(handle).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getMeshes().getAsset(handle).uuid;
 
-      components["mesh"] = path;
+      components["mesh"] = uuid;
     }
   }
 
   if (mEntityDatabase.has<SkinnedMesh>(entity)) {
     auto handle = mEntityDatabase.get<SkinnedMesh>(entity).handle;
     if (mAssetRegistry.getSkinnedMeshes().hasAsset(handle)) {
-      auto path = mAssetRegistry.getSkinnedMeshes()
-                      .getAsset(handle)
-                      .relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getSkinnedMeshes().getAsset(handle).uuid;
 
-      components["skinnedMesh"] = path;
+      components["skinnedMesh"] = uuid;
     }
   }
 
   if (mEntityDatabase.has<Skeleton>(entity)) {
     auto handle = mEntityDatabase.get<Skeleton>(entity).assetHandle;
     if (mAssetRegistry.getSkeletons().hasAsset(handle)) {
-      auto path =
-          mAssetRegistry.getSkeletons().getAsset(handle).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getSkeletons().getAsset(handle).uuid;
 
-      components["skeleton"] = path;
+      components["skeleton"] = uuid;
     }
   }
 
@@ -196,11 +185,9 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     auto handle = mEntityDatabase.get<Animator>(entity).asset;
 
     if (mAssetRegistry.getAnimators().hasAsset(handle)) {
-      auto path =
-          mAssetRegistry.getAnimators().getAsset(handle).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getAnimators().getAsset(handle).uuid;
 
-      components["animator"]["asset"] = path;
+      components["animator"]["asset"] = uuid;
     }
   }
 
@@ -210,10 +197,9 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
       const auto &asset =
           mAssetRegistry.getLuaScripts().getAsset(script.handle);
 
-      auto path = asset.relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = asset.uuid;
 
-      components["script"]["asset"] = path;
+      components["script"]["asset"] = uuid;
 
       for (auto &[name, value] : script.variables) {
         auto it = asset.data.variables.find(name);
@@ -229,13 +215,10 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
         } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
           auto handle = value.get<PrefabAssetHandle>();
           if (mAssetRegistry.getPrefabs().hasAsset(handle)) {
-            auto path = mAssetRegistry.getPrefabs()
-                            .getAsset(handle)
-                            .relativePath.string();
-            std::replace(path.begin(), path.end(), '\\', '/');
+            auto uuid = mAssetRegistry.getPrefabs().getAsset(handle).uuid;
 
             components["script"]["variables"][name]["type"] = "prefab";
-            components["script"]["variables"][name]["value"] = path;
+            components["script"]["variables"][name]["value"] = uuid;
           }
         }
       }
@@ -245,11 +228,9 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   if (mEntityDatabase.has<AudioSource>(entity)) {
     auto handle = mEntityDatabase.get<AudioSource>(entity).source;
     if (mAssetRegistry.getAudios().hasAsset(handle)) {
-      auto path =
-          mAssetRegistry.getAudios().getAsset(handle).relativePath.string();
-      std::replace(path.begin(), path.end(), '\\', '/');
+      auto uuid = mAssetRegistry.getAudios().getAsset(handle).uuid;
 
-      components["audio"]["source"] = path;
+      components["audio"]["source"] = uuid;
     }
   }
 

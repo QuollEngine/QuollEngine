@@ -54,8 +54,6 @@ public:
     switch (format) {
     case AudioAssetFormat::Wav:
       return ma_encoding_format_wav;
-    case AudioAssetFormat::Mp3:
-      return ma_encoding_format_mp3;
     }
 
     return ma_encoding_format_unknown;
