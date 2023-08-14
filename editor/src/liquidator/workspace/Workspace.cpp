@@ -37,6 +37,7 @@ Workspace::~Workspace() {
   ImGuiIO &io = ImGui::GetIO();
 
   ImGui::SaveIniSettingsToDisk(io.IniFilename);
+  io.IniFilename = nullptr;
   WorkspaceIO::saveWorkspaceState(mState, mState.project.settingsPath /
                                               "state.lqstate");
 }

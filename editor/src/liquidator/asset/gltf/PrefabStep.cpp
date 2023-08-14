@@ -85,8 +85,20 @@ void loadPrefabs(GLTFImportData &importData) {
 
     if (hasValidMesh) {
       if (node.skin >= 0) {
-        prefab.data.skinnedMeshes.push_back(
-            {localEntityId, importData.skinnedMeshes.map.at(node.mesh)});
+        auto handle = importData.skinnedMeshes.map.at(node.mesh);
+        const auto &asset =
+            importData.assetCache.getRegistry().getSkinnedMeshes().getAsset(
+                handle);
+
+        std::vector<MaterialAssetHandle> materials;
+        for (const auto &g : asset.data.geometries) {
+          materials.push_back(g.material);
+        }
+
+        prefab.data.skinnedMeshes.push_back({localEntityId, handle});
+
+        SkinnedMeshRenderer renderer{materials};
+        prefab.data.skinnedMeshRenderers.push_back({localEntityId, renderer});
 
         prefab.data.skeletons.push_back(
             {localEntityId,
@@ -98,6 +110,20 @@ void loadPrefabs(GLTFImportData &importData) {
         }
 
       } else {
+        auto handle = importData.meshes.map.at(node.mesh);
+        const auto &asset =
+            importData.assetCache.getRegistry().getMeshes().getAsset(handle);
+
+        std::vector<MaterialAssetHandle> materials;
+        for (const auto &g : asset.data.geometries) {
+          materials.push_back(g.material);
+        }
+
+        prefab.data.meshes.push_back({localEntityId, handle});
+
+        MeshRenderer renderer{materials};
+        prefab.data.meshRenderers.push_back({localEntityId, renderer});
+
         prefab.data.meshes.push_back(
             {localEntityId, importData.meshes.map.at(node.mesh)});
 

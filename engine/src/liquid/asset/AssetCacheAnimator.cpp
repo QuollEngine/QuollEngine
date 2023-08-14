@@ -9,9 +9,8 @@
 
 namespace liquid {
 
-Result<Path>
-liquid::AssetCache::createAnimatorFromSource(const Path &sourcePath,
-                                             const String &uuid) {
+Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
+                                                  const String &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);

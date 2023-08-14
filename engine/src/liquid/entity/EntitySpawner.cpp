@@ -78,9 +78,19 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
     mEntityDatabase.set<Mesh>(entity, {pMesh.value});
   }
 
+  for (const auto &pRenderer : asset.meshRenderers) {
+    auto entity = getOrCreateEntity(pRenderer.entity);
+    mEntityDatabase.set(entity, pRenderer.value);
+  }
+
   for (const auto &pSkinnedMesh : asset.skinnedMeshes) {
     auto entity = getOrCreateEntity(pSkinnedMesh.entity);
     mEntityDatabase.set<SkinnedMesh>(entity, {pSkinnedMesh.value});
+  }
+
+  for (const auto &pRenderer : asset.skinnedMeshRenderers) {
+    auto entity = getOrCreateEntity(pRenderer.entity);
+    mEntityDatabase.set(entity, pRenderer.value);
   }
 
   for (const auto &pSkeleton : asset.skeletons) {

@@ -50,9 +50,9 @@ MaterialPBR::Properties::getProperties() const {
           {"emissiveFactor", emissiveFactor}};
 }
 
-MaterialPBR::MaterialPBR(const Properties &properties,
+MaterialPBR::MaterialPBR(const String &name, const Properties &properties,
                          RenderStorage &renderStorage)
-    : Material(properties.getTextures(), properties.getProperties(),
+    : Material(name, properties.getTextures(), properties.getProperties(),
                renderStorage) {}
 
 } // namespace liquid

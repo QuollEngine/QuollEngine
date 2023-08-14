@@ -328,6 +328,213 @@ TEST_F(SceneLoaderMeshTest,
   EXPECT_EQ(entityDatabase.get<liquid::SkinnedMesh>(entity).handle, handle);
 }
 
+using SceneLoaderMeshRendererTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderMeshRendererTest, DoesNotCreateComponentIfFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::MeshRenderer>(entity));
+}
+
+TEST_F(SceneLoaderMeshRendererTest, DoesNotCreateComponentIfFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["meshRenderer"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::MeshRenderer>(entity));
+  }
+}
+
+TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithMaterialsIfValid) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  liquid::AssetData<liquid::MaterialAsset> material2{};
+  material2.uuid = "material2";
+  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+
+  auto [node, entity] = createNode();
+  node["components"]["meshRenderer"]["materials"].push_back("material1");
+  node["components"]["meshRenderer"]["materials"].push_back("material2");
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::MeshRenderer>(entity));
+  const auto &renderer = entityDatabase.get<liquid::MeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 2);
+  EXPECT_EQ(renderer.materials.at(0), handle1);
+  EXPECT_EQ(renderer.materials.at(1), handle2);
+}
+
+TEST_F(SceneLoaderMeshRendererTest,
+       CreatesComponentAndIgnoresInvalidMaterials) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  auto [node, entity] = createNode();
+  // Valid node
+  node["components"]["meshRenderer"]["materials"].push_back("material1");
+
+  // Non-existent node
+  node["components"]["meshRenderer"]["materials"].push_back("material25");
+
+  // Invalid schema
+  for (auto invalidNode : invalidNodes) {
+    node["components"]["meshRenderer"]["materials"].push_back(invalidNode);
+  }
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::MeshRenderer>(entity));
+  const auto &renderer = entityDatabase.get<liquid::MeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 1);
+  EXPECT_EQ(renderer.materials.at(0), handle1);
+}
+
+TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithNoMaterials) {
+  auto [node, entity] = createNode();
+  node["components"]["meshRenderer"]["materials"] =
+      YAML::Node(YAML::NodeType::Sequence);
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::MeshRenderer>(entity));
+  const auto &renderer = entityDatabase.get<liquid::MeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 0);
+}
+
+TEST_F(SceneLoaderMeshRendererTest,
+       CreatesComponentWithNoMaterialsIfNoMaterialsField) {
+  auto [node, entity] = createNode();
+  node["components"]["meshRenderer"]["materials"] =
+      YAML::Node(YAML::NodeType::Map);
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::MeshRenderer>(entity));
+  const auto &renderer = entityDatabase.get<liquid::MeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 0);
+}
+
+using SceneLoaderSkinnedMeshRendererTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest,
+       DoesNotCreateComponentIfFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+}
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest,
+       DoesNotCreateComponentIfFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["components"]["skinnedMeshRenderer"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+  }
+}
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest,
+       CreatesComponentWithMaterialsIfValid) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  liquid::AssetData<liquid::MaterialAsset> material2{};
+  material2.uuid = "material2";
+  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+
+  auto [node, entity] = createNode();
+  node["components"]["skinnedMeshRenderer"]["materials"].push_back("material1");
+  node["components"]["skinnedMeshRenderer"]["materials"].push_back("material2");
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+  const auto &renderer =
+      entityDatabase.get<liquid::SkinnedMeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 2);
+  EXPECT_EQ(renderer.materials.at(0), handle1);
+  EXPECT_EQ(renderer.materials.at(1), handle2);
+}
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest,
+       CreatesComponentAndIgnoresInvalidMaterials) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  auto [node, entity] = createNode();
+  // Valid node
+  node["components"]["skinnedMeshRenderer"]["materials"].push_back("material1");
+
+  // Non-existent node
+  node["components"]["skinnedMeshRenderer"]["materials"].push_back(
+      "material25");
+
+  // Invalid schema
+  for (auto invalidNode : invalidNodes) {
+    node["components"]["skinnedMeshRenderer"]["materials"].push_back(
+        invalidNode);
+  }
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+  const auto &renderer =
+      entityDatabase.get<liquid::SkinnedMeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 1);
+  EXPECT_EQ(renderer.materials.at(0), handle1);
+}
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest, CreatesComponentWithNoMaterials) {
+  auto [node, entity] = createNode();
+  node["components"]["skinnedMeshRenderer"]["materials"] =
+      YAML::Node(YAML::NodeType::Sequence);
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+  const auto &renderer =
+      entityDatabase.get<liquid::SkinnedMeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 0);
+}
+
+TEST_F(SceneLoaderSkinnedMeshRendererTest,
+       CreatesComponentWithNoMaterialsIfNoMaterialsField) {
+  auto [node, entity] = createNode();
+  node["components"]["skinnedMeshRenderer"]["materials"] =
+      YAML::Node(YAML::NodeType::Map);
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::SkinnedMeshRenderer>(entity));
+  const auto &renderer =
+      entityDatabase.get<liquid::SkinnedMeshRenderer>(entity);
+  EXPECT_EQ(renderer.materials.size(), 0);
+}
+
 using SceneLoaderSkeletonTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderSkeletonTest,

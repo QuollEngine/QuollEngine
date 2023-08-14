@@ -163,12 +163,40 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
+  if (mEntityDatabase.has<MeshRenderer>(entity)) {
+    const auto &renderer = mEntityDatabase.get<MeshRenderer>(entity);
+
+    components["meshRenderer"]["materials"] =
+        YAML::Node(YAML::NodeType::Sequence);
+
+    for (auto material : renderer.materials) {
+      if (mAssetRegistry.getMaterials().hasAsset(material)) {
+        auto uuid = mAssetRegistry.getMaterials().getAsset(material).uuid;
+        components["meshRenderer"]["materials"].push_back(uuid);
+      }
+    }
+  }
+
   if (mEntityDatabase.has<SkinnedMesh>(entity)) {
     auto handle = mEntityDatabase.get<SkinnedMesh>(entity).handle;
     if (mAssetRegistry.getSkinnedMeshes().hasAsset(handle)) {
       auto uuid = mAssetRegistry.getSkinnedMeshes().getAsset(handle).uuid;
 
       components["skinnedMesh"] = uuid;
+    }
+  }
+
+  if (mEntityDatabase.has<SkinnedMeshRenderer>(entity)) {
+    const auto &renderer = mEntityDatabase.get<SkinnedMeshRenderer>(entity);
+
+    components["skinnedMeshRenderer"]["materials"] =
+        YAML::Node(YAML::NodeType::Sequence);
+
+    for (auto material : renderer.materials) {
+      if (mAssetRegistry.getMaterials().hasAsset(material)) {
+        auto uuid = mAssetRegistry.getMaterials().getAsset(material).uuid;
+        components["skinnedMeshRenderer"]["materials"].push_back(uuid);
+      }
     }
   }
 

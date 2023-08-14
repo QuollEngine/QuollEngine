@@ -137,7 +137,7 @@ TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
                                              0,
                                              glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material(properties, renderStorage);
+  liquid::MaterialPBR material("test", properties, renderStorage);
 
   auto *buffer = device.getBuffer(material.getBuffer());
 

@@ -195,6 +195,7 @@ void AssetBrowser::render(WorkspaceContext &context) {
         bool dndAllowed = entry.assetType == AssetType::Prefab ||
                           entry.assetType == AssetType::Mesh ||
                           entry.assetType == AssetType::SkinnedMesh ||
+                          entry.assetType == AssetType::Material ||
                           entry.assetType == AssetType::Skeleton ||
                           entry.assetType == AssetType::Texture ||
                           entry.assetType == AssetType::Audio ||
@@ -430,18 +431,27 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     return entry;
   };
 
-  auto addTextureEntryIfExists = [&](TextureAssetHandle handle) {
-    if (handle != TextureAssetHandle::Null) {
-      mEntries.push_back(createPrefabEntry(
-          assetManager.getAssetRegistry().getTextures(), handle));
+  auto addPrefabEntry = [&]<typename AssetHandle, typename AssetData>(
+                            AssetMap<AssetHandle, AssetData> &map,
+                            AssetHandle handle,
+                            std::unordered_map<AssetHandle, bool> &cache) {
+    if (handle != AssetHandle::Null && !cache.contains(handle)) {
+      cache.insert_or_assign(handle, true);
+      mEntries.push_back(createPrefabEntry(map, handle));
+      return true;
     }
+
+    return false;
   };
 
-  auto addMaterialEntryIfExists = [&](MaterialAssetHandle handle) {
-    if (handle != MaterialAssetHandle::Null) {
-      mEntries.push_back(
-          createPrefabEntry(assetRegistry.getMaterials(), handle));
+  std::unordered_map<TextureAssetHandle, bool> textureCache;
+  auto addTextureEntryIfExists = [&](TextureAssetHandle handle) {
+    addPrefabEntry(assetRegistry.getTextures(), handle, textureCache);
+  };
 
+  std::unordered_map<MaterialAssetHandle, bool> materialCache;
+  auto addMaterialEntry = [&](MaterialAssetHandle handle) {
+    if (addPrefabEntry(assetRegistry.getMaterials(), handle, materialCache)) {
       const auto &material = assetRegistry.getMaterials().getAsset(handle);
 
       addTextureEntryIfExists(material.data.baseColorTexture);
@@ -452,67 +462,46 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     }
   };
 
+  std::unordered_map<MeshAssetHandle, bool> meshCache;
   for (const auto &ref : prefab.data.meshes) {
-    const auto &asset = assetRegistry.getMeshes().getAsset(ref.value);
-
-    mEntries.push_back(createPrefabEntry(assetRegistry.getMeshes(), ref.value));
-
-    for (const auto &geometry : asset.data.geometries) {
-      addMaterialEntryIfExists(geometry.material);
-    }
+    addPrefabEntry(assetRegistry.getMeshes(), ref.value, meshCache);
   }
 
+  std::unordered_map<SkinnedMeshAssetHandle, bool> skinnedMeshCache;
   for (const auto &ref : prefab.data.skinnedMeshes) {
-    const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(ref.value);
+    addPrefabEntry(assetRegistry.getSkinnedMeshes(), ref.value,
+                   skinnedMeshCache);
+  }
 
-    mEntries.push_back(
-        createPrefabEntry(assetRegistry.getSkinnedMeshes(), ref.value));
-
-    for (const auto &geometry : asset.data.geometries) {
-      addMaterialEntryIfExists(geometry.material);
+  for (const auto &renderer : prefab.data.meshRenderers) {
+    for (auto material : renderer.value.materials) {
+      addMaterialEntry(material);
     }
   }
 
+  for (const auto &renderer : prefab.data.skinnedMeshRenderers) {
+    for (auto material : renderer.value.materials) {
+      addMaterialEntry(material);
+    }
+  }
+
+  std::unordered_map<SkeletonAssetHandle, bool> skeletonCache;
   for (const auto &ref : prefab.data.skeletons) {
-    const auto &asset = assetRegistry.getSkeletons().getAsset(ref.value);
-
-    Entry entry;
-    entry.isDirectory = false;
-    entry.path = asset.path;
-    entry.name = removePrefabName(asset.name);
-    entry.assetType = asset.type;
-    entry.asset = static_cast<uint32_t>(ref.value);
-
-    setDefaultProps(entry, assetManager.getAssetRegistry());
-    mEntries.push_back(entry);
+    addPrefabEntry(assetRegistry.getSkeletons(), ref.value, skeletonCache);
   }
 
-  for (const auto ref : prefab.data.animations) {
-    const auto &asset = assetRegistry.getAnimations().getAsset(ref);
-
-    Entry entry;
-    entry.isDirectory = false;
-    entry.path = asset.path;
-    entry.name = removePrefabName(asset.name);
-    entry.assetType = asset.type;
-    entry.asset = static_cast<uint32_t>(ref);
-
-    setDefaultProps(entry, assetManager.getAssetRegistry());
-    mEntries.push_back(entry);
-  }
-
+  std::unordered_map<AnimatorAssetHandle, bool> animatorCache;
   for (const auto &ref : prefab.data.animators) {
-    const auto &asset = assetRegistry.getAnimators().getAsset(ref.value);
+    addPrefabEntry(assetRegistry.getAnimators(), ref.value, animatorCache);
+  }
 
-    Entry entry;
-    entry.isDirectory = false;
-    entry.path = asset.path;
-    entry.name = removePrefabName(asset.name);
-    entry.assetType = asset.type;
-    entry.asset = static_cast<uint32_t>(ref.value);
-
-    setDefaultProps(entry, assetManager.getAssetRegistry());
-    mEntries.push_back(entry);
+  std::unordered_map<AnimationAssetHandle, bool> animationCache;
+  for (const auto &ref : prefab.data.animators) {
+    const auto &animator = assetRegistry.getAnimators().getAsset(ref.value);
+    for (const auto &state : animator.data.states) {
+      addPrefabEntry(assetRegistry.getAnimations(), state.animation,
+                     animationCache);
+    }
   }
 }
 

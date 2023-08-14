@@ -167,7 +167,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
 
 TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   liquid::AssetData<liquid::MeshAsset> mesh{};
-  mesh.uuid = "mesh.mesh";
+  mesh.uuid = "mesh.asset";
 
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
@@ -176,7 +176,66 @@ TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["mesh"]);
-  EXPECT_EQ(node["mesh"].as<liquid::String>(""), "mesh.mesh");
+  EXPECT_EQ(node["mesh"].as<liquid::String>(""), "mesh.asset");
+}
+
+// Mesh renderer
+TEST_F(EntitySerializerTest,
+       DoesNotCreateMeshRendererFieldIfMeshRendererComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["meshRenderer"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1.asset";
+
+  liquid::AssetData<liquid::MaterialAsset> material2{};
+  material2.uuid = "material2.asset";
+
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::MeshRenderer>(entity, {{handle1, handle2}});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["meshRenderer"]);
+  EXPECT_TRUE(node["meshRenderer"]["materials"]);
+  EXPECT_EQ(node["meshRenderer"]["materials"].size(), 2);
+  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<liquid::String>(""),
+            "material1.asset");
+  EXPECT_EQ(node["meshRenderer"]["materials"][1].as<liquid::String>(""),
+            "material2.asset");
+}
+
+TEST_F(EntitySerializerTest,
+       CreatesMeshRendererAndIgnoresNonExistentMaterials) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1.asset";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::MeshRenderer>(
+      entity, {{handle1, liquid::MaterialAssetHandle{25}}});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["meshRenderer"]);
+  EXPECT_TRUE(node["meshRenderer"]["materials"]);
+  EXPECT_EQ(node["meshRenderer"]["materials"].size(), 1);
+  EXPECT_EQ(node["meshRenderer"]["materials"][0].as<liquid::String>(""),
+            "material1.asset");
+}
+
+TEST_F(EntitySerializerTest, CreatesMeshRendererWithNoMaterials) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::MeshRenderer>(entity, {});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["meshRenderer"]);
+  EXPECT_TRUE(node["meshRenderer"]["materials"]);
+  EXPECT_EQ(node["meshRenderer"]["materials"].size(), 0);
 }
 
 // Skinned mesh
@@ -210,6 +269,66 @@ TEST_F(EntitySerializerTest,
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["skinnedMesh"]);
   EXPECT_EQ(node["skinnedMesh"].as<liquid::String>(""), "skinnedMesh.mesh");
+}
+
+// Skinned mesh renderer
+TEST_F(
+    EntitySerializerTest,
+    DoesNotCreateSkinnedMeshRendererFieldIfSkinnedMeshRendererComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["skinnedMeshRenderer"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1.asset";
+
+  liquid::AssetData<liquid::MaterialAsset> material2{};
+  material2.uuid = "material2.asset";
+
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+  auto handle2 = assetRegistry.getMaterials().addAsset(material2);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::SkinnedMeshRenderer>(entity, {{handle1, handle2}});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]["materials"]);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"].size(), 2);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<liquid::String>(""),
+            "material1.asset");
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][1].as<liquid::String>(""),
+            "material2.asset");
+}
+
+TEST_F(EntitySerializerTest,
+       CreatesSkinnedMeshRendererAndIgnoresNonExistentMaterials) {
+  liquid::AssetData<liquid::MaterialAsset> material1{};
+  material1.uuid = "material1.asset";
+  auto handle1 = assetRegistry.getMaterials().addAsset(material1);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::SkinnedMeshRenderer>(
+      entity, {{handle1, liquid::MaterialAssetHandle{25}}});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]["materials"]);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"].size(), 1);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"][0].as<liquid::String>(""),
+            "material1.asset");
+}
+
+TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererWithNoMaterials) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::SkinnedMeshRenderer>(entity, {});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]);
+  EXPECT_TRUE(node["skinnedMeshRenderer"]["materials"]);
+  EXPECT_EQ(node["skinnedMeshRenderer"]["materials"].size(), 0);
 }
 
 // Skeleton

@@ -16,11 +16,12 @@ public:
   /**
    * @brief Creates material
    *
+   * @param name Material name
    * @param textures Textures
    * @param properties Material properties
    * @param renderStorage Render storage
    */
-  Material(const std::vector<rhi::TextureHandle> &textures,
+  Material(const String &name, const std::vector<rhi::TextureHandle> &textures,
            const std::vector<std::pair<String, Property>> &properties,
            RenderStorage &renderStorage);
 
@@ -57,6 +58,13 @@ public:
   inline rhi::BufferHandle getBuffer() const { return mBuffer.getHandle(); }
 
   /**
+   * @brief Get buffer address
+   *
+   * @return Buffer device address
+   */
+  inline rhi::DeviceAddress getAddress() const { return mBuffer.getAddress(); }
+
+  /**
    * @brief Get properties
    *
    * @return Unordered list of properties
@@ -64,13 +72,6 @@ public:
   inline const std::vector<Property> &getProperties() const {
     return mProperties;
   }
-
-  /**
-   * @brief Get descriptor
-   *
-   * @return rhi::Descriptor
-   */
-  inline const rhi::Descriptor &getDescriptor() const { return mDescriptor; }
 
 private:
   /**
@@ -87,8 +88,6 @@ private:
   rhi::Buffer mBuffer;
 
   char *mData = nullptr;
-
-  rhi::Descriptor mDescriptor;
 
   std::vector<Property> mProperties;
   std::map<String, size_t> mPropertyMap;

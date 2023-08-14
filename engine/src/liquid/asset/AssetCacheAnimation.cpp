@@ -55,6 +55,7 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
   animation.path = filePath;
   animation.type = AssetType::Animation;
   animation.uuid = filePath.stem().string();
+  animation.name = header.name;
 
   stream.read(animation.data.time);
   uint32_t numKeyframes = 0;

@@ -4,7 +4,8 @@
 
 namespace liquid {
 
-Material::Material(const std::vector<rhi::TextureHandle> &textures,
+Material::Material(const String &name,
+                   const std::vector<rhi::TextureHandle> &textures,
                    const std::vector<std::pair<String, Property>> &properties,
                    RenderStorage &renderStorage)
     : mTextures(textures) {
@@ -17,9 +18,9 @@ Material::Material(const std::vector<rhi::TextureHandle> &textures,
 
   if (!mProperties.empty()) {
     auto size = updateBufferData();
-    mBuffer =
-        renderStorage.createBuffer({rhi::BufferUsage::Uniform, size, mData});
-    mDescriptor = renderStorage.createMaterialDescriptor(mBuffer);
+    rhi::BufferDescription desc{rhi::BufferUsage::Uniform, size, mData};
+    desc.debugName = name;
+    mBuffer = renderStorage.createBuffer(desc);
   }
 }
 

@@ -25,13 +25,6 @@ void GameExporter::exportGame(const Project &project, const Path &destination) {
                         destination / project.scenesPath.filename(),
                         co::overwrite_existing | co::recursive);
 
-  for (auto &entry :
-       std::filesystem::recursive_directory_iterator(destinationAssetsPath)) {
-    if (entry.path().extension() == ".lqhash") {
-      std::filesystem::remove(entry.path());
-    }
-  }
-
   // Copy engine data
   auto enginePath = Engine::getEnginePath();
   std::filesystem::copy(enginePath, destination / enginePath.filename(),

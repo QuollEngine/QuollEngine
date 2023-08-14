@@ -27,15 +27,46 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
   header.name = asset.name;
   file.write(header);
 
+  std::map<MaterialAssetHandle, uint32_t> localMaterialMap;
+  {
+    std::vector<String> assetPaths;
+    assetPaths.reserve(asset.data.meshes.size());
+
+    for (auto &component : asset.data.meshRenderers) {
+      for (auto material : component.value.materials) {
+        if (localMaterialMap.find(material) == localMaterialMap.end()) {
+          auto uuid = mRegistry.getMaterials().getAsset(material).uuid;
+          localMaterialMap.insert_or_assign(
+              material, static_cast<uint32_t>(assetPaths.size()));
+          assetPaths.push_back(uuid);
+        }
+      }
+    }
+
+    for (auto &component : asset.data.skinnedMeshRenderers) {
+      for (auto material : component.value.materials) {
+        if (localMaterialMap.find(material) == localMaterialMap.end()) {
+          auto uuid = mRegistry.getMaterials().getAsset(material).uuid;
+          localMaterialMap.insert_or_assign(
+              material, static_cast<uint32_t>(assetPaths.size()));
+          assetPaths.push_back(uuid);
+        }
+      }
+    }
+
+    file.write(static_cast<uint32_t>(assetPaths.size()));
+    file.write(assetPaths);
+  }
+
   std::map<MeshAssetHandle, uint32_t> localMeshMap;
   {
     std::vector<String> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
 
     for (auto &component : asset.data.meshes) {
-      auto uuid = mRegistry.getMeshes().getAsset(component.value).uuid;
 
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
+        auto uuid = mRegistry.getMeshes().getAsset(component.value).uuid;
         localMeshMap.insert_or_assign(component.value,
                                       static_cast<uint32_t>(assetPaths.size()));
         assetPaths.push_back(uuid);
@@ -159,11 +190,38 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
   }
 
   {
+    auto numComponents = static_cast<uint32_t>(asset.data.meshRenderers.size());
+    file.write(numComponents);
+    for (auto &component : asset.data.meshRenderers) {
+      file.write(component.entity);
+
+      file.write(static_cast<uint32_t>(component.value.materials.size()));
+      for (auto handle : component.value.materials) {
+        file.write(localMaterialMap.at(handle));
+      }
+    }
+  }
+
+  {
     auto numComponents = static_cast<uint32_t>(asset.data.skinnedMeshes.size());
     file.write(numComponents);
     for (auto &component : asset.data.skinnedMeshes) {
       file.write(component.entity);
       file.write(localSkinnedMeshMap.at(component.value));
+    }
+  }
+
+  {
+    auto numComponents =
+        static_cast<uint32_t>(asset.data.skinnedMeshRenderers.size());
+    file.write(numComponents);
+    for (auto &component : asset.data.skinnedMeshRenderers) {
+      file.write(component.entity);
+
+      file.write(static_cast<uint32_t>(component.value.materials.size()));
+      for (auto handle : component.value.materials) {
+        file.write(localMaterialMap.at(handle));
+      }
     }
   }
 
@@ -235,8 +293,28 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   prefab.type = AssetType::Prefab;
   prefab.uuid = filePath.stem().string();
 
-  std::vector<MeshAssetHandle> localMeshMap;
+  std::vector<MaterialAssetHandle> localMaterialMap;
+  {
+    uint32_t numAssets = 0;
+    stream.read(numAssets);
+    std::vector<liquid::String> actual(numAssets);
+    stream.read(actual);
+    localMaterialMap.resize(numAssets, MaterialAssetHandle::Null);
 
+    for (uint32_t i = 0; i < numAssets; ++i) {
+      auto assetUuid = actual.at(i);
+      const auto &res = getOrLoadMaterialFromUuid(assetUuid);
+      if (res.hasData()) {
+        localMaterialMap.at(i) = res.getData();
+        warnings.insert(warnings.end(), res.getWarnings().begin(),
+                        res.getWarnings().end());
+      } else {
+        warnings.push_back(res.getError());
+      }
+    }
+  }
+
+  std::vector<MeshAssetHandle> localMeshMap;
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
@@ -391,7 +469,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     prefab.data.meshes.resize(numComponents);
 
-    auto &map = mRegistry.getMeshes();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 0;
       stream.read(entity);
@@ -408,9 +485,33 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     uint32_t numComponents = 0;
     stream.read(numComponents);
 
+    prefab.data.meshRenderers.resize(numComponents);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      uint32_t numMaterials = 0;
+      stream.read(numMaterials);
+
+      std::vector<uint32_t> materialIndices(numMaterials);
+      stream.read(materialIndices);
+
+      prefab.data.meshRenderers.at(i).entity = entity;
+
+      for (auto materialIndex : materialIndices) {
+        prefab.data.meshRenderers.at(i).value.materials.push_back(
+            localMaterialMap.at(materialIndex));
+      }
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+
     prefab.data.skinnedMeshes.resize(numComponents);
 
-    auto &map = mRegistry.getSkinnedMeshes();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 0;
       stream.read(entity);
@@ -427,9 +528,33 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     uint32_t numComponents = 0;
     stream.read(numComponents);
 
+    prefab.data.skinnedMeshRenderers.resize(numComponents);
+
+    for (uint32_t i = 0; i < numComponents; ++i) {
+      uint32_t entity = 0;
+      stream.read(entity);
+
+      uint32_t numMaterials = 0;
+      stream.read(numMaterials);
+
+      std::vector<uint32_t> materialIndices(numMaterials);
+      stream.read(materialIndices);
+
+      prefab.data.skinnedMeshRenderers.at(i).entity = entity;
+
+      for (auto materialIndex : materialIndices) {
+        prefab.data.skinnedMeshRenderers.at(i).value.materials.push_back(
+            localMaterialMap.at(materialIndex));
+      }
+    }
+  }
+
+  {
+    uint32_t numComponents = 0;
+    stream.read(numComponents);
+
     prefab.data.skeletons.resize(numComponents);
 
-    auto &map = mRegistry.getSkeletons();
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 0;
       stream.read(entity);
@@ -445,7 +570,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numComponents = 0;
     stream.read(numComponents);
-    auto &map = mRegistry.getAnimations();
 
     prefab.data.animations.resize(numComponents);
 
@@ -460,7 +584,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numComponents = 0;
     stream.read(numComponents);
-    auto &map = mRegistry.getAnimators();
 
     prefab.data.animators.resize(numComponents);
 

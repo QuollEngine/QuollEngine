@@ -5,6 +5,7 @@
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec2 inTextureCoord[2];
 layout(location = 3) in mat3 inTBN;
+layout(location = 6) in flat uint inMaterialIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -13,6 +14,7 @@ layout(location = 0) out vec4 outColor;
 #include "bindless/scene.glsl"
 #include "bindless/shadows.glsl"
 #include "bindless/lights.glsl"
+#include "bindless/material.glsl"
 
 layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
 layout(set = 0, binding = 0) uniform sampler2DArray uTextures2DArray[];
@@ -20,8 +22,11 @@ layout(set = 0, binding = 0) uniform samplerCube uTexturesCube[];
 layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
+  MaterialsArray materials;
   Empty meshTransforms;
+  MaterialRangeArray meshMaterialRanges;
   Empty skinnedMeshTransforms;
+  MaterialRangeArray skinnedMaterialRanges;
   Empty skeletons;
   Camera camera;
   Scene scene;
@@ -30,26 +35,6 @@ layout(set = 1, binding = 0) uniform DrawParameters {
   ShadowMapsArray shadows;
 }
 uDrawParams;
-
-layout(std140, set = 2, binding = 0) uniform MaterialDataRaw {
-  uint baseColorTexture[1];
-  int baseColorTextureCoord[1];
-  vec4 baseColorFactor;
-  uint metallicRoughnessTexture[1];
-  int metallicRoughnessTextureCoord[1];
-  float metallicFactor[1];
-  float roughnessFactor[1];
-  uint normalTexture[1];
-  int normalTextureCoord[1];
-  float normalScale[1];
-  uint occlusionTexture[1];
-  int occlusionTextureCoord[1];
-  float occlusionStrength[1];
-  uint emissiveTexture[1];
-  int emissiveTextureCoord[1];
-  vec3 emissiveFactor;
-}
-uMaterialDataRaw;
 
 /**
  * @brief PBR Material data
@@ -165,17 +150,18 @@ struct MaterialData {
   vec3 emissiveFactor;
 };
 
+#define getMaterial() uDrawParams.materials.items[inMaterialIndex]
+
 MaterialData uMaterialData = MaterialData(
-    uMaterialDataRaw.baseColorTexture[0],
-    uMaterialDataRaw.baseColorTextureCoord[0], uMaterialDataRaw.baseColorFactor,
-    uMaterialDataRaw.metallicRoughnessTexture[0],
-    uMaterialDataRaw.metallicRoughnessTextureCoord[0],
-    uMaterialDataRaw.metallicFactor[0], uMaterialDataRaw.roughnessFactor[0],
-    uMaterialDataRaw.normalTexture[0], uMaterialDataRaw.normalTextureCoord[0],
-    uMaterialDataRaw.normalScale[0], uMaterialDataRaw.occlusionTexture[0],
-    uMaterialDataRaw.occlusionTextureCoord[0],
-    uMaterialDataRaw.occlusionStrength[0], uMaterialDataRaw.emissiveTexture[0],
-    uMaterialDataRaw.emissiveTextureCoord[0], uMaterialDataRaw.emissiveFactor);
+    getMaterial().baseColorTexture[0], getMaterial().baseColorTextureCoord[0],
+    getMaterial().baseColorFactor, getMaterial().metallicRoughnessTexture[0],
+    getMaterial().metallicRoughnessTextureCoord[0],
+    getMaterial().metallicFactor[0], getMaterial().roughnessFactor[0],
+    getMaterial().normalTexture[0], getMaterial().normalTextureCoord[0],
+    getMaterial().normalScale[0], getMaterial().occlusionTexture[0],
+    getMaterial().occlusionTextureCoord[0], getMaterial().occlusionStrength[0],
+    getMaterial().emissiveTexture[0], getMaterial().emissiveTextureCoord[0],
+    getMaterial().emissiveFactor);
 
 const float PI = 3.141592653589793;
 const mat4 DepthBiasMatrix = mat4(0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,

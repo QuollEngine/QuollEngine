@@ -103,6 +103,26 @@ private:
                   ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render mesh renderer
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+                          ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Render skinned mesh renderer
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderSkinnedMeshRenderer(Scene &scene, AssetRegistry &assetRegistry,
+                                 ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render animation component
    *
    * @param state Workspace state

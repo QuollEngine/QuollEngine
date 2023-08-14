@@ -114,10 +114,12 @@ public:
   /**
    * @brief Create PBR material
    *
+   * @param name Material name
    * @param properties PBR properties
    * @param renderStorage Render storage
    */
-  MaterialPBR(const Properties &properties, RenderStorage &renderStorage);
+  MaterialPBR(const String &name, const Properties &properties,
+              RenderStorage &renderStorage);
 };
 
 } // namespace liquid
