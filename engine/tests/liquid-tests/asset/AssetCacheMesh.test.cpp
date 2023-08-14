@@ -50,12 +50,6 @@ public:
           geometry.indices.push_back(udist(mt));
         }
 
-        liquid::AssetData<liquid::MaterialAsset> material;
-        material.uuid = "material-geom-" + std::to_string(i);
-
-        geometry.material =
-            cache.getRegistry().getMaterials().addAsset(material);
-
         asset.data.geometries.push_back(geometry);
       }
     }
@@ -107,11 +101,6 @@ public:
       for (size_t i = 0; i < countIndices; ++i) {
         geometry.indices.push_back(udist(mt));
       }
-
-      liquid::AssetData<liquid::MaterialAsset> material;
-      material.uuid = "material-geom-" + std::to_string(i);
-
-      geometry.material = cache.getRegistry().getMaterials().addAsset(material);
 
       asset.data.geometries.push_back(geometry);
     }
@@ -201,10 +190,6 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
       file.read(valueActual);
       EXPECT_EQ(valueExpected, valueActual);
     }
-
-    liquid::String materialPath;
-    file.read(materialPath);
-    EXPECT_EQ(materialPath, "material-geom-" + std::to_string(i));
   }
 
   EXPECT_FALSE(std::filesystem::exists(
@@ -266,47 +251,8 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
       auto actual = actualGeometry.indices.at(i);
       EXPECT_EQ(expected, actual);
     }
-
-    EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
   }
 }
-
-TEST_F(AssetCacheMeshTest, LoadsMeshWithMaterials) {
-  auto textureHandle = cache.loadTextureFromFile(CachePath / "tex.asset");
-  liquid::AssetData<liquid::MaterialAsset> materialData{};
-  materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = cache.createMaterialFromAsset(materialData, "");
-  auto materialHandle = cache.loadMaterialFromFile(materialPath.getData());
-
-  liquid::AssetData<liquid::MeshAsset> meshData{};
-
-  liquid::BaseGeometryAsset<liquid::Vertex> geometry;
-  geometry.material = materialHandle.getData();
-  geometry.vertices.push_back({1.0f});
-  geometry.indices.push_back(1);
-  meshData.data.geometries.push_back(geometry);
-
-  auto meshPath = cache.createMeshFromAsset(meshData, "");
-
-  cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  cache.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
-
-  auto meshHandle = cache.loadMeshFromFile(meshPath.getData()).getData();
-  auto &newMesh = cache.getRegistry().getMeshes().getAsset(meshHandle);
-
-  EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Null);
-
-  auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
-      newMesh.data.geometries.at(0).material);
-  EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Null);
-
-  auto &newTexture = cache.getRegistry().getTextures().getAsset(
-      newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.uuid, "tex");
-}
-
 TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
@@ -404,10 +350,6 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
       file.read(valueActual);
       EXPECT_EQ(valueExpected, valueActual);
     }
-
-    liquid::String materialUuid;
-    file.read(materialUuid);
-    EXPECT_EQ(materialUuid, "material-geom-" + std::to_string(i));
   }
 }
 
@@ -468,42 +410,5 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
       auto actual = actualGeometry.indices.at(i);
       EXPECT_EQ(expected, actual);
     }
-
-    EXPECT_EQ(expectedGeometry.material, actualGeometry.material);
   }
-}
-
-TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshWithMaterials) {
-  auto textureHandle = cache.loadTextureFromFile(CachePath / "tex.asset");
-  liquid::AssetData<liquid::MaterialAsset> materialData{};
-  materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = cache.createMaterialFromAsset(materialData, "");
-  auto materialHandle = cache.loadMaterialFromFile(materialPath.getData());
-
-  liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
-  liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
-  geometry.material = materialHandle.getData();
-  geometry.vertices.push_back({1.0f});
-  geometry.indices.push_back(1);
-  meshData.data.geometries.push_back(geometry);
-
-  auto meshPath = cache.createSkinnedMeshFromAsset(meshData, "");
-
-  cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  cache.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
-
-  auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath.getData()).getData();
-  auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(meshHandle);
-
-  EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Null);
-
-  auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
-      newMesh.data.geometries.at(0).material);
-  EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Null);
-
-  auto &newTexture = cache.getRegistry().getTextures().getAsset(
-      newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.uuid, "tex");
 }

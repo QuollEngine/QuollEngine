@@ -90,10 +90,8 @@ void loadPrefabs(GLTFImportData &importData) {
             importData.assetCache.getRegistry().getSkinnedMeshes().getAsset(
                 handle);
 
-        std::vector<MaterialAssetHandle> materials;
-        for (const auto &g : asset.data.geometries) {
-          materials.push_back(g.material);
-        }
+        auto materials =
+            importData.meshMaterialData.skinnedMeshMaterialMap.at(handle);
 
         prefab.data.skinnedMeshes.push_back({localEntityId, handle});
 
@@ -114,10 +112,7 @@ void loadPrefabs(GLTFImportData &importData) {
         const auto &asset =
             importData.assetCache.getRegistry().getMeshes().getAsset(handle);
 
-        std::vector<MaterialAssetHandle> materials;
-        for (const auto &g : asset.data.geometries) {
-          materials.push_back(g.material);
-        }
+        auto materials = importData.meshMaterialData.meshMaterialMap.at(handle);
 
         prefab.data.meshes.push_back({localEntityId, handle});
 

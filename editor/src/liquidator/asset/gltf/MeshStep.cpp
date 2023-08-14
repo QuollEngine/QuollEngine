@@ -410,6 +410,7 @@ void loadMeshes(GLTFImportData &importData) {
       }
     }
 
+    std::vector<MaterialAssetHandle> materials;
     AssetData<MeshAsset> mesh;
     AssetData<SkinnedMeshAsset> skinnedMesh;
 
@@ -418,7 +419,9 @@ void loadMeshes(GLTFImportData &importData) {
 
       auto material = primitive.material >= 0
                           ? importData.materials.map.at(primitive.material)
-                          : MaterialAssetHandle::Null;
+                          : importData.assetCache.getRegistry()
+                                .getDefaultObjects()
+                                .defaultMaterial;
 
       if (isSkinnedMesh) {
         auto &&result =
@@ -453,7 +456,8 @@ void loadMeshes(GLTFImportData &importData) {
                                    skinnedResult.getWarnings().end());
 
         if (vertices.size() > 0) {
-          skinnedMesh.data.geometries.push_back({vertices, indices, material});
+          skinnedMesh.data.geometries.push_back({vertices, indices});
+          materials.push_back(material);
         }
       } else {
         auto &&result =
@@ -476,7 +480,8 @@ void loadMeshes(GLTFImportData &importData) {
         }
 
         if (vertices.size() > 0) {
-          mesh.data.geometries.push_back({vertices, indices, material});
+          mesh.data.geometries.push_back({vertices, indices});
+          materials.push_back(material);
         }
       }
     }
@@ -492,6 +497,8 @@ void loadMeshes(GLTFImportData &importData) {
           skinnedMesh, getUUID(importData, assetName));
       auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
       importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
+      importData.meshMaterialData.skinnedMeshMaterialMap.insert_or_assign(
+          handle.getData(), materials);
 
       importData.outputUuids.insert_or_assign(assetName,
                                               assetCache.getRegistry()
@@ -509,6 +516,9 @@ void loadMeshes(GLTFImportData &importData) {
       auto path = assetCache.createMeshFromAsset(mesh, uuid);
       auto handle = assetCache.loadMeshFromFile(path.getData());
       importData.meshes.map.insert_or_assign(i, handle.getData());
+
+      importData.meshMaterialData.meshMaterialMap.insert_or_assign(
+          handle.getData(), materials);
 
       importData.outputUuids.insert_or_assign(
           assetName,

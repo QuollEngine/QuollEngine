@@ -56,10 +56,6 @@ Result<Path> AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset,
     auto numIndices = static_cast<uint32_t>(geometry.indices.size());
     file.write(numIndices);
     file.write(geometry.indices);
-
-    auto materialPath =
-        getAssetUuid(mRegistry.getMaterials(), geometry.material);
-    file.write(materialPath);
   }
 
   return Result<Path>::Ok(assetPath);
@@ -136,18 +132,6 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
-
-    String materialPath;
-    stream.read(materialPath);
-
-    const auto &res = getOrLoadMaterialFromUuid(materialPath);
-    if (res.hasData()) {
-      mesh.data.geometries.at(i).material = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else {
-      warnings.push_back("Mesh does not have material");
-    }
   }
 
   return Result<MeshAssetHandle>::Ok(mRegistry.getMeshes().addAsset(mesh),
@@ -219,10 +203,6 @@ AssetCache::createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset,
     auto numIndices = static_cast<uint32_t>(geometry.indices.size());
     file.write(numIndices);
     file.write(geometry.indices);
-
-    auto materialUuid =
-        getAssetUuid(mRegistry.getMaterials(), geometry.material);
-    file.write(materialUuid);
   }
 
   return Result<Path>::Ok(assetPath);
@@ -312,17 +292,6 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
 
     mesh.data.geometries.at(i).indices.resize(numIndices);
     stream.read(mesh.data.geometries.at(i).indices);
-
-    String materialUuid;
-    stream.read(materialUuid);
-    const auto &res = getOrLoadMaterialFromUuid(materialUuid);
-    if (res.hasData()) {
-      mesh.data.geometries.at(i).material = res.getData();
-      warnings.insert(warnings.end(), res.getWarnings().begin(),
-                      res.getWarnings().end());
-    } else {
-      warnings.push_back(res.getError());
-    }
   }
 
   return Result<SkinnedMeshAssetHandle>::Ok(

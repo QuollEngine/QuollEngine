@@ -9,8 +9,6 @@
 
 namespace liquid {
 
-class Material;
-
 /**
  * @brief Base geometry asset data
  *
@@ -26,11 +24,6 @@ template <class TVertex> struct BaseGeometryAsset {
    * List of indices
    */
   std::vector<uint32_t> indices;
-
-  /**
-   * Material handle
-   */
-  MaterialAssetHandle material = MaterialAssetHandle::Null;
 };
 
 /**
@@ -41,11 +34,6 @@ struct MeshAsset {
    * List of geometries
    */
   std::vector<BaseGeometryAsset<Vertex>> geometries;
-
-  /**
-   * List of materials
-   */
-  std::vector<SharedPtr<Material>> materials;
 
   /**
    * @brief Vertex buffer for all geometries
@@ -76,11 +64,6 @@ struct SkinnedMeshAsset {
    * @brief Index buffer for all geometries
    */
   rhi::Buffer indexBuffer;
-
-  /**
-   * List of materials
-   */
-  std::vector<SharedPtr<Material>> materials;
 };
 
 } // namespace liquid

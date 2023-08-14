@@ -668,16 +668,9 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
       cache.createTextureFromAsset(tempTextureAsset, "").getData();
   auto textureHandle = cache.loadTextureFromFile(texturePath);
 
-  // Create material
-  liquid::AssetData<liquid::MaterialAsset> materialData{};
-  materialData.data.baseColorTexture = textureHandle.getData();
-  auto materialPath = cache.createMaterialFromAsset(materialData, "").getData();
-  auto materialHandle = cache.loadMaterialFromFile(materialPath);
-
   // Create mesh
   liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
   liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
-  geometry.material = materialHandle.getData();
   geometry.vertices.push_back({1.0f});
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
@@ -713,7 +706,6 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Delete all existing assets
   cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  cache.getRegistry().getMaterials().deleteAsset(materialHandle.getData());
   cache.getRegistry().getSkinnedMeshes().deleteAsset(meshHandle.getData());
   cache.getRegistry().getSkeletons().deleteAsset(skeletonHandle.getData());
   cache.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
@@ -731,20 +723,6 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(
       newPrefab.data.skinnedMeshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
-  EXPECT_NE(newMesh.data.geometries.at(0).material,
-            liquid::MaterialAssetHandle::Null);
-
-  // Validate material
-  auto &newMaterial = cache.getRegistry().getMaterials().getAsset(
-      newMesh.data.geometries.at(0).material);
-  EXPECT_EQ(newMaterial.path, materialPath);
-  EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Null);
-
-  // Validate texture
-  auto &newTexture = cache.getRegistry().getTextures().getAsset(
-      newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.path, texturePath);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
