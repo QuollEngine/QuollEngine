@@ -164,17 +164,6 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
       mesh.data.indexBuffer.unmap();
     }
-
-    mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
-    for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
-      auto &geometry = mesh.data.geometries.at(i);
-      auto material = geometry.material != MaterialAssetHandle::Null
-                          ? geometry.material
-                          : mDefaultObjects.defaultMaterial;
-
-      mesh.data.materials.at(i) =
-          mMaterials.getAsset(material).data.deviceHandle;
-    }
   }
 
   // Synchronize skinned meshes
@@ -229,17 +218,6 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       }
 
       mesh.data.indexBuffer.unmap();
-    }
-
-    mesh.data.materials.resize(mesh.data.geometries.size(), nullptr);
-    for (size_t i = 0; i < mesh.data.geometries.size(); ++i) {
-      auto &geometry = mesh.data.geometries.at(i);
-      auto material = geometry.material != MaterialAssetHandle::Null
-                          ? geometry.material
-                          : mDefaultObjects.defaultMaterial;
-
-      mesh.data.materials.at(i) =
-          mMaterials.getAsset(material).data.deviceHandle;
     }
   }
 }

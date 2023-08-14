@@ -64,7 +64,6 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
     assetPaths.reserve(asset.data.meshes.size());
 
     for (auto &component : asset.data.meshes) {
-
       if (localMeshMap.find(component.value) == localMeshMap.end()) {
         auto uuid = mRegistry.getMeshes().getAsset(component.value).uuid;
         localMeshMap.insert_or_assign(component.value,
