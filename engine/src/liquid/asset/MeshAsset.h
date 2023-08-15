@@ -1,7 +1,5 @@
 #pragma once
 
-#include "liquid/scene/Vertex.h"
-#include "liquid/scene/SkinnedVertex.h"
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/Buffer.h"
 
@@ -11,14 +9,42 @@ namespace liquid {
 
 /**
  * @brief Base geometry asset data
- *
- * @tparam TVertex Vertex
  */
-template <class TVertex> struct BaseGeometryAsset {
+struct BaseGeometryAsset {
   /**
-   * List of vertices
+   * Positions
    */
-  std::vector<TVertex> vertices;
+  std::vector<glm::vec3> positions;
+
+  /**
+   * Normals
+   */
+  std::vector<glm::vec3> normals;
+
+  /**
+   * Tangents
+   */
+  std::vector<glm::vec4> tangents;
+
+  /**
+   * Texture coordinates for index 0
+   */
+  std::vector<glm::vec2> texCoords0;
+
+  /**
+   * Texture coordinates for index 1
+   */
+  std::vector<glm::vec2> texCoords1;
+
+  /**
+   * Joints
+   */
+  std::vector<glm::uvec4> joints;
+
+  /**
+   * Weights
+   */
+  std::vector<glm::vec4> weights;
 
   /**
    * List of indices
@@ -33,37 +59,22 @@ struct MeshAsset {
   /**
    * List of geometries
    */
-  std::vector<BaseGeometryAsset<Vertex>> geometries;
+  std::vector<BaseGeometryAsset> geometries;
 
   /**
-   * @brief Vertex buffer for all geometries
+   * @brief Vertex buffers for all geometries
    */
-  rhi::Buffer vertexBuffer;
+  std::vector<rhi::BufferHandle> vertexBuffers;
 
   /**
-   * @brief Index buffer for all geometries
+   * Vertex buffer binding offsets
    */
-  rhi::Buffer indexBuffer;
-};
-
-/**
- * @brief Skinned mesh asset data
- */
-struct SkinnedMeshAsset {
-  /**
-   * List of geometries
-   */
-  std::vector<BaseGeometryAsset<SkinnedVertex>> geometries;
-
-  /**
-   * @brief Vertex buffer for all geometries
-   */
-  rhi::Buffer vertexBuffer;
+  std::vector<uint64_t> vertexBufferOffsets;
 
   /**
    * @brief Index buffer for all geometries
    */
-  rhi::Buffer indexBuffer;
+  rhi::BufferHandle indexBuffer = rhi::BufferHandle::Null;
 };
 
 } // namespace liquid

@@ -8,72 +8,47 @@ static constexpr uint32_t TriangleVertices = 3;
 
 /**
  * @brief Mikktspace adapter
- *
- * @tparam TVertex Vertex type
  */
-template <class TVertex> class MikktspaceAdapter {
-  /**
-   * @brief Mesh data
-   */
+class MikktspaceAdapter {
   struct MeshData {
-    /**
-     * @brief Vertices
-     */
-    std::vector<TVertex> &vertices;
-
-    /**
-     * @brief Indices
-     */
+    const std::vector<glm::vec3> &positions;
+    const std::vector<glm::vec3> &normals;
+    const std::vector<glm::vec2> &texCoords;
     const std::vector<uint32_t> &indices;
+    std::vector<glm::vec4> &tangents;
   };
 
 public:
   /**
    * @brief Mikktspace adapter
    */
-  MikktspaceAdapter() {
-    mInterface.m_getNumFaces = getNumFaces;
-    mInterface.m_getNumVerticesOfFace = getNumVerticesOfFace;
-    mInterface.m_getPosition = getPosition;
-    mInterface.m_getNormal = getNormal;
-    mInterface.m_getTexCoord = getTexCoord;
-    mInterface.m_setTSpaceBasic = setTSpaceBasic;
-    // We do not need the custom tangent
-    // space generator since we are using
-    // basic one.
-    mInterface.m_setTSpace = nullptr;
-  }
+  MikktspaceAdapter();
 
   /**
    * @brief Generate tangents
    *
-   * @param vertices Vertices
+   * @param positions Vertex positions
+   * @param normals Vertex normals
+   * @param texCoords Vertex texture coordinates
    * @param indices Indices
+   * @param[out] tangents Output tangents
    */
-  void generate(std::vector<TVertex> &vertices,
-                const std::vector<uint32_t> &indices) {
-    MeshData data{vertices, indices};
-
-    SMikkTSpaceContext context{};
-    context.m_pInterface = &mInterface;
-    context.m_pUserData = &data;
-
-    genTangSpaceDefault(&context);
-  }
+  void generate(const std::vector<glm::vec3> &positions,
+                const std::vector<glm::vec3> &normals,
+                const std::vector<glm::vec2> &texCoords,
+                const std::vector<uint32_t> &indices,
+                std::vector<glm::vec4> &tangents);
 
 private:
   // NOLINTBEGIN(cppcoreguidelines-avoid-c-arrays)
+
   /**
    * @brief Get number of faces
    *
    * @param context Mikktspace context
    * @return Number of triangles based on indices
    */
-  static int getNumFaces(const SMikkTSpaceContext *pContext) {
-    auto &data = getMeshData(pContext);
-
-    return static_cast<int>(data.indices.size()) / TriangleVertices;
-  }
+  static int getNumFaces(const SMikkTSpaceContext *pContext);
 
   /**
    * @brief Get number of vertices of a face
@@ -82,8 +57,8 @@ private:
    * @param faceIndex Face index (unused)
    * @return Vertices of triangle
    */
-  static int getNumVerticesOfFace(const SMikkTSpaceContext *pContext,
-                                  const int faceIndex) {
+  static inline int getNumVerticesOfFace(const SMikkTSpaceContext *pContext,
+                                         const int faceIndex) {
     return TriangleVertices;
   }
 
@@ -97,13 +72,7 @@ private:
    */
   static void getPosition(const SMikkTSpaceContext *context,
                           float outAttribute[], const int faceIndex,
-                          const int vertexIndex) {
-    auto &vertex = getVertex(context, faceIndex, vertexIndex);
-
-    outAttribute[0] = vertex.x;
-    outAttribute[1] = vertex.y;
-    outAttribute[2] = vertex.z;
-  }
+                          const int vertexIndex);
 
   /**
    * @brief Get normal
@@ -114,13 +83,7 @@ private:
    * @param vertexIndex Relative vertex index
    */
   static void getNormal(const SMikkTSpaceContext *context, float outAttribute[],
-                        const int faceIndex, const int vertexIndex) {
-    auto &vertex = getVertex(context, faceIndex, vertexIndex);
-
-    outAttribute[0] = vertex.nx;
-    outAttribute[1] = vertex.ny;
-    outAttribute[2] = vertex.nz;
-  }
+                        const int faceIndex, const int vertexIndex);
 
   /**
    * @brief Get texture coordinate
@@ -132,12 +95,7 @@ private:
    */
   static void getTexCoord(const SMikkTSpaceContext *context,
                           float outAttribute[], const int faceIndex,
-                          const int vertexIndex) {
-    auto &vertex = getVertex(context, faceIndex, vertexIndex);
-
-    outAttribute[0] = vertex.u0;
-    outAttribute[1] = vertex.v0;
-  }
+                          const int vertexIndex);
 
   /**
    * @brief Set tangent space
@@ -150,16 +108,9 @@ private:
    */
   static void setTSpaceBasic(const SMikkTSpaceContext *context,
                              const float tangents[], const float sign,
-                             const int faceIndex, const int vertexIndex) {
-    auto &vertex = getVertex(context, faceIndex, vertexIndex);
+                             const int faceIndex, const int vertexIndex);
 
-    vertex.tx = tangents[0];
-    vertex.ty = tangents[1];
-    vertex.tz = tangents[2];
-    vertex.tw = sign;
-  }
   // NOLINTEND(cppcoreguidelines-avoid-c-arrays)
-
 private:
   /**
    * @brief Get mesh data from context
@@ -167,7 +118,7 @@ private:
    * @param context Mikktpsace context
    * @return Mesh data
    */
-  static MeshData &getMeshData(const SMikkTSpaceContext *context) {
+  static inline MeshData &getMeshData(const SMikkTSpaceContext *context) {
     return *static_cast<MeshData *>(context->m_pUserData);
   }
 
@@ -180,27 +131,7 @@ private:
    * @return Vertex index
    */
   static size_t getVertexIndex(const SMikkTSpaceContext *context, int faceIndex,
-                               int vertexIndex) {
-    auto &meshData = getMeshData(context);
-    size_t index = static_cast<size_t>(faceIndex * 3 + vertexIndex);
-
-    return meshData.indices.at(index);
-  }
-
-  /**
-   * @brief Get vertex from face index and relative vertex index
-   *
-   * @param context Mikktpsace context
-   * @param faceIndex Face index
-   * @param vertexIndex Vertex index relative to face
-   * @return Vertex
-   */
-  static TVertex &getVertex(const SMikkTSpaceContext *context, int faceIndex,
-                            int vertexIndex) {
-    auto &meshData = getMeshData(context);
-    auto index = getVertexIndex(context, faceIndex, vertexIndex);
-    return meshData.vertices.at(index);
-  }
+                               int vertexIndex);
 
 private:
   SMikkTSpaceInterface mInterface{};

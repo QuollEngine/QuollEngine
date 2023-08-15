@@ -1,6 +1,8 @@
 #include "liquid/core/Base.h"
 #include "EditorRendererFrameData.h"
 
+#include "liquid/renderer/MeshRenderUtils.h"
+
 namespace liquid::editor {
 
 static constexpr size_t MaxNumJoints = 32;
@@ -135,8 +137,16 @@ void EditorRendererFrameData::addTextOutline(
 void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
                                              const glm::mat4 &worldTransform) {
   MeshOutline outline{};
-  outline.indexBuffer = mesh.indexBuffer.getHandle();
-  outline.vertexBuffer = mesh.vertexBuffer.getHandle();
+  outline.indexBuffer = mesh.indexBuffer;
+  {
+    auto data = MeshRenderUtils::getGeometryBuffers(mesh);
+    outline.vertexBuffers = std::vector(data.begin(), data.end());
+  }
+  {
+    auto data = MeshRenderUtils::getGeometryBufferOffsets(mesh);
+    outline.vertexBufferOffsets = std::vector(data.begin(), data.end());
+  }
+
   outline.indexCounts.resize(mesh.geometries.size());
   outline.indexOffsets.resize(mesh.geometries.size());
   outline.vertexOffsets.resize(mesh.geometries.size());
@@ -152,7 +162,7 @@ void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
     lastVertexOffset +=
-        static_cast<uint32_t>(mesh.geometries.at(i).vertices.size());
+        static_cast<uint32_t>(mesh.geometries.at(i).positions.size());
   }
 
   mMeshOutlines.push_back(outline);
@@ -160,11 +170,19 @@ void EditorRendererFrameData::addMeshOutline(const MeshAsset &mesh,
 }
 
 void EditorRendererFrameData::addSkinnedMeshOutline(
-    const SkinnedMeshAsset &mesh, const std::vector<glm::mat4> &skeleton,
+    const MeshAsset &mesh, const std::vector<glm::mat4> &skeleton,
     const glm::mat4 &worldTransform) {
   MeshOutline outline{};
-  outline.indexBuffer = mesh.indexBuffer.getHandle();
-  outline.vertexBuffer = mesh.vertexBuffer.getHandle();
+  outline.indexBuffer = mesh.indexBuffer;
+  {
+    auto data = MeshRenderUtils::getSkinnedGeometryBuffers(mesh);
+    outline.vertexBuffers = std::vector(data.begin(), data.end());
+  }
+  {
+    auto data = MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh);
+    outline.vertexBufferOffsets = std::vector(data.begin(), data.end());
+  }
+
   outline.indexCounts.resize(mesh.geometries.size());
   outline.indexOffsets.resize(mesh.geometries.size());
   outline.vertexOffsets.resize(mesh.geometries.size());
@@ -180,7 +198,7 @@ void EditorRendererFrameData::addSkinnedMeshOutline(
     outline.vertexOffsets.at(i) = lastVertexOffset;
     lastIndexOffset += outline.indexCounts.at(i);
     lastVertexOffset +=
-        static_cast<uint32_t>(mesh.geometries.at(i).vertices.size());
+        static_cast<uint32_t>(mesh.geometries.at(i).positions.size());
   }
 
   mMeshOutlines.push_back(outline);

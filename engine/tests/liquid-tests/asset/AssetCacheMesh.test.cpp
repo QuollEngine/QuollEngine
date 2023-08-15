@@ -25,25 +25,13 @@ public:
       size_t countIndices = 20;
 
       for (size_t i = 0; i < countGeometries; ++i) {
-        liquid::BaseGeometryAsset<liquid::Vertex> geometry;
+        liquid::BaseGeometryAsset geometry;
         for (size_t i = 0; i < countVertices; ++i) {
-          geometry.vertices.push_back({// positions
-                                       dist(mt), dist(mt), dist(mt),
-
-                                       // normals
-                                       dist(mt), dist(mt), dist(mt),
-
-                                       // colors
-                                       dist(mt), dist(mt), dist(mt),
-
-                                       // tangents
-                                       dist(mt), dist(mt), dist(mt), dist(mt),
-
-                                       // texcoords0
-                                       dist(mt), dist(mt),
-
-                                       // texcoords1
-                                       dist(mt), dist(mt)});
+          geometry.positions.push_back({dist(mt), dist(mt), dist(mt)});
+          geometry.normals.push_back({dist(mt), dist(mt), dist(mt)});
+          geometry.tangents.push_back({dist(mt), dist(mt), dist(mt), dist(mt)});
+          geometry.texCoords0.push_back({dist(mt), dist(mt)});
+          geometry.texCoords1.push_back({dist(mt), dist(mt)});
         }
 
         for (size_t i = 0; i < countIndices; ++i) {
@@ -57,9 +45,8 @@ public:
     return asset;
   }
 
-  liquid::AssetData<liquid::SkinnedMeshAsset>
-  createRandomizedSkinnedMeshAsset() {
-    liquid::AssetData<liquid::SkinnedMeshAsset> asset;
+  liquid::AssetData<liquid::MeshAsset> createRandomizedSkinnedMeshAsset() {
+    liquid::AssetData<liquid::MeshAsset> asset;
     asset.name = "test-mesh0";
 
     std::random_device device;
@@ -71,31 +58,15 @@ public:
     size_t countIndices = 20;
 
     for (size_t i = 0; i < countGeometries; ++i) {
-      liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
+      liquid::BaseGeometryAsset geometry;
       for (size_t i = 0; i < countVertices; ++i) {
-        geometry.vertices.push_back({// positions
-                                     dist(mt), dist(mt), dist(mt),
-
-                                     // normals
-                                     dist(mt), dist(mt), dist(mt),
-
-                                     // colors
-                                     dist(mt), dist(mt), dist(mt),
-
-                                     // tangents
-                                     dist(mt), dist(mt), dist(mt), dist(mt),
-
-                                     // texcoords0
-                                     dist(mt), dist(mt),
-
-                                     // texcoords1
-                                     dist(mt), dist(mt),
-
-                                     // joints
-                                     udist(mt), udist(mt), udist(mt), udist(mt),
-
-                                     // weights
-                                     dist(mt), dist(mt), dist(mt), dist(mt)});
+        geometry.positions.push_back({dist(mt), dist(mt), dist(mt)});
+        geometry.normals.push_back({dist(mt), dist(mt), dist(mt)});
+        geometry.tangents.push_back({dist(mt), dist(mt), dist(mt), dist(mt)});
+        geometry.texCoords0.push_back({dist(mt), dist(mt)});
+        geometry.texCoords1.push_back({dist(mt), dist(mt)});
+        geometry.joints.push_back({udist(mt), udist(mt), udist(mt), udist(mt)});
+        geometry.weights.push_back({dist(mt), dist(mt), dist(mt), dist(mt)});
       }
 
       for (size_t i = 0; i < countIndices; ++i) {
@@ -136,8 +107,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
     file.read(numVertices);
     EXPECT_EQ(numVertices, 10);
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec3 valueExpected(vertex.x, vertex.y, vertex.z);
+      const auto &valueExpected = asset.data.geometries.at(i).positions.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
@@ -145,8 +115,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec3 valueExpected(vertex.nx, vertex.ny, vertex.nz);
+      const auto &valueExpected = asset.data.geometries.at(i).normals.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
@@ -154,8 +123,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec4 valueExpected(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      const auto &valueExpected = asset.data.geometries.at(i).tangents.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
@@ -163,8 +131,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec2 valueExpected(vertex.u0, vertex.v0);
+      const auto &valueExpected = asset.data.geometries.at(i).texCoords0.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
@@ -172,8 +139,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec2 valueExpected(vertex.u1, vertex.v1);
+      const auto &valueExpected = asset.data.geometries.at(i).texCoords1.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
@@ -199,7 +165,7 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
 TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
   auto asset = createRandomizedMeshAsset();
   for (auto &geometry : asset.data.geometries) {
-    geometry.vertices.clear();
+    geometry.positions.clear();
   }
 
   auto filePath = cache.createMeshFromAsset(asset, "").getData();
@@ -230,20 +196,17 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
     auto &expectedGeometry = asset.data.geometries.at(g);
     auto &actualGeometry = mesh.data.geometries.at(g);
 
-    for (size_t v = 0; v < expectedGeometry.vertices.size(); ++v) {
-      auto &expected = expectedGeometry.vertices.at(v);
-      auto &actual = actualGeometry.vertices.at(v);
+    EXPECT_EQ(expectedGeometry.positions.size(),
+              actualGeometry.positions.size());
+    for (size_t v = 0; v < expectedGeometry.positions.size(); ++v) {
+      auto &e = expectedGeometry;
+      auto &a = actualGeometry;
 
-      EXPECT_EQ(glm::vec3(expected.x, expected.y, expected.z),
-                glm::vec3(actual.x, actual.y, actual.z));
-      EXPECT_EQ(glm::vec3(expected.nx, expected.ny, expected.nz),
-                glm::vec3(actual.nx, actual.ny, actual.nz));
-      EXPECT_EQ(glm::vec4(expected.tx, expected.ty, expected.tz, expected.tw),
-                glm::vec4(actual.tx, actual.ty, actual.tz, actual.tw));
-      EXPECT_EQ(glm::vec2(expected.u0, expected.v0),
-                glm::vec2(actual.u0, actual.v0));
-      EXPECT_EQ(glm::vec2(expected.u1, expected.v1),
-                glm::vec2(actual.u1, actual.v1));
+      EXPECT_EQ(e.positions.at(v), a.positions.at(v));
+      EXPECT_EQ(e.normals.at(v), a.normals.at(v));
+      EXPECT_EQ(e.tangents.at(v), a.tangents.at(v));
+      EXPECT_EQ(e.texCoords0.at(v), a.texCoords0.at(v));
+      EXPECT_EQ(e.texCoords1.at(v), a.texCoords1.at(v));
     }
 
     for (size_t i = 0; i < expectedGeometry.indices.size(); ++i) {
@@ -278,7 +241,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     file.read(numVertices);
     EXPECT_EQ(numVertices, 10);
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
+      const auto &vertex = asset.data.geometries.at(i).positions.at(v);
       glm::vec3 valueExpected(vertex.x, vertex.y, vertex.z);
       glm::vec3 valueActual;
       file.read(valueActual);
@@ -287,8 +250,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec3 valueExpected(vertex.nx, vertex.ny, vertex.nz);
+      const auto &valueExpected = asset.data.geometries.at(i).normals.at(v);
       glm::vec3 valueActual;
       file.read(valueActual);
 
@@ -296,8 +258,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec4 valueExpected(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
+      const auto &valueExpected = asset.data.geometries.at(i).tangents.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
@@ -305,8 +266,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec2 valueExpected(vertex.u0, vertex.v0);
+      const auto &valueExpected = asset.data.geometries.at(i).texCoords0.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
@@ -314,8 +274,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec2 valueExpected(vertex.u1, vertex.v1);
+      const auto &valueExpected = asset.data.geometries.at(i).texCoords1.at(v);
       glm::vec2 valueActual;
       file.read(valueActual);
 
@@ -323,8 +282,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::uvec4 valueExpected(vertex.j0, vertex.j1, vertex.j2, vertex.j3);
+      const auto &valueExpected = asset.data.geometries.at(i).joints.at(v);
       glm::uvec4 valueActual;
       file.read(valueActual);
 
@@ -332,8 +290,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
     }
 
     for (uint32_t v = 0; v < numVertices; ++v) {
-      const auto &vertex = asset.data.geometries.at(i).vertices.at(v);
-      glm::vec4 valueExpected(vertex.w0, vertex.w1, vertex.w2, vertex.w3);
+      const auto &valueExpected = asset.data.geometries.at(i).weights.at(v);
       glm::vec4 valueActual;
       file.read(valueActual);
 
@@ -356,7 +313,7 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
 TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
   auto asset = createRandomizedSkinnedMeshAsset();
   for (auto &geometry : asset.data.geometries) {
-    geometry.vertices.clear();
+    geometry.positions.clear();
   }
 
   auto filePath = cache.createSkinnedMeshFromAsset(asset, "").getData();
@@ -389,20 +346,19 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
     auto &expectedGeometry = asset.data.geometries.at(g);
     auto &actualGeometry = mesh.data.geometries.at(g);
 
-    for (size_t v = 0; v < expectedGeometry.vertices.size(); ++v) {
-      auto &expected = expectedGeometry.vertices.at(v);
-      auto &actual = actualGeometry.vertices.at(v);
+    EXPECT_EQ(expectedGeometry.positions.size(),
+              actualGeometry.positions.size());
+    for (size_t v = 0; v < expectedGeometry.positions.size(); ++v) {
+      auto &e = expectedGeometry;
+      auto &a = actualGeometry;
 
-      EXPECT_EQ(glm::vec3(expected.x, expected.y, expected.z),
-                glm::vec3(actual.x, actual.y, actual.z));
-      EXPECT_EQ(glm::vec3(expected.nx, expected.ny, expected.nz),
-                glm::vec3(actual.nx, actual.ny, actual.nz));
-      EXPECT_EQ(glm::vec4(expected.tx, expected.ty, expected.tz, expected.tw),
-                glm::vec4(actual.tx, actual.ty, actual.tz, actual.tw));
-      EXPECT_EQ(glm::vec2(expected.u0, expected.v0),
-                glm::vec2(actual.u0, actual.v0));
-      EXPECT_EQ(glm::vec2(expected.u1, expected.v1),
-                glm::vec2(actual.u1, actual.v1));
+      EXPECT_EQ(e.positions.at(v), a.positions.at(v));
+      EXPECT_EQ(e.normals.at(v), a.normals.at(v));
+      EXPECT_EQ(e.tangents.at(v), a.tangents.at(v));
+      EXPECT_EQ(e.texCoords0.at(v), a.texCoords0.at(v));
+      EXPECT_EQ(e.texCoords1.at(v), a.texCoords1.at(v));
+      EXPECT_EQ(e.joints.at(v), a.joints.at(v));
+      EXPECT_EQ(e.weights.at(v), a.weights.at(v));
     }
 
     for (size_t i = 0; i < expectedGeometry.indices.size(); ++i) {

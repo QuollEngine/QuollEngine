@@ -1,5 +1,6 @@
 #include "liquid/core/Base.h"
 #include "liquid/core/Engine.h"
+#include "liquid/renderer/MeshVertexLayout.h"
 
 #include "liquidator/ui/IconRegistry.h"
 
@@ -122,7 +123,7 @@ void EditorRenderer::attach(RenderGraph &graph,
     auto collidableShapePipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("collidable-shape.vert"),
          mRenderStorage.getShader("collidable-shape.frag"),
-         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         createMeshPositionLayout(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::LineList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise,
@@ -160,13 +161,18 @@ void EditorRenderer::attach(RenderGraph &graph,
         auto type = frameData.getCollidableShapeType();
 
         if (type == PhysicsGeometryType::Box) {
-          commandList.bindVertexBuffer(mCollidableCube.buffer.getHandle());
+          commandList.bindVertexBuffers(
+              std::array{mCollidableCube.buffer.getHandle()}, std::array{0ul});
           commandList.draw(mCollidableCube.vertexCount, 0);
         } else if (type == PhysicsGeometryType::Sphere) {
-          commandList.bindVertexBuffer(mCollidableSphere.buffer.getHandle());
+          commandList.bindVertexBuffers(
+              std::array{mCollidableSphere.buffer.getHandle()},
+              std::array{0ul});
           commandList.draw(mCollidableSphere.vertexCount, 0);
         } else if (type == PhysicsGeometryType::Capsule) {
-          commandList.bindVertexBuffer(mCollidableCapsule.buffer.getHandle());
+          commandList.bindVertexBuffers(
+              std::array{mCollidableCapsule.buffer.getHandle()},
+              std::array{0ul});
           commandList.draw(mCollidableCapsule.vertexCount, 0);
         }
       }
@@ -351,7 +357,7 @@ void EditorRenderer::attach(RenderGraph &graph,
     auto outlineGeometryStencilWritePipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-geometry.vert"),
          mRenderStorage.getShader("outline-color.frag"),
-         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         createMeshPositionLayout(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise},
@@ -366,7 +372,7 @@ void EditorRenderer::attach(RenderGraph &graph,
     auto outlineGeometryPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-geometry.vert"),
          mRenderStorage.getShader("outline-color.frag"),
-         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         createMeshPositionLayout(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise},
@@ -382,7 +388,7 @@ void EditorRenderer::attach(RenderGraph &graph,
         mRenderStorage.addPipeline(
             {mRenderStorage.getShader("outline-skinned-geometry.vert"),
              mRenderStorage.getShader("outline-color.frag"),
-             rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+             createSkinnedMeshPositionLayout(),
              rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
              rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
                                      rhi::CullMode::None,
@@ -398,14 +404,14 @@ void EditorRenderer::attach(RenderGraph &graph,
     auto outlineSkinnedGeometryPipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("outline-skinned-geometry.vert"),
          mRenderStorage.getShader("outline-color.frag"),
-         rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+         createSkinnedMeshPositionLayout(),
          rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                  rhi::FrontFace::Clockwise},
          rhi::PipelineColorBlend{{rhi::PipelineColorBlendAttachment{}}},
          outlinePipelineStencil,
          {},
-         "sprite outline"});
+         "skinned geometry outline"});
 
     outlinePass.addPipeline(outlineSpriteStencilWritePipeline);
     outlinePass.addPipeline(outlineSpritePipeline);
@@ -676,7 +682,9 @@ void EditorRenderer::renderMeshOutlines(rhi::RenderCommandList &commandList,
   for (uint32_t instanceIndex = instanceStart; instanceIndex < instanceEnd;
        ++instanceIndex) {
     const auto &outline = frameData.getMeshOutlines().at(instanceIndex);
-    commandList.bindVertexBuffer(outline.vertexBuffer);
+
+    commandList.bindVertexBuffers(outline.vertexBuffers,
+                                  outline.vertexBufferOffsets);
     commandList.bindIndexBuffer(outline.indexBuffer, rhi::IndexType::Uint32);
 
     for (size_t i = 0; i < outline.indexCounts.size(); ++i) {
@@ -691,11 +699,11 @@ void EditorRenderer::createCollidableShapes() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   static constexpr float Pi = glm::pi<float>();
 
-  using V = Vertex;
+  using V = glm::vec3;
 
   // Box shape
   {
-    std::vector<Vertex> CollidableBoxVertices{
+    std::vector<glm::vec3> CollidableBoxVertices{
         // clang-format off
       V{-0.5f, -0.5f, -0.5f}, V{0.5f, -0.5f, -0.5f},
       V{-0.5f, -0.5f, -0.5f}, V{-0.5f, 0.5f, -0.5f},
@@ -720,7 +728,7 @@ void EditorRenderer::createCollidableShapes() {
 
     mCollidableCube.buffer = mRenderStorage.createBuffer(
         {rhi::BufferUsage::Vertex,
-         CollidableBoxVertices.size() * sizeof(Vertex),
+         CollidableBoxVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableBoxVertices.data())});
     mCollidableCube.vertexCount =
         static_cast<uint32_t>(CollidableBoxVertices.size());
@@ -743,7 +751,7 @@ void EditorRenderer::createCollidableShapes() {
 
   // Sphere shape
   {
-    auto drawUnitCircle = [](std::vector<Vertex> &vertices,
+    auto drawUnitCircle = [](std::vector<glm::vec3> &vertices,
                              uint32_t numSegments, CalculationFn cX,
                              CalculationFn cY, CalculationFn cZ) {
       const float SegmentDelta = 2.0f * Pi / static_cast<float>(numSegments);
@@ -766,14 +774,14 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     static constexpr uint32_t NumSegments = 12;
-    std::vector<Vertex> CollidableSphereVertices;
+    std::vector<glm::vec3> CollidableSphereVertices;
 
     drawUnitCircle(CollidableSphereVertices, NumSegments, cZero, cSin, cCos);
     drawUnitCircle(CollidableSphereVertices, NumSegments, cSin, cCos, cZero);
 
     mCollidableSphere.buffer = mRenderStorage.createBuffer(
         {rhi::BufferUsage::Vertex,
-         CollidableSphereVertices.size() * sizeof(Vertex),
+         CollidableSphereVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableSphereVertices.data())});
     mCollidableSphere.vertexCount =
         static_cast<uint32_t>(CollidableSphereVertices.size());
@@ -781,7 +789,7 @@ void EditorRenderer::createCollidableShapes() {
 
   // Capsule shape
   {
-    auto drawUnitHalfCircle = [](std::vector<Vertex> &vertices,
+    auto drawUnitHalfCircle = [](std::vector<glm::vec3> &vertices,
                                  uint32_t numSegments, CalculationFn cX,
                                  CalculationFn cY, CalculationFn cZ,
                                  float circleAngle) {
@@ -805,7 +813,7 @@ void EditorRenderer::createCollidableShapes() {
     };
 
     static constexpr uint32_t NumSegments = 12;
-    std::vector<Vertex> CollidableCapsuleVertices;
+    std::vector<glm::vec3> CollidableCapsuleVertices;
 
     drawUnitHalfCircle(CollidableCapsuleVertices, NumSegments, cCos,
                        cSinCenter(0.5f), cZero, Pi);
@@ -831,7 +839,7 @@ void EditorRenderer::createCollidableShapes() {
 
     mCollidableCapsule.buffer = mRenderStorage.createBuffer(
         {rhi::BufferUsage::Vertex,
-         CollidableCapsuleVertices.size() * sizeof(Vertex),
+         CollidableCapsuleVertices.size() * sizeof(glm::vec3),
          static_cast<const void *>(CollidableCapsuleVertices.data())});
     mCollidableCapsule.vertexCount =
         static_cast<uint32_t>(CollidableCapsuleVertices.size());

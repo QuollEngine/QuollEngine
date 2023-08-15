@@ -81,8 +81,13 @@ static String getValidationMessage(
 
   auto newStr = str.substr(lastPipe + 2);
   std::stringstream ss;
-  ss << newStr << " (" << pCallbackData->pMessageIdName << "; 0x" << std::hex
-     << pCallbackData->messageIdNumber << ")";
+  ss << newStr;
+  ss << "\n\t"
+     << "Message ID: " << pCallbackData->pMessageIdName;
+  for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
+    ss << "\n\t"
+       << "Object: " << pCallbackData->pObjects[i].pObjectName;
+  }
 
   return ss.str();
 }

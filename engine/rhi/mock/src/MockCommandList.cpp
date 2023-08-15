@@ -57,12 +57,15 @@ void MockCommandList::bindDescriptor(PipelineHandle pipeline, uint32_t firstSet,
   mBindings.descriptors.insert_or_assign(firstSet, descriptor);
 }
 
-void MockCommandList::bindVertexBuffer(BufferHandle buffer) {
+void MockCommandList::bindVertexBuffers(
+    const std::span<const BufferHandle> buffers,
+    const std::span<const uint64_t> offsets) {
   auto *command = new MockCommandBindVertexBuffer;
-  command->buffer = buffer;
+  command->buffers = std::vector(buffers.begin(), buffers.end());
+  command->offsets = std::vector(offsets.begin(), offsets.end());
   mCommands.push_back(std::unique_ptr<MockCommand>(command));
 
-  mBindings.vertexBuffer = buffer;
+  mBindings.vertexBuffers = command->buffers;
 }
 
 void MockCommandList::bindIndexBuffer(BufferHandle buffer,

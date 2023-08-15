@@ -60,7 +60,12 @@ public:
     /**
      * Vertex buffer
      */
-    rhi::BufferHandle vertexBuffer;
+    std::vector<rhi::BufferHandle> vertexBuffers;
+
+    /**
+     * Vertex buffer binding offsets
+     */
+    std::vector<uint64_t> vertexBufferOffsets;
 
     /**
      * Index buffer
@@ -200,7 +205,7 @@ public:
    * @param skeleton Skeleton joints
    * @param worldTransform World transform
    */
-  void addSkinnedMeshOutline(const SkinnedMeshAsset &mesh,
+  void addSkinnedMeshOutline(const MeshAsset &mesh,
                              const std::vector<glm::mat4> &skeleton,
                              const glm::mat4 &worldTransform);
 

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "RenderHandle.h"
-#include "liquid/scene/Vertex.h"
-#include "liquid/scene/SkinnedVertex.h"
 #include "liquid/rhi/Format.h"
 
 namespace liquid::rhi {
@@ -164,89 +162,7 @@ struct PipelineVertexInputLayout {
    * Input layout attributes
    */
   std::vector<PipelineVertexInputAttribute> attributes;
-
-  /**
-   * @brief Create vertex input layout
-   *
-   * Generic function that returns empty layout
-   *
-   * @tparam InputType Vertex type
-   * @return Pipeline vertex input layout
-   */
-  template <class InputType> static PipelineVertexInputLayout create() {
-    return PipelineVertexInputLayout{};
-  };
 };
-
-/**
- * @brief Create vertex input layout for Vertex
- *
- * @return Pipeline vertex input layout
- */
-template <>
-inline PipelineVertexInputLayout PipelineVertexInputLayout::create<Vertex>() {
-  static constexpr uint32_t PositionSlot = 0;
-  static constexpr uint32_t NormalSlot = 1;
-  static constexpr uint32_t TangentSlot = 2;
-  static constexpr uint32_t ColorSlot = 3;
-  static constexpr uint32_t TexCoord0Slot = 4;
-  static constexpr uint32_t TexCoord1Slot = 5;
-
-  return PipelineVertexInputLayout{
-      {PipelineVertexInputBinding{0, sizeof(Vertex), VertexInputRate::Vertex}},
-      {
-          PipelineVertexInputAttribute{PositionSlot, 0, rhi::Format::Rgb32Float,
-                                       offsetof(SkinnedVertex, x)},
-          PipelineVertexInputAttribute{NormalSlot, 0, rhi::Format::Rgb32Float,
-                                       offsetof(SkinnedVertex, nx)},
-          PipelineVertexInputAttribute{TangentSlot, 0, rhi::Format::Rgba32Float,
-                                       offsetof(SkinnedVertex, tx)},
-          PipelineVertexInputAttribute{ColorSlot, 0, rhi::Format::Rgb32Float,
-                                       offsetof(SkinnedVertex, r)},
-          PipelineVertexInputAttribute{TexCoord0Slot, 0, rhi::Format::Rg32Float,
-                                       offsetof(SkinnedVertex, u0)},
-          PipelineVertexInputAttribute{TexCoord1Slot, 0, rhi::Format::Rg32Float,
-                                       offsetof(SkinnedVertex, u1)},
-      }};
-}
-
-/**
- * @brief Create vertex input layout for Skinned vertex
- *
- * @return Pipeline vertex input layout
- */
-template <>
-inline PipelineVertexInputLayout
-PipelineVertexInputLayout::create<SkinnedVertex>() {
-  static constexpr uint32_t PositionSlot = 0;
-  static constexpr uint32_t NormalSlot = 1;
-  static constexpr uint32_t TangentSlot = 2;
-  static constexpr uint32_t ColorSlot = 3;
-  static constexpr uint32_t TexCoord0Slot = 4;
-  static constexpr uint32_t TexCoord1Slot = 5;
-  static constexpr uint32_t JointsSlot = 6;
-  static constexpr uint32_t WeightsSlot = 7;
-
-  return PipelineVertexInputLayout{
-      {PipelineVertexInputBinding{0, sizeof(SkinnedVertex),
-                                  VertexInputRate::Vertex}},
-      {PipelineVertexInputAttribute{PositionSlot, 0, rhi::Format::Rgb32Float,
-                                    offsetof(SkinnedVertex, x)},
-       PipelineVertexInputAttribute{NormalSlot, 0, rhi::Format::Rgb32Float,
-                                    offsetof(SkinnedVertex, nx)},
-       PipelineVertexInputAttribute{TangentSlot, 0, rhi::Format::Rgba32Float,
-                                    offsetof(SkinnedVertex, tx)},
-       PipelineVertexInputAttribute{ColorSlot, 0, rhi::Format::Rgb32Float,
-                                    offsetof(SkinnedVertex, r)},
-       PipelineVertexInputAttribute{TexCoord0Slot, 0, rhi::Format::Rg32Float,
-                                    offsetof(SkinnedVertex, u0)},
-       PipelineVertexInputAttribute{TexCoord1Slot, 0, rhi::Format::Rg32Float,
-                                    offsetof(SkinnedVertex, u1)},
-       PipelineVertexInputAttribute{JointsSlot, 0, rhi::Format::Rgba32Uint,
-                                    offsetof(SkinnedVertex, j0)},
-       PipelineVertexInputAttribute{WeightsSlot, 0, rhi::Format::Rgba32Float,
-                                    offsetof(SkinnedVertex, w0)}}};
-}
 
 /**
  * @brief Pipeline color blend attachment

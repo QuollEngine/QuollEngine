@@ -126,9 +126,8 @@ public:
    * @param uuid Asset uuid
    * @return Path to new mesh asset
    */
-  Result<Path>
-  createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset,
-                             const String &uuid);
+  Result<Path> createSkinnedMeshFromAsset(const AssetData<MeshAsset> &asset,
+                                          const String &uuid);
 
   /**
    * @brief Load skinned mesh from file

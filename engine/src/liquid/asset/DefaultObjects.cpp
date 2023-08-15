@@ -12,75 +12,151 @@ namespace liquid::default_objects {
 
 AssetData<MeshAsset> createCube() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-  BaseGeometryAsset<Vertex> geometry;
 
-  std::vector<Vertex> vertices;
+  std::vector<glm::vec3> positions;
+  std::vector<glm::vec3> normals;
+  std::vector<glm::vec4> tangents;
+  std::vector<glm::vec2> texCoords;
+
   std::vector<uint32_t> indices{0,  1,  2,  3,  2,  1,  4,  5,  6,  7,  6,  5,
                                 8,  9,  10, 11, 10, 9,  12, 13, 14, 15, 14, 13,
                                 16, 17, 18, 19, 18, 17, 20, 21, 22, 23, 22, 21};
 
-  vertices.push_back({-1, -1, -1, 0, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-                      0.0, 0.0}); // 0
-  vertices.push_back({1, -1, -1, 0, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-                      1.0, 0.0}); // 1
-  vertices.push_back({-1, 1, -1, 0, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-                      0.0, 1.0}); // 2
-  vertices.push_back(
-      {1, 1, -1, 0, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0}); // 3
+  // Front face
+  positions.push_back({-1.0f, -1.0f, -1.0f});
+  positions.push_back({1.0f, -1.0f, -1.0f});
+  positions.push_back({-1.0f, 1.0f, -1.0f});
+  positions.push_back({1.0f, 1.0f, -1.0f});
+
+  normals.push_back({0.0, 0.0, -1.0});
+  normals.push_back({0.0, 0.0, -1.0});
+  normals.push_back({0.0, 0.0, -1.0});
+  normals.push_back({0.0, 0.0, -1.0});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
 
   // back face (debug = red)
-  vertices.push_back(
-      {-1, 1, 1, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0}); // 4
-  vertices.push_back(
-      {1, 1, 1, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0}); // 5
-  vertices.push_back(
-      {-1, -1, 1, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}); // 6
-  vertices.push_back(
-      {1, -1, 1, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0}); // 7
+  positions.push_back({-1.0f, 1.0f, 1.0f});
+  positions.push_back({1.0f, 1.0f, 1.0f});
+  positions.push_back({-1.0f, -1.0f, 1.0f});
+  positions.push_back({1.0f, -1.0f, 1.0f});
+
+  normals.push_back({0.0f, 0.0f, 1.0f});
+  normals.push_back({0.0f, 0.0f, 1.0f});
+  normals.push_back({0.0f, 0.0f, 1.0f});
+  normals.push_back({0.0f, 0.0f, 1.0f});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
 
   // left face (debug = green)
-  vertices.push_back({-1, -1, 1, -1.0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                      0.0, 0.0}); // 8
-  vertices.push_back({-1, -1, -1, -1.0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                      1.0, 0.0}); // 9
-  vertices.push_back({-1, 1, 1, 0, -1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                      0.0, 1.0}); // 10
-  vertices.push_back({-1, 1, -1, 0, -1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                      1.0, 1.0}); // 11
+  positions.push_back({-1.0f, -1.0f, 1.0f});
+  positions.push_back({-1.0f, -1.0f, -1.0f});
+  positions.push_back({-1.0f, 1.0f, 1.0f});
+  positions.push_back({-1.0f, 1.0f, -1.0f});
+
+  normals.push_back({-1.0f, 0.0f, 0.0f});
+  normals.push_back({-1.0f, 0.0f, 0.0f});
+  normals.push_back({-1.0f, 0.0f, 0.0f});
+  normals.push_back({-1.0f, 0.0f, 0.0f});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
 
   // right face (debug = yellow)
-  vertices.push_back({1, -1, -1, 1.0, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-                      0.0, 0.0}); // 12
-  vertices.push_back(
-      {1, -1, 1, 1.0, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0}); // 13
-  vertices.push_back(
-      {1, 1, -1, 1.0, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0}); // 14
-  vertices.push_back(
-      {1, 1, 1, 1.0, 0, 0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0}); // 15
+  positions.push_back({1.0f, -1.0f, -1.0f});
+  positions.push_back({1.0f, -1.0f, 1.0f});
+  positions.push_back({1.0f, 1.0f, -1.0f});
+  positions.push_back({1.0f, 1.0f, 1.0f});
+
+  normals.push_back({1.0f, 0.0f, 0.0f});
+  normals.push_back({1.0f, 0.0f, 0.0f});
+  normals.push_back({1.0f, 0.0f, 0.0f});
+  normals.push_back({1.0f, 0.0f, 0.0f});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
 
   // bottom face = cyan
-  vertices.push_back({-1, 1, -1, 0, 1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
-                      0.0, 0.0}); // 16
-  vertices.push_back(
-      {1, 1, -1, 0, 1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0}); // 17
-  vertices.push_back(
-      {-1, 1, 1, 0, 1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0}); // 18
-  vertices.push_back(
-      {1, 1, 1, 0, 1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0}); // 19
+  positions.push_back({-1.0f, 1.0f, -1.0f});
+  positions.push_back({1.0f, 1.0f, -1.0f});
+  positions.push_back({-1.0f, 1.0f, 1.0f});
+  positions.push_back({1.0f, 1.0f, 1.0f});
+
+  normals.push_back({0.0f, 1.0f, 0.0f});
+  normals.push_back({0.0f, 1.0f, 0.0f});
+  normals.push_back({0.0f, 1.0f, 0.0f});
+  normals.push_back({0.0f, 1.0f, 0.0f});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
 
   // top face = blue
-  vertices.push_back({-1, -1, 1, 0, -1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-                      0.0, 0.0}); // 20
-  vertices.push_back({1, -1, 1, 0, -1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-                      1.0, 0.0}); // 21
-  vertices.push_back({-1, -1, -1, 0, -1.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 1.0,
-                      0.0, 1.0}); // 22
-  vertices.push_back({1, -1, -1, 0, -1.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-                      1.0, 1.0}); // 23
+  positions.push_back({-1.0f, -1.0f, 1.0f});
+  positions.push_back({1.0f, -1.0f, 1.0f});
+  positions.push_back({-1.0f, -1.0f, -1.0f});
+  positions.push_back({1.0f, -1.0f, -1.0f});
+
+  normals.push_back({0.0f, -1.0f, 0.0f});
+  normals.push_back({0.0f, -1.0f, 0.0f});
+  normals.push_back({0.0f, -1.0f, 0.0f});
+  normals.push_back({0.0f, -1.0f, 0.0f});
+
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+  tangents.push_back({0.0f, 0.0f, 0.0f, 0.0f});
+
+  texCoords.push_back({0.0f, 0.0f});
+  texCoords.push_back({1.0f, 0.0f});
+  texCoords.push_back({0.0f, 1.0f});
+  texCoords.push_back({1.0f, 1.0f});
+
+  BaseGeometryAsset geometry;
+  geometry.indices = indices;
+  geometry.positions = positions;
+  geometry.normals = normals;
+  geometry.tangents = tangents;
+  geometry.texCoords0 = texCoords;
+  geometry.texCoords1 = texCoords;
 
   AssetData<MeshAsset> mesh;
-  geometry.vertices = vertices;
-  geometry.indices = indices;
   mesh.name = "Cube";
   mesh.path = "liquid::engine/meshes/cube";
   mesh.uuid = "liquid::engine/meshes/cube";

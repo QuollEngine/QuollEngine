@@ -1,6 +1,9 @@
 #include "liquid/core/Base.h"
 #include "MousePickingGraph.h"
 
+#include "liquid/renderer/MeshVertexLayout.h"
+#include "liquid/renderer/MeshRenderUtils.h"
+
 namespace liquid::editor {
 
 MousePickingGraph::MousePickingGraph(
@@ -198,7 +201,7 @@ void MousePickingGraph::createRenderGraph() {
       mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.mesh.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
-          rhi::PipelineVertexInputLayout::create<Vertex>(),
+          createMeshVertexLayout(),
           rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
           rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
                                   rhi::FrontFace::CounterClockwise},
@@ -212,7 +215,7 @@ void MousePickingGraph::createRenderGraph() {
       mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
           mRenderStorage.getShader("mouse-picking.skinned-mesh.vertex"),
           mRenderStorage.getShader("mouse-picking.selector.fragment"),
-          rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+          createSkinnedMeshPositionLayout(),
           rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
           rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Back,
                                   rhi::FrontFace::CounterClockwise},
@@ -311,15 +314,17 @@ void MousePickingGraph::createRenderGraph() {
 
         uint32_t numInstances =
             static_cast<uint32_t>(meshData.transforms.size());
-        commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
-        commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
-                                    rhi::IndexType::Uint32);
+
+        commandList.bindVertexBuffers(
+            MeshRenderUtils::getGeometryBuffers(mesh),
+            MeshRenderUtils::getGeometryBufferOffsets(mesh));
+        commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
 
         int32_t vertexOffset = 0;
         uint32_t indexOffset = 0;
         for (auto &geometry : mesh.geometries) {
           uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
-          int32_t vertexCount = static_cast<int32_t>(geometry.vertices.size());
+          int32_t vertexCount = static_cast<int32_t>(geometry.positions.size());
 
           commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
                                   numInstances, instanceStart);
@@ -345,15 +350,17 @@ void MousePickingGraph::createRenderGraph() {
 
         uint32_t numInstances =
             static_cast<uint32_t>(meshData.transforms.size());
-        commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
-        commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
-                                    rhi::IndexType::Uint32);
+
+        commandList.bindVertexBuffers(
+            MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
+            MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh));
+        commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
 
         int32_t vertexOffset = 0;
         uint32_t indexOffset = 0;
         for (auto &geometry : mesh.geometries) {
           uint32_t indexCount = static_cast<uint32_t>(geometry.indices.size());
-          int32_t vertexCount = static_cast<int32_t>(geometry.vertices.size());
+          int32_t vertexCount = static_cast<int32_t>(geometry.positions.size());
 
           commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
                                   numInstances, instanceStart);

@@ -51,9 +51,9 @@ The following code order must be followed in all shaders:
 All inputs must be ordered by their location in ascending order:
 
 ```glsl
-layout(location = 0) inPosition;
-layout(location = 1) inNormal;
-layout(location = 3) inColor;
+layout(location = 0) in vec3 inPosition;
+layout(location = 1) in vec3 inNormal;
+layout(location = 3) in vec2 inTexCoord0;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 6) out mat3 outTBN;

@@ -117,7 +117,12 @@ struct MockCommandBindVertexBuffer
   /**
    * Vertex buffer
    */
-  BufferHandle buffer;
+  std::vector<BufferHandle> buffers;
+
+  /**
+   * Vertex buffer binding offsets
+   */
+  std::vector<uint64_t> offsets;
 };
 
 /**

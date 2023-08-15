@@ -73,11 +73,13 @@ public:
                               std::span<uint32_t> dynamicOffsets) = 0;
 
   /**
-   * @brief Bind vertex buffer
+   * @brief Bind vertex buffers
    *
-   * @param buffer Vertex buffer
+   * @param buffers Vertex buffers
+   * @param offsets Vertex buffer binding offsets
    */
-  virtual void bindVertexBuffer(BufferHandle buffer) = 0;
+  virtual void bindVertexBuffers(const std::span<const BufferHandle> buffers,
+                                 const std::span<const uint64_t> offsets) = 0;
 
   /**
    * @brief Bind index buffer

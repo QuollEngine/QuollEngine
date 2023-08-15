@@ -259,7 +259,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
-  liquid::AssetData<liquid::SkinnedMeshAsset> mesh{};
+  liquid::AssetData<liquid::MeshAsset> mesh{};
   mesh.uuid = "skinnedMesh.mesh";
   auto handle = assetRegistry.getSkinnedMeshes().addAsset(mesh);
 
