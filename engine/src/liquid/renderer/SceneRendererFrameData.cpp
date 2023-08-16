@@ -246,7 +246,7 @@ void SceneRendererFrameData::addMesh(
 }
 
 void SceneRendererFrameData::addSkinnedMesh(
-    SkinnedMeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
+    MeshAssetHandle handle, Entity entity, const glm::mat4 &transform,
     const std::vector<glm::mat4> &skeleton,
     const std::vector<rhi::DeviceAddress> &materials) {
   uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());

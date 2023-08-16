@@ -337,7 +337,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
 
   auto filePath = cache.createSkinnedMeshFromAsset(asset, "");
   auto handle = cache.loadSkinnedMeshFromFile(filePath.getData());
-  EXPECT_NE(handle.getData(), liquid::SkinnedMeshAssetHandle::Null);
+  EXPECT_NE(handle.getData(), liquid::MeshAssetHandle::Null);
   auto &mesh =
       cache.getRegistry().getSkinnedMeshes().getAsset(handle.getData());
   EXPECT_EQ(mesh.name, asset.name);

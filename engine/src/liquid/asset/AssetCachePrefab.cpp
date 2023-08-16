@@ -76,7 +76,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
     file.write(assetPaths);
   }
 
-  std::map<SkinnedMeshAssetHandle, uint32_t> localSkinnedMeshMap;
+  std::map<MeshAssetHandle, uint32_t> localSkinnedMeshMap;
   {
     std::vector<String> assetPaths;
     assetPaths.reserve(asset.data.skinnedMeshes.size());
@@ -334,13 +334,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     }
   }
 
-  std::vector<SkinnedMeshAssetHandle> localSkinnedMeshMap;
+  std::vector<MeshAssetHandle> localSkinnedMeshMap;
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
     std::vector<liquid::String> actual(numAssets);
     stream.read(actual);
-    localSkinnedMeshMap.resize(numAssets, SkinnedMeshAssetHandle::Null);
+    localSkinnedMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);

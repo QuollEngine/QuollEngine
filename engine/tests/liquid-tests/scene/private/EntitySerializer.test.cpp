@@ -248,7 +248,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest,
        DoesNotCreateSkinnedMeshFieldIfSkinnedMeshAssetIsNotInRegistry) {
-  static constexpr liquid::SkinnedMeshAssetHandle NonExistentMeshHandle{45};
+  static constexpr liquid::MeshAssetHandle NonExistentMeshHandle{45};
 
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::SkinnedMesh>(entity, {NonExistentMeshHandle});

@@ -71,7 +71,7 @@ struct PrefabAsset {
   /**
    * List of skinned meshes
    */
-  std::vector<PrefabComponent<SkinnedMeshAssetHandle>> skinnedMeshes;
+  std::vector<PrefabComponent<MeshAssetHandle>> skinnedMeshes;
 
   /**
    * List of skeletons

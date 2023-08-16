@@ -92,9 +92,9 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create three skinned meshes
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::PrefabComponent<liquid::SkinnedMeshAssetHandle> mesh{};
+    liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
     mesh.entity = i;
-    mesh.value = liquid::SkinnedMeshAssetHandle{i};
+    mesh.value = liquid::MeshAssetHandle{i};
     asset.data.skinnedMeshes.push_back(mesh);
   }
 
@@ -222,7 +222,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<liquid::SkinnedMesh>(entity);
-    EXPECT_EQ(mesh.handle, static_cast<liquid::SkinnedMeshAssetHandle>(i));
+    EXPECT_EQ(mesh.handle, static_cast<liquid::MeshAssetHandle>(i));
   }
 
   // Test skinned mesh renderer

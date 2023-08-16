@@ -151,7 +151,7 @@ AssetCache::createSkinnedMeshFromAsset(const AssetData<MeshAsset> &asset,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<SkinnedMeshAssetHandle>
+Result<MeshAssetHandle>
 AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
                                                const Path &filePath,
                                                const AssetFileHeader &header) {
@@ -172,7 +172,7 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
     uint32_t numVertices = 0;
     stream.read(numVertices);
     if (numVertices == 0) {
-      return Result<SkinnedMeshAssetHandle>::Error(
+      return Result<MeshAssetHandle>::Error(
           "Skinned mesh geometry has no vertices");
     }
 
@@ -198,7 +198,7 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(numIndices);
 
     if (numIndices == 0) {
-      return Result<SkinnedMeshAssetHandle>::Error(
+      return Result<MeshAssetHandle>::Error(
           "Skinned mesh geometry has no indices");
     }
 
@@ -206,17 +206,17 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(mesh.data.geometries.at(i).indices);
   }
 
-  return Result<SkinnedMeshAssetHandle>::Ok(
+  return Result<MeshAssetHandle>::Ok(
       mRegistry.getSkinnedMeshes().addAsset(mesh), warnings);
 }
 
-Result<SkinnedMeshAssetHandle>
+Result<MeshAssetHandle>
 AssetCache::loadSkinnedMeshFromFile(const Path &filePath) {
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::SkinnedMesh);
   if (header.hasError()) {
-    return Result<SkinnedMeshAssetHandle>::Error(header.getError());
+    return Result<MeshAssetHandle>::Error(header.getError());
   }
 
   return loadSkinnedMeshDataFromInputStream(stream, filePath, header.getData());
@@ -235,15 +235,15 @@ Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const String &uuid) {
   return loadMeshFromFile(getPathFromUuid(uuid));
 }
 
-Result<SkinnedMeshAssetHandle>
+Result<MeshAssetHandle>
 AssetCache::getOrLoadSkinnedMeshFromUuid(const String &uuid) {
   if (uuid.empty()) {
-    return Result<SkinnedMeshAssetHandle>::Ok(SkinnedMeshAssetHandle::Null);
+    return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
   }
 
   auto handle = mRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
-  if (handle != SkinnedMeshAssetHandle::Null) {
-    return Result<SkinnedMeshAssetHandle>::Ok(handle);
+  if (handle != MeshAssetHandle::Null) {
+    return Result<MeshAssetHandle>::Ok(handle);
   }
 
   return loadSkinnedMeshFromFile(getPathFromUuid(uuid));

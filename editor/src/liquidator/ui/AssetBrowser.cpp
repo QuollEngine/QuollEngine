@@ -467,7 +467,7 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     addPrefabEntry(assetRegistry.getMeshes(), ref.value, meshCache);
   }
 
-  std::unordered_map<SkinnedMeshAssetHandle, bool> skinnedMeshCache;
+  std::unordered_map<MeshAssetHandle, bool> skinnedMeshCache;
   for (const auto &ref : prefab.data.skinnedMeshes) {
     addPrefabEntry(assetRegistry.getSkinnedMeshes(), ref.value,
                    skinnedMeshCache);

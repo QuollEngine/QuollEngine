@@ -295,7 +295,7 @@ public:
    *
    * @return Skinned mesh groups
    */
-  inline const std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData> &
+  inline const std::unordered_map<MeshAssetHandle, SkinnedMeshData> &
   getSkinnedMeshGroups() const {
     return mSkinnedMeshGroups;
   }
@@ -367,7 +367,7 @@ public:
    * @param skeleton Skeleton joint transforms
    * @param materials Materials
    */
-  void addSkinnedMesh(SkinnedMeshAssetHandle handle, Entity entity,
+  void addSkinnedMesh(MeshAssetHandle handle, Entity entity,
                       const glm::mat4 &transform,
                       const std::vector<glm::mat4> &skeleton,
                       const std::vector<rhi::DeviceAddress> &materials);
@@ -672,8 +672,7 @@ private:
   rhi::Buffer mMeshMaterialsBuffer;
   rhi::Buffer mSkinnedMeshMaterialsBuffer;
   std::unordered_map<MeshAssetHandle, MeshData> mMeshGroups;
-  std::unordered_map<SkinnedMeshAssetHandle, SkinnedMeshData>
-      mSkinnedMeshGroups;
+  std::unordered_map<MeshAssetHandle, SkinnedMeshData> mSkinnedMeshGroups;
 
   rhi::Buffer mSceneBuffer;
   rhi::Buffer mDirectionalLightsBuffer;

@@ -10,8 +10,6 @@ enum class FontAssetHandle : uint32_t { Null = 0 };
 
 enum class MeshAssetHandle : uint32_t { Null = 0 };
 
-enum class SkinnedMeshAssetHandle : uint32_t { Null = 0 };
-
 enum class SkeletonAssetHandle : uint32_t { Null = 0 };
 
 enum class AnimationAssetHandle : uint32_t { Null = 0 };
