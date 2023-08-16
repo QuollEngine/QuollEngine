@@ -119,6 +119,54 @@ private:
                      rhi::PipelineHandle pipeline, uint32_t frameIndex);
 
   /**
+   * @brief Render geometries
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline handle
+   * @param mesh Mesh asset
+   * @param instanceStart Instance start
+   * @param numInstances Instance count
+   */
+  void renderGeometries(rhi::RenderCommandList &commandList,
+                        rhi::PipelineHandle pipeline, const MeshAsset &mesh,
+                        uint32_t instanceStart, uint32_t numInstances);
+
+  /**
+   * @brief Render meshes for shadows
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline handle
+   * @param frameIndex Frame index
+   */
+  void renderShadowsMesh(rhi::RenderCommandList &commandList,
+                         rhi::PipelineHandle pipeline, uint32_t frameIndex);
+
+  /**
+   * @brief Render skinned meshes for shadows
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline handle
+   * @param frameIndex Frame index
+   */
+  void renderShadowsSkinnedMesh(rhi::RenderCommandList &commandList,
+                                rhi::PipelineHandle pipeline,
+                                uint32_t frameIndex);
+
+  /**
+   * @brief Render geometries for shadows
+   *
+   * @param commandList Command list
+   * @param pipeline Pipeline handle
+   * @param mesh Mesh asset
+   * @param instanceStart Instance start
+   * @param numInstances Instance count
+   */
+  void renderShadowsGeometries(rhi::RenderCommandList &commandList,
+                               rhi::PipelineHandle pipeline,
+                               const MeshAsset &mesh, uint32_t instanceStart,
+                               uint32_t numInstances);
+
+  /**
    * @brief Render texts
    *
    * @param commandList Command list

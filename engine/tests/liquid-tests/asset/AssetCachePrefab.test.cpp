@@ -100,7 +100,7 @@ public:
     }
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
-      liquid::AssetData<liquid::SkinnedMeshAsset> mesh;
+      liquid::AssetData<liquid::MeshAsset> mesh;
       mesh.uuid = "smesh-" + std::to_string(i);
       auto handle = cache.getRegistry().getSkinnedMeshes().addAsset(mesh);
       asset.data.skinnedMeshes.push_back({i, handle});
@@ -669,9 +669,16 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto textureHandle = cache.loadTextureFromFile(texturePath);
 
   // Create mesh
-  liquid::AssetData<liquid::SkinnedMeshAsset> meshData{};
-  liquid::BaseGeometryAsset<liquid::SkinnedVertex> geometry;
-  geometry.vertices.push_back({1.0f});
+  liquid::AssetData<liquid::MeshAsset> meshData{};
+  liquid::BaseGeometryAsset geometry{};
+  geometry.positions.push_back({});
+  geometry.normals.push_back({});
+  geometry.tangents.push_back({});
+  geometry.texCoords0.push_back({});
+  geometry.texCoords1.push_back({});
+  geometry.joints.push_back({});
+  geometry.weights.push_back({});
+
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
   auto meshPath = cache.createSkinnedMeshFromAsset(meshData, "").getData();

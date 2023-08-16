@@ -83,11 +83,13 @@ public:
                       std::span<uint32_t> dynamicOffsets) override;
 
   /**
-   * @brief Bind vertex buffer
+   * @brief Bind vertex buffers
    *
-   * @param buffer Vertex buffer
+   * @param buffers Vertex buffers
+   * @param offsets Vertex buffer binding offsets
    */
-  void bindVertexBuffer(BufferHandle buffer) override;
+  void bindVertexBuffers(const std::span<const BufferHandle> buffers,
+                         const std::span<const uint64_t> offsets) override;
 
   /**
    * @brief Bind index buffer

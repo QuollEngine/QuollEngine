@@ -134,35 +134,37 @@ public:
       const auto &g = meshAsset.data.geometries.at(gi);
       auto &p = gltfMesh.primitives.at(gi);
 
-      EXPECT_EQ(g.vertices.size(), p.positions.data.size());
-      if (p.normals.data.size() < g.vertices.size()) {
-        p.normals.data.resize(g.vertices.size());
+      EXPECT_EQ(g.positions.size(), p.positions.data.size());
+      EXPECT_EQ(g.positions.size(), g.normals.size());
+      if (p.normals.data.size() < g.normals.size()) {
+        p.normals.data.resize(g.normals.size());
       }
 
-      if (p.texCoords0.data.size() < g.vertices.size()) {
-        p.texCoords0.data.resize(g.vertices.size());
+      EXPECT_EQ(g.positions.size(), g.tangents.size());
+      if (p.tangents.data.size() < g.tangents.size()) {
+        p.tangents.data.resize(g.tangents.size());
       }
 
-      if (p.texCoords1.data.size() < g.vertices.size()) {
-        p.texCoords1.data.resize(g.vertices.size());
+      EXPECT_EQ(g.positions.size(), g.texCoords0.size());
+      if (p.texCoords0.data.size() < g.texCoords0.size()) {
+        p.texCoords0.data.resize(g.texCoords0.size());
       }
 
-      if (p.tangents.data.size() < g.vertices.size()) {
-        p.tangents.data.resize(g.vertices.size());
+      EXPECT_EQ(g.positions.size(), g.texCoords1.size());
+      if (p.texCoords1.data.size() < g.texCoords1.size()) {
+        p.texCoords1.data.resize(g.texCoords1.size());
       }
 
       if (p.indices.data.empty()) {
         p.indices.data.resize(g.indices.size());
       }
 
-      for (size_t i = 0; i < g.vertices.size(); ++i) {
-        auto &v = g.vertices.at(i);
-        fns.testPosition(glm::vec3(v.x, v.y, v.z), p.positions.data.at(i));
-        fns.testNormal(glm::vec3(v.nx, v.ny, v.nz), p.normals.data.at(i));
-        fns.testTangent(glm::vec4(v.tx, v.ty, v.tw, v.tz),
-                        p.tangents.data.at(i));
-        fns.testTexCoord0(glm::vec2(v.u0, v.v0), p.texCoords0.data.at(i));
-        fns.testTexCoord1(glm::vec2(v.u1, v.v1), p.texCoords1.data.at(i));
+      for (size_t i = 0; i < g.positions.size(); ++i) {
+        fns.testPosition(g.positions.at(i), p.positions.data.at(i));
+        fns.testNormal(g.normals.at(i), p.normals.data.at(i));
+        fns.testTangent(g.tangents.at(i), p.tangents.data.at(i));
+        fns.testTexCoord0(g.texCoords0.at(i), p.texCoords0.data.at(i));
+        fns.testTexCoord1(g.texCoords1.at(i), p.texCoords1.data.at(i));
       }
 
       EXPECT_EQ(g.indices.size(), p.indices.data.size());

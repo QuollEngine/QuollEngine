@@ -303,7 +303,7 @@ TEST_F(SceneLoaderMeshTest,
 
 TEST_F(SceneLoaderMeshTest,
        DoesNotCreateSkinnedMeshComponentIfNoSkinnedMeshHandleInRegistry) {
-  liquid::AssetData<liquid::SkinnedMeshAsset> data{};
+  liquid::AssetData<liquid::MeshAsset> data{};
   data.uuid = "hello";
   auto handle = assetRegistry.getSkinnedMeshes().addAsset(data);
 
@@ -316,7 +316,7 @@ TEST_F(SceneLoaderMeshTest,
 
 TEST_F(SceneLoaderMeshTest,
        CreatesSkinnedMeshComponentWithFileDataIfValidField) {
-  liquid::AssetData<liquid::SkinnedMeshAsset> data{};
+  liquid::AssetData<liquid::MeshAsset> data{};
   data.uuid = "hello";
   auto handle = assetRegistry.getSkinnedMeshes().addAsset(data);
 

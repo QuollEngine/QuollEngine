@@ -24,11 +24,11 @@ struct MockBindings {
   RenderPassHandle renderPass = RenderPassHandle::Null;
 
   /**
-   * Vertex buffer
+   * Vertex buffers
    *
    * Graphics specific
    */
-  BufferHandle vertexBuffer = BufferHandle::Null;
+  std::vector<BufferHandle> vertexBuffers;
 
   /**
    * Index buffer

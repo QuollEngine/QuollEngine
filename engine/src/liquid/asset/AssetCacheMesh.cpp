@@ -30,28 +30,13 @@ Result<Path> AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset,
   file.write(numGeometries);
 
   for (auto &geometry : asset.data.geometries) {
-    auto numVertices = static_cast<uint32_t>(geometry.vertices.size());
+    auto numVertices = static_cast<uint32_t>(geometry.positions.size());
     file.write(numVertices);
-    std::vector<glm::vec3> positions(numVertices);
-    std::vector<glm::vec3> normals(numVertices);
-    std::vector<glm::vec4> tangents(numVertices);
-    std::vector<glm::vec2> texCoords0(numVertices);
-    std::vector<glm::vec2> texCoords1(numVertices);
-
-    for (uint32_t i = 0; i < numVertices; ++i) {
-      const auto &vertex = geometry.vertices.at(i);
-      positions.at(i) = glm::vec3(vertex.x, vertex.y, vertex.z);
-      normals.at(i) = glm::vec3(vertex.nx, vertex.ny, vertex.nz);
-      tangents.at(i) = glm::vec4(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
-      texCoords0.at(i) = glm::vec2(vertex.u0, vertex.v0);
-      texCoords1.at(i) = glm::vec2(vertex.u1, vertex.v1);
-    }
-
-    file.write(positions);
-    file.write(normals);
-    file.write(tangents);
-    file.write(texCoords0);
-    file.write(texCoords1);
+    file.write(geometry.positions);
+    file.write(geometry.normals);
+    file.write(geometry.tangents);
+    file.write(geometry.texCoords0);
+    file.write(geometry.texCoords1);
 
     auto numIndices = static_cast<uint32_t>(geometry.indices.size());
     file.write(numIndices);
@@ -83,45 +68,22 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
     stream.read(numVertices);
 
     if (numVertices == 0) {
-      return Result<MeshAssetHandle>::Error(
-          "Skinned mesh geometry has no vertices");
+      return Result<MeshAssetHandle>::Error("Mesh geometry has no vertices");
     }
 
-    mesh.data.geometries.at(i).vertices.resize(numVertices);
+    auto &g = mesh.data.geometries.at(i);
 
-    std::vector<glm::vec3> positions(numVertices);
-    std::vector<glm::vec3> normals(numVertices);
-    std::vector<glm::vec4> tangents(numVertices);
-    std::vector<glm::vec2> texCoords0(numVertices);
-    std::vector<glm::vec2> texCoords1(numVertices);
+    g.positions.resize(numVertices);
+    g.normals.resize(numVertices);
+    g.tangents.resize(numVertices);
+    g.texCoords0.resize(numVertices);
+    g.texCoords1.resize(numVertices);
 
-    stream.read(positions);
-    stream.read(normals);
-    stream.read(tangents);
-    stream.read(texCoords0);
-    stream.read(texCoords1);
-
-    for (uint32_t v = 0; v < numVertices; ++v) {
-      auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
-      vertex.x = positions.at(v).x;
-      vertex.y = positions.at(v).y;
-      vertex.z = positions.at(v).z;
-
-      vertex.nx = normals.at(v).x;
-      vertex.ny = normals.at(v).y;
-      vertex.nz = normals.at(v).z;
-
-      vertex.tx = tangents.at(v).x;
-      vertex.ty = tangents.at(v).y;
-      vertex.tz = tangents.at(v).z;
-      vertex.tw = tangents.at(v).w;
-
-      vertex.u0 = texCoords0.at(v).x;
-      vertex.v0 = texCoords0.at(v).y;
-
-      vertex.u1 = texCoords1.at(v).x;
-      vertex.v1 = texCoords1.at(v).y;
-    }
+    stream.read(g.positions);
+    stream.read(g.normals);
+    stream.read(g.tangents);
+    stream.read(g.texCoords0);
+    stream.read(g.texCoords1);
 
     uint32_t numIndices = 0;
     stream.read(numIndices);
@@ -150,7 +112,7 @@ Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
 }
 
 Result<Path>
-AssetCache::createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset,
+AssetCache::createSkinnedMeshFromAsset(const AssetData<MeshAsset> &asset,
                                        const String &uuid) {
   auto assetPath = createAssetPath(uuid);
 
@@ -171,34 +133,15 @@ AssetCache::createSkinnedMeshFromAsset(const AssetData<SkinnedMeshAsset> &asset,
   file.write(numGeometries);
 
   for (auto &geometry : asset.data.geometries) {
-    auto numVertices = static_cast<uint32_t>(geometry.vertices.size());
+    auto numVertices = static_cast<uint32_t>(geometry.positions.size());
     file.write(numVertices);
-    std::vector<glm::vec3> positions(numVertices);
-    std::vector<glm::vec3> normals(numVertices);
-    std::vector<glm::vec4> tangents(numVertices);
-    std::vector<glm::vec2> texCoords0(numVertices);
-    std::vector<glm::vec2> texCoords1(numVertices);
-    std::vector<glm::uvec4> joints(numVertices);
-    std::vector<glm::vec4> weights(numVertices);
-
-    for (uint32_t i = 0; i < numVertices; ++i) {
-      const auto &vertex = geometry.vertices.at(i);
-      positions.at(i) = glm::vec3(vertex.x, vertex.y, vertex.z);
-      normals.at(i) = glm::vec3(vertex.nx, vertex.ny, vertex.nz);
-      tangents.at(i) = glm::vec4(vertex.tx, vertex.ty, vertex.tz, vertex.tw);
-      texCoords0.at(i) = glm::vec2(vertex.u0, vertex.v0);
-      texCoords1.at(i) = glm::vec2(vertex.u1, vertex.v1);
-      joints.at(i) = glm::uvec4(vertex.j0, vertex.j1, vertex.j2, vertex.j3);
-      weights.at(i) = glm::vec4(vertex.w0, vertex.w1, vertex.w2, vertex.w3);
-    }
-
-    file.write(positions);
-    file.write(normals);
-    file.write(tangents);
-    file.write(texCoords0);
-    file.write(texCoords1);
-    file.write(joints);
-    file.write(weights);
+    file.write(geometry.positions);
+    file.write(geometry.normals);
+    file.write(geometry.tangents);
+    file.write(geometry.texCoords0);
+    file.write(geometry.texCoords1);
+    file.write(geometry.joints);
+    file.write(geometry.weights);
 
     auto numIndices = static_cast<uint32_t>(geometry.indices.size());
     file.write(numIndices);
@@ -214,7 +157,7 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
                                                const AssetFileHeader &header) {
   std::vector<String> warnings;
 
-  AssetData<SkinnedMeshAsset> mesh{};
+  AssetData<MeshAsset> mesh{};
   mesh.name = header.name;
   mesh.path = filePath;
   mesh.type = AssetType::SkinnedMesh;
@@ -232,55 +175,24 @@ AssetCache::loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
       return Result<SkinnedMeshAssetHandle>::Error(
           "Skinned mesh geometry has no vertices");
     }
-    mesh.data.geometries.at(i).vertices.resize(numVertices);
 
-    std::vector<glm::vec3> positions(numVertices);
-    std::vector<glm::vec3> normals(numVertices);
-    std::vector<glm::vec4> tangents(numVertices);
-    std::vector<glm::vec2> texCoords0(numVertices);
-    std::vector<glm::vec2> texCoords1(numVertices);
-    std::vector<glm::uvec4> joints(numVertices);
-    std::vector<glm::vec4> weights(numVertices);
+    auto &g = mesh.data.geometries.at(i);
 
-    stream.read(positions);
-    stream.read(normals);
-    stream.read(tangents);
-    stream.read(texCoords0);
-    stream.read(texCoords1);
-    stream.read(joints);
-    stream.read(weights);
+    g.positions.resize(numVertices);
+    g.normals.resize(numVertices);
+    g.tangents.resize(numVertices);
+    g.texCoords0.resize(numVertices);
+    g.texCoords1.resize(numVertices);
+    g.joints.resize(numVertices);
+    g.weights.resize(numVertices);
 
-    for (uint32_t v = 0; v < numVertices; ++v) {
-      auto &vertex = mesh.data.geometries.at(i).vertices.at(v);
-      vertex.x = positions.at(v).x;
-      vertex.y = positions.at(v).y;
-      vertex.z = positions.at(v).z;
-
-      vertex.nx = normals.at(v).x;
-      vertex.ny = normals.at(v).y;
-      vertex.nz = normals.at(v).z;
-
-      vertex.tx = tangents.at(v).x;
-      vertex.ty = tangents.at(v).y;
-      vertex.tz = tangents.at(v).z;
-      vertex.tw = tangents.at(v).w;
-
-      vertex.u0 = texCoords0.at(v).x;
-      vertex.v0 = texCoords0.at(v).y;
-
-      vertex.u1 = texCoords1.at(v).x;
-      vertex.v1 = texCoords1.at(v).y;
-
-      vertex.j0 = joints.at(v).x;
-      vertex.j1 = joints.at(v).y;
-      vertex.j2 = joints.at(v).z;
-      vertex.j3 = joints.at(v).w;
-
-      vertex.w0 = weights.at(v).x;
-      vertex.w1 = weights.at(v).y;
-      vertex.w2 = weights.at(v).z;
-      vertex.w3 = weights.at(v).w;
-    }
+    stream.read(g.positions);
+    stream.read(g.normals);
+    stream.read(g.tangents);
+    stream.read(g.texCoords0);
+    stream.read(g.texCoords1);
+    stream.read(g.joints);
+    stream.read(g.weights);
 
     uint32_t numIndices = 0;
     stream.read(numIndices);

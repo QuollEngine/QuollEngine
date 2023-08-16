@@ -114,47 +114,58 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 
   // Synchronize meshes
   for (auto &[_, mesh] : mMeshes.getAssets()) {
-    if (rhi::isHandleValid(mesh.data.vertexBuffer.getHandle())) {
+    if (!mesh.data.vertexBuffers.empty()) {
       continue;
     }
 
-    size_t vbSize = 0;
     size_t ibSize = 0;
     for (auto &g : mesh.data.geometries) {
-      vbSize += g.vertices.size() * sizeof(Vertex);
       ibSize += g.indices.size() * sizeof(uint32_t);
     }
 
-    {
-      rhi::BufferDescription description;
-      description.usage = rhi::BufferUsage::Vertex;
-      description.size = vbSize;
-      description.data = nullptr;
-      description.debugName = mesh.name + " vertex";
-      mesh.data.vertexBuffer = renderStorage.createBuffer(description);
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CreateBuffer(FieldName, Type)                                          \
+  {                                                                            \
+    size_t vbSize = 0;                                                         \
+    for (auto &g : mesh.data.geometries) {                                     \
+      size_t vertexSize = g.FieldName.size();                                  \
+      vbSize += vertexSize * sizeof(Type);                                     \
+    }                                                                          \
+    rhi::BufferDescription description;                                        \
+    description.usage = rhi::BufferUsage::Vertex;                              \
+    description.size = vbSize;                                                 \
+    description.data = nullptr;                                                \
+    description.debugName = mesh.name + " vertices";                           \
+    auto buffer = renderStorage.createBuffer(description);                     \
+                                                                               \
+    auto *data = static_cast<Type *>(buffer.map());                            \
+    mesh.data.vertexBufferOffsets.push_back(0);                                \
+    size_t offset = 0;                                                         \
+    for (auto &g : mesh.data.geometries) {                                     \
+      memcpy(data + offset, g.FieldName.data(),                                \
+             g.FieldName.size() * sizeof(Type));                               \
+      offset += g.FieldName.size();                                            \
+    }                                                                          \
+    buffer.unmap();                                                            \
+    mesh.data.vertexBuffers.push_back(buffer.getHandle());                     \
+  }
 
-      auto *data = static_cast<Vertex *>(mesh.data.vertexBuffer.map());
-
-      size_t offset = 0;
-      for (auto &g : mesh.data.geometries) {
-        memcpy(data + offset, g.vertices.data(),
-               g.vertices.size() * sizeof(Vertex));
-        offset += g.vertices.size();
-      }
-
-      mesh.data.vertexBuffer.unmap();
-    }
+    CreateBuffer(positions, glm::vec3);
+    CreateBuffer(normals, glm::vec3);
+    CreateBuffer(tangents, glm::vec4);
+    CreateBuffer(texCoords0, glm::vec2);
+    CreateBuffer(texCoords1, glm::vec2);
 
     {
       rhi::BufferDescription description;
       description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
-      description.debugName = mesh.name + " index";
+      description.debugName = mesh.name + " indices";
 
-      mesh.data.indexBuffer = renderStorage.createBuffer(description);
+      auto buffer = renderStorage.createBuffer(description);
 
-      auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());
+      auto *data = static_cast<uint32_t *>(buffer.map());
       size_t offset = 0;
       for (auto &g : mesh.data.geometries) {
         memcpy(data + offset, g.indices.data(),
@@ -162,43 +173,30 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
         offset += g.indices.size();
       }
 
-      mesh.data.indexBuffer.unmap();
+      buffer.unmap();
+
+      mesh.data.indexBuffer = buffer.getHandle();
     }
   }
 
   // Synchronize skinned meshes
   for (auto &[_, mesh] : mSkinnedMeshes.getAssets()) {
-    if (rhi::isHandleValid(mesh.data.vertexBuffer.getHandle())) {
+    if (!mesh.data.vertexBuffers.empty()) {
       continue;
     }
 
-    size_t vbSize = 0;
     size_t ibSize = 0;
     for (auto &g : mesh.data.geometries) {
-      vbSize += g.vertices.size() * sizeof(SkinnedVertex);
       ibSize += g.indices.size() * sizeof(uint32_t);
     }
 
-    {
-      rhi::BufferDescription description;
-      description.usage = rhi::BufferUsage::Vertex;
-      description.size = vbSize;
-      description.data = nullptr;
-      description.debugName = mesh.name + " vertex";
-
-      mesh.data.vertexBuffer = renderStorage.createBuffer(description);
-
-      auto *data = static_cast<SkinnedVertex *>(mesh.data.vertexBuffer.map());
-
-      size_t offset = 0;
-      for (auto &g : mesh.data.geometries) {
-        memcpy(data + offset, g.vertices.data(),
-               g.vertices.size() * sizeof(SkinnedVertex));
-        offset += g.vertices.size();
-      }
-
-      mesh.data.vertexBuffer.unmap();
-    }
+    CreateBuffer(positions, glm::vec3);
+    CreateBuffer(normals, glm::vec3);
+    CreateBuffer(tangents, glm::vec4);
+    CreateBuffer(texCoords0, glm::vec2);
+    CreateBuffer(texCoords1, glm::vec2);
+    CreateBuffer(joints, glm::uvec4);
+    CreateBuffer(weights, glm::vec4);
 
     {
       rhi::BufferDescription description;
@@ -207,9 +205,9 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
       description.data = nullptr;
       description.debugName = mesh.name + " index";
 
-      mesh.data.indexBuffer = renderStorage.createBuffer(description);
+      auto buffer = renderStorage.createBuffer(description);
 
-      auto *data = static_cast<uint32_t *>(mesh.data.indexBuffer.map());
+      auto *data = static_cast<uint32_t *>(buffer.map());
       size_t offset = 0;
       for (auto &g : mesh.data.geometries) {
         memcpy(data + offset, g.indices.data(),
@@ -217,7 +215,9 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
         offset += g.indices.size();
       }
 
-      mesh.data.indexBuffer.unmap();
+      buffer.unmap();
+
+      mesh.data.indexBuffer = buffer.getHandle();
     }
   }
 }

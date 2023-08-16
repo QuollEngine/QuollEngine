@@ -2,8 +2,8 @@
 #extension GL_EXT_scalar_block_layout : require
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 6) in uvec4 inJoints;
-layout(location = 7) in vec4 inWeights;
+layout(location = 1) in uvec4 inJoints;
+layout(location = 2) in vec4 inWeights;
 
 layout(location = 0) out uint outEntity;
 

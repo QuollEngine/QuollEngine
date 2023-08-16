@@ -15,9 +15,6 @@
 #include "EnvironmentAsset.h"
 #include "LuaScriptAsset.h"
 
-#include "liquid/scene/Vertex.h"
-#include "liquid/scene/SkinnedVertex.h"
-
 #include "liquid/rhi/RenderDevice.h"
 
 #include "liquid/renderer/RenderStorage.h"
@@ -35,7 +32,7 @@ class AssetRegistry {
   using FontMap = AssetMap<FontAssetHandle, FontAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
   using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
-  using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, SkinnedMeshAsset>;
+  using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, MeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
   using AnimatorMap = AssetMap<AnimatorAssetHandle, AnimatorAsset>;

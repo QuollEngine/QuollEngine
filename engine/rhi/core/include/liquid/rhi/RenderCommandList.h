@@ -109,12 +109,14 @@ public:
   }
 
   /**
-   * @brief Bind vertex buffer
+   * @brief Bind vertex buffers
    *
-   * @param buffer Vertex buffer
+   * @param buffers Vertex buffers
+   * @param offsets Vertex buffer binding offsets
    */
-  inline void bindVertexBuffer(BufferHandle buffer) {
-    mNativeRenderCommandList->bindVertexBuffer(buffer);
+  inline void bindVertexBuffers(const std::span<const BufferHandle> buffers,
+                                const std::span<const uint64_t> offsets) {
+    mNativeRenderCommandList->bindVertexBuffers(buffers, offsets);
   }
 
   /**

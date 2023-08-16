@@ -4,6 +4,8 @@
 #include "SceneRenderer.h"
 #include "StandardPushConstants.h"
 #include "BindlessDrawParameters.h"
+#include "MeshVertexLayout.h"
+#include "MeshRenderUtils.h"
 
 namespace liquid {
 
@@ -173,7 +175,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     auto pipeline = mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
         mRenderStorage.getShader("__engine.shadowmap.default.vertex"),
         mRenderStorage.getShader("__engine.shadowmap.default.fragment"),
-        rhi::PipelineVertexInputLayout::create<Vertex>(),
+        createMeshPositionLayout(),
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                 rhi::FrontFace::Clockwise},
@@ -186,7 +188,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
             mRenderStorage.getShader("__engine.shadowmap.skinned.vertex"),
             mRenderStorage.getShader("__engine.shadowmap.default.fragment"),
-            rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+            createSkinnedMeshPositionLayout(),
             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill,
                                     rhi::CullMode::Front,
@@ -219,7 +221,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(uint32_t), &index);
 
-          render(commandList, pipeline, frameIndex);
+          renderShadowsMesh(commandList, pipeline, frameIndex);
         }
       }
 
@@ -237,7 +239,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
                                     sizeof(uint32_t), &index);
 
-          renderSkinned(commandList, skinnedPipeline, frameIndex);
+          renderShadowsSkinnedMesh(commandList, skinnedPipeline, frameIndex);
         }
       }
     });
@@ -281,7 +283,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     auto pipeline = mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
         mRenderStorage.getShader("__engine.geometry.default.vertex"),
         mRenderStorage.getShader("__engine.pbr.default.fragment"),
-        rhi::PipelineVertexInputLayout::create<Vertex>(),
+        createMeshVertexLayout(),
         rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
         rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                 rhi::FrontFace::Clockwise},
@@ -294,7 +296,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
         mRenderStorage.addPipeline(rhi::GraphicsPipelineDescription{
             mRenderStorage.getShader("__engine.geometry.skinned.vertex"),
             mRenderStorage.getShader("__engine.pbr.default.fragment"),
-            rhi::PipelineVertexInputLayout::create<SkinnedVertex>(),
+            createSkinnedMeshVertexLayout(),
             rhi::PipelineInputAssembly{rhi::PrimitiveTopology::TriangleList},
             rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::None,
                                     rhi::FrontFace::Clockwise},
@@ -416,7 +418,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     auto pipeline = mRenderStorage.addPipeline(
         {mRenderStorage.getShader("__engine.skybox.default.vertex"),
          mRenderStorage.getShader("__engine.skybox.default.fragment"),
-         rhi::PipelineVertexInputLayout::create<Vertex>(),
+         createMeshPositionLayout(),
          rhi::PipelineInputAssembly{},
          rhi::PipelineRasterizer{rhi::PolygonMode::Fill, rhi::CullMode::Front,
                                  rhi::FrontFace::Clockwise},
@@ -445,9 +447,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
                              .data;
 
-      commandList.bindVertexBuffer(cube.vertexBuffer.getHandle());
-      commandList.bindIndexBuffer(cube.indexBuffer.getHandle(),
-                                  rhi::IndexType::Uint32);
+      commandList.bindVertexBuffers(std::array{cube.vertexBuffers.at(0)},
+                                    std::array{0ul});
+      commandList.bindIndexBuffer(cube.indexBuffer, rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
           static_cast<uint32_t>(cube.geometries.at(0).indices.size()), 0, 0);
@@ -877,34 +879,13 @@ void SceneRenderer::render(rhi::RenderCommandList &commandList,
   auto &frameData = mFrameData.at(frameIndex);
 
   uint32_t instanceStart = 0;
-
   for (auto &[handle, meshData] : frameData.getMeshGroups()) {
     const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
-    commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
-    commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
-                                rhi::IndexType::Uint32);
 
-    int32_t vertexOffset = 0;
-    uint32_t indexOffset = 0;
-    for (size_t g = 0; g < mesh.geometries.size(); ++g) {
-      auto &geometry = mesh.geometries.at(g);
-
-      auto index = static_cast<uint32_t>(g);
-
-      commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
-                                sizeof(uint32_t), &index);
-
-      uint32_t indexCount =
-          static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-      int32_t vertexCount =
-          static_cast<int32_t>(mesh.geometries.at(g).vertices.size());
-
-      commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
-                              numInstances, instanceStart);
-      vertexOffset += vertexCount;
-      indexOffset += indexCount;
-    }
+    commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
+    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+    renderGeometries(commandList, pipeline, mesh, instanceStart, numInstances);
     instanceStart += numInstances;
   }
 }
@@ -920,26 +901,100 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
     const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
 
-    commandList.bindVertexBuffer(mesh.vertexBuffer.getHandle());
-    commandList.bindIndexBuffer(mesh.indexBuffer.getHandle(),
-                                rhi::IndexType::Uint32);
+    commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
+    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
 
-    int32_t vertexOffset = 0;
-    uint32_t indexOffset = 0;
-    for (size_t g = 0; g < mesh.geometries.size(); ++g) {
-      auto &geometry = mesh.geometries.at(g);
-
-      uint32_t indexCount =
-          static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
-      int32_t vertexCount =
-          static_cast<int32_t>(mesh.geometries.at(g).vertices.size());
-
-      commandList.drawIndexed(indexCount, indexOffset, vertexOffset,
-                              numInstances, instanceStart);
-      vertexOffset += vertexCount;
-      indexOffset += indexCount;
-    }
+    renderGeometries(commandList, pipeline, mesh, instanceStart, numInstances);
     instanceStart += numInstances;
+  }
+}
+
+void SceneRenderer::renderGeometries(rhi::RenderCommandList &commandList,
+                                     rhi::PipelineHandle pipeline,
+                                     const MeshAsset &mesh,
+                                     uint32_t instanceStart,
+                                     uint32_t numInstances) {
+  int32_t vertexOffset = 0;
+  uint32_t indexOffset = 0;
+  for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+    auto &geometry = mesh.geometries.at(g);
+
+    auto index = static_cast<uint32_t>(g);
+
+    commandList.pushConstants(pipeline, rhi::ShaderStage::Vertex, 0,
+                              sizeof(uint32_t), &index);
+
+    uint32_t indexCount =
+        static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
+    int32_t vertexCount =
+        static_cast<int32_t>(mesh.geometries.at(g).positions.size());
+
+    commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
+                            instanceStart);
+    vertexOffset += vertexCount;
+    indexOffset += indexCount;
+  }
+}
+
+void SceneRenderer::renderShadowsMesh(rhi::RenderCommandList &commandList,
+                                      rhi::PipelineHandle pipeline,
+                                      uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
+
+  uint32_t instanceStart = 0;
+  for (auto &[handle, meshData] : frameData.getMeshGroups()) {
+    const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
+    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+
+    commandList.bindVertexBuffers(
+        MeshRenderUtils::getGeometryBuffers(mesh),
+        MeshRenderUtils::getGeometryBufferOffsets(mesh));
+    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+    renderShadowsGeometries(commandList, pipeline, mesh, instanceStart,
+                            numInstances);
+    instanceStart += numInstances;
+  }
+}
+
+void SceneRenderer::renderShadowsSkinnedMesh(
+    rhi::RenderCommandList &commandList, rhi::PipelineHandle pipeline,
+    uint32_t frameIndex) {
+  auto &frameData = mFrameData.at(frameIndex);
+
+  uint32_t instanceStart = 0;
+  for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
+    const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+    uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
+
+    commandList.bindVertexBuffers(
+        MeshRenderUtils::getSkinnedGeometryBuffers(mesh),
+        MeshRenderUtils::getSkinnedGeometryBufferOffsets(mesh));
+    commandList.bindIndexBuffer(mesh.indexBuffer, rhi::IndexType::Uint32);
+    renderShadowsGeometries(commandList, pipeline, mesh, instanceStart,
+                            numInstances);
+    instanceStart += numInstances;
+  }
+}
+
+void SceneRenderer::renderShadowsGeometries(rhi::RenderCommandList &commandList,
+                                            rhi::PipelineHandle pipeline,
+                                            const MeshAsset &mesh,
+                                            uint32_t instanceStart,
+                                            uint32_t numInstances) {
+  int32_t vertexOffset = 0;
+  uint32_t indexOffset = 0;
+  for (size_t g = 0; g < mesh.geometries.size(); ++g) {
+    auto &geometry = mesh.geometries.at(g);
+
+    uint32_t indexCount =
+        static_cast<uint32_t>(mesh.geometries.at(g).indices.size());
+    int32_t vertexCount =
+        static_cast<int32_t>(mesh.geometries.at(g).positions.size());
+
+    commandList.drawIndexed(indexCount, indexOffset, vertexOffset, numInstances,
+                            instanceStart);
+    vertexOffset += vertexCount;
+    indexOffset += indexCount;
   }
 }
 

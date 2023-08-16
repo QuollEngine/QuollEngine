@@ -73,12 +73,20 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
   mStats.addCommandCall();
 }
 
-void VulkanCommandBuffer::bindVertexBuffer(BufferHandle buffer) {
-  const auto &vulkanBuffer = mRegistry.getBuffers().at(buffer);
-  std::array<VkDeviceSize, 1> offsets{0};
-  std::array<VkBuffer, 1> buffers{vulkanBuffer->getBuffer()};
+void VulkanCommandBuffer::bindVertexBuffers(
+    const std::span<const BufferHandle> buffers,
+    const std::span<const uint64_t> offsets) {
+  LIQUID_ASSERT(buffers.size() == offsets.size(),
+                "Buffers and offsets must match");
 
-  vkCmdBindVertexBuffers(mCommandBuffer, 0, 1, buffers.data(), offsets.data());
+  std::vector<VkBuffer> vkBuffers;
+  for (auto handle : buffers) {
+    vkBuffers.push_back(mRegistry.getBuffers().at(handle)->getBuffer());
+  }
+
+  vkCmdBindVertexBuffers(mCommandBuffer, 0,
+                         static_cast<uint32_t>(vkBuffers.size()),
+                         vkBuffers.data(), offsets.data());
   mStats.addCommandCall();
 }
 

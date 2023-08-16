@@ -52,6 +52,10 @@ DeviceAddress VulkanBuffer::getAddress() {
 }
 
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
+  LIQUID_ASSERT(description.size > 0,
+                "Cannot create \"" + description.debugName +
+                    "\" buffer because buffer size is zero.");
+
   mSize = description.size;
   mUsage = description.usage;
   mAllocationUsage = description.allocationUsage;

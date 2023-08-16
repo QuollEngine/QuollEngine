@@ -9,98 +9,116 @@
 namespace liquid::editor {
 
 /**
- * @brief Get vertex position in vec3
- *
- * @tparam TVertex Vertex type
- * @param v Vertex
- * @return GLM vec3 position
- */
-template <class TVertex> inline glm::vec3 getVertexPosition(TVertex &v) {
-  return glm::vec3(v.x, v.y, v.z);
-}
-
-/**
  * @brief Generate normals from vertex positions
  *
- * @tparam TVertex Vertex type
- * @param vertices Vertices
+ * @param positions Positions
  * @param indices Indices
+ * @param[out] normals Normals
  */
-template <class TVertex>
-void generateNormals(std::vector<TVertex> &vertices,
-                     std::vector<uint32_t> &indices) {
-  for (auto &v : vertices) {
-    v.nx = 0.0f;
-    v.ny = 0.0f;
-    v.nz = 0.0f;
+void generateNormals(const std::vector<glm::vec3> &positions,
+                     const std::vector<uint32_t> &indices,
+                     std::vector<glm::vec3> &normals) {
+  for (auto &n : normals) {
+    n.x = 0.0f;
+    n.y = 0.0f;
+    n.z = 0.0f;
   }
 
   for (size_t i = 0; i < indices.size(); i += 3) {
-    auto &v0 = vertices.at(indices.at(i));
-    auto &v1 = vertices.at(indices.at(i + 1));
-    auto &v2 = vertices.at(indices.at(i + 2));
+    auto i0 = indices.at(i);
+    auto i1 = indices.at(i + 1);
+    auto i2 = indices.at(i + 2);
 
-    auto edge1 = getVertexPosition(v0) - getVertexPosition(v1);
-    auto edge2 = getVertexPosition(v0) - getVertexPosition(v2);
+    const auto &p0 = positions.at(i0);
+    const auto &p1 = positions.at(i1);
+    const auto &p2 = positions.at(i2);
+
+    auto &n0 = normals.at(i0);
+    auto &n1 = normals.at(i1);
+    auto &n2 = normals.at(i2);
+
+    auto edge1 = p0 - p1;
+    auto edge2 = p0 - p2;
 
     auto normal = glm::cross(edge1, edge2);
 
-    v0.nx += normal.x;
-    v0.ny += normal.y;
-    v0.nz += normal.z;
+    n0.x += normal.x;
+    n0.y += normal.y;
+    n0.z += normal.z;
 
-    v1.nx += normal.x;
-    v1.ny += normal.y;
-    v1.nz += normal.z;
+    n1.x += normal.x;
+    n1.y += normal.y;
+    n1.z += normal.z;
 
-    v2.nx += normal.x;
-    v2.ny += normal.y;
-    v2.nz += normal.z;
+    n2.x += normal.x;
+    n2.y += normal.y;
+    n2.z += normal.z;
   }
 
-  for (auto &v : vertices) {
-    auto n = glm::normalize(glm::vec3(v.nx, v.ny, v.nz));
-    v.nx = n.x;
-    v.ny = n.y;
-    v.nz = n.z;
+  for (auto &n : normals) {
+    auto normalized = glm::normalize(glm::vec3(n.x, n.y, n.z));
+    n.x = normalized.x;
+    n.y = normalized.y;
+    n.z = normalized.z;
   }
 }
 
 /**
  * @brief Generate tangents using Mikktspace
  *
- * @tparam TVertex Vertex type
  * @param vertices Vertices
  * @param indices Indices
  */
-template <class TVertex>
-void generateTangents(std::vector<TVertex> &vertices,
-                      const std::vector<uint32_t> &indices) {
-  MikktspaceAdapter<TVertex> adapter;
+void generateTangents(const std::vector<glm::vec3> &vertices,
+                      const std::vector<glm::vec3> &normals,
+                      const std::vector<glm::vec2> &texCoords,
+                      const std::vector<uint32_t> &indices,
+                      std::vector<glm::vec4> &tangents) {
+  MikktspaceAdapter adapter;
 
-  adapter.generate(vertices, indices);
+  adapter.generate(vertices, normals, texCoords, indices, tangents);
 }
 
 /**
  * @brief Optimize meshes using meshoptimizer
  *
- * @tparam TVertex Vertex type
- * @param vertices Vertices
+ * @param g Geometry
  * @param indices Indices
  */
-template <class TVertex>
-void optimizeMeshes(std::vector<TVertex> &vertices,
-                    std::vector<uint32_t> &indices) {
+void optimizeMeshes(BaseGeometryAsset &g) {
   static constexpr float OverdrawThreshold = 1.05f;
 
-  meshopt_optimizeVertexCache(indices.data(), indices.data(), indices.size(),
-                              vertices.size());
-  meshopt_optimizeOverdraw(indices.data(), indices.data(), indices.size(),
-                           &vertices.at(0).x, vertices.size(), sizeof(TVertex),
+  size_t vertexSize = g.positions.size();
+
+  meshopt_optimizeVertexCache(g.indices.data(), g.indices.data(),
+                              g.indices.size(), vertexSize);
+  meshopt_optimizeOverdraw(g.indices.data(), g.indices.data(), g.indices.size(),
+                           &g.positions.at(0).x, vertexSize, sizeof(glm::vec3),
                            OverdrawThreshold);
-  meshopt_optimizeVertexFetch(vertices.data(), indices.data(), indices.size(),
-                              vertices.data(), vertices.size(),
-                              sizeof(TVertex));
+
+  std::vector<uint32_t> remap(g.positions.size());
+  meshopt_optimizeVertexFetchRemap(remap.data(), g.indices.data(),
+                                   g.indices.size(), g.positions.size());
+
+  meshopt_remapIndexBuffer(g.indices.data(), g.indices.data(), g.indices.size(),
+                           remap.data());
+  meshopt_remapVertexBuffer(g.positions.data(), g.positions.data(), vertexSize,
+                            sizeof(glm::vec3), remap.data());
+  meshopt_remapVertexBuffer(g.normals.data(), g.normals.data(), vertexSize,
+                            sizeof(glm::vec3), remap.data());
+  meshopt_remapVertexBuffer(g.tangents.data(), g.tangents.data(), vertexSize,
+                            sizeof(glm::vec4), remap.data());
+  meshopt_remapVertexBuffer(g.texCoords0.data(), g.texCoords0.data(),
+                            vertexSize, sizeof(glm::vec2), remap.data());
+  meshopt_remapVertexBuffer(g.texCoords1.data(), g.texCoords1.data(),
+                            vertexSize, sizeof(glm::vec2), remap.data());
+
+  if (!g.joints.empty()) {
+    meshopt_remapVertexBuffer(g.joints.data(), g.joints.data(), vertexSize,
+                              sizeof(glm::uvec4), remap.data());
+    meshopt_remapVertexBuffer(g.weights.data(), g.weights.data(), vertexSize,
+                              sizeof(glm::vec4), remap.data());
+  }
 }
 
 /**
@@ -110,28 +128,22 @@ void optimizeMeshes(std::vector<TVertex> &vertices,
  * and texture coordinates that exist
  * for both mesh and skinned mesh
  *
- * @tparam TMesh Mesh type
+ * @param primitiveName Primitive name
  * @param primitive GLTF mesh primitive
- * @param i Mesh index
- * @param p Primitive index
  * @param model GLTF model
+ * @param geometry Mesh geometry
  * @return Vertices and indices
  */
-template <class TVertex>
-Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>
-loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
-                           size_t p, const tinygltf::Model &model) {
-  std::vector<uint32_t> indices;
-  std::vector<TVertex> vertices;
+Result<bool> loadStandardMeshAttributes(const String &primitiveName,
+                                        const tinygltf::Primitive &primitive,
+                                        const tinygltf::Model &model,
+                                        BaseGeometryAsset &geometry) {
+  auto &indices = geometry.indices;
   std::vector<String> warnings;
 
-  String meshName =
-      "Mesh #" + std::to_string(i) + ", Primitive #" + std::to_string(p);
-
   if (primitive.attributes.find("POSITION") == primitive.attributes.end()) {
-    return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
-        Error(meshName +
-              " skipped because it does not have position attribute");
+    return Result<bool>::Error(
+        primitiveName + " skipped because it does not have position attribute");
   }
 
   auto &&positionMeta =
@@ -141,16 +153,19 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
   // According to spec, position attribute can only be vec3<float>
   if (positionMeta.accessor.type == TINYGLTF_TYPE_VEC3 &&
       positionMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
-    vertices.resize(vertexSize);
+    geometry.positions.resize(vertexSize);
+    geometry.normals.resize(vertexSize);
+    geometry.tangents.resize(vertexSize);
+    geometry.texCoords0.resize(vertexSize);
+    geometry.texCoords1.resize(vertexSize);
+
     auto *data = reinterpret_cast<const glm::vec3 *>(positionMeta.rawData);
     for (size_t i = 0; i < vertexSize; ++i) {
-      vertices[i].x = data[i].x;
-      vertices[i].y = data[i].y;
-      vertices[i].z = data[i].z;
+      geometry.positions.at(i) = data[i];
     }
   } else {
-    return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
-        Error(meshName + " skipped because it has invalid position format");
+    return Result<bool>::Error(
+        primitiveName + " skipped because it has invalid position format");
   }
 
   if (primitive.indices >= 0) {
@@ -178,12 +193,12 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
         indices[i] = data[i];
       }
     } else {
-      return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::
-          Error(meshName + " skipped because it has invalid index format");
+      return Result<bool>::Error(
+          primitiveName + " skipped because it has invalid index format");
     }
   } else {
-    indices.resize(vertices.size());
-    for (size_t i = 0; i < vertices.size(); ++i) {
+    indices.resize(geometry.positions.size());
+    for (size_t i = 0; i < geometry.positions.size(); ++i) {
       indices.at(i) = static_cast<uint32_t>(i);
     }
   }
@@ -205,16 +220,14 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     if (validNormals) {
       auto *data = reinterpret_cast<const glm::vec3 *>(normalMeta.rawData);
       for (size_t i = 0; i < vertexSize; ++i) {
-        vertices[i].nx = data[i].x;
-        vertices[i].ny = data[i].y;
-        vertices[i].nz = data[i].z;
+        geometry.normals.at(i) = data[i];
       }
     }
   }
 
   if (!validNormals) {
-    warnings.push_back("Normals for " + meshName + " are generated");
-    generateNormals(vertices, indices);
+    warnings.push_back("Normals for " + primitiveName + " are generated");
+    generateNormals(geometry.positions, geometry.indices, geometry.normals);
   }
 
   if (primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end()) {
@@ -230,8 +243,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
         auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
         for (size_t i = 0; i < vertexSize; ++i) {
-          vertices[i].u0 = data[i].x;
-          vertices[i].v0 = data[i].y;
+          geometry.texCoords0.at(i) = data[i];
         }
       } else if (uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
@@ -257,8 +269,7 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
       if (uvMeta.accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
         auto *data = reinterpret_cast<const glm::vec2 *>(uvMeta.rawData);
         for (size_t i = 0; i < vertexSize; ++i) {
-          vertices[i].u1 = data[i].x;
-          vertices[i].v1 = data[i].y;
+          geometry.texCoords1.at(i) = data[i];
         }
       } else if (uvMeta.accessor.componentType ==
                      TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE ||
@@ -288,30 +299,28 @@ loadStandardMeshAttributes(const tinygltf::Primitive &primitive, size_t i,
     if (validTangents) {
       auto *data = reinterpret_cast<const glm::vec4 *>(tangentMeta.rawData);
       for (size_t i = 0; i < vertexSize; ++i) {
-        vertices[i].tx = data[i].x;
-        vertices[i].ty = data[i].y;
-        vertices[i].tz = data[i].z;
-        vertices[i].tw = data[i].w;
+        geometry.tangents.at(i) = data[i];
       }
     }
   }
 
   if (!validTangents) {
-    generateTangents(vertices, indices);
+    generateTangents(geometry.positions, geometry.normals, geometry.texCoords0,
+                     geometry.indices, geometry.tangents);
   }
 
-  return Result<std::pair<std::vector<TVertex>, std::vector<uint32_t>>>::Ok(
-      {vertices, indices}, warnings);
+  return Result<bool>::Ok(true, warnings);
 }
 
-Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
-                                       size_t i, size_t p,
+Result<bool> loadSkinnedMeshAttributes(const String &primitiveName,
+                                       const tinygltf::Primitive &primitive,
                                        const tinygltf::Model &model,
-                                       std::vector<SkinnedVertex> &vertices) {
-  String meshName = "Skinned mesh #" + std::to_string(i) + ", Primitive #" +
-                    std::to_string(p);
+                                       BaseGeometryAsset &geometry) {
 
   std::vector<String> warnings;
+
+  geometry.joints.resize(geometry.positions.size());
+  geometry.weights.resize(geometry.positions.size());
 
   bool validJoints =
       primitive.attributes.find("JOINTS_0") != primitive.attributes.end();
@@ -328,20 +337,14 @@ Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
             reinterpret_cast<const glm::u8vec4 *>(jointMeta.rawData);
 
         for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-          vertices.at(i).j0 = data[i].x;
-          vertices.at(i).j1 = data[i].y;
-          vertices.at(i).j2 = data[i].z;
-          vertices.at(i).j3 = data[i].w;
+          geometry.joints.at(i) = data[i];
         }
       } else if (jointMeta.accessor.componentType ==
                  TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
         const auto *data =
             reinterpret_cast<const glm::u16vec4 *>(jointMeta.rawData);
         for (size_t i = 0; i < jointMeta.accessor.count; ++i) {
-          vertices.at(i).j0 = data[i].x;
-          vertices.at(i).j1 = data[i].y;
-          vertices.at(i).j2 = data[i].z;
-          vertices.at(i).j3 = data[i].w;
+          geometry.joints.at(i) = data[i];
         }
       } else {
         validJoints = false;
@@ -350,7 +353,7 @@ Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
   }
 
   if (!validJoints) {
-    warnings.push_back(meshName + " joints attribute is invalid");
+    warnings.push_back(primitiveName + " joints attribute is invalid");
   }
 
   bool validWeights =
@@ -368,16 +371,13 @@ Result<bool> loadSkinnedMeshAttributes(const tinygltf::Primitive &primitive,
           reinterpret_cast<const glm::vec4 *>(weightsMeta.rawData);
 
       for (size_t i = 0; i < weightsMeta.accessor.count; ++i) {
-        vertices.at(i).w0 = data[i].x;
-        vertices.at(i).w1 = data[i].y;
-        vertices.at(i).w2 = data[i].z;
-        vertices.at(i).w3 = data[i].w;
+        geometry.weights.at(i) = data[i];
       }
     }
   }
 
   if (!validWeights) {
-    warnings.push_back(meshName + " weights attribute is invalid");
+    warnings.push_back(primitiveName + " weights attribute is invalid");
   }
 
   return Result<bool>::Ok(true, warnings);
@@ -410,11 +410,15 @@ void loadMeshes(GLTFImportData &importData) {
       }
     }
 
+    auto assetName =
+        gltfMesh.name.empty() ? "mesh-" + std::to_string(i) : gltfMesh.name;
+
     std::vector<MaterialAssetHandle> materials;
     AssetData<MeshAsset> mesh;
-    AssetData<SkinnedMeshAsset> skinnedMesh;
 
     for (size_t p = 0; p < gltfMesh.primitives.size(); ++p) {
+      auto primitiveName = assetName + ", primitive #" + std::to_string(p);
+
       const auto &primitive = gltfMesh.primitives.at(p);
 
       auto material = primitive.material >= 0
@@ -423,24 +427,22 @@ void loadMeshes(GLTFImportData &importData) {
                                 .getDefaultObjects()
                                 .defaultMaterial;
 
+      BaseGeometryAsset geometry;
+      auto &&result =
+          loadStandardMeshAttributes(primitiveName, primitive, model, geometry);
+
+      if (result.hasError()) {
+        importData.warnings.push_back(result.getError());
+        continue;
+      }
+
+      importData.warnings.insert(importData.warnings.end(),
+                                 result.getWarnings().begin(),
+                                 result.getWarnings().end());
+
       if (isSkinnedMesh) {
-        auto &&result =
-            loadStandardMeshAttributes<SkinnedVertex>(primitive, i, p, model);
-
-        if (result.hasError()) {
-          importData.warnings.push_back(result.getError());
-          continue;
-        }
-
-        importData.warnings.insert(importData.warnings.end(),
-                                   result.getWarnings().begin(),
-                                   result.getWarnings().end());
-
-        auto &vertices = result.getData().first;
-        auto &indices = result.getData().second;
-
-        auto &&skinnedResult =
-            loadSkinnedMeshAttributes(primitive, i, p, model, vertices);
+        auto &&skinnedResult = loadSkinnedMeshAttributes(
+            primitiveName, primitive, model, geometry);
 
         if (skinnedResult.hasError()) {
           importData.warnings.push_back(result.getError());
@@ -448,78 +450,56 @@ void loadMeshes(GLTFImportData &importData) {
         }
 
         if (importData.optimize) {
-          optimizeMeshes(vertices, indices);
+          optimizeMeshes(geometry);
         }
 
         importData.warnings.insert(importData.warnings.end(),
                                    skinnedResult.getWarnings().begin(),
                                    skinnedResult.getWarnings().end());
+      }
 
-        if (vertices.size() > 0) {
-          skinnedMesh.data.geometries.push_back({vertices, indices});
-          materials.push_back(material);
-        }
-      } else {
-        auto &&result =
-            loadStandardMeshAttributes<Vertex>(primitive, i, p, model);
+      if (importData.optimize) {
+        optimizeMeshes(geometry);
+      }
 
-        if (result.hasError()) {
-          importData.warnings.push_back(result.getError());
-          continue;
-        }
-
-        importData.warnings.insert(importData.warnings.end(),
-                                   result.getWarnings().begin(),
-                                   result.getWarnings().end());
-
-        auto &vertices = result.getData().first;
-        auto &indices = result.getData().second;
-
-        if (importData.optimize) {
-          optimizeMeshes(vertices, indices);
-        }
-
-        if (vertices.size() > 0) {
-          mesh.data.geometries.push_back({vertices, indices});
-          materials.push_back(material);
-        }
+      if (geometry.positions.size() > 0) {
+        mesh.data.geometries.push_back(geometry);
+        materials.push_back(material);
       }
     }
 
-    if (isSkinnedMesh && !skinnedMesh.data.geometries.empty()) {
-      auto assetName = gltfMesh.name.empty() ? "skinnedmesh" + std::to_string(i)
-                                             : gltfMesh.name;
+    if (mesh.data.geometries.empty()) {
+      // Do nothing if there are no meshes in GLTF file
+      return;
+    }
 
-      skinnedMesh.type = AssetType::SkinnedMesh;
-      skinnedMesh.name = getGLTFAssetName(importData, assetName);
+    if (isSkinnedMesh) {
+      mesh.type = AssetType::SkinnedMesh;
+      mesh.name = getGLTFAssetName(importData, assetName);
 
       auto path = assetCache.createSkinnedMeshFromAsset(
-          skinnedMesh, getUUID(importData, assetName));
+          mesh, getUUID(importData, assetName));
       auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
+
       importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
       importData.meshMaterialData.skinnedMeshMaterialMap.insert_or_assign(
           handle.getData(), materials);
-
       importData.outputUuids.insert_or_assign(assetName,
                                               assetCache.getRegistry()
                                                   .getSkinnedMeshes()
                                                   .getAsset(handle.getData())
                                                   .uuid);
-    } else if (!mesh.data.geometries.empty()) {
-      auto assetName =
-          gltfMesh.name.empty() ? "mesh " + std::to_string(i) : gltfMesh.name;
-      auto uuid = getUUID(importData, assetName);
-
-      mesh.type = AssetType::Mesh;
+    } else {
       mesh.name = getGLTFAssetName(importData, assetName);
+      mesh.type = AssetType::Mesh;
 
-      auto path = assetCache.createMeshFromAsset(mesh, uuid);
+      auto path =
+          assetCache.createMeshFromAsset(mesh, getUUID(importData, assetName));
       auto handle = assetCache.loadMeshFromFile(path.getData());
-      importData.meshes.map.insert_or_assign(i, handle.getData());
 
+      importData.meshes.map.insert_or_assign(i, handle.getData());
       importData.meshMaterialData.meshMaterialMap.insert_or_assign(
           handle.getData(), materials);
-
       importData.outputUuids.insert_or_assign(
           assetName,
           assetCache.getRegistry().getMeshes().getAsset(handle.getData()).uuid);

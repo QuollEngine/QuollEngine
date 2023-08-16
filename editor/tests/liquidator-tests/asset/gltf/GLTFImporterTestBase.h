@@ -205,6 +205,11 @@ static tinygltf::Primitive createPrimitive(tinygltf::Model &model,
         createBufferFromVector(model, inPrimitive.texCoords0);
   }
 
+  if (!inPrimitive.texCoords1.data.empty()) {
+    primitive.attributes["TEXCOORD_1"] =
+        createBufferFromVector(model, inPrimitive.texCoords1);
+  }
+
   if (!inPrimitive.indices.data.empty()) {
     if (inPrimitive.indices.componentType ==
         TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
@@ -250,20 +255,19 @@ static GLTFTestPrimitive createCubePrimitive() {
   const auto &g = asset.data.geometries.at(0);
 
   GLTFTestPrimitive primitive;
-  primitive.positions.data.resize(g.vertices.size());
-  primitive.normals.data.resize(g.vertices.size());
-  primitive.tangents.data.resize(g.vertices.size());
-  primitive.texCoords0.data.resize(g.vertices.size());
-  primitive.texCoords1.data.resize(g.vertices.size());
+  primitive.positions.data.resize(g.positions.size());
+  primitive.normals.data.resize(g.positions.size());
+  primitive.tangents.data.resize(g.positions.size());
+  primitive.texCoords0.data.resize(g.positions.size());
+  primitive.texCoords1.data.resize(g.positions.size());
   primitive.indices.data.resize(g.indices.size());
 
-  for (size_t i = 0; i < g.vertices.size(); ++i) {
-    const auto &v = g.vertices.at(i);
-    primitive.positions.data.at(i) = glm::vec3(v.x, v.y, v.z);
-    primitive.normals.data.at(i) = glm::vec3(v.nx, v.ny, v.nz);
-    primitive.tangents.data.at(i) = glm::vec4(v.tx, v.ty, v.tz, v.tw);
-    primitive.texCoords0.data.at(i) = glm::vec2(v.u0, v.v0);
-    primitive.texCoords1.data.at(i) = glm::vec2(v.u1, v.v1);
+  for (size_t i = 0; i < g.positions.size(); ++i) {
+    primitive.positions.data.at(i) = g.positions.at(i);
+    primitive.normals.data.at(i) = g.normals.at(i);
+    primitive.tangents.data.at(i) = g.tangents.at(i);
+    primitive.texCoords0.data.at(i) = g.texCoords0.at(i);
+    primitive.texCoords1.data.at(i) = g.texCoords1.at(i);
   }
 
   for (size_t i = 0; i < g.indices.size(); ++i) {

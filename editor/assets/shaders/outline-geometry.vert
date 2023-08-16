@@ -1,8 +1,6 @@
 #version 460
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 6) in uvec4 inJoints;
-layout(location = 7) in vec4 inWeights;
 
 #include "bindless-editor.glsl"
 
