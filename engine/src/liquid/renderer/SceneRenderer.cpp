@@ -447,8 +447,9 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
                              .getAsset(mAssetRegistry.getDefaultObjects().cube)
                              .data;
 
+      std::array<uint64_t, 1> vbOffsets{0};
       commandList.bindVertexBuffers(std::array{cube.vertexBuffers.at(0)},
-                                    std::array{0ul});
+                                    vbOffsets);
       commandList.bindIndexBuffer(cube.indexBuffer, rhi::IndexType::Uint32);
 
       commandList.drawIndexed(
