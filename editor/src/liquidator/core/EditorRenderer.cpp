@@ -160,19 +160,19 @@ void EditorRenderer::attach(RenderGraph &graph,
 
         auto type = frameData.getCollidableShapeType();
 
+        std::array<uint64_t, 1> offsets{0};
+
         if (type == PhysicsGeometryType::Box) {
           commandList.bindVertexBuffers(
-              std::array{mCollidableCube.buffer.getHandle()}, std::array{0ul});
+              std::array{mCollidableCube.buffer.getHandle()}, offsets);
           commandList.draw(mCollidableCube.vertexCount, 0);
         } else if (type == PhysicsGeometryType::Sphere) {
           commandList.bindVertexBuffers(
-              std::array{mCollidableSphere.buffer.getHandle()},
-              std::array{0ul});
+              std::array{mCollidableSphere.buffer.getHandle()}, offsets);
           commandList.draw(mCollidableSphere.vertexCount, 0);
         } else if (type == PhysicsGeometryType::Capsule) {
           commandList.bindVertexBuffers(
-              std::array{mCollidableCapsule.buffer.getHandle()},
-              std::array{0ul});
+              std::array{mCollidableCapsule.buffer.getHandle()}, offsets);
           commandList.draw(mCollidableCapsule.vertexCount, 0);
         }
       }

@@ -268,9 +268,10 @@ void ImguiRenderer::setupRenderStates(ImDrawData *data,
                                       rhi::PipelineHandle pipeline,
                                       uint32_t frameIndex) {
   if (data->TotalVtxCount > 0) {
+    std::array<uint64_t, 1> offsets{0};
     commandList.bindVertexBuffers(
         std::array{mFrameData.at(frameIndex).vertexBuffer.getHandle()},
-        std::array{0ul});
+        offsets);
     commandList.bindIndexBuffer(
         mFrameData.at(frameIndex).indexBuffer.getHandle(),
         sizeof(ImDrawIdx) == 2 ? rhi::IndexType::Uint16
