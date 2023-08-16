@@ -29,7 +29,7 @@ InitActionsTestSuite(EntityActionsTest, EntityCreateSkinnedMeshActionTest);
 using EntityUpdateSkinnedMeshActionTest = ActionTestBase;
 InitDefaultUpdateComponentTests(EntityUpdateSkinnedMeshActionTest,
                                 EntitySetSkinnedMesh, SkinnedMesh, handle,
-                                liquid::SkinnedMeshAssetHandle{25});
+                                liquid::MeshAssetHandle{25});
 InitActionsTestSuite(EntityActionsTest, EntityUpdateSkinnedMeshActionTest);
 
 using EntityDeleteSkinnedMeshActionTest = ActionTestBase;

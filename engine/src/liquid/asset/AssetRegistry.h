@@ -32,7 +32,7 @@ class AssetRegistry {
   using FontMap = AssetMap<FontAssetHandle, FontAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
   using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
-  using SkinnedMeshMap = AssetMap<SkinnedMeshAssetHandle, MeshAsset>;
+  using SkinnedMeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
   using AnimatorMap = AssetMap<AnimatorAssetHandle, AnimatorAsset>;

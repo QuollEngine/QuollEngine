@@ -168,7 +168,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto uuid = node["components"]["skinnedMesh"].as<String>("");
     auto handle = mAssetRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
 
-    if (handle != SkinnedMeshAssetHandle::Null) {
+    if (handle != MeshAssetHandle::Null) {
       mEntityDatabase.set<SkinnedMesh>(entity, {handle});
     }
   }

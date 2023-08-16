@@ -78,7 +78,7 @@ struct MeshMaterialData {
   /**
    * Skinned mesh material map
    */
-  std::map<SkinnedMeshAssetHandle, std::vector<MaterialAssetHandle>>
+  std::map<MeshAssetHandle, std::vector<MaterialAssetHandle>>
       skinnedMeshMaterialMap;
 };
 
@@ -151,7 +151,7 @@ struct GLTFImportData {
   /**
    * Skinned mesh map
    */
-  GLTFToAsset<SkinnedMeshAssetHandle> skinnedMeshes;
+  GLTFToAsset<MeshAssetHandle> skinnedMeshes;
 
   /**
    * Mesh material data

@@ -1380,7 +1380,7 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
-      auto asset = *static_cast<SkinnedMeshAssetHandle *>(payload->Data);
+      auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
 
       if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
         actionExecutor.execute<EntitySetSkinnedMesh>(

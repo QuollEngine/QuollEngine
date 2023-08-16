@@ -726,7 +726,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Validate mesh
   EXPECT_NE(newPrefab.data.skinnedMeshes.at(0).value,
-            liquid::SkinnedMeshAssetHandle::Null);
+            liquid::MeshAssetHandle::Null);
   auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(
       newPrefab.data.skinnedMeshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
