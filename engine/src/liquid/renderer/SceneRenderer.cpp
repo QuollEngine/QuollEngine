@@ -783,7 +783,7 @@ void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
   for (auto [entity, skeleton, world, mesh, renderer] :
        entityDatabase.view<Skeleton, WorldTransform, SkinnedMesh,
                            SkinnedMeshRenderer>()) {
-    const auto &asset = mAssetRegistry.getSkinnedMeshes().getAsset(mesh.handle);
+    const auto &asset = mAssetRegistry.getMeshes().getAsset(mesh.handle);
 
     std::vector<rhi::DeviceAddress> materials;
     for (auto material : renderer.materials) {
@@ -899,7 +899,7 @@ void SceneRenderer::renderSkinned(rhi::RenderCommandList &commandList,
   uint32_t instanceStart = 0;
 
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+    const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(mesh.vertexBuffers, mesh.vertexBufferOffsets);
@@ -964,7 +964,7 @@ void SceneRenderer::renderShadowsSkinnedMesh(
 
   uint32_t instanceStart = 0;
   for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-    const auto &mesh = mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+    const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
     uint32_t numInstances = static_cast<uint32_t>(meshData.transforms.size());
 
     commandList.bindVertexBuffers(

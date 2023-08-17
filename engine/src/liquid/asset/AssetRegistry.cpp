@@ -156,54 +156,17 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
     CreateBuffer(texCoords0, glm::vec2);
     CreateBuffer(texCoords1, glm::vec2);
 
+    if (mesh.type == AssetType::SkinnedMesh) {
+      CreateBuffer(joints, glm::uvec4);
+      CreateBuffer(weights, glm::vec4);
+    }
+
     {
       rhi::BufferDescription description;
       description.usage = rhi::BufferUsage::Index;
       description.size = ibSize;
       description.data = nullptr;
       description.debugName = mesh.name + " indices";
-
-      auto buffer = renderStorage.createBuffer(description);
-
-      auto *data = static_cast<uint32_t *>(buffer.map());
-      size_t offset = 0;
-      for (auto &g : mesh.data.geometries) {
-        memcpy(data + offset, g.indices.data(),
-               g.indices.size() * sizeof(uint32_t));
-        offset += g.indices.size();
-      }
-
-      buffer.unmap();
-
-      mesh.data.indexBuffer = buffer.getHandle();
-    }
-  }
-
-  // Synchronize skinned meshes
-  for (auto &[_, mesh] : mSkinnedMeshes.getAssets()) {
-    if (!mesh.data.vertexBuffers.empty()) {
-      continue;
-    }
-
-    size_t ibSize = 0;
-    for (auto &g : mesh.data.geometries) {
-      ibSize += g.indices.size() * sizeof(uint32_t);
-    }
-
-    CreateBuffer(positions, glm::vec3);
-    CreateBuffer(normals, glm::vec3);
-    CreateBuffer(tangents, glm::vec4);
-    CreateBuffer(texCoords0, glm::vec2);
-    CreateBuffer(texCoords1, glm::vec2);
-    CreateBuffer(joints, glm::uvec4);
-    CreateBuffer(weights, glm::vec4);
-
-    {
-      rhi::BufferDescription description;
-      description.usage = rhi::BufferUsage::Index;
-      description.size = ibSize;
-      description.data = nullptr;
-      description.debugName = mesh.name + " index";
 
       auto buffer = renderStorage.createBuffer(description);
 
@@ -246,12 +209,6 @@ AssetRegistry::getAssetByUuid(const String &uuid) {
   for (auto &[handle, asset] : mMeshes.getAssets()) {
     if (asset.uuid == uuid) {
       return {AssetType::Mesh, static_cast<uint32_t>(handle)};
-    }
-  }
-
-  for (auto &[handle, asset] : mSkinnedMeshes.getAssets()) {
-    if (asset.uuid == uuid) {
-      return {AssetType::SkinnedMesh, static_cast<uint32_t>(handle)};
     }
   }
 

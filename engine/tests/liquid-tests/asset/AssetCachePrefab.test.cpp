@@ -99,21 +99,6 @@ public:
       asset.data.meshes.push_back({numMeshes + i, handle});
     }
 
-    for (uint32_t i = 0; i < numSkeletons; ++i) {
-      liquid::AssetData<liquid::MeshAsset> mesh;
-      mesh.uuid = "smesh-" + std::to_string(i);
-      auto handle = cache.getRegistry().getSkinnedMeshes().addAsset(mesh);
-      asset.data.skinnedMeshes.push_back({i, handle});
-    }
-
-    // Add two more entities that point to the same
-    // meshes to test that existing meshes are always
-    // referenced instead of added again
-    for (uint32_t i = 0; i < 2; ++i) {
-      auto handle = asset.data.skinnedMeshes.at(static_cast<size_t>(i)).value;
-      asset.data.skinnedMeshes.push_back({numSkeletons + i, handle});
-    }
-
     for (uint32_t i = 0; i < numSkinnedMeshRenderers; ++i) {
       liquid::SkinnedMeshRenderer renderer{};
       renderer.materials.push_back(materials.at((i % 2)));
@@ -212,22 +197,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto expectedString = map.getAsset(expected.at(i).value).uuid;
       EXPECT_EQ(expectedString, actualMeshes.at(i));
-    }
-  }
-
-  std::vector<liquid::String> actualSkinnedMeshes;
-  {
-    auto &expected = asset.data.skinnedMeshes;
-    auto &map = cache.getRegistry().getSkinnedMeshes();
-    uint32_t numAssets = 0;
-    file.read(numAssets);
-    EXPECT_EQ(numAssets, 3);
-    actualSkinnedMeshes.resize(numAssets);
-    file.read(actualSkinnedMeshes);
-
-    for (uint32_t i = 0; i < numAssets; ++i) {
-      auto expectedString = map.getAsset(expected.at(i).value).uuid;
-      EXPECT_EQ(expectedString, actualSkinnedMeshes.at(i));
     }
   }
 
@@ -371,26 +340,6 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
         auto uuid = actualMaterials.at(materialIndex);
         EXPECT_EQ(uuid, map.getAsset(handle).uuid);
       }
-    }
-  }
-
-  {
-    uint32_t numComponents = 0;
-    file.read(numComponents);
-    EXPECT_EQ(numComponents, 5);
-    auto &map = cache.getRegistry().getSkinnedMeshes();
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 999;
-      file.read(entity);
-      EXPECT_EQ(entity, i);
-
-      uint32_t meshIndex = 999;
-      file.read(meshIndex);
-      EXPECT_EQ(meshIndex, i % 3);
-
-      auto &expected = map.getAsset(asset.data.skinnedMeshes.at(i).value);
-
-      EXPECT_EQ(expected.uuid, actualSkinnedMeshes.at(meshIndex));
     }
   }
 
@@ -586,14 +535,6 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
     }
   }
 
-  EXPECT_EQ(asset.data.skinnedMeshes.size(), prefab.data.skinnedMeshes.size());
-  for (size_t i = 0; i < prefab.data.skinnedMeshes.size(); ++i) {
-    auto &expected = asset.data.skinnedMeshes.at(i);
-    auto &actual = prefab.data.skinnedMeshes.at(i);
-    EXPECT_EQ(expected.entity, actual.entity);
-    EXPECT_EQ(expected.value, actual.value);
-  }
-
   EXPECT_EQ(asset.data.skinnedMeshRenderers.size(),
             prefab.data.skinnedMeshRenderers.size());
   for (size_t i = 0; i < prefab.data.skinnedMeshRenderers.size(); ++i) {
@@ -670,6 +611,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Create mesh
   liquid::AssetData<liquid::MeshAsset> meshData{};
+  meshData.type = liquid::AssetType::SkinnedMesh;
   liquid::BaseGeometryAsset geometry{};
   geometry.positions.push_back({});
   geometry.normals.push_back({});
@@ -681,8 +623,8 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
-  auto meshPath = cache.createSkinnedMeshFromAsset(meshData, "").getData();
-  auto meshHandle = cache.loadSkinnedMeshFromFile(meshPath);
+  auto meshPath = cache.createMeshFromAsset(meshData, "").getData();
+  auto meshHandle = cache.loadMeshFromFile(meshPath);
 
   // Create skeleton
   liquid::AssetData<liquid::SkeletonAsset> skeletonData{};
@@ -704,7 +646,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Create prefab
   liquid::AssetData<liquid::PrefabAsset> prefabData{};
-  prefabData.data.skinnedMeshes.push_back({0U, meshHandle.getData()});
+  prefabData.data.meshes.push_back({0U, meshHandle.getData()});
   prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
   prefabData.data.animations.push_back(animationHandle.getData());
   prefabData.data.animators.push_back({0U, animatorHandle.getData()});
@@ -713,7 +655,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
 
   // Delete all existing assets
   cache.getRegistry().getTextures().deleteAsset(textureHandle.getData());
-  cache.getRegistry().getSkinnedMeshes().deleteAsset(meshHandle.getData());
+  cache.getRegistry().getMeshes().deleteAsset(meshHandle.getData());
   cache.getRegistry().getSkeletons().deleteAsset(skeletonHandle.getData());
   cache.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
   cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
@@ -725,10 +667,9 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
       cache.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
 
   // Validate mesh
-  EXPECT_NE(newPrefab.data.skinnedMeshes.at(0).value,
-            liquid::MeshAssetHandle::Null);
-  auto &newMesh = cache.getRegistry().getSkinnedMeshes().getAsset(
-      newPrefab.data.skinnedMeshes.at(0).value);
+  EXPECT_NE(newPrefab.data.meshes.at(0).value, liquid::MeshAssetHandle::Null);
+  auto &newMesh = cache.getRegistry().getMeshes().getAsset(
+      newPrefab.data.meshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
 
   // Validate skeleton

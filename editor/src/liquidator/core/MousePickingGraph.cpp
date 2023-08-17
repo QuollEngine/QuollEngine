@@ -345,8 +345,7 @@ void MousePickingGraph::createRenderGraph() {
 
       uint32_t instanceStart = 0;
       for (auto &[handle, meshData] : frameData.getSkinnedMeshGroups()) {
-        const auto &mesh =
-            mAssetRegistry.getSkinnedMeshes().getAsset(handle).data;
+        const auto &mesh = mAssetRegistry.getMeshes().getAsset(handle).data;
 
         uint32_t numInstances =
             static_cast<uint32_t>(meshData.transforms.size());

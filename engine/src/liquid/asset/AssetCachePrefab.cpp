@@ -76,26 +76,6 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
     file.write(assetPaths);
   }
 
-  std::map<MeshAssetHandle, uint32_t> localSkinnedMeshMap;
-  {
-    std::vector<String> assetPaths;
-    assetPaths.reserve(asset.data.skinnedMeshes.size());
-
-    for (auto &component : asset.data.skinnedMeshes) {
-      auto uuid = mRegistry.getSkinnedMeshes().getAsset(component.value).uuid;
-
-      if (localSkinnedMeshMap.find(component.value) ==
-          localSkinnedMeshMap.end()) {
-        localSkinnedMeshMap.insert_or_assign(
-            component.value, static_cast<uint32_t>(assetPaths.size()));
-        assetPaths.push_back(uuid);
-      }
-    }
-
-    file.write(static_cast<uint32_t>(assetPaths.size()));
-    file.write(assetPaths);
-  }
-
   std::map<SkeletonAssetHandle, uint32_t> localSkeletonMap;
   {
     std::vector<String> assetPaths;
@@ -198,15 +178,6 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
       for (auto handle : component.value.materials) {
         file.write(localMaterialMap.at(handle));
       }
-    }
-  }
-
-  {
-    auto numComponents = static_cast<uint32_t>(asset.data.skinnedMeshes.size());
-    file.write(numComponents);
-    for (auto &component : asset.data.skinnedMeshes) {
-      file.write(component.entity);
-      file.write(localSkinnedMeshMap.at(component.value));
     }
   }
 
@@ -326,27 +297,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
       const auto &res = getOrLoadMeshFromUuid(assetUuid);
       if (res.hasData()) {
         localMeshMap.at(i) = res.getData();
-        warnings.insert(warnings.end(), res.getWarnings().begin(),
-                        res.getWarnings().end());
-      } else {
-        warnings.push_back(res.getError());
-      }
-    }
-  }
-
-  std::vector<MeshAssetHandle> localSkinnedMeshMap;
-  {
-    uint32_t numAssets = 0;
-    stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
-    stream.read(actual);
-    localSkinnedMeshMap.resize(numAssets, MeshAssetHandle::Null);
-
-    for (uint32_t i = 0; i < numAssets; ++i) {
-      auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadSkinnedMeshFromUuid(assetUuid);
-      if (res.hasData()) {
-        localSkinnedMeshMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
                         res.getWarnings().end());
       } else {
@@ -509,24 +459,6 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
     uint32_t numComponents = 0;
     stream.read(numComponents);
 
-    prefab.data.skinnedMeshes.resize(numComponents);
-
-    for (uint32_t i = 0; i < numComponents; ++i) {
-      uint32_t entity = 0;
-      stream.read(entity);
-
-      uint32_t meshIndex = 0;
-      stream.read(meshIndex);
-
-      prefab.data.skinnedMeshes.at(i).entity = entity;
-      prefab.data.skinnedMeshes.at(i).value = localSkinnedMeshMap.at(meshIndex);
-    }
-  }
-
-  {
-    uint32_t numComponents = 0;
-    stream.read(numComponents);
-
     prefab.data.skinnedMeshRenderers.resize(numComponents);
 
     for (uint32_t i = 0; i < numComponents; ++i) {
@@ -638,8 +570,9 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
   if (prefab.data.transforms.empty() && prefab.data.directionalLights.empty() &&
       prefab.data.pointLights.empty() && prefab.data.meshes.empty() &&
-      prefab.data.skinnedMeshes.empty() && prefab.data.skeletons.empty() &&
-      prefab.data.animators.empty() && prefab.data.names.empty()) {
+      prefab.data.skeletons.empty() && prefab.data.animators.empty() &&
+      prefab.data.names.empty() && prefab.data.meshRenderers.empty() &&
+      prefab.data.skinnedMeshRenderers.empty()) {
     return Result<PrefabAssetHandle>::Error("Prefab is empty");
   }
 

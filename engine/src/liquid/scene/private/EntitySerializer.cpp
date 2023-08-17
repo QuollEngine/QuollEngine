@@ -161,6 +161,13 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
 
       components["mesh"] = uuid;
     }
+  } else if (mEntityDatabase.has<SkinnedMesh>(entity)) {
+    auto handle = mEntityDatabase.get<SkinnedMesh>(entity).handle;
+    if (mAssetRegistry.getMeshes().hasAsset(handle)) {
+      auto uuid = mAssetRegistry.getMeshes().getAsset(handle).uuid;
+
+      components["mesh"] = uuid;
+    }
   }
 
   if (mEntityDatabase.has<MeshRenderer>(entity)) {
@@ -174,15 +181,6 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
         auto uuid = mAssetRegistry.getMaterials().getAsset(material).uuid;
         components["meshRenderer"]["materials"].push_back(uuid);
       }
-    }
-  }
-
-  if (mEntityDatabase.has<SkinnedMesh>(entity)) {
-    auto handle = mEntityDatabase.get<SkinnedMesh>(entity).handle;
-    if (mAssetRegistry.getSkinnedMeshes().hasAsset(handle)) {
-      auto uuid = mAssetRegistry.getSkinnedMeshes().getAsset(handle).uuid;
-
-      components["skinnedMesh"] = uuid;
     }
   }
 

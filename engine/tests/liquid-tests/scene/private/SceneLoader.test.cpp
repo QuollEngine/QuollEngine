@@ -256,6 +256,7 @@ TEST_F(SceneLoaderMeshTest,
        DoesNotCreateMeshComponentIfNoMeshHandleInRegistry) {
   liquid::AssetData<liquid::MeshAsset> data{};
   data.uuid = "hello";
+  data.type = liquid::AssetType::Mesh;
   auto handle = assetRegistry.getMeshes().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -265,8 +266,9 @@ TEST_F(SceneLoaderMeshTest,
   EXPECT_FALSE(entityDatabase.has<liquid::Mesh>(entity));
 }
 
-TEST_F(SceneLoaderMeshTest, CreatesMeshComponentWithFileDataIfValidField) {
+TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
   liquid::AssetData<liquid::MeshAsset> data{};
+  data.type = liquid::AssetType::Mesh;
   data.uuid = "hello";
   auto handle = assetRegistry.getMeshes().addAsset(data);
 
@@ -275,56 +277,23 @@ TEST_F(SceneLoaderMeshTest, CreatesMeshComponentWithFileDataIfValidField) {
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<liquid::Mesh>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMesh>(entity));
   EXPECT_EQ(entityDatabase.get<liquid::Mesh>(entity).handle, handle);
 }
 
 TEST_F(SceneLoaderMeshTest,
-       DoesNotCreateSkinnedMeshComponentIfMeshFieldIsNotDefined) {
-  auto [node, entity] = createNode();
-  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
-
-  EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMesh>(entity));
-}
-
-TEST_F(SceneLoaderMeshTest,
-       DoesNotCreateSkinnedMeshComponentIfMeshFieldIsInvalid) {
-  std::vector<YAML::Node> invalidNodes{
-      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
-      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
-      YAML::Node(YAML::NodeType::Scalar)};
-
-  for (const auto &invalidNode : invalidNodes) {
-    auto [node, entity] = createNode();
-    node["skinnedMesh"] = invalidNode;
-    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
-    EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMesh>(entity));
-  }
-}
-
-TEST_F(SceneLoaderMeshTest,
-       DoesNotCreateSkinnedMeshComponentIfNoSkinnedMeshHandleInRegistry) {
+       CreatesSkinnedMeshComponentIfValidAssetTypeIsSkinnedMesh) {
   liquid::AssetData<liquid::MeshAsset> data{};
+  data.type = liquid::AssetType::SkinnedMesh;
   data.uuid = "hello";
-  auto handle = assetRegistry.getSkinnedMeshes().addAsset(data);
+  auto handle = assetRegistry.getMeshes().addAsset(data);
 
   auto [node, entity] = createNode();
-  node["components"]["skinnedMesh"] = "bye";
-  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
-
-  EXPECT_FALSE(entityDatabase.has<liquid::SkinnedMesh>(entity));
-}
-
-TEST_F(SceneLoaderMeshTest,
-       CreatesSkinnedMeshComponentWithFileDataIfValidField) {
-  liquid::AssetData<liquid::MeshAsset> data{};
-  data.uuid = "hello";
-  auto handle = assetRegistry.getSkinnedMeshes().addAsset(data);
-
-  auto [node, entity] = createNode();
-  node["components"]["skinnedMesh"] = data.uuid;
+  node["components"]["mesh"] = data.uuid;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<liquid::SkinnedMesh>(entity));
+  EXPECT_FALSE(entityDatabase.has<liquid::Mesh>(entity));
   EXPECT_EQ(entityDatabase.get<liquid::SkinnedMesh>(entity).handle, handle);
 }
 

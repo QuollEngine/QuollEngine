@@ -63,26 +63,6 @@ struct AnimationData {
 };
 
 /**
- * @brief Mesh material data
- *
- * Used to store mapping between
- * mesh assets and materials that point
- * to each primitive of the mesh
- */
-struct MeshMaterialData {
-  /**
-   * Mesh material map
-   */
-  std::map<MeshAssetHandle, std::vector<MaterialAssetHandle>> meshMaterialMap;
-
-  /**
-   * Skinned mesh material map
-   */
-  std::map<MeshAssetHandle, std::vector<MaterialAssetHandle>>
-      skinnedMeshMaterialMap;
-};
-
-/**
  * @brief GLTF import data
  *
  * Stores all the information to perform the import
@@ -149,14 +129,10 @@ struct GLTFImportData {
   GLTFToAsset<MeshAssetHandle> meshes;
 
   /**
-   * Skinned mesh map
+   * Map of materials associated
+   * with meshes
    */
-  GLTFToAsset<MeshAssetHandle> skinnedMeshes;
-
-  /**
-   * Mesh material data
-   */
-  MeshMaterialData meshMaterialData;
+  std::map<MeshAssetHandle, std::vector<MaterialAssetHandle>> meshMaterials;
 
   /**
    * Directional light map

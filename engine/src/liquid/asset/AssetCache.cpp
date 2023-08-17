@@ -33,7 +33,7 @@ Result<AssetFileHeader> AssetCache::checkAssetFile(InputBinaryStream &file,
         "Opened file is not a liquid asset: " + filePath.string());
   }
 
-  if (header.type != assetType) {
+  if (assetType != AssetType::None && header.type != assetType) {
     return Result<AssetFileHeader>::Error("Opened file is not a liquid " +
                                           getAssetTypeString(assetType) +
                                           " asset: " + filePath.string());
@@ -178,7 +178,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (header.type == AssetType::SkinnedMesh) {
-    auto res = loadSkinnedMeshDataFromInputStream(stream, path, header);
+    auto res = loadMeshDataFromInputStream(stream, path, header);
 
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
