@@ -261,14 +261,14 @@ TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
   liquid::AssetData<liquid::MeshAsset> mesh{};
   mesh.uuid = "skinnedMesh.mesh";
-  auto handle = assetRegistry.getSkinnedMeshes().addAsset(mesh);
+  auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
   auto entity = entityDatabase.create();
   entityDatabase.set<liquid::SkinnedMesh>(entity, {handle});
 
   auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_TRUE(node["skinnedMesh"]);
-  EXPECT_EQ(node["skinnedMesh"].as<liquid::String>(""), "skinnedMesh.mesh");
+  EXPECT_TRUE(node["mesh"]);
+  EXPECT_EQ(node["mesh"].as<liquid::String>(""), "skinnedMesh.mesh");
 }
 
 // Skinned mesh renderer

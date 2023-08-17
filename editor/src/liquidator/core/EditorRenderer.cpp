@@ -501,7 +501,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
 
       const auto &world =
           entityDatabase.get<WorldTransform>(state.selectedEntity);
-      const auto &data = assetRegistry.getSkinnedMeshes().getAsset(handle).data;
+      const auto &data = assetRegistry.getMeshes().getAsset(handle).data;
 
       const auto &skeleton = entityDatabase.get<Skeleton>(state.selectedEntity)
                                  .jointFinalTransforms;

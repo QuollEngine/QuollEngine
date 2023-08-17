@@ -32,7 +32,6 @@ class AssetRegistry {
   using FontMap = AssetMap<FontAssetHandle, FontAsset>;
   using MaterialMap = AssetMap<MaterialAssetHandle, MaterialAsset>;
   using MeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
-  using SkinnedMeshMap = AssetMap<MeshAssetHandle, MeshAsset>;
   using SkeletonMap = AssetMap<SkeletonAssetHandle, SkeletonAsset>;
   using AnimationMap = AssetMap<AnimationAssetHandle, AnimationAsset>;
   using AnimatorMap = AssetMap<AnimatorAssetHandle, AnimatorAsset>;
@@ -116,13 +115,6 @@ public:
   inline MeshMap &getMeshes() { return mMeshes; }
 
   /**
-   * @brief Get skinned meshes
-   *
-   * @return Skinned mesh asset map
-   */
-  inline SkinnedMeshMap &getSkinnedMeshes() { return mSkinnedMeshes; }
-
-  /**
    * @brief Get skeletons
    *
    * @return Skeleton asset map
@@ -185,7 +177,6 @@ private:
   FontMap mFonts;
   MaterialMap mMaterials;
   MeshMap mMeshes;
-  SkinnedMeshMap mSkinnedMeshes;
   SkeletonMap mSkeletons;
   AnimationMap mAnimations;
   AnimatorMap mAnimators;

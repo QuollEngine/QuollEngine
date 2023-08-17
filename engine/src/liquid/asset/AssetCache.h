@@ -117,27 +117,6 @@ public:
   Result<MeshAssetHandle> loadMeshFromFile(const Path &filePath);
 
   /**
-   * @brief Create skinned mesh from asset
-   *
-   * Create engine specific skinned mesh asset
-   * from mesh data
-   *
-   * @param asset Mesh asset
-   * @param uuid Asset uuid
-   * @return Path to new mesh asset
-   */
-  Result<Path> createSkinnedMeshFromAsset(const AssetData<MeshAsset> &asset,
-                                          const String &uuid);
-
-  /**
-   * @brief Load skinned mesh from file
-   *
-   * @param filePath Path to asset
-   * @return Skinned mesh asset handle
-   */
-  Result<MeshAssetHandle> loadSkinnedMeshFromFile(const Path &filePath);
-
-  /**
    * @brief Create skeleton from asset
    *
    * Create engine specific skeleton asset
@@ -419,19 +398,6 @@ private:
                               const AssetFileHeader &header);
 
   /**
-   * @brief Load skinned mesh from input stream
-   *
-   * @param stream Input stream
-   * @param filePath Path to asset
-   * @param header Asset file header
-   * @return Skinned mesh asset handle
-   */
-  Result<MeshAssetHandle>
-  loadSkinnedMeshDataFromInputStream(InputBinaryStream &stream,
-                                     const Path &filePath,
-                                     const AssetFileHeader &header);
-
-  /**
    * @brief Load skeleton from input stream
    *
    * @param stream Input stream
@@ -513,14 +479,6 @@ private:
    * @return Existing or newly loaded mesh
    */
   Result<MeshAssetHandle> getOrLoadMeshFromUuid(const String &uuid);
-
-  /**
-   * @brief Get or load skinned mesh from uuid
-   *
-   * @param uuid Asset uuid
-   * @return Existing or newly loaded skinned mesh
-   */
-  Result<MeshAssetHandle> getOrLoadSkinnedMeshFromUuid(const String &uuid);
 
   /**
    * @brief Get or load skeleton from uuid

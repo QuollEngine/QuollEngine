@@ -46,8 +46,9 @@ static bool isPrefabValid(AssetRegistry &assetRegistry,
   const auto &prefab = prefabs.getAsset(handle).data;
 
   return !prefab.animators.empty() || !prefab.meshes.empty() ||
-         !prefab.skeletons.empty() || !prefab.skinnedMeshes.empty() ||
-         !prefab.transforms.empty();
+         !prefab.skeletons.empty() || !prefab.transforms.empty() ||
+         !prefab.directionalLights.empty() || !prefab.pointLights.empty() ||
+         !prefab.meshRenderers.empty() || !prefab.skinnedMeshRenderers.empty();
 }
 
 ActionExecutorResult

@@ -140,7 +140,13 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     auto handle = mAssetRegistry.getMeshes().findHandleByUuid(uuid);
 
     if (handle != MeshAssetHandle::Null) {
-      mEntityDatabase.set<Mesh>(entity, {handle});
+      auto type = mAssetRegistry.getMeshes().getAsset(handle).type;
+
+      if (type == AssetType::Mesh) {
+        mEntityDatabase.set<Mesh>(entity, {handle});
+      } else if (type == AssetType::SkinnedMesh) {
+        mEntityDatabase.set<SkinnedMesh>(entity, {handle});
+      }
     }
   }
 
@@ -162,15 +168,6 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
 
     mEntityDatabase.set(entity, renderer);
-  }
-
-  if (node["components"]["skinnedMesh"]) {
-    auto uuid = node["components"]["skinnedMesh"].as<String>("");
-    auto handle = mAssetRegistry.getSkinnedMeshes().findHandleByUuid(uuid);
-
-    if (handle != MeshAssetHandle::Null) {
-      mEntityDatabase.set<SkinnedMesh>(entity, {handle});
-    }
   }
 
   if (node["components"]["skinnedMeshRenderer"] &&

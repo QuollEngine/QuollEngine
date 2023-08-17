@@ -49,9 +49,7 @@ void loadPrefabs(GLTFImportData &importData) {
 
     bool hasValidMesh =
         node.mesh >= 0 &&
-        (importData.skinnedMeshes.map.find(node.mesh) !=
-             importData.skinnedMeshes.map.end() ||
-         importData.meshes.map.find(node.mesh) != importData.meshes.map.end());
+        importData.meshes.map.find(node.mesh) != importData.meshes.map.end();
     bool hasValidLight = false;
 
     auto itExtLight = node.extensions.find("KHR_lights_punctual");
@@ -84,17 +82,13 @@ void loadPrefabs(GLTFImportData &importData) {
         {localEntityId, node.name.empty() ? "Untitled" : node.name});
 
     if (hasValidMesh) {
+      auto handle = importData.meshes.map.at(node.mesh);
+      const auto &asset =
+          importData.assetCache.getRegistry().getMeshes().getAsset(handle);
+      const auto &materials = importData.meshMaterials.at(handle);
+      prefab.data.meshes.push_back({localEntityId, handle});
+
       if (node.skin >= 0) {
-        auto handle = importData.skinnedMeshes.map.at(node.mesh);
-        const auto &asset =
-            importData.assetCache.getRegistry().getSkinnedMeshes().getAsset(
-                handle);
-
-        auto materials =
-            importData.meshMaterialData.skinnedMeshMaterialMap.at(handle);
-
-        prefab.data.skinnedMeshes.push_back({localEntityId, handle});
-
         SkinnedMeshRenderer renderer{materials};
         prefab.data.skinnedMeshRenderers.push_back({localEntityId, renderer});
 
@@ -106,16 +100,7 @@ void loadPrefabs(GLTFImportData &importData) {
         if (it != importData.animations.skinAnimatorMap.end()) {
           prefab.data.animators.push_back({localEntityId, it->second});
         }
-
       } else {
-        auto handle = importData.meshes.map.at(node.mesh);
-        const auto &asset =
-            importData.assetCache.getRegistry().getMeshes().getAsset(handle);
-
-        auto materials = importData.meshMaterialData.meshMaterialMap.at(handle);
-
-        prefab.data.meshes.push_back({localEntityId, handle});
-
         MeshRenderer renderer{materials};
         prefab.data.meshRenderers.push_back({localEntityId, renderer});
 

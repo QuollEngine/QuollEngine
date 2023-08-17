@@ -600,7 +600,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
       auto handle =
           scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity).handle;
 
-      const auto &asset = assetRegistry.getSkinnedMeshes().getAsset(handle);
+      const auto &asset = assetRegistry.getMeshes().getAsset(handle);
 
       if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
         table.row("Name", asset.name);
@@ -610,7 +610,7 @@ void EntityPanel::renderMesh(Scene &scene, AssetRegistry &assetRegistry,
     }
 
     if (shouldDelete("SkinnedMesh")) {
-      actionExecutor.execute<EntityDeleteSkinnedMesh>(mSelectedEntity);
+      actionExecutor.execute<EntityDeleteMesh>(mSelectedEntity);
     }
   }
 }
@@ -1368,29 +1368,13 @@ void EntityPanel::handleDragAndDrop(Scene &scene, AssetRegistry &assetRegistry,
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::Mesh).c_str())) {
       auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
-
-      if (scene.entityDatabase.has<Mesh>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetMesh>(
-            mSelectedEntity, scene.entityDatabase.get<Mesh>(mSelectedEntity),
-            Mesh{asset});
-      } else {
-        actionExecutor.execute<EntityCreateMesh>(mSelectedEntity, Mesh{asset});
-      }
+      actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(
             getAssetTypeString(AssetType::SkinnedMesh).c_str())) {
       auto asset = *static_cast<MeshAssetHandle *>(payload->Data);
-
-      if (scene.entityDatabase.has<SkinnedMesh>(mSelectedEntity)) {
-        actionExecutor.execute<EntitySetSkinnedMesh>(
-            mSelectedEntity,
-            scene.entityDatabase.get<SkinnedMesh>(mSelectedEntity),
-            SkinnedMesh{asset});
-      } else {
-        actionExecutor.execute<EntityCreateSkinnedMesh>(mSelectedEntity,
-                                                        SkinnedMesh{asset});
-      }
+      actionExecutor.execute<EntitySetMesh>(mSelectedEntity, asset);
     }
 
     if (auto *payload = ImGui::AcceptDragDropPayload(

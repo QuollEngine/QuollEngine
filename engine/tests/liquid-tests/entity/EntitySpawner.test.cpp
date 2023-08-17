@@ -57,9 +57,12 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two meshes
   for (uint32_t i = 0; i < 2; ++i) {
+    liquid::AssetData<liquid::MeshAsset> meshAsset{};
+    meshAsset.type = liquid::AssetType::Mesh;
+
     liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
     mesh.entity = i;
-    mesh.value = liquid::MeshAssetHandle{i};
+    mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
     asset.data.meshes.push_back(mesh);
   }
 
@@ -92,10 +95,13 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create three skinned meshes
   for (uint32_t i = 2; i < 5; ++i) {
+    liquid::AssetData<liquid::MeshAsset> meshAsset{};
+    meshAsset.type = liquid::AssetType::SkinnedMesh;
+
     liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
     mesh.entity = i;
-    mesh.value = liquid::MeshAssetHandle{i};
-    asset.data.skinnedMeshes.push_back(mesh);
+    mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
+    asset.data.meshes.push_back(mesh);
   }
 
   // create skeletons for skinned meshes
@@ -203,7 +209,15 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     auto entity = res.at(i);
 
     const auto &mesh = db.get<liquid::Mesh>(entity);
-    EXPECT_EQ(mesh.handle, static_cast<liquid::MeshAssetHandle>(i));
+    EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
+  }
+
+  // Test skinned meshes
+  for (uint32_t i = 2; i < 5; ++i) {
+    auto entity = res.at(i);
+
+    const auto &mesh = db.get<liquid::SkinnedMesh>(entity);
+    EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
   }
 
   // Test mesh renderers
@@ -215,14 +229,6 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
       EXPECT_EQ(renderer.materials.at(mi),
                 static_cast<liquid::MaterialAssetHandle>(mi + 1));
     }
-  }
-
-  // Test skinned meshes
-  for (uint32_t i = 2; i < 5; ++i) {
-    auto entity = res.at(i);
-
-    const auto &mesh = db.get<liquid::SkinnedMesh>(entity);
-    EXPECT_EQ(mesh.handle, static_cast<liquid::MeshAssetHandle>(i));
   }
 
   // Test skinned mesh renderer
@@ -311,8 +317,12 @@ TEST_F(
     transform.value.parent = -1;
     asset.data.transforms.push_back(transform);
 
+    liquid::AssetData<liquid::MeshAsset> meshData{};
+    meshData.type = liquid::AssetType::SkinnedMesh;
+
     liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
     mesh.entity = 1;
+    mesh.value = assetRegistry.getMeshes().addAsset(meshData);
     asset.data.meshes.push_back(mesh);
   }
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);

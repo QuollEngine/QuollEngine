@@ -473,37 +473,17 @@ void loadMeshes(GLTFImportData &importData) {
       return;
     }
 
-    if (isSkinnedMesh) {
-      mesh.type = AssetType::SkinnedMesh;
-      mesh.name = getGLTFAssetName(importData, assetName);
+    mesh.type = isSkinnedMesh ? AssetType::SkinnedMesh : AssetType::Mesh;
+    mesh.name = getGLTFAssetName(importData, assetName);
+    auto path =
+        assetCache.createMeshFromAsset(mesh, getUUID(importData, assetName));
+    auto handle = assetCache.loadMeshFromFile(path.getData());
+    importData.meshes.map.insert_or_assign(i, handle.getData());
 
-      auto path = assetCache.createSkinnedMeshFromAsset(
-          mesh, getUUID(importData, assetName));
-      auto handle = assetCache.loadSkinnedMeshFromFile(path.getData());
-
-      importData.skinnedMeshes.map.insert_or_assign(i, handle.getData());
-      importData.meshMaterialData.skinnedMeshMaterialMap.insert_or_assign(
-          handle.getData(), materials);
-      importData.outputUuids.insert_or_assign(assetName,
-                                              assetCache.getRegistry()
-                                                  .getSkinnedMeshes()
-                                                  .getAsset(handle.getData())
-                                                  .uuid);
-    } else {
-      mesh.name = getGLTFAssetName(importData, assetName);
-      mesh.type = AssetType::Mesh;
-
-      auto path =
-          assetCache.createMeshFromAsset(mesh, getUUID(importData, assetName));
-      auto handle = assetCache.loadMeshFromFile(path.getData());
-
-      importData.meshes.map.insert_or_assign(i, handle.getData());
-      importData.meshMaterialData.meshMaterialMap.insert_or_assign(
-          handle.getData(), materials);
-      importData.outputUuids.insert_or_assign(
-          assetName,
-          assetCache.getRegistry().getMeshes().getAsset(handle.getData()).uuid);
-    }
+    importData.meshMaterials.insert_or_assign(handle.getData(), materials);
+    importData.outputUuids.insert_or_assign(
+        assetName,
+        assetCache.getRegistry().getMeshes().getAsset(handle.getData()).uuid);
   }
 }
 

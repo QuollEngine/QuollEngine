@@ -18,8 +18,9 @@ namespace liquid {
  */
 static bool isPrefabEmpty(const PrefabAsset &prefab) {
   return prefab.animators.empty() && prefab.meshes.empty() &&
-         prefab.skeletons.empty() && prefab.skinnedMeshes.empty() &&
-         prefab.transforms.empty();
+         prefab.skeletons.empty() && prefab.directionalLights.empty() &&
+         prefab.pointLights.empty() && prefab.meshRenderers.empty() &&
+         prefab.skinnedMeshRenderers.empty() && prefab.transforms.empty();
 }
 
 int EntitySpawnerScriptingInterface::LuaInterface::spawnEmpty(void *state) {
