@@ -48,8 +48,7 @@ Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
 
   for (const auto &entry :
        std::filesystem::recursive_directory_iterator(mAssetsPath)) {
-    if (!entry.is_regular_file() || entry.path().extension() == ".lqhash" ||
-        entry.path().extension() == ".assetmeta") {
+    if (!entry.is_regular_file() || entry.path().extension() == ".assetmeta") {
       continue;
     }
 

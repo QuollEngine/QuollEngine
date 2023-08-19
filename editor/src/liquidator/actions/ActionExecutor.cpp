@@ -77,15 +77,11 @@ void ActionExecutor::saveActionResult(const ActionExecutorResult &result) {
   }
 
   if (!result.entitiesToDelete.empty()) {
-    for (auto entity : result.entitiesToDelete) {
-      mSceneIO.deleteEntityFilesAndRelations(entity, mScenePath);
-    }
+    mSceneIO.deleteEntities(result.entitiesToDelete, mScenePath);
   }
 
   if (!result.entitiesToSave.empty()) {
-    for (auto entity : result.entitiesToSave) {
-      mSceneIO.saveEntity(entity, mScenePath);
-    }
+    mSceneIO.saveEntities(result.entitiesToSave, mScenePath);
   }
 
   if (result.saveScene) {

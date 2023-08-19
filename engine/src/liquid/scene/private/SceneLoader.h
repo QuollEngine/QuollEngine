@@ -38,12 +38,10 @@ public:
    *
    * @param node YAML node
    * @param entityIdCache Entity ID cache
-   * @param excludeEntity Entity to exclude from search
    * @return Found starting camera
    */
   Result<Entity> loadStartingCamera(const YAML::Node &node,
-                                    EntityIdCache &entityIdCache,
-                                    Entity excludeEntity);
+                                    EntityIdCache &entityIdCache);
 
 private:
   AssetRegistry &mAssetRegistry;

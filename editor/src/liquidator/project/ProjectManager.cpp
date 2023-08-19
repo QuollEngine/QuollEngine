@@ -26,7 +26,6 @@ bool ProjectManager::createProjectInPath() {
   std::filesystem::create_directory(mProject.assetsCachePath);
   std::filesystem::create_directory(mProject.settingsPath);
   std::filesystem::create_directory(mProject.scenesPath);
-  std::filesystem::create_directory(mProject.scenesPath / "entities");
 
   {
     YAML::Node sceneObj;
@@ -34,11 +33,10 @@ bool ProjectManager::createProjectInPath() {
 
     YAML::Node mainZone;
     mainZone["name"] = "MainZone";
-    mainZone["entities"] = "./entities";
     sceneObj["zones"][0] = mainZone;
     sceneObj["persistentZone"] = 0;
 
-    std::ofstream stream(mProject.scenesPath / "main.lqscene");
+    std::ofstream stream(mProject.scenesPath / "main.scene");
     stream << sceneObj;
     stream.close();
   }
