@@ -4,31 +4,33 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/scene/SceneIO.h"
 
+const liquid::Path ScenePath =
+    std::filesystem::current_path() / "scene-io-test" / "main.scene";
+
 class SceneIOTest : public ::testing::Test {
-public:
-  static const liquid::Path SceneDirectory;
-  static const liquid::Path SceneEntitiesDirectory;
-  static const liquid::Path ScenePath;
 
 public:
   SceneIOTest() : sceneIO(assetRegistry, scene) {}
 
   void SetUp() override {
-    std::filesystem::create_directory(SceneDirectory);
-    std::filesystem::create_directory(SceneEntitiesDirectory);
+    TearDown();
+    std::filesystem::create_directory(ScenePath.parent_path());
     std::ofstream stream(ScenePath);
     YAML::Node root;
     root["name"] = "TestScene";
+    root["version"] = "0.1";
 
     YAML::Node zoneNode;
     zoneNode["name"] = "TestZone";
-    zoneNode["entities"] = "entities";
     zoneNode["startingCamera"] = 3;
     root["zones"][0] = zoneNode;
-    root["persistentZone"] = 0;
 
     stream << root;
     stream.close();
+  }
+
+  void TearDown() override {
+    std::filesystem::remove_all(ScenePath.parent_path());
   }
 
   YAML::Node loadSceneFile(liquid::Path path) {
@@ -45,29 +47,21 @@ public:
     stream.close();
   }
 
-  void TearDown() override { std::filesystem::remove_all(SceneDirectory); }
+  void createSceneFileWithEntity(const std::vector<YAML::Node> &entities) {
+    YAML::Node root;
+    root["name"] = "TestScene";
+    root["version"] = "0.1";
 
-  liquid::String getEntityFile(liquid::Entity entity) {
-    auto id = scene.entityDatabase.get<liquid::Id>(entity).id;
-    return std::to_string(id) + ".lqnode";
-  }
+    YAML::Node zoneNode;
+    zoneNode["name"] = "TestZone";
+    zoneNode["entities"] = "entities";
+    zoneNode["startingCamera"] = 3;
+    root["zones"][0] = zoneNode;
+    root["entities"] = entities;
 
-  void writeNodeToFile(const YAML::Node &node, const liquid::String &path) {
-    std::ofstream stream(SceneEntitiesDirectory / (path + ".lqnode"));
-    stream << node;
+    std::ofstream stream(ScenePath);
+    stream << root;
     stream.close();
-  }
-
-  void createSimpleEntityFile(uint64_t id, uint64_t parent = 0) {
-    YAML::Node node;
-    node["id"] = id;
-    node["version"] = "0.1";
-
-    if (parent > 0) {
-      node["components"]["transform"]["parent"] = parent;
-    }
-
-    writeNodeToFile(node, std::to_string(id));
   }
 
 public:
@@ -76,20 +70,10 @@ public:
   liquid::SceneIO sceneIO;
 };
 
-const liquid::Path SceneIOTest::SceneDirectory =
-    std::filesystem::current_path() / "scene-io-test";
-
-const liquid::Path SceneIOTest::ScenePath =
-    SceneIOTest::SceneDirectory / "main.lqscene";
-
-const liquid::Path SceneIOTest::SceneEntitiesDirectory =
-    SceneIOTest::SceneDirectory / "entities";
-
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
   YAML::Node node;
-  node["version"] = "0.1";
 
-  writeNodeToFile(node, "test");
+  createSceneFileWithEntity({node});
   sceneIO.loadScene(ScenePath);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
@@ -106,9 +90,8 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
 
   for (const auto &invalidNode : invalidNodes) {
     YAML::Node node;
-    node["version"] = "0.1";
     node["id"] = invalidNode;
-    writeNodeToFile(node, "test");
+    createSceneFileWithEntity({node});
     sceneIO.loadScene(ScenePath);
 
     EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
@@ -117,9 +100,9 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsInvalid) {
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsZero) {
   YAML::Node node;
-  node["version"] = "0.1";
   node["id"] = 0;
-  writeNodeToFile(node, "test");
+  createSceneFileWithEntity({node});
+
   sceneIO.loadScene(ScenePath);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
@@ -127,9 +110,9 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsZero) {
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
   YAML::Node node;
-  node["version"] = "0.1";
   node["id"] = -1;
-  writeNodeToFile(node, "test");
+  createSceneFileWithEntity({node});
+
   sceneIO.loadScene(ScenePath);
 
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 2);
@@ -137,91 +120,54 @@ TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdIsNegative) {
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfIdAlreadyExists) {
   YAML::Node node;
-  node["version"] = "0.1";
   node["id"] = 50;
 
-  writeNodeToFile(node, "test");
-  sceneIO.loadScene(ScenePath);
-
-  // first one is added
-  EXPECT_EQ(scene.entityDatabase.getEntityCount(), 3);
+  createSceneFileWithEntity({node, node});
 
   sceneIO.loadScene(ScenePath);
 
-  // second addition will fail due to duplicate Id
   EXPECT_EQ(scene.entityDatabase.getEntityCount(), 3);
 }
 
-TEST_F(SceneIOTest, LoadingSceneFilesFromDirectoryCreatesOneEntityPerFile) {
+TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
   static constexpr uint64_t NumEntities = 9;
 
+  std::vector<YAML::Node> nodes(NumEntities);
+
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
-    createSimpleEntityFile(i);
+    YAML::Node node;
+    node["id"] = i;
+    nodes.push_back(node);
   }
+
+  createSceneFileWithEntity(nodes);
 
   const auto &entities = sceneIO.loadScene(ScenePath);
 
+  EXPECT_GT(scene.entityDatabase.getEntityCount(), NumEntities);
   EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
   for (auto entity : entities) {
     EXPECT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
   }
 }
 
-TEST_F(SceneIOTest, SavingEntityAfterLoadingCreatesEntityWithNonConflictingId) {
-  static constexpr uint64_t NumEntities = 9;
-
-  for (uint64_t i = 1; i < NumEntities + 1; ++i) {
-    createSimpleEntityFile(i);
-  }
-
-  sceneIO.loadScene(ScenePath);
-
-  auto entity = scene.entityDatabase.create();
-
-  sceneIO.saveEntity(entity, ScenePath);
-
-  auto id = scene.entityDatabase.get<liquid::Id>(entity).id;
-
-  EXPECT_EQ(id, 10);
-  EXPECT_TRUE(
-      std::filesystem::is_regular_file(SceneEntitiesDirectory / "10.lqnode"));
-}
-
-TEST_F(SceneIOTest, SavingEntitySavesParentBeforeEntityIfParentHasNoId) {
-  auto entity = scene.entityDatabase.create();
-  auto parent = scene.entityDatabase.create();
-  auto parent2 = scene.entityDatabase.create();
-
-  scene.entityDatabase.set<liquid::Parent>(entity, {parent});
-  scene.entityDatabase.set<liquid::Parent>(parent, {parent2});
-
-  sceneIO.saveEntity(entity, ScenePath);
-
-  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
-  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent));
-  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent2));
-
-  auto entityId = scene.entityDatabase.get<liquid::Id>(entity).id;
-  auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
-  auto parent2Id = scene.entityDatabase.get<liquid::Id>(parent2).id;
-
-  EXPECT_TRUE(std::filesystem::is_regular_file(
-      SceneEntitiesDirectory / (std::to_string(entityId) + ".lqnode")));
-  EXPECT_TRUE(std::filesystem::is_regular_file(
-      SceneEntitiesDirectory / (std::to_string(parentId) + ".lqnode")));
-  EXPECT_TRUE(std::filesystem::is_regular_file(
-      SceneEntitiesDirectory / (std::to_string(parent2Id) + ".lqnode")));
-}
-
 TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
   static constexpr uint64_t NumEntities = 9;
+
+  std::vector<YAML::Node> nodes(NumEntities);
 
   for (uint64_t i = 1; i < NumEntities + 1; ++i) {
     // set parent to next entity
     // to make sure that parent entities
     // are loaded after child ones
-    createSimpleEntityFile(i, i + 1);
+
+    YAML::Node node;
+    node["id"] = i;
+    node["transform"]["parent"] = i + 1;
+    nodes.push_back(node);
   }
+
+  createSceneFileWithEntity(nodes);
 
   const auto &entities = sceneIO.loadScene(ScenePath);
 
@@ -230,17 +176,23 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
             entities.size() - 1);
 }
 
+// TODO: Updater after migration
 TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
   static constexpr uint64_t NumEntities = 9;
 
   auto parent = scene.entityDatabase.create();
 
   // Creates ID for the parent and store it in cache
-  sceneIO.saveEntity(parent, ScenePath);
+  sceneIO.saveEntities({parent}, ScenePath);
 
   auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
 
-  createSimpleEntityFile(10, parentId);
+  {
+    YAML::Node node;
+    node["id"] = 200;
+    node["transform"]["parent"] = parentId;
+    createSceneFileWithEntity({node});
+  }
 
   sceneIO.loadScene(ScenePath);
 
@@ -252,29 +204,217 @@ TEST_F(SceneIOTest, LoadingSetsParentsFromPreviousSaveProperly) {
             parent);
 }
 
+TEST_F(SceneIOTest, SavingEntityAfterLoadingCreatesEntityWithNonConflictingId) {
+  static constexpr uint64_t NumEntities = 9;
+
+  std::vector<YAML::Node> nodes(NumEntities);
+
+  for (uint64_t i = 1; i < NumEntities + 1; ++i) {
+    YAML::Node node;
+    node["id"] = i;
+    nodes.push_back(node);
+  }
+
+  createSceneFileWithEntity(nodes);
+
+  sceneIO.loadScene(ScenePath);
+
+  auto entity = scene.entityDatabase.create();
+
+  sceneIO.saveEntities({entity}, ScenePath);
+
+  auto id = scene.entityDatabase.get<liquid::Id>(entity).id;
+  EXPECT_EQ(id, 10);
+}
+
+TEST_F(SceneIOTest, SavingEntitySavesParentBeforeEntityIfParentHasNoId) {
+  auto entity = scene.entityDatabase.create();
+  auto parent = scene.entityDatabase.create();
+  auto parent2 = scene.entityDatabase.create();
+
+  scene.entityDatabase.set<liquid::Parent>(entity, {parent});
+  scene.entityDatabase.set<liquid::Parent>(parent, {parent2});
+
+  sceneIO.saveEntities({entity}, ScenePath);
+
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent2));
+
+  auto entityId = scene.entityDatabase.get<liquid::Id>(entity).id;
+  auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
+  auto parent2Id = scene.entityDatabase.get<liquid::Id>(parent2).id;
+
+  std::ifstream stream(ScenePath);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  EXPECT_EQ(node["entities"].size(), 3);
+  EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), parent2Id);
+  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0), parentId);
+  EXPECT_EQ(node["entities"][2]["id"].as<uint64_t>(0), entityId);
+}
+
+TEST_F(SceneIOTest, SavingEntityAndParentTogetherOnlySavesTheParentOnce) {
+  auto entity = scene.entityDatabase.create();
+  auto parent = scene.entityDatabase.create();
+  auto parent2 = scene.entityDatabase.create();
+
+  scene.entityDatabase.set<liquid::Parent>(entity, {parent});
+  scene.entityDatabase.set<liquid::Parent>(parent, {parent2});
+
+  sceneIO.saveEntities({entity, parent}, ScenePath);
+
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent));
+  ASSERT_TRUE(scene.entityDatabase.has<liquid::Id>(parent2));
+
+  auto entityId = scene.entityDatabase.get<liquid::Id>(entity).id;
+  auto parentId = scene.entityDatabase.get<liquid::Id>(parent).id;
+  auto parent2Id = scene.entityDatabase.get<liquid::Id>(parent2).id;
+
+  std::ifstream stream(ScenePath);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  EXPECT_EQ(node["entities"].size(), 3);
+  EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), parent2Id);
+  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0), parentId);
+  EXPECT_EQ(node["entities"][2]["id"].as<uint64_t>(0), entityId);
+}
+
 TEST_F(SceneIOTest, SavingEntityCreatesIdComponentIfComponentDoesNotExist) {
   auto entity = scene.entityDatabase.create();
-  sceneIO.saveEntity(entity, ScenePath);
+  sceneIO.saveEntities({entity}, ScenePath);
 
   EXPECT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
 }
 
-TEST_F(SceneIOTest, SavingNewEntityCreatesEntityFile) {
-  auto entity = scene.entityDatabase.create();
+TEST_F(SceneIOTest, SavingNewEntityAddsNewNodeInSceneFile) {
+  auto e1 = scene.entityDatabase.create();
+  auto e2 = scene.entityDatabase.create();
+  scene.entityDatabase.set<liquid::Id>(e1, {155});
+  scene.entityDatabase.set<liquid::Name>(e1, {"E1"});
+  scene.entityDatabase.set<liquid::Name>(e2, {"E2"});
 
-  sceneIO.saveEntity(entity, ScenePath);
+  sceneIO.saveEntities({e1, e2}, ScenePath);
 
-  auto path = SceneEntitiesDirectory / getEntityFile(entity);
-  EXPECT_TRUE(std::filesystem::is_regular_file(path));
+  std::ifstream stream(ScenePath);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+            scene.entityDatabase.get<liquid::Id>(e2).id);
+  EXPECT_EQ(node["entities"][1]["name"].as<liquid::String>(""), "E2");
 }
 
-TEST_F(SceneIOTest, SavingExistingEntityCreatesEntityFile) {
-  auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::Id>(entity, {155});
-  sceneIO.saveEntity(entity, ScenePath);
+TEST_F(SceneIOTest, SavingExistingEntityUpdatesExistingNodeInSceneFile) {
+  auto e1 = scene.entityDatabase.create();
+  auto e2 = scene.entityDatabase.create();
+  {
+    scene.entityDatabase.set<liquid::Id>(e1, {155});
+    scene.entityDatabase.set<liquid::Name>(e1, {"E1"});
+    scene.entityDatabase.set<liquid::Name>(e2, {"E2"});
 
-  auto path = SceneEntitiesDirectory / "155.lqnode";
-  EXPECT_TRUE(std::filesystem::is_regular_file(path));
+    sceneIO.saveEntities({e1, e2}, ScenePath);
+
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 2);
+    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), 155);
+    EXPECT_EQ(node["entities"][0]["name"].as<liquid::String>(""), "E1");
+
+    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e2).id);
+    EXPECT_EQ(node["entities"][1]["name"].as<liquid::String>(""), "E2");
+  }
+
+  {
+    scene.entityDatabase.set<liquid::Name>(e1, {"E1 New"});
+
+    sceneIO.saveEntities({e1}, ScenePath);
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 2);
+    EXPECT_EQ(node["entities"][0]["id"].as<uint32_t>(0), 155);
+    EXPECT_EQ(node["entities"][0]["name"].as<liquid::String>(""), "E1 New");
+
+    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e2).id);
+    EXPECT_EQ(node["entities"][1]["name"].as<liquid::String>(""), "E2");
+  }
+}
+
+TEST_F(SceneIOTest, DeletingEntityDeletesItFromSceneFile) {
+  auto e1 = scene.entityDatabase.create();
+  auto e2 = scene.entityDatabase.create();
+  {
+
+    sceneIO.saveEntities({e1, e2}, ScenePath);
+
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 2);
+    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e1).id);
+
+    EXPECT_EQ(node["entities"][1]["id"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e2).id);
+  }
+
+  {
+    sceneIO.deleteEntities({e1}, ScenePath);
+
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 1);
+    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e2).id);
+  }
+}
+
+TEST_F(SceneIOTest, DeletingEntityDeletesItsChildrenFromSceneFile) {
+  auto e1 = scene.entityDatabase.create();
+  auto e2 = scene.entityDatabase.create();
+  auto e3 = scene.entityDatabase.create();
+  auto e4 = scene.entityDatabase.create();
+
+  {
+
+    scene.entityDatabase.set<liquid::Parent>(e2, {e1});
+
+    scene.entityDatabase.set<liquid::Parent>(e3, {e1});
+
+    scene.entityDatabase.set<liquid::Parent>(e4, {e2});
+    sceneIO.saveEntities({e1, e2, e3, e4}, ScenePath);
+
+    scene.entityDatabase.set<liquid::Children>(e1, {{e2, e3}});
+    scene.entityDatabase.set<liquid::Children>(e3, {{e4}});
+
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 4);
+  }
+
+  {
+    sceneIO.deleteEntities({e1}, ScenePath);
+
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 0);
+  }
 }
 
 TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
@@ -319,7 +459,7 @@ TEST_F(SceneIOTest,
 
   scene.activeCamera = entity;
   sceneIO.saveStartingCamera(ScenePath);
-  sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
+  sceneIO.deleteEntities({entity}, ScenePath);
 
   EXPECT_EQ(scene.activeCamera, another);
 }
@@ -332,7 +472,7 @@ TEST_F(SceneIOTest,
 
   scene.activeCamera = entity;
   sceneIO.saveStartingCamera(ScenePath);
-  sceneIO.deleteEntityFilesAndRelations(entity, ScenePath);
+  sceneIO.deleteEntities({entity}, ScenePath);
 
   EXPECT_EQ(scene.activeCamera, scene.dummyCamera);
 }
@@ -341,7 +481,7 @@ TEST_F(SceneIOTest, SavesEntityAsInitialCameraIfItHasCameraComponent) {
   auto entity = scene.entityDatabase.create();
   scene.entityDatabase.set<liquid::Id>(entity, {15});
   scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
-  sceneIO.saveEntity(entity, ScenePath);
+  sceneIO.saveEntities({entity}, ScenePath);
 
   scene.activeCamera = entity;
   sceneIO.saveStartingCamera(ScenePath);
@@ -360,8 +500,7 @@ TEST_F(SceneIOTest, SavesEntityAsInitialCameraIfItHasCameraComponent) {
 TEST_F(SceneIOTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveCameraComponent) {
   auto entity = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::Id>(entity, {15});
-  sceneIO.saveEntity(entity, ScenePath);
+  sceneIO.saveEntities({entity}, ScenePath);
 
   scene.activeCamera = entity;
   sceneIO.saveStartingCamera(ScenePath);

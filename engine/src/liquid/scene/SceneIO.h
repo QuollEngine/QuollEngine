@@ -30,12 +30,20 @@ public:
   std::vector<Entity> loadScene(const Path &path);
 
   /**
-   * @brief Save entity
+   * @brief Save entities
    *
-   * @param entity Entity
+   * @param entities Entities
    * @param path Scene path
    */
-  void saveEntity(Entity entity, const Path &path);
+  void saveEntities(const std::vector<Entity> &entities, const Path &path);
+
+  /**
+   * @brief Delete entities and all descendants
+   *
+   * @param entities Entities
+   * @param path Scene path
+   */
+  void deleteEntities(const std::vector<Entity> &entities, const Path &path);
 
   /**
    * @brief Save starting camera
@@ -54,14 +62,6 @@ public:
   Result<bool> saveEnvironment(const Path &path);
 
   /**
-   * @brief Delete entity
-   *
-   * @param entity Entity
-   * @param path Scene path
-   */
-  void deleteEntityFilesAndRelations(Entity entity, const Path &path);
-
-  /**
    * @brief Reset everything
    *
    * Clear cache, destroy the entity database,
@@ -70,15 +70,6 @@ public:
   void reset();
 
 private:
-  /**
-   * @brief Get entity path
-   *
-   * @param entity Entity
-   * @param path Scene path
-   * @return Entity path
-   */
-  Path getEntityPath(Entity entity, const Path &path);
-
   /**
    * @brief Load environment
    *
@@ -102,10 +93,32 @@ private:
   Result<Entity> createEntityFromNode(const YAML::Node &node);
 
 private:
+  /**
+   * @brief Update entity in scene YAML
+   *
+   * @param entity Entity
+   * @param node YAML node
+   * @param updateCache Entity update cache
+   */
+  void updateSceneYaml(Entity entity, YAML::Node &node,
+                       std::unordered_map<Entity, bool> &updateCache);
+
+  /**
+   * @brief Remove entity in scene YAML
+   *
+   * @param entity Entity
+   * @param node YAML node
+   * @param deleteCache Entity delete cache
+   */
+  void removeEntityFromSceneYaml(Entity entity, YAML::Node &node,
+                                 std::unordered_map<Entity, bool> &deleteCache);
+
+private:
   Scene &mScene;
   AssetRegistry &mAssetRegistry;
 
   std::unordered_map<uint64_t, Entity> mEntityIdCache;
+
   uint64_t mLastId = 1;
 };
 

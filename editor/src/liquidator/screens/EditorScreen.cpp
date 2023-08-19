@@ -91,8 +91,7 @@ void EditorScreen::start(const Project &project) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  Workspace workspace(project, assetManager,
-                      project.scenesPath / "main.lqscene");
+  Workspace workspace(project, assetManager, project.scenesPath / "main.scene");
 
   auto context = workspace.getContext();
 

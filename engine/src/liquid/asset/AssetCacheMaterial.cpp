@@ -12,8 +12,6 @@ namespace liquid {
 Result<Path>
 AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset,
                                     const String &uuid) {
-  String extension = ".lqmat";
-
   auto assetPath = createAssetPath(uuid);
 
   OutputBinaryStream file(assetPath);

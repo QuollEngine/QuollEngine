@@ -83,7 +83,7 @@ void Runtime::start() {
   });
 
   liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
-  sceneIO.loadScene(mConfig.scenesPath / "main.lqscene");
+  sceneIO.loadScene(mConfig.scenesPath / "main.scene");
 
   presenter.updateFramebuffers(device->getSwapchain());
 

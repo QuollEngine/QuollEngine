@@ -9,8 +9,8 @@ SceneLoader::SceneLoader(AssetRegistry &assetRegistry,
 
 Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
-  if (node["components"]["name"] && node["components"]["name"].IsScalar()) {
-    auto name = node["components"]["name"].as<liquid::String>();
+  if (node["name"] && node["name"].IsScalar()) {
+    auto name = node["name"].as<liquid::String>();
     mEntityDatabase.set<Name>(entity, {name});
   } else {
     auto name = "Untitled " + node["id"].as<String>();
@@ -18,22 +18,18 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   }
 
   LocalTransform transform{};
-  if (node["components"]["transform"] &&
-      node["components"]["transform"].IsMap()) {
+  if (node["transform"] && node["transform"].IsMap()) {
     transform.localPosition =
-        node["components"]["transform"]["position"].as<glm::vec3>(
-            transform.localPosition);
+        node["transform"]["position"].as<glm::vec3>(transform.localPosition);
 
     transform.localRotation =
-        node["components"]["transform"]["rotation"].as<glm::quat>(
-            transform.localRotation);
+        node["transform"]["rotation"].as<glm::quat>(transform.localRotation);
 
     transform.localScale =
-        node["components"]["transform"]["scale"].as<glm::vec3>(
-            transform.localScale);
+        node["transform"]["scale"].as<glm::vec3>(transform.localScale);
 
-    if (node["components"]["transform"]["parent"]) {
-      auto parentId = node["components"]["transform"]["parent"].as<uint64_t>(0);
+    if (node["transform"]["parent"]) {
+      auto parentId = node["transform"]["parent"].as<uint64_t>(0);
 
       auto it = entityIdCache.find(parentId);
       Entity parentEntity =
@@ -55,8 +51,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
   mEntityDatabase.set(entity, transform);
   mEntityDatabase.set<WorldTransform>(entity, {});
 
-  if (node["components"]["sprite"]) {
-    auto uuid = node["components"]["sprite"].as<String>("");
+  if (node["sprite"]) {
+    auto uuid = node["sprite"].as<String>("");
 
     auto handle = mAssetRegistry.getTextures().findHandleByUuid(uuid);
 
@@ -65,17 +61,14 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["rigidBody"] &&
-      node["components"]["rigidBody"].IsMap()) {
+  if (node["rigidBody"] && node["rigidBody"].IsMap()) {
     RigidBody rigidBody{};
     rigidBody.dynamicDesc.mass =
-        node["components"]["rigidBody"]["mass"].as<float>(
-            rigidBody.dynamicDesc.mass);
-    rigidBody.dynamicDesc.inertia =
-        node["components"]["rigidBody"]["inertia"].as<glm::vec3>(
-            rigidBody.dynamicDesc.inertia);
+        node["rigidBody"]["mass"].as<float>(rigidBody.dynamicDesc.mass);
+    rigidBody.dynamicDesc.inertia = node["rigidBody"]["inertia"].as<glm::vec3>(
+        rigidBody.dynamicDesc.inertia);
     rigidBody.dynamicDesc.applyGravity =
-        node["components"]["rigidBody"]["applyGravity"].as<bool>(
+        node["rigidBody"]["applyGravity"].as<bool>(
             rigidBody.dynamicDesc.applyGravity);
 
     mEntityDatabase.set(entity, rigidBody);
@@ -87,35 +80,29 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       {"capsule", PhysicsGeometryType::Capsule},
       {"plane", PhysicsGeometryType::Plane}};
 
-  if (node["components"]["collidable"] &&
-      node["components"]["collidable"].IsMap() &&
-      ValidShapes.find(node["components"]["collidable"]["shape"].as<String>(
-          "unknown")) != ValidShapes.end()) {
+  if (node["collidable"] && node["collidable"].IsMap() &&
+      ValidShapes.find(node["collidable"]["shape"].as<String>("unknown")) !=
+          ValidShapes.end()) {
     Collidable collidable{};
-    auto shape =
-        ValidShapes.at(node["components"]["collidable"]["shape"].as<String>());
+    auto shape = ValidShapes.at(node["collidable"]["shape"].as<String>());
     collidable.geometryDesc.type = shape;
 
     if (shape == PhysicsGeometryType::Box) {
       liquid::PhysicsGeometryBox box{};
       box.halfExtents =
-          node["components"]["collidable"]["halfExtents"].as<glm::vec3>(
-              box.halfExtents);
+          node["collidable"]["halfExtents"].as<glm::vec3>(box.halfExtents);
 
       collidable.geometryDesc.params = box;
     } else if (shape == PhysicsGeometryType::Sphere) {
       liquid::PhysicsGeometrySphere sphere{};
-      sphere.radius =
-          node["components"]["collidable"]["radius"].as<float>(sphere.radius);
+      sphere.radius = node["collidable"]["radius"].as<float>(sphere.radius);
 
       collidable.geometryDesc.params = sphere;
     } else if (shape == PhysicsGeometryType::Capsule) {
       liquid::PhysicsGeometryCapsule capsule{};
-      capsule.radius =
-          node["components"]["collidable"]["radius"].as<float>(capsule.radius);
+      capsule.radius = node["collidable"]["radius"].as<float>(capsule.radius);
       capsule.halfHeight =
-          node["components"]["collidable"]["halfHeight"].as<float>(
-              capsule.halfHeight);
+          node["collidable"]["halfHeight"].as<float>(capsule.halfHeight);
 
       collidable.geometryDesc.params = capsule;
     } else if (shape == PhysicsGeometryType::Plane) {
@@ -123,20 +110,20 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
 
     collidable.materialDesc.dynamicFriction =
-        node["components"]["collidable"]["dynamicFriction"].as<float>(
+        node["collidable"]["dynamicFriction"].as<float>(
             collidable.materialDesc.dynamicFriction);
     collidable.materialDesc.restitution =
-        node["components"]["collidable"]["restitution"].as<float>(
+        node["collidable"]["restitution"].as<float>(
             collidable.materialDesc.restitution);
     collidable.materialDesc.staticFriction =
-        node["components"]["collidable"]["staticFriction"].as<float>(
+        node["collidable"]["staticFriction"].as<float>(
             collidable.materialDesc.staticFriction);
 
     mEntityDatabase.set(entity, collidable);
   }
 
-  if (node["components"]["mesh"]) {
-    auto uuid = node["components"]["mesh"].as<String>("");
+  if (node["mesh"]) {
+    auto uuid = node["mesh"].as<String>("");
     auto handle = mAssetRegistry.getMeshes().findHandleByUuid(uuid);
 
     if (handle != MeshAssetHandle::Null) {
@@ -150,10 +137,9 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["meshRenderer"] &&
-      node["components"]["meshRenderer"].IsMap()) {
+  if (node["meshRenderer"] && node["meshRenderer"].IsMap()) {
     MeshRenderer renderer{};
-    auto materials = node["components"]["meshRenderer"]["materials"];
+    auto materials = node["meshRenderer"]["materials"];
 
     if (materials.IsSequence()) {
       for (auto material : materials) {
@@ -170,10 +156,9 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     mEntityDatabase.set(entity, renderer);
   }
 
-  if (node["components"]["skinnedMeshRenderer"] &&
-      node["components"]["skinnedMeshRenderer"].IsMap()) {
+  if (node["skinnedMeshRenderer"] && node["skinnedMeshRenderer"].IsMap()) {
     SkinnedMeshRenderer renderer{};
-    auto materials = node["components"]["skinnedMeshRenderer"]["materials"];
+    auto materials = node["skinnedMeshRenderer"]["materials"];
 
     if (materials.IsSequence()) {
       for (auto material : materials) {
@@ -190,8 +175,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     mEntityDatabase.set(entity, renderer);
   }
 
-  if (node["components"]["skeleton"]) {
-    auto uuid = node["components"]["skeleton"].as<String>("");
+  if (node["skeleton"]) {
+    auto uuid = node["skeleton"].as<String>("");
     auto handle = mAssetRegistry.getSkeletons().findHandleByUuid(uuid);
 
     if (handle != SkeletonAssetHandle::Null) {
@@ -218,10 +203,9 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["animator"] &&
-      node["components"]["animator"].IsMap() &&
-      node["components"]["animator"]["asset"]) {
-    auto assetPath = node["components"]["animator"]["asset"].as<String>("");
+  if (node["animator"] && node["animator"].IsMap() &&
+      node["animator"]["asset"]) {
+    auto assetPath = node["animator"]["asset"].as<String>("");
     auto handle = mAssetRegistry.getAnimators().findHandleByUuid(assetPath);
 
     if (handle != AnimatorAssetHandle::Null) {
@@ -232,8 +216,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["light"] && node["components"]["light"].IsMap()) {
-    auto light = node["components"]["light"];
+  if (node["light"] && node["light"].IsMap()) {
+    auto light = node["light"];
     auto type =
         light["type"].as<uint32_t>(std::numeric_limits<uint32_t>::max());
 
@@ -272,51 +256,49 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["camera"] && node["components"]["camera"].IsMap()) {
+  if (node["camera"] && node["camera"].IsMap()) {
     PerspectiveLens lens{};
-    float near = node["components"]["camera"]["near"].as<float>(lens.near);
+    float near = node["camera"]["near"].as<float>(lens.near);
     if (near >= 0.0f) {
       lens.near = near;
     }
 
-    float far = node["components"]["camera"]["far"].as<float>(lens.far);
+    float far = node["camera"]["far"].as<float>(lens.far);
     if (far >= 0.0f) {
       lens.far = far;
     }
 
     glm::vec2 sensorSize =
-        node["components"]["camera"]["sensorSize"].as<glm::vec2>(
-            lens.sensorSize);
+        node["camera"]["sensorSize"].as<glm::vec2>(lens.sensorSize);
 
     if (sensorSize.x >= 0.0f && sensorSize.y >= 0.0f) {
       lens.sensorSize = sensorSize;
     }
 
     float focalLength =
-        node["components"]["camera"]["focalLength"].as<float>(lens.focalLength);
+        node["camera"]["focalLength"].as<float>(lens.focalLength);
     if (focalLength >= 0.0f) {
       lens.focalLength = focalLength;
     }
 
-    float aperture =
-        node["components"]["camera"]["aperture"].as<float>(lens.aperture);
+    float aperture = node["camera"]["aperture"].as<float>(lens.aperture);
     if (aperture >= 0.0f) {
       lens.aperture = aperture;
     }
 
-    float shutterSpeed = node["components"]["camera"]["shutterSpeed"].as<float>(
-        lens.shutterSpeed);
+    float shutterSpeed =
+        node["camera"]["shutterSpeed"].as<float>(lens.shutterSpeed);
     if (shutterSpeed >= 0.0f) {
       lens.shutterSpeed = shutterSpeed;
     }
 
-    lens.sensitivity = node["components"]["camera"]["sensitivity"].as<uint32_t>(
-        lens.sensitivity);
+    lens.sensitivity =
+        node["camera"]["sensitivity"].as<uint32_t>(lens.sensitivity);
 
     bool autoRatio = true;
-    if (node["components"]["camera"]["aspectRatio"] &&
-        node["components"]["camera"]["aspectRatio"].IsScalar()) {
-      auto res = node["components"]["camera"]["aspectRatio"].as<String>("");
+    if (node["camera"]["aspectRatio"] &&
+        node["camera"]["aspectRatio"].IsScalar()) {
+      auto res = node["camera"]["aspectRatio"].as<String>("");
       if (res.empty()) {
         res = "auto";
       }
@@ -326,8 +308,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     if (autoRatio) {
       mEntityDatabase.set<AutoAspectRatio>(entity, {});
     } else {
-      float aspectRatio = node["components"]["camera"]["aspectRatio"].as<float>(
-          lens.aspectRatio);
+      float aspectRatio =
+          node["camera"]["aspectRatio"].as<float>(lens.aspectRatio);
       if (aspectRatio >= 0.0f) {
         lens.aspectRatio = aspectRatio;
       }
@@ -337,8 +319,8 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     mEntityDatabase.set(entity, lens);
   }
 
-  if (node["components"]["audio"] && node["components"]["audio"].IsMap()) {
-    auto uuid = node["components"]["audio"]["source"].as<String>("");
+  if (node["audio"] && node["audio"].IsMap()) {
+    auto uuid = node["audio"]["source"].as<String>("");
 
     auto handle = mAssetRegistry.getAudios().findHandleByUuid(uuid);
 
@@ -347,17 +329,16 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["script"]) {
+  if (node["script"]) {
     Script script{};
     String uuid;
-    if (node["components"]["script"].IsScalar()) {
-      uuid = node["components"]["script"].as<String>("");
-    } else if (node["components"]["script"].IsMap()) {
-      uuid = node["components"]["script"]["asset"].as<String>("");
+    if (node["script"].IsScalar()) {
+      uuid = node["script"].as<String>("");
+    } else if (node["script"].IsMap()) {
+      uuid = node["script"]["asset"].as<String>("");
 
-      if (node["components"]["script"]["variables"] &&
-          node["components"]["script"]["variables"].IsMap()) {
-        for (const auto &var : node["components"]["script"]["variables"]) {
+      if (node["script"]["variables"] && node["script"]["variables"].IsMap()) {
+        for (const auto &var : node["script"]["variables"]) {
           if (!var.second.IsMap()) {
             continue;
           }
@@ -384,23 +365,21 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
-  if (node["components"]["text"] && node["components"]["text"].IsMap()) {
-    auto uuid = node["components"]["text"]["font"].as<String>("");
+  if (node["text"] && node["text"].IsMap()) {
+    auto uuid = node["text"]["font"].as<String>("");
     auto handle = mAssetRegistry.getFonts().findHandleByUuid(uuid);
 
     Text textComponent{};
     textComponent.font = handle;
 
     if (handle != FontAssetHandle::Null) {
-      if (node["components"]["text"]["content"] &&
-          node["components"]["text"]["content"].IsScalar()) {
-        textComponent.text = node["components"]["text"]["content"].as<String>(
-            textComponent.text);
+      if (node["text"]["content"] && node["text"]["content"].IsScalar()) {
+        textComponent.text =
+            node["text"]["content"].as<String>(textComponent.text);
       }
 
       textComponent.lineHeight =
-          node["components"]["text"]["lineHeight"].as<float>(
-              textComponent.lineHeight);
+          node["text"]["lineHeight"].as<float>(textComponent.lineHeight);
 
       mEntityDatabase.set(entity, textComponent);
     }
@@ -410,26 +389,16 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
 }
 
 Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
-                                               EntityIdCache &entityIdCache,
-                                               Entity excludeEntity) {
+                                               EntityIdCache &entityIdCache) {
   Entity entity = Entity::Null;
   if (node && node.IsScalar()) {
-    auto entityId = node.as<uint64_t>();
+    auto entityId = node.as<uint64_t>(0);
 
-    if (entityIdCache.find(entityId) != entityIdCache.end()) {
+    if (entityId > 0 && entityIdCache.find(entityId) != entityIdCache.end()) {
       auto foundEntity = entityIdCache.at(entityId);
 
-      if (foundEntity != excludeEntity &&
-          mEntityDatabase.has<PerspectiveLens>(foundEntity)) {
+      if (mEntityDatabase.has<PerspectiveLens>(foundEntity)) {
         entity = foundEntity;
-      }
-    }
-  }
-
-  if (entity == Entity::Null) {
-    for (auto [e, _] : mEntityDatabase.view<PerspectiveLens>()) {
-      if (e != excludeEntity) {
-        entity = e;
       }
     }
   }

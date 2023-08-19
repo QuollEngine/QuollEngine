@@ -8,21 +8,21 @@ EntitySerializer::EntitySerializer(AssetRegistry &assetRegistry,
     : mAssetRegistry(assetRegistry), mEntityDatabase(entityDatabase) {}
 
 Result<YAML::Node> EntitySerializer::serialize(Entity entity) {
-  YAML::Node node;
-
   if (!mEntityDatabase.has<Id>(entity)) {
     return Result<YAML::Node>::Error("Entity does not have an ID");
   }
 
-  node["id"] = mEntityDatabase.get<Id>(entity).id;
-  node["version"] = "0.1";
-  node["components"] = createComponentsNode(entity);
+  auto node = createComponentsNode(entity);
 
   return Result<YAML::Node>::Ok(node);
 }
 
 YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   YAML::Node components;
+
+  if (mEntityDatabase.has<Id>(entity)) {
+    components["id"] = mEntityDatabase.get<Id>(entity).id;
+  }
 
   // Set name component if name is empty
   if (!mEntityDatabase.has<Name>(entity) ||

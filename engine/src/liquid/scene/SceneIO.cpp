@@ -21,47 +21,31 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
   std::ifstream stream(path, std::ios::in);
   auto scene = YAML::Load(stream);
 
-  auto persistentZoneIndex = scene["persistentZone"].as<uint32_t>();
-  auto persistentZone = scene["zones"][persistentZoneIndex];
+  auto currentZone = scene["zones"][0];
 
-  loadEnvironment(persistentZone);
+  loadEnvironment(currentZone);
 
   stream.close();
-  auto entitiesPath =
-      path.parent_path() / persistentZone["entities"].as<String>();
 
   std::vector<Entity> entities;
   std::vector<YAML::Node> yamlNodes;
+  for (const auto &node : scene["entities"]) {
+    auto res = createEntityFromNode(node);
 
-  if (std::filesystem::is_directory(entitiesPath)) {
-    for (const auto &entry :
-         std::filesystem::recursive_directory_iterator(entitiesPath)) {
-      std::ifstream stream(entry.path(), std::ios::in);
-
-      auto node = YAML::Load(stream);
-      auto res = createEntityFromNode(node);
-
-      if (res.hasData()) {
-        entities.push_back(res.getData());
-        yamlNodes.push_back(std::move(node));
-      }
-
-      stream.close();
+    if (res.hasData()) {
+      entities.push_back(res.getData());
+      yamlNodes.push_back(node);
     }
   }
 
   for (size_t i = 0; i < entities.size(); ++i) {
     auto &node = yamlNodes.at(i);
 
-    if (!node["components"]) {
-      node["components"] = YAML::Node(YAML::NodeType::Map);
-    }
-
     sceneLoader.loadComponents(node, entities.at(i), mEntityIdCache);
   }
 
-  auto res = sceneLoader.loadStartingCamera(persistentZone["startingCamera"],
-                                            mEntityIdCache, Entity::Null);
+  auto res = sceneLoader.loadStartingCamera(currentZone["startingCamera"],
+                                            mEntityIdCache);
   if (res.hasData()) {
     mScene.activeCamera = res.getData();
   } else {
@@ -71,13 +55,35 @@ std::vector<Entity> SceneIO::loadScene(const Path &path) {
   return entities;
 }
 
-void SceneIO::saveEntity(Entity entity, const Path &path) {
+void SceneIO::saveEntities(const std::vector<Entity> &entities,
+                           const Path &path) {
+  std::ifstream stream(path);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  std::unordered_map<Entity, bool> updateCache;
+
+  for (auto entity : entities) {
+    updateSceneYaml(entity, node, updateCache);
+  }
+
+  std::ofstream wstream(path);
+  wstream << node;
+  wstream.close();
+}
+
+void SceneIO::updateSceneYaml(Entity entity, YAML::Node &node,
+                              std::unordered_map<Entity, bool> &updateCache) {
+  if (updateCache.contains(entity)) {
+    return;
+  }
+
   detail::EntitySerializer serializer(mAssetRegistry, mScene.entityDatabase);
 
   if (mScene.entityDatabase.has<Parent>(entity)) {
     auto parent = mScene.entityDatabase.get<Parent>(entity).parent;
     if (!mScene.entityDatabase.has<Id>(parent)) {
-      saveEntity(parent, path);
+      updateSceneYaml(parent, node, updateCache);
     }
   }
 
@@ -86,15 +92,94 @@ void SceneIO::saveEntity(Entity entity, const Path &path) {
   }
 
   auto id = mScene.entityDatabase.get<Id>(entity).id;
-  mEntityIdCache.insert({id, entity});
 
-  auto node = serializer.serialize(entity);
+  auto updatedNode = serializer.serialize(entity);
+  if (updatedNode.hasData()) {
+    if (mEntityIdCache.find(id) == mEntityIdCache.end()) {
+      node["entities"].push_back(updatedNode.getData());
+    } else {
+      size_t i = 0;
+      for (; i < node["entities"].size() &&
+             node["entities"][i]["id"].as<uint64_t>(0) != id;
+           ++i) {
+      }
 
-  if (node.hasData() && std::filesystem::is_regular_file(path)) {
-    std::ofstream stream(getEntityPath(entity, path), std::ios::out);
-    stream << node.getData();
-    stream.close();
+      if (i < node["entities"].size()) {
+        node["entities"][i] = updatedNode.getData();
+      }
+    }
   }
+  updateCache.insert_or_assign(entity, true);
+  mEntityIdCache.insert({id, entity});
+}
+
+void SceneIO::deleteEntities(const std::vector<Entity> &entities,
+                             const Path &path) {
+  Entity currentActiveCamera = Entity::Null;
+  for (auto entity : entities) {
+    if (mScene.activeCamera == entity) {
+      currentActiveCamera = entity;
+    }
+  }
+
+  if (currentActiveCamera != Entity::Null) {
+    mScene.activeCamera = mScene.dummyCamera;
+  }
+
+  std::ifstream stream(path);
+  auto node = YAML::Load(stream);
+  stream.close();
+
+  std::unordered_map<Entity, bool> deleteCache;
+
+  for (auto entity : entities) {
+    removeEntityFromSceneYaml(entity, node, deleteCache);
+  }
+
+  if (currentActiveCamera != Entity::Null) {
+    detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
+    for (auto [e, _] : mScene.entityDatabase.view<PerspectiveLens>()) {
+      if (e != currentActiveCamera && e != mScene.dummyCamera) {
+        mScene.activeCamera = e;
+        break;
+      }
+    }
+  }
+
+  std::ofstream wstream(path);
+  wstream << node;
+  wstream.close();
+}
+
+void SceneIO::removeEntityFromSceneYaml(
+    Entity entity, YAML::Node &node,
+    std::unordered_map<Entity, bool> &deleteCache) {
+  if (deleteCache.contains(entity)) {
+    return;
+  }
+
+  if (mScene.entityDatabase.has<Children>(entity)) {
+    const auto &children = mScene.entityDatabase.get<Children>(entity);
+    for (auto entity : children.children) {
+      removeEntityFromSceneYaml(entity, node, deleteCache);
+    }
+  }
+
+  if (!mScene.entityDatabase.has<Id>(entity)) {
+    return;
+  }
+
+  auto id = mScene.entityDatabase.get<Id>(entity).id;
+
+  size_t i = 0;
+  for (; i < node["entities"].size() &&
+         node["entities"][i]["id"].as<uint64_t>(0) != id;
+       ++i) {
+  }
+
+  node["entities"].remove(i);
+  mEntityIdCache.erase(id);
+  deleteCache.insert_or_assign(entity, true);
 }
 
 Result<bool> SceneIO::saveStartingCamera(const Path &path) {
@@ -108,7 +193,7 @@ Result<bool> SceneIO::saveStartingCamera(const Path &path) {
 
   std::ifstream stream(path);
   auto node = YAML::Load(stream);
-  node["zones"][node["persistentZone"].as<uint32_t>()]["startingCamera"] =
+  node["zones"][0]["startingCamera"] =
       mScene.entityDatabase.get<Id>(mScene.activeCamera).id;
   stream.close();
 
@@ -117,34 +202,6 @@ Result<bool> SceneIO::saveStartingCamera(const Path &path) {
   writeStream.close();
 
   return Result<bool>::Ok(true);
-}
-
-void SceneIO::deleteEntityFilesAndRelations(Entity entity, const Path &path) {
-  if (mScene.entityDatabase.has<PerspectiveLens>(entity)) {
-    detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
-    auto res =
-        sceneLoader.loadStartingCamera(YAML::Node{}, mEntityIdCache, entity);
-    if (res.hasData()) {
-      mScene.activeCamera = res.getData();
-      saveStartingCamera(path);
-    } else {
-      mScene.activeCamera = mScene.dummyCamera;
-    }
-  }
-
-  if (mScene.entityDatabase.has<Children>(entity)) {
-    const auto &children = mScene.entityDatabase.get<Children>(entity);
-    for (auto entity : children.children) {
-      deleteEntityFilesAndRelations(entity, path);
-    }
-  }
-
-  if (mScene.entityDatabase.has<Id>(entity)) {
-    auto id = mScene.entityDatabase.get<Id>(entity).id;
-    mEntityIdCache.insert({id, entity});
-
-    std::filesystem::remove(getEntityPath(entity, path));
-  }
 }
 
 void SceneIO::reset() {
@@ -158,27 +215,12 @@ void SceneIO::reset() {
   mScene.activeCamera = dummyCamera;
 }
 
-Path SceneIO::getEntityPath(Entity entity, const Path &path) {
-  std::ifstream stream(path, std::ios::in);
-  auto scene = YAML::Load(stream);
-
-  auto persistentZoneIndex = scene["persistentZone"].as<uint32_t>();
-  auto persistentZone = scene["zones"][persistentZoneIndex];
-
-  stream.close();
-  auto entitiesPath =
-      path.parent_path() / persistentZone["entities"].as<String>();
-
-  auto id = mScene.entityDatabase.get<Id>(entity).id;
-  return entitiesPath / (std::to_string(id) + ".lqnode");
-}
-
 Result<bool> SceneIO::saveEnvironment(const Path &path) {
   std::ifstream stream(path);
   auto node = YAML::Load(stream);
   stream.close();
 
-  auto zone = node["zones"][node["persistentZone"].as<uint32_t>()];
+  auto zone = node["zones"][0];
   zone["environment"] = YAML::Null;
 
   if (mScene.entityDatabase.exists(mScene.environment)) {

@@ -3,30 +3,38 @@
 
 #include "liquidator-tests/Testing.h"
 
-static const liquid::Path ScenePath{std::filesystem::current_path() / "scene"};
+static const liquid::Path ScenePath{std::filesystem::current_path() /
+                                    "scene-test" / "main.scene"};
 
 class ActionExecutorTest : public ::testing::Test {
 public:
   void SetUp() override {
-    std::filesystem::create_directories(ScenePath / "entities");
+    TearDown();
+    std::filesystem::create_directories(ScenePath.parent_path());
 
-    YAML::Node scene;
-    scene["persistentZone"] = 0;
-    scene["zones"][0]["entities"] = (ScenePath / "entities").string();
-    std::ofstream stream(ScenePath / "main.lqscene");
-    stream << scene;
+    YAML::Node root;
+    root["name"] = "TestScene";
+    root["version"] = "0.1";
+
+    YAML::Node zoneNode;
+    zoneNode["name"] = "TestZone";
+    root["zones"][0] = zoneNode;
+
+    std::ofstream stream(ScenePath);
+    stream << root;
     stream.close();
 
-    executor.getSceneIO().loadScene(ScenePath / "main.lqscene");
+    executor.getSceneIO().loadScene(ScenePath);
   }
 
-  void TearDown() override { std::filesystem::remove_all(ScenePath); }
+  void TearDown() override {
+    std::filesystem::remove_all(ScenePath.parent_path());
+  }
 
 public:
   liquid::AssetRegistry assetRegistry;
   liquid::editor::WorkspaceState state{};
-  liquid::editor::ActionExecutor executor{state, assetRegistry,
-                                          ScenePath / "main.lqscene"};
+  liquid::editor::ActionExecutor executor{state, assetRegistry, ScenePath};
 };
 
 struct TestActionData {
@@ -135,8 +143,13 @@ TEST_F(ActionExecutorTest,
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
 
-  auto entityPath = ScenePath / "entities" / "1.lqnode";
-  EXPECT_FALSE(std::filesystem::exists(entityPath));
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 0);
+  }
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
@@ -145,7 +158,16 @@ TEST_F(ActionExecutorTest,
   executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+
+    EXPECT_EQ(node["entities"].size(), 1);
+    auto id = state.scene.entityDatabase.get<liquid::Id>(entity).id;
+    EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), id);
+  }
 }
 
 TEST_F(
@@ -156,8 +178,12 @@ TEST_F(
   auto entity = state.scene.entityDatabase.create();
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
 
-  auto entityPath = ScenePath / "entities" / "1.lqnode";
-  EXPECT_FALSE(std::filesystem::exists(entityPath));
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+    EXPECT_EQ(node["entities"].size(), 0);
+  }
 
   auto *actionPtr = new TestAction;
   actionPtr->saveEntityOnExecute(entity);
@@ -166,7 +192,13 @@ TEST_F(
   executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
-  EXPECT_FALSE(std::filesystem::exists(entityPath));
+
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+    EXPECT_EQ(node["entities"].size(), 0);
+  }
 }
 
 TEST_F(ActionExecutorTest,
@@ -175,10 +207,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
 
-  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
-
-  auto entityPath = ScenePath / "entities" / "15.lqnode";
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
+  executor.getSceneIO().saveEntities({entity}, ScenePath);
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -187,7 +216,12 @@ TEST_F(ActionExecutorTest,
   executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
-  EXPECT_FALSE(std::filesystem::exists(entityPath));
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+    EXPECT_EQ(node["entities"].size(), 0);
+  }
 }
 
 TEST_F(
@@ -199,10 +233,7 @@ TEST_F(
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
 
-  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
-
-  auto entityPath = ScenePath / "entities" / "15.lqnode";
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
+  executor.getSceneIO().saveEntities({entity}, ScenePath);
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -211,7 +242,13 @@ TEST_F(
   executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
+
+  {
+    std::ifstream stream(ScenePath);
+    auto node = YAML::Load(stream);
+    stream.close();
+    EXPECT_EQ(node["entities"].size(), 1);
+  }
 }
 
 TEST_F(ActionExecutorTest,
@@ -221,10 +258,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
-  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
-
-  auto entityPath = ScenePath / "entities" / "15.lqnode";
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
+  executor.getSceneIO().saveEntities({entity}, ScenePath);
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
@@ -234,15 +268,14 @@ TEST_F(ActionExecutorTest,
   executor.process();
   EXPECT_TRUE(actionData->called);
 
-  std::ifstream stream(ScenePath / "main.lqscene");
+  std::ifstream stream(ScenePath);
   auto node = YAML::Load(stream);
   stream.close();
 
-  auto startingCamera =
-      node["zones"][node["persistentZone"].as<size_t>()]["startingCamera"];
+  auto startingCamera = node["zones"][0]["startingCamera"];
   EXPECT_TRUE(startingCamera);
   EXPECT_TRUE(startingCamera.IsScalar());
-  EXPECT_EQ(startingCamera.as<uint32_t>(), 15);
+  EXPECT_EQ(startingCamera.as<uint32_t>(0), 15);
 }
 
 TEST_F(ActionExecutorTest,
@@ -254,11 +287,6 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
-  executor.getSceneIO().saveEntity(entity, ScenePath / "main.lqscene");
-
-  auto entityPath = ScenePath / "entities" / "15.lqnode";
-  EXPECT_TRUE(std::filesystem::exists(entityPath));
-
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
   auto actionData = actionPtr->getData();
@@ -267,12 +295,11 @@ TEST_F(ActionExecutorTest,
   executor.process();
   EXPECT_TRUE(actionData->called);
 
-  std::ifstream stream(ScenePath / "main.lqscene");
+  std::ifstream stream(ScenePath);
   auto node = YAML::Load(stream);
   stream.close();
 
-  auto startingCamera =
-      node["zones"][node["persistentZone"].as<size_t>()]["startingCamera"];
+  auto startingCamera = node["zones"][0]["startingCamera"];
   EXPECT_FALSE(startingCamera);
 }
 
