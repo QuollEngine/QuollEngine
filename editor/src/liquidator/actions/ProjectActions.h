@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/asset/AssetManager.h"
 
 namespace liquid::editor {
 
@@ -9,6 +10,13 @@ namespace liquid::editor {
  */
 class ExportAsGame : public Action {
 public:
+  /**
+   * @brief Create action
+   *
+   * @param assetManager Asset manager
+   */
+  ExportAsGame(AssetManager &assetManager);
+
   /**
    * @brief Action executor
    *
@@ -28,6 +36,9 @@ public:
    * @retval false Predicate is false
    */
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+
+private:
+  AssetManager &mAssetManager;
 };
 
 } // namespace liquid::editor

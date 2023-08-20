@@ -202,9 +202,9 @@ Result<Path> AssetManager::createAnimator(const Path &assetPath) {
   return Result<Path>::Ok(sourceAssetPath, res.getWarnings());
 }
 
-Result<bool>
-AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
-  LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
+Result<bool> AssetManager::reloadAssets() {
+  LIQUID_PROFILE_EVENT("AssetManager::reloadAssets");
+
   std::vector<String> warnings;
 
   std::unordered_map<String, bool> allLoadedUuids{};
@@ -246,7 +246,16 @@ AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
     }
   }
 
+  return Result<bool>::Ok(true, warnings);
+}
+
+Result<bool>
+AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
+  LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
+  auto reloadRes = reloadAssets();
+
   auto res = mAssetCache.preloadAssets(renderStorage);
+  auto warnings = res.getWarnings();
 
   if (res.hasError())
     return res;

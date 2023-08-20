@@ -14,9 +14,10 @@
 
 namespace liquid::editor {
 
-UIRoot::UIRoot() {
+UIRoot::UIRoot(AssetManager &assetManager) {
   mMainMenu.begin("Project")
-      .add("Export as game", TypedActionCreator::create<ExportAsGame>())
+      .add("Export as game",
+           TypedActionCreator::create<ExportAsGame>(assetManager))
       .end()
       .begin("Objects")
       .add("Create empty object",

@@ -31,8 +31,10 @@ class UIRoot {
 public:
   /**
    * @brief Create UI root
+   *
+   * @param assetManager Asset manager
    */
-  UIRoot();
+  UIRoot(AssetManager &assetManager);
 
   /**
    * @brief Render UI Root

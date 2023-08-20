@@ -97,7 +97,7 @@ void EditorScreen::start(const Project &project) {
 
   auto &state = context.state;
 
-  UIRoot ui;
+  UIRoot ui(assetManager);
 
   MainLoop mainLoop(mWindow, fpsCounter);
 
