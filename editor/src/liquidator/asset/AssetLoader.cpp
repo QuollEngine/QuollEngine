@@ -26,7 +26,7 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
   using FileTypeEntry = platform::FileDialog::FileTypeEntry;
 
   std::vector<FileTypeEntry> entries{
-      FileTypeEntry{"Scene files", AssetManager::SceneExtensions},
+      FileTypeEntry{"Prefab files", AssetManager::PrefabExtensions},
       FileTypeEntry{"Audio files", AssetManager::AudioExtensions},
       FileTypeEntry{"Script files", AssetManager::ScriptExtensions},
       FileTypeEntry{"Font files", AssetManager::FontExtensions},

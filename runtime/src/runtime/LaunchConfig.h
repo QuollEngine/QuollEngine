@@ -12,14 +12,9 @@ struct LaunchConfig {
   String name;
 
   /**
-   * Game assets path
+   * Starting scene UUID
    */
-  Path assetsPath;
-
-  /**
-   * Game scenes path
-   */
-  Path scenesPath;
+  String startingScene;
 };
 
 } // namespace liquid::runtime

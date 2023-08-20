@@ -24,12 +24,8 @@ int main() {
 
   liquid::runtime::LaunchConfig launchConfig{};
 
-  auto assetsPathRelative = node["paths"]["assets"].as<liquid::String>();
-  auto scenesPathRelative = node["paths"]["scenes"].as<liquid::String>();
-
   launchConfig.name = node["name"].as<liquid::String>();
-  launchConfig.assetsPath = gamePath / assetsPathRelative;
-  launchConfig.scenesPath = gamePath / scenesPathRelative;
+  launchConfig.startingScene = node["startingScene"].as<liquid::String>();
 
   liquid::runtime::Runtime runtime(launchConfig);
 

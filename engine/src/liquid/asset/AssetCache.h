@@ -275,6 +275,24 @@ public:
       LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null);
 
   /**
+   * @brief Create scene from source
+   *
+   * @param sourcePath Source path
+   * @param uuid Existing uuid
+   * @return Path to new Scene
+   */
+  Result<Path> createSceneFromSource(const Path &sourcePath,
+                                     const String &uuid);
+
+  /**
+   * @brief Load scene from file
+   *
+   * @param filePath Path to asset
+   * @return Scene asset handle
+   */
+  Result<SceneAssetHandle> loadSceneFromFile(const Path &filePath);
+
+  /**
    * @brief Get asset registry
    *
    * @return Asset registry

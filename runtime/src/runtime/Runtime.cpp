@@ -37,7 +37,8 @@ void Runtime::start() {
   liquid::Scene scene;
   liquid::EventSystem eventSystem;
   liquid::Window window(mConfig.name, Width, Height, eventSystem);
-  liquid::AssetCache assetCache(mConfig.assetsPath, true);
+  liquid::AssetCache assetCache(std::filesystem::current_path() / "assets",
+                                true);
 
   liquid::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
@@ -82,8 +83,16 @@ void Runtime::start() {
     presenter.enqueueFramebufferUpdate();
   });
 
+  auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
+      mConfig.startingScene);
+
+  LIQUID_ASSERT(handle != SceneAssetHandle::Null, "Scene not found");
+  if (handle == SceneAssetHandle::Null) {
+    return;
+  }
+
   liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
-  sceneIO.loadScene(mConfig.scenesPath / "main.scene");
+  sceneIO.loadScene(handle);
 
   presenter.updateFramebuffers(device->getSwapchain());
 

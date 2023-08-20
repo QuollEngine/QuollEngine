@@ -150,6 +150,15 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
+  if (meta.type == AssetType::Scene) {
+    auto res = loadSceneFromFile(path);
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
   InputBinaryStream stream(path);
   AssetFileHeader header;
   stream.read(header);

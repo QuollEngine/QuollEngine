@@ -60,6 +60,11 @@ public:
   static const std::vector<String> AnimatorExtensions;
 
   /**
+   * @brief Supported prefab extensions
+   */
+  static const std::vector<String> PrefabExtensions;
+
+  /**
    * @brief Supported scene extensions
    */
   static const std::vector<String> SceneExtensions;
@@ -342,6 +347,16 @@ private:
    */
   Result<UUIDMap> loadSourceEnvironment(const Path &sourceAssetPath,
                                         const UUIDMap &uuids);
+
+  /**
+   * @brief Load scene asset
+   *
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
+   */
+  Result<UUIDMap> loadSourceScene(const Path &sourceAssetPath,
+                                  const UUIDMap &uuids);
 
 private:
   RenderStorage &mRenderStorage;

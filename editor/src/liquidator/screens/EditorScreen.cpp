@@ -47,7 +47,9 @@ EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
                            rhi::RenderDevice *device)
     : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
 
-void EditorScreen::start(const Project &project) {
+void EditorScreen::start(const Project &rawProject) {
+  auto project = rawProject;
+
   LogMemoryStorage userLogStorage;
   Engine::getUserLogger().setTransport(userLogStorage.createTransport());
 
@@ -71,6 +73,20 @@ void EditorScreen::start(const Project &project) {
   presenter.updateFramebuffers(mDevice->getSwapchain());
 
   auto res = assetManager.validateAndPreloadAssets(renderStorage);
+
+  SceneAssetHandle sceneAsset = SceneAssetHandle::Null;
+  for (auto [handle, data] :
+       assetManager.getAssetRegistry().getScenes().getAssets()) {
+    sceneAsset = handle;
+    project.startingScene = data.uuid;
+  }
+
+  LIQUID_ASSERT(sceneAsset != SceneAssetHandle::Null,
+                "Scene asset does not exist");
+  if (sceneAsset == SceneAssetHandle::Null) {
+    return;
+  }
+
   AssetLoadStatusDialog loadStatusDialog("Loaded with warnings");
 
   if (res.hasWarnings()) {
@@ -91,7 +107,8 @@ void EditorScreen::start(const Project &project) {
 
   EditorCamera editorCamera(mEventSystem, mWindow);
 
-  Workspace workspace(project, assetManager, project.scenesPath / "main.scene");
+  Workspace workspace(project, assetManager, sceneAsset,
+                      project.assetsPath / "main.scene");
 
   auto context = workspace.getContext();
 

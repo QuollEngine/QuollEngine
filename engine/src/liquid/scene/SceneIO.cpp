@@ -11,25 +11,18 @@ SceneIO::SceneIO(AssetRegistry &assetRegistry, Scene &scene)
   reset();
 }
 
-std::vector<Entity> SceneIO::loadScene(const Path &path) {
+std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
   detail::SceneLoader sceneLoader(mAssetRegistry, mScene.entityDatabase);
 
-  if (!std::filesystem::is_regular_file(path)) {
-    return {};
-  }
+  const auto &root = mAssetRegistry.getScenes().getAsset(scene).data.data;
 
-  std::ifstream stream(path, std::ios::in);
-  auto scene = YAML::Load(stream);
-
-  auto currentZone = scene["zones"][0];
+  auto currentZone = root["zones"][0];
 
   loadEnvironment(currentZone);
 
-  stream.close();
-
   std::vector<Entity> entities;
   std::vector<YAML::Node> yamlNodes;
-  for (const auto &node : scene["entities"]) {
+  for (const auto &node : root["entities"]) {
     auto res = createEntityFromNode(node);
 
     if (res.hasData()) {

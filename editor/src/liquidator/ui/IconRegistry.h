@@ -23,7 +23,8 @@ enum class EditorIcon {
   Sun,
   Light,
   Camera,
-  Environment
+  Environment,
+  Scene
 };
 
 /**

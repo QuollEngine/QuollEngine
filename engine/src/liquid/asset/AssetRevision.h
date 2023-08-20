@@ -16,14 +16,15 @@ enum class AssetRevision : uint32_t {
   LuaScript = 230911,
   Font = 230911,
   Environment = 230911,
-  Animator = 230911
+  Animator = 230911,
+  Scene = 230820
 };
 
 /**
  * @brief Get revision for asset type
  *
  * @param type Asset type
- * @return Asset revsion
+ * @return Asset revision
  */
 static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
   switch (type) {
@@ -51,6 +52,8 @@ static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
     return AssetRevision::Environment;
   case AssetType::Animator:
     return AssetRevision::Animator;
+  case AssetType::Scene:
+    return AssetRevision::Scene;
   default:
     return AssetRevision{0};
   }

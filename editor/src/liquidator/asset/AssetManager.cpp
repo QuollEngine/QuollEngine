@@ -36,9 +36,10 @@ const std::vector<String> AssetManager::TextureExtensions{"png", "jpg", "jpeg",
 const std::vector<String> AssetManager::ScriptExtensions{"lua"};
 const std::vector<String> AssetManager::AudioExtensions{"wav"};
 const std::vector<String> AssetManager::FontExtensions{"ttf", "otf"};
-const std::vector<String> AssetManager::SceneExtensions{"gltf", "glb"};
+const std::vector<String> AssetManager::PrefabExtensions{"gltf", "glb"};
 const std::vector<String> AssetManager::EnvironmentExtensions{"hdr"};
 const std::vector<String> AssetManager::AnimatorExtensions{"animator"};
+const std::vector<String> AssetManager::SceneExtensions{"scene"};
 
 using co = std::filesystem::copy_options;
 
@@ -296,6 +297,8 @@ Result<UUIDMap> AssetManager::loadSourceAsset(const Path &sourceAssetPath,
     res = loadSourceEnvironment(sourceAssetPath, uuids);
   } else if (type == AssetType::Animator) {
     res = loadSourceAnimator(sourceAssetPath, uuids);
+  } else if (type == AssetType::Scene) {
+    res = loadSourceScene(sourceAssetPath, uuids);
   }
 
   if (res.hasData()) {
@@ -435,6 +438,25 @@ Result<UUIDMap> AssetManager::loadSourcePrefab(const Path &sourceAssetPath,
 Result<UUIDMap> AssetManager::loadSourceEnvironment(const Path &sourceAssetPath,
                                                     const UUIDMap &uuids) {
   return mHDRIImporter.loadFromPath(sourceAssetPath, uuids);
+}
+
+Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
+                                              const UUIDMap &uuids) {
+  auto createRes = mAssetCache.createSceneFromSource(
+      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  if (!createRes.hasData()) {
+    return Result<UUIDMap>::Error(createRes.getError());
+  }
+
+  auto res = mAssetCache.loadSceneFromFile(createRes.getData());
+
+  if (res.hasData()) {
+    auto uuid =
+        mAssetCache.getRegistry().getScenes().getAsset(res.getData()).uuid;
+    return Result<UUIDMap>::Ok({{"root", uuid}});
+  }
+
+  return Result<UUIDMap>::Error(res.getError());
 }
 
 String AssetManager::getFileHash(const Path &path) {
@@ -578,7 +600,7 @@ AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {
   if (isExtension(FontExtensions)) {
     return AssetType::Font;
   }
-  if (isExtension(SceneExtensions)) {
+  if (isExtension(PrefabExtensions)) {
     return AssetType::Prefab;
   }
   if (isExtension(EnvironmentExtensions)) {
@@ -586,6 +608,9 @@ AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {
   }
   if (isExtension(AnimatorExtensions)) {
     return AssetType::Animator;
+  }
+  if (isExtension(SceneExtensions)) {
+    return AssetType::Scene;
   }
 
   return AssetType::None;

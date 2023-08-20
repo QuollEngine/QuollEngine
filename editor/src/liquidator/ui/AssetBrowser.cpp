@@ -98,6 +98,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
     return EditorIcon::Animator;
   case AssetType::Environment:
     return EditorIcon::Environment;
+  case AssetType::Scene:
+    return EditorIcon::Scene;
 
   default:
     return EditorIcon::Unknown;
