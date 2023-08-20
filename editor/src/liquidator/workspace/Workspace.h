@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/scene/SceneIO.h"
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/asset/AssetManager.h"
@@ -55,6 +56,7 @@ private:
   AssetManager &mAssetManager;
   WorkspaceState mState;
   ActionExecutor mActionExecutor;
+  SceneIO mSceneIO;
 
   bool mRequiresDockspaceInit = false;
 

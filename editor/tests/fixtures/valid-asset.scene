@@ -1,0 +1,5 @@
+version: 0.1
+name: Main
+zones:
+    - name: MainZone
+entities: []

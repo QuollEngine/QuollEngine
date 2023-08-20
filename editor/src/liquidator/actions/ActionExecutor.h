@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquidator/actions/Action.h"
+#include "liquidator/asset/SceneWriter.h"
 #include "liquid/scene/SceneIO.h"
 
 namespace liquid::editor {
@@ -56,13 +57,6 @@ public:
   void redo();
 
   /**
-   * @brief Get scene IO
-   *
-   * @return Scene IO
-   */
-  inline SceneIO &getSceneIO() { return mSceneIO; }
-
-  /**
    * @brief Get undo stack
    *
    * @return Undo stack
@@ -76,6 +70,13 @@ public:
    */
   inline const ActionStack &getRedoStack() const { return mRedoStack; }
 
+  /**
+   * @brief Get scene writer
+   *
+   * @return Scene writer
+   */
+  inline SceneWriter &getSceneWriter() { return mSceneWriter; }
+
 private:
   /**
    * @brief Save action result
@@ -87,8 +88,8 @@ private:
 private:
   WorkspaceState &mState;
   AssetRegistry &mAssetRegistry;
-  SceneIO mSceneIO;
   Path mScenePath;
+  SceneWriter mSceneWriter;
 
   std::unique_ptr<Action> mActionToProcess;
   ActionStack mUndoStack;

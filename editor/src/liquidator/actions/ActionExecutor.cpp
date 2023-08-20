@@ -5,8 +5,8 @@ namespace liquid::editor {
 
 ActionExecutor::ActionExecutor(WorkspaceState &state,
                                AssetRegistry &assetRegistry, Path scenePath)
-    : mState(state), mScenePath(scenePath),
-      mSceneIO(assetRegistry, state.scene), mAssetRegistry(assetRegistry) {}
+    : mState(state), mScenePath(scenePath), mAssetRegistry(assetRegistry),
+      mSceneWriter(mState.scene, mAssetRegistry) {}
 
 void ActionExecutor::process() {
   if (!mActionToProcess) {
@@ -77,16 +77,15 @@ void ActionExecutor::saveActionResult(const ActionExecutorResult &result) {
   }
 
   if (!result.entitiesToDelete.empty()) {
-    mSceneIO.deleteEntities(result.entitiesToDelete, mScenePath);
+    mSceneWriter.deleteEntities(result.entitiesToDelete);
   }
 
   if (!result.entitiesToSave.empty()) {
-    mSceneIO.saveEntities(result.entitiesToSave, mScenePath);
+    mSceneWriter.saveEntities(result.entitiesToSave);
   }
 
   if (result.saveScene) {
-    mSceneIO.saveStartingCamera(mScenePath);
-    mSceneIO.saveEnvironment(mScenePath);
+    mSceneWriter.saveScene();
   }
 }
 

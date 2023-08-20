@@ -13,8 +13,10 @@ namespace liquid::editor {
 Workspace::Workspace(Project project, AssetManager &assetManager,
                      Path scenePath)
     : mAssetManager(assetManager), mState{project},
-      mActionExecutor(mState, mAssetManager.getAssetRegistry(), scenePath) {
-  mActionExecutor.getSceneIO().loadScene(scenePath);
+      mActionExecutor(mState, mAssetManager.getAssetRegistry(), scenePath),
+      mSceneIO(mAssetManager.getAssetRegistry(), mState.scene) {
+  mSceneIO.loadScene(scenePath);
+  mActionExecutor.getSceneWriter().open(scenePath);
 
   mLayoutPath = (project.settingsPath / "layout.ini").string();
   ImGuiIO &io = ImGui::GetIO();
