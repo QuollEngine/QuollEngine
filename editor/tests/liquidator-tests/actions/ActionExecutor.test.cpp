@@ -24,7 +24,7 @@ public:
     stream << root;
     stream.close();
 
-    executor.getSceneIO().loadScene(ScenePath);
+    executor.getSceneWriter().open(ScenePath);
   }
 
   void TearDown() override {
@@ -207,7 +207,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
 
-  executor.getSceneIO().saveEntities({entity}, ScenePath);
+  executor.getSceneWriter().saveEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -233,7 +233,7 @@ TEST_F(
   state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
 
-  executor.getSceneIO().saveEntities({entity}, ScenePath);
+  executor.getSceneWriter().saveEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->deleteEntityOnExecute(entity);
@@ -258,7 +258,7 @@ TEST_F(ActionExecutorTest,
   state.scene.entityDatabase.set<liquid::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
-  executor.getSceneIO().saveEntities({entity}, ScenePath);
+  executor.getSceneWriter().saveEntities({entity});
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
