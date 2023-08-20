@@ -27,14 +27,14 @@ struct Project {
   Path assetsCachePath;
 
   /**
-   * Path to scenes directory
-   */
-  Path scenesPath;
-
-  /**
    * Path to settings directory
    */
   Path settingsPath;
+
+  /**
+   * Starting scene asset UUID
+   */
+  String startingScene;
 };
 
 } // namespace liquid::editor

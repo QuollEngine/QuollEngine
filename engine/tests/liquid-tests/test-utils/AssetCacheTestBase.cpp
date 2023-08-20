@@ -9,8 +9,8 @@ const liquid::Path AssetCacheTestBase::CachePath =
 AssetCacheTestBase::AssetCacheTestBase() : cache(CachePath) {}
 
 void AssetCacheTestBase::SetUp() {
-  std::filesystem::remove_all(CachePath);
+  TearDown();
   std::filesystem::create_directory(CachePath);
 }
 
-void AssetCacheTestBase::TearDown() {}
+void AssetCacheTestBase::TearDown() { std::filesystem::remove_all(CachePath); }

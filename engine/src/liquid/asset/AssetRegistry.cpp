@@ -254,6 +254,12 @@ AssetRegistry::getAssetByUuid(const String &uuid) {
     }
   }
 
+  for (auto &[handle, asset] : mScenes.getAssets()) {
+    if (asset.uuid == uuid) {
+      return {AssetType::Scene, static_cast<uint32_t>(handle)};
+    }
+  }
+
   return {AssetType::None, 0};
 }
 

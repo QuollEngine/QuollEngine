@@ -22,12 +22,12 @@ public:
   SceneIO(AssetRegistry &assetRegistry, Scene &scene);
 
   /**
-   * @brief Load scene from a path
+   * @brief Load scene from asset
    *
-   * @param path Scene path
+   * @param scene Scene asset
    * @return List of entities
    */
-  std::vector<Entity> loadScene(const Path &path);
+  std::vector<Entity> loadScene(SceneAssetHandle scene);
 
   /**
    * @brief Reset everything

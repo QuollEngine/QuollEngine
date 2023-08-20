@@ -14,6 +14,7 @@
 #include "PrefabAsset.h"
 #include "EnvironmentAsset.h"
 #include "LuaScriptAsset.h"
+#include "SceneAsset.h"
 
 #include "liquid/rhi/RenderDevice.h"
 
@@ -39,6 +40,7 @@ class AssetRegistry {
   using PrefabMap = AssetMap<PrefabAssetHandle, PrefabAsset>;
   using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
   using EnvironmentMap = AssetMap<EnvironmentAssetHandle, EnvironmentAsset>;
+  using SceneMap = AssetMap<SceneAssetHandle, SceneAsset>;
 
   struct DefaultObjects {
     MeshAssetHandle cube = MeshAssetHandle::Null;
@@ -164,6 +166,13 @@ public:
   inline EnvironmentMap &getEnvironments() { return mEnvironments; }
 
   /**
+   * @brief Get scenes
+   *
+   * @return Scenes asset map
+   */
+  inline SceneMap &getScenes() { return mScenes; }
+
+  /**
    * @brief Get asset by uuid
    *
    * @param uuid Asset uuid
@@ -184,6 +193,7 @@ private:
   PrefabMap mPrefabs;
   LuaScriptMap mLuaScripts;
   EnvironmentMap mEnvironments;
+  SceneMap mScenes;
 
   DefaultObjects mDefaultObjects;
 };

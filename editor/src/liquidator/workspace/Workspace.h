@@ -19,9 +19,11 @@ public:
    *
    * @param project Project
    * @param assetManager Asset manager
+   * @param scene Scene asset
    * @param scenePath Scene path
    */
-  Workspace(Project project, AssetManager &assetManager, Path scenePath);
+  Workspace(Project project, AssetManager &assetManager, SceneAssetHandle scene,
+            Path scenePath);
 
   Workspace(const Workspace &) = delete;
   Workspace &operator=(const Workspace &) = delete;

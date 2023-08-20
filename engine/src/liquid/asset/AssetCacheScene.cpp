@@ -1,0 +1,70 @@
+#include "liquid/core/Base.h"
+#include "AssetCache.h"
+
+namespace liquid {
+
+Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
+                                               const String &uuid) {
+  using co = std::filesystem::copy_options;
+
+  auto assetPath = createAssetPath(uuid);
+
+  std::error_code code;
+  if (!std::filesystem::copy_file(sourcePath, assetPath, co::overwrite_existing,
+                                  code)) {
+    return Result<Path>::Error(
+        "Cannot create scene from source: " + sourcePath.stem().string() +
+        "; " + code.message());
+  }
+
+  auto metaRes = createMetaFile(AssetType::Scene,
+                                sourcePath.filename().string(), assetPath);
+
+  if (!metaRes.hasData()) {
+    std::filesystem::remove(assetPath);
+    return Result<Path>::Error("Cannot create scene from source: " +
+                               sourcePath.stem().string());
+  }
+
+  return Result<Path>::Ok(assetPath);
+}
+
+Result<SceneAssetHandle> AssetCache::loadSceneFromFile(const Path &filePath) {
+  std::ifstream stream(filePath);
+  auto root = YAML::Load(stream);
+  stream.close();
+
+  if (root["type"].as<String>("") != "scene") {
+    return Result<SceneAssetHandle>::Error("Type must be scene");
+  }
+
+  if (root["version"].as<String>("") != "0.1") {
+    return Result<SceneAssetHandle>::Error("Version is not supported");
+  }
+
+  if (root["name"].as<String>("").length() == 0) {
+    return Result<SceneAssetHandle>::Error("`name` cannot be empty");
+  }
+
+  if (root["zones"].Type() != YAML::NodeType::Sequence) {
+    return Result<SceneAssetHandle>::Error("`zones` field is invalid");
+  }
+
+  if (root["entities"].Type() != YAML::NodeType::Sequence) {
+    return Result<SceneAssetHandle>::Error("`entities` field is invalid");
+  }
+
+  auto meta = getMetaFromUuid(filePath.stem().string());
+
+  AssetData<SceneAsset> asset{};
+  asset.type = AssetType::Scene;
+  asset.name = meta.name;
+  asset.path = filePath;
+  asset.uuid = filePath.stem().string();
+  asset.data.data = root;
+
+  auto handle = mRegistry.getScenes().addAsset(asset);
+  return Result<SceneAssetHandle>::Ok(handle);
+}
+
+} // namespace liquid
