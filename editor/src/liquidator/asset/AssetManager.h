@@ -164,6 +164,13 @@ public:
   Result<Path> createAnimator(const Path &assetPath);
 
   /**
+   * @brief Reload assets
+   *
+   * @return Result
+   */
+  Result<bool> reloadAssets();
+
+  /**
    * @brief Validate and preload assets
    *
    * @param renderStorage Render storage

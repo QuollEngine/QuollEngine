@@ -6,9 +6,14 @@
 
 namespace liquid::editor {
 
+ExportAsGame::ExportAsGame(AssetManager &assetManager)
+    : mAssetManager(assetManager) {}
+
 ActionExecutorResult ExportAsGame::onExecute(WorkspaceState &state,
                                              AssetRegistry &assetRegistry) {
   auto path = platform::FileDialog::getFilePathFromCreateDialog({});
+
+  mAssetManager.reloadAssets();
 
   GameExporter exporter;
   exporter.exportGame(state.project, path);
