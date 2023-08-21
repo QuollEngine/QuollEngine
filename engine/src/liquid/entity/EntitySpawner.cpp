@@ -48,7 +48,7 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
       auto entity = getOrCreateEntity(pTransform.entity);
       mEntityDatabase.set(entity, Parent{parent});
 
-      if (!mEntityDatabase.has<Children>(entity)) {
+      if (!mEntityDatabase.has<Children>(parent)) {
         mEntityDatabase.set<Children>(parent, {{entity}});
       } else {
         mEntityDatabase.get<Children>(parent).children.push_back(entity);

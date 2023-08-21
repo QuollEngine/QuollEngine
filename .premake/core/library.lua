@@ -7,7 +7,7 @@ function setupLibraryDirectories()
     }
 
     filter { "configurations:Debug or configurations:Test" }
-        sysincludedirs {
+        externalincludedirs {
             "../vendor/Debug/include",
             "../vendor/Debug/include/freetype2",
             "../vendor/Debug/include/msdfgen"
@@ -15,7 +15,7 @@ function setupLibraryDirectories()
         libdirs { "../vendor/Debug/lib", "../vendor/Debug/lib/debug" }
     
     filter { "configurations:Release or configurations:Profile" }
-        sysincludedirs {
+        externalincludedirs {
             "../vendor/Release/include",
             "../vendor/Release/include/freetype2",
             "../vendor/Release/include/msdfgen"
@@ -26,14 +26,14 @@ function setupLibraryDirectories()
         -- Vulkan SDK for Windows adds environment
         -- variable that points to Vulkan SDK
         -- installation
-        sysincludedirs {
+        externalincludedirs {
             "$(VULKAN_SDK)/Include"
         }
 
     filter { "system:macosx" }
         -- Vulkan SDK for macOS is installed to
         -- global include, library, and bin dirs
-        sysincludedirs {
+        externalincludedirs {
             "/usr/local/include"
         }
 

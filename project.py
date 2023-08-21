@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 import shutil
 import subprocess
 import hashlib
+import argparse
 from pathlib import Path
 
 workingDir = os.getcwd()
@@ -21,9 +22,20 @@ projectFile = os.path.join(workingDir, 'project.json')
 vendorRootDir = os.path.join(workingDir, 'vendor')
 tempDir = os.path.join(vendorRootDir, 'tmp')
 projectHashFile = os.path.join(vendorRootDir, 'project_hash')
+
 buildModes = ['Debug', 'Release']
 
 profiler_data = {}
+
+parser = argparse.ArgumentParser(description='Liquid project dependency manager')
+
+parser.add_argument('-m', '--mode', nargs='+', help='Mode', choices=['debug', 'release'], default=['debug', 'release'])
+parser.add_argument('-p', '--packages', help='Specify which package to install', nargs='+', default=None)
+
+args = parser.parse_args()
+
+buildModes = [x.capitalize() for x in args.mode]
+projectNames = args.packages
 
 #
 # Error handler for rmtree
@@ -214,15 +226,8 @@ project = open_project(projectFile)
 dependencies = project['dependencies']
 cleanAll = True
 
-if len(sys.argv) == 2:
-    projectName = sys.argv[1]
-
-    dependencies = [x for x in dependencies if x['name'] == projectName]
-
-    if len(dependencies) == 0:
-        print(f'`{projectName}` dependency is not found')
-        sys.exit(1)
-
+if projectNames is not None:
+    dependencies = [x for x in dependencies if x['name'] in projectNames]
     cleanAll = False
 elif project_hash_matches(projectFile, projectHashFile):
     print('Dependencies are up to date!')
@@ -318,8 +323,8 @@ shutil.rmtree(tempDir, onerror=on_rm_error)
 print(f'{"Name":<14} {"Fetch":<8} {"Build (Debug)":<12} {"Build (Release)":<12}')
 for k, v in profiler_data.items():
     fixed_fetch = f'{v["fetch"]:.4f}'
-    fixed_build_debug = f'{v["build-Debug"]:.4f}'
-    fixed_build_release = f'{v["build-Release"]:.4f}'
+    fixed_build_debug = f'{v["build-Debug"]:.4f}' if 'build-Debug' in v else 0
+    fixed_build_release = f'{v["build-Release"]:.4f}' if 'build-Release' in v else 0
 
     print(f'{k:<14} {fixed_fetch:<8} {fixed_build_debug:<12} {fixed_build_release:<12}')
 
