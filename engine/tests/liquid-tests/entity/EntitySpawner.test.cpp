@@ -40,8 +40,38 @@ TEST_F(EntitySpawnerDeathTest, SpawnPrefabReturnsEmptyListIfPrefabIsEmpty) {
 TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   liquid::AssetData<liquid::PrefabAsset> asset{};
 
-  // Create 5 transforms
-  for (int32_t i = 0; i < 5; ++i) {
+  // Create 1 transforms with no parent
+  {
+    glm::vec3 position(0.0f);
+    glm::quat rotation(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec3 scale = position;
+
+    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    transform.entity = 0;
+    transform.value.position = position;
+    transform.value.rotation = rotation;
+    transform.value.scale = scale;
+    transform.value.parent = -1;
+    asset.data.transforms.push_back(transform);
+  }
+
+  // Create 2 transforms that point to previous entity
+  for (int32_t i = 1; i < 3; ++i) {
+    glm::vec3 position(static_cast<float>(i));
+    glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec3 scale = position;
+
+    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    transform.entity = i;
+    transform.value.position = position;
+    transform.value.rotation = rotation;
+    transform.value.scale = scale;
+    transform.value.parent = 0;
+    asset.data.transforms.push_back(transform);
+  }
+
+  // Create transforms that point to previous parent
+  for (int32_t i = 3; i < 5; ++i) {
     glm::vec3 position(static_cast<float>(i));
     glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
@@ -158,13 +188,24 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // Test relations
   // First item has no parent
   EXPECT_FALSE(db.has<liquid::Parent>(res.at(0)));
+  EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.size(), 2);
   EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.at(0), res.at(1));
+  EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.at(1), res.at(2));
 
-  for (uint32_t i = 1; i < 5; ++i) {
+  // Second and third items have first entity as parent
+  for (uint32_t i = 1; i < 3; ++i) {
+    auto current = res.at(i);
+    EXPECT_TRUE(db.has<liquid::Parent>(current));
+    EXPECT_EQ(db.get<liquid::Parent>(current).parent, res.at(0));
+  }
+
+  for (uint32_t i = 3; i < 5; ++i) {
     auto current = res.at(i);
     auto parent = res.at(i - 1);
     // All transform items have parent that is the previous item
     EXPECT_EQ(db.get<liquid::Parent>(current).parent, parent);
+
+    EXPECT_TRUE(db.has<liquid::Children>(parent));
     EXPECT_EQ(db.get<liquid::Children>(parent).children.at(0), current);
   }
 
