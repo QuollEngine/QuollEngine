@@ -20,6 +20,7 @@ void loadMaterials(GLTFImportData &importData) {
 
     auto assetName = gltfMaterial.name.empty() ? "material" + std::to_string(i)
                                                : gltfMaterial.name;
+    assetName += ".mat";
 
     AssetData<MaterialAsset> material;
 

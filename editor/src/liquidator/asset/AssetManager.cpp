@@ -85,9 +85,9 @@ Result<Path> AssetManager::importAsset(const Path &source,
   auto targetAssetPath =
       getUniquePath(targetAssetDirectory / source.filename());
 
-  if (targetAssetPath.extension() == ".gltf") {
-    GLTFImporter importer(mAssetCache, mImageLoader, mOptimize);
-    auto res = importer.saveBinary(source, targetAssetPath);
+  if (targetAssetPath.extension() == ".gltf" ||
+      targetAssetPath.extension() == ".glb") {
+    auto res = GLTFImporter::createEmbeddedGlb(source, targetAssetPath);
     if (res.hasError()) {
       return Result<Path>::Error(res.getError());
     }

@@ -15,6 +15,7 @@ void loadSkeletons(GLTFImportData &importData) {
 
     auto skeletonName =
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
+    skeletonName += ".skel";
 
     std::unordered_map<uint32_t, int> jointParents;
     std::unordered_map<uint32_t, uint32_t> normalizedJointMap;
