@@ -22,8 +22,10 @@ workspace "LiquidEngine"
     
     configurations { "Debug", "Release", "Profile", "Test" }
 
+    
     filter { "toolset:msc-*" }
-        flags { "FatalCompileWarnings" }
+       defines { "_SILENCE_CXX20_CISO646_REMOVED_WARNING" }
+       flags { "FatalCompileWarnings" }
 
     filter {"configurations:Debug or configurations:Test"}
         defines { "LIQUID_DEBUG" }

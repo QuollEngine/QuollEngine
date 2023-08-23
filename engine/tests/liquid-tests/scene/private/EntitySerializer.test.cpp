@@ -368,14 +368,34 @@ TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   EXPECT_EQ(node["skeleton"].as<liquid::String>(), "skeleton.skel");
 }
 
-// Animator
-TEST_F(EntitySerializerTest,
-       DoesNotCreateAnimatorFieldIfAnimatorComponentDoesNotExist) {
+// Joint attachment
+TEST_F(
+    EntitySerializerTest,
+    DoesNotCreateJointAttachmentFieldIfJointAttachmentComponentDoesNotExist) {
   auto entity = entityDatabase.create();
   auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_FALSE(node["animator"]);
+  EXPECT_FALSE(node["jointAttachment"]);
 }
 
+TEST_F(EntitySerializerTest,
+       DoesNotCreateJointAttachmentFieldIfJointAttachmentIdIsNonZero) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::JointAttachment>(entity, {});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["jointAttachment"]);
+}
+
+TEST_F(EntitySerializerTest, CreatesJointAttachmentFieldWithJointId) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<liquid::JointAttachment>(entity, {10});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["jointAttachment"]);
+  EXPECT_EQ(node["jointAttachment"]["joint"].as<uint32_t>(0), 10);
+}
+
+// Animator
 TEST_F(EntitySerializerTest,
        DoesNotCreateAnimatorFieldIfAnimatorAssetIsNotInRegistry) {
   static constexpr liquid::AnimatorAssetHandle NonExistentAnimatorHandle{45};

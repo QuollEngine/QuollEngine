@@ -28,6 +28,7 @@ EntityDatabase::EntityDatabase() {
   reg<AudioStatus>();
   reg<SkinnedMesh>();
   reg<Skeleton>();
+  reg<JointAttachment>();
   reg<SkeletonDebug>();
   reg<RigidBody>();
   reg<Collidable>();

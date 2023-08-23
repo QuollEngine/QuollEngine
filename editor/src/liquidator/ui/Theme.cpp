@@ -113,6 +113,7 @@ static void setImguiStyles() {
   style.PopupBorderSize = 0.0f;
   style.PopupRounding = 4.0f;
   style.ChildRounding = Styles.childRounding;
+  style.WindowMenuButtonPosition = ImGuiDir_None;
 
   // Tables
   style.Colors[ImGuiCol_TableBorderLight] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);

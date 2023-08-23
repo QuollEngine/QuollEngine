@@ -119,4 +119,63 @@ bool EntitySetParent::predicate(WorkspaceState &state,
   return parentIsNotDescendant;
 }
 
+EntityRemoveParent::EntityRemoveParent(Entity entity) : mEntity(entity) {}
+
+ActionExecutorResult
+EntityRemoveParent::onExecute(WorkspaceState &state,
+                              AssetRegistry &assetRegistry) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  auto parent = scene.entityDatabase.get<Parent>(mEntity).parent;
+
+  scene.entityDatabase.remove<Parent>(mEntity);
+
+  auto &children = scene.entityDatabase.get<Children>(parent).children;
+  if (children.size() > 1) {
+    auto it = std::find(children.begin(), children.end(), mEntity);
+
+    mChildIndex = std::distance(children.begin(), it);
+    children.erase(it);
+  } else {
+    scene.entityDatabase.remove<Children>(parent);
+  }
+
+  mPreviousParent = parent;
+
+  ActionExecutorResult res{};
+  res.addToHistory = true;
+  res.entitiesToSave.push_back(mEntity);
+
+  return res;
+}
+
+ActionExecutorResult EntityRemoveParent::onUndo(WorkspaceState &state,
+                                                AssetRegistry &assetRegistry) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  scene.entityDatabase.set<Parent>(mEntity, {mPreviousParent});
+  if (scene.entityDatabase.has<Children>(mPreviousParent)) {
+    auto &children =
+        scene.entityDatabase.get<Children>(mPreviousParent).children;
+    children.insert(children.begin() + mChildIndex, mEntity);
+  } else {
+    scene.entityDatabase.set<Children>(mPreviousParent, {{mEntity}});
+  }
+
+  ActionExecutorResult res{};
+  res.entitiesToSave.push_back(mEntity);
+
+  return res;
+}
+
+bool EntityRemoveParent::predicate(WorkspaceState &state,
+                                   AssetRegistry &assetRegistry) {
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  return scene.entityDatabase.has<Parent>(mEntity);
+}
+
 } // namespace liquid::editor

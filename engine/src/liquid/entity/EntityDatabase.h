@@ -14,6 +14,7 @@
 #include "liquid/scene/PerspectiveLens.h"
 #include "liquid/scene/AutoAspectRatio.h"
 #include "liquid/scene/Skeleton.h"
+#include "liquid/scene/JointAttachment.h"
 #include "liquid/scene/Camera.h"
 #include "liquid/scene/Parent.h"
 #include "liquid/scene/Children.h"

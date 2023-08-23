@@ -10,39 +10,24 @@ namespace liquid {
 class KeyframeInterpolator {
 public:
   /**
-   * @brief Get interpolated value based on keyframe sequence
+   * @brief Get vec3 interpolated value based on keyframe sequence
    *
    * @param sequence Keyframe sequence
    * @param time Time
-   * @return Interpolated value
+   * @return Vec3 value
    */
-  const glm::vec4 interpolate(const KeyframeSequenceAsset &sequence,
-                              float time) const;
-
-private:
-  /**
-   * @brief Get step interpolated value
-   *
-   * Gets the previous interpolated value
-   *
-   * @param sequence Keyframe sequence
-   * @param time Time
-   * @return Value at previous time
-   */
-  const glm::vec4 &
-  getStepInterpolatedValue(const KeyframeSequenceAsset &sequence,
-                           float time) const;
+  static glm::vec3 interpolateVec3(const KeyframeSequenceAsset &sequence,
+                                   float time);
 
   /**
-   * @brief Get linear interpolated value between two times
+   * @brief Get quat interpolated value based on keyframe sequence
    *
    * @param sequence Keyframe sequence
    * @param time Time
-   * @return Interpolated value
+   * @return Quat value
    */
-  const glm::vec4
-  getLinearInterpolatedValue(const KeyframeSequenceAsset &sequence,
-                             float time) const;
+  static glm::quat interpolateQuat(const KeyframeSequenceAsset &sequence,
+                                   float time);
 };
 
 } // namespace liquid

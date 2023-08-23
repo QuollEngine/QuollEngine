@@ -585,6 +585,67 @@ TEST_F(SceneLoaderSkeletonTest,
   }
 }
 
+using SceneLoaderJointAttachmentTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       DoesNotCreateJointAttachmentIfJointAttachmentFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::JointAttachment>(entity));
+}
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       DoesNotCreateJointAttachmentIfJointAttachmentFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["jointAttachment"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::Skeleton>(entity));
+  }
+}
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       DoesNotCreateJointAttachmentIfJointFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  node["jointAttachment"]["test"] = 10;
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::JointAttachment>(entity));
+}
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       DoesNotCreateJointAttachmentIfJointFieldIsNegative) {
+  auto [node, entity] = createNode();
+  node["jointAttachment"]["joint"] = -1;
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::JointAttachment>(entity));
+}
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       DoesNotCreateJointAttachmentIfJointFieldIsLargerThanMaximumJointSize) {
+  auto [node, entity] = createNode();
+  node["jointAttachment"]["joint"] = std::numeric_limits<uint8_t>::max();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::JointAttachment>(entity));
+}
+
+TEST_F(SceneLoaderJointAttachmentTest,
+       CreatesJointAttachmentWithDefinedJointValue) {
+  auto [node, entity] = createNode();
+  node["jointAttachment"]["joint"] = 20;
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_TRUE(entityDatabase.has<liquid::JointAttachment>(entity));
+  EXPECT_EQ(entityDatabase.get<liquid::JointAttachment>(entity).joint, 20);
+}
+
 using SceneLoaderAnimatorTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderAnimatorTest,

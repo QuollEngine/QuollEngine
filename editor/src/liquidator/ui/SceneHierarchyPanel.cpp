@@ -14,40 +14,6 @@
 
 namespace liquid::editor {
 
-void SceneHierarchyPanel::render(WorkspaceState &state,
-                                 ActionExecutor &actionExecutor) {
-  static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
-  static constexpr float TreeNodeIndentSpacing = 10.0f;
-
-  float paddingY = ImGui::GetStyle().WindowPadding.y;
-  StyleStack stack;
-  stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-  uint32_t index = 0;
-
-  if (auto _ = widgets::Window("Scene")) {
-    auto &scene = state.mode == WorkspaceMode::Simulation
-                      ? state.simulationScene
-                      : state.scene;
-
-    StyleStack stack;
-    stack.pushStyle(ImGuiStyleVar_ItemSpacing,
-                    ImVec2(Theme::getStyles().itemSpacing.x, 0.0f));
-    stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
-    stack.pushStyle(ImGuiStyleVar_IndentSpacing, TreeNodeIndentSpacing);
-
-    for (auto [entity, transform] :
-         scene.entityDatabase.view<LocalTransform>()) {
-      if (scene.entityDatabase.has<Parent>(entity)) {
-        continue;
-      }
-
-      index = renderEntity(entity, index + 1, ImGuiTreeNodeFlags_DefaultOpen,
-                           state, actionExecutor);
-    }
-  }
-}
-
 static String getNameAndIcon(const String &name, const char *icon) {
   return String(icon) + "  " + name;
 }
@@ -90,6 +56,67 @@ static String getNodeName(const String &name, Entity entity,
   return name;
 }
 
+void SceneHierarchyPanel::render(WorkspaceState &state,
+                                 ActionExecutor &actionExecutor) {
+
+  float paddingY = ImGui::GetStyle().WindowPadding.y;
+  StyleStack stack;
+  stack.pushStyle(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+  if (auto _ = widgets::Window("Scene")) {
+    renderRoot(state, actionExecutor);
+  }
+}
+
+void SceneHierarchyPanel::renderRoot(WorkspaceState &state,
+                                     ActionExecutor &actionExecutor) {
+  static constexpr ImVec2 TreeNodeItemPadding{4.0f, 8.0f};
+  static constexpr float TreeNodeIndentSpacing = 10.0f;
+
+  auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
+                                                        : state.scene;
+
+  int treeNodeFlags =
+      ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
+      ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen;
+
+  bool open = false;
+  String nodeName = "Scene";
+
+  StyleStack stack;
+  stack.pushStyle(ImGuiStyleVar_ItemSpacing,
+                  ImVec2(Theme::getStyles().itemSpacing.x, 0.0f));
+  stack.pushStyle(ImGuiStyleVar_FramePadding, TreeNodeItemPadding);
+  stack.pushStyle(ImGuiStyleVar_IndentSpacing, TreeNodeIndentSpacing);
+
+  if (ImGui::TreeNodeEx(nodeName.c_str(), treeNodeFlags)) {
+    open = true;
+  }
+
+  if (ImGui::BeginDragDropTarget()) {
+    if (auto *payload = ImGui::AcceptDragDropPayload("Entity")) {
+      auto entity = *static_cast<Entity *>(payload->Data);
+      actionExecutor.execute<EntityRemoveParent>(entity);
+    }
+    ImGui::EndDragDropTarget();
+  }
+
+  if (open) {
+    uint32_t index = 0;
+    for (auto [entity, transform] :
+         scene.entityDatabase.view<LocalTransform>()) {
+      if (scene.entityDatabase.has<Parent>(entity)) {
+        continue;
+      }
+
+      index = renderEntity(entity, index + 1, ImGuiTreeNodeFlags_DefaultOpen,
+                           state, actionExecutor);
+    }
+
+    ImGui::TreePop();
+  }
+}
+
 uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
                                            int flags, WorkspaceState &state,
                                            ActionExecutor &actionExecutor) {
@@ -127,7 +154,7 @@ uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
       styleStack.pushFont(Theme::getBoldFont());
       styleStack.pushColor(ImGuiCol_Header,
                            Theme::getColor(ThemeColor::Primary100));
-    } else if ((innerIndex % 2) == 0) {
+    } else if ((innerIndex % 2) != 0) {
       styleStack.pushColor(ImGuiCol_Header,
                            Theme::getColor(ThemeColor::Neutral200));
     }

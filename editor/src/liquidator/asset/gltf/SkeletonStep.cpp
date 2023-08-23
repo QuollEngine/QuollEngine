@@ -102,6 +102,8 @@ void loadSkeletons(GLTFImportData &importData) {
     auto assetName =
         skin.name.empty() ? "skeleton" + std::to_string(si) : skin.name;
 
+    assetName += ".skel";
+
     AssetData<SkeletonAsset> asset;
     asset.name = getGLTFAssetName(importData, assetName);
     asset.type = AssetType::Skeleton;

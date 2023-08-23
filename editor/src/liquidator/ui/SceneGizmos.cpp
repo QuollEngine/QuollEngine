@@ -21,18 +21,17 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
                                                         : state.scene;
   auto &entityDatabase = scene.entityDatabase;
 
-  glm::vec3 worldPosition;
-  glm::quat worldRotation;
-  glm::vec3 worldScale;
+  glm::vec3 localScale;
+  glm::quat localRotation;
+  glm::vec3 localPosition;
 
   glm::vec3 noopSkew;
   glm::vec4 noopPerspective;
 
-  glm::decompose(worldTransform, worldScale, worldRotation, worldPosition,
-                 noopSkew, noopPerspective);
-
   if (!entityDatabase.has<Parent>(entity)) {
-    return LocalTransform{worldPosition, worldRotation, worldScale};
+    glm::decompose(worldTransform, localScale, localRotation, localPosition,
+                   noopSkew, noopPerspective);
+    return LocalTransform{localPosition, localRotation, localScale};
   }
 
   Entity parent = entityDatabase.get<Parent>(entity).parent;
@@ -44,18 +43,29 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
   const auto &parentWorld =
       entityDatabase.get<WorldTransform>(parent).worldTransform;
 
-  glm::vec3 parentPosition;
-  glm::quat parentRotation;
-  glm::vec3 parentScale;
+  int16_t jointId = -1;
+  if (entityDatabase.has<JointAttachment>(entity) &&
+      entityDatabase.has<Skeleton>(parent)) {
+    jointId = entityDatabase.get<JointAttachment>(entity).joint;
+  }
 
-  glm::decompose(parentWorld, parentScale, parentRotation, parentPosition,
-                 noopSkew, noopPerspective);
+  if (jointId >= 0 && jointId < std::numeric_limits<uint8_t>::max()) {
+    const auto &jointTransform =
+        entityDatabase.get<Skeleton>(parent).jointWorldTransforms.at(jointId);
 
-  return LocalTransform{
-      worldPosition - parentPosition,
-      glm::toQuat(glm::inverse(parentWorld) * glm::toMat4(worldRotation)),
-      glm::vec3(worldScale.x / parentScale.x, worldScale.y / parentScale.y,
-                worldScale.z / parentScale.z)};
+    auto localTransform =
+        glm::inverse(parentWorld * jointTransform) * worldTransform;
+
+    glm::decompose(localTransform, localScale, localRotation, localPosition,
+                   noopSkew, noopPerspective);
+  } else {
+    auto localTransform = glm::inverse(parentWorld) * worldTransform;
+
+    glm::decompose(localTransform, localScale, localRotation, localPosition,
+                   noopSkew, noopPerspective);
+  }
+
+  return LocalTransform{localPosition, localRotation, localScale};
 }
 
 /**

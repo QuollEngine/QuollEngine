@@ -207,6 +207,13 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
+  if (mEntityDatabase.has<JointAttachment>(entity)) {
+    auto joint = mEntityDatabase.get<JointAttachment>(entity).joint;
+    if (joint >= 0) {
+      components["jointAttachment"]["joint"] = joint;
+    }
+  }
+
   if (mEntityDatabase.has<Animator>(entity)) {
     auto handle = mEntityDatabase.get<Animator>(entity).asset;
 

@@ -194,10 +194,24 @@ void loadAnimations(GLTFImportData &importData) {
         sequence.jointTarget = true;
       }
 
-      for (size_t i = 0; i < sampler.times.size(); ++i) {
-        sequence.keyframeTimes.push_back(sampler.times.at(i));
-        sequence.keyframeValues.push_back(sampler.values.at(i));
+      if (target == KeyframeSequenceAssetTarget::Rotation) {
+        for (size_t i = 0; i < sampler.times.size(); ++i) {
+          sequence.keyframeTimes.push_back(sampler.times.at(i));
+
+          auto v = sampler.values.at(i);
+          auto q = glm::quat(v.w, v.x, v.y, v.z);
+          q = glm::normalize(q);
+          v = glm::vec4(q.x, q.y, q.z, q.w);
+
+          sequence.keyframeValues.push_back(v);
+        }
+      } else {
+        for (size_t i = 0; i < sampler.times.size(); ++i) {
+          sequence.keyframeTimes.push_back(sampler.times.at(i));
+          sequence.keyframeValues.push_back(sampler.values.at(i));
+        }
       }
+
       animation.data.keyframes.push_back(sequence);
     }
 
