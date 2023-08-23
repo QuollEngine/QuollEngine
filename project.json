@@ -305,12 +305,12 @@
       ]
     },
     {
-      "name": "stb-image",
+      "name": "stb",
       "buildSource": "stb-master",
       "url": "https://github.com/nothings/stb/archive/refs/heads/master.zip",
       "cmd": [
         "{MKDIR} {{VENDOR_INSTALL_DIR}}/include/stb",
-        "{COPY} stb_image.h {{VENDOR_INSTALL_DIR}}/include/stb"
+        "{COPY} stb_image.h stb_image_write.h {{VENDOR_INSTALL_DIR}}/include/stb"
       ]
     },
     {

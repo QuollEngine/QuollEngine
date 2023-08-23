@@ -33,13 +33,14 @@ public:
                                const UUIDMap &uuids);
 
   /**
-   * @brief Save binary from ASCII gltf
+   * @brief Create embedded GLB file
    *
-   * @param source ASCII source path
-   * @param destination Destination path
+   * @param source Source path
+   * @param destination Destination directory
    * @return GLB file path
    */
-  Result<Path> saveBinary(const Path &source, const Path &destination);
+  static Result<Path> createEmbeddedGlb(const Path &source,
+                                        const Path &destination);
 
 private:
   AssetCache &mAssetCache;

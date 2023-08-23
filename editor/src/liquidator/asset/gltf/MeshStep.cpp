@@ -412,6 +412,7 @@ void loadMeshes(GLTFImportData &importData) {
 
     auto assetName =
         gltfMesh.name.empty() ? "mesh-" + std::to_string(i) : gltfMesh.name;
+    assetName += ".mesh";
 
     std::vector<MaterialAssetHandle> materials;
     AssetData<MeshAsset> mesh;

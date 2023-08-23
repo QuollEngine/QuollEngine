@@ -17,6 +17,7 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   auto &image = model.images.at(model.textures.at(index).source);
   auto assetName =
       image.name.empty() ? "texture" + std::to_string(index) : image.name;
+  assetName += ".tex";
 
   rhi::Format format = rhi::Format::Undefined;
 
@@ -32,9 +33,11 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
     return TextureAssetHandle::Null;
   }
 
+  auto prevUuid = getUUIDFromMap(importData.uuids, assetName);
+
   auto uuid = importData.imageLoader.loadFromMemory(
       const_cast<void *>(static_cast<const void *>(image.image.data())),
-      image.width, image.height, getUUIDFromMap(importData.uuids, assetName),
+      image.width, image.height, prevUuid,
       getGLTFAssetName(importData, assetName),
       generateMipMaps && importData.optimize, format);
 

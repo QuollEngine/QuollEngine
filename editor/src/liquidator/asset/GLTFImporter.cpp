@@ -51,13 +51,18 @@ Result<UUIDMap> GLTFImporter::loadFromPath(const Path &sourceAssetPath,
   return Result<UUIDMap>::Ok(importData.outputUuids, importData.warnings);
 }
 
-Result<Path> GLTFImporter::saveBinary(const Path &source,
-                                      const Path &destination) {
+Result<Path> GLTFImporter::createEmbeddedGlb(const Path &source,
+                                             const Path &destination) {
   tinygltf::TinyGLTF gltf;
   tinygltf::Model model;
   String error, warning;
 
-  bool ret = gltf.LoadASCIIFromFile(&model, &error, &warning, source.string());
+  bool ret = false;
+  if (source.extension() == ".gltf") {
+    ret = gltf.LoadASCIIFromFile(&model, &error, &warning, source.string());
+  } else if (source.extension() == ".glb") {
+    ret = gltf.LoadBinaryFromFile(&model, &error, &warning, source.string());
+  }
 
   if (!warning.empty()) {
     return Result<Path>::Error(warning);

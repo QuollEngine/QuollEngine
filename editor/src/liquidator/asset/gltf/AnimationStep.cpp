@@ -20,6 +20,7 @@ void loadAnimations(GLTFImportData &importData) {
     auto assetName = gltfAnimation.name.empty()
                          ? "animation" + std::to_string(i)
                          : gltfAnimation.name;
+    assetName += ".anim";
 
     struct SamplerInfo {
       std::vector<float> times;
