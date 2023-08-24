@@ -203,6 +203,14 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
+  if (node["jointAttachment"] && node["jointAttachment"].IsMap()) {
+    auto joint = node["jointAttachment"]["joint"].as<int16_t>(-1);
+    if (joint >= 0 && joint < std::numeric_limits<uint8_t>::max()) {
+      JointAttachment attachment{joint};
+      mEntityDatabase.set(entity, attachment);
+    }
+  }
+
   if (node["animator"] && node["animator"].IsMap() &&
       node["animator"]["asset"]) {
     auto assetPath = node["animator"]["asset"].as<String>("");

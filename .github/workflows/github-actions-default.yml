@@ -156,7 +156,7 @@ jobs:
       - name: Install dependencies and setup project
         run: |
           python3 project.py
-          ../premake/premake5.exe vs2019
+          ../premake/premake5.exe vs2022
 
       - name: Build
         run: |

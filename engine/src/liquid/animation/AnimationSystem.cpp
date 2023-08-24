@@ -60,27 +60,31 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
     bool hasSkeleton = entityDatabase.has<Skeleton>(entity);
 
     for (const auto &sequence : animation.data.keyframes) {
-      const auto &value =
-          mKeyframeInterpolator.interpolate(sequence, animator.normalizedTime);
-
       if (sequence.jointTarget && hasSkeleton) {
         auto &skeleton = entityDatabase.get<Skeleton>(entity);
         if (sequence.target == KeyframeSequenceAssetTarget::Position) {
-          skeleton.jointLocalPositions.at(sequence.joint) = glm::vec3(value);
+          skeleton.jointLocalPositions.at(sequence.joint) =
+              KeyframeInterpolator::interpolateVec3(sequence,
+                                                    animator.normalizedTime);
         } else if (sequence.target == KeyframeSequenceAssetTarget::Rotation) {
           skeleton.jointLocalRotations.at(sequence.joint) =
-              glm::quat(value.w, value.x, value.y, value.z);
+              KeyframeInterpolator::interpolateQuat(sequence,
+                                                    animator.normalizedTime);
         } else if (sequence.target == KeyframeSequenceAssetTarget::Scale) {
-          skeleton.jointLocalScales.at(sequence.joint) = glm::vec3(value);
+          skeleton.jointLocalScales.at(sequence.joint) =
+              KeyframeInterpolator::interpolateVec3(sequence,
+                                                    animator.normalizedTime);
         }
       } else {
         if (sequence.target == KeyframeSequenceAssetTarget::Position) {
-          transform.localPosition = glm::vec3(value);
+          transform.localPosition = KeyframeInterpolator::interpolateVec3(
+              sequence, animator.normalizedTime);
         } else if (sequence.target == KeyframeSequenceAssetTarget::Rotation) {
-          transform.localRotation =
-              glm::quat(value.w, value.x, value.y, value.z);
+          transform.localRotation = KeyframeInterpolator::interpolateQuat(
+              sequence, animator.normalizedTime);
         } else if (sequence.target == KeyframeSequenceAssetTarget::Scale) {
-          transform.localScale = glm::vec3(value);
+          transform.localScale = KeyframeInterpolator::interpolateVec3(
+              sequence, animator.normalizedTime);
         }
       }
     }

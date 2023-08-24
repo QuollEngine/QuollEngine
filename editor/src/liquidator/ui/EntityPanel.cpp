@@ -99,7 +99,8 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderPointLight(scene, actionExecutor);
     renderCamera(state, scene, actionExecutor);
     renderAnimation(state, scene, assetRegistry, actionExecutor);
-    renderSkeleton(scene, actionExecutor);
+    renderSkeleton(scene, assetRegistry, actionExecutor);
+    renderJointAttachment(scene, actionExecutor);
     renderCollidable(scene, actionExecutor);
     renderRigidBody(scene, actionExecutor);
     renderAudio(scene, assetRegistry, actionExecutor);
@@ -737,7 +738,8 @@ void EntityPanel::renderSkinnedMeshRenderer(Scene &scene,
   }
 }
 
-void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
+void EntityPanel::renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
+                                 ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<Skeleton>(mSelectedEntity)) {
     return;
   }
@@ -747,6 +749,18 @@ void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
   if (auto _ = widgets::Section(SectionName.c_str())) {
     bool showBones = scene.entityDatabase.has<SkeletonDebug>(mSelectedEntity);
 
+    const auto &skeleton = scene.entityDatabase.get<Skeleton>(mSelectedEntity);
+
+    auto handle = skeleton.assetHandle;
+
+    const auto &asset = assetRegistry.getSkeletons().getAsset(handle);
+
+    if (auto table = widgets::Table("TableSkinnedMesh", 2)) {
+      table.row("Name", asset.name);
+      table.row("Number of joints",
+                static_cast<uint32_t>(skeleton.jointNames.size()));
+    }
+
     if (ImGui::Checkbox("Show bones", &showBones)) {
       actionExecutor.execute<EntityToggleSkeletonDebugBones>(mSelectedEntity);
     }
@@ -754,6 +768,61 @@ void EntityPanel::renderSkeleton(Scene &scene, ActionExecutor &actionExecutor) {
 
   if (shouldDelete("Skeleton")) {
     actionExecutor.execute<EntityDeleteSkeleton>(mSelectedEntity);
+  }
+}
+
+void EntityPanel::renderJointAttachment(Scene &scene,
+                                        ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<JointAttachment>(mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName = String(fa::Bone) + " Joint attachment";
+
+  if (auto _ = widgets::Section(SectionName.c_str())) {
+    if (!scene.entityDatabase.has<Parent>(mSelectedEntity) ||
+        !scene.entityDatabase.has<Skeleton>(
+            scene.entityDatabase.get<Parent>(mSelectedEntity).parent)) {
+      ImGui::Text("Entity must be an immediate child of a skeleton");
+      return;
+    }
+
+    auto parentEntity =
+        scene.entityDatabase.get<Parent>(mSelectedEntity).parent;
+
+    const auto &skeleton = scene.entityDatabase.get<Skeleton>(parentEntity);
+
+    auto &attachment =
+        scene.entityDatabase.get<JointAttachment>(mSelectedEntity);
+
+    auto label = attachment.joint >= 0 &&
+                         attachment.joint <
+                             static_cast<int16_t>(skeleton.jointNames.size())
+                     ? skeleton.jointNames.at(attachment.joint)
+                     : "Select joint";
+
+    if (ImGui::Button(label.c_str())) {
+      ImGui::OpenPopup("SetJointAttachment");
+    }
+
+    if (ImGui::BeginPopup("SetJointAttachment")) {
+      for (size_t i = 0; i < skeleton.jointNames.size(); ++i) {
+        if (ImGui::Selectable(skeleton.jointNames.at(i).c_str())) {
+          auto newAttachment = attachment;
+          newAttachment.joint = static_cast<int16_t>(i);
+
+          actionExecutor.execute<EntityDefaultUpdateComponent<JointAttachment>>(
+              mSelectedEntity, attachment, newAttachment);
+        }
+      }
+
+      ImGui::EndPopup();
+    }
+  }
+
+  if (shouldDelete("Joint attachment")) {
+    actionExecutor.execute<EntityDefaultDeleteAction<JointAttachment>>(
+        mSelectedEntity);
   }
 }
 
@@ -1351,6 +1420,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
       Text text{"Hello world"};
       text.font = assetRegistry.getDefaultObjects().defaultFont;
       actionExecutor.execute<EntityCreateText>(mSelectedEntity, text);
+    }
+
+    if (!scene.entityDatabase.has<JointAttachment>(mSelectedEntity) &&
+        ImGui::Selectable("Joint attachment")) {
+      actionExecutor.execute<EntityDefaultCreateComponent<JointAttachment>>(
+          mSelectedEntity, JointAttachment{});
     }
 
     ImGui::EndPopup();

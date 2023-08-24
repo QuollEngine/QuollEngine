@@ -6,7 +6,7 @@
 
 using EntitySetParentTest = ActionTestBase;
 
-TEST_F(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
+TEST_P(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
   auto entity = activeScene().entityDatabase.create();
   auto parent = activeScene().entityDatabase.create();
 
@@ -32,7 +32,7 @@ TEST_F(EntitySetParentTest, ExecutorSetsParentForEntityAndChildrenForParent) {
       entity);
 }
 
-TEST_F(
+TEST_P(
     EntitySetParentTest,
     ExecutorChildrenOfPreviousParentOnExecuteIfPreviousParentOnlyHasEntityAsChildren) {
   auto entity = activeScene().entityDatabase.create();
@@ -68,7 +68,7 @@ TEST_F(
       entity);
 }
 
-TEST_F(
+TEST_P(
     EntitySetParentTest,
     ExecutorRemovesEntityFromChildrenOfParentIfEntityIsOneOfChildrenOfParent) {
   auto entity = activeScene().entityDatabase.create();
@@ -113,7 +113,7 @@ TEST_F(
       entity);
 }
 
-TEST_F(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
+TEST_P(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
   auto entity = activeScene().entityDatabase.create();
   auto parent = activeScene().entityDatabase.create();
 
@@ -129,7 +129,7 @@ TEST_F(EntitySetParentTest, UndoRemovesEntityParentIfEntityDidNotHaveParent) {
   EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Children>(parent));
 }
 
-TEST_F(
+TEST_P(
     EntitySetParentTest,
     UndoSetsPreviousParentAndRemovesParentChildrenIfEntityIsTheOnlyChildOfCurrentParent) {
   auto entity = activeScene().entityDatabase.create();
@@ -165,7 +165,7 @@ TEST_F(
       entity);
 }
 
-TEST_F(
+TEST_P(
     EntitySetParentTest,
     UndoSetsPreviousParentAndRemovesEntityFromCurrentParentIfEntityIsOneOfTheChildrenOfCurrentParent) {
   auto entity = activeScene().entityDatabase.create();
@@ -210,14 +210,14 @@ TEST_F(
       entity);
 }
 
-TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
+TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentDoesNotExist) {
   auto entity = activeScene().entityDatabase.create();
 
   EXPECT_FALSE(liquid::editor::EntitySetParent(entity, liquid::Entity{25})
                    .predicate(state, assetRegistry));
 }
 
-TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
+TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
   auto entity = activeScene().entityDatabase.create();
   auto child0 = activeScene().entityDatabase.create();
 
@@ -227,7 +227,7 @@ TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsAChildOfEntity) {
                    .predicate(state, assetRegistry));
 }
 
-TEST_F(EntitySetParentTest,
+TEST_P(EntitySetParentTest,
        PredicateReturnsFalseIfParentIsADescendantOfEntity) {
   auto entity = activeScene().entityDatabase.create();
   auto child0 = activeScene().entityDatabase.create();
@@ -240,7 +240,7 @@ TEST_F(EntitySetParentTest,
                    .predicate(state, assetRegistry));
 }
 
-TEST_F(EntitySetParentTest,
+TEST_P(EntitySetParentTest,
        PredicateReturnsFalseIfParentIsAlreadyParentOfEntity) {
   auto entity = activeScene().entityDatabase.create();
   auto parent = activeScene().entityDatabase.create();
@@ -250,17 +250,153 @@ TEST_F(EntitySetParentTest,
                    .predicate(state, assetRegistry));
 }
 
-TEST_F(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
+TEST_P(EntitySetParentTest, PredicateReturnsFalseIfParentIsEntityItself) {
   auto entity = activeScene().entityDatabase.create();
 
   EXPECT_FALSE(liquid::editor::EntitySetParent(entity, entity)
                    .predicate(state, assetRegistry));
 }
 
-TEST_F(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
+TEST_P(EntitySetParentTest, PredicateReturnsTrueIfEntityParentIsValid) {
   auto entity = activeScene().entityDatabase.create();
   auto parent = activeScene().entityDatabase.create();
 
   EXPECT_TRUE(liquid::editor::EntitySetParent(entity, parent)
                   .predicate(state, assetRegistry));
 }
+
+InitActionsTestSuite(EntityActionsTest, EntitySetParentTest);
+
+using EntityRemoveParentTest = ActionTestBase;
+
+TEST_P(EntityRemoveParentTest,
+       ExecutorRemovesParentFromEntityAndChildFromParent) {
+  auto entity = activeScene().entityDatabase.create();
+  auto parent = activeScene().entityDatabase.create();
+  auto c1 = activeScene().entityDatabase.create();
+  auto c2 = activeScene().entityDatabase.create();
+  auto c3 = activeScene().entityDatabase.create();
+
+  activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
+  activeScene().entityDatabase.set<liquid::Children>(parent,
+                                                     {{c1, entity, c2, c3}});
+
+  liquid::editor::EntityRemoveParent action(entity);
+  auto res = action.onExecute(state, assetRegistry);
+
+  EXPECT_TRUE(res.addToHistory);
+  EXPECT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Parent>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Children>(parent));
+
+  const auto &children =
+      activeScene().entityDatabase.get<liquid::Children>(parent).children;
+
+  EXPECT_EQ(children.size(), 3);
+  EXPECT_EQ(children.at(0), c1);
+  EXPECT_EQ(children.at(1), c2);
+  EXPECT_EQ(children.at(2), c3);
+}
+
+TEST_P(
+    EntityRemoveParentTest,
+    ExecutorRemovesParentFromEntityAndChildrenFromParentIfEntityWasTheOnlyChild) {
+  auto entity = activeScene().entityDatabase.create();
+  auto parent = activeScene().entityDatabase.create();
+
+  activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
+  activeScene().entityDatabase.set<liquid::Children>(parent, {{entity}});
+
+  liquid::editor::EntityRemoveParent action(entity);
+  auto res = action.onExecute(state, assetRegistry);
+
+  EXPECT_TRUE(res.addToHistory);
+  EXPECT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Parent>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Children>(parent));
+}
+
+TEST_P(EntityRemoveParentTest,
+       UndoAddsParentToEntityAndAddsEntityAsChildOfParentInTheSameSpot) {
+  auto entity = activeScene().entityDatabase.create();
+  auto parent = activeScene().entityDatabase.create();
+  auto c1 = activeScene().entityDatabase.create();
+  auto c2 = activeScene().entityDatabase.create();
+  auto c3 = activeScene().entityDatabase.create();
+
+  activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
+  activeScene().entityDatabase.set<liquid::Children>(parent,
+                                                     {{c1, entity, c2, c3}});
+
+  liquid::editor::EntityRemoveParent action(entity);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
+
+  EXPECT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Parent>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Parent>(entity).parent,
+            parent);
+
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Children>(parent));
+
+  const auto &children =
+      activeScene().entityDatabase.get<liquid::Children>(parent).children;
+
+  EXPECT_EQ(children.size(), 4);
+  EXPECT_EQ(children.at(0), c1);
+  EXPECT_EQ(children.at(1), entity);
+  EXPECT_EQ(children.at(2), c2);
+  EXPECT_EQ(children.at(3), c3);
+}
+
+TEST_P(EntityRemoveParentTest,
+       UndoAddsParentToEntityAndAddsEntityAsChildOfParentIfItWasTheOnlyChild) {
+  auto entity = activeScene().entityDatabase.create();
+  auto parent = activeScene().entityDatabase.create();
+
+  activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
+  activeScene().entityDatabase.set<liquid::Children>(parent, {{entity}});
+
+  liquid::editor::EntityRemoveParent action(entity);
+  action.onExecute(state, assetRegistry);
+  auto res = action.onUndo(state, assetRegistry);
+
+  EXPECT_EQ(res.entitiesToSave.size(), 1);
+  EXPECT_EQ(res.entitiesToSave.at(0), entity);
+
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Parent>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Parent>(entity).parent,
+            parent);
+
+  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Children>(parent));
+
+  const auto &children =
+      activeScene().entityDatabase.get<liquid::Children>(parent).children;
+
+  EXPECT_EQ(children.size(), 1);
+  EXPECT_EQ(children.at(0), entity);
+}
+
+TEST_P(EntityRemoveParentTest, PredicateReturnsTrueIfEntityHasParent) {
+  auto entity = activeScene().entityDatabase.create();
+  auto parent = activeScene().entityDatabase.create();
+  activeScene().entityDatabase.set<liquid::Parent>(entity, {parent});
+
+  EXPECT_TRUE(liquid::editor::EntityRemoveParent(entity).predicate(
+      state, assetRegistry));
+}
+
+TEST_P(EntityRemoveParentTest, PredicateReturnsFalseIfEntityDoesNotHaveParent) {
+  auto entity = activeScene().entityDatabase.create();
+
+  EXPECT_FALSE(liquid::editor::EntityRemoveParent(entity).predicate(
+      state, assetRegistry));
+}
+
+InitActionsTestSuite(EntityActionsTest, EntityRemoveParentTest);

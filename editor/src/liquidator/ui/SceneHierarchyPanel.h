@@ -25,6 +25,14 @@ public:
 
 private:
   /**
+   * @brief Render scene root at top
+   *
+   * @param state Workspace state
+   * @param actionExecutor Action executor
+   */
+  void renderRoot(WorkspaceState &state, ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render entity as tree item
    *
    * @param entity Entity

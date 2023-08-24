@@ -12,14 +12,26 @@ namespace liquid {
 class SkeletonUpdater {
 public:
   /**
-   * @brief Update skeletons
-   *
-   * Update skeleton joint transforms and
-   * debug skeleton bone transforms
+   * @brief Update
    *
    * @param entityDatabase Entity database
    */
   void update(EntityDatabase &entityDatabase);
+
+private:
+  /**
+   * @brief Update skeletons
+   *
+   * @param entityDatabase Entity database
+   */
+  void updateSkeletons(EntityDatabase &entityDatabase);
+
+  /**
+   * @brief Update debug bones
+   *
+   * @param entityDatabase Entity database
+   */
+  void updateDebugBones(EntityDatabase &entityDatabase);
 };
 
 } // namespace liquid

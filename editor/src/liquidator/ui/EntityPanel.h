@@ -138,9 +138,19 @@ private:
    * @brief Render skeleton component
    *
    * @param scene Scene
+   * @param assetRegistry Asset registry
    * @param actionExecutor Action executor
    */
-  void renderSkeleton(Scene &scene, ActionExecutor &actionExecutor);
+  void renderSkeleton(Scene &scene, AssetRegistry &assetRegistry,
+                      ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Render joint attachment component
+   *
+   * @param scene Scene
+   * @param actionExecutor Action executor
+   */
+  void renderJointAttachment(Scene &scene, ActionExecutor &actionExecutor);
 
   /**
    * @brief Render collidable component

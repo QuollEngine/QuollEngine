@@ -36,7 +36,22 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
                                glm::toMat4(local.localRotation) *
                                glm::scale(identity, local.localScale);
 
-    world.worldTransform = parentTransform.worldTransform * localTransform;
+    int16_t jointId = -1;
+    if (entityDatabase.has<JointAttachment>(entity) &&
+        entityDatabase.has<Skeleton>(parent.parent)) {
+      jointId = entityDatabase.get<JointAttachment>(entity).joint;
+    }
+
+    if (jointId >= 0 && static_cast<size_t>(jointId) <
+                            entityDatabase.get<Skeleton>(parent.parent)
+                                .jointWorldTransforms.size()) {
+      const auto &jointTransform = entityDatabase.get<Skeleton>(parent.parent)
+                                       .jointWorldTransforms.at(jointId);
+      world.worldTransform =
+          parentTransform.worldTransform * jointTransform * localTransform;
+    } else {
+      world.worldTransform = parentTransform.worldTransform * localTransform;
+    }
   }
 }
 
