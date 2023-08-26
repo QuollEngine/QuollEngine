@@ -162,4 +162,55 @@ TEST_P(
   EXPECT_NE(state.activeCamera, state.camera);
 }
 
+TEST_P(DeleteEntityActionTest,
+       ExecuteSetsEnvironmentToDummyEnvironmentIfEnvironmnetIsDeletedEntity) {
+  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = entity;
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state, assetRegistry);
+
+  EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteSetsEnvironmentToDummyEnvironmentEnvironmentIsADescendantOfDeletedEntity) {
+  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  {
+    auto e1 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+
+    auto e2 = activeScene().entityDatabase.create();
+    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().activeEnvironment = e2;
+  }
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state, assetRegistry);
+
+  EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+  EXPECT_TRUE(res.saveScene);
+}
+
+TEST_P(
+    DeleteEntityActionTest,
+    ExecuteDoesNotSetEnvironmentToDummyEnvironmentIfEnvironmentIsNotAffectedByDelete) {
+  activeScene().dummyEnvironment = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = activeScene().entityDatabase.create();
+
+  auto entity = activeScene().entityDatabase.create();
+
+  liquid::editor::DeleteEntity action(entity);
+  auto res = action.onExecute(state, assetRegistry);
+
+  EXPECT_NE(activeScene().activeEnvironment, activeScene().dummyEnvironment);
+  EXPECT_FALSE(res.saveScene);
+}
+
 InitActionsTestSuite(EntityActionsTest, DeleteEntityActionTest);

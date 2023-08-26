@@ -18,8 +18,6 @@ std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
 
   auto currentZone = root["zones"][0];
 
-  loadEnvironment(currentZone);
-
   std::vector<Entity> entities;
   std::vector<YAML::Node> yamlNodes;
   for (const auto &node : root["entities"]) {
@@ -37,12 +35,26 @@ std::vector<Entity> SceneIO::loadScene(SceneAssetHandle scene) {
     sceneLoader.loadComponents(node, entities.at(i), mEntityIdCache);
   }
 
-  auto res = sceneLoader.loadStartingCamera(currentZone["startingCamera"],
-                                            mEntityIdCache);
-  if (res.hasData()) {
-    mScene.activeCamera = res.getData();
-  } else {
-    mScene.activeCamera = mScene.dummyCamera;
+  {
+    auto res = sceneLoader.loadStartingCamera(currentZone["startingCamera"],
+                                              mEntityIdCache);
+
+    if (res.hasData()) {
+      mScene.activeCamera = res.getData();
+    } else {
+      mScene.activeCamera = mScene.dummyCamera;
+    }
+  }
+
+  {
+    auto res =
+        sceneLoader.loadEnvironment(currentZone["environment"], mEntityIdCache);
+
+    if (res.hasData()) {
+      mScene.activeEnvironment = res.getData();
+    } else {
+      mScene.activeEnvironment = mScene.dummyEnvironment;
+    }
   }
 
   return entities;
@@ -57,48 +69,8 @@ void SceneIO::reset() {
 
   mScene.dummyCamera = dummyCamera;
   mScene.activeCamera = dummyCamera;
-}
 
-void SceneIO::loadEnvironment(const YAML::Node &zone) {
-  if (!mScene.entityDatabase.exists(mScene.environment)) {
-    mScene.environment = mScene.entityDatabase.create();
-  }
-
-  if (!zone["environment"] || zone["environment"].IsNull() ||
-      !zone["environment"].IsMap()) {
-    return;
-  }
-
-  auto skybox = zone["environment"]["skybox"];
-  if (skybox && skybox.IsMap() && skybox["type"] && skybox["type"].IsScalar()) {
-    auto skyboxType = skybox["type"].as<String>();
-
-    if (skyboxType == "color") {
-      EnvironmentSkybox component{EnvironmentSkyboxType::Color};
-      component.color = skybox["color"].as<glm::vec4>(glm::vec4{0.0f});
-      mScene.entityDatabase.set(mScene.environment, component);
-    } else if (skyboxType == "texture" && skybox["texture"].IsScalar()) {
-      auto uuid = skybox["texture"].as<String>();
-      auto handle = mAssetRegistry.getEnvironments().findHandleByUuid(uuid);
-
-      EnvironmentSkybox component{EnvironmentSkyboxType::Texture};
-      component.texture = handle;
-
-      if (handle != EnvironmentAssetHandle::Null) {
-        mScene.entityDatabase.set(mScene.environment, component);
-      }
-    }
-  }
-
-  auto lighting = zone["environment"]["lighting"];
-  if (lighting && lighting.IsMap() && lighting["source"] &&
-      lighting["source"].IsScalar()) {
-    auto sourceType = lighting["source"].as<String>();
-    if (sourceType == "skybox") {
-      mScene.entityDatabase.set<EnvironmentLightingSkyboxSource>(
-          mScene.environment, {});
-    }
-  }
+  mScene.dummyEnvironment = mScene.entityDatabase.create();
 }
 
 Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {

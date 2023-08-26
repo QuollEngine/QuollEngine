@@ -11,7 +11,6 @@
 #include "StatusBar.h"
 #include "AssetBrowser.h"
 #include "IconRegistry.h"
-#include "EnvironmentPanel.h"
 #include "SceneView.h"
 #include "SceneGizmos.h"
 #include "MainMenu.h"
@@ -85,7 +84,6 @@ public:
 private:
   SceneHierarchyPanel mSceneHierarchyPanel;
   EntityPanel mEntityPanel;
-  EnvironmentPanel mEnvironmentPanel;
   EditorGridPanel mEditorCameraPanel;
   AssetBrowser mAssetBrowser;
   Inspector mInspector;

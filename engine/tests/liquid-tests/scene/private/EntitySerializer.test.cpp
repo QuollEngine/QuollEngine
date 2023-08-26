@@ -734,6 +734,7 @@ TEST_F(EntitySerializerTest,
   EXPECT_EQ(node["text"]["font"].as<liquid::String>(""), "Roboto.ttf");
 }
 
+// Rigid body
 TEST_F(EntitySerializerTest,
        DoesNotCreateRigidBodyFieldIfRigidBodyComponentDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -761,6 +762,7 @@ TEST_F(EntitySerializerTest, CreatesRigidBodyFieldIfRigidBodyComponentExists) {
   EXPECT_EQ(node["rigidBody"]["mass"].as<float>(), rigidBodyDesc.mass);
 }
 
+// Collidable
 TEST_F(EntitySerializerTest,
        DoesNotCreateCollidableFieldIfCollidableComponentDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -901,4 +903,83 @@ TEST_F(EntitySerializerTest, CreatesEntityComponentIfParentIdExists) {
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_EQ(node["transform"]["parent"].as<uint64_t>(0), ParentId);
+}
+
+// Skybox
+TEST_F(EntitySerializerTest,
+       DoesNotCreateSkyboxFieldIfEnvironmentSkyboxDoesNotExist) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["skybox"]);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateEnvironmentIfSkyboxIsTextureButAssetDoesNotExist) {
+  static constexpr liquid::EnvironmentAssetHandle NonExistentHandle{45};
+
+  auto entity = entityDatabase.create();
+
+  liquid::EnvironmentSkybox component{liquid::EnvironmentSkyboxType::Texture,
+                                      NonExistentHandle};
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["skybox"]);
+}
+
+TEST_F(EntitySerializerTest,
+       CreatesSkyboxWithTextureColorIfTypeIsTextureAndAssetExists) {
+  liquid::AssetData<liquid::EnvironmentAsset> data{};
+  data.uuid = "uuid.env";
+  auto handle = assetRegistry.getEnvironments().addAsset(data);
+
+  auto entity = entityDatabase.create();
+
+  liquid::EnvironmentSkybox component{liquid::EnvironmentSkyboxType::Texture,
+                                      handle};
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["skybox"]);
+  EXPECT_EQ(node["skybox"]["type"].as<liquid::String>(""), "texture");
+  EXPECT_EQ(node["skybox"]["texture"].as<liquid::String>(""), "uuid.env");
+  EXPECT_FALSE(node["skybox"]["color"]);
+}
+
+TEST_F(EntitySerializerTest,
+       CreatesSkyboxWithColorTypeIfTypeIsColorAndAssetExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::EnvironmentSkybox component{liquid::EnvironmentSkyboxType::Color,
+                                      liquid::EnvironmentAssetHandle::Null,
+                                      glm::vec4(0.2f, 0.3f, 0.4f, 0.5f)};
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["skybox"]);
+  EXPECT_EQ(node["skybox"]["type"].as<liquid::String>(""), "color");
+  EXPECT_EQ(node["skybox"]["color"].as<glm::vec4>(),
+            glm::vec4(0.2f, 0.3f, 0.4f, 0.5f));
+  EXPECT_FALSE(node["skybox"]["texture"]);
+}
+
+// Environment lighting
+TEST_F(EntitySerializerTest,
+       DoesNotCreateEnvironmentLightingFieldIfNoEnvironmentLightingComponent) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["environmentLighting"]);
+}
+
+TEST_F(EntitySerializerTest,
+       CreateEnvironmentLightingWithSkyboxSourceIfComponentExists) {
+  auto entity = entityDatabase.create();
+
+  liquid::EnvironmentLightingSkyboxSource component{};
+  entityDatabase.set(entity, component);
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["environmentLighting"]);
+  EXPECT_EQ(node["environmentLighting"]["source"].as<liquid::String>(""),
+            "skybox");
 }

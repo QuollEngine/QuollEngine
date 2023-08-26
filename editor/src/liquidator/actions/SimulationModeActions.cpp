@@ -10,7 +10,8 @@ StartSimulationMode::onExecute(WorkspaceState &state,
   state.simulationScene.entityDatabase.destroy();
   state.scene.entityDatabase.duplicate(state.simulationScene.entityDatabase);
   state.simulationScene.dummyCamera = state.scene.dummyCamera;
-  state.simulationScene.environment = state.scene.environment;
+  state.simulationScene.activeEnvironment = state.scene.activeEnvironment;
+  state.simulationScene.dummyEnvironment = state.scene.dummyEnvironment;
 
   if (state.scene.entityDatabase.has<Camera>(state.scene.activeCamera)) {
     state.simulationScene.activeCamera = state.scene.activeCamera;

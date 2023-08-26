@@ -54,6 +54,19 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
     }
   }
 
+  bool preserveActiveEnvironment = true;
+  {
+    auto current = scene.activeEnvironment;
+
+    preserveActiveEnvironment = current != mEntity;
+    while (preserveActiveEnvironment &&
+           scene.entityDatabase.has<Parent>(current)) {
+      auto parent = scene.entityDatabase.get<Parent>(current).parent;
+      preserveActiveEnvironment = parent != mEntity;
+      current = parent;
+    }
+  }
+
   if (!preserveStartingCamera) {
     scene.activeCamera = scene.dummyCamera;
   }
@@ -62,9 +75,13 @@ ActionExecutorResult DeleteEntity::onExecute(WorkspaceState &state,
     state.activeCamera = state.camera;
   }
 
+  if (!preserveActiveEnvironment) {
+    scene.activeEnvironment = scene.dummyEnvironment;
+  }
+
   ActionExecutorResult res{};
   res.entitiesToDelete.push_back(mEntity);
-  res.saveScene = !preserveStartingCamera;
+  res.saveScene = !preserveStartingCamera || !preserveActiveEnvironment;
   return res;
 }
 

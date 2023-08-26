@@ -20,6 +20,9 @@ static String getNameAndIcon(const String &name, const char *icon) {
 
 static String getNodeName(const String &name, Entity entity,
                           EntityDatabase &entityDatabase) {
+  if (entityDatabase.has<EnvironmentSkybox>(entity)) {
+    return getNameAndIcon(name, fa::Cloud);
+  }
 
   if (entityDatabase.has<Camera>(entity)) {
     return getNameAndIcon(name, fa::Video);

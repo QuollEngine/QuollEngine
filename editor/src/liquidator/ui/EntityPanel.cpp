@@ -76,6 +76,41 @@ static bool ImguiMultilineInputText(const String &label, String &value,
                                    InputTextCallback, &userData);
 }
 
+static void dndEnvironmentAsset(widgets::Section &section, Entity entity,
+                                const EnvironmentSkybox &skybox,
+                                ActionExecutor &actionExecutor) {
+  static constexpr float DropBorderWidth = 3.5f;
+  auto &g = *ImGui::GetCurrentContext();
+
+  ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                 g.LastItemData.Rect.Min.y + DropBorderWidth);
+  ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                 g.LastItemData.Rect.Max.y - DropBorderWidth);
+  if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                       g.LastItemData.ID)) {
+    if (auto *payload = ImGui::AcceptDragDropPayload(
+            getAssetTypeString(AssetType::Environment).c_str())) {
+      auto asset = *static_cast<EnvironmentAssetHandle *>(payload->Data);
+      auto newSkybox = skybox;
+      newSkybox.texture = asset;
+      actionExecutor.execute<EntityDefaultUpdateComponent<EnvironmentSkybox>>(
+          entity, skybox, newSkybox);
+    }
+  }
+}
+
+static String getSkyboxTypeLabel(EnvironmentSkyboxType type) {
+  if (type == EnvironmentSkyboxType::Color) {
+    return "Color";
+  }
+
+  if (type == EnvironmentSkyboxType::Texture) {
+    return "Texture";
+  }
+
+  return "None";
+}
+
 void EntityPanel::renderContent(WorkspaceState &state,
                                 AssetRegistry &assetRegistry,
                                 ActionExecutor &actionExecutor) {
@@ -105,6 +140,8 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderRigidBody(scene, actionExecutor);
     renderAudio(scene, assetRegistry, actionExecutor);
     renderScripting(scene, assetRegistry, actionExecutor);
+    renderSkybox(scene, assetRegistry, actionExecutor);
+    renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
     renderAddComponent(scene, assetRegistry, actionExecutor);
     handleDragAndDrop(scene, assetRegistry, actionExecutor);
   }
@@ -1352,6 +1389,125 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
+void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
+                               ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName = String(fa::Cloud) + "  Skybox";
+
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    float width = section.getClipRect().GetWidth();
+    const float height = width * 0.5f;
+
+    auto &skybox = scene.entityDatabase.get<EnvironmentSkybox>(mSelectedEntity);
+
+    ImGui::Text("Type");
+    if (ImGui::BeginCombo("###SkyboxType",
+                          getSkyboxTypeLabel(skybox.type).c_str())) {
+      if (ImGui::Selectable("Color")) {
+        auto newSkybox = skybox;
+        newSkybox.type = EnvironmentSkyboxType::Color;
+
+        actionExecutor.execute<EntityDefaultUpdateComponent<EnvironmentSkybox>>(
+            mSelectedEntity, skybox, newSkybox);
+      } else if (ImGui::Selectable("Texture")) {
+        auto newSkybox = skybox;
+        newSkybox.type = EnvironmentSkyboxType::Texture;
+
+        actionExecutor.execute<EntityDefaultUpdateComponent<EnvironmentSkybox>>(
+            mSelectedEntity, skybox, newSkybox);
+      }
+
+      ImGui::EndCombo();
+    }
+
+    if (skybox.type == EnvironmentSkyboxType::Color) {
+      bool sendAction = false;
+
+      glm::vec4 color = skybox.color;
+      if (widgets::InputColor("Color", color)) {
+        if (!mEnvironmentSkyboxAction) {
+          mEnvironmentSkyboxAction =
+              std::make_unique<EntityDefaultUpdateComponent<EnvironmentSkybox>>(
+                  mSelectedEntity, skybox);
+        }
+
+        skybox.color = color;
+      }
+
+      sendAction |= ImGui::IsItemDeactivatedAfterEdit();
+
+      if (sendAction && mEnvironmentSkyboxAction) {
+        mEnvironmentSkyboxAction->setNewComponent(skybox);
+        actionExecutor.execute(std::move(mEnvironmentSkyboxAction));
+      }
+
+    } else if (skybox.type == EnvironmentSkyboxType::Texture) {
+      if (assetRegistry.getEnvironments().hasAsset(skybox.texture)) {
+        const auto &envAsset =
+            assetRegistry.getEnvironments().getAsset(skybox.texture);
+
+        imgui::image(envAsset.preview, ImVec2(width, height), ImVec2(0, 0),
+                     ImVec2(1, 1), ImGui::GetID("environment-texture-drop"));
+
+        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+
+        if (ImGui::Button(fa::Times)) {
+          auto newSkybox = skybox;
+          newSkybox.texture = EnvironmentAssetHandle::Null;
+          actionExecutor
+              .execute<EntityDefaultUpdateComponent<EnvironmentSkybox>>(
+                  mSelectedEntity, skybox, newSkybox);
+        }
+
+      } else {
+        ImGui::Button("Drag environment asset here", ImVec2(width, height));
+        dndEnvironmentAsset(section, mSelectedEntity, skybox, actionExecutor);
+      }
+    }
+
+    if (scene.activeEnvironment != mSelectedEntity) {
+      if (ImGui::Button("Set as starting environment")) {
+        actionExecutor.execute<SceneSetStartingEnvironment>(mSelectedEntity);
+      }
+    } else {
+      ImGui::Text("Is the starting environment");
+    }
+  }
+
+  if (shouldDelete("Skybox")) {
+    actionExecutor.execute<EntityDefaultDeleteAction<EnvironmentSkybox>>(
+        mSelectedEntity);
+  }
+}
+
+void EntityPanel::renderEnvironmentLighting(Scene &scene,
+                                            AssetRegistry &assetRegistry,
+                                            ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
+          mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName = String(fa::Sun) + "  Environment lighting";
+
+  if (auto section = widgets::Section(SectionName.c_str())) {
+
+    ImGui::Text("Source");
+    if (ImGui::BeginCombo("###Source", "Skybox")) {
+      ImGui::EndCombo();
+    }
+  }
+
+  if (shouldDelete("EnvironmentLighting")) {
+    actionExecutor
+        .execute<EntityDefaultDeleteAction<EnvironmentLightingSkyboxSource>>(
+            mSelectedEntity);
+  }
+}
+
 void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
                                      ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.exists(mSelectedEntity)) {
@@ -1426,6 +1582,20 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
         ImGui::Selectable("Joint attachment")) {
       actionExecutor.execute<EntityDefaultCreateComponent<JointAttachment>>(
           mSelectedEntity, JointAttachment{});
+    }
+
+    if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity) &&
+        ImGui::Selectable("Skybox")) {
+      actionExecutor.execute<EntityDefaultCreateComponent<EnvironmentSkybox>>(
+          mSelectedEntity, EnvironmentSkybox{});
+    }
+
+    if (!scene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
+            mSelectedEntity) &&
+        ImGui::Selectable("Environment lighting")) {
+      actionExecutor.execute<
+          EntityDefaultCreateComponent<EnvironmentLightingSkyboxSource>>(
+          mSelectedEntity, EnvironmentLightingSkyboxSource{});
     }
 
     ImGui::EndPopup();

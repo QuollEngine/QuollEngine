@@ -43,6 +43,16 @@ public:
   Result<Entity> loadStartingCamera(const YAML::Node &node,
                                     EntityIdCache &entityIdCache);
 
+  /**
+   * @brief Load environment
+   *
+   * @param node YAML node
+   * @param entityIdCache Entity ID cache
+   * @return Found environment
+   */
+  Result<Entity> loadEnvironment(const YAML::Node &node,
+                                 EntityIdCache &entityIdCache);
+
 private:
   AssetRegistry &mAssetRegistry;
   EntityDatabase &mEntityDatabase;

@@ -6,7 +6,6 @@
 #include "StyleStack.h"
 #include "Theme.h"
 #include "FontAwesome.h"
-#include "EnvironmentPanel.h"
 
 namespace liquid::editor {
 
@@ -16,13 +15,6 @@ Inspector::Inspector() {
                           ActionExecutor &actionExecutor) {
                      mEntityPanel.renderContent(state, assetRegistry,
                                                 actionExecutor);
-                   }});
-
-  mTabs.push_back({"Environment", fa::EarthEurope,
-                   [](WorkspaceState &state, AssetRegistry &assetRegistry,
-                      ActionExecutor &actionExecutor) {
-                     EnvironmentPanel::renderContent(state, assetRegistry,
-                                                     actionExecutor);
                    }});
 }
 

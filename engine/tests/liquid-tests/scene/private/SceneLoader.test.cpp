@@ -2290,3 +2290,226 @@ TEST_F(SceneLoaderActiveCameraTest,
   EXPECT_TRUE(res.hasData());
   EXPECT_EQ(res.getData(), startingCameraNode.second);
 }
+
+using SceneLoaderSkyboxTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderSkyboxTest, DoesNotAddSkyboxIfNoSkyboxField) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+}
+
+TEST_F(SceneLoaderSkyboxTest, DoesNotAddSkyboxComponentIfSkyboxFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["skybox"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+  }
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       DoesNotAddSkyboxComponentIfSkyboxTypeIsNotColorOrTexture) {
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       YAML::Node("randomType")};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["skybox"]["type"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+  }
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       DoesNotAddSkyboxComponentIfSkyboxTypeIsTextureButTextureIsNotDefined) {
+  auto [node, entity] = createNode();
+  node["skybox"]["type"] = "texture";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_FALSE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       DoesNotAddSkyboxComponentIfSkyboxTypeIsTextureButTextureIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       YAML::Node("randomUuid")};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["skybox"]["type"] = "texture";
+    node["skybox"]["texture"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+  }
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       AddsTextureSkyboxIfTypeIsTextureAndTextureExists) {
+  liquid::AssetData<liquid::EnvironmentAsset> data{};
+  data.uuid = "test-uuid.uuid";
+
+  auto handle = assetRegistry.getEnvironments().addAsset(data);
+
+  auto [node, entity] = createNode();
+  node["skybox"]["type"] = "texture";
+  node["skybox"]["texture"] = "test-uuid.uuid";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  ASSERT_TRUE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+  const auto &component = entityDatabase.get<liquid::EnvironmentSkybox>(entity);
+  EXPECT_EQ(component.type, liquid::EnvironmentSkyboxType::Texture);
+  EXPECT_EQ(component.texture, handle);
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       AddsColorSkyboxWithBlackColorIfTypeIsColorButColorIsNotDefined) {
+  auto [node, entity] = createNode();
+  node["skybox"]["type"] = "color";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  ASSERT_TRUE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+
+  const auto &component = entityDatabase.get<liquid::EnvironmentSkybox>(entity);
+  EXPECT_EQ(component.type, liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(component.color, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+}
+
+TEST_F(SceneLoaderSkyboxTest,
+       AddsColorSkyboxWithBlackColorIfTypeIsColorButColorIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined),
+      YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map),
+      YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar),
+  };
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["skybox"]["type"] = "color";
+    node["skybox"]["color"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    ASSERT_TRUE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+
+    const auto &component =
+        entityDatabase.get<liquid::EnvironmentSkybox>(entity);
+    EXPECT_EQ(component.type, liquid::EnvironmentSkyboxType::Color);
+    EXPECT_EQ(component.color, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  }
+}
+
+TEST_F(SceneLoaderSkyboxTest, AddsColorSkyboxIfTypeIsColorAndColorIsDefined) {
+  liquid::AssetData<liquid::EnvironmentAsset> data{};
+  data.uuid = "test-uuid.uuid";
+
+  auto handle = assetRegistry.getEnvironments().addAsset(data);
+
+  auto [node, entity] = createNode();
+  node["skybox"]["type"] = "color";
+  node["skybox"]["color"] = glm::vec4(0.4f, 0.2f, 0.5f, 0.2f);
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  ASSERT_TRUE(entityDatabase.has<liquid::EnvironmentSkybox>(entity));
+  const auto &component = entityDatabase.get<liquid::EnvironmentSkybox>(entity);
+  EXPECT_EQ(component.type, liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(component.color, glm::vec4(0.4f, 0.2f, 0.5f, 0.2f));
+}
+
+using SceneLoaderEnvironmentLightingTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderEnvironmentLightingTest,
+       DoesNotAddEnvironmentLightingIfNoEnvironmentLightingField) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(
+      entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(entity));
+}
+
+TEST_F(SceneLoaderEnvironmentLightingTest,
+       DoesNotAddEnvironmentLightingIfFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["environmentLighting"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(
+        entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(entity));
+  }
+}
+
+TEST_F(SceneLoaderEnvironmentLightingTest,
+       DoesNotAddEnvironmentLightingIfSourceIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{YAML::Node(YAML::NodeType::Undefined),
+                                       YAML::Node(YAML::NodeType::Null),
+                                       YAML::Node(YAML::NodeType::Map),
+                                       YAML::Node(YAML::NodeType::Sequence),
+                                       YAML::Node(YAML::NodeType::Scalar),
+                                       YAML::Node("randomSource")};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["environmentLighting"]["source"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(
+        entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(entity));
+  }
+}
+
+TEST_F(SceneLoaderEnvironmentLightingTest,
+       AddsSkyboxEnvironmentLightingSourceIfSourceIsSkybox) {
+  auto [node, entity] = createNode();
+  node["environmentLighting"]["source"] = "skybox";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+  EXPECT_TRUE(
+      entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(entity));
+}
+
+using SceneLoaderActiveEnvironmentTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderActiveEnvironmentTest, ReturnsErrorIfEnvironmentIsNotId) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined),
+      YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map),
+      YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar),
+  };
+
+  for (auto node : invalidNodes) {
+    auto res = sceneLoader.loadEnvironment(node, entityIdCache);
+    EXPECT_TRUE(res.hasError());
+  }
+}
+
+TEST_F(SceneLoaderActiveEnvironmentTest,
+       ReturnsErrorIfEnvironmentEntityDoesNotExist) {
+  YAML::Node node(23232);
+
+  auto res = sceneLoader.loadEnvironment(node, entityIdCache);
+  EXPECT_TRUE(res.hasError());
+}
+
+TEST_F(SceneLoaderActiveCameraTest, ReturnsEntityIfEnvironmentEntityExists) {
+  auto environmentNode = createNode(true);
+
+  auto res =
+      sceneLoader.loadEnvironment(environmentNode.first["id"], entityIdCache);
+  EXPECT_TRUE(res.hasData());
+  EXPECT_EQ(res.getData(), environmentNode.second);
+}

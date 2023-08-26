@@ -267,6 +267,25 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     }
   }
 
+  if (mEntityDatabase.has<EnvironmentSkybox>(entity)) {
+    const auto &component = mEntityDatabase.get<EnvironmentSkybox>(entity);
+    if (component.type == EnvironmentSkyboxType::Color) {
+      components["skybox"]["type"] = "color";
+      components["skybox"]["color"] = component.color;
+    } else if (component.type == EnvironmentSkyboxType::Texture) {
+      if (mAssetRegistry.getEnvironments().hasAsset(component.texture)) {
+        const auto &asset =
+            mAssetRegistry.getEnvironments().getAsset(component.texture);
+        components["skybox"]["type"] = "texture";
+        components["skybox"]["texture"] = asset.uuid;
+      }
+    }
+  }
+
+  if (mEntityDatabase.has<EnvironmentLightingSkyboxSource>(entity)) {
+    components["environmentLighting"]["source"] = "skybox";
+  }
+
   return components;
 }
 
