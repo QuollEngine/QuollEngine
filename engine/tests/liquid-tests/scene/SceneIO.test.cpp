@@ -227,278 +227,115 @@ TEST_F(SceneIOTest,
   auto handle = createSceneAsset();
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+      scene.activeEnvironment));
   EXPECT_FALSE(
       scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
+          scene.activeEnvironment));
 }
 
 TEST_F(SceneIOTest,
-       CreatesEmptyEnvironmentEntityOnLoadIfSceneEnvironmentIsNull) {
+       CreatesEmptyEnvironmentEntityOnLoadIfSceneEnvironmentIsInvalid) {
   auto handle = createSceneAsset();
   auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"] = YAML::Node(YAML::NodeType::Null);
+
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    zoneNode["environment"] = invalidNode;
+    sceneIO.loadScene(handle);
+
+    EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+    EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+        scene.activeEnvironment));
+    EXPECT_FALSE(
+        scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
+            scene.activeEnvironment));
+  }
+}
+
+TEST_F(
+    SceneIOTest,
+    CreatesEmptyEnvironmentEntityOnLoadIfEnvironmentDoesNotPointToValidEntity) {
+  auto handle = createSceneAsset();
+  auto zoneNode = getSceneYaml(handle)["zones"][0];
+  zoneNode["environment"] = 100;
+
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+      scene.activeEnvironment));
   EXPECT_FALSE(
       scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
+          scene.activeEnvironment));
 }
 
-TEST_F(SceneIOTest,
-       CreatesEmptyEnvironmentEntityOnLoadIfEnvironmentFieldIsNotAMap) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"] = YAML::Node(YAML::NodeType::Null);
+TEST_F(
+    SceneIOTest,
+    CreatesEnvironmentEntityWithoutSkyboxComponentsOnLoadIfEnvironmentEntityHasNoSkybox) {
+  YAML::Node envEntity;
+  envEntity["id"] = 125;
+
+  auto handle = createSceneAsset({envEntity});
+  auto sceneNode = getSceneYaml(handle);
+
+  auto zoneNode = sceneNode["zones"][0];
+
+  zoneNode["environment"] = 125;
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+            125);
+  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+      scene.activeEnvironment));
+}
+
+TEST_F(
+    SceneIOTest,
+    CreatesEnvironmentEntityWithoutEnvironmentLightingComponentsOnLoadIfEnvironmentEntityHasNoEnvironmentLighting) {
+  YAML::Node envEntity;
+  envEntity["id"] = 125;
+
+  auto handle = createSceneAsset({envEntity});
+  auto sceneNode = getSceneYaml(handle);
+
+  auto zoneNode = sceneNode["zones"][0];
+
+  zoneNode["environment"] = 125;
+  sceneIO.loadScene(handle);
+
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+            125);
   EXPECT_FALSE(
       scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
-}
-
-TEST_F(SceneIOTest,
-       CreatesEnvironmentEntityWithoutSkyboxComponentsOnLoadIfNoSkyboxField) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"] = YAML::Node(YAML::NodeType::Map);
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithoutSkyboxComponentsOnLoadIfSkyboxFieldIsNotMap) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"] = YAML::Node(YAML::NodeType::Scalar);
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithoutSkyboxComponentsOnLoadIfSkyboxFieldIsNull) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"] = YAML::Null;
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-}
-
-TEST_F(SceneIOTest,
-       CreatesEnvironmentEntityWithNoSkyboxComponentsIfSkyboxTypeIsUnknown) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "something-else";
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-}
-
-TEST_F(SceneIOTest,
-       CreatesEnvironmentEntityWithSkyboxColorOnLoadIfSkyboxTypeIsColor) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "color";
-  zoneNode["environment"]["skybox"]["color"] =
-      glm::vec4{0.5f, 0.2f, 0.3f, 1.0f};
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .type,
-      liquid::EnvironmentSkyboxType::Color);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .texture,
-      liquid::EnvironmentAssetHandle::Null);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .color,
-      glm::vec4(0.5f, 0.2f, 0.3f, 1.0f));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithBlackColorOnLoadIfSkyboxTypeIsColorButColorValueIsNotSequence) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "color";
-  zoneNode["environment"]["skybox"]["color"] =
-      YAML::Node(YAML::NodeType::Scalar);
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .type,
-      liquid::EnvironmentSkyboxType::Color);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .texture,
-      liquid::EnvironmentAssetHandle::Null);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .color,
-      glm::vec4(0.0f));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithBlackColorOnLoadIfSkyboxTypeIsColorButColorValueIsNotVec4) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "color";
-  zoneNode["environment"]["skybox"]["color"][0] = 10.5f;
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .type,
-      liquid::EnvironmentSkyboxType::Color);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .texture,
-      liquid::EnvironmentAssetHandle::Null);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .color,
-      glm::vec4(0.0f));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithNoSkyboxTextureIfTypeIsTextureButEnvironmentAssetDoesNotExist) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "texture";
-  zoneNode["environment"]["skybox"]["texture"] = "non-existent-file.hdr";
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithSkyboxTextureIfTypeIsTextureAndEnvironmentAssetExists) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-  auto envHandle = assetRegistry.getEnvironments().addAsset(asset);
-
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["skybox"]["type"] = "texture";
-  zoneNode["environment"]["skybox"]["texture"] = "test-env";
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  ASSERT_TRUE(
-      scene.entityDatabase.has<liquid::EnvironmentSkybox>(scene.environment));
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .type,
-      liquid::EnvironmentSkyboxType::Texture);
-  EXPECT_EQ(
-      scene.entityDatabase.get<liquid::EnvironmentSkybox>(scene.environment)
-          .texture,
-      envHandle);
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithoutEnvironmentLightingComponentsOnLoadIfNoLightingFiled) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"] = YAML::Node(YAML::NodeType::Map);
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithoutEnvironmentLightingComponentsOnLoadIfLightingFieldIsNotMap) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["lighting"] = YAML::Node(YAML::NodeType::Scalar);
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithoutEnvironmentLightingComponentsOnLoadIfLightingFieldIsNull) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["lighting"] = YAML::Null;
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
-}
-
-TEST_F(
-    SceneIOTest,
-    CreatesEnvironmentEntityWithNoEnvironmentLightingComponentOnLoadIfLightingSourceIsUnknown) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["lighting"]["source"] = "something-else";
-  sceneIO.loadScene(handle);
-
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.environment));
+          scene.activeEnvironment));
 }
 
 TEST_F(
     SceneIOTest,
     CreatesEnvironmentEntityWithEnvironmentLightingSourceSkyboxIfLightingSourceIsSkybox) {
-  auto handle = createSceneAsset();
-  auto zoneNode = getSceneYaml(handle)["zones"][0];
-  zoneNode["environment"]["lighting"]["source"] = "skybox";
+  YAML::Node envEntity;
+  envEntity["id"] = 125;
+  envEntity["environmentLighting"]["source"] = "skybox";
+
+  auto handle = createSceneAsset({envEntity});
+  auto sceneNode = getSceneYaml(handle);
+
+  auto zoneNode = sceneNode["zones"][0];
+
+  zoneNode["environment"] = 125;
   sceneIO.loadScene(handle);
 
-  EXPECT_TRUE(scene.entityDatabase.exists(scene.environment));
+  EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
+  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+            125);
   EXPECT_TRUE(scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-      scene.environment));
+      scene.activeEnvironment));
 }

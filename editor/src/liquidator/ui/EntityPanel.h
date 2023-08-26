@@ -199,6 +199,26 @@ private:
                        ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render skybox component
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
+                    ActionExecutor &actionExecutor);
+
+  /**
+   * @brief Render environment lighting component
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderEnvironmentLighting(Scene &scene, AssetRegistry &assetRegistry,
+                                 ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render add component button
    *
    * @param scene Scene
@@ -242,6 +262,8 @@ private:
   std::unique_ptr<EntitySetScriptVariable> mSetScriptVariable;
   std::unique_ptr<EntitySetPointLight> mPointLightAction;
   std::unique_ptr<EntitySetPerspectiveLens> mPerspectiveLensAction;
+  std::unique_ptr<EntityDefaultUpdateComponent<EnvironmentSkybox>>
+      mEnvironmentSkyboxAction;
 };
 
 } // namespace liquid::editor

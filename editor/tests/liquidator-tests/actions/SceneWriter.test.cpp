@@ -175,7 +175,6 @@ TEST_F(SceneWriterTest, DeletingEntityDeletesItFromSceneFile) {
   auto e3 = scene.entityDatabase.create();
 
   {
-
     writer.saveEntities({e1, e2, e3});
 
     auto node = loadSceneFile();
@@ -253,6 +252,26 @@ TEST_F(SceneWriterTest, DeletingStartingCameraSetsStartingCameraToNull) {
   }
 }
 
+TEST_F(SceneWriterTest, DeletingEnvironmentSetsEnvironmentToNull) {
+  auto e1 = scene.entityDatabase.create();
+  scene.activeEnvironment = e1;
+
+  writer.saveEntities({e1});
+  writer.saveScene();
+
+  {
+    auto node = loadSceneFile();
+    EXPECT_EQ(node["zones"][0]["environment"].as<uint64_t>(0),
+              scene.entityDatabase.get<liquid::Id>(e1).id);
+  }
+
+  {
+    writer.deleteEntities({e1});
+    auto node = loadSceneFile();
+    EXPECT_TRUE(node["zones"][0]["environment"].IsNull());
+  }
+}
+
 TEST_F(SceneWriterTest,
        DoesNotSaveEntityAsInitialCameraIfItDoesNotHaveCameraComponent) {
   auto entity = scene.entityDatabase.create();
@@ -290,152 +309,22 @@ TEST_F(SceneWriterTest, SavesEntityAsStartingCameraIfItHasCameraComponent) {
   EXPECT_EQ(node["zones"][0]["startingCamera"].as<uint64_t>(0), 15);
 }
 
-TEST_F(SceneWriterTest,
-       SetsEnvironmentToNullOnSaveIfSceneEnvironmentEntityIsNull) {
-  scene.environment = liquid::Entity::Null;
+TEST_F(SceneWriterTest, DoesNotSaveEntityAsEnvironmentIfItDoesNotHaveId) {
+  scene.activeEnvironment = scene.entityDatabase.create();
   writer.saveScene();
 
   auto node = loadSceneFile();
-  EXPECT_TRUE(node["zones"][0]["environment"].IsNull());
+  EXPECT_FALSE(node["zones"][0]["environment"].IsNull());
 }
 
-TEST_F(SceneWriterTest,
-       SetsEnvironmentToNullOnSaveIfNoSkyboxOrEnvironmentLightingComponents) {
-  scene.environment = scene.entityDatabase.create();
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  EXPECT_TRUE(node["zones"][0]["environment"].IsNull());
-}
-
-TEST_F(SceneWriterTest, SetsSkyboxToNullOnSaveIfNoSkyboxComponent) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-
-  auto handle = assetRegistry.getEnvironments().addAsset(asset);
-
-  scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      scene.environment, {});
+TEST_F(SceneWriterTest, SetsEnvironmentToEntityIdIfEnvironmentEntityHasId) {
+  scene.activeEnvironment = scene.entityDatabase.create();
+  scene.entityDatabase.set<liquid::Id>(scene.activeEnvironment, {10});
 
   writer.saveScene();
 
   auto node = loadSceneFile();
   auto envNode = node["zones"][0]["environment"];
 
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["skybox"].IsNull());
-}
-
-TEST_F(SceneWriterTest,
-       SetsSkyboxToNullOnSaveIfSkyboxTypeIsTextureButTextureAssetDoesNotExist) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-
-  auto handle = assetRegistry.getEnvironments().addAsset(asset);
-
-  assetRegistry.getEnvironments().deleteAsset(handle);
-
-  scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
-      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
-  scene.entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      scene.environment, {});
-
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  auto envNode = node["zones"][0]["environment"];
-
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["skybox"].IsNull());
-}
-
-TEST_F(
-    SceneWriterTest,
-    SetsSkyboxTypeToTextureOnSaveIfSceneEnvironmentSkyboxTypeIsTextureAndAssetExists) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-
-  auto handle = assetRegistry.getEnvironments().addAsset(asset);
-
-  scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
-      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
-
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  auto envNode = node["zones"][0]["environment"];
-
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["skybox"].IsMap());
-  EXPECT_TRUE(envNode["skybox"]["type"].IsScalar());
-  EXPECT_EQ(envNode["skybox"]["type"].as<liquid::String>(), "texture");
-  EXPECT_EQ(envNode["skybox"]["texture"].as<liquid::String>(), "test-env");
-  EXPECT_FALSE(envNode["skybox"]["color"]);
-}
-
-TEST_F(SceneWriterTest,
-       SetsSkyboxTypeToColorOnSaveIfSceneEnvironmentSkyboxTypeIsColor) {
-  scene.environment = scene.entityDatabase.create();
-
-  liquid::EnvironmentSkybox component{};
-  component.type = liquid::EnvironmentSkyboxType::Color;
-  component.color = glm::vec4(0.5f, 0.2f, 0.5f, 1.0f);
-  scene.entityDatabase.set(scene.environment, component);
-
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  auto envNode = node["zones"][0]["environment"];
-
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["skybox"].IsMap());
-  EXPECT_TRUE(envNode["skybox"]["type"].IsScalar());
-  EXPECT_EQ(envNode["skybox"]["type"].as<liquid::String>(), "color");
-  EXPECT_FALSE(envNode["skybox"]["texture"]);
-  EXPECT_EQ(envNode["skybox"]["color"].as<glm::vec4>(), component.color);
-}
-
-TEST_F(
-    SceneWriterTest,
-    SetsEnvironmentLightingToNullOnSaveIfNoEnvironmentLightingSourceComponent) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-  auto handle = assetRegistry.getEnvironments().addAsset(asset);
-
-  scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentSkybox>(
-      scene.environment, {liquid::EnvironmentSkyboxType::Texture, handle});
-
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  auto envNode = node["zones"][0]["environment"];
-
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["lighting"].IsNull());
-}
-
-TEST_F(
-    SceneWriterTest,
-    SetsEnvironmentLightingSkyboxSourceComponentOnSaveIfLightingSourceIsSkybox) {
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
-  asset.uuid = "test-env";
-  auto handle = assetRegistry.getEnvironments().addAsset(asset);
-
-  scene.environment = scene.entityDatabase.create();
-  scene.entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      scene.environment, {});
-
-  writer.saveScene();
-
-  auto node = loadSceneFile();
-  auto envNode = node["zones"][0]["environment"];
-
-  EXPECT_TRUE(envNode.IsMap());
-  EXPECT_TRUE(envNode["lighting"].IsMap());
-  EXPECT_TRUE(envNode["lighting"]["source"].IsScalar());
-  EXPECT_EQ(envNode["lighting"]["source"].as<liquid::String>(), "skybox");
+  EXPECT_EQ(envNode.as<uint64_t>(0), 10);
 }

@@ -129,6 +129,10 @@ void SceneWriter::removeEntityFromSceneYaml(
     mRoot["zones"][0]["startingCamera"] = YAML::Node(YAML::NodeType::Null);
   }
 
+  if (mRoot["zones"][0]["environment"].as<uint64_t>(0) == id) {
+    mRoot["zones"][0]["environment"] = YAML::Node(YAML::NodeType::Null);
+  }
+
   mEntityIdCache.erase(id);
   deleteCache.insert_or_assign(entity, true);
 }
@@ -144,44 +148,12 @@ void SceneWriter::updateStartingCamera() {
 }
 
 void SceneWriter::updateEnvironment() {
-  auto zone = mRoot["zones"][0];
-  zone["environment"] = YAML::Null;
-
-  if (mScene.entityDatabase.exists(mScene.environment)) {
-    YAML::Node skyboxNode(YAML::NodeType::Null);
-    YAML::Node lightingNode(YAML::NodeType::Null);
-
-    if (mScene.entityDatabase.has<EnvironmentSkybox>(mScene.environment)) {
-      auto &skybox =
-          mScene.entityDatabase.get<EnvironmentSkybox>(mScene.environment);
-
-      if (skybox.type == EnvironmentSkyboxType::Color) {
-        skyboxNode = YAML::Node(YAML::NodeType::Map);
-        skyboxNode["type"] = "color";
-        skyboxNode["color"] = skybox.color;
-      } else if (skybox.type == EnvironmentSkyboxType::Texture &&
-                 mAssetRegistry.getEnvironments().hasAsset(skybox.texture)) {
-        auto uuid =
-            mAssetRegistry.getEnvironments().getAsset(skybox.texture).uuid;
-
-        skyboxNode = YAML::Node(YAML::NodeType::Map);
-        skyboxNode["type"] = "texture";
-        skyboxNode["texture"] = uuid;
-      }
-    }
-
-    if (mScene.entityDatabase.has<EnvironmentLightingSkyboxSource>(
-            mScene.environment)) {
-      lightingNode = YAML::Node(YAML::NodeType::Map);
-      lightingNode["source"] = "skybox";
-    }
-
-    if (skyboxNode.IsMap() || lightingNode.IsMap()) {
-      zone["environment"] = YAML::Node(YAML::NodeType::Map);
-      zone["environment"]["skybox"] = skyboxNode;
-      zone["environment"]["lighting"] = lightingNode;
-    }
+  if (!mScene.entityDatabase.has<Id>(mScene.activeEnvironment)) {
+    return;
   }
+
+  mRoot["zones"][0]["environment"] =
+      mScene.entityDatabase.get<Id>(mScene.activeEnvironment).id;
 }
 
 void SceneWriter::save() {

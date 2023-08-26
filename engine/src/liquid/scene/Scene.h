@@ -31,7 +31,15 @@ struct Scene {
   /**
    * Environment
    */
-  Entity environment = Entity::Null;
+  Entity activeEnvironment = Entity::Null;
+
+  /**
+   * Dummy environment
+   *
+   * Used as a fallback if there are no
+   * environments in the scene
+   */
+  Entity dummyEnvironment = Entity::Null;
 };
 
 } // namespace liquid

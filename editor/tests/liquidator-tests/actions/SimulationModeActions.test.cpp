@@ -22,12 +22,13 @@ TEST_F(StartSimulationModeActionTest,
   state.scene.entityDatabase.set<liquid::Camera>(activeCamera, {});
 
   state.mode = WM::Edit;
-  state.scene.environment = liquid::Entity{12};
+  state.scene.activeEnvironment = liquid::Entity{12};
   state.scene.activeCamera = activeCamera;
   state.scene.dummyCamera = liquid::Entity{15};
   auto entity = state.scene.entityDatabase.create();
 
-  EXPECT_EQ(state.simulationScene.environment, liquid::Entity::Null);
+  EXPECT_EQ(state.simulationScene.activeEnvironment, liquid::Entity::Null);
+  EXPECT_EQ(state.simulationScene.dummyEnvironment, liquid::Entity::Null);
   EXPECT_EQ(state.simulationScene.activeCamera, liquid::Entity::Null);
   EXPECT_EQ(state.simulationScene.dummyCamera, liquid::Entity::Null);
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
@@ -35,7 +36,10 @@ TEST_F(StartSimulationModeActionTest,
   liquid::editor::StartSimulationMode action;
   action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
+  EXPECT_EQ(state.simulationScene.activeEnvironment,
+            state.scene.activeEnvironment);
+  EXPECT_EQ(state.simulationScene.dummyEnvironment,
+            state.scene.dummyEnvironment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.activeCamera);
   EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
   EXPECT_EQ(state.activeCamera, state.scene.activeCamera);
@@ -48,12 +52,12 @@ TEST_F(StartSimulationModeActionTest,
   state.scene.entityDatabase.set<liquid::Camera>(dummyCamera, {});
 
   state.mode = WM::Edit;
-  state.scene.environment = liquid::Entity{12};
+  state.scene.activeEnvironment = liquid::Entity{12};
   state.scene.activeCamera = liquid::Entity{14};
   state.scene.dummyCamera = dummyCamera;
   auto entity = state.scene.entityDatabase.create();
 
-  EXPECT_EQ(state.simulationScene.environment, liquid::Entity::Null);
+  EXPECT_EQ(state.simulationScene.activeEnvironment, liquid::Entity::Null);
   EXPECT_EQ(state.simulationScene.activeCamera, liquid::Entity::Null);
   EXPECT_EQ(state.simulationScene.dummyCamera, liquid::Entity::Null);
   EXPECT_FALSE(state.simulationScene.entityDatabase.exists(entity));
@@ -61,7 +65,8 @@ TEST_F(StartSimulationModeActionTest,
   liquid::editor::StartSimulationMode action;
   action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(state.simulationScene.environment, state.scene.environment);
+  EXPECT_EQ(state.simulationScene.activeEnvironment,
+            state.scene.activeEnvironment);
   EXPECT_EQ(state.simulationScene.activeCamera, state.scene.dummyCamera);
   EXPECT_EQ(state.simulationScene.dummyCamera, state.scene.dummyCamera);
   EXPECT_EQ(state.activeCamera, state.scene.dummyCamera);

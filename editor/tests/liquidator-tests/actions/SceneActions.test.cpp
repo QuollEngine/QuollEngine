@@ -61,423 +61,97 @@ TEST_P(SceneSetStartingCameraActionTest,
 
 InitActionsTestSuite(SceneActionsTest, SceneSetStartingCameraActionTest);
 
-using SceneRemoveSkyboxActionTest = ActionTestBase;
+using SceneSetStartingEnvironmentActionTest = ActionTestBase;
 
-TEST_P(SceneRemoveSkyboxActionTest,
-       ExecutorRemovesSkyboxComponentFromEnvironmentEntity) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentSkybox>(
-      activeScene().environment, {});
+TEST_P(SceneSetStartingEnvironmentActionTest, ExecutorSetsActiveEnvironment) {
+  auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::SceneRemoveSkybox action;
+  liquid::editor::SceneSetStartingEnvironment action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
+  EXPECT_EQ(activeScene().activeEnvironment, entity);
   EXPECT_TRUE(res.saveScene);
   EXPECT_TRUE(res.addToHistory);
 }
 
-TEST_P(SceneRemoveSkyboxActionTest,
-       UndoAddsPreviousSkyboxComponentForEnvironmentEntity) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentSkybox>(
-      activeScene().environment, {});
+TEST_P(SceneSetStartingEnvironmentActionTest,
+       UndoSetsPreviousActiveEnvironment) {
+  auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::SceneRemoveSkybox action;
+  auto environment = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = environment;
+
+  liquid::editor::SceneSetStartingEnvironment action(entity);
   action.onExecute(state, assetRegistry);
 
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
+  EXPECT_EQ(activeScene().activeEnvironment, environment);
   EXPECT_TRUE(res.saveScene);
 }
 
-TEST_P(SceneRemoveSkyboxActionTest,
-       PredicateReturnsFalseIfEntityDoesNotHaveSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
+TEST_P(SceneSetStartingEnvironmentActionTest,
+       PredicateReturnsFalseIfProvidedEntityEqualsActiveEnvironment) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = entity;
 
-  liquid::editor::SceneRemoveSkybox action;
+  liquid::editor::SceneSetStartingEnvironment action(entity);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
-TEST_P(SceneRemoveSkyboxActionTest, PredicateReturnsTrueIfEntityHasSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentSkybox>(
-      activeScene().environment, {});
+TEST_P(
+    SceneSetStartingEnvironmentActionTest,
+    PredicateReturnsTrueIfProvidedEnvironmentEntityIsDifferentThanActiveEnvironment) {
+  auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::SceneRemoveSkybox action;
+  liquid::editor::SceneSetStartingEnvironment action(entity);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
-InitActionsTestSuite(SceneActionsTest, SceneRemoveSkyboxActionTest);
+InitActionsTestSuite(SceneActionsTest, SceneSetStartingEnvironmentActionTest);
 
-using SceneChangeSkyboxTypeActionTest = ActionTestBase;
+using SceneRemoveStartingEnvironmentActionTest = ActionTestBase;
 
-TEST_P(SceneChangeSkyboxTypeActionTest, ExecutorSetsDefaultSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentSkybox>(
-      activeScene().environment, {});
+TEST_P(SceneRemoveStartingEnvironmentActionTest,
+       ExecutorSetsActiveEnvironmentToDummyEnvironment) {
+  activeScene().activeEnvironment = activeScene().entityDatabase.create();
 
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Texture);
+  liquid::editor::SceneRemoveStartingEnvironment action;
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Texture);
+  EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
   EXPECT_TRUE(res.saveScene);
   EXPECT_TRUE(res.addToHistory);
 }
 
-TEST_P(SceneChangeSkyboxTypeActionTest,
-       UndoSetsPreviousSkyboxForEnvironmentIfEnvironmentHadSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentSkybox>(
-      activeScene().environment, {liquid::EnvironmentSkyboxType::Color});
+TEST_P(SceneRemoveStartingEnvironmentActionTest,
+       UndoSetsPreviousEnvironmentAsActive) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = entity;
 
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Texture);
+  liquid::editor::SceneRemoveStartingEnvironment action;
   action.onExecute(state, assetRegistry);
 
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Color);
+  EXPECT_EQ(activeScene().activeEnvironment, entity);
   EXPECT_TRUE(res.saveScene);
 }
 
-TEST_P(SceneChangeSkyboxTypeActionTest,
-       UndoRemovesSkyboxFromEnvironmentIfEnvironmentDidNotHaveSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Texture);
-  action.onExecute(state, assetRegistry);
-
-  auto res = action.onUndo(state, assetRegistry);
-
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_TRUE(res.saveScene);
-}
-
-TEST_P(SceneChangeSkyboxTypeActionTest,
-       PredicateReturnsFalseIfTypeEqualsEnvironmentSkyboxType) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set(
-      activeScene().environment,
-      liquid::EnvironmentSkybox{liquid::EnvironmentSkyboxType::Texture});
-
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Texture);
+TEST_P(SceneRemoveStartingEnvironmentActionTest,
+       PredicateReturnsFalseIfEnvironmentEntityIsDummy) {
+  liquid::editor::SceneRemoveStartingEnvironment action;
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
-TEST_P(SceneChangeSkyboxTypeActionTest,
-       PredicateReturnsTrueIfEntityDoesNotHaveSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
+TEST_P(SceneRemoveStartingEnvironmentActionTest,
+       PredicateReturnsTrueIfActiveEnvironmentIsDifferentThanDummyEnvironment) {
+  auto entity = activeScene().entityDatabase.create();
+  activeScene().activeEnvironment = entity;
 
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Color);
+  liquid::editor::SceneRemoveStartingEnvironment action;
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
-TEST_P(SceneChangeSkyboxTypeActionTest,
-       PredicateReturnsTrueIfTypeDoesNotEqualEnvironmentSkyboxType) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set(
-      activeScene().environment,
-      liquid::EnvironmentSkybox{liquid::EnvironmentSkyboxType::Texture});
-
-  liquid::editor::SceneChangeSkyboxType action(
-      liquid::EnvironmentSkyboxType::Color);
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
-}
-
-InitActionsTestSuite(SceneActionsTest, SceneChangeSkyboxTypeActionTest);
-
-using SceneSetSkyboxColorActionTest = ActionTestBase;
-
-TEST_P(SceneSetSkyboxColorActionTest, ExecutorSetsSkyboxColorForEnvironment) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set(activeScene().environment,
-                                   liquid::EnvironmentSkybox{});
-
-  liquid::editor::SceneSetSkyboxColor action(glm::vec4{0.2f});
-  auto res = action.onExecute(state, assetRegistry);
-
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Color);
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .color,
-            glm::vec4{0.2f});
-  EXPECT_TRUE(res.saveScene);
-  EXPECT_TRUE(res.addToHistory);
-}
-
-TEST_P(SceneSetSkyboxColorActionTest,
-       UndoSetsPreviousSkyboxColorForEnvironment) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Color};
-  skybox.color = glm::vec4(0.6f);
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  liquid::editor::SceneSetSkyboxColor action(glm::vec4{0.2f});
-  action.onExecute(state, assetRegistry);
-
-  auto res = action.onUndo(state, assetRegistry);
-
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Color);
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .color,
-            glm::vec4{0.6f});
-  EXPECT_TRUE(res.saveScene);
-}
-
-TEST_P(SceneSetSkyboxColorActionTest,
-       PredicateReturnsFalseIfEnvironmentDoesNotHaveSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  EXPECT_FALSE(
-      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
-}
-
-TEST_P(SceneSetSkyboxColorActionTest,
-       PredicateReturnsFalseIfEnvironmentSkyboxTypeIsNotColor) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Texture};
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  EXPECT_FALSE(
-      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
-}
-
-TEST_P(SceneSetSkyboxColorActionTest,
-       PredicateReturnsTrueIfEnvironmentSkyboxTypeIsColor) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Color};
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  EXPECT_TRUE(
-      liquid::editor::SceneSetSkyboxColor({}).predicate(state, assetRegistry));
-}
-
-InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxColorActionTest);
-
-using SceneSetSkyboxTextureActionTest = ActionTestBase;
-
-TEST_P(SceneSetSkyboxTextureActionTest,
-       ExecutorSetsSkyboxTextureForEnvironmentEntity) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set(activeScene().environment,
-                                   liquid::EnvironmentSkybox{});
-
-  liquid::editor::SceneSetSkyboxTexture action(
-      liquid::EnvironmentAssetHandle{20});
-  auto res = action.onExecute(state, assetRegistry);
-
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Texture);
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .texture,
-            liquid::EnvironmentAssetHandle{20});
-  EXPECT_TRUE(res.saveScene);
-  EXPECT_TRUE(res.addToHistory);
-}
-
-TEST_P(SceneSetSkyboxTextureActionTest,
-       UndoSetsPreviousSkyboxTextureForEnvironment) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Texture};
-  skybox.texture = liquid::EnvironmentAssetHandle{15};
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  liquid::editor::SceneSetSkyboxTexture action(
-      liquid::EnvironmentAssetHandle{20});
-  action.onExecute(state, assetRegistry);
-
-  auto res = action.onUndo(state, assetRegistry);
-
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::EnvironmentSkybox>(
-      activeScene().environment));
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .type,
-            liquid::EnvironmentSkyboxType::Texture);
-  EXPECT_EQ(activeScene()
-                .entityDatabase
-                .get<liquid::EnvironmentSkybox>(activeScene().environment)
-                .texture,
-            liquid::EnvironmentAssetHandle{15});
-  EXPECT_TRUE(res.saveScene);
-}
-
-TEST_P(SceneSetSkyboxTextureActionTest,
-       PredicateReturnsFalseIfEnvironmentDoesNotHaveSkybox) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
-      state, assetRegistry));
-}
-
-TEST_P(SceneSetSkyboxTextureActionTest,
-       PredicateReturnsFalseIfEnvironmentSkyboxTypeIsNotTexture) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Color};
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  EXPECT_FALSE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
-      state, assetRegistry));
-}
-
-TEST_P(SceneSetSkyboxTextureActionTest,
-       PredicateReturnsTrueIfEnvironmentSkyboxTypeIsTexture) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  liquid::EnvironmentSkybox skybox{liquid::EnvironmentSkyboxType::Texture};
-  activeScene().entityDatabase.set(activeScene().environment, skybox);
-
-  EXPECT_TRUE(liquid::editor::SceneSetSkyboxTexture({}).predicate(
-      state, assetRegistry));
-}
-
-InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxTextureActionTest);
-
-using SceneRemoveLightingActionTest = ActionTestBase;
-
-TEST_P(SceneRemoveLightingActionTest,
-       ExecutorRemovesEnvironmentLightingComponent) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      activeScene().environment, {});
-
-  liquid::editor::SceneRemoveLighting action;
-  auto res = action.onExecute(state, assetRegistry);
-
-  EXPECT_FALSE(
-      activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          activeScene().environment));
-  EXPECT_TRUE(res.saveScene);
-  EXPECT_TRUE(res.addToHistory);
-}
-
-TEST_P(SceneRemoveLightingActionTest,
-       UndoAddsPreviousEnvironmentLightingForEnvironment) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      activeScene().environment, {});
-
-  liquid::editor::SceneRemoveLighting action;
-  action.onExecute(state, assetRegistry);
-
-  auto res = action.onUndo(state, assetRegistry);
-
-  EXPECT_TRUE(
-      activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          activeScene().environment));
-  EXPECT_TRUE(res.saveScene);
-}
-
-TEST_P(SceneRemoveLightingActionTest,
-       PredicateReturnsTrueIfEnvironmentHasLightingSource) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      activeScene().environment, {});
-
-  liquid::editor::SceneRemoveLighting action;
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
-}
-
-TEST_P(SceneRemoveLightingActionTest,
-       PredicateReturnsFalseIfEnvironmentDoesNotHaveLightingSource) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::editor::SceneRemoveLighting action;
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
-}
-
-InitActionsTestSuite(SceneActionsTest, SceneRemoveLightingActionTest);
-
-using SceneSetSkyboxLightingSourceActionTest = ActionTestBase;
-
-TEST_P(SceneSetSkyboxLightingSourceActionTest,
-       ExecutorSetsSkyboxLightingSourceComponentForEnvironmentEntity) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::editor::SceneSetSkyboxLightingSource action;
-  auto res = action.onExecute(state, assetRegistry);
-
-  EXPECT_TRUE(
-      activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          activeScene().environment));
-  EXPECT_TRUE(res.saveScene);
-  EXPECT_TRUE(res.addToHistory);
-}
-
-TEST_P(SceneSetSkyboxLightingSourceActionTest,
-       UndoRemovesSkyboxLightingSourceComponentFromEnvironment) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::editor::SceneSetSkyboxLightingSource action;
-  action.onExecute(state, assetRegistry);
-
-  auto res = action.onUndo(state, assetRegistry);
-
-  EXPECT_FALSE(
-      activeScene().entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          activeScene().environment));
-  EXPECT_TRUE(res.saveScene);
-}
-
-TEST_P(SceneSetSkyboxLightingSourceActionTest,
-       PredicateReturnsTrueIfEnvironmentDoesNotHaveSkyboxLightingSource) {
-  activeScene().environment = activeScene().entityDatabase.create();
-
-  liquid::editor::SceneSetSkyboxLightingSource action;
-  EXPECT_TRUE(action.predicate(state, assetRegistry));
-}
-
-TEST_P(SceneSetSkyboxLightingSourceActionTest,
-       PredicateReturnsFalseIfEnvironmentDoesHasSkyboxLightingSource) {
-  activeScene().environment = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::EnvironmentLightingSkyboxSource>(
-      activeScene().environment, {});
-
-  liquid::editor::SceneSetSkyboxLightingSource action;
-  EXPECT_FALSE(action.predicate(state, assetRegistry));
-}
-
-InitActionsTestSuite(SceneActionsTest, SceneSetSkyboxLightingSourceActionTest);
+InitActionsTestSuite(SceneActionsTest,
+                     SceneRemoveStartingEnvironmentActionTest);

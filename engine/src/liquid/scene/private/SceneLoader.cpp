@@ -393,6 +393,32 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
+  if (node["skybox"] && node["skybox"].IsMap()) {
+    EnvironmentSkybox skybox{};
+    auto type = node["skybox"]["type"].as<String>("");
+    if (type == "color") {
+      skybox.type = EnvironmentSkyboxType::Color;
+      skybox.color = node["skybox"]["color"].as<glm::vec4>(
+          glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+      mEntityDatabase.set(entity, skybox);
+    } else if (type == "texture") {
+      auto uuid = node["skybox"]["texture"].as<String>("");
+      auto handle = mAssetRegistry.getEnvironments().findHandleByUuid(uuid);
+      if (handle != EnvironmentAssetHandle::Null) {
+        skybox.type = EnvironmentSkyboxType::Texture;
+        skybox.texture = handle;
+        mEntityDatabase.set(entity, skybox);
+      }
+    }
+  }
+
+  if (node["environmentLighting"] && node["environmentLighting"].IsMap()) {
+    auto source = node["environmentLighting"]["source"].as<String>("");
+    if (source == "skybox") {
+      mEntityDatabase.set<EnvironmentLightingSkyboxSource>(entity, {});
+    }
+  }
+
   return Result<bool>::Ok(true);
 }
 
@@ -416,6 +442,20 @@ Result<Entity> SceneLoader::loadStartingCamera(const YAML::Node &node,
   }
 
   return Result<Entity>::Ok(entity);
+}
+
+Result<Entity> SceneLoader::loadEnvironment(const YAML::Node &node,
+                                            EntityIdCache &entityIdCache) {
+  if (node && node.IsScalar()) {
+    auto entityId = node.as<uint64_t>(0);
+
+    if (entityId > 0 && entityIdCache.contains(entityId)) {
+      auto entity = entityIdCache.at(entityId);
+      return Result<Entity>::Ok(entity);
+    }
+  }
+
+  return Result<Entity>::Error("Environment entity not found");
 }
 
 } // namespace liquid::detail

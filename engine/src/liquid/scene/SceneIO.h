@@ -39,13 +39,6 @@ public:
 
 private:
   /**
-   * @brief Load environment
-   *
-   * @param zone Zone
-   */
-  void loadEnvironment(const YAML::Node &zone);
-
-  /**
    * @brief Create entity from YAML node
    *
    * @param node YAML node

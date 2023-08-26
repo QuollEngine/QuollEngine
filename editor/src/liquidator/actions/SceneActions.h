@@ -52,55 +52,16 @@ private:
 };
 
 /**
- * @brief Remove skybox from scene action
+ * @brief Set starting environment for scene action
  */
-class SceneRemoveSkybox : public Action {
-public:
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
-
-private:
-  EnvironmentSkybox mOldSkybox{};
-};
-
-/**
- * @brief Change skybox type scene action
- */
-class SceneChangeSkyboxType : public Action {
+class SceneSetStartingEnvironment : public Action {
 public:
   /**
    * @brief Create action
    *
-   * @param type Skybox type
+   * @param entity Entity
    */
-  SceneChangeSkyboxType(EnvironmentSkyboxType type);
+  SceneSetStartingEnvironment(Entity entity);
 
   /**
    * @brief Action executor
@@ -133,108 +94,14 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
-  EnvironmentSkyboxType mType;
-  std::optional<EnvironmentSkybox> mOldSkybox;
+  Entity mEntity;
+  Entity mPreviousEnvironment = Entity::Null;
 };
 
 /**
- * @brief Set skybox color action
+ * @brief Remove starting environment from scene action
  */
-class SceneSetSkyboxColor : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param color Color
-   */
-  SceneSetSkyboxColor(glm::vec4 color);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
-
-private:
-  EnvironmentSkybox mOldSkybox;
-  glm::vec4 mColor;
-};
-
-/**
- * @brief Set skybox texture action
- */
-class SceneSetSkyboxTexture : public Action {
-public:
-  /**
-   * @brief Create action
-   *
-   * @param texture Skybox texture
-   */
-  SceneSetSkyboxTexture(liquid::EnvironmentAssetHandle texture);
-
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
-
-private:
-  liquid::EnvironmentAssetHandle mTexture;
-  EnvironmentSkybox mOldSkybox;
-};
-
-/**
- * @brief Remove environment lighting from scene action
- */
-class SceneRemoveLighting : public Action {
+class SceneRemoveStartingEnvironment : public Action {
 public:
   /**
    * @brief Action executor
@@ -267,43 +134,7 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 
 private:
-  EnvironmentLightingSkyboxSource mOldLightingSource;
-};
-
-/**
- * @brief Set skybox environment lighting source for scene actio
- */
-class SceneSetSkyboxLightingSource : public Action {
-public:
-  /**
-   * @brief Action executor
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onExecute(WorkspaceState &state,
-                                 AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action undo
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @return Executor result
-   */
-  ActionExecutorResult onUndo(WorkspaceState &state,
-                              AssetRegistry &assetRegistry) override;
-
-  /**
-   * @brief Action predicate
-   *
-   * @param state Workspace state
-   * @param assetRegistry Asset registry
-   * @retval true Predicate is true
-   * @retval false Predicate is false
-   */
-  bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
+  Entity mPreviousEnvironment = Entity::Null;
 };
 
 } // namespace liquid::editor
