@@ -11,6 +11,7 @@ class VulkanRenderPass;
 class VulkanFramebuffer;
 class VulkanPipeline;
 class VulkanShader;
+class VulkanSampler;
 
 /**
  * @brief Vulkan resource registry
@@ -48,6 +49,7 @@ class VulkanResourceRegistry {
   using ShaderMap = ResourceMap<ShaderHandle, VulkanShader>;
   using BufferMap = ResourceMap<BufferHandle, VulkanBuffer>;
   using TextureMap = ResourceMap<TextureHandle, VulkanTexture>;
+  using SamplerMap = ResourceMap<SamplerHandle, VulkanSampler>;
   using RenderPassMap = ResourceMap<RenderPassHandle, VulkanRenderPass>;
   using FramebufferMap = ResourceMap<FramebufferHandle, VulkanFramebuffer>;
   using PipelineMap = ResourceMap<PipelineHandle, VulkanPipeline>;
@@ -130,6 +132,29 @@ public:
    * @return List of textures
    */
   inline const TextureMap::Map &getTextures() const { return mTextures.map; }
+
+  /**
+   * @brief Set sampler
+   *
+   * @param sampler Vulkan sampler
+   * @param handle Sampler handle
+   */
+  void setSampler(std::unique_ptr<VulkanSampler> &&sampler,
+                  SamplerHandle handle);
+
+  /**
+   * @brief Delete sampler
+   *
+   * @param handle Sampler handle
+   */
+  void deleteSampler(SamplerHandle handle);
+
+  /**
+   * @brief Get samplers
+   *
+   * @return List of samplers
+   */
+  inline const SamplerMap::Map &getSamplers() const { return mSamplers.map; }
 
   /**
    * @brief Set render pass
@@ -218,6 +243,7 @@ public:
 private:
   BufferMap mBuffers;
   TextureMap mTextures;
+  SamplerMap mSamplers;
   ShaderMap mShaders;
   RenderPassMap mRenderPasses;
   FramebufferMap mFramebuffers;

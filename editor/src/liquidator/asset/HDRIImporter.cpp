@@ -28,17 +28,26 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
     binding0.name = "uInputTexture";
     binding0.shaderStage = rhi::ShaderStage::Compute;
     binding0.descriptorCount = 1;
-    binding0.descriptorType = rhi::DescriptorType::CombinedImageSampler;
+    binding0.descriptorType = rhi::DescriptorType::SampledImage;
 
     rhi::DescriptorLayoutBindingDescription binding1{};
     binding1.type = rhi::DescriptorLayoutBindingType::Static;
     binding1.binding = 1;
-    binding1.name = "uOutputTexture";
+    binding1.name = "uInputSampler";
     binding1.shaderStage = rhi::ShaderStage::Compute;
     binding1.descriptorCount = 1;
-    binding1.descriptorType = rhi::DescriptorType::StorageImage;
+    binding1.descriptorType = rhi::DescriptorType::Sampler;
 
-    auto layout = device->createDescriptorLayout({{binding0, binding1}});
+    rhi::DescriptorLayoutBindingDescription binding2{};
+    binding2.type = rhi::DescriptorLayoutBindingType::Static;
+    binding2.binding = 2;
+    binding2.name = "uOutputTexture";
+    binding2.shaderStage = rhi::ShaderStage::Compute;
+    binding2.descriptorCount = 1;
+    binding2.descriptorType = rhi::DescriptorType::StorageImage;
+
+    auto layout = device->createDescriptorLayout(
+        {{binding0, binding1, binding2}, "HDRI cubemap generator"});
     mDescriptorGenerateCubemap = device->createDescriptor(layout);
   }
 
@@ -48,7 +57,8 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
         {shadersPath / "equirectangular-to-cubemap.comp.spv"});
 
     mPipelineGenerateCubemap =
-        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
+            shader, "HDRI equirectangular to cubemap"});
 
     mRenderStorage.getDevice()->createPipeline(
         mRenderStorage.getComputePipelineDescription(mPipelineGenerateCubemap),
@@ -61,7 +71,8 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
         {shadersPath / "generate-irradiance-map.comp.spv"});
 
     mPipelineGenerateIrradianceMap =
-        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
+            shader, "HDRI generate irradiance map"});
 
     mRenderStorage.getDevice()->createPipeline(
         mRenderStorage.getComputePipelineDescription(
@@ -74,8 +85,8 @@ HDRIImporter::HDRIImporter(AssetCache &assetCache, RenderStorage &renderStorage)
         "hrdi.generate-specular-map.compute",
         {shadersPath / "generate-specular-map.comp.spv"});
 
-    mPipelineGenerateSpecularMap =
-        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{shader});
+    mPipelineGenerateSpecularMap = mRenderStorage.addPipeline(
+        rhi::ComputePipelineDescription{shader, "HDRI generate specular map"});
 
     mRenderStorage.getDevice()->createPipeline(
         mRenderStorage.getComputePipelineDescription(
@@ -264,10 +275,14 @@ HDRIImporter::convertEquirectangularToCubemap(float *data, uint32_t width,
   {
     std::array<rhi::TextureHandle, 1> hdriTextureData{hdriTexture};
     mDescriptorGenerateCubemap.write(0, hdriTextureData,
-                                     rhi::DescriptorType::CombinedImageSampler);
+                                     rhi::DescriptorType::SampledImage);
+
+    std::array<rhi::SamplerHandle, 1> samplerData{
+        mRenderStorage.getDefaultSampler()};
+    mDescriptorGenerateCubemap.write(1, samplerData);
 
     std::array<rhi::TextureHandle, 1> unfilteredCubemapData{unfilteredCubemap};
-    mDescriptorGenerateCubemap.write(1, unfilteredCubemapData,
+    mDescriptorGenerateCubemap.write(2, unfilteredCubemapData,
                                      rhi::DescriptorType::StorageImage);
 
     auto commandList = device->requestImmediateCommandList();
@@ -316,10 +331,14 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
       unfilteredCubemap.texture};
   mDescriptorGenerateCubemap.write(0, unfilteredCubemapData,
-                                   rhi::DescriptorType::CombinedImageSampler);
+                                   rhi::DescriptorType::SampledImage);
+
+  std::array<rhi::SamplerHandle, 1> samplerData{
+      mRenderStorage.getDefaultSampler()};
+  mDescriptorGenerateCubemap.write(1, samplerData);
 
   std::array<rhi::TextureHandle, 1> irradianceCubemapData{irradianceCubemap};
-  mDescriptorGenerateCubemap.write(1, irradianceCubemapData,
+  mDescriptorGenerateCubemap.write(2, irradianceCubemapData,
                                    rhi::DescriptorType::StorageImage);
 
   auto commandList = device->requestImmediateCommandList();
@@ -403,13 +422,17 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   std::array<rhi::TextureHandle, 1> unfilteredCubemapData{
       unfilteredCubemap.texture};
   mDescriptorGenerateCubemap.write(0, unfilteredCubemapData,
-                                   rhi::DescriptorType::CombinedImageSampler);
+                                   rhi::DescriptorType::SampledImage);
+
+  std::array<rhi::SamplerHandle, 1> samplerData{
+      mRenderStorage.getDefaultSampler()};
+  mDescriptorGenerateCubemap.write(1, samplerData);
 
   for (size_t mipLevel = 0; mipLevel < unfilteredCubemap.levels.size();
        ++mipLevel) {
     std::array<rhi::TextureHandle, 1> textureViewData{
         textureViews.at(mipLevel)};
-    mDescriptorGenerateCubemap.write(1, textureViewData,
+    mDescriptorGenerateCubemap.write(2, textureViewData,
                                      rhi::DescriptorType::StorageImage);
 
     auto commandList = device->requestImmediateCommandList();

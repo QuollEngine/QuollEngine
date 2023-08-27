@@ -4,13 +4,17 @@
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(push_constant) uniform DrawParameters { uvec4 textures; };
 
 vec3 sampleSource(float x, float y) {
-  return texture(uGlobalTextures[textures.x], vec2(x, y)).rgb;
+  return texture(sampler2D(uGlobalTextures[textures.x],
+                           uGlobalSamplers[textures.z]),
+                 vec2(x, y))
+      .rgb;
 }
 
 vec3 pow3(vec3 v, float p) {
@@ -52,7 +56,7 @@ void main() {
 
   vec3 color = vec3(0.0);
 
-  if (textures.z == 0) {
+  if (textures.w == 0) {
     vec3 c0 = (a + b + d + e) * (0.125 / 4.0);
     vec3 c1 = (b + c + e + f) * (0.125 / 4.0);
     vec3 c2 = (d + e + g + h) * (0.125 / 4.0);

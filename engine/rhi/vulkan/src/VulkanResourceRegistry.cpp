@@ -2,6 +2,7 @@
 
 #include "VulkanResourceRegistry.h"
 #include "VulkanTexture.h"
+#include "VulkanSampler.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -35,6 +36,15 @@ void VulkanResourceRegistry::deleteBuffer(BufferHandle handle) {
 void VulkanResourceRegistry::setTexture(
     std::unique_ptr<VulkanTexture> &&texture, TextureHandle handle) {
   mTextures.map.insert_or_assign(handle, std::move(texture));
+}
+
+void VulkanResourceRegistry::setSampler(
+    std::unique_ptr<VulkanSampler> &&sampler, SamplerHandle handle) {
+  mSamplers.map.insert_or_assign(handle, std::move(sampler));
+}
+
+void VulkanResourceRegistry::deleteSampler(SamplerHandle handle) {
+  mSamplers.map.erase(handle);
 }
 
 void VulkanResourceRegistry::deleteTexture(TextureHandle handle) {

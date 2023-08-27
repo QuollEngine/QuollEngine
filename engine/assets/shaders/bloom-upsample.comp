@@ -4,13 +4,17 @@
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(push_constant) uniform DrawParameters { uvec4 textures; };
 
 vec3 sampleSource(float x, float y) {
-  return texture(uGlobalTextures[textures.x], vec2(x, y)).rgb;
+  return texture(sampler2D(uGlobalTextures[textures.x],
+                           uGlobalSamplers[textures.z]),
+                 vec2(x, y))
+      .rgb;
 }
 
 void main() {

@@ -8,13 +8,15 @@ layout(location = 0) in vec2 inTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(push_constant) uniform DrawParameters {
+  Camera camera;
   uint sceneTexture;
   uint bloomTexture;
-  Camera camera;
+  uint defaultSampler;
 }
 uDrawParams;
 
@@ -51,9 +53,14 @@ const float BloomContribution = 0.2;
 
 void main() {
   vec4 hdrColor =
-      texture(uGlobalTextures[uDrawParams.sceneTexture], inTexCoord);
+      texture(sampler2D(uGlobalTextures[uDrawParams.sceneTexture],
+                        uGlobalSamplers[uDrawParams.defaultSampler]),
+              inTexCoord);
   vec3 bloomColor =
-      texture(uGlobalTextures[uDrawParams.bloomTexture], inTexCoord).rgb;
+      texture(sampler2D(uGlobalTextures[uDrawParams.bloomTexture],
+                        uGlobalSamplers[uDrawParams.defaultSampler]),
+              inTexCoord)
+          .rgb;
 
   float ev100 = getCamera().exposure.x;
 

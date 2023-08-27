@@ -8,12 +8,15 @@ layout(location = 1) in vec2 inTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
-layout(push_constant) uniform TextureData { layout(offset = 64) uint index; }
+layout(push_constant) uniform TextureData { layout(offset = 64) uvec4 index; }
 uTextureData;
 
 void main() {
-  outColor = inColor * texture(uGlobalTextures[uTextureData.index], inTexCoord);
+  outColor = inColor * texture(sampler2D(uGlobalTextures[uTextureData.index.x],
+                                         uGlobalSamplers[uTextureData.index.y]),
+                               inTexCoord);
 }

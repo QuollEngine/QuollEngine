@@ -16,10 +16,11 @@ layout(location = 0) out vec4 outColor;
 #include "bindless/lights.glsl"
 #include "bindless/material.glsl"
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 0) uniform sampler2DArray uTextures2DArray[];
-layout(set = 0, binding = 0) uniform samplerCube uTexturesCube[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 0) uniform texture2DArray uTextures2DArray[];
+layout(set = 0, binding = 0) uniform textureCube uTexturesCube[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
   MaterialsArray materials;
@@ -33,6 +34,7 @@ layout(set = 1, binding = 0) uniform DrawParameters {
   DirectionalLightsArray directionalLights;
   PointLightsArray pointLights;
   ShadowMapsArray shadows;
+  uint defaultSampler;
 }
 uDrawParams;
 
@@ -231,7 +233,8 @@ float schlickSpecularGeometricAttenuation(float roughness, float NdotV,
  */
 vec3 getNormal() {
   if (uMaterialData.normalTexture > 0) {
-    vec3 n = texture(uGlobalTextures[uMaterialData.normalTexture],
+    vec3 n = texture(sampler2D(uGlobalTextures[uMaterialData.normalTexture],
+                               uGlobalSamplers[uDrawParams.defaultSampler]),
                      inTextureCoord[uMaterialData.normalTextureCoord])
                  .xyz;
     n = (n * 2.0 - 1.0) * uMaterialData.normalScale;
@@ -316,7 +319,8 @@ float calculateShadowFactorFromMap(vec3 shadowCoords, vec2 offset,
                                    uint cascadeIndex) {
   uint index = getScene().textures.w;
   float closestDepth =
-      texture(uTextures2DArray[index],
+      texture(sampler2DArray(uTextures2DArray[index],
+                             uGlobalSamplers[uDrawParams.defaultSampler]),
               vec3(shadowCoords.x + offset.x, 1.0 - shadowCoords.y + offset.y,
                    cascadeIndex))
           .r;
@@ -358,7 +362,11 @@ float calculateShadowFactor(DirectionalLightItem item) {
 
   // Use percentage closer filtering
   if (getShadowMap(cascadeIndex).shadowData.y > 0.5) {
-    ivec2 size = textureSize(uTextures2DArray[getScene().textures.w], 0).xy;
+    ivec2 size =
+        textureSize(sampler2DArray(uTextures2DArray[getScene().textures.w],
+                                   uGlobalSamplers[uDrawParams.defaultSampler]),
+                    0)
+            .xy;
     float scale = 0.75;
 
     float dx = scale / float(size.x);
@@ -404,8 +412,10 @@ void main() {
 
   if (uMaterialData.metallicRoughnessTexture > 0) {
     vec3 mrSample =
-        texture(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
-                inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
+        texture(
+            sampler2D(uGlobalTextures[uMaterialData.metallicRoughnessTexture],
+                      uGlobalSamplers[uDrawParams.defaultSampler]),
+            inTextureCoord[uMaterialData.metallicRoughnessTextureCoord])
             .xyz;
     roughness *= mrSample.g;
     metallic *= mrSample.b;
@@ -416,10 +426,12 @@ void main() {
 
   vec4 baseColor;
   if (uMaterialData.baseColorTexture > 0) {
-    baseColor = texture(uGlobalTextures[uMaterialData.baseColorTexture],
-                        inTextureCoord[uMaterialData.baseColorTextureCoord])
-                    .xyzw *
-                uMaterialData.baseColorFactor;
+    baseColor =
+        texture(sampler2D(uGlobalTextures[uMaterialData.baseColorTexture],
+                          uGlobalSamplers[uDrawParams.defaultSampler]),
+                inTextureCoord[uMaterialData.baseColorTextureCoord])
+            .xyzw *
+        uMaterialData.baseColorFactor;
   } else {
     baseColor = uMaterialData.baseColorFactor;
   }
@@ -469,19 +481,29 @@ void main() {
   }
 
   if (getScene().data.w == 1) {
-    vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
+    vec2 brdfLut =
+        texture(sampler2D(BrdfLut, uGlobalSamplers[uDrawParams.defaultSampler]),
+                vec2(NdotV, roughness))
+            .rg;
 
     vec3 kS = schlickFresnel(F0, NdotV);
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
 
     color += getScene().color.rgb * (kD + kS * brdfLut.r + brdfLut.g);
   } else if (getScene().data.w == 2 && getScene().textures.x > 0) {
-    vec2 brdfLut = texture(BrdfLut, vec2(NdotV, roughness)).rg;
+    vec2 brdfLut =
+        texture(sampler2D(BrdfLut, uGlobalSamplers[uDrawParams.defaultSampler]),
+                vec2(NdotV, roughness))
+            .rg;
 
     vec3 Fr = max(vec3(1.0 - roughness), F0) - F0;
     vec3 kS = F0 + Fr * pow(1 - NdotV, 5.0);
     vec3 FssEss = kS * brdfLut.r + brdfLut.g;
-    float lod = roughness * float(textureQueryLevels(SpecularMap) - 1);
+    float lod =
+        roughness *
+        float(textureQueryLevels(samplerCube(
+                  SpecularMap, uGlobalSamplers[uDrawParams.defaultSampler])) -
+              1);
     vec3 reflection = normalize(reflect(-v, n));
 
     float Ems = 1.0 - (brdfLut.r + brdfLut.g);
@@ -489,24 +511,38 @@ void main() {
     vec3 FmsEms = Ems * FssEss * Favg / (1.0 - Favg * Ems);
     vec3 kD = diffuseColor * (1.0 - FssEss + FmsEms);
 
-    vec3 diffuse = textureLod(IrradianceMap, n, 0).rgb * kD;
-    vec3 specular = textureLod(SpecularMap, reflection, lod).rgb * FssEss;
+    vec3 diffuse =
+        textureLod(samplerCube(IrradianceMap,
+                               uGlobalSamplers[uDrawParams.defaultSampler]),
+                   n, 0)
+            .rgb *
+        kD;
+    vec3 specular =
+        textureLod(samplerCube(SpecularMap,
+                               uGlobalSamplers[uDrawParams.defaultSampler]),
+                   reflection, lod)
+            .rgb *
+        FssEss;
 
     color += diffuse + specular;
   }
 
   if (uMaterialData.occlusionTexture > 0) {
-    float ao = texture(uGlobalTextures[uMaterialData.occlusionTexture],
-                       inTextureCoord[uMaterialData.occlusionTextureCoord])
-                   .r;
+    float ao =
+        texture(sampler2D(uGlobalTextures[uMaterialData.occlusionTexture],
+                          uGlobalSamplers[uDrawParams.defaultSampler]),
+                inTextureCoord[uMaterialData.occlusionTextureCoord])
+            .r;
     color = mix(color, color * ao, uMaterialData.occlusionStrength);
   }
 
   if (uMaterialData.emissiveTexture > 0) {
-    vec3 emissive = texture(uGlobalTextures[uMaterialData.emissiveTexture],
-                            inTextureCoord[uMaterialData.emissiveTextureCoord])
-                        .rgb *
-                    uMaterialData.emissiveFactor;
+    vec3 emissive =
+        texture(sampler2D(uGlobalTextures[uMaterialData.emissiveTexture],
+                          uGlobalSamplers[uDrawParams.defaultSampler]),
+                inTextureCoord[uMaterialData.emissiveTextureCoord])
+            .rgb *
+        uMaterialData.emissiveFactor;
     color += emissive;
   } else {
     color += uMaterialData.emissiveFactor;

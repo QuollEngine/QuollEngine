@@ -35,6 +35,16 @@ public:
              DescriptorType type, uint32_t start) override;
 
   /**
+   * @brief Bind sampler descriptors
+   *
+   * @param binding Binding number
+   * @param samplers Samplers
+   * @param start Starting index
+   */
+  void write(uint32_t binding, std::span<SamplerHandle> samplers,
+             uint32_t start) override;
+
+  /**
    * @brief Write buffers
    *
    * @param binding Binding number
@@ -68,7 +78,7 @@ private:
    * @param bufferInfos Buffer infos
    */
   void write(uint32_t binding, uint32_t start, size_t descriptorCount,
-             DescriptorType type, const VkDescriptorImageInfo *imageInfos,
+             VkDescriptorType type, const VkDescriptorImageInfo *imageInfos,
              VkDescriptorBufferInfo *bufferInfos);
 
 private:

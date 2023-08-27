@@ -12,7 +12,7 @@ VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
                              VulkanResourceAllocator &allocator,
                              VulkanDeviceObject &device)
     : mAllocator(allocator), mDevice(device), mImage(image),
-      mImageView(imageView), mSampler(sampler), mFormat(format) {
+      mImageView(imageView), mFormat(format) {
 
   // Note: This constructor is ONLY used
   // for defining swapchain; so, its usage
@@ -135,24 +135,6 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
 
   mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE_VIEW,
                         mImageView);
-
-  VkSamplerCreateInfo samplerCreateInfo{};
-  samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  samplerCreateInfo.pNext = nullptr;
-  samplerCreateInfo.flags = 0;
-  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-  samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-  samplerCreateInfo.minLod = 0.0f;
-  samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
-  checkForVulkanError(
-      vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
-      "Failed to image sampler", description.debugName);
-
-  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_SAMPLER,
-                        mSampler);
 }
 
 VulkanTexture::VulkanTexture(const TextureViewDescription &description,
@@ -196,31 +178,9 @@ VulkanTexture::VulkanTexture(const TextureViewDescription &description,
 
   mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_IMAGE_VIEW,
                         mImageView);
-
-  VkSamplerCreateInfo samplerCreateInfo{};
-  samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  samplerCreateInfo.pNext = nullptr;
-  samplerCreateInfo.flags = 0;
-  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-  samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
-  samplerCreateInfo.minLod = 0.0f;
-  samplerCreateInfo.maxLod = VK_LOD_CLAMP_NONE;
-  checkForVulkanError(
-      vkCreateSampler(mDevice, &samplerCreateInfo, nullptr, &mSampler),
-      "Failed to image sampler", description.debugName);
-
-  mDevice.setObjectName(description.debugName, VK_OBJECT_TYPE_SAMPLER,
-                        mSampler);
 }
 
 VulkanTexture::~VulkanTexture() {
-  if (mSampler) {
-    vkDestroySampler(mDevice, mSampler, nullptr);
-  }
-
   if (mImageView) {
     vkDestroyImageView(mDevice, mImageView, nullptr);
   }

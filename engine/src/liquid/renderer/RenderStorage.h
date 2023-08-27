@@ -38,9 +38,8 @@ public:
    * @param addToDescriptor Add texture to global descriptor
    * @return Texture handle
    */
-  rhi::TextureHandle
-  createTexture(const liquid::rhi::TextureDescription &description,
-                bool addToDescriptor = true);
+  rhi::TextureHandle createTexture(const rhi::TextureDescription &description,
+                                   bool addToDescriptor = true);
 
   /**
    * @brief Create texture view
@@ -50,8 +49,18 @@ public:
    * @return Texture view handle
    */
   rhi::TextureHandle
-  createTextureView(const liquid::rhi::TextureViewDescription &description,
+  createTextureView(const rhi::TextureViewDescription &description,
                     bool addToDescriptor = true);
+
+  /**
+   * @brief Create sampler
+   *
+   * @param description Sampler description
+   * @param addToDescriptor Add sampler to global descriptor
+   * @return Sampler handle
+   */
+  rhi::SamplerHandle createSampler(const rhi::SamplerDescription &description,
+                                   bool addToDescriptor = true);
 
   /**
    * @brief Destroy texture
@@ -67,9 +76,8 @@ public:
    * @param description Shader description
    * @return Shader handle
    */
-  rhi::ShaderHandle
-  createShader(const String &name,
-               const liquid::rhi::ShaderDescription &description);
+  rhi::ShaderHandle createShader(const String &name,
+                                 const rhi::ShaderDescription &description);
 
   /**
    * @brief Get shader by name
@@ -85,6 +93,13 @@ public:
    * @param handle Texture handle
    */
   void addToDescriptor(rhi::TextureHandle handle);
+
+  /**
+   * @brief Add sampler to global descriptor
+   *
+   * @param handle Sampler handle
+   */
+  void addToDescriptor(rhi::SamplerHandle handle);
 
   /**
    * @brief Get new texture handle
@@ -113,7 +128,7 @@ public:
    * @param description Buffer description
    * @return Buffer
    */
-  rhi::Buffer createBuffer(const liquid::rhi::BufferDescription &description);
+  rhi::Buffer createBuffer(const rhi::BufferDescription &description);
 
   /**
    * @brief Get global textures descriptor
@@ -125,12 +140,13 @@ public:
   }
 
   /**
-   * @brief Create material descriptor
+   * @brief Get default sampler
    *
-   * @param buffer Material buffer
-   * @return Material descriptor
+   * @return Default sampler
    */
-  rhi::Descriptor createMaterialDescriptor(rhi::Buffer buffer);
+  inline rhi::SamplerHandle getDefaultSampler() const {
+    return mDefaultSampler;
+  }
 
   /**
    * @brief Get render device
@@ -185,8 +201,6 @@ public:
 private:
   rhi::RenderDevice *mDevice = nullptr;
 
-  rhi::DescriptorLayoutHandle mMaterialDescriptorLayout{0};
-
   rhi::Descriptor mGlobalTexturesDescriptor;
 
   std::vector<std::variant<rhi::GraphicsPipelineDescription,
@@ -200,6 +214,9 @@ private:
   HandleCounter<rhi::TextureHandle, TextureStart> mTextureCounter;
   HandleCounter<rhi::RenderPassHandle> mRenderPassCounter;
   HandleCounter<rhi::FramebufferHandle> mFramebufferCounter;
+  HandleCounter<rhi::SamplerHandle> mSamplerCounter;
+
+  rhi::SamplerHandle mDefaultSampler = rhi::SamplerHandle::Null;
 
   std::unordered_map<String, rhi::ShaderHandle> mShaderMap;
 };

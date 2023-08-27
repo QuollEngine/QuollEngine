@@ -194,6 +194,8 @@ private:
   RenderStorage &mRenderStorage;
   std::array<SceneRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
 
+  rhi::SamplerHandle mBloomSampler;
+
   uint32_t mMaxSampleCounts = 1;
 };
 

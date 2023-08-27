@@ -18,8 +18,9 @@ layout(location = 6) out uint outMaterialIndex;
 #include "bindless/camera.glsl"
 #include "bindless/material.glsl"
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
   MaterialsArray materials;

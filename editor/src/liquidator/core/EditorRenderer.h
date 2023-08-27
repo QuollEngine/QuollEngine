@@ -96,6 +96,8 @@ private:
 
   RenderStorage &mRenderStorage;
   std::array<EditorRendererFrameData, rhi::RenderDevice::NumFrames> mFrameData;
+
+  rhi::SamplerHandle mTextOutlineSampler = rhi::SamplerHandle::Null;
 };
 
 } // namespace liquid::editor

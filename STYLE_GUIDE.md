@@ -70,7 +70,8 @@ layout(set = 0, binding = 1) uniform SceneData { ... } uSceneData;
 layout(set = 0, binding = 2) uniform samplerCube uIblMaps[2];
 
 layout(set = 1, binding = 0) uniform MaterialData { ... } uMaterialData;
-layout(set = 1, binding = 1) uniform sampler2D uTextures[8];
+layout(set = 1, binding = 1) uniform texture2D uTextures[8];
+layout(set = 1, binding = 2) uniform sampler2D uSamplers[8];
 ```
 
 > **Note:**
@@ -145,7 +146,7 @@ layout(set = 1, binding = 0) uniform CameraData {
     mat4 viewProj;
 } uCameraData;
 
-layout(set = 1, binding = 1) uniform sampler2D uTextures;
+layout(set = 1, binding = 1) uniform texture2D uTextures;
 ```
 
 > **Note:**

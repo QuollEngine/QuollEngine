@@ -6,8 +6,9 @@ enum class DescriptorType {
   UniformBuffer,
   UniformBufferDynamic,
   StorageBuffer,
-  CombinedImageSampler,
+  SampledImage,
   StorageImage,
+  Sampler,
   None
 };
 

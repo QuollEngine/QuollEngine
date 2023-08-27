@@ -246,7 +246,8 @@ void ImguiRenderer::draw(rhi::RenderCommandList &commandList,
         commandList.bindPipeline(pipeline);
 
         glm::uvec4 textureData{
-            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cmd->TextureId))};
+            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(cmd->TextureId)),
+            rhi::castHandleToUint(mRenderStorage.getDefaultSampler()), 0, 0};
 
         commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment,
                                   sizeof(glm::mat4), sizeof(glm::uvec4),

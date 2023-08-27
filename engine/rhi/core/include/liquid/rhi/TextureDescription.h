@@ -1,6 +1,7 @@
 #pragma once
 
 #include "liquid/rhi/Format.h"
+#include "liquid/rhi/RenderHandle.h"
 
 namespace liquid::rhi {
 

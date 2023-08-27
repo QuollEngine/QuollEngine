@@ -199,6 +199,22 @@ public:
                          TextureHandle handle) override;
 
   /**
+   * @brief Create sampler
+   *
+   * @param description Sampler description
+   * @param handle Sampler handle
+   */
+  void createSampler(const SamplerDescription &description,
+                     SamplerHandle handle) override;
+
+  /**
+   * @brief Destroy sampler
+   *
+   * @param handle Sampler handle
+   */
+  void destroySampler(SamplerHandle handle) override;
+
+  /**
    * @brief Create render pass
    *
    * @param description Render pass description
@@ -317,6 +333,7 @@ public:
 private:
   MockResourceMap<BufferHandle, std::unique_ptr<MockBuffer>> mBuffers;
   MockResourceMap<TextureHandle, MockTexture> mTextures;
+  MockResourceMap<SamplerHandle, SamplerDescription> mSamplers;
   MockResourceMap<FramebufferHandle, FramebufferDescription> mFramebuffers;
   MockResourceMap<RenderPassHandle, RenderPassDescription> mRenderPasses;
 

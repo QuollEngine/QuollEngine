@@ -52,6 +52,14 @@ EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
                               {shadersPath / "outline-text.vert.spv"});
   mRenderStorage.createShader("outline-text.frag",
                               {shadersPath / "outline-text.frag.spv"});
+
+  {
+    rhi::SamplerDescription description{};
+    description.wrapModeU = rhi::WrapMode::ClampToEdge;
+    description.wrapModeV = rhi::WrapMode::ClampToEdge;
+    description.wrapModeW = rhi::WrapMode::ClampToEdge;
+    mTextOutlineSampler = mRenderStorage.createSampler(description);
+  }
 }
 
 void EditorRenderer::attach(RenderGraph &graph,
@@ -220,10 +228,12 @@ void EditorRenderer::attach(RenderGraph &graph,
 
         uint32_t previousInstance = 0;
         for (auto &[icon, count] : frameData.getGizmoCounts()) {
-          auto uIcon = rhi::castHandleToUint(icon);
+          glm::uvec4 uIcon{
+              rhi::castHandleToUint(icon),
+              rhi::castHandleToUint(mRenderStorage.getDefaultSampler()), 0, 0};
           commandList.pushConstants(objectIconsPipeline,
                                     rhi::ShaderStage::Fragment, 0,
-                                    sizeof(uint32_t), &uIcon);
+                                    sizeof(uint32_t), glm::value_ptr(uIcon));
 
           commandList.draw(4, 0, count, previousInstance);
 
@@ -642,6 +652,7 @@ void EditorRenderer::renderTextOutlines(rhi::RenderCommandList &commandList,
     pc.index.x = instanceStart;
     pc.index.y = text.glyphStart;
     pc.index.z = rhi::castHandleToUint(text.fontTexture);
+    pc.index.w = rhi::castHandleToUint(mTextOutlineSampler);
 
     commandList.pushConstants(
         pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
