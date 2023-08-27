@@ -3,8 +3,9 @@
 
 #include "../../../engine/assets/shaders/generate-ibl.glsl"
 
-layout(set = 0, binding = 0) uniform samplerCube uInputTexture;
-layout(set = 0, binding = 1,
+layout(set = 0, binding = 0) uniform textureCube uInputTexture;
+layout(set = 0, binding = 1) uniform sampler uInputSampler;
+layout(set = 0, binding = 2,
        rgba16f) writeonly uniform imageCube uOutputTexture;
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
@@ -26,7 +27,9 @@ void main() {
 
     float lod = 0.5 * log2(6.0 * width * width / (float(NumSamples) * pdf));
 
-    irradiance += textureLod(uInputTexture, H, lod).rgb * NdotH;
+    irradiance +=
+        textureLod(samplerCube(uInputTexture, uInputSampler), H, lod).rgb *
+        NdotH;
   }
 
   irradiance /= float(NumSamples);

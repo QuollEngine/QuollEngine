@@ -7,8 +7,9 @@ layout(location = 0) out vec4 outColor;
 
 #include "bindless/base.glsl"
 
-layout(set = 0, binding = 0) uniform samplerCube uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform textureCube uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 /**
  * @brief Skybox
@@ -30,6 +31,7 @@ Buffer(16) Skybox {
 layout(set = 1, binding = 0) uniform DrawParams {
   Empty camera;
   Skybox skybox;
+  uint defaultSampler;
 }
 uDrawParams;
 
@@ -38,7 +40,10 @@ uDrawParams;
 void main() {
   if (getSkybox().data.x > 0) {
     vec3 color =
-        textureLod(uGlobalTextures[getSkybox().data.x], inTexCoord, 0).xyz;
+        textureLod(samplerCube(uGlobalTextures[getSkybox().data.x],
+                               uGlobalSamplers[uDrawParams.defaultSampler]),
+                   inTexCoord, 0)
+            .xyz;
 
     outColor = vec4(color, 1.0);
   } else {

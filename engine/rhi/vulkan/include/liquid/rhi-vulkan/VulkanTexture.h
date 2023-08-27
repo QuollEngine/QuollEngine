@@ -79,13 +79,6 @@ public:
   inline VkImageView getImageView() const { return mImageView; }
 
   /**
-   * @brief Get Vulkan sampler
-   *
-   * @return Vulkan sampler
-   */
-  inline VkSampler getSampler() const { return mSampler; }
-
-  /**
    * @brief Get Vulkan allocation
    *
    * @return Vulkan allocation
@@ -119,7 +112,6 @@ private:
   VkFormat mFormat = VK_FORMAT_MAX_ENUM;
   VkImage mImage = VK_NULL_HANDLE;
   VkImageView mImageView = VK_NULL_HANDLE;
-  VkSampler mSampler = VK_NULL_HANDLE;
   VmaAllocation mAllocation = VK_NULL_HANDLE;
   VkImageAspectFlags mAspectFlags = VK_IMAGE_ASPECT_NONE;
   VulkanResourceAllocator &mAllocator;

@@ -98,6 +98,15 @@ void MockRenderDevice::createTexture(const TextureDescription &description,
   return mTextures.insert({description}, handle);
 }
 
+void MockRenderDevice::createSampler(const SamplerDescription &description,
+                                     SamplerHandle handle) {
+  return mSamplers.insert({description}, handle);
+}
+
+void MockRenderDevice::destroySampler(SamplerHandle handle) {
+  mSamplers.erase(handle);
+}
+
 const TextureDescription
 MockRenderDevice::getTextureDescription(TextureHandle handle) const {
   return mTextures.at(handle).getDescription();

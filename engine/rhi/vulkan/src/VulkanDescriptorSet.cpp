@@ -4,6 +4,7 @@
 #include "VulkanMapping.h"
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
+#include "VulkanSampler.h"
 
 namespace liquid::rhi {
 
@@ -25,10 +26,28 @@ void VulkanDescriptorSet::write(uint32_t binding,
             ? VK_IMAGE_LAYOUT_GENERAL
             : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfos.at(i).imageView = vkTexture->getImageView();
-    imageInfos.at(i).sampler = vkTexture->getSampler();
+    imageInfos.at(i).sampler = VK_NULL_HANDLE;
   }
 
-  write(binding, start, imageInfos.size(), type, imageInfos.data(), nullptr);
+  write(binding, start, imageInfos.size(),
+        VulkanMapping::getDescriptorType(type), imageInfos.data(), nullptr);
+}
+
+void VulkanDescriptorSet::write(uint32_t binding,
+                                std::span<SamplerHandle> samplers,
+                                uint32_t start) {
+  std::vector<VkDescriptorImageInfo> samplerInfos{samplers.size(),
+                                                  VkDescriptorImageInfo{}};
+
+  for (size_t i = 0; i < samplers.size(); ++i) {
+    const auto &vkSampler = mRegistry.getSamplers().at(samplers[i]);
+    samplerInfos.at(i).sampler = vkSampler->getSampler();
+    samplerInfos.at(i).imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    samplerInfos.at(i).imageView = VK_NULL_HANDLE;
+  }
+
+  write(binding, start, samplerInfos.size(), VK_DESCRIPTOR_TYPE_SAMPLER,
+        samplerInfos.data(), nullptr);
 }
 
 void VulkanDescriptorSet::write(uint32_t binding,
@@ -44,7 +63,8 @@ void VulkanDescriptorSet::write(uint32_t binding,
     bufferInfos.at(i).range = vkBuffer->getSize();
   }
 
-  write(binding, start, bufferInfos.size(), type, nullptr, bufferInfos.data());
+  write(binding, start, bufferInfos.size(),
+        VulkanMapping::getDescriptorType(type), nullptr, bufferInfos.data());
 }
 
 void VulkanDescriptorSet::write(uint32_t binding,
@@ -60,12 +80,12 @@ void VulkanDescriptorSet::write(uint32_t binding,
     vkBufferInfos.at(i).range = bufferInfos[i].range;
   }
 
-  write(binding, start, bufferInfos.size(), type, nullptr,
-        vkBufferInfos.data());
+  write(binding, start, bufferInfos.size(),
+        VulkanMapping::getDescriptorType(type), nullptr, vkBufferInfos.data());
 }
 
 void VulkanDescriptorSet::write(uint32_t binding, uint32_t start,
-                                size_t descriptorCount, DescriptorType type,
+                                size_t descriptorCount, VkDescriptorType type,
                                 const VkDescriptorImageInfo *imageInfos,
                                 VkDescriptorBufferInfo *bufferInfos) {
   VkWriteDescriptorSet write{};
@@ -78,7 +98,7 @@ void VulkanDescriptorSet::write(uint32_t binding, uint32_t start,
   write.pBufferInfo = bufferInfos;
   write.pImageInfo = imageInfos;
   write.pTexelBufferView = nullptr;
-  write.descriptorType = VulkanMapping::getDescriptorType(type);
+  write.descriptorType = type;
 
   vkUpdateDescriptorSets(mDevice, 1, &write, 0, nullptr);
 }

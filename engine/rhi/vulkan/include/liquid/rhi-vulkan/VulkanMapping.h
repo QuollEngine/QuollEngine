@@ -9,6 +9,7 @@
 #include "liquid/rhi/IndexType.h"
 #include "liquid/rhi/Format.h"
 #include "liquid/rhi/Filter.h"
+#include "liquid/rhi/WrapMode.h"
 
 #include "VulkanHeaders.h"
 
@@ -183,6 +184,14 @@ public:
    * @return Vulkan filter
    */
   static VkFilter getFilter(Filter filter);
+
+  /**
+   * @brief Get Vulkan sampler address mode
+   *
+   * @param wrapMode Wrap mode
+   * @return Vulkan sampler address mode
+   */
+  static VkSamplerAddressMode getAddressMode(WrapMode wrapMode);
 
   // Vulkan to RHI mapping
 public:

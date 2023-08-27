@@ -25,7 +25,7 @@ void main() {
 
   uint boundIndex = gl_VertexIndex % QUAD_VERTICES;
   uint glyphIndex =
-      uTextParams.text.y + uint(floor(gl_VertexIndex / QUAD_VERTICES));
+      uTextParams.text.z + uint(floor(gl_VertexIndex / QUAD_VERTICES));
 
   GlyphItem glyph = getGlyph(glyphIndex);
 

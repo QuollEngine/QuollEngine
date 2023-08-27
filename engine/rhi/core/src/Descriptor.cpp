@@ -16,6 +16,13 @@ Descriptor &Descriptor::write(uint32_t binding,
   return *this;
 }
 
+Descriptor &Descriptor::write(uint32_t binding,
+                              std::span<SamplerHandle> samplers,
+                              uint32_t start) {
+  mNativeDescriptor->write(binding, samplers, start);
+  return *this;
+}
+
 Descriptor &Descriptor::write(uint32_t binding, std::span<BufferHandle> buffers,
                               DescriptorType type, uint32_t start) {
   mNativeDescriptor->write(binding, buffers, type, start);

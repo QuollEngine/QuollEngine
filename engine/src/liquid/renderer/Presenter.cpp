@@ -16,18 +16,26 @@ Presenter::Presenter(RenderStorage &renderStorage)
       {Engine::getShadersPath() / "fullscreen-quad.frag.spv"});
 
   rhi::DescriptorLayoutDescription desc{};
-  desc.bindings.resize(1);
+  desc.bindings.resize(2);
   desc.bindings.at(0).binding = 0;
   desc.bindings.at(0).descriptorCount = 1;
   desc.bindings.at(0).shaderStage = rhi::ShaderStage::Fragment;
-  desc.bindings.at(0).descriptorType =
-      rhi::DescriptorType::CombinedImageSampler;
+  desc.bindings.at(0).descriptorType = rhi::DescriptorType::SampledImage;
   desc.bindings.at(0).name = "uTexture";
+
+  desc.bindings.at(1).binding = 1;
+  desc.bindings.at(1).descriptorCount = 1;
+  desc.bindings.at(1).shaderStage = rhi::ShaderStage::Fragment;
+  desc.bindings.at(1).descriptorType = rhi::DescriptorType::Sampler;
+  desc.bindings.at(1).name = "uSampler";
   desc.debugName = "Presenter";
 
   auto layout = renderStorage.getDevice()->createDescriptorLayout(desc);
 
   mPresentDescriptor = renderStorage.getDevice()->createDescriptor(layout);
+
+  std::array<rhi::SamplerHandle, 1> samplers{renderStorage.getDefaultSampler()};
+  mPresentDescriptor.write(1, samplers);
 
   auto vertexShader =
       mRenderStorage.getShader("__engine.fullscreenQuad.default.vertex");
@@ -42,6 +50,7 @@ Presenter::Presenter(RenderStorage &renderStorage)
       liquid::rhi::FrontFace::CounterClockwise};
   pipelineDescription.colorBlend.attachments = {
       liquid::rhi::PipelineColorBlendAttachment{}};
+  pipelineDescription.debugName = "presenter";
 
   mPresentPipeline = mRenderStorage.addPipeline(pipelineDescription);
 
@@ -121,8 +130,7 @@ void Presenter::present(rhi::RenderCommandList &commandList,
   if (handle != mPresentTexture) {
     mPresentTexture = handle;
     std::array<rhi::TextureHandle, 1> textures{mPresentTexture};
-    mPresentDescriptor.write(0, textures,
-                             rhi::DescriptorType::CombinedImageSampler);
+    mPresentDescriptor.write(0, textures, rhi::DescriptorType::SampledImage);
   }
 
   {

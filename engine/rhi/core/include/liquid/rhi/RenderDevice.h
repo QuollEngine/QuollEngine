@@ -15,6 +15,7 @@
 #include "RenderPassDescription.h"
 #include "FramebufferDescription.h"
 #include "PipelineDescription.h"
+#include "SamplerDescription.h"
 
 namespace liquid::rhi {
 
@@ -184,6 +185,22 @@ public:
    */
   virtual void createTextureView(const TextureViewDescription &description,
                                  TextureHandle handle) = 0;
+
+  /**
+   * @brief Create sampler
+   *
+   * @param description Sampler description
+   * @param handle Sampler handle
+   */
+  virtual void createSampler(const SamplerDescription &description,
+                             SamplerHandle handle) = 0;
+
+  /**
+   * @brief Destroy sampler
+   *
+   * @param handle Sampler handle
+   */
+  virtual void destroySampler(SamplerHandle handle) = 0;
 
   /**
    * @brief Create render pass

@@ -11,6 +11,7 @@ layout(location = 0) out vec3 outTexCoord;
 layout(set = 1, binding = 0) uniform DrawParameters {
   Camera camera;
   Empty skybox;
+  uint defaultSampler;
 }
 uDrawParams;
 

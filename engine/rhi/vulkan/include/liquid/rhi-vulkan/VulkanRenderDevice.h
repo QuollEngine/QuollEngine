@@ -176,6 +176,22 @@ public:
                          TextureHandle handle) override;
 
   /**
+   * @brief Create sampler
+   *
+   * @param description Sampler description
+   * @param handle Sampler handle
+   */
+  void createSampler(const SamplerDescription &description,
+                     SamplerHandle handle) override;
+
+  /**
+   * @brief Destroy sampler
+   *
+   * @param handle Sampler handle
+   */
+  void destroySampler(SamplerHandle handle) override;
+
+  /**
    * @brief Create render pass
    *
    * @param description Render pass description

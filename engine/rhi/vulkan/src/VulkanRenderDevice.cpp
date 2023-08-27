@@ -5,6 +5,7 @@
 #include "VulkanRenderDevice.h"
 #include "VulkanDeviceObject.h"
 #include "VulkanTexture.h"
+#include "VulkanSampler.h"
 #include "VulkanBuffer.h"
 #include "VulkanRenderPass.h"
 #include "VulkanFramebuffer.h"
@@ -173,6 +174,16 @@ void VulkanRenderDevice::createTexture(const TextureDescription &description,
   mRegistry.setTexture(
       std::make_unique<VulkanTexture>(description, mAllocator, mDevice),
       handle);
+}
+
+void VulkanRenderDevice::createSampler(const SamplerDescription &description,
+                                       SamplerHandle handle) {
+  mRegistry.setSampler(std::make_unique<VulkanSampler>(description, mDevice),
+                       handle);
+}
+
+void VulkanRenderDevice::destroySampler(SamplerHandle handle) {
+  mRegistry.deleteSampler(handle);
 }
 
 const TextureDescription

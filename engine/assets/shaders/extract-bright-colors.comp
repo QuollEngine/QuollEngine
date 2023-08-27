@@ -5,20 +5,24 @@
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(push_constant) uniform DrawParameters { uvec4 textures; };
 
 const float BrightnessTreshold = 1.0;
 
 void main() {
-  uvec2 size = textureSize(uGlobalTextures[textures.y], 0);
+  uvec2 size = textureSize(
+      sampler2D(uGlobalTextures[textures.y], uGlobalSamplers[textures.z]), 0);
 
   vec2 texCoord = vec2(float(gl_GlobalInvocationID.x) / float(size.x),
                        float(gl_GlobalInvocationID.y) / float(size.y));
 
-  vec4 color = texture(uGlobalTextures[textures.x], texCoord);
+  vec4 color = texture(
+      sampler2D(uGlobalTextures[textures.x], uGlobalSamplers[textures.z]),
+      texCoord);
 
   float brightness = 0.2126 * color.x + 0.7152 * color.y + 0.0722 * color.z;
 

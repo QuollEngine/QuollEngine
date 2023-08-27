@@ -85,8 +85,9 @@ static String getValidationMessage(
   ss << "\n\t"
      << "Message ID: " << pCallbackData->pMessageIdName;
   for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
+    const char *name = pCallbackData->pObjects[i].pObjectName;
     ss << "\n\t"
-       << "Object: " << pCallbackData->pObjects[i].pObjectName;
+       << "Object: " << (name ? name : "[no name]");
   }
 
   return ss.str();

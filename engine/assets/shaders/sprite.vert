@@ -10,14 +10,15 @@ Buffer(16) SpritesArray { uint items[]; };
 layout(location = 0) out vec2 outTexCoord;
 layout(location = 1) out flat uint outTextureIndex;
 
-layout(set = 0, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 0, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 0, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 0, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 0, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 layout(set = 1, binding = 0) uniform DrawParameters {
   Camera camera;
   TransformsArray transforms;
   SpritesArray sprites;
-  Empty pad0;
+  uint pad0;
 }
 uDrawParams;
 

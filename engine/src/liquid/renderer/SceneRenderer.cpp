@@ -77,6 +77,15 @@ SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
       {Engine::getShadersPath() / "bloom-upsample.comp.spv"});
 
   generateBrdfLut();
+
+  {
+    rhi::SamplerDescription description{};
+    description.wrapModeU = rhi::WrapMode::ClampToEdge;
+    description.wrapModeV = rhi::WrapMode::ClampToEdge;
+    description.wrapModeW = rhi::WrapMode::ClampToEdge;
+    description.debugName = "bloom";
+    mBloomSampler = mRenderStorage.createSampler(description);
+  }
 }
 
 void SceneRenderer::setClearColor(const glm::vec4 &clearColor) {
@@ -258,6 +267,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       rhi::DeviceAddress directionalLights;
       rhi::DeviceAddress pointLights;
       rhi::DeviceAddress shadows;
+      rhi::SamplerHandle sampler;
     };
 
     size_t pbrOffset = 0;
@@ -270,7 +280,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
           frameData.getSkinnedMeshMaterialsBuffer(),
           frameData.getSkeletonsBuffer(), frameData.getCameraBuffer(),
           frameData.getSceneBuffer(), frameData.getDirectionalLightsBuffer(),
-          frameData.getPointLightsBuffer(), frameData.getShadowMapsBuffer()});
+          frameData.getPointLightsBuffer(), frameData.getShadowMapsBuffer(),
+          mRenderStorage.getDefaultSampler()});
     }
 
     auto &pass = graph.addGraphicsPass("meshPass");
@@ -349,7 +360,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       rhi::DeviceAddress camera;
       rhi::DeviceAddress transforms;
       rhi::DeviceAddress textures;
-      rhi::DeviceAddress pad0;
+      rhi::SamplerHandle sampler;
     };
 
     auto &pass = graph.addGraphicsPass("spritePass");
@@ -376,7 +387,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     for (auto &frameData : mFrameData) {
       spriteOffset = frameData.getBindlessParams().addRange(SpriteDrawParams{
           frameData.getCameraBuffer(), frameData.getSpriteTransformsBuffer(),
-          frameData.getSpriteTexturesBuffer(), frameData.getCameraBuffer()});
+          frameData.getSpriteTexturesBuffer(),
+          mRenderStorage.getDefaultSampler()});
     }
 
     pass.setExecutor([pipeline, spriteOffset,
@@ -401,12 +413,14 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     struct SkyboxDrawParams {
       rhi::DeviceAddress camera;
       rhi::DeviceAddress skybox;
+      rhi::SamplerHandle defaultSampler;
     };
 
     size_t skyboxOffset = 0;
     for (auto &frameData : mFrameData) {
       skyboxOffset = frameData.getBindlessParams().addRange(SkyboxDrawParams{
-          frameData.getCameraBuffer(), frameData.getSkyboxBuffer()});
+          frameData.getCameraBuffer(), frameData.getSkyboxBuffer(),
+          mRenderStorage.getDefaultSampler()});
     }
 
     auto &pass = graph.addGraphicsPass("skyboxPass");
@@ -494,19 +508,23 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       bloomChain.push_back({view, options.size / 2u});
     }
 
-    auto extractBrightColorsPipeline = mRenderStorage.addPipeline(
-        rhi::ComputePipelineDescription{mRenderStorage.getShader(
-            "__engine.bloom.extract-bright-colors.compute")});
+    auto extractBrightColorsPipeline =
+        mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
+            mRenderStorage.getShader(
+                "__engine.bloom.extract-bright-colors.compute"),
+            "extract bright colors"});
     pass.addPipeline(extractBrightColorsPipeline);
 
     auto downsamplePipeline =
         mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
-            mRenderStorage.getShader("__engine.bloom.downsample.compute")});
+            mRenderStorage.getShader("__engine.bloom.downsample.compute"),
+            "bloom downsample"});
     pass.addPipeline(downsamplePipeline);
 
     auto upsamplePipeline =
         mRenderStorage.addPipeline(rhi::ComputePipelineDescription{
-            mRenderStorage.getShader("__engine.bloom.upsample.compute")});
+            mRenderStorage.getShader("__engine.bloom.upsample.compute"),
+            "bloom upsample"});
     pass.addPipeline(upsamplePipeline);
 
     static constexpr uint32_t WorkGroupSize = 32;
@@ -524,7 +542,8 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
         glm::uvec4 texture{
             static_cast<uint32_t>(sceneColorResolved.getHandle()),
-            static_cast<uint32_t>(bloomTexture.getHandle()), 0, 0};
+            static_cast<uint32_t>(bloomTexture.getHandle()),
+            static_cast<uint32_t>(mBloomSampler), 0};
         commandList.pushConstants(extractBrightColorsPipeline,
                                   rhi::ShaderStage::Compute, 0,
                                   sizeof(glm::uvec4), glm::value_ptr(texture));
@@ -564,7 +583,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
           glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
                              static_cast<uint32_t>(target.texture.getHandle()),
-                             level - 1, level};
+                             static_cast<uint32_t>(mBloomSampler), level - 1};
           commandList.pushConstants(
               downsamplePipeline, rhi::ShaderStage::Compute, 0,
               sizeof(glm::uvec4), glm::value_ptr(texture));
@@ -613,7 +632,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
           glm::uvec4 texture{static_cast<uint32_t>(source.texture.getHandle()),
                              static_cast<uint32_t>(target.texture.getHandle()),
-                             0, 0};
+                             static_cast<uint32_t>(mBloomSampler), 0};
           commandList.pushConstants(upsamplePipeline, rhi::ShaderStage::Compute,
                                     0, sizeof(glm::uvec4),
                                     glm::value_ptr(texture));
@@ -653,15 +672,21 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
                                  mRenderStorage.getGlobalTexturesDescriptor());
 
       struct Data {
+        rhi::DeviceAddress bufferAddress;
+
         rhi::TextureHandle sceneColor;
 
         rhi::TextureHandle bloomTexture;
 
-        rhi::DeviceAddress bufferAddress;
+        rhi::SamplerHandle defaultSampler;
       };
 
-      Data data{sceneColorResolved.getHandle(), bloomTexture.getHandle(),
-                mFrameData.at(frameIndex).getCameraBuffer()};
+      Data data{
+          mFrameData.at(frameIndex).getCameraBuffer(),
+          sceneColorResolved.getHandle(),
+          bloomTexture.getHandle(),
+          mRenderStorage.getDefaultSampler(),
+      };
 
       commandList.pushConstants(pipeline, rhi::ShaderStage::Fragment, 0,
                                 sizeof(Data), &data);
@@ -1010,8 +1035,10 @@ void SceneRenderer::renderText(rhi::RenderCommandList &commandList,
     commandList.bindDescriptor(pipeline, 0,
                                mRenderStorage.getGlobalTexturesDescriptor());
 
-    glm::uvec4 textConstants{rhi::castHandleToUint(text.fontTexture),
-                             text.glyphStart, 0, 0};
+    glm::uvec4 textConstants{
+        rhi::castHandleToUint(text.fontTexture),
+        rhi::castHandleToUint(mRenderStorage.getDefaultSampler()),
+        text.glyphStart, 0};
 
     commandList.pushConstants(
         pipeline, rhi::ShaderStage::Vertex | rhi::ShaderStage::Fragment, 0,
@@ -1039,7 +1066,8 @@ void SceneRenderer::generateBrdfLut() {
   auto layout = device->createDescriptorLayout({{binding0}});
 
   auto pipeline = mRenderStorage.addPipeline(rhi::ComputePipelineDescription(
-      {mRenderStorage.getShader("__engine.pbr.brdfLut.compute")}));
+      {mRenderStorage.getShader("__engine.pbr.brdfLut.compute"),
+       "generate brdf lut"}));
 
   device->createPipeline(mRenderStorage.getComputePipelineDescription(pipeline),
                          pipeline);

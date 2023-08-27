@@ -17,8 +17,9 @@ layout(set = 0, binding = 0) uniform DrawParameters {
 }
 uDrawParams;
 
-layout(set = 1, binding = 0) uniform sampler2D uGlobalTextures[];
-layout(set = 1, binding = 1) writeonly uniform image2D uGlobalImages[];
+layout(set = 1, binding = 0) uniform texture2D uGlobalTextures[];
+layout(set = 1, binding = 1) uniform sampler uGlobalSamplers[];
+layout(set = 1, binding = 2) writeonly uniform image2D uGlobalImages[];
 
 #define getOutlineTransform(index) uDrawParams.outlineTransforms.items[index]
 

@@ -31,8 +31,8 @@ public:
     /**
      * Binding data
      */
-    std::variant<std::vector<TextureHandle>, std::vector<BufferHandle>,
-                 std::vector<DescriptorBufferInfo>>
+    std::variant<std::vector<TextureHandle>, std::vector<SamplerHandle>,
+                 std::vector<BufferHandle>, std::vector<DescriptorBufferInfo>>
         data;
   };
 
@@ -54,6 +54,16 @@ public:
    */
   void write(uint32_t binding, std::span<TextureHandle> textures,
              DescriptorType type, uint32_t start) override;
+
+  /**
+   * @brief Bind sampler descriptors
+   *
+   * @param binding Binding number
+   * @param samplers Samplers
+   * @param start Starting index
+   */
+  void write(uint32_t binding, std::span<SamplerHandle> samplers,
+             uint32_t start) override;
 
   /**
    * @brief Bind buffer descriptors

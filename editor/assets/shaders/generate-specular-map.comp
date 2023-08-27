@@ -4,8 +4,9 @@
 
 #include "../../../engine/assets/shaders/generate-ibl.glsl"
 
-layout(set = 0, binding = 0) uniform samplerCube uInputTexture;
-layout(set = 0, binding = 1,
+layout(set = 0, binding = 0) uniform textureCube uInputTexture;
+layout(set = 0, binding = 1) uniform sampler uInputSampler;
+layout(set = 0, binding = 2,
        rgba16f) writeonly uniform imageCube uOutputTexture;
 
 layout(push_constant) uniform PushConstants { vec4 data; }
@@ -29,8 +30,9 @@ void main() {
   }
 
   if (roughness == 0.0) {
-    imageStore(uOutputTexture, ivec3(gl_GlobalInvocationID),
-               textureLod(uInputTexture, normal, 0));
+    imageStore(
+        uOutputTexture, ivec3(gl_GlobalInvocationID),
+        textureLod(samplerCube(uInputTexture, uInputSampler), normal, 0));
     return;
   }
 
@@ -54,7 +56,10 @@ void main() {
 
       float mipLevel =
           0.5 * log2(6.0 * mipWidth * mipWidth / (float(NumSamples) * pdf));
-      specular += textureLod(uInputTexture, L, mipLevel).rgb * NdotL;
+      specular +=
+          textureLod(samplerCube(uInputTexture, uInputSampler), L, mipLevel)
+              .rgb *
+          NdotL;
       totalWeight += NdotL;
     }
   }
