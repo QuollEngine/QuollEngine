@@ -34,7 +34,7 @@ template <class TData> struct AssetData {
   /**
    * Asset uuid
    */
-  String uuid;
+  Uuid uuid;
 
   /**
    * Asset name

@@ -30,11 +30,11 @@ public:
    * @brief Create texture from source
    *
    * @param sourcePath Source path
-   * @param uuid Asset uui
+   * @param uuid Asset uuid
    * @return Path to new texture asset
    */
   Result<Path> createTextureFromSource(const Path &sourcePath,
-                                       const String &uuid);
+                                       const Uuid &uuid);
 
   /**
    * @brief Create texture from asset
@@ -43,11 +43,9 @@ public:
    * asset from any texture asset
    *
    * @param asset Texture asset
-   * @param uuid Asset uuid
    * @return Path to new texture asset
    */
-  Result<Path> createTextureFromAsset(const AssetData<TextureAsset> &asset,
-                                      const String &uuid);
+  Result<Path> createTextureFromAsset(const AssetData<TextureAsset> &asset);
 
   /**
    * @brief Load texture from file
@@ -64,7 +62,7 @@ public:
    * @param uuid Asset uuid
    * @return Path to new font asset
    */
-  Result<Path> createFontFromSource(const Path &sourcePath, const String &uuid);
+  Result<Path> createFontFromSource(const Path &sourcePath, const Uuid &uuid);
 
   /**
    * @brief Load font from file
@@ -81,11 +79,9 @@ public:
    * from material data
    *
    * @param asset Material asset
-   * @param uuid Asset uuid
    * @return Path to new material asset
    */
-  Result<Path> createMaterialFromAsset(const AssetData<MaterialAsset> &asset,
-                                       const String &uuid);
+  Result<Path> createMaterialFromAsset(const AssetData<MaterialAsset> &asset);
 
   /**
    * @brief Load material from file
@@ -102,11 +98,9 @@ public:
    * from mesh data
    *
    * @param asset Mesh asset
-   * @param uuid Asset uuid
    * @return Path to new mesh asset
    */
-  Result<Path> createMeshFromAsset(const AssetData<MeshAsset> &asset,
-                                   const String &uuid);
+  Result<Path> createMeshFromAsset(const AssetData<MeshAsset> &asset);
 
   /**
    * @brief Load mesh from file
@@ -123,11 +117,9 @@ public:
    * from mesh data
    *
    * @param asset Skeleton asset
-   * @param uuid Asset uuid
    * @return Path to new skeleton asset
    */
-  Result<Path> createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset,
-                                       const String &uuid);
+  Result<Path> createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset);
 
   /**
    * @brief Load skeleton from file
@@ -144,11 +136,9 @@ public:
    * from animation data
    *
    * @param asset Animation asset
-   * @param uuid Existing uuid
    * @return Path to new animation asset
    */
-  Result<Path> createAnimationFromAsset(const AssetData<AnimationAsset> &asset,
-                                        const String &uuid);
+  Result<Path> createAnimationFromAsset(const AssetData<AnimationAsset> &asset);
 
   /**
    * @brief Load animation from file
@@ -166,7 +156,7 @@ public:
    * @return Path to new animator asset
    */
   Result<Path> createAnimatorFromSource(const Path &sourcePath,
-                                        const String &uuid);
+                                        const Uuid &uuid);
 
   /**
    * @brief Create animator from asset
@@ -175,11 +165,9 @@ public:
    * from animator data
    *
    * @param asset Animator asset
-   * @param uuid Existing uuid
    * @return Path to new animator asset
    */
-  Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset,
-                                       const String &uuid);
+  Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset);
 
   /**
    * @brief Load animator from file
@@ -199,8 +187,7 @@ public:
    * @param uuid Existing uuid
    * @return Path to new audio asset
    */
-  Result<Path> createAudioFromSource(const Path &sourcePath,
-                                     const String &uuid);
+  Result<Path> createAudioFromSource(const Path &sourcePath, const Uuid &uuid);
 
   /**
    * @brief Load audio from file
@@ -217,11 +204,9 @@ public:
    * from prefab data
    *
    * @param asset Prefab asset
-   * @param uuid Asset uuid
    * @return Path to new prefab asset
    */
-  Result<Path> createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
-                                     const String &uuid);
+  Result<Path> createPrefabFromAsset(const AssetData<PrefabAsset> &asset);
 
   /**
    * @brief Load prefab from file
@@ -238,12 +223,10 @@ public:
    * from environment data
    *
    * @param asset Environment asset
-   * @param uuid Existing uuid
    * @return Path to new environment asset
    */
   Result<Path>
-  createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset,
-                             const String &uuid);
+  createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset);
 
   /**
    * @brief Load environment from file
@@ -261,7 +244,7 @@ public:
    * @return Path to new Lua script
    */
   Result<Path> createLuaScriptFromSource(const Path &sourcePath,
-                                         const String &uuid);
+                                         const Uuid &uuid);
 
   /**
    * @brief Load Lua script from file
@@ -281,8 +264,7 @@ public:
    * @param uuid Existing uuid
    * @return Path to new Scene
    */
-  Result<Path> createSceneFromSource(const Path &sourcePath,
-                                     const String &uuid);
+  Result<Path> createSceneFromSource(const Path &sourcePath, const Uuid &uuid);
 
   /**
    * @brief Load scene from file
@@ -331,7 +313,7 @@ public:
    * @param uuid Asset uuid
    * @return Asset meta
    */
-  AssetMeta getMetaFromUuid(const String &uuid) const;
+  AssetMeta getMetaFromUuid(const Uuid &uuid) const;
 
   /**
    * @brief Create asset metafile
@@ -356,12 +338,12 @@ private:
    * @return Uuid of asset
    */
   template <class TAssetMap>
-  String getAssetUuid(TAssetMap &map, typename TAssetMap::Handle handle) {
+  Uuid getAssetUuid(TAssetMap &map, typename TAssetMap::Handle handle) {
     if (handle != TAssetMap::Handle::Null) {
       return map.getAsset(handle).uuid;
     }
 
-    return String("");
+    return Uuid{};
   }
 
   /**
@@ -472,7 +454,7 @@ private:
    * @param uuid Asset uuid
    * @return Path to asset
    */
-  Path getPathFromUuid(const String &uuid);
+  Path getPathFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load texture from uuid
@@ -480,7 +462,7 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded texture
    */
-  Result<TextureAssetHandle> getOrLoadTextureFromUuid(const String &uuid);
+  Result<TextureAssetHandle> getOrLoadTextureFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load material from uuid
@@ -488,7 +470,7 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded material
    */
-  Result<MaterialAssetHandle> getOrLoadMaterialFromUuid(const String &uuid);
+  Result<MaterialAssetHandle> getOrLoadMaterialFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load mesh from uuid
@@ -496,7 +478,7 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded mesh
    */
-  Result<MeshAssetHandle> getOrLoadMeshFromUuid(const String &uuid);
+  Result<MeshAssetHandle> getOrLoadMeshFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load skeleton from uuid
@@ -504,7 +486,7 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded skeleton
    */
-  Result<SkeletonAssetHandle> getOrLoadSkeletonFromUuid(const String &uuid);
+  Result<SkeletonAssetHandle> getOrLoadSkeletonFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load animation from uuid
@@ -512,7 +494,7 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded animation
    */
-  Result<AnimationAssetHandle> getOrLoadAnimationFromUuid(const String &uuid);
+  Result<AnimationAssetHandle> getOrLoadAnimationFromUuid(const Uuid &uuid);
 
   /**
    * @brief Get or load animator from uuid
@@ -520,23 +502,16 @@ private:
    * @param uuid Asset uuid
    * @return Existing or newly loaded animator
    */
-  Result<AnimatorAssetHandle> getOrLoadAnimatorFromUuid(const String &uuid);
+  Result<AnimatorAssetHandle> getOrLoadAnimatorFromUuid(const Uuid &uuid);
 
 private:
   /**
-   * @brief Generate asset uuid
-   *
-   * @return New asset uuid
-   */
-  String generateUUID();
-
-  /**
    * @brief Create asset path
    *
-   * @param uuid Asset uui
+   * @param uuid Asset uuid
    * @return Asset path
    */
-  Path createAssetPath(const String &uuid);
+  Path createAssetPath(const Uuid &uuid);
 
 private:
   AssetRegistry mRegistry;

@@ -88,7 +88,7 @@ public:
 
 TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = cache.createMeshFromAsset(asset, "");
+  auto filePath = cache.createMeshFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -170,7 +170,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
     geometry.positions.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset, "").getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handle = cache.loadMeshFromFile(filePath);
   EXPECT_TRUE(handle.hasError());
 }
@@ -181,14 +181,14 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
     geometry.indices.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset, "").getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handle = cache.loadMeshFromFile(filePath);
   EXPECT_TRUE(handle.hasError());
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
-  auto filePath = cache.createMeshFromAsset(asset, "").getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handleRes = cache.loadMeshFromFile(filePath);
 
   auto handle = handleRes.getData();
@@ -223,7 +223,7 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
 TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = cache.createMeshFromAsset(asset, "");
+  auto filePath = cache.createMeshFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -320,7 +320,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
     geometry.positions.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset, "").getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handle = cache.loadMeshFromFile(filePath);
   EXPECT_TRUE(handle.hasError());
 }
@@ -331,7 +331,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
     geometry.indices.clear();
   }
 
-  auto filePath = cache.createMeshFromAsset(asset, "").getData();
+  auto filePath = cache.createMeshFromAsset(asset).getData();
   auto handle = cache.loadMeshFromFile(filePath);
   EXPECT_TRUE(handle.hasError());
 }
@@ -339,7 +339,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
 TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
-  auto filePath = cache.createMeshFromAsset(asset, "");
+  auto filePath = cache.createMeshFromAsset(asset);
   auto handle = cache.loadMeshFromFile(filePath.getData());
   EXPECT_NE(handle.getData(), liquid::MeshAssetHandle::Null);
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle.getData());

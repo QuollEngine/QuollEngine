@@ -476,8 +476,10 @@ void loadMeshes(GLTFImportData &importData) {
 
     mesh.type = isSkinnedMesh ? AssetType::SkinnedMesh : AssetType::Mesh;
     mesh.name = getGLTFAssetName(importData, assetName);
-    auto path =
-        assetCache.createMeshFromAsset(mesh, getUUID(importData, assetName));
+    mesh.uuid = getUUID(importData, assetName);
+
+    auto path = assetCache.createMeshFromAsset(mesh);
+
     auto handle = assetCache.loadMeshFromFile(path.getData());
     importData.meshes.map.insert_or_assign(i, handle.getData());
 

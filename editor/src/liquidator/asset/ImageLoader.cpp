@@ -11,10 +11,9 @@ namespace liquid::editor {
 ImageLoader::ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage)
     : mAssetCache(assetCache), mRenderStorage(renderStorage) {}
 
-Result<String> ImageLoader::loadFromPath(const Path &sourceAssetPath,
-                                         const String &uuid,
-                                         bool generateMipMaps,
-                                         rhi::Format format) {
+Result<Uuid> ImageLoader::loadFromPath(const Path &sourceAssetPath,
+                                       const Uuid &uuid, bool generateMipMaps,
+                                       rhi::Format format) {
   int32_t width = 0;
   int32_t height = 0;
   int32_t channels = 0;
@@ -23,7 +22,7 @@ Result<String> ImageLoader::loadFromPath(const Path &sourceAssetPath,
                          &channels, STBI_rgb_alpha);
 
   if (!data) {
-    return Result<String>::Error(stbi_failure_reason());
+    return Result<Uuid>::Error(stbi_failure_reason());
   }
 
   auto res = loadFromMemory(
@@ -34,11 +33,11 @@ Result<String> ImageLoader::loadFromPath(const Path &sourceAssetPath,
   return res;
 }
 
-Result<String> ImageLoader::loadFromMemory(void *data, uint32_t width,
-                                           uint32_t height, const String &uuid,
-                                           const String &name,
-                                           bool generateMipMaps,
-                                           rhi::Format format) {
+Result<Uuid> ImageLoader::loadFromMemory(void *data, uint32_t width,
+                                         uint32_t height, const Uuid &uuid,
+                                         const String &name,
+                                         bool generateMipMaps,
+                                         rhi::Format format) {
   std::vector<TextureAssetLevel> levels;
   std::vector<uint8_t> assetData;
   if (generateMipMaps) {
@@ -82,6 +81,7 @@ Result<String> ImageLoader::loadFromMemory(void *data, uint32_t width,
 
   AssetData<TextureAsset> asset{};
   asset.name = name;
+  asset.uuid = uuid;
   asset.size = TextureUtils::getBufferSizeFromLevels(levels);
   asset.data.data = std::move(assetData);
   asset.data.height = height;
@@ -90,18 +90,18 @@ Result<String> ImageLoader::loadFromMemory(void *data, uint32_t width,
   asset.data.levels = levels;
   asset.data.format = format;
 
-  auto createdFileRes = mAssetCache.createTextureFromAsset(asset, uuid);
+  auto createdFileRes = mAssetCache.createTextureFromAsset(asset);
 
   if (createdFileRes.hasError()) {
-    return Result<String>::Error(createdFileRes.getError());
+    return Result<Uuid>::Error(createdFileRes.getError());
   }
 
   auto loadRes = mAssetCache.loadTextureFromFile(createdFileRes.getData());
   if (loadRes.hasError()) {
-    return Result<String>::Error(loadRes.getError());
+    return Result<Uuid>::Error(loadRes.getError());
   }
 
-  return Result<String>::Ok(
+  return Result<Uuid>::Ok(
       mAssetCache.getRegistry().getTextures().getAsset(loadRes.getData()).uuid);
 }
 

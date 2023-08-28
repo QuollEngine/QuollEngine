@@ -10,9 +10,8 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset,
-                                    const String &uuid) {
-  auto assetPath = createAssetPath(uuid);
+AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -69,13 +68,13 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   AssetData<MaterialAsset> material{};
   material.name = header.name;
   material.path = filePath;
-  material.uuid = filePath.stem().string();
+  material.uuid = Uuid(filePath.stem().string());
   material.type = AssetType::Material;
   std::vector<String> warnings{};
 
   // Base color
   {
-    String textureUuid;
+    Uuid textureUuid;
     stream.read(textureUuid);
     const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
@@ -91,7 +90,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Metallic roughness
   {
-    String textureUuid;
+    Uuid textureUuid;
     stream.read(textureUuid);
     const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
@@ -109,7 +108,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Normal
   {
-    String textureUuid;
+    Uuid textureUuid;
     stream.read(textureUuid);
     const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
@@ -125,7 +124,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Occlusion
   {
-    String textureUuid;
+    Uuid textureUuid;
     stream.read(textureUuid);
     const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
@@ -141,7 +140,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
 
   // Emissive
   {
-    String textureUuid;
+    Uuid textureUuid;
     stream.read(textureUuid);
     const auto &res = getOrLoadTextureFromUuid(textureUuid);
     if (res.hasData()) {
@@ -177,8 +176,8 @@ AssetCache::loadMaterialFromFile(const Path &filePath) {
 }
 
 Result<MaterialAssetHandle>
-AssetCache::getOrLoadMaterialFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+AssetCache::getOrLoadMaterialFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Null);
   }
 

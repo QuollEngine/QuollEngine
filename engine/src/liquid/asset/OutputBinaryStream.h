@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/core/Uuid.h"
 #include "AssetFileHeader.h"
 
 namespace liquid {
@@ -84,6 +85,15 @@ template <> inline void OutputBinaryStream::write(const String &value) {
 }
 
 /**
+ * @brief Write string data to file
+ *
+ * @param value String value
+ */
+template <> inline void OutputBinaryStream::write(const Uuid &value) {
+  write(value.toString());
+}
+
+/**
  * @brief Write GLM 2D vector to file
  *
  * @param value GLM 2D vector value
@@ -138,6 +148,18 @@ inline void OutputBinaryStream::write(const AssetFileHeader &value) {
  */
 template <>
 inline void OutputBinaryStream::write(const std::vector<String> &value) {
+  for (auto &v : value) {
+    write(v);
+  }
+}
+
+/**
+ * @brief Write vector of dynamic strings to file
+ *
+ * @param value String vector
+ */
+template <>
+inline void OutputBinaryStream::write(const std::vector<Uuid> &value) {
   for (auto &v : value) {
     write(v);
   }

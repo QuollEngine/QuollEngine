@@ -77,8 +77,8 @@ private:
    * @return Irradiance map texture asset
    */
   Result<TextureAssetHandle>
-  generateIrradianceMap(const CubemapData &unfilteredCubemap,
-                        const String &uuid, const String &name);
+  generateIrradianceMap(const CubemapData &unfilteredCubemap, const Uuid &uuid,
+                        const String &name);
 
   /**
    * @brief Generate specular map
@@ -89,7 +89,7 @@ private:
    * @return Specular map texture asset
    */
   Result<TextureAssetHandle>
-  generateSpecularMap(const CubemapData &unfilteredCubemap, const String &uuid,
+  generateSpecularMap(const CubemapData &unfilteredCubemap, const Uuid &uuid,
                       const String &name);
 
 private:

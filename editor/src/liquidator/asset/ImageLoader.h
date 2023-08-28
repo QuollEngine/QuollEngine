@@ -29,8 +29,8 @@ public:
    * @param format Texture format
    * @return Uuid of newly created texture
    */
-  Result<String> loadFromPath(const Path &sourceAssetPath, const String &uuid,
-                              bool generateMipMaps, rhi::Format format);
+  Result<Uuid> loadFromPath(const Path &sourceAssetPath, const Uuid &uuid,
+                            bool generateMipMaps, rhi::Format format);
 
   /**
    * @brief Load texture from memory
@@ -44,9 +44,9 @@ public:
    * @param format Texture format
    * @return Uuid of newly created texture
    */
-  Result<String> loadFromMemory(void *data, uint32_t width, uint32_t height,
-                                const String &uuid, const String &name,
-                                bool generateMipMaps, rhi::Format format);
+  Result<Uuid> loadFromMemory(void *data, uint32_t width, uint32_t height,
+                              const Uuid &uuid, const String &name,
+                              bool generateMipMaps, rhi::Format format);
 
 private:
   /**

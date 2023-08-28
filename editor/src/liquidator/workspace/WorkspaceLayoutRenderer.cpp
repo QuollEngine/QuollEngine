@@ -51,9 +51,14 @@ void WorkspaceLayoutRenderer::reset() {
   auto dockspaceId = ImGui::GetID("LiquidatorDockspace");
 
   ImGui::DockBuilderRemoveNode(dockspaceId);
-  ImGui::DockBuilderAddNode(dockspaceId,
-                            ImGuiDockNodeFlags_DockSpace |
-                                ImGuiDockNodeFlags_PassthruCentralNode);
+  ImGui::DockBuilderAddNode(
+      dockspaceId,
+      // Imgui dockspace two enums that can
+      // be used together. Linter does not like performing
+      // bitwise operations on this; so, supressing the warning
+      // just for this special use-case
+      // NOLINTNEXTLINE(clang-diagnostic-deprecated-enum-enum-conversion)
+      ImGuiDockNodeFlags_DockSpace | ImGuiDockNodeFlags_PassthruCentralNode);
   ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 
   // Default template

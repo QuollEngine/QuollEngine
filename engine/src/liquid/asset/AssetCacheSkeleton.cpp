@@ -10,9 +10,8 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset,
-                                    const String &uuid) {
-  auto assetPath = createAssetPath(uuid);
+AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -47,7 +46,7 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
   AssetData<SkeletonAsset> skeleton{};
   skeleton.path = filePath;
   skeleton.type = AssetType::Skeleton;
-  skeleton.uuid = filePath.stem().string();
+  skeleton.uuid = Uuid(filePath.stem().string());
   skeleton.name = header.name;
 
   uint32_t numJoints = 0;
@@ -84,8 +83,8 @@ AssetCache::loadSkeletonFromFile(const Path &filePath) {
 }
 
 Result<SkeletonAssetHandle>
-AssetCache::getOrLoadSkeletonFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+AssetCache::getOrLoadSkeletonFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Null);
   }
 

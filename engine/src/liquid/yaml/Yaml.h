@@ -154,4 +154,39 @@ template <> struct convert<glm::quat> {
   }
 };
 
+/**
+ * @brief Uuid Yaml serializer
+ */
+template <> struct convert<liquid::Uuid> {
+  /**
+   * @brief Encode Uuid to Yaml
+   *
+   * @param value Uuid
+   * @return Yaml node
+   */
+  static Node encode(const liquid::Uuid &value) {
+    return convert<liquid::String>::encode(value.toString());
+  }
+
+  /**
+   * @brief Decode Yaml to uuid
+   *
+   * @param node Yaml node
+   * @param value Uuid value
+   * @retval true Decoding successful
+   * @retval false Decoding failed
+   */
+  static bool decode(const Node &node, liquid::Uuid &value) {
+    liquid::String str;
+    bool status = convert<liquid::String>::decode(node, str);
+    if (!status) {
+      return status;
+    }
+
+    value.updateWithString(str);
+
+    return status;
+  }
+};
+
 } // namespace YAML

@@ -51,11 +51,6 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-#include "Assert.h"
-#include "Profiler.h"
-#include "Errorable.h"
-#include "BitwiseEnum.h"
-
 namespace liquid {
 
 using String = std::string;
@@ -65,5 +60,11 @@ using Path = std::filesystem::path;
 template <class T> using SharedPtr = std::shared_ptr<T>;
 
 } // namespace liquid
+
+#include "Assert.h"
+#include "Profiler.h"
+#include "Errorable.h"
+#include "BitwiseEnum.h"
+#include "Uuid.h"
 
 #endif

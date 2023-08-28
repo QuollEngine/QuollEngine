@@ -8,16 +8,15 @@
 
 namespace liquid {
 
-Result<Path>
-AssetCache::createEnvironmentFromAsset(const AssetData<EnvironmentAsset> &asset,
-                                       const String &uuid) {
+Result<Path> AssetCache::createEnvironmentFromAsset(
+    const AssetData<EnvironmentAsset> &asset) {
   auto irradianceMapUuid =
       mRegistry.getTextures().getAsset(asset.data.irradianceMap).uuid;
 
   auto specularMapUuid =
       mRegistry.getTextures().getAsset(asset.data.specularMap).uuid;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};
@@ -36,10 +35,10 @@ Result<EnvironmentAssetHandle>
 AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
                                                const Path &filePath,
                                                const AssetFileHeader &header) {
-  String irradianceMapUuid;
+  Uuid irradianceMapUuid;
   stream.read(irradianceMapUuid);
 
-  String specularMapUuid;
+  Uuid specularMapUuid;
   stream.read(specularMapUuid);
 
   auto irradianceMapRes = getOrLoadTextureFromUuid(irradianceMapUuid);
@@ -55,7 +54,7 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
 
   AssetData<EnvironmentAsset> environment{};
   environment.path = filePath;
-  environment.uuid = filePath.stem().string();
+  environment.uuid = Uuid(filePath.stem().string());
   environment.type = AssetType::Environment;
   environment.data.irradianceMap = irradianceMapRes.getData();
   environment.data.specularMap = specularMapRes.getData();

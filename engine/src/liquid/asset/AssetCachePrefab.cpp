@@ -10,9 +10,8 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
-                                  const String &uuid) {
-  auto assetPath = createAssetPath(uuid);
+AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -29,7 +28,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
 
   std::map<MaterialAssetHandle, uint32_t> localMaterialMap;
   {
-    std::vector<String> assetPaths;
+    std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
 
     for (auto &component : asset.data.meshRenderers) {
@@ -60,7 +59,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
 
   std::map<MeshAssetHandle, uint32_t> localMeshMap;
   {
-    std::vector<String> assetPaths;
+    std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.meshes.size());
 
     for (auto &component : asset.data.meshes) {
@@ -78,7 +77,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
 
   std::map<SkeletonAssetHandle, uint32_t> localSkeletonMap;
   {
-    std::vector<String> assetPaths;
+    std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.skeletons.size());
 
     for (auto &component : asset.data.skeletons) {
@@ -97,7 +96,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
 
   std::map<AnimationAssetHandle, uint32_t> localAnimationMap;
   {
-    std::vector<String> assetPaths;
+    std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animations.size());
 
     for (auto handle : asset.data.animations) {
@@ -116,7 +115,7 @@ AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset,
 
   std::map<AnimatorAssetHandle, uint32_t> localAnimatorMap;
   {
-    std::vector<String> assetPaths;
+    std::vector<Uuid> assetPaths;
     assetPaths.reserve(asset.data.animators.size());
 
     for (auto &component : asset.data.animators) {
@@ -261,13 +260,13 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   prefab.name = header.name;
   prefab.path = filePath;
   prefab.type = AssetType::Prefab;
-  prefab.uuid = filePath.stem().string();
+  prefab.uuid = Uuid(filePath.stem().string());
 
   std::vector<MaterialAssetHandle> localMaterialMap;
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
+    std::vector<liquid::Uuid> actual(numAssets);
     stream.read(actual);
     localMaterialMap.resize(numAssets, MaterialAssetHandle::Null);
 
@@ -288,7 +287,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
+    std::vector<liquid::Uuid> actual(numAssets);
     stream.read(actual);
     localMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
@@ -309,7 +308,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
+    std::vector<liquid::Uuid> actual(numAssets);
     stream.read(actual);
     localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
 
@@ -332,7 +331,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
+    std::vector<liquid::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
 
@@ -356,7 +355,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::String> actual(numAssets);
+    std::vector<liquid::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
 

@@ -24,12 +24,12 @@ bool LuaInterpreter::evaluate(const std::vector<uint8_t> &bytes,
   auto ret = luaL_loadstring(
       luaState, liquid::String{bytes.begin(), bytes.end()}.c_str());
 
-  if (!ret == LUA_OK) {
+  if (ret != LUA_OK) {
     return false;
   }
 
   ret = lua_pcall(luaState, 0, 0, 0);
-  if (!ret == LUA_OK) {
+  if (ret != LUA_OK) {
     return false;
   }
 

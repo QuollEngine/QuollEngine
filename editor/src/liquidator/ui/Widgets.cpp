@@ -136,7 +136,7 @@ ContextMenu::~ContextMenu() {
 Table::Table(const char *id, uint32_t numColumns) {
   mExpanded = ImGui::BeginTable(id, static_cast<int>(numColumns),
                                 ImGuiTableFlags_Borders |
-                                    ImGuiTableColumnFlags_WidthStretch |
+                                    ImGuiTableFlags_SizingStretchSame |
                                     ImGuiTableFlags_RowBg);
 }
 

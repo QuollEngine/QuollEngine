@@ -78,7 +78,7 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
 
 Result<Path>
 liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
-                                              const String &uuid) {
+                                              const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -111,13 +111,13 @@ AssetCache::loadLuaScriptFromFile(const Path &filePath,
         "File cannot be opened for reading: " + filePath.string());
   }
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   AssetData<LuaScriptAsset> asset;
   asset.path = filePath;
   asset.name = meta.name;
   asset.type = AssetType::LuaScript;
-  asset.uuid = filePath.stem().string();
+  asset.uuid = Uuid(filePath.stem().string());
   asset.data.bytes = readFileIntoBuffer(stream);
 
   stream.close();

@@ -40,7 +40,7 @@ void ImguiDebugLayer::renderPerformanceMetrics() {
                    ImGuiWindowFlags_NoDocking)) {
     if (ImGui::BeginTable("Table", 2,
                           ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_SizingStretchSame |
                               ImGuiTableFlags_RowBg)) {
 
       renderTableRow("FPS", std::to_string(fps));
@@ -82,7 +82,7 @@ void ImguiDebugLayer::renderUsageMetrics() {
 
     if (ImGui::BeginTable("Table", 2,
                           ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch |
+                              ImGuiTableFlags_SizingStretchSame |
                               ImGuiTableFlags_RowBg)) {
       // Buffers
       renderTableRow(
@@ -127,7 +127,7 @@ void ImguiDebugLayer::renderPhysicalDeviceInfo() {
                    &mPhysicalDeviceInfoVisible, ImGuiWindowFlags_NoDocking)) {
     if (ImGui::BeginTable("Table", 2,
                           ImGuiTableFlags_Borders |
-                              ImGuiTableColumnFlags_WidthStretch)) {
+                              ImGuiTableFlags_SizingStretchSame)) {
       renderTableRow("Name", mPhysicalDeviceInfo.getName());
       renderTableRow("Type", mPhysicalDeviceInfo.getTypeString());
 

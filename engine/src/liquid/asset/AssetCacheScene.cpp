@@ -4,7 +4,7 @@
 namespace liquid {
 
 Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
-                                               const String &uuid) {
+                                               const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -54,13 +54,13 @@ Result<SceneAssetHandle> AssetCache::loadSceneFromFile(const Path &filePath) {
     return Result<SceneAssetHandle>::Error("`entities` field is invalid");
   }
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   AssetData<SceneAsset> asset{};
   asset.type = AssetType::Scene;
   asset.name = meta.name;
   asset.path = filePath;
-  asset.uuid = filePath.stem().string();
+  asset.uuid = Uuid(filePath.stem().string());
   asset.data.data = root;
 
   auto handle = mRegistry.getScenes().addAsset(asset);

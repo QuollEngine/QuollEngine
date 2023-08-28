@@ -136,7 +136,7 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
   }
 }
 
-String AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
+Uuid AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
   auto it = mAssetCacheMap.find(sourceAssetPath.string());
   if (it != mAssetCacheMap.end()) {
     return it->second;
@@ -146,13 +146,13 @@ String AssetManager::findRootAssetUuid(const Path &sourceAssetPath) {
   std::ifstream stream(metaFilePath);
 
   if (!stream.good()) {
-    return "/";
+    return Uuid{};
   }
 
   auto node = YAML::Load(stream);
   stream.close();
 
-  auto uuid = node["uuid"]["root"].as<String>("");
+  auto uuid = node["uuid"]["root"].as<Uuid>(Uuid{});
 
   mAssetCacheMap.insert_or_assign(
       std::filesystem::canonical(sourceAssetPath).string(), uuid);
@@ -220,7 +220,7 @@ Result<bool> AssetManager::reloadAssets() {
 
     if (res.hasData()) {
       for (const auto &[_, uuid] : res.getData()) {
-        allLoadedUuids.insert_or_assign(uuid, true);
+        allLoadedUuids.insert_or_assign(uuid.toString(), true);
       }
     }
 
@@ -497,9 +497,9 @@ UUIDMap AssetManager::getUuidsFromMeta(const Path &sourceAssetPath) const {
   for (const auto &pair : node["uuid"]) {
     if (pair.second.IsScalar()) {
       uuidMap.insert_or_assign(pair.first.as<String>(),
-                               pair.second.as<String>(""));
+                               pair.second.as<Uuid>(Uuid{}));
     } else {
-      uuidMap.insert_or_assign(pair.first.as<String>(), "");
+      uuidMap.insert_or_assign(pair.first.as<String>(), Uuid{});
     }
   }
 

@@ -10,7 +10,8 @@ public:
 
 TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
   auto sourcePath = FixturesPath / "valid-font.ttf";
-  auto filePath = cache.createFontFromSource(sourcePath, "");
+  auto filePath =
+      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
 
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
@@ -18,7 +19,8 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
 
   EXPECT_EQ(meta.type, liquid::AssetType::Font);
   EXPECT_EQ(meta.name, "valid-font.ttf");
@@ -26,7 +28,8 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
 
 TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.ttf";
-  auto filePath = cache.createFontFromSource(sourcePath, "");
+  auto filePath =
+      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
 
   auto result = cache.loadFontFromFile(filePath.getData());
 
@@ -45,7 +48,8 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
 
 TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.otf";
-  auto filePath = cache.createFontFromSource(sourcePath, "");
+  auto filePath =
+      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
 
   auto result = cache.loadFontFromFile(filePath.getData());
 

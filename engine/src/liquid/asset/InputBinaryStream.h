@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/core/Uuid.h"
 #include "AssetFileHeader.h"
 #include "AssetMeta.h"
 
@@ -85,6 +86,17 @@ template <> inline void InputBinaryStream::read(String &value) {
 }
 
 /**
+ * @brief Read binary data into uuid
+ *
+ * @param value Uuid value
+ */
+template <> inline void InputBinaryStream::read(Uuid &value) {
+  String str;
+  read(str);
+  value.updateWithString(str);
+}
+
+/**
  * @brief Read binary data into GLM 2D vector
  *
  * @param value GLM 2D vector value
@@ -127,10 +139,18 @@ template <> inline void InputBinaryStream::read(glm::quat &value) {
  */
 template <> inline void InputBinaryStream::read(std::vector<String> &value) {
   for (size_t i = 0; i < value.size(); ++i) {
-    uint32_t length = 0;
-    read(&length, sizeof(uint32_t));
-    value.at(i).resize(length);
-    read(value.at(i).data(), length);
+    read<String>(value.at(i));
+  }
+}
+
+/**
+ * @brief Read binary data into vector of uuids
+ *
+ * @param value String vector
+ */
+template <> inline void InputBinaryStream::read(std::vector<Uuid> &value) {
+  for (size_t i = 0; i < value.size(); ++i) {
+    read<Uuid>(value.at(i));
   }
 }
 

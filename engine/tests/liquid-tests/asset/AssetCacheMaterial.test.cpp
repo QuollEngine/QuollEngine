@@ -21,7 +21,7 @@ public:
 
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = "base";
+      texture.uuid = liquid::Uuid("base");
 
       asset.data.baseColorTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -32,7 +32,7 @@ public:
     asset.data.metallicRoughnessTextureCoord = 3;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = "mr";
+      texture.uuid = liquid::Uuid("mr");
 
       asset.data.metallicRoughnessTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -42,7 +42,7 @@ public:
     asset.data.normalTextureCoord = 4;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = "normal";
+      texture.uuid = liquid::Uuid("normal");
 
       asset.data.normalTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -52,7 +52,7 @@ public:
     asset.data.occlusionTextureCoord = 5;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = "occlusion";
+      texture.uuid = liquid::Uuid("occlusion");
 
       asset.data.occlusionTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -62,7 +62,7 @@ public:
     asset.data.emissiveTextureCoord = 6;
     if (createTextures) {
       liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = "emissive";
+      texture.uuid = liquid::Uuid("emissive");
 
       asset.data.emissiveTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -79,7 +79,7 @@ public:
 
 TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
   auto asset = createMaterialAsset(true);
-  auto filePath = cache.createMaterialFromAsset(asset, "");
+  auto filePath = cache.createMaterialFromAsset(asset);
 
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
@@ -159,7 +159,7 @@ TEST_F(AssetCacheMaterialTest,
        CreatesMaterialWithoutTexturesFromAssetIfReferencedTexturesAreInvalid) {
   auto asset = createMaterialAsset(false);
 
-  auto filePath = cache.createMaterialFromAsset(asset, "");
+  auto filePath = cache.createMaterialFromAsset(asset);
 
   {
     liquid::InputBinaryStream file(filePath.getData());
@@ -234,7 +234,7 @@ TEST_F(AssetCacheMaterialTest,
 TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
   auto asset = createMaterialAsset(true);
 
-  auto assetFile = cache.createMaterialFromAsset(asset, "");
+  auto assetFile = cache.createMaterialFromAsset(asset);
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
@@ -282,7 +282,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   auto asset = createMaterialAsset(false);
 
-  auto assetFile = cache.createMaterialFromAsset(asset, "");
+  auto assetFile = cache.createMaterialFromAsset(asset);
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
@@ -332,7 +332,7 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   auto texture = cache.loadTextureFromFile(CachePath / "tex.asset");
   liquid::AssetData<liquid::MaterialAsset> material{};
   material.data.baseColorTexture = texture.getData();
-  auto path = cache.createMaterialFromAsset(material, "");
+  auto path = cache.createMaterialFromAsset(material);
 
   cache.getRegistry().getTextures().deleteAsset(texture.getData());
   EXPECT_FALSE(cache.getRegistry().getTextures().hasAsset(texture.getData()));
@@ -347,5 +347,5 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.uuid, "tex");
+  EXPECT_EQ(newTexture.uuid, liquid::Uuid("tex"));
 }

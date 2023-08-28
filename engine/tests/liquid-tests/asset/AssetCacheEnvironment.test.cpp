@@ -33,7 +33,7 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
 
-  auto filePath = cache.createEnvironmentFromAsset(asset, "");
+  auto filePath = cache.createEnvironmentFromAsset(asset);
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
@@ -71,7 +71,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset, "");
+  auto createRes = cache.createEnvironmentFromAsset(asset);
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
@@ -107,7 +107,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset, "");
+  auto createRes = cache.createEnvironmentFromAsset(asset);
 
   cache.getRegistry().getTextures().deleteAsset(irradianceMap);
   cache.getRegistry().getTextures().deleteAsset(specularMap);
@@ -141,7 +141,7 @@ TEST_F(AssetCacheEnvironmentTest,
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
-  auto createRes = cache.createEnvironmentFromAsset(asset, "");
+  auto createRes = cache.createEnvironmentFromAsset(asset);
 
   EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
 
