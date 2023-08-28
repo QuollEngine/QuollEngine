@@ -124,6 +124,7 @@ void loadAnimations(GLTFImportData &importData) {
     AssetData<AnimationAsset> animation;
     animation.name = getGLTFAssetName(importData, assetName);
     animation.data.time = maxTime;
+    animation.uuid = getUUID(importData, assetName);
 
     int32_t targetNode = -1;
     int32_t targetSkin = -1;
@@ -223,8 +224,7 @@ void loadAnimations(GLTFImportData &importData) {
       continue;
     }
 
-    auto filePath = assetCache.createAnimationFromAsset(
-        animation, getUUID(importData, assetName));
+    auto filePath = assetCache.createAnimationFromAsset(animation);
     auto handle = assetCache.loadAnimationFromFile(filePath.getData());
     importData.outputUuids.insert_or_assign(assetName,
                                             assetCache.getRegistry()
@@ -253,7 +253,9 @@ void loadAnimations(GLTFImportData &importData) {
     auto animatorName = "animator-skin-" + std::to_string(skin);
 
     AssetData<AnimatorAsset> asset{};
-    asset.name = asset.name = getGLTFAssetName(importData, animatorName);
+    asset.name = getGLTFAssetName(importData, animatorName);
+    asset.uuid = getUUID(importData, animatorName);
+
     for (auto [handle, assetName] : animations) {
       AnimationState state{};
       state.name = assetName;
@@ -278,8 +280,7 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    auto path = assetCache.createAnimatorFromAsset(
-        asset, getUUID(importData, animatorName));
+    auto path = assetCache.createAnimatorFromAsset(asset);
     auto handle = assetCache.loadAnimatorFromFile(path.getData());
     importData.animations.skinAnimatorMap.insert_or_assign(skin,
                                                            handle.getData());
@@ -320,8 +321,7 @@ void loadAnimations(GLTFImportData &importData) {
       }
     }
 
-    auto path = assetCache.createAnimatorFromAsset(
-        asset, getUUID(importData, animatorName));
+    auto path = assetCache.createAnimatorFromAsset(asset);
     auto handle = assetCache.loadAnimatorFromFile(path.getData());
     importData.animations.nodeAnimatorMap.insert_or_assign(node,
                                                            handle.getData());

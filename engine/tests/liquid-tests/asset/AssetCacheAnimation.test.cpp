@@ -55,7 +55,7 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
 
 TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
-  auto filePath = cache.createAnimationFromAsset(asset, "");
+  auto filePath = cache.createAnimationFromAsset(asset);
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
@@ -113,7 +113,7 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
 TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
-  auto filePath = cache.createAnimationFromAsset(asset, "");
+  auto filePath = cache.createAnimationFromAsset(asset);
   auto handle = cache.loadAnimationFromFile(filePath.getData());
   EXPECT_FALSE(handle.hasError());
   EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);

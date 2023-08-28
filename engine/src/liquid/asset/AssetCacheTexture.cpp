@@ -86,8 +86,8 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
   }
 }
 
-Result<Path> liquid::AssetCache::createTextureFromSource(const Path &sourcePath,
-                                                         const String &uuid) {
+Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
+                                                 const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -111,8 +111,7 @@ Result<Path> liquid::AssetCache::createTextureFromSource(const Path &sourcePath,
 }
 
 Result<Path>
-AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset,
-                                   const String &uuid) {
+AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   ktxTextureCreateInfo createInfo{};
   createInfo.baseWidth = asset.data.width;
   createInfo.baseHeight = asset.data.height;
@@ -126,7 +125,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset,
   createInfo.generateMipmaps = KTX_FALSE;
   createInfo.vkFormat = getVulkanFormatFromFormat(asset.data.format);
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = createAssetPath(asset.uuid);
 
   ktxTexture2 *texture = nullptr;
   {
@@ -179,17 +178,24 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset,
 
 Result<TextureAssetHandle>
 AssetCache::loadTextureFromFile(const Path &filePath) {
-  FILE *stream = fopen(filePath.string().c_str(), "rb");
-  if (!stream) {
+  std::ifstream stream(filePath, std::ios::binary);
+  if (!stream.good()) {
     return Result<TextureAssetHandle>::Error("Cannot open file: " +
                                              filePath.string());
   }
 
-  ktxTexture *ktxTextureData = nullptr;
-  KTX_error_code result = ktxTexture_CreateFromStdioStream(
-      stream, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &ktxTextureData);
+  stream.seekg(0, std::ios::end);
+  auto size = stream.tellg();
+  stream.seekg(0, std::ios::beg);
 
-  fclose(stream);
+  std::vector<uint8_t> bytes(size);
+  stream.read(reinterpret_cast<char *>(bytes.data()), size);
+  stream.close();
+
+  ktxTexture *ktxTextureData = nullptr;
+  KTX_error_code result = ktxTexture_CreateFromMemory(
+      bytes.data(), bytes.size(), KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
+      &ktxTextureData);
 
   if (result != KTX_SUCCESS) {
     return Result<TextureAssetHandle>::Error(
@@ -205,14 +211,14 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
         "Texture arrays are not supported");
   }
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   AssetData<TextureAsset> texture{};
   // TODO: Remove size
   texture.size = ktxTexture_GetDataSizeUncompressed(ktxTextureData);
   texture.name = meta.name;
   texture.path = filePath;
-  texture.uuid = filePath.stem().string();
+  texture.uuid = Uuid(filePath.stem().string());
   texture.type = AssetType::Texture;
   texture.data.data.resize(texture.size);
   texture.data.width = ktxTextureData->baseWidth;
@@ -273,8 +279,8 @@ AssetCache::loadTextureFromFile(const Path &filePath) {
 }
 
 Result<TextureAssetHandle>
-AssetCache::getOrLoadTextureFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+AssetCache::getOrLoadTextureFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<TextureAssetHandle>::Ok(TextureAssetHandle::Null);
   }
 

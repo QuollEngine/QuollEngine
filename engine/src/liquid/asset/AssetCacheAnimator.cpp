@@ -10,7 +10,7 @@
 namespace liquid {
 
 Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
-                                                  const String &uuid) {
+                                                  const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -34,8 +34,7 @@ Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
 }
 
 Result<Path>
-AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset,
-                                    const String &uuid) {
+AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   YAML::Node root;
   root["version"] = "0.1";
   root["type"] = "animator";
@@ -59,7 +58,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset,
     }
   }
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = createAssetPath(asset.uuid);
 
   std::ofstream stream(assetPath);
   stream << root;
@@ -93,13 +92,13 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     return Result<AnimatorAssetHandle>::Error("`states` field must be a map");
   }
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   AssetData<AnimatorAsset> asset{};
   asset.type = AssetType::Animator;
   asset.name = meta.name;
   asset.path = filePath;
-  asset.uuid = filePath.stem().string();
+  asset.uuid = Uuid(filePath.stem().string());
 
   std::vector<String> warnings;
 
@@ -120,8 +119,8 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
 
     auto output = stateNode["output"];
     if (output["type"] && output["type"].as<String>("") == "animation") {
-      auto animation = output["animation"].as<String>("");
-      if (!animation.empty()) {
+      auto animation = output["animation"].as<Uuid>(Uuid{});
+      if (!animation.isEmpty()) {
         auto res = getOrLoadAnimationFromUuid(animation);
         if (res.hasData()) {
           state.animation = res.getData();
@@ -246,8 +245,8 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
 }
 
 Result<AnimatorAssetHandle>
-AssetCache::getOrLoadAnimatorFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+AssetCache::getOrLoadAnimatorFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
   }
 

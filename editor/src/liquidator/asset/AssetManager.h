@@ -142,7 +142,7 @@ public:
    * @param sourceAssetPath Source asset path
    * @return Found engine asset root uuid
    */
-  String findRootAssetUuid(const Path &sourceAssetPath);
+  Uuid findRootAssetUuid(const Path &sourceAssetPath);
 
   /**
    * @brief Create directory in assets
@@ -368,7 +368,7 @@ private:
 
   HDRIImporter mHDRIImporter;
 
-  std::unordered_map<String, String> mAssetCacheMap;
+  std::unordered_map<String, Uuid> mAssetCacheMap;
 };
 
 } // namespace liquid::editor

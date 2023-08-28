@@ -12,14 +12,16 @@ public:
 };
 
 TEST_F(AssetCacheSceneTest, CreatesSceneFromSource) {
-  auto filePath = cache.createSceneFromSource(FixturesPath / "test.scene", "");
+  auto filePath = cache.createSceneFromSource(FixturesPath / "test.scene",
+                                              liquid::Uuid::generate());
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
 
   EXPECT_EQ(meta.type, liquid::AssetType::Scene);
   EXPECT_EQ(meta.name, "test.scene");

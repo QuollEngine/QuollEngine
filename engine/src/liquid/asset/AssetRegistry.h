@@ -179,7 +179,7 @@ public:
    * @retval {AssetType::None, 0} Asset does not exist
    * @return Asset type and ID
    */
-  std::pair<AssetType, uint32_t> getAssetByUuid(const String &uuid);
+  std::pair<AssetType, uint32_t> getAssetByUuid(const Uuid &uuid);
 
 private:
   TextureMap mTextures;

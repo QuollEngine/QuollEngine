@@ -61,7 +61,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset, "");
+  auto filePath = cache.createSkeletonFromAsset(asset);
 
   liquid::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
@@ -150,7 +150,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
     }
   }
 
-  auto filePath = cache.createSkeletonFromAsset(asset, "");
+  auto filePath = cache.createSkeletonFromAsset(asset);
   auto handle = cache.loadSkeletonFromFile(filePath.getData());
 
   EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Null);

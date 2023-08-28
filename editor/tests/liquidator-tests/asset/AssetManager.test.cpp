@@ -102,15 +102,16 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
 
   auto sourcePath = manager.createAnimator(animatorPath).getData();
   auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
-  EXPECT_EQ(engineUuidBefore.size(), 32);
+  EXPECT_TRUE(engineUuidBefore.isValid());
 
   std::filesystem::remove(
-      (manager.getCachePath() / engineUuidBefore).replace_extension("asset"));
+      (manager.getCachePath() / (engineUuidBefore.toString()))
+          .replace_extension("asset"));
 
   manager.loadSourceIfChanged(sourcePath);
 
   auto engineUuidAfter = manager.findRootAssetUuid(sourcePath);
-  EXPECT_EQ(engineUuidAfter.size(), 32);
+  EXPECT_TRUE(engineUuidAfter.isValid());
   EXPECT_EQ(engineUuidBefore, engineUuidAfter);
 }
 
@@ -128,15 +129,15 @@ TEST_F(
 
   auto sourcePath = manager.createAnimator(animatorPath).getData();
   auto engineUuidBefore = manager.findRootAssetUuid(sourcePath);
-  EXPECT_EQ(engineUuidBefore.size(), 32);
+  EXPECT_TRUE(engineUuidBefore.isValid());
 
-  std::filesystem::remove(
-      (manager.getCachePath() / engineUuidBefore).replace_extension("asset"));
+  std::filesystem::remove((manager.getCachePath() / engineUuidBefore.toString())
+                              .replace_extension("asset"));
 
   manager.validateAndPreloadAssets(renderStorage);
 
   auto engineUuidAfter = manager.findRootAssetUuid(sourcePath);
-  EXPECT_EQ(engineUuidAfter.size(), 32);
+  EXPECT_TRUE(engineUuidAfter.isValid());
   EXPECT_EQ(engineUuidBefore, engineUuidAfter);
 }
 
@@ -220,7 +221,8 @@ TEST_P(AssetTest, ImportCreatesAssetInCache) {
   auto uuid = manager.findRootAssetUuid(res.getData());
 
   EXPECT_TRUE(res.hasData());
-  EXPECT_EQ(uuid.size(), 32);
+  EXPECT_TRUE(uuid.isValid());
+
   EXPECT_EQ(
       manager.getCache().getMetaFromUuid(uuid).type,
       liquid::editor::AssetManager::getAssetTypeFromExtension(res.getData()));

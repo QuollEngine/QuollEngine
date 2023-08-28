@@ -11,21 +11,24 @@ public:
 TEST_F(AssetCacheAudioTest, CreatesAudioFromSource) {
   auto audioPath = FixturesPath / "valid-audio.wav";
 
-  auto filePath = cache.createAudioFromSource(audioPath, "");
+  auto filePath =
+      cache.createAudioFromSource(audioPath, liquid::Uuid::generate());
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
   EXPECT_EQ(meta.type, liquid::AssetType::Audio);
   EXPECT_EQ(meta.name, "valid-audio.wav");
 }
 
 TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
   auto audioPath = FixturesPath / "valid-audio.wav";
-  auto filePath = cache.createAudioFromSource(audioPath, "");
+  auto filePath =
+      cache.createAudioFromSource(audioPath, liquid::Uuid::generate());
 
   auto result = cache.loadAudioFromFile(filePath.getData());
 

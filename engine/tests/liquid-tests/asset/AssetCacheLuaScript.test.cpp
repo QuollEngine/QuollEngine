@@ -11,7 +11,8 @@ class AssetCacheLuaScriptTest : public AssetCacheTestBase {
 public:
   liquid::Result<liquid::LuaScriptAssetHandle>
   loadFromSource(liquid::Path sourcePath) {
-    auto cachePath = cache.createLuaScriptFromSource(sourcePath, "");
+    auto cachePath =
+        cache.createLuaScriptFromSource(sourcePath, liquid::Uuid::generate());
 
     return cache.loadLuaScriptFromFile(cachePath.getData());
   }
@@ -22,14 +23,16 @@ using AssetCacheLuaScriptDeathTest = AssetCacheLuaScriptTest;
 TEST_F(AssetCacheLuaScriptTest, CreateLuaScriptFromSource) {
   auto scriptPath = FixturesPath / "script-asset-valid.lua";
 
-  auto filePath = cache.createLuaScriptFromSource(scriptPath, "");
+  auto filePath =
+      cache.createLuaScriptFromSource(scriptPath, liquid::Uuid::generate());
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
 
   EXPECT_EQ(meta.type, liquid::AssetType::LuaScript);
   EXPECT_EQ(meta.name, "script-asset-valid.lua");
@@ -130,7 +133,7 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
 
 TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
   auto filePath = cache.createLuaScriptFromSource(
-      FixturesPath / "component-script.lua", "");
+      FixturesPath / "component-script.lua", liquid::Uuid::generate());
 
   auto result = cache.loadLuaScriptFromFile(filePath.getData());
   EXPECT_FALSE(result.hasError());
@@ -140,7 +143,7 @@ TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
   auto handle = result.getData();
 
   auto filePath2 = cache.createLuaScriptFromSource(
-      FixturesPath / "component-script-2.lua", "");
+      FixturesPath / "component-script-2.lua", liquid::Uuid::generate());
   cache.loadLuaScriptFromFile(filePath2.getData(), handle);
 
   const auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
@@ -164,7 +167,7 @@ TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
 
 TEST_F(AssetCacheLuaScriptDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
   auto filePath = cache.createLuaScriptFromSource(
-      FixturesPath / "script-asset-valid.lua", "");
+      FixturesPath / "script-asset-valid.lua", liquid::Uuid::generate());
 
   EXPECT_DEATH(cache.loadLuaScriptFromFile(filePath.getData(),
                                            liquid::LuaScriptAssetHandle{25}),

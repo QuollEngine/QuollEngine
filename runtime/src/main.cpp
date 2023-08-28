@@ -25,7 +25,7 @@ int main() {
   liquid::runtime::LaunchConfig launchConfig{};
 
   launchConfig.name = node["name"].as<liquid::String>();
-  launchConfig.startingScene = node["startingScene"].as<liquid::String>();
+  launchConfig.startingScene = node["startingScene"].as<liquid::Uuid>();
 
   liquid::runtime::Runtime runtime(launchConfig);
 

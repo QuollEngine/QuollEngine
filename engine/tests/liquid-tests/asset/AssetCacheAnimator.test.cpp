@@ -18,15 +18,16 @@ public:
 using AssetCacheAnimatorDeathTest = AssetCacheAnimatorTest;
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
-  auto filePath =
-      cache.createAnimatorFromSource(FixturesPath / "test.animator", "");
+  auto filePath = cache.createAnimatorFromSource(FixturesPath / "test.animator",
+                                                 liquid::Uuid::generate());
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
 
   EXPECT_EQ(meta.type, liquid::AssetType::Animator);
   EXPECT_EQ(meta.name, "test.animator");
@@ -34,13 +35,13 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   liquid::AssetData<liquid::AnimationAsset> animData{};
-  animData.uuid = "idle";
+  animData.uuid = liquid::Uuid("idle");
   auto idle = cache.getRegistry().getAnimations().addAsset(animData);
 
-  animData.uuid = "walk";
+  animData.uuid = liquid::Uuid("walk");
   auto walk = cache.getRegistry().getAnimations().addAsset(animData);
 
-  animData.uuid = "run";
+  animData.uuid = liquid::Uuid("run");
   auto run = cache.getRegistry().getAnimations().addAsset(animData);
 
   liquid::AssetData<liquid::AnimatorAsset> asset{};
@@ -69,13 +70,14 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   asset.data.states.push_back(stateWalk);
   asset.data.states.push_back(stateRun);
 
-  auto filePath = cache.createAnimatorFromAsset(asset, "");
+  auto filePath = cache.createAnimatorFromAsset(asset);
 
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
-  auto meta = cache.getMetaFromUuid(filePath.getData().stem().string());
+  auto meta =
+      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
 
   EXPECT_EQ(meta.type, liquid::AssetType::Animator);
   EXPECT_EQ(meta.name, "my-animator.animator");
@@ -451,7 +453,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
 
   liquid::AssetData<liquid::AnimationAsset> animData{};
-  animData.uuid = "my-animation";
+  animData.uuid = liquid::Uuid("my-animation");
 
   auto animationHandle = cache.getRegistry().getAnimations().addAsset(animData);
 
@@ -485,7 +487,7 @@ TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorLoadsAnimationsBeforeLoadingAnimator) {
 
   liquid::AssetData<liquid::AnimationAsset> animData{};
-  auto path = cache.createAnimationFromAsset(animData, "");
+  auto path = cache.createAnimationFromAsset(animData);
 
   YAML::Node node;
   node["version"] = "0.1";
@@ -499,7 +501,8 @@ TEST_F(AssetCacheAnimatorTest,
   stream << node;
   stream.close();
 
-  auto filePath = cache.createAnimatorFromSource(FilePath, "");
+  auto filePath =
+      cache.createAnimatorFromSource(FilePath, liquid::Uuid::generate());
 
   auto res = cache.loadAnimatorFromFile(filePath.getData());
   EXPECT_TRUE(res.hasData());
@@ -520,7 +523,7 @@ TEST_F(AssetCacheAnimatorTest,
 TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
   liquid::AssetData<liquid::AnimatorAsset> animData{};
   animData.data.states.push_back({});
-  auto animatorPath = cache.createAnimatorFromAsset(animData, "");
+  auto animatorPath = cache.createAnimatorFromAsset(animData);
 
   auto result = cache.loadAnimatorFromFile(animatorPath.getData());
   EXPECT_FALSE(result.hasError());
@@ -529,7 +532,7 @@ TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
 
   auto handle = result.getData();
 
-  auto animatorPath2 = cache.createAnimatorFromAsset(animData, "").getData();
+  auto animatorPath2 = cache.createAnimatorFromAsset(animData).getData();
 
   // Load script to update the handle
   auto res2 = cache.loadAnimatorFromFile(animatorPath2, handle);
@@ -544,7 +547,7 @@ TEST_F(AssetCacheAnimatorDeathTest,
        UpdateAnimatorFailsIfProvidedHandleDoesNotExist) {
   liquid::AssetData<liquid::AnimatorAsset> animData{};
   animData.data.states.push_back({});
-  auto animatorPath = cache.createAnimatorFromAsset(animData, "");
+  auto animatorPath = cache.createAnimatorFromAsset(animData);
 
   EXPECT_DEATH(cache.loadAnimatorFromFile(animatorPath.getData(),
                                           liquid::AnimatorAssetHandle{25}),

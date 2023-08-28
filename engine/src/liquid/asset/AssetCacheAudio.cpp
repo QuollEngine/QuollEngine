@@ -13,7 +13,7 @@ static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
 }
 
 Result<Path> liquid::AssetCache::createAudioFromSource(const Path &sourcePath,
-                                                       const String &uuid) {
+                                                       const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -60,12 +60,12 @@ Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
   stream.seekg(0, std::ios::beg);
   stream.read(&bytes[0], pos);
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   AssetData<AudioAsset> asset;
   asset.name = meta.name;
   asset.path = filePath;
-  asset.uuid = filePath.stem().string();
+  asset.uuid = Uuid(filePath.stem().string());
   asset.type = AssetType::Audio;
   asset.data.bytes = bytes;
 

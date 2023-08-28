@@ -185,8 +185,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   }
 }
 
-std::pair<AssetType, uint32_t>
-AssetRegistry::getAssetByUuid(const String &uuid) {
+std::pair<AssetType, uint32_t> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
   LIQUID_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
   for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.uuid == uuid) {

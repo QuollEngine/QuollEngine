@@ -9,9 +9,9 @@
 
 namespace liquid {
 
-Result<Path> AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset,
-                                             const String &uuid) {
-  auto assetPath = createAssetPath(uuid);
+Result<Path>
+AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -61,7 +61,7 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
   mesh.name = header.name;
   mesh.path = filePath;
   mesh.type = header.type;
-  mesh.uuid = filePath.stem().string();
+  mesh.uuid = Uuid(filePath.stem().string());
 
   uint32_t numGeometries = 0;
   stream.read(numGeometries);
@@ -129,8 +129,8 @@ Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
   return loadMeshDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
   }
 

@@ -2,15 +2,15 @@
 
 namespace liquid::editor {
 
-using UUIDMap = std::unordered_map<String, String>;
+using UUIDMap = std::unordered_map<String, Uuid>;
 
 /**
  * @brief Get uuid from map
  *
  * @param uuids Uuid map
  * @param key Uuid map key
- * @return Uuid or empty string
+ * @return Uuid or empty uuid
  */
-String getUUIDFromMap(const UUIDMap &uuids, const String &key);
+Uuid getUUIDFromMap(const UUIDMap &uuids, const String &key);
 
 } // namespace liquid::editor

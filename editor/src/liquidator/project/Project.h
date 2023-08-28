@@ -34,7 +34,7 @@ struct Project {
   /**
    * Starting scene asset UUID
    */
-  String startingScene;
+  Uuid startingScene;
 };
 
 } // namespace liquid::editor

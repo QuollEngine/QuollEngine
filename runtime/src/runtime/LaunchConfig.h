@@ -12,9 +12,9 @@ struct LaunchConfig {
   String name;
 
   /**
-   * Starting scene UUID
+   * Starting scene uuid
    */
-  String startingScene;
+  Uuid startingScene;
 };
 
 } // namespace liquid::runtime

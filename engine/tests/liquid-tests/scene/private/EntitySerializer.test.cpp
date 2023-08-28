@@ -136,7 +136,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
   liquid::AssetData<liquid::TextureAsset> texture{};
-  texture.uuid = "texture.tex";
+  texture.uuid = liquid::Uuid("texture.tex");
   auto handle = assetRegistry.getTextures().addAsset(texture);
 
   auto entity = entityDatabase.create();
@@ -167,7 +167,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateMeshFieldIfMeshAssetIsNotInRegistry) {
 
 TEST_F(EntitySerializerTest, CreatesMeshFieldIfMeshAssetIsInRegistry) {
   liquid::AssetData<liquid::MeshAsset> mesh{};
-  mesh.uuid = "mesh.asset";
+  mesh.uuid = liquid::Uuid("mesh.asset");
 
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
@@ -189,10 +189,10 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1.asset";
+  material1.uuid = liquid::Uuid("material1.asset");
 
   liquid::AssetData<liquid::MaterialAsset> material2{};
-  material2.uuid = "material2.asset";
+  material2.uuid = liquid::Uuid("material2.asset");
 
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
@@ -213,7 +213,7 @@ TEST_F(EntitySerializerTest, CreatesMeshRendererFieldWithMaterials) {
 TEST_F(EntitySerializerTest,
        CreatesMeshRendererAndIgnoresNonExistentMaterials) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1.asset";
+  material1.uuid = liquid::Uuid("material1.asset");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   auto entity = entityDatabase.create();
@@ -260,7 +260,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshFieldIfSkinnedMeshAssetIsRegistry) {
   liquid::AssetData<liquid::MeshAsset> mesh{};
-  mesh.uuid = "skinnedMesh.mesh";
+  mesh.uuid = liquid::Uuid("skinnedMesh.mesh");
   auto handle = assetRegistry.getMeshes().addAsset(mesh);
 
   auto entity = entityDatabase.create();
@@ -282,10 +282,10 @@ TEST_F(
 
 TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1.asset";
+  material1.uuid = liquid::Uuid("material1.asset");
 
   liquid::AssetData<liquid::MaterialAsset> material2{};
-  material2.uuid = "material2.asset";
+  material2.uuid = liquid::Uuid("material2.asset");
 
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
@@ -306,7 +306,7 @@ TEST_F(EntitySerializerTest, CreatesSkinnedMeshRendererFieldWithMaterials) {
 TEST_F(EntitySerializerTest,
        CreatesSkinnedMeshRendererAndIgnoresNonExistentMaterials) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1.asset";
+  material1.uuid = liquid::Uuid("material1.asset");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   auto entity = entityDatabase.create();
@@ -354,7 +354,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesSkeletonFieldIfSkeletonAssetIsInRegistry) {
   liquid::AssetData<liquid::SkeletonAsset> skeleton{};
-  skeleton.uuid = "skeleton.skel";
+  skeleton.uuid = liquid::Uuid("skeleton.skel");
   auto handle = assetRegistry.getSkeletons().addAsset(skeleton);
 
   auto entity = entityDatabase.create();
@@ -411,7 +411,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesAnimatorWithValidAnimations) {
   liquid::AssetData<liquid::AnimatorAsset> animator{};
-  animator.uuid = "test.animator";
+  animator.uuid = liquid::Uuid("test.animator");
   auto handle = assetRegistry.getAnimators().addAsset(animator);
 
   liquid::Animator component{};
@@ -598,7 +598,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesAudioFieldIfAudioAssetIsInRegistry) {
   liquid::AssetData<liquid::AudioAsset> audio{};
-  audio.uuid = "bark.wav";
+  audio.uuid = liquid::Uuid("bark.wav");
   auto handle = assetRegistry.getAudios().addAsset(audio);
 
   auto entity = entityDatabase.create();
@@ -631,7 +631,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   liquid::AssetData<liquid::LuaScriptAsset> script{};
-  script.uuid = "script.lua";
+  script.uuid = liquid::Uuid("script.lua");
   script.data.variables.insert_or_assign(
       "test_str",
       liquid::LuaScriptVariable{liquid::LuaScriptVariableType::String});
@@ -641,7 +641,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
   liquid::AssetData<liquid::PrefabAsset> prefab{};
-  prefab.uuid = "test.lqprefab";
+  prefab.uuid = liquid::Uuid("test.lqprefab");
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
 
   auto entity = entityDatabase.create();
@@ -686,7 +686,7 @@ TEST_F(EntitySerializerTest,
 
 TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfTextContentsAreEmpty) {
   liquid::AssetData<liquid::FontAsset> font{};
-  font.uuid = "Roboto.ttf";
+  font.uuid = liquid::Uuid("Roboto.ttf");
   auto handle = assetRegistry.getFonts().addAsset(font);
 
   auto entity = entityDatabase.create();
@@ -715,7 +715,7 @@ TEST_F(EntitySerializerTest, DoesNotCreateTextFieldIfFontAssetIsNotInRegistry) {
 TEST_F(EntitySerializerTest,
        CreatesTextFieldIfTextContentsAreNotEmptyAndFontAssetIsInRegistry) {
   liquid::AssetData<liquid::FontAsset> font{};
-  font.uuid = "Roboto.ttf";
+  font.uuid = liquid::Uuid("Roboto.ttf");
   auto handle = assetRegistry.getFonts().addAsset(font);
 
   auto entity = entityDatabase.create();
@@ -930,7 +930,7 @@ TEST_F(EntitySerializerTest,
 TEST_F(EntitySerializerTest,
        CreatesSkyboxWithTextureColorIfTypeIsTextureAndAssetExists) {
   liquid::AssetData<liquid::EnvironmentAsset> data{};
-  data.uuid = "uuid.env";
+  data.uuid = liquid::Uuid("uuid.env");
   auto handle = assetRegistry.getEnvironments().addAsset(data);
 
   auto entity = entityDatabase.create();

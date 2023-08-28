@@ -3,13 +3,13 @@
 
 namespace liquid::editor {
 
-String getUUIDFromMap(const UUIDMap &uuids, const String &key) {
+Uuid getUUIDFromMap(const UUIDMap &uuids, const String &key) {
   auto it = uuids.find(key);
   if (it != uuids.end()) {
     return it->second;
   }
 
-  return "";
+  return Uuid{};
 }
 
 } // namespace liquid::editor

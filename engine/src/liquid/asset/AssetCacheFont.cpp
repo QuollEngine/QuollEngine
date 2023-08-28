@@ -12,7 +12,7 @@
 namespace liquid {
 
 Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
-                                              const String &uuid) {
+                                              const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
   auto assetPath = createAssetPath(uuid);
@@ -44,13 +44,13 @@ Result<FontAssetHandle> AssetCache::loadFontFromFile(const Path &filePath) {
     return Result<FontAssetHandle>::Error(res.getError());
   }
 
-  auto meta = getMetaFromUuid(filePath.stem().string());
+  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
 
   auto &data = res.getData();
   data.type = AssetType::Font;
   data.name = meta.name;
   data.path = filePath;
-  data.uuid = filePath.stem().string();
+  data.uuid = Uuid(filePath.stem().string());
 
   auto handle = mRegistry.getFonts().addAsset(data);
 

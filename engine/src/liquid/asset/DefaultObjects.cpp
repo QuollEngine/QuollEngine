@@ -1,4 +1,5 @@
 #include "liquid/core/Base.h"
+#include "liquid/core/Uuid.h"
 #include "AssetData.h"
 #include "MeshAsset.h"
 #include "MaterialAsset.h"
@@ -159,7 +160,7 @@ AssetData<MeshAsset> createCube() {
   AssetData<MeshAsset> mesh;
   mesh.name = "Cube";
   mesh.path = "liquid::engine/meshes/cube";
-  mesh.uuid = "liquid::engine/meshes/cube";
+  mesh.uuid = Uuid("liquid::engine/meshes/cube");
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
@@ -171,7 +172,7 @@ AssetData<MaterialAsset> createDefaultMaterial() {
   AssetData<MaterialAsset> material;
   material.name = "Default material";
   material.path = "liquid::engine/materials/default";
-  material.uuid = "liquid::engine/materials/default";
+  material.uuid = Uuid("liquid::engine/materials/default");
 
   return material;
 }
@@ -184,7 +185,7 @@ AssetData<FontAsset> createDefaultFont() {
 
   font.getData().name = "Roboto (default)";
   font.getData().path = "liquid::engine/fonts/Roboto-Regular";
-  font.getData().uuid = "liquid::engine/fonts/Roboto-Regular";
+  font.getData().uuid = Uuid("liquid::engine/fonts/Roboto-Regular");
 
   return font.getData();
 }

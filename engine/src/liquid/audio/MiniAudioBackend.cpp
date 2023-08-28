@@ -54,9 +54,10 @@ public:
     switch (format) {
     case AudioAssetFormat::Wav:
       return ma_encoding_format_wav;
+    case AudioAssetFormat::Unknown:
+    default:
+      return ma_encoding_format_unknown;
     }
-
-    return ma_encoding_format_unknown;
   }
 
   /**

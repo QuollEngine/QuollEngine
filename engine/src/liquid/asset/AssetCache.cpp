@@ -6,8 +6,6 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-#include <uuid.h>
-
 namespace liquid {
 
 AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
@@ -71,9 +69,10 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
   return loadAsset(path, true);
 }
 
-AssetMeta AssetCache::getMetaFromUuid(const String &uuid) const {
+AssetMeta AssetCache::getMetaFromUuid(const Uuid &uuid) const {
   AssetMeta meta{};
-  auto typePath = (mAssetsPath / uuid).replace_extension("assetmeta");
+  auto typePath =
+      (mAssetsPath / uuid.toString()).replace_extension("assetmeta");
   if (!std::filesystem::exists(typePath)) {
     return meta;
   }
@@ -88,9 +87,11 @@ AssetMeta AssetCache::getMetaFromUuid(const String &uuid) const {
 }
 
 Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
+  auto uuid = Uuid(path.stem().string());
+
   uint32_t handle = 0;
   if (updateExisting) {
-    const auto &asset = mRegistry.getAssetByUuid(path.stem().string());
+    const auto &asset = mRegistry.getAssetByUuid(uuid);
     handle = asset.second;
 
     if (asset.first != AssetType::None && asset.first != AssetType::LuaScript &&
@@ -101,7 +102,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   // Handle files that are not in liquid format
-  auto meta = getMetaFromUuid(path.stem().string());
+  auto meta = getMetaFromUuid(uuid);
 
   if (meta.type == AssetType::Texture) {
     auto res = loadTextureFromFile(path);
@@ -249,29 +250,15 @@ Result<Path> AssetCache::createMetaFile(AssetType type, String name,
   return Result<Path>::Ok(metaPath);
 }
 
-String liquid::AssetCache::generateUUID() {
-  std::random_device rd;
-  auto seed_data = std::array<int, std::mt19937::state_size>{};
-  std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
-  std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-  std::mt19937 generator(seq);
-
-  uuids::uuid_random_generator gen{generator};
-  auto id = gen();
-
-  auto str = uuids::to_string(id);
-
-  std::erase(str, '-');
-  return str;
+Path AssetCache::createAssetPath(const Uuid &uuid) {
+  auto stem = uuid.isEmpty() ? Uuid::generate() : uuid;
+  return (mAssetsPath / stem.toString())
+      .replace_extension("asset")
+      .make_preferred();
 }
 
-Path AssetCache::createAssetPath(const String &uuid) {
-  auto stem = uuid.empty() ? generateUUID() : uuid;
-  return (mAssetsPath / stem).replace_extension("asset").make_preferred();
-}
-
-Path AssetCache::getPathFromUuid(const String &uuid) {
-  return (mAssetsPath / uuid).replace_extension("asset");
+Path AssetCache::getPathFromUuid(const Uuid &uuid) {
+  return (mAssetsPath / uuid.toString()).replace_extension("asset");
 }
 
 } // namespace liquid

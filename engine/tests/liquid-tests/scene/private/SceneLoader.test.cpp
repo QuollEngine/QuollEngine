@@ -216,7 +216,7 @@ TEST_F(SceneLoaderSpriteTest,
 
 TEST_F(SceneLoaderSpriteTest, CreatesSpriteComponentWithFileDataIfValidField) {
   liquid::AssetData<liquid::TextureAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getTextures().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -253,7 +253,7 @@ TEST_F(SceneLoaderMeshTest, DoesNotCreateMeshComponentIfMeshFieldIsInvalid) {
 TEST_F(SceneLoaderMeshTest,
        DoesNotCreateMeshComponentIfNoMeshHandleInRegistry) {
   liquid::AssetData<liquid::MeshAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   data.type = liquid::AssetType::Mesh;
   auto handle = assetRegistry.getMeshes().addAsset(data);
 
@@ -267,7 +267,7 @@ TEST_F(SceneLoaderMeshTest,
 TEST_F(SceneLoaderMeshTest, CreatesMeshComponentIfValidAssetTypeIsMesh) {
   liquid::AssetData<liquid::MeshAsset> data{};
   data.type = liquid::AssetType::Mesh;
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getMeshes().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -283,7 +283,7 @@ TEST_F(SceneLoaderMeshTest,
        CreatesSkinnedMeshComponentIfValidAssetTypeIsSkinnedMesh) {
   liquid::AssetData<liquid::MeshAsset> data{};
   data.type = liquid::AssetType::SkinnedMesh;
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getMeshes().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -319,11 +319,11 @@ TEST_F(SceneLoaderMeshRendererTest, DoesNotCreateComponentIfFieldIsInvalid) {
 
 TEST_F(SceneLoaderMeshRendererTest, CreatesComponentWithMaterialsIfValid) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1";
+  material1.uuid = liquid::Uuid("material1");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   liquid::AssetData<liquid::MaterialAsset> material2{};
-  material2.uuid = "material2";
+  material2.uuid = liquid::Uuid("material2");
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
 
   auto [node, entity] = createNode();
@@ -346,7 +346,7 @@ TEST_F(SceneLoaderMeshRendererTest,
       YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
 
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1";
+  material1.uuid = liquid::Uuid("material1");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   auto [node, entity] = createNode();
@@ -419,11 +419,11 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
 TEST_F(SceneLoaderSkinnedMeshRendererTest,
        CreatesComponentWithMaterialsIfValid) {
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1";
+  material1.uuid = liquid::Uuid("material1");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   liquid::AssetData<liquid::MaterialAsset> material2{};
-  material2.uuid = "material2";
+  material2.uuid = liquid::Uuid("material2");
   auto handle2 = assetRegistry.getMaterials().addAsset(material2);
 
   auto [node, entity] = createNode();
@@ -447,7 +447,7 @@ TEST_F(SceneLoaderSkinnedMeshRendererTest,
       YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
 
   liquid::AssetData<liquid::MaterialAsset> material1{};
-  material1.uuid = "material1";
+  material1.uuid = liquid::Uuid("material1");
   auto handle1 = assetRegistry.getMaterials().addAsset(material1);
 
   auto [node, entity] = createNode();
@@ -525,7 +525,7 @@ TEST_F(SceneLoaderSkeletonTest,
 TEST_F(SceneLoaderSkeletonTest,
        DoesNotCreateSkeletonComponentIfNoSkeletonHandleInRegistry) {
   liquid::AssetData<liquid::SkeletonAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
 
   auto handle = assetRegistry.getSkeletons().addAsset(data);
 
@@ -553,7 +553,7 @@ TEST_F(SceneLoaderSkeletonTest,
     data.data.jointNames.push_back("J" + std::to_string(i));
   }
 
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getSkeletons().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -687,7 +687,7 @@ TEST_F(SceneLoaderAnimatorTest,
 
 TEST_F(SceneLoaderAnimatorTest, CreatesAnimatorComponentIfAllFieldsAreValid) {
   liquid::AssetData<liquid::AnimatorAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   data.data.initialState = 5;
   auto handle = assetRegistry.getAnimators().addAsset(data);
 
@@ -1543,7 +1543,8 @@ TEST_F(SceneLoaderAudioTest,
 TEST_F(SceneLoaderAudioTest,
        DoesNotCreateAudioComponentIfNoAudioHandleInRegistry) {
   liquid::AssetData<liquid::AudioAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
+
   auto handle = assetRegistry.getAudios().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -1555,7 +1556,8 @@ TEST_F(SceneLoaderAudioTest,
 
 TEST_F(SceneLoaderAudioTest, CreatesAudioComponentWithFileDataIfValidField) {
   liquid::AssetData<liquid::AudioAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
+
   auto handle = assetRegistry.getAudios().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -1594,7 +1596,8 @@ TEST_F(SceneLoaderScriptTest,
 TEST_F(SceneLoaderScriptTest,
        DoesNotCreateScriptComponentIfNoScriptHandleInRegistry) {
   liquid::AssetData<liquid::LuaScriptAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
+
   auto handle = assetRegistry.getLuaScripts().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -1607,7 +1610,7 @@ TEST_F(SceneLoaderScriptTest,
 TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileDataIfStringFieldWithValidPath) {
   liquid::AssetData<liquid::LuaScriptAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getLuaScripts().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -1621,11 +1624,11 @@ TEST_F(SceneLoaderScriptTest,
 TEST_F(SceneLoaderScriptTest,
        CreatesScriptComponentWithFileAndVariablesIfMapWithValidPath) {
   liquid::AssetData<liquid::LuaScriptAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getLuaScripts().addAsset(data);
 
   liquid::AssetData<liquid::PrefabAsset> prefabData{};
-  prefabData.uuid = "my-prefab";
+  prefabData.uuid = liquid::Uuid("my-prefab");
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefabData);
 
   auto [node, entity] = createNode();
@@ -1691,7 +1694,7 @@ TEST_F(SceneLoaderTextTest, DoesNotCreateTextComponentIfTextFontIsInvalid) {
 TEST_F(SceneLoaderScriptTest,
        DoesNotCreateTextComponentIfNoFontHandleInRegistry) {
   liquid::AssetData<liquid::FontAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getFonts().addAsset(data);
 
   auto [node, entity] = createNode();
@@ -1709,7 +1712,7 @@ TEST_F(SceneLoaderScriptTest,
       YAML::Node(YAML::NodeType::Scalar)};
 
   liquid::AssetData<liquid::FontAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getFonts().addAsset(data);
 
   liquid::Text defaults{};
@@ -1753,7 +1756,7 @@ TEST_F(SceneLoaderTextTest, CreatesTextComponentWithFileDataIfValidField) {
       YAML::Node(YAML::NodeType::Scalar)};
 
   liquid::AssetData<liquid::FontAsset> data{};
-  data.uuid = "hello";
+  data.uuid = liquid::Uuid("hello");
   auto handle = assetRegistry.getFonts().addAsset(data);
 
   liquid::Text defaults{};
@@ -2360,7 +2363,7 @@ TEST_F(SceneLoaderSkyboxTest,
 TEST_F(SceneLoaderSkyboxTest,
        AddsTextureSkyboxIfTypeIsTextureAndTextureExists) {
   liquid::AssetData<liquid::EnvironmentAsset> data{};
-  data.uuid = "test-uuid.uuid";
+  data.uuid = liquid::Uuid("test-uuid.uuid");
 
   auto handle = assetRegistry.getEnvironments().addAsset(data);
 
@@ -2412,7 +2415,7 @@ TEST_F(SceneLoaderSkyboxTest,
 
 TEST_F(SceneLoaderSkyboxTest, AddsColorSkyboxIfTypeIsColorAndColorIsDefined) {
   liquid::AssetData<liquid::EnvironmentAsset> data{};
-  data.uuid = "test-uuid.uuid";
+  data.uuid = liquid::Uuid("test-uuid.uuid");
 
   auto handle = assetRegistry.getEnvironments().addAsset(data);
 

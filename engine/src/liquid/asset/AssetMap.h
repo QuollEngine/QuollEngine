@@ -1,5 +1,6 @@
 #pragma once
 
+#include "liquid/core/Uuid.h"
 #include "AssetData.h"
 
 namespace liquid {
@@ -78,7 +79,7 @@ public:
    * @param uuid Asset uuid
    * @return Handle
    */
-  inline THandle findHandleByUuid(const String &uuid) const {
+  inline THandle findHandleByUuid(const Uuid &uuid) const {
     for (auto &[handle, data] : mAssets) {
       if (data.uuid == uuid) {
         return handle;

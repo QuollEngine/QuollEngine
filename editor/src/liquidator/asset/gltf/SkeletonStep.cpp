@@ -107,6 +107,7 @@ void loadSkeletons(GLTFImportData &importData) {
     AssetData<SkeletonAsset> asset;
     asset.name = getGLTFAssetName(importData, assetName);
     asset.type = AssetType::Skeleton;
+    asset.uuid = getUUID(importData, skeletonName);
 
     for (auto &joint : skin.joints) {
       uint32_t nJoint = normalizedJointMap.at(joint);
@@ -123,8 +124,7 @@ void loadSkeletons(GLTFImportData &importData) {
       asset.data.jointParents.push_back(parent >= 0 ? parent : 0);
     }
 
-    auto path = assetCache.createSkeletonFromAsset(
-        asset, getUUID(importData, skeletonName));
+    auto path = assetCache.createSkeletonFromAsset(asset);
     auto handle = assetCache.loadSkeletonFromFile(path.getData());
 
     importData.skeletons.skeletonMap.map.insert_or_assign(

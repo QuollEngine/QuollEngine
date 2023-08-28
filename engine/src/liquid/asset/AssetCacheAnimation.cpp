@@ -10,9 +10,8 @@
 namespace liquid {
 
 Result<Path>
-AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset,
-                                     const String &uuid) {
-  auto assetPath = createAssetPath(uuid);
+AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
+  auto assetPath = createAssetPath(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -54,7 +53,7 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
   AssetData<AnimationAsset> animation{};
   animation.path = filePath;
   animation.type = AssetType::Animation;
-  animation.uuid = filePath.stem().string();
+  animation.uuid = Uuid(filePath.stem().string());
   animation.name = header.name;
 
   stream.read(animation.data.time);
@@ -93,8 +92,8 @@ AssetCache::loadAnimationFromFile(const Path &filePath) {
 }
 
 Result<AnimationAssetHandle>
-AssetCache::getOrLoadAnimationFromUuid(const String &uuid) {
-  if (uuid.empty()) {
+AssetCache::getOrLoadAnimationFromUuid(const Uuid &uuid) {
+  if (uuid.isEmpty()) {
     return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Null);
   }
 
