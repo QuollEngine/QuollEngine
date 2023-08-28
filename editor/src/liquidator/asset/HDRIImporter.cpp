@@ -116,7 +116,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   auto irradianceMapName = sourceAssetPath.filename().string() + "/irradiance";
   auto irradianceCubemap = generateIrradianceMap(
-      unfilteredCubemap, getUUIDFromMap(uuids, "irradiance"),
+      unfilteredCubemap, getOrCreateUuidFromMap(uuids, "irradiance"),
       irradianceMapName);
 
   if (irradianceCubemap.hasError()) {
@@ -126,7 +126,8 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
 
   auto specularMapName = sourceAssetPath.filename().string() + "/specular";
   auto specularCubemap = generateSpecularMap(
-      unfilteredCubemap, getUUIDFromMap(uuids, "specular"), specularMapName);
+      unfilteredCubemap, getOrCreateUuidFromMap(uuids, "specular"),
+      specularMapName);
 
   if (specularCubemap.hasError()) {
     device->destroyTexture(unfilteredCubemap.texture);
@@ -139,7 +140,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
   device->destroyTexture(unfilteredCubemap.texture);
 
   AssetData<EnvironmentAsset> environment{};
-  environment.uuid = getUUIDFromMap(uuids, "root");
+  environment.uuid = getOrCreateUuidFromMap(uuids, "root");
   environment.data.specularMap = specularCubemap.getData();
   environment.data.irradianceMap = irradianceCubemap.getData();
 
@@ -149,7 +150,7 @@ Result<UUIDMap> HDRIImporter::loadFromPath(const Path &sourceAssetPath,
     return Result<UUIDMap>::Error(createdFileRes.getError());
   }
 
-  auto loadRes = mAssetCache.loadEnvironmentFromFile(createdFileRes.getData());
+  auto loadRes = mAssetCache.loadEnvironment(environment.uuid);
   if (loadRes.hasError()) {
     return Result<UUIDMap>::Error(loadRes.getError());
   }
@@ -387,7 +388,7 @@ HDRIImporter::generateIrradianceMap(const CubemapData &unfilteredCubemap,
     return Result<TextureAssetHandle>::Error(createdFileRes.getError());
   }
 
-  return mAssetCache.loadTextureFromFile(createdFileRes.getData());
+  return mAssetCache.loadTexture(asset.uuid);
 }
 
 Result<TextureAssetHandle>
@@ -481,7 +482,7 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
     return Result<TextureAssetHandle>::Error(createdFileRes.getError());
   }
 
-  return mAssetCache.loadTextureFromFile(createdFileRes.getData());
+  return mAssetCache.loadTexture(asset.uuid);
 }
 
 } // namespace liquid::editor

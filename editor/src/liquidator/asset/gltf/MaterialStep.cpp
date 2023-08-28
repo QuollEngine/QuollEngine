@@ -25,7 +25,7 @@ void loadMaterials(GLTFImportData &importData) {
     AssetData<MaterialAsset> material;
 
     material.name = getGLTFAssetName(importData, assetName);
-    material.uuid = getUUID(importData, assetName);
+    material.uuid = getOrCreateGLTFUuid(importData, assetName);
     material.type = AssetType::Material;
 
     if (gltfMaterial.pbrMetallicRoughness.baseColorTexture.index >= 0) {
@@ -96,7 +96,7 @@ void loadMaterials(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createMaterialFromAsset(material);
-    auto handle = assetCache.loadMaterialFromFile(path.getData());
+    auto handle = assetCache.loadMaterial(material.uuid);
     importData.materials.map.insert_or_assign(i, handle.getData());
 
     importData.outputUuids.insert_or_assign(assetName,

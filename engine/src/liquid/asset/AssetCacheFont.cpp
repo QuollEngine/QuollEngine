@@ -13,9 +13,14 @@ namespace liquid {
 
 Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
                                               const Uuid &uuid) {
+  if (uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   using co = std::filesystem::copy_options;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = getPathFromUuid(uuid);
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
@@ -23,8 +28,8 @@ Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
                                sourcePath.stem().string());
   }
 
-  auto metaRes = createMetaFile(AssetType::Font, sourcePath.filename().string(),
-                                assetPath);
+  auto metaRes = createAssetMeta(AssetType::Font,
+                                 sourcePath.filename().string(), assetPath);
 
   if (!metaRes.hasData()) {
     std::filesystem::remove(assetPath);
@@ -35,7 +40,9 @@ Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<FontAssetHandle> AssetCache::loadFontFromFile(const Path &filePath) {
+Result<FontAssetHandle> AssetCache::loadFont(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   MsdfLoader loader;
 
   auto res = loader.loadFontData(filePath);
@@ -44,7 +51,7 @@ Result<FontAssetHandle> AssetCache::loadFontFromFile(const Path &filePath) {
     return Result<FontAssetHandle>::Error(res.getError());
   }
 
-  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
+  auto meta = getAssetMeta(uuid);
 
   auto &data = res.getData();
   data.type = AssetType::Font;

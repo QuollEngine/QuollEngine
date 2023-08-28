@@ -9,8 +9,8 @@ using UUIDMap = std::unordered_map<String, Uuid>;
  *
  * @param uuids Uuid map
  * @param key Uuid map key
- * @return Uuid or empty uuid
+ * @return Uuid
  */
-Uuid getUUIDFromMap(const UUIDMap &uuids, const String &key);
+Uuid getOrCreateUuidFromMap(const UUIDMap &uuids, const String &key);
 
 } // namespace liquid::editor

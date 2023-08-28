@@ -11,9 +11,14 @@ namespace liquid {
 
 Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
                                                   const Uuid &uuid) {
+  if (uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   using co = std::filesystem::copy_options;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = getPathFromUuid(uuid);
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
@@ -21,8 +26,8 @@ Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
                                sourcePath.stem().string());
   }
 
-  auto metaRes = createMetaFile(AssetType::Animator,
-                                sourcePath.filename().string(), assetPath);
+  auto metaRes = createAssetMeta(AssetType::Animator,
+                                 sourcePath.filename().string(), assetPath);
 
   if (!metaRes.hasData()) {
     std::filesystem::remove(assetPath);
@@ -35,6 +40,11 @@ Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
 
 Result<Path>
 AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   YAML::Node root;
   root["version"] = "0.1";
   root["type"] = "animator";
@@ -58,13 +68,13 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
     }
   }
 
-  auto assetPath = createAssetPath(asset.uuid);
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   std::ofstream stream(assetPath);
   stream << root;
   stream.close();
 
-  auto metaRes = createMetaFile(AssetType::Animator, asset.name, assetPath);
+  auto metaRes = createAssetMeta(AssetType::Animator, asset.name, assetPath);
   if (metaRes.hasError()) {
     std::filesystem::remove(assetPath);
     return metaRes;
@@ -74,8 +84,9 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
 }
 
 Result<AnimatorAssetHandle>
-AssetCache::loadAnimatorFromFile(const Path &filePath,
-                                 AnimatorAssetHandle handle) {
+AssetCache::loadAnimator(const Uuid &uuid, AnimatorAssetHandle handle) {
+  auto filePath = getPathFromUuid(uuid);
+
   std::ifstream stream(filePath);
   auto root = YAML::Load(stream);
   stream.close();
@@ -92,7 +103,7 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     return Result<AnimatorAssetHandle>::Error("`states` field must be a map");
   }
 
-  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
+  auto meta = getAssetMeta(uuid);
 
   AssetData<AnimatorAsset> asset{};
   asset.type = AssetType::Animator;
@@ -121,7 +132,7 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
     if (output["type"] && output["type"].as<String>("") == "animation") {
       auto animation = output["animation"].as<Uuid>(Uuid{});
       if (!animation.isEmpty()) {
-        auto res = getOrLoadAnimationFromUuid(animation);
+        auto res = getOrLoadAnimation(animation);
         if (res.hasData()) {
           state.animation = res.getData();
         }
@@ -244,8 +255,7 @@ AssetCache::loadAnimatorFromFile(const Path &filePath,
   return Result<AnimatorAssetHandle>::Ok(handle, warnings);
 }
 
-Result<AnimatorAssetHandle>
-AssetCache::getOrLoadAnimatorFromUuid(const Uuid &uuid) {
+Result<AnimatorAssetHandle> AssetCache::getOrLoadAnimator(const Uuid &uuid) {
   if (uuid.isEmpty()) {
     return Result<AnimatorAssetHandle>::Ok(AnimatorAssetHandle::Null);
   }
@@ -255,7 +265,7 @@ AssetCache::getOrLoadAnimatorFromUuid(const Uuid &uuid) {
     return Result<AnimatorAssetHandle>::Ok(handle);
   }
 
-  return loadAnimatorFromFile(getPathFromUuid(uuid));
+  return loadAnimator(uuid);
 }
 
 } // namespace liquid

@@ -96,7 +96,7 @@ Result<Uuid> ImageLoader::loadFromMemory(void *data, uint32_t width,
     return Result<Uuid>::Error(createdFileRes.getError());
   }
 
-  auto loadRes = mAssetCache.loadTextureFromFile(createdFileRes.getData());
+  auto loadRes = mAssetCache.loadTexture(asset.uuid);
   if (loadRes.hasError()) {
     return Result<Uuid>::Error(loadRes.getError());
   }

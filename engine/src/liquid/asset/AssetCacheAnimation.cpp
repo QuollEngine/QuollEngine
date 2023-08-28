@@ -11,7 +11,12 @@ namespace liquid {
 
 Result<Path>
 AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
-  auto assetPath = createAssetPath(asset.uuid);
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -79,8 +84,9 @@ AssetCache::loadAnimationDataFromInputStream(InputBinaryStream &stream,
       mRegistry.getAnimations().addAsset(animation));
 }
 
-Result<AnimationAssetHandle>
-AssetCache::loadAnimationFromFile(const Path &filePath) {
+Result<AnimationAssetHandle> AssetCache::loadAnimation(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Animation);
@@ -91,8 +97,7 @@ AssetCache::loadAnimationFromFile(const Path &filePath) {
   return loadAnimationDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<AnimationAssetHandle>
-AssetCache::getOrLoadAnimationFromUuid(const Uuid &uuid) {
+Result<AnimationAssetHandle> AssetCache::getOrLoadAnimation(const Uuid &uuid) {
   if (uuid.isEmpty()) {
     return Result<AnimationAssetHandle>::Ok(AnimationAssetHandle::Null);
   }
@@ -102,7 +107,7 @@ AssetCache::getOrLoadAnimationFromUuid(const Uuid &uuid) {
     return Result<AnimationAssetHandle>::Ok(handle);
   }
 
-  return loadAnimationFromFile(getPathFromUuid(uuid));
+  return loadAnimation(uuid);
 }
 
 } // namespace liquid

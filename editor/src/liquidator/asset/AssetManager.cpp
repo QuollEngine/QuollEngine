@@ -325,13 +325,13 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
   int32_t channels = 0;
 
   if (sourceAssetPath.extension() == ".ktx2") {
-    auto createRes = mAssetCache.createTextureFromSource(
-        sourceAssetPath, getUUIDFromMap(uuids, "root"));
+    auto uuid = getOrCreateUuidFromMap(uuids, "root");
+    auto createRes = mAssetCache.createTextureFromSource(sourceAssetPath, uuid);
     if (!createRes.hasData()) {
       return Result<UUIDMap>::Error(createRes.getError());
     }
 
-    auto res = mAssetCache.loadTextureFromFile(createRes.getData());
+    auto res = mAssetCache.loadTexture(uuid);
 
     if (res.hasData()) {
       auto uuid =
@@ -342,9 +342,9 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
     return Result<UUIDMap>::Error(res.getError());
   }
 
-  auto uuid =
-      mImageLoader.loadFromPath(sourceAssetPath, getUUIDFromMap(uuids, "root"),
-                                mOptimize, rhi::Format::Rgba8Srgb);
+  auto uuid = mImageLoader.loadFromPath(sourceAssetPath,
+                                        getOrCreateUuidFromMap(uuids, "root"),
+                                        mOptimize, rhi::Format::Rgba8Srgb);
 
   if (uuid.hasError()) {
     return Result<UUIDMap>::Error(uuid.getError());
@@ -355,17 +355,15 @@ Result<UUIDMap> AssetManager::loadSourceTexture(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
-  auto createRes = mAssetCache.createAudioFromSource(
-      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createAudioFromSource(sourceAssetPath, uuid);
   if (!createRes.hasData()) {
     return Result<UUIDMap>::Error(createRes.getError());
   }
 
-  auto res = mAssetCache.loadAudioFromFile(createRes.getData());
+  auto res = mAssetCache.loadAudio(uuid);
 
   if (res.hasData()) {
-    auto uuid =
-        mAssetCache.getRegistry().getAudios().getAsset(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 
@@ -374,13 +372,13 @@ Result<UUIDMap> AssetManager::loadSourceAudio(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
                                                const UUIDMap &uuids) {
-  auto createRes = mAssetCache.createLuaScriptFromSource(
-      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createLuaScriptFromSource(sourceAssetPath, uuid);
   if (!createRes.hasData()) {
     return Result<UUIDMap>::Error(createRes.getError());
   }
 
-  auto res = mAssetCache.loadLuaScriptFromFile(createRes.getData());
+  auto res = mAssetCache.loadLuaScript(uuid);
 
   if (res.hasData()) {
     auto uuid =
@@ -393,13 +391,13 @@ Result<UUIDMap> AssetManager::loadSourceScript(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
                                              const UUIDMap &uuids) {
-  auto createRes = mAssetCache.createFontFromSource(
-      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createFontFromSource(sourceAssetPath, uuid);
   if (!createRes.hasData()) {
     return Result<UUIDMap>::Error(createRes.getError());
   }
 
-  auto res = mAssetCache.loadFontFromFile(createRes.getData());
+  auto res = mAssetCache.loadFont(uuid);
 
   if (res.hasData()) {
     auto uuid =
@@ -412,13 +410,13 @@ Result<UUIDMap> AssetManager::loadSourceFont(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
                                                  const UUIDMap &uuids) {
-  auto createRes = mAssetCache.createAnimatorFromSource(
-      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createAnimatorFromSource(sourceAssetPath, uuid);
   if (!createRes.hasData()) {
     return Result<UUIDMap>::Error(createRes.getError());
   }
 
-  auto res = mAssetCache.loadAnimatorFromFile(createRes.getData());
+  auto res = mAssetCache.loadAnimator(uuid);
 
   if (res.hasData()) {
     auto uuid =
@@ -442,17 +440,15 @@ Result<UUIDMap> AssetManager::loadSourceEnvironment(const Path &sourceAssetPath,
 
 Result<UUIDMap> AssetManager::loadSourceScene(const Path &sourceAssetPath,
                                               const UUIDMap &uuids) {
-  auto createRes = mAssetCache.createSceneFromSource(
-      sourceAssetPath, getUUIDFromMap(uuids, "root"));
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createSceneFromSource(sourceAssetPath, uuid);
   if (!createRes.hasData()) {
     return Result<UUIDMap>::Error(createRes.getError());
   }
 
-  auto res = mAssetCache.loadSceneFromFile(createRes.getData());
+  auto res = mAssetCache.loadScene(uuid);
 
   if (res.hasData()) {
-    auto uuid =
-        mAssetCache.getRegistry().getScenes().getAsset(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 

@@ -12,23 +12,26 @@ public:
   void SetUp() override {
     AssetCacheTestBase::SetUp();
 
-    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          CachePath / "irradiance.asset");
-    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          CachePath / "specular.asset");
-    std::filesystem::copy(FixturesPath / "1x1-2d.ktx",
-                          CachePath / "brdf.asset");
+    irradianceUuid = liquid::Uuid::generate();
+    specularUuid = liquid::Uuid::generate();
+
+    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
+                                  irradianceUuid);
+    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
+                                  specularUuid);
   }
+
+  liquid::Uuid irradianceUuid;
+  liquid::Uuid specularUuid;
 };
 
 TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
-  auto irradianceMap =
-      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
-  auto specularMap =
-      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
+  auto specularMap = cache.loadTexture(specularUuid).getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
   asset.name = "env-0";
+  asset.uuid = liquid::Uuid::generate();
   asset.path = FixturesPath / "environment";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -46,14 +49,14 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   EXPECT_EQ(header.type, liquid::AssetType::Environment);
   EXPECT_EQ(header.name, asset.name);
 
-  liquid::String irradianceMapPath;
-  file.read(irradianceMapPath);
+  liquid::Uuid readIrradianceUuid;
+  file.read(readIrradianceUuid);
 
-  liquid::String specularMapPath;
-  file.read(specularMapPath);
+  liquid::Uuid readSpecularUuid;
+  file.read(readSpecularUuid);
 
-  EXPECT_EQ(irradianceMapPath, "irradiance");
-  EXPECT_EQ(specularMapPath, "specular");
+  EXPECT_EQ(readIrradianceUuid, irradianceUuid);
+  EXPECT_EQ(readSpecularUuid, specularUuid);
 
   EXPECT_FALSE(std::filesystem::exists(
       filePath.getData().replace_extension("assetmeta")));
@@ -61,13 +64,12 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
 
 TEST_F(AssetCacheEnvironmentTest,
        DoesNotLoadEnvironmentAssetIfEnvironmentTexturesCouldNotBeLoaded) {
-  auto irradianceMap =
-      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
-  auto specularMap =
-      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
+  auto specularMap = cache.loadTexture(specularUuid).getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
 
+  asset.uuid = liquid::Uuid::generate();
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -77,18 +79,19 @@ TEST_F(AssetCacheEnvironmentTest,
   cache.getRegistry().getTextures().deleteAsset(specularMap);
 
   {
-    std::filesystem::remove(CachePath / "irradiance.asset");
-    auto res = cache.loadEnvironmentFromFile(createRes.getData());
+    std::filesystem::remove(cache.getPathFromUuid(irradianceUuid));
+    auto res = cache.loadEnvironment(asset.uuid);
 
     EXPECT_TRUE(res.hasError());
     EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
   }
 
   {
-    std::filesystem::copy(FixturesPath / "1x1-cubemap.ktx",
-                          CachePath / "irradiance.asset");
-    std::filesystem::remove(CachePath / "specular.asset");
-    auto res = cache.loadEnvironmentFromFile(createRes.getData());
+    cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
+                                  irradianceUuid);
+    std::filesystem::remove(cache.getPathFromUuid(specularUuid));
+
+    auto res = cache.loadEnvironment(asset.uuid);
 
     EXPECT_TRUE(res.hasError());
     EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
@@ -97,14 +100,13 @@ TEST_F(AssetCacheEnvironmentTest,
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithTexturesIfTexturesAreNotLoaded) {
-  auto irradianceMap =
-      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
-  auto specularMap =
-      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
+  auto specularMap = cache.loadTexture(specularUuid).getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
 
   asset.path = FixturesPath / "environment.lqenv";
+  asset.uuid = liquid::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
@@ -114,7 +116,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   EXPECT_TRUE(cache.getRegistry().getTextures().getAssets().empty());
 
-  auto res = cache.loadEnvironmentFromFile(createRes.getData());
+  auto res = cache.loadEnvironment(asset.uuid);
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
@@ -131,13 +133,12 @@ TEST_F(AssetCacheEnvironmentTest,
 
 TEST_F(AssetCacheEnvironmentTest,
        LoadsEnvironmentAssetWithExistingTexturesIfTexturesAreLoaded) {
-  auto irradianceMap =
-      cache.loadTextureFromFile(CachePath / "irradiance.asset").getData();
-  auto specularMap =
-      cache.loadTextureFromFile(CachePath / "specular.asset").getData();
+  auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
+  auto specularMap = cache.loadTexture(specularUuid).getData();
 
   liquid::AssetData<liquid::EnvironmentAsset> asset{};
 
+  asset.uuid = liquid::Uuid::generate();
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -145,7 +146,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   EXPECT_EQ(cache.getRegistry().getTextures().getAssets().size(), 2);
 
-  auto res = cache.loadEnvironmentFromFile(createRes.getData());
+  auto res = cache.loadEnvironment(asset.uuid);
 
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());

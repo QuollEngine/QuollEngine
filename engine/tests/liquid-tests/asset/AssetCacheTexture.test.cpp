@@ -13,25 +13,26 @@ public:
 };
 
 TEST_F(AssetCacheTextureTest, CreatesTextureFromSource) {
-  auto filePath = cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx",
-                                                liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(uuid);
 
   EXPECT_EQ(meta.type, liquid::AssetType::Texture);
   EXPECT_EQ(meta.name, "1x1-2d.ktx");
 }
 
 TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
-  auto createdRes = cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx",
-                                                  liquid::Uuid::generate());
-  auto texture = cache.loadTextureFromFile(createdRes.getData());
+  auto uuid = liquid::Uuid::generate();
+  auto createdRes =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
+  auto texture = cache.loadTexture(uuid);
   auto handle = texture.getData();
 
   auto asset = cache.getRegistry().getTextures().getAsset(handle);
@@ -45,17 +46,17 @@ TEST_F(AssetCacheTextureTest, CreatesTextureFromAsset) {
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(uuid);
   EXPECT_EQ(meta.type, liquid::AssetType::Texture);
   EXPECT_EQ(meta.name, "1x1-2d.ktx");
 }
 
 TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
-  auto filePath = cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx",
-                                                liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
-  auto texture = cache.loadTextureFromFile(filePath.getData());
+  auto texture = cache.loadTexture(uuid);
   auto handle = texture.getData();
 
   auto asset = cache.getRegistry().getTextures().getAsset(handle);
@@ -67,28 +68,30 @@ TEST_F(AssetCacheTextureTest, LoadsTextureToRegistry) {
 
 TEST_F(AssetCacheTextureTest, FailsIfKtxFileCannotBeLoaded) {
   // non-existent file
-  EXPECT_TRUE(cache.loadTextureFromFile(CachePath / "non-existent-file.asset")
-                  .hasError());
+  EXPECT_TRUE(cache.loadTexture(liquid::Uuid::generate()).hasError());
 
   // invalid format
+  auto uuid = liquid::Uuid::generate();
   auto filePath = cache.createTextureFromSource(
-      FixturesPath / "white-image-100x100.png", liquid::Uuid::generate());
+      FixturesPath / "white-image-100x100.png", uuid);
 
-  EXPECT_TRUE(cache.loadTextureFromFile(filePath.getData()).hasError());
+  EXPECT_TRUE(cache.loadTexture(uuid).hasError());
 }
 
 TEST_F(AssetCacheTextureTest, FailsIfTextureIsOneDimensional) {
-  auto filePath = cache.createTextureFromSource(FixturesPath / "1x1-1d.ktx",
-                                                liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-1d.ktx", uuid);
 
-  EXPECT_TRUE(cache.loadTextureFromFile(filePath.getData()).hasError());
+  EXPECT_TRUE(cache.loadTexture(uuid).hasError());
 }
 
 TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
-  auto filePath = cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx",
-                                                liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", uuid);
 
-  auto texture = cache.loadTextureFromFile(filePath.getData());
+  auto texture = cache.loadTexture(uuid);
   EXPECT_TRUE(texture.hasData());
 
   auto &asset = cache.getRegistry().getTextures().getAsset(texture.getData());
@@ -100,9 +103,11 @@ TEST_F(AssetCacheTextureTest, LoadsTexture2D) {
 }
 
 TEST_F(AssetCacheTextureTest, LoadsTextureCubemap) {
-  auto filePath = cache.createTextureFromSource(
-      FixturesPath / "1x1-cubemap.ktx", liquid::Uuid::generate());
-  auto texture = cache.loadTextureFromFile(filePath.getData());
+  auto uuid = liquid::Uuid::generate();
+
+  auto filePath =
+      cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx", uuid);
+  auto texture = cache.loadTexture(uuid);
 
   EXPECT_TRUE(texture.hasData());
 

@@ -15,8 +15,9 @@ LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
 liquid::LuaScope &
 LuaScriptingInterfaceTestBase::call(liquid::Entity entity,
                                     const liquid::String &functionName) {
-  auto handle =
-      assetCache.loadLuaScriptFromFile(FixturesPath / mScriptName).getData();
+  auto uuid = liquid::Uuid::generate();
+  assetCache.createLuaScriptFromSource(FixturesPath / mScriptName, uuid);
+  auto handle = assetCache.loadLuaScript(uuid).getData();
 
   entityDatabase.set<liquid::Script>(entity, {handle});
 

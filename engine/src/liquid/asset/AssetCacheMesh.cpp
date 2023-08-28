@@ -11,7 +11,12 @@ namespace liquid {
 
 Result<Path>
 AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
-  auto assetPath = createAssetPath(asset.uuid);
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -112,7 +117,9 @@ AssetCache::loadMeshDataFromInputStream(InputBinaryStream &stream,
                                      warnings);
 }
 
-Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
+Result<MeshAssetHandle> AssetCache::loadMesh(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::None);
@@ -129,7 +136,7 @@ Result<MeshAssetHandle> AssetCache::loadMeshFromFile(const Path &filePath) {
   return loadMeshDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const Uuid &uuid) {
+Result<MeshAssetHandle> AssetCache::getOrLoadMesh(const Uuid &uuid) {
   if (uuid.isEmpty()) {
     return Result<MeshAssetHandle>::Ok(MeshAssetHandle::Null);
   }
@@ -139,7 +146,7 @@ Result<MeshAssetHandle> AssetCache::getOrLoadMeshFromUuid(const Uuid &uuid) {
     return Result<MeshAssetHandle>::Ok(handle);
   }
 
-  return loadMeshFromFile(getPathFromUuid(uuid));
+  return loadMesh(uuid);
 }
 
 } // namespace liquid

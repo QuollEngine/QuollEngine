@@ -12,11 +12,16 @@ static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
   return AudioAssetFormat::Unknown;
 }
 
-Result<Path> liquid::AssetCache::createAudioFromSource(const Path &sourcePath,
-                                                       const Uuid &uuid) {
+Result<Path> AssetCache::createAudioFromSource(const Path &sourcePath,
+                                               const Uuid &uuid) {
+  if (uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   using co = std::filesystem::copy_options;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = getPathFromUuid(uuid);
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
@@ -24,8 +29,8 @@ Result<Path> liquid::AssetCache::createAudioFromSource(const Path &sourcePath,
                                sourcePath.stem().string());
   }
 
-  auto metaRes = createMetaFile(AssetType::Audio,
-                                sourcePath.filename().string(), assetPath);
+  auto metaRes = createAssetMeta(AssetType::Audio,
+                                 sourcePath.filename().string(), assetPath);
 
   if (!metaRes.hasData()) {
     std::filesystem::remove(assetPath);
@@ -36,7 +41,9 @@ Result<Path> liquid::AssetCache::createAudioFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
+Result<AudioAssetHandle> AssetCache::loadAudio(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   auto ext = filePath.extension().string();
   ext.erase(0, 1);
 
@@ -60,7 +67,7 @@ Result<AudioAssetHandle> AssetCache::loadAudioFromFile(const Path &filePath) {
   stream.seekg(0, std::ios::beg);
   stream.read(&bytes[0], pos);
 
-  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
+  auto meta = getAssetMeta(uuid);
 
   AssetData<AudioAsset> asset;
   asset.name = meta.name;

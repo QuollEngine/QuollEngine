@@ -11,7 +11,12 @@ namespace liquid {
 
 Result<Path>
 AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
-  auto assetPath = createAssetPath(asset.uuid);
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -70,8 +75,8 @@ AssetCache::loadSkeletonDataFromInputStream(InputBinaryStream &stream,
       mRegistry.getSkeletons().addAsset(skeleton));
 }
 
-Result<SkeletonAssetHandle>
-AssetCache::loadSkeletonFromFile(const Path &filePath) {
+Result<SkeletonAssetHandle> AssetCache::loadSkeleton(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Skeleton);
@@ -82,8 +87,7 @@ AssetCache::loadSkeletonFromFile(const Path &filePath) {
   return loadSkeletonDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<SkeletonAssetHandle>
-AssetCache::getOrLoadSkeletonFromUuid(const Uuid &uuid) {
+Result<SkeletonAssetHandle> AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
   if (uuid.isEmpty()) {
     return Result<SkeletonAssetHandle>::Ok(SkeletonAssetHandle::Null);
   }
@@ -93,7 +97,7 @@ AssetCache::getOrLoadSkeletonFromUuid(const Uuid &uuid) {
     return Result<SkeletonAssetHandle>::Ok(handle);
   }
 
-  return loadSkeletonFromFile(getPathFromUuid(uuid));
+  return loadSkeleton(uuid);
 }
 
 } // namespace liquid

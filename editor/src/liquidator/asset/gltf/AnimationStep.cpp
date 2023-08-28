@@ -124,7 +124,7 @@ void loadAnimations(GLTFImportData &importData) {
     AssetData<AnimationAsset> animation;
     animation.name = getGLTFAssetName(importData, assetName);
     animation.data.time = maxTime;
-    animation.uuid = getUUID(importData, assetName);
+    animation.uuid = getOrCreateGLTFUuid(importData, assetName);
 
     int32_t targetNode = -1;
     int32_t targetSkin = -1;
@@ -225,7 +225,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto filePath = assetCache.createAnimationFromAsset(animation);
-    auto handle = assetCache.loadAnimationFromFile(filePath.getData());
+    auto handle = assetCache.loadAnimation(animation.uuid);
     importData.outputUuids.insert_or_assign(assetName,
                                             assetCache.getRegistry()
                                                 .getAnimations()
@@ -254,7 +254,7 @@ void loadAnimations(GLTFImportData &importData) {
 
     AssetData<AnimatorAsset> asset{};
     asset.name = getGLTFAssetName(importData, animatorName);
-    asset.uuid = getUUID(importData, animatorName);
+    asset.uuid = getOrCreateGLTFUuid(importData, animatorName);
 
     for (auto [handle, assetName] : animations) {
       AnimationState state{};
@@ -281,7 +281,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createAnimatorFromAsset(asset);
-    auto handle = assetCache.loadAnimatorFromFile(path.getData());
+    auto handle = assetCache.loadAnimator(asset.uuid);
     importData.animations.skinAnimatorMap.insert_or_assign(skin,
                                                            handle.getData());
 
@@ -322,7 +322,7 @@ void loadAnimations(GLTFImportData &importData) {
     }
 
     auto path = assetCache.createAnimatorFromAsset(asset);
-    auto handle = assetCache.loadAnimatorFromFile(path.getData());
+    auto handle = assetCache.loadAnimator(asset.uuid);
     importData.animations.nodeAnimatorMap.insert_or_assign(node,
                                                            handle.getData());
     importData.outputUuids.insert_or_assign(animatorName,

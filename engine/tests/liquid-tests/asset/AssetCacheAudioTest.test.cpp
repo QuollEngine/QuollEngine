@@ -11,26 +11,27 @@ public:
 TEST_F(AssetCacheAudioTest, CreatesAudioFromSource) {
   auto audioPath = FixturesPath / "valid-audio.wav";
 
-  auto filePath =
-      cache.createAudioFromSource(audioPath, liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+
+  auto filePath = cache.createAudioFromSource(audioPath, uuid);
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(uuid);
   EXPECT_EQ(meta.type, liquid::AssetType::Audio);
   EXPECT_EQ(meta.name, "valid-audio.wav");
 }
 
 TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
   auto audioPath = FixturesPath / "valid-audio.wav";
-  auto filePath =
-      cache.createAudioFromSource(audioPath, liquid::Uuid::generate());
 
-  auto result = cache.loadAudioFromFile(filePath.getData());
+  auto uuid = liquid::Uuid::generate();
+
+  auto filePath = cache.createAudioFromSource(audioPath, uuid);
+  auto result = cache.loadAudio(uuid);
 
   EXPECT_TRUE(result.hasData());
   EXPECT_FALSE(result.hasError());
@@ -47,9 +48,9 @@ TEST_F(AssetCacheAudioTest, LoadsWavAudioFileIntoRegistry) {
 }
 
 TEST_F(AssetCacheAudioTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
-  auto filePath = CachePath / "non-existent-file.wav";
+  auto uuid = liquid::Uuid::generate();
 
-  auto result = cache.loadAudioFromFile(filePath);
+  auto result = cache.loadAudio(uuid);
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());
