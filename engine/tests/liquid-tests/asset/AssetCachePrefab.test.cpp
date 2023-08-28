@@ -14,6 +14,7 @@ public:
   liquid::AssetData<liquid::PrefabAsset> createPrefabAsset() {
     liquid::AssetData<liquid::PrefabAsset> asset;
     asset.name = "test-prefab0";
+    asset.uuid = liquid::Uuid::generate();
 
     std::random_device device;
     std::mt19937 mt(device());
@@ -151,8 +152,12 @@ public:
 
   void SetUp() override {
     AssetCacheTestBase::SetUp();
-    std::filesystem::copy(FixturesPath / "1x1-2d.ktx", CachePath / "tex.asset");
+
+    textureUuid = liquid::Uuid::generate();
+    cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", textureUuid);
   }
+
+  liquid::Uuid textureUuid;
 };
 
 TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
@@ -478,10 +483,11 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
 TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
   liquid::AssetData<liquid::PrefabAsset> asset;
+  asset.uuid = liquid::Uuid::generate();
 
   auto filePath = cache.createPrefabFromAsset(asset);
 
-  auto res = cache.loadPrefabFromFile(filePath.getData());
+  auto res = cache.loadPrefab(asset.uuid);
   EXPECT_TRUE(res.hasError());
   EXPECT_FALSE(res.hasData());
   EXPECT_FALSE(res.hasWarnings());
@@ -490,7 +496,7 @@ TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
 TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createPrefabFromAsset(asset);
-  auto handle = cache.loadPrefabFromFile(filePath.getData());
+  auto handle = cache.loadPrefab(asset.uuid);
   EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Null);
   EXPECT_FALSE(handle.hasWarnings());
 
@@ -599,18 +605,19 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
 
 TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   // Create texture
-  auto tempTextureHandle =
-      cache.loadTextureFromFile(CachePath / "tex.asset").getData();
+  auto tempTextureHandle = cache.loadTexture(textureUuid).getData();
   auto tempTextureAsset =
       cache.getRegistry().getTextures().getAsset(tempTextureHandle);
   cache.getRegistry().getTextures().deleteAsset(tempTextureHandle);
 
   auto texturePath = cache.createTextureFromAsset(tempTextureAsset).getData();
-  auto textureHandle = cache.loadTextureFromFile(texturePath);
+  auto textureHandle = cache.loadTexture(textureUuid);
 
   // Create mesh
   liquid::AssetData<liquid::MeshAsset> meshData{};
   meshData.type = liquid::AssetType::SkinnedMesh;
+  meshData.uuid = liquid::Uuid::generate();
+
   liquid::BaseGeometryAsset geometry{};
   geometry.positions.push_back({});
   geometry.normals.push_back({});
@@ -623,27 +630,32 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   geometry.indices.push_back(0);
   meshData.data.geometries.push_back(geometry);
   auto meshPath = cache.createMeshFromAsset(meshData).getData();
-  auto meshHandle = cache.loadMeshFromFile(meshPath);
+  auto meshHandle = cache.loadMesh(meshData.uuid);
 
   // Create skeleton
   liquid::AssetData<liquid::SkeletonAsset> skeletonData{};
+  skeletonData.uuid = liquid::Uuid::generate();
+
   auto skeletonPath = cache.createSkeletonFromAsset(skeletonData).getData();
-  auto skeletonHandle = cache.loadSkeletonFromFile(skeletonPath);
+  auto skeletonHandle = cache.loadSkeleton(skeletonData.uuid);
 
   // Create animation
   liquid::AssetData<liquid::AnimationAsset> animationData{};
   animationData.data.time = 2.5;
+  animationData.uuid = liquid::Uuid::generate();
   auto animationPath = cache.createAnimationFromAsset(animationData).getData();
-  auto animationHandle = cache.loadAnimationFromFile(animationPath);
+  auto animationHandle = cache.loadAnimation(animationData.uuid);
 
   // Create animator
   liquid::AssetData<liquid::AnimatorAsset> animatorData{};
   animatorData.data.states.push_back({"INITIAL"});
+  animatorData.uuid = liquid::Uuid::generate();
   auto animatorPath = cache.createAnimatorFromAsset(animatorData).getData();
-  auto animatorHandle = cache.loadAnimatorFromFile(animatorPath);
+  auto animatorHandle = cache.loadAnimator(animatorData.uuid);
 
   // Create prefab
   liquid::AssetData<liquid::PrefabAsset> prefabData{};
+  prefabData.uuid = liquid::Uuid::generate();
   prefabData.data.meshes.push_back({0U, meshHandle.getData()});
   prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
   prefabData.data.animations.push_back(animationHandle.getData());
@@ -658,7 +670,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().getAnimations().deleteAsset(animationHandle.getData());
   cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
 
-  auto prefabHandle = cache.loadPrefabFromFile(prefabPath.getData());
+  auto prefabHandle = cache.loadPrefab(prefabData.uuid);
   EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Null);
 
   auto &newPrefab =

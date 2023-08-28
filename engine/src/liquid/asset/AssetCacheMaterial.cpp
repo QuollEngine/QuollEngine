@@ -11,7 +11,12 @@ namespace liquid {
 
 Result<Path>
 AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
-  auto assetPath = createAssetPath(asset.uuid);
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -76,7 +81,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTextureFromUuid(textureUuid);
+    const auto &res = getOrLoadTexture(textureUuid);
     if (res.hasData()) {
       material.data.baseColorTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -92,7 +97,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTextureFromUuid(textureUuid);
+    const auto &res = getOrLoadTexture(textureUuid);
     if (res.hasData()) {
       material.data.metallicRoughnessTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -110,7 +115,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTextureFromUuid(textureUuid);
+    const auto &res = getOrLoadTexture(textureUuid);
     if (res.hasData()) {
       material.data.normalTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -126,7 +131,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTextureFromUuid(textureUuid);
+    const auto &res = getOrLoadTexture(textureUuid);
     if (res.hasData()) {
       material.data.occlusionTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -142,7 +147,7 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
   {
     Uuid textureUuid;
     stream.read(textureUuid);
-    const auto &res = getOrLoadTextureFromUuid(textureUuid);
+    const auto &res = getOrLoadTexture(textureUuid);
     if (res.hasData()) {
       material.data.emissiveTexture = res.getData();
       warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -158,8 +163,8 @@ AssetCache::loadMaterialDataFromInputStream(InputBinaryStream &stream,
       mRegistry.getMaterials().addAsset(material), warnings);
 }
 
-Result<MaterialAssetHandle>
-AssetCache::loadMaterialFromFile(const Path &filePath) {
+Result<MaterialAssetHandle> AssetCache::loadMaterial(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   if (!stream.good()) {
@@ -175,8 +180,7 @@ AssetCache::loadMaterialFromFile(const Path &filePath) {
   return loadMaterialDataFromInputStream(stream, filePath, header.getData());
 }
 
-Result<MaterialAssetHandle>
-AssetCache::getOrLoadMaterialFromUuid(const Uuid &uuid) {
+Result<MaterialAssetHandle> AssetCache::getOrLoadMaterial(const Uuid &uuid) {
   if (uuid.isEmpty()) {
     return Result<MaterialAssetHandle>::Ok(MaterialAssetHandle::Null);
   }
@@ -186,7 +190,7 @@ AssetCache::getOrLoadMaterialFromUuid(const Uuid &uuid) {
     return Result<MaterialAssetHandle>::Ok(handle);
   }
 
-  return loadMaterialFromFile(getPathFromUuid(uuid));
+  return loadMaterial(uuid);
 }
 
 } // namespace liquid

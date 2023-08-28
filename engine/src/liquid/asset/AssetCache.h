@@ -50,10 +50,10 @@ public:
   /**
    * @brief Load texture from file
    *
-   * @param filePath Path to asset
+   * @param uuid Texture uuid
    * @return Texture asset handle
    */
-  Result<TextureAssetHandle> loadTextureFromFile(const Path &filePath);
+  Result<TextureAssetHandle> loadTexture(const Uuid &uuid);
 
   /**
    * @brief Create font from source
@@ -67,10 +67,10 @@ public:
   /**
    * @brief Load font from file
    *
-   * @param filePath Path to asset
+   * @param uuid Font uuid
    * @return Font asset handle
    */
-  Result<FontAssetHandle> loadFontFromFile(const Path &filePath);
+  Result<FontAssetHandle> loadFont(const Uuid &uuid);
 
   /**
    * @brief Create material from asset
@@ -86,10 +86,10 @@ public:
   /**
    * @brief Load material from file
    *
-   * @param filePath Path to asset
+   * @param uuid Material uuid
    * @return Material asset handle
    */
-  Result<MaterialAssetHandle> loadMaterialFromFile(const Path &filePath);
+  Result<MaterialAssetHandle> loadMaterial(const Uuid &uuid);
 
   /**
    * @brief Create mesh from asset
@@ -105,10 +105,10 @@ public:
   /**
    * @brief Load mesh from file
    *
-   * @param filePath Path to asset
+   * @param uuid Mesh uuid
    * @return Mesh asset handle
    */
-  Result<MeshAssetHandle> loadMeshFromFile(const Path &filePath);
+  Result<MeshAssetHandle> loadMesh(const Uuid &uuid);
 
   /**
    * @brief Create skeleton from asset
@@ -122,12 +122,12 @@ public:
   Result<Path> createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset);
 
   /**
-   * @brief Load skeleton from file
+   * @brief Load skeleton
    *
-   * @param filePath Path to asset
+   * @param uuid Skeleton uuid
    * @return Skeleton asset handle
    */
-  Result<SkeletonAssetHandle> loadSkeletonFromFile(const Path &filePath);
+  Result<SkeletonAssetHandle> loadSkeleton(const Uuid &uuid);
 
   /**
    * @brief Create animation from asset
@@ -141,12 +141,12 @@ public:
   Result<Path> createAnimationFromAsset(const AssetData<AnimationAsset> &asset);
 
   /**
-   * @brief Load animation from file
+   * @brief Load animation
    *
-   * @param filePath Path to asset
+   * @param uuid Animation uuid
    * @return Animation asset handle
    */
-  Result<AnimationAssetHandle> loadAnimationFromFile(const Path &filePath);
+  Result<AnimationAssetHandle> loadAnimation(const Uuid &uuid);
 
   /**
    * @brief Create animator from source
@@ -170,15 +170,15 @@ public:
   Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset);
 
   /**
-   * @brief Load animator from file
+   * @brief Load animator
    *
-   * @param filePath Path to asset
+   * @param uuid Animator uuid
    * @param handle Existing asset handle
    * @return Animator asset handle
    */
   Result<AnimatorAssetHandle>
-  loadAnimatorFromFile(const Path &filePath,
-                       AnimatorAssetHandle handle = AnimatorAssetHandle::Null);
+  loadAnimator(const Uuid &uuid,
+               AnimatorAssetHandle handle = AnimatorAssetHandle::Null);
 
   /**
    * @brief Copy audio from source
@@ -190,12 +190,12 @@ public:
   Result<Path> createAudioFromSource(const Path &sourcePath, const Uuid &uuid);
 
   /**
-   * @brief Load audio from file
+   * @brief Load audio
    *
-   * @param filePath Path to asset
+   * @param uuid Audio uuid
    * @return Audio asset handle
    */
-  Result<AudioAssetHandle> loadAudioFromFile(const Path &filePath);
+  Result<AudioAssetHandle> loadAudio(const Uuid &uuid);
 
   /**
    * @brief Create prefab from asset
@@ -209,12 +209,12 @@ public:
   Result<Path> createPrefabFromAsset(const AssetData<PrefabAsset> &asset);
 
   /**
-   * @brief Load prefab from file
+   * @brief Load prefab
    *
-   * @param filePath Path to asset
+   * @param uuid Prefab uuid
    * @return Prefab asset handle
    */
-  Result<PrefabAssetHandle> loadPrefabFromFile(const Path &filePath);
+  Result<PrefabAssetHandle> loadPrefab(const Uuid &uuid);
 
   /**
    * @brief Create environment from asset
@@ -231,10 +231,10 @@ public:
   /**
    * @brief Load environment from file
    *
-   * @param filePath Path to asset
+   * @param uuid Environment uuid
    * @return Environment asset handle
    */
-  Result<EnvironmentAssetHandle> loadEnvironmentFromFile(const Path &filePath);
+  Result<EnvironmentAssetHandle> loadEnvironment(const Uuid &uuid);
 
   /**
    * @brief Create Lua script from source
@@ -247,15 +247,15 @@ public:
                                          const Uuid &uuid);
 
   /**
-   * @brief Load Lua script from file
+   * @brief Load Lua script
    *
-   * @param filePath Path to asset
+   * @param uuid Lua script uuid
    * @param handle Lua script handle
    * @return Lua script handle
    */
-  Result<LuaScriptAssetHandle> loadLuaScriptFromFile(
-      const Path &filePath,
-      LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null);
+  Result<LuaScriptAssetHandle>
+  loadLuaScript(const Uuid &uuid,
+                LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null);
 
   /**
    * @brief Create scene from source
@@ -267,12 +267,12 @@ public:
   Result<Path> createSceneFromSource(const Path &sourcePath, const Uuid &uuid);
 
   /**
-   * @brief Load scene from file
+   * @brief Load scene
    *
-   * @param filePath Path to asset
+   * @param uuid Scene uuid
    * @return Scene asset handle
    */
-  Result<SceneAssetHandle> loadSceneFromFile(const Path &filePath);
+  Result<SceneAssetHandle> loadScene(const Uuid &uuid);
 
   /**
    * @brief Get asset registry
@@ -313,20 +313,15 @@ public:
    * @param uuid Asset uuid
    * @return Asset meta
    */
-  AssetMeta getMetaFromUuid(const Uuid &uuid) const;
+  AssetMeta getAssetMeta(const Uuid &uuid) const;
 
   /**
-   * @brief Create asset metafile
+   * @brief Get asset path from uuid
    *
-   * Creates file in the same path as
-   * the path of the asset
-   *
-   * @param type Asset type
-   * @param name Asset name
-   * @param path Full path to asset
-   * @return Path to meta file
+   * @param uuid Asset uuid
+   * @return Path to asset
    */
-  Result<Path> createMetaFile(AssetType type, String name, Path path);
+  Path getPathFromUuid(const Uuid &uuid);
 
 private:
   /**
@@ -358,6 +353,19 @@ private:
   Result<AssetFileHeader> checkAssetFile(InputBinaryStream &file,
                                          const Path &filePath,
                                          AssetType assetType);
+
+  /**
+   * @brief Create asset metafile
+   *
+   * Creates file in the same path as
+   * the path of the asset
+   *
+   * @param type Asset type
+   * @param name Asset name
+   * @param path Full path to asset
+   * @return Path to meta file
+   */
+  Result<Path> createAssetMeta(AssetType type, String name, Path path);
 
   /**
    * @brief Load single asset
@@ -449,69 +457,52 @@ private:
 
 private:
   /**
-   * @brief Get asset path from uuid
-   *
-   * @param uuid Asset uuid
-   * @return Path to asset
-   */
-  Path getPathFromUuid(const Uuid &uuid);
-
-  /**
-   * @brief Get or load texture from uuid
+   * @brief Get or load texture
    *
    * @param uuid Asset uuid
    * @return Existing or newly loaded texture
    */
-  Result<TextureAssetHandle> getOrLoadTextureFromUuid(const Uuid &uuid);
+  Result<TextureAssetHandle> getOrLoadTexture(const Uuid &uuid);
 
   /**
-   * @brief Get or load material from uuid
+   * @brief Get or load material
    *
-   * @param uuid Asset uuid
+   * @param uuid Material uuid
    * @return Existing or newly loaded material
    */
-  Result<MaterialAssetHandle> getOrLoadMaterialFromUuid(const Uuid &uuid);
+  Result<MaterialAssetHandle> getOrLoadMaterial(const Uuid &uuid);
 
   /**
-   * @brief Get or load mesh from uuid
+   * @brief Get or load mesh
    *
-   * @param uuid Asset uuid
+   * @param uuid Mesh uuid
    * @return Existing or newly loaded mesh
    */
-  Result<MeshAssetHandle> getOrLoadMeshFromUuid(const Uuid &uuid);
+  Result<MeshAssetHandle> getOrLoadMesh(const Uuid &uuid);
 
   /**
-   * @brief Get or load skeleton from uuid
+   * @brief Get or load skeleton
    *
-   * @param uuid Asset uuid
+   * @param uuid Skeleton uuid
    * @return Existing or newly loaded skeleton
    */
-  Result<SkeletonAssetHandle> getOrLoadSkeletonFromUuid(const Uuid &uuid);
+  Result<SkeletonAssetHandle> getOrLoadSkeleton(const Uuid &uuid);
 
   /**
-   * @brief Get or load animation from uuid
+   * @brief Get or load animation
    *
-   * @param uuid Asset uuid
+   * @param uuid Animation uuid
    * @return Existing or newly loaded animation
    */
-  Result<AnimationAssetHandle> getOrLoadAnimationFromUuid(const Uuid &uuid);
+  Result<AnimationAssetHandle> getOrLoadAnimation(const Uuid &uuid);
 
   /**
-   * @brief Get or load animator from uuid
+   * @brief Get or load aniamtor from uuid
    *
-   * @param uuid Asset uuid
+   * @param uuid Animator uuid
    * @return Existing or newly loaded animator
    */
-  Result<AnimatorAssetHandle> getOrLoadAnimatorFromUuid(const Uuid &uuid);
-
-private:
-  /**
-   * @brief Create asset path
-   *
-   * @param uuid Asset uuid
-   * @return Asset path
-   */
-  Path createAssetPath(const Uuid &uuid);
+  Result<AnimatorAssetHandle> getOrLoadAnimator(const Uuid &uuid);
 
 private:
   AssetRegistry mRegistry;

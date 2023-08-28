@@ -224,7 +224,7 @@ TEST_P(AssetTest, ImportCreatesAssetInCache) {
   EXPECT_TRUE(uuid.isValid());
 
   EXPECT_EQ(
-      manager.getCache().getMetaFromUuid(uuid).type,
+      manager.getCache().getAssetMeta(uuid).type,
       liquid::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
 }
 

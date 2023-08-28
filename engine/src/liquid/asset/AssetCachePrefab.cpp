@@ -11,7 +11,12 @@ namespace liquid {
 
 Result<Path>
 AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
-  auto assetPath = createAssetPath(asset.uuid);
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream file(assetPath);
 
@@ -272,7 +277,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadMaterialFromUuid(assetUuid);
+      const auto &res = getOrLoadMaterial(assetUuid);
       if (res.hasData()) {
         localMaterialMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -293,7 +298,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadMeshFromUuid(assetUuid);
+      const auto &res = getOrLoadMesh(assetUuid);
       if (res.hasData()) {
         localMeshMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -314,7 +319,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadSkeletonFromUuid(assetUuid);
+      const auto &res = getOrLoadSkeleton(assetUuid);
       if (res.hasData()) {
         localSkeletonMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -337,7 +342,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadAnimationFromUuid(assetUuid);
+      const auto &res = getOrLoadAnimation(assetUuid);
       if (res.hasData()) {
         localAnimationMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -361,7 +366,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto assetUuid = actual.at(i);
-      const auto &res = getOrLoadAnimatorFromUuid(assetUuid);
+      const auto &res = getOrLoadAnimator(assetUuid);
       if (res.hasData()) {
         localAnimatorMap.at(i) = res.getData();
         warnings.insert(warnings.end(), res.getWarnings().begin(),
@@ -579,7 +584,9 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
                                        warnings);
 }
 
-Result<PrefabAssetHandle> AssetCache::loadPrefabFromFile(const Path &filePath) {
+Result<PrefabAssetHandle> AssetCache::loadPrefab(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Prefab);

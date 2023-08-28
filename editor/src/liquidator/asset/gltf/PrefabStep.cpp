@@ -17,7 +17,7 @@ void loadPrefabs(GLTFImportData &importData) {
   AssetData<PrefabAsset> prefab;
   prefab.name = importData.sourcePath.filename().string();
   prefab.type = AssetType::Prefab;
-  prefab.uuid = getUUID(importData, "root");
+  prefab.uuid = getOrCreateGLTFUuid(importData, "root");
 
   auto &gltfNodes = model.scenes.at(model.defaultScene);
 
@@ -135,7 +135,7 @@ void loadPrefabs(GLTFImportData &importData) {
   auto path = assetCache.createPrefabFromAsset(prefab);
 
   if (path.hasData()) {
-    auto handle = assetCache.loadPrefabFromFile(path.getData());
+    auto handle = assetCache.loadPrefab(prefab.uuid);
 
     if (handle.hasData()) {
       importData.outputUuids.insert_or_assign("root",

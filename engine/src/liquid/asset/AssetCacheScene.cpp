@@ -7,7 +7,7 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
                                                const Uuid &uuid) {
   using co = std::filesystem::copy_options;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = getPathFromUuid(uuid);
 
   std::error_code code;
   if (!std::filesystem::copy_file(sourcePath, assetPath, co::overwrite_existing,
@@ -17,8 +17,8 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
         "; " + code.message());
   }
 
-  auto metaRes = createMetaFile(AssetType::Scene,
-                                sourcePath.filename().string(), assetPath);
+  auto metaRes = createAssetMeta(AssetType::Scene,
+                                 sourcePath.filename().string(), assetPath);
 
   if (!metaRes.hasData()) {
     std::filesystem::remove(assetPath);
@@ -29,7 +29,9 @@ Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<SceneAssetHandle> AssetCache::loadSceneFromFile(const Path &filePath) {
+Result<SceneAssetHandle> AssetCache::loadScene(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
+
   std::ifstream stream(filePath);
   auto root = YAML::Load(stream);
   stream.close();
@@ -54,7 +56,7 @@ Result<SceneAssetHandle> AssetCache::loadSceneFromFile(const Path &filePath) {
     return Result<SceneAssetHandle>::Error("`entities` field is invalid");
   }
 
-  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
+  auto meta = getAssetMeta(uuid);
 
   AssetData<SceneAsset> asset{};
   asset.type = AssetType::Scene;

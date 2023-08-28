@@ -476,11 +476,11 @@ void loadMeshes(GLTFImportData &importData) {
 
     mesh.type = isSkinnedMesh ? AssetType::SkinnedMesh : AssetType::Mesh;
     mesh.name = getGLTFAssetName(importData, assetName);
-    mesh.uuid = getUUID(importData, assetName);
+    mesh.uuid = getOrCreateGLTFUuid(importData, assetName);
 
     auto path = assetCache.createMeshFromAsset(mesh);
 
-    auto handle = assetCache.loadMeshFromFile(path.getData());
+    auto handle = assetCache.loadMesh(mesh.uuid);
     importData.meshes.map.insert_or_assign(i, handle.getData());
 
     importData.meshMaterials.insert_or_assign(handle.getData(), materials);

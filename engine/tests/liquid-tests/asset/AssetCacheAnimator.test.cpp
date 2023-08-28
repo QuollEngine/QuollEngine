@@ -18,16 +18,16 @@ public:
 using AssetCacheAnimatorDeathTest = AssetCacheAnimatorTest;
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
-  auto filePath = cache.createAnimatorFromSource(FixturesPath / "test.animator",
-                                                 liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath =
+      cache.createAnimatorFromSource(FixturesPath / "test.animator", uuid);
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(uuid);
 
   EXPECT_EQ(meta.type, liquid::AssetType::Animator);
   EXPECT_EQ(meta.name, "test.animator");
@@ -47,6 +47,7 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   liquid::AssetData<liquid::AnimatorAsset> asset{};
   asset.data.initialState = 1;
   asset.name = "my-animator.animator";
+  asset.uuid = liquid::Uuid::generate();
 
   liquid::AnimationState stateIdle;
   stateIdle.name = "idle";
@@ -76,8 +77,7 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(asset.uuid);
 
   EXPECT_EQ(meta.type, liquid::AssetType::Animator);
   EXPECT_EQ(meta.name, "my-animator.animator");
@@ -182,47 +182,56 @@ TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorFailsIfRequiredPropertiesAreInvalid) {
 
   {
+    auto uuid = liquid::Uuid::generate();
+    auto filePath = cache.getPathFromUuid(uuid);
+
     YAML::Node node;
     node["version"] = "0.2";
     node["type"] = "animator";
     node["states"] = YAML::Node(YAML::NodeType::Sequence);
-    std::ofstream stream(FilePath);
+    std::ofstream stream(filePath);
     stream << node;
     stream.close();
 
-    auto res = cache.loadAnimatorFromFile(FilePath);
+    auto res = cache.loadAnimator(uuid);
     EXPECT_FALSE(res.hasData());
     EXPECT_TRUE(res.hasError());
     EXPECT_FALSE(res.hasWarnings());
   }
 
   {
+    auto uuid = liquid::Uuid::generate();
+    auto filePath = cache.getPathFromUuid(uuid);
+
     YAML::Node node;
     node["version"] = "0.1";
     node["type"] = "not-animator";
     node["states"] = YAML::Node(YAML::NodeType::Sequence);
 
-    std::ofstream stream(FilePath);
+    std::ofstream stream(filePath);
     stream << node;
     stream.close();
 
-    auto res = cache.loadAnimatorFromFile(FilePath);
+    auto res = cache.loadAnimator(uuid);
     EXPECT_FALSE(res.hasData());
     EXPECT_TRUE(res.hasError());
     EXPECT_FALSE(res.hasWarnings());
   }
 
   {
+    auto uuid = liquid::Uuid::generate();
+    auto filePath = cache.getPathFromUuid(uuid);
+
     YAML::Node node;
     node["version"] = "0.1";
     node["type"] = "animator";
     node["states"] = "test";
 
-    std::ofstream stream(FilePath);
+    std::ofstream stream(filePath);
     stream << node;
     stream.close();
 
-    auto res = cache.loadAnimatorFromFile(FilePath);
+    auto res = cache.loadAnimator(uuid);
     EXPECT_FALSE(res.hasData());
     EXPECT_TRUE(res.hasError());
     EXPECT_FALSE(res.hasWarnings());
@@ -247,11 +256,13 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   }
   node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
-  std::ofstream stream(FilePath);
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+  std::ofstream stream(filePath);
   stream << node;
   stream.close();
 
-  auto res = cache.loadAnimatorFromFile(FilePath);
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_TRUE(res.hasWarnings());
@@ -287,11 +298,13 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
     node["states"][invalidStateNames[i]] = invalidNodes[i];
   }
 
-  std::ofstream stream(FilePath);
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+  std::ofstream stream(filePath);
   stream << node;
   stream.close();
 
-  auto res = cache.loadAnimatorFromFile(FilePath);
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_TRUE(res.hasWarnings());
@@ -323,11 +336,13 @@ TEST_F(AssetCacheAnimatorTest,
     node["initial"] = invalidNode;
     node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
-    std::ofstream stream(FilePath);
+    auto uuid = liquid::Uuid::generate();
+    auto filePath = cache.getPathFromUuid(uuid);
+    std::ofstream stream(filePath);
     stream << node;
     stream.close();
 
-    auto res = cache.loadAnimatorFromFile(FilePath);
+    auto res = cache.loadAnimator(uuid);
     EXPECT_TRUE(res.hasData());
     EXPECT_FALSE(res.hasError());
     EXPECT_TRUE(res.hasWarnings());
@@ -351,11 +366,14 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
   node["states"]["valid1"] = YAML::Node(YAML::NodeType::Map);
   node["states"]["valid2"] = YAML::Node(YAML::NodeType::Map);
 
-  std::ofstream stream(FilePath);
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+
+  std::ofstream stream(filePath);
   stream << node;
   stream.close();
 
-  auto res = cache.loadAnimatorFromFile(FilePath);
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -425,11 +443,13 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 
   node["states"]["walk"] = YAML::Node(YAML::NodeType::Map);
 
-  std::ofstream stream(FilePath);
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+  std::ofstream stream(filePath);
   stream << node;
   stream.close();
 
-  auto res = cache.loadAnimatorFromFile(FilePath);
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_TRUE(res.hasWarnings());
@@ -465,11 +485,13 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
   state["output"]["type"] = "animation";
   state["output"]["animation"] = "my-animation";
 
-  std::ofstream stream(FilePath);
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.getPathFromUuid(uuid);
+  std::ofstream stream(filePath);
   stream << node;
   stream.close();
 
-  auto res = cache.loadAnimatorFromFile(FilePath);
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -485,8 +507,8 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
 
 TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorLoadsAnimationsBeforeLoadingAnimator) {
-
   liquid::AssetData<liquid::AnimationAsset> animData{};
+  animData.uuid = liquid::Uuid::generate();
   auto path = cache.createAnimationFromAsset(animData);
 
   YAML::Node node;
@@ -501,10 +523,10 @@ TEST_F(AssetCacheAnimatorTest,
   stream << node;
   stream.close();
 
-  auto filePath =
-      cache.createAnimatorFromSource(FilePath, liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.createAnimatorFromSource(FilePath, uuid);
 
-  auto res = cache.loadAnimatorFromFile(filePath.getData());
+  auto res = cache.loadAnimator(uuid);
   EXPECT_TRUE(res.hasData());
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -522,10 +544,11 @@ TEST_F(AssetCacheAnimatorTest,
 
 TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
   liquid::AssetData<liquid::AnimatorAsset> animData{};
+  animData.uuid = liquid::Uuid::generate();
   animData.data.states.push_back({});
   auto animatorPath = cache.createAnimatorFromAsset(animData);
 
-  auto result = cache.loadAnimatorFromFile(animatorPath.getData());
+  auto result = cache.loadAnimator(animData.uuid);
   EXPECT_FALSE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_TRUE(result.hasData());
@@ -535,7 +558,7 @@ TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
   auto animatorPath2 = cache.createAnimatorFromAsset(animData).getData();
 
   // Load script to update the handle
-  auto res2 = cache.loadAnimatorFromFile(animatorPath2, handle);
+  auto res2 = cache.loadAnimator(animData.uuid, handle);
   EXPECT_EQ(res2.getData(), handle);
 
   auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
@@ -546,10 +569,10 @@ TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
 TEST_F(AssetCacheAnimatorDeathTest,
        UpdateAnimatorFailsIfProvidedHandleDoesNotExist) {
   liquid::AssetData<liquid::AnimatorAsset> animData{};
+  animData.uuid = liquid::Uuid::generate();
   animData.data.states.push_back({});
   auto animatorPath = cache.createAnimatorFromAsset(animData);
 
-  EXPECT_DEATH(cache.loadAnimatorFromFile(animatorPath.getData(),
-                                          liquid::AnimatorAssetHandle{25}),
-               ".*");
+  EXPECT_DEATH(
+      cache.loadAnimator(animData.uuid, liquid::AnimatorAssetHandle{25}), ".*");
 }

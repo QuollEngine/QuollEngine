@@ -160,10 +160,11 @@ struct GLTFImportData {
  *
  * @param importData Import data
  * @param name Asset name
- * @return Uuid or empty uuid
+ * @return Uuid
  */
-static Uuid getUUID(const GLTFImportData &importData, const String &name) {
-  return getUUIDFromMap(importData.uuids, name);
+static Uuid getOrCreateGLTFUuid(const GLTFImportData &importData,
+                                const String &name) {
+  return getOrCreateUuidFromMap(importData.uuids, name);
 }
 
 /**

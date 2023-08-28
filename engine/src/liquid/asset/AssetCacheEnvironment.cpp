@@ -10,13 +10,18 @@ namespace liquid {
 
 Result<Path> AssetCache::createEnvironmentFromAsset(
     const AssetData<EnvironmentAsset> &asset) {
+  if (asset.uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   auto irradianceMapUuid =
       mRegistry.getTextures().getAsset(asset.data.irradianceMap).uuid;
 
   auto specularMapUuid =
       mRegistry.getTextures().getAsset(asset.data.specularMap).uuid;
 
-  auto assetPath = createAssetPath(asset.uuid);
+  auto assetPath = getPathFromUuid(asset.uuid);
 
   OutputBinaryStream stream(assetPath);
   AssetFileHeader header{};
@@ -41,12 +46,12 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   Uuid specularMapUuid;
   stream.read(specularMapUuid);
 
-  auto irradianceMapRes = getOrLoadTextureFromUuid(irradianceMapUuid);
+  auto irradianceMapRes = getOrLoadTexture(irradianceMapUuid);
   if (irradianceMapRes.hasError()) {
     return Result<EnvironmentAssetHandle>::Error(irradianceMapRes.getError());
   }
 
-  auto specularMapRes = getOrLoadTextureFromUuid(specularMapUuid);
+  auto specularMapRes = getOrLoadTexture(specularMapUuid);
   if (specularMapRes.hasError()) {
     mRegistry.getTextures().deleteAsset(irradianceMapRes.getData());
     return Result<EnvironmentAssetHandle>::Error(specularMapRes.getError());
@@ -64,8 +69,8 @@ AssetCache::loadEnvironmentDataFromInputStream(InputBinaryStream &stream,
   return Result<EnvironmentAssetHandle>::Ok(environmentHandle);
 }
 
-Result<EnvironmentAssetHandle>
-AssetCache::loadEnvironmentFromFile(const Path &filePath) {
+Result<EnvironmentAssetHandle> AssetCache::loadEnvironment(const Uuid &uuid) {
+  auto filePath = getPathFromUuid(uuid);
   InputBinaryStream stream(filePath);
 
   const auto &header = checkAssetFile(stream, filePath, AssetType::Environment);

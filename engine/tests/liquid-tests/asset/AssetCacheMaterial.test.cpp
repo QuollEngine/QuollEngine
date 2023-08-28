@@ -15,6 +15,7 @@ public:
   createMaterialAsset(bool createTextures) {
     liquid::AssetData<liquid::MaterialAsset> asset{};
     asset.name = "material1";
+    asset.uuid = liquid::Uuid("material1.uuid");
     asset.type = liquid::AssetType::Material;
     asset.data.baseColorFactor = glm::vec4(2.5f, 0.2f, 0.5f, 5.2f);
     asset.data.baseColorTextureCoord = 2;
@@ -73,8 +74,12 @@ public:
 
   void SetUp() override {
     AssetCacheTestBase::SetUp();
-    std::filesystem::copy(FixturesPath / "1x1-2d.ktx", CachePath / "tex.asset");
+
+    textureUuid = liquid::Uuid::generate();
+    cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", textureUuid);
   }
+
+  liquid::Uuid textureUuid;
 };
 
 TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
@@ -238,7 +243,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = cache.loadMaterialFromFile(assetFile.getData());
+  auto res = cache.loadMaterial(asset.uuid);
 
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -249,7 +254,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, asset.name);
-  EXPECT_EQ(material.path.filename().string().size(), 38);
+  EXPECT_TRUE(material.uuid.isValid());
   EXPECT_EQ(material.type, liquid::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
@@ -286,7 +291,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   EXPECT_FALSE(assetFile.hasError());
   EXPECT_FALSE(assetFile.hasWarnings());
 
-  auto res = cache.loadMaterialFromFile(assetFile.getData());
+  auto res = cache.loadMaterial(asset.uuid);
 
   EXPECT_FALSE(res.hasError());
   EXPECT_FALSE(res.hasWarnings());
@@ -298,7 +303,7 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
   EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
-  EXPECT_EQ(material.path.filename().string().size(), 38);
+  EXPECT_TRUE(material.uuid.isValid());
   EXPECT_EQ(material.type, liquid::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
@@ -329,15 +334,16 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 }
 
 TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
-  auto texture = cache.loadTextureFromFile(CachePath / "tex.asset");
+  auto texture = cache.loadTexture(textureUuid);
   liquid::AssetData<liquid::MaterialAsset> material{};
+  material.uuid = liquid::Uuid::generate();
   material.data.baseColorTexture = texture.getData();
   auto path = cache.createMaterialFromAsset(material);
 
   cache.getRegistry().getTextures().deleteAsset(texture.getData());
   EXPECT_FALSE(cache.getRegistry().getTextures().hasAsset(texture.getData()));
 
-  auto handle = cache.loadMaterialFromFile(path.getData());
+  auto handle = cache.loadMaterial(material.uuid);
 
   auto &newMaterial =
       cache.getRegistry().getMaterials().getAsset(handle.getData());
@@ -347,5 +353,5 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);
-  EXPECT_EQ(newTexture.uuid, liquid::Uuid("tex"));
+  EXPECT_EQ(newTexture.uuid, textureUuid);
 }

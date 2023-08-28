@@ -14,6 +14,7 @@ public:
   liquid::AssetData<liquid::MeshAsset> createRandomizedMeshAsset() {
     liquid::AssetData<liquid::MeshAsset> asset;
     asset.name = "test-mesh0";
+    asset.uuid = liquid::Uuid::generate();
     asset.type = liquid::AssetType::Mesh;
 
     {
@@ -49,6 +50,7 @@ public:
   liquid::AssetData<liquid::MeshAsset> createRandomizedSkinnedMeshAsset() {
     liquid::AssetData<liquid::MeshAsset> asset;
     asset.name = "test-mesh0";
+    asset.uuid = liquid::Uuid::generate();
     asset.type = liquid::AssetType::SkinnedMesh;
 
     std::random_device device;
@@ -171,7 +173,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset).getData();
-  auto handle = cache.loadMeshFromFile(filePath);
+  auto handle = cache.loadMesh(asset.uuid);
   EXPECT_TRUE(handle.hasError());
 }
 
@@ -182,14 +184,14 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset).getData();
-  auto handle = cache.loadMeshFromFile(filePath);
+  auto handle = cache.loadMesh(asset.uuid);
   EXPECT_TRUE(handle.hasError());
 }
 
 TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset).getData();
-  auto handleRes = cache.loadMeshFromFile(filePath);
+  auto handleRes = cache.loadMesh(asset.uuid);
 
   auto handle = handleRes.getData();
   EXPECT_NE(handle, liquid::MeshAssetHandle::Null);
@@ -321,7 +323,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoVertices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset).getData();
-  auto handle = cache.loadMeshFromFile(filePath);
+  auto handle = cache.loadMesh(asset.uuid);
   EXPECT_TRUE(handle.hasError());
 }
 
@@ -332,7 +334,7 @@ TEST_F(AssetCacheMeshTest, DoesNotLoadSkinnedMeshIfItHasNoIndices) {
   }
 
   auto filePath = cache.createMeshFromAsset(asset).getData();
-  auto handle = cache.loadMeshFromFile(filePath);
+  auto handle = cache.loadMesh(asset.uuid);
   EXPECT_TRUE(handle.hasError());
 }
 
@@ -340,7 +342,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
   auto asset = createRandomizedSkinnedMeshAsset();
 
   auto filePath = cache.createMeshFromAsset(asset);
-  auto handle = cache.loadMeshFromFile(filePath.getData());
+  auto handle = cache.loadMesh(asset.uuid);
   EXPECT_NE(handle.getData(), liquid::MeshAssetHandle::Null);
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle.getData());
   EXPECT_EQ(mesh.name, asset.name);

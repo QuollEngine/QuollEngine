@@ -69,7 +69,7 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
   return loadAsset(path, true);
 }
 
-AssetMeta AssetCache::getMetaFromUuid(const Uuid &uuid) const {
+AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   AssetMeta meta{};
   auto typePath =
       (mAssetsPath / uuid.toString()).replace_extension("assetmeta");
@@ -102,10 +102,10 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   // Handle files that are not in liquid format
-  auto meta = getMetaFromUuid(uuid);
+  auto meta = getAssetMeta(uuid);
 
   if (meta.type == AssetType::Texture) {
-    auto res = loadTextureFromFile(path);
+    auto res = loadTexture(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -114,8 +114,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::LuaScript) {
-    auto res =
-        loadLuaScriptFromFile(path, static_cast<LuaScriptAssetHandle>(handle));
+    auto res = loadLuaScript(uuid, static_cast<LuaScriptAssetHandle>(handle));
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -124,8 +123,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::Animator) {
-    auto res =
-        loadAnimatorFromFile(path, static_cast<AnimatorAssetHandle>(handle));
+    auto res = loadAnimator(uuid, static_cast<AnimatorAssetHandle>(handle));
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -134,7 +132,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::Audio) {
-    auto res = loadAudioFromFile(path);
+    auto res = loadAudio(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -143,7 +141,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::Font) {
-    auto res = loadFontFromFile(path);
+    auto res = loadFont(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -152,7 +150,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::Scene) {
-    auto res = loadSceneFromFile(path);
+    auto res = loadScene(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -234,8 +232,8 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   return Result<bool>::Error("Unknown asset file: " + path.stem().string());
 }
 
-Result<Path> AssetCache::createMetaFile(AssetType type, String name,
-                                        Path path) {
+Result<Path> AssetCache::createAssetMeta(AssetType type, String name,
+                                         Path path) {
   auto metaPath = path.replace_extension("assetmeta");
   OutputBinaryStream stream(path);
 
@@ -248,13 +246,6 @@ Result<Path> AssetCache::createMetaFile(AssetType type, String name,
   stream.write(name);
 
   return Result<Path>::Ok(metaPath);
-}
-
-Path AssetCache::createAssetPath(const Uuid &uuid) {
-  auto stem = uuid.isEmpty() ? Uuid::generate() : uuid;
-  return (mAssetsPath / stem.toString())
-      .replace_extension("asset")
-      .make_preferred();
 }
 
 Path AssetCache::getPathFromUuid(const Uuid &uuid) {

@@ -9,9 +9,9 @@ public:
 };
 
 TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
+  auto uuid = liquid::Uuid::generate();
   auto sourcePath = FixturesPath / "valid-font.ttf";
-  auto filePath =
-      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
+  auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
   EXPECT_TRUE(filePath.hasData());
   EXPECT_FALSE(filePath.hasError());
@@ -19,8 +19,7 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
 
   EXPECT_EQ(filePath.getData().filename().string().size(), 38);
 
-  auto meta =
-      cache.getMetaFromUuid(liquid::Uuid(filePath.getData().stem().string()));
+  auto meta = cache.getAssetMeta(uuid);
 
   EXPECT_EQ(meta.type, liquid::AssetType::Font);
   EXPECT_EQ(meta.name, "valid-font.ttf");
@@ -28,10 +27,10 @@ TEST_F(AssetCacheFontTest, CreatesFontFromSource) {
 
 TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.ttf";
-  auto filePath =
-      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
-  auto result = cache.loadFontFromFile(filePath.getData());
+  auto result = cache.loadFont(uuid);
 
   EXPECT_TRUE(result.hasData());
   EXPECT_FALSE(result.hasError());
@@ -48,10 +47,10 @@ TEST_F(AssetCacheFontTest, LoadsTTFFontFromFile) {
 
 TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   auto sourcePath = FixturesPath / "valid-font.otf";
-  auto filePath =
-      cache.createFontFromSource(sourcePath, liquid::Uuid::generate());
+  auto uuid = liquid::Uuid::generate();
+  auto filePath = cache.createFontFromSource(sourcePath, uuid);
 
-  auto result = cache.loadFontFromFile(filePath.getData());
+  auto result = cache.loadFont(uuid);
 
   EXPECT_TRUE(result.hasData());
   EXPECT_FALSE(result.hasError());
@@ -66,10 +65,8 @@ TEST_F(AssetCacheFontTest, LoadsOTFFontFromFile) {
   EXPECT_EQ(asset.name, "valid-font.otf");
 }
 
-TEST_F(AssetCacheFontTest, FileReturnsErrorIfAudioFileCannotBeOpened) {
-  auto filePath = CachePath / "non-existent-file.asset";
-
-  auto result = cache.loadFontFromFile(filePath);
+TEST_F(AssetCacheFontTest, FileReturnsErrorIfFontFileCannotBeOpened) {
+  auto result = cache.loadFont(liquid::Uuid::generate());
   EXPECT_TRUE(result.hasError());
   EXPECT_FALSE(result.hasWarnings());
   EXPECT_FALSE(result.hasData());

@@ -16,6 +16,7 @@ public:
 TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
+  asset.uuid = liquid::Uuid::generate();
 
   {
     std::random_device device;
@@ -105,6 +106,7 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
 TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   liquid::AssetData<liquid::SkeletonAsset> asset;
   asset.name = "test-skel0";
+  asset.uuid = liquid::Uuid::generate();
 
   {
     std::random_device device;
@@ -151,7 +153,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   }
 
   auto filePath = cache.createSkeletonFromAsset(asset);
-  auto handle = cache.loadSkeletonFromFile(filePath.getData());
+  auto handle = cache.loadSkeleton(asset.uuid);
 
   EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Null);
 

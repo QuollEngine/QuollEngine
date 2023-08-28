@@ -79,9 +79,14 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
 Result<Path>
 liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
                                               const Uuid &uuid) {
+  if (uuid.isEmpty()) {
+    LIQUID_ASSERT(false, "Invalid uuid provided");
+    return Result<Path>::Error("Invalid uuid provided");
+  }
+
   using co = std::filesystem::copy_options;
 
-  auto assetPath = createAssetPath(uuid);
+  auto assetPath = getPathFromUuid(uuid);
 
   if (!std::filesystem::copy_file(sourcePath, assetPath,
                                   co::overwrite_existing)) {
@@ -89,8 +94,8 @@ liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
                                sourcePath.stem().string());
   }
 
-  auto metaRes = createMetaFile(AssetType::LuaScript,
-                                sourcePath.filename().string(), assetPath);
+  auto metaRes = createAssetMeta(AssetType::LuaScript,
+                                 sourcePath.filename().string(), assetPath);
 
   if (!metaRes.hasData()) {
     std::filesystem::remove(assetPath);
@@ -102,8 +107,9 @@ liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
 }
 
 Result<LuaScriptAssetHandle>
-AssetCache::loadLuaScriptFromFile(const Path &filePath,
-                                  LuaScriptAssetHandle handle) {
+AssetCache::loadLuaScript(const Uuid &uuid, LuaScriptAssetHandle handle) {
+  auto filePath = getPathFromUuid(uuid);
+
   std::ifstream stream(filePath);
 
   if (!stream.good()) {
@@ -111,7 +117,7 @@ AssetCache::loadLuaScriptFromFile(const Path &filePath,
         "File cannot be opened for reading: " + filePath.string());
   }
 
-  auto meta = getMetaFromUuid(Uuid(filePath.stem().string()));
+  auto meta = getAssetMeta(uuid);
 
   AssetData<LuaScriptAsset> asset;
   asset.path = filePath;

@@ -16,6 +16,7 @@ public:
 liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
   liquid::AssetData<liquid::AnimationAsset> asset;
   asset.name = "test-anim0";
+  asset.uuid = liquid::Uuid::generate();
   {
     std::random_device device;
     std::mt19937 mt(device());
@@ -114,7 +115,7 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto asset = createRandomizedAnimation();
 
   auto filePath = cache.createAnimationFromAsset(asset);
-  auto handle = cache.loadAnimationFromFile(filePath.getData());
+  auto handle = cache.loadAnimation(asset.uuid);
   EXPECT_FALSE(handle.hasError());
   EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);
 

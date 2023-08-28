@@ -33,7 +33,7 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
     return TextureAssetHandle::Null;
   }
 
-  auto prevUuid = getUUIDFromMap(importData.uuids, assetName);
+  auto prevUuid = getOrCreateUuidFromMap(importData.uuids, assetName);
 
   auto uuid = importData.imageLoader.loadFromMemory(
       const_cast<void *>(static_cast<const void *>(image.image.data())),
