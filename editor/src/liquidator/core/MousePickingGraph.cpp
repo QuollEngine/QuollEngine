@@ -1,8 +1,8 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 #include "MousePickingGraph.h"
 
-#include "liquid/renderer/MeshVertexLayout.h"
-#include "liquid/renderer/MeshRenderUtils.h"
+#include "quoll/renderer/MeshVertexLayout.h"
+#include "quoll/renderer/MeshRenderUtils.h"
 
 namespace quoll::editor {
 

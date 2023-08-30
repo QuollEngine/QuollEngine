@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/entity/EntityDatabase.h"
-#include "liquid/animation/AnimationSystem.h"
-#include "liquid/physics/PhysicsSystem.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "quoll/animation/AnimationSystem.h"
+#include "quoll/physics/PhysicsSystem.h"
 
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"

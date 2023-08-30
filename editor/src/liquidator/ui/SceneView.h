@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/rhi/RenderHandle.h"
+#include "quoll/rhi/RenderHandle.h"
 
 namespace quoll::editor {
 

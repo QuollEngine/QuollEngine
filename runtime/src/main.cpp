@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
-#include "liquid/core/Version.h"
-#include "liquid/core/Engine.h"
-#include "liquid/yaml/Yaml.h"
+#include "quoll/core/Base.h"
+#include "quoll/core/Version.h"
+#include "quoll/core/Engine.h"
+#include "quoll/yaml/Yaml.h"
 
 #include "runtime/Runtime.h"
 

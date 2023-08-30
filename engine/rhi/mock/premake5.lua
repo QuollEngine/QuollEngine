@@ -4,8 +4,8 @@ project "LiquidRHIMock"
 
     includedirs {
         "include",
-        "include/liquid/rhi-mock",
-        "../base/include/liquid/rhi"
+        "include/quoll/rhi-mock",
+        "../base/include/quoll/rhi"
     }
 
     files {

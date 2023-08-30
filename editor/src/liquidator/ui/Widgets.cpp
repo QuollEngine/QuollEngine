@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/imgui/Imgui.h"
-#include "liquid/imgui/ImguiUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/imgui/Imgui.h"
+#include "quoll/imgui/ImguiUtils.h"
 
 #include "Widgets.h"
 #include "Theme.h"

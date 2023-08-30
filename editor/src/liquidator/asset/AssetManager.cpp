@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/yaml/Yaml.h"
-#include "liquid/asset/AssetRevision.h"
+#include "quoll/core/Base.h"
+#include "quoll/yaml/Yaml.h"
+#include "quoll/asset/AssetRevision.h"
 
 #include "AssetManager.h"
 #include "GLTFImporter.h"

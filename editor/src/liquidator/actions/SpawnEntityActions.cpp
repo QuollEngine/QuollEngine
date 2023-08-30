@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/entity/EntitySpawner.h"
+#include "quoll/core/Base.h"
+#include "quoll/entity/EntitySpawner.h"
 
 #include "EntityMeshActions.h"
 #include "EntitySkeletonActions.h"

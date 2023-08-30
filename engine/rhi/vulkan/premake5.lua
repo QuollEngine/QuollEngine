@@ -4,8 +4,8 @@ project "LiquidRHIVulkan"
 
     includedirs {
         "include",
-        "include/liquid/rhi-vulkan",
-        "../base/include/liquid/rhi"
+        "include/quoll/rhi-vulkan",
+        "../base/include/quoll/rhi"
     }
 
     files {

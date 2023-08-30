@@ -1,5 +1,5 @@
 #include <AppKit/AppKit.h>
-#include "liquid/platform/tools/FileDialog.h"
+#include "quoll/platform/tools/FileDialog.h"
 
 namespace quoll::platform {
 

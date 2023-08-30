@@ -4,7 +4,7 @@ project "LiquidRHICore"
 
     includedirs {
         "include",
-        "include/liquid/rhi"
+        "include/quoll/rhi"
     }
 
     files {

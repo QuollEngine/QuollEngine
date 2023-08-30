@@ -1,5 +1,5 @@
 #include <AppKit/AppKit.h>
-#include "liquid/platform/tools/WindowTools.h"
+#include "quoll/platform/tools/WindowTools.h"
 
 namespace quoll::platform {
 

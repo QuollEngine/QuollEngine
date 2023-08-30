@@ -1,15 +1,15 @@
 
 #pragma once
 
-#include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/asset/MeshAsset.h"
+#include "quoll/rhi/RenderHandle.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/asset/MeshAsset.h"
 
-#include "liquid/scene/Camera.h"
-#include "liquid/renderer/RenderStorage.h"
-#include "liquid/renderer/BindlessDrawParameters.h"
-#include "liquid/renderer/SceneRendererFrameData.h"
-#include "liquid/entity/EntityDatabase.h"
+#include "quoll/scene/Camera.h"
+#include "quoll/renderer/RenderStorage.h"
+#include "quoll/renderer/BindlessDrawParameters.h"
+#include "quoll/renderer/SceneRendererFrameData.h"
+#include "quoll/entity/EntityDatabase.h"
 
 namespace quoll::editor {
 

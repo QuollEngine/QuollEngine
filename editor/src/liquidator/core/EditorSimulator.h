@@ -1,16 +1,16 @@
 #pragma once
 
-#include "liquid/asset/AssetRegistry.h"
+#include "quoll/asset/AssetRegistry.h"
 
-#include "liquid/core/EntityDeleter.h"
-#include "liquid/scene/SceneUpdater.h"
-#include "liquid/scene/SkeletonUpdater.h"
-#include "liquid/scene/CameraAspectRatioUpdater.h"
-#include "liquid/animation/AnimationSystem.h"
-#include "liquid/scripting/ScriptingSystem.h"
-#include "liquid/physics/PhysicsSystem.h"
-#include "liquid/audio/AudioSystem.h"
-#include "liquid/window/Window.h"
+#include "quoll/core/EntityDeleter.h"
+#include "quoll/scene/SceneUpdater.h"
+#include "quoll/scene/SkeletonUpdater.h"
+#include "quoll/scene/CameraAspectRatioUpdater.h"
+#include "quoll/animation/AnimationSystem.h"
+#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/physics/PhysicsSystem.h"
+#include "quoll/audio/AudioSystem.h"
+#include "quoll/window/Window.h"
 
 #include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/state/WorkspaceState.h"

@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 #include "SceneView.h"
 
-#include "liquid/imgui/ImguiUtils.h"
+#include "quoll/imgui/ImguiUtils.h"
 
 namespace quoll::editor {
 

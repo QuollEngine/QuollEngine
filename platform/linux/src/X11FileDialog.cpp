@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/platform/tools/FileDialog.h"
+#include "quoll/core/Base.h"
+#include "quoll/platform/tools/FileDialog.h"
 
 namespace quoll::platform {
 

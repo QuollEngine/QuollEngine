@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/yaml/Yaml.h"
-#include "liquid/scene/private/EntitySerializer.h"
+#include "quoll/core/Base.h"
+#include "quoll/yaml/Yaml.h"
+#include "quoll/scene/private/EntitySerializer.h"
 
 #include "SceneWriter.h"
 

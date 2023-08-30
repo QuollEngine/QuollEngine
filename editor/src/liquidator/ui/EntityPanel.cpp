@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/imgui/ImguiUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/imgui/ImguiUtils.h"
 
 #include "liquidator/actions/EntityNameActions.h"
 #include "liquidator/actions/EntityTransformActions.h"

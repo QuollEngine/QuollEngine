@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 #include "EditorRendererFrameData.h"
 
-#include "liquid/renderer/MeshRenderUtils.h"
+#include "quoll/renderer/MeshRenderUtils.h"
 
 namespace quoll::editor {
 

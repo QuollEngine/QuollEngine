@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/yaml/Yaml.h"
-#include "liquid/platform/tools/FileDialog.h"
+#include "quoll/core/Base.h"
+#include "quoll/yaml/Yaml.h"
+#include "quoll/platform/tools/FileDialog.h"
 
 #include "ProjectManager.h"
 

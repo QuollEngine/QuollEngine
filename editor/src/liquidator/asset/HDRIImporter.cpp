@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/renderer/RenderGraph.h"
-#include "liquid/renderer/TextureUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/renderer/RenderGraph.h"
+#include "quoll/renderer/TextureUtils.h"
 
 #include "HDRIImporter.h"
 

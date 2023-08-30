@@ -1,5 +1,5 @@
 #include <AppKit/AppKit.h>
-#include "liquid/platform/tools/FileOpener.h"
+#include "quoll/platform/tools/FileOpener.h"
 
 namespace quoll::platform {
 

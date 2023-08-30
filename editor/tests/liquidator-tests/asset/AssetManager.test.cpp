@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
-#include "liquid/core/Engine.h"
-#include "liquid/yaml/Yaml.h"
-#include "liquid/rhi-mock/MockRenderDevice.h"
+#include "quoll/core/Base.h"
+#include "quoll/core/Engine.h"
+#include "quoll/yaml/Yaml.h"
+#include "quoll/rhi-mock/MockRenderDevice.h"
 
 #include "liquidator-tests/Testing.h"
 #include "liquidator/asset/AssetManager.h"

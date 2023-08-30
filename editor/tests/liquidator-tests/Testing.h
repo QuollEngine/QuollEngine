@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/entity/Entity.h"
+#include "quoll/entity/Entity.h"
 
 namespace glm {
 

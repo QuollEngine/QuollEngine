@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
-#include "liquid/core/Engine.h"
+#include "quoll/core/Base.h"
+#include "quoll/core/Engine.h"
 
-#include "liquid/rhi-vulkan/VulkanRenderBackend.h"
+#include "quoll/rhi-vulkan/VulkanRenderBackend.h"
 #include "liquidator/screens/EditorScreen.h"
 #include "liquidator/screens/ProjectSelectorScreen.h"
 

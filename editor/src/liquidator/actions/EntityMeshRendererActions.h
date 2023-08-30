@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "EntityDefaultDeleteAction.h"
 
-#include "liquid/renderer/MeshRenderer.h"
+#include "quoll/renderer/MeshRenderer.h"
 
 namespace quoll::editor {
 

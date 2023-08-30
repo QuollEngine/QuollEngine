@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/platform/tools/WindowUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/platform/tools/WindowUtils.h"
 
 namespace quoll::platform {
 

@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/core/Engine.h"
-#include "liquid/window/Window.h"
+#include "quoll/core/Base.h"
+#include "quoll/core/Engine.h"
+#include "quoll/window/Window.h"
 
 #include "VulkanHeaders.h"
 #include <GLFW/glfw3.h>

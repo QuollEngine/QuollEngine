@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/asset/AssetCache.h"
-#include "liquid/asset/DefaultObjects.h"
-#include "liquid/rhi-mock/MockRenderDevice.h"
+#include "quoll/asset/AssetCache.h"
+#include "quoll/asset/DefaultObjects.h"
+#include "quoll/rhi-mock/MockRenderDevice.h"
 
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE
 #define TINYGLTF_NO_INCLUDE_JSON

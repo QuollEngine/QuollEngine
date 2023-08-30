@@ -1,10 +1,10 @@
 #pragma once
 
-#include "liquid/renderer/RenderGraph.h"
-#include "liquid/renderer/SceneRendererFrameData.h"
-#include "liquid/asset/AssetRegistry.h"
+#include "quoll/renderer/RenderGraph.h"
+#include "quoll/renderer/SceneRendererFrameData.h"
+#include "quoll/asset/AssetRegistry.h"
 
-#include "liquid/window/Window.h"
+#include "quoll/window/Window.h"
 
 namespace quoll::editor {
 

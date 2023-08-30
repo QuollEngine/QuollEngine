@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/rhi/RenderHandle.h"
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/renderer/RenderStorage.h"
+#include "quoll/rhi/RenderHandle.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/renderer/RenderStorage.h"
 
 namespace quoll::editor {
 

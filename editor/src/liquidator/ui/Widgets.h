@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/imgui/ImguiUtils.h"
+#include "quoll/imgui/ImguiUtils.h"
 
 namespace quoll::editor::widgets {
 
