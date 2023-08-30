@@ -2,7 +2,7 @@
 #include "liquid/audio/MiniAudio.h"
 #include "AssetCache.h"
 
-namespace liquid {
+namespace quoll {
 
 static AudioAssetFormat getAudioFormatFromExtension(StringView extension) {
   if (extension == "wav") {
@@ -79,4 +79,4 @@ Result<AudioAssetHandle> AssetCache::loadAudio(const Uuid &uuid) {
   return Result<AudioAssetHandle>::Ok(mRegistry.getAudios().addAsset(asset));
 }
 
-} // namespace liquid
+} // namespace quoll

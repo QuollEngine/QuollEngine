@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief UUID
@@ -82,4 +82,4 @@ private:
   String mUuid = "";
 };
 
-} // namespace liquid
+} // namespace quoll

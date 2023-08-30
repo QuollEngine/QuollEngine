@@ -2,7 +2,7 @@
 
 #include "LightStep.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void loadLights(GLTFImportData &importData) {
   for (auto i = 0; i < importData.model.lights.size(); ++i) {
@@ -39,4 +39,4 @@ void loadLights(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

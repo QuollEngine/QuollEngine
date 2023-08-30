@@ -5,7 +5,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void Toolbar::render(WorkspaceState &state, AssetRegistry &assetRegistry,
                      ActionExecutor &actionExecutor) {
@@ -59,4 +59,4 @@ void Toolbar::add(ActionCreator *actionCreator, String label, String icon,
                     std::move(ptr), label, icon, type});
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

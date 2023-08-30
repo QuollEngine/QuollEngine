@@ -39,7 +39,7 @@
 #include "liquid/renderer/MeshRenderer.h"
 #include "liquid/renderer/SkinnedMeshRenderer.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Entity database
@@ -60,4 +60,4 @@ public:
 template <class TComponent>
 using EntityDatabaseObserver = EntityStorageSparseSetObserver<TComponent>;
 
-} // namespace liquid
+} // namespace quoll

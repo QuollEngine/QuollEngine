@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MockDescriptor.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 template <class T>
 static constexpr std::vector<T> vectorFrom(std::span<T> data) {
@@ -33,4 +33,4 @@ void MockDescriptor::write(uint32_t binding,
   mBindings.push_back({binding, type, start, vectorFrom(bufferInfos)});
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

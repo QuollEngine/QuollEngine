@@ -2,7 +2,7 @@
 
 #include "liquid/imgui/ImguiUtils.h"
 
-namespace liquid::editor::widgets {
+namespace quoll::editor::widgets {
 
 /**
  * @brief Section widget
@@ -409,4 +409,4 @@ private:
   bool mChanged = false;
 };
 
-} // namespace liquid::editor::widgets
+} // namespace quoll::editor::widgets

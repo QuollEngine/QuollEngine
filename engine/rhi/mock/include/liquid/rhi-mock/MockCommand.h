@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class MockCommandType {
   BeginRenderPass,
@@ -385,4 +385,4 @@ struct MockCommandBlitTexture
   Filter filter;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -9,7 +9,7 @@
 
 #include "PerspectiveLensScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int PerspectiveLensScriptingInterface::LuaInterface::getNear(void *state) {
   LuaScope scope(state);
@@ -534,4 +534,4 @@ int PerspectiveLensScriptingInterface::LuaInterface::deleteThis(void *state) {
       getName(), state);
 }
 
-} // namespace liquid
+} // namespace quoll

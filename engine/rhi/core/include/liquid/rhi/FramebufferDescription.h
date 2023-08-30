@@ -2,7 +2,7 @@
 
 #include "RenderHandle.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Framebuffer description
@@ -39,4 +39,4 @@ struct FramebufferDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

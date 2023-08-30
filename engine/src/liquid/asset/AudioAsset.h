@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class AudioAssetFormat { Unknown = 0, Wav };
 
@@ -19,4 +19,4 @@ struct AudioAsset {
   AudioAssetFormat format = AudioAssetFormat::Wav;
 };
 
-} // namespace liquid
+} // namespace quoll

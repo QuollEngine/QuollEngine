@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::entity_utils {
+namespace quoll::entity_utils {
 
 template <class T, class... Types>
 constexpr bool AreTypesUnique =
@@ -8,4 +8,4 @@ constexpr bool AreTypesUnique =
 
 template <class T> constexpr bool AreTypesUnique<T> = std::true_type{};
 
-} // namespace liquid::entity_utils
+} // namespace quoll::entity_utils

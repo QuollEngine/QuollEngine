@@ -2,7 +2,7 @@
 #include "DeleteEntityAction.h"
 #include "EntityLightActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntityDeleteDirectionalLight::EntityDeleteDirectionalLight(Entity entity)
     : mEntity(entity) {}
@@ -53,4 +53,4 @@ bool EntityDeleteDirectionalLight::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<DirectionalLight>(mEntity);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

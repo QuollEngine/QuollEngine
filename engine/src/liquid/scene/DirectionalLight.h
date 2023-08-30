@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Directional light component
@@ -22,4 +22,4 @@ struct DirectionalLight {
   glm::vec3 direction{0.0f};
 };
 
-} // namespace liquid
+} // namespace quoll

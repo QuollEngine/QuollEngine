@@ -8,7 +8,7 @@
 
 #include "liquid/window/Window.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 class VulkanRenderDevice;
 
@@ -95,4 +95,4 @@ private:
   Window &mWindow;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

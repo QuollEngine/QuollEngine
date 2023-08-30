@@ -6,7 +6,7 @@
 #include "liquid/rhi/Descriptor.h"
 #include "liquid/renderer/RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Material instance
@@ -93,4 +93,4 @@ private:
   std::map<String, size_t> mPropertyMap;
 };
 
-} // namespace liquid
+} // namespace quoll

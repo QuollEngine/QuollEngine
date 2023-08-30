@@ -4,7 +4,7 @@
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Check if two descriptor set bindings match
@@ -131,4 +131,4 @@ void VulkanPipelineLayoutCache::destroyAllDescriptorLayouts() {
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

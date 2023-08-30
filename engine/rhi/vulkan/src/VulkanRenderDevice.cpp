@@ -16,7 +16,7 @@
 
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanRenderDevice::VulkanRenderDevice(
     VulkanRenderBackend &backend, const VulkanPhysicalDevice &physicalDevice)
@@ -248,4 +248,4 @@ bool VulkanRenderDevice::hasPipeline(PipelineHandle handle) {
   return mRegistry.hasPipeline(handle);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

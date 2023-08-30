@@ -3,7 +3,7 @@
 #include "liquid/entity/Entity.h"
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene updater
@@ -40,4 +40,4 @@ private:
   void updateLights(EntityDatabase &entityDatabase);
 };
 
-} // namespace liquid
+} // namespace quoll

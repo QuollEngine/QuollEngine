@@ -10,43 +10,38 @@ using EntityCreateAudioActionTest = ActionTestBase;
 TEST_P(EntityCreateAudioActionTest, ExecutorCreatesAudioSourceComponent) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::EntityCreateAudio action(entity,
-                                           liquid::AudioAssetHandle{15});
+  quoll::editor::EntityCreateAudio action(entity, quoll::AudioAssetHandle{15});
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
-      liquid::AudioAssetHandle{15});
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::AudioSource>(entity).source,
+            quoll::AudioAssetHandle{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
 
 TEST_P(EntityCreateAudioActionTest, UndoDeletesAudioSourceComponet) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::AudioSource>(
-      entity, {liquid::AudioAssetHandle{25}});
+  activeScene().entityDatabase.set<quoll::AudioSource>(
+      entity, {quoll::AudioAssetHandle{25}});
 
-  liquid::editor::EntityCreateAudio action(entity,
-                                           liquid::AudioAssetHandle{15});
+  quoll::editor::EntityCreateAudio action(entity, quoll::AudioAssetHandle{15});
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::AudioSource>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::AudioSource>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_P(EntityCreateAudioActionTest,
        PredicateReturnsFalseIfAudioAssetIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
-  liquid::editor::EntityCreateAudio action(entity,
-                                           liquid::AudioAssetHandle{15});
+  quoll::editor::EntityCreateAudio action(entity, quoll::AudioAssetHandle{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityCreateAudioActionTest,
        PredicateReturnsFalseIfEntityAlreadyHasAudio) {
   auto entity = activeScene().entityDatabase.create();
-  liquid::editor::EntityCreateAudio action(entity,
-                                           liquid::AudioAssetHandle{15});
+  quoll::editor::EntityCreateAudio action(entity, quoll::AudioAssetHandle{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -55,7 +50,7 @@ TEST_P(EntityCreateAudioActionTest,
   auto entity = activeScene().entityDatabase.create();
   auto handle = assetRegistry.getAudios().addAsset({});
 
-  liquid::editor::EntityCreateAudio action(entity, handle);
+  quoll::editor::EntityCreateAudio action(entity, handle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
@@ -65,35 +60,33 @@ using EntitySetAudioActionTest = ActionTestBase;
 
 TEST_P(EntitySetAudioActionTest, ExecutorSetsAudioForEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::AudioSource>(entity, {});
+  activeScene().entityDatabase.set<quoll::AudioSource>(entity, {});
 
-  liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
+  quoll::editor::EntitySetAudio action(entity, quoll::AudioAssetHandle{15});
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
-      liquid::AudioAssetHandle{15});
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::AudioSource>(entity).source,
+            quoll::AudioAssetHandle{15});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_P(EntitySetAudioActionTest, UndoSetsPreviousAudioForEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::AudioSource>(
-      entity, {liquid::AudioAssetHandle{25}});
+  activeScene().entityDatabase.set<quoll::AudioSource>(
+      entity, {quoll::AudioAssetHandle{25}});
 
-  liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
+  quoll::editor::EntitySetAudio action(entity, quoll::AudioAssetHandle{15});
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::AudioSource>(entity).source,
-      liquid::AudioAssetHandle{25});
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::AudioSource>(entity).source,
+            quoll::AudioAssetHandle{25});
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
 TEST_P(EntitySetAudioActionTest, PredicateReturnsFalseIfAudioIsInvalid) {
   auto entity = activeScene().entityDatabase.create();
-  liquid::editor::EntitySetAudio action(entity, liquid::AudioAssetHandle{15});
+  quoll::editor::EntitySetAudio action(entity, quoll::AudioAssetHandle{15});
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -101,7 +94,7 @@ TEST_P(EntitySetAudioActionTest, PredicateReturnsTrueIfAudioExists) {
   auto entity = activeScene().entityDatabase.create();
   auto scriptHandle = assetRegistry.getAudios().addAsset({});
 
-  liquid::editor::EntitySetAudio action(entity, scriptHandle);
+  quoll::editor::EntitySetAudio action(entity, scriptHandle);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 

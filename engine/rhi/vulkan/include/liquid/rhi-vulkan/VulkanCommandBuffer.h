@@ -6,7 +6,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorPool.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan command buffer
@@ -213,4 +213,4 @@ private:
   DeviceStats &mStats;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

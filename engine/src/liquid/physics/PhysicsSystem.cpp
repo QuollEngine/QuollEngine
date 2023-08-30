@@ -18,7 +18,7 @@ static const bool RECORD_MEMORY_ALLOCATIONS = false;
 
 using namespace physx;
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Physx simulation event callback
@@ -622,4 +622,4 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

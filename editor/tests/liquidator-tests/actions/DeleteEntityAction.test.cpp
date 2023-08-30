@@ -10,10 +10,10 @@ TEST_P(DeleteEntityActionTest,
        ExecuteAddsDeleteComponentToEntityInSceneIfWorkspaceModeIsEdit) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Delete>(entity));
   ASSERT_EQ(res.entitiesToDelete.size(), 1);
   EXPECT_EQ(res.entitiesToDelete.at(0), entity);
 }
@@ -23,10 +23,10 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
   state.selectedEntity = entity;
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
@@ -36,17 +36,17 @@ TEST_P(
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     state.selectedEntity = e2;
   }
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
@@ -55,10 +55,10 @@ TEST_P(
   auto entity = activeScene().entityDatabase.create();
   state.selectedEntity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(DeleteEntityActionTest,
@@ -68,7 +68,7 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
   activeScene().activeCamera = entity;
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
@@ -84,14 +84,14 @@ TEST_P(
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     activeScene().activeCamera = e2;
   }
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeCamera, activeScene().dummyCamera);
@@ -106,7 +106,7 @@ TEST_P(
 
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(activeScene().activeCamera, activeScene().dummyCamera);
@@ -120,7 +120,7 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
   state.activeCamera = entity;
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.activeCamera, state.camera);
@@ -135,14 +135,14 @@ TEST_P(
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     state.activeCamera = e2;
   }
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(state.activeCamera, state.camera);
@@ -156,7 +156,7 @@ TEST_P(
 
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(state.activeCamera, state.camera);
@@ -169,7 +169,7 @@ TEST_P(DeleteEntityActionTest,
   auto entity = activeScene().entityDatabase.create();
   activeScene().activeEnvironment = entity;
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
@@ -184,14 +184,14 @@ TEST_P(
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     activeScene().activeEnvironment = e2;
   }
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_EQ(activeScene().activeEnvironment, activeScene().dummyEnvironment);
@@ -206,7 +206,7 @@ TEST_P(
 
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::DeleteEntity action(entity);
+  quoll::editor::DeleteEntity action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
   EXPECT_NE(activeScene().activeEnvironment, activeScene().dummyEnvironment);

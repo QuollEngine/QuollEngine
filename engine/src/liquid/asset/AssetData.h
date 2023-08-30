@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Asset data wrapper
@@ -47,4 +47,4 @@ template <class TData> struct AssetData {
   rhi::TextureHandle preview = rhi::TextureHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -41,7 +41,7 @@
 
 #include "ImGuizmo.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
                            rhi::RenderDevice *device)
@@ -57,7 +57,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   RenderStorage renderStorage(mDevice);
 
-  liquid::RendererOptions initialOptions{};
+  quoll::RendererOptions initialOptions{};
   initialOptions.size = mWindow.getFramebufferSize();
   Renderer renderer(renderStorage, initialOptions);
 
@@ -278,4 +278,4 @@ void EditorScreen::start(const Project &rawProject) {
   mDevice->waitForIdle();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

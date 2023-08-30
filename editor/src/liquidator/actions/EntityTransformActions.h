@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Entity set local transform continous action
@@ -70,4 +70,4 @@ private:
   std::optional<LocalTransform> mNewLocalTransform;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

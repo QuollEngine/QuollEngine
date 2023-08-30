@@ -2,7 +2,7 @@
 
 #include "Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 static constexpr size_t AssetFileMagicLength = 11;
 
@@ -33,4 +33,4 @@ struct AssetFileHeader {
   AssetType type = AssetType::None;
 };
 
-} // namespace liquid
+} // namespace quoll

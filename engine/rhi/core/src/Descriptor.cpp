@@ -2,7 +2,7 @@
 
 #include "Descriptor.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 Descriptor::Descriptor(NativeDescriptor *nativeDescriptor,
                        DescriptorHandle handle)
@@ -38,4 +38,4 @@ Descriptor &Descriptor::write(uint32_t binding,
   return *this;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

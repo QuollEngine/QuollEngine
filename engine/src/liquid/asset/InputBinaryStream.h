@@ -4,7 +4,7 @@
 #include "AssetFileHeader.h"
 #include "AssetMeta.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Input binary stream
@@ -175,4 +175,4 @@ template <> inline void InputBinaryStream::read(AssetMeta &meta) {
   read(meta.name);
 }
 
-} // namespace liquid
+} // namespace quoll

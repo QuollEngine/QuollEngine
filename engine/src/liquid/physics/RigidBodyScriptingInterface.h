@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for rigid body
@@ -130,4 +130,4 @@ public:
   static const String getName() { return "rigid_body"; }
 };
 
-} // namespace liquid
+} // namespace quoll

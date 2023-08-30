@@ -2,7 +2,7 @@
 #include "VulkanQueueFamily.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
                                      VkSurfaceKHR surface) {
@@ -37,4 +37,4 @@ VulkanQueueFamily::VulkanQueueFamily(VkPhysicalDevice device,
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

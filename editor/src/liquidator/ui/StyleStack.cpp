@@ -3,7 +3,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 StyleStack::~StyleStack() {
   if (mPushedColors > 0) {
@@ -49,4 +49,4 @@ void StyleStack::pushFont(ImFont *font) {
   mPushedFonts++;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

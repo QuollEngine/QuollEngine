@@ -12,12 +12,11 @@
 
 namespace fs = std::filesystem;
 
-static const liquid::Path AssetsPath = fs::current_path() / "assets";
-static const liquid::Path CachePath = fs::current_path() / "cache";
-static const liquid::Path FixturesPath = fs::current_path() / "fixtures";
-static const liquid::Path TempPath = fs::current_path() / "temp";
-static const liquid::Path InnerPathInAssets =
-    AssetsPath / "inner-1" / "inner-2";
+static const quoll::Path AssetsPath = fs::current_path() / "assets";
+static const quoll::Path CachePath = fs::current_path() / "cache";
+static const quoll::Path FixturesPath = fs::current_path() / "fixtures";
+static const quoll::Path TempPath = fs::current_path() / "temp";
+static const quoll::Path InnerPathInAssets = AssetsPath / "inner-1" / "inner-2";
 
 class AssetManagerTest : public ::testing::Test {
 public:
@@ -37,26 +36,25 @@ public:
     fs::remove_all(TempPath);
   }
 
-  void createEmptyFile(liquid::Path path) {
+  void createEmptyFile(quoll::Path path) {
     std::ofstream stream(path);
     stream.close();
   }
 
 public:
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage;
-  liquid::editor::AssetManager manager;
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage;
+  quoll::editor::AssetManager manager;
 };
 
 class AssetTest : public AssetManagerTest,
                   public ::testing::WithParamInterface<
-                      std::tuple<liquid::String, liquid ::String>> {};
+                      std::tuple<quoll::String, quoll::String>> {};
 
 template <class T>
-std::vector<std::tuple<liquid::String, liquid::String>>
-mapExtensions(const std::vector<liquid::String> &extensions, T &&fn) {
-  std::vector<std::tuple<liquid::String, liquid::String>> temp(
-      extensions.size());
+std::vector<std::tuple<quoll::String, quoll::String>>
+mapExtensions(const std::vector<quoll::String> &extensions, T &&fn) {
+  std::vector<std::tuple<quoll::String, quoll::String>> temp(extensions.size());
   std::transform(extensions.begin(), extensions.end(), temp.begin(),
                  [&fn](auto str) {
                    return std::tuple{str, fn(str)};
@@ -118,8 +116,8 @@ TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
 TEST_F(
     AssetManagerTest,
     ValidateAndPreloadDoesNotCreateFileWithNewUUIDIfFileContentsHaveChanged) {
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage(&device);
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage(&device);
 
   fs::create_directories(InnerPathInAssets);
 
@@ -145,8 +143,8 @@ TEST_F(AssetManagerTest,
        ValidateAndPreloadDeletesCacheFileIfAssetFileDoesNotExist) {
   auto texturePath = CachePath / "test.asset";
 
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage(&device);
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage(&device);
 
   createEmptyFile(texturePath);
 
@@ -225,7 +223,7 @@ TEST_P(AssetTest, ImportCreatesAssetInCache) {
 
   EXPECT_EQ(
       manager.getCache().getAssetMeta(uuid).type,
-      liquid::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
+      quoll::editor::AssetManager::getAssetTypeFromExtension(res.getData()));
 }
 
 TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
@@ -242,8 +240,8 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
 
   std::ifstream stream(metaPath);
   auto node = YAML::Load(stream);
-  auto sourceAssetHash = node["sourceHash"].as<liquid::String>();
-  auto uuid = node["uuid"]["root"].as<liquid::String>();
+  auto sourceAssetHash = node["sourceHash"].as<quoll::String>();
+  auto uuid = node["uuid"]["root"].as<quoll::String>();
   auto revision = node["revision"].as<uint32_t>();
   stream.close();
 
@@ -253,7 +251,7 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
   {
     std::ifstream stream(sourcePath, std::ios::binary);
 
-    liquid::String calculatedHash;
+    quoll::String calculatedHash;
     CryptoPP::SHA256 sha256;
     CryptoPP::FileSource source(
         stream, true,
@@ -268,23 +266,23 @@ TEST_P(AssetTest, ImportCreatesMetaFileInSourceDirectory) {
 }
 
 InitAssetTestSuite(AssetManagerTexture,
-                   liquid::editor::AssetManager::TextureExtensions,
+                   quoll::editor::AssetManager::TextureExtensions,
                    [](auto str) {
                      return str == "ktx2" ? str : (str + ".ktx2");
                    });
 
 InitAssetTestSuite(AssetManagerAudio,
-                   liquid::editor::AssetManager::AudioExtensions,
+                   quoll::editor::AssetManager::AudioExtensions,
                    [](auto str) { return str; });
 
 InitAssetTestSuite(AssetManagerScript,
-                   liquid::editor::AssetManager::ScriptExtensions,
+                   quoll::editor::AssetManager::ScriptExtensions,
                    [](auto str) { return str; });
 
 InitAssetTestSuite(AssetManagerAnimator,
-                   liquid::editor::AssetManager::AnimatorExtensions,
+                   quoll::editor::AssetManager::AnimatorExtensions,
                    [](auto str) { return str; });
 
 InitAssetTestSuite(AssetManagerFont,
-                   liquid::editor::AssetManager::FontExtensions,
+                   quoll::editor::AssetManager::FontExtensions,
                    [](auto str) { return str; });

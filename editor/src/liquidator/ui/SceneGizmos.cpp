@@ -4,7 +4,7 @@
 #include "liquid/imgui/Imgui.h"
 #include "ImGuizmo.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Calculate local transforms from world
@@ -130,4 +130,4 @@ bool SceneGizmos::render(WorkspaceState &state,
   return ImGuizmo::IsOver();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

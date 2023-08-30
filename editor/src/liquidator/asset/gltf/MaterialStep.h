@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load materials into registry
@@ -11,4 +11,4 @@ namespace liquid::editor {
  */
 void loadMaterials(GLTFImportData &importData);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -6,7 +6,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanShader.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan pipeline layout cache
@@ -95,4 +95,4 @@ private:
   std::vector<VkDescriptorSetLayout> mDescriptorSetLayouts;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

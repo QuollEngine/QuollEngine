@@ -7,7 +7,7 @@
 #include "EntityQuery.h"
 #include "EntityQueryScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int EntityQueryScriptingInterface::LuaInterface::getFirstEntityByName(
     void *state) {
@@ -70,4 +70,4 @@ int EntityQueryScriptingInterface::LuaInterface::deleteEntity(void *state) {
   return 0;
 }
 
-} // namespace liquid
+} // namespace quoll

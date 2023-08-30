@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Create script entity action
@@ -177,4 +177,4 @@ private:
 
 using EntityDeleteScript = EntityDefaultDeleteAction<Script>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

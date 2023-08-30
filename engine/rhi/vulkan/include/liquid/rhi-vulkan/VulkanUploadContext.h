@@ -4,7 +4,7 @@
 #include "VulkanQueue.h"
 #include "VulkanCommandPool.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan upload context
@@ -53,4 +53,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

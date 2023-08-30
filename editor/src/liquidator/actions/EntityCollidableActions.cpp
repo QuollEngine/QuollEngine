@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityCollidableActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Get defaulty geometry from type
@@ -71,4 +71,4 @@ bool EntitySetCollidableType::predicate(WorkspaceState &state,
              mType;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

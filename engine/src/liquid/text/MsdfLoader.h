@@ -4,7 +4,7 @@
 #include "liquid/asset/Result.h"
 #include "liquid/asset/AssetData.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Msdf loader
@@ -20,4 +20,4 @@ public:
   Result<AssetData<FontAsset>> loadFontData(const Path &path);
 };
 
-} // namespace liquid
+} // namespace quoll

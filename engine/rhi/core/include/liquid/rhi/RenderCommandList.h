@@ -2,7 +2,7 @@
 
 #include "NativeRenderCommandListInterface.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Render command list
@@ -267,4 +267,4 @@ private:
   std::unique_ptr<NativeRenderCommandListInterface> mNativeRenderCommandList;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

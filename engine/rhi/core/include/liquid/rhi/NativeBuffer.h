@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/DeviceAddress.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Native buffer interface
@@ -45,4 +45,4 @@ public:
   virtual DeviceAddress getAddress() = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

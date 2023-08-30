@@ -6,7 +6,7 @@
 #include "liquidator/core/TransformOperation.h"
 #include "liquidator/project/Project.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class WorkspaceMode { Edit, Simulation };
 
@@ -67,4 +67,4 @@ struct WorkspaceState {
   glm::uvec4 grid;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

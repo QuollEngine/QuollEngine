@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderDevice.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Bindless draw parameters
@@ -83,4 +83,4 @@ private:
   rhi::Descriptor mDescriptor;
 };
 
-} // namespace liquid
+} // namespace quoll

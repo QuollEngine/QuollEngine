@@ -7,7 +7,7 @@
 #include <ft2build.h>
 #include <freetype/freetype.h>
 
-namespace liquid {
+namespace quoll {
 
 Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   static constexpr double MaxCornerAngle = 3.0;
@@ -128,4 +128,4 @@ Result<AssetData<FontAsset>> MsdfLoader::loadFontData(const Path &path) {
   return Result<AssetData<FontAsset>>::Ok(fontAsset);
 }
 
-} // namespace liquid
+} // namespace quoll

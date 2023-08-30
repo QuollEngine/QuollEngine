@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Renderer options
@@ -12,4 +12,4 @@ struct RendererOptions {
   glm::uvec2 size;
 };
 
-} // namespace liquid
+} // namespace quoll

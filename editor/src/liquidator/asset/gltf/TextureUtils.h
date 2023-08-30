@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class GLTFTextureColorSpace { Linear, Srgb };
 
@@ -19,4 +19,4 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
                                GLTFTextureColorSpace colorSpace,
                                bool generateMipMaps);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -3,27 +3,27 @@
 
 #include "ScriptingInterfaceTestBase.h"
 
-const liquid::String LuaScriptingInterfaceTestBase::ScriptName =
+const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
     "scripting-system-component-tester.lua";
 
 LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
-    const liquid::String &scriptName)
+    const quoll::String &scriptName)
     : assetCache(std::filesystem::current_path()),
       scriptingSystem(eventSystem, assetCache.getRegistry()),
       mScriptName(scriptName) {}
 
-liquid::LuaScope &
-LuaScriptingInterfaceTestBase::call(liquid::Entity entity,
-                                    const liquid::String &functionName) {
-  auto uuid = liquid::Uuid::generate();
+quoll::LuaScope &
+LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
+                                    const quoll::String &functionName) {
+  auto uuid = quoll::Uuid::generate();
   assetCache.createLuaScriptFromSource(FixturesPath / mScriptName, uuid);
   auto handle = assetCache.loadLuaScript(uuid).getData();
 
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
   scriptingSystem.start(entityDatabase);
 
-  auto &scripting = entityDatabase.get<liquid::Script>(entity);
+  auto &scripting = entityDatabase.get<quoll::Script>(entity);
 
   scripting.scope.luaGetGlobal(functionName);
   scripting.scope.call(0);

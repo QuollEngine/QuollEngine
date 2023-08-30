@@ -2,7 +2,7 @@
 
 #include "liquid/scene/Joint.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Skeleton asset data
@@ -39,4 +39,4 @@ struct SkeletonAsset {
   std::vector<String> jointNames;
 };
 
-} // namespace liquid
+} // namespace quoll

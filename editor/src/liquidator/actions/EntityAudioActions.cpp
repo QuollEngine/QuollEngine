@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityAudioActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetAudio::EntitySetAudio(Entity entity, AudioAssetHandle audio)
     : mEntity(entity), mAudio(audio) {}
@@ -60,4 +60,4 @@ bool EntityCreateAudio::predicate(WorkspaceState &state,
          assetRegistry.getAudios().hasAsset(mHandle);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

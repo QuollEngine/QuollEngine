@@ -6,7 +6,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanResourceAllocator::VulkanResourceAllocator(
     VulkanRenderBackend &backend, VulkanPhysicalDevice &physicalDevice,
@@ -63,4 +63,4 @@ VulkanResourceAllocator::~VulkanResourceAllocator() {
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

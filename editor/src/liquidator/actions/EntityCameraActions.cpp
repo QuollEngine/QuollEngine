@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityCameraActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntityCreatePerspectiveLens::EntityCreatePerspectiveLens(Entity entity)
     : mEntity(entity) {}
@@ -122,4 +122,4 @@ bool EntityDeletePerspectiveLens::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<PerspectiveLens>(mEntity);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

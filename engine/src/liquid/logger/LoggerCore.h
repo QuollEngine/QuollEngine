@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class LogSeverity {
   Debug = 0,
@@ -37,4 +37,4 @@ static String getLogSeverityString(LogSeverity severity) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

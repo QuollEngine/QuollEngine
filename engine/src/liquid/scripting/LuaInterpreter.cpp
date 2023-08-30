@@ -5,7 +5,7 @@
 #include "LuaInterpreter.h"
 #include "LuaScope.h"
 
-namespace liquid {
+namespace quoll {
 
 LuaScope LuaInterpreter::createScope() {
   auto *state = luaL_newstate();
@@ -21,8 +21,8 @@ bool LuaInterpreter::evaluate(const std::vector<uint8_t> &bytes,
                               LuaScope &scope) {
   auto *luaState = scope.getLuaState();
 
-  auto ret = luaL_loadstring(
-      luaState, liquid::String{bytes.begin(), bytes.end()}.c_str());
+  auto ret = luaL_loadstring(luaState,
+                             quoll::String{bytes.begin(), bytes.end()}.c_str());
 
   if (ret != LUA_OK) {
     return false;
@@ -37,4 +37,4 @@ bool LuaInterpreter::evaluate(const std::vector<uint8_t> &bytes,
   return true;
 }
 
-} // namespace liquid
+} // namespace quoll

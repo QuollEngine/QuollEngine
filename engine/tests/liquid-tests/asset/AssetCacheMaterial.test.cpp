@@ -11,18 +11,18 @@
 
 class AssetCacheMaterialTest : public AssetCacheTestBase {
 public:
-  liquid::AssetData<liquid::MaterialAsset>
+  quoll::AssetData<quoll::MaterialAsset>
   createMaterialAsset(bool createTextures) {
-    liquid::AssetData<liquid::MaterialAsset> asset{};
+    quoll::AssetData<quoll::MaterialAsset> asset{};
     asset.name = "material1";
-    asset.uuid = liquid::Uuid("material1.uuid");
-    asset.type = liquid::AssetType::Material;
+    asset.uuid = quoll::Uuid("material1.uuid");
+    asset.type = quoll::AssetType::Material;
     asset.data.baseColorFactor = glm::vec4(2.5f, 0.2f, 0.5f, 5.2f);
     asset.data.baseColorTextureCoord = 2;
 
     if (createTextures) {
-      liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = liquid::Uuid("base");
+      quoll::AssetData<quoll::TextureAsset> texture;
+      texture.uuid = quoll::Uuid("base");
 
       asset.data.baseColorTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -32,8 +32,8 @@ public:
     asset.data.roughnessFactor = 2.5f;
     asset.data.metallicRoughnessTextureCoord = 3;
     if (createTextures) {
-      liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = liquid::Uuid("mr");
+      quoll::AssetData<quoll::TextureAsset> texture;
+      texture.uuid = quoll::Uuid("mr");
 
       asset.data.metallicRoughnessTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -42,8 +42,8 @@ public:
     asset.data.normalScale = 0.6f;
     asset.data.normalTextureCoord = 4;
     if (createTextures) {
-      liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = liquid::Uuid("normal");
+      quoll::AssetData<quoll::TextureAsset> texture;
+      texture.uuid = quoll::Uuid("normal");
 
       asset.data.normalTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -52,8 +52,8 @@ public:
     asset.data.occlusionStrength = 0.4f;
     asset.data.occlusionTextureCoord = 5;
     if (createTextures) {
-      liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = liquid::Uuid("occlusion");
+      quoll::AssetData<quoll::TextureAsset> texture;
+      texture.uuid = quoll::Uuid("occlusion");
 
       asset.data.occlusionTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -62,8 +62,8 @@ public:
     asset.data.emissiveFactor = glm::vec3(0.5f, 0.6f, 2.5f);
     asset.data.emissiveTextureCoord = 6;
     if (createTextures) {
-      liquid::AssetData<liquid::TextureAsset> texture;
-      texture.uuid = liquid::Uuid("emissive");
+      quoll::AssetData<quoll::TextureAsset> texture;
+      texture.uuid = quoll::Uuid("emissive");
 
       asset.data.emissiveTexture =
           cache.getRegistry().getTextures().addAsset(texture);
@@ -75,11 +75,11 @@ public:
   void SetUp() override {
     AssetCacheTestBase::SetUp();
 
-    textureUuid = liquid::Uuid::generate();
+    textureUuid = quoll::Uuid::generate();
     cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", textureUuid);
   }
 
-  liquid::Uuid textureUuid;
+  quoll::Uuid textureUuid;
 };
 
 TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
@@ -90,14 +90,14 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
   EXPECT_FALSE(filePath.hasWarnings());
 
   {
-    liquid::InputBinaryStream file(filePath.getData());
+    quoll::InputBinaryStream file(filePath.getData());
     EXPECT_TRUE(file.good());
 
-    liquid::AssetFileHeader header;
+    quoll::AssetFileHeader header;
     file.read(header);
 
     // Base color
-    liquid::String baseTexturePath;
+    quoll::String baseTexturePath;
     file.read(baseTexturePath);
     int8_t baseTextureCoord = -1;
     file.read(baseTextureCoord);
@@ -105,7 +105,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(baseColorFactor);
 
     // Metallic roughness
-    liquid::String metallicRoughnessTexturePath;
+    quoll::String metallicRoughnessTexturePath;
     file.read(metallicRoughnessTexturePath);
     int8_t metallicRoughnessTextureCoord = -1;
     file.read(metallicRoughnessTextureCoord);
@@ -115,7 +115,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(roughnessFactor);
 
     // Normal
-    liquid::String normalTexturePath;
+    quoll::String normalTexturePath;
     file.read(normalTexturePath);
     int8_t normalTextureCoord = -1;
     file.read(normalTextureCoord);
@@ -123,7 +123,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(normalScale);
 
     // Occlusion
-    liquid::String occlusionTexturePath;
+    quoll::String occlusionTexturePath;
     file.read(occlusionTexturePath);
     int8_t occlusionTextureCoord = -1;
     file.read(occlusionTextureCoord);
@@ -131,7 +131,7 @@ TEST_F(AssetCacheMaterialTest, CreatesMaterialWithTexturesFromAsset) {
     file.read(occlusionStrength);
 
     // Emissive
-    liquid::String emissiveTexturePath;
+    quoll::String emissiveTexturePath;
     file.read(emissiveTexturePath);
     int8_t emissiveTextureCoord = -1;
     file.read(emissiveTextureCoord);
@@ -167,14 +167,14 @@ TEST_F(AssetCacheMaterialTest,
   auto filePath = cache.createMaterialFromAsset(asset);
 
   {
-    liquid::InputBinaryStream file(filePath.getData());
+    quoll::InputBinaryStream file(filePath.getData());
     EXPECT_TRUE(file.good());
 
-    liquid::AssetFileHeader header;
+    quoll::AssetFileHeader header;
     file.read(header);
 
     // Base color
-    liquid::String baseTexturePath;
+    quoll::String baseTexturePath;
     file.read(baseTexturePath);
     int8_t baseTextureCoord = -1;
     file.read(baseTextureCoord);
@@ -182,7 +182,7 @@ TEST_F(AssetCacheMaterialTest,
     file.read(baseColorFactor);
 
     // Metallic roughness
-    liquid::String metallicRoughnessTexturePath;
+    quoll::String metallicRoughnessTexturePath;
     file.read(metallicRoughnessTexturePath);
     int8_t metallicRoughnessTextureCoord = -1;
     file.read(metallicRoughnessTextureCoord);
@@ -192,7 +192,7 @@ TEST_F(AssetCacheMaterialTest,
     file.read(roughnessFactor);
 
     // Normal
-    liquid::String normalTexturePath;
+    quoll::String normalTexturePath;
     file.read(normalTexturePath);
     int8_t normalTextureCoord = -1;
     file.read(normalTextureCoord);
@@ -200,7 +200,7 @@ TEST_F(AssetCacheMaterialTest,
     file.read(normalScale);
 
     // Occlusion
-    liquid::String occlusionTexturePath;
+    quoll::String occlusionTexturePath;
     file.read(occlusionTexturePath);
     int8_t occlusionTextureCoord = -1;
     file.read(occlusionTextureCoord);
@@ -208,7 +208,7 @@ TEST_F(AssetCacheMaterialTest,
     file.read(occlusionStrength);
 
     // Emissive
-    liquid::String emissiveTexturePath;
+    quoll::String emissiveTexturePath;
     file.read(emissiveTexturePath);
     int8_t emissiveTextureCoord = -1;
     file.read(emissiveTextureCoord);
@@ -216,7 +216,7 @@ TEST_F(AssetCacheMaterialTest,
     file.read(emissiveFactor);
 
     EXPECT_EQ(header.magic, header.MagicConstant);
-    EXPECT_EQ(header.type, liquid::AssetType::Material);
+    EXPECT_EQ(header.type, quoll::AssetType::Material);
     EXPECT_EQ(baseTexturePath, "");
     EXPECT_EQ(baseTextureCoord, 2);
     EXPECT_EQ(baseColorFactor, glm::vec4(2.5f, 0.2f, 0.5f, 5.2f));
@@ -250,12 +250,12 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
+  EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_EQ(material.name, asset.name);
   EXPECT_TRUE(material.uuid.isValid());
-  EXPECT_EQ(material.type, liquid::AssetType::Material);
+  EXPECT_EQ(material.type, quoll::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
   EXPECT_EQ(material.data.baseColorTextureCoord,
@@ -300,11 +300,11 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 
   auto handle = res.getData();
 
-  EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
+  EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
 
   auto &material = cache.getRegistry().getMaterials().getAsset(handle);
   EXPECT_TRUE(material.uuid.isValid());
-  EXPECT_EQ(material.type, liquid::AssetType::Material);
+  EXPECT_EQ(material.type, quoll::AssetType::Material);
 
   EXPECT_EQ(material.data.baseColorTexture, asset.data.baseColorTexture);
   EXPECT_EQ(material.data.baseColorTextureCoord,
@@ -335,8 +335,8 @@ TEST_F(AssetCacheMaterialTest, LoadsMaterialWithoutTexturesFromFile) {
 
 TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   auto texture = cache.loadTexture(textureUuid);
-  liquid::AssetData<liquid::MaterialAsset> material{};
-  material.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::MaterialAsset> material{};
+  material.uuid = quoll::Uuid::generate();
   material.data.baseColorTexture = texture.getData();
   auto path = cache.createMaterialFromAsset(material);
 
@@ -348,8 +348,7 @@ TEST_F(AssetCacheMaterialTest, LoadsTexturesWithMaterials) {
   auto &newMaterial =
       cache.getRegistry().getMaterials().getAsset(handle.getData());
 
-  EXPECT_NE(newMaterial.data.baseColorTexture,
-            liquid::TextureAssetHandle::Null);
+  EXPECT_NE(newMaterial.data.baseColorTexture, quoll::TextureAssetHandle::Null);
 
   auto &newTexture = cache.getRegistry().getTextures().getAsset(
       newMaterial.data.baseColorTexture);

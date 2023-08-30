@@ -6,7 +6,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanUploadContext::VulkanUploadContext(VulkanDeviceObject &mDevice,
                                          VulkanCommandPool &pool,
@@ -73,4 +73,4 @@ void VulkanUploadContext::createFence() {
   LOG_DEBUG_VK("Upload fence created", mUploadFence);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

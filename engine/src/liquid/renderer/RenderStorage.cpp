@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 static constexpr uint32_t Hundred = 100;
 
@@ -49,7 +49,7 @@ RenderStorage::RenderStorage(rhi::RenderDevice *device) : mDevice(device) {
 }
 
 rhi::TextureHandle
-RenderStorage::createTexture(const liquid::rhi::TextureDescription &description,
+RenderStorage::createTexture(const quoll::rhi::TextureDescription &description,
                              bool addToDescriptor) {
   auto handle = getNewTextureHandle();
 
@@ -165,4 +165,4 @@ RenderStorage::addPipeline(const rhi::ComputePipelineDescription &description) {
   return static_cast<rhi::PipelineHandle>(mPipelineDescriptions.size());
 }
 
-} // namespace liquid
+} // namespace quoll

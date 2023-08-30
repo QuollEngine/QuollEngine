@@ -3,7 +3,7 @@
 #include "EntityDatabase.h"
 #include "liquid/asset/AssetRegistry.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Entity spawner
@@ -50,4 +50,4 @@ private:
   AssetRegistry &mAssetRegistry;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -5,7 +5,7 @@
 #include "Widgets.h"
 #include "Theme.h"
 
-namespace liquid::editor::widgets {
+namespace quoll::editor::widgets {
 
 /**
  * @brief Section horizontal bounds
@@ -306,4 +306,4 @@ InputColor::InputColor(String label, glm::vec4 &value) {
   mChanged = ImGui::ColorEdit4(id.c_str(), glm::value_ptr(value));
 }
 
-} // namespace liquid::editor::widgets
+} // namespace quoll::editor::widgets

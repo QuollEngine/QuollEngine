@@ -8,7 +8,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanTexture.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan swapchain
@@ -165,4 +165,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

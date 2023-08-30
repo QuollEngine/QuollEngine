@@ -5,7 +5,7 @@
 
 #include "liquid/core/Engine.h"
 
-namespace liquid {
+namespace quoll {
 
 ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
                                  AssetRegistry &assetRegistry)
@@ -171,4 +171,4 @@ void ScriptingSystem::destroyScriptingData(Script &component) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

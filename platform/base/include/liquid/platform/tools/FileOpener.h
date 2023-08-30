@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 /**
  * @brief Platform file opener
@@ -15,4 +15,4 @@ public:
   static void openFile(const Path &path);
 };
 
-} // namespace liquid::platform
+} // namespace quoll::platform

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class DescriptorType {
   UniformBuffer,
@@ -12,4 +12,4 @@ enum class DescriptorType {
   None
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

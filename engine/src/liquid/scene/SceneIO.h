@@ -6,7 +6,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/scene/Scene.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene writer and reader
@@ -53,4 +53,4 @@ private:
   std::unordered_map<uint64_t, Entity> mEntityIdCache;
 };
 
-} // namespace liquid
+} // namespace quoll

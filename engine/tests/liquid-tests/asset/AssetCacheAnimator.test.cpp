@@ -8,7 +8,7 @@
 #include "liquid-tests/Testing.h"
 #include "liquid-tests/test-utils/AssetCacheTestBase.h"
 
-static const liquid::Path FilePath =
+static const quoll::Path FilePath =
     AssetCacheTestBase::CachePath / "test.animator";
 
 class AssetCacheAnimatorTest : public AssetCacheTestBase {
@@ -18,7 +18,7 @@ public:
 using AssetCacheAnimatorDeathTest = AssetCacheAnimatorTest;
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath =
       cache.createAnimatorFromSource(FixturesPath / "test.animator", uuid);
   EXPECT_TRUE(filePath.hasData());
@@ -29,39 +29,39 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
 
   auto meta = cache.getAssetMeta(uuid);
 
-  EXPECT_EQ(meta.type, liquid::AssetType::Animator);
+  EXPECT_EQ(meta.type, quoll::AssetType::Animator);
   EXPECT_EQ(meta.name, "test.animator");
 }
 
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
-  liquid::AssetData<liquid::AnimationAsset> animData{};
-  animData.uuid = liquid::Uuid("idle");
+  quoll::AssetData<quoll::AnimationAsset> animData{};
+  animData.uuid = quoll::Uuid("idle");
   auto idle = cache.getRegistry().getAnimations().addAsset(animData);
 
-  animData.uuid = liquid::Uuid("walk");
+  animData.uuid = quoll::Uuid("walk");
   auto walk = cache.getRegistry().getAnimations().addAsset(animData);
 
-  animData.uuid = liquid::Uuid("run");
+  animData.uuid = quoll::Uuid("run");
   auto run = cache.getRegistry().getAnimations().addAsset(animData);
 
-  liquid::AssetData<liquid::AnimatorAsset> asset{};
+  quoll::AssetData<quoll::AnimatorAsset> asset{};
   asset.data.initialState = 1;
   asset.name = "my-animator.animator";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
 
-  liquid::AnimationState stateIdle;
+  quoll::AnimationState stateIdle;
   stateIdle.name = "idle";
   stateIdle.animation = idle;
   stateIdle.transitions.push_back({"WALK", 1});
   stateIdle.transitions.push_back({"RUN", 2});
 
-  liquid::AnimationState stateWalk;
+  quoll::AnimationState stateWalk;
   stateWalk.name = "walk";
   stateWalk.animation = walk;
   stateWalk.transitions.push_back({"IDLE", 0});
   stateWalk.transitions.push_back({"RUN", 2});
 
-  liquid::AnimationState stateRun;
+  quoll::AnimationState stateRun;
   stateRun.name = "run";
   stateRun.animation = run;
   stateRun.transitions.push_back({"IDLE", 0});
@@ -79,7 +79,7 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
   auto meta = cache.getAssetMeta(asset.uuid);
 
-  EXPECT_EQ(meta.type, liquid::AssetType::Animator);
+  EXPECT_EQ(meta.type, quoll::AssetType::Animator);
   EXPECT_EQ(meta.name, "my-animator.animator");
 
   auto path = filePath.getData();
@@ -88,9 +88,9 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
   auto node = YAML::Load(stream);
   stream.close();
 
-  EXPECT_EQ(node["version"].as<liquid::String>(""), "0.1");
-  EXPECT_EQ(node["type"].as<liquid::String>(""), "animator");
-  EXPECT_EQ(node["initial"].as<liquid::String>(""), "walk");
+  EXPECT_EQ(node["version"].as<quoll::String>(""), "0.1");
+  EXPECT_EQ(node["type"].as<quoll::String>(""), "animator");
+  EXPECT_EQ(node["initial"].as<quoll::String>(""), "walk");
   EXPECT_TRUE(node["states"].IsMap());
 
   // idle
@@ -101,8 +101,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto output = state["output"];
     EXPECT_TRUE(output.IsMap());
-    EXPECT_EQ(output["type"].as<liquid::String>(""), "animation");
-    EXPECT_EQ(output["animation"].as<liquid::String>(""), "idle");
+    EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
+    EXPECT_EQ(output["animation"].as<quoll::String>(""), "idle");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -110,15 +110,15 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto t1 = on[0];
     EXPECT_TRUE(t1.IsMap());
-    EXPECT_EQ(t1["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t1["event"].as<liquid::String>(""), "WALK");
-    EXPECT_EQ(t1["target"].as<liquid::String>(""), "walk");
+    EXPECT_EQ(t1["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t1["event"].as<quoll::String>(""), "WALK");
+    EXPECT_EQ(t1["target"].as<quoll::String>(""), "walk");
 
     auto t2 = on[1];
     EXPECT_TRUE(t2.IsMap());
-    EXPECT_EQ(t2["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t2["event"].as<liquid::String>(""), "RUN");
-    EXPECT_EQ(t2["target"].as<liquid::String>(""), "run");
+    EXPECT_EQ(t2["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t2["event"].as<quoll::String>(""), "RUN");
+    EXPECT_EQ(t2["target"].as<quoll::String>(""), "run");
   }
 
   // walk
@@ -129,8 +129,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto output = state["output"];
     EXPECT_TRUE(output.IsMap());
-    EXPECT_EQ(output["type"].as<liquid::String>(""), "animation");
-    EXPECT_EQ(output["animation"].as<liquid::String>(""), "walk");
+    EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
+    EXPECT_EQ(output["animation"].as<quoll::String>(""), "walk");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -138,15 +138,15 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto t1 = on[0];
     EXPECT_TRUE(t1.IsMap());
-    EXPECT_EQ(t1["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t1["event"].as<liquid::String>(""), "IDLE");
-    EXPECT_EQ(t1["target"].as<liquid::String>(""), "idle");
+    EXPECT_EQ(t1["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t1["event"].as<quoll::String>(""), "IDLE");
+    EXPECT_EQ(t1["target"].as<quoll::String>(""), "idle");
 
     auto t2 = on[1];
     EXPECT_TRUE(t2.IsMap());
-    EXPECT_EQ(t2["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t2["event"].as<liquid::String>(""), "RUN");
-    EXPECT_EQ(t2["target"].as<liquid::String>(""), "run");
+    EXPECT_EQ(t2["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t2["event"].as<quoll::String>(""), "RUN");
+    EXPECT_EQ(t2["target"].as<quoll::String>(""), "run");
   }
 
   // run
@@ -157,8 +157,8 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto output = state["output"];
     EXPECT_TRUE(output.IsMap());
-    EXPECT_EQ(output["type"].as<liquid::String>(""), "animation");
-    EXPECT_EQ(output["animation"].as<liquid::String>(""), "run");
+    EXPECT_EQ(output["type"].as<quoll::String>(""), "animation");
+    EXPECT_EQ(output["animation"].as<quoll::String>(""), "run");
 
     auto on = state["on"];
     EXPECT_TRUE(on.IsSequence());
@@ -166,15 +166,15 @@ TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFileFromAsset) {
 
     auto t1 = on[0];
     EXPECT_TRUE(t1.IsMap());
-    EXPECT_EQ(t1["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t1["event"].as<liquid::String>(""), "IDLE");
-    EXPECT_EQ(t1["target"].as<liquid::String>(""), "idle");
+    EXPECT_EQ(t1["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t1["event"].as<quoll::String>(""), "IDLE");
+    EXPECT_EQ(t1["target"].as<quoll::String>(""), "idle");
 
     auto t2 = on[1];
     EXPECT_TRUE(t2.IsMap());
-    EXPECT_EQ(t2["type"].as<liquid::String>(""), "event");
-    EXPECT_EQ(t2["event"].as<liquid::String>(""), "WALK");
-    EXPECT_EQ(t2["target"].as<liquid::String>(""), "walk");
+    EXPECT_EQ(t2["type"].as<quoll::String>(""), "event");
+    EXPECT_EQ(t2["event"].as<quoll::String>(""), "WALK");
+    EXPECT_EQ(t2["target"].as<quoll::String>(""), "walk");
   }
 }
 
@@ -182,7 +182,7 @@ TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorFailsIfRequiredPropertiesAreInvalid) {
 
   {
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
     auto filePath = cache.getPathFromUuid(uuid);
 
     YAML::Node node;
@@ -200,7 +200,7 @@ TEST_F(AssetCacheAnimatorTest,
   }
 
   {
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
     auto filePath = cache.getPathFromUuid(uuid);
 
     YAML::Node node;
@@ -219,7 +219,7 @@ TEST_F(AssetCacheAnimatorTest,
   }
 
   {
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
     auto filePath = cache.getPathFromUuid(uuid);
 
     YAML::Node node;
@@ -245,8 +245,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
       YAML::Node(YAML::NodeType::Sequence),
   };
 
-  std::vector<liquid::String> invalidStateNames{"invalid0", "invalid1",
-                                                "invalid2"};
+  std::vector<quoll::String> invalidStateNames{"invalid0", "invalid1",
+                                               "invalid2"};
 
   YAML::Node node;
   node["version"] = "0.1";
@@ -256,7 +256,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   }
   node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.getPathFromUuid(uuid);
   std::ofstream stream(filePath);
   stream << node;
@@ -276,7 +276,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresStatesThatHaveInvalidData) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "valid");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Null);
+            quoll::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -287,8 +287,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
       YAML::Node(YAML::NodeType::Sequence),
   };
 
-  std::vector<liquid::String> invalidStateNames{"invalid0", "invalid1",
-                                                "invalid2"};
+  std::vector<quoll::String> invalidStateNames{"invalid0", "invalid1",
+                                               "invalid2"};
 
   YAML::Node node;
   node["version"] = "0.1";
@@ -298,7 +298,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
     node["states"][invalidStateNames[i]] = invalidNodes[i];
   }
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.getPathFromUuid(uuid);
   std::ofstream stream(filePath);
   stream << node;
@@ -319,7 +319,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorAddsDummyStateIfNoValidState) {
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "INITIAL");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Null);
+            quoll::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 0);
 }
 
@@ -336,7 +336,7 @@ TEST_F(AssetCacheAnimatorTest,
     node["initial"] = invalidNode;
     node["states"]["valid"] = YAML::Node(YAML::NodeType::Map);
 
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
     auto filePath = cache.getPathFromUuid(uuid);
     std::ofstream stream(filePath);
     stream << node;
@@ -366,7 +366,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorSetsInitialState) {
   node["states"]["valid1"] = YAML::Node(YAML::NodeType::Map);
   node["states"]["valid2"] = YAML::Node(YAML::NodeType::Map);
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.getPathFromUuid(uuid);
 
   std::ofstream stream(filePath);
@@ -443,7 +443,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 
   node["states"]["walk"] = YAML::Node(YAML::NodeType::Map);
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.getPathFromUuid(uuid);
   std::ofstream stream(filePath);
   stream << node;
@@ -463,7 +463,7 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
   EXPECT_EQ(animator.data.states.size(), 2);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
   EXPECT_EQ(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle::Null);
+            quoll::AnimationAssetHandle::Null);
   EXPECT_EQ(animator.data.states.at(0).transitions.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).transitions.at(0).eventName,
             "NEW_EVENT");
@@ -472,8 +472,8 @@ TEST_F(AssetCacheAnimatorTest, LoadAnimatorIgnoresInvalidTransitions) {
 
 TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
 
-  liquid::AssetData<liquid::AnimationAsset> animData{};
-  animData.uuid = liquid::Uuid("my-animation");
+  quoll::AssetData<quoll::AnimationAsset> animData{};
+  animData.uuid = quoll::Uuid("my-animation");
 
   auto animationHandle = cache.getRegistry().getAnimations().addAsset(animData);
 
@@ -485,7 +485,7 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
   state["output"]["type"] = "animation";
   state["output"]["animation"] = "my-animation";
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.getPathFromUuid(uuid);
   std::ofstream stream(filePath);
   stream << node;
@@ -507,8 +507,8 @@ TEST_F(AssetCacheAnimatorTest, LoadsAnimatorWithAlreadyLoadedAnimations) {
 
 TEST_F(AssetCacheAnimatorTest,
        LoadAnimatorLoadsAnimationsBeforeLoadingAnimator) {
-  liquid::AssetData<liquid::AnimationAsset> animData{};
-  animData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::AnimationAsset> animData{};
+  animData.uuid = quoll::Uuid::generate();
   auto path = cache.createAnimationFromAsset(animData);
 
   YAML::Node node;
@@ -523,7 +523,7 @@ TEST_F(AssetCacheAnimatorTest,
   stream << node;
   stream.close();
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath = cache.createAnimatorFromSource(FilePath, uuid);
 
   auto res = cache.loadAnimator(uuid);
@@ -539,12 +539,12 @@ TEST_F(AssetCacheAnimatorTest,
   EXPECT_EQ(animator.data.states.size(), 1);
   EXPECT_EQ(animator.data.states.at(0).name, "idle");
   EXPECT_NE(animator.data.states.at(0).animation,
-            liquid::AnimationAssetHandle{0});
+            quoll::AnimationAssetHandle{0});
 }
 
 TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
-  liquid::AssetData<liquid::AnimatorAsset> animData{};
-  animData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::AnimatorAsset> animData{};
+  animData.uuid = quoll::Uuid::generate();
   animData.data.states.push_back({});
   auto animatorPath = cache.createAnimatorFromAsset(animData);
 
@@ -563,16 +563,16 @@ TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
 
   auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
   EXPECT_EQ(animator.path, animatorPath2);
-  EXPECT_EQ(animator.type, liquid::AssetType::Animator);
+  EXPECT_EQ(animator.type, quoll::AssetType::Animator);
 }
 
 TEST_F(AssetCacheAnimatorDeathTest,
        UpdateAnimatorFailsIfProvidedHandleDoesNotExist) {
-  liquid::AssetData<liquid::AnimatorAsset> animData{};
-  animData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::AnimatorAsset> animData{};
+  animData.uuid = quoll::Uuid::generate();
   animData.data.states.push_back({});
   auto animatorPath = cache.createAnimatorFromAsset(animData);
 
   EXPECT_DEATH(
-      cache.loadAnimator(animData.uuid, liquid::AnimatorAssetHandle{25}), ".*");
+      cache.loadAnimator(animData.uuid, quoll::AnimatorAssetHandle{25}), ".*");
 }

@@ -8,7 +8,7 @@
 
 #include "VulkanHeaders.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan pipeline
@@ -114,4 +114,4 @@ private:
   String mDebugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

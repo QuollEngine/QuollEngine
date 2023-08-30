@@ -26,7 +26,7 @@ struct StringComponent {
   std::string value;
 };
 
-static constexpr liquid::Entity DeadEntity{12};
+static constexpr quoll::Entity DeadEntity{12};
 
 /**
  * @brief Test entity storage
@@ -37,7 +37,7 @@ static constexpr liquid::Entity DeadEntity{12};
  * @tparam ...TComponentTypes Component types
  */
 template <class... TComponentTypes>
-class TestEntityStorage : public liquid::EntityStorageSparseSet {
+class TestEntityStorage : public quoll::EntityStorageSparseSet {
 public:
   /**
    * @brief Create test entity storage
@@ -69,7 +69,7 @@ public:
 
 TEST(EntityStorageSparseSetTest, ReturnsFalseIfEntityDoesNotExist) {
   TestEntityStorage<Component1> storage;
-  EXPECT_FALSE(storage.exists(liquid::Entity{12}));
+  EXPECT_FALSE(storage.exists(quoll::Entity{12}));
 }
 
 TEST(EntityStorageSparseSetTest, ReturnsTrueIfEntityExists) {
@@ -255,10 +255,10 @@ TEST(EntityStorageSparseSetTest, UseRecyclesEntity) {
 
 TEST(EntityStorageSparseSetTest, DoesNotDeleteNonExistentEntity) {
   TestEntityStorage<IntComponent, FloatComponent> storage;
-  storage.deleteEntity(liquid::Entity::Null);
+  storage.deleteEntity(quoll::Entity::Null);
 
   auto e1 = storage.create();
-  EXPECT_NE(e1, liquid::Entity::Null);
+  EXPECT_NE(e1, quoll::Entity::Null);
 }
 
 TEST(EntityStorageSparseSetTest, DeletesEntityAndItsComponentsIfExists) {
@@ -473,9 +473,9 @@ TEST(EntityStorageSparseSetTest, DeletesMultipleComponents) {
 TEST(EntityStorageSparseSetTest,
      RemoveObserverIteratesOverAllRemovedComponents) {
   struct Pair {
-    liquid::Entity entity;
+    quoll::Entity entity;
     int value;
-    liquid::String strValue;
+    quoll::String strValue;
   };
 
   TestEntityStorage<IntComponent, StringComponent> storage;
@@ -549,9 +549,9 @@ TEST(EntityStorageSparseSetTest,
 
 TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
   struct Pair {
-    liquid::Entity entity;
+    quoll::Entity entity;
     int value;
-    liquid::String strValue;
+    quoll::String strValue;
   };
 
   TestEntityStorage<IntComponent, StringComponent> storage;
@@ -628,7 +628,7 @@ TEST(EntityStorageSparseSetTest, DeletingEntitiesTriggersRemoveObservers) {
 
 TEST(EntityStorageSparseSetTest, ClearingObserverClearsAllExistingData) {
   struct Pair {
-    liquid::Entity entity;
+    quoll::Entity entity;
     int value;
   };
 

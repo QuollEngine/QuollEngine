@@ -8,7 +8,7 @@
 
 #include "TextScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int TextScriptingInterface::LuaInterface::getText(void *state) {
   LuaScope scope(state);
@@ -142,4 +142,4 @@ int TextScriptingInterface::LuaInterface::deleteThis(void *state) {
   return ComponentLuaInterfaceCommon::deleteComponent<Text>(getName(), state);
 }
 
-} // namespace liquid
+} // namespace quoll

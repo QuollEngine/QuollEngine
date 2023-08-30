@@ -3,7 +3,7 @@
 #include "LuaHeaders.h"
 #include "LuaScope.h"
 
-namespace liquid {
+namespace quoll {
 
 LuaScope::LuaScope(void *scope) : mScope(static_cast<lua_State *>(scope)) {}
 
@@ -129,4 +129,4 @@ LuaTable LuaScope::createTable(uint32_t size) {
   return LuaTable(mScope, -1);
 }
 
-} // namespace liquid
+} // namespace quoll

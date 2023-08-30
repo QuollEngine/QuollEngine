@@ -14,9 +14,9 @@ public:
 };
 
 TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
-  liquid::AssetData<liquid::SkeletonAsset> asset;
+  quoll::AssetData<quoll::SkeletonAsset> asset;
   asset.name = "test-skel0";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
 
   {
     std::random_device device;
@@ -64,13 +64,13 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
 
   auto filePath = cache.createSkeletonFromAsset(asset);
 
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, liquid::AssetType::Skeleton);
+  EXPECT_EQ(header.type, quoll::AssetType::Skeleton);
 
   uint32_t numJoints = 0;
   file.read(numJoints);
@@ -80,8 +80,8 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
   std::vector<glm::quat> actualRotations(numJoints);
   std::vector<glm::vec3> actualScales(numJoints);
   std::vector<glm::mat4> actualInverseBindMatrices(numJoints);
-  std::vector<liquid::JointId> actualParents(numJoints);
-  std::vector<liquid::String> actualNames(numJoints);
+  std::vector<quoll::JointId> actualParents(numJoints);
+  std::vector<quoll::String> actualNames(numJoints);
   file.read(actualPositions);
   file.read(actualRotations);
   file.read(actualScales);
@@ -104,9 +104,9 @@ TEST_F(AssetCacheSkeletonTest, CreatesSkeletonFileFromSkeletonAsset) {
 }
 
 TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
-  liquid::AssetData<liquid::SkeletonAsset> asset;
+  quoll::AssetData<quoll::SkeletonAsset> asset;
   asset.name = "test-skel0";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
 
   {
     std::random_device device;
@@ -155,7 +155,7 @@ TEST_F(AssetCacheSkeletonTest, LoadsSkeletonAssetFromFile) {
   auto filePath = cache.createSkeletonFromAsset(asset);
   auto handle = cache.loadSkeleton(asset.uuid);
 
-  EXPECT_NE(handle.getData(), liquid::SkeletonAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::SkeletonAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getSkeletons().getAsset(handle.getData());
 

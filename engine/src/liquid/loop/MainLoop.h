@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 class Window;
 class FPSCounter;
@@ -47,4 +47,4 @@ private:
   std::function<bool(float)> mUpdateFn;
   std::function<void()> mRenderFn;
 };
-} // namespace liquid
+} // namespace quoll

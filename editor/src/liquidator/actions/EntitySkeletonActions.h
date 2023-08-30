@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Toggle debug bones for skeleton entity actions
@@ -89,4 +89,4 @@ private:
   std::optional<SkeletonDebug> mOldSkeletonDebug;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

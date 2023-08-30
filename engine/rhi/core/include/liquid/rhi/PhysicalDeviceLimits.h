@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Physical device limits
@@ -496,4 +496,4 @@ struct PhysicalDeviceLimits {
   uint64_t nonCoherentAtomSize;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -7,7 +7,7 @@
 
 #include "EditorRendererFrameData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Editor renderer
@@ -100,4 +100,4 @@ private:
   rhi::SamplerHandle mTextOutlineSampler = rhi::SamplerHandle::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

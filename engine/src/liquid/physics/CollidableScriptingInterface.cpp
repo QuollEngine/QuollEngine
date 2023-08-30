@@ -8,7 +8,7 @@
 
 #include "CollidableScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int CollidableScriptingInterface::LuaInterface::setDefaultMaterial(
     void *state) {
@@ -30,10 +30,10 @@ int CollidableScriptingInterface::LuaInterface::setDefaultMaterial(
       scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
 
   if (!entityDatabase.has<Collidable>(entity)) {
-    entityDatabase.set(entity, liquid::Collidable{});
+    entityDatabase.set(entity, quoll::Collidable{});
   } else {
     entityDatabase.get<Collidable>(entity).materialDesc =
-        liquid::PhysicsMaterialDesc{};
+        quoll::PhysicsMaterialDesc{};
   }
 
   return 0;
@@ -428,4 +428,4 @@ int CollidableScriptingInterface::LuaInterface::deleteThis(void *state) {
                                                                   state);
 }
 
-} // namespace liquid
+} // namespace quoll

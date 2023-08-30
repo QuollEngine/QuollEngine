@@ -7,7 +7,7 @@ class DeviceStatsTest : public ::testing::Test {
 public:
   DeviceStatsTest() : stats(nullptr) {}
 
-  liquid::rhi::DeviceStats stats;
+  quoll::rhi::DeviceStats stats;
 };
 
 TEST_F(DeviceStatsTest, AddsDrawCalls) {

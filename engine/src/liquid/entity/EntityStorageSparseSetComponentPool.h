@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Sparse set pool for entity storage
@@ -22,4 +22,4 @@ struct EntityStorageSparseSetComponentPool {
   std::vector<std::any> components;
 };
 
-} // namespace liquid
+} // namespace quoll

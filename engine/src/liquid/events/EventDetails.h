@@ -4,7 +4,7 @@
 #include "liquid/window/MouseEvent.h"
 #include "liquid/window/KeyboardEvent.h"
 
-namespace liquid::event_detail {
+namespace quoll::event_detail {
 
 /**
  * @brief Type "function" to find the correct event object
@@ -66,4 +66,4 @@ template <> struct GetEventData<KeyboardEvent> {
   using Data = KeyboardEventObject;
 };
 
-} // namespace liquid::event_detail
+} // namespace quoll::event_detail

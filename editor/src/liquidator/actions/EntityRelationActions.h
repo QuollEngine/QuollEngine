@@ -2,7 +2,7 @@
 
 #include "Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Entity remove parent action
@@ -101,4 +101,4 @@ private:
   Entity mPreviousParent = Entity::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -2,7 +2,7 @@
 
 #include "NativeDescriptor.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Descriptor
@@ -84,4 +84,4 @@ private:
   DescriptorHandle mHandle{0};
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

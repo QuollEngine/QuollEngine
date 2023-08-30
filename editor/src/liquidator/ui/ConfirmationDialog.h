@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Confirmation dialog component
@@ -47,4 +47,4 @@ private:
   String mCancelButtonLabel;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

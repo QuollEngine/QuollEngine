@@ -5,7 +5,7 @@
 #include "AssetFileHeader.h"
 #include "AssetMeta.h"
 
-namespace liquid {
+namespace quoll {
 
 class InputBinaryStream;
 
@@ -509,4 +509,4 @@ private:
   Path mAssetsPath;
 };
 
-} // namespace liquid
+} // namespace quoll

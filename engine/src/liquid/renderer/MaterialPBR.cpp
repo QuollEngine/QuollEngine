@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MaterialPBR.h"
 
-namespace liquid {
+namespace quoll {
 
 const std::vector<rhi::TextureHandle>
 MaterialPBR::Properties::getTextures() const {
@@ -55,4 +55,4 @@ MaterialPBR::MaterialPBR(const String &name, const Properties &properties,
     : Material(name, properties.getTextures(), properties.getProperties(),
                renderStorage) {}
 
-} // namespace liquid
+} // namespace quoll

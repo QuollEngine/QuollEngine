@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Font glyph data
@@ -53,4 +53,4 @@ struct FontAsset {
   rhi::TextureHandle deviceHandle = rhi::TextureHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

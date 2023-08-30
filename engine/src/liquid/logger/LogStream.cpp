@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "LogStream.h"
 
-namespace liquid {
+namespace quoll {
 
 LogStream::LogStream(LogSeverity severity, LogTimestamp timestamp,
                      const LogTransport transport)
@@ -17,4 +17,4 @@ LogStream::~LogStream() {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

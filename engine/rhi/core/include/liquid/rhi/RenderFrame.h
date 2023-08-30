@@ -2,7 +2,7 @@
 
 #include "RenderCommandList.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Rendering frame details
@@ -24,4 +24,4 @@ struct RenderFrame {
   RenderCommandList &commandList;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

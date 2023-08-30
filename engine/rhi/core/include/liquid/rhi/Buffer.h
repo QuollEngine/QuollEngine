@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/NativeBuffer.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Hardware buffer
@@ -78,4 +78,4 @@ private:
   NativeBuffer *mNativeBuffer = nullptr;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

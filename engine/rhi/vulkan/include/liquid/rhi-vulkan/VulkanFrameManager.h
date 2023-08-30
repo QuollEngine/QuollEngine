@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "VulkanDeviceObject.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan frame manager
@@ -94,4 +94,4 @@ private:
   uint32_t mFrameIndex = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

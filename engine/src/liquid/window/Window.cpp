@@ -6,7 +6,7 @@
 
 #include "liquid/platform/tools/WindowUtils.h"
 
-namespace liquid {
+namespace quoll {
 
 Window::Window(StringView title, uint32_t width, uint32_t height,
                EventSystem &eventSystem)
@@ -193,4 +193,4 @@ void Window::setWindowSize(const glm::uvec2 &size) {
 
 void Window::maximize() { glfwMaximizeWindow(mWindowInstance); }
 
-} // namespace liquid
+} // namespace quoll

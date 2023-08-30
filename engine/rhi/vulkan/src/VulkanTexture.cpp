@@ -5,7 +5,7 @@
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanTexture::VulkanTexture(VkImage image, VkImageView imageView,
                              VkSampler sampler, VkFormat format,
@@ -190,4 +190,4 @@ VulkanTexture::~VulkanTexture() {
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

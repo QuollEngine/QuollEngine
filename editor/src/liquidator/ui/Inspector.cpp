@@ -7,7 +7,7 @@
 #include "Theme.h"
 #include "FontAwesome.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Inspector::Inspector() {
   mTabs.push_back({"Entity", fa::Wrench,
@@ -86,4 +86,4 @@ void Inspector::render(WorkspaceState &state, AssetRegistry &assetRegistry,
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

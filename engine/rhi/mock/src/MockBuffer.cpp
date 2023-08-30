@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MockBuffer.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 MockBuffer::MockBuffer(const BufferDescription &description)
     : mDescription(description) {
@@ -22,4 +22,4 @@ rhi::DeviceAddress MockBuffer::getAddress() {
   return rhi::DeviceAddress{reinterpret_cast<uint64_t>(this)};
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

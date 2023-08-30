@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Maps physx data with engine
@@ -26,4 +26,4 @@ public:
   static physx::PxTransform getPhysxTransform(const glm::mat4 &transform);
 };
 
-} // namespace liquid
+} // namespace quoll

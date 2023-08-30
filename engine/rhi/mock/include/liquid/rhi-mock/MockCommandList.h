@@ -4,7 +4,7 @@
 #include "MockCommand.h"
 #include "MockCommandData.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock command list
@@ -225,4 +225,4 @@ private:
   std::vector<MockDispatchCall> mDispatchCalls;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

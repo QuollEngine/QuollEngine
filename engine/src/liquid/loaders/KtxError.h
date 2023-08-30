@@ -2,7 +2,7 @@
 
 #include <ktx.h>
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief KTX Error
@@ -21,4 +21,4 @@ public:
   KtxError(const String &what, ktx_error_code_e resultCode);
 };
 
-} // namespace liquid
+} // namespace quoll

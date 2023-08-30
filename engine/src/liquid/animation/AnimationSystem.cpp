@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "AnimationSystem.h"
 
-namespace liquid {
+namespace quoll {
 
 AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
@@ -91,4 +91,4 @@ void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

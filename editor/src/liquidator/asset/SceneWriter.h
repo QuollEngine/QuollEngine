@@ -5,7 +5,7 @@
 
 #include "liquid/yaml/Yaml.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Scene writer
@@ -106,4 +106,4 @@ private:
   uint64_t mLastId = 1;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

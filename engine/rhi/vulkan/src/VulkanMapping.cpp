@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanMapping.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VkPrimitiveTopology
 VulkanMapping::getPrimitiveTopology(PrimitiveTopology topology) {
@@ -379,4 +379,4 @@ ShaderStage VulkanMapping::getShaderStage(VkShaderStageFlags stageFlags) {
   return static_cast<ShaderStage>(stageFlags);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

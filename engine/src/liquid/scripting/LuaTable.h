@@ -2,7 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Lua table
@@ -62,4 +62,4 @@ private:
   void *mScope = nullptr;
 };
 
-} // namespace liquid
+} // namespace quoll

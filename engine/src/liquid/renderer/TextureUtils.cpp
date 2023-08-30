@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "TextureUtils.h"
 
-namespace liquid {
+namespace quoll {
 
 void TextureUtils::copyDataToTexture(
     rhi::RenderDevice *device, void *source, rhi::TextureHandle destination,
@@ -205,4 +205,4 @@ size_t TextureUtils::getBufferSizeFromLevels(
   return size;
 }
 
-} // namespace liquid
+} // namespace quoll

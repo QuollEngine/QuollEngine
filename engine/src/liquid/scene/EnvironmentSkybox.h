@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/asset/EnvironmentAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class EnvironmentSkyboxType { Color, Texture };
 
@@ -27,4 +27,4 @@ struct EnvironmentSkybox {
   glm::vec4 color{0.0f, 0.0f, 0.0f, 1.0f};
 };
 
-} // namespace liquid
+} // namespace quoll

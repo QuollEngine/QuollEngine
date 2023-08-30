@@ -5,7 +5,7 @@
 #include "PhysicsObjects.h"
 #include "PhysxMapping.h"
 
-namespace liquid {
+namespace quoll {
 
 physx::PxGeometryType::Enum
 PhysxMapping::getPhysxGeometryType(const PhysicsGeometryType &type) {
@@ -45,4 +45,4 @@ physx::PxTransform PhysxMapping::getPhysxTransform(const glm::mat4 &transform) {
   return pose;
 }
 
-} // namespace liquid
+} // namespace quoll

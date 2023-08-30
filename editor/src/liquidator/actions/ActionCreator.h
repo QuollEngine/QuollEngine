@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Action creator
@@ -17,4 +17,4 @@ public:
   virtual std::unique_ptr<Action> create() = 0;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

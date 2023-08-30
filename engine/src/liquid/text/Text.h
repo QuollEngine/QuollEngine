@@ -2,7 +2,7 @@
 
 #include "liquid/asset/Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Text component
@@ -24,4 +24,4 @@ struct Text {
   FontAssetHandle font = FontAssetHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

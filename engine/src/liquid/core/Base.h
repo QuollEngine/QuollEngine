@@ -51,7 +51,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-namespace liquid {
+namespace quoll {
 
 using String = std::string;
 using StringView = std::string_view;
@@ -59,7 +59,7 @@ using Path = std::filesystem::path;
 
 template <class T> using SharedPtr = std::shared_ptr<T>;
 
-} // namespace liquid
+} // namespace quoll
 
 #include "Assert.h"
 #include "Profiler.h"

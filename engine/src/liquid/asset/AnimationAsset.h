@@ -2,7 +2,7 @@
 
 #include "liquid/scene/Joint.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class KeyframeSequenceAssetTarget : uint8_t { Position, Rotation, Scale };
 
@@ -59,4 +59,4 @@ struct AnimationAsset {
   std::vector<KeyframeSequenceAsset> keyframes;
 };
 
-} // namespace liquid
+} // namespace quoll

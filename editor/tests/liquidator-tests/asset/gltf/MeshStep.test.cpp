@@ -114,7 +114,7 @@ public:
     return scene;
   }
 
-  liquid::Result<liquid::editor::UUIDMap> loadScene(GLTFTestScene &scene) {
+  quoll::Result<quoll::editor::UUIDMap> loadScene(GLTFTestScene &scene) {
     auto path = saveSceneGLTF(scene);
     return importer.loadFromPath(path, {});
   }
@@ -127,7 +127,7 @@ public:
     auto &gltfMesh = scene.meshes.at(0);
 
     const auto &meshAsset = assetCache.getRegistry().getMeshes().getAsset(
-        liquid::MeshAssetHandle{1});
+        quoll::MeshAssetHandle{1});
 
     EXPECT_EQ(meshAsset.data.geometries.size(), gltfMesh.primitives.size());
     for (size_t gi = 0; gi < meshAsset.data.geometries.size(); ++gi) {

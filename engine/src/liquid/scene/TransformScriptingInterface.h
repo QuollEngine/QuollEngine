@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for local transform
@@ -94,4 +94,4 @@ public:
   static const String getName() { return "local_transform"; }
 };
 
-} // namespace liquid
+} // namespace quoll

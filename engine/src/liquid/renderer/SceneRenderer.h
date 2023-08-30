@@ -6,7 +6,7 @@
 #include "liquid/renderer/RendererOptions.h"
 #include "SceneRendererFrameData.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene render pass data
@@ -199,4 +199,4 @@ private:
   uint32_t mMaxSampleCounts = 1;
 };
 
-} // namespace liquid
+} // namespace quoll

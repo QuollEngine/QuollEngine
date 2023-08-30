@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Point light for entity
@@ -22,4 +22,4 @@ struct PointLight {
   float range = 10.0f;
 };
 
-} // namespace liquid
+} // namespace quoll

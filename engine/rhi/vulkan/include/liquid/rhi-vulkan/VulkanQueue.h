@@ -2,7 +2,7 @@
 
 #include "VulkanDeviceObject.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan queue
@@ -61,4 +61,4 @@ private:
   uint32_t mQueueIndex = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

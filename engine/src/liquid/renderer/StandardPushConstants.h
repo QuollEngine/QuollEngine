@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Standard push constants
@@ -12,4 +12,4 @@ struct StandardPushConstants {
   glm::mat4 modelMatrix;
 };
 
-} // namespace liquid
+} // namespace quoll

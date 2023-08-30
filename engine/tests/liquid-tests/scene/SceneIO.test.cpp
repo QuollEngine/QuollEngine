@@ -5,7 +5,7 @@
 #include "liquid/scene/SceneIO.h"
 #include "liquid/scene/private/EntitySerializer.h"
 
-const liquid::Path ScenePath =
+const quoll::Path ScenePath =
     std::filesystem::current_path() / "scene-io-test" / "main.scene";
 
 class SceneIOTest : public ::testing::Test {
@@ -51,7 +51,7 @@ public:
     stream.close();
   }
 
-  liquid::SceneAssetHandle
+  quoll::SceneAssetHandle
   createSceneAsset(const std::vector<YAML::Node> &entities = {}) {
     YAML::Node root;
     root["name"] = "TestScene";
@@ -64,21 +64,21 @@ public:
     root["zones"][0] = zoneNode;
     root["entities"] = entities;
 
-    liquid::AssetData<liquid::SceneAsset> asset{};
+    quoll::AssetData<quoll::SceneAsset> asset{};
     asset.name = "Scene";
     asset.data.data = root;
 
     return assetRegistry.getScenes().addAsset(asset);
   }
 
-  YAML::Node getSceneYaml(liquid::SceneAssetHandle handle) {
+  YAML::Node getSceneYaml(quoll::SceneAssetHandle handle) {
     return assetRegistry.getScenes().getAsset(handle).data.data;
   }
 
 public:
-  liquid::AssetRegistry assetRegistry;
-  liquid::Scene scene;
-  liquid::SceneIO sceneIO;
+  quoll::AssetRegistry assetRegistry;
+  quoll::Scene scene;
+  quoll::SceneIO sceneIO;
 };
 
 TEST_F(SceneIOTest, DoesNotCreateEntityFromNodeIfNodeDoesNotHaveId) {
@@ -157,7 +157,7 @@ TEST_F(SceneIOTest, LoadsSceneFileWithManyEntities) {
   EXPECT_GT(scene.entityDatabase.getEntityCount(), NumEntities);
   EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
   for (auto entity : entities) {
-    EXPECT_TRUE(scene.entityDatabase.has<liquid::Id>(entity));
+    EXPECT_TRUE(scene.entityDatabase.has<quoll::Id>(entity));
   }
 }
 
@@ -181,15 +181,15 @@ TEST_F(SceneIOTest, LoadingSetsParentsProperly) {
   const auto &entities = sceneIO.loadScene(handle);
 
   EXPECT_GT(scene.entityDatabase.getEntityCount(), entities.size() + 1);
-  EXPECT_EQ(scene.entityDatabase.getEntityCountForComponent<liquid::Parent>(),
+  EXPECT_EQ(scene.entityDatabase.getEntityCountForComponent<quoll::Parent>(),
             entities.size() - 1);
 }
 
 TEST_F(SceneIOTest, CreatesDummyCameraComponentOnConstruct) {
   EXPECT_TRUE(scene.entityDatabase.exists(scene.dummyCamera));
-  EXPECT_TRUE(scene.entityDatabase.has<liquid::Camera>(scene.dummyCamera));
+  EXPECT_TRUE(scene.entityDatabase.has<quoll::Camera>(scene.dummyCamera));
   EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::PerspectiveLens>(scene.dummyCamera));
+      scene.entityDatabase.has<quoll::PerspectiveLens>(scene.dummyCamera));
 }
 
 TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
@@ -197,11 +197,11 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
 
   {
     auto entity = scene.entityDatabase.create();
-    scene.entityDatabase.set<liquid::Id>(entity, {3});
-    scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
+    scene.entityDatabase.set<quoll::Id>(entity, {3});
+    scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
 
-    liquid::detail::EntitySerializer serializer(assetRegistry,
-                                                scene.entityDatabase);
+    quoll::detail::EntitySerializer serializer(assetRegistry,
+                                               scene.entityDatabase);
 
     auto entityNode = serializer.serialize(entity);
 
@@ -212,7 +212,7 @@ TEST_F(SceneIOTest, SetsInitialCameraAsTheActiveCameraOnLoad) {
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeCamera));
   EXPECT_TRUE(
-      scene.entityDatabase.has<liquid::PerspectiveLens>(scene.activeCamera));
+      scene.entityDatabase.has<quoll::PerspectiveLens>(scene.activeCamera));
 }
 
 TEST_F(SceneIOTest,
@@ -228,11 +228,10 @@ TEST_F(SceneIOTest,
   sceneIO.loadScene(handle);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
       scene.activeEnvironment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.activeEnvironment));
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
+      scene.activeEnvironment));
 }
 
 TEST_F(SceneIOTest,
@@ -250,10 +249,10 @@ TEST_F(SceneIOTest,
     sceneIO.loadScene(handle);
 
     EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-    EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+    EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
         scene.activeEnvironment));
     EXPECT_FALSE(
-        scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
+        scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
             scene.activeEnvironment));
   }
 }
@@ -268,11 +267,10 @@ TEST_F(
   sceneIO.loadScene(handle);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
       scene.activeEnvironment));
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.activeEnvironment));
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
+      scene.activeEnvironment));
 }
 
 TEST_F(
@@ -290,9 +288,9 @@ TEST_F(
   sceneIO.loadScene(handle);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
             125);
-  EXPECT_FALSE(scene.entityDatabase.has<liquid::EnvironmentSkybox>(
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentSkybox>(
       scene.activeEnvironment));
 }
 
@@ -311,11 +309,10 @@ TEST_F(
   sceneIO.loadScene(handle);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
             125);
-  EXPECT_FALSE(
-      scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
-          scene.activeEnvironment));
+  EXPECT_FALSE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
+      scene.activeEnvironment));
 }
 
 TEST_F(
@@ -334,8 +331,8 @@ TEST_F(
   sceneIO.loadScene(handle);
 
   EXPECT_TRUE(scene.entityDatabase.exists(scene.activeEnvironment));
-  EXPECT_EQ(scene.entityDatabase.get<liquid::Id>(scene.activeEnvironment).id,
+  EXPECT_EQ(scene.entityDatabase.get<quoll::Id>(scene.activeEnvironment).id,
             125);
-  EXPECT_TRUE(scene.entityDatabase.has<liquid::EnvironmentLightingSkyboxSource>(
+  EXPECT_TRUE(scene.entityDatabase.has<quoll::EnvironmentLightingSkyboxSource>(
       scene.activeEnvironment));
 }

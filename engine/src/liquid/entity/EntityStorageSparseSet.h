@@ -6,7 +6,7 @@
 #include "EntityStorageSparseSetView.h"
 #include "EntityStorageSparseSetObserver.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Sparse set based entity storage
@@ -450,4 +450,4 @@ private:
   size_t mNumEntities = 0;
 };
 
-} // namespace liquid
+} // namespace quoll

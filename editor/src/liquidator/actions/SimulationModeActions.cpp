@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "SimulationModeActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ActionExecutorResult
 StartSimulationMode::onExecute(WorkspaceState &state,
@@ -60,4 +60,4 @@ bool StopSimulationMode::predicate(WorkspaceState &state,
   return state.mode == WorkspaceMode::Simulation;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

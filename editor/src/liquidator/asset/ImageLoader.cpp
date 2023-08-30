@@ -6,7 +6,7 @@
 
 #include <stb/stb_image.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ImageLoader::ImageLoader(AssetCache &assetCache, RenderStorage &renderStorage)
     : mAssetCache(assetCache), mRenderStorage(renderStorage) {}
@@ -144,4 +144,4 @@ std::vector<uint8_t> ImageLoader::generateMipMapsFromTextureData(
   return std::move(textureData);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

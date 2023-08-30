@@ -11,7 +11,7 @@
 #include "liquid/renderer/SceneRendererFrameData.h"
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Frame data for editor renderer
@@ -390,4 +390,4 @@ private:
   BindlessDrawParameters mBindlessParams;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

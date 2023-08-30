@@ -4,7 +4,7 @@
 #include "liquid/scripting/LuaMessages.h"
 #include "AssetCache.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Store text file contents in a buffer
@@ -77,8 +77,8 @@ static void injectInputVarsInterface(LuaScope &scope, LuaScriptAsset &data) {
 }
 
 Result<Path>
-liquid::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
-                                              const Uuid &uuid) {
+quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
+                                             const Uuid &uuid) {
   if (uuid.isEmpty()) {
     LIQUID_ASSERT(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
@@ -164,4 +164,4 @@ AssetCache::loadLuaScript(const Uuid &uuid, LuaScriptAssetHandle handle) {
   return Result<LuaScriptAssetHandle>::Ok(handle);
 }
 
-} // namespace liquid
+} // namespace quoll

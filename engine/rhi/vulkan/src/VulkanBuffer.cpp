@@ -3,7 +3,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanBuffer::VulkanBuffer(const BufferDescription &description,
                            VulkanResourceAllocator &allocator,
@@ -140,4 +140,4 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

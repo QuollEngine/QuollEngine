@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntitySkinnedMeshRendererActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetSkinnedMeshRendererMaterial::EntitySetSkinnedMeshRendererMaterial(
     Entity entity, size_t slot, MaterialAssetHandle handle)
@@ -147,4 +147,4 @@ bool EntityRemoveLastSkinnedMeshRendererMaterialSlot::predicate(
              .materials.size() > 0;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

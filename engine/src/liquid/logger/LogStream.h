@@ -2,7 +2,7 @@
 
 #include "LoggerCore.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Log stream
@@ -72,4 +72,4 @@ private:
   LogTransport mTransport;
 };
 
-} // namespace liquid
+} // namespace quoll

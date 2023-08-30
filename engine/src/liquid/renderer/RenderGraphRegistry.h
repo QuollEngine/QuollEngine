@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Render graph texture view description
@@ -288,4 +288,4 @@ private:
   RenderGraphResourceCache<rhi::TextureHandle, TextureDesc> mTextureCache;
 };
 
-} // namespace liquid
+} // namespace quoll

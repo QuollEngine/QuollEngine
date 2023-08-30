@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 using JointId = uint8_t;
 
-} // namespace liquid
+} // namespace quoll

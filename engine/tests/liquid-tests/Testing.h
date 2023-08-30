@@ -2,7 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 
-static const liquid::Path FixturesPath =
+static const quoll::Path FixturesPath =
     std::filesystem::current_path() / "fixtures";
 
 namespace glm {
@@ -24,13 +24,13 @@ void PrintTo(const qua<T, Q> &value, std::ostream *out) {
 
 } // namespace glm
 
-namespace liquid {
+namespace quoll {
 
 static void PrintTo(Entity entity, std::ostream *out) {
   *out << static_cast<uint32_t>(entity);
 }
 
-} // namespace liquid
+} // namespace quoll
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>

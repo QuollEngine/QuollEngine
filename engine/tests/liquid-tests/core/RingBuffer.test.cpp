@@ -9,7 +9,7 @@ struct Data {
 
 class RingBufferTest : public ::testing::Test {
 public:
-  liquid::RingBuffer<Data> buffer{5};
+  quoll::RingBuffer<Data> buffer{5};
 };
 
 using RingBufferDeathTest = RingBufferTest;
@@ -54,7 +54,7 @@ TEST_F(RingBufferDeathTest, PoppingFailsIfQueueIsEmpty) {
 }
 
 TEST_F(RingBufferTest, ManyOperations) {
-  liquid::RingBuffer<Data> bigBuffer(150);
+  quoll::RingBuffer<Data> bigBuffer(150);
 
   static constexpr int NumAdditions = 100;
   for (int i = 0; i < NumAdditions; ++i) {

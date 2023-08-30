@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Create version
@@ -18,4 +18,4 @@ constexpr inline uint64_t createVersion(uint8_t major, uint8_t minor = 0,
          (static_cast<uint64_t>(patch) << 40) | (static_cast<uint64_t>(build));
 }
 
-} // namespace liquid
+} // namespace quoll

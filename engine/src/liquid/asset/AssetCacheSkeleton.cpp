@@ -7,7 +7,7 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path>
 AssetCache::createSkeletonFromAsset(const AssetData<SkeletonAsset> &asset) {
@@ -100,4 +100,4 @@ Result<SkeletonAssetHandle> AssetCache::getOrLoadSkeleton(const Uuid &uuid) {
   return loadSkeleton(uuid);
 }
 
-} // namespace liquid
+} // namespace quoll

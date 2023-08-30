@@ -2,7 +2,7 @@
 
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene structure
@@ -42,4 +42,4 @@ struct Scene {
   Entity dummyEnvironment = Entity::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -4,7 +4,7 @@
 
 #include "SceneWriter.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 SceneWriter::SceneWriter(Scene &scene, AssetRegistry &assetRegistry)
     : mScene(scene), mAssetRegistry(assetRegistry) {}
@@ -170,4 +170,4 @@ void SceneWriter::save() {
 
 uint64_t SceneWriter::generateId() { return mLastId++; }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

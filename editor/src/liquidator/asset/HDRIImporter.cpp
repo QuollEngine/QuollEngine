@@ -6,7 +6,7 @@
 
 #include <stb/stb_image.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static constexpr uint32_t CubemapSides = 6;
 
@@ -485,4 +485,4 @@ HDRIImporter::generateSpecularMap(const CubemapData &unfilteredCubemap,
   return mAssetCache.loadTexture(asset.uuid);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

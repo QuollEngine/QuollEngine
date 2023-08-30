@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/NativeResourceMetrics.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock resource metrics
@@ -38,4 +38,4 @@ public:
   size_t getDescriptorsCount() const override;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

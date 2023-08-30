@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Camera look at component
@@ -22,4 +22,4 @@ struct CameraLookAt {
   glm::vec3 up;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

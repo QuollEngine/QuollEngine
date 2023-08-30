@@ -6,7 +6,7 @@
 
 #include "liquidator/actions/EditorGridActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void EditorGridPanel::render(WorkspaceState &state,
                              ActionExecutor &actionExecutor) {
@@ -38,4 +38,4 @@ void EditorGridPanel::render(WorkspaceState &state,
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

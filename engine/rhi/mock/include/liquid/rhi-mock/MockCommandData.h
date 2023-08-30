@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock command bindings
@@ -92,4 +92,4 @@ struct MockDispatchCall {
   uint32_t groupCountZ = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

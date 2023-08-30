@@ -4,7 +4,7 @@
 #include "liquid/imgui/ImguiUtils.h"
 #include "Widgets.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static void renderTextureIfExists(widgets::Table &table, const String &label,
                                   TextureAssetHandle handle,
@@ -68,4 +68,4 @@ void MaterialViewer::render(AssetRegistry &assetRegistry) {
 
 void MaterialViewer::open(MaterialAssetHandle handle) { mHandle = handle; }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

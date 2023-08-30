@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "SkeletonUpdater.h"
 
-namespace liquid {
+namespace quoll {
 
 void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("SkeletonUpdater::update");
@@ -48,4 +48,4 @@ void SkeletonUpdater::updateDebugBones(EntityDatabase &entityDatabase) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

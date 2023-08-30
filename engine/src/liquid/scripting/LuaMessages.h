@@ -2,7 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Messages used in Lua scripts
@@ -103,4 +103,4 @@ template <> inline String LuaMessages::getTypename<Entity>() {
   return "entity table";
 }
 
-} // namespace liquid
+} // namespace quoll

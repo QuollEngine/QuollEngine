@@ -3,7 +3,7 @@
 #include "liquid/core/Uuid.h"
 #include "AssetFileHeader.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Output binary stream
@@ -165,4 +165,4 @@ inline void OutputBinaryStream::write(const std::vector<Uuid> &value) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

@@ -7,7 +7,7 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path> AssetCache::createAnimatorFromSource(const Path &sourcePath,
                                                   const Uuid &uuid) {
@@ -268,4 +268,4 @@ Result<AnimatorAssetHandle> AssetCache::getOrLoadAnimator(const Uuid &uuid) {
   return loadAnimator(uuid);
 }
 
-} // namespace liquid
+} // namespace quoll

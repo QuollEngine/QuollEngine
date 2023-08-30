@@ -2,7 +2,7 @@
 
 #include "Joint.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Joint attachment
@@ -14,4 +14,4 @@ struct JointAttachment {
   int16_t joint = -1;
 };
 
-} // namespace liquid
+} // namespace quoll

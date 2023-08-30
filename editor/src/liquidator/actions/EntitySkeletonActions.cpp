@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntitySkeletonActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntityToggleSkeletonDebugBones::EntityToggleSkeletonDebugBones(Entity entity)
     : mEntity(entity) {}
@@ -90,4 +90,4 @@ bool EntityDeleteSkeleton::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<Skeleton>(mEntity);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

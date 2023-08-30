@@ -3,7 +3,7 @@
 #include "liquid/asset/TextureAsset.h"
 #include "liquid/rhi/RenderDevice.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Texture utilities
@@ -74,4 +74,4 @@ public:
   getBufferSizeFromLevels(const std::vector<TextureAssetLevel> &levels);
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityStorageSparseSet.h"
 
-namespace liquid {
+namespace quoll {
 
 EntityStorageSparseSet::~EntityStorageSparseSet() { destroy(); }
 
@@ -105,4 +105,4 @@ void EntityStorageSparseSet::deleteAllObservers() {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

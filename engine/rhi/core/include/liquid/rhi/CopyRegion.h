@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Copy region
@@ -37,4 +37,4 @@ struct CopyRegion {
   glm::uvec3 imageExtent{0};
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

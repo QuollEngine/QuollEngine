@@ -7,7 +7,7 @@
  * @brief Test base class for Lua scripting interfaces
  */
 class LuaScriptingInterfaceTestBase : public ::testing::Test {
-  static const liquid::String ScriptName;
+  static const quoll::String ScriptName;
 
 public:
   /**
@@ -15,7 +15,7 @@ public:
    *
    * @param scriptName Script name
    */
-  LuaScriptingInterfaceTestBase(const liquid::String &scriptName = ScriptName);
+  LuaScriptingInterfaceTestBase(const quoll::String &scriptName = ScriptName);
 
   /**
    * @brief Call function
@@ -24,15 +24,15 @@ public:
    * @param functionName Function name
    * @return Lua scope
    */
-  liquid::LuaScope &call(liquid::Entity entity,
-                         const liquid::String &functionName);
+  quoll::LuaScope &call(quoll::Entity entity,
+                        const quoll::String &functionName);
 
 protected:
-  liquid::EntityDatabase entityDatabase;
-  liquid::EventSystem eventSystem;
-  liquid::AssetCache assetCache;
-  liquid::ScriptingSystem scriptingSystem;
+  quoll::EntityDatabase entityDatabase;
+  quoll::EventSystem eventSystem;
+  quoll::AssetCache assetCache;
+  quoll::ScriptingSystem scriptingSystem;
 
 private:
-  liquid::String mScriptName;
+  quoll::String mScriptName;
 };

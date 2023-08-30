@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Handle counter
@@ -24,4 +24,4 @@ private:
   uint32_t mLastHandle = TStart;
 };
 
-} // namespace liquid
+} // namespace quoll

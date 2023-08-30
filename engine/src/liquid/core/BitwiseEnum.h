@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 #define EnableBitwiseEnum(TEnum)                                               \
   constexpr inline TEnum operator~(TEnum a) {                                  \
@@ -41,4 +41,4 @@ namespace liquid {
     return (a & b) == b;                                                       \
   }
 
-} // namespace liquid
+} // namespace quoll

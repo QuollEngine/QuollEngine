@@ -50,13 +50,13 @@ TEST_F(EntityQueryLuaInterfaceTest,
   auto entity = entityDatabase.create();
 
   auto e1 = entityDatabase.create();
-  entityDatabase.set<liquid::Name>(e1, {"Test"});
+  entityDatabase.set<quoll::Name>(e1, {"Test"});
 
   auto &scope = call(entity, "entity_query_get_first_by_name");
 
-  auto table = scope.getGlobal<liquid::LuaTable>("found_entity");
+  auto table = scope.getGlobal<quoll::LuaTable>("found_entity");
   table.get("id");
-  EXPECT_EQ(scope.get<liquid::Entity>(), e1);
+  EXPECT_EQ(scope.get<quoll::Entity>(), e1);
 }
 
 TEST_F(EntityQueryLuaInterfaceTest, DeleteEntityDoesNothingIfInvalidArgument) {
@@ -64,27 +64,27 @@ TEST_F(EntityQueryLuaInterfaceTest, DeleteEntityDoesNothingIfInvalidArgument) {
 
   {
     call(entity, "entity_query_delete_entity_no_param");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 
   {
     call(entity, "entity_query_delete_entity_param_nil");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 
   {
     call(entity, "entity_query_delete_entity_param_boolean");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 
   {
     call(entity, "entity_query_delete_entity_param_table");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 
   {
     call(entity, "entity_query_delete_entity_param_string");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 }
 
@@ -94,7 +94,7 @@ TEST_F(EntityQueryLuaInterfaceTest,
 
   {
     call(entity, "entity_query_delete_entity_param_invalid_entity");
-    EXPECT_FALSE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
   }
 }
 
@@ -104,6 +104,6 @@ TEST_F(EntityQueryLuaInterfaceTest,
 
   {
     call(entity, "entity_query_delete_entity_param_entity_table");
-    EXPECT_TRUE(entityDatabase.has<liquid::Delete>(entity));
+    EXPECT_TRUE(entityDatabase.has<quoll::Delete>(entity));
   }
 }

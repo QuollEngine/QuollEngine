@@ -4,7 +4,7 @@
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/actions/EntityTransformActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Scene gizmos
@@ -27,4 +27,4 @@ private:
   std::unique_ptr<EntitySetLocalTransformContinuous> mAction;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

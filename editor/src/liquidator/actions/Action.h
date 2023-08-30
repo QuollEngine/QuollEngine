@@ -3,7 +3,7 @@
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/ui/FontAwesome.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Action executor result
@@ -78,4 +78,4 @@ public:
                          AssetRegistry &assetRegistry) = 0;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

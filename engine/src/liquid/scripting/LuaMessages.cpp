@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "LuaMessages.h"
 
-namespace liquid {
+namespace quoll {
 
 String LuaMessages::noEntityTable(const String &interfaceName,
                                   const String &functionName) {
@@ -42,4 +42,4 @@ String LuaMessages::assetNotFound(const String &interfaceName,
   return "Asset of type " + type + " is not found";
 }
 
-} // namespace liquid
+} // namespace quoll

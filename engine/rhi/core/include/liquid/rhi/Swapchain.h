@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Platform agnostic swapchain details
@@ -17,4 +17,4 @@ struct Swapchain {
   glm::uvec2 extent{};
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

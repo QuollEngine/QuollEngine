@@ -5,7 +5,7 @@
 
 #include "liquid/renderer/MeshRenderer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set material slot for mesh renderer
@@ -158,4 +158,4 @@ using EntityCreateMeshRenderer = EntityDefaultCreateComponent<MeshRenderer>;
 
 using EntityDeleteMeshRenderer = EntityDefaultDeleteAction<MeshRenderer>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

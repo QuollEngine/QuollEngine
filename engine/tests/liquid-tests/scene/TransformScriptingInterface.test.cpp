@@ -27,8 +27,8 @@ TEST_F(TransformLuaScriptingInterfaceTest,
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity,
-                                             {glm::vec3(2.5f, 0.2f, 0.5f)});
+  entityDatabase.set<quoll::LocalTransform>(entity,
+                                            {glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_get");
 
@@ -45,24 +45,24 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 
 TEST_F(TransformLuaScriptingInterfaceTest, SetsPositionValue) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity,
-                                             {glm::vec3(1.5f, 0.2f, 0.5f)});
+  entityDatabase.set<quoll::LocalTransform>(entity,
+                                            {glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set");
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localPosition,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localPosition,
             glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DoesNothingIfSetPositionArgumentsAreInvalid) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(
+  entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_position_set_invalid");
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localScale,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
             glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
@@ -84,7 +84,7 @@ TEST_F(TransformLuaScriptingInterfaceTest,
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsScaleValue) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(
+  entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(2.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_get");
@@ -102,24 +102,24 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 
 TEST_F(TransformLuaScriptingInterfaceTest, SetsScaleValue) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(
+  entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set");
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localScale,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
             glm::vec3(2.5f, 3.5f, 0.2f));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DoesNothingIfSetScaleArgumentsAreNotNumbers) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(
+  entityDatabase.set<quoll::LocalTransform>(
       entity, {{}, {}, glm::vec3(1.5f, 0.2f, 0.5f)});
 
   auto &scope = call(entity, "local_transform_scale_set_invalid");
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localScale,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localScale,
             glm::vec3(1.5f, 0.2f, 0.5f));
 }
 
@@ -146,7 +146,7 @@ TEST_F(TransformLuaScriptingInterfaceTest,
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetRotationReturnsRotationInDegrees) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity, {{}, TestQuat, {}});
+  entityDatabase.set<quoll::LocalTransform>(entity, {{}, TestQuat, {}});
 
   auto &scope = call(entity, "local_transform_rotation_get");
 
@@ -169,12 +169,11 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 TEST_F(TransformLuaScriptingInterfaceTest,
        SetRotationConvertsProvidedEulerDegreeRotationsToQuat) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity, {{}, {}, {}});
+  entityDatabase.set<quoll::LocalTransform>(entity, {{}, {}, {}});
 
   auto &scope = call(entity, "local_transform_rotation_set");
 
-  auto actual =
-      entityDatabase.get<liquid::LocalTransform>(entity).localRotation;
+  auto actual = entityDatabase.get<quoll::LocalTransform>(entity).localRotation;
   auto expected = TestQuat;
 
   EXPECT_NEAR(actual.x, expected.x, 0.0001f);
@@ -187,21 +186,21 @@ TEST_F(TransformLuaScriptingInterfaceTest,
        DoesNothingIfSetRotationArgumentsAreNotNumbers) {
   constexpr glm::quat RandomQuat{0.2f, 0.4f, 0.1f, 0.5f};
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity, {{}, RandomQuat, {}});
+  entityDatabase.set<quoll::LocalTransform>(entity, {{}, RandomQuat, {}});
 
   auto &scope = call(entity, "local_transform_rotation_set_invalid");
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localRotation,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localRotation,
             RandomQuat);
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DeleteDoesNothingIfProvidedArgumentIsInvalid) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity, {});
+  entityDatabase.set<quoll::LocalTransform>(entity, {});
 
   call(entity, "local_transform_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransform>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::LocalTransform>(entity));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
@@ -209,14 +208,14 @@ TEST_F(TransformLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
 
   call(entity, "local_transform_delete");
-  EXPECT_FALSE(entityDatabase.has<liquid::LocalTransform>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LocalTransform>(entity));
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,
        DeleteRemovesLocalTransformComponentFromEntity) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::LocalTransform>(entity, {});
+  entityDatabase.set<quoll::LocalTransform>(entity, {});
 
   call(entity, "local_transform_delete");
-  EXPECT_FALSE(entityDatabase.has<liquid::LocalTransform>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::LocalTransform>(entity));
 }

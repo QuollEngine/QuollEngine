@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set collidable type for entity action
@@ -60,4 +60,4 @@ using EntityCreateCollidable = EntityDefaultCreateComponent<Collidable>;
 
 using EntityDeleteCollidable = EntityDefaultDeleteAction<Collidable>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

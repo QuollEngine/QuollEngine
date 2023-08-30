@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ActionExecutor.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ActionExecutor::ActionExecutor(WorkspaceState &state,
                                AssetRegistry &assetRegistry, Path scenePath)
@@ -89,4 +89,4 @@ void ActionExecutor::saveActionResult(const ActionExecutorResult &result) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

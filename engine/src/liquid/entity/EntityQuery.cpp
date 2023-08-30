@@ -3,7 +3,7 @@
 #include "EntityDatabase.h"
 #include "EntityQuery.h"
 
-namespace liquid {
+namespace quoll {
 
 EntityQuery::EntityQuery(EntityDatabase &entityDatabase)
     : mEntityDatabase(entityDatabase) {}
@@ -18,4 +18,4 @@ Entity EntityQuery::getFirstEntityByName(StringView name) {
   return Entity::Null;
 }
 
-} // namespace liquid
+} // namespace quoll

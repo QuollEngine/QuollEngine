@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief World transform component
@@ -12,4 +12,4 @@ struct WorldTransform {
   glm::mat4 worldTransform{1.0f};
 };
 
-} // namespace liquid
+} // namespace quoll

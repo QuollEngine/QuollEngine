@@ -17,7 +17,7 @@
 #include "PipelineDescription.h"
 #include "SamplerDescription.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Render device interface
@@ -269,4 +269,4 @@ public:
   virtual bool hasPipeline(PipelineHandle handle) = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

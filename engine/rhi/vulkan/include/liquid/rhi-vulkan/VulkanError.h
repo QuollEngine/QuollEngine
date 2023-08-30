@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Create Vulkan error message
@@ -29,4 +29,4 @@ inline void checkForVulkanError(VkResult resultCode, const String &errorMessage,
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

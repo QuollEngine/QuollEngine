@@ -3,7 +3,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ConfirmationDialog::ConfirmationDialog(const String &title,
                                        const String &prompt,
@@ -38,4 +38,4 @@ void ConfirmationDialog::render() {
   mOpen = false;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

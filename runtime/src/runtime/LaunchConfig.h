@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::runtime {
+namespace quoll::runtime {
 
 /**
  * @brief Launch configuration structure
@@ -17,4 +17,4 @@ struct LaunchConfig {
   Uuid startingScene;
 };
 
-} // namespace liquid::runtime
+} // namespace quoll::runtime

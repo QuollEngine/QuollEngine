@@ -12,7 +12,7 @@
 #include "UIRoot.h"
 #include "ImGuizmo.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 UIRoot::UIRoot(AssetManager &assetManager) {
   mMainMenu.begin("Project")
@@ -95,4 +95,4 @@ void UIRoot::processShortcuts(WorkspaceContext &context,
       });
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

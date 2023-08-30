@@ -10,7 +10,7 @@ public:
   /**
    * @brief Cache path
    */
-  static const liquid::Path CachePath;
+  static const quoll::Path CachePath;
 
 public:
   /**
@@ -32,5 +32,5 @@ public:
   /**
    * Asset cache
    */
-  liquid::AssetCache cache;
+  quoll::AssetCache cache;
 };

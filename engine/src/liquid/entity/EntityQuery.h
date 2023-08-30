@@ -2,7 +2,7 @@
 
 #include "EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Entity query
@@ -28,4 +28,4 @@ private:
   EntityDatabase &mEntityDatabase;
 };
 
-} // namespace liquid
+} // namespace quoll

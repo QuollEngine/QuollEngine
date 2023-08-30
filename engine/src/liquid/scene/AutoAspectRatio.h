@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Auto aspect ratio component
@@ -10,4 +10,4 @@ namespace liquid {
  */
 struct AutoAspectRatio {};
 
-} // namespace liquid
+} // namespace quoll

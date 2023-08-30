@@ -6,7 +6,7 @@
 #include "liquid/asset/OutputBinaryStream.h"
 #include "liquid/asset/AssetFileHeader.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path> AssetCache::createEnvironmentFromAsset(
     const AssetData<EnvironmentAsset> &asset) {
@@ -81,4 +81,4 @@ Result<EnvironmentAssetHandle> AssetCache::loadEnvironment(const Uuid &uuid) {
   return loadEnvironmentDataFromInputStream(stream, filePath, header.getData());
 }
 
-} // namespace liquid
+} // namespace quoll

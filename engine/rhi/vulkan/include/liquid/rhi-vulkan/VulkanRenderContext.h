@@ -11,7 +11,7 @@
 
 #include "liquid/rhi/RenderCommandList.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan render context
@@ -70,4 +70,4 @@ private:
   VulkanDeviceObject &mDevice;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Spawn empty entity at view action
@@ -141,4 +141,4 @@ private:
   Entity mSpawnedEntity = Entity::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

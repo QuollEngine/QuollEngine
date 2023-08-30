@@ -11,7 +11,7 @@
 #include "IconRegistry.h"
 #include "MaterialViewer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Asset browser component
@@ -77,4 +77,4 @@ private:
   MaterialViewer mMaterialViewer;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

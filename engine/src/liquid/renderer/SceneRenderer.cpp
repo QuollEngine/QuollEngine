@@ -7,7 +7,7 @@
 #include "MeshVertexLayout.h"
 #include "MeshRenderUtils.h"
 
-namespace liquid {
+namespace quoll {
 
 SceneRenderer::SceneRenderer(AssetRegistry &assetRegistry,
                              RenderStorage &renderStorage)
@@ -655,10 +655,10 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
     pipelineDescription.fragmentShader =
         mRenderStorage.getShader("__engine.hdr.default.fragment");
     pipelineDescription.rasterizer = rhi::PipelineRasterizer{
-        liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
-        liquid::rhi::FrontFace::CounterClockwise};
+        quoll::rhi::PolygonMode::Fill, quoll::rhi::CullMode::Front,
+        quoll::rhi::FrontFace::CounterClockwise};
     pipelineDescription.colorBlend.attachments = {
-        liquid::rhi::PipelineColorBlendAttachment{}};
+        quoll::rhi::PipelineColorBlendAttachment{}};
     pipelineDescription.debugName = "hdr";
 
     auto pipeline = mRenderStorage.addPipeline(pipelineDescription);
@@ -1104,4 +1104,4 @@ void SceneRenderer::generateBrdfLut() {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

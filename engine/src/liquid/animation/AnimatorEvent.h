@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * Animator event component
@@ -12,4 +12,4 @@ struct AnimatorEvent {
   String eventName;
 };
 
-} // namespace liquid
+} // namespace quoll

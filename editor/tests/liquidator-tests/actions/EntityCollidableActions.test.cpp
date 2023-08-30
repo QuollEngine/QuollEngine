@@ -29,23 +29,23 @@ TEST_P(EntitySetCollidableTypeActionTest,
        ExecutorSetsCollidableTypeAndResetsTheParamsOfExistingCollidable) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::Collidable collidable{};
+  quoll::Collidable collidable{};
   collidable.materialDesc.staticFriction = 5.0f;
   activeScene().entityDatabase.set(entity, collidable);
 
-  liquid::editor::EntitySetCollidableType action(
-      entity, liquid::PhysicsGeometryType::Sphere);
+  quoll::editor::EntitySetCollidableType action(
+      entity, quoll::PhysicsGeometryType::Sphere);
   auto res = action.onExecute(state, assetRegistry);
 
   const auto &collidableNew =
-      activeScene().entityDatabase.get<liquid::Collidable>(entity);
+      activeScene().entityDatabase.get<quoll::Collidable>(entity);
 
-  auto sphere = std::get<liquid::PhysicsGeometrySphere>(
-      collidableNew.geometryDesc.params);
+  auto sphere =
+      std::get<quoll::PhysicsGeometrySphere>(collidableNew.geometryDesc.params);
 
   EXPECT_EQ(collidableNew.geometryDesc.type,
-            liquid::PhysicsGeometryType::Sphere);
-  EXPECT_EQ(sphere.radius, liquid::PhysicsGeometrySphere{}.radius);
+            quoll::PhysicsGeometryType::Sphere);
+  EXPECT_EQ(sphere.radius, quoll::PhysicsGeometrySphere{}.radius);
   EXPECT_EQ(collidableNew.materialDesc.staticFriction, 5.0f);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
@@ -55,24 +55,24 @@ TEST_P(EntitySetCollidableTypeActionTest,
        UndoSetsOldCollidableParametersForEntity) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::Collidable collidable{};
-  std::get<liquid::PhysicsGeometryBox>(collidable.geometryDesc.params)
+  quoll::Collidable collidable{};
+  std::get<quoll::PhysicsGeometryBox>(collidable.geometryDesc.params)
       .halfExtents = glm::vec3(0.2f);
   collidable.materialDesc.staticFriction = 5.0f;
   activeScene().entityDatabase.set(entity, collidable);
 
-  liquid::editor::EntitySetCollidableType action(
-      entity, liquid::PhysicsGeometryType::Sphere);
+  quoll::editor::EntitySetCollidableType action(
+      entity, quoll::PhysicsGeometryType::Sphere);
   action.onExecute(state, assetRegistry);
 
   auto res = action.onUndo(state, assetRegistry);
 
   const auto &collidableNew =
-      activeScene().entityDatabase.get<liquid::Collidable>(entity);
+      activeScene().entityDatabase.get<quoll::Collidable>(entity);
 
-  EXPECT_EQ(collidableNew.geometryDesc.type, liquid::PhysicsGeometryType::Box);
+  EXPECT_EQ(collidableNew.geometryDesc.type, quoll::PhysicsGeometryType::Box);
   EXPECT_EQ(
-      std::get<liquid::PhysicsGeometryBox>(collidableNew.geometryDesc.params)
+      std::get<quoll::PhysicsGeometryBox>(collidableNew.geometryDesc.params)
           .halfExtents,
       glm::vec3(0.2f));
   EXPECT_EQ(collidableNew.materialDesc.staticFriction, 5.0f);
@@ -83,28 +83,28 @@ TEST_P(EntitySetCollidableTypeActionTest,
        PredicatesReturnsFalseIfEntityHasNoCollidableComponent) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::EntitySetCollidableType action(
-      entity, liquid::PhysicsGeometryType::Sphere);
+  quoll::editor::EntitySetCollidableType action(
+      entity, quoll::PhysicsGeometryType::Sphere);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,
        PredicatesReturnsFalseIfEntityCollidableGeometryTypeEqualsProvidedType) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Collidable>(entity, {});
+  activeScene().entityDatabase.set<quoll::Collidable>(entity, {});
 
-  liquid::editor::EntitySetCollidableType action(
-      entity, liquid::PhysicsGeometryType::Box);
+  quoll::editor::EntitySetCollidableType action(
+      entity, quoll::PhysicsGeometryType::Box);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetCollidableTypeActionTest,
        PredicatesReturnsTrueIfCollidableTypeForEntityDoesNotEqualProvidedType) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Collidable>(entity, {});
+  activeScene().entityDatabase.set<quoll::Collidable>(entity, {});
 
-  liquid::editor::EntitySetCollidableType action(
-      entity, liquid::PhysicsGeometryType::Sphere);
+  quoll::editor::EntitySetCollidableType action(
+      entity, quoll::PhysicsGeometryType::Sphere);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 

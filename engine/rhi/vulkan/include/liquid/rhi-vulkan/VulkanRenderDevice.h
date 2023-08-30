@@ -16,7 +16,7 @@
 #include "VulkanDescriptorPool.h"
 #include "VulkanSwapchain.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan render device
@@ -277,4 +277,4 @@ private:
   DeviceStats mStats;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

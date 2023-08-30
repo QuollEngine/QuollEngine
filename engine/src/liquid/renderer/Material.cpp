@@ -2,7 +2,7 @@
 #include "liquid/core/Engine.h"
 #include "Material.h"
 
-namespace liquid {
+namespace quoll {
 
 Material::Material(const String &name,
                    const std::vector<rhi::TextureHandle> &textures,
@@ -93,4 +93,4 @@ size_t Material::updateBufferData() {
   return size;
 }
 
-} // namespace liquid
+} // namespace quoll

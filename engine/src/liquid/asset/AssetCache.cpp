@@ -6,7 +6,7 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-namespace liquid {
+namespace quoll {
 
 AssetCache::AssetCache(const Path &assetsPath, bool createDefaultObjects)
     : mAssetsPath(assetsPath) {
@@ -252,4 +252,4 @@ Path AssetCache::getPathFromUuid(const Uuid &uuid) {
   return (mAssetsPath / uuid.toString()).replace_extension("asset");
 }
 
-} // namespace liquid
+} // namespace quoll

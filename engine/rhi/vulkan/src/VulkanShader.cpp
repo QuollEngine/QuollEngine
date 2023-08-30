@@ -7,7 +7,7 @@
 
 #include "spirv_reflect.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanShader::VulkanShader(const ShaderDescription &description,
                            VulkanDeviceObject &device)
@@ -159,4 +159,4 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
   spvReflectDestroyShaderModule(&shaderReflectModule);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

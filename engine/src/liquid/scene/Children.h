@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Children component
@@ -15,4 +15,4 @@ struct Children {
   std::vector<Entity> children;
 };
 
-} // namespace liquid
+} // namespace quoll

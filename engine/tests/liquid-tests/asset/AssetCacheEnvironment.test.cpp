@@ -12,8 +12,8 @@ public:
   void SetUp() override {
     AssetCacheTestBase::SetUp();
 
-    irradianceUuid = liquid::Uuid::generate();
-    specularUuid = liquid::Uuid::generate();
+    irradianceUuid = quoll::Uuid::generate();
+    specularUuid = quoll::Uuid::generate();
 
     cache.createTextureFromSource(FixturesPath / "1x1-cubemap.ktx",
                                   irradianceUuid);
@@ -21,17 +21,17 @@ public:
                                   specularUuid);
   }
 
-  liquid::Uuid irradianceUuid;
-  liquid::Uuid specularUuid;
+  quoll::Uuid irradianceUuid;
+  quoll::Uuid specularUuid;
 };
 
 TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
   auto specularMap = cache.loadTexture(specularUuid).getData();
 
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
+  quoll::AssetData<quoll::EnvironmentAsset> asset{};
   asset.name = "env-0";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
   asset.path = FixturesPath / "environment";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -41,18 +41,18 @@ TEST_F(AssetCacheEnvironmentTest, CreatesEnvironmentFileFromEnvironmentAsset) {
   EXPECT_FALSE(filePath.hasError());
   EXPECT_FALSE(filePath.hasWarnings());
 
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, liquid::AssetType::Environment);
+  EXPECT_EQ(header.type, quoll::AssetType::Environment);
   EXPECT_EQ(header.name, asset.name);
 
-  liquid::Uuid readIrradianceUuid;
+  quoll::Uuid readIrradianceUuid;
   file.read(readIrradianceUuid);
 
-  liquid::Uuid readSpecularUuid;
+  quoll::Uuid readSpecularUuid;
   file.read(readSpecularUuid);
 
   EXPECT_EQ(readIrradianceUuid, irradianceUuid);
@@ -67,9 +67,9 @@ TEST_F(AssetCacheEnvironmentTest,
   auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
   auto specularMap = cache.loadTexture(specularUuid).getData();
 
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
+  quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -103,10 +103,10 @@ TEST_F(AssetCacheEnvironmentTest,
   auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
   auto specularMap = cache.loadTexture(specularUuid).getData();
 
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
+  quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
   asset.path = FixturesPath / "environment.lqenv";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
@@ -127,8 +127,8 @@ TEST_F(AssetCacheEnvironmentTest,
 
   const auto &environment =
       cache.getRegistry().getEnvironments().getAsset(res.getData());
-  EXPECT_NE(environment.data.irradianceMap, liquid::TextureAssetHandle::Null);
-  EXPECT_NE(environment.data.specularMap, liquid::TextureAssetHandle::Null);
+  EXPECT_NE(environment.data.irradianceMap, quoll::TextureAssetHandle::Null);
+  EXPECT_NE(environment.data.specularMap, quoll::TextureAssetHandle::Null);
 }
 
 TEST_F(AssetCacheEnvironmentTest,
@@ -136,9 +136,9 @@ TEST_F(AssetCacheEnvironmentTest,
   auto irradianceMap = cache.loadTexture(irradianceUuid).getData();
   auto specularMap = cache.loadTexture(specularUuid).getData();
 
-  liquid::AssetData<liquid::EnvironmentAsset> asset{};
+  quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
   asset.path = FixturesPath / "environment.lqenv";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;

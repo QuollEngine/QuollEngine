@@ -17,7 +17,7 @@
 #include "ScriptDecorator.h"
 #include "ScriptLogger.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Create interface table
@@ -149,4 +149,4 @@ void ScriptDecorator::removeVariableInjectors(LuaScope &scope) {
   scope.setGlobal("__privateVariables", nullptr);
 }
 
-} // namespace liquid
+} // namespace quoll

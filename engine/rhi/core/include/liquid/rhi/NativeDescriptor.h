@@ -3,7 +3,7 @@
 #include "DescriptorType.h"
 #include "RenderHandle.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Descriptor buffer info
@@ -75,4 +75,4 @@ public:
                      DescriptorType type, uint32_t start) = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

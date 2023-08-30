@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityMeshActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Replace mesh with new one
@@ -125,8 +125,8 @@ bool EntityDeleteMesh::predicate(WorkspaceState &state,
   auto &scene = state.mode == WorkspaceMode::Simulation ? state.simulationScene
                                                         : state.scene;
 
-  return scene.entityDatabase.has<liquid::Mesh>(mEntity) ||
-         scene.entityDatabase.has<liquid::SkinnedMesh>(mEntity);
+  return scene.entityDatabase.has<quoll::Mesh>(mEntity) ||
+         scene.entityDatabase.has<quoll::SkinnedMesh>(mEntity);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

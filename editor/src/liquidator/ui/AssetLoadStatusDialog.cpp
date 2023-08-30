@@ -3,7 +3,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 AssetLoadStatusDialog::AssetLoadStatusDialog(const String &title,
                                              const String &okayButton)
@@ -38,4 +38,4 @@ void AssetLoadStatusDialog::setMessages(const std::vector<String> &messages) {
   mMessages = messages;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

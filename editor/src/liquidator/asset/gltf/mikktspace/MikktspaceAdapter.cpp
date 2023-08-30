@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MikktspaceAdapter.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 MikktspaceAdapter::MikktspaceAdapter() {
   mInterface.m_getNumFaces = getNumFaces;
@@ -91,4 +91,4 @@ size_t MikktspaceAdapter::getVertexIndex(const SMikkTSpaceContext *context,
   return meshData.indices.at(index);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

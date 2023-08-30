@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class FileStatus { Created, Updated, Deleted };
 
@@ -56,4 +56,4 @@ private:
   Path mPath;
 };
 
-} // namespace liquid
+} // namespace quoll

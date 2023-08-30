@@ -5,7 +5,7 @@
 #include "RendererOptions.h"
 #include "RenderGraph.h"
 
-namespace liquid {
+namespace quoll {
 
 class Window;
 
@@ -131,4 +131,4 @@ private:
   rhi::TextureHandle mSceneTexture{0};
 };
 
-} // namespace liquid
+} // namespace quoll

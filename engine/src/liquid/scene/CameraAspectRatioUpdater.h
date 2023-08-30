@@ -3,7 +3,7 @@
 #include "liquid/window/Window.h"
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Camera aspect ratio updater
@@ -31,4 +31,4 @@ private:
   Window &mWindow;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for perspective lens
@@ -167,4 +167,4 @@ public:
   static const String getName() { return "perspective_lens"; }
 };
 
-} // namespace liquid
+} // namespace quoll

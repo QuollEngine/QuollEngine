@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "StreamTransport.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Format log headers
@@ -30,4 +30,4 @@ LogTransport createStreamTransport(std::ostream &stream) {
       };
 }
 
-} // namespace liquid
+} // namespace quoll

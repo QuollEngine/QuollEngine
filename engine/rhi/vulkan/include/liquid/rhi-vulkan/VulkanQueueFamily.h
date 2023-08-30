@@ -2,7 +2,7 @@
 
 #include "VulkanHeaders.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan queue family indices
@@ -75,4 +75,4 @@ private:
   std::optional<uint32_t> mTransferFamily;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

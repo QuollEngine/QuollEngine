@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/SamplerDescription.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan sampler
@@ -45,4 +45,4 @@ private:
   VkSampler mSampler = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -4,7 +4,7 @@
 #include "Buffer.h"
 #include "TransformUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void loadSkeletons(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
@@ -138,4 +138,4 @@ void loadSkeletons(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

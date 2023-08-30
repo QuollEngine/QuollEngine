@@ -6,7 +6,7 @@
 #include "liquid/rhi/NativeBuffer.h"
 #include "liquid/rhi/BufferDescription.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan hardware buffer
@@ -114,4 +114,4 @@ private:
   String mDebugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

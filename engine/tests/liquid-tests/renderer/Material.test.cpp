@@ -8,25 +8,24 @@ class MaterialTest : public ::testing::Test {
 public:
   MaterialTest() : renderStorage(&device) {}
 
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage;
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage;
 };
 
 TEST_F(MaterialTest, SetsBuffersAndTextures) {
-  std::vector<liquid::rhi::TextureHandle> textures{
-      liquid::rhi::TextureHandle(1)};
+  std::vector<quoll::rhi::TextureHandle> textures{quoll::rhi::TextureHandle(1)};
 
-  liquid::Material material(
+  quoll::Material material(
       "test", textures,
       {
-          {"specular", liquid::Property(glm::vec3(0.5, 0.2, 0.3))},
-          {"diffuse", liquid::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
+          {"specular", quoll::Property(glm::vec3(0.5, 0.2, 0.3))},
+          {"diffuse", quoll::Property(glm::vec4(1.0, 1.0, 1.0, 1.0))},
       },
       renderStorage);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_TRUE(liquid::rhi::isHandleValid(material.getBuffer()));
+  EXPECT_TRUE(quoll::rhi::isHandleValid(material.getBuffer()));
 
   auto *buffer = device.getBuffer(material.getBuffer());
   const char *data = static_cast<const char *>(buffer->map());
@@ -41,34 +40,33 @@ TEST_F(MaterialTest, SetsBuffersAndTextures) {
 }
 
 TEST_F(MaterialTest, DoesNotCreateBuffersIfEmptyProperties) {
-  std::vector<liquid::rhi::TextureHandle> textures{
-      liquid::rhi::TextureHandle(1)};
+  std::vector<quoll::rhi::TextureHandle> textures{quoll::rhi::TextureHandle(1)};
 
-  liquid::Material material("test", textures, {}, renderStorage);
+  quoll::Material material("test", textures, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures(), textures);
   EXPECT_EQ(material.hasTextures(), true);
-  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
+  EXPECT_FALSE(quoll::rhi::isHandleValid(material.getBuffer()));
 }
 
 TEST_F(MaterialTest, DoesNotSetTexturesIfNoTexture) {
-  liquid::Material material("test", {}, {}, renderStorage);
+  quoll::Material material("test", {}, {}, renderStorage);
 
   EXPECT_EQ(material.getTextures().size(), 0);
   EXPECT_EQ(material.hasTextures(), false);
-  EXPECT_FALSE(liquid::rhi::isHandleValid(material.getBuffer()));
+  EXPECT_FALSE(quoll::rhi::isHandleValid(material.getBuffer()));
 }
 
 TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material("test", {},
-                            {
-                                {"specular", liquid::Property(testVec3)},
-                                {"diffuse", liquid::Property(testReal)},
-                            },
-                            renderStorage);
+  quoll::Material material("test", {},
+                           {
+                               {"specular", quoll::Property(testVec3)},
+                               {"diffuse", quoll::Property(testReal)},
+                           },
+                           renderStorage);
 
   const auto &properties = material.getProperties();
   {
@@ -85,7 +83,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfPropertyDoesNotExist) {
                 testReal);
   }
 
-  material.updateProperty("non-existent-property", liquid::Property(1.0f));
+  material.updateProperty("non-existent-property", quoll::Property(1.0f));
 
   {
     EXPECT_EQ(properties.size(), 2);
@@ -106,12 +104,12 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material("test", {},
-                            {
-                                {"specular", liquid::Property(testVec3)},
-                                {"diffuse", liquid::Property(testReal)},
-                            },
-                            renderStorage);
+  quoll::Material material("test", {},
+                           {
+                               {"specular", quoll::Property(testVec3)},
+                               {"diffuse", quoll::Property(testReal)},
+                           },
+                           renderStorage);
 
   const auto &properties = material.getProperties();
   {
@@ -128,7 +126,7 @@ TEST_F(MaterialTest, DoesNotUpdatePropertyIfNewPropertyTypeIsDifferent) {
                 testReal);
   }
 
-  material.updateProperty("specular", liquid::Property(1.0f));
+  material.updateProperty("specular", quoll::Property(1.0f));
 
   {
     EXPECT_EQ(properties.size(), 2);
@@ -149,12 +147,12 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
   glm::vec3 testVec3{1.0f, 0.2f, 3.6f};
   float testReal = 45.0f;
 
-  liquid::Material material("test", {},
-                            {
-                                {"specular", liquid::Property(testVec3)},
-                                {"diffuse", liquid::Property(testReal)},
-                            },
-                            renderStorage);
+  quoll::Material material("test", {},
+                           {
+                               {"specular", quoll::Property(testVec3)},
+                               {"diffuse", quoll::Property(testReal)},
+                           },
+                           renderStorage);
 
   const auto &properties = material.getProperties();
   {
@@ -173,8 +171,8 @@ TEST_F(MaterialTest, UpdatesPropertyIfNameAndTypeMatch) {
 
   glm::vec3 newTestVec3{2.6, 0.1, 5.3};
   float newTestReal = 78.2f;
-  material.updateProperty("specular", liquid::Property(newTestVec3));
-  material.updateProperty("diffuse", liquid::Property(newTestReal));
+  material.updateProperty("specular", quoll::Property(newTestVec3));
+  material.updateProperty("diffuse", quoll::Property(newTestReal));
 
   {
     EXPECT_EQ(properties.size(), 2);

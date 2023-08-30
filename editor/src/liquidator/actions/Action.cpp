@@ -1,11 +1,11 @@
 #include "liquid/core/Base.h"
 #include "Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ActionExecutorResult Action::onUndo(WorkspaceState &state,
                                     AssetRegistry &assetRegistry) {
   return {};
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

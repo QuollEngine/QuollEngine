@@ -5,7 +5,7 @@
 #include "liquid/core/SparseSet.h"
 #include "EventObserver.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Event pool
@@ -130,4 +130,4 @@ private:
   std::map<TEvent, SparseSet<EventObserver>> mObservers;
 };
 
-} // namespace liquid
+} // namespace quoll

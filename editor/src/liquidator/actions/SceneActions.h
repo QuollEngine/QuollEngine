@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set starting camera for scene action
@@ -137,4 +137,4 @@ private:
   Entity mPreviousEnvironment = Entity::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -4,7 +4,7 @@
 #include "liquidator/actions/ActionExecutor.h"
 #include "Shortcut.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Shortcuts manager
@@ -33,4 +33,4 @@ private:
   std::vector<std::unique_ptr<ActionCreator>> mActionCreators;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

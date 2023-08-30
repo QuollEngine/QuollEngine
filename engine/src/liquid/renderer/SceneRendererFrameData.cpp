@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "SceneRendererFrameData.h"
 
-namespace liquid {
+namespace quoll {
 
 SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
                                                size_t reservedSpace)
@@ -226,7 +226,7 @@ void SceneRendererFrameData::setDefaultMaterial(rhi::DeviceAddress material) {
 }
 
 void SceneRendererFrameData::addMesh(
-    MeshAssetHandle handle, liquid::Entity entity, const glm::mat4 &transform,
+    MeshAssetHandle handle, quoll::Entity entity, const glm::mat4 &transform,
     const std::vector<rhi::DeviceAddress> &materials) {
   uint32_t start = static_cast<uint32_t>(mFlatMaterials.size());
   for (const auto &material : materials) {
@@ -514,4 +514,4 @@ void SceneRendererFrameData::clear() {
   mSkinnedMeshGroups.clear();
 }
 
-} // namespace liquid
+} // namespace quoll

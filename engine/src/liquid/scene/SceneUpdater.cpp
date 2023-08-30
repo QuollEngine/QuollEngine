@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "SceneUpdater.h"
 
-namespace liquid {
+namespace quoll {
 
 void SceneUpdater::update(EntityDatabase &entityDatabase) {
   LIQUID_PROFILE_EVENT("SceneUpdater::update");
@@ -95,4 +95,4 @@ void SceneUpdater::updateLights(EntityDatabase &entityDatabase) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

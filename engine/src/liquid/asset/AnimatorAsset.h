@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Animation state transition
@@ -61,4 +61,4 @@ struct AnimatorAsset {
   std::vector<AnimationState> states;
 };
 
-} // namespace liquid
+} // namespace quoll

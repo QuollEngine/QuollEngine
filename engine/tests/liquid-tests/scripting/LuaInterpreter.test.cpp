@@ -4,7 +4,7 @@
 
 #include "liquid-tests/Testing.h"
 
-inline std::vector<uint8_t> readFileIntoBuffer(const liquid::Path &fileName) {
+inline std::vector<uint8_t> readFileIntoBuffer(const quoll::Path &fileName) {
   std::ifstream file(fileName);
 
   LIQUID_ASSERT(file.good(), "File cannot be opened");
@@ -20,7 +20,7 @@ inline std::vector<uint8_t> readFileIntoBuffer(const liquid::Path &fileName) {
 
 class LuaInterpreterTest : public ::testing::Test {
 public:
-  liquid::LuaInterpreter interpreter;
+  quoll::LuaInterpreter interpreter;
 };
 
 TEST_F(LuaInterpreterTest, EvaluateScript) {
@@ -34,7 +34,7 @@ TEST_F(LuaInterpreterTest, EvaluateScript) {
 
   lua_getglobal(luaScope, "state");
   EXPECT_TRUE(lua_isstring(luaScope, -1));
-  EXPECT_EQ(liquid::String(lua_tostring(luaScope, -1)), "none");
+  EXPECT_EQ(quoll::String(lua_tostring(luaScope, -1)), "none");
   lua_pop(luaScope, -1);
 
   lua_getglobal(luaScope, "start");
@@ -44,7 +44,7 @@ TEST_F(LuaInterpreterTest, EvaluateScript) {
 
   lua_getglobal(luaScope, "state");
   EXPECT_TRUE(lua_isstring(luaScope, -1));
-  EXPECT_EQ(liquid::String(lua_tostring(luaScope, -1)), "start");
+  EXPECT_EQ(quoll::String(lua_tostring(luaScope, -1)), "start");
   lua_pop(luaScope, -1);
 
   lua_getglobal(luaScope, "update");
@@ -54,7 +54,7 @@ TEST_F(LuaInterpreterTest, EvaluateScript) {
 
   lua_getglobal(luaScope, "state");
   EXPECT_TRUE(lua_isstring(luaScope, -1));
-  EXPECT_EQ(liquid::String(lua_tostring(luaScope, -1)), "update");
+  EXPECT_EQ(quoll::String(lua_tostring(luaScope, -1)), "update");
   lua_pop(luaScope, -1);
 
   interpreter.destroyScope(scope);

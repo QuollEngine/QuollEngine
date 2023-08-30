@@ -12,26 +12,26 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, ExecutorSpawnsEmptyEntityAtView) {
       glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
                   glm::vec3{0.0f, 1.0f, 0.0f});
 
-  liquid::Camera component{};
+  quoll::Camera component{};
   component.viewMatrix = viewMatrix;
   activeScene().entityDatabase.set(camera, component);
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
-  EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
 
   auto entity = res.entitiesToSave.at(0);
 
   EXPECT_EQ(activeScene()
-                .entityDatabase.get<liquid::LocalTransform>(entity)
+                .entityDatabase.get<quoll::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(0.0f, 0.0f, -10.0f));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Name>(entity).name,
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Name>(entity).name,
             "New entity");
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::WorldTransform>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::WorldTransform>(entity));
   EXPECT_TRUE(res.addToHistory);
 }
 
@@ -41,84 +41,84 @@ TEST_P(SpawnEmptyEntityAtViewActionTest, UndoRemovesSpawnedEntity) {
       glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
                   glm::vec3{0.0f, 1.0f, 0.0f});
 
-  liquid::Camera component{};
+  quoll::Camera component{};
   component.viewMatrix = viewMatrix;
   activeScene().entityDatabase.set(camera, component);
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   auto execRes = action.onExecute(state, assetRegistry);
   auto undoRes = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
   EXPECT_EQ(execRes.entitiesToSave.at(0), undoRes.entitiesToDelete.at(0));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Delete>(
       execRes.entitiesToSave.at(0)));
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
   action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
     SpawnEmptyEntityAtViewActionTest,
     UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   auto res = action.onExecute(state, assetRegistry);
 
   auto entity = res.entitiesToSave.at(0);
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     state.selectedEntity = e2;
   }
 
   action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
        UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
   state.selectedEntity = activeScene().entityDatabase.create();
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   action.onExecute(state, assetRegistry);
   action.onUndo(state, assetRegistry);
 
-  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(SpawnEmptyEntityAtViewActionTest,
        PredicateReturnsTrueIfCameraEntityHasCamera) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
@@ -127,7 +127,7 @@ TEST_P(SpawnEmptyEntityAtViewActionTest,
   auto camera = activeScene().entityDatabase.create();
   state.camera = camera;
 
-  liquid::editor::SpawnEmptyEntityAtView action;
+  quoll::editor::SpawnEmptyEntityAtView action;
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -141,28 +141,28 @@ TEST_P(SpawnPrefabAtViewActionTest, ExecutorSpawnsPrefabAtView) {
       glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
                   glm::vec3{0.0f, 1.0f, 0.0f});
 
-  liquid::Camera component{};
+  quoll::Camera component{};
   component.viewMatrix = viewMatrix;
   activeScene().entityDatabase.set(camera, component);
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 3);
-  EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
-  EXPECT_NE(res.entitiesToSave.at(1), liquid::Entity::Null);
-  EXPECT_NE(res.entitiesToSave.at(2), liquid::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(1), quoll::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(2), quoll::Entity::Null);
 
   auto entity = res.entitiesToSave.at(2);
 
   EXPECT_EQ(activeScene()
-                .entityDatabase.get<liquid::LocalTransform>(entity)
+                .entityDatabase.get<quoll::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(0.0f, 0.0f, -10.0f));
   EXPECT_TRUE(res.addToHistory);
@@ -174,17 +174,17 @@ TEST_P(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
       glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
                   glm::vec3{0.0f, 1.0f, 0.0f});
 
-  liquid::Camera component{};
+  quoll::Camera component{};
   component.viewMatrix = viewMatrix;
   activeScene().entityDatabase.set(camera, component);
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
 
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto execRes = action.onExecute(state, assetRegistry);
 
   auto undoRes = action.onUndo(state, assetRegistry);
@@ -196,97 +196,96 @@ TEST_P(SpawnPrefabAtViewActionTest, UndoRemovesRootNode) {
 
   EXPECT_EQ(undoRes.entitiesToDelete.back(), entity);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Delete>(entity));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedRootIsSelected) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
 
   auto entity = res.entitiesToSave.at(0);
   state.selectedEntity = entity;
 
   action.onUndo(state, assetRegistry);
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(SpawnPrefabAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSelectedEntityIsDescendantOfSpawnedRoot) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
 
   state.selectedEntity = res.entitiesToSave.back();
 
   action.onUndo(state, assetRegistry);
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
     SpawnEmptyEntityAtViewActionTest,
     UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotInSpawnedPrefabTree) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   asset.data.transforms.push_back({1});
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   auto res = action.onExecute(state, assetRegistry);
 
-  state.selectedEntity = liquid::Entity{25};
+  state.selectedEntity = quoll::Entity{25};
 
   action.onUndo(state, assetRegistry);
-  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
     SpawnPrefabAtViewActionTest,
     PredicateReturnsTrueIfPrefabAssetExistsAndIsNotEmptyAndCameraEntityHasCamera) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest,
        PredicateReturnsFalseIfPrefabAssetDoesNotExist) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
-  liquid::editor::SpawnPrefabAtView action(liquid::PrefabAssetHandle{15},
-                                           camera);
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
+  quoll::editor::SpawnPrefabAtView action(quoll::PrefabAssetHandle{15}, camera);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnPrefabAtViewActionTest, PredicateReturnsFalseIfPrefabAssetIsEmpty) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -294,11 +293,11 @@ TEST_P(SpawnPrefabAtViewActionTest,
        PredicateReturnsFalseIfCameraEntityHasNoCamera) {
   auto camera = activeScene().entityDatabase.create();
 
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   asset.data.transforms.push_back({0});
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::editor::SpawnPrefabAtView action(prefab, camera);
+  quoll::editor::SpawnPrefabAtView action(prefab, camera);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
@@ -307,9 +306,9 @@ InitActionsTestSuite(EntityActionsTest, SpawnPrefabAtViewActionTest);
 using SpawnSpriteAtViewActionTest = ActionTestBase;
 
 TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
-  liquid::AssetData<liquid::TextureAsset> data{};
+  quoll::AssetData<quoll::TextureAsset> data{};
   data.name = "my-texture";
-  data.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  data.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
@@ -317,83 +316,83 @@ TEST_P(SpawnSpriteAtViewActionTest, ExecutorSpawnsSpriteAtView) {
       glm::lookAt(glm::vec3{0.0f, 0.0f, -20.0f}, glm::vec3{0.0f, 0.0f, 0.0f},
                   glm::vec3{0.0f, 1.0f, 0.0f});
 
-  liquid::Camera component{};
+  quoll::Camera component{};
   component.viewMatrix = viewMatrix;
   activeScene().entityDatabase.set(camera, component);
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
   auto res = action.onExecute(state, assetRegistry);
 
   ASSERT_EQ(res.entitiesToSave.size(), 1);
-  EXPECT_NE(res.entitiesToSave.at(0), liquid::Entity::Null);
+  EXPECT_NE(res.entitiesToSave.at(0), quoll::Entity::Null);
 
   auto entity = res.entitiesToSave.at(0);
 
   EXPECT_EQ(activeScene()
-                .entityDatabase.get<liquid::LocalTransform>(entity)
+                .entityDatabase.get<quoll::LocalTransform>(entity)
                 .localPosition,
             glm::vec3(0.0f, 0.0f, -10.0f));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Name>(entity).name,
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Name>(entity).name,
             "my-texture");
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::WorldTransform>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Sprite>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::WorldTransform>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Sprite>(entity));
 
   EXPECT_TRUE(res.addToHistory);
 }
 
 TEST_P(SpawnSpriteAtViewActionTest, UndoRemovesSpawnedEntity) {
-  liquid::AssetData<liquid::TextureAsset> data{};
-  data.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  quoll::AssetData<quoll::TextureAsset> data{};
+  data.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
   auto execRes = action.onExecute(state, assetRegistry);
   auto undoRes = action.onUndo(state, assetRegistry);
 
   EXPECT_EQ(execRes.entitiesToSave.size(), 1);
   EXPECT_EQ(undoRes.entitiesToDelete.size(), 1);
   EXPECT_EQ(execRes.entitiesToSave.at(0), undoRes.entitiesToDelete.at(0));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Delete>(
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Delete>(
       execRes.entitiesToSave.at(0)));
 }
 
 TEST_P(SpawnSpriteAtViewActionTest,
        UndoSetsSelectedEntityToNullIfSpawnedEntityIsSelected) {
-  liquid::AssetData<liquid::TextureAsset> data{};
-  data.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  quoll::AssetData<quoll::TextureAsset> data{};
+  data.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
   auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
   action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(
     SpawnSpriteAtViewActionTest,
     UndoSetsSelectedEntityToNullIfSelectedEntityIsADescendantOfSpawnedEntity) {
-  liquid::AssetData<liquid::TextureAsset> data{};
-  data.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  quoll::AssetData<quoll::TextureAsset> data{};
+  data.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
   auto res = action.onExecute(state, assetRegistry);
   state.selectedEntity = res.entitiesToSave.at(0);
 
@@ -401,35 +400,35 @@ TEST_P(
 
   {
     auto e1 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e1, {entity});
+    activeScene().entityDatabase.set<quoll::Parent>(e1, {entity});
 
     auto e2 = activeScene().entityDatabase.create();
-    activeScene().entityDatabase.set<liquid::Parent>(e2, {e1});
+    activeScene().entityDatabase.set<quoll::Parent>(e2, {e1});
     state.selectedEntity = e2;
   }
 
   action.onUndo(state, assetRegistry);
 
-  EXPECT_EQ(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_EQ(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(SpawnSpriteAtViewActionTest,
        UndoDoesNotSetSelectedEntityToNullIfSelectedEntityIsNotSpawnedEntity) {
-  liquid::AssetData<liquid::TextureAsset> data{};
-  data.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  quoll::AssetData<quoll::TextureAsset> data{};
+  data.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto textureAsset = assetRegistry.getTextures().addAsset(data);
 
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
   state.selectedEntity = activeScene().entityDatabase.create();
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
   action.onExecute(state, assetRegistry);
   action.onUndo(state, assetRegistry);
 
-  EXPECT_NE(state.selectedEntity, liquid::Entity::Null);
+  EXPECT_NE(state.selectedEntity, quoll::Entity::Null);
 }
 
 TEST_P(SpawnSpriteAtViewActionTest,
@@ -437,10 +436,10 @@ TEST_P(SpawnSpriteAtViewActionTest,
   auto textureAsset = assetRegistry.getTextures().addAsset({});
 
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
@@ -452,18 +451,18 @@ TEST_P(SpawnSpriteAtViewActionTest,
   auto camera = activeScene().entityDatabase.create();
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(textureAsset, camera);
+  quoll::editor::SpawnSpriteAtView action(textureAsset, camera);
 
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(SpawnSpriteAtViewActionTest, PredicateReturnsFalseIfAssetDoesNotExist) {
   auto camera = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Camera>(camera, {});
+  activeScene().entityDatabase.set<quoll::Camera>(camera, {});
   state.camera = camera;
 
-  liquid::editor::SpawnSpriteAtView action(liquid::TextureAssetHandle{45},
-                                           camera);
+  quoll::editor::SpawnSpriteAtView action(quoll::TextureAssetHandle{45},
+                                          camera);
 
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }

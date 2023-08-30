@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Scene view widget
@@ -41,4 +41,4 @@ private:
   bool mExpanded = false;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

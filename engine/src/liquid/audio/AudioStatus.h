@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Audio status component
@@ -12,4 +12,4 @@ struct AudioStatus {
   void *instance = nullptr;
 };
 
-} // namespace liquid
+} // namespace quoll

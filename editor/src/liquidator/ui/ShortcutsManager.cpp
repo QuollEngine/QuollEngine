@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "ShortcutsManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void ShortcutsManager::add(Shortcut shortcut, ActionCreator *actionCreator) {
   mShortcuts.push_back(shortcut);
@@ -20,4 +20,4 @@ void ShortcutsManager::process(int key, int mods,
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

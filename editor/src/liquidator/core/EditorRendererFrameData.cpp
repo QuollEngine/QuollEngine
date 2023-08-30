@@ -3,7 +3,7 @@
 
 #include "liquid/renderer/MeshRenderUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static constexpr size_t MaxNumJoints = 32;
 
@@ -330,4 +330,4 @@ void EditorRendererFrameData::createBindlessParamsRange() {
       mOutlineTextGlyphsBuffer.getAddress()});
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

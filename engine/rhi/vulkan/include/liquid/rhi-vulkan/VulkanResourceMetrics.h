@@ -4,7 +4,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanDescriptorPool.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan resource metrics
@@ -53,4 +53,4 @@ private:
   VulkanDescriptorPool &mDescriptorPool;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

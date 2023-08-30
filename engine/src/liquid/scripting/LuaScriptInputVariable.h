@@ -3,7 +3,7 @@
 #include "liquid/asset/Asset.h"
 #include "liquid/asset/LuaScriptAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Lua script input variable value
@@ -60,4 +60,4 @@ private:
   std::variant<String, PrefabAssetHandle, TextureAssetHandle> mValue;
 };
 
-} // namespace liquid
+} // namespace quoll

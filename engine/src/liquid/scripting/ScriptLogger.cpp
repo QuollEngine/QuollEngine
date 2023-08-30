@@ -5,7 +5,7 @@
 #include "LuaMessages.h"
 #include "ScriptLogger.h"
 
-namespace liquid {
+namespace quoll {
 
 void createScriptLogger(LuaScope &scope) {
   auto logTable = scope.createTable(1);
@@ -78,4 +78,4 @@ void createScriptLogger(LuaScope &scope) {
   });
 }
 
-} // namespace liquid
+} // namespace quoll

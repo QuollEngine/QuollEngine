@@ -2,7 +2,7 @@
 
 #include "EntityPanel.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Inspector panel
@@ -39,4 +39,4 @@ private:
   std::vector<Tab> mTabs;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "CameraAspectRatioUpdater.h"
 
-namespace liquid {
+namespace quoll {
 
 CameraAspectRatioUpdater::CameraAspectRatioUpdater(Window &window)
     : mWindow(window) {}
@@ -19,4 +19,4 @@ void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

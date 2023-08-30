@@ -2,7 +2,7 @@
 
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Skeleton updater
@@ -34,4 +34,4 @@ private:
   void updateDebugBones(EntityDatabase &entityDatabase);
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -66,11 +66,11 @@ for (name, code) in icons:
 
 fileContents = """#pragma once
 
-namespace liquidator::fa {
+namespace quollator::fa {
 
 $ICONS
 
-} // namespace liquidator::fa
+} // namespace quollator::fa
 """.replace('$ICONS', '\n'.join(lines))
 
 with open(FA_HEADER_FILE, 'w') as f:

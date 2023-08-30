@@ -2,7 +2,7 @@
 
 #include "liquidator/project/Project.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Game exporter
@@ -18,4 +18,4 @@ public:
   void exportGame(const Project &project, const Path &destination);
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

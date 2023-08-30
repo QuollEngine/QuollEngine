@@ -3,7 +3,7 @@
 #include "liquid/rhi/Buffer.h"
 #include "liquid/rhi/NativeBuffer.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 Buffer::Buffer(BufferHandle handle, NativeBuffer *nativeBuffer)
     : mHandle(handle), mNativeBuffer(nativeBuffer) {}
@@ -20,4 +20,4 @@ void Buffer::update(const void *data, size_t size) {
 
 void Buffer::resize(size_t size) { mNativeBuffer->resize(size); }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

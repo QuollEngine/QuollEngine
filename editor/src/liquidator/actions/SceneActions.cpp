@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "SceneActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 SceneSetStartingCamera::SceneSetStartingCamera(Entity entity)
     : mEntity(entity) {}
@@ -118,4 +118,4 @@ bool SceneRemoveStartingEnvironment::predicate(WorkspaceState &state,
   return scene.activeEnvironment != scene.dummyEnvironment;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

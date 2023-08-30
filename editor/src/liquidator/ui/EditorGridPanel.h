@@ -3,7 +3,7 @@
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Editor grid panel component
@@ -22,4 +22,4 @@ private:
   bool mOpen = false;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

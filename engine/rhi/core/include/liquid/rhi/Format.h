@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum Format {
   Undefined = 0,
@@ -17,4 +17,4 @@ enum Format {
   Depth32FloatStencil8Uint
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

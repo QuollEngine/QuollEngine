@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set audio for entity action
@@ -104,4 +104,4 @@ private:
 
 using EntityDeleteAudio = EntityDefaultDeleteAction<AudioSource>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

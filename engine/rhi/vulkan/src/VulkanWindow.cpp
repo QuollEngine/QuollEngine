@@ -7,7 +7,7 @@
 
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window) {
   VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -26,4 +26,4 @@ VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window) {
   return surface;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

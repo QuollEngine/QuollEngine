@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Swappable vector
@@ -145,4 +145,4 @@ private:
   std::vector<TItem> mBuffer;
 };
 
-} // namespace liquid
+} // namespace quoll

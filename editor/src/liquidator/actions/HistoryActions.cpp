@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "HistoryActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Undo::Undo(ActionExecutor &actionExecutor) : mActionExecutor(actionExecutor) {}
 
@@ -27,4 +27,4 @@ bool Redo::predicate(WorkspaceState &state, AssetRegistry &assetRegistry) {
   return !mActionExecutor.getRedoStack().empty();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

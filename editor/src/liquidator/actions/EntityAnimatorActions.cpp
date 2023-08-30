@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityAnimatorActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntityCreateAnimator::EntityCreateAnimator(Entity entity,
                                            AnimatorAssetHandle handle)
@@ -65,4 +65,4 @@ bool EntitySetAnimator::predicate(WorkspaceState &state,
   return assetRegistry.getAnimators().hasAsset(mAnimator);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

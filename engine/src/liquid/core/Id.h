@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief ID component
@@ -12,4 +12,4 @@ struct Id {
   uint64_t id = 0;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 /**
  * @brief Platform window utilities
@@ -17,4 +17,4 @@ public:
   static void enableDarkMode(GLFWwindow *window);
 };
 
-} // namespace liquid::platform
+} // namespace quoll::platform

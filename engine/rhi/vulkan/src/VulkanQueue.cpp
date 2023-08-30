@@ -3,7 +3,7 @@
 
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanQueue::VulkanQueue(VulkanDeviceObject &device, uint32_t queueIndex)
     : mQueueIndex(queueIndex) {
@@ -35,4 +35,4 @@ void VulkanQueue::submit(
 
 void VulkanQueue::waitForIdle() { vkQueueWaitIdle(mQueue); }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

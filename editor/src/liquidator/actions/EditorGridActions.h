@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set grid lines action
@@ -96,4 +96,4 @@ private:
   bool mShow = false;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

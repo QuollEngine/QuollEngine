@@ -5,7 +5,7 @@
 #include "VulkanRenderContext.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
                                          VulkanCommandPool &pool,
@@ -100,4 +100,4 @@ void VulkanRenderContext::endRendering(VulkanFrameManager &frameManager) {
                         waitSemaphoreInfos, signalSemaphoreInfos);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

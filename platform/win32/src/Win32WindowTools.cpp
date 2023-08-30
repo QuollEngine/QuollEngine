@@ -9,7 +9,7 @@
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 void WindowUtils::enableDarkMode(GLFWwindow *window) {
   HWND hWnd = glfwGetWin32Window(window);
@@ -18,4 +18,4 @@ void WindowUtils::enableDarkMode(GLFWwindow *window) {
                           sizeof(value));
 }
 
-} // namespace liquid::platform
+} // namespace quoll::platform

@@ -13,7 +13,7 @@
 
 #include "VulkanHeaders.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan mapper
@@ -212,4 +212,4 @@ public:
   static ShaderStage getShaderStage(VkShaderStageFlags stageFlags);
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

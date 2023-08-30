@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class ThemeColor {
   White,
@@ -102,4 +102,4 @@ public:
   static const ThemeStyles &getStyles();
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

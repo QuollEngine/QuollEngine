@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 class VulkanBuffer;
 class VulkanTexture;
@@ -250,4 +250,4 @@ private:
   PipelineMap mPipelines;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

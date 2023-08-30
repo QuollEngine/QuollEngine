@@ -1,10 +1,10 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Audio start component
  */
 struct AudioStart {};
 
-} // namespace liquid
+} // namespace quoll

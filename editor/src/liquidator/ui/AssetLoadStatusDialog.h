@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Asset loading status dialog component
@@ -51,4 +51,4 @@ private:
   std::vector<String> mMessages;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -2,7 +2,7 @@
 #include "LuaHeaders.h"
 #include "LuaTable.h"
 
-namespace liquid {
+namespace quoll {
 
 LuaTable::LuaTable(void *scope, int32_t index) : mScope(scope), mIndex(index) {}
 
@@ -32,4 +32,4 @@ void LuaTable::get(const char *key) {
   lua_getfield(static_cast<lua_State *>(mScope), mIndex, key);
 }
 
-} // namespace liquid
+} // namespace quoll

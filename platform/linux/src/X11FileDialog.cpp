@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "liquid/platform/tools/FileDialog.h"
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 Path FileDialog::getFilePathFromDialog(
     const std::vector<FileTypeEntry> &fileTypes) {
@@ -15,4 +15,4 @@ Path FileDialog::getFilePathFromCreateDialog(
   return "";
 }
 
-} // namespace liquid::platform
+} // namespace quoll::platform

@@ -7,7 +7,7 @@
 #include "EntitySpawner.h"
 #include "EntitySpawnerScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Check if prefab is empty
@@ -113,4 +113,4 @@ int EntitySpawnerScriptingInterface::LuaInterface::spawnSprite(void *state) {
   return 1;
 }
 
-} // namespace liquid
+} // namespace quoll

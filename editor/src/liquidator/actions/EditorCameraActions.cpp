@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EditorCameraActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 MoveCameraToEntity::MoveCameraToEntity(Entity entity) : mEntity(entity) {}
 
@@ -30,4 +30,4 @@ bool MoveCameraToEntity::predicate(WorkspaceState &state,
   return true;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

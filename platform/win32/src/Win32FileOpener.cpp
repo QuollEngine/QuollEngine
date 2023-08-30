@@ -3,10 +3,10 @@
 #include <windows.h>
 #include <shellapi.h>
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 void FileOpener::openFile(const Path &path) {
   ShellExecuteA(NULL, "Open", path.string().c_str(), NULL, NULL, SW_SHOW);
 }
 
-} // namespace liquid::platform
+} // namespace quoll::platform

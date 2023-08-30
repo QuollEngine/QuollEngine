@@ -12,7 +12,7 @@ public:
 };
 
 TEST_F(AssetCacheSceneTest, CreatesSceneFromSource) {
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
   auto filePath =
       cache.createSceneFromSource(FixturesPath / "test.scene", uuid);
   EXPECT_TRUE(filePath.hasData());
@@ -23,7 +23,7 @@ TEST_F(AssetCacheSceneTest, CreatesSceneFromSource) {
 
   auto meta = cache.getAssetMeta(uuid);
 
-  EXPECT_EQ(meta.type, liquid::AssetType::Scene);
+  EXPECT_EQ(meta.type, quoll::AssetType::Scene);
   EXPECT_EQ(meta.name, "test.scene");
 }
 
@@ -35,7 +35,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfTypeIsInvalid) {
   node["zones"] = YAML::Node(YAML::NodeType::Sequence);
   node["entities"] = YAML::Node(YAML::NodeType::Sequence);
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
 
   std::ofstream stream(cache.getPathFromUuid(uuid));
   stream << node;
@@ -55,7 +55,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfVersionIsInvalid) {
   node["zones"] = YAML::Node(YAML::NodeType::Sequence);
   node["entities"] = YAML::Node(YAML::NodeType::Sequence);
 
-  auto uuid = liquid::Uuid::generate();
+  auto uuid = quoll::Uuid::generate();
 
   std::ofstream stream(cache.getPathFromUuid(uuid));
 
@@ -83,7 +83,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfZonesFieldIsNotSequence) {
     node["entities"] = YAML::Node(YAML::NodeType::Sequence);
     node["zones"] = invNode;
 
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
 
     std::ofstream stream(cache.getPathFromUuid(uuid));
 
@@ -112,7 +112,7 @@ TEST_F(AssetCacheSceneTest, LoadSceneFailsIfEntitiesFieldIsNotSequence) {
     node["zones"] = YAML::Node(YAML::NodeType::Sequence);
     node["entities"] = invNode;
 
-    auto uuid = liquid::Uuid::generate();
+    auto uuid = quoll::Uuid::generate();
 
     std::ofstream stream(cache.getPathFromUuid(uuid));
     stream << node;

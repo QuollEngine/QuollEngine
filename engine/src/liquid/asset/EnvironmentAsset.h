@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Environment asset
@@ -17,4 +17,4 @@ struct EnvironmentAsset {
   TextureAssetHandle specularMap = TextureAssetHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

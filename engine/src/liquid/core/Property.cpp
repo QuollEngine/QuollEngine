@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "Property.h"
 
-namespace liquid {
+namespace quoll {
 
 Property::Property(int32_t value) : mType(INT32), mValue(value) {}
 Property::Property(uint32_t value) : mType(UINT32), mValue(value) {}
@@ -99,4 +99,4 @@ const String Property::toString() const {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

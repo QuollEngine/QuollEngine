@@ -2,7 +2,7 @@
 
 #include "RenderDevice.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Render backend
@@ -32,4 +32,4 @@ public:
   virtual RenderDevice *createDefaultDevice() = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -2,7 +2,7 @@
 #include "EntityCameraActions.h"
 #include "EntityScriptingActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntityCreateScript::EntityCreateScript(Entity entity,
                                        LuaScriptAssetHandle handle)
@@ -138,4 +138,4 @@ void EntitySetScriptVariable::setValue(LuaScriptInputVariable value) {
   mValue = value;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

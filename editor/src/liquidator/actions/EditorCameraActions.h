@@ -5,7 +5,7 @@
 
 #include <glm/gtc/matrix_access.hpp>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Move camera to entity action
@@ -43,4 +43,4 @@ private:
   Entity mEntity;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -2,7 +2,7 @@
 #include "MockRenderDevice.h"
 #include "MockResourceMetrics.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 MockRenderDevice::MockRenderDevice() : mDeviceStats(new MockResourceMetrics) {
   for (auto i = 0; i < NumFrames; ++i) {
@@ -176,4 +176,4 @@ const MockPipeline &MockRenderDevice::getPipeline(PipelineHandle handle) const {
   return mPipelines.at(handle);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

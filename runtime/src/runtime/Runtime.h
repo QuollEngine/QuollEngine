@@ -2,7 +2,7 @@
 
 #include "LaunchConfig.h"
 
-namespace liquid::runtime {
+namespace quoll::runtime {
 
 /**
  * @brief Runtime wrapper
@@ -27,4 +27,4 @@ private:
   LaunchConfig mConfig;
 };
 
-} // namespace liquid::runtime
+} // namespace quoll::runtime

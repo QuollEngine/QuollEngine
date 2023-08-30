@@ -4,7 +4,7 @@
 
 struct GLFWwindow;
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief GLFW Window
@@ -151,4 +151,4 @@ private:
   HandlerMap<void(bool)> mFocusHandlers;
 };
 
-} // namespace liquid
+} // namespace quoll

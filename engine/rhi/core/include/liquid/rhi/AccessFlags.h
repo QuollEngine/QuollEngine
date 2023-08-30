@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class Access : uint64_t {
   None = 0,
@@ -28,4 +28,4 @@ enum class Access : uint64_t {
 
 EnableBitwiseEnum(Access)
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

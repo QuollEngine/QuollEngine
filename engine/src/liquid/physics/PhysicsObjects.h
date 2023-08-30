@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Describes material attached to a shape
@@ -92,8 +92,8 @@ struct PhysicsGeometryBox {
 };
 
 using PhysicsGeometryParams =
-    std::variant<liquid::PhysicsGeometryBox, liquid::PhysicsGeometrySphere,
-                 liquid::PhysicsGeometryCapsule, liquid::PhysicsGeometryPlane>;
+    std::variant<quoll::PhysicsGeometryBox, quoll::PhysicsGeometrySphere,
+                 quoll::PhysicsGeometryCapsule, quoll::PhysicsGeometryPlane>;
 
 /**
  * @brief Describes geometry
@@ -130,4 +130,4 @@ struct PhysicsDynamicRigidBodyDesc {
   bool applyGravity = true;
 };
 
-} // namespace liquid
+} // namespace quoll

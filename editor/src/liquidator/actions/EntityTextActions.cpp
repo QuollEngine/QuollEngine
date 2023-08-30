@@ -1,8 +1,8 @@
 #include "liquid/core/Base.h"
 #include "EntityTextActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 // Do nothing
 
-} // namespace liquid::editor
+} // namespace quoll::editor

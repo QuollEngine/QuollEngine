@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "RenderGraphSyncDependency.h"
 
-namespace liquid {
+namespace quoll {
 
 RenderGraphTextureSyncDependency
 RenderGraphSyncDependency::getTextureRead(RenderGraphPassType type) {
@@ -83,4 +83,4 @@ RenderGraphSyncDependency::getBufferRead(RenderGraphPassType type,
   return {stage, access};
 }
 
-} // namespace liquid
+} // namespace quoll

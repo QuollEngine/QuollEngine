@@ -6,7 +6,7 @@
 
 #include <meshoptimizer.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Generate normals from vertex positions
@@ -490,4 +490,4 @@ void loadMeshes(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -3,7 +3,7 @@
 #include "VulkanBuffer.h"
 #include "VulkanTexture.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanResourceMetrics::VulkanResourceMetrics(
     VulkanResourceRegistry &registry, VulkanDescriptorPool &descriptorPool)
@@ -31,4 +31,4 @@ size_t VulkanResourceMetrics::getDescriptorsCount() const {
   return mDescriptorPool.getDescriptorsCount();
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

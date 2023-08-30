@@ -4,7 +4,7 @@
 #include "VulkanValidator.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanValidator::VulkanValidator() {
   mMessengerCreateInfo.sType =
@@ -132,4 +132,4 @@ bool VulkanValidator::checkValidationSupport() {
   return true;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

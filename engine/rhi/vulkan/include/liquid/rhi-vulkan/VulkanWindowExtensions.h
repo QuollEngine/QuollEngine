@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 extern const std::vector<String> vulkanWindowExtensions;
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

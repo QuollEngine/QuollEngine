@@ -2,7 +2,7 @@
 #include "MiniAudio.h"
 #include "MiniAudioBackend.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Miniaudio sound interface
@@ -134,4 +134,4 @@ bool MiniAudioBackend::isPlaying(void *instance) {
   return mImpl->isPlaying(static_cast<MiniAudioSoundInstance *>(instance));
 }
 
-} // namespace liquid
+} // namespace quoll

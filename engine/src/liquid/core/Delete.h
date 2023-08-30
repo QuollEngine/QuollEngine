@@ -1,10 +1,10 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Delete component
  */
 struct Delete {};
 
-} // namespace liquid
+} // namespace quoll

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Parent component
@@ -15,4 +15,4 @@ struct Parent {
   Entity parent = Entity::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

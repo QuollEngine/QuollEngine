@@ -10,25 +10,25 @@ using EntityToggleSkeletonDebugBonesActionTest = ActionTestBase;
 TEST_P(EntityToggleSkeletonDebugBonesActionTest,
        ExecutorSetsDebugBonesForEntityIfNoDebugBones) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
 
-  liquid::editor::EntityToggleSkeletonDebugBones action(entity);
+  quoll::editor::EntityToggleSkeletonDebugBones action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkeletonDebug>(entity));
   EXPECT_TRUE(res.entitiesToSave.empty());
 }
 
 TEST_P(EntityToggleSkeletonDebugBonesActionTest,
        ExecutorRemovesDebugBonesForEntityIfHasDebugBones) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
-  activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
-  liquid::editor::EntityToggleSkeletonDebugBones action(entity);
+  quoll::editor::EntityToggleSkeletonDebugBones action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkeletonDebug>(entity));
   EXPECT_TRUE(res.entitiesToSave.empty());
 }
 
@@ -36,16 +36,16 @@ TEST_P(EntityToggleSkeletonDebugBonesActionTest,
        PredicateReturnsFalseIfEntityHasNoSkeleton) {
   auto entity = activeScene().entityDatabase.create();
 
-  liquid::editor::EntityToggleSkeletonDebugBones action(entity);
+  quoll::editor::EntityToggleSkeletonDebugBones action(entity);
   EXPECT_FALSE(action.predicate(state, assetRegistry));
 }
 
 TEST_P(EntityToggleSkeletonDebugBonesActionTest,
        PredicateReturnsTrueIfEntityHasSkeleton) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
 
-  liquid::editor::EntityToggleSkeletonDebugBones action(entity);
+  quoll::editor::EntityToggleSkeletonDebugBones action(entity);
   EXPECT_TRUE(action.predicate(state, assetRegistry));
 }
 
@@ -60,14 +60,14 @@ InitDefaultDeleteComponentTests(EntityDeleteSkeletonActionTest,
 TEST_P(EntityDeleteSkeletonActionTest,
        ExecutorDeletesSkeletonDebugComponentFromEntity) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
-  activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
-  liquid::editor::EntityDeleteSkeleton action(entity);
+  quoll::editor::EntityDeleteSkeleton action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Skeleton>(entity));
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Skeleton>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -76,13 +76,13 @@ TEST_P(
     EntityDeleteSkeletonActionTest,
     UndoDoesNotCreateSkeletonDebugComponentForEntityIfItDidNotExistDuringExecution) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
 
-  liquid::editor::EntityDeleteSkeleton action(entity);
+  quoll::editor::EntityDeleteSkeleton action(entity);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -90,15 +90,15 @@ TEST_P(
 TEST_P(EntityDeleteSkeletonActionTest,
        UndoCretesSkeletonDebugComponentForEntityIfItExistedDuringExecution) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::Skeleton>(entity, {});
-  activeScene().entityDatabase.set<liquid::SkeletonDebug>(entity, {});
+  activeScene().entityDatabase.set<quoll::Skeleton>(entity, {});
+  activeScene().entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
-  liquid::editor::EntityDeleteSkeleton action(entity);
+  quoll::editor::EntityDeleteSkeleton action(entity);
   action.onExecute(state, assetRegistry);
 
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkeletonDebug>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkeletonDebug>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }

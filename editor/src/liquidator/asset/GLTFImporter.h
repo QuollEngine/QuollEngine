@@ -4,7 +4,7 @@
 #include "gltf/GLTFImportData.h"
 #include "ImageLoader.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief GLTF importer
@@ -48,4 +48,4 @@ private:
   bool mOptimize = false;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "LuaScriptInputVariable.h"
 
-namespace liquid {
+namespace quoll {
 
 LuaScriptInputVariable::LuaScriptInputVariable(String value)
     : mValue(value), mType(LuaScriptVariableType::String) {}
@@ -12,4 +12,4 @@ LuaScriptInputVariable::LuaScriptInputVariable(PrefabAssetHandle value)
 LuaScriptInputVariable::LuaScriptInputVariable(TextureAssetHandle value)
     : mValue(value), mType(LuaScriptVariableType::AssetTexture) {}
 
-} // namespace liquid
+} // namespace quoll

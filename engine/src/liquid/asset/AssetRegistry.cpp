@@ -5,7 +5,7 @@
 #include "AssetRegistry.h"
 #include "DefaultObjects.h"
 
-namespace liquid {
+namespace quoll {
 
 void AssetRegistry::createDefaultObjects() {
   auto mesh = default_objects::createCube();
@@ -78,7 +78,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
   for (auto &[_, asset] : mMaterials.getAssets()) {
     auto &material = asset.data;
     if (!material.deviceHandle) {
-      liquid::MaterialPBR::Properties properties{};
+      quoll::MaterialPBR::Properties properties{};
 
       properties.baseColorFactor = material.baseColorFactor;
       properties.baseColorTexture =
@@ -262,4 +262,4 @@ std::pair<AssetType, uint32_t> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
   return {AssetType::None, 0};
 }
 
-} // namespace liquid
+} // namespace quoll

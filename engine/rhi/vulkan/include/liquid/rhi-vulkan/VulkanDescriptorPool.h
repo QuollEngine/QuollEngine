@@ -6,7 +6,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanPipelineLayoutCache.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan descriptor pool
@@ -88,4 +88,4 @@ private:
       mDescriptorLayoutMap;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -2,7 +2,7 @@
 
 #include "RenderGraphPass.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Render graph texture sync dependency
@@ -83,4 +83,4 @@ public:
   getBufferWrite(RenderGraphPassType type);
 };
 
-} // namespace liquid
+} // namespace quoll
