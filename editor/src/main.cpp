@@ -2,8 +2,8 @@
 #include "quoll/core/Engine.h"
 
 #include "quoll/rhi-vulkan/VulkanRenderBackend.h"
-#include "liquidator/screens/EditorScreen.h"
-#include "liquidator/screens/ProjectSelectorScreen.h"
+#include "quoll/editor/screens/EditorScreen.h"
+#include "quoll/editor/screens/ProjectSelectorScreen.h"
 
 int main() {
   static constexpr uint32_t InitialWidth = 1024;
