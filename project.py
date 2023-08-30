@@ -27,7 +27,7 @@ buildModes = ['Debug', 'Release']
 
 profiler_data = {}
 
-parser = argparse.ArgumentParser(description='Liquid project dependency manager')
+parser = argparse.ArgumentParser(description='Quoll project dependency manager')
 
 parser.add_argument('-m', '--mode', nargs='+', help='Mode', choices=['debug', 'release'], default=['debug', 'release'])
 parser.add_argument('-p', '--packages', help='Specify which package to install', nargs='+', default=None)

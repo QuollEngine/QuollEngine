@@ -12,7 +12,7 @@ namespace quoll {
  */
 class Logger {
 public:
-#if defined(LIQUID_DEBUG)
+#if defined(QUOLL_DEBUG)
   /**
    * @brief Default severity
    *

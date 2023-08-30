@@ -27,12 +27,12 @@ Result<AssetFileHeader> AssetCache::checkAssetFile(InputBinaryStream &file,
   file.read(header);
 
   if (header.magic != AssetFileHeader::MagicConstant) {
-    return Result<AssetFileHeader>::Error(
-        "Opened file is not a liquid asset: " + filePath.string());
+    return Result<AssetFileHeader>::Error("Opened file is not a quoll asset: " +
+                                          filePath.string());
   }
 
   if (assetType != AssetType::None && header.type != assetType) {
-    return Result<AssetFileHeader>::Error("Opened file is not a liquid " +
+    return Result<AssetFileHeader>::Error("Opened file is not a quoll " +
                                           getAssetTypeString(assetType) +
                                           " asset: " + filePath.string());
   }
@@ -41,7 +41,7 @@ Result<AssetFileHeader> AssetCache::checkAssetFile(InputBinaryStream &file,
 }
 
 Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
-  LIQUID_PROFILE_EVENT("AssetCache::preloadAssets");
+  QUOLL_PROFILE_EVENT("AssetCache::preloadAssets");
   std::vector<String> warnings;
 
   for (const auto &entry :
@@ -101,7 +101,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
     }
   }
 
-  // Handle files that are not in liquid format
+  // Handle files that are not in quoll format
   auto meta = getAssetMeta(uuid);
 
   if (meta.type == AssetType::Texture) {
@@ -163,7 +163,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   stream.read(header);
 
   if (header.magic != AssetFileHeader::MagicConstant) {
-    return Result<bool>::Error("Not a liquid asset: " + path.stem().string());
+    return Result<bool>::Error("Not a quoll asset: " + path.stem().string());
   }
 
   if (header.type == AssetType::Material) {

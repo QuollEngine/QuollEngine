@@ -23,7 +23,7 @@ Workspace::Workspace(Project project, AssetManager &assetManager,
   io.IniFilename = mLayoutPath.c_str();
   ImGui::LoadIniSettingsFromDisk(io.IniFilename);
 
-  auto statePath = project.settingsPath / "state.lqstate";
+  auto statePath = project.settingsPath / "default.state";
 
   mState.scene.entityDatabase.reg<CameraLookAt>();
   mState.camera =
@@ -41,7 +41,7 @@ Workspace::~Workspace() {
   ImGui::SaveIniSettingsToDisk(io.IniFilename);
   io.IniFilename = nullptr;
   WorkspaceIO::saveWorkspaceState(mState, mState.project.settingsPath /
-                                              "state.lqstate");
+                                              "default.state");
 }
 
 void Workspace::renderLayout() {

@@ -84,7 +84,7 @@ private:
 };
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#if defined(LIQUID_DEBUG)
+#if defined(QUOLL_DEBUG)
 #define LOG_DEBUG(stream) quoll::Engine::getLogger().debug() << stream
 #else
 #define LOG_DEBUG(_)                                                           \

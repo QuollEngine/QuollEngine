@@ -155,8 +155,8 @@ void VulkanSwapchain::pickMostSuitableSurfaceFormat(
                surfaceFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
       });
 
-  LIQUID_ASSERT(it != surfaceFormats.end(),
-                "Most suitable surface format not found");
+  QuollAssert(it != surfaceFormats.end(),
+              "Most suitable surface format not found");
 
   mSurfaceFormat = it != surfaceFormats.end() ? *it : surfaceFormats[0];
 }
@@ -207,7 +207,7 @@ VkCompositeAlphaFlagBitsKHR VulkanSwapchain::getSuitableCompositeAlpha(
 
 uint32_t
 VulkanSwapchain::acquireNextImage(VkSemaphore imageAvailableSemaphore) {
-  LIQUID_PROFILE_EVENT("VulkanSwapchain::acquireNextImage");
+  QUOLL_PROFILE_EVENT("VulkanSwapchain::acquireNextImage");
   uint32_t imageIndex = 0;
   VkResult result = vkAcquireNextImageKHR(
       mDevice, mSwapchain, std::numeric_limits<uint64_t>::max(),

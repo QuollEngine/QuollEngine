@@ -33,7 +33,7 @@ function copyEngineAssets()
     }
 end
 
-project "LiquidEngine"
+project "QuollEngine"
     basedir "../workspace/engine"
     kind "StaticLib"
 
@@ -48,7 +48,7 @@ project "LiquidEngine"
     loadSourceFiles{}
     linkDependenciesWith{}
 
-project "LiquidEngineTest"
+project "QuollEngineTest"
     basedir "../workspace/engine-test"
     kind "ConsoleApp"
 
@@ -67,7 +67,7 @@ project "LiquidEngineTest"
         "tests/**.h"
     }
 
-    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore"}
+    linkDependenciesWith{"QuollEngine", "QuollRHIMock", "QuollRHICore"}
     linkGoogleTest{}
 
     postbuildcommands {

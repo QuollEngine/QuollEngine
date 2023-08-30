@@ -2,17 +2,17 @@
 function setupPlatformDefines()
     filter { "system:windows" }
         defines {
-            "LIQUID_PLATFORM_WINDOWS"
+            "QUOLL_PLATFORM_WINDOWS"
         }
 
     filter { "system:macosx" }
         defines {
-            "LIQUID_PLATFORM_MACOS"
+            "QUOLL_PLATFORM_MACOS"
         }
 
     filter { "system:linux" }
         defines {
-            "LIQUID_PLATFORM_LINUX"
+            "QUOLL_PLATFORM_LINUX"
         }
 
     filter{}

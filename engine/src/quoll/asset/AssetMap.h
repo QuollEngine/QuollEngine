@@ -40,8 +40,7 @@ public:
    * @param data Asset data
    */
   void updateAsset(THandle handle, const AssetData<TData> &data) {
-    LIQUID_ASSERT(mAssets.find(handle) != mAssets.end(),
-                  "Asset does not exist");
+    QuollAssert(mAssets.find(handle) != mAssets.end(), "Asset does not exist");
     mAssets.at(handle) = data;
   }
 

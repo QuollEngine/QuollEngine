@@ -52,9 +52,9 @@ DeviceAddress VulkanBuffer::getAddress() {
 }
 
 void VulkanBuffer::createBuffer(const BufferDescription &description) {
-  LIQUID_ASSERT(description.size > 0,
-                "Cannot create \"" + description.debugName +
-                    "\" buffer because buffer size is zero.");
+  QuollAssert(description.size > 0,
+              "Cannot create \"" + description.debugName +
+                  "\" buffer because buffer size is zero.");
 
   mSize = description.size;
   mUsage = description.usage;
@@ -99,7 +99,7 @@ void VulkanBuffer::createBuffer(const BufferDescription &description) {
     bufferUsage |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
   }
 
-  LIQUID_ASSERT(bufferUsage != 0, "Buffer usage cannot be empty");
+  QuollAssert(bufferUsage != 0, "Buffer usage cannot be empty");
 
   VkBufferCreateInfo createBufferInfo{};
   createBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

@@ -12,7 +12,8 @@ int main() {
   quoll::Engine::setPath(std::filesystem::current_path() / "engine");
 
   quoll::EventSystem eventSystem;
-  quoll::Window window("Liquidator", InitialWidth, InitialHeight, eventSystem);
+  quoll::Window window("Quoll Engine", InitialWidth, InitialHeight,
+                       eventSystem);
 
   quoll::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();

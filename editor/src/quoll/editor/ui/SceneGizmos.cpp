@@ -36,9 +36,9 @@ calculateLocalTransformFromWorld(WorkspaceState &state, Entity entity,
 
   Entity parent = entityDatabase.get<Parent>(entity).parent;
 
-  LIQUID_ASSERT(entityDatabase.exists(parent) &&
-                    entityDatabase.has<WorldTransform>(parent),
-                "Parent entity does not exist or has no transform");
+  QuollAssert(entityDatabase.exists(parent) &&
+                  entityDatabase.has<WorldTransform>(parent),
+              "Parent entity does not exist or has no transform");
 
   const auto &parentWorld =
       entityDatabase.get<WorldTransform>(parent).worldTransform;

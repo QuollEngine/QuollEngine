@@ -88,7 +88,7 @@ public:
    * @return Begin iterator
    */
   Iterator begin() {
-    LIQUID_ASSERT(mPool != nullptr, "Observer is not initialized");
+    QuollAssert(mPool != nullptr, "Observer is not initialized");
 
     return Iterator(0, mPool);
   }

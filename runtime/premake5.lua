@@ -2,16 +2,16 @@ function copyRuntime()
   -- Make sure that runtime is built
   -- before it can be copied to current
   -- project
-  links { "LiquidRuntime" }
+  links { "QuollRuntime" }
 
-  runtimeTargetName = 'LiquidRuntime';
+  runtimeTargetName = 'QuollRuntime';
   runtimeTargetLocationRelativeToProjects = '../../workspace/runtime';
   postbuildcommands {
     "{COPYFILE} "..runtimeTargetLocationRelativeToProjects.."/bin/%{cfg.buildcfg}/"..getTargetExtension(runtimeTargetName).." %{cfg.buildtarget.directory}/"
   }
 end
 
-project "LiquidRuntime"
+project "QuollRuntime"
     basedir "../workspace/runtime"
     kind "ConsoleApp"
 
@@ -20,7 +20,7 @@ project "LiquidRuntime"
     }
 
     loadSourceFiles{}
-    linkDependenciesWith{"LiquidEngine"}
+    linkDependenciesWith{"QuollEngine"}
     linkVulkanRHI{}
     linkOptick{}
     linkPlatform()

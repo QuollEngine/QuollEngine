@@ -18,7 +18,7 @@
 
 namespace quoll::rhi {
 
-static const String LIQUID_ENGINE_NAME = "Liquid";
+static const String QUOLL_ENGINE_NAME = "Quoll";
 
 VulkanRenderBackend::VulkanRenderBackend(Window &window, bool enableValidations)
     : mWindow(window) {
@@ -56,7 +56,7 @@ RenderDevice *VulkanRenderBackend::createDefaultDevice() {
 void VulkanRenderBackend::createInstance(StringView applicationName,
                                          bool enableValidations) {
   VkResult result = volkInitialize();
-  LIQUID_ASSERT(result == VK_SUCCESS, "Cannot initialize Vulkan loader");
+  QuollAssert(result == VK_SUCCESS, "Cannot initialize Vulkan loader");
 
   std::vector<const char *> extensions;
   extensions.resize(vulkanWindowExtensions.size());
@@ -69,7 +69,7 @@ void VulkanRenderBackend::createInstance(StringView applicationName,
   appInfo.pNext = nullptr;
   appInfo.pApplicationName = String(applicationName).c_str();
   appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);
-  appInfo.pEngineName = LIQUID_ENGINE_NAME.c_str();
+  appInfo.pEngineName = QUOLL_ENGINE_NAME.c_str();
   appInfo.engineVersion = VK_MAKE_API_VERSION(0, 0, 12, 0);
   appInfo.apiVersion = VK_API_VERSION_1_2;
 
@@ -120,7 +120,7 @@ VulkanPhysicalDevice VulkanRenderBackend::pickPhysicalDevice() {
                !device.getPresentModes(mSurface).empty();
       });
 
-  LIQUID_ASSERT(it != devices.end(), "No suitable physical device found");
+  QuollAssert(it != devices.end(), "No suitable physical device found");
 
   physicalDevice = *it;
   LOG_DEBUG_VK_NO_HANDLE(

@@ -33,7 +33,7 @@ void GameExporter::exportGame(const Project &project, const Path &destination) {
   for (auto entry :
        std::filesystem::directory_iterator(std::filesystem::current_path())) {
     if (entry.is_regular_file() &&
-        entry.path().stem().string() == "LiquidRuntime") {
+        entry.path().stem().string() == "QuollRuntime") {
       runtimePath = entry.path();
     }
   }

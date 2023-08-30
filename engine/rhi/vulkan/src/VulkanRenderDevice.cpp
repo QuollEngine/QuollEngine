@@ -42,8 +42,8 @@ VulkanRenderDevice::VulkanRenderDevice(
   VkQueue graphicsQueue = mGraphicsQueue.getVulkanHandle();
   uint32_t queueIndex = mGraphicsQueue.getQueueIndex();
 
-  LIQUID_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
-                                 &queueIndex, 1, nullptr);
+  QUOLL_PROFILE_GPU_INIT_VULKAN(&device, &physicalDeviceHandle, &graphicsQueue,
+                                &queueIndex, 1, nullptr);
 }
 
 RenderCommandList VulkanRenderDevice::requestImmediateCommandList() {
@@ -88,7 +88,7 @@ RenderFrame VulkanRenderDevice::beginFrame() {
   static constexpr auto SkipFrame = std::numeric_limits<uint32_t>::max();
   static RenderCommandList emptyCommandList;
 
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
+  QUOLL_PROFILE_EVENT("VulkanRenderDevice::beginFrame");
 
   mStats.resetCalls();
   mFrameManager.waitForFrame();
@@ -107,11 +107,11 @@ RenderFrame VulkanRenderDevice::beginFrame() {
 }
 
 void VulkanRenderDevice::endFrame(const RenderFrame &renderFrame) {
-  LIQUID_PROFILE_EVENT("VulkanRenderDevice::endFrame");
+  QUOLL_PROFILE_EVENT("VulkanRenderDevice::endFrame");
   mRenderContext.endRendering(mFrameManager);
 
   VkSwapchainKHR swapchainHandle = mSwapchain.getVulkanHandle();
-  LIQUID_PROFILE_GPU_FLIP(&mSwapchain);
+  QUOLL_PROFILE_GPU_FLIP(&mSwapchain);
 
   auto queuePresentResult = mRenderContext.present(
       mFrameManager, mSwapchain, renderFrame.swapchainImageIndex);

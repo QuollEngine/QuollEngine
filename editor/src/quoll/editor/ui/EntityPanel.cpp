@@ -45,8 +45,8 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
       static_cast<ImguiInputTextCallbackUserData *>(data->UserData);
   if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
     auto &str = userData->value;
-    LIQUID_ASSERT(data->Buf == str.c_str(),
-                  "Buffer and string value must point to the same address");
+    QuollAssert(data->Buf == str.c_str(),
+                "Buffer and string value must point to the same address");
     str.resize(data->BufTextLen);
     data->Buf = str.data();
   }
@@ -63,8 +63,8 @@ static int InputTextCallback(ImGuiInputTextCallbackData *data) {
 static bool ImguiMultilineInputText(const String &label, String &value,
                                     const ImVec2 &size,
                                     ImGuiInputTextFlags flags = 0) {
-  LIQUID_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0,
-                "Do not back callback resize flag");
+  QuollAssert((flags & ImGuiInputTextFlags_CallbackResize) == 0,
+              "Do not back callback resize flag");
 
   flags |= ImGuiInputTextFlags_CallbackResize;
 

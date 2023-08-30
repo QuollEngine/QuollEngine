@@ -11,7 +11,7 @@ std::unordered_map<EditorIcon, rhi::TextureHandle> IconRegistry::mIconMap{};
 
 void IconRegistry::loadIcons(RenderStorage &renderStorage,
                              const std::filesystem::path &iconsPath) {
-  LIQUID_ASSERT(mIconMap.empty(), "Icons are already loaded");
+  QuollAssert(mIconMap.empty(), "Icons are already loaded");
 
   ImageTextureLoader loader(renderStorage);
 

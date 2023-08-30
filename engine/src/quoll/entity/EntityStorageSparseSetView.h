@@ -145,7 +145,7 @@ public:
    * @return End iterator
    */
   Iterator end() {
-    LIQUID_ASSERT(mSmallestPool != nullptr, "Begin is not called");
+    QuollAssert(mSmallestPool != nullptr, "Begin is not called");
 
     return Iterator(mSmallestPool->entities.size(), mPools, mSmallestPool);
   }

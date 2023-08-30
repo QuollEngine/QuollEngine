@@ -6,7 +6,7 @@
 
 namespace quoll::rhi {
 
-const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
+const String QUOLL_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
 
 /**
@@ -16,8 +16,8 @@ const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
  * @param name Feature name
  */
 static void assertFeature(VkBool32 featureFlag, String name) {
-  LIQUID_ASSERT(featureFlag == VK_TRUE,
-                "Feature is not supported in physical device: " + name);
+  QuollAssert(featureFlag == VK_TRUE,
+              "Feature is not supported in physical device: " + name);
   if (featureFlag != VK_TRUE) {
     Engine::getLogger().fatal()
         << "Vulkan renderer requires the following feature to be enabled: "
@@ -65,12 +65,12 @@ VulkanDeviceObject::VulkanDeviceObject(
   const auto &portabilityExt = std::find_if(
       pdExtensions.cbegin(), pdExtensions.cend(), [](const auto &ext) {
         return String(static_cast<const char *>(ext.extensionName)) ==
-               LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
+               QUOLL_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME;
       });
 
   if (portabilityExt != pdExtensions.end()) {
     extensions.push_back(
-        LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
+        QUOLL_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME.c_str());
   }
 
   VkPhysicalDeviceHostQueryResetFeatures queryResetFeatures{};

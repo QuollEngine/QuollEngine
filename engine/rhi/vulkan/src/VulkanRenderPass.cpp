@@ -33,9 +33,9 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     auto &desc = description.colorAttachments.at(i);
     const auto &texture = registry.getTextures().at(desc.texture);
 
-    LIQUID_ASSERT(BitwiseEnumContains(texture->getDescription().usage,
-                                      TextureUsage::Color),
-                  "Texture cannot be a color attachment");
+    QuollAssert(BitwiseEnumContains(texture->getDescription().usage,
+                                    TextureUsage::Color),
+                "Texture cannot be a color attachment");
 
     VkAttachmentDescription attachment =
         getVulkanAttachmentDescription(desc, registry);
@@ -61,9 +61,9 @@ VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
     const auto &desc = description.depthAttachment.value();
     const auto &texture = registry.getTextures().at(desc.texture);
 
-    LIQUID_ASSERT(BitwiseEnumContains(texture->getDescription().usage,
-                                      TextureUsage::Depth),
-                  "Texture cannot be a depth attachment");
+    QuollAssert(BitwiseEnumContains(texture->getDescription().usage,
+                                    TextureUsage::Depth),
+                "Texture cannot be a depth attachment");
 
     VkAttachmentDescription attachment =
         getVulkanAttachmentDescription(desc, registry);

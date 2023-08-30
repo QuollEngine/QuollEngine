@@ -33,11 +33,11 @@ bool WorkspaceLayoutRenderer::begin() {
       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking;
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-  ImGui::Begin("LiquidatorDockspaceMain", nullptr, flags);
+  ImGui::Begin("QuollEditorDockspaceMain", nullptr, flags);
   ImGui::PopStyleVar();
   ImGui::PopStyleVar(2);
 
-  auto dockspaceId = ImGui::GetID("LiquidatorDockspace");
+  auto dockspaceId = ImGui::GetID("QuollEditorDockspace");
   ImGui::DockSpace(dockspaceId, ImVec2{0.0f, 0.0f},
                    ImGuiDockNodeFlags_PassthruCentralNode);
 
@@ -48,7 +48,7 @@ void WorkspaceLayoutRenderer::end() { ImGui::End(); }
 
 void WorkspaceLayoutRenderer::reset() {
   const auto &viewport = ImGui::GetMainViewport();
-  auto dockspaceId = ImGui::GetID("LiquidatorDockspace");
+  auto dockspaceId = ImGui::GetID("QuollEditorDockspace");
 
   ImGui::DockBuilderRemoveNode(dockspaceId);
   ImGui::DockBuilderAddNode(
@@ -92,7 +92,7 @@ void WorkspaceLayoutRenderer::reset() {
 
 void WorkspaceLayoutRenderer::resize() {
   const auto &viewport = ImGui::GetMainViewport();
-  auto dockspaceId = ImGui::GetID("LiquidatorDockspace");
+  auto dockspaceId = ImGui::GetID("QuollEditorDockspace");
   ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 }
 

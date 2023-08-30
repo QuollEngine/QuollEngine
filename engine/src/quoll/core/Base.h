@@ -1,7 +1,7 @@
-#ifndef LIQUID_CORE_BASE_H_
-#define LIQUID_CORE_BASE_H_
+#ifndef QUOLL_CORE_BASE_H_
+#define QUOLL_CORE_BASE_H_
 
-#ifdef LIQUID_DEBUG
+#ifdef QUOLL_DEBUG
 #ifndef _DEBUG
 #define _DEBUG
 #endif

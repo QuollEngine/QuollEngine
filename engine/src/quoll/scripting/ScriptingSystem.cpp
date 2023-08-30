@@ -12,7 +12,7 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
     : mEventSystem(eventSystem), mAssetRegistry(assetRegistry) {}
 
 void ScriptingSystem::start(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("ScriptingSystem::start");
+  QUOLL_PROFILE_EVENT("ScriptingSystem::start");
   ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
   for (auto [entity, component] : entityDatabase.view<Script>()) {
@@ -48,7 +48,7 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
                                             component.variables);
 
     bool success = mLuaInterpreter.evaluate(script.data.bytes, component.scope);
-    LIQUID_ASSERT(success, "Cannot evaluate script");
+    QuollAssert(success, "Cannot evaluate script");
 
     scriptDecorator.removeVariableInjectors(component.scope);
 
@@ -63,7 +63,7 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
 }
 
 void ScriptingSystem::update(float dt, EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("ScriptingSystem::update");
+  QUOLL_PROFILE_EVENT("ScriptingSystem::update");
 
   for (auto [entity, script] : mScriptRemoveObserver) {
     destroyScriptingData(script);

@@ -1,4 +1,4 @@
-project "LiquidRHICore"
+project "QuollRHICore"
     basedir "../../../workspace/rhi-core"
     kind "StaticLib"
 

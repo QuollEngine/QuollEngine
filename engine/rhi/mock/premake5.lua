@@ -1,4 +1,4 @@
-project "LiquidRHIMock"
+project "QuollRHIMock"
     basedir "../../../workspace/rhi-mock"
     kind "StaticLib"
 

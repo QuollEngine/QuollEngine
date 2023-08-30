@@ -12,7 +12,7 @@ namespace quoll {
 Result<Path>
 AssetCache::createMeshFromAsset(const AssetData<MeshAsset> &asset) {
   if (asset.uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 
@@ -129,8 +129,8 @@ Result<MeshAssetHandle> AssetCache::loadMesh(const Uuid &uuid) {
 
   if (header.getData().type != AssetType::Mesh &&
       header.getData().type != AssetType::SkinnedMesh) {
-    return Result<MeshAssetHandle>::Error(
-        "Opened file is not a liquid asset: " + filePath.string());
+    return Result<MeshAssetHandle>::Error("Opened file is not a quoll asset: " +
+                                          filePath.string());
   }
 
   return loadMeshDataFromInputStream(stream, filePath, header.getData());

@@ -90,7 +90,7 @@ VulkanDescriptorPool::createDescriptor(DescriptorLayoutHandle layout) {
 
   mDescriptorSets.push_back(descriptorSet);
 
-  LiquidDebugOnly(
+  QuollDebugOnly(
       { mDescriptorLayoutMap.insert_or_assign(descriptorSet, vulkanLayout); });
 
   auto handle = static_cast<DescriptorHandle>(mDescriptorSets.size());

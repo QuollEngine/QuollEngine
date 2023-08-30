@@ -1,7 +1,7 @@
 #pragma once
 
-#ifdef LIQUID_DEBUG
-#define LIQUID_ASSERT(condition, message)                                      \
+#ifdef QUOLL_DEBUG
+#define QuollAssert(condition, message)                                        \
   do {                                                                         \
     if (!(condition)) {                                                        \
       std::cerr << "Assertion `" #condition "` failed in " << __FILE__         \
@@ -10,7 +10,7 @@
     }                                                                          \
   } while (false)
 #else
-#define LIQUID_ASSERT(condition, message)                                      \
+#define QuollAssert(condition, message)                                        \
   do {                                                                         \
   } while (false)
 #endif

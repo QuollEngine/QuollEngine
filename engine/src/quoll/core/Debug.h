@@ -1,12 +1,12 @@
 #pragma once
 
-#ifdef LIQUID_DEBUG
-#define LiquidDebugOnly(Content)                                               \
+#ifdef QUOLL_DEBUG
+#define QuollDebugOnly(Content)                                                \
   do {                                                                         \
     Content                                                                    \
   } while (false)
 #else
-#define LiquidDebugOnly(Content)                                               \
+#define QuollDebugOnly(Content)                                                \
   do {                                                                         \
   } while (false)
 #endif

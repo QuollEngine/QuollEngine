@@ -15,7 +15,7 @@ struct AssetFileHeader {
   /**
    * Magic constant
    */
-  static constexpr const char *MagicConstant = "LQASSETFILE";
+  static constexpr const char *MagicConstant = "QLASSETFILE";
 
   /**
    * Magic value

@@ -46,7 +46,7 @@ static VkFormat getVulkanFormatFromFormat(rhi::Format format) {
     return VK_FORMAT_D32_SFLOAT;
   case rhi::Format::Undefined:
   default:
-    LIQUID_ASSERT(false, "Undefined format");
+    QuollAssert(false, "Undefined format");
     return VK_FORMAT_UNDEFINED;
   }
 }
@@ -81,7 +81,7 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
     return rhi::Format::Depth32Float;
   case VK_FORMAT_UNDEFINED:
   default:
-    LIQUID_ASSERT(false, "Undefined format");
+    QuollAssert(false, "Undefined format");
     return rhi::Format::Undefined;
   }
 }
@@ -89,7 +89,7 @@ static rhi::Format getFormatFromVulkanFormat(VkFormat format) {
 Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
                                                  const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 
@@ -118,7 +118,7 @@ Result<Path> AssetCache::createTextureFromSource(const Path &sourcePath,
 Result<Path>
 AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   if (asset.uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 

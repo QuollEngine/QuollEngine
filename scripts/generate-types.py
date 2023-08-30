@@ -37,7 +37,7 @@ def output_vulkan_map(formats):
     RHI_TO_VK_DEFAULT_TEMPLATE = '''
     case rhi::Format::Undefined:
     default:
-        LIQUID_ASSERT(false, "Undefined format");
+        QuollAssert(false, "Undefined format");
         return VK_FORMAT_UNDEFINED;'''
 
     VK_TO_RHI_CASE_TEMPLATE = '''
@@ -46,7 +46,7 @@ def output_vulkan_map(formats):
     VK_TO_RHI_DEFAULT_TEMPLATE = '''
     case VK_FORMAT_UNDEFINED:
     default:
-        LIQUID_ASSERT(false, "Undefined format");
+        QuollAssert(false, "Undefined format");
         return rhi::Format::Undefined;
     '''
 

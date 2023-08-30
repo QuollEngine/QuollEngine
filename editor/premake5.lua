@@ -1,7 +1,7 @@
-project "LiquidEditor"
+project "QuollEditor"
     basedir "../workspace/editor"
     kind "ConsoleApp"
-    targetname "Liquidator"
+    targetname "QuollEditor"
 
     includedirs {
         "./src",
@@ -9,7 +9,7 @@ project "LiquidEditor"
 
     loadSourceFiles{}
     linkOptick{}
-    linkDependenciesWith{"LiquidEngine", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"QuollEngine", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     linkVulkanRHI{}
     linkPlatform()
     
@@ -47,7 +47,7 @@ project "LiquidEditor"
 
     copyEngineAssets()
 
-project "LiquidEditorTest"
+project "QuollEditorTest"
     basedir "../workspace/editor-test"
     kind "ConsoleApp"
 
@@ -72,7 +72,7 @@ project "LiquidEditorTest"
         "src/main.cpp"
     }
 
-    linkDependenciesWith{"LiquidEngine", "LiquidRHIMock", "LiquidRHICore", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"QuollEngine", "QuollRHIMock", "QuollRHICore", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
     linkGoogleTest{}
     linkPlatform()
 

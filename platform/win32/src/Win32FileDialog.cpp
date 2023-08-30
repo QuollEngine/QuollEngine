@@ -21,7 +21,7 @@ struct Win32Entry {
 };
 
 static void checkWin32Error(HRESULT res, const quoll::String &message) {
-  LIQUID_ASSERT(SUCCEEDED(res), "Failed to open file dialog " + message);
+  QuollAssert(SUCCEEDED(res), "Failed to open file dialog " + message);
 }
 
 quoll::Path

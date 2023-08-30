@@ -28,7 +28,7 @@ public:
    * @param item Item
    */
   void push(const TItem &item) {
-    LIQUID_ASSERT(mSize < mBuffer.size(), "Queue is full");
+    QuollAssert(mSize < mBuffer.size(), "Queue is full");
     mBuffer.at(mEnd) = item;
     mEnd = (mEnd + 1) % mBuffer.size();
     mSize++;
@@ -38,7 +38,7 @@ public:
    * @brief Pop item from the front
    */
   void pop() {
-    LIQUID_ASSERT(!empty(), "Cannot pop from empty queue");
+    QuollAssert(!empty(), "Cannot pop from empty queue");
     mStart = (mStart + 1) % mBuffer.size();
     mSize--;
   }
@@ -49,7 +49,7 @@ public:
    * @return Item
    */
   inline TItem &front() {
-    LIQUID_ASSERT(!empty(), "Queue is empty");
+    QuollAssert(!empty(), "Queue is empty");
     return mBuffer.at(mStart);
   }
 
@@ -59,7 +59,7 @@ public:
    * @return Item
    */
   inline const TItem &front() const {
-    LIQUID_ASSERT(!empty(), "Queue is empty");
+    QuollAssert(!empty(), "Queue is empty");
     return mBuffer.at(mStart);
   }
 

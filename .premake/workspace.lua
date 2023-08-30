@@ -1,12 +1,12 @@
 
-workspace "LiquidEngine"
+workspace "QuollEngine"
     basedir "../workspace/"
     language "C++"
     cppdialect "C++20"
     architecture "x86_64"
 
     -- Set editor as starting project
-    startproject "LiquidEditor"
+    startproject "QuollEditor"
     
     setupLibraryDirectories{}
     setupPlatformDefines{}
@@ -28,15 +28,15 @@ workspace "LiquidEngine"
        flags { "FatalCompileWarnings" }
 
     filter {"configurations:Debug or configurations:Test"}
-        defines { "LIQUID_DEBUG" }
+        defines { "QUOLL_DEBUG" }
         symbols "On"
 
     filter {"configurations:Release or configurations:Profile"}
-        defines { "LIQUID_RELEASE" }
+        defines { "QUOLL_RELEASE" }
         optimize "On"
 
     filter {"configurations:Profile"}
-        defines { "LIQUID_PROFILER" }
+        defines { "QUOLL_PROFILER" }
 
     defines { "configurations:Test" }
-        defines { "LIQUID_TEST" }
+        defines { "QUOLL_TEST" }

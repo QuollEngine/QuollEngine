@@ -4,14 +4,14 @@
 namespace quoll {
 
 void SceneUpdater::update(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("SceneUpdater::update");
+  QUOLL_PROFILE_EVENT("SceneUpdater::update");
   updateTransforms(entityDatabase);
   updateCameras(entityDatabase);
   updateLights(entityDatabase);
 }
 
 void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("SceneUpdater::updateTransforms");
+  QUOLL_PROFILE_EVENT("SceneUpdater::updateTransforms");
 
   for (auto [entity, local, world] :
        entityDatabase.view<LocalTransform, WorldTransform>()) {
@@ -56,7 +56,7 @@ void SceneUpdater::updateTransforms(EntityDatabase &entityDatabase) {
 }
 
 void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("SceneUpdater::updateCameras");
+  QUOLL_PROFILE_EVENT("SceneUpdater::updateCameras");
 
   for (auto [entity, lens, world, camera] :
        entityDatabase.view<PerspectiveLens, WorldTransform, Camera>()) {
@@ -78,7 +78,7 @@ void SceneUpdater::updateCameras(EntityDatabase &entityDatabase) {
 }
 
 void SceneUpdater::updateLights(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("SceneUpdater::updateLights");
+  QUOLL_PROFILE_EVENT("SceneUpdater::updateLights");
 
   for (auto [entity, world, light] :
        entityDatabase.view<WorldTransform, DirectionalLight>()) {

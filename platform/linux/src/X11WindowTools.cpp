@@ -4,7 +4,7 @@
 namespace quoll::platform {
 
 void WindowUtils::enableDarkMode(GLFWwindow *window) {
-  LIQUID_ASSERT(false, "Not implemented");
+  QuollAssert(false, "Not implemented");
 }
 
 } // namespace quoll::platform

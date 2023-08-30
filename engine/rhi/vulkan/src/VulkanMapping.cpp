@@ -322,7 +322,7 @@ VkFormat VulkanMapping::getFormat(Format format) {
     return VK_FORMAT_D32_SFLOAT_S8_UINT;
   case rhi::Format::Undefined:
   default:
-    LIQUID_ASSERT(false, "Undefined format");
+    QuollAssert(false, "Undefined format");
     return VK_FORMAT_UNDEFINED;
   }
 }
@@ -334,7 +334,7 @@ VkFilter VulkanMapping::getFilter(Filter filter) {
   case Filter::Linear:
     return VK_FILTER_LINEAR;
   default:
-    LIQUID_ASSERT(false, "Filter does not exist");
+    QuollAssert(false, "Filter does not exist");
     return VK_FILTER_MAX_ENUM;
   }
 }
@@ -350,7 +350,7 @@ VkSamplerAddressMode VulkanMapping::getAddressMode(WrapMode wrapMode) {
   case WrapMode::ClampToBorder:
     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
   default:
-    LIQUID_ASSERT(false, "Wrap mode does not exist");
+    QuollAssert(false, "Wrap mode does not exist");
     return VK_SAMPLER_ADDRESS_MODE_MAX_ENUM;
   }
 }
@@ -370,7 +370,7 @@ VulkanMapping::getDescriptorType(VkDescriptorType descriptorType) {
     return DescriptorType::StorageBuffer;
 
   default:
-    LIQUID_ASSERT(false, "Descriptor type does not exist");
+    QuollAssert(false, "Descriptor type does not exist");
     return DescriptorType::None;
   }
 }

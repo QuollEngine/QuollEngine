@@ -15,14 +15,14 @@ ActionExecutorResult EntitySetParent::onExecute(WorkspaceState &state,
   if (db.has<Parent>(mEntity)) {
     mPreviousParent = db.get<Parent>(mEntity).parent;
 
-    LIQUID_ASSERT(db.has<Children>(mPreviousParent),
-                  "Parent entity must have children");
+    QuollAssert(db.has<Children>(mPreviousParent),
+                "Parent entity must have children");
     auto &children = db.get<Children>(mPreviousParent).children;
 
     auto it = std::find(children.begin(), children.end(), mEntity);
 
-    LIQUID_ASSERT(it != children.end(),
-                  "Entity must exist in children of parent");
+    QuollAssert(it != children.end(),
+                "Entity must exist in children of parent");
 
     if (children.size() == 1) {
       db.remove<Children>(mPreviousParent);
@@ -69,12 +69,11 @@ ActionExecutorResult EntitySetParent::onUndo(WorkspaceState &state,
     db.remove<Parent>(mEntity);
   }
 
-  LIQUID_ASSERT(db.has<Children>(mParent), "Entity parent has no children");
+  QuollAssert(db.has<Children>(mParent), "Entity parent has no children");
   auto &children = db.get<Children>(mParent).children;
   auto it = std::find(children.begin(), children.end(), mEntity);
 
-  LIQUID_ASSERT(it != children.end(),
-                "Entity must exist in children of parent");
+  QuollAssert(it != children.end(), "Entity must exist in children of parent");
 
   if (children.size() == 1) {
     db.remove<Children>(mParent);

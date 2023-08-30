@@ -7,7 +7,7 @@ AnimationSystem::AnimationSystem(AssetRegistry &assetRegistry)
     : mAssetRegistry(assetRegistry) {}
 
 void AnimationSystem::update(float dt, EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("AnimationSystem::update");
+  QUOLL_PROFILE_EVENT("AnimationSystem::update");
   const auto &animMap = mAssetRegistry.getAnimations();
 
   for (auto [entity, animator, animatorEvent] :

@@ -4,7 +4,7 @@
 namespace quoll::platform {
 
 void FileOpener::openFile(const Path &path) {
-  LIQUID_ASSERT(false, "Not implemented");
+  QuollAssert(false, "Not implemented");
 }
 
 } // namespace quoll::platform
