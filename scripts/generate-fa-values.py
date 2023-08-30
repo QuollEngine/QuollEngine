@@ -3,7 +3,7 @@ import re
 import sys
 import os
 
-FA_HEADER_FILE = Path(os.path.dirname(__file__), '..', 'editor', 'src', 'liquidator', 'ui', 'FontAwesome.h')
+FA_HEADER_FILE = Path(os.path.dirname(__file__), '..', 'editor', 'src', 'quoll', 'editor', 'ui', 'FontAwesome.h')
 
 FORMAT_PATTERN_FA_VAR = '\$fa-var-(\S+)\: (\S+);'
 FORMAT_PATTERN_ICON = '\"(\S+)\"\:'
