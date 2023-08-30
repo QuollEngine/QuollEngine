@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/entity/Entity.h"
-#include "liquid/scene/Scene.h"
-#include "liquid/asset/AssetRegistry.h"
+#include "quoll/entity/Entity.h"
+#include "quoll/scene/Scene.h"
+#include "quoll/asset/AssetRegistry.h"
 #include "liquidator/core/TransformOperation.h"
 #include "liquidator/project/Project.h"
 

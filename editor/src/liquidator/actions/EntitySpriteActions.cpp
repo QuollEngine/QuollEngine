@@ -1,4 +1,4 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 #include "EntitySpriteActions.h"
 
 namespace quoll::editor {

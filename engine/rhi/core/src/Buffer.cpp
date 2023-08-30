@@ -1,7 +1,7 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 
-#include "liquid/rhi/Buffer.h"
-#include "liquid/rhi/NativeBuffer.h"
+#include "quoll/rhi/Buffer.h"
+#include "quoll/rhi/NativeBuffer.h"
 
 namespace quoll::rhi {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquid/asset/AssetCache.h"
-#include "liquid/asset/AssetRevision.h"
+#include "quoll/asset/AssetCache.h"
+#include "quoll/asset/AssetRevision.h"
 #include "ImageLoader.h"
 #include "HDRIImporter.h"
 #include "UUIDMap.h"

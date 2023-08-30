@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/loaders/ImageTextureLoader.h"
+#include "quoll/core/Base.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/loaders/ImageTextureLoader.h"
 
 #include "IconRegistry.h"
 

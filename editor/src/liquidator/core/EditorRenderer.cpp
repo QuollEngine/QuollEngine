@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/core/Engine.h"
-#include "liquid/renderer/MeshVertexLayout.h"
+#include "quoll/core/Base.h"
+#include "quoll/core/Engine.h"
+#include "quoll/renderer/MeshVertexLayout.h"
 
 #include "liquidator/ui/IconRegistry.h"
 

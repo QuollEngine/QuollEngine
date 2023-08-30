@@ -3,7 +3,7 @@
 #include "Action.h"
 #include "EntityDefaultDeleteAction.h"
 
-#include "liquid/renderer/SkinnedMeshRenderer.h"
+#include "quoll/renderer/SkinnedMeshRenderer.h"
 
 namespace quoll::editor {
 

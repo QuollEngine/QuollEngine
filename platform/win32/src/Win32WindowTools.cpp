@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/platform/tools/WindowUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/platform/tools/WindowUtils.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>

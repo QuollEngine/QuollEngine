@@ -1,30 +1,30 @@
-#include "liquid/core/Base.h"
+#include "quoll/core/Base.h"
 #include "Runtime.h"
 
 // Core systems
-#include "liquid/window/Window.h"
-#include "liquid/events/EventSystem.h"
-#include "liquid/profiler/FPSCounter.h"
-#include "liquid/loop/MainLoop.h"
-#include "liquid/renderer/Renderer.h"
-#include "liquid/scripting/ScriptingSystem.h"
-#include "liquid/scene/SceneUpdater.h"
-#include "liquid/physics/PhysicsSystem.h"
-#include "liquid/renderer/Presenter.h"
-#include "liquid/scene/CameraAspectRatioUpdater.h"
-#include "liquid/animation/AnimationSystem.h"
-#include "liquid/scene/SkeletonUpdater.h"
-#include "liquid/audio/AudioSystem.h"
-#include "liquid/core/EntityDeleter.h"
-#include "liquid/scene/SceneIO.h"
-#include "liquid/renderer/SceneRenderer.h"
+#include "quoll/window/Window.h"
+#include "quoll/events/EventSystem.h"
+#include "quoll/profiler/FPSCounter.h"
+#include "quoll/loop/MainLoop.h"
+#include "quoll/renderer/Renderer.h"
+#include "quoll/scripting/ScriptingSystem.h"
+#include "quoll/scene/SceneUpdater.h"
+#include "quoll/physics/PhysicsSystem.h"
+#include "quoll/renderer/Presenter.h"
+#include "quoll/scene/CameraAspectRatioUpdater.h"
+#include "quoll/animation/AnimationSystem.h"
+#include "quoll/scene/SkeletonUpdater.h"
+#include "quoll/audio/AudioSystem.h"
+#include "quoll/core/EntityDeleter.h"
+#include "quoll/scene/SceneIO.h"
+#include "quoll/renderer/SceneRenderer.h"
 
 // Render hardware interfaces
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/rhi-vulkan/VulkanRenderDevice.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/rhi-vulkan/VulkanRenderDevice.h"
 
 // Asset
-#include "liquid/asset/AssetCache.h"
+#include "quoll/asset/AssetCache.h"
 
 namespace quoll::runtime {
 

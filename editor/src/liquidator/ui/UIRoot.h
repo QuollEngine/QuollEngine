@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/animation/AnimationSystem.h"
-#include "liquid/physics/PhysicsSystem.h"
-#include "liquid/renderer/Renderer.h"
+#include "quoll/animation/AnimationSystem.h"
+#include "quoll/physics/PhysicsSystem.h"
+#include "quoll/renderer/Renderer.h"
 
 #include "Toolbar.h"
 #include "SceneHierarchyPanel.h"

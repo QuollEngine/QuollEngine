@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 #include "liquidator/asset/SceneWriter.h"
-#include "liquid/scene/SceneIO.h"
+#include "quoll/scene/SceneIO.h"
 
 namespace quoll::editor {
 

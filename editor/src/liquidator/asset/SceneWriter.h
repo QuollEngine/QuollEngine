@@ -1,9 +1,9 @@
 #pragma once
 
-#include "liquid/scene/Scene.h"
-#include "liquid/asset/AssetRegistry.h"
+#include "quoll/scene/Scene.h"
+#include "quoll/asset/AssetRegistry.h"
 
-#include "liquid/yaml/Yaml.h"
+#include "quoll/yaml/Yaml.h"
 
 namespace quoll::editor {
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "liquid/renderer/Renderer.h"
-#include "liquid/window/Window.h"
-#include "liquid/entity/EntityDatabase.h"
-#include "liquid/events/EventSystem.h"
+#include "quoll/renderer/Renderer.h"
+#include "quoll/window/Window.h"
+#include "quoll/entity/EntityDatabase.h"
+#include "quoll/events/EventSystem.h"
 #include "liquidator/core/CameraLookAt.h"
 #include "liquidator/state/WorkspaceState.h"
 

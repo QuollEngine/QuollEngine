@@ -1,6 +1,6 @@
-#include "liquid/core/Base.h"
-#include "liquid/asset/AssetCache.h"
-#include "liquid/renderer/TextureUtils.h"
+#include "quoll/core/Base.h"
+#include "quoll/asset/AssetCache.h"
+#include "quoll/renderer/TextureUtils.h"
 
 #include "ImageLoader.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "liquid/rhi/RenderDevice.h"
-#include "liquid/asset/Result.h"
+#include "quoll/rhi/RenderDevice.h"
+#include "quoll/asset/Result.h"
 
 namespace quoll::editor {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/logger/Logger.h"
+#include "quoll/logger/Logger.h"
 
 namespace quoll::editor {
 

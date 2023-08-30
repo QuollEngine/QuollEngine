@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/imgui/Imgui.h"
+#include "quoll/core/Base.h"
+#include "quoll/imgui/Imgui.h"
 
 #include "liquidator/core/CameraLookAt.h"
 #include "liquidator/editor-scene/EditorCamera.h"

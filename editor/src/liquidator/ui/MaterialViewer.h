@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/asset/AssetRegistry.h"
+#include "quoll/asset/AssetRegistry.h"
 
 namespace quoll::editor {
 

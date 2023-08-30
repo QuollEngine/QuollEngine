@@ -1,8 +1,8 @@
 #pragma once
 
-#include "liquid/events/EventSystem.h"
-#include "liquid/window/Window.h"
-#include "liquid/rhi/RenderDevice.h"
+#include "quoll/events/EventSystem.h"
+#include "quoll/window/Window.h"
+#include "quoll/rhi/RenderDevice.h"
 
 #include "../project/ProjectManager.h"
 

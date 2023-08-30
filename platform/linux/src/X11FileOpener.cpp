@@ -1,5 +1,5 @@
-#include "liquid/core/Base.h"
-#include "liquid/platform/tools/FileOpener.h"
+#include "quoll/core/Base.h"
+#include "quoll/platform/tools/FileOpener.h"
 
 namespace quoll::platform {
 

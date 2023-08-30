@@ -78,19 +78,19 @@ function Clang-Tidy {
 if ($LintRHICore) {
     echo "Checking RHICore files"
 
-    Clang-Tidy -Path "engine/rhi/core" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/core/include/liquid/rhi", "./platform/base/include"
+    Clang-Tidy -Path "engine/rhi/core" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/core/include/quoll/rhi", "./platform/base/include"
 }
 
 if ($LintRHIVulkan) {
     echo "Checking RHIVulkan files"
 
-    Clang-Tidy -Path "engine/rhi/vulkan" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/vulkan/include", "./engine/rhi/vulkan/include/liquid/rhi-vulkan", "./platform/base/include"
+    Clang-Tidy -Path "engine/rhi/vulkan" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/vulkan/include", "./engine/rhi/vulkan/include/quoll/rhi-vulkan", "./platform/base/include"
 }
 
 if ($LintRHIMock) {
     echo "Checking RHIMock files"
 
-    Clang-Tidy -Path "engine/rhi/mock" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/mock/include", "./engine/rhi/mock/include/liquid/rhi-mock", "./platform/base/include"
+    Clang-Tidy -Path "engine/rhi/mock" -Headers "./engine/src", "./engine/rhi/core/include", "./engine/rhi/mock/include", "./engine/rhi/mock/include/quoll/rhi-mock", "./platform/base/include"
 }
 
 if ($LintEngine) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "liquid/asset/Result.h"
+#include "quoll/asset/Result.h"
 #include "gltf/GLTFImportData.h"
 #include "ImageLoader.h"
 
