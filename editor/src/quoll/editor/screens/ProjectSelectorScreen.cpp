@@ -100,7 +100,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
 
     ImGui::SetNextWindowPos(actionBarPos, 0, CenterWindowPivot);
 
-    if (ImGui::Begin("Liquidator", nullptr,
+    if (ImGui::Begin("Quoll Engine", nullptr,
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
                          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
                          ImGuiWindowFlags_NoTitleBar)) {

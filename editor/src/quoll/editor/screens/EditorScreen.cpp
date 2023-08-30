@@ -81,8 +81,8 @@ void EditorScreen::start(const Project &rawProject) {
     project.startingScene = data.uuid;
   }
 
-  LIQUID_ASSERT(sceneAsset != SceneAssetHandle::Null,
-                "Scene asset does not exist");
+  QuollAssert(sceneAsset != SceneAssetHandle::Null,
+              "Scene asset does not exist");
   if (sceneAsset == SceneAssetHandle::Null) {
     return;
   }

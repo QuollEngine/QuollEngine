@@ -8,7 +8,7 @@ namespace quoll::editor {
 
 bool ProjectManager::createProjectInPath() {
   auto projectPath = platform::FileDialog::getFilePathFromCreateDialog(
-      {{"Liquid project", {"liquid"}}});
+      {{"Quoll project", {"quoll"}}});
 
   if (projectPath.empty()) {
     return false;
@@ -53,7 +53,7 @@ bool ProjectManager::createProjectInPath() {
     projectObj["paths"]["settings"] =
         std::filesystem::relative(mProject.settingsPath, projectPath).string();
 
-    auto projectFile = projectPath / (mProject.name + ".liquid");
+    auto projectFile = projectPath / (mProject.name + ".quoll");
 
     std::ofstream stream(projectFile, std::ios::out);
     stream << projectObj;
@@ -65,7 +65,7 @@ bool ProjectManager::createProjectInPath() {
 
 bool ProjectManager::openProjectInPath() {
   auto projectFilePath = platform::FileDialog::getFilePathFromDialog(
-      {{"Liquid project", {"liquid"}}});
+      {{"Quoll project", {"quoll"}}});
   if (projectFilePath.empty()) {
     return false;
   }

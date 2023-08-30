@@ -59,7 +59,7 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
   VkDescriptorSet descriptorSet =
       mDescriptorPool.getDescriptorSet(descriptor.getHandle());
 
-  LIQUID_ASSERT(
+  QuollAssert(
       vulkanPipeline->getDescriptorLayout(firstSet) ==
           mDescriptorPool.getLayoutFromDescriptor(descriptorSet),
       "Layout of provided descriptor does not match the layout for set #" +
@@ -76,8 +76,8 @@ void VulkanCommandBuffer::bindDescriptor(PipelineHandle pipeline,
 void VulkanCommandBuffer::bindVertexBuffers(
     const std::span<const BufferHandle> buffers,
     const std::span<const uint64_t> offsets) {
-  LIQUID_ASSERT(buffers.size() == offsets.size(),
-                "Buffers and offsets must match");
+  QuollAssert(buffers.size() == offsets.size(),
+              "Buffers and offsets must match");
 
   std::vector<VkBuffer> vkBuffers;
   for (auto handle : buffers) {

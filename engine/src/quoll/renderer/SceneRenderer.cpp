@@ -217,7 +217,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
       std::array<uint32_t, 1> offsets{static_cast<uint32_t>(shadowDrawOffset)};
       {
-        LIQUID_PROFILE_EVENT("shadowPass::meshes");
+        QUOLL_PROFILE_EVENT("shadowPass::meshes");
         commandList.bindPipeline(pipeline);
 
         commandList.bindDescriptor(
@@ -235,7 +235,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       }
 
       {
-        LIQUID_PROFILE_EVENT("shadowPass::skinnedMeshes");
+        QUOLL_PROFILE_EVENT("shadowPass::skinnedMeshes");
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(
             pipeline, 0, frameData.getBindlessParams().getDescriptor(),
@@ -328,7 +328,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
 
       std::array<uint32_t, 1> offsets{static_cast<uint32_t>(pbrOffset)};
       {
-        LIQUID_PROFILE_EVENT("meshPass::meshes");
+        QUOLL_PROFILE_EVENT("meshPass::meshes");
 
         commandList.bindPipeline(pipeline);
         commandList.bindDescriptor(
@@ -341,7 +341,7 @@ SceneRenderPassData SceneRenderer::attach(RenderGraph &graph,
       }
 
       {
-        LIQUID_PROFILE_EVENT("meshPass::skinnedMeshes");
+        QUOLL_PROFILE_EVENT("meshPass::skinnedMeshes");
 
         commandList.bindPipeline(skinnedPipeline);
         commandList.bindDescriptor(
@@ -766,12 +766,12 @@ void SceneRenderer::attachText(RenderGraph &graph,
 
 void SceneRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                     Entity camera, uint32_t frameIndex) {
-  LIQUID_ASSERT(entityDatabase.has<Camera>(camera),
-                "Entity does not have a camera");
+  QuollAssert(entityDatabase.has<Camera>(camera),
+              "Entity does not have a camera");
 
   auto &frameData = mFrameData.at(frameIndex);
 
-  LIQUID_PROFILE_EVENT("SceneRenderer::updateFrameData");
+  QUOLL_PROFILE_EVENT("SceneRenderer::updateFrameData");
   frameData.clear();
 
   frameData.setCameraData(entityDatabase.get<Camera>(camera),

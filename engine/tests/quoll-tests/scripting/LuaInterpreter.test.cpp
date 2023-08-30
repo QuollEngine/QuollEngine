@@ -7,7 +7,7 @@
 inline std::vector<uint8_t> readFileIntoBuffer(const quoll::Path &fileName) {
   std::ifstream file(fileName);
 
-  LIQUID_ASSERT(file.good(), "File cannot be opened");
+  QuollAssert(file.good(), "File cannot be opened");
 
   std::ostringstream ss;
   ss << file.rdbuf();

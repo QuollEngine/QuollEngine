@@ -16,7 +16,7 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const Path &path) {
 
   void *data = stbi_load(path.string().c_str(), &width, &height, &channels,
                          STBI_rgb_alpha);
-  LIQUID_ASSERT(data, "Failed to load image: " + path.string());
+  QuollAssert(data, "Failed to load image: " + path.string());
 
   description.format = rhi::Format::Rgba8Srgb;
   description.width = width;

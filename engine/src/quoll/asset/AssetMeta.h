@@ -3,7 +3,7 @@
 namespace quoll {
 
 /**
- * @brief Metadata for non liquid assets
+ * @brief Metadata for non quoll assets
  */
 struct AssetMeta {
   /**

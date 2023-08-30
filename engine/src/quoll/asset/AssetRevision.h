@@ -5,19 +5,19 @@
 namespace quoll {
 
 enum class AssetRevision : uint32_t {
-  Material = 230911,
-  Texture = 230911,
-  Mesh = 230915,
-  SkinnedMesh = 230915,
-  Skeleton = 230911,
-  Animation = 230923,
-  Audio = 230911,
-  Prefab = 230823,
-  LuaScript = 230911,
-  Font = 230911,
-  Environment = 230911,
-  Animator = 230911,
-  Scene = 230820
+  Material = 230901,
+  Texture = 230901,
+  Mesh = 230901,
+  SkinnedMesh = 230901,
+  Skeleton = 230901,
+  Animation = 230901,
+  Audio = 230901,
+  Prefab = 230901,
+  LuaScript = 230901,
+  Font = 230901,
+  Environment = 230901,
+  Animator = 230901,
+  Scene = 230901
 };
 
 /**

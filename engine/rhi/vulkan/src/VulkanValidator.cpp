@@ -39,7 +39,7 @@ void VulkanValidator::attachToInstanceCreateConfig(
 }
 
 void VulkanValidator::attachToInstance(VkInstance instance) {
-  LIQUID_ASSERT(checkValidationSupport(), "Cannot create debug messenger");
+  QuollAssert(checkValidationSupport(), "Cannot create debug messenger");
 
   checkForVulkanError(
       VulkanValidator::createDebugUtilsMessengerEXT(

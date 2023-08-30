@@ -31,7 +31,7 @@ public:
    */
   BackendImpl() {
     auto result = ma_engine_init(nullptr, &mEngine);
-    LIQUID_ASSERT(result == MA_SUCCESS, "Could not create audio engine");
+    QuollAssert(result == MA_SUCCESS, "Could not create audio engine");
   }
 
   /**
@@ -74,14 +74,13 @@ public:
       config.encodingFormat = getEncodingFormat(asset.format);
       auto res = ma_decoder_init_memory(asset.bytes.data(), asset.bytes.size(),
                                         &config, &instance->decoder);
-      LIQUID_ASSERT(res == MA_SUCCESS,
-                    "Cannot initialize MiniAudio data source");
+      QuollAssert(res == MA_SUCCESS, "Cannot initialize MiniAudio data source");
     }
 
     {
       auto res = ma_sound_init_from_data_source(&mEngine, &instance->decoder, 0,
                                                 nullptr, &instance->sound);
-      LIQUID_ASSERT(res == MA_SUCCESS, "Cannot initialize MiniAudio sound");
+      QuollAssert(res == MA_SUCCESS, "Cannot initialize MiniAudio sound");
     }
 
     ma_sound_start(&instance->sound);

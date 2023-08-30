@@ -106,7 +106,7 @@ public:
    * @return Property value
    */
   template <class TValueType> inline const TValueType getValue() const {
-    LIQUID_ASSERT(false, "Property type is not supported");
+    QuollAssert(false, "Property type is not supported");
 
     return std::any_cast<TValueType>(mValue);
   }
@@ -123,7 +123,7 @@ private:
  * @return int32 value
  */
 template <> inline const int32_t Property::getValue() const {
-  LIQUID_ASSERT(mType == INT32, "Property type is not int32");
+  QuollAssert(mType == INT32, "Property type is not int32");
 
   return std::any_cast<int32_t>(mValue);
 }
@@ -134,7 +134,7 @@ template <> inline const int32_t Property::getValue() const {
  * @return uint32 value
  */
 template <> inline const uint32_t Property::getValue() const {
-  LIQUID_ASSERT(mType == UINT32, "Property type is not uint32");
+  QuollAssert(mType == UINT32, "Property type is not uint32");
 
   return std::any_cast<uint32_t>(mValue);
 }
@@ -145,7 +145,7 @@ template <> inline const uint32_t Property::getValue() const {
  * @return uint64 value
  */
 template <> inline const uint64_t Property::getValue() const {
-  LIQUID_ASSERT(mType == UINT64, "Property type is not uint64");
+  QuollAssert(mType == UINT64, "Property type is not uint64");
 
   return std::any_cast<uint64_t>(mValue);
 }
@@ -156,7 +156,7 @@ template <> inline const uint64_t Property::getValue() const {
  * @return Real value
  */
 template <> inline const float Property::getValue() const {
-  LIQUID_ASSERT(mType == REAL, "Property type is not a real number");
+  QuollAssert(mType == REAL, "Property type is not a real number");
 
   return std::any_cast<float>(mValue);
 }
@@ -167,7 +167,7 @@ template <> inline const float Property::getValue() const {
  * @return Vec2 value
  */
 template <> inline const glm::vec2 Property::getValue() const {
-  LIQUID_ASSERT(mType == VECTOR2, "Property type is not Vector2");
+  QuollAssert(mType == VECTOR2, "Property type is not Vector2");
 
   return std::any_cast<glm::vec2>(mValue);
 }
@@ -178,7 +178,7 @@ template <> inline const glm::vec2 Property::getValue() const {
  * @return Vec3 value
  */
 template <> inline const glm::vec3 Property::getValue() const {
-  LIQUID_ASSERT(mType == VECTOR3, "Property type is not Vector3");
+  QuollAssert(mType == VECTOR3, "Property type is not Vector3");
 
   return std::any_cast<glm::vec3>(mValue);
 }
@@ -189,7 +189,7 @@ template <> inline const glm::vec3 Property::getValue() const {
  * @return vec4 value
  */
 template <> inline const glm::vec4 Property::getValue() const {
-  LIQUID_ASSERT(mType == VECTOR4, "Property type is not Vector4");
+  QuollAssert(mType == VECTOR4, "Property type is not Vector4");
 
   return std::any_cast<glm::vec4>(mValue);
 }
@@ -200,7 +200,7 @@ template <> inline const glm::vec4 Property::getValue() const {
  * @return Matrix4x4 value
  */
 template <> inline const glm::mat4 Property::getValue() const {
-  LIQUID_ASSERT(mType == MATRIX4, "Property type is not Matrix4");
+  QuollAssert(mType == MATRIX4, "Property type is not Matrix4");
 
   return std::any_cast<glm::mat4>(mValue);
 }

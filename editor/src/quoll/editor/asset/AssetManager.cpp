@@ -204,7 +204,7 @@ Result<Path> AssetManager::createAnimator(const Path &assetPath) {
 }
 
 Result<bool> AssetManager::reloadAssets() {
-  LIQUID_PROFILE_EVENT("AssetManager::reloadAssets");
+  QUOLL_PROFILE_EVENT("AssetManager::reloadAssets");
 
   std::vector<String> warnings;
 
@@ -252,7 +252,7 @@ Result<bool> AssetManager::reloadAssets() {
 
 Result<bool>
 AssetManager::validateAndPreloadAssets(RenderStorage &renderStorage) {
-  LIQUID_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
+  QUOLL_PROFILE_EVENT("AssetManager::validateAndPreloadAssets");
   auto reloadRes = reloadAssets();
 
   auto res = mAssetCache.preloadAssets(renderStorage);

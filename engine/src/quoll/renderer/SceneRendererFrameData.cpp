@@ -147,7 +147,7 @@ SceneRendererFrameData::SceneRendererFrameData(RenderStorage &renderStorage,
 }
 
 void SceneRendererFrameData::updateBuffers() {
-  LIQUID_PROFILE_EVENT("SceneRendererFrameData::updateBuffer");
+  QUOLL_PROFILE_EVENT("SceneRendererFrameData::updateBuffer");
   mFlatMaterialsBuffer.update(mFlatMaterials.data(),
                               mFlatMaterials.size() *
                                   sizeof(rhi::DeviceAddress));

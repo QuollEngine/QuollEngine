@@ -27,10 +27,10 @@ public:
    * @param entityDatabase Entity database
    */
   void output(EntityDatabase &entityDatabase) {
-    LIQUID_PROFILE_EVENT("AudioSystem::output");
+    QUOLL_PROFILE_EVENT("AudioSystem::output");
 
     {
-      LIQUID_PROFILE_EVENT("Cleanup audio data for delete components");
+      QUOLL_PROFILE_EVENT("Cleanup audio data for delete components");
 
       for (auto [entity, source] : mAudioSourceRemoveObserver) {
         if (entityDatabase.has<AudioStart>(entity)) {
@@ -51,7 +51,7 @@ public:
     }
 
     {
-      LIQUID_PROFILE_EVENT("Start audios");
+      QUOLL_PROFILE_EVENT("Start audios");
       for (auto [entity, source, play] :
            entityDatabase.view<AudioSource, AudioStart>()) {
         if (entityDatabase.has<AudioStatus>(entity)) {
@@ -68,8 +68,7 @@ public:
     }
 
     {
-      LIQUID_PROFILE_EVENT(
-          "Delete audio status components for finished audios");
+      QUOLL_PROFILE_EVENT("Delete audio status components for finished audios");
 
       std::set<Entity> toBeDeletedStatuses;
       for (auto [entity, status] : entityDatabase.view<AudioStatus>()) {

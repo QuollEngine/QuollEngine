@@ -19,7 +19,7 @@ void RenderGraphPass::read(RenderGraphResource<rhi::TextureHandle> handle) {
 }
 
 void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferUsage usage) {
-  LIQUID_ASSERT(
+  QuollAssert(
       !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Vertex) &&
           !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Index) &&
           !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Indirect),
@@ -29,12 +29,11 @@ void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferUsage usage) {
 
 void RenderGraphPass::read(rhi::BufferHandle handle, rhi::BufferUsage usage) {
   if (mType == RenderGraphPassType::Compute) {
-    LIQUID_ASSERT(
-        !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Vertex) &&
-            !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Index),
-        "Compute pass can only read "
-        "buffers from uniform, storage, "
-        "or indirect");
+    QuollAssert(!BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Vertex) &&
+                    !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Index),
+                "Compute pass can only read "
+                "buffers from uniform, storage, "
+                "or indirect");
   }
   mBufferInputs.push_back({handle, usage});
 }

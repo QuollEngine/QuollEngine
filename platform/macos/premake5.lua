@@ -1,8 +1,8 @@
 function linkPlatform()
-    links { "LiquidPlatformMacOS" }
+    links { "QuollPlatformMacOS" }
 end
 
-project "LiquidPlatformMacOS"
+project "QuollPlatformMacOS"
     basedir "../../workspace/platform-macos"
     kind "StaticLib"
 

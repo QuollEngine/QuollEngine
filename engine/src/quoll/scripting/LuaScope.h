@@ -50,7 +50,7 @@ public:
    * @return Variable value
    */
   template <class T> T get(int32_t index = -1) {
-    LIQUID_ASSERT(false, "Not implemented");
+    QuollAssert(false, "Not implemented");
   }
 
   /**
@@ -65,7 +65,7 @@ public:
    * @retval false Type does not match
    */
   template <class T> bool is(int32_t index = -1) {
-    LIQUID_ASSERT(false, "Not implemented");
+    QuollAssert(false, "Not implemented");
     return false;
   }
 
@@ -79,7 +79,7 @@ public:
    * @param value Variable value
    */
   template <class T> void set(const T &value) {
-    LIQUID_ASSERT(false, "Not implemented");
+    QuollAssert(false, "Not implemented");
   }
 
   /**

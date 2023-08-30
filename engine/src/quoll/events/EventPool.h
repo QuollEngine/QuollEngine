@@ -120,8 +120,8 @@ public:
    * @return Observers for event type
    */
   inline const SparseSet<EventObserver> &getObservers(TEvent type) const {
-    LIQUID_ASSERT(mObservers.find(type) != mObservers.end(),
-                  "No observers found for event");
+    QuollAssert(mObservers.find(type) != mObservers.end(),
+                "No observers found for event");
     return mObservers.at(type);
   }
 

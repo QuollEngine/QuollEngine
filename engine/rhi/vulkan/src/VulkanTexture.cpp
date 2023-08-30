@@ -27,13 +27,13 @@ VulkanTexture::VulkanTexture(const TextureDescription &description,
       mFormat(VulkanMapping::getFormat(description.format)),
       mDescription(description) {
 
-  LIQUID_ASSERT(description.width > 0 && description.height > 0,
-                "Texture dimensions cannot be zero");
+  QuollAssert(description.width > 0 && description.height > 0,
+              "Texture dimensions cannot be zero");
 
-  LIQUID_ASSERT(description.type == TextureType::Cubemap
-                    ? description.layerCount == 6
-                    : true,
-                "Cubemap must have 6 layers");
+  QuollAssert(description.type == TextureType::Cubemap
+                  ? description.layerCount == 6
+                  : true,
+              "Cubemap must have 6 layers");
 
   uint32_t imageFlags = description.type == TextureType::Cubemap
                             ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT

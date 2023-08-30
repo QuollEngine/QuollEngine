@@ -12,7 +12,7 @@ namespace quoll {
 Result<Path>
 AssetCache::createAnimationFromAsset(const AssetData<AnimationAsset> &asset) {
   if (asset.uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 

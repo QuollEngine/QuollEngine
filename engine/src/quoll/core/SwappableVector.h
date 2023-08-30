@@ -84,7 +84,7 @@ public:
    * @param index Index
    */
   void erase(size_t index) {
-    LIQUID_ASSERT(index < mSize, "Index out of bounds");
+    QuollAssert(index < mSize, "Index out of bounds");
     size_t lastItem = mSize - 1;
     mBuffer.at(index) = mBuffer.at(lastItem);
     mSize--;
@@ -97,7 +97,7 @@ public:
    * @return Item
    */
   inline TItem &at(size_t index) {
-    LIQUID_ASSERT(index < mSize, "Index out of bounds");
+    QuollAssert(index < mSize, "Index out of bounds");
     return mBuffer.at(index);
   }
 
@@ -108,7 +108,7 @@ public:
    * @return Item
    */
   inline const TItem &at(size_t index) const {
-    LIQUID_ASSERT(index < mSize, "Index out of bounds");
+    QuollAssert(index < mSize, "Index out of bounds");
     return mBuffer.at(index);
   }
 

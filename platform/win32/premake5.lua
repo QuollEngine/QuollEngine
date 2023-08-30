@@ -1,8 +1,8 @@
 function linkPlatform()
-    links { 'LiquidPlatformWin32' }
+    links { 'QuollPlatformWin32' }
 end
 
-project 'LiquidPlatformWin32'
+project 'QuollPlatformWin32'
     basedir "../../workspace/platform-win32"
     kind "StaticLib"
 

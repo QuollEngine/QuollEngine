@@ -62,7 +62,7 @@ public:
    * @param key Item key
    */
   void erase(size_t key) {
-    LIQUID_ASSERT(key < mSparseData.size(), "Index out of bounds");
+    QuollAssert(key < mSparseData.size(), "Index out of bounds");
 
     auto lastKey = size() - 1;
 
@@ -91,10 +91,10 @@ public:
    * @return item data
    */
   inline TData &at(size_t key) {
-    LIQUID_ASSERT(key < mSparseData.size(), "Index out of bounds");
+    QuollAssert(key < mSparseData.size(), "Index out of bounds");
     size_t denseIndex = mSparseData.at(key);
 
-    LIQUID_ASSERT(denseIndex != Empty, "No data at key");
+    QuollAssert(denseIndex != Empty, "No data at key");
 
     return mRealData.at(denseIndex);
   }
@@ -106,10 +106,10 @@ public:
    * @return item data
    */
   inline const TData &at(size_t key) const {
-    LIQUID_ASSERT(key < mSparseData.size(), "Index out of bounds");
+    QuollAssert(key < mSparseData.size(), "Index out of bounds");
     size_t denseIndex = mSparseData.at(key);
 
-    LIQUID_ASSERT(denseIndex != Empty, "No data at key");
+    QuollAssert(denseIndex != Empty, "No data at key");
 
     return mRealData.at(denseIndex);
   }

@@ -21,7 +21,7 @@ VulkanRenderContext::VulkanRenderContext(VulkanDeviceObject &device,
 VkResult VulkanRenderContext::present(VulkanFrameManager &frameManager,
                                       const VulkanSwapchain &swapchain,
                                       uint32_t imageIdx) {
-  LIQUID_PROFILE_EVENT("VulkanRenderContext::present");
+  QUOLL_PROFILE_EVENT("VulkanRenderContext::present");
   std::array<VkSemaphore, 1> waitSemaphores{
       frameManager.getRenderFinishedSemaphore()};
   std::array<VkSwapchainKHR, 1> swapchains{swapchain};

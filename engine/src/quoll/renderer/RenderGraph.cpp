@@ -112,7 +112,7 @@ void RenderGraph::buildResources(RenderStorage &storage) {
 }
 
 void RenderGraph::compile() {
-  LIQUID_PROFILE_EVENT("RenderGraph::compile");
+  QUOLL_PROFILE_EVENT("RenderGraph::compile");
   std::vector<size_t> passIndices;
   passIndices.reserve(mPasses.size());
 
@@ -121,7 +121,7 @@ void RenderGraph::compile() {
   for (auto &x : mPasses) {
     uniquePasses.insert(x.getName());
   }
-  LIQUID_ASSERT(
+  QuollAssert(
       uniquePasses.size() == mPasses.size(),
       "Some of the names in the render graph are used in more than one pass");
 
@@ -202,7 +202,7 @@ void RenderGraph::compile() {
 }
 
 void RenderGraph::buildBarriers() {
-  LIQUID_PROFILE_EVENT("RenderGraph::buildBarriers");
+  QUOLL_PROFILE_EVENT("RenderGraph::buildBarriers");
 
   std::unordered_map<rhi::TextureHandle, rhi::ImageLayout>
       textureAttachmentLayouts;
@@ -269,9 +269,8 @@ void RenderGraph::buildBarriers() {
       auto newDependency =
           RenderGraphSyncDependency::getTextureRead(pass.getType());
 
-      LIQUID_ASSERT(textureDependencies.find(handle) !=
-                        textureDependencies.end(),
-                    "Cannot read from unwritten texture");
+      QuollAssert(textureDependencies.find(handle) != textureDependencies.end(),
+                  "Cannot read from unwritten texture");
 
       auto oldDependency = textureDependencies.at(handle);
 
@@ -365,7 +364,7 @@ void RenderGraph::buildBarriers() {
 }
 
 void RenderGraph::buildPasses(RenderStorage &storage) {
-  LIQUID_PROFILE_EVENT("RenderGraph::buildPasses");
+  QUOLL_PROFILE_EVENT("RenderGraph::buildPasses");
 
   for (auto &pass : mCompiledPasses) {
     if (pass.getType() == RenderGraphPassType::Compute) {
@@ -378,7 +377,7 @@ void RenderGraph::buildPasses(RenderStorage &storage) {
 
 void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
                                     RenderStorage &storage) {
-  LIQUID_PROFILE_EVENT("RenderGraph::buildGraphicsPass");
+  QUOLL_PROFILE_EVENT("RenderGraph::buildGraphicsPass");
   auto *device = storage.getDevice();
 
   uint32_t width = 0;
@@ -469,7 +468,7 @@ void RenderGraph::buildGraphicsPass(RenderGraphPass &pass,
 
 void RenderGraph::buildComputePass(RenderGraphPass &pass,
                                    RenderStorage &storage) {
-  LIQUID_PROFILE_EVENT("buildComputePass");
+  QUOLL_PROFILE_EVENT("buildComputePass");
   auto *device = storage.getDevice();
 
   for (auto handle : pass.mPipelines) {
@@ -485,7 +484,7 @@ void RenderGraph::buildComputePass(RenderGraphPass &pass,
 
 void RenderGraph::execute(rhi::RenderCommandList &commandList,
                           uint32_t frameIndex) {
-  LIQUID_PROFILE_EVENT("RenderGraph::execute");
+  QUOLL_PROFILE_EVENT("RenderGraph::execute");
 
   for (auto &pass : mCompiledPasses) {
     commandList.pipelineBarrier(pass.mDependencies.memoryBarriers,

@@ -53,8 +53,8 @@ VulkanShader::~VulkanShader() {
 std::vector<char> VulkanShader::readShaderFile(const Path &filepath) {
   std::ifstream file(filepath, std::ios::ate | std::ios::binary);
 
-  LIQUID_ASSERT(file.is_open(),
-                "Failed to open shader file \"" + filepath.string() + "\"");
+  QuollAssert(file.is_open(),
+              "Failed to open shader file \"" + filepath.string() + "\"");
 
   std::streamsize fileSize = file.tellg();
   std::vector<char> buffer(fileSize);
@@ -72,9 +72,9 @@ void VulkanShader::createReflectionInfo(const std::vector<char> &bytes) {
   SpvReflectResult result = spvReflectCreateShaderModule(
       bytes.size(), bytes.data(), &shaderReflectModule);
 
-  LIQUID_ASSERT(result == SPV_REFLECT_RESULT_SUCCESS,
-                "Failed to read reflection data from shader " +
-                    mPath.filename().string());
+  QuollAssert(result == SPV_REFLECT_RESULT_SUCCESS,
+              "Failed to read reflection data from shader " +
+                  mPath.filename().string());
 
   mStage = static_cast<VkShaderStageFlagBits>(shaderReflectModule.shader_stage);
 

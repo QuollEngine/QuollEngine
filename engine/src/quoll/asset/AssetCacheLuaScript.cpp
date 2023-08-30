@@ -80,7 +80,7 @@ Result<Path>
 quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
                                              const Uuid &uuid) {
   if (uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 

@@ -10,7 +10,7 @@
 
 #include "quoll/core/Engine.h"
 
-#ifdef LIQUID_PROFILER
+#ifdef QUOLL_PROFILER
 static const bool RECORD_MEMORY_ALLOCATIONS = true;
 #else
 static const bool RECORD_MEMORY_ALLOCATIONS = false;
@@ -331,7 +331,7 @@ PhysicsSystem::PhysicsSystem(EventSystem &eventSystem)
 PhysicsSystem::~PhysicsSystem() { delete mImpl; }
 
 void PhysicsSystem::update(float dt, EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("PhysicsSystem::update");
+  QUOLL_PROFILE_EVENT("PhysicsSystem::update");
 
   synchronizeComponents(entityDatabase);
 
@@ -369,10 +369,10 @@ void PhysicsSystem::observeChanges(EntityDatabase &entityDatabase) {
 }
 
 void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("PhysicsSystem::synchronizeEntitiesWithPhysx");
+  QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeEntitiesWithPhysx");
 
   {
-    LIQUID_PROFILE_EVENT("Cleanup dangling physx objects in scene");
+    QUOLL_PROFILE_EVENT("Cleanup dangling physx objects in scene");
     for (auto [entity, physx] : mPhysxInstanceRemoveObserver) {
       if (physx.rigidDynamic) {
         mImpl->getScene()->removeActor(*physx.rigidDynamic);
@@ -393,7 +393,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Synchronize collidable components");
+    QUOLL_PROFILE_EVENT("Synchronize collidable components");
     for (auto [entity, collidable, world] :
          entityDatabase.view<Collidable, WorldTransform>()) {
       if (!entityDatabase.has<PhysxInstance>(entity)) {
@@ -460,7 +460,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Synchronize rigid body components");
+    QUOLL_PROFILE_EVENT("Synchronize rigid body components");
     for (auto [entity, rigidBody, world] :
          entityDatabase.view<RigidBody, WorldTransform>()) {
       if (!entityDatabase.has<PhysxInstance>(entity)) {
@@ -502,7 +502,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Clear rigid body velocities");
+    QUOLL_PROFILE_EVENT("Clear rigid body velocities");
     for (auto [entity, _, _2, physx] :
          entityDatabase.view<RigidBodyClear, RigidBody, PhysxInstance>()) {
       physx.rigidDynamic->setLinearVelocity(PxVec3(0.0f));
@@ -513,7 +513,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Apply forces");
+    QUOLL_PROFILE_EVENT("Apply forces");
 
     for (auto [entity, force, _, physx] :
          entityDatabase.view<Force, RigidBody, PhysxInstance>()) {
@@ -525,7 +525,7 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Apply torques");
+    QUOLL_PROFILE_EVENT("Apply torques");
 
     for (auto [entity, torque, _, physx] :
          entityDatabase.view<Torque, RigidBody, PhysxInstance>()) {
@@ -538,12 +538,12 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
 }
 
 void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("PhysicsSystem::synchronizeTransforms");
+  QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeTransforms");
   uint32_t count = 0;
   auto **actors = mImpl->getScene()->getActiveActors(count);
 
   {
-    LIQUID_PROFILE_EVENT("Synchronize world transforms");
+    QUOLL_PROFILE_EVENT("Synchronize world transforms");
     // calculate world transforms first so that local
     // transforms are calculated from the most recent
     // values
@@ -581,7 +581,7 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
   }
 
   {
-    LIQUID_PROFILE_EVENT("Synchronize local transforms");
+    QUOLL_PROFILE_EVENT("Synchronize local transforms");
     // Calculate local transforms from parent world transforms
     for (uint32_t i = 0; i < count; ++i) {
       if (actors[i]->getType() != PxActorType::eRIGID_DYNAMIC) {

@@ -641,7 +641,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
   auto handle = assetRegistry.getLuaScripts().addAsset(script);
 
   quoll::AssetData<quoll::PrefabAsset> prefab{};
-  prefab.uuid = quoll::Uuid("test.lqprefab");
+  prefab.uuid = quoll::Uuid("test.prefab");
   auto prefabHandle = assetRegistry.getPrefabs().addAsset(prefab);
 
   auto entity = entityDatabase.create();
@@ -672,7 +672,7 @@ TEST_F(EntitySerializerTest, CreatesScriptFieldIfScriptAssetIsRegistry) {
 
   EXPECT_EQ(
       node["script"]["variables"]["test_prefab"]["value"].as<quoll::String>(""),
-      "test.lqprefab");
+      "test.prefab");
 }
 
 // Text

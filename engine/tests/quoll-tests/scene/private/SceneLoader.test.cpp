@@ -1633,7 +1633,7 @@ TEST_F(SceneLoaderScriptTest,
   node["script"]["variables"]["test_valid_prefab"]["value"] = prefabData.uuid;
   node["script"]["variables"]["test_invalid_prefab"]["type"] = "prefab";
   node["script"]["variables"]["test_invalid_prefab"]["value"] =
-      "unknown-prefab-file.lqprefab";
+      "unknown-prefab-file.prefab";
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));

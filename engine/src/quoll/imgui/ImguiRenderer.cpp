@@ -27,7 +27,7 @@ ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
   ImGui_ImplGlfw_InitForVulkan(window.getInstance(), true);
 
   ImGuiIO &io = ImGui::GetIO();
-  io.BackendRendererName = "LiquidRHI";
+  io.BackendRendererName = "QuollRHI";
   io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
   io.IniFilename = nullptr;
 
@@ -70,8 +70,8 @@ ImguiRenderer::~ImguiRenderer() {
 
 ImguiRenderPassData ImguiRenderer::attach(RenderGraph &graph,
                                           const RendererOptions &options) {
-  LIQUID_ASSERT(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
-                        "before starting rendering");
+  QuollAssert(mReady, "Fonts are not built. Call ImguiRenderer::loadFonts "
+                      "before starting rendering");
 
   rhi::TextureDescription imguiDesc{};
   imguiDesc.usage = rhi::TextureUsage::Color | rhi::TextureUsage::Sampled;

@@ -17,7 +17,7 @@ void AssetRegistry::createDefaultObjects() {
 }
 
 void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
-  LIQUID_PROFILE_EVENT("AssetRegistry::syncWithDevice");
+  QUOLL_PROFILE_EVENT("AssetRegistry::syncWithDevice");
 
   // Synchronize textures
   for (auto &[_, texture] : mTextures.getAssets()) {
@@ -186,7 +186,7 @@ void AssetRegistry::syncWithDevice(RenderStorage &renderStorage) {
 }
 
 std::pair<AssetType, uint32_t> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
-  LIQUID_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
+  QUOLL_PROFILE_EVENT("AssetRegistry::getAssetByUUID");
   for (auto &[handle, asset] : mTextures.getAssets()) {
     if (asset.uuid == uuid) {
       return {AssetType::Texture, static_cast<uint32_t>(handle)};

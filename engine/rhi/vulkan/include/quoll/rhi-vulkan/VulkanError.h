@@ -21,8 +21,8 @@ String createVulkanErrorMessage(VkResult resultCode, const String &errorMessage,
  */
 inline void checkForVulkanError(VkResult resultCode, const String &errorMessage,
                                 const String &debugName = "") {
-  LIQUID_ASSERT(resultCode == VK_SUCCESS,
-                createVulkanErrorMessage(resultCode, errorMessage, debugName));
+  QuollAssert(resultCode == VK_SUCCESS,
+              createVulkanErrorMessage(resultCode, errorMessage, debugName));
   if (resultCode != VK_SUCCESS) {
     std::cout << createVulkanErrorMessage(resultCode, errorMessage, debugName);
     std::terminate();

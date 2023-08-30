@@ -7,7 +7,7 @@ CameraAspectRatioUpdater::CameraAspectRatioUpdater(Window &window)
     : mWindow(window) {}
 
 void CameraAspectRatioUpdater::update(EntityDatabase &entityDatabase) {
-  LIQUID_PROFILE_EVENT("CameraAspectRatioUpdater::update");
+  QUOLL_PROFILE_EVENT("CameraAspectRatioUpdater::update");
   const auto &size = mWindow.getWindowSize();
 
   if (size.x <= 0 || size.y <= 0)

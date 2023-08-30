@@ -17,8 +17,7 @@ Entity EntitySpawner::spawnEmpty(LocalTransform transform) {
 
 std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
                                                LocalTransform transform) {
-  LIQUID_ASSERT(mAssetRegistry.getPrefabs().hasAsset(handle),
-                "Prefab not found");
+  QuollAssert(mAssetRegistry.getPrefabs().hasAsset(handle), "Prefab not found");
 
   const auto &assetName = mAssetRegistry.getPrefabs().getAsset(handle).name;
   const auto &asset = mAssetRegistry.getPrefabs().getAsset(handle).data;
@@ -154,8 +153,8 @@ std::vector<Entity> EntitySpawner::spawnPrefab(PrefabAssetHandle handle,
     }
   }
 
-  LIQUID_ASSERT(!rootEntities.empty(),
-                "Nothing is spawned. Check that prefab is not empty.");
+  QuollAssert(!rootEntities.empty(),
+              "Nothing is spawned. Check that prefab is not empty.");
 
   auto rootNode = Entity::Null;
   // If more than one root exists,

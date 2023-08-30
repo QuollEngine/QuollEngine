@@ -45,9 +45,9 @@ public:
   template <class TComponentType> void reg() {
     auto id = getComponentId<TComponentType>();
 
-    LIQUID_ASSERT(mComponentPools.find(id) == mComponentPools.end(),
-                  "Component pool " + String(typeid(TComponentType).name()) +
-                      " already exists");
+    QuollAssert(mComponentPools.find(id) == mComponentPools.end(),
+                "Component pool " + String(typeid(TComponentType).name()) +
+                    " already exists");
 
     mComponentPools.insert({id, {}});
 
@@ -99,9 +99,9 @@ public:
    */
   template <class TComponentType>
   void set(Entity entity, const TComponentType &value) {
-    LIQUID_ASSERT(exists(entity),
-                  "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
-                      " does not exist");
+    QuollAssert(exists(entity),
+                "Entity " + std::to_string(static_cast<uint32_t>(entity)) +
+                    " does not exist");
 
     auto &pool = getPoolForComponent<TComponentType>();
 
@@ -131,10 +131,10 @@ public:
    */
   template <class TComponentType>
   const TComponentType &get(Entity entity) const {
-    LIQUID_ASSERT(has<TComponentType>(entity),
-                  "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " +
-                      std::to_string(static_cast<uint32_t>(entity)));
+    QuollAssert(has<TComponentType>(entity),
+                "Component named " + String(typeid(TComponentType).name()) +
+                    " does not exist for entity " +
+                    std::to_string(static_cast<uint32_t>(entity)));
     const auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<const TComponentType &>(
@@ -149,10 +149,10 @@ public:
    * @return Component value
    */
   template <class TComponentType> TComponentType &get(Entity entity) {
-    LIQUID_ASSERT(has<TComponentType>(entity),
-                  "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " +
-                      std::to_string(static_cast<uint32_t>(entity)));
+    QuollAssert(has<TComponentType>(entity),
+                "Component named " + String(typeid(TComponentType).name()) +
+                    " does not exist for entity " +
+                    std::to_string(static_cast<uint32_t>(entity)));
     auto &pool = getPoolForComponent<TComponentType>();
 
     return std::any_cast<TComponentType &>(
@@ -184,10 +184,10 @@ public:
     size_t sEntity = static_cast<size_t>(entity);
 
     auto &pool = getPoolForComponent<TComponentType>();
-    LIQUID_ASSERT(sEntity < pool.entityIndices.size(),
-                  "Component named " + String(typeid(TComponentType).name()) +
-                      " does not exist for entity " +
-                      std::to_string(static_cast<uint32_t>(entity)));
+    QuollAssert(sEntity < pool.entityIndices.size(),
+                "Component named " + String(typeid(TComponentType).name()) +
+                    " does not exist for entity " +
+                    std::to_string(static_cast<uint32_t>(entity)));
 
     size_t entityIndexToDelete = pool.entityIndices[sEntity];
 
@@ -269,8 +269,8 @@ public:
   EntityStorageSparseSetObserver<TComponentType> observeRemove() {
     auto &observers = getRemoveObserverPoolForComponent<TComponentType>();
 
-    LIQUID_ASSERT(observers.size() < MaxObserverPoolSizePerComponent - 1,
-                  "Maximum number of observers is reached");
+    QuollAssert(observers.size() < MaxObserverPoolSizePerComponent - 1,
+                "Maximum number of observers is reached");
 
     observers.push_back({});
 
@@ -300,9 +300,9 @@ private:
   template <class TComponentType>
   const EntityStorageSparseSetComponentPool &getPoolForComponent() const {
     auto id = getComponentId<TComponentType>();
-    LIQUID_ASSERT(mComponentPools.find(id) != mComponentPools.end(),
-                  "Component pool " + String(typeid(TComponentType).name()) +
-                      " does not exists");
+    QuollAssert(mComponentPools.find(id) != mComponentPools.end(),
+                "Component pool " + String(typeid(TComponentType).name()) +
+                    " does not exists");
 
     return mComponentPools.at(id);
   }
@@ -318,9 +318,9 @@ private:
   template <class TComponentType>
   EntityStorageSparseSetComponentPool &getPoolForComponent() {
     auto id = getComponentId<TComponentType>();
-    LIQUID_ASSERT(mComponentPools.find(id) != mComponentPools.end(),
-                  "Component pool " + String(typeid(TComponentType).name()) +
-                      " does not exists");
+    QuollAssert(mComponentPools.find(id) != mComponentPools.end(),
+                "Component pool " + String(typeid(TComponentType).name()) +
+                    " does not exists");
 
     return mComponentPools.at(id);
   }
@@ -337,9 +337,9 @@ private:
   std::vector<EntityStorageSparseSetComponentPool> &
   getRemoveObserverPoolForComponent() {
     auto id = getComponentId<TComponentType>();
-    LIQUID_ASSERT(mRemoveObserverPools.find(id) != mRemoveObserverPools.end(),
-                  "Component pool " + String(typeid(TComponentType).name()) +
-                      " does not exist");
+    QuollAssert(mRemoveObserverPools.find(id) != mRemoveObserverPools.end(),
+                "Component pool " + String(typeid(TComponentType).name()) +
+                    " does not exist");
 
     return mRemoveObserverPools.at(id);
   }

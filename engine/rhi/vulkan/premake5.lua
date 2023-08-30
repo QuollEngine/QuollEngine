@@ -1,4 +1,4 @@
-project "LiquidRHIVulkan"
+project "QuollRHIVulkan"
     basedir "../../../workspace/rhi-vulkan"
     kind "StaticLib"
 
@@ -14,6 +14,6 @@ project "LiquidRHIVulkan"
     }
 
 function linkVulkanRHI()
-    links { "LiquidRHIVulkan", "LiquidRHICore", "vendor-libvolk", "vendor-libspirv-reflect" }
+    links { "QuollRHIVulkan", "QuollRHICore", "vendor-libvolk", "vendor-libspirv-reflect" }
     includedirs { "../engine/rhi/vulkan/include" }
 end

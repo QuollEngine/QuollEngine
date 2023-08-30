@@ -102,12 +102,12 @@ jobs:
       - name: Test engine
         run: |
           cd workspace/engine-test/bin/Test
-          ./LiquidEngineTest
+          ./QuollEngineTest
 
       - name: Test editor
         run: |
           cd workspace/editor-test/bin/Test
-          ./LiquidEditorTest
+          ./QuollEditorTest
 
       - name: Coverage
         run: |
@@ -160,14 +160,14 @@ jobs:
 
       - name: Build
         run: |
-          msbuild .\workspace\LiquidEngine.sln /p:configuration=Test
+          msbuild .\workspace\QuollEngine.sln /p:configuration=Test
 
       - name: Test engine
         run: |
           cd workspace/engine-test/bin/Test
-          ./LiquidEngineTest
+          ./QuollEngineTest
 
       - name: Test editor
         run: |
           cd workspace/editor-test/bin/Test
-          ./LiquidEditorTest
+          ./QuollEditorTest

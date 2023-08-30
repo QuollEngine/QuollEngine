@@ -15,8 +15,8 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
   if (initReturnValue == GLFW_FALSE) {
     const char *errorMsg = nullptr;
     glfwGetError(&errorMsg);
-    LIQUID_ASSERT(initReturnValue,
-                  "Failed to initialize GLFW: " + String(errorMsg));
+    QuollAssert(initReturnValue,
+                "Failed to initialize GLFW: " + String(errorMsg));
     Engine::getLogger().error() << "Failed to initialize GLFW: " << errorMsg;
     return;
   }
@@ -33,8 +33,8 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
   if (!mWindowInstance) {
     const char *errorMsg = nullptr;
     glfwGetError(&errorMsg);
-    LIQUID_ASSERT(initReturnValue,
-                  "Failed to create GLFW window: " + String(errorMsg));
+    QuollAssert(initReturnValue,
+                "Failed to create GLFW window: " + String(errorMsg));
     Engine::getLogger().error() << "Failed to create GLFW window: " << errorMsg;
   }
 

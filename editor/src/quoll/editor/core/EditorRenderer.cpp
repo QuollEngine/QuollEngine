@@ -159,7 +159,7 @@ void EditorRenderer::attach(RenderGraph &graph,
       // Collidable shapes
       if (frameData.isCollidableEntitySelected() &&
           frameData.getCollidableShapeType() != PhysicsGeometryType::Plane) {
-        LIQUID_PROFILE_EVENT("EditorPass::CollidableShapes");
+        QUOLL_PROFILE_EVENT("EditorPass::CollidableShapes");
 
         commandList.bindPipeline(collidableShapePipeline);
         commandList.bindDescriptor(
@@ -187,7 +187,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 
       // Editor grid
       {
-        LIQUID_PROFILE_EVENT("EditorPass::EditorGrid");
+        QUOLL_PROFILE_EVENT("EditorPass::EditorGrid");
 
         commandList.bindPipeline(editorGridPipeline);
         commandList.bindDescriptor(
@@ -200,7 +200,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 
       // Skeleton bones
       if (!frameData.getBoneCounts().empty()) {
-        LIQUID_PROFILE_EVENT("EditorPass::SkeletonBones");
+        QUOLL_PROFILE_EVENT("EditorPass::SkeletonBones");
 
         commandList.bindPipeline(skeletonLinesPipeline);
         commandList.bindDescriptor(
@@ -216,7 +216,7 @@ void EditorRenderer::attach(RenderGraph &graph,
 
       // Object gizmos
       {
-        LIQUID_PROFILE_EVENT("EditorPass::ObjectGizmos");
+        QUOLL_PROFILE_EVENT("EditorPass::ObjectGizmos");
 
         commandList.bindPipeline(objectIconsPipeline);
         commandList.bindDescriptor(
@@ -488,7 +488,7 @@ void EditorRenderer::updateFrameData(EntityDatabase &entityDatabase,
                                      uint32_t frameIndex) {
   auto &frameData = mFrameData.at(frameIndex);
 
-  LIQUID_PROFILE_EVENT("EditorRenderer::update");
+  QUOLL_PROFILE_EVENT("EditorRenderer::update");
   frameData.clear();
 
   if (entityDatabase.exists(state.selectedEntity)) {

@@ -101,7 +101,7 @@ public:
    * @brief Poll events
    */
   inline void poll() {
-    LIQUID_PROFILE_EVENT("EventSystem::poll");
+    QUOLL_PROFILE_EVENT("EventSystem::poll");
     poll<0, std::tuple_size<decltype(mPools)>::value>();
   }
 

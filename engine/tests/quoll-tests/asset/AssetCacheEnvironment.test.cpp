@@ -70,7 +70,7 @@ TEST_F(AssetCacheEnvironmentTest,
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
   asset.uuid = quoll::Uuid::generate();
-  asset.path = FixturesPath / "environment.lqenv";
+  asset.path = FixturesPath / "environment.env";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);
@@ -105,7 +105,7 @@ TEST_F(AssetCacheEnvironmentTest,
 
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
-  asset.path = FixturesPath / "environment.lqenv";
+  asset.path = FixturesPath / "environment.env";
   asset.uuid = quoll::Uuid::generate();
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
@@ -139,7 +139,7 @@ TEST_F(AssetCacheEnvironmentTest,
   quoll::AssetData<quoll::EnvironmentAsset> asset{};
 
   asset.uuid = quoll::Uuid::generate();
-  asset.path = FixturesPath / "environment.lqenv";
+  asset.path = FixturesPath / "environment.env";
   asset.data.irradianceMap = irradianceMap;
   asset.data.specularMap = specularMap;
   auto createRes = cache.createEnvironmentFromAsset(asset);

@@ -12,7 +12,7 @@ namespace quoll {
 Result<Path>
 AssetCache::createMaterialFromAsset(const AssetData<MaterialAsset> &asset) {
   if (asset.uuid.isEmpty()) {
-    LIQUID_ASSERT(false, "Invalid uuid provided");
+    QuollAssert(false, "Invalid uuid provided");
     return Result<Path>::Error("Invalid uuid provided");
   }
 
