@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Audio source component
@@ -15,4 +15,4 @@ struct AudioSource {
   AudioAssetHandle source = AudioAssetHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

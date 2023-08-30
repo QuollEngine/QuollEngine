@@ -3,7 +3,7 @@
 #include "liquid/asset/Asset.h"
 #include "Joint.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Skeleton component
@@ -82,4 +82,4 @@ struct SkeletonDebug {
   std::vector<glm::mat4> boneTransforms;
 };
 
-} // namespace liquid
+} // namespace quoll

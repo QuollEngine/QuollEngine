@@ -2,7 +2,7 @@
 
 #include "RenderGraphRegistry.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Render graph resource
@@ -59,4 +59,4 @@ private:
   size_t mIndex;
 };
 
-} // namespace liquid
+} // namespace quoll

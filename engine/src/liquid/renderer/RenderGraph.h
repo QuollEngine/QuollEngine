@@ -7,7 +7,7 @@
 #include "RenderGraphResource.h"
 #include "RenderGraphPass.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class GraphDirty { None, PassChanges, SizeUpdate };
 
@@ -181,4 +181,4 @@ private:
   std::vector<RenderGraphPass> mCompiledPasses;
 };
 
-} // namespace liquid
+} // namespace quoll

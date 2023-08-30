@@ -4,7 +4,7 @@
 
 #include "MainLoop.h"
 
-namespace liquid {
+namespace quoll {
 
 MainLoop::MainLoop(Window &window, FPSCounter &fpsCounter)
     : mWindow(window), mFpsCounter(fpsCounter) {}
@@ -68,4 +68,4 @@ void MainLoop::run() {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

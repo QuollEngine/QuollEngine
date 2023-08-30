@@ -5,7 +5,7 @@
 
 #include "liquid/renderer/SkinnedMeshRenderer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set material slot for skinned mesh renderer
@@ -161,4 +161,4 @@ using EntityCreateSkinnedMeshRenderer =
 using EntityDeleteSkinnedMeshRenderer =
     EntityDefaultDeleteAction<SkinnedMeshRenderer>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

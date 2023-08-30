@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "DeviceStats.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 DeviceStats::DeviceStats(NativeResourceMetrics *resourceMetrics)
     : mResourceMetrics(resourceMetrics) {}
@@ -20,4 +20,4 @@ void DeviceStats::resetCalls() {
 
 void DeviceStats::addCommandCall() { mCommandCallsCount++; }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

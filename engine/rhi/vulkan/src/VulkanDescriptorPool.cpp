@@ -7,7 +7,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanDescriptorPool::VulkanDescriptorPool(
     VulkanDeviceObject &device, VulkanResourceRegistry &registry,
@@ -104,4 +104,4 @@ void VulkanDescriptorPool::reset() {
   mDescriptorSets.clear();
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

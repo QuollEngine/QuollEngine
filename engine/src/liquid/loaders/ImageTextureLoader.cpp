@@ -5,13 +5,13 @@
 #include <stb/stb_image.h>
 #include "ImageTextureLoader.h"
 
-namespace liquid {
+namespace quoll {
 
 ImageTextureLoader::ImageTextureLoader(RenderStorage &renderStorage)
     : mRenderStorage(renderStorage) {}
 
 rhi::TextureHandle ImageTextureLoader::loadFromFile(const Path &path) {
-  liquid::rhi::TextureDescription description;
+  quoll::rhi::TextureDescription description;
   int width = 0, height = 0, channels = 0;
 
   void *data = stbi_load(path.string().c_str(), &width, &height, &channels,
@@ -39,4 +39,4 @@ rhi::TextureHandle ImageTextureLoader::loadFromFile(const Path &path) {
   return texture;
 }
 
-} // namespace liquid
+} // namespace quoll

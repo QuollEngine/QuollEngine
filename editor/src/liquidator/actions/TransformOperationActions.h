@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Set active transform action
@@ -51,4 +51,4 @@ private:
   TransformOperation mOldTransformOperation{};
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

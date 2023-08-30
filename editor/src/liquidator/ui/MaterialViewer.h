@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AssetRegistry.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Material viewer
@@ -27,4 +27,4 @@ private:
   MaterialAssetHandle mHandle = MaterialAssetHandle::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

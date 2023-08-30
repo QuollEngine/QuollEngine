@@ -2,7 +2,7 @@
 
 #include "PhysicsObjects.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Rigid body component
@@ -14,4 +14,4 @@ struct RigidBody {
   PhysicsDynamicRigidBodyDesc dynamicDesc;
 };
 
-} // namespace liquid
+} // namespace quoll

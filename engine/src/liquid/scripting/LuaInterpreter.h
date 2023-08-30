@@ -2,7 +2,7 @@
 
 #include "LuaScope.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Lua interpreter
@@ -36,4 +36,4 @@ public:
   bool evaluate(const std::vector<uint8_t> &bytes, LuaScope &scope);
 };
 
-} // namespace liquid
+} // namespace quoll

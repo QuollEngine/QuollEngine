@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Camera component
@@ -29,4 +29,4 @@ struct Camera {
   glm::vec4 exposure{1.0f, 0.0f, 0.0f, 0.0f};
 };
 
-} // namespace liquid
+} // namespace quoll

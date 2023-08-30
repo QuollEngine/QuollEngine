@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Keyboard shortcut
@@ -92,4 +92,4 @@ private:
   int mKey = -1;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

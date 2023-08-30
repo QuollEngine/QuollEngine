@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Shader description
@@ -12,4 +12,4 @@ struct ShaderDescription {
   Path path;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

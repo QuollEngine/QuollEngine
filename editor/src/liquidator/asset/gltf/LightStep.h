@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load lights into asset registry
@@ -17,4 +17,4 @@ namespace liquid::editor {
  */
 void loadLights(GLTFImportData &importData);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -3,7 +3,7 @@
 #include "MaterialStep.h"
 #include "TextureUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load materials into registry
@@ -107,4 +107,4 @@ void loadMaterials(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

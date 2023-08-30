@@ -3,7 +3,7 @@
 #include "RenderHandle.h"
 #include "liquid/rhi/Format.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class PrimitiveTopology {
   PointList,
@@ -364,4 +364,4 @@ struct ComputePipelineDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

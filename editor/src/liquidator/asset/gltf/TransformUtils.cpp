@@ -2,7 +2,7 @@
 
 #include "TransformUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
                      glm::quat &rotation, glm::vec3 &scale) {
@@ -50,4 +50,4 @@ TransformData loadTransformData(const tinygltf::Node &node) {
   return data;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -5,7 +5,7 @@
 
 class SparseSetTest : public ::testing::Test {
 public:
-  liquid::SparseSet<uint32_t> sparseSet;
+  quoll::SparseSet<uint32_t> sparseSet;
 
   static constexpr size_t NumItems = 20;
 };

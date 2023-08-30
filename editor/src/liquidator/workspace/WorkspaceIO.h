@@ -3,7 +3,7 @@
 #include "liquidator/project/Project.h"
 #include "liquidator/state/WorkspaceState.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Workspace input/output
@@ -31,4 +31,4 @@ public:
                                  const std::filesystem::path &path);
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

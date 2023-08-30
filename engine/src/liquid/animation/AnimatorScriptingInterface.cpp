@@ -8,7 +8,7 @@
 
 #include "AnimatorScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int AnimatorScriptingInterface::LuaInterface::trigger(void *state) {
   LuaScope scope(state);
@@ -47,4 +47,4 @@ int AnimatorScriptingInterface::LuaInterface::deleteThis(void *state) {
                                                                 state);
 }
 
-} // namespace liquid
+} // namespace quoll

@@ -5,7 +5,7 @@
 #include "liquid/yaml/Yaml.h"
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid::detail {
+namespace quoll::detail {
 
 /**
  * @brief Serialize entity for writing
@@ -42,4 +42,4 @@ private:
   EntityDatabase &mEntityDatabase;
 };
 
-} // namespace liquid::detail
+} // namespace quoll::detail

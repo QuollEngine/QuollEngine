@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Transient transform data
@@ -54,4 +54,4 @@ void decomposeMatrix(const glm::mat4 &matrix, glm::vec3 &position,
  */
 TransformData loadTransformData(const tinygltf::Node &node);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

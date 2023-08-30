@@ -3,7 +3,7 @@
 #include "AssetLoader.h"
 #include "GLTFImporter.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 AssetLoader::AssetLoader(AssetManager &assetManager)
     : mAssetManager(assetManager) {}
@@ -46,4 +46,4 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
   return Result<bool>::Ok(true, res.getWarnings());
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

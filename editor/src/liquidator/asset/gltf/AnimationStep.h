@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load animations into asset registry
@@ -14,4 +14,4 @@ namespace liquid::editor {
  */
 void loadAnimations(GLTFImportData &importData);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

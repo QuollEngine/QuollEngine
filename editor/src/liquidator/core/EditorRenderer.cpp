@@ -6,7 +6,7 @@
 
 #include "EditorRenderer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EditorRenderer::EditorRenderer(RenderStorage &renderStorage,
                                rhi::RenderDevice *device)
@@ -859,4 +859,4 @@ void EditorRenderer::createCollidableShapes() {
   // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

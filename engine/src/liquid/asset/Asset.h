@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class MaterialAssetHandle : uint32_t { Null = 0 };
 
@@ -74,4 +74,4 @@ inline const String getAssetTypeString(AssetType type) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

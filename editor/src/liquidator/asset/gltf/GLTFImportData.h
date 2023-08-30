@@ -6,7 +6,7 @@
 #include "liquidator/asset/gltf/TinyGLTF.h"
 #include "liquidator/asset/UUIDMap.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Mapping for GLTF index to
@@ -179,4 +179,4 @@ static String getGLTFAssetName(const GLTFImportData &importData,
   return importData.sourcePath.filename().string() + "/" + name;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

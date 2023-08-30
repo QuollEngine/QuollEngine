@@ -7,15 +7,15 @@
 
 class EntityMeshActionTestBase : public ActionTestBase {
 public:
-  liquid::MeshAssetHandle createMesh() {
-    liquid::AssetData<liquid::MeshAsset> asset{};
-    asset.type = liquid::AssetType::Mesh;
+  quoll::MeshAssetHandle createMesh() {
+    quoll::AssetData<quoll::MeshAsset> asset{};
+    asset.type = quoll::AssetType::Mesh;
     return assetRegistry.getMeshes().addAsset(asset);
   }
 
-  liquid::MeshAssetHandle createSkinnedMesh() {
-    liquid::AssetData<liquid::MeshAsset> asset{};
-    asset.type = liquid::AssetType::SkinnedMesh;
+  quoll::MeshAssetHandle createSkinnedMesh() {
+    quoll::AssetData<quoll::MeshAsset> asset{};
+    asset.type = quoll::AssetType::SkinnedMesh;
     return assetRegistry.getMeshes().addAsset(asset);
   }
 };
@@ -26,12 +26,11 @@ TEST_P(EntitySetMeshTest, ExecutorSetsMeshComponentIfMeshTypeIsMesh) {
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createMesh();
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Mesh>(entity).handle,
-            mesh);
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Mesh>(entity).handle, mesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -41,13 +40,12 @@ TEST_P(EntitySetMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createSkinnedMesh();
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::SkinnedMesh>(entity).handle,
-      mesh);
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::SkinnedMesh>(entity).handle,
+            mesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -57,15 +55,14 @@ TEST_P(EntitySetMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createSkinnedMesh();
   auto mesh = createMesh();
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Mesh>(entity).handle,
-            mesh);
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Mesh>(entity).handle, mesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -75,16 +72,15 @@ TEST_P(EntitySetMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createMesh();
   auto mesh = createSkinnedMesh();
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::SkinnedMesh>(entity).handle,
-      mesh);
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::SkinnedMesh>(entity).handle,
+            mesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -94,14 +90,14 @@ TEST_P(EntitySetMeshTest, UndoSetsPreviousMeshHandleIfSameComponent) {
   auto oldMesh = createMesh();
   auto mesh = createMesh();
 
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Mesh>(entity).handle,
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Mesh>(entity).handle,
             oldMesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -111,16 +107,15 @@ TEST_P(EntitySetMeshTest, UndoSetsPreviousSkinnedMeshHandleIfSameComponent) {
   auto oldMesh = createSkinnedMesh();
   auto mesh = createSkinnedMesh();
 
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::SkinnedMesh>(entity).handle,
-      oldMesh);
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::SkinnedMesh>(entity).handle,
+            oldMesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
@@ -129,17 +124,16 @@ TEST_P(EntitySetMeshTest, UndoReplacesNewMeshWithOldSkinnedMesh) {
   auto oldMesh = createSkinnedMesh();
   auto mesh = createMesh();
 
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::SkinnedMesh>(entity).handle,
-      oldMesh);
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::SkinnedMesh>(entity).handle,
+            oldMesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
@@ -148,15 +142,15 @@ TEST_P(EntitySetMeshTest, UndoReplacesNewSkinnedMeshWithOldMesh) {
   auto oldMesh = createMesh();
   auto mesh = createSkinnedMesh();
 
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {oldMesh});
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Mesh>(entity).handle,
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Mesh>(entity).handle,
             oldMesh);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -165,11 +159,11 @@ TEST_P(EntitySetMeshTest, UndoDeletesMeshComponentIfNoPreviousComponent) {
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createMesh();
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
@@ -178,11 +172,11 @@ TEST_P(EntitySetMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createSkinnedMesh();
 
-  liquid::editor::EntitySetMesh action(entity, mesh);
+  quoll::editor::EntitySetMesh action(entity, mesh);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
 
@@ -190,16 +184,15 @@ TEST_P(EntitySetMeshTest, PredicateReturnsTrueIfMeshExists) {
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createSkinnedMesh();
 
-  EXPECT_TRUE(liquid::editor::EntitySetMesh(entity, mesh)
+  EXPECT_TRUE(quoll::editor::EntitySetMesh(entity, mesh)
                   .predicate(state, assetRegistry));
 }
 
 TEST_P(EntitySetMeshTest, PredicateReturnsFalseIfMeshDoesNotExist) {
   auto entity = activeScene().entityDatabase.create();
 
-  EXPECT_FALSE(
-      liquid::editor::EntitySetMesh(entity, liquid::MeshAssetHandle{25})
-          .predicate(state, assetRegistry));
+  EXPECT_FALSE(quoll::editor::EntitySetMesh(entity, quoll::MeshAssetHandle{25})
+                   .predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntitySetMeshTest);
@@ -210,12 +203,12 @@ TEST_P(EntityDeleteMeshTest, ExecutorDeletesMeshIfCurrentComponentIsMesh) {
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createMesh();
 
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {oldMesh});
-  liquid::editor::EntityDeleteMesh action(entity);
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
+  quoll::editor::EntityDeleteMesh action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -225,12 +218,12 @@ TEST_P(EntityDeleteMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createSkinnedMesh();
 
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {oldMesh});
-  liquid::editor::EntityDeleteMesh action(entity);
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {oldMesh});
+  quoll::editor::EntityDeleteMesh action(entity);
   auto res = action.onExecute(state, assetRegistry);
 
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_FALSE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_FALSE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
   EXPECT_TRUE(res.addToHistory);
 }
@@ -239,13 +232,13 @@ TEST_P(EntityDeleteMeshTest, UndoRecreatesMeshIfDeletedComponentWasMesh) {
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createMesh();
 
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {oldMesh});
-  liquid::editor::EntityDeleteMesh action(entity);
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {oldMesh});
+  quoll::editor::EntityDeleteMesh action(entity);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::Mesh>(entity));
-  EXPECT_EQ(activeScene().entityDatabase.get<liquid::Mesh>(entity).handle,
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::Mesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::Mesh>(entity).handle,
             oldMesh);
 }
 
@@ -254,33 +247,32 @@ TEST_P(EntityDeleteMeshTest,
   auto entity = activeScene().entityDatabase.create();
   auto oldMesh = createSkinnedMesh();
 
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {oldMesh});
-  liquid::editor::EntityDeleteMesh action(entity);
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {oldMesh});
+  quoll::editor::EntityDeleteMesh action(entity);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
-  EXPECT_TRUE(activeScene().entityDatabase.has<liquid::SkinnedMesh>(entity));
-  EXPECT_EQ(
-      activeScene().entityDatabase.get<liquid::SkinnedMesh>(entity).handle,
-      oldMesh);
+  EXPECT_TRUE(activeScene().entityDatabase.has<quoll::SkinnedMesh>(entity));
+  EXPECT_EQ(activeScene().entityDatabase.get<quoll::SkinnedMesh>(entity).handle,
+            oldMesh);
 }
 
 TEST_P(EntityDeleteMeshTest, PredicateReturnsTrueIfEntityHasMesh) {
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createMesh();
-  activeScene().entityDatabase.set<liquid::Mesh>(entity, {mesh});
+  activeScene().entityDatabase.set<quoll::Mesh>(entity, {mesh});
 
   EXPECT_TRUE(
-      liquid::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
+      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
 }
 
 TEST_P(EntityDeleteMeshTest, PredicateReturnsTrueIfEntityHasSkinnedMesh) {
   auto entity = activeScene().entityDatabase.create();
   auto mesh = createSkinnedMesh();
-  activeScene().entityDatabase.set<liquid::SkinnedMesh>(entity, {mesh});
+  activeScene().entityDatabase.set<quoll::SkinnedMesh>(entity, {mesh});
 
   EXPECT_TRUE(
-      liquid::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
+      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
 }
 
 TEST_P(EntityDeleteMeshTest,
@@ -288,7 +280,7 @@ TEST_P(EntityDeleteMeshTest,
   auto entity = activeScene().entityDatabase.create();
 
   EXPECT_FALSE(
-      liquid::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
+      quoll::editor::EntityDeleteMesh(entity).predicate(state, assetRegistry));
 }
 
 InitActionsTestSuite(EntityActionsTest, EntityDeleteMeshTest);

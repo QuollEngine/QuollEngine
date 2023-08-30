@@ -2,7 +2,7 @@
 
 #include "liquid/logger/Logger.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Global engine singleton
@@ -85,11 +85,11 @@ private:
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if defined(LIQUID_DEBUG)
-#define LOG_DEBUG(stream) liquid::Engine::getLogger().debug() << stream
+#define LOG_DEBUG(stream) quoll::Engine::getLogger().debug() << stream
 #else
 #define LOG_DEBUG(_)                                                           \
   {}
 #endif
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-} // namespace liquid
+} // namespace quoll

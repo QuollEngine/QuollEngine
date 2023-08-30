@@ -2,7 +2,7 @@
 
 #include "PhysicsObjects.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Collidable component
@@ -19,4 +19,4 @@ struct Collidable {
   PhysicsMaterialDesc materialDesc;
 };
 
-} // namespace liquid
+} // namespace quoll

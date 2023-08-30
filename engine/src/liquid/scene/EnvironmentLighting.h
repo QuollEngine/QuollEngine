@@ -1,10 +1,10 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Environment lighting skybox source
  */
 struct EnvironmentLightingSkyboxSource {};
 
-} // namespace liquid
+} // namespace quoll

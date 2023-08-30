@@ -3,7 +3,7 @@
 #include "liquid/asset/AssetCache.h"
 #include "UUIDMap.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief HDRI Importer
@@ -101,4 +101,4 @@ private:
   rhi::PipelineHandle mPipelineGenerateSpecularMap;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

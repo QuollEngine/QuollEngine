@@ -5,7 +5,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanFrameManager::VulkanFrameManager(VulkanDeviceObject &device)
     : mDevice(device) {
@@ -86,4 +86,4 @@ void VulkanFrameManager::createFences() {
   LOG_DEBUG_VK_NO_HANDLE("Frame fences created: " << mFrameFences.size());
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -5,7 +5,7 @@
 
 class FPSCounterTest : public ::testing::Test {
 public:
-  liquid::FPSCounter counter;
+  quoll::FPSCounter counter;
 };
 
 TEST_F(FPSCounterTest, CollectsFPS) {

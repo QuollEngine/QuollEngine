@@ -10,7 +10,7 @@
 
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Imgui render pass data
@@ -166,4 +166,4 @@ private:
   rhi::RenderDevice *mDevice;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include "Material.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief PBR material instance
@@ -122,4 +122,4 @@ public:
               RenderStorage &renderStorage);
 };
 
-} // namespace liquid
+} // namespace quoll

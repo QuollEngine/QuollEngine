@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "UUIDMap.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Uuid getOrCreateUuidFromMap(const UUIDMap &uuids, const String &key) {
   auto it = uuids.find(key);
@@ -12,4 +12,4 @@ Uuid getOrCreateUuidFromMap(const UUIDMap &uuids, const String &key) {
   return Uuid::generate();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

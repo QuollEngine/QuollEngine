@@ -2,7 +2,7 @@
 
 #include "liquidator/editor-scene/EditorCamera.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Status bar component
@@ -17,4 +17,4 @@ public:
   static void render(EditorCamera &editorCamera);
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

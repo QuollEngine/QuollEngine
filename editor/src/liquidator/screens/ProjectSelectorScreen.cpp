@@ -16,7 +16,7 @@
 
 #include "ProjectSelectorScreen.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ProjectSelectorScreen::ProjectSelectorScreen(Window &window,
                                              EventSystem &eventSystem,
@@ -28,7 +28,7 @@ std::optional<Project> ProjectSelectorScreen::start() {
   AssetRegistry assetRegistry;
   RenderStorage renderStorage(mDevice);
 
-  liquid::RendererOptions initialOptions{};
+  quoll::RendererOptions initialOptions{};
   initialOptions.size = mWindow.getFramebufferSize();
 
   Renderer renderer(renderStorage, initialOptions);
@@ -149,4 +149,4 @@ std::optional<Project> ProjectSelectorScreen::start() {
   return project;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

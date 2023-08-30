@@ -7,7 +7,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanRenderPass::VulkanRenderPass(const RenderPassDescription &description,
                                    VulkanDeviceObject &device,
@@ -172,4 +172,4 @@ VkAttachmentDescription VulkanRenderPass::getVulkanAttachmentDescription(
   return attachment;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

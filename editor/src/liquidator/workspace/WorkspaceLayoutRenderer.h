@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Workspace layout renderer
@@ -31,4 +31,4 @@ public:
   static void resize();
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

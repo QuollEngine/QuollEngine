@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for animator
@@ -48,4 +48,4 @@ public:
   static const String getName() { return "animator"; }
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -6,48 +6,48 @@
 class RenderGraphPassTest : public ::testing::Test {
 public:
   RenderGraphPassTest()
-      : graphicsPass("Graphics", liquid::RenderGraphPassType::Graphics),
-        computePass("Compute", liquid::RenderGraphPassType::Compute),
+      : graphicsPass("Graphics", quoll::RenderGraphPassType::Graphics),
+        computePass("Compute", quoll::RenderGraphPassType::Compute),
         graph("Test graph") {}
 
-  liquid::RenderGraph graph;
-  liquid::RenderGraphPass graphicsPass;
-  liquid::RenderGraphPass computePass;
+  quoll::RenderGraph graph;
+  quoll::RenderGraphPass graphicsPass;
+  quoll::RenderGraphPass computePass;
 };
 
 TEST_F(RenderGraphPassTest, SetsNameAndTypeOnConstruct) {
   EXPECT_EQ(graphicsPass.getName(), "Graphics");
-  EXPECT_EQ(graphicsPass.getType(), liquid::RenderGraphPassType::Graphics);
+  EXPECT_EQ(graphicsPass.getType(), quoll::RenderGraphPassType::Graphics);
 
   EXPECT_EQ(computePass.getName(), "Compute");
-  EXPECT_EQ(computePass.getType(), liquid::RenderGraphPassType::Compute);
+  EXPECT_EQ(computePass.getType(), quoll::RenderGraphPassType::Compute);
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToOutputOnWrite) {
-  auto handle = graph.create(liquid::rhi::TextureDescription{});
+  auto handle = graph.create(quoll::rhi::TextureDescription{});
 
-  graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4());
+  graphicsPass.write(handle, quoll::AttachmentType::Color, glm::vec4());
   EXPECT_EQ(graphicsPass.getTextureOutputs().size(), 1);
   EXPECT_EQ(graphicsPass.getTextureOutputs().at(0).texture, handle);
 }
 
 TEST_F(RenderGraphPassTest, AddsClearValueToAttachmentDataOnWrite) {
-  auto handle = graph.create(liquid::rhi::TextureDescription{});
+  auto handle = graph.create(quoll::rhi::TextureDescription{});
 
-  graphicsPass.write(handle, liquid::AttachmentType::Color, glm::vec4(2.0f));
+  graphicsPass.write(handle, quoll::AttachmentType::Color, glm::vec4(2.0f));
   EXPECT_EQ(graphicsPass.getAttachments().size(), 1);
   EXPECT_EQ(std::get<glm::vec4>(graphicsPass.getAttachments().at(0).clearValue),
             glm::vec4(2.0f));
 
   // Defaults
   EXPECT_EQ(graphicsPass.getAttachments().at(0).loadOp,
-            liquid::rhi::AttachmentLoadOp::DontCare);
+            quoll::rhi::AttachmentLoadOp::DontCare);
   EXPECT_EQ(graphicsPass.getAttachments().at(0).storeOp,
-            liquid::rhi::AttachmentStoreOp::DontCare);
+            quoll::rhi::AttachmentStoreOp::DontCare);
 }
 
 TEST_F(RenderGraphPassTest, AddsTextureHandleToInputOnRead) {
-  auto handle = graph.create(liquid::rhi::TextureDescription{});
+  auto handle = graph.create(quoll::rhi::TextureDescription{});
 
   graphicsPass.read(handle);
   EXPECT_EQ(graphicsPass.getAttachments().size(), 0);
@@ -57,77 +57,75 @@ TEST_F(RenderGraphPassTest, AddsTextureHandleToInputOnRead) {
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithVertexOnGraphicsPass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(graphicsPass.write(handle, liquid::rhi::BufferUsage::Vertex),
+  EXPECT_DEATH(graphicsPass.write(handle, quoll::rhi::BufferUsage::Vertex),
                ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithVertexOnComputePass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(computePass.write(handle, liquid::rhi::BufferUsage::Vertex),
+  EXPECT_DEATH(computePass.write(handle, quoll::rhi::BufferUsage::Vertex),
                ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithIndexOnGraphicsPass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(graphicsPass.write(handle, liquid::rhi::BufferUsage::Index),
+  EXPECT_DEATH(graphicsPass.write(handle, quoll::rhi::BufferUsage::Index),
                ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithIndexOnComputePass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(computePass.write(handle, liquid::rhi::BufferUsage::Index),
-               ".*");
+  EXPECT_DEATH(computePass.write(handle, quoll::rhi::BufferUsage::Index), ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithIndirectOnGraphicsPass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(graphicsPass.write(handle, liquid::rhi::BufferUsage::Indirect),
+  EXPECT_DEATH(graphicsPass.write(handle, quoll::rhi::BufferUsage::Indirect),
                ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsWritingBufferWithIndirectOnComputePass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(computePass.write(handle, liquid::rhi::BufferUsage::Indirect),
+  EXPECT_DEATH(computePass.write(handle, quoll::rhi::BufferUsage::Indirect),
                ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsReadingBufferWithVertexOnComputePass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(computePass.read(handle, liquid::rhi::BufferUsage::Vertex),
-               ".*");
+  EXPECT_DEATH(computePass.read(handle, quoll::rhi::BufferUsage::Vertex), ".*");
 }
 
 TEST_F(RenderGraphPassTest, FailsReadingBufferWithIndexOnComputePass) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  EXPECT_DEATH(computePass.read(handle, liquid::rhi::BufferUsage::Index), ".*");
+  EXPECT_DEATH(computePass.read(handle, quoll::rhi::BufferUsage::Index), ".*");
 }
 
 TEST_F(RenderGraphPassTest, AddsBufferHandleToOutputOnWrite) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  graphicsPass.write(handle, liquid::rhi::BufferUsage::Storage);
+  graphicsPass.write(handle, quoll::rhi::BufferUsage::Storage);
   EXPECT_EQ(graphicsPass.getBufferOutputs().size(), 1);
   EXPECT_EQ(graphicsPass.getBufferOutputs().at(0).buffer, handle);
   EXPECT_EQ(graphicsPass.getBufferOutputs().at(0).usage,
-            liquid::rhi::BufferUsage::Storage);
+            quoll::rhi::BufferUsage::Storage);
 }
 
 TEST_F(RenderGraphPassTest, AddsBufferHandleToInputOnRead) {
-  liquid::rhi::BufferHandle handle{2};
+  quoll::rhi::BufferHandle handle{2};
 
-  computePass.read(handle, liquid::rhi::BufferUsage::Storage);
+  computePass.read(handle, quoll::rhi::BufferUsage::Storage);
   EXPECT_EQ(computePass.getBufferOutputs().size(), 0);
   EXPECT_EQ(computePass.getBufferInputs().size(), 1);
   EXPECT_EQ(computePass.getBufferInputs().at(0).buffer, handle);
   EXPECT_EQ(computePass.getBufferInputs().at(0).usage,
-            liquid::rhi::BufferUsage::Storage);
+            quoll::rhi::BufferUsage::Storage);
 }

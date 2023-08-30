@@ -10,7 +10,7 @@
 #include "Widgets.h"
 #include "AssetBrowser.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static constexpr uint32_t ItemWidth = 90;
 static constexpr uint32_t ItemHeight = 100;
@@ -554,4 +554,4 @@ const Path &AssetBrowser::getCurrentFetchPath() const {
   return mCurrentDirectory;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

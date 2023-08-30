@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <shobjidl.h>
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 /**
  * @brief Win32 file type entry
@@ -20,11 +20,11 @@ struct Win32Entry {
   std::wstring extensions;
 };
 
-static void checkWin32Error(HRESULT res, const liquid::String &message) {
+static void checkWin32Error(HRESULT res, const quoll::String &message) {
   LIQUID_ASSERT(SUCCEEDED(res), "Failed to open file dialog " + message);
 }
 
-liquid::Path
+quoll::Path
 FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileOpenDialog, nullptr,
@@ -87,7 +87,7 @@ FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
   int length = WideCharToMultiByte(
       CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()), NULL, 0, NULL, NULL);
 
-  liquid::String filePath(length, 0);
+  quoll::String filePath(length, 0);
   WideCharToMultiByte(CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()),
                       &filePath.at(0), length, NULL, NULL);
 
@@ -98,7 +98,7 @@ FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
   return filePath;
 }
 
-liquid::Path FileDialog::getFilePathFromCreateDialog(
+quoll::Path FileDialog::getFilePathFromCreateDialog(
     const std::vector<FileTypeEntry> &fileTypes) {
   IFileDialog *pFileOpen = nullptr;
   checkWin32Error(CoCreateInstance(CLSID_FileSaveDialog, nullptr,
@@ -161,7 +161,7 @@ liquid::Path FileDialog::getFilePathFromCreateDialog(
   int length = WideCharToMultiByte(
       CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()), NULL, 0, NULL, NULL);
 
-  liquid::String filePath(length, 0);
+  quoll::String filePath(length, 0);
   WideCharToMultiByte(CP_UTF8, 0, &ws.at(0), static_cast<int>(ws.size()),
                       &filePath.at(0), length, NULL, NULL);
 
@@ -172,4 +172,4 @@ liquid::Path FileDialog::getFilePathFromCreateDialog(
   return filePath;
 }
 
-} // namespace liquid::platform
+} // namespace quoll::platform

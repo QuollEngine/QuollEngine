@@ -9,7 +9,7 @@
 #include "gltf/LightStep.h"
 #include "gltf/PrefabStep.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 GLTFImporter::GLTFImporter(AssetCache &assetCache, ImageLoader &imageLoader,
                            bool optimize)
@@ -89,4 +89,4 @@ Result<Path> GLTFImporter::createEmbeddedGlb(const Path &source,
   return Result<Path>::Ok(destinationGlb);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

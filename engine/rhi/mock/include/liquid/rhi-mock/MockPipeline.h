@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/PipelineDescription.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock pipeline
@@ -61,4 +61,4 @@ private:
   Type mType;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

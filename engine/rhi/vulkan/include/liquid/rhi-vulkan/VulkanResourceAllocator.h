@@ -6,7 +6,7 @@
 
 #include <vma/vk_mem_alloc.h>
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan resource allocator
@@ -47,4 +47,4 @@ private:
   VmaAllocator mAllocator = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

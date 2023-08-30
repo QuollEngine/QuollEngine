@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Force component
@@ -12,4 +12,4 @@ struct Force {
   glm::vec3 force;
 };
 
-} // namespace liquid
+} // namespace quoll

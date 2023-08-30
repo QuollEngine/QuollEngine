@@ -9,7 +9,7 @@
 
 #include "FontAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path> AssetCache::createFontFromSource(const Path &sourcePath,
                                               const Uuid &uuid) {
@@ -64,4 +64,4 @@ Result<FontAssetHandle> AssetCache::loadFont(const Uuid &uuid) {
   return Result<FontAssetHandle>::Ok(handle);
 }
 
-} // namespace liquid
+} // namespace quoll

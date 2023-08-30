@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class MouseButtonEvent { Pressed, Released, Moved };
 
@@ -53,4 +53,4 @@ struct MouseScrollEventObject {
   float yoffset = 0.0f;
 };
 
-} // namespace liquid
+} // namespace quoll

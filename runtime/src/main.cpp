@@ -8,7 +8,7 @@
 int main() {
   auto gamePath = std::filesystem::current_path();
 
-  liquid::Engine::setPath(gamePath / "engine");
+  quoll::Engine::setPath(gamePath / "engine");
 
   auto launchPath = gamePath / "launch.yml";
 
@@ -22,12 +22,12 @@ int main() {
 
   auto node = YAML::Load(stream);
 
-  liquid::runtime::LaunchConfig launchConfig{};
+  quoll::runtime::LaunchConfig launchConfig{};
 
-  launchConfig.name = node["name"].as<liquid::String>();
-  launchConfig.startingScene = node["startingScene"].as<liquid::Uuid>();
+  launchConfig.name = node["name"].as<quoll::String>();
+  launchConfig.startingScene = node["startingScene"].as<quoll::Uuid>();
 
-  liquid::runtime::Runtime runtime(launchConfig);
+  quoll::runtime::Runtime runtime(launchConfig);
 
   runtime.start();
 

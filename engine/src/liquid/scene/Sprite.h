@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Sprite component
@@ -12,4 +12,4 @@ struct Sprite {
   TextureAssetHandle handle;
 };
 
-} // namespace liquid
+} // namespace quoll

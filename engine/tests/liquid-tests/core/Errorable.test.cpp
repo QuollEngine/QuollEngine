@@ -10,7 +10,7 @@ struct Data {
 enum class Error { None = 0, InvalidNumber = 1, MaximumReached = 2 };
 
 TEST(ErrorableTest, NoErrorIfDataIsPassed) {
-  liquid::Errorable<Data, Error> errorable(Data{45});
+  quoll::Errorable<Data, Error> errorable(Data{45});
 
   EXPECT_TRUE(errorable.hasResult());
   EXPECT_FALSE(errorable.hasError());
@@ -19,7 +19,7 @@ TEST(ErrorableTest, NoErrorIfDataIsPassed) {
 }
 
 TEST(ErrorableTest, HasErrorIfErrorIsPassed) {
-  liquid::Errorable<Data, Error> errorable(Error::MaximumReached);
+  quoll::Errorable<Data, Error> errorable(Error::MaximumReached);
 
   EXPECT_FALSE(errorable.hasResult());
   EXPECT_TRUE(errorable.hasError());

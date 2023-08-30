@@ -9,7 +9,7 @@
 
 #include "liquid/renderer/RenderGraph.h"
 
-namespace liquid {
+namespace quoll {
 
 Renderer::Renderer(RenderStorage &storage, const RendererOptions &options)
     : mRenderStorage(storage), mGraph("Main"), mOptions(options) {}
@@ -43,4 +43,4 @@ void Renderer::execute(rhi::RenderCommandList &commandList,
   mGraph.execute(commandList, frameIndex);
 }
 
-} // namespace liquid
+} // namespace quoll

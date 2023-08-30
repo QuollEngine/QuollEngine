@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MockCommandList.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 template <class T>
 static constexpr std::vector<T> vectorFrom(std::span<T> data) {
@@ -202,4 +202,4 @@ void MockCommandList::clear() {
   mCommands.clear();
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

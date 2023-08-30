@@ -9,25 +9,25 @@ int main() {
   static constexpr uint32_t InitialWidth = 1024;
   static constexpr uint32_t InitialHeight = 768;
 
-  liquid::Engine::setPath(std::filesystem::current_path() / "engine");
+  quoll::Engine::setPath(std::filesystem::current_path() / "engine");
 
-  liquid::EventSystem eventSystem;
-  liquid::Window window("Liquidator", InitialWidth, InitialHeight, eventSystem);
+  quoll::EventSystem eventSystem;
+  quoll::Window window("Liquidator", InitialWidth, InitialHeight, eventSystem);
 
-  liquid::rhi::VulkanRenderBackend backend(window);
+  quoll::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
 
-  liquid::editor::ProjectSelectorScreen projectSelector(window, eventSystem,
-                                                        device);
+  quoll::editor::ProjectSelectorScreen projectSelector(window, eventSystem,
+                                                       device);
 
   auto project = projectSelector.start();
 
   device->destroyResources();
   if (project.has_value()) {
-    liquid::Engine::getLogger().info()
+    quoll::Engine::getLogger().info()
         << "Project selected: " << project.value().name;
 
-    liquid::editor::EditorScreen editor(window, eventSystem, device);
+    quoll::editor::EditorScreen editor(window, eventSystem, device);
     editor.start(project.value());
   }
 

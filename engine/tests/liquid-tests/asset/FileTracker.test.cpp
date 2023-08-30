@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 static const fs::path fileTrackerPath = FixturesPath / "file-tracker-test";
 
-bool compareChangedFiles(liquid::ChangedFile a, liquid::ChangedFile b) {
+bool compareChangedFiles(quoll::ChangedFile a, quoll::ChangedFile b) {
   return a.path.string() < b.path.string();
 }
 
@@ -32,7 +32,7 @@ public:
     }
   }
 
-  liquid::FileTracker fileTracker;
+  quoll::FileTracker fileTracker;
 
 protected:
   void SetUp() override {
@@ -70,25 +70,25 @@ TEST_F(FileTrackerTest, FirstTrackTreatsAllFilesAsCreated) {
   {
     fs::path path(fileTrackerPath / "file-0");
     EXPECT_EQ(files.at(0).path, path);
-    EXPECT_EQ(files.at(0).status, liquid::FileStatus::Created);
+    EXPECT_EQ(files.at(0).status, quoll::FileStatus::Created);
   }
 
   {
     fs::path path(fileTrackerPath / "file-1");
     EXPECT_EQ(files.at(1).path, path);
-    EXPECT_EQ(files.at(1).status, liquid::FileStatus::Created);
+    EXPECT_EQ(files.at(1).status, quoll::FileStatus::Created);
   }
 
   {
     fs::path path(fileTrackerPath / "inner-dir" / "file-0");
     EXPECT_EQ(files.at(2).path, path);
-    EXPECT_EQ(files.at(2).status, liquid::FileStatus::Created);
+    EXPECT_EQ(files.at(2).status, quoll::FileStatus::Created);
   }
 
   {
     fs::path path(fileTrackerPath / "inner-dir" / "file-1");
     EXPECT_EQ(files.at(3).path, path);
-    EXPECT_EQ(files.at(3).status, liquid::FileStatus::Created);
+    EXPECT_EQ(files.at(3).status, quoll::FileStatus::Created);
   }
 }
 
@@ -103,7 +103,7 @@ TEST_F(FileTrackerTest, TracksUpdatedFile) {
 
   const auto &files = fileTracker.trackForChanges();
   EXPECT_EQ(files.size(), 1);
-  EXPECT_EQ(files.at(0).status, liquid::FileStatus::Updated);
+  EXPECT_EQ(files.at(0).status, quoll::FileStatus::Updated);
   EXPECT_EQ(files.at(0).path, changedFilePath);
 }
 
@@ -119,7 +119,7 @@ TEST_F(FileTrackerTest, TracksCreatedFile) {
 
   const auto &files = fileTracker.trackForChanges();
   EXPECT_EQ(files.size(), 1);
-  EXPECT_EQ(files.at(0).status, liquid::FileStatus::Created);
+  EXPECT_EQ(files.at(0).status, quoll::FileStatus::Created);
   EXPECT_EQ(files.at(0).path, changedFilePath);
 }
 
@@ -132,7 +132,7 @@ TEST_F(FileTrackerTest, TracksDeletedFile) {
 
   const auto &files = fileTracker.trackForChanges();
   EXPECT_EQ(files.size(), 1);
-  EXPECT_EQ(files.at(0).status, liquid::FileStatus::Deleted);
+  EXPECT_EQ(files.at(0).status, quoll::FileStatus::Deleted);
   EXPECT_EQ(files.at(0).path, changedFilePath);
 }
 
@@ -158,10 +158,10 @@ TEST_F(FileTrackerTest, TracksChanges) {
 
   std::sort(files.begin(), files.end(), compareChangedFiles);
 
-  EXPECT_EQ(files.at(0).status, liquid::FileStatus::Updated);
+  EXPECT_EQ(files.at(0).status, quoll::FileStatus::Updated);
   EXPECT_EQ(files.at(0).path, changedFilePath1);
-  EXPECT_EQ(files.at(1).status, liquid::FileStatus::Deleted);
+  EXPECT_EQ(files.at(1).status, quoll::FileStatus::Deleted);
   EXPECT_EQ(files.at(1).path, changedFilePath2);
-  EXPECT_EQ(files.at(2).status, liquid::FileStatus::Created);
+  EXPECT_EQ(files.at(2).status, quoll::FileStatus::Created);
   EXPECT_EQ(files.at(2).path, changedFilePath3);
 }

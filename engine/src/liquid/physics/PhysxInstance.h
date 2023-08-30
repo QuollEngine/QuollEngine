@@ -4,7 +4,7 @@
 #include <PxShape.h>
 #include <PxMaterial.h>
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief PhysX instance component
@@ -31,4 +31,4 @@ struct PhysxInstance {
   physx::PxMaterial *material = nullptr;
 };
 
-} // namespace liquid
+} // namespace quoll

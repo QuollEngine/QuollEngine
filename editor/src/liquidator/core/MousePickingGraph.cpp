@@ -4,7 +4,7 @@
 #include "liquid/renderer/MeshVertexLayout.h"
 #include "liquid/renderer/MeshRenderUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 MousePickingGraph::MousePickingGraph(
     const std::array<SceneRendererFrameData, 2> &frameData,
@@ -394,4 +394,4 @@ void MousePickingGraph::createRenderGraph() {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

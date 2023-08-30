@@ -8,7 +8,7 @@
 
 #include "NameScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int NameScriptingInterface::LuaInterface::get(void *state) {
   LuaScope scope(state);
@@ -73,4 +73,4 @@ int NameScriptingInterface::LuaInterface::deleteThis(void *state) {
   return ComponentLuaInterfaceCommon::deleteComponent<Name>(getName(), state);
 }
 
-} // namespace liquid
+} // namespace quoll

@@ -3,17 +3,17 @@
 #include "liquid/imgui/Imgui.h"
 #include "liquid/rhi/RenderHandle.h"
 
-namespace liquid::imgui {
+namespace quoll::imgui {
 
-void image(liquid::rhi::TextureHandle handle, const ImVec2 &size,
+void image(quoll::rhi::TextureHandle handle, const ImVec2 &size,
            const ImVec2 &uv0 = ImVec2(0, 0), const ImVec2 &uv1 = ImVec2(1, 1),
            ImGuiID id = 0, const ImVec4 &tint_col = ImVec4(1, 1, 1, 1),
            const ImVec4 &border_col = ImVec4(0, 0, 0, 0));
 
-bool imageButton(liquid::rhi::TextureHandle handle, const ImVec2 &size,
+bool imageButton(quoll::rhi::TextureHandle handle, const ImVec2 &size,
                  const ImVec2 &uv0 = ImVec2(0, 0),
                  const ImVec2 &uv1 = ImVec2(1, 1), int frame_padding = -1,
                  const ImVec4 &bg_col = ImVec4(0, 0, 0, 0),
                  const ImVec4 &tint_col = ImVec4(1, 1, 1, 1));
 
-} // namespace liquid::imgui
+} // namespace quoll::imgui

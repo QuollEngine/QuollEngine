@@ -4,7 +4,7 @@
 #include "Widgets.h"
 #include "StyleStack.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void LogViewer::render(LogMemoryStorage &userLogs) {
   auto flags = ImGuiWindowFlags_HorizontalScrollbar |
@@ -49,4 +49,4 @@ void LogViewer::renderLogContainer(const String &name,
   ImGui::PopID();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

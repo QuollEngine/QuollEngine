@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AudioAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief MiniAudio backend
@@ -54,4 +54,4 @@ private:
   BackendImpl *mImpl = nullptr;
 };
 
-} // namespace liquid
+} // namespace quoll

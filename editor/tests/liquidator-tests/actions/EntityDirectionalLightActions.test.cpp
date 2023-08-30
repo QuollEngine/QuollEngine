@@ -49,14 +49,14 @@ TEST_P(
     EntityDeleteDirectionalLightActionTest,
     UndoDoesNotCreateCascadedShadowMapForEntityIfItDidNotExistDuringExecution) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
+  activeScene().entityDatabase.set<quoll::DirectionalLight>(entity, {});
 
-  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  quoll::editor::EntityDeleteDirectionalLight action(entity);
   action.onExecute(state, assetRegistry);
   auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_FALSE(
-      activeScene().entityDatabase.has<liquid::CascadedShadowMap>(entity));
+      activeScene().entityDatabase.has<quoll::CascadedShadowMap>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }
@@ -64,16 +64,16 @@ TEST_P(
 TEST_P(EntityDeleteDirectionalLightActionTest,
        UndoCreatesCascadedShadowMapForEntityIfItExistedDuringExecution) {
   auto entity = activeScene().entityDatabase.create();
-  activeScene().entityDatabase.set<liquid::DirectionalLight>(entity, {});
-  activeScene().entityDatabase.set<liquid::CascadedShadowMap>(entity, {});
+  activeScene().entityDatabase.set<quoll::DirectionalLight>(entity, {});
+  activeScene().entityDatabase.set<quoll::CascadedShadowMap>(entity, {});
 
-  liquid::editor::EntityDeleteDirectionalLight action(entity);
+  quoll::editor::EntityDeleteDirectionalLight action(entity);
   action.onExecute(state, assetRegistry);
 
   auto res = action.onUndo(state, assetRegistry);
 
   EXPECT_TRUE(
-      activeScene().entityDatabase.has<liquid::CascadedShadowMap>(entity));
+      activeScene().entityDatabase.has<quoll::CascadedShadowMap>(entity));
   ASSERT_EQ(res.entitiesToSave.size(), 1);
   EXPECT_EQ(res.entitiesToSave.at(0), entity);
 }

@@ -3,10 +3,10 @@
 
 #include "liquid-tests/Testing.h"
 
-using SequenceTarget = liquid::KeyframeSequenceAssetTarget;
-using SequenceInterpolation = liquid::KeyframeSequenceAssetInterpolation;
+using SequenceTarget = quoll::KeyframeSequenceAssetTarget;
+using SequenceInterpolation = quoll::KeyframeSequenceAssetInterpolation;
 
-using Interpolator = liquid::KeyframeInterpolator;
+using Interpolator = quoll::KeyframeInterpolator;
 
 class KeyframeInterpolatorTest : public ::testing::Test {
 public:
@@ -35,7 +35,7 @@ using KeyframeInterpolatorDeathTest = KeyframeInterpolatorTest;
 
 TEST_F(KeyframeInterpolatorTest,
        GetLastKeyframeValueIfTimeIsBiggerThanLastKeyframe) {
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Step;
   sequence.keyframeTimes.push_back(1.0f);
@@ -45,7 +45,7 @@ TEST_F(KeyframeInterpolatorTest,
 }
 
 TEST_F(KeyframeInterpolatorTest, GetPreviousKeyframeValueOnStepInterpolation) {
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Step;
   sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
@@ -60,7 +60,7 @@ TEST_F(KeyframeInterpolatorTest, GetPreviousKeyframeValueOnStepInterpolation) {
 
 TEST_F(KeyframeInterpolatorTest,
        GetInterpolatedKeyFrameValueBetweenTwoKeysOnLinearInterpolationOnVec3) {
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Linear;
   sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
@@ -80,7 +80,7 @@ TEST_F(KeyframeInterpolatorTest,
 
 TEST_F(KeyframeInterpolatorTest,
        GetLastItemValueIfTimeIsLargerThanLastTimeOnLinearInterpolationOnVec3) {
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Linear;
   sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
@@ -95,7 +95,7 @@ TEST_F(KeyframeInterpolatorTest,
   std::random_device device;
   std::mt19937 mt(device());
 
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Linear;
   sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};
@@ -126,7 +126,7 @@ TEST_F(KeyframeInterpolatorTest,
   std::random_device device;
   std::mt19937 mt(device());
 
-  liquid::KeyframeSequenceAsset sequence;
+  quoll::KeyframeSequenceAsset sequence;
   sequence.target = SequenceTarget::Position;
   sequence.interpolation = SequenceInterpolation::Linear;
   sequence.keyframeTimes = {0.0f, 0.5f, 1.0f};

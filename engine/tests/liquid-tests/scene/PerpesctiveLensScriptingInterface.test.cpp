@@ -39,7 +39,7 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest, GetReturnsComponentValues) {
   auto entity = entityDatabase.create();
 
-  liquid::PerspectiveLens lens{};
+  quoll::PerspectiveLens lens{};
   lens.near = 0.5f;
   lens.far = 500.0f;
   lens.sensorSize = glm::vec2(15.0f, 25.0f);
@@ -67,18 +67,18 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   auto &scope = call(entity, "perspective_lens_set_invalid");
 
-  EXPECT_FALSE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        SetCreatesComponentIfItDoesNotExist) {
   auto entity = entityDatabase.create();
-  EXPECT_FALSE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 
   auto &scope = call(entity, "perspective_lens_set");
 
-  EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
-  const auto &lens = entityDatabase.get<liquid::PerspectiveLens>(entity);
+  EXPECT_TRUE(entityDatabase.has<quoll::PerspectiveLens>(entity));
+  const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
 
   EXPECT_EQ(lens.near, 0.004f);
   EXPECT_EQ(lens.far, 4000.0f);
@@ -92,11 +92,11 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        SetStoresProvidedValuesInComponent) {
   auto entity = entityDatabase.create();
-  entityDatabase.set(entity, liquid::PerspectiveLens{});
+  entityDatabase.set(entity, quoll::PerspectiveLens{});
 
   auto &scope = call(entity, "perspective_lens_set");
 
-  const auto &lens = entityDatabase.get<liquid::PerspectiveLens>(entity);
+  const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
 
   EXPECT_EQ(lens.near, 0.004f);
   EXPECT_EQ(lens.far, 4000.0f);
@@ -110,11 +110,11 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        DeleteDoesNothingIfProvidedArgumentsAreInvalid) {
   auto entity = entityDatabase.create();
-  entityDatabase.set(entity, liquid::PerspectiveLens{});
+  entityDatabase.set(entity, quoll::PerspectiveLens{});
 
   auto &scope = call(entity, "perspective_lens_delete_invalid");
 
-  EXPECT_TRUE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
@@ -123,15 +123,15 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
 
   auto &scope = call(entity, "perspective_lens_delete");
 
-  EXPECT_FALSE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        DeleteRemovesComponentIfComponentExists) {
   auto entity = entityDatabase.create();
-  entityDatabase.set(entity, liquid::PerspectiveLens{});
+  entityDatabase.set(entity, quoll::PerspectiveLens{});
 
   auto &scope = call(entity, "perspective_lens_delete");
 
-  EXPECT_FALSE(entityDatabase.has<liquid::PerspectiveLens>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }

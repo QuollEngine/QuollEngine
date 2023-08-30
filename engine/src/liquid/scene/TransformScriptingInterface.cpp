@@ -9,7 +9,7 @@
 
 #include "TransformScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int TransformScriptingInterface::LuaInterface::getPosition(void *state) {
   LuaScope scope(state);
@@ -229,4 +229,4 @@ int TransformScriptingInterface::LuaInterface::deleteThis(void *state) {
                                                                       state);
 }
 
-} // namespace liquid
+} // namespace quoll

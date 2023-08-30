@@ -2,7 +2,7 @@
 
 #include "Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class AssetRevision : uint32_t {
   Material = 230911,
@@ -59,4 +59,4 @@ static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

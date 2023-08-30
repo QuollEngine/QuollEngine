@@ -6,7 +6,7 @@
 
 #include "../project/ProjectManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Editor screen
@@ -39,4 +39,4 @@ private:
   rhi::RenderDevice *mDevice;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

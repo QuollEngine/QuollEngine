@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/ActionExecutor.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Undo action
@@ -76,4 +76,4 @@ private:
   ActionExecutor &mActionExecutor;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

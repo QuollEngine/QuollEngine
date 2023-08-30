@@ -12,8 +12,8 @@
 
 namespace fs = std::filesystem;
 
-static const liquid::Path CachePath = fs::current_path() / "cache";
-static const liquid::Path TempPath = fs::current_path() / "temp2";
+static const quoll::Path CachePath = fs::current_path() / "cache";
+static const quoll::Path TempPath = fs::current_path() / "temp2";
 
 enum class GLTFTestAttribute {
   Positions,
@@ -38,7 +38,7 @@ template <class T> struct GLTFTestBufferData {
 };
 
 struct GLTFTestPrimitive {
-  template <class T> GLTFTestBufferData<T> &a(const liquid::String &name) {
+  template <class T> GLTFTestBufferData<T> &a(const quoll::String &name) {
     return GLTFTestBufferData<T>{};
   }
 
@@ -139,8 +139,8 @@ int createBufferFromVector(tinygltf::Model &model,
   return static_cast<int>(model.accessors.size() - 1);
 }
 
-static liquid::Path saveGLTF(const liquid::String &filename,
-                             tinygltf::Model &model) {
+static quoll::Path saveGLTF(const quoll::String &filename,
+                            tinygltf::Model &model) {
   tinygltf::TinyGLTF gltf;
   gltf.WriteGltfSceneToFile(&model, (TempPath / filename).string(), true, true,
                             true, true);
@@ -251,7 +251,7 @@ static tinygltf::Primitive createPrimitive(tinygltf::Model &model,
 }
 
 static GLTFTestPrimitive createCubePrimitive() {
-  auto asset = liquid::default_objects::createCube();
+  auto asset = quoll::default_objects::createCube();
   const auto &g = asset.data.geometries.at(0);
 
   GLTFTestPrimitive primitive;
@@ -289,7 +289,7 @@ static tinygltf::Mesh createMesh(tinygltf::Model &model, GLTFTestMesh &inMesh) {
   return mesh;
 }
 
-static liquid::Path saveSceneGLTF(GLTFTestScene &scene) {
+static quoll::Path saveSceneGLTF(GLTFTestScene &scene) {
   tinygltf::Scene gltfScene;
   gltfScene.name = "Scene";
   tinygltf::Model model;
@@ -330,9 +330,9 @@ public:
     fs::remove_all(TempPath);
   }
 
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage;
-  liquid::AssetCache assetCache;
-  liquid::editor::ImageLoader imageLoader;
-  liquid::editor::GLTFImporter importer;
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage;
+  quoll::AssetCache assetCache;
+  quoll::editor::ImageLoader imageLoader;
+  quoll::editor::GLTFImporter importer;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class ImageLayout {
   Undefined = 0,
@@ -17,4 +17,4 @@ enum class ImageLayout {
   AttachmentOptional = 1000314001,
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

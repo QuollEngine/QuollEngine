@@ -5,23 +5,23 @@
 
 #include "liquid-tests/Testing.h"
 
-using namespace liquid::rhi;
+using namespace quoll::rhi;
 
 class RenderGraphTest : public ::testing::Test {
 public:
   RenderGraphTest() : graph("TestGraph"), storage(&device) {}
 
-  liquid::RenderGraphResource<TextureHandle>
-  createTexture(liquid::rhi::TextureDescription desc) {
+  quoll::RenderGraphResource<TextureHandle>
+  createTexture(quoll::rhi::TextureDescription desc) {
     return graph.create(desc);
   }
 
   MockRenderDevice device;
-  liquid::RenderStorage storage;
-  liquid::RenderGraph graph;
+  quoll::RenderStorage storage;
+  quoll::RenderGraph graph;
 
   using OnBuildMockFunction =
-      ::testing::MockFunction<void(TextureHandle, liquid::RenderStorage &)>;
+      ::testing::MockFunction<void(TextureHandle, quoll::RenderStorage &)>;
 };
 
 using RenderGraphDeathTest = RenderGraphTest;
@@ -77,10 +77,10 @@ TEST_F(RenderGraphTest, ImportsExternalResourcesToRenderGraph) {
 TEST_F(RenderGraphTest, AddsGraphicsPass) {
   auto &pass = graph.addGraphicsPass("Test");
   EXPECT_EQ(pass.getName(), "Test");
-  EXPECT_EQ(pass.getType(), liquid::RenderGraphPassType::Graphics);
+  EXPECT_EQ(pass.getType(), quoll::RenderGraphPassType::Graphics);
   EXPECT_EQ(graph.getPasses().at(0).getName(), "Test");
   EXPECT_EQ(graph.getPasses().at(0).getType(),
-            liquid::RenderGraphPassType::Graphics);
+            quoll::RenderGraphPassType::Graphics);
 
   EXPECT_TRUE(graph.getCompiledPasses().empty());
 }
@@ -88,10 +88,10 @@ TEST_F(RenderGraphTest, AddsGraphicsPass) {
 TEST_F(RenderGraphTest, AddsComputePass) {
   auto &pass = graph.addComputePass("Test");
   EXPECT_EQ(pass.getName(), "Test");
-  EXPECT_EQ(pass.getType(), liquid::RenderGraphPassType::Compute);
+  EXPECT_EQ(pass.getType(), quoll::RenderGraphPassType::Compute);
   EXPECT_EQ(graph.getPasses().at(0).getName(), "Test");
   EXPECT_EQ(graph.getPasses().at(0).getType(),
-            liquid::RenderGraphPassType::Compute);
+            quoll::RenderGraphPassType::Compute);
 
   EXPECT_TRUE(graph.getCompiledPasses().empty());
 }
@@ -131,7 +131,7 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 
   auto finalColor = storage.createTexture({});
 
-  std::unordered_map<liquid::String, liquid::RenderGraphResource<TextureHandle>>
+  std::unordered_map<quoll::String, quoll::RenderGraphResource<TextureHandle>>
       textures{{"a-d", createTexture({})},
                {"b-c", createTexture({})},
                {"b-g", createTexture({})},
@@ -143,51 +143,50 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
                {"f-g", createTexture({})},
                {"final-color", graph.import(finalColor)}};
 
-  std::unordered_map<liquid::String, liquid::rhi::BufferHandle> buffers{
+  std::unordered_map<quoll::String, quoll::rhi::BufferHandle> buffers{
       {"a-b", device.createBuffer({}).getHandle()},
       {"d-b", device.createBuffer({}).getHandle()}};
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffers.at("a-b"), liquid::rhi::BufferUsage::Storage);
-    pass.write(textures.at("a-d"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(buffers.at("a-b"), quoll::rhi::BufferUsage::Storage);
+    pass.write(textures.at("a-d"), quoll::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
-    pass.read(buffers.at("a-b"), liquid::rhi::BufferUsage::Vertex);
-    pass.read(buffers.at("d-b"), liquid::rhi::BufferUsage::Index);
-    pass.write(textures.at("b-c"), liquid::AttachmentType::Color, glm::vec4());
-    pass.write(textures.at("b-g"), liquid::AttachmentType::Depth, glm::vec4());
+    pass.read(buffers.at("a-b"), quoll::rhi::BufferUsage::Vertex);
+    pass.read(buffers.at("d-b"), quoll::rhi::BufferUsage::Index);
+    pass.write(textures.at("b-c"), quoll::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("b-g"), quoll::AttachmentType::Depth, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("C");
     pass.read(textures.at("b-c"));
     pass.read(textures.at("h-c"));
-    pass.write(textures.at("c-e"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("c-e"), quoll::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("D");
     pass.read(textures.at("a-d"));
-    pass.write(buffers.at("d-b"), liquid::rhi::BufferUsage::Uniform);
-    pass.write(textures.at("d-e"), liquid::AttachmentType::Color, glm::vec4());
-    pass.write(textures.at("d-g"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(buffers.at("d-b"), quoll::rhi::BufferUsage::Uniform);
+    pass.write(textures.at("d-e"), quoll::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("d-g"), quoll::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("E");
     pass.read(textures.at("d-e"));
     pass.read(textures.at("c-e"));
-    pass.write(textures.at("e-f"), liquid::AttachmentType::Color, glm::vec4());
+    pass.write(textures.at("e-f"), quoll::AttachmentType::Color, glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("F");
     pass.read(textures.at("e-f"));
-    pass.write(textures.at("f-g"), liquid::AttachmentType::Resolve,
-               glm::vec4());
+    pass.write(textures.at("f-g"), quoll::AttachmentType::Resolve, glm::vec4());
   }
 
   {
@@ -195,26 +194,26 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
     pass.read(textures.at("f-g"));
     pass.read(textures.at("d-g"));
     pass.read(textures.at("b-g"));
-    pass.write(textures.at("final-color"), liquid::AttachmentType::Color,
+    pass.write(textures.at("final-color"), quoll::AttachmentType::Color,
                glm::vec4());
   }
 
   {
     auto &pass = graph.addGraphicsPass("H");
-    pass.write(textures.at("h-c"), liquid::AttachmentType::Depth, glm::vec4());
+    pass.write(textures.at("h-c"), quoll::AttachmentType::Depth, glm::vec4());
   }
 
   graph.build(storage);
 
   // Join sorted pass names to a string
   // for easier assertion
-  std::vector<liquid::String> names(graph.getPasses().size());
+  std::vector<quoll::String> names(graph.getPasses().size());
   std::transform(graph.getCompiledPasses().begin(),
                  graph.getCompiledPasses().end(), names.begin(),
                  [](auto &pass) { return pass.getName(); });
 
   // Convert it to string for easier checking
-  liquid::String output = "";
+  quoll::String output = "";
   for (auto &x : names) {
     output += x + " ";
   }
@@ -228,50 +227,50 @@ TEST_F(RenderGraphTest, TopologicallySortRenderGraph) {
 TEST_F(RenderGraphTest, SetsPassAttachmentOperations) {
   auto handle = createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("A").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
-  graph.addGraphicsPass("B").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("B").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
-  graph.addGraphicsPass("C").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("C").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
 
   graph.build(storage);
 
   EXPECT_EQ(graph.getCompiledPasses().at(0).getAttachments().at(0).loadOp,
-            liquid::rhi::AttachmentLoadOp::Clear);
+            quoll::rhi::AttachmentLoadOp::Clear);
   EXPECT_EQ(graph.getCompiledPasses().at(0).getAttachments().at(0).storeOp,
-            liquid::rhi::AttachmentStoreOp::Store);
+            quoll::rhi::AttachmentStoreOp::Store);
 
   EXPECT_EQ(graph.getCompiledPasses().at(1).getAttachments().at(0).loadOp,
-            liquid::rhi::AttachmentLoadOp::Load);
+            quoll::rhi::AttachmentLoadOp::Load);
   EXPECT_EQ(graph.getCompiledPasses().at(1).getAttachments().at(0).storeOp,
-            liquid::rhi::AttachmentStoreOp::Store);
+            quoll::rhi::AttachmentStoreOp::Store);
 
   EXPECT_EQ(graph.getCompiledPasses().at(2).getAttachments().at(0).loadOp,
-            liquid::rhi::AttachmentLoadOp::Load);
+            quoll::rhi::AttachmentLoadOp::Load);
   EXPECT_EQ(graph.getCompiledPasses().at(2).getAttachments().at(0).storeOp,
-            liquid::rhi::AttachmentStoreOp::Store);
+            quoll::rhi::AttachmentStoreOp::Store);
 }
 
 TEST_F(RenderGraphTest,
        SetsImageBarrierFromUndefinedBeforeFirstPassThatWritesToTheTexture) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
-  liquid::rhi::TextureDescription depthDescription{};
-  depthDescription.usage = liquid::rhi::TextureUsage::Depth;
+  quoll::rhi::TextureDescription depthDescription{};
+  depthDescription.usage = quoll::rhi::TextureUsage::Depth;
   auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
     pass.read(colorTexture);
-    pass.write(depthTexture, liquid::AttachmentType::Depth, {});
+    pass.write(depthTexture, quoll::AttachmentType::Depth, {});
   }
 
   graph.build(storage);
@@ -282,15 +281,14 @@ TEST_F(RenderGraphTest,
   {
     const auto &imageBarrier = dependencies0.imageBarriers.at(0);
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
-    EXPECT_EQ(imageBarrier.srcStage, liquid::rhi::PipelineStage::None);
+    EXPECT_EQ(imageBarrier.srcStage, quoll::rhi::PipelineStage::None);
     EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::None);
-    EXPECT_EQ(imageBarrier.dstAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.srcLayout, liquid::rhi::ImageLayout::Undefined);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::None);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.srcLayout, quoll::rhi::ImageLayout::Undefined);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
   }
 
   const auto &dependencies1 =
@@ -301,16 +299,16 @@ TEST_F(RenderGraphTest,
     const auto &imageBarrier = dependencies1.imageBarriers.at(0);
 
     EXPECT_EQ(imageBarrier.texture, depthTexture.getHandle());
-    EXPECT_EQ(imageBarrier.srcStage, liquid::rhi::PipelineStage::None);
+    EXPECT_EQ(imageBarrier.srcStage, quoll::rhi::PipelineStage::None);
     EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::EarlyFragmentTests |
-                  liquid::rhi::PipelineStage::LateFragmentTests);
-    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::None);
+              quoll::rhi::PipelineStage::EarlyFragmentTests |
+                  quoll::rhi::PipelineStage::LateFragmentTests);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::None);
     EXPECT_EQ(imageBarrier.dstAccess,
-              liquid::rhi::Access::DepthStencilAttachmentWrite);
-    EXPECT_EQ(imageBarrier.srcLayout, liquid::rhi::ImageLayout::Undefined);
+              quoll::rhi::Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(imageBarrier.srcLayout, quoll::rhi::ImageLayout::Undefined);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+              quoll::rhi::ImageLayout::DepthStencilAttachmentOptimal);
   }
 
   {
@@ -318,28 +316,26 @@ TEST_F(RenderGraphTest,
 
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+              quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
   }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierForAllMipLevelsIfTextureIsNotAView) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   colorDescription.mipLevelCount = 20;
   auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   graph.build(storage);
@@ -355,8 +351,8 @@ TEST_F(RenderGraphTest, SetsImageBarrierForAllMipLevelsIfTextureIsNotAView) {
 
 TEST_F(RenderGraphTest,
        SetsImageBarrierForSpecifiedMipLevelsWhenTextureIsView) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   colorDescription.mipLevelCount = 20;
   auto colorTexture = createTexture(colorDescription);
 
@@ -364,7 +360,7 @@ TEST_F(RenderGraphTest,
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(view, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(view, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   graph.build(storage);
@@ -379,19 +375,19 @@ TEST_F(RenderGraphTest,
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWrites) {
-  liquid::rhi::TextureDescription description{};
-  description.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription description{};
+  description.usage = quoll::rhi::TextureUsage::Color;
 
   auto colorTexture = createTexture(description);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   {
     auto &pass = graph.addComputePass("B");
-    pass.write(colorTexture, liquid::AttachmentType::Color, {});
+    pass.write(colorTexture, quoll::AttachmentType::Color, {});
   }
 
   graph.build(storage);
@@ -403,35 +399,35 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWrites) {
   const auto &imageBarrier = dependencies.imageBarriers.at(0);
   EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
   EXPECT_EQ(imageBarrier.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+            quoll::rhi::PipelineStage::ColorAttachmentOutput);
+  EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
   EXPECT_EQ(imageBarrier.srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-  EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+            quoll::rhi::ImageLayout::ColorAttachmentOptimal);
+  EXPECT_EQ(imageBarrier.dstLayout, quoll::rhi::ImageLayout::General);
 }
 
 TEST_F(RenderGraphTest,
        SetsMultipleImageBarriersWhenPassesWriteToMultipleTextures) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
-  liquid::rhi::TextureDescription depthDescription{};
-  depthDescription.usage = liquid::rhi::TextureUsage::Depth;
+  quoll::rhi::TextureDescription depthDescription{};
+  depthDescription.usage = quoll::rhi::TextureUsage::Depth;
   auto depthTexture = createTexture(depthDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
-    pass.write(depthTexture, liquid::AttachmentType::Depth, {});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
+    pass.write(depthTexture, quoll::AttachmentType::Depth, {});
   }
 
   {
     auto &pass = graph.addComputePass("B");
-    pass.write(colorTexture, liquid::AttachmentType::Color, {});
-    pass.write(depthTexture, liquid::AttachmentType::Depth, {});
+    pass.write(colorTexture, quoll::AttachmentType::Color, {});
+    pass.write(depthTexture, quoll::AttachmentType::Depth, {});
   }
 
   graph.build(storage);
@@ -444,14 +440,13 @@ TEST_F(RenderGraphTest,
     const auto &imageBarrier = dependencies.imageBarriers.at(0);
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, quoll::rhi::ImageLayout::General);
   }
 
   {
@@ -459,26 +454,26 @@ TEST_F(RenderGraphTest,
 
     EXPECT_EQ(imageBarrier.texture, depthTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::EarlyFragmentTests |
-                  liquid::rhi::PipelineStage::LateFragmentTests);
-    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
+              quoll::rhi::PipelineStage::EarlyFragmentTests |
+                  quoll::rhi::PipelineStage::LateFragmentTests);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
     EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::DepthStencilAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+              quoll::rhi::Access::DepthStencilAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
-    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+              quoll::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, quoll::rhi::ImageLayout::General);
   }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWriteAndPassRead) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   {
@@ -495,24 +490,24 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassWriteAndPassRead) {
   const auto &imageBarrier = dependencies.imageBarriers.at(0);
   EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
   EXPECT_EQ(imageBarrier.srcStage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+            quoll::rhi::PipelineStage::ColorAttachmentOutput);
+  EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
   EXPECT_EQ(imageBarrier.srcLayout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+            quoll::rhi::ImageLayout::ColorAttachmentOptimal);
   EXPECT_EQ(imageBarrier.dstLayout,
-            liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+            quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 TEST_F(RenderGraphTest, SetsImageBarriersBetweenPassReads) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   {
@@ -535,16 +530,14 @@ TEST_F(RenderGraphTest, SetsImageBarriersBetweenPassReads) {
     const auto &imageBarrier = dependencies1.imageBarriers.at(0);
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+              quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
   }
 
   auto dependencies2 = graph.getCompiledPasses().at(2).getSyncDependencies();
@@ -554,32 +547,31 @@ TEST_F(RenderGraphTest, SetsImageBarriersBetweenPassReads) {
     const auto &imageBarrier = dependencies2.imageBarriers.at(0);
 
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
-    EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(imageBarrier.srcAccess, liquid::rhi::Access::ShaderRead);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.srcStage, quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ShaderRead);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+              quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+              quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
   }
 }
 
 TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassReadAndPassWrite) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(colorTexture, liquid::AttachmentType::Color, glm::vec4{});
+    pass.write(colorTexture, quoll::AttachmentType::Color, glm::vec4{});
   }
 
   {
     auto &pass = graph.addGraphicsPass("B");
     pass.read(colorTexture);
-    pass.write(colorTexture, liquid::AttachmentType::Color, {});
+    pass.write(colorTexture, quoll::AttachmentType::Color, {});
   }
 
   graph.build(storage);
@@ -593,17 +585,15 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassReadAndPassWrite) {
 
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
     EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ColorAttachmentWrite);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
   }
 
   {
@@ -611,16 +601,14 @@ TEST_F(RenderGraphTest, SetsImageBarrierBetweenPassReadAndPassWrite) {
 
     EXPECT_EQ(imageBarrier.texture, colorTexture.getHandle());
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.dstStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
     EXPECT_EQ(imageBarrier.dstLayout,
-              liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+              quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
   }
 }
 
@@ -630,7 +618,7 @@ TEST_F(RenderGraphTest,
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Storage);
   }
 
   graph.build(storage);
@@ -640,10 +628,10 @@ TEST_F(RenderGraphTest,
 
   const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
   EXPECT_EQ(bufferBarrier.buffer, buffer1);
-  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::None);
-  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::None);
-  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.srcStage, quoll::rhi::PipelineStage::None);
+  EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::None);
+  EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
 }
 
 TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWrites) {
@@ -651,12 +639,12 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWrites) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Uniform);
   }
 
   graph.build(storage);
@@ -666,10 +654,10 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWrites) {
 
   const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
   EXPECT_EQ(bufferBarrier.buffer, buffer1);
-  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.srcStage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
   EXPECT_EQ(bufferBarrier.size, 0);
   EXPECT_EQ(bufferBarrier.offset, 0);
 }
@@ -680,14 +668,14 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenMultipleBufferWrites) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
-    pass.write(buffer2, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Storage);
+    pass.write(buffer2, quoll::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Uniform);
-    pass.write(buffer2, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Uniform);
+    pass.write(buffer2, quoll::rhi::BufferUsage::Storage);
   }
 
   graph.build(storage);
@@ -699,11 +687,10 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenMultipleBufferWrites) {
     const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
     EXPECT_EQ(bufferBarrier.buffer, buffer1);
     EXPECT_EQ(bufferBarrier.srcStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(bufferBarrier.dstStage,
-              liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
-    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+              quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
     EXPECT_EQ(bufferBarrier.size, 0);
     EXPECT_EQ(bufferBarrier.offset, 0);
   }
@@ -712,11 +699,10 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenMultipleBufferWrites) {
     const auto &bufferBarrier = dependencies.bufferBarriers.at(1);
     EXPECT_EQ(bufferBarrier.buffer, buffer2);
     EXPECT_EQ(bufferBarrier.srcStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(bufferBarrier.dstStage,
-              liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
-    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+              quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
     EXPECT_EQ(bufferBarrier.size, 0);
     EXPECT_EQ(bufferBarrier.offset, 0);
   }
@@ -728,12 +714,12 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWriteAndRead) {
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
+    pass.write(buffer1, quoll::rhi::BufferUsage::Storage);
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
+    pass.read(buffer1, quoll::rhi::BufferUsage::Uniform);
   }
 
   graph.build(storage);
@@ -743,31 +729,31 @@ TEST_F(RenderGraphTest, SetsBufferBarrierBetweenBufferWriteAndRead) {
 
   const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
   EXPECT_EQ(bufferBarrier.buffer, buffer1);
-  EXPECT_EQ(bufferBarrier.srcStage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(bufferBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(bufferBarrier.srcStage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::ShaderWrite);
+  EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
   EXPECT_EQ(bufferBarrier.size, 0);
   EXPECT_EQ(bufferBarrier.offset, 0);
 }
 
 TEST_F(RenderGraphTest, SetsBufferAndTextureBarriersBetweenPasses) {
-  liquid::rhi::TextureDescription colorDescription{};
-  colorDescription.usage = liquid::rhi::TextureUsage::Color;
+  quoll::rhi::TextureDescription colorDescription{};
+  colorDescription.usage = quoll::rhi::TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
 
   auto buffer1 = device.createBuffer({}).getHandle();
 
   {
     auto &pass = graph.addGraphicsPass("A");
-    pass.write(buffer1, liquid::rhi::BufferUsage::Storage);
-    pass.write(colorTexture, liquid::AttachmentType::Color, {});
+    pass.write(buffer1, quoll::rhi::BufferUsage::Storage);
+    pass.write(colorTexture, quoll::AttachmentType::Color, {});
   }
 
   {
     auto &pass = graph.addComputePass("C");
-    pass.read(buffer1, liquid::rhi::BufferUsage::Uniform);
-    pass.write(colorTexture, liquid::AttachmentType::Color, {});
+    pass.read(buffer1, quoll::rhi::BufferUsage::Uniform);
+    pass.write(colorTexture, quoll::AttachmentType::Color, {});
   }
 
   graph.build(storage);
@@ -780,25 +766,23 @@ TEST_F(RenderGraphTest, SetsBufferAndTextureBarriersBetweenPasses) {
     const auto &imageBarrier = dependencies.imageBarriers.at(0);
     EXPECT_EQ(imageBarrier.texture, colorTexture);
     EXPECT_EQ(imageBarrier.srcStage,
-              liquid::rhi::PipelineStage::ColorAttachmentOutput);
-    EXPECT_EQ(imageBarrier.dstStage, liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(imageBarrier.srcAccess,
-              liquid::rhi::Access::ColorAttachmentWrite);
-    EXPECT_EQ(imageBarrier.dstAccess, liquid::rhi::Access::ShaderWrite);
+              quoll::rhi::PipelineStage::ColorAttachmentOutput);
+    EXPECT_EQ(imageBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(imageBarrier.srcAccess, quoll::rhi::Access::ColorAttachmentWrite);
+    EXPECT_EQ(imageBarrier.dstAccess, quoll::rhi::Access::ShaderWrite);
     EXPECT_EQ(imageBarrier.srcLayout,
-              liquid::rhi::ImageLayout::ColorAttachmentOptimal);
-    EXPECT_EQ(imageBarrier.dstLayout, liquid::rhi::ImageLayout::General);
+              quoll::rhi::ImageLayout::ColorAttachmentOptimal);
+    EXPECT_EQ(imageBarrier.dstLayout, quoll::rhi::ImageLayout::General);
   }
 
   {
     const auto &bufferBarrier = dependencies.bufferBarriers.at(0);
     EXPECT_EQ(bufferBarrier.buffer, buffer1);
     EXPECT_EQ(bufferBarrier.srcStage,
-              liquid::rhi::PipelineStage::FragmentShader);
-    EXPECT_EQ(bufferBarrier.dstStage,
-              liquid::rhi::PipelineStage::ComputeShader);
-    EXPECT_EQ(bufferBarrier.srcAccess, liquid::rhi::Access::ShaderWrite);
-    EXPECT_EQ(bufferBarrier.dstAccess, liquid::rhi::Access::ShaderRead);
+              quoll::rhi::PipelineStage::FragmentShader);
+    EXPECT_EQ(bufferBarrier.dstStage, quoll::rhi::PipelineStage::ComputeShader);
+    EXPECT_EQ(bufferBarrier.srcAccess, quoll::rhi::Access::ShaderWrite);
+    EXPECT_EQ(bufferBarrier.dstAccess, quoll::rhi::Access::ShaderRead);
     EXPECT_EQ(bufferBarrier.size, 0);
     EXPECT_EQ(bufferBarrier.offset, 0);
   }
@@ -813,7 +797,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyColorAttachments) {
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
-  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{2.5f});
+  pass.write(texture, quoll::AttachmentType::Color, glm::vec4{2.5f});
 
   graph.build(storage);
 
@@ -852,7 +836,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyDepthAttachment) {
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
-  pass.write(texture, liquid::AttachmentType::Depth,
+  pass.write(texture, quoll::AttachmentType::Depth,
              DepthStencilClear{2.5f, 35});
 
   graph.build(storage);
@@ -893,7 +877,7 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithOnlyResolveAttachment) {
   auto texture = createTexture(colorDescription);
 
   auto &pass = graph.addGraphicsPass("A");
-  pass.write(texture, liquid::AttachmentType::Resolve, glm::vec4{2.5f});
+  pass.write(texture, quoll::AttachmentType::Resolve, glm::vec4{2.5f});
 
   graph.build(storage);
 
@@ -935,10 +919,10 @@ TEST_F(RenderGraphTest, BuildsRenderPassWithAllAttachments) {
   auto resolve = createTexture(description);
 
   auto &pass = graph.addGraphicsPass("A");
-  pass.write(color1, liquid::AttachmentType::Color, glm::vec4{2.5f});
-  pass.write(color2, liquid::AttachmentType::Color, glm::vec4{4.5f});
-  pass.write(depth, liquid::AttachmentType::Depth, DepthStencilClear{2.5f, 35});
-  pass.write(resolve, liquid::AttachmentType::Resolve, glm::vec4{5.5f});
+  pass.write(color1, quoll::AttachmentType::Color, glm::vec4{2.5f});
+  pass.write(color2, quoll::AttachmentType::Color, glm::vec4{4.5f});
+  pass.write(depth, quoll::AttachmentType::Depth, DepthStencilClear{2.5f, 35});
+  pass.write(resolve, quoll::AttachmentType::Resolve, glm::vec4{5.5f});
 
   graph.build(storage);
 
@@ -991,7 +975,7 @@ TEST_F(RenderGraphTest, BuildsGraphicsPipelinesForGraphicsPasses) {
 
   auto texture = createTexture({});
   auto &pass = graph.addGraphicsPass("A");
-  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{0.0f});
+  pass.write(texture, quoll::AttachmentType::Color, glm::vec4{0.0f});
   pass.addPipeline(pipeline);
 
   graph.build(storage);
@@ -1017,7 +1001,7 @@ TEST_F(RenderGraphTest, BuildsComputePipelinesForComputePasses) {
 
   auto texture = createTexture({});
   auto &pass = graph.addComputePass("A");
-  pass.write(texture, liquid::AttachmentType::Color, glm::vec4{0.0f});
+  pass.write(texture, quoll::AttachmentType::Color, glm::vec4{0.0f});
   pass.addPipeline(pipeline);
 
   graph.build(storage);
@@ -1032,8 +1016,8 @@ TEST_F(RenderGraphTest, BuildsComputePipelinesForComputePasses) {
 }
 
 TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
-  using TextureDescription = liquid::rhi::TextureDescription;
-  using TextureUsage = liquid::rhi::TextureUsage;
+  using TextureDescription = quoll::rhi::TextureDescription;
+  using TextureUsage = quoll::rhi::TextureUsage;
   TextureDescription colorDescription{};
   colorDescription.usage = TextureUsage::Color;
   auto colorTexture = createTexture(colorDescription);
@@ -1049,7 +1033,7 @@ TEST_F(RenderGraphDeathTest, FailsIfPassReadsFromNonWrittenTexture) {
 TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
   auto handle = createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("A").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
   graph.addGraphicsPass("B");
   graph.addGraphicsPass("C");
@@ -1064,7 +1048,7 @@ TEST_F(RenderGraphTest, CompilationRemovesLonelyNodes) {
 TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
   auto handle = createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("A").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
   graph.addGraphicsPass("E").read(handle);
 
@@ -1078,7 +1062,7 @@ TEST_F(RenderGraphTest, RecompilationRecreatesCompiledPassesList) {
 TEST_F(RenderGraphDeathTest, CompilationFailsIfMultipleNodesHaveTheSameName) {
   auto handle = createTexture({});
 
-  graph.addGraphicsPass("A").write(handle, liquid::AttachmentType::Color,
+  graph.addGraphicsPass("A").write(handle, quoll::AttachmentType::Color,
                                    glm::vec4());
   graph.addGraphicsPass("B");
   graph.addGraphicsPass("A");
@@ -1096,10 +1080,10 @@ TEST_F(RenderGraphTest, DestroysAllTransientResourcesOnDestroy) {
   auto t2 = graph.createView(t1, 1, 2, 3, 4);
 
   auto pipeline =
-      storage.addPipeline(liquid::rhi::GraphicsPipelineDescription{});
+      storage.addPipeline(quoll::rhi::GraphicsPipelineDescription{});
 
   auto &pass = graph.addGraphicsPass("test");
-  pass.write(t1, liquid::AttachmentType::Color, {});
+  pass.write(t1, quoll::AttachmentType::Color, {});
   pass.addPipeline(pipeline);
 
   graph.build(storage);

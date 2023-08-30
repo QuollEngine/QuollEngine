@@ -13,10 +13,10 @@ class AssetCacheAnimationTest : public AssetCacheTestBase {
 public:
 };
 
-liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
-  liquid::AssetData<liquid::AnimationAsset> asset;
+quoll::AssetData<quoll::AnimationAsset> createRandomizedAnimation() {
+  quoll::AssetData<quoll::AnimationAsset> asset;
   asset.name = "test-anim0";
-  asset.uuid = liquid::Uuid::generate();
+  asset.uuid = quoll::Uuid::generate();
   {
     std::random_device device;
     std::mt19937 mt(device());
@@ -30,12 +30,12 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
     asset.data.time = static_cast<float>(countKeyframeValues) * 0.5f;
 
     for (size_t i = 0; i < countKeyframes; ++i) {
-      liquid::KeyframeSequenceAsset keyframe;
+      quoll::KeyframeSequenceAsset keyframe;
       keyframe.interpolation =
-          static_cast<liquid::KeyframeSequenceAssetInterpolation>(
+          static_cast<quoll::KeyframeSequenceAssetInterpolation>(
               interpolationDist(mt));
       keyframe.target =
-          static_cast<liquid::KeyframeSequenceAssetTarget>(targetDist(mt));
+          static_cast<quoll::KeyframeSequenceAssetTarget>(targetDist(mt));
       keyframe.joint = udist(mt);
       keyframe.jointTarget = keyframe.joint == 10;
       keyframe.keyframeTimes.resize(countKeyframeValues);
@@ -57,13 +57,13 @@ liquid::AssetData<liquid::AnimationAsset> createRandomizedAnimation() {
 TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   auto asset = createRandomizedAnimation();
   auto filePath = cache.createAnimationFromAsset(asset);
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, liquid::AssetType::Animation);
+  EXPECT_EQ(header.type, quoll::AssetType::Animation);
   EXPECT_EQ(header.name, asset.name);
 
   float time = 0.0f;
@@ -78,10 +78,10 @@ TEST_F(AssetCacheAnimationTest, CreatesAnimationFile) {
   for (uint32_t i = 0; i < numKeyframes; ++i) {
     auto &keyframe = asset.data.keyframes.at(i);
 
-    liquid::KeyframeSequenceAssetTarget target{0};
-    liquid::KeyframeSequenceAssetInterpolation interpolation{0};
+    quoll::KeyframeSequenceAssetTarget target{0};
+    quoll::KeyframeSequenceAssetInterpolation interpolation{0};
     bool jointTarget = false;
-    liquid::JointId joint = 0;
+    quoll::JointId joint = 0;
     uint32_t numValues = 0;
 
     file.read(target);
@@ -117,11 +117,11 @@ TEST_F(AssetCacheAnimationTest, LoadsAnimationAssetFromFile) {
   auto filePath = cache.createAnimationFromAsset(asset);
   auto handle = cache.loadAnimation(asset.uuid);
   EXPECT_FALSE(handle.hasError());
-  EXPECT_NE(handle.getData(), liquid::AnimationAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::AnimationAssetHandle::Null);
 
   auto &actual = cache.getRegistry().getAnimations().getAsset(handle.getData());
   EXPECT_EQ(actual.name, asset.name);
-  EXPECT_EQ(actual.type, liquid::AssetType::Animation);
+  EXPECT_EQ(actual.type, quoll::AssetType::Animation);
 
   EXPECT_EQ(actual.data.time, asset.data.time);
   EXPECT_EQ(actual.data.keyframes.size(), asset.data.keyframes.size());

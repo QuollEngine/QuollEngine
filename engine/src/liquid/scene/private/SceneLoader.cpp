@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "SceneLoader.h"
 
-namespace liquid::detail {
+namespace quoll::detail {
 
 SceneLoader::SceneLoader(AssetRegistry &assetRegistry,
                          EntityDatabase &entityDatabase)
@@ -10,7 +10,7 @@ SceneLoader::SceneLoader(AssetRegistry &assetRegistry,
 Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
                                          EntityIdCache &entityIdCache) {
   if (node["name"] && node["name"].IsScalar()) {
-    auto name = node["name"].as<liquid::String>();
+    auto name = node["name"].as<quoll::String>();
     mEntityDatabase.set<Name>(entity, {name});
   } else {
     auto name = "Untitled " + node["id"].as<String>();
@@ -88,18 +88,18 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     collidable.geometryDesc.type = shape;
 
     if (shape == PhysicsGeometryType::Box) {
-      liquid::PhysicsGeometryBox box{};
+      quoll::PhysicsGeometryBox box{};
       box.halfExtents =
           node["collidable"]["halfExtents"].as<glm::vec3>(box.halfExtents);
 
       collidable.geometryDesc.params = box;
     } else if (shape == PhysicsGeometryType::Sphere) {
-      liquid::PhysicsGeometrySphere sphere{};
+      quoll::PhysicsGeometrySphere sphere{};
       sphere.radius = node["collidable"]["radius"].as<float>(sphere.radius);
 
       collidable.geometryDesc.params = sphere;
     } else if (shape == PhysicsGeometryType::Capsule) {
-      liquid::PhysicsGeometryCapsule capsule{};
+      quoll::PhysicsGeometryCapsule capsule{};
       capsule.radius = node["collidable"]["radius"].as<float>(capsule.radius);
       capsule.halfHeight =
           node["collidable"]["halfHeight"].as<float>(capsule.halfHeight);
@@ -184,7 +184,7 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
       const auto &skeleton =
           mAssetRegistry.getSkeletons().getAsset(handle).data;
 
-      liquid::Skeleton skeletonComponent{};
+      quoll::Skeleton skeletonComponent{};
       skeletonComponent.jointLocalPositions = skeleton.jointLocalPositions;
       skeletonComponent.jointLocalRotations = skeleton.jointLocalRotations;
       skeletonComponent.jointLocalScales = skeleton.jointLocalScales;
@@ -460,4 +460,4 @@ Result<Entity> SceneLoader::loadEnvironment(const YAML::Node &node,
   return Result<Entity>::Error("Environment entity not found");
 }
 
-} // namespace liquid::detail
+} // namespace quoll::detail

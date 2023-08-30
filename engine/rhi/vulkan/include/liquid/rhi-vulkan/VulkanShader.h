@@ -5,7 +5,7 @@
 
 #include "VulkanDeviceObject.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan shader
@@ -96,4 +96,4 @@ private:
   Path mPath;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for text component
@@ -74,4 +74,4 @@ public:
   static const String getName() { return "text"; }
 };
 
-} // namespace liquid
+} // namespace quoll

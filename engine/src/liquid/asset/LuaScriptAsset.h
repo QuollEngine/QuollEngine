@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class LuaScriptVariableType { String, AssetPrefab, AssetTexture, Invalid };
 
@@ -34,4 +34,4 @@ struct LuaScriptAsset {
   std::unordered_map<String, LuaScriptVariable> variables;
 };
 
-} // namespace liquid
+} // namespace quoll

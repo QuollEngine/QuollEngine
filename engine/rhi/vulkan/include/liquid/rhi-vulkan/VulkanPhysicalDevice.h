@@ -4,7 +4,7 @@
 #include "VulkanQueueFamily.h"
 #include "liquid/rhi/PhysicalDeviceInformation.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan Physical Device information
@@ -126,4 +126,4 @@ private:
   VkPhysicalDevice mDevice = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

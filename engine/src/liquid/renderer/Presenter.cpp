@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "Presenter.h"
 
-namespace liquid {
+namespace quoll {
 
 Presenter::Presenter(RenderStorage &renderStorage)
     : mRenderStorage(renderStorage) {
@@ -46,10 +46,10 @@ Presenter::Presenter(RenderStorage &renderStorage)
   pipelineDescription.vertexShader = vertexShader;
   pipelineDescription.fragmentShader = fragmentShader;
   pipelineDescription.rasterizer = rhi::PipelineRasterizer{
-      liquid::rhi::PolygonMode::Fill, liquid::rhi::CullMode::Front,
-      liquid::rhi::FrontFace::CounterClockwise};
+      quoll::rhi::PolygonMode::Fill, quoll::rhi::CullMode::Front,
+      quoll::rhi::FrontFace::CounterClockwise};
   pipelineDescription.colorBlend.attachments = {
-      liquid::rhi::PipelineColorBlendAttachment{}};
+      quoll::rhi::PipelineColorBlendAttachment{}};
   pipelineDescription.debugName = "presenter";
 
   mPresentPipeline = mRenderStorage.addPipeline(pipelineDescription);
@@ -179,4 +179,4 @@ void Presenter::present(rhi::RenderCommandList &commandList,
 
 void Presenter::enqueueFramebufferUpdate() { mUpdateRequired = true; }
 
-} // namespace liquid
+} // namespace quoll

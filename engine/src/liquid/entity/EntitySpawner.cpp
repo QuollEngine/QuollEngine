@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntitySpawner.h"
 
-namespace liquid {
+namespace quoll {
 
 EntitySpawner::EntitySpawner(EntityDatabase &entityDatabase,
                              AssetRegistry &assetRegistry)
@@ -192,4 +192,4 @@ Entity EntitySpawner::spawnSprite(TextureAssetHandle handle,
   return entity;
 }
 
-} // namespace liquid
+} // namespace quoll

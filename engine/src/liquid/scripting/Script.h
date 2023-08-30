@@ -7,7 +7,7 @@
 
 #include "LuaScope.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting component
@@ -57,4 +57,4 @@ struct Script {
   EventObserverId onKeyRelease = EventObserverMax;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -12,17 +12,17 @@ public:
     scriptingSystem.observeChanges(entityDatabase);
   }
 
-  liquid::LuaScriptAssetHandle
-  loadLuaScript(liquid::String filename = "scripting-system-tester.lua") {
-    auto uuid = liquid::Uuid::generate();
+  quoll::LuaScriptAssetHandle
+  loadLuaScript(quoll::String filename = "scripting-system-tester.lua") {
+    auto uuid = quoll::Uuid::generate();
     assetCache.createLuaScriptFromSource(FixturesPath / filename, uuid);
     return assetCache.loadLuaScript(uuid).getData();
   }
 
-  liquid::EntityDatabase entityDatabase;
-  liquid::EventSystem eventSystem;
-  liquid::AssetCache assetCache;
-  liquid::ScriptingSystem scriptingSystem;
+  quoll::EntityDatabase entityDatabase;
+  quoll::EventSystem eventSystem;
+  quoll::AssetCache assetCache;
+  quoll::ScriptingSystem scriptingSystem;
 };
 
 using ScriptingSystemDeathTest = ScriptingSystemTest;
@@ -33,9 +33,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -51,25 +51,25 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
 
   static constexpr size_t NumEntities = 20;
 
-  std::vector<liquid::Entity> entities(NumEntities, liquid::Entity::Null);
+  std::vector<quoll::Entity> entities(NumEntities, quoll::Entity::Null);
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entityDatabase.create();
     entities.at(i) = entity;
 
-    entityDatabase.set<liquid::Script>(entity, {handle});
+    entityDatabase.set<quoll::Script>(entity, {handle});
   }
 
   scriptingSystem.start(entityDatabase);
 
-  std::vector<liquid::Script> scripts(entities.size());
+  std::vector<quoll::Script> scripts(entities.size());
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
-    scripts.at(i) = entityDatabase.get<liquid::Script>(entity);
-    ASSERT_TRUE(eventSystem.hasObserver(liquid::CollisionEvent::CollisionEnded,
+    scripts.at(i) = entityDatabase.get<quoll::Script>(entity);
+    ASSERT_TRUE(eventSystem.hasObserver(quoll::CollisionEvent::CollisionEnded,
                                         scripts.at(i).onCollisionEnd));
 
     if ((i % 2) == 0) {
-      entityDatabase.remove<liquid::Script>(entity);
+      entityDatabase.remove<quoll::Script>(entity);
     }
   }
 
@@ -77,12 +77,11 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
   for (size_t i = 0; i < entities.size(); ++i) {
     auto entity = entities.at(i);
     bool deleted = (i % 2) == 0;
-    EXPECT_NE(entityDatabase.has<liquid::Script>(entity), deleted);
+    EXPECT_NE(entityDatabase.has<quoll::Script>(entity), deleted);
 
     if (deleted) {
-      EXPECT_FALSE(
-          eventSystem.hasObserver(liquid::CollisionEvent::CollisionEnded,
-                                  scripts.at(i).onCollisionEnd));
+      EXPECT_FALSE(eventSystem.hasObserver(
+          quoll::CollisionEvent::CollisionEnded, scripts.at(i).onCollisionEnd));
     }
   }
 }
@@ -91,9 +90,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -110,9 +109,9 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.start(entityDatabase);
@@ -126,9 +125,9 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
   // Call 10 times
@@ -144,52 +143,52 @@ TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
-  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
 }
 
 TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarTypesAreInvalid) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
   auto entity = entityDatabase.create();
-  liquid::Script script{handle};
+  quoll::Script script{handle};
   script.variables.insert_or_assign("string_value",
-                                    liquid::PrefabAssetHandle{15});
+                                    quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("prefab_value",
-                                    liquid::PrefabAssetHandle{15});
+                                    quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
-                                    liquid::TextureAssetHandle{25});
+                                    quoll::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
-  EXPECT_FALSE(entityDatabase.has<liquid::Script>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
 }
 
 TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
   auto entity = entityDatabase.create();
-  liquid::Script script{handle};
+  quoll::Script script{handle};
   script.variables.insert_or_assign("string_value",
-                                    liquid::String("Hello world"));
+                                    quoll::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
-                                    liquid::PrefabAssetHandle{15});
+                                    quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
-                                    liquid::TextureAssetHandle{25});
+                                    quoll::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
-  ASSERT_TRUE(entityDatabase.has<liquid::Script>(entity));
+  ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
 
-  EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
+  EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
             "Hello world");
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
@@ -199,48 +198,48 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
   auto handle = loadLuaScript("scripting-system-vars.lua");
 
   auto entity = entityDatabase.create();
-  liquid::Script script{handle};
+  quoll::Script script{handle};
   script.variables.insert_or_assign("string_value",
-                                    liquid::String("Hello world"));
+                                    quoll::String("Hello world"));
   script.variables.insert_or_assign("prefab_value",
-                                    liquid::PrefabAssetHandle{15});
+                                    quoll::PrefabAssetHandle{15});
   script.variables.insert_or_assign("texture_value",
-                                    liquid::TextureAssetHandle{25});
+                                    quoll::TextureAssetHandle{25});
   entityDatabase.set(entity, script);
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  EXPECT_EQ(component.scope.getGlobal<liquid::String>("var_string"),
+  EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
             "Hello world");
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_prefab"), 15);
   EXPECT_EQ(component.scope.getGlobal<uint32_t>("var_texture"), 25);
 
-  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("global_vars"));
-  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("entity"));
+  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("global_vars"));
+  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("entity"));
 
   component.scope.luaGetGlobal("update");
   component.scope.call(0);
 
   EXPECT_TRUE(component.scope.isGlobal<std::nullptr_t>("global_vars"));
-  EXPECT_TRUE(component.scope.isGlobal<liquid::LuaTable>("entity"));
+  EXPECT_TRUE(component.scope.isGlobal<quoll::LuaTable>("entity"));
 }
 
 TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  EXPECT_LT(component.onCollisionStart, liquid::EventObserverMax);
-  EXPECT_LT(component.onCollisionEnd, liquid::EventObserverMax);
-  EXPECT_LT(component.onKeyPress, liquid::EventObserverMax);
-  EXPECT_LT(component.onKeyRelease, liquid::EventObserverMax);
+  EXPECT_LT(component.onCollisionStart, quoll::EventObserverMax);
+  EXPECT_LT(component.onCollisionEnd, quoll::EventObserverMax);
+  EXPECT_LT(component.onKeyPress, quoll::EventObserverMax);
+  EXPECT_LT(component.onKeyRelease, quoll::EventObserverMax);
 }
 
 TEST_F(ScriptingSystemTest,
@@ -248,14 +247,14 @@ TEST_F(ScriptingSystemTest,
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted,
-                       {liquid::Entity{5}, liquid::Entity{6}});
+  eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
+                       {quoll::Entity{5}, quoll::Entity{6}});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 0);
@@ -265,14 +264,14 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionStarted,
-                       {entity, liquid::Entity{6}});
+  eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
+                       {entity, quoll::Entity{6}});
   eventSystem.poll();
 
   auto *luaScope = component.scope.getLuaState();
@@ -284,14 +283,14 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::CollisionEvent::CollisionEnded,
-                       {liquid::Entity{5}, entity});
+  eventSystem.dispatch(quoll::CollisionEvent::CollisionEnded,
+                       {quoll::Entity{5}, entity});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 2);
@@ -302,13 +301,13 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::KeyboardEvent::Pressed, {15, -1, 3});
+  eventSystem.dispatch(quoll::KeyboardEvent::Pressed, {15, -1, 3});
   eventSystem.poll();
 
   auto *luaScope = component.scope.getLuaState();
@@ -321,13 +320,13 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
   auto handle = loadLuaScript();
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Script>(entity, {handle});
+  entityDatabase.set<quoll::Script>(entity, {handle});
 
-  auto &component = entityDatabase.get<liquid::Script>(entity);
+  auto &component = entityDatabase.get<quoll::Script>(entity);
 
   scriptingSystem.start(entityDatabase);
 
-  eventSystem.dispatch(liquid::KeyboardEvent::Released, {35, -1, 3});
+  eventSystem.dispatch(quoll::KeyboardEvent::Released, {35, -1, 3});
   eventSystem.poll();
 
   EXPECT_EQ(component.scope.getGlobal<int32_t>("event"), 4);

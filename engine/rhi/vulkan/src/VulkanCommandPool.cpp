@@ -7,7 +7,7 @@
 
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanCommandPool::VulkanCommandPool(VulkanDeviceObject &device,
                                      uint32_t queueFamilyIndex,
@@ -72,4 +72,4 @@ void VulkanCommandPool::freeCommandList(RenderCommandList &commandList) {
   vkFreeCommandBuffers(mDevice, mCommandPool, 1, &commandBuffer);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

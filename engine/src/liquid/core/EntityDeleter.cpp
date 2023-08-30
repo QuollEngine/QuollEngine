@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityDeleter.h"
 
-namespace liquid {
+namespace quoll {
 
 void addToDeleteList(Entity entity, EntityDatabase &entityDatabase,
                      std::vector<Entity> &deleteList) {
@@ -56,4 +56,4 @@ void EntityDeleter::update(Scene &scene) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

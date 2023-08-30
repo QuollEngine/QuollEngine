@@ -14,7 +14,7 @@
 #include "liquidator/actions/EntityLightActions.h"
 #include "liquidator/actions/EntityCameraActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Entity panel component
@@ -266,4 +266,4 @@ private:
       mEnvironmentSkyboxAction;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

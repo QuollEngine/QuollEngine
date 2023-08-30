@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "KeyframeInterpolator.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Convert vec4 to other values
@@ -137,4 +137,4 @@ KeyframeInterpolator::interpolateQuat(const KeyframeSequenceAsset &sequence,
   return interpolate<glm::quat>(sequence, time);
 }
 
-} // namespace liquid
+} // namespace quoll

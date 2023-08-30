@@ -2,7 +2,7 @@
 
 #include "liquid/yaml/Yaml.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene asset
@@ -16,4 +16,4 @@ struct SceneAsset {
   YAML::Node data;
 };
 
-} // namespace liquid
+} // namespace quoll

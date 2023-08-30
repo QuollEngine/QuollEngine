@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Local transform component
@@ -22,4 +22,4 @@ struct LocalTransform {
   glm::vec3 localScale{1.0f};
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/NativeDescriptor.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock descriptor
@@ -92,4 +92,4 @@ private:
   DescriptorLayoutHandle mLayout;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

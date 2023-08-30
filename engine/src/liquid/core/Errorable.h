@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Errorable type
@@ -69,4 +69,4 @@ private:
   TError mError = TError::None;
 };
 
-} // namespace liquid
+} // namespace quoll

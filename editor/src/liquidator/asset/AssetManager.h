@@ -6,7 +6,7 @@
 #include "HDRIImporter.h"
 #include "UUIDMap.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Manage all the assets in the editor
@@ -371,4 +371,4 @@ private:
   std::unordered_map<String, Uuid> mAssetCacheMap;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

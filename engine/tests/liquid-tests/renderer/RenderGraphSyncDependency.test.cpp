@@ -7,180 +7,173 @@ class RenderGraphSyncDependencyTextureReadTest : public ::testing::Test {};
 
 TEST_F(RenderGraphSyncDependencyTextureReadTest,
        ReturnsComputeShaderWhenPassIsCompute) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureRead(
-      liquid::RenderGraphPassType::Compute);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureRead(
+      quoll::RenderGraphPassType::Compute);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(dependency.layout, liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureReadTest,
        ReturnsFragmentShaderDependencyWhenPassIsGraphics) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureRead(
-      liquid::RenderGraphPassType::Graphics);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureRead(
+      quoll::RenderGraphPassType::Graphics);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead);
-  EXPECT_EQ(dependency.layout, liquid::rhi::ImageLayout::ShaderReadOnlyOptimal);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 class RenderGraphSyncDependencyTextureWriteTest : public ::testing::Test {};
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsColorAttachmentWriteWhenPassIsGraphicsAndAttachmentIsColor) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Graphics, liquid::AttachmentType::Color);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Graphics, quoll::AttachmentType::Color);
 
-  EXPECT_EQ(dependency.stage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(dependency.layout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ColorAttachmentOutput);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::ColorAttachmentOptimal);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsColorAttachmentWriteWhenPassIsGraphicsAndAttachmentIsResolve) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Graphics, liquid::AttachmentType::Resolve);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Graphics, quoll::AttachmentType::Resolve);
 
-  EXPECT_EQ(dependency.stage,
-            liquid::rhi::PipelineStage::ColorAttachmentOutput);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ColorAttachmentWrite);
-  EXPECT_EQ(dependency.layout,
-            liquid::rhi::ImageLayout::ColorAttachmentOptimal);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ColorAttachmentOutput);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ColorAttachmentWrite);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::ColorAttachmentOptimal);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsDepthAttachmentWriteWhenPassIsGraphicsAndAttachmentIsDepth) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Graphics, liquid::AttachmentType::Depth);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Graphics, quoll::AttachmentType::Depth);
 
-  EXPECT_EQ(dependency.stage,
-            liquid::rhi::PipelineStage::EarlyFragmentTests |
-                liquid::rhi::PipelineStage::LateFragmentTests);
-  EXPECT_EQ(dependency.access,
-            liquid::rhi::Access::DepthStencilAttachmentWrite);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::EarlyFragmentTests |
+                                  quoll::rhi::PipelineStage::LateFragmentTests);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::DepthStencilAttachmentWrite);
   EXPECT_EQ(dependency.layout,
-            liquid::rhi::ImageLayout::DepthStencilAttachmentOptimal);
+            quoll::rhi::ImageLayout::DepthStencilAttachmentOptimal);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsComputeShaderWhenPassIsComputeAndAttachmentIsColor) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Compute, liquid::AttachmentType::Color);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Compute, quoll::AttachmentType::Color);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(dependency.layout, liquid::rhi::ImageLayout::General);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderWrite);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::General);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsComputeShaderWhenPassIsComputeAndAttachmentIsResolve) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Compute, liquid::AttachmentType::Resolve);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Compute, quoll::AttachmentType::Resolve);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(dependency.layout, liquid::rhi::ImageLayout::General);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderWrite);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::General);
 }
 
 TEST_F(RenderGraphSyncDependencyTextureWriteTest,
        ReturnsComputeShaderWhenPassIsComputeAndAttachmentIsDepth) {
-  auto dependency = liquid::RenderGraphSyncDependency::getTextureWrite(
-      liquid::RenderGraphPassType::Compute, liquid::AttachmentType::Depth);
+  auto dependency = quoll::RenderGraphSyncDependency::getTextureWrite(
+      quoll::RenderGraphPassType::Compute, quoll::AttachmentType::Depth);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderWrite);
-  EXPECT_EQ(dependency.layout, liquid::rhi::ImageLayout::General);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderWrite);
+  EXPECT_EQ(dependency.layout, quoll::rhi::ImageLayout::General);
 }
 
 class RenderGraphSyncDependencyBufferReadTest : public ::testing::Test {};
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsComputeShaderWhenPassIsCompute) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Compute, liquid::rhi::BufferUsage::Indirect);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Compute, quoll::rhi::BufferUsage::Indirect);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsVertexReadWhenPassIsGraphicsAndUsageIncludesVertex) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Vertex);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics, quoll::rhi::BufferUsage::Vertex);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::VertexAttributeInput);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::VertexAttributeRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::VertexAttributeInput);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::VertexAttributeRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsIndexReadWhenPassIsGraphicsAndUsageIncludesIndex) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Index);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics, quoll::rhi::BufferUsage::Index);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::IndexInput);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::IndexRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::IndexInput);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::IndexRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsIndirectReadWhenPassIsGraphicsAndUsageIncludesIndirect) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics,
-      liquid::rhi::BufferUsage::Indirect);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics, quoll::rhi::BufferUsage::Indirect);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::DrawIndirect);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::IndirectCommandRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::DrawIndirect);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::IndirectCommandRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsFragmentShaderReadWhenBufferUsageIncludesUniform) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Uniform);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics, quoll::rhi::BufferUsage::Uniform);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsFragmentShaderReadWhenBufferUsageIncludesStorage) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics, liquid::rhi::BufferUsage::Storage);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics, quoll::rhi::BufferUsage::Storage);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferReadTest,
        ReturnsMultipleStagesForMultipleUsage) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferRead(
-      liquid::RenderGraphPassType::Graphics,
-      liquid::rhi::BufferUsage::Storage | liquid::rhi::BufferUsage::Vertex);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferRead(
+      quoll::RenderGraphPassType::Graphics,
+      quoll::rhi::BufferUsage::Storage | quoll::rhi::BufferUsage::Vertex);
 
   EXPECT_EQ(dependency.stage,
-            liquid::rhi::PipelineStage::FragmentShader |
-                liquid::rhi::PipelineStage::VertexAttributeInput);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderRead |
-                                   liquid::rhi::Access::VertexAttributeRead);
+            quoll::rhi::PipelineStage::FragmentShader |
+                quoll::rhi::PipelineStage::VertexAttributeInput);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderRead |
+                                   quoll::rhi::Access::VertexAttributeRead);
 }
 
 class RenderGraphSyncDependencyBufferWriteTest : public ::testing::Test {};
 
 TEST_F(RenderGraphSyncDependencyBufferWriteTest,
        ReturnsComputeShaderWhenPassIsCompute) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferWrite(
-      liquid::RenderGraphPassType::Compute);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferWrite(
+      quoll::RenderGraphPassType::Compute);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::ComputeShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::ComputeShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderWrite);
 }
 
 TEST_F(RenderGraphSyncDependencyBufferWriteTest,
        ReturnsFragmentShaderWhenPassIsGraphics) {
-  auto dependency = liquid::RenderGraphSyncDependency::getBufferWrite(
-      liquid::RenderGraphPassType::Graphics);
+  auto dependency = quoll::RenderGraphSyncDependency::getBufferWrite(
+      quoll::RenderGraphPassType::Graphics);
 
-  EXPECT_EQ(dependency.stage, liquid::rhi::PipelineStage::FragmentShader);
-  EXPECT_EQ(dependency.access, liquid::rhi::Access::ShaderWrite);
+  EXPECT_EQ(dependency.stage, quoll::rhi::PipelineStage::FragmentShader);
+  EXPECT_EQ(dependency.access, quoll::rhi::Access::ShaderWrite);
 }

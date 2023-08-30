@@ -5,7 +5,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanResourceRegistry.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan descriptor set
@@ -87,4 +87,4 @@ private:
   VkDescriptorSet mDescriptorSet = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

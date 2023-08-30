@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class PipelineBindPoint { Graphics, Compute };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

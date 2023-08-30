@@ -12,7 +12,7 @@
 #include <ktx.h>
 #include <ktxvulkan.h>
 
-namespace liquid {
+namespace quoll {
 
 static constexpr uint32_t CubemapSides = 6;
 
@@ -128,7 +128,7 @@ AssetCache::createTextureFromAsset(const AssetData<TextureAsset> &asset) {
   createInfo.baseDepth = 1;
   createInfo.numDimensions = 2;
   createInfo.numFaces =
-      asset.data.type == liquid::TextureAssetType::Cubemap ? CubemapSides : 1;
+      asset.data.type == quoll::TextureAssetType::Cubemap ? CubemapSides : 1;
   createInfo.numLayers = asset.data.layers;
   createInfo.numLevels = static_cast<uint32_t>(asset.data.levels.size());
   createInfo.isArray = KTX_FALSE;
@@ -301,4 +301,4 @@ Result<TextureAssetHandle> AssetCache::getOrLoadTexture(const Uuid &uuid) {
   return loadTexture(uuid);
 }
 
-} // namespace liquid
+} // namespace quoll

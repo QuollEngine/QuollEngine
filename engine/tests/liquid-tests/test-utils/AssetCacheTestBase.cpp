@@ -3,7 +3,7 @@
 
 #include "AssetCacheTestBase.h"
 
-const liquid::Path AssetCacheTestBase::CachePath =
+const quoll::Path AssetCacheTestBase::CachePath =
     std::filesystem::current_path() / "cache";
 
 AssetCacheTestBase::AssetCacheTestBase() : cache(CachePath) {}

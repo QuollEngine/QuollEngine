@@ -18,7 +18,7 @@ static inline uint64_t getAlignedBufferSize(uint64_t size) {
   return ((size - 1) / BufferMemoryAlignment + 1) * BufferMemoryAlignment;
 }
 
-namespace liquid {
+namespace quoll {
 
 ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
     : mRenderStorage(renderStorage), mDevice(renderStorage.getDevice()) {
@@ -41,16 +41,16 @@ ImguiRenderer::ImguiRenderer(Window &window, RenderStorage &renderStorage)
                               {Engine::getShadersPath() / "imgui.frag.spv"});
 
   for (auto &x : mFrameData) {
-    liquid::rhi::BufferDescription vertexDesc{};
-    vertexDesc.usage = liquid::rhi::BufferUsage::Vertex;
+    quoll::rhi::BufferDescription vertexDesc{};
+    vertexDesc.usage = quoll::rhi::BufferUsage::Vertex;
     vertexDesc.size = 1;
     vertexDesc.mapped = true;
     vertexDesc.debugName = "imgui vertex";
 
     x.vertexBuffer = renderStorage.createBuffer(vertexDesc);
 
-    liquid::rhi::BufferDescription indexDesc{};
-    indexDesc.usage = liquid::rhi::BufferUsage::Index;
+    quoll::rhi::BufferDescription indexDesc{};
+    indexDesc.usage = quoll::rhi::BufferUsage::Index;
     indexDesc.size = 1;
     indexDesc.mapped = true;
     indexDesc.debugName = "imgui index";
@@ -356,4 +356,4 @@ void ImguiRenderer::buildFonts() {
   mReady = true;
 }
 
-} // namespace liquid
+} // namespace quoll

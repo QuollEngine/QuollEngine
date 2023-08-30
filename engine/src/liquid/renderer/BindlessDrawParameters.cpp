@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "BindlessDrawParameters.h"
 
-namespace liquid {
+namespace quoll {
 
 void BindlessDrawParameters::build(rhi::RenderDevice *device) {
   size_t maxSize = 0;
@@ -76,4 +76,4 @@ BindlessDrawParameters::padSizeToMinimumUniformAlignment(size_t originalSize) {
   return originalSize;
 }
 
-} // namespace liquid
+} // namespace quoll

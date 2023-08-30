@@ -13,7 +13,7 @@ struct TestObject {
 
 class EventPoolTest : public ::testing::Test {
 public:
-  liquid::EventPool<TestEvent, TestObject> eventPool;
+  quoll::EventPool<TestEvent, TestObject> eventPool;
 
   MOCK_METHOD(void, onValueAdded, (const TestObject &));
   MOCK_METHOD(void, onValueRemoved, (const TestObject &));

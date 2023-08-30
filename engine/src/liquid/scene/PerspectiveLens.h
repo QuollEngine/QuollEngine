@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Perspective lens component
@@ -99,4 +99,4 @@ struct PerspectiveLens {
   uint32_t sensitivity = DefaultSensitivity;
 };
 
-} // namespace liquid
+} // namespace quoll

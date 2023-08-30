@@ -3,7 +3,7 @@
 #include "TinyGLTF.h"
 #include "Buffer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
                                     int accessorIndex) {
@@ -17,4 +17,4 @@ BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
   return {accessor, bufferView, bufferOffset};
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

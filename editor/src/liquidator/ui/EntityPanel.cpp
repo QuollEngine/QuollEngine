@@ -23,7 +23,7 @@
 #include "Widgets.h"
 #include "FontAwesome.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Imgui text callback user data
@@ -1532,7 +1532,7 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
     if (!scene.entityDatabase.has<LocalTransform>(mSelectedEntity) &&
         ImGui::Selectable("Transform")) {
       actionExecutor.execute<EntitySetLocalTransformContinuous>(
-          mSelectedEntity, liquid::LocalTransform{}, liquid::LocalTransform{});
+          mSelectedEntity, quoll::LocalTransform{}, quoll::LocalTransform{});
     }
 
     if (!scene.entityDatabase.has<RigidBody>(mSelectedEntity) &&
@@ -1684,4 +1684,4 @@ bool EntityPanel::shouldDelete(const char *component) {
   return clicked;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

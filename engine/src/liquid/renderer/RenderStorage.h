@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "HandleCounter.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Render storage
@@ -221,4 +221,4 @@ private:
   std::unordered_map<String, rhi::ShaderHandle> mShaderMap;
 };
 
-} // namespace liquid
+} // namespace quoll

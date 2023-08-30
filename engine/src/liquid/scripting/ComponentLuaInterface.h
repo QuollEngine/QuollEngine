@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 template <class TComponentInterface> struct ComponentLuaInterface {
 public:
@@ -20,4 +20,4 @@ public:
   };
 };
 
-} // namespace liquid
+} // namespace quoll

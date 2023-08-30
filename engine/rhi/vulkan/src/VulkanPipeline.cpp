@@ -8,7 +8,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanPipeline::VulkanPipeline(const GraphicsPipelineDescription &description,
                                VulkanDeviceObject &device,
@@ -338,4 +338,4 @@ void VulkanPipeline::createLayout(
                mPipelineLayout);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

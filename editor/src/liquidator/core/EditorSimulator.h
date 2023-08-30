@@ -15,7 +15,7 @@
 #include "liquidator/editor-scene/EditorCamera.h"
 #include "liquidator/state/WorkspaceState.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Manager editor simulation
@@ -101,4 +101,4 @@ private:
   WorkspaceMode mMode = WorkspaceMode::Edit;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

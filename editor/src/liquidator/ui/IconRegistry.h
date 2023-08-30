@@ -4,7 +4,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/renderer/RenderStorage.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class EditorIcon {
   Unknown,
@@ -59,4 +59,4 @@ private:
   static std::unordered_map<EditorIcon, rhi::TextureHandle> mIconMap;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

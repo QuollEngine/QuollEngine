@@ -2,7 +2,7 @@
 
 #include "liquid/asset/AnimationAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Interpolates keyframes
@@ -30,4 +30,4 @@ public:
                                    float time);
 };
 
-} // namespace liquid
+} // namespace quoll

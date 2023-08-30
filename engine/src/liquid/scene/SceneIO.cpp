@@ -4,7 +4,7 @@
 #include "private/SceneLoader.h"
 #include "private/EntitySerializer.h"
 
-namespace liquid {
+namespace quoll {
 
 SceneIO::SceneIO(AssetRegistry &assetRegistry, Scene &scene)
     : mScene(scene), mAssetRegistry(assetRegistry) {
@@ -89,4 +89,4 @@ Result<Entity> SceneIO::createEntityFromNode(const YAML::Node &node) {
   return Result<Entity>::Error("Node does not have an ID");
 }
 
-} // namespace liquid
+} // namespace quoll

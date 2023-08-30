@@ -2,7 +2,7 @@
 
 #include "liquid/logger/Logger.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief In memory storage for logs
@@ -38,4 +38,4 @@ private:
   std::vector<LogEntry> mEntries;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

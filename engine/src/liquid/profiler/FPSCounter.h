@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief FPS counter
@@ -25,4 +25,4 @@ private:
   uint32_t mFps = 0;
 };
 
-} // namespace liquid
+} // namespace quoll

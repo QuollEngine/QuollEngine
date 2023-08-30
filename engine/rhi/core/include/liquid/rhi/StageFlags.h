@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class ShaderStage {
   Vertex = 0x00000001,
@@ -35,4 +35,4 @@ enum class PipelineStage : uint64_t {
 
 EnableBitwiseEnum(PipelineStage);
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

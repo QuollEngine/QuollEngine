@@ -2,7 +2,7 @@
 #include "RenderGraphPass.h"
 #include "RenderGraph.h"
 
-namespace liquid {
+namespace quoll {
 
 RenderGraphPass::RenderGraphPass(StringView name, RenderGraphPassType type)
     : mName(name), mType(type) {}
@@ -20,9 +20,9 @@ void RenderGraphPass::read(RenderGraphResource<rhi::TextureHandle> handle) {
 
 void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferUsage usage) {
   LIQUID_ASSERT(
-      !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Vertex) &&
-          !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Index) &&
-          !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Indirect),
+      !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Vertex) &&
+          !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Index) &&
+          !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Indirect),
       "Buffers can only be written from Uniform or Storage");
   mBufferOutputs.push_back({handle, usage});
 }
@@ -30,8 +30,8 @@ void RenderGraphPass::write(rhi::BufferHandle handle, rhi::BufferUsage usage) {
 void RenderGraphPass::read(rhi::BufferHandle handle, rhi::BufferUsage usage) {
   if (mType == RenderGraphPassType::Compute) {
     LIQUID_ASSERT(
-        !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Vertex) &&
-            !BitwiseEnumContains(usage, liquid::rhi::BufferUsage::Index),
+        !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Vertex) &&
+            !BitwiseEnumContains(usage, quoll::rhi::BufferUsage::Index),
         "Compute pass can only read "
         "buffers from uniform, storage, "
         "or indirect");
@@ -52,4 +52,4 @@ void RenderGraphPass::execute(rhi::RenderCommandList &commandList,
   mExecutor(commandList, frameIndex);
 }
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include "liquid/asset/Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Animator component
@@ -31,4 +31,4 @@ struct Animator {
   bool playing = true;
 };
 
-} // namespace liquid
+} // namespace quoll

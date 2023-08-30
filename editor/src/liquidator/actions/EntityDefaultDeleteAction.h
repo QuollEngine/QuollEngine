@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Entity default component delete action
@@ -254,4 +254,4 @@ private:
   std::optional<TComponent> mNewComponent;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

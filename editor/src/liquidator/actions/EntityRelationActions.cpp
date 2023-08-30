@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityRelationActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetParent::EntitySetParent(Entity entity, Entity parent)
     : mEntity(entity), mParent(parent) {}
@@ -178,4 +178,4 @@ bool EntityRemoveParent::predicate(WorkspaceState &state,
   return scene.entityDatabase.has<Parent>(mEntity);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

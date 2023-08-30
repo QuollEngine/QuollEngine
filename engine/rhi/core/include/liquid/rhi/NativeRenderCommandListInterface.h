@@ -9,7 +9,7 @@
 #include "liquid/rhi/CopyRegion.h"
 #include "liquid/rhi/BlitRegion.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Native render command list interface
@@ -198,4 +198,4 @@ public:
                            std::span<BlitRegion> regions, Filter filter) = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -5,7 +5,7 @@
 #include "VulkanFramebuffer.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanFramebuffer::VulkanFramebuffer(const FramebufferDescription &description,
                                      VulkanDeviceObject &device,
@@ -44,4 +44,4 @@ VulkanFramebuffer::~VulkanFramebuffer() {
   vkDestroyFramebuffer(mDevice, mFramebuffer, nullptr);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -2,7 +2,7 @@
 
 #include "liquid/asset/Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Skinned mesh component
@@ -14,4 +14,4 @@ struct SkinnedMesh {
   MeshAssetHandle handle = MeshAssetHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

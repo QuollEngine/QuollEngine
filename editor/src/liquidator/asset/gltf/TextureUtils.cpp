@@ -2,7 +2,7 @@
 
 #include "TextureUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
                                GLTFTextureColorSpace colorSpace,
@@ -56,4 +56,4 @@ TextureAssetHandle loadTexture(GLTFImportData &importData, size_t index,
   return handle;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

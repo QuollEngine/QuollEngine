@@ -6,7 +6,7 @@
 #include "liquid/renderer/MeshRenderer.h"
 #include "liquid/renderer/SkinnedMeshRenderer.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Prefab component
@@ -109,4 +109,4 @@ struct PrefabAsset {
   std::vector<PrefabComponent<SkinnedMeshRenderer>> skinnedMeshRenderers;
 };
 
-} // namespace liquid
+} // namespace quoll

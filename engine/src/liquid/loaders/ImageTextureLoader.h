@@ -2,7 +2,7 @@
 
 #include "liquid/renderer/RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Loads images in various formats as textures
@@ -30,4 +30,4 @@ private:
   RenderStorage &mRenderStorage;
 };
 
-} // namespace liquid
+} // namespace quoll

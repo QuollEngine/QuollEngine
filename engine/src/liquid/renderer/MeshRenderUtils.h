@@ -2,7 +2,7 @@
 
 #include "liquid/asset/MeshAsset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Mesh render utilities
@@ -54,4 +54,4 @@ public:
   getSkinnedGeometryBufferOffsets(const MeshAsset &mesh);
 };
 
-} // namespace liquid
+} // namespace quoll

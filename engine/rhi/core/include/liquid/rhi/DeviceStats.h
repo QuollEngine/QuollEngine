@@ -2,7 +2,7 @@
 
 #include "NativeResourceMetrics.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Device statistics collector
@@ -76,4 +76,4 @@ private:
   NativeResourceMetrics *mResourceMetrics;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

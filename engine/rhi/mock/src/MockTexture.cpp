@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MockTexture.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 MockTexture::MockTexture(const TextureDescription &description)
     : mDescription(description) {
@@ -11,4 +11,4 @@ MockTexture::MockTexture(const TextureDescription &description)
 MockTexture::MockTexture(const TextureViewDescription &description)
     : mViewDescription(description) {}
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

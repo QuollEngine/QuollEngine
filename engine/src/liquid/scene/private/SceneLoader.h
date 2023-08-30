@@ -5,7 +5,7 @@
 #include "liquid/yaml/Yaml.h"
 #include "liquid/entity/EntityDatabase.h"
 
-namespace liquid::detail {
+namespace quoll::detail {
 
 using EntityIdCache = std::unordered_map<uint64_t, Entity>;
 
@@ -58,4 +58,4 @@ private:
   EntityDatabase &mEntityDatabase;
 };
 
-} // namespace liquid::detail
+} // namespace quoll::detail

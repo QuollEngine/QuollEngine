@@ -7,7 +7,7 @@
 #include "OutputBinaryStream.h"
 #include "InputBinaryStream.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path>
 AssetCache::createPrefabFromAsset(const AssetData<PrefabAsset> &asset) {
@@ -271,7 +271,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::Uuid> actual(numAssets);
+    std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localMaterialMap.resize(numAssets, MaterialAssetHandle::Null);
 
@@ -292,7 +292,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::Uuid> actual(numAssets);
+    std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localMeshMap.resize(numAssets, MeshAssetHandle::Null);
 
@@ -313,7 +313,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
   {
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::Uuid> actual(numAssets);
+    std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localSkeletonMap.resize(numAssets, SkeletonAssetHandle::Null);
 
@@ -336,7 +336,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::Uuid> actual(numAssets);
+    std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimationMap.resize(numAssets, AnimationAssetHandle::Null);
 
@@ -360,7 +360,7 @@ AssetCache::loadPrefabDataFromInputStream(InputBinaryStream &stream,
 
     uint32_t numAssets = 0;
     stream.read(numAssets);
-    std::vector<liquid::Uuid> actual(numAssets);
+    std::vector<quoll::Uuid> actual(numAssets);
     stream.read(actual);
     localAnimatorMap.resize(numAssets, AnimatorAssetHandle::Null);
 
@@ -597,4 +597,4 @@ Result<PrefabAssetHandle> AssetCache::loadPrefab(const Uuid &uuid) {
   return loadPrefabDataFromInputStream(stream, filePath, header.getData());
 }
 
-} // namespace liquid
+} // namespace quoll

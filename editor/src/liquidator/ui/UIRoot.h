@@ -19,7 +19,7 @@
 
 #include "liquidator/workspace/WorkspaceContext.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Root UI entry point
@@ -96,4 +96,4 @@ private:
   ShortcutsManager mShortcutsManager;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

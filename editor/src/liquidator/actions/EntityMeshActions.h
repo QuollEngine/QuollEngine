@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Create or update entity mesh action
@@ -101,4 +101,4 @@ private:
   MeshAssetHandle mOldMesh = MeshAssetHandle::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Start simulation mode action
@@ -56,4 +56,4 @@ public:
   bool predicate(WorkspaceState &state, AssetRegistry &assetRegistry) override;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

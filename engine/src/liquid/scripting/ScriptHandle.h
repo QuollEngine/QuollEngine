@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class ScriptHandle : uint32_t {};
 
-} // namespace liquid
+} // namespace quoll

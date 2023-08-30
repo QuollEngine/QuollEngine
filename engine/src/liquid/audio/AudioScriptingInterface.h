@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for audio
@@ -57,4 +57,4 @@ public:
   static const String getName() { return "audio"; }
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -3,7 +3,7 @@
 
 #include <uuid.h>
 
-namespace liquid {
+namespace quoll {
 
 Uuid Uuid::generate() {
   std::random_device rd;
@@ -25,4 +25,4 @@ Uuid::Uuid(String uuid) : mUuid(uuid) {}
 
 void Uuid::updateWithString(String uuid) { mUuid = uuid; }
 
-} // namespace liquid
+} // namespace quoll

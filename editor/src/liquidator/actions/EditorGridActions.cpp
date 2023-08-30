@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EditorGridActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 bool SetGridLines::isShown(WorkspaceState &state) { return state.grid.x == 1; }
 
@@ -35,4 +35,4 @@ bool SetGridAxisLines::predicate(WorkspaceState &state,
   return state.grid.y != static_cast<uint32_t>(mShow);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

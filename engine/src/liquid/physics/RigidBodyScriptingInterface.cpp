@@ -8,7 +8,7 @@
 
 #include "RigidBodyScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int RigidBodyScriptingInterface::LuaInterface::setDefaultParams(void *state) {
   LuaScope scope(state);
@@ -356,4 +356,4 @@ int RigidBodyScriptingInterface::LuaInterface::deleteThis(void *state) {
                                                                  state);
 }
 
-} // namespace liquid
+} // namespace quoll

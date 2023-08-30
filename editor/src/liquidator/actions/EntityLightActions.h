@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 using EntityCreateDirectionalLight =
     EntityDefaultCreateComponent<DirectionalLight>;
@@ -74,4 +74,4 @@ using EntitySetPointLight = EntityDefaultUpdateComponent<PointLight>;
 
 using EntityDeletePointLight = EntityDefaultDeleteAction<PointLight>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -2,7 +2,7 @@
 
 #include "liquidator/core/LogMemoryStorage.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Log viewer
@@ -32,4 +32,4 @@ private:
   size_t mUserLogSize = 0;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -4,7 +4,7 @@
 #include "liquidator/asset/SceneWriter.h"
 #include "liquid/scene/SceneIO.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Action executor
@@ -96,4 +96,4 @@ private:
   ActionStack mRedoStack;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

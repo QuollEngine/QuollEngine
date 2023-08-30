@@ -6,7 +6,7 @@
 
 #include "liquid/window/Window.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Render graph for mouse picking
@@ -102,4 +102,4 @@ private:
   uint32_t mFrameIndex = std::numeric_limits<uint32_t>::max();
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

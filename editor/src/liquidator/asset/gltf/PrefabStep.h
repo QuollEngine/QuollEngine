@@ -2,7 +2,7 @@
 
 #include "GLTFImportData.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load prefabs into asset registry
@@ -11,4 +11,4 @@ namespace liquid::editor {
  */
 void loadPrefabs(GLTFImportData &importData);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

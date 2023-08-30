@@ -2,7 +2,7 @@
 
 #include "VulkanHeaders.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Validates vulkan
@@ -106,4 +106,4 @@ private:
   VkDebugUtilsMessengerCreateInfoEXT mMessengerCreateInfo{};
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

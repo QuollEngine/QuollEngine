@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Interface for native resource metrics
@@ -36,4 +36,4 @@ public:
   virtual size_t getDescriptorsCount() const = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

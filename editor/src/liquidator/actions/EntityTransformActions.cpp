@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityTransformActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetLocalTransformContinuous::EntitySetLocalTransformContinuous(
     Entity entity, std::optional<LocalTransform> oldLocalTransform,
@@ -58,4 +58,4 @@ bool EntitySetLocalTransformContinuous::predicate(
   return mNewLocalTransform.has_value();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "MeshRenderUtils.h"
 
-namespace liquid {
+namespace quoll {
 
 static constexpr size_t PositionsIndex = 0;
 static constexpr size_t JointsIndex = 5;
@@ -32,4 +32,4 @@ MeshRenderUtils::getSkinnedGeometryBufferOffsets(const MeshAsset &mesh) {
                     mesh.vertexBufferOffsets.at(WeightsIndex)};
 }
 
-} // namespace liquid
+} // namespace quoll

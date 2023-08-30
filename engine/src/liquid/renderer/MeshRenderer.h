@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Mesh renderer component
@@ -14,4 +14,4 @@ struct MeshRenderer {
   std::vector<MaterialAssetHandle> materials;
 };
 
-} // namespace liquid
+} // namespace quoll

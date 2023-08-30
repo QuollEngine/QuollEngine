@@ -3,7 +3,7 @@
 
 #include "liquid/imgui/ImguiUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 SceneView::SceneView(rhi::TextureHandle texture) {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -18,4 +18,4 @@ SceneView::~SceneView() {
   ImGui::PopStyleVar();
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

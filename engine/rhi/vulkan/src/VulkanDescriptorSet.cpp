@@ -6,7 +6,7 @@
 #include "VulkanTexture.h"
 #include "VulkanSampler.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanDescriptorSet::VulkanDescriptorSet(VulkanDeviceObject &device,
                                          const VulkanResourceRegistry &registry,
@@ -103,4 +103,4 @@ void VulkanDescriptorSet::write(uint32_t binding, uint32_t start,
   vkUpdateDescriptorSets(mDevice, 1, &write, 0, nullptr);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

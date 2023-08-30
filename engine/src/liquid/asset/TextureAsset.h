@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderHandle.h"
 #include "liquid/rhi/Format.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class TextureAssetType { Standard, Cubemap };
 
@@ -79,4 +79,4 @@ struct TextureAsset {
   rhi::TextureHandle deviceHandle = rhi::TextureHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

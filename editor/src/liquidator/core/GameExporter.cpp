@@ -4,7 +4,7 @@
 
 #include "GameExporter.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void GameExporter::exportGame(const Project &project, const Path &destination) {
   using co = std::filesystem::copy_options;
@@ -54,4 +54,4 @@ void GameExporter::exportGame(const Project &project, const Path &destination) {
   Engine::getLogger().info() << "Game exported to " << destination;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

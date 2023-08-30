@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Asset loader
@@ -40,4 +40,4 @@ private:
   AssetManager &mAssetManager;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

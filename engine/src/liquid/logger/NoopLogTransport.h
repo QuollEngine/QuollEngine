@@ -2,7 +2,7 @@
 
 #include "LoggerCore.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Noop log transport
@@ -13,4 +13,4 @@ constexpr auto NoopLogTransport = [](LogSeverity, LogTimestamp, String) {
   // Do nothing
 };
 
-} // namespace liquid
+} // namespace quoll

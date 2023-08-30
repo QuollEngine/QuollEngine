@@ -2,7 +2,7 @@
 
 #include "liquid/scripting/ComponentLuaInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting interfaces for entity query
@@ -50,4 +50,4 @@ public:
   static const String getName() { return "entity_query"; }
 };
 
-} // namespace liquid
+} // namespace quoll

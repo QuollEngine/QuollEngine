@@ -2,7 +2,7 @@
 
 #include "mikktspace.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static constexpr uint32_t TriangleVertices = 3;
 
@@ -137,4 +137,4 @@ private:
   SMikkTSpaceInterface mInterface{};
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "VulkanPhysicalDevice.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 std::vector<VulkanPhysicalDevice>
 VulkanPhysicalDevice::getPhysicalDevices(VkInstance instance,
@@ -253,4 +253,4 @@ const PhysicalDeviceInformation VulkanPhysicalDevice::getDeviceInfo() const {
   return PhysicalDeviceInformation(mName, properties, limits);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

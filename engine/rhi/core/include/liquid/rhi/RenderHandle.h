@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class ShaderHandle : uint32_t { Null = 0 };
 
@@ -64,4 +64,4 @@ constexpr inline uint32_t castHandleToUint(THandle handle) {
   return static_cast<uint32_t>(handle);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

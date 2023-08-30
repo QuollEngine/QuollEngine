@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Create animator entity action
@@ -104,4 +104,4 @@ private:
 
 using EntityDeleteAnimator = EntityDefaultDeleteAction<Animator>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

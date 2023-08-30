@@ -8,7 +8,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanMapping.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VkCommandBuffer commandBuffer, const VulkanResourceRegistry &registry,
@@ -335,4 +335,4 @@ void VulkanCommandBuffer::blitTexture(TextureHandle source,
                  VulkanMapping::getFilter(filter));
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class Filter { Nearest, Linear };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

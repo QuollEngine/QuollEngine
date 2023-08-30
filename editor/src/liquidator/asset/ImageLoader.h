@@ -3,7 +3,7 @@
 #include "liquid/rhi/RenderDevice.h"
 #include "liquid/asset/Result.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Image loader
@@ -67,4 +67,4 @@ private:
   AssetCache &mAssetCache;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

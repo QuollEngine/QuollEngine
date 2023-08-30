@@ -4,8 +4,8 @@
 #include "liquidator/actions/EntityTransformActions.h"
 #include "liquidator/actions/EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 using EntitySetName = EntityDefaultUpdateComponent<Name>;
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Map for mock resources
@@ -133,4 +133,4 @@ private:
   std::unordered_map<THandle, uint32_t> mEmplacements;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

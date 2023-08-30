@@ -2,10 +2,10 @@
 #include "MockRenderBackend.h"
 #include "MockRenderDevice.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 RenderDevice *MockRenderBackend::createDefaultDevice() {
   return new MockRenderDevice;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

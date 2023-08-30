@@ -8,37 +8,37 @@ class MaterialPBRTest : public ::testing::Test {
 public:
   MaterialPBRTest() : renderStorage(&device) {}
 
-  liquid::rhi::MockRenderDevice device;
-  liquid::RenderStorage renderStorage;
+  quoll::rhi::MockRenderDevice device;
+  quoll::RenderStorage renderStorage;
 };
 
 TEST_F(MaterialPBRTest, GetsTextures) {
-  liquid::MaterialPBR::Properties properties;
+  quoll::MaterialPBR::Properties properties;
   EXPECT_EQ(properties.getTextures().size(), 0);
 
-  properties.baseColorTexture = liquid::rhi::TextureHandle(1);
+  properties.baseColorTexture = quoll::rhi::TextureHandle(1);
   EXPECT_EQ(properties.getTextures().size(), 1);
   EXPECT_EQ(properties.getTextures()[0], properties.baseColorTexture);
 
-  properties.metallicRoughnessTexture = liquid::rhi::TextureHandle(2);
+  properties.metallicRoughnessTexture = quoll::rhi::TextureHandle(2);
   EXPECT_EQ(properties.getTextures().size(), 2);
   EXPECT_EQ(properties.getTextures()[0], properties.baseColorTexture);
   EXPECT_EQ(properties.getTextures()[1], properties.metallicRoughnessTexture);
 
-  properties.normalTexture = liquid::rhi::TextureHandle(2);
+  properties.normalTexture = quoll::rhi::TextureHandle(2);
   EXPECT_EQ(properties.getTextures().size(), 3);
   EXPECT_EQ(properties.getTextures()[0], properties.baseColorTexture);
   EXPECT_EQ(properties.getTextures()[1], properties.metallicRoughnessTexture);
   EXPECT_EQ(properties.getTextures()[2], properties.normalTexture);
 
-  properties.occlusionTexture = liquid::rhi::TextureHandle(4);
+  properties.occlusionTexture = quoll::rhi::TextureHandle(4);
   EXPECT_EQ(properties.getTextures().size(), 4);
   EXPECT_EQ(properties.getTextures()[0], properties.baseColorTexture);
   EXPECT_EQ(properties.getTextures()[1], properties.metallicRoughnessTexture);
   EXPECT_EQ(properties.getTextures()[2], properties.normalTexture);
   EXPECT_EQ(properties.getTextures()[3], properties.occlusionTexture);
 
-  properties.emissiveTexture = liquid::rhi::TextureHandle(5);
+  properties.emissiveTexture = quoll::rhi::TextureHandle(5);
   EXPECT_EQ(properties.getTextures().size(), 5);
   EXPECT_EQ(properties.getTextures()[0], properties.baseColorTexture);
   EXPECT_EQ(properties.getTextures()[1], properties.metallicRoughnessTexture);
@@ -48,22 +48,22 @@ TEST_F(MaterialPBRTest, GetsTextures) {
 }
 
 TEST_F(MaterialPBRTest, GetsProperties) {
-  liquid::MaterialPBR::Properties properties{liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             {1.0f, 0.2f, 0.3f, 0.4f},
-                                             liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             0.2f,
-                                             0.6f,
-                                             liquid::rhi::TextureHandle::Null,
-                                             1,
-                                             0.7f,
-                                             liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             0.3f,
-                                             liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             glm::vec3(1.0f, 0.2f, 0.4f)};
+  quoll::MaterialPBR::Properties properties{quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            {1.0f, 0.2f, 0.3f, 0.4f},
+                                            quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            0.2f,
+                                            0.6f,
+                                            quoll::rhi::TextureHandle::Null,
+                                            1,
+                                            0.7f,
+                                            quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            0.3f,
+                                            quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            glm::vec3(1.0f, 0.2f, 0.4f)};
 
 #define EXPECT_PROP_EQ(idx, key, type, value)                                  \
   EXPECT_EQ(properties.getProperties()[idx].first, key);                       \
@@ -91,25 +91,25 @@ TEST_F(MaterialPBRTest, GetsProperties) {
   EXPECT_PROP_EQ(14, "emissiveTextureCoord", int, 0);
   EXPECT_PROP_EQ(15, "emissiveFactor", glm::vec3, glm::vec3(1.0, 0.2, 0.4));
 
-  properties.baseColorTexture = liquid::rhi::TextureHandle(1);
+  properties.baseColorTexture = quoll::rhi::TextureHandle(1);
   EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
 
-  properties.normalTexture = liquid::rhi::TextureHandle(2);
+  properties.normalTexture = quoll::rhi::TextureHandle(2);
   EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
   EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
 
-  properties.occlusionTexture = liquid::rhi::TextureHandle(3);
+  properties.occlusionTexture = quoll::rhi::TextureHandle(3);
   EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
   EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
   EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 3);
 
-  properties.metallicRoughnessTexture = liquid::rhi::TextureHandle(4);
+  properties.metallicRoughnessTexture = quoll::rhi::TextureHandle(4);
   EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
   EXPECT_PROP_EQ(3, "metallicRoughnessTexture", uint32_t, 4);
   EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
   EXPECT_PROP_EQ(10, "occlusionTexture", uint32_t, 3);
 
-  properties.emissiveTexture = liquid::rhi::TextureHandle(5);
+  properties.emissiveTexture = quoll::rhi::TextureHandle(5);
   EXPECT_PROP_EQ(0, "baseColorTexture", uint32_t, 1);
   EXPECT_PROP_EQ(3, "metallicRoughnessTexture", uint32_t, 4);
   EXPECT_PROP_EQ(7, "normalTexture", uint32_t, 2);
@@ -120,24 +120,24 @@ TEST_F(MaterialPBRTest, GetsProperties) {
 }
 
 TEST_F(MaterialPBRTest, SetsShadersPropertiesAndTextures) {
-  liquid::MaterialPBR::Properties properties{liquid::rhi::TextureHandle(1),
-                                             0,
-                                             {1.0f, 0.2f, 0.3f, 0.4f},
-                                             liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             0.2f,
-                                             0.6f,
-                                             liquid::rhi::TextureHandle(2),
-                                             1,
-                                             0.7f,
-                                             liquid::rhi::TextureHandle::Null,
-                                             0,
-                                             0.3f,
-                                             liquid::rhi::TextureHandle(3),
-                                             0,
-                                             glm::vec3(1.0f, 0.2f, 0.4f)};
+  quoll::MaterialPBR::Properties properties{quoll::rhi::TextureHandle(1),
+                                            0,
+                                            {1.0f, 0.2f, 0.3f, 0.4f},
+                                            quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            0.2f,
+                                            0.6f,
+                                            quoll::rhi::TextureHandle(2),
+                                            1,
+                                            0.7f,
+                                            quoll::rhi::TextureHandle::Null,
+                                            0,
+                                            0.3f,
+                                            quoll::rhi::TextureHandle(3),
+                                            0,
+                                            glm::vec3(1.0f, 0.2f, 0.4f)};
 
-  liquid::MaterialPBR material("test", properties, renderStorage);
+  quoll::MaterialPBR material("test", properties, renderStorage);
 
   auto *buffer = device.getBuffer(material.getBuffer());
 

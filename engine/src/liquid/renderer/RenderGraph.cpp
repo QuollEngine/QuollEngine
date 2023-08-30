@@ -6,7 +6,7 @@
 #include "RenderGraphSyncDependency.h"
 #include "RenderGraph.h"
 
-namespace liquid {
+namespace quoll {
 
 EnableBitwiseEnum(GraphDirty);
 
@@ -541,4 +541,4 @@ void RenderGraph::destroy(RenderStorage &storage) {
   }
 }
 
-} // namespace liquid
+} // namespace quoll

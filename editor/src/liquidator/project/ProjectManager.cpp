@@ -4,7 +4,7 @@
 
 #include "ProjectManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 bool ProjectManager::createProjectInPath() {
   auto projectPath = platform::FileDialog::getFilePathFromCreateDialog(
@@ -96,4 +96,4 @@ bool ProjectManager::openProjectInPath() {
   return true;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

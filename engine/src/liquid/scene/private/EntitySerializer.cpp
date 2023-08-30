@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntitySerializer.h"
 
-namespace liquid::detail {
+namespace quoll::detail {
 
 EntitySerializer::EntitySerializer(AssetRegistry &assetRegistry,
                                    EntityDatabase &entityDatabase)
@@ -289,4 +289,4 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
   return components;
 }
 
-} // namespace liquid::detail
+} // namespace quoll::detail

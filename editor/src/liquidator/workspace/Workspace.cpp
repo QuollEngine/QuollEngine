@@ -8,7 +8,7 @@
 #include "WorkspaceLayoutRenderer.h"
 #include "WorkspaceIO.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Workspace::Workspace(Project project, AssetManager &assetManager,
                      SceneAssetHandle scene, Path scenePath)
@@ -58,4 +58,4 @@ void Workspace::renderLayout() {
 
 void Workspace::update() { mActionExecutor.process(); }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

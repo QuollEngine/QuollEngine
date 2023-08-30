@@ -20,7 +20,7 @@
 
 #include "liquid/renderer/RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Asset registry
@@ -198,4 +198,4 @@ private:
   DefaultObjects mDefaultObjects;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -2,7 +2,7 @@
 
 #include "ActionCreator.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Typed action creator implementation
@@ -59,4 +59,4 @@ public:
   }
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

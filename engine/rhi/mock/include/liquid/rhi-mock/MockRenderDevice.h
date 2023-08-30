@@ -8,7 +8,7 @@
 #include "MockCommandList.h"
 #include "MockResourceMap.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock render device
@@ -351,4 +351,4 @@ private:
   DeviceStats mDeviceStats;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

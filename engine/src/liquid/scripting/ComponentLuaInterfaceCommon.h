@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Common functions for lua interface
@@ -44,4 +44,4 @@ public:
   }
 };
 
-} // namespace liquid
+} // namespace quoll

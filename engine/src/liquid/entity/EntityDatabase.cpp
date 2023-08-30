@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityDatabase.h"
 
-namespace liquid {
+namespace quoll {
 
 EntityDatabase::EntityDatabase() {
   reg<Id>();
@@ -42,4 +42,4 @@ EntityDatabase::EntityDatabase() {
   reg<SkinnedMeshRenderer>();
 }
 
-} // namespace liquid
+} // namespace quoll

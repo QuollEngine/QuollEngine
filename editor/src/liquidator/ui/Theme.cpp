@@ -4,7 +4,7 @@
 
 #include "Theme.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 
 /**
@@ -217,4 +217,4 @@ ImFont *Theme::getBoldFont() { return Fonts.at(1); }
 
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
-} // namespace liquid::editor
+} // namespace quoll::editor

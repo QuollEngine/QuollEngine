@@ -5,7 +5,7 @@
 #include "ImageLayout.h"
 #include "StageFlags.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Memory barrier
@@ -122,4 +122,4 @@ struct BufferBarrier {
   uint32_t size = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

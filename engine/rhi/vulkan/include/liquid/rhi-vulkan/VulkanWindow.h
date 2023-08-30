@@ -3,7 +3,7 @@
 #include "VulkanHeaders.h"
 #include "liquid/window/Window.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Create Vulkan surface from window
@@ -14,4 +14,4 @@ namespace liquid::rhi {
  */
 VkSurfaceKHR createSurfaceFromWindow(VkInstance instance, Window &window);
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

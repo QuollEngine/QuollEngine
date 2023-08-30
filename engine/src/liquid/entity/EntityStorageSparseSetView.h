@@ -2,7 +2,7 @@
 
 #include "EntityStorageSparseSetComponentPool.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief View for sparse set based entity storage
@@ -179,4 +179,4 @@ private:
   EntityStorageSparseSetComponentPool *mSmallestPool = nullptr;
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -5,7 +5,7 @@
 #include "liquid/rhi/Swapchain.h"
 #include "RenderStorage.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Presents texture to swapchain
@@ -62,4 +62,4 @@ private:
   bool mUpdateRequired = false;
 };
 
-} // namespace liquid
+} // namespace quoll

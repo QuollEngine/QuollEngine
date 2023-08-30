@@ -2,7 +2,7 @@
 
 #include "LoggerCore.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Create stream transport
@@ -12,4 +12,4 @@ namespace liquid {
  */
 LogTransport createStreamTransport(std::ostream &stream);
 
-} // namespace liquid
+} // namespace quoll

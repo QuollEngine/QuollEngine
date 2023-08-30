@@ -2,7 +2,7 @@
 
 #include "liquid/scene/Scene.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Entity deleter
@@ -20,4 +20,4 @@ public:
   void update(Scene &scene);
 };
 
-} // namespace liquid
+} // namespace quoll

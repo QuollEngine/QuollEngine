@@ -4,7 +4,7 @@
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/actions/ActionCreator.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class ToolbarItemType { Toggleable, HideWhenInactive };
 
@@ -56,4 +56,4 @@ private:
   std::vector<ToolbarItem> mItems;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

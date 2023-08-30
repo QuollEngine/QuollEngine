@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Create script logger
@@ -9,4 +9,4 @@ namespace liquid {
  */
 void createScriptLogger(LuaScope &scope);
 
-} // namespace liquid
+} // namespace quoll

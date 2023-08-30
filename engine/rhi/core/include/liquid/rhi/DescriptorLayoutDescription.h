@@ -3,7 +3,7 @@
 #include "Descriptor.h"
 #include "StageFlags.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum DescriptorLayoutBindingType { Static, Dynamic };
 
@@ -57,4 +57,4 @@ struct DescriptorLayoutDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -4,7 +4,7 @@
 
 #include "ProjectActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 ExportAsGame::ExportAsGame(AssetManager &assetManager)
     : mAssetManager(assetManager) {}
@@ -26,4 +26,4 @@ bool ExportAsGame::predicate(WorkspaceState &state,
   return true;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -3,7 +3,7 @@
 #include "liquid/rhi/BufferDescription.h"
 #include "liquid/rhi/NativeBuffer.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock buffer
@@ -57,4 +57,4 @@ private:
   BufferDescription mDescription;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

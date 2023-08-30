@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Torque component
@@ -12,4 +12,4 @@ struct Torque {
   glm::vec3 torque;
 };
 
-} // namespace liquid
+} // namespace quoll

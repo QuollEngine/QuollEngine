@@ -2,7 +2,7 @@
 
 #include "liquidator/actions/Action.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Delete entity action
@@ -40,4 +40,4 @@ private:
   Entity mEntity;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

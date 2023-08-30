@@ -9,7 +9,7 @@ struct Data {
 
 class SwappableVectorTest : public ::testing::Test {
 public:
-  liquid::SwappableVector<Data> buffer;
+  quoll::SwappableVector<Data> buffer;
 };
 
 using SwappableVectorDeathTest = SwappableVectorTest;

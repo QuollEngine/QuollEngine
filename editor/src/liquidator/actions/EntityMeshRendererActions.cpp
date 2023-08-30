@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntityMeshRendererActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetMeshRendererMaterial::EntitySetMeshRendererMaterial(
     Entity entity, size_t slot, MaterialAssetHandle handle)
@@ -146,4 +146,4 @@ bool EntityRemoveLastMeshRendererMaterialSlot::predicate(
   return scene.entityDatabase.get<MeshRenderer>(mEntity).materials.size() > 0;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

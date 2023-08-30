@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Entity EditorCamera::createDefaultCamera(EntityDatabase &entityDatabase) {
   auto camera = entityDatabase.create();
@@ -237,4 +237,4 @@ void EditorCamera::setViewport(float x, float y, float width, float height,
   mCaptureMouse = captureMouse;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

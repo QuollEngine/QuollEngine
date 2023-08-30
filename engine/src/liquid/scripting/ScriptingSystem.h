@@ -6,7 +6,7 @@
 
 #include "LuaInterpreter.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scripting system
@@ -84,4 +84,4 @@ private:
   EntityDatabaseObserver<Script> mScriptRemoveObserver;
 };
 
-} // namespace liquid
+} // namespace quoll

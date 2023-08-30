@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Sparse set data structure
@@ -161,4 +161,4 @@ private:
   std::vector<size_t> mEmptyData;
 };
 
-} // namespace liquid
+} // namespace quoll

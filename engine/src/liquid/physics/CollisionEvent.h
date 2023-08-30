@@ -2,7 +2,7 @@
 
 #include "liquid/entity/Entity.h"
 
-namespace liquid {
+namespace quoll {
 
 enum class CollisionEvent { CollisionStarted, CollisionEnded };
 
@@ -21,4 +21,4 @@ struct CollisionObject {
   Entity b = Entity::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

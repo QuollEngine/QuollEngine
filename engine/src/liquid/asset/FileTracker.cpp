@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "FileTracker.h"
 
-namespace liquid {
+namespace quoll {
 
 FileTracker::FileTracker(Path path) : mPath(path) {}
 
@@ -44,4 +44,4 @@ FileTracker::getAllTrackedFiles() {
   return mFiles;
 }
 
-} // namespace liquid
+} // namespace quoll

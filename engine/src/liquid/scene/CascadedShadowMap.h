@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Cascaded shadow map component
@@ -34,4 +34,4 @@ struct CascadedShadowMap {
   uint32_t numCascades = 4;
 };
 
-} // namespace liquid
+} // namespace quoll

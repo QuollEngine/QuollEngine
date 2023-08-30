@@ -2,8 +2,8 @@
 
 #include "MiniAudioBackend.h"
 
-namespace liquid {
+namespace quoll {
 
 using DefaultAudioBackend = MiniAudioBackend;
 
-} // namespace liquid
+} // namespace quoll

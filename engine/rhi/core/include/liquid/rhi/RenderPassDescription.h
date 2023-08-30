@@ -4,7 +4,7 @@
 #include "liquid/rhi/ImageLayout.h"
 #include "liquid/rhi/PipelineBindPoint.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class AttachmentLoadOp { Load, Clear, DontCare };
 
@@ -102,4 +102,4 @@ struct RenderPassDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

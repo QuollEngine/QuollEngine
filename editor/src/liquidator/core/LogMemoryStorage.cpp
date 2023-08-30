@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "LogMemoryStorage.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 LogTransport LogMemoryStorage::createTransport() {
   return [this](LogSeverity severity, LogTimestamp timestamp, String message) {
@@ -11,4 +11,4 @@ LogTransport LogMemoryStorage::createTransport() {
 
 void LogMemoryStorage::clear() { mEntries.clear(); }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

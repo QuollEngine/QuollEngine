@@ -7,34 +7,34 @@
 
 using ::testing::_;
 
-using LS = liquid::LogSeverity;
+using LS = quoll::LogSeverity;
 
 class ScriptLoggerTest
     : public LuaScriptingInterfaceTestBase,
-      public testing::WithParamInterface<std::tuple<liquid::String, LS>> {
+      public testing::WithParamInterface<std::tuple<quoll::String, LS>> {
 public:
   ScriptLoggerTest()
       : LuaScriptingInterfaceTestBase("scripting-system-logging-tester.lua") {}
 
   void SetUp() override {
-    liquid::Engine::getUserLogger().setTransport(
+    quoll::Engine::getUserLogger().setTransport(
         [this](auto severity, auto timestamp, auto message) {
           mockTransport(severity, timestamp, message);
         });
   }
 
   void TearDown() override {
-    liquid::Engine::getUserLogger().setTransport(liquid::NoopLogTransport);
+    quoll::Engine::getUserLogger().setTransport(quoll::NoopLogTransport);
   }
 
   MOCK_METHOD(void, mockTransport,
-              (liquid::LogSeverity, liquid::LogTimestamp, liquid::String));
+              (quoll::LogSeverity, quoll::LogTimestamp, quoll::String));
 };
 
 TEST_P(ScriptLoggerTest, LogsErrorIfNoArgumentIsProvided) {
   auto [value, severity] = GetParam();
 
-  EXPECT_CALL(*this, mockTransport(liquid::LogSeverity::Error, _, _)).Times(5);
+  EXPECT_CALL(*this, mockTransport(quoll::LogSeverity::Error, _, _)).Times(5);
 
   auto entity = entityDatabase.create();
   auto &scope = call(entity, value + "_invalid");

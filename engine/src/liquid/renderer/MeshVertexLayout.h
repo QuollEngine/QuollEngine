@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/PipelineDescription.h"
 
-namespace liquid {
+namespace quoll {
 
 namespace mesh_vertex_layout_detail {
 
@@ -75,4 +75,4 @@ static rhi::PipelineVertexInputLayout createSkinnedMeshPositionLayout() {
   return createMeshVertexLayoutFrom<glm::vec3, glm::uvec4, glm::vec4>();
 }
 
-} // namespace liquid
+} // namespace quoll

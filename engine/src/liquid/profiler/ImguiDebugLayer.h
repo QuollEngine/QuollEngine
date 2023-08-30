@@ -4,7 +4,7 @@
 #include "liquid/rhi/PhysicalDeviceInformation.h"
 #include "liquid/rhi/DeviceStats.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Imgui debug layer
@@ -69,4 +69,4 @@ private:
   bool mPerformanceMetricsVisible = false;
 };
 
-} // namespace liquid
+} // namespace quoll

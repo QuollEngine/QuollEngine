@@ -4,7 +4,7 @@
 
 // Reference:
 // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VkResult.html
-static const std::map<VkResult, liquid::String> resultMap{
+static const std::map<VkResult, quoll::String> resultMap{
     // Success codes
     {VK_SUCCESS, "Operation successfully completed"},
     {VK_NOT_READY, "Operation has not yet completed"},
@@ -64,7 +64,7 @@ static const std::map<VkResult, liquid::String> resultMap{
      "Swapchain does not have exclusive full screen access"},
 };
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 String createVulkanErrorMessage(VkResult resultCode, const String &what,
                                 const String &debugName) {
@@ -87,4 +87,4 @@ String createVulkanErrorMessage(VkResult resultCode, const String &what,
   return ss.str();
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

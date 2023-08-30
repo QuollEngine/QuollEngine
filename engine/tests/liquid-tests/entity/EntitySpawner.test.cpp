@@ -7,28 +7,28 @@ class EntitySpawnerTest : public ::testing::Test {
 public:
   EntitySpawnerTest() : entitySpawner(entityDatabase, assetRegistry) {}
 
-  liquid::EntityDatabase entityDatabase;
-  liquid::AssetRegistry assetRegistry;
-  liquid::EntitySpawner entitySpawner;
+  quoll::EntityDatabase entityDatabase;
+  quoll::AssetRegistry assetRegistry;
+  quoll::EntitySpawner entitySpawner;
 };
 
 using EntitySpawnerDeathTest = EntitySpawnerTest;
 
 TEST_F(EntitySpawnerTest, SpawnEmptyCreatesEmptyEntity) {
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 
   auto entity = entitySpawner.spawnEmpty(transform);
   EXPECT_TRUE(entityDatabase.exists(entity));
-  EXPECT_TRUE(entityDatabase.has<liquid::LocalTransform>(entity));
-  EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(entity));
-  EXPECT_TRUE(entityDatabase.has<liquid::Name>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::LocalTransform>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::WorldTransform>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Name>(entity));
 
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localPosition,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localPosition,
             transform.localPosition);
 }
 
 TEST_F(EntitySpawnerDeathTest, SpawnPrefabFailsIfPrefabDoesNotExist) {
-  EXPECT_DEATH(entitySpawner.spawnPrefab(liquid::PrefabAssetHandle{15}, {}),
+  EXPECT_DEATH(entitySpawner.spawnPrefab(quoll::PrefabAssetHandle{15}, {}),
                ".*");
 }
 
@@ -38,7 +38,7 @@ TEST_F(EntitySpawnerDeathTest, SpawnPrefabReturnsEmptyListIfPrefabIsEmpty) {
 }
 
 TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
 
   // Create 1 transforms with no parent
   {
@@ -46,7 +46,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     glm::quat rotation(0.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = 0;
     transform.value.position = position;
     transform.value.rotation = rotation;
@@ -61,7 +61,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = i;
     transform.value.position = position;
     transform.value.rotation = rotation;
@@ -76,7 +76,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
     glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = i;
     transform.value.position = position;
     transform.value.rotation = rotation;
@@ -87,10 +87,10 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two meshes
   for (uint32_t i = 0; i < 2; ++i) {
-    liquid::AssetData<liquid::MeshAsset> meshAsset{};
-    meshAsset.type = liquid::AssetType::Mesh;
+    quoll::AssetData<quoll::MeshAsset> meshAsset{};
+    meshAsset.type = quoll::AssetType::Mesh;
 
-    liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
+    quoll::PrefabComponent<quoll::MeshAssetHandle> mesh{};
     mesh.entity = i;
     mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
     asset.data.meshes.push_back(mesh);
@@ -98,26 +98,26 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two mesh renderers with 3 materials each
   for (uint32_t i = 0; i < 2; ++i) {
-    liquid::PrefabComponent<liquid::MeshRenderer> renderer{};
+    quoll::PrefabComponent<quoll::MeshRenderer> renderer{};
     renderer.entity = i;
-    renderer.value.materials.push_back(liquid::MaterialAssetHandle{1});
-    renderer.value.materials.push_back(liquid::MaterialAssetHandle{2});
-    renderer.value.materials.push_back(liquid::MaterialAssetHandle{3});
+    renderer.value.materials.push_back(quoll::MaterialAssetHandle{1});
+    renderer.value.materials.push_back(quoll::MaterialAssetHandle{2});
+    renderer.value.materials.push_back(quoll::MaterialAssetHandle{3});
     asset.data.meshRenderers.push_back(renderer);
   }
 
   // Create three skinned mesh renderers with 2 materials each
   for (uint32_t i = 0; i < 3; ++i) {
-    liquid::PrefabComponent<liquid::SkinnedMeshRenderer> renderer{};
+    quoll::PrefabComponent<quoll::SkinnedMeshRenderer> renderer{};
     renderer.entity = i;
-    renderer.value.materials.push_back(liquid::MaterialAssetHandle{1});
-    renderer.value.materials.push_back(liquid::MaterialAssetHandle{2});
+    renderer.value.materials.push_back(quoll::MaterialAssetHandle{1});
+    renderer.value.materials.push_back(quoll::MaterialAssetHandle{2});
     asset.data.skinnedMeshRenderers.push_back(renderer);
   }
 
   // Create names
   for (uint32_t i = 3; i < 5; ++i) {
-    liquid::PrefabComponent<liquid::String> name{};
+    quoll::PrefabComponent<quoll::String> name{};
     name.entity = i;
     name.value = "Test name " + std::to_string(i);
     asset.data.names.push_back(name);
@@ -125,10 +125,10 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create three skinned meshes
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::AssetData<liquid::MeshAsset> meshAsset{};
-    meshAsset.type = liquid::AssetType::SkinnedMesh;
+    quoll::AssetData<quoll::MeshAsset> meshAsset{};
+    meshAsset.type = quoll::AssetType::SkinnedMesh;
 
-    liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
+    quoll::PrefabComponent<quoll::MeshAssetHandle> mesh{};
     mesh.entity = i;
     mesh.value = assetRegistry.getMeshes().addAsset(meshAsset);
     asset.data.meshes.push_back(mesh);
@@ -136,25 +136,25 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // create skeletons for skinned meshes
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::PrefabComponent<liquid::SkeletonAssetHandle> skeleton{};
+    quoll::PrefabComponent<quoll::SkeletonAssetHandle> skeleton{};
     skeleton.entity = i;
     skeleton.value = assetRegistry.getSkeletons().addAsset({});
     asset.data.skeletons.push_back(skeleton);
   }
 
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::AnimationAssetHandle animation{i};
+    quoll::AnimationAssetHandle animation{i};
     asset.data.animations.push_back(animation);
   }
 
   // create animators for skinned meshes
   // also create one additional animator
   for (uint32_t i = 2; i < 5; ++i) {
-    liquid::AssetData<liquid::AnimatorAsset> animatorAsset{};
+    quoll::AssetData<quoll::AnimatorAsset> animatorAsset{};
     animatorAsset.data.initialState = i;
     auto handle = assetRegistry.getAnimators().addAsset(animatorAsset);
 
-    liquid::PrefabComponent<liquid::AnimatorAssetHandle> animator{};
+    quoll::PrefabComponent<quoll::AnimatorAssetHandle> animator{};
     animator.entity = i;
     animator.value = handle;
     asset.data.animators.push_back(animator);
@@ -162,7 +162,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two directional lights
   for (uint32_t i = 1; i < 3; ++i) {
-    liquid::PrefabComponent<liquid::DirectionalLight> light{};
+    quoll::PrefabComponent<quoll::DirectionalLight> light{};
     light.entity = i;
     light.value.intensity = 25.0f;
     asset.data.directionalLights.push_back(light);
@@ -170,7 +170,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Create two point lights
   for (uint32_t i = 3; i < 5; ++i) {
-    liquid::PrefabComponent<liquid::PointLight> light{};
+    quoll::PrefabComponent<quoll::PointLight> light{};
     light.entity = i;
     light.value.range = 25.0f;
     asset.data.pointLights.push_back(light);
@@ -178,7 +178,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
 
   EXPECT_EQ(res.size(), 5);
@@ -187,45 +187,45 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   // Test relations
   // First item has no parent
-  EXPECT_FALSE(db.has<liquid::Parent>(res.at(0)));
-  EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.size(), 2);
-  EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.at(0), res.at(1));
-  EXPECT_EQ(db.get<liquid::Children>(res.at(0)).children.at(1), res.at(2));
+  EXPECT_FALSE(db.has<quoll::Parent>(res.at(0)));
+  EXPECT_EQ(db.get<quoll::Children>(res.at(0)).children.size(), 2);
+  EXPECT_EQ(db.get<quoll::Children>(res.at(0)).children.at(0), res.at(1));
+  EXPECT_EQ(db.get<quoll::Children>(res.at(0)).children.at(1), res.at(2));
 
   // Second and third items have first entity as parent
   for (uint32_t i = 1; i < 3; ++i) {
     auto current = res.at(i);
-    EXPECT_TRUE(db.has<liquid::Parent>(current));
-    EXPECT_EQ(db.get<liquid::Parent>(current).parent, res.at(0));
+    EXPECT_TRUE(db.has<quoll::Parent>(current));
+    EXPECT_EQ(db.get<quoll::Parent>(current).parent, res.at(0));
   }
 
   for (uint32_t i = 3; i < 5; ++i) {
     auto current = res.at(i);
     auto parent = res.at(i - 1);
     // All transform items have parent that is the previous item
-    EXPECT_EQ(db.get<liquid::Parent>(current).parent, parent);
+    EXPECT_EQ(db.get<quoll::Parent>(current).parent, parent);
 
-    EXPECT_TRUE(db.has<liquid::Children>(parent));
-    EXPECT_EQ(db.get<liquid::Children>(parent).children.at(0), current);
+    EXPECT_TRUE(db.has<quoll::Children>(parent));
+    EXPECT_EQ(db.get<quoll::Children>(parent).children.at(0), current);
   }
 
   // Test transforms
 
   // First item becomes the root node
   // if it is the only root node
-  EXPECT_EQ(db.get<liquid::LocalTransform>(res.at(0)).localPosition,
+  EXPECT_EQ(db.get<quoll::LocalTransform>(res.at(0)).localPosition,
             transform.localPosition);
-  EXPECT_TRUE(db.has<liquid::WorldTransform>(res.at(0)));
+  EXPECT_TRUE(db.has<quoll::WorldTransform>(res.at(0)));
 
   for (uint32_t i = 1; i < 5; ++i) {
     auto entity = res.at(i);
 
-    const auto &transform = db.get<liquid::LocalTransform>(entity);
+    const auto &transform = db.get<quoll::LocalTransform>(entity);
     const auto &pTransform = asset.data.transforms.at(i).value;
     EXPECT_EQ(transform.localPosition, pTransform.position);
     EXPECT_EQ(transform.localRotation, pTransform.rotation);
     EXPECT_EQ(transform.localScale, pTransform.scale);
-    EXPECT_TRUE(db.has<liquid::WorldTransform>(entity));
+    EXPECT_TRUE(db.has<quoll::WorldTransform>(entity));
   }
 
   // Test names
@@ -233,14 +233,14 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // First three items have names with Untitled
   for (uint32_t i = 0; i < 3; ++i) {
     auto entity = res.at(i);
-    const auto &name = db.get<liquid::Name>(entity);
+    const auto &name = db.get<quoll::Name>(entity);
 
     EXPECT_EQ(name.name, "New entity");
   }
 
   for (uint32_t i = 3; i < 5; ++i) {
     auto entity = res.at(i);
-    const auto &name = db.get<liquid::Name>(entity);
+    const auto &name = db.get<quoll::Name>(entity);
 
     EXPECT_EQ(name.name, "Test name " + std::to_string(i));
   }
@@ -249,7 +249,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (uint32_t i = 0; i < 2; ++i) {
     auto entity = res.at(i);
 
-    const auto &mesh = db.get<liquid::Mesh>(entity);
+    const auto &mesh = db.get<quoll::Mesh>(entity);
     EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
   }
 
@@ -257,29 +257,29 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
-    const auto &mesh = db.get<liquid::SkinnedMesh>(entity);
+    const auto &mesh = db.get<quoll::SkinnedMesh>(entity);
     EXPECT_EQ(mesh.handle, asset.data.meshes.at(i).value);
   }
 
   // Test mesh renderers
   for (uint32_t i = 0; i < 2; ++i) {
     auto entity = res.at(i);
-    const auto &renderer = db.get<liquid::MeshRenderer>(entity);
+    const auto &renderer = db.get<quoll::MeshRenderer>(entity);
 
     for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
       EXPECT_EQ(renderer.materials.at(mi),
-                static_cast<liquid::MaterialAssetHandle>(mi + 1));
+                static_cast<quoll::MaterialAssetHandle>(mi + 1));
     }
   }
 
   // Test skinned mesh renderer
   for (uint32_t i = 0; i < 3; ++i) {
     auto entity = res.at(i);
-    const auto &renderer = db.get<liquid::SkinnedMeshRenderer>(entity);
+    const auto &renderer = db.get<quoll::SkinnedMeshRenderer>(entity);
 
     for (size_t mi = 0; mi < renderer.materials.size(); ++mi) {
       EXPECT_EQ(renderer.materials.at(mi),
-                static_cast<liquid::MaterialAssetHandle>(mi + 1));
+                static_cast<quoll::MaterialAssetHandle>(mi + 1));
     }
   }
 
@@ -287,7 +287,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
 
-    const auto &skeleton = db.get<liquid::Skeleton>(entity);
+    const auto &skeleton = db.get<quoll::Skeleton>(entity);
 
     // Skeletons vector only has three items
     EXPECT_EQ(skeleton.assetHandle, asset.data.skeletons.at(i - 2).value);
@@ -296,8 +296,8 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
   // Test animators
   for (uint32_t i = 2; i < 5; ++i) {
     auto entity = res.at(i);
-    const auto &animator = db.get<liquid::Animator>(entity);
-    EXPECT_NE(animator.asset, liquid::AnimatorAssetHandle::Null);
+    const auto &animator = db.get<quoll::Animator>(entity);
+    EXPECT_NE(animator.asset, quoll::AnimatorAssetHandle::Null);
     EXPECT_EQ(animator.currentState, i);
     EXPECT_EQ(
         assetRegistry.getAnimators().getAsset(animator.asset).data.initialState,
@@ -307,22 +307,22 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesEntitiesFromPrefab) {
 
   for (uint32_t i = 1; i < 3; ++i) {
     auto entity = res.at(i);
-    const auto &light = db.get<liquid::DirectionalLight>(entity);
+    const auto &light = db.get<quoll::DirectionalLight>(entity);
     EXPECT_EQ(light.intensity, 25.0f);
   }
 
   for (uint32_t i = 3; i < 5; ++i) {
     auto entity = res.at(i);
-    const auto &light = db.get<liquid::PointLight>(entity);
+    const auto &light = db.get<quoll::PointLight>(entity);
     EXPECT_EQ(light.range, 25.0f);
   }
 }
 
 TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
 
   {
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = 0;
     transform.value.parent = 1;
     transform.value.position = glm::vec3(0.2f);
@@ -330,7 +330,7 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
   }
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
   EXPECT_EQ(res.size(), 2);
 
@@ -339,67 +339,66 @@ TEST_F(EntitySpawnerTest, SpawnPrefabCreatesParentsBeforeChild) {
   auto root = res.at(0);
   auto child = res.at(1);
 
-  EXPECT_EQ(db.get<liquid::LocalTransform>(root).localPosition,
-            glm::vec3(0.5f));
-  EXPECT_EQ(db.get<liquid::LocalTransform>(child).localPosition,
+  EXPECT_EQ(db.get<quoll::LocalTransform>(root).localPosition, glm::vec3(0.5f));
+  EXPECT_EQ(db.get<quoll::LocalTransform>(child).localPosition,
             glm::vec3(0.2f));
 }
 
 TEST_F(
     EntitySpawnerTest,
     SpawnPrefabWrapsAllSpawnedEntitiesInAParentIfPrefabHasMoreThanOneRootEntity) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
-  asset.uuid = liquid::Uuid("231231231");
+  quoll::AssetData<quoll::PrefabAsset> asset{};
+  asset.uuid = quoll::Uuid("231231231");
   asset.name = "my-prefab";
 
   {
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = 0;
     transform.value.parent = -1;
     asset.data.transforms.push_back(transform);
 
-    liquid::AssetData<liquid::MeshAsset> meshData{};
-    meshData.type = liquid::AssetType::SkinnedMesh;
+    quoll::AssetData<quoll::MeshAsset> meshData{};
+    meshData.type = quoll::AssetType::SkinnedMesh;
 
-    liquid::PrefabComponent<liquid::MeshAssetHandle> mesh{};
+    quoll::PrefabComponent<quoll::MeshAssetHandle> mesh{};
     mesh.entity = 1;
     mesh.value = assetRegistry.getMeshes().addAsset(meshData);
     asset.data.meshes.push_back(mesh);
   }
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
   EXPECT_EQ(res.size(), 3);
 
   auto &db = entityDatabase;
 
   auto root = res.at(res.size() - 1);
-  EXPECT_EQ(db.get<liquid::LocalTransform>(root).localPosition,
+  EXPECT_EQ(db.get<quoll::LocalTransform>(root).localPosition,
             transform.localPosition);
-  EXPECT_TRUE(db.has<liquid::WorldTransform>(root));
-  EXPECT_EQ(db.get<liquid::Name>(root).name, "my-prefab");
+  EXPECT_TRUE(db.has<quoll::WorldTransform>(root));
+  EXPECT_EQ(db.get<quoll::Name>(root).name, "my-prefab");
 
-  EXPECT_FALSE(entityDatabase.has<liquid::Parent>(root));
+  EXPECT_FALSE(entityDatabase.has<quoll::Parent>(root));
 
-  auto children = db.get<liquid::Children>(root).children;
+  auto children = db.get<quoll::Children>(root).children;
   EXPECT_EQ(children.size(), 2);
   for (size_t i = 0; i < children.size(); ++i) {
     auto entity = res.at(i);
     EXPECT_EQ(children.at(i), entity);
-    EXPECT_EQ(db.get<liquid::Parent>(entity).parent, root);
+    EXPECT_EQ(db.get<quoll::Parent>(entity).parent, root);
   }
 }
 
 TEST_F(EntitySpawnerTest,
        SpawnPrefabCreatesSingleEntityIfPrefabHasOneRootEntity) {
-  liquid::AssetData<liquid::PrefabAsset> asset{};
+  quoll::AssetData<quoll::PrefabAsset> asset{};
   for (int32_t i = 0; i < 2; ++i) {
     glm::vec3 position(static_cast<float>(i));
     glm::quat rotation(static_cast<float>(i) / 5.0f, 0.0f, 0.0f, 1.0f);
     glm::vec3 scale = position;
 
-    liquid::PrefabComponent<liquid::PrefabTransformData> transform{};
+    quoll::PrefabComponent<quoll::PrefabTransformData> transform{};
     transform.entity = i;
     transform.value.position = position;
     transform.value.rotation = rotation;
@@ -409,7 +408,7 @@ TEST_F(EntitySpawnerTest,
   }
   auto prefab = assetRegistry.getPrefabs().addAsset(asset);
 
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
   auto res = entitySpawner.spawnPrefab(prefab, transform);
   EXPECT_EQ(res.size(), 2);
 
@@ -417,28 +416,28 @@ TEST_F(EntitySpawnerTest,
 
   auto root = res.at(0);
 
-  EXPECT_EQ(db.get<liquid::LocalTransform>(root).localPosition,
+  EXPECT_EQ(db.get<quoll::LocalTransform>(root).localPosition,
             transform.localPosition);
-  EXPECT_TRUE(db.has<liquid::WorldTransform>(root));
-  EXPECT_EQ(entityDatabase.get<liquid::Name>(root).name, "New entity");
+  EXPECT_TRUE(db.has<quoll::WorldTransform>(root));
+  EXPECT_EQ(entityDatabase.get<quoll::Name>(root).name, "New entity");
 }
 
 TEST_F(EntitySpawnerTest,
        SpawnSpriteCreatesEntityWithSpriteAndTransformComponents) {
-  liquid::AssetData<liquid::TextureAsset> asset{};
-  asset.uuid = liquid::Uuid("121311231");
+  quoll::AssetData<quoll::TextureAsset> asset{};
+  asset.uuid = quoll::Uuid("121311231");
   asset.name = "my-sprite";
-  asset.data.deviceHandle = liquid::rhi::TextureHandle{25};
+  asset.data.deviceHandle = quoll::rhi::TextureHandle{25};
   auto assetHandle = assetRegistry.getTextures().addAsset(asset);
 
-  liquid::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
+  quoll::LocalTransform transform{glm::vec3(0.5f, 0.5f, 0.5f)};
 
   auto entity = entitySpawner.spawnSprite(assetHandle, transform);
   EXPECT_TRUE(entityDatabase.exists(entity));
-  EXPECT_EQ(entityDatabase.get<liquid::LocalTransform>(entity).localPosition,
+  EXPECT_EQ(entityDatabase.get<quoll::LocalTransform>(entity).localPosition,
             transform.localPosition);
-  EXPECT_TRUE(entityDatabase.has<liquid::WorldTransform>(entity));
-  EXPECT_TRUE(entityDatabase.has<liquid::Sprite>(entity));
-  EXPECT_EQ(entityDatabase.get<liquid::Sprite>(entity).handle, assetHandle);
-  EXPECT_EQ(entityDatabase.get<liquid::Name>(entity).name, "my-sprite");
+  EXPECT_TRUE(entityDatabase.has<quoll::WorldTransform>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Sprite>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::Sprite>(entity).handle, assetHandle);
+  EXPECT_EQ(entityDatabase.get<quoll::Name>(entity).name, "my-sprite");
 }

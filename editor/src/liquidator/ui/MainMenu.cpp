@@ -3,7 +3,7 @@
 
 #include "Widgets.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 MainMenuItem::MainMenuItem(MainMenuItem *parent, String label,
                            ActionCreator *actionCreator, Shortcut shortcut)
@@ -52,4 +52,4 @@ void MainMenu::render(ActionExecutor &actionExecutor) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

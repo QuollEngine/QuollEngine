@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Property
@@ -205,4 +205,4 @@ template <> inline const glm::mat4 Property::getValue() const {
   return std::any_cast<glm::mat4>(mValue);
 }
 
-} // namespace liquid
+} // namespace quoll

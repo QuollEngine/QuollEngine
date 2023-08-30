@@ -8,7 +8,7 @@
 
 #include "AudioScriptingInterface.h"
 
-namespace liquid {
+namespace quoll {
 
 int AudioScriptingInterface::LuaInterface::play(void *state) {
   LuaScope scope(state);
@@ -64,4 +64,4 @@ int AudioScriptingInterface::LuaInterface::deleteThis(void *state) {
                                                                    state);
 }
 
-} // namespace liquid
+} // namespace quoll

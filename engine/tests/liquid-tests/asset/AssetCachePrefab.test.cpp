@@ -11,10 +11,10 @@
 
 class AssetCachePrefabTest : public AssetCacheTestBase {
 public:
-  liquid::AssetData<liquid::PrefabAsset> createPrefabAsset() {
-    liquid::AssetData<liquid::PrefabAsset> asset;
+  quoll::AssetData<quoll::PrefabAsset> createPrefabAsset() {
+    quoll::AssetData<quoll::PrefabAsset> asset;
     asset.name = "test-prefab0";
-    asset.uuid = liquid::Uuid::generate();
+    asset.uuid = quoll::Uuid::generate();
 
     std::random_device device;
     std::mt19937 mt(device());
@@ -36,7 +36,7 @@ public:
     uint32_t numNames = 3;
 
     for (uint32_t i = 0; i < numTransforms; ++i) {
-      liquid::PrefabTransformData transform{};
+      quoll::PrefabTransformData transform{};
       transform.position = {dist(mt), dist(mt), dist(mt)};
       transform.rotation = {dist(mt), dist(mt), dist(mt), dist(mt)};
       transform.scale = {dist(mt), dist(mt), dist(mt)};
@@ -46,13 +46,13 @@ public:
     }
 
     for (uint32_t i = 0; i < numNames; ++i) {
-      liquid::String name = "Test name " + std::to_string(i);
+      quoll::String name = "Test name " + std::to_string(i);
 
       asset.data.names.push_back({i, name});
     }
 
     for (uint32_t i = 0; i < numDirectionalLights; ++i) {
-      liquid::DirectionalLight light{};
+      quoll::DirectionalLight light{};
       light.color = {distColor(mt), distColor(mt), distColor(mt),
                      distColor(mt)};
       light.intensity = distPositive(mt);
@@ -61,7 +61,7 @@ public:
     }
 
     for (uint32_t i = 0; i < numPointLights; ++i) {
-      liquid::PointLight light{};
+      quoll::PointLight light{};
       light.color = {distColor(mt), distColor(mt), distColor(mt),
                      distColor(mt)};
       light.intensity = distPositive(mt);
@@ -70,22 +70,22 @@ public:
       asset.data.pointLights.push_back({i, light});
     }
 
-    std::vector<liquid::MaterialAssetHandle> materials(numMaterials);
+    std::vector<quoll::MaterialAssetHandle> materials(numMaterials);
     for (uint32_t i = 0; i < numMaterials; ++i) {
-      liquid::AssetData<liquid::MaterialAsset> material;
-      material.uuid = liquid::Uuid("material-" + std::to_string(i));
+      quoll::AssetData<quoll::MaterialAsset> material;
+      material.uuid = quoll::Uuid("material-" + std::to_string(i));
       materials.at(i) = cache.getRegistry().getMaterials().addAsset(material);
     }
 
     for (uint32_t i = 0; i < numMeshes; ++i) {
-      liquid::AssetData<liquid::MeshAsset> mesh;
-      mesh.uuid = liquid::Uuid("mesh-" + std::to_string(i));
+      quoll::AssetData<quoll::MeshAsset> mesh;
+      mesh.uuid = quoll::Uuid("mesh-" + std::to_string(i));
       auto handle = cache.getRegistry().getMeshes().addAsset(mesh);
       asset.data.meshes.push_back({i, handle});
     }
 
     for (uint32_t i = 0; i < numMeshRenderers; ++i) {
-      liquid::MeshRenderer renderer{};
+      quoll::MeshRenderer renderer{};
       renderer.materials.push_back(materials.at(i % 3));
       renderer.materials.push_back(materials.at(1 + (i % 3)));
 
@@ -101,7 +101,7 @@ public:
     }
 
     for (uint32_t i = 0; i < numSkinnedMeshRenderers; ++i) {
-      liquid::SkinnedMeshRenderer renderer{};
+      quoll::SkinnedMeshRenderer renderer{};
       renderer.materials.push_back(materials.at((i % 2)));
       renderer.materials.push_back(materials.at(1 + (i % 2)));
       renderer.materials.push_back(materials.at(2 + (i % 2)));
@@ -110,8 +110,8 @@ public:
     }
 
     for (uint32_t i = 0; i < numSkeletons; ++i) {
-      liquid::AssetData<liquid::SkeletonAsset> skeleton;
-      skeleton.uuid = liquid::Uuid("skel-" + std::to_string(i));
+      quoll::AssetData<quoll::SkeletonAsset> skeleton;
+      skeleton.uuid = quoll::Uuid("skel-" + std::to_string(i));
       auto handle = cache.getRegistry().getSkeletons().addAsset(skeleton);
       asset.data.skeletons.push_back({i, handle});
     }
@@ -125,16 +125,16 @@ public:
     }
 
     for (uint32_t i = 0; i < numAnimations; ++i) {
-      liquid::AssetData<liquid::AnimationAsset> animation;
-      animation.uuid = liquid::Uuid("animation-" + std::to_string(i));
+      quoll::AssetData<quoll::AnimationAsset> animation;
+      animation.uuid = quoll::Uuid("animation-" + std::to_string(i));
 
       auto handle = cache.getRegistry().getAnimations().addAsset(animation);
       asset.data.animations.push_back(handle);
     }
 
     for (uint32_t i = 0; i < numAnimators; ++i) {
-      liquid::AssetData<liquid::AnimatorAsset> animator;
-      animator.uuid = liquid::Uuid("animator-" + std::to_string(i));
+      quoll::AssetData<quoll::AnimatorAsset> animator;
+      animator.uuid = quoll::Uuid("animator-" + std::to_string(i));
       auto handle = cache.getRegistry().getAnimators().addAsset(animator);
       asset.data.animators.push_back({i, handle});
     }
@@ -153,27 +153,27 @@ public:
   void SetUp() override {
     AssetCacheTestBase::SetUp();
 
-    textureUuid = liquid::Uuid::generate();
+    textureUuid = quoll::Uuid::generate();
     cache.createTextureFromSource(FixturesPath / "1x1-2d.ktx", textureUuid);
   }
 
-  liquid::Uuid textureUuid;
+  quoll::Uuid textureUuid;
 };
 
 TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
   auto asset = createPrefabAsset();
 
   auto filePath = cache.createPrefabFromAsset(asset);
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
-  liquid::String magic(liquid::AssetFileMagicLength, '$');
+  quoll::String magic(quoll::AssetFileMagicLength, '$');
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, liquid::AssetType::Prefab);
+  EXPECT_EQ(header.type, quoll::AssetType::Prefab);
 
-  std::vector<liquid::Uuid> actualMaterials;
+  std::vector<quoll::Uuid> actualMaterials;
   {
     auto &map = cache.getRegistry().getMaterials();
     auto &actual = actualMaterials;
@@ -185,11 +185,11 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 
     for (uint32_t i = 0; i < numAssets; ++i) {
       auto handle = map.findHandleByUuid(actual.at(i));
-      EXPECT_NE(handle, liquid::MaterialAssetHandle::Null);
+      EXPECT_NE(handle, quoll::MaterialAssetHandle::Null);
     }
   }
 
-  std::vector<liquid::Uuid> actualMeshes;
+  std::vector<quoll::Uuid> actualMeshes;
   {
     auto &expected = asset.data.meshes;
     auto &map = cache.getRegistry().getMeshes();
@@ -205,7 +205,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     }
   }
 
-  std::vector<liquid::Uuid> actualSkeletons;
+  std::vector<quoll::Uuid> actualSkeletons;
   {
     auto &expected = asset.data.skeletons;
     auto &map = cache.getRegistry().getSkeletons();
@@ -221,7 +221,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     }
   }
 
-  std::vector<liquid::Uuid> actualAnimations;
+  std::vector<quoll::Uuid> actualAnimations;
   {
     auto &expected = asset.data.animations;
     auto &map = cache.getRegistry().getAnimations();
@@ -238,7 +238,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     }
   }
 
-  std::vector<liquid::Uuid> actualAnimators;
+  std::vector<quoll::Uuid> actualAnimators;
   {
     auto &expected = asset.data.animators;
     auto &map = cache.getRegistry().getAnimators();
@@ -259,7 +259,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
     uint32_t numComponents = 0;
     file.read(numComponents);
     EXPECT_EQ(numComponents, 5);
-    std::vector<liquid::PrefabTransformData> transforms(numComponents);
+    std::vector<quoll::PrefabTransformData> transforms(numComponents);
     for (uint32_t i = 0; i < numComponents; ++i) {
       uint32_t entity = 0;
       file.read(entity);
@@ -291,7 +291,7 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
       file.read(entity);
       EXPECT_EQ(entity, i);
 
-      liquid::String name;
+      quoll::String name;
       file.read(name);
 
       EXPECT_EQ(asset.data.names.at(i).value, name);
@@ -482,8 +482,8 @@ TEST_F(AssetCachePrefabTest, CreatesPrefabFile) {
 }
 
 TEST_F(AssetCachePrefabTest, FailsLoadingPrefabIfPrefabHasNoComponents) {
-  liquid::AssetData<liquid::PrefabAsset> asset;
-  asset.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::PrefabAsset> asset;
+  asset.uuid = quoll::Uuid::generate();
 
   auto filePath = cache.createPrefabFromAsset(asset);
 
@@ -497,7 +497,7 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabFile) {
   auto asset = createPrefabAsset();
   auto filePath = cache.createPrefabFromAsset(asset);
   auto handle = cache.loadPrefab(asset.uuid);
-  EXPECT_NE(handle.getData(), liquid::PrefabAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::PrefabAssetHandle::Null);
   EXPECT_FALSE(handle.hasWarnings());
 
   auto &prefab = cache.getRegistry().getPrefabs().getAsset(handle.getData());
@@ -614,11 +614,11 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto textureHandle = cache.loadTexture(textureUuid);
 
   // Create mesh
-  liquid::AssetData<liquid::MeshAsset> meshData{};
-  meshData.type = liquid::AssetType::SkinnedMesh;
-  meshData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::MeshAsset> meshData{};
+  meshData.type = quoll::AssetType::SkinnedMesh;
+  meshData.uuid = quoll::Uuid::generate();
 
-  liquid::BaseGeometryAsset geometry{};
+  quoll::BaseGeometryAsset geometry{};
   geometry.positions.push_back({});
   geometry.normals.push_back({});
   geometry.tangents.push_back({});
@@ -633,29 +633,29 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   auto meshHandle = cache.loadMesh(meshData.uuid);
 
   // Create skeleton
-  liquid::AssetData<liquid::SkeletonAsset> skeletonData{};
-  skeletonData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::SkeletonAsset> skeletonData{};
+  skeletonData.uuid = quoll::Uuid::generate();
 
   auto skeletonPath = cache.createSkeletonFromAsset(skeletonData).getData();
   auto skeletonHandle = cache.loadSkeleton(skeletonData.uuid);
 
   // Create animation
-  liquid::AssetData<liquid::AnimationAsset> animationData{};
+  quoll::AssetData<quoll::AnimationAsset> animationData{};
   animationData.data.time = 2.5;
-  animationData.uuid = liquid::Uuid::generate();
+  animationData.uuid = quoll::Uuid::generate();
   auto animationPath = cache.createAnimationFromAsset(animationData).getData();
   auto animationHandle = cache.loadAnimation(animationData.uuid);
 
   // Create animator
-  liquid::AssetData<liquid::AnimatorAsset> animatorData{};
+  quoll::AssetData<quoll::AnimatorAsset> animatorData{};
   animatorData.data.states.push_back({"INITIAL"});
-  animatorData.uuid = liquid::Uuid::generate();
+  animatorData.uuid = quoll::Uuid::generate();
   auto animatorPath = cache.createAnimatorFromAsset(animatorData).getData();
   auto animatorHandle = cache.loadAnimator(animatorData.uuid);
 
   // Create prefab
-  liquid::AssetData<liquid::PrefabAsset> prefabData{};
-  prefabData.uuid = liquid::Uuid::generate();
+  quoll::AssetData<quoll::PrefabAsset> prefabData{};
+  prefabData.uuid = quoll::Uuid::generate();
   prefabData.data.meshes.push_back({0U, meshHandle.getData()});
   prefabData.data.skeletons.push_back({0U, skeletonHandle.getData()});
   prefabData.data.animations.push_back(animationHandle.getData());
@@ -671,34 +671,34 @@ TEST_F(AssetCachePrefabTest, LoadsPrefabWithMeshAnimationSkeleton) {
   cache.getRegistry().getAnimators().deleteAsset(animatorHandle.getData());
 
   auto prefabHandle = cache.loadPrefab(prefabData.uuid);
-  EXPECT_NE(prefabHandle.getData(), liquid::PrefabAssetHandle::Null);
+  EXPECT_NE(prefabHandle.getData(), quoll::PrefabAssetHandle::Null);
 
   auto &newPrefab =
       cache.getRegistry().getPrefabs().getAsset(prefabHandle.getData());
 
   // Validate mesh
-  EXPECT_NE(newPrefab.data.meshes.at(0).value, liquid::MeshAssetHandle::Null);
+  EXPECT_NE(newPrefab.data.meshes.at(0).value, quoll::MeshAssetHandle::Null);
   auto &newMesh = cache.getRegistry().getMeshes().getAsset(
       newPrefab.data.meshes.at(0).value);
   EXPECT_EQ(newMesh.path, meshPath);
 
   // Validate skeleton
   EXPECT_NE(newPrefab.data.skeletons.at(0).value,
-            liquid::SkeletonAssetHandle::Null);
+            quoll::SkeletonAssetHandle::Null);
   auto &newSkeleton = cache.getRegistry().getSkeletons().getAsset(
       newPrefab.data.skeletons.at(0).value);
   EXPECT_EQ(newSkeleton.path, skeletonPath);
 
   // Validate animation
   auto newAnimationHandle = newPrefab.data.animations.at(0);
-  EXPECT_NE(newAnimationHandle, liquid::AnimationAssetHandle::Null);
+  EXPECT_NE(newAnimationHandle, quoll::AnimationAssetHandle::Null);
   auto &newAnimation =
       cache.getRegistry().getAnimations().getAsset(newAnimationHandle);
   EXPECT_EQ(newAnimation.path, animationPath);
 
   // Validate animator
   auto newAnimatorHandle = newPrefab.data.animators.at(0).value;
-  EXPECT_NE(newAnimatorHandle, liquid::AnimatorAssetHandle::Null);
+  EXPECT_NE(newAnimatorHandle, quoll::AnimatorAssetHandle::Null);
   auto &newAnimator =
       cache.getRegistry().getAnimators().getAsset(newAnimatorHandle);
   EXPECT_EQ(newAnimator.path, animatorPath);

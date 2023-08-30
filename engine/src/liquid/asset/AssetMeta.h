@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Metadata for non liquid assets
@@ -17,4 +17,4 @@ struct AssetMeta {
   String name;
 };
 
-} // namespace liquid
+} // namespace quoll

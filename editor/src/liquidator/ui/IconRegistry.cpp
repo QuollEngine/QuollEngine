@@ -4,7 +4,7 @@
 
 #include "IconRegistry.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,-warnings-as-errors)
 std::unordered_map<EditorIcon, rhi::TextureHandle> IconRegistry::mIconMap{};
@@ -51,4 +51,4 @@ void IconRegistry::loadIcons(RenderStorage &renderStorage,
                             loader.loadFromFile(iconsPath / "camera.png"));
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

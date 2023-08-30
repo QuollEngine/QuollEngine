@@ -2,7 +2,7 @@
 
 #include "liquid/renderer/Material.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Material asset data
@@ -94,4 +94,4 @@ struct MaterialAsset {
   SharedPtr<Material> deviceHandle;
 };
 
-} // namespace liquid
+} // namespace quoll

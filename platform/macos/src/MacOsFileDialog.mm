@@ -1,7 +1,7 @@
 #include <AppKit/AppKit.h>
 #include "liquid/platform/tools/FileDialog.h"
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 Path FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes) {
     // TODO: Fix this in macOS
@@ -19,13 +19,13 @@ Path FileDialog::getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTyp
     NSArray *arrayExtensions = [NSArray arrayWithObjects:&nssExtensions[0] count:nssExtensions.size()];
     fileDialog.allowedFileTypes = arrayExtensions;
     
-    liquid::String filename;
+    quoll::String filename;
     
     NSModalResponse result = [fileDialog runModal];
     if (result == NSModalResponseOK){
         NSURL *nsFilenameUrl = [fileDialog URL];
         NSString *nsFilename = [nsFilenameUrl path];
-        filename = liquid::String([nsFilename UTF8String]);
+        filename = quoll::String([nsFilename UTF8String]);
     }
     
     return filename;
@@ -37,4 +37,4 @@ FileDialog::getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTy
     return "";
 }
 
-} // namespace liquid::platform
+} // namespace quoll::platform

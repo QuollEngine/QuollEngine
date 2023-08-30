@@ -4,7 +4,7 @@
 #include "liquidator/actions/ActionCreator.h"
 #include "Shortcut.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Main menu item
@@ -94,4 +94,4 @@ public:
   void render(ActionExecutor &actionExecutor);
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

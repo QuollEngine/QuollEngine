@@ -9,7 +9,7 @@
 
 #include "SpawnEntityActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Get transform from camera view matrix
@@ -228,4 +228,4 @@ bool SpawnSpriteAtView::predicate(WorkspaceState &state,
          scene.entityDatabase.has<Camera>(mCamera);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

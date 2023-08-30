@@ -4,7 +4,7 @@
 #include "VulkanResourceRegistry.h"
 #include "VulkanDeviceObject.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan framebuffer
@@ -44,4 +44,4 @@ private:
   VkFramebuffer mFramebuffer = VK_NULL_HANDLE;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Transient buffer meta data
@@ -35,4 +35,4 @@ struct BufferMeta {
 BufferMeta getBufferMetaForAccessor(const tinygltf::Model &model,
                                     int accessorIndex);
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class WrapMode { Repeat, MirroredRepeat, ClampToEdge, ClampToBorder };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

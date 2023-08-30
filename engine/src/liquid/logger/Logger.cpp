@@ -3,7 +3,7 @@
 #include "NoopLogTransport.h"
 #include "Logger.h"
 
-namespace liquid {
+namespace quoll {
 
 Logger::Logger(LogSeverity minSeverity) : mMinSeverity(minSeverity) {}
 
@@ -16,4 +16,4 @@ LogStream Logger::log(LogSeverity severity) {
 
 void Logger::setTransport(LogTransport transport) { mTransport = transport; }
 
-} // namespace liquid
+} // namespace quoll

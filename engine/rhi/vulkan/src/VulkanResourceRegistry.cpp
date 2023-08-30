@@ -9,7 +9,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 void VulkanResourceRegistry::setShader(std::unique_ptr<VulkanShader> &&shader,
                                        ShaderHandle handle) {
@@ -79,4 +79,4 @@ void VulkanResourceRegistry::deletePipeline(PipelineHandle handle) {
   mPipelines.map.erase(handle);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -3,7 +3,7 @@
 #include "liquid/core/Property.h"
 #include "PhysicalDeviceLimits.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class PhysicalDeviceType {
   DiscreteGPU,
@@ -107,4 +107,4 @@ private:
   PhysicalDeviceLimits mLimits;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

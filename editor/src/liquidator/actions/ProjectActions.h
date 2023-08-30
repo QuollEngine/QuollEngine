@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "liquidator/asset/AssetManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Export as game action
@@ -41,4 +41,4 @@ private:
   AssetManager &mAssetManager;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

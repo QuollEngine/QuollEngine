@@ -1,7 +1,7 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 enum class TransformOperation { Move, Rotate, Scale };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

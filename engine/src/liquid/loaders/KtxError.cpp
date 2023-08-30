@@ -3,7 +3,7 @@
 
 // Reference:
 // https://www.khronos.org/ktx/documentation/libktx/ktx_8h.html#a8de6927e772cc95a9f49593c3dd72069
-static const std::map<ktx_error_code_e, liquid::String> resultMap{
+static const std::map<ktx_error_code_e, quoll::String> resultMap{
     // Success codes
     {KTX_SUCCESS, "Operation successfully completed"},
     {KTX_FILE_DATA_ERROR, "The data in the file is inconsistent with the spec"},
@@ -24,7 +24,7 @@ static const std::map<ktx_error_code_e, liquid::String> resultMap{
     {KTX_UNSUPPORTED_FEATURE, "Feature not supported"},
 };
 
-namespace liquid {
+namespace quoll {
 
 static String createErrorMessage(const String &what,
                                  ktx_error_code_e resultCode) {
@@ -44,4 +44,4 @@ static String createErrorMessage(const String &what,
 KtxError::KtxError(const String &what, ktx_error_code_e resultCode)
     : std::runtime_error(createErrorMessage(what, resultCode)){};
 
-} // namespace liquid
+} // namespace quoll

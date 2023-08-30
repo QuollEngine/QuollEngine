@@ -11,7 +11,7 @@
 #include <cryptopp/files.h>
 #include <cryptopp/hex.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static const String LuaScriptTemplate = R"""(function start()
   -- Initialize your data here
@@ -121,14 +121,14 @@ void AssetManager::generatePreview(const Path &sourceAssetPath,
 
   if (res.first == AssetType::Environment) {
     auto &asset = mAssetCache.getRegistry().getEnvironments().getAsset(
-        static_cast<liquid::EnvironmentAssetHandle>(handle));
+        static_cast<quoll::EnvironmentAssetHandle>(handle));
     if (!rhi::isHandleValid(asset.preview)) {
       asset.preview =
           mHDRIImporter.loadFromPathToDevice(sourceAssetPath, renderStorage);
     }
   } else if (res.first == AssetType::Texture) {
     auto &asset = mAssetCache.getRegistry().getTextures().getAsset(
-        static_cast<liquid::TextureAssetHandle>(handle));
+        static_cast<quoll::TextureAssetHandle>(handle));
 
     if (!rhi::isHandleValid(asset.preview)) {
       asset.preview = asset.data.deviceHandle;
@@ -625,4 +625,4 @@ std::optional<Path> AssetManager::createDirectoriesRecursive(const Path &path) {
   return lastExisting;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

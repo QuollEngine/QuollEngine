@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "TransformOperationActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 SetActiveTransform::SetActiveTransform(TransformOperation transformOperation)
     : mTransformOperation(transformOperation) {}
@@ -28,4 +28,4 @@ bool SetActiveTransform::predicate(WorkspaceState &state,
   return state.activeTransform != mTransformOperation;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

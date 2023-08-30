@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EditorSimulator.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EditorSimulator::EditorSimulator(EventSystem &eventSystem, Window &window,
                                  AssetRegistry &assetRegistry,
@@ -75,4 +75,4 @@ void EditorSimulator::updateSimulation(float dt, WorkspaceState &state) {
   mAudioSystem.output(entityDatabase);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

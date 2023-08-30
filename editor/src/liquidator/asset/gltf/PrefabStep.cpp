@@ -3,7 +3,7 @@
 #include "PrefabStep.h"
 #include "TransformUtils.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Load prefabs into asset registry
@@ -147,4 +147,4 @@ void loadPrefabs(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

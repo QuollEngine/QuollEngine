@@ -7,7 +7,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/renderer/BindlessDrawParameters.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Scene renderer frame data
@@ -354,7 +354,7 @@ public:
    * @param transform Mesh world transform
    * @param materials Materials
    */
-  void addMesh(MeshAssetHandle handle, liquid::Entity entity,
+  void addMesh(MeshAssetHandle handle, quoll::Entity entity,
                const glm::mat4 &transform,
                const std::vector<rhi::DeviceAddress> &materials);
 
@@ -700,4 +700,4 @@ private:
   BindlessDrawParameters mBindlessParams;
 };
 
-} // namespace liquid
+} // namespace quoll

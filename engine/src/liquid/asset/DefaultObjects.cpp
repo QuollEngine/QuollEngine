@@ -9,7 +9,7 @@
 #include "liquid/text/MsdfLoader.h"
 #include "liquid/core/Engine.h"
 
-namespace liquid::default_objects {
+namespace quoll::default_objects {
 
 AssetData<MeshAsset> createCube() {
   // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
@@ -159,8 +159,8 @@ AssetData<MeshAsset> createCube() {
 
   AssetData<MeshAsset> mesh;
   mesh.name = "Cube";
-  mesh.path = "liquid::engine/meshes/cube";
-  mesh.uuid = Uuid("liquid::engine/meshes/cube");
+  mesh.path = "quoll::engine/meshes/cube";
+  mesh.uuid = Uuid("quoll::engine/meshes/cube");
   mesh.data.geometries.push_back(geometry);
 
   return mesh;
@@ -171,8 +171,8 @@ AssetData<MeshAsset> createCube() {
 AssetData<MaterialAsset> createDefaultMaterial() {
   AssetData<MaterialAsset> material;
   material.name = "Default material";
-  material.path = "liquid::engine/materials/default";
-  material.uuid = Uuid("liquid::engine/materials/default");
+  material.path = "quoll::engine/materials/default";
+  material.uuid = Uuid("quoll::engine/materials/default");
 
   return material;
 }
@@ -184,10 +184,10 @@ AssetData<FontAsset> createDefaultFont() {
       loader.loadFontData(Engine::getFontsPath() / "Roboto-Regular.ttf");
 
   font.getData().name = "Roboto (default)";
-  font.getData().path = "liquid::engine/fonts/Roboto-Regular";
-  font.getData().uuid = Uuid("liquid::engine/fonts/Roboto-Regular");
+  font.getData().path = "quoll::engine/fonts/Roboto-Regular";
+  font.getData().uuid = Uuid("quoll::engine/fonts/Roboto-Regular");
 
   return font.getData();
 }
 
-} // namespace liquid::default_objects
+} // namespace quoll::default_objects

@@ -5,7 +5,7 @@ struct lua_State;
 #include "LuaTable.h"
 #include "liquid/entity/Entity.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Lua user data object
@@ -587,4 +587,4 @@ template <> inline LuaTable LuaScope::getGlobal<LuaTable>(const String &name) {
   return get<LuaTable>();
 }
 
-} // namespace liquid
+} // namespace quoll

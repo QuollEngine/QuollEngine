@@ -3,7 +3,7 @@
 #include "EventPool.h"
 #include "EventDetails.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Event system
@@ -127,4 +127,4 @@ private:
       mPools;
 };
 
-} // namespace liquid
+} // namespace quoll

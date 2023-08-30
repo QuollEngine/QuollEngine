@@ -3,7 +3,7 @@
 #include "liquidator/actions/Action.h"
 #include "EntityDefaultDeleteAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Create perspective lens entity action
@@ -110,4 +110,4 @@ private:
   bool mIsStartingCamera = false;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

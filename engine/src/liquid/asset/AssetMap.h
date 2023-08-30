@@ -3,7 +3,7 @@
 #include "liquid/core/Uuid.h"
 #include "AssetData.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Asset map
@@ -128,4 +128,4 @@ private:
   THandle mLastHandle{1};
 };
 
-} // namespace liquid
+} // namespace quoll

@@ -6,7 +6,7 @@
 #include "liquidator/state/WorkspaceState.h"
 #include "liquidator/actions/ActionExecutor.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Scene hierarchy panel component
@@ -49,4 +49,4 @@ private:
   Entity mRightClickedEntity = Entity::Null;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

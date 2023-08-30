@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "PhysicalDeviceInformation.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 PhysicalDeviceInformation::PhysicalDeviceInformation(
     StringView name, const PhysicalDeviceProperties &properties,
@@ -23,4 +23,4 @@ const String PhysicalDeviceInformation::getTypeString() const {
   }
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

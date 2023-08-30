@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 enum class KeyboardEvent { Pressed, Released, Repeat };
 
@@ -24,4 +24,4 @@ struct KeyboardEventObject {
   int mods = 0;
 };
 
-} // namespace liquid
+} // namespace quoll

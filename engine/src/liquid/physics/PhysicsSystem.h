@@ -5,7 +5,7 @@
 
 #include "PhysicsObjects.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Physics system
@@ -77,4 +77,4 @@ private:
   EntityDatabaseObserver<PhysxInstance> mPhysxInstanceRemoveObserver;
 };
 
-} // namespace liquid
+} // namespace quoll

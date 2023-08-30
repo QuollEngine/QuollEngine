@@ -26,7 +26,7 @@
 // Asset
 #include "liquid/asset/AssetCache.h"
 
-namespace liquid::runtime {
+namespace quoll::runtime {
 
 Runtime::Runtime(const LaunchConfig &config) : mConfig(config) {}
 
@@ -34,28 +34,28 @@ void Runtime::start() {
   static constexpr uint32_t Width = 800;
   static constexpr uint32_t Height = 600;
 
-  liquid::Scene scene;
-  liquid::EventSystem eventSystem;
-  liquid::Window window(mConfig.name, Width, Height, eventSystem);
-  liquid::AssetCache assetCache(std::filesystem::current_path() / "assets",
-                                true);
+  quoll::Scene scene;
+  quoll::EventSystem eventSystem;
+  quoll::Window window(mConfig.name, Width, Height, eventSystem);
+  quoll::AssetCache assetCache(std::filesystem::current_path() / "assets",
+                               true);
 
-  liquid::rhi::VulkanRenderBackend backend(window);
+  quoll::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
-  liquid::RenderStorage renderStorage(device);
+  quoll::RenderStorage renderStorage(device);
 
-  liquid::RendererOptions initialOptions{};
+  quoll::RendererOptions initialOptions{};
   initialOptions.size = {Width, Height};
-  liquid::Renderer renderer(renderStorage, initialOptions);
+  quoll::Renderer renderer(renderStorage, initialOptions);
 
   SceneRenderer sceneRenderer(assetCache.getRegistry(), renderStorage);
 
   auto res = assetCache.preloadAssets(renderStorage);
 
-  liquid::FPSCounter fpsCounter;
-  liquid::MainLoop mainLoop(window, fpsCounter);
+  quoll::FPSCounter fpsCounter;
+  quoll::MainLoop mainLoop(window, fpsCounter);
 
-  liquid::Presenter presenter(renderStorage);
+  quoll::Presenter presenter(renderStorage);
 
   renderer.setGraphBuilder([&](auto &graph, const auto &options) {
     auto passData = sceneRenderer.attach(graph, options);
@@ -64,15 +64,14 @@ void Runtime::start() {
     return RendererTextures{passData.finalColor, passData.finalColor};
   });
 
-  liquid::ScriptingSystem scriptingSystem(eventSystem,
-                                          assetCache.getRegistry());
-  liquid::SceneUpdater sceneUpdater;
-  liquid::PhysicsSystem physicsSystem(eventSystem);
-  liquid::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
-  liquid::AnimationSystem animationSystem(assetCache.getRegistry());
-  liquid::SkeletonUpdater skeletonUpdater;
-  liquid::AudioSystem audioSystem(assetCache.getRegistry());
-  liquid::EntityDeleter entityDeleter;
+  quoll::ScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
+  quoll::SceneUpdater sceneUpdater;
+  quoll::PhysicsSystem physicsSystem(eventSystem);
+  quoll::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
+  quoll::AnimationSystem animationSystem(assetCache.getRegistry());
+  quoll::SkeletonUpdater skeletonUpdater;
+  quoll::AudioSystem audioSystem(assetCache.getRegistry());
+  quoll::EntityDeleter entityDeleter;
 
   audioSystem.observeChanges(scene.entityDatabase);
   scriptingSystem.observeChanges(scene.entityDatabase);
@@ -91,7 +90,7 @@ void Runtime::start() {
     return;
   }
 
-  liquid::SceneIO sceneIO(assetCache.getRegistry(), scene);
+  quoll::SceneIO sceneIO(assetCache.getRegistry(), scene);
   sceneIO.loadScene(handle);
 
   presenter.updateFramebuffers(device->getSwapchain());
@@ -143,4 +142,4 @@ void Runtime::start() {
   device->waitForIdle();
 }
 
-} // namespace liquid::runtime
+} // namespace quoll::runtime

@@ -8,7 +8,7 @@
 #include "WorkspaceIO.h"
 #include <glm/gtc/matrix_access.hpp>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void WorkspaceIO::saveWorkspaceState(WorkspaceState &state,
                                      const std::filesystem::path &path) {
@@ -125,4 +125,4 @@ void WorkspaceIO::loadWorkspaceState(WorkspaceState &state,
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

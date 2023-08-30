@@ -4,15 +4,15 @@
 #include "liquid-tests/Testing.h"
 
 struct SkeletonUpdaterTest : public ::testing::Test {
-  liquid::SkeletonAssetHandle handle{2};
-  liquid::EntityDatabase entityDatabase;
-  liquid::SkeletonUpdater skeletonUpdater;
+  quoll::SkeletonAssetHandle handle{2};
+  quoll::EntityDatabase entityDatabase;
+  quoll::SkeletonUpdater skeletonUpdater;
 
-  std::tuple<liquid::Skeleton &, liquid::SkeletonDebug &, liquid::Entity>
+  std::tuple<quoll::Skeleton &, quoll::SkeletonDebug &, quoll::Entity>
   createSkeleton(uint32_t numJoints) {
     auto entity = entityDatabase.create();
 
-    liquid::Skeleton skeleton;
+    quoll::Skeleton skeleton;
 
     skeleton.jointWorldTransforms.resize(numJoints, glm::mat4{1.0f});
     skeleton.jointFinalTransforms.resize(numJoints, glm::mat4{1.0f});
@@ -31,7 +31,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
 
     entityDatabase.set(entity, skeleton);
 
-    liquid::SkeletonDebug skeletonDebug{};
+    quoll::SkeletonDebug skeletonDebug{};
     auto numBones = skeleton.numJoints * 2;
     skeletonDebug.bones.reserve(numBones);
 
@@ -47,15 +47,15 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     return {getSkeleton(entity), getDebugSkeleton(entity), entity};
   }
 
-  liquid::Skeleton &getSkeleton(liquid::Entity entity) {
-    return entityDatabase.get<liquid::Skeleton>(entity);
+  quoll::Skeleton &getSkeleton(quoll::Entity entity) {
+    return entityDatabase.get<quoll::Skeleton>(entity);
   }
 
-  liquid::SkeletonDebug &getDebugSkeleton(liquid::Entity entity) {
-    return entityDatabase.get<liquid::SkeletonDebug>(entity);
+  quoll::SkeletonDebug &getDebugSkeleton(quoll::Entity entity) {
+    return entityDatabase.get<quoll::SkeletonDebug>(entity);
   }
 
-  glm::mat4 getLocalTransform(liquid::Skeleton &skeleton, uint32_t i) {
+  glm::mat4 getLocalTransform(quoll::Skeleton &skeleton, uint32_t i) {
     glm::mat4 identity{1.0f};
     return glm::translate(identity, skeleton.jointLocalPositions.at(i)) *
            glm::toMat4(skeleton.jointLocalRotations.at(i)) *
@@ -127,7 +127,7 @@ TEST_F(SkeletonUpdaterDeathTest,
        FailsIfDebugBoneSizeIsNotTwiceTheNumberOfJoints) {
   const auto &[skeleton, _, entity] = createSkeleton(2);
 
-  entityDatabase.set<liquid::SkeletonDebug>(entity, {});
+  entityDatabase.set<quoll::SkeletonDebug>(entity, {});
 
   EXPECT_DEATH(skeletonUpdater.update(entityDatabase), ".*");
 }

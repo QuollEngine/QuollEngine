@@ -12,51 +12,51 @@ struct HistoryTestActionData {
   bool undoCalled = false;
 };
 
-class HistoryTestAction : public liquid::editor::Action {
+class HistoryTestAction : public quoll::editor::Action {
 public:
   HistoryTestAction() : mData(new HistoryTestActionData) {}
 
-  liquid::editor::ActionExecutorResult
-  onExecute(liquid::editor::WorkspaceState &state,
-            liquid::AssetRegistry &assetRegistry) override {
+  quoll::editor::ActionExecutorResult
+  onExecute(quoll::editor::WorkspaceState &state,
+            quoll::AssetRegistry &assetRegistry) override {
     mData->called = true;
 
-    liquid::editor::ActionExecutorResult res;
+    quoll::editor::ActionExecutorResult res;
     res.addToHistory = true;
     return res;
   }
 
-  liquid::editor::ActionExecutorResult
-  onUndo(liquid::editor::WorkspaceState &state,
-         liquid::AssetRegistry &assetRegistry) override {
+  quoll::editor::ActionExecutorResult
+  onUndo(quoll::editor::WorkspaceState &state,
+         quoll::AssetRegistry &assetRegistry) override {
     mData->undoCalled = true;
 
     return {};
   }
 
-  bool predicate(liquid::editor::WorkspaceState &state,
-                 liquid::AssetRegistry &assetRegistry) {
+  bool predicate(quoll::editor::WorkspaceState &state,
+                 quoll::AssetRegistry &assetRegistry) {
     return true;
   }
 
-  liquid::SharedPtr<HistoryTestActionData> getData() { return mData; }
+  quoll::SharedPtr<HistoryTestActionData> getData() { return mData; }
 
 private:
-  liquid::SharedPtr<HistoryTestActionData> mData;
+  quoll::SharedPtr<HistoryTestActionData> mData;
 };
 
 TEST_F(UndoActionTest, ExecutorCallsActionExecutorUndo) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(action));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
-  executor.execute<liquid::editor::Undo>(executor);
+  executor.execute<quoll::editor::Undo>(executor);
   executor.process();
 
   EXPECT_TRUE(actionData->undoCalled);
@@ -67,21 +67,21 @@ TEST_F(UndoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(action));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
-  EXPECT_TRUE(liquid::editor::Undo(executor).predicate(state, assetRegistry));
+  EXPECT_TRUE(quoll::editor::Undo(executor).predicate(state, assetRegistry));
 }
 
 TEST_F(UndoActionTest, PredicateReturnsFalseIfActionExecutorUndoStackIsEmpty) {
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  EXPECT_FALSE(liquid::editor::Undo(executor).predicate(state, assetRegistry));
+  EXPECT_FALSE(quoll::editor::Undo(executor).predicate(state, assetRegistry));
 }
 
 using RedoActionTest = ActionTestBase;
@@ -90,10 +90,10 @@ TEST_F(RedoActionTest, ExecutorCallsActionExecutor) {
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(action));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -102,7 +102,7 @@ TEST_F(RedoActionTest, ExecutorCallsActionExecutor) {
 
   actionData->called = false;
 
-  executor.execute<liquid::editor::Redo>(executor);
+  executor.execute<quoll::editor::Redo>(executor);
   executor.process();
 
   EXPECT_TRUE(actionData->called);
@@ -113,21 +113,21 @@ TEST_F(RedoActionTest,
   auto *action = new HistoryTestAction;
   auto actionData = action->getData();
 
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(action));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(action));
   executor.process();
 
   executor.undo();
   EXPECT_TRUE(actionData->undoCalled);
 
-  EXPECT_TRUE(liquid::editor::Redo(executor).predicate(state, assetRegistry));
+  EXPECT_TRUE(quoll::editor::Redo(executor).predicate(state, assetRegistry));
 }
 
 TEST_F(RedoActionTest, PredicateReturnsFalseIfActionExecutorRedoStackIsEmpty) {
-  liquid::editor::ActionExecutor executor(state, assetRegistry,
-                                          std::filesystem::current_path());
+  quoll::editor::ActionExecutor executor(state, assetRegistry,
+                                         std::filesystem::current_path());
 
-  EXPECT_FALSE(liquid::editor::Redo(executor).predicate(state, assetRegistry));
+  EXPECT_FALSE(quoll::editor::Redo(executor).predicate(state, assetRegistry));
 }

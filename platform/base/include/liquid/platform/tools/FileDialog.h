@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::platform {
+namespace quoll::platform {
 
 /**
  * @brief Platform file dialog
@@ -14,12 +14,12 @@ public:
     /**
      * Entry label
      */
-    liquid::StringView label;
+    quoll::StringView label;
 
     /**
      * Entry extensions
      */
-    std::vector<liquid::String> extensions;
+    std::vector<quoll::String> extensions;
   };
 
 public:
@@ -29,7 +29,7 @@ public:
    * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
-  static liquid::Path
+  static quoll::Path
   getFilePathFromDialog(const std::vector<FileTypeEntry> &fileTypes);
 
   /**
@@ -38,8 +38,8 @@ public:
    * @param fileTypes Supported file types
    * @return Chosen or empty file path
    */
-  static liquid::Path
+  static quoll::Path
   getFilePathFromCreateDialog(const std::vector<FileTypeEntry> &fileTypes);
 };
 
-} // namespace liquid::platform
+} // namespace quoll::platform

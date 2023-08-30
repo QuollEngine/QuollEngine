@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Blit region
@@ -47,4 +47,4 @@ struct BlitRegion {
   std::array<glm::ivec3, 2> dstOffsets;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

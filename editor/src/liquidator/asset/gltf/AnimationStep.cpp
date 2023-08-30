@@ -3,7 +3,7 @@
 #include "AnimationStep.h"
 #include "Buffer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void loadAnimations(GLTFImportData &importData) {
   auto &assetCache = importData.assetCache;
@@ -333,4 +333,4 @@ void loadAnimations(GLTFImportData &importData) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

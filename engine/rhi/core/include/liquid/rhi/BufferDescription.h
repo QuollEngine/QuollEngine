@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 enum class BufferUsage {
   None = 0,
@@ -58,4 +58,4 @@ struct BufferDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

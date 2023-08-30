@@ -2,7 +2,7 @@
 #include "liquid/logger/StreamTransport.h"
 #include "Engine.h"
 
-namespace liquid {
+namespace quoll {
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 Engine Engine::engine;
@@ -29,4 +29,4 @@ void Engine::resetLoggers() {
   engine.mUserLogger.setTransport(createStreamTransport(std::cout));
 }
 
-} // namespace liquid
+} // namespace quoll

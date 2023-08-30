@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "AssetCache.h"
 
-namespace liquid {
+namespace quoll {
 
 Result<Path> AssetCache::createSceneFromSource(const Path &sourcePath,
                                                const Uuid &uuid) {
@@ -69,4 +69,4 @@ Result<SceneAssetHandle> AssetCache::loadScene(const Uuid &uuid) {
   return Result<SceneAssetHandle>::Ok(handle);
 }
 
-} // namespace liquid
+} // namespace quoll

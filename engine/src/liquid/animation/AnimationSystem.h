@@ -4,7 +4,7 @@
 #include "liquid/asset/AssetRegistry.h"
 #include "KeyframeInterpolator.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Animation system
@@ -31,4 +31,4 @@ private:
   KeyframeInterpolator mKeyframeInterpolator;
 };
 
-} // namespace liquid
+} // namespace quoll

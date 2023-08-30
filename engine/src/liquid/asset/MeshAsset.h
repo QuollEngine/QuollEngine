@@ -5,7 +5,7 @@
 
 #include "Asset.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Base geometry asset data
@@ -77,4 +77,4 @@ struct MeshAsset {
   rhi::BufferHandle indexBuffer = rhi::BufferHandle::Null;
 };
 
-} // namespace liquid
+} // namespace quoll

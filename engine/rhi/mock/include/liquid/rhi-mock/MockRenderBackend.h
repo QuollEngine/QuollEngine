@@ -2,7 +2,7 @@
 
 #include "liquid/rhi/RenderBackend.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock render backend
@@ -16,4 +16,4 @@ class MockRenderBackend : public RenderBackend {
   RenderDevice *createDefaultDevice() override;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

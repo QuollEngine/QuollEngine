@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "EntitySpriteActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 EntitySetSprite::EntitySetSprite(Entity entity, TextureAssetHandle handle)
     : mEntity(entity), mSprite(handle) {}
@@ -60,4 +60,4 @@ bool EntityCreateSprite::predicate(WorkspaceState &state,
          assetRegistry.getTextures().hasAsset(mHandle);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

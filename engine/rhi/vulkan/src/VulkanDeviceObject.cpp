@@ -4,7 +4,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanError.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 const String LIQUID_VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME =
     "VK_KHR_portability_subset";
@@ -209,4 +209,4 @@ void VulkanDeviceObject::setObjectName(const String &name, VkObjectType type,
   vkSetDebugUtilsObjectNameEXT(mDevice, &nameInfo);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

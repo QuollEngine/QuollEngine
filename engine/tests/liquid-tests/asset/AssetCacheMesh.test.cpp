@@ -11,11 +11,11 @@
 
 class AssetCacheMeshTest : public AssetCacheTestBase {
 public:
-  liquid::AssetData<liquid::MeshAsset> createRandomizedMeshAsset() {
-    liquid::AssetData<liquid::MeshAsset> asset;
+  quoll::AssetData<quoll::MeshAsset> createRandomizedMeshAsset() {
+    quoll::AssetData<quoll::MeshAsset> asset;
     asset.name = "test-mesh0";
-    asset.uuid = liquid::Uuid::generate();
-    asset.type = liquid::AssetType::Mesh;
+    asset.uuid = quoll::Uuid::generate();
+    asset.type = quoll::AssetType::Mesh;
 
     {
       std::random_device device;
@@ -27,7 +27,7 @@ public:
       size_t countIndices = 20;
 
       for (size_t i = 0; i < countGeometries; ++i) {
-        liquid::BaseGeometryAsset geometry;
+        quoll::BaseGeometryAsset geometry;
         for (size_t i = 0; i < countVertices; ++i) {
           geometry.positions.push_back({dist(mt), dist(mt), dist(mt)});
           geometry.normals.push_back({dist(mt), dist(mt), dist(mt)});
@@ -47,11 +47,11 @@ public:
     return asset;
   }
 
-  liquid::AssetData<liquid::MeshAsset> createRandomizedSkinnedMeshAsset() {
-    liquid::AssetData<liquid::MeshAsset> asset;
+  quoll::AssetData<quoll::MeshAsset> createRandomizedSkinnedMeshAsset() {
+    quoll::AssetData<quoll::MeshAsset> asset;
     asset.name = "test-mesh0";
-    asset.uuid = liquid::Uuid::generate();
-    asset.type = liquid::AssetType::SkinnedMesh;
+    asset.uuid = quoll::Uuid::generate();
+    asset.type = quoll::AssetType::SkinnedMesh;
 
     std::random_device device;
     std::mt19937 mt(device());
@@ -62,7 +62,7 @@ public:
     size_t countIndices = 20;
 
     for (size_t i = 0; i < countGeometries; ++i) {
-      liquid::BaseGeometryAsset geometry;
+      quoll::BaseGeometryAsset geometry;
       for (size_t i = 0; i < countVertices; ++i) {
         geometry.positions.push_back({dist(mt), dist(mt), dist(mt)});
         geometry.normals.push_back({dist(mt), dist(mt), dist(mt)});
@@ -92,14 +92,14 @@ TEST_F(AssetCacheMeshTest, CreatesMeshFileFromMeshAsset) {
   auto asset = createRandomizedMeshAsset();
   auto filePath = cache.createMeshFromAsset(asset);
 
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
   EXPECT_EQ(header.name, asset.name);
   EXPECT_EQ(header.magic, header.MagicConstant);
-  EXPECT_EQ(header.type, liquid::AssetType::Mesh);
+  EXPECT_EQ(header.type, quoll::AssetType::Mesh);
 
   uint32_t numGeometries = 0;
   file.read(numGeometries);
@@ -194,7 +194,7 @@ TEST_F(AssetCacheMeshTest, LoadsMeshFromFile) {
   auto handleRes = cache.loadMesh(asset.uuid);
 
   auto handle = handleRes.getData();
-  EXPECT_NE(handle, liquid::MeshAssetHandle::Null);
+  EXPECT_NE(handle, quoll::MeshAssetHandle::Null);
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle);
   EXPECT_EQ(mesh.name, asset.name);
 
@@ -227,15 +227,15 @@ TEST_F(AssetCacheMeshTest, CreatesSkinnedMeshFileFromSkinnedMeshAsset) {
 
   auto filePath = cache.createMeshFromAsset(asset);
 
-  liquid::InputBinaryStream file(filePath.getData());
+  quoll::InputBinaryStream file(filePath.getData());
   EXPECT_TRUE(file.good());
 
-  liquid::AssetFileHeader header;
+  quoll::AssetFileHeader header;
   file.read(header);
 
   EXPECT_EQ(header.magic, header.MagicConstant);
   EXPECT_EQ(header.name, "test-mesh0");
-  EXPECT_EQ(header.type, liquid::AssetType::SkinnedMesh);
+  EXPECT_EQ(header.type, quoll::AssetType::SkinnedMesh);
 
   uint32_t numGeometries = 0;
   file.read(numGeometries);
@@ -343,7 +343,7 @@ TEST_F(AssetCacheMeshTest, LoadsSkinnedMeshFromFile) {
 
   auto filePath = cache.createMeshFromAsset(asset);
   auto handle = cache.loadMesh(asset.uuid);
-  EXPECT_NE(handle.getData(), liquid::MeshAssetHandle::Null);
+  EXPECT_NE(handle.getData(), quoll::MeshAssetHandle::Null);
   auto &mesh = cache.getRegistry().getMeshes().getAsset(handle.getData());
   EXPECT_EQ(mesh.name, asset.name);
 

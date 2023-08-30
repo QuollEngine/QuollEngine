@@ -7,7 +7,7 @@
 #include "liquid/rhi/BufferDescription.h"
 #include "RenderGraphResource.h"
 
-namespace liquid {
+namespace quoll {
 
 class RenderGraph;
 
@@ -328,4 +328,4 @@ private:
   glm::uvec3 mDimensions{};
 };
 
-} // namespace liquid
+} // namespace quoll

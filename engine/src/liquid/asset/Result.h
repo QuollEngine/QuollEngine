@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Result object
@@ -113,4 +113,4 @@ private:
   String mError;
 };
 
-} // namespace liquid
+} // namespace quoll

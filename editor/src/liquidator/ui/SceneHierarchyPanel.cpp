@@ -12,7 +12,7 @@
 #include "liquidator/actions/DeleteEntityAction.h"
 #include "liquidator/actions/EntityRelationActions.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 static String getNameAndIcon(const String &name, const char *icon) {
   return String(icon) + "  " + name;
@@ -224,4 +224,4 @@ uint32_t SceneHierarchyPanel::renderEntity(Entity entity, uint32_t index,
   return innerIndex;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

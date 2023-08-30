@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Name component
@@ -12,4 +12,4 @@ struct Name {
   String name;
 };
 
-} // namespace liquid
+} // namespace quoll

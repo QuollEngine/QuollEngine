@@ -3,7 +3,7 @@
 #include "VulkanHeaders.h"
 #include "VulkanPhysicalDevice.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan device
@@ -55,4 +55,4 @@ private:
   const VulkanPhysicalDevice &mPhysicalDevice;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

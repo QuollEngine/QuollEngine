@@ -1,7 +1,7 @@
 #include "liquid/core/Base.h"
 #include "DeleteEntityAction.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 DeleteEntity::DeleteEntity(Entity entity) : mEntity(entity) {}
 
@@ -90,4 +90,4 @@ bool DeleteEntity::predicate(WorkspaceState &state,
   return true;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

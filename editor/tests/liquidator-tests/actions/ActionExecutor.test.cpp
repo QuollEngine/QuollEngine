@@ -3,8 +3,8 @@
 
 #include "liquidator-tests/Testing.h"
 
-static const liquid::Path ScenePath{std::filesystem::current_path() /
-                                    "scene-test" / "main.scene"};
+static const quoll::Path ScenePath{std::filesystem::current_path() /
+                                   "scene-test" / "main.scene"};
 
 class ActionExecutorTest : public ::testing::Test {
 public:
@@ -32,31 +32,31 @@ public:
   }
 
 public:
-  liquid::AssetRegistry assetRegistry;
-  liquid::editor::WorkspaceState state{};
-  liquid::editor::ActionExecutor executor{state, assetRegistry, ScenePath};
+  quoll::AssetRegistry assetRegistry;
+  quoll::editor::WorkspaceState state{};
+  quoll::editor::ActionExecutor executor{state, assetRegistry, ScenePath};
 };
 
 struct TestActionData {
   bool called = false;
   bool undoCalled = false;
-  std::vector<liquid::Entity> entitiesToSave;
-  std::vector<liquid::Entity> entitiesToDelete;
+  std::vector<quoll::Entity> entitiesToSave;
+  std::vector<quoll::Entity> entitiesToDelete;
   bool saveScene = false;
   bool mPredicate = true;
   bool addToHistory = false;
 };
 
-class TestAction : public liquid::editor::Action {
+class TestAction : public quoll::editor::Action {
 public:
   TestAction() : mData(new TestActionData) {}
 
-  liquid::editor::ActionExecutorResult
-  onExecute(liquid::editor::WorkspaceState &state,
-            liquid::AssetRegistry &assetRegistry) {
+  quoll::editor::ActionExecutorResult
+  onExecute(quoll::editor::WorkspaceState &state,
+            quoll::AssetRegistry &assetRegistry) {
     mData->called = true;
 
-    liquid::editor::ActionExecutorResult res{};
+    quoll::editor::ActionExecutorResult res{};
 
     res.entitiesToSave = mData->entitiesToSave;
     res.entitiesToDelete = mData->entitiesToDelete;
@@ -66,12 +66,12 @@ public:
     return res;
   }
 
-  liquid::editor::ActionExecutorResult
-  onUndo(liquid::editor::WorkspaceState &state,
-         liquid::AssetRegistry &assetRegistry) override {
+  quoll::editor::ActionExecutorResult
+  onUndo(quoll::editor::WorkspaceState &state,
+         quoll::AssetRegistry &assetRegistry) override {
     mData->undoCalled = true;
 
-    liquid::editor::ActionExecutorResult res{};
+    quoll::editor::ActionExecutorResult res{};
 
     res.entitiesToSave = mData->entitiesToDelete;
     res.entitiesToDelete = mData->entitiesToSave;
@@ -80,19 +80,19 @@ public:
     return res;
   }
 
-  bool predicate(liquid::editor::WorkspaceState &state,
-                 liquid::AssetRegistry &assetRegistry) override {
+  bool predicate(quoll::editor::WorkspaceState &state,
+                 quoll::AssetRegistry &assetRegistry) override {
     return mData->mPredicate;
   }
 
-  inline liquid::SharedPtr<TestActionData> getData() { return mData; }
+  inline quoll::SharedPtr<TestActionData> getData() { return mData; }
 
 public:
-  void saveEntityOnExecute(liquid::Entity entity) {
+  void saveEntityOnExecute(quoll::Entity entity) {
     mData->entitiesToSave.push_back(entity);
   }
 
-  void deleteEntityOnExecute(liquid::Entity entity) {
+  void deleteEntityOnExecute(quoll::Entity entity) {
     mData->entitiesToDelete.push_back(entity);
   }
 
@@ -103,7 +103,7 @@ public:
   void setPredicate(bool predicate) { mData->mPredicate = predicate; }
 
 private:
-  liquid::SharedPtr<TestActionData> mData;
+  quoll::SharedPtr<TestActionData> mData;
 };
 
 TEST_F(ActionExecutorTest, ExecuteDoesNothingIfNoActionToProcess) {
@@ -120,18 +120,18 @@ TEST_F(ActionExecutorTest,
 
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_FALSE(actionData->called);
 }
 
 TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
 
   auto *actionPtr = new TestAction;
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   EXPECT_TRUE(executor.getUndoStack().empty());
@@ -141,7 +141,7 @@ TEST_F(ActionExecutorTest, ExecuteCallsActionExecutorWithState) {
 TEST_F(ActionExecutorTest,
        ExecuteCreatesEntityFilesIfActionReturnsEntitiesToSaveAndModeIsEdit) {
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
 
   {
     std::ifstream stream(ScenePath);
@@ -155,7 +155,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->saveEntityOnExecute(entity);
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -165,7 +165,7 @@ TEST_F(ActionExecutorTest,
     stream.close();
 
     EXPECT_EQ(node["entities"].size(), 1);
-    auto id = state.scene.entityDatabase.get<liquid::Id>(entity).id;
+    auto id = state.scene.entityDatabase.get<quoll::Id>(entity).id;
     EXPECT_EQ(node["entities"][0]["id"].as<uint64_t>(0), id);
   }
 }
@@ -173,10 +173,10 @@ TEST_F(ActionExecutorTest,
 TEST_F(
     ActionExecutorTest,
     ExecuteDoesNotCreateEntityFilesIfActionReturnsEntitiesToSaveAndModeIsSimulation) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
 
   {
     std::ifstream stream(ScenePath);
@@ -189,7 +189,7 @@ TEST_F(
   actionPtr->saveEntityOnExecute(entity);
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -204,8 +204,8 @@ TEST_F(
 TEST_F(ActionExecutorTest,
        ExecuteDeletesEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsEdit) {
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
-  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
 
   executor.getSceneWriter().saveEntities({entity});
 
@@ -213,7 +213,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->deleteEntityOnExecute(entity);
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   {
@@ -227,11 +227,11 @@ TEST_F(ActionExecutorTest,
 TEST_F(
     ActionExecutorTest,
     ExecuteDoesNotDeleteEntityFilesIfActionReturnsEntitiesToDeleteAndModeIsSimulation) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::Name>(entity, {"My name"});
-  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.entityDatabase.set<quoll::Name>(entity, {"My name"});
+  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
 
   executor.getSceneWriter().saveEntities({entity});
 
@@ -239,7 +239,7 @@ TEST_F(
   actionPtr->deleteEntityOnExecute(entity);
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -254,8 +254,8 @@ TEST_F(
 TEST_F(ActionExecutorTest,
        ExecuteSavesSceneFileIfActionReturnsSaveSceneAndModeIsEdit) {
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
-  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
+  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
   executor.getSceneWriter().saveEntities({entity});
@@ -264,7 +264,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->saveSceneOnExecute();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -280,18 +280,18 @@ TEST_F(ActionExecutorTest,
 
 TEST_F(ActionExecutorTest,
        ExecuteDoesNotSaveSceneFileIfActionReturnsSaveSceneAndModeIsSimulation) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
 
   auto entity = state.scene.entityDatabase.create();
-  state.scene.entityDatabase.set<liquid::PerspectiveLens>(entity, {});
-  state.scene.entityDatabase.set<liquid::Id>(entity, {15});
+  state.scene.entityDatabase.set<quoll::PerspectiveLens>(entity, {});
+  state.scene.entityDatabase.set<quoll::Id>(entity, {15});
   state.scene.activeCamera = entity;
 
   auto *actionPtr = new TestAction;
   actionPtr->saveSceneOnExecute();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -309,7 +309,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -320,13 +320,13 @@ TEST_F(ActionExecutorTest,
 TEST_F(
     ActionExecutorTest,
     ExecuteDoesNotAddActionToUndoStackIfActionReturnsAddToHistoryAndModeIsSimulation) {
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
 
   auto *actionPtr = new TestAction;
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
 
@@ -343,13 +343,13 @@ TEST_F(ActionExecutorTest, UndoDoesNothingIfModeIsSimulation) {
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(executor.getUndoStack().empty());
   EXPECT_TRUE(executor.getRedoStack().empty());
 
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
   executor.undo();
 
   EXPECT_FALSE(executor.getUndoStack().empty());
@@ -362,7 +362,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(executor.getUndoStack().empty());
@@ -384,7 +384,7 @@ TEST_F(ActionExecutorTest, RedoDoesNothingIfModeIsSimulation) {
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(executor.getUndoStack().empty());
@@ -394,7 +394,7 @@ TEST_F(ActionExecutorTest, RedoDoesNothingIfModeIsSimulation) {
   EXPECT_TRUE(executor.getUndoStack().empty());
   EXPECT_FALSE(executor.getRedoStack().empty());
 
-  state.mode = liquid::editor::WorkspaceMode::Simulation;
+  state.mode = quoll::editor::WorkspaceMode::Simulation;
   executor.redo();
   EXPECT_TRUE(executor.getUndoStack().empty());
   EXPECT_FALSE(executor.getRedoStack().empty());
@@ -406,7 +406,7 @@ TEST_F(ActionExecutorTest,
   actionPtr->addToHistory();
   auto actionData = actionPtr->getData();
 
-  executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+  executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
   executor.process();
   EXPECT_TRUE(actionData->called);
   EXPECT_FALSE(executor.getUndoStack().empty());
@@ -432,7 +432,7 @@ TEST_F(
     actionPtr->addToHistory();
     auto actionData = actionPtr->getData();
 
-    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
     executor.process();
     EXPECT_TRUE(actionData->called);
     EXPECT_FALSE(executor.getUndoStack().empty());
@@ -449,7 +449,7 @@ TEST_F(
     auto *actionPtr = new TestAction;
     auto actionData = actionPtr->getData();
 
-    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
     executor.process();
 
     EXPECT_TRUE(actionData->called);
@@ -466,7 +466,7 @@ TEST_F(
     actionPtr->addToHistory();
     auto actionData = actionPtr->getData();
 
-    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
     executor.process();
     EXPECT_TRUE(actionData->called);
     EXPECT_FALSE(executor.getUndoStack().empty());
@@ -482,7 +482,7 @@ TEST_F(
     actionPtr->addToHistory();
     auto actionData = actionPtr->getData();
 
-    executor.execute(std::unique_ptr<liquid::editor::Action>(actionPtr));
+    executor.execute(std::unique_ptr<quoll::editor::Action>(actionPtr));
     executor.process();
 
     EXPECT_TRUE(actionData->called);

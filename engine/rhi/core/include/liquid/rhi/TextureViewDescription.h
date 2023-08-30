@@ -2,7 +2,7 @@
 
 #include "RenderHandle.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Texture view description
@@ -39,4 +39,4 @@ struct TextureViewDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

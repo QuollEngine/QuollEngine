@@ -4,7 +4,7 @@
 #include "liquidator/actions/ActionExecutor.h"
 #include "liquidator/asset/AssetManager.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Workspace context
@@ -26,4 +26,4 @@ struct WorkspaceContext {
   AssetManager &assetManager;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

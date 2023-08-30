@@ -7,7 +7,7 @@
 
 #include "WorkspaceContext.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Workspace
@@ -65,4 +65,4 @@ private:
   String mLayoutPath;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

@@ -5,7 +5,7 @@
 
 #include "WorkspaceLayoutRenderer.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 bool WorkspaceLayoutRenderer::begin() {
   const float WINDOW_AND_STATUS_BAR_HEIGHT = ImGui::GetFrameHeight() * 2.0f;
@@ -96,4 +96,4 @@ void WorkspaceLayoutRenderer::resize() {
   ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

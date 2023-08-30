@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Project data
@@ -37,4 +37,4 @@ struct Project {
   Uuid startingScene;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

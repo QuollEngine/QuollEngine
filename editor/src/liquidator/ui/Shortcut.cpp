@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 Shortcut::Shortcut(int key, int mods) : mKey(key), mMods(mods) {}
 
@@ -58,4 +58,4 @@ bool Shortcut::operator==(const Shortcut &rhs) const {
   return mKey == rhs.mKey && mMods == rhs.mMods;
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

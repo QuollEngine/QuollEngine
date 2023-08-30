@@ -1,6 +1,6 @@
 #pragma once
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Ring buffer
@@ -85,4 +85,4 @@ private:
   std::vector<TItem> mBuffer;
 };
 
-} // namespace liquid
+} // namespace quoll

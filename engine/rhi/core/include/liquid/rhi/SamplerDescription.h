@@ -3,7 +3,7 @@
 #include "Filter.h"
 #include "WrapMode.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Sampler description
@@ -53,4 +53,4 @@ struct SamplerDescription {
   String debugName;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

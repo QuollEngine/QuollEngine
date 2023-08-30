@@ -3,7 +3,7 @@
 #include "ImguiDebugLayer.h"
 #include "liquid/imgui/Imgui.h"
 
-namespace liquid {
+namespace quoll {
 
 ImguiDebugLayer::ImguiDebugLayer(
     const rhi::PhysicalDeviceInformation &physicalDeviceInfo,
@@ -146,4 +146,4 @@ void ImguiDebugLayer::renderTableRow(StringView header, StringView value) {
   ImGui::Text("%s", String(value).c_str());
 }
 
-} // namespace liquid
+} // namespace quoll

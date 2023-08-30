@@ -4,7 +4,7 @@
 #include "liquid/entity/EntityDatabase.h"
 #include "liquid/asset/AssetRegistry.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Decorates scope with with globals
@@ -49,4 +49,4 @@ public:
   static void createEntityTable(LuaScope &scope, Entity entity);
 };
 
-} // namespace liquid
+} // namespace quoll

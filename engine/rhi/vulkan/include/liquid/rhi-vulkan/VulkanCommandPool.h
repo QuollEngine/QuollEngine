@@ -6,7 +6,7 @@
 #include "VulkanDeviceObject.h"
 #include "VulkanDescriptorPool.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Vulkan command pool
@@ -61,4 +61,4 @@ private:
   uint32_t mQueueFamilyIndex = 0;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

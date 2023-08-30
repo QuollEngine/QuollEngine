@@ -16,7 +16,7 @@
 #include "VulkanError.h"
 #include "VulkanLog.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 static const String LIQUID_ENGINE_NAME = "Liquid";
 
@@ -128,4 +128,4 @@ VulkanPhysicalDevice VulkanRenderBackend::pickPhysicalDevice() {
   return physicalDevice;
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

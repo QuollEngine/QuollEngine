@@ -7,7 +7,7 @@
 #include "liquidator/core/CameraLookAt.h"
 #include "liquidator/state/WorkspaceState.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 /**
  * @brief Editor camera
@@ -194,4 +194,4 @@ private:
   EventSystem &mEventSystem;
 };
 
-} // namespace liquid::editor
+} // namespace quoll::editor

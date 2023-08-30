@@ -5,7 +5,7 @@
 
 #include "liquid/audio/DefaultAudioBackend.h"
 
-namespace liquid {
+namespace quoll {
 
 /**
  * @brief Audio system
@@ -64,7 +64,7 @@ public:
         entityDatabase.set<AudioStatus>(entity, {sound});
       }
 
-      entityDatabase.destroyComponents<liquid::AudioStart>();
+      entityDatabase.destroyComponents<quoll::AudioStart>();
     }
 
     {
@@ -123,4 +123,4 @@ private:
   EntityDatabaseObserver<AudioStatus> mAudioStatusRemoveObserver;
 };
 
-} // namespace liquid
+} // namespace quoll

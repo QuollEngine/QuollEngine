@@ -5,7 +5,7 @@
 #include "Theme.h"
 #include "StyleStack.h"
 
-namespace liquid::editor {
+namespace quoll::editor {
 
 void StatusBar::render(EditorCamera &editorCamera) {
   const ImGuiViewport *viewport = ImGui::GetMainViewport();
@@ -51,4 +51,4 @@ void StatusBar::render(EditorCamera &editorCamera) {
   }
 }
 
-} // namespace liquid::editor
+} // namespace quoll::editor

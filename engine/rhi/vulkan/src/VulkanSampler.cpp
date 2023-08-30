@@ -6,7 +6,7 @@
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 VulkanSampler::VulkanSampler(const SamplerDescription &description,
                              VulkanDeviceObject &device)
@@ -38,4 +38,4 @@ VulkanSampler::~VulkanSampler() {
   vkDestroySampler(mDevice, mSampler, nullptr);
 }
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi

@@ -12,25 +12,24 @@ TEST_F(AnimatorLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   call(entity, "animator_trigger_invalid");
 
-  EXPECT_FALSE(entityDatabase.has<liquid::AnimatorEvent>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorEvent>(entity));
 }
 
 TEST_F(AnimatorLuaScriptingInterfaceTest, TriggerAddsAnimatorEventComponent) {
   auto entity = entityDatabase.create();
   call(entity, "animator_trigger");
 
-  EXPECT_TRUE(entityDatabase.has<liquid::AnimatorEvent>(entity));
-  EXPECT_EQ(entityDatabase.get<liquid::AnimatorEvent>(entity).eventName,
-            "Move");
+  EXPECT_TRUE(entityDatabase.has<quoll::AnimatorEvent>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::AnimatorEvent>(entity).eventName, "Move");
 }
 
 TEST_F(AnimatorLuaScriptingInterfaceTest,
        DeleteDoesNothingIfProvidedArgumentIsInvalid) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Animator>(entity, {});
+  entityDatabase.set<quoll::Animator>(entity, {});
 
   call(entity, "animator_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<liquid::Animator>(entity));
+  EXPECT_TRUE(entityDatabase.has<quoll::Animator>(entity));
 }
 
 TEST_F(AnimatorLuaScriptingInterfaceTest,
@@ -38,14 +37,14 @@ TEST_F(AnimatorLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
 
   call(entity, "animator_delete");
-  EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
 }
 
 TEST_F(AnimatorLuaScriptingInterfaceTest,
        DeleteRemovesAnimatorSourceComponentFromEntity) {
   auto entity = entityDatabase.create();
-  entityDatabase.set<liquid::Animator>(entity, {});
+  entityDatabase.set<quoll::Animator>(entity, {});
 
   call(entity, "animator_delete");
-  EXPECT_FALSE(entityDatabase.has<liquid::Animator>(entity));
+  EXPECT_FALSE(entityDatabase.has<quoll::Animator>(entity));
 }

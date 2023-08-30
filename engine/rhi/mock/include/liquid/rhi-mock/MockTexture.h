@@ -3,7 +3,7 @@
 #include "liquid/rhi/TextureDescription.h"
 #include "liquid/rhi/TextureViewDescription.h"
 
-namespace liquid::rhi {
+namespace quoll::rhi {
 
 /**
  * @brief Mock texture
@@ -48,4 +48,4 @@ private:
   TextureViewDescription mViewDescription;
 };
 
-} // namespace liquid::rhi
+} // namespace quoll::rhi
