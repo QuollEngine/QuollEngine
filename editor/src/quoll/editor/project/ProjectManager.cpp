@@ -6,6 +6,10 @@
 
 namespace quoll::editor {
 
+static const String GitIgnoreContents = R"""(cache/
+settings/
+)""";
+
 bool ProjectManager::createProjectInPath() {
   auto projectPath = platform::FileDialog::getFilePathFromCreateDialog(
       {{"Quoll project", {"quoll"}}});
@@ -25,6 +29,14 @@ bool ProjectManager::createProjectInPath() {
   std::filesystem::create_directory(mProject.assetsCachePath);
   std::filesystem::create_directory(mProject.settingsPath);
 
+  std::filesystem::create_directory(mProject.assetsPath / "scenes");
+  std::filesystem::create_directory(mProject.assetsPath / "prefabs");
+  std::filesystem::create_directory(mProject.assetsPath / "textures");
+  std::filesystem::create_directory(mProject.assetsPath / "fonts");
+  std::filesystem::create_directory(mProject.assetsPath / "audio");
+  std::filesystem::create_directory(mProject.assetsPath / "scripts");
+  std::filesystem::create_directory(mProject.assetsPath / "animators");
+
   {
     YAML::Node sceneObj;
     sceneObj["name"] = "MainScene";
@@ -36,7 +48,7 @@ bool ProjectManager::createProjectInPath() {
     sceneObj["zones"][0] = mainZone;
     sceneObj["entities"] = YAML::Node(YAML::NodeType::Sequence);
 
-    std::ofstream stream(mProject.assetsPath / "main.scene");
+    std::ofstream stream(mProject.assetsPath / "scenes" / "main.scene");
     stream << sceneObj;
     stream.close();
   }
@@ -57,6 +69,12 @@ bool ProjectManager::createProjectInPath() {
 
     std::ofstream stream(projectFile, std::ios::out);
     stream << projectObj;
+    stream.close();
+  }
+
+  {
+    std::ofstream stream(projectPath / ".gitignore", std::ios::out);
+    stream << GitIgnoreContents;
     stream.close();
   }
 
