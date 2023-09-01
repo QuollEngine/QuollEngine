@@ -399,6 +399,14 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
     setDefaultProps(entry, assetManager.getAssetRegistry());
     mEntries.push_back(entry);
   }
+
+  std::sort(mEntries.begin(), mEntries.end(), [](const auto &a, const auto &b) {
+    if (a.isDirectory != b.isDirectory) {
+      return a.isDirectory > b.isDirectory;
+    }
+
+    return a.name < b.name;
+  });
 }
 
 void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
