@@ -221,17 +221,22 @@ void AssetBrowser::render(WorkspaceContext &context) {
           ImGui::EndTooltip();
         }
 
-        if (entry.assetType == AssetType::Prefab) {
-          if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-            ImGui::OpenPopup(id.c_str(), ImGuiPopupFlags_MouseButtonRight);
+        if (!entry.isDirectory &&
+            ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+          ImGui::OpenPopup(id.c_str(), ImGuiPopupFlags_MouseButtonRight);
+        }
+
+        if (ImGui::BeginPopup(id.c_str())) {
+          if (entry.assetType == AssetType::Prefab &&
+              ImGui::MenuItem("View contents")) {
+            setCurrentFetch(static_cast<PrefabAssetHandle>(entry.asset));
           }
 
-          if (ImGui::BeginPopup(id.c_str())) {
-            if (ImGui::MenuItem("View contents")) {
-              setCurrentFetch(static_cast<PrefabAssetHandle>(entry.asset));
-            }
-            ImGui::EndPopup();
+          if (ImGui::MenuItem("Copy UUID")) {
+            ImGui::SetClipboardText(entry.uuid.toString().c_str());
           }
+
+          ImGui::EndPopup();
         }
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - ItemHeight);
@@ -394,6 +399,7 @@ void AssetBrowser::fetchAssetDirectory(Path path, AssetManager &assetManager) {
     entry.path = filePath;
     entry.name = filePath.filename().string();
     entry.assetType = pair.first;
+    entry.uuid = engineAssetUuid;
     entry.asset = pair.second;
 
     setDefaultProps(entry, assetManager.getAssetRegistry());
@@ -435,6 +441,7 @@ void AssetBrowser::fetchPrefab(PrefabAssetHandle handle,
     entry.path = asset.path;
     entry.name = removePrefabName(asset.name);
     entry.assetType = asset.type;
+    entry.uuid = asset.uuid;
     entry.asset = static_cast<uint32_t>(handle);
     setDefaultProps(entry, assetManager.getAssetRegistry());
 
