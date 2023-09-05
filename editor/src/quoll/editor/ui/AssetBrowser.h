@@ -19,6 +19,7 @@ namespace quoll::editor {
 class AssetBrowser {
   struct Entry {
     Path path;
+    Uuid uuid;
     String name;
     String truncatedName;
     float textWidth = 0.0f;
