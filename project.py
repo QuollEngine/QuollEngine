@@ -8,7 +8,7 @@ import sys
 import time
 import stat
 from glob import glob
-from urllib.request import urlretrieve
+from urllib.request import urlretrieve, Request, urlopen
 from urllib.parse import urlparse
 import shutil
 import subprocess
@@ -20,6 +20,7 @@ workingDir = os.getcwd()
 
 projectFile = os.path.join(workingDir, 'project.json')
 vendorRootDir = os.path.join(workingDir, 'vendor')
+archivesDir = os.path.join(vendorRootDir, 'archives')
 tempDir = os.path.join(vendorRootDir, 'tmp')
 projectHashFile = os.path.join(vendorRootDir, 'project_hash')
 
@@ -31,6 +32,8 @@ parser = argparse.ArgumentParser(description='Quoll project dependency manager')
 
 parser.add_argument('-m', '--mode', nargs='+', help='Mode', choices=['debug', 'release'], default=['debug', 'release'])
 parser.add_argument('-p', '--packages', help='Specify which package to install', nargs='+', default=None)
+parser.add_argument('--build', action=argparse.BooleanOptionalAction, default=True)
+parser.add_argument('--fetch', action=argparse.BooleanOptionalAction, default=True)
 
 args = parser.parse_args()
 
@@ -60,18 +63,20 @@ def clean_make_dir(path):
 #
 # Opens project JSON file, loads it, and parses it
 #
-def open_project(path):
+def open_project(path, projectNames):
     with open(path, 'r') as projectFile:
         fileContents = projectFile.read()
 
     project = json.loads(fileContents);
 
+    if projectNames is not None:
+        project['dependencies'] = [x for x in project['dependencies'] if x['name'] in projectNames]
+
     for x in project['dependencies']:
-        parsedURL = urlparse(x['url'])
-        filename = f'{x["name"]}-{os.path.basename(parsedURL.path)}'
-        x['archivePath'] = os.path.join(tempDir, filename)
+        x['archivePath'] = os.path.join(archivesDir, x['name'])
         x['archiveContentPath'] = os.path.join(tempDir, x['name'])
         x['sourceDir'] = os.path.normpath(os.path.join(x['archiveContentPath'], x['buildSource']))
+        profiler_data[x['name']] = { 'fetch': 0, 'build': 0 }
 
     return project
 
@@ -105,15 +110,60 @@ def project_hash_matches(projectFilePath, hashFilePath):
         return False
 
 #
-# Fetches and extracts dependencies of a project
+# Check if dependency alread fetched
+#
+def is_dependency_fetched(dependency):
+    pathEtag = Path(dependency['archivePath']).with_suffix('.etag')
+    if not os.path.exists(dependency['archivePath']) or not os.path.exists(pathEtag):
+       return False
+
+    remoteEtag = None
+    request = Request(dependency['url'], method='HEAD')
+    try:
+        with urlopen(request) as response:
+            remoteEtag = response.headers['ETag'].strip('"')
+    except:
+        pass
+
+    localEtag = None
+    try:
+        with open(pathEtag) as f:
+            localEtag = f.read()
+    except:
+        pass
+
+    if remoteEtag == None:
+        return False
+    
+    return remoteEtag == localEtag
+
+#
+# Fetches dependencies of a project
 #
 def fetch_dependencies(dependencies):
     for x in dependencies:
-        profiler_data[x['name']] = { 'fetch': 0, 'build': 0 }
+        print(f'Fetching {x["name"]}...', end=' ')
+        if not is_dependency_fetched(x):
+            start = time.time()
+            (_, headers) = urlretrieve(x['url'], x['archivePath'])
+            profiler_data[x['name']]['fetch'] = time.time() - start
 
-        print(f'Fetching {x["name"]}...')
-        start = time.time()
-        urlretrieve(x['url'], x['archivePath'])
+            print('Downloaded')
+
+            etag = headers['ETag'].strip('"')
+            pathEtag = Path(x['archivePath']).with_suffix('.etag')
+
+            with open(pathEtag, 'w') as f:
+                f.write(etag)
+        else:
+            print('Local used')
+
+
+#
+# Extracts dependencies of a project
+#
+def extract_dependencies(dependencies):
+    for x in dependencies:
         with zipfile.ZipFile(x['archivePath'], 'r') as zipRef:
             for info in zipRef.infolist():
                 extracted_path = zipRef.extract(info, x['archiveContentPath'])
@@ -122,10 +172,8 @@ def fetch_dependencies(dependencies):
                 if info.create_system == 3:
                     unix_attributes = info.external_attr >> 16
                     if unix_attributes:
-                        os.chmod(extracted_path, unix_attributes)
-
-        os.unlink(x['archivePath'])
-        profiler_data[x['name']]['fetch'] = time.time() - start
+                        os.chmod(extracted_path, unix_attributes)        
+     
 
 #
 # Command to copy files to directory
@@ -192,12 +240,7 @@ def cmd_mkdir(cmdLine, x):
 # Parse placeholders
 #
 def parse_placeholders(cmdLine, params):
-    placeholders = {
-        'VENDOR_ROOT_DIR': params['VENDOR_ROOT_DIR'],
-        'VENDOR_INSTALL_DIR': params['VENDOR_INSTALL_DIR'],
-        'VENDOR_PROJECTS_DIR': params['VENDOR_PROJECTS_DIR'],
-        'SOURCE_DIR': params['SOURCE_DIR'],
-        'BUILD_MODE': params['BUILD_MODE'],
+    placeholders = params | {
         'PLATFORM': platform.system().lower(),
         'OS_NAME': os.name,
         'ARCHITECTURE': platform.machine()
@@ -222,103 +265,115 @@ def run_process(cmdLine, cwd):
 def is_dict(obj, key):
     return key in obj and type(obj[key]) is dict
 
-project = open_project(projectFile)
+project = open_project(projectFile, projectNames)
 dependencies = project['dependencies']
 cleanAll = True
 
 if projectNames is not None:
-    dependencies = [x for x in dependencies if x['name'] in projectNames]
     cleanAll = False
-elif project_hash_matches(projectFile, projectHashFile):
-    print('Dependencies are up to date!')
-    sys.exit(0)
 
-if cleanAll:
-    clean_make_dir(vendorRootDir)
+if not os.path.exists(vendorRootDir):
+    os.mkdir(path=vendorRootDir)
+
+if not os.path.exists(archivesDir):
+    os.mkdir(path=archivesDir)
+
+if args.fetch:
+    print('Fetching dependencies')
+    fetch_dependencies(dependencies)
+
+if args.build:
+    print('Building dependencies')
+
+    clean_make_dir(tempDir)
+    extract_dependencies(dependencies)
 
     for buildMode in buildModes:
-        vendorModeDir = os.path.join(vendorRootDir, buildMode)
-        clean_make_dir(vendorModeDir)
-        clean_make_dir(os.path.join(vendorModeDir, 'include'))
-        clean_make_dir(os.path.join(vendorModeDir, 'lib'))
-        clean_make_dir(os.path.join(vendorModeDir, 'bin'))
+        if project_hash_matches(projectFile, projectHashFile + '.' + buildMode.lower()):
+            print('Dependencies already built for', buildMode)
+            continue
 
-    clean_make_dir(os.path.join(vendorRootDir, 'projects'))
+        if cleanAll:
+            clean_make_dir(os.path.join(vendorRootDir, 'projects'))
+            vendorModeDir = os.path.join(vendorRootDir, buildMode)
+            clean_make_dir(vendorModeDir)
+            clean_make_dir(os.path.join(vendorModeDir, 'include'))
+            clean_make_dir(os.path.join(vendorModeDir, 'lib'))
+            clean_make_dir(os.path.join(vendorModeDir, 'bin'))
 
-clean_make_dir(os.path.join(tempDir))
-fetch_dependencies(dependencies)
+        for x in dependencies: 
+            print(f'Building {x["name"]}...')
+            start = time.time()
+            params = {
+                'VENDOR_ROOT_DIR': vendorRootDir,
+                'VENDOR_INSTALL_DIR': os.path.join(vendorRootDir, buildMode),
+                'VENDOR_PROJECTS_DIR': os.path.join(vendorRootDir, 'projects'),
+                'SOURCE_DIR': x['sourceDir'],
+                'BUILD_MODE': buildMode
+            }
+            
+            for cmdLine in x['cmd']:
+                if isinstance(cmdLine, str):
+                    parsedCmdLine = parse_placeholders(cmdLine, params)
+                    printedCmdLine = parse_placeholders(cmdLine, {
+                        'VENDOR_ROOT_DIR': 'vendor/',
+                        'VENDOR_INSTALL_DIR': f'vendor/{buildMode}',
+                        'VENDOR_PROJECTS_DIR': 'vendor/projects',
+                        'SOURCE_DIR': f'{x["name"]}/',
+                        'BUILD_MODE': buildMode
+                    })
+                    print('\t', printedCmdLine)
 
-for buildMode in buildModes:
-    for x in dependencies: 
-        print(f'Building {x["name"]}...')
-        start = time.time()
-        params = {
-            'VENDOR_ROOT_DIR': vendorRootDir,
-            'VENDOR_INSTALL_DIR': os.path.join(vendorRootDir, buildMode),
-            'VENDOR_PROJECTS_DIR': os.path.join(vendorRootDir, 'projects'),
-            'SOURCE_DIR': x['sourceDir'],
-            'BUILD_MODE': buildMode
-        }
-        
-        for cmdLine in x['cmd']:
-            if isinstance(cmdLine, str):
-                parsedCmdLine = parse_placeholders(cmdLine, params)
-                printedCmdLine = parse_placeholders(cmdLine, {
-                    'VENDOR_ROOT_DIR': 'vendor/',
-                    'VENDOR_INSTALL_DIR': f'vendor/{buildMode}',
-                    'VENDOR_PROJECTS_DIR': 'vendor/projects',
-                    'SOURCE_DIR': f'{x["name"]}/',
-                    'BUILD_MODE': buildMode
-                })
-                print('\t', printedCmdLine)
+                    if parsedCmdLine.startswith('{COPY}'):
+                        cmd_copy(parsedCmdLine, x)
+                    elif parsedCmdLine.startswith('{MKDIR}'):
+                        cmd_mkdir(parsedCmdLine, x)
+                    elif parsedCmdLine.startswith('{RM}'):
+                        cmd_rm(parsedCmdLine, x)
+                    else:
+                        run_process(parsedCmdLine, x['sourceDir'])
+                elif cmdLine['type'] == 'cmake':
+                    params = params | { 'CMAKE_IS_DEBUG': 'ON' if buildMode == 'Debug' else 'OFF' }
+                    print('CMake build')
 
-                if parsedCmdLine.startswith('{COPY}'):
-                    cmd_copy(parsedCmdLine, x)
-                elif parsedCmdLine.startswith('{MKDIR}'):
-                    cmd_mkdir(parsedCmdLine, x)
-                elif parsedCmdLine.startswith('{RM}'):
-                    cmd_rm(parsedCmdLine, x)
-                else:
-                    run_process(parsedCmdLine, x['sourceDir'])
-            elif cmdLine['type'] == 'cmake':
-                print('CMake build')
-                options = {
-                    'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_INSTALL_DIR}}', params)
-                }
-                source = '.'
-                if 'source' in cmdLine:
-                    source = cmdLine['source']
+                    options = {
+                        'CMAKE_INSTALL_PREFIX': parse_placeholders('{{VENDOR_INSTALL_DIR}}', params)
+                    }
+                    source = '.'
+                    if 'source' in cmdLine:
+                        source = cmdLine['source']
 
-                if is_dict(cmdLine, 'options'):
-                    if is_dict(cmdLine['options'], 'common'):
-                        for k, v in cmdLine['options']['common'].items():
-                            options[k] = parse_placeholders(v, params)
+                    if is_dict(cmdLine, 'options'):
+                        if is_dict(cmdLine['options'], 'common'):
+                            for k, v in cmdLine['options']['common'].items():
+                                options[k] = parse_placeholders(v, params)
 
-                    if sys.platform == 'linux' and is_dict(cmdLine['options'], 'linux'):
-                        for k, v in cmdLine['options']['linux'].items():
-                            options[k] = parse_placeholders(v, params)
-                    elif sys.platform == 'win32' and is_dict(cmdLine['options'], 'windows'):
-                        for k, v in cmdLine['options']['windows'].items():
-                            options[k] = parse_placeholders(v, params)
-                    elif sys.platform == 'darwin' and is_dict(cmdLine['options'], 'macos'):
-                        for k, v in cmdLine['options']['macos'].items():
-                            options[k] = parse_placeholders(v, params)
+                        if sys.platform == 'linux' and is_dict(cmdLine['options'], 'linux'):
+                            for k, v in cmdLine['options']['linux'].items():
+                                options[k] = parse_placeholders(v, params)
+                        elif sys.platform == 'win32' and is_dict(cmdLine['options'], 'windows'):
+                            for k, v in cmdLine['options']['windows'].items():
+                                options[k] = parse_placeholders(v, params)
+                        elif sys.platform == 'darwin' and is_dict(cmdLine['options'], 'macos'):
+                            for k, v in cmdLine['options']['macos'].items():
+                                options[k] = parse_placeholders(v, params)
 
-                print("The following options are being used")
-                for k, v in options.items():
-                    print(f'{k:<40} {v}')
+                    print("The following options are being used")
+                    for k, v in options.items():
+                        print(f'{k:<40} {v}')
 
-                cmdOptions = ''
-                for k, v in options.items():
-                    cmdOptions = f'{cmdOptions} -D{k}={v}'
+                    cmdOptions = ''
+                    for k, v in options.items():
+                        cmdOptions = f'{cmdOptions} -D{k}={v}'
 
-                run_process(f'cmake {source} -B build {cmdOptions}', x['sourceDir'])
-                run_process(f'cmake --build build --config {buildMode}', x['sourceDir'])
-                run_process(f'cmake --install build --config {buildMode}', x['sourceDir'])
+                    run_process(f'cmake {source} -B build {cmdOptions}', x['sourceDir'])
+                    run_process(f'cmake --build build --config {buildMode}', x['sourceDir'])
+                    run_process(f'cmake --install build --config {buildMode}', x['sourceDir'])
 
-        profiler_data[x['name']][f'build-{buildMode}'] = time.time() - start
+            profiler_data[x['name']][f'build-{buildMode}'] = time.time() - start
+        create_project_hash_file(projectFile, projectHashFile + '.' + buildMode.lower())
 
-shutil.rmtree(tempDir, onerror=on_rm_error)
+    shutil.rmtree(tempDir, onerror=on_rm_error)
 
 print(f'{"Name":<14} {"Fetch":<8} {"Build (Debug)":<12} {"Build (Release)":<12}')
 for k, v in profiler_data.items():
@@ -328,4 +383,3 @@ for k, v in profiler_data.items():
 
     print(f'{k:<14} {fixed_fetch:<8} {fixed_build_debug:<12} {fixed_build_release:<12}')
 
-create_project_hash_file(projectFile, projectHashFile)

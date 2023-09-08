@@ -11,9 +11,9 @@ project "vendor-libmsdfgen"
         "../../vendor/projects/msdfgen/save-png.cpp"
     }
 
-    includedirs {
-        "../../vendor/Debug/include/msdfgen/core",
-        "../../vendor/Debug/include/msdfgen/ext"
+    vendorIncludes {
+        "msdfgen/core",
+        "msdfgen/ext"
     }
 
     filter { "toolset:msc-*" }

@@ -1,3 +1,30 @@
+function mapDirNames(arr, basePath)
+    local t = {}
+    for k, v in pairs(arr) do
+        t[k] = basePath .. "/" .. v
+    end
+
+    return t
+end
+
+-- Set vendor includes based on configuration
+function vendorIncludes(...) 
+    filter { "configurations:Debug or configurations:Test" }
+        externalincludedirs(mapDirNames(..., "../../vendor/Debug/include"))
+    
+    filter { "configurations:Release or configurations:Profile" }
+        externalincludedirs(mapDirNames(..., "../../vendor/Release/include"))
+end
+
+-- Set vendor includes based on configuration
+function vendorIncludesExternal(...) 
+    filter { "configurations:Debug or configurations:Test" }
+        externalincludedirs(mapDirNames(..., "../vendor/Debug/include"))
+    
+    filter { "configurations:Release or configurations:Profile" }
+        externalincludedirs(mapDirNames(..., "../vendor/Release/include"))
+end
+
 -- Setup all library directories
 function setupLibraryDirectories()
     -- This define is needed for libktx to reference
@@ -6,20 +33,17 @@ function setupLibraryDirectories()
         "KHRONOS_STATIC"
     }
 
+    vendorIncludesExternal {
+        "",
+        "freetype2",
+        "msdfgen"
+    }
+
+
     filter { "configurations:Debug or configurations:Test" }
-        externalincludedirs {
-            "../vendor/Debug/include",
-            "../vendor/Debug/include/freetype2",
-            "../vendor/Debug/include/msdfgen"
-        }
         libdirs { "../vendor/Debug/lib", "../vendor/Debug/lib/debug" }
     
     filter { "configurations:Release or configurations:Profile" }
-        externalincludedirs {
-            "../vendor/Release/include",
-            "../vendor/Release/include/freetype2",
-            "../vendor/Release/include/msdfgen"
-        }
         libdirs { "../vendor/Release/lib", "../vendor/Release/lib/release" }
 
     filter { "system:windows" }

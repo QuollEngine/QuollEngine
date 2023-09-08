@@ -46,7 +46,6 @@ project "QuollEngine"
     filter{}
 
     loadSourceFiles{}
-    linkDependenciesWith{}
 
 project "QuollEngineTest"
     basedir "../workspace/engine-test"
