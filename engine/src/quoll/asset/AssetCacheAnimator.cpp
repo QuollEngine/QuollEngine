@@ -83,8 +83,7 @@ AssetCache::createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset) {
   return Result<Path>::Ok(assetPath);
 }
 
-Result<AnimatorAssetHandle>
-AssetCache::loadAnimator(const Uuid &uuid, AnimatorAssetHandle handle) {
+Result<AnimatorAssetHandle> AssetCache::loadAnimator(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -244,6 +243,8 @@ AssetCache::loadAnimator(const Uuid &uuid, AnimatorAssetHandle handle) {
           "Initial state is set to first item because it was invalid");
     }
   }
+
+  auto handle = mRegistry.getAnimators().findHandleByUuid(uuid);
 
   if (handle == AnimatorAssetHandle::Null) {
     auto newHandle = mRegistry.getAnimators().addAsset(asset);

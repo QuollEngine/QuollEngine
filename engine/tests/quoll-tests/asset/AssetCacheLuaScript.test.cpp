@@ -128,7 +128,8 @@ TEST_F(AssetCacheLuaScriptTest, LoadsLuaScriptIntoRegistry) {
   EXPECT_EQ(scriptContents, contents);
 }
 
-TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
+TEST_F(AssetCacheLuaScriptTest,
+       UpdatesExistingLuaScriptIfAssetWithUuidAlreadyExists) {
   auto uuid1 = quoll::Uuid::generate();
   auto filePath = cache.createLuaScriptFromSource(
       FixturesPath / "component-script.lua", uuid1);
@@ -139,36 +140,35 @@ TEST_F(AssetCacheLuaScriptTest, UpdatesExistingLuaScriptIfHandleExists) {
   EXPECT_TRUE(result.hasData());
 
   auto handle = result.getData();
+  {
+    auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+    EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
+    EXPECT_EQ(script.name, "component-script.lua");
+  }
 
-  auto uuid2 = quoll::Uuid::generate();
-  auto filePath2 = cache.createLuaScriptFromSource(
-      FixturesPath / "component-script-2.lua", uuid2);
-  cache.loadLuaScript(uuid2, handle);
+  cache.createLuaScriptFromSource(FixturesPath / "component-script-2.lua",
+                                  uuid1);
 
-  const auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
-  EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
+  {
+    auto result = cache.loadLuaScript(uuid1);
+    EXPECT_EQ(result.getData(), handle);
+    const auto &script = cache.getRegistry().getLuaScripts().getAsset(handle);
+    EXPECT_EQ(script.type, quoll::AssetType::LuaScript);
+    EXPECT_EQ(script.name, "component-script-2.lua");
 
-  std::ifstream file(script.path);
+    std::ifstream file(script.path);
 
-  EXPECT_TRUE(file.good());
+    EXPECT_TRUE(file.good());
 
-  std::ostringstream ss;
-  ss << file.rdbuf();
-  const std::string &s = ss.str();
-  std::vector<char> bytes(s.begin(), s.end());
-  file.close();
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    const std::string &s = ss.str();
+    std::vector<char> bytes(s.begin(), s.end());
+    file.close();
 
-  quoll::String contents(bytes.begin(), bytes.end());
-  quoll::String scriptContents(script.data.bytes.begin(),
-                               script.data.bytes.end());
-  EXPECT_EQ(scriptContents, contents);
-}
-
-TEST_F(AssetCacheLuaScriptDeathTest, UpdateFailsIfProvidedHandleDoesNotExist) {
-  auto uuid = quoll::Uuid::generate();
-  auto filePath = cache.createLuaScriptFromSource(
-      FixturesPath / "script-asset-valid.lua", uuid);
-
-  EXPECT_DEATH(cache.loadLuaScript(uuid, quoll::LuaScriptAssetHandle{25}),
-               ".*");
+    quoll::String contents(bytes.begin(), bytes.end());
+    quoll::String scriptContents(script.data.bytes.begin(),
+                                 script.data.bytes.end());
+    EXPECT_EQ(scriptContents, contents);
+  }
 }

@@ -542,8 +542,10 @@ TEST_F(AssetCacheAnimatorTest,
             quoll::AnimationAssetHandle{0});
 }
 
-TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
+TEST_F(AssetCacheAnimatorTest,
+       UpdatesExistingAnimatorIfAssetWithUuidAlreadyExists) {
   quoll::AssetData<quoll::AnimatorAsset> animData{};
+  animData.name = "old-name";
   animData.uuid = quoll::Uuid::generate();
   animData.data.states.push_back({});
   auto animatorPath = cache.createAnimatorFromAsset(animData);
@@ -555,24 +557,21 @@ TEST_F(AssetCacheAnimatorTest, UpdatesExistingAnimatorIfHandleExists) {
 
   auto handle = result.getData();
 
-  auto animatorPath2 = cache.createAnimatorFromAsset(animData).getData();
+  {
+    auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+    EXPECT_EQ(animator.type, quoll::AssetType::Animator);
+    EXPECT_EQ(animator.name, "old-name");
+  }
 
-  // Load script to update the handle
-  auto res2 = cache.loadAnimator(animData.uuid, handle);
-  EXPECT_EQ(res2.getData(), handle);
+  animData.name = "new-name";
+  cache.createAnimatorFromAsset(animData);
 
-  auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
-  EXPECT_EQ(animator.path, animatorPath2);
-  EXPECT_EQ(animator.type, quoll::AssetType::Animator);
-}
+  {
+    auto result = cache.loadAnimator(animData.uuid);
+    EXPECT_EQ(result.getData(), handle);
 
-TEST_F(AssetCacheAnimatorDeathTest,
-       UpdateAnimatorFailsIfProvidedHandleDoesNotExist) {
-  quoll::AssetData<quoll::AnimatorAsset> animData{};
-  animData.uuid = quoll::Uuid::generate();
-  animData.data.states.push_back({});
-  auto animatorPath = cache.createAnimatorFromAsset(animData);
-
-  EXPECT_DEATH(
-      cache.loadAnimator(animData.uuid, quoll::AnimatorAssetHandle{25}), ".*");
+    auto &animator = cache.getRegistry().getAnimators().getAsset(handle);
+    EXPECT_EQ(animator.type, quoll::AssetType::Animator);
+    EXPECT_EQ(animator.name, "new-name");
+  }
 }

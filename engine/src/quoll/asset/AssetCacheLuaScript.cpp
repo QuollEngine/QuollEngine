@@ -106,8 +106,7 @@ quoll::AssetCache::createLuaScriptFromSource(const Path &sourcePath,
   return Result<Path>::Ok(assetPath);
 }
 
-Result<LuaScriptAssetHandle>
-AssetCache::loadLuaScript(const Uuid &uuid, LuaScriptAssetHandle handle) {
+Result<LuaScriptAssetHandle> AssetCache::loadLuaScript(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
   std::ifstream stream(filePath);
@@ -153,6 +152,8 @@ AssetCache::loadLuaScript(const Uuid &uuid, LuaScriptAssetHandle handle) {
   }
 
   interpreter.destroyScope(scope);
+
+  auto handle = mRegistry.getLuaScripts().findHandleByUuid(uuid);
 
   if (handle == LuaScriptAssetHandle::Null) {
     auto newHandle = mRegistry.getLuaScripts().addAsset(asset);
