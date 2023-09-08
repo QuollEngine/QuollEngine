@@ -50,7 +50,7 @@ Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
       continue;
     }
 
-    auto res = loadAsset(entry.path(), false);
+    auto res = loadAsset(entry.path());
 
     if (res.hasError()) {
       warnings.push_back(res.getError());
@@ -63,10 +63,6 @@ Result<bool> AssetCache::preloadAssets(RenderStorage &renderStorage) {
   mRegistry.syncWithDevice(renderStorage);
 
   return Result<bool>::Ok(true, warnings);
-}
-
-Result<bool> AssetCache::loadAsset(const Path &path) {
-  return loadAsset(path, true);
 }
 
 AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
@@ -86,20 +82,8 @@ AssetMeta AssetCache::getAssetMeta(const Uuid &uuid) const {
   return meta;
 }
 
-Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
+Result<bool> AssetCache::loadAsset(const Path &path) {
   auto uuid = Uuid(path.stem().string());
-
-  uint32_t handle = 0;
-  if (updateExisting) {
-    const auto &asset = mRegistry.getAssetByUuid(uuid);
-    handle = asset.second;
-
-    if (asset.first != AssetType::None && asset.first != AssetType::LuaScript &&
-        asset.first != AssetType::Animator) {
-      return Result<bool>::Error(
-          "Can only reload Lua scripts and animators on watch");
-    }
-  }
 
   // Handle files that are not in quoll format
   auto meta = getAssetMeta(uuid);
@@ -114,7 +98,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::LuaScript) {
-    auto res = loadLuaScript(uuid, static_cast<LuaScriptAssetHandle>(handle));
+    auto res = loadLuaScript(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }
@@ -123,7 +107,7 @@ Result<bool> AssetCache::loadAsset(const Path &path, bool updateExisting) {
   }
 
   if (meta.type == AssetType::Animator) {
-    auto res = loadAnimator(uuid, static_cast<AnimatorAssetHandle>(handle));
+    auto res = loadAnimator(uuid);
     if (res.hasError()) {
       return Result<bool>::Error(res.getError());
     }

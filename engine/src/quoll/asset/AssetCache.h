@@ -173,12 +173,9 @@ public:
    * @brief Load animator
    *
    * @param uuid Animator uuid
-   * @param handle Existing asset handle
    * @return Animator asset handle
    */
-  Result<AnimatorAssetHandle>
-  loadAnimator(const Uuid &uuid,
-               AnimatorAssetHandle handle = AnimatorAssetHandle::Null);
+  Result<AnimatorAssetHandle> loadAnimator(const Uuid &uuid);
 
   /**
    * @brief Copy audio from source
@@ -250,12 +247,9 @@ public:
    * @brief Load Lua script
    *
    * @param uuid Lua script uuid
-   * @param handle Lua script handle
    * @return Lua script handle
    */
-  Result<LuaScriptAssetHandle>
-  loadLuaScript(const Uuid &uuid,
-                LuaScriptAssetHandle handle = LuaScriptAssetHandle::Null);
+  Result<LuaScriptAssetHandle> loadLuaScript(const Uuid &uuid);
 
   /**
    * @brief Create scene from source
@@ -295,17 +289,6 @@ public:
    * @return Preload result
    */
   Result<bool> preloadAssets(RenderStorage &renderStorage);
-
-  /**
-   * @brief Load single asset
-   *
-   * Automatically identifies the asset type
-   * and loads it to registry
-   *
-   * @param path Path to asset
-   * @return Load result
-   */
-  Result<bool> loadAsset(const Path &path);
 
   /**
    * @brief Get meta from uuid
@@ -374,10 +357,9 @@ private:
    * and loads it to registry
    *
    * @param path Path to asset
-   * @param updateExisting Update if asset already exists
    * @return Load result
    */
-  Result<bool> loadAsset(const Path &path, bool updateExisting);
+  Result<bool> loadAsset(const Path &path);
 
 private:
   /**
