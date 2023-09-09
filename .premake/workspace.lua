@@ -34,6 +34,7 @@ workspace "QuollEngine"
     filter {"configurations:Release or configurations:Profile"}
         defines { "QUOLL_RELEASE" }
         optimize "On"
+        symbols "Off"
 
     filter {"configurations:Profile"}
         defines { "QUOLL_PROFILER" }

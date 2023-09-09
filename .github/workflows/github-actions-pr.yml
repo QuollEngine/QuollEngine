@@ -1,8 +1,6 @@
 name: Pull Request Checks
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -19,9 +17,29 @@ jobs:
       - name: Verify Clang Format
         run: ./scripts/clang-format-all.sh 14 verify
 
+  fetch-dependencies:
+    name: Fetch dependencies
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v3
+        id: cache-vendor
+        with:
+          path: ./vendor/archives
+          key: fetch-dependencies
+      - name: Fetch dependencies
+        run: |
+          python3 project.py --no-build
+      - name: Store dependencies as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependencies
+          path: ./vendor/archives
+
   static-analysis:
     name: Static Analysis
     runs-on: ubuntu-22.04
+    needs: fetch-dependencies
     steps:
       - name: Install dependencies
         run: |
@@ -36,12 +54,20 @@ jobs:
       - uses: actions/cache@v3
         id: cache-vendor
         with:
-          path: ./vendor
-          key: ${{ runner.os }}-static-analysis-${{ hashFiles('./project.json') }}
+          path: |
+            ./vendor
+            !./vendor/archives
+          key: ${{ runner.os }}-${{ runner.name }}-${{ hashFiles('./project.json') }}
+
+      - name: Download fetched dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
+          path: vendor/archives
 
       - name: Install dependencies and setup project
         run: |
-          python3 project.py
+          python3 project.py --no-fetch
 
       - name: Static Analysis
         run: |
@@ -66,6 +92,7 @@ jobs:
   build-and-test-linux:
     name: Build and test (Linux)
     runs-on: ubuntu-22.04
+    needs: fetch-dependencies
     steps:
       - name: Install dependencies
         run: |
@@ -87,12 +114,20 @@ jobs:
       - uses: actions/cache@v3
         id: cache-vendor
         with:
-          path: ./vendor
-          key: ${{ runner.os }}-build-and-test-${{ hashFiles('./project.json') }}
+          path: |
+            ./vendor
+            !./vendor/archives
+          key: ${{ runner.os }}-${{ runner.name }}-${{ hashFiles('./project.json') }}
+
+      - name: Download fetched dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
+          path: vendor/archives
 
       - name: Install dependencies and setup project
         run: |
-          python3 project.py
+          python3 project.py --no-fetch
           premake5 gmake
 
       - name: Build
@@ -125,6 +160,7 @@ jobs:
   build-and-test-windows:
     name: Build and test (Windows)
     runs-on: windows-latest
+    needs: fetch-dependencies
     env:
       VULKAN_VERSION: 1.3.250.1
     steps:
@@ -144,18 +180,27 @@ jobs:
           .\VulkanSDK.exe --root $VulkanSDK --accept-licenses --default-answer --confirm-command install
 
           echo "VULKAN_SDK=$VulkanSDK" >> $env:GITHUB_ENV
+          echo "$VulkanSDK/Bin" >> $env:GITHUB_PATH
 
       - uses: actions/checkout@v2
 
       - uses: actions/cache@v3
         id: cache-vendor
         with:
-          path: ./vendor
-          key: ${{ runner.os }}-build-and-test-${{ hashFiles('./project.json') }}
+          path: |
+            ./vendor
+            !./vendor/archives
+          key: ${{ runner.os }}-${{ runner.name }}-${{ hashFiles('./project.json') }}
+
+      - name: Download fetched dependencies
+        uses: actions/download-artifact@v3
+        with:
+          name: dependencies
+          path: vendor/archives
 
       - name: Install dependencies and setup project
         run: |
-          python3 project.py
+          python3 project.py --no-fetch
           ../premake/premake5.exe vs2022
 
       - name: Build

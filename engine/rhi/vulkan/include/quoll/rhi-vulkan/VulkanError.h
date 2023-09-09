@@ -1,5 +1,7 @@
 #pragma once
 
+#include "quoll/core/Engine.h"
+
 namespace quoll::rhi {
 
 /**
@@ -24,7 +26,8 @@ inline void checkForVulkanError(VkResult resultCode, const String &errorMessage,
   QuollAssert(resultCode == VK_SUCCESS,
               createVulkanErrorMessage(resultCode, errorMessage, debugName));
   if (resultCode != VK_SUCCESS) {
-    std::cout << createVulkanErrorMessage(resultCode, errorMessage, debugName);
+    Engine::getLogger().fatal()
+        << createVulkanErrorMessage(resultCode, errorMessage, debugName);
     std::terminate();
   }
 }

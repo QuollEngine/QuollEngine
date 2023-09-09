@@ -6,9 +6,8 @@ project "vendor-libmsdf-atlas-gen"
         "../../vendor/projects/msdf-atlas-gen/*.cpp"
     }
 
-    includedirs {
-        "../../vendor/Debug/include/msdf-atlas-gen",
-        "../../vendor/Debug/include/msdfgen"
+    vendorIncludes {
+        "msdf-atlas-gen"
     }
 
     filter { "toolset:msc-*" }

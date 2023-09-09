@@ -26,7 +26,7 @@ public:
    *
    * Default severity is warning in release mode
    */
-  static constexpr LogSeverity DefaultSeverity = LogSeverity::Warning;
+  static constexpr LogSeverity DefaultSeverity = LogSeverity::Info;
 #endif
 
 public:

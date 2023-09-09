@@ -20,8 +20,8 @@
     },
     {
       "name": "crypto++",
-      "url": "https://github.com/abdes/cryptopp-cmake/archive/refs/tags/CRYPTOPP_8_7_0.zip",
-      "buildSource": "cryptopp-cmake-CRYPTOPP_8_7_0",
+      "url": "https://github.com/abdes/cryptopp-cmake/archive/refs/tags/CRYPTOPP_8_8_0.zip",
+      "buildSource": "cryptopp-cmake-CRYPTOPP_8_8_0",
       "cmd": [
         {
           "type": "cmake",
@@ -62,8 +62,8 @@
     },
     {
       "name": "libktx",
-      "url": "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.0.0.zip",
-      "buildSource": "KTX-Software-4.0.0",
+      "url": "https://github.com/QuollEngine/quoll-libktx-private/archive/refs/heads/4.0.0.zip",
+      "buildSource": "quoll-libktx-private-4.0.0",
       "cmd": [
         {
           "type": "cmake",
@@ -139,7 +139,7 @@
             "common": {
               "CMAKE_BUILD_TYPE": "{{BUILD_MODE}}",
               "PHYSX_ROOT_DIR": "{{SOURCE_DIR}}/physx",
-              "NV_USE_DEBUG_WINCRT": "ON",
+              "NV_USE_DEBUG_WINCRT": "{{CMAKE_IS_DEBUG}}",
               "NV_USE_STATIC_WINCRT": "OFF",
               "PXSHARED_INSTALL_PREFIX": "{{VENDOR_INSTALL_DIR}}",
               "CMAKEMODULES_PATH": "{{SOURCE_DIR}}/externals/cmakemodules",
