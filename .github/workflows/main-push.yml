@@ -45,6 +45,7 @@ jobs:
 
       - name: Build
         run: |
+          premake5 vs2022
           msbuild .\workspace\QuollEngine.sln /p:configuration=Release /t:QuollEditor
 
       - name: Prepare archive
