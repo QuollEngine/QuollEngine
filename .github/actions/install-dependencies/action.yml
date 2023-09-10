@@ -1,0 +1,62 @@
+name: Install vcpkg dependencies
+description: Install dependencies and cache the results
+inputs:
+  triplet:
+    description: Triplet
+    required: true
+  mono:
+    description: Mono prefix for linux
+    required: true
+  token:
+    description: Github token
+    required: true
+  cacheAction:
+    description: Whether to read, write, or readwrite to cache
+    required: false
+    default: "read"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install dependencies
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        # For GLFW
+        sudo apt-get update
+        sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev
+
+    - uses: ./.github/actions/setup-vcpkg
+    - name: Check vcpkg version
+      shell: bash
+      run: ./vcpkg/vcpkg version
+    - name: Setup Nuget as binary source provider
+      shell: bash
+      env:
+        NUGET_SOURCE: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+      run: |
+        alias nuget="${{ inputs.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`"
+        nuget sources remove -name nuget.org
+
+        nuget sources add \
+          -name "GitHub" \
+          -source "$NUGET_SOURCE" \
+          -username "${{ github.repository_owner }}" \
+          -password "${{ inputs.token }}" \
+          -storepasswordincleartext 
+
+        nuget setapikey "${{ inputs.token }}" -source "$NUGET_SOURCE"
+
+    - name: Install packages
+      shell: bash
+      env:
+        VCPKG_BINARY_SOURCES: "clear;nuget,GitHub,${{ inputs.cacheAction }}"
+        VCPKG_USE_NUGET_CACHE: true
+        DEBUG_INSTALL: false
+      run: |
+        if [ $DEBUG_INSTALL == 'true' ]; then
+          ./vcpkg/vcpkg Install --triplet ${{ inputs.triplet }} --debug 
+        else
+          ./vcpkg/vcpkg Install --triplet ${{ inputs.triplet }} 
+        fi

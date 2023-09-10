@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanHeaders.h"
-#include <vma/vk_mem_alloc.h>
+#include <vk_mem_alloc.h>
 
 #include "VulkanCommandPool.h"
 #include "VulkanSwapchain.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanHeaders.h"
-#include <vma/vk_mem_alloc.h>
+#include <vk_mem_alloc.h>
 #include "VulkanDeviceObject.h"
 #include "VulkanUploadContext.h"
 #include "VulkanResourceAllocator.h"

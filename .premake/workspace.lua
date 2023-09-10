@@ -22,7 +22,8 @@ workspace "QuollEngine"
     
     configurations { "Debug", "Release", "Profile", "Test" }
 
-    
+    staticruntime "On"
+
     filter { "toolset:msc-*" }
        defines { "_SILENCE_CXX20_CISO646_REMOVED_WARNING" }
        flags { "FatalCompileWarnings" }

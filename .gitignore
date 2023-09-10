@@ -6,6 +6,7 @@
 
 # Vendor
 vendor/
+vcpkg_installed/
 
 # Visual Studio
 .vs

@@ -1,5 +1,5 @@
 project "vendor-libmsdf-atlas-gen"
-    basedir "../../vendor/projects/lua"
+    basedir "../../vendor/projects/msdf-atlas-gen"
     kind "StaticLib"
 
     files {

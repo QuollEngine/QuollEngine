@@ -289,7 +289,7 @@ if args.build:
     extract_dependencies(dependencies)
 
     for buildMode in buildModes:
-        if project_hash_matches(projectFile, projectHashFile + '.' + buildMode.lower()):
+        if cleanAll and project_hash_matches(projectFile, projectHashFile + '.' + buildMode.lower()):
             print('Dependencies already built for', buildMode)
             continue
 

@@ -1,0 +1,62 @@
+name: Main push
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-release:
+    name: Build release
+    strategy:
+      matrix:
+        system: [windows]
+        include:
+          - system: windows
+            os: windows-2022
+            triplet: x64-windows-static
+            mono: ""
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    steps:
+      - name: Setup MSBuild
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.1
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Vulkan SDK
+        uses: ./.github/actions/setup-vulkan
+
+      - name: Install premake
+        uses: ./.github/actions/setup-premake
+
+      - name: Install project dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          triplet: ${{ matrix.triplet }}
+          mono: ${{ matrix.mono }}
+          token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
+
+      # Deprecated: Remove after full migration
+      - name: Install other dependencies (deprecated)
+        run: |
+          python3 project.py
+
+      - name: Build
+        run: |
+          msbuild .\workspace\QuollEngine.sln /p:configuration=Release /t:QuollEditor
+
+      - name: Prepare archive
+        run: |
+          Compress-Archive -Path .\workspace\editor\bin\Release\* -DestinationPath QuollEngine.zip
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: QuollEngine.zip
+          prerelease: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          artifactContentType: "application/zip"
+          name: "Experimental"
+          tag: "experimental"

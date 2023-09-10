@@ -1,0 +1,183 @@
+name: Pull request checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-format
+      - name: Verify Clang Format
+        run: ./scripts/clang-format-all.sh 14 verify
+
+  build-dependencies:
+    name: Build dependencies
+    strategy:
+      matrix:
+        system: [linux, windows]
+        include:
+          - system: linux
+            os: ubuntu-22.04
+            triplet: x64-linux
+            mono: "mono"
+          - system: windows
+            os: windows-2022
+            triplet: x64-windows-static
+            mono: ""
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and build dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          triplet: ${{ matrix.triplet }}
+          mono: ${{ matrix.mono }}
+          token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
+          cacheAction: readwrite
+
+  static-analysis:
+    name: Static Analysis
+    needs: build-dependencies
+    strategy:
+      matrix:
+        system: [linux]
+        include:
+          - system: linux
+            os: ubuntu-22.04
+            triplet: x64-linux
+            mono: "mono"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install clang-tidy
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Vulkan sdk
+        uses: ./.github/actions/setup-vulkan
+
+      - name: Install project dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          triplet: ${{ matrix.triplet }}
+          mono: ${{ matrix.mono }}
+          token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
+
+      # Deprecated: Remove after full migration
+      - name: Install other dependencies (deprecated)
+        run: |
+          python3 project.py
+
+      - name: Static Analysis
+        run: |
+          ./scripts/clang-tidy-all.sh 14
+
+  docs-checker:
+    name: Documentation checker
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get clean
+          sudo apt-get update
+          sudo apt-get install doxygen
+
+      - uses: actions/checkout@v4
+
+      - name: Doxygen checks
+        run: |
+          ./scripts/doxygen-validate.sh
+
+  build-and-test:
+    name: Build and test
+    needs: build-dependencies
+    strategy:
+      matrix:
+        system: [linux, windows]
+        include:
+          - system: linux
+            os: ubuntu-22.04
+            triplet: x64-linux
+            mono: "mono"
+          - system: windows
+            os: windows-2022
+            triplet: x64-windows-static
+            mono: ""
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install lcov
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install lcov
+
+      - name: Setup MSBuild
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.1
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Vulkan SDK
+        uses: ./.github/actions/setup-vulkan
+
+      - name: Install premake
+        uses: ./.github/actions/setup-premake
+
+      - name: Install project dependencies
+        uses: ./.github/actions/install-dependencies
+        with:
+          triplet: ${{ matrix.triplet }}
+          mono: ${{ matrix.mono }}
+          token: ${{ secrets.PACKAGES_DEPLOY_TOKEN }}
+
+      # Deprecated: Remove after full migration
+      - name: Install other dependencies (deprecated)
+        run: |
+          python3 project.py
+
+      - name: Build (Makefile)
+        if: runner.os == 'Linux'
+        run: |
+          premake5 gmake
+          make --directory workspace -j$(nproc) config=test
+
+      - name: Build (Visual studio)
+        if: runner.os == 'Windows'
+        run: |
+          premake5 vs2022
+          msbuild .\workspace\QuollEngine.sln /p:configuration=Test
+
+      - name: Test engine
+        run: |
+          cd workspace/engine-test/bin/Test
+          ./QuollEngineTest
+
+      - name: Test editor
+        run: |
+          cd workspace/editor-test/bin/Test
+          ./QuollEditorTest
+
+      - name: Coverage
+        if: runner.os == 'Linux'
+        run: |
+          ./scripts/generate-coverage-report.sh
+
+      - name: Upload to Codecov
+        if: runner.os == 'Linux'
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/report.info
+          flags: engine-unit
+          verbose: true
+          fail_ci_if_error: true

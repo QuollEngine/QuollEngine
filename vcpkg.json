@@ -1,0 +1,94 @@
+{
+  "dependencies": [
+    {
+      "name": "zstd",
+      "default-features": false
+    },
+    {
+      "name": "glm",
+      "default-features": false
+    },
+    {
+      "name": "glfw3",
+      "default-features": false
+    },
+    {
+      "name": "imgui",
+      "default-features": false,
+      "features": ["docking-experimental", "glfw-binding"]
+    },
+    {
+      "name": "imguizmo",
+      "default-features": false
+    },
+    {
+      "name": "freetype",
+      "default-features": false
+    },
+    {
+      "name": "stduuid",
+      "default-features": false
+    },
+    {
+      "name": "cryptopp",
+      "default-features": false
+    },
+    {
+      "name": "lua",
+      "default-features": false
+    },
+    {
+      "name": "gtest",
+      "default-features": false
+    },
+    {
+      "name": "spirv-reflect",
+      "default-features": false
+    },
+    {
+      "name": "volk",
+      "default-features": false
+    },
+    {
+      "name": "tinygltf",
+      "default-features": false
+    },
+    {
+      "name": "stb",
+      "default-features": false
+    },
+    {
+      "name": "miniaudio",
+      "default-features": false
+    },
+    {
+      "name": "meshoptimizer",
+      "default-features": false
+    },
+    {
+      "name": "vulkan-memory-allocator",
+      "default-features": false
+    },
+    {
+      "name": "yaml-cpp",
+      "default-features": false
+    },
+    {
+      "name": "nlohmann-json",
+      "default-features": false
+    },
+    {
+      "name": "mikktspace",
+      "default-features": false
+    },
+    {
+      "name": "physx",
+      "default-features": false
+    },
+    {
+      "name": "ktx",
+      "default-features": false,
+      "features": ["vulkan"]
+    }
+  ]
+}

@@ -5,7 +5,8 @@
 #include "VulkanError.h"
 #include "VulkanMapping.h"
 
-#include "spirv_reflect.h"
+#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
+#include <spirv_reflect.h>
 
 namespace quoll::rhi {
 

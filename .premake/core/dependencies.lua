@@ -1,36 +1,55 @@
+-- Appends debug suffix to
+-- linked libraries automatically
+function linkSuffixed(...)
+    function appendDebug(arr)
+        local t = {}
+        for k, v in pairs(arr) do
+            t[k] = v .. 'd'
+        end
+    
+        return t
+    end
+
+    filter { "configurations:Debug or configurations:Test" }
+        links(appendDebug(...))
+
+    filter { "configurations:Release or configurations:Profile" }
+        links { ... }
+
+    filter{}
+end
+
 -- Link dependencies without Vulkan
 function linkDependenciesWith(...)
     links { ... }
 
     links {
-        "vendor-libimgui",
-        "vendor-libspirv-reflect",
-        "vendor-liblua",
+        "spirv-reflect",
+        "lua",
         "vendor-libmsdf-atlas-gen",
         "vendor-libmsdfgen",
         "glfw3",
         "cryptopp",
         "ktx",
-        "PhysX_static",
-        "PhysXPvdSDK_static",
-        "PhysXExtensions_static",
-        "PhysXCommon_static",
-        "PhysXFoundation_static"
+        "zstd",
+        "PhysX_static_64",
+        "PhysXPvdSDK_static_64",
+        "PhysXExtensions_static_64",
+        "PhysXCommon_static_64",
+        "PhysXFoundation_static_64"
     }
 
-    filter { "system:windows", "configurations:Debug or configurations:Test" }
-        links { "yaml-cppd", "freetyped", "dwmapi" }
-
-    filter { "system:windows", "configurations:Release or configurations:Profile" }
-        links { "yaml-cpp", "freetype", "dwmapi" }
-
-    filter {"system:linux or system:macosx"}
-        links { "yaml-cpp", "freetype" }
-
+    linkSuffixed {
+        "yaml-cpp", "imgui", "freetype"
+    }
+    
     -- These libs must be linked after
     -- all libraries are linked
     filter { "system:linux" }
         links { "Xrandr", "Xi", "X11", "dl" }
+
+    filter { "system:windows" }
+        links { "dwmapi" }
 
     filter{}
 end

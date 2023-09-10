@@ -9,7 +9,9 @@ project "QuollEditor"
 
     loadSourceFiles{}
     linkOptick{}
-    linkDependenciesWith{"QuollEngine", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"QuollEngine", "imguizmo", "meshoptimizer"}
+    linkSuffixed { "mikktspace" }
+
     linkVulkanRHI{}
     linkPlatform()
     
@@ -72,7 +74,9 @@ project "QuollEditorTest"
         "src/main.cpp"
     }
 
-    linkDependenciesWith{"QuollEngine", "QuollRHIMock", "QuollRHICore", "vendor-libimguizmo", "vendor-libmikktspace", "meshoptimizer"}
+    linkDependenciesWith{"QuollEngine", "QuollRHIMock", "QuollRHICore", "imguizmo", "meshoptimizer"}
+    linkSuffixed { "mikktspace" }
+
     linkGoogleTest{}
     linkPlatform()
 

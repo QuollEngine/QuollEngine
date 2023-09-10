@@ -1,7 +1,7 @@
 #include "quoll/core/Base.h"
 #include "Uuid.h"
 
-#include <uuid.h>
+#include <stduuid/uuid.h>
 
 namespace quoll {
 

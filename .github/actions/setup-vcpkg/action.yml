@@ -1,0 +1,19 @@
+name: Setup vcpkg
+description: Set up vcpkg and make it available from path
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: microsoft/vcpkg
+        path: ./vcpkg
+
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+    - if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        ./vcpkg/bootstrap-vcpkg.bat -disableMetrics

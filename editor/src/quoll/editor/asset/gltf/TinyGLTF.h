@@ -5,7 +5,7 @@
 #define TINYGLTF_NO_INCLUDE_JSON
 #define TINYGLTF_USE_CPP14
 
-#include <json/json.hpp>
-#include <stb/stb_image.h>
-#include <stb/stb_image_write.h>
-#include <tinygltf/tiny_gltf.h>
+#include <nlohmann/json.hpp>
+#include <stb_image.h>
+#include <stb_image_write.h>
+#include <tiny_gltf.h>

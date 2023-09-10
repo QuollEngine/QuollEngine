@@ -5,10 +5,12 @@
 #ifndef _DEBUG
 #define _DEBUG
 #endif
+#undef NDEBUG
 #else
 #ifndef NDEBUG
 #define NDEBUG
 #endif
+#undef _DEBUG
 #endif
 
 #include <iostream>
