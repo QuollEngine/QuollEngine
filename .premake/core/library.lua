@@ -8,6 +8,7 @@ function mapDirNames(arr, basePath)
 end
 
 -- Set vendor includes based on configuration
+-- Deprecated: Remove after migrating msdfgen
 function vendorIncludes(...) 
     filter { "configurations:Debug or configurations:Test" }
         externalincludedirs(mapDirNames(..., "../../vendor/Debug/include"))
@@ -17,6 +18,7 @@ function vendorIncludes(...)
 end
 
 -- Set vendor includes based on configuration
+-- Deprecated: Remove after migrating msdfgen
 function vendorIncludesExternal(...) 
     filter { "configurations:Debug or configurations:Test" }
         externalincludedirs(mapDirNames(..., "../vendor/Debug/include"))
@@ -33,18 +35,33 @@ function setupLibraryDirectories()
         "KHRONOS_STATIC"
     }
 
+    filter { "system:windows" }
+        externalincludedirs {
+            "../vcpkg_installed/x64-windows-static/include",
+        }
+    filter { "system:linux" }
+        externalincludedirs {
+            "../vcpkg_installed/x64-linux/include",
+        }
+    filter {}
+
     vendorIncludesExternal {
         "",
-        "freetype2",
         "msdfgen"
     }
 
 
-    filter { "configurations:Debug or configurations:Test" }
-        libdirs { "../vendor/Debug/lib", "../vendor/Debug/lib/debug" }
+    filter { "system:windows", "configurations:Debug or configurations:Test" }
+        libdirs { "../vendor/Debug/lib", "../vcpkg_installed/x64-windows-static/debug/lib" }
     
-    filter { "configurations:Release or configurations:Profile" }
-        libdirs { "../vendor/Release/lib", "../vendor/Release/lib/release" }
+    filter { "system:windows", "configurations:Release or configurations:Profile" }
+        libdirs { "../vendor/Release/lib", "../vcpkg_installed/x64-windows-static/lib" }
+
+    filter { "system:linux", "configurations:Debug or configurations:Test" }
+        libdirs { "../vendor/Debug/lib", "../vcpkg_installed/x64-linux/debug/lib" }
+    
+    filter { "system:linux", "configurations:Release or configurations:Profile" }
+        libdirs { "../vendor/Release/lib", "../vcpkg_installed/x64-linux/lib" }
 
     filter { "system:windows" }
         -- Vulkan SDK for Windows adds environment

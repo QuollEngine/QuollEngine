@@ -4,7 +4,7 @@
 #include "VulkanRenderBackend.h"
 #include "VulkanDeviceObject.h"
 
-#include <vma/vk_mem_alloc.h>
+#include <vk_mem_alloc.h>
 
 namespace quoll::rhi {
 

@@ -1,5 +1,5 @@
 project "vendor-libmsdfgen"
-    basedir "../../vendor/projects/lua"
+    basedir "../../vendor/projects/msdfgen"
     kind "StaticLib"
 
     files {

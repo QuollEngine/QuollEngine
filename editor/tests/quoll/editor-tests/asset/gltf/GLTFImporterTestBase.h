@@ -8,7 +8,7 @@
 #define TINYGLTF_NO_INCLUDE_JSON
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #define TINYGLTF_USE_CPP14
-#include <tinygltf/tiny_gltf.h>
+#include <tiny_gltf.h>
 
 namespace fs = std::filesystem;
 

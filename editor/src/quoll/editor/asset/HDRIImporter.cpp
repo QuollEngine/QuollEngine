@@ -4,7 +4,7 @@
 
 #include "HDRIImporter.h"
 
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 namespace quoll::editor {
 

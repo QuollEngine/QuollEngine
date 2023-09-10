@@ -46,9 +46,9 @@ $VulkanSDK=Join-Path -Path $Env:VULKAN_SDK -ChildPath "Include"
 
 $VendorIncludes=@(
   $VulkanSDK
+  './vcpkg_installed/x64-windows-static/include',
   './vendor/Debug/include'
   './vendor/Debug/include/msdfgen'
-  './vendor/Debug/include/freetype2'
 )
 
 function Create-Header-Args {

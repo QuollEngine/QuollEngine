@@ -1,0 +1,32 @@
+name: Setuo Vulkan
+description: Setup Vulkan
+inputs:
+  version:
+    description: Vulkan version
+    required: false
+    default: 1.3.250.1
+runs:
+  using: composite
+  steps:
+    - name: Install Vulkan SDK
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+        sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
+        sudo apt-get clean
+        sudo apt-get update
+        sudo apt-get install vulkan-sdk
+    - name: Install Vulkan SDK
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        VULKAN_VERSION: "${{ inputs.version }}"
+      run: |
+        $VulkanSDK = "D:\VulkanSDK\${Env:VULKAN_VERSION}"
+        $ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${Env:VULKAN_VERSION}/windows/VulkanSDK-${Env:VULKAN_VERSION}-Installer.exe" -OutFile VulkanSDK.exe
+        .\VulkanSDK.exe --root $VulkanSDK --accept-licenses --default-answer --confirm-command install
+
+        echo "VULKAN_SDK=$VulkanSDK" >> $env:GITHUB_ENV
+        echo "$VulkanSDK/Bin" >> $env:GITHUB_PATH

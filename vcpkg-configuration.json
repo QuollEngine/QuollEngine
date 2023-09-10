@@ -1,0 +1,23 @@
+{
+  "default-registry": null,
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/Microsoft/vcpkg",
+      "baseline": "962e5e39f8a25f42522f51fffc574e05a3efd26b",
+      "packages": ["*"]
+    },
+    {
+      "kind": "git",
+      "repository": "https://github.com/Microsoft/vcpkg",
+      "baseline": "59ea102312180ae2972e0bb47cef2cfce407b407",
+      "packages": ["physx"]
+    },
+    {
+      "kind": "git",
+      "repository": "https://github.com/Microsoft/vcpkg",
+      "baseline": "307ac18b08e4125d3c521a86b7d7b317629be277",
+      "packages": ["glm"]
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 #include "GLTFImporter.h"
 #include "HDRIImporter.h"
 
-#include <stb/stb_image.h>
+#include <stb_image.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/files.h>
 #include <cryptopp/hex.h>
