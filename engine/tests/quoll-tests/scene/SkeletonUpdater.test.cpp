@@ -19,7 +19,7 @@ struct SkeletonUpdaterTest : public ::testing::Test {
     skeleton.numJoints = numJoints;
 
     for (uint32_t i = 0; i < numJoints; ++i) {
-      float value = static_cast<float>(i + 1);
+      float value = static_cast<float>(i) + 1.2f;
       skeleton.jointLocalPositions.push_back(glm::vec3(value));
       skeleton.jointLocalRotations.push_back(
           glm::quat(value, value, value, value));

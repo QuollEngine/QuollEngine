@@ -13,7 +13,16 @@ void SkeletonUpdater::update(EntityDatabase &entityDatabase) {
 void SkeletonUpdater::updateSkeletons(EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("SkeletonUpdater::update");
   for (auto [entity, skeleton] : entityDatabase.view<Skeleton>()) {
-    for (uint32_t i = 0; i < skeleton.numJoints; ++i) {
+
+    {
+      glm::mat4 identity{1.0f};
+      skeleton.jointWorldTransforms.at(0) =
+          glm::translate(identity, skeleton.jointLocalPositions.at(0)) *
+          glm::toMat4(skeleton.jointLocalRotations.at(0)) *
+          glm::scale(identity, skeleton.jointLocalScales.at(0));
+    }
+
+    for (uint32_t i = 1; i < skeleton.numJoints; ++i) {
       glm::mat4 identity{1.0f};
       auto localTransform =
           glm::translate(identity, skeleton.jointLocalPositions.at(i)) *
