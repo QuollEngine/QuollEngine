@@ -3,7 +3,7 @@ def glfw(k):
     return f'GLFW_KEY_{upper_k}'
 
 def print_map(key, glfw_key):
-    print('{"', key, '", ', glfw(glfw_key), '},', sep='')
+    print('{"', f'KEY_{key}', '", ', glfw(glfw_key), '},', sep='')
 
 print('// letters')
 letters = [chr(i).upper() for i in range(ord('a'), ord('z') + 1)]
@@ -18,20 +18,21 @@ for k in digits:
 
 print()
 print('// special')
-special_chars = {
-    "'": 'comma',
-    '-': 'minus',
-    '.': 'period',
-    '/': 'slash',
-    ';': 'semicolon',
-    '=': 'equal',
-    '[': 'left_bracket',
-    '\\\\': 'backslash',
-    ']': 'right_bracket',
-    '`': 'grave_accent'
-}
+special_chars = [
+ 'comma',
+ 'minus',
+ 'period',
+ 'slash',
+ 'semicolon',
+ 'equal',
+ 'left_bracket',
+ 'backslash',
+ 'right_bracket',
+ 'grave_accent'
+]
+
 for k in special_chars:
-    print_map(k, special_chars[k])
+    print_map(k, k)
 
 commands = [
     'SPACE',

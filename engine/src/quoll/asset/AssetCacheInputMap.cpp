@@ -5,6 +5,100 @@
 
 namespace quoll {
 
+static Result<bool> checkBoolean(YAML::Node node) {
+  if (node.IsNull()) {
+    return Result<bool>::Ok(true);
+  }
+
+  auto value = node.as<String>("");
+
+  if (!input::exists(value)) {
+    return Result<bool>::Error("Binding item value is invalid: " + value);
+  }
+
+  if (input::getKeyDataType(value) != InputDataType::Boolean) {
+    return Result<bool>::Error("Binding item value must be boolean: " + value);
+  }
+
+  return Result<bool>::Ok(true);
+}
+
+static Result<bool> checkAxis1d(YAML::Node node) {
+  if (node.IsNull()) {
+    return Result<bool>::Ok(true);
+  }
+
+  if (node.IsScalar()) {
+    auto value = node.as<String>("");
+
+    if (!input::exists(value)) {
+      return Result<bool>::Error("Binding item value is invalid: " + value);
+    }
+
+    if (input::getKeyDataType(value) != InputDataType::Axis1d) {
+      return Result<bool>::Error("Binding item value must be axis-1d: " +
+                                 value);
+    }
+
+    return Result<bool>::Ok(true);
+  }
+
+  if (node.IsSequence() && node.size() == 2) {
+    for (auto segment : node) {
+      auto res = checkBoolean(segment);
+      if (res.hasError()) {
+        return res;
+      }
+    }
+
+    return Result<bool>::Ok(true);
+  }
+
+  return Result<bool>::Error("Invalid binding item value");
+}
+
+static Result<bool> checkAxis2d(YAML::Node node) {
+  if (node.IsNull()) {
+    return Result<bool>::Ok(true);
+  }
+
+  if (node.IsScalar()) {
+    auto value = node.as<String>("");
+
+    if (!input::exists(value)) {
+      return Result<bool>::Error("Binding item value is invalid: " + value);
+    }
+
+    if (input::getKeyDataType(value) != InputDataType::Axis2d) {
+      return Result<bool>::Error("Binding item value must be axis-2d: " +
+                                 value);
+    }
+
+    return Result<bool>::Ok(true);
+  }
+
+  if (node.IsMap()) {
+    if (!node["x"] || !node["y"]) {
+      return Result<bool>::Error(
+          "Both `x` and `y` values must be provided for expanded axis-2d");
+    }
+
+    auto resX = checkAxis1d(node["x"]);
+    if (resX.hasError()) {
+      return resX;
+    }
+
+    auto resY = checkAxis1d(node["y"]);
+    if (resY.hasError()) {
+      return resY;
+    }
+
+    return Result<bool>::Ok(true);
+  }
+
+  return Result<bool>::Error("Invalid binding item value");
+}
+
 Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
   auto filePath = getPathFromUuid(uuid);
 
@@ -108,23 +202,10 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
     }
 
     if (commandType == "axis-2d") {
-      if (value.size() != 4) {
-        return Result<InputMapAssetHandle>::Error(
-            "Binding item value cannot be used with axis 2d command");
-      }
+      auto res = checkAxis2d(value);
 
-      for (auto param : value) {
-        auto p = param.as<String>("");
-
-        if (!param.IsNull() && p == "") {
-          return Result<InputMapAssetHandle>::Error(
-              "Binding item value cannot be used with axis 2d command");
-        }
-
-        if (!param.IsNull() && !input::exists(p)) {
-          return Result<InputMapAssetHandle>::Error(
-              "Binding item value is invalid: " + p);
-        }
+      if (res.hasError()) {
+        return Result<InputMapAssetHandle>::Error(res.getError());
       }
     }
   }
@@ -154,9 +235,9 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
 
     auto type = node["type"].as<String>("");
     if (type == "axis-2d") {
-      command.type = InputMapCommandType::Axis2d;
+      command.type = InputDataType::Axis2d;
     } else if (type == "boolean") {
-      command.type = InputMapCommandType::Boolean;
+      command.type = InputDataType::Boolean;
     }
 
     asset.data.commands.push_back(command);
@@ -167,12 +248,36 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
     binding.command = node["command"].as<size_t>(0);
     binding.scheme = node["scheme"].as<size_t>(0);
 
-    if (node["binding"].IsSequence()) {
-      for (auto b : node["binding"]) {
-        binding.binding.push_back({input::get(b.as<String>(""))});
+    auto &command = asset.data.commands.at(binding.command);
+
+    if (node["binding"].IsNull()) {
+      binding.value = -1;
+    }
+
+    if (node["binding"].IsScalar()) {
+      binding.value = input::get(node["binding"].as<String>(""));
+    } else if (node["binding"]["x"] && node["binding"]["y"]) {
+      InputMapAxis2dValue value2d{};
+      if (node["binding"]["x"].IsScalar()) {
+        value2d.x = input::get(node["binding"]["x"].as<String>(""));
+      } else if (node["binding"]["x"].IsSequence()) {
+        value2d.x =
+            std::array{input::get(node["binding"]["x"][0].as<String>("")),
+                       input::get(node["binding"]["x"][1].as<String>(""))};
       }
-    } else {
-      binding.binding.push_back({input::get(node["binding"].as<String>(""))});
+
+      if (node["binding"]["y"].IsScalar()) {
+        value2d.y = input::get(node["binding"]["y"].as<String>(""));
+      } else if (node["binding"]["y"].IsSequence()) {
+        value2d.y =
+            std::array{input::get(node["binding"]["y"][0].as<String>("")),
+                       input::get(node["binding"]["y"][1].as<String>(""))};
+      }
+
+      binding.value = value2d;
+    }
+
+    if (command.type == InputDataType::Boolean) {
     }
 
     asset.data.bindings.push_back(binding);
