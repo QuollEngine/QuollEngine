@@ -1,11 +1,8 @@
 #pragma once
 
-namespace quoll {
+#include "quoll/input/InputDataType.h"
 
-/**
- * @brief Input map command types
- */
-enum InputMapCommandType { Boolean, Axis2d };
+namespace quoll {
 
 /**
  * @brief Input map scheme
@@ -15,16 +12,6 @@ struct InputMapScheme {
    * Scheme name
    */
   String name;
-};
-
-/**
- * @brief Input map keyboard binding
- */
-struct InputMapKeyboard {
-  /**
-   * Keyboard key
-   */
-  int key;
 };
 
 /**
@@ -39,7 +26,28 @@ struct InputMapCommand {
   /**
    * Command type
    */
-  InputMapCommandType type;
+  InputDataType type;
+};
+
+using InputMapValue = int;
+
+using InputMapAxisSegment = std::array<InputMapValue, 2>;
+
+using InputMapAxis1dValue = std::variant<InputMapValue, InputMapAxisSegment>;
+
+/**
+ * @brief 2d axis value
+ */
+struct InputMapAxis2dValue {
+  /**
+   * 1d axis value for x
+   */
+  InputMapAxis1dValue x;
+
+  /**
+   * 1d axis value for y
+   */
+  InputMapAxis1dValue y;
 };
 
 /**
@@ -57,9 +65,9 @@ struct InputMapBinding {
   size_t command = 0;
 
   /**
-   * Binding values
+   * Binding value
    */
-  std::vector<InputMapKeyboard> binding;
+  std::variant<InputMapValue, InputMapAxis2dValue> value;
 };
 
 /**
