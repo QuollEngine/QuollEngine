@@ -17,6 +17,7 @@ enum class EditorIcon {
   Skeleton,
   Animation,
   Animator,
+  InputMap,
   Audio,
   Prefab,
   Script,

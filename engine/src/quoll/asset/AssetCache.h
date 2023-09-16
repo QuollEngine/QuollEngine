@@ -170,6 +170,24 @@ public:
   Result<Path> createAnimatorFromAsset(const AssetData<AnimatorAsset> &asset);
 
   /**
+   * @brief Load input map
+   *
+   * @param uuid Input map uuid
+   * @return Input map asset handle
+   */
+  Result<InputMapAssetHandle> loadInputMap(const Uuid &uuid);
+
+  /**
+   * @brief Create input map from source
+   *
+   * @param sourcePath Source path
+   * @param uuid Existing uuid
+   * @return Path to new input map asset
+   */
+  Result<Path> createInputMapFromSource(const Path &sourcePath,
+                                        const Uuid &uuid);
+
+  /**
    * @brief Load animator
    *
    * @param uuid Animator uuid

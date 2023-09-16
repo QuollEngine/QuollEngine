@@ -15,8 +15,6 @@ class AssetCacheAnimatorTest : public AssetCacheTestBase {
 public:
 };
 
-using AssetCacheAnimatorDeathTest = AssetCacheAnimatorTest;
-
 TEST_F(AssetCacheAnimatorTest, CreatesAnimatorFromSource) {
   auto uuid = quoll::Uuid::generate();
   auto filePath =
