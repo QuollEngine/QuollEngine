@@ -7,6 +7,7 @@ layout(location = 0) in vec3 inPosition;
 Buffer(64) CollidableParams {
   mat4 worldTransform;
   uvec4 type;
+  vec4 center;
   vec4 params;
 };
 
@@ -42,6 +43,8 @@ void main() {
              GetCollidableParams().params.x);
     finalPosition *= scale;
   }
+
+  finalPosition += GetCollidableParams().center.xyz;
 
   gl_Position = getCamera().viewProj * GetCollidableParams().worldTransform *
                 vec4(finalPosition, 1.0);

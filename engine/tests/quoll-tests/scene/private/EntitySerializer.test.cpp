@@ -777,6 +777,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
   quoll::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = quoll::PhysicsGeometryType::Box;
   geometryDesc.params = boxGeometry;
+  geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
   entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
 
@@ -784,6 +785,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
 
   EXPECT_TRUE(node["collidable"]);
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "box");
+  EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
+            geometryDesc.center);
   EXPECT_EQ(node["collidable"]["halfExtents"].as<glm::vec3>(glm::vec3(0.0f)),
             boxGeometry.halfExtents);
 }
@@ -796,6 +799,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
   quoll::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = quoll::PhysicsGeometryType::Sphere;
   geometryDesc.params = sphereParams;
+  geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
   entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
 
@@ -803,6 +807,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
 
   EXPECT_TRUE(node["collidable"]);
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "sphere");
+  EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
+            geometryDesc.center);
   EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), sphereParams.radius);
 }
 
@@ -814,6 +820,7 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
   quoll::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = quoll::PhysicsGeometryType::Capsule;
   geometryDesc.params = capsuleParams;
+  geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
   entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
 
@@ -821,6 +828,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
 
   EXPECT_TRUE(node["collidable"]);
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "capsule");
+  EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
+            geometryDesc.center);
   EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), capsuleParams.radius);
   EXPECT_EQ(node["collidable"]["halfHeight"].as<float>(0.0f),
             capsuleParams.halfHeight);
@@ -831,12 +840,15 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
 
   quoll::PhysicsGeometryDesc geometryDesc{};
   geometryDesc.type = quoll::PhysicsGeometryType::Plane;
+  geometryDesc.center = glm::vec3{2.5f, 3.5f, 4.5f};
 
   entityDatabase.set<quoll::Collidable>(entity, {geometryDesc});
 
   auto node = entitySerializer.createComponentsNode(entity);
 
   EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
+            geometryDesc.center);
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "plane");
 }
 

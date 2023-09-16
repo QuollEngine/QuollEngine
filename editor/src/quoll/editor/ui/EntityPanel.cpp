@@ -996,6 +996,16 @@ void EntityPanel::renderCollidable(Scene &scene,
 
     bool sendAction = false;
 
+    auto center = collidable.geometryDesc.center;
+    if (widgets::Input("Center", center, false)) {
+      if (!mCollidableAction) {
+        mCollidableAction =
+            std::make_unique<EntitySetCollidable>(mSelectedEntity, collidable);
+      }
+
+      collidable.geometryDesc.center = center;
+    }
+
     if (collidable.geometryDesc.type == PhysicsGeometryType::Box) {
       auto &box = std::get<PhysicsGeometryBox>(collidable.geometryDesc.params);
       auto halfExtents = box.halfExtents;

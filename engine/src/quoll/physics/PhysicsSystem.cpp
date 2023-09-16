@@ -453,8 +453,10 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
         mImpl->getScene()->addActor(*physx.rigidStatic);
       } else if (physx.rigidStatic) {
         // Update transform of rigid static if exists
+        auto transform = glm::translate(world.worldTransform,
+                                        collidable.geometryDesc.center);
         physx.rigidStatic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
+            PhysxMapping::getPhysxTransform(transform));
       }
     }
   }
@@ -496,8 +498,18 @@ void PhysicsSystem::synchronizeComponents(EntityDatabase &entityDatabase) {
       physx.rigidDynamic->setMassSpaceInertiaTensor(
           {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,
            rigidBody.dynamicDesc.inertia.z});
-      physx.rigidDynamic->setGlobalPose(
-          PhysxMapping::getPhysxTransform(world.worldTransform));
+
+      if (entityDatabase.has<Collidable>(entity)) {
+        auto transform = glm::translate(
+            world.worldTransform,
+            entityDatabase.get<Collidable>(entity).geometryDesc.center);
+
+        physx.rigidDynamic->setGlobalPose(
+            PhysxMapping::getPhysxTransform(transform));
+      } else {
+        physx.rigidDynamic->setGlobalPose(
+            PhysxMapping::getPhysxTransform(world.worldTransform));
+      }
     };
   }
 
@@ -573,6 +585,11 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
         glm::decompose(world.worldTransform, scale, emptyQuat, empty3, empty3,
                        empty4);
 
+        if (entityDatabase.has<Collidable>(entity)) {
+          position -=
+              entityDatabase.get<Collidable>(entity).geometryDesc.center;
+        }
+
         world.worldTransform = glm::translate(glm::mat4{1.0f}, position) *
                                glm::toMat4(rotation) *
                                glm::scale(glm::mat4{1.0f}, scale);
@@ -598,6 +615,10 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
 
+      if (entityDatabase.has<Collidable>(entity)) {
+        position -= entityDatabase.get<Collidable>(entity).geometryDesc.center;
+      }
+
       if (entityDatabase.has<LocalTransform>(entity)) {
         auto &transform = entityDatabase.get<LocalTransform>(entity);
 
@@ -610,7 +631,6 @@ void PhysicsSystem::synchronizeTransforms(EntityDatabase &entityDatabase) {
 
           transform.localPosition =
               glm::vec3(invParentTransform * glm::vec4(position, 1.0));
-
           transform.localRotation =
               glm::toQuat(invParentTransform * glm::toMat4(rotation));
         } else {

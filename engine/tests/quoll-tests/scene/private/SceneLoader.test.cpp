@@ -1915,6 +1915,44 @@ TEST_F(SceneLoaderCollidableTest,
 }
 
 TEST_F(SceneLoaderCollidableTest,
+       SetsCenterToZeroIfCollidableCenterFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["center"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    const auto &center =
+        entityDatabase.get<quoll::Collidable>(entity).geometryDesc.center;
+
+    EXPECT_EQ(center, glm::vec3(0.0f));
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest, SetsCenterToProvidedCenterFieldIfValid) {
+  auto input = glm::vec3{2.5f, 3.5f, 4.5f};
+
+  auto [node, entity] = createNode();
+  node["collidable"]["shape"] = "box";
+  node["collidable"]["center"] = input;
+
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+  const auto &center =
+      entityDatabase.get<quoll::Collidable>(entity).geometryDesc.center;
+
+  EXPECT_EQ(center, input);
+}
+
+TEST_F(SceneLoaderCollidableTest,
        TriesToFillCollidableBoxComponentIfFieldPropertiesAreInvalid) {
   std::vector<YAML::Node> invalidNodes{
       YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),

@@ -288,6 +288,8 @@ void EditorRendererFrameData::setCollidable(
     const WorldTransform &worldTransform) {
   mCollidableEntity = entity;
   mCollidableEntityParams.worldTransform = worldTransform.worldTransform;
+  mCollidableEntityParams.center =
+      glm::vec4(collidable.geometryDesc.center, 0.0f);
   mCollidableEntityParams.type.x =
       static_cast<uint32_t>(collidable.geometryDesc.type);
 

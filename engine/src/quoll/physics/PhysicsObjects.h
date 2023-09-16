@@ -105,6 +105,11 @@ struct PhysicsGeometryDesc {
   PhysicsGeometryType type = PhysicsGeometryType::Box;
 
   /**
+   * Geometry center;
+   */
+  glm::vec3 center{0.0f};
+
+  /**
    * Geometry parameters
    */
   PhysicsGeometryParams params = PhysicsGeometryBox{};
