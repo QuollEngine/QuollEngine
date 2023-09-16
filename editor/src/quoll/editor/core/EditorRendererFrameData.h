@@ -45,6 +45,11 @@ public:
     glm::uvec4 type;
 
     /**
+     * Collidable center
+     */
+    glm::vec4 center;
+
+    /**
      * Collidable parameters
      *
      * Parameters differ between different

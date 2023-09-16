@@ -122,6 +122,7 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     auto type = component.geometryDesc.type;
 
     components["collidable"]["shape"] = getPhysicsGeometryTypeString(type);
+    components["collidable"]["center"] = component.geometryDesc.center;
 
     if (type == PhysicsGeometryType::Box) {
       components["collidable"]["halfExtents"] =
