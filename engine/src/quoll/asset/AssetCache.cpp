@@ -115,6 +115,15 @@ Result<bool> AssetCache::loadAsset(const Path &path) {
     return Result<bool>::Ok(true, res.getWarnings());
   }
 
+  if (meta.type == AssetType::InputMap) {
+    auto res = loadInputMap(uuid);
+    if (res.hasError()) {
+      return Result<bool>::Error(res.getError());
+    }
+
+    return Result<bool>::Ok(true, res.getWarnings());
+  }
+
   if (meta.type == AssetType::Audio) {
     auto res = loadAudio(uuid);
     if (res.hasError()) {

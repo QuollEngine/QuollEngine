@@ -26,6 +26,8 @@ enum class EnvironmentAssetHandle : uint32_t { Null = 0 };
 
 enum class SceneAssetHandle : uint32_t { Null = 0 };
 
+enum class InputMapAssetHandle : uint32_t { Null = 0 };
+
 enum class AssetType : uint8_t {
   None,
   Material,
@@ -40,7 +42,8 @@ enum class AssetType : uint8_t {
   Font,
   Environment,
   Animator,
-  Scene
+  Scene,
+  InputMap
 };
 
 inline const String getAssetTypeString(AssetType type) {
@@ -69,6 +72,8 @@ inline const String getAssetTypeString(AssetType type) {
     return "lua script";
   case AssetType::Scene:
     return "scene";
+  case AssetType::InputMap:
+    return "input map";
   default:
     return "none";
   }

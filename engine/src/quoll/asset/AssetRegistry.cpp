@@ -259,6 +259,12 @@ std::pair<AssetType, uint32_t> AssetRegistry::getAssetByUuid(const Uuid &uuid) {
     }
   }
 
+  for (auto &[handle, asset] : mInputMaps.getAssets()) {
+    if (asset.uuid == uuid) {
+      return {AssetType::InputMap, static_cast<uint32_t>(handle)};
+    }
+  }
+
   return {AssetType::None, 0};
 }
 

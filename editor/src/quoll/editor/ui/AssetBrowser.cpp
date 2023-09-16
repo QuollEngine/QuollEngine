@@ -96,6 +96,8 @@ static EditorIcon getIconFromAssetType(AssetType type) {
     return EditorIcon::Script;
   case AssetType::Animator:
     return EditorIcon::Animator;
+  case AssetType::InputMap:
+    return EditorIcon::InputMap;
   case AssetType::Environment:
     return EditorIcon::Environment;
   case AssetType::Scene:

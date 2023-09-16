@@ -17,6 +17,7 @@ enum class AssetRevision : uint32_t {
   Font = 230901,
   Environment = 230901,
   Animator = 230901,
+  InputMap = 230916,
   Scene = 230901
 };
 
@@ -52,6 +53,8 @@ static constexpr AssetRevision getRevisionForAssetType(AssetType type) {
     return AssetRevision::Environment;
   case AssetType::Animator:
     return AssetRevision::Animator;
+  case AssetType::InputMap:
+    return AssetRevision::InputMap;
   case AssetType::Scene:
     return AssetRevision::Scene;
   default:

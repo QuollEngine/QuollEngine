@@ -283,6 +283,10 @@ InitAssetTestSuite(AssetManagerAnimator,
                    quoll::editor::AssetManager::AnimatorExtensions,
                    [](auto str) { return str; });
 
+InitAssetTestSuite(AssetManagerInputMap,
+                   quoll::editor::AssetManager::InputMapExtensions,
+                   [](auto str) { return str; });
+
 InitAssetTestSuite(AssetManagerFont,
                    quoll::editor::AssetManager::FontExtensions,
                    [](auto str) { return str; });

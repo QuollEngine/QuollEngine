@@ -55,9 +55,14 @@ public:
   static const std::vector<String> FontExtensions;
 
   /**
-   * @brief Supported font extensions
+   * @brief Supported animator extensions
    */
   static const std::vector<String> AnimatorExtensions;
+
+  /**
+   * @brief Supported input map extensions
+   */
+  static const std::vector<String> InputMapExtensions;
 
   /**
    * @brief Supported prefab extensions
@@ -326,7 +331,17 @@ private:
    * @return Uuid map
    */
   Result<UUIDMap> loadSourceAnimator(const Path &sourceAssetPath,
-                                     const UUIDMap &uuid);
+                                     const UUIDMap &uuids);
+
+  /**
+   * @brief Load input map asset
+   *
+   * @param sourceAssetPath Source asset path
+   * @param uuids Uuid map
+   * @return Uuid map
+   */
+  Result<UUIDMap> loadSourceInputMap(const Path &sourceAssetPath,
+                                     const UUIDMap &uuids);
 
   /**
    * @brief Load prefab asset

@@ -39,6 +39,7 @@ const std::vector<String> AssetManager::FontExtensions{"ttf", "otf"};
 const std::vector<String> AssetManager::PrefabExtensions{"gltf", "glb"};
 const std::vector<String> AssetManager::EnvironmentExtensions{"hdr"};
 const std::vector<String> AssetManager::AnimatorExtensions{"animator"};
+const std::vector<String> AssetManager::InputMapExtensions{"inputmap"};
 const std::vector<String> AssetManager::SceneExtensions{"scene"};
 
 using co = std::filesystem::copy_options;
@@ -297,6 +298,8 @@ Result<UUIDMap> AssetManager::loadSourceAsset(const Path &sourceAssetPath,
     res = loadSourceEnvironment(sourceAssetPath, uuids);
   } else if (type == AssetType::Animator) {
     res = loadSourceAnimator(sourceAssetPath, uuids);
+  } else if (type == AssetType::InputMap) {
+    res = loadSourceInputMap(sourceAssetPath, uuids);
   } else if (type == AssetType::Scene) {
     res = loadSourceScene(sourceAssetPath, uuids);
   }
@@ -421,6 +424,25 @@ Result<UUIDMap> AssetManager::loadSourceAnimator(const Path &sourceAssetPath,
   if (res.hasData()) {
     auto uuid =
         mAssetCache.getRegistry().getAnimators().getAsset(res.getData()).uuid;
+    return Result<UUIDMap>::Ok({{"root", uuid}});
+  }
+
+  return Result<UUIDMap>::Error(res.getError());
+}
+
+Result<UUIDMap> AssetManager::loadSourceInputMap(const Path &sourceAssetPath,
+                                                 const UUIDMap &uuids) {
+  auto uuid = getOrCreateUuidFromMap(uuids, "root");
+  auto createRes = mAssetCache.createInputMapFromSource(sourceAssetPath, uuid);
+  if (!createRes.hasData()) {
+    return Result<UUIDMap>::Error(createRes.getError());
+  }
+
+  auto res = mAssetCache.loadInputMap(uuid);
+
+  if (res.hasData()) {
+    auto uuid =
+        mAssetCache.getRegistry().getInputMaps().getAsset(res.getData()).uuid;
     return Result<UUIDMap>::Ok({{"root", uuid}});
   }
 
@@ -604,6 +626,9 @@ AssetType AssetManager::getAssetTypeFromExtension(const Path &path) {
   }
   if (isExtension(AnimatorExtensions)) {
     return AssetType::Animator;
+  }
+  if (isExtension(InputMapExtensions)) {
+    return AssetType::InputMap;
   }
   if (isExtension(SceneExtensions)) {
     return AssetType::Scene;

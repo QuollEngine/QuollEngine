@@ -15,6 +15,7 @@
 #include "EnvironmentAsset.h"
 #include "LuaScriptAsset.h"
 #include "SceneAsset.h"
+#include "InputMapAsset.h"
 
 #include "quoll/rhi/RenderDevice.h"
 
@@ -41,6 +42,7 @@ class AssetRegistry {
   using LuaScriptMap = AssetMap<LuaScriptAssetHandle, LuaScriptAsset>;
   using EnvironmentMap = AssetMap<EnvironmentAssetHandle, EnvironmentAsset>;
   using SceneMap = AssetMap<SceneAssetHandle, SceneAsset>;
+  using InputMapMap = AssetMap<InputMapAssetHandle, InputMapAsset>;
 
   struct DefaultObjects {
     MeshAssetHandle cube = MeshAssetHandle::Null;
@@ -173,6 +175,13 @@ public:
   inline SceneMap &getScenes() { return mScenes; }
 
   /**
+   * @brief Get input maps
+   *
+   * @return Input map asset map
+   */
+  inline InputMapMap &getInputMaps() { return mInputMaps; }
+
+  /**
    * @brief Get asset by uuid
    *
    * @param uuid Asset uuid
@@ -194,6 +203,7 @@ private:
   LuaScriptMap mLuaScripts;
   EnvironmentMap mEnvironments;
   SceneMap mScenes;
+  InputMapMap mInputMaps;
 
   DefaultObjects mDefaultObjects;
 };
