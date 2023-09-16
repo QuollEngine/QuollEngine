@@ -209,6 +209,16 @@ private:
                     ActionExecutor &actionExecutor);
 
   /**
+   * @brief Render input
+   *
+   * @param scene Scene
+   * @param assetRegistry Asset registry
+   * @param actionExecutor Action executor
+   */
+  void renderInput(Scene &scene, AssetRegistry &assetRegistry,
+                   ActionExecutor &actionExecutor);
+
+  /**
    * @brief Render environment lighting component
    *
    * @param scene Scene

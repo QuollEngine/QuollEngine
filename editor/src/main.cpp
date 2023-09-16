@@ -12,8 +12,9 @@ int main() {
   quoll::Engine::setPath(std::filesystem::current_path() / "engine");
 
   quoll::EventSystem eventSystem;
+  quoll::InputDeviceManager deviceManager;
   quoll::Window window("Quoll Engine", InitialWidth, InitialHeight,
-                       eventSystem);
+                       deviceManager, eventSystem);
 
   quoll::rhi::VulkanRenderBackend backend(window);
   auto *device = backend.createDefaultDevice();
@@ -28,7 +29,8 @@ int main() {
     quoll::Engine::getLogger().info()
         << "Project selected: " << project.value().name;
 
-    quoll::editor::EditorScreen editor(window, eventSystem, device);
+    quoll::editor::EditorScreen editor(window, deviceManager, eventSystem,
+                                       device);
     editor.start(project.value());
   }
 

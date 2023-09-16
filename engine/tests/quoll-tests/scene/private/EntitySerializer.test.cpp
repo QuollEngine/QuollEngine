@@ -131,7 +131,7 @@ TEST_F(EntitySerializerTest,
   entityDatabase.set<quoll::Sprite>(entity, {NonExistentMeshHandle});
 
   auto node = entitySerializer.createComponentsNode(entity);
-  EXPECT_FALSE(node["mesh"]);
+  EXPECT_FALSE(node["sprite"]);
 }
 
 TEST_F(EntitySerializerTest, CreatesSpriteFieldIfTextureAssetIsInRegistry) {
@@ -993,4 +993,36 @@ TEST_F(EntitySerializerTest,
   EXPECT_TRUE(node["environmentLighting"]);
   EXPECT_EQ(node["environmentLighting"]["source"].as<quoll::String>(""),
             "skybox");
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateInputMapFieldIfNoInputMapRefComponent) {
+  auto entity = entityDatabase.create();
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["inputMap"]);
+}
+
+TEST_F(EntitySerializerTest,
+       DoesNotCreateInputMapFieldIfInputMapAssetDoesNotExist) {
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::InputMapAssetRef>(entity,
+                                              {quoll::InputMapAssetHandle{25}});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_FALSE(node["inputMap"]);
+}
+
+TEST_F(EntitySerializerTest,
+       CreatesInputMapFieldIfComponentExistsAndAssetIsValid) {
+  quoll::AssetData<quoll::InputMapAsset> asset{};
+  asset.uuid = quoll::Uuid("inputMap.asset");
+
+  auto handle = assetRegistry.getInputMaps().addAsset(asset);
+
+  auto entity = entityDatabase.create();
+  entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+  EXPECT_TRUE(node["inputMap"]);
+  EXPECT_EQ(node["inputMap"]["asset"].as<quoll::String>(""), "inputMap.asset");
 }

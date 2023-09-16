@@ -287,6 +287,15 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     components["environmentLighting"]["source"] = "skybox";
   }
 
+  if (mEntityDatabase.has<InputMapAssetRef>(entity)) {
+    const auto &component = mEntityDatabase.get<InputMapAssetRef>(entity);
+
+    if (mAssetRegistry.getInputMaps().hasAsset(component.handle)) {
+      components["inputMap"]["asset"] =
+          mAssetRegistry.getInputMaps().getAsset(component.handle).uuid;
+    }
+  }
+
   return components;
 }
 

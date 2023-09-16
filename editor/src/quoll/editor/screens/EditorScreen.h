@@ -20,11 +20,12 @@ public:
    * @brief Create editor screen
    *
    * @param window Window
+   * @param deviceManager Device manager
    * @param eventSystem Event system
    * @param device Render device
    */
-  EditorScreen(Window &window, EventSystem &eventSystem,
-               rhi::RenderDevice *device);
+  EditorScreen(Window &window, InputDeviceManager &deviceManager,
+               EventSystem &eventSystem, rhi::RenderDevice *device);
 
   /**
    * @brief Start editor screen
@@ -34,6 +35,7 @@ public:
   void start(const Project &project);
 
 private:
+  InputDeviceManager &mDeviceManager;
   Window &mWindow;
   EventSystem &mEventSystem;
   rhi::RenderDevice *mDevice;

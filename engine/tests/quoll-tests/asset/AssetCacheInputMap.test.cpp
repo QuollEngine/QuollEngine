@@ -90,6 +90,16 @@ TEST_F(AssetCacheInputMapTest,
 
   // Control schemes
   {
+    auto res = loadInputMap([](auto &node) {
+      YAML::Node item;
+      item["name"] = "Test scheme";
+
+      node["schemes"].push_back(item);
+    });
+    EXPECT_TRUE(res.hasError());
+  }
+
+  {
     auto res = loadInputMap([](auto &node) { node["schemes"] = "test"; });
     EXPECT_TRUE(res.hasError());
   }
@@ -111,6 +121,17 @@ TEST_F(AssetCacheInputMapTest,
   }
 
   // Commands
+  {
+    auto res = loadInputMap([](auto &node) {
+      YAML::Node item;
+      item["name"] = "Test command";
+      item["type"] = "boolean";
+
+      node["commands"].push_back(item);
+    });
+    EXPECT_TRUE(res.hasError());
+  }
+
   {
     auto res = loadInputMap([](auto &node) { node["commands"] = "test"; });
     EXPECT_TRUE(res.hasError());

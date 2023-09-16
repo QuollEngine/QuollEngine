@@ -155,6 +155,11 @@ void Table::column(const glm::vec3 &value) {
   ImGui::Text("%.2f %.2f %.2f", value.x, value.y, value.z);
 }
 
+void Table::column(const glm::vec2 &value) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f %.2f", value.x, value.y);
+}
+
 void Table::column(const glm::quat &value) {
   ImGui::TableNextColumn();
   ImGui::Text("%.2f %.2f %.2f %.2f", value.x, value.y, value.z, value.w);

@@ -205,7 +205,8 @@ void AssetBrowser::render(WorkspaceContext &context) {
                           entry.assetType == AssetType::Audio ||
                           entry.assetType == AssetType::LuaScript ||
                           entry.assetType == AssetType::Environment ||
-                          entry.assetType == AssetType::Animator;
+                          entry.assetType == AssetType::Animator ||
+                          entry.assetType == AssetType::InputMap;
 
         if (dndAllowed) {
           if (ImGui::BeginDragDropSource()) {

@@ -127,26 +127,46 @@ Result<InputMapAssetHandle> AssetCache::loadInputMap(const Uuid &uuid) {
     return Result<InputMapAssetHandle>::Error("Bindings field must be a list");
   }
 
+  std::set<String> duplicateNames;
   for (auto scheme : root["schemes"]) {
     if (!scheme.IsMap()) {
       return Result<InputMapAssetHandle>::Error("Scheme item must be a map");
     }
 
-    if (scheme["name"].as<String>("") == "") {
+    auto name = scheme["name"].as<String>("");
+    if (name == "") {
       return Result<InputMapAssetHandle>::Error(
           "Scheme item name must be a string and cannot be empty");
     }
+
+    if (duplicateNames.contains(name)) {
+      return Result<InputMapAssetHandle>::Error(
+          "Scheme item with same name is found");
+    }
+
+    duplicateNames.insert(name);
   }
+
+  duplicateNames.clear();
 
   for (auto command : root["commands"]) {
     if (!command.IsMap()) {
       return Result<InputMapAssetHandle>::Error("Command item must be a map");
     }
 
-    if (command["name"].as<String>("") == "") {
+    auto name = command["name"].as<String>("");
+
+    if (name == "") {
       return Result<InputMapAssetHandle>::Error(
           "Command item name must be a string and cannot be empty");
     }
+
+    if (duplicateNames.contains(name)) {
+      return Result<InputMapAssetHandle>::Error(
+          "Scheme item with same name is found");
+    }
+
+    duplicateNames.insert(name);
 
     auto type = command["type"].as<String>("");
     if (type != "boolean" && type != "axis-2d") {
