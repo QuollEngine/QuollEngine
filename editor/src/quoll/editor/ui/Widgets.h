@@ -243,6 +243,13 @@ public:
   void column(const glm::vec3 &value);
 
   /**
+   * @brief Render vector2 column
+   *
+   * @param value Vector2 value
+   */
+  void column(const glm::vec2 &value);
+
+  /**
    * @brief Render quaternion column
    *
    * @param value Quaternion value

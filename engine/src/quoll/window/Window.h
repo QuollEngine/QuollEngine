@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/events/EventSystem.h"
+#include "quoll/input/InputDeviceManager.h"
 
 struct GLFWwindow;
 
@@ -20,10 +21,11 @@ public:
    * @param title Window title
    * @param width Window width
    * @param height Window height
+   * @param deviceManager Device manager
    * @param eventSystem Event system
    */
   Window(StringView title, uint32_t width, uint32_t height,
-         EventSystem &eventSystem);
+         InputDeviceManager &deviceManager, EventSystem &eventSystem);
 
   /**
    * @brief Destroys window
@@ -141,6 +143,16 @@ public:
   void focus();
 
 private:
+  InputStateValue getKeyboardState(int key);
+
+  InputStateValue getMouseState(int key);
+
+  InputStateValue getGamepadState(int jid, int key);
+
+  static void addGamepad(int jid, Window *window);
+
+private:
+  InputDeviceManager &mDeviceManager;
   EventSystem &mEventSystem;
   ::GLFWwindow *mWindowInstance;
 

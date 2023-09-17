@@ -2548,3 +2548,70 @@ TEST_F(SceneLoaderActiveCameraTest, ReturnsEntityIfEnvironmentEntityExists) {
   EXPECT_TRUE(res.hasData());
   EXPECT_EQ(res.getData(), environmentNode.second);
 }
+
+using SceneLoaderInputMapTest = SceneLoaderTest;
+
+TEST_F(SceneLoaderInputMapTest,
+       DoesNotCreateInputMapComponentIfInputMapFieldIsNotDefined) {
+  auto [node, entity] = createNode();
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+}
+
+TEST_F(SceneLoaderInputMapTest,
+       DoesNotCreateInputMapComponentIfInputMapFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["inputMap"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+  }
+}
+
+TEST_F(SceneLoaderInputMapTest,
+       DoesNotCreateInputMapComponentIfInputMapAssetFieldIsInvalid) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Map),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    node["inputMap"]["asset"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+    EXPECT_FALSE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+  }
+}
+
+TEST_F(SceneLoaderInputMapTest,
+       DoesNotCreateInputMapComponentIfNoInputMapHandleInRegistry) {
+  quoll::AssetData<quoll::InputMapAsset> data{};
+  data.uuid = quoll::Uuid("hello");
+  data.type = quoll::AssetType::InputMap;
+  auto handle = assetRegistry.getInputMaps().addAsset(data);
+
+  auto [node, entity] = createNode();
+  node["inputMap"]["asset"] = "bye";
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  EXPECT_FALSE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+}
+
+TEST_F(SceneLoaderInputMapTest, CreatesInputMapComponentIfInputMapAssetExists) {
+  quoll::AssetData<quoll::InputMapAsset> data{};
+  data.type = quoll::AssetType::InputMap;
+  data.uuid = quoll::Uuid("hello");
+  auto handle = assetRegistry.getInputMaps().addAsset(data);
+
+  auto [node, entity] = createNode();
+  node["inputMap"]["asset"] = data.uuid;
+  sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+  ASSERT_TRUE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).handle, handle);
+}

@@ -38,6 +38,7 @@
 #include "quoll/text/Text.h"
 #include "quoll/renderer/MeshRenderer.h"
 #include "quoll/renderer/SkinnedMeshRenderer.h"
+#include "quoll/input/InputMap.h"
 
 namespace quoll {
 

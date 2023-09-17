@@ -5,12 +5,13 @@
 #include <GLFW/glfw3.h>
 
 #include "quoll/platform/tools/WindowUtils.h"
+#include "quoll/input/KeyMappings.h"
 
 namespace quoll {
 
 Window::Window(StringView title, uint32_t width, uint32_t height,
-               EventSystem &eventSystem)
-    : mEventSystem(eventSystem) {
+               InputDeviceManager &deviceManager, EventSystem &eventSystem)
+    : mDeviceManager(deviceManager), mEventSystem(eventSystem) {
   auto initReturnValue = glfwInit();
   if (initReturnValue == GLFW_FALSE) {
     const char *errorMsg = nullptr;
@@ -111,6 +112,37 @@ Window::Window(StringView title, uint32_t width, uint32_t height,
         MouseScrollEvent::Scroll,
         {static_cast<float>(xoffset), static_cast<float>(yoffset)});
   });
+
+  mDeviceManager.addDevice({.type = InputDeviceType::Keyboard,
+                            .name = "Keyboard",
+                            .index = 0,
+                            .stateFn = std::bind(&Window::getKeyboardState,
+                                                 this, std::placeholders::_1)});
+
+  mDeviceManager.addDevice({.type = InputDeviceType::Mouse,
+                            .name = "Mouse",
+                            .index = 0,
+                            .stateFn = std::bind(&Window::getMouseState, this,
+                                                 std::placeholders::_1)});
+
+  for (int jid = 0; jid <= GLFW_JOYSTICK_LAST; ++jid) {
+    if (glfwJoystickPresent(jid)) {
+      addGamepad(jid, this);
+    }
+  }
+
+  // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+  static auto *StaticWindowObj = this;
+  glfwSetJoystickCallback([](int jid, int event) {
+    auto *window = StaticWindowObj;
+
+    if (event == GLFW_CONNECTED) {
+      addGamepad(jid, window);
+    } else if (event == GLFW_DISCONNECTED) {
+      window->mDeviceManager.removeDevice(InputDeviceType::Gamepad,
+                                          static_cast<uint32_t>(jid));
+    }
+  });
 }
 
 Window::~Window() {
@@ -185,6 +217,60 @@ bool Window::isKeyPressed(int key) const {
 }
 
 void Window::focus() { glfwFocusWindow(mWindowInstance); }
+
+InputStateValue Window::getKeyboardState(int key) {
+  int val = glfwGetKey(mWindowInstance, input::getGlfwKeyboardKey(key));
+  return val == GLFW_PRESS;
+}
+
+InputStateValue Window::getMouseState(int key) {
+  if (input::isMouseMove(key)) {
+    double xpos = 0.0, ypos = 0.0;
+    glfwGetCursorPos(mWindowInstance, &xpos, &ypos);
+
+    auto windowSize = getWindowSize();
+
+    return glm::vec2{
+        static_cast<float>(xpos) / static_cast<float>(windowSize.x),
+        static_cast<float>(ypos) / static_cast<float>(windowSize.y)};
+  }
+
+  return glfwGetMouseButton(mWindowInstance, input::getGlfwMouseButton(key)) ==
+         GLFW_PRESS;
+}
+
+InputStateValue Window::getGamepadState(int jid, int key) {
+  GLFWgamepadstate state{};
+  glfwGetGamepadState(jid, &state);
+
+  if (input::isGamepadAxis(key)) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+    return state.axes[input::getGlfwGamepadAxis(key)];
+  }
+
+  if (input::isGamepadButton(key)) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+    return state.buttons[input::getGlfwGamepadButton(key)] == GLFW_PRESS;
+  }
+
+  return {};
+}
+
+void Window::addGamepad(int jid, Window *window) {
+  if (!glfwJoystickIsGamepad(jid)) {
+    return;
+  }
+
+  const char *name = glfwGetJoystickName(jid);
+
+  InputDevice device = {.type = InputDeviceType::Gamepad,
+                        .name = name,
+                        .index = static_cast<uint32_t>(jid),
+                        .stateFn = std::bind(&Window::getGamepadState, window,
+                                             jid, std::placeholders::_1)};
+
+  window->mDeviceManager.addDevice(device);
+}
 
 void Window::setWindowSize(const glm::uvec2 &size) {
   glfwSetWindowSize(mWindowInstance, static_cast<int>(size.x),

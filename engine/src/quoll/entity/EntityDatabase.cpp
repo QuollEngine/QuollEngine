@@ -40,6 +40,8 @@ EntityDatabase::EntityDatabase() {
   reg<Text>();
   reg<MeshRenderer>();
   reg<SkinnedMeshRenderer>();
+  reg<InputMapAssetRef>();
+  reg<InputMap>();
 }
 
 } // namespace quoll

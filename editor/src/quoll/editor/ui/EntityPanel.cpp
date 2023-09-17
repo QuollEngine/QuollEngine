@@ -140,6 +140,7 @@ void EntityPanel::renderContent(WorkspaceState &state,
     renderRigidBody(scene, actionExecutor);
     renderAudio(scene, assetRegistry, actionExecutor);
     renderScripting(scene, assetRegistry, actionExecutor);
+    renderInput(scene, assetRegistry, actionExecutor);
     renderSkybox(scene, assetRegistry, actionExecutor);
     renderEnvironmentLighting(scene, assetRegistry, actionExecutor);
     renderAddComponent(scene, assetRegistry, actionExecutor);
@@ -1399,6 +1400,76 @@ void EntityPanel::renderScripting(Scene &scene, AssetRegistry &assetRegistry,
   }
 }
 
+void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
+                              ActionExecutor &actionExecutor) {
+  if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity)) {
+    return;
+  }
+
+  static const String SectionName = String(fa::Keyboard) + "  Input map";
+
+  if (auto section = widgets::Section(SectionName.c_str())) {
+    float width = section.getClipRect().GetWidth();
+    const float height = width * 0.5f;
+
+    auto &component =
+        scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
+
+    if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
+      ImGui::Button(
+          assetRegistry.getInputMaps().getAsset(component.handle).name.c_str(),
+          ImVec2(width, height));
+    } else {
+      ImGui::Button("Drag input map here", ImVec2(width, height));
+    }
+
+    static constexpr float DropBorderWidth = 3.5f;
+    auto &g = *ImGui::GetCurrentContext();
+
+    ImVec2 dropMin(section.getClipRect().Min.x + DropBorderWidth,
+                   g.LastItemData.Rect.Min.y + DropBorderWidth);
+    ImVec2 dropMax(section.getClipRect().Max.x - DropBorderWidth,
+                   g.LastItemData.Rect.Max.y - DropBorderWidth);
+    if (ImGui::BeginDragDropTargetCustom(ImRect(dropMin, dropMax),
+                                         g.LastItemData.ID)) {
+      if (auto *payload = ImGui::AcceptDragDropPayload(
+              getAssetTypeString(AssetType::InputMap).c_str())) {
+        auto newHandle = *static_cast<InputMapAssetHandle *>(payload->Data);
+        auto newComponent = component;
+        newComponent.handle = newHandle;
+        actionExecutor.execute<EntityDefaultUpdateComponent<InputMapAssetRef>>(
+            mSelectedEntity, component, newComponent);
+      }
+    }
+
+    if (scene.entityDatabase.has<InputMap>(mSelectedEntity)) {
+      ImGui::Text("Debug");
+
+      const auto &inputMap =
+          scene.entityDatabase.get<InputMap>(mSelectedEntity);
+
+      if (auto table = widgets::Table("InputMapValues", 2)) {
+        for (auto [key, command] : inputMap.commandNameMap) {
+          auto type = inputMap.commandDataTypes.at(command);
+          if (type == InputDataType::Boolean) {
+            auto value = std::get<bool>(inputMap.commandValues.at(command));
+            table.row(key, value ? "true" : "false");
+          } else if (type == InputDataType::Axis2d) {
+            auto value =
+                std::get<glm::vec2>(inputMap.commandValues.at(command));
+            table.row(key, value);
+          }
+        }
+      }
+    }
+  }
+
+  if (shouldDelete("Input map")) {
+    actionExecutor.execute<EntityDefaultDeleteAction<InputMapAssetRef>>(
+        mSelectedEntity);
+  }
+}
+
 void EntityPanel::renderSkybox(Scene &scene, AssetRegistry &assetRegistry,
                                ActionExecutor &actionExecutor) {
   if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity)) {
@@ -1504,7 +1575,6 @@ void EntityPanel::renderEnvironmentLighting(Scene &scene,
   static const String SectionName = String(fa::Sun) + "  Environment lighting";
 
   if (auto section = widgets::Section(SectionName.c_str())) {
-
     ImGui::Text("Source");
     if (ImGui::BeginCombo("###Source", "Skybox")) {
       ImGui::EndCombo();
@@ -1592,6 +1662,12 @@ void EntityPanel::renderAddComponent(Scene &scene, AssetRegistry &assetRegistry,
         ImGui::Selectable("Joint attachment")) {
       actionExecutor.execute<EntityDefaultCreateComponent<JointAttachment>>(
           mSelectedEntity, JointAttachment{});
+    }
+
+    if (!scene.entityDatabase.has<InputMapAssetRef>(mSelectedEntity) &&
+        ImGui::Selectable("Input map")) {
+      actionExecutor.execute<EntityDefaultCreateComponent<InputMapAssetRef>>(
+          mSelectedEntity, InputMapAssetRef{});
     }
 
     if (!scene.entityDatabase.has<EnvironmentSkybox>(mSelectedEntity) &&

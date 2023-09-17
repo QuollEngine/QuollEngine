@@ -11,6 +11,7 @@
 #include "quoll/physics/PhysicsSystem.h"
 #include "quoll/audio/AudioSystem.h"
 #include "quoll/window/Window.h"
+#include "quoll/input/InputMapSystem.h"
 
 #include "quoll/editor/editor-scene/EditorCamera.h"
 #include "quoll/editor/state/WorkspaceState.h"
@@ -28,13 +29,15 @@ public:
   /**
    * @brief Create editor simulation
    *
+   * @param deviceManager Device manager
    * @param eventSystem Event system
    * @param window Window
    * @param assetRegistry Asset registry
    * @param editorCamera Editor camera
    */
-  EditorSimulator(EventSystem &eventSystem, Window &window,
-                  AssetRegistry &assetRegistry, EditorCamera &editorCamera);
+  EditorSimulator(InputDeviceManager &deviceManager, EventSystem &eventSystem,
+                  Window &window, AssetRegistry &assetRegistry,
+                  EditorCamera &editorCamera);
 
   /**
    * @brief Main update function
@@ -97,6 +100,7 @@ private:
   ScriptingSystem mScriptingSystem;
   PhysicsSystem mPhysicsSystem;
   AudioSystem<DefaultAudioBackend> mAudioSystem;
+  InputMapSystem mInputMapSystem;
 
   WorkspaceMode mMode = WorkspaceMode::Edit;
 };

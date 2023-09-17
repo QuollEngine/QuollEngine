@@ -43,9 +43,10 @@
 
 namespace quoll::editor {
 
-EditorScreen::EditorScreen(Window &window, EventSystem &eventSystem,
-                           rhi::RenderDevice *device)
-    : mWindow(window), mEventSystem(eventSystem), mDevice(device) {}
+EditorScreen::EditorScreen(Window &window, InputDeviceManager &deviceManager,
+                           EventSystem &eventSystem, rhi::RenderDevice *device)
+    : mDeviceManager(deviceManager), mWindow(window), mEventSystem(eventSystem),
+      mDevice(device) {}
 
 void EditorScreen::start(const Project &rawProject) {
   auto project = rawProject;
@@ -182,7 +183,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   ui.processShortcuts(context, mEventSystem);
 
-  EditorSimulator simulator(mEventSystem, mWindow,
+  EditorSimulator simulator(mDeviceManager, mEventSystem, mWindow,
                             assetManager.getAssetRegistry(), editorCamera);
 
   mWindow.maximize();

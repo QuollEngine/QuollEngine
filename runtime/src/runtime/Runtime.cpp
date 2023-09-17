@@ -36,7 +36,8 @@ void Runtime::start() {
 
   quoll::Scene scene;
   quoll::EventSystem eventSystem;
-  quoll::Window window(mConfig.name, Width, Height, eventSystem);
+  quoll::InputDeviceManager deviceManager;
+  quoll::Window window(mConfig.name, Width, Height, deviceManager, eventSystem);
   quoll::AssetCache assetCache(std::filesystem::current_path() / "assets",
                                true);
 

@@ -423,6 +423,17 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     }
   }
 
+  if (node["inputMap"] && node["inputMap"].IsMap()) {
+    auto uuid = node["inputMap"]["asset"].as<Uuid>(Uuid{});
+    auto handle = mAssetRegistry.getInputMaps().findHandleByUuid(uuid);
+
+    if (handle != InputMapAssetHandle::Null) {
+      auto type = mAssetRegistry.getInputMaps().getAsset(handle).type;
+
+      mEntityDatabase.set<InputMapAssetRef>(entity, {handle});
+    }
+  }
+
   return Result<bool>::Ok(true);
 }
 

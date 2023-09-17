@@ -1,6 +1,6 @@
 def glfw(k):
     upper_k = f'{k}'.upper()
-    return f'GLFW_KEY_{upper_k}'
+    return f'getKeyboardKeyFromGlfw(GLFW_KEY_{upper_k})'
 
 def print_map(key, glfw_key):
     print('{"', f'KEY_{key}', '", ', glfw(glfw_key), '},', sep='')
