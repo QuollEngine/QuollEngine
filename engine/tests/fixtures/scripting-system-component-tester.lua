@@ -856,7 +856,6 @@ function input_get_value_boolean_table()
     input_command_value = entity.input:get_value_boolean({})
 end
 
-
 --- get_value_axis_2d
 function input_get_value_axis_2d()
     command = entity.input:get_command("Test")
@@ -897,4 +896,17 @@ function input_get_value_axis_2d_table()
     input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d({})
 end
  
+--- set_scheme
+function input_set_scheme()
+    entity.input:set_scheme("Test scheme")
+end
 
+function input_set_scheme_invalid()
+    entity.input.set_scheme("Test scheme")
+    entity.input:set_scheme()
+    entity.input:set_scheme(10)
+    entity.input:set_scheme(true)
+    entity.input:set_scheme(nil)
+    entity.input:set_scheme({})
+    entity.input:set_scheme(entity_query_get_first_by_name)
+end

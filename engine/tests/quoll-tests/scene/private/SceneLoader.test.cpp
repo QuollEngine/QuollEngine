@@ -2610,8 +2610,35 @@ TEST_F(SceneLoaderInputMapTest, CreatesInputMapComponentIfInputMapAssetExists) {
 
   auto [node, entity] = createNode();
   node["inputMap"]["asset"] = data.uuid;
+  node["inputMap"]["defaultScheme"] = 1;
   sceneLoader.loadComponents(node, entity, entityIdCache).getData();
 
   ASSERT_TRUE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).handle, handle);
+  EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).defaultScheme,
+            1);
+}
+
+TEST_F(SceneLoaderInputMapTest, SetsInputMapDefaultSchemeToZeroIfInvalidField) {
+  quoll::AssetData<quoll::InputMapAsset> data{};
+  data.type = quoll::AssetType::InputMap;
+  data.uuid = quoll::Uuid("hello");
+  auto handle = assetRegistry.getInputMaps().addAsset(data);
+
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Sequence), YAML::Node(YAML::NodeType::Map),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (auto invalidNode : invalidNodes) {
+
+    auto [node, entity] = createNode();
+    node["inputMap"]["asset"] = data.uuid;
+    node["inputMap"]["defaultScheme"] = invalidNode;
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::InputMapAssetRef>(entity));
+    EXPECT_EQ(entityDatabase.get<quoll::InputMapAssetRef>(entity).defaultScheme,
+              0);
+  }
 }

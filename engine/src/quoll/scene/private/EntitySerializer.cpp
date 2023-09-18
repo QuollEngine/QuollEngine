@@ -293,6 +293,7 @@ YAML::Node EntitySerializer::createComponentsNode(Entity entity) {
     if (mAssetRegistry.getInputMaps().hasAsset(component.handle)) {
       components["inputMap"]["asset"] =
           mAssetRegistry.getInputMaps().getAsset(component.handle).uuid;
+      components["inputMap"]["defaultScheme"] = component.defaultScheme;
     }
   }
 

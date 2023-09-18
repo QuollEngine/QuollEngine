@@ -36,17 +36,22 @@ public:
 
   quoll::Entity createInputMap() {
     quoll::AssetData<quoll::InputMapAsset> asset{};
+    asset.data.schemes.push_back({"Explore"});
+    asset.data.schemes.push_back({"Combat"});
+
     asset.data.commands.push_back({"Jump", quoll::InputDataType::Boolean});
     asset.data.commands.push_back({"Move", quoll::InputDataType::Axis2d});
     asset.data.commands.push_back({"Look", quoll::InputDataType::Axis2d});
+    asset.data.commands.push_back({"Aim", quoll::InputDataType::Axis2d});
     asset.data.commands.push_back({"Shoot", quoll::InputDataType::Boolean});
+    asset.data.commands.push_back({"Pick", quoll::InputDataType::Boolean});
 
     // Null data for testing purposes
     asset.data.bindings.push_back({0, 2, quoll::InputMapAxis2dValue{-1, -1}});
 
     // Jump
     asset.data.bindings.push_back({0, 0, quoll::input::get("GAMEPAD_SOUTH")});
-    asset.data.bindings.push_back({1, 0, quoll::input::get("KEY_SPACE")});
+    asset.data.bindings.push_back({0, 0, quoll::input::get("KEY_SPACE")});
 
     // Move
     asset.data.bindings.push_back(
@@ -54,7 +59,7 @@ public:
          quoll::InputMapAxis2dValue{quoll::input::get("GAMEPAD_LEFT_X"),
                                     quoll::input::get("GAMEPAD_LEFT_Y")}});
     asset.data.bindings.push_back(
-        {1, 1,
+        {0, 1,
          quoll::InputMapAxis2dValue{
              quoll::InputMapAxisSegment{quoll::input::get("KEY_A"),
                                         quoll::input::get("KEY_D")},
@@ -62,12 +67,31 @@ public:
                                         quoll::input::get("KEY_S")}}});
 
     // Look
-    asset.data.bindings.push_back({1, 2, quoll::input::get("MOUSE_MOVE")});
+    asset.data.bindings.push_back({0, 2, quoll::input::get("MOUSE_MOVE")});
+
+    // Aim
+    asset.data.bindings.push_back(
+        {1, 3,
+         quoll::InputMapAxis2dValue{quoll::input::get("GAMEPAD_LEFT_X"),
+                                    quoll::input::get("GAMEPAD_LEFT_Y")}});
+
+    asset.data.bindings.push_back(
+        {1, 3,
+         quoll::InputMapAxis2dValue{
+             quoll::InputMapAxisSegment{quoll::input::get("KEY_A"),
+                                        quoll::input::get("KEY_D")},
+             quoll::InputMapAxisSegment{quoll::input::get("KEY_W"),
+                                        quoll::input::get("KEY_S")}}});
 
     // Shoot
-    asset.data.bindings.push_back({1, 3, quoll::input::get("MOUSE_LEFT")});
+    asset.data.bindings.push_back({1, 4, quoll::input::get("MOUSE_LEFT")});
     asset.data.bindings.push_back(
-        {0, 3, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
+        {1, 4, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
+
+    // Shoot
+    asset.data.bindings.push_back({0, 5, quoll::input::get("MOUSE_LEFT")});
+    asset.data.bindings.push_back(
+        {0, 5, quoll::input::get("GAMEPAD_BUMPER_RIGHT")});
 
     asset.uuid = quoll::Uuid::generate();
     auto handle = registry.getInputMaps().addAsset(asset);
@@ -92,49 +116,96 @@ TEST_F(InputMapSystemTest,
 
   EXPECT_TRUE(db.has<quoll::InputMap>(entity));
   auto inputMap = db.get<quoll::InputMap>(entity);
-  EXPECT_EQ(inputMap.commandNameMap.size(), 4);
+
+  EXPECT_EQ(inputMap.schemes.size(), 2);
+  EXPECT_EQ(inputMap.schemeNameMap.size(), 2);
+  EXPECT_EQ(inputMap.schemeNameMap.at("Explore"), 0);
+  EXPECT_EQ(inputMap.schemeNameMap.at("Combat"), 1);
+
+  EXPECT_EQ(inputMap.commandNameMap.size(), 6);
   EXPECT_EQ(inputMap.commandNameMap.at("Jump"), 0);
   EXPECT_EQ(inputMap.commandNameMap.at("Move"), 1);
   EXPECT_EQ(inputMap.commandNameMap.at("Look"), 2);
-  EXPECT_EQ(inputMap.commandNameMap.at("Shoot"), 3);
+  EXPECT_EQ(inputMap.commandNameMap.at("Aim"), 3);
+  EXPECT_EQ(inputMap.commandNameMap.at("Shoot"), 4);
+  EXPECT_EQ(inputMap.commandNameMap.at("Pick"), 5);
 
-  EXPECT_EQ(inputMap.commandDataTypes.size(), 4);
+  EXPECT_EQ(inputMap.commandDataTypes.size(), 6);
   EXPECT_EQ(inputMap.commandDataTypes.at(0), quoll::InputDataType::Boolean);
   EXPECT_EQ(inputMap.commandDataTypes.at(1), quoll::InputDataType::Axis2d);
   EXPECT_EQ(inputMap.commandDataTypes.at(2), quoll::InputDataType::Axis2d);
-  EXPECT_EQ(inputMap.commandDataTypes.at(3), quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap.commandDataTypes.at(3), quoll::InputDataType::Axis2d);
+  EXPECT_EQ(inputMap.commandDataTypes.at(4), quoll::InputDataType::Boolean);
+  EXPECT_EQ(inputMap.commandDataTypes.at(5), quoll::InputDataType::Boolean);
 
-  auto &bindings = inputMap.inputKeyToCommandMap;
-  EXPECT_EQ(bindings.size(), 11);
+  // Explore
+  {
+    auto &layout = inputMap.schemes.at(0);
 
-  EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_SOUTH")), 0);
-  EXPECT_EQ(bindings.at(quoll::input::get("KEY_SPACE")), 0);
+    auto &bindings = layout.inputKeyToCommandMap;
+    EXPECT_EQ(bindings.size(), 11);
 
-  EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_X")), 1);
-  EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_Y")), 1);
-  EXPECT_EQ(bindings.at(quoll::input::get("KEY_A")), 1);
-  EXPECT_EQ(bindings.at(quoll::input::get("KEY_D")), 1);
-  EXPECT_EQ(bindings.at(quoll::input::get("KEY_W")), 1);
-  EXPECT_EQ(bindings.at(quoll::input::get("KEY_S")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_SOUTH")), 0);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_SPACE")), 0);
 
-  EXPECT_EQ(bindings.at(quoll::input::get("MOUSE_MOVE")), 2);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_X")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_Y")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_A")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_D")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_W")), 1);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_S")), 1);
 
-  EXPECT_EQ(bindings.at(quoll::input::get("MOUSE_LEFT")), 3);
-  EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_BUMPER_RIGHT")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("MOUSE_MOVE")), 2);
 
-  auto &keyFields = inputMap.inputKeyFields;
-  EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_X")),
-            quoll::InputDataTypeField::X);
-  EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_Y")),
-            quoll::InputDataTypeField::Y);
-  EXPECT_EQ(keyFields.at(quoll::input::get("KEY_A")),
-            quoll::InputDataTypeField::X0);
-  EXPECT_EQ(keyFields.at(quoll::input::get("KEY_D")),
-            quoll::InputDataTypeField::X1);
-  EXPECT_EQ(keyFields.at(quoll::input::get("KEY_W")),
-            quoll::InputDataTypeField::Y0);
-  EXPECT_EQ(keyFields.at(quoll::input::get("KEY_S")),
-            quoll::InputDataTypeField::Y1);
+    EXPECT_EQ(bindings.at(quoll::input::get("MOUSE_LEFT")), 5);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_BUMPER_RIGHT")), 5);
+
+    auto &keyFields = layout.inputKeyFields;
+    EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_X")),
+              quoll::InputDataTypeField::X);
+    EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_Y")),
+              quoll::InputDataTypeField::Y);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_A")),
+              quoll::InputDataTypeField::X0);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_D")),
+              quoll::InputDataTypeField::X1);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_W")),
+              quoll::InputDataTypeField::Y0);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_S")),
+              quoll::InputDataTypeField::Y1);
+  }
+
+  // Combat
+  {
+    auto &layout = inputMap.schemes.at(1);
+
+    auto &bindings = layout.inputKeyToCommandMap;
+    EXPECT_EQ(bindings.size(), 8);
+
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_X")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_LEFT_Y")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_A")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_D")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_W")), 3);
+    EXPECT_EQ(bindings.at(quoll::input::get("KEY_S")), 3);
+
+    EXPECT_EQ(bindings.at(quoll::input::get("MOUSE_LEFT")), 4);
+    EXPECT_EQ(bindings.at(quoll::input::get("GAMEPAD_BUMPER_RIGHT")), 4);
+
+    auto &keyFields = layout.inputKeyFields;
+    EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_X")),
+              quoll::InputDataTypeField::X);
+    EXPECT_EQ(keyFields.at(quoll::input::get("GAMEPAD_LEFT_Y")),
+              quoll::InputDataTypeField::Y);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_A")),
+              quoll::InputDataTypeField::X0);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_D")),
+              quoll::InputDataTypeField::X1);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_W")),
+              quoll::InputDataTypeField::Y0);
+    EXPECT_EQ(keyFields.at(quoll::input::get("KEY_S")),
+              quoll::InputDataTypeField::Y1);
+  }
 }
 
 TEST_F(InputMapSystemTest, DeleteInputMapComponentIfAssetRefIsDeleted) {
@@ -144,6 +215,32 @@ TEST_F(InputMapSystemTest, DeleteInputMapComponentIfAssetRefIsDeleted) {
   inputMapSystem.update(db);
 
   EXPECT_FALSE(db.has<quoll::InputMap>(entity));
+}
+
+TEST_F(InputMapSystemTest,
+       ChangingActiveSchemeWritesDataToCommandsInThatScheme) {
+  auto key = quoll::input::get("MOUSE_LEFT");
+
+  auto entity = createInputMap();
+  inputMapSystem.update(db);
+  setInputState(key, true);
+
+  auto &inputMap = db.get<quoll::InputMap>(entity);
+  auto pick = inputMap.commandNameMap.at("Pick");
+  auto shoot = inputMap.commandNameMap.at("Shoot");
+
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
+
+  inputMapSystem.update(db);
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), true);
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), false);
+
+  inputMap.activeScheme = 1;
+
+  inputMapSystem.update(db);
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(pick)), false);
+  EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(shoot)), true);
 }
 
 using InputMapSystemBooleanValueTest = InputMapSystemTest;
@@ -157,21 +254,22 @@ TEST_F(InputMapSystemBooleanValueTest,
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
 }
 
 TEST_F(InputMapSystemBooleanValueTest,
        SetsValueToFalseWhenBooleanKeyStateIsFalse) {
-  auto key = GLFW_KEY_SPACE;
+  auto key = quoll::input::get("KEY_SPACE");
   auto entity = createInputMap();
 
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command =
-      inputMap.inputKeyToCommandMap.at(quoll::input::get("KEY_SPACE"));
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
 }
@@ -185,7 +283,8 @@ TEST_F(InputMapSystemBooleanValueTest,
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
 }
@@ -198,7 +297,8 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfFloatKeyStateIsZero) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
 }
@@ -211,7 +311,8 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToTrueIfVec2StateIsNotZero) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), true);
 }
@@ -224,7 +325,8 @@ TEST_F(InputMapSystemBooleanValueTest, SetsValueToFalseIfVec2StateIsZero) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<bool>(inputMap.commandValues.at(command)), false);
 }
@@ -239,7 +341,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsValueToIncomingAxis2dInput) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(-0.4f, 0.2f));
@@ -253,7 +356,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToIncomingFloatInput) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(0.5f, 0.0f));
@@ -267,7 +371,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToIncomingFloatInput) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(0.0f, -0.8f));
@@ -282,7 +387,8 @@ TEST_F(InputMapSystemAxis2dValueTest,
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(-1.0f, 0.0f));
@@ -296,7 +402,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToOneIfIncomingBooleanIsX1) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(1.0f, 0.0f));
@@ -311,7 +418,8 @@ TEST_F(InputMapSystemAxis2dValueTest,
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(0.0f, -1.0f));
@@ -325,7 +433,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY1) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(key);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(0.0f, 1.0f));
@@ -343,7 +452,8 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsPositiveValueToOne) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(keyX);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(keyX);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(1.0f, 1.0f));
@@ -361,7 +471,8 @@ TEST_F(InputMapSystemAxis2dValueTest, ClampsNegativeValueToNegativeOne) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(keyX);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(keyX);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(-1.0f, -1.0f));
@@ -379,7 +490,8 @@ TEST_F(InputMapSystemAxis2dValueTest, AddsMultipleInputValuesTogether) {
   inputMapSystem.update(db);
 
   auto inputMap = db.get<quoll::InputMap>(entity);
-  auto command = inputMap.inputKeyToCommandMap.at(keyX);
+  auto &scheme = inputMap.schemes.at(0);
+  auto command = scheme.inputKeyToCommandMap.at(keyX);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
             glm::vec2(-0.2f, 0.4f));

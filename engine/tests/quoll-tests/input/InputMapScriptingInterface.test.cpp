@@ -5,7 +5,8 @@
 
 class InputMapLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {
 public:
-  quoll::Entity createEntityWithInputMap(bool value = false) {
+  quoll::Entity createEntityWithInputMap(bool value = false,
+                                         size_t defaultScheme = 0) {
     auto entity = entityDatabase.create();
 
     quoll::InputMap map{};
@@ -13,6 +14,11 @@ public:
     map.commandDataTypes.push_back(quoll::InputDataType::Boolean);
     map.commandValues.resize(2, value);
     map.commandNameMap["Test"] = 1;
+
+    map.schemes.resize(2);
+    map.schemeNameMap.insert_or_assign("Default scheme", 0);
+    map.schemeNameMap.insert_or_assign("Test scheme", 1);
+    map.activeScheme = defaultScheme;
 
     entityDatabase.set(entity, map);
     return entity;
@@ -307,4 +313,39 @@ TEST_F(InputMapLuaScriptingInterfaceTest,
     EXPECT_EQ(scope.getGlobal<float>("input_command_value_x"), 0.0f);
     EXPECT_EQ(scope.getGlobal<float>("input_command_value_y"), 0.0f);
   }
+}
+
+// set_scheme
+TEST_F(InputMapLuaScriptingInterfaceTest, SetSchemeSetsSchemeToProvidedValue) {
+  auto entity = createEntityWithInputMap();
+
+  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 0);
+  call(entity, "input_set_scheme");
+  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 1);
+}
+
+TEST_F(InputMapLuaScriptingInterfaceTest,
+       SetSchemeDoesNothingIfInputMapComponentDoesNotExist) {
+  auto entity = entityDatabase.create();
+
+  call(entity, "input_set_scheme");
+  EXPECT_FALSE(entityDatabase.has<quoll::InputMap>(entity));
+}
+
+TEST_F(InputMapLuaScriptingInterfaceTest,
+       SetSchemeDoesNothingIfSchemeNotFound) {
+  auto entity = createEntityWithInputMap(false, 0);
+  entityDatabase.get<quoll::InputMap>(entity).schemeNameMap.erase(
+      "Test scheme");
+
+  call(entity, "input_set_scheme");
+  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 0);
+}
+
+TEST_F(InputMapLuaScriptingInterfaceTest,
+       SetSchemeDoesNothingIfInvalidValueProvided) {
+  auto entity = createEntityWithInputMap(false, 1);
+
+  call(entity, "input_set_scheme_invalid");
+  EXPECT_EQ(entityDatabase.get<quoll::InputMap>(entity).activeScheme, 1);
 }

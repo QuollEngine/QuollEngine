@@ -1020,9 +1020,10 @@ TEST_F(EntitySerializerTest,
   auto handle = assetRegistry.getInputMaps().addAsset(asset);
 
   auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle});
+  entityDatabase.set<quoll::InputMapAssetRef>(entity, {handle, 0});
 
   auto node = entitySerializer.createComponentsNode(entity);
   EXPECT_TRUE(node["inputMap"]);
   EXPECT_EQ(node["inputMap"]["asset"].as<quoll::String>(""), "inputMap.asset");
+  EXPECT_EQ(node["inputMap"]["defaultScheme"].as<uint32_t>(999), 0);
 }

@@ -35,7 +35,7 @@ public:
   static int getCommandValueBoolean(void *state);
 
   /**
-   * @brief Set static friction
+   * @brief Get axis 2d command value
    *
    * @param state Lua state
    * @return Number of arguments
@@ -43,13 +43,22 @@ public:
   static int getCommandValueAxis2d(void *state);
 
   /**
+   * @brief Set scheme
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int setScheme(void *state);
+
+  /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 4> Fields{
+  static constexpr std::array<InterfaceField, 5> Fields{
       InterfaceField{"get_command", getCommand},
       InterfaceField{"get_value_boolean", getCommandValueBoolean},
       InterfaceField{"get_value_axis_2d", getCommandValueAxis2d},
-      InterfaceField{"is_pressed", getCommandValueBoolean}};
+      InterfaceField{"is_pressed", getCommandValueBoolean},
+      InterfaceField{"set_scheme", setScheme}};
 
   /**
    * @brief Get component name in scripts
