@@ -91,6 +91,14 @@ TEST_F(AssetManagerTest, CreatesAnimatorFileAndLoadsIt) {
   EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.animator"));
 }
 
+TEST_F(AssetManagerTest, CreatesInputMapFileAndLoadsIt) {
+  auto handle = manager.createInputMap(InnerPathInAssets / "test");
+
+  EXPECT_TRUE(handle.hasData());
+  EXPECT_EQ(handle.getData(), InnerPathInAssets / "test.inputmap");
+  EXPECT_TRUE(fs::exists(InnerPathInAssets / "test.inputmap"));
+}
+
 TEST_F(AssetManagerTest, ReloadingAssetIfChangedDoesNotCreateFileWithNewUUID) {
   fs::create_directories(InnerPathInAssets);
 
