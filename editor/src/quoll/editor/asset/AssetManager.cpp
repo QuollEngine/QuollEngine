@@ -31,6 +31,14 @@ states:
     on: []
 )""";
 
+static const String InputMapTemplate = R"""(version: 0.1
+type: inputmap
+schemes:
+  - name: Default
+commands: []
+bindings: []
+)""";
+
 const std::vector<String> AssetManager::TextureExtensions{"png", "jpg", "jpeg",
                                                           "bmp", "tga", "ktx2"};
 const std::vector<String> AssetManager::ScriptExtensions{"lua"};
@@ -194,6 +202,23 @@ Result<Path> AssetManager::createAnimator(const Path &assetPath) {
   sourceAssetPath.replace_extension("animator");
   std::ofstream stream(sourceAssetPath);
   stream << AnimatorTemplate;
+  stream.close();
+
+  auto res = loadSourceAsset(sourceAssetPath, {});
+  if (res.hasError()) {
+    return Result<Path>::Error(res.getError());
+  }
+
+  return Result<Path>::Ok(sourceAssetPath, res.getWarnings());
+}
+
+Result<Path> AssetManager::createInputMap(const Path &assetPath) {
+  createDirectoriesRecursive(assetPath.parent_path());
+
+  auto sourceAssetPath = assetPath;
+  sourceAssetPath.replace_extension("inputmap");
+  std::ofstream stream(sourceAssetPath);
+  stream << InputMapTemplate;
   stream.close();
 
   auto res = loadSourceAsset(sourceAssetPath, {});

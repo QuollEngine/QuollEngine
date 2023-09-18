@@ -306,6 +306,14 @@ void AssetBrowser::render(WorkspaceContext &context) {
           mStagingEntry.isEditable = true;
           mStagingEntry.assetType = AssetType::Animator;
         }
+
+        if (ImGui::MenuItem("Create input map")) {
+          mHasStagingEntry = true;
+          mStagingEntry.icon = EditorIcon::InputMap;
+          mStagingEntry.isDirectory = false;
+          mStagingEntry.isEditable = true;
+          mStagingEntry.assetType = AssetType::InputMap;
+        }
         ImGui::EndPopup();
       }
     }
@@ -353,6 +361,8 @@ void AssetBrowser::handleCreateEntry(AssetManager &assetManager) {
       assetManager.createLuaScript(path);
     } else if (mStagingEntry.assetType == AssetType::Animator) {
       assetManager.createAnimator(path);
+    } else if (mStagingEntry.assetType == AssetType::InputMap) {
+      assetManager.createInputMap(path);
     }
   }
 

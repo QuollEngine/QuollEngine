@@ -174,6 +174,14 @@ public:
   Result<Path> createAnimator(const Path &assetPath);
 
   /**
+   * @brief Create input map in assets
+   *
+   * @param assetPath Path to assets
+   * @return Result
+   */
+  Result<Path> createInputMap(const Path &assetPath);
+
+  /**
    * @brief Reload assets
    *
    * @return Result

@@ -32,6 +32,7 @@ Result<bool> AssetLoader::loadFromFileDialog(const Path &directory) {
       FileTypeEntry{"Font files", AssetManager::FontExtensions},
       FileTypeEntry{"Texture files", AssetManager::TextureExtensions},
       FileTypeEntry{"Animator files", AssetManager::AnimatorExtensions},
+      FileTypeEntry{"Input map files", AssetManager::InputMapExtensions},
       FileTypeEntry{"Environment files", AssetManager::EnvironmentExtensions}};
 
   auto filePath = platform::FileDialog::getFilePathFromDialog(entries);
