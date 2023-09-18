@@ -3,12 +3,14 @@
 
 #include "ScriptingInterfaceTestBase.h"
 
+static const quoll::Path CachePath = std::filesystem::current_path() / "cache";
+
 const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
     "scripting-system-component-tester.lua";
 
 LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
     const quoll::String &scriptName)
-    : assetCache(std::filesystem::current_path()),
+    : assetCache(CachePath),
       scriptingSystem(eventSystem, assetCache.getRegistry()),
       mScriptName(scriptName) {}
 
@@ -26,7 +28,18 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
   auto &scripting = entityDatabase.get<quoll::Script>(entity);
 
   scripting.scope.luaGetGlobal(functionName);
-  scripting.scope.call(0);
+  if (!scripting.scope.call(0)) {
+    QuollAssert(false, "Failed to call function: " + functionName);
+  }
 
   return scripting.scope;
+}
+
+void LuaScriptingInterfaceTestBase::SetUp() {
+  TearDown();
+  std::filesystem::create_directory(CachePath);
+}
+
+void LuaScriptingInterfaceTestBase::TearDown() {
+  std::filesystem::remove_all(CachePath);
 }

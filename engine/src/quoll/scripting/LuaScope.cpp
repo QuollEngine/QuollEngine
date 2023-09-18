@@ -88,6 +88,10 @@ void LuaScope::luaSetNumber(float value) {
   lua_pushnumber(mScope, static_cast<lua_Number>(value));
 }
 
+void LuaScope::luaSetInteger(size_t value) {
+  lua_pushinteger(mScope, static_cast<lua_Integer>(value));
+}
+
 void LuaScope::luaSetString(const String &value) {
   lua_pushstring(mScope, value.c_str());
 }
@@ -111,17 +115,19 @@ bool LuaScope::hasFunction(const String &name) {
   return ret;
 }
 
-void LuaScope::call(uint32_t numArgs) {
+bool LuaScope::call(uint32_t numArgs) {
   if (lua_pcall(mScope, numArgs, 0, 0) == LUA_OK) {
     lua_pop(mScope, lua_gettop(mScope));
-  } else {
-    auto stringView = luaGetString(-1);
-
-    Engine::getUserLogger().error()
-        << "Failed to call lua function: " << stringView;
-
-    lua_pop(mScope, -1);
+    return true;
   }
+
+  auto stringView = luaGetString(-1);
+
+  Engine::getUserLogger().error()
+      << "Failed to call lua function: " << stringView;
+
+  lua_pop(mScope, -1);
+  return false;
 }
 
 LuaTable LuaScope::createTable(uint32_t size) {

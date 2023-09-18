@@ -9,7 +9,7 @@
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
 
 static const quoll::Path FilePath =
-    AssetCacheTestBase::CachePath / "test.animator";
+    std::filesystem::current_path() / "cache" / "test.animator";
 
 class AssetCacheAnimatorTest : public AssetCacheTestBase {
 public:

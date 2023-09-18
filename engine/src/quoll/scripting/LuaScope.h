@@ -50,7 +50,7 @@ public:
    * @return Variable value
    */
   template <class T> T get(int32_t index = -1) {
-    QuollAssert(false, "Not implemented");
+    QuollAssert(false, String("Not implemented: ") + typeid(T).name());
   }
 
   /**
@@ -65,7 +65,7 @@ public:
    * @retval false Type does not match
    */
   template <class T> bool is(int32_t index = -1) {
-    QuollAssert(false, "Not implemented");
+    QuollAssert(false, String("Not implemented: ") + typeid(T).name());
     return false;
   }
 
@@ -79,7 +79,7 @@ public:
    * @param value Variable value
    */
   template <class T> void set(const T &value) {
-    QuollAssert(false, "Not implemented");
+    QuollAssert(false, String("Not implemented: ") + typeid(T).name());
   }
 
   /**
@@ -153,8 +153,10 @@ public:
    * @brief Call global function
    *
    * @param numArgs Number of arguments
+   * @retval true Function call successful
+   * @retval false Function call failed
    */
-  void call(uint32_t numArgs);
+  bool call(uint32_t numArgs);
 
   /**
    * @brief Create table
@@ -321,6 +323,13 @@ private:
    * @param value Integer value
    */
   void luaSetInteger(int32_t value);
+
+  /**
+   * @brief Push size_t to stack
+   *
+   * @param value size_t value
+   */
+  void luaSetInteger(size_t value);
 
   /**
    * @brief Push boolean to stack
@@ -556,6 +565,15 @@ template <> inline void LuaScope::set<uint32_t>(const uint32_t &value) {
  */
 template <> inline void LuaScope::set<float>(const float &value) {
   luaSetNumber(value);
+}
+
+/**
+ * @brief Set size_t
+ *
+ * @param value size_t value
+ */
+template <> inline void LuaScope::set<size_t>(const size_t &value) {
+  luaSetInteger(value);
 }
 
 /**

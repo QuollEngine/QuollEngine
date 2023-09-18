@@ -13,7 +13,7 @@ public:
 };
 
 /**
- * @brief Lua scripting interface for rigid body
+ * @brief Lua scripting interface for collidable
  */
 class CollidableScriptingInterface::LuaInterface
     : public ComponentLuaInterface<CollidableScriptingInterface::LuaInterface> {
