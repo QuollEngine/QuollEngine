@@ -13,7 +13,8 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
         !entityDatabase.has<InputMap>(entity)) {
       entityDatabase.set(
           entity, createInputMap(
-                      mAssetRegistry.getInputMaps().getAsset(ref.handle).data));
+                      mAssetRegistry.getInputMaps().getAsset(ref.handle).data,
+                      ref.defaultScheme));
     }
   }
 
@@ -40,8 +41,10 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
   }
 
   for (auto [entity, inputMap] : entityDatabase.view<InputMap>()) {
+    auto &scheme = inputMap.schemes.at(inputMap.activeScheme);
+
     for (auto &device : mDeviceManager.getDevices()) {
-      for (const auto &[key, command] : inputMap.inputKeyToCommandMap) {
+      for (const auto &[key, command] : scheme.inputKeyToCommandMap) {
         auto variant = device.stateFn(key);
 
         auto dataType = inputMap.commandDataTypes.at(command);
@@ -62,7 +65,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
 
           if (std::get_if<bool>(&variant) != nullptr &&
               std::get<bool>(variant)) {
-            auto field = inputMap.inputKeyFields.at(key);
+            auto field = scheme.inputKeyFields.at(key);
             if (field == InputDataTypeField::X0) {
               commandValue.x += -1.0f;
             } else if (field == InputDataTypeField::X1) {
@@ -74,7 +77,7 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
             }
 
           } else if (auto *inputValue = std::get_if<float>(&variant)) {
-            auto field = inputMap.inputKeyFields.at(key);
+            auto field = scheme.inputKeyFields.at(key);
             if (field == InputDataTypeField::X) {
               commandValue.x += *inputValue;
             } else if (field == InputDataTypeField::Y) {
@@ -105,11 +108,20 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
   }
 }
 
-InputMap InputMapSystem::createInputMap(InputMapAsset &asset) {
+InputMap InputMapSystem::createInputMap(InputMapAsset &asset,
+                                        size_t defaultScheme) {
   InputMap inputMap{};
+
+  inputMap.activeScheme = std::min(defaultScheme, asset.schemes.size() - 1);
 
   inputMap.commandDataTypes.reserve(asset.commands.size());
   inputMap.commandValues.resize(asset.commands.size());
+  inputMap.schemes.resize(asset.schemes.size());
+
+  size_t schemeIndex = 0;
+  for (const auto &scheme : asset.schemes) {
+    inputMap.schemeNameMap.insert_or_assign(scheme.name, schemeIndex++);
+  }
 
   size_t commandIndex = 0;
   for (const auto &command : asset.commands) {
@@ -118,59 +130,57 @@ InputMap InputMapSystem::createInputMap(InputMapAsset &asset) {
   }
 
   for (const auto &binding : asset.bindings) {
+    auto &scheme = inputMap.schemes.at(binding.scheme);
+
     if (const auto *value = std::get_if<InputMapValue>(&binding.value)) {
       if (*value >= 0) {
-        inputMap.inputKeyToCommandMap.insert_or_assign(*value, binding.command);
-        inputMap.inputKeyFields.insert_or_assign(*value,
-                                                 InputDataTypeField::Value);
+        scheme.inputKeyToCommandMap.insert_or_assign(*value, binding.command);
+        scheme.inputKeyFields.insert_or_assign(*value,
+                                               InputDataTypeField::Value);
       }
     } else if (const auto *axis2d =
                    std::get_if<InputMapAxis2dValue>(&binding.value)) {
       if (const auto *value = std::get_if<InputMapValue>(&axis2d->x)) {
         if (*value >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(*value,
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(*value,
-                                                   InputDataTypeField::X);
+          scheme.inputKeyToCommandMap.insert_or_assign(*value, binding.command);
+          scheme.inputKeyFields.insert_or_assign(*value, InputDataTypeField::X);
         }
       } else if (const auto *value =
                      std::get_if<InputMapAxisSegment>(&axis2d->x)) {
         if (value->at(0) >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(value->at(0),
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(value->at(0),
-                                                   InputDataTypeField::X0);
+          scheme.inputKeyToCommandMap.insert_or_assign(value->at(0),
+                                                       binding.command);
+          scheme.inputKeyFields.insert_or_assign(value->at(0),
+                                                 InputDataTypeField::X0);
         }
 
         if (value->at(1) >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(value->at(1),
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(value->at(1),
-                                                   InputDataTypeField::X1);
+          scheme.inputKeyToCommandMap.insert_or_assign(value->at(1),
+                                                       binding.command);
+          scheme.inputKeyFields.insert_or_assign(value->at(1),
+                                                 InputDataTypeField::X1);
         }
       }
 
       if (const auto *value = std::get_if<InputMapValue>(&axis2d->y)) {
         if (*value >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(*value,
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(*value,
-                                                   InputDataTypeField::Y);
+          scheme.inputKeyToCommandMap.insert_or_assign(*value, binding.command);
+          scheme.inputKeyFields.insert_or_assign(*value, InputDataTypeField::Y);
         }
       } else if (const auto *value =
                      std::get_if<InputMapAxisSegment>(&axis2d->y)) {
         if (value->at(0) >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(value->at(0),
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(value->at(0),
-                                                   InputDataTypeField::Y0);
+          scheme.inputKeyToCommandMap.insert_or_assign(value->at(0),
+                                                       binding.command);
+          scheme.inputKeyFields.insert_or_assign(value->at(0),
+                                                 InputDataTypeField::Y0);
         }
 
         if (value->at(1) >= 0) {
-          inputMap.inputKeyToCommandMap.insert_or_assign(value->at(1),
-                                                         binding.command);
-          inputMap.inputKeyFields.insert_or_assign(value->at(1),
-                                                   InputDataTypeField::Y1);
+          scheme.inputKeyToCommandMap.insert_or_assign(value->at(1),
+                                                       binding.command);
+          scheme.inputKeyFields.insert_or_assign(value->at(1),
+                                                 InputDataTypeField::Y1);
         }
       }
     }

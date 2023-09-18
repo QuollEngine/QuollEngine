@@ -127,7 +127,7 @@ int InputMapScriptingInterface::LuaInterface::getCommandValueAxis2d(
 
   if (!scope.is<LuaTable>(1)) {
     Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_command_value_boolean");
+        << LuaMessages::noEntityTable(getName(), "get_command_value_axis_2d");
 
     scope.set(0.0f);
     scope.set(0.0f);
@@ -136,7 +136,7 @@ int InputMapScriptingInterface::LuaInterface::getCommandValueAxis2d(
 
   if (!scope.is<uint32_t>(2)) {
     Engine::getUserLogger().error() << LuaMessages::invalidArguments<uint32_t>(
-        getName(), "get_command_value_boolean");
+        getName(), "get_command_value_axis_2d");
 
     scope.set(0.0f);
     scope.set(0.0f);
@@ -184,6 +184,52 @@ int InputMapScriptingInterface::LuaInterface::getCommandValueAxis2d(
   }
 
   return 2;
+}
+
+int InputMapScriptingInterface::LuaInterface::setScheme(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "set_scheme");
+
+    return 0;
+  }
+
+  if (!scope.is<String>(2)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<String>(getName(), "set_scheme");
+
+    return 0;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<Entity>();
+  scope.pop(1);
+
+  auto name = scope.get<String>(2);
+  scope.pop(2);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  if (!entityDatabase.has<InputMap>(entity)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::componentDoesNotExist(getName(), entity);
+    return 0;
+  }
+
+  auto &inputMap = entityDatabase.get<InputMap>(entity);
+  if (!inputMap.schemeNameMap.contains(name)) {
+    Engine::getUserLogger().error()
+        << "Input scheme \"" << name << "\" does not exist";
+    return 0;
+  }
+
+  inputMap.activeScheme = inputMap.schemeNameMap.at(name);
+
+  return 0;
 }
 
 } // namespace quoll

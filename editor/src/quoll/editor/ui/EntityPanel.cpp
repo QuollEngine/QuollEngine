@@ -1410,15 +1410,16 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
 
   if (auto section = widgets::Section(SectionName.c_str())) {
     float width = section.getClipRect().GetWidth();
-    const float height = width * 0.5f;
+    const float height = width * 0.2f;
 
     auto &component =
         scene.entityDatabase.get<InputMapAssetRef>(mSelectedEntity);
 
     if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
-      ImGui::Button(
-          assetRegistry.getInputMaps().getAsset(component.handle).name.c_str(),
-          ImVec2(width, height));
+      const auto &asset =
+          assetRegistry.getInputMaps().getAsset(component.handle);
+
+      ImGui::Button(asset.name.c_str(), ImVec2(width, height));
     } else {
       ImGui::Button("Drag input map here", ImVec2(width, height));
     }
@@ -1442,11 +1443,45 @@ void EntityPanel::renderInput(Scene &scene, AssetRegistry &assetRegistry,
       }
     }
 
-    if (scene.entityDatabase.has<InputMap>(mSelectedEntity)) {
-      ImGui::Text("Debug");
+    if (assetRegistry.getInputMaps().hasAsset(component.handle)) {
+      const auto &asset =
+          assetRegistry.getInputMaps().getAsset(component.handle);
 
+      const auto *schemeName =
+          component.defaultScheme < asset.data.schemes.size()
+              ? asset.data.schemes.at(component.defaultScheme).name.c_str()
+              : "Select scheme";
+
+      ImGui::Text("Default scheme");
+      if (ImGui::BeginCombo("##DefaultScheme", schemeName)) {
+        for (size_t i = 0; i < asset.data.schemes.size(); ++i) {
+          const auto *name = asset.data.schemes.at(i).name.c_str();
+          bool selectable = i == component.defaultScheme;
+
+          if (ImGui::Selectable(name, &selectable)) {
+            auto newComponent = component;
+            newComponent.defaultScheme = i;
+
+            actionExecutor
+                .execute<EntityDefaultUpdateComponent<InputMapAssetRef>>(
+                    mSelectedEntity, component, newComponent);
+          }
+        }
+        ImGui::EndCombo();
+      }
+    }
+
+    if (scene.entityDatabase.has<InputMap>(mSelectedEntity)) {
       const auto &inputMap =
           scene.entityDatabase.get<InputMap>(mSelectedEntity);
+
+      const auto *schemeName = assetRegistry.getInputMaps()
+                                   .getAsset(component.handle)
+                                   .data.schemes.at(inputMap.activeScheme)
+                                   .name.c_str();
+
+      ImGui::Text("Debug");
+      ImGui::Text("Active scheme: %s", schemeName);
 
       if (auto table = widgets::Table("InputMapValues", 2)) {
         for (auto [key, command] : inputMap.commandNameMap) {
