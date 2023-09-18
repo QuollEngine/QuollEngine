@@ -609,8 +609,8 @@ function text_get_text()
     text = entity.text:get_text()
 end
 
-function text_get_invalid_text()
-    text = entity.name.get_text()
+function text_get_text_invalid()
+    text = entity.text.get_text()
 end
 
 function text_set_text()
@@ -776,3 +776,125 @@ end
 function perspective_lens_delete_invalid()
     entity.perspective_lens.delete()
 end
+
+-- Input map
+input_command = nil
+input_command_value = nil
+input_command_value_x = nil
+input_command_value_y = nil
+
+--- get_command
+function input_get_command()
+    input_command = entity.input:get_command("Test")
+end
+
+function input_get_command_no_member()
+    input_command = entity.input.get_command("Test")
+end
+
+function input_get_command_no_param()
+    input_command = entity.input:get_command()
+end
+ 
+function input_get_command_nil()
+    input_command = entity.input:get_command(nil);
+end
+ 
+function input_get_command_number()
+    input_command = entity.input:get_command(10);
+end
+
+function input_get_command_boolean()
+    input_command = entity.input:get_command(true)
+end
+ 
+function input_get_command_function()
+    input_command = entity.input:get_command(entity_query_get_first_by_name)
+end
+ 
+function input_get_command_table()
+    input_command = entity.input:get_command({})
+end
+ 
+--- get_value_boolean
+function input_get_value_boolean()
+    command = entity.input:get_command("Test")
+    input_command_value = entity.input:get_value_boolean(command)
+end
+
+function input_get_value_boolean_non_existent_command()
+    input_command_value = entity.input.get_value_boolean(10)
+end
+
+function input_get_value_boolean_no_member()
+    command = entity.input:get_command("Test")
+    input_command_value = entity.input.get_value_boolean(command)
+end
+
+function input_get_value_boolean_no_param()
+    command = entity.input:get_command()
+    input_command_value = entity.input:get_value_boolean()
+end
+ 
+function input_get_value_boolean_nil()
+    command = entity.input:get_command()
+    input_command_value = entity.input:get_value_boolean(nil)
+end
+ 
+function input_get_value_boolean_string()
+    command = entity.input:get_command()
+    input_command_value = entity.input:get_value_boolean("test")
+end
+ 
+function input_get_value_boolean_function()
+    command = entity.input:get_command()
+    input_command_value = entity.input:get_value_boolean(entity_query_get_first_by_name)
+end
+ 
+function input_get_value_boolean_table()
+    command = entity.input:get_command()
+    input_command_value = entity.input:get_value_boolean({})
+end
+
+
+--- get_value_axis_2d
+function input_get_value_axis_2d()
+    command = entity.input:get_command("Test")
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d(command)
+end
+
+function input_get_value_axis_2d_no_member()
+    command = entity.input:get_command("Test")
+    input_command_value_x, input_command_value_y = entity.input.get_value_axis_2d(command)
+end
+
+function input_get_value_axis_2d_non_existent_command()
+    input_command_value_x, input_command_value_y = entity.input.get_value_axis_2d(10)
+end
+
+function input_get_value_axis_2d_no_param()
+    command = entity.input:get_command()
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d()
+end
+ 
+function input_get_value_axis_2d_nil()
+    command = entity.input:get_command()
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d(nil)
+end
+ 
+function input_get_value_axis_2d_string()
+    command = entity.input:get_command()
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d("test")
+end
+ 
+function input_get_value_axis_2d_function()
+    command = entity.input:get_command()
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d(entity_query_get_first_by_name)
+end
+ 
+function input_get_value_axis_2d_table()
+    command = entity.input:get_command()
+    input_command_value_x, input_command_value_y = entity.input:get_value_axis_2d({})
+end
+ 
+

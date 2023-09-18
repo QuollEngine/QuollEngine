@@ -27,6 +27,16 @@ public:
   quoll::LuaScope &call(quoll::Entity entity,
                         const quoll::String &functionName);
 
+  /**
+   * @brief Set up test
+   */
+  void SetUp() override;
+
+  /**
+   * @brief Tear down test
+   */
+  void TearDown() override;
+
 protected:
   quoll::EntityDatabase entityDatabase;
   quoll::EventSystem eventSystem;

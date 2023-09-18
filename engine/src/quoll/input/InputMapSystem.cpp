@@ -68,9 +68,9 @@ void InputMapSystem::update(EntityDatabase &entityDatabase) {
             } else if (field == InputDataTypeField::X1) {
               commandValue.x += 1.0f;
             } else if (field == InputDataTypeField::Y0) {
-              commandValue.y += 1.0f;
-            } else if (field == InputDataTypeField::Y1) {
               commandValue.y += -1.0f;
+            } else if (field == InputDataTypeField::Y1) {
+              commandValue.y += 1.0f;
             }
 
           } else if (auto *inputValue = std::get_if<float>(&variant)) {

@@ -3,25 +3,23 @@
 #include "quoll/scripting/ScriptingSystem.h"
 
 #include "quoll-tests/Testing.h"
+#include "quoll-tests/test-utils/AssetCacheTestBase.h"
 
-class ScriptingSystemTest : public ::testing::Test {
+class ScriptingSystemTest : public AssetCacheTestBase {
 public:
-  ScriptingSystemTest()
-      : assetCache(FixturesPath),
-        scriptingSystem(eventSystem, assetCache.getRegistry()) {
+  ScriptingSystemTest() : scriptingSystem(eventSystem, cache.getRegistry()) {
     scriptingSystem.observeChanges(entityDatabase);
   }
 
   quoll::LuaScriptAssetHandle
   loadLuaScript(quoll::String filename = "scripting-system-tester.lua") {
     auto uuid = quoll::Uuid::generate();
-    assetCache.createLuaScriptFromSource(FixturesPath / filename, uuid);
-    return assetCache.loadLuaScript(uuid).getData();
+    cache.createLuaScriptFromSource(FixturesPath / filename, uuid);
+    return cache.loadLuaScript(uuid).getData();
   }
 
   quoll::EntityDatabase entityDatabase;
   quoll::EventSystem eventSystem;
-  quoll::AssetCache assetCache;
   quoll::ScriptingSystem scriptingSystem;
 };
 

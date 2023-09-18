@@ -11,6 +11,7 @@
 #include "quoll/scene/PerspectiveLensScriptingInterface.h"
 #include "quoll/text/TextScriptingInterface.h"
 #include "quoll/animation/AnimatorScriptingInterface.h"
+#include "quoll/input/InputMapScriptingInterface.h"
 
 #include "LuaMessages.h"
 #include "LuaScope.h"
@@ -69,6 +70,7 @@ void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
   registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
   registerEntityInterface<TextScriptingInterface>(scope, table, entity);
   registerEntityInterface<AnimatorScriptingInterface>(scope, table, entity);
+  registerEntityInterface<InputMapScriptingInterface>(scope, table, entity);
 }
 
 void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,

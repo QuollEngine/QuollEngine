@@ -17,6 +17,8 @@ public:
       : LuaScriptingInterfaceTestBase("scripting-system-logging-tester.lua") {}
 
   void SetUp() override {
+    LuaScriptingInterfaceTestBase::SetUp();
+
     quoll::Engine::getUserLogger().setTransport(
         [this](auto severity, auto timestamp, auto message) {
           mockTransport(severity, timestamp, message);
@@ -24,6 +26,8 @@ public:
   }
 
   void TearDown() override {
+    LuaScriptingInterfaceTestBase::TearDown();
+
     quoll::Engine::getUserLogger().setTransport(quoll::NoopLogTransport);
   }
 

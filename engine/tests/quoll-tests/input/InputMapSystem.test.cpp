@@ -302,7 +302,8 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsXValueToOneIfIncomingBooleanIsX1) {
             glm::vec2(1.0f, 0.0f));
 }
 
-TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY0) {
+TEST_F(InputMapSystemAxis2dValueTest,
+       SetsYValueToNegativeOneIfIncomingBooleanIsY0) {
   auto key = quoll::input::get("KEY_W");
   auto entity = createInputMap();
 
@@ -313,11 +314,10 @@ TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY0) {
   auto command = inputMap.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
-            glm::vec2(0.0f, 1.0f));
+            glm::vec2(0.0f, -1.0f));
 }
 
-TEST_F(InputMapSystemAxis2dValueTest,
-       SetsYValueToNegativeOneIfIncomingBooleanIsY1) {
+TEST_F(InputMapSystemAxis2dValueTest, SetsYValueToOneIfIncomingBooleanIsY1) {
   auto key = quoll::input::get("KEY_S");
   auto entity = createInputMap();
 
@@ -328,7 +328,7 @@ TEST_F(InputMapSystemAxis2dValueTest,
   auto command = inputMap.inputKeyToCommandMap.at(key);
 
   EXPECT_EQ(std::get<glm::vec2>(inputMap.commandValues.at(command)),
-            glm::vec2(0.0f, -1.0f));
+            glm::vec2(0.0f, 1.0f));
 }
 
 TEST_F(InputMapSystemAxis2dValueTest, ClampsPositiveValueToOne) {
