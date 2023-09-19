@@ -822,39 +822,39 @@ void EntityPanel::renderJointAttachment(Scene &scene,
         !scene.entityDatabase.has<Skeleton>(
             scene.entityDatabase.get<Parent>(mSelectedEntity).parent)) {
       ImGui::Text("Entity must be an immediate child of a skeleton");
-      return;
-    }
+    } else {
+      auto parentEntity =
+          scene.entityDatabase.get<Parent>(mSelectedEntity).parent;
 
-    auto parentEntity =
-        scene.entityDatabase.get<Parent>(mSelectedEntity).parent;
+      const auto &skeleton = scene.entityDatabase.get<Skeleton>(parentEntity);
 
-    const auto &skeleton = scene.entityDatabase.get<Skeleton>(parentEntity);
+      auto &attachment =
+          scene.entityDatabase.get<JointAttachment>(mSelectedEntity);
 
-    auto &attachment =
-        scene.entityDatabase.get<JointAttachment>(mSelectedEntity);
+      auto label = attachment.joint >= 0 &&
+                           attachment.joint <
+                               static_cast<int16_t>(skeleton.jointNames.size())
+                       ? skeleton.jointNames.at(attachment.joint)
+                       : "Select joint";
 
-    auto label = attachment.joint >= 0 &&
-                         attachment.joint <
-                             static_cast<int16_t>(skeleton.jointNames.size())
-                     ? skeleton.jointNames.at(attachment.joint)
-                     : "Select joint";
-
-    if (ImGui::Button(label.c_str())) {
-      ImGui::OpenPopup("SetJointAttachment");
-    }
-
-    if (ImGui::BeginPopup("SetJointAttachment")) {
-      for (size_t i = 0; i < skeleton.jointNames.size(); ++i) {
-        if (ImGui::Selectable(skeleton.jointNames.at(i).c_str())) {
-          auto newAttachment = attachment;
-          newAttachment.joint = static_cast<int16_t>(i);
-
-          actionExecutor.execute<EntityDefaultUpdateComponent<JointAttachment>>(
-              mSelectedEntity, attachment, newAttachment);
-        }
+      if (ImGui::Button(label.c_str())) {
+        ImGui::OpenPopup("SetJointAttachment");
       }
 
-      ImGui::EndPopup();
+      if (ImGui::BeginPopup("SetJointAttachment")) {
+        for (size_t i = 0; i < skeleton.jointNames.size(); ++i) {
+          if (ImGui::Selectable(skeleton.jointNames.at(i).c_str())) {
+            auto newAttachment = attachment;
+            newAttachment.joint = static_cast<int16_t>(i);
+
+            actionExecutor
+                .execute<EntityDefaultUpdateComponent<JointAttachment>>(
+                    mSelectedEntity, attachment, newAttachment);
+          }
+        }
+
+        ImGui::EndPopup();
+      }
     }
   }
 
