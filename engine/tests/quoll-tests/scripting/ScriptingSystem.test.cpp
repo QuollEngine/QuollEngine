@@ -4,6 +4,7 @@
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/AssetCacheTestBase.h"
+#include "quoll-tests/test-utils/TestPhysicsBackend.h"
 
 class ScriptingSystemTest : public AssetCacheTestBase {
 public:
@@ -21,6 +22,7 @@ public:
   quoll::EntityDatabase entityDatabase;
   quoll::EventSystem eventSystem;
   quoll::ScriptingSystem scriptingSystem;
+  quoll::PhysicsSystem physicsSystem{new TestPhysicsBackend};
 };
 
 using ScriptingSystemDeathTest = ScriptingSystemTest;
@@ -36,7 +38,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnUpdate) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   scriptingSystem.update(TimeDelta, entityDatabase);
@@ -57,7 +59,7 @@ TEST_F(ScriptingSystemTest, DeletesScriptDataWhenComponentIsDeleted) {
     entityDatabase.set<quoll::Script>(entity, {handle});
   }
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   std::vector<quoll::Script> scripts(entities.size());
   for (size_t i = 0; i < entities.size(); ++i) {
@@ -93,7 +95,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingUpdateFunctionOnEveryUpdate) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   for (size_t i = 0; i < 10; ++i) {
@@ -112,7 +114,7 @@ TEST_F(ScriptingSystemTest, CallsScriptStartFunctionOnStart) {
   auto &component = entityDatabase.get<quoll::Script>(entity);
   EXPECT_EQ(component.scope.getLuaState(), nullptr);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
   auto *luaScope = component.scope.getLuaState();
@@ -130,7 +132,7 @@ TEST_F(ScriptingSystemTest, CallsScriptingStartFunctionOnlyOnceOnStart) {
 
   // Call 10 times
   for (size_t i = 0; i < 10; ++i) {
-    scriptingSystem.start(entityDatabase);
+    scriptingSystem.start(entityDatabase, physicsSystem);
   }
   EXPECT_NE(component.scope.getLuaState(), nullptr);
 
@@ -145,7 +147,7 @@ TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarsAreNotSet) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
 }
 
@@ -164,7 +166,7 @@ TEST_F(ScriptingSystemTest, RemovesScriptComponentIfInputVarTypesAreInvalid) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   EXPECT_FALSE(entityDatabase.has<quoll::Script>(entity));
 }
 
@@ -183,7 +185,7 @@ TEST_F(ScriptingSystemTest, SetsVariablesToInputVarsOnStart) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
   ASSERT_TRUE(entityDatabase.has<quoll::Script>(entity));
 
   EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
@@ -207,7 +209,7 @@ TEST_F(ScriptingSystemTest, RemovesVariableSetterAfterInputVariablesAreSet) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   EXPECT_EQ(component.scope.getGlobal<quoll::String>("var_string"),
             "Hello world");
@@ -232,7 +234,7 @@ TEST_F(ScriptingSystemTest, RegistersEventsOnStart) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   EXPECT_LT(component.onCollisionStart, quoll::EventObserverMax);
   EXPECT_LT(component.onCollisionEnd, quoll::EventObserverMax);
@@ -249,7 +251,7 @@ TEST_F(ScriptingSystemTest,
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
                        {quoll::Entity{5}, quoll::Entity{6}});
@@ -266,7 +268,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionStartEventIfEntityCollided) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionStarted,
                        {entity, quoll::Entity{6}});
@@ -285,7 +287,7 @@ TEST_F(ScriptingSystemTest, CallsScriptCollisionEndEventIfEntityCollided) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   eventSystem.dispatch(quoll::CollisionEvent::CollisionEnded,
                        {quoll::Entity{5}, entity});
@@ -303,7 +305,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyPressEventIfKeyIsPressed) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   eventSystem.dispatch(quoll::KeyboardEvent::Pressed, {15, -1, 3});
   eventSystem.poll();
@@ -322,7 +324,7 @@ TEST_F(ScriptingSystemTest, CallsScriptKeyReleaseEventIfKeyIsReleased) {
 
   auto &component = entityDatabase.get<quoll::Script>(entity);
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   eventSystem.dispatch(quoll::KeyboardEvent::Released, {35, -1, 3});
   eventSystem.poll();

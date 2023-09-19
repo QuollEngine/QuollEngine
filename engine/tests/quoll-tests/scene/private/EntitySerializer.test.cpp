@@ -789,6 +789,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForBoxGeometry) {
             geometryDesc.center);
   EXPECT_EQ(node["collidable"]["halfExtents"].as<glm::vec3>(glm::vec3(0.0f)),
             boxGeometry.halfExtents);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
@@ -810,6 +812,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForSphereGeometry) {
   EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
             geometryDesc.center);
   EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), sphereParams.radius);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
@@ -833,6 +837,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForCapsuleGeometry) {
   EXPECT_EQ(node["collidable"]["radius"].as<float>(0.0f), capsuleParams.radius);
   EXPECT_EQ(node["collidable"]["halfHeight"].as<float>(0.0f),
             capsuleParams.halfHeight);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
@@ -850,6 +856,8 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldForPlaneGeometry) {
   EXPECT_EQ(node["collidable"]["center"].as<glm::vec3>(glm::vec3(0.0f)),
             geometryDesc.center);
   EXPECT_EQ(node["collidable"]["shape"].as<quoll::String>(""), "plane");
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
 }
 
 TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
@@ -871,6 +879,32 @@ TEST_F(EntitySerializerTest, CreatesCollidableFieldMaterialData) {
             materialDesc.restitution);
   EXPECT_EQ(node["collidable"]["staticFriction"].as<float>(0.0f),
             materialDesc.staticFriction);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentSimulationMode) {
+  auto entity = entityDatabase.create();
+
+  entityDatabase.set<quoll::Collidable>(entity, {{}, {}, false});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(true), false);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(false), true);
+}
+
+TEST_F(EntitySerializerTest, CreatesCollidableWithDifferentQueryMode) {
+  auto entity = entityDatabase.create();
+
+  entityDatabase.set<quoll::Collidable>(entity, {{}, {}, true, false});
+
+  auto node = entitySerializer.createComponentsNode(entity);
+
+  EXPECT_TRUE(node["collidable"]);
+  EXPECT_EQ(node["collidable"]["useInSimulation"].as<bool>(false), true);
+  EXPECT_EQ(node["collidable"]["useInQueries"].as<bool>(true), false);
 }
 
 TEST_F(EntitySerializerTest,

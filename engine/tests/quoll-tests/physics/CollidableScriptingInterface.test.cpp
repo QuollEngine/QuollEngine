@@ -445,6 +445,34 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
             collidable.materialDesc.restitution);
 }
 
+// sweep
+TEST_F(CollidableLuaScriptingInterfaceTest,
+       SweepReturnsFalseIfProvidedArgumentsAreInvalid) {
+  physicsBackend->setSweepValue(true);
+
+  auto entity = entityDatabase.create();
+  call(entity, "collidable_sweep_invalid");
+}
+
+TEST_F(CollidableLuaScriptingInterfaceTest, SweepReturnsFalseIfSweepTestFails) {
+  physicsBackend->setSweepValue(false);
+
+  auto entity = entityDatabase.create();
+  auto scope = call(entity, "collidable_sweep");
+  EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
+  EXPECT_FALSE(scope.getGlobal<bool>("sweep_output"));
+}
+
+TEST_F(CollidableLuaScriptingInterfaceTest,
+       SweepReturnsTrueIfSweepTestSucceeds) {
+  physicsBackend->setSweepValue(true);
+
+  auto entity = entityDatabase.create();
+  auto scope = call(entity, "collidable_sweep");
+  EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
+  EXPECT_TRUE(scope.getGlobal<bool>("sweep_output"));
+}
+
 // Delete
 TEST_F(CollidableLuaScriptingInterfaceTest,
        DeleteDoesNothingIfProvidedArgumentIsInvalid) {

@@ -3,6 +3,8 @@
 #include "quoll/asset/AssetCache.h"
 #include "quoll/scripting/ScriptingSystem.h"
 
+#include "TestPhysicsBackend.h"
+
 /**
  * @brief Test base class for Lua scripting interfaces
  */
@@ -42,6 +44,8 @@ protected:
   quoll::EventSystem eventSystem;
   quoll::AssetCache assetCache;
   quoll::ScriptingSystem scriptingSystem;
+  TestPhysicsBackend *physicsBackend = new TestPhysicsBackend;
+  quoll::PhysicsSystem physicsSystem;
 
 private:
   quoll::String mScriptName;

@@ -5,6 +5,15 @@
 
 static const quoll::Path CachePath = std::filesystem::current_path() / "cache";
 
+static int luaAssert(void *state) {
+  quoll::LuaScope scope(state);
+  QuollAssert(scope.is<bool>(1), "Invalid value provided");
+
+  auto val = scope.get<bool>(1);
+  scope.set(val);
+  return 1;
+}
+
 const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
     "scripting-system-component-tester.lua";
 
@@ -12,7 +21,7 @@ LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
     const quoll::String &scriptName)
     : assetCache(CachePath),
       scriptingSystem(eventSystem, assetCache.getRegistry()),
-      mScriptName(scriptName) {}
+      mScriptName(scriptName), physicsSystem(physicsBackend) {}
 
 quoll::LuaScope &
 LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
@@ -23,9 +32,11 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
 
   entityDatabase.set<quoll::Script>(entity, {handle});
 
-  scriptingSystem.start(entityDatabase);
+  scriptingSystem.start(entityDatabase, physicsSystem);
 
   auto &scripting = entityDatabase.get<quoll::Script>(entity);
+
+  scripting.scope.setGlobal("assert_native", &luaAssert);
 
   scripting.scope.luaGetGlobal(functionName);
   if (!scripting.scope.call(0)) {

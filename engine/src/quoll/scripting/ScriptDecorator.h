@@ -4,6 +4,8 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/asset/AssetRegistry.h"
 
+#include "quoll/physics/PhysicsSystem.h"
+
 namespace quoll {
 
 /**
@@ -17,10 +19,12 @@ public:
    * @param scope Lua scope
    * @param entity Entity
    * @param entityDatabase Entity database
+   * @param physicsSystem Physics system
    * @param assetRegistry Asset registry
    */
   void attachToScope(LuaScope &scope, Entity entity,
                      EntityDatabase &entityDatabase,
+                     PhysicsSystem &physicsSystem,
                      AssetRegistry &assetRegistry);
 
   /**

@@ -2194,6 +2194,85 @@ TEST_F(SceneLoaderCollidableTest,
   EXPECT_EQ(material.staticFriction, validStaticFriction);
 }
 
+TEST_F(SceneLoaderCollidableTest, SetsCollidableModesToTrueIfInvalidField) {
+  std::vector<YAML::Node> invalidNodes{
+      YAML::Node(YAML::NodeType::Undefined), YAML::Node(YAML::NodeType::Null),
+      YAML::Node(YAML::NodeType::Map), YAML::Node(YAML::NodeType::Sequence),
+      YAML::Node(YAML::NodeType::Scalar)};
+
+  for (const auto &invalidNode : invalidNodes) {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["useInSimulation"] = invalidNode;
+    node["collidable"]["useInQueries"] = invalidNode;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInSimulation);
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInQueries);
+  }
+}
+
+TEST_F(SceneLoaderCollidableTest, SetsCollidableModesToDataInFileIfValid) {
+  {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["useInSimulation"] = false;
+    node["collidable"]["useInQueries"] = false;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    EXPECT_FALSE(entityDatabase.get<quoll::Collidable>(entity).useInSimulation);
+    EXPECT_FALSE(entityDatabase.get<quoll::Collidable>(entity).useInQueries);
+  }
+
+  {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["useInSimulation"] = true;
+    node["collidable"]["useInQueries"] = false;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInSimulation);
+    EXPECT_FALSE(entityDatabase.get<quoll::Collidable>(entity).useInQueries);
+  }
+
+  {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["useInSimulation"] = false;
+    node["collidable"]["useInQueries"] = true;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    EXPECT_FALSE(entityDatabase.get<quoll::Collidable>(entity).useInSimulation);
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInQueries);
+  }
+
+  {
+    auto [node, entity] = createNode();
+    // Shape does not matter here
+    node["collidable"]["shape"] = "box";
+    node["collidable"]["useInSimulation"] = true;
+    node["collidable"]["useInQueries"] = true;
+
+    sceneLoader.loadComponents(node, entity, entityIdCache).getData();
+
+    ASSERT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInSimulation);
+    EXPECT_TRUE(entityDatabase.get<quoll::Collidable>(entity).useInQueries);
+  }
+}
+
 using SceneLoaderParentTest = SceneLoaderTest;
 
 TEST_F(SceneLoaderParentTest,

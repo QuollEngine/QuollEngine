@@ -5,25 +5,27 @@
 #include <PxPhysicsAPI.h>
 #include "PhysxMapping.h"
 
+using namespace physx;
+
 namespace quoll {
 
-physx::PxGeometryType::Enum
+PxGeometryType::Enum
 PhysxMapping::getPhysxGeometryType(const PhysicsGeometryType &type) {
   switch (type) {
   case PhysicsGeometryType::Box:
-    return physx::PxGeometryType::eBOX;
+    return PxGeometryType::eBOX;
   case PhysicsGeometryType::Sphere:
-    return physx::PxGeometryType::eSPHERE;
+    return PxGeometryType::eSPHERE;
   case PhysicsGeometryType::Capsule:
-    return physx::PxGeometryType::eCAPSULE;
+    return PxGeometryType::eCAPSULE;
   case PhysicsGeometryType::Plane:
-    return physx::PxGeometryType::ePLANE;
+    return PxGeometryType::ePLANE;
   default:
-    return physx::PxGeometryType::eINVALID;
+    return PxGeometryType::eINVALID;
   }
 }
 
-physx::PxTransform PhysxMapping::getPhysxTransform(const glm::mat4 &transform) {
+PxTransform PhysxMapping::getPhysxTransform(const glm::mat4 &transform) {
   glm::vec3 empty3;
   glm::vec4 empty4;
 
@@ -32,7 +34,7 @@ physx::PxTransform PhysxMapping::getPhysxTransform(const glm::mat4 &transform) {
 
   glm::decompose(transform, empty3, rotation, position, empty3, empty4);
 
-  physx::PxTransform pose;
+  PxTransform pose;
   pose.p.x = position.x;
   pose.p.y = position.y;
   pose.p.z = position.z;
@@ -43,6 +45,10 @@ physx::PxTransform PhysxMapping::getPhysxTransform(const glm::mat4 &transform) {
   pose.q.z = rotation.z;
 
   return pose;
+}
+
+PxVec3 PhysxMapping::getPhysxVec3(const glm::vec3 &value) {
+  return PxVec3(value.x, value.y, value.z);
 }
 
 } // namespace quoll

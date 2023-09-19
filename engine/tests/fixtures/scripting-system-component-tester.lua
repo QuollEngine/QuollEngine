@@ -1,3 +1,10 @@
+function assert(a, b)
+    ret = assert_native(a == b)
+    if ret == false then
+        error("Assetion failed: ", a, b)
+    end
+end
+
 function start()
 end
 
@@ -591,6 +598,29 @@ end
 
 function collidable_set_plane_geometry_invalid()
     entity.collidable.set_plane_geometry()
+end
+
+sweep_output = nil
+function collidable_sweep()
+    sweep_output = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
+end
+
+function collidable_sweep_invalid()
+    assert(entity.collidable.sweep(0.0, 1.0, 0.0, 2.0), false)
+
+    assert(entity.collidable:sweep(), false)
+    assert(entity.collidable:sweep(0.0), false)
+    assert(entity.collidable:sweep(0.0, 0.0), false)
+    assert(entity.collidable:sweep(0.0, 0.0, 0.0), false)
+
+    invalid_vars = {true, "test", {}, local_transform_scale_set, nil}
+
+    for _, var in ipairs(invalid_vars) do
+        assert(entity.collidable:sweep(var, 1.0, 0.0, 2.0), false)
+        assert(entity.collidable:sweep(0.0, var, 0.0, 2.0), false)
+        assert(entity.collidable:sweep(0.0, 0.0, var, 2.0), false)
+        assert(entity.collidable:sweep(0.0, 0.0, 0.0, var), false)
+    end
 end
 
 function collidable_delete()

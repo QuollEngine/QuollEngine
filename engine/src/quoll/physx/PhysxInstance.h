@@ -29,6 +29,16 @@ struct PhysxInstance {
    * Material
    */
   physx::PxMaterial *material = nullptr;
+
+  /**
+   * Use shape in simulation
+   */
+  bool useShapeInSimulation = true;
+
+  /**
+   * Use shape in queries
+   */
+  bool useShapeInQueries = true;
 };
 
 } // namespace quoll

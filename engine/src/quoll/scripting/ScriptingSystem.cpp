@@ -11,7 +11,8 @@ ScriptingSystem::ScriptingSystem(EventSystem &eventSystem,
                                  AssetRegistry &assetRegistry)
     : mEventSystem(eventSystem), mAssetRegistry(assetRegistry) {}
 
-void ScriptingSystem::start(EntityDatabase &entityDatabase) {
+void ScriptingSystem::start(EntityDatabase &entityDatabase,
+                            PhysicsSystem &physicsSystem) {
   QUOLL_PROFILE_EVENT("ScriptingSystem::start");
   ScriptDecorator scriptDecorator;
   std::vector<Entity> deleteList;
@@ -43,7 +44,7 @@ void ScriptingSystem::start(EntityDatabase &entityDatabase) {
     }
     component.scope = mLuaInterpreter.createScope();
     scriptDecorator.attachToScope(component.scope, entity, entityDatabase,
-                                  mAssetRegistry);
+                                  physicsSystem, mAssetRegistry);
     scriptDecorator.attachVariableInjectors(component.scope,
                                             component.variables);
 

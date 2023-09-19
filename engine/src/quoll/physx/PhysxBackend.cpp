@@ -166,6 +166,22 @@ void PhysxBackend::observeChanges(EntityDatabase &entityDatabase) {
   mPhysxInstanceRemoveObserver = entityDatabase.observeRemove<PhysxInstance>();
 }
 
+bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
+                         const glm::vec3 &direction, float distance) {
+  QuollAssert(entityDatabase.has<PhysxInstance>(entity),
+              "Physx instance not found");
+
+  const auto &physx = entityDatabase.get<PhysxInstance>(entity);
+  const auto &transform = entityDatabase.get<WorldTransform>(entity);
+
+  PxSweepBuffer hit;
+
+  return mScene->sweep(
+      physx.shape->getGeometry().any(),
+      PhysxMapping::getPhysxTransform(transform.worldTransform),
+      PhysxMapping::getPhysxVec3(direction), distance, hit);
+}
+
 void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
   QUOLL_PROFILE_EVENT("PhysicsSystem::synchronizeEntitiesWithPhysx");
 
@@ -239,6 +255,18 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         physx.shape->release();
         physx.shape = newShape;
       }
+
+      if (physx.useShapeInSimulation != collidable.useInSimulation) {
+        physx.shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE,
+                             collidable.useInSimulation);
+      }
+      physx.useShapeInSimulation = collidable.useInSimulation;
+
+      if (physx.useShapeInQueries != collidable.useInQueries) {
+        physx.shape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE,
+                             collidable.useInQueries);
+      }
+      physx.useShapeInQueries = collidable.useInQueries;
 
       // Create rigid static if no rigid body
       if (!entityDatabase.has<RigidBody>(entity) && !physx.rigidStatic) {

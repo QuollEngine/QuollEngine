@@ -7,6 +7,8 @@ struct lua_State;
 
 namespace quoll {
 
+using LuaScopeFn = int (*)(void *);
+
 /**
  * @brief Lua user data object
  */
@@ -359,6 +361,13 @@ private:
    */
   void luaSetUserData(void *value);
 
+  /**
+   * @brief Push function to the stack
+   *
+   * @param value User data value
+   */
+  void luaSetFunction(LuaScopeFn fn);
+
 private:
   lua_State *mScope = nullptr;
 };
@@ -592,6 +601,15 @@ template <> inline void LuaScope::set<String>(const String &value) {
  */
 template <> inline void LuaScope::set<LuaUserData>(const LuaUserData &value) {
   luaSetUserData(value.pointer);
+}
+
+/**
+ * @brief Set function
+ *
+ * @param value Function pointer
+ */
+template <> inline void LuaScope::set<LuaScopeFn>(const LuaScopeFn &value) {
+  luaSetFunction(value);
 }
 
 /**

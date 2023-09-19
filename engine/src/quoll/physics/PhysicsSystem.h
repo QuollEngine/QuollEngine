@@ -56,6 +56,21 @@ public:
     mBackend->observeChanges(entityDatabase);
   }
 
+  /**
+   * @brief Run sweep collision test
+   *
+   * @param entityDatabase Entity database
+   * @param entity Entity
+   * @param direction Sweep direction
+   * @param distance Sweep distance
+   * @retval true Entity collided
+   * @retval false Entity not collided
+   */
+  inline bool sweep(EntityDatabase &entityDatabase, Entity entity,
+                    const glm::vec3 &direction, float distance) {
+    return mBackend->sweep(entityDatabase, entity, direction, distance);
+  }
+
 private:
   std::unique_ptr<PhysicsBackend> mBackend;
 };

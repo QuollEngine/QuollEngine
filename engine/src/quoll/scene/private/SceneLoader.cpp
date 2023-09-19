@@ -88,6 +88,10 @@ Result<bool> SceneLoader::loadComponents(const YAML::Node &node, Entity entity,
     collidable.geometryDesc.type = shape;
     collidable.geometryDesc.center = node["collidable"]["center"].as<glm::vec3>(
         collidable.geometryDesc.center);
+    collidable.useInSimulation = node["collidable"]["useInSimulation"].as<bool>(
+        collidable.useInSimulation);
+    collidable.useInQueries =
+        node["collidable"]["useInQueries"].as<bool>(collidable.useInQueries);
 
     if (shape == PhysicsGeometryType::Box) {
       quoll::PhysicsGeometryBox box{};
