@@ -81,7 +81,7 @@ int TextScriptingInterface::LuaInterface::getLineHeight(void *state) {
     Engine::getUserLogger().error()
         << LuaMessages::noEntityTable(getName(), "get_line_height");
 
-    scope.set<String>("");
+    scope.set<float>(0.0);
     return 1;
   }
 

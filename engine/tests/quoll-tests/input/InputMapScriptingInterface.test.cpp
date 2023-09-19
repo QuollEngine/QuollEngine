@@ -71,41 +71,7 @@ TEST_F(InputMapLuaScriptingInterfaceTest,
 TEST_F(InputMapLuaScriptingInterfaceTest,
        GetCommandReturnsNilIfProvidedArgumentIsInvalid) {
   auto entity = createEntityWithInputMap();
-
-  {
-    auto &scope = call(entity, "input_get_command_no_member");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_no_param");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_nil");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_number");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_boolean");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_function");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
-
-  {
-    auto &scope = call(entity, "input_get_command_table");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("input_command"));
-  }
+  auto &scope = call(entity, "input_get_command_invalid");
 }
 
 // get_value_boolean

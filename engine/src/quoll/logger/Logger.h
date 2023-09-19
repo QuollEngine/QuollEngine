@@ -38,6 +38,13 @@ public:
   Logger(LogSeverity minSeverity = DefaultSeverity);
 
   /**
+   * @brief Set minimum severity
+   *
+   * @param minSeverity Minimum severity
+   */
+  void setMinSeverity(LogSeverity minSeverity);
+
+  /**
    * @brief Set log transport
    *
    * @param transport Log transport

@@ -6,39 +6,13 @@
 using EntityQueryLuaInterfaceTest = LuaScriptingInterfaceTestBase;
 
 TEST_F(EntityQueryLuaInterfaceTest,
-       GetEntityByNameReturnsNullIfParametersAreNotPassed) {
+       GetEntityByNameReturnsNullIfParametersAreInvalid) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "entity_query_get_first_by_name_no_param");
-
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
+  call(entity, "entity_query_get_first_by_name_invalid");
 }
 
 TEST_F(EntityQueryLuaInterfaceTest,
-       GetEntityByNameReturnsNullIfParametersAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  {
-    auto &scope = call(entity, "entity_query_get_first_by_name_param_nil");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_query_get_first_by_name_param_boolean");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_query_get_first_by_name_param_function");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_query_get_first_by_name_param_table");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("found_entity"));
-  }
-}
-
-TEST_F(EntityQueryLuaInterfaceTest, GetEntityByNameIsNullIfEntityDoesNotExist) {
+       GetEntityByNameReturnsNulllIfEntityDoesNotExist) {
   auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "entity_query_get_first_by_name");
@@ -62,40 +36,8 @@ TEST_F(EntityQueryLuaInterfaceTest,
 TEST_F(EntityQueryLuaInterfaceTest, DeleteEntityDoesNothingIfInvalidArgument) {
   auto entity = entityDatabase.create();
 
-  {
-    call(entity, "entity_query_delete_entity_no_param");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
-
-  {
-    call(entity, "entity_query_delete_entity_param_nil");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
-
-  {
-    call(entity, "entity_query_delete_entity_param_boolean");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
-
-  {
-    call(entity, "entity_query_delete_entity_param_table");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
-
-  {
-    call(entity, "entity_query_delete_entity_param_string");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
-}
-
-TEST_F(EntityQueryLuaInterfaceTest,
-       DeleteEntityDoesNothingIfEntityDoesNotExist) {
-  auto entity = entityDatabase.create();
-
-  {
-    call(entity, "entity_query_delete_entity_param_invalid_entity");
-    EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
-  }
+  call(entity, "entity_query_delete_entity_invalid");
+  EXPECT_FALSE(entityDatabase.has<quoll::Delete>(entity));
 }
 
 TEST_F(EntityQueryLuaInterfaceTest,

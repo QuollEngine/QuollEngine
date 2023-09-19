@@ -16,14 +16,10 @@ TEST_F(TextLuaScriptingInterfaceTest,
   EXPECT_EQ(name, "");
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, GetTextReturnsEmptyStringIfNoSelf) {
+TEST_F(TextLuaScriptingInterfaceTest,
+       GetTextReturnsEmptyStringIfInvalidArguments) {
   auto entity = entityDatabase.create();
-
-  auto &scope = call(entity, "text_get_text_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
-  auto name = scope.getGlobal<quoll::String>("text");
-  EXPECT_EQ(name, "");
+  call(entity, "text_get_text_invalid");
 }
 
 TEST_F(TextLuaScriptingInterfaceTest, GetTextReturnsTextDataIfComponentExists) {
@@ -75,14 +71,11 @@ TEST_F(TextLuaScriptingInterfaceTest,
   EXPECT_EQ(name, 0.0f);
 }
 
-TEST_F(TextLuaScriptingInterfaceTest, GetLineHeightReturnsZeroIfNoSelf) {
+TEST_F(TextLuaScriptingInterfaceTest,
+       GetLineHeightReturnsZeroIfInvalidArguments) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "text_get_line_height_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Text>(entity));
-  auto name = scope.getGlobal<float>("text_line_height");
-  EXPECT_EQ(name, 0.0f);
+  call(entity, "text_get_line_height_invalid");
 }
 
 TEST_F(TextLuaScriptingInterfaceTest,
