@@ -33,7 +33,6 @@
 #include "quoll/physics/Force.h"
 #include "quoll/physics/Torque.h"
 #include "quoll/physics/RigidBodyClear.h"
-#include "quoll/physics/PhysxInstance.h"
 #include "quoll/scripting/Script.h"
 #include "quoll/text/Text.h"
 #include "quoll/renderer/MeshRenderer.h"

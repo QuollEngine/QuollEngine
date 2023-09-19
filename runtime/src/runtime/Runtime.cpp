@@ -67,7 +67,8 @@ void Runtime::start() {
 
   quoll::ScriptingSystem scriptingSystem(eventSystem, assetCache.getRegistry());
   quoll::SceneUpdater sceneUpdater;
-  quoll::PhysicsSystem physicsSystem(eventSystem);
+  quoll::PhysicsSystem physicsSystem =
+      quoll::PhysicsSystem::createPhysxBackend(eventSystem);
   quoll::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
   quoll::AnimationSystem animationSystem(assetCache.getRegistry());
   quoll::SkeletonUpdater skeletonUpdater;

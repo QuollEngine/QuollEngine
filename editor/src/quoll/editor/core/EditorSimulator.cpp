@@ -10,7 +10,8 @@ EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
     : mInputMapSystem(deviceManager, assetRegistry),
       mCameraAspectRatioUpdater(window),
       mScriptingSystem(eventSystem, assetRegistry),
-      mAnimationSystem(assetRegistry), mPhysicsSystem(eventSystem),
+      mAnimationSystem(assetRegistry),
+      mPhysicsSystem(PhysicsSystem::createPhysxBackend(eventSystem)),
       mEditorCamera(editorCamera), mAudioSystem(assetRegistry) {}
 
 void EditorSimulator::update(float dt, WorkspaceState &state) {
