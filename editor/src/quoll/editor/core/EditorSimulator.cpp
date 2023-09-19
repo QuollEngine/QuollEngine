@@ -69,7 +69,7 @@ void EditorSimulator::updateSimulation(float dt, WorkspaceState &state) {
 
   mCameraAspectRatioUpdater.update(entityDatabase);
 
-  mScriptingSystem.start(entityDatabase);
+  mScriptingSystem.start(entityDatabase, mPhysicsSystem);
   mScriptingSystem.update(dt, entityDatabase);
   mAnimationSystem.update(dt, entityDatabase);
 

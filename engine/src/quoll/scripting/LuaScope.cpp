@@ -100,6 +100,11 @@ void LuaScope::luaSetUserData(void *data) {
   lua_pushlightuserdata(mScope, data);
 }
 
+void LuaScope::luaSetFunction(int (*value)(void *)) {
+  lua_pushcfunction(static_cast<lua_State *>(mScope),
+                    reinterpret_cast<lua_CFunction>(value));
+}
+
 int LuaScope::luaGetGlobal(const String &name) {
   return lua_getglobal(mScope, name.c_str());
 }

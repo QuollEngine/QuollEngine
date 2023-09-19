@@ -107,6 +107,14 @@ public:
   static int setPlaneGeometry(void *state);
 
   /**
+   * @brief Sweep tset
+   *
+   * @param state Lua state
+   * @return Number of arguments
+   */
+  static int sweep(void *state);
+
+  /**
    * @brief Delete component
    *
    * @param state Lua state
@@ -117,7 +125,7 @@ public:
   /**
    * @brief Interface fields
    */
-  static constexpr std::array<InterfaceField, 12> Fields{
+  static constexpr std::array<InterfaceField, 13> Fields{
       InterfaceField{"set_default_material", setDefaultMaterial},
       InterfaceField{"get_static_friction", getStaticFriction},
       InterfaceField{"set_static_friction", setStaticFriction},
@@ -129,6 +137,7 @@ public:
       InterfaceField{"set_sphere_geometry", setSphereGeometry},
       InterfaceField{"set_capsule_geometry", setCapsuleGeometry},
       InterfaceField{"set_plane_geometry", setPlaneGeometry},
+      InterfaceField{"sweep", sweep},
       InterfaceField{"delete", deleteThis}};
 
   /**

@@ -47,6 +47,19 @@ public:
    * @param entityDatabase Entity database
    */
   virtual void observeChanges(EntityDatabase &entityDatabase) = 0;
+
+  /**
+   * @brief Run sweep collision test
+   *
+   * @param entityDatabase Entity database
+   * @param entity Entity
+   * @param direction Sweep direction
+   * @param distance Sweep distance
+   * @retval true Entity collided
+   * @retval false Entity not collided
+   */
+  virtual bool sweep(EntityDatabase &entityDatabase, Entity entity,
+                     const glm::vec3 &direction, float distance) = 0;
 };
 
 } // namespace quoll

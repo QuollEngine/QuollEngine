@@ -75,9 +75,12 @@ void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
 
 void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,
                                     EntityDatabase &entityDatabase,
+                                    PhysicsSystem &physicsSystem,
                                     AssetRegistry &assetRegistry) {
   scope.setGlobal<LuaUserData>("__privateDatabase",
                                {static_cast<void *>(&entityDatabase)});
+  scope.setGlobal<LuaUserData>("__privatePhysics",
+                               {static_cast<void *>(&physicsSystem)});
   scope.setGlobal<LuaUserData>("__privateAssetRegistry",
                                {static_cast<void *>(&assetRegistry)});
 

@@ -103,7 +103,7 @@ void Runtime::start() {
 
     entityDeleter.update(scene);
     cameraAspectRatioUpdater.update(entityDatabase);
-    scriptingSystem.start(entityDatabase);
+    scriptingSystem.start(entityDatabase, physicsSystem);
     scriptingSystem.update(dt, entityDatabase);
     animationSystem.update(dt, entityDatabase);
     skeletonUpdater.update(entityDatabase);

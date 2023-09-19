@@ -61,6 +61,19 @@ public:
    */
   void observeChanges(EntityDatabase &entityDatabase) override;
 
+  /**
+   * @brief Run sweep collision test
+   *
+   * @param entityDatabase Entity database
+   * @param entity Entity
+   * @param direction Sweep direction
+   * @param distance Sweep distance
+   * @retval true Entity collided
+   * @retval false Entity not collided
+   */
+  bool sweep(EntityDatabase &entityDatabase, Entity entity,
+             const glm::vec3 &direction, float distance) override;
+
 private:
   /**
    * @brief Synchronize physics components

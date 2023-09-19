@@ -3,6 +3,7 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/events/EventSystem.h"
 #include "quoll/asset/AssetRegistry.h"
+#include "quoll/physics/PhysicsSystem.h"
 
 #include "LuaInterpreter.h"
 
@@ -32,8 +33,9 @@ public:
    * @brief Call script start on new scripts
    *
    * @param entityDatabase Entity database
+   * @param physicsSystem Physics system
    */
-  void start(EntityDatabase &entityDatabase);
+  void start(EntityDatabase &entityDatabase, PhysicsSystem &physicsSystem);
 
   /**
    * @brief Call script update on new scripts

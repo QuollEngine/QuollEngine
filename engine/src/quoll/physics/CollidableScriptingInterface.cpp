@@ -5,6 +5,7 @@
 #include "quoll/scripting/LuaScope.h"
 #include "quoll/scripting/LuaMessages.h"
 #include "quoll/scripting/ComponentLuaInterfaceCommon.h"
+#include "quoll/physics/PhysicsSystem.h"
 
 #include "CollidableScriptingInterface.h"
 
@@ -421,6 +422,48 @@ int CollidableScriptingInterface::LuaInterface::setPlaneGeometry(void *state) {
   }
 
   return 0;
+}
+
+int CollidableScriptingInterface::LuaInterface::sweep(void *state) {
+  LuaScope scope(state);
+
+  if (!scope.is<LuaTable>(1)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::noEntityTable(getName(), "sweep");
+    scope.set(false);
+    return 1;
+  }
+
+  if (!scope.is<float>(2) || !scope.is<float>(3) || !scope.is<float>(4) ||
+      !scope.is<float>(5)) {
+    Engine::getUserLogger().error()
+        << LuaMessages::invalidArguments<float, float, float, float>(getName(),
+                                                                     "sweep");
+    scope.set(false);
+    return 1;
+  }
+
+  auto entityTable = scope.get<LuaTable>(1);
+  entityTable.get("id");
+  Entity entity = scope.get<Entity>();
+  scope.pop(1);
+
+  float dirX = scope.get<float>(2);
+  float dirY = scope.get<float>(3);
+  float dirZ = scope.get<float>(4);
+  float distance = scope.get<float>(5);
+  scope.pop(3);
+
+  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
+      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
+
+  PhysicsSystem &physicsSystem = *static_cast<PhysicsSystem *>(
+      scope.getGlobal<LuaUserData>("__privatePhysics").pointer);
+
+  scope.set(physicsSystem.sweep(entityDatabase, entity, {dirX, dirY, dirZ},
+                                distance));
+
+  return 1;
 }
 
 int CollidableScriptingInterface::LuaInterface::deleteThis(void *state) {

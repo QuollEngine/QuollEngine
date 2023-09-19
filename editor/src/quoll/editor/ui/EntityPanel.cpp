@@ -1057,6 +1057,26 @@ void EntityPanel::renderCollidable(Scene &scene,
       }
     }
 
+    bool useInSimulation = collidable.useInSimulation;
+    ImGui::Text("Use in simulation");
+
+    if (ImGui::Checkbox("##UseInSimulation", &useInSimulation)) {
+      auto newCollidable = collidable;
+      newCollidable.useInSimulation = useInSimulation;
+      actionExecutor.execute<EntityDefaultUpdateComponent<Collidable>>(
+          mSelectedEntity, collidable, newCollidable);
+    }
+
+    bool useInQueries = collidable.useInQueries;
+    ImGui::Text("Use in queries");
+
+    if (ImGui::Checkbox("##Use in queries", &useInQueries)) {
+      auto newCollidable = collidable;
+      newCollidable.useInQueries = useInQueries;
+      actionExecutor.execute<EntityDefaultUpdateComponent<Collidable>>(
+          mSelectedEntity, collidable, newCollidable);
+    }
+
     {
       auto &material = collidable.materialDesc;
 
