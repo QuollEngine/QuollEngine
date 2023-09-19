@@ -12,23 +12,23 @@ for k in letters:
 
 print()
 print('// digits')
-digits = [i for i in range(1, 10)]
+digits = [i for i in range(0, 10)]
 for k in digits:
     print_map(k, k)
 
 print()
 print('// special')
 special_chars = [
- 'comma',
- 'minus',
- 'period',
- 'slash',
- 'semicolon',
- 'equal',
- 'left_bracket',
- 'backslash',
- 'right_bracket',
- 'grave_accent'
+ 'COMMA',
+ 'MINUS',
+ 'PERIOD',
+ 'SLASH',
+ 'SEMICOLON',
+ 'EQUAL',
+ 'LEFT_BRACKET',
+ 'BACKSLASH',
+ 'RIGHT_BRACKET',
+ 'GRAVE_ACCENT'
 ]
 
 for k in special_chars:

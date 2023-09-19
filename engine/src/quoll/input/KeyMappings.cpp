@@ -52,6 +52,7 @@ static const std::unordered_map<String, int> Mapping{
     {"KEY_Z", getKeyboardKeyFromGlfw(GLFW_KEY_Z)},
 
     // digits
+    {"KEY_0", getKeyboardKeyFromGlfw(GLFW_KEY_0)},
     {"KEY_1", getKeyboardKeyFromGlfw(GLFW_KEY_1)},
     {"KEY_2", getKeyboardKeyFromGlfw(GLFW_KEY_2)},
     {"KEY_3", getKeyboardKeyFromGlfw(GLFW_KEY_3)},
@@ -63,16 +64,16 @@ static const std::unordered_map<String, int> Mapping{
     {"KEY_9", getKeyboardKeyFromGlfw(GLFW_KEY_9)},
 
     // special
-    {"KEY_comma", getKeyboardKeyFromGlfw(GLFW_KEY_COMMA)},
-    {"KEY_minus", getKeyboardKeyFromGlfw(GLFW_KEY_MINUS)},
-    {"KEY_period", getKeyboardKeyFromGlfw(GLFW_KEY_PERIOD)},
-    {"KEY_slash", getKeyboardKeyFromGlfw(GLFW_KEY_SLASH)},
-    {"KEY_semicolon", getKeyboardKeyFromGlfw(GLFW_KEY_SEMICOLON)},
-    {"KEY_equal", getKeyboardKeyFromGlfw(GLFW_KEY_EQUAL)},
-    {"KEY_left_bracket", getKeyboardKeyFromGlfw(GLFW_KEY_LEFT_BRACKET)},
-    {"KEY_backslash", getKeyboardKeyFromGlfw(GLFW_KEY_BACKSLASH)},
-    {"KEY_right_bracket", getKeyboardKeyFromGlfw(GLFW_KEY_RIGHT_BRACKET)},
-    {"KEY_grave_accent", getKeyboardKeyFromGlfw(GLFW_KEY_GRAVE_ACCENT)},
+    {"KEY_COMMA", getKeyboardKeyFromGlfw(GLFW_KEY_COMMA)},
+    {"KEY_MINUS", getKeyboardKeyFromGlfw(GLFW_KEY_MINUS)},
+    {"KEY_PERIOD", getKeyboardKeyFromGlfw(GLFW_KEY_PERIOD)},
+    {"KEY_SLASH", getKeyboardKeyFromGlfw(GLFW_KEY_SLASH)},
+    {"KEY_SEMICOLON", getKeyboardKeyFromGlfw(GLFW_KEY_SEMICOLON)},
+    {"KEY_EQUAL", getKeyboardKeyFromGlfw(GLFW_KEY_EQUAL)},
+    {"KEY_LEFT_BRACKET", getKeyboardKeyFromGlfw(GLFW_KEY_LEFT_BRACKET)},
+    {"KEY_BACKSLASH", getKeyboardKeyFromGlfw(GLFW_KEY_BACKSLASH)},
+    {"KEY_RIGHT_BRACKET", getKeyboardKeyFromGlfw(GLFW_KEY_RIGHT_BRACKET)},
+    {"KEY_GRAVE_ACCENT", getKeyboardKeyFromGlfw(GLFW_KEY_GRAVE_ACCENT)},
 
     // command keys
     {"KEY_SPACE", getKeyboardKeyFromGlfw(GLFW_KEY_SPACE)},
