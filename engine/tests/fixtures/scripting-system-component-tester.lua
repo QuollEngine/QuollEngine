@@ -1,7 +1,8 @@
-function assert(a, b)
+function expect_eq(a, b)
     ret = assert_native(a == b)
     if ret == false then
-        error("Assetion failed: ", a, b)
+        msg = "Assertion failed: " .. tostring(a) .. " - " .. tostring(b)
+        error(msg)
     end
 end
 
@@ -14,24 +15,13 @@ end
 found_entity = -1
 
 -- Entity query: get first by name
-function entity_query_get_first_by_name_no_param()
-   found_entity = entity_query.get_first_entity_by_name()
-end
-
-function entity_query_get_first_by_name_param_nil()
-   found_entity = entity_query.get_first_entity_by_name(nil);
-end
-
-function entity_query_get_first_by_name_param_boolean()
-   found_entity = entity_query.get_first_entity_by_name(true)
-end
-
-function entity_query_get_first_by_name_param_function()
-   found_entity = entity_query.get_first_entity_by_name(entity_query_get_first_by_name)
-end
-
-function entity_query_get_first_by_name_param_table()
-   found_entity = entity_query.get_first_entity_by_name({})
+function entity_query_get_first_by_name_invalid()
+   expect_eq(entity_query.get_first_entity_by_name(), nil)
+   expect_eq(entity_query.get_first_entity_by_name(nil), nil)
+   expect_eq(entity_query.get_first_entity_by_name(true), nil)
+   expect_eq(entity_query.get_first_entity_by_name(entity_query_get_first_by_name), nil)
+   expect_eq(entity_query.get_first_entity_by_name({}), nil)
+   expect_eq(entity_query.get_first_entity_by_name(1), nil)
 end
 
 function entity_query_get_first_by_name()
@@ -39,29 +29,13 @@ function entity_query_get_first_by_name()
 end
 
 -- Entity query: delete entity
-function entity_query_delete_entity_no_param()
+function entity_query_delete_entity_invalid()
     entity_query.delete_entity()
-end
-
-function entity_query_delete_entity_param_nil()
     entity_query.delete_entity(nil)
-end
-
-function entity_query_delete_entity_param_boolean()
     entity_query.delete_entity(true)
-end
-
-function entity_query_delete_entity_param_table()
     entity_query.delete_entity({})
-end
-
-function entity_query_delete_entity_param_string()
     entity_query.delete_entity("Test")
-end
-
-function entity_query_delete_entity_param_invalid_entity()
-    custom_entity = {id=123123}
-    entity_query.delete_entity(custom_entity)
+    entity_query.delete_entity({id=123123})
 end
 
 function entity_query_delete_entity_param_entity_table()
@@ -75,56 +49,27 @@ function entity_spawner_spawn_empty()
     created_entity = entity_spawner.spawn_empty()
 end
 
-function entity_spawner_spawn_prefab_no_param()
-    created_entity = entity_spawner.spawn_prefab()
-end
-
-function entity_spawner_spawn_prefab_param_nil()
-    created_entity = entity_spawner.spawn_prefab(nil)
-end
-
-function entity_spawner_spawn_prefab_param_boolean()
-    created_entity = entity_spawner.spawn_prefab(true)
-end
-
-function entity_spawner_spawn_prefab_param_table()
-    created_entity = entity_spawner.spawn_prefab({})
-end
-
-function entity_spawner_spawn_prefab_param_string()
-    created_entity = entity_spawner.spawn_prefab("Test")
-end
-
-function entity_spawner_spawn_prefab_unknown_handle()
-    created_entity = entity_spawner.spawn_prefab(99999)
+function entity_spawner_spawn_prefab_invalid()
+    expect_eq(entity_spawner.spawn_prefab(), nil)
+    expect_eq(entity_spawner.spawn_prefab())
+    expect_eq(entity_spawner.spawn_prefab(nil))
+    expect_eq(entity_spawner.spawn_prefab(true))
+    expect_eq(entity_spawner.spawn_prefab({}))
+    expect_eq(entity_spawner.spawn_prefab("Test"))
+    expect_eq(entity_spawner.spawn_prefab(99999))
 end
 
 function entity_spawner_spawn_prefab()
     created_entity = entity_spawner.spawn_prefab(1)
 end
 
-function entity_spawner_spawn_sprite_no_param()
-    created_entity = entity_spawner.spawn_sprite()
-end
-
-function entity_spawner_spawn_sprite_param_nil()
-    created_entity = entity_spawner.spawn_sprite(nil)
-end
-
-function entity_spawner_spawn_sprite_param_boolean()
-    created_entity = entity_spawner.spawn_sprite(true)
-end
-
-function entity_spawner_spawn_sprite_param_table()
-    created_entity = entity_spawner.spawn_sprite({})
-end
-
-function entity_spawner_spawn_sprite_param_string()
-    created_entity = entity_spawner.spawn_sprite("Test")
-end
-
-function entity_spawner_spawn_sprite_unknown_handle()
-    created_entity = entity_spawner.spawn_sprite(9999)
+function entity_spawner_spawn_sprite_invalid()
+    expect_eq(entity_spawner.spawn_sprite())
+    expect_eq(entity_spawner.spawn_sprite(nil))
+    expect_eq(entity_spawner.spawn_sprite(true))
+    expect_eq(entity_spawner.spawn_sprite({}))
+    expect_eq(entity_spawner.spawn_sprite("Test"))
+    expect_eq(entity_spawner.spawn_sprite(9999))
 end
 
 function entity_spawner_spawn_sprite()
@@ -139,7 +84,7 @@ function name_get()
 end
 
 function name_get_invalid()
-    name = entity.name.get()
+    expect_eq(entity.name.get(), '')
 end
 
 function name_set()
@@ -172,7 +117,10 @@ function local_transform_position_get()
 end
 
 function local_transform_position_get_invalid()
-    local_position_x, local_position_y, local_position_z = entity.local_transform.get_position()
+    x, y, z = entity.local_transform.get_position()
+    expect_eq(x, nil)
+    expect_eq(y, nil)
+    expect_eq(z, nil)
 end
 
 function local_transform_position_set()
@@ -211,7 +159,10 @@ function local_transform_scale_get()
 end
 
 function local_transform_scale_get_invalid()
-    local_scale_x, local_scale_y, local_scale_z = entity.local_transform.get_scale()
+    x, y, z = entity.local_transform.get_scale()
+    expect_eq(x, nil)
+    expect_eq(y, nil)
+    expect_eq(z, nil)
 end
 
 function local_transform_scale_set()
@@ -250,7 +201,10 @@ function local_transform_rotation_get()
 end
 
 function local_transform_rotation_get_invalid()
-    local_rotation_x, local_rotation_y, local_rotation_z = entity.local_transform.get_rotation()
+    x, y, z = entity.local_transform.get_rotation()
+    expect_eq(x, nil)
+    expect_eq(y, nil)
+    expect_eq(z, nil)
 end
 
 function local_transform_rotation_set()
@@ -304,7 +258,7 @@ function rigid_body_get_mass()
 end
 
 function rigid_body_get_mass_invalid()
-    mass = entity.rigid_body.get_mass()
+    expect_eq(entity.rigid_body.get_mass(), nil)
 end
 
 function rigid_body_set_mass()
@@ -328,7 +282,10 @@ function rigid_body_get_inertia()
 end
 
 function rigid_body_get_inertia_invalid()
-    inertia_x, inertia_y, inertia_z = entity.rigid_body.get_inertia()
+    x, y, x = entity.rigid_body.get_inertia()
+    expect_eq(x, nil)
+    expect_eq(y, nil)
+    expect_eq(z, nil)
 end
 
 function rigid_body_set_inertia()
@@ -365,7 +322,7 @@ function rigid_body_is_gravity_applied()
 end
 
 function rigid_body_is_gravity_applied_invalid()
-    is_gravity_applied = entity.rigid_body.is_gravity_applied()
+    expect_eq(entity.rigid_body.is_gravity_applied(), nil)
 end
 
 function rigid_body_apply_gravity()
@@ -468,7 +425,7 @@ function collidable_get_static_friction()
 end
 
 function collidable_get_static_friction_invalid()
-    static_friction = entity.collidable.get_static_friction()
+    expect_eq(entity.collidable.get_static_friction(), nil)
 end
 
 function collidable_set_static_friction()
@@ -490,7 +447,7 @@ function collidable_get_dynamic_friction()
 end
 
 function collidable_get_dynamic_friction_invalid()
-    dynamic_friction = entity.collidable.get_dynamic_friction()
+    expect_eq(entity.collidable.get_dynamic_friction(), nil)
 end
 
 function collidable_set_dynamic_friction()
@@ -512,7 +469,7 @@ function collidable_get_restitution()
 end
 
 function collidable_get_restitution_invalid()
-    restitution = entity.collidable.get_restitution()
+    expect_eq(entity.collidable.get_restitution(), nil)
 end
 
 function collidable_set_restitution()
@@ -606,20 +563,20 @@ function collidable_sweep()
 end
 
 function collidable_sweep_invalid()
-    assert(entity.collidable.sweep(0.0, 1.0, 0.0, 2.0), false)
+    expect_eq(entity.collidable.sweep(0.0, 1.0, 0.0, 2.0), false)
 
-    assert(entity.collidable:sweep(), false)
-    assert(entity.collidable:sweep(0.0), false)
-    assert(entity.collidable:sweep(0.0, 0.0), false)
-    assert(entity.collidable:sweep(0.0, 0.0, 0.0), false)
+    expect_eq(entity.collidable:sweep(), false)
+    expect_eq(entity.collidable:sweep(0.0), false)
+    expect_eq(entity.collidable:sweep(0.0, 0.0), false)
+    expect_eq(entity.collidable:sweep(0.0, 0.0, 0.0), false)
 
     invalid_vars = {true, "test", {}, local_transform_scale_set, nil}
 
     for _, var in ipairs(invalid_vars) do
-        assert(entity.collidable:sweep(var, 1.0, 0.0, 2.0), false)
-        assert(entity.collidable:sweep(0.0, var, 0.0, 2.0), false)
-        assert(entity.collidable:sweep(0.0, 0.0, var, 2.0), false)
-        assert(entity.collidable:sweep(0.0, 0.0, 0.0, var), false)
+        expect_eq(entity.collidable:sweep(var, 1.0, 0.0, 2.0), false)
+        expect_eq(entity.collidable:sweep(0.0, var, 0.0, 2.0), false)
+        expect_eq(entity.collidable:sweep(0.0, 0.0, var, 2.0), false)
+        expect_eq(entity.collidable:sweep(0.0, 0.0, 0.0, var), false)
     end
 end
 
@@ -640,7 +597,7 @@ function text_get_text()
 end
 
 function text_get_text_invalid()
-    text = entity.text.get_text()
+    expect_eq(entity.text.get_text(), '')
 end
 
 function text_set_text()
@@ -660,7 +617,7 @@ function text_get_line_height()
 end
 
 function text_get_line_height_invalid()
-    text_line_height = entity.text.get_line_height()
+    expect_eq(entity.text.get_line_height(), 0.0)
 end
 
 function text_set_line_height()
@@ -719,7 +676,7 @@ function audio_is_playing()
 end
 
 function audio_is_playing_invalid()
-    audio_is_playing_flag = entity.audio.is_playing()
+    expect_eq(entity.audio.is_playing(), false)
 end
 
 function audio_delete_invalid()
@@ -751,13 +708,16 @@ function perspective_lens_get()
 end
 
 function perspective_lens_get_invalid()
-    pr_near = entity.perspective_lens.get_near()
-    pr_far = entity.perspective_lens.get_far()
-    pr_sensor_width, pr_sensor_height = entity.perspective_lens.get_sensor_size()
-    pr_focal_length = entity.perspective_lens.get_focal_length()
-    pr_aperture = entity.perspective_lens.get_aperture()
-    pr_shutter_speed = entity.perspective_lens.get_shutter_speed()
-    pr_sensitivity = entity.perspective_lens.get_sensitivity()
+    expect_eq(entity.perspective_lens.get_near(), nil)
+    expect_eq(entity.perspective_lens.get_far(), nil)
+    w, h = entity.perspective_lens.get_sensor_size()
+    expect_eq(w, nil)
+    expect_eq(h, nil)
+
+    expect_eq(entity.perspective_lens.get_focal_length(), nil)
+    expect_eq(entity.perspective_lens.get_aperture(), nil)
+    expect_eq(entity.perspective_lens.get_shutter_speed(), nil)
+    expect_eq(entity.perspective_lens.get_sensitivity(), nil)
 end
 
 function perspective_lens_set()
@@ -818,32 +778,14 @@ function input_get_command()
     input_command = entity.input:get_command("Test")
 end
 
-function input_get_command_no_member()
-    input_command = entity.input.get_command("Test")
-end
-
-function input_get_command_no_param()
-    input_command = entity.input:get_command()
-end
- 
-function input_get_command_nil()
-    input_command = entity.input:get_command(nil);
-end
- 
-function input_get_command_number()
-    input_command = entity.input:get_command(10);
-end
-
-function input_get_command_boolean()
-    input_command = entity.input:get_command(true)
-end
- 
-function input_get_command_function()
-    input_command = entity.input:get_command(entity_query_get_first_by_name)
-end
- 
-function input_get_command_table()
-    input_command = entity.input:get_command({})
+function input_get_command_invalid()
+    expect_eq(entity.input.get_command("Test"), nil)
+    expect_eq( entity.input:get_command())
+    expect_eq( entity.input:get_command(nil))
+    expect_eq( entity.input:get_command(10))
+    expect_eq( entity.input:get_command(true))
+    expect_eq( entity.input:get_command(entity_query_get_first_by_name))
+    expect_eq( entity.input:get_command({}))
 end
  
 --- get_value_boolean

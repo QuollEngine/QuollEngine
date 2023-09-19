@@ -18,12 +18,7 @@ TEST_F(NameLuaScriptingInterfaceTest,
 
 TEST_F(NameLuaScriptingInterfaceTest, ReturnsEmptyStringIfNoSelf) {
   auto entity = entityDatabase.create();
-
-  auto &scope = call(entity, "name_get_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Name>(entity));
-  auto name = scope.getGlobal<quoll::String>("name");
-  EXPECT_EQ(name, "");
+  call(entity, "name_get_invalid");
 }
 
 TEST_F(NameLuaScriptingInterfaceTest, ReturnsNameComponentDataIfExists) {

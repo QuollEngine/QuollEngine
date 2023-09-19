@@ -44,9 +44,7 @@ TEST_F(AudioLuaScriptingInterfaceTest,
        IsPlayingReturnsFalseIfInvalidArguments) {
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::AudioStatus>(entity, {});
-
-  auto &scope = call(entity, "audio_is_playing_invalid");
-  EXPECT_FALSE(scope.getGlobal<bool>("audio_is_playing_flag"));
+  call(entity, "audio_is_playing_invalid");
 }
 
 TEST_F(AudioLuaScriptingInterfaceTest,

@@ -27,39 +27,7 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
 TEST_F(EntitySpawnerLuaInterfaceTest,
        SpawnPrefabReturnsNullIfInvalidArguments) {
   auto entity = entityDatabase.create();
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_prefab_no_param");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_prefab_param_nil");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_prefab_param_boolean");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_prefab_param_table");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_prefab_param_string");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-}
-
-TEST_F(EntitySpawnerLuaInterfaceTest,
-       SpawnPrefabReturnsNullIfPrefabDoesNotExist) {
-  auto entity = entityDatabase.create();
-
-  auto &scope = call(entity, "entity_spawner_spawn_prefab_unknown_handle");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  auto &scope = call(entity, "entity_spawner_spawn_prefab_invalid");
 }
 
 TEST_F(EntitySpawnerLuaInterfaceTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
@@ -69,14 +37,6 @@ TEST_F(EntitySpawnerLuaInterfaceTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
   auto entity = entityDatabase.create();
 
   auto &scope = call(entity, "entity_spawner_spawn_prefab");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-}
-
-TEST_F(EntitySpawnerLuaInterfaceTest,
-       SpawnPrefabDoesNothingIfPrefabDoesNotExist) {
-  auto entity = entityDatabase.create();
-
-  auto &scope = call(entity, "entity_spawner_spawn_prefab_unknown_handle");
   EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
 }
 
@@ -113,39 +73,7 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
 TEST_F(EntitySpawnerLuaInterfaceTest,
        SpawnSpriteReturnsNullIfInvalidArguments) {
   auto entity = entityDatabase.create();
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_sprite_no_param");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_nil");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_boolean");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_table");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-
-  {
-    auto &scope = call(entity, "entity_spawner_spawn_sprite_param_string");
-    EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
-  }
-}
-
-TEST_F(EntitySpawnerLuaInterfaceTest,
-       SpawnSpriteReturnsNullIfTextureDoesNotExist) {
-  auto entity = entityDatabase.create();
-
-  auto &scope = call(entity, "entity_spawner_spawn_sprite_unknown_handle");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  auto &scope = call(entity, "entity_spawner_spawn_sprite_invalid");
 }
 
 TEST_F(EntitySpawnerLuaInterfaceTest,

@@ -49,8 +49,7 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
 
-  auto &scope = call(entity, "collidable_get_static_friction_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("static_friction"));
+  call(entity, "collidable_get_static_friction_invalid");
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -118,8 +117,7 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
 
-  auto &scope = call(entity, "collidable_get_dynamic_friction_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("dynamic_friction"));
+  call(entity, "collidable_get_dynamic_friction_invalid");
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -187,8 +185,7 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::Collidable>(entity, {});
 
-  auto &scope = call(entity, "collidable_get_restitution_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("restitution"));
+  call(entity, "collidable_get_restitution_invalid");
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,

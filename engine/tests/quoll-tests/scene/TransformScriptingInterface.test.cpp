@@ -18,11 +18,7 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetPositionReturnsNilIfValuesAreInvalid) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "local_transform_position_get_invalid");
-
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_x"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_y"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_position_z"));
+  call(entity, "local_transform_position_get_invalid");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsPositionValue) {
@@ -75,11 +71,7 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetScaleReturnsNilIfValuesAreInvalid) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "local_transform_scale_get_invalid");
-
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_x"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_y"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_scale_z"));
+  call(entity, "local_transform_scale_get_invalid");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest, GetsScaleValue) {
@@ -136,11 +128,7 @@ TEST_F(TransformLuaScriptingInterfaceDeathTest,
 TEST_F(TransformLuaScriptingInterfaceTest,
        GetRotationReturnsNilIfValuesAreInvalid) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "local_transform_rotation_get_invalid");
-
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_x"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_y"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("local_rotation_z"));
+  call(entity, "local_transform_rotation_get_invalid");
 }
 
 TEST_F(TransformLuaScriptingInterfaceTest,

@@ -7,6 +7,10 @@ namespace quoll {
 
 Logger::Logger(LogSeverity minSeverity) : mMinSeverity(minSeverity) {}
 
+void Logger::setMinSeverity(LogSeverity minSeverity) {
+  mMinSeverity = minSeverity;
+}
+
 LogStream Logger::log(LogSeverity severity) {
   auto timestamp = std::chrono::system_clock::now();
 

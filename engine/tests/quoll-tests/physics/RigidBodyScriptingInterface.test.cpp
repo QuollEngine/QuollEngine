@@ -29,8 +29,7 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::RigidBody>(entity, {});
 
-  auto &scope = call(entity, "rigid_body_get_mass_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("mass"));
+  call(entity, "rigid_body_get_mass_invalid");
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -91,10 +90,7 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::RigidBody>(entity, {});
 
-  auto &scope = call(entity, "rigid_body_get_inertia_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_x"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_y"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("inertia_z"));
+  call(entity, "rigid_body_get_inertia_invalid");
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,
@@ -161,8 +157,7 @@ TEST_F(RigidBodyLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set<quoll::RigidBody>(entity, {});
 
-  auto &scope = call(entity, "rigid_body_is_gravity_applied_invalid");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("is_gravity_applied"));
+  call(entity, "rigid_body_is_gravity_applied_invalid");
 }
 
 TEST_F(RigidBodyLuaScriptingInterfaceTest,

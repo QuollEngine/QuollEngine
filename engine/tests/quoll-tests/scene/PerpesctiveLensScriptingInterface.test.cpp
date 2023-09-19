@@ -9,16 +9,7 @@ class PerspectiveLensLuaScriptingInterfaceTest
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        GetReturnsNilIfInvalidParamsAreProvided) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "perspective_lens_get_invalid");
-
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_near"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_far"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensor_width"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensor_height"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_focal_length"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_aperture"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_shutter_speed"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensitivity"));
+  call(entity, "perspective_lens_get_invalid");
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,

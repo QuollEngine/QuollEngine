@@ -23,6 +23,7 @@ public:
         [this](auto severity, auto timestamp, auto message) {
           mockTransport(severity, timestamp, message);
         });
+    quoll::Engine::getUserLogger().setMinSeverity(quoll::LogSeverity::Debug);
   }
 
   void TearDown() override {
