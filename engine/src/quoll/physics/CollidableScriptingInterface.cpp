@@ -460,10 +460,20 @@ int CollidableScriptingInterface::LuaInterface::sweep(void *state) {
   PhysicsSystem &physicsSystem = *static_cast<PhysicsSystem *>(
       scope.getGlobal<LuaUserData>("__privatePhysics").pointer);
 
-  scope.set(physicsSystem.sweep(entityDatabase, entity, {dirX, dirY, dirZ},
-                                distance));
+  CollisionHit hit{};
+  auto result = physicsSystem.sweep(entityDatabase, entity, {dirX, dirY, dirZ},
+                                    distance, hit);
 
-  return 1;
+  scope.set(result);
+
+  if (result) {
+    auto table = scope.createTable(1);
+    table.set("normal", hit.normal);
+  } else {
+    scope.set(nullptr);
+  }
+
+  return 2;
 }
 
 int CollidableScriptingInterface::LuaInterface::deleteThis(void *state) {

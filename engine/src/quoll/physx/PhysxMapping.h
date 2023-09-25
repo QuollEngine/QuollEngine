@@ -32,6 +32,14 @@ public:
    * @return Physx vec3
    */
   static physx::PxVec3 getPhysxVec3(const glm::vec3 &value);
+
+  /**
+   * @brief Get Vec3
+   *
+   * @param value Physx vec3
+   * @return Vec3 value
+   */
+  static glm::vec3 getVec3(const physx::PxVec3 &value);
 };
 
 } // namespace quoll

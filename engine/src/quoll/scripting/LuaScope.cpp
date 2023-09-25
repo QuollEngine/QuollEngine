@@ -42,6 +42,24 @@ void LuaScope::stackDump() {
 
 void LuaScope::luaGetTableField(const String &key, int index) {
   lua_getfield(mScope, index, key.c_str());
+}
+
+glm::vec3 LuaScope::luaGetVec3(int index) {
+  glm::vec3 res{};
+
+  luaGetTableField("x", index);
+  res.x = get<float>();
+  lua_pop(mScope, 1);
+
+  luaGetTableField("y", index);
+  res.y = get<float>();
+  lua_pop(mScope, 1);
+
+  luaGetTableField("z", index);
+  res.z = get<float>();
+  lua_pop(mScope, 1);
+
+  return res;
 };
 
 bool LuaScope::luaGetBoolean(int index) {
@@ -103,6 +121,14 @@ void LuaScope::luaSetUserData(void *data) {
 void LuaScope::luaSetFunction(int (*value)(void *)) {
   lua_pushcfunction(static_cast<lua_State *>(mScope),
                     reinterpret_cast<lua_CFunction>(value));
+}
+
+void LuaScope::luaSetVec3(const glm::vec3 &value) {
+  auto table = createTable(3);
+
+  table.set("x", value.x);
+  table.set("y", value.y);
+  table.set("z", value.z);
 }
 
 int LuaScope::luaGetGlobal(const String &name) {

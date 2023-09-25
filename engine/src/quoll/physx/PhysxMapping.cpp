@@ -51,4 +51,8 @@ PxVec3 PhysxMapping::getPhysxVec3(const glm::vec3 &value) {
   return PxVec3(value.x, value.y, value.z);
 }
 
+glm::vec3 PhysxMapping::getVec3(const physx::PxVec3 &value) {
+  return glm::vec3(value.x, value.y, value.z);
+}
+
 } // namespace quoll

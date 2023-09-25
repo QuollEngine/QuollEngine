@@ -18,12 +18,36 @@ public:
   LuaTable(void *scope, int32_t index);
 
   /**
+   * @brief Set int table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, int32_t value);
+
+  /**
    * @brief Set number table value
    *
    * @param key Key column
    * @param value Value column
    */
   void set(const char *key, uint32_t value);
+
+  /**
+   * @brief Set float table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, float value);
+
+  /**
+   * @brief Set vec3 table value
+   *
+   * @param key Key column
+   * @param value Value column
+   */
+  void set(const char *key, const glm::vec3 &value);
 
   /**
    * @brief Set entity table value
