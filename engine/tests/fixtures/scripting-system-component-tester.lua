@@ -558,25 +558,36 @@ function collidable_set_plane_geometry_invalid()
 end
 
 sweep_output = nil
+sweep_normal = nil
+sweep_data = nil
 function collidable_sweep()
-    sweep_output = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
+    sweep_output, sweep_data = entity.collidable:sweep(0.0, 0.0, 0.0, 0.0)
+
+    if sweep_output then
+       sweep_normal = sweep_data.normal
+    end
 end
 
 function collidable_sweep_invalid()
-    expect_eq(entity.collidable.sweep(0.0, 1.0, 0.0, 2.0), false)
+    function expect_eq_c(a, b)
+        expect_eq(a, false)
+        expect_eq(b, nil)
+    end
 
-    expect_eq(entity.collidable:sweep(), false)
-    expect_eq(entity.collidable:sweep(0.0), false)
-    expect_eq(entity.collidable:sweep(0.0, 0.0), false)
-    expect_eq(entity.collidable:sweep(0.0, 0.0, 0.0), false)
+    expect_eq_c(entity.collidable.sweep(0.0, 1.0, 0.0, 2.0))
+
+    expect_eq_c(entity.collidable:sweep())
+    expect_eq_c(entity.collidable:sweep(0.0))
+    expect_eq_c(entity.collidable:sweep(0.0, 0.0))
+    expect_eq_c(entity.collidable:sweep(0.0, 0.0, 0.0))
 
     invalid_vars = {true, "test", {}, local_transform_scale_set, nil}
 
     for _, var in ipairs(invalid_vars) do
-        expect_eq(entity.collidable:sweep(var, 1.0, 0.0, 2.0), false)
-        expect_eq(entity.collidable:sweep(0.0, var, 0.0, 2.0), false)
-        expect_eq(entity.collidable:sweep(0.0, 0.0, var, 2.0), false)
-        expect_eq(entity.collidable:sweep(0.0, 0.0, 0.0, var), false)
+        expect_eq_c(entity.collidable:sweep(var, 1.0, 0.0, 2.0))
+        expect_eq_c(entity.collidable:sweep(0.0, var, 0.0, 2.0))
+        expect_eq_c(entity.collidable:sweep(0.0, 0.0, var, 2.0))
+        expect_eq_c(entity.collidable:sweep(0.0, 0.0, 0.0, var))
     end
 end
 

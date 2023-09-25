@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/entity/EntityDatabase.h"
+#include "CollisionHit.h"
 
 namespace quoll {
 
@@ -55,11 +56,13 @@ public:
    * @param entity Entity
    * @param direction Sweep direction
    * @param distance Sweep distance
+   * @param[out] hit Collision hit
    * @retval true Entity collided
    * @retval false Entity not collided
    */
   virtual bool sweep(EntityDatabase &entityDatabase, Entity entity,
-                     const glm::vec3 &direction, float distance) = 0;
+                     const glm::vec3 &direction, float distance,
+                     CollisionHit &hit) = 0;
 };
 
 } // namespace quoll

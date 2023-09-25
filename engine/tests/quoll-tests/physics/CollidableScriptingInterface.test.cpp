@@ -458,16 +458,23 @@ TEST_F(CollidableLuaScriptingInterfaceTest, SweepReturnsFalseIfSweepTestFails) {
   auto scope = call(entity, "collidable_sweep");
   EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
   EXPECT_FALSE(scope.getGlobal<bool>("sweep_output"));
+  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("sweep_data"));
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
        SweepReturnsTrueIfSweepTestSucceeds) {
   physicsBackend->setSweepValue(true);
+  physicsBackend->setSweepHitData({.normal = glm::vec3{2.5f, 3.5f, 4.5f}});
 
   auto entity = entityDatabase.create();
   auto scope = call(entity, "collidable_sweep");
   EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
   EXPECT_TRUE(scope.getGlobal<bool>("sweep_output"));
+
+  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("sweep_normal"));
+
+  auto normal = scope.getGlobal<glm::vec3>("sweep_normal");
+  EXPECT_EQ(normal, glm::vec3(2.5f, 3.5f, 4.5f));
 }
 
 // Delete

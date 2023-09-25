@@ -221,6 +221,14 @@ private:
   void luaGetTableField(const String &key, int index);
 
   /**
+   * @brief Get vec3 from lua
+   *
+   * @param index Stack index
+   * @return Vec3 value
+   */
+  glm::vec3 luaGetVec3(int index);
+
+  /**
    * @brief Convert stack value to boolean
    *
    * @param index Stack index
@@ -368,6 +376,13 @@ private:
    */
   void luaSetFunction(LuaScopeFn fn);
 
+  /**
+   * @brief Push vec3 to stack
+   *
+   * @param value Vec3 value
+   */
+  void luaSetVec3(const glm::vec3 &value);
+
 private:
   lua_State *mScope = nullptr;
 };
@@ -460,6 +475,16 @@ template <> inline LuaTable LuaScope::get<LuaTable>(int32_t index) {
  */
 template <> inline LuaUserData LuaScope::get<LuaUserData>(int32_t index) {
   return {luaGetUserData(index)};
+}
+
+/**
+ * @brief Get vec3 data
+ *
+ * @param index Stack index
+ * @return Vec3 data
+ */
+template <> inline glm::vec3 LuaScope::get<glm::vec3>(int32_t index) {
+  return luaGetVec3(index);
 }
 
 /**
@@ -610,6 +635,15 @@ template <> inline void LuaScope::set<LuaUserData>(const LuaUserData &value) {
  */
 template <> inline void LuaScope::set<LuaScopeFn>(const LuaScopeFn &value) {
   luaSetFunction(value);
+}
+
+/**
+ * @brief Set vec3
+ *
+ * @param value Vec3 value
+ */
+template <> inline void LuaScope::set<glm::vec3>(const glm::vec3 &value) {
+  luaSetVec3(value);
 }
 
 /**

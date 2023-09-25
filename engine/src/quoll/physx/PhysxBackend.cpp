@@ -15,6 +15,23 @@ using namespace physx;
 namespace quoll {
 
 /**
+ * @brief Get shape local transform
+ *
+ * @param center Geometry center
+ * @param type Shape type
+ * @return Local transform
+ */
+static PxTransform getShapeLocalTransform(const glm::vec3 &center,
+                                          PhysicsGeometryType type) {
+  if (type == PhysicsGeometryType::Capsule) {
+    return PxTransform(PhysxMapping::getPhysxVec3(center),
+                       PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+  }
+
+  return PxTransform(PhysxMapping::getPhysxVec3(center));
+}
+
+/**
  * @brief Update physx shape with geometry data
  *
  * @param geometryDesc Geometry description
@@ -167,19 +184,28 @@ void PhysxBackend::observeChanges(EntityDatabase &entityDatabase) {
 }
 
 bool PhysxBackend::sweep(EntityDatabase &entityDatabase, Entity entity,
-                         const glm::vec3 &direction, float distance) {
+                         const glm::vec3 &direction, float distance,
+                         CollisionHit &hit) {
   QuollAssert(entityDatabase.has<PhysxInstance>(entity),
               "Physx instance not found");
 
   const auto &physx = entityDatabase.get<PhysxInstance>(entity);
   const auto &transform = entityDatabase.get<WorldTransform>(entity);
+  const auto &collidable = entityDatabase.get<Collidable>(entity);
 
-  PxSweepBuffer hit;
+  PxSweepBuffer buffer;
 
-  return mScene->sweep(
-      physx.shape->getGeometry().any(),
-      PhysxMapping::getPhysxTransform(transform.worldTransform),
-      PhysxMapping::getPhysxVec3(direction), distance, hit);
+  bool result =
+      mScene->sweep(physx.shape->getGeometry().any(),
+                    PhysxMapping::getPhysxTransform(transform.worldTransform) *
+                        physx.shape->getLocalPose(),
+                    PhysxMapping::getPhysxVec3(direction), distance, buffer);
+
+  if (result) {
+    hit.normal = PhysxMapping::getVec3(buffer.getAnyHit(0).normal);
+  }
+
+  return result;
 }
 
 void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
@@ -267,6 +293,8 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
                              collidable.useInQueries);
       }
       physx.useShapeInQueries = collidable.useInQueries;
+      physx.shape->setLocalPose(getShapeLocalTransform(
+          collidable.geometryDesc.center, collidable.geometryDesc.type));
 
       // Create rigid static if no rigid body
       if (!entityDatabase.has<RigidBody>(entity) && !physx.rigidStatic) {
@@ -279,10 +307,8 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
         mScene->addActor(*physx.rigidStatic);
       } else if (physx.rigidStatic) {
         // Update transform of rigid static if exists
-        auto transform = glm::translate(world.worldTransform,
-                                        collidable.geometryDesc.center);
         physx.rigidStatic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(transform));
+            PhysxMapping::getPhysxTransform(world.worldTransform));
       }
     }
   }
@@ -324,18 +350,8 @@ void PhysxBackend::synchronizeComponents(EntityDatabase &entityDatabase) {
       physx.rigidDynamic->setMassSpaceInertiaTensor(
           {rigidBody.dynamicDesc.inertia.x, rigidBody.dynamicDesc.inertia.y,
            rigidBody.dynamicDesc.inertia.z});
-
-      if (entityDatabase.has<Collidable>(entity)) {
-        auto transform = glm::translate(
-            world.worldTransform,
-            entityDatabase.get<Collidable>(entity).geometryDesc.center);
-
-        physx.rigidDynamic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(transform));
-      } else {
-        physx.rigidDynamic->setGlobalPose(
-            PhysxMapping::getPhysxTransform(world.worldTransform));
-      }
+      physx.rigidDynamic->setGlobalPose(
+          PhysxMapping::getPhysxTransform(world.worldTransform));
     };
   }
 
@@ -411,11 +427,6 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
         glm::decompose(world.worldTransform, scale, emptyQuat, empty3, empty3,
                        empty4);
 
-        if (entityDatabase.has<Collidable>(entity)) {
-          position -=
-              entityDatabase.get<Collidable>(entity).geometryDesc.center;
-        }
-
         world.worldTransform = glm::translate(glm::mat4{1.0f}, position) *
                                glm::toMat4(rotation) *
                                glm::scale(glm::mat4{1.0f}, scale);
@@ -440,10 +451,6 @@ void PhysxBackend::synchronizeTransforms(EntityDatabase &entityDatabase) {
                          globalTransform.p.z);
       glm::quat rotation(globalTransform.q.w, globalTransform.q.x,
                          globalTransform.q.y, globalTransform.q.z);
-
-      if (entityDatabase.has<Collidable>(entity)) {
-        position -= entityDatabase.get<Collidable>(entity).geometryDesc.center;
-      }
 
       if (entityDatabase.has<LocalTransform>(entity)) {
         auto &transform = entityDatabase.get<LocalTransform>(entity);
@@ -500,7 +507,8 @@ PxShape *PhysxBackend::createShape(const PhysicsGeometryDesc &geometryDesc,
                                scale.y * halfHeight);
     shape = mPhysics->createShape(geometry, material, true);
 
-    PxTransform relativePose(PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
+    PxTransform relativePose(PhysxMapping::getPhysxVec3(geometryDesc.center),
+                             PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f)));
     shape->setLocalPose(relativePose);
   } else if (geometryDesc.type == PhysicsGeometryType::Plane) {
     shape = mPhysics->createShape(PxPlaneGeometry(), material, true);

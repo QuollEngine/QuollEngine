@@ -63,12 +63,14 @@ public:
    * @param entity Entity
    * @param direction Sweep direction
    * @param distance Sweep distance
+   * @param[out] hit Collision hit
    * @retval true Entity collided
    * @retval false Entity not collided
    */
   inline bool sweep(EntityDatabase &entityDatabase, Entity entity,
-                    const glm::vec3 &direction, float distance) {
-    return mBackend->sweep(entityDatabase, entity, direction, distance);
+                    const glm::vec3 &direction, float distance,
+                    CollisionHit &hit) {
+    return mBackend->sweep(entityDatabase, entity, direction, distance, hit);
   }
 
 private:
