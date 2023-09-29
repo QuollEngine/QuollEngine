@@ -18,6 +18,7 @@
 #include "quoll/core/EntityDeleter.h"
 #include "quoll/scene/SceneIO.h"
 #include "quoll/renderer/SceneRenderer.h"
+#include "quoll/input/InputMapSystem.h"
 
 // Render hardware interfaces
 #include "quoll/rhi/RenderDevice.h"
@@ -69,19 +70,23 @@ void Runtime::start() {
   quoll::SceneUpdater sceneUpdater;
   quoll::PhysicsSystem physicsSystem =
       quoll::PhysicsSystem::createPhysxBackend(eventSystem);
-  quoll::CameraAspectRatioUpdater cameraAspectRatioUpdater(window);
+  quoll::CameraAspectRatioUpdater cameraAspectRatioUpdater;
   quoll::AnimationSystem animationSystem(assetCache.getRegistry());
   quoll::SkeletonUpdater skeletonUpdater;
   quoll::AudioSystem audioSystem(assetCache.getRegistry());
   quoll::EntityDeleter entityDeleter;
+  quoll::InputMapSystem inputMapSystem(deviceManager, assetCache.getRegistry());
+
+  cameraAspectRatioUpdater.setViewportSize(window.getFramebufferSize());
 
   audioSystem.observeChanges(scene.entityDatabase);
   scriptingSystem.observeChanges(scene.entityDatabase);
   physicsSystem.observeChanges(scene.entityDatabase);
 
-  window.addResizeHandler([&](auto width, auto height) {
+  window.addFramebufferResizeHandler([&](auto width, auto height) {
     renderer.setFramebufferSize({width, height});
     presenter.enqueueFramebufferUpdate();
+    cameraAspectRatioUpdater.setViewportSize({width, height});
   });
 
   auto handle = assetCache.getRegistry().getScenes().findHandleByUuid(
@@ -98,10 +103,12 @@ void Runtime::start() {
   presenter.updateFramebuffers(device->getSwapchain());
 
   mainLoop.setUpdateFn([&](float dt) mutable {
-    eventSystem.poll();
     auto &entityDatabase = scene.entityDatabase;
-
     entityDeleter.update(scene);
+
+    eventSystem.poll();
+
+    inputMapSystem.update(entityDatabase);
     cameraAspectRatioUpdater.update(entityDatabase);
     scriptingSystem.start(entityDatabase, physicsSystem);
     scriptingSystem.update(dt, entityDatabase);

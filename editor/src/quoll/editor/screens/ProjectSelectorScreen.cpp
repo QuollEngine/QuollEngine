@@ -55,10 +55,11 @@ std::optional<Project> ProjectSelectorScreen::start() {
     return RendererTextures{imguiPassData.imguiColor, imguiPassData.imguiColor};
   });
 
-  auto resizeHandler = mWindow.addResizeHandler([&](auto width, auto height) {
-    renderer.setFramebufferSize({width, height});
-    presenter.enqueueFramebufferUpdate();
-  });
+  auto resizeHandler =
+      mWindow.addFramebufferResizeHandler([&](auto width, auto height) {
+        renderer.setFramebufferSize({width, height});
+        presenter.enqueueFramebufferUpdate();
+      });
 
   mainLoop.setUpdateFn([&project, this](float dt) {
     mEventSystem.poll();

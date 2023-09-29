@@ -144,7 +144,7 @@ void EditorScreen::start(const Project &rawProject) {
 
   mousePicking.setFramebufferSize(mWindow.getFramebufferSize());
 
-  mWindow.addResizeHandler([&](auto width, auto height) {
+  mWindow.addFramebufferResizeHandler([&](auto width, auto height) {
     renderer.setFramebufferSize({width, height});
     mousePicking.setFramebufferSize({width, height});
     presenter.enqueueFramebufferUpdate();
@@ -224,7 +224,8 @@ void EditorScreen::start(const Project &rawProject) {
     logViewer.render(userLogStorage);
 
     bool mouseClicked =
-        ui.renderSceneView(context, renderer.getSceneTexture(), editorCamera);
+        ui.renderSceneView(context, renderer.getSceneTexture(), editorCamera,
+                           simulator.getCameraAspectRatioUpdater());
 
     StatusBar::render(editorCamera);
 

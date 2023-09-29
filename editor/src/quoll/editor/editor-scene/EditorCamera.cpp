@@ -58,7 +58,7 @@ EditorCamera::EditorCamera(EventSystem &eventSystem, Window &window)
         }
 
         static constexpr float MinOOBThreshold = 2.0f;
-        const auto &size = mWindow.getWindowSize();
+        const auto &size = mWindow.getFramebufferSize();
 
         float minX = 0;
         float maxX = static_cast<float>(size.x);

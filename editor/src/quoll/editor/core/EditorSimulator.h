@@ -57,6 +57,15 @@ public:
    */
   inline PhysicsSystem &getPhysicsSystem() { return mPhysicsSystem; }
 
+  /**
+   * @brief Get camera aspect ratio updater
+   *
+   * @return Camera aspect ratio updater
+   */
+  inline CameraAspectRatioUpdater &getCameraAspectRatioUpdater() {
+    return mCameraAspectRatioUpdater;
+  }
+
 private:
   /**
    * @brief Cleanup simulation database
