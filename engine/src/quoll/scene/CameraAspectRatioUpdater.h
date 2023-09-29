@@ -1,6 +1,5 @@
 #pragma once
 
-#include "quoll/window/Window.h"
 #include "quoll/entity/EntityDatabase.h"
 
 namespace quoll {
@@ -14,21 +13,21 @@ namespace quoll {
 class CameraAspectRatioUpdater {
 public:
   /**
-   * @brief Create camera aspect ratio updater
-   *
-   * @param window Window
-   */
-  CameraAspectRatioUpdater(Window &window);
-
-  /**
    * @brief Update aspect ratios
    *
    * @param entityDatabase Entity database
    */
   void update(EntityDatabase &entityDatabase);
 
+  /**
+   * @brief Set viewport size
+   *
+   * @param size Viewport size
+   */
+  void setViewportSize(glm::uvec2 size);
+
 private:
-  Window &mWindow;
+  glm::uvec2 mSize{};
 };
 
 } // namespace quoll

@@ -8,7 +8,6 @@ EditorSimulator::EditorSimulator(InputDeviceManager &deviceManager,
                                  AssetRegistry &assetRegistry,
                                  EditorCamera &editorCamera)
     : mInputMapSystem(deviceManager, assetRegistry),
-      mCameraAspectRatioUpdater(window),
       mScriptingSystem(eventSystem, assetRegistry),
       mAnimationSystem(assetRegistry),
       mPhysicsSystem(PhysicsSystem::createPhysxBackend(eventSystem)),

@@ -84,13 +84,13 @@ public:
   void pollEvents();
 
   /**
-   * @brief Add resize handler
+   * @brief Add framebuffer resize handler
    *
-   * @param handler Resize handler
-   * @return Resize handler ID
+   * @param handler Framebuffer resize handler
+   * @return Framebuffer resize handler ID
    */
-  uint32_t
-  addResizeHandler(const std::function<void(uint32_t, uint32_t)> &handler);
+  uint32_t addFramebufferResizeHandler(
+      const std::function<void(uint32_t, uint32_t)> &handler);
 
   /**
    * @brief Remove resize handler

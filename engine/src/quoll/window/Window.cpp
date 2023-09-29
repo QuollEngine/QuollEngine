@@ -178,7 +178,7 @@ bool Window::shouldClose() { return glfwWindowShouldClose(mWindowInstance); }
 
 void Window::pollEvents() { glfwPollEvents(); }
 
-uint32_t Window::addResizeHandler(
+uint32_t Window::addFramebufferResizeHandler(
     const std::function<void(uint32_t, uint32_t)> &handler) {
   uint32_t id = static_cast<uint32_t>(mResizeHandlers.size());
 

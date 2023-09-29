@@ -51,7 +51,7 @@ void MainLoop::run() {
       accumulator -= TimeDelta;
     }
 
-    const auto &size = mWindow.getWindowSize();
+    const auto &size = mWindow.getFramebufferSize();
     if (size.x > 0 && size.y > 0) {
       mRenderFn();
     }
