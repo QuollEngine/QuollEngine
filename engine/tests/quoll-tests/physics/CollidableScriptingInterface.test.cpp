@@ -7,15 +7,6 @@ class CollidableLuaScriptingInterfaceTest
     : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetDefaultMaterialDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_default_material_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        SetDefaultMaterialCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
 
@@ -45,19 +36,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 
 // Get static friction
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       GetStaticFrictionReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Collidable>(entity, {});
-
-  call(entity, "collidable_get_static_friction_invalid");
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        GetStaticFrictionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "collidable_get_static_friction");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("static_friction"));
+  auto state = call(entity, "collidable_get_static_friction");
+  EXPECT_TRUE(state["static_friction"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -67,20 +50,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   collidable.materialDesc.staticFriction = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto &scope = call(entity, "collidable_get_static_friction");
-  EXPECT_EQ(scope.getGlobal<float>("static_friction"), 2.5f);
+  auto state = call(entity, "collidable_get_static_friction");
+  EXPECT_EQ(state["static_friction"].get<float>(), 2.5f);
 }
 
 // Set static friction
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetStaticFrictionDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_static_friction_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest,
        SetStaticFrictionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -113,19 +87,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 
 // Get dynamic friction
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       GetDynamicFrictionReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Collidable>(entity, {});
-
-  call(entity, "collidable_get_dynamic_friction_invalid");
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        GetDynamicFrictionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "collidable_get_dynamic_friction");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("dynamic_friction"));
+  auto state = call(entity, "collidable_get_dynamic_friction");
+  EXPECT_TRUE(state["dynamic_friction"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -135,20 +101,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   collidable.materialDesc.dynamicFriction = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto &scope = call(entity, "collidable_get_dynamic_friction");
-  EXPECT_EQ(scope.getGlobal<float>("dynamic_friction"), 2.5f);
+  auto state = call(entity, "collidable_get_dynamic_friction");
+  EXPECT_EQ(state["dynamic_friction"].get<float>(), 2.5f);
 }
 
 // Set dynamic friction
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetDynamicFrictionDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_dynamic_friction_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest,
        SetDynamicFrictionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -181,19 +138,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 
 // Get restitution friction
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       GetRestitutionReturnsNullIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Collidable>(entity, {});
-
-  call(entity, "collidable_get_restitution_invalid");
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        GetRestitutionReturnsNullIfCollidableDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "collidable_get_restitution");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("restitution"));
+  auto state = call(entity, "collidable_get_restitution");
+  EXPECT_TRUE(state["restitution"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -203,20 +152,11 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   collidable.materialDesc.restitution = 2.5f;
   entityDatabase.set(entity, collidable);
 
-  auto &scope = call(entity, "collidable_get_restitution");
-  EXPECT_EQ(scope.getGlobal<float>("restitution"), 2.5f);
+  auto state = call(entity, "collidable_get_restitution");
+  EXPECT_EQ(state["restitution"].get<float>(), 2.5f);
 }
 
 // Set restitution
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetRestitutionDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_restitution_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest,
        SetRestitutionCreatesCollidableIfItDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -226,35 +166,6 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   EXPECT_EQ(
       entityDatabase.get<quoll::Collidable>(entity).materialDesc.restitution,
       2.5);
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetRestitutionUpdatesExistingCollidableIfExists) {
-  auto entity = entityDatabase.create();
-
-  quoll::Collidable collidable{};
-  collidable.materialDesc.dynamicFriction = 2.5f;
-  entityDatabase.set(entity, collidable);
-
-  call(entity, "collidable_set_restitution");
-
-  const auto &updatedCollidable = entityDatabase.get<quoll::Collidable>(entity);
-  EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
-  EXPECT_EQ(updatedCollidable.materialDesc.restitution, 2.5);
-  EXPECT_NE(updatedCollidable.materialDesc.restitution,
-            collidable.materialDesc.restitution);
-  EXPECT_EQ(updatedCollidable.materialDesc.dynamicFriction,
-            collidable.materialDesc.dynamicFriction);
-}
-
-// Set box geometry
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetBoxGeometryDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_box_geometry_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -297,15 +208,6 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 
 // Set sphere geometry
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetSphereGeometryDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_sphere_geometry_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        SetSphereGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
@@ -343,15 +245,6 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 }
 
 // Set capsule geometry
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetCapsuleGeometryDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_capsule_geometry_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest,
        SetCapsuleGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
@@ -401,15 +294,6 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 
 // Set plane geometry
 TEST_F(CollidableLuaScriptingInterfaceTest,
-       SetPlaneGeometryDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-  call(entity, "collidable_set_plane_geometry_invalid");
-  EXPECT_FALSE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
-TEST_F(CollidableLuaScriptingInterfaceTest,
        SetPlaneGeometryCreatesCollidableIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
@@ -443,22 +327,14 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
 }
 
 // sweep
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       SweepReturnsFalseIfProvidedArgumentsAreInvalid) {
-  physicsBackend->setSweepValue(true);
-
-  auto entity = entityDatabase.create();
-  call(entity, "collidable_sweep_invalid");
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest, SweepReturnsFalseIfSweepTestFails) {
   physicsBackend->setSweepValue(false);
 
   auto entity = entityDatabase.create();
-  auto scope = call(entity, "collidable_sweep");
-  EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
-  EXPECT_FALSE(scope.getGlobal<bool>("sweep_output"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("sweep_data"));
+  auto state = call(entity, "collidable_sweep");
+  EXPECT_TRUE(state["sweep_output"].is<bool>());
+  EXPECT_FALSE(state["sweep_output"].get<bool>());
+  EXPECT_TRUE(state["sweep_data"].is<sol::nil_t>());
 }
 
 TEST_F(CollidableLuaScriptingInterfaceTest,
@@ -467,26 +343,17 @@ TEST_F(CollidableLuaScriptingInterfaceTest,
   physicsBackend->setSweepHitData({.normal = glm::vec3{2.5f, 3.5f, 4.5f}});
 
   auto entity = entityDatabase.create();
-  auto scope = call(entity, "collidable_sweep");
-  EXPECT_TRUE(scope.isGlobal<bool>("sweep_output"));
-  EXPECT_TRUE(scope.getGlobal<bool>("sweep_output"));
+  auto state = call(entity, "collidable_sweep");
+  EXPECT_TRUE(state["sweep_output"].is<bool>());
+  EXPECT_TRUE(state["sweep_output"].get<bool>());
 
-  EXPECT_FALSE(scope.isGlobal<std::nullptr_t>("sweep_normal"));
+  EXPECT_FALSE(state["sweep_normal"].is<sol::nil_t>());
 
-  auto normal = scope.getGlobal<glm::vec3>("sweep_normal");
+  auto normal = state["sweep_normal"].get<glm::vec3>();
   EXPECT_EQ(normal, glm::vec3(2.5f, 3.5f, 4.5f));
 }
 
 // Delete
-TEST_F(CollidableLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Collidable>(entity, {});
-
-  call(entity, "collidable_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::Collidable>(entity));
-}
-
 TEST_F(CollidableLuaScriptingInterfaceTest,
        DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();

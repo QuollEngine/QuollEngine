@@ -7,24 +7,18 @@ class PerspectiveLensLuaScriptingInterfaceTest
     : public LuaScriptingInterfaceTestBase {};
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
-       GetReturnsNilIfInvalidParamsAreProvided) {
-  auto entity = entityDatabase.create();
-  call(entity, "perspective_lens_get_invalid");
-}
-
-TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        GetReturnsNilIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "perspective_lens_get");
+  auto state = call(entity, "perspective_lens_get");
 
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_near"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_far"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensor_width"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensor_height"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_focal_length"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_aperture"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_shutter_speed"));
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("pr_sensitivity"));
+  EXPECT_TRUE(state["pr_near"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_far"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_sensor_width"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_sensor_height"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_focal_length"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_aperture"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_shutter_speed"].is<sol::nil_t>());
+  EXPECT_TRUE(state["pr_sensitivity"].is<sol::nil_t>());
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest, GetReturnsComponentValues) {
@@ -40,25 +34,17 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest, GetReturnsComponentValues) {
   lens.sensitivity = 3000;
   entityDatabase.set(entity, lens);
 
-  auto &scope = call(entity, "perspective_lens_get");
+  auto state = call(entity, "perspective_lens_get");
 
-  EXPECT_EQ(scope.getGlobal<float>("pr_near"), lens.near);
-  EXPECT_EQ(scope.getGlobal<float>("pr_far"), lens.far);
-  EXPECT_EQ(scope.getGlobal<float>("pr_sensor_width"), lens.sensorSize.x);
-  EXPECT_EQ(scope.getGlobal<float>("pr_sensor_height"), lens.sensorSize.y);
-  EXPECT_EQ(scope.getGlobal<float>("pr_focal_length"), lens.focalLength);
-  EXPECT_EQ(scope.getGlobal<float>("pr_aperture"), lens.aperture);
-  EXPECT_FLOAT_EQ(scope.getGlobal<float>("pr_shutter_speed"),
+  EXPECT_EQ(state["pr_near"].get<float>(), lens.near);
+  EXPECT_EQ(state["pr_far"].get<float>(), lens.far);
+  EXPECT_EQ(state["pr_sensor_width"].get<float>(), lens.sensorSize.x);
+  EXPECT_EQ(state["pr_sensor_height"].get<float>(), lens.sensorSize.y);
+  EXPECT_EQ(state["pr_focal_length"].get<float>(), lens.focalLength);
+  EXPECT_EQ(state["pr_aperture"].get<float>(), lens.aperture);
+  EXPECT_FLOAT_EQ(state["pr_shutter_speed"].get<float>(),
                   1.0f / lens.shutterSpeed);
-  EXPECT_EQ(scope.getGlobal<float>("pr_sensitivity"), lens.sensitivity);
-}
-
-TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
-       SetDoesNothingIfInvalidParamsAreProvided) {
-  auto entity = entityDatabase.create();
-  auto &scope = call(entity, "perspective_lens_set_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
+  EXPECT_EQ(state["pr_sensitivity"].get<float>(), lens.sensitivity);
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
@@ -66,7 +52,7 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 
-  auto &scope = call(entity, "perspective_lens_set");
+  auto state = call(entity, "perspective_lens_set");
 
   EXPECT_TRUE(entityDatabase.has<quoll::PerspectiveLens>(entity));
   const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
@@ -85,7 +71,7 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, quoll::PerspectiveLens{});
 
-  auto &scope = call(entity, "perspective_lens_set");
+  auto state = call(entity, "perspective_lens_set");
 
   const auto &lens = entityDatabase.get<quoll::PerspectiveLens>(entity);
 
@@ -99,20 +85,10 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
 }
 
 TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentsAreInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set(entity, quoll::PerspectiveLens{});
-
-  auto &scope = call(entity, "perspective_lens_delete_invalid");
-
-  EXPECT_TRUE(entityDatabase.has<quoll::PerspectiveLens>(entity));
-}
-
-TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
        DeleteDoesNothingIfComponentDoesNotExist) {
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "perspective_lens_delete");
+  auto state = call(entity, "perspective_lens_delete");
 
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }
@@ -122,7 +98,7 @@ TEST_F(PerspectiveLensLuaScriptingInterfaceTest,
   auto entity = entityDatabase.create();
   entityDatabase.set(entity, quoll::PerspectiveLens{});
 
-  auto &scope = call(entity, "perspective_lens_delete");
+  auto state = call(entity, "perspective_lens_delete");
 
   EXPECT_FALSE(entityDatabase.has<quoll::PerspectiveLens>(entity));
 }

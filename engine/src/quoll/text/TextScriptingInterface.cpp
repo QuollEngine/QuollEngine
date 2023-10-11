@@ -3,143 +3,62 @@
 
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scripting/LuaMessages.h"
-#include "quoll/scripting/LuaScope.h"
-#include "quoll/scripting/ComponentLuaInterfaceCommon.h"
 
 #include "TextScriptingInterface.h"
 
 namespace quoll {
 
-int TextScriptingInterface::LuaInterface::getText(void *state) {
-  LuaScope scope(state);
+TextScriptingInterface::LuaInterface::LuaInterface(Entity entity,
+                                                   ScriptGlobals scriptGlobals)
+    : mEntity(entity), mScriptGlobals(scriptGlobals) {}
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_text");
-
-    scope.set<String>("");
-    return 1;
+sol_maybe<String> TextScriptingInterface::LuaInterface::getText() {
+  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+    return mScriptGlobals.entityDatabase.get<Text>(mEntity).text;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (entityDatabase.has<Text>(entity)) {
-    scope.set(entityDatabase.get<Text>(entity).text);
-  } else {
-    scope.set<String>("");
-  }
-
-  return 1;
+  return sol::nil;
 }
 
-int TextScriptingInterface::LuaInterface::setText(void *state) {
-  LuaScope scope(state);
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_text");
-
-    return 0;
-  }
-
-  if (!scope.is<String>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<String>(getName(), "set_text");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  auto text = scope.get<String>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
+void TextScriptingInterface::LuaInterface::setText(String text) {
   // Text needs to exist in order to change it
-  if (!entityDatabase.has<Text>(entity)) {
-    return 0;
+  if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+    return;
   }
 
-  entityDatabase.get<Text>(entity).text = text;
-
-  return 0;
+  mScriptGlobals.entityDatabase.get<Text>(mEntity).text = text;
 }
-int TextScriptingInterface::LuaInterface::getLineHeight(void *state) {
-  LuaScope scope(state);
 
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "get_line_height");
-
-    scope.set<float>(0.0);
-    return 1;
+sol_maybe<float> TextScriptingInterface::LuaInterface::getLineHeight() {
+  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+    return mScriptGlobals.entityDatabase.get<Text>(mEntity).lineHeight;
   }
 
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
-  if (entityDatabase.has<Text>(entity)) {
-    scope.set(entityDatabase.get<Text>(entity).lineHeight);
-  } else {
-    scope.set<float>(0.0f);
-  }
-
-  return 1;
+  return sol::nil;
 }
-int TextScriptingInterface::LuaInterface::setLineHeight(void *state) {
-  LuaScope scope(state);
-  if (!scope.is<LuaTable>(1)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::noEntityTable(getName(), "set_line_height");
 
-    return 0;
-  }
-
-  if (!scope.is<float>(2)) {
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<float>(getName(), "set_line_height");
-
-    return 0;
-  }
-
-  auto entityTable = scope.get<LuaTable>(1);
-  entityTable.get("id");
-  Entity entity = scope.get<Entity>();
-  scope.pop(1);
-
-  auto lineHeight = scope.get<float>(2);
-  scope.pop(2);
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-
+void TextScriptingInterface::LuaInterface::setLineHeight(float lineHeight) {
   // Text needs to exist in order to change it
-  if (!entityDatabase.has<Text>(entity)) {
-    return 0;
+  if (!mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+    return;
   }
 
-  entityDatabase.get<Text>(entity).lineHeight = lineHeight;
-
-  return 0;
+  mScriptGlobals.entityDatabase.get<Text>(mEntity).lineHeight = lineHeight;
 };
 
-int TextScriptingInterface::LuaInterface::deleteThis(void *state) {
-  return ComponentLuaInterfaceCommon::deleteComponent<Text>(getName(), state);
+void TextScriptingInterface::LuaInterface::deleteThis() {
+  if (mScriptGlobals.entityDatabase.has<Text>(mEntity)) {
+    mScriptGlobals.entityDatabase.remove<Text>(mEntity);
+  }
+}
+
+void TextScriptingInterface::LuaInterface::create(
+    sol::usertype<TextScriptingInterface::LuaInterface> usertype) {
+  usertype["get_text"] = &LuaInterface::getText;
+  usertype["set_text"] = &LuaInterface::setText;
+  usertype["get_line_height"] = &LuaInterface::getLineHeight;
+  usertype["set_line_height"] = &LuaInterface::setLineHeight;
+  usertype["delete"] = &LuaInterface::deleteThis;
 }
 
 } // namespace quoll

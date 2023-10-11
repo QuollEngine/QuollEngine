@@ -15,30 +15,27 @@ public:
 /**
  * @brief Lua scripting interface for animator
  */
-class AnimatorScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<AnimatorScriptingInterface::LuaInterface> {
+class AnimatorScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Play audio
+   * @brief Create animator table
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int trigger(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
+  /**
+   * @brief Trigger animation event
+   *
+   * @param event Event to trigger
+   */
+  void trigger(String event);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 2> Fields{
-      InterfaceField{"trigger", trigger}, InterfaceField{"delete", deleteThis}};
+  void deleteThis();
 
   /**
    * @brief Get component name in scripts
@@ -46,6 +43,18 @@ public:
    * @return Component name
    */
   static const String getName() { return "animator"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param usertype User type
+   */
+  static void
+  create(sol::usertype<AnimatorScriptingInterface::LuaInterface> usertype);
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

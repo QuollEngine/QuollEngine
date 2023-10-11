@@ -15,50 +15,47 @@ public:
 /**
  * @brief Lua scripting interface for input map
  */
-class InputMapScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<InputMapScriptingInterface::LuaInterface> {
+class InputMapScriptingInterface::LuaInterface {
 public:
+  /**
+   * @brief Create input map table
+   *
+   * @param entity Entity
+   * @param scriptGlobals Script globals
+   */
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
   /**
    * @brief Get command
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param name Command name
+   * @return Command id
    */
-  static int getCommand(void *state);
+  sol_maybe<size_t> getCommand(String name);
 
   /**
    * @brief Check if command is pressed
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param command Command id
+   * @return Command boolean value
    */
-  static int getCommandValueBoolean(void *state);
+  sol_maybe<bool> getCommandValueBoolean(size_t command);
 
   /**
    * @brief Get axis 2d command value
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param command Command id
+   * @return Command 2d axis value
    */
-  static int getCommandValueAxis2d(void *state);
+  std::tuple<sol_maybe<float>, sol_maybe<float>>
+  getCommandValueAxis2d(size_t command);
 
   /**
    * @brief Set scheme
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param name Scheme name
    */
-  static int setScheme(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 5> Fields{
-      InterfaceField{"get_command", getCommand},
-      InterfaceField{"get_value_boolean", getCommandValueBoolean},
-      InterfaceField{"get_value_axis_2d", getCommandValueAxis2d},
-      InterfaceField{"is_pressed", getCommandValueBoolean},
-      InterfaceField{"set_scheme", setScheme}};
+  void setScheme(String name);
 
   /**
    * @brief Get component name in scripts
@@ -66,6 +63,18 @@ public:
    * @return Component name
    */
   static const String getName() { return "input"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param usertype User type
+   */
+  static void
+  create(sol::usertype<InputMapScriptingInterface::LuaInterface> usertype);
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

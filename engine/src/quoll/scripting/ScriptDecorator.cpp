@@ -12,146 +12,72 @@
 #include "quoll/text/TextScriptingInterface.h"
 #include "quoll/animation/AnimatorScriptingInterface.h"
 #include "quoll/input/InputMapScriptingInterface.h"
+#include "quoll/physics/CollisionHitLuaTable.h"
+#include "lua/Math.h"
 
 #include "LuaMessages.h"
-#include "LuaScope.h"
+#include "LuaHeaders.h"
 #include "ScriptDecorator.h"
 #include "ScriptLogger.h"
 
+#include "EntityTable.h"
+
 namespace quoll {
 
-/**
- * @brief Create interface table
- *
- * @tparam TLuaInterface Lua interface
- * @param scope Lua scope
- * @return Lua table
- */
-template <class TLuaInterface> LuaTable createInterfaceTable(LuaScope &scope) {
-  static constexpr auto TableSize =
-      static_cast<uint32_t>(sizeof(TLuaInterface::Fields));
-  auto table = scope.createTable(TableSize + 1);
+void ScriptDecorator::attachToScope(sol::state_view state, Entity entity,
+                                    ScriptGlobals &scriptGlobals) {
+  LuaMath::create(state);
+  CollisionHitLuaTable::create(state);
+  EntityTable::create(state);
+  EntitySpawnerScriptingInterface::LuaInterface::create(state);
+  EntityQueryScriptingInterface::LuaInterface::create(state);
 
-  for (auto &field : TLuaInterface::Fields) {
-    table.set(field.key, field.fn);
-  }
+  state["entity"] = EntityTable(entity, scriptGlobals);
+  state["entity_spawner"] =
+      EntitySpawnerScriptingInterface::LuaInterface(scriptGlobals);
+  state["entity_query"] =
+      EntityQueryScriptingInterface::LuaInterface(scriptGlobals);
 
-  return table;
-}
-
-/**
- * @brief Register component with scope
- *
- * @tparam TComponent Component to registry
- * @param scope Lua scope
- * @param table Main table
- * @param entity Entity
- */
-template <class TInterface>
-void registerEntityInterface(LuaScope &scope, LuaTable &table, Entity entity) {
-  using TLuaInterface = typename TInterface::LuaInterface;
-
-  auto componentTable = createInterfaceTable<TLuaInterface>(scope);
-  componentTable.set("id", entity);
-
-  table.set(TLuaInterface::getName().c_str(), componentTable);
-}
-
-void ScriptDecorator::createEntityTable(LuaScope &scope, Entity entity) {
-  auto table = scope.createTable(3);
-  table.set("id", entity);
-
-  registerEntityInterface<NameScriptingInterface>(scope, table, entity);
-  registerEntityInterface<TransformScriptingInterface>(scope, table, entity);
-  registerEntityInterface<PerspectiveLensScriptingInterface>(scope, table,
-                                                             entity);
-  registerEntityInterface<RigidBodyScriptingInterface>(scope, table, entity);
-  registerEntityInterface<CollidableScriptingInterface>(scope, table, entity);
-  registerEntityInterface<AudioScriptingInterface>(scope, table, entity);
-  registerEntityInterface<TextScriptingInterface>(scope, table, entity);
-  registerEntityInterface<AnimatorScriptingInterface>(scope, table, entity);
-  registerEntityInterface<InputMapScriptingInterface>(scope, table, entity);
-}
-
-void ScriptDecorator::attachToScope(LuaScope &scope, Entity entity,
-                                    EntityDatabase &entityDatabase,
-                                    PhysicsSystem &physicsSystem,
-                                    AssetRegistry &assetRegistry) {
-  scope.setGlobal<LuaUserData>("__privateDatabase",
-                               {static_cast<void *>(&entityDatabase)});
-  scope.setGlobal<LuaUserData>("__privatePhysics",
-                               {static_cast<void *>(&physicsSystem)});
-  scope.setGlobal<LuaUserData>("__privateAssetRegistry",
-                               {static_cast<void *>(&assetRegistry)});
-
-  createEntityTable(scope, entity);
-  scope.setPreviousValueAsGlobal("entity");
-
-  createInterfaceTable<EntityQueryScriptingInterface::LuaInterface>(scope);
-  scope.setPreviousValueAsGlobal("entity_query");
-
-  createInterfaceTable<EntitySpawnerScriptingInterface::LuaInterface>(scope);
-  scope.setPreviousValueAsGlobal("entity_spawner");
-
-  createScriptLogger(scope);
-  scope.setPreviousValueAsGlobal("logger");
+  createScriptLogger(state);
 }
 
 void ScriptDecorator::attachVariableInjectors(
-    LuaScope &scope,
+    sol::state_view state,
     std::unordered_map<String, LuaScriptInputVariable> &variables) {
-  scope.setGlobal<LuaUserData>("__privateVariables",
-                               {static_cast<void *>(&variables)});
-  auto table = scope.createTable(1);
-
-  table.set("register", [](void *state) {
-    LuaScope scope(state);
-    if (!scope.is<String>(1) || !scope.is<uint32_t>(2)) {
-      scope.error(LuaMessages::invalidArguments<String, uint32_t>("input_vars",
-                                                                  "register"));
-      return 0;
-    }
-
-    auto name = scope.get<String>(1);
-    auto type = scope.get<uint32_t>(2);
-
+  auto inputVars = state.create_named_table("input_vars");
+  inputVars["register"] = [&variables](String name, uint32_t type)
+      -> std::variant<String, uint32_t, sol::nil_t> {
     if (type >= static_cast<uint32_t>(LuaScriptVariableType::Invalid)) {
-      scope.error("Variable \"" + name + "\" has invalid type");
-      return 0;
+      //     scope.error("Variable \"" + name + "\" has invalid type");
+      return sol::nil;
     }
 
-    auto &data =
-        *static_cast<std::unordered_map<String, LuaScriptInputVariable> *>(
-            scope.getGlobal<LuaUserData>("__privateVariables").pointer);
-
-    auto value = data.at(name);
+    auto value = variables.at(name);
     if (value.isType(LuaScriptVariableType::String)) {
-      scope.set(value.get<String>());
-    } else if (value.isType(LuaScriptVariableType::AssetPrefab)) {
-      scope.set(static_cast<uint32_t>(value.get<PrefabAssetHandle>()));
-    } else if (value.isType(LuaScriptVariableType::AssetTexture)) {
-      scope.set(static_cast<uint32_t>(value.get<TextureAssetHandle>()));
+      return value.get<String>();
     }
 
-    return 1;
-  });
+    if (value.isType(LuaScriptVariableType::AssetPrefab)) {
+      return static_cast<uint32_t>(value.get<PrefabAssetHandle>());
+    }
 
-  auto typesTable = scope.createTable(3);
-  typesTable.set("Invalid",
-                 static_cast<uint32_t>(LuaScriptVariableType::Invalid));
-  typesTable.set("String",
-                 static_cast<uint32_t>(LuaScriptVariableType::String));
-  typesTable.set("AssetPrefab",
-                 static_cast<uint32_t>(LuaScriptVariableType::AssetPrefab));
-  typesTable.set("AssetTexture",
-                 static_cast<uint32_t>(LuaScriptVariableType::AssetTexture));
-  table.set("types", typesTable);
-  scope.setPreviousValueAsGlobal("input_vars");
+    if (value.isType(LuaScriptVariableType::AssetTexture)) {
+      return static_cast<uint32_t>(value.get<TextureAssetHandle>());
+    }
+
+    return sol::nil;
+  };
+
+  inputVars["types"] = state.create_table_with(
+      "Invalid", LuaScriptVariableType::Invalid,          //
+      "String", LuaScriptVariableType::String,            //
+      "AssetPrefab", LuaScriptVariableType::AssetPrefab,  //
+      "AssetTexture", LuaScriptVariableType::AssetTexture //
+  );
 }
 
-void ScriptDecorator::removeVariableInjectors(LuaScope &scope) {
-  scope.setGlobal("input_vars", nullptr);
-  scope.setGlobal("__privateVariables", nullptr);
+void ScriptDecorator::removeVariableInjectors(sol::state_view state) {
+  state["input_vars"] = sol::nil;
 }
 
 } // namespace quoll

@@ -36,22 +36,13 @@ public:
               (quoll::LogSeverity, quoll::LogTimestamp, quoll::String));
 };
 
-TEST_P(ScriptLoggerTest, LogsErrorIfNoArgumentIsProvided) {
-  auto [value, severity] = GetParam();
-
-  EXPECT_CALL(*this, mockTransport(quoll::LogSeverity::Error, _, _)).Times(5);
-
-  auto entity = entityDatabase.create();
-  auto &scope = call(entity, value + "_invalid");
-}
-
 TEST_P(ScriptLoggerTest, LogsMessageOnCall) {
   auto [value, severity] = GetParam();
 
   EXPECT_CALL(*this, mockTransport(severity, _, "Hello world")).Times(1);
 
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, value);
+  call(entity, value);
 }
 
 INSTANTIATE_TEST_SUITE_P(

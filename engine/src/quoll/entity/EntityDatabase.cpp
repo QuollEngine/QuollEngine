@@ -1,5 +1,6 @@
 #include "quoll/core/Base.h"
 #include "quoll/physx/PhysxInstance.h"
+#include "quoll/scripting/Script.h"
 
 #include "EntityDatabase.h"
 

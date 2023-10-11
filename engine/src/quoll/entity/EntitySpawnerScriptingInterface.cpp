@@ -23,94 +23,70 @@ static bool isPrefabEmpty(const PrefabAsset &prefab) {
          prefab.skinnedMeshRenderers.empty() && prefab.transforms.empty();
 }
 
-int EntitySpawnerScriptingInterface::LuaInterface::spawnEmpty(void *state) {
-  LuaScope scope(state);
+EntitySpawnerScriptingInterface::LuaInterface::LuaInterface(
+    ScriptGlobals &scriptGlobals)
+    : mScriptGlobals(scriptGlobals) {}
 
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-  AssetRegistry &assetRegistry = *static_cast<AssetRegistry *>(
-      scope.getGlobal<LuaUserData>("__privateAssetRegistry").pointer);
-
-  auto entity = EntitySpawner(entityDatabase, assetRegistry).spawnEmpty({});
-  ScriptDecorator::createEntityTable(scope, entity);
-
-  return 1;
+EntityTable EntitySpawnerScriptingInterface::LuaInterface::spawnEmpty() {
+  auto entity =
+      EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
+          .spawnEmpty({});
+  return EntityTable(entity, mScriptGlobals);
 }
 
-int EntitySpawnerScriptingInterface::LuaInterface::spawnPrefab(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<uint32_t>(1)) {
-    scope.set(nullptr);
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<uint32_t>(getName(), "spawn_prefab");
-
-    return 1;
-  }
-
-  auto prefabHandle = static_cast<PrefabAssetHandle>(scope.get<uint32_t>(1));
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-  AssetRegistry &assetRegistry = *static_cast<AssetRegistry *>(
-      scope.getGlobal<LuaUserData>("__privateAssetRegistry").pointer);
-
-  if (!assetRegistry.getPrefabs().hasAsset(prefabHandle)) {
-    scope.set(nullptr);
+sol_maybe<EntityTable>
+EntitySpawnerScriptingInterface::LuaInterface::spawnPrefab(
+    PrefabAssetHandle prefab) {
+  if (!mScriptGlobals.assetRegistry.getPrefabs().hasAsset(prefab)) {
     Engine::getUserLogger().error() << LuaMessages::assetNotFound(
         getName(), "spawn_prefab", getAssetTypeString(AssetType::Prefab));
 
-    return 1;
+    return sol::nil;
   }
 
-  if (isPrefabEmpty(assetRegistry.getPrefabs().getAsset(prefabHandle).data)) {
-    scope.set(nullptr);
+  if (isPrefabEmpty(
+          mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).data)) {
     Engine::getUserLogger().warning()
         << LuaMessages::nothingSpawnedBecauseEmptyPrefab(
                getName(), "spawn_prefab",
-               assetRegistry.getPrefabs().getAsset(prefabHandle).name);
+               mScriptGlobals.assetRegistry.getPrefabs().getAsset(prefab).name);
 
-    return 1;
+    return sol::nil;
   }
 
-  auto entities = EntitySpawner(entityDatabase, assetRegistry)
-                      .spawnPrefab(prefabHandle, {});
+  auto entities =
+      EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
+          .spawnPrefab(prefab, {});
 
-  ScriptDecorator::createEntityTable(scope, entities.at(0));
-  return 1;
+  return EntityTable(entities.at(0), mScriptGlobals);
 }
 
-int EntitySpawnerScriptingInterface::LuaInterface::spawnSprite(void *state) {
-  LuaScope scope(state);
-
-  if (!scope.is<uint32_t>(1)) {
-    scope.set(nullptr);
-    Engine::getUserLogger().error()
-        << LuaMessages::invalidArguments<uint32_t>(getName(), "spawn_sprite");
-
-    return 1;
-  }
-
-  auto textureHandle = static_cast<TextureAssetHandle>(scope.get<uint32_t>(1));
-
-  EntityDatabase &entityDatabase = *static_cast<EntityDatabase *>(
-      scope.getGlobal<LuaUserData>("__privateDatabase").pointer);
-  AssetRegistry &assetRegistry = *static_cast<AssetRegistry *>(
-      scope.getGlobal<LuaUserData>("__privateAssetRegistry").pointer);
-
-  if (!assetRegistry.getTextures().hasAsset(textureHandle)) {
-    scope.set(nullptr);
+sol_maybe<EntityTable>
+EntitySpawnerScriptingInterface::LuaInterface::spawnSprite(
+    TextureAssetHandle texture) {
+  if (!mScriptGlobals.assetRegistry.getTextures().hasAsset(texture)) {
     Engine::getUserLogger().error() << LuaMessages::assetNotFound(
         getName(), "spawn_sprite", getAssetTypeString(AssetType::Texture));
 
-    return 1;
+    return sol::nil;
   }
 
-  auto entity = EntitySpawner(entityDatabase, assetRegistry)
-                    .spawnSprite(textureHandle, {});
+  auto entity =
+      EntitySpawner(mScriptGlobals.entityDatabase, mScriptGlobals.assetRegistry)
+          .spawnSprite(texture, {});
 
-  ScriptDecorator::createEntityTable(scope, entity);
-  return 1;
+  return EntityTable(entity, mScriptGlobals);
+}
+
+void EntitySpawnerScriptingInterface::LuaInterface::create(
+    sol::state_view state) {
+  auto usertype =
+      state.new_usertype<EntitySpawnerScriptingInterface::LuaInterface>(
+          "EntitySpawner");
+
+  usertype["spawn_empty"] = &LuaInterface::spawnEmpty;
+  usertype["spawn_prefab"] = &LuaInterface::spawnPrefab;
+  usertype["spawn_sprite"] = &LuaInterface::spawnSprite;
 }
 
 } // namespace quoll

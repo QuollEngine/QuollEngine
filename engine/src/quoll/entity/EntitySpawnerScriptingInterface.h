@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quoll/scripting/ComponentLuaInterface.h"
+#include "quoll/scripting/EntityTable.h"
 
 namespace quoll {
 
@@ -15,41 +16,37 @@ public:
 /**
  * @brief Lua scripting interface for entity spawner
  */
-class EntitySpawnerScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<
-          EntitySpawnerScriptingInterface::LuaInterface> {
+class EntitySpawnerScriptingInterface::LuaInterface {
 public:
+  /**
+   * @brief Create entity spawner
+   *
+   * @param scriptGlobals Script globals
+   */
+  LuaInterface(ScriptGlobals &scriptGlobals);
+
   /**
    * @brief Spawn empty entity
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Newly created empty entity
    */
-  static int spawnEmpty(void *state);
+  EntityTable spawnEmpty();
 
   /**
    * @brief Spawn prefab
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param prefab Prefab asset
+   * @return Root prefab entity
    */
-  static int spawnPrefab(void *state);
+  sol_maybe<EntityTable> spawnPrefab(PrefabAssetHandle prefab);
 
   /**
    * @brief Spawn sprite
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param texture Texture asset
+   * @return Sprite entity
    */
-  static int spawnSprite(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 3> Fields{
-      InterfaceField{"spawn_empty", spawnEmpty},
-      InterfaceField{"spawn_prefab", spawnPrefab},
-      InterfaceField{"spawn_sprite", spawnSprite}};
+  sol_maybe<EntityTable> spawnSprite(TextureAssetHandle texture);
 
   /**
    * @brief Get component name in scripts
@@ -57,6 +54,16 @@ public:
    * @return Component name
    */
   static const String getName() { return "entity_spawner"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param state Sol state
+   */
+  static void create(sol::state_view state);
+
+private:
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

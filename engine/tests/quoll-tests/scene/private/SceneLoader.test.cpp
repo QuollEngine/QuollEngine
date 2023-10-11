@@ -1,6 +1,7 @@
 #include "quoll/core/Base.h"
 #include "quoll-tests/Testing.h"
 
+#include "quoll/scripting/Script.h"
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/scene/private/SceneLoader.h"
 

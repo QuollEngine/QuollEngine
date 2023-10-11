@@ -5,6 +5,7 @@
 #include "quoll/asset/AssetRegistry.h"
 #include "quoll/physics/PhysicsSystem.h"
 
+#include "Script.h"
 #include "LuaInterpreter.h"
 
 namespace quoll {

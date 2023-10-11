@@ -5,15 +5,6 @@
 
 static const quoll::Path CachePath = std::filesystem::current_path() / "cache";
 
-static int luaAssert(void *state) {
-  quoll::LuaScope scope(state);
-  QuollAssert(scope.is<bool>(1), "Invalid value provided");
-
-  auto val = scope.get<bool>(1);
-  scope.set(val);
-  return 1;
-}
-
 const quoll::String LuaScriptingInterfaceTestBase::ScriptName =
     "scripting-system-component-tester.lua";
 
@@ -23,7 +14,7 @@ LuaScriptingInterfaceTestBase::LuaScriptingInterfaceTestBase(
       scriptingSystem(eventSystem, assetCache.getRegistry()),
       mScriptName(scriptName), physicsSystem(physicsBackend) {}
 
-quoll::LuaScope &
+sol::state_view
 LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
                                     const quoll::String &functionName) {
   auto uuid = quoll::Uuid::generate();
@@ -34,16 +25,14 @@ LuaScriptingInterfaceTestBase::call(quoll::Entity entity,
 
   scriptingSystem.start(entityDatabase, physicsSystem);
 
-  auto &scripting = entityDatabase.get<quoll::Script>(entity);
+  auto &script = entityDatabase.get<quoll::Script>(entity);
+  sol::state_view state(script.state);
 
-  scripting.scope.setGlobal("assert_native", &luaAssert);
+  state["assert_native"] = [](bool value) { return value; };
 
-  scripting.scope.luaGetGlobal(functionName);
-  if (!scripting.scope.call(0)) {
-    QuollAssert(false, "Failed to call function: " + functionName);
-  }
+  state[functionName]();
 
-  return scripting.scope;
+  return state;
 }
 
 void LuaScriptingInterfaceTestBase::SetUp() {

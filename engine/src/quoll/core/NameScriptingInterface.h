@@ -14,39 +14,42 @@ struct NameScriptingInterface {
 /**
  * @brief Lua interface for name component
  */
-class NameScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<NameScriptingInterface::LuaInterface> {
+class NameScriptingInterface::LuaInterface {
 public:
+  /**
+   * @brief Create name
+   *
+   * @param entity Entity
+   * @param scriptGlobals Script globals
+   */
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
   /**
    * @brief Get name
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Name
    */
-  static int get(void *state);
+  String get();
 
   /**
    * @brief Set name
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param name Name
    */
-  static int set(void *state);
+  void set(String name);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
+  void deleteThis();
 
   /**
-   * @brief Interface fields
+   * @brief Create user type
+   *
+   * @param usertype User type
    */
-  static constexpr std::array<InterfaceField, 3> Fields{
-      InterfaceField{"get", get}, InterfaceField{"set", set},
-      InterfaceField{"delete", deleteThis}};
+  static void
+  create(sol::usertype<NameScriptingInterface::LuaInterface> usertype);
 
   /**
    * @brief Get component name in scripts
@@ -54,6 +57,10 @@ public:
    * @return Component name
    */
   static const String getName() { return "name"; }
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

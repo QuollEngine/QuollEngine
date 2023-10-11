@@ -3,37 +3,40 @@
 
 #include "LuaHeaders.h"
 #include "LuaInterpreter.h"
-#include "LuaScope.h"
 
 namespace quoll {
 
-LuaScope LuaInterpreter::createScope() {
-  auto *state = luaL_newstate();
-  luaL_openlibs(state);
-  return LuaScope(state);
+inline void errorHandler(sol::optional<std::string> message) {
+  if (message) {
+    Engine::getUserLogger().error() << message.value();
+  }
 }
 
-void LuaInterpreter::destroyScope(LuaScope &scope) {
-  lua_close(scope.getLuaState());
+lua_State *LuaInterpreter::createState() {
+  auto *state = luaL_newstate();
+  lua_atpanic(state, sol::c_call<decltype(&errorHandler), &errorHandler>);
+  luaL_openlibs(state);
+  return state;
 }
+
+void LuaInterpreter::destroyState(lua_State *state) { lua_close(state); }
 
 bool LuaInterpreter::evaluate(const std::vector<uint8_t> &bytes,
-                              LuaScope &scope) {
-  auto *luaState = scope.getLuaState();
+                              lua_State *state) {
 
-  auto ret = luaL_loadstring(luaState,
-                             quoll::String{bytes.begin(), bytes.end()}.c_str());
+  auto ret =
+      luaL_loadstring(state, quoll::String{bytes.begin(), bytes.end()}.c_str());
 
   if (ret != LUA_OK) {
     return false;
   }
 
-  ret = lua_pcall(luaState, 0, 0, 0);
+  ret = lua_pcall(state, 0, 0, 0);
   if (ret != LUA_OK) {
     return false;
   }
 
-  lua_pop(luaState, lua_gettop(luaState));
+  lua_pop(state, lua_gettop(state));
   return true;
 }
 

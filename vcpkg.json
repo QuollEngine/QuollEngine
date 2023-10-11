@@ -89,6 +89,10 @@
       "name": "ktx",
       "default-features": false,
       "features": ["vulkan"]
+    },
+    {
+      "name": "sol2",
+      "default-features": false
     }
   ]
 }

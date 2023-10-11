@@ -15,76 +15,76 @@ public:
 /**
  * @brief Lua interface for local transform
  */
-class TransformScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<TransformScriptingInterface::LuaInterface> {
+class TransformScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Get scale
+   * @brief Create transform
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int getScale(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
 
   /**
-   * @brief Set scale
+   * @brief Get local scale
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Local scale
    */
-  static int setScale(void *state);
+  std::tuple<float, float, float> getScale();
 
   /**
-   * @brief Get position
+   * @brief Set local scale
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param x Local scale in x axis
+   * @param y Local scale in y axis
+   * @param z Local scale in z axis
    */
-  static int getPosition(void *state);
+  void setScale(float x, float y, float z);
 
   /**
-   * @brief Set position
+   * @brief Get local position
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Local position
    */
-  static int setPosition(void *state);
+  std::tuple<float, float, float> getPosition();
+
+  /**
+   * @brief Set local position
+   *
+   * @param x Local position in x axis
+   * @param y Local position in y axis
+   * @param z Local position in z axis
+   */
+  void setPosition(float x, float y, float z);
 
   /**
    * @brief Get rotation
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @return Local rotation in euler angles
    */
-  static int getRotation(void *state);
+  std::tuple<float, float, float> getRotation();
 
   /**
-   * @brief Set rotation
+   * @brief Set local rotation
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param x Local rotation as euler angles in x axis
+   * @param y Local rotation as euler angles in y axis
+   * @param z Local rotation as euler angles in z axis
    */
-  static int setRotation(void *state);
+  void setRotation(float x, float y, float z);
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
+  void deleteThis();
 
   /**
-   * @brief Interface fields
+   * @brief Create user type
+   *
+   * @param usertype User type
    */
-  static constexpr std::array<InterfaceField, 7> Fields{
-      InterfaceField{"get_scale", getScale},
-      InterfaceField{"set_scale", setScale},
-      InterfaceField{"get_position", getPosition},
-      InterfaceField{"set_position", setPosition},
-      InterfaceField{"get_rotation", getRotation},
-      InterfaceField{"set_rotation", setRotation},
-      InterfaceField{"delete", deleteThis}};
+  static void
+  create(sol::usertype<TransformScriptingInterface::LuaInterface> usertype);
 
   /**
    * @brief Get component name in scripts
@@ -92,6 +92,10 @@ public:
    * @return Component name
    */
   static const String getName() { return "local_transform"; }
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll

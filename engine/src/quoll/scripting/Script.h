@@ -4,8 +4,7 @@
 #include "quoll/asset/Asset.h"
 #include "quoll/events/EventObserver.h"
 #include "quoll/scripting/LuaScriptInputVariable.h"
-
-#include "LuaScope.h"
+#include "LuaHeaders.h"
 
 namespace quoll {
 
@@ -27,9 +26,9 @@ struct Script {
   bool started = false;
 
   /**
-   * Lua scope
+   * Lua state
    */
-  LuaScope scope;
+  lua_State *state;
 
   /**
    * Input variables

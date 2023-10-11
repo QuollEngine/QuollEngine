@@ -4,7 +4,10 @@
 #include "quoll/entity/EntityDatabase.h"
 #include "quoll/asset/AssetRegistry.h"
 
+#include "Script.h"
 #include "quoll/physics/PhysicsSystem.h"
+
+#include "ScriptGlobals.h"
 
 namespace quoll {
 
@@ -16,41 +19,29 @@ public:
   /**
    * @brief Attach to scope
    *
-   * @param scope Lua scope
+   * @param state Sol state
    * @param entity Entity
-   * @param entityDatabase Entity database
-   * @param physicsSystem Physics system
-   * @param assetRegistry Asset registry
+   * @param scriptGlobals Script globals
    */
-  void attachToScope(LuaScope &scope, Entity entity,
-                     EntityDatabase &entityDatabase,
-                     PhysicsSystem &physicsSystem,
-                     AssetRegistry &assetRegistry);
+  void attachToScope(sol::state_view state, Entity entity,
+                     ScriptGlobals &scriptGlobals);
 
   /**
    * @brief Attach variable injectors
    *
-   * @param scope Lua scope
+   * @param state Sol state
    * @param variables Input variables
    */
   void attachVariableInjectors(
-      LuaScope &scope,
+      sol::state_view state,
       std::unordered_map<String, LuaScriptInputVariable> &variables);
 
   /**
    * @brief Remove variable injectors
    *
-   * @param scope Lua scope
+   * @param state Sol state
    */
-  void removeVariableInjectors(LuaScope &scope);
-
-  /**
-   * @brief Create entity table for the given entity
-   *
-   * @param scope Lua scope
-   * @param entity Entity
-   */
-  static void createEntityTable(LuaScope &scope, Entity entity);
+  void removeVariableInjectors(sol::state_view state);
 };
 
 } // namespace quoll

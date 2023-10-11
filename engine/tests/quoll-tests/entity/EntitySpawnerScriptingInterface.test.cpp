@@ -1,4 +1,5 @@
 #include "quoll/core/Base.h"
+#include "quoll/scripting/EntityTable.h"
 
 #include "quoll-tests/Testing.h"
 #include "quoll-tests/test-utils/ScriptingInterfaceTestBase.h"
@@ -8,12 +9,12 @@ using EntitySpawnerLuaInterfaceTest = LuaScriptingInterfaceTestBase;
 TEST_F(EntitySpawnerLuaInterfaceTest,
        SpawnEmptyCreatesEmptyEntityAndReturnsEntityTable) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "entity_spawner_spawn_empty");
+  auto state = call(entity, "entity_spawner_spawn_empty");
 
-  EXPECT_TRUE(scope.isGlobal<quoll::LuaTable>("created_entity"));
-  auto createdEntityTable = scope.getGlobal<quoll::LuaTable>("created_entity");
-  createdEntityTable.get("id");
-  auto createdEntity = scope.get<quoll::Entity>();
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+
+  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
   EXPECT_TRUE(entityDatabase.exists(createdEntity));
@@ -24,20 +25,14 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
   EXPECT_TRUE(entityDatabase.has<quoll::WorldTransform>(createdEntity));
 }
 
-TEST_F(EntitySpawnerLuaInterfaceTest,
-       SpawnPrefabReturnsNullIfInvalidArguments) {
-  auto entity = entityDatabase.create();
-  auto &scope = call(entity, "entity_spawner_spawn_prefab_invalid");
-}
-
 TEST_F(EntitySpawnerLuaInterfaceTest, SpawnPrefabReturnsNullIfPrefabIsEmpty) {
   auto prefab = assetCache.getRegistry().getPrefabs().addAsset({});
   ASSERT_EQ(prefab, quoll::PrefabAssetHandle{1});
 
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "entity_spawner_spawn_prefab");
-  EXPECT_TRUE(scope.isGlobal<std::nullptr_t>("created_entity"));
+  auto state = call(entity, "entity_spawner_spawn_prefab");
+  EXPECT_TRUE(state["created_entity"].is<sol::nil_t>());
 }
 
 TEST_F(EntitySpawnerLuaInterfaceTest,
@@ -51,12 +46,12 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
 
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "entity_spawner_spawn_prefab");
+  auto state = call(entity, "entity_spawner_spawn_prefab");
 
-  EXPECT_TRUE(scope.isGlobal<quoll::LuaTable>("created_entity"));
-  auto createdEntityTable = scope.getGlobal<quoll::LuaTable>("created_entity");
-  createdEntityTable.get("id");
-  auto createdEntity = scope.get<quoll::Entity>();
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+
+  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
   EXPECT_TRUE(entityDatabase.exists(createdEntity));
@@ -71,9 +66,11 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
 }
 
 TEST_F(EntitySpawnerLuaInterfaceTest,
-       SpawnSpriteReturnsNullIfInvalidArguments) {
+       SpawnSpriteReturnsNullIfTextureDoesNotExist) {
   auto entity = entityDatabase.create();
-  auto &scope = call(entity, "entity_spawner_spawn_sprite_invalid");
+  auto state = call(entity, "entity_spawner_spawn_sprite");
+
+  EXPECT_TRUE(state["created_entity"].is<sol::nil_t>());
 }
 
 TEST_F(EntitySpawnerLuaInterfaceTest,
@@ -83,12 +80,12 @@ TEST_F(EntitySpawnerLuaInterfaceTest,
 
   auto entity = entityDatabase.create();
 
-  auto &scope = call(entity, "entity_spawner_spawn_sprite");
+  auto state = call(entity, "entity_spawner_spawn_sprite");
 
-  EXPECT_TRUE(scope.isGlobal<quoll::LuaTable>("created_entity"));
-  auto createdEntityTable = scope.getGlobal<quoll::LuaTable>("created_entity");
-  createdEntityTable.get("id");
-  auto createdEntity = scope.get<quoll::Entity>();
+  EXPECT_TRUE(state["created_entity"].is<quoll::EntityTable>());
+
+  auto createdEntityTable = state["created_entity"].get<quoll::EntityTable>();
+  auto createdEntity = createdEntityTable.getEntity();
 
   EXPECT_NE(entity, createdEntity);
   EXPECT_TRUE(entityDatabase.exists(createdEntity));

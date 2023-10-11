@@ -7,29 +7,12 @@ class AnimatorLuaScriptingInterfaceTest : public LuaScriptingInterfaceTestBase {
 public:
 };
 
-TEST_F(AnimatorLuaScriptingInterfaceTest,
-       TriggerDoesNothingIfEventNameIsInvalid) {
-  auto entity = entityDatabase.create();
-  call(entity, "animator_trigger_invalid");
-
-  EXPECT_FALSE(entityDatabase.has<quoll::AnimatorEvent>(entity));
-}
-
 TEST_F(AnimatorLuaScriptingInterfaceTest, TriggerAddsAnimatorEventComponent) {
   auto entity = entityDatabase.create();
   call(entity, "animator_trigger");
 
   EXPECT_TRUE(entityDatabase.has<quoll::AnimatorEvent>(entity));
   EXPECT_EQ(entityDatabase.get<quoll::AnimatorEvent>(entity).eventName, "Move");
-}
-
-TEST_F(AnimatorLuaScriptingInterfaceTest,
-       DeleteDoesNothingIfProvidedArgumentIsInvalid) {
-  auto entity = entityDatabase.create();
-  entityDatabase.set<quoll::Animator>(entity, {});
-
-  call(entity, "animator_delete_invalid");
-  EXPECT_TRUE(entityDatabase.has<quoll::Animator>(entity));
 }
 
 TEST_F(AnimatorLuaScriptingInterfaceTest,

@@ -1,23 +1,10 @@
 #pragma once
 
+#include "ScriptGlobals.h"
+#include "LuaHeaders.h"
+
 namespace quoll {
 
-template <class TComponentInterface> struct ComponentLuaInterface {
-public:
-  /**
-   * @brief Interface field used in table
-   */
-  struct InterfaceField {
-    /**
-     * Field key
-     */
-    const char *key;
-
-    /**
-     * Field function
-     */
-    int (*fn)(void *);
-  };
-};
+template <class T> using sol_maybe = std::variant<T, sol::nil_t>;
 
 } // namespace quoll

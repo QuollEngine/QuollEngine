@@ -15,39 +15,33 @@ public:
 /**
  * @brief Lua scripting interface for Audio
  */
-class AudioScriptingInterface::LuaInterface
-    : public ComponentLuaInterface<AudioScriptingInterface::LuaInterface> {
+class AudioScriptingInterface::LuaInterface {
 public:
   /**
-   * @brief Play audio
+   * @brief Create audio table
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @param entity Entity
+   * @param scriptGlobals Script globals
    */
-  static int play(void *state);
+  LuaInterface(Entity entity, ScriptGlobals scriptGlobals);
+
+  /**
+   * @brief Play audio
+   */
+  void play();
 
   /**
    * @brief Check if audio is still playing
    *
-   * @param state Lua state
-   * @return Number of arguments
+   * @retval true Audio still playing
+   * @retval false Audio is not playing
    */
-  static int isPlaying(void *state);
+  bool isPlaying();
 
   /**
    * @brief Delete component
-   *
-   * @param state Lua state
-   * @return Number of arguments
    */
-  static int deleteThis(void *state);
-
-  /**
-   * @brief Interface fields
-   */
-  static constexpr std::array<InterfaceField, 3> Fields{
-      InterfaceField{"play", play}, InterfaceField{"is_playing", isPlaying},
-      InterfaceField{"delete", deleteThis}};
+  void deleteThis();
 
   /**
    * @brief Get component name in scripts
@@ -55,6 +49,18 @@ public:
    * @return Component name
    */
   static const String getName() { return "audio"; }
+
+  /**
+   * @brief Create user type
+   *
+   * @param usertype User type
+   */
+  static void
+  create(sol::usertype<AudioScriptingInterface::LuaInterface> usertype);
+
+private:
+  Entity mEntity;
+  ScriptGlobals mScriptGlobals;
 };
 
 } // namespace quoll
